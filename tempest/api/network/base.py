@@ -49,7 +49,6 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
         neutron as True
     """
 
-    _interface = 'json'
     force_tenant_isolation = False
 
     # Default to ipv4.
@@ -152,13 +151,14 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
 
     @classmethod
     def create_subnet(cls, network, gateway='', cidr=None, mask_bits=None,
-                      **kwargs):
+                      ip_version=None, **kwargs):
         """Wrapper utility that returns a test subnet."""
         # The cidr and mask_bits depend on the ip version.
-        if cls._ip_version == 4:
+        ip_version = ip_version if ip_version is not None else cls._ip_version
+        if ip_version == 4:
             cidr = cidr or netaddr.IPNetwork(CONF.network.tenant_network_cidr)
             mask_bits = mask_bits or CONF.network.tenant_network_mask_bits
-        elif cls._ip_version == 6:
+        elif ip_version == 6:
             cidr = (
                 cidr or netaddr.IPNetwork(CONF.network.tenant_network_v6_cidr))
             mask_bits = mask_bits or CONF.network.tenant_network_v6_mask_bits
@@ -174,7 +174,7 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
                 resp, body = cls.client.create_subnet(
                     network_id=network['id'],
                     cidr=str(subnet_cidr),
-                    ip_version=cls._ip_version,
+                    ip_version=ip_version,
                     gateway_ip=gateway_ip,
                     **kwargs)
                 break
