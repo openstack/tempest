@@ -28,8 +28,8 @@ class RoutersTest(base.BaseRouterTest):
     _interface = 'json'
 
     @classmethod
-    def setUpClass(cls):
-        super(RoutersTest, cls).setUpClass()
+    def resource_setup(cls):
+        super(RoutersTest, cls).resource_setup()
         if not test.is_extension_enabled('router', 'network'):
             msg = "router extension not enabled."
             raise cls.skipException(msg)

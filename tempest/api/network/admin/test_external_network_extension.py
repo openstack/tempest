@@ -18,8 +18,8 @@ class ExternalNetworksTestJSON(base.BaseAdminNetworkTest):
     _interface = 'json'
 
     @classmethod
-    def setUpClass(cls):
-        super(ExternalNetworksTestJSON, cls).setUpClass()
+    def resource_setup(cls):
+        super(ExternalNetworksTestJSON, cls).resource_setup()
         cls.network = cls.create_network()
 
     def _create_network(self, external=True):

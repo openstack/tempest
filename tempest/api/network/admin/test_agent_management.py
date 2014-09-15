@@ -21,8 +21,8 @@ class AgentManagementTestJSON(base.BaseAdminNetworkTest):
     _interface = 'json'
 
     @classmethod
-    def setUpClass(cls):
-        super(AgentManagementTestJSON, cls).setUpClass()
+    def resource_setup(cls):
+        super(AgentManagementTestJSON, cls).resource_setup()
         if not test.is_extension_enabled('agent', 'network'):
             msg = "agent extension not enabled."
             raise cls.skipException(msg)
