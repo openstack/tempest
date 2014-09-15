@@ -76,7 +76,10 @@ def safe_setup(f):
                 f(cls)
             except Exception as se:
                 etype, value, trace = sys.exc_info()
-                LOG.exception("setUpClass failed: %s" % se)
+                if etype is cls.skipException:
+                    LOG.info("setUpClass skipped: %s:" % se)
+                else:
+                    LOG.exception("setUpClass failed: %s" % se)
                 try:
                     cls.tearDownClass()
                 except Exception as te:
