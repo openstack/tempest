@@ -94,11 +94,11 @@ def min_client_version(*args, **kwargs):
 
 class ClientTestBase(tempest.test.BaseTestCase):
     @classmethod
-    def setUpClass(cls):
+    def resource_setup(cls):
         if not CONF.cli.enabled:
             msg = "cli testing disabled"
             raise cls.skipException(msg)
-        super(ClientTestBase, cls).setUpClass()
+        super(ClientTestBase, cls).resource_setup()
 
     def __init__(self, *args, **kwargs):
         self.parser = tempest.cli.output_parser

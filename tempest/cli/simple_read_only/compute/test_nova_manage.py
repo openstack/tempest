@@ -36,7 +36,7 @@ class SimpleReadOnlyNovaManageTest(cli.ClientTestBase):
     """
 
     @classmethod
-    def setUpClass(cls):
+    def resource_setup(cls):
         if not CONF.service_available.nova:
             msg = ("%s skipped as Nova is not available" % cls.__name__)
             raise cls.skipException(msg)
@@ -44,7 +44,7 @@ class SimpleReadOnlyNovaManageTest(cli.ClientTestBase):
             msg = ("%s skipped as *-manage commands not available"
                    % cls.__name__)
             raise cls.skipException(msg)
-        super(SimpleReadOnlyNovaManageTest, cls).setUpClass()
+        super(SimpleReadOnlyNovaManageTest, cls).resource_setup()
 
     def test_admin_fake_action(self):
         self.assertRaises(exceptions.CommandFailed,
