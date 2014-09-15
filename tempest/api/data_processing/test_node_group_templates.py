@@ -19,8 +19,8 @@ from tempest import test
 
 class NodeGroupTemplateTest(dp_base.BaseDataProcessingTest):
     @classmethod
-    def setUpClass(cls):
-        super(NodeGroupTemplateTest, cls).setUpClass()
+    def resource_setup(cls):
+        super(NodeGroupTemplateTest, cls).resource_setup()
         cls.node_group_template = {
             'description': 'Test node group template',
             'plugin_name': 'vanilla',

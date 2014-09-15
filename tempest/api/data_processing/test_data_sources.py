@@ -19,8 +19,8 @@ from tempest import test
 
 class DataSourceTest(dp_base.BaseDataProcessingTest):
     @classmethod
-    def setUpClass(cls):
-        super(DataSourceTest, cls).setUpClass()
+    def resource_setup(cls):
+        super(DataSourceTest, cls).resource_setup()
         cls.swift_data_source_with_creds = {
             'url': 'swift://sahara-container.sahara/input-source',
             'description': 'Test data source',
