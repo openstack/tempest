@@ -20,8 +20,8 @@ from tempest import test
 class DatabaseFlavorsTest(base.BaseDatabaseTest):
 
     @classmethod
-    def setUpClass(cls):
-        super(DatabaseFlavorsTest, cls).setUpClass()
+    def resource_setup(cls):
+        super(DatabaseFlavorsTest, cls).resource_setup()
         cls.client = cls.database_flavors_client
 
     @test.attr(type='smoke')
