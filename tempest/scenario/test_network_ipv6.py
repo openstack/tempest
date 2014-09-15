@@ -12,7 +12,6 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
-
 from tempest.scenario import manager
 from tempest import test
 from tempest.common import sniffer
@@ -35,8 +34,8 @@ class TestNetworkIPv6(manager.NetworkScenarioTest):
     def test_large_prefix(self):
         import netaddr
 
-        net = self ._create_network(tenant_id=self.tenant_id,
-                                    namestart='net-125-126')
+        net = self._create_network(tenant_id=self.tenant_id,
+                                   namestart='net-125-126')
         for bits in [125, 126]:
             sub = self._create_subnet(network=net,
                                       namestart='subnet-{0}'.format(bits),
@@ -46,6 +45,57 @@ class TestNetworkIPv6(manager.NetworkScenarioTest):
             n_addresses = end.value - start.value + 1
             self.assertEqual(expected=pow(2, 128 - bits)-3,
                              observed=n_addresses)
+
+    @test.services('compute', 'network')
+    def test_46(self):
+        ex_net = CONF.network.public_network_id
+        net = self._create_network(tenant_id=self.tenant_id,
+                                   namestart='net-46')
+
+        def define_access(srv):
+            for nic in srv.addresses[net.name]:
+                if nic['version'] == 6:
+                    srv.accessIPv6 = nic['addr']
+                else:
+                    srv.accessIPv4 = nic['addr']
+
+        sub4 = self._create_subnet(network=net,
+                                   namestart='sub-4',
+                                   ip_version=4)
+        self._create_subnet(network=net,
+                            namestart='sub-6')
+        router = self._get_router(tenant_id=self.tenant_id)
+        sub4.add_to_router(router_id=router['id'])
+
+        key_pair = self.create_keypair()
+        sec_group = self._create_security_group_nova()
+        kwargs = {'key_name': key_pair.id,
+                  'security_groups': [sec_group.name]}
+
+        i1 = self.create_server(create_kwargs=kwargs)
+        i2 = self.create_server(create_kwargs=kwargs)
+
+        fip1 = self._create_floating_ip(thing=i1, external_network_id=ex_net)
+        fip2 = self._create_floating_ip(thing=i2, external_network_id=ex_net)
+        define_access(i1)
+        define_access(i2)
+
+        ssh1 = self.get_remote_client(server_or_ip=fip1.floating_ip_address,
+                                      private_key=key_pair.private_key)
+        ssh2 = self.get_remote_client(server_or_ip=fip2.floating_ip_address,
+                                      private_key=key_pair.private_key)
+
+        r = ssh1.exec_command('ip addr show dev eth0')
+        self.assertIn(i1.accessIPv4, r)
+        self.assertNotIn(i1.accessIPv6, r)  # should fail when v6 assigned
+        r = ssh2.exec_command('ip addr show dev eth0')
+        self.assertIn(i2.accessIPv4, r)
+        self.assertNotIn(i2.accessIPv6, r)  # should fail when v6 assigned
+        r = ssh1.exec_command(cmd='ping -c1 {0}'.format(i2.accessIPv4))
+        self.assertIn('0% packet loss', r)
+        r = ssh2.exec_command(cmd='ping -c1 {0}'.format(i1.accessIPv4))
+        self.assertIn('0% packet loss', r)
+
 
 
 class TestRadvdIPv6(manager.NetworkScenarioTest):
