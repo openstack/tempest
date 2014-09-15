@@ -29,8 +29,8 @@ class TestMessages(base.BaseMessagingTest):
     _interface = 'json'
 
     @classmethod
-    def setUpClass(cls):
-        super(TestMessages, cls).setUpClass()
+    def resource_setup(cls):
+        super(TestMessages, cls).resource_setup()
         cls.queue_name = data_utils.rand_name('Queues-Test')
         # Create Queue
         cls.client.create_queue(cls.queue_name)
@@ -117,6 +117,6 @@ class TestMessages(base.BaseMessagingTest):
         self.assertEqual('204', resp['status'])
 
     @classmethod
-    def tearDownClass(cls):
+    def resource_cleanup(cls):
         cls.delete_queue(cls.queue_name)
-        super(TestMessages, cls).tearDownClass()
+        super(TestMessages, cls).resource_cleanup()
