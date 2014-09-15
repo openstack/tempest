@@ -23,9 +23,8 @@ class RegionsTestJSON(base.BaseIdentityV3AdminTest):
     _interface = 'json'
 
     @classmethod
-    @test.safe_setup
-    def setUpClass(cls):
-        super(RegionsTestJSON, cls).setUpClass()
+    def resource_setup(cls):
+        super(RegionsTestJSON, cls).resource_setup()
         cls.setup_regions = list()
         cls.client = cls.region_client
         for i in range(2):
@@ -34,10 +33,10 @@ class RegionsTestJSON(base.BaseIdentityV3AdminTest):
             cls.setup_regions.append(region)
 
     @classmethod
-    def tearDownClass(cls):
+    def resource_cleanup(cls):
         for r in cls.setup_regions:
             cls.client.delete_region(r['id'])
-        super(RegionsTestJSON, cls).tearDownClass()
+        super(RegionsTestJSON, cls).resource_cleanup()
 
     def _delete_region(self, region_id):
         self.client.delete_region(region_id)

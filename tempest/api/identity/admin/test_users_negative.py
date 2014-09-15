@@ -25,8 +25,8 @@ class UsersNegativeTestJSON(base.BaseIdentityV2AdminTest):
     _interface = 'json'
 
     @classmethod
-    def setUpClass(cls):
-        super(UsersNegativeTestJSON, cls).setUpClass()
+    def resource_setup(cls):
+        super(UsersNegativeTestJSON, cls).resource_setup()
         cls.alt_user = data_utils.rand_name('test_user_')
         cls.alt_password = data_utils.rand_name('pass_')
         cls.alt_email = cls.alt_user + '@testmail.tm'
