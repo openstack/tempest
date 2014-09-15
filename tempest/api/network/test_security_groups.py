@@ -222,11 +222,11 @@ class SecGroupIPv6Test(SecGroupTest):
     _tenant_network_cidr = CONF.network.tenant_network_v6_cidr
 
     @classmethod
-    def setUpClass(cls):
+    def resource_setup(cls):
         if not CONF.network_feature_enabled.ipv6:
             skip_msg = "IPv6 Tests are disabled."
             raise cls.skipException(skip_msg)
-        super(SecGroupIPv6Test, cls).setUpClass()
+        super(SecGroupIPv6Test, cls).resource_setup()
 
 
 class SecGroupIPv6TestXML(SecGroupIPv6Test):
