@@ -22,8 +22,8 @@ class TestNodeStates(base.BaseBaremetalTest):
     """Tests for baremetal NodeStates."""
 
     @classmethod
-    def setUpClass(cls):
-        super(TestNodeStates, cls).setUpClass()
+    def resource_setup(cls):
+        super(TestNodeStates, cls).resource_setup()
         _, cls.chassis = cls.create_chassis()
         _, cls.node = cls.create_node(cls.chassis['uuid'])
 

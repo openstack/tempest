@@ -21,8 +21,8 @@ class TestChassis(base.BaseBaremetalTest):
     """Tests for chassis."""
 
     @classmethod
-    def setUpClass(cls):
-        super(TestChassis, cls).setUpClass()
+    def resource_setup(cls):
+        super(TestChassis, cls).resource_setup()
         _, cls.chassis = cls.create_chassis()
 
     def _assertExpected(self, expected, actual):
