@@ -125,9 +125,8 @@ class ListImagesTest(base.BaseV2ImageTest):
     """
 
     @classmethod
-    @test.safe_setup
-    def setUpClass(cls):
-        super(ListImagesTest, cls).setUpClass()
+    def resource_setup(cls):
+        super(ListImagesTest, cls).resource_setup()
         # We add a few images here to test the listing functionality of
         # the images API
         cls._create_standard_image('bare', 'raw')
