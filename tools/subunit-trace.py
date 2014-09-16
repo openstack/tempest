@@ -23,62 +23,12 @@ import functools
 import re
 import sys
 
-import mimeparse
 import subunit
 import testtools
 
 DAY_SECONDS = 60 * 60 * 24
 FAILS = []
 RESULTS = {}
-
-
-class Starts(testtools.StreamResult):
-
-    def __init__(self, output):
-        super(Starts, self).__init__()
-        self._output = output
-
-    def startTestRun(self):
-        self._neednewline = False
-        self._emitted = set()
-
-    def status(self, test_id=None, test_status=None, test_tags=None,
-               runnable=True, file_name=None, file_bytes=None, eof=False,
-               mime_type=None, route_code=None, timestamp=None):
-        super(Starts, self).status(
-            test_id, test_status,
-            test_tags=test_tags, runnable=runnable, file_name=file_name,
-            file_bytes=file_bytes, eof=eof, mime_type=mime_type,
-            route_code=route_code, timestamp=timestamp)
-        if not test_id:
-            if not file_bytes:
-                return
-            if not mime_type or mime_type == 'test/plain;charset=utf8':
-                mime_type = 'text/plain; charset=utf-8'
-            primary, sub, parameters = mimeparse.parse_mime_type(mime_type)
-            content_type = testtools.content_type.ContentType(
-                primary, sub, parameters)
-            content = testtools.content.Content(
-                content_type, lambda: [file_bytes])
-            text = content.as_text()
-            if text and text[-1] not in '\r\n':
-                self._neednewline = True
-            self._output.write(text)
-        elif test_status == 'inprogress' and test_id not in self._emitted:
-            if self._neednewline:
-                self._neednewline = False
-                self._output.write('\n')
-            worker = ''
-            for tag in test_tags or ():
-                if tag.startswith('worker-'):
-                    worker = '(' + tag[7:] + ') '
-            if timestamp:
-                timestr = timestamp.isoformat()
-            else:
-                timestr = ''
-                self._output.write('%s: %s%s [start]\n' %
-                                   (timestr, worker, test_id))
-            self._emitted.add(test_id)
 
 
 def cleanup_test_name(name, strip_tags=True, strip_scenarios=False):
@@ -274,12 +224,11 @@ def main():
     args = parse_args()
     stream = subunit.ByteStreamToStreamResult(
         sys.stdin, non_subunit_name='stdout')
-    starts = Starts(sys.stdout)
     outcomes = testtools.StreamToDict(
         functools.partial(show_outcome, sys.stdout,
                           print_failures=args.print_failures))
     summary = testtools.StreamSummary()
-    result = testtools.CopyStreamResult([starts, outcomes, summary])
+    result = testtools.CopyStreamResult([outcomes, summary])
     result.startTestRun()
     try:
         stream.run(result)
