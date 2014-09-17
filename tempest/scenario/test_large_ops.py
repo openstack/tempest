@@ -25,7 +25,7 @@ CONF = config.CONF
 LOG = logging.getLogger(__name__)
 
 
-class TestLargeOpsScenario(manager.NetworkScenarioTest):
+class TestLargeOpsScenario(manager.OfficialClientTest):
 
     """
     Test large operations.
