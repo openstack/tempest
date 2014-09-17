@@ -1,4 +1,5 @@
 [gerrit]
-host=review.openstack.org
+host=review.gerrithub.io
 port=29418
-project=openstack/tempest.git
+project=cisco-openstack/tempest.git
+defaultbranch=proposed
