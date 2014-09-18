@@ -66,35 +66,6 @@ def attr(*args, **kwargs):
     return decorator
 
 
-def safe_setup(f):
-    """A decorator used to wrap the setUpClass for cleaning up resources
-       when setUpClass failed.
-
-    Deprecated, see:
-    http://specs.openstack.org/openstack/qa-specs/specs/resource-cleanup.html
-    """
-    @functools.wraps(f)
-    def decorator(cls):
-            try:
-                f(cls)
-            except Exception as se:
-                etype, value, trace = sys.exc_info()
-                if etype is cls.skipException:
-                    LOG.info("setUpClass skipped: %s:" % se)
-                else:
-                    LOG.exception("setUpClass failed: %s" % se)
-                try:
-                    cls.tearDownClass()
-                except Exception as te:
-                    LOG.exception("tearDownClass failed: %s" % te)
-                try:
-                    raise etype(value), None, trace
-                finally:
-                    del trace  # for avoiding circular refs
-
-    return decorator
-
-
 def get_service_list():
     service_list = {
         'compute': CONF.service_available.nova,
