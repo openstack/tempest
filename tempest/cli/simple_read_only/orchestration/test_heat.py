@@ -38,6 +38,9 @@ class SimpleReadOnlyHeatClientTest(tempest.cli.ClientTestBase):
                    "not available")
             raise cls.skipException(msg)
         super(SimpleReadOnlyHeatClientTest, cls).setUpClass()
+        cls.heat_template_path = os.path.join(os.path.dirname(
+            os.path.dirname(os.path.realpath(__file__))),
+            'heat_templates/heat_minimal.yaml')
 
     def test_heat_stack_list(self):
         self.heat('stack-list')
@@ -70,17 +73,13 @@ class SimpleReadOnlyHeatClientTest(tempest.cli.ClientTestBase):
         self.assertIsInstance(json.loads(rsrc_schema), dict)
 
     def test_heat_template_validate_yaml(self):
-        filepath = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                'heat_templates/heat_minimal.yaml')
-        ret = self.heat('template-validate -f %s' % filepath)
+        ret = self.heat('template-validate -f %s' % self.heat_template_path)
         # On success template-validate returns a json representation
         # of the template parameters
         self.assertIsInstance(json.loads(ret), dict)
 
     def test_heat_template_validate_hot(self):
-        filepath = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                'heat_templates/heat_minimal_hot.yaml')
-        ret = self.heat('template-validate -f %s' % filepath)
+        ret = self.heat('template-validate -f %s' % self.heat_template_path)
         self.assertIsInstance(json.loads(ret), dict)
 
     def test_heat_help(self):
