@@ -19,6 +19,7 @@ from tempest import clients
 from tempest.common.utils import data_utils
 from tempest import config
 from tempest import exceptions
+from tempest.openstack.common import excutils
 from tempest.openstack.common import log as logging
 import tempest.test
 
@@ -242,15 +243,16 @@ class BaseComputeTest(tempest.test.BaseTestCase):
                 try:
                     cls.servers_client.wait_for_server_status(
                         server['id'], kwargs['wait_until'])
-                except Exception as ex:
-                    if ('preserve_server_on_error' not in kwargs
-                        or kwargs['preserve_server_on_error'] is False):
-                        for server in servers:
-                            try:
-                                cls.servers_client.delete_server(server['id'])
-                            except Exception:
-                                pass
-                    raise ex
+                except Exception:
+                    with excutils.save_and_reraise_exception():
+                        if ('preserve_server_on_error' not in kwargs
+                            or kwargs['preserve_server_on_error'] is False):
+                            for server in servers:
+                                try:
+                                    cls.servers_client.delete_server(
+                                        server['id'])
+                                except Exception:
+                                    pass
 
         cls.servers.extend(servers)
 
