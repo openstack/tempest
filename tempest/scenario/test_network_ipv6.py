@@ -73,8 +73,8 @@ class TestNetworkIPv6(manager.NetworkScenarioTest):
         kwargs = {'key_name': key_pair.id,
                   'security_groups': [sec_group.name]}
 
-        i1 = self.create_server(create_kwargs=kwargs, image=image_id, flavor=1)
-        i2 = self.create_server(create_kwargs=kwargs, image=image_id, flavor=1)
+        i1 = self.create_server(create_kwargs=kwargs, image=image_id, flavor=2)
+        i2 = self.create_server(create_kwargs=kwargs, image=image_id, flavor=2)
 
         fip1 = self._create_floating_ip(thing=i1, external_network_id=ex_net)
         fip2 = self._create_floating_ip(thing=i2, external_network_id=ex_net)
@@ -90,10 +90,12 @@ class TestNetworkIPv6(manager.NetworkScenarioTest):
 
         r = ssh1.exec_command('ip addr show dev eth0')
         self.assertIn(i1.accessIPv4, r)
-        self.assertIn(i1.accessIPv6, r)  # should fail if image not support v6
+        # v6 should be configured since the image supports it
+        self.assertIn(i1.accessIPv6, r)
         r = ssh2.exec_command('ip addr show dev eth0')
         self.assertIn(i2.accessIPv4, r)
-        self.assertIn(i2.accessIPv6, r)  # should fail if image not support v6
+        # v6 should be configured since the image supports it
+        self.assertIn(i2.accessIPv6, r)
         r = ssh1.exec_command(cmd='ping -c1 {0}'.format(i2.accessIPv4))
         self.assertIn('0% packet loss', r)
         r = ssh2.exec_command(cmd='ping -c1 {0}'.format(i1.accessIPv4))
