@@ -77,8 +77,7 @@ class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
         new_password = data_utils.rand_name('pass1')
         self.client.update_user_password(user['id'], new_password,
                                          original_password)
-        resp, body = self.token.auth(user['id'], new_password)
-        self.assertEqual(201, resp.status)
+        resp, _ = self.token.auth(user['id'], new_password)
         subject_token = resp['x-subject-token']
         # Perform GET Token to verify and confirm password is updated
         _, token_details = self.client.get_token(subject_token)

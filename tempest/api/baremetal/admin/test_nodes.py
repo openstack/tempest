@@ -106,3 +106,17 @@ class TestNodes(base.BaseBaremetalTest):
         body = self.client.get_node_supported_boot_devices(self.node['uuid'])
         self.assertIn('supported_boot_devices', body)
         self.assertTrue(isinstance(body['supported_boot_devices'], list))
+
+    @test.attr(type='smoke')
+    def test_get_console(self):
+        _, body = self.client.get_console(self.node['uuid'])
+        con_info = ['console_enabled', 'console_info']
+        for key in con_info:
+            self.assertIn(key, body)
+
+    @test.attr(type='smoke')
+    def test_set_console_mode(self):
+        self.client.set_console_mode(self.node['uuid'], True)
+
+        _, body = self.client.get_console(self.node['uuid'])
+        self.assertEqual(True, body['console_enabled'])

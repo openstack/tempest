@@ -26,8 +26,9 @@ import urllib2
 import yaml
 
 
-is_grenade = (os.environ.get('DEVSTACK_GATE_GRENADE', "0") == "1" or
-              os.environ.get('DEVSTACK_GATE_GRENADE_FORWARD', "0") == "1")
+# DEVSTACK_GATE_GRENADE is either unset if grenade is not running
+# or a string describing what type of grenade run to perform.
+is_grenade = os.environ.get('DEVSTACK_GATE_GRENADE') is not None
 dump_all_errors = True
 
 # As logs are made clean, add to this set

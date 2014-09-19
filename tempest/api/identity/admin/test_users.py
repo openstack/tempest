@@ -97,10 +97,9 @@ class UsersTestJSON(base.BaseIdentityV2AdminTest):
         self.token_client.auth(self.data.test_user, self.data.test_password,
                                self.data.test_tenant)
         # Re-auth
-        resp, body = self.token_client.auth(self.data.test_user,
-                                            self.data.test_password,
-                                            self.data.test_tenant)
-        self.assertEqual('200', resp['status'])
+        self.token_client.auth(self.data.test_user,
+                               self.data.test_password,
+                               self.data.test_tenant)
 
     @test.attr(type='gate')
     def test_authentication_request_without_token(self):
@@ -113,10 +112,9 @@ class UsersTestJSON(base.BaseIdentityV2AdminTest):
         # Delete the token from database
         self.client.delete_token(token)
         # Re-auth
-        resp, body = self.token_client.auth(self.data.test_user,
-                                            self.data.test_password,
-                                            self.data.test_tenant)
-        self.assertEqual('200', resp['status'])
+        self.token_client.auth(self.data.test_user,
+                               self.data.test_password,
+                               self.data.test_tenant)
         self.client.auth_provider.clear_auth()
 
     @test.attr(type='smoke')
@@ -205,9 +203,8 @@ class UsersTestJSON(base.BaseIdentityV2AdminTest):
 
         # Validate the updated password
         # Get a token
-        resp, body = self.token_client.auth(self.data.test_user, new_pass,
-                                            self.data.test_tenant)
-        self.assertEqual('200', resp['status'])
+        _, body = self.token_client.auth(self.data.test_user, new_pass,
+                                         self.data.test_tenant)
         self.assertTrue('id' in body['token'])
 
 

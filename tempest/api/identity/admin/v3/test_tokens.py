@@ -35,8 +35,7 @@ class TokensV3TestJSON(base.BaseIdentityV3AdminTest):
             email=u_email)
         self.addCleanup(self.client.delete_user, user['id'])
         # Perform Authentication
-        resp, body = self.token.auth(user['id'], u_password)
-        self.assertEqual(201, resp.status)
+        resp, _ = self.token.auth(user['id'], u_password)
         subject_token = resp['x-subject-token']
         # Perform GET Token
         _, token_details = self.client.get_token(subject_token)
@@ -48,7 +47,6 @@ class TokensV3TestJSON(base.BaseIdentityV3AdminTest):
         self.assertRaises(exceptions.NotFound, self.client.get_token,
                           subject_token)
 
-    @test.skip_because(bug="1351026")
     @test.attr(type='gate')
     def test_rescope_token(self):
         """Rescope a token.
@@ -89,7 +87,6 @@ class TokensV3TestJSON(base.BaseIdentityV3AdminTest):
         # Get an unscoped token.
         resp, token_auth = self.token.auth(user=user['id'],
                                            password=user_password)
-        self.assertEqual(201, resp.status)
 
         token_id = resp['x-subject-token']
         orig_expires_at = token_auth['token']['expires_at']
@@ -114,7 +111,6 @@ class TokensV3TestJSON(base.BaseIdentityV3AdminTest):
                                            tenant=project1_name,
                                            domain='Default')
         token1_id = resp['x-subject-token']
-        self.assertEqual(201, resp.status)
 
         self.assertEqual(orig_expires_at, token_auth['token']['expires_at'],
                          'Expiration time should match original token')
@@ -141,10 +137,9 @@ class TokensV3TestJSON(base.BaseIdentityV3AdminTest):
         self.client.delete_token(token1_id)
 
         # Now get another scoped token using the unscoped token.
-        resp, token_auth = self.token.auth(token=token_id,
-                                           tenant=project2_name,
-                                           domain='Default')
-        self.assertEqual(201, resp.status)
+        _, token_auth = self.token.auth(token=token_id,
+                                        tenant=project2_name,
+                                        domain='Default')
 
         self.assertEqual(project2['id'],
                          token_auth['token']['project']['id'])

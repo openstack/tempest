@@ -309,6 +309,7 @@ class TokenClientJSON(IdentityClientJSON):
 
         body = json.dumps(creds)
         resp, body = self.post(self.auth_url, body=body)
+        self.expected_success(200, resp.status)
 
         return resp, body['access']
 
@@ -326,6 +327,7 @@ class TokenClientJSON(IdentityClientJSON):
 
         body = json.dumps(creds)
         resp, body = self.post(self.auth_url, body=body)
+        self.expected_success(200, resp.status)
 
         return resp, body['access']
 

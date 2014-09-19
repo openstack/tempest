@@ -47,5 +47,3 @@ class AccountNegativeTest(base.BaseObjectTest):
         self.assertRaises(exceptions.Unauthorized,
                           self.custom_account_client.list_account_containers,
                           params=params)
-        # delete the user which was created
-        self.data.teardown_all()

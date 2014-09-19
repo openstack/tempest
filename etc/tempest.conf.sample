@@ -747,10 +747,10 @@
 
 # The cidr block to allocate tenant ipv6 subnets from (string
 # value)
-#tenant_network_v6_cidr=2003::/64
+#tenant_network_v6_cidr=2003::/48
 
 # The mask bits for tenant ipv6 subnets (integer value)
-#tenant_network_v6_mask_bits=96
+#tenant_network_v6_mask_bits=64
 
 # Whether tenant network connectivity should be evaluated
 # directly (boolean value)
@@ -842,6 +842,15 @@
 # entry, all, indicates that all of these features are
 # expected to be enabled (list value)
 #discoverable_apis=all
+
+# Execute (old style) container-sync tests (boolean value)
+#container_sync=true
+
+# Execute object-versioning tests (boolean value)
+#object_versioning=true
+
+# Execute discoverability tests (boolean value)
+#discoverability=true
 
 
 [orchestration]

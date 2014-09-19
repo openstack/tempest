@@ -94,6 +94,13 @@ class ScenarioTest(tempest.test.BaseTestCase):
         cls.network_client = cls.manager.network_client
 
     @classmethod
+    def tearDownClass(cls):
+        # Isolated creds also manages network resources, which should
+        # be cleaned up at the end of the test case
+        cls.isolated_creds.clear_isolated_creds()
+        super(ScenarioTest, cls).tearDownClass()
+
+    @classmethod
     def _get_credentials(cls, get_creds, ctype):
         if CONF.compute.allow_tenant_isolation:
             creds = get_creds()
@@ -105,6 +112,11 @@ class ScenarioTest(tempest.test.BaseTestCase):
     def credentials(cls):
         return cls._get_credentials(cls.isolated_creds.get_primary_creds,
                                     'user')
+
+    @classmethod
+    def alt_credentials(cls):
+        return cls._get_credentials(cls.isolated_creds.get_alt_creds,
+                                    'alt_user')
 
     @classmethod
     def admin_credentials(cls):
@@ -181,11 +193,13 @@ class ScenarioTest(tempest.test.BaseTestCase):
     # The create_[resource] functions only return body and discard the
     # resp part which is not used in scenario tests
 
-    def create_keypair(self):
+    def create_keypair(self, client=None):
+        if not client:
+            client = self.keypairs_client
         name = data_utils.rand_name(self.__class__.__name__)
         # We don't need to create a keypair by pubkey in scenario
-        resp, body = self.keypairs_client.create_keypair(name)
-        self.addCleanup(self.keypairs_client.delete_keypair, name)
+        resp, body = client.create_keypair(name)
+        self.addCleanup(client.delete_keypair, name)
         return body
 
     def create_server(self, name=None, image=None, flavor=None,
@@ -257,14 +271,18 @@ class ScenarioTest(tempest.test.BaseTestCase):
         _, volume = self.volumes_client.create_volume(
             size=size, display_name=name, snapshot_id=snapshot_id,
             imageRef=imageRef, volume_type=volume_type)
+
         if wait_on_delete:
             self.addCleanup(self.volumes_client.wait_for_resource_deletion,
                             volume['id'])
-        self.addCleanup_with_wait(
-            waiter_callable=self.volumes_client.wait_for_resource_deletion,
-            thing_id=volume['id'], thing_id_param='id',
-            cleanup_callable=self.delete_wrapper,
-            cleanup_args=[self.volumes_client.delete_volume, volume['id']])
+            self.addCleanup(self.delete_wrapper,
+                            self.volumes_client.delete_volume, volume['id'])
+        else:
+            self.addCleanup_with_wait(
+                waiter_callable=self.volumes_client.wait_for_resource_deletion,
+                thing_id=volume['id'], thing_id_param='id',
+                cleanup_callable=self.delete_wrapper,
+                cleanup_args=[self.volumes_client.delete_volume, volume['id']])
 
         self.assertEqual(name, volume['display_name'])
         self.volumes_client.wait_for_volume_status(volume['id'], 'available')
@@ -398,6 +416,9 @@ class ScenarioTest(tempest.test.BaseTestCase):
         LOG.debug("image:%s" % self.image)
 
     def _log_console_output(self, servers=None):
+        if not CONF.compute_feature_enabled.console_output:
+            LOG.debug('Console output not supported, cannot log')
+            return
         if not servers:
             _, servers = self.servers_client.list_servers()
             servers = servers['servers']
@@ -428,6 +449,24 @@ class ScenarioTest(tempest.test.BaseTestCase):
         LOG.debug("Created snapshot image %s for server %s",
                   image_name, server['name'])
         return snapshot_image
+
+    def nova_volume_attach(self):
+        # TODO(andreaf) Device should be here CONF.compute.volume_device_name
+        _, volume_attachment = self.servers_client.attach_volume(
+            self.server['id'], self.volume['id'], '/dev/vdb')
+        volume = volume_attachment['volumeAttachment']
+        self.assertEqual(self.volume['id'], volume['id'])
+        self.volumes_client.wait_for_volume_status(volume['id'], 'in-use')
+        # Refresh the volume after the attachment
+        _, self.volume = self.volumes_client.get_volume(volume['id'])
+
+    def nova_volume_detach(self):
+        self.servers_client.detach_volume(self.server['id'], self.volume['id'])
+        self.volumes_client.wait_for_volume_status(self.volume['id'],
+                                                   'available')
+
+        _, volume = self.volumes_client.get_volume(self.volume['id'])
+        self.assertEqual('available', volume['status'])
 
 
 # TODO(yfried): change this class name to NetworkScenarioTest once client
@@ -464,11 +503,15 @@ class NeutronScenarioTest(ScenarioTest):
         cls.tenant_id = cls.manager.identity_client.tenant_id
         cls.check_preconditions()
 
-    def _create_network(self, tenant_id, namestart='network-smoke-'):
+    def _create_network(self, client=None, tenant_id=None,
+                        namestart='network-smoke-'):
+        if not client:
+            client = self.network_client
+        if not tenant_id:
+            tenant_id = client.rest_client.tenant_id
         name = data_utils.rand_name(namestart)
-        _, result = self.network_client.create_network(name=name,
-                                                       tenant_id=tenant_id)
-        network = net_resources.DeletableNetwork(client=self.network_client,
+        _, result = client.create_network(name=name, tenant_id=tenant_id)
+        network = net_resources.DeletableNetwork(client=client,
                                                  **result['network'])
         self.assertEqual(network.name, name)
         self.addCleanup(self.delete_wrapper, network.delete)
@@ -498,11 +541,14 @@ class NeutronScenarioTest(ScenarioTest):
             return resource_list[resource_type]
         return temp
 
-    def _create_subnet(self, network, namestart='subnet-smoke-', **kwargs):
+    def _create_subnet(self, network, client=None, namestart='subnet-smoke',
+                       **kwargs):
         """
         Create a subnet for the given network within the cidr block
         configured for tenant networks.
         """
+        if not client:
+            client = self.network_client
 
         def cidr_in_use(cidr, tenant_id):
             """
@@ -531,27 +577,29 @@ class NeutronScenarioTest(ScenarioTest):
                 **kwargs
             )
             try:
-                _, result = self.network_client.create_subnet(**subnet)
+                _, result = client.create_subnet(**subnet)
                 break
-            except exc.NeutronClientException as e:
+            except exceptions.Conflict as e:
                 is_overlapping_cidr = 'overlaps with another subnet' in str(e)
                 if not is_overlapping_cidr:
                     raise
         self.assertIsNotNone(result, 'Unable to allocate tenant network')
-        subnet = net_resources.DeletableSubnet(client=self.network_client,
+        subnet = net_resources.DeletableSubnet(client=client,
                                                **result['subnet'])
         self.assertEqual(subnet.cidr, str_cidr)
         self.addCleanup(self.delete_wrapper, subnet.delete)
         return subnet
 
-    def _create_port(self, network, namestart='port-quotatest'):
+    def _create_port(self, network, client=None, namestart='port-quotatest'):
+        if not client:
+            client = self.network_client
         name = data_utils.rand_name(namestart)
-        _, result = self.network_client.create_port(
+        _, result = client.create_port(
             name=name,
             network_id=network.id,
             tenant_id=network.tenant_id)
         self.assertIsNotNone(result, 'Unable to allocate port')
-        port = net_resources.DeletablePort(client=self.network_client,
+        port = net_resources.DeletablePort(client=client,
                                            **result['port'])
         self.addCleanup(self.delete_wrapper, port.delete)
         return port
@@ -563,16 +611,23 @@ class NeutronScenarioTest(ScenarioTest):
                          "Unable to determine which port to target.")
         return ports[0]['id']
 
-    def _create_floating_ip(self, thing, external_network_id, port_id=None):
+    def _get_network_by_name(self, network_name):
+        net = self._list_networks(name=network_name)
+        return net_common.AttributeDict(net[0])
+
+    def _create_floating_ip(self, thing, external_network_id, port_id=None,
+                            client=None):
+        if not client:
+            client = self.network_client
         if not port_id:
             port_id = self._get_server_port_id(thing)
-        _, result = self.network_client.create_floatingip(
+        _, result = client.create_floatingip(
             floating_network_id=external_network_id,
             port_id=port_id,
             tenant_id=thing['tenant_id']
         )
         floating_ip = net_resources.DeletableFloatingIp(
-            client=self.network_client,
+            client=client,
             **result['floatingip'])
         self.addCleanup(self.delete_wrapper, floating_ip.delete)
         return floating_ip
@@ -703,10 +758,12 @@ class NeutronScenarioTest(ScenarioTest):
                                             CONF.compute.ping_timeout,
                                             1)
 
-    def _create_security_group(self, tenant_id, client=None,
+    def _create_security_group(self, client=None, tenant_id=None,
                                namestart='secgroup-smoke'):
         if client is None:
             client = self.network_client
+        if tenant_id is None:
+            tenant_id = client.rest_client.tenant_id
         secgroup = self._create_empty_security_group(namestart=namestart,
                                                      client=client,
                                                      tenant_id=tenant_id)
@@ -718,7 +775,7 @@ class NeutronScenarioTest(ScenarioTest):
             self.assertEqual(secgroup.id, rule.security_group_id)
         return secgroup
 
-    def _create_empty_security_group(self, tenant_id, client=None,
+    def _create_empty_security_group(self, client=None, tenant_id=None,
                                      namestart='secgroup-smoke'):
         """Create a security group without rules.
 
@@ -731,6 +788,8 @@ class NeutronScenarioTest(ScenarioTest):
         """
         if client is None:
             client = self.network_client
+        if not tenant_id:
+            tenant_id = client.rest_client.tenant_id
         sg_name = data_utils.rand_name(namestart)
         sg_desc = sg_name + " description"
         sg_dict = dict(name=sg_name,
@@ -747,13 +806,15 @@ class NeutronScenarioTest(ScenarioTest):
         self.addCleanup(self.delete_wrapper, secgroup.delete)
         return secgroup
 
-    def _default_security_group(self, tenant_id, client=None):
+    def _default_security_group(self, client=None, tenant_id=None):
         """Get default secgroup for given tenant_id.
 
         :returns: DeletableSecurityGroup -- default secgroup for given tenant
         """
         if client is None:
             client = self.network_client
+        if not tenant_id:
+            tenant_id = client.rest_client.tenant_id
         sgs = [
             sg for sg in client.list_security_groups().values()[0]
             if sg['tenant_id'] == tenant_id and sg['name'] == 'default'
@@ -766,7 +827,7 @@ class NeutronScenarioTest(ScenarioTest):
         return net_resources.DeletableSecurityGroup(client=client,
                                                     **sgs[0])
 
-    def _create_security_group_rule(self, client=None, secgroup=None,
+    def _create_security_group_rule(self, secgroup=None, client=None,
                                     tenant_id=None, **kwargs):
         """Create a rule from a dictionary of rule parameters.
 
@@ -774,8 +835,6 @@ class NeutronScenarioTest(ScenarioTest):
         default secgroup in tenant_id.
 
         :param secgroup: type DeletableSecurityGroup.
-        :param secgroup_id: search for secgroup by id
-            default -- choose default secgroup for given tenant_id
         :param tenant_id: if secgroup not passed -- the tenant in which to
             search for default secgroup
         :param kwargs: a dictionary containing rule parameters:
@@ -789,8 +848,11 @@ class NeutronScenarioTest(ScenarioTest):
         """
         if client is None:
             client = self.network_client
+        if not tenant_id:
+            tenant_id = client.rest_client.tenant_id
         if secgroup is None:
-            secgroup = self._default_security_group(tenant_id)
+            secgroup = self._default_security_group(client=client,
+                                                    tenant_id=tenant_id)
 
         ruleset = dict(security_group_id=secgroup.id,
                        tenant_id=secgroup.tenant_id)
@@ -852,7 +914,7 @@ class NeutronScenarioTest(ScenarioTest):
                                       username=ssh_login,
                                       private_key=private_key)
 
-    def _get_router(self, tenant_id):
+    def _get_router(self, client=None, tenant_id=None):
         """Retrieve a router for the given tenant id.
 
         If a public router has been configured, it will be returned.
@@ -861,41 +923,62 @@ class NeutronScenarioTest(ScenarioTest):
         network has, a tenant router will be created and returned that
         routes traffic to the public network.
         """
+        if not client:
+            client = self.network_client
+        if not tenant_id:
+            tenant_id = client.rest_client.tenant_id
         router_id = CONF.network.public_router_id
         network_id = CONF.network.public_network_id
         if router_id:
-            result = self.network_client.show_router(router_id)
+            result = client.show_router(router_id)
             return net_resources.AttributeDict(**result['router'])
         elif network_id:
-            router = self._create_router(tenant_id)
+            router = self._create_router(client, tenant_id)
             router.set_gateway(network_id)
             return router
         else:
             raise Exception("Neither of 'public_router_id' or "
                             "'public_network_id' has been defined.")
 
-    def _create_router(self, tenant_id, namestart='router-smoke-'):
+    def _create_router(self, client=None, tenant_id=None,
+                       namestart='router-smoke'):
+        if not client:
+            client = self.network_client
+        if not tenant_id:
+            tenant_id = client.rest_client.tenant_id
         name = data_utils.rand_name(namestart)
-        _, result = self.network_client.create_router(name=name,
-                                                      admin_state_up=True,
-                                                      tenant_id=tenant_id, )
-        router = net_resources.DeletableRouter(client=self.network_client,
+        _, result = client.create_router(name=name,
+                                         admin_state_up=True,
+                                         tenant_id=tenant_id)
+        router = net_resources.DeletableRouter(client=client,
                                                **result['router'])
         self.assertEqual(router.name, name)
         self.addCleanup(self.delete_wrapper, router.delete)
         return router
 
-    def _create_networks(self, tenant_id=None):
+    def create_networks(self, client=None, tenant_id=None):
         """Create a network with a subnet connected to a router.
+
+        The baremetal driver is a special case since all nodes are
+        on the same shared network.
 
         :returns: network, subnet, router
         """
-        if tenant_id is None:
-            tenant_id = self.tenant_id
-        network = self._create_network(tenant_id)
-        router = self._get_router(tenant_id)
-        subnet = self._create_subnet(network)
-        subnet.add_to_router(router.id)
+        if CONF.baremetal.driver_enabled:
+            # NOTE(Shrews): This exception is for environments where tenant
+            # credential isolation is available, but network separation is
+            # not (the current baremetal case). Likely can be removed when
+            # test account mgmt is reworked:
+            # https://blueprints.launchpad.net/tempest/+spec/test-accounts
+            network = self._get_network_by_name(
+                CONF.compute.fixed_network_name)
+            router = None
+            subnet = None
+        else:
+            network = self._create_network(client=client, tenant_id=tenant_id)
+            router = self._get_router(client=client, tenant_id=tenant_id)
+            subnet = self._create_subnet(network=network, client=client)
+            subnet.add_to_router(router.id)
         return network, subnet, router
 
 
@@ -1560,7 +1643,7 @@ class BaremetalScenarioTest(OfficialClientTest):
             timeout=CONF.baremetal.unprovision_timeout)
 
 
-class EncryptionScenarioTest(OfficialClientTest):
+class EncryptionScenarioTest(ScenarioTest):
     """
     Base class for encryption scenario tests
     """
@@ -1568,11 +1651,7 @@ class EncryptionScenarioTest(OfficialClientTest):
     @classmethod
     def setUpClass(cls):
         super(EncryptionScenarioTest, cls).setUpClass()
-
-        # use admin credentials to create encrypted volume types
-        admin_creds = cls.admin_credentials()
-        manager = clients.OfficialClientManager(credentials=admin_creds)
-        cls.admin_volume_client = manager.volume_client
+        cls.admin_volume_types_client = cls.admin_manager.volume_types_client
 
     def _wait_for_volume_status(self, status):
         self.status_timeout(
@@ -1580,53 +1659,35 @@ class EncryptionScenarioTest(OfficialClientTest):
 
     def nova_boot(self):
         self.keypair = self.create_keypair()
-        create_kwargs = {'key_name': self.keypair.name}
-        self.server = self.create_server(self.compute_client,
-                                         image=self.image,
+        create_kwargs = {'key_name': self.keypair['name']}
+        self.server = self.create_server(image=self.image,
                                          create_kwargs=create_kwargs)
 
     def create_volume_type(self, client=None, name=None):
         if not client:
-            client = self.admin_volume_client
+            client = self.admin_volume_types_client
         if not name:
             name = 'generic'
         randomized_name = data_utils.rand_name('scenario-type-' + name + '-')
         LOG.debug("Creating a volume type: %s", randomized_name)
-        volume_type = client.volume_types.create(randomized_name)
-        self.addCleanup(client.volume_types.delete, volume_type.id)
-        return volume_type
+        _, body = client.create_volume_type(
+            randomized_name)
+        self.assertIn('id', body)
+        self.addCleanup(client.delete_volume_type, body['id'])
+        return body
 
     def create_encryption_type(self, client=None, type_id=None, provider=None,
                                key_size=None, cipher=None,
                                control_location=None):
         if not client:
-            client = self.admin_volume_client
+            client = self.admin_volume_types_client
         if not type_id:
             volume_type = self.create_volume_type()
-            type_id = volume_type.id
+            type_id = volume_type['id']
         LOG.debug("Creating an encryption type for volume type: %s", type_id)
-        client.volume_encryption_types.create(type_id,
-                                              {'provider': provider,
-                                               'key_size': key_size,
-                                               'cipher': cipher,
-                                               'control_location':
-                                               control_location})
-
-    def nova_volume_attach(self):
-        attach_volume_client = self.compute_client.volumes.create_server_volume
-        volume = attach_volume_client(self.server.id,
-                                      self.volume.id,
-                                      '/dev/vdb')
-        self.assertEqual(self.volume.id, volume.id)
-        self._wait_for_volume_status('in-use')
-
-    def nova_volume_detach(self):
-        detach_volume_client = self.compute_client.volumes.delete_server_volume
-        detach_volume_client(self.server.id, self.volume.id)
-        self._wait_for_volume_status('available')
-
-        volume = self.volume_client.volumes.get(self.volume.id)
-        self.assertEqual('available', volume.status)
+        client.create_encryption_type(
+            type_id, provider=provider, key_size=key_size, cipher=cipher,
+            control_location=control_location)
 
 
 class NetworkScenarioTest(OfficialClientTest):
@@ -1781,6 +1842,10 @@ class NetworkScenarioTest(OfficialClientTest):
             if netaddr.valid_ipv6(ip):
                 ip6 = ip
         return ports[0]['id'], ip4, ip6
+
+    def _get_network_by_name(self, network_name):
+        net = self._list_networks(name=network_name)
+        return net_common.AttributeDict(net[0])
 
     def _create_floating_ip(self, thing, external_network_id, port_id=None):
         ip4 = None
@@ -2184,17 +2249,31 @@ class NetworkScenarioTest(OfficialClientTest):
         self.addCleanup(self.delete_wrapper, router)
         return router
 
-    def _create_networks(self, tenant_id=None):
+    def create_networks(self, tenant_id=None):
         """Create a network with a subnet connected to a router.
+
+        The baremetal driver is a special case since all nodes are
+        on the same shared network.
 
         :returns: network, subnet, router
         """
-        if tenant_id is None:
-            tenant_id = self.tenant_id
-        network = self._create_network(tenant_id)
-        router = self._get_router(tenant_id)
-        subnet = self._create_subnet(network)
-        subnet.add_to_router(router.id)
+        if CONF.baremetal.driver_enabled:
+            # NOTE(Shrews): This exception is for environments where tenant
+            # credential isolation is available, but network separation is
+            # not (the current baremetal case). Likely can be removed when
+            # test account mgmt is reworked:
+            # https://blueprints.launchpad.net/tempest/+spec/test-accounts
+            network = self._get_network_by_name(
+                CONF.compute.fixed_network_name)
+            router = None
+            subnet = None
+        else:
+            if tenant_id is None:
+                tenant_id = self.tenant_id
+            network = self._create_network(tenant_id)
+            router = self._get_router(tenant_id)
+            subnet = self._create_subnet(network)
+            subnet.add_to_router(router.id)
         return network, subnet, router
 
 

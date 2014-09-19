@@ -67,12 +67,14 @@ class PolicyClientXML(rest_client.RestClient):
         create_policy = common.Element("policy", xmlns=XMLNS,
                                        blob=blob, type=type)
         resp, body = self.post('policies', str(common.Document(create_policy)))
+        self.expected_success(201, resp.status)
         body = self._parse_body(etree.fromstring(body))
         return resp, body
 
     def list_policies(self):
         """Lists the policies."""
         resp, body = self.get('policies')
+        self.expected_success(200, resp.status)
         body = self._parse_array(etree.fromstring(body))
         return resp, body
 
@@ -80,20 +82,23 @@ class PolicyClientXML(rest_client.RestClient):
         """Lists out the given policy."""
         url = 'policies/%s' % policy_id
         resp, body = self.get(url)
+        self.expected_success(200, resp.status)
         body = self._parse_body(etree.fromstring(body))
         return resp, body
 
     def update_policy(self, policy_id, **kwargs):
         """Updates a policy."""
-        resp, body = self.get_policy(policy_id)
         type = kwargs.get('type')
         update_policy = common.Element("policy", xmlns=XMLNS, type=type)
         url = 'policies/%s' % policy_id
         resp, body = self.patch(url, str(common.Document(update_policy)))
+        self.expected_success(200, resp.status)
         body = self._parse_body(etree.fromstring(body))
         return resp, body
 
     def delete_policy(self, policy_id):
         """Deletes the policy."""
         url = "policies/%s" % policy_id
-        return self.delete(url)
+        resp, body = self.delete(url)
+        self.expected_success(204, resp.status)
+        return resp, body

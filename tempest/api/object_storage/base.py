@@ -69,10 +69,11 @@ class BaseObjectTest(tempest.test.BaseTestCase):
         cls.object_client_alt.auth_provider.clear_auth()
         cls.container_client_alt.auth_provider.clear_auth()
 
-        cls.data = base.DataGenerator(cls.identity_admin_client)
+        cls.data = SwiftDataGenerator(cls.identity_admin_client)
 
     @classmethod
     def tearDownClass(cls):
+        cls.data.teardown_all()
         cls.isolated_creds.clear_isolated_creds()
         super(BaseObjectTest, cls).tearDownClass()
 
@@ -116,3 +117,28 @@ class BaseObjectTest(tempest.test.BaseTestCase):
         self.assertThat(resp, custom_matchers.ExistsAllResponseHeaders(
                         target, method))
         self.assertThat(resp, custom_matchers.AreAllWellFormatted())
+
+
+class SwiftDataGenerator(base.DataGenerator):
+
+    def setup_test_user(self, reseller=False):
+        super(SwiftDataGenerator, self).setup_test_user()
+        if reseller:
+            role_name = CONF.object_storage.reseller_admin_role
+        else:
+            role_name = CONF.object_storage.operator_role
+        role_id = self._get_role_id(role_name)
+        self._assign_role(role_id)
+
+    def _get_role_id(self, role_name):
+        try:
+            _, roles = self.client.list_roles()
+            return next(r['id'] for r in roles if r['name'] == role_name)
+        except StopIteration:
+            msg = "Role name '%s' is not found" % role_name
+            raise exceptions.NotFound(msg)
+
+    def _assign_role(self, role_id):
+        self.client.assign_user_role(self.tenant['id'],
+                                     self.user['id'],
+                                     role_id)

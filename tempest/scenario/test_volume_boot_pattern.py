@@ -117,7 +117,7 @@ class TestVolumeBootPattern(manager.ScenarioTest):
                 private_key=keypair['private_key'])
         except Exception:
             LOG.exception('ssh to server failed')
-            self._log_console_output(self)
+            self._log_console_output(servers=[server])
             raise
 
     def _get_content(self, ssh_client):

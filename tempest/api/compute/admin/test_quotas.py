@@ -57,9 +57,9 @@ class QuotasAdminTestJSON(base.BaseV2ComputeAdminTest):
         resp, quota_set = self.adm_client.get_default_quota_set(
             self.demo_tenant_id)
         self.assertEqual(200, resp.status)
-        self.assertEqual(sorted(expected_quota_set),
-                         sorted(quota_set.keys()))
         self.assertEqual(quota_set['id'], self.demo_tenant_id)
+        for quota in expected_quota_set:
+            self.assertIn(quota, quota_set.keys())
 
     @test.attr(type='gate')
     def test_update_all_quota_resources_for_tenant(self):
@@ -79,10 +79,18 @@ class QuotasAdminTestJSON(base.BaseV2ComputeAdminTest):
             **new_quota_set)
 
         default_quota_set.pop('id')
+        # NOTE(PhilDay) The following is safe as we're not updating these
+        # two quota values yet.  Once the Nova change to add these is merged
+        # and the client updated to support them this can be removed
+        if 'server_groups' in default_quota_set:
+            default_quota_set.pop('server_groups')
+        if 'server_group_members' in default_quota_set:
+            default_quota_set.pop('server_group_members')
         self.addCleanup(self.adm_client.update_quota_set,
                         self.demo_tenant_id, **default_quota_set)
         self.assertEqual(200, resp.status)
-        self.assertEqual(new_quota_set, quota_set)
+        for quota in new_quota_set:
+            self.assertIn(quota, quota_set.keys())
 
     # TODO(afazekas): merge these test cases
     @test.attr(type='gate')

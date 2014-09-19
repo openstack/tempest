@@ -99,12 +99,15 @@ class TestNetworkBasicOps(manager.NeutronScenarioTest):
 
     def setUp(self):
         super(TestNetworkBasicOps, self).setUp()
-        self.security_group = \
-            self._create_security_group(tenant_id=self.tenant_id)
-        self.network, self.subnet, self.router = self._create_networks()
-        self.check_networks()
         self.keypairs = {}
         self.servers = []
+
+    def _setup_network_and_servers(self):
+        self.security_group = \
+            self._create_security_group(tenant_id=self.tenant_id)
+        self.network, self.subnet, self.router = self.create_networks()
+        self.check_networks()
+
         name = data_utils.rand_name('server-smoke')
         server = self._create_server(name, self.network)
         self._check_tenant_network_connectivity()
@@ -123,19 +126,21 @@ class TestNetworkBasicOps(manager.NeutronScenarioTest):
         self.assertIn(self.network.name, seen_names)
         self.assertIn(self.network.id, seen_ids)
 
-        seen_subnets = self._list_subnets()
-        seen_net_ids = [n['network_id'] for n in seen_subnets]
-        seen_subnet_ids = [n['id'] for n in seen_subnets]
-        self.assertIn(self.network.id, seen_net_ids)
-        self.assertIn(self.subnet.id, seen_subnet_ids)
+        if self.subnet:
+            seen_subnets = self._list_subnets()
+            seen_net_ids = [n['network_id'] for n in seen_subnets]
+            seen_subnet_ids = [n['id'] for n in seen_subnets]
+            self.assertIn(self.network.id, seen_net_ids)
+            self.assertIn(self.subnet.id, seen_subnet_ids)
 
-        seen_routers = self._list_routers()
-        seen_router_ids = [n['id'] for n in seen_routers]
-        seen_router_names = [n['name'] for n in seen_routers]
-        self.assertIn(self.router.name,
-                      seen_router_names)
-        self.assertIn(self.router.id,
-                      seen_router_ids)
+        if self.router:
+            seen_routers = self._list_routers()
+            seen_router_ids = [n['id'] for n in seen_routers]
+            seen_router_names = [n['name'] for n in seen_routers]
+            self.assertIn(self.router.name,
+                          seen_router_names)
+            self.assertIn(self.router.id,
+                          seen_router_ids)
 
     def _create_server(self, name, network):
         keypair = self.create_keypair()
@@ -198,7 +203,7 @@ class TestNetworkBasicOps(manager.NeutronScenarioTest):
             floating_ip, server)
 
     def _create_new_network(self):
-        self.new_net = self._create_network(self.tenant_id)
+        self.new_net = self._create_network(tenant_id=self.tenant_id)
         self.new_subnet = self._create_subnet(
             network=self.new_net,
             gateway_ip=None)
@@ -347,6 +352,7 @@ class TestNetworkBasicOps(manager.NeutronScenarioTest):
 
 
         """
+        self._setup_network_and_servers()
         self._check_public_network_connectivity(should_connect=True)
         self._check_network_internal_connectivity(network=self.network)
         self._check_network_external_connectivity()
@@ -372,7 +378,7 @@ class TestNetworkBasicOps(manager.NeutronScenarioTest):
         4. check VM can ping new network dhcp port
 
         """
-
+        self._setup_network_and_servers()
         self._check_public_network_connectivity(should_connect=True)
         self._create_new_network()
         self._hotplug_server()

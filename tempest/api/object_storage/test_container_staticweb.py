@@ -48,7 +48,6 @@ class StaticWebTest(base.BaseObjectTest):
     def tearDownClass(cls):
         if hasattr(cls, "container_name"):
             cls.delete_containers([cls.container_name])
-        cls.data.teardown_all()
         super(StaticWebTest, cls).tearDownClass()
 
     @test.requires_ext(extension='staticweb', service='object')

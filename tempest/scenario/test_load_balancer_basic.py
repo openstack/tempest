@@ -73,6 +73,35 @@ class TestLoadBalancerBasic(manager.NetworkScenarioTest):
         self.server_ips = {}
         self.server_fixed_ips = {}
         self._create_security_group()
+        self._set_net_and_subnet()
+
+    def _set_net_and_subnet(self):
+        """
+        Query and set appropriate network and subnet attributes to be used
+        for the test.  Existing tenant networks are used if they are found.
+        The configured private network and associated subnet is used as a
+        fallback in absence of tenant networking.
+        """
+        try:
+            tenant_net = self._list_networks(tenant_id=self.tenant_id)[0]
+        except IndexError:
+            tenant_net = None
+
+        if tenant_net:
+            tenant_subnet = self._list_subnets(tenant_id=self.tenant_id)[0]
+            self.subnet = net_common.DeletableSubnet(
+                client=self.network_client,
+                **tenant_subnet)
+            self.network = tenant_net
+        else:
+            self.network = self._get_network_by_name(
+                config.compute.fixed_network_name)
+            # TODO(adam_g): We are assuming that the first subnet associated
+            # with the fixed network is the one we want.  In the future, we
+            # should instead pull a subnet id from config, which is set by
+            # devstack/admin/etc.
+            subnet = self._list_subnets(network_id=self.network['id'])[0]
+            self.subnet = net_common.AttributeDict(subnet)
 
     def _create_security_group(self):
         self.security_group = self._create_security_group_neutron(
@@ -96,10 +125,9 @@ class TestLoadBalancerBasic(manager.NetworkScenarioTest):
     def _create_server(self, name):
         keypair = self.create_keypair(name='keypair-%s' % name)
         security_groups = [self.security_group.name]
-        net = self._list_networks(tenant_id=self.tenant_id)[0]
         create_kwargs = {
             'nics': [
-                {'net-id': net['id']},
+                {'net-id': self.network['id']},
             ],
             'key_name': keypair.name,
             'security_groups': security_groups,
@@ -107,6 +135,7 @@ class TestLoadBalancerBasic(manager.NetworkScenarioTest):
         server = self.create_server(name=name,
                                     create_kwargs=create_kwargs)
         self.servers_keypairs[server.id] = keypair
+        net_name = self.network['name']
         if (config.network.public_network_id and not
                 config.network.tenant_networks_reachable):
             public_network_id = config.network.public_network_id
@@ -115,8 +144,8 @@ class TestLoadBalancerBasic(manager.NetworkScenarioTest):
             self.floating_ips[floating_ip] = server
             self.server_ips[server.id] = floating_ip.floating_ip_address
         else:
-            self.server_ips[server.id] = server.networks[net['name']][0]
-        self.server_fixed_ips[server.id] = server.networks[net['name']][0]
+            self.server_ips[server.id] = server.networks[net_name][0]
+        self.server_fixed_ips[server.id] = server.networks[net_name][0]
         self.assertTrue(self.servers_keypairs)
         return server
 
@@ -132,7 +161,6 @@ class TestLoadBalancerBasic(manager.NetworkScenarioTest):
         1. SSH to the instance
         2. Start two http backends listening on ports 80 and 88 respectively
         """
-
         for server_id, ip in self.server_ips.iteritems():
             private_key = self.servers_keypairs[server_id].private_key
             server_name = self.compute_client.servers.get(server_id).name
@@ -196,10 +224,6 @@ class TestLoadBalancerBasic(manager.NetworkScenarioTest):
 
     def _create_pool(self):
         """Create a pool with ROUND_ROBIN algorithm."""
-        # get tenant subnet and verify there's only one
-        subnet = self._list_subnets(tenant_id=self.tenant_id)[0]
-        self.subnet = net_common.DeletableSubnet(client=self.network_client,
-                                                 **subnet)
         self.pool = super(TestLoadBalancerBasic, self)._create_pool(
             lb_method='ROUND_ROBIN',
             protocol='HTTP',
@@ -288,8 +312,6 @@ class TestLoadBalancerBasic(manager.NetworkScenarioTest):
             self.assertEqual(expected,
                              set(resp))
 
-    @test.skip_because(bug="1342124")
-    @test.attr(type='smoke')
     @test.services('compute', 'network')
     def test_load_balancer_basic(self):
         self._create_server('server1')

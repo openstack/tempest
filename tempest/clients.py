@@ -180,12 +180,14 @@ from tempest.services.volume.json.availability_zone_client import \
 from tempest.services.volume.json.backups_client import BackupsClientJSON
 from tempest.services.volume.json.extensions_client import \
     ExtensionsClientJSON as VolumeExtensionClientJSON
+from tempest.services.volume.json.qos_client import QosSpecsClientJSON
 from tempest.services.volume.json.snapshots_client import SnapshotsClientJSON
 from tempest.services.volume.json.volumes_client import VolumesClientJSON
 from tempest.services.volume.v2.json.availability_zone_client import \
     VolumeV2AvailabilityZoneClientJSON
 from tempest.services.volume.v2.json.extensions_client import \
     ExtensionsV2ClientJSON as VolumeV2ExtensionClientJSON
+from tempest.services.volume.v2.json.qos_client import QosSpecsV2ClientJSON
 from tempest.services.volume.v2.json.volumes_client import VolumesV2ClientJSON
 from tempest.services.volume.v2.xml.availability_zone_client import \
     VolumeV2AvailabilityZoneClientXML
@@ -428,6 +430,13 @@ class Manager(manager.Manager):
         self.security_group_default_rules_client = (
             SecurityGroupDefaultRulesClientJSON(self.auth_provider))
         self.networks_client = NetworksClientJSON(self.auth_provider)
+        # NOTE : As XML clients are not implemented for Qos-specs.
+        # So, setting the qos_client here. Once client are implemented,
+        # qos_client would be moved to its respective if/else.
+        # Bug : 1312553
+        self.volume_qos_client = QosSpecsClientJSON(self.auth_provider)
+        self.volume_qos_v2_client = QosSpecsV2ClientJSON(
+            self.auth_provider)
 
 
 class AltManager(Manager):

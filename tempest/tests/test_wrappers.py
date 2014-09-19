@@ -69,14 +69,14 @@ class TestWrappers(base.TestCase):
 
         self.assertEqual(
             p.returncode, expected,
-            "Stdout: %s; Stderr: %s" % (p.stdout, p.stderr))
+            "Stdout: %s; Stderr: %s" % (p.stdout.read(), p.stderr.read()))
 
     def test_pretty_tox(self):
         # Git init is required for the pbr testr command. pbr requires a git
         # version or an sdist to work. so make the test directory a git repo
         # too.
         subprocess.call(['git', 'init'], stderr=DEVNULL)
-        self.assertRunExit('pretty_tox.sh tests.passing', 0)
+        self.assertRunExit('pretty_tox.sh passing', 0)
 
     def test_pretty_tox_fails(self):
         # Git init is required for the pbr testr command. pbr requires a git
@@ -86,7 +86,7 @@ class TestWrappers(base.TestCase):
         self.assertRunExit('pretty_tox.sh', 1)
 
     def test_pretty_tox_serial(self):
-        self.assertRunExit('pretty_tox_serial.sh tests.passing', 0)
+        self.assertRunExit('pretty_tox_serial.sh passing', 0)
 
     def test_pretty_tox_serial_fails(self):
         self.assertRunExit('pretty_tox_serial.sh', 1)

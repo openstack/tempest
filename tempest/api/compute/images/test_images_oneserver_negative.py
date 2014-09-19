@@ -55,6 +55,7 @@ class ImagesOneServerNegativeTestJSON(base.BaseV2ComputeTest):
         self.__class__.server_id = self.rebuild_server(self.server_id)
 
     @classmethod
+    @test.safe_setup
     def setUpClass(cls):
         super(ImagesOneServerNegativeTestJSON, cls).setUpClass()
         cls.client = cls.images_client
@@ -67,12 +68,8 @@ class ImagesOneServerNegativeTestJSON(base.BaseV2ComputeTest):
                         % cls.__name__)
             raise cls.skipException(skip_msg)
 
-        try:
-            resp, server = cls.create_test_server(wait_until='ACTIVE')
-            cls.server_id = server['id']
-        except Exception:
-            cls.tearDownClass()
-            raise
+        resp, server = cls.create_test_server(wait_until='ACTIVE')
+        cls.server_id = server['id']
 
         cls.image_ids = []
 

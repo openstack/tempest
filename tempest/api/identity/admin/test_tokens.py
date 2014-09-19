@@ -35,10 +35,9 @@ class TokensTestJSON(base.BaseIdentityV2AdminTest):
                                           tenant['id'], '')
         self.data.users.append(user)
         # then get a token for the user
-        rsp, body = self.token_client.auth(user_name,
-                                           user_password,
-                                           tenant['name'])
-        self.assertEqual(rsp['status'], '200')
+        _, body = self.token_client.auth(user_name,
+                                         user_password,
+                                         tenant['name'])
         self.assertEqual(body['token']['tenant']['name'],
                          tenant['name'])
         # Perform GET Token
@@ -89,15 +88,13 @@ class TokensTestJSON(base.BaseIdentityV2AdminTest):
                                      role['id'])
 
         # Get an unscoped token.
-        resp, body = self.token_client.auth(user_name, user_password)
-        self.assertEqual(200, resp.status)
+        _, body = self.token_client.auth(user_name, user_password)
 
         token_id = body['token']['id']
 
         # Use the unscoped token to get a token scoped to tenant1
-        resp, body = self.token_client.auth_token(token_id,
-                                                  tenant=tenant1_name)
-        self.assertEqual(200, resp.status)
+        _, body = self.token_client.auth_token(token_id,
+                                               tenant=tenant1_name)
 
         scoped_token_id = body['token']['id']
 
@@ -105,9 +102,8 @@ class TokensTestJSON(base.BaseIdentityV2AdminTest):
         self.client.delete_token(scoped_token_id)
 
         # Use the unscoped token to get a token scoped to tenant2
-        resp, body = self.token_client.auth_token(token_id,
-                                                  tenant=tenant2_name)
-        self.assertEqual(200, resp.status)
+        _, body = self.token_client.auth_token(token_id,
+                                               tenant=tenant2_name)
 
 
 class TokensTestXML(TokensTestJSON):

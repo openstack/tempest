@@ -419,10 +419,10 @@ NetworkGroup = [
                default=28,
                help="The mask bits for tenant ipv4 subnets"),
     cfg.StrOpt('tenant_network_v6_cidr',
-               default="2003::/64",
+               default="2003::/48",
                help="The cidr block to allocate tenant ipv6 subnets from"),
     cfg.IntOpt('tenant_network_v6_mask_bits',
-               default=96,
+               default=64,
                help="The mask bits for tenant ipv6 subnets"),
     cfg.BoolOpt('tenant_networks_reachable',
                 default=False,
@@ -622,6 +622,15 @@ ObjectStoreFeaturesGroup = [
                 help="A list of the enabled optional discoverable apis. "
                      "A single entry, all, indicates that all of these "
                      "features are expected to be enabled"),
+    cfg.BoolOpt('container_sync',
+                default=True,
+                help="Execute (old style) container-sync tests"),
+    cfg.BoolOpt('object_versioning',
+                default=True,
+                help="Execute object-versioning tests"),
+    cfg.BoolOpt('discoverability',
+                default=True,
+                help="Execute discoverability tests"),
 ]
 
 database_group = cfg.OptGroup(name='database',

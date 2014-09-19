@@ -60,13 +60,14 @@ class CredentialsClientXML(rest_client.RestClient):
                                     type=cred_type, user_id=user_id)
         credential.append(blob)
         resp, body = self.post('credentials', str(common.Document(credential)))
+        self.expected_success(201, resp.status)
         body = self._parse_body(etree.fromstring(body))
         body['blob'] = json.loads(body['blob'])
         return resp, body
 
     def update_credential(self, credential_id, **kwargs):
         """Updates a credential."""
-        resp, body = self.get_credential(credential_id)
+        _, body = self.get_credential(credential_id)
         cred_type = kwargs.get('type', body['type'])
         access_key = kwargs.get('access_key', body['blob']['access'])
         secret_key = kwargs.get('secret_key', body['blob']['secret'])
@@ -83,6 +84,7 @@ class CredentialsClientXML(rest_client.RestClient):
         credential.append(blob)
         resp, body = self.patch('credentials/%s' % credential_id,
                                 str(common.Document(credential)))
+        self.expected_success(200, resp.status)
         body = self._parse_body(etree.fromstring(body))
         body['blob'] = json.loads(body['blob'])
         return resp, body
@@ -90,6 +92,7 @@ class CredentialsClientXML(rest_client.RestClient):
     def get_credential(self, credential_id):
         """To GET Details of a credential."""
         resp, body = self.get('credentials/%s' % credential_id)
+        self.expected_success(200, resp.status)
         body = self._parse_body(etree.fromstring(body))
         body['blob'] = json.loads(body['blob'])
         return resp, body
@@ -97,10 +100,12 @@ class CredentialsClientXML(rest_client.RestClient):
     def list_credentials(self):
         """Lists out all the available credentials."""
         resp, body = self.get('credentials')
+        self.expected_success(200, resp.status)
         body = self._parse_creds(etree.fromstring(body))
         return resp, body
 
     def delete_credential(self, credential_id):
         """Deletes a credential."""
         resp, body = self.delete('credentials/%s' % credential_id)
+        self.expected_success(204, resp.status)
         return resp, body

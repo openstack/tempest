@@ -26,11 +26,7 @@ hypervisors_servers['response_body']['properties']['hypervisors']['items'][
         'items': {
             'type': 'object',
             'properties': {
-                # NOTE: Now the type of 'id' is integer,
-                # but here allows 'string' also because we
-                # will be able to change it to 'uuid' in
-                # the future.
-                'id': {'type': ['integer', 'string']},
+                'uuid': {'type': 'string'},
                 'name': {'type': 'string'}
             }
         }

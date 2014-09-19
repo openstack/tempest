@@ -16,6 +16,7 @@
 import socket
 
 from tempest.api.network import base
+from tempest.common import custom_matchers
 from tempest.common.utils import data_utils
 from tempest import config
 from tempest import test
@@ -72,18 +73,12 @@ class PortsTestJSON(base.BaseNetworkTest):
         _, body = self.client.show_port(self.port['id'])
         port = body['port']
         self.assertIn('id', port)
-        self.assertEqual(port['id'], self.port['id'])
-        self.assertEqual(self.port['admin_state_up'], port['admin_state_up'])
-        self.assertEqual(self.port['device_id'], port['device_id'])
-        self.assertEqual(self.port['device_owner'], port['device_owner'])
-        self.assertEqual(self.port['mac_address'], port['mac_address'])
-        self.assertEqual(self.port['name'], port['name'])
-        self.assertEqual(self.port['security_groups'],
-                         port['security_groups'])
-        self.assertEqual(self.port['network_id'], port['network_id'])
-        self.assertEqual(self.port['security_groups'],
-                         port['security_groups'])
-        self.assertEqual(port['fixed_ips'], [])
+        # TODO(Santosh)- This is a temporary workaround to compare create_port
+        # and show_port dict elements.Remove this once extra_dhcp_opts issue
+        # gets fixed in neutron.( bug - 1365341.)
+        self.assertThat(self.port,
+                        custom_matchers.MatchesDictExceptForKeys
+                        (port, excluded_keys=['extra_dhcp_opts']))
 
     @test.attr(type='smoke')
     def test_show_port_fields(self):
@@ -134,6 +129,7 @@ class PortsTestJSON(base.BaseNetworkTest):
         for port in ports:
             self.assertEqual(sorted(fields), sorted(port.keys()))
 
+    @test.skip_because(bug="1364166")
     @test.attr(type='smoke')
     def test_update_port_with_second_ip(self):
         # Create a network with two subnets
@@ -249,10 +245,10 @@ class PortsIpV6TestJSON(PortsTestJSON):
     _tenant_network_mask_bits = CONF.network.tenant_network_v6_mask_bits
 
     @classmethod
+    @test.safe_setup
     def setUpClass(cls):
         super(PortsIpV6TestJSON, cls).setUpClass()
         if not CONF.network_feature_enabled.ipv6:
-            cls.tearDownClass()
             skip_msg = "IPv6 Tests are disabled."
             raise cls.skipException(skip_msg)
 
@@ -274,6 +270,5 @@ class PortsAdminExtendedAttrsIpV6TestJSON(PortsAdminExtendedAttrsTestJSON):
         super(PortsAdminExtendedAttrsIpV6TestJSON, cls).setUpClass()
 
 
-class PortsAdminExtendedAttrsIpV6TestXML(
-    PortsAdminExtendedAttrsIpV6TestJSON):
+class PortsAdminExtendedAttrsIpV6TestXML(PortsAdminExtendedAttrsIpV6TestJSON):
     _interface = 'xml'

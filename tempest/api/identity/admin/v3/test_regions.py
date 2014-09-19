@@ -40,34 +40,30 @@ class RegionsTestJSON(base.BaseIdentityV3AdminTest):
         super(RegionsTestJSON, cls).tearDownClass()
 
     def _delete_region(self, region_id):
-        resp, _ = self.client.delete_region(region_id)
-        self.assertEqual(204, resp.status)
+        self.client.delete_region(region_id)
         self.assertRaises(exceptions.NotFound,
                           self.client.get_region, region_id)
 
     @test.attr(type='gate')
     def test_create_update_get_delete_region(self):
         r_description = data_utils.rand_name('description-')
-        resp, region = self.client.create_region(
+        _, region = self.client.create_region(
             r_description, parent_region_id=self.setup_regions[0]['id'])
-        self.assertEqual(201, resp.status)
         self.addCleanup(self._delete_region, region['id'])
         self.assertEqual(r_description, region['description'])
         self.assertEqual(self.setup_regions[0]['id'],
                          region['parent_region_id'])
         # Update region with new description and parent ID
         r_alt_description = data_utils.rand_name('description-')
-        resp, region = self.client.update_region(
+        _, region = self.client.update_region(
             region['id'],
             description=r_alt_description,
             parent_region_id=self.setup_regions[1]['id'])
-        self.assertEqual(200, resp.status)
         self.assertEqual(r_alt_description, region['description'])
         self.assertEqual(self.setup_regions[1]['id'],
                          region['parent_region_id'])
         # Get the details of region
-        resp, region = self.client.get_region(region['id'])
-        self.assertEqual(200, resp.status)
+        _, region = self.client.get_region(region['id'])
         self.assertEqual(r_alt_description, region['description'])
         self.assertEqual(self.setup_regions[1]['id'],
                          region['parent_region_id'])
@@ -77,19 +73,17 @@ class RegionsTestJSON(base.BaseIdentityV3AdminTest):
         # Create a region with a specific id
         r_region_id = data_utils.rand_uuid()
         r_description = data_utils.rand_name('description-')
-        resp, region = self.client.create_region(
+        _, region = self.client.create_region(
             r_description, unique_region_id=r_region_id)
         self.addCleanup(self._delete_region, region['id'])
         # Asserting Create Region with specific id response body
-        self.assertEqual(201, resp.status)
         self.assertEqual(r_region_id, region['id'])
         self.assertEqual(r_description, region['description'])
 
     @test.attr(type='gate')
     def test_list_regions(self):
         # Get a list of regions
-        resp, fetched_regions = self.client.list_regions()
-        self.assertEqual(200, resp.status)
+        _, fetched_regions = self.client.list_regions()
         missing_regions =\
             [e for e in self.setup_regions if e not in fetched_regions]
         # Asserting List Regions response

@@ -148,11 +148,11 @@ class BaseVolumeV1Test(BaseVolumeTest):
     _api_version = 1
 
 
-class BaseVolumeV1AdminTest(BaseVolumeV1Test):
+class BaseVolumeAdminTest(BaseVolumeTest):
     """Base test case class for all Volume Admin API tests."""
     @classmethod
     def setUpClass(cls):
-        super(BaseVolumeV1AdminTest, cls).setUpClass()
+        super(BaseVolumeAdminTest, cls).setUpClass()
         cls.adm_user = CONF.identity.admin_username
         cls.adm_pass = CONF.identity.admin_password
         cls.adm_tenant = CONF.identity.admin_tenant_name
@@ -160,11 +160,62 @@ class BaseVolumeV1AdminTest(BaseVolumeV1Test):
             msg = ("Missing Volume Admin API credentials "
                    "in configuration.")
             raise cls.skipException(msg)
+
         if CONF.compute.allow_tenant_isolation:
             cls.os_adm = clients.Manager(cls.isolated_creds.get_admin_creds(),
                                          interface=cls._interface)
         else:
             cls.os_adm = clients.AdminManager(interface=cls._interface)
+
+        cls.qos_specs = []
+
         cls.client = cls.os_adm.volume_types_client
         cls.hosts_client = cls.os_adm.volume_hosts_client
         cls.quotas_client = cls.os_adm.volume_quotas_client
+        cls.volume_types_client = cls.os_adm.volume_types_client
+
+        if cls._api_version == 1:
+            if not CONF.volume_feature_enabled.api_v1:
+                msg = "Volume API v1 is disabled"
+                raise cls.skipException(msg)
+            cls.volume_qos_client = cls.os_adm.volume_qos_client
+        elif cls._api_version == 2:
+            if not CONF.volume_feature_enabled.api_v2:
+                msg = "Volume API v2 is disabled"
+                raise cls.skipException(msg)
+            cls.volume_qos_client = cls.os_adm.volume_qos_v2_client
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.clear_qos_specs()
+        super(BaseVolumeAdminTest, cls).tearDownClass()
+
+    @classmethod
+    def create_test_qos_specs(cls, name=None, consumer=None, **kwargs):
+        """create a test Qos-Specs."""
+        name = name or data_utils.rand_name(cls.__name__ + '-QoS')
+        consumer = consumer or 'front-end'
+        _, qos_specs = cls.volume_qos_client.create_qos(name, consumer,
+                                                        **kwargs)
+        cls.qos_specs.append(qos_specs['id'])
+        return qos_specs
+
+    @classmethod
+    def clear_qos_specs(cls):
+        for qos_id in cls.qos_specs:
+            try:
+                cls.volume_qos_client.delete_qos(qos_id)
+            except exceptions.NotFound:
+                # The qos_specs may have already been deleted which is OK.
+                pass
+
+        for qos_id in cls.qos_specs:
+            try:
+                cls.volume_qos_client.wait_for_resource_deletion(qos_id)
+            except exceptions.NotFound:
+                # The qos_specs may have already been deleted which is OK.
+                pass
+
+
+class BaseVolumeV1AdminTest(BaseVolumeAdminTest):
+    _api_version = 1

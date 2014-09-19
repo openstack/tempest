@@ -59,7 +59,6 @@ class ObjectFormPostNegativeTest(base.BaseObjectTest):
     def tearDownClass(cls):
         cls.account_client.delete_account_metadata(metadata=cls.metadata)
         cls.delete_containers(cls.containers)
-        cls.data.teardown_all()
         super(ObjectFormPostNegativeTest, cls).tearDownClass()
 
     def get_multipart_form(self, expires=600):

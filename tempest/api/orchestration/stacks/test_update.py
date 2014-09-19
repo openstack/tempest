@@ -61,7 +61,6 @@ resources:
                          self.list_resources(stack_identifier))
 
     @test.attr(type='gate')
-    @test.skip_because(bug='1308682')
     def test_stack_update_add_remove(self):
         stack_name = data_utils.rand_name('heat')
         stack_identifier = self.create_stack(stack_name, self.template)

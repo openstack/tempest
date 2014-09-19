@@ -52,8 +52,11 @@ class Accounts(cred_provider.CredentialProvider):
             hash_dict[temp_hash.hexdigest()] = account
         return hash_dict
 
-    def _create_hash_file(self, hash):
-        path = os.path.join(os.path.join(self.accounts_dir, hash))
+    def is_multi_user(self):
+        return len(self.hash_dict) > 1
+
+    def _create_hash_file(self, hash_string):
+        path = os.path.join(os.path.join(self.accounts_dir, hash_string))
         if not os.path.isfile(path):
             open(path, 'w').close()
             return True
@@ -66,20 +69,20 @@ class Accounts(cred_provider.CredentialProvider):
             # Create File from first hash (since none are in use)
             self._create_hash_file(hashes[0])
             return hashes[0]
-        for hash in hashes:
-            res = self._create_hash_file(hash)
+        for _hash in hashes:
+            res = self._create_hash_file(_hash)
             if res:
-                return hash
+                return _hash
         msg = 'Insufficient number of users provided'
         raise exceptions.InvalidConfiguration(msg)
 
     def _get_creds(self):
-        free_hash = self._get_free_hash(self.hashes.keys())
+        free_hash = self._get_free_hash(self.hash_dict.keys())
         return self.hash_dict[free_hash]
 
     @lockutils.synchronized('test_accounts_io', external=True)
-    def remove_hash(self, hash):
-        hash_path = os.path.join(self.accounts_dir, hash)
+    def remove_hash(self, hash_string):
+        hash_path = os.path.join(self.accounts_dir, hash_string)
         if not os.path.isfile(hash_path):
             LOG.warning('Expected an account lock file %s to remove, but '
                         'one did not exist')
@@ -89,43 +92,79 @@ class Accounts(cred_provider.CredentialProvider):
                 os.rmdir(self.accounts_dir)
 
     def get_hash(self, creds):
-        for hash in self.hash_dict:
-            # NOTE(mtreinish) Assuming with v3 that username, tenant, password
-            # is unique enough
-            cred_dict = {
-                'username': creds.username,
-                'tenant_name': creds.tenant_name,
-                'password': creds.password
-            }
-            if self.hash_dict[hash] == cred_dict:
-                return hash
+        for _hash in self.hash_dict:
+            # Comparing on the attributes that are expected in the YAML
+            if all([getattr(creds, k) == self.hash_dict[_hash][k] for k in
+                    creds.CONF_ATTRIBUTES]):
+                return _hash
         raise AttributeError('Invalid credentials %s' % creds)
 
     def remove_credentials(self, creds):
-        hash = self.get_hash(creds)
-        self.remove_hash(hash, self.accounts_dir)
+        _hash = self.get_hash(creds)
+        self.remove_hash(_hash)
 
     def get_primary_creds(self):
-        if self.credentials.get('primary'):
-            return self.credentials.get('primary')
+        if self.isolated_creds.get('primary'):
+            return self.isolated_creds.get('primary')
         creds = self._get_creds()
         primary_credential = auth.get_credentials(**creds)
-        self.credentials['primary'] = primary_credential
+        self.isolated_creds['primary'] = primary_credential
         return primary_credential
 
     def get_alt_creds(self):
-        if self.credentials.get('alt'):
-            return self.credentials.get('alt')
+        if self.isolated_creds.get('alt'):
+            return self.isolated_creds.get('alt')
         creds = self._get_creds()
         alt_credential = auth.get_credentials(**creds)
-        self.credentials['alt'] = alt_credential
+        self.isolated_creds['alt'] = alt_credential
         return alt_credential
 
     def clear_isolated_creds(self):
-        for creds in self.credentials.values():
+        for creds in self.isolated_creds.values():
             self.remove_credentials(creds)
 
     def get_admin_creds(self):
         msg = ('If admin credentials are available tenant_isolation should be'
                ' used instead')
         raise NotImplementedError(msg)
+
+
+class NotLockingAccounts(Accounts):
+    """Credentials provider which always returns the first and second
+    configured accounts as primary and alt users.
+    This credential provider can be used in case of serial test execution
+    to preserve the current behaviour of the serial tempest run.
+    """
+
+    def get_creds(self, id):
+        try:
+            # No need to sort the dict as within the same python process
+            # the HASH seed won't change, so subsequent calls to keys()
+            # will return the same result
+            _hash = self.hash_dict.keys()[id]
+        except IndexError:
+            msg = 'Insufficient number of users provided'
+            raise exceptions.InvalidConfiguration(msg)
+        return self.hash_dict[_hash]
+
+    def get_primary_creds(self):
+        if self.isolated_creds.get('primary'):
+            return self.isolated_creds.get('primary')
+        creds = self.get_creds(0)
+        primary_credential = auth.get_credentials(**creds)
+        self.isolated_creds['primary'] = primary_credential
+        return primary_credential
+
+    def get_alt_creds(self):
+        if self.isolated_creds.get('alt'):
+            return self.isolated_creds.get('alt')
+        creds = self.get_creds(1)
+        alt_credential = auth.get_credentials(**creds)
+        self.isolated_creds['alt'] = alt_credential
+        return alt_credential
+
+    def clear_isolated_creds(self):
+        self.isolated_creds = {}
+
+    def get_admin_creds(self):
+        return auth.get_default_credentials("identity_admin", fill_in=False)

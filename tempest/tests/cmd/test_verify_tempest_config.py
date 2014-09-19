@@ -238,8 +238,8 @@ class TestDiscovery(base.TestCase):
                                                           'neutron', {})
         self.assertIn('neutron', results)
         self.assertIn('extensions', results['neutron'])
-        self.assertEqual(['fake1', 'fake2', 'not_fake'],
-                         results['neutron']['extensions'])
+        self.assertEqual(sorted(['fake1', 'fake2', 'not_fake']),
+                         sorted(results['neutron']['extensions']))
 
     def test_verify_extensions_cinder(self):
         def fake_list_extensions():
@@ -277,8 +277,8 @@ class TestDiscovery(base.TestCase):
                                                           'cinder', {})
         self.assertIn('cinder', results)
         self.assertIn('extensions', results['cinder'])
-        self.assertEqual(['fake1', 'fake2', 'not_fake'],
-                         results['cinder']['extensions'])
+        self.assertEqual(sorted(['fake1', 'fake2', 'not_fake']),
+                         sorted(results['cinder']['extensions']))
 
     def test_verify_extensions_nova(self):
         def fake_list_extensions():
@@ -316,8 +316,8 @@ class TestDiscovery(base.TestCase):
                                                           'nova', {})
         self.assertIn('nova', results)
         self.assertIn('extensions', results['nova'])
-        self.assertEqual(['fake1', 'fake2', 'not_fake'],
-                         results['nova']['extensions'])
+        self.assertEqual(sorted(['fake1', 'fake2', 'not_fake']),
+                         sorted(results['nova']['extensions']))
 
     def test_verify_extensions_nova_v3(self):
         def fake_list_extensions():
@@ -355,8 +355,8 @@ class TestDiscovery(base.TestCase):
                                                           'nova_v3', {})
         self.assertIn('nova_v3', results)
         self.assertIn('extensions', results['nova_v3'])
-        self.assertEqual(['fake1', 'fake2', 'not_fake'],
-                         results['nova_v3']['extensions'])
+        self.assertEqual(sorted(['fake1', 'fake2', 'not_fake']),
+                         sorted(results['nova_v3']['extensions']))
 
     def test_verify_extensions_swift(self):
         def fake_list_extensions():
@@ -395,5 +395,5 @@ class TestDiscovery(base.TestCase):
                                                           'swift', {})
         self.assertIn('swift', results)
         self.assertIn('extensions', results['swift'])
-        self.assertEqual(['not_fake', 'fake1', 'fake2'],
-                         results['swift']['extensions'])
+        self.assertEqual(sorted(['not_fake', 'fake1', 'fake2']),
+                         sorted(results['swift']['extensions']))
