@@ -647,7 +647,8 @@ class NeutronScenarioTest(ScenarioTest):
         return floating_ip
 
     def _ping_ip_address(self, ip_address, should_succeed=True):
-        ping_cmd = 'ping' if self._ip_version == 4 else 'ping6'
+        ping_cmd = 'ping6' if (getattr(self, '_ip_version', None)
+                               and self._ip_version == 6) else 'ping'
         cmd = [ping_cmd, '-c1', '-w1', ip_address]
 
         def ping():
