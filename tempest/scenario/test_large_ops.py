@@ -39,6 +39,9 @@ class TestLargeOpsScenario(manager.ScenarioTest):
 
     @classmethod
     def setUpClass(cls):
+        if CONF.scenario.large_ops_number < 1:
+            raise cls.skipException("large_ops_number not set to multiple "
+                                    "instances")
         cls.set_network_resources()
         super(TestLargeOpsScenario, cls).setUpClass()
 
@@ -75,8 +78,6 @@ class TestLargeOpsScenario(manager.ScenarioTest):
         self._wait_for_server_status('ACTIVE')
 
     def _large_ops_scenario(self):
-        if CONF.scenario.large_ops_number < 1:
-            return
         self.glance_image_create()
         self.nova_boot()
 
