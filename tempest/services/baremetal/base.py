@@ -95,9 +95,13 @@ class BaremetalClient(rest_client.RestClient):
                     for ch in get_change(value, path + '%s/' % name):
                         yield ch
                 else:
-                    yield {'path': path + name,
-                           'value': value,
-                           'op': 'replace'}
+                    if value is None:
+                        yield {'path': path + name,
+                               'op': 'remove'}
+                    else:
+                        yield {'path': path + name,
+                               'value': value,
+                               'op': 'replace'}
 
         patch = [ch for ch in get_change(kw)
                  if ch['path'].lstrip('/') in allowed_attributes]

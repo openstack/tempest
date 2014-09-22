@@ -13,6 +13,8 @@
 import six
 
 from tempest.api.baremetal.admin import base
+from tempest.common.utils import data_utils
+from tempest.common import waiters
 from tempest import exceptions as exc
 from tempest import test
 
@@ -32,6 +34,17 @@ class TestNodes(base.BaseBaremetalTest):
             if key not in ('created_at', 'updated_at'):
                 self.assertIn(key, actual)
                 self.assertEqual(value, actual[key])
+
+    def _associate_node_with_instance(self):
+        self.client.set_node_power_state(self.node['uuid'], 'power off')
+        waiters.wait_for_bm_node_status(self.client, self.node['uuid'],
+                                        'power_state', 'power off')
+        instance_uuid = data_utils.rand_uuid()
+        self.client.update_node(self.node['uuid'],
+                                instance_uuid=instance_uuid)
+        self.addCleanup(self.client.update_node,
+                        uuid=self.node['uuid'], instance_uuid=None)
+        return instance_uuid
 
     @test.attr(type='smoke')
     def test_create_node(self):
@@ -61,6 +74,34 @@ class TestNodes(base.BaseBaremetalTest):
         _, body = self.client.list_nodes()
         self.assertIn(self.node['uuid'],
                       [i['uuid'] for i in body['nodes']])
+
+    @test.attr(type='smoke')
+    def test_list_nodes_association(self):
+        _, body = self.client.list_nodes(associated=True)
+        self.assertNotIn(self.node['uuid'],
+                         [n['uuid'] for n in body['nodes']])
+
+        self._associate_node_with_instance()
+
+        _, body = self.client.list_nodes(associated=True)
+        self.assertIn(self.node['uuid'], [n['uuid'] for n in body['nodes']])
+
+        _, body = self.client.list_nodes(associated=False)
+        self.assertNotIn(self.node['uuid'], [n['uuid'] for n in body['nodes']])
+
+    @test.attr(type='smoke')
+    def test_node_port_list(self):
+        _, port = self.create_port(self.node['uuid'],
+                                   data_utils.rand_mac_address())
+        _, body = self.client.list_node_ports(self.node['uuid'])
+        self.assertIn(port['uuid'],
+                      [p['uuid'] for p in body['ports']])
+
+    @test.attr(type='smoke')
+    def test_node_port_list_no_ports(self):
+        _, node = self.create_node(self.chassis['uuid'])
+        _, body = self.client.list_node_ports(node['uuid'])
+        self.assertEmpty(body['ports'])
 
     @test.attr(type='smoke')
     def test_update_node(self):
@@ -120,3 +161,10 @@ class TestNodes(base.BaseBaremetalTest):
 
         _, body = self.client.get_console(self.node['uuid'])
         self.assertEqual(True, body['console_enabled'])
+
+    @test.attr(type='smoke')
+    def test_get_node_by_instance_uuid(self):
+        instance_uuid = self._associate_node_with_instance()
+        _, body = self.client.show_node_by_instance_uuid(instance_uuid)
+        self.assertEqual(len(body['nodes']), 1)
+        self.assertIn(self.node['uuid'], [n['uuid'] for n in body['nodes']])

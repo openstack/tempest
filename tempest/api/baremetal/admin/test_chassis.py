@@ -75,3 +75,9 @@ class TestChassis(base.BaseBaremetalTest):
                    description=new_description))
         _, chassis = self.client.show_chassis(uuid)
         self.assertEqual(chassis['description'], new_description)
+
+    @test.attr(type='smoke')
+    def test_chassis_node_list(self):
+        _, node = self.create_node(self.chassis['uuid'])
+        _, body = self.client.list_chassis_nodes(self.chassis['uuid'])
+        self.assertIn(node['uuid'], [n['uuid'] for n in body['nodes']])
