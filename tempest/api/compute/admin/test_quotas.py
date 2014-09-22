@@ -34,8 +34,8 @@ class QuotasAdminTestJSON(base.BaseV2ComputeAdminTest):
         super(QuotasAdminTestJSON, self).setUp()
 
     @classmethod
-    def setUpClass(cls):
-        super(QuotasAdminTestJSON, cls).setUpClass()
+    def resource_setup(cls):
+        super(QuotasAdminTestJSON, cls).resource_setup()
         cls.adm_client = cls.os_adm.quotas_client
 
         # NOTE(afazekas): these test cases should always create and use a new
@@ -167,8 +167,8 @@ class QuotaClassesAdminTestJSON(base.BaseV2ComputeAdminTest):
         super(QuotaClassesAdminTestJSON, self).setUp()
 
     @classmethod
-    def setUpClass(cls):
-        super(QuotaClassesAdminTestJSON, cls).setUpClass()
+    def resource_setup(cls):
+        super(QuotaClassesAdminTestJSON, cls).resource_setup()
         cls.adm_client = cls.os_adm.quota_classes_client
 
     def _restore_default_quotas(self, original_defaults):

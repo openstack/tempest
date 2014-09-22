@@ -23,8 +23,8 @@ from tempest import test
 class KeyPairsNegativeTestJSON(base.BaseV2ComputeTest):
 
     @classmethod
-    def setUpClass(cls):
-        super(KeyPairsNegativeTestJSON, cls).setUpClass()
+    def resource_setup(cls):
+        super(KeyPairsNegativeTestJSON, cls).resource_setup()
         cls.client = cls.keypairs_client
 
     def _create_keypair(self, keypair_name, pub_key=None):

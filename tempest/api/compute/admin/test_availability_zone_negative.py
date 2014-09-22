@@ -24,8 +24,8 @@ class AZAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
     """
 
     @classmethod
-    def setUpClass(cls):
-        super(AZAdminNegativeTestJSON, cls).setUpClass()
+    def resource_setup(cls):
+        super(AZAdminNegativeTestJSON, cls).resource_setup()
         cls.non_adm_client = cls.availability_zone_client
 
     @test.attr(type=['negative', 'gate'])

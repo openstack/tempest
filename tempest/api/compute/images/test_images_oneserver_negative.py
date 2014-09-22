@@ -55,9 +55,8 @@ class ImagesOneServerNegativeTestJSON(base.BaseV2ComputeTest):
         self.__class__.server_id = self.rebuild_server(self.server_id)
 
     @classmethod
-    @test.safe_setup
-    def setUpClass(cls):
-        super(ImagesOneServerNegativeTestJSON, cls).setUpClass()
+    def resource_setup(cls):
+        super(ImagesOneServerNegativeTestJSON, cls).resource_setup()
         cls.client = cls.images_client
         if not CONF.service_available.glance:
             skip_msg = ("%s skipped as glance is not available" % cls.__name__)

@@ -27,8 +27,8 @@ class LiveBlockMigrationNegativeTestJSON(base.BaseV2ComputeAdminTest):
     _host_key = 'OS-EXT-SRV-ATTR:host'
 
     @classmethod
-    def setUpClass(cls):
-        super(LiveBlockMigrationNegativeTestJSON, cls).setUpClass()
+    def resource_setup(cls):
+        super(LiveBlockMigrationNegativeTestJSON, cls).resource_setup()
         if not CONF.compute_feature_enabled.live_migration:
             raise cls.skipException("Live migration is not enabled")
         cls.admin_hosts_client = cls.os_adm.hosts_client

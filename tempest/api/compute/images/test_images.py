@@ -23,8 +23,8 @@ CONF = config.CONF
 class ImagesTestJSON(base.BaseV2ComputeTest):
 
     @classmethod
-    def setUpClass(cls):
-        super(ImagesTestJSON, cls).setUpClass()
+    def resource_setup(cls):
+        super(ImagesTestJSON, cls).resource_setup()
         if not CONF.service_available.glance:
             skip_msg = ("%s skipped as glance is not available" % cls.__name__)
             raise cls.skipException(skip_msg)

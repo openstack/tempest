@@ -24,8 +24,8 @@ class ServicesAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
     """
 
     @classmethod
-    def setUpClass(cls):
-        super(ServicesAdminNegativeTestJSON, cls).setUpClass()
+    def resource_setup(cls):
+        super(ServicesAdminNegativeTestJSON, cls).resource_setup()
         cls.client = cls.os_adm.services_client
         cls.non_admin_client = cls.services_client
 

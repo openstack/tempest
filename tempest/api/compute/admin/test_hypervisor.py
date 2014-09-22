@@ -24,8 +24,8 @@ class HypervisorAdminTestJSON(base.BaseV2ComputeAdminTest):
     """
 
     @classmethod
-    def setUpClass(cls):
-        super(HypervisorAdminTestJSON, cls).setUpClass()
+    def resource_setup(cls):
+        super(HypervisorAdminTestJSON, cls).resource_setup()
         cls.client = cls.os_adm.hypervisor_client
 
     def _list_hypervisors(self):

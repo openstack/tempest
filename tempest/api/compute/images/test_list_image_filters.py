@@ -32,9 +32,8 @@ LOG = logging.getLogger(__name__)
 class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
 
     @classmethod
-    @test.safe_setup
-    def setUpClass(cls):
-        super(ListImageFiltersTestJSON, cls).setUpClass()
+    def resource_setup(cls):
+        super(ListImageFiltersTestJSON, cls).resource_setup()
         if not CONF.service_available.glance:
             skip_msg = ("%s skipped as glance is not available" % cls.__name__)
             raise cls.skipException(skip_msg)

@@ -21,8 +21,8 @@ from tempest import test
 class AbsoluteLimitsNegativeTestJSON(base.BaseV2ComputeTest):
 
     @classmethod
-    def setUpClass(cls):
-        super(AbsoluteLimitsNegativeTestJSON, cls).setUpClass()
+    def resource_setup(cls):
+        super(AbsoluteLimitsNegativeTestJSON, cls).resource_setup()
         cls.client = cls.limits_client
         cls.server_client = cls.servers_client
 

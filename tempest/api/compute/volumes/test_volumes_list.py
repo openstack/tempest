@@ -32,8 +32,8 @@ class VolumesTestJSON(base.BaseV2ComputeTest):
     """
 
     @classmethod
-    def setUpClass(cls):
-        super(VolumesTestJSON, cls).setUpClass()
+    def resource_setup(cls):
+        super(VolumesTestJSON, cls).resource_setup()
         cls.client = cls.volumes_extensions_client
         if not CONF.service_available.cinder:
             skip_msg = ("%s skipped as Cinder is not available" % cls.__name__)
@@ -69,11 +69,11 @@ class VolumesTestJSON(base.BaseV2ComputeTest):
                 raise
 
     @classmethod
-    def tearDownClass(cls):
+    def resource_cleanup(cls):
         # Delete the created Volumes
         for volume in cls.volume_list:
             cls.delete_volume(volume['id'])
-        super(VolumesTestJSON, cls).tearDownClass()
+        super(VolumesTestJSON, cls).resource_cleanup()
 
     @test.attr(type='gate')
     def test_volume_list(self):

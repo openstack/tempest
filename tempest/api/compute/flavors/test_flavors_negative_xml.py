@@ -24,8 +24,8 @@ class FlavorsNegativeTestXML(base.BaseV2ComputeTest):
     _interface = 'xml'
 
     @classmethod
-    def setUpClass(cls):
-        super(FlavorsNegativeTestXML, cls).setUpClass()
+    def resource_setup(cls):
+        super(FlavorsNegativeTestXML, cls).resource_setup()
         cls.client = cls.flavors_client
 
     @test.attr(type=['negative', 'gate'])

@@ -24,8 +24,8 @@ class AZV3Test(base.BaseComputeTest):
     _api_version = 3
 
     @classmethod
-    def setUpClass(cls):
-        super(AZV3Test, cls).setUpClass()
+    def resource_setup(cls):
+        super(AZV3Test, cls).resource_setup()
         cls.client = cls.availability_zone_client
 
     @test.attr(type='gate')

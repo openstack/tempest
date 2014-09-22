@@ -23,10 +23,10 @@ CONF = config.CONF
 class ServerAddressesTestJSON(base.BaseV2ComputeTest):
 
     @classmethod
-    def setUpClass(cls):
+    def resource_setup(cls):
         # This test module might use a network and a subnet
         cls.set_network_resources(network=True, subnet=True)
-        super(ServerAddressesTestJSON, cls).setUpClass()
+        super(ServerAddressesTestJSON, cls).resource_setup()
         cls.client = cls.servers_client
 
         resp, cls.server = cls.create_test_server(wait_until='ACTIVE')

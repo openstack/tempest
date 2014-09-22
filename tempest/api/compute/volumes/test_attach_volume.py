@@ -32,9 +32,9 @@ class AttachVolumeTestJSON(base.BaseV2ComputeTest):
         self.attached = False
 
     @classmethod
-    def setUpClass(cls):
+    def resource_setup(cls):
         cls.prepare_instance_network()
-        super(AttachVolumeTestJSON, cls).setUpClass()
+        super(AttachVolumeTestJSON, cls).resource_setup()
         cls.device = CONF.compute.volume_device_name
         if not CONF.service_available.cinder:
             skip_msg = ("%s skipped as Cinder is not available" % cls.__name__)

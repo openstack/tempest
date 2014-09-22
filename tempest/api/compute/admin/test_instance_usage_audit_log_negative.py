@@ -24,8 +24,8 @@ from tempest import test
 class InstanceUsageAuditLogNegativeTestJSON(base.BaseV2ComputeAdminTest):
 
     @classmethod
-    def setUpClass(cls):
-        super(InstanceUsageAuditLogNegativeTestJSON, cls).setUpClass()
+    def resource_setup(cls):
+        super(InstanceUsageAuditLogNegativeTestJSON, cls).resource_setup()
         cls.adm_client = cls.os_adm.instance_usages_audit_log_client
 
     @test.attr(type=['negative', 'gate'])
