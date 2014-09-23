@@ -457,6 +457,19 @@ class ScenarioTest(tempest.test.BaseTestCase):
         if wait:
             self.servers_client.wait_for_server_status(server_id, 'ACTIVE')
 
+    def ping_ip_address(self, ip_address, should_succeed=True):
+        cmd = ['ping', '-c1', '-w1', ip_address]
+
+        def ping():
+            proc = subprocess.Popen(cmd,
+                                    stdout=subprocess.PIPE,
+                                    stderr=subprocess.PIPE)
+            proc.communicate()
+            return (proc.returncode == 0) == should_succeed
+
+        return tempest.test.call_until_true(
+            ping, CONF.compute.ping_timeout, 1)
+
 
 # TODO(yfried): change this class name to NetworkScenarioTest once client
 # migration is complete
@@ -635,19 +648,6 @@ class NeutronScenarioTest(ScenarioTest):
         self.assertIsNone(floating_ip.port_id)
         return floating_ip
 
-    def _ping_ip_address(self, ip_address, should_succeed=True):
-        cmd = ['ping', '-c1', '-w1', ip_address]
-
-        def ping():
-            proc = subprocess.Popen(cmd,
-                                    stdout=subprocess.PIPE,
-                                    stderr=subprocess.PIPE)
-            proc.communicate()
-            return (proc.returncode == 0) == should_succeed
-
-        return tempest.test.call_until_true(
-            ping, CONF.compute.ping_timeout, 1)
-
     def _check_vm_connectivity(self, ip_address,
                                username=None,
                                private_key=None,
@@ -667,8 +667,8 @@ class NeutronScenarioTest(ScenarioTest):
             msg = "Timed out waiting for %s to become reachable" % ip_address
         else:
             msg = "ip address %s is reachable" % ip_address
-        self.assertTrue(self._ping_ip_address(ip_address,
-                                              should_succeed=should_connect),
+        self.assertTrue(self.ping_ip_address(ip_address,
+                                             should_succeed=should_connect),
                         msg=msg)
         if should_connect:
             # no need to check ssh for negative connectivity
@@ -1845,19 +1845,6 @@ class NetworkScenarioTest(OfficialClientTest):
         self.assertIsNone(floating_ip.port_id)
         return floating_ip
 
-    def _ping_ip_address(self, ip_address, should_succeed=True):
-        cmd = ['ping', '-c1', '-w1', ip_address]
-
-        def ping():
-            proc = subprocess.Popen(cmd,
-                                    stdout=subprocess.PIPE,
-                                    stderr=subprocess.PIPE)
-            proc.communicate()
-            return (proc.returncode == 0) == should_succeed
-
-        return tempest.test.call_until_true(
-            ping, CONF.compute.ping_timeout, 1)
-
     def _create_pool(self, lb_method, protocol, subnet_id):
         """Wrapper utility that returns a test pool."""
         name = data_utils.rand_name('pool-')
@@ -1929,8 +1916,8 @@ class NetworkScenarioTest(OfficialClientTest):
             msg = "Timed out waiting for %s to become reachable" % ip_address
         else:
             msg = "ip address %s is reachable" % ip_address
-        self.assertTrue(self._ping_ip_address(ip_address,
-                                              should_succeed=should_connect),
+        self.assertTrue(self.ping_ip_address(ip_address,
+                                             should_succeed=should_connect),
                         msg=msg)
         if should_connect:
             # no need to check ssh for negative connectivity
@@ -2279,19 +2266,6 @@ class OrchestrationScenarioTest(ScenarioTest):
         """Return a stack output value for a given key."""
         return next((o['output_value'] for o in stack['outputs']
                     if o['output_key'] == output_key), None)
-
-    def _ping_ip_address(self, ip_address, should_succeed=True):
-        cmd = ['ping', '-c1', '-w1', ip_address]
-
-        def ping():
-            proc = subprocess.Popen(cmd,
-                                    stdout=subprocess.PIPE,
-                                    stderr=subprocess.PIPE)
-            proc.communicate()
-            return (proc.returncode == 0) == should_succeed
-
-        return tempest.test.call_until_true(
-            ping, CONF.orchestration.build_timeout, 1)
 
 
 class SwiftScenarioTest(ScenarioTest):
