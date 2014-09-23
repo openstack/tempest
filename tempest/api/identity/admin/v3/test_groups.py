@@ -22,8 +22,8 @@ class GroupsV3TestJSON(base.BaseIdentityV3AdminTest):
     _interface = 'json'
 
     @classmethod
-    def setUpClass(cls):
-        super(GroupsV3TestJSON, cls).setUpClass()
+    def resource_setup(cls):
+        super(GroupsV3TestJSON, cls).resource_setup()
 
     @test.attr(type='smoke')
     def test_group_create_update_get(self):

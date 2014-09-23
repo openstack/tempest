@@ -22,9 +22,8 @@ class RolesV3TestJSON(base.BaseIdentityV3AdminTest):
     _interface = 'json'
 
     @classmethod
-    @test.safe_setup
-    def setUpClass(cls):
-        super(RolesV3TestJSON, cls).setUpClass()
+    def resource_setup(cls):
+        super(RolesV3TestJSON, cls).resource_setup()
         for _ in range(3):
             role_name = data_utils.rand_name(name='role-')
             _, role = cls.client.create_role(role_name)
@@ -52,7 +51,7 @@ class RolesV3TestJSON(base.BaseIdentityV3AdminTest):
             data_utils.rand_name('Role-'))
 
     @classmethod
-    def tearDownClass(cls):
+    def resource_cleanup(cls):
         cls.client.delete_role(cls.role['id'])
         cls.client.delete_group(cls.group_body['id'])
         cls.client.delete_user(cls.user_body['id'])
@@ -61,7 +60,7 @@ class RolesV3TestJSON(base.BaseIdentityV3AdminTest):
         # before deleting,or else it would result in unauthorized error
         cls.client.update_domain(cls.domain['id'], enabled=False)
         cls.client.delete_domain(cls.domain['id'])
-        super(RolesV3TestJSON, cls).tearDownClass()
+        super(RolesV3TestJSON, cls).resource_cleanup()
 
     def _list_assertions(self, body, fetched_role_ids, role_id):
         self.assertEqual(len(body), 1)

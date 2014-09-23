@@ -29,8 +29,8 @@ LOG = logging.getLogger(__name__)
 class BaseIdentityAdminTest(tempest.test.BaseTestCase):
 
     @classmethod
-    def setUpClass(cls):
-        super(BaseIdentityAdminTest, cls).setUpClass()
+    def resource_setup(cls):
+        super(BaseIdentityAdminTest, cls).resource_setup()
         cls.os_adm = clients.AdminManager(interface=cls._interface)
         cls.os = clients.Manager(interface=cls._interface)
 
@@ -72,10 +72,10 @@ class BaseIdentityAdminTest(tempest.test.BaseTestCase):
 class BaseIdentityV2AdminTest(BaseIdentityAdminTest):
 
     @classmethod
-    def setUpClass(cls):
+    def resource_setup(cls):
         if not CONF.identity_feature_enabled.api_v2:
             raise cls.skipException("Identity api v2 is not enabled")
-        super(BaseIdentityV2AdminTest, cls).setUpClass()
+        super(BaseIdentityV2AdminTest, cls).resource_setup()
         cls.client = cls.os_adm.identity_client
         cls.token_client = cls.os_adm.token_client
         if not cls.client.has_admin_extensions():
@@ -84,18 +84,18 @@ class BaseIdentityV2AdminTest(BaseIdentityAdminTest):
         cls.non_admin_client = cls.os.identity_client
 
     @classmethod
-    def tearDownClass(cls):
+    def resource_cleanup(cls):
         cls.data.teardown_all()
-        super(BaseIdentityV2AdminTest, cls).tearDownClass()
+        super(BaseIdentityV2AdminTest, cls).resource_cleanup()
 
 
 class BaseIdentityV3AdminTest(BaseIdentityAdminTest):
 
     @classmethod
-    def setUpClass(cls):
+    def resource_setup(cls):
         if not CONF.identity_feature_enabled.api_v3:
             raise cls.skipException("Identity api v3 is not enabled")
-        super(BaseIdentityV3AdminTest, cls).setUpClass()
+        super(BaseIdentityV3AdminTest, cls).resource_setup()
         cls.client = cls.os_adm.identity_v3_client
         cls.token = cls.os_adm.token_v3_client
         cls.endpoints_client = cls.os_adm.endpoints_client
@@ -108,9 +108,9 @@ class BaseIdentityV3AdminTest(BaseIdentityAdminTest):
         cls.non_admin_client = cls.os.identity_v3_client
 
     @classmethod
-    def tearDownClass(cls):
+    def resource_cleanup(cls):
         cls.data.teardown_all()
-        super(BaseIdentityV3AdminTest, cls).tearDownClass()
+        super(BaseIdentityV3AdminTest, cls).resource_cleanup()
 
 
 class DataGenerator(object):

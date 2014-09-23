@@ -22,8 +22,8 @@ class ListProjectsTestJSON(base.BaseIdentityV3AdminTest):
     _interface = 'json'
 
     @classmethod
-    def setUpClass(cls):
-        super(ListProjectsTestJSON, cls).setUpClass()
+    def resource_setup(cls):
+        super(ListProjectsTestJSON, cls).resource_setup()
         cls.project_ids = list()
         cls.data.setup_test_domain()
         # Create project with domain

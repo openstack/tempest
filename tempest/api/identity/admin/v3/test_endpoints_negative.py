@@ -25,8 +25,8 @@ class EndpointsNegativeTestJSON(base.BaseIdentityV3AdminTest):
     _interface = 'json'
 
     @classmethod
-    def setUpClass(cls):
-        super(EndpointsNegativeTestJSON, cls).setUpClass()
+    def resource_setup(cls):
+        super(EndpointsNegativeTestJSON, cls).resource_setup()
         cls.identity_client = cls.client
         cls.client = cls.endpoints_client
         cls.service_ids = list()
@@ -40,10 +40,10 @@ class EndpointsNegativeTestJSON(base.BaseIdentityV3AdminTest):
         cls.service_ids.append(cls.service_id)
 
     @classmethod
-    def tearDownClass(cls):
+    def resource_cleanup(cls):
         for s in cls.service_ids:
             cls.service_client.delete_service(s)
-        super(EndpointsNegativeTestJSON, cls).tearDownClass()
+        super(EndpointsNegativeTestJSON, cls).resource_cleanup()
 
     @test.attr(type=['negative', 'gate'])
     def test_create_with_enabled_False(self):
