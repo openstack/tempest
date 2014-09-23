@@ -22,8 +22,8 @@ from tempest import test
 class InstanceActionsNegativeV3Test(base.BaseV3ComputeTest):
 
     @classmethod
-    def setUpClass(cls):
-        super(InstanceActionsNegativeV3Test, cls).setUpClass()
+    def resource_setup(cls):
+        super(InstanceActionsNegativeV3Test, cls).resource_setup()
         cls.client = cls.servers_client
         resp, server = cls.create_test_server(wait_until='ACTIVE')
         cls.server_id = server['id']

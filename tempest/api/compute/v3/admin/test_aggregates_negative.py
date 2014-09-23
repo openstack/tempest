@@ -27,8 +27,8 @@ class AggregatesAdminNegativeV3Test(base.BaseV3ComputeAdminTest):
     """
 
     @classmethod
-    def setUpClass(cls):
-        super(AggregatesAdminNegativeV3Test, cls).setUpClass()
+    def resource_setup(cls):
+        super(AggregatesAdminNegativeV3Test, cls).resource_setup()
         cls.client = cls.aggregates_admin_client
         cls.user_client = cls.aggregates_client
         cls.aggregate_name_prefix = 'test_aggregate_'

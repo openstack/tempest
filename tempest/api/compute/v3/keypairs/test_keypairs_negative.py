@@ -23,8 +23,8 @@ from tempest import test
 class KeyPairsNegativeV3Test(base.BaseV3ComputeTest):
 
     @classmethod
-    def setUpClass(cls):
-        super(KeyPairsNegativeV3Test, cls).setUpClass()
+    def resource_setup(cls):
+        super(KeyPairsNegativeV3Test, cls).resource_setup()
         cls.client = cls.keypairs_client
 
     def _create_keypair(self, keypair_name, pub_key=None):

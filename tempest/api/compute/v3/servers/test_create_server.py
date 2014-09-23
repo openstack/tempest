@@ -31,9 +31,9 @@ class ServersV3Test(base.BaseV3ComputeTest):
     disk_config = 'AUTO'
 
     @classmethod
-    def setUpClass(cls):
+    def resource_setup(cls):
         cls.prepare_instance_network()
-        super(ServersV3Test, cls).setUpClass()
+        super(ServersV3Test, cls).resource_setup()
         cls.meta = {'hello': 'world'}
         cls.accessIPv4 = '1.1.1.1'
         cls.accessIPv6 = '0000:0000:0000:0000:0000:babe:220.12.22.2'
@@ -108,9 +108,9 @@ class ServersWithSpecificFlavorV3Test(base.BaseV3ComputeAdminTest):
     disk_config = 'AUTO'
 
     @classmethod
-    def setUpClass(cls):
+    def resource_setup(cls):
         cls.prepare_instance_network()
-        super(ServersWithSpecificFlavorV3Test, cls).setUpClass()
+        super(ServersWithSpecificFlavorV3Test, cls).resource_setup()
         cls.client = cls.servers_client
         cls.flavor_client = cls.flavors_admin_client
 
@@ -192,8 +192,8 @@ class ServersV3TestManualDisk(ServersV3Test):
     disk_config = 'MANUAL'
 
     @classmethod
-    def setUpClass(cls):
+    def resource_setup(cls):
         if not CONF.compute_feature_enabled.disk_config:
             msg = "DiskConfig extension not enabled."
             raise cls.skipException(msg)
-        super(ServersV3TestManualDisk, cls).setUpClass()
+        super(ServersV3TestManualDisk, cls).resource_setup()

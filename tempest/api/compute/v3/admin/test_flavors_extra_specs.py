@@ -27,8 +27,8 @@ class FlavorsExtraSpecsV3Test(base.BaseV3ComputeAdminTest):
     """
 
     @classmethod
-    def setUpClass(cls):
-        super(FlavorsExtraSpecsV3Test, cls).setUpClass()
+    def resource_setup(cls):
+        super(FlavorsExtraSpecsV3Test, cls).resource_setup()
 
         cls.client = cls.flavors_admin_client
         flavor_name = data_utils.rand_name('test_flavor')
@@ -48,10 +48,10 @@ class FlavorsExtraSpecsV3Test(base.BaseV3ComputeAdminTest):
                                                     swap=swap, rxtx=rxtx)
 
     @classmethod
-    def tearDownClass(cls):
+    def resource_cleanup(cls):
         resp, body = cls.client.delete_flavor(cls.flavor['id'])
         cls.client.wait_for_resource_deletion(cls.flavor['id'])
-        super(FlavorsExtraSpecsV3Test, cls).tearDownClass()
+        super(FlavorsExtraSpecsV3Test, cls).resource_cleanup()
 
     @test.attr(type='gate')
     def test_flavor_set_get_update_show_unset_keys(self):

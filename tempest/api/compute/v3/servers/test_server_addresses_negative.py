@@ -23,10 +23,10 @@ class ServerAddressesV3NegativeTest(base.BaseV3ComputeTest):
     _interface = 'json'
 
     @classmethod
-    def setUpClass(cls):
+    def resource_setup(cls):
         # This test module might use a network and a subnet
         cls.set_network_resources(network=True, subnet=True)
-        super(ServerAddressesV3NegativeTest, cls).setUpClass()
+        super(ServerAddressesV3NegativeTest, cls).resource_setup()
         cls.client = cls.servers_client
 
         resp, cls.server = cls.create_test_server(wait_until='ACTIVE')

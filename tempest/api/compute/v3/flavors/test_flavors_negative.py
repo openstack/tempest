@@ -35,6 +35,6 @@ class FlavorDetailsNegativeV3Test(base.BaseV3ComputeTest,
     _schema = flavors.flavors_details
 
     @classmethod
-    def setUpClass(cls):
-        super(FlavorDetailsNegativeV3Test, cls).setUpClass()
+    def resource_setup(cls):
+        super(FlavorDetailsNegativeV3Test, cls).resource_setup()
         cls.set_resource("flavor", cls.flavor_ref)
