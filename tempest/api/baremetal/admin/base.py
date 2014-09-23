@@ -53,8 +53,8 @@ class BaseBaremetalTest(test.BaseTestCase):
     """Base class for Baremetal API tests."""
 
     @classmethod
-    def setUpClass(cls):
-        super(BaseBaremetalTest, cls).setUpClass()
+    def resource_setup(cls):
+        super(BaseBaremetalTest, cls).resource_setup()
 
         if not CONF.service_available.ironic:
             skip_msg = ('%s skipped as Ironic is not available' % cls.__name__)
@@ -75,7 +75,7 @@ class BaseBaremetalTest(test.BaseTestCase):
             cls.created_objects[resource] = set()
 
     @classmethod
-    def tearDownClass(cls):
+    def resource_cleanup(cls):
         """Ensure that all created objects get destroyed."""
 
         try:
@@ -85,7 +85,7 @@ class BaseBaremetalTest(test.BaseTestCase):
                 for u in uuids:
                     delete_method(u, ignore_errors=exc.NotFound)
         finally:
-            super(BaseBaremetalTest, cls).tearDownClass()
+            super(BaseBaremetalTest, cls).resource_cleanup()
 
     @classmethod
     @creates('chassis')
