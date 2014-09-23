@@ -22,8 +22,8 @@ class BaseRouterTest(base.BaseAdminNetworkTest):
     # require admin credentials by default
 
     @classmethod
-    def setUpClass(cls):
-        super(BaseRouterTest, cls).setUpClass()
+    def resource_setup(cls):
+        super(BaseRouterTest, cls).resource_setup()
 
     def _delete_router(self, router_id):
         self.client.delete_router(router_id)

@@ -33,8 +33,8 @@ class ExtensionsTestJSON(base.BaseNetworkTest):
     """
 
     @classmethod
-    def setUpClass(cls):
-        super(ExtensionsTestJSON, cls).setUpClass()
+    def resource_setup(cls):
+        super(ExtensionsTestJSON, cls).resource_setup()
 
     @test.attr(type='smoke')
     def test_list_show_extensions(self):

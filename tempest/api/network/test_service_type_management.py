@@ -18,8 +18,8 @@ class ServiceTypeManagementTestJSON(base.BaseNetworkTest):
     _interface = 'json'
 
     @classmethod
-    def setUpClass(cls):
-        super(ServiceTypeManagementTestJSON, cls).setUpClass()
+    def resource_setup(cls):
+        super(ServiceTypeManagementTestJSON, cls).resource_setup()
         if not test.is_extension_enabled('service-type', 'network'):
             msg = "Neutron Service Type Management not enabled."
             raise cls.skipException(msg)

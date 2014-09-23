@@ -38,9 +38,8 @@ class PortsTestJSON(base.BaseNetworkTest):
     """
 
     @classmethod
-    @test.safe_setup
-    def setUpClass(cls):
-        super(PortsTestJSON, cls).setUpClass()
+    def resource_setup(cls):
+        super(PortsTestJSON, cls).resource_setup()
         cls.network = cls.create_network()
         cls.port = cls.create_port(cls.network)
 
@@ -162,9 +161,8 @@ class PortsAdminExtendedAttrsTestJSON(base.BaseAdminNetworkTest):
     _interface = 'json'
 
     @classmethod
-    @test.safe_setup
-    def setUpClass(cls):
-        super(PortsAdminExtendedAttrsTestJSON, cls).setUpClass()
+    def resource_setup(cls):
+        super(PortsAdminExtendedAttrsTestJSON, cls).resource_setup()
         cls.identity_client = cls._get_identity_admin_client()
         cls.tenant = cls.identity_client.get_tenant_by_name(
             CONF.identity.tenant_name)
@@ -245,9 +243,8 @@ class PortsIpV6TestJSON(PortsTestJSON):
     _tenant_network_mask_bits = CONF.network.tenant_network_v6_mask_bits
 
     @classmethod
-    @test.safe_setup
-    def setUpClass(cls):
-        super(PortsIpV6TestJSON, cls).setUpClass()
+    def resource_setup(cls):
+        super(PortsIpV6TestJSON, cls).resource_setup()
         if not CONF.network_feature_enabled.ipv6:
             skip_msg = "IPv6 Tests are disabled."
             raise cls.skipException(skip_msg)
@@ -263,11 +260,11 @@ class PortsAdminExtendedAttrsIpV6TestJSON(PortsAdminExtendedAttrsTestJSON):
     _tenant_network_mask_bits = CONF.network.tenant_network_v6_mask_bits
 
     @classmethod
-    def setUpClass(cls):
+    def resource_setup(cls):
         if not CONF.network_feature_enabled.ipv6:
             skip_msg = "IPv6 Tests are disabled."
             raise cls.skipException(skip_msg)
-        super(PortsAdminExtendedAttrsIpV6TestJSON, cls).setUpClass()
+        super(PortsAdminExtendedAttrsIpV6TestJSON, cls).resource_setup()
 
 
 class PortsAdminExtendedAttrsIpV6TestXML(PortsAdminExtendedAttrsIpV6TestJSON):

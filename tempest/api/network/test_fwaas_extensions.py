@@ -46,8 +46,8 @@ class FWaaSExtensionTestJSON(base.BaseNetworkTest):
     """
 
     @classmethod
-    def setUpClass(cls):
-        super(FWaaSExtensionTestJSON, cls).setUpClass()
+    def resource_setup(cls):
+        super(FWaaSExtensionTestJSON, cls).resource_setup()
         if not test.is_extension_enabled('fwaas', 'network'):
             msg = "FWaaS Extension not enabled."
             raise cls.skipException(msg)
