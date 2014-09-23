@@ -144,14 +144,19 @@ class BaseComputeTest(tempest.test.BaseTestCase):
         for server in cls.servers:
             try:
                 cls.servers_client.delete_server(server['id'])
-            except Exception:
+            except exceptions.NotFound:
+                # Something else already cleaned up the server, nothing to be
+                # worried about
                 pass
+            except Exception:
+                LOG.exception('Deleting server %s failed' % server['id'])
 
         for server in cls.servers:
             try:
                 cls.servers_client.wait_for_server_termination(server['id'])
             except Exception:
-                pass
+                LOG.exception('Waiting for deletion of server %s failed'
+                              % server['id'])
 
     @classmethod
     def server_check_teardown(cls):
