@@ -147,8 +147,8 @@ class TestNetworkBasicOps(manager.NeutronScenarioTest):
         self.keypairs[keypair['name']] = keypair
         security_groups = [self.security_group]
         create_kwargs = {
-            'nics': [
-                {'net-id': network.id},
+            'networks': [
+                {'uuid': network.id},
             ],
             'key_name': keypair['name'],
             'security_groups': security_groups,

@@ -234,8 +234,8 @@ class TestSecurityGroupsBasicOps(manager.NeutronScenarioTest):
         if security_groups is None:
             security_groups = [tenant.security_groups['default']]
         create_kwargs = {
-            'nics': [
-                {'net-id': tenant.network.id},
+            'networks': [
+                {'uuid': tenant.network.id},
             ],
             'key_name': tenant.keypair['name'],
             'security_groups': security_groups,
