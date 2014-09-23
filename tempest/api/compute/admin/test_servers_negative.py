@@ -17,6 +17,7 @@ import uuid
 import testtools
 
 from tempest.api.compute import base
+from tempest.common import tempest_fixtures as fixtures
 from tempest.common.utils import data_utils
 from tempest import config
 from tempest import exceptions
@@ -58,6 +59,8 @@ class ServersAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
                           'Resize not available.')
     @test.attr(type=['negative', 'gate'])
     def test_resize_server_using_overlimit_ram(self):
+        # NOTE(mriedem): Avoid conflicts with os-quota-class-sets tests.
+        self.useFixture(fixtures.LockFixture('compute_quotas'))
         flavor_name = data_utils.rand_name("flavor-")
         flavor_id = self._get_unused_flavor_id()
         resp, quota_set = self.quotas_client.get_default_quota_set(
@@ -78,6 +81,8 @@ class ServersAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
                           'Resize not available.')
     @test.attr(type=['negative', 'gate'])
     def test_resize_server_using_overlimit_vcpus(self):
+        # NOTE(mriedem): Avoid conflicts with os-quota-class-sets tests.
+        self.useFixture(fixtures.LockFixture('compute_quotas'))
         flavor_name = data_utils.rand_name("flavor-")
         flavor_id = self._get_unused_flavor_id()
         ram = 512
