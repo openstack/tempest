@@ -198,6 +198,31 @@ class SimpleReadOnlyNeutronClientTest(cli.ClientTestBase):
                                             'auth_mode', 'status'])
 
     @test.attr(type='smoke')
+    @test.requires_ext(extension='fwaas', service='network')
+    def test_neutron_firewall_list(self):
+        firewall_list = self.parser.listing(self.neutron
+                                            ('firewall-list'))
+        self.assertTableStruct(firewall_list, ['id', 'name',
+                                               'firewall_policy_id'])
+
+    @test.attr(type='smoke')
+    @test.requires_ext(extension='fwaas', service='network')
+    def test_neutron_firewall_policy_list(self):
+        firewall_policy = self.parser.listing(self.neutron
+                                              ('firewall-policy-list'))
+        self.assertTableStruct(firewall_policy, ['id', 'name',
+                                                 'firewall_rules'])
+
+    @test.attr(type='smoke')
+    @test.requires_ext(extension='fwaas', service='network')
+    def test_neutron_firewall_rule_list(self):
+        firewall_rule = self.parser.listing(self.neutron
+                                            ('firewall-rule-list'))
+        self.assertTableStruct(firewall_rule, ['id', 'name',
+                                               'firewall_policy_id',
+                                               'summary', 'enabled'])
+
+    @test.attr(type='smoke')
     def test_neutron_help(self):
         help_text = self.neutron('help')
         lines = help_text.split('\n')
