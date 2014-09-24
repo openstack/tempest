@@ -73,6 +73,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
         )
         cls.admin_manager = clients.Manager(cls.admin_credentials())
         # Clients (in alphabetical order)
+        cls.flavors_client = cls.manager.flavors_client
         cls.floating_ips_client = cls.manager.floating_ips_client
         # Glance image client v1
         cls.image_client = cls.manager.image_client
@@ -146,7 +147,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
     def addCleanup_with_wait(self, waiter_callable, thing_id, thing_id_param,
                              cleanup_callable, cleanup_args=None,
                              cleanup_kwargs=None, ignore_error=True):
-        """Adds wait for ansyc resource deletion at the end of cleanups
+        """Adds wait for async resource deletion at the end of cleanups
 
         @param waiter_callable: callable to wait for the resource to delete
         @param thing_id: the id of the resource to be cleaned-up
@@ -321,8 +322,9 @@ class ScenarioTest(tempest.test.BaseTestCase):
         if isinstance(server_or_ip, six.string_types):
             ip = server_or_ip
         else:
-            network_name_for_ssh = CONF.compute.network_for_ssh
-            ip = server_or_ip.networks[network_name_for_ssh][0]
+            addr = server_or_ip['addresses'][CONF.compute.network_for_ssh][0]
+            ip = addr['addr']
+
         if username is None:
             username = CONF.scenario.ssh_user
         if private_key is None:
@@ -438,6 +440,22 @@ class ScenarioTest(tempest.test.BaseTestCase):
 
         _, volume = self.volumes_client.get_volume(self.volume['id'])
         self.assertEqual('available', volume['status'])
+
+    def rebuild_server(self, server_id, image=None,
+                       preserve_ephemeral=False, wait=True,
+                       rebuild_kwargs=None):
+        if image is None:
+            image = CONF.compute.image_ref
+
+        rebuild_kwargs = rebuild_kwargs or {}
+
+        LOG.debug("Rebuilding server (id: %s, image: %s, preserve eph: %s)",
+                  server_id, image, preserve_ephemeral)
+        self.servers_client.rebuild(server_id=server_id, image_ref=image,
+                                    preserve_ephemeral=preserve_ephemeral,
+                                    **rebuild_kwargs)
+        if wait:
+            self.servers_client.wait_for_server_status(server_id, 'ACTIVE')
 
 
 # TODO(yfried): change this class name to NetworkScenarioTest once client
@@ -1481,7 +1499,7 @@ class BaremetalProvisionStates(object):
     ERROR = 'error'
 
 
-class BaremetalScenarioTest(OfficialClientTest):
+class BaremetalScenarioTest(ScenarioTest):
     @classmethod
     def setUpClass(cls):
         super(BaremetalScenarioTest, cls).setUpClass()
@@ -1492,12 +1510,13 @@ class BaremetalScenarioTest(OfficialClientTest):
             raise cls.skipException(msg)
 
         # use an admin client manager for baremetal client
-        admin_creds = cls.admin_credentials()
-        manager = clients.OfficialClientManager(credentials=admin_creds)
+        manager = clients.Manager(
+            credentials=cls.admin_credentials()
+        )
         cls.baremetal_client = manager.baremetal_client
 
         # allow any issues obtaining the node list to raise early
-        cls.baremetal_client.node.list()
+        cls.baremetal_client.list_nodes()
 
     def _node_state_timeout(self, node_id, state_attr,
                             target_states, timeout=10, interval=1):
@@ -1506,7 +1525,7 @@ class BaremetalScenarioTest(OfficialClientTest):
 
         def check_state():
             node = self.get_node(node_id=node_id)
-            if getattr(node, state_attr) in target_states:
+            if node.get(state_attr) in target_states:
                 return True
             return False
 
@@ -1546,14 +1565,20 @@ class BaremetalScenarioTest(OfficialClientTest):
 
     def get_node(self, node_id=None, instance_id=None):
         if node_id:
-            return self.baremetal_client.node.get(node_id)
+            _, body = self.baremetal_client.show_node(node_id)
+            return body
         elif instance_id:
-            return self.baremetal_client.node.get_by_instance_uuid(instance_id)
+            _, body = self.baremetal_client.show_node_by_instance_uuid(
+                instance_id)
+            if body['nodes']:
+                return body['nodes'][0]
 
-    def get_ports(self, node_id):
+    def get_ports(self, node_uuid):
         ports = []
-        for port in self.baremetal_client.node.list_ports(node_id):
-            ports.append(self.baremetal_client.port.get(port.uuid))
+        _, body = self.baremetal_client.list_node_ports(node_uuid)
+        for port in body['ports']:
+            _, p = self.baremetal_client.show_port(port['uuid'])
+            ports.append(p)
         return ports
 
     def add_keypair(self):
@@ -1568,42 +1593,37 @@ class BaremetalScenarioTest(OfficialClientTest):
 
     def boot_instance(self):
         create_kwargs = {
-            'key_name': self.keypair.id
+            'key_name': self.keypair['name']
         }
         self.instance = self.create_server(
             wait_on_boot=False, create_kwargs=create_kwargs)
 
-        self.addCleanup_with_wait(self.compute_client.servers,
-                                  self.instance.id,
-                                  cleanup_callable=self.delete_wrapper,
-                                  cleanup_args=[self.instance])
+        self.wait_node(self.instance['id'])
+        self.node = self.get_node(instance_id=self.instance['id'])
 
-        self.wait_node(self.instance.id)
-        self.node = self.get_node(instance_id=self.instance.id)
-
-        self.wait_power_state(self.node.uuid, BaremetalPowerStates.POWER_ON)
+        self.wait_power_state(self.node['uuid'], BaremetalPowerStates.POWER_ON)
 
         self.wait_provisioning_state(
-            self.node.uuid,
+            self.node['uuid'],
             [BaremetalProvisionStates.DEPLOYWAIT,
              BaremetalProvisionStates.ACTIVE],
             timeout=15)
 
-        self.wait_provisioning_state(self.node.uuid,
+        self.wait_provisioning_state(self.node['uuid'],
                                      BaremetalProvisionStates.ACTIVE,
                                      timeout=CONF.baremetal.active_timeout)
 
-        self.status_timeout(
-            self.compute_client.servers, self.instance.id, 'ACTIVE')
-
-        self.node = self.get_node(instance_id=self.instance.id)
-        self.instance = self.compute_client.servers.get(self.instance.id)
+        self.servers_client.wait_for_server_status(self.instance['id'],
+                                                   'ACTIVE')
+        self.node = self.get_node(instance_id=self.instance['id'])
+        _, self.instance = self.servers_client.get_server(self.instance['id'])
 
     def terminate_instance(self):
-        self.instance.delete()
-        self.wait_power_state(self.node.uuid, BaremetalPowerStates.POWER_OFF)
+        self.servers_client.delete_server(self.instance['id'])
+        self.wait_power_state(self.node['uuid'],
+                              BaremetalPowerStates.POWER_OFF)
         self.wait_provisioning_state(
-            self.node.uuid,
+            self.node['uuid'],
             BaremetalProvisionStates.NOSTATE,
             timeout=CONF.baremetal.unprovision_timeout)
 
