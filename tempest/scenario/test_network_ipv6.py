@@ -48,6 +48,7 @@ class TestNetworkIPv6(manager.NetworkScenarioTest):
 
     @test.services('compute', 'network')
     def test_46(self):
+        image_id = CONF.compute.image_ref_alt
         ex_net = CONF.network.public_network_id
         net = self._create_network(tenant_id=self.tenant_id,
                                    namestart='net-46')
@@ -72,8 +73,8 @@ class TestNetworkIPv6(manager.NetworkScenarioTest):
         kwargs = {'key_name': key_pair.id,
                   'security_groups': [sec_group.name]}
 
-        i1 = self.create_server(create_kwargs=kwargs)
-        i2 = self.create_server(create_kwargs=kwargs)
+        i1 = self.create_server(create_kwargs=kwargs, image=image_id, flavor=2)
+        i2 = self.create_server(create_kwargs=kwargs, image=image_id, flavor=2)
 
         fip1 = self._create_floating_ip(thing=i1, external_network_id=ex_net)
         fip2 = self._create_floating_ip(thing=i2, external_network_id=ex_net)
@@ -81,19 +82,27 @@ class TestNetworkIPv6(manager.NetworkScenarioTest):
         define_access(i2)
 
         ssh1 = self.get_remote_client(server_or_ip=fip1.floating_ip_address,
+                                      username=CONF.compute.image_alt_ssh_user,
                                       private_key=key_pair.private_key)
         ssh2 = self.get_remote_client(server_or_ip=fip2.floating_ip_address,
+                                      username=CONF.compute.image_alt_ssh_user,
                                       private_key=key_pair.private_key)
 
         r = ssh1.exec_command('ip addr show dev eth0')
         self.assertIn(i1.accessIPv4, r)
-        self.assertNotIn(i1.accessIPv6, r)  # should fail when v6 assigned
+        # v6 should be configured since the image supports it
+        self.assertIn(i1.accessIPv6, r)
         r = ssh2.exec_command('ip addr show dev eth0')
         self.assertIn(i2.accessIPv4, r)
-        self.assertNotIn(i2.accessIPv6, r)  # should fail when v6 assigned
+        # v6 should be configured since the image supports it
+        self.assertIn(i2.accessIPv6, r)
         r = ssh1.exec_command(cmd='ping -c1 {0}'.format(i2.accessIPv4))
         self.assertIn('0% packet loss', r)
         r = ssh2.exec_command(cmd='ping -c1 {0}'.format(i1.accessIPv4))
+        self.assertIn('0% packet loss', r)
+        r = ssh1.exec_command(cmd='ping6 -c1 {0}'.format(i2.accessIPv6))
+        self.assertIn('0% packet loss', r)
+        r = ssh2.exec_command(cmd='ping6 -c1 {0}'.format(i1.accessIPv6))
         self.assertIn('0% packet loss', r)
 
 
