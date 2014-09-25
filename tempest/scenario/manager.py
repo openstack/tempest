@@ -486,18 +486,8 @@ class NeutronScenarioTest(ScenarioTest):
 
     @classmethod
     def check_preconditions(cls):
-        if CONF.service_available.neutron:
-            cls.enabled = True
-            # verify that neutron_available is telling the truth
-            try:
-                cls.network_client.list_networks()
-            except exc.EndpointNotFound:
-                cls.enabled = False
-                raise
-        else:
-            cls.enabled = False
-            msg = 'Neutron not available'
-            raise cls.skipException(msg)
+        if not CONF.service_available.neutron:
+            raise cls.skipException('Neutron not available')
 
     @classmethod
     def setUpClass(cls):
@@ -809,9 +799,6 @@ class NeutronScenarioTest(ScenarioTest):
         ]
         msg = "No default security group for tenant %s." % (tenant_id)
         self.assertTrue(len(sgs) > 0, msg)
-        if len(sgs) > 1:
-            msg = "Found %d default security groups" % len(sgs)
-            raise exc.NeutronClientNoUniqueMatch(msg=msg)
         return net_resources.DeletableSecurityGroup(client=client,
                                                     **sgs[0])
 
@@ -1582,13 +1569,12 @@ class BaremetalScenarioTest(ScenarioTest):
 
     def wait_node(self, instance_id):
         """Waits for a node to be associated with instance_id."""
-        from ironicclient import exc as ironic_exceptions
 
         def _get_node():
             node = None
             try:
                 node = self.get_node(instance_id=instance_id)
-            except ironic_exceptions.HTTPNotFound:
+            except exceptions.NotFound:
                 pass
             return node is not None
 
