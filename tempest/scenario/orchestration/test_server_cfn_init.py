@@ -83,7 +83,7 @@ class CfnInitScenarioTest(manager.OrchestrationScenarioTest):
         server_ip =\
             server['addresses'][CONF.compute.network_for_ssh][0]['addr']
 
-        if not self._ping_ip_address(server_ip):
+        if not self.ping_ip_address(server_ip):
             self._log_console_output(servers=[server])
             self.fail(
                 "Timed out waiting for %s to become reachable" % server_ip)
