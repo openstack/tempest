@@ -106,20 +106,6 @@ def service_tags_not_in_module_path(physical_line, filename):
                             "T107: service tag should not be in path")
 
 
-def no_official_client_manager_in_api_tests(physical_line, filename):
-    """Check that the OfficialClientManager isn't used in the api tests
-
-    The api tests should not use the official clients.
-
-    T108: Can not use OfficialClientManager in the API tests
-    """
-    if 'tempest/api' in filename:
-        if 'OfficialClientManager' in physical_line:
-            return (physical_line.find('OfficialClientManager'),
-                    'T108: OfficialClientManager can not be used in the api '
-                    'tests')
-
-
 def no_mutable_default_args(logical_line):
     """Check that mutable object isn't used as default argument
 
@@ -136,5 +122,4 @@ def factory(register):
     register(no_setupclass_for_unit_tests)
     register(no_vi_headers)
     register(service_tags_not_in_module_path)
-    register(no_official_client_manager_in_api_tests)
     register(no_mutable_default_args)
