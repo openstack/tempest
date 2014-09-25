@@ -54,31 +54,46 @@ class SecurityGroupRulesTestJSON(base.BaseSecurityGroupsTest):
 
     @test.attr(type='smoke')
     @test.services('network')
-    def test_security_group_rules_create_with_optional_arguments(self):
+    def test_security_group_rules_create_with_optional_cidr(self):
         # Positive test: Creation of Security Group rule
-        # with optional arguments
+        # with optional argument cidr
         # should be successful
 
-        secgroup1 = None
-        secgroup2 = None
+        # Creating a Security Group to add rules to it
+        resp, security_group = self.create_security_group()
+        parent_group_id = security_group['id']
+
+        # Adding rules to the created Security Group with optional cidr
+        cidr = '10.2.3.124/24'
+        self.client.create_security_group_rule(parent_group_id,
+                                               self.ip_protocol,
+                                               self.from_port,
+                                               self.to_port,
+                                               cidr=cidr)
+
+    @test.attr(type='smoke')
+    @test.services('network')
+    def test_security_group_rules_create_with_optional_group_id(self):
+        # Positive test: Creation of Security Group rule
+        # with optional argument group_id
+        # should be successful
+
         # Creating a Security Group to add rules to it
         resp, security_group = self.create_security_group()
         secgroup1 = security_group['id']
+
         # Creating a Security Group so as to assign group_id to the rule
         resp, security_group = self.create_security_group()
         secgroup2 = security_group['id']
-        # Adding rules to the created Security Group with optional arguments
+
+        # Adding rules to the created Security Group with optional group_id
         parent_group_id = secgroup1
-        cidr = '10.2.3.124/24'
         group_id = secgroup2
-        resp, rule = \
-            self.client.create_security_group_rule(parent_group_id,
-                                                   self.ip_protocol,
-                                                   self.from_port,
-                                                   self.to_port,
-                                                   cidr=cidr,
-                                                   group_id=group_id)
-        self.assertEqual(200, resp.status)
+        self.client.create_security_group_rule(parent_group_id,
+                                               self.ip_protocol,
+                                               self.from_port,
+                                               self.to_port,
+                                               group_id=group_id)
 
     @test.attr(type='smoke')
     @test.services('network')
