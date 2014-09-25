@@ -396,9 +396,10 @@ class ScenarioTest(tempest.test.BaseTestCase):
             _, servers = self.servers_client.list_servers()
             servers = servers['servers']
         for server in servers:
-            LOG.debug('Console output for %s', server['id'])
-            LOG.debug(self.servers_client.get_console_output(server['id'],
-                                                             length=None))
+            console_output = self.servers_client.get_console_output(
+                server['id'], length=None)
+            LOG.debug('Console output for %s\nhead=%s\nbody=\n%s',
+                      server['id'], console_output[0], console_output[1])
 
     def create_server_snapshot(self, server, name=None):
         # Glance client
