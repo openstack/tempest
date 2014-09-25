@@ -17,11 +17,11 @@
 import collections
 import json
 import re
-import string
 import time
 
 import jsonschema
 from lxml import etree
+import six
 
 from tempest.common import http
 from tempest.common.utils import misc as misc_utils
@@ -38,6 +38,19 @@ TOKEN_CHARS_RE = re.compile('^[-A-Za-z0-9+/=]*$')
 
 # All the successful HTTP status codes from RFC 2616
 HTTP_SUCCESS = (200, 201, 202, 203, 204, 205, 206)
+
+
+# convert a structure into a string safely
+def safe_body(body, maxlen=2048):
+    try:
+        text = six.text_type(body)
+    except UnicodeDecodeError:
+        # if this isn't actually text, return marker that
+        return "<BinaryData: removed>"
+    if len(text) > maxlen:
+        return text[:maxlen]
+    else:
+        return text
 
 
 class RestClient(object):
@@ -258,6 +271,31 @@ class RestClient(object):
             self.LOG.debug('Starting Request (%s): %s %s' %
                            (caller_name, method, req_url))
 
+    def _log_request_full(self, method, req_url, resp,
+                          secs="", req_headers=None,
+                          req_body=None, resp_body=None,
+                          caller_name=None, extra=None):
+        if 'X-Auth-Token' in req_headers:
+            req_headers['X-Auth-Token'] = '<omitted>'
+        log_fmt = """Request (%s): %s %s %s%s
+    Request - Headers: %s
+        Body: %s
+    Response - Headers: %s
+        Body: %s"""
+
+        self.LOG.debug(
+            log_fmt % (
+                caller_name,
+                resp['status'],
+                method,
+                req_url,
+                secs,
+                str(req_headers),
+                safe_body(req_body),
+                str(resp),
+                safe_body(resp_body)),
+            extra=extra)
+
     def _log_request(self, method, req_url, resp,
                      secs="", req_headers=None,
                      req_body=None, resp_body=None):
@@ -281,32 +319,10 @@ class RestClient(object):
                 secs),
             extra=extra)
 
-        # We intentionally duplicate the info content because in a parallel
-        # world this is important to match
-        trace_regex = CONF.debug.trace_requests
-        if trace_regex and re.search(trace_regex, caller_name):
-            if 'X-Auth-Token' in req_headers:
-                req_headers['X-Auth-Token'] = '<omitted>'
-            log_fmt = """Request (%s): %s %s %s%s
-    Request - Headers: %s
-        Body: %s
-    Response - Headers: %s
-        Body: %s"""
-
-            self.LOG.debug(
-                log_fmt % (
-                    caller_name,
-                    resp['status'],
-                    method,
-                    req_url,
-                    secs,
-                    str(req_headers),
-                    filter(lambda x: x in string.printable,
-                           str(req_body)[:2048]),
-                    str(resp),
-                    filter(lambda x: x in string.printable,
-                           str(resp_body)[:2048])),
-                extra=extra)
+        # Also look everything at DEBUG if you want to filter this
+        # out, don't run at debug.
+        self._log_request_full(method, req_url, resp, secs, req_headers,
+                               req_body, resp_body, caller_name, extra)
 
     def _parse_resp(self, body):
         if self._get_type() is "json":
