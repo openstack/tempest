@@ -24,8 +24,8 @@ class BaseDataProcessingTest(tempest.test.BaseTestCase):
     _interface = 'json'
 
     @classmethod
-    def setUpClass(cls):
-        super(BaseDataProcessingTest, cls).setUpClass()
+    def resource_setup(cls):
+        super(BaseDataProcessingTest, cls).resource_setup()
         if not CONF.service_available.sahara:
             raise cls.skipException('Sahara support is required')
 
@@ -43,7 +43,7 @@ class BaseDataProcessingTest(tempest.test.BaseTestCase):
         cls._jobs = []
 
     @classmethod
-    def tearDownClass(cls):
+    def resource_cleanup(cls):
         cls.cleanup_resources(getattr(cls, '_cluster_templates', []),
                               cls.client.delete_cluster_template)
         cls.cleanup_resources(getattr(cls, '_node_group_templates', []),
@@ -56,7 +56,7 @@ class BaseDataProcessingTest(tempest.test.BaseTestCase):
         cls.cleanup_resources(getattr(cls, '_data_sources', []),
                               cls.client.delete_data_source)
         cls.clear_isolated_creds()
-        super(BaseDataProcessingTest, cls).tearDownClass()
+        super(BaseDataProcessingTest, cls).resource_cleanup()
 
     @staticmethod
     def cleanup_resources(resource_id_list, method):

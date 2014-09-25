@@ -22,9 +22,8 @@ class JobTest(dp_base.BaseDataProcessingTest):
     sahara/restapi/rest_api_v1.1_EDP.html#jobs
     """
     @classmethod
-    @test.safe_setup
-    def setUpClass(cls):
-        super(JobTest, cls).setUpClass()
+    def resource_setup(cls):
+        super(JobTest, cls).resource_setup()
         # create job binary
         job_binary = {
             'name': data_utils.rand_name('sahara-job-binary'),

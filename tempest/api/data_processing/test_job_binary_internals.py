@@ -22,8 +22,8 @@ class JobBinaryInternalTest(dp_base.BaseDataProcessingTest):
     sahara/restapi/rest_api_v1.1_EDP.html#job-binary-internals
     """
     @classmethod
-    def setUpClass(cls):
-        super(JobBinaryInternalTest, cls).setUpClass()
+    def resource_setup(cls):
+        super(JobBinaryInternalTest, cls).resource_setup()
         cls.job_binary_internal_data = 'Some script may be data'
 
     def _create_job_binary_internal(self, binary_name=None):
