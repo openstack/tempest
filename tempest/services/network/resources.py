@@ -51,8 +51,18 @@ class DeletableResource(AttributeDict):
     def delete(self):
         return
 
+    @abc.abstractmethod
+    def show(self):
+        return
+
     def __hash__(self):
         return hash(self.id)
+
+    def wait_for_status(self, status):
+        if not hasattr(self, 'status'):
+            return
+
+        return self.client.wait_for_resource_status(self.show, status)
 
 
 class DeletableNetwork(DeletableResource):
@@ -161,3 +171,8 @@ class DeletableVip(DeletableResource):
 
     def delete(self):
         self.client.delete_vip(self.id)
+
+    def show(self):
+        _, result = self.client.show_vip(self.id)
+        super(DeletableVip, self).update(**result['vip'])
+        return self

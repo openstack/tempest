@@ -28,7 +28,7 @@ from tempest import test
 config = config.CONF
 
 
-class TestLoadBalancerBasic(manager.NetworkScenarioTest):
+class TestLoadBalancerBasic(manager.NeutronScenarioTest):
 
     """
     This test checks basic load balancing.
@@ -72,7 +72,7 @@ class TestLoadBalancerBasic(manager.NetworkScenarioTest):
         super(TestLoadBalancerBasic, self).setUp()
         self.server_ips = {}
         self.server_fixed_ips = {}
-        self._create_security_group()
+        self._create_security_group_for_test()
         self._set_net_and_subnet()
 
     def _set_net_and_subnet(self):
@@ -103,8 +103,8 @@ class TestLoadBalancerBasic(manager.NetworkScenarioTest):
             subnet = self._list_subnets(network_id=self.network['id'])[0]
             self.subnet = net_common.AttributeDict(subnet)
 
-    def _create_security_group(self):
-        self.security_group = self._create_security_group_neutron(
+    def _create_security_group_for_test(self):
+        self.security_group = self._create_security_group(
             tenant_id=self.tenant_id)
         self._create_security_group_rules_for_port(self.port1)
         self._create_security_group_rules_for_port(self.port2)
@@ -117,35 +117,35 @@ class TestLoadBalancerBasic(manager.NetworkScenarioTest):
             'port_range_max': port,
         }
         self._create_security_group_rule(
-            client=self.network_client,
             secgroup=self.security_group,
             tenant_id=self.tenant_id,
             **rule)
 
     def _create_server(self, name):
-        keypair = self.create_keypair(name='keypair-%s' % name)
-        security_groups = [self.security_group.name]
+        keypair = self.create_keypair()
+        security_groups = [self.security_group]
         create_kwargs = {
             'nics': [
                 {'net-id': self.network['id']},
             ],
-            'key_name': keypair.name,
+            'key_name': keypair['name'],
             'security_groups': security_groups,
         }
-        server = self.create_server(name=name,
-                                    create_kwargs=create_kwargs)
-        self.servers_keypairs[server.id] = keypair
         net_name = self.network['name']
+        server = self.create_server(name=name, create_kwargs=create_kwargs)
+        self.servers_keypairs[server['id']] = keypair
         if (config.network.public_network_id and not
                 config.network.tenant_networks_reachable):
             public_network_id = config.network.public_network_id
             floating_ip = self._create_floating_ip(
                 server, public_network_id)
             self.floating_ips[floating_ip] = server
-            self.server_ips[server.id] = floating_ip.floating_ip_address
+            self.server_ips[server['id']] = floating_ip.floating_ip_address
         else:
-            self.server_ips[server.id] = server.networks[net_name][0]
-        self.server_fixed_ips[server.id] = server.networks[net_name][0]
+            self.server_ips[server['id']] =\
+                server['addresses'][net_name][0]['addr']
+        self.server_fixed_ips[server['id']] =\
+            server['addresses'][net_name][0]['addr']
         self.assertTrue(self.servers_keypairs)
         return server
 
@@ -162,8 +162,8 @@ class TestLoadBalancerBasic(manager.NetworkScenarioTest):
         2. Start two http backends listening on ports 80 and 88 respectively
         """
         for server_id, ip in self.server_ips.iteritems():
-            private_key = self.servers_keypairs[server_id].private_key
-            server_name = self.compute_client.servers.get(server_id).name
+            private_key = self.servers_keypairs[server_id]['private_key']
+            server_name = self.servers_client.get_server(server_id)[1]['name']
             username = config.scenario.ssh_user
             ssh_client = self.get_remote_client(
                 server_or_ip=ip,
@@ -269,11 +269,7 @@ class TestLoadBalancerBasic(manager.NetworkScenarioTest):
                                     protocol_port=80,
                                     subnet_id=self.subnet.id,
                                     pool_id=self.pool.id)
-        self.status_timeout(NeutronRetriever(self.network_client,
-                                             self.network_client.vip_path,
-                                             net_common.DeletableVip),
-                            self.vip.id,
-                            expected_status='ACTIVE')
+        self.vip.wait_for_status('ACTIVE')
         if (config.network.public_network_id and not
                 config.network.tenant_networks_reachable):
             self._assign_floating_ip_to_vip(self.vip)
@@ -286,8 +282,8 @@ class TestLoadBalancerBasic(manager.NetworkScenarioTest):
         # vip port - see https://bugs.launchpad.net/neutron/+bug/1163569
         # However the linuxbridge-agent does, and it is necessary to add a
         # security group with a rule that allows tcp port 80 to the vip port.
-        body = {'port': {'security_groups': [self.security_group.id]}}
-        self.network_client.update_port(self.vip.port_id, body)
+        self.network_client.update_port(
+            self.vip.port_id, security_groups=[self.security_group.id])
 
     def _check_load_balancing(self):
         """
@@ -318,27 +314,3 @@ class TestLoadBalancerBasic(manager.NetworkScenarioTest):
         self._start_servers()
         self._create_load_balancer()
         self._check_load_balancing()
-
-
-class NeutronRetriever(object):
-    """
-    Helper class to make possible handling neutron objects returned by GET
-    requests as attribute dicts.
-
-    Whet get() method is called, the returned dictionary is wrapped into
-    a corresponding DeletableResource class which provides attribute access
-    to dictionary values.
-
-    Usage:
-        This retriever is used to allow using status_timeout from
-        tempest.manager with Neutron objects.
-    """
-
-    def __init__(self, network_client, path, resource):
-        self.network_client = network_client
-        self.path = path
-        self.resource = resource
-
-    def get(self, thing_id):
-        obj = self.network_client.get(self.path % thing_id)
-        return self.resource(client=self.network_client, **obj.values()[0])
