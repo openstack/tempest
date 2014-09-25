@@ -27,8 +27,8 @@ class BaseDatabaseTest(tempest.test.BaseTestCase):
     _interface = 'json'
 
     @classmethod
-    def setUpClass(cls):
-        super(BaseDatabaseTest, cls).setUpClass()
+    def resource_setup(cls):
+        super(BaseDatabaseTest, cls).resource_setup()
         if not CONF.service_available.trove:
             skip_msg = ("%s skipped as trove is not available" % cls.__name__)
             raise cls.skipException(skip_msg)

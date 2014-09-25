@@ -21,8 +21,8 @@ class DatabaseVersionsTest(base.BaseDatabaseTest):
     _interface = 'json'
 
     @classmethod
-    def setUpClass(cls):
-        super(DatabaseVersionsTest, cls).setUpClass()
+    def resource_setup(cls):
+        super(DatabaseVersionsTest, cls).resource_setup()
         cls.client = cls.database_versions_client
 
     @test.attr(type='smoke')
