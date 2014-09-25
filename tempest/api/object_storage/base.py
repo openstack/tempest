@@ -28,9 +28,9 @@ CONF = config.CONF
 class BaseObjectTest(tempest.test.BaseTestCase):
 
     @classmethod
-    def setUpClass(cls):
+    def resource_setup(cls):
         cls.set_network_resources()
-        super(BaseObjectTest, cls).setUpClass()
+        super(BaseObjectTest, cls).resource_setup()
         if not CONF.service_available.swift:
             skip_msg = ("%s skipped as swift is not available" % cls.__name__)
             raise cls.skipException(skip_msg)
@@ -72,10 +72,10 @@ class BaseObjectTest(tempest.test.BaseTestCase):
         cls.data = SwiftDataGenerator(cls.identity_admin_client)
 
     @classmethod
-    def tearDownClass(cls):
+    def resource_cleanup(cls):
         cls.data.teardown_all()
         cls.isolated_creds.clear_isolated_creds()
-        super(BaseObjectTest, cls).tearDownClass()
+        super(BaseObjectTest, cls).resource_cleanup()
 
     @classmethod
     def delete_containers(cls, containers, container_client=None,

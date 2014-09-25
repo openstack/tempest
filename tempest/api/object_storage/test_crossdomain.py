@@ -22,8 +22,8 @@ from tempest import test
 class CrossdomainTest(base.BaseObjectTest):
 
     @classmethod
-    def setUpClass(cls):
-        super(CrossdomainTest, cls).setUpClass()
+    def resource_setup(cls):
+        super(CrossdomainTest, cls).resource_setup()
 
         cls.xml_start = '<?xml version="1.0"?>\n' \
                         '<!DOCTYPE cross-domain-policy SYSTEM ' \
