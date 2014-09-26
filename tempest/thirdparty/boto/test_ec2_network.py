@@ -13,7 +13,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest import test
 from tempest.thirdparty.boto import test as boto_test
 
 
@@ -22,21 +21,22 @@ class EC2NetworkTest(boto_test.BotoTestCase):
     @classmethod
     def resource_setup(cls):
         super(EC2NetworkTest, cls).resource_setup()
-        cls.client = cls.os.ec2api_client
+        cls.ec2_client = cls.os.ec2api_client
 
     # Note(afazekas): these tests for things duable without an instance
-    @test.skip_because(bug="1080406")
     def test_disassociate_not_associated_floating_ip(self):
         # EC2 disassociate not associated floating ip
         ec2_codes = self.ec2_error_code
-        address = self.client.allocate_address()
+        address = self.ec2_client.allocate_address()
         public_ip = address.public_ip
-        rcuk = self.addResourceCleanUp(self.client.release_address, public_ip)
-        addresses_get = self.client.get_all_addresses(addresses=(public_ip,))
+        rcuk = self.addResourceCleanUp(self.ec2_client.release_address,
+                                       public_ip)
+        addresses_get = self.ec2_client.get_all_addresses(
+            addresses=(public_ip,))
         self.assertEqual(len(addresses_get), 1)
         self.assertEqual(addresses_get[0].public_ip, public_ip)
         self.assertBotoError(ec2_codes.client.InvalidAssociationID.NotFound,
                              address.disassociate)
-        self.client.release_address(public_ip)
-        self.cancelResourceCleanUp(rcuk)
+        self.ec2_client.release_address(public_ip)
         self.assertAddressReleasedWait(address)
+        self.cancelResourceCleanUp(rcuk)
