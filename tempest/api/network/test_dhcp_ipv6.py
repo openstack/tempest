@@ -257,7 +257,11 @@ class NetworksTestDHCPv6JSON(base.BaseNetworkTest):
                 real_dhcp_ip, real_eui_ip = [real_ips[sub['id']]
                                              for sub in subnet_dhcp,
                                              subnet_slaac]
-
+                self.client.delete_port(port['id'])
+                self.ports.pop()
+                _, body = self.client.list_ports()
+                ports_id_list = [i['id'] for i in body['ports']]
+                self.assertNotIn(port['id'], ports_id_list)
                 self._clean_network()
                 self.assertSequenceEqual((real_eui_ip, real_dhcp_ip),
                                          (eui_ip, dhcp_ip),
