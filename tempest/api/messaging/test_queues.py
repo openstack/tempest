@@ -18,7 +18,7 @@ import logging
 from six import moves
 from testtools import matchers
 
-from tempest.api.queuing import base
+from tempest.api.messaging import base
 from tempest.common.utils import data_utils
 from tempest import test
 
@@ -26,7 +26,7 @@ from tempest import test
 LOG = logging.getLogger(__name__)
 
 
-class TestQueues(base.BaseQueuingTest):
+class TestQueues(base.BaseMessagingTest):
 
     @test.attr(type='smoke')
     def test_create_queue(self):
@@ -40,7 +40,7 @@ class TestQueues(base.BaseQueuingTest):
         self.assertEqual('', body)
 
 
-class TestManageQueue(base.BaseQueuingTest):
+class TestManageQueue(base.BaseMessagingTest):
     _interface = 'json'
 
     @classmethod

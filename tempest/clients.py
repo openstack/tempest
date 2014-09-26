@@ -151,6 +151,8 @@ from tempest.services.identity.xml.identity_client import IdentityClientXML
 from tempest.services.identity.xml.identity_client import TokenClientXML
 from tempest.services.image.v1.json.image_client import ImageClientJSON
 from tempest.services.image.v2.json.image_client import ImageClientV2JSON
+from tempest.services.messaging.json.messaging_client import \
+    MessagingClientJSON
 from tempest.services.network.json.network_client import NetworkClientJSON
 from tempest.services.network.xml.network_client import NetworkClientXML
 from tempest.services.object_storage.account_client import AccountClient
@@ -162,7 +164,6 @@ from tempest.services.object_storage.object_client import \
     ObjectClientCustomizedHeader
 from tempest.services.orchestration.json.orchestration_client import \
     OrchestrationClient
-from tempest.services.queuing.json.queuing_client import QueuingClientJSON
 from tempest.services.telemetry.json.telemetry_client import \
     TelemetryClientJSON
 from tempest.services.telemetry.xml.telemetry_client import \
@@ -384,7 +385,7 @@ class Manager(manager.Manager):
                 self.auth_provider)
             self.database_versions_client = DatabaseVersionsClientJSON(
                 self.auth_provider)
-            self.queuing_client = QueuingClientJSON(self.auth_provider)
+            self.messaging_client = MessagingClientJSON(self.auth_provider)
             if CONF.service_available.ceilometer:
                 self.telemetry_client = TelemetryClientJSON(
                     self.auth_provider)

@@ -15,7 +15,7 @@
 
 import logging
 
-from tempest.api.queuing import base
+from tempest.api.messaging import base
 from tempest.common.utils import data_utils
 from tempest import config
 from tempest import test
@@ -25,7 +25,7 @@ LOG = logging.getLogger(__name__)
 CONF = config.CONF
 
 
-class TestMessages(base.BaseQueuingTest):
+class TestMessages(base.BaseMessagingTest):
     _interface = 'json'
 
     @classmethod
@@ -35,7 +35,7 @@ class TestMessages(base.BaseQueuingTest):
         # Create Queue
         cls.client.create_queue(cls.queue_name)
 
-    def _post_messages(self, repeat=CONF.queuing.max_messages_per_page):
+    def _post_messages(self, repeat=CONF.messaging.max_messages_per_page):
         message_body = self.generate_message_body(repeat=repeat)
         resp, body = self.post_messages(queue_name=self.queue_name,
                                         rbody=message_body)
