@@ -56,7 +56,8 @@ class ServerRescueNegativeTestJSON(base.BaseV2ComputeTest):
 
     @classmethod
     def resource_cleanup(cls):
-        cls.delete_volume(cls.volume['id'])
+        if getattr(cls, 'volume', None):
+            cls.delete_volume(cls.volume['id'])
         super(ServerRescueNegativeTestJSON, cls).resource_cleanup()
 
     def _detach(self, server_id, volume_id):
