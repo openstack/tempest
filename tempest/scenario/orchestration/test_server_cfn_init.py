@@ -86,7 +86,8 @@ class CfnInitScenarioTest(manager.OrchestrationScenarioTest):
         if not self.ping_ip_address(server_ip):
             self._log_console_output(servers=[server])
             self.fail(
-                "Timed out waiting for %s to become reachable" % server_ip)
+                "(CfnInitScenarioTest:test_server_cfn_init) Timed out waiting "
+                "for %s to become reachable" % server_ip)
 
         try:
             self.client.wait_for_resource_status(
