@@ -18,11 +18,11 @@ import tempfile
 import time
 import urllib2
 
-from tempest.api.network import common as net_common
 from tempest.common import commands
 from tempest import config
 from tempest import exceptions
 from tempest.scenario import manager
+from tempest.services.network import resources as net_resources
 from tempest import test
 
 config = config.CONF
@@ -89,7 +89,7 @@ class TestLoadBalancerBasic(manager.NetworkScenarioTest):
 
         if tenant_net:
             tenant_subnet = self._list_subnets(tenant_id=self.tenant_id)[0]
-            self.subnet = net_common.DeletableSubnet(
+            self.subnet = net_resources.DeletableSubnet(
                 client=self.network_client,
                 **tenant_subnet)
             self.network = tenant_net
@@ -101,7 +101,7 @@ class TestLoadBalancerBasic(manager.NetworkScenarioTest):
             # should instead pull a subnet id from config, which is set by
             # devstack/admin/etc.
             subnet = self._list_subnets(network_id=self.network['id'])[0]
-            self.subnet = net_common.AttributeDict(subnet)
+            self.subnet = net_resources.AttributeDict(subnet)
 
     def _create_security_group_for_test(self):
         self.security_group = self._create_security_group(
