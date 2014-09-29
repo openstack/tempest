@@ -1248,38 +1248,38 @@ class SwiftScenarioTest(ScenarioTest):
         cls.container_client = cls.manager.container_client
         cls.object_client = cls.manager.object_client
 
-    def _get_swift_stat(self):
+    def get_swift_stat(self):
         """get swift status for our user account."""
         self.account_client.list_account_containers()
         LOG.debug('Swift status information obtained successfully')
 
-    def _create_container(self, container_name=None):
+    def create_container(self, container_name=None):
         name = container_name or data_utils.rand_name(
             'swift-scenario-container')
         self.container_client.create_container(name)
         # look for the container to assure it is created
-        self._list_and_check_container_objects(name)
+        self.list_and_check_container_objects(name)
         LOG.debug('Container %s created' % (name))
         return name
 
-    def _delete_container(self, container_name):
+    def delete_container(self, container_name):
         self.container_client.delete_container(container_name)
         LOG.debug('Container %s deleted' % (container_name))
 
-    def _upload_object_to_container(self, container_name, obj_name=None):
+    def upload_object_to_container(self, container_name, obj_name=None):
         obj_name = obj_name or data_utils.rand_name('swift-scenario-object')
         obj_data = data_utils.arbitrary_string()
         self.object_client.create_object(container_name, obj_name, obj_data)
         return obj_name, obj_data
 
-    def _delete_object(self, container_name, filename):
+    def delete_object(self, container_name, filename):
         self.object_client.delete_object(container_name, filename)
-        self._list_and_check_container_objects(container_name,
-                                               not_present_obj=[filename])
+        self.list_and_check_container_objects(container_name,
+                                              not_present_obj=[filename])
 
-    def _list_and_check_container_objects(self, container_name,
-                                          present_obj=None,
-                                          not_present_obj=None):
+    def list_and_check_container_objects(self, container_name,
+                                         present_obj=None,
+                                         not_present_obj=None):
         """
         List objects for a given container and assert which are present and
         which are not.
@@ -1297,7 +1297,7 @@ class SwiftScenarioTest(ScenarioTest):
             for obj in not_present_obj:
                 self.assertNotIn(obj, object_list)
 
-    def _change_container_acl(self, container_name, acl):
+    def change_container_acl(self, container_name, acl):
         metadata_param = {'metadata_prefix': 'x-container-',
                           'metadata': {'read': acl}}
         self.container_client.update_container_metadata(container_name,
@@ -1305,6 +1305,6 @@ class SwiftScenarioTest(ScenarioTest):
         resp, _ = self.container_client.list_container_metadata(container_name)
         self.assertEqual(resp['x-container-read'], acl)
 
-    def _download_and_verify(self, container_name, obj_name, expected_data):
+    def download_and_verify(self, container_name, obj_name, expected_data):
         _, obj = self.object_client.get_object(container_name, obj_name)
         self.assertEqual(obj, expected_data)

@@ -41,13 +41,13 @@ class TestSwiftBasicOps(manager.SwiftScenarioTest):
 
     @test.services('object_storage')
     def test_swift_basic_ops(self):
-        self._get_swift_stat()
-        container_name = self._create_container()
-        obj_name, obj_data = self._upload_object_to_container(container_name)
-        self._list_and_check_container_objects(container_name, [obj_name])
-        self._download_and_verify(container_name, obj_name, obj_data)
-        self._delete_object(container_name, obj_name)
-        self._delete_container(container_name)
+        self.get_swift_stat()
+        container_name = self.create_container()
+        obj_name, obj_data = self.upload_object_to_container(container_name)
+        self.list_and_check_container_objects(container_name, [obj_name])
+        self.download_and_verify(container_name, obj_name, obj_data)
+        self.delete_object(container_name, obj_name)
+        self.delete_container(container_name)
 
     @test.services('object_storage')
     def test_swift_acl_anonymous_download(self):
@@ -58,15 +58,15 @@ class TestSwiftBasicOps(manager.SwiftScenarioTest):
         4. Check if the object can be download by anonymous user
         5. Delete the object and container
         """
-        container_name = self._create_container()
-        obj_name, _ = self._upload_object_to_container(container_name)
+        container_name = self.create_container()
+        obj_name, _ = self.upload_object_to_container(container_name)
         obj_url = '%s/%s/%s' % (self.object_client.base_url,
                                 container_name, obj_name)
         http_client = http.ClosingHttp()
         resp, _ = http_client.request(obj_url, 'GET')
         self.assertEqual(resp.status, 401)
-        self._change_container_acl(container_name, '.r:*')
+        self.change_container_acl(container_name, '.r:*')
         resp, _ = http_client.request(obj_url, 'GET')
         self.assertEqual(resp.status, 200)
-        self._delete_object(container_name, obj_name)
-        self._delete_container(container_name)
+        self.delete_object(container_name, obj_name)
+        self.delete_container(container_name)
