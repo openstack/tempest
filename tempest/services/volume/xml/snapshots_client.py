@@ -26,16 +26,17 @@ CONF = config.CONF
 LOG = logging.getLogger(__name__)
 
 
-class SnapshotsClientXML(rest_client.RestClient):
-    """Client class to send CRUD Volume API requests."""
+class BaseSnapshotsClientXML(rest_client.RestClient):
+    """Base Client class to send CRUD Volume API requests."""
     TYPE = "xml"
 
     def __init__(self, auth_provider):
-        super(SnapshotsClientXML, self).__init__(auth_provider)
+        super(BaseSnapshotsClientXML, self).__init__(auth_provider)
 
         self.service = CONF.volume.catalog_type
         self.build_interval = CONF.volume.build_interval
         self.build_timeout = CONF.volume.build_timeout
+        self.create_resp = 200
 
     def list_snapshots(self, params=None):
         """List all snapshot."""
@@ -90,7 +91,7 @@ class SnapshotsClientXML(rest_client.RestClient):
         resp, body = self.post('snapshots',
                                str(common.Document(snapshot)))
         body = common.xml_to_json(etree.fromstring(body))
-        self.expected_success(200, resp.status)
+        self.expected_success(self.create_resp, resp.status)
         return resp, body
 
     def update_snapshot(self, snapshot_id, **kwargs):
@@ -243,3 +244,7 @@ class SnapshotsClientXML(rest_client.RestClient):
             body = common.xml_to_json(etree.fromstring(body))
         self.expected_success(202, resp.status)
         return resp, body
+
+
+class SnapshotsClientXML(BaseSnapshotsClientXML):
+    """Client class to send CRUD Volume V1 API requests."""

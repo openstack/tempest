@@ -24,15 +24,16 @@ CONF = config.CONF
 LOG = logging.getLogger(__name__)
 
 
-class SnapshotsClientJSON(rest_client.RestClient):
-    """Client class to send CRUD Volume API requests."""
+class BaseSnapshotsClientJSON(rest_client.RestClient):
+    """Base Client class to send CRUD Volume API requests."""
 
     def __init__(self, auth_provider):
-        super(SnapshotsClientJSON, self).__init__(auth_provider)
+        super(BaseSnapshotsClientJSON, self).__init__(auth_provider)
 
         self.service = CONF.volume.catalog_type
         self.build_interval = CONF.volume.build_interval
         self.build_timeout = CONF.volume.build_timeout
+        self.create_resp = 200
 
     def list_snapshots(self, params=None):
         """List all the snapshot."""
@@ -77,7 +78,7 @@ class SnapshotsClientJSON(rest_client.RestClient):
         post_body = json.dumps({'snapshot': post_body})
         resp, body = self.post('snapshots', post_body)
         body = json.loads(body)
-        self.expected_success(200, resp.status)
+        self.expected_success(self.create_resp, resp.status)
         return resp, body['snapshot']
 
     def update_snapshot(self, snapshot_id, **kwargs):
@@ -203,3 +204,7 @@ class SnapshotsClientJSON(rest_client.RestClient):
         resp, body = self.post('snapshots/%s/action' % snapshot_id, post_body)
         self.expected_success(202, resp.status)
         return resp, body
+
+
+class SnapshotsClientJSON(BaseSnapshotsClientJSON):
+    """Client class to send CRUD Volume V1 API requests."""

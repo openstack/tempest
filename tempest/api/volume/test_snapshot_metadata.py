@@ -17,13 +17,12 @@ from tempest.api.volume import base
 from tempest import test
 
 
-class SnapshotMetadataTest(base.BaseVolumeV1Test):
-    _interface = "json"
+class SnapshotV2MetadataTestJSON(base.BaseVolumeTest):
 
     @classmethod
     @test.safe_setup
     def setUpClass(cls):
-        super(SnapshotMetadataTest, cls).setUpClass()
+        super(SnapshotV2MetadataTestJSON, cls).setUpClass()
         cls.client = cls.snapshots_client
         # Create a volume
         cls.volume = cls.create_volume()
@@ -34,7 +33,7 @@ class SnapshotMetadataTest(base.BaseVolumeV1Test):
     def tearDown(self):
         # Update the metadata to {}
         self.client.update_snapshot_metadata(self.snapshot_id, {})
-        super(SnapshotMetadataTest, self).tearDown()
+        super(SnapshotV2MetadataTestJSON, self).tearDown()
 
     @test.attr(type='gate')
     def test_create_get_delete_snapshot_metadata(self):
@@ -100,5 +99,13 @@ class SnapshotMetadataTest(base.BaseVolumeV1Test):
         self.assertEqual(expect, body)
 
 
-class SnapshotMetadataTestXML(SnapshotMetadataTest):
+class SnapshotV2MetadataTestXML(SnapshotV2MetadataTestJSON):
+    _interface = "xml"
+
+
+class SnapshotV1MetadataTestJSON(SnapshotV2MetadataTestJSON):
+    _api_version = 1
+
+
+class SnapshotV1MetadataTestXML(SnapshotV1MetadataTestJSON):
     _interface = "xml"
