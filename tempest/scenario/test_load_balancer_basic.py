@@ -28,7 +28,7 @@ from tempest import test
 config = config.CONF
 
 
-class TestLoadBalancerBasic(manager.NeutronScenarioTest):
+class TestLoadBalancerBasic(manager.NetworkScenarioTest):
 
     """
     This test checks basic load balancing.

@@ -26,7 +26,7 @@ CONF = config.CONF
 LOG = logging.getLogger(__name__)
 
 
-class TestSecurityGroupsBasicOps(manager.NeutronScenarioTest):
+class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
 
     """
     This test suite assumes that Nova has been configured to

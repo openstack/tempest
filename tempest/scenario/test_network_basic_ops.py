@@ -34,7 +34,7 @@ Floating_IP_tuple = collections.namedtuple('Floating_IP_tuple',
                                            ['floating_ip', 'server'])
 
 
-class TestNetworkBasicOps(manager.NeutronScenarioTest):
+class TestNetworkBasicOps(manager.NetworkScenarioTest):
 
     """
     This smoke test suite assumes that Nova has been configured to

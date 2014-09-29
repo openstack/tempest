@@ -25,7 +25,7 @@ CONF = config.CONF
 LOG = logging.getLogger(__name__)
 
 
-class TestNetworkAdvancedServerOps(manager.NeutronScenarioTest):
+class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
 
     """
     This test case checks VM connectivity after some advanced

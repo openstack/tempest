@@ -467,9 +467,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
             ping, CONF.compute.ping_timeout, 1)
 
 
-# TODO(yfried): change this class name to NetworkScenarioTest once client
-# migration is complete
-class NeutronScenarioTest(ScenarioTest):
+class NetworkScenarioTest(ScenarioTest):
     """Base class for network scenario tests.
     This class provide helpers for network scenario tests, using the neutron
     API. Helpers from ancestor which use the nova network API are overridden
@@ -487,7 +485,7 @@ class NeutronScenarioTest(ScenarioTest):
 
     @classmethod
     def setUpClass(cls):
-        super(NeutronScenarioTest, cls).setUpClass()
+        super(NetworkScenarioTest, cls).setUpClass()
         cls.tenant_id = cls.manager.identity_client.tenant_id
         cls.check_preconditions()
 
