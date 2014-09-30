@@ -31,9 +31,9 @@ class ServersTestJSON(base.BaseV2ComputeTest):
     disk_config = 'AUTO'
 
     @classmethod
-    def setUpClass(cls):
+    def resource_setup(cls):
         cls.prepare_instance_network()
-        super(ServersTestJSON, cls).setUpClass()
+        super(ServersTestJSON, cls).resource_setup()
         cls.meta = {'hello': 'world'}
         cls.accessIPv4 = '1.1.1.1'
         cls.accessIPv6 = '0000:0000:0000:0000:0000:babe:220.12.22.2'
@@ -129,9 +129,9 @@ class ServersWithSpecificFlavorTestJSON(base.BaseV2ComputeAdminTest):
     disk_config = 'AUTO'
 
     @classmethod
-    def setUpClass(cls):
+    def resource_setup(cls):
         cls.prepare_instance_network()
-        super(ServersWithSpecificFlavorTestJSON, cls).setUpClass()
+        super(ServersWithSpecificFlavorTestJSON, cls).resource_setup()
         cls.flavor_client = cls.os_adm.flavors_client
         cls.client = cls.servers_client
 
@@ -214,11 +214,11 @@ class ServersTestManualDisk(ServersTestJSON):
     disk_config = 'MANUAL'
 
     @classmethod
-    def setUpClass(cls):
+    def resource_setup(cls):
         if not CONF.compute_feature_enabled.disk_config:
             msg = "DiskConfig extension not enabled."
             raise cls.skipException(msg)
-        super(ServersTestManualDisk, cls).setUpClass()
+        super(ServersTestManualDisk, cls).resource_setup()
 
 
 class ServersTestXML(ServersTestJSON):

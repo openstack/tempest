@@ -38,7 +38,12 @@ class Accounts(cred_provider.CredentialProvider):
 
     def __init__(self, name):
         super(Accounts, self).__init__(name)
-        accounts = read_accounts_yaml(CONF.auth.test_accounts_file)
+        if os.path.isfile(CONF.auth.test_accounts_file):
+            accounts = read_accounts_yaml(CONF.auth.test_accounts_file)
+            self.use_default_creds = False
+        else:
+            accounts = {}
+            self.use_default_creds = True
         self.hash_dict = self.get_hash_dict(accounts)
         self.accounts_dir = os.path.join(CONF.lock_path, 'test_accounts')
         self.isolated_creds = {}
@@ -77,6 +82,9 @@ class Accounts(cred_provider.CredentialProvider):
         raise exceptions.InvalidConfiguration(msg)
 
     def _get_creds(self):
+        if self.use_default_creds:
+            raise exceptions.InvalidConfiguration(
+                "Account file %s doesn't exist" % CONF.auth.test_accounts_file)
         free_hash = self._get_free_hash(self.hash_dict.keys())
         return self.hash_dict[free_hash]
 
@@ -150,16 +158,22 @@ class NotLockingAccounts(Accounts):
     def get_primary_creds(self):
         if self.isolated_creds.get('primary'):
             return self.isolated_creds.get('primary')
-        creds = self.get_creds(0)
-        primary_credential = auth.get_credentials(**creds)
+        if not self.use_default_creds:
+            creds = self.get_creds(0)
+            primary_credential = auth.get_credentials(**creds)
+        else:
+            primary_credential = auth.get_default_credentials('user')
         self.isolated_creds['primary'] = primary_credential
         return primary_credential
 
     def get_alt_creds(self):
         if self.isolated_creds.get('alt'):
             return self.isolated_creds.get('alt')
-        creds = self.get_creds(1)
-        alt_credential = auth.get_credentials(**creds)
+        if not self.use_default_creds:
+            creds = self.get_creds(1)
+            alt_credential = auth.get_credentials(**creds)
+        else:
+            alt_credential = auth.get_default_credentials('alt_user')
         self.isolated_creds['alt'] = alt_credential
         return alt_credential
 

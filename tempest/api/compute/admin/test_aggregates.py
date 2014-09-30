@@ -29,8 +29,8 @@ class AggregatesAdminTestJSON(base.BaseV2ComputeAdminTest):
     _host_key = 'OS-EXT-SRV-ATTR:host'
 
     @classmethod
-    def setUpClass(cls):
-        super(AggregatesAdminTestJSON, cls).setUpClass()
+    def resource_setup(cls):
+        super(AggregatesAdminTestJSON, cls).resource_setup()
         cls.client = cls.os_adm.aggregates_client
         cls.aggregate_name_prefix = 'test_aggregate_'
         cls.az_name_prefix = 'test_az_'

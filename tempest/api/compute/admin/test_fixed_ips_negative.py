@@ -23,8 +23,8 @@ CONF = config.CONF
 class FixedIPsNegativeTestJson(base.BaseV2ComputeAdminTest):
 
     @classmethod
-    def setUpClass(cls):
-        super(FixedIPsNegativeTestJson, cls).setUpClass()
+    def resource_setup(cls):
+        super(FixedIPsNegativeTestJson, cls).resource_setup()
         if CONF.service_available.neutron:
             msg = ("%s skipped as neutron is available" % cls.__name__)
             raise cls.skipException(msg)

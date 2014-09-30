@@ -27,8 +27,8 @@ class FlavorsExtraSpecsTestJSON(base.BaseV2ComputeAdminTest):
     """
 
     @classmethod
-    def setUpClass(cls):
-        super(FlavorsExtraSpecsTestJSON, cls).setUpClass()
+    def resource_setup(cls):
+        super(FlavorsExtraSpecsTestJSON, cls).resource_setup()
         if not test.is_extension_enabled('OS-FLV-EXT-DATA', 'compute'):
             msg = "OS-FLV-EXT-DATA extension not enabled."
             raise cls.skipException(msg)
@@ -51,10 +51,10 @@ class FlavorsExtraSpecsTestJSON(base.BaseV2ComputeAdminTest):
                                                     swap=swap, rxtx=rxtx)
 
     @classmethod
-    def tearDownClass(cls):
+    def resource_cleanup(cls):
         resp, body = cls.client.delete_flavor(cls.flavor['id'])
         cls.client.wait_for_resource_deletion(cls.flavor['id'])
-        super(FlavorsExtraSpecsTestJSON, cls).tearDownClass()
+        super(FlavorsExtraSpecsTestJSON, cls).resource_cleanup()
 
     @test.attr(type='gate')
     def test_flavor_set_get_update_show_unset_keys(self):

@@ -23,8 +23,8 @@ from tempest import test
 
 class ObjectExpiryTest(base.BaseObjectTest):
     @classmethod
-    def setUpClass(cls):
-        super(ObjectExpiryTest, cls).setUpClass()
+    def resource_setup(cls):
+        super(ObjectExpiryTest, cls).resource_setup()
         cls.container_name = data_utils.rand_name(name='TestContainer')
         cls.container_client.create_container(cls.container_name)
 
@@ -36,9 +36,9 @@ class ObjectExpiryTest(base.BaseObjectTest):
                                                    self.object_name, '')
 
     @classmethod
-    def tearDownClass(cls):
+    def resource_cleanup(cls):
         cls.delete_containers([cls.container_name])
-        super(ObjectExpiryTest, cls).tearDownClass()
+        super(ObjectExpiryTest, cls).resource_cleanup()
 
     def _test_object_expiry(self, metadata):
         # update object metadata

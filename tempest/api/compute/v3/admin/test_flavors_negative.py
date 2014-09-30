@@ -28,8 +28,8 @@ class FlavorsAdminNegativeV3Test(base.BaseV3ComputeAdminTest):
     """
 
     @classmethod
-    def setUpClass(cls):
-        super(FlavorsAdminNegativeV3Test, cls).setUpClass()
+    def resource_setup(cls):
+        super(FlavorsAdminNegativeV3Test, cls).resource_setup()
 
         cls.client = cls.flavors_admin_client
         cls.user_client = cls.flavors_client

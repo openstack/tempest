@@ -55,10 +55,10 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
     _ip_version = 4
 
     @classmethod
-    def setUpClass(cls):
+    def resource_setup(cls):
         # Create no network resources for these test.
         cls.set_network_resources()
-        super(BaseNetworkTest, cls).setUpClass()
+        super(BaseNetworkTest, cls).resource_setup()
         if not CONF.service_available.neutron:
             raise cls.skipException("Neutron support is required")
 
@@ -84,7 +84,7 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
         cls.ipsecpolicies = []
 
     @classmethod
-    def tearDownClass(cls):
+    def resource_cleanup(cls):
         if CONF.service_available.neutron:
             # Clean up ipsec policies
             for ipsecpolicy in cls.ipsecpolicies:
@@ -137,7 +137,7 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
             for network in cls.networks:
                 cls.client.delete_network(network['id'])
             cls.clear_isolated_creds()
-        super(BaseNetworkTest, cls).tearDownClass()
+        super(BaseNetworkTest, cls).resource_cleanup()
 
     @classmethod
     def create_network(cls, network_name=None):
@@ -368,8 +368,8 @@ class BaseAdminNetworkTest(BaseNetworkTest):
     _interface = 'json'
 
     @classmethod
-    def setUpClass(cls):
-        super(BaseAdminNetworkTest, cls).setUpClass()
+    def resource_setup(cls):
+        super(BaseAdminNetworkTest, cls).resource_setup()
         admin_username = CONF.compute_admin.username
         admin_password = CONF.compute_admin.password
         admin_tenant = CONF.compute_admin.tenant_name

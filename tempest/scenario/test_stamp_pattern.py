@@ -15,7 +15,6 @@
 
 import time
 
-from cinderclient import exceptions as cinder_exceptions
 import testtools
 
 from tempest.common.utils import data_utils
@@ -30,7 +29,7 @@ CONF = config.CONF
 LOG = logging.getLogger(__name__)
 
 
-class TestStampPattern(manager.OfficialClientTest):
+class TestStampPattern(manager.ScenarioTest):
     """
     This test is for snapshotting an instance/volume and attaching the volume
     created from snapshot to the instance booted from snapshot.
@@ -59,13 +58,13 @@ class TestStampPattern(manager.OfficialClientTest):
             raise cls.skipException("Cinder volume snapshots are disabled")
 
     def _wait_for_volume_snapshot_status(self, volume_snapshot, status):
-        self.status_timeout(self.volume_client.volume_snapshots,
-                            volume_snapshot.id, status)
+        self.snapshots_client.wait_for_snapshot_status(volume_snapshot['id'],
+                                                       status)
 
     def _boot_image(self, image_id):
-        security_groups = [self.security_group.name]
+        security_groups = [self.security_group]
         create_kwargs = {
-            'key_name': self.keypair.name,
+            'key_name': self.keypair['name'],
             'security_groups': security_groups
         }
         return self.create_server(image=image_id, create_kwargs=create_kwargs)
@@ -74,53 +73,54 @@ class TestStampPattern(manager.OfficialClientTest):
         self.keypair = self.create_keypair()
 
     def _create_floating_ip(self):
-        floating_ip = self.compute_client.floating_ips.create()
-        self.addCleanup(self.delete_wrapper, floating_ip)
+        _, floating_ip = self.floating_ips_client.create_floating_ip()
+        self.addCleanup(self.delete_wrapper,
+                        self.floating_ips_client.delete_floating_ip,
+                        floating_ip['id'])
         return floating_ip
 
     def _add_floating_ip(self, server, floating_ip):
-        server.add_floating_ip(floating_ip)
+        self.floating_ips_client.associate_floating_ip_to_server(
+            floating_ip['ip'], server['id'])
 
     def _ssh_to_server(self, server_or_ip):
         return self.get_remote_client(server_or_ip)
 
     def _create_volume_snapshot(self, volume):
         snapshot_name = data_utils.rand_name('scenario-snapshot-')
-        volume_snapshots = self.volume_client.volume_snapshots
-        snapshot = volume_snapshots.create(
-            volume.id, display_name=snapshot_name)
+        _, snapshot = self.snapshots_client.create_snapshot(
+            volume['id'], display_name=snapshot_name)
 
         def cleaner():
-            volume_snapshots.delete(snapshot)
+            self.snapshots_client.delete_snapshot(snapshot['id'])
             try:
-                while volume_snapshots.get(snapshot.id):
+                while self.snapshots_client.get_snapshot(snapshot['id']):
                     time.sleep(1)
-            except cinder_exceptions.NotFound:
+            except exceptions.NotFound:
                 pass
         self.addCleanup(cleaner)
         self._wait_for_volume_status(volume, 'available')
-        self._wait_for_volume_snapshot_status(snapshot, 'available')
-        self.assertEqual(snapshot_name, snapshot.display_name)
+        self.snapshots_client.wait_for_snapshot_status(snapshot['id'],
+                                                       'available')
+        self.assertEqual(snapshot_name, snapshot['display_name'])
         return snapshot
 
     def _wait_for_volume_status(self, volume, status):
-        self.status_timeout(
-            self.volume_client.volumes, volume.id, status)
+        self.volumes_client.wait_for_volume_status(volume['id'], status)
 
     def _create_volume(self, snapshot_id=None):
         return self.create_volume(snapshot_id=snapshot_id)
 
     def _attach_volume(self, server, volume):
-        attach_volume_client = self.compute_client.volumes.create_server_volume
-        attached_volume = attach_volume_client(server.id,
-                                               volume.id,
-                                               '/dev/vdb')
-        self.assertEqual(volume.id, attached_volume.id)
+        # TODO(andreaf) we should use device from config instead if vdb
+        _, attached_volume = self.servers_client.attach_volume(
+            server['id'], volume['id'], device='/dev/vdb')
+        attached_volume = attached_volume['volumeAttachment']
+        self.assertEqual(volume['id'], attached_volume['id'])
         self._wait_for_volume_status(attached_volume, 'in-use')
 
     def _detach_volume(self, server, volume):
-        detach_volume_client = self.compute_client.volumes.delete_server_volume
-        detach_volume_client(server.id, volume.id)
+        self.servers_client.detach_volume(server['id'], volume['id'])
         self._wait_for_volume_status(volume, 'available')
 
     def _wait_for_volume_available_on_the_system(self, server_or_ip):
@@ -157,7 +157,7 @@ class TestStampPattern(manager.OfficialClientTest):
     def test_stamp_pattern(self):
         # prepare for booting a instance
         self._add_keypair()
-        self.security_group = self._create_security_group_nova()
+        self.security_group = self._create_security_group()
 
         # boot an instance and create a timestamp file in it
         volume = self._create_volume()
@@ -167,7 +167,7 @@ class TestStampPattern(manager.OfficialClientTest):
         if CONF.compute.use_floatingip_for_ssh:
             floating_ip_for_server = self._create_floating_ip()
             self._add_floating_ip(server, floating_ip_for_server)
-            ip_for_server = floating_ip_for_server.ip
+            ip_for_server = floating_ip_for_server['ip']
         else:
             ip_for_server = server
 
@@ -184,17 +184,17 @@ class TestStampPattern(manager.OfficialClientTest):
 
         # create second volume from the snapshot(volume2)
         volume_from_snapshot = self._create_volume(
-            snapshot_id=volume_snapshot.id)
+            snapshot_id=volume_snapshot['id'])
 
         # boot second instance from the snapshot(instance2)
-        server_from_snapshot = self._boot_image(snapshot_image.id)
+        server_from_snapshot = self._boot_image(snapshot_image['id'])
 
         # create and add floating IP to server_from_snapshot
         if CONF.compute.use_floatingip_for_ssh:
             floating_ip_for_snapshot = self._create_floating_ip()
             self._add_floating_ip(server_from_snapshot,
                                   floating_ip_for_snapshot)
-            ip_for_snapshot = floating_ip_for_snapshot.ip
+            ip_for_snapshot = floating_ip_for_snapshot['ip']
         else:
             ip_for_snapshot = server_from_snapshot
 

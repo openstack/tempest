@@ -25,7 +25,7 @@ CONF = config.CONF
 LOG = logging.getLogger(__name__)
 
 
-class TestNetworkAdvancedServerOps(manager.NeutronScenarioTest):
+class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
 
     """
     This test case checks VM connectivity after some advanced
@@ -61,8 +61,8 @@ class TestNetworkAdvancedServerOps(manager.NeutronScenarioTest):
         network, subnet, router = self.create_networks()
         public_network_id = CONF.network.public_network_id
         create_kwargs = {
-            'nics': [
-                {'net-id': network.id},
+            'networks': [
+                {'uuid': network.id},
             ],
             'key_name': self.keypair['name'],
             'security_groups': [security_group],

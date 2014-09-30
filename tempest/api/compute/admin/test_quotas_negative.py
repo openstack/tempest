@@ -25,8 +25,8 @@ class QuotasAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
     force_tenant_isolation = True
 
     @classmethod
-    def setUpClass(cls):
-        super(QuotasAdminNegativeTestJSON, cls).setUpClass()
+    def resource_setup(cls):
+        super(QuotasAdminNegativeTestJSON, cls).resource_setup()
         cls.client = cls.os.quotas_client
         cls.adm_client = cls.os_adm.quotas_client
         cls.sg_client = cls.security_groups_client

@@ -27,9 +27,9 @@ class BaremetalClientV1(base.BaremetalClient):
         self.uri_prefix = 'v%s' % self.version
 
     @base.handle_errors
-    def list_nodes(self):
+    def list_nodes(self, **kwargs):
         """List all existing nodes."""
-        return self._list_request('nodes')
+        return self._list_request('nodes', **kwargs)
 
     @base.handle_errors
     def list_chassis(self):
@@ -37,9 +37,19 @@ class BaremetalClientV1(base.BaremetalClient):
         return self._list_request('chassis')
 
     @base.handle_errors
+    def list_chassis_nodes(self, chassis_uuid):
+        """List all nodes associated with a chassis."""
+        return self._list_request('/chassis/%s/nodes' % chassis_uuid)
+
+    @base.handle_errors
     def list_ports(self, **kwargs):
         """List all existing ports."""
         return self._list_request('ports', **kwargs)
+
+    @base.handle_errors
+    def list_node_ports(self, uuid):
+        """List all ports associated with the node."""
+        return self._list_request('/nodes/%s/ports' % uuid)
 
     @base.handle_errors
     def list_nodestates(self, uuid):
@@ -66,6 +76,21 @@ class BaremetalClientV1(base.BaremetalClient):
 
         """
         return self._show_request('nodes', uuid)
+
+    @base.handle_errors
+    def show_node_by_instance_uuid(self, instance_uuid):
+        """
+        Gets a node associated with given instance uuid.
+
+        :param uuid: Unique identifier of the node in UUID format.
+        :return: Serialized node as a dictionary.
+
+        """
+        uri = '/nodes/detail?instance_uuid=%s' % instance_uuid
+
+        return self._show_request('nodes',
+                                  uuid=None,
+                                  uri=uri)
 
     @base.handle_errors
     def show_chassis(self, uuid):
@@ -203,7 +228,8 @@ class BaremetalClientV1(base.BaremetalClient):
                            'properties/cpu_num',
                            'properties/storage',
                            'properties/memory',
-                           'driver')
+                           'driver',
+                           'instance_uuid')
 
         patch = self._make_patch(node_attributes, **kwargs)
 

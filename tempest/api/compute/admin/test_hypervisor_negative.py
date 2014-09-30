@@ -28,8 +28,8 @@ class HypervisorAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
     """
 
     @classmethod
-    def setUpClass(cls):
-        super(HypervisorAdminNegativeTestJSON, cls).setUpClass()
+    def resource_setup(cls):
+        super(HypervisorAdminNegativeTestJSON, cls).resource_setup()
         cls.client = cls.os_adm.hypervisor_client
         cls.non_adm_client = cls.hypervisor_client
 

@@ -25,8 +25,8 @@ class HostsAdminNegativeV3Test(base.BaseV3ComputeAdminTest):
     """
 
     @classmethod
-    def setUpClass(cls):
-        super(HostsAdminNegativeV3Test, cls).setUpClass()
+    def resource_setup(cls):
+        super(HostsAdminNegativeV3Test, cls).resource_setup()
         cls.client = cls.hosts_admin_client
         cls.non_admin_client = cls.hosts_client
 

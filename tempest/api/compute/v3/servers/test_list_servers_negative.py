@@ -26,9 +26,8 @@ class ListServersNegativeV3Test(base.BaseV3ComputeTest):
     force_tenant_isolation = True
 
     @classmethod
-    @test.safe_setup
-    def setUpClass(cls):
-        super(ListServersNegativeV3Test, cls).setUpClass()
+    def resource_setup(cls):
+        super(ListServersNegativeV3Test, cls).resource_setup()
         cls.client = cls.servers_client
 
         # The following servers are created for use

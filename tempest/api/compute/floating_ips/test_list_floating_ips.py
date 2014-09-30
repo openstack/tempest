@@ -20,8 +20,8 @@ from tempest import test
 class FloatingIPDetailsTestJSON(base.BaseV2ComputeTest):
 
     @classmethod
-    def setUpClass(cls):
-        super(FloatingIPDetailsTestJSON, cls).setUpClass()
+    def resource_setup(cls):
+        super(FloatingIPDetailsTestJSON, cls).resource_setup()
         cls.client = cls.floating_ips_client
         cls.floating_ip = []
         cls.floating_ip_id = []
@@ -31,10 +31,10 @@ class FloatingIPDetailsTestJSON(base.BaseV2ComputeTest):
             cls.floating_ip_id.append(body['id'])
 
     @classmethod
-    def tearDownClass(cls):
+    def resource_cleanup(cls):
         for i in range(3):
             cls.client.delete_floating_ip(cls.floating_ip_id[i])
-        super(FloatingIPDetailsTestJSON, cls).tearDownClass()
+        super(FloatingIPDetailsTestJSON, cls).resource_cleanup()
 
     @test.attr(type='gate')
     @test.services('network')

@@ -30,11 +30,10 @@ class SecurityGroupDefaultRulesTest(base.BaseV2ComputeAdminTest):
     @testtools.skipIf(CONF.service_available.neutron,
                       "Skip as this functionality is not yet "
                       "implemented in Neutron. Related Bug#1311500")
-    @test.safe_setup
-    def setUpClass(cls):
+    def resource_setup(cls):
         # A network and a subnet will be created for these tests
         cls.set_network_resources(network=True, subnet=True)
-        super(SecurityGroupDefaultRulesTest, cls).setUpClass()
+        super(SecurityGroupDefaultRulesTest, cls).resource_setup()
         cls.adm_client = cls.os_adm.security_group_default_rules_client
 
     def _create_security_group_default_rules(self, ip_protocol='tcp',

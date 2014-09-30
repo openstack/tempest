@@ -24,8 +24,8 @@ CONF = config.CONF
 class ImagesNegativeV3Test(base.BaseV3ComputeTest):
 
     @classmethod
-    def setUpClass(cls):
-        super(ImagesNegativeV3Test, cls).setUpClass()
+    def resource_setup(cls):
+        super(ImagesNegativeV3Test, cls).resource_setup()
         if not CONF.service_available.glance:
             skip_msg = ("%s skipped as glance is not available" % cls.__name__)
             raise cls.skipException(skip_msg)

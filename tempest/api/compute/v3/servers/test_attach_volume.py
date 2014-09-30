@@ -32,9 +32,9 @@ class AttachVolumeV3Test(base.BaseV3ComputeTest):
         self.attached = False
 
     @classmethod
-    def setUpClass(cls):
+    def resource_setup(cls):
         cls.prepare_instance_network()
-        super(AttachVolumeV3Test, cls).setUpClass()
+        super(AttachVolumeV3Test, cls).resource_setup()
         cls.device = CONF.compute.volume_device_name
         if not CONF.service_available.cinder:
             skip_msg = ("%s skipped as Cinder is not available" % cls.__name__)

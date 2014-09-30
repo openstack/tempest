@@ -21,12 +21,11 @@ from tempest import test
 CONF = config.CONF
 
 
-class VolumesSnapshotNegativeTest(base.BaseVolumeV1Test):
-    _interface = "json"
+class VolumesV2SnapshotNegativeTestJSON(base.BaseVolumeTest):
 
     @classmethod
     def setUpClass(cls):
-        super(VolumesSnapshotNegativeTest, cls).setUpClass()
+        super(VolumesV2SnapshotNegativeTestJSON, cls).setUpClass()
 
         if not CONF.volume_feature_enabled.snapshot:
             raise cls.skipException("Cinder volume snapshots are disabled")
@@ -48,5 +47,13 @@ class VolumesSnapshotNegativeTest(base.BaseVolumeV1Test):
                           None, display_name=s_name)
 
 
-class VolumesSnapshotNegativeTestXML(VolumesSnapshotNegativeTest):
+class VolumesV2SnapshotNegativeTestXML(VolumesV2SnapshotNegativeTestJSON):
+    _interface = "xml"
+
+
+class VolumesV1SnapshotNegativeTestJSON(VolumesV2SnapshotNegativeTestJSON):
+    _api_version = 1
+
+
+class VolumesV1SnapshotNegativeTestXML(VolumesV1SnapshotNegativeTestJSON):
     _interface = "xml"

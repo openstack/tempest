@@ -23,8 +23,8 @@ from tempest import test
 class TenantUsagesNegativeTestJSON(base.BaseV2ComputeAdminTest):
 
     @classmethod
-    def setUpClass(cls):
-        super(TenantUsagesNegativeTestJSON, cls).setUpClass()
+    def resource_setup(cls):
+        super(TenantUsagesNegativeTestJSON, cls).resource_setup()
         cls.adm_client = cls.os_adm.tenant_usages_client
         cls.client = cls.os.tenant_usages_client
         cls.identity_client = cls._get_identity_admin_client()

@@ -62,14 +62,11 @@ class TestWrappers(base.TestCase):
         p = subprocess.Popen(
             "bash %s" % cmd, shell=True,
             stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        # wait in the general case is dangerous, however the amount of
-        # data coming back on those pipes is small enough it shouldn't be
-        # a problem.
-        p.wait()
+        out, err = p.communicate()
 
         self.assertEqual(
             p.returncode, expected,
-            "Stdout: %s; Stderr: %s" % (p.stdout.read(), p.stderr.read()))
+            "Stdout: %s; Stderr: %s" % (out, err))
 
     def test_pretty_tox(self):
         # Git init is required for the pbr testr command. pbr requires a git

@@ -69,6 +69,9 @@ def attr(*args, **kwargs):
 def safe_setup(f):
     """A decorator used to wrap the setUpClass for cleaning up resources
        when setUpClass failed.
+
+    Deprecated, see:
+    http://specs.openstack.org/openstack/qa-specs/specs/resource-cleanup.html
     """
     @functools.wraps(f)
     def decorator(cls):
@@ -279,15 +282,51 @@ class BaseTestCase(BaseDeps):
 
     @classmethod
     def setUpClass(cls):
+        # It should never be overridden by descendants
         if hasattr(super(BaseTestCase, cls), 'setUpClass'):
             super(BaseTestCase, cls).setUpClass()
         cls.setUpClassCalled = True
+        # No test resource is allocated until here
+        try:
+            # TODO(andreaf) Split-up resource_setup in stages:
+            # skip checks, pre-hook, credentials, clients, resources, post-hook
+            cls.resource_setup()
+        except Exception:
+            etype, value, trace = sys.exc_info()
+            LOG.info("%s in resource setup. Invoking tearDownClass." % etype)
+            # Catch any exception in tearDown so we can re-raise the original
+            # exception at the end
+            try:
+                cls.tearDownClass()
+            except Exception as te:
+                LOG.exception("tearDownClass failed: %s" % te)
+            try:
+                raise etype(value), None, trace
+            finally:
+                del trace  # for avoiding circular refs
 
     @classmethod
     def tearDownClass(cls):
         at_exit_set.discard(cls)
+        # It should never be overridden by descendants
         if hasattr(super(BaseTestCase, cls), 'tearDownClass'):
             super(BaseTestCase, cls).tearDownClass()
+        try:
+            cls.resource_cleanup()
+        finally:
+            cls.clear_isolated_creds()
+
+    @classmethod
+    def resource_setup(cls):
+        """Class level setup steps for test cases.
+        Recommended order: skip checks, credentials, clients, resources.
+        """
+        pass
+
+    @classmethod
+    def resource_cleanup(cls):
+        """Class level resource cleanup for test cases. """
+        pass
 
     def setUp(self):
         super(BaseTestCase, self).setUp()
@@ -355,7 +394,7 @@ class BaseTestCase(BaseDeps):
         """
         Clears isolated creds if set
         """
-        if getattr(cls, 'isolated_creds'):
+        if hasattr(cls, 'isolated_creds'):
             cls.isolated_creds.clear_isolated_creds()
 
     @classmethod

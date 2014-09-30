@@ -51,6 +51,15 @@ skipped or not. Do not approve changes that depend on an API call to determine
 whether to skip or not.
 
 
+Test Documentation
+------------------
+When a new test is being added refer to the :ref:`TestDocumentation` section in
+hacking to see if the requirements are being met. With the exception of a class
+level docstring linking to the API ref doc in the API tests and a docstring for
+scenario tests this is up to the reviewers discretion whether a docstring is
+required or not.
+
+
 When to approve
 ---------------
  * Every patch needs two +2s before being approved.

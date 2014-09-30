@@ -55,9 +55,8 @@ class ImagesOneServerNegativeTestJSON(base.BaseV2ComputeTest):
         self.__class__.server_id = self.rebuild_server(self.server_id)
 
     @classmethod
-    @test.safe_setup
-    def setUpClass(cls):
-        super(ImagesOneServerNegativeTestJSON, cls).setUpClass()
+    def resource_setup(cls):
+        super(ImagesOneServerNegativeTestJSON, cls).resource_setup()
         cls.client = cls.images_client
         if not CONF.service_available.glance:
             skip_msg = ("%s skipped as glance is not available" % cls.__name__)
@@ -72,19 +71,6 @@ class ImagesOneServerNegativeTestJSON(base.BaseV2ComputeTest):
         cls.server_id = server['id']
 
         cls.image_ids = []
-
-    @test.skip_because(bug="1006725")
-    @test.attr(type=['negative', 'gate'])
-    def test_create_image_specify_multibyte_character_image_name(self):
-        if self.__class__._interface == "xml":
-            raise self.skipException("Not testable in XML")
-        # invalid multibyte sequence from:
-        # http://stackoverflow.com/questions/1301402/
-        #     example-invalid-utf8-string
-        invalid_name = data_utils.rand_name(u'\xc3\x28')
-        self.assertRaises(exceptions.BadRequest,
-                          self.client.create_image, self.server_id,
-                          invalid_name)
 
     @test.attr(type=['negative', 'gate'])
     def test_create_image_specify_invalid_metadata(self):

@@ -20,8 +20,8 @@ from tempest.common.utils import data_utils
 class BaseSecGroupTest(base.BaseNetworkTest):
 
     @classmethod
-    def setUpClass(cls):
-        super(BaseSecGroupTest, cls).setUpClass()
+    def resource_setup(cls):
+        super(BaseSecGroupTest, cls).resource_setup()
 
     def _create_security_group(self):
         # Create a security group

@@ -24,9 +24,8 @@ class FloatingIPsTestJSON(base.BaseFloatingIPsTest):
     floating_ip = None
 
     @classmethod
-    @test.safe_setup
-    def setUpClass(cls):
-        super(FloatingIPsTestJSON, cls).setUpClass()
+    def resource_setup(cls):
+        super(FloatingIPsTestJSON, cls).resource_setup()
         cls.client = cls.floating_ips_client
         cls.floating_ip_id = None
 
@@ -39,11 +38,11 @@ class FloatingIPsTestJSON(base.BaseFloatingIPsTest):
         cls.floating_ip = body['ip']
 
     @classmethod
-    def tearDownClass(cls):
+    def resource_cleanup(cls):
         # Deleting the floating IP which is created in this method
         if cls.floating_ip_id:
             resp, body = cls.client.delete_floating_ip(cls.floating_ip_id)
-        super(FloatingIPsTestJSON, cls).tearDownClass()
+        super(FloatingIPsTestJSON, cls).resource_cleanup()
 
     def _try_delete_floating_ip(self, floating_ip_id):
         # delete floating ip, if it exists

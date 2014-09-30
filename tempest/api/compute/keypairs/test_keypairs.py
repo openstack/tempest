@@ -23,8 +23,8 @@ class KeyPairsV3Test(base.BaseComputeTest):
     _api_version = 3
 
     @classmethod
-    def setUpClass(cls):
-        super(KeyPairsV3Test, cls).setUpClass()
+    def resource_setup(cls):
+        super(KeyPairsV3Test, cls).resource_setup()
         cls.client = cls.keypairs_client
 
     def _delete_keypair(self, keypair_name):

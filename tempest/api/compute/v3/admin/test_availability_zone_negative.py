@@ -25,8 +25,8 @@ class AZAdminNegativeV3Test(base.BaseV3ComputeAdminTest):
     """
 
     @classmethod
-    def setUpClass(cls):
-        super(AZAdminNegativeV3Test, cls).setUpClass()
+    def resource_setup(cls):
+        super(AZAdminNegativeV3Test, cls).resource_setup()
         cls.client = cls.availability_zone_admin_client
         cls.non_adm_client = cls.availability_zone_client
 

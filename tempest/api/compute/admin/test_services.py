@@ -25,8 +25,8 @@ class ServicesAdminTestJSON(base.BaseV2ComputeAdminTest):
     """
 
     @classmethod
-    def setUpClass(cls):
-        super(ServicesAdminTestJSON, cls).setUpClass()
+    def resource_setup(cls):
+        super(ServicesAdminTestJSON, cls).resource_setup()
         cls.client = cls.os_adm.services_client
 
     @test.attr(type='gate')

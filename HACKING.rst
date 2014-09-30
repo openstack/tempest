@@ -227,3 +227,48 @@ itself, and thus have a different set of guidelines around them:
 
 2. The unit tests cannot use setUpClass, instead fixtures and testresources
    should be used for shared state between tests.
+
+
+.. _TestDocumentation:
+
+Test Documentation
+------------------
+For tests being added we need to require inline documentation in the form of
+docstings to explain what is being tested. In API tests for a new API a class
+level docstring should be added to an API reference doc. If one doesn't exist
+a TODO comment should be put indicating that the reference needs to be added.
+For individual API test cases a method level docstring should be used to
+explain the functionality being tested if the test name isn't descriptive
+enough. For example::
+
+    def test_get_role_by_id(self):
+        """Get a role by its id."""
+
+the docstring there is superfluous and shouldn't be added. but for a method
+like::
+
+    def test_volume_backup_create_get_detailed_list_restore_delete(self):
+        pass
+
+a docstring would be useful because while the test title is fairly descriptive
+the operations being performed are complex enough that a bit more explanation
+will help people figure out the intent of the test.
+
+For scenario tests a class level docstring describing the steps in the scenario
+is required. If there is more than one test case in the class individual
+docstrings for the workflow in each test methods can be used instead. A good
+example of this would be::
+
+    class TestVolumeBootPattern(manager.OfficialClientTest):
+    """
+    This test case attempts to reproduce the following steps:
+
+     * Create in Cinder some bootable volume importing a Glance image
+     * Boot an instance from the bootable volume
+     * Write content to the volume
+     * Delete an instance and Boot a new instance from the volume
+     * Check written content in the instance
+     * Create a volume snapshot while the instance is running
+     * Boot an additional instance from the new snapshot based volume
+     * Check written content in the instance booted from snapshot
+    """

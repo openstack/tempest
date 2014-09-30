@@ -20,21 +20,19 @@ LOG = logging.getLogger(__name__)
 CONF = config.CONF
 
 
-class VolumesSnapshotTest(base.BaseVolumeV1Test):
-    _interface = "json"
+class VolumesV2SnapshotTestJSON(base.BaseVolumeTest):
 
     @classmethod
     @test.safe_setup
     def setUpClass(cls):
-        super(VolumesSnapshotTest, cls).setUpClass()
+        super(VolumesV2SnapshotTestJSON, cls).setUpClass()
         cls.volume_origin = cls.create_volume()
 
         if not CONF.volume_feature_enabled.snapshot:
             raise cls.skipException("Cinder volume snapshots are disabled")
 
-    @classmethod
-    def tearDownClass(cls):
-        super(VolumesSnapshotTest, cls).tearDownClass()
+        cls.name_field = cls.special_fields['name_field']
+        cls.descrip_field = cls.special_fields['descrip_field']
 
     def _detach(self, volume_id):
         """Detach volume."""
@@ -90,8 +88,8 @@ class VolumesSnapshotTest(base.BaseVolumeV1Test):
     def test_snapshot_create_get_list_update_delete(self):
         # Create a snapshot
         s_name = data_utils.rand_name('snap')
-        snapshot = self.create_snapshot(self.volume_origin['id'],
-                                        display_name=s_name)
+        params = {self.name_field: s_name}
+        snapshot = self.create_snapshot(self.volume_origin['id'], **params)
 
         # Get the snap and check for some of its details
         _, snap_get = self.snapshots_client.get_snapshot(snapshot['id'])
@@ -100,26 +98,26 @@ class VolumesSnapshotTest(base.BaseVolumeV1Test):
                          "Referred volume origin mismatch")
 
         # Compare also with the output from the list action
-        tracking_data = (snapshot['id'], snapshot['display_name'])
+        tracking_data = (snapshot['id'], snapshot[self.name_field])
         _, snaps_list = self.snapshots_client.list_snapshots()
-        snaps_data = [(f['id'], f['display_name']) for f in snaps_list]
+        snaps_data = [(f['id'], f[self.name_field]) for f in snaps_list]
         self.assertIn(tracking_data, snaps_data)
 
         # Updates snapshot with new values
         new_s_name = data_utils.rand_name('new-snap')
         new_desc = 'This is the new description of snapshot.'
+        params = {self.name_field: new_s_name,
+                  self.descrip_field: new_desc}
         _, update_snapshot = \
-            self.snapshots_client.update_snapshot(snapshot['id'],
-                                                  display_name=new_s_name,
-                                                  display_description=new_desc)
+            self.snapshots_client.update_snapshot(snapshot['id'], **params)
         # Assert response body for update_snapshot method
-        self.assertEqual(new_s_name, update_snapshot['display_name'])
-        self.assertEqual(new_desc, update_snapshot['display_description'])
+        self.assertEqual(new_s_name, update_snapshot[self.name_field])
+        self.assertEqual(new_desc, update_snapshot[self.descrip_field])
         # Assert response body for get_snapshot method
         _, updated_snapshot = \
             self.snapshots_client.get_snapshot(snapshot['id'])
-        self.assertEqual(new_s_name, updated_snapshot['display_name'])
-        self.assertEqual(new_desc, updated_snapshot['display_description'])
+        self.assertEqual(new_s_name, updated_snapshot[self.name_field])
+        self.assertEqual(new_desc, updated_snapshot[self.descrip_field])
 
         # Delete the snapshot
         self.snapshots_client.delete_snapshot(snapshot['id'])
@@ -131,11 +129,11 @@ class VolumesSnapshotTest(base.BaseVolumeV1Test):
         """list snapshots with params."""
         # Create a snapshot
         display_name = data_utils.rand_name('snap')
-        snapshot = self.create_snapshot(self.volume_origin['id'],
-                                        display_name=display_name)
+        params = {self.name_field: display_name}
+        snapshot = self.create_snapshot(self.volume_origin['id'], **params)
 
         # Verify list snapshots by display_name filter
-        params = {'display_name': snapshot['display_name']}
+        params = {self.name_field: snapshot[self.name_field]}
         self._list_by_param_values_and_assert(params)
 
         # Verify list snapshots by status filter
@@ -144,7 +142,7 @@ class VolumesSnapshotTest(base.BaseVolumeV1Test):
 
         # Verify list snapshots by status and display name filter
         params = {'status': 'available',
-                  'display_name': snapshot['display_name']}
+                  self.name_field: snapshot[self.name_field]}
         self._list_by_param_values_and_assert(params)
 
     @test.attr(type='gate')
@@ -152,18 +150,18 @@ class VolumesSnapshotTest(base.BaseVolumeV1Test):
         """list snapshot details with params."""
         # Create a snapshot
         display_name = data_utils.rand_name('snap')
-        snapshot = self.create_snapshot(self.volume_origin['id'],
-                                        display_name=display_name)
+        params = {self.name_field: display_name}
+        snapshot = self.create_snapshot(self.volume_origin['id'], **params)
 
         # Verify list snapshot details by display_name filter
-        params = {'display_name': snapshot['display_name']}
+        params = {self.name_field: snapshot[self.name_field]}
         self._list_by_param_values_and_assert(params, with_detail=True)
         # Verify list snapshot details by status filter
         params = {'status': 'available'}
         self._list_by_param_values_and_assert(params, with_detail=True)
         # Verify list snapshot details by status and display name filter
         params = {'status': 'available',
-                  'display_name': snapshot['display_name']}
+                  self.name_field: snapshot[self.name_field]}
         self._list_by_param_values_and_assert(params, with_detail=True)
 
     @test.attr(type='gate')
@@ -181,5 +179,13 @@ class VolumesSnapshotTest(base.BaseVolumeV1Test):
         self.clear_snapshots()
 
 
-class VolumesSnapshotTestXML(VolumesSnapshotTest):
+class VolumesV2SnapshotTestXML(VolumesV2SnapshotTestJSON):
+    _interface = "xml"
+
+
+class VolumesV1SnapshotTestJSON(VolumesV2SnapshotTestJSON):
+    _api_version = 1
+
+
+class VolumesV1SnapshotTestXML(VolumesV1SnapshotTestJSON):
     _interface = "xml"

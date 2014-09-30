@@ -25,11 +25,11 @@ CONF = config.CONF
 class ServerDiskConfigTestJSON(base.BaseV2ComputeTest):
 
     @classmethod
-    def setUpClass(cls):
+    def resource_setup(cls):
         if not CONF.compute_feature_enabled.disk_config:
             msg = "DiskConfig extension not enabled."
             raise cls.skipException(msg)
-        super(ServerDiskConfigTestJSON, cls).setUpClass()
+        super(ServerDiskConfigTestJSON, cls).resource_setup()
         cls.client = cls.os.servers_client
         resp, server = cls.create_test_server(wait_until='ACTIVE')
         cls.server_id = server['id']

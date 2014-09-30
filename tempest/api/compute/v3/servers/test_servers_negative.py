@@ -42,8 +42,8 @@ class ServersNegativeV3Test(base.BaseV3ComputeTest):
             super(ServersNegativeV3Test, self).tearDown()
 
     @classmethod
-    def setUpClass(cls):
-        super(ServersNegativeV3Test, cls).setUpClass()
+    def resource_setup(cls):
+        super(ServersNegativeV3Test, cls).resource_setup()
         cls.client = cls.servers_client
         if CONF.compute.allow_tenant_isolation:
             cls.alt_os = clients.Manager(cls.isolated_creds.get_alt_creds())

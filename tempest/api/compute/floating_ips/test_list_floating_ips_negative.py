@@ -27,8 +27,8 @@ CONF = config.CONF
 class FloatingIPDetailsNegativeTestJSON(base.BaseV2ComputeTest):
 
     @classmethod
-    def setUpClass(cls):
-        super(FloatingIPDetailsNegativeTestJSON, cls).setUpClass()
+    def resource_setup(cls):
+        super(FloatingIPDetailsNegativeTestJSON, cls).resource_setup()
         cls.client = cls.floating_ips_client
 
     @test.attr(type=['negative', 'gate'])

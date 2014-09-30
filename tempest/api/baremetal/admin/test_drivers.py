@@ -22,9 +22,8 @@ CONF = config.CONF
 class TestDrivers(base.BaseBaremetalTest):
     """Tests for drivers."""
     @classmethod
-    @test.safe_setup
-    def setUpClass(cls):
-        super(TestDrivers, cls).setUpClass()
+    def resource_setup(cls):
+        super(TestDrivers, cls).resource_setup()
         cls.driver_name = CONF.baremetal.driver
 
     @test.attr(type="smoke")

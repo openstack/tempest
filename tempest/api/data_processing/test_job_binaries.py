@@ -22,9 +22,8 @@ class JobBinaryTest(dp_base.BaseDataProcessingTest):
     sahara/restapi/rest_api_v1.1_EDP.html#job-binaries
     """
     @classmethod
-    @test.safe_setup
-    def setUpClass(cls):
-        super(JobBinaryTest, cls).setUpClass()
+    def resource_setup(cls):
+        super(JobBinaryTest, cls).resource_setup()
         cls.swift_job_binary_with_extra = {
             'url': 'swift://sahara-container.sahara/example.jar',
             'description': 'Test job binary',

@@ -23,10 +23,10 @@ from tempest import test
 class VirtualInterfacesNegativeTestJSON(base.BaseV2ComputeTest):
 
     @classmethod
-    def setUpClass(cls):
+    def resource_setup(cls):
         # For this test no network resources are needed
         cls.set_network_resources()
-        super(VirtualInterfacesNegativeTestJSON, cls).setUpClass()
+        super(VirtualInterfacesNegativeTestJSON, cls).resource_setup()
         cls.client = cls.servers_client
 
     @test.attr(type=['negative', 'gate'])

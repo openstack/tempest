@@ -32,8 +32,8 @@ class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
                          map(lambda x: x[key], body))
 
     @classmethod
-    def setUpClass(cls):
-        super(UsersV3TestJSON, cls).setUpClass()
+    def resource_setup(cls):
+        super(UsersV3TestJSON, cls).resource_setup()
         alt_user = data_utils.rand_name('test_user')
         alt_password = data_utils.rand_name('pass')
         cls.alt_email = alt_user + '@testmail.tm'

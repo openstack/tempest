@@ -29,7 +29,7 @@ class GetConsoleOutputNegativeTestJSON(base.BaseV2ComputeTest,
     _schema = servers.get_console_output
 
     @classmethod
-    def setUpClass(cls):
-        super(GetConsoleOutputNegativeTestJSON, cls).setUpClass()
+    def resource_setup(cls):
+        super(GetConsoleOutputNegativeTestJSON, cls).resource_setup()
         _resp, server = cls.create_test_server()
         cls.set_resource("server", server['id'])

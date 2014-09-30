@@ -21,9 +21,9 @@ from tempest import test
 class ServerAddressesNegativeTestJSON(base.BaseV2ComputeTest):
 
     @classmethod
-    def setUpClass(cls):
+    def resource_setup(cls):
         cls.set_network_resources(network=True, subnet=True)
-        super(ServerAddressesNegativeTestJSON, cls).setUpClass()
+        super(ServerAddressesNegativeTestJSON, cls).resource_setup()
         cls.client = cls.servers_client
 
         resp, cls.server = cls.create_test_server(wait_until='ACTIVE')

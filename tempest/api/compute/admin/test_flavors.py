@@ -28,8 +28,8 @@ class FlavorsAdminTestJSON(base.BaseV2ComputeAdminTest):
     """
 
     @classmethod
-    def setUpClass(cls):
-        super(FlavorsAdminTestJSON, cls).setUpClass()
+    def resource_setup(cls):
+        super(FlavorsAdminTestJSON, cls).resource_setup()
         if not test.is_extension_enabled('OS-FLV-EXT-DATA', 'compute'):
             msg = "OS-FLV-EXT-DATA extension not enabled."
             raise cls.skipException(msg)

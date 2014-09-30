@@ -27,8 +27,8 @@ CONF = config.CONF
 class VolumesNegativeTest(base.BaseV2ComputeTest):
 
     @classmethod
-    def setUpClass(cls):
-        super(VolumesNegativeTest, cls).setUpClass()
+    def resource_setup(cls):
+        super(VolumesNegativeTest, cls).resource_setup()
         cls.client = cls.volumes_extensions_client
         if not CONF.service_available.cinder:
             skip_msg = ("%s skipped as Cinder is not available" % cls.__name__)

@@ -28,8 +28,8 @@ class DeleteServersTestJSON(base.BaseV2ComputeTest):
     # for preventing "Quota exceeded for instances"
 
     @classmethod
-    def setUpClass(cls):
-        super(DeleteServersTestJSON, cls).setUpClass()
+    def resource_setup(cls):
+        super(DeleteServersTestJSON, cls).resource_setup()
         cls.client = cls.servers_client
 
     @test.attr(type='gate')
@@ -130,8 +130,8 @@ class DeleteServersAdminTestJSON(base.BaseV2ComputeAdminTest):
     # for preventing "Quota exceeded for instances".
 
     @classmethod
-    def setUpClass(cls):
-        super(DeleteServersAdminTestJSON, cls).setUpClass()
+    def resource_setup(cls):
+        super(DeleteServersAdminTestJSON, cls).resource_setup()
         cls.non_admin_client = cls.servers_client
         cls.admin_client = cls.os_adm.servers_client
 

@@ -35,9 +35,8 @@ class MeteringJSON(base.BaseAdminNetworkTest):
     """
 
     @classmethod
-    @test.safe_setup
-    def setUpClass(cls):
-        super(MeteringJSON, cls).setUpClass()
+    def resource_setup(cls):
+        super(MeteringJSON, cls).resource_setup()
         if not test.is_extension_enabled('metering', 'network'):
             msg = "metering extension not enabled."
             raise cls.skipException(msg)

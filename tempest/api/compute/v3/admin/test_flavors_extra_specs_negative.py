@@ -28,8 +28,8 @@ class FlavorsExtraSpecsNegativeV3Test(base.BaseV3ComputeAdminTest):
     """
 
     @classmethod
-    def setUpClass(cls):
-        super(FlavorsExtraSpecsNegativeV3Test, cls).setUpClass()
+    def resource_setup(cls):
+        super(FlavorsExtraSpecsNegativeV3Test, cls).resource_setup()
 
         cls.client = cls.flavors_admin_client
         flavor_name = data_utils.rand_name('test_flavor')
@@ -49,10 +49,10 @@ class FlavorsExtraSpecsNegativeV3Test(base.BaseV3ComputeAdminTest):
                                                     swap=swap, rxtx=rxtx)
 
     @classmethod
-    def tearDownClass(cls):
+    def resource_cleanup(cls):
         resp, body = cls.client.delete_flavor(cls.flavor['id'])
         cls.client.wait_for_resource_deletion(cls.flavor['id'])
-        super(FlavorsExtraSpecsNegativeV3Test, cls).tearDownClass()
+        super(FlavorsExtraSpecsNegativeV3Test, cls).resource_cleanup()
 
     @test.attr(type=['negative', 'gate'])
     def test_flavor_non_admin_set_keys(self):
