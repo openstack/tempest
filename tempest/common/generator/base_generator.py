@@ -144,6 +144,9 @@ class BasicGeneratorSet(object):
                     continue
 
             name = generator.__name__
+            if ("exclude_tests" in schema and
+               name in schema["exclude_tests"]):
+                continue
             if path is not None:
                 name = "%s_%s" % ("_".join(path), name)
             scenarios.append({
