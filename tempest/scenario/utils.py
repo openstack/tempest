@@ -40,33 +40,33 @@ class ImageUtils(object):
         self.non_ssh_image_pattern = \
             CONF.input_scenario.non_ssh_image_regex
         # Setup clients
-        ocm = clients.OfficialClientManager(
-            auth.get_default_credentials('user'))
-        self.client = ocm.compute_client
+        os = clients.Manager()
+        self.images_client = os.images_client
+        self.flavors_client = os.flavors_client
 
     def ssh_user(self, image_id):
-        _image = self.client.images.get(image_id)
+        _, _image = self.images_client.get_image(image_id)
         for regex, user in self.ssh_users:
             # First match wins
-            if re.match(regex, _image.name) is not None:
+            if re.match(regex, _image['name']) is not None:
                 return user
         else:
             return self.default_ssh_user
 
     def _is_sshable_image(self, image):
         return not re.search(pattern=self.non_ssh_image_pattern,
-                             string=str(image.name))
+                             string=str(image['name']))
 
     def is_sshable_image(self, image_id):
-        _image = self.client.images.get(image_id)
+        _, _image = self.images_client.get_image(image_id)
         return self._is_sshable_image(_image)
 
     def _is_flavor_enough(self, flavor, image):
-        return image.minDisk <= flavor.disk
+        return image['minDisk'] <= flavor['disk']
 
     def is_flavor_enough(self, flavor_id, image_id):
-        _image = self.client.images.get(image_id)
-        _flavor = self.client.flavors.get(flavor_id)
+        _, _image = self.images_client.get_image(image_id)
+        _, _flavor = self.flavors_client.get_flavor_details(flavor_id)
         return self._is_flavor_enough(_flavor, _image)
 
 
@@ -81,7 +81,7 @@ class InputScenarioUtils(object):
     load_tests = testscenarios.load_tests_apply_scenarios
 
 
-    class TestInputScenario(manager.OfficialClientTest):
+    class TestInputScenario(manager.ScenarioTest):
 
         scenario_utils = utils.InputScenarioUtils()
         scenario_flavor = scenario_utils.scenario_flavors
@@ -91,17 +91,18 @@ class InputScenarioUtils(object):
 
         def test_create_server_metadata(self):
             name = rand_name('instance')
-            _ = self.compute_client.servers.create(name=name,
-                                                   flavor=self.flavor_ref,
-                                                   image=self.image_ref)
+            self.servers_client.create_server(name=name,
+                                              flavor_ref=self.flavor_ref,
+                                              image_ref=self.image_ref)
     """
     validchars = "-_.{ascii}{digit}".format(ascii=string.ascii_letters,
                                             digit=string.digits)
 
     def __init__(self):
-        ocm = clients.OfficialClientManager(
+        os = clients.Manager(
             auth.get_default_credentials('user', fill_in=False))
-        self.client = ocm.compute_client
+        self.images_client = os.images_client
+        self.flavors_client = os.flavors_client
         self.image_pattern = CONF.input_scenario.image_regex
         self.flavor_pattern = CONF.input_scenario.flavor_regex
 
@@ -118,10 +119,11 @@ class InputScenarioUtils(object):
         if not CONF.service_available.glance:
             return []
         if not hasattr(self, '_scenario_images'):
-            images = self.client.images.list(detailed=False)
+            _, images = self.images_client.list_images()
             self._scenario_images = [
-                (self._normalize_name(i.name), dict(image_ref=i.id))
-                for i in images if re.search(self.image_pattern, str(i.name))
+                (self._normalize_name(i['name']), dict(image_ref=i['id']))
+                for i in images if re.search(self.image_pattern,
+                                             str(i['name']))
             ]
         return self._scenario_images
 
@@ -131,10 +133,11 @@ class InputScenarioUtils(object):
         :return: a scenario with name and uuid of flavors
         """
         if not hasattr(self, '_scenario_flavors'):
-            flavors = self.client.flavors.list(detailed=False)
+            _, flavors = self.flavors_client.list_flavors()
             self._scenario_flavors = [
-                (self._normalize_name(f.name), dict(flavor_ref=f.id))
-                for f in flavors if re.search(self.flavor_pattern, str(f.name))
+                (self._normalize_name(f['name']), dict(flavor_ref=f['id']))
+                for f in flavors if re.search(self.flavor_pattern,
+                                              str(f['name']))
             ]
         return self._scenario_flavors
 

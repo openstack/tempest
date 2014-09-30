@@ -49,6 +49,7 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
         neutron as True
     """
 
+    _interface = 'json'
     force_tenant_isolation = False
 
     # Default to ipv4.
@@ -365,7 +366,6 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
 
 
 class BaseAdminNetworkTest(BaseNetworkTest):
-    _interface = 'json'
 
     @classmethod
     def resource_setup(cls):

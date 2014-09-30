@@ -64,7 +64,8 @@ class ServerRescueTestJSON(base.BaseV2ComputeTest):
     def resource_cleanup(cls):
         # Deleting the floating IP which is created in this method
         cls.floating_ips_client.delete_floating_ip(cls.floating_ip_id)
-        cls.delete_volume(cls.volume['id'])
+        if getattr(cls, 'volume', None):
+            cls.delete_volume(cls.volume['id'])
         resp, cls.sg = cls.security_groups_client.delete_security_group(
             cls.sg_id)
         super(ServerRescueTestJSON, cls).resource_cleanup()
