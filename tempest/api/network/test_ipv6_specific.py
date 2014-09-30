@@ -142,6 +142,32 @@ class NetworksTestPortsIPv6JSON(base.BaseNetworkTest):
         self.assertEqual(4, len(self._port_ips(port)))
         self._clean_network()
 
+    @test.attr(type='smoke')
+    def test_port_multiprefix_46_router(self):
+        """When 4 subnets configured with IPv6 SLAAC and IPv4,
+        the created port shall receive IPs from all of them..
+        Routers sending RAs shall not affect DHCP allocating.
+        """
+        subnets = []
+        for ra_mode, add_mode in (
+                ('slaac', 'slaac'),
+                ('dhcpv6-stateless', 'dhcpv6-stateless'),
+                ('dhcpv6-stateful', 'dhcpv6-stateful'),
+        ):
+            kwargs = {'ipv6_ra_mode': ra_mode,
+                      'ipv6_address_mode': add_mode}
+            subnets.append(self.create_subnet(self.network, **kwargs))
+        subnets.append(self.create_subnet(self.network, ip_version=4))
+        router = self.create_router(router_name="cisco",
+                                        admin_state_up=True)
+        for sub in subnets:
+            self.create_router_interface(router['id'],
+                                         sub['id'])
+        port = self.create_port(self.network)
+        self.assertEqual(4, len(self._port_ips(port)))
+        self._clean_network()
+
+
     def tearDown(self):
         self._clean_network()
         super(NetworksTestPortsIPv6JSON, self).tearDown()
