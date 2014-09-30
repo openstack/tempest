@@ -184,7 +184,9 @@ def create_users(users):
 def destroy_users(users):
     admin = keystone_admin()
     for user in users:
-        user_id = admin.identity.get_user_by_name(user['name'])['id']
+        tenant_id = admin.identity.get_tenant_by_name(user['tenant'])['id']
+        user_id = admin.identity.get_user_by_username(tenant_id,
+                                                      user['name'])['id']
         r, body = admin.identity.delete_user(user_id)
 
 
