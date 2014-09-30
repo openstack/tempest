@@ -525,7 +525,8 @@ def destroy_volumes(volumes):
     for volume in volumes:
         client = client_for_user(volume['owner'])
         volume_id = _get_volume_by_name(client, volume['name'])['id']
-        r, body = client.volumes.delete_volume(volume_id)
+        client.volumes.detach_volume(volume_id)
+        client.volumes.delete_volume(volume_id)
 
 
 def attach_volumes(volumes):
