@@ -26,11 +26,11 @@ class BaseTelemetryTest(tempest.test.BaseTestCase):
     """Base test case class for all Telemetry API tests."""
 
     @classmethod
-    def setUpClass(cls):
+    def resource_setup(cls):
         if not CONF.service_available.ceilometer:
             raise cls.skipException("Ceilometer support is required")
         cls.set_network_resources()
-        super(BaseTelemetryTest, cls).setUpClass()
+        super(BaseTelemetryTest, cls).resource_setup()
         os = cls.get_client_manager()
         cls.telemetry_client = os.telemetry_client
         cls.servers_client = os.servers_client
@@ -84,12 +84,12 @@ class BaseTelemetryTest(tempest.test.BaseTestCase):
                 pass
 
     @classmethod
-    def tearDownClass(cls):
+    def resource_cleanup(cls):
         cls.cleanup_resources(cls.telemetry_client.delete_alarm, cls.alarm_ids)
         cls.cleanup_resources(cls.servers_client.delete_server, cls.server_ids)
         cls.cleanup_resources(cls.image_client.delete_image, cls.image_ids)
         cls.clear_isolated_creds()
-        super(BaseTelemetryTest, cls).tearDownClass()
+        super(BaseTelemetryTest, cls).resource_cleanup()
 
     def await_samples(self, metric, query):
         """
