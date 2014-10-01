@@ -27,8 +27,8 @@ class AgentsAdminTestJSON(base.BaseV2ComputeAdminTest):
     """
 
     @classmethod
-    def setUpClass(cls):
-        super(AgentsAdminTestJSON, cls).setUpClass()
+    def resource_setup(cls):
+        super(AgentsAdminTestJSON, cls).resource_setup()
         cls.client = cls.os_adm.agents_client
 
     def setUp(self):

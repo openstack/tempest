@@ -16,7 +16,7 @@
 import logging
 import urlparse
 
-from tempest.api.queuing import base
+from tempest.api.messaging import base
 from tempest.common.utils import data_utils
 from tempest import config
 from tempest import test
@@ -26,12 +26,12 @@ LOG = logging.getLogger(__name__)
 CONF = config.CONF
 
 
-class TestClaims(base.BaseQueuingTest):
+class TestClaims(base.BaseMessagingTest):
     _interface = 'json'
 
     @classmethod
-    def setUpClass(cls):
-        super(TestClaims, cls).setUpClass()
+    def resource_setup(cls):
+        super(TestClaims, cls).resource_setup()
         cls.queue_name = data_utils.rand_name('Queues-Test')
         # Create Queue
         cls.create_queue(cls.queue_name)
@@ -44,9 +44,9 @@ class TestClaims(base.BaseQueuingTest):
 
         # Post Claim
         claim_ttl = data_utils.rand_int_id(start=60,
-                                           end=CONF.queuing.max_claim_ttl)
-        claim_grace = data_utils.rand_int_id(start=60,
-                                             end=CONF.queuing.max_claim_grace)
+                                           end=CONF.messaging.max_claim_ttl)
+        claim_grace = data_utils.\
+            rand_int_id(start=60, end=CONF.messaging.max_claim_grace)
         claim_body = {"ttl": claim_ttl, "grace": claim_grace}
         resp, body = self.client.post_claims(queue_name=self.queue_name,
                                              rbody=claim_body)
@@ -90,7 +90,7 @@ class TestClaims(base.BaseQueuingTest):
 
         # Update Claim
         claim_ttl = data_utils.rand_int_id(start=60,
-                                           end=CONF.queuing.max_claim_ttl)
+                                           end=CONF.messaging.max_claim_ttl)
         update_rbody = {"ttl": claim_ttl}
 
         self.client.update_claim(claim_uri, rbody=update_rbody)
@@ -118,6 +118,6 @@ class TestClaims(base.BaseQueuingTest):
         self.client.delete_messages(message_uri)
 
     @classmethod
-    def tearDownClass(cls):
+    def resource_cleanup(cls):
         cls.delete_queue(cls.queue_name)
-        super(TestClaims, cls).tearDownClass()
+        super(TestClaims, cls).resource_cleanup()

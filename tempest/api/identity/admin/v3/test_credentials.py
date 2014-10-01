@@ -22,9 +22,8 @@ class CredentialsTestJSON(base.BaseIdentityV3AdminTest):
     _interface = 'json'
 
     @classmethod
-    @test.safe_setup
-    def setUpClass(cls):
-        super(CredentialsTestJSON, cls).setUpClass()
+    def resource_setup(cls):
+        super(CredentialsTestJSON, cls).resource_setup()
         cls.projects = list()
         cls.creds_list = [['project_id', 'user_id', 'id'],
                           ['access', 'secret']]
@@ -43,11 +42,11 @@ class CredentialsTestJSON(base.BaseIdentityV3AdminTest):
             email=u_email, project_id=cls.projects[0])
 
     @classmethod
-    def tearDownClass(cls):
+    def resource_cleanup(cls):
         cls.client.delete_user(cls.user_body['id'])
         for p in cls.projects:
             cls.client.delete_project(p)
-        super(CredentialsTestJSON, cls).tearDownClass()
+        super(CredentialsTestJSON, cls).resource_cleanup()
 
     def _delete_credential(self, cred_id):
         self.creds_client.delete_credential(cred_id)

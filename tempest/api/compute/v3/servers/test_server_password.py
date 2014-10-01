@@ -21,8 +21,8 @@ from tempest import test
 class ServerPasswordV3Test(base.BaseV3ComputeTest):
 
     @classmethod
-    def setUpClass(cls):
-        super(ServerPasswordV3Test, cls).setUpClass()
+    def resource_setup(cls):
+        super(ServerPasswordV3Test, cls).resource_setup()
         cls.client = cls.servers_client
         resp, cls.server = cls.create_test_server(wait_until="ACTIVE")
 

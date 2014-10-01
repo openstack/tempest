@@ -13,6 +13,7 @@
 import time
 import urllib
 
+from tempest.common.utils import misc
 from tempest import config
 from tempest import exceptions
 
@@ -227,3 +228,39 @@ class NetworkClientBase(object):
         except exceptions.NotFound:
             return True
         return False
+
+    def wait_for_resource_status(self, fetch, status, interval=None,
+                                 timeout=None):
+        """
+        @summary: Waits for a network resource to reach a status
+        @param fetch: the callable to be used to query the resource status
+        @type fecth: callable that takes no parameters and returns the resource
+        @param status: the status that the resource has to reach
+        @type status: String
+        @param interval: the number of seconds to wait between each status
+          query
+        @type interval: Integer
+        @param timeout: the maximum number of seconds to wait for the resource
+          to reach the desired status
+        @type timeout: Integer
+        """
+        if not interval:
+            interval = self.build_interval
+        if not timeout:
+            timeout = self.build_timeout
+        start_time = time.time()
+
+        while time.time() - start_time <= timeout:
+            resource = fetch()
+            if resource['status'] == status:
+                return
+            time.sleep(interval)
+
+        # At this point, the wait has timed out
+        message = 'Resource %s' % (str(resource))
+        message += ' failed to reach status %s' % status
+        message += ' within the required time %s' % timeout
+        caller = misc.find_test_caller()
+        if caller:
+            message = '(%s) %s' % (caller, message)
+        raise exceptions.TimeoutException(message)

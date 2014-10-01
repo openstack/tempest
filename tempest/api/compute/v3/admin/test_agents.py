@@ -23,8 +23,8 @@ class AgentsAdminV3Test(base.BaseV3ComputeAdminTest):
     """
 
     @classmethod
-    def setUpClass(cls):
-        super(AgentsAdminV3Test, cls).setUpClass()
+    def resource_setup(cls):
+        super(AgentsAdminV3Test, cls).resource_setup()
         cls.client = cls.agents_admin_client
 
     @test.attr(type='gate')

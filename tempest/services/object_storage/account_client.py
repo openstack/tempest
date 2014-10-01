@@ -58,8 +58,6 @@ class AccountClient(rest_client.RestClient):
         """Delete an account."""
         url = ''
         if params:
-            if 'bulk-delete' in params:
-                url += 'bulk-delete&'
             url = '?%s%s' % (url, urllib.urlencode(params))
 
         resp, body = self.delete(url, headers={}, body=data)
@@ -74,13 +72,19 @@ class AccountClient(rest_client.RestClient):
         return resp, body
 
     def create_account_metadata(self, metadata,
-                                metadata_prefix='X-Account-Meta-'):
+                                metadata_prefix='X-Account-Meta-',
+                                data=None, params=None):
         """Creates an account metadata entry."""
         headers = {}
-        for key in metadata:
-            headers[metadata_prefix + key] = metadata[key]
+        if metadata:
+            for key in metadata:
+                headers[metadata_prefix + key] = metadata[key]
 
-        resp, body = self.post('', headers=headers, body=None)
+        url = ''
+        if params:
+            url = '?%s%s' % (url, urllib.urlencode(params))
+
+        resp, body = self.post(url, headers=headers, body=data)
         return resp, body
 
     def delete_account_metadata(self, metadata,

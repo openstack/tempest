@@ -26,8 +26,8 @@ class FloatingIPAdminTestJSON(base.BaseAdminNetworkTest):
     force_tenant_isolation = True
 
     @classmethod
-    def setUpClass(cls):
-        super(FloatingIPAdminTestJSON, cls).setUpClass()
+    def resource_setup(cls):
+        super(FloatingIPAdminTestJSON, cls).resource_setup()
         cls.ext_net_id = CONF.network.public_network_id
         cls.floating_ip = cls.create_floatingip(cls.ext_net_id)
         cls.alt_manager = clients.Manager(cls.isolated_creds.get_alt_creds())

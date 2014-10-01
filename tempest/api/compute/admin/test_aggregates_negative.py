@@ -27,8 +27,8 @@ class AggregatesAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
     """
 
     @classmethod
-    def setUpClass(cls):
-        super(AggregatesAdminNegativeTestJSON, cls).setUpClass()
+    def resource_setup(cls):
+        super(AggregatesAdminNegativeTestJSON, cls).resource_setup()
         cls.client = cls.os_adm.aggregates_client
         cls.user_client = cls.aggregates_client
         cls.aggregate_name_prefix = 'test_aggregate_'

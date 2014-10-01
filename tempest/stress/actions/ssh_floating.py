@@ -30,7 +30,7 @@ class FloatingStress(stressaction.StressAction):
         proc = subprocess.Popen(cmd,
                                 stdout=subprocess.PIPE,
                                 stderr=subprocess.PIPE)
-        proc.wait()
+        proc.communicate()
         success = proc.returncode == 0
         return success
 

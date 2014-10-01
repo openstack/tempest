@@ -22,9 +22,8 @@ class ClusterTemplateTest(dp_base.BaseDataProcessingTest):
     sahara/restapi/rest_api_v1.0.html#cluster-templates
     """
     @classmethod
-    @test.safe_setup
-    def setUpClass(cls):
-        super(ClusterTemplateTest, cls).setUpClass()
+    def resource_setup(cls):
+        super(ClusterTemplateTest, cls).resource_setup()
         # create node group template
         node_group_template = {
             'name': data_utils.rand_name('sahara-ng-template'),

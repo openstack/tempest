@@ -26,13 +26,12 @@ CONF = config.CONF
 class ServerRescueNegativeV3Test(base.BaseV3ComputeTest):
 
     @classmethod
-    @test.safe_setup
-    def setUpClass(cls):
+    def resource_setup(cls):
         if not CONF.compute_feature_enabled.rescue:
             msg = "Server rescue not available."
             raise cls.skipException(msg)
 
-        super(ServerRescueNegativeV3Test, cls).setUpClass()
+        super(ServerRescueNegativeV3Test, cls).resource_setup()
         cls.device = CONF.compute.volume_device_name
 
         # Create a volume and wait for it to become ready for attach
@@ -55,10 +54,10 @@ class ServerRescueNegativeV3Test(base.BaseV3ComputeTest):
         cls.servers_client.wait_for_server_status(cls.server_id, 'ACTIVE')
 
     @classmethod
-    def tearDownClass(cls):
+    def resource_cleanup(cls):
         if hasattr(cls, 'volume'):
             cls.delete_volume(cls.volume['id'])
-        super(ServerRescueNegativeV3Test, cls).tearDownClass()
+        super(ServerRescueNegativeV3Test, cls).resource_cleanup()
 
     def _detach(self, server_id, volume_id):
         self.servers_client.detach_volume(server_id, volume_id)

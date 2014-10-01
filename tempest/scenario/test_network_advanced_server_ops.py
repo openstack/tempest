@@ -25,7 +25,7 @@ CONF = config.CONF
 LOG = logging.getLogger(__name__)
 
 
-class TestNetworkAdvancedServerOps(manager.NeutronScenarioTest):
+class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
 
     """
     This test case checks VM connectivity after some advanced
@@ -61,8 +61,8 @@ class TestNetworkAdvancedServerOps(manager.NeutronScenarioTest):
         network, subnet, router = self.create_networks()
         public_network_id = CONF.network.public_network_id
         create_kwargs = {
-            'nics': [
-                {'net-id': network.id},
+            'networks': [
+                {'uuid': network.id},
             ],
             'key_name': self.keypair['name'],
             'security_groups': [security_group],
@@ -92,6 +92,7 @@ class TestNetworkAdvancedServerOps(manager.NeutronScenarioTest):
         self.servers_client.wait_for_server_status(self.server['id'], 'ACTIVE')
         self._check_network_connectivity()
 
+    @test.skip_because(bug="1323658")
     @test.services('compute', 'network')
     def test_server_connectivity_stop_start(self):
         self._setup_network_and_servers()
@@ -139,6 +140,7 @@ class TestNetworkAdvancedServerOps(manager.NeutronScenarioTest):
         self.servers_client.resume_server(self.server['id'])
         self._wait_server_status_and_check_network_connectivity()
 
+    @test.skip_because(bug="1323658")
     @testtools.skipUnless(CONF.compute_feature_enabled.resize,
                           'Resize is not available.')
     @test.services('compute', 'network')

@@ -24,9 +24,8 @@ class RolesTestJSON(base.BaseIdentityV2AdminTest):
     _interface = 'json'
 
     @classmethod
-    @test.safe_setup
-    def setUpClass(cls):
-        super(RolesTestJSON, cls).setUpClass()
+    def resource_setup(cls):
+        super(RolesTestJSON, cls).resource_setup()
         for _ in moves.xrange(5):
             role_name = data_utils.rand_name(name='role-')
             _, role = cls.client.create_role(role_name)

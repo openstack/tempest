@@ -26,9 +26,8 @@ CONF = config.CONF
 class AccountQuotasTest(base.BaseObjectTest):
 
     @classmethod
-    @test.safe_setup
-    def setUpClass(cls):
-        super(AccountQuotasTest, cls).setUpClass()
+    def resource_setup(cls):
+        super(AccountQuotasTest, cls).resource_setup()
         cls.container_name = data_utils.rand_name(name="TestContainer")
         cls.container_client.create_container(cls.container_name)
 
@@ -71,10 +70,10 @@ class AccountQuotasTest(base.BaseObjectTest):
         super(AccountQuotasTest, self).tearDown()
 
     @classmethod
-    def tearDownClass(cls):
+    def resource_cleanup(cls):
         if hasattr(cls, "container_name"):
             cls.delete_containers([cls.container_name])
-        super(AccountQuotasTest, cls).tearDownClass()
+        super(AccountQuotasTest, cls).resource_cleanup()
 
     @test.attr(type="smoke")
     @test.requires_ext(extension='account_quotas', service='object')

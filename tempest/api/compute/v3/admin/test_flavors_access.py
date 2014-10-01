@@ -26,8 +26,8 @@ class FlavorsAccessV3Test(base.BaseV3ComputeAdminTest):
     """
 
     @classmethod
-    def setUpClass(cls):
-        super(FlavorsAccessV3Test, cls).setUpClass()
+    def resource_setup(cls):
+        super(FlavorsAccessV3Test, cls).resource_setup()
 
         cls.client = cls.flavors_admin_client
         admin_client = cls._get_identity_admin_client()

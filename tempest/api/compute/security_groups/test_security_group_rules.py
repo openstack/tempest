@@ -23,8 +23,8 @@ CONF = config.CONF
 class SecurityGroupRulesTestJSON(base.BaseSecurityGroupsTest):
 
     @classmethod
-    def setUpClass(cls):
-        super(SecurityGroupRulesTestJSON, cls).setUpClass()
+    def resource_setup(cls):
+        super(SecurityGroupRulesTestJSON, cls).resource_setup()
         cls.client = cls.security_groups_client
         cls.neutron_available = CONF.service_available.neutron
 

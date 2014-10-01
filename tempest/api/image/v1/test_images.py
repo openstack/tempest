@@ -106,9 +106,8 @@ class ListImagesTest(base.BaseV1ImageTest):
     """
 
     @classmethod
-    @test.safe_setup
-    def setUpClass(cls):
-        super(ListImagesTest, cls).setUpClass()
+    def resource_setup(cls):
+        super(ListImagesTest, cls).resource_setup()
         # We add a few images here to test the listing functionality of
         # the images API
         img1 = cls._create_remote_image('one', 'bare', 'raw')
@@ -235,8 +234,7 @@ class ListImagesTest(base.BaseV1ImageTest):
 
 class ListSnapshotImagesTest(base.BaseV1ImageTest):
     @classmethod
-    @test.safe_setup
-    def setUpClass(cls):
+    def resource_setup(cls):
         # This test class only uses nova v3 api to create snapshot
         # as the similar test which uses nova v2 api already exists
         # in nova v2 compute images api tests.
@@ -246,7 +244,7 @@ class ListSnapshotImagesTest(base.BaseV1ImageTest):
             skip_msg = ("%s skipped as nova v3 api is not available" %
                         cls.__name__)
             raise cls.skipException(skip_msg)
-        super(ListSnapshotImagesTest, cls).setUpClass()
+        super(ListSnapshotImagesTest, cls).resource_setup()
         cls.servers_client = cls.os.servers_v3_client
         cls.servers = []
         # We add a few images here to test the listing functionality of
@@ -265,10 +263,10 @@ class ListSnapshotImagesTest(base.BaseV1ImageTest):
         cls.client.wait_for_image_status(image['id'], 'active')
 
     @classmethod
-    def tearDownClass(cls):
+    def resource_cleanup(cls):
         for server in getattr(cls, "servers", []):
             cls.servers_client.delete_server(server['id'])
-        super(ListSnapshotImagesTest, cls).tearDownClass()
+        super(ListSnapshotImagesTest, cls).resource_cleanup()
 
     @classmethod
     def _create_snapshot(cls, name, image_id, flavor, **kwargs):
@@ -329,8 +327,8 @@ class ListSnapshotImagesTest(base.BaseV1ImageTest):
 
 class UpdateImageMetaTest(base.BaseV1ImageTest):
     @classmethod
-    def setUpClass(cls):
-        super(UpdateImageMetaTest, cls).setUpClass()
+    def resource_setup(cls):
+        super(UpdateImageMetaTest, cls).resource_setup()
         cls.image_id = cls._create_standard_image('1', 'ami', 'ami', 42)
 
     @classmethod

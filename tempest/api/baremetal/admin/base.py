@@ -28,6 +28,10 @@ CONF = config.CONF
 # which has no external dependencies.
 SUPPORTED_DRIVERS = ['fake']
 
+# NOTE(jroll): resources must be deleted in a specific order, this list
+# defines the resource types to clean up, and the correct order.
+RESOURCE_TYPES = ['port', 'node', 'chassis']
+
 
 def creates(resource):
     """Decorator that adds resources to the appropriate cleanup list."""
@@ -49,8 +53,8 @@ class BaseBaremetalTest(test.BaseTestCase):
     """Base class for Baremetal API tests."""
 
     @classmethod
-    def setUpClass(cls):
-        super(BaseBaremetalTest, cls).setUpClass()
+    def resource_setup(cls):
+        super(BaseBaremetalTest, cls).resource_setup()
 
         if not CONF.service_available.ironic:
             skip_msg = ('%s skipped as Ironic is not available' % cls.__name__)
@@ -66,21 +70,22 @@ class BaseBaremetalTest(test.BaseTestCase):
         mgr = clients.AdminManager()
         cls.client = mgr.baremetal_client
         cls.power_timeout = CONF.baremetal.power_timeout
-        cls.created_objects = {'chassis': set(),
-                               'port': set(),
-                               'node': set()}
+        cls.created_objects = {}
+        for resource in RESOURCE_TYPES:
+            cls.created_objects[resource] = set()
 
     @classmethod
-    def tearDownClass(cls):
+    def resource_cleanup(cls):
         """Ensure that all created objects get destroyed."""
 
         try:
-            for resource, uuids in cls.created_objects.iteritems():
+            for resource in RESOURCE_TYPES:
+                uuids = cls.created_objects[resource]
                 delete_method = getattr(cls.client, 'delete_%s' % resource)
                 for u in uuids:
                     delete_method(u, ignore_errors=exc.NotFound)
         finally:
-            super(BaseBaremetalTest, cls).tearDownClass()
+            super(BaseBaremetalTest, cls).resource_cleanup()
 
     @classmethod
     @creates('chassis')

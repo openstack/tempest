@@ -108,8 +108,8 @@ class BotoExceptionMatcher(object):
     CODE_RE = '.*'  # regexp makes sense in group match
 
     def match(self, exc):
-        """:returns: Retruns with an error string if not matches,
-               returns with None when matches.
+        """:returns: Returns with an error string if it does not match,
+               returns with None when it matches.
         """
         if not isinstance(exc, exception.BotoServerError):
             return "%r not an BotoServerError instance" % exc
@@ -485,7 +485,7 @@ class BotoTestCase(tempest.test.BaseTestCase):
 
     @classmethod
     def destroy_volume_wait(cls, volume):
-        """Delete volume, tryies to detach first.
+        """Delete volume, tries to detach first.
            Use just for teardown!
         """
         exc_num = 0
@@ -518,7 +518,7 @@ class BotoTestCase(tempest.test.BaseTestCase):
 
     @classmethod
     def destroy_snapshot_wait(cls, snapshot):
-        """delete snaphot, wait until not exists."""
+        """delete snapshot, wait until it ceases to exist."""
         snapshot.delete()
 
         def _update():

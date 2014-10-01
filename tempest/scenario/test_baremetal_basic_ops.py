@@ -41,26 +41,23 @@ class BaremetalBasicOps(manager.BaremetalScenarioTest):
           expected state transitions
     """
     def rebuild_instance(self, preserve_ephemeral=False):
-        self.rebuild_server(self.instance,
+        self.rebuild_server(server_id=self.instance['id'],
                             preserve_ephemeral=preserve_ephemeral,
                             wait=False)
 
-        node = self.get_node(instance_id=self.instance.id)
-        self.instance = self.compute_client.servers.get(self.instance.id)
-
-        self.addCleanup_with_wait(self.compute_client.servers,
-                                  self.instance.id,
-                                  cleanup_callable=self.delete_wrapper,
-                                  cleanup_args=[self.instance])
+        node = self.get_node(instance_id=self.instance['id'])
 
         # We should remain on the same node
-        self.assertEqual(self.node.uuid, node.uuid)
+        self.assertEqual(self.node['uuid'], node['uuid'])
         self.node = node
 
-        self.status_timeout(self.compute_client.servers, self.instance.id,
-                            'REBUILD')
-        self.status_timeout(self.compute_client.servers, self.instance.id,
-                            'ACTIVE')
+        self.servers_client.wait_for_server_status(
+            server_id=self.instance['id'],
+            status='REBUILD',
+            ready_wait=False)
+        self.servers_client.wait_for_server_status(
+            server_id=self.instance['id'],
+            status='ACTIVE')
 
     def create_remote_file(self, client, filename):
         """Create a file on the remote client connection.
@@ -99,23 +96,26 @@ class BaremetalBasicOps(manager.BaremetalScenarioTest):
 
     def get_flavor_ephemeral_size(self):
         """Returns size of the ephemeral partition in GiB."""
-        f_id = self.instance.flavor['id']
-        ephemeral = self.compute_client.flavors.get(f_id).ephemeral
-        if ephemeral != 'N/A':
-            return int(ephemeral)
-        return None
+        f_id = self.instance['flavor']['id']
+        _, flavor = self.flavors_client.get_flavor_details(f_id)
+        ephemeral = flavor.get('OS-FLV-EXT-DATA:ephemeral')
+        if not ephemeral or ephemeral == 'N/A':
+            return None
+        return int(ephemeral)
 
     def add_floating_ip(self):
-        floating_ip = self.compute_client.floating_ips.create()
-        self.instance.add_floating_ip(floating_ip)
-        return floating_ip.ip
+        _, floating_ip = self.floating_ips_client.create_floating_ip()
+        self.floating_ips_client.associate_floating_ip_to_server(
+            floating_ip['ip'], self.instance['id'])
+        return floating_ip['ip']
 
     def validate_ports(self):
-        for port in self.get_ports(self.node.uuid):
-            n_port_id = port.extra['vif_port_id']
-            n_port = self.network_client.show_port(n_port_id)['port']
-            self.assertEqual(n_port['device_id'], self.instance.id)
-            self.assertEqual(n_port['mac_address'], port.address)
+        for port in self.get_ports(self.node['uuid']):
+            n_port_id = port['extra']['vif_port_id']
+            _, body = self.network_client.show_port(n_port_id)
+            n_port = body['port']
+            self.assertEqual(n_port['device_id'], self.instance['id'])
+            self.assertEqual(n_port['mac_address'], port['address'])
 
     @test.services('baremetal', 'compute', 'image', 'network')
     def test_baremetal_server_ops(self):

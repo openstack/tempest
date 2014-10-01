@@ -30,16 +30,16 @@ from tempest import test
 
 class ObjectTest(base.BaseObjectTest):
     @classmethod
-    def setUpClass(cls):
-        super(ObjectTest, cls).setUpClass()
+    def resource_setup(cls):
+        super(ObjectTest, cls).resource_setup()
         cls.container_name = data_utils.rand_name(name='TestContainer')
         cls.container_client.create_container(cls.container_name)
         cls.containers = [cls.container_name]
 
     @classmethod
-    def tearDownClass(cls):
+    def resource_cleanup(cls):
         cls.delete_containers(cls.containers)
-        super(ObjectTest, cls).tearDownClass()
+        super(ObjectTest, cls).resource_cleanup()
 
     def _create_object(self, metadata=None):
         # setup object

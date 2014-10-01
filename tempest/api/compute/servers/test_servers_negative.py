@@ -42,8 +42,8 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
         super(ServersNegativeTestJSON, self).tearDown()
 
     @classmethod
-    def setUpClass(cls):
-        super(ServersNegativeTestJSON, cls).setUpClass()
+    def resource_setup(cls):
+        super(ServersNegativeTestJSON, cls).resource_setup()
         cls.client = cls.servers_client
         if CONF.compute.allow_tenant_isolation:
             cls.alt_os = clients.Manager(cls.isolated_creds.get_alt_creds())

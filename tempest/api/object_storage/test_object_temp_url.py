@@ -30,8 +30,8 @@ CONF = config.CONF
 class ObjectTempUrlTest(base.BaseObjectTest):
 
     @classmethod
-    def setUpClass(cls):
-        super(ObjectTempUrlTest, cls).setUpClass()
+    def resource_setup(cls):
+        super(ObjectTempUrlTest, cls).resource_setup()
         # create a container
         cls.container_name = data_utils.rand_name(name='TestContainer')
         cls.container_client.create_container(cls.container_name)
@@ -52,14 +52,14 @@ class ObjectTempUrlTest(base.BaseObjectTest):
                                         cls.object_name, cls.content)
 
     @classmethod
-    def tearDownClass(cls):
+    def resource_cleanup(cls):
         for metadata in cls.metadatas:
             cls.account_client.delete_account_metadata(
                 metadata=metadata)
 
         cls.delete_containers(cls.containers)
 
-        super(ObjectTempUrlTest, cls).tearDownClass()
+        super(ObjectTempUrlTest, cls).resource_cleanup()
 
     def setUp(self):
         super(ObjectTempUrlTest, self).setUp()

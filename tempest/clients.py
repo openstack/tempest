@@ -151,6 +151,8 @@ from tempest.services.identity.xml.identity_client import IdentityClientXML
 from tempest.services.identity.xml.identity_client import TokenClientXML
 from tempest.services.image.v1.json.image_client import ImageClientJSON
 from tempest.services.image.v2.json.image_client import ImageClientV2JSON
+from tempest.services.messaging.json.messaging_client import \
+    MessagingClientJSON
 from tempest.services.network.json.network_client import NetworkClientJSON
 from tempest.services.network.xml.network_client import NetworkClientXML
 from tempest.services.object_storage.account_client import AccountClient
@@ -162,7 +164,6 @@ from tempest.services.object_storage.object_client import \
     ObjectClientCustomizedHeader
 from tempest.services.orchestration.json.orchestration_client import \
     OrchestrationClient
-from tempest.services.queuing.json.queuing_client import QueuingClientJSON
 from tempest.services.telemetry.json.telemetry_client import \
     TelemetryClientJSON
 from tempest.services.telemetry.xml.telemetry_client import \
@@ -188,11 +189,15 @@ from tempest.services.volume.v2.json.availability_zone_client import \
 from tempest.services.volume.v2.json.extensions_client import \
     ExtensionsV2ClientJSON as VolumeV2ExtensionClientJSON
 from tempest.services.volume.v2.json.qos_client import QosSpecsV2ClientJSON
+from tempest.services.volume.v2.json.snapshots_client import \
+    SnapshotsV2ClientJSON
 from tempest.services.volume.v2.json.volumes_client import VolumesV2ClientJSON
 from tempest.services.volume.v2.xml.availability_zone_client import \
     VolumeV2AvailabilityZoneClientXML
 from tempest.services.volume.v2.xml.extensions_client import \
     ExtensionsV2ClientXML as VolumeV2ExtensionClientXML
+from tempest.services.volume.v2.xml.snapshots_client import \
+    SnapshotsV2ClientXML
 from tempest.services.volume.v2.xml.volumes_client import VolumesV2ClientXML
 from tempest.services.volume.xml.admin.volume_hosts_client import \
     VolumeHostsClientXML
@@ -245,6 +250,7 @@ class Manager(manager.Manager):
                 self.auth_provider)
             self.backups_client = BackupsClientXML(self.auth_provider)
             self.snapshots_client = SnapshotsClientXML(self.auth_provider)
+            self.snapshots_v2_client = SnapshotsV2ClientXML(self.auth_provider)
             self.volumes_client = VolumesClientXML(self.auth_provider)
             self.volumes_v2_client = VolumesV2ClientXML(self.auth_provider)
             self.volume_types_client = VolumeTypesClientXML(
@@ -324,6 +330,8 @@ class Manager(manager.Manager):
                 self.auth_provider)
             self.backups_client = BackupsClientJSON(self.auth_provider)
             self.snapshots_client = SnapshotsClientJSON(self.auth_provider)
+            self.snapshots_v2_client = SnapshotsV2ClientJSON(
+                self.auth_provider)
             self.volumes_client = VolumesClientJSON(self.auth_provider)
             self.volumes_v2_client = VolumesV2ClientJSON(self.auth_provider)
             self.volume_types_client = VolumeTypesClientJSON(
@@ -384,7 +392,7 @@ class Manager(manager.Manager):
                 self.auth_provider)
             self.database_versions_client = DatabaseVersionsClientJSON(
                 self.auth_provider)
-            self.queuing_client = QueuingClientJSON(self.auth_provider)
+            self.messaging_client = MessagingClientJSON(self.auth_provider)
             if CONF.service_available.ceilometer:
                 self.telemetry_client = TelemetryClientJSON(
                     self.auth_provider)

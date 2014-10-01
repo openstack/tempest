@@ -30,12 +30,12 @@ LOG = logging.getLogger(__name__)
 
 class AuthorizationTestJSON(base.BaseV2ComputeTest):
     @classmethod
-    def setUpClass(cls):
+    def resource_setup(cls):
         if not CONF.service_available.glance:
             raise cls.skipException('Glance is not available.')
         # No network resources required for this test
         cls.set_network_resources()
-        super(AuthorizationTestJSON, cls).setUpClass()
+        super(AuthorizationTestJSON, cls).resource_setup()
         if not cls.multi_user:
             msg = "Need >1 user"
             raise cls.skipException(msg)
@@ -88,12 +88,12 @@ class AuthorizationTestJSON(base.BaseV2ComputeTest):
             parent_group_id, ip_protocol, from_port, to_port)
 
     @classmethod
-    def tearDownClass(cls):
+    def resource_cleanup(cls):
         if cls.multi_user:
             cls.images_client.delete_image(cls.image['id'])
             cls.keypairs_client.delete_keypair(cls.keypairname)
             cls.security_client.delete_security_group(cls.security_group['id'])
-        super(AuthorizationTestJSON, cls).tearDownClass()
+        super(AuthorizationTestJSON, cls).resource_cleanup()
 
     @test.attr(type='gate')
     def test_get_server_for_alt_account_fails(self):

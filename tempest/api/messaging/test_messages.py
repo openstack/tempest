@@ -15,7 +15,7 @@
 
 import logging
 
-from tempest.api.queuing import base
+from tempest.api.messaging import base
 from tempest.common.utils import data_utils
 from tempest import config
 from tempest import test
@@ -25,17 +25,17 @@ LOG = logging.getLogger(__name__)
 CONF = config.CONF
 
 
-class TestMessages(base.BaseQueuingTest):
+class TestMessages(base.BaseMessagingTest):
     _interface = 'json'
 
     @classmethod
-    def setUpClass(cls):
-        super(TestMessages, cls).setUpClass()
+    def resource_setup(cls):
+        super(TestMessages, cls).resource_setup()
         cls.queue_name = data_utils.rand_name('Queues-Test')
         # Create Queue
         cls.client.create_queue(cls.queue_name)
 
-    def _post_messages(self, repeat=CONF.queuing.max_messages_per_page):
+    def _post_messages(self, repeat=CONF.messaging.max_messages_per_page):
         message_body = self.generate_message_body(repeat=repeat)
         resp, body = self.post_messages(queue_name=self.queue_name,
                                         rbody=message_body)
@@ -117,6 +117,6 @@ class TestMessages(base.BaseQueuingTest):
         self.assertEqual('204', resp['status'])
 
     @classmethod
-    def tearDownClass(cls):
+    def resource_cleanup(cls):
         cls.delete_queue(cls.queue_name)
-        super(TestMessages, cls).tearDownClass()
+        super(TestMessages, cls).resource_cleanup()

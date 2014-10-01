@@ -26,10 +26,9 @@ CONF = config.CONF
 class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
 
     @classmethod
-    @test.safe_setup
-    def setUpClass(cls):
+    def resource_setup(cls):
         cls.set_network_resources(network=True, subnet=True, dhcp=True)
-        super(ListServerFiltersTestJSON, cls).setUpClass()
+        super(ListServerFiltersTestJSON, cls).resource_setup()
         cls.client = cls.servers_client
 
         # Check to see if the alternate image ref actually exists...

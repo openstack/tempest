@@ -27,8 +27,8 @@ class LiveBlockMigrationV3NegativeTest(base.BaseV3ComputeAdminTest):
     _host_key = 'os-extended-server-attributes:host'
 
     @classmethod
-    def setUpClass(cls):
-        super(LiveBlockMigrationV3NegativeTest, cls).setUpClass()
+    def resource_setup(cls):
+        super(LiveBlockMigrationV3NegativeTest, cls).resource_setup()
         if not CONF.compute_feature_enabled.live_migration:
             raise cls.skipException("Live migration is not enabled")
 

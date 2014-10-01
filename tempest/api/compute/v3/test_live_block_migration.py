@@ -26,8 +26,8 @@ class LiveBlockMigrationV3Test(base.BaseV3ComputeAdminTest):
     _host_key = 'os-extended-server-attributes:host'
 
     @classmethod
-    def setUpClass(cls):
-        super(LiveBlockMigrationV3Test, cls).setUpClass()
+    def resource_setup(cls):
+        super(LiveBlockMigrationV3Test, cls).resource_setup()
 
         cls.admin_hosts_client = cls.hosts_admin_client
         cls.admin_servers_client = cls.servers_admin_client

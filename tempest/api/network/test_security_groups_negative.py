@@ -24,8 +24,8 @@ class NegativeSecGroupTest(base.BaseSecGroupTest):
     _interface = 'json'
 
     @classmethod
-    def setUpClass(cls):
-        super(NegativeSecGroupTest, cls).setUpClass()
+    def resource_setup(cls):
+        super(NegativeSecGroupTest, cls).resource_setup()
         if not test.is_extension_enabled('security-group', 'network'):
             msg = "security-group extension not enabled."
             raise cls.skipException(msg)

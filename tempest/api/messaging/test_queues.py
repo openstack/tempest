@@ -18,7 +18,7 @@ import logging
 from six import moves
 from testtools import matchers
 
-from tempest.api.queuing import base
+from tempest.api.messaging import base
 from tempest.common.utils import data_utils
 from tempest import test
 
@@ -26,7 +26,7 @@ from tempest import test
 LOG = logging.getLogger(__name__)
 
 
-class TestQueues(base.BaseQueuingTest):
+class TestQueues(base.BaseMessagingTest):
 
     @test.attr(type='smoke')
     def test_create_queue(self):
@@ -40,12 +40,12 @@ class TestQueues(base.BaseQueuingTest):
         self.assertEqual('', body)
 
 
-class TestManageQueue(base.BaseQueuingTest):
+class TestManageQueue(base.BaseMessagingTest):
     _interface = 'json'
 
     @classmethod
-    def setUpClass(cls):
-        super(TestManageQueue, cls).setUpClass()
+    def resource_setup(cls):
+        super(TestManageQueue, cls).resource_setup()
         cls.queues = list()
         for _ in moves.xrange(5):
             queue_name = data_utils.rand_name('Queues-Test')
@@ -125,7 +125,7 @@ class TestManageQueue(base.BaseQueuingTest):
         self.assertThat(body, matchers.Equals(req_body))
 
     @classmethod
-    def tearDownClass(cls):
+    def resource_cleanup(cls):
         for queue_name in cls.queues:
             cls.client.delete_queue(queue_name)
-        super(TestManageQueue, cls).tearDownClass()
+        super(TestManageQueue, cls).resource_cleanup()

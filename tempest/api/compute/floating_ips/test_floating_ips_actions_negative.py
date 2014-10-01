@@ -28,8 +28,8 @@ class FloatingIPsNegativeTestJSON(base.BaseFloatingIPsTest):
     server_id = None
 
     @classmethod
-    def setUpClass(cls):
-        super(FloatingIPsNegativeTestJSON, cls).setUpClass()
+    def resource_setup(cls):
+        super(FloatingIPsNegativeTestJSON, cls).resource_setup()
         cls.client = cls.floating_ips_client
 
         # Server creation

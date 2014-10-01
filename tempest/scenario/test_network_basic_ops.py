@@ -34,7 +34,7 @@ Floating_IP_tuple = collections.namedtuple('Floating_IP_tuple',
                                            ['floating_ip', 'server'])
 
 
-class TestNetworkBasicOps(manager.NeutronScenarioTest):
+class TestNetworkBasicOps(manager.NetworkScenarioTest):
 
     """
     This smoke test suite assumes that Nova has been configured to
@@ -147,8 +147,8 @@ class TestNetworkBasicOps(manager.NeutronScenarioTest):
         self.keypairs[keypair['name']] = keypair
         security_groups = [self.security_group]
         create_kwargs = {
-            'nics': [
-                {'net-id': network.id},
+            'networks': [
+                {'uuid': network.id},
             ],
             'key_name': keypair['name'],
             'security_groups': security_groups,

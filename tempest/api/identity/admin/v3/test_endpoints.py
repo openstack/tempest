@@ -22,9 +22,8 @@ class EndPointsTestJSON(base.BaseIdentityV3AdminTest):
     _interface = 'json'
 
     @classmethod
-    @test.safe_setup
-    def setUpClass(cls):
-        super(EndPointsTestJSON, cls).setUpClass()
+    def resource_setup(cls):
+        super(EndPointsTestJSON, cls).resource_setup()
         cls.identity_client = cls.client
         cls.client = cls.endpoints_client
         cls.service_ids = list()
@@ -47,12 +46,12 @@ class EndPointsTestJSON(base.BaseIdentityV3AdminTest):
             cls.setup_endpoints.append(endpoint)
 
     @classmethod
-    def tearDownClass(cls):
+    def resource_cleanup(cls):
         for e in cls.setup_endpoints:
             cls.client.delete_endpoint(e['id'])
         for s in cls.service_ids:
             cls.service_client.delete_service(s)
-        super(EndPointsTestJSON, cls).tearDownClass()
+        super(EndPointsTestJSON, cls).resource_cleanup()
 
     @test.attr(type='gate')
     def test_list_endpoints(self):

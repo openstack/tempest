@@ -28,8 +28,8 @@ class AggregatesAdminV3Test(base.BaseV3ComputeAdminTest):
     _host_key = 'os-extended-server-attributes:host'
 
     @classmethod
-    def setUpClass(cls):
-        super(AggregatesAdminV3Test, cls).setUpClass()
+    def resource_setup(cls):
+        super(AggregatesAdminV3Test, cls).resource_setup()
         cls.client = cls.aggregates_admin_client
         cls.aggregate_name_prefix = 'test_aggregate_'
         cls.az_name_prefix = 'test_az_'

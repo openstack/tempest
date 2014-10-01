@@ -23,8 +23,8 @@ from tempest import test
 class ServerPersonalityTestJSON(base.BaseV2ComputeTest):
 
     @classmethod
-    def setUpClass(cls):
-        super(ServerPersonalityTestJSON, cls).setUpClass()
+    def resource_setup(cls):
+        super(ServerPersonalityTestJSON, cls).resource_setup()
         cls.client = cls.servers_client
         cls.user_client = cls.limits_client
 

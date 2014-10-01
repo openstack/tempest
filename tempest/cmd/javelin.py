@@ -213,9 +213,7 @@ class JavelinCheck(unittest.TestCase):
         self.check_users()
         self.check_objects()
         self.check_servers()
-        # TODO(sdague): Volumes not yet working, bring it back once the
-        # code is self testing.
-        # self.check_volumes()
+        self.check_volumes()
         self.check_telemetry()
 
     def check_users(self):
@@ -300,15 +298,15 @@ class JavelinCheck(unittest.TestCase):
         LOG.info("checking volumes")
         for volume in self.res['volumes']:
             client = client_for_user(volume['owner'])
-            found = _get_volume_by_name(client, volume['name'])
+            vol_body = _get_volume_by_name(client, volume['name'])
             self.assertIsNotNone(
-                found,
+                vol_body,
                 "Couldn't find expected volume %s" % volume['name'])
 
             # Verify that a volume's attachment retrieved
             server_id = _get_server_by_name(client, volume['server'])['id']
-            attachment = self.client.get_attachment_from_volume(volume)
-            self.assertEqual(volume['id'], attachment['volume_id'])
+            attachment = client.volumes.get_attachment_from_volume(vol_body)
+            self.assertEqual(vol_body['id'], attachment['volume_id'])
             self.assertEqual(server_id, attachment['server_id'])
 
     def _confirm_telemetry_sample(self, server, sample):
@@ -501,8 +499,8 @@ def destroy_servers(servers):
 
 def _get_volume_by_name(client, name):
     r, body = client.volumes.list_volumes()
-    for volume in body['volumes']:
-        if name == volume['name']:
+    for volume in body:
+        if name == volume['display_name']:
             return volume
     return None
 
@@ -512,26 +510,32 @@ def create_volumes(volumes):
         client = client_for_user(volume['owner'])
 
         # only create a volume if the name isn't here
-        r, body = client.volumes.list_volumes()
-        if any(item['name'] == volume['name'] for item in body):
+        if _get_volume_by_name(client, volume['name']):
+            LOG.info("volume '%s' already exists" % volume['name'])
             continue
 
-        client.volumes.create_volume(volume['name'], volume['size'])
+        size = volume['gb']
+        v_name = volume['name']
+        resp, body = client.volumes.create_volume(size=size,
+                                                  display_name=v_name)
+        client.volumes.wait_for_volume_status(body['id'], 'available')
 
 
 def destroy_volumes(volumes):
     for volume in volumes:
         client = client_for_user(volume['owner'])
         volume_id = _get_volume_by_name(client, volume['name'])['id']
-        r, body = client.volumes.delete_volume(volume_id)
+        client.volumes.detach_volume(volume_id)
+        client.volumes.delete_volume(volume_id)
 
 
 def attach_volumes(volumes):
     for volume in volumes:
         client = client_for_user(volume['owner'])
-
         server_id = _get_server_by_name(client, volume['server'])['id']
-        client.volumes.attach_volume(volume['name'], server_id)
+        volume_id = _get_volume_by_name(client, volume['name'])['id']
+        device = volume['device']
+        client.volumes.attach_volume(volume_id, server_id, device)
 
 
 #######################
@@ -552,10 +556,8 @@ def create_resources():
     create_objects(RES['objects'])
     create_images(RES['images'])
     create_servers(RES['servers'])
-    # TODO(sdague): volumes definition doesn't work yet, bring it
-    # back once we're actually executing the code
-    # create_volumes(RES['volumes'])
-    # attach_volumes(RES['volumes'])
+    create_volumes(RES['volumes'])
+    attach_volumes(RES['volumes'])
 
 
 def destroy_resources():
