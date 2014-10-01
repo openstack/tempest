@@ -396,6 +396,12 @@ class ScenarioTest(tempest.test.BaseTestCase):
             LOG.debug(self.servers_client.get_console_output(server['id'],
                                                              length=None))
 
+    def _log_net_info(self, exc):
+        # network debug is called as part of ssh init
+        if not isinstance(exc, exceptions.SSHTimeout):
+            LOG.debug('Network information on a devstack host')
+            debug.log_net_debug()
+
     def create_server_snapshot(self, server, name=None):
         # Glance client
         _image_client = self.image_client
@@ -676,9 +682,7 @@ class NetworkScenarioTest(ScenarioTest):
                 ex_msg += ": " + msg
             LOG.exception(ex_msg)
             self._log_console_output(servers)
-            # network debug is called as part of ssh init
-            if not isinstance(e, exceptions.SSHTimeout):
-                debug.log_net_debug()
+            self._log_net_info(e)
             raise
 
     def _check_tenant_network_connectivity(self, server,
@@ -702,9 +706,7 @@ class NetworkScenarioTest(ScenarioTest):
         except Exception as e:
             LOG.exception('Tenant network connectivity check failed')
             self._log_console_output(servers_for_debug)
-            # network debug is called as part of ssh init
-            if not isinstance(e, exceptions.SSHTimeout):
-                debug.log_net_debug()
+            self._log_net_info(e)
             raise
 
     def _check_remote_connectivity(self, source, dest, should_succeed=True):
