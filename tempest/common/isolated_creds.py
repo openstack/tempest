@@ -238,12 +238,12 @@ class IsolatedCreds(cred_provider.CredentialProvider):
 
     def _create_subnet(self, subnet_name, tenant_id, network_id):
         if self.network_resources:
-            ip_version=self.network_resources.get('ip_version', 4)
+            ip_version = self.network_resources.get('ip_version', 4)
         else:
-            ip_version=4
+            ip_version = 4
         if not self.tempest_client:
             body = {'subnet': {'name': subnet_name, 'tenant_id': tenant_id,
-                               'network_id': network_id, 'ip_version': ip_version}}
+                    'network_id': network_id, 'ip_version': ip_version}}
             if self.network_resources:
                 body['enable_dhcp'] = self.network_resources['dhcp']
         if ip_version == 6:
