@@ -528,7 +528,7 @@ class NetworkScenarioTest(ScenarioTest):
         return temp
 
     def _create_subnet(self, network, client=None, namestart='subnet-smoke',
-                       **kwargs):
+                       max_net_bits=0, **kwargs):
         """
         Create a subnet for the given network within the cidr block
         configured for tenant networks.
@@ -544,24 +544,33 @@ class NetworkScenarioTest(ScenarioTest):
             cidr_in_use = self._list_subnets(tenant_id=tenant_id, cidr=cidr)
             return len(cidr_in_use) != 0
 
-        tenant_cidr = netaddr.IPNetwork(CONF.network.tenant_network_cidr)
+        ip_version = kwargs.get('ip_version', self._ip_version)
+        if ip_version == 6:
+            tenant_cidr = \
+                netaddr.IPNetwork(CONF.network.tenant_network_v6_cidr)
+            network_prefix = CONF.network.tenant_network_v6_mask_bits
+        else:
+            tenant_cidr = netaddr.IPNetwork(CONF.network.tenant_network_cidr)
+            network_prefix = CONF.network.tenant_network_mask_bits
+        if max_net_bits:
+            network_prefix = max_net_bits
         result = None
         # Repeatedly attempt subnet creation with sequential cidr
         # blocks until an unallocated block is found.
-        for subnet_cidr in tenant_cidr.subnet(
-                CONF.network.tenant_network_mask_bits):
+        for subnet_cidr in tenant_cidr.subnet(network_prefix):
             str_cidr = str(subnet_cidr)
             if cidr_in_use(str_cidr, tenant_id=network.tenant_id):
                 continue
 
             subnet = dict(
                 name=data_utils.rand_name(namestart),
-                ip_version=4,
                 network_id=network.id,
                 tenant_id=network.tenant_id,
                 cidr=str_cidr,
                 **kwargs
             )
+            if 'ip_version' not in kwargs:
+                subnet['ip_version'] = ip_version
             try:
                 _, result = client.create_subnet(**subnet)
                 break
