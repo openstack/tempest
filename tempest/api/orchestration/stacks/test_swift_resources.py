@@ -26,9 +26,8 @@ CONF = config.CONF
 
 class SwiftResourcesTestJSON(base.BaseOrchestrationTest):
     @classmethod
-    @test.safe_setup
-    def setUpClass(cls):
-        super(SwiftResourcesTestJSON, cls).setUpClass()
+    def resource_setup(cls):
+        super(SwiftResourcesTestJSON, cls).resource_setup()
         cls.stack_name = data_utils.rand_name('heat')
         template = cls.read_template('swift_basic')
         os = clients.Manager()

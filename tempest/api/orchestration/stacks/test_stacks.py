@@ -23,8 +23,8 @@ class StacksTestJSON(base.BaseOrchestrationTest):
     empty_template = "HeatTemplateFormatVersion: '2012-12-12'\n"
 
     @classmethod
-    def setUpClass(cls):
-        super(StacksTestJSON, cls).setUpClass()
+    def resource_setup(cls):
+        super(StacksTestJSON, cls).resource_setup()
 
     @test.attr(type='smoke')
     def test_stack_list_responds(self):

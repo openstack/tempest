@@ -26,9 +26,8 @@ Resources:
 """
 
     @classmethod
-    @test.safe_setup
-    def setUpClass(cls):
-        super(TemplateYAMLTestJSON, cls).setUpClass()
+    def resource_setup(cls):
+        super(TemplateYAMLTestJSON, cls).resource_setup()
         cls.stack_name = data_utils.rand_name('heat')
         cls.stack_identifier = cls.create_stack(cls.stack_name, cls.template)
         cls.client.wait_for_stack_status(cls.stack_identifier,

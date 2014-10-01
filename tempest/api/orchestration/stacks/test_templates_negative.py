@@ -30,8 +30,8 @@ Resources:
     invalid_template_url = 'http://www.example.com/template.yaml'
 
     @classmethod
-    def setUpClass(cls):
-        super(TemplateYAMLNegativeTestJSON, cls).setUpClass()
+    def resource_setup(cls):
+        super(TemplateYAMLNegativeTestJSON, cls).resource_setup()
         cls.parameters = {}
 
     @test.attr(type=['gate', 'negative'])

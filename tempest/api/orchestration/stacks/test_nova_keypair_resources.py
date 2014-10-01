@@ -27,8 +27,8 @@ class NovaKeyPairResourcesYAMLTest(base.BaseOrchestrationTest):
     _type = 'type'
 
     @classmethod
-    def setUpClass(cls):
-        super(NovaKeyPairResourcesYAMLTest, cls).setUpClass()
+    def resource_setup(cls):
+        super(NovaKeyPairResourcesYAMLTest, cls).resource_setup()
         cls.stack_name = data_utils.rand_name('heat')
         template = cls.read_template('nova_keypair', ext=cls._tpl_type)
 
