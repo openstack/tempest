@@ -13,7 +13,6 @@
 #    under the License.
 
 import netaddr
-from neutronclient.common import exceptions as n_exc
 
 from tempest import auth
 from tempest import clients
@@ -29,15 +28,14 @@ LOG = logging.getLogger(__name__)
 
 class IsolatedCreds(cred_provider.CredentialProvider):
 
-    def __init__(self, name, tempest_client=True, interface='json',
-                 password='pass', network_resources=None):
-        super(IsolatedCreds, self).__init__(name, tempest_client, interface,
-                                            password, network_resources)
+    def __init__(self, name, interface='json', password='pass',
+                 network_resources=None):
+        super(IsolatedCreds, self).__init__(name, interface, password,
+                                            network_resources)
         self.network_resources = network_resources
         self.isolated_creds = {}
         self.isolated_net_resources = {}
         self.ports = []
-        self.tempest_client = tempest_client
         self.interface = interface
         self.password = password
         self.identity_admin_client, self.network_admin_client = (
@@ -50,96 +48,50 @@ class IsolatedCreds(cred_provider.CredentialProvider):
             identity
             network
         """
-        if self.tempest_client:
-            os = clients.AdminManager(interface=self.interface)
-        else:
-            os = clients.OfficialClientManager(
-                auth.get_default_credentials('identity_admin')
-            )
+        os = clients.AdminManager(interface=self.interface)
         return os.identity_client, os.network_client
 
     def _create_tenant(self, name, description):
-        if self.tempest_client:
-            _, tenant = self.identity_admin_client.create_tenant(
-                name=name, description=description)
-        else:
-            tenant = self.identity_admin_client.tenants.create(
-                name,
-                description=description)
+        _, tenant = self.identity_admin_client.create_tenant(
+            name=name, description=description)
         return tenant
 
     def _get_tenant_by_name(self, name):
-        if self.tempest_client:
-            _, tenant = self.identity_admin_client.get_tenant_by_name(name)
-        else:
-            tenants = self.identity_admin_client.tenants.list()
-            for ten in tenants:
-                if ten['name'] == name:
-                    tenant = ten
-                    break
-            else:
-                raise exceptions.NotFound('No such tenant')
+        _, tenant = self.identity_admin_client.get_tenant_by_name(name)
         return tenant
 
     def _create_user(self, username, password, tenant, email):
-        if self.tempest_client:
-            _, user = self.identity_admin_client.create_user(username,
-                                                             password,
-                                                             tenant['id'],
-                                                             email)
-        else:
-            user = self.identity_admin_client.users.create(username, password,
-                                                           email,
-                                                           tenant_id=tenant.id)
+        _, user = self.identity_admin_client.create_user(
+            username, password, tenant['id'], email)
         return user
 
     def _get_user(self, tenant, username):
-        if self.tempest_client:
-            _, user = self.identity_admin_client.get_user_by_username(
-                tenant['id'],
-                username)
-        else:
-            user = self.identity_admin_client.users.get(username)
+        _, user = self.identity_admin_client.get_user_by_username(
+            tenant['id'], username)
         return user
 
     def _list_roles(self):
-        if self.tempest_client:
-            _, roles = self.identity_admin_client.list_roles()
-        else:
-            roles = self.identity_admin_client.roles.list()
+        _, roles = self.identity_admin_client.list_roles()
         return roles
 
     def _assign_user_role(self, tenant, user, role_name):
         role = None
         try:
             roles = self._list_roles()
-            if self.tempest_client:
-                role = next(r for r in roles if r['name'] == role_name)
-            else:
-                role = next(r for r in roles if r.name == role_name)
+            role = next(r for r in roles if r['name'] == role_name)
         except StopIteration:
             msg = 'No "%s" role found' % role_name
             raise exceptions.NotFound(msg)
-        if self.tempest_client:
-            self.identity_admin_client.assign_user_role(tenant['id'],
-                                                        user['id'], role['id'])
-        else:
-            self.identity_admin_client.roles.add_user_role(user.id, role.id,
-                                                           tenant.id)
+        self.identity_admin_client.assign_user_role(tenant['id'], user['id'],
+                                                    role['id'])
 
     def _delete_user(self, user):
-        if self.tempest_client:
-            self.identity_admin_client.delete_user(user)
-        else:
-            self.identity_admin_client.users.delete(user)
+        self.identity_admin_client.delete_user(user)
 
     def _delete_tenant(self, tenant):
         if CONF.service_available.neutron:
             self._cleanup_default_secgroup(tenant)
-        if self.tempest_client:
-            self.identity_admin_client.delete_tenant(tenant)
-        else:
-            self.identity_admin_client.tenants.delete(tenant)
+        self.identity_admin_client.delete_tenant(tenant)
 
     def _create_creds(self, suffix="", admin=False):
         """Create random credentials under the following schema.
@@ -175,15 +127,9 @@ class IsolatedCreds(cred_provider.CredentialProvider):
         return self._get_credentials(user, tenant)
 
     def _get_credentials(self, user, tenant):
-        if self.tempest_client:
-            user_get = user.get
-            tenant_get = tenant.get
-        else:
-            user_get = user.__dict__.get
-            tenant_get = tenant.__dict__.get
         return auth.get_credentials(
-            username=user_get('name'), user_id=user_get('id'),
-            tenant_name=tenant_get('name'), tenant_id=tenant_get('id'),
+            username=user['name'], user_id=user['id'],
+            tenant_name=tenant['name'], tenant_id=tenant['id'],
             password=self.password)
 
     def _create_network_resources(self, tenant_id):
@@ -228,45 +174,32 @@ class IsolatedCreds(cred_provider.CredentialProvider):
         return network, subnet, router
 
     def _create_network(self, name, tenant_id):
-        if self.tempest_client:
-            resp, resp_body = self.network_admin_client.create_network(
-                name=name, tenant_id=tenant_id)
-        else:
-            body = {'network': {'tenant_id': tenant_id, 'name': name}}
-            resp_body = self.network_admin_client.create_network(body)
+        _, resp_body = self.network_admin_client.create_network(
+            name=name, tenant_id=tenant_id)
         return resp_body['network']
 
     def _create_subnet(self, subnet_name, tenant_id, network_id):
-        if not self.tempest_client:
-            body = {'subnet': {'name': subnet_name, 'tenant_id': tenant_id,
-                               'network_id': network_id, 'ip_version': 4}}
-            if self.network_resources:
-                body['enable_dhcp'] = self.network_resources['dhcp']
         base_cidr = netaddr.IPNetwork(CONF.network.tenant_network_cidr)
         mask_bits = CONF.network.tenant_network_mask_bits
         for subnet_cidr in base_cidr.subnet(mask_bits):
             try:
-                if self.tempest_client:
-                    if self.network_resources:
-                        resp, resp_body = self.network_admin_client.\
-                            create_subnet(
-                                network_id=network_id, cidr=str(subnet_cidr),
-                                name=subnet_name,
-                                tenant_id=tenant_id,
-                                enable_dhcp=self.network_resources['dhcp'],
-                                ip_version=4)
-                    else:
-                        resp, resp_body = self.network_admin_client.\
-                            create_subnet(network_id=network_id,
-                                          cidr=str(subnet_cidr),
-                                          name=subnet_name,
-                                          tenant_id=tenant_id,
-                                          ip_version=4)
+                if self.network_resources:
+                    _, resp_body = self.network_admin_client.\
+                        create_subnet(
+                            network_id=network_id, cidr=str(subnet_cidr),
+                            name=subnet_name,
+                            tenant_id=tenant_id,
+                            enable_dhcp=self.network_resources['dhcp'],
+                            ip_version=4)
                 else:
-                    body['subnet']['cidr'] = str(subnet_cidr)
-                    resp_body = self.network_admin_client.create_subnet(body)
+                    _, resp_body = self.network_admin_client.\
+                        create_subnet(network_id=network_id,
+                                      cidr=str(subnet_cidr),
+                                      name=subnet_name,
+                                      tenant_id=tenant_id,
+                                      ip_version=4)
                 break
-            except (n_exc.BadRequest, exceptions.BadRequest) as e:
+            except exceptions.BadRequest as e:
                 if 'overlaps with another subnet' not in str(e):
                     raise
         else:
@@ -278,25 +211,15 @@ class IsolatedCreds(cred_provider.CredentialProvider):
     def _create_router(self, router_name, tenant_id):
         external_net_id = dict(
             network_id=CONF.network.public_network_id)
-        if self.tempest_client:
-            resp, resp_body = self.network_admin_client.create_router(
-                router_name,
-                external_gateway_info=external_net_id,
-                tenant_id=tenant_id)
-        else:
-            body = {'router': {'name': router_name, 'tenant_id': tenant_id,
-                               'external_gateway_info': external_net_id,
-                               'admin_state_up': True}}
-            resp_body = self.network_admin_client.create_router(body)
+        _, resp_body = self.network_admin_client.create_router(
+            router_name,
+            external_gateway_info=external_net_id,
+            tenant_id=tenant_id)
         return resp_body['router']
 
     def _add_router_interface(self, router_id, subnet_id):
-        if self.tempest_client:
-            self.network_admin_client.add_router_interface_with_subnet_id(
-                router_id, subnet_id)
-        else:
-            body = {'subnet_id': subnet_id}
-            self.network_admin_client.add_interface_router(router_id, body)
+        self.network_admin_client.add_router_interface_with_subnet_id(
+            router_id, subnet_id)
 
     def get_primary_network(self):
         return self.isolated_net_resources.get('primary')[0]
@@ -380,12 +303,8 @@ class IsolatedCreds(cred_provider.CredentialProvider):
 
     def _cleanup_default_secgroup(self, tenant):
         net_client = self.network_admin_client
-        if self.tempest_client:
-            resp, resp_body = net_client.list_security_groups(tenant_id=tenant,
-                                                              name="default")
-        else:
-            resp_body = net_client.list_security_groups(tenant_id=tenant,
-                                                        name="default")
+        _, resp_body = net_client.list_security_groups(tenant_id=tenant,
+                                                       name="default")
         secgroups_to_delete = resp_body['security_groups']
         for secgroup in secgroups_to_delete:
             try:
@@ -404,12 +323,8 @@ class IsolatedCreds(cred_provider.CredentialProvider):
             if (not self.network_resources or
                 self.network_resources.get('router')):
                 try:
-                    if self.tempest_client:
-                        net_client.remove_router_interface_with_subnet_id(
-                            router['id'], subnet['id'])
-                    else:
-                        body = {'subnet_id': subnet['id']}
-                        net_client.remove_interface_router(router['id'], body)
+                    net_client.remove_router_interface_with_subnet_id(
+                        router['id'], subnet['id'])
                 except exceptions.NotFound:
                     LOG.warn('router with name: %s not found for delete' %
                              router['name'])

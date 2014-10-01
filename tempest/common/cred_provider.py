@@ -24,8 +24,8 @@ LOG = logging.getLogger(__name__)
 
 @six.add_metaclass(abc.ABCMeta)
 class CredentialProvider(object):
-    def __init__(self, name, tempest_client=True, interface='json',
-                 password='pass', network_resources=None):
+    def __init__(self, name, interface='json', password='pass',
+                 network_resources=None):
         self.name = name
 
     @abc.abstractmethod

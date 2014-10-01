@@ -62,8 +62,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
         super(ScenarioTest, cls).setUpClass()
         # Using tempest client for isolated credentials as well
         cls.isolated_creds = isolated_creds.IsolatedCreds(
-            cls.__name__, tempest_client=True,
-            network_resources=cls.network_resources)
+            cls.__name__, network_resources=cls.network_resources)
         cls.manager = clients.Manager(
             credentials=cls.credentials()
         )
