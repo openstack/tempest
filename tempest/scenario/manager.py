@@ -47,15 +47,7 @@ LOG_cinder_client.addHandler(log.NullHandler())
 
 
 class ScenarioTest(tempest.test.BaseTestCase):
-    """Replaces the OfficialClientTest base class.
-
-    Uses tempest own clients as opposed to OfficialClients.
-
-    Common differences:
-    - replace resource.attribute with resource['attribute']
-    - replace resouce.delete with delete_callable(resource['id'])
-    - replace local waiters with common / rest_client waiters
-    """
+    """Base class for scenario tests. Uses tempest own clients. """
 
     @classmethod
     def setUpClass(cls):
