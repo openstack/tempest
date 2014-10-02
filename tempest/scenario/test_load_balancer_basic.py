@@ -38,9 +38,8 @@ class TestLoadBalancerBasic(manager.NetworkScenarioTest):
     2. SSH to the instance and start two servers
     3. Create a load balancer with two members and with ROUND_ROBIN algorithm
        associate the VIP with a floating ip
-    4. Send 10 requests to the floating ip and check that they are shared
-       between the two servers and that both of them get equal portions
-    of the requests
+    4. Send NUM requests to the floating ip and check that they are shared
+       between the two servers.
     """
 
     @classmethod
@@ -67,6 +66,7 @@ class TestLoadBalancerBasic(manager.NetworkScenarioTest):
         cls.server_ips = {}
         cls.port1 = 80
         cls.port2 = 88
+        cls.num = 50
 
     def setUp(self):
         super(TestLoadBalancerBasic, self).setUp()
@@ -287,26 +287,21 @@ class TestLoadBalancerBasic(manager.NetworkScenarioTest):
 
     def _check_load_balancing(self):
         """
-        1. Send 10 requests on the floating ip associated with the VIP
-        2. Check that the requests are shared between
-           the two servers and that both of them get equal portions
-           of the requests
+        1. Send NUM requests on the floating ip associated with the VIP
+        2. Check that the requests are shared between the two servers
         """
 
         self._check_connection(self.vip_ip)
-        self._send_requests(self.vip_ip, set(["server1", "server2"]))
+        self._send_requests(self.vip_ip, ["server1", "server2"])
 
-    def _send_requests(self, vip_ip, expected, num_req=10):
-        count = 0
-        while count < num_req:
-            resp = []
-            for i in range(len(self.members)):
-                resp.append(
-                    urllib2.urlopen(
-                        "http://{0}/".format(vip_ip)).read())
-            count += 1
-            self.assertEqual(expected,
-                             set(resp))
+    def _send_requests(self, vip_ip, servers):
+        counters = dict.fromkeys(servers, 0)
+        for i in range(self.num):
+            server = urllib2.urlopen("http://{0}/".format(vip_ip)).read()
+            counters[server] += 1
+        # Assert that each member of the pool gets balanced at least once
+        for member, counter in counters.iteritems():
+            self.assertGreater(counter, 0, 'Member %s never balanced' % member)
 
     @test.services('compute', 'network')
     def test_load_balancer_basic(self):
