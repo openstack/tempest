@@ -21,7 +21,6 @@ import subprocess
 import netaddr
 import six
 
-from tempest.api.network import common as net_common
 from tempest import auth
 from tempest import clients
 from tempest.common import debug
@@ -590,7 +589,7 @@ class NetworkScenarioTest(ScenarioTest):
 
     def _get_network_by_name(self, network_name):
         net = self._list_networks(name=network_name)
-        return net_common.AttributeDict(net[0])
+        return net_resources.AttributeDict(net[0])
 
     def _create_floating_ip(self, thing, external_network_id, port_id=None,
                             client=None):
