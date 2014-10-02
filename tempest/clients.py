@@ -225,7 +225,6 @@ class Manager(manager.Manager):
     def __init__(self, credentials=None, interface='json', service=None):
         # Set interface and client type first
         self.interface = interface
-        self.client_type = 'tempest'
         # super cares for credentials validation
         super(Manager, self).__init__(credentials=credentials)
 
