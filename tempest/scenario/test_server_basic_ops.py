@@ -35,8 +35,7 @@ class TestServerBasicOps(manager.ScenarioTest):
      * Create a security group to control network access in instance
      * Add simple permissive rules to the security group
      * Launch an instance
-     * Pause/unpause the instance
-     * Suspend/resume the instance
+     * Perform ssh to instance
      * Terminate the instance
     """
 
