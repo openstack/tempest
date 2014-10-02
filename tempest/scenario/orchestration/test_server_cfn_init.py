@@ -24,6 +24,7 @@ LOG = logging.getLogger(__name__)
 
 class CfnInitScenarioTest(manager.OrchestrationScenarioTest):
 
+    @test.skip_because(bug="1374175")
     def setUp(self):
         super(CfnInitScenarioTest, self).setUp()
         if not CONF.orchestration.image_ref:
