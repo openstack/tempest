@@ -477,6 +477,7 @@ class NetworkScenarioTest(ScenarioTest):
     Subclassed tests will be skipped if Neutron is not enabled
 
     """
+    _ip_version = 4
 
     @classmethod
     def check_preconditions(cls):
