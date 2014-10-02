@@ -75,9 +75,7 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
                                                       new_password)
             linux_client.validate_authentication()
 
-    @test.attr(type='smoke')
-    def test_reboot_server_hard(self):
-        # The server should be power cycled
+    def _test_reboot_server(self, reboot_type):
         if self.run_ssh:
             # Get the time the server was last rebooted,
             resp, server = self.client.get_server(self.server_id)
@@ -85,7 +83,7 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
                                                       self.password)
             boot_time = linux_client.get_boot_time()
 
-        resp, body = self.client.reboot(self.server_id, 'HARD')
+        resp, body = self.client.reboot(self.server_id, reboot_type)
         self.assertEqual(202, resp.status)
         self.client.wait_for_server_status(self.server_id, 'ACTIVE')
 
@@ -96,29 +94,17 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
             new_boot_time = linux_client.get_boot_time()
             self.assertTrue(new_boot_time > boot_time,
                             '%s > %s' % (new_boot_time, boot_time))
+
+    @test.attr(type='smoke')
+    def test_reboot_server_hard(self):
+        # The server should be power cycled
+        self._test_reboot_server('HARD')
 
     @test.skip_because(bug="1014647")
     @test.attr(type='smoke')
     def test_reboot_server_soft(self):
         # The server should be signaled to reboot gracefully
-        if self.run_ssh:
-            # Get the time the server was last rebooted,
-            resp, server = self.client.get_server(self.server_id)
-            linux_client = remote_client.RemoteClient(server, self.ssh_user,
-                                                      self.password)
-            boot_time = linux_client.get_boot_time()
-
-        resp, body = self.client.reboot(self.server_id, 'SOFT')
-        self.assertEqual(202, resp.status)
-        self.client.wait_for_server_status(self.server_id, 'ACTIVE')
-
-        if self.run_ssh:
-            # Log in and verify the boot time has changed
-            linux_client = remote_client.RemoteClient(server, self.ssh_user,
-                                                      self.password)
-            new_boot_time = linux_client.get_boot_time()
-            self.assertTrue(new_boot_time > boot_time,
-                            '%s > %s' % (new_boot_time, boot_time))
+        self._test_reboot_server('SOFT')
 
     @test.attr(type='smoke')
     def test_rebuild_server(self):
