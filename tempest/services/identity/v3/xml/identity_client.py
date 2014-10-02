@@ -95,14 +95,11 @@ class IdentityV3ClientXML(rest_client.RestClient):
         _json = common.xml_to_json(body)
         return _json
 
-    def create_user(self, user_name, **kwargs):
+    def create_user(self, user_name, password=None, project_id=None,
+                    email=None, domain_id='default', **kwargs):
         """Creates a user."""
-        password = kwargs.get('password', None)
-        email = kwargs.get('email', None)
         en = kwargs.get('enabled', 'true')
-        project_id = kwargs.get('project_id', None)
         description = kwargs.get('description', None)
-        domain_id = kwargs.get('domain_id', 'default')
         post_body = common.Element("user",
                                    xmlns=XMLNS,
                                    name=user_name,
