@@ -24,7 +24,6 @@ LOG = logging.getLogger(__name__)
 
 class CfnInitScenarioTest(manager.OrchestrationScenarioTest):
 
-    @test.skip_because(bug="1374175")
     def setUp(self):
         super(CfnInitScenarioTest, self).setUp()
         if not CONF.orchestration.image_ref:
@@ -84,7 +83,8 @@ class CfnInitScenarioTest(manager.OrchestrationScenarioTest):
         server_ip =\
             server['addresses'][CONF.compute.network_for_ssh][0]['addr']
 
-        if not self.ping_ip_address(server_ip):
+        if not self.ping_ip_address(
+            server_ip, ping_timeout=CONF.orchestration.build_timeout):
             self._log_console_output(servers=[server])
             self.fail(
                 "(CfnInitScenarioTest:test_server_cfn_init) Timed out waiting "
