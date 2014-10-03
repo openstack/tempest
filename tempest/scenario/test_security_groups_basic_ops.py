@@ -138,10 +138,10 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
             raise cls.skipException(msg)
 
     @classmethod
-    def setUpClass(cls):
+    def resource_setup(cls):
         # Create no network resources for these tests.
         cls.set_network_resources()
-        super(TestSecurityGroupsBasicOps, cls).setUpClass()
+        super(TestSecurityGroupsBasicOps, cls).resource_setup()
         # TODO(mnewby) Consider looking up entities as needed instead
         # of storing them as collections on the class.
         cls.floating_ips = {}
