@@ -55,9 +55,8 @@ class VolumesV2ListTestJSON(base.BaseVolumeTest):
                              [str_vol(v) for v in fetched_list]))
 
     @classmethod
-    @test.safe_setup
-    def setUpClass(cls):
-        super(VolumesV2ListTestJSON, cls).setUpClass()
+    def resource_setup(cls):
+        super(VolumesV2ListTestJSON, cls).resource_setup()
         cls.client = cls.volumes_client
         cls.name = cls.VOLUME_FIELDS[1]
 
@@ -72,12 +71,12 @@ class VolumesV2ListTestJSON(base.BaseVolumeTest):
             cls.volume_id_list.append(volume['id'])
 
     @classmethod
-    def tearDownClass(cls):
+    def resource_cleanup(cls):
         # Delete the created volumes
         for volid in cls.volume_id_list:
             cls.client.delete_volume(volid)
             cls.client.wait_for_resource_deletion(volid)
-        super(VolumesV2ListTestJSON, cls).tearDownClass()
+        super(VolumesV2ListTestJSON, cls).resource_cleanup()
 
     def _list_by_param_value_and_assert(self, params, with_detail=False):
         """

@@ -22,9 +22,8 @@ class VolumesActionsTest(base.BaseVolumeV1AdminTest):
     _interface = "json"
 
     @classmethod
-    @test.safe_setup
-    def setUpClass(cls):
-        super(VolumesActionsTest, cls).setUpClass()
+    def resource_setup(cls):
+        super(VolumesActionsTest, cls).resource_setup()
         cls.client = cls.volumes_client
 
         # Create admin volume client
@@ -38,12 +37,12 @@ class VolumesActionsTest(base.BaseVolumeV1AdminTest):
         cls.client.wait_for_volume_status(cls.volume['id'], 'available')
 
     @classmethod
-    def tearDownClass(cls):
+    def resource_cleanup(cls):
         # Delete the test volume
         cls.client.delete_volume(cls.volume['id'])
         cls.client.wait_for_resource_deletion(cls.volume['id'])
 
-        super(VolumesActionsTest, cls).tearDownClass()
+        super(VolumesActionsTest, cls).resource_cleanup()
 
     def _reset_volume_status(self, volume_id, status):
         # Reset the volume status

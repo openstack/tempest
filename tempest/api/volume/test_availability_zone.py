@@ -24,8 +24,8 @@ class AvailabilityZoneV2TestJSON(base.BaseVolumeTest):
     """
 
     @classmethod
-    def setUpClass(cls):
-        super(AvailabilityZoneV2TestJSON, cls).setUpClass()
+    def resource_setup(cls):
+        super(AvailabilityZoneV2TestJSON, cls).resource_setup()
         cls.client = cls.availability_zone_client
 
     @test.attr(type='gate')
