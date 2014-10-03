@@ -200,29 +200,6 @@ class InstanceRunTest(boto_test.BotoTestCase):
             instance.terminate()
         self.assertInstanceStateWait(instance, '_GONE')
 
-    def test_run_reboot_terminate_instance(self):
-        # EC2 run, await till it reaches to running state, then reboot,
-        # and wait untill its state is running, and then terminate
-        image_ami = self.ec2_client.get_image(self.images["ami"]
-                                              ["image_id"])
-        reservation = image_ami.run(kernel_id=self.images["aki"]["image_id"],
-                                    ramdisk_id=self.images["ari"]["image_id"],
-                                    instance_type=self.instance_type)
-
-        self.assertEqual(1, len(reservation.instances))
-
-        instance = reservation.instances[0]
-        if instance.state != "running":
-            self.assertInstanceStateWait(instance, "running")
-
-        instance.reboot()
-        if instance.state != "running":
-            self.assertInstanceStateWait(instance, "running")
-        LOG.debug("Instance rebooted - state: %s", instance.state)
-
-        instance.terminate()
-        self.assertInstanceStateWait(instance, '_GONE')
-
     def test_compute_with_volumes(self):
         # EC2 1. integration test (not strict)
         image_ami = self.ec2_client.get_image(self.images["ami"]["image_id"])

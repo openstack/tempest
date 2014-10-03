@@ -12,12 +12,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import keystoneclient.v2_0.client as keystoneclient
 import mock
-import neutronclient.v2_0.client as neutronclient
 from oslo.config import cfg
 
-from tempest import clients
 from tempest.common import http
 from tempest.common import isolated_creds
 from tempest import config
@@ -51,24 +48,6 @@ class TestTenantIsolation(base.TestCase):
                                    json_iden_client.IdentityClientJSON))
         self.assertTrue(isinstance(iso_creds.network_admin_client,
                                    json_network_client.NetworkClientJSON))
-
-    def test_official_client(self):
-        self.useFixture(mockpatch.PatchObject(keystoneclient.Client,
-                                              'authenticate'))
-        self.useFixture(mockpatch.PatchObject(clients.OfficialClientManager,
-                                              '_get_image_client'))
-        self.useFixture(mockpatch.PatchObject(clients.OfficialClientManager,
-                                              '_get_object_storage_client'))
-        self.useFixture(mockpatch.PatchObject(clients.OfficialClientManager,
-                                              '_get_orchestration_client'))
-        self.useFixture(mockpatch.PatchObject(clients.OfficialClientManager,
-                                              '_get_ceilometer_client'))
-        iso_creds = isolated_creds.IsolatedCreds('test class',
-                                                 tempest_client=False)
-        self.assertTrue(isinstance(iso_creds.identity_admin_client,
-                                   keystoneclient.Client))
-        self.assertTrue(isinstance(iso_creds.network_admin_client,
-                                   neutronclient.Client))
 
     def test_tempest_client_xml(self):
         iso_creds = isolated_creds.IsolatedCreds('test class', interface='xml')

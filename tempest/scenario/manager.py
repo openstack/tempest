@@ -21,7 +21,6 @@ import subprocess
 import netaddr
 import six
 
-from tempest.api.network import common as net_common
 from tempest import auth
 from tempest import clients
 from tempest.common import debug
@@ -47,23 +46,14 @@ LOG_cinder_client.addHandler(log.NullHandler())
 
 
 class ScenarioTest(tempest.test.BaseTestCase):
-    """Replaces the OfficialClientTest base class.
-
-    Uses tempest own clients as opposed to OfficialClients.
-
-    Common differences:
-    - replace resource.attribute with resource['attribute']
-    - replace resouce.delete with delete_callable(resource['id'])
-    - replace local waiters with common / rest_client waiters
-    """
+    """Base class for scenario tests. Uses tempest own clients. """
 
     @classmethod
     def setUpClass(cls):
         super(ScenarioTest, cls).setUpClass()
         # Using tempest client for isolated credentials as well
         cls.isolated_creds = isolated_creds.IsolatedCreds(
-            cls.__name__, tempest_client=True,
-            network_resources=cls.network_resources)
+            cls.__name__, network_resources=cls.network_resources)
         cls.manager = clients.Manager(
             credentials=cls.credentials()
         )
@@ -599,7 +589,7 @@ class NetworkScenarioTest(ScenarioTest):
 
     def _get_network_by_name(self, network_name):
         net = self._list_networks(name=network_name)
-        return net_common.AttributeDict(net[0])
+        return net_resources.AttributeDict(net[0])
 
     def _create_floating_ip(self, thing, external_network_id, port_id=None,
                             client=None):
