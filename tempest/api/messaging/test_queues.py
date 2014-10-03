@@ -20,6 +20,7 @@ from testtools import matchers
 
 from tempest.api.messaging import base
 from tempest.common.utils import data_utils
+from tempest import exceptions
 from tempest import test
 
 
@@ -29,14 +30,20 @@ LOG = logging.getLogger(__name__)
 class TestQueues(base.BaseMessagingTest):
 
     @test.attr(type='smoke')
-    def test_create_queue(self):
-        # Create Queue
+    def test_create_delete_queue(self):
+        # Create & Delete Queue
         queue_name = data_utils.rand_name('test-')
         _, body = self.create_queue(queue_name)
 
         self.addCleanup(self.client.delete_queue, queue_name)
 
         self.assertEqual('', body)
+
+        _, body = self.delete_queue(queue_name)
+        self.assertEqual('', body)
+        self.assertRaises(exceptions.NotFound,
+                          self.client.get_queue,
+                          queue_name)
 
 
 class TestManageQueue(base.BaseMessagingTest):
@@ -51,13 +58,6 @@ class TestManageQueue(base.BaseMessagingTest):
             cls.queues.append(queue_name)
             # Create Queue
             cls.client.create_queue(queue_name)
-
-    @test.attr(type='smoke')
-    def test_delete_queue(self):
-        # Delete Queue
-        queue_name = self.queues.pop()
-        _, body = self.delete_queue(queue_name)
-        self.assertEqual('', body)
 
     @test.attr(type='smoke')
     def test_check_queue_existence(self):
