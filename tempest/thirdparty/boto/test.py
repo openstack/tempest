@@ -195,8 +195,8 @@ class BotoTestCase(tempest.test.BaseTestCase):
     """Recommended to use as base class for boto related test."""
 
     @classmethod
-    def setUpClass(cls):
-        super(BotoTestCase, cls).setUpClass()
+    def resource_setup(cls):
+        super(BotoTestCase, cls).resource_setup()
         cls.conclusion = decision_maker()
         cls.os = cls.get_client_manager()
         # The trash contains cleanup functions and paramaters in tuples
@@ -245,7 +245,7 @@ class BotoTestCase(tempest.test.BaseTestCase):
             raise self.failureException, "BotoServerError not raised"
 
     @classmethod
-    def tearDownClass(cls):
+    def resource_cleanup(cls):
         """Calls the callables added by addResourceCleanUp,
         when you overwrite this function don't forget to call this too.
         """
@@ -264,7 +264,7 @@ class BotoTestCase(tempest.test.BaseTestCase):
             finally:
                 del cls._resource_trash_bin[key]
         cls.clear_isolated_creds()
-        super(BotoTestCase, cls).tearDownClass()
+        super(BotoTestCase, cls).resource_cleanup()
         # NOTE(afazekas): let the super called even on exceptions
         # The real exceptions already logged, if the super throws another,
         # does not causes hidden issues

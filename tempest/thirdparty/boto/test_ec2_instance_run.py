@@ -30,8 +30,8 @@ LOG = logging.getLogger(__name__)
 class InstanceRunTest(boto_test.BotoTestCase):
 
     @classmethod
-    def setUpClass(cls):
-        super(InstanceRunTest, cls).setUpClass()
+    def resource_setup(cls):
+        super(InstanceRunTest, cls).resource_setup()
         if not cls.conclusion['A_I_IMAGES_READY']:
             raise cls.skipException("".join(("EC2 ", cls.__name__,
                                     ": requires ami/aki/ari manifest")))
