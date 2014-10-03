@@ -35,11 +35,11 @@ class SimpleReadOnlyNeutronClientTest(cli.ClientTestBase):
     """
 
     @classmethod
-    def setUpClass(cls):
+    def resource_setup(cls):
         if (not CONF.service_available.neutron):
             msg = "Skipping all Neutron cli tests because it is not available"
             raise cls.skipException(msg)
-        super(SimpleReadOnlyNeutronClientTest, cls).setUpClass()
+        super(SimpleReadOnlyNeutronClientTest, cls).resource_setup()
 
     @test.attr(type='smoke')
     def test_neutron_fake_action(self):

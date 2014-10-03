@@ -31,11 +31,11 @@ class SimpleReadOnlySwiftClientTest(cli.ClientTestBase):
     """
 
     @classmethod
-    def setUpClass(cls):
+    def resource_setup(cls):
         if not CONF.service_available.swift:
             msg = ("%s skipped as Swift is not available" % cls.__name__)
             raise cls.skipException(msg)
-        super(SimpleReadOnlySwiftClientTest, cls).setUpClass()
+        super(SimpleReadOnlySwiftClientTest, cls).resource_setup()
 
     def test_swift_fake_action(self):
         self.assertRaises(exceptions.CommandFailed,
