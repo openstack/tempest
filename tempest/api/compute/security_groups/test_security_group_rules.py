@@ -27,13 +27,9 @@ class SecurityGroupRulesTestJSON(base.BaseSecurityGroupsTest):
         super(SecurityGroupRulesTestJSON, cls).resource_setup()
         cls.client = cls.security_groups_client
         cls.neutron_available = CONF.service_available.neutron
-
-    @classmethod
-    def setUpClass(self):
-        super(SecurityGroupRulesTestJSON, self).setUpClass()
-        self.ip_protocol = 'tcp'
-        self.from_port = 22
-        self.to_port = 22
+        cls.ip_protocol = 'tcp'
+        cls.from_port = 22
+        cls.to_port = 22
 
     @test.attr(type='smoke')
     @test.services('network')
