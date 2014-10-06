@@ -256,13 +256,13 @@ class Client(SocketServer.BaseRequestHandler):
         start_time = time.time()
         LOG.info("executing cmd: %s" % cmd)
         while True:
-            ready = poll.poll(self.channel_timeout)
-            if not any(ready) or cmd_timeout is not 0:
-                if not self._is_timed_out(start_time, cmd_timeout):
-                    continue
+            if self._is_timed_out(start_time, cmd_timeout):
                 raise exceptions.TimeoutException(
                     "Command: '{0}' executed on host '{1}'.".format(
-                        cmd, self.host))
+                        cmd, self.host)) 
+            ready = poll.poll(self.channel_timeout)
+            if not any(ready):
+                    continue
             if not ready[0]:  # If there is nothing to read.
                 continue
             out_chunk = err_chunk = None
@@ -270,10 +270,12 @@ class Client(SocketServer.BaseRequestHandler):
                 out_chunk = channel.recv(self.buf_size)
                 out_data += out_chunk,
             if channel.recv_stderr_ready():
-                err_chunk = channel.recv_stderr(self.buf_size)
+                err_chunk = channel.recv_stderr(self.buf_size) 
                 err_data += err_chunk,
             if channel.closed and not err_chunk and not out_chunk:
                 break
+            #LOG.info("ERROR: {0}".format(err_chunk))
+            #LOG.info("STUFF: {0}".format(out_chunk))
             # hack for avoiding unexpected hung
             time.sleep(0.1)
         exit_status = channel.recv_exit_status()

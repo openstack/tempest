@@ -9,101 +9,69 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
-__author__ = 'Albert'
-__email__ = "albert.vico@midokura.com"
+
+import os
 
 from tempest import config
 from tempest.openstack.common import log as logging
-from tempest.scenario.midokura.midotools import scenario
+from tempest.scenario.midokura import manager
 from tempest import test
 
 CONF = config.CONF
 LOG = logging.getLogger(__name__)
-CIDR1 = "10.10.1.0/24"
+
+# path should be described in tempest.conf
+SCPATH = "/network_scenarios/"
 
 
-class TestAdminStateUp(scenario.TestScenario):
+class TestAdminStateUp(manager.AdvancedNetworkScenarioTest):
 
     @classmethod
     def setUpClass(cls):
         super(TestAdminStateUp, cls).setUpClass()
-        cls.scenario = {}
+        cls.servers_and_keys = []
 
     def setUp(self):
         super(TestAdminStateUp, self).setUp()
-        self.security_group = \
-            self._create_security_group_neutron(tenant_id=self.tenant_id)
-        self._scenario_conf()
-        self.custom_scenario(self.scenario)
-
-    def _scenario_conf(self):
-        serverA = {
-            'floating_ip': True,
-            'sg': None,
-        }
-        routerA = {
-            "public": True,
-            "name": "router_1"
-        }
-        subnetA = {
-            "network_id": None,
-            "ip_version": 4,
-            "cidr": CIDR1,
-            "allocation_pools": None,
-            "routers": [routerA],
-            "dns": [],
-            "routes": [],
-        }
-        networkA = {
-            'subnets': [subnetA],
-            'servers': [serverA],
-        }
-        tenantA = {
-            'networks': [networkA],
-            'tenant_id': None,
-            'type': 'default',
-            'hasgateway': False,
-            'MasterKey': False,
-        }
-        self.scenario = {
-            'tenants': [tenantA],
-        }
+        self.servers_and_keys = self.setup_topology(
+            os.path.abspath('{0}scenario_basic_adminstateup.yaml'.format(SCPATH)))
 
     def _check_connection(self, should_connect=True):
         ssh_login = CONF.compute.image_ssh_user
-        floating_ip, server = self.floating_ip_tuple
+        floating_ip = self.servers_and_keys[0]['FIP']
         ip_address = floating_ip.floating_ip_address
-        private_key = self.servers[server].private_key
-        self._check_public_network_connectivity(
+        private_key = self.servers_and_keys[0]['keypair']['private_key']
+        self.check_public_network_connectivity(
             ip_address, ssh_login, private_key, should_connect)
 
     def _check_vm_connectivity_router(self):
-        for router in self.routers:
+        tenant_routers = self._get_tenant_routers(tenant=self.tenant_id)
+        for router in tenant_routers:
             self.network_client.update_router(
-                router.id, {'router': {'admin_state_up': False}})
+                router['id'], admin_state_up=False)
             LOG.info("router test")
             self._check_connection(False)
             self.network_client.update_router(
-                router.id, {'router': {'admin_state_up': True}})
+                router['id'], admin_state_up=True)
 
     def _check_vm_connectivity_net(self):
         for network in self.networks:
             LOG.info("network test")
             self.network_client.update_network(
-                network.id, {'network': {'admin_state_up': False}})
+                network['id'], admin_state_up=False)
             self._check_connection(False)
             self.network_client.update_network(
-                network.id, {'network': {'admin_state_up': True}})
+                network['id'], admin_state_up=True)
 
     def _check_vm_connectivity_port(self):
         LOG.info("port test")
-        floating_ip, server = self.floating_ip_tuple
+        floating_ip = self.servers_and_keys[0]['FIP']
         port_id = floating_ip.get("port_id")
         self.network_client.update_port(
-            port_id, {'port': {'admin_state_up': False}})
+            port_id, admin_state_up=False)
         self._check_connection(False)
         self.network_client.update_port(
-            port_id, {'port': {'admin_state_up': True}})
+            port_id, admin_state_up=True)
 
     @test.attr(type='smoke')
     @test.services('compute', 'network')
@@ -113,7 +81,7 @@ class TestAdminStateUp(scenario.TestScenario):
         self._check_connection(True)
         LOG.info("End of Rotuer test")
 
-
+    @test.skip_because(bug="1237807")
     @test.attr(type='smoke')
     @test.services('compute', 'network')
     def test_network_adminstateup_network(self):
@@ -127,5 +95,6 @@ class TestAdminStateUp(scenario.TestScenario):
     def test_network_adminstateup_port(self):
         LOG.info("Starting Port test")
         self._check_vm_connectivity_port()
-        LOG.info("End of Port test")
         self._check_connection(True)
+        LOG.info("End of Port test")
+

@@ -616,7 +616,6 @@ class NetworkScenarioTest(ScenarioTest):
             str_cidr = str(subnet_cidr)
             if cidr_in_use(str_cidr, tenant_id=network.tenant_id):
                 continue
-
             subnet = dict(
                 name=data_utils.rand_name(namestart),
                 network_id=network.id,
@@ -625,8 +624,10 @@ class NetworkScenarioTest(ScenarioTest):
                 ip_version=ip_version,
                 **kwargs
             )
+            subnet.update(**kwargs)
             try:
                 result = client.create_subnet(**subnet)
+                str_cidr = subnet['cidr']
                 break
             except exceptions.Conflict as e:
                 is_overlapping_cidr = 'overlaps with another subnet' in str(e)

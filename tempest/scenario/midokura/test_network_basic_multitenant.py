@@ -14,56 +14,56 @@
 import re
 import os
 
+from tempest import config
 from tempest.openstack.common import log as logging
 from tempest.scenario.midokura.midotools import helper
 from tempest.scenario.midokura import manager
 from tempest import test
 
-
+CONF = config.CONF
 LOG = logging.getLogger(__name__)
 # path should be described in tempest.conf
 SCPATH = "/network_scenarios/"
 
 
-class TestNetworkBasicVMConnectivity(manager.AdvancedNetworkScenarioTest):
+class TestNetworkBasicMultitenants(manager.AdvancedNetworkScenarioTest):
     """
-        Scenario:
-        A launched VM should get an ip address and
-        routing table entries from DHCP. And
-        it should be able to metadata service.
+        Description:
+        Overlapping IP in different tenants
 
-        Pre-requisites:
-        1 tenant
-        1 network
-        1 VM
+        Scenario:
+        VMs with overlapping ip address in different
+        tenants should not interfare each other
+
+        Prerequisites:
+        - 2 tenants
+        - 1 network for each tenant
+        - 1 subnet with same CIDR for each tenant
 
         Steps:
-        1. create a network
-        2. launch a VM
-        3. verify that the VM gets IP address
-        4. verify that the VM gets default GW
-           in the routing table
-        5. verify that the VM gets a
-           routing entry for metadata service via dhcp agent
+        This testing requires that an option
+        "allow_overlapping_ips = True
+        " is configured in neutron.conf file
 
-        Expected results:
-        vm should get an ip address (confirm by "ip addr" command)
-        VM should get a defaut gw
-        VM should get a route for 169.254.169.254 (on non-cirros )
+        1. launch VMs with overlapping IP
+        2. make sure they are not interfered
+
+        Expected result:
+        should succeed
     """
 
     @classmethod
     def setUpClass(cls):
-        super(TestNetworkBasicVMConnectivity, cls).setUpClass()
+        super(TestNetworkBasicMultitenants, cls).setUpClass()
         cls.check_preconditions()
 
     def setUp(self):
-        super(TestNetworkBasicVMConnectivity, self).setUp()
-        self.servers_and_keys = self.setup_topology(
+        super(TestNetworkBasicMultitenants, self).setUp()
+        self.scenarios = self.setup_topology(
             os.path.abspath(
-                '{0}scenario_basic_vmconnectivity.yaml'.format(SCPATH)))
+                '{0}scenario_basic_multitenant.yaml'.format(SCPATH)))
 
-    def _test_routes(self, hops):
+    def _route_and_ip_test(self, hops):
         LOG.info("Trying to get the list of ips")
         try:
             ssh_client = self.setup_tunnel(hops)
@@ -71,10 +71,10 @@ class TestNetworkBasicVMConnectivity(manager.AdvancedNetworkScenarioTest):
             LOG.debug(net_info)
             pattern = re.compile(
                 '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}')
-            ip_list = pattern.findall(net_info)
-            LOG.debug(ip_list)
+            _list = pattern.findall(net_info)
+            LOG.debug(_list)
             remote_ip, _ = hops[-1]
-            self.assertIn(remote_ip, ip_list)
+            self.assertIn(remote_ip, _list)
             route_out = ssh_client.exec_command("sudo /sbin/route -n")
             self._check_default_gateway(route_out, remote_ip)
             LOG.info(route_out)
@@ -85,7 +85,6 @@ class TestNetworkBasicVMConnectivity(manager.AdvancedNetworkScenarioTest):
     def _check_default_gateway(self, route_out, internal_ip):
         try:
             rtable = helper.Routetable.build_route_table(route_out)
-            # TODO(QA): More extended route table tests
             LOG.debug(rtable)
             self.assertTrue(any([r.is_default_route() for r in rtable]))
         except Exception as inst:
@@ -94,27 +93,25 @@ class TestNetworkBasicVMConnectivity(manager.AdvancedNetworkScenarioTest):
 
     @test.attr(type='smoke')
     @test.services('compute', 'network')
-    def test_network_basic_vmconnectivity(self):
-        ap_details = self.servers_and_keys[-1]
-        access_point = ap_details['server']
-        networks = access_point['addresses']
+    def test_network_basic_multitenant(self):
+        for creds_and_scenario in self.scenarios:
+            self._multitenant_test(creds_and_scenario)
+
+    def _multitenant_test(self, creds_and_scenario):
+        # the access_point server should be the last one in the list
+        creds = creds_and_scenario['credentials']
+        self.set_context(creds)
+        servers_and_keys = creds_and_scenario['servers_and_keys']
+        ap_details = servers_and_keys[-1]
+        networks = ap_details['server']['addresses']
         hops = [(ap_details['FIP'].floating_ip_address,
                 ap_details['keypair']['private_key'])]
-        # the access_point server should be the last one in the list
-        for element in self.servers_and_keys[:-1]:
-            if element['server']['name'].startswith('access_point'):
-                continue
+        for element in servers_and_keys[:-1]:
             server = element['server']
             name = server['addresses'].keys()[0]
             if any(i in networks.keys() for i in server['addresses'].keys()):
                 remote_ip = server['addresses'][name][0]['addr']
-                keypair = element['keypair']
-                privatekey = keypair['private_key']
+                privatekey = element['keypair']['private_key']
                 hops.append((remote_ip, privatekey))
-                self._test_routes(hops)
-            else:
-                LOG.info("FAIL - No ip connectivity to the server ip: %s"
-                         % server.networks[name][0])
-                raise Exception("FAIL - No ip for this network : %s"
-                                % server.networks)
+                self._route_and_ip_test(hops)
         LOG.info("test finished, tearing down now ....")

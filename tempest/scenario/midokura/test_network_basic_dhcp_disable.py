@@ -9,22 +9,19 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
-__author__ = 'Albert'
-__email__ = "albert.vico@midokura.com"
 
-import threading
 import re
-import time
+import os
 
 from tempest.openstack.common import log as logging
-from tempest.scenario.midokura.midotools import scenario
+from tempest.scenario.midokura import manager
 from tempest import test
 
 LOG = logging.getLogger(__name__)
-CIDR1 = "10.10.10.0/24"
+SCPATH = "/network_scenarios/"
 
 
-class TestNetworkBasicDhcpDisable(scenario.TestScenario):
+class TestNetworkBasicDhcpDisable(manager.AdvancedNetworkScenarioTest):
     """
         Scenario:
             Ability to disable DHCP
@@ -47,44 +44,13 @@ class TestNetworkBasicDhcpDisable(scenario.TestScenario):
 
     def setUp(self):
         super(TestNetworkBasicDhcpDisable, self).setUp()
-        self.security_group = \
-            self._create_security_group_neutron(tenant_id=self.tenant_id)
-        self._scenario_conf()
-        self.custom_scenario(self.scenario)
-
-    def _scenario_conf(self):
-        serverB = {
-            'floating_ip': False,
-            'sg': None,
-        }
-        subnetA = {
-            "network_id": None,
-            "ip_version": 4,
-            "cidr": CIDR1,
-            "allocation_pools": None,
-            "dns": [],
-            "routes": [],
-            "routers": None,
-        }
-        networkA = {
-            'subnets': [subnetA],
-            'servers': [serverB],
-        }
-        tenantA = {
-            'networks': [networkA],
-            'tenant_id': None,
-            'type': 'default',
-            'hasgateway': True,
-            'MasterKey': False,
-        }
-        self.scenario = {
-            'tenants': [tenantA],
-        }
+        self.servers_and_keys = \
+            self.setup_topology(os.path.abspath('{0}scenario_basic_dhcp_disable.yaml'.format(SCPATH)))
 
     # this should be ported to "linux_client" class
-    def _do_dhcp_lease(self, remote_ip, pk, timeout=0):
+    def _do_dhcp_lease(self, hops, timeout=0):
         try:
-            ssh_client = self.setup_tunnel([(remote_ip, pk)])
+            ssh_client = self.setup_tunnel(hops)
             pid = ssh_client.exec_command("ps fuax | grep udhcp | "
                                           "awk '{print $1}'").split("\n")[0]
             LOG.info(pid)
@@ -98,11 +64,12 @@ class TestNetworkBasicDhcpDisable(scenario.TestScenario):
             else:
                 raise
 
-    def _get_ip(self, remote_ip, pk, timeout=0, shouldFail=False):
+    def _get_ip(self, hops, timeout=0, shouldFail=False):
         try:
-            ssh_client = self.setup_tunnel([(remote_ip, pk)])
+            ssh_client = self.setup_tunnel(hops)
             net_info = ssh_client.get_ip_list(timeout)
             LOG.debug(net_info)
+            remote_ip, _ = hops[-1]
             pattern = re.compile(
                 '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}')
             list = pattern.findall(net_info)
@@ -118,27 +85,33 @@ class TestNetworkBasicDhcpDisable(scenario.TestScenario):
     @test.attr(type='smoke')
     @test.services('compute', 'network')
     def test_network_basic_dhcp_disable(self):
-        ap_details = self.access_point.keys()[0]
-        networks = ap_details.networks
-        for server in self.servers:
+        ap_details = self.servers_and_keys[-1]
+        ap = ap_details['server']
+        networks = ap['addresses']
+        hops = [(ap_details['FIP'].floating_ip_address,
+            ap_details['keypair']['private_key'])]
+        #the last element is ignored since it is the gateway
+        for element in self.servers_and_keys[:-1]:
+            server = element['server']
             # servers should only have 1 network
-            name = server.networks.keys()[0]
-            if any(i in networks.keys() for i in server.networks.keys()):
-                remote_ip = server.networks[name][0]
-                pk = self.servers[server].private_key
+            name = server['addresses'].keys()[0]
+            if any(i in networks.keys() for i in server['addresses'].keys()):
+                remote_ip = server['addresses'][name][0]['addr']
+                keypair = element['keypair']
+                pk = keypair['private_key']
+                hops.append((remote_ip, pk))
                 LOG.info("Checking the IP before the lease")
                 # get the ip
-                self._get_ip(remote_ip, pk)
-                subn = self.subnets[0]
-                self._toggle_dhcp(subnet_id=subn["id"])
+                self._get_ip(hops)
+                net = self._get_network_by_name(name)[0]
+                subn = net['subnets'][0]
+                self._toggle_dhcp(subnet_id=subn)
                 # should give timeout
-                self._do_dhcp_lease(remote_ip, pk, 20)
-                self._get_ip(remote_ip, pk, 10, True)
+                self._do_dhcp_lease(hops, 20)
+                self._get_ip(hops, 10, True)
             else:
                 LOG.info("FAIL - No ip connectivity to the server ip: %s"
                          % server.networks[name][0])
                 raise Exception("FAIL - No ip for this network : %s"
                                 % server.networks)
         LOG.info("test finished, tearing down now ....")
-        while threading.active_count() > 1:
-                    time.sleep(0.1)

@@ -9,23 +9,20 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
-__author__ = 'Albert'
-__email__ = "albert.vico@midokura.com"
 
 
 import itertools
-import threading
-import time
+import os
 
 from tempest.openstack.common import log as logging
-from tempest.scenario.midokura.midotools import scenario
+from tempest.scenario.midokura import manager
 from tempest import test
 
 LOG = logging.getLogger(__name__)
-CIDR1 = "10.10.1.0/24"
+SCPATH = "/network_scenarios/"
 
 
-class TestNetworkBasicInterVMConnectivity(scenario.TestScenario):
+class TestNetworkBasicInterVMConnectivity(manager.AdvancedNetworkScenarioTest):
     """
         Scenario:
         A launched VM should get an ip address
@@ -52,66 +49,39 @@ class TestNetworkBasicInterVMConnectivity(scenario.TestScenario):
 
     def setUp(self):
         super(TestNetworkBasicInterVMConnectivity, self).setUp()
-        self.security_group = \
-            self._create_security_group_neutron(
-                tenant_id=self.tenant_id)
-        self._scenario_conf()
-        self.custom_scenario(self.scenario)
-
-    def _scenario_conf(self):
-        serverB = {
-            'floating_ip': False,
-            'sg': None,
-        }
-        subnetA = {
-            "network_id": None,
-            "ip_version": 4,
-            "cidr": CIDR1,
-            "allocation_pools": None,
-            "routers": None,
-            "dns": [],
-            "routes": [],
-        }
-        networkA = {
-            'subnets': [subnetA],
-            'servers': [serverB, serverB],
-        }
-        tenantA = {
-            'networks': [networkA],
-            'tenant_id': None,
-            'type': 'default',
-            'hasgateway': True,
-            'MasterKey': True,
-        }
-        self.scenario = {
-            'tenants': [tenantA],
-        }
-
+        self.servers_and_keys = self.setup_topology(
+                os.path.abspath('{0}scenario_basic_inter_vmconnectivity.yaml'.format(SCPATH)))
+        
+   
     @test.attr(type='smoke')
     @test.services('compute', 'network')
     def test_network_basic_inter_vmssh(self):
-        ap_details = self.access_point.keys()[0]
-        networks = ap_details.networks
+        ap_details = self.servers_and_keys[-1]
+        ap = ap_details['server']
+        networks = ap['addresses']
+        hops=[(ap_details['FIP'].floating_ip_address, ap_details['keypair']['private_key'])]
         ip_pk = []
-        for server in self.servers:
+        #the access_point server should be the last one in the list
+        for element in self.servers_and_keys[:-1]:
             # servers should only have 1 network
-            name = server.networks.keys()[0]
-            if any(i in networks.keys() for i in server.networks.keys()):
-                remote_ip = server.networks[name][0]
-                pk = self.servers[server].private_key
+            server = element['server']
+            name = server['addresses'].keys()[0]
+            if any(i in networks.keys() for i in server['addresses'].keys()):
+                remote_ip = server['addresses'][name][0]['addr']
+                keypair = element['keypair']
+                pk = keypair['private_key']
                 ip_pk.append((remote_ip, pk))
             else:
                 LOG.info("FAIL - No ip connectivity to the server ip: %s"
-                         % server.networks[name][0])
+                         % server['addresses'][name][0]['addr'])
                 raise Exception("FAIL - No ip for this network : %s"
-                            % server.networks)
+                            % server['addresses'][name])
         for pair in itertools.permutations(ip_pk):
             LOG.info("Checking ssh between %s %s"
                      % (pair[0][0], pair[1][0]))
-            self._ssh_through_gateway(pair[0], pair[1])
+            nhops = hops + [pair[0]]
+            self._ssh_through_gateway(nhops, pair[1])
             LOG.info("Checking ping between %s %s"
                      % (pair[0][0], pair[1][0]))
-            self._ping_through_gateway(pair[0], pair[1])
+            self._ping_through_gateway(hops, pair[1])
         LOG.info("test finished, tearing down now ....")
-        while threading.active_count() > 1:
-                    time.sleep(0.1)

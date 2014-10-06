@@ -9,22 +9,22 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
-__author__ = 'Albert'
-__email__ = "albert.vico@midokura.com"
 
-
+import os
 
 from tempest import config
 from tempest.openstack.common import log as logging
-from tempest.scenario.midokura.midotools import scenario
+from tempest.scenario.midokura import manager
 from tempest import test
 
 
 LOG = logging.getLogger(__name__)
-CIDR1 = "10.10.10.0/24"
 CONF = config.CONF
+SCPATH = "/network_scenarios/"
 
-class TestNetworkBasicSecurityGroupsNetcat(scenario.TestScenario):
+
+class TestNetworkBasicSecurityGroupsNetcat(
+        manager.AdvancedNetworkScenarioTest):
     """
         Scenario:
             check default SG behavior for TCP
@@ -51,67 +51,75 @@ class TestNetworkBasicSecurityGroupsNetcat(scenario.TestScenario):
 
     def setUp(self):
         super(TestNetworkBasicSecurityGroupsNetcat, self).setUp()
-        self.security_group = \
-            self._create_security_group_neutron(tenant_id=self.tenant_id)
-        self._scenario_conf()
-        self.custom_scenario(self.scenario)
-
-    def _scenario_conf(self):
-        vm1 = {
-            'floating_ip': False,
-            'sg': ["default"],
-        }
-        vm2 = {
-            'floating_ip': False,
-            'sg': ["default"],
-        }
-        subnetA = {
-            "network_id": None,
-            "ip_version": 4,
-            "cidr": CIDR1,
-            "allocation_pools": None,
-            "routers": None,
-            "dns": [],
-            "routes": [],
-        }
-        networkA = {
-            'subnets': [subnetA],
-            'servers': [vm1, vm2],
-        }
-        tenantA = {
-            'networks': [networkA],
-            'tenant_id': None,
-            'type': 'default',
-            'hasgateway': True,
-            'MasterKey': True,
-        }
-        self.scenario = {
-            'tenants': [tenantA],
-        }
+        self.servers_and_keys = self.setup_topology(
+            os.path.abspath('{0}scenario_basic_netcat.yaml'.format(SCPATH)))
 
     def _netcat_test(self, ip_server, ssh_server, ssh_client):
         ssh_server.exec_command("nc -l -p 50000 > test.txt &")
         ssh_client.exec_command("echo '123' > send.txt")
-        ssh_client.exec_command("nc %s 50000 < send.txt" % ip_server)
+        ssh_client.exec_command("nc %s 50000 < send.txt &" % ip_server, 20)
         result = ssh_server.exec_command("cat test.txt")
         return result
 
-    def _test_netcat(self, source, destination):
-        ssh_client = self.setup_tunnel([destination])
-        ssh_server = self.setup_tunnel([source])
-        result = self._netcat_test(source[0], ssh_server, ssh_client)
+    def _netcat_test_udp(self, ip_server, ssh_server, ssh_client):
+        ssh_server.exec_command("nc -lu -p 50000 > test.txt &")
+        ssh_client.exec_command("echo '123' > send.txt")
+        ssh_client.exec_command("nc -u %s 50000 < send.txt &" % ip_server, 20)
+        result = ssh_server.exec_command("cat test.txt")
+        return result
+
+    def _test_netcat(self, source, destination, udp=False):
+        ap_details = self.servers_and_keys[-1]
+        hop = [(ap_details['FIP'].floating_ip_address,
+                ap_details['keypair']['private_key'])]
+        d_hops = hop + [destination]
+        s_hops = hop + [source]
+        ssh_client = self.setup_tunnel(d_hops)
+        ssh_server = self.setup_tunnel(s_hops)
+        if udp:
+            result = self._netcat_test_udp(source[0], ssh_server, ssh_client)
+        else:
+            result = self._netcat_test(source[0], ssh_server, ssh_client)
         LOG.info(result)
         self.assertEqual("123\n", result)
 
+
     @test.attr(type='smoke')
     @test.services('compute', 'network')
-    def test_network_basic_security_group(self):
+    def test_network_basic_netcat_udp(self):
         # we get the access point server
-        #import ipdb; ipdb.set_trace()
-        vm1_server = self.servers.items()[0][0]
-        vm2_server = self.servers.items()[1][0]
-        vm1_pk = self.servers[vm1_server].private_key
-        vm2_pk = self.servers[vm2_server].private_key
-        vm1 = (vm1_server.networks.values()[0][0], vm1_pk)
-        vm2 = (vm2_server.networks.values()[0][0], vm2_pk)
+        vm1_server = self.servers_and_keys[0]['server']
+        vm2_server = self.servers_and_keys[1]['server']
+        vm1_pk = self.servers_and_keys[0]['keypair']['private_key']
+        vm2_pk = self.servers_and_keys[0]['keypair']['private_key']
+        vm1 = (vm1_server['addresses'].values()[0][0]['addr'], vm1_pk)
+        vm2 = (vm2_server['addresses'].values()[0][0]['addr'], vm2_pk)
+        self._test_netcat(vm1, vm2, udp=True)
+
+    @test.attr(type='smoke')
+    @test.services('compute', 'network')
+    def test_network_basic_netcat(self):
+        # we get the access point server
+        vm1_server = self.servers_and_keys[0]['server']
+        vm2_server = self.servers_and_keys[1]['server']
+        vm1_pk = self.servers_and_keys[0]['keypair']['private_key']
+        vm2_pk = self.servers_and_keys[0]['keypair']['private_key']
+        vm1 = (vm1_server['addresses'].values()[0][0]['addr'], vm1_pk)
+        vm2 = (vm2_server['addresses'].values()[0][0]['addr'], vm2_pk)
         self._test_netcat(vm1, vm2)
+
+    @test.attr(type='smoke')
+    @test.services('compute', 'network')
+    def test_network_default_security_group(self):
+        # we get the access point server
+        ap_details = self.servers_and_keys[-1]
+        hop = [(ap_details['FIP'].floating_ip_address,
+                ap_details['keypair']['private_key'])]
+        vm1_server = self.servers_and_keys[0]['server']
+        vm2_server = self.servers_and_keys[1]['server']
+        vm1_pk = self.servers_and_keys[0]['keypair']['private_key']
+        vm2_pk = self.servers_and_keys[0]['keypair']['private_key']
+        vm1 = (vm1_server['addresses'].values()[0][0]['addr'], vm1_pk)
+        vm2 = (vm2_server['addresses'].values()[0][0]['addr'], vm2_pk)
+        hop.append(vm1)
+        self._ping_through_gateway(hop, vm2)

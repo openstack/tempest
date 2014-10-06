@@ -9,19 +9,19 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
-__author__ = 'Albert'
-__email__ = "albert.vico@midokura.com"
 
+import os
 
 from tempest.openstack.common import log as logging
-from tempest.scenario.midokura.midotools import scenario
+from tempest.scenario.midokura import manager
 from tempest import test
 
 
 LOG = logging.getLogger(__name__)
-CIDR1 = "10.10.1.0/24"
+SCPATH = "/network_scenarios/"
 
-class TestNetworkAdvancedMetadata(scenario.TestScenario):
+
+class TestNetworkAdvancedMetadata(manager.AdvancedNetworkScenarioTest):
     """
     Description:
         VMs on a neutron network, which is NOT connected to a router,
@@ -53,53 +53,23 @@ class TestNetworkAdvancedMetadata(scenario.TestScenario):
 
     def setUp(self):
         super(TestNetworkAdvancedMetadata, self).setUp()
-        self.security_group = \
-            self._create_security_group_neutron(
-                tenant_id=self.tenant_id)
-        self._scenario_conf()
-        self.custom_scenario(self.scenario)
-
-    def _scenario_conf(self):
-        serverA = {
-            'floating_ip': False,
-            'sg': None,
-        }
-        routerA = {
-            "public": False,
-            "name": "router_1"
-        }
-        subnetA = {
-            "network_id": None,
-            "ip_version": 4,
-            "cidr": CIDR1,
-            "allocation_pools": None,
-            "routers": [routerA],
-            "dns": [],
-            "routes": [],
-        }
-        networkA = {
-            'subnets': [subnetA],
-            'servers': [serverA],
-        }
-        tenantA = {
-            'networks': [networkA],
-            'tenant_id': None,
-            'type': 'default',
-            'hasgateway': True,
-            'MasterKey': True,
-        }
-        self.scenario = {
-            'tenants': [tenantA],
-        }
+        self.servers_and_keys = \
+            self.setup_topology(os.path.abspath(
+                '{0}scenario_advanced_metadata.yaml'.format(SCPATH)))
 
     def _check_metadata(self):
         try:
-            server = self.servers.keys()[0]
-            destination = (server.networks.values()[0][0], self.servers[server].private_key)
-            ssh_client = self.setup_tunnel([destination])
+            ap_details = self.servers_and_keys[-1]
+            hops = [(ap_details['FIP'].floating_ip_address,
+                     ap_details['keypair']['private_key'])]
+            server = self.servers_and_keys[0]['server']
+            name = server['addresses'].keys()[0]
+            remote_ip = server['addresses'][name][0]['addr']
+            pk = self.servers_and_keys[0]['keypair']['private_key']
+            hops.append((remote_ip, pk))
+            ssh_client = self.setup_tunnel(hops)
             result = \
                 ssh_client.exec_command("curl http://169.254.169.254")
-            #result = ssh_client.exec_command("ip a")
             LOG.info(result)
             expected = \
                 "1.0\n2007-01-19\n2007-03-01\n2007-08-29\n2007-10-10\n" \

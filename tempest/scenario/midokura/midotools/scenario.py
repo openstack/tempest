@@ -426,7 +426,6 @@ class TestScenario(manager.NetworkScenarioTest):
         access_point_ip = \
             self.floating_ips[server].floating_ip_address
         private_key = keypair.private_key
-
         # should implement a wait for status "ACTIVE" function
         access_point_ssh = self._ssh_to_server(access_point_ip,
                                                private_key=private_key)

@@ -9,23 +9,21 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
-__author__ = 'Albert'
-__email__ = "albert.vico@midokura.com"
 
-
+import os
 
 from tempest import config
 from tempest.openstack.common import log as logging
-from tempest.scenario.midokura.midotools import scenario
+from tempest.scenario.midokura import manager
 from tempest import test
 
 
 LOG = logging.getLogger(__name__)
-CIDR1 = "10.10.10.0/24"
 CONF = config.CONF
+SCPATH = "/network_scenarios/"
 
 
-class TestNetworkAdvancedSecurityGroups(scenario.TestScenario):
+class TestNetworkAdvancedSecurityGroups(manager.AdvancedNetworkScenarioTest):
     """
         Scenario:
             check default SG behavior for TCP
@@ -58,89 +56,51 @@ class TestNetworkAdvancedSecurityGroups(scenario.TestScenario):
 
     def setUp(self):
         super(TestNetworkAdvancedSecurityGroups, self).setUp()
-        self.security_group = \
-            self._create_security_group_neutron(tenant_id=self.tenant_id)
-        self._create_empty_security_group(tenant_id=self.tenant_id, name="sg")
-        self._create_loginale_security_group(tenant_id=self.tenant_id)
-        self._scenario_conf()
-        self.rules = list()
-        self.custom_scenario(self.scenario)
-
-    def _scenario_conf(self):
-        vm1 = {
-            'floating_ip': False,
-            'sg': ["sg", "ssh"],
-        }
-        vm2 = {
-            'floating_ip': False,
-            'sg': ["sg"],
-        }
-        subnetA = {
-            "network_id": None,
-            "ip_version": 4,
-            "cidr": CIDR1,
-            "allocation_pools": None,
-            "routers": None,
-            "dns": [],
-            "routes": [],
-        }
-        networkA = {
-            'subnets': [subnetA],
-            'servers': [vm1, vm2],
-        }
-        tenantA = {
-            'networks': [networkA],
-            'tenant_id': None,
-            'type': 'default',
-            'hasgateway': True,
-            'MasterKey': True,
-        }
-        self.scenario = {
-            'tenants': [tenantA],
-        }
+        self.servers_and_keys = self.setup_topology(
+            os.path.abspath('{0}scenario_advanced_security_groups.yaml'.format(SCPATH)))
 
     @test.attr(type='smoke')
     @test.services('compute', 'network')
     def test_network_advanced_security_group(self):
-        rulesets = [
-             {
-                'direction': 'egress',
-                'protocol': 'icmp',
-                'port_range_min': 8,
-                'port_range_max': None,
+        rulesets = [{
+                    'direction': 'egress',
+                    'protocol': 'icmp',
+                    'port_range_min': 8,
+                    'port_range_max': None,
+                    },
+                    {
+                    'direction': 'ingress',
+                    'protocol': 'icmp',
+                    'port_range_min': 8,
+                    'port_range_max': None,
+                    }]
+        sg = self._get_security_group_by_name("sg")
+        for rule in rulesets:
+            self._create_security_group_rule(secgroup=sg, **rule)
 
-            },
-            {
-                'direction': 'ingress',
-                'protocol': 'icmp',
-                'port_range_min': 8,
-                'port_range_max': None,
-            }
-        ]
-        sg = self._get_security_group("sg")
-        self._create_security_group_rule(secgroup=sg,
-                                         tenant_id=self.tenant_id,
-                                         **rulesets[0])
-
-        self._create_security_group_rule(secgroup=sg,
-                                         tenant_id=self.tenant_id,
-                                         **rulesets[1])
-
-        vm1_server = self.servers.items()[0][0]
-        vm2_server = self.servers.items()[1][0]
-        vm1_pk = self.servers[vm1_server].private_key
-        vm2_pk = self.servers[vm2_server].private_key
-        vm1 = (vm1_server.networks.values()[0][0], vm1_pk)
-        vm2 = (vm2_server.networks.values()[0][0], vm2_pk)
-        self._ping_through_gateway(vm1, vm2, should_fail=False)
+        ap_details = self.servers_and_keys[-1]
+        hops = [(ap_details['FIP'].floating_ip_address,
+                 ap_details['keypair']['private_key'])]
+        vm1_server = self.servers_and_keys[0]['server']
+        vm2_server = self.servers_and_keys[1]['server']
+        vm1_pk = self.servers_and_keys[0]['keypair']['private_key']
+        vm2_pk = self.servers_and_keys[0]['keypair']['private_key']
+        vm1 = (vm1_server['addresses'].values()[0][0]['addr'], vm1_pk)
+        vm2 = (vm2_server['addresses'].values()[0][0]['addr'], vm2_pk)
+        nhops = hops + [vm1]
+        self._ping_through_gateway(nhops, vm2, should_succed=True)
 
     @test.attr(type='smoke')
     @test.services('compute', 'network')
     def test_network_advanced_security_group_negative(self):
-        vm1_server = self.servers.items()[0][0]
-        vm2_server = self.servers.items()[1][0]
-        vm1_pk = self.servers[vm1_server].private_key
-        vm2_pk = self.servers[vm2_server].private_key
-        vm1 = (vm1_server.networks.values()[0][0], vm1_pk)
-        vm2 = (vm2_server.networks.values()[0][0], vm2_pk)
-        self._ping_through_gateway(vm1, vm2, should_fail=True)
+        ap_details = self.servers_and_keys[-1]
+        hops = [(ap_details['FIP'].floating_ip_address,
+                 ap_details['keypair']['private_key'])]
+        vm1_server = self.servers_and_keys[0]['server']
+        vm2_server = self.servers_and_keys[1]['server']
+        vm1_pk = self.servers_and_keys[0]['keypair']['private_key']
+        vm2_pk = self.servers_and_keys[0]['keypair']['private_key']
+        vm1 = (vm1_server['addresses'].values()[0][0]['addr'], vm1_pk)
+        vm2 = (vm2_server['addresses'].values()[0][0]['addr'], vm2_pk)
+        nhops = hops + [vm1]
+        self._ping_through_gateway(nhops, vm2, should_succed=False)
