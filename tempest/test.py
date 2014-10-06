@@ -123,7 +123,7 @@ def services(*args, **kwargs):
     def decorator(f):
         services = ['compute', 'image', 'baremetal', 'volume', 'orchestration',
                     'network', 'identity', 'object_storage', 'dashboard',
-                    'ceilometer', 'data_processing']
+                    'telemetry', 'data_processing']
         for service in args:
             if service not in services:
                 raise exceptions.InvalidServiceTag('%s is not a valid '
