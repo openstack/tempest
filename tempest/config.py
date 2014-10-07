@@ -143,6 +143,9 @@ IdentityFeatureGroup = [
     cfg.BoolOpt('api_v3',
                 default=True,
                 help='Is the v3 identity API enabled'),
+    cfg.BoolOpt('xml_api',
+                default=False,
+                help='If false, skip all identity api tests with xml'),
 ]
 
 compute_group = cfg.OptGroup(name='compute',
