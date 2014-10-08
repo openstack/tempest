@@ -202,7 +202,7 @@ class DataGenerator(object):
         def _try_wrapper(func, item, **kwargs):
             try:
                 if kwargs:
-                    func(item['id'], kwargs)
+                    func(item['id'], **kwargs)
                 else:
                     func(item['id'])
             except exceptions.NotFound:
