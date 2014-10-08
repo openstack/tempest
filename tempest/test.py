@@ -270,7 +270,14 @@ class BaseTestCase(BaseDeps):
             try:
                 cls.tearDownClass()
             except Exception as te:
-                LOG.exception("tearDownClass failed: %s" % te)
+                tetype, _, _ = sys.exc_info()
+                # TODO(gmann): Till we split-up resource_setup &
+                # resource_cleanup in more structural way, log
+                # AttributeError as info instead of exception.
+                if tetype is AttributeError:
+                    LOG.info("tearDownClass failed: %s" % te)
+                else:
+                    LOG.exception("tearDownClass failed: %s" % te)
             try:
                 raise etype(value), None, trace
             finally:
