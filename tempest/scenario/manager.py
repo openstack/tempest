@@ -443,8 +443,9 @@ class ScenarioTest(tempest.test.BaseTestCase):
         if wait:
             self.servers_client.wait_for_server_status(server_id, 'ACTIVE')
 
-    def ping_ip_address(self, ip_address, should_succeed=True):
-        cmd = ['ping', '-c1', '-w1', ip_address]
+    def ping_ip_address(self, ip_address, should_succeed=True, ip_version=4):
+        ping_cmd = 'ping6' if ip_version == 6 else 'ping'
+        cmd = [ping_cmd, '-c1', '-w1', ip_address]
 
         def ping():
             proc = subprocess.Popen(cmd,
@@ -534,7 +535,7 @@ class NetworkScenarioTest(ScenarioTest):
             cidr_in_use = self._list_subnets(tenant_id=tenant_id, cidr=cidr)
             return len(cidr_in_use) != 0
 
-        ip_version = kwargs.get('ip_version', self._ip_version)
+        ip_version = kwargs.get('ip_version', getattr(self, "_ip_version", 4))
         if ip_version == 6:
             tenant_cidr = \
                 netaddr.IPNetwork(CONF.network.tenant_network_v6_cidr)
@@ -634,7 +635,8 @@ class NetworkScenarioTest(ScenarioTest):
     def _check_vm_connectivity(self, ip_address,
                                username=None,
                                private_key=None,
-                               should_connect=True):
+                               should_connect=True,
+                               ip_version=None):
         """
         :param ip_address: server to test against
         :param username: server's ssh username
@@ -646,12 +648,14 @@ class NetworkScenarioTest(ScenarioTest):
         :raises: AssertError if the result of the connectivity check does
             not match the value of the should_connect param
         """
+        ip_version = ip_version or getattr(self, "_ip_version", 4)
         if should_connect:
             msg = "Timed out waiting for %s to become reachable" % ip_address
         else:
             msg = "ip address %s is reachable" % ip_address
         self.assertTrue(self.ping_ip_address(ip_address,
-                                             should_succeed=should_connect),
+                                             should_succeed=should_connect,
+                                             ip_version=ip_version),
                         msg=msg)
         if should_connect:
             # no need to check ssh for negative connectivity

@@ -183,11 +183,6 @@ class IsolatedCreds(cred_provider.CredentialProvider):
             ip_version = self.network_resources.get('ip_version', 4)
         else:
             ip_version = 4
-        if not self.tempest_client:
-            body = {'subnet': {'name': subnet_name, 'tenant_id': tenant_id,
-                    'network_id': network_id, 'ip_version': ip_version}}
-            if self.network_resources:
-                body['enable_dhcp'] = self.network_resources['dhcp']
         if ip_version == 6:
             base_cidr = netaddr.IPNetwork(CONF.network.tenant_network_v6_cidr)
             mask_bits = CONF.network.tenant_network_v6_mask_bits
