@@ -23,11 +23,11 @@ class TelemetryNotificationAPITestJSON(base.BaseTelemetryTest):
     _interface = 'json'
 
     @classmethod
-    def setUpClass(cls):
+    def resource_setup(cls):
         if CONF.telemetry.too_slow_to_test:
             raise cls.skipException("Ceilometer feature for fast work mysql "
                                     "is disabled")
-        super(TelemetryNotificationAPITestJSON, cls).setUpClass()
+        super(TelemetryNotificationAPITestJSON, cls).resource_setup()
 
     @test.attr(type="gate")
     @testtools.skipIf(not CONF.service_available.nova,

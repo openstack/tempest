@@ -30,8 +30,8 @@ class TestClaims(base.BaseMessagingTest):
     _interface = 'json'
 
     @classmethod
-    def setUpClass(cls):
-        super(TestClaims, cls).setUpClass()
+    def resource_setup(cls):
+        super(TestClaims, cls).resource_setup()
         cls.queue_name = data_utils.rand_name('Queues-Test')
         # Create Queue
         cls.create_queue(cls.queue_name)
@@ -118,6 +118,6 @@ class TestClaims(base.BaseMessagingTest):
         self.client.delete_messages(message_uri)
 
     @classmethod
-    def tearDownClass(cls):
+    def resource_cleanup(cls):
         cls.delete_queue(cls.queue_name)
-        super(TestClaims, cls).tearDownClass()
+        super(TestClaims, cls).resource_cleanup()

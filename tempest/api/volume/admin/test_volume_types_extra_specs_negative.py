@@ -25,8 +25,8 @@ class ExtraSpecsNegativeTest(base.BaseVolumeV1AdminTest):
     _interface = 'json'
 
     @classmethod
-    def setUpClass(cls):
-        super(ExtraSpecsNegativeTest, cls).setUpClass()
+    def resource_setup(cls):
+        super(ExtraSpecsNegativeTest, cls).resource_setup()
         vol_type_name = data_utils.rand_name('Volume-type-')
         cls.extra_specs = {"spec1": "val1"}
         _, cls.volume_type = cls.client.create_volume_type(
@@ -34,9 +34,9 @@ class ExtraSpecsNegativeTest(base.BaseVolumeV1AdminTest):
             extra_specs=cls.extra_specs)
 
     @classmethod
-    def tearDownClass(cls):
+    def resource_cleanup(cls):
         cls.client.delete_volume_type(cls.volume_type['id'])
-        super(ExtraSpecsNegativeTest, cls).tearDownClass()
+        super(ExtraSpecsNegativeTest, cls).resource_cleanup()
 
     @test.attr(type='gate')
     def test_update_no_body(self):

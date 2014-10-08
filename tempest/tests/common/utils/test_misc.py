@@ -82,7 +82,7 @@ class TestMisc(base.TestCase):
         self.assertEqual(':tearDown', tearDown())
 
     def test_find_test_caller_teardown_class(self):
-        def tearDownClass(cls):
+        def tearDownClass(cls):  # noqa
             return misc.find_test_caller()
         self.assertEqual('TestMisc:tearDownClass',
                          tearDownClass(self.__class__))

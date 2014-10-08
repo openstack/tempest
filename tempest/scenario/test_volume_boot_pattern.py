@@ -36,8 +36,8 @@ class TestVolumeBootPattern(manager.ScenarioTest):
      * Check written content in the instance booted from snapshot
     """
     @classmethod
-    def setUpClass(cls):
-        super(TestVolumeBootPattern, cls).setUpClass()
+    def resource_setup(cls):
+        super(TestVolumeBootPattern, cls).resource_setup()
 
         if not CONF.volume_feature_enabled.snapshot:
             raise cls.skipException("Cinder volume snapshots are disabled")

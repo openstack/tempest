@@ -27,9 +27,8 @@ class VolumesBackupsTest(base.BaseVolumeV1AdminTest):
     _interface = "json"
 
     @classmethod
-    @test.safe_setup
-    def setUpClass(cls):
-        super(VolumesBackupsTest, cls).setUpClass()
+    def resource_setup(cls):
+        super(VolumesBackupsTest, cls).resource_setup()
 
         if not CONF.volume_feature_enabled.backup:
             raise cls.skipException("Cinder backup feature disabled")

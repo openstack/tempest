@@ -25,8 +25,8 @@ class VolumesServicesTestJSON(base.BaseVolumeV1AdminTest):
     _interface = "json"
 
     @classmethod
-    def setUpClass(cls):
-        super(VolumesServicesTestJSON, cls).setUpClass()
+    def resource_setup(cls):
+        super(VolumesServicesTestJSON, cls).resource_setup()
         cls.client = cls.os_adm.volume_services_client
         _, cls.services = cls.client.list_services()
         cls.host_name = cls.services[0]['host']

@@ -22,15 +22,15 @@ class VolumeTypesExtraSpecsTest(base.BaseVolumeV1AdminTest):
     _interface = "json"
 
     @classmethod
-    def setUpClass(cls):
-        super(VolumeTypesExtraSpecsTest, cls).setUpClass()
+    def resource_setup(cls):
+        super(VolumeTypesExtraSpecsTest, cls).resource_setup()
         vol_type_name = data_utils.rand_name('Volume-type-')
         _, cls.volume_type = cls.client.create_volume_type(vol_type_name)
 
     @classmethod
-    def tearDownClass(cls):
+    def resource_cleanup(cls):
         cls.client.delete_volume_type(cls.volume_type['id'])
-        super(VolumeTypesExtraSpecsTest, cls).tearDownClass()
+        super(VolumeTypesExtraSpecsTest, cls).resource_cleanup()
 
     @test.attr(type='smoke')
     def test_volume_type_extra_specs_list(self):

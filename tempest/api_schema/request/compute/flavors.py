@@ -40,14 +40,19 @@ common_admin_flavor_create = {
     "json-schema": {
         "type": "object",
         "properties": {
-            "name": {"type": "string"},
-            "ram": {"type": "integer", "minimum": 1},
-            "vcpus": {"type": "integer", "minimum": 1},
-            "disk": {"type": "integer"},
-            "id": {"type": "integer"},
-            "swap": {"type": "integer"},
-            "rxtx_factor": {"type": "integer"},
-            "OS-FLV-EXT-DATA:ephemeral": {"type": "integer"}
+           "flavor": {
+               "type": "object",
+               "properties": {
+                   "name": {"type": "string",
+                            "exclude_tests": ["gen_str_min_length"]},
+                   "ram": {"type": "integer", "minimum": 1},
+                   "vcpus": {"type": "integer", "minimum": 1},
+                   "disk": {"type": "integer"},
+                   "id": {"type": "integer",
+                          "exclude_tests": ["gen_none", "gen_string"]
+                          },
+                   }
+               }
         }
     }
 }

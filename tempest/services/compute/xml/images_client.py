@@ -127,7 +127,7 @@ class ImagesClientXML(rest_client.RestClient):
     def get_image(self, image_id):
         """Returns the details of a single image."""
         resp, body = self.get("images/%s" % str(image_id))
-        self.expected_success(200, resp)
+        self.expected_success(200, resp.status)
         body = self._parse_image(etree.fromstring(body))
         return resp, body
 

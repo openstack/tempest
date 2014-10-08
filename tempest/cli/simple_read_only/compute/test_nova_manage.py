@@ -36,7 +36,7 @@ class SimpleReadOnlyNovaManageTest(cli.ClientTestBase):
     """
 
     @classmethod
-    def setUpClass(cls):
+    def resource_setup(cls):
         if not CONF.service_available.nova:
             msg = ("%s skipped as Nova is not available" % cls.__name__)
             raise cls.skipException(msg)
@@ -44,7 +44,7 @@ class SimpleReadOnlyNovaManageTest(cli.ClientTestBase):
             msg = ("%s skipped as *-manage commands not available"
                    % cls.__name__)
             raise cls.skipException(msg)
-        super(SimpleReadOnlyNovaManageTest, cls).setUpClass()
+        super(SimpleReadOnlyNovaManageTest, cls).resource_setup()
 
     def test_admin_fake_action(self):
         self.assertRaises(exceptions.CommandFailed,
@@ -65,19 +65,16 @@ class SimpleReadOnlyNovaManageTest(cli.ClientTestBase):
                          self.nova_manage('', '--version', merge_stderr=True))
 
     def test_debug_flag(self):
-        self.assertNotEqual("", self.nova_manage('flavor list',
+        self.assertNotEqual("", self.nova_manage('service list',
                             '--debug'))
 
     def test_verbose_flag(self):
-        self.assertNotEqual("", self.nova_manage('flavor list',
+        self.assertNotEqual("", self.nova_manage('service list',
                             '--verbose'))
 
     # test actions
     def test_version(self):
         self.assertNotEqual("", self.nova_manage('version'))
-
-    def test_flavor_list(self):
-        self.assertNotEqual("", self.nova_manage('flavor list'))
 
     def test_db_sync(self):
         # make sure command doesn't error out

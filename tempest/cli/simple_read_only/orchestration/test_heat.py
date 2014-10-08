@@ -32,12 +32,12 @@ class SimpleReadOnlyHeatClientTest(tempest.cli.ClientTestBase):
     """
 
     @classmethod
-    def setUpClass(cls):
+    def resource_setup(cls):
         if (not CONF.service_available.heat):
             msg = ("Skipping all Heat cli tests because it is "
                    "not available")
             raise cls.skipException(msg)
-        super(SimpleReadOnlyHeatClientTest, cls).setUpClass()
+        super(SimpleReadOnlyHeatClientTest, cls).resource_setup()
         cls.heat_template_path = os.path.join(os.path.dirname(
             os.path.dirname(os.path.realpath(__file__))),
             'heat_templates/heat_minimal.yaml')

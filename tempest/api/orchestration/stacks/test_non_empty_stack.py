@@ -25,8 +25,8 @@ LOG = logging.getLogger(__name__)
 class StacksTestJSON(base.BaseOrchestrationTest):
 
     @classmethod
-    def setUpClass(cls):
-        super(StacksTestJSON, cls).setUpClass()
+    def resource_setup(cls):
+        super(StacksTestJSON, cls).resource_setup()
         cls.stack_name = data_utils.rand_name('heat')
         template = cls.read_template('non_empty_stack')
         image_id = (CONF.orchestration.image_ref or

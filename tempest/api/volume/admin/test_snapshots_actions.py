@@ -22,9 +22,8 @@ class SnapshotsActionsTest(base.BaseVolumeV1AdminTest):
     _interface = "json"
 
     @classmethod
-    @test.safe_setup
-    def setUpClass(cls):
-        super(SnapshotsActionsTest, cls).setUpClass()
+    def resource_setup(cls):
+        super(SnapshotsActionsTest, cls).resource_setup()
         cls.client = cls.snapshots_client
 
         # Create admin volume client
@@ -46,7 +45,7 @@ class SnapshotsActionsTest(base.BaseVolumeV1AdminTest):
                                             'available')
 
     @classmethod
-    def tearDownClass(cls):
+    def resource_cleanup(cls):
         # Delete the test snapshot
         cls.client.delete_snapshot(cls.snapshot['id'])
         cls.client.wait_for_resource_deletion(cls.snapshot['id'])
@@ -55,7 +54,7 @@ class SnapshotsActionsTest(base.BaseVolumeV1AdminTest):
         cls.volumes_client.delete_volume(cls.volume['id'])
         cls.volumes_client.wait_for_resource_deletion(cls.volume['id'])
 
-        super(SnapshotsActionsTest, cls).tearDownClass()
+        super(SnapshotsActionsTest, cls).resource_cleanup()
 
     def tearDown(self):
         # Set snapshot's status to available after test

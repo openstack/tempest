@@ -83,6 +83,7 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
         cls.fw_rules = []
         cls.fw_policies = []
         cls.ipsecpolicies = []
+        cls.ethertype = "IPv" + str(cls._ip_version)
 
     @classmethod
     def resource_cleanup(cls):

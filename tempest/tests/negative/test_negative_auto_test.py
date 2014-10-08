@@ -43,9 +43,9 @@ class TestNegativeAutoTest(base.TestCase):
     def _check_prop_entries(self, result, entry):
         entries = [a for a in result if entry in a[0]]
         self.assertIsNotNone(entries)
-        self.assertIs(len(entries), 2)
+        self.assertGreater(len(entries), 1)
         for entry in entries:
-            self.assertIsNotNone(entry[1]['schema'])
+            self.assertIsNotNone(entry[1]['_negtest_name'])
 
     def _check_resource_entries(self, result, entry):
         entries = [a for a in result if entry in a[0]]
@@ -57,12 +57,11 @@ class TestNegativeAutoTest(base.TestCase):
     def test_generate_scenario(self):
         scenarios = test.NegativeAutoTest.\
             generate_scenario(self.fake_input_desc)
-
         self.assertIsInstance(scenarios, list)
         for scenario in scenarios:
             self.assertIsInstance(scenario, tuple)
             self.assertIsInstance(scenario[0], str)
             self.assertIsInstance(scenario[1], dict)
-        self._check_prop_entries(scenarios, "prop_minRam")
-        self._check_prop_entries(scenarios, "prop_minDisk")
+        self._check_prop_entries(scenarios, "minRam")
+        self._check_prop_entries(scenarios, "minDisk")
         self._check_resource_entries(scenarios, "inv_res")

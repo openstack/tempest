@@ -1141,8 +1141,10 @@ class TempestConfigPrivate(object):
         # to remove an issue with the config file up to date checker.
         if parse_conf:
             config_files.append(path)
-
-        cfg.CONF([], project='tempest', default_config_files=config_files)
+        if os.path.isfile(path):
+            cfg.CONF([], project='tempest', default_config_files=config_files)
+        else:
+            cfg.CONF([], project='tempest')
         logging.setup('tempest')
         LOG = logging.getLogger('tempest')
         LOG.info("Using tempest config file %s" % path)

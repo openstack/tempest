@@ -30,8 +30,8 @@ class BaseOrchestrationTest(tempest.test.BaseTestCase):
     """Base test case class for all Orchestration API tests."""
 
     @classmethod
-    def setUpClass(cls):
-        super(BaseOrchestrationTest, cls).setUpClass()
+    def resource_setup(cls):
+        super(BaseOrchestrationTest, cls).resource_setup()
         cls.os = clients.Manager()
         if not CONF.service_available.heat:
             raise cls.skipException("Heat support is required")
@@ -146,11 +146,11 @@ class BaseOrchestrationTest(tempest.test.BaseTestCase):
             return yaml.safe_load(f)
 
     @classmethod
-    def tearDownClass(cls):
+    def resource_cleanup(cls):
         cls._clear_stacks()
         cls._clear_keypairs()
         cls._clear_images()
-        super(BaseOrchestrationTest, cls).tearDownClass()
+        super(BaseOrchestrationTest, cls).resource_cleanup()
 
     @staticmethod
     def stack_output(stack, output_key):

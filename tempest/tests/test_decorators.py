@@ -97,6 +97,28 @@ class TestServicesDecorator(BaseDecoratorsTest):
                           self._test_services_helper, 'compute',
                           'volume')
 
+    def test_services_list(self):
+        service_list = test.get_service_list()
+        for service in service_list:
+            try:
+                self._test_services_helper(service)
+            except exceptions.InvalidServiceTag:
+                self.fail('%s is not listed in the valid service tag list'
+                          % service)
+            except KeyError:
+                # NOTE(mtreinish): This condition is to test for a entry in
+                # the outer decorator list but not in the service_list dict.
+                # However, because we're looping over the service_list dict
+                # it's unlikely we'll trigger this. So manual review is still
+                # need for the list in the outer decorator.
+                self.fail('%s is in the list of valid service tags but there '
+                          'is no corresponding entry in the dict returned from'
+                          ' get_service_list()' % service)
+            except testtools.TestCase.skipException:
+                # Test didn't raise an exception because of an incorrect list
+                # entry so move onto the next entry
+                continue
+
 
 class TestStressDecorator(BaseDecoratorsTest):
     def _test_stresstest_helper(self, expected_frequency='process',

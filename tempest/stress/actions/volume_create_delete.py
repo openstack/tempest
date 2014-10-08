@@ -20,14 +20,12 @@ class VolumeCreateDeleteTest(stressaction.StressAction):
         name = data_utils.rand_name("volume")
         self.logger.info("creating %s" % name)
         volumes_client = self.manager.volumes_client
-        resp, volume = volumes_client.create_volume(size=1,
-                                                    display_name=name)
-        assert(resp.status == 200)
+        _, volume = volumes_client.create_volume(size=1,
+                                                 display_name=name)
         vol_id = volume['id']
         volumes_client.wait_for_volume_status(vol_id, 'available')
         self.logger.info("created %s" % volume['id'])
         self.logger.info("deleting %s" % name)
-        resp, _ = volumes_client.delete_volume(vol_id)
-        assert(resp.status == 202)
+        volumes_client.delete_volume(vol_id)
         volumes_client.wait_for_resource_deletion(vol_id)
         self.logger.info("deleted %s" % vol_id)

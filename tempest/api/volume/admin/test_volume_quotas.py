@@ -27,8 +27,8 @@ class VolumeQuotasAdminTestJSON(base.BaseVolumeV1AdminTest):
     force_tenant_isolation = True
 
     @classmethod
-    def setUpClass(cls):
-        super(VolumeQuotasAdminTestJSON, cls).setUpClass()
+    def resource_setup(cls):
+        super(VolumeQuotasAdminTestJSON, cls).resource_setup()
         cls.admin_volume_client = cls.os_adm.volumes_client
         cls.demo_tenant_id = cls.isolated_creds.get_primary_creds().tenant_id
 
