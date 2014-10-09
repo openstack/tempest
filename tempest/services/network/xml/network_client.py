@@ -25,7 +25,8 @@ class NetworkClientXML(client_base.NetworkClientBase):
     # list of plurals used for xml serialization
     PLURALS = ['dns_nameservers', 'host_routes', 'allocation_pools',
                'fixed_ips', 'extensions', 'extra_dhcp_opts', 'pools',
-               'health_monitors', 'vips', 'members', 'allowed_address_pairs']
+               'health_monitors', 'vips', 'members', 'allowed_address_pairs',
+               'firewall_rules']
 
     def get_rest_client(self, auth_provider):
         rc = rest_client.RestClient(auth_provider)
@@ -278,6 +279,27 @@ class NetworkClientXML(client_base.NetworkClientBase):
         network = common.Element("network_id", network_id)
         resp, body = self.post(uri, str(common.Document(network)))
         self.rest_client.expected_success(201, resp.status)
+        body = _root_tag_fetcher_and_xml_to_json_parse(body)
+        return resp, body
+
+    def insert_firewall_rule_in_policy(self, firewall_policy_id,
+                                       firewall_rule_id, insert_after="",
+                                       insert_before=""):
+        uri = '%s/fw/firewall_policies/%s/insert_rule' % (self.uri_prefix,
+                                                          firewall_policy_id)
+        rule = common.Element("firewall_rule_id", firewall_rule_id)
+        resp, body = self.put(uri, str(common.Document(rule)))
+        self.rest_client.expected_success(200, resp.status)
+        body = _root_tag_fetcher_and_xml_to_json_parse(body)
+        return resp, body
+
+    def remove_firewall_rule_from_policy(self, firewall_policy_id,
+                                         firewall_rule_id):
+        uri = '%s/fw/firewall_policies/%s/remove_rule' % (self.uri_prefix,
+                                                          firewall_policy_id)
+        rule = common.Element("firewall_rule_id", firewall_rule_id)
+        resp, body = self.put(uri, str(common.Document(rule)))
+        self.rest_client.expected_success(200, resp.status)
         body = _root_tag_fetcher_and_xml_to_json_parse(body)
         return resp, body
 
