@@ -170,7 +170,6 @@ class BaseVolumeAdminTest(BaseVolumeTest):
 
         cls.qos_specs = []
 
-        cls.client = cls.os_adm.volume_types_client
         cls.hosts_client = cls.os_adm.volume_hosts_client
         cls.quotas_client = cls.os_adm.volume_quotas_client
         cls.volume_types_client = cls.os_adm.volume_types_client
