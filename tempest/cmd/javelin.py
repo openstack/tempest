@@ -20,6 +20,7 @@ resources in a declarative way.
 """
 
 import argparse
+import collections
 import datetime
 import os
 import sys
@@ -43,7 +44,7 @@ from tempest.services.volume.json import volumes_client
 
 OPTS = {}
 USERS = {}
-RES = {}
+RES = collections.defaultdict(list)
 
 LOG = None
 
@@ -508,6 +509,9 @@ def _get_volume_by_name(client, name):
 
 
 def create_volumes(volumes):
+    if not volumes:
+        return
+    LOG.info("Creating volumes")
     for volume in volumes:
         client = client_for_user(volume['owner'])
 
@@ -630,7 +634,7 @@ def main():
     global RES
     get_options()
     setup_logging()
-    RES = load_resources(OPTS.resources)
+    RES.update(load_resources(OPTS.resources))
 
     if OPTS.mode == 'create':
         create_resources()
