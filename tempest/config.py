@@ -481,7 +481,10 @@ NetworkFeaturesGroup = [
                 help="Allow the execution of IPv6 subnet tests that use "
                      "the extended IPv6 attributes ipv6_ra_mode "
                      "and ipv6_address_mode"
-                )
+                ),
+    cfg.BoolOpt('xml_api',
+                default=False,
+                help='If false, skip all network api tests with xml')
 ]
 
 messaging_group = cfg.OptGroup(name='messaging',
