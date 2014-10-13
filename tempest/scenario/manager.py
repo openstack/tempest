@@ -468,6 +468,7 @@ class NetworkScenarioTest(ScenarioTest):
     Subclassed tests will be skipped if Neutron is not enabled
 
     """
+    _ip_version = 4
 
     @classmethod
     def check_preconditions(cls):
@@ -519,7 +520,7 @@ class NetworkScenarioTest(ScenarioTest):
         return temp
 
     def _create_subnet(self, network, client=None, namestart='subnet-smoke',
-                       max_net_bits=0, **kwargs):
+                       net_max_bits=0, **kwargs):
         """
         Create a subnet for the given network within the cidr block
         configured for tenant networks.
@@ -543,8 +544,8 @@ class NetworkScenarioTest(ScenarioTest):
         else:
             tenant_cidr = netaddr.IPNetwork(CONF.network.tenant_network_cidr)
             network_prefix = CONF.network.tenant_network_mask_bits
-        if max_net_bits:
-            network_prefix = max_net_bits
+        if net_max_bits:
+            network_prefix = net_max_bits
         result = None
         # Repeatedly attempt subnet creation with sequential cidr
         # blocks until an unallocated block is found.
