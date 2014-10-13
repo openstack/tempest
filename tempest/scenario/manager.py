@@ -269,12 +269,26 @@ class ScenarioTest(tempest.test.BaseTestCase):
                 'to_port': 22,
                 'cidr': '0.0.0.0/0',
             },
+             {
+                # ssh -6
+                'ip_protocol': 'tcp',
+                'from_port': 22,
+                'to_port': 22,
+                'cidr': '::/0',
+            },
             {
                 # ping
                 'ip_proto': 'icmp',
                 'from_port': -1,
                 'to_port': -1,
                 'cidr': '0.0.0.0/0',
+            },
+            {
+                # ping6
+                'ip_protocol': 'icmp',
+                'from_port': -1,
+                'to_port': -1,
+                'cidr': '::/0',
             }
         ]
         rules = list()
@@ -386,6 +400,12 @@ class ScenarioTest(tempest.test.BaseTestCase):
             LOG.debug(self.servers_client.get_console_output(server['id'],
                                                              length=None))
 
+    def _log_net_info(self, exc):
+        # network debug is called as part of ssh init
+        if not isinstance(exc, exceptions.SSHTimeout):
+            LOG.debug('Network information on a devstack host')
+            debug.log_net_debug()
+
     def create_server_snapshot(self, server, name=None):
         # Glance client
         _image_client = self.image_client
@@ -443,7 +463,8 @@ class ScenarioTest(tempest.test.BaseTestCase):
         if wait:
             self.servers_client.wait_for_server_status(server_id, 'ACTIVE')
 
-    def ping_ip_address(self, ip_address, should_succeed=True, ip_version=4):
+    def ping_ip_address(self, ip_address, should_succeed=True):
+        ip_version = netaddr.IPAddress(ip_address).version
         ping_cmd = 'ping6' if ip_version == 6 else 'ping'
         cmd = [ping_cmd, '-c1', '-w1', ip_address]
 
@@ -468,7 +489,6 @@ class NetworkScenarioTest(ScenarioTest):
     Subclassed tests will be skipped if Neutron is not enabled
 
     """
-    _ip_version = 4
 
     @classmethod
     def check_preconditions(cls):
@@ -535,7 +555,6 @@ class NetworkScenarioTest(ScenarioTest):
             """
             cidr_in_use = self._list_subnets(tenant_id=tenant_id, cidr=cidr)
             return len(cidr_in_use) != 0
-
         ip_version = kwargs.get('ip_version', getattr(self, "_ip_version", 4))
         if ip_version == 6:
             tenant_cidr = \
@@ -546,6 +565,8 @@ class NetworkScenarioTest(ScenarioTest):
             network_prefix = CONF.network.tenant_network_mask_bits
         if net_max_bits:
             network_prefix = net_max_bits
+
+        #tenant_cidr = netaddr.IPNetwork(CONF.network.tenant_network_cidr)
         result = None
         # Repeatedly attempt subnet creation with sequential cidr
         # blocks until an unallocated block is found.
@@ -556,13 +577,12 @@ class NetworkScenarioTest(ScenarioTest):
 
             subnet = dict(
                 name=data_utils.rand_name(namestart),
+                ip_version=4,
                 network_id=network.id,
                 tenant_id=network.tenant_id,
                 cidr=str_cidr,
                 **kwargs
             )
-            if 'ip_version' not in kwargs:
-                subnet['ip_version'] = ip_version
             try:
                 _, result = client.create_subnet(**subnet)
                 break
@@ -636,8 +656,7 @@ class NetworkScenarioTest(ScenarioTest):
     def _check_vm_connectivity(self, ip_address,
                                username=None,
                                private_key=None,
-                               should_connect=True,
-                               ip_version=None):
+                               should_connect=True):
         """
         :param ip_address: server to test against
         :param username: server's ssh username
@@ -649,14 +668,12 @@ class NetworkScenarioTest(ScenarioTest):
         :raises: AssertError if the result of the connectivity check does
             not match the value of the should_connect param
         """
-        ip_version = ip_version or getattr(self, "_ip_version", 4)
         if should_connect:
             msg = "Timed out waiting for %s to become reachable" % ip_address
         else:
             msg = "ip address %s is reachable" % ip_address
         self.assertTrue(self.ping_ip_address(ip_address,
-                                             should_succeed=should_connect,
-                                             ip_version=ip_version),
+                                             should_succeed=should_connect),
                         msg=msg)
         if should_connect:
             # no need to check ssh for negative connectivity
@@ -680,9 +697,7 @@ class NetworkScenarioTest(ScenarioTest):
                 ex_msg += ": " + msg
             LOG.exception(ex_msg)
             self._log_console_output(servers)
-            # network debug is called as part of ssh init
-            if not isinstance(e, exceptions.SSHTimeout):
-                debug.log_net_debug()
+            self._log_net_info(e)
             raise
 
     def _check_tenant_network_connectivity(self, server,
@@ -706,9 +721,7 @@ class NetworkScenarioTest(ScenarioTest):
         except Exception as e:
             LOG.exception('Tenant network connectivity check failed')
             self._log_console_output(servers_for_debug)
-            # network debug is called as part of ssh init
-            if not isinstance(e, exceptions.SSHTimeout):
-                debug.log_net_debug()
+            self._log_net_info(e)
             raise
 
     def _check_remote_connectivity(self, source, dest, should_succeed=True):

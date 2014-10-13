@@ -122,6 +122,18 @@ def verify_cinder_api_versions(os, update):
                             not CONF.volume_feature_enabled.api_v2, update)
 
 
+def verify_api_versions(os, service, update):
+    verify = {
+        'cinder': verify_cinder_api_versions,
+        'glance': verify_glance_api_versions,
+        'keystone': verify_keystone_api_versions,
+        'nova': verify_nova_api_versions,
+    }
+    if service not in verify:
+        return
+    verify[service](os, update)
+
+
 def get_extension_client(os, service):
     extensions_client = {
         'nova': os.extensions_client,
@@ -337,10 +349,13 @@ def main():
         elif service not in services:
             continue
         results = verify_extensions(os, service, results)
-    verify_keystone_api_versions(os, update)
-    verify_glance_api_versions(os, update)
-    verify_nova_api_versions(os, update)
-    verify_cinder_api_versions(os, update)
+
+    # Verify API verisons of all services in the keystone catalog and keystone
+    # itself.
+    services.append('keystone')
+    for service in services:
+        verify_api_versions(os, service, update)
+
     display_results(results, update, replace)
     if update:
         conf_file.close()
