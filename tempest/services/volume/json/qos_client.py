@@ -38,6 +38,11 @@ class BaseQosSpecsClientJSON(rest_client.RestClient):
             return True
         return False
 
+    @property
+    def resource_type(self):
+        """Returns the primary type of resource this client works with."""
+        return 'qos'
+
     def wait_for_qos_operations(self, qos_id, operation, args=None):
         """Waits for a qos operations to be completed.
 

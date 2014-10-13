@@ -55,6 +55,11 @@ class VolumeTypesClientJSON(rest_client.RestClient):
             return True
         return False
 
+    @property
+    def resource_type(self):
+        """Returns the primary type of resource this client works with."""
+        return 'volume-type/encryption-type'
+
     def list_volume_types(self, params=None):
         """List all the volume_types created."""
         url = 'types'
