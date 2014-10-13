@@ -24,12 +24,10 @@ class VolumeVerifyStress(stressaction.StressAction):
 
     def _create_keypair(self):
         keyname = data_utils.rand_name("key")
-        resp, self.key = self.manager.keypairs_client.create_keypair(keyname)
-        assert(resp.status == 200)
+        _, self.key = self.manager.keypairs_client.create_keypair(keyname)
 
     def _delete_keypair(self):
-        resp, _ = self.manager.keypairs_client.delete_keypair(self.key['name'])
-        assert(resp.status == 202)
+        self.manager.keypairs_client.delete_keypair(self.key['name'])
 
     def _create_vm(self):
         self.name = name = data_utils.rand_name("instance")
@@ -38,18 +36,16 @@ class VolumeVerifyStress(stressaction.StressAction):
         vm_args = self.vm_extra_args.copy()
         vm_args['security_groups'] = [self.sec_grp]
         vm_args['key_name'] = self.key['name']
-        resp, server = servers_client.create_server(name, self.image,
-                                                    self.flavor,
-                                                    **vm_args)
+        _, server = servers_client.create_server(name, self.image,
+                                                 self.flavor,
+                                                 **vm_args)
         self.server_id = server['id']
-        assert(resp.status == 202)
         self.manager.servers_client.wait_for_server_status(self.server_id,
                                                            'ACTIVE')
 
     def _destroy_vm(self):
         self.logger.info("deleting server: %s" % self.server_id)
-        resp, _ = self.manager.servers_client.delete_server(self.server_id)
-        assert(resp.status == 204)  # It cannot be 204 if I had to wait..
+        self.manager.servers_client.delete_server(self.server_id)
         self.manager.servers_client.wait_for_server_termination(self.server_id)
         self.logger.info("deleted server: %s" % self.server_id)
 
@@ -81,10 +77,9 @@ class VolumeVerifyStress(stressaction.StressAction):
         name = data_utils.rand_name("volume")
         self.logger.info("creating volume: %s" % name)
         volumes_client = self.manager.volumes_client
-        resp, self.volume = volumes_client.create_volume(
+        _, self.volume = volumes_client.create_volume(
             size=1,
             display_name=name)
-        assert(resp.status == 200)
         volumes_client.wait_for_volume_status(self.volume['id'],
                                               'available')
         self.logger.info("created volume: %s" % self.volume['id'])
@@ -92,8 +87,7 @@ class VolumeVerifyStress(stressaction.StressAction):
     def _delete_volume(self):
         self.logger.info("deleting volume: %s" % self.volume['id'])
         volumes_client = self.manager.volumes_client
-        resp, _ = volumes_client.delete_volume(self.volume['id'])
-        assert(resp.status == 202)
+        volumes_client.delete_volume(self.volume['id'])
         volumes_client.wait_for_resource_deletion(self.volume['id'])
         self.logger.info("deleted volume: %s" % self.volume['id'])
 
@@ -193,10 +187,9 @@ class VolumeVerifyStress(stressaction.StressAction):
         servers_client = self.manager.servers_client
         self.logger.info("attach volume (%s) to vm %s" %
                          (self.volume['id'], self.server_id))
-        resp, body = servers_client.attach_volume(self.server_id,
-                                                  self.volume['id'],
-                                                  self.part_name)
-        assert(resp.status == 200)
+        servers_client.attach_volume(self.server_id,
+                                     self.volume['id'],
+                                     self.part_name)
         self.manager.volumes_client.wait_for_volume_status(self.volume['id'],
                                                            'in-use')
         if self.enable_ssh_verify:
@@ -204,9 +197,8 @@ class VolumeVerifyStress(stressaction.StressAction):
                              % self.server_id)
             self.part_wait(self.attach_match_count)
 
-        resp, body = servers_client.detach_volume(self.server_id,
-                                                  self.volume['id'])
-        assert(resp.status == 202)
+        servers_client.detach_volume(self.server_id,
+                                     self.volume['id'])
         self.manager.volumes_client.wait_for_volume_status(self.volume['id'],
                                                            'available')
         if self.enable_ssh_verify:

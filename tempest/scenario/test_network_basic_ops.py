@@ -88,10 +88,10 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
             raise cls.skipException(msg)
 
     @classmethod
-    def setUpClass(cls):
+    def resource_setup(cls):
         # Create no network resources for these tests.
         cls.set_network_resources()
-        super(TestNetworkBasicOps, cls).setUpClass()
+        super(TestNetworkBasicOps, cls).resource_setup()
         for ext in ['router', 'security-group']:
             if not test.is_extension_enabled(ext, 'network'):
                 msg = "%s extension not enabled." % ext

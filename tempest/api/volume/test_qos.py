@@ -25,9 +25,8 @@ class QosSpecsV2TestJSON(base.BaseVolumeAdminTest):
     """
 
     @classmethod
-    @test.safe_setup
-    def setUpClass(cls):
-        super(QosSpecsV2TestJSON, cls).setUpClass()
+    def resource_setup(cls):
+        super(QosSpecsV2TestJSON, cls).resource_setup()
         # Create admin qos client
         # Create a test shared qos-specs for tests
         cls.qos_name = utils.rand_name(cls.__name__ + '-QoS')

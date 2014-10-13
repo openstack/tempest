@@ -38,12 +38,12 @@ class TestLargeOpsScenario(manager.ScenarioTest):
     """
 
     @classmethod
-    def setUpClass(cls):
+    def resource_setup(cls):
         if CONF.scenario.large_ops_number < 1:
             raise cls.skipException("large_ops_number not set to multiple "
                                     "instances")
         cls.set_network_resources()
-        super(TestLargeOpsScenario, cls).setUpClass()
+        super(TestLargeOpsScenario, cls).resource_setup()
 
     def _wait_for_server_status(self, status):
         for server in self.servers:

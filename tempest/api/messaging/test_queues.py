@@ -44,8 +44,8 @@ class TestManageQueue(base.BaseMessagingTest):
     _interface = 'json'
 
     @classmethod
-    def setUpClass(cls):
-        super(TestManageQueue, cls).setUpClass()
+    def resource_setup(cls):
+        super(TestManageQueue, cls).resource_setup()
         cls.queues = list()
         for _ in moves.xrange(5):
             queue_name = data_utils.rand_name('Queues-Test')
@@ -125,7 +125,7 @@ class TestManageQueue(base.BaseMessagingTest):
         self.assertThat(body, matchers.Equals(req_body))
 
     @classmethod
-    def tearDownClass(cls):
+    def resource_cleanup(cls):
         for queue_name in cls.queues:
             cls.client.delete_queue(queue_name)
-        super(TestManageQueue, cls).tearDownClass()
+        super(TestManageQueue, cls).resource_cleanup()

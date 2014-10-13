@@ -51,8 +51,8 @@ class TestStampPattern(manager.ScenarioTest):
     """
 
     @classmethod
-    def setUpClass(cls):
-        super(TestStampPattern, cls).setUpClass()
+    def resource_setup(cls):
+        super(TestStampPattern, cls).resource_setup()
 
         if not CONF.volume_feature_enabled.snapshot:
             raise cls.skipException("Cinder volume snapshots are disabled")
