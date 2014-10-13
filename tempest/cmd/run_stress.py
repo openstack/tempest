@@ -102,9 +102,11 @@ def main():
                                       call_inherited=ns.call_inherited)
 
     if ns.serial:
+        # Duration is total time
+        duration = ns.duration / len(tests)
         for test in tests:
             step_result = driver.stress_openstack([test],
-                                                  ns.duration,
+                                                  duration,
                                                   ns.number,
                                                   ns.stop)
             # NOTE(mkoderer): we just save the last result code
