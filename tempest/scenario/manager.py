@@ -21,7 +21,6 @@ import subprocess
 import netaddr
 import six
 
-from tempest.api.network import common as net_common
 from tempest import auth
 from tempest import clients
 from tempest.common import debug
@@ -47,23 +46,14 @@ LOG_cinder_client.addHandler(log.NullHandler())
 
 
 class ScenarioTest(tempest.test.BaseTestCase):
-    """Replaces the OfficialClientTest base class.
-
-    Uses tempest own clients as opposed to OfficialClients.
-
-    Common differences:
-    - replace resource.attribute with resource['attribute']
-    - replace resouce.delete with delete_callable(resource['id'])
-    - replace local waiters with common / rest_client waiters
-    """
+    """Base class for scenario tests. Uses tempest own clients. """
 
     @classmethod
-    def setUpClass(cls):
-        super(ScenarioTest, cls).setUpClass()
+    def resource_setup(cls):
+        super(ScenarioTest, cls).resource_setup()
         # Using tempest client for isolated credentials as well
         cls.isolated_creds = isolated_creds.IsolatedCreds(
-            cls.__name__, tempest_client=True,
-            network_resources=cls.network_resources)
+            cls.__name__, network_resources=cls.network_resources)
         cls.manager = clients.Manager(
             credentials=cls.credentials()
         )
@@ -453,8 +443,9 @@ class ScenarioTest(tempest.test.BaseTestCase):
         if wait:
             self.servers_client.wait_for_server_status(server_id, 'ACTIVE')
 
-    def ping_ip_address(self, ip_address, should_succeed=True):
-        cmd = ['ping', '-c1', '-w1', ip_address]
+    def ping_ip_address(self, ip_address, should_succeed=True, ip_version=4):
+        ping_cmd = 'ping6' if ip_version == 6 else 'ping'
+        cmd = [ping_cmd, '-c1', '-w1', ip_address]
 
         def ping():
             proc = subprocess.Popen(cmd,
@@ -485,8 +476,8 @@ class NetworkScenarioTest(ScenarioTest):
             raise cls.skipException('Neutron not available')
 
     @classmethod
-    def setUpClass(cls):
-        super(NetworkScenarioTest, cls).setUpClass()
+    def resource_setup(cls):
+        super(NetworkScenarioTest, cls).resource_setup()
         cls.tenant_id = cls.manager.identity_client.tenant_id
         cls.check_preconditions()
 
@@ -545,7 +536,7 @@ class NetworkScenarioTest(ScenarioTest):
             cidr_in_use = self._list_subnets(tenant_id=tenant_id, cidr=cidr)
             return len(cidr_in_use) != 0
 
-        ip_version = kwargs.get('ip_version', self._ip_version)
+        ip_version = kwargs.get('ip_version', getattr(self, "_ip_version", 4))
         if ip_version == 6:
             tenant_cidr = \
                 netaddr.IPNetwork(CONF.network.tenant_network_v6_cidr)
@@ -609,7 +600,7 @@ class NetworkScenarioTest(ScenarioTest):
 
     def _get_network_by_name(self, network_name):
         net = self._list_networks(name=network_name)
-        return net_common.AttributeDict(net[0])
+        return net_resources.AttributeDict(net[0])
 
     def _create_floating_ip(self, thing, external_network_id, port_id=None,
                             client=None):
@@ -645,7 +636,8 @@ class NetworkScenarioTest(ScenarioTest):
     def _check_vm_connectivity(self, ip_address,
                                username=None,
                                private_key=None,
-                               should_connect=True):
+                               should_connect=True,
+                               ip_version=None):
         """
         :param ip_address: server to test against
         :param username: server's ssh username
@@ -657,12 +649,14 @@ class NetworkScenarioTest(ScenarioTest):
         :raises: AssertError if the result of the connectivity check does
             not match the value of the should_connect param
         """
+        ip_version = ip_version or getattr(self, "_ip_version", 4)
         if should_connect:
             msg = "Timed out waiting for %s to become reachable" % ip_address
         else:
             msg = "ip address %s is reachable" % ip_address
         self.assertTrue(self.ping_ip_address(ip_address,
-                                             should_succeed=should_connect),
+                                             should_succeed=should_connect,
+                                             ip_version=ip_version),
                         msg=msg)
         if should_connect:
             # no need to check ssh for negative connectivity
@@ -1022,8 +1016,8 @@ class BaremetalProvisionStates(object):
 
 class BaremetalScenarioTest(ScenarioTest):
     @classmethod
-    def setUpClass(cls):
-        super(BaremetalScenarioTest, cls).setUpClass()
+    def resource_setup(cls):
+        super(BaremetalScenarioTest, cls).resource_setup()
 
         if (not CONF.service_available.ironic or
            not CONF.baremetal.driver_enabled):
@@ -1154,8 +1148,8 @@ class EncryptionScenarioTest(ScenarioTest):
     """
 
     @classmethod
-    def setUpClass(cls):
-        super(EncryptionScenarioTest, cls).setUpClass()
+    def resource_setup(cls):
+        super(EncryptionScenarioTest, cls).resource_setup()
         cls.admin_volume_types_client = cls.admin_manager.volume_types_client
 
     def _wait_for_volume_status(self, status):
@@ -1201,8 +1195,8 @@ class OrchestrationScenarioTest(ScenarioTest):
     """
 
     @classmethod
-    def setUpClass(cls):
-        super(OrchestrationScenarioTest, cls).setUpClass()
+    def resource_setup(cls):
+        super(OrchestrationScenarioTest, cls).resource_setup()
         if not CONF.service_available.heat:
             raise cls.skipException("Heat support is required")
 
@@ -1246,9 +1240,9 @@ class SwiftScenarioTest(ScenarioTest):
     """
 
     @classmethod
-    def setUpClass(cls):
+    def resource_setup(cls):
         cls.set_network_resources()
-        super(SwiftScenarioTest, cls).setUpClass()
+        super(SwiftScenarioTest, cls).resource_setup()
         if not CONF.service_available.swift:
             skip_msg = ("%s skipped as swift is not available" %
                         cls.__name__)

@@ -23,9 +23,8 @@ CONF = config.CONF
 class VolumesV2SnapshotTestJSON(base.BaseVolumeTest):
 
     @classmethod
-    @test.safe_setup
-    def setUpClass(cls):
-        super(VolumesV2SnapshotTestJSON, cls).setUpClass()
+    def resource_setup(cls):
+        super(VolumesV2SnapshotTestJSON, cls).resource_setup()
         cls.volume_origin = cls.create_volume()
 
         if not CONF.volume_feature_enabled.snapshot:

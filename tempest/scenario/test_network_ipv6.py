@@ -39,7 +39,7 @@ class TestNetworkIPv6(manager.NetworkScenarioTest):
         for bits in [125, 126]:
             sub = self._create_subnet(network=net,
                                       namestart='subnet-{0}'.format(bits),
-                                      net_max_bits=bits)
+                                      max_net_bits=bits)
             start = netaddr.IPAddress(sub.allocation_pools[0]['start'])
             end = netaddr.IPAddress(sub.allocation_pools[0]['end'])
             n_addresses = end.value - start.value + 1

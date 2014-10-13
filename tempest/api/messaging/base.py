@@ -35,8 +35,8 @@ class BaseMessagingTest(test.BaseTestCase):
     """
 
     @classmethod
-    def setUpClass(cls):
-        super(BaseMessagingTest, cls).setUpClass()
+    def resource_setup(cls):
+        super(BaseMessagingTest, cls).resource_setup()
         if not CONF.service_available.zaqar:
             raise cls.skipException("Zaqar support is required")
         os = cls.get_client_manager()

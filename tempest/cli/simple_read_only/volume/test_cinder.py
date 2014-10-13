@@ -35,11 +35,11 @@ class SimpleReadOnlyCinderClientTest(cli.ClientTestBase):
     """
 
     @classmethod
-    def setUpClass(cls):
+    def resource_setup(cls):
         if not CONF.service_available.cinder:
             msg = ("%s skipped as Cinder is not available" % cls.__name__)
             raise cls.skipException(msg)
-        super(SimpleReadOnlyCinderClientTest, cls).setUpClass()
+        super(SimpleReadOnlyCinderClientTest, cls).resource_setup()
 
     def test_cinder_fake_action(self):
         self.assertRaises(exceptions.CommandFailed,

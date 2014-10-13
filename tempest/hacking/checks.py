@@ -24,7 +24,7 @@ PYTHON_CLIENTS = ['cinder', 'glance', 'keystone', 'nova', 'swift', 'neutron',
 
 PYTHON_CLIENT_RE = re.compile('import (%s)client' % '|'.join(PYTHON_CLIENTS))
 TEST_DEFINITION = re.compile(r'^\s*def test.*')
-SETUPCLASS_DEFINITION = re.compile(r'^\s*def setUpClass')
+SETUP_TEARDOWN_CLASS_DEFINITION = re.compile(r'^\s+def (setUp|tearDown)Class')
 SCENARIO_DECORATOR = re.compile(r'\s*@.*services\((.*)\)')
 VI_HEADER_RE = re.compile(r"^#\s+vim?:.+")
 mutable_default_args = re.compile(r"^\s*def .+\((.+=\{\}|.+=\[\])")
@@ -58,15 +58,15 @@ def scenario_tests_need_service_tags(physical_line, filename,
                         "T104: Scenario tests require a service decorator")
 
 
-def no_setupclass_for_unit_tests(physical_line, filename):
+def no_setup_teardown_class_for_tests(physical_line, filename):
 
     if pep8.noqa(physical_line):
         return
 
-    if 'tempest/tests' in filename:
-        if SETUPCLASS_DEFINITION.match(physical_line):
+    if 'tempest/test.py' not in filename:
+        if SETUP_TEARDOWN_CLASS_DEFINITION.match(physical_line):
             return (physical_line.find('def'),
-                    "T105: setUpClass can not be used with unit tests")
+                    "T105: (setUp|tearDown)Class can not be used in tests")
 
 
 def no_vi_headers(physical_line, line_number, lines):
@@ -106,20 +106,6 @@ def service_tags_not_in_module_path(physical_line, filename):
                             "T107: service tag should not be in path")
 
 
-def no_official_client_manager_in_api_tests(physical_line, filename):
-    """Check that the OfficialClientManager isn't used in the api tests
-
-    The api tests should not use the official clients.
-
-    T108: Can not use OfficialClientManager in the API tests
-    """
-    if 'tempest/api' in filename:
-        if 'OfficialClientManager' in physical_line:
-            return (physical_line.find('OfficialClientManager'),
-                    'T108: OfficialClientManager can not be used in the api '
-                    'tests')
-
-
 def no_mutable_default_args(logical_line):
     """Check that mutable object isn't used as default argument
 
@@ -133,8 +119,7 @@ def no_mutable_default_args(logical_line):
 def factory(register):
     register(import_no_clients_in_api)
     register(scenario_tests_need_service_tags)
-    register(no_setupclass_for_unit_tests)
+    register(no_setup_teardown_class_for_tests)
     register(no_vi_headers)
     register(service_tags_not_in_module_path)
-    register(no_official_client_manager_in_api_tests)
     register(no_mutable_default_args)

@@ -26,8 +26,8 @@ LOG = logging.getLogger(__name__)
 class CinderResourcesTest(base.BaseOrchestrationTest):
 
     @classmethod
-    def setUpClass(cls):
-        super(CinderResourcesTest, cls).setUpClass()
+    def resource_setup(cls):
+        super(CinderResourcesTest, cls).resource_setup()
         if not CONF.service_available.cinder:
             raise cls.skipException('Cinder support is required')
 

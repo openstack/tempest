@@ -22,9 +22,8 @@ from tempest import test
 class VolumesV2MetadataTest(base.BaseVolumeTest):
 
     @classmethod
-    @test.safe_setup
-    def setUpClass(cls):
-        super(VolumesV2MetadataTest, cls).setUpClass()
+    def resource_setup(cls):
+        super(VolumesV2MetadataTest, cls).resource_setup()
         # Create a volume
         cls.volume = cls.create_volume()
         cls.volume_id = cls.volume['id']

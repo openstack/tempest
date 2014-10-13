@@ -74,19 +74,17 @@ class FloatingStress(stressaction.StressAction):
         self.logger.info("creating %s" % name)
         vm_args = self.vm_extra_args.copy()
         vm_args['security_groups'] = [self.sec_grp]
-        resp, server = servers_client.create_server(name, self.image,
-                                                    self.flavor,
-                                                    **vm_args)
+        _, server = servers_client.create_server(name, self.image,
+                                                 self.flavor,
+                                                 **vm_args)
         self.server_id = server['id']
-        assert(resp.status == 202)
         if self.wait_after_vm_create:
             self.manager.servers_client.wait_for_server_status(self.server_id,
                                                                'ACTIVE')
 
     def _destroy_vm(self):
         self.logger.info("deleting %s" % self.server_id)
-        resp, _ = self.manager.servers_client.delete_server(self.server_id)
-        assert(resp.status == 204)  # It cannot be 204 if I had to wait..
+        self.manager.servers_client.delete_server(self.server_id)
         self.manager.servers_client.wait_for_server_termination(self.server_id)
         self.logger.info("deleted %s" % self.server_id)
 

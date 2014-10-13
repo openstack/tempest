@@ -34,11 +34,11 @@ class SimpleReadOnlySaharaClientTest(cli.ClientTestBase):
     """
 
     @classmethod
-    def setUpClass(cls):
+    def resource_setup(cls):
         if not CONF.service_available.sahara:
             msg = "Skipping all Sahara cli tests because it is not available"
             raise cls.skipException(msg)
-        super(SimpleReadOnlySaharaClientTest, cls).setUpClass()
+        super(SimpleReadOnlySaharaClientTest, cls).resource_setup()
 
     @test.attr(type='negative')
     def test_sahara_fake_action(self):

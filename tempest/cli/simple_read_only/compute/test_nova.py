@@ -41,11 +41,11 @@ class SimpleReadOnlyNovaClientTest(cli.ClientTestBase):
     """
 
     @classmethod
-    def setUpClass(cls):
+    def resource_setup(cls):
         if not CONF.service_available.nova:
             msg = ("%s skipped as Nova is not available" % cls.__name__)
             raise cls.skipException(msg)
-        super(SimpleReadOnlyNovaClientTest, cls).setUpClass()
+        super(SimpleReadOnlyNovaClientTest, cls).resource_setup()
 
     def test_admin_fake_action(self):
         self.assertRaises(exceptions.CommandFailed,

@@ -63,6 +63,5 @@ class Manager(object):
                 'Credentials must be specified')
         auth_provider_class = self.get_auth_provider_class(credentials)
         return auth_provider_class(
-            client_type=getattr(self, 'client_type', None),
             interface=getattr(self, 'interface', None),
             credentials=credentials)

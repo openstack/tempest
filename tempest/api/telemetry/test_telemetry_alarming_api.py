@@ -20,8 +20,8 @@ class TelemetryAlarmingAPITestJSON(base.BaseTelemetryTest):
     _interface = 'json'
 
     @classmethod
-    def setUpClass(cls):
-        super(TelemetryAlarmingAPITestJSON, cls).setUpClass()
+    def resource_setup(cls):
+        super(TelemetryAlarmingAPITestJSON, cls).resource_setup()
         cls.rule = {'meter_name': 'cpu_util',
                     'comparison_operator': 'gt',
                     'threshold': 80.0,

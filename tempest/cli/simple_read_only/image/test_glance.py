@@ -34,11 +34,11 @@ class SimpleReadOnlyGlanceClientTest(cli.ClientTestBase):
     """
 
     @classmethod
-    def setUpClass(cls):
+    def resource_setup(cls):
         if not CONF.service_available.glance:
             msg = ("%s skipped as Glance is not available" % cls.__name__)
             raise cls.skipException(msg)
-        super(SimpleReadOnlyGlanceClientTest, cls).setUpClass()
+        super(SimpleReadOnlyGlanceClientTest, cls).resource_setup()
 
     def test_glance_fake_action(self):
         self.assertRaises(exceptions.CommandFailed,

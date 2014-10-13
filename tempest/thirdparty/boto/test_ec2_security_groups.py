@@ -20,8 +20,8 @@ from tempest.thirdparty.boto import test as boto_test
 class EC2SecurityGroupTest(boto_test.BotoTestCase):
 
     @classmethod
-    def setUpClass(cls):
-        super(EC2SecurityGroupTest, cls).setUpClass()
+    def resource_setup(cls):
+        super(EC2SecurityGroupTest, cls).resource_setup()
         cls.client = cls.os.ec2api_client
 
     def test_create_authorize_security_group(self):

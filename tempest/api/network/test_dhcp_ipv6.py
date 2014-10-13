@@ -31,7 +31,6 @@ class NetworksTestDHCPv6JSON(base.BaseNetworkTest):
     _ip_version = 6
 
     @classmethod
-    @test.safe_setup
     def setUpClass(cls):
         super(NetworksTestDHCPv6JSON, cls).setUpClass()
         msg = None

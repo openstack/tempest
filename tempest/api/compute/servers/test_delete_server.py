@@ -70,6 +70,18 @@ class DeleteServersTestJSON(base.BaseV2ComputeTest):
         self.assertEqual('204', resp['status'])
         self.client.wait_for_server_termination(server['id'])
 
+    @testtools.skipUnless(CONF.compute_feature_enabled.suspend,
+                          'Suspend is not available.')
+    @test.attr(type='gate')
+    def test_delete_server_while_in_suspended_state(self):
+        # Delete a server while it's VM state is Suspended
+        _, server = self.create_test_server(wait_until='ACTIVE')
+        self.client.suspend_server(server['id'])
+        self.client.wait_for_server_status(server['id'], 'SUSPENDED')
+        resp, _ = self.client.delete_server(server['id'])
+        self.assertEqual('204', resp['status'])
+        self.client.wait_for_server_termination(server['id'])
+
     @testtools.skipUnless(CONF.compute_feature_enabled.shelve,
                           'Shelve is not available.')
     @test.attr(type='gate')
