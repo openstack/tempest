@@ -514,7 +514,7 @@ VolumeGroup = [
                help='Time in seconds between volume availability checks.'),
     cfg.IntOpt('build_timeout',
                default=300,
-               help='Timeout in seconds to wait for a volume to become'
+               help='Timeout in seconds to wait for a volume to become '
                     'available.'),
     cfg.StrOpt('catalog_type',
                default='volume',

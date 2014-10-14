@@ -1100,7 +1100,7 @@
 # value)
 #build_interval=1
 
-# Timeout in seconds to wait for a volume to becomeavailable.
+# Timeout in seconds to wait for a volume to become available.
 # (integer value)
 #build_timeout=300
 
