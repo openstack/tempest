@@ -13,11 +13,7 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
-'''
-Created on Sep 3, 2014
 
-@author: David_Paterson
-'''
 from tempest import config
 from tempest.openstack.common import log as logging
 from tempest import test
