@@ -30,21 +30,30 @@ class TestNetworkIPv6(manager.NetworkScenarioTest):
     network_resources = {'network': False, 'router': False, 'subnet': False,
                          'dhcp': False}
 
-    @test.services('network')
-    def test_large_prefix(self):
+    def _number_of_addresses_for_net_bits(self, net_bits):
         import netaddr
 
         net = self._create_network(tenant_id=self.tenant_id,
                                    namestart='net-125-126')
-        for bits in [125, 126]:
-            sub = self._create_subnet(network=net,
-                                      namestart='subnet-{0}'.format(bits),
-                                      max_net_bits=bits)
-            start = netaddr.IPAddress(sub.allocation_pools[0]['start'])
-            end = netaddr.IPAddress(sub.allocation_pools[0]['end'])
-            n_addresses = end.value - start.value + 1
-            self.assertEqual(expected=pow(2, 128 - bits)-3,
-                             observed=n_addresses)
+        sub = self._create_subnet(network=net,
+                                  namestart='subnet-{0}'.format(net_bits),
+                                  net_max_bits=net_bits,
+                                  enable_dhcp=False)
+        start = netaddr.IPAddress(sub.allocation_pools[0]['start'])
+        end = netaddr.IPAddress(sub.allocation_pools[0]['end'])
+        return end.value - start.value + 1
+
+    @test.services('network')
+    def test_large_prefix_125(self):
+        self.assertEqual(expected=8,
+                         observed=self._number_of_addresses_for_net_bits(125),
+                         message='::/125 should have 8 addresses')
+
+    @test.services('network')
+    def test_large_prefix_126(self):
+        self.assertEqual(expected=4,
+                         observed=self._number_of_addresses_for_net_bits(126),
+                         message='::/126 should have 4 addresses')
 
     @test.services('compute', 'network')
     def test_46(self):
@@ -54,11 +63,11 @@ class TestNetworkIPv6(manager.NetworkScenarioTest):
                                    namestart='net-46')
 
         def define_access(srv):
-            for nic in srv.addresses[net.name]:
+            for nic in srv['addresses'][net.name]:
                 if nic['version'] == 6:
-                    srv.accessIPv6 = nic['addr']
+                    srv['accessIPv6'] = nic['addr']
                 else:
-                    srv.accessIPv4 = nic['addr']
+                    srv['accessIPv4'] = nic['addr']
 
         sub4 = self._create_subnet(network=net,
                                    namestart='sub-4',
@@ -69,9 +78,8 @@ class TestNetworkIPv6(manager.NetworkScenarioTest):
         sub4.add_to_router(router_id=router['id'])
 
         key_pair = self.create_keypair()
-        sec_group = self._create_security_group_nova()
-        kwargs = {'key_name': key_pair.id,
-                  'security_groups': [sec_group.name]}
+        sec_grp = self._create_security_group(tenant_id=self.tenant_id)
+        kwargs = {'key_name': key_pair['name'], 'security_groups': [sec_grp]}
 
         i1 = self.create_server(create_kwargs=kwargs, image=image_id, flavor=2)
         i2 = self.create_server(create_kwargs=kwargs, image=image_id, flavor=2)
@@ -83,26 +91,26 @@ class TestNetworkIPv6(manager.NetworkScenarioTest):
 
         ssh1 = self.get_remote_client(server_or_ip=fip1.floating_ip_address,
                                       username=CONF.compute.image_alt_ssh_user,
-                                      private_key=key_pair.private_key)
+                                      private_key=key_pair['private_key'])
         ssh2 = self.get_remote_client(server_or_ip=fip2.floating_ip_address,
                                       username=CONF.compute.image_alt_ssh_user,
-                                      private_key=key_pair.private_key)
+                                      private_key=key_pair['private_key'])
 
         r = ssh1.exec_command('ip addr show dev eth0')
-        self.assertIn(i1.accessIPv4, r)
+        self.assertIn(i1['accessIPv4'], r)
         # v6 should be configured since the image supports it
-        self.assertIn(i1.accessIPv6, r)
+        self.assertIn(i1['accessIPv6'], r)
         r = ssh2.exec_command('ip addr show dev eth0')
-        self.assertIn(i2.accessIPv4, r)
+        self.assertIn(i2['accessIPv4'], r)
         # v6 should be configured since the image supports it
-        self.assertIn(i2.accessIPv6, r)
-        r = ssh1.exec_command(cmd='ping -c1 {0}'.format(i2.accessIPv4))
+        self.assertIn(i2['accessIPv6'], r)
+        r = ssh1.exec_command(cmd='ping -c1 {0}'.format(i2['accessIPv4']))
         self.assertIn('0% packet loss', r)
-        r = ssh2.exec_command(cmd='ping -c1 {0}'.format(i1.accessIPv4))
+        r = ssh2.exec_command(cmd='ping -c1 {0}'.format(i1['accessIPv4']))
         self.assertIn('0% packet loss', r)
-        r = ssh1.exec_command(cmd='ping6 -c1 {0}'.format(i2.accessIPv6))
+        r = ssh1.exec_command(cmd='ping6 -c1 {0}'.format(i2['accessIPv6']))
         self.assertIn('0% packet loss', r)
-        r = ssh2.exec_command(cmd='ping6 -c1 {0}'.format(i1.accessIPv6))
+        r = ssh2.exec_command(cmd='ping6 -c1 {0}'.format(i1['accessIPv6']))
         self.assertIn('0% packet loss', r)
 
 

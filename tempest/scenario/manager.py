@@ -611,12 +611,17 @@ class NetworkScenarioTest(ScenarioTest):
         self.addCleanup(self.delete_wrapper, port.delete)
         return port
 
-    def _get_server_port_id(self, server, ip_addr=None):
+    def _get_server_port_id_and_ips(self, server, ip_addr=None):
         ports = self._list_ports(device_id=server['id'],
                                  fixed_ip=ip_addr)
         self.assertEqual(len(ports), 1,
                          "Unable to determine which port to target.")
-        return ports[0]['id']
+        ip4 = None
+        for ip46 in ports[0]['fixed_ips']:
+            ip = ip46['ip_address']
+            if netaddr.valid_ipv4(ip):
+                ip4 = ip
+        return ports[0]['id'], ip4
 
     def _get_network_by_name(self, network_name):
         net = self._list_networks(name=network_name)
@@ -627,11 +632,14 @@ class NetworkScenarioTest(ScenarioTest):
         if not client:
             client = self.network_client
         if not port_id:
-            port_id = self._get_server_port_id(thing)
+            port_id, ip4 = self._get_server_port_id_and_ips(thing)
+        else:
+            ip4 = None
         _, result = client.create_floatingip(
             floating_network_id=external_network_id,
             port_id=port_id,
-            tenant_id=thing['tenant_id']
+            tenant_id=thing['tenant_id'],
+            fixed_ip_address=ip4  # floating for ipv6 is not supported
         )
         floating_ip = net_resources.DeletableFloatingIp(
             client=client,
@@ -640,7 +648,7 @@ class NetworkScenarioTest(ScenarioTest):
         return floating_ip
 
     def _associate_floating_ip(self, floating_ip, server):
-        port_id = self._get_server_port_id(server)
+        port_id = self._get_server_port_id_and_ips(server)[0]
         floating_ip.update(port_id=port_id)
         self.assertEqual(port_id, floating_ip.port_id)
         return floating_ip
