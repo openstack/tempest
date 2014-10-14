@@ -271,7 +271,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
             },
              {
                 # ssh -6
-                'ip_protocol': 'tcp',
+                'ip_proto': 'tcp',
                 'from_port': 22,
                 'to_port': 22,
                 'cidr': '::/0',
@@ -285,7 +285,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
             },
             {
                 # ping6
-                'ip_protocol': 'icmp',
+                'ip_proto': 'icmp',
                 'from_port': -1,
                 'to_port': -1,
                 'cidr': '::/0',
@@ -577,7 +577,7 @@ class NetworkScenarioTest(ScenarioTest):
 
             subnet = dict(
                 name=data_utils.rand_name(namestart),
-                ip_version=4,
+                ip_version=ip_version,
                 network_id=network.id,
                 tenant_id=network.tenant_id,
                 cidr=str_cidr,
