@@ -68,7 +68,10 @@ class FixedIPsNegativeTestJson(base.BaseV2ComputeAdminTest):
         # NOTE(maurosr): since this exercises the same code snippet, we do it
         # only for reserve action
         body = {"reserve": "None"}
-        self.assertRaises(exceptions.NotFound,
+        # NOTE(eliqiao): in Juno, the exception is NotFound, but in master, we
+        # change the error code to BadRequest, both exceptions should be
+        # accepted by tempest
+        self.assertRaises((exceptions.NotFound, exceptions.BadRequest),
                           self.client.reserve_fixed_ip,
                           "my.invalid.ip", body)
 
