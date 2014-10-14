@@ -23,8 +23,8 @@ import six
 
 from tempest import auth
 from tempest import clients
+from tempest.common import credentials
 from tempest.common import debug
-from tempest.common import isolated_creds
 from tempest.common.utils import data_utils
 from tempest.common.utils.linux import remote_client
 from tempest import config
@@ -51,8 +51,9 @@ class ScenarioTest(tempest.test.BaseTestCase):
     @classmethod
     def resource_setup(cls):
         super(ScenarioTest, cls).resource_setup()
-        # Using tempest client for isolated credentials as well
-        cls.isolated_creds = isolated_creds.IsolatedCreds(
+        # TODO(andreaf) Some of the code from this resource_setup could be
+        # moved into `BaseTestCase`
+        cls.isolated_creds = credentials.get_isolated_credentials(
             cls.__name__, network_resources=cls.network_resources)
         cls.manager = clients.Manager(
             credentials=cls.credentials()
@@ -79,27 +80,19 @@ class ScenarioTest(tempest.test.BaseTestCase):
         cls.orchestration_client = cls.manager.orchestration_client
 
     @classmethod
-    def _get_credentials(cls, get_creds, ctype):
-        if CONF.compute.allow_tenant_isolation:
-            creds = get_creds()
-        else:
-            creds = auth.get_default_credentials(ctype)
-        return creds
-
-    @classmethod
     def credentials(cls):
-        return cls._get_credentials(cls.isolated_creds.get_primary_creds,
-                                    'user')
+        return cls.isolated_creds.get_primary_creds()
 
     @classmethod
     def alt_credentials(cls):
-        return cls._get_credentials(cls.isolated_creds.get_alt_creds,
-                                    'alt_user')
+        return cls.isolated_creds.get_alt_creds()
 
     @classmethod
     def admin_credentials(cls):
-        return cls._get_credentials(cls.isolated_creds.get_admin_creds,
-                                    'identity_admin')
+        try:
+            return cls.isolated_creds.get_admin_creds()
+        except NotImplementedError:
+            raise cls.skipException('Admin Credentials are not available')
 
     # ## Methods to handle sync and async deletes
 

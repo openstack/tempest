@@ -38,8 +38,27 @@ AuthGroup = [
                default='etc/accounts.yaml',
                help="Path to the yaml file that contains the list of "
                     "credentials to use for running tests"),
+    cfg.BoolOpt('allow_tenant_isolation',
+                default=False,
+                help="Allows test cases to create/destroy tenants and "
+                     "users. This option requires that OpenStack Identity "
+                     "API admin credentials are known. If false, isolated "
+                     "test cases and parallel execution, can still be "
+                     "achieved configuring a list of test accounts",
+                deprecated_opts=[cfg.DeprecatedOpt('allow_tenant_isolation',
+                                                   group='compute'),
+                                 cfg.DeprecatedOpt('allow_tenant_isolation',
+                                                   group='orchestration')]),
+    cfg.BoolOpt('locking_credentials_provider',
+                default=False,
+                help="If set to True it enables the Accounts provider, "
+                     "which locks credentials to allow for parallel execution "
+                     "with pre-provisioned accounts. It can only be used to "
+                     "run tests that ensure credentials cleanup happens. "
+                     "It requires at least `2 * CONC` distinct accounts "
+                     "configured in `test_accounts_file`, with CONC == the "
+                     "number of concurrent test processes."),
 ]
-
 
 identity_group = cfg.OptGroup(name='identity',
                               title="Keystone Configuration Options")
@@ -129,12 +148,6 @@ compute_group = cfg.OptGroup(name='compute',
                              title='Compute Service Options')
 
 ComputeGroup = [
-    cfg.BoolOpt('allow_tenant_isolation',
-                default=False,
-                help="Allows test cases to create/destroy tenants and "
-                     "users. This option enables isolated test cases and "
-                     "better parallel execution, but also requires that "
-                     "OpenStack Identity API admin credentials are known."),
     cfg.StrOpt('image_ref',
                help="Valid primary image reference to be used in tests. "
                     "This is a required option"),
@@ -666,12 +679,6 @@ OrchestrationGroup = [
                choices=['public', 'admin', 'internal',
                         'publicURL', 'adminURL', 'internalURL'],
                help="The endpoint type to use for the orchestration service."),
-    cfg.BoolOpt('allow_tenant_isolation',
-                default=False,
-                help="Allows test cases to create/destroy tenants and "
-                     "users. This option enables isolated test cases and "
-                     "better parallel execution, but also requires that "
-                     "OpenStack Identity API admin credentials are known."),
     cfg.IntOpt('build_interval',
                default=1,
                help="Time in seconds between build status checks."),

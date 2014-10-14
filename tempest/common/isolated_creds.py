@@ -351,3 +351,6 @@ class IsolatedCreds(cred_provider.CredentialProvider):
             except exceptions.NotFound:
                 LOG.warn("tenant with name: %s not found for delete" %
                          creds.tenant_name)
+
+    def is_multi_user(self):
+        return True
