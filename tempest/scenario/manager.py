@@ -442,7 +442,9 @@ class ScenarioTest(tempest.test.BaseTestCase):
         if wait:
             self.servers_client.wait_for_server_status(server_id, 'ACTIVE')
 
-    def ping_ip_address(self, ip_address, should_succeed=True):
+    def ping_ip_address(self, ip_address, should_succeed=True,
+                        ping_timeout=None):
+        timeout = ping_timeout or CONF.compute.ping_timeout
         cmd = ['ping', '-c1', '-w1', ip_address]
 
         def ping():
@@ -452,8 +454,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
             proc.communicate()
             return (proc.returncode == 0) == should_succeed
 
-        return tempest.test.call_until_true(
-            ping, CONF.compute.ping_timeout, 1)
+        return tempest.test.call_until_true(ping, timeout, 1)
 
 
 class NetworkScenarioTest(ScenarioTest):
