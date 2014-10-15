@@ -138,6 +138,11 @@ class BaseSnapshotsClientJSON(rest_client.RestClient):
             return True
         return False
 
+    @property
+    def resource_type(self):
+        """Returns the primary type of resource this client works with."""
+        return 'volume-snapshot'
+
     def reset_snapshot_status(self, snapshot_id, status):
         """Reset the specified snapshot's status."""
         post_body = json.dumps({'os-reset_status': {"status": status}})

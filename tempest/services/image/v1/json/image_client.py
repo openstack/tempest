@@ -240,6 +240,11 @@ class ImageClientJSON(rest_client.RestClient):
             return True
         return False
 
+    @property
+    def resource_type(self):
+        """Returns the primary type of resource this client works with."""
+        return 'image_meta'
+
     def get_image_membership(self, image_id):
         url = 'v1/images/%s/members' % image_id
         resp, body = self.get(url)
