@@ -89,13 +89,13 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
 
     @classmethod
     def resource_setup(cls):
-        # Create no network resources for these tests.
-        cls.set_network_resources()
-        super(TestNetworkBasicOps, cls).resource_setup()
         for ext in ['router', 'security-group']:
             if not test.is_extension_enabled(ext, 'network'):
                 msg = "%s extension not enabled." % ext
                 raise cls.skipException(msg)
+        # Create no network resources for these tests.
+        cls.set_network_resources()
+        super(TestNetworkBasicOps, cls).resource_setup()
 
     def setUp(self):
         super(TestNetworkBasicOps, self).setUp()

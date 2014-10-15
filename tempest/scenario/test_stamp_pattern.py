@@ -52,10 +52,9 @@ class TestStampPattern(manager.ScenarioTest):
 
     @classmethod
     def resource_setup(cls):
-        super(TestStampPattern, cls).resource_setup()
-
         if not CONF.volume_feature_enabled.snapshot:
             raise cls.skipException("Cinder volume snapshots are disabled")
+        super(TestStampPattern, cls).resource_setup()
 
     def _wait_for_volume_snapshot_status(self, volume_snapshot, status):
         self.snapshots_client.wait_for_snapshot_status(volume_snapshot['id'],
