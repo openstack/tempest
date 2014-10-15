@@ -358,6 +358,25 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
     @testtools.skipUnless(CONF.compute_feature_enabled.console_output,
                           'Console output not supported.')
     @test.attr(type='gate')
+    def test_get_console_output_with_unlimited_size(self):
+        _, server = self.create_test_server(wait_until='ACTIVE')
+
+        def _check_full_length_console_log():
+            _, output = self.servers_client.get_console_output(server['id'],
+                                                               None)
+            self.assertTrue(output, "Console output was empty.")
+            lines = len(output.split('\n'))
+
+            # NOTE: This test tries to get full length console log, and the
+            # length should be bigger than the one of test_get_console_output.
+            self.assertTrue(lines > 10, "Cannot get enough console log length."
+                                        " (lines: %s)" % lines)
+
+        self.wait_for(_check_full_length_console_log)
+
+    @testtools.skipUnless(CONF.compute_feature_enabled.console_output,
+                          'Console output not supported.')
+    @test.attr(type='gate')
     def test_get_console_output_server_id_in_shutoff_status(self):
         # Positive test:Should be able to GET the console output
         # for a given server_id in SHUTOFF status
