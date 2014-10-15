@@ -622,6 +622,23 @@ class NetworkScenarioTest(ScenarioTest):
         self.assertIsNone(floating_ip.port_id)
         return floating_ip
 
+    def check_floating_ip_status(self, floating_ip, status):
+        """Verifies floatingip has reached given status. without waiting
+
+        :param floating_ip: net_resources.DeletableFloatingIp floating IP to
+        to check status
+        :param status: target status
+        :raises: AssertionError if status doesn't match
+        """
+        floating_ip.refresh()
+        self.assertEqual(status, floating_ip.status,
+                         message="FloatingIP: {fp} is at status: {cst}. "
+                                 "failed  to reach status: {st}"
+                         .format(fp=floating_ip, cst=floating_ip.status,
+                                 st=status))
+        LOG.info("FloatingIP: {fp} is at status: {st}"
+                 .format(fp=floating_ip, st=status))
+
     def _check_vm_connectivity(self, ip_address,
                                username=None,
                                private_key=None,

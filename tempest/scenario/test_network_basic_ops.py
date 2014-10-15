@@ -176,16 +176,31 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
 
     def _check_public_network_connectivity(self, should_connect=True,
                                            msg=None):
+        """Verifies connectivty to a VM via public network and floating IP,
+        and verifies floating IP has resource status is correct.
+
+        Floating IP status is verified after connectivity test in order to
+        not add extra waiting and mask racing conditions.
+
+        :param should_connect: bool. determines if connectivity check is
+        negative or positive.
+        :param msg: Failure message to add to Error message. Should describe
+        the place in the test scenario where the method was called,
+        to indicate the context of the failure
+        """
         ssh_login = CONF.compute.image_ssh_user
         floating_ip, server = self.floating_ip_tuple
         ip_address = floating_ip.floating_ip_address
         private_key = None
+        floatingip_status = 'DOWN'
         if should_connect:
             private_key = self._get_server_key(server)
+            floatingip_status = 'ACTIVE'
         # call the common method in the parent class
         super(TestNetworkBasicOps, self)._check_public_network_connectivity(
             ip_address, ssh_login, private_key, should_connect, msg,
             self.servers)
+        self.check_floating_ip_status(floating_ip, floatingip_status)
 
     def _disassociate_floating_ips(self):
         floating_ip, server = self.floating_ip_tuple
@@ -349,6 +364,8 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         - associate detached floating ip to a new VM and verify connectivity.
         VMs are created with unique keypair so connectivity also asserts that
         floating IP is associated with the new VM instead of the old one
+
+        Verifies that floating IP status is updated correctly after each change
 
 
         """
