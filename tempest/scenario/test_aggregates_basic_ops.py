@@ -33,8 +33,8 @@ class TestAggregatesBasicOps(manager.ScenarioTest):
     Deletes aggregate
     """
     @classmethod
-    def setUpClass(cls):
-        super(TestAggregatesBasicOps, cls).setUpClass()
+    def resource_setup(cls):
+        super(TestAggregatesBasicOps, cls).resource_setup()
         cls.aggregates_client = cls.manager.aggregates_client
         cls.hosts_client = cls.manager.hosts_client
 

@@ -13,6 +13,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import copy
+
 import jsonschema
 import mock
 
@@ -86,15 +88,6 @@ class TestNegativeBasicGenerator(base.TestCase):
 class BaseNegativeGenerator(object):
     types = ['string', 'integer', 'object']
 
-    fake_input_str = {"type": "string",
-                      "minLength": 2,
-                      "maxLength": 8,
-                      'results': {'gen_int': 404}}
-
-    fake_input_int = {"type": "integer",
-                      "maximum": 255,
-                      "minimum": 1}
-
     fake_input_obj = {"type": "object",
                       "properties": {"minRam": {"type": "integer"},
                                      "diskName": {"type": "string"},
@@ -106,31 +99,21 @@ class BaseNegativeGenerator(object):
         "type": "not_defined"
     }
 
-    def _validate_result(self, data):
-        self.assertTrue(isinstance(data, list))
-        for t in data:
-            self.assertIsInstance(t, tuple)
-            self.assertEqual(3, len(t))
-            self.assertIsInstance(t[0], str)
+    class fake_test_class(object):
+        def __init__(self, scenario):
+            for k, v in scenario.iteritems():
+                setattr(self, k, v)
 
-    def test_generate_string(self):
-        result = self.generator.generate(self.fake_input_str)
-        self._validate_result(result)
-
-    def test_generate_integer(self):
-        result = self.generator.generate(self.fake_input_int)
-        self._validate_result(result)
-
-    def test_generate_obj(self):
-        result = self.generator.generate(self.fake_input_obj)
-        self._validate_result(result)
+    def _validate_result(self, valid_schema, invalid_schema):
+        for k, v in valid_schema.iteritems():
+            self.assertTrue(k in invalid_schema)
 
     def test_generator_mandatory_functions(self):
         for data_type in self.types:
             self.assertIn(data_type, self.generator.types_dict)
 
     def test_generate_with_unknown_type(self):
-        self.assertRaises(TypeError, self.generator.generate,
+        self.assertRaises(TypeError, self.generator.generate_payload,
                           self.unknown_type_schema)
 
 
@@ -151,3 +134,16 @@ class TestNegativeNegativeGenerator(base.TestCase, BaseNegativeGenerator):
     def setUp(self):
         super(TestNegativeNegativeGenerator, self).setUp()
         self.generator = negative_generator.NegativeTestGenerator()
+
+    def test_generate_obj(self):
+        schema = self.fake_input_obj
+        scenarios = self.generator.generate_scenarios(schema)
+        for scenario in scenarios:
+            test = self.fake_test_class(scenario)
+            valid_schema = \
+                valid_generator.ValidTestGenerator().generate_valid(schema)
+            schema_under_test = copy.copy(valid_schema)
+            expected_result = \
+                self.generator.generate_payload(test, schema_under_test)
+            self.assertEqual(expected_result, None)
+            self._validate_result(valid_schema, schema_under_test)

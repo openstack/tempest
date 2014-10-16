@@ -568,9 +568,10 @@ class RestClient(object):
             if self.is_resource_deleted(id):
                 return
             if int(time.time()) - start_time >= self.build_timeout:
-                message = ('Failed to delete resource %(id)s within the '
-                           'required time (%(timeout)s s).' %
-                           {'id': id, 'timeout': self.build_timeout})
+                message = ('Failed to delete %(resource_type)s %(id)s within '
+                           'the required time (%(timeout)s s).' %
+                           {'resource_type': self.resource_type, 'id': id,
+                            'timeout': self.build_timeout})
                 caller = misc_utils.find_test_caller()
                 if caller:
                     message = '(%s) %s' % (caller, message)
@@ -584,6 +585,11 @@ class RestClient(object):
         message = ('"%s" does not implement is_resource_deleted'
                    % self.__class__.__name__)
         raise NotImplementedError(message)
+
+    @property
+    def resource_type(self):
+        """Returns the primary type of resource this client works with."""
+        return 'resource'
 
     @classmethod
     def validate_response(cls, schema, resp, body):

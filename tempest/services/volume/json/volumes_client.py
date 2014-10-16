@@ -187,6 +187,11 @@ class BaseVolumesClientJSON(rest_client.RestClient):
             return True
         return False
 
+    @property
+    def resource_type(self):
+        """Returns the primary type of resource this client works with."""
+        return 'volume'
+
     def extend_volume(self, volume_id, extend_size):
         """Extend a volume."""
         post_body = {

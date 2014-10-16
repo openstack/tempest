@@ -42,6 +42,7 @@ class ServersTestJSON(base.BaseV2ComputeTest):
         personality = [{'path': '/test.txt',
                        'contents': base64.b64encode(file_contents)}]
         cls.client = cls.servers_client
+        cls.network_client = cls.os.network_client
         cli_resp = cls.create_test_server(name=cls.name,
                                           meta=cls.meta,
                                           accessIPv4=cls.accessIPv4,
@@ -123,6 +124,40 @@ class ServersTestJSON(base.BaseV2ComputeTest):
         resp, server_group = self.client.get_server_group(group_id)
         self.assertEqual(200, resp.status)
         self.assertIn(server['id'], server_group['members'])
+
+    @testtools.skipUnless(CONF.service_available.neutron,
+                          'Neutron service must be available.')
+    def test_verify_multiple_nics_order(self):
+        # Verify that the networks order given at the server creation is
+        # preserved within the server.
+        name_net1 = data_utils.rand_name(self.__class__.__name__)
+        _, net1 = self.network_client.create_network(name=name_net1)
+        name_net2 = data_utils.rand_name(self.__class__.__name__)
+        _, net2 = self.network_client.create_network(name=name_net2)
+
+        _, subnet1 = self.network_client.create_subnet(
+            network_id=net1['network']['id'],
+            cidr='19.80.0.0/24',
+            ip_version=4)
+        _, subnet2 = self.network_client.create_subnet(
+            network_id=net2['network']['id'],
+            cidr='19.86.0.0/24',
+            ip_version=4)
+
+        networks = [{'uuid': net1['network']['id']},
+                    {'uuid': net2['network']['id']}]
+
+        _, server_multi_nics = self.create_test_server(
+            networks=networks, wait_until='ACTIVE')
+
+        _, addresses = self.client.list_addresses(server_multi_nics['id'])
+
+        expected_addr = ['19.80.0.2', '19.86.0.2']
+
+        addr = [addresses[name_net1][0]['addr'],
+                addresses[name_net2][0]['addr']]
+
+        self.assertEqual(expected_addr, addr)
 
 
 class ServersWithSpecificFlavorTestJSON(base.BaseV2ComputeAdminTest):

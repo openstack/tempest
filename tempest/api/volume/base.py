@@ -32,9 +32,9 @@ class BaseVolumeTest(tempest.test.BaseTestCase):
     _interface = 'json'
 
     @classmethod
-    def setUpClass(cls):
+    def resource_setup(cls):
         cls.set_network_resources()
-        super(BaseVolumeTest, cls).setUpClass()
+        super(BaseVolumeTest, cls).resource_setup()
 
         if not CONF.service_available.cinder:
             skip_msg = ("%s skipped as Cinder is not available" % cls.__name__)
@@ -83,11 +83,11 @@ class BaseVolumeTest(tempest.test.BaseTestCase):
             raise exceptions.InvalidConfiguration(message=msg)
 
     @classmethod
-    def tearDownClass(cls):
+    def resource_cleanup(cls):
         cls.clear_snapshots()
         cls.clear_volumes()
         cls.clear_isolated_creds()
-        super(BaseVolumeTest, cls).tearDownClass()
+        super(BaseVolumeTest, cls).resource_cleanup()
 
     @classmethod
     def create_volume(cls, size=1, **kwargs):
@@ -152,25 +152,19 @@ class BaseVolumeV1Test(BaseVolumeTest):
 class BaseVolumeAdminTest(BaseVolumeTest):
     """Base test case class for all Volume Admin API tests."""
     @classmethod
-    def setUpClass(cls):
-        super(BaseVolumeAdminTest, cls).setUpClass()
-        cls.adm_user = CONF.identity.admin_username
-        cls.adm_pass = CONF.identity.admin_password
-        cls.adm_tenant = CONF.identity.admin_tenant_name
-        if not all((cls.adm_user, cls.adm_pass, cls.adm_tenant)):
-            msg = ("Missing Volume Admin API credentials "
-                   "in configuration.")
-            raise cls.skipException(msg)
+    def resource_setup(cls):
+        super(BaseVolumeAdminTest, cls).resource_setup()
 
-        if CONF.compute.allow_tenant_isolation:
-            cls.os_adm = clients.Manager(cls.isolated_creds.get_admin_creds(),
-                                         interface=cls._interface)
-        else:
-            cls.os_adm = clients.AdminManager(interface=cls._interface)
+        try:
+            cls.adm_creds = cls.isolated_creds.get_admin_creds()
+            cls.os_adm = clients.Manager(
+                credentials=cls.adm_creds, interface=cls._interface)
+        except NotImplementedError:
+            msg = "Missing Volume Admin API credentials in configuration."
+            raise cls.skipException(msg)
 
         cls.qos_specs = []
 
-        cls.client = cls.os_adm.volume_types_client
         cls.hosts_client = cls.os_adm.volume_hosts_client
         cls.quotas_client = cls.os_adm.volume_quotas_client
         cls.volume_types_client = cls.os_adm.volume_types_client
@@ -187,9 +181,9 @@ class BaseVolumeAdminTest(BaseVolumeTest):
             cls.volume_qos_client = cls.os_adm.volume_qos_v2_client
 
     @classmethod
-    def tearDownClass(cls):
+    def resource_cleanup(cls):
         cls.clear_qos_specs()
-        super(BaseVolumeAdminTest, cls).tearDownClass()
+        super(BaseVolumeAdminTest, cls).resource_cleanup()
 
     @classmethod
     def create_test_qos_specs(cls, name=None, consumer=None, **kwargs):

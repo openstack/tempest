@@ -57,8 +57,8 @@ class TestLoadBalancerBasic(manager.NetworkScenarioTest):
             raise cls.skipException(msg)
 
     @classmethod
-    def setUpClass(cls):
-        super(TestLoadBalancerBasic, cls).setUpClass()
+    def resource_setup(cls):
+        super(TestLoadBalancerBasic, cls).resource_setup()
         cls.check_preconditions()
         cls.servers_keypairs = {}
         cls.members = []

@@ -17,11 +17,15 @@ import six
 
 from tempest.api.network import base_security_groups as base
 from tempest.common.utils import data_utils
+from tempest import config
 from tempest import test
+
+CONF = config.CONF
 
 
 class SecGroupTest(base.BaseSecGroupTest):
     _interface = 'json'
+    _tenant_network_cidr = CONF.network.tenant_network_cidr
 
     @classmethod
     def resource_setup(cls):
@@ -29,6 +33,40 @@ class SecGroupTest(base.BaseSecGroupTest):
         if not test.is_extension_enabled('security-group', 'network'):
             msg = "security-group extension not enabled."
             raise cls.skipException(msg)
+
+    def _create_verify_security_group_rule(self, sg_id, direction,
+                                           ethertype, protocol,
+                                           port_range_min,
+                                           port_range_max,
+                                           remote_group_id=None,
+                                           remote_ip_prefix=None):
+        # Create Security Group rule with the input params and validate
+        # that SG rule is created with the same parameters.
+        resp, rule_create_body = self.client.create_security_group_rule(
+            security_group_id=sg_id,
+            direction=direction,
+            ethertype=ethertype,
+            protocol=protocol,
+            port_range_min=port_range_min,
+            port_range_max=port_range_max,
+            remote_group_id=remote_group_id,
+            remote_ip_prefix=remote_ip_prefix
+        )
+
+        sec_group_rule = rule_create_body['security_group_rule']
+        self.addCleanup(self._delete_security_group_rule,
+                        sec_group_rule['id'])
+
+        expected = {'direction': direction, 'protocol': protocol,
+                    'ethertype': ethertype, 'port_range_min': port_range_min,
+                    'port_range_max': port_range_max,
+                    'remote_group_id': remote_group_id,
+                    'remote_ip_prefix': remote_ip_prefix}
+        for key, value in six.iteritems(expected):
+            self.assertEqual(value, sec_group_rule[key],
+                             "Field %s of the created security group "
+                             "rule does not match with %s." %
+                             (key, value))
 
     @test.attr(type='smoke')
     def test_list_security_groups(self):
@@ -80,7 +118,8 @@ class SecGroupTest(base.BaseSecGroupTest):
             _, rule_create_body = self.client.create_security_group_rule(
                 security_group_id=group_create_body['security_group']['id'],
                 protocol=protocol,
-                direction='ingress'
+                direction='ingress',
+                ethertype=self.ethertype
             )
 
             # Show details of the created security rule
@@ -102,30 +141,93 @@ class SecGroupTest(base.BaseSecGroupTest):
 
     @test.attr(type='smoke')
     def test_create_security_group_rule_with_additional_args(self):
-        # Verify creating security group rule with the following
-        # arguments works: "protocol": "tcp", "port_range_max": 77,
-        # "port_range_min": 77, "direction":"ingress".
-        group_create_body, _ = self._create_security_group()
+        """Verify security group rule with additional arguments works.
 
+        direction:ingress, ethertype:[IPv4/IPv6],
+        protocol:tcp, port_range_min:77, port_range_max:77
+        """
+        group_create_body, _ = self._create_security_group()
+        sg_id = group_create_body['security_group']['id']
         direction = 'ingress'
         protocol = 'tcp'
         port_range_min = 77
         port_range_max = 77
-        _, rule_create_body = self.client.create_security_group_rule(
-            security_group_id=group_create_body['security_group']['id'],
-            direction=direction,
-            protocol=protocol,
-            port_range_min=port_range_min,
-            port_range_max=port_range_max
-        )
+        self._create_verify_security_group_rule(sg_id, direction,
+                                                self.ethertype, protocol,
+                                                port_range_min,
+                                                port_range_max)
 
-        sec_group_rule = rule_create_body['security_group_rule']
+    @test.attr(type='smoke')
+    def test_create_security_group_rule_with_icmp_type_code(self):
+        """Verify security group rule for icmp protocol works.
 
-        self.assertEqual(sec_group_rule['direction'], direction)
-        self.assertEqual(sec_group_rule['protocol'], protocol)
-        self.assertEqual(int(sec_group_rule['port_range_min']), port_range_min)
-        self.assertEqual(int(sec_group_rule['port_range_max']), port_range_max)
+        Specify icmp type (port_range_min) and icmp code
+        (port_range_max) with different values. A seperate testcase
+        is added for icmp protocol as icmp validation would be
+        different from tcp/udp.
+        """
+        group_create_body, _ = self._create_security_group()
+
+        sg_id = group_create_body['security_group']['id']
+        direction = 'ingress'
+        protocol = 'icmp'
+        icmp_type_codes = [(3, 2), (2, 3), (3, 0), (2, None)]
+        for icmp_type, icmp_code in icmp_type_codes:
+            self._create_verify_security_group_rule(sg_id, direction,
+                                                    self.ethertype, protocol,
+                                                    icmp_type, icmp_code)
+
+    @test.attr(type='smoke')
+    def test_create_security_group_rule_with_remote_group_id(self):
+        # Verify creating security group rule with remote_group_id works
+        sg1_body, _ = self._create_security_group()
+        sg2_body, _ = self._create_security_group()
+
+        sg_id = sg1_body['security_group']['id']
+        direction = 'ingress'
+        protocol = 'udp'
+        port_range_min = 50
+        port_range_max = 55
+        remote_id = sg2_body['security_group']['id']
+        self._create_verify_security_group_rule(sg_id, direction,
+                                                self.ethertype, protocol,
+                                                port_range_min,
+                                                port_range_max,
+                                                remote_group_id=remote_id)
+
+    @test.attr(type='smoke')
+    def test_create_security_group_rule_with_remote_ip_prefix(self):
+        # Verify creating security group rule with remote_ip_prefix works
+        sg1_body, _ = self._create_security_group()
+
+        sg_id = sg1_body['security_group']['id']
+        direction = 'ingress'
+        protocol = 'tcp'
+        port_range_min = 76
+        port_range_max = 77
+        ip_prefix = self._tenant_network_cidr
+        self._create_verify_security_group_rule(sg_id, direction,
+                                                self.ethertype, protocol,
+                                                port_range_min,
+                                                port_range_max,
+                                                remote_ip_prefix=ip_prefix)
 
 
 class SecGroupTestXML(SecGroupTest):
+    _interface = 'xml'
+
+
+class SecGroupIPv6Test(SecGroupTest):
+    _ip_version = 6
+    _tenant_network_cidr = CONF.network.tenant_network_v6_cidr
+
+    @classmethod
+    def resource_setup(cls):
+        if not CONF.network_feature_enabled.ipv6:
+            skip_msg = "IPv6 Tests are disabled."
+            raise cls.skipException(skip_msg)
+        super(SecGroupIPv6Test, cls).resource_setup()
+
+
+class SecGroupIPv6TestXML(SecGroupIPv6Test):
     _interface = 'xml'

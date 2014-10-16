@@ -13,6 +13,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import six
+
 from tempest.api.compute.security_groups import base
 from tempest import config
 from tempest import test
@@ -27,13 +29,40 @@ class SecurityGroupRulesTestJSON(base.BaseSecurityGroupsTest):
         super(SecurityGroupRulesTestJSON, cls).resource_setup()
         cls.client = cls.security_groups_client
         cls.neutron_available = CONF.service_available.neutron
+        cls.ip_protocol = 'tcp'
+        cls.from_port = 22
+        cls.to_port = 22
 
-    @classmethod
-    def setUpClass(self):
-        super(SecurityGroupRulesTestJSON, self).setUpClass()
-        self.ip_protocol = 'tcp'
-        self.from_port = 22
-        self.to_port = 22
+    def setUp(cls):
+        super(SecurityGroupRulesTestJSON, cls).setUp()
+
+        from_port = cls.from_port
+        to_port = cls.to_port
+        group = {}
+        ip_range = {}
+        if cls._interface == 'xml':
+            # NOTE: An XML response is different from the one of JSON
+            # like the following.
+            from_port = six.text_type(from_port)
+            to_port = six.text_type(to_port)
+            group = {'tenant_id': 'None', 'name': 'None'}
+            ip_range = {'cidr': 'None'}
+        cls.expected = {
+            'id': None,
+            'parent_group_id': None,
+            'ip_protocol': cls.ip_protocol,
+            'from_port': from_port,
+            'to_port': to_port,
+            'ip_range': ip_range,
+            'group': group
+        }
+
+    def _check_expected_response(self, actual_rule):
+        for key in self.expected:
+            if key == 'id':
+                continue
+            self.assertEqual(self.expected[key], actual_rule[key],
+                             "Miss-matched key is %s" % key)
 
     @test.attr(type='smoke')
     @test.services('network')
@@ -41,44 +70,68 @@ class SecurityGroupRulesTestJSON(base.BaseSecurityGroupsTest):
         # Positive test: Creation of Security Group rule
         # should be successful
         # Creating a Security Group to add rules to it
-        resp, security_group = self.create_security_group()
+        _, security_group = self.create_security_group()
         securitygroup_id = security_group['id']
         # Adding rules to the created Security Group
-        resp, rule = \
+        _, rule = \
             self.client.create_security_group_rule(securitygroup_id,
                                                    self.ip_protocol,
                                                    self.from_port,
                                                    self.to_port)
-        self.addCleanup(self.client.delete_security_group_rule, rule['id'])
-        self.assertEqual(200, resp.status)
+        self.expected['parent_group_id'] = securitygroup_id
+        self.expected['ip_range'] = {'cidr': '0.0.0.0/0'}
+        self._check_expected_response(rule)
 
     @test.attr(type='smoke')
     @test.services('network')
-    def test_security_group_rules_create_with_optional_arguments(self):
+    def test_security_group_rules_create_with_optional_cidr(self):
         # Positive test: Creation of Security Group rule
-        # with optional arguments
+        # with optional argument cidr
         # should be successful
 
-        secgroup1 = None
-        secgroup2 = None
         # Creating a Security Group to add rules to it
-        resp, security_group = self.create_security_group()
-        secgroup1 = security_group['id']
-        # Creating a Security Group so as to assign group_id to the rule
-        resp, security_group = self.create_security_group()
-        secgroup2 = security_group['id']
-        # Adding rules to the created Security Group with optional arguments
-        parent_group_id = secgroup1
+        _, security_group = self.create_security_group()
+        parent_group_id = security_group['id']
+
+        # Adding rules to the created Security Group with optional cidr
         cidr = '10.2.3.124/24'
-        group_id = secgroup2
-        resp, rule = \
+        _, rule = \
             self.client.create_security_group_rule(parent_group_id,
                                                    self.ip_protocol,
                                                    self.from_port,
                                                    self.to_port,
-                                                   cidr=cidr,
+                                                   cidr=cidr)
+        self.expected['parent_group_id'] = parent_group_id
+        self.expected['ip_range'] = {'cidr': cidr}
+        self._check_expected_response(rule)
+
+    @test.attr(type='smoke')
+    @test.services('network')
+    def test_security_group_rules_create_with_optional_group_id(self):
+        # Positive test: Creation of Security Group rule
+        # with optional argument group_id
+        # should be successful
+
+        # Creating a Security Group to add rules to it
+        _, security_group = self.create_security_group()
+        parent_group_id = security_group['id']
+
+        # Creating a Security Group so as to assign group_id to the rule
+        _, security_group = self.create_security_group()
+        group_id = security_group['id']
+        group_name = security_group['name']
+
+        # Adding rules to the created Security Group with optional group_id
+        _, rule = \
+            self.client.create_security_group_rule(parent_group_id,
+                                                   self.ip_protocol,
+                                                   self.from_port,
+                                                   self.to_port,
                                                    group_id=group_id)
-        self.assertEqual(200, resp.status)
+        self.expected['parent_group_id'] = parent_group_id
+        self.expected['group'] = {'tenant_id': self.client.tenant_id,
+                                  'name': group_name}
+        self._check_expected_response(rule)
 
     @test.attr(type='smoke')
     @test.services('network')

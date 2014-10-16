@@ -226,6 +226,11 @@ class BaseVolumesClientXML(rest_client.RestClient):
             return True
         return False
 
+    @property
+    def resource_type(self):
+        """Returns the primary type of resource this client works with."""
+        return 'volume'
+
     def attach_volume(self, volume_id, instance_uuid, mountpoint):
         """Attaches a volume to a given instance on a given mountpoint."""
         post_body = common.Element("os-attach",

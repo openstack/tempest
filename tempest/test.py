@@ -29,8 +29,8 @@ import testscenarios
 import testtools
 
 from tempest import clients
+from tempest.common import credentials
 import tempest.common.generator.valid_generator as valid
-from tempest.common import isolated_creds
 from tempest import config
 from tempest import exceptions
 from tempest.openstack.common import importutils
@@ -66,35 +66,6 @@ def attr(*args, **kwargs):
     return decorator
 
 
-def safe_setup(f):
-    """A decorator used to wrap the setUpClass for cleaning up resources
-       when setUpClass failed.
-
-    Deprecated, see:
-    http://specs.openstack.org/openstack/qa-specs/specs/resource-cleanup.html
-    """
-    @functools.wraps(f)
-    def decorator(cls):
-            try:
-                f(cls)
-            except Exception as se:
-                etype, value, trace = sys.exc_info()
-                if etype is cls.skipException:
-                    LOG.info("setUpClass skipped: %s:" % se)
-                else:
-                    LOG.exception("setUpClass failed: %s" % se)
-                try:
-                    cls.tearDownClass()
-                except Exception as te:
-                    LOG.exception("tearDownClass failed: %s" % te)
-                try:
-                    raise etype(value), None, trace
-                finally:
-                    del trace  # for avoiding circular refs
-
-    return decorator
-
-
 def get_service_list():
     service_list = {
         'compute': CONF.service_available.nova,
@@ -123,7 +94,7 @@ def services(*args, **kwargs):
     def decorator(f):
         services = ['compute', 'image', 'baremetal', 'volume', 'orchestration',
                     'network', 'identity', 'object_storage', 'dashboard',
-                    'ceilometer', 'data_processing']
+                    'telemetry', 'data_processing']
         for service in args:
             if service not in services:
                 raise exceptions.InvalidServiceTag('%s is not a valid '
@@ -299,7 +270,14 @@ class BaseTestCase(BaseDeps):
             try:
                 cls.tearDownClass()
             except Exception as te:
-                LOG.exception("tearDownClass failed: %s" % te)
+                tetype, _, _ = sys.exc_info()
+                # TODO(gmann): Till we split-up resource_setup &
+                # resource_cleanup in more structural way, log
+                # AttributeError as info instead of exception.
+                if tetype is AttributeError:
+                    LOG.info("tearDownClass failed: %s" % te)
+                else:
+                    LOG.exception("tearDownClass failed: %s" % te)
             try:
                 raise etype(value), None, trace
             finally:
@@ -362,31 +340,20 @@ class BaseTestCase(BaseDeps):
         """
         Returns an OpenStack client manager
         """
-        cls.isolated_creds = isolated_creds.IsolatedCreds(
-            cls.__name__, network_resources=cls.network_resources)
-
         force_tenant_isolation = getattr(cls, 'force_tenant_isolation', None)
-        if CONF.compute.allow_tenant_isolation or force_tenant_isolation:
-            creds = cls.isolated_creds.get_primary_creds()
-            if getattr(cls, '_interface', None):
-                os = clients.Manager(credentials=creds,
-                                     interface=cls._interface,
-                                     service=cls._service)
-            elif interface:
-                os = clients.Manager(credentials=creds,
-                                     interface=interface,
-                                     service=cls._service)
-            else:
-                os = clients.Manager(credentials=creds,
-                                     service=cls._service)
-        else:
-            if getattr(cls, '_interface', None):
-                os = clients.Manager(interface=cls._interface,
-                                     service=cls._service)
-            elif interface:
-                os = clients.Manager(interface=interface, service=cls._service)
-            else:
-                os = clients.Manager(service=cls._service)
+
+        cls.isolated_creds = credentials.get_isolated_credentials(
+            name=cls.__name__, network_resources=cls.network_resources,
+            force_tenant_isolation=force_tenant_isolation,
+        )
+
+        creds = cls.isolated_creds.get_primary_creds()
+        params = dict(credentials=creds, service=cls._service)
+        if getattr(cls, '_interface', None):
+            interface = cls._interface
+        if interface:
+            params['interface'] = interface
+        os = clients.Manager(**params)
         return os
 
     @classmethod
@@ -510,13 +477,9 @@ class NegativeAutoTest(BaseTestCase):
                                              "expected_result": expected_result
                                              }))
         if schema is not None:
-            for name, schema, expected_result in generator.generate(schema):
-                if (expected_result is None and
-                    "default_result_code" in description):
-                    expected_result = description["default_result_code"]
-                scenario_list.append((name,
-                                      {"schema": schema,
-                                       "expected_result": expected_result}))
+            for scenario in generator.generate_scenarios(schema):
+                scenario_list.append((scenario['_negtest_name'],
+                                      scenario))
         LOG.debug(scenario_list)
         return scenario_list
 
@@ -546,8 +509,14 @@ class NegativeAutoTest(BaseTestCase):
         """
         LOG.info("Executing %s" % description["name"])
         LOG.debug(description)
+        generator = importutils.import_class(
+            CONF.negative.test_generator)()
+        schema = description.get("json-schema", None)
         method = description["http-method"]
         url = description["url"]
+        expected_result = None
+        if "default_result_code" in description:
+            expected_result = description["default_result_code"]
 
         resources = [self.get_resource(r) for
                      r in description.get("resources", [])]
@@ -557,13 +526,19 @@ class NegativeAutoTest(BaseTestCase):
             # entry (see get_resource).
             # We just send a valid json-schema with it
             valid_schema = None
-            schema = description.get("json-schema", None)
             if schema:
                 valid_schema = \
                     valid.ValidTestGenerator().generate_valid(schema)
             new_url, body = self._http_arguments(valid_schema, url, method)
-        elif hasattr(self, "schema"):
-            new_url, body = self._http_arguments(self.schema, url, method)
+        elif hasattr(self, "_negtest_name"):
+            schema_under_test = \
+                valid.ValidTestGenerator().generate_valid(schema)
+            local_expected_result = \
+                generator.generate_payload(self, schema_under_test)
+            if local_expected_result is not None:
+                expected_result = local_expected_result
+            new_url, body = \
+                self._http_arguments(schema_under_test, url, method)
         else:
             raise Exception("testscenarios are not active. Please make sure "
                             "that your test runner supports the load_tests "
@@ -575,7 +550,7 @@ class NegativeAutoTest(BaseTestCase):
             client = self.client
         resp, resp_body = client.send_request(method, new_url,
                                               resources, body=body)
-        self._check_negative_response(resp.status, resp_body)
+        self._check_negative_response(expected_result, resp.status, resp_body)
 
     def _http_arguments(self, json_dict, url, method):
         LOG.debug("dict: %s url: %s method: %s" % (json_dict, url, method))
@@ -586,8 +561,7 @@ class NegativeAutoTest(BaseTestCase):
         else:
             return url, json.dumps(json_dict)
 
-    def _check_negative_response(self, result, body):
-        expected_result = getattr(self, "expected_result", None)
+    def _check_negative_response(self, expected_result, result, body):
         self.assertTrue(result >= 400 and result < 500 and result != 413,
                         "Expected client error, got %s:%s" %
                         (result, body))

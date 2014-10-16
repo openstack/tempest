@@ -138,10 +138,10 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
             raise cls.skipException(msg)
 
     @classmethod
-    def setUpClass(cls):
+    def resource_setup(cls):
         # Create no network resources for these tests.
         cls.set_network_resources()
-        super(TestSecurityGroupsBasicOps, cls).setUpClass()
+        super(TestSecurityGroupsBasicOps, cls).resource_setup()
         # TODO(mnewby) Consider looking up entities as needed instead
         # of storing them as collections on the class.
         cls.floating_ips = {}
@@ -241,7 +241,11 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
             'security_groups': security_groups,
             'tenant_id': tenant.creds.tenant_id
         }
-        return self.create_server(name=name, create_kwargs=create_kwargs)
+        server = self.create_server(name=name, create_kwargs=create_kwargs)
+        self.assertEqual(
+            sorted([s['name'] for s in security_groups]),
+            sorted([s['name'] for s in server['security_groups']]))
+        return server
 
     def _create_tenant_servers(self, tenant, num=1):
         for i in range(num):

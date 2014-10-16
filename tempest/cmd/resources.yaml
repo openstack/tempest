@@ -57,3 +57,4 @@ objects:
     name: javelin1
     owner: javelin
     file: /etc/hosts
+telemetry: true

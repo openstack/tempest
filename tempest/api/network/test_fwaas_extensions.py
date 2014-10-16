@@ -36,6 +36,8 @@ class FWaaSExtensionTestJSON(base.BaseNetworkTest):
         List firewall policies
         Create firewall policy
         Update firewall policy
+        Insert firewall rule to policy
+        Remove firewall rule from policy
         Delete firewall policy
         Show firewall policy
         List firewall
@@ -59,6 +61,14 @@ class FWaaSExtensionTestJSON(base.BaseNetworkTest):
         try:
             self.client.delete_firewall_policy(policy_id)
         # if policy is not found, this means it was deleted in the test
+        except exceptions.NotFound:
+            pass
+
+    def _try_delete_rule(self, rule_id):
+        # delete rule, if it exists
+        try:
+            self.client.delete_firewall_rule(rule_id)
+        # if rule is not found, this means it was deleted in the test
         except exceptions.NotFound:
             pass
 
@@ -210,6 +220,40 @@ class FWaaSExtensionTestJSON(base.BaseNetworkTest):
 
         # Delete firewall
         self.client.delete_firewall(firewall_id)
+
+    @test.attr(type='smoke')
+    def test_insert_remove_firewall_rule_from_policy(self):
+        # Create firewall rule
+        resp, body = self.client.create_firewall_rule(
+            name=data_utils.rand_name("fw-rule"),
+            action="allow",
+            protocol="tcp")
+        fw_rule_id = body['firewall_rule']['id']
+        self.addCleanup(self._try_delete_rule, fw_rule_id)
+        # Create firewall policy
+        _, body = self.client.create_firewall_policy(
+            name=data_utils.rand_name("fw-policy"))
+        fw_policy_id = body['firewall_policy']['id']
+        self.addCleanup(self._try_delete_policy, fw_policy_id)
+
+        # Insert rule to firewall policy
+        self.client.insert_firewall_rule_in_policy(
+            fw_policy_id, fw_rule_id, '', '')
+
+        # Verify insertion of rule in policy
+        self.assertIn(fw_rule_id, self._get_list_fw_rule_ids(fw_policy_id))
+        # Remove rule from the firewall policy
+        self.client.remove_firewall_rule_from_policy(
+            fw_policy_id, fw_rule_id)
+
+        # Verify removal of rule from firewall policy
+        self.assertNotIn(fw_rule_id, self._get_list_fw_rule_ids(fw_policy_id))
+
+    def _get_list_fw_rule_ids(self, fw_policy_id):
+        _, fw_policy = self.client.show_firewall_policy(
+            fw_policy_id)
+        return [ruleid for ruleid in fw_policy['firewall_policy']
+                ['firewall_rules']]
 
 
 class FWaaSExtensionTestXML(FWaaSExtensionTestJSON):

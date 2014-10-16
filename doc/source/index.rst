@@ -29,6 +29,15 @@ where your test contributions should go.
    field_guide/thirdparty
    field_guide/unit_tests
 
+---------------------
+Command Documentation
+---------------------
+
+.. toctree::
+   :maxdepth: 1
+
+   cleanup
+
 ==================
 Indices and tables
 ==================

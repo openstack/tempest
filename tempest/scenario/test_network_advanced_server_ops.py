@@ -50,10 +50,10 @@ class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
             raise cls.skipException(msg)
 
     @classmethod
-    def setUpClass(cls):
+    def resource_setup(cls):
         # Create no network resources for these tests.
         cls.set_network_resources()
-        super(TestNetworkAdvancedServerOps, cls).setUpClass()
+        super(TestNetworkAdvancedServerOps, cls).resource_setup()
 
     def _setup_network_and_servers(self):
         self.keypair = self.create_keypair()
@@ -87,6 +87,7 @@ class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
         self._check_public_network_connectivity(floating_ip, username,
                                                 private_key, should_connect,
                                                 servers=[self.server])
+        self.check_floating_ip_status(self.floating_ip, 'ACTIVE')
 
     def _wait_server_status_and_check_network_connectivity(self):
         self.servers_client.wait_for_server_status(self.server['id'], 'ACTIVE')

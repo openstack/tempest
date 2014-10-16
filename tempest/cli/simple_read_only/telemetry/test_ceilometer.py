@@ -32,12 +32,12 @@ class SimpleReadOnlyCeilometerClientTest(cli.ClientTestBase):
     """
 
     @classmethod
-    def setUpClass(cls):
+    def resource_setup(cls):
         if (not CONF.service_available.ceilometer):
             msg = ("Skipping all Ceilometer cli tests because it is "
                    "not available")
             raise cls.skipException(msg)
-        super(SimpleReadOnlyCeilometerClientTest, cls).setUpClass()
+        super(SimpleReadOnlyCeilometerClientTest, cls).resource_setup()
 
     def test_ceilometer_meter_list(self):
         self.ceilometer('meter-list')

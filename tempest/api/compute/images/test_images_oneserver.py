@@ -105,7 +105,11 @@ class ImagesOneServerTestJSON(base.BaseV2ComputeTest):
             raise self.skipException("Not testable in XML")
         # prefix character is:
         # http://www.fileformat.info/info/unicode/char/1F4A9/index.htm
-        utf8_name = data_utils.rand_name(u'\xF0\x9F\x92\xA9')
+
+        # We use a string with 3 byte utf-8 character due to bug
+        # #1370954 in glance which will 500 if mysql is used as the
+        # backend and it attempts to store a 4 byte utf-8 character
+        utf8_name = data_utils.rand_name('\xe2\x82\xa1')
         resp, body = self.client.create_image(self.server_id, utf8_name)
         image_id = data_utils.parse_image_id(resp['location'])
         self.addCleanup(self.client.delete_image, image_id)

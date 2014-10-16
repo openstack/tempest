@@ -25,9 +25,8 @@ class VolumeMultiBackendTest(base.BaseVolumeV1AdminTest):
     _interface = "json"
 
     @classmethod
-    @test.safe_setup
-    def setUpClass(cls):
-        super(VolumeMultiBackendTest, cls).setUpClass()
+    def resource_setup(cls):
+        super(VolumeMultiBackendTest, cls).resource_setup()
         if not CONF.volume_feature_enabled.multi_backend:
             raise cls.skipException("Cinder multi-backend feature disabled")
 
@@ -61,7 +60,7 @@ class VolumeMultiBackendTest(base.BaseVolumeV1AdminTest):
             extra_specs = {spec_key_with_prefix: backend_name_key}
         else:
             extra_specs = {spec_key_without_prefix: backend_name_key}
-        _, self.type = self.client.create_volume_type(
+        _, self.type = self.volume_types_client.create_volume_type(
             type_name, extra_specs=extra_specs)
         self.volume_type_id_list.append(self.type['id'])
 
@@ -76,7 +75,7 @@ class VolumeMultiBackendTest(base.BaseVolumeV1AdminTest):
             self.volume['id'], 'available')
 
     @classmethod
-    def tearDownClass(cls):
+    def resource_cleanup(cls):
         # volumes deletion
         vid_prefix = getattr(cls, 'volume_id_list_with_prefix', [])
         for volume_id in vid_prefix:
@@ -91,9 +90,9 @@ class VolumeMultiBackendTest(base.BaseVolumeV1AdminTest):
         # volume types deletion
         volume_type_id_list = getattr(cls, 'volume_type_id_list', [])
         for volume_type_id in volume_type_id_list:
-            cls.client.delete_volume_type(volume_type_id)
+            cls.volume_types_client.delete_volume_type(volume_type_id)
 
-        super(VolumeMultiBackendTest, cls).tearDownClass()
+        super(VolumeMultiBackendTest, cls).resource_cleanup()
 
     @test.attr(type='smoke')
     def test_backend_name_reporting(self):

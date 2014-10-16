@@ -86,6 +86,24 @@ class TestDiscovery(base.TestCase):
         self.assertIn('v2.0', versions)
         self.assertIn('v3.0', versions)
 
+    def test_verify_api_versions(self):
+        api_services = ['cinder', 'glance', 'keystone', 'nova']
+        fake_os = mock.MagicMock()
+        for svc in api_services:
+            m = 'verify_%s_api_versions' % svc
+            with mock.patch.object(verify_tempest_config, m) as verify_mock:
+                verify_tempest_config.verify_api_versions(fake_os, svc, True)
+                verify_mock.assert_called_once_with(fake_os, True)
+
+    def test_verify_api_versions_not_implemented(self):
+        api_services = ['cinder', 'glance', 'keystone', 'nova']
+        fake_os = mock.MagicMock()
+        for svc in api_services:
+            m = 'verify_%s_api_versions' % svc
+            with mock.patch.object(verify_tempest_config, m) as verify_mock:
+                verify_tempest_config.verify_api_versions(fake_os, 'foo', True)
+                self.assertFalse(verify_mock.called)
+
     def test_verify_keystone_api_versions_no_v3(self):
         self.useFixture(mockpatch.PatchObject(
             verify_tempest_config, '_get_unversioned_endpoint',

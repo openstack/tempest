@@ -83,6 +83,7 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
         cls.fw_rules = []
         cls.fw_policies = []
         cls.ipsecpolicies = []
+        cls.ethertype = "IPv" + str(cls._ip_version)
 
     @classmethod
     def resource_cleanup(cls):
@@ -365,19 +366,15 @@ class BaseAdminNetworkTest(BaseNetworkTest):
     @classmethod
     def resource_setup(cls):
         super(BaseAdminNetworkTest, cls).resource_setup()
-        admin_username = CONF.compute_admin.username
-        admin_password = CONF.compute_admin.password
-        admin_tenant = CONF.compute_admin.tenant_name
-        if not (admin_username and admin_password and admin_tenant):
+
+        try:
+            creds = cls.isolated_creds.get_admin_creds()
+            cls.os_adm = clients.Manager(
+                credentials=creds, interface=cls._interface)
+        except NotImplementedError:
             msg = ("Missing Administrative Network API credentials "
                    "in configuration.")
             raise cls.skipException(msg)
-        if (CONF.compute.allow_tenant_isolation or
-            cls.force_tenant_isolation is True):
-            cls.os_adm = clients.Manager(cls.isolated_creds.get_admin_creds(),
-                                         interface=cls._interface)
-        else:
-            cls.os_adm = clients.ComputeAdminManager(interface=cls._interface)
         cls.admin_client = cls.os_adm.network_client
 
     @classmethod

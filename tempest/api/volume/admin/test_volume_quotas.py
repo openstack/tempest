@@ -27,8 +27,8 @@ class VolumeQuotasAdminTestJSON(base.BaseVolumeV1AdminTest):
     force_tenant_isolation = True
 
     @classmethod
-    def setUpClass(cls):
-        super(VolumeQuotasAdminTestJSON, cls).setUpClass()
+    def resource_setup(cls):
+        super(VolumeQuotasAdminTestJSON, cls).resource_setup()
         cls.admin_volume_client = cls.os_adm.volumes_client
         cls.demo_tenant_id = cls.isolated_creds.get_primary_creds().tenant_id
 
@@ -71,7 +71,8 @@ class VolumeQuotasAdminTestJSON(base.BaseVolumeV1AdminTest):
 
     @test.attr(type='gate')
     def test_show_quota_usage(self):
-        _, quota_usage = self.quotas_client.get_quota_usage(self.adm_tenant)
+        _, quota_usage = self.quotas_client.get_quota_usage(
+            self.os_adm.credentials.tenant_name)
         for key in QUOTA_KEYS:
             self.assertIn(key, quota_usage)
             for usage_key in QUOTA_USAGE_KEYS:

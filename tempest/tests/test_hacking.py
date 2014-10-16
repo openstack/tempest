@@ -47,13 +47,27 @@ class HackingTestCase(base.TestCase):
     just assertTrue if the check is expected to fail and assertFalse if it
     should pass.
     """
-    def test_no_setupclass_for_unit_tests(self):
-        self.assertTrue(checks.no_setupclass_for_unit_tests(
+    def test_no_setup_teardown_class_for_tests(self):
+        self.assertTrue(checks.no_setup_teardown_class_for_tests(
             "  def setUpClass(cls):", './tempest/tests/fake_test.py'))
-        self.assertIsNone(checks.no_setupclass_for_unit_tests(
+        self.assertIsNone(checks.no_setup_teardown_class_for_tests(
             "  def setUpClass(cls): # noqa", './tempest/tests/fake_test.py'))
-        self.assertFalse(checks.no_setupclass_for_unit_tests(
+        self.assertTrue(checks.no_setup_teardown_class_for_tests(
             "  def setUpClass(cls):", './tempest/api/fake_test.py'))
+        self.assertTrue(checks.no_setup_teardown_class_for_tests(
+            "  def setUpClass(cls):", './tempest/scenario/fake_test.py'))
+        self.assertFalse(checks.no_setup_teardown_class_for_tests(
+            "  def setUpClass(cls):", './tempest/test.py'))
+        self.assertTrue(checks.no_setup_teardown_class_for_tests(
+            "  def tearDownClass(cls):", './tempest/tests/fake_test.py'))
+        self.assertIsNone(checks.no_setup_teardown_class_for_tests(
+            "  def tearDownClass(cls): # noqa", './tempest/tests/fake_test.py'))
+        self.assertTrue(checks.no_setup_teardown_class_for_tests(
+            "  def tearDownClass(cls):", './tempest/api/fake_test.py'))
+        self.assertTrue(checks.no_setup_teardown_class_for_tests(
+            "  def tearDownClass(cls):", './tempest/scenario/fake_test.py'))
+        self.assertFalse(checks.no_setup_teardown_class_for_tests(
+            "  def tearDownClass(cls):", './tempest/test.py'))
 
     def test_import_no_clients_in_api(self):
         for client in checks.PYTHON_CLIENTS:

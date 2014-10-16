@@ -99,6 +99,11 @@ class FlavorsV3ClientJSON(rest_client.RestClient):
                 return False
         return True
 
+    @property
+    def resource_type(self):
+        """Returns the primary type of resource this client works with."""
+        return 'flavor'
+
     def set_flavor_extra_spec(self, flavor_id, specs):
         """Sets extra Specs to the mentioned flavor."""
         post_body = json.dumps({'extra_specs': specs})

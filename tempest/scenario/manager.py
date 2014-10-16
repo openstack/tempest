@@ -23,8 +23,8 @@ import six
 
 from tempest import auth
 from tempest import clients
+from tempest.common import credentials
 from tempest.common import debug
-from tempest.common import isolated_creds
 from tempest.common.utils import data_utils
 from tempest.common.utils.linux import remote_client
 from tempest import config
@@ -49,10 +49,11 @@ class ScenarioTest(tempest.test.BaseTestCase):
     """Base class for scenario tests. Uses tempest own clients. """
 
     @classmethod
-    def setUpClass(cls):
-        super(ScenarioTest, cls).setUpClass()
-        # Using tempest client for isolated credentials as well
-        cls.isolated_creds = isolated_creds.IsolatedCreds(
+    def resource_setup(cls):
+        super(ScenarioTest, cls).resource_setup()
+        # TODO(andreaf) Some of the code from this resource_setup could be
+        # moved into `BaseTestCase`
+        cls.isolated_creds = credentials.get_isolated_credentials(
             cls.__name__, network_resources=cls.network_resources)
         cls.manager = clients.Manager(
             credentials=cls.credentials()
@@ -79,27 +80,19 @@ class ScenarioTest(tempest.test.BaseTestCase):
         cls.orchestration_client = cls.manager.orchestration_client
 
     @classmethod
-    def _get_credentials(cls, get_creds, ctype):
-        if CONF.compute.allow_tenant_isolation:
-            creds = get_creds()
-        else:
-            creds = auth.get_default_credentials(ctype)
-        return creds
-
-    @classmethod
     def credentials(cls):
-        return cls._get_credentials(cls.isolated_creds.get_primary_creds,
-                                    'user')
+        return cls.isolated_creds.get_primary_creds()
 
     @classmethod
     def alt_credentials(cls):
-        return cls._get_credentials(cls.isolated_creds.get_alt_creds,
-                                    'alt_user')
+        return cls.isolated_creds.get_alt_creds()
 
     @classmethod
     def admin_credentials(cls):
-        return cls._get_credentials(cls.isolated_creds.get_admin_creds,
-                                    'identity_admin')
+        try:
+            return cls.isolated_creds.get_admin_creds()
+        except NotImplementedError:
+            raise cls.skipException('Admin Credentials are not available')
 
     # ## Methods to handle sync and async deletes
 
@@ -382,9 +375,16 @@ class ScenarioTest(tempest.test.BaseTestCase):
             _, servers = self.servers_client.list_servers()
             servers = servers['servers']
         for server in servers:
-            LOG.debug('Console output for %s', server['id'])
-            LOG.debug(self.servers_client.get_console_output(server['id'],
-                                                             length=None))
+            console_output = self.servers_client.get_console_output(
+                server['id'], length=None)
+            LOG.debug('Console output for %s\nhead=%s\nbody=\n%s',
+                      server['id'], console_output[0], console_output[1])
+
+    def _log_net_info(self, exc):
+        # network debug is called as part of ssh init
+        if not isinstance(exc, exceptions.SSHTimeout):
+            LOG.debug('Network information on a devstack host')
+            debug.log_net_debug()
 
     def create_server_snapshot(self, server, name=None):
         # Glance client
@@ -443,7 +443,9 @@ class ScenarioTest(tempest.test.BaseTestCase):
         if wait:
             self.servers_client.wait_for_server_status(server_id, 'ACTIVE')
 
-    def ping_ip_address(self, ip_address, should_succeed=True):
+    def ping_ip_address(self, ip_address, should_succeed=True,
+                        ping_timeout=None):
+        timeout = ping_timeout or CONF.compute.ping_timeout
         cmd = ['ping', '-c1', '-w1', ip_address]
 
         def ping():
@@ -453,8 +455,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
             proc.communicate()
             return (proc.returncode == 0) == should_succeed
 
-        return tempest.test.call_until_true(
-            ping, CONF.compute.ping_timeout, 1)
+        return tempest.test.call_until_true(ping, timeout, 1)
 
 
 class NetworkScenarioTest(ScenarioTest):
@@ -474,8 +475,8 @@ class NetworkScenarioTest(ScenarioTest):
             raise cls.skipException('Neutron not available')
 
     @classmethod
-    def setUpClass(cls):
-        super(NetworkScenarioTest, cls).setUpClass()
+    def resource_setup(cls):
+        super(NetworkScenarioTest, cls).resource_setup()
         cls.tenant_id = cls.manager.identity_client.tenant_id
         cls.check_preconditions()
 
@@ -622,6 +623,23 @@ class NetworkScenarioTest(ScenarioTest):
         self.assertIsNone(floating_ip.port_id)
         return floating_ip
 
+    def check_floating_ip_status(self, floating_ip, status):
+        """Verifies floatingip has reached given status. without waiting
+
+        :param floating_ip: net_resources.DeletableFloatingIp floating IP to
+        to check status
+        :param status: target status
+        :raises: AssertionError if status doesn't match
+        """
+        floating_ip.refresh()
+        self.assertEqual(status, floating_ip.status,
+                         message="FloatingIP: {fp} is at status: {cst}. "
+                                 "failed  to reach status: {st}"
+                         .format(fp=floating_ip, cst=floating_ip.status,
+                                 st=status))
+        LOG.info("FloatingIP: {fp} is at status: {st}"
+                 .format(fp=floating_ip, st=status))
+
     def _check_vm_connectivity(self, ip_address,
                                username=None,
                                private_key=None,
@@ -666,9 +684,7 @@ class NetworkScenarioTest(ScenarioTest):
                 ex_msg += ": " + msg
             LOG.exception(ex_msg)
             self._log_console_output(servers)
-            # network debug is called as part of ssh init
-            if not isinstance(e, exceptions.SSHTimeout):
-                debug.log_net_debug()
+            self._log_net_info(e)
             raise
 
     def _check_tenant_network_connectivity(self, server,
@@ -692,9 +708,7 @@ class NetworkScenarioTest(ScenarioTest):
         except Exception as e:
             LOG.exception('Tenant network connectivity check failed')
             self._log_console_output(servers_for_debug)
-            # network debug is called as part of ssh init
-            if not isinstance(e, exceptions.SSHTimeout):
-                debug.log_net_debug()
+            self._log_net_info(e)
             raise
 
     def _check_remote_connectivity(self, source, dest, should_succeed=True):
@@ -924,8 +938,8 @@ class NetworkScenarioTest(ScenarioTest):
         router_id = CONF.network.public_router_id
         network_id = CONF.network.public_network_id
         if router_id:
-            result = client.show_router(router_id)
-            return net_resources.AttributeDict(**result['router'])
+            resp, body = client.show_router(router_id)
+            return net_resources.AttributeDict(**body['router'])
         elif network_id:
             router = self._create_router(client, tenant_id)
             router.set_gateway(network_id)
@@ -1002,8 +1016,8 @@ class BaremetalProvisionStates(object):
 
 class BaremetalScenarioTest(ScenarioTest):
     @classmethod
-    def setUpClass(cls):
-        super(BaremetalScenarioTest, cls).setUpClass()
+    def resource_setup(cls):
+        super(BaremetalScenarioTest, cls).resource_setup()
 
         if (not CONF.service_available.ironic or
            not CONF.baremetal.driver_enabled):
@@ -1134,8 +1148,8 @@ class EncryptionScenarioTest(ScenarioTest):
     """
 
     @classmethod
-    def setUpClass(cls):
-        super(EncryptionScenarioTest, cls).setUpClass()
+    def resource_setup(cls):
+        super(EncryptionScenarioTest, cls).resource_setup()
         cls.admin_volume_types_client = cls.admin_manager.volume_types_client
 
     def _wait_for_volume_status(self, status):
@@ -1181,8 +1195,8 @@ class OrchestrationScenarioTest(ScenarioTest):
     """
 
     @classmethod
-    def setUpClass(cls):
-        super(OrchestrationScenarioTest, cls).setUpClass()
+    def resource_setup(cls):
+        super(OrchestrationScenarioTest, cls).resource_setup()
         if not CONF.service_available.heat:
             raise cls.skipException("Heat support is required")
 
@@ -1226,9 +1240,9 @@ class SwiftScenarioTest(ScenarioTest):
     """
 
     @classmethod
-    def setUpClass(cls):
+    def resource_setup(cls):
         cls.set_network_resources()
-        super(SwiftScenarioTest, cls).setUpClass()
+        super(SwiftScenarioTest, cls).resource_setup()
         if not CONF.service_available.swift:
             skip_msg = ("%s skipped as swift is not available" %
                         cls.__name__)
