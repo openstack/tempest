@@ -126,6 +126,8 @@ class BaseComputeTest(tempest.test.BaseTestCase):
 
     @classmethod
     def clear_servers(cls):
+        LOG.debug('Clearing servers: %s', ','.join(
+            server['id'] for server in cls.servers))
         for server in cls.servers:
             try:
                 cls.servers_client.delete_server(server['id'])
@@ -165,6 +167,7 @@ class BaseComputeTest(tempest.test.BaseTestCase):
 
     @classmethod
     def clear_images(cls):
+        LOG.debug('Clearing images: %s', ','.join(cls.images))
         for image_id in cls.images:
             try:
                 cls.images_client.delete_image(image_id)
@@ -176,6 +179,8 @@ class BaseComputeTest(tempest.test.BaseTestCase):
 
     @classmethod
     def clear_security_groups(cls):
+        LOG.debug('Clearing security groups: %s', ','.join(
+            str(sg['id']) for sg in cls.security_groups))
         for sg in cls.security_groups:
             try:
                 resp, body =\
@@ -190,6 +195,7 @@ class BaseComputeTest(tempest.test.BaseTestCase):
 
     @classmethod
     def clear_server_groups(cls):
+        LOG.debug('Clearing server groups: %s', ','.join(cls.server_groups))
         for server_group_id in cls.server_groups:
             try:
                 cls.client.delete_server_group(server_group_id)
