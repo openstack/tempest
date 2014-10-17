@@ -259,7 +259,7 @@ is required. If there is more than one test case in the class individual
 docstrings for the workflow in each test methods can be used instead. A good
 example of this would be::
 
-    class TestVolumeBootPattern(manager.OfficialClientTest):
+    class TestVolumeBootPattern(manager.ScenarioTest):
     """
     This test case attempts to reproduce the following steps:
 
