@@ -46,7 +46,7 @@ function get_image_id() {
     local image_path=$3
     images=`${with_venv} nova image-list`
     #if grep -q $image_name $images; then
-    if [[ "$images" == *${image_name}* ]];then
+    if [[ "$images" == *\ ${image_name}\ * ]];then
         image_id=`${with_venv} nova image-list | grep " $image_name "  | awk {'print $2'}`
     else
         image_filename=$(basename $image_path)
