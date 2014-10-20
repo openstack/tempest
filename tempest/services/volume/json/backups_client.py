@@ -95,9 +95,10 @@ class BaseBackupsClientJSON(rest_client.RestClient):
                 raise exceptions.VolumeBackupException(backup_id=backup_id)
 
             if int(time.time()) - start >= self.build_timeout:
-                message = ('Volume backup %s failed to reach %s status within '
-                           'the required time (%s s).' %
-                           (backup_id, status, self.build_timeout))
+                message = ('Volume backup %s failed to reach %s status '
+                           '(current %s) within the required time (%s s).' %
+                           (backup_id, status, backup_status,
+                            self.build_timeout))
                 raise exceptions.TimeoutException(message)
 
 
