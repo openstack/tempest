@@ -17,6 +17,7 @@ import cStringIO as StringIO
 import hashlib
 import random
 import re
+import gzip
 import time
 import zlib
 
@@ -30,16 +31,16 @@ from tempest import test
 
 class ObjectTest(base.BaseObjectTest):
     @classmethod
-    def resource_setup(cls):
-        super(ObjectTest, cls).resource_setup()
+    def setUpClass(cls):
+        super(ObjectTest, cls).setUpClass()
         cls.container_name = data_utils.rand_name(name='TestContainer')
         cls.container_client.create_container(cls.container_name)
         cls.containers = [cls.container_name]
 
     @classmethod
-    def resource_cleanup(cls):
+    def tearDownClass(cls):
         cls.delete_containers(cls.containers)
-        super(ObjectTest, cls).resource_cleanup()
+        super(ObjectTest, cls).tearDownClass()
 
     def _create_object(self, metadata=None):
         # setup object
@@ -129,7 +130,7 @@ class ObjectTest(base.BaseObjectTest):
         self.assertEqual(body, data)
 
     @test.attr(type='gate')
-    def test_create_object_with_content_encoding(self):
+    def test_create_object_with_content_encoding_deflate(self):
         # create object with content_encoding
         object_name = data_utils.rand_name(name='TestObject')
 
@@ -150,6 +151,37 @@ class ObjectTest(base.BaseObjectTest):
         # download compressed object
         metadata = {}
         metadata['accept-encoding'] = 'deflate'
+        resp, body = self.object_client.get_object(
+            self.container_name,
+            object_name,
+            metadata=metadata)
+        self.assertEqual(body, data_before)
+
+    @test.attr(type='gate')
+    def test_create_object_with_content_encoding_gzip(self):
+        # create object with content_encoding
+        object_name = data_utils.rand_name(name='TestObject')
+
+        # put compressed string
+        data_before = 'x' * 2000
+        file_gzip = StringIO.StringIO()
+	gzip_file = gzip.GzipFile(filename=object_name, mode='wb', fileobj = file_gzip)
+    	gzip_file.write(data_before)
+    	gzip_file.close()
+
+        data = file_gzip.getvalue()
+        metadata = {}
+        metadata['content-encoding'] = 'gzip'
+        resp, _ = self.object_client.create_object(
+            self.container_name,
+            object_name,
+            data,
+            metadata=metadata)
+        self.assertEqual(resp['status'], '201')
+        self.assertHeaders(resp, 'Object', 'PUT')
+        # download compressed object
+        metadata = {}
+        metadata['accept-encoding'] = 'gzip'
         resp, body = self.object_client.get_object(
             self.container_name,
             object_name,
