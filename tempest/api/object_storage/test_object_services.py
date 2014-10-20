@@ -165,7 +165,7 @@ class ObjectTest(base.BaseObjectTest):
         # put compressed string
         data_before = 'x' * 2000
         file_gzip = StringIO.StringIO()
-	    gzip_file = gzip.GzipFile(filename=object_name, mode='wb', fileobj = file_gzip)
+	gzip_file = gzip.GzipFile(filename=object_name, mode='wb', fileobj = file_gzip)
     	gzip_file.write(data_before)
     	gzip_file.close()
 
