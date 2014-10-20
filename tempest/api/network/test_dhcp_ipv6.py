@@ -243,13 +243,8 @@ class NetworksTestDHCPv6JSON(base.BaseNetworkTest):
                     subnet_slaac['cidr'],
                     port_mac
                 ).format()
-                # TODO: remove this check when 1330826 is fixed
-                _, body = self.client.list_ports()
-                for dport in body['ports']:
-                    if dport['device_owner'] == 'network:dhcp' and dport['fixed_ips']:
-                        dhcp_ip = (netaddr.IPAddress(dhcp_ip) + 1).format()
-                        break
-                # End of check
+                # TODO: this check when 1330826 is fixed
+                dhcp_ip = [dhcp_ip, (netaddr.IPAddress(dhcp_ip) + 1).format()]
                 port = self.create_port(self.network, mac_address=port_mac)
                 real_ips = dict([(k['subnet_id'], k['ip_address'])
                                  for k in port['fixed_ips']])
@@ -262,14 +257,15 @@ class NetworksTestDHCPv6JSON(base.BaseNetworkTest):
                 ports_id_list = [i['id'] for i in body['ports']]
                 self.assertNotIn(port['id'], ports_id_list)
                 self._clean_network()
-                self.assertSequenceEqual((real_eui_ip, real_dhcp_ip),
-                                         (eui_ip, dhcp_ip),
-                                         ('Real port IPs %s,%s are not equal'
-                                          ' to planned IPs %s,%s') % (
-                                             real_dhcp_ip,
-                                             real_eui_ip,
-                                             eui_ip,
-                                             dhcp_ip))
+                self.assertEqual(real_eui_ip,
+                                 eui_ip,
+                                 'Real IP is {0}, but shall be {1}'.format(
+                                     real_eui_ip,
+                                     eui_ip))
+                self.assertTrue(real_dhcp_ip in dhcp_ip,
+                                'Real IP is {0}, but shall be one from {1}'.format(
+                                    real_dhcp_ip,
+                                    str(dhcp_ip)))
 
     @test.attr(type='smoke')
     def test_dhcpv6_64_subnets(self):
@@ -299,13 +295,8 @@ class NetworksTestDHCPv6JSON(base.BaseNetworkTest):
                     subnet_slaac['cidr'],
                     port_mac
                 ).format()
-                # TODO: remove this check when 1330826 is fixed
-                _, body = self.client.list_ports()
-                for dport in body['ports']:
-                    if dport['device_owner'] == 'network:dhcp' and dport['fixed_ips']:
-                        dhcp_ip = (netaddr.IPAddress(dhcp_ip) + 1).format()
-                        break
-                # End of check
+                # TODO: remove this when 1330826 is fixed
+                dhcp_ip = [dhcp_ip, (netaddr.IPAddress(dhcp_ip) + 1).format()]
                 port = self.create_port(self.network, mac_address=port_mac)
                 real_ips = dict([(k['subnet_id'], k['ip_address'])
                                  for k in port['fixed_ips']])
@@ -313,14 +304,16 @@ class NetworksTestDHCPv6JSON(base.BaseNetworkTest):
                                              for sub in subnet_dhcp,
                                              subnet_slaac]
                 self._clean_network()
-                self.assertSequenceEqual((real_eui_ip, real_dhcp_ip),
-                                         (eui_ip, dhcp_ip),
-                                         ('Real port IPs %s,%s are not equal'
-                                          ' to planned IPs %s,%s') % (
-                                             real_dhcp_ip,
-                                             real_eui_ip,
-                                             eui_ip,
-                                             dhcp_ip))
+                self.assertTrue({real_eui_ip, real_dhcp_ip}.issubset([eui_ip] + dhcp_ip))
+                self.assertEqual(real_eui_ip,
+                                 eui_ip,
+                                 'Real IP is {0}, but shall be {1}'.format(
+                                     real_eui_ip,
+                                     eui_ip))
+                self.assertTrue(real_dhcp_ip in dhcp_ip,
+                                'Real IP is {0}, but shall be one from {1}'.format(
+                                    real_dhcp_ip,
+                                    str(dhcp_ip)))
 
     @test.attr(type='smoke')
     def test_slaac_duplicate(self):
