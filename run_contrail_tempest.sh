@@ -147,10 +147,10 @@ then
 fi
 
 if [ $populate_config -eq 1 ]; then
-  ./contrail/contrail-tempest-init.sh
+   (unset http_proxy && ./contrail/contrail-tempest-init.sh)
 fi
 
-run_tests
+(unset http_proxy && run_tests)
 retval=$?
 
 exit $retval
