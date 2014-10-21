@@ -138,6 +138,7 @@ class NegativeSecGroupTest(base.BaseSecGroupTest):
 
         # Create rule for icmp protocol with invalid ports
         states = [(1, 256, 'Invalid value for ICMP code'),
+                  (None, 6, 'ICMP type (port-range-min) is missing'),
                   (300, 1, 'Invalid value for ICMP type')]
         for pmin, pmax, msg in states:
             ex = self.assertRaises(
