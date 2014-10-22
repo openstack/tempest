@@ -3,7 +3,6 @@
 #export WORKSPACE=$PWD
 cd $WORKSPACE
 with_venv=tools/with_venv.sh
-sudo apt-get install -y git sshpass libxml2-dev libxslt-dev python-dev libffi-dev gcc
 
 #TEMPEST_DIR="~/tempest1/tempest"
 KEYSTONE_SERVICE_PROTOCOL="http"
