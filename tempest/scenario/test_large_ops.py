@@ -47,6 +47,8 @@ class TestLargeOpsScenario(manager.ScenarioTest):
 
     def _wait_for_server_status(self, status):
         for server in self.servers:
+            # Make sure nova list keeps working throughout the build process
+            self.servers_client.list_servers()
             self.servers_client.wait_for_server_status(server['id'], status)
 
     def nova_boot(self):
