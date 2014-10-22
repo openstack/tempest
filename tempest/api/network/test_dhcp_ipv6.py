@@ -26,13 +26,14 @@ from tempest import test
 CONF = config.CONF
 LOG = logging.getLogger(__name__)
 
+
 class NetworksTestDHCPv6JSON(base.BaseNetworkTest):
     _interface = 'json'
     _ip_version = 6
 
     @classmethod
-    def setUpClass(cls):
-        super(NetworksTestDHCPv6JSON, cls).setUpClass()
+    def resource_setup(cls):
+        super(NetworksTestDHCPv6JSON, cls).resource_setup()
         msg = None
         if not CONF.network_feature_enabled.ipv6:
             msg = "IPv6 is not enabled"
@@ -67,6 +68,15 @@ class NetworksTestDHCPv6JSON(base.BaseNetworkTest):
                 self.routers.pop()
             self.client.delete_router(router['id'])
 
+    def _get_ips_from_subnet(self, **kwargs):
+        subnet = self.create_subnet(self.network, **kwargs)
+        port_mac = data_utils.rand_mac_address()
+        port = self.create_port(self.network, mac_address=port_mac)
+        real_ip = next(iter(port['fixed_ips']))['ip_address']
+        eui_ip = data_utils.get_ipv6_addr_by_EUI64(subnet['cidr'],
+                                                   port_mac).format()
+        return real_ip, eui_ip
+
     @test.attr(type='smoke')
     def test_dhcpv6_stateless_eui64(self):
         """When subnets configured with RAs SLAAC (AOM=100) and DHCP stateless
@@ -79,49 +89,12 @@ class NetworksTestDHCPv6JSON(base.BaseNetworkTest):
         ):
             kwargs = {'ipv6_ra_mode': ra_mode,
                       'ipv6_address_mode': add_mode}
-            subnet = self.create_subnet(self.network, **kwargs)
-            port_mac = data_utils.rand_mac_address()
-            port = self.create_port(self.network, mac_address=port_mac)
-            real_ip = next(iter(port['fixed_ips']))['ip_address']
-            eui_ip = data_utils.get_ipv6_addr_by_EUI64(subnet['cidr'],
-                                                       port_mac).format()
+            real_ip, eui_ip = self._get_ips_from_subnet(**kwargs)
             self._clean_network()
             self.assertEqual(eui_ip, real_ip,
                              ('Real port IP is %s, but shall be %s when '
                               'ipv6_ra_mode=%s and ipv6_address_mode=%s') % (
                                  real_ip, eui_ip, ra_mode, add_mode))
-
-    @test.attr(type='smoke')
-    def test_dhcpv6_stateless_only_ra(self):
-        """When subnets configured with RAs SLAAC (AOM=100) and DHCP stateless
-        (AOM=110) for radvd and dnsmasq is not configured, port shall receive
-        IP address calculated from its MAC and mask advertised from RAs
-        """
-        for ra_mode, add_mode in (
-                ('slaac', None),
-                ('dhcpv6-stateless', None),
-        ):
-            kwargs = {'ipv6_ra_mode': ra_mode,
-                      'ipv6_address_mode': add_mode}
-            kwargs = {k: v for k, v in kwargs.iteritems() if v}
-            subnet = self.create_subnet(self.network, **kwargs)
-            router = self.create_router(router_name="router1",
-                                        admin_state_up=True)
-            self.create_router_interface(router['id'],
-                                         subnet['id'])
-            port_mac = data_utils.rand_mac_address()
-            port = self.create_port(self.network, mac_address=port_mac)
-            real_ip = next(iter(port['fixed_ips']))['ip_address']
-            eui_ip = data_utils.get_ipv6_addr_by_EUI64(subnet['cidr'],
-                                                       port_mac).format()
-            self._clean_network()
-            self.assertEqual(eui_ip, real_ip,
-                             ('Real port IP is %s, but shall be %s when '
-                              'ipv6_ra_mode=%s and ipv6_address_mode=%s') % (
-                                 real_ip,
-                                 eui_ip,
-                                 ra_mode if ra_mode else "Off",
-                                 add_mode if add_mode else "Off"))
 
     @test.attr(type='smoke')
     def test_dhcpv6_stateless_no_ra(self):
@@ -136,16 +109,11 @@ class NetworksTestDHCPv6JSON(base.BaseNetworkTest):
             kwargs = {'ipv6_ra_mode': ra_mode,
                       'ipv6_address_mode': add_mode}
             kwargs = {k: v for k, v in kwargs.iteritems() if v}
-            subnet = self.create_subnet(self.network, **kwargs)
-            port_mac = data_utils.rand_mac_address()
-            port = self.create_port(self.network, mac_address=port_mac)
-            real_ip = next(iter(port['fixed_ips']))['ip_address']
-            eui_ip = data_utils.get_ipv6_addr_by_EUI64(subnet['cidr'],
-                                                       port_mac).format()
+            real_ip, eui_ip = self._get_ips_from_subnet(**kwargs)
             self._clean_network()
             self.assertEqual(eui_ip, real_ip,
-                             ('Real port IP %s equal to EUI-64 %s when '
-                              'ipv6_ra_mode=%s and ipv6_address_mode=%s') % (
+                             ('Real port IP %s shall be equal to EUI-64 %s'
+                              'when ipv6_ra_mode=%s,ipv6_address_mode=%s') % (
                                  real_ip, eui_ip,
                                  ra_mode if ra_mode else "Off",
                                  add_mode if add_mode else "Off"))
@@ -173,16 +141,12 @@ class NetworksTestDHCPv6JSON(base.BaseNetworkTest):
         """If no radvd option and no dnsmasq option is configured
         port shall receive IP from fixed IPs list of subnet.
         """
-        subnet = self.create_subnet(self.network)
-        port_mac = data_utils.rand_mac_address()
-        port = self.create_port(self.network, mac_address=port_mac)
-        real_ip = next(iter(port['fixed_ips']))['ip_address']
-        eui_ip = data_utils.get_ipv6_addr_by_EUI64(subnet['cidr'],
-                                                   port_mac).format()
+        real_ip, eui_ip = self._get_ips_from_subnet()
         self._clean_network()
         self.assertNotEqual(eui_ip, real_ip,
                             ('Real port IP %s equal to EUI-64 %s when '
-                             'ipv6_ra_mode=Off and ipv6_address_mode=Off') % (
+                             'ipv6_ra_mode=Off and ipv6_address_mode=Off,'
+                             'but shall be taken from fixed IPs') % (
                                 real_ip, eui_ip))
 
     @test.attr(type='smoke')
@@ -228,7 +192,6 @@ class NetworksTestDHCPv6JSON(base.BaseNetworkTest):
                 kwargs = {'ipv6_ra_mode': ra_mode,
                           'ipv6_address_mode': add_mode}
                 kwargs_dhcp = {'ipv6_address_mode': 'dhcpv6-stateful'}
-
                 if order == "slaac_first":
                     subnet_slaac = self.create_subnet(self.network, **kwargs)
                     subnet_dhcp = self.create_subnet(
@@ -243,7 +206,7 @@ class NetworksTestDHCPv6JSON(base.BaseNetworkTest):
                     subnet_slaac['cidr'],
                     port_mac
                 ).format()
-                # TODO: this check when 1330826 is fixed
+                # TODO: remove this when 1219795 is fixed
                 dhcp_ip = [dhcp_ip, (netaddr.IPAddress(dhcp_ip) + 1).format()]
                 port = self.create_port(self.network, mac_address=port_mac)
                 real_ips = dict([(k['subnet_id'], k['ip_address'])
@@ -295,7 +258,7 @@ class NetworksTestDHCPv6JSON(base.BaseNetworkTest):
                     subnet_slaac['cidr'],
                     port_mac
                 ).format()
-                # TODO: remove this when 1330826 is fixed
+                # TODO: remove this when 1219795 is fixed
                 dhcp_ip = [dhcp_ip, (netaddr.IPAddress(dhcp_ip) + 1).format()]
                 port = self.create_port(self.network, mac_address=port_mac)
                 real_ips = dict([(k['subnet_id'], k['ip_address'])
@@ -316,36 +279,9 @@ class NetworksTestDHCPv6JSON(base.BaseNetworkTest):
                                     str(dhcp_ip)))
 
     @test.attr(type='smoke')
-    def test_slaac_duplicate(self):
-        """When creating SLAAC address, neutron shall check
-        that there are not any duplicates of this address in
-        the network.
-        """
-        kwargs = {'ipv6_ra_mode': 'slaac',
-                  'ipv6_address_mode': 'slaac',
-                  'cidr': netaddr.IPNetwork('2014::/64'),
-                  'mask_bits': 64}
-        subnet = self.create_subnet(self.network, **kwargs)
-        port_mac = data_utils.rand_mac_address()
-        eui_ip = data_utils.get_ipv6_addr_by_EUI64(subnet['cidr'],
-                                                   port_mac).format()
-        port = self.create_port(self.network,
-                                fixed_ips=[
-                                    {'subnet_id': subnet['id'],
-                                     'ip_address': eui_ip}])
-        port_ip = next(iter(port['fixed_ips']))['ip_address']
-        self.assertEqual(port_ip, eui_ip, "IP is not EUI-64: %s" % port_ip)
-        self.assertRaisesRegexp(
-            exceptions.Conflict,
-            "An object with that identifier already exists",
-            self.create_port,
-            self.network,
-            mac_address=port_mac)
-
-    @test.attr(type='smoke')
     def test_dhcp_stateful(self):
         """When all options below, DHCPv6 shall allocate first
-        address from subnet pool to port..
+        address from subnet pool to port.
         """
         for ra_mode, add_mode in (
                 ('dhcpv6-stateful', 'dhcpv6-stateful'),
@@ -356,7 +292,7 @@ class NetworksTestDHCPv6JSON(base.BaseNetworkTest):
                       'ipv6_address_mode': add_mode}
             kwargs = {k: v for k, v in kwargs.iteritems() if v}
             subnet = self.create_subnet(self.network, **kwargs)
-            port = self.create_port(self.network,)
+            port = self.create_port(self.network)
             port_ip = next(iter(port['fixed_ips']))['ip_address']
             first_alloc = subnet["allocation_pools"][0]["start"]
             self._clean_network()
@@ -369,18 +305,12 @@ class NetworksTestDHCPv6JSON(base.BaseNetworkTest):
     def test_dhcp_stateful_fixedips(self):
         """When all options below, port shall be able to get
         requested IP from fixed IP range not depending on
-        DHCP settings configured..
+        DHCP stateful (not SLAAC!) settings configured..
         """
         for ra_mode, add_mode in (
                 ('dhcpv6-stateful', 'dhcpv6-stateful'),
                 ('dhcpv6-stateful', None),
                 (None, 'dhcpv6-stateful'),
-                ('slaac', 'slaac'),
-                ('dhcpv6-stateless', 'dhcpv6-stateless'),
-                (None, 'slaac'),
-                (None, 'dhcpv6-stateless'),
-                ('slaac', None),
-                ('dhcpv6-stateless', None),
         ):
             kwargs = {'ipv6_ra_mode': ra_mode,
                       'ipv6_address_mode': add_mode}
@@ -441,6 +371,63 @@ class NetworksTestDHCPv6JSON(base.BaseNetworkTest):
                                 self.network,
                                 fixed_ips=[{'subnet_id': subnet['id'],
                                             'ip_address': ip}])
+
+    def _create_subnet_router(self, kwargs):
+        subnet = self.create_subnet(self.network, **kwargs)
+        router = self.create_router(router_name="cisco",
+                                    admin_state_up=True)
+        port = self.create_router_interface(router['id'],
+                                            subnet['id'])
+        _, body = self.client.show_port(port['port_id'])
+        return subnet, body['port']
+
+    @test.attr(type='smoke')
+    def test_dhcp_stateful_router(self):
+        """When all options below the router interface shall
+        receive DHCPv6 IP address from allocation pool.
+        """
+        for ra_mode, add_mode in (
+                ('dhcpv6-stateful', 'dhcpv6-stateful'),
+                ('dhcpv6-stateful', None),
+                (None, 'dhcpv6-stateful'),
+        ):
+            kwargs = {'ipv6_ra_mode': ra_mode,
+                      'ipv6_address_mode': add_mode}
+            kwargs = {k: v for k, v in kwargs.iteritems() if v}
+            subnet, port = self._create_subnet_router(kwargs)
+            port_ip = next(iter(port['fixed_ips']))['ip_address']
+            self._clean_network()
+            self.assertEqual(port_ip, subnet['gateway_ip'],
+                             ("Port IP %s is not as first IP from "
+                              "subnets allocation pool: %s") % (
+                                 port_ip, subnet['gateway_ip']))
+
+    @test.attr(type='smoke')
+    def test_dhcp_stateless_router(self):
+        """When all options below the router interface shall
+        receive DHCPv6 IP SLAAC address according to its MAC.
+        """
+        for ra_mode, add_mode in (
+                ('dhcpv6-stateless', 'dhcpv6-stateless'),
+                ('dhcpv6-stateless', None),
+                (None, 'dhcpv6-stateless'),
+                ('slaac', 'slaac'),
+                ('slaac', None),
+                (None, 'slaac')
+        ):
+            kwargs = {'ipv6_ra_mode': ra_mode,
+                      'ipv6_address_mode': add_mode}
+            kwargs = {k: v for k, v in kwargs.iteritems() if v}
+            subnet, port = self._create_subnet_router(kwargs)
+            port_ip = next(iter(port['fixed_ips']))['ip_address']
+            eui64_ip = data_utils.get_ipv6_addr_by_EUI64(
+                subnet['cidr'],
+                port['mac_address'])
+            self._clean_network()
+            self.assertEqual(port_ip, eui64_ip,
+                             ("Port IP %s is not as first IP from "
+                              "subnets allocation pool: %s") % (
+                                 port_ip, subnet['gateway_ip']))
 
     def tearDown(self):
         self._clean_network()

@@ -149,7 +149,7 @@ class NetworkClientXML(client_base.NetworkClientBase):
         resp, body = self.put(uri, str(common.Document(subnet)))
         self.rest_client.expected_success(200, resp.status)
         body = _root_tag_fetcher_and_xml_to_json_parse(body)
-        return resp, body
+        return resp, body['_v_root']
 
     def add_router_interface_with_port_id(self, router_id, port_id):
         uri = '%s/routers/%s/add_router_interface' % (self.uri_prefix,
