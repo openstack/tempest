@@ -16,6 +16,7 @@
 
 import collections
 import json
+import logging as real_logging
 import re
 import time
 
@@ -310,14 +311,15 @@ class RestClient(object):
         caller_name = misc_utils.find_test_caller()
         if secs:
             secs = " %.3fs" % secs
-        self.LOG.info(
-            'Request (%s): %s %s %s%s' % (
-                caller_name,
-                resp['status'],
-                method,
-                req_url,
-                secs),
-            extra=extra)
+        if not self.LOG.isEnabledFor(real_logging.DEBUG):
+            self.LOG.info(
+                'Request (%s): %s %s %s%s' % (
+                    caller_name,
+                    resp['status'],
+                    method,
+                    req_url,
+                    secs),
+                extra=extra)
 
         # Also look everything at DEBUG if you want to filter this
         # out, don't run at debug.
