@@ -447,20 +447,6 @@ class Manager(manager.Manager):
             self.auth_provider)
 
 
-class AltManager(Manager):
-
-    """
-    Manager object that uses the alt_XXX credentials for its
-    managed client objects
-    """
-
-    def __init__(self, interface='json', service=None):
-        super(AltManager, self).__init__(
-            credentials=auth.get_default_credentials('alt_user'),
-            interface=interface,
-            service=service)
-
-
 class AdminManager(Manager):
 
     """
