@@ -32,8 +32,8 @@ class PoliciesTestJSON(base.BaseIdentityV3AdminTest):
         for _ in range(3):
             blob = data_utils.rand_name('BlobName-')
             policy_type = data_utils.rand_name('PolicyType-')
-            resp, policy = self.policy_client.create_policy(blob,
-                                                            policy_type)
+            policy = self.policy_client.create_policy(blob,
+                                                      policy_type)
             # Delete the Policy at the end of this method
             self.addCleanup(self._delete_policy, policy['id'])
             policy_ids.append(policy['id'])
@@ -49,7 +49,7 @@ class PoliciesTestJSON(base.BaseIdentityV3AdminTest):
         # Test to update policy
         blob = data_utils.rand_name('BlobName-')
         policy_type = data_utils.rand_name('PolicyType-')
-        _, policy = self.policy_client.create_policy(blob, policy_type)
+        policy = self.policy_client.create_policy(blob, policy_type)
         self.addCleanup(self._delete_policy, policy['id'])
         self.assertIn('id', policy)
         self.assertIn('type', policy)

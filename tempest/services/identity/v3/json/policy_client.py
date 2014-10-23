@@ -39,7 +39,7 @@ class PolicyClientJSON(rest_client.RestClient):
         resp, body = self.post('policies', post_body)
         self.expected_success(201, resp.status)
         body = json.loads(body)
-        return resp, body['policy']
+        return rest_client.ResponseBody(resp, body['policy'])
 
     def list_policies(self):
         """Lists the policies."""
