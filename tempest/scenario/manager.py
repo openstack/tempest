@@ -624,14 +624,20 @@ class NetworkScenarioTest(ScenarioTest):
         return floating_ip
 
     def check_floating_ip_status(self, floating_ip, status):
-        """Verifies floatingip has reached given status. without waiting
+        """Verifies floatingip reaches the given status
 
         :param floating_ip: net_resources.DeletableFloatingIp floating IP to
         to check status
         :param status: target status
         :raises: AssertionError if status doesn't match
         """
-        floating_ip.refresh()
+        def refresh():
+            floating_ip.refresh()
+            return status == floating_ip.status
+
+        tempest.test.call_until_true(refresh,
+                                     CONF.network.build_timeout,
+                                     CONF.network.build_interval)
         self.assertEqual(status, floating_ip.status,
                          message="FloatingIP: {fp} is at status: {cst}. "
                                  "failed  to reach status: {st}"
