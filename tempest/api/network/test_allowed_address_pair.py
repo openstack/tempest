@@ -94,5 +94,5 @@ class AllowedAddressPairTestJSON(base.BaseNetworkTest):
         self.assertEqual(mac_address, self.mac_address)
 
 
-class AllowedAddressPairTestXML(AllowedAddressPairTestJSON):
-    _interface = 'xml'
+class AllowedAddressPairTestJSON6(AllowedAddressPairTestJSON):
+    _ip_version = 6

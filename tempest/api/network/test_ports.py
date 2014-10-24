@@ -152,10 +152,6 @@ class PortsTestJSON(base.BaseNetworkTest):
         self.assertEqual(1, len(port['fixed_ips']))
 
 
-class PortsTestXML(PortsTestJSON):
-    _interface = 'xml'
-
-
 class PortsAdminExtendedAttrsTestJSON(base.BaseAdminNetworkTest):
     _interface = 'json'
 
@@ -232,10 +228,6 @@ class PortsAdminExtendedAttrsTestJSON(base.BaseAdminNetworkTest):
                          show_port['binding:vif_details'])
 
 
-class PortsAdminExtendedAttrsTestXML(PortsAdminExtendedAttrsTestJSON):
-    _interface = 'xml'
-
-
 class PortsIpV6TestJSON(PortsTestJSON):
     _ip_version = 6
     _tenant_network_cidr = CONF.network.tenant_network_v6_cidr
@@ -249,10 +241,6 @@ class PortsIpV6TestJSON(PortsTestJSON):
             raise cls.skipException(skip_msg)
 
 
-class PortsIpV6TestXML(PortsIpV6TestJSON):
-    _interface = 'xml'
-
-
 class PortsAdminExtendedAttrsIpV6TestJSON(PortsAdminExtendedAttrsTestJSON):
     _ip_version = 6
     _tenant_network_cidr = CONF.network.tenant_network_v6_cidr
@@ -264,7 +252,3 @@ class PortsAdminExtendedAttrsIpV6TestJSON(PortsAdminExtendedAttrsTestJSON):
             skip_msg = "IPv6 Tests are disabled."
             raise cls.skipException(skip_msg)
         super(PortsAdminExtendedAttrsIpV6TestJSON, cls).resource_setup()
-
-
-class PortsAdminExtendedAttrsIpV6TestXML(PortsAdminExtendedAttrsIpV6TestJSON):
-    _interface = 'xml'

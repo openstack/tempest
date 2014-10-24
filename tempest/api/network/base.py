@@ -268,9 +268,11 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
         return vip
 
     @classmethod
-    def create_member(cls, protocol_port, pool):
+    def create_member(cls, protocol_port, pool, ip_version=None):
         """Wrapper utility that returns a test member."""
-        resp, body = cls.client.create_member(address="10.0.9.46",
+        ip_version = ip_version if ip_version is not None else cls._ip_version
+        member_address = "fd00::abcd" if ip_version == 6 else "10.0.9.46"
+        resp, body = cls.client.create_member(address=member_address,
                                               protocol_port=protocol_port,
                                               pool_id=pool['id'])
         member = body['member']

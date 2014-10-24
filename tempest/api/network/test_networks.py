@@ -510,7 +510,3 @@ class NetworksIpV6TestJSON(NetworksTestJSON):
             gateway=self._subnet_data[self._ip_version]['gateway'],
             ipv6_ra_mode='slaac',
             ipv6_address_mode='slaac')
-
-
-class NetworksIpV6TestXML(NetworksIpV6TestJSON):
-    _interface = 'xml'

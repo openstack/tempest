@@ -55,7 +55,9 @@ class LoadBalancerTestJSON(base.BaseNetworkTest):
                                  protocol_port=80,
                                  subnet=cls.subnet,
                                  pool=cls.pool)
-        cls.member = cls.create_member(80, cls.pool)
+        cls.member = cls.create_member(80, cls.pool, cls._ip_version)
+        cls.member_address = ("10.0.9.47" if cls._ip_version == 4
+                              else "2015::beef")
         cls.health_monitor = cls.create_health_monitor(delay=4,
                                                        max_retries=3,
                                                        Type="TCP",
@@ -213,13 +215,14 @@ class LoadBalancerTestJSON(base.BaseNetworkTest):
     def test_list_members_with_filters(self):
         attr_exceptions = ['status', 'status_description']
         self._check_list_with_filter('member', attr_exceptions,
-                                     address="10.0.9.47", protocol_port=80,
+                                     address=self.member_address,
+                                     protocol_port=80,
                                      pool_id=self.pool['id'])
 
     @test.attr(type='smoke')
     def test_create_update_delete_member(self):
         # Creates a member
-        _, body = self.client.create_member(address="10.0.9.47",
+        _, body = self.client.create_member(address=self.member_address,
                                             protocol_port=80,
                                             pool_id=self.pool['id'])
         member = body['member']
@@ -419,5 +422,5 @@ class LoadBalancerTestJSON(base.BaseNetworkTest):
         self.assertEqual(2, member['weight'])
 
 
-class LoadBalancerTestXML(LoadBalancerTestJSON):
-    _interface = 'xml'
+class LoadBalancerTestJSON6(LoadBalancerTestJSON):
+    _ip_version = 6

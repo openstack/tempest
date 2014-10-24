@@ -280,7 +280,7 @@ class NetworksTestDHCPv6JSON(base.BaseNetworkTest):
 
     @test.attr(type='smoke')
     def test_dhcp_stateful(self):
-        """When all options below, DHCPv6 shall allocate first
+        """With all options below, DHCPv6 shall allocate first
         address from subnet pool to port.
         """
         for ra_mode, add_mode in (
@@ -303,7 +303,7 @@ class NetworksTestDHCPv6JSON(base.BaseNetworkTest):
 
     @test.attr(type='smoke')
     def test_dhcp_stateful_fixedips(self):
-        """When all options below, port shall be able to get
+        """With all options below, port shall be able to get
         requested IP from fixed IP range not depending on
         DHCP stateful (not SLAAC!) settings configured..
         """
@@ -383,7 +383,7 @@ class NetworksTestDHCPv6JSON(base.BaseNetworkTest):
 
     @test.attr(type='smoke')
     def test_dhcp_stateful_router(self):
-        """When all options below the router interface shall
+        """With all options below the router interface shall
         receive DHCPv6 IP address from allocation pool.
         """
         for ra_mode, add_mode in (
@@ -402,9 +402,11 @@ class NetworksTestDHCPv6JSON(base.BaseNetworkTest):
                               "subnets allocation pool: %s") % (
                                  port_ip, subnet['gateway_ip']))
 
+
+
     @test.attr(type='smoke')
     def test_dhcp_stateless_router(self):
-        """When all options below the router interface shall
+        """With all options below the router interface shall
         receive DHCPv6 IP SLAAC address according to its MAC.
         """
         for ra_mode, add_mode in (
@@ -429,10 +431,33 @@ class NetworksTestDHCPv6JSON(base.BaseNetworkTest):
                               "subnets allocation pool: %s") % (
                                  port_ip, subnet['gateway_ip']))
 
+    @test.attr(type='smoke')
+    def test_dhcp_stateless_router_wogw(self):
+        """With all options below the router interface shall
+        receive DHCPv6 IP SLAAC address according to its MAC.
+        """
+        for ra_mode, add_mode in (
+                ('dhcpv6-stateless', 'dhcpv6-stateless'),
+                ('dhcpv6-stateless', None),
+                (None, 'dhcpv6-stateless'),
+                ('slaac', 'slaac'),
+                ('slaac', None),
+                (None, 'slaac')
+        ):
+            kwargs = {'ipv6_ra_mode': ra_mode,
+                      'ipv6_address_mode': add_mode}
+            kwargs = {k: v for k, v in kwargs.iteritems() if v}
+            kwargs['gateway'] = None
+            subnet, port = self._create_subnet_router(kwargs)
+            port_ip = next(iter(port['fixed_ips']))['ip_address']
+            eui64_ip = data_utils.get_ipv6_addr_by_EUI64(
+                subnet['cidr'],
+                port['mac_address']).format()
+            self._clean_network()
+            self.assertEqual(port_ip, eui64_ip,
+                             ("Port IP %s is not SLAAC %s") % (
+                                 port_ip, eui64_ip))
+
     def tearDown(self):
         self._clean_network()
         super(NetworksTestDHCPv6JSON, self).tearDown()
-
-
-class NetworksTestDHCPv6XML(NetworksTestDHCPv6JSON):
-    _interface = 'xml'

@@ -189,10 +189,6 @@ class NegativeSecGroupTest(base.BaseSecGroupTest):
                           direction='ingress', ethertype=self.ethertype)
 
 
-class NegativeSecGroupTestXML(NegativeSecGroupTest):
-    _interface = 'xml'
-
-
 class NegativeSecGroupIPv6Test(NegativeSecGroupTest):
     _ip_version = 6
     _tenant_network_cidr = CONF.network.tenant_network_v6_cidr
@@ -203,7 +199,3 @@ class NegativeSecGroupIPv6Test(NegativeSecGroupTest):
             skip_msg = "IPv6 Tests are disabled."
             raise cls.skipException(skip_msg)
         super(NegativeSecGroupIPv6Test, cls).resource_setup()
-
-
-class NegativeSecGroupIPv6TestXML(NegativeSecGroupIPv6Test):
-    _interface = 'xml'
