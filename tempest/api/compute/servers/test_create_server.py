@@ -128,6 +128,9 @@ class ServersTestJSON(base.BaseV2ComputeTest):
     @testtools.skipUnless(CONF.service_available.neutron,
                           'Neutron service must be available.')
     def test_verify_multiple_nics_order(self):
+        if getattr(self, '_interface',
+                   None) == 'xml' and not CONF.network_feature_enabled.xml_api:
+            raise self.skipException('Neutron XML API is not enabled')
         # Verify that the networks order given at the server creation is
         # preserved within the server.
         name_net1 = data_utils.rand_name(self.__class__.__name__)
