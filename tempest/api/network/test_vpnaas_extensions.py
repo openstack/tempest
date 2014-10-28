@@ -305,5 +305,5 @@ class VPNaaSTestJSON(base.BaseAdminNetworkTest):
         self._assertExpected(self.ipsecpolicy, ipsecpolicy)
 
 
-class VPNaaSTestXML(VPNaaSTestJSON):
-    _interface = 'xml'
+class VPNaaSTestJSON6(VPNaaSTestJSON):
+    _ip_version = 6

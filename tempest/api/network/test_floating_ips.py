@@ -213,7 +213,3 @@ class FloatingIPTestJSON(base.BaseNetworkTest):
         update_floating_ip = body['floatingip']
         self.assertEqual(update_floating_ip['fixed_ip_address'],
                          list_ips[1])
-
-
-class FloatingIPTestXML(FloatingIPTestJSON):
-    _interface = 'xml'

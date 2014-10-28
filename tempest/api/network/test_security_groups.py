@@ -213,10 +213,6 @@ class SecGroupTest(base.BaseSecGroupTest):
                                                 remote_ip_prefix=ip_prefix)
 
 
-class SecGroupTestXML(SecGroupTest):
-    _interface = 'xml'
-
-
 class SecGroupIPv6Test(SecGroupTest):
     _ip_version = 6
     _tenant_network_cidr = CONF.network.tenant_network_v6_cidr
@@ -227,7 +223,3 @@ class SecGroupIPv6Test(SecGroupTest):
             skip_msg = "IPv6 Tests are disabled."
             raise cls.skipException(skip_msg)
         super(SecGroupIPv6Test, cls).resource_setup()
-
-
-class SecGroupIPv6TestXML(SecGroupIPv6Test):
-    _interface = 'xml'

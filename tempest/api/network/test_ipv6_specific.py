@@ -204,7 +204,3 @@ class NetworksTestPortsIPv6JSON(base.BaseNetworkTest):
     def tearDown(self):
         self._clean_network()
         super(NetworksTestPortsIPv6JSON, self).tearDown()
-
-
-class NetworksTestDHCPv6XML(NetworksTestPortsIPv6JSON):
-    _interface = 'xml'
