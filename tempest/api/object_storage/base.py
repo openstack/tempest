@@ -36,18 +36,12 @@ class BaseObjectTest(tempest.test.BaseTestCase):
             raise cls.skipException(skip_msg)
         cls.isolated_creds = isolated_creds.IsolatedCreds(
             cls.__name__, network_resources=cls.network_resources)
-        if CONF.compute.allow_tenant_isolation:
-            # Get isolated creds for normal user
-            cls.os = clients.Manager(cls.isolated_creds.get_primary_creds())
-            # Get isolated creds for admin user
-            cls.os_admin = clients.Manager(
-                cls.isolated_creds.get_admin_creds())
-            # Get isolated creds for alt user
-            cls.os_alt = clients.Manager(cls.isolated_creds.get_alt_creds())
-        else:
-            cls.os = clients.Manager()
-            cls.os_admin = clients.AdminManager()
-            cls.os_alt = clients.AltManager()
+        # Get isolated creds for normal user
+        cls.os = clients.Manager(cls.isolated_creds.get_primary_creds())
+        # Get isolated creds for admin user
+        cls.os_admin = clients.Manager(cls.isolated_creds.get_admin_creds())
+        # Get isolated creds for alt user
+        cls.os_alt = clients.Manager(cls.isolated_creds.get_alt_creds())
 
         cls.object_client = cls.os.object_client
         cls.container_client = cls.os.container_client

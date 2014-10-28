@@ -15,7 +15,7 @@ fi
 TEMPDIR=`mktemp -d /tmp/${PROJECT_NAME}.XXXXXX`
 trap "rm -rf $TEMPDIR" EXIT
 
-tools/config/generate_sample.sh -b ./ -p ${PROJECT_NAME} -o ${TEMPDIR}
+oslo-config-generator --config-file tools/config/config-generator.tempest.conf --output-file ${TEMPDIR}/${CFGFILE_NAME}
 if [ $? != 0 ]
 then
     exit 1
@@ -24,6 +24,6 @@ fi
 if ! diff -u ${TEMPDIR}/${CFGFILE_NAME} ${CFGFILE}
 then
    echo "${0##*/}: ${PROJECT_NAME}.conf.sample is not up to date."
-   echo "${0##*/}: Please run ${0%%${0##*/}}generate_sample.sh."
+   echo "${0##*/}: Please run tox -egenconfig."
    exit 1
 fi

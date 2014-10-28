@@ -41,10 +41,7 @@ class BaseImageTest(tempest.test.BaseTestCase):
         if not CONF.service_available.glance:
             skip_msg = ("%s skipped as glance is not available" % cls.__name__)
             raise cls.skipException(skip_msg)
-        if CONF.compute.allow_tenant_isolation:
-            cls.os = clients.Manager(cls.isolated_creds.get_primary_creds())
-        else:
-            cls.os = clients.Manager()
+        cls.os = clients.Manager(cls.isolated_creds.get_primary_creds())
 
     @classmethod
     def resource_cleanup(cls):
@@ -91,10 +88,7 @@ class BaseV1ImageMembersTest(BaseV1ImageTest):
     @classmethod
     def resource_setup(cls):
         super(BaseV1ImageMembersTest, cls).resource_setup()
-        if CONF.compute.allow_tenant_isolation:
-            cls.os_alt = clients.Manager(cls.isolated_creds.get_alt_creds())
-        else:
-            cls.os_alt = clients.AltManager()
+        cls.os_alt = clients.Manager(cls.isolated_creds.get_alt_creds())
 
         cls.alt_img_cli = cls.os_alt.image_client
         cls.alt_tenant_id = cls.alt_img_cli.tenant_id
@@ -126,11 +120,8 @@ class BaseV2MemberImageTest(BaseV2ImageTest):
     @classmethod
     def resource_setup(cls):
         super(BaseV2MemberImageTest, cls).resource_setup()
-        if CONF.compute.allow_tenant_isolation:
-            creds = cls.isolated_creds.get_alt_creds()
-            cls.os_alt = clients.Manager(creds)
-        else:
-            cls.os_alt = clients.AltManager()
+        creds = cls.isolated_creds.get_alt_creds()
+        cls.os_alt = clients.Manager(creds)
         cls.os_img_client = cls.os.image_client_v2
         cls.alt_img_client = cls.os_alt.image_client_v2
         cls.alt_tenant_id = cls.alt_img_client.tenant_id

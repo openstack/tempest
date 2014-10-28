@@ -16,6 +16,7 @@
 
 import collections
 import json
+import logging as real_logging
 import re
 import time
 
@@ -36,8 +37,8 @@ CONF = config.CONF
 MAX_RECURSION_DEPTH = 2
 TOKEN_CHARS_RE = re.compile('^[-A-Za-z0-9+/=]*$')
 
-# All the successful HTTP status codes from RFC 2616
-HTTP_SUCCESS = (200, 201, 202, 203, 204, 205, 206)
+# All the successful HTTP status codes from RFC 7231 & 4918
+HTTP_SUCCESS = (200, 201, 202, 203, 204, 205, 206, 207)
 
 
 # convert a structure into a string safely
@@ -208,8 +209,9 @@ class RestClient(object):
     @classmethod
     def expected_success(cls, expected_code, read_code):
         assert_msg = ("This function only allowed to use for HTTP status"
-                      "codes which explicitly defined in the RFC 2616. {0}"
-                      " is not a defined Success Code!").format(expected_code)
+                      "codes which explicitly defined in the RFC 7231 & 4918."
+                      "{0} is not a defined Success Code!"
+                      ).format(expected_code)
         if isinstance(expected_code, list):
             for code in expected_code:
                 assert code in HTTP_SUCCESS, assert_msg
@@ -310,14 +312,15 @@ class RestClient(object):
         caller_name = misc_utils.find_test_caller()
         if secs:
             secs = " %.3fs" % secs
-        self.LOG.info(
-            'Request (%s): %s %s %s%s' % (
-                caller_name,
-                resp['status'],
-                method,
-                req_url,
-                secs),
-            extra=extra)
+        if not self.LOG.isEnabledFor(real_logging.DEBUG):
+            self.LOG.info(
+                'Request (%s): %s %s %s%s' % (
+                    caller_name,
+                    resp['status'],
+                    method,
+                    req_url,
+                    secs),
+                extra=extra)
 
         # Also look everything at DEBUG if you want to filter this
         # out, don't run at debug.
@@ -568,9 +571,10 @@ class RestClient(object):
             if self.is_resource_deleted(id):
                 return
             if int(time.time()) - start_time >= self.build_timeout:
-                message = ('Failed to delete resource %(id)s within the '
-                           'required time (%(timeout)s s).' %
-                           {'id': id, 'timeout': self.build_timeout})
+                message = ('Failed to delete %(resource_type)s %(id)s within '
+                           'the required time (%(timeout)s s).' %
+                           {'resource_type': self.resource_type, 'id': id,
+                            'timeout': self.build_timeout})
                 caller = misc_utils.find_test_caller()
                 if caller:
                     message = '(%s) %s' % (caller, message)
@@ -584,6 +588,11 @@ class RestClient(object):
         message = ('"%s" does not implement is_resource_deleted'
                    % self.__class__.__name__)
         raise NotImplementedError(message)
+
+    @property
+    def resource_type(self):
+        """Returns the primary type of resource this client works with."""
+        return 'resource'
 
     @classmethod
     def validate_response(cls, schema, resp, body):

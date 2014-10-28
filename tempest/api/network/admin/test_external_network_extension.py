@@ -83,7 +83,3 @@ class ExternalNetworksTestJSON(base.BaseAdminNetworkTest):
         self.assertEqual(self.network['name'], show_net['name'])
         self.assertEqual(self.network['id'], show_net['id'])
         self.assertFalse(show_net['router:external'])
-
-
-class ExternalNetworksTestXML(ExternalNetworksTestJSON):
-    _interface = 'xml'

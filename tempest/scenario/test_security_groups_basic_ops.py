@@ -241,7 +241,11 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
             'security_groups': security_groups,
             'tenant_id': tenant.creds.tenant_id
         }
-        return self.create_server(name=name, create_kwargs=create_kwargs)
+        server = self.create_server(name=name, create_kwargs=create_kwargs)
+        self.assertEqual(
+            sorted([s['name'] for s in security_groups]),
+            sorted([s['name'] for s in server['security_groups']]))
+        return server
 
     def _create_tenant_servers(self, tenant, num=1):
         for i in range(num):

@@ -58,7 +58,15 @@ class Accounts(cred_provider.CredentialProvider):
         return hash_dict
 
     def is_multi_user(self):
-        return len(self.hash_dict) > 1
+        # Default credentials is not a valid option with locking Account
+        if self.use_default_creds:
+            raise exceptions.InvalidConfiguration(
+                "Account file %s doesn't exist" % CONF.auth.test_accounts_file)
+        else:
+            return len(self.hash_dict) > 1
+
+    def is_multi_tenant(self):
+        return self.is_multi_user()
 
     def _create_hash_file(self, hash_string):
         path = os.path.join(os.path.join(self.accounts_dir, hash_string))
@@ -143,6 +151,27 @@ class NotLockingAccounts(Accounts):
     This credential provider can be used in case of serial test execution
     to preserve the current behaviour of the serial tempest run.
     """
+
+    def _unique_creds(self, cred_arg=None):
+        """Verify that the configured credentials are valid and distinct """
+        if self.use_default_creds:
+            try:
+                user = self.get_primary_creds()
+                alt_user = self.get_alt_creds()
+                return getattr(user, cred_arg) != getattr(alt_user, cred_arg)
+            except exceptions.InvalidCredentials as ic:
+                msg = "At least one of the configured credentials is " \
+                      "not valid: %s" % ic.message
+                raise exceptions.InvalidConfiguration(msg)
+        else:
+            # TODO(andreaf) Add a uniqueness check here
+            return len(self.hash_dict) > 1
+
+    def is_multi_user(self):
+        return self._unique_creds('username')
+
+    def is_multi_tenant(self):
+        return self._unique_creds('tenant_id')
 
     def get_creds(self, id):
         try:

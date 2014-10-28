@@ -109,7 +109,3 @@ class LoadBalancerAdminTestJSON(base.BaseAdminNetworkTest):
         self.addCleanup(self.admin_client.delete_member, member['id'])
         self.assertIsNotNone(member['id'])
         self.assertEqual(self.tenant_id, member['tenant_id'])
-
-
-class LoadBalancerAdminTestXML(LoadBalancerAdminTestJSON):
-    _interface = 'xml'

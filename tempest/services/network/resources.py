@@ -52,7 +52,7 @@ class DeletableResource(AttributeDict):
         return
 
     @abc.abstractmethod
-    def show(self):
+    def refresh(self):
         return
 
     def __hash__(self):
@@ -62,7 +62,11 @@ class DeletableResource(AttributeDict):
         if not hasattr(self, 'status'):
             return
 
-        return self.client.wait_for_resource_status(self.show, status)
+        def helper_get():
+            self.refresh()
+            return self
+
+        return self.client.wait_for_resource_status(helper_get, status)
 
 
 class DeletableNetwork(DeletableResource):
@@ -115,6 +119,12 @@ class DeletableRouter(DeletableResource):
 
 
 class DeletableFloatingIp(DeletableResource):
+
+    def refresh(self, *args, **kwargs):
+        _, result = self.client.show_floatingip(self.id,
+                                                *args,
+                                                **kwargs)
+        super(DeletableFloatingIp, self).update(**result['floatingip'])
 
     def update(self, *args, **kwargs):
         _, result = self.client.update_floatingip(self.id,
@@ -172,7 +182,6 @@ class DeletableVip(DeletableResource):
     def delete(self):
         self.client.delete_vip(self.id)
 
-    def show(self):
+    def refresh(self):
         _, result = self.client.show_vip(self.id)
         super(DeletableVip, self).update(**result['vip'])
-        return self

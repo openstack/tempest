@@ -62,6 +62,9 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
         super(BaseNetworkTest, cls).resource_setup()
         if not CONF.service_available.neutron:
             raise cls.skipException("Neutron support is required")
+        if getattr(cls, '_interface', None) == 'xml':
+            if not CONF.network_feature_enabled.xml_api:
+                raise cls.skipException('XML API is not enabled')
 
         os = cls.get_client_manager()
 
@@ -370,19 +373,15 @@ class BaseAdminNetworkTest(BaseNetworkTest):
     @classmethod
     def resource_setup(cls):
         super(BaseAdminNetworkTest, cls).resource_setup()
-        admin_username = CONF.compute_admin.username
-        admin_password = CONF.compute_admin.password
-        admin_tenant = CONF.compute_admin.tenant_name
-        if not (admin_username and admin_password and admin_tenant):
+
+        try:
+            creds = cls.isolated_creds.get_admin_creds()
+            cls.os_adm = clients.Manager(
+                credentials=creds, interface=cls._interface)
+        except NotImplementedError:
             msg = ("Missing Administrative Network API credentials "
                    "in configuration.")
             raise cls.skipException(msg)
-        if (CONF.compute.allow_tenant_isolation or
-            cls.force_tenant_isolation is True):
-            cls.os_adm = clients.Manager(cls.isolated_creds.get_admin_creds(),
-                                         interface=cls._interface)
-        else:
-            cls.os_adm = clients.ComputeAdminManager(interface=cls._interface)
         cls.admin_client = cls.os_adm.network_client
 
     @classmethod

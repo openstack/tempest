@@ -23,8 +23,8 @@ import six
 
 from tempest import auth
 from tempest import clients
+from tempest.common import credentials
 from tempest.common import debug
-from tempest.common import isolated_creds
 from tempest.common.utils import data_utils
 from tempest.common.utils.linux import remote_client
 from tempest import config
@@ -51,8 +51,9 @@ class ScenarioTest(tempest.test.BaseTestCase):
     @classmethod
     def resource_setup(cls):
         super(ScenarioTest, cls).resource_setup()
-        # Using tempest client for isolated credentials as well
-        cls.isolated_creds = isolated_creds.IsolatedCreds(
+        # TODO(andreaf) Some of the code from this resource_setup could be
+        # moved into `BaseTestCase`
+        cls.isolated_creds = credentials.get_isolated_credentials(
             cls.__name__, network_resources=cls.network_resources)
         cls.manager = clients.Manager(
             credentials=cls.credentials()
@@ -79,27 +80,19 @@ class ScenarioTest(tempest.test.BaseTestCase):
         cls.orchestration_client = cls.manager.orchestration_client
 
     @classmethod
-    def _get_credentials(cls, get_creds, ctype):
-        if CONF.compute.allow_tenant_isolation:
-            creds = get_creds()
-        else:
-            creds = auth.get_default_credentials(ctype)
-        return creds
-
-    @classmethod
     def credentials(cls):
-        return cls._get_credentials(cls.isolated_creds.get_primary_creds,
-                                    'user')
+        return cls.isolated_creds.get_primary_creds()
 
     @classmethod
     def alt_credentials(cls):
-        return cls._get_credentials(cls.isolated_creds.get_alt_creds,
-                                    'alt_user')
+        return cls.isolated_creds.get_alt_creds()
 
     @classmethod
     def admin_credentials(cls):
-        return cls._get_credentials(cls.isolated_creds.get_admin_creds,
-                                    'identity_admin')
+        try:
+            return cls.isolated_creds.get_admin_creds()
+        except NotImplementedError:
+            raise cls.skipException('Admin Credentials are not available')
 
     # ## Methods to handle sync and async deletes
 
@@ -396,9 +389,10 @@ class ScenarioTest(tempest.test.BaseTestCase):
             _, servers = self.servers_client.list_servers()
             servers = servers['servers']
         for server in servers:
-            LOG.debug('Console output for %s', server['id'])
-            LOG.debug(self.servers_client.get_console_output(server['id'],
-                                                             length=None))
+            console_output = self.servers_client.get_console_output(
+                server['id'], length=None)
+            LOG.debug('Console output for %s\nhead=%s\nbody=\n%s',
+                      server['id'], console_output[0], console_output[1])
 
     def _log_net_info(self, exc):
         # network debug is called as part of ssh init
@@ -463,9 +457,11 @@ class ScenarioTest(tempest.test.BaseTestCase):
         if wait:
             self.servers_client.wait_for_server_status(server_id, 'ACTIVE')
 
-    def ping_ip_address(self, ip_address, should_succeed=True):
+    def ping_ip_address(self, ip_address, should_succeed=True,
+                        ping_timeout=None):
         ip_version = netaddr.IPAddress(ip_address).version
         ping_cmd = 'ping6' if ip_version == 6 else 'ping'
+        timeout = ping_timeout or CONF.compute.ping_timeout
         cmd = [ping_cmd, '-c1', '-w1', ip_address]
 
         def ping():
@@ -475,8 +471,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
             proc.communicate()
             return (proc.returncode == 0) == should_succeed
 
-        return tempest.test.call_until_true(
-            ping, CONF.compute.ping_timeout, 1)
+        return tempest.test.call_until_true(ping, timeout, 1)
 
 
 class NetworkScenarioTest(ScenarioTest):
@@ -660,6 +655,29 @@ class NetworkScenarioTest(ScenarioTest):
         floating_ip.update(port_id=None)
         self.assertIsNone(floating_ip.port_id)
         return floating_ip
+
+    def check_floating_ip_status(self, floating_ip, status):
+        """Verifies floatingip reaches the given status
+
+        :param floating_ip: net_resources.DeletableFloatingIp floating IP to
+        to check status
+        :param status: target status
+        :raises: AssertionError if status doesn't match
+        """
+        def refresh():
+            floating_ip.refresh()
+            return status == floating_ip.status
+
+        tempest.test.call_until_true(refresh,
+                                     CONF.network.build_timeout,
+                                     CONF.network.build_interval)
+        self.assertEqual(status, floating_ip.status,
+                         message="FloatingIP: {fp} is at status: {cst}. "
+                                 "failed  to reach status: {st}"
+                         .format(fp=floating_ip, cst=floating_ip.status,
+                                 st=status))
+        LOG.info("FloatingIP: {fp} is at status: {st}"
+                 .format(fp=floating_ip, st=status))
 
     def _check_vm_connectivity(self, ip_address,
                                username=None,
