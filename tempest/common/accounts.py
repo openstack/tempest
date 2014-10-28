@@ -65,6 +65,9 @@ class Accounts(cred_provider.CredentialProvider):
         else:
             return len(self.hash_dict) > 1
 
+    def is_multi_tenant(self):
+        return self.is_multi_user()
+
     def _create_hash_file(self, hash_string):
         path = os.path.join(os.path.join(self.accounts_dir, hash_string))
         if not os.path.isfile(path):
@@ -149,13 +152,13 @@ class NotLockingAccounts(Accounts):
     to preserve the current behaviour of the serial tempest run.
     """
 
-    def is_multi_user(self):
+    def _unique_creds(self, cred_arg=None):
+        """Verify that the configured credentials are valid and distinct """
         if self.use_default_creds:
-            # Verify that the configured users are valid and distinct
             try:
                 user = self.get_primary_creds()
                 alt_user = self.get_alt_creds()
-                return user.username != alt_user.username
+                return getattr(user, cred_arg) != getattr(alt_user, cred_arg)
             except exceptions.InvalidCredentials as ic:
                 msg = "At least one of the configured credentials is " \
                       "not valid: %s" % ic.message
@@ -163,6 +166,12 @@ class NotLockingAccounts(Accounts):
         else:
             # TODO(andreaf) Add a uniqueness check here
             return len(self.hash_dict) > 1
+
+    def is_multi_user(self):
+        return self._unique_creds('username')
+
+    def is_multi_tenant(self):
+        return self._unique_creds('tenant_id')
 
     def get_creds(self, id):
         try:

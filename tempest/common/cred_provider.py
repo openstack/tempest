@@ -48,3 +48,7 @@ class CredentialProvider(object):
     @abc.abstractmethod
     def is_multi_user(self):
         return
+
+    @abc.abstractmethod
+    def is_multi_tenant(self):
+        return
