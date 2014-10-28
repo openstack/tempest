@@ -130,7 +130,8 @@ class FloatingIPsTestJSON(base.BaseFloatingIPsTest):
 
         # Make sure no longer associated with old server
         self.assertRaises((exceptions.NotFound,
-                           exceptions.UnprocessableEntity),
+                           exceptions.UnprocessableEntity,
+                           exceptions.Conflict),
                           self.client.disassociate_floating_ip_from_server,
                           self.floating_ip, self.server_id)
 
