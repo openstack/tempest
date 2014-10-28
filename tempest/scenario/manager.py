@@ -1270,6 +1270,9 @@ class SwiftScenarioTest(ScenarioTest):
         # look for the container to assure it is created
         self.list_and_check_container_objects(name)
         LOG.debug('Container %s created' % (name))
+        self.addCleanup(self.delete_wrapper,
+                        self.container_client.delete_container,
+                        name)
         return name
 
     def delete_container(self, container_name):
@@ -1280,6 +1283,10 @@ class SwiftScenarioTest(ScenarioTest):
         obj_name = obj_name or data_utils.rand_name('swift-scenario-object')
         obj_data = data_utils.arbitrary_string()
         self.object_client.create_object(container_name, obj_name, obj_data)
+        self.addCleanup(self.delete_wrapper,
+                        self.object_client.delete_object,
+                        container_name,
+                        obj_name)
         return obj_name, obj_data
 
     def delete_object(self, container_name, filename):
