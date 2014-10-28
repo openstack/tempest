@@ -179,9 +179,6 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         """Verifies connectivty to a VM via public network and floating IP,
         and verifies floating IP has resource status is correct.
 
-        Floating IP status is verified after connectivity test in order to
-        not add extra waiting and mask racing conditions.
-
         :param should_connect: bool. determines if connectivity check is
         negative or positive.
         :param msg: Failure message to add to Error message. Should describe
