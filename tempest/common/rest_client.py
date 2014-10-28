@@ -37,8 +37,8 @@ CONF = config.CONF
 MAX_RECURSION_DEPTH = 2
 TOKEN_CHARS_RE = re.compile('^[-A-Za-z0-9+/=]*$')
 
-# All the successful HTTP status codes from RFC 2616
-HTTP_SUCCESS = (200, 201, 202, 203, 204, 205, 206)
+# All the successful HTTP status codes from RFC 7231 & 4918
+HTTP_SUCCESS = (200, 201, 202, 203, 204, 205, 206, 207)
 
 
 # convert a structure into a string safely
@@ -209,8 +209,9 @@ class RestClient(object):
     @classmethod
     def expected_success(cls, expected_code, read_code):
         assert_msg = ("This function only allowed to use for HTTP status"
-                      "codes which explicitly defined in the RFC 2616. {0}"
-                      " is not a defined Success Code!").format(expected_code)
+                      "codes which explicitly defined in the RFC 7231 & 4918."
+                      "{0} is not a defined Success Code!"
+                      ).format(expected_code)
         if isinstance(expected_code, list):
             for code in expected_code:
                 assert code in HTTP_SUCCESS, assert_msg
