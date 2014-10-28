@@ -26,7 +26,7 @@ class NetworkClientXML(client_base.NetworkClientBase):
     PLURALS = ['dns_nameservers', 'host_routes', 'allocation_pools',
                'fixed_ips', 'extensions', 'extra_dhcp_opts', 'pools',
                'health_monitors', 'vips', 'members', 'allowed_address_pairs',
-               'firewall_rules']
+               'firewall_rules', 'security_groups']
 
     def get_rest_client(self, auth_provider):
         rc = rest_client.RestClient(auth_provider)

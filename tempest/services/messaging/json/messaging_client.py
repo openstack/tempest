@@ -48,22 +48,26 @@ class MessagingClientJSON(rest_client.RestClient):
     def create_queue(self, queue_name):
         uri = '{0}/queues/{1}'.format(self.uri_prefix, queue_name)
         resp, body = self.put(uri, body=None)
+        self.expected_success(201, resp.status)
         return resp, body
 
     def get_queue(self, queue_name):
         uri = '{0}/queues/{1}'.format(self.uri_prefix, queue_name)
         resp, body = self.get(uri)
+        self.expected_success(204, resp.status)
         return resp, body
 
     def head_queue(self, queue_name):
         uri = '{0}/queues/{1}'.format(self.uri_prefix, queue_name)
         resp, body = self.head(uri)
+        self.expected_success(204, resp.status)
         return resp, body
 
     def delete_queue(self, queue_name):
         uri = '{0}/queues/{1}'.format(self.uri_prefix, queue_name)
-        resp = self.delete(uri)
-        return resp
+        resp, body = self.delete(uri)
+        self.expected_success(204, resp.status)
+        return resp, body
 
     def get_queue_stats(self, queue_name):
         uri = '{0}/queues/{1}/stats'.format(self.uri_prefix, queue_name)
@@ -75,12 +79,14 @@ class MessagingClientJSON(rest_client.RestClient):
     def get_queue_metadata(self, queue_name):
         uri = '{0}/queues/{1}/metadata'.format(self.uri_prefix, queue_name)
         resp, body = self.get(uri)
+        self.expected_success(200, resp.status)
         body = json.loads(body)
         return resp, body
 
     def set_queue_metadata(self, queue_name, rbody):
         uri = '{0}/queues/{1}/metadata'.format(self.uri_prefix, queue_name)
         resp, body = self.put(uri, body=json.dumps(rbody))
+        self.expected_success(204, resp.status)
         return resp, body
 
     def post_messages(self, queue_name, rbody):
@@ -90,6 +96,7 @@ class MessagingClientJSON(rest_client.RestClient):
                                headers=self.headers)
 
         body = json.loads(body)
+        self.validate_response(queues_schema.post_messages, resp, body)
         return resp, body
 
     def list_messages(self, queue_name):
@@ -126,7 +133,7 @@ class MessagingClientJSON(rest_client.RestClient):
 
     def delete_messages(self, message_uri):
         resp, body = self.delete(message_uri)
-        assert(resp['status'] == '204')
+        self.expected_success(204, resp.status)
         return resp, body
 
     def post_claims(self, queue_name, rbody, url_params=False):
@@ -152,10 +159,10 @@ class MessagingClientJSON(rest_client.RestClient):
 
     def update_claim(self, claim_uri, rbody):
         resp, body = self.patch(claim_uri, body=json.dumps(rbody))
-        assert(resp['status'] == '204')
+        self.expected_success(204, resp.status)
         return resp, body
 
     def release_claim(self, claim_uri):
         resp, body = self.delete(claim_uri)
-        assert(resp['status'] == '204')
+        self.expected_success(204, resp.status)
         return resp, body

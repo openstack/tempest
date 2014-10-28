@@ -1,4 +1,5 @@
-# (c) 2014 Deutsche Telekom AG
+# Copyright (c) 2014 Deutsche Telekom AG
+# Copyright (c) 2014 Hewlett-Packard Development Company, L.P.
 #    Licensed under the Apache License, Version 2.0 (the "License");
 #    you may not use this file except in compliance with the License.
 #    You may obtain a copy of the License at
@@ -42,4 +43,12 @@ class CredentialProvider(object):
 
     @abc.abstractmethod
     def clear_isolated_creds(self):
+        return
+
+    @abc.abstractmethod
+    def is_multi_user(self):
+        return
+
+    @abc.abstractmethod
+    def is_multi_tenant(self):
         return

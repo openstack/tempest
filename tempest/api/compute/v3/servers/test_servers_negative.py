@@ -45,10 +45,7 @@ class ServersNegativeV3Test(base.BaseV3ComputeTest):
     def resource_setup(cls):
         super(ServersNegativeV3Test, cls).resource_setup()
         cls.client = cls.servers_client
-        if CONF.compute.allow_tenant_isolation:
-            cls.alt_os = clients.Manager(cls.isolated_creds.get_alt_creds())
-        else:
-            cls.alt_os = clients.AltManager()
+        cls.alt_os = clients.Manager(cls.isolated_creds.get_alt_creds())
         cls.alt_client = cls.alt_os.servers_v3_client
         resp, server = cls.create_test_server(wait_until='ACTIVE')
         cls.server_id = server['id']

@@ -130,9 +130,7 @@ class TestNodes(base.BaseBaremetalTest):
 
     @test.attr(type='smoke')
     def test_set_node_boot_device(self):
-        body = self.client.set_node_boot_device(self.node['uuid'], 'pxe')
-        # No content
-        self.assertEqual('', body)
+        self.client.set_node_boot_device(self.node['uuid'], 'pxe')
 
     @test.attr(type='smoke')
     def test_get_node_boot_device(self):

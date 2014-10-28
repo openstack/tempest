@@ -204,3 +204,8 @@ class ImagesClientXML(rest_client.RestClient):
         except exceptions.NotFound:
             return True
         return False
+
+    @property
+    def resource_type(self):
+        """Returns the primary type of resource this client works with."""
+        return 'image'

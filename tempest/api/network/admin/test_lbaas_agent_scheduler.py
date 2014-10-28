@@ -69,7 +69,3 @@ class LBaaSAgentSchedulerTestJSON(base.BaseAdminNetworkTest):
         _, body = self.admin_client.show_lbaas_agent_hosting_pool(
             self.pool['id'])
         self.assertEqual('Loadbalancer agent', body['agent']['agent_type'])
-
-
-class LBaaSAgentSchedulerTestXML(LBaaSAgentSchedulerTestJSON):
-    _interface = 'xml'

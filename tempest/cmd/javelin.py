@@ -283,6 +283,8 @@ class JavelinCheck(unittest.TestCase):
         If in check mode confirm that the oldest sample available is from
         before the upgrade.
         """
+        if not self.res.get('telemetry'):
+            return
         LOG.info("checking telemetry")
         for server in self.res['servers']:
             client = client_for_user(server['owner'])

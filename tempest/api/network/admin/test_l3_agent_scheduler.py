@@ -76,7 +76,3 @@ class L3AgentSchedulerTestJSON(base.BaseAdminNetworkTest):
             router['router']['id'])
         # NOTE(afazekas): The deletion not asserted, because neutron
         # is not forbidden to reschedule the router to the same agent
-
-
-class L3AgentSchedulerTestXML(L3AgentSchedulerTestJSON):
-    _interface = 'xml'

@@ -102,6 +102,11 @@ class FloatingIPsClientJSON(rest_client.RestClient):
             return True
         return False
 
+    @property
+    def resource_type(self):
+        """Returns the primary type of resource this client works with."""
+        return 'floating_ip'
+
     def list_floating_ip_pools(self, params=None):
         """Returns a list of all floating IP Pools."""
         url = 'os-floating-ip-pools'

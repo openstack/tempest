@@ -498,7 +498,10 @@ class BotoTestCase(tempest.test.BaseTestCase):
         def _volume_state():
             volume.update(validate=True)
             try:
-                if volume.status != "available":
+                # NOTE(gmann): Make sure volume is attached.
+                # Checking status as 'not "available"' is not enough to make
+                # sure volume is attached as it can be in "error" state
+                if volume.status == "in-use":
                     volume.detach(force=True)
             except BaseException:
                 LOG.exception("Failed to detach volume %s" % volume)

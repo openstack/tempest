@@ -136,6 +136,11 @@ class FlavorsClientXML(rest_client.RestClient):
                 return False
         return True
 
+    @property
+    def resource_type(self):
+        """Returns the primary type of resource this client works with."""
+        return 'flavor'
+
     def set_flavor_extra_spec(self, flavor_id, specs):
         """Sets extra Specs to the mentioned flavor."""
         extra_specs = xml_utils.Element("extra_specs")

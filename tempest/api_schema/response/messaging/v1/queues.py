@@ -105,7 +105,9 @@ queue_stats = {
 
 resource_schema = {
     'type': 'array',
-    'items': 'string',
+    'items': {
+        'type': 'string'
+    },
     'minItems': 1
 }
 

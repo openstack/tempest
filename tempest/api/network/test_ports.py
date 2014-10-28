@@ -151,6 +151,41 @@ class PortsTestJSON(base.BaseNetworkTest):
         port = self.update_port(port, fixed_ips=fixed_ip_1)
         self.assertEqual(1, len(port['fixed_ips']))
 
+    def _update_port_with_security_groups(self, security_groups_names):
+        post_body = {"network_id": self.network['id']}
+        self.create_subnet(self.network)
+        security_groups_list = list()
+        for name in security_groups_names:
+            _, group_create_body = self.client.create_security_group(
+                name=name)
+            self.addCleanup(self.client.delete_security_group,
+                            group_create_body['security_group']['id'])
+            security_groups_list.append(group_create_body['security_group']
+                                        ['id'])
+        # Create a port
+        _, body = self.client.create_port(**post_body)
+        self.addCleanup(self.client.delete_port, body['port']['id'])
+        port = body['port']
+        # Update the port with security groups
+        update_body = {"security_groups": security_groups_list}
+        _, body = self.client.update_port(
+            port['id'], **update_body)
+        # Verify the security groups updated to port
+        port_show = body['port']
+        for security_group in security_groups_list:
+            self.assertIn(security_group, port_show['security_groups'])
+
+    @test.attr(type='smoke')
+    def test_update_port_with_security_group(self):
+        self._update_port_with_security_groups(
+            [data_utils.rand_name('secgroup')])
+
+    @test.attr(type='smoke')
+    def test_update_port_with_two_security_groups(self):
+        self._update_port_with_security_groups(
+            [data_utils.rand_name('secgroup'),
+             data_utils.rand_name('secgroup')])
+
 
 class PortsAdminExtendedAttrsTestJSON(base.BaseAdminNetworkTest):
     _interface = 'json'

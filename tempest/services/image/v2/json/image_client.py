@@ -117,6 +117,11 @@ class ImageClientV2JSON(rest_client.RestClient):
             return True
         return False
 
+    @property
+    def resource_type(self):
+        """Returns the primary type of resource this client works with."""
+        return 'image'
+
     def store_image(self, image_id, data):
         url = 'v2/images/%s/file' % image_id
         headers = {'Content-Type': 'application/octet-stream'}

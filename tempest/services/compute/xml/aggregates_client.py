@@ -94,6 +94,11 @@ class AggregatesClientXML(rest_client.RestClient):
             return True
         return False
 
+    @property
+    def resource_type(self):
+        """Returns the primary type of resource this client works with."""
+        return 'aggregate'
+
     def add_host(self, aggregate_id, host):
         """Adds a host to the given aggregate."""
         post_body = xml_utils.Element("add_host", host=host)

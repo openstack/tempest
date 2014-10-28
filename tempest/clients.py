@@ -181,6 +181,8 @@ from tempest.services.volume.json.extensions_client import \
 from tempest.services.volume.json.qos_client import QosSpecsClientJSON
 from tempest.services.volume.json.snapshots_client import SnapshotsClientJSON
 from tempest.services.volume.json.volumes_client import VolumesClientJSON
+from tempest.services.volume.v2.json.admin.volume_types_client import \
+    VolumeTypesV2ClientJSON
 from tempest.services.volume.v2.json.availability_zone_client import \
     VolumeV2AvailabilityZoneClientJSON
 from tempest.services.volume.v2.json.extensions_client import \
@@ -332,6 +334,8 @@ class Manager(manager.Manager):
             self.volumes_v2_client = VolumesV2ClientJSON(self.auth_provider)
             self.volume_types_client = VolumeTypesClientJSON(
                 self.auth_provider)
+            self.volume_types_v2_client = VolumeTypesV2ClientJSON(
+                self.auth_provider)
             self.identity_client = IdentityClientJSON(self.auth_provider)
             self.identity_v3_client = IdentityV3ClientJSON(
                 self.auth_provider)
@@ -441,20 +445,6 @@ class Manager(manager.Manager):
         self.volume_qos_client = QosSpecsClientJSON(self.auth_provider)
         self.volume_qos_v2_client = QosSpecsV2ClientJSON(
             self.auth_provider)
-
-
-class AltManager(Manager):
-
-    """
-    Manager object that uses the alt_XXX credentials for its
-    managed client objects
-    """
-
-    def __init__(self, interface='json', service=None):
-        super(AltManager, self).__init__(
-            credentials=auth.get_default_credentials('alt_user'),
-            interface=interface,
-            service=service)
 
 
 class AdminManager(Manager):
