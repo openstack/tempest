@@ -116,7 +116,7 @@ function run_tests {
   fi
 }
 
-sudo apt-get install -y git sshpass libxml2-dev libxslt-dev python-dev libffi-dev gcc
+sudo apt-get install -y git sshpass libxml2-dev libxslt-dev python-dev libffi-dev gcc || exit 1
 
 if [ $never_venv -eq 0 ]
 then
