@@ -50,8 +50,9 @@ function get_image_id() {
         image_id=`${with_venv} nova image-list | grep " $image_name "  | awk {'print $2'}`
     else
         image_filename=$(basename $image_path)
-        rm -f $image_filename
-        `wget $image_path`
+        if [ ! -f $image_filename ]; then
+            `wget $image_path`
+        fi
         export OS_IMAGE_URL=http://${keystone_host}:9292/ && ${with_venv} glance image-create --name $image_name --disk-format qcow2 --container-format bare --is-public True --file $image_filename > /dev/null
         image_id=`${with_venv} nova image-list | grep " $image_name "  | awk {'print $2'}`
     fi
