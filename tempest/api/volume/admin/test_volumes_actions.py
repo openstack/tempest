@@ -26,9 +26,6 @@ class VolumesActionsTest(base.BaseVolumeV1AdminTest):
         super(VolumesActionsTest, cls).resource_setup()
         cls.client = cls.volumes_client
 
-        # Create admin volume client
-        cls.admin_volume_client = cls.os_adm.volumes_client
-
         # Create a test shared volume for tests
         vol_name = utils.rand_name(cls.__name__ + '-Volume-')
 

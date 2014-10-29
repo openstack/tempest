@@ -66,13 +66,14 @@ class VolumeMultiBackendV2Test(base.BaseVolumeAdminTest):
 
         params = {self.name_field: vol_name, 'volume_type': type_name}
 
-        _, self.volume = self.volume_client.create_volume(size=1, **params)
+        _, self.volume = self.admin_volume_client.create_volume(size=1,
+                                                                **params)
         if with_prefix:
             self.volume_id_list_with_prefix.append(self.volume['id'])
         else:
             self.volume_id_list_without_prefix.append(
                 self.volume['id'])
-        self.volume_client.wait_for_volume_status(
+        self.admin_volume_client.wait_for_volume_status(
             self.volume['id'], 'available')
 
     @classmethod
@@ -80,13 +81,13 @@ class VolumeMultiBackendV2Test(base.BaseVolumeAdminTest):
         # volumes deletion
         vid_prefix = getattr(cls, 'volume_id_list_with_prefix', [])
         for volume_id in vid_prefix:
-            cls.volume_client.delete_volume(volume_id)
-            cls.volume_client.wait_for_resource_deletion(volume_id)
+            cls.admin_volume_client.delete_volume(volume_id)
+            cls.admin_volume_client.wait_for_resource_deletion(volume_id)
 
         vid_no_pre = getattr(cls, 'volume_id_list_without_prefix', [])
         for volume_id in vid_no_pre:
-            cls.volume_client.delete_volume(volume_id)
-            cls.volume_client.wait_for_resource_deletion(volume_id)
+            cls.admin_volume_client.delete_volume(volume_id)
+            cls.admin_volume_client.wait_for_resource_deletion(volume_id)
 
         # volume types deletion
         volume_type_id_list = getattr(cls, 'volume_type_id_list', [])
@@ -130,7 +131,7 @@ class VolumeMultiBackendV2Test(base.BaseVolumeAdminTest):
         # the multi backend feature has been enabled
         # if multi-backend is enabled: os-vol-attr:host should be like:
         # host@backend_name
-        _, volume = self.volume_client.get_volume(volume_id)
+        _, volume = self.admin_volume_client.get_volume(volume_id)
 
         volume1_host = volume['os-vol-host-attr:host']
         msg = ("multi-backend reporting incorrect values for volume %s" %
@@ -141,10 +142,10 @@ class VolumeMultiBackendV2Test(base.BaseVolumeAdminTest):
         # this test checks that the two volumes created at setUp don't
         # belong to the same backend (if they are, than the
         # volume backend distinction is not working properly)
-        _, volume = self.volume_client.get_volume(volume1_id)
+        _, volume = self.admin_volume_client.get_volume(volume1_id)
         volume1_host = volume['os-vol-host-attr:host']
 
-        _, volume = self.volume_client.get_volume(volume2_id)
+        _, volume = self.admin_volume_client.get_volume(volume2_id)
         volume2_host = volume['os-vol-host-attr:host']
 
         msg = ("volumes %s and %s were created in the same backend" %
