@@ -18,6 +18,7 @@ import functools
 from tempest_lib.cli import base
 import testtools
 
+from tempest.common import credentials
 from tempest import config
 from tempest import exceptions
 from tempest.openstack.common import versionutils
@@ -72,10 +73,12 @@ class ClientTestBase(base.ClientTestBase, test.BaseTestCase):
             msg = "cli testing disabled"
             raise cls.skipException(msg)
         super(ClientTestBase, cls).resource_setup()
+        cls.cred_prov = credentials.get_isolated_credentials(cls.__name__)
+        cls.creds = cls.cred_prov.get_admin_creds()
 
     def _get_clients(self):
-        clients = base.CLIClient(CONF.identity.admin_username,
-                                 CONF.identity.admin_password,
-                                 CONF.identity.admin_tenant_name,
+        clients = base.CLIClient(self.creds.username,
+                                 self.creds.password,
+                                 self.creds.tenant_name,
                                  CONF.identity.uri, CONF.cli.cli_dir)
         return clients
