@@ -381,6 +381,16 @@ class NetworksTestDHCPv6JSON(base.BaseNetworkTest):
         _, body = self.client.show_port(port['port_id'])
         return subnet, body['port']
 
+    def _create_custom_subnet(self, kwargs):
+        net_cidr =  netaddr.IPNetwork(CONF.network.tenant_network_v6_cidr)
+        mask_bits = CONF.network.tenant_network_v6_mask_bits
+        cidr = str(next(iter(net_cidr.subnet(mask_bits))))
+        kwargs.update({'network_id': self.network['id']})
+        kwargs.update({'cidr': cidr})
+        resp, body = self.client.create_subnet(**kwargs)
+        #self.addCleanup(self._delete_subnet, body['subnet'])
+        return body['subnet']
+
     @test.attr(type='smoke')
     def test_dhcp_stateful_router(self):
         """With all options below the router interface shall
@@ -407,7 +417,7 @@ class NetworksTestDHCPv6JSON(base.BaseNetworkTest):
     @test.attr(type='smoke')
     def test_dhcp_stateless_router(self):
         """With all options below the router interface shall
-        receive DHCPv6 IP SLAAC address according to its MAC.
+        receive first address in allocation pool of subnet.
         """
         for ra_mode, add_mode in (
                 ('dhcpv6-stateless', 'dhcpv6-stateless'),
@@ -422,11 +432,14 @@ class NetworksTestDHCPv6JSON(base.BaseNetworkTest):
             kwargs = {k: v for k, v in kwargs.iteritems() if v}
             subnet, port = self._create_subnet_router(kwargs)
             port_ip = next(iter(port['fixed_ips']))['ip_address']
+            self._clean_network()
             eui64_ip = data_utils.get_ipv6_addr_by_EUI64(
                 subnet['cidr'],
-                port['mac_address'])
-            self._clean_network()
-            self.assertEqual(port_ip, eui64_ip,
+                port['mac_address']).format()
+            self.assertNotEqual(port_ip, eui64_ip,
+                             ("Port IP %s is the same as EUI64 "
+                              "addressl: %s") % (port_ip, eui64_ip))
+            self.assertEqual(port_ip, subnet['gateway_ip'],
                              ("Port IP %s is not as first IP from "
                               "subnets allocation pool: %s") % (
                                  port_ip, subnet['gateway_ip']))
@@ -438,17 +451,23 @@ class NetworksTestDHCPv6JSON(base.BaseNetworkTest):
         """
         for ra_mode, add_mode in (
                 ('dhcpv6-stateless', 'dhcpv6-stateless'),
-                ('dhcpv6-stateless', None),
+                #('dhcpv6-stateless', None),
                 (None, 'dhcpv6-stateless'),
                 ('slaac', 'slaac'),
-                ('slaac', None),
+                #('slaac', None),
                 (None, 'slaac')
         ):
             kwargs = {'ipv6_ra_mode': ra_mode,
                       'ipv6_address_mode': add_mode}
             kwargs = {k: v for k, v in kwargs.iteritems() if v}
-            kwargs['gateway'] = None
-            subnet, port = self._create_subnet_router(kwargs)
+            kwargs.update({'ip_version': 6})
+            subnet = self._create_custom_subnet(kwargs)
+            router = self.create_router(router_name="cisco",
+                                        admin_state_up=True)
+            port = self.create_router_interface(router['id'],
+                                                subnet['id'])
+            _, body = self.client.show_port(port['port_id'])
+            port = body['port']
             port_ip = next(iter(port['fixed_ips']))['ip_address']
             eui64_ip = data_utils.get_ipv6_addr_by_EUI64(
                 subnet['cidr'],
