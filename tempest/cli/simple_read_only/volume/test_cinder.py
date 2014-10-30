@@ -16,11 +16,12 @@
 import logging
 import re
 
+from tempest_lib import exceptions
 import testtools
 
 from tempest import cli
 from tempest import config
-from tempest import exceptions
+
 
 CONF = config.CONF
 LOG = logging.getLogger(__name__)
@@ -40,6 +41,11 @@ class SimpleReadOnlyCinderClientTest(cli.ClientTestBase):
             msg = ("%s skipped as Cinder is not available" % cls.__name__)
             raise cls.skipException(msg)
         super(SimpleReadOnlyCinderClientTest, cls).resource_setup()
+
+    def cinder(self, *args, **kwargs):
+        return self.clients.cinder(*args,
+                                   endpoint_type=CONF.volume.endpoint_type,
+                                   **kwargs)
 
     def test_cinder_fake_action(self):
         self.assertRaises(exceptions.CommandFailed,
