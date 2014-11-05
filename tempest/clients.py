@@ -291,7 +291,8 @@ class Manager(manager.Manager):
                 self.telemetry_client = TelemetryClientXML(
                     self.auth_provider)
             self.token_client = TokenClientXML()
-            self.token_v3_client = V3TokenClientXML()
+            if CONF.identity_feature_enabled.api_v3:
+                self.token_v3_client = V3TokenClientXML()
             self.volume_availability_zone_client = \
                 VolumeAvailabilityZoneClientXML(self.auth_provider)
             self.volume_v2_availability_zone_client = \
@@ -397,7 +398,8 @@ class Manager(manager.Manager):
                 self.telemetry_client = TelemetryClientJSON(
                     self.auth_provider)
             self.token_client = TokenClientJSON()
-            self.token_v3_client = V3TokenClientJSON()
+            if CONF.identity_feature_enabled.api_v3:
+                self.token_v3_client = V3TokenClientJSON()
             self.negative_client = rest_client.NegativeRestClient(
                 self.auth_provider)
             self.negative_client.service = service
