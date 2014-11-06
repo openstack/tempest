@@ -72,7 +72,7 @@ class VolumeQuotasAdminTestJSON(base.BaseVolumeV1AdminTest):
     @test.attr(type='gate')
     def test_show_quota_usage(self):
         _, quota_usage = self.quotas_client.get_quota_usage(
-            self.os_adm.credentials.tenant_name)
+            self.os_adm.credentials.tenant_id)
         for key in QUOTA_KEYS:
             self.assertIn(key, quota_usage)
             for usage_key in QUOTA_USAGE_KEYS:
