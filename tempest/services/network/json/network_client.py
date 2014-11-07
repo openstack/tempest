@@ -318,6 +318,8 @@ class NetworkClientJSON(service_client.ServiceClient):
                 cur_gw_info.pop('enable_snat', None)
         update_body['external_gateway_info'] = kwargs.get(
             'external_gateway_info', body['router']['external_gateway_info'])
+        if 'distributed' in kwargs:
+            update_body['distributed'] = kwargs['distributed']
         update_body = dict(router=update_body)
         update_body = json.dumps(update_body)
         resp, body = self.put(uri, update_body)
