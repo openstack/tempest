@@ -758,8 +758,10 @@
 # value)
 #public_network_id =
 
-# Id of the public router that provides external connectivity (string
-# value)
+# Id of the public router that provides external connectivity. This
+# should only be used when Neutron's 'allow_overlapping_ips' is set to
+# 'False' in neutron.conf. usually not needed past 'Grizzly' release
+# (string value)
 #public_router_id =
 
 # The network region name to use. If empty, the value of
