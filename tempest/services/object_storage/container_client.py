@@ -59,6 +59,7 @@ class ContainerClient(rest_client.RestClient):
         """Deletes the container (if it's empty)."""
         url = str(container_name)
         resp, body = self.delete(url)
+        self.expected_success(204, resp.status)
         return resp, body
 
     def update_container_metadata(
