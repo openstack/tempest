@@ -552,6 +552,15 @@ def create_networks(networks):
         client.networks.create_network(name=network['name'])
 
 
+def destroy_networks(networks):
+    LOG.info("Destroying subnets")
+    for network in networks:
+        client = client_for_user(network['owner'])
+        network_id = _get_resource_by_name(client.networks, 'networks',
+                                           network['name'])['id']
+        client.networks.delete_network(network_id)
+
+
 def create_subnets(subnets):
     LOG.info("Creating subnets")
     for subnet in subnets:
@@ -572,6 +581,15 @@ def create_subnets(subnets):
                 raise
 
 
+def destroy_subnets(subnets):
+    LOG.info("Destroying subnets")
+    for subnet in subnets:
+        client = client_for_user(subnet['owner'])
+        subnet_id = _get_resource_by_name(client.networks,
+                                          'subnets', subnet['name'])['id']
+        client.networks.delete_subnet(subnet_id)
+
+
 def create_routers(routers):
     LOG.info("Creating routers")
     for router in routers:
@@ -584,6 +602,20 @@ def create_routers(routers):
             continue
 
         client.networks.create_router(router['name'])
+
+
+def destroy_routers(routers):
+    LOG.info("Destroying routers")
+    for router in routers:
+        client = client_for_user(router['owner'])
+        router_id = _get_resource_by_name(client.networks,
+                                          'routers', router['name'])['id']
+        for subnet in router['subnet']:
+            subnet_id = _get_resource_by_name(client.networks,
+                                              'subnets', subnet)['id']
+            client.networks.remove_router_interface_with_subnet_id(router_id,
+                                                                   subnet_id)
+        client.networks.delete_router(router_id)
 
 
 def add_router_interface(routers):
@@ -705,6 +737,17 @@ def create_secgroups(secgroups):
                 secgroup_id, ip_proto, from_port, to_port, cidr=cidr)
 
 
+def destroy_secgroups(secgroups):
+    LOG.info("Destroying security groups")
+    for secgroup in secgroups:
+        client = client_for_user(secgroup['owner'])
+        sg_id = _get_resource_by_name(client.secgroups,
+                                      'security_groups',
+                                      secgroup['name'])
+        # sg rules are deleted automatically
+        client.secgroups.delete_security_group(sg_id['id'])
+
+
 #######################
 #
 # VOLUMES
@@ -793,6 +836,11 @@ def destroy_resources():
     destroy_images(RES['images'])
     destroy_objects(RES['objects'])
     destroy_volumes(RES['volumes'])
+    if CONF.service_available.neutron and not CONF.baremetal.driver_enabled:
+        destroy_routers(RES['routers'])
+        destroy_subnets(RES['subnets'])
+        destroy_networks(RES['networks'])
+    destroy_secgroups(RES['secgroups'])
     destroy_users(RES['users'])
     destroy_tenants(RES['tenants'])
     LOG.warn("Destroy mode incomplete")
