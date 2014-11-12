@@ -42,6 +42,10 @@ class SimpleReadOnlyHeatClientTest(tempest.cli.ClientTestBase):
             os.path.dirname(os.path.realpath(__file__))),
             'heat_templates/heat_minimal.yaml')
 
+    def heat(self, *args, **kwargs):
+        return self.clients.heat(
+            *args, endpoint_type=CONF.orchestration.endpoint_type, **kwargs)
+
     def test_heat_stack_list(self):
         self.heat('stack-list')
 

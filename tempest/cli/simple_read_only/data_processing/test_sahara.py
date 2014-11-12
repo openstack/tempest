@@ -15,9 +15,10 @@
 import logging
 import re
 
+from tempest_lib import exceptions
+
 from tempest import cli
 from tempest import config
-from tempest import exceptions
 from tempest import test
 
 CONF = config.CONF
@@ -39,6 +40,10 @@ class SimpleReadOnlySaharaClientTest(cli.ClientTestBase):
             msg = "Skipping all Sahara cli tests because it is not available"
             raise cls.skipException(msg)
         super(SimpleReadOnlySaharaClientTest, cls).resource_setup()
+
+    def sahara(self, *args, **kwargs):
+        return self.clients.sahara(
+            *args, endpoint_type=CONF.data_processing.endpoint_type, **kwargs)
 
     @test.attr(type='negative')
     def test_sahara_fake_action(self):

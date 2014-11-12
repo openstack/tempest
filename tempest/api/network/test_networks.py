@@ -280,6 +280,10 @@ class NetworksTestJSON(base.BaseNetworkTest):
         self.subnets.pop()
 
     @test.attr(type='smoke')
+    def test_create_delete_subnet_without_gateway(self):
+        self._create_verify_delete_subnet()
+
+    @test.attr(type='smoke')
     def test_create_delete_subnet_with_gw(self):
         self._create_verify_delete_subnet(
             **self.subnet_dict(['gateway']))
@@ -492,7 +496,7 @@ class NetworksIpV6TestJSON(NetworksTestJSON):
         self.assertEqual(subnet['gateway_ip'], gateway)
 
     @test.attr(type='smoke')
-    def test_create_delete_subnet_without_gw(self):
+    def test_create_delete_subnet_with_default_gw(self):
         net = netaddr.IPNetwork(CONF.network.tenant_network_v6_cidr)
         gateway_ip = str(netaddr.IPAddress(net.first + 1))
         name = data_utils.rand_name('network-')
@@ -501,12 +505,58 @@ class NetworksIpV6TestJSON(NetworksTestJSON):
         # Verifies Subnet GW in IPv6
         self.assertEqual(subnet['gateway_ip'], gateway_ip)
 
+    @test.attr(type='smoke')
+    def test_create_list_subnet_with_no_gw64_one_network(self):
+        name = data_utils.rand_name('network-')
+        network = self.create_network(name)
+        ipv6_gateway = self.subnet_dict(['gateway'])['gateway']
+        subnet1 = self.create_subnet(network,
+                                     ip_version=6,
+                                     gateway=ipv6_gateway)
+        self.assertEqual(netaddr.IPNetwork(subnet1['cidr']).version, 6,
+                         'The created subnet is not IPv6')
+        subnet2 = self.create_subnet(network,
+                                     gateway=None,
+                                     ip_version=4)
+        self.assertEqual(netaddr.IPNetwork(subnet2['cidr']).version, 4,
+                         'The created subnet is not IPv4')
+        # Verifies Subnet GW is set in IPv6
+        self.assertEqual(subnet1['gateway_ip'], ipv6_gateway)
+        # Verifies Subnet GW is None in IPv4
+        self.assertEqual(subnet2['gateway_ip'], None)
+        # Verifies all 2 subnets in the same network
+        _, body = self.client.list_subnets()
+        subnets = [sub['id'] for sub in body['subnets']
+                   if sub['network_id'] == network['id']]
+        test_subnet_ids = [sub['id'] for sub in (subnet1, subnet2)]
+        self.assertItemsEqual(subnets,
+                              test_subnet_ids,
+                              'Subnet are not in the same network')
+
     @testtools.skipUnless(CONF.network_feature_enabled.ipv6_subnet_attributes,
                           "IPv6 extended attributes for subnets not "
                           "available")
     @test.attr(type='smoke')
-    def test_create_delete_subnet_with_v6_attributes(self):
+    def test_create_delete_subnet_with_v6_attributes_stateful(self):
         self._create_verify_delete_subnet(
             gateway=self._subnet_data[self._ip_version]['gateway'],
+            ipv6_ra_mode='dhcpv6-stateful',
+            ipv6_address_mode='dhcpv6-stateful')
+
+    @testtools.skipUnless(CONF.network_feature_enabled.ipv6_subnet_attributes,
+                          "IPv6 extended attributes for subnets not "
+                          "available")
+    @test.attr(type='smoke')
+    def test_create_delete_subnet_with_v6_attributes_slaac(self):
+        self._create_verify_delete_subnet(
             ipv6_ra_mode='slaac',
             ipv6_address_mode='slaac')
+
+    @testtools.skipUnless(CONF.network_feature_enabled.ipv6_subnet_attributes,
+                          "IPv6 extended attributes for subnets not "
+                          "available")
+    @test.attr(type='smoke')
+    def test_create_delete_subnet_with_v6_attributes_stateless(self):
+        self._create_verify_delete_subnet(
+            ipv6_ra_mode='dhcpv6-stateless',
+            ipv6_address_mode='dhcpv6-stateless')

@@ -16,7 +16,8 @@
 import shlex
 import subprocess
 
-import tempest.exceptions as exceptions
+from tempest_lib import exceptions
+
 from tempest.openstack.common import log as logging
 from tempest.tests import base
 
