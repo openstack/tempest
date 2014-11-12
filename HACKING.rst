@@ -260,15 +260,15 @@ docstrings for the workflow in each test methods can be used instead. A good
 example of this would be::
 
     class TestVolumeBootPattern(manager.ScenarioTest):
-    """
-    This test case attempts to reproduce the following steps:
+        """
+        This test case attempts to reproduce the following steps:
 
-     * Create in Cinder some bootable volume importing a Glance image
-     * Boot an instance from the bootable volume
-     * Write content to the volume
-     * Delete an instance and Boot a new instance from the volume
-     * Check written content in the instance
-     * Create a volume snapshot while the instance is running
-     * Boot an additional instance from the new snapshot based volume
-     * Check written content in the instance booted from snapshot
-    """
+         * Create in Cinder some bootable volume importing a Glance image
+         * Boot an instance from the bootable volume
+         * Write content to the volume
+         * Delete an instance and Boot a new instance from the volume
+         * Check written content in the instance
+         * Create a volume snapshot while the instance is running
+         * Boot an additional instance from the new snapshot based volume
+         * Check written content in the instance booted from snapshot
+        """

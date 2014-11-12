@@ -16,6 +16,7 @@
 from tempest.common import custom_matchers
 from tempest.common import debug
 from tempest import config
+from tempest import exceptions
 from tempest.openstack.common import log as logging
 from tempest.scenario import manager
 from tempest import test
@@ -129,6 +130,17 @@ class TestMinimumBasicScenario(manager.ScenarioTest):
                                                secgroup['name'])
         self.addCleanup(self.servers_client.remove_security_group,
                         self.server['id'], secgroup['name'])
+
+        def wait_for_secgroup_add():
+            _, body = self.servers_client.get_server(self.server['id'])
+            return {'name': secgroup['name']} in body['security_groups']
+
+        if not test.call_until_true(wait_for_secgroup_add,
+                                    CONF.compute.build_timeout,
+                                    CONF.compute.build_interval):
+            msg = ('Timed out waiting for adding security group %s to server '
+                   '%s' % (secgroup['id'], self.server['id']))
+            raise exceptions.TimeoutException(msg)
 
     @test.services('compute', 'volume', 'image', 'network')
     def test_minimum_basic_scenario(self):

@@ -13,9 +13,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib import exceptions
+
 from tempest import cli
 from tempest import config
-from tempest import exceptions
 from tempest.openstack.common import log as logging
 
 
@@ -45,6 +46,9 @@ class SimpleReadOnlyNovaManageTest(cli.ClientTestBase):
                    % cls.__name__)
             raise cls.skipException(msg)
         super(SimpleReadOnlyNovaManageTest, cls).resource_setup()
+
+    def nova_manage(self, *args, **kwargs):
+        return self.clients.nova_manage(*args, **kwargs)
 
     def test_admin_fake_action(self):
         self.assertRaises(exceptions.CommandFailed,

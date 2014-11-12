@@ -15,9 +15,10 @@
 
 import re
 
+from tempest_lib import exceptions
+
 from tempest import cli
 from tempest import config
-from tempest import exceptions
 from tempest.openstack.common import log as logging
 
 CONF = config.CONF
@@ -39,6 +40,11 @@ class SimpleReadOnlyGlanceClientTest(cli.ClientTestBase):
             msg = ("%s skipped as Glance is not available" % cls.__name__)
             raise cls.skipException(msg)
         super(SimpleReadOnlyGlanceClientTest, cls).resource_setup()
+
+    def glance(self, *args, **kwargs):
+        return self.clients.glance(*args,
+                                   endpoint_type=CONF.image.endpoint_type,
+                                   **kwargs)
 
     def test_glance_fake_action(self):
         self.assertRaises(exceptions.CommandFailed,

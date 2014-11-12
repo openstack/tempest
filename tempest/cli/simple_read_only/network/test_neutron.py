@@ -15,9 +15,10 @@
 
 import re
 
+from tempest_lib import exceptions
+
 from tempest import cli
 from tempest import config
-from tempest import exceptions
 from tempest.openstack.common import log as logging
 from tempest import test
 
@@ -40,6 +41,11 @@ class SimpleReadOnlyNeutronClientTest(cli.ClientTestBase):
             msg = "Skipping all Neutron cli tests because it is not available"
             raise cls.skipException(msg)
         super(SimpleReadOnlyNeutronClientTest, cls).resource_setup()
+
+    def neutron(self, *args, **kwargs):
+        return self.clients.neutron(*args,
+                                    endpoint_type=CONF.network.endpoint_type,
+                                    **kwargs)
 
     @test.attr(type='smoke')
     def test_neutron_fake_action(self):

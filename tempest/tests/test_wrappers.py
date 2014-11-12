@@ -34,7 +34,6 @@ class TestWrappers(base.TestCase):
         # Setup Test files
         self.testr_conf_file = os.path.join(self.directory, '.testr.conf')
         self.setup_cfg_file = os.path.join(self.directory, 'setup.cfg')
-        self.subunit_trace = os.path.join(self.directory, 'subunit-trace.py')
         self.passing_file = os.path.join(self.test_dir, 'test_passing.py')
         self.failing_file = os.path.join(self.test_dir, 'test_failing.py')
         self.init_file = os.path.join(self.test_dir, '__init__.py')
@@ -45,7 +44,6 @@ class TestWrappers(base.TestCase):
         shutil.copy('setup.py', self.setup_py)
         shutil.copy('tempest/tests/files/setup.cfg', self.setup_cfg_file)
         shutil.copy('tempest/tests/files/__init__.py', self.init_file)
-        shutil.copy('tools/subunit-trace.py', self.subunit_trace)
         # copy over the pretty_tox scripts
         shutil.copy('tools/pretty_tox.sh',
                     os.path.join(self.directory, 'pretty_tox.sh'))

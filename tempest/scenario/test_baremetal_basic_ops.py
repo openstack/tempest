@@ -132,7 +132,6 @@ class BaremetalBasicOps(manager.BaremetalScenarioTest):
         # We expect the ephemeral partition to be mounted on /mnt and to have
         # the same size as our flavor definition.
         eph_size = self.get_flavor_ephemeral_size()
-        self.assertIsNotNone(eph_size)
         if eph_size > 0:
             preserve_ephemeral = True
 
