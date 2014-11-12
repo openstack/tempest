@@ -35,6 +35,9 @@ class RoutersTest(base.BaseRouterTest):
             raise cls.skipException(msg)
         admin_manager = clients.AdminManager()
         cls.identity_admin_client = admin_manager.identity_client
+        cls.tenant_cidr = (CONF.network.tenant_network_cidr
+                           if cls._ip_version == 4 else
+                           CONF.network.tenant_network_v6_cidr)
 
     def _cleanup_router(self, router):
         self.delete_router(router)
@@ -319,7 +322,7 @@ class RoutersTest(base.BaseRouterTest):
         network02 = self.create_network(
             network_name=data_utils.rand_name('router-network02-'))
         subnet01 = self.create_subnet(network01)
-        sub02_cidr = netaddr.IPNetwork(CONF.network.tenant_network_cidr).next()
+        sub02_cidr = netaddr.IPNetwork(self.tenant_cidr).next()
         subnet02 = self.create_subnet(network02, cidr=sub02_cidr)
         router = self._create_router(data_utils.rand_name('router-'))
         interface01 = self._add_router_interface_with_subnet_id(router['id'],
@@ -337,3 +340,7 @@ class RoutersTest(base.BaseRouterTest):
         self.assertEqual(router_id, interface_port['device_id'])
         self.assertEqual(subnet_id,
                          interface_port['fixed_ips'][0]['subnet_id'])
+
+
+class RoutersIpV6Test(RoutersTest):
+    _ip_version = 6

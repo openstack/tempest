@@ -44,17 +44,22 @@ class ExtraDHCPOptionsTestJSON(base.BaseNetworkTest):
         cls.network = cls.create_network()
         cls.subnet = cls.create_subnet(cls.network)
         cls.port = cls.create_port(cls.network)
+        cls.ip_tftp = ('123.123.123.123' if cls._ip_version == 4
+                       else '2015::dead')
+        cls.ip_server = ('123.123.123.45' if cls._ip_version == 4
+                         else '2015::badd')
+        cls.extra_dhcp_opts = [
+            {'opt_value': 'pxelinux.0', 'opt_name': 'bootfile-name'},
+            {'opt_value': cls.ip_tftp, 'opt_name': 'tftp-server'},
+            {'opt_value': cls.ip_server, 'opt_name': 'server-ip-address'}
+        ]
 
     @test.attr(type='smoke')
     def test_create_list_port_with_extra_dhcp_options(self):
         # Create a port with Extra DHCP Options
-        extra_dhcp_opts = [
-            {'opt_value': 'pxelinux.0', 'opt_name': 'bootfile-name'},
-            {'opt_value': '123.123.123.123', 'opt_name': 'tftp-server'},
-            {'opt_value': '123.123.123.45', 'opt_name': 'server-ip-address'}
-        ]
-        _, body = self.client.create_port(network_id=self.network['id'],
-                                          extra_dhcp_opts=extra_dhcp_opts)
+        _, body = self.client.create_port(
+            network_id=self.network['id'],
+            extra_dhcp_opts=self.extra_dhcp_opts)
         port_id = body['port']['id']
         self.addCleanup(self.client.delete_port, port_id)
 
@@ -63,23 +68,19 @@ class ExtraDHCPOptionsTestJSON(base.BaseNetworkTest):
         ports = body['ports']
         port = [p for p in ports if p['id'] == port_id]
         self.assertTrue(port)
-        self._confirm_extra_dhcp_options(port[0], extra_dhcp_opts)
+        self._confirm_extra_dhcp_options(port[0], self.extra_dhcp_opts)
 
     @test.attr(type='smoke')
     def test_update_show_port_with_extra_dhcp_options(self):
         # Update port with extra dhcp options
-        extra_dhcp_opts = [
-            {'opt_value': 'pxelinux.0', 'opt_name': 'bootfile-name'},
-            {'opt_value': '123.123.123.123', 'opt_name': 'tftp-server'},
-            {'opt_value': '123.123.123.45', 'opt_name': 'server-ip-address'}
-        ]
         name = data_utils.rand_name('new-port-name')
-        _, body = self.client.update_port(self.port['id'], name=name,
-                                          extra_dhcp_opts=extra_dhcp_opts)
-
+        _, body = self.client.update_port(
+            self.port['id'],
+            name=name,
+            extra_dhcp_opts=self.extra_dhcp_opts)
         # Confirm extra dhcp options were added to the port
         _, body = self.client.show_port(self.port['id'])
-        self._confirm_extra_dhcp_options(body['port'], extra_dhcp_opts)
+        self._confirm_extra_dhcp_options(body['port'], self.extra_dhcp_opts)
 
     def _confirm_extra_dhcp_options(self, port, extra_dhcp_opts):
         retrieved = port['extra_dhcp_opts']
@@ -92,3 +93,7 @@ class ExtraDHCPOptionsTestJSON(base.BaseNetworkTest):
             else:
                 self.fail('Extra DHCP option not found in port %s' %
                           str(retrieved_option))
+
+
+class ExtraDHCPOptionsIpV6TestJSON(ExtraDHCPOptionsTestJSON):
+    _ip_version = 6
