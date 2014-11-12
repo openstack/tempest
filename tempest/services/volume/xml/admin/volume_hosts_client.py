@@ -24,14 +24,14 @@ from tempest import config
 CONF = config.CONF
 
 
-class VolumeHostsClientXML(rest_client.RestClient):
+class BaseVolumeHostsClientXML(rest_client.RestClient):
     """
     Client class to send CRUD Volume Hosts API requests to a Cinder endpoint
     """
     TYPE = "xml"
 
     def __init__(self, auth_provider):
-        super(VolumeHostsClientXML, self).__init__(auth_provider)
+        super(BaseVolumeHostsClientXML, self).__init__(auth_provider)
         self.service = CONF.volume.catalog_type
         self.build_interval = CONF.compute.build_interval
         self.build_timeout = CONF.compute.build_timeout
@@ -72,3 +72,9 @@ class VolumeHostsClientXML(rest_client.RestClient):
         self.expected_success(200, resp.status)
         body = self._parse_array(etree.fromstring(body))
         return resp, body
+
+
+class VolumeHostsClientXML(BaseVolumeHostsClientXML):
+    """
+    Client class to send CRUD Volume Host API V1 requests to a Cinder endpoint
+    """
