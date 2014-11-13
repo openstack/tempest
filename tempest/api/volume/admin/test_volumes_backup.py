@@ -33,7 +33,6 @@ class VolumesBackupsTest(base.BaseVolumeV1AdminTest):
         if not CONF.volume_feature_enabled.backup:
             raise cls.skipException("Cinder backup feature disabled")
 
-        cls.volumes_adm_client = cls.os_adm.volumes_client
         cls.backups_adm_client = cls.os_adm.backups_client
         cls.volume = cls.create_volume()
 
@@ -47,8 +46,8 @@ class VolumesBackupsTest(base.BaseVolumeV1AdminTest):
         self.addCleanup(self.backups_adm_client.delete_backup,
                         backup['id'])
         self.assertEqual(backup_name, backup['name'])
-        self.volumes_adm_client.wait_for_volume_status(self.volume['id'],
-                                                       'available')
+        self.admin_volume_client.wait_for_volume_status(
+            self.volume['id'], 'available')
         self.backups_adm_client.wait_for_backup_status(backup['id'],
                                                        'available')
 
@@ -65,10 +64,10 @@ class VolumesBackupsTest(base.BaseVolumeV1AdminTest):
         _, restore = self.backups_adm_client.restore_backup(backup['id'])
 
         # Delete backup
-        self.addCleanup(self.volumes_adm_client.delete_volume,
+        self.addCleanup(self.admin_volume_client.delete_volume,
                         restore['volume_id'])
         self.assertEqual(backup['id'], restore['backup_id'])
         self.backups_adm_client.wait_for_backup_status(backup['id'],
                                                        'available')
-        self.volumes_adm_client.wait_for_volume_status(restore['volume_id'],
-                                                       'available')
+        self.admin_volume_client.wait_for_volume_status(
+            restore['volume_id'], 'available')
