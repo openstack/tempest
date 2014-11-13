@@ -116,6 +116,7 @@ class DeleteServersTestJSON(base.BaseV2ComputeTest):
         self.assertEqual('204', resp['status'])
         self.client.wait_for_server_termination(server['id'])
 
+    @test.services('volume')
     @test.attr(type='gate')
     def test_delete_server_while_in_attached_volume(self):
         # Delete a server while a volume is attached to it
