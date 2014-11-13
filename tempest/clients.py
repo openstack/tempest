@@ -230,22 +230,9 @@ class Manager(manager.Manager):
         # super cares for credentials validation
         super(Manager, self).__init__(credentials=credentials)
 
+        self._set_compute_clients(self.interface)
+
         if self.interface == 'xml':
-            self.certificates_client = CertificatesClientXML(
-                self.auth_provider)
-            self.servers_client = ServersClientXML(self.auth_provider)
-            self.limits_client = LimitsClientXML(self.auth_provider)
-            self.images_client = ImagesClientXML(self.auth_provider)
-            self.keypairs_client = KeyPairsClientXML(self.auth_provider)
-            self.quotas_client = QuotasClientXML(self.auth_provider)
-            self.quota_classes_client = QuotaClassesClientXML(
-                self.auth_provider)
-            self.flavors_client = FlavorsClientXML(self.auth_provider)
-            self.extensions_client = ExtensionsClientXML(self.auth_provider)
-            self.volumes_extensions_client = VolumesExtensionsClientXML(
-                self.auth_provider)
-            self.floating_ips_client = FloatingIPsClientXML(
-                self.auth_provider)
             self.backups_client = BackupsClientXML(self.auth_provider)
             self.snapshots_client = SnapshotsClientXML(self.auth_provider)
             self.snapshots_v2_client = SnapshotsV2ClientXML(self.auth_provider)
@@ -256,29 +243,15 @@ class Manager(manager.Manager):
             self.identity_client = IdentityClientXML(self.auth_provider)
             self.identity_v3_client = IdentityV3ClientXML(
                 self.auth_provider)
-            self.security_groups_client = SecurityGroupsClientXML(
-                self.auth_provider)
-            self.interfaces_client = InterfacesClientXML(self.auth_provider)
             self.endpoints_client = EndPointClientXML(self.auth_provider)
-            self.fixed_ips_client = FixedIPsClientXML(self.auth_provider)
-            self.availability_zone_client = AvailabilityZoneClientXML(
-                self.auth_provider)
             self.service_client = ServiceClientXML(self.auth_provider)
             self.volume_services_client = VolumesServicesClientXML(
                 self.auth_provider)
-            self.aggregates_client = AggregatesClientXML(self.auth_provider)
-            self.services_client = ServicesClientXML(self.auth_provider)
-            self.tenant_usages_client = TenantUsagesClientXML(
-                self.auth_provider)
             self.policy_client = PolicyClientXML(self.auth_provider)
             self.region_client = RegionClientXML(self.auth_provider)
-            self.hosts_client = HostsClientXML(self.auth_provider)
-            self.hypervisor_client = HypervisorClientXML(self.auth_provider)
             self.network_client = NetworkClientXML(self.auth_provider)
             self.credentials_client = CredentialsClientXML(
                 self.auth_provider)
-            self.instance_usages_audit_log_client = \
-                InstanceUsagesAuditLogClientXML(self.auth_provider)
             self.volume_hosts_client = VolumeHostsClientXML(
                 self.auth_provider)
             self.volume_quotas_client = VolumeQuotasClientXML(
@@ -299,32 +272,7 @@ class Manager(manager.Manager):
                 VolumeV2AvailabilityZoneClientXML(self.auth_provider)
 
         elif self.interface == 'json':
-            self.certificates_client = CertificatesClientJSON(
-                self.auth_provider)
-            self.certificates_v3_client = CertificatesV3ClientJSON(
-                self.auth_provider)
             self.baremetal_client = BaremetalClientJSON(self.auth_provider)
-            self.servers_client = ServersClientJSON(self.auth_provider)
-            self.servers_v3_client = ServersV3ClientJSON(self.auth_provider)
-            self.limits_client = LimitsClientJSON(self.auth_provider)
-            self.images_client = ImagesClientJSON(self.auth_provider)
-            self.keypairs_client = KeyPairsClientJSON(self.auth_provider)
-            self.keypairs_v3_client = KeyPairsV3ClientJSON(
-                self.auth_provider)
-            self.quotas_client = QuotasClientJSON(self.auth_provider)
-            self.quota_classes_client = QuotaClassesClientJSON(
-                self.auth_provider)
-            self.quotas_v3_client = QuotasV3ClientJSON(self.auth_provider)
-            self.flavors_client = FlavorsClientJSON(self.auth_provider)
-            self.flavors_v3_client = FlavorsV3ClientJSON(self.auth_provider)
-            self.extensions_v3_client = ExtensionsV3ClientJSON(
-                self.auth_provider)
-            self.extensions_client = ExtensionsClientJSON(
-                self.auth_provider)
-            self.volumes_extensions_client = VolumesExtensionsClientJSON(
-                self.auth_provider)
-            self.floating_ips_client = FloatingIPsClientJSON(
-                self.auth_provider)
             self.backups_client = BackupsClientJSON(self.auth_provider)
             self.snapshots_client = SnapshotsClientJSON(self.auth_provider)
             self.snapshots_v2_client = SnapshotsV2ClientJSON(
@@ -338,46 +286,15 @@ class Manager(manager.Manager):
             self.identity_client = IdentityClientJSON(self.auth_provider)
             self.identity_v3_client = IdentityV3ClientJSON(
                 self.auth_provider)
-            self.security_groups_client = SecurityGroupsClientJSON(
-                self.auth_provider)
-            self.interfaces_v3_client = InterfacesV3ClientJSON(
-                self.auth_provider)
-            self.interfaces_client = InterfacesClientJSON(
-                self.auth_provider)
             self.endpoints_client = EndPointClientJSON(self.auth_provider)
-            self.fixed_ips_client = FixedIPsClientJSON(self.auth_provider)
-            self.availability_zone_v3_client = AvailabilityZoneV3ClientJSON(
-                self.auth_provider)
-            self.availability_zone_client = AvailabilityZoneClientJSON(
-                self.auth_provider)
-            self.services_v3_client = ServicesV3ClientJSON(
-                self.auth_provider)
             self.service_client = ServiceClientJSON(self.auth_provider)
             self.volume_services_client = VolumesServicesClientJSON(
                 self.auth_provider)
-            self.agents_v3_client = AgentsV3ClientJSON(self.auth_provider)
-            self.aggregates_v3_client = AggregatesV3ClientJSON(
-                self.auth_provider)
-            self.aggregates_client = AggregatesClientJSON(
-                self.auth_provider)
-            self.services_client = ServicesClientJSON(self.auth_provider)
-            self.tenant_usages_client = TenantUsagesClientJSON(
-                self.auth_provider)
-            self.version_v3_client = VersionV3ClientJSON(self.auth_provider)
-            self.migrations_v3_client = MigrationsV3ClientJSON(
-                self.auth_provider)
             self.policy_client = PolicyClientJSON(self.auth_provider)
             self.region_client = RegionClientJSON(self.auth_provider)
-            self.hosts_client = HostsClientJSON(self.auth_provider)
-            self.hypervisor_v3_client = HypervisorV3ClientJSON(
-                self.auth_provider)
-            self.hypervisor_client = HypervisorClientJSON(
-                self.auth_provider)
             self.network_client = NetworkClientJSON(self.auth_provider)
             self.credentials_client = CredentialsClientJSON(
                 self.auth_provider)
-            self.instance_usages_audit_log_client = \
-                InstanceUsagesAuditLogClientJSON(self.auth_provider)
             self.volume_hosts_client = VolumeHostsClientJSON(
                 self.auth_provider)
             self.volume_quotas_client = VolumeQuotasClientJSON(
@@ -386,7 +303,7 @@ class Manager(manager.Manager):
                 self.auth_provider)
             self.volumes_v2_extension_client = VolumeV2ExtensionClientJSON(
                 self.auth_provider)
-            self.hosts_v3_client = HostsV3ClientJSON(self.auth_provider)
+
             self.database_flavors_client = DatabaseFlavorsClientJSON(
                 self.auth_provider)
             self.database_versions_client = DatabaseVersionsClientJSON(
@@ -445,6 +362,83 @@ class Manager(manager.Manager):
         self.volume_qos_client = QosSpecsClientJSON(self.auth_provider)
         self.volume_qos_v2_client = QosSpecsV2ClientJSON(
             self.auth_provider)
+
+    def _set_compute_clients(self, type):
+        if type == 'json':
+            self._set_compute_json_clients()
+        else:
+            self._set_compute_xml_clients()
+
+    def _set_compute_xml_clients(self):
+        self.certificates_client = CertificatesClientXML(self.auth_provider)
+        self.servers_client = ServersClientXML(self.auth_provider)
+        self.limits_client = LimitsClientXML(self.auth_provider)
+        self.images_client = ImagesClientXML(self.auth_provider)
+        self.keypairs_client = KeyPairsClientXML(self.auth_provider)
+        self.quotas_client = QuotasClientXML(self.auth_provider)
+        self.quota_classes_client = QuotaClassesClientXML(self.auth_provider)
+        self.flavors_client = FlavorsClientXML(self.auth_provider)
+        self.extensions_client = ExtensionsClientXML(self.auth_provider)
+        self.volumes_extensions_client = VolumesExtensionsClientXML(
+            self.auth_provider)
+        self.floating_ips_client = FloatingIPsClientXML(self.auth_provider)
+        self.security_groups_client = SecurityGroupsClientXML(
+            self.auth_provider)
+        self.interfaces_client = InterfacesClientXML(self.auth_provider)
+        self.fixed_ips_client = FixedIPsClientXML(self.auth_provider)
+        self.availability_zone_client = AvailabilityZoneClientXML(
+            self.auth_provider)
+        self.aggregates_client = AggregatesClientXML(self.auth_provider)
+        self.services_client = ServicesClientXML(self.auth_provider)
+        self.tenant_usages_client = TenantUsagesClientXML(self.auth_provider)
+        self.hosts_client = HostsClientXML(self.auth_provider)
+        self.hypervisor_client = HypervisorClientXML(self.auth_provider)
+        self.instance_usages_audit_log_client = \
+            InstanceUsagesAuditLogClientXML(self.auth_provider)
+
+    def _set_compute_json_clients(self):
+        self.certificates_client = CertificatesClientJSON(self.auth_provider)
+        self.certificates_v3_client = CertificatesV3ClientJSON(
+            self.auth_provider)
+        self.servers_client = ServersClientJSON(self.auth_provider)
+        self.servers_v3_client = ServersV3ClientJSON(self.auth_provider)
+        self.limits_client = LimitsClientJSON(self.auth_provider)
+        self.images_client = ImagesClientJSON(self.auth_provider)
+        self.keypairs_client = KeyPairsClientJSON(self.auth_provider)
+        self.keypairs_v3_client = KeyPairsV3ClientJSON(self.auth_provider)
+        self.quotas_client = QuotasClientJSON(self.auth_provider)
+        self.quota_classes_client = QuotaClassesClientJSON(self.auth_provider)
+        self.quotas_v3_client = QuotasV3ClientJSON(self.auth_provider)
+        self.flavors_client = FlavorsClientJSON(self.auth_provider)
+        self.flavors_v3_client = FlavorsV3ClientJSON(self.auth_provider)
+        self.extensions_client = ExtensionsClientJSON(self.auth_provider)
+        self.extensions_v3_client = ExtensionsV3ClientJSON(self.auth_provider)
+        self.volumes_extensions_client = VolumesExtensionsClientJSON(
+            self.auth_provider)
+        self.floating_ips_client = FloatingIPsClientJSON(self.auth_provider)
+        self.security_groups_client = SecurityGroupsClientJSON(
+            self.auth_provider)
+        self.interfaces_client = InterfacesClientJSON(self.auth_provider)
+        self.interfaces_v3_client = InterfacesV3ClientJSON(self.auth_provider)
+        self.fixed_ips_client = FixedIPsClientJSON(self.auth_provider)
+        self.availability_zone_client = AvailabilityZoneClientJSON(
+            self.auth_provider)
+        self.availability_zone_v3_client = AvailabilityZoneV3ClientJSON(
+            self.auth_provider)
+        self.services_v3_client = ServicesV3ClientJSON(self.auth_provider)
+        self.agents_v3_client = AgentsV3ClientJSON(self.auth_provider)
+        self.aggregates_client = AggregatesClientJSON(self.auth_provider)
+        self.aggregates_v3_client = AggregatesV3ClientJSON(self.auth_provider)
+        self.services_client = ServicesClientJSON(self.auth_provider)
+        self.tenant_usages_client = TenantUsagesClientJSON(self.auth_provider)
+        self.version_v3_client = VersionV3ClientJSON(self.auth_provider)
+        self.migrations_v3_client = MigrationsV3ClientJSON(self.auth_provider)
+        self.hosts_client = HostsClientJSON(self.auth_provider)
+        self.hosts_v3_client = HostsV3ClientJSON(self.auth_provider)
+        self.hypervisor_client = HypervisorClientJSON(self.auth_provider)
+        self.hypervisor_v3_client = HypervisorV3ClientJSON(self.auth_provider)
+        self.instance_usages_audit_log_client = \
+            InstanceUsagesAuditLogClientJSON(self.auth_provider)
 
 
 class AdminManager(Manager):
