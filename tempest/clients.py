@@ -308,8 +308,6 @@ class Manager(manager.Manager):
             self.servers_v3_client = ServersV3ClientJSON(self.auth_provider)
             self.limits_client = LimitsClientJSON(self.auth_provider)
             self.images_client = ImagesClientJSON(self.auth_provider)
-            self.keypairs_v3_client = KeyPairsV3ClientJSON(
-                self.auth_provider)
             self.keypairs_client = KeyPairsClientJSON(self.auth_provider)
             self.keypairs_v3_client = KeyPairsV3ClientJSON(
                 self.auth_provider)
