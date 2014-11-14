@@ -117,7 +117,7 @@ a0:b0:c0:d0:e0:f0"""
 
         self.assertEqual(self.conn.get_mac_address(), macs)
         self._assert_exec_called_with(
-            "/sbin/ifconfig | awk '/HWaddr/ {print $5}'")
+            "/bin/ip addr | awk '/ether/ {print $2}'")
 
     def test_get_ip_list(self):
         ips = """1: lo: <LOOPBACK,UP,LOWER_UP> mtu 16436 qdisc noqueue
