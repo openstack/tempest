@@ -58,7 +58,7 @@ class FlavorsAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
         resp, flavor = self.client.create_flavor(flavor_name,
                                                  self.ram,
                                                  self.vcpus, self.disk,
-                                                 '',
+                                                 None,
                                                  ephemeral=self.ephemeral,
                                                  swap=self.swap,
                                                  rxtx=self.rxtx)
