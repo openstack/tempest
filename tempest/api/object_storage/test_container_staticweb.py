@@ -67,7 +67,6 @@ class StaticWebTest(base.BaseObjectTest):
         # we should retrieve the self.object_name file
         resp, body = self.custom_account_client.request("GET",
                                                         self.container_name)
-        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
         # This request is equivalent to GET object
         self.assertHeaders(resp, 'Object', 'GET')
         self.assertEqual(body, self.object_data)
@@ -92,7 +91,6 @@ class StaticWebTest(base.BaseObjectTest):
         # we should retrieve a listing of objects
         resp, body = self.custom_account_client.request("GET",
                                                         self.container_name)
-        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
         # The target of the request is not any Swift resource. Therefore, the
         # existence of response header is checked without a custom matcher.
         self.assertIn('content-length', resp)
@@ -131,7 +129,6 @@ class StaticWebTest(base.BaseObjectTest):
         # we should retrieve a listing of objects
         resp, body = self.custom_account_client.request("GET",
                                                         self.container_name)
-        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
         self.assertIn(self.object_name, body)
         css = '<link rel="stylesheet" type="text/css" href="listings.css" />'
         self.assertIn(css, body)

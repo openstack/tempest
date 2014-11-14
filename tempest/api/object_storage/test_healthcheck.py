@@ -36,9 +36,6 @@ class HealthcheckTest(base.BaseObjectTest):
 
         resp, _ = self.account_client.get("healthcheck", {})
 
-        # The status is expected to be 200
-        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
-
         # The target of the request is not any Swift resource. Therefore, the
         # existence of response header is checked without a custom matcher.
         self.assertIn('content-length', resp)

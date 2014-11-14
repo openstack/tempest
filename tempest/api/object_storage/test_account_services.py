@@ -67,7 +67,6 @@ class AccountTest(base.BaseObjectTest):
 
         resp, container_list = \
             os_test_user.account_client.list_account_containers()
-        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
 
         # When sending a request to an account which has not received a PUT
         # container request, the response does not contain 'accept-ranges'
@@ -93,7 +92,6 @@ class AccountTest(base.BaseObjectTest):
         params = {'format': 'json'}
         resp, container_list = self.account_client.list_account_containers(
             params=params)
-        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
         self.assertHeaders(resp, 'Account', 'GET')
         self.assertIsNotNone(container_list)
         self.assertTrue([c['name'] for c in container_list])
@@ -106,7 +104,6 @@ class AccountTest(base.BaseObjectTest):
         params = {'format': 'xml'}
         resp, container_list = self.account_client.list_account_containers(
             params=params)
-        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
         self.assertHeaders(resp, 'Account', 'GET')
         self.assertIsNotNone(container_list)
         self.assertEqual(container_list.tag, 'account')
@@ -123,7 +120,6 @@ class AccountTest(base.BaseObjectTest):
     def test_list_extensions(self):
         resp, extensions = self.account_client.list_extensions()
 
-        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
         self.assertThat(resp, custom_matchers.AreAllWellFormatted())
 
     @test.attr(type='smoke')
@@ -182,7 +178,6 @@ class AccountTest(base.BaseObjectTest):
                   'end_marker': self.containers[self.containers_count - 1]}
         resp, container_list = self.account_client.list_account_containers(
             params=params)
-        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
         self.assertHeaders(resp, 'Account', 'GET')
         self.assertEqual(len(container_list), self.containers_count - 2)
 
@@ -208,7 +203,6 @@ class AccountTest(base.BaseObjectTest):
                   'end_marker': self.containers[self.containers_count / 2]}
         resp, container_list = self.account_client.list_account_containers(
             params=params)
-        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
         self.assertHeaders(resp, 'Account', 'GET')
         self.assertEqual(len(container_list),
                          min(limit, self.containers_count / 2))
@@ -222,7 +216,6 @@ class AccountTest(base.BaseObjectTest):
                   'end_marker': self.containers[self.containers_count - 1]}
         resp, container_list = self.account_client.list_account_containers(
             params=params)
-        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
         self.assertHeaders(resp, 'Account', 'GET')
         self.assertEqual(len(container_list),
                          min(limit, self.containers_count - 2))
@@ -237,7 +230,6 @@ class AccountTest(base.BaseObjectTest):
         resp, _ = self.account_client.create_account_metadata(metadata)
 
         resp, _ = self.account_client.list_account_metadata()
-        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
         self.assertHeaders(resp, 'Account', 'HEAD')
         self.assertIn('x-account-meta-test-account-meta1', resp)
         self.assertIn('x-account-meta-test-account-meta2', resp)
@@ -247,7 +239,6 @@ class AccountTest(base.BaseObjectTest):
     def test_list_no_account_metadata(self):
         # list no account metadata
         resp, _ = self.account_client.list_account_metadata()
-        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
         self.assertHeaders(resp, 'Account', 'HEAD')
         self.assertNotIn('x-account-meta-', str(resp))
 
@@ -256,7 +247,6 @@ class AccountTest(base.BaseObjectTest):
         # add metadata to account
         metadata = {'test-account-meta1': 'Meta1'}
         resp, _ = self.account_client.create_account_metadata(metadata)
-        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
         self.assertHeaders(resp, 'Account', 'POST')
 
         resp, body = self.account_client.list_account_metadata()
@@ -272,7 +262,6 @@ class AccountTest(base.BaseObjectTest):
         metadata = {'test-account-meta1': 'Meta1'}
         self.account_client.create_account_metadata(metadata)
         resp, _ = self.account_client.delete_account_metadata(metadata)
-        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
         self.assertHeaders(resp, 'Account', 'POST')
 
         resp, _ = self.account_client.list_account_metadata()
@@ -284,7 +273,6 @@ class AccountTest(base.BaseObjectTest):
         # registered at a server
         metadata = {'test-account-meta1': ''}
         resp, _ = self.account_client.create_account_metadata(metadata)
-        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
         self.assertHeaders(resp, 'Account', 'POST')
 
         resp, _ = self.account_client.list_account_metadata()
@@ -298,7 +286,6 @@ class AccountTest(base.BaseObjectTest):
         self.account_client.create_account_metadata(metadata_1)
         metadata_2 = {'test-account-meta1': ''}
         resp, _ = self.account_client.delete_account_metadata(metadata_2)
-        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
         self.assertHeaders(resp, 'Account', 'POST')
 
         resp, _ = self.account_client.list_account_metadata()
@@ -313,7 +300,6 @@ class AccountTest(base.BaseObjectTest):
         resp, body = self.account_client.create_and_delete_account_metadata(
             metadata_2,
             metadata_1)
-        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
         self.assertHeaders(resp, 'Account', 'POST')
 
         resp, _ = self.account_client.list_account_metadata()
