@@ -222,7 +222,7 @@ class AccountClientCustomizedHeader(rest_client.RestClient):
 
         url = '?format=%s' % self.format
         if params:
-            url += '&%s' + urllib.urlencode(params)
+            url += '&%s' % urllib.urlencode(params)
 
         headers = {}
         if metadata:
