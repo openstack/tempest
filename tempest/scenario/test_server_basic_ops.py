@@ -88,15 +88,10 @@ class TestServerBasicOps(manager.ScenarioTest):
             self.floating_ips_client.associate_floating_ip_to_server(
                 floating_ip['ip'], self.instance['id'])
             # Check ssh
-            try:
-                self.get_remote_client(
-                    server_or_ip=floating_ip['ip'],
-                    username=self.image_utils.ssh_user(self.image_ref),
-                    private_key=self.keypair['private_key'])
-            except Exception:
-                LOG.exception('ssh to server failed')
-                self._log_console_output()
-                raise
+            self.get_remote_client(
+                server_or_ip=floating_ip['ip'],
+                username=self.image_utils.ssh_user(self.image_ref),
+                private_key=self.keypair['private_key'])
 
     @test.services('compute', 'network')
     def test_server_basicops(self):

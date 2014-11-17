@@ -110,14 +110,8 @@ class TestVolumeBootPattern(manager.ScenarioTest):
             network_name_for_ssh = CONF.compute.network_for_ssh
             ip = server.networks[network_name_for_ssh][0]
 
-        try:
-            return self.get_remote_client(
-                ip,
-                private_key=keypair['private_key'])
-        except Exception:
-            LOG.exception('ssh to server failed')
-            self._log_console_output(servers=[server])
-            raise
+        return self.get_remote_client(ip, private_key=keypair['private_key'],
+                                      log_console_of_servers=[server])
 
     def _get_content(self, ssh_client):
         return ssh_client.exec_command('cat /tmp/text')
