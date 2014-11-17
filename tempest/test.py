@@ -24,7 +24,6 @@ import urllib
 import uuid
 
 import fixtures
-import testresources
 import testscenarios
 import testtools
 
@@ -222,23 +221,9 @@ def validate_tearDownClass():
 
 atexit.register(validate_tearDownClass)
 
-if sys.version_info >= (2, 7):
-    class BaseDeps(testtools.TestCase,
-                   testtools.testcase.WithAttributes,
-                   testresources.ResourcedTestCase):
-        pass
-else:
-    # Define asserts for py26
-    import unittest2
 
-    class BaseDeps(testtools.TestCase,
-                   testtools.testcase.WithAttributes,
-                   testresources.ResourcedTestCase,
-                   unittest2.TestCase):
-        pass
-
-
-class BaseTestCase(BaseDeps):
+class BaseTestCase(testtools.testcase.WithAttributes,
+                   testtools.TestCase):
 
     setUpClassCalled = False
     _service = None
