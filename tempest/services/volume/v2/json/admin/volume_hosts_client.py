@@ -1,4 +1,4 @@
-# Copyright 2013 OpenStack Foundation
+# Copyright 2014 OpenStack Foundation
 # All Rights Reserved.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -13,23 +13,16 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest.api.volume import base
-from tempest import test
+
+from tempest.services.volume.json.admin import volume_hosts_client
 
 
-class VolumeHostsAdminV2TestsJSON(base.BaseVolumeAdminTest):
-    _interface = "json"
+class VolumeHostsV2ClientJSON(volume_hosts_client.BaseVolumeHostsClientJSON):
+    """
+    Client class to send CRUD Volume V2 API requests to a Cinder endpoint
+    """
 
-    @test.attr(type='gate')
-    def test_list_hosts(self):
-        _, hosts = self.hosts_client.list_hosts()
-        self.assertTrue(len(hosts) >= 2, "No. of hosts are < 2,"
-                        "response of list hosts is: % s" % hosts)
+    def __init__(self, auth_provider):
+        super(VolumeHostsV2ClientJSON, self).__init__(auth_provider)
 
-
-class VolumeHostsAdminV1TestsJSON(VolumeHostsAdminV2TestsJSON):
-    _api_version = 1
-
-
-class VolumeHostsAdminV1TestsXML(VolumeHostsAdminV1TestsJSON):
-    _interface = 'xml'
+        self.api_version = "v2"

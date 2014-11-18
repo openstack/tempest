@@ -181,6 +181,8 @@ from tempest.services.volume.json.extensions_client import \
 from tempest.services.volume.json.qos_client import QosSpecsClientJSON
 from tempest.services.volume.json.snapshots_client import SnapshotsClientJSON
 from tempest.services.volume.json.volumes_client import VolumesClientJSON
+from tempest.services.volume.v2.json.admin.volume_hosts_client import \
+    VolumeHostsV2ClientJSON
 from tempest.services.volume.v2.json.admin.volume_types_client import \
     VolumeTypesV2ClientJSON
 from tempest.services.volume.v2.json.availability_zone_client import \
@@ -296,6 +298,8 @@ class Manager(manager.Manager):
             self.credentials_client = CredentialsClientJSON(
                 self.auth_provider)
             self.volume_hosts_client = VolumeHostsClientJSON(
+                self.auth_provider)
+            self.volume_hosts_v2_client = VolumeHostsV2ClientJSON(
                 self.auth_provider)
             self.volume_quotas_client = VolumeQuotasClientJSON(
                 self.auth_provider)
