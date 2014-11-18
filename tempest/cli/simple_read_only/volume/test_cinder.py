@@ -137,8 +137,7 @@ class SimpleReadOnlyCinderClientTest(cli.ClientTestBase):
     def test_cinder_service_list(self):
         service_list = self.parser.listing(self.cinder('service-list'))
         self.assertTableStruct(service_list, ['Binary', 'Host', 'Zone',
-                                              'Status', 'State', 'Updated_at',
-                                              'Disabled Reason'])
+                                              'Status', 'State', 'Updated_at'])
 
     def test_cinder_transfer_list(self):
         transfer_list = self.parser.listing(self.cinder('transfer-list'))
