@@ -429,7 +429,7 @@
 
 # Does the test environment support live migration available? (boolean
 # value)
-#live_migration = false
+#live_migration = true
 
 # Does the test environment support pausing? (boolean value)
 #pause = true
