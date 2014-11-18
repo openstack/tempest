@@ -146,11 +146,9 @@ class ContainerTest(base.BaseObjectTest):
     def test_delete_container(self):
         # create a container
         container_name = self._create_container()
-        # delete container
+        # delete container, success asserted within
         resp, _ = self.container_client.delete_container(container_name)
-        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
         self.assertHeaders(resp, 'Container', 'DELETE')
-
         self.containers.remove(container_name)
 
     @test.attr(type='smoke')
