@@ -74,8 +74,6 @@ class BulkTest(base.BaseObjectTest):
 
         self.containers.append(container_name)
 
-        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
-
         # When uploading an archived file with the bulk operation, the response
         # does not contain 'content-length' header. This is the special case,
         # therefore the existence of response headers is checked without
@@ -91,7 +89,6 @@ class BulkTest(base.BaseObjectTest):
         param = {'format': 'json'}
         resp, body = self.account_client.list_account_containers(param)
 
-        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
         self.assertHeaders(resp, 'Account', 'GET')
 
         self.assertIn(container_name, [b['name'] for b in body])
@@ -100,7 +97,6 @@ class BulkTest(base.BaseObjectTest):
         resp, contents_list = self.container_client.list_container_contents(
             container_name, param)
 
-        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
         self.assertHeaders(resp, 'Container', 'GET')
 
         self.assertIn(object_name, [c['name'] for c in contents_list])

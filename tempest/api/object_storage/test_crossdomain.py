@@ -43,7 +43,6 @@ class CrossdomainTest(base.BaseObjectTest):
     def test_get_crossdomain_policy(self):
         resp, body = self.account_client.get("crossdomain.xml", {})
 
-        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
         self.assertTrue(body.startswith(self.xml_start) and
                         body.endswith(self.xml_end))
 

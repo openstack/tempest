@@ -51,7 +51,6 @@ class ContainerTest(base.BaseObjectTest):
         container_name = data_utils.rand_name(name='TestContainer')
         resp, body = self.container_client.create_container(container_name)
         self.containers.append(container_name)
-        self.assertIn(resp['status'], ('202', '201'))
         self.assertHeaders(resp, 'Container', 'PUT')
 
     @test.attr(type='smoke')
@@ -62,7 +61,6 @@ class ContainerTest(base.BaseObjectTest):
         self.containers.append(container_name)
 
         resp, _ = self.container_client.create_container(container_name)
-        self.assertIn(resp['status'], ('202', '201'))
         self.assertHeaders(resp, 'Container', 'PUT')
 
     @test.attr(type='smoke')
@@ -74,7 +72,6 @@ class ContainerTest(base.BaseObjectTest):
             container_name,
             metadata=metadata)
         self.containers.append(container_name)
-        self.assertIn(resp['status'], ('201', '202'))
         self.assertHeaders(resp, 'Container', 'PUT')
 
         resp, _ = self.container_client.list_container_metadata(
@@ -93,7 +90,6 @@ class ContainerTest(base.BaseObjectTest):
             container_name,
             metadata=metadata)
         self.containers.append(container_name)
-        self.assertIn(resp['status'], ('201', '202'))
         self.assertHeaders(resp, 'Container', 'PUT')
 
         resp, _ = self.container_client.list_container_metadata(
@@ -116,7 +112,6 @@ class ContainerTest(base.BaseObjectTest):
         resp, _ = self.container_client.create_container(
             container_name,
             remove_metadata=metadata_2)
-        self.assertIn(resp['status'], ('201', '202'))
         self.assertHeaders(resp, 'Container', 'PUT')
 
         resp, _ = self.container_client.list_container_metadata(
@@ -135,7 +130,6 @@ class ContainerTest(base.BaseObjectTest):
         resp, _ = self.container_client.create_container(
             container_name,
             remove_metadata=metadata)
-        self.assertIn(resp['status'], ('201', '202'))
         self.assertHeaders(resp, 'Container', 'PUT')
 
         resp, _ = self.container_client.list_container_metadata(
@@ -159,7 +153,6 @@ class ContainerTest(base.BaseObjectTest):
 
         resp, object_list = self.container_client.list_container_contents(
             container_name)
-        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
         self.assertHeaders(resp, 'Container', 'GET')
         self.assertEqual(object_name, object_list.strip('\n'))
 
@@ -170,7 +163,6 @@ class ContainerTest(base.BaseObjectTest):
 
         resp, object_list = self.container_client.list_container_contents(
             container_name)
-        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
         self.assertHeaders(resp, 'Container', 'GET')
         self.assertEqual('', object_list.strip('\n'))
 
@@ -185,7 +177,6 @@ class ContainerTest(base.BaseObjectTest):
         resp, object_list = self.container_client.list_container_contents(
             container_name,
             params=params)
-        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
         self.assertHeaders(resp, 'Container', 'GET')
         self.assertEqual(object_name.split('/')[0], object_list.strip('/\n'))
 
@@ -199,7 +190,6 @@ class ContainerTest(base.BaseObjectTest):
         resp, object_list = self.container_client.list_container_contents(
             container_name,
             params=params)
-        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
         self.assertHeaders(resp, 'Container', 'GET')
         self.assertEqual(object_name, object_list.strip('\n'))
 
@@ -213,7 +203,6 @@ class ContainerTest(base.BaseObjectTest):
         resp, object_list = self.container_client.list_container_contents(
             container_name,
             params=params)
-        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
         self.assertHeaders(resp, 'Container', 'GET')
 
         self.assertIsNotNone(object_list)
@@ -233,7 +222,6 @@ class ContainerTest(base.BaseObjectTest):
         resp, object_list = self.container_client.list_container_contents(
             container_name,
             params=params)
-        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
         self.assertHeaders(resp, 'Container', 'GET')
 
         self.assertIsNotNone(object_list)
@@ -258,7 +246,6 @@ class ContainerTest(base.BaseObjectTest):
         resp, object_list = self.container_client.list_container_contents(
             container_name,
             params=params)
-        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
         self.assertHeaders(resp, 'Container', 'GET')
         self.assertEqual(object_name, object_list.strip('\n'))
 
@@ -272,7 +259,6 @@ class ContainerTest(base.BaseObjectTest):
         resp, object_list = self.container_client.list_container_contents(
             container_name,
             params=params)
-        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
         self.assertHeaders(resp, 'Container', 'GET')
         self.assertEqual(object_name, object_list.strip('\n'))
 
@@ -287,7 +273,6 @@ class ContainerTest(base.BaseObjectTest):
         resp, object_list = self.container_client.list_container_contents(
             container_name,
             params=params)
-        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
         self.assertHeaders(resp, 'Container', 'GET')
         self.assertEqual(object_name, object_list.strip('\n'))
 
@@ -302,7 +287,6 @@ class ContainerTest(base.BaseObjectTest):
         resp, object_list = self.container_client.list_container_contents(
             container_name,
             params=params)
-        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
         self.assertHeaders(resp, 'Container', 'GET')
         self.assertEqual(object_name, object_list.strip('\n'))
 
@@ -318,7 +302,6 @@ class ContainerTest(base.BaseObjectTest):
 
         resp, _ = self.container_client.list_container_metadata(
             container_name)
-        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
         self.assertHeaders(resp, 'Container', 'HEAD')
         self.assertIn('x-container-meta-name', resp)
         self.assertEqual(resp['x-container-meta-name'], metadata['name'])
@@ -330,7 +313,6 @@ class ContainerTest(base.BaseObjectTest):
 
         resp, _ = self.container_client.list_container_metadata(
             container_name)
-        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
         self.assertHeaders(resp, 'Container', 'HEAD')
         self.assertNotIn('x-container-meta-', str(resp))
 
@@ -348,7 +330,6 @@ class ContainerTest(base.BaseObjectTest):
             container_name,
             metadata=metadata_2,
             remove_metadata=metadata_1)
-        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
         self.assertHeaders(resp, 'Container', 'POST')
 
         resp, _ = self.container_client.list_container_metadata(
@@ -367,7 +348,6 @@ class ContainerTest(base.BaseObjectTest):
         resp, _ = self.container_client.update_container_metadata(
             container_name,
             metadata=metadata)
-        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
         self.assertHeaders(resp, 'Container', 'POST')
 
         resp, _ = self.container_client.list_container_metadata(
@@ -388,7 +368,6 @@ class ContainerTest(base.BaseObjectTest):
         resp, _ = self.container_client.delete_container_metadata(
             container_name,
             metadata=metadata)
-        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
         self.assertHeaders(resp, 'Container', 'POST')
 
         resp, _ = self.container_client.list_container_metadata(
@@ -404,7 +383,6 @@ class ContainerTest(base.BaseObjectTest):
         resp, _ = self.container_client.update_container_metadata(
             container_name,
             metadata=metadata)
-        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
         self.assertHeaders(resp, 'Container', 'POST')
 
         resp, _ = self.container_client.list_container_metadata(
@@ -424,7 +402,6 @@ class ContainerTest(base.BaseObjectTest):
         resp, _ = self.container_client.delete_container_metadata(
             container_name,
             metadata=metadata)
-        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
         self.assertHeaders(resp, 'Container', 'POST')
 
         resp, _ = self.container_client.list_container_metadata(container_name)
