@@ -36,12 +36,11 @@ class TestServerAdvancedOps(manager.ScenarioTest):
 
     @classmethod
     def resource_setup(cls):
-        cls.set_network_resources()
-        super(TestServerAdvancedOps, cls).resource_setup()
-
         if CONF.compute.flavor_ref_alt == CONF.compute.flavor_ref:
             msg = "Skipping test - flavor_ref and flavor_ref_alt are identical"
             raise cls.skipException(msg)
+        cls.set_network_resources()
+        super(TestServerAdvancedOps, cls).resource_setup()
 
     @testtools.skipUnless(CONF.compute_feature_enabled.resize,
                           'Resize is not available.')
