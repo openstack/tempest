@@ -21,7 +21,7 @@ from tempest import test
 CONF = config.CONF
 
 
-class VolumeTypesTest(base.BaseVolumeV1AdminTest):
+class VolumeTypesV2Test(base.BaseVolumeAdminTest):
     _interface = "json"
 
     def _delete_volume(self, volume_id):
@@ -43,6 +43,7 @@ class VolumeTypesTest(base.BaseVolumeV1AdminTest):
         volume = {}
         vol_name = data_utils.rand_name("volume-")
         vol_type_name = data_utils.rand_name("volume-type-")
+        self.name_field = self.special_fields['name_field']
         proto = CONF.volume.storage_protocol
         vendor = CONF.volume.vendor_name
         extra_specs = {"storage_protocol": proto,
@@ -54,21 +55,20 @@ class VolumeTypesTest(base.BaseVolumeV1AdminTest):
         self.assertIn('id', body)
         self.addCleanup(self._delete_volume_type, body['id'])
         self.assertIn('name', body)
+        params = {self.name_field: vol_name, 'volume_type': vol_type_name}
         _, volume = self.volumes_client.create_volume(
-            size=1, display_name=vol_name,
-            volume_type=vol_type_name)
+            size=1, **params)
         self.assertIn('id', volume)
         self.addCleanup(self._delete_volume, volume['id'])
-        self.assertIn('display_name', volume)
-        self.assertEqual(volume['display_name'], vol_name,
+        self.assertIn(self.name_field, volume)
+        self.assertEqual(volume[self.name_field], vol_name,
                          "The created volume name is not equal "
                          "to the requested name")
         self.assertTrue(volume['id'] is not None,
                         "Field volume id is empty or not found.")
-        self.volumes_client.wait_for_volume_status(volume['id'],
-                                                   'available')
+        self.volumes_client.wait_for_volume_status(volume['id'], 'available')
         _, fetched_volume = self.volumes_client.get_volume(volume['id'])
-        self.assertEqual(vol_name, fetched_volume['display_name'],
+        self.assertEqual(vol_name, fetched_volume[self.name_field],
                          'The fetched Volume is different '
                          'from the created Volume')
         self.assertEqual(volume['id'], fetched_volume['id'],
@@ -154,3 +154,7 @@ class VolumeTypesTest(base.BaseVolumeV1AdminTest):
             self.volume_types_client.get_encryption_type(
                 encryption_type['volume_type_id']))
         self.assertEmpty(deleted_encryption_type)
+
+
+class VolumeTypesV1Test(VolumeTypesV2Test):
+    _api_version = 1
