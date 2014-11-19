@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 
-cd ${WORKSPACE:-$(pwd)}
 with_venv=tools/with_venv.sh
 
 export OS_USERNAME=${OS_USERNAME:-admin}
@@ -28,6 +27,7 @@ TEMPEST_CONFIG_DIR=${TEMPEST_CONFIG_DIR:-$TEMPEST_DIR/etc}
 TEMPEST_CONFIG=$TEMPEST_CONFIG_DIR/tempest.conf
 
 source $TEMPEST_DIR/contrail/functions
+cd ${TEMPEST_DIR:-$(pwd)}
 
 cp $TEMPEST_DIR/etc/tempest.conf.sample $TEMPEST_CONFIG
 password=${ADMIN_PASSWORD:-contrail123}
