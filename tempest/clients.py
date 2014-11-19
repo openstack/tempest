@@ -233,34 +233,18 @@ class Manager(manager.Manager):
         super(Manager, self).__init__(credentials=credentials)
 
         self._set_compute_clients(self.interface)
+        self._set_volume_clients(self.interface)
 
         if self.interface == 'xml':
-            self.backups_client = BackupsClientXML(self.auth_provider)
-            self.snapshots_client = SnapshotsClientXML(self.auth_provider)
-            self.snapshots_v2_client = SnapshotsV2ClientXML(self.auth_provider)
-            self.volumes_client = VolumesClientXML(self.auth_provider)
-            self.volumes_v2_client = VolumesV2ClientXML(self.auth_provider)
-            self.volume_types_client = VolumeTypesClientXML(
-                self.auth_provider)
             self.identity_client = IdentityClientXML(self.auth_provider)
             self.identity_v3_client = IdentityV3ClientXML(
                 self.auth_provider)
             self.endpoints_client = EndPointClientXML(self.auth_provider)
             self.service_client = ServiceClientXML(self.auth_provider)
-            self.volume_services_client = VolumesServicesClientXML(
-                self.auth_provider)
             self.policy_client = PolicyClientXML(self.auth_provider)
             self.region_client = RegionClientXML(self.auth_provider)
             self.network_client = NetworkClientXML(self.auth_provider)
             self.credentials_client = CredentialsClientXML(
-                self.auth_provider)
-            self.volume_hosts_client = VolumeHostsClientXML(
-                self.auth_provider)
-            self.volume_quotas_client = VolumeQuotasClientXML(
-                self.auth_provider)
-            self.volumes_extension_client = VolumeExtensionClientXML(
-                self.auth_provider)
-            self.volumes_v2_extension_client = VolumeV2ExtensionClientXML(
                 self.auth_provider)
             if CONF.service_available.ceilometer:
                 self.telemetry_client = TelemetryClientXML(
@@ -268,44 +252,18 @@ class Manager(manager.Manager):
             self.token_client = TokenClientXML()
             if CONF.identity_feature_enabled.api_v3:
                 self.token_v3_client = V3TokenClientXML()
-            self.volume_availability_zone_client = \
-                VolumeAvailabilityZoneClientXML(self.auth_provider)
-            self.volume_v2_availability_zone_client = \
-                VolumeV2AvailabilityZoneClientXML(self.auth_provider)
 
         elif self.interface == 'json':
             self.baremetal_client = BaremetalClientJSON(self.auth_provider)
-            self.backups_client = BackupsClientJSON(self.auth_provider)
-            self.snapshots_client = SnapshotsClientJSON(self.auth_provider)
-            self.snapshots_v2_client = SnapshotsV2ClientJSON(
-                self.auth_provider)
-            self.volumes_client = VolumesClientJSON(self.auth_provider)
-            self.volumes_v2_client = VolumesV2ClientJSON(self.auth_provider)
-            self.volume_types_client = VolumeTypesClientJSON(
-                self.auth_provider)
-            self.volume_types_v2_client = VolumeTypesV2ClientJSON(
-                self.auth_provider)
             self.identity_client = IdentityClientJSON(self.auth_provider)
             self.identity_v3_client = IdentityV3ClientJSON(
                 self.auth_provider)
             self.endpoints_client = EndPointClientJSON(self.auth_provider)
             self.service_client = ServiceClientJSON(self.auth_provider)
-            self.volume_services_client = VolumesServicesClientJSON(
-                self.auth_provider)
             self.policy_client = PolicyClientJSON(self.auth_provider)
             self.region_client = RegionClientJSON(self.auth_provider)
             self.network_client = NetworkClientJSON(self.auth_provider)
             self.credentials_client = CredentialsClientJSON(
-                self.auth_provider)
-            self.volume_hosts_client = VolumeHostsClientJSON(
-                self.auth_provider)
-            self.volume_hosts_v2_client = VolumeHostsV2ClientJSON(
-                self.auth_provider)
-            self.volume_quotas_client = VolumeQuotasClientJSON(
-                self.auth_provider)
-            self.volumes_extension_client = VolumeExtensionClientJSON(
-                self.auth_provider)
-            self.volumes_v2_extension_client = VolumeV2ExtensionClientJSON(
                 self.auth_provider)
 
             self.database_flavors_client = DatabaseFlavorsClientJSON(
@@ -322,10 +280,6 @@ class Manager(manager.Manager):
             self.negative_client = rest_client.NegativeRestClient(
                 self.auth_provider)
             self.negative_client.service = service
-            self.volume_availability_zone_client = \
-                VolumeAvailabilityZoneClientJSON(self.auth_provider)
-            self.volume_v2_availability_zone_client = \
-                VolumeV2AvailabilityZoneClientJSON(self.auth_provider)
 
         else:
             msg = "Unsupported interface type `%s'" % interface
@@ -353,13 +307,6 @@ class Manager(manager.Manager):
         self.custom_account_client = \
             AccountClientCustomizedHeader(self.auth_provider)
         self.data_processing_client = DataProcessingClient(
-            self.auth_provider)
-        # NOTE : As XML clients are not implemented for Qos-specs.
-        # So, setting the qos_client here. Once client are implemented,
-        # qos_client would be moved to its respective if/else.
-        # Bug : 1312553
-        self.volume_qos_client = QosSpecsClientJSON(self.auth_provider)
-        self.volume_qos_v2_client = QosSpecsV2ClientJSON(
             self.auth_provider)
 
     def _set_compute_clients(self, type):
@@ -445,6 +392,65 @@ class Manager(manager.Manager):
         self.hypervisor_v3_client = HypervisorV3ClientJSON(self.auth_provider)
         self.instance_usages_audit_log_client = \
             InstanceUsagesAuditLogClientJSON(self.auth_provider)
+
+    def _set_volume_clients(self, type):
+        if type == 'json':
+            self._set_volume_json_clients()
+        else:
+            self._set_volume_xml_clients()
+
+        # Common volume clients
+        # NOTE : As XML clients are not implemented for Qos-specs.
+        # So, setting the qos_client here. Once client are implemented,
+        # qos_client would be moved to its respective if/else.
+        # Bug : 1312553
+        self.volume_qos_client = QosSpecsClientJSON(self.auth_provider)
+        self.volume_qos_v2_client = QosSpecsV2ClientJSON(
+            self.auth_provider)
+
+    def _set_volume_xml_clients(self):
+        self.backups_client = BackupsClientXML(self.auth_provider)
+        self.snapshots_client = SnapshotsClientXML(self.auth_provider)
+        self.snapshots_v2_client = SnapshotsV2ClientXML(self.auth_provider)
+        self.volumes_client = VolumesClientXML(self.auth_provider)
+        self.volumes_v2_client = VolumesV2ClientXML(self.auth_provider)
+        self.volume_types_client = VolumeTypesClientXML(self.auth_provider)
+        self.volume_services_client = VolumesServicesClientXML(
+            self.auth_provider)
+        self.volume_hosts_client = VolumeHostsClientXML(self.auth_provider)
+        self.volume_quotas_client = VolumeQuotasClientXML(self.auth_provider)
+        self.volumes_extension_client = VolumeExtensionClientXML(
+            self.auth_provider)
+        self.volumes_v2_extension_client = VolumeV2ExtensionClientXML(
+            self.auth_provider)
+        self.volume_availability_zone_client = \
+            VolumeAvailabilityZoneClientXML(self.auth_provider)
+        self.volume_v2_availability_zone_client = \
+            VolumeV2AvailabilityZoneClientXML(self.auth_provider)
+
+    def _set_volume_json_clients(self):
+        self.backups_client = BackupsClientJSON(self.auth_provider)
+        self.snapshots_client = SnapshotsClientJSON(self.auth_provider)
+        self.snapshots_v2_client = SnapshotsV2ClientJSON(self.auth_provider)
+        self.volumes_client = VolumesClientJSON(self.auth_provider)
+        self.volumes_v2_client = VolumesV2ClientJSON(self.auth_provider)
+        self.volume_types_client = VolumeTypesClientJSON(self.auth_provider)
+        self.volume_services_client = VolumesServicesClientJSON(
+            self.auth_provider)
+        self.volume_hosts_client = VolumeHostsClientJSON(self.auth_provider)
+        self.volume_hosts_v2_client = VolumeHostsV2ClientJSON(
+            self.auth_provider)
+        self.volume_quotas_client = VolumeQuotasClientJSON(self.auth_provider)
+        self.volumes_extension_client = VolumeExtensionClientJSON(
+            self.auth_provider)
+        self.volumes_v2_extension_client = VolumeV2ExtensionClientJSON(
+            self.auth_provider)
+        self.volume_availability_zone_client = \
+            VolumeAvailabilityZoneClientJSON(self.auth_provider)
+        self.volume_v2_availability_zone_client = \
+            VolumeV2AvailabilityZoneClientJSON(self.auth_provider)
+        self.volume_types_v2_client = VolumeTypesV2ClientJSON(
+            self.auth_provider)
 
 
 class AdminManager(Manager):
