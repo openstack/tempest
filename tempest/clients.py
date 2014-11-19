@@ -233,39 +233,18 @@ class Manager(manager.Manager):
         super(Manager, self).__init__(credentials=credentials)
 
         self._set_compute_clients(self.interface)
+        self._set_identity_clients(self.interface)
         self._set_volume_clients(self.interface)
 
         if self.interface == 'xml':
-            self.identity_client = IdentityClientXML(self.auth_provider)
-            self.identity_v3_client = IdentityV3ClientXML(
-                self.auth_provider)
-            self.endpoints_client = EndPointClientXML(self.auth_provider)
-            self.service_client = ServiceClientXML(self.auth_provider)
-            self.policy_client = PolicyClientXML(self.auth_provider)
-            self.region_client = RegionClientXML(self.auth_provider)
             self.network_client = NetworkClientXML(self.auth_provider)
-            self.credentials_client = CredentialsClientXML(
-                self.auth_provider)
             if CONF.service_available.ceilometer:
                 self.telemetry_client = TelemetryClientXML(
                     self.auth_provider)
-            self.token_client = TokenClientXML()
-            if CONF.identity_feature_enabled.api_v3:
-                self.token_v3_client = V3TokenClientXML()
 
         elif self.interface == 'json':
             self.baremetal_client = BaremetalClientJSON(self.auth_provider)
-            self.identity_client = IdentityClientJSON(self.auth_provider)
-            self.identity_v3_client = IdentityV3ClientJSON(
-                self.auth_provider)
-            self.endpoints_client = EndPointClientJSON(self.auth_provider)
-            self.service_client = ServiceClientJSON(self.auth_provider)
-            self.policy_client = PolicyClientJSON(self.auth_provider)
-            self.region_client = RegionClientJSON(self.auth_provider)
             self.network_client = NetworkClientJSON(self.auth_provider)
-            self.credentials_client = CredentialsClientJSON(
-                self.auth_provider)
-
             self.database_flavors_client = DatabaseFlavorsClientJSON(
                 self.auth_provider)
             self.database_versions_client = DatabaseVersionsClientJSON(
@@ -274,9 +253,6 @@ class Manager(manager.Manager):
             if CONF.service_available.ceilometer:
                 self.telemetry_client = TelemetryClientJSON(
                     self.auth_provider)
-            self.token_client = TokenClientJSON()
-            if CONF.identity_feature_enabled.api_v3:
-                self.token_v3_client = V3TokenClientJSON()
             self.negative_client = rest_client.NegativeRestClient(
                 self.auth_provider)
             self.negative_client.service = service
@@ -392,6 +368,36 @@ class Manager(manager.Manager):
         self.hypervisor_v3_client = HypervisorV3ClientJSON(self.auth_provider)
         self.instance_usages_audit_log_client = \
             InstanceUsagesAuditLogClientJSON(self.auth_provider)
+
+    def _set_identity_clients(self, type):
+        if type == 'json':
+            self._set_identity_json_clients()
+        else:
+            self._set_identity_xml_clients()
+
+    def _set_identity_xml_clients(self):
+        self.identity_client = IdentityClientXML(self.auth_provider)
+        self.identity_v3_client = IdentityV3ClientXML(self.auth_provider)
+        self.endpoints_client = EndPointClientXML(self.auth_provider)
+        self.service_client = ServiceClientXML(self.auth_provider)
+        self.policy_client = PolicyClientXML(self.auth_provider)
+        self.region_client = RegionClientXML(self.auth_provider)
+        self.token_client = TokenClientXML()
+        if CONF.identity_feature_enabled.api_v3:
+            self.token_v3_client = V3TokenClientXML()
+        self.credentials_client = CredentialsClientXML(self.auth_provider)
+
+    def _set_identity_json_clients(self):
+        self.identity_client = IdentityClientJSON(self.auth_provider)
+        self.identity_v3_client = IdentityV3ClientJSON(self.auth_provider)
+        self.endpoints_client = EndPointClientJSON(self.auth_provider)
+        self.service_client = ServiceClientJSON(self.auth_provider)
+        self.policy_client = PolicyClientJSON(self.auth_provider)
+        self.region_client = RegionClientJSON(self.auth_provider)
+        self.token_client = TokenClientJSON()
+        if CONF.identity_feature_enabled.api_v3:
+            self.token_v3_client = V3TokenClientJSON()
+        self.credentials_client = CredentialsClientJSON(self.auth_provider)
 
     def _set_volume_clients(self, type):
         if type == 'json':
