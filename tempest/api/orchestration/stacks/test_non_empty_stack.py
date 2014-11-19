@@ -31,13 +31,15 @@ class StacksTestJSON(base.BaseOrchestrationTest):
         template = cls.read_template('non_empty_stack')
         image_id = (CONF.orchestration.image_ref or
                     cls._create_image()['id'])
+        flavor = CONF.orchestration.instance_type
         # create the stack
         cls.stack_identifier = cls.create_stack(
             cls.stack_name,
             template,
             parameters={
                 'trigger': 'start',
-                'image': image_id
+                'image': image_id,
+                'flavor': flavor
             })
         cls.stack_id = cls.stack_identifier.split('/')[1]
         cls.resource_name = 'fluffy'
