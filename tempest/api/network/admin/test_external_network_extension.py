@@ -12,6 +12,7 @@
 
 from tempest.api.network import base
 from tempest.common.utils import data_utils
+from tempest import exceptions
 
 
 class ExternalNetworksTestJSON(base.BaseAdminNetworkTest):
@@ -30,6 +31,26 @@ class ExternalNetworksTestJSON(base.BaseAdminNetworkTest):
         network = body['network']
         self.addCleanup(self.admin_client.delete_network, network['id'])
         return network
+
+    def _try_delete_resource(self, delete_callable, *args, **kwargs):
+        """Cleanup resources in case of test-failure
+
+        Some resources should be explicitly deleted by the test. if the test
+        fails, these resources remain.
+        If the test failed to delete a resource, this method will execute
+        the appropriate delete methods. Otherwise, the method ignores NotFound
+        exceptions thrown for resources that were correctly deleted by the
+        test.
+
+        :param delete_callable: delete method
+        :param args: arguments for delete method
+        :param kwargs: keyword arguments for delete method
+        """
+        try:
+            delete_callable(*args, **kwargs)
+        # if resource is not found, this means it was deleted in the test
+        except exceptions.NotFound:
+            pass
 
     def test_create_external_network(self):
         # Create a network as an admin user specifying the
@@ -83,3 +104,42 @@ class ExternalNetworksTestJSON(base.BaseAdminNetworkTest):
         self.assertEqual(self.network['name'], show_net['name'])
         self.assertEqual(self.network['id'], show_net['id'])
         self.assertFalse(show_net['router:external'])
+
+    def test_delete_external_networks_with_floating_ip(self):
+        """Verifies external network can be deleted while still holding
+        (unassociated) floating IPs
+
+        """
+        # Set cls.client to admin to use base.create_subnet()
+        client = self.admin_client
+        _, body = client.create_network(**{'router:external': True})
+        external_network = body['network']
+        self.addCleanup(self._try_delete_resource,
+                        client.delete_network,
+                        external_network['id'])
+        subnet = self.create_subnet(external_network, client=client)
+        _, body = client.create_floatingip(
+            floating_network_id=external_network['id'])
+        created_floating_ip = body['floatingip']
+        self.addCleanup(self._try_delete_resource,
+                        client.delete_floatingip,
+                        created_floating_ip['id'])
+        _, floatingip_list = client.list_floatingips(
+            network=external_network['id'])
+        self.assertIn(created_floating_ip['id'],
+                      (f['id'] for f in floatingip_list['floatingips']))
+        client.delete_network(external_network['id'])
+        # Verifies floating ip is deleted
+        _, floatingip_list = client.list_floatingips()
+        self.assertNotIn(created_floating_ip['id'],
+                         (f['id'] for f in floatingip_list['floatingips']))
+        # Verifies subnet is deleted
+        _, subnet_list = client.list_subnets()
+        self.assertNotIn(subnet['id'],
+                         (s['id'] for s in subnet_list))
+        # Removes subnet from the cleanup list
+        self.subnets.remove(subnet)
+
+
+class ExternalNetworksTestXML(ExternalNetworksTestJSON):
+    _interface = 'xml'

@@ -51,7 +51,6 @@ class ObjectExpiryTest(base.BaseObjectTest):
         resp, _ = \
             self.object_client.list_object_metadata(self.container_name,
                                                     self.object_name)
-        self.assertEqual(resp['status'], '200')
         self.assertHeaders(resp, 'Object', 'HEAD')
         self.assertIn('x-delete-at', resp)
         # we want to ensure that we will sleep long enough for things to
@@ -60,7 +59,6 @@ class ObjectExpiryTest(base.BaseObjectTest):
 
         resp, body = self.object_client.get_object(self.container_name,
                                                    self.object_name)
-        self.assertEqual(resp['status'], '200')
         self.assertHeaders(resp, 'Object', 'GET')
         self.assertIn('x-delete-at', resp)
 

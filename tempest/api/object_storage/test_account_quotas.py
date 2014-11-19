@@ -83,7 +83,6 @@ class AccountQuotasTest(base.BaseObjectTest):
         resp, _ = self.object_client.create_object(self.container_name,
                                                    object_name, data)
 
-        self.assertEqual(resp["status"], "201")
         self.assertHeaders(resp, 'Object', 'PUT')
 
     @test.attr(type=["smoke"])

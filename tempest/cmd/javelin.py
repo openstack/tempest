@@ -26,6 +26,7 @@ import os
 import sys
 import unittest
 
+import netaddr
 import yaml
 
 import tempest.auth
@@ -34,14 +35,17 @@ from tempest import exceptions
 from tempest.openstack.common import log as logging
 from tempest.openstack.common import timeutils
 from tempest.services.compute.json import flavors_client
+from tempest.services.compute.json import security_groups_client
 from tempest.services.compute.json import servers_client
 from tempest.services.identity.json import identity_client
 from tempest.services.image.v2.json import image_client
+from tempest.services.network.json import network_client
 from tempest.services.object_storage import container_client
 from tempest.services.object_storage import object_client
 from tempest.services.telemetry.json import telemetry_client
 from tempest.services.volume.json import volumes_client
 
+CONF = config.CONF
 OPTS = {}
 USERS = {}
 RES = collections.defaultdict(list)
@@ -69,7 +73,9 @@ class OSClient(object):
         self.images = image_client.ImageClientV2JSON(_auth)
         self.flavors = flavors_client.FlavorsClientJSON(_auth)
         self.telemetry = telemetry_client.TelemetryClientJSON(_auth)
+        self.secgroups = security_groups_client.SecurityGroupsClientJSON(_auth)
         self.volumes = volumes_client.VolumesClientJSON(_auth)
+        self.networks = network_client.NetworkClientJSON(_auth)
 
 
 def load_resources(fname):
@@ -89,6 +95,10 @@ def client_for_user(name):
         return OSClient(user['name'], user['pass'], user['tenant'])
     else:
         LOG.error("%s not found in USERS: %s" % (name, USERS))
+
+
+def resp_ok(response):
+    return 200 >= int(response['status']) < 300
 
 ###################
 #
@@ -212,12 +222,36 @@ class JavelinCheck(unittest.TestCase):
     def runTest(self, *args):
         pass
 
+    def _ping_ip(self, ip_addr, count, namespace=None):
+        if namespace is None:
+            ping_cmd = "ping -c1 " + ip_addr
+        else:
+            ping_cmd = "sudo ip netns exec %s ping -c1 %s" % (namespace,
+                                                              ip_addr)
+        for current in range(count):
+            return_code = os.system(ping_cmd)
+            if return_code is 0:
+                break
+        self.assertNotEqual(current, count - 1,
+                            "Server is not pingable at %s" % ip_addr)
+
     def check(self):
         self.check_users()
         self.check_objects()
         self.check_servers()
         self.check_volumes()
         self.check_telemetry()
+        self.check_secgroups()
+
+        # validate neutron is enabled and ironic disabled:
+        # Tenant network isolation is not supported when using ironic.
+        # "admin" has set up a neutron flat network environment within a shared
+        # fixed network for all tenants to use.
+        # In this case, network/subnet/router creation can be skipped and the
+        # server booted the same as nova network.
+        if (CONF.service_available.neutron and
+                not CONF.baremetal.driver_enabled):
+            self.check_networking()
 
     def check_users(self):
         """Check that the users we expect to exist, do.
@@ -264,15 +298,32 @@ class JavelinCheck(unittest.TestCase):
                 "Couldn't find expected server %s" % server['name'])
 
             r, found = client.servers.get_server(found['id'])
-            # get the ipv4 address
-            addr = found['addresses']['private'][0]['addr']
-            for count in range(60):
-                return_code = os.system("ping -c1 " + addr)
-                if return_code is 0:
-                    break
-            self.assertNotEqual(count, 59,
-                                "Server %s is not pingable at %s" % (
-                                    server['name'], addr))
+            # validate neutron is enabled and ironic disabled:
+            if (CONF.service_available.neutron and
+                    not CONF.baremetal.driver_enabled):
+                for network_name, body in found['addresses'].items():
+                    for addr in body:
+                        ip = addr['addr']
+                        if addr.get('OS-EXT-IPS:type', 'fixed') == 'fixed':
+                            namespace = _get_router_namespace(client,
+                                                              network_name)
+                            self._ping_ip(ip, 60, namespace)
+                        else:
+                            self._ping_ip(ip, 60)
+            else:
+                addr = found['addresses']['private'][0]['addr']
+                self._ping_ip(addr, 60)
+
+    def check_secgroups(self):
+        """Check that the security groups are still existing."""
+        LOG.info("Checking security groups")
+        for secgroup in self.res['secgroups']:
+            client = client_for_user(secgroup['owner'])
+            found = _get_resource_by_name(client.secgroups, 'security_groups',
+                                          secgroup['name'])
+            self.assertIsNotNone(
+                found,
+                "Couldn't find expected secgroup %s" % secgroup['name'])
 
     def check_telemetry(self):
         """Check that ceilometer provides a sane sample.
@@ -333,6 +384,17 @@ class JavelinCheck(unittest.TestCase):
                 oldest_timestamp < JAVELIN_START,
                 'timestamp should come before start of second javelin run'
             )
+
+    def check_networking(self):
+        """Check that the networks are still there."""
+        for res_type in ('networks', 'subnets', 'routers'):
+            for res in self.res[res_type]:
+                client = client_for_user(res['owner'])
+                found = _get_resource_by_name(client.networks, res_type,
+                                              res['name'])
+                self.assertIsNotNone(
+                    found,
+                    "Couldn't find expected resource %s" % res['name'])
 
 
 #######################
@@ -440,6 +502,147 @@ def destroy_images(images):
 
 #######################
 #
+# NETWORKS
+#
+#######################
+
+def _get_router_namespace(client, network):
+    network_id = _get_resource_by_name(client.networks,
+                                       'networks', network)['id']
+    resp, n_body = client.networks.list_routers()
+    if not resp_ok(resp):
+        raise ValueError("unable to routers list: [%s] %s" % (resp, n_body))
+    for router in n_body['routers']:
+        router_id = router['id']
+        resp, r_body = client.networks.list_router_interfaces(router_id)
+        if not resp_ok(resp):
+            raise ValueError("unable to router interfaces list: [%s] %s" %
+                             (resp, r_body))
+        for port in r_body['ports']:
+            if port['network_id'] == network_id:
+                return "qrouter-%s" % router_id
+
+
+def _get_resource_by_name(client, resource, name):
+    get_resources = getattr(client, 'list_%s' % resource)
+    if get_resources is None:
+        raise AttributeError("client doesn't have method list_%s" % resource)
+    r, body = get_resources()
+    if not resp_ok(r):
+        raise ValueError("unable to list %s: [%s] %s" % (resource, r, body))
+    if isinstance(body, dict):
+        body = body[resource]
+    for res in body:
+        if name == res['name']:
+            return res
+    raise ValueError('%s not found in %s resources' % (name, resource))
+
+
+def create_networks(networks):
+    LOG.info("Creating networks")
+    for network in networks:
+        client = client_for_user(network['owner'])
+
+        # only create a network if the name isn't here
+        r, body = client.networks.list_networks()
+        if any(item['name'] == network['name'] for item in body['networks']):
+            LOG.warning("Dupplicated network name: %s" % network['name'])
+            continue
+
+        client.networks.create_network(name=network['name'])
+
+
+def destroy_networks(networks):
+    LOG.info("Destroying subnets")
+    for network in networks:
+        client = client_for_user(network['owner'])
+        network_id = _get_resource_by_name(client.networks, 'networks',
+                                           network['name'])['id']
+        client.networks.delete_network(network_id)
+
+
+def create_subnets(subnets):
+    LOG.info("Creating subnets")
+    for subnet in subnets:
+        client = client_for_user(subnet['owner'])
+
+        network = _get_resource_by_name(client.networks, 'networks',
+                                        subnet['network'])
+        ip_version = netaddr.IPNetwork(subnet['range']).version
+        # ensure we don't overlap with another subnet in the network
+        try:
+            client.networks.create_subnet(network_id=network['id'],
+                                          cidr=subnet['range'],
+                                          name=subnet['name'],
+                                          ip_version=ip_version)
+        except exceptions.BadRequest as e:
+            is_overlapping_cidr = 'overlaps with another subnet' in str(e)
+            if not is_overlapping_cidr:
+                raise
+
+
+def destroy_subnets(subnets):
+    LOG.info("Destroying subnets")
+    for subnet in subnets:
+        client = client_for_user(subnet['owner'])
+        subnet_id = _get_resource_by_name(client.networks,
+                                          'subnets', subnet['name'])['id']
+        client.networks.delete_subnet(subnet_id)
+
+
+def create_routers(routers):
+    LOG.info("Creating routers")
+    for router in routers:
+        client = client_for_user(router['owner'])
+
+        # only create a router if the name isn't here
+        r, body = client.networks.list_routers()
+        if any(item['name'] == router['name'] for item in body['routers']):
+            LOG.warning("Dupplicated router name: %s" % router['name'])
+            continue
+
+        client.networks.create_router(router['name'])
+
+
+def destroy_routers(routers):
+    LOG.info("Destroying routers")
+    for router in routers:
+        client = client_for_user(router['owner'])
+        router_id = _get_resource_by_name(client.networks,
+                                          'routers', router['name'])['id']
+        for subnet in router['subnet']:
+            subnet_id = _get_resource_by_name(client.networks,
+                                              'subnets', subnet)['id']
+            client.networks.remove_router_interface_with_subnet_id(router_id,
+                                                                   subnet_id)
+        client.networks.delete_router(router_id)
+
+
+def add_router_interface(routers):
+    for router in routers:
+        client = client_for_user(router['owner'])
+        router_id = _get_resource_by_name(client.networks,
+                                          'routers', router['name'])['id']
+
+        for subnet in router['subnet']:
+            subnet_id = _get_resource_by_name(client.networks,
+                                              'subnets', subnet)['id']
+            # connect routers to their subnets
+            client.networks.add_router_interface_with_subnet_id(router_id,
+                                                                subnet_id)
+        # connect routers to exteral network if set to "gateway"
+        if router['gateway']:
+            if CONF.network.public_network_id:
+                ext_net = CONF.network.public_network_id
+                client.networks._update_router(
+                    router_id, set_enable_snat=True,
+                    external_gateway_info={"network_id": ext_net})
+            else:
+                raise ValueError('public_network_id is not configured.')
+
+
+#######################
+#
 # SERVERS
 #
 #######################
@@ -473,10 +676,21 @@ def create_servers(servers):
 
         image_id = _get_image_by_name(client, server['image'])['id']
         flavor_id = _get_flavor_by_name(client, server['flavor'])['id']
-        resp, body = client.servers.create_server(server['name'], image_id,
-                                                  flavor_id)
+        # validate neutron is enabled and ironic disabled
+        kwargs = dict()
+        if (CONF.service_available.neutron and
+                not CONF.baremetal.driver_enabled and server.get('networks')):
+            get_net_id = lambda x: (_get_resource_by_name(
+                client.networks, 'networks', x)['id'])
+            kwargs['networks'] = [{'uuid': get_net_id(network)}
+                                  for network in server['networks']]
+        resp, body = client.servers.create_server(
+            server['name'], image_id, flavor_id, **kwargs)
         server_id = body['id']
         client.servers.wait_for_server_status(server_id, 'ACTIVE')
+        # create to security group(s) after server spawning
+        for secgroup in server['secgroups']:
+            client.servers.add_security_group(server_id, secgroup)
 
 
 def destroy_servers(servers):
@@ -494,6 +708,44 @@ def destroy_servers(servers):
         client.servers.delete_server(response['id'])
         client.servers.wait_for_server_termination(response['id'],
                                                    ignore_error=True)
+
+
+def create_secgroups(secgroups):
+    LOG.info("Creating security groups")
+    for secgroup in secgroups:
+        client = client_for_user(secgroup['owner'])
+
+        # only create a security group if the name isn't here
+        # i.e. a security group may be used by another server
+        # only create a router if the name isn't here
+        r, body = client.secgroups.list_security_groups()
+        if any(item['name'] == secgroup['name'] for item in body):
+            LOG.warning("Security group '%s' already exists" %
+                        secgroup['name'])
+            continue
+
+        resp, body = client.secgroups.create_security_group(
+            secgroup['name'], secgroup['description'])
+        if not resp_ok(resp):
+            raise ValueError("Failed to create security group: [%s] %s" %
+                             (resp, body))
+        secgroup_id = body['id']
+        # for each security group, create the rules
+        for rule in secgroup['rules']:
+            ip_proto, from_port, to_port, cidr = rule.split()
+            client.secgroups.create_security_group_rule(
+                secgroup_id, ip_proto, from_port, to_port, cidr=cidr)
+
+
+def destroy_secgroups(secgroups):
+    LOG.info("Destroying security groups")
+    for secgroup in secgroups:
+        client = client_for_user(secgroup['owner'])
+        sg_id = _get_resource_by_name(client.secgroups,
+                                      'security_groups',
+                                      secgroup['name'])
+        # sg rules are deleted automatically
+        client.secgroups.delete_security_group(sg_id['id'])
 
 
 #######################
@@ -563,6 +815,15 @@ def create_resources():
     # next create resources in a well known order
     create_objects(RES['objects'])
     create_images(RES['images'])
+
+    # validate neutron is enabled and ironic is disabled
+    if CONF.service_available.neutron and not CONF.baremetal.driver_enabled:
+        create_networks(RES['networks'])
+        create_subnets(RES['subnets'])
+        create_routers(RES['routers'])
+        add_router_interface(RES['routers'])
+
+    create_secgroups(RES['secgroups'])
     create_servers(RES['servers'])
     create_volumes(RES['volumes'])
     attach_volumes(RES['volumes'])
@@ -575,6 +836,11 @@ def destroy_resources():
     destroy_images(RES['images'])
     destroy_objects(RES['objects'])
     destroy_volumes(RES['volumes'])
+    if CONF.service_available.neutron and not CONF.baremetal.driver_enabled:
+        destroy_routers(RES['routers'])
+        destroy_subnets(RES['subnets'])
+        destroy_networks(RES['networks'])
+    destroy_secgroups(RES['secgroups'])
     destroy_users(RES['users'])
     destroy_tenants(RES['tenants'])
     LOG.warn("Destroy mode incomplete")

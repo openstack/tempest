@@ -25,14 +25,14 @@ from tempest import exceptions
 CONF = config.CONF
 
 
-class VolumeTypesClientXML(rest_client.RestClient):
+class BaseVolumeTypesClientXML(rest_client.RestClient):
     """
     Client class to send CRUD Volume Types API requests to a Cinder endpoint
     """
     TYPE = "xml"
 
     def __init__(self, auth_provider):
-        super(VolumeTypesClientXML, self).__init__(auth_provider)
+        super(BaseVolumeTypesClientXML, self).__init__(auth_provider)
         self.service = CONF.volume.catalog_type
         self.build_interval = CONF.compute.build_interval
         self.build_timeout = CONF.compute.build_timeout
@@ -210,3 +210,9 @@ class VolumeTypesClientXML(rest_client.RestClient):
     def resource_type(self):
         """Returns the primary type of resource this client works with."""
         return 'volume-type'
+
+
+class VolumeTypesClientXML(BaseVolumeTypesClientXML):
+    """
+    Client class to send CRUD Volume Type API V1 requests to a Cinder endpoint
+    """

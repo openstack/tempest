@@ -120,16 +120,6 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
             cls.enabled = False
             raise cls.skipException(msg)
         super(TestSecurityGroupsBasicOps, cls).check_preconditions()
-        # need alt_creds here to check preconditions
-        cls.alt_creds = cls.alt_credentials()
-        cls.alt_manager = clients.Manager(cls.alt_creds)
-        # Credentials from the manager are filled with both IDs and Names
-        cls.alt_creds = cls.alt_manager.credentials
-        if (cls.alt_creds is None) or \
-                (cls.tenant_id is cls.alt_creds.tenant_id):
-            msg = 'No alt_tenant defined'
-            cls.enabled = False
-            raise cls.skipException(msg)
         if not (CONF.network.tenant_networks_reachable or
                 CONF.network.public_network_id):
             msg = ('Either tenant_networks_reachable must be "true", or '
@@ -144,6 +134,13 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
         super(TestSecurityGroupsBasicOps, cls).resource_setup()
         # TODO(mnewby) Consider looking up entities as needed instead
         # of storing them as collections on the class.
+
+        # get credentials for secondary tenant
+        cls.alt_creds = cls.isolated_creds.get_alt_creds()
+        cls.alt_manager = clients.Manager(cls.alt_creds)
+        # Credentials from the manager are filled with both IDs and Names
+        cls.alt_creds = cls.alt_manager.credentials
+
         cls.floating_ips = {}
         cls.tenants = {}
         creds = cls.credentials()
@@ -437,6 +434,8 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
     @test.attr(type='smoke')
     @test.services('compute', 'network')
     def test_cross_tenant_traffic(self):
+        if not self.isolated_creds.is_multi_tenant():
+            raise self.skipException("No secondary tenant defined")
         try:
             # deploy new tenant
             self._deploy_tenant(self.alt_tenant)

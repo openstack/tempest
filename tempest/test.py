@@ -342,10 +342,12 @@ class BaseTestCase(BaseDeps):
         """
         force_tenant_isolation = getattr(cls, 'force_tenant_isolation', None)
 
-        cls.isolated_creds = credentials.get_isolated_credentials(
-            name=cls.__name__, network_resources=cls.network_resources,
-            force_tenant_isolation=force_tenant_isolation,
-        )
+        if (not hasattr(cls, 'isolated_creds') or
+            not cls.isolated_creds.name == cls.__name__):
+            cls.isolated_creds = credentials.get_isolated_credentials(
+                name=cls.__name__, network_resources=cls.network_resources,
+                force_tenant_isolation=force_tenant_isolation,
+            )
 
         creds = cls.isolated_creds.get_primary_creds()
         params = dict(credentials=creds, service=cls._service)

@@ -117,21 +117,23 @@ list_virtual_interfaces = {
     }
 }
 
+common_attach_volume_info = {
+    'type': 'object',
+    'properties': {
+        'id': {'type': 'string'},
+        'device': {'type': 'string'},
+        'volumeId': {'type': 'string'},
+        'serverId': {'type': ['integer', 'string']}
+    },
+    'required': ['id', 'device', 'volumeId', 'serverId']
+}
+
 attach_volume = {
     'status_code': [200],
     'response_body': {
         'type': 'object',
         'properties': {
-            'volumeAttachment': {
-                'type': 'object',
-                'properties': {
-                    'id': {'type': 'string'},
-                    'device': {'type': 'string'},
-                    'volumeId': {'type': 'string'},
-                    'serverId': {'type': ['integer', 'string']}
-                },
-                'required': ['id', 'device', 'volumeId', 'serverId']
-            }
+            'volumeAttachment': common_attach_volume_info
         },
         'required': ['volumeAttachment']
     }
@@ -140,6 +142,27 @@ attach_volume = {
 detach_volume = {
     'status_code': [202]
 }
+
+get_volume_attachment = copy.deepcopy(attach_volume)
+get_volume_attachment['response_body']['properties'][
+    'volumeAttachment']['properties'].update({'serverId': {'type': 'string'}})
+
+list_volume_attachments = {
+    'status_code': [200],
+    'response_body': {
+        'type': 'object',
+        'properties': {
+            'volumeAttachments': {
+                'type': 'array',
+                'items': common_attach_volume_info
+            }
+        },
+        'required': ['volumeAttachments']
+    }
+}
+list_volume_attachments['response_body']['properties'][
+    'volumeAttachments']['items']['properties'].update(
+    {'serverId': {'type': 'string'}})
 
 set_get_server_metadata_item = {
     'status_code': [200],

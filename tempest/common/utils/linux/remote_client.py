@@ -91,7 +91,7 @@ class RemoteClient():
         return self.exec_command(cmd)
 
     def get_mac_address(self):
-        cmd = "/sbin/ifconfig | awk '/HWaddr/ {print $5}'"
+        cmd = "/bin/ip addr | awk '/ether/ {print $2}'"
         return self.exec_command(cmd)
 
     def get_ip_list(self):

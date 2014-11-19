@@ -46,11 +46,14 @@ class ObjectClient(rest_client.RestClient):
             url += '?%s' % urllib.urlencode(params)
 
         resp, body = self.put(url, data, headers)
+        self.expected_success(201, resp.status)
         return resp, body
 
     def update_object(self, container, object_name, data):
         """Upload data to replace current storage object."""
-        return self.create_object(container, object_name, data)
+        resp, body = self.create_object(container, object_name, data)
+        self.expected_success(201, resp.status)
+        return resp, body
 
     def delete_object(self, container, object_name, params=None):
         """Delete storage object."""
@@ -58,6 +61,7 @@ class ObjectClient(rest_client.RestClient):
         if params:
             url += '?%s' % urllib.urlencode(params)
         resp, body = self.delete(url, headers={})
+        self.expected_success([200, 204], resp.status)
         return resp, body
 
     def update_object_metadata(self, container, object_name, metadata,
@@ -70,6 +74,7 @@ class ObjectClient(rest_client.RestClient):
 
         url = "%s/%s" % (str(container), str(object_name))
         resp, body = self.post(url, None, headers=headers)
+        self.expected_success(202, resp.status)
         return resp, body
 
     def list_object_metadata(self, container, object_name):
@@ -77,6 +82,7 @@ class ObjectClient(rest_client.RestClient):
 
         url = "%s/%s" % (str(container), str(object_name))
         resp, body = self.head(url)
+        self.expected_success(200, resp.status)
         return resp, body
 
     def get_object(self, container, object_name, metadata=None):
@@ -89,6 +95,7 @@ class ObjectClient(rest_client.RestClient):
 
         url = "{0}/{1}".format(container, object_name)
         resp, body = self.get(url, headers=headers)
+        self.expected_success([200, 206], resp.status)
         return resp, body
 
     def copy_object_in_same_container(self, container, src_object_name,
@@ -105,6 +112,7 @@ class ObjectClient(rest_client.RestClient):
                 headers[str(key)] = metadata[key]
 
         resp, body = self.put(url, None, headers=headers)
+        self.expected_success(201, resp.status)
         return resp, body
 
     def copy_object_across_containers(self, src_container, src_object_name,
@@ -122,6 +130,7 @@ class ObjectClient(rest_client.RestClient):
                 headers[str(key)] = metadata[key]
 
         resp, body = self.put(url, None, headers=headers)
+        self.expected_success(201, resp.status)
         return resp, body
 
     def copy_object_2d_way(self, container, src_object_name, dest_object_name,
@@ -137,12 +146,14 @@ class ObjectClient(rest_client.RestClient):
                 headers[str(key)] = metadata[key]
 
         resp, body = self.copy(url, headers=headers)
+        self.expected_success(201, resp.status)
         return resp, body
 
     def create_object_segments(self, container, object_name, segment, data):
         """Creates object segments."""
         url = "{0}/{1}/{2}".format(container, object_name, segment)
         resp, body = self.put(url, data)
+        self.expected_success(201, resp.status)
         return resp, body
 
     def put_object_with_chunk(self, container, name, contents, chunk_size):
@@ -167,7 +178,7 @@ class ObjectClient(rest_client.RestClient):
             resp_headers[header.lower()] = value
 
         self._error_checker('PUT', None, headers, contents, resp, body)
-
+        self.expected_success(201, resp.status)
         return resp.status, resp.reason, resp_headers
 
 
@@ -220,6 +231,7 @@ class ObjectClientCustomizedHeader(rest_client.RestClient):
 
         url = "{0}/{1}".format(container, object_name)
         resp, body = self.get(url, headers=headers)
+        self.expected_success(200, resp.status)
         return resp, body
 
     def create_object(self, container, object_name, data, metadata=None):
@@ -234,6 +246,7 @@ class ObjectClientCustomizedHeader(rest_client.RestClient):
             headers['content-length'] = '0'
         url = "%s/%s" % (str(container), str(object_name))
         resp, body = self.put(url, data, headers=headers)
+        self.expected_success(201, resp.status)
         return resp, body
 
     def delete_object(self, container, object_name, metadata=None):
@@ -246,6 +259,7 @@ class ObjectClientCustomizedHeader(rest_client.RestClient):
 
         url = "%s/%s" % (str(container), str(object_name))
         resp, body = self.delete(url, headers=headers)
+        self.expected_success(200, resp.status)
         return resp, body
 
     def create_object_continue(self, container, object_name,
