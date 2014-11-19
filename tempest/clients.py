@@ -339,7 +339,6 @@ class Manager(manager.Manager):
 
         # common clients
         self.account_client = AccountClient(self.auth_provider)
-        self.agents_client = AgentsClientJSON(self.auth_provider)
         if CONF.service_available.glance:
             self.image_client = ImageClientJSON(self.auth_provider)
             self.image_client_v2 = ImageClientV2JSON(self.auth_provider)
@@ -355,10 +354,6 @@ class Manager(manager.Manager):
             AccountClientCustomizedHeader(self.auth_provider)
         self.data_processing_client = DataProcessingClient(
             self.auth_provider)
-        self.migrations_client = MigrationsClientJSON(self.auth_provider)
-        self.security_group_default_rules_client = (
-            SecurityGroupDefaultRulesClientJSON(self.auth_provider))
-        self.networks_client = NetworksClientJSON(self.auth_provider)
         # NOTE : As XML clients are not implemented for Qos-specs.
         # So, setting the qos_client here. Once client are implemented,
         # qos_client would be moved to its respective if/else.
@@ -372,6 +367,13 @@ class Manager(manager.Manager):
             self._set_compute_json_clients()
         else:
             self._set_compute_xml_clients()
+
+        # Common compute clients
+        self.agents_client = AgentsClientJSON(self.auth_provider)
+        self.networks_client = NetworksClientJSON(self.auth_provider)
+        self.migrations_client = MigrationsClientJSON(self.auth_provider)
+        self.security_group_default_rules_client = (
+            SecurityGroupDefaultRulesClientJSON(self.auth_provider))
 
     def _set_compute_xml_clients(self):
         self.certificates_client = CertificatesClientXML(self.auth_provider)
