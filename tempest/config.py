@@ -898,29 +898,32 @@ DashboardGroup = [
 ]
 
 
-data_processing_group = cfg.OptGroup(name="data_processing",
+data_processing_group = cfg.OptGroup(name="data-processing",
                                      title="Data Processing options")
 
 DataProcessingGroup = [
     cfg.StrOpt('catalog_type',
-               default='data_processing',
+               default='data-processing',
+               deprecated_group="data_processing",
                help="Catalog type of the data processing service."),
     cfg.StrOpt('endpoint_type',
                default='publicURL',
                choices=['public', 'admin', 'internal',
                         'publicURL', 'adminURL', 'internalURL'],
+               deprecated_group="data_processing",
                help="The endpoint type to use for the data processing "
                     "service."),
 ]
 
 
 data_processing_feature_group = cfg.OptGroup(
-    name="data_processing-feature-enabled",
+    name="data-processing-feature-enabled",
     title="Enabled Data Processing features")
 
 DataProcessingFeaturesGroup = [
     cfg.ListOpt('plugins',
                 default=["vanilla", "hdp"],
+                deprecated_group="data_processing-feature-enabled",
                 help="List of enabled data processing plugins")
 ]
 
@@ -1298,9 +1301,9 @@ class TempestConfigPrivate(object):
         self.telemetry = _CONF.telemetry
         self.telemetry_feature_enabled = _CONF['telemetry-feature-enabled']
         self.dashboard = _CONF.dashboard
-        self.data_processing = _CONF.data_processing
+        self.data_processing = _CONF['data-processing']
         self.data_processing_feature_enabled = _CONF[
-            'data_processing-feature-enabled']
+            'data-processing-feature-enabled']
         self.boto = _CONF.boto
         self.stress = _CONF.stress
         self.scenario = _CONF.scenario
