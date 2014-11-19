@@ -12,7 +12,6 @@
 
 from tempest.api.network import base
 from tempest.common.utils import data_utils
-from tempest import exceptions
 
 
 class ExternalNetworksTestJSON(base.BaseAdminNetworkTest):
@@ -31,26 +30,6 @@ class ExternalNetworksTestJSON(base.BaseAdminNetworkTest):
         network = body['network']
         self.addCleanup(self.admin_client.delete_network, network['id'])
         return network
-
-    def _try_delete_resource(self, delete_callable, *args, **kwargs):
-        """Cleanup resources in case of test-failure
-
-        Some resources should be explicitly deleted by the test. if the test
-        fails, these resources remain.
-        If the test failed to delete a resource, this method will execute
-        the appropriate delete methods. Otherwise, the method ignores NotFound
-        exceptions thrown for resources that were correctly deleted by the
-        test.
-
-        :param delete_callable: delete method
-        :param args: arguments for delete method
-        :param kwargs: keyword arguments for delete method
-        """
-        try:
-            delete_callable(*args, **kwargs)
-        # if resource is not found, this means it was deleted in the test
-        except exceptions.NotFound:
-            pass
 
     def test_create_external_network(self):
         # Create a network as an admin user specifying the
