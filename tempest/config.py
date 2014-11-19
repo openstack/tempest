@@ -219,10 +219,12 @@ ComputeGroup = [
                     "channel."),
     cfg.StrOpt('fixed_network_name',
                default='private',
-               help="Visible fixed network name "),
+               help="Name of the fixed network that is visible to all test "
+                    "tenants."),
     cfg.StrOpt('network_for_ssh',
                default='public',
-               help="Network used for SSH connections."),
+               help="Network used for SSH connections. Ignored if "
+                    "use_floatingip_for_ssh=true or run_ssh=false."),
     cfg.IntOpt('ip_version_for_ssh',
                default=4,
                help="IP version used for SSH connections."),
@@ -263,7 +265,9 @@ ComputeGroup = [
     cfg.StrOpt('floating_ip_range',
                default='10.0.0.0/29',
                help='Unallocated floating IP range, which will be used to '
-                    'test the floating IP bulk feature for CRUD operation.')
+                    'test the floating IP bulk feature for CRUD operation. '
+                    'This block must not overlap an existing floating IP '
+                    'pool.')
 ]
 
 compute_features_group = cfg.OptGroup(name='compute-feature-enabled',
@@ -972,7 +976,14 @@ InputScenarioGroup = [
 
 
 baremetal_group = cfg.OptGroup(name='baremetal',
-                               title='Baremetal provisioning service options')
+                               title='Baremetal provisioning service options',
+                               help='When enabling baremetal tests, Nova '
+                                    'must be configured to use the Ironic '
+                                    'driver. The following paremeters for the '
+                                    '[compute] section must be disabled: '
+                                    'console_output, interface_attach, '
+                                    'live_migration, pause, rescue, resize '
+                                    'shelve, snapshot, and suspend')
 
 BaremetalGroup = [
     cfg.StrOpt('catalog_type',
