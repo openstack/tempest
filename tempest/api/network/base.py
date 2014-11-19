@@ -156,8 +156,13 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
 
     @classmethod
     def create_subnet(cls, network, gateway='', cidr=None, mask_bits=None,
-                      ip_version=None, **kwargs):
+                      ip_version=None, client=None, **kwargs):
         """Wrapper utility that returns a test subnet."""
+
+        # allow tests to use admin client
+        if not client:
+            client = cls.client
+
         # The cidr and mask_bits depend on the ip version.
         ip_version = ip_version if ip_version is not None else cls._ip_version
         gateway_not_set = gateway == ''
@@ -175,7 +180,7 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
             else:
                 gateway_ip = gateway
             try:
-                resp, body = cls.client.create_subnet(
+                resp, body = client.create_subnet(
                     network_id=network['id'],
                     cidr=str(subnet_cidr),
                     ip_version=ip_version,
