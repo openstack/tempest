@@ -129,6 +129,7 @@ class CfnInitScenarioTest(manager.OrchestrationScenarioTest):
                 raise e
 
     @test.attr(type='slow')
+    @test.skip_because(bug='1374175')
     @test.services('orchestration', 'compute')
     def test_server_cfn_init(self):
         self.assign_keypair()
