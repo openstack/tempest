@@ -42,7 +42,7 @@ HTTP_SUCCESS = (200, 201, 202, 203, 204, 205, 206, 207)
 
 
 # convert a structure into a string safely
-def safe_body(body, maxlen=2048):
+def safe_body(body, maxlen=4096):
     try:
         text = six.text_type(body)
     except UnicodeDecodeError:
