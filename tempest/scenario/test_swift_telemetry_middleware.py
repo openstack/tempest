@@ -51,6 +51,9 @@ class TestSwiftTelemetry(manager.SwiftScenarioTest):
             skip_msg = ("%s skipped as ceilometer is not available" %
                         cls.__name__)
             raise cls.skipException(skip_msg)
+        elif CONF.telemetry.too_slow_to_test:
+            skip_msg = "Ceilometer feature for fast work mysql is disabled"
+            raise cls.skipException(skip_msg)
         super(TestSwiftTelemetry, cls).resource_setup()
         cls.telemetry_client = cls.manager.telemetry_client
 
