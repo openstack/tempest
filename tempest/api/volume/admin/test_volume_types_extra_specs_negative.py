@@ -21,12 +21,12 @@ from tempest import exceptions
 from tempest import test
 
 
-class ExtraSpecsNegativeTest(base.BaseVolumeV1AdminTest):
+class ExtraSpecsNegativeV2Test(base.BaseVolumeAdminTest):
     _interface = 'json'
 
     @classmethod
     def resource_setup(cls):
-        super(ExtraSpecsNegativeTest, cls).resource_setup()
+        super(ExtraSpecsNegativeV2Test, cls).resource_setup()
         vol_type_name = data_utils.rand_name('Volume-type-')
         cls.extra_specs = {"spec1": "val1"}
         _, cls.volume_type = cls.volume_types_client.create_volume_type(
@@ -36,7 +36,7 @@ class ExtraSpecsNegativeTest(base.BaseVolumeV1AdminTest):
     @classmethod
     def resource_cleanup(cls):
         cls.volume_types_client.delete_volume_type(cls.volume_type['id'])
-        super(ExtraSpecsNegativeTest, cls).resource_cleanup()
+        super(ExtraSpecsNegativeV2Test, cls).resource_cleanup()
 
     @test.attr(type='gate')
     def test_update_no_body(self):
@@ -140,5 +140,9 @@ class ExtraSpecsNegativeTest(base.BaseVolumeV1AdminTest):
             self.volume_type['id'], str(uuid.uuid4()))
 
 
-class ExtraSpecsNegativeTestXML(ExtraSpecsNegativeTest):
+class ExtraSpecsNegativeV1Test(ExtraSpecsNegativeV2Test):
+    _api_version = 1
+
+
+class ExtraSpecsNegativeV1TestXML(ExtraSpecsNegativeV1Test):
     _interface = 'xml'
