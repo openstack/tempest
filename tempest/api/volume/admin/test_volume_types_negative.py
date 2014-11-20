@@ -20,16 +20,18 @@ from tempest import exceptions
 from tempest import test
 
 
-class VolumeTypesNegativeTest(base.BaseVolumeV1AdminTest):
+class VolumeTypesNegativeV2Test(base.BaseVolumeAdminTest):
     _interface = 'json'
 
     @test.attr(type='gate')
     def test_create_with_nonexistent_volume_type(self):
         # Should not be able to create volume with nonexistent volume_type.
+        self.name_field = self.special_fields['name_field']
+        params = {self.name_field: str(uuid.uuid4()),
+                  'volume_type': str(uuid.uuid4())}
         self.assertRaises(exceptions.NotFound,
                           self.volumes_client.create_volume, size=1,
-                          display_name=str(uuid.uuid4()),
-                          volume_type=str(uuid.uuid4()))
+                          **params)
 
     @test.attr(type='gate')
     def test_create_with_empty_name(self):
@@ -52,5 +54,9 @@ class VolumeTypesNegativeTest(base.BaseVolumeV1AdminTest):
                           str(uuid.uuid4()))
 
 
-class VolumesTypesNegativeTestXML(VolumeTypesNegativeTest):
+class VolumeTypesNegativeV1Test(VolumeTypesNegativeV2Test):
+    _api_version = 1
+
+
+class VolumeTypesNegativeV1TestXML(VolumeTypesNegativeV1Test):
     _interface = 'xml'

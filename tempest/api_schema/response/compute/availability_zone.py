@@ -27,7 +27,7 @@ detail = {
                     'properties': {
                         'available': {'type': 'boolean'},
                         'active': {'type': 'boolean'},
-                        'updated_at': {'type': 'string'}
+                        'updated_at': {'type': ['string', 'null']}
                     },
                     'required': ['available', 'active', 'updated_at']
                 }

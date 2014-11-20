@@ -45,12 +45,6 @@ class ServerRescueTestJSON(base.BaseV2ComputeTest):
                                                              cls.sg_desc)
         cls.sg_id = cls.sg['id']
 
-        # Create a volume and wait for it to become ready for attach
-        resp, cls.volume = cls.volumes_extensions_client.create_volume(
-            1, display_name=data_utils.rand_name(cls.__name__ + '_volume'))
-        cls.volumes_extensions_client.wait_for_volume_status(
-            cls.volume['id'], 'available')
-
         # Server for positive tests
         resp, server = cls.create_test_server(wait_until='BUILD')
         cls.server_id = server['id']
@@ -64,8 +58,6 @@ class ServerRescueTestJSON(base.BaseV2ComputeTest):
     def resource_cleanup(cls):
         # Deleting the floating IP which is created in this method
         cls.floating_ips_client.delete_floating_ip(cls.floating_ip_id)
-        if getattr(cls, 'volume', None):
-            cls.delete_volume(cls.volume['id'])
         resp, cls.sg = cls.security_groups_client.delete_security_group(
             cls.sg_id)
         super(ServerRescueTestJSON, cls).resource_cleanup()

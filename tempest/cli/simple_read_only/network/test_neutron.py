@@ -162,6 +162,42 @@ class SimpleReadOnlyNeutronClientTest(cli.ClientTestBase):
                                              'allocation_pools'])
 
     @test.attr(type='smoke')
+    @test.requires_ext(extension='vpnaas', service='network')
+    def test_neutron_vpn_ikepolicy_list(self):
+        ikepolicy = self.parser.listing(self.neutron('vpn-ikepolicy-list'))
+        self.assertTableStruct(ikepolicy, ['id', 'name',
+                                           'auth_algorithm',
+                                           'encryption_algorithm',
+                                           'ike_version', 'pfs'])
+
+    @test.attr(type='smoke')
+    @test.requires_ext(extension='vpnaas', service='network')
+    def test_neutron_vpn_ipsecpolicy_list(self):
+        ipsecpolicy = self.parser.listing(self.neutron('vpn-ipsecpolicy-list'))
+        self.assertTableStruct(ipsecpolicy, ['id', 'name',
+                                             'auth_algorithm',
+                                             'encryption_algorithm',
+                                             'pfs'])
+
+    @test.attr(type='smoke')
+    @test.requires_ext(extension='vpnaas', service='network')
+    def test_neutron_vpn_service_list(self):
+        vpn_list = self.parser.listing(self.neutron('vpn-service-list'))
+        self.assertTableStruct(vpn_list, ['id', 'name',
+                                          'router_id', 'status'])
+
+    @test.attr(type='smoke')
+    @test.requires_ext(extension='vpnaas', service='network')
+    def test_neutron_ipsec_site_connection_list(self):
+        ipsec_site = self.parser.listing(self.neutron
+                                         ('ipsec-site-connection-list'))
+        self.assertTableStruct(ipsec_site, ['id', 'name',
+                                            'peer_address',
+                                            'peer_cidrs',
+                                            'route_mode',
+                                            'auth_mode', 'status'])
+
+    @test.attr(type='smoke')
     def test_neutron_help(self):
         help_text = self.neutron('help')
         lines = help_text.split('\n')

@@ -117,12 +117,10 @@ class ObjectFormPostTest(base.BaseObjectTest):
         url = "%s/%s" % (self.container_name, self.object_name)
 
         resp, body = self.object_client.post(url, body, headers=headers)
-        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
         self.assertHeaders(resp, "Object", "POST")
 
         # Ensure object is available
         resp, body = self.object_client.get("%s/%s%s" % (
             self.container_name, self.object_name, "testfile"))
-        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
         self.assertHeaders(resp, "Object", "GET")
         self.assertEqual(body, "hello world")

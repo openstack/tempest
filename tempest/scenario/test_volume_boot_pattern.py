@@ -37,10 +37,9 @@ class TestVolumeBootPattern(manager.ScenarioTest):
     """
     @classmethod
     def resource_setup(cls):
-        super(TestVolumeBootPattern, cls).resource_setup()
-
         if not CONF.volume_feature_enabled.snapshot:
             raise cls.skipException("Cinder volume snapshots are disabled")
+        super(TestVolumeBootPattern, cls).resource_setup()
 
     def _create_volume_from_image(self):
         img_uuid = CONF.compute.image_ref

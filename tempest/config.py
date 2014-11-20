@@ -449,7 +449,9 @@ NetworkGroup = [
     cfg.StrOpt('public_router_id',
                default="",
                help="Id of the public router that provides external "
-                    "connectivity"),
+                    "connectivity. This should only be used when Neutron's "
+                    "'allow_overlapping_ips' is set to 'False' in "
+                    "neutron.conf. usually not needed past 'Grizzly' release"),
     cfg.IntOpt('build_timeout',
                default=300,
                help="Timeout in seconds to wait for network operation to "

@@ -45,13 +45,11 @@ class ObjectTestACLs(base.BaseObjectTest):
         resp_meta, body = self.container_client.update_container_metadata(
             self.container_name, metadata=cont_headers,
             metadata_prefix='')
-        self.assertIn(int(resp_meta['status']), test.HTTP_SUCCESS)
         self.assertHeaders(resp_meta, 'Container', 'POST')
         # create object
         object_name = data_utils.rand_name(name='Object')
         resp, _ = self.object_client.create_object(self.container_name,
                                                    object_name, 'data')
-        self.assertEqual(resp['status'], '201')
         self.assertHeaders(resp, 'Object', 'PUT')
         # Trying to read the object with rights
         self.custom_object_client.auth_provider.set_alt_auth_data(
@@ -60,7 +58,6 @@ class ObjectTestACLs(base.BaseObjectTest):
         )
         resp, _ = self.custom_object_client.get_object(
             self.container_name, object_name)
-        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
         self.assertHeaders(resp, 'Object', 'GET')
 
     @test.attr(type='smoke')
@@ -72,7 +69,6 @@ class ObjectTestACLs(base.BaseObjectTest):
         resp_meta, body = self.container_client.update_container_metadata(
             self.container_name, metadata=cont_headers,
             metadata_prefix='')
-        self.assertIn(int(resp_meta['status']), test.HTTP_SUCCESS)
         self.assertHeaders(resp_meta, 'Container', 'POST')
         # Trying to write the object with rights
         self.custom_object_client.auth_provider.set_alt_auth_data(
@@ -83,5 +79,4 @@ class ObjectTestACLs(base.BaseObjectTest):
         resp, _ = self.custom_object_client.create_object(
             self.container_name,
             object_name, 'data')
-        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
         self.assertHeaders(resp, 'Object', 'PUT')

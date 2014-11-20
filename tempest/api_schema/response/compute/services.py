@@ -28,7 +28,7 @@ list_services = {
                         'state': {'type': 'string'},
                         'binary': {'type': 'string'},
                         'status': {'type': 'string'},
-                        'updated_at': {'type': 'string'},
+                        'updated_at': {'type': ['string', 'null']},
                         'disabled_reason': {'type': ['string', 'null']}
                     },
                     'required': ['id', 'zone', 'host', 'state', 'binary',

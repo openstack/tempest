@@ -25,6 +25,7 @@ from tempest import auth
 from tempest import clients
 from tempest.common.utils import misc
 from tempest import config
+from tempest import exceptions
 
 CONF = config.CONF
 
@@ -151,9 +152,12 @@ def load_tests_input_scenario_utils(*args):
         loader, standard_tests, pattern = args
     else:
         standard_tests, module, loader = args
-    scenario_utils = InputScenarioUtils()
-    scenario_flavor = scenario_utils.scenario_flavors
-    scenario_image = scenario_utils.scenario_images
+    try:
+        scenario_utils = InputScenarioUtils()
+        scenario_flavor = scenario_utils.scenario_flavors
+        scenario_image = scenario_utils.scenario_images
+    except exceptions.InvalidConfiguration:
+        return standard_tests
     for test in testtools.iterate_tests(standard_tests):
         setattr(test, 'scenarios', testscenarios.multiply_scenarios(
             scenario_image,

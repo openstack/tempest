@@ -120,7 +120,6 @@ class ObjectSloTest(base.BaseObjectTest):
                                    manifest,
                                    params)
 
-        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
         self._assertHeadersSLO(resp, 'PUT')
 
     @test.attr(type='gate')
@@ -132,7 +131,6 @@ class ObjectSloTest(base.BaseObjectTest):
             self.container_name,
             object_name)
 
-        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
         self._assertHeadersSLO(resp, 'HEAD')
 
     @test.attr(type='gate')
@@ -144,7 +142,6 @@ class ObjectSloTest(base.BaseObjectTest):
             self.container_name,
             object_name)
 
-        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
         self._assertHeadersSLO(resp, 'GET')
 
         sum_data = self.content + self.content
@@ -160,8 +157,6 @@ class ObjectSloTest(base.BaseObjectTest):
             self.container_name,
             object_name,
             params=params_del)
-
-        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
 
         # When deleting SLO using multipart manifest, the response contains
         # not 'content-length' but 'transfer-encoding' header. This is the

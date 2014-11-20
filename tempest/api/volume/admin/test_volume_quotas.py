@@ -29,7 +29,6 @@ class VolumeQuotasAdminTestJSON(base.BaseVolumeV1AdminTest):
     @classmethod
     def resource_setup(cls):
         super(VolumeQuotasAdminTestJSON, cls).resource_setup()
-        cls.admin_volume_client = cls.os_adm.volumes_client
         cls.demo_tenant_id = cls.isolated_creds.get_primary_creds().tenant_id
 
     @test.attr(type='gate')

@@ -17,11 +17,17 @@ users:
     tenant: discuss
 
 secgroups:
-  - angon:
+  - name: angon
     owner: javelin
+    description: angon
     rules:
       - 'icmp -1 -1 0.0.0.0/0'
       - 'tcp 22 22 0.0.0.0/0'
+  - name: baobab
+    owner: javelin
+    description: baobab
+    rules:
+      - 'tcp 80 80 0.0.0.0/0'
 
 # resources that we want to create
 images:
@@ -43,15 +49,45 @@ volumes:
     owner: javelin
     gb: 2
     device: /dev/vdb
+networks:
+  - name: world1
+    owner: javelin
+  - name: world2
+    owner: javelin
+subnets:
+  - name: subnet1
+    range: 10.1.0.0/24
+    network: world1
+    owner: javelin
+  - name: subnet2
+    range: 192.168.1.0/24
+    network: world2
+    owner: javelin
+routers:
+  - name: connector
+    owner: javelin
+    gateway: true
+    subnet:
+      - subnet1
+      - subnet2
 servers:
   - name: peltast
     owner: javelin
     flavor: m1.small
     image: javelin_cirros
+    networks:
+      - world1
+    secgroups:
+      - angon
+      - baobab
   - name: hoplite
     owner: javelin
     flavor: m1.medium
     image: javelin_cirros
+    networks:
+      - world2
+    secgroups:
+      - angon
 objects:
   - container: jc1
     name: javelin1

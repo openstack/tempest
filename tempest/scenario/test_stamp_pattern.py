@@ -52,10 +52,9 @@ class TestStampPattern(manager.ScenarioTest):
 
     @classmethod
     def resource_setup(cls):
-        super(TestStampPattern, cls).resource_setup()
-
         if not CONF.volume_feature_enabled.snapshot:
             raise cls.skipException("Cinder volume snapshots are disabled")
+        super(TestStampPattern, cls).resource_setup()
 
     def _wait_for_volume_snapshot_status(self, volume_snapshot, status):
         self.snapshots_client.wait_for_snapshot_status(volume_snapshot['id'],
@@ -115,7 +114,6 @@ class TestStampPattern(manager.ScenarioTest):
         # TODO(andreaf) we should use device from config instead if vdb
         _, attached_volume = self.servers_client.attach_volume(
             server['id'], volume['id'], device='/dev/vdb')
-        attached_volume = attached_volume['volumeAttachment']
         self.assertEqual(volume['id'], attached_volume['id'])
         self._wait_for_volume_status(attached_volume, 'in-use')
 
