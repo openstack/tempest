@@ -18,19 +18,21 @@ from tempest.common.utils import data_utils as utils
 from tempest import test
 
 
-class VolumesActionsTest(base.BaseVolumeV1AdminTest):
+class VolumesActionsV2Test(base.BaseVolumeAdminTest):
     _interface = "json"
 
     @classmethod
     def resource_setup(cls):
-        super(VolumesActionsTest, cls).resource_setup()
+        super(VolumesActionsV2Test, cls).resource_setup()
         cls.client = cls.volumes_client
 
         # Create a test shared volume for tests
         vol_name = utils.rand_name(cls.__name__ + '-Volume-')
+        cls.name_field = cls.special_fields['name_field']
+        params = {cls.name_field: vol_name}
 
         _, cls.volume = cls.client.create_volume(size=1,
-                                                 display_name=vol_name)
+                                                 **params)
         cls.client.wait_for_volume_status(cls.volume['id'], 'available')
 
     @classmethod
@@ -39,7 +41,7 @@ class VolumesActionsTest(base.BaseVolumeV1AdminTest):
         cls.client.delete_volume(cls.volume['id'])
         cls.client.wait_for_resource_deletion(cls.volume['id'])
 
-        super(VolumesActionsTest, cls).resource_cleanup()
+        super(VolumesActionsV2Test, cls).resource_cleanup()
 
     def _reset_volume_status(self, volume_id, status):
         # Reset the volume status
@@ -50,13 +52,14 @@ class VolumesActionsTest(base.BaseVolumeV1AdminTest):
     def tearDown(self):
         # Set volume's status to available after test
         self._reset_volume_status(self.volume['id'], 'available')
-        super(VolumesActionsTest, self).tearDown()
+        super(VolumesActionsV2Test, self).tearDown()
 
     def _create_temp_volume(self):
         # Create a temp volume for force delete tests
         vol_name = utils.rand_name('Volume')
+        params = {self.name_field: vol_name}
         _, temp_volume = self.client.create_volume(size=1,
-                                                   display_name=vol_name)
+                                                   **params)
         self.client.wait_for_volume_status(temp_volume['id'], 'available')
 
         return temp_volume
@@ -92,5 +95,9 @@ class VolumesActionsTest(base.BaseVolumeV1AdminTest):
         self._create_reset_and_force_delete_temp_volume('error')
 
 
-class VolumesActionsTestXML(VolumesActionsTest):
+class VolumesActionsV1Test(VolumesActionsV2Test):
+    _api_version = 1
+
+
+class VolumesActionsV1TestXML(VolumesActionsV1Test):
     _interface = "xml"
