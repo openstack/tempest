@@ -33,7 +33,6 @@ class NetworksTestDHCPv6JSON(base.BaseNetworkTest):
 
     @classmethod
     def resource_setup(cls):
-        super(NetworksTestDHCPv6JSON, cls).resource_setup()
         msg = None
         if not CONF.network_feature_enabled.ipv6:
             msg = "IPv6 is not enabled"
@@ -41,32 +40,40 @@ class NetworksTestDHCPv6JSON(base.BaseNetworkTest):
             msg = "DHCPv6 attributes are not enabled."
         if msg:
             raise cls.skipException(msg)
+        super(NetworksTestDHCPv6JSON, cls).resource_setup()
         cls.network = cls.create_network()
+
+    def _remove_from_list_by_index(self, things_list, elem):
+        for index, i in enumerate(things_list):
+            if i['id'] == elem['id']:
+                break
+        del things_list[index]
 
     def _clean_network(self):
         resp, body = self.client.list_ports()
         ports = body['ports']
         for port in ports:
-            if self.ports:
-                self.ports.pop()
-            if port['device_owner'] == 'network:router_interface':
+            if (port['device_owner'] == 'network:router_interface'
+                and port['device_id'] in [r['id'] for r in self.routers]):
                 self.client.remove_router_interface_with_port_id(
                     port['device_id'], port['id']
                 )
             else:
-                self.client.delete_port(port['id'])
+                if port['id'] in [p['id'] for p in self.ports]:
+                    self.client.delete_port(port['id'])
+                    self._remove_from_list_by_index(self.ports, port)
         resp, body = self.client.list_subnets()
         subnets = body['subnets']
         for subnet in subnets:
-            if self.subnets:
-                self.subnets.pop()
-            self.client.delete_subnet(subnet['id'])
+            if subnet['id'] in [s['id'] for s in self.subnets]:
+                self.client.delete_subnet(subnet['id'])
+                self._remove_from_list_by_index(self.subnets, subnet)
         resp, body = self.client.list_routers()
         routers = body['routers']
         for router in routers:
-            if self.routers:
-                self.routers.pop()
-            self.client.delete_router(router['id'])
+            if router['id'] in [r['id'] for r in self.routers]:
+                self.client.delete_router(router['id'])
+                self._remove_from_list_by_index(self.routers, router)
 
     def _get_ips_from_subnet(self, **kwargs):
         subnet = self.create_subnet(self.network, **kwargs)
@@ -206,7 +213,7 @@ class NetworksTestDHCPv6JSON(base.BaseNetworkTest):
                     subnet_slaac['cidr'],
                     port_mac
                 ).format()
-                # TODO: remove this when 1219795 is fixed
+                # TODO(sergsh): remove this when 1219795 is fixed
                 dhcp_ip = [dhcp_ip, (netaddr.IPAddress(dhcp_ip) + 1).format()]
                 port = self.create_port(self.network, mac_address=port_mac)
                 real_ips = dict([(k['subnet_id'], k['ip_address'])
@@ -225,10 +232,11 @@ class NetworksTestDHCPv6JSON(base.BaseNetworkTest):
                                  'Real IP is {0}, but shall be {1}'.format(
                                      real_eui_ip,
                                      eui_ip))
-                self.assertTrue(real_dhcp_ip in dhcp_ip,
-                                'Real IP is {0}, but shall be one from {1}'.format(
-                                    real_dhcp_ip,
-                                    str(dhcp_ip)))
+                self.assertTrue(
+                    real_dhcp_ip in dhcp_ip,
+                    'Real IP is {0}, but shall be one from {1}'.format(
+                        real_dhcp_ip,
+                        str(dhcp_ip)))
 
     @test.attr(type='smoke')
     def test_dhcpv6_64_subnets(self):
@@ -258,7 +266,7 @@ class NetworksTestDHCPv6JSON(base.BaseNetworkTest):
                     subnet_slaac['cidr'],
                     port_mac
                 ).format()
-                # TODO: remove this when 1219795 is fixed
+                # TODO(sergsh): remove this when 1219795 is fixed
                 dhcp_ip = [dhcp_ip, (netaddr.IPAddress(dhcp_ip) + 1).format()]
                 port = self.create_port(self.network, mac_address=port_mac)
                 real_ips = dict([(k['subnet_id'], k['ip_address'])
@@ -267,16 +275,18 @@ class NetworksTestDHCPv6JSON(base.BaseNetworkTest):
                                              for sub in subnet_dhcp,
                                              subnet_slaac]
                 self._clean_network()
-                self.assertTrue({real_eui_ip, real_dhcp_ip}.issubset([eui_ip] + dhcp_ip))
+                self.assertTrue({real_eui_ip,
+                                 real_dhcp_ip}.issubset([eui_ip] + dhcp_ip))
                 self.assertEqual(real_eui_ip,
                                  eui_ip,
                                  'Real IP is {0}, but shall be {1}'.format(
                                      real_eui_ip,
                                      eui_ip))
-                self.assertTrue(real_dhcp_ip in dhcp_ip,
-                                'Real IP is {0}, but shall be one from {1}'.format(
-                                    real_dhcp_ip,
-                                    str(dhcp_ip)))
+                self.assertTrue(
+                    real_dhcp_ip in dhcp_ip,
+                    'Real IP is {0}, but shall be one from {1}'.format(
+                        real_dhcp_ip,
+                        str(dhcp_ip)))
 
     @test.attr(type='smoke')
     def test_dhcp_stateful(self):
@@ -294,12 +304,15 @@ class NetworksTestDHCPv6JSON(base.BaseNetworkTest):
             subnet = self.create_subnet(self.network, **kwargs)
             port = self.create_port(self.network)
             port_ip = next(iter(port['fixed_ips']))['ip_address']
-            first_alloc = subnet["allocation_pools"][0]["start"]
+            dhcp_ip = subnet["allocation_pools"][0]["start"]
+            # TODO(sergsh): remove this when 1219795 is fixed
+            dhcp_ip = [dhcp_ip, (netaddr.IPAddress(dhcp_ip) + 1).format()]
             self._clean_network()
-            self.assertEqual(port_ip, first_alloc,
-                             ("Port IP %s is not as first IP from "
-                              "subnets allocation pool: %s") % (
-                                 port_ip, first_alloc))
+            self.assertTrue(
+                port_ip in dhcp_ip,
+                'Real IP is {0}, but shall be one from {1}'.format(
+                    port_ip,
+                    str(dhcp_ip)))
 
     @test.attr(type='smoke')
     def test_dhcp_stateful_fixedips(self):
@@ -374,21 +387,23 @@ class NetworksTestDHCPv6JSON(base.BaseNetworkTest):
 
     def _create_subnet_router(self, kwargs):
         subnet = self.create_subnet(self.network, **kwargs)
-        router = self.create_router(router_name="cisco",
-                                    admin_state_up=True)
+        router = self.create_router(
+            router_name=data_utils.rand_name("routerv6-"),
+            admin_state_up=True)
         port = self.create_router_interface(router['id'],
                                             subnet['id'])
         _, body = self.client.show_port(port['port_id'])
         return subnet, body['port']
 
     def _create_custom_subnet(self, kwargs):
-        net_cidr =  netaddr.IPNetwork(CONF.network.tenant_network_v6_cidr)
+        net_cidr = netaddr.IPNetwork(CONF.network.tenant_network_v6_cidr)
         mask_bits = CONF.network.tenant_network_v6_mask_bits
         cidr = str(next(iter(net_cidr.subnet(mask_bits))))
-        kwargs.update({'network_id': self.network['id']})
-        kwargs.update({'cidr': cidr})
+        kwargs.update({
+            'network_id': self.network['id'],
+            'cidr': cidr})
         resp, body = self.client.create_subnet(**kwargs)
-        #self.addCleanup(self._delete_subnet, body['subnet'])
+        self.subnets.append(body['subnet'])
         return body['subnet']
 
     @test.attr(type='smoke')
@@ -412,12 +427,12 @@ class NetworksTestDHCPv6JSON(base.BaseNetworkTest):
                               "subnets allocation pool: %s") % (
                                  port_ip, subnet['gateway_ip']))
 
-
-
     @test.attr(type='smoke')
     def test_dhcp_stateless_router(self):
         """With all options below the router interface shall
-        receive first address in allocation pool of subnet.
+        receive first address in allocation pool of subnet,
+        because gateway is set explicitly to first IP in
+        'create_subnet' function.
         """
         for ra_mode, add_mode in (
                 ('dhcpv6-stateless', 'dhcpv6-stateless'),
@@ -437,8 +452,8 @@ class NetworksTestDHCPv6JSON(base.BaseNetworkTest):
                 subnet['cidr'],
                 port['mac_address']).format()
             self.assertNotEqual(port_ip, eui64_ip,
-                             ("Port IP %s is the same as EUI64 "
-                              "addressl: %s") % (port_ip, eui64_ip))
+                                ("Port IP %s is the same as EUI64 "
+                                 "addressl: %s") % (port_ip, eui64_ip))
             self.assertEqual(port_ip, subnet['gateway_ip'],
                              ("Port IP %s is not as first IP from "
                               "subnets allocation pool: %s") % (
@@ -447,23 +462,26 @@ class NetworksTestDHCPv6JSON(base.BaseNetworkTest):
     @test.attr(type='smoke')
     def test_dhcp_stateless_router_wogw(self):
         """With all options below the router interface shall
-        receive DHCPv6 IP SLAAC address according to its MAC.
+        receive DHCPv6 IP SLAAC address according to its MAC,
+        because gateway is not set explicitly in local function
+        '_create_custom_subnet' and default is used.
         """
         for ra_mode, add_mode in (
                 ('dhcpv6-stateless', 'dhcpv6-stateless'),
-                #('dhcpv6-stateless', None),
+                # ('dhcpv6-stateless', None),
                 (None, 'dhcpv6-stateless'),
                 ('slaac', 'slaac'),
-                #('slaac', None),
+                # ('slaac', None),
                 (None, 'slaac')
         ):
             kwargs = {'ipv6_ra_mode': ra_mode,
-                      'ipv6_address_mode': add_mode}
+                      'ipv6_address_mode': add_mode,
+                      'ip_version': 6}
             kwargs = {k: v for k, v in kwargs.iteritems() if v}
-            kwargs.update({'ip_version': 6})
             subnet = self._create_custom_subnet(kwargs)
-            router = self.create_router(router_name="cisco",
-                                        admin_state_up=True)
+            router = self.create_router(
+                router_name=data_utils.rand_name("routerv6-"),
+                admin_state_up=True)
             port = self.create_router_interface(router['id'],
                                                 subnet['id'])
             _, body = self.client.show_port(port['port_id'])

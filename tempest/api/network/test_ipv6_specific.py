@@ -131,7 +131,7 @@ class NetworksTestPortsIPv6JSON(base.BaseNetworkTest):
     @test.attr(type='smoke')
     def test_port_update_delete_46(self):
         """When 2 subnets configured with IPv6 SLAAC and IPv4
-        port-update shall assign IP of subnets allocation pool..
+        port-update shall assign IP of subnets allocation pool.
         """
         for ra_mode, add_mode in (
                 ('slaac', 'slaac'),
