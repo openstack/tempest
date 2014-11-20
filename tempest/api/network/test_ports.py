@@ -276,13 +276,6 @@ class PortsIpV6TestJSON(PortsTestJSON):
     _tenant_network_cidr = CONF.network.tenant_network_v6_cidr
     _tenant_network_mask_bits = CONF.network.tenant_network_v6_mask_bits
 
-    @classmethod
-    def resource_setup(cls):
-        super(PortsIpV6TestJSON, cls).resource_setup()
-        if not CONF.network_feature_enabled.ipv6:
-            skip_msg = "IPv6 Tests are disabled."
-            raise cls.skipException(skip_msg)
-
 
 class PortsIpV6TestXML(PortsIpV6TestJSON):
     _interface = 'xml'
@@ -292,13 +285,6 @@ class PortsAdminExtendedAttrsIpV6TestJSON(PortsAdminExtendedAttrsTestJSON):
     _ip_version = 6
     _tenant_network_cidr = CONF.network.tenant_network_v6_cidr
     _tenant_network_mask_bits = CONF.network.tenant_network_v6_mask_bits
-
-    @classmethod
-    def resource_setup(cls):
-        if not CONF.network_feature_enabled.ipv6:
-            skip_msg = "IPv6 Tests are disabled."
-            raise cls.skipException(skip_msg)
-        super(PortsAdminExtendedAttrsIpV6TestJSON, cls).resource_setup()
 
 
 class PortsAdminExtendedAttrsIpV6TestXML(PortsAdminExtendedAttrsIpV6TestJSON):
