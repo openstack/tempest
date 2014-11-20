@@ -629,6 +629,9 @@
 # (boolean value)
 #trust = true
 
+# If false, skip all identity api tests with xml (boolean value)
+#xml_api = false
+
 
 [image]
 
