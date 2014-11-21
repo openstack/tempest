@@ -66,17 +66,6 @@ class NetworksTestPortsIPv6JSON(base.BaseNetworkTest):
                 self.routers.pop()
             self.client.delete_router(router['id'])
 
-    # Avoid race condition described in bug 1219795
-    # by workaround function:
-    def wr_bug1219795(self, subnet):
-        dhcp_ip = subnet["allocation_pools"][0]["start"]
-        _, body = self.client.list_ports()
-        for dport in body['ports']:
-            if dport['device_owner'] == 'network:dhcp' and dport['fixed_ips']:
-                dhcp_ip = (netaddr.IPAddress(dhcp_ip) + 1).format()
-                break
-        return dhcp_ip
-
     def _create_subnets_and_port(self, kwargs1=None, kwargs2=None):
         kwargs1 = kwargs1 or {}
         kwargs2 = kwargs2 or {}
@@ -144,8 +133,15 @@ class NetworksTestPortsIPv6JSON(base.BaseNetworkTest):
                 kwargs2={'ip_version': 4})
             fixed_ips1 = [{'subnet_id': sub1['id']}]
             fixed_ips2 = [{'subnet_id': sub2['id']}]
-            expected_ips = (self.wr_bug1219795(sub2), self._eui64(port, sub1))
-            self.assertSequenceEqual(self._port_ips(port), expected_ips)
+            dhcp_ip = sub2["allocation_pools"][0]["start"]
+            # TODO(sergsh): remove this when 1219795 is fixed
+            dhcp_ip = [dhcp_ip, (netaddr.IPAddress(dhcp_ip) + 1).format()]
+            expected_ips = dhcp_ip + [self._eui64(port, sub1)]
+            for element in self._port_ips(port):
+                self.assertIn(
+                    element, expected_ips,
+                    "IP {real} is not in expected list: {expected}".format(
+                        real=element, expected=str(expected_ips)))
             port = self.update_port(port, fixed_ips=fixed_ips1)
             self.assertEqual(1, len(self._port_ips(port)))
             port = self.update_port(port, fixed_ips=fixed_ips1 + fixed_ips2)
