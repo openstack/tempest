@@ -199,3 +199,22 @@ class NegativeSecGroupIPv6Test(NegativeSecGroupTest):
             skip_msg = "IPv6 Tests are disabled."
             raise cls.skipException(skip_msg)
         super(NegativeSecGroupIPv6Test, cls).resource_setup()
+
+    @test.attr(type=['negative', 'gate'])
+    def test_create_security_group_rule_wrong_ip_prefix_version(self):
+        group_create_body, _ = self._create_security_group()
+
+        # Create rule with bad remote_ip_prefix
+        pairs = ({'ethertype': 'IPv6',
+                  'ip_prefix': CONF.network.tenant_network_cidr},
+                 {'ethertype': 'IPv4',
+                  'ip_prefix': CONF.network.tenant_network_v6_cidr})
+        for pair in pairs:
+            self.assertRaisesRegexp(
+                exceptions.BadRequest,
+                "Conflicting value ethertype",
+                self.client.create_security_group_rule,
+                security_group_id=group_create_body['security_group']['id'],
+                protocol='tcp', direction='ingress',
+                ethertype=pair['ethertype'],
+                remote_ip_prefix=pair['ip_prefix'])
