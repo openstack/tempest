@@ -84,5 +84,5 @@ class RoutersNegativeTest(base.BaseRouterTest):
                           self.router['id'])
 
 
-class RoutersNegativeTest6(RoutersNegativeTest):
+class RoutersNegativeIpV6Test(RoutersNegativeTest):
     _ip_version = 6

@@ -47,7 +47,7 @@ class ExtraDHCPOptionsTestJSON(base.BaseNetworkTest):
         cls.ip_tftp = ('123.123.123.123' if cls._ip_version == 4
                        else '2015::dead')
         cls.ip_server = ('123.123.123.45' if cls._ip_version == 4
-                       else '2015::badd')
+                         else '2015::badd')
         cls.extra_dhcp_opts = [
             {'opt_value': 'pxelinux.0', 'opt_name': 'bootfile-name'},
             {'opt_value': cls.ip_tftp, 'opt_name': 'tftp-server'},
@@ -95,5 +95,5 @@ class ExtraDHCPOptionsTestJSON(base.BaseNetworkTest):
                           str(retrieved_option))
 
 
-class ExtraDHCPOptionsTestJSON6(ExtraDHCPOptionsTestJSON):
+class ExtraDHCPOptionsIpV6TestJSON(ExtraDHCPOptionsTestJSON):
     _ip_version = 6

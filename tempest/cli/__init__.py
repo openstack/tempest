@@ -16,6 +16,7 @@
 import functools
 
 from tempest_lib.cli import base
+from tempest_lib.cli import output_parser
 import testtools
 
 from tempest.common import credentials
@@ -66,7 +67,7 @@ def min_client_version(*args, **kwargs):
     return decorator
 
 
-class ClientTestBase(base.ClientTestBase, test.BaseTestCase):
+class ClientTestBase(test.BaseTestCase):
     @classmethod
     def resource_setup(cls):
         if not CONF.cli.enabled:
@@ -82,3 +83,36 @@ class ClientTestBase(base.ClientTestBase, test.BaseTestCase):
                                  self.creds.tenant_name,
                                  CONF.identity.uri, CONF.cli.cli_dir)
         return clients
+
+    # TODO(mtreinish): The following code is basically copied from tempest-lib.
+    # The base cli test class in tempest-lib 0.0.1 doesn't work as a mixin like
+    # is needed here. The code below should be removed when tempest-lib
+    # provides a way to provide this functionality
+    def setUp(self):
+        super(ClientTestBase, self).setUp()
+        self.clients = self._get_clients()
+        self.parser = output_parser
+
+    def assertTableStruct(self, items, field_names):
+        """Verify that all items has keys listed in field_names.
+
+        :param items: items to assert are field names in the output table
+        :type items: list
+        :param field_names: field names from the output table of the cmd
+        :type field_names: list
+        """
+        for item in items:
+            for field in field_names:
+                self.assertIn(field, item)
+
+    def assertFirstLineStartsWith(self, lines, beginning):
+        """Verify that the first line starts with a string
+
+        :param lines: strings for each line of output
+        :type lines: list
+        :param beginning: verify this is at the beginning of the first line
+        :type beginning: string
+        """
+        self.assertTrue(lines[0].startswith(beginning),
+                        msg=('Beginning of first line has invalid content: %s'
+                             % lines[:3]))

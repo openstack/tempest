@@ -341,5 +341,6 @@ class RoutersTest(base.BaseRouterTest):
         self.assertEqual(subnet_id,
                          interface_port['fixed_ips'][0]['subnet_id'])
 
-class RoutersTest6(RoutersTest):
+
+class RoutersIpV6Test(RoutersTest):
     _ip_version = 6
