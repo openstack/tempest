@@ -123,8 +123,9 @@ class RestClient(object):
                                        'retry-after', 'server',
                                        'vary', 'www-authenticate'))
         dscv = CONF.identity.disable_ssl_certificate_validation
+        ca_certs = CONF.identity.ca_certificates_file
         self.http_obj = http.ClosingHttp(
-            disable_ssl_certificate_validation=dscv)
+            disable_ssl_certificate_validation=dscv, ca_certs=ca_certs)
 
     def _get_type(self):
         return self.TYPE
