@@ -143,6 +143,9 @@ IdentityFeatureGroup = [
     cfg.BoolOpt('api_v3',
                 default=True,
                 help='Is the v3 identity API enabled'),
+    cfg.BoolOpt('xml_api',
+                default=False,
+                help='If false, skip all identity api tests with xml'),
 ]
 
 compute_group = cfg.OptGroup(name='compute',
@@ -312,7 +315,7 @@ ComputeFeaturesGroup = [
                 default=True,
                 help="Does the test environment support suspend/resume?"),
     cfg.BoolOpt('live_migration',
-                default=False,
+                default=True,
                 help="Does the test environment support live migration "
                      "available?"),
     cfg.BoolOpt('block_migration_for_live_migration',

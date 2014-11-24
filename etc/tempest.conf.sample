@@ -429,7 +429,7 @@
 
 # Does the test environment support live migration available? (boolean
 # value)
-#live_migration = false
+#live_migration = true
 
 # Does the test environment support pausing? (boolean value)
 #pause = true
@@ -628,6 +628,9 @@
 # Does the identity service have delegation and impersonation enabled
 # (boolean value)
 #trust = true
+
+# If false, skip all identity api tests with xml (boolean value)
+#xml_api = false
 
 
 [image]

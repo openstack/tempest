@@ -502,13 +502,6 @@ class BulkNetworkOpsTestXML(BulkNetworkOpsTestJSON):
 class NetworksIpV6TestJSON(NetworksTestJSON):
     _ip_version = 6
 
-    @classmethod
-    def resource_setup(cls):
-        if not CONF.network_feature_enabled.ipv6:
-            skip_msg = "IPv6 Tests are disabled."
-            raise cls.skipException(skip_msg)
-        super(NetworksIpV6TestJSON, cls).resource_setup()
-
     @test.attr(type='smoke')
     def test_create_delete_subnet_with_gw(self):
         net = netaddr.IPNetwork(CONF.network.tenant_network_v6_cidr)

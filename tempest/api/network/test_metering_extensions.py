@@ -44,7 +44,7 @@ class MeteringJSON(base.BaseAdminNetworkTest):
         name = data_utils.rand_name("metering-label")
         cls.metering_label = cls.create_metering_label(name, description)
         remote_ip_prefix = ("10.0.0.0/24" if cls._ip_version == 4
-                            else "20ab::/64")
+                            else "fd02::/64")
         direction = "ingress"
         cls.metering_label_rule = cls.create_metering_label_rule(
             remote_ip_prefix, direction,
@@ -114,7 +114,7 @@ class MeteringJSON(base.BaseAdminNetworkTest):
     def test_create_delete_metering_label_rule_with_filters(self):
         # Creates a rule
         remote_ip_prefix = ("10.0.1.0/24" if self._ip_version == 4
-                            else "20ba::/64")
+                            else "fd03::/64")
         _, body = (self.admin_client.create_metering_label_rule(
                    remote_ip_prefix=remote_ip_prefix,
                    direction="ingress",
@@ -145,5 +145,9 @@ class MeteringJSON(base.BaseAdminNetworkTest):
         self.assertFalse(metering_label_rule['excluded'])
 
 
-class MeteringJSON6(MeteringJSON):
+class MeteringIpV6JSON(MeteringJSON):
     _ip_version = 6
+
+
+class MeteringXML(MeteringJSON):
+    interface = 'xml'

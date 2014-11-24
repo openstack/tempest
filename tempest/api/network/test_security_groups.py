@@ -213,16 +213,13 @@ class SecGroupTest(base.BaseSecGroupTest):
                                                 remote_ip_prefix=ip_prefix)
 
 
+class SecGroupTestXML(SecGroupTest):
+    _interface = 'xml'
+
+
 class SecGroupIPv6Test(SecGroupTest):
     _ip_version = 6
     _tenant_network_cidr = CONF.network.tenant_network_v6_cidr
-
-    @classmethod
-    def resource_setup(cls):
-        if not CONF.network_feature_enabled.ipv6:
-            skip_msg = "IPv6 Tests are disabled."
-            raise cls.skipException(skip_msg)
-        super(SecGroupIPv6Test, cls).resource_setup()
 
     @test.attr(type='smoke')
     def test_create_security_group_rule_with_dufferent_ip_versions(self):
@@ -247,3 +244,7 @@ class SecGroupIPv6Test(SecGroupTest):
                 port_range_min,
                 port_range_max,
                 remote_ip_prefix=versions[num]["ip_prefix"])
+
+
+class SecGroupIPv6TestXML(SecGroupIPv6Test):
+    _interface = 'xml'

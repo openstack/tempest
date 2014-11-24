@@ -189,16 +189,13 @@ class NegativeSecGroupTest(base.BaseSecGroupTest):
                           direction='ingress', ethertype=self.ethertype)
 
 
+class NegativeSecGroupTestXML(NegativeSecGroupTest):
+    _interface = 'xml'
+
+
 class NegativeSecGroupIPv6Test(NegativeSecGroupTest):
     _ip_version = 6
     _tenant_network_cidr = CONF.network.tenant_network_v6_cidr
-
-    @classmethod
-    def resource_setup(cls):
-        if not CONF.network_feature_enabled.ipv6:
-            skip_msg = "IPv6 Tests are disabled."
-            raise cls.skipException(skip_msg)
-        super(NegativeSecGroupIPv6Test, cls).resource_setup()
 
     @test.attr(type=['negative', 'gate'])
     def test_create_security_group_rule_wrong_ip_prefix_version(self):
@@ -218,3 +215,7 @@ class NegativeSecGroupIPv6Test(NegativeSecGroupTest):
                 protocol='tcp', direction='ingress',
                 ethertype=pair['ethertype'],
                 remote_ip_prefix=pair['ip_prefix'])
+
+
+class NegativeSecGroupIPv6TestXML(NegativeSecGroupIPv6Test):
+    _interface = 'xml'
