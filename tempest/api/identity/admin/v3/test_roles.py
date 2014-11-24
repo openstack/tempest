@@ -173,7 +173,3 @@ class RolesV3TestJSON(base.BaseIdentityV3AdminTest):
         _, body = self.client.list_roles()
         found = [role for role in body if role in self.data.v3_roles]
         self.assertEqual(len(found), len(self.data.v3_roles))
-
-
-class RolesV3TestXML(RolesV3TestJSON):
-    _interface = 'xml'

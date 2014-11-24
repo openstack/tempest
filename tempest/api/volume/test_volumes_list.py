@@ -205,14 +205,6 @@ class VolumesV2ListTestJSON(base.BaseVolumeTest):
         self._list_by_param_value_and_assert(params, with_detail=True)
 
 
-class VolumesV2ListTestXML(VolumesV2ListTestJSON):
-    _interface = 'xml'
-
-
 class VolumesV1ListTestJSON(VolumesV2ListTestJSON):
     _api_version = 1
     VOLUME_FIELDS = ('id', 'display_name')
-
-
-class VolumesV1ListTestXML(VolumesV1ListTestJSON):
-    _interface = 'xml'

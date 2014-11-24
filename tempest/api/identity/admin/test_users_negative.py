@@ -227,7 +227,3 @@ class UsersNegativeTestJSON(base.BaseIdentityV2AdminTest):
         for invalid in invalid_id:
             self.assertRaises(exceptions.NotFound,
                               self.client.list_users_for_tenant, invalid)
-
-
-class UsersNegativeTestXML(UsersNegativeTestJSON):
-    _interface = 'xml'

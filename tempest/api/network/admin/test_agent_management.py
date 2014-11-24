@@ -83,7 +83,3 @@ class AgentManagementTestJSON(base.BaseAdminNetworkTest):
         origin_agent = {'description': description}
         self.admin_client.update_agent(agent_id=self.agent['id'],
                                        agent_info=origin_agent)
-
-
-class AgentManagementTestXML(AgentManagementTestJSON):
-    _interface = 'xml'

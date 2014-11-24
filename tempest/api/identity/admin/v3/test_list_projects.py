@@ -67,7 +67,3 @@ class ListProjectsTestJSON(base.BaseIdentityV3AdminTest):
         resp, body = self.client.list_projects(params)
         self.assertIn(self.p1[key], map(lambda x: x[key], body))
         self.assertNotIn(self.p2[key], map(lambda x: x[key], body))
-
-
-class ListProjectsTestXML(ListProjectsTestJSON):
-    _interface = 'xml'

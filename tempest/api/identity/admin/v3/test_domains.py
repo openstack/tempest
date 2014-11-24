@@ -85,7 +85,3 @@ class DomainsTestJSON(base.BaseIdentityV3AdminTest):
         self.assertEqual(new_name, fetched_domain['name'])
         self.assertEqual(new_desc, fetched_domain['description'])
         self.assertEqual('true', str(fetched_domain['enabled']).lower())
-
-
-class DomainsTestXML(DomainsTestJSON):
-    _interface = 'xml'

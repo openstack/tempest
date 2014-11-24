@@ -313,7 +313,3 @@ class VPNaaSTestJSON(base.BaseAdminNetworkTest):
         _, body = self.client.show_ipsecpolicy(self.ipsecpolicy['id'])
         ipsecpolicy = body['ipsecpolicy']
         self._assertExpected(self.ipsecpolicy, ipsecpolicy)
-
-
-class VPNaaSTestXML(VPNaaSTestJSON):
-    _interface = 'xml'

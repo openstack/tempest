@@ -74,7 +74,3 @@ class ProjectsNegativeTestJSON(base.BaseIdentityV3AdminTest):
         # Attempt to delete a non existent project should fail
         self.assertRaises(exceptions.NotFound, self.client.delete_project,
                           data_utils.rand_uuid_hex())
-
-
-class ProjectsNegativeTestXML(ProjectsNegativeTestJSON):
-    _interface = 'xml'

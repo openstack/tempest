@@ -93,7 +93,3 @@ class DHCPAgentSchedulersTestJSON(base.BaseAdminNetworkTest):
                                                               network_id)
         self.assertTrue(self._check_network_in_dhcp_agent(
             network_id, agent))
-
-
-class DHCPAgentSchedulersTestXML(DHCPAgentSchedulersTestJSON):
-    _interface = 'xml'

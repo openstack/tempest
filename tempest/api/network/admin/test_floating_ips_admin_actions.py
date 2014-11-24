@@ -63,7 +63,3 @@ class FloatingIPAdminTestJSON(base.BaseAdminNetworkTest):
         self.assertNotIn(floating_ip_admin['floatingip']['id'],
                          floating_ip_ids)
         self.assertNotIn(floating_ip_alt['id'], floating_ip_ids)
-
-
-class FloatingIPAdminTestXML(FloatingIPAdminTestJSON):
-    _interface = 'xml'

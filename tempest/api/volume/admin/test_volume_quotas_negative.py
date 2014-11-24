@@ -76,7 +76,3 @@ class VolumeQuotasNegativeTestJSON(base.BaseVolumeV1AdminTest):
         self.assertRaises(exceptions.OverLimit,
                           self.snapshots_client.create_snapshot,
                           self.volume['id'])
-
-
-class VolumeQuotasNegativeTestXML(VolumeQuotasNegativeTestJSON):
-    _interface = "xml"

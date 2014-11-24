@@ -370,10 +370,6 @@ class NetworksTestJSON(base.BaseNetworkTest):
         self.assertEmpty(subnets, "Public subnets visible")
 
 
-class NetworksTestXML(NetworksTestJSON):
-    _interface = 'xml'
-
-
 class BulkNetworkOpsTestJSON(base.BaseNetworkTest):
     _interface = 'json'
 
@@ -495,10 +491,6 @@ class BulkNetworkOpsTestJSON(base.BaseNetworkTest):
             self.assertIn(n['id'], ports_list)
 
 
-class BulkNetworkOpsTestXML(BulkNetworkOpsTestJSON):
-    _interface = 'xml'
-
-
 class NetworksIpV6TestJSON(NetworksTestJSON):
     _ip_version = 6
 
@@ -577,7 +569,3 @@ class NetworksIpV6TestJSON(NetworksTestJSON):
         self._create_verify_delete_subnet(
             ipv6_ra_mode='dhcpv6-stateless',
             ipv6_address_mode='dhcpv6-stateless')
-
-
-class NetworksIpV6TestXML(NetworksIpV6TestJSON):
-    _interface = 'xml'

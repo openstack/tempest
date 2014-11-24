@@ -29,7 +29,3 @@ class VolumeHostsAdminV2TestsJSON(base.BaseVolumeAdminTest):
 
 class VolumeHostsAdminV1TestsJSON(VolumeHostsAdminV2TestsJSON):
     _api_version = 1
-
-
-class VolumeHostsAdminV1TestsXML(VolumeHostsAdminV1TestsJSON):
-    _interface = 'xml'

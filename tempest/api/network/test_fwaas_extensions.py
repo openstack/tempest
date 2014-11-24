@@ -254,7 +254,3 @@ class FWaaSExtensionTestJSON(base.BaseNetworkTest):
             fw_policy_id)
         return [ruleid for ruleid in fw_policy['firewall_policy']
                 ['firewall_rules']]
-
-
-class FWaaSExtensionTestXML(FWaaSExtensionTestJSON):
-    _interface = 'xml'

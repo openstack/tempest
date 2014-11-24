@@ -89,7 +89,3 @@ class RegionsTestJSON(base.BaseIdentityV3AdminTest):
         self.assertEqual(0, len(missing_regions),
                          "Failed to find region %s in fetched list" %
                          ', '.join(str(e) for e in missing_regions))
-
-
-class RegionsTestXML(RegionsTestJSON):
-    _interface = 'xml'

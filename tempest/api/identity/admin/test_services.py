@@ -98,7 +98,3 @@ class ServicesTestJSON(base.BaseIdentityV2AdminTest):
         _, body = self.client.list_services()
         found = [serv for serv in body if serv['id'] in service_ids]
         self.assertEqual(len(found), len(services), 'Services not found')
-
-
-class ServicesTestXML(ServicesTestJSON):
-    _interface = 'xml'

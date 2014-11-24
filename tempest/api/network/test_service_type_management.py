@@ -28,7 +28,3 @@ class ServiceTypeManagementTestJSON(base.BaseNetworkTest):
     def test_service_provider_list(self):
         _, body = self.client.list_service_providers()
         self.assertIsInstance(body['service_providers'], list)
-
-
-class ServiceTypeManagementTestXML(ServiceTypeManagementTestJSON):
-    _interface = 'xml'
