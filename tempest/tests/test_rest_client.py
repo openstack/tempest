@@ -18,7 +18,6 @@ import httplib2
 from oslotest import mockpatch
 
 from tempest.common import rest_client
-from tempest.common import xml_utils as xml
 from tempest import config
 from tempest import exceptions
 from tempest.tests import base
@@ -236,29 +235,8 @@ class TestRestClientUpdateHeaders(BaseRestClientTestClass):
         )
 
 
-class TestRestClientHeadersXML(TestRestClientHeadersJSON):
-    TYPE = "xml"
-
-    # These two tests are needed in one exemplar
-    def test_send_json_accept_xml(self):
-        resp, __ = self.rest_client.get(self.url,
-                                        self.rest_client.get_headers("xml",
-                                                                     "json"))
-        resp = dict((k.lower(), v) for k, v in resp.iteritems())
-        self.assertEqual("application/json", resp["content-type"])
-        self.assertEqual("application/xml", resp["accept"])
-
-    def test_send_xml_accept_json(self):
-        resp, __ = self.rest_client.get(self.url,
-                                        self.rest_client.get_headers("json",
-                                                                     "xml"))
-        resp = dict((k.lower(), v) for k, v in resp.iteritems())
-        self.assertEqual("application/json", resp["accept"])
-        self.assertEqual("application/xml", resp["content-type"])
-
-
-class TestRestClientParseRespXML(BaseRestClientTestClass):
-    TYPE = "xml"
+class TestRestClientParseRespJSON(BaseRestClientTestClass):
+    TYPE = "json"
 
     keys = ["fake_key1", "fake_key2"]
     values = ["fake_value1", "fake_value2"]
@@ -274,37 +252,8 @@ class TestRestClientParseRespXML(BaseRestClientTestClass):
 
     def setUp(self):
         self.fake_http = fake_http.fake_httplib2()
-        super(TestRestClientParseRespXML, self).setUp()
+        super(TestRestClientParseRespJSON, self).setUp()
         self.rest_client.TYPE = self.TYPE
-
-    def test_parse_resp_body_item(self):
-        body_item = xml.Element("item", **self.item_expected)
-        body = self.rest_client._parse_resp(str(xml.Document(body_item)))
-        self.assertEqual(self.item_expected, body)
-
-    def test_parse_resp_body_list(self):
-        self.rest_client.list_tags = ["fake_list", ]
-        body_list = xml.Element(self.rest_client.list_tags[0])
-        for i in range(2):
-            body_list.append(xml.Element("fake_item",
-                                         **self.list_expected["body_list"][i]))
-        body = self.rest_client._parse_resp(str(xml.Document(body_list)))
-        self.assertEqual(self.list_expected["body_list"], body)
-
-    def test_parse_resp_body_dict(self):
-        self.rest_client.dict_tags = ["fake_dict", ]
-        body_dict = xml.Element(self.rest_client.dict_tags[0])
-
-        for i in range(2):
-            body_dict.append(xml.Element("fake_item", xml.Text(self.values[i]),
-                                         key=self.keys[i]))
-
-        body = self.rest_client._parse_resp(str(xml.Document(body_dict)))
-        self.assertEqual(self.dict_expected["body_dict"], body)
-
-
-class TestRestClientParseRespJSON(TestRestClientParseRespXML):
-    TYPE = "json"
 
     def test_parse_resp_body_item(self):
         body = self.rest_client._parse_resp(json.dumps(self.item_expected))
@@ -424,10 +373,6 @@ class TestRestClientErrorCheckerJSON(base.TestCase):
         self.assertRaises(exceptions.UnexpectedResponseCode,
                           self.rest_client._error_checker,
                           **self.set_data("402"))
-
-
-class TestRestClientErrorCheckerXML(TestRestClientErrorCheckerJSON):
-    c_type = "application/xml"
 
 
 class TestRestClientErrorCheckerTEXT(TestRestClientErrorCheckerJSON):
