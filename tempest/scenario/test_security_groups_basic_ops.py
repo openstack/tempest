@@ -271,7 +271,7 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
 
     def _assign_floating_ips(self, tenant, server):
         public_network_id = CONF.network.public_network_id
-        floating_ip = self._create_floating_ip(
+        floating_ip = self.create_floating_ip(
             server, public_network_id,
             client=tenant.manager.network_client)
         self.floating_ips.setdefault(server['id'], floating_ip)

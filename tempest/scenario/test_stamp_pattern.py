@@ -71,17 +71,6 @@ class TestStampPattern(manager.ScenarioTest):
     def _add_keypair(self):
         self.keypair = self.create_keypair()
 
-    def _create_floating_ip(self):
-        _, floating_ip = self.floating_ips_client.create_floating_ip()
-        self.addCleanup(self.delete_wrapper,
-                        self.floating_ips_client.delete_floating_ip,
-                        floating_ip['id'])
-        return floating_ip
-
-    def _add_floating_ip(self, server, floating_ip):
-        self.floating_ips_client.associate_floating_ip_to_server(
-            floating_ip['ip'], server['id'])
-
     def _ssh_to_server(self, server_or_ip):
         return self.get_remote_client(server_or_ip)
 
@@ -163,8 +152,7 @@ class TestStampPattern(manager.ScenarioTest):
 
         # create and add floating IP to server1
         if CONF.compute.use_floatingip_for_ssh:
-            floating_ip_for_server = self._create_floating_ip()
-            self._add_floating_ip(server, floating_ip_for_server)
+            floating_ip_for_server = self.create_floating_ip(server)
             ip_for_server = floating_ip_for_server['ip']
         else:
             ip_for_server = server
@@ -189,9 +177,8 @@ class TestStampPattern(manager.ScenarioTest):
 
         # create and add floating IP to server_from_snapshot
         if CONF.compute.use_floatingip_for_ssh:
-            floating_ip_for_snapshot = self._create_floating_ip()
-            self._add_floating_ip(server_from_snapshot,
-                                  floating_ip_for_snapshot)
+            floating_ip_for_snapshot = self.create_floating_ip(
+                server_from_snapshot)
             ip_for_snapshot = floating_ip_for_snapshot['ip']
         else:
             ip_for_snapshot = server_from_snapshot
