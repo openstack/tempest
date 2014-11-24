@@ -90,7 +90,3 @@ class SecurityGroupsTestAdminJSON(base.BaseV2ComputeAdminTest):
             self.assertEqual(sec_group['tenant_id'], client_tenant_id,
                              "Failed to get all security groups for "
                              "non admin user.")
-
-
-class SecurityGroupsTestAdminXML(SecurityGroupsTestAdminJSON):
-    _interface = 'xml'

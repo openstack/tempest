@@ -379,7 +379,3 @@ class AuthorizationTestJSON(base.BaseV2ComputeTest):
         self.assertRaises(exceptions.NotFound,
                           self.alt_client.get_console_output,
                           self.server['id'], 10)
-
-
-class AuthorizationTestXML(AuthorizationTestJSON):
-    _interface = 'xml'

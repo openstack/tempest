@@ -155,7 +155,3 @@ class ServerMetadataNegativeTestJSON(base.BaseV2ComputeTest):
         self.assertRaises(exceptions.BadRequest,
                           self.client.set_server_metadata,
                           self.server_id, meta=meta, no_metadata_field=True)
-
-
-class ServerMetadataNegativeTestXML(ServerMetadataNegativeTestJSON):
-    _interface = 'xml'

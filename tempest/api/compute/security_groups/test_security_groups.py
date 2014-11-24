@@ -155,7 +155,3 @@ class SecurityGroupsTestJSON(base.BaseSecurityGroupsTest):
             self.client.get_security_group(securitygroup_id)
         self.assertEqual(s_new_name, fetched_group['name'])
         self.assertEqual(s_new_des, fetched_group['description'])
-
-
-class SecurityGroupsTestXML(SecurityGroupsTestJSON):
-    _interface = 'xml'

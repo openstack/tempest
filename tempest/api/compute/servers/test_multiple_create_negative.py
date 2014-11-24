@@ -66,7 +66,3 @@ class MultipleCreateNegativeTestJSON(base.BaseV2ComputeTest):
         self.assertRaises(exceptions.BadRequest, self._create_multiple_servers,
                           min_count=min_count,
                           max_count=max_count)
-
-
-class MultipleCreateNegativeTestXML(MultipleCreateNegativeTestJSON):
-    _interface = 'xml'

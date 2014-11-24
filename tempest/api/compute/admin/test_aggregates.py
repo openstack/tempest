@@ -221,9 +221,3 @@ class AggregatesAdminTestJSON(base.BaseV2ComputeAdminTest):
                                                wait_until='ACTIVE')
         resp, body = admin_servers_client.get_server(server['id'])
         self.assertEqual(self.host, body[self._host_key])
-
-
-class AggregatesAdminTestXML(AggregatesAdminTestJSON):
-    _host_key = (
-        '{http://docs.openstack.org/compute/ext/extended_status/api/v1.1}host')
-    _interface = 'xml'

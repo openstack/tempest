@@ -117,7 +117,3 @@ class KeyPairsV3Test(base.BaseComputeTest):
 
 class KeyPairsV2TestJSON(KeyPairsV3Test):
     _api_version = 2
-
-
-class KeyPairsV2TestXML(KeyPairsV2TestJSON):
-    _interface = 'xml'

@@ -156,7 +156,3 @@ class QuotasAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
         self.assertRaises((exceptions.OverLimit, exceptions.Unauthorized),
                           self.sg_client.create_security_group_rule,
                           secgroup_id, ip_protocol, 1025, 1025)
-
-
-class QuotasAdminNegativeTestXML(QuotasAdminNegativeTestJSON):
-    _interface = 'xml'

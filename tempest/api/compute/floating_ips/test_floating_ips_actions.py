@@ -134,7 +134,3 @@ class FloatingIPsTestJSON(base.BaseFloatingIPsTest):
                            exceptions.Conflict),
                           self.client.disassociate_floating_ip_from_server,
                           self.floating_ip, self.server_id)
-
-
-class FloatingIPsTestXML(FloatingIPsTestJSON):
-    _interface = 'xml'

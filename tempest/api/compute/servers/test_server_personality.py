@@ -61,7 +61,3 @@ class ServerPersonalityTestJSON(base.BaseV2ComputeTest):
             })
         resp, server = self.create_test_server(personality=person)
         self.assertEqual('202', resp['status'])
-
-
-class ServerPersonalityTestXML(ServerPersonalityTestJSON):
-    _interface = "xml"

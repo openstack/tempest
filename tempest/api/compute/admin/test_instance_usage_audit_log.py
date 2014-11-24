@@ -54,7 +54,3 @@ class InstanceUsageAuditLogTestJSON(base.BaseV2ComputeAdminTest):
                           'period_beginning', 'num_hosts_not_run']
         for item in expected_items:
             self.assertIn(item, body)
-
-
-class InstanceUsageAuditLogTestXML(InstanceUsageAuditLogTestJSON):
-    _interface = 'xml'

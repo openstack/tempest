@@ -157,7 +157,3 @@ class AttachInterfacesTestJSON(base.BaseV2ComputeTest):
         resp, body = self.client.remove_fixed_ip(server['id'],
                                                  fixed_ip)
         self.assertEqual(202, resp.status)
-
-
-class AttachInterfacesTestXML(AttachInterfacesTestJSON):
-    _interface = 'xml'

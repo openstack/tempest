@@ -51,9 +51,3 @@ class LiveBlockMigrationNegativeTestJSON(base.BaseV2ComputeAdminTest):
         self.assertRaises(exceptions.BadRequest, self._migrate_server_to,
                           server_id, target_host)
         self.servers_client.wait_for_server_status(server_id, 'ACTIVE')
-
-
-class LiveBlockMigrationNegativeTestXML(LiveBlockMigrationNegativeTestJSON):
-    _host_key = (
-        '{http://docs.openstack.org/compute/ext/extended_status/api/v1.1}host')
-    _interface = 'xml'

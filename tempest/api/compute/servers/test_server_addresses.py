@@ -65,7 +65,3 @@ class ServerAddressesTestJSON(base.BaseV2ComputeTest):
             addr = addr[addr_type]
             for address in addresses[addr_type]:
                 self.assertTrue(any([a for a in addr if a == address]))
-
-
-class ServerAddressesTestXML(ServerAddressesTestJSON):
-    _interface = 'xml'
