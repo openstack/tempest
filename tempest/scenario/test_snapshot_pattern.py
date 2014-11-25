@@ -65,17 +65,6 @@ class TestSnapshotPattern(manager.ScenarioTest):
         got_timestamp = ssh_client.exec_command('cat /tmp/timestamp')
         self.assertEqual(self.timestamp, got_timestamp)
 
-    def _create_floating_ip(self):
-        _, floating_ip = self.floating_ips_client.create_floating_ip()
-        self.addCleanup(self.delete_wrapper,
-                        self.floating_ips_client.delete_floating_ip,
-                        floating_ip['id'])
-        return floating_ip
-
-    def _set_floating_ip_to_server(self, server, floating_ip):
-        self.floating_ips_client.associate_floating_ip_to_server(
-            floating_ip['ip'], server['id'])
-
     @testtools.skipUnless(CONF.compute_feature_enabled.snapshot,
                           'Snapshotting is not available.')
     @test.services('compute', 'network', 'image')
@@ -87,8 +76,7 @@ class TestSnapshotPattern(manager.ScenarioTest):
         # boot a instance and create a timestamp file in it
         server = self._boot_image(CONF.compute.image_ref)
         if CONF.compute.use_floatingip_for_ssh:
-            fip_for_server = self._create_floating_ip()
-            self._set_floating_ip_to_server(server, fip_for_server)
+            fip_for_server = self.create_floating_ip(server)
             self._write_timestamp(fip_for_server['ip'])
         else:
             self._write_timestamp(server)
@@ -101,9 +89,7 @@ class TestSnapshotPattern(manager.ScenarioTest):
 
         # check the existence of the timestamp file in the second instance
         if CONF.compute.use_floatingip_for_ssh:
-            fip_for_snapshot = self._create_floating_ip()
-            self._set_floating_ip_to_server(server_from_snapshot,
-                                            fip_for_snapshot)
+            fip_for_snapshot = self.create_floating_ip(server_from_snapshot)
             self._check_timestamp(fip_for_snapshot['ip'])
         else:
             self._check_timestamp(server_from_snapshot)

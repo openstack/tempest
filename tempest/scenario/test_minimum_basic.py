@@ -89,16 +89,6 @@ class TestMinimumBasicScenario(manager.ScenarioTest):
         self.servers_client.reboot(self.server['id'], 'SOFT')
         self._wait_for_server_status('ACTIVE')
 
-    def nova_floating_ip_create(self):
-        _, self.floating_ip = self.floating_ips_client.create_floating_ip()
-        self.addCleanup(self.delete_wrapper,
-                        self.floating_ips_client.delete_floating_ip,
-                        self.floating_ip['id'])
-
-    def nova_floating_ip_add(self):
-        self.floating_ips_client.associate_floating_ip_to_server(
-            self.floating_ip['ip'], self.server['id'])
-
     def ssh_to_server(self):
         try:
             self.linux_client = self.get_remote_client(self.floating_ip['ip'])
@@ -155,8 +145,7 @@ class TestMinimumBasicScenario(manager.ScenarioTest):
         self.addCleanup(self.nova_volume_detach)
         self.cinder_show()
 
-        self.nova_floating_ip_create()
-        self.nova_floating_ip_add()
+        self.floating_ip = self.create_floating_ip(self.server)
         self.create_and_add_security_group()
         self.ssh_to_server()
         self.nova_reboot()

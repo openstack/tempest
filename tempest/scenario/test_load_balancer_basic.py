@@ -137,7 +137,7 @@ class TestLoadBalancerBasic(manager.NetworkScenarioTest):
         if (config.network.public_network_id and not
                 config.network.tenant_networks_reachable):
             public_network_id = config.network.public_network_id
-            floating_ip = self._create_floating_ip(
+            floating_ip = self.create_floating_ip(
                 server, public_network_id)
             self.floating_ips[floating_ip] = server
             self.server_ips[server['id']] = floating_ip.floating_ip_address
@@ -257,8 +257,8 @@ class TestLoadBalancerBasic(manager.NetworkScenarioTest):
     def _assign_floating_ip_to_vip(self, vip):
         public_network_id = config.network.public_network_id
         port_id = vip.port_id
-        floating_ip = self._create_floating_ip(vip, public_network_id,
-                                               port_id=port_id)
+        floating_ip = self.create_floating_ip(vip, public_network_id,
+                                              port_id=port_id)
         self.floating_ips.setdefault(vip.id, [])
         self.floating_ips[vip.id].append(floating_ip)
 
