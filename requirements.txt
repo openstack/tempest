@@ -6,7 +6,6 @@ anyjson>=0.3.3
 httplib2>=0.7.5
 jsonschema>=2.0.0,<3.0.0
 testtools>=0.9.36,!=1.2.0
-lxml>=2.3
 boto>=2.32.1
 paramiko>=1.13.0
 netaddr>=0.7.12
