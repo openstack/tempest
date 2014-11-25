@@ -42,7 +42,7 @@ class TestDashboardBasicOps(manager.ScenarioTest):
 
     def check_login_page(self):
         response = urllib2.urlopen(CONF.dashboard.dashboard_url)
-        self.assertIn("<h3>Log In</h3>", response.read())
+        self.assertIn("Log In", response.read())
 
     def user_login(self):
         self.opener = urllib2.build_opener(urllib2.HTTPCookieProcessor())
