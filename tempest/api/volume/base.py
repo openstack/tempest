@@ -176,6 +176,7 @@ class BaseVolumeAdminTest(BaseVolumeTest):
             cls.admin_volume_client = cls.os_adm.volumes_client
             cls.hosts_client = cls.os_adm.volume_hosts_client
             cls.admin_snapshots_client = cls.os_adm.snapshots_client
+            cls.backups_adm_client = cls.os_adm.backups_client
         elif cls._api_version == 2:
             if not CONF.volume_feature_enabled.api_v2:
                 msg = "Volume API v2 is disabled"
@@ -185,6 +186,7 @@ class BaseVolumeAdminTest(BaseVolumeTest):
             cls.admin_volume_client = cls.os_adm.volumes_v2_client
             cls.hosts_client = cls.os_adm.volume_hosts_v2_client
             cls.admin_snapshots_client = cls.os_adm.snapshots_v2_client
+            cls.backups_adm_client = cls.os_adm.backups_v2_client
 
     @classmethod
     def resource_cleanup(cls):
