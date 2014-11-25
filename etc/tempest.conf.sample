@@ -260,7 +260,8 @@
 # The endpoint type to use for the compute service. (string value)
 #endpoint_type = publicURL
 
-# Visible fixed network name  (string value)
+# Name of the fixed network that is visible to all test tenants.
+# (string value)
 #fixed_network_name = private
 
 # Valid primary flavor to use in tests. (string value)
@@ -270,7 +271,8 @@
 #flavor_ref_alt = 2
 
 # Unallocated floating IP range, which will be used to test the
-# floating IP bulk feature for CRUD operation. (string value)
+# floating IP bulk feature for CRUD operation. This block must not
+# overlap an existing floating IP pool. (string value)
 #floating_ip_range = 10.0.0.0/29
 
 # Password used to authenticate to an instance using the alternate
@@ -299,7 +301,8 @@
 # IP version used for SSH connections. (integer value)
 #ip_version_for_ssh = 4
 
-# Network used for SSH connections. (string value)
+# Network used for SSH connections. Ignored if
+# use_floatingip_for_ssh=true or run_ssh=false. (string value)
 #network_for_ssh = public
 
 # Path to a private key file for SSH access to remote hosts (string
