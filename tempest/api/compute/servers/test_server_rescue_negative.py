@@ -148,7 +148,3 @@ class ServerRescueNegativeTestJSON(base.BaseV2ComputeTest):
                           self.servers_client.detach_volume,
                           self.server_id,
                           volume['id'])
-
-
-class ServerRescueNegativeTestXML(ServerRescueNegativeTestJSON):
-    _interface = 'xml'

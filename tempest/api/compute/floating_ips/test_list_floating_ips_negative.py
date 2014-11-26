@@ -43,7 +43,3 @@ class FloatingIPDetailsNegativeTestJSON(base.BaseV2ComputeTest):
             non_exist_id = data_utils.rand_int_id(start=999)
         self.assertRaises(exceptions.NotFound,
                           self.client.get_floating_ip_details, non_exist_id)
-
-
-class FloatingIPDetailsNegativeTestXML(FloatingIPDetailsNegativeTestJSON):
-    _interface = 'xml'

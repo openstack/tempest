@@ -38,7 +38,3 @@ class VirtualInterfacesNegativeTestJSON(base.BaseV2ComputeTest):
         self.assertRaises(exceptions.NotFound,
                           self.client.list_virtual_interfaces,
                           invalid_server_id)
-
-
-class VirtualInterfacesNegativeTestXML(VirtualInterfacesNegativeTestJSON):
-    _interface = 'xml'

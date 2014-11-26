@@ -50,7 +50,3 @@ class VirtualInterfacesTestJSON(base.BaseV2ComputeTest):
             mac_address = virt_iface['mac_address']
             self.assertTrue(netaddr.valid_mac(mac_address),
                             "Invalid mac address detected.")
-
-
-class VirtualInterfacesTestXML(VirtualInterfacesTestJSON):
-    _interface = 'xml'

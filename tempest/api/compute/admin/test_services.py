@@ -76,7 +76,3 @@ class ServicesAdminTestJSON(base.BaseV2ComputeAdminTest):
         self.assertEqual(1, len(services))
         self.assertEqual(host_name, services[0]['host'])
         self.assertEqual(binary_name, services[0]['binary'])
-
-
-class ServicesAdminTestXML(ServicesAdminTestJSON):
-    _interface = 'xml'

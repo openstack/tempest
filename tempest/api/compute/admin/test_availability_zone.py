@@ -46,7 +46,3 @@ class AZAdminV3Test(base.BaseComputeAdminTest):
 
 class AZAdminV2TestJSON(AZAdminV3Test):
     _api_version = 2
-
-
-class AZAdminV2TestXML(AZAdminV2TestJSON):
-    _interface = 'xml'

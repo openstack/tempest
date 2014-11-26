@@ -132,7 +132,3 @@ class FlavorsV2TestJSON(FlavorsV3Test):
     _api_version = 2
     _min_disk = 'minDisk'
     _min_ram = 'minRam'
-
-
-class FlavorsV2TestXML(FlavorsV2TestJSON):
-    _interface = 'xml'

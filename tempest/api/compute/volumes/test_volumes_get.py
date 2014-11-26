@@ -71,7 +71,3 @@ class VolumesGetTestJSON(base.BaseV2ComputeTest):
                         matchers.ContainsAll(metadata.items()),
                         'The fetched Volume metadata misses data '
                         'from the created Volume')
-
-
-class VolumesGetTestXML(VolumesGetTestJSON):
-    _interface = "xml"

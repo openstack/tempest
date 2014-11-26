@@ -47,7 +47,3 @@ class InstanceActionsTestJSON(base.BaseV2ComputeTest):
         self.assertEqual(200, resp.status)
         self.assertEqual(self.server_id, body['instance_uuid'])
         self.assertEqual('create', body['action'])
-
-
-class InstanceActionsTestXML(InstanceActionsTestJSON):
-    _interface = 'xml'

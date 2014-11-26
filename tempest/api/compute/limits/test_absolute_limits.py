@@ -43,7 +43,3 @@ class AbsoluteLimitsTestJSON(base.BaseV2ComputeTest):
         self.assertEqual(0, len(missing_elements),
                          "Failed to find element %s in absolute limits list"
                          % ', '.join(ele for ele in missing_elements))
-
-
-class AbsoluteLimitsTestXML(AbsoluteLimitsTestJSON):
-    _interface = 'xml'

@@ -308,7 +308,3 @@ class FlavorsAdminTestJSON(base.BaseV2ComputeAdminTest):
         self.assertEqual(flavor['disk'], self.disk)
         self.assertEqual(flavor['ram'], int(ram))
         self.assertEqual(int(flavor['id']), new_flavor_id)
-
-
-class FlavorsAdminTestXML(FlavorsAdminTestJSON):
-    _interface = 'xml'

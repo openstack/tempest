@@ -98,7 +98,3 @@ class VolumesNegativeTest(base.BaseV2ComputeTest):
     def test_delete_volume_without_passing_volume_id(self):
         # Negative: Should not be able to delete volume when empty ID is passed
         self.assertRaises(exceptions.NotFound, self.client.delete_volume, '')
-
-
-class VolumesNegativeTestXML(VolumesNegativeTest):
-    _interface = "xml"

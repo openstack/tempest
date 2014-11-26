@@ -162,7 +162,3 @@ class SecurityGroupRulesNegativeTestJSON(base.BaseSecurityGroupsTest):
         self.assertRaises(exceptions.NotFound,
                           self.client.delete_security_group_rule,
                           non_existent_rule_id)
-
-
-class SecurityGroupRulesNegativeTestXML(SecurityGroupRulesNegativeTestJSON):
-    _interface = 'xml'

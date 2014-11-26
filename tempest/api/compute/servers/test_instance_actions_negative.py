@@ -41,7 +41,3 @@ class InstanceActionsNegativeTestJSON(base.BaseV2ComputeTest):
         # Get the action details of the provided server with invalid request
         self.assertRaises(exceptions.NotFound, self.client.get_instance_action,
                           self.server_id, '999')
-
-
-class InstanceActionsNegativeTestXML(InstanceActionsNegativeTestJSON):
-    _interface = 'xml'

@@ -58,7 +58,3 @@ class FixedIPsTestJson(base.BaseV2ComputeAdminTest):
         body = {"unreserve": "None"}
         resp, body = self.client.reserve_fixed_ip(self.ip, body)
         self.assertEqual(resp.status, 202)
-
-
-class FixedIPsTestXml(FixedIPsTestJson):
-    _interface = 'xml'
