@@ -136,6 +136,7 @@ class TestVolumeBootPattern(manager.ScenarioTest):
         actual = self._get_content(ssh_client)
         self.assertEqual(expected, actual)
 
+    @test.skip_because(bug='1373513')
     @test.services('compute', 'volume', 'image')
     def test_volume_boot_pattern(self):
         keypair = self.create_keypair()
