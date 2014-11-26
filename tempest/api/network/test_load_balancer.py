@@ -424,7 +424,3 @@ class LoadBalancerTestJSON(base.BaseNetworkTest):
 
 class LoadBalancerIpV6TestJSON(LoadBalancerTestJSON):
     _ip_version = 6
-
-
-class LoadBalancerTestXML(LoadBalancerTestJSON):
-    _interface = 'xml'

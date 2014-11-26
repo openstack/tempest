@@ -97,7 +97,3 @@ class VolumesActionsV2Test(base.BaseVolumeAdminTest):
 
 class VolumesActionsV1Test(VolumesActionsV2Test):
     _api_version = 1
-
-
-class VolumesActionsV1TestXML(VolumesActionsV1Test):
-    _interface = "xml"

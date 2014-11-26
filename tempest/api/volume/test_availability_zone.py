@@ -35,13 +35,5 @@ class AvailabilityZoneV2TestJSON(base.BaseVolumeTest):
         self.assertTrue(len(availability_zone) > 0)
 
 
-class AvailabilityZoneV2TestXML(AvailabilityZoneV2TestJSON):
-    _interface = 'xml'
-
-
 class AvailabilityZoneV1TestJSON(AvailabilityZoneV2TestJSON):
     _api_version = 1
-
-
-class AvailabilityZoneV1TestXML(AvailabilityZoneV1TestJSON):
-    _interface = 'xml'

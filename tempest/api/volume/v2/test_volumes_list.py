@@ -82,7 +82,3 @@ class VolumesV2ListTestJSON(base.BaseVolumeTest):
 
         _list_details_with_multiple_params()
         _list_details_with_multiple_params(sort_dir='desc')
-
-
-class VolumesV2ListTestXML(VolumesV2ListTestJSON):
-    _interface = 'xml'

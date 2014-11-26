@@ -149,13 +149,5 @@ class VolumesV2GetTest(base.BaseVolumeTest):
         self._volume_create_get_update_delete(source_volid=origin['id'])
 
 
-class VolumesV2GetTestXML(VolumesV2GetTest):
-    _interface = "xml"
-
-
 class VolumesV1GetTest(VolumesV2GetTest):
     _api_version = 1
-
-
-class VolumesV1GetTestXML(VolumesV1GetTest):
-    _interface = "xml"

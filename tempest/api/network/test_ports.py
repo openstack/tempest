@@ -187,10 +187,6 @@ class PortsTestJSON(base.BaseNetworkTest):
              data_utils.rand_name('secgroup')])
 
 
-class PortsTestXML(PortsTestJSON):
-    _interface = 'xml'
-
-
 class PortsAdminExtendedAttrsTestJSON(base.BaseAdminNetworkTest):
     _interface = 'json'
 
@@ -267,25 +263,13 @@ class PortsAdminExtendedAttrsTestJSON(base.BaseAdminNetworkTest):
                          show_port['binding:vif_details'])
 
 
-class PortsAdminExtendedAttrsTestXML(PortsAdminExtendedAttrsTestJSON):
-    _interface = 'xml'
-
-
 class PortsIpV6TestJSON(PortsTestJSON):
     _ip_version = 6
     _tenant_network_cidr = CONF.network.tenant_network_v6_cidr
     _tenant_network_mask_bits = CONF.network.tenant_network_v6_mask_bits
 
 
-class PortsIpV6TestXML(PortsIpV6TestJSON):
-    _interface = 'xml'
-
-
 class PortsAdminExtendedAttrsIpV6TestJSON(PortsAdminExtendedAttrsTestJSON):
     _ip_version = 6
     _tenant_network_cidr = CONF.network.tenant_network_v6_cidr
     _tenant_network_mask_bits = CONF.network.tenant_network_v6_mask_bits
-
-
-class PortsAdminExtendedAttrsIpV6TestXML(PortsAdminExtendedAttrsIpV6TestJSON):
-    _interface = 'xml'

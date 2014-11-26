@@ -231,14 +231,6 @@ class SecGroupTest(base.BaseSecGroupTest):
         self.assertEqual(int(sec_group_rule['protocol']), protocol)
 
 
-class SecGroupTestXML(SecGroupTest):
-    _interface = 'xml'
-
-
 class SecGroupIPv6Test(SecGroupTest):
     _ip_version = 6
     _tenant_network_cidr = CONF.network.tenant_network_v6_cidr
-
-
-class SecGroupIPv6TestXML(SecGroupIPv6Test):
-    _interface = 'xml'

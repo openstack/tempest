@@ -178,13 +178,5 @@ class VolumesV2SnapshotTestJSON(base.BaseVolumeTest):
         self.clear_snapshots()
 
 
-class VolumesV2SnapshotTestXML(VolumesV2SnapshotTestJSON):
-    _interface = "xml"
-
-
 class VolumesV1SnapshotTestJSON(VolumesV2SnapshotTestJSON):
     _api_version = 1
-
-
-class VolumesV1SnapshotTestXML(VolumesV1SnapshotTestJSON):
-    _interface = "xml"

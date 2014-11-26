@@ -142,7 +142,3 @@ class ExtraSpecsNegativeV2Test(base.BaseVolumeAdminTest):
 
 class ExtraSpecsNegativeV1Test(ExtraSpecsNegativeV2Test):
     _api_version = 1
-
-
-class ExtraSpecsNegativeV1TestXML(ExtraSpecsNegativeV1Test):
-    _interface = 'xml'

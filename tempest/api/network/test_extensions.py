@@ -73,7 +73,3 @@ class ExtensionsTestJSON(base.BaseNetworkTest):
         for e in expected_alias:
             if test.is_extension_enabled(e, 'network'):
                 self.assertIn(e, actual_alias)
-
-
-class ExtensionsTestXML(ExtensionsTestJSON):
-    _interface = 'xml'

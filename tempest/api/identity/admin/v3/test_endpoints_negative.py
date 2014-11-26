@@ -88,7 +88,3 @@ class EndpointsNegativeTestJSON(base.BaseIdentityV3AdminTest):
     def test_update_with_enabled_True(self):
         # Enabled should be a boolean, not a string like 'True'
         self._assert_update_raises_bad_request('True')
-
-
-class EndpointsNegativeTestXML(EndpointsNegativeTestJSON):
-    _interface = 'xml'

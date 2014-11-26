@@ -113,7 +113,3 @@ class VolumeQuotasAdminTestJSON(base.BaseVolumeV1AdminTest):
         self.quotas_client.delete_quota_set(tenant_id)
         _, quota_set_new = self.quotas_client.get_quota_set(tenant_id)
         self.assertEqual(volume_default, quota_set_new['volumes'])
-
-
-class VolumeQuotasAdminTestXML(VolumeQuotasAdminTestJSON):
-    _interface = "xml"

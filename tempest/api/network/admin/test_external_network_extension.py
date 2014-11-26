@@ -118,7 +118,3 @@ class ExternalNetworksTestJSON(base.BaseAdminNetworkTest):
                          (s['id'] for s in subnet_list))
         # Removes subnet from the cleanup list
         self.subnets.remove(subnet)
-
-
-class ExternalNetworksTestXML(ExternalNetworksTestJSON):
-    _interface = 'xml'

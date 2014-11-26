@@ -104,7 +104,3 @@ class TokensTestJSON(base.BaseIdentityV2AdminTest):
         # Use the unscoped token to get a token scoped to tenant2
         _, body = self.token_client.auth_token(token_id,
                                                tenant=tenant2_name)
-
-
-class TokensTestXML(TokensTestJSON):
-    _interface = 'xml'

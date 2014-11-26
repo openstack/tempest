@@ -94,7 +94,3 @@ class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
         self.assertEqual(self.data.v3_users[0]['name'], user['name'])
         self.assertEqual(self.alt_email, user['email'])
         self.assertEqual(self.data.domain['id'], user['domain_id'])
-
-
-class UsersV3TestXML(UsersV3TestJSON):
-    _interface = 'xml'
