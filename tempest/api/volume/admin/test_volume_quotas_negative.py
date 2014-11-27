@@ -18,13 +18,13 @@ from tempest import exceptions
 from tempest import test
 
 
-class VolumeQuotasNegativeTestJSON(base.BaseVolumeV1AdminTest):
+class BaseVolumeQuotasNegativeV2TestJSON(base.BaseVolumeAdminTest):
     _interface = "json"
     force_tenant_isolation = True
 
     @classmethod
     def resource_setup(cls):
-        super(VolumeQuotasNegativeTestJSON, cls).resource_setup()
+        super(BaseVolumeQuotasNegativeV2TestJSON, cls).resource_setup()
         demo_user = cls.isolated_creds.get_primary_creds()
         cls.demo_tenant_id = demo_user.tenant_id
         cls.shared_quota_set = {'gigabytes': 3, 'volumes': 1, 'snapshots': 1}
@@ -76,3 +76,7 @@ class VolumeQuotasNegativeTestJSON(base.BaseVolumeV1AdminTest):
         self.assertRaises(exceptions.OverLimit,
                           self.snapshots_client.create_snapshot,
                           self.volume['id'])
+
+
+class VolumeQuotasNegativeV1TestJSON(BaseVolumeQuotasNegativeV2TestJSON):
+    _api_version = 1
