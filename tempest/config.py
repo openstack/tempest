@@ -143,9 +143,6 @@ IdentityFeatureGroup = [
     cfg.BoolOpt('api_v3',
                 default=True,
                 help='Is the v3 identity API enabled'),
-    cfg.BoolOpt('xml_api',
-                default=False,
-                help='If false, skip all identity api tests with xml'),
 ]
 
 compute_group = cfg.OptGroup(name='compute',
@@ -280,9 +277,6 @@ ComputeFeaturesGroup = [
     cfg.BoolOpt('api_v3',
                 default=False,
                 help="If false, skip all nova v3 tests."),
-    cfg.BoolOpt('xml_api_v2',
-                default=True,
-                help="If false skip all v2 api tests with xml"),
     cfg.BoolOpt('disk_config',
                 default=True,
                 help="If false, skip disk config tests"),
@@ -491,9 +485,6 @@ NetworkFeaturesGroup = [
                      "the extended IPv6 attributes ipv6_ra_mode "
                      "and ipv6_address_mode"
                 ),
-    cfg.BoolOpt('xml_api',
-                default=False,
-                help='If false, skip all network api tests with xml')
 ]
 
 messaging_group = cfg.OptGroup(name='messaging',

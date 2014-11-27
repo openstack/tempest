@@ -62,9 +62,6 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
         super(BaseNetworkTest, cls).resource_setup()
         if not CONF.service_available.neutron:
             raise cls.skipException("Neutron support is required")
-        if getattr(cls, '_interface', None) == 'xml':
-            if not CONF.network_feature_enabled.xml_api:
-                raise cls.skipException('XML API is not enabled')
         if cls._ip_version == 6 and not CONF.network_feature_enabled.ipv6:
             raise cls.skipException("IPv6 Tests are disabled.")
 

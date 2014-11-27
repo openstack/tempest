@@ -467,9 +467,6 @@
 # [nova.vnc]->vnc_enabled in nova.conf (boolean value)
 #vnc_console = false
 
-# If false skip all v2 api tests with xml (boolean value)
-#xml_api_v2 = true
-
 
 [dashboard]
 
@@ -631,9 +628,6 @@
 # Does the identity service have delegation and impersonation enabled
 # (boolean value)
 #trust = true
-
-# If false, skip all identity api tests with xml (boolean value)
-#xml_api = false
 
 
 [image]
@@ -809,9 +803,6 @@
 # Allow the execution of IPv6 subnet tests that use the extended IPv6
 # attributes ipv6_ra_mode and ipv6_address_mode (boolean value)
 #ipv6_subnet_attributes = false
-
-# If false, skip all network api tests with xml (boolean value)
-#xml_api = false
 
 
 [object-storage]
