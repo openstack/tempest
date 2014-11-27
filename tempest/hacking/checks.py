@@ -30,18 +30,18 @@ VI_HEADER_RE = re.compile(r"^#\s+vim?:.+")
 mutable_default_args = re.compile(r"^\s*def .+\((.+=\{\}|.+=\[\])")
 
 
-def import_no_clients_in_api(physical_line, filename):
-    """Check for client imports from tempest/api tests
+def import_no_clients_in_api_and_scenario_tests(physical_line, filename):
+    """Check for client imports from tempest/api & tempest/scenario tests
 
     T102: Cannot import OpenStack python clients
     """
 
-    if "tempest/api" in filename:
+    if "tempest/api" in filename or "tempest/scenario" in filename:
         res = PYTHON_CLIENT_RE.match(physical_line)
         if res:
             return (physical_line.find(res.group(1)),
                     ("T102: python clients import not allowed"
-                     " in tempest/api/* tests"))
+                     " in tempest/api/* or tempest/scenario/* tests"))
 
 
 def scenario_tests_need_service_tags(physical_line, filename,
@@ -117,7 +117,7 @@ def no_mutable_default_args(logical_line):
 
 
 def factory(register):
-    register(import_no_clients_in_api)
+    register(import_no_clients_in_api_and_scenario_tests)
     register(scenario_tests_need_service_tags)
     register(no_setup_teardown_class_for_tests)
     register(no_vi_headers)

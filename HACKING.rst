@@ -8,7 +8,8 @@ Tempest Coding Guide
 Tempest Specific Commandments
 ------------------------------
 
-- [T102] Cannot import OpenStack python clients in tempest/api tests
+- [T102] Cannot import OpenStack python clients in tempest/api &
+         tempest/scenario tests
 - [T104] Scenario tests require a services decorator
 - [T105] Unit tests cannot use setUpClass
 - [T106] vim configuration should not be kept in source files.
