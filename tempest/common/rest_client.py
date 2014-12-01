@@ -52,6 +52,23 @@ def safe_body(body, maxlen=4096):
         return text
 
 
+class ResponseBody(dict):
+    """Class that wraps an http response and body into a single value.
+
+    Callers that receive this object will normally use it as a dict but
+    can extract the response if needed.
+    """
+
+    def __init__(self, response, body=None):
+        body_data = body or {}
+        self.update(body_data)
+        self.response = response
+
+    def __str__(self):
+        body = super.__str__(self)
+        return "request: %s\nBody: %s" % (self.response, body)
+
+
 class RestClient(object):
 
     TYPE = "json"
