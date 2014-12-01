@@ -66,7 +66,7 @@ class ResponseBody(dict):
 
     def __str__(self):
         body = super.__str__(self)
-        return "request: %s\nBody: %s" % (self.response, body)
+        return "response: %s\nBody: %s" % (self.response, body)
 
 
 class RestClient(object):
