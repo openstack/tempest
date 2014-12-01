@@ -52,7 +52,3 @@ class NetworksNegativeTestJSON(base.BaseNetworkTest):
         non_exist_id = data_utils.rand_name('network')
         self.assertRaises(exceptions.NotFound, self.client.delete_network,
                           non_exist_id)
-
-
-class NetworksNegativeTestXML(NetworksNegativeTestJSON):
-    _interface = 'xml'

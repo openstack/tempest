@@ -98,13 +98,5 @@ class SnapshotV2MetadataTestJSON(base.BaseVolumeTest):
         self.assertEqual(expect, body)
 
 
-class SnapshotV2MetadataTestXML(SnapshotV2MetadataTestJSON):
-    _interface = "xml"
-
-
 class SnapshotV1MetadataTestJSON(SnapshotV2MetadataTestJSON):
     _api_version = 1
-
-
-class SnapshotV1MetadataTestXML(SnapshotV1MetadataTestJSON):
-    _interface = "xml"

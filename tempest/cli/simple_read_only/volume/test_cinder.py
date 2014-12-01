@@ -16,11 +16,13 @@
 import logging
 import re
 
+from tempest_lib import exceptions
 import testtools
 
 from tempest import cli
+from tempest import clients
 from tempest import config
-from tempest import exceptions
+
 
 CONF = config.CONF
 LOG = logging.getLogger(__name__)
@@ -40,6 +42,14 @@ class SimpleReadOnlyCinderClientTest(cli.ClientTestBase):
             msg = ("%s skipped as Cinder is not available" % cls.__name__)
             raise cls.skipException(msg)
         super(SimpleReadOnlyCinderClientTest, cls).resource_setup()
+        id_cl = clients.AdminManager().identity_client
+        tenant = id_cl.get_tenant_by_name(CONF.identity.admin_tenant_name)
+        cls.admin_tenant_id = tenant['id']
+
+    def cinder(self, *args, **kwargs):
+        return self.clients.cinder(*args,
+                                   endpoint_type=CONF.volume.endpoint_type,
+                                   **kwargs)
 
     def test_cinder_fake_action(self):
         self.assertRaises(exceptions.CommandFailed,
@@ -81,15 +91,13 @@ class SimpleReadOnlyCinderClientTest(cli.ClientTestBase):
     def test_cinder_quota_defaults(self):
         """This CLI can accept and string as param."""
         roles = self.parser.listing(self.cinder('quota-defaults',
-                                                params=CONF.identity.
-                                                admin_tenant_name))
+                                                params=self.admin_tenant_id))
         self.assertTableStruct(roles, ['Property', 'Value'])
 
     def test_cinder_quota_show(self):
         """This CLI can accept and string as param."""
         roles = self.parser.listing(self.cinder('quota-show',
-                                                params=CONF.identity.
-                                                admin_tenant_name))
+                                                params=self.admin_tenant_id))
         self.assertTableStruct(roles, ['Property', 'Value'])
 
     def test_cinder_rate_limits(self):
@@ -131,8 +139,7 @@ class SimpleReadOnlyCinderClientTest(cli.ClientTestBase):
     def test_cinder_service_list(self):
         service_list = self.parser.listing(self.cinder('service-list'))
         self.assertTableStruct(service_list, ['Binary', 'Host', 'Zone',
-                                              'Status', 'State', 'Updated_at',
-                                              'Disabled Reason'])
+                                              'Status', 'State', 'Updated_at'])
 
     def test_cinder_transfer_list(self):
         transfer_list = self.parser.listing(self.cinder('transfer-list'))

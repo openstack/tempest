@@ -143,7 +143,6 @@ class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
         # Verify only the expected number of servers are returned
         params = {'limit': 1}
         resp, servers = self.client.list_servers(params)
-        # when _interface='xml', one element for servers_links in servers
         self.assertEqual(1, len([x for x in servers['servers'] if 'id' in x]))
 
     @test.attr(type='gate')
@@ -293,7 +292,3 @@ class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
         params = {'limit': 1}
         resp, servers = self.client.list_servers_with_detail(params)
         self.assertEqual(1, len(servers['servers']))
-
-
-class ListServerFiltersTestXML(ListServerFiltersTestJSON):
-    _interface = 'xml'

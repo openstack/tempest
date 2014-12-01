@@ -38,9 +38,6 @@ class BaseComputeTest(tempest.test.BaseTestCase):
     def resource_setup(cls):
         cls.set_network_resources()
         super(BaseComputeTest, cls).resource_setup()
-        if getattr(cls, '_interface', None) == 'xml' and cls._api_version == 2:
-            if not CONF.compute_feature_enabled.xml_api_v2:
-                raise cls.skipException('XML API is not enabled')
 
         # TODO(andreaf) WE should care also for the alt_manager here
         # but only once client lazy load in the manager is done
@@ -72,6 +69,8 @@ class BaseComputeTest(tempest.test.BaseTestCase):
             cls.quotas_client = cls.os.quotas_client
             # NOTE(mriedem): os-quota-class-sets is v2 API only
             cls.quota_classes_client = cls.os.quota_classes_client
+            # NOTE(mriedem): os-networks is v2 API only
+            cls.networks_client = cls.os.networks_client
             cls.limits_client = cls.os.limits_client
             cls.volumes_extensions_client = cls.os.volumes_extensions_client
             cls.volumes_client = cls.os.volumes_client
@@ -126,6 +125,8 @@ class BaseComputeTest(tempest.test.BaseTestCase):
 
     @classmethod
     def clear_servers(cls):
+        LOG.debug('Clearing servers: %s', ','.join(
+            server['id'] for server in cls.servers))
         for server in cls.servers:
             try:
                 cls.servers_client.delete_server(server['id'])
@@ -165,6 +166,7 @@ class BaseComputeTest(tempest.test.BaseTestCase):
 
     @classmethod
     def clear_images(cls):
+        LOG.debug('Clearing images: %s', ','.join(cls.images))
         for image_id in cls.images:
             try:
                 cls.images_client.delete_image(image_id)
@@ -176,6 +178,8 @@ class BaseComputeTest(tempest.test.BaseTestCase):
 
     @classmethod
     def clear_security_groups(cls):
+        LOG.debug('Clearing security groups: %s', ','.join(
+            str(sg['id']) for sg in cls.security_groups))
         for sg in cls.security_groups:
             try:
                 resp, body =\
@@ -190,6 +194,7 @@ class BaseComputeTest(tempest.test.BaseTestCase):
 
     @classmethod
     def clear_server_groups(cls):
+        LOG.debug('Clearing server groups: %s', ','.join(cls.server_groups))
         for server_group_id in cls.server_groups:
             try:
                 cls.client.delete_server_group(server_group_id)

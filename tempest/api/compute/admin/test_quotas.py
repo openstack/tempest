@@ -152,10 +152,6 @@ class QuotasAdminTestJSON(base.BaseV2ComputeAdminTest):
         self.assertEqual(ram_default, quota_set_new['ram'])
 
 
-class QuotasAdminTestXML(QuotasAdminTestJSON):
-    _interface = 'xml'
-
-
 class QuotaClassesAdminTestJSON(base.BaseV2ComputeAdminTest):
     """Tests the os-quota-class-sets API to update default quotas.
     """
@@ -202,7 +198,3 @@ class QuotaClassesAdminTestJSON(base.BaseV2ComputeAdminTest):
         LOG.debug("assert that the response has all of the changed values")
         self.assertThat(update_body.items(),
                         matchers.ContainsAll(body.items()))
-
-
-class QuotaClassesAdminTestXML(QuotaClassesAdminTestJSON):
-    _interface = 'xml'

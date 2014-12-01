@@ -55,7 +55,8 @@ Scenario tests are complex "through path" tests for OpenStack
 functionality. They are typically a series of steps where complicated
 state requiring multiple services is set up exercised, and torn down.
 
-Scenario tests can and should use the OpenStack python clients.
+Scenario tests should not use the existing python clients for OpenStack,
+but should instead use the tempest implementations of clients.
 
 
 :ref:`stress_field_guide`

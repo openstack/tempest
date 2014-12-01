@@ -27,9 +27,7 @@ class AttachVolumeTestJSON(base.BaseV2ComputeTest):
 
     def __init__(self, *args, **kwargs):
         super(AttachVolumeTestJSON, self).__init__(*args, **kwargs)
-        self.server = None
-        self.volume = None
-        self.attached = False
+        self.attachment = None
 
     @classmethod
     def resource_setup(cls):
@@ -41,13 +39,15 @@ class AttachVolumeTestJSON(base.BaseV2ComputeTest):
             raise cls.skipException(skip_msg)
 
     def _detach(self, server_id, volume_id):
-        if self.attached:
+        if self.attachment:
             self.servers_client.detach_volume(server_id, volume_id)
             self.volumes_client.wait_for_volume_status(volume_id, 'available')
 
     def _delete_volume(self):
+        # Delete the created Volumes
         if self.volume:
             self.volumes_client.delete_volume(self.volume['id'])
+            self.volumes_client.wait_for_resource_deletion(self.volume['id'])
             self.volume = None
 
     def _create_and_attach(self):
@@ -57,8 +57,8 @@ class AttachVolumeTestJSON(base.BaseV2ComputeTest):
                                                  adminPass=admin_pass)
 
         # Record addresses so that we can ssh later
-        _, self.server['addresses'] = \
-            self.servers_client.list_addresses(self.server['id'])
+        _, self.server['addresses'] = (
+            self.servers_client.list_addresses(self.server['id']))
 
         # Create a volume and wait for it to become ready
         _, self.volume = self.volumes_client.create_volume(
@@ -68,12 +68,12 @@ class AttachVolumeTestJSON(base.BaseV2ComputeTest):
                                                    'available')
 
         # Attach the volume to the server
-        self.servers_client.attach_volume(self.server['id'],
-                                          self.volume['id'],
-                                          device='/dev/%s' % self.device)
+        _, self.attachment = self.servers_client.attach_volume(
+            self.server['id'],
+            self.volume['id'],
+            device='/dev/%s' % self.device)
         self.volumes_client.wait_for_volume_status(self.volume['id'], 'in-use')
 
-        self.attached = True
         self.addCleanup(self._detach, self.server['id'], self.volume['id'])
 
     @testtools.skipUnless(CONF.compute.run_ssh, 'SSH required for this test')
@@ -97,8 +97,7 @@ class AttachVolumeTestJSON(base.BaseV2ComputeTest):
         self.assertIn(self.device, partitions)
 
         self._detach(self.server['id'], self.volume['id'])
-        self.attached = False
-
+        self.attachment = None
         self.servers_client.stop(self.server['id'])
         self.servers_client.wait_for_server_status(self.server['id'],
                                                    'SHUTOFF')
@@ -112,6 +111,20 @@ class AttachVolumeTestJSON(base.BaseV2ComputeTest):
         partitions = linux_client.get_partitions()
         self.assertNotIn(self.device, partitions)
 
+    @test.attr(type='gate')
+    def test_list_get_volume_attachments(self):
+        # Create Server, Volume and attach that Volume to Server
+        self._create_and_attach()
+        # List Volume attachment of the server
+        _, body = self.servers_client.list_volume_attachments(
+            self.server['id'])
+        self.assertEqual(1, len(body))
+        self.assertIn(self.attachment, body)
 
-class AttachVolumeTestXML(AttachVolumeTestJSON):
-    _interface = 'xml'
+        # Get Volume attachment of the server
+        _, body = self.servers_client.get_volume_attachment(
+            self.server['id'],
+            self.attachment['id'])
+        self.assertEqual(self.server['id'], body['serverId'])
+        self.assertEqual(self.volume['id'], body['volumeId'])
+        self.assertEqual(self.attachment['id'], body['id'])

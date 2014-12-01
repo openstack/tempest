@@ -69,13 +69,18 @@ class HackingTestCase(base.TestCase):
         self.assertFalse(checks.no_setup_teardown_class_for_tests(
             "  def tearDownClass(cls):", './tempest/test.py'))
 
-    def test_import_no_clients_in_api(self):
+    def test_import_no_clients_in_api_and_scenario_tests(self):
         for client in checks.PYTHON_CLIENTS:
             string = "import " + client + "client"
-            self.assertTrue(checks.import_no_clients_in_api(
-                string, './tempest/api/fake_test.py'))
-            self.assertFalse(checks.import_no_clients_in_api(
-                string, './tempest/scenario/fake_test.py'))
+            self.assertTrue(
+                checks.import_no_clients_in_api_and_scenario_tests(
+                    string, './tempest/api/fake_test.py'))
+            self.assertTrue(
+                checks.import_no_clients_in_api_and_scenario_tests(
+                    string, './tempest/scenario/fake_test.py'))
+            self.assertFalse(
+                checks.import_no_clients_in_api_and_scenario_tests(
+                    string, './tempest/test.py'))
 
     def test_scenario_tests_need_service_tags(self):
         self.assertFalse(checks.scenario_tests_need_service_tags(

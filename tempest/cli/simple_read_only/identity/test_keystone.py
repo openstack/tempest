@@ -15,9 +15,10 @@
 
 import re
 
+from tempest_lib import exceptions
+
 from tempest import cli
 from tempest import config
-from tempest import exceptions
 from tempest.openstack.common import log as logging
 
 CONF = config.CONF
@@ -33,6 +34,9 @@ class SimpleReadOnlyKeystoneClientTest(cli.ClientTestBase):
     These tests do not presume any content, nor do they create
     their own. They only verify the structure of output if present.
     """
+
+    def keystone(self, *args, **kwargs):
+        return self.clients.keystone(*args, **kwargs)
 
     def test_admin_fake_action(self):
         self.assertRaises(exceptions.CommandFailed,

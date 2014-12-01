@@ -38,7 +38,3 @@ class AZV3Test(base.BaseComputeTest):
 
 class AZV2TestJSON(AZV3Test):
     _api_version = 2
-
-
-class AZV2TestXML(AZV2TestJSON):
-    _interface = 'xml'

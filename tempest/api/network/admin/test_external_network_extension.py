@@ -84,6 +84,37 @@ class ExternalNetworksTestJSON(base.BaseAdminNetworkTest):
         self.assertEqual(self.network['id'], show_net['id'])
         self.assertFalse(show_net['router:external'])
 
+    def test_delete_external_networks_with_floating_ip(self):
+        """Verifies external network can be deleted while still holding
+        (unassociated) floating IPs
 
-class ExternalNetworksTestXML(ExternalNetworksTestJSON):
-    _interface = 'xml'
+        """
+        # Set cls.client to admin to use base.create_subnet()
+        client = self.admin_client
+        _, body = client.create_network(**{'router:external': True})
+        external_network = body['network']
+        self.addCleanup(self._try_delete_resource,
+                        client.delete_network,
+                        external_network['id'])
+        subnet = self.create_subnet(external_network, client=client)
+        _, body = client.create_floatingip(
+            floating_network_id=external_network['id'])
+        created_floating_ip = body['floatingip']
+        self.addCleanup(self._try_delete_resource,
+                        client.delete_floatingip,
+                        created_floating_ip['id'])
+        _, floatingip_list = client.list_floatingips(
+            network=external_network['id'])
+        self.assertIn(created_floating_ip['id'],
+                      (f['id'] for f in floatingip_list['floatingips']))
+        client.delete_network(external_network['id'])
+        # Verifies floating ip is deleted
+        _, floatingip_list = client.list_floatingips()
+        self.assertNotIn(created_floating_ip['id'],
+                         (f['id'] for f in floatingip_list['floatingips']))
+        # Verifies subnet is deleted
+        _, subnet_list = client.list_subnets()
+        self.assertNotIn(subnet['id'],
+                         (s['id'] for s in subnet_list))
+        # Removes subnet from the cleanup list
+        self.subnets.remove(subnet)

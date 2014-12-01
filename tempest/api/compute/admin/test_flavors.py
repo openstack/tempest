@@ -296,7 +296,7 @@ class FlavorsAdminTestJSON(base.BaseV2ComputeAdminTest):
         flavor_name = data_utils.rand_name(self.flavor_name_prefix)
         new_flavor_id = data_utils.rand_int_id(start=1000)
 
-        ram = " 1024 "
+        ram = "1024"
         resp, flavor = self.client.create_flavor(flavor_name,
                                                  ram, self.vcpus,
                                                  self.disk,
@@ -308,7 +308,3 @@ class FlavorsAdminTestJSON(base.BaseV2ComputeAdminTest):
         self.assertEqual(flavor['disk'], self.disk)
         self.assertEqual(flavor['ram'], int(ram))
         self.assertEqual(int(flavor['id']), new_flavor_id)
-
-
-class FlavorsAdminTestXML(FlavorsAdminTestJSON):
-    _interface = 'xml'

@@ -13,8 +13,13 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import netaddr
+
 from tempest.api.network import base
+from tempest import config
 from tempest import test
+
+CONF = config.CONF
 
 
 class AllowedAddressPairTestJSON(base.BaseNetworkTest):
@@ -68,22 +73,50 @@ class AllowedAddressPairTestJSON(base.BaseNetworkTest):
         self._confirm_allowed_address_pair(port[0], self.ip_address)
 
     @test.attr(type='smoke')
-    def test_update_port_with_address_pair(self):
+    def _update_port_with_address(self, address, mac_address=None, **kwargs):
         # Create a port without allowed address pair
         _, body = self.client.create_port(network_id=self.network['id'])
         port_id = body['port']['id']
         self.addCleanup(self.client.delete_port, port_id)
-
-        # Confirm  port is created
-        _, body = self.client.show_port(port_id)
+        if mac_address is None:
+            mac_address = self.mac_address
 
         # Update allowed address pair attribute of port
-        allowed_address_pairs = [{'ip_address': self.ip_address,
-                                  'mac_address': self.mac_address}]
+        allowed_address_pairs = [{'ip_address': address,
+                                  'mac_address': mac_address}]
+        if kwargs:
+            allowed_address_pairs.append(kwargs['allowed_address_pairs'])
         _, body = self.client.update_port(
             port_id, allowed_address_pairs=allowed_address_pairs)
-        newport = body['port']
-        self._confirm_allowed_address_pair(newport, self.ip_address)
+        allowed_address_pair = body['port']['allowed_address_pairs']
+        self.assertEqual(allowed_address_pair, allowed_address_pairs)
+
+    @test.attr(type='smoke')
+    def test_update_port_with_address_pair(self):
+        # Update port with allowed address pair
+        self._update_port_with_address(self.ip_address)
+
+    @test.attr(type='smoke')
+    def test_update_port_with_cidr_address_pair(self):
+        # Update allowed address pair with cidr
+        cidr = str(netaddr.IPNetwork(CONF.network.tenant_network_cidr))
+        self._update_port_with_address(cidr)
+
+    @test.attr(type='smoke')
+    def test_update_port_with_multiple_ip_mac_address_pair(self):
+        # Create an ip _address and mac_address through port create
+        _, resp = self.client.create_port(network_id=self.network['id'])
+        newportid = resp['port']['id']
+        self.addCleanup(self.client.delete_port, newportid)
+        ipaddress = resp['port']['fixed_ips'][0]['ip_address']
+        macaddress = resp['port']['mac_address']
+
+        # Update allowed address pair port with multiple ip and  mac
+        allowed_address_pairs = {'ip_address': ipaddress,
+                                 'mac_address': macaddress}
+        self._update_port_with_address(
+            self.ip_address, self.mac_address,
+            allowed_address_pairs=allowed_address_pairs)
 
     def _confirm_allowed_address_pair(self, port, ip):
         msg = 'Port allowed address pairs should not be empty'
@@ -94,5 +127,5 @@ class AllowedAddressPairTestJSON(base.BaseNetworkTest):
         self.assertEqual(mac_address, self.mac_address)
 
 
-class AllowedAddressPairTestXML(AllowedAddressPairTestJSON):
-    _interface = 'xml'
+class AllowedAddressPairIpV6TestJSON(AllowedAddressPairTestJSON):
+    _ip_version = 6

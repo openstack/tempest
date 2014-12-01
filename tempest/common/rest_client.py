@@ -16,16 +16,15 @@
 
 import collections
 import json
+import logging as real_logging
 import re
 import time
 
 import jsonschema
-from lxml import etree
 import six
 
 from tempest.common import http
 from tempest.common.utils import misc as misc_utils
-from tempest.common import xml_utils as common
 from tempest import config
 from tempest import exceptions
 from tempest.openstack.common import log as logging
@@ -36,12 +35,12 @@ CONF = config.CONF
 MAX_RECURSION_DEPTH = 2
 TOKEN_CHARS_RE = re.compile('^[-A-Za-z0-9+/=]*$')
 
-# All the successful HTTP status codes from RFC 2616
-HTTP_SUCCESS = (200, 201, 202, 203, 204, 205, 206)
+# All the successful HTTP status codes from RFC 7231 & 4918
+HTTP_SUCCESS = (200, 201, 202, 203, 204, 205, 206, 207)
 
 
 # convert a structure into a string safely
-def safe_body(body, maxlen=2048):
+def safe_body(body, maxlen=4096):
     try:
         text = six.text_type(body)
     except UnicodeDecodeError:
@@ -208,8 +207,9 @@ class RestClient(object):
     @classmethod
     def expected_success(cls, expected_code, read_code):
         assert_msg = ("This function only allowed to use for HTTP status"
-                      "codes which explicitly defined in the RFC 2616. {0}"
-                      " is not a defined Success Code!").format(expected_code)
+                      "codes which explicitly defined in the RFC 7231 & 4918."
+                      "{0} is not a defined Success Code!"
+                      ).format(expected_code)
         if isinstance(expected_code, list):
             for code in expected_code:
                 assert code in HTTP_SUCCESS, assert_msg
@@ -310,14 +310,15 @@ class RestClient(object):
         caller_name = misc_utils.find_test_caller()
         if secs:
             secs = " %.3fs" % secs
-        self.LOG.info(
-            'Request (%s): %s %s %s%s' % (
-                caller_name,
-                resp['status'],
-                method,
-                req_url,
-                secs),
-            extra=extra)
+        if not self.LOG.isEnabledFor(real_logging.DEBUG):
+            self.LOG.info(
+                'Request (%s): %s %s %s%s' % (
+                    caller_name,
+                    resp['status'],
+                    method,
+                    req_url,
+                    secs),
+                extra=extra)
 
         # Also look everything at DEBUG if you want to filter this
         # out, don't run at debug.
@@ -325,48 +326,30 @@ class RestClient(object):
                                req_body, resp_body, caller_name, extra)
 
     def _parse_resp(self, body):
-        if self._get_type() is "json":
-            body = json.loads(body)
+        body = json.loads(body)
 
-            # We assume, that if the first value of the deserialized body's
-            # item set is a dict or a list, that we just return the first value
-            # of deserialized body.
-            # Essentially "cutting out" the first placeholder element in a body
-            # that looks like this:
-            #
-            #  {
-            #    "users": [
-            #      ...
-            #    ]
-            #  }
-            try:
-                # Ensure there are not more than one top-level keys
-                if len(body.keys()) > 1:
-                    return body
-                # Just return the "wrapped" element
-                first_key, first_item = body.items()[0]
-                if isinstance(first_item, (dict, list)):
-                    return first_item
-            except (ValueError, IndexError):
-                pass
-            return body
-        elif self._get_type() is "xml":
-            element = etree.fromstring(body)
-            if any(s in element.tag for s in self.dict_tags):
-                # Parse dictionary-like xmls (metadata, etc)
-                dictionary = {}
-                for el in element.getchildren():
-                    dictionary[u"%s" % el.get("key")] = u"%s" % el.text
-                return dictionary
-            if any(s in element.tag for s in self.list_tags):
-                # Parse list-like xmls (users, roles, etc)
-                array = []
-                for child in element.getchildren():
-                    array.append(common.xml_to_json(child))
-                return array
-
-            # Parse one-item-like xmls (user, role, etc)
-            return common.xml_to_json(element)
+        # We assume, that if the first value of the deserialized body's
+        # item set is a dict or a list, that we just return the first value
+        # of deserialized body.
+        # Essentially "cutting out" the first placeholder element in a body
+        # that looks like this:
+        #
+        #  {
+        #    "users": [
+        #      ...
+        #    ]
+        #  }
+        try:
+            # Ensure there are not more than one top-level keys
+            if len(body.keys()) > 1:
+                return body
+            # Just return the "wrapped" element
+            first_key, first_item = body.items()[0]
+            if isinstance(first_item, (dict, list)):
+                return first_item
+        except (ValueError, IndexError):
+            pass
+        return body
 
     def response_checker(self, method, resp, resp_body):
         if (resp.status in set((204, 205, 304)) or resp.status < 200 or

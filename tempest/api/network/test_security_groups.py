@@ -212,22 +212,25 @@ class SecGroupTest(base.BaseSecGroupTest):
                                                 port_range_max,
                                                 remote_ip_prefix=ip_prefix)
 
-
-class SecGroupTestXML(SecGroupTest):
-    _interface = 'xml'
+    @test.attr(type='smoke')
+    def test_create_security_group_rule_with_protocol_integer_value(self):
+        # Verify creating security group rule with the
+        # protocol as integer value
+        # arguments : "protocol": 17
+        group_create_body, _ = self._create_security_group()
+        direction = 'ingress'
+        protocol = 17
+        security_group_id = group_create_body['security_group']['id']
+        _, rule_create_body = self.client.create_security_group_rule(
+            security_group_id=security_group_id,
+            direction=direction,
+            protocol=protocol
+        )
+        sec_group_rule = rule_create_body['security_group_rule']
+        self.assertEqual(sec_group_rule['direction'], direction)
+        self.assertEqual(int(sec_group_rule['protocol']), protocol)
 
 
 class SecGroupIPv6Test(SecGroupTest):
     _ip_version = 6
     _tenant_network_cidr = CONF.network.tenant_network_v6_cidr
-
-    @classmethod
-    def resource_setup(cls):
-        if not CONF.network_feature_enabled.ipv6:
-            skip_msg = "IPv6 Tests are disabled."
-            raise cls.skipException(skip_msg)
-        super(SecGroupIPv6Test, cls).resource_setup()
-
-
-class SecGroupIPv6TestXML(SecGroupIPv6Test):
-    _interface = 'xml'

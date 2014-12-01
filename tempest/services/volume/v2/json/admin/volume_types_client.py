@@ -1,3 +1,6 @@
+# Copyright 2012 OpenStack Foundation
+# All Rights Reserved.
+#
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
 #    not use this file except in compliance with the License. You may obtain
 #    a copy of the License at
@@ -10,21 +13,16 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest import exceptions
-from tempest.tests import base
+
+from tempest.services.volume.json.admin import volume_types_client
 
 
-class TestOutputParser(base.TestCase):
+class VolumeTypesV2ClientJSON(volume_types_client.BaseVolumeTypesClientJSON):
+    """
+    Client class to send CRUD Volume V2 API requests to a Cinder endpoint
+    """
 
-    def test_command_failed_exception(self):
-        returncode = 1
-        cmd = "foo"
-        stdout = "output"
-        stderr = "error"
-        try:
-            raise exceptions.CommandFailed(returncode, cmd, stdout, stderr)
-        except exceptions.CommandFailed as e:
-            self.assertIn(str(returncode), str(e))
-            self.assertIn(cmd, str(e))
-            self.assertIn(stdout, str(e))
-            self.assertIn(stderr, str(e))
+    def __init__(self, auth_provider):
+        super(VolumeTypesV2ClientJSON, self).__init__(auth_provider)
+
+        self.api_version = "v2"

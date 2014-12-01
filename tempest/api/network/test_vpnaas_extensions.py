@@ -39,6 +39,7 @@ class VPNaaSTestJSON(base.BaseAdminNetworkTest):
             msg = "vpnaas extension not enabled."
             raise cls.skipException(msg)
         super(VPNaaSTestJSON, cls).resource_setup()
+        cls.ext_net_id = CONF.network.public_network_id
         cls.network = cls.create_network()
         cls.subnet = cls.create_subnet(cls.network)
         cls.router = cls.create_router(
@@ -121,17 +122,21 @@ class VPNaaSTestJSON(base.BaseAdminNetworkTest):
         tenant_id = self._get_tenant_id()
 
         # Create vpn service for the newly created tenant
+        network2 = self.create_network()
+        subnet2 = self.create_subnet(network2)
+        router2 = self.create_router(data_utils.rand_name('router-'),
+                                     external_network_id=self.ext_net_id)
+        self.create_router_interface(router2['id'], subnet2['id'])
         name = data_utils.rand_name('vpn-service')
         _, body = self.admin_client.create_vpnservice(
-            subnet_id=self.subnet['id'],
-            router_id=self.router['id'],
+            subnet_id=subnet2['id'],
+            router_id=router2['id'],
             name=name,
             admin_state_up=True,
             tenant_id=tenant_id)
         vpnservice = body['vpnservice']
         self.assertIsNotNone(vpnservice['id'])
         self.addCleanup(self.admin_client.delete_vpnservice, vpnservice['id'])
-
         # Assert that created vpnservice is found in API list call
         _, body = self.client.list_vpnservices()
         vpn_services = [vs['id'] for vs in body['vpnservices']]
@@ -167,9 +172,14 @@ class VPNaaSTestJSON(base.BaseAdminNetworkTest):
     @test.attr(type='smoke')
     def test_create_update_delete_vpn_service(self):
         # Creates a VPN service and sets up deletion
-        name = data_utils.rand_name('vpn-service')
-        _, body = self.client.create_vpnservice(subnet_id=self.subnet['id'],
-                                                router_id=self.router['id'],
+        network1 = self.create_network()
+        subnet1 = self.create_subnet(network1)
+        router1 = self.create_router(data_utils.rand_name('router-'),
+                                     external_network_id=self.ext_net_id)
+        self.create_router_interface(router1['id'], subnet1['id'])
+        name = data_utils.rand_name('vpn-service1')
+        _, body = self.client.create_vpnservice(subnet_id=subnet1['id'],
+                                                router_id=router1['id'],
                                                 name=name,
                                                 admin_state_up=True)
         vpnservice = body['vpnservice']
@@ -303,7 +313,3 @@ class VPNaaSTestJSON(base.BaseAdminNetworkTest):
         _, body = self.client.show_ipsecpolicy(self.ipsecpolicy['id'])
         ipsecpolicy = body['ipsecpolicy']
         self._assertExpected(self.ipsecpolicy, ipsecpolicy)
-
-
-class VPNaaSTestXML(VPNaaSTestJSON):
-    _interface = 'xml'

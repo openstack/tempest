@@ -102,13 +102,5 @@ class VolumesV2TransfersTest(base.BaseVolumeTest):
         self.client.wait_for_volume_status(volume['id'], 'available')
 
 
-class VolumesV2TransfersTestXML(VolumesV2TransfersTest):
-    _interface = "xml"
-
-
 class VolumesV1TransfersTest(VolumesV2TransfersTest):
     _api_version = 1
-
-
-class VolumesV1TransfersTestXML(VolumesV1TransfersTest):
-    _interface = "xml"

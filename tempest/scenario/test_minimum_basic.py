@@ -16,6 +16,7 @@
 from tempest.common import custom_matchers
 from tempest.common import debug
 from tempest import config
+from tempest import exceptions
 from tempest.openstack.common import log as logging
 from tempest.scenario import manager
 from tempest import test
@@ -77,9 +78,8 @@ class TestMinimumBasicScenario(manager.ScenarioTest):
 
     def nova_volume_attach(self):
         volume_device_path = '/dev/' + CONF.compute.volume_device_name
-        _, volume_attachment = self.servers_client.attach_volume(
+        _, volume = self.servers_client.attach_volume(
             self.server['id'], self.volume['id'], volume_device_path)
-        volume = volume_attachment['volumeAttachment']
         self.assertEqual(self.volume['id'], volume['id'])
         self.volumes_client.wait_for_volume_status(volume['id'], 'in-use')
         # Refresh the volume after the attachment
@@ -88,16 +88,6 @@ class TestMinimumBasicScenario(manager.ScenarioTest):
     def nova_reboot(self):
         self.servers_client.reboot(self.server['id'], 'SOFT')
         self._wait_for_server_status('ACTIVE')
-
-    def nova_floating_ip_create(self):
-        _, self.floating_ip = self.floating_ips_client.create_floating_ip()
-        self.addCleanup(self.delete_wrapper,
-                        self.floating_ips_client.delete_floating_ip,
-                        self.floating_ip['id'])
-
-    def nova_floating_ip_add(self):
-        self.floating_ips_client.associate_floating_ip_to_server(
-            self.floating_ip['ip'], self.server['id'])
 
     def ssh_to_server(self):
         try:
@@ -130,6 +120,17 @@ class TestMinimumBasicScenario(manager.ScenarioTest):
         self.addCleanup(self.servers_client.remove_security_group,
                         self.server['id'], secgroup['name'])
 
+        def wait_for_secgroup_add():
+            _, body = self.servers_client.get_server(self.server['id'])
+            return {'name': secgroup['name']} in body['security_groups']
+
+        if not test.call_until_true(wait_for_secgroup_add,
+                                    CONF.compute.build_timeout,
+                                    CONF.compute.build_interval):
+            msg = ('Timed out waiting for adding security group %s to server '
+                   '%s' % (secgroup['id'], self.server['id']))
+            raise exceptions.TimeoutException(msg)
+
     @test.services('compute', 'volume', 'image', 'network')
     def test_minimum_basic_scenario(self):
         self.glance_image_create()
@@ -144,8 +145,7 @@ class TestMinimumBasicScenario(manager.ScenarioTest):
         self.addCleanup(self.nova_volume_detach)
         self.cinder_show()
 
-        self.nova_floating_ip_create()
-        self.nova_floating_ip_add()
+        self.floating_ip = self.create_floating_ip(self.server)
         self.create_and_add_security_group()
         self.ssh_to_server()
         self.nova_reboot()

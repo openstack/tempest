@@ -18,29 +18,28 @@ from tempest.common.utils import data_utils
 from tempest import test
 
 
-class SnapshotsActionsTest(base.BaseVolumeV1AdminTest):
+class SnapshotsActionsV2Test(base.BaseVolumeAdminTest):
     _interface = "json"
 
     @classmethod
     def resource_setup(cls):
-        super(SnapshotsActionsTest, cls).resource_setup()
+        super(SnapshotsActionsV2Test, cls).resource_setup()
         cls.client = cls.snapshots_client
-
-        # Create admin volume client
-        cls.admin_snapshots_client = cls.os_adm.snapshots_client
 
         # Create a test shared volume for tests
         vol_name = data_utils.rand_name(cls.__name__ + '-Volume-')
+        cls.name_field = cls.special_fields['name_field']
+        params = {cls.name_field: vol_name}
         _, cls.volume = \
-            cls.volumes_client.create_volume(size=1, display_name=vol_name)
+            cls.volumes_client.create_volume(size=1, **params)
         cls.volumes_client.wait_for_volume_status(cls.volume['id'],
                                                   'available')
 
         # Create a test shared snapshot for tests
         snap_name = data_utils.rand_name(cls.__name__ + '-Snapshot-')
+        params = {cls.name_field: snap_name}
         _, cls.snapshot = \
-            cls.client.create_snapshot(cls.volume['id'],
-                                       display_name=snap_name)
+            cls.client.create_snapshot(cls.volume['id'], **params)
         cls.client.wait_for_snapshot_status(cls.snapshot['id'],
                                             'available')
 
@@ -54,7 +53,7 @@ class SnapshotsActionsTest(base.BaseVolumeV1AdminTest):
         cls.volumes_client.delete_volume(cls.volume['id'])
         cls.volumes_client.wait_for_resource_deletion(cls.volume['id'])
 
-        super(SnapshotsActionsTest, cls).resource_cleanup()
+        super(SnapshotsActionsV2Test, cls).resource_cleanup()
 
     def tearDown(self):
         # Set snapshot's status to available after test
@@ -62,7 +61,7 @@ class SnapshotsActionsTest(base.BaseVolumeV1AdminTest):
         snapshot_id = self.snapshot['id']
         self.admin_snapshots_client.reset_snapshot_status(snapshot_id,
                                                           status)
-        super(SnapshotsActionsTest, self).tearDown()
+        super(SnapshotsActionsV2Test, self).tearDown()
 
     def _create_reset_and_force_delete_temp_snapshot(self, status=None):
         # Create snapshot, reset snapshot status,
@@ -127,9 +126,5 @@ class SnapshotsActionsTest(base.BaseVolumeV1AdminTest):
         self._create_reset_and_force_delete_temp_snapshot('error_deleting')
 
 
-class SnapshotsActionsTestXML(SnapshotsActionsTest):
-    _interface = "xml"
-
-    def _get_progress_alias(self):
-        return '{http://docs.openstack.org/volume/ext' \
-               '/extended_snapshot_attributes/api/v1}progress'
+class SnapshotsActionsV1Test(SnapshotsActionsV2Test):
+    _api_version = 1

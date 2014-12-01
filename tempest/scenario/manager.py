@@ -411,9 +411,8 @@ class ScenarioTest(tempest.test.BaseTestCase):
 
     def nova_volume_attach(self):
         # TODO(andreaf) Device should be here CONF.compute.volume_device_name
-        _, volume_attachment = self.servers_client.attach_volume(
+        _, volume = self.servers_client.attach_volume(
             self.server['id'], self.volume['id'], '/dev/vdb')
-        volume = volume_attachment['volumeAttachment']
         self.assertEqual(self.volume['id'], volume['id'])
         self.volumes_client.wait_for_volume_status(volume['id'], 'in-use')
         # Refresh the volume after the attachment
@@ -457,6 +456,68 @@ class ScenarioTest(tempest.test.BaseTestCase):
 
         return tempest.test.call_until_true(ping, timeout, 1)
 
+    def check_vm_connectivity(self, ip_address,
+                              username=None,
+                              private_key=None,
+                              should_connect=True):
+        """
+        :param ip_address: server to test against
+        :param username: server's ssh username
+        :param private_key: server's ssh private key to be used
+        :param should_connect: True/False indicates positive/negative test
+            positive - attempt ping and ssh
+            negative - attempt ping and fail if succeed
+
+        :raises: AssertError if the result of the connectivity check does
+            not match the value of the should_connect param
+        """
+        if should_connect:
+            msg = "Timed out waiting for %s to become reachable" % ip_address
+        else:
+            msg = "ip address %s is reachable" % ip_address
+        self.assertTrue(self.ping_ip_address(ip_address,
+                                             should_succeed=should_connect),
+                        msg=msg)
+        if should_connect:
+            # no need to check ssh for negative connectivity
+            self.get_remote_client(ip_address, username, private_key)
+
+    def check_public_network_connectivity(self, ip_address, username,
+                                          private_key, should_connect=True,
+                                          msg=None, servers=None):
+        # The target login is assumed to have been configured for
+        # key-based authentication by cloud-init.
+        LOG.debug('checking network connections to IP %s with user: %s' %
+                  (ip_address, username))
+        try:
+            self.check_vm_connectivity(ip_address,
+                                       username,
+                                       private_key,
+                                       should_connect=should_connect)
+        except Exception as e:
+            ex_msg = 'Public network connectivity check failed'
+            if msg:
+                ex_msg += ": " + msg
+            LOG.exception(ex_msg)
+            self._log_console_output(servers)
+            # network debug is called as part of ssh init
+            if not isinstance(e, exceptions.SSHTimeout):
+                debug.log_net_debug()
+            raise
+
+    def create_floating_ip(self, thing, pool_name=None):
+        """Creates a floating IP and associates to a server using
+        Nova clients
+        """
+
+        _, floating_ip = self.floating_ips_client.create_floating_ip(pool_name)
+        self.addCleanup(self.delete_wrapper,
+                        self.floating_ips_client.delete_floating_ip,
+                        floating_ip['id'])
+        self.floating_ips_client.associate_floating_ip_to_server(
+            floating_ip['ip'], thing['id'])
+        return floating_ip
+
 
 class NetworkScenarioTest(ScenarioTest):
     """Base class for network scenario tests.
@@ -476,9 +537,9 @@ class NetworkScenarioTest(ScenarioTest):
 
     @classmethod
     def resource_setup(cls):
+        cls.check_preconditions()
         super(NetworkScenarioTest, cls).resource_setup()
         cls.tenant_id = cls.manager.identity_client.tenant_id
-        cls.check_preconditions()
 
     def _create_network(self, client=None, tenant_id=None,
                         namestart='network-smoke-'):
@@ -592,8 +653,13 @@ class NetworkScenarioTest(ScenarioTest):
         net = self._list_networks(name=network_name)
         return net_resources.AttributeDict(net[0])
 
-    def _create_floating_ip(self, thing, external_network_id, port_id=None,
-                            client=None):
+    def create_floating_ip(self, thing, external_network_id=None,
+                           port_id=None, client=None):
+        """Creates a floating IP and associates to a resource/port using
+        Neutron client
+        """
+        if not external_network_id:
+            external_network_id = CONF.network.public_network_id
         if not client:
             client = self.network_client
         if not port_id:
@@ -624,14 +690,20 @@ class NetworkScenarioTest(ScenarioTest):
         return floating_ip
 
     def check_floating_ip_status(self, floating_ip, status):
-        """Verifies floatingip has reached given status. without waiting
+        """Verifies floatingip reaches the given status
 
         :param floating_ip: net_resources.DeletableFloatingIp floating IP to
         to check status
         :param status: target status
         :raises: AssertionError if status doesn't match
         """
-        floating_ip.refresh()
+        def refresh():
+            floating_ip.refresh()
+            return status == floating_ip.status
+
+        tempest.test.call_until_true(refresh,
+                                     CONF.network.build_timeout,
+                                     CONF.network.build_interval)
         self.assertEqual(status, floating_ip.status,
                          message="FloatingIP: {fp} is at status: {cst}. "
                                  "failed  to reach status: {st}"
@@ -639,53 +711,6 @@ class NetworkScenarioTest(ScenarioTest):
                                  st=status))
         LOG.info("FloatingIP: {fp} is at status: {st}"
                  .format(fp=floating_ip, st=status))
-
-    def _check_vm_connectivity(self, ip_address,
-                               username=None,
-                               private_key=None,
-                               should_connect=True):
-        """
-        :param ip_address: server to test against
-        :param username: server's ssh username
-        :param private_key: server's ssh private key to be used
-        :param should_connect: True/False indicates positive/negative test
-            positive - attempt ping and ssh
-            negative - attempt ping and fail if succeed
-
-        :raises: AssertError if the result of the connectivity check does
-            not match the value of the should_connect param
-        """
-        if should_connect:
-            msg = "Timed out waiting for %s to become reachable" % ip_address
-        else:
-            msg = "ip address %s is reachable" % ip_address
-        self.assertTrue(self.ping_ip_address(ip_address,
-                                             should_succeed=should_connect),
-                        msg=msg)
-        if should_connect:
-            # no need to check ssh for negative connectivity
-            self.get_remote_client(ip_address, username, private_key)
-
-    def _check_public_network_connectivity(self, ip_address, username,
-                                           private_key, should_connect=True,
-                                           msg=None, servers=None):
-        # The target login is assumed to have been configured for
-        # key-based authentication by cloud-init.
-        LOG.debug('checking network connections to IP %s with user: %s' %
-                  (ip_address, username))
-        try:
-            self._check_vm_connectivity(ip_address,
-                                        username,
-                                        private_key,
-                                        should_connect=should_connect)
-        except Exception as e:
-            ex_msg = 'Public network connectivity check failed'
-            if msg:
-                ex_msg += ": " + msg
-            LOG.exception(ex_msg)
-            self._log_console_output(servers)
-            self._log_net_info(e)
-            raise
 
     def _check_tenant_network_connectivity(self, server,
                                            username,
@@ -701,10 +726,10 @@ class NetworkScenarioTest(ScenarioTest):
         try:
             for net_name, ip_addresses in server['networks'].iteritems():
                 for ip_address in ip_addresses:
-                    self._check_vm_connectivity(ip_address,
-                                                username,
-                                                private_key,
-                                                should_connect=should_connect)
+                    self.check_vm_connectivity(ip_address,
+                                               username,
+                                               private_key,
+                                               should_connect=should_connect)
         except Exception as e:
             LOG.exception('Tenant network connectivity check failed')
             self._log_console_output(servers_for_debug)
@@ -1017,12 +1042,11 @@ class BaremetalProvisionStates(object):
 class BaremetalScenarioTest(ScenarioTest):
     @classmethod
     def resource_setup(cls):
-        super(BaremetalScenarioTest, cls).resource_setup()
-
         if (not CONF.service_available.ironic or
            not CONF.baremetal.driver_enabled):
             msg = 'Ironic not available or Ironic compute driver not enabled'
             raise cls.skipException(msg)
+        super(BaremetalScenarioTest, cls).resource_setup()
 
         # use an admin client manager for baremetal client
         manager = clients.Manager(
@@ -1196,9 +1220,9 @@ class OrchestrationScenarioTest(ScenarioTest):
 
     @classmethod
     def resource_setup(cls):
-        super(OrchestrationScenarioTest, cls).resource_setup()
         if not CONF.service_available.heat:
             raise cls.skipException("Heat support is required")
+        super(OrchestrationScenarioTest, cls).resource_setup()
 
     @classmethod
     def credentials(cls):
@@ -1241,12 +1265,12 @@ class SwiftScenarioTest(ScenarioTest):
 
     @classmethod
     def resource_setup(cls):
-        cls.set_network_resources()
-        super(SwiftScenarioTest, cls).resource_setup()
         if not CONF.service_available.swift:
             skip_msg = ("%s skipped as swift is not available" %
                         cls.__name__)
             raise cls.skipException(skip_msg)
+        cls.set_network_resources()
+        super(SwiftScenarioTest, cls).resource_setup()
         # Clients for Swift
         cls.account_client = cls.manager.account_client
         cls.container_client = cls.manager.container_client
@@ -1264,6 +1288,9 @@ class SwiftScenarioTest(ScenarioTest):
         # look for the container to assure it is created
         self.list_and_check_container_objects(name)
         LOG.debug('Container %s created' % (name))
+        self.addCleanup(self.delete_wrapper,
+                        self.container_client.delete_container,
+                        name)
         return name
 
     def delete_container(self, container_name):
@@ -1274,6 +1301,10 @@ class SwiftScenarioTest(ScenarioTest):
         obj_name = obj_name or data_utils.rand_name('swift-scenario-object')
         obj_data = data_utils.arbitrary_string()
         self.object_client.create_object(container_name, obj_name, obj_data)
+        self.addCleanup(self.delete_wrapper,
+                        self.object_client.delete_object,
+                        container_name,
+                        obj_name)
         return obj_name, obj_data
 
     def delete_object(self, container_name, filename):

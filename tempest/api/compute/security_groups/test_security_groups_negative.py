@@ -201,7 +201,3 @@ class SecurityGroupsNegativeTestJSON(base.BaseSecurityGroupsTest):
                           self.client.update_security_group,
                           non_exist_id, name=s_name,
                           description=s_description)
-
-
-class SecurityGroupsNegativeTestXML(SecurityGroupsNegativeTestJSON):
-    _interface = 'xml'

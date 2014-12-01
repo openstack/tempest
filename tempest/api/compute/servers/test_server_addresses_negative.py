@@ -42,7 +42,3 @@ class ServerAddressesNegativeTestJSON(base.BaseV2ComputeTest):
         self.assertRaises(exceptions.NotFound,
                           self.client.list_addresses_by_network,
                           self.server['id'], 'invalid')
-
-
-class ServerAddressesNegativeTestXML(ServerAddressesNegativeTestJSON):
-    _interface = 'xml'

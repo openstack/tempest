@@ -259,14 +259,6 @@ class VolumesV2NegativeTest(base.BaseVolumeTest):
         self.assertEqual(0, len(fetched_volume))
 
 
-class VolumesV2NegativeTestXML(VolumesV2NegativeTest):
-    _interface = 'xml'
-
-
 class VolumesV1NegativeTest(VolumesV2NegativeTest):
     _api_version = 1
     _name = 'display_name'
-
-
-class VolumesV1NegativeTestXML(VolumesV1NegativeTest):
-    _interface = 'xml'

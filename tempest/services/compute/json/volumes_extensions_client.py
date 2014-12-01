@@ -73,10 +73,9 @@ class VolumesExtensionsClientJSON(rest_client.RestClient):
         metadata: A dictionary of values to be used as metadata.
         """
         post_body = {
-            'size': size,
-            'display_name': kwargs.get('display_name'),
-            'metadata': kwargs.get('metadata'),
+            'size': size
         }
+        post_body.update(kwargs)
 
         post_body = json.dumps({'volume': post_body})
         resp, body = self.post('os-volumes', post_body)

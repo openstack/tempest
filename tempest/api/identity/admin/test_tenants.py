@@ -178,7 +178,3 @@ class TenantsTestJSON(base.BaseIdentityV2AdminTest):
 
         self.client.delete_tenant(t_id)
         self.data.tenants.remove(tenant)
-
-
-class TenantsTestXML(TenantsTestJSON):
-    _interface = 'xml'

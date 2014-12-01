@@ -44,9 +44,12 @@ class TestSwiftBasicOps(manager.SwiftScenarioTest):
         self.get_swift_stat()
         container_name = self.create_container()
         obj_name, obj_data = self.upload_object_to_container(container_name)
-        self.list_and_check_container_objects(container_name, [obj_name])
+        self.list_and_check_container_objects(container_name,
+                                              present_obj=[obj_name])
         self.download_and_verify(container_name, obj_name, obj_data)
         self.delete_object(container_name, obj_name)
+        self.list_and_check_container_objects(container_name,
+                                              not_present_obj=[obj_name])
         self.delete_container(container_name)
 
     @test.services('object_storage')
@@ -68,5 +71,3 @@ class TestSwiftBasicOps(manager.SwiftScenarioTest):
         self.change_container_acl(container_name, '.r:*')
         resp, _ = http_client.request(obj_url, 'GET')
         self.assertEqual(resp.status, 200)
-        self.delete_object(container_name, obj_name)
-        self.delete_container(container_name)

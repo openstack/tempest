@@ -61,7 +61,6 @@ class ContainerQuotasTest(base.BaseObjectTest):
 
         resp, _ = self.object_client.create_object(
             self.container_name, object_name, data)
-        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
         self.assertHeaders(resp, 'Object', 'PUT')
 
         nafter = self._get_bytes_used()

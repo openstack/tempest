@@ -91,7 +91,3 @@ class GroupsV3TestJSON(base.BaseIdentityV3AdminTest):
         _, user_groups = self.client.list_user_groups(user['id'])
         self.assertEqual(sorted(groups), sorted(user_groups))
         self.assertEqual(2, len(user_groups))
-
-
-class GroupsV3TestXML(GroupsV3TestJSON):
-    _interface = 'xml'

@@ -82,7 +82,3 @@ class FixedIPsNegativeTestJson(base.BaseV2ComputeAdminTest):
         self.assertRaises(exceptions.BadRequest,
                           self.client.reserve_fixed_ip,
                           self.ip, body)
-
-
-class FixedIPsNegativeTestXml(FixedIPsNegativeTestJson):
-    _interface = 'xml'

@@ -113,7 +113,3 @@ class ServerMetadataTestJSON(base.BaseV2ComputeTest):
         resp, resp_metadata = self.client.list_server_metadata(self.server_id)
         expected = {'key2': 'value2'}
         self.assertEqual(expected, resp_metadata)
-
-
-class ServerMetadataTestXML(ServerMetadataTestJSON):
-    _interface = 'xml'

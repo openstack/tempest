@@ -105,7 +105,3 @@ class RolesTestJSON(base.BaseIdentityV2AdminTest):
         self.client.assign_user_role(tenant['id'], user['id'], role['id'])
         _, roles = self.client.list_user_roles(tenant['id'], user['id'])
         self.assert_role_in_role_list(role, roles)
-
-
-class RolesTestXML(RolesTestJSON):
-    _interface = 'xml'

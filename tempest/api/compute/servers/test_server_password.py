@@ -35,7 +35,3 @@ class ServerPasswordTestJSON(base.BaseV2ComputeTest):
     def test_delete_server_password(self):
         resp, body = self.client.delete_password(self.server['id'])
         self.assertEqual(204, resp.status)
-
-
-class ServerPasswordTestXML(ServerPasswordTestJSON):
-    _interface = 'xml'

@@ -1,5 +1,4 @@
 # Copyright 2014 IBM Corp.
-# All Rights Reserved.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
 #    not use this file except in compliance with the License. You may obtain
@@ -13,14 +12,22 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest.services.volume.xml import availability_zone_client
+from tempest.api.compute import base
+from tempest import config
+from tempest import test
+
+CONF = config.CONF
 
 
-class VolumeV2AvailabilityZoneClientXML(
-        availability_zone_client.BaseVolumeAvailabilityZoneClientXML):
+class NetworksTestJSON(base.BaseV2ComputeTest):
+    @classmethod
+    def resource_setup(cls):
+        if CONF.service_available.neutron:
+            raise cls.skipException('nova-network is not available.')
+        super(NetworksTestJSON, cls).resource_setup()
+        cls.client = cls.os.networks_client
 
-    def __init__(self, auth_provider):
-        super(VolumeV2AvailabilityZoneClientXML, self).__init__(
-            auth_provider)
-
-        self.api_version = "v2"
+    @test.attr(type='gate')
+    def test_list_networks(self):
+        _, networks = self.client.list_networks()
+        self.assertNotEmpty(networks, "No networks found.")

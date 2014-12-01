@@ -37,10 +37,9 @@ class TestVolumeBootPattern(manager.ScenarioTest):
     """
     @classmethod
     def resource_setup(cls):
-        super(TestVolumeBootPattern, cls).resource_setup()
-
         if not CONF.volume_feature_enabled.snapshot:
             raise cls.skipException("Cinder volume snapshots are disabled")
+        super(TestVolumeBootPattern, cls).resource_setup()
 
     def _create_volume_from_image(self):
         img_uuid = CONF.compute.image_ref
@@ -137,6 +136,7 @@ class TestVolumeBootPattern(manager.ScenarioTest):
         actual = self._get_content(ssh_client)
         self.assertEqual(expected, actual)
 
+    @test.skip_because(bug='1373513')
     @test.services('compute', 'volume', 'image')
     def test_volume_boot_pattern(self):
         keypair = self.create_keypair()

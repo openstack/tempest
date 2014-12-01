@@ -18,12 +18,12 @@ from tempest.common.utils import data_utils
 from tempest import test
 
 
-class VolumeTypesExtraSpecsTest(base.BaseVolumeV1AdminTest):
+class VolumeTypesExtraSpecsV2Test(base.BaseVolumeAdminTest):
     _interface = "json"
 
     @classmethod
     def resource_setup(cls):
-        super(VolumeTypesExtraSpecsTest, cls).resource_setup()
+        super(VolumeTypesExtraSpecsV2Test, cls).resource_setup()
         vol_type_name = data_utils.rand_name('Volume-type-')
         _, cls.volume_type = cls.volume_types_client.create_volume_type(
             vol_type_name)
@@ -31,7 +31,7 @@ class VolumeTypesExtraSpecsTest(base.BaseVolumeV1AdminTest):
     @classmethod
     def resource_cleanup(cls):
         cls.volume_types_client.delete_volume_type(cls.volume_type['id'])
-        super(VolumeTypesExtraSpecsTest, cls).resource_cleanup()
+        super(VolumeTypesExtraSpecsV2Test, cls).resource_cleanup()
 
     @test.attr(type='smoke')
     def test_volume_type_extra_specs_list(self):
@@ -83,3 +83,7 @@ class VolumeTypesExtraSpecsTest(base.BaseVolumeV1AdminTest):
         self.volume_types_client.delete_volume_type_extra_specs(
             self.volume_type['id'],
             extra_specs.keys()[0])
+
+
+class VolumeTypesExtraSpecsV1Test(VolumeTypesExtraSpecsV2Test):
+    _api_version = 1

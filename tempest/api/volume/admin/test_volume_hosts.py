@@ -17,7 +17,7 @@ from tempest.api.volume import base
 from tempest import test
 
 
-class VolumeHostsAdminTestsJSON(base.BaseVolumeV1AdminTest):
+class VolumeHostsAdminV2TestsJSON(base.BaseVolumeAdminTest):
     _interface = "json"
 
     @test.attr(type='gate')
@@ -27,5 +27,5 @@ class VolumeHostsAdminTestsJSON(base.BaseVolumeV1AdminTest):
                         "response of list hosts is: % s" % hosts)
 
 
-class VolumeHostsAdminTestsXML(VolumeHostsAdminTestsJSON):
-    _interface = 'xml'
+class VolumeHostsAdminV1TestsJSON(VolumeHostsAdminV2TestsJSON):
+    _api_version = 1

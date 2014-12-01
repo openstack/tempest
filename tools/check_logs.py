@@ -31,7 +31,7 @@ import yaml
 is_grenade = os.environ.get('DEVSTACK_GATE_GRENADE') is not None
 dump_all_errors = True
 
-# As logs are made clean, add to this set
+# As logs are made clean, remove from this set
 allowed_dirty = set([
     'c-api',
     'ceilometer-acentral',

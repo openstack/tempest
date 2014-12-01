@@ -23,13 +23,13 @@ from tempest import exceptions
 CONF = config.CONF
 
 
-class BackupsClientJSON(rest_client.RestClient):
+class BaseBackupsClientJSON(rest_client.RestClient):
     """
     Client class to send CRUD Volume backup API requests to a Cinder endpoint
     """
 
     def __init__(self, auth_provider):
-        super(BackupsClientJSON, self).__init__(auth_provider)
+        super(BaseBackupsClientJSON, self).__init__(auth_provider)
         self.service = CONF.volume.catalog_type
         self.build_interval = CONF.volume.build_interval
         self.build_timeout = CONF.volume.build_timeout
@@ -99,3 +99,7 @@ class BackupsClientJSON(rest_client.RestClient):
                            'the required time (%s s).' %
                            (backup_id, status, self.build_timeout))
                 raise exceptions.TimeoutException(message)
+
+
+class BackupsClientJSON(BaseBackupsClientJSON):
+    """Volume V1 Backups client"""

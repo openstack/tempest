@@ -20,6 +20,7 @@ from testtools import matchers
 
 from tempest.api.messaging import base
 from tempest.common.utils import data_utils
+from tempest import exceptions
 from tempest import test
 
 
@@ -29,14 +30,21 @@ LOG = logging.getLogger(__name__)
 class TestQueues(base.BaseMessagingTest):
 
     @test.attr(type='smoke')
-    def test_create_queue(self):
-        # Create Queue
+    def test_create_delete_queue(self):
+        # Create & Delete Queue
         queue_name = data_utils.rand_name('test-')
         _, body = self.create_queue(queue_name)
 
         self.addCleanup(self.client.delete_queue, queue_name)
-
+        # NOTE(gmann): create_queue returns response status code as 201
+        # so specifically checking the expected empty response body as
+        # this is not going to be checked in response_checker().
         self.assertEqual('', body)
+
+        self.delete_queue(queue_name)
+        self.assertRaises(exceptions.NotFound,
+                          self.client.get_queue,
+                          queue_name)
 
 
 class TestManageQueue(base.BaseMessagingTest):
@@ -53,25 +61,16 @@ class TestManageQueue(base.BaseMessagingTest):
             cls.client.create_queue(queue_name)
 
     @test.attr(type='smoke')
-    def test_delete_queue(self):
-        # Delete Queue
-        queue_name = self.queues.pop()
-        _, body = self.delete_queue(queue_name)
-        self.assertEqual('', body)
-
-    @test.attr(type='smoke')
     def test_check_queue_existence(self):
         # Checking Queue Existence
         for queue_name in self.queues:
-            _, body = self.check_queue_exists(queue_name)
-            self.assertEqual('', body)
+            self.check_queue_exists(queue_name)
 
     @test.attr(type='smoke')
     def test_check_queue_head(self):
         # Checking Queue Existence by calling HEAD
         for queue_name in self.queues:
-            _, body = self.check_queue_exists_head(queue_name)
-            self.assertEqual('', body)
+            self.check_queue_exists_head(queue_name)
 
     @test.attr(type='smoke')
     def test_list_queues(self):
@@ -111,8 +110,8 @@ class TestManageQueue(base.BaseMessagingTest):
         req_body = dict()
         req_body[data_utils.rand_name('key1')] = req_body1
         # Set Queue Metadata
-        _, body = self.set_queue_metadata(queue_name, req_body)
-        self.assertEqual('', body)
+        self.set_queue_metadata(queue_name, req_body)
+
         # Get Queue Metadata
         _, body = self.get_queue_metadata(queue_name)
         self.assertThat(body, matchers.Equals(req_body))

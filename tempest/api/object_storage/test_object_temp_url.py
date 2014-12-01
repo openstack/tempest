@@ -105,13 +105,11 @@ class ObjectTempUrlTest(base.BaseObjectTest):
 
         # trying to get object using temp url within expiry time
         resp, body = self.object_client.get(url)
-        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
         self.assertHeaders(resp, 'Object', 'GET')
         self.assertEqual(body, self.content)
 
         # Testing a HEAD on this Temp URL
         resp, body = self.object_client.head(url)
-        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
         self.assertHeaders(resp, 'Object', 'HEAD')
 
     @test.attr(type='gate')
@@ -136,7 +134,6 @@ class ObjectTempUrlTest(base.BaseObjectTest):
                                  self.object_name, "GET",
                                  expires, key2)
         resp, body = self.object_client.get(url)
-        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
         self.assertEqual(body, self.content)
 
     @test.attr(type='gate')
@@ -153,12 +150,10 @@ class ObjectTempUrlTest(base.BaseObjectTest):
 
         # trying to put random data in the object using temp url
         resp, body = self.object_client.put(url, new_data, None)
-        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
         self.assertHeaders(resp, 'Object', 'PUT')
 
         # Testing a HEAD on this Temp URL
         resp, body = self.object_client.head(url)
-        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
         self.assertHeaders(resp, 'Object', 'HEAD')
 
         # Validate that the content of the object has been modified
@@ -181,7 +176,6 @@ class ObjectTempUrlTest(base.BaseObjectTest):
 
         # Testing a HEAD on this Temp URL
         resp, body = self.object_client.head(url)
-        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
         self.assertHeaders(resp, 'Object', 'HEAD')
 
     @test.attr(type='gate')
@@ -196,7 +190,6 @@ class ObjectTempUrlTest(base.BaseObjectTest):
 
         # trying to get object using temp url within expiry time
         resp, body = self.object_client.get(url)
-        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
         self.assertHeaders(resp, 'Object', 'GET')
         self.assertEqual(body, self.content)
         self.assertEqual(resp['content-disposition'], 'inline')

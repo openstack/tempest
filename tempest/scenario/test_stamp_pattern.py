@@ -52,10 +52,9 @@ class TestStampPattern(manager.ScenarioTest):
 
     @classmethod
     def resource_setup(cls):
-        super(TestStampPattern, cls).resource_setup()
-
         if not CONF.volume_feature_enabled.snapshot:
             raise cls.skipException("Cinder volume snapshots are disabled")
+        super(TestStampPattern, cls).resource_setup()
 
     def _wait_for_volume_snapshot_status(self, volume_snapshot, status):
         self.snapshots_client.wait_for_snapshot_status(volume_snapshot['id'],
@@ -71,17 +70,6 @@ class TestStampPattern(manager.ScenarioTest):
 
     def _add_keypair(self):
         self.keypair = self.create_keypair()
-
-    def _create_floating_ip(self):
-        _, floating_ip = self.floating_ips_client.create_floating_ip()
-        self.addCleanup(self.delete_wrapper,
-                        self.floating_ips_client.delete_floating_ip,
-                        floating_ip['id'])
-        return floating_ip
-
-    def _add_floating_ip(self, server, floating_ip):
-        self.floating_ips_client.associate_floating_ip_to_server(
-            floating_ip['ip'], server['id'])
 
     def _ssh_to_server(self, server_or_ip):
         return self.get_remote_client(server_or_ip)
@@ -115,7 +103,6 @@ class TestStampPattern(manager.ScenarioTest):
         # TODO(andreaf) we should use device from config instead if vdb
         _, attached_volume = self.servers_client.attach_volume(
             server['id'], volume['id'], device='/dev/vdb')
-        attached_volume = attached_volume['volumeAttachment']
         self.assertEqual(volume['id'], attached_volume['id'])
         self._wait_for_volume_status(attached_volume, 'in-use')
 
@@ -165,8 +152,7 @@ class TestStampPattern(manager.ScenarioTest):
 
         # create and add floating IP to server1
         if CONF.compute.use_floatingip_for_ssh:
-            floating_ip_for_server = self._create_floating_ip()
-            self._add_floating_ip(server, floating_ip_for_server)
+            floating_ip_for_server = self.create_floating_ip(server)
             ip_for_server = floating_ip_for_server['ip']
         else:
             ip_for_server = server
@@ -191,9 +177,8 @@ class TestStampPattern(manager.ScenarioTest):
 
         # create and add floating IP to server_from_snapshot
         if CONF.compute.use_floatingip_for_ssh:
-            floating_ip_for_snapshot = self._create_floating_ip()
-            self._add_floating_ip(server_from_snapshot,
-                                  floating_ip_for_snapshot)
+            floating_ip_for_snapshot = self.create_floating_ip(
+                server_from_snapshot)
             ip_for_snapshot = floating_ip_for_snapshot['ip']
         else:
             ip_for_snapshot = server_from_snapshot

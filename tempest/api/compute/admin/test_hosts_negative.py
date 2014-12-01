@@ -66,7 +66,6 @@ class HostsAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
                           status='enable',
                           maintenance_mode='enable')
 
-    @test.skip_because(bug="1261964", interface="xml")
     @test.attr(type=['negative', 'gate'])
     def test_update_host_with_extra_param(self):
         # only 'status' and 'maintenance_mode' are the valid params.
@@ -167,7 +166,3 @@ class HostsAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
         self.assertRaises(exceptions.Unauthorized,
                           self.non_admin_client.reboot_host,
                           hostname)
-
-
-class HostsAdminNegativeTestXML(HostsAdminNegativeTestJSON):
-    _interface = 'xml'

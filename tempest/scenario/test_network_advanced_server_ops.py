@@ -70,8 +70,8 @@ class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
         server_name = data_utils.rand_name('server-smoke')
         self.server = self.create_server(name=server_name,
                                          create_kwargs=create_kwargs)
-        self.floating_ip = self._create_floating_ip(self.server,
-                                                    public_network_id)
+        self.floating_ip = self.create_floating_ip(self.server,
+                                                   public_network_id)
         # Verify that we can indeed connect to the server before we mess with
         # it's state
         self._wait_server_status_and_check_network_connectivity()
@@ -84,9 +84,9 @@ class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
             should_connect=should_connect,
             servers_for_debug=[self.server])
         floating_ip = self.floating_ip.floating_ip_address
-        self._check_public_network_connectivity(floating_ip, username,
-                                                private_key, should_connect,
-                                                servers=[self.server])
+        self.check_public_network_connectivity(floating_ip, username,
+                                               private_key, should_connect,
+                                               servers=[self.server])
         self.check_floating_ip_status(self.floating_ip, 'ACTIVE')
 
     def _wait_server_status_and_check_network_connectivity(self):

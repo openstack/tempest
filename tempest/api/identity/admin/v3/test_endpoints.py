@@ -81,8 +81,7 @@ class EndPointsTestJSON(base.BaseIdentityV3AdminTest):
         fetched_endpoints_id = [e['id'] for e in fetched_endpoints]
         self.assertIn(endpoint['id'], fetched_endpoints_id)
         # Deleting the endpoint created in this method
-        _, body = self.client.delete_endpoint(endpoint['id'])
-        self.assertEqual(body, '')
+        self.client.delete_endpoint(endpoint['id'])
         # Checking whether endpoint is deleted successfully
         resp, fetched_endpoints = self.client.list_endpoints()
         fetched_endpoints_id = [e['id'] for e in fetched_endpoints]
@@ -123,7 +122,3 @@ class EndPointsTestJSON(base.BaseIdentityV3AdminTest):
         self.assertEqual(url2, endpoint['url'])
         self.assertEqual(region2, endpoint['region'])
         self.assertEqual('false', str(endpoint['enabled']).lower())
-
-
-class EndPointsTestXML(EndPointsTestJSON):
-    _interface = 'xml'

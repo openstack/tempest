@@ -70,7 +70,3 @@ class PoliciesTestJSON(base.BaseIdentityV3AdminTest):
         self.assertEqual(fetched_policy['id'], policy['id'])
         self.assertEqual(fetched_policy['blob'], policy['blob'])
         self.assertEqual(update_type, fetched_policy['type'])
-
-
-class PoliciesTestXML(PoliciesTestJSON):
-    _interface = 'xml'

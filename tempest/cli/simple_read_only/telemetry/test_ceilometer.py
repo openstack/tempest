@@ -39,6 +39,10 @@ class SimpleReadOnlyCeilometerClientTest(cli.ClientTestBase):
             raise cls.skipException(msg)
         super(SimpleReadOnlyCeilometerClientTest, cls).resource_setup()
 
+    def ceilometer(self, *args, **kwargs):
+        return self.clients.ceilometer(
+            *args, endpoint_type=CONF.telemetry.endpoint_type, **kwargs)
+
     def test_ceilometer_meter_list(self):
         self.ceilometer('meter-list')
 

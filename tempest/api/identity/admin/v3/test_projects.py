@@ -176,7 +176,3 @@ class ProjectsTestJSON(base.BaseIdentityV3AdminTest):
         self.assertEqual(project['id'],
                          new_user_get['project_id'])
         self.assertEqual(u_email, new_user_get['email'])
-
-
-class ProjectsTestXML(ProjectsTestJSON):
-    _interface = 'xml'

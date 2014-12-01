@@ -203,9 +203,8 @@ class IsolatedCreds(cred_provider.CredentialProvider):
                 if 'overlaps with another subnet' not in str(e):
                     raise
         else:
-            e = exceptions.BuildErrorException()
-            e.message = 'Available CIDR for subnet creation could not be found'
-            raise e
+            message = 'Available CIDR for subnet creation could not be found'
+            raise Exception(message)
         return resp_body['subnet']
 
     def _create_router(self, router_name, tenant_id):
@@ -353,4 +352,7 @@ class IsolatedCreds(cred_provider.CredentialProvider):
                          creds.tenant_name)
 
     def is_multi_user(self):
+        return True
+
+    def is_multi_tenant(self):
         return True

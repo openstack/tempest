@@ -53,7 +53,3 @@ class MultipleCreateTestJSON(base.BaseV2ComputeTest):
                                                    return_reservation_id=True)
         self.assertEqual(resp['status'], '202')
         self.assertIn('reservation_id', body)
-
-
-class MultipleCreateTestXML(MultipleCreateTestJSON):
-    _interface = 'xml'

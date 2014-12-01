@@ -52,6 +52,7 @@ class AccountClient(rest_client.RestClient):
             headers[remove_metadata_prefix + key] = remove_metadata[key]
 
         resp, body = self.put(url, data, headers)
+        self.expected_success(200, resp.status)
         return resp, body
 
     def delete_account(self, data=None, params=None):
@@ -61,6 +62,7 @@ class AccountClient(rest_client.RestClient):
             url = '?%s%s' % (url, urllib.urlencode(params))
 
         resp, body = self.delete(url, headers={}, body=data)
+        self.expected_success(200, resp.status)
         return resp, body
 
     def list_account_metadata(self):
@@ -69,6 +71,7 @@ class AccountClient(rest_client.RestClient):
         Returns all account metadata headers
         """
         resp, body = self.head('')
+        self.expected_success(204, resp.status)
         return resp, body
 
     def create_account_metadata(self, metadata,
@@ -85,6 +88,7 @@ class AccountClient(rest_client.RestClient):
             url = '?%s%s' % (url, urllib.urlencode(params))
 
         resp, body = self.post(url, headers=headers, body=data)
+        self.expected_success([200, 204], resp.status)
         return resp, body
 
     def delete_account_metadata(self, metadata,
@@ -97,6 +101,7 @@ class AccountClient(rest_client.RestClient):
         for item in metadata:
             headers[metadata_prefix + item] = metadata[item]
         resp, body = self.post('', headers=headers, body=None)
+        self.expected_success(204, resp.status)
         return resp, body
 
     def create_and_delete_account_metadata(
@@ -115,6 +120,7 @@ class AccountClient(rest_client.RestClient):
             headers[delete_metadata_prefix + key] = delete_metadata[key]
 
         resp, body = self.post('', headers=headers, body=None)
+        self.expected_success(204, resp.status)
         return resp, body
 
     def list_account_containers(self, params=None):
@@ -147,6 +153,7 @@ class AccountClient(rest_client.RestClient):
             body = etree.fromstring(body)
         else:
             body = body.strip().splitlines()
+        self.expected_success([200, 204], resp.status)
         return resp, body
 
     def list_extensions(self):
@@ -156,6 +163,7 @@ class AccountClient(rest_client.RestClient):
         finally:
             self.reset_path()
         body = json.loads(body)
+        self.expected_success(200, resp.status)
         return resp, body
 
 
@@ -222,7 +230,7 @@ class AccountClientCustomizedHeader(rest_client.RestClient):
 
         url = '?format=%s' % self.format
         if params:
-            url += '&%s' + urllib.urlencode(params)
+            url += '&%s' % urllib.urlencode(params)
 
         headers = {}
         if metadata:
@@ -230,4 +238,5 @@ class AccountClientCustomizedHeader(rest_client.RestClient):
                 headers[str(key)] = metadata[key]
 
         resp, body = self.get(url, headers=headers)
+        self.expected_success(200, resp.status)
         return resp, body
