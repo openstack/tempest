@@ -66,7 +66,8 @@ class NetworksTestJSON(base.BaseNetworkTest):
         super(NetworksTestJSON, cls).resource_setup()
         cls.network = cls.create_network()
         cls.name = cls.network['name']
-        cls.subnet = cls.create_subnet(cls.network)
+        cls.subnet = cls._create_subnet_with_last_subnet_block(cls.network,
+                                                               cls._ip_version)
         cls.cidr = cls.subnet['cidr']
         cls._subnet_data = {6: {'gateway':
                                 str(cls._get_gateway_from_tempest_conf(6)),
@@ -94,6 +95,23 @@ class NetworksTestJSON(base.BaseNetworkTest):
                                                      'nexthop':
                                                      '10.100.1.2'}],
                                 'new_dns_nameservers': ['7.8.8.8', '7.8.4.4']}}
+
+    @classmethod
+    def _create_subnet_with_last_subnet_block(cls, network, ip_version):
+        """Derive last subnet CIDR block from tenant CIDR and
+           create the subnet with that derived CIDR
+        """
+        if ip_version == 4:
+            cidr = netaddr.IPNetwork(CONF.network.tenant_network_cidr)
+            mask_bits = CONF.network.tenant_network_mask_bits
+        elif ip_version == 6:
+            cidr = netaddr.IPNetwork(CONF.network.tenant_network_v6_cidr)
+            mask_bits = CONF.network.tenant_network_v6_mask_bits
+
+        subnet_cidr = list(cidr.subnet(mask_bits))[-1]
+        gateway_ip = str(netaddr.IPAddress(subnet_cidr) + 1)
+        return cls.create_subnet(network, gateway=gateway_ip,
+                                 cidr=subnet_cidr, mask_bits=mask_bits)
 
     @classmethod
     def _get_gateway_from_tempest_conf(cls, ip_version):
@@ -129,6 +147,15 @@ class NetworksTestJSON(base.BaseNetworkTest):
         self.assertThat(actual, custom_matchers.MatchesDictExceptForKeys(
                         expected, exclude_keys))
 
+    def _delete_network(self, network):
+        # Deleting network also deletes its subnets if exists
+        self.client.delete_network(network['id'])
+        if network in self.networks:
+            self.networks.remove(network)
+        for subnet in self.subnets:
+            if subnet['network_id'] == network['id']:
+                self.subnets.remove(subnet)
+
     def _create_verify_delete_subnet(self, cidr=None, mask_bits=None,
                                      **kwargs):
         network = self.create_network()
@@ -156,6 +183,7 @@ class NetworksTestJSON(base.BaseNetworkTest):
         # Create a network
         name = data_utils.rand_name('network-')
         network = self.create_network(network_name=name)
+        self.addCleanup(self._delete_network, network)
         net_id = network['id']
         self.assertEqual('ACTIVE', network['status'])
         # Verify network update
@@ -312,6 +340,7 @@ class NetworksTestJSON(base.BaseNetworkTest):
     @test.attr(type='smoke')
     def test_update_subnet_gw_dns_host_routes_dhcp(self):
         network = self.create_network()
+        self.addCleanup(self._delete_network, network)
 
         subnet = self.create_subnet(
             network, **self.subnet_dict(['gateway', 'host_routes',
