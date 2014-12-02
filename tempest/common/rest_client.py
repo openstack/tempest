@@ -53,7 +53,7 @@ def safe_body(body, maxlen=4096):
 
 
 class ResponseBody(dict):
-    """Class that wraps an http response and body into a single value.
+    """Class that wraps an http response and dict body into a single value.
 
     Callers that receive this object will normally use it as a dict but
     can extract the response if needed.
@@ -62,6 +62,23 @@ class ResponseBody(dict):
     def __init__(self, response, body=None):
         body_data = body or {}
         self.update(body_data)
+        self.response = response
+
+    def __str__(self):
+        body = super.__str__(self)
+        return "response: %s\nBody: %s" % (self.response, body)
+
+
+class ResponseBodyList(list):
+    """Class that wraps an http response and list body into a single value.
+
+    Callers that receive this object will normally use it as a list but
+    can extract the response if needed.
+    """
+
+    def __init__(self, response, body=None):
+        body_data = body or []
+        self.extend(body_data)
         self.response = response
 
     def __str__(self):

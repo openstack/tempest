@@ -46,7 +46,7 @@ class PolicyClientJSON(rest_client.RestClient):
         resp, body = self.get('policies')
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return resp, body['policies']
+        return rest_client.ResponseBodyList(resp, body['policies'])
 
     def get_policy(self, policy_id):
         """Lists out the given policy."""
@@ -54,7 +54,7 @@ class PolicyClientJSON(rest_client.RestClient):
         resp, body = self.get(url)
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return resp, body['policy']
+        return rest_client.ResponseBody(resp, body['policy'])
 
     def update_policy(self, policy_id, **kwargs):
         """Updates a policy."""
@@ -67,11 +67,11 @@ class PolicyClientJSON(rest_client.RestClient):
         resp, body = self.patch(url, post_body)
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return resp, body['policy']
+        return rest_client.ResponseBody(resp, body['policy'])
 
     def delete_policy(self, policy_id):
         """Deletes the policy."""
         url = "policies/%s" % policy_id
         resp, body = self.delete(url)
         self.expected_success(204, resp.status)
-        return resp, body
+        return rest_client.ResponseBody(resp, body)
