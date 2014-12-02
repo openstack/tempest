@@ -12,10 +12,93 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-"""Javelin makes resources that should survive an upgrade.
-
-Javelin is a tool for creating, verifying, and deleting a small set of
+"""Javelin is a tool for creating, verifying, and deleting a small set of
 resources in a declarative way.
+
+Javelin is meant to be used as a way to validate quickly that resources can
+survive an upgrade process.
+
+Authentication
+--------------
+
+Javelin will be creating (and removing) users and tenants so it needs the admin
+credentials of your cloud to operate properly. The corresponding info can be
+given the usual way, either through CLI options or environment variables.
+
+You're probably familiar with these, but just in case::
+
+    +----------+------------------+----------------------+
+    | Param    | CLI              | Environment Variable |
+    +----------+------------------+----------------------+
+    | Username | --os-username    | OS_USERNAME          |
+    | Password | --os-password    | OS_PASSWORD          |
+    | Tenant   | --os-tenant-name | OS_TENANT_NAME       |
+    +----------+------------------+----------------------+
+
+
+Runtime Arguments
+-----------------
+
+**-m/--mode**: (Required) Has to be one of 'check', 'create' or 'destroy'. It
+indicates which actions javelin is going to perform.
+
+**-r/--resources**: (Required) The path to a YAML file describing the resources
+used by Javelin.
+
+**-d/--devstack-base**: (Required) The path to the devstack repo used to
+retrieve artefacts (like images) that will be referenced in the resource files.
+
+**-c/--config-file**: (Optional) The path to a valid Tempest config file
+describing your cloud. Javelin may use this to determine if certain services
+are enabled and modify its behavior accordingly.
+
+
+Resource file
+-------------
+
+The resource file is a valid YAML file describing the resources that will be
+created, checked and destroyed by javelin. Here's a canonical example of a
+resource file::
+
+  tenants:
+    - javelin
+    - discuss
+
+  users:
+    - name: javelin
+      pass: gungnir
+      tenant: javelin
+    - name: javelin2
+      pass: gungnir2
+      tenant: discuss
+
+  # resources that we want to create
+  images:
+    - name: javelin_cirros
+      owner: javelin
+      file: cirros-0.3.2-x86_64-blank.img
+      format: ami
+      aki: cirros-0.3.2-x86_64-vmlinuz
+      ari: cirros-0.3.2-x86_64-initrd
+
+  servers:
+    - name: peltast
+      owner: javelin
+      flavor: m1.small
+      image: javelin_cirros
+    - name: hoplite
+      owner: javelin
+      flavor: m1.medium
+      image: javelin_cirros
+
+
+An important piece of the resource definition is the *owner* field, which is
+the user (that we've created) that is the owner of that resource. All
+operations on that resource will happen as that regular user to ensure that
+admin level access does not mask issues.
+
+The check phase will act like a unit test, using well known assert methods to
+verify that the correct resources exist.
 
 """
 
