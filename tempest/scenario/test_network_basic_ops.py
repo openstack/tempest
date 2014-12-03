@@ -146,7 +146,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
     def _create_server(self, name, network):
         keypair = self.create_keypair()
         self.keypairs[keypair['name']] = keypair
-        security_groups = [self.security_group]
+        security_groups = [{'name': self.security_group['name']}]
         create_kwargs = {
             'networks': [
                 {'uuid': network.id},

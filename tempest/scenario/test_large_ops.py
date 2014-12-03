@@ -84,7 +84,7 @@ class TestLargeOpsScenario(manager.ScenarioTest):
             self.image,
             flavor_id,
             min_count=CONF.scenario.large_ops_number,
-            security_groups=[secgroup])
+            security_groups=[{'name': secgroup['name']}])
         # needed because of bug 1199788
         params = {'name': name}
         _, server_list = self.servers_client.list_servers(params)

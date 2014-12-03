@@ -37,7 +37,7 @@ class TestSnapshotPattern(manager.ScenarioTest):
     """
 
     def _boot_image(self, image_id):
-        security_groups = [self.security_group]
+        security_groups = [{'name': self.security_group['name']}]
         create_kwargs = {
             'key_name': self.keypair['name'],
             'security_groups': security_groups

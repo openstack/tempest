@@ -67,10 +67,11 @@ class TestShelveInstance(manager.ScenarioTest):
         self.keypair = self.create_keypair()
 
         self.security_group = self._create_security_group()
+        security_groups = [{'name': self.security_group['name']}]
 
         create_kwargs = {
             'key_name': self.keypair['name'],
-            'security_groups': [self.security_group]
+            'security_groups': security_groups
         }
         server = self.create_server(image=CONF.compute.image_ref,
                                     create_kwargs=create_kwargs)

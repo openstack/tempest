@@ -65,7 +65,7 @@ class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
                 {'uuid': network.id},
             ],
             'key_name': self.keypair['name'],
-            'security_groups': [security_group],
+            'security_groups': [{'name': security_group['name']}],
         }
         server_name = data_utils.rand_name('server-smoke')
         self.server = self.create_server(name=server_name,
