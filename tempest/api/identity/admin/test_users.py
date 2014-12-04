@@ -206,7 +206,3 @@ class UsersTestJSON(base.BaseIdentityV2AdminTest):
         _, body = self.token_client.auth(self.data.test_user, new_pass,
                                          self.data.test_tenant)
         self.assertTrue('id' in body['token'])
-
-
-class UsersTestXML(UsersTestJSON):
-    _interface = 'xml'

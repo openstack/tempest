@@ -147,7 +147,3 @@ class MeteringJSON(base.BaseAdminNetworkTest):
 
 class MeteringIpV6JSON(MeteringJSON):
     _ip_version = 6
-
-
-class MeteringXML(MeteringJSON):
-    interface = 'xml'

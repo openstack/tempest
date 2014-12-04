@@ -263,7 +263,3 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
         params = {'changes-since': self.image1['created']}
         resp, images = self.client.list_images_with_detail(params)
         self.assertTrue(any([i for i in images if i['id'] == self.image1_id]))
-
-
-class ListImageFiltersTestXML(ListImageFiltersTestJSON):
-    _interface = 'xml'

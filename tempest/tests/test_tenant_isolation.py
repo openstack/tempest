@@ -21,9 +21,7 @@ from tempest import config
 from tempest import exceptions
 from tempest.openstack.common.fixture import mockpatch
 from tempest.services.identity.json import identity_client as json_iden_client
-from tempest.services.identity.xml import identity_client as xml_iden_client
 from tempest.services.network.json import network_client as json_network_client
-from tempest.services.network.xml import network_client as xml_network_client
 from tempest.tests import base
 from tempest.tests import fake_config
 from tempest.tests import fake_http
@@ -48,14 +46,6 @@ class TestTenantIsolation(base.TestCase):
                                    json_iden_client.IdentityClientJSON))
         self.assertTrue(isinstance(iso_creds.network_admin_client,
                                    json_network_client.NetworkClientJSON))
-
-    def test_tempest_client_xml(self):
-        iso_creds = isolated_creds.IsolatedCreds('test class', interface='xml')
-        self.assertEqual(iso_creds.interface, 'xml')
-        self.assertTrue(isinstance(iso_creds.identity_admin_client,
-                                   xml_iden_client.IdentityClientXML))
-        self.assertTrue(isinstance(iso_creds.network_admin_client,
-                                   xml_network_client.NetworkClientXML))
 
     def _mock_user_create(self, id, name):
         user_fix = self.useFixture(mockpatch.PatchObject(

@@ -65,7 +65,10 @@ class TestSwiftBasicOps(manager.SwiftScenarioTest):
         obj_name, _ = self.upload_object_to_container(container_name)
         obj_url = '%s/%s/%s' % (self.object_client.base_url,
                                 container_name, obj_name)
-        http_client = http.ClosingHttp()
+        dscv = CONF.identity.disable_ssl_certificate_validation
+        ca_certs = CONF.identity.ca_certificates_file
+        http_client = http.ClosingHttp(
+            disable_ssl_certificate_validation=dscv, ca_certs=ca_certs)
         resp, _ = http_client.request(obj_url, 'GET')
         self.assertEqual(resp.status, 401)
         self.change_container_acl(container_name, '.r:*')

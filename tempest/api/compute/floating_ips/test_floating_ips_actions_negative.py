@@ -93,7 +93,3 @@ class FloatingIPsNegativeTestJSON(base.BaseFloatingIPsTest):
         self.assertRaises(exceptions.NotFound,
                           self.client.associate_floating_ip_to_server,
                           '', self.server_id)
-
-
-class FloatingIPsNegativeTestXML(FloatingIPsNegativeTestJSON):
-    _interface = 'xml'

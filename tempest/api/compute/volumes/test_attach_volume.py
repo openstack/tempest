@@ -111,7 +111,6 @@ class AttachVolumeTestJSON(base.BaseV2ComputeTest):
         partitions = linux_client.get_partitions()
         self.assertNotIn(self.device, partitions)
 
-    @test.skip_because(bug="1323591", interface="xml")
     @test.attr(type='gate')
     def test_list_get_volume_attachments(self):
         # Create Server, Volume and attach that Volume to Server
@@ -129,7 +128,3 @@ class AttachVolumeTestJSON(base.BaseV2ComputeTest):
         self.assertEqual(self.server['id'], body['serverId'])
         self.assertEqual(self.volume['id'], body['volumeId'])
         self.assertEqual(self.attachment['id'], body['id'])
-
-
-class AttachVolumeTestXML(AttachVolumeTestJSON):
-    _interface = 'xml'

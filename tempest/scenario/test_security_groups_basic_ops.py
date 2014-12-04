@@ -230,12 +230,13 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
         self._set_compute_context(tenant)
         if security_groups is None:
             security_groups = [tenant.security_groups['default']]
+        security_groups_names = [{'name': s['name']} for s in security_groups]
         create_kwargs = {
             'networks': [
                 {'uuid': tenant.network.id},
             ],
             'key_name': tenant.keypair['name'],
-            'security_groups': security_groups,
+            'security_groups': security_groups_names,
             'tenant_id': tenant.creds.tenant_id
         }
         server = self.create_server(name=name, create_kwargs=create_kwargs)
@@ -271,7 +272,7 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
 
     def _assign_floating_ips(self, tenant, server):
         public_network_id = CONF.network.public_network_id
-        floating_ip = self._create_floating_ip(
+        floating_ip = self.create_floating_ip(
             server, public_network_id,
             client=tenant.manager.network_client)
         self.floating_ips.setdefault(server['id'], floating_ip)

@@ -12,16 +12,39 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import HTMLParser
 import urllib
 import urllib2
-
-from lxml import html
 
 from tempest import config
 from tempest.scenario import manager
 from tempest import test
 
 CONF = config.CONF
+
+
+class HorizonHTMLParser(HTMLParser.HTMLParser):
+    csrf_token = None
+    region = None
+
+    def _find_name(self, attrs, name):
+        for attrpair in attrs:
+            if attrpair[0] == 'name' and attrpair[1] == name:
+                return True
+        return False
+
+    def _find_value(self, attrs):
+        for attrpair in attrs:
+            if attrpair[0] == 'value':
+                return attrpair[1]
+        return None
+
+    def handle_starttag(self, tag, attrs):
+        if tag == 'input':
+            if self._find_name(attrs, 'csrfmiddlewaretoken'):
+                self.csrf_token = self._find_value(attrs)
+            if self._find_name(attrs, 'region'):
+                self.region = self._find_value(attrs)
 
 
 class TestDashboardBasicOps(manager.ScenarioTest):
@@ -42,17 +65,15 @@ class TestDashboardBasicOps(manager.ScenarioTest):
 
     def check_login_page(self):
         response = urllib2.urlopen(CONF.dashboard.dashboard_url)
-        self.assertIn("<h3>Log In</h3>", response.read())
+        self.assertIn("Log In", response.read())
 
     def user_login(self):
         self.opener = urllib2.build_opener(urllib2.HTTPCookieProcessor())
         response = self.opener.open(CONF.dashboard.dashboard_url).read()
 
         # Grab the CSRF token and default region
-        csrf_token = html.fromstring(response).xpath(
-            '//input[@name="csrfmiddlewaretoken"]/@value')[0]
-        region = html.fromstring(response).xpath(
-            '//input[@name="region"]/@value')[0]
+        parser = HorizonHTMLParser()
+        parser.feed(response)
 
         # Prepare login form request
         req = urllib2.Request(CONF.dashboard.login_url)
@@ -60,8 +81,8 @@ class TestDashboardBasicOps(manager.ScenarioTest):
         req.add_header('Referer', CONF.dashboard.dashboard_url)
         params = {'username': CONF.identity.username,
                   'password': CONF.identity.password,
-                  'region': region,
-                  'csrfmiddlewaretoken': csrf_token}
+                  'region': parser.region,
+                  'csrfmiddlewaretoken': parser.csrf_token}
         self.opener.open(req, urllib.urlencode(params))
 
     def check_home_page(self):

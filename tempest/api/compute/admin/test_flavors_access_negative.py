@@ -135,7 +135,3 @@ class FlavorsAccessNegativeTestJSON(base.BaseV2ComputeAdminTest):
                           self.client.remove_flavor_access,
                           new_flavor['id'],
                           str(uuid.uuid4()))
-
-
-class FlavorsAdminNegativeTestXML(FlavorsAccessNegativeTestJSON):
-    _interface = 'xml'

@@ -29,9 +29,9 @@ projects.
 
 Scope of these tests
 --------------------
-Scenario tests should use the official python client libraries for
-OpenStack, as they provide a more realistic approach in how people
-will interact with the services.
+Scenario tests should always use the Tempest implementation of the
+OpenStack API, as we want to ensure that bugs aren't hidden by the
+official clients.
 
 Tests should be tagged with which services they exercise, as
 determined by which client libraries are used directly by the test.

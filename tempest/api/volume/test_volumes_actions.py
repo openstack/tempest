@@ -142,13 +142,5 @@ class VolumesV2ActionsTest(base.BaseVolumeTest):
         self.assertEqual(False, bool_flag)
 
 
-class VolumesV2ActionsTestXML(VolumesV2ActionsTest):
-    _interface = "xml"
-
-
 class VolumesV1ActionsTest(VolumesV2ActionsTest):
     _api_version = 1
-
-
-class VolumesV1ActionsTestXML(VolumesV1ActionsTest):
-    _interface = "xml"

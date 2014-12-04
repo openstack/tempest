@@ -35,9 +35,10 @@ class ImageClientV2JSON(rest_client.RestClient):
 
     def _get_http(self):
         dscv = CONF.identity.disable_ssl_certificate_validation
+        ca_certs = CONF.identity.ca_certificates_file
         return glance_http.HTTPClient(auth_provider=self.auth_provider,
                                       filters=self.filters,
-                                      insecure=dscv)
+                                      insecure=dscv, ca_certs=ca_certs)
 
     def _validate_schema(self, body, type='image'):
         if type in ['image', 'images']:

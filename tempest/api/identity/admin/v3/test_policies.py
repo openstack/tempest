@@ -32,13 +32,13 @@ class PoliciesTestJSON(base.BaseIdentityV3AdminTest):
         for _ in range(3):
             blob = data_utils.rand_name('BlobName-')
             policy_type = data_utils.rand_name('PolicyType-')
-            resp, policy = self.policy_client.create_policy(blob,
-                                                            policy_type)
+            policy = self.policy_client.create_policy(blob,
+                                                      policy_type)
             # Delete the Policy at the end of this method
             self.addCleanup(self._delete_policy, policy['id'])
             policy_ids.append(policy['id'])
         # List and Verify Policies
-        _, body = self.policy_client.list_policies()
+        body = self.policy_client.list_policies()
         for p in body:
             fetched_ids.append(p['id'])
         missing_pols = [p for p in policy_ids if p not in fetched_ids]
@@ -49,7 +49,7 @@ class PoliciesTestJSON(base.BaseIdentityV3AdminTest):
         # Test to update policy
         blob = data_utils.rand_name('BlobName-')
         policy_type = data_utils.rand_name('PolicyType-')
-        _, policy = self.policy_client.create_policy(blob, policy_type)
+        policy = self.policy_client.create_policy(blob, policy_type)
         self.addCleanup(self._delete_policy, policy['id'])
         self.assertIn('id', policy)
         self.assertIn('type', policy)
@@ -59,18 +59,14 @@ class PoliciesTestJSON(base.BaseIdentityV3AdminTest):
         self.assertEqual(policy_type, policy['type'])
         # Update policy
         update_type = data_utils.rand_name('UpdatedPolicyType-')
-        _, data = self.policy_client.update_policy(
+        data = self.policy_client.update_policy(
             policy['id'], type=update_type)
         self.assertIn('type', data)
         # Assertion for updated value with fetched value
-        _, fetched_policy = self.policy_client.get_policy(policy['id'])
+        fetched_policy = self.policy_client.get_policy(policy['id'])
         self.assertIn('id', fetched_policy)
         self.assertIn('blob', fetched_policy)
         self.assertIn('type', fetched_policy)
         self.assertEqual(fetched_policy['id'], policy['id'])
         self.assertEqual(fetched_policy['blob'], policy['blob'])
         self.assertEqual(update_type, fetched_policy['type'])
-
-
-class PoliciesTestXML(PoliciesTestJSON):
-    _interface = 'xml'

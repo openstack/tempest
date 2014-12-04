@@ -38,13 +38,5 @@ class VolumesV2ExtendTest(base.BaseVolumeTest):
         self.assertEqual(int(volume['size']), extend_size)
 
 
-class VolumesV2ExtendTestXML(VolumesV2ExtendTest):
-    _interface = "xml"
-
-
 class VolumesV1ExtendTest(VolumesV2ExtendTest):
     _api_version = 1
-
-
-class VolumesV1ExtendTestXML(VolumesV1ExtendTest):
-    _interface = "xml"

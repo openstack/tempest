@@ -39,7 +39,3 @@ class CertificatesV3Test(base.BaseComputeTest):
 
 class CertificatesV2TestJSON(CertificatesV3Test):
     _api_version = 2
-
-
-class CertificatesV2TestXML(CertificatesV2TestJSON):
-    _interface = 'xml'

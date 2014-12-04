@@ -47,13 +47,5 @@ class VolumesV2SnapshotNegativeTestJSON(base.BaseVolumeTest):
                           None, display_name=s_name)
 
 
-class VolumesV2SnapshotNegativeTestXML(VolumesV2SnapshotNegativeTestJSON):
-    _interface = "xml"
-
-
 class VolumesV1SnapshotNegativeTestJSON(VolumesV2SnapshotNegativeTestJSON):
     _api_version = 1
-
-
-class VolumesV1SnapshotNegativeTestXML(VolumesV1SnapshotNegativeTestJSON):
-    _interface = "xml"

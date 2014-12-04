@@ -148,7 +148,3 @@ class ServersAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
         self.assertRaises(exceptions.Conflict,
                           self.client.migrate_server,
                           server_id)
-
-
-class ServersAdminNegativeTestXML(ServersAdminNegativeTestJSON):
-    _interface = 'xml'

@@ -31,9 +31,6 @@ class BaseIdentityAdminTest(tempest.test.BaseTestCase):
     @classmethod
     def resource_setup(cls):
         super(BaseIdentityAdminTest, cls).resource_setup()
-        if getattr(cls, '_interface', None) == 'xml':
-            if not CONF.identity_feature_enabled.xml_api:
-                raise cls.skipException('XML API is not enabled')
         cls.os_adm = clients.AdminManager(interface=cls._interface)
         cls.os = clients.Manager(interface=cls._interface)
 

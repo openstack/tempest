@@ -329,8 +329,7 @@ class InstanceRunTest(boto_test.BotoTestCase):
 
         volume.detach()
 
-        self.assertVolumeStatusWait(_volume_state, "available")
-        wait.re_search_wait(_volume_state, "available")
+        self.assertVolumeStatusWait(volume, "available")
 
         wait.state_wait(_part_state, 'DECREASE')
 

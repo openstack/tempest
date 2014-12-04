@@ -23,17 +23,16 @@ CONF = config.CONF
 LOG = logging.getLogger(__name__)
 
 
-class VolumesBackupsTest(base.BaseVolumeV1AdminTest):
+class VolumesBackupsV2Test(base.BaseVolumeAdminTest):
     _interface = "json"
 
     @classmethod
     def resource_setup(cls):
-        super(VolumesBackupsTest, cls).resource_setup()
+        super(VolumesBackupsV2Test, cls).resource_setup()
 
         if not CONF.volume_feature_enabled.backup:
             raise cls.skipException("Cinder backup feature disabled")
 
-        cls.backups_adm_client = cls.os_adm.backups_client
         cls.volume = cls.create_volume()
 
     @test.attr(type='smoke')
@@ -71,3 +70,7 @@ class VolumesBackupsTest(base.BaseVolumeV1AdminTest):
                                                        'available')
         self.admin_volume_client.wait_for_volume_status(
             restore['volume_id'], 'available')
+
+
+class VolumesBackupsV1Test(VolumesBackupsV2Test):
+    _api_version = 1

@@ -182,9 +182,3 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
         resp, server = self.create_test_server(sched_hints=hints,
                                                wait_until='ACTIVE')
         self.assertEqual('202', resp['status'])
-
-
-class ServersAdminTestXML(ServersAdminTestJSON):
-    _host_key = (
-        '{http://docs.openstack.org/compute/ext/extended_status/api/v1.1}host')
-    _interface = 'xml'

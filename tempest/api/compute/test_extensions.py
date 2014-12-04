@@ -52,7 +52,3 @@ class ExtensionsTestJSON(base.BaseV2ComputeTest):
         resp, extension = self.extensions_client.get_extension('os-consoles')
         self.assertEqual(200, resp.status)
         self.assertEqual('os-consoles', extension['alias'])
-
-
-class ExtensionsTestXML(ExtensionsTestJSON):
-    _interface = 'xml'

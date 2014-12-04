@@ -9,7 +9,7 @@
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
-# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
 # License for the specific language governing permissions and limitations
 # under the License.
 
@@ -36,14 +36,14 @@ should yield an empty report.
 **NOTE**: The _tenants_to_clean array in dry-run.json lists the
 tenants that cleanup will loop through and delete child objects, not
 delete the tenant itself. This may differ from the tenants array as you
-can clean the tempest and alternate tempest tenants but not delete the
-tenants themselves.  This is actually the default behavior.
+can clean the tempest and alternate tempest tenants but by default,
+cleanup deletes the objects in the tempest and alternate tempest tenants
+but does not delete those tenants unless the --delete-tempest-conf-objects
+flag is used to force their deletion.
 
 **Normal mode**: running with no arguments, will query your deployment and
-build a list of objects to delete after filtering out out the objects
-found in saved_state.json and based on the
---preserve-tempest-conf-objects and
---delete-tempest-conf-objects flags.
+build a list of objects to delete after filtering out the objects found in
+saved_state.json and based on the --delete-tempest-conf-objects flag.
 
 By default the tempest and alternate tempest users and tenants are not
 deleted and the admin user specified in tempest.conf is never deleted.
@@ -84,7 +84,6 @@ class Cleanup(object):
         # available services
         self.tenant_services = cleanup_service.get_tenant_cleanup_services()
         self.global_services = cleanup_service.get_global_cleanup_services()
-        cleanup_service.init_conf()
 
     def run(self):
         opts = self.options
@@ -98,7 +97,7 @@ class Cleanup(object):
     def _cleanup(self):
         LOG.debug("Begin cleanup")
         is_dry_run = self.options.dry_run
-        is_preserve = self.options.preserve_tempest_conf_objects
+        is_preserve = not self.options.delete_tempest_conf_objects
         is_save_state = False
 
         if is_dry_run:
@@ -149,7 +148,7 @@ class Cleanup(object):
         LOG.debug("Cleaning tenant:  %s " % tenant['name'])
         is_dry_run = self.options.dry_run
         dry_run_data = self.dry_run_data
-        is_preserve = self.options.preserve_tempest_conf_objects
+        is_preserve = not self.options.delete_tempest_conf_objects
         tenant_id = tenant['id']
         tenant_name = tenant['name']
         tenant_data = None
@@ -194,23 +193,16 @@ class Cleanup(object):
                             dest='init_saved_state', default=False,
                             help="Creates JSON file: " + SAVED_STATE_JSON +
                             ", representing the current state of your "
-                            "deployment,  specifically objects types "
-                            "Tempest creates and destroys during a run. "
+                            "deployment,  specifically object types "
+                            "tempest creates and destroys during a run. "
                             "You must run with this flag prior to "
-                            "executing cleanup.")
-        parser.add_argument('--preserve-tempest-conf-objects',
-                            action="store_true",
-                            dest='preserve_tempest_conf_objects',
-                            default=True, help="Do not delete the "
-                            "tempest and alternate tempest users and "
-                            "tenants, so they may be used for future "
-                            "tempest runs. By default this is argument "
-                            "is true.")
+                            "executing cleanup in normal mode, which is with "
+                            "no arguments.")
         parser.add_argument('--delete-tempest-conf-objects',
-                            action="store_false",
-                            dest='preserve_tempest_conf_objects',
+                            action="store_true",
+                            dest='delete_tempest_conf_objects',
                             default=False,
-                            help="Delete the tempest and "
+                            help="Force deletion of the tempest and "
                             "alternate tempest users and tenants.")
         parser.add_argument('--dry-run', action="store_true",
                             dest='dry_run', default=False,
@@ -291,6 +283,7 @@ class Cleanup(object):
 
 
 def main():
+    cleanup_service.init_conf()
     cleanup = Cleanup()
     cleanup.run()
     LOG.info('Cleanup finished!')

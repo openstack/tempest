@@ -37,7 +37,3 @@ class ListImageFiltersNegativeTestJSON(base.BaseV2ComputeTest):
         nonexistent_image = data_utils.rand_uuid()
         self.assertRaises(exceptions.NotFound, self.client.get_image,
                           nonexistent_image)
-
-
-class ListImageFiltersNegativeTestXML(ListImageFiltersNegativeTestJSON):
-    _interface = 'xml'

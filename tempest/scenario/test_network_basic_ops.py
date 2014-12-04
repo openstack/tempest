@@ -112,7 +112,8 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         server = self._create_server(name, self.network)
         self._check_tenant_network_connectivity()
 
-        self._create_and_associate_floating_ips(server)
+        floating_ip = self.create_floating_ip(server)
+        self.floating_ip_tuple = Floating_IP_tuple(floating_ip, server)
 
     def check_networks(self):
         """
@@ -145,7 +146,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
     def _create_server(self, name, network):
         keypair = self.create_keypair()
         self.keypairs[keypair['name']] = keypair
-        security_groups = [self.security_group]
+        security_groups = [{'name': self.security_group['name']}]
         create_kwargs = {
             'networks': [
                 {'uuid': network.id},
@@ -169,13 +170,8 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
                     server, ssh_login, self._get_server_key(server),
                     servers_for_debug=self.servers)
 
-    def _create_and_associate_floating_ips(self, server):
-        public_network_id = CONF.network.public_network_id
-        floating_ip = self._create_floating_ip(server, public_network_id)
-        self.floating_ip_tuple = Floating_IP_tuple(floating_ip, server)
-
-    def _check_public_network_connectivity(self, should_connect=True,
-                                           msg=None):
+    def check_public_network_connectivity(self, should_connect=True,
+                                          msg=None):
         """Verifies connectivty to a VM via public network and floating IP,
         and verifies floating IP has resource status is correct.
 
@@ -194,7 +190,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
             private_key = self._get_server_key(server)
             floatingip_status = 'ACTIVE'
         # call the common method in the parent class
-        super(TestNetworkBasicOps, self)._check_public_network_connectivity(
+        super(TestNetworkBasicOps, self).check_public_network_connectivity(
             ip_address, ssh_login, private_key, should_connect, msg,
             self.servers)
         self.check_floating_ip_status(floating_ip, floatingip_status)
@@ -367,17 +363,17 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
 
         """
         self._setup_network_and_servers()
-        self._check_public_network_connectivity(should_connect=True)
+        self.check_public_network_connectivity(should_connect=True)
         self._check_network_internal_connectivity(network=self.network)
         self._check_network_external_connectivity()
         self._disassociate_floating_ips()
-        self._check_public_network_connectivity(should_connect=False,
-                                                msg="after disassociate "
-                                                    "floating ip")
+        self.check_public_network_connectivity(should_connect=False,
+                                               msg="after disassociate "
+                                                   "floating ip")
         self._reassociate_floating_ips()
-        self._check_public_network_connectivity(should_connect=True,
-                                                msg="after re-associate "
-                                                    "floating ip")
+        self.check_public_network_connectivity(should_connect=True,
+                                               msg="after re-associate "
+                                                   "floating ip")
 
     @testtools.skipUnless(CONF.compute_feature_enabled.interface_attach,
                           'NIC hotplug not available')
@@ -393,7 +389,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
 
         """
         self._setup_network_and_servers()
-        self._check_public_network_connectivity(should_connect=True)
+        self.check_public_network_connectivity(should_connect=True)
         self._create_new_network()
         self._hotplug_server()
         self._check_network_internal_connectivity(network=self.new_net)

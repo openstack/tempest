@@ -56,7 +56,3 @@ class VolumeTypesNegativeV2Test(base.BaseVolumeAdminTest):
 
 class VolumeTypesNegativeV1Test(VolumeTypesNegativeV2Test):
     _api_version = 1
-
-
-class VolumeTypesNegativeV1TestXML(VolumeTypesNegativeV1Test):
-    _interface = 'xml'

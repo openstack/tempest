@@ -38,6 +38,7 @@ class BotoClientBase(object):
         # FIXME(andreaf) replace credentials and auth_url with auth_provider
 
         insecure_ssl = CONF.identity.disable_ssl_certificate_validation
+        ca_cert = CONF.identity.ca_certificates_file
 
         self.connection_timeout = str(CONF.boto.http_socket_timeout)
         self.num_retries = str(CONF.boto.num_retries)
@@ -46,7 +47,8 @@ class BotoClientBase(object):
                         "password": password,
                         "auth_url": auth_url,
                         "tenant_name": tenant_name,
-                        "insecure": insecure_ssl}
+                        "insecure": insecure_ssl,
+                        "cacert": ca_cert}
 
     def _keystone_aws_get(self):
         # FIXME(andreaf) Move EC2 credentials to AuthProvider

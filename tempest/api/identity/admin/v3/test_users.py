@@ -144,7 +144,3 @@ class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
         self.data.setup_test_v3_user()
         _, user = self.client.get_user(self.data.v3_user['id'])
         self.assertEqual(self.data.v3_user['id'], user['id'])
-
-
-class UsersV3TestXML(UsersV3TestJSON):
-    _interface = 'xml'

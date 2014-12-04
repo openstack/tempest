@@ -79,7 +79,3 @@ class FloatingIPDetailsTestJSON(base.BaseV2ComputeTest):
         self.assertEqual(200, resp.status)
         self.assertNotEqual(0, len(floating_ip_pools),
                             "Expected floating IP Pools. Got zero.")
-
-
-class FloatingIPDetailsTestXML(FloatingIPDetailsTestJSON):
-    _interface = 'xml'

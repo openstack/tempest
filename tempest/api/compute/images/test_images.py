@@ -47,7 +47,3 @@ class ImagesTestJSON(base.BaseV2ComputeTest):
                                                     wait_until='SAVING')
         resp, body = self.client.delete_image(image['id'])
         self.assertEqual('204', resp['status'])
-
-
-class ImagesTestXML(ImagesTestJSON):
-    _interface = 'xml'

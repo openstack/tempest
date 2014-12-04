@@ -186,9 +186,22 @@ class PortsTestJSON(base.BaseNetworkTest):
             [data_utils.rand_name('secgroup'),
              data_utils.rand_name('secgroup')])
 
-
-class PortsTestXML(PortsTestJSON):
-    _interface = 'xml'
+    @test.attr(type='smoke')
+    def test_create_show_delete_port_user_defined_mac(self):
+        # Create a port for a legal mac
+        _, body = self.client.create_port(network_id=self.network['id'])
+        old_port = body['port']
+        free_mac_address = old_port['mac_address']
+        self.client.delete_port(old_port['id'])
+        # Create a new port with user defined mac
+        _, body = self.client.create_port(network_id=self.network['id'],
+                                          mac_address=free_mac_address)
+        self.addCleanup(self.client.delete_port, body['port']['id'])
+        port = body['port']
+        _, body = self.client.show_port(port['id'])
+        show_port = body['port']
+        self.assertEqual(free_mac_address,
+                         show_port['mac_address'])
 
 
 class PortsAdminExtendedAttrsTestJSON(base.BaseAdminNetworkTest):
@@ -267,25 +280,13 @@ class PortsAdminExtendedAttrsTestJSON(base.BaseAdminNetworkTest):
                          show_port['binding:vif_details'])
 
 
-class PortsAdminExtendedAttrsTestXML(PortsAdminExtendedAttrsTestJSON):
-    _interface = 'xml'
-
-
 class PortsIpV6TestJSON(PortsTestJSON):
     _ip_version = 6
     _tenant_network_cidr = CONF.network.tenant_network_v6_cidr
     _tenant_network_mask_bits = CONF.network.tenant_network_v6_mask_bits
 
 
-class PortsIpV6TestXML(PortsIpV6TestJSON):
-    _interface = 'xml'
-
-
 class PortsAdminExtendedAttrsIpV6TestJSON(PortsAdminExtendedAttrsTestJSON):
     _ip_version = 6
     _tenant_network_cidr = CONF.network.tenant_network_v6_cidr
     _tenant_network_mask_bits = CONF.network.tenant_network_v6_mask_bits
-
-
-class PortsAdminExtendedAttrsIpV6TestXML(PortsAdminExtendedAttrsIpV6TestJSON):
-    _interface = 'xml'

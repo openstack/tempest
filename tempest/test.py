@@ -414,12 +414,8 @@ class NegativeAutoTest(BaseTestCase):
         else:
             standard_tests, module, loader = args
         for test in testtools.iterate_tests(standard_tests):
-            schema_file = getattr(test, '_schema_file', None)
             schema = getattr(test, '_schema', None)
-            if schema_file is not None:
-                setattr(test, 'scenarios',
-                        NegativeAutoTest.generate_scenario(schema_file))
-            elif schema is not None:
+            if schema is not None:
                 setattr(test, 'scenarios',
                         NegativeAutoTest.generate_scenario(schema))
         return testscenarios.load_tests_apply_scenarios(*args)

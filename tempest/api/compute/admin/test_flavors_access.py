@@ -96,7 +96,3 @@ class FlavorsAccessTestJSON(base.BaseV2ComputeAdminTest):
         resp, flavors = self.flavors_client.list_flavors_with_detail()
         self.assertEqual(resp.status, 200)
         self.assertNotIn(new_flavor['id'], map(lambda x: x['id'], flavors))
-
-
-class FlavorsAdminTestXML(FlavorsAccessTestJSON):
-    _interface = 'xml'

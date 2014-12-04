@@ -169,11 +169,3 @@ class DeleteServersAdminTestJSON(base.BaseV2ComputeAdminTest):
         resp, _ = self.admin_client.delete_server(server['id'])
         self.assertEqual('204', resp['status'])
         self.servers_client.wait_for_server_termination(server['id'])
-
-
-class DeleteServersTestXML(DeleteServersTestJSON):
-    _interface = 'xml'
-
-
-class DeleteServersAdminTestXML(DeleteServersAdminTestJSON):
-    _interface = 'xml'

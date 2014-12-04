@@ -1,4 +1,4 @@
-# Copyright 2014 IBM Corp.
+# Copyright 2014 OpenStack Foundation
 # All Rights Reserved.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -13,14 +13,14 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest.services.volume.xml import availability_zone_client
+from tempest.services.volume.json import backups_client
 
 
-class VolumeV2AvailabilityZoneClientXML(
-        availability_zone_client.BaseVolumeAvailabilityZoneClientXML):
+class BackupsClientV2JSON(backups_client.BaseBackupsClientJSON):
+    """
+    Client class to send CRUD Volume V2 API requests to a Cinder endpoint
+    """
 
     def __init__(self, auth_provider):
-        super(VolumeV2AvailabilityZoneClientXML, self).__init__(
-            auth_provider)
-
+        super(BackupsClientV2JSON, self).__init__(auth_provider)
         self.api_version = "v2"

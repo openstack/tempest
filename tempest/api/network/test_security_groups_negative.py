@@ -138,6 +138,7 @@ class NegativeSecGroupTest(base.BaseSecGroupTest):
 
         # Create rule for icmp protocol with invalid ports
         states = [(1, 256, 'Invalid value for ICMP code'),
+                  (None, 6, 'ICMP type (port-range-min) is missing'),
                   (300, 1, 'Invalid value for ICMP type')]
         for pmin, pmax, msg in states:
             ex = self.assertRaises(
@@ -189,10 +190,6 @@ class NegativeSecGroupTest(base.BaseSecGroupTest):
                           direction='ingress', ethertype=self.ethertype)
 
 
-class NegativeSecGroupTestXML(NegativeSecGroupTest):
-    _interface = 'xml'
-
-
 class NegativeSecGroupIPv6Test(NegativeSecGroupTest):
     _ip_version = 6
     _tenant_network_cidr = CONF.network.tenant_network_v6_cidr
@@ -215,7 +212,3 @@ class NegativeSecGroupIPv6Test(NegativeSecGroupTest):
                 protocol='tcp', direction='ingress',
                 ethertype=pair['ethertype'],
                 remote_ip_prefix=pair['ip_prefix'])
-
-
-class NegativeSecGroupIPv6TestXML(NegativeSecGroupIPv6Test):
-    _interface = 'xml'

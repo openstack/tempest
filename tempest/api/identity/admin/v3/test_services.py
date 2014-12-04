@@ -91,7 +91,3 @@ class ServicesTestJSON(base.BaseIdentityV3AdminTest):
         fetched_ids = [service['id'] for service in services]
         found = [s for s in fetched_ids if s in service_ids]
         self.assertEqual(len(found), len(service_ids))
-
-
-class ServicesTestXML(ServicesTestJSON):
-    _interface = 'xml'

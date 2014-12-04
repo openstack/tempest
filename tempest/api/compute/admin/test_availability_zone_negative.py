@@ -35,7 +35,3 @@ class AZAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
         self.assertRaises(
             exceptions.Unauthorized,
             self.non_adm_client.get_availability_zone_list_detail)
-
-
-class AZAdminNegativeTestXML(AZAdminNegativeTestJSON):
-    _interface = 'xml'

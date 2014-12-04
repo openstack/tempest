@@ -370,10 +370,6 @@ class NetworksTestJSON(base.BaseNetworkTest):
         self.assertEmpty(subnets, "Public subnets visible")
 
 
-class NetworksTestXML(NetworksTestJSON):
-    _interface = 'xml'
-
-
 class BulkNetworkOpsTestJSON(base.BaseNetworkTest):
     _interface = 'json'
 
@@ -493,10 +489,6 @@ class BulkNetworkOpsTestJSON(base.BaseNetworkTest):
         for n in created_ports:
             self.assertIsNotNone(n['id'])
             self.assertIn(n['id'], ports_list)
-
-
-class BulkNetworkOpsTestXML(BulkNetworkOpsTestJSON):
-    _interface = 'xml'
 
 
 class NetworksIpV6TestJSON(NetworksTestJSON):

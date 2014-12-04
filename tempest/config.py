@@ -71,6 +71,10 @@ IdentityGroup = [
     cfg.BoolOpt('disable_ssl_certificate_validation',
                 default=False,
                 help="Set to True if using self-signed SSL certificates."),
+    cfg.StrOpt('ca_certificates_file',
+               default=None,
+               help='Specify a CA bundle file to use in verifying a '
+                    'TLS (https) server certificate.'),
     cfg.StrOpt('uri',
                help="Full URI of the OpenStack Identity API (Keystone), v2"),
     cfg.StrOpt('uri_v3',
@@ -143,9 +147,6 @@ IdentityFeatureGroup = [
     cfg.BoolOpt('api_v3',
                 default=True,
                 help='Is the v3 identity API enabled'),
-    cfg.BoolOpt('xml_api',
-                default=False,
-                help='If false, skip all identity api tests with xml'),
 ]
 
 compute_group = cfg.OptGroup(name='compute',
@@ -222,10 +223,12 @@ ComputeGroup = [
                     "channel."),
     cfg.StrOpt('fixed_network_name',
                default='private',
-               help="Visible fixed network name "),
+               help="Name of the fixed network that is visible to all test "
+                    "tenants."),
     cfg.StrOpt('network_for_ssh',
                default='public',
-               help="Network used for SSH connections."),
+               help="Network used for SSH connections. Ignored if "
+                    "use_floatingip_for_ssh=true or run_ssh=false."),
     cfg.IntOpt('ip_version_for_ssh',
                default=4,
                help="IP version used for SSH connections."),
@@ -266,7 +269,9 @@ ComputeGroup = [
     cfg.StrOpt('floating_ip_range',
                default='10.0.0.0/29',
                help='Unallocated floating IP range, which will be used to '
-                    'test the floating IP bulk feature for CRUD operation.')
+                    'test the floating IP bulk feature for CRUD operation. '
+                    'This block must not overlap an existing floating IP '
+                    'pool.')
 ]
 
 compute_features_group = cfg.OptGroup(name='compute-feature-enabled',
@@ -276,9 +281,6 @@ ComputeFeaturesGroup = [
     cfg.BoolOpt('api_v3',
                 default=False,
                 help="If false, skip all nova v3 tests."),
-    cfg.BoolOpt('xml_api_v2',
-                default=True,
-                help="If false skip all v2 api tests with xml"),
     cfg.BoolOpt('disk_config',
                 default=True,
                 help="If false, skip disk config tests"),
@@ -487,9 +489,6 @@ NetworkFeaturesGroup = [
                      "the extended IPv6 attributes ipv6_ra_mode "
                      "and ipv6_address_mode"
                 ),
-    cfg.BoolOpt('xml_api',
-                default=False,
-                help='If false, skip all network api tests with xml')
 ]
 
 messaging_group = cfg.OptGroup(name='messaging',
@@ -975,7 +974,14 @@ InputScenarioGroup = [
 
 
 baremetal_group = cfg.OptGroup(name='baremetal',
-                               title='Baremetal provisioning service options')
+                               title='Baremetal provisioning service options',
+                               help='When enabling baremetal tests, Nova '
+                                    'must be configured to use the Ironic '
+                                    'driver. The following paremeters for the '
+                                    '[compute] section must be disabled: '
+                                    'console_output, interface_attach, '
+                                    'live_migration, pause, rescue, resize '
+                                    'shelve, snapshot, and suspend')
 
 BaremetalGroup = [
     cfg.StrOpt('catalog_type',
