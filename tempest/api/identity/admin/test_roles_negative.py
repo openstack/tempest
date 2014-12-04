@@ -223,7 +223,3 @@ class RolesNegativeTestJSON(base.BaseIdentityV2AdminTest):
                               user['id'])
         finally:
             self.client.auth_provider.clear_auth()
-
-
-class RolesTestXML(RolesNegativeTestJSON):
-    _interface = 'xml'

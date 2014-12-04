@@ -73,10 +73,9 @@ class VolumesExtensionsClientJSON(rest_client.RestClient):
         metadata: A dictionary of values to be used as metadata.
         """
         post_body = {
-            'size': size,
-            'display_name': kwargs.get('display_name'),
-            'metadata': kwargs.get('metadata'),
+            'size': size
         }
+        post_body.update(kwargs)
 
         post_body = json.dumps({'volume': post_body})
         resp, body = self.post('os-volumes', post_body)
@@ -93,7 +92,6 @@ class VolumesExtensionsClientJSON(rest_client.RestClient):
     def wait_for_volume_status(self, volume_id, status):
         """Waits for a Volume to reach a given status."""
         resp, body = self.get_volume(volume_id)
-        volume_name = body['displayName']
         volume_status = body['status']
         start = int(time.time())
 
@@ -107,7 +105,7 @@ class VolumesExtensionsClientJSON(rest_client.RestClient):
             if int(time.time()) - start >= self.build_timeout:
                 message = ('Volume %s failed to reach %s status within '
                            'the required time (%s s).' %
-                           (volume_name, status, self.build_timeout))
+                           (volume_id, status, self.build_timeout))
                 raise exceptions.TimeoutException(message)
 
     def is_resource_deleted(self, id):

@@ -131,7 +131,3 @@ class ImagesNegativeTestJSON(base.BaseV2ComputeTest):
         # Return an error while trying to delete image with id over limit
         self.assertRaises(exceptions.NotFound, self.client.delete_image,
                           '11a22b9-12a9-5555-cc11-00ab112223fa-3fac')
-
-
-class ImagesNegativeTestXML(ImagesNegativeTestJSON):
-    _interface = 'xml'

@@ -123,7 +123,7 @@ class TestLoadBalancerBasic(manager.NetworkScenarioTest):
 
     def _create_server(self, name):
         keypair = self.create_keypair()
-        security_groups = [self.security_group]
+        security_groups = [{'name': self.security_group['name']}]
         create_kwargs = {
             'networks': [
                 {'uuid': self.network['id']},
@@ -137,7 +137,7 @@ class TestLoadBalancerBasic(manager.NetworkScenarioTest):
         if (config.network.public_network_id and not
                 config.network.tenant_networks_reachable):
             public_network_id = config.network.public_network_id
-            floating_ip = self._create_floating_ip(
+            floating_ip = self.create_floating_ip(
                 server, public_network_id)
             self.floating_ips[floating_ip] = server
             self.server_ips[server['id']] = floating_ip.floating_ip_address
@@ -187,7 +187,7 @@ class TestLoadBalancerBasic(manager.NetworkScenarioTest):
 
             # Start netcat
             start_server = ('while true; do '
-                            'sudo nc -ll -p %(port)s -e sh /tmp/%(script)s; '
+                            'sudo nc -l -p %(port)s -e sh /tmp/%(script)s; '
                             'done &')
             cmd = start_server % {'port': self.port1,
                                   'script': 'script1'}
@@ -260,8 +260,8 @@ class TestLoadBalancerBasic(manager.NetworkScenarioTest):
     def _assign_floating_ip_to_vip(self, vip):
         public_network_id = config.network.public_network_id
         port_id = vip.port_id
-        floating_ip = self._create_floating_ip(vip, public_network_id,
-                                               port_id=port_id)
+        floating_ip = self.create_floating_ip(vip, public_network_id,
+                                              port_id=port_id)
         self.floating_ips.setdefault(vip.id, [])
         self.floating_ips[vip.id].append(floating_ip)
 
@@ -303,6 +303,8 @@ class TestLoadBalancerBasic(manager.NetworkScenarioTest):
             try:
                 server = urllib2.urlopen("http://{0}/".format(vip_ip)).read()
                 counters[server] += 1
+            # HTTP exception means fail of server, so don't increase counter
+            # of success and continue connection tries
             except urllib2.HTTPError:
                 continue
         # Assert that each member of the pool gets balanced at least once

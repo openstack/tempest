@@ -44,13 +44,5 @@ class ExtensionsV2TestJSON(base.BaseVolumeTest):
             raise self.skipException('There are not any extensions configured')
 
 
-class ExtensionsV2TestXML(ExtensionsV2TestJSON):
-    _interface = 'xml'
-
-
 class ExtensionsV1TestJSON(ExtensionsV2TestJSON):
     _api_version = 1
-
-
-class ExtensionsV1TestXML(ExtensionsV1TestJSON):
-    _interface = 'xml'

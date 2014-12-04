@@ -21,12 +21,10 @@ import re
 import time
 
 import jsonschema
-from lxml import etree
 import six
 
 from tempest.common import http
 from tempest.common.utils import misc as misc_utils
-from tempest.common import xml_utils as common
 from tempest import config
 from tempest import exceptions
 from tempest.openstack.common import log as logging
@@ -52,6 +50,40 @@ def safe_body(body, maxlen=4096):
         return text[:maxlen]
     else:
         return text
+
+
+class ResponseBody(dict):
+    """Class that wraps an http response and dict body into a single value.
+
+    Callers that receive this object will normally use it as a dict but
+    can extract the response if needed.
+    """
+
+    def __init__(self, response, body=None):
+        body_data = body or {}
+        self.update(body_data)
+        self.response = response
+
+    def __str__(self):
+        body = super.__str__(self)
+        return "response: %s\nBody: %s" % (self.response, body)
+
+
+class ResponseBodyList(list):
+    """Class that wraps an http response and list body into a single value.
+
+    Callers that receive this object will normally use it as a list but
+    can extract the response if needed.
+    """
+
+    def __init__(self, response, body=None):
+        body_data = body or []
+        self.extend(body_data)
+        self.response = response
+
+    def __str__(self):
+        body = super.__str__(self)
+        return "response: %s\nBody: %s" % (self.response, body)
 
 
 class RestClient(object):
@@ -91,8 +123,9 @@ class RestClient(object):
                                        'retry-after', 'server',
                                        'vary', 'www-authenticate'))
         dscv = CONF.identity.disable_ssl_certificate_validation
+        ca_certs = CONF.identity.ca_certificates_file
         self.http_obj = http.ClosingHttp(
-            disable_ssl_certificate_validation=dscv)
+            disable_ssl_certificate_validation=dscv, ca_certs=ca_certs)
 
     def _get_type(self):
         return self.TYPE
@@ -328,48 +361,30 @@ class RestClient(object):
                                req_body, resp_body, caller_name, extra)
 
     def _parse_resp(self, body):
-        if self._get_type() is "json":
-            body = json.loads(body)
+        body = json.loads(body)
 
-            # We assume, that if the first value of the deserialized body's
-            # item set is a dict or a list, that we just return the first value
-            # of deserialized body.
-            # Essentially "cutting out" the first placeholder element in a body
-            # that looks like this:
-            #
-            #  {
-            #    "users": [
-            #      ...
-            #    ]
-            #  }
-            try:
-                # Ensure there are not more than one top-level keys
-                if len(body.keys()) > 1:
-                    return body
-                # Just return the "wrapped" element
-                first_key, first_item = body.items()[0]
-                if isinstance(first_item, (dict, list)):
-                    return first_item
-            except (ValueError, IndexError):
-                pass
-            return body
-        elif self._get_type() is "xml":
-            element = etree.fromstring(body)
-            if any(s in element.tag for s in self.dict_tags):
-                # Parse dictionary-like xmls (metadata, etc)
-                dictionary = {}
-                for el in element.getchildren():
-                    dictionary[u"%s" % el.get("key")] = u"%s" % el.text
-                return dictionary
-            if any(s in element.tag for s in self.list_tags):
-                # Parse list-like xmls (users, roles, etc)
-                array = []
-                for child in element.getchildren():
-                    array.append(common.xml_to_json(child))
-                return array
-
-            # Parse one-item-like xmls (user, role, etc)
-            return common.xml_to_json(element)
+        # We assume, that if the first value of the deserialized body's
+        # item set is a dict or a list, that we just return the first value
+        # of deserialized body.
+        # Essentially "cutting out" the first placeholder element in a body
+        # that looks like this:
+        #
+        #  {
+        #    "users": [
+        #      ...
+        #    ]
+        #  }
+        try:
+            # Ensure there are not more than one top-level keys
+            if len(body.keys()) > 1:
+                return body
+            # Just return the "wrapped" element
+            first_key, first_item = body.items()[0]
+            if isinstance(first_item, (dict, list)):
+                return first_item
+        except (ValueError, IndexError):
+            pass
+        return body
 
     def response_checker(self, method, resp, resp_body):
         if (resp.status in set((204, 205, 304)) or resp.status < 200 or

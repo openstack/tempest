@@ -15,8 +15,11 @@
 
 from tempest.api.compute import base
 from tempest.api_schema.request.compute.v2 import flavors
+from tempest import config
 from tempest import test
 
+
+CONF = config.CONF
 
 load_tests = test.NegativeAutoTest.load_tests
 
@@ -24,14 +27,14 @@ load_tests = test.NegativeAutoTest.load_tests
 @test.SimpleNegativeAutoTest
 class FlavorsListWithDetailsNegativeTestJSON(base.BaseV2ComputeTest,
                                              test.NegativeAutoTest):
-    _service = 'compute'
+    _service = CONF.compute.catalog_type
     _schema = flavors.flavor_list
 
 
 @test.SimpleNegativeAutoTest
 class FlavorDetailsNegativeTestJSON(base.BaseV2ComputeTest,
                                     test.NegativeAutoTest):
-    _service = 'compute'
+    _service = CONF.compute.catalog_type
     _schema = flavors.flavors_details
 
     @classmethod

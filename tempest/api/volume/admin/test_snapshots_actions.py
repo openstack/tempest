@@ -128,11 +128,3 @@ class SnapshotsActionsV2Test(base.BaseVolumeAdminTest):
 
 class SnapshotsActionsV1Test(SnapshotsActionsV2Test):
     _api_version = 1
-
-
-class SnapshotsActionsV1TestXML(SnapshotsActionsV1Test):
-    _interface = "xml"
-
-    def _get_progress_alias(self):
-        return '{http://docs.openstack.org/volume/ext' \
-               '/extended_snapshot_attributes/api/v1}progress'

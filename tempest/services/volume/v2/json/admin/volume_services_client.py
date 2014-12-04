@@ -13,14 +13,14 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest.services.volume.json import backups_client
+from tempest.services.volume.json.admin import volume_services_client as vs_cli
 
 
-class BackupsClientXML(backups_client.BackupsClientJSON):
+class VolumesServicesV2ClientJSON(vs_cli.BaseVolumesServicesClientJSON):
     """
-    Client class to send CRUD Volume Backup API requests to a Cinder endpoint
+    Client class to send CRUD Volume V2 API requests to a Cinder endpoint
     """
-    TYPE = "xml"
 
-    # TODO(gfidente): XML client isn't yet implemented because of bug 1270589
-    pass
+    def __init__(self, auth_provider):
+        super(VolumesServicesV2ClientJSON, self).__init__(auth_provider)
+        self.api_version = "v2"

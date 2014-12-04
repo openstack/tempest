@@ -46,7 +46,3 @@ class AbsoluteLimitsNegativeTestJSON(base.BaseV2ComputeTest):
                           name='test', meta=meta_data,
                           flavor_ref=self.flavor_ref,
                           image_ref=self.image_ref)
-
-
-class AbsoluteLimitsNegativeTestXML(AbsoluteLimitsNegativeTestJSON):
-    _interface = 'xml'

@@ -30,7 +30,3 @@ class ExtensionTestJSON(base.BaseIdentityV2AdminTest):
         for value in body:
             for key in keys:
                 self.assertIn(key, value)
-
-
-class ExtensionTestXML(ExtensionTestJSON):
-    _interface = 'xml'

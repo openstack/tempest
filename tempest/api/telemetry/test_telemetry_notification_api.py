@@ -73,7 +73,3 @@ class TelemetryNotificationAPITestJSON(base.BaseTelemetryTest):
 
         for metric in self.glance_v2_notifications:
             self.await_samples(metric, query)
-
-
-class TelemetryNotificationAPITestXML(TelemetryNotificationAPITestJSON):
-    _interface = 'xml'

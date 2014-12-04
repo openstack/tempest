@@ -23,7 +23,7 @@ from tempest.openstack.common import jsonutils
 CONF = config.CONF
 
 
-class VolumeQuotasClientJSON(rest_client.RestClient):
+class BaseVolumeQuotasClientJSON(rest_client.RestClient):
     """
     Client class to send CRUD Volume Quotas API requests to a Cinder endpoint
     """
@@ -31,7 +31,7 @@ class VolumeQuotasClientJSON(rest_client.RestClient):
     TYPE = "json"
 
     def __init__(self, auth_provider):
-        super(VolumeQuotasClientJSON, self).__init__(auth_provider)
+        super(BaseVolumeQuotasClientJSON, self).__init__(auth_provider)
 
         self.service = CONF.volume.catalog_type
         self.build_interval = CONF.volume.build_interval
@@ -85,3 +85,9 @@ class VolumeQuotasClientJSON(rest_client.RestClient):
         """Delete the tenant's quota set."""
         resp, body = self.delete('os-quota-sets/%s' % tenant_id)
         self.expected_success(200, resp.status)
+
+
+class VolumeQuotasClientJSON(BaseVolumeQuotasClientJSON):
+    """
+    Client class to send CRUD Volume Type API V1 requests to a Cinder endpoint
+    """

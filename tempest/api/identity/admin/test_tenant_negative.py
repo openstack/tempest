@@ -135,7 +135,3 @@ class TenantsNegativeTestJSON(base.BaseIdentityV2AdminTest):
         self.assertRaises(exceptions.Unauthorized, self.client.update_tenant,
                           tenant['id'])
         self.client.auth_provider.clear_auth()
-
-
-class TenantsNegativeTestXML(TenantsNegativeTestJSON):
-    _interface = 'xml'

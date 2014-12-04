@@ -197,8 +197,10 @@ class ObjectClientCustomizedHeader(rest_client.RestClient):
                 body=None):
         """A simple HTTP request interface."""
         dscv = CONF.identity.disable_ssl_certificate_validation
+        ca_certs = CONF.identity.ca_certificates_file
         self.http_obj = http.ClosingHttp(
-            disable_ssl_certificate_validation=dscv)
+            disable_ssl_certificate_validation=dscv,
+            ca_certs=ca_certs)
         if headers is None:
             headers = {}
         elif extra_headers:

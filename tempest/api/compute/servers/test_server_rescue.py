@@ -117,7 +117,3 @@ class ServerRescueTestJSON(base.BaseV2ComputeTest):
         resp, body = self.servers_client.remove_security_group(self.server_id,
                                                                self.sg_name)
         self.assertEqual(202, resp.status)
-
-
-class ServerRescueTestXML(ServerRescueTestJSON):
-    _interface = 'xml'

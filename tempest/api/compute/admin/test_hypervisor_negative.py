@@ -134,7 +134,3 @@ class HypervisorAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
             exceptions.Unauthorized,
             self.non_adm_client.search_hypervisor,
             hypers[0]['hypervisor_hostname'])
-
-
-class HypervisorAdminNegativeTestXML(HypervisorAdminNegativeTestJSON):
-    _interface = 'xml'

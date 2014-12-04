@@ -132,7 +132,3 @@ class ServerDiskConfigTestJSON(base.BaseV2ComputeTest):
         # Verify the disk_config attribute is set correctly
         resp, server = self.client.get_server(server['id'])
         self.assertEqual('MANUAL', server['OS-DCF:diskConfig'])
-
-
-class ServerDiskConfigTestXML(ServerDiskConfigTestJSON):
-    _interface = 'xml'

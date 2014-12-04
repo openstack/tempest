@@ -22,13 +22,13 @@ QUOTA_KEYS = ['gigabytes', 'snapshots', 'volumes']
 QUOTA_USAGE_KEYS = ['reserved', 'limit', 'in_use']
 
 
-class VolumeQuotasAdminTestJSON(base.BaseVolumeV1AdminTest):
+class BaseVolumeQuotasAdminV2TestJSON(base.BaseVolumeAdminTest):
     _interface = "json"
     force_tenant_isolation = True
 
     @classmethod
     def resource_setup(cls):
-        super(VolumeQuotasAdminTestJSON, cls).resource_setup()
+        super(BaseVolumeQuotasAdminV2TestJSON, cls).resource_setup()
         cls.demo_tenant_id = cls.isolated_creds.get_primary_creds().tenant_id
 
     @test.attr(type='gate')
@@ -115,5 +115,5 @@ class VolumeQuotasAdminTestJSON(base.BaseVolumeV1AdminTest):
         self.assertEqual(volume_default, quota_set_new['volumes'])
 
 
-class VolumeQuotasAdminTestXML(VolumeQuotasAdminTestJSON):
-    _interface = "xml"
+class VolumeQuotasAdminV1TestJSON(BaseVolumeQuotasAdminV2TestJSON):
+    _api_version = 1

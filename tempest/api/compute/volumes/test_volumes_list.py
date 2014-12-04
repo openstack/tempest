@@ -165,7 +165,3 @@ class VolumesTestJSON(base.BaseV2ComputeTest):
                              all_vol_list[index + params['offset']]['id'],
                              "Failed to list volume details by "
                              "offset and limit")
-
-
-class VolumesTestXML(VolumesTestJSON):
-    _interface = 'xml'

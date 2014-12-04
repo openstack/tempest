@@ -103,7 +103,6 @@ class ServersTestJSON(base.BaseV2ComputeTest):
                                                   self.password)
         self.assertTrue(linux_client.hostname_equals_servername(self.name))
 
-    @test.skip_because(bug="1306367", interface="xml")
     @test.attr(type='gate')
     def test_create_server_with_scheduler_hint_group(self):
         # Create a server with the scheduler hint "group".
@@ -128,9 +127,6 @@ class ServersTestJSON(base.BaseV2ComputeTest):
     @testtools.skipUnless(CONF.service_available.neutron,
                           'Neutron service must be available.')
     def test_verify_multiple_nics_order(self):
-        if getattr(self, '_interface',
-                   None) == 'xml' and not CONF.network_feature_enabled.xml_api:
-            raise self.skipException('Neutron XML API is not enabled')
         # Verify that the networks order given at the server creation is
         # preserved within the server.
         name_net1 = data_utils.rand_name(self.__class__.__name__)
@@ -279,11 +275,3 @@ class ServersTestManualDisk(ServersTestJSON):
             msg = "DiskConfig extension not enabled."
             raise cls.skipException(msg)
         super(ServersTestManualDisk, cls).resource_setup()
-
-
-class ServersTestXML(ServersTestJSON):
-    _interface = 'xml'
-
-
-class ServersWithSpecificFlavorTestXML(ServersWithSpecificFlavorTestJSON):
-    _interface = 'xml'

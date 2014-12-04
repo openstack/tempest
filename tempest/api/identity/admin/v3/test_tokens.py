@@ -145,7 +145,3 @@ class TokensV3TestJSON(base.BaseIdentityV3AdminTest):
                          token_auth['token']['project']['id'])
         self.assertEqual(project2['name'],
                          token_auth['token']['project']['name'])
-
-
-class TokensV3TestXML(TokensV3TestJSON):
-    _interface = 'xml'

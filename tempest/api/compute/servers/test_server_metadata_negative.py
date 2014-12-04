@@ -40,7 +40,7 @@ class ServerMetadataNegativeTestJSON(base.BaseV2ComputeTest):
         for sz in [256, 257, 511, 1023]:
             key = "k" * sz
             meta = {key: 'data1'}
-            self.assertRaises(exceptions.OverLimit,
+            self.assertRaises((exceptions.BadRequest, exceptions.OverLimit),
                               self.create_test_server,
                               meta=meta)
 
@@ -155,7 +155,3 @@ class ServerMetadataNegativeTestJSON(base.BaseV2ComputeTest):
         self.assertRaises(exceptions.BadRequest,
                           self.client.set_server_metadata,
                           self.server_id, meta=meta, no_metadata_field=True)
-
-
-class ServerMetadataNegativeTestXML(ServerMetadataNegativeTestJSON):
-    _interface = 'xml'

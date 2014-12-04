@@ -99,13 +99,5 @@ class VolumesV2MetadataTest(base.BaseVolumeTest):
         self.assertThat(body.items(), matchers.ContainsAll(expect.items()))
 
 
-class VolumesV2MetadataTestXML(VolumesV2MetadataTest):
-    _interface = "xml"
-
-
 class VolumesV1MetadataTest(VolumesV2MetadataTest):
     _api_version = 1
-
-
-class VolumesV1MetadataTestXML(VolumesV1MetadataTest):
-    _interface = "xml"

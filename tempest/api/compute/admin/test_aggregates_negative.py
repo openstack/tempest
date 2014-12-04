@@ -186,7 +186,3 @@ class AggregatesAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
 
         self.assertRaises(exceptions.NotFound, self.client.remove_host,
                           aggregate['id'], non_exist_host)
-
-
-class AggregatesAdminNegativeTestXML(AggregatesAdminNegativeTestJSON):
-    _interface = 'xml'

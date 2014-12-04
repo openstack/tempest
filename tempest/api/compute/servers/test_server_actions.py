@@ -498,7 +498,3 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
             self.assertEqual(console_type, body['type'])
             self.assertNotEqual('', body['url'])
             self._validate_url(body['url'])
-
-
-class ServerActionsTestXML(ServerActionsTestJSON):
-    _interface = 'xml'

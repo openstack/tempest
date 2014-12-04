@@ -16,8 +16,8 @@
 
 from tempest.api.identity import base
 from tempest import clients
+from tempest.common import credentials
 from tempest.common import custom_matchers
-from tempest.common import isolated_creds
 from tempest import config
 from tempest import exceptions
 import tempest.test
@@ -34,7 +34,7 @@ class BaseObjectTest(tempest.test.BaseTestCase):
         if not CONF.service_available.swift:
             skip_msg = ("%s skipped as swift is not available" % cls.__name__)
             raise cls.skipException(skip_msg)
-        cls.isolated_creds = isolated_creds.IsolatedCreds(
+        cls.isolated_creds = credentials.get_isolated_credentials(
             cls.__name__, network_resources=cls.network_resources)
         # Get isolated creds for normal user
         cls.os = clients.Manager(cls.isolated_creds.get_primary_creds())

@@ -78,7 +78,7 @@
 #
 
 # List of logger=LEVEL pairs. (list value)
-#default_log_levels = amqp=WARN,amqplib=WARN,boto=WARN,qpid=WARN,sqlalchemy=WARN,suds=INFO,oslo.messaging=INFO,iso8601=WARN,requests.packages.urllib3.connectionpool=WARN,urllib3.connectionpool=WARN
+#default_log_levels = amqp=WARN,amqplib=WARN,boto=WARN,qpid=WARN,sqlalchemy=WARN,suds=INFO,oslo.messaging=INFO,iso8601=WARN,requests.packages.urllib3.connectionpool=WARN,urllib3.connectionpool=WARN,websocket=WARN,keystonemiddleware=WARN,routes.middleware=WARN,stevedore=WARN
 
 # Enables or disables fatal status of deprecations. (boolean value)
 #fatal_deprecations = false
@@ -260,7 +260,8 @@
 # The endpoint type to use for the compute service. (string value)
 #endpoint_type = publicURL
 
-# Visible fixed network name  (string value)
+# Name of the fixed network that is visible to all test tenants.
+# (string value)
 #fixed_network_name = private
 
 # Valid primary flavor to use in tests. (string value)
@@ -270,7 +271,8 @@
 #flavor_ref_alt = 2
 
 # Unallocated floating IP range, which will be used to test the
-# floating IP bulk feature for CRUD operation. (string value)
+# floating IP bulk feature for CRUD operation. This block must not
+# overlap an existing floating IP pool. (string value)
 #floating_ip_range = 10.0.0.0/29
 
 # Password used to authenticate to an instance using the alternate
@@ -299,7 +301,8 @@
 # IP version used for SSH connections. (integer value)
 #ip_version_for_ssh = 4
 
-# Network used for SSH connections. (string value)
+# Network used for SSH connections. Ignored if
+# use_floatingip_for_ssh=true or run_ssh=false. (string value)
 #network_for_ssh = public
 
 # Path to a private key file for SSH access to remote hosts (string
@@ -464,9 +467,6 @@
 # [nova.vnc]->vnc_enabled in nova.conf (boolean value)
 #vnc_console = false
 
-# If false skip all v2 api tests with xml (boolean value)
-#xml_api_v2 = true
-
 
 [dashboard]
 
@@ -578,6 +578,10 @@
 # (string value)
 #auth_version = v2
 
+# Specify a CA bundle file to use in verifying a TLS (https) server
+# certificate. (string value)
+#ca_certificates_file = <None>
+
 # Catalog type of the Identity service. (string value)
 #catalog_type = identity
 
@@ -628,9 +632,6 @@
 # Does the identity service have delegation and impersonation enabled
 # (boolean value)
 #trust = true
-
-# If false, skip all identity api tests with xml (boolean value)
-#xml_api = false
 
 
 [image]
@@ -806,9 +807,6 @@
 # Allow the execution of IPv6 subnet tests that use the extended IPv6
 # attributes ipv6_ra_mode and ipv6_address_mode (boolean value)
 #ipv6_subnet_attributes = false
-
-# If false, skip all network api tests with xml (boolean value)
-#xml_api = false
 
 
 [object-storage]

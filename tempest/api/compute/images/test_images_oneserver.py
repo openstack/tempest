@@ -99,10 +99,6 @@ class ImagesOneServerTestJSON(base.BaseV2ComputeTest):
 
     @test.attr(type=['gate'])
     def test_create_image_specify_multibyte_character_image_name(self):
-        if self.__class__._interface == "xml":
-            # NOTE(sdague): not entirely accurage, but we'd need a ton of work
-            # in our XML client to make this good
-            raise self.skipException("Not testable in XML")
         # prefix character is:
         # http://www.fileformat.info/info/unicode/char/1F4A9/index.htm
 
@@ -114,7 +110,3 @@ class ImagesOneServerTestJSON(base.BaseV2ComputeTest):
         image_id = data_utils.parse_image_id(resp['location'])
         self.addCleanup(self.client.delete_image, image_id)
         self.assertEqual('202', resp['status'])
-
-
-class ImagesOneServerTestXML(ImagesOneServerTestJSON):
-    _interface = 'xml'

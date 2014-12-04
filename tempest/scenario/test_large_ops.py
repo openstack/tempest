@@ -12,6 +12,7 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
+from tempest_lib import exceptions
 
 from tempest.common.utils import data_utils
 from tempest import config
@@ -44,6 +45,22 @@ class TestLargeOpsScenario(manager.ScenarioTest):
                                     "instances")
         cls.set_network_resources()
         super(TestLargeOpsScenario, cls).resource_setup()
+        # list of cleanup calls to be executed in reverse order
+        cls._cleanup_resources = []
+
+    @classmethod
+    def resource_cleanup(cls):
+        while cls._cleanup_resources:
+            function, args, kwargs = cls._cleanup_resources.pop(-1)
+            try:
+                function(*args, **kwargs)
+            except exceptions.NotFound:
+                pass
+        super(TestLargeOpsScenario, cls).resource_cleanup()
+
+    @classmethod
+    def addCleanupClass(cls, function, *arguments, **keywordArguments):
+        cls._cleanup_resources.append((function, arguments, keywordArguments))
 
     def _wait_for_server_status(self, status):
         for server in self.servers:
@@ -54,13 +71,20 @@ class TestLargeOpsScenario(manager.ScenarioTest):
     def nova_boot(self):
         name = data_utils.rand_name('scenario-server-')
         flavor_id = CONF.compute.flavor_ref
-        secgroup = self._create_security_group()
+        # Explicitly create secgroup to avoid cleanup at the end of testcases.
+        # Since no traffic is tested, we don't need to actually add rules to
+        # secgroup
+        _, secgroup = self.security_groups_client.create_security_group(
+            'secgroup-%s' % name, 'secgroup-desc-%s' % name)
+        self.addCleanupClass(self.security_groups_client.delete_security_group,
+                             secgroup['id'])
+
         self.servers_client.create_server(
             name,
             self.image,
             flavor_id,
             min_count=CONF.scenario.large_ops_number,
-            security_groups=[secgroup])
+            security_groups=[{'name': secgroup['name']}])
         # needed because of bug 1199788
         params = {'name': name}
         _, server_list = self.servers_client.list_servers(params)
@@ -68,15 +92,12 @@ class TestLargeOpsScenario(manager.ScenarioTest):
         for server in self.servers:
             # after deleting all servers - wait for all servers to clear
             # before cleanup continues
-            self.addCleanup(self.servers_client.wait_for_server_termination,
-                            server['id'])
+            self.addCleanupClass(self.servers_client.
+                                 wait_for_server_termination,
+                                 server['id'])
         for server in self.servers:
-            self.addCleanup_with_wait(
-                waiter_callable=(self.servers_client.
-                                 wait_for_server_termination),
-                thing_id=server['id'], thing_id_param='server_id',
-                cleanup_callable=self.delete_wrapper,
-                cleanup_args=[self.servers_client.delete_server, server['id']])
+            self.addCleanupClass(self.servers_client.delete_server,
+                                 server['id'])
         self._wait_for_server_status('ACTIVE')
 
     def _large_ops_scenario(self):

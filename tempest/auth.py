@@ -26,8 +26,6 @@ from tempest import config
 from tempest.openstack.common import log as logging
 from tempest.services.identity.json import identity_client as json_id
 from tempest.services.identity.v3.json import identity_client as json_v3id
-from tempest.services.identity.v3.xml import identity_client as xml_v3id
-from tempest.services.identity.xml import identity_client as xml_id
 
 
 CONF = config.CONF
@@ -44,15 +42,14 @@ class AuthProvider(object):
         """
         :param credentials: credentials for authentication
         :param interface: 'json' or 'xml'. Applicable for tempest client only
+            (deprecated: only json now supported)
         """
         credentials = self._convert_credentials(credentials)
         if self.check_credentials(credentials):
             self.credentials = credentials
         else:
             raise TypeError("Invalid credentials")
-        self.interface = interface
-        if self.interface is None:
-            self.interface = 'json'
+        self.interface = 'json'
         self.cache = None
         self.alt_auth_data = None
         self.alt_part = None
@@ -255,10 +252,7 @@ class KeystoneV2AuthProvider(KeystoneAuthProvider):
     EXPIRY_DATE_FORMAT = '%Y-%m-%dT%H:%M:%SZ'
 
     def _auth_client(self):
-        if self.interface == 'json':
-            return json_id.TokenClientJSON()
-        else:
-            return xml_id.TokenClientXML()
+        return json_id.TokenClientJSON()
 
     def _auth_params(self):
         return dict(
@@ -336,10 +330,7 @@ class KeystoneV3AuthProvider(KeystoneAuthProvider):
     EXPIRY_DATE_FORMAT = '%Y-%m-%dT%H:%M:%S.%fZ'
 
     def _auth_client(self):
-        if self.interface == 'json':
-            return json_v3id.V3TokenClientJSON()
-        else:
-            return xml_v3id.V3TokenClientXML()
+        return json_v3id.V3TokenClientJSON()
 
     def _auth_params(self):
         return dict(

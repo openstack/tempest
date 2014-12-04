@@ -147,7 +147,3 @@ class ListServersNegativeTestJSON(base.BaseV2ComputeTest):
                   if srv['id'] in deleted_ids]
         self.assertEqual('200', resp['status'])
         self.assertEqual([], actual)
-
-
-class ListServersNegativeTestXML(ListServersNegativeTestJSON):
-    _interface = 'xml'

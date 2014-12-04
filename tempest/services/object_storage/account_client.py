@@ -181,7 +181,11 @@ class AccountClientCustomizedHeader(rest_client.RestClient):
     def request(self, method, url, extra_headers=False, headers=None,
                 body=None):
         """A simple HTTP request interface."""
-        self.http_obj = http.ClosingHttp()
+        dscv = CONF.identity.disable_ssl_certificate_validation
+        ca_certs = CONF.identity.ca_certificates_file
+        self.http_obj = http.ClosingHttp(
+            disable_ssl_certificate_validation=dscv,
+            ca_certs=ca_certs)
         if headers is None:
             headers = {}
         elif extra_headers:

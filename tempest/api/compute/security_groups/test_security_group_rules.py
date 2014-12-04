@@ -13,8 +13,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import six
-
 from tempest.api.compute.security_groups import base
 from tempest import config
 from tempest import test
@@ -40,13 +38,6 @@ class SecurityGroupRulesTestJSON(base.BaseSecurityGroupsTest):
         to_port = cls.to_port
         group = {}
         ip_range = {}
-        if cls._interface == 'xml':
-            # NOTE: An XML response is different from the one of JSON
-            # like the following.
-            from_port = six.text_type(from_port)
-            to_port = six.text_type(to_port)
-            group = {'tenant_id': 'None', 'name': 'None'}
-            ip_range = {'cidr': 'None'}
         cls.expected = {
             'id': None,
             'parent_group_id': None,
@@ -195,7 +186,3 @@ class SecurityGroupRulesTestJSON(base.BaseSecurityGroupsTest):
             self.client.list_security_group_rules(sg1_id)
         # The group1 has no rules because group2 has deleted
         self.assertEqual(0, len(rules))
-
-
-class SecurityGroupRulesTestXML(SecurityGroupRulesTestJSON):
-    _interface = 'xml'
