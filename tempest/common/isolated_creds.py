@@ -316,9 +316,12 @@ class IsolatedCreds(cred_provider.CredentialProvider):
         net_client = self.network_admin_client
         for cred in self.isolated_net_resources:
             network, subnet, router = self.isolated_net_resources.get(cred)
+            credentials = self.isolated_creds.get(cred)
             LOG.debug("Clearing network: %(network)s, "
-                      "subnet: %(subnet)s, router: %(router)s",
-                      {'network': network, 'subnet': subnet, 'router': router})
+                      "subnet: %(subnet)s, router: %(router)s for credentials "
+                      "%(credentials)",
+                      {'network': network, 'subnet': subnet,
+                       'router': router, 'credentials': credentials})
             if (not self.network_resources or
                 self.network_resources.get('router')):
                 try:
