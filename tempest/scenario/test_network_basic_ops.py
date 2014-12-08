@@ -381,6 +381,9 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
 
     @testtools.skipUnless(CONF.compute_feature_enabled.interface_attach,
                           'NIC hotplug not available')
+    @testtools.skipIf(CONF.network.port_vnic_type in ['direct', 'macvtap'],
+                      'NIC hotplug not supported for '
+                      'vnic_type direct or macvtap')
     @test.attr(type='smoke')
     @test.services('compute', 'network')
     def test_hotplug_nic(self):

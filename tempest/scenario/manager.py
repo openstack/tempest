@@ -639,14 +639,15 @@ class NetworkScenarioTest(ScenarioTest):
         self.addCleanup(self.delete_wrapper, subnet.delete)
         return subnet
 
-    def _create_port(self, network, client=None, namestart='port-quotatest'):
+    def _create_port(self, network_id, client=None, namestart='port-quotatest',
+                     **kwargs):
         if not client:
             client = self.network_client
         name = data_utils.rand_name(namestart)
         result = client.create_port(
             name=name,
-            network_id=network.id,
-            tenant_id=network.tenant_id)
+            network_id=network_id,
+            **kwargs)
         self.assertIsNotNone(result, 'Unable to allocate port')
         port = net_resources.DeletablePort(client=client,
                                            **result['port'])
@@ -1046,6 +1047,66 @@ class NetworkScenarioTest(ScenarioTest):
             subnet = self._create_subnet(**subnet_kwargs)
             subnet.add_to_router(router.id)
         return network, subnet, router
+
+    def create_server(self, name=None, image=None, flavor=None,
+                      wait_on_boot=True, wait_on_delete=True,
+                      create_kwargs=None):
+        vnic_type = CONF.network.port_vnic_type
+
+        # If vnic_type is configured create port for
+        # every network
+        if vnic_type:
+            ports = []
+            networks = []
+            create_port_body = {'binding:vnic_type': vnic_type,
+                                'namestart': 'port-smoke'}
+            if create_kwargs:
+                net_client = create_kwargs.get("network_client",
+                                               self.network_client)
+
+                # Convert security group names to security group ids
+                # to pass to create_port
+                if create_kwargs.get('security_groups'):
+                    security_groups = net_client.list_security_groups().get(
+                        'security_groups')
+                    sec_dict = dict([(s['name'], s['id'])
+                                    for s in security_groups])
+
+                    sec_groups_names = [s['name'] for s in create_kwargs[
+                        'security_groups']]
+                    security_groups_ids = [sec_dict[s]
+                                           for s in sec_groups_names]
+
+                    if security_groups_ids:
+                        create_port_body[
+                            'security_groups'] = security_groups_ids
+                networks = create_kwargs.get('networks')
+            else:
+                net_client = self.network_client
+            # If there are no networks passed to us we look up
+            # for the tenant's private networks and create a port
+            # if there is only one private network. The same behaviour
+            # as we would expect when passing the call to the clients
+            # with no networks
+            if not networks:
+                networks = net_client.list_networks(filters={
+                    'router:external': False})
+                self.assertEqual(1, len(networks),
+                                 "There is more than one"
+                                 " network for the tenant")
+            for net in networks:
+                net_id = net['uuid']
+                port = self._create_port(network_id=net_id,
+                                         client=net_client,
+                                         **create_port_body)
+                ports.append({'port': port.id})
+            if ports:
+                create_kwargs['networks'] = ports
+
+        return super(NetworkScenarioTest, self).create_server(
+            name=name, image=image, flavor=flavor,
+            wait_on_boot=wait_on_boot, wait_on_delete=wait_on_delete,
+            create_kwargs=create_kwargs)
 
 
 # power/provision states as of icehouse
