@@ -22,6 +22,7 @@ from tempest import exceptions
 from tempest.openstack.common import excutils
 from tempest.openstack.common import log as logging
 import tempest.test
+import random
 
 CONF = config.CONF
 
@@ -57,6 +58,8 @@ class BaseComputeTest(tempest.test.BaseTestCase):
         cls.images = []
         cls.security_groups = []
         cls.server_groups = []
+        cls.network_client = cls.os.network_client
+        cls.fixed_network_name = CONF.compute.fixed_network_name
 
         if cls._api_version == 2:
             cls.servers_client = cls.os.servers_client
@@ -198,7 +201,29 @@ class BaseComputeTest(tempest.test.BaseTestCase):
             name = kwargs.pop('name')
         flavor = kwargs.get('flavor', cls.flavor_ref)
         image_id = kwargs.get('image_id', cls.image_ref)
-
+        if 'networks' not in kwargs and cls.fixed_network_name:
+            response, body = cls.network_client.list_networks()
+            #self.assertEqual('200', response['status'])
+            networks = body['networks']
+            # If several networks found, set the NetID on which to connect the
+            # server to avoid the following error "Multiple possible netwo
+            # found, use a Network ID to be more specific."
+            # See Tempest #1297660
+            if len(networks) > 1:
+                 for network in networks:
+                   if network['name'] == cls.fixed_network_name:
+                      kwargs['networks'] = [{'uuid': str(network['id'])}]
+                      break
+                 if 'networks' not in kwargs: 
+                    # Randomly choose a network from the available networks
+                     net = random.choice(networks)
+                     kwargs['networks'] = [{'uuid': str(net['id'])}]
+                     msg = ("The network on which the NIC of the server must "
+                           "be connected can not be found :  "
+                           "fixed_network_name=%s. Starting instance with "
+                           "random network.") % cls.fixed_network_name
+                     LOG.info(msg)
+                                                     
         resp, body = cls.servers_client.create_server(
             name, image_id, flavor, **kwargs)
 
