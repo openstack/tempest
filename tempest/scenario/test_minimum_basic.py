@@ -14,7 +14,6 @@
 #    under the License.
 
 from tempest.common import custom_matchers
-from tempest.common import debug
 from tempest import config
 from tempest import exceptions
 from tempest.openstack.common import log as logging
@@ -89,17 +88,6 @@ class TestMinimumBasicScenario(manager.ScenarioTest):
         self.servers_client.reboot(self.server['id'], 'SOFT')
         self._wait_for_server_status('ACTIVE')
 
-    def ssh_to_server(self):
-        try:
-            self.linux_client = self.get_remote_client(self.floating_ip['ip'])
-        except Exception as e:
-            LOG.exception('ssh to server failed')
-            self._log_console_output()
-            # network debug is called as part of ssh init
-            if not isinstance(e, test.exceptions.SSHTimeout):
-                debug.log_net_debug()
-            raise
-
     def check_partitions(self):
         # NOTE(andreaf) The device name may be different on different guest OS
         partitions = self.linux_client.get_partitions()
@@ -147,7 +135,9 @@ class TestMinimumBasicScenario(manager.ScenarioTest):
 
         self.floating_ip = self.create_floating_ip(self.server)
         self.create_and_add_security_group()
-        self.ssh_to_server()
+
+        self.linux_client = self.get_remote_client(self.floating_ip['ip'])
         self.nova_reboot()
-        self.ssh_to_server()
+
+        self.linux_client = self.get_remote_client(self.floating_ip['ip'])
         self.check_partitions()

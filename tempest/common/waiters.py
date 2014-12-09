@@ -111,22 +111,24 @@ def wait_for_image_status(client, image_id, status):
     while image['status'] != status:
         time.sleep(client.build_interval)
         resp, image = client.get_image(image_id)
-        if image['status'] == 'ERROR':
+        status_curr = image['status']
+        if status_curr == 'ERROR':
             raise exceptions.AddImageException(image_id=image_id)
 
         # check the status again to avoid a false negative where we hit
         # the timeout at the same time that the image reached the expected
         # status
-        if image['status'] == status:
+        if status_curr == status:
             return
 
         if int(time.time()) - start >= client.build_timeout:
-            message = ('Image %(image_id)s failed to reach %(status)s '
-                       'status within the required time (%(timeout)s s).' %
+            message = ('Image %(image_id)s failed to reach %(status)s state'
+                       '(current state %(status_curr)s) '
+                       'within the required time (%(timeout)s s).' %
                        {'image_id': image_id,
                         'status': status,
+                        'status_curr': status_curr,
                         'timeout': client.build_timeout})
-            message += ' Current status: %s.' % image['status']
             caller = misc_utils.find_test_caller()
             if caller:
                 message = '(%s) %s' % (caller, message)
@@ -144,7 +146,8 @@ def wait_for_bm_node_status(client, node_id, attr, status):
     while node[attr] != status:
         time.sleep(client.build_interval)
         _, node = client.show_node(node_id)
-        if node[attr] == status:
+        status_curr = node[attr]
+        if status_curr == status:
             return
 
         if int(time.time()) - start >= client.build_timeout:
@@ -154,7 +157,7 @@ def wait_for_bm_node_status(client, node_id, attr, status):
                         'attr': attr,
                         'status': status,
                         'timeout': client.build_timeout})
-            message += ' Current state of %s: %s.' % (attr, node[attr])
+            message += ' Current state of %s: %s.' % (attr, status_curr)
             caller = misc_utils.find_test_caller()
             if caller:
                 message = '(%s) %s' % (caller, message)

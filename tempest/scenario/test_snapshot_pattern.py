@@ -47,21 +47,13 @@ class TestSnapshotPattern(manager.ScenarioTest):
     def _add_keypair(self):
         self.keypair = self.create_keypair()
 
-    def _ssh_to_server(self, server_or_ip):
-        try:
-            return self.get_remote_client(server_or_ip)
-        except Exception:
-            LOG.exception('Initializing SSH connection failed')
-            self._log_console_output()
-            raise
-
     def _write_timestamp(self, server_or_ip):
-        ssh_client = self._ssh_to_server(server_or_ip)
+        ssh_client = self.get_remote_client(server_or_ip)
         ssh_client.exec_command('date > /tmp/timestamp; sync')
         self.timestamp = ssh_client.exec_command('cat /tmp/timestamp')
 
     def _check_timestamp(self, server_or_ip):
-        ssh_client = self._ssh_to_server(server_or_ip)
+        ssh_client = self.get_remote_client(server_or_ip)
         got_timestamp = ssh_client.exec_command('cat /tmp/timestamp')
         self.assertEqual(self.timestamp, got_timestamp)
 
