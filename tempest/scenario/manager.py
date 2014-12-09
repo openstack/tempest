@@ -1005,6 +1005,10 @@ class NetworkScenarioTest(ScenarioTest):
         self.addCleanup(self.delete_wrapper, router.delete)
         return router
 
+    def _update_router_admin_state(self, router, admin_state_up):
+        router.update(admin_state_up=admin_state_up)
+        self.assertEqual(admin_state_up, router.admin_state_up)
+
     def create_networks(self, client=None, tenant_id=None):
         """Create a network with a subnet connected to a router.
 
