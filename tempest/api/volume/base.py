@@ -145,10 +145,6 @@ class BaseVolumeTest(tempest.test.BaseTestCase):
                 pass
 
 
-class BaseVolumeV1Test(BaseVolumeTest):
-    _api_version = 1
-
-
 class BaseVolumeAdminTest(BaseVolumeTest):
     """Base test case class for all Volume Admin API tests."""
     @classmethod
@@ -222,7 +218,3 @@ class BaseVolumeAdminTest(BaseVolumeTest):
             except exceptions.NotFound:
                 # The qos_specs may have already been deleted which is OK.
                 pass
-
-
-class BaseVolumeV1AdminTest(BaseVolumeAdminTest):
-    _api_version = 1

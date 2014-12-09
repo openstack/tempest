@@ -259,6 +259,7 @@ class NetworkClientBase(object):
         # At this point, the wait has timed out
         message = 'Resource %s' % (str(resource))
         message += ' failed to reach status %s' % status
+        message += ' (current: %s)' % resource['status']
         message += ' within the required time %s' % timeout
         caller = misc.find_test_caller()
         if caller:

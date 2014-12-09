@@ -165,21 +165,19 @@ def get_enabled_extensions(service):
 def verify_extensions(os, service, results):
     extensions_client = get_extension_client(os, service)
     __, resp = extensions_client.list_extensions()
+    # For Nova, Cinder and Neutron we use the alias name rather than the
+    # 'name' field because the alias is considered to be the canonical
+    # name.
     if isinstance(resp, dict):
-        # For both Nova and Neutron we use the alias name rather than the
-        # 'name' field because the alias is considered to be the canonical
-        # name.
-        if service in ['nova', 'nova_v3', 'neutron']:
-            extensions = map(lambda x: x['alias'], resp['extensions'])
-        elif service == 'swift':
+        if service == 'swift':
             # Remove Swift general information from extensions list
             resp.pop('swift')
             extensions = resp.keys()
         else:
-            extensions = map(lambda x: x['name'], resp['extensions'])
+            extensions = map(lambda x: x['alias'], resp['extensions'])
 
     else:
-        extensions = map(lambda x: x['name'], resp)
+        extensions = map(lambda x: x['alias'], resp)
     if not results.get(service):
         results[service] = {}
     extensions_opt = get_enabled_extensions(service)

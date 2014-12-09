@@ -34,15 +34,6 @@ class TestPortsNegative(base.BaseBaremetalTest):
                           self.create_port, node_id=node_id, address=address)
 
     @test.attr(type=['negative', 'smoke'])
-    def test_create_port_malformed_extra(self):
-        node_id = self.node['uuid']
-        address = data_utils.rand_mac_address()
-        extra = {'key': 0.123}
-        self.assertRaises(exc.BadRequest,
-                          self.create_port, node_id=node_id,
-                          address=address, extra=extra)
-
-    @test.attr(type=['negative', 'smoke'])
     def test_create_port_nonexsistent_node_id(self):
         node_id = str(data_utils.rand_uuid())
         address = data_utils.rand_mac_address()
@@ -160,31 +151,6 @@ class TestPortsNegative(base.BaseBaremetalTest):
                                   'value': new_address}])
 
     @test.attr(type=['negative', 'smoke'])
-    def test_update_port_add_malformed_extra(self):
-        node_id = self.node['uuid']
-        address = data_utils.rand_mac_address()
-
-        _, port = self.create_port(node_id=node_id, address=address)
-        port_id = port['uuid']
-
-        self.assertRaises(exc.BadRequest, self.client.update_port, port_id,
-                          [{'path': '/extra/key', ' op': 'add',
-                            'value': 0.123}])
-
-    @test.attr(type=['negative', 'smoke'])
-    def test_update_port_add_whole_malformed_extra(self):
-        node_id = self.node['uuid']
-        address = data_utils.rand_mac_address()
-
-        _, port = self.create_port(node_id=node_id, address=address)
-        port_id = port['uuid']
-
-        self.assertRaises(exc.BadRequest, self.client.update_port, port_id,
-                          [{'path': '/extra',
-                            'op': 'add',
-                            'value': [1, 2, 3, 4, 'a']}])
-
-    @test.attr(type=['negative', 'smoke'])
     def test_update_port_add_nonexistent_property(self):
         node_id = self.node['uuid']
         address = data_utils.rand_mac_address()
@@ -252,37 +218,6 @@ class TestPortsNegative(base.BaseBaremetalTest):
         patch = [{'path': '/address',
                   'op': 'replace',
                   'value': 'malformed:mac'}]
-
-        self.assertRaises(exc.BadRequest,
-                          self.client.update_port, port_id, patch)
-
-    @test.attr(type=['negative', 'smoke'])
-    def test_update_port_replace_extra_item_with_malformed(self):
-        node_id = self.node['uuid']
-        address = data_utils.rand_mac_address()
-        extra = {'key': 'value'}
-
-        _, port = self.create_port(node_id=node_id, address=address,
-                                   extra=extra)
-        port_id = port['uuid']
-
-        patch = [{'path': '/extra/key',
-                  'op': 'replace',
-                  'value': 0.123}]
-        self.assertRaises(exc.BadRequest,
-                          self.client.update_port, port_id, patch)
-
-    @test.attr(type=['negative', 'smoke'])
-    def test_update_port_replace_whole_extra_with_malformed(self):
-        node_id = self.node['uuid']
-        address = data_utils.rand_mac_address()
-
-        _, port = self.create_port(node_id=node_id, address=address)
-        port_id = port['uuid']
-
-        patch = [{'path': '/extra',
-                  'op': 'replace',
-                  'value': [1, 2, 3, 4, 'a']}]
 
         self.assertRaises(exc.BadRequest,
                           self.client.update_port, port_id, patch)
