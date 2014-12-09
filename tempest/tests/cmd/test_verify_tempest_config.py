@@ -261,9 +261,9 @@ class TestDiscovery(base.TestCase):
 
     def test_verify_extensions_cinder(self):
         def fake_list_extensions():
-            return (None, {'extensions': [{'name': 'fake1'},
-                                          {'name': 'fake2'},
-                                          {'name': 'not_fake'}]})
+            return (None, {'extensions': [{'alias': 'fake1'},
+                                          {'alias': 'fake2'},
+                                          {'alias': 'not_fake'}]})
         fake_os = mock.MagicMock()
         fake_os.volumes_extension_client.list_extensions = fake_list_extensions
         self.useFixture(mockpatch.PatchObject(
@@ -283,9 +283,9 @@ class TestDiscovery(base.TestCase):
 
     def test_verify_extensions_cinder_all(self):
         def fake_list_extensions():
-            return (None, {'extensions': [{'name': 'fake1'},
-                                          {'name': 'fake2'},
-                                          {'name': 'not_fake'}]})
+            return (None, {'extensions': [{'alias': 'fake1'},
+                                          {'alias': 'fake2'},
+                                          {'alias': 'not_fake'}]})
         fake_os = mock.MagicMock()
         fake_os.volumes_extension_client.list_extensions = fake_list_extensions
         self.useFixture(mockpatch.PatchObject(
@@ -300,9 +300,8 @@ class TestDiscovery(base.TestCase):
 
     def test_verify_extensions_nova(self):
         def fake_list_extensions():
-            return (None, {'extensions': [{'alias': 'fake1'},
-                                          {'alias': 'fake2'},
-                                          {'alias': 'not_fake'}]})
+            return (None, [{'alias': 'fake1'}, {'alias': 'fake2'},
+                           {'alias': 'not_fake'}])
         fake_os = mock.MagicMock()
         fake_os.extensions_client.list_extensions = fake_list_extensions
         self.useFixture(mockpatch.PatchObject(
@@ -339,9 +338,9 @@ class TestDiscovery(base.TestCase):
 
     def test_verify_extensions_nova_v3(self):
         def fake_list_extensions():
-            return (None, {'extensions': [{'alias': 'fake1'},
-                                          {'alias': 'fake2'},
-                                          {'alias': 'not_fake'}]})
+            return (None, [{'alias': 'fake1'},
+                           {'alias': 'fake2'},
+                           {'alias': 'not_fake'}])
         fake_os = mock.MagicMock()
         fake_os.extensions_v3_client.list_extensions = fake_list_extensions
         self.useFixture(mockpatch.PatchObject(
