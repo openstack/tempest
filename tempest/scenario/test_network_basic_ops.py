@@ -18,7 +18,6 @@ import re
 
 import testtools
 
-from tempest.common import debug
 from tempest.common.utils import data_utils
 from tempest import config
 from tempest import exceptions
@@ -325,7 +324,6 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
                 LOG.exception("Unable to access {dest} via ssh to "
                               "floating-ip {src}".format(dest=remote_ip,
                                                          src=floating_ip))
-                debug.log_ip_ns()
                 raise
 
     @test.attr(type='smoke')

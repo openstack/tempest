@@ -19,63 +19,6 @@ from tempest.openstack.common import log as logging
 
 LOG = logging.getLogger(__name__)
 
-# NOTE(afazekas):
-# These commands assumes the tempest node is the same as
-# the only one service node. all-in-one installation.
-
-
-def sudo_cmd_call(cmd):
-    args = shlex.split(cmd.encode('utf-8'))
-    subprocess_args = {'stdout': subprocess.PIPE,
-                       'stderr': subprocess.STDOUT}
-    proc = subprocess.Popen(['/usr/bin/sudo', '-n'] + args,
-                            **subprocess_args)
-    stdout = proc.communicate()[0]
-    if proc.returncode != 0:
-        LOG.error(("Command {0} returned with exit status {1},"
-                   "output {2}").format(cmd, proc.returncode, stdout))
-    return stdout
-
-
-def ip_addr_raw():
-    return sudo_cmd_call("ip a")
-
-
-def ip_route_raw():
-    return sudo_cmd_call("ip r")
-
-
-def ip_ns_raw():
-    return sudo_cmd_call("ip netns list")
-
-
-def iptables_raw(table):
-    return sudo_cmd_call("iptables --line-numbers -L -nv -t " + table)
-
-
-def ip_ns_list():
-    return ip_ns_raw().split()
-
-
-def ip_ns_exec(ns, cmd):
-    return sudo_cmd_call(" ".join(("ip netns exec", ns, cmd)))
-
-
-def ip_ns_addr(ns):
-    return ip_ns_exec(ns, "ip a")
-
-
-def ip_ns_route(ns):
-    return ip_ns_exec(ns, "ip r")
-
-
-def iptables_ns(ns, table):
-    return ip_ns_exec(ns, "iptables -v -S -t " + table)
-
-
-def ovs_db_dump():
-    return sudo_cmd_call("ovsdb-client dump")
-
 
 def copy_file_to_host(file_from, dest, host, username, pkey):
     dest = "%s@%s:%s" % (username, host, dest)

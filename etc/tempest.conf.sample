@@ -517,9 +517,6 @@
 # From tempest.config
 #
 
-# Enable diagnostic commands (boolean value)
-#enable = true
-
 # A regex to determine which requests should be traced.  This is a
 # regex to match the caller for rest client requests to be able to
 # selectively trace calls out of specific classes and methods. It

@@ -24,7 +24,6 @@ import six
 from tempest import auth
 from tempest import clients
 from tempest.common import credentials
-from tempest.common import debug
 from tempest.common.utils import data_utils
 from tempest.common.utils.linux import remote_client
 from tempest import config
@@ -326,7 +325,6 @@ class ScenarioTest(tempest.test.BaseTestCase):
             linux_client.validate_authentication()
         except Exception:
             LOG.exception('Initializing SSH connection to %s failed' % ip)
-            debug.log_net_debug()
             # If we don't explicitely set for which servers we want to
             # log the console output then all the servers will be logged.
             # See the definition of _log_console_output()
@@ -400,7 +398,6 @@ class ScenarioTest(tempest.test.BaseTestCase):
         # network debug is called as part of ssh init
         if not isinstance(exc, exceptions.SSHTimeout):
             LOG.debug('Network information on a devstack host')
-            debug.log_net_debug()
 
     def create_server_snapshot(self, server, name=None):
         # Glance client
@@ -510,15 +507,12 @@ class ScenarioTest(tempest.test.BaseTestCase):
                                        username,
                                        private_key,
                                        should_connect=should_connect)
-        except Exception as e:
+        except Exception:
             ex_msg = 'Public network connectivity check failed'
             if msg:
                 ex_msg += ": " + msg
             LOG.exception(ex_msg)
             self._log_console_output(servers)
-            # network debug is called as part of ssh init
-            if not isinstance(e, exceptions.SSHTimeout):
-                debug.log_net_debug()
             raise
 
     def create_floating_ip(self, thing, pool_name=None):

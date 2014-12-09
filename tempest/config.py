@@ -926,9 +926,6 @@ debug_group = cfg.OptGroup(name="debug",
                            title="Debug System")
 
 DebugGroup = [
-    cfg.BoolOpt('enable',
-                default=True,
-                help="Enable diagnostic commands"),
     cfg.StrOpt('trace_requests',
                default='',
                help="""A regex to determine which requests should be traced.
