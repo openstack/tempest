@@ -38,6 +38,8 @@ class FWaaSExtensionTestJSON(base.BaseNetworkTest):
         Update firewall policy
         Insert firewall rule to policy
         Remove firewall rule from policy
+        Insert firewall rule after/before rule in policy
+        Update firewall policy audited attribute
         Delete firewall policy
         Show firewall policy
         List firewall
@@ -222,14 +224,14 @@ class FWaaSExtensionTestJSON(base.BaseNetworkTest):
         self.client.delete_firewall(firewall_id)
 
     @test.attr(type='smoke')
-    def test_insert_remove_firewall_rule_from_policy(self):
+    def test_firewall_rule_insertion_position_removal_rule_from_policy(self):
         # Create firewall rule
         resp, body = self.client.create_firewall_rule(
             name=data_utils.rand_name("fw-rule"),
             action="allow",
             protocol="tcp")
-        fw_rule_id = body['firewall_rule']['id']
-        self.addCleanup(self._try_delete_rule, fw_rule_id)
+        fw_rule_id1 = body['firewall_rule']['id']
+        self.addCleanup(self._try_delete_rule, fw_rule_id1)
         # Create firewall policy
         _, body = self.client.create_firewall_policy(
             name=data_utils.rand_name("fw-policy"))
@@ -238,19 +240,76 @@ class FWaaSExtensionTestJSON(base.BaseNetworkTest):
 
         # Insert rule to firewall policy
         self.client.insert_firewall_rule_in_policy(
-            fw_policy_id, fw_rule_id, '', '')
+            fw_policy_id, fw_rule_id1, '', '')
 
         # Verify insertion of rule in policy
-        self.assertIn(fw_rule_id, self._get_list_fw_rule_ids(fw_policy_id))
+        self.assertIn(fw_rule_id1, self._get_list_fw_rule_ids(fw_policy_id))
+        # Create another firewall rule
+        _, body = self.client.create_firewall_rule(
+            name=data_utils.rand_name("fw-rule"),
+            action="allow",
+            protocol="icmp")
+        fw_rule_id2 = body['firewall_rule']['id']
+        self.addCleanup(self._try_delete_rule, fw_rule_id2)
+
+        # Insert rule to firewall policy after the first rule
+        self.client.insert_firewall_rule_in_policy(
+            fw_policy_id, fw_rule_id2, fw_rule_id1, '')
+
+        # Verify the posiition of rule after insertion
+        _, fw_rule = self.client.show_firewall_rule(
+            fw_rule_id2)
+
+        self.assertEqual(int(fw_rule['firewall_rule']['position']), 2)
         # Remove rule from the firewall policy
         self.client.remove_firewall_rule_from_policy(
-            fw_policy_id, fw_rule_id)
+            fw_policy_id, fw_rule_id2)
+        # Insert rule to firewall policy before the first rule
+        self.client.insert_firewall_rule_in_policy(
+            fw_policy_id, fw_rule_id2, '', fw_rule_id1)
+        # Verify the posiition of rule after insertion
+        _, fw_rule = self.client.show_firewall_rule(
+            fw_rule_id2)
+        self.assertEqual(int(fw_rule['firewall_rule']['position']), 1)
+        # Remove rule from the firewall policy
+        self.client.remove_firewall_rule_from_policy(
+            fw_policy_id, fw_rule_id2)
+        # Verify removal of rule from firewall policy
+        self.assertNotIn(fw_rule_id2, self._get_list_fw_rule_ids(fw_policy_id))
+
+        # Remove rule from the firewall policy
+        self.client.remove_firewall_rule_from_policy(
+            fw_policy_id, fw_rule_id1)
 
         # Verify removal of rule from firewall policy
-        self.assertNotIn(fw_rule_id, self._get_list_fw_rule_ids(fw_policy_id))
+        self.assertNotIn(fw_rule_id1, self._get_list_fw_rule_ids(fw_policy_id))
 
     def _get_list_fw_rule_ids(self, fw_policy_id):
         _, fw_policy = self.client.show_firewall_policy(
             fw_policy_id)
         return [ruleid for ruleid in fw_policy['firewall_policy']
                 ['firewall_rules']]
+
+    def test_update_firewall_policy_audited_attribute(self):
+        # Create firewall rule
+        _, body = self.client.create_firewall_rule(
+            name=data_utils.rand_name("fw-rule"),
+            action="allow",
+            protocol="icmp")
+        fw_rule_id = body['firewall_rule']['id']
+        self.addCleanup(self._try_delete_rule, fw_rule_id)
+        # Create firewall policy
+        _, body = self.client.create_firewall_policy(
+            name=data_utils.rand_name('fw-policy'))
+        fw_policy_id = body['firewall_policy']['id']
+        self.addCleanup(self._try_delete_policy, fw_policy_id)
+        self.assertFalse(body['firewall_policy']['audited'])
+        # Update firewall policy audited attribute to ture
+        self.client.update_firewall_policy(fw_policy_id,
+                                           audited=True)
+        # Insert Firewall rule to firewall policy
+        self.client.insert_firewall_rule_in_policy(
+            fw_policy_id, fw_rule_id, '', '')
+        _, body = self.client.show_firewall_policy(
+            fw_policy_id)
+        self.assertFalse(body['firewall_policy']['audited'])
