@@ -111,9 +111,9 @@ they do not need to be tagged as compute.
 Negative Tests
 --------------
 Newly added negative tests should use the negative test framework. First step
-is to create an interface description in a json file under `etc/schemas`.
-These descriptions consists of two important sections for the test
-(one of those is mandatory):
+is to create an interface description in a python file under
+`tempest/api_schema/request/`. These descriptions consists of two important
+sections for the test (one of those is mandatory):
 
  - A resource (part of the URL of the request): Resources needed for a test
  must be created in `setUpClass` and registered with `set_resource` e.g.:
@@ -126,21 +126,17 @@ out of the given interface description::
 
     load_tests = test.NegativeAutoTest.load_tests
 
-    class SampeTestNegativeTestJSON(<your base class>, test.NegativeAutoTest):
-        _interface = 'json'
+    @test.SimpleNegativeAutoTest
+    class SampleTestNegativeTestJSON(<your base class>, test.NegativeAutoTest):
         _service = 'compute'
-        _schema_file = <your Schema file>
+        _schema = <your schema file>
 
-Negative tests must be marked with a negative attribute::
-
-    @test.attr(type=['negative', 'gate'])
-    def test_get_console_output(self):
-        self.execute(self._schema_file)
+The class decorator `SimpleNegativeAutoTest` will automatically generate test
+cases out of the given schema in the attribute `_schema`.
 
 All negative tests should be added into a separate negative test file.
 If such a file doesn't exist for the particular resource being tested a new
-test file should be added. Old XML based negative tests can be kept but should
-be renamed to `_xml.py`.
+test file should be added.
 
 Test skips because of Known Bugs
 --------------------------------

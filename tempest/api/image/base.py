@@ -15,7 +15,7 @@
 import cStringIO as StringIO
 
 from tempest import clients
-from tempest.common import isolated_creds
+from tempest.common import credentials
 from tempest.common.utils import data_utils
 from tempest import config
 from tempest import exceptions
@@ -36,7 +36,7 @@ class BaseImageTest(tempest.test.BaseTestCase):
         super(BaseImageTest, cls).resource_setup()
         cls.created_images = []
         cls._interface = 'json'
-        cls.isolated_creds = isolated_creds.IsolatedCreds(
+        cls.isolated_creds = credentials.get_isolated_credentials(
             cls.__name__, network_resources=cls.network_resources)
         if not CONF.service_available.glance:
             skip_msg = ("%s skipped as glance is not available" % cls.__name__)

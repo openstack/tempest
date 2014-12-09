@@ -71,6 +71,10 @@ IdentityGroup = [
     cfg.BoolOpt('disable_ssl_certificate_validation',
                 default=False,
                 help="Set to True if using self-signed SSL certificates."),
+    cfg.StrOpt('ca_certificates_file',
+               default=None,
+               help='Specify a CA bundle file to use in verifying a '
+                    'TLS (https) server certificate.'),
     cfg.StrOpt('uri',
                help="Full URI of the OpenStack Identity API (Keystone), v2"),
     cfg.StrOpt('uri_v3',

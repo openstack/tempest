@@ -36,8 +36,10 @@ class IdentityV3ClientJSON(rest_client.RestClient):
         """Creates a user."""
         en = kwargs.get('enabled', True)
         description = kwargs.get('description', None)
+        default_project_id = kwargs.get('default_project_id')
         post_body = {
             'project_id': project_id,
+            'default_project_id': default_project_id,
             'description': description,
             'domain_id': domain_id,
             'email': email,
@@ -57,6 +59,11 @@ class IdentityV3ClientJSON(rest_client.RestClient):
         email = kwargs.get('email', body['email'])
         en = kwargs.get('enabled', body['enabled'])
         project_id = kwargs.get('project_id', body['project_id'])
+        if 'default_project_id' in body.keys():
+            default_project_id = kwargs.get('default_project_id',
+                                            body['default_project_id'])
+        else:
+            default_project_id = kwargs.get('default_project_id')
         description = kwargs.get('description', body['description'])
         domain_id = kwargs.get('domain_id', body['domain_id'])
         post_body = {
@@ -64,6 +71,7 @@ class IdentityV3ClientJSON(rest_client.RestClient):
             'email': email,
             'enabled': en,
             'project_id': project_id,
+            'default_project_id': default_project_id,
             'id': user_id,
             'domain_id': domain_id,
             'description': description

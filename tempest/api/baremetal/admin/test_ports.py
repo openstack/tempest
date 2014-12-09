@@ -57,11 +57,13 @@ class TestPorts(base.BaseBaremetalTest):
         _, body = self.client.show_port(uuid)
         self._assertExpected(port, body)
 
+    @test.skip_because(bug='1398350')
     @test.attr(type='smoke')
     def test_create_port_with_extra(self):
         node_id = self.node['uuid']
         address = data_utils.rand_mac_address()
-        extra = {'key': 'value'}
+        extra = {'str': 'value', 'int': 123, 'float': 0.123,
+                 'bool': True, 'list': [1, 2, 3], 'dict': {'foo': 'bar'}}
 
         _, port = self.create_port(node_id=node_id, address=address,
                                    extra=extra)
@@ -224,6 +226,7 @@ class TestPorts(base.BaseBaremetalTest):
         _, body = self.client.show_port(port['uuid'])
         self.assertEqual(extra, body['extra'])
 
+    @test.skip_because(bug='1398350')
     @test.attr(type='smoke')
     def test_update_port_mixed_ops(self):
         node_id = self.node['uuid']
@@ -234,7 +237,7 @@ class TestPorts(base.BaseBaremetalTest):
                                    extra=extra)
 
         new_address = data_utils.rand_mac_address()
-        new_extra = {'key1': 'new-value1', 'key3': 'new-value3'}
+        new_extra = {'key1': 0.123, 'key3': {'cat': 'meow'}}
 
         patch = [{'path': '/address',
                   'op': 'replace',

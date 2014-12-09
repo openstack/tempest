@@ -145,10 +145,6 @@ class BaseVolumeTest(tempest.test.BaseTestCase):
                 pass
 
 
-class BaseVolumeV1Test(BaseVolumeTest):
-    _api_version = 1
-
-
 class BaseVolumeAdminTest(BaseVolumeTest):
     """Base test case class for all Volume Admin API tests."""
     @classmethod
@@ -170,6 +166,8 @@ class BaseVolumeAdminTest(BaseVolumeTest):
                 msg = "Volume API v1 is disabled"
                 raise cls.skipException(msg)
             cls.volume_qos_client = cls.os_adm.volume_qos_client
+            cls.admin_volume_services_client = \
+                cls.os_adm.volume_services_client
             cls.volume_types_client = cls.os_adm.volume_types_client
             cls.admin_volume_client = cls.os_adm.volumes_client
             cls.hosts_client = cls.os_adm.volume_hosts_client
@@ -181,6 +179,8 @@ class BaseVolumeAdminTest(BaseVolumeTest):
                 msg = "Volume API v2 is disabled"
                 raise cls.skipException(msg)
             cls.volume_qos_client = cls.os_adm.volume_qos_v2_client
+            cls.admin_volume_services_client = \
+                cls.os_adm.volume_services_v2_client
             cls.volume_types_client = cls.os_adm.volume_types_v2_client
             cls.admin_volume_client = cls.os_adm.volumes_v2_client
             cls.hosts_client = cls.os_adm.volume_hosts_v2_client
@@ -218,7 +218,3 @@ class BaseVolumeAdminTest(BaseVolumeTest):
             except exceptions.NotFound:
                 # The qos_specs may have already been deleted which is OK.
                 pass
-
-
-class BaseVolumeV1AdminTest(BaseVolumeAdminTest):
-    _api_version = 1

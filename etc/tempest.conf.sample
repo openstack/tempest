@@ -578,6 +578,10 @@
 # (string value)
 #auth_version = v2
 
+# Specify a CA bundle file to use in verifying a TLS (https) server
+# certificate. (string value)
+#ca_certificates_file = <None>
+
 # Catalog type of the Identity service. (string value)
 #catalog_type = identity
 

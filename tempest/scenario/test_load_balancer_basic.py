@@ -123,10 +123,10 @@ class TestLoadBalancerBasic(manager.NetworkScenarioTest):
 
     def _create_server(self, name):
         keypair = self.create_keypair()
-        security_groups = [self.security_group]
+        security_groups = [{'name': self.security_group['name']}]
         create_kwargs = {
-            'nics': [
-                {'net-id': self.network['id']},
+            'networks': [
+                {'uuid': self.network['id']},
             ],
             'key_name': keypair['name'],
             'security_groups': security_groups,
@@ -170,9 +170,9 @@ class TestLoadBalancerBasic(manager.NetworkScenarioTest):
                 private_key=private_key)
 
             # Write a backend's response into a file
-            resp = """echo -ne "HTTP/1.1 200 OK\r\nContent-Length: 7\r\n""" \
-                   """Connection: close\r\nContent-Type: text/html; """ \
-                   """charset=UTF-8\r\n\r\n%s"; cat >/dev/null"""
+            resp = ('echo -ne "HTTP/1.1 200 OK\r\nContent-Length: 7\r\n'
+                    'Connection: close\r\nContent-Type: text/html; '
+                    'charset=UTF-8\r\n\r\n%s"; cat >/dev/null')
 
             with tempfile.NamedTemporaryFile() as script:
                 script.write(resp % server_name)
@@ -186,8 +186,9 @@ class TestLoadBalancerBasic(manager.NetworkScenarioTest):
                                                username, key.name)
 
             # Start netcat
-            start_server = """sudo nc -ll -p %(port)s -e sh """ \
-                           """/tmp/%(script)s &"""
+            start_server = ('while true; do '
+                            'sudo nc -l -p %(port)s -e sh /tmp/%(script)s; '
+                            'done &')
             cmd = start_server % {'port': self.port1,
                                   'script': 'script1'}
             ssh_client.exec_command(cmd)
@@ -214,6 +215,8 @@ class TestLoadBalancerBasic(manager.NetworkScenarioTest):
                     return True
                 return False
             except IOError:
+                return False
+            except urllib2.HTTPError:
                 return False
         timeout = config.compute.ping_timeout
         start = time.time()
@@ -297,8 +300,13 @@ class TestLoadBalancerBasic(manager.NetworkScenarioTest):
     def _send_requests(self, vip_ip, servers):
         counters = dict.fromkeys(servers, 0)
         for i in range(self.num):
-            server = urllib2.urlopen("http://{0}/".format(vip_ip)).read()
-            counters[server] += 1
+            try:
+                server = urllib2.urlopen("http://{0}/".format(vip_ip)).read()
+                counters[server] += 1
+            # HTTP exception means fail of server, so don't increase counter
+            # of success and continue connection tries
+            except urllib2.HTTPError:
+                continue
         # Assert that each member of the pool gets balanced at least once
         for member, counter in counters.iteritems():
             self.assertGreater(counter, 0, 'Member %s never balanced' % member)

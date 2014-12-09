@@ -219,7 +219,7 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
         # Pass really long metadata while creating a server
 
         metadata = {'a': 'b' * 260}
-        self.assertRaises(exceptions.OverLimit,
+        self.assertRaises((exceptions.BadRequest, exceptions.OverLimit),
                           self.create_test_server,
                           meta=metadata)
 
