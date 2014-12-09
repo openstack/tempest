@@ -24,6 +24,7 @@ class ServiceTypeManagementTestJSON(base.BaseNetworkTest):
             msg = "Neutron Service Type Management not enabled."
             raise cls.skipException(msg)
 
+    @test.skip_because(bug="1400370")
     @test.attr(type='smoke')
     def test_service_provider_list(self):
         _, body = self.client.list_service_providers()
