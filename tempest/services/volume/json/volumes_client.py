@@ -174,10 +174,12 @@ class BaseVolumesClientJSON(rest_client.RestClient):
                 raise exceptions.VolumeBuildErrorException(volume_id=volume_id)
 
             if int(time.time()) - start >= self.build_timeout:
-                message = 'Volume %s failed to reach %s status within '\
-                          'the required time (%s s).' % (volume_id,
-                                                         status,
-                                                         self.build_timeout)
+                message = ('Volume %s failed to reach %s status (current: %s) '
+                           'within the required time '
+                           '(%s s).' % (volume_id,
+                                        status,
+                                        volume_status,
+                                        self.build_timeout))
                 raise exceptions.TimeoutException(message)
 
     def is_resource_deleted(self, id):
