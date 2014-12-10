@@ -26,10 +26,6 @@ class IdentityClientJSON(rest_client.RestClient):
         self.service = CONF.identity.catalog_type
         self.endpoint_url = 'adminURL'
 
-        # Needed for xml service client
-        self.list_tags = ["roles", "tenants", "users", "services",
-                          "extensions"]
-
     def has_admin_extensions(self):
         """
         Returns True if the KSADM Admin Extensions are supported
@@ -335,9 +331,6 @@ class TokenClientJSON(IdentityClientJSON):
                 body=None):
         """A simple HTTP request interface."""
         if headers is None:
-            # Always accept 'json', for TokenClientXML too.
-            # Because XML response is not easily
-            # converted to the corresponding JSON one
             headers = self.get_headers(accept_type="json")
         elif extra_headers:
             try:
