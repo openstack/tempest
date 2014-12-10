@@ -190,7 +190,7 @@ class RoutersTest(base.BaseRouterTest):
         self.assertEqual(len(list_body['ports']), 1)
         gw_port = list_body['ports'][0]
         fixed_ips = gw_port['fixed_ips']
-        self.assertEqual(len(fixed_ips), 1)
+        self.assertGreaterEqual(len(fixed_ips), 1)
         resp, public_net_body = self.admin_client.show_network(
             CONF.network.public_network_id)
         public_subnet_id = public_net_body['network']['subnets'][0]
