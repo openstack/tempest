@@ -140,15 +140,15 @@ class EndpointNotFound(TempestException):
     message = "Endpoint not found"
 
 
-class RateLimitExceeded(TempestException):
+class RateLimitExceeded(RestClientException):
     message = "Rate limit exceeded"
 
 
-class OverLimit(TempestException):
+class OverLimit(RestClientException):
     message = "Quota exceeded"
 
 
-class ServerFault(TempestException):
+class ServerFault(RestClientException):
     message = "Got server fault"
 
 
