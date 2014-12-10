@@ -33,7 +33,6 @@ CONF = config.CONF
 
 # redrive rate limited calls at most twice
 MAX_RECURSION_DEPTH = 2
-TOKEN_CHARS_RE = re.compile('^[-A-Za-z0-9+/=]*$')
 
 # All the successful HTTP status codes from RFC 7231 & 4918
 HTTP_SUCCESS = (200, 201, 202, 203, 204, 205, 206, 207)
