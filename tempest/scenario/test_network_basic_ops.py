@@ -398,6 +398,9 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         self._hotplug_server()
         self._check_network_internal_connectivity(network=self.new_net)
 
+    @testtools.skipIf(CONF.baremetal.driver_enabled,
+                      'Router state cannot be altered on a shared baremetal '
+                      'network')
     @test.attr(type='smoke')
     @test.services('compute', 'network')
     def test_update_router_admin_state(self):
