@@ -66,6 +66,23 @@ class PortsTestJSON(base.BaseNetworkTest):
         self.assertEqual(updated_port['name'], new_name)
         self.assertFalse(updated_port['admin_state_up'])
 
+    def test_create_bulk_port(self):
+        network1 = self.network
+        name = data_utils.rand_name('network-')
+        network2 = self.create_network(network_name=name)
+        network_list = [network1['id'], network2['id']]
+        port_list = [{'network_id': net_id} for net_id in network_list]
+        _, body = self.client.create_bulk_port(port_list)
+        created_ports = body['ports']
+        port1 = created_ports[0]
+        port2 = created_ports[1]
+        self.addCleanup(self._delete_port, port1['id'])
+        self.addCleanup(self._delete_port, port2['id'])
+        self.assertEqual(port1['network_id'], network1['id'])
+        self.assertEqual(port2['network_id'], network2['id'])
+        self.assertTrue(port1['admin_state_up'])
+        self.assertTrue(port2['admin_state_up'])
+
     @test.attr(type='smoke')
     def test_show_port(self):
         # Verify the details of port
