@@ -38,19 +38,6 @@ MAX_RECURSION_DEPTH = 2
 HTTP_SUCCESS = (200, 201, 202, 203, 204, 205, 206, 207)
 
 
-# convert a structure into a string safely
-def safe_body(body, maxlen=4096):
-    try:
-        text = six.text_type(body)
-    except UnicodeDecodeError:
-        # if this isn't actually text, return marker that
-        return "<BinaryData: removed>"
-    if len(text) > maxlen:
-        return text[:maxlen]
-    else:
-        return text
-
-
 class ResponseBody(dict):
     """Class that wraps an http response and dict body into a single value.
 
@@ -295,6 +282,18 @@ class RestClient(object):
                 return resp[i]
         return ""
 
+    def _safe_body(self, body, maxlen=4096):
+        # convert a structure into a string safely
+        try:
+            text = six.text_type(body)
+        except UnicodeDecodeError:
+            # if this isn't actually text, return marker that
+            return "<BinaryData: removed>"
+        if len(text) > maxlen:
+            return text[:maxlen]
+        else:
+            return text
+
     def _log_request_start(self, method, req_url, req_headers=None,
                            req_body=None):
         if req_headers is None:
@@ -325,9 +324,9 @@ class RestClient(object):
                 req_url,
                 secs,
                 str(req_headers),
-                safe_body(req_body),
+                self._safe_body(req_body),
                 str(resp),
-                safe_body(resp_body)),
+                self._safe_body(resp_body)),
             extra=extra)
 
     def _log_request(self, method, req_url, resp,
