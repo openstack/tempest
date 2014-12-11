@@ -10,6 +10,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import netaddr
 import re
 import time
 
@@ -87,7 +88,9 @@ class RemoteClient():
         return self.exec_command(cmd)
 
     def ping_host(self, host):
-        cmd = 'ping -c1 -w1 %s' % host
+        addr = netaddr.IPAddress(host)
+        cmd = 'ping6' if addr.version == 6 else 'ping'
+        cmd += ' -c1 -w1 {0}'.format(host)
         return self.exec_command(cmd)
 
     def get_mac_address(self):
