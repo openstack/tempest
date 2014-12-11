@@ -152,6 +152,10 @@ class ServerFault(RestClientException):
     message = "Got server fault"
 
 
+class NotImplemented(RestClientException):
+    message = "Got NotImplemented error"
+
+
 class ImageFault(TempestException):
     message = "Got image fault"
 

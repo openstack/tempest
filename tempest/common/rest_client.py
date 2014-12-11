@@ -539,15 +539,17 @@ class RestClient(object):
                             message = resp_body['cloudServersFault']['message']
                         elif 'computeFault' in resp_body:
                             message = resp_body['computeFault']['message']
-                        elif 'error' in resp_body:  # Keystone errors
+                        elif 'error' in resp_body:
                             message = resp_body['error']['message']
-                            raise exceptions.IdentityError(message)
                         elif 'message' in resp_body:
                             message = resp_body['message']
                     else:
                         message = resp_body
 
-            raise exceptions.ServerFault(message)
+            if resp.status == 501:
+                raise exceptions.NotImplemented(message)
+            else:
+                raise exceptions.ServerFault(message)
 
         if resp.status >= 400:
             raise exceptions.UnexpectedResponseCode(str(resp.status))
