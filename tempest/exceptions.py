@@ -75,7 +75,7 @@ class Unauthorized(RestClientException):
     message = 'Unauthorized'
 
 
-class InvalidServiceTag(RestClientException):
+class InvalidServiceTag(TempestException):
     message = "Invalid service tag"
 
 
