@@ -162,7 +162,10 @@ def get_enabled_extensions(service):
 
 def verify_extensions(os, service, results):
     extensions_client = get_extension_client(os, service)
-    __, resp = extensions_client.list_extensions()
+    if service == 'neutron':
+        resp = extensions_client.list_extensions()
+    else:
+        __, resp = extensions_client.list_extensions()
     # For Nova, Cinder and Neutron we use the alias name rather than the
     # 'name' field because the alias is considered to be the canonical
     # name.

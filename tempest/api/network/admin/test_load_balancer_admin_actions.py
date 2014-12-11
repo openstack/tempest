@@ -46,7 +46,7 @@ class LoadBalancerAdminTestJSON(base.BaseAdminNetworkTest):
     @test.attr(type='smoke')
     def test_create_vip_as_admin_for_another_tenant(self):
         name = data_utils.rand_name('vip-')
-        _, body = self.admin_client.create_pool(
+        body = self.admin_client.create_pool(
             name=data_utils.rand_name('pool-'),
             lb_method="ROUND_ROBIN",
             protocol="HTTP",
@@ -54,24 +54,24 @@ class LoadBalancerAdminTestJSON(base.BaseAdminNetworkTest):
             tenant_id=self.tenant_id)
         pool = body['pool']
         self.addCleanup(self.admin_client.delete_pool, pool['id'])
-        _, body = self.admin_client.create_vip(name=name,
-                                               protocol="HTTP",
-                                               protocol_port=80,
-                                               subnet_id=self.subnet['id'],
-                                               pool_id=pool['id'],
-                                               tenant_id=self.tenant_id)
+        body = self.admin_client.create_vip(name=name,
+                                            protocol="HTTP",
+                                            protocol_port=80,
+                                            subnet_id=self.subnet['id'],
+                                            pool_id=pool['id'],
+                                            tenant_id=self.tenant_id)
         vip = body['vip']
         self.addCleanup(self.admin_client.delete_vip, vip['id'])
         self.assertIsNotNone(vip['id'])
         self.assertEqual(self.tenant_id, vip['tenant_id'])
-        _, body = self.client.show_vip(vip['id'])
+        body = self.client.show_vip(vip['id'])
         show_vip = body['vip']
         self.assertEqual(vip['id'], show_vip['id'])
         self.assertEqual(vip['name'], show_vip['name'])
 
     @test.attr(type='smoke')
     def test_create_health_monitor_as_admin_for_another_tenant(self):
-        _, body = (
+        body = (
             self.admin_client.create_health_monitor(delay=4,
                                                     max_retries=3,
                                                     type="TCP",
@@ -82,13 +82,13 @@ class LoadBalancerAdminTestJSON(base.BaseAdminNetworkTest):
                         health_monitor['id'])
         self.assertIsNotNone(health_monitor['id'])
         self.assertEqual(self.tenant_id, health_monitor['tenant_id'])
-        _, body = self.client.show_health_monitor(health_monitor['id'])
+        body = self.client.show_health_monitor(health_monitor['id'])
         show_health_monitor = body['health_monitor']
         self.assertEqual(health_monitor['id'], show_health_monitor['id'])
 
     @test.attr(type='smoke')
     def test_create_pool_from_admin_user_other_tenant(self):
-        _, body = self.admin_client.create_pool(
+        body = self.admin_client.create_pool(
             name=data_utils.rand_name('pool-'),
             lb_method="ROUND_ROBIN",
             protocol="HTTP",
@@ -101,10 +101,10 @@ class LoadBalancerAdminTestJSON(base.BaseAdminNetworkTest):
 
     @test.attr(type='smoke')
     def test_create_member_from_admin_user_other_tenant(self):
-        _, body = self.admin_client.create_member(address="10.0.9.47",
-                                                  protocol_port=80,
-                                                  pool_id=self.pool['id'],
-                                                  tenant_id=self.tenant_id)
+        body = self.admin_client.create_member(address="10.0.9.47",
+                                               protocol_port=80,
+                                               pool_id=self.pool['id'],
+                                               tenant_id=self.tenant_id)
         member = body['member']
         self.addCleanup(self.admin_client.delete_member, member['id'])
         self.assertIsNotNone(member['id'])

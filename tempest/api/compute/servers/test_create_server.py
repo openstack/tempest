@@ -130,23 +130,23 @@ class ServersTestJSON(base.BaseV2ComputeTest):
         # Verify that the networks order given at the server creation is
         # preserved within the server.
         name_net1 = data_utils.rand_name(self.__class__.__name__)
-        _, net1 = self.network_client.create_network(name=name_net1)
+        net1 = self.network_client.create_network(name=name_net1)
         self.addCleanup(self.network_client.delete_network,
                         net1['network']['id'])
 
         name_net2 = data_utils.rand_name(self.__class__.__name__)
-        _, net2 = self.network_client.create_network(name=name_net2)
+        net2 = self.network_client.create_network(name=name_net2)
         self.addCleanup(self.network_client.delete_network,
                         net2['network']['id'])
 
-        _, subnet1 = self.network_client.create_subnet(
+        subnet1 = self.network_client.create_subnet(
             network_id=net1['network']['id'],
             cidr='19.80.0.0/24',
             ip_version=4)
         self.addCleanup(self.network_client.delete_subnet,
                         subnet1['subnet']['id'])
 
-        _, subnet2 = self.network_client.create_subnet(
+        subnet2 = self.network_client.create_subnet(
             network_id=net2['network']['id'],
             cidr='19.86.0.0/24',
             ip_version=4)

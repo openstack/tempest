@@ -222,9 +222,9 @@ class TestDiscovery(base.TestCase):
 
     def test_verify_extensions_neutron(self):
         def fake_list_extensions():
-            return (None, {'extensions': [{'alias': 'fake1'},
-                                          {'alias': 'fake2'},
-                                          {'alias': 'not_fake'}]})
+            return {'extensions': [{'alias': 'fake1'},
+                                   {'alias': 'fake2'},
+                                   {'alias': 'not_fake'}]}
         fake_os = mock.MagicMock()
         fake_os.network_client.list_extensions = fake_list_extensions
         self.useFixture(mockpatch.PatchObject(
@@ -244,9 +244,9 @@ class TestDiscovery(base.TestCase):
 
     def test_verify_extensions_neutron_all(self):
         def fake_list_extensions():
-            return (None, {'extensions': [{'alias': 'fake1'},
-                                          {'alias': 'fake2'},
-                                          {'alias': 'not_fake'}]})
+            return {'extensions': [{'alias': 'fake1'},
+                                   {'alias': 'fake2'},
+                                   {'alias': 'not_fake'}]}
         fake_os = mock.MagicMock()
         fake_os.network_client.list_extensions = fake_list_extensions
         self.useFixture(mockpatch.PatchObject(

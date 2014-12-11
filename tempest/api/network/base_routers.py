@@ -29,14 +29,14 @@ class BaseRouterTest(base.BaseAdminNetworkTest):
         self.client.delete_router(router_id)
         # Asserting that the router is not found in the list
         # after deletion
-        _, list_body = self.client.list_routers()
+        list_body = self.client.list_routers()
         routers_list = list()
         for router in list_body['routers']:
             routers_list.append(router['id'])
         self.assertNotIn(router_id, routers_list)
 
     def _add_router_interface_with_subnet_id(self, router_id, subnet_id):
-        _, interface = self.client.add_router_interface_with_subnet_id(
+        interface = self.client.add_router_interface_with_subnet_id(
             router_id, subnet_id)
         self.addCleanup(self._remove_router_interface_with_subnet_id,
                         router_id, subnet_id)
@@ -44,11 +44,11 @@ class BaseRouterTest(base.BaseAdminNetworkTest):
         return interface
 
     def _remove_router_interface_with_subnet_id(self, router_id, subnet_id):
-        _, body = self.client.remove_router_interface_with_subnet_id(
+        body = self.client.remove_router_interface_with_subnet_id(
             router_id, subnet_id)
         self.assertEqual(subnet_id, body['subnet_id'])
 
     def _remove_router_interface_with_port_id(self, router_id, port_id):
-        _, body = self.client.remove_router_interface_with_port_id(router_id,
-                                                                   port_id)
+        body = self.client.remove_router_interface_with_port_id(router_id,
+                                                                port_id)
         self.assertEqual(port_id, body['port_id'])

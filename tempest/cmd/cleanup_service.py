@@ -85,7 +85,7 @@ def _get_priv_net_id(prv_net_name, tenant_name):
     net_cl = am.network_client
     id_cl = am.identity_client
 
-    _, networks = net_cl.list_networks()
+    networks = net_cl.list_networks()
     tenant = id_cl.get_tenant_by_name(tenant_name)
     t_id = tenant['id']
     n_id = None
@@ -357,7 +357,7 @@ class NetworkService(BaseService):
 
     def list(self):
         client = self.client
-        _, networks = client.list_networks()
+        networks = client.list_networks()
         networks = self._filter_by_tenant_id(networks['networks'])
         # filter out networks declared in tempest.conf
         if self.is_preserve:
@@ -385,7 +385,7 @@ class NetworkIpSecPolicyService(NetworkService):
 
     def list(self):
         client = self.client
-        _, ipsecpols = client.list_ipsecpolicies()
+        ipsecpols = client.list_ipsecpolicies()
         ipsecpols = ipsecpols['ipsecpolicies']
         ipsecpols = self._filter_by_tenant_id(ipsecpols)
         LOG.debug("List count, %s IP Security Policies" % len(ipsecpols))
@@ -410,7 +410,7 @@ class NetworkFwPolicyService(NetworkService):
 
     def list(self):
         client = self.client
-        _, fwpols = client.list_firewall_policies()
+        fwpols = client.list_firewall_policies()
         fwpols = fwpols['firewall_policies']
         fwpols = self._filter_by_tenant_id(fwpols)
         LOG.debug("List count, %s Firewall Policies" % len(fwpols))
@@ -435,7 +435,7 @@ class NetworkFwRulesService(NetworkService):
 
     def list(self):
         client = self.client
-        _, fwrules = client.list_firewall_rules()
+        fwrules = client.list_firewall_rules()
         fwrules = fwrules['firewall_rules']
         fwrules = self._filter_by_tenant_id(fwrules)
         LOG.debug("List count, %s Firewall Rules" % len(fwrules))
@@ -460,7 +460,7 @@ class NetworkIkePolicyService(NetworkService):
 
     def list(self):
         client = self.client
-        _, ikepols = client.list_ikepolicies()
+        ikepols = client.list_ikepolicies()
         ikepols = ikepols['ikepolicies']
         ikepols = self._filter_by_tenant_id(ikepols)
         LOG.debug("List count, %s IKE Policies" % len(ikepols))
@@ -485,7 +485,7 @@ class NetworkVpnServiceService(NetworkService):
 
     def list(self):
         client = self.client
-        _, vpnsrvs = client.list_vpnservices()
+        vpnsrvs = client.list_vpnservices()
         vpnsrvs = vpnsrvs['vpnservices']
         vpnsrvs = self._filter_by_tenant_id(vpnsrvs)
         LOG.debug("List count, %s VPN Services" % len(vpnsrvs))
@@ -510,7 +510,7 @@ class NetworkFloatingIpService(NetworkService):
 
     def list(self):
         client = self.client
-        _, flips = client.list_floatingips()
+        flips = client.list_floatingips()
         flips = flips['floatingips']
         flips = self._filter_by_tenant_id(flips)
         LOG.debug("List count, %s Network Floating IPs" % len(flips))
@@ -535,7 +535,7 @@ class NetworkRouterService(NetworkService):
 
     def list(self):
         client = self.client
-        _, routers = client.list_routers()
+        routers = client.list_routers()
         routers = routers['routers']
         routers = self._filter_by_tenant_id(routers)
         if self.is_preserve:
@@ -551,7 +551,7 @@ class NetworkRouterService(NetworkService):
         for router in routers:
             try:
                 rid = router['id']
-                _, ports = client.list_router_interfaces(rid)
+                ports = client.list_router_interfaces(rid)
                 ports = ports['ports']
                 for port in ports:
                     subid = port['fixed_ips'][0]['subnet_id']
@@ -570,7 +570,7 @@ class NetworkHealthMonitorService(NetworkService):
 
     def list(self):
         client = self.client
-        _, hms = client.list_health_monitors()
+        hms = client.list_health_monitors()
         hms = hms['health_monitors']
         hms = self._filter_by_tenant_id(hms)
         LOG.debug("List count, %s Health Monitors" % len(hms))
@@ -595,7 +595,7 @@ class NetworkMemberService(NetworkService):
 
     def list(self):
         client = self.client
-        _, members = client.list_members()
+        members = client.list_members()
         members = members['members']
         members = self._filter_by_tenant_id(members)
         LOG.debug("List count, %s Members" % len(members))
@@ -620,7 +620,7 @@ class NetworkVipService(NetworkService):
 
     def list(self):
         client = self.client
-        _, vips = client.list_vips()
+        vips = client.list_vips()
         vips = vips['vips']
         vips = self._filter_by_tenant_id(vips)
         LOG.debug("List count, %s VIPs" % len(vips))
@@ -645,7 +645,7 @@ class NetworkPoolService(NetworkService):
 
     def list(self):
         client = self.client
-        _, pools = client.list_pools()
+        pools = client.list_pools()
         pools = pools['pools']
         pools = self._filter_by_tenant_id(pools)
         LOG.debug("List count, %s Pools" % len(pools))
@@ -670,7 +670,7 @@ class NetworMeteringLabelRuleService(NetworkService):
 
     def list(self):
         client = self.client
-        _, rules = client.list_metering_label_rules()
+        rules = client.list_metering_label_rules()
         rules = rules['metering_label_rules']
         rules = self._filter_by_tenant_id(rules)
         LOG.debug("List count, %s Metering Label Rules" % len(rules))
@@ -695,7 +695,7 @@ class NetworMeteringLabelService(NetworkService):
 
     def list(self):
         client = self.client
-        _, labels = client.list_metering_labels()
+        labels = client.list_metering_labels()
         labels = labels['metering_labels']
         labels = self._filter_by_tenant_id(labels)
         LOG.debug("List count, %s Metering Labels" % len(labels))
@@ -720,7 +720,7 @@ class NetworkPortService(NetworkService):
 
     def list(self):
         client = self.client
-        _, ports = client.list_ports()
+        ports = client.list_ports()
         ports = ports['ports']
         ports = self._filter_by_tenant_id(ports)
         if self.is_preserve:
@@ -747,7 +747,7 @@ class NetworkSubnetService(NetworkService):
 
     def list(self):
         client = self.client
-        _, subnets = client.list_subnets()
+        subnets = client.list_subnets()
         subnets = subnets['subnets']
         subnets = self._filter_by_tenant_id(subnets)
         if self.is_preserve:

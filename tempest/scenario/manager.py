@@ -558,7 +558,7 @@ class NetworkScenarioTest(ScenarioTest):
         if not tenant_id:
             tenant_id = client.rest_client.tenant_id
         name = data_utils.rand_name(namestart)
-        _, result = client.create_network(name=name, tenant_id=tenant_id)
+        result = client.create_network(name=name, tenant_id=tenant_id)
         network = net_resources.DeletableNetwork(client=client,
                                                  **result['network'])
         self.assertEqual(network.name, name)
@@ -585,7 +585,7 @@ class NetworkScenarioTest(ScenarioTest):
         def temp(*args, **kwargs):
             temp_method = self.admin_manager.network_client.__getattr__(
                 'list_%s' % resource_type)
-            _, resource_list = temp_method(*args, **kwargs)
+            resource_list = temp_method(*args, **kwargs)
             return resource_list[resource_type]
         return temp
 
@@ -634,7 +634,7 @@ class NetworkScenarioTest(ScenarioTest):
                 **kwargs
             )
             try:
-                _, result = client.create_subnet(**subnet)
+                result = client.create_subnet(**subnet)
                 break
             except exceptions.Conflict as e:
                 is_overlapping_cidr = 'overlaps with another subnet' in str(e)
@@ -651,7 +651,7 @@ class NetworkScenarioTest(ScenarioTest):
         if not client:
             client = self.network_client
         name = data_utils.rand_name(namestart)
-        _, result = client.create_port(
+        result = client.create_port(
             name=name,
             network_id=network.id,
             tenant_id=network.tenant_id)
@@ -690,7 +690,7 @@ class NetworkScenarioTest(ScenarioTest):
             port_id, ip4 = self._get_server_port_id_and_ip4(thing)
         else:
             ip4 = None
-        _, result = client.create_floatingip(
+        result = client.create_floatingip(
             floating_network_id=external_network_id,
             port_id=port_id,
             tenant_id=thing['tenant_id'],
@@ -823,7 +823,7 @@ class NetworkScenarioTest(ScenarioTest):
         sg_dict = dict(name=sg_name,
                        description=sg_desc)
         sg_dict['tenant_id'] = tenant_id
-        _, result = client.create_security_group(**sg_dict)
+        result = client.create_security_group(**sg_dict)
         secgroup = net_resources.DeletableSecurityGroup(
             client=client,
             **result['security_group']
@@ -883,7 +883,7 @@ class NetworkScenarioTest(ScenarioTest):
                        tenant_id=secgroup.tenant_id)
         ruleset.update(kwargs)
 
-        _, sg_rule = client.create_security_group_rule(**ruleset)
+        sg_rule = client.create_security_group_rule(**ruleset)
         sg_rule = net_resources.DeletableSecurityGroupRule(
             client=client,
             **sg_rule['security_group_rule']
@@ -937,9 +937,9 @@ class NetworkScenarioTest(ScenarioTest):
         """Wrapper utility that returns a test pool."""
         client = self.network_client
         name = data_utils.rand_name('pool')
-        _, resp_pool = client.create_pool(protocol=protocol, name=name,
-                                          subnet_id=subnet_id,
-                                          lb_method=lb_method)
+        resp_pool = client.create_pool(protocol=protocol, name=name,
+                                       subnet_id=subnet_id,
+                                       lb_method=lb_method)
         pool = net_resources.DeletablePool(client=client, **resp_pool['pool'])
         self.assertEqual(pool['name'], name)
         self.addCleanup(self.delete_wrapper, pool.delete)
@@ -948,9 +948,9 @@ class NetworkScenarioTest(ScenarioTest):
     def _create_member(self, address, protocol_port, pool_id):
         """Wrapper utility that returns a test member."""
         client = self.network_client
-        _, resp_member = client.create_member(protocol_port=protocol_port,
-                                              pool_id=pool_id,
-                                              address=address)
+        resp_member = client.create_member(protocol_port=protocol_port,
+                                           pool_id=pool_id,
+                                           address=address)
         member = net_resources.DeletableMember(client=client,
                                                **resp_member['member'])
         self.addCleanup(self.delete_wrapper, member.delete)
@@ -960,9 +960,9 @@ class NetworkScenarioTest(ScenarioTest):
         """Wrapper utility that returns a test vip."""
         client = self.network_client
         name = data_utils.rand_name('vip')
-        _, resp_vip = client.create_vip(protocol=protocol, name=name,
-                                        subnet_id=subnet_id, pool_id=pool_id,
-                                        protocol_port=protocol_port)
+        resp_vip = client.create_vip(protocol=protocol, name=name,
+                                     subnet_id=subnet_id, pool_id=pool_id,
+                                     protocol_port=protocol_port)
         vip = net_resources.DeletableVip(client=client, **resp_vip['vip'])
         self.assertEqual(vip['name'], name)
         self.addCleanup(self.delete_wrapper, vip.delete)
@@ -1007,9 +1007,9 @@ class NetworkScenarioTest(ScenarioTest):
         if not tenant_id:
             tenant_id = client.rest_client.tenant_id
         name = data_utils.rand_name(namestart)
-        _, result = client.create_router(name=name,
-                                         admin_state_up=True,
-                                         tenant_id=tenant_id)
+        result = client.create_router(name=name,
+                                      admin_state_up=True,
+                                      tenant_id=tenant_id)
         router = net_resources.DeletableRouter(client=client,
                                                **result['router'])
         self.assertEqual(router.name, name)
@@ -1274,7 +1274,7 @@ class OrchestrationScenarioTest(ScenarioTest):
 
     @classmethod
     def _get_default_network(cls):
-        _, networks = cls.networks_client.list_networks()
+        networks = cls.networks_client.list_networks()
         for net in networks:
             if net['label'] == CONF.compute.fixed_network_name:
                 return net

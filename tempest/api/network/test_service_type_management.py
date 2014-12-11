@@ -27,5 +27,5 @@ class ServiceTypeManagementTestJSON(base.BaseNetworkTest):
     @test.skip_because(bug="1400370")
     @test.attr(type='smoke')
     def test_service_provider_list(self):
-        _, body = self.client.list_service_providers()
+        body = self.client.list_service_providers()
         self.assertIsInstance(body['service_providers'], list)

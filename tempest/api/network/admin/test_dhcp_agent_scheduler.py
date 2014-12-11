@@ -34,12 +34,12 @@ class DHCPAgentSchedulersTestJSON(base.BaseAdminNetworkTest):
 
     @test.attr(type='smoke')
     def test_list_dhcp_agent_hosting_network(self):
-        _, body = self.admin_client.list_dhcp_agent_hosting_network(
+        self.admin_client.list_dhcp_agent_hosting_network(
             self.network['id'])
 
     @test.attr(type='smoke')
     def test_list_networks_hosted_by_one_dhcp(self):
-        resp, body = self.admin_client.list_dhcp_agent_hosting_network(
+        body = self.admin_client.list_dhcp_agent_hosting_network(
             self.network['id'])
         agents = body['agents']
         self.assertIsNotNone(agents)
@@ -49,7 +49,7 @@ class DHCPAgentSchedulersTestJSON(base.BaseAdminNetworkTest):
 
     def _check_network_in_dhcp_agent(self, network_id, agent):
         network_ids = []
-        _, body = self.admin_client.list_networks_hosted_by_one_dhcp_agent(
+        body = self.admin_client.list_networks_hosted_by_one_dhcp_agent(
             agent['id'])
         networks = body['networks']
         for network in networks:
@@ -63,7 +63,7 @@ class DHCPAgentSchedulersTestJSON(base.BaseAdminNetworkTest):
         self.ports.remove(self.port)
         agent = dict()
         agent['agent_type'] = None
-        resp, body = self.admin_client.list_agents()
+        body = self.admin_client.list_agents()
         agents = body['agents']
         for a in agents:
             if a['agent_type'] == 'DHCP agent':
@@ -82,14 +82,14 @@ class DHCPAgentSchedulersTestJSON(base.BaseAdminNetworkTest):
             self._remove_network_from_dhcp_agent(network_id, agent)
 
     def _remove_network_from_dhcp_agent(self, network_id, agent):
-        _, body = self.admin_client.remove_network_from_dhcp_agent(
+        self.admin_client.remove_network_from_dhcp_agent(
             agent_id=agent['id'],
             network_id=network_id)
         self.assertFalse(self._check_network_in_dhcp_agent(
             network_id, agent))
 
     def _add_dhcp_agent_to_network(self, network_id, agent):
-        _, body = self.admin_client.add_dhcp_agent_to_network(agent['id'],
-                                                              network_id)
+        self.admin_client.add_dhcp_agent_to_network(agent['id'],
+                                                    network_id)
         self.assertTrue(self._check_network_in_dhcp_agent(
             network_id, agent))

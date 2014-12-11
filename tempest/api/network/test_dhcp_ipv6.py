@@ -57,7 +57,7 @@ class NetworksTestDHCPv6(base.BaseNetworkTest):
         del things_list[index]
 
     def _clean_network(self):
-        resp, body = self.client.list_ports()
+        body = self.client.list_ports()
         ports = body['ports']
         for port in ports:
             if (port['device_owner'] == 'network:router_interface'
@@ -69,13 +69,13 @@ class NetworksTestDHCPv6(base.BaseNetworkTest):
                 if port['id'] in [p['id'] for p in self.ports]:
                     self.client.delete_port(port['id'])
                     self._remove_from_list_by_index(self.ports, port)
-        resp, body = self.client.list_subnets()
+        body = self.client.list_subnets()
         subnets = body['subnets']
         for subnet in subnets:
             if subnet['id'] in [s['id'] for s in self.subnets]:
                 self.client.delete_subnet(subnet['id'])
                 self._remove_from_list_by_index(self.subnets, subnet)
-        resp, body = self.client.list_routers()
+        body = self.client.list_routers()
         routers = body['routers']
         for router in routers:
             if router['id'] in [r['id'] for r in self.routers]:
@@ -197,7 +197,7 @@ class NetworksTestDHCPv6(base.BaseNetworkTest):
                                              subnet_slaac]
                 self.client.delete_port(port['id'])
                 self.ports.pop()
-                _, body = self.client.list_ports()
+                body = self.client.list_ports()
                 ports_id_list = [i['id'] for i in body['ports']]
                 self.assertNotIn(port['id'], ports_id_list)
                 self._clean_network()
@@ -361,7 +361,7 @@ class NetworksTestDHCPv6(base.BaseNetworkTest):
             admin_state_up=True)
         port = self.create_router_interface(router['id'],
                                             subnet['id'])
-        _, body = self.client.show_port(port['port_id'])
+        body = self.client.show_port(port['port_id'])
         return subnet, body['port']
 
     def test_dhcp_stateful_router(self):
