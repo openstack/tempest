@@ -194,7 +194,8 @@ class RoutersTest(base.BaseRouterTest):
         resp, public_net_body = self.admin_client.show_network(
             CONF.network.public_network_id)
         public_subnet_id = public_net_body['network']['subnets'][0]
-        self.assertEqual(fixed_ips[0]['subnet_id'], public_subnet_id)
+        self.assertIn(public_subnet_id,
+                      map(lambda x: x['subnet_id'], fixed_ips))
 
     @test.attr(type='smoke')
     def test_update_router_set_gateway(self):
