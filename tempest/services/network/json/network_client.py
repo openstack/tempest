@@ -40,8 +40,13 @@ class NetworkClientJSON(network_client_base.NetworkClientBase):
     def deserialize_list(self, body):
         res = json.loads(body)
         # expecting response in form
-        # {'resources': [ res1, res2] }
-        return res[res.keys()[0]]
+        # {'resources': [ res1, res2] } => when pagination disabled
+        # {'resources': [..], 'resources_links': {}} => if pagination enabled
+        pagination_suffix = "_links"
+        for k in res.keys():
+            if k[-len(pagination_suffix):] == pagination_suffix:
+                continue
+            return res[k]
 
     def serialize(self, data):
         return json.dumps(data)
