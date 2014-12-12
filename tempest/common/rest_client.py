@@ -153,11 +153,6 @@ class RestClient(object):
             if catalog_type == service:
                 endpoint_type = getattr(cfg, 'endpoint_type', 'publicURL')
                 break
-        # Special case for compute v3 service which hasn't its own
-        # configuration group
-        else:
-            if service == CONF.compute.catalog_v3_type:
-                endpoint_type = CONF.compute.endpoint_type
         return endpoint_type
 
     @property
