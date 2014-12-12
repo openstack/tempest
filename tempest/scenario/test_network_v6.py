@@ -48,6 +48,9 @@ class TestGettingAddress(manager.NetworkScenarioTest):
             msg = ('Either tenant_networks_reachable must be "true", or '
                    'public_network_id must be defined.')
             raise cls.skipException(msg)
+        if CONF.baremetal.driver_enabled:
+            msg = ('Baremetal does not currently support network isolation')
+            raise cls.skipException(msg)
 
         super(TestGettingAddress, cls).check_preconditions()
 
