@@ -351,7 +351,7 @@ class TestRestClientErrorCheckerJSON(base.TestCase):
                           **self.set_data("500"))
 
     def test_response_501_with_text(self):
-        self.assertRaises(exceptions.ServerFault,
+        self.assertRaises(exceptions.NotImplemented,
                           self.rest_client._error_checker,
                           **self.set_data("501"))
 
@@ -363,7 +363,7 @@ class TestRestClientErrorCheckerJSON(base.TestCase):
 
     def test_response_501_with_dict(self):
         r_body = '{"resp_body": {"err": "fake_resp_body"}}'
-        self.assertRaises(exceptions.ServerFault,
+        self.assertRaises(exceptions.NotImplemented,
                           self.rest_client._error_checker,
                           **self.set_data("501", r_body=r_body))
 
