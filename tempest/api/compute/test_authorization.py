@@ -31,30 +31,42 @@ LOG = logging.getLogger(__name__)
 
 
 class AuthorizationTestJSON(base.BaseV2ComputeTest):
+
     @classmethod
-    def resource_setup(cls):
+    def skip_checks(cls):
+        super(AuthorizationTestJSON, cls).skip_checks()
         if not CONF.service_available.glance:
             raise cls.skipException('Glance is not available.')
+
+    @classmethod
+    def setup_credentials(cls):
         # No network resources required for this test
         cls.set_network_resources()
-        super(AuthorizationTestJSON, cls).resource_setup()
+        super(AuthorizationTestJSON, cls).setup_credentials()
         if not cls.multi_user:
             msg = "Need >1 user"
             raise cls.skipException(msg)
+
+        creds = cls.isolated_creds.get_alt_creds()
+        cls.alt_manager = clients.Manager(credentials=creds)
+
+    @classmethod
+    def setup_clients(cls):
+        super(AuthorizationTestJSON, cls).setup_clients()
         cls.client = cls.os.servers_client
         cls.images_client = cls.os.images_client
         cls.glance_client = cls.os.image_client
         cls.keypairs_client = cls.os.keypairs_client
         cls.security_client = cls.os.security_groups_client
 
-        creds = cls.isolated_creds.get_alt_creds()
-        cls.alt_manager = clients.Manager(credentials=creds)
-
         cls.alt_client = cls.alt_manager.servers_client
         cls.alt_images_client = cls.alt_manager.images_client
         cls.alt_keypairs_client = cls.alt_manager.keypairs_client
         cls.alt_security_client = cls.alt_manager.security_groups_client
 
+    @classmethod
+    def resource_setup(cls):
+        super(AuthorizationTestJSON, cls).resource_setup()
         server = cls.create_test_server(wait_until='ACTIVE')
         cls.server = cls.client.get_server(server['id'])
 

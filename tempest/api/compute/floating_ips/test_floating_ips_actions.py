@@ -25,9 +25,13 @@ class FloatingIPsTestJSON(base.BaseFloatingIPsTest):
     floating_ip = None
 
     @classmethod
+    def setup_clients(cls):
+        super(FloatingIPsTestJSON, cls).setup_clients()
+        cls.client = cls.floating_ips_client
+
+    @classmethod
     def resource_setup(cls):
         super(FloatingIPsTestJSON, cls).resource_setup()
-        cls.client = cls.floating_ips_client
         cls.floating_ip_id = None
 
         # Server creation

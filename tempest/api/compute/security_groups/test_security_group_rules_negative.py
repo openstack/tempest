@@ -34,8 +34,8 @@ def not_existing_id():
 class SecurityGroupRulesNegativeTestJSON(base.BaseSecurityGroupsTest):
 
     @classmethod
-    def resource_setup(cls):
-        super(SecurityGroupRulesNegativeTestJSON, cls).resource_setup()
+    def setup_clients(cls):
+        super(SecurityGroupRulesNegativeTestJSON, cls).setup_clients()
         cls.client = cls.security_groups_client
 
     @test.attr(type=['negative', 'smoke'])

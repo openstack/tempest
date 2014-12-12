@@ -22,11 +22,18 @@ from tempest import test
 class ServerAddressesNegativeTestJSON(base.BaseV2ComputeTest):
 
     @classmethod
-    def resource_setup(cls):
+    def setup_credentials(cls):
         cls.set_network_resources(network=True, subnet=True)
-        super(ServerAddressesNegativeTestJSON, cls).resource_setup()
+        super(ServerAddressesNegativeTestJSON, cls).setup_credentials()
+
+    @classmethod
+    def setup_clients(cls):
+        super(ServerAddressesNegativeTestJSON, cls).setup_clients()
         cls.client = cls.servers_client
 
+    @classmethod
+    def resource_setup(cls):
+        super(ServerAddressesNegativeTestJSON, cls).resource_setup()
         cls.server = cls.create_test_server(wait_until='ACTIVE')
 
     @test.attr(type=['negative', 'gate'])

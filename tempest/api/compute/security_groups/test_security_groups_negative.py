@@ -29,9 +29,13 @@ CONF = config.CONF
 class SecurityGroupsNegativeTestJSON(base.BaseSecurityGroupsTest):
 
     @classmethod
+    def setup_clients(cls):
+        super(SecurityGroupsNegativeTestJSON, cls).setup_clients()
+        cls.client = cls.security_groups_client
+
+    @classmethod
     def resource_setup(cls):
         super(SecurityGroupsNegativeTestJSON, cls).resource_setup()
-        cls.client = cls.security_groups_client
         cls.neutron_available = CONF.service_available.neutron
 
     def _generate_a_non_existent_security_group_id(self):

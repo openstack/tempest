@@ -24,12 +24,19 @@ CONF = config.CONF
 class ServerRescueTestJSON(base.BaseV2ComputeTest):
 
     @classmethod
-    def resource_setup(cls):
+    def skip_checks(cls):
+        super(ServerRescueTestJSON, cls).skip_checks()
         if not CONF.compute_feature_enabled.rescue:
             msg = "Server rescue not available."
             raise cls.skipException(msg)
 
+    @classmethod
+    def setup_credentials(cls):
         cls.set_network_resources(network=True, subnet=True, router=True)
+        super(ServerRescueTestJSON, cls).setup_credentials()
+
+    @classmethod
+    def resource_setup(cls):
         super(ServerRescueTestJSON, cls).resource_setup()
 
         # Floating IP creation

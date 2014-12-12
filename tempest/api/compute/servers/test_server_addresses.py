@@ -20,11 +20,19 @@ from tempest import test
 class ServerAddressesTestJSON(base.BaseV2ComputeTest):
 
     @classmethod
-    def resource_setup(cls):
+    def setup_credentials(cls):
         # This test module might use a network and a subnet
         cls.set_network_resources(network=True, subnet=True)
-        super(ServerAddressesTestJSON, cls).resource_setup()
+        super(ServerAddressesTestJSON, cls).setup_credentials()
+
+    @classmethod
+    def setup_clients(cls):
+        super(ServerAddressesTestJSON, cls).setup_clients()
         cls.client = cls.servers_client
+
+    @classmethod
+    def resource_setup(cls):
+        super(ServerAddressesTestJSON, cls).resource_setup()
 
         cls.server = cls.create_test_server(wait_until='ACTIVE')
 

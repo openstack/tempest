@@ -20,9 +20,13 @@ from tempest import test
 class FloatingIPDetailsTestJSON(base.BaseV2ComputeTest):
 
     @classmethod
+    def setup_clients(cls):
+        super(FloatingIPDetailsTestJSON, cls).setup_clients()
+        cls.client = cls.floating_ips_client
+
+    @classmethod
     def resource_setup(cls):
         super(FloatingIPDetailsTestJSON, cls).resource_setup()
-        cls.client = cls.floating_ips_client
         cls.floating_ip = []
         cls.floating_ip_id = []
         for i in range(3):
