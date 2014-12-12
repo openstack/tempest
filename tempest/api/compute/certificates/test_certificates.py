@@ -17,9 +17,9 @@ from tempest.api.compute import base
 from tempest import test
 
 
-class CertificatesV3Test(base.BaseComputeTest):
+class CertificatesV2TestJSON(base.BaseComputeTest):
 
-    _api_version = 3
+    _api_version = 2
 
     @test.attr(type='gate')
     def test_create_root_certificate(self):
@@ -35,7 +35,3 @@ class CertificatesV3Test(base.BaseComputeTest):
         self.assertEqual(200, resp.status)
         self.assertIn('data', body)
         self.assertIn('private_key', body)
-
-
-class CertificatesV2TestJSON(CertificatesV3Test):
-    _api_version = 2

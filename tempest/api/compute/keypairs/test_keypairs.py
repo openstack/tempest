@@ -18,13 +18,13 @@ from tempest.common.utils import data_utils
 from tempest import test
 
 
-class KeyPairsV3Test(base.BaseComputeTest):
+class KeyPairsV2TestJSON(base.BaseComputeTest):
 
-    _api_version = 3
+    _api_version = 2
 
     @classmethod
     def resource_setup(cls):
-        super(KeyPairsV3Test, cls).resource_setup()
+        super(KeyPairsV2TestJSON, cls).resource_setup()
         cls.client = cls.keypairs_client
 
     def _delete_keypair(self, keypair_name):
@@ -113,7 +113,3 @@ class KeyPairsV3Test(base.BaseComputeTest):
         self.assertEqual(key_name, k_name,
                          "The created keypair name is not equal "
                          "to the requested name!")
-
-
-class KeyPairsV2TestJSON(KeyPairsV3Test):
-    _api_version = 2

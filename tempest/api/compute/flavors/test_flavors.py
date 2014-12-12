@@ -17,15 +17,15 @@ from tempest.api.compute import base
 from tempest import test
 
 
-class FlavorsV3Test(base.BaseComputeTest):
+class FlavorsV2TestJSON(base.BaseComputeTest):
 
-    _api_version = 3
-    _min_disk = 'min_disk'
-    _min_ram = 'min_ram'
+    _api_version = 2
+    _min_disk = 'minDisk'
+    _min_ram = 'minRam'
 
     @classmethod
     def resource_setup(cls):
-        super(FlavorsV3Test, cls).resource_setup()
+        super(FlavorsV2TestJSON, cls).resource_setup()
         cls.client = cls.flavors_client
 
     @test.attr(type='smoke')
@@ -125,10 +125,3 @@ class FlavorsV3Test(base.BaseComputeTest):
         params = {self._min_ram: flavor['ram'] + 1}
         resp, flavors = self.client.list_flavors(params)
         self.assertFalse(any([i for i in flavors if i['id'] == flavor_id]))
-
-
-class FlavorsV2TestJSON(FlavorsV3Test):
-
-    _api_version = 2
-    _min_disk = 'minDisk'
-    _min_ram = 'minRam'

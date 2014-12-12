@@ -31,7 +31,7 @@ LOG = logging.getLogger(__name__)
 class BaseComputeTest(tempest.test.BaseTestCase):
     """Base test case class for all Compute API tests."""
 
-    _api_version = 3
+    _api_version = 2
     force_tenant_isolation = False
 
     @classmethod
@@ -87,29 +87,6 @@ class BaseComputeTest(tempest.test.BaseTestCase):
             cls.migrations_client = cls.os.migrations_client
             cls.security_group_default_rules_client = (
                 cls.os.security_group_default_rules_client)
-
-        elif cls._api_version == 3:
-            if not CONF.compute_feature_enabled.api_v3:
-                skip_msg = ("%s skipped as nova v3 api is not available" %
-                            cls.__name__)
-                raise cls.skipException(skip_msg)
-            cls.servers_client = cls.os.servers_v3_client
-            cls.images_client = cls.os.image_client
-            cls.flavors_client = cls.os.flavors_v3_client
-            cls.services_client = cls.os.services_v3_client
-            cls.extensions_client = cls.os.extensions_v3_client
-            cls.availability_zone_client = cls.os.availability_zone_v3_client
-            cls.interfaces_client = cls.os.interfaces_v3_client
-            cls.hypervisor_client = cls.os.hypervisor_v3_client
-            cls.keypairs_client = cls.os.keypairs_v3_client
-            cls.volumes_client = cls.os.volumes_client
-            cls.certificates_client = cls.os.certificates_v3_client
-            cls.keypairs_client = cls.os.keypairs_v3_client
-            cls.aggregates_client = cls.os.aggregates_v3_client
-            cls.hosts_client = cls.os.hosts_v3_client
-            cls.quotas_client = cls.os.quotas_v3_client
-            cls.version_client = cls.os.version_v3_client
-            cls.migrations_client = cls.os.migrations_v3_client
         else:
             msg = ("Unexpected API version is specified (%s)" %
                    cls._api_version)
@@ -316,20 +293,14 @@ class BaseComputeTest(tempest.test.BaseTestCase):
         if 'name' in kwargs:
             name = kwargs.pop('name')
 
-        if cls._api_version == 2:
-            resp, image = cls.images_client.create_image(server_id, name)
-        elif cls._api_version == 3:
-            resp, image = cls.servers_client.create_image(server_id, name)
+        resp, image = cls.images_client.create_image(server_id, name)
         image_id = data_utils.parse_image_id(resp['location'])
         cls.images.append(image_id)
 
         if 'wait_until' in kwargs:
             cls.images_client.wait_for_image_status(image_id,
                                                     kwargs['wait_until'])
-            if cls._api_version == 2:
-                resp, image = cls.images_client.get_image(image_id)
-            elif cls._api_version == 3:
-                resp, image = cls.images_client.get_image_meta(image_id)
+            resp, image = cls.images_client.get_image(image_id)
 
             if kwargs['wait_until'] == 'ACTIVE':
                 if kwargs.get('wait_for_server', True):
@@ -347,28 +318,17 @@ class BaseComputeTest(tempest.test.BaseTestCase):
             except Exception:
                 LOG.exception('Failed to delete server %s' % server_id)
         resp, server = cls.create_test_server(wait_until='ACTIVE', **kwargs)
-        if cls._api_version == 2:
-            cls.password = server['adminPass']
-        elif cls._api_version == 3:
-            cls.password = server['admin_password']
+        cls.password = server['adminPass']
         return server['id']
 
     @classmethod
     def delete_volume(cls, volume_id):
         """Deletes the given volume and waits for it to be gone."""
-        if cls._api_version == 2:
-            cls._delete_volume(cls.volumes_extensions_client, volume_id)
-        elif cls._api_version == 3:
-            cls._delete_volume(cls.volumes_client, volume_id)
+        cls._delete_volume(cls.volumes_extensions_client, volume_id)
 
 
 class BaseV2ComputeTest(BaseComputeTest):
     _api_version = 2
-    _interface = "json"
-
-
-class BaseV3ComputeTest(BaseComputeTest):
-    _api_version = 3
     _interface = "json"
 
 
@@ -387,29 +347,10 @@ class BaseComputeAdminTest(BaseComputeTest):
             msg = ("Missing Compute Admin API credentials in configuration.")
             raise cls.skipException(msg)
 
-        if cls._api_version == 2:
-            cls.availability_zone_admin_client = (
-                cls.os_adm.availability_zone_client)
-
-        else:
-            cls.servers_admin_client = cls.os_adm.servers_v3_client
-            cls.services_admin_client = cls.os_adm.services_v3_client
-            cls.availability_zone_admin_client = \
-                cls.os_adm.availability_zone_v3_client
-            cls.hypervisor_admin_client = cls.os_adm.hypervisor_v3_client
-            cls.flavors_admin_client = cls.os_adm.flavors_v3_client
-            cls.aggregates_admin_client = cls.os_adm.aggregates_v3_client
-            cls.hosts_admin_client = cls.os_adm.hosts_v3_client
-            cls.quotas_admin_client = cls.os_adm.quotas_v3_client
-            cls.agents_admin_client = cls.os_adm.agents_v3_client
-            cls.migrations_admin_client = cls.os_adm.migrations_v3_client
+        cls.availability_zone_admin_client = (
+            cls.os_adm.availability_zone_client)
 
 
 class BaseV2ComputeAdminTest(BaseComputeAdminTest):
     """Base test case class for Compute Admin V2 API tests."""
     _api_version = 2
-
-
-class BaseV3ComputeAdminTest(BaseComputeAdminTest):
-    """Base test case class for Compute Admin V3 API tests."""
-    _api_version = 3
