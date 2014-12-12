@@ -116,14 +116,12 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
     def check_preconditions(cls):
         if CONF.baremetal.driver_enabled:
             msg = ('Not currently supported by baremetal.')
-            cls.enabled = False
             raise cls.skipException(msg)
         super(TestSecurityGroupsBasicOps, cls).check_preconditions()
         if not (CONF.network.tenant_networks_reachable or
                 CONF.network.public_network_id):
             msg = ('Either tenant_networks_reachable must be "true", or '
                    'public_network_id must be defined.')
-            cls.enabled = False
             raise cls.skipException(msg)
 
     @classmethod
