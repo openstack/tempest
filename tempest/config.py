@@ -249,9 +249,6 @@ ComputeGroup = [
                choices=['public', 'admin', 'internal',
                         'publicURL', 'adminURL', 'internalURL'],
                help="The endpoint type to use for the compute service."),
-    cfg.StrOpt('catalog_v3_type',
-               default='computev3',
-               help="Catalog type of the Compute v3 service."),
     cfg.StrOpt('path_to_private_key',
                help="Path to a private key file for SSH access to remote "
                     "hosts"),
@@ -278,9 +275,6 @@ compute_features_group = cfg.OptGroup(name='compute-feature-enabled',
                                       title="Enabled Compute Service Features")
 
 ComputeFeaturesGroup = [
-    cfg.BoolOpt('api_v3',
-                default=False,
-                help="If false, skip all nova v3 tests."),
     cfg.BoolOpt('disk_config',
                 default=True,
                 help="If false, skip disk config tests"),
@@ -288,12 +282,6 @@ ComputeFeaturesGroup = [
                 default=['all'],
                 help='A list of enabled compute extensions with a special '
                      'entry all which indicates every extension is enabled. '
-                     'Each extension should be specified with alias name. '
-                     'Empty list indicates all extensions are disabled'),
-    cfg.ListOpt('api_v3_extensions',
-                default=['all'],
-                help='A list of enabled v3 extensions with a special entry all'
-                     ' which indicates every extension is enabled. '
                      'Each extension should be specified with alias name. '
                      'Empty list indicates all extensions are disabled'),
     cfg.BoolOpt('change_password',

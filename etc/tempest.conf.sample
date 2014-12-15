@@ -254,9 +254,6 @@
 # Catalog type of the Compute service. (string value)
 #catalog_type = compute
 
-# Catalog type of the Compute v3 service. (string value)
-#catalog_v3_type = computev3
-
 # The endpoint type to use for the compute service. (string value)
 #endpoint_type = publicURL
 
@@ -393,15 +390,6 @@
 # specified with alias name. Empty list indicates all extensions are
 # disabled (list value)
 #api_extensions = all
-
-# If false, skip all nova v3 tests. (boolean value)
-#api_v3 = false
-
-# A list of enabled v3 extensions with a special entry all which
-# indicates every extension is enabled. Each extension should be
-# specified with alias name. Empty list indicates all extensions are
-# disabled (list value)
-#api_v3_extensions = all
 
 # Does the test environment block migration support cinder iSCSI
 # volumes (boolean value)
