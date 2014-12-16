@@ -13,7 +13,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import base64
 import sys
 
 import testtools
@@ -166,18 +165,10 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
     def test_rebuild_non_existent_server(self):
         # Rebuild a non existent server
         nonexistent_server = data_utils.rand_uuid()
-        meta = {'rebuild': 'server'}
-        new_name = data_utils.rand_name('server')
-        file_contents = 'Test server rebuild.'
-        personality = [{'path': '/etc/rebuild.txt',
-                        'contents': base64.b64encode(file_contents)}]
         self.assertRaises(exceptions.NotFound,
                           self.client.rebuild,
                           nonexistent_server,
-                          self.image_ref_alt,
-                          name=new_name, meta=meta,
-                          personality=personality,
-                          adminPass='rebuild')
+                          self.image_ref_alt)
 
     @test.attr(type=['negative', 'gate'])
     def test_create_numeric_server_name(self):
