@@ -15,19 +15,10 @@
 
 import json
 
-from tempest.common import rest_client
-from tempest import config
-
-CONF = config.CONF
+from tempest.services.identity.v3.json import base
 
 
-class EndPointClientJSON(rest_client.RestClient):
-
-    def __init__(self, auth_provider):
-        super(EndPointClientJSON, self).__init__(auth_provider)
-        self.service = CONF.identity.catalog_type
-        self.endpoint_url = 'adminURL'
-        self.api_version = "v3"
+class EndPointClientJSON(base.IdentityV3Client):
 
     def list_endpoints(self):
         """GET endpoints."""

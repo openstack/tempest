@@ -16,18 +16,10 @@
 import json
 
 from tempest.common import rest_client
-from tempest import config
-
-CONF = config.CONF
+from tempest.services.identity.v3.json import base
 
 
-class PolicyClientJSON(rest_client.RestClient):
-
-    def __init__(self, auth_provider):
-        super(PolicyClientJSON, self).__init__(auth_provider)
-        self.service = CONF.identity.catalog_type
-        self.endpoint_url = 'adminURL'
-        self.api_version = "v3"
+class PolicyClientJSON(base.IdentityV3Client):
 
     def create_policy(self, blob, type):
         """Creates a Policy."""

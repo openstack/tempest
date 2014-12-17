@@ -15,19 +15,10 @@
 
 import json
 
-from tempest.common import rest_client
-from tempest import config
-
-CONF = config.CONF
+from tempest.services.identity.v3.json import base
 
 
-class ServiceClientJSON(rest_client.RestClient):
-
-    def __init__(self, auth_provider):
-        super(ServiceClientJSON, self).__init__(auth_provider)
-        self.service = CONF.identity.catalog_type
-        self.endpoint_url = 'adminURL'
-        self.api_version = "v3"
+class ServiceClientJSON(base.IdentityV3Client):
 
     def update_service(self, service_id, **kwargs):
         """Updates a service."""
