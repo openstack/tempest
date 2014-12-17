@@ -14,26 +14,18 @@ import json
 import time
 import urllib
 
-from tempest.common import rest_client
-from tempest import config
 from tempest import exceptions
 from tempest.openstack.common import log as logging
+from tempest.services.volume.json import base
 
-CONF = config.CONF
 
 LOG = logging.getLogger(__name__)
 
 
-class BaseSnapshotsClientJSON(rest_client.RestClient):
+class BaseSnapshotsClientJSON(base.VolumeClient):
     """Base Client class to send CRUD Volume API requests."""
 
-    def __init__(self, auth_provider):
-        super(BaseSnapshotsClientJSON, self).__init__(auth_provider)
-
-        self.service = CONF.volume.catalog_type
-        self.build_interval = CONF.volume.build_interval
-        self.build_timeout = CONF.volume.build_timeout
-        self.create_resp = 200
+    create_resp = 200
 
     def list_snapshots(self, params=None):
         """List all the snapshot."""

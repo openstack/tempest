@@ -15,21 +15,12 @@
 import json
 import time
 
-from tempest.common import rest_client
-from tempest import config
 from tempest import exceptions
+from tempest.services.volume.json import base
 
-CONF = config.CONF
 
-
-class BaseQosSpecsClientJSON(rest_client.RestClient):
+class BaseQosSpecsClientJSON(base.VolumeClient):
     """Client class to send CRUD QoS API requests"""
-
-    def __init__(self, auth_provider):
-        super(BaseQosSpecsClientJSON, self).__init__(auth_provider)
-        self.service = CONF.volume.catalog_type
-        self.build_interval = CONF.volume.build_interval
-        self.build_timeout = CONF.volume.build_timeout
 
     def is_resource_deleted(self, qos_id):
         try:
