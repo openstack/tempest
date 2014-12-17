@@ -72,6 +72,10 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
             * test that reverse traffic is still blocked
             * test than revesre traffic is enabled once an appropriate rule has
             been created on source tenant
+        7._test_port_update_new_security_group:
+           * test that traffic is blocked with default security group
+           * test that traffic is enabled after updating port with new security
+           group having appropriate rule
 
     assumptions:
         1. alt_tenant/user existed and is different from primary_tenant/user
@@ -452,7 +456,57 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
             # in-tenant check
             self._test_in_tenant_block(self.primary_tenant)
             self._test_in_tenant_allow(self.primary_tenant)
+        except Exception:
+            for tenant in self.tenants.values():
+                self._log_console_output(servers=tenant.servers)
+            raise
 
+    @test.attr(type='smoke')
+    @test.services('compute', 'network')
+    def test_port_update_new_security_group(self):
+        """
+        This test verifies the traffic after updating the vm port with new
+        security group having appropiate rule.
+        """
+        new_tenant = self.primary_tenant
+
+        # Create empty security group and add icmp rule in it
+        new_sg = self._create_empty_security_group(
+            namestart='secgroup_new-',
+            tenant_id=new_tenant.creds.tenant_id,
+            client=new_tenant.manager.network_client)
+        icmp_rule = dict(
+            protocol='icmp',
+            direction='ingress',
+        )
+        self._create_security_group_rule(
+            secgroup=new_sg,
+            client=new_tenant.manager.network_client,
+            **icmp_rule)
+        new_tenant.security_groups.update(new_sg=new_sg)
+
+        # Create server with default security group
+        name = 'server-{tenant}-gen-1-'.format(
+               tenant=new_tenant.creds.tenant_name
+        )
+        name = data_utils.rand_name(name)
+        server = self._create_server(name, new_tenant)
+
+        # Check connectivity failure with default security group
+        try:
+            access_point_ssh = self._connect_to_access_point(new_tenant)
+            self._check_connectivity(access_point=access_point_ssh,
+                                     ip=self._get_server_ip(server),
+                                     should_succeed=False)
+            server_id = server['id']
+            port_id = self._list_ports(device_id=server_id)[0]['id']
+
+            # update port with new security group and check connectivity
+            self.network_client.update_port(port_id, security_groups=[
+                new_tenant.security_groups['new_sg'].id])
+            self._check_connectivity(
+                access_point=access_point_ssh,
+                ip=self._get_server_ip(server))
         except Exception:
             for tenant in self.tenants.values():
                 self._log_console_output(servers=tenant.servers)
