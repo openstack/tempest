@@ -32,6 +32,10 @@ class AbsoluteLimitsNegativeTestJSON(base.BaseV2ComputeTest):
         # Get max limit value
         max_meta = self.client.get_specific_absolute_limit('maxImageMeta')
 
+        # No point in running this test if there is no limit.
+        if int(max_meta) == -1:
+            raise self.skipException('no limit for maxImageMeta')
+
         # Create server should fail, since we are passing > metadata Limit!
         max_meta_data = int(max_meta) + 1
 
