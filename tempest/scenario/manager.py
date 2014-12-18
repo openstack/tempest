@@ -262,12 +262,26 @@ class ScenarioTest(tempest.test.BaseTestCase):
                 'to_port': 22,
                 'cidr': '0.0.0.0/0',
             },
+             {
+                # ssh -6
+                'ip_proto': 'tcp',
+                'from_port': 22,
+                'to_port': 22,
+                'cidr': '::/0',
+            },
             {
                 # ping
                 'ip_proto': 'icmp',
                 'from_port': -1,
                 'to_port': -1,
                 'cidr': '0.0.0.0/0',
+            },
+            {
+                # ping6
+                'ip_proto': 'icmp',
+                'from_port': -1,
+                'to_port': -1,
+                'cidr': '::/0',
             }
         ]
         rules = list()
@@ -297,7 +311,19 @@ class ScenarioTest(tempest.test.BaseTestCase):
 
         return secgroup
 
-    def get_remote_client(self, server_or_ip, username=None, private_key=None):
+    def get_remote_client(self, server_or_ip, username=None, private_key=None,
+                          log_console_of_servers=None):
+        """Get a SSH client to a remote server
+
+        @param server_or_ip a server object as returned by Tempest compute
+            client or an IP address to connect to
+        @param username name of the Linux account on the remote server
+        @param private_key the SSH private key to use
+        @param log_console_of_servers a list of server objects. Each server
+            in the list will have its console printed in the logs in case the
+            SSH connection failed to be established
+        @return a RemoteClient object
+        """
         if isinstance(server_or_ip, six.string_types):
             ip = server_or_ip
         else:
@@ -312,9 +338,13 @@ class ScenarioTest(tempest.test.BaseTestCase):
                                                   pkey=private_key)
         try:
             linux_client.validate_authentication()
-        except exceptions.SSHTimeout:
-            LOG.exception('ssh connection to %s failed' % ip)
+        except Exception:
+            LOG.exception('Initializing SSH connection to %s failed' % ip)
             debug.log_net_debug()
+            # If we don't explicitely set for which servers we want to
+            # log the console output then all the servers will be logged.
+            # See the definition of _log_console_output()
+            self._log_console_output(log_console_of_servers)
             raise
 
         return linux_client
@@ -444,8 +474,10 @@ class ScenarioTest(tempest.test.BaseTestCase):
 
     def ping_ip_address(self, ip_address, should_succeed=True,
                         ping_timeout=None):
+        ip_version = netaddr.IPAddress(ip_address).version
+        ping_cmd = 'ping6' if ip_version == 6 else 'ping'
         timeout = ping_timeout or CONF.compute.ping_timeout
-        cmd = ['ping', '-c1', '-w1', ip_address]
+        cmd = [ping_cmd, '-c1', '-w1', ip_address]
 
         def ping():
             proc = subprocess.Popen(cmd,
@@ -580,7 +612,7 @@ class NetworkScenarioTest(ScenarioTest):
         return temp
 
     def _create_subnet(self, network, client=None, namestart='subnet-smoke',
-                       **kwargs):
+                       net_max_bits=0, **kwargs):
         """
         Create a subnet for the given network within the cidr block
         configured for tenant networks.
@@ -595,20 +627,29 @@ class NetworkScenarioTest(ScenarioTest):
             """
             cidr_in_use = self._list_subnets(tenant_id=tenant_id, cidr=cidr)
             return len(cidr_in_use) != 0
+        ip_version = kwargs.get('ip_version', getattr(self, "_ip_version", 4))
+        kwargs.update({'ip_version': ip_version})
+        if ip_version == 6:
+            tenant_cidr = \
+                netaddr.IPNetwork(CONF.network.tenant_network_v6_cidr)
+            network_prefix = CONF.network.tenant_network_v6_mask_bits
+        else:
+            tenant_cidr = netaddr.IPNetwork(CONF.network.tenant_network_cidr)
+            network_prefix = CONF.network.tenant_network_mask_bits
+        if net_max_bits:
+            network_prefix = net_max_bits
 
-        tenant_cidr = netaddr.IPNetwork(CONF.network.tenant_network_cidr)
+        #tenant_cidr = netaddr.IPNetwork(CONF.network.tenant_network_cidr)
         result = None
         # Repeatedly attempt subnet creation with sequential cidr
         # blocks until an unallocated block is found.
-        for subnet_cidr in tenant_cidr.subnet(
-                CONF.network.tenant_network_mask_bits):
+        for subnet_cidr in tenant_cidr.subnet(network_prefix):
             str_cidr = str(subnet_cidr)
             if cidr_in_use(str_cidr, tenant_id=network.tenant_id):
                 continue
 
             subnet = dict(
                 name=data_utils.rand_name(namestart),
-                ip_version=4,
                 network_id=network.id,
                 tenant_id=network.tenant_id,
                 cidr=str_cidr,
@@ -642,12 +683,17 @@ class NetworkScenarioTest(ScenarioTest):
         self.addCleanup(self.delete_wrapper, port.delete)
         return port
 
-    def _get_server_port_id(self, server, ip_addr=None):
+    def _get_server_port_id_and_ips(self, server, ip_addr=None):
         ports = self._list_ports(device_id=server['id'],
                                  fixed_ip=ip_addr)
         self.assertEqual(len(ports), 1,
                          "Unable to determine which port to target.")
-        return ports[0]['id']
+        ip4 = None
+        for ip46 in ports[0]['fixed_ips']:
+            ip = ip46['ip_address']
+            if netaddr.valid_ipv4(ip):
+                ip4 = ip
+        return ports[0]['id'], ip4
 
     def _get_network_by_name(self, network_name):
         net = self._list_networks(name=network_name)
@@ -663,11 +709,14 @@ class NetworkScenarioTest(ScenarioTest):
         if not client:
             client = self.network_client
         if not port_id:
-            port_id = self._get_server_port_id(thing)
+            port_id, ip4 = self._get_server_port_id_and_ips(thing)
+        else:
+            ip4 = None
         _, result = client.create_floatingip(
             floating_network_id=external_network_id,
             port_id=port_id,
-            tenant_id=thing['tenant_id']
+            tenant_id=thing['tenant_id'],
+            fixed_ip_address=ip4  # floating for ipv6 is not supported
         )
         floating_ip = net_resources.DeletableFloatingIp(
             client=client,
@@ -676,7 +725,7 @@ class NetworkScenarioTest(ScenarioTest):
         return floating_ip
 
     def _associate_floating_ip(self, floating_ip, server):
-        port_id = self._get_server_port_id(server)
+        port_id = self._get_server_port_id_and_ips(server)[0]
         floating_ip.update(port_id=port_id)
         self.assertEqual(port_id, floating_ip.port_id)
         return floating_ip
@@ -988,6 +1037,10 @@ class NetworkScenarioTest(ScenarioTest):
         self.assertEqual(router.name, name)
         self.addCleanup(self.delete_wrapper, router.delete)
         return router
+
+    def _update_router_admin_state(self, router, admin_state_up):
+        router.update(admin_state_up=admin_state_up)
+        self.assertEqual(admin_state_up, router.admin_state_up)
 
     def create_networks(self, client=None, tenant_id=None):
         """Create a network with a subnet connected to a router.

@@ -185,9 +185,12 @@ class OrchestrationClient(rest_client.RestClient):
                         resource_status_reason=body['resource_status_reason'])
 
             if int(time.time()) - start >= self.build_timeout:
-                message = ('Resource %s failed to reach %s status within '
-                           'the required time (%s s).' %
-                           (resource_name, status, self.build_timeout))
+                message = ('Resource %s failed to reach %s status '
+                           '(current %s) within the required time (%s s).' %
+                           (resource_name,
+                            status,
+                            resource_status,
+                            self.build_timeout))
                 raise exceptions.TimeoutException(message)
             time.sleep(self.build_interval)
 
@@ -214,9 +217,10 @@ class OrchestrationClient(rest_client.RestClient):
                     stack_status_reason=body['stack_status_reason'])
 
             if int(time.time()) - start >= self.build_timeout:
-                message = ('Stack %s failed to reach %s status within '
-                           'the required time (%s s).' %
-                           (stack_name, status, self.build_timeout))
+                message = ('Stack %s failed to reach %s status (current: %s) '
+                           'within the required time (%s s).' %
+                           (stack_name, status, stack_status,
+                            self.build_timeout))
                 raise exceptions.TimeoutException(message)
             time.sleep(self.build_interval)
 

@@ -119,14 +119,8 @@ class CfnInitScenarioTest(manager.OrchestrationScenarioTest):
         if self.keypair:
             # Check that the user can authenticate with the generated
             # keypair
-            try:
-                linux_client = self.get_remote_client(
-                    server_ip, username='ec2-user')
-                linux_client.validate_authentication()
-            except (exceptions.ServerUnreachable,
-                    exceptions.SSHTimeout) as e:
-                self._log_console_output(servers=[server])
-                raise e
+            self.get_remote_client(server_ip, username='ec2-user',
+                                   log_console_of_servers=[server])
 
     @test.attr(type='slow')
     @test.skip_because(bug='1374175')
