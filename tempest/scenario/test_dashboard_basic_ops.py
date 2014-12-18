@@ -67,7 +67,7 @@ class TestDashboardBasicOps(manager.ScenarioTest):
         response = urllib2.urlopen(CONF.dashboard.dashboard_url)
         self.assertIn("Log In", response.read())
 
-    def user_login(self):
+    def user_login(self, username, password):
         self.opener = urllib2.build_opener(urllib2.HTTPCookieProcessor())
         response = self.opener.open(CONF.dashboard.dashboard_url).read()
 
@@ -79,8 +79,8 @@ class TestDashboardBasicOps(manager.ScenarioTest):
         req = urllib2.Request(CONF.dashboard.login_url)
         req.add_header('Content-type', 'application/x-www-form-urlencoded')
         req.add_header('Referer', CONF.dashboard.dashboard_url)
-        params = {'username': CONF.identity.username,
-                  'password': CONF.identity.password,
+        params = {'username': username,
+                  'password': password,
                   'region': parser.region,
                   'csrfmiddlewaretoken': parser.csrf_token}
         self.opener.open(req, urllib.urlencode(params))
@@ -91,6 +91,7 @@ class TestDashboardBasicOps(manager.ScenarioTest):
 
     @test.services('dashboard')
     def test_basic_scenario(self):
+        creds = self.credentials()
         self.check_login_page()
-        self.user_login()
+        self.user_login(creds.username, creds.password)
         self.check_home_page()
