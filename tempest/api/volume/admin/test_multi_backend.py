@@ -60,14 +60,14 @@ class VolumeMultiBackendV2Test(base.BaseVolumeAdminTest):
             extra_specs = {spec_key_with_prefix: backend_name_key}
         else:
             extra_specs = {spec_key_without_prefix: backend_name_key}
-        _, self.type = self.volume_types_client.create_volume_type(
+        self.type = self.volume_types_client.create_volume_type(
             type_name, extra_specs=extra_specs)
         self.volume_type_id_list.append(self.type['id'])
 
         params = {self.name_field: vol_name, 'volume_type': type_name}
 
-        _, self.volume = self.admin_volume_client.create_volume(size=1,
-                                                                **params)
+        self.volume = self.admin_volume_client.create_volume(size=1,
+                                                             **params)
         if with_prefix:
             self.volume_id_list_with_prefix.append(self.volume['id'])
         else:
@@ -131,7 +131,7 @@ class VolumeMultiBackendV2Test(base.BaseVolumeAdminTest):
         # the multi backend feature has been enabled
         # if multi-backend is enabled: os-vol-attr:host should be like:
         # host@backend_name
-        _, volume = self.admin_volume_client.get_volume(volume_id)
+        volume = self.admin_volume_client.get_volume(volume_id)
 
         volume1_host = volume['os-vol-host-attr:host']
         msg = ("multi-backend reporting incorrect values for volume %s" %
@@ -142,10 +142,10 @@ class VolumeMultiBackendV2Test(base.BaseVolumeAdminTest):
         # this test checks that the two volumes created at setUp don't
         # belong to the same backend (if they are, than the
         # volume backend distinction is not working properly)
-        _, volume = self.admin_volume_client.get_volume(volume1_id)
+        volume = self.admin_volume_client.get_volume(volume1_id)
         volume1_host = volume['os-vol-host-attr:host']
 
-        _, volume = self.admin_volume_client.get_volume(volume2_id)
+        volume = self.admin_volume_client.get_volume(volume2_id)
         volume2_host = volume['os-vol-host-attr:host']
 
         msg = ("volumes %s and %s were created in the same backend" %

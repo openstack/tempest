@@ -142,7 +142,7 @@ class SnapshotService(BaseService):
 
     def list(self):
         client = self.client
-        __, snaps = client.list_snapshots()
+        snaps = client.list_snapshots()
         LOG.debug("List count, %s Snapshots" % len(snaps))
         return snaps
 
@@ -323,7 +323,7 @@ class VolumeService(BaseService):
 
     def list(self):
         client = self.client
-        _, vols = client.list_volumes()
+        vols = client.list_volumes()
         LOG.debug("List count, %s Volumes" % len(vols))
         return vols
 
