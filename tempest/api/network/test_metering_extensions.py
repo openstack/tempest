@@ -23,7 +23,7 @@ from tempest import test
 LOG = logging.getLogger(__name__)
 
 
-class MeteringJSON(base.BaseAdminNetworkTest):
+class MeteringTestJSON(base.BaseAdminNetworkTest):
     _interface = 'json'
 
     """
@@ -36,7 +36,7 @@ class MeteringJSON(base.BaseAdminNetworkTest):
 
     @classmethod
     def resource_setup(cls):
-        super(MeteringJSON, cls).resource_setup()
+        super(MeteringTestJSON, cls).resource_setup()
         if not test.is_extension_enabled('metering', 'network'):
             msg = "metering extension not enabled."
             raise cls.skipException(msg)
@@ -145,5 +145,5 @@ class MeteringJSON(base.BaseAdminNetworkTest):
         self.assertFalse(metering_label_rule['excluded'])
 
 
-class MeteringIpV6JSON(MeteringJSON):
+class MeteringIpV6TestJSON(MeteringTestJSON):
     _ip_version = 6
