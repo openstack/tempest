@@ -68,15 +68,15 @@ class TestGettingAddress(manager.NetworkScenarioTest):
          one IPv4 subnet
          Creates router with ports on both subnets
         """
-        net = self._create_network(tenant_id=self.tenant_id)
-        sub4 = self._create_subnet(network=net,
+        self.network = self._create_network(tenant_id=self.tenant_id)
+        sub4 = self._create_subnet(network=self.network,
                                    namestart='sub4',
                                    ip_version=4,)
         # since https://bugs.launchpad.net/neutron/+bug/1394112 we need
         # to specify gateway_ip manually
         net_range = netaddr.IPNetwork(CONF.network.tenant_network_v6_cidr)
         gateway_ip = (netaddr.IPAddress(net_range) + 1).format()
-        sub6 = self._create_subnet(network=net,
+        sub6 = self._create_subnet(network=self.network,
                                    namestart='sub6',
                                    ip_version=6,
                                    gateway_ip=gateway_ip,
@@ -101,7 +101,10 @@ class TestGettingAddress(manager.NetworkScenarioTest):
     def prepare_server(self):
         username = CONF.compute.image_ssh_user
 
-        srv = self.create_server(create_kwargs=self.srv_kwargs)
+        create_kwargs = self.srv_kwargs
+        create_kwargs['networks'] = [{'uuid': self.network.id}]
+
+        srv = self.create_server(create_kwargs=create_kwargs)
         fip = self.create_floating_ip(thing=srv)
         self.define_server_ips(srv=srv)
         ssh = self.get_remote_client(
