@@ -90,7 +90,7 @@ class IsolatedCreds(cred_provider.CredentialProvider):
             self._cleanup_default_secgroup(tenant)
         self.identity_admin_client.delete_tenant(tenant)
 
-    def _create_creds(self, suffix="", admin=False):
+    def _create_creds(self, suffix="", admin=False, roles=None):
         """Create random credentials under the following schema.
 
         If the name contains a '.' is the full class path of something, and
@@ -121,8 +121,13 @@ class IsolatedCreds(cred_provider.CredentialProvider):
             self._assign_user_role(tenant, user, swift_operator_role)
         if admin:
             self._assign_user_role(tenant, user, CONF.identity.admin_role)
-        for role in CONF.auth.tempest_roles:
-            self._assign_user_role(tenant, user, role)
+        # Add roles specified in config file
+        for conf_role in CONF.auth.tempest_roles:
+            self._assign_user_role(tenant, user, conf_role)
+        # Add roles requested by caller
+        if roles:
+            for role in roles:
+                self._assign_user_role(tenant, user, role)
         return self._get_credentials(user, tenant)
 
     def _get_credentials(self, user, tenant):
@@ -247,12 +252,15 @@ class IsolatedCreds(cred_provider.CredentialProvider):
         return self.isolated_net_resources.get('alt')[2]
 
     def get_credentials(self, credential_type):
-        if self.isolated_creds.get(credential_type):
-            credentials = self.isolated_creds[credential_type]
+        if self.isolated_creds.get(str(credential_type)):
+            credentials = self.isolated_creds[str(credential_type)]
         else:
-            is_admin = (credential_type == 'admin')
-            credentials = self._create_creds(admin=is_admin)
-            self.isolated_creds[credential_type] = credentials
+            if credential_type in ['primary', 'alt', 'admin']:
+                is_admin = (credential_type == 'admin')
+                credentials = self._create_creds(admin=is_admin)
+            else:
+                credentials = self._create_creds(roles=credential_type)
+            self.isolated_creds[str(credential_type)] = credentials
             # Maintained until tests are ported
             LOG.info("Acquired isolated creds:\n credentials: %s"
                      % credentials)
@@ -260,7 +268,7 @@ class IsolatedCreds(cred_provider.CredentialProvider):
                 not CONF.baremetal.driver_enabled):
                 network, subnet, router = self._create_network_resources(
                     credentials.tenant_id)
-                self.isolated_net_resources[credential_type] = (
+                self.isolated_net_resources[str(credential_type)] = (
                     network, subnet, router,)
                 LOG.info("Created isolated network resources for : \n"
                          + " credentials: %s" % credentials)
@@ -274,6 +282,26 @@ class IsolatedCreds(cred_provider.CredentialProvider):
 
     def get_alt_creds(self):
         return self.get_credentials('alt')
+
+    def get_creds_by_roles(self, roles, force_new=False):
+        roles = list(set(roles))
+        # The roles list as a str will become the index as the dict key for
+        # the created credentials set in the isolated_creds dict.
+        exist_creds = self.isolated_creds.get(str(roles))
+        # If force_new flag is True 2 cred sets with the same roles are needed
+        # handle this by creating a separate index for old one to store it
+        # separately for cleanup
+        if exist_creds and force_new:
+            new_index = str(roles) + '-' + str(len(self.isolated_creds))
+            self.isolated_creds[new_index] = exist_creds
+            del self.isolated_creds[str(roles)]
+            # Handle isolated neutron resouces if they exist too
+            if CONF.service_available.neutron:
+                exist_net = self.isolated_net_resources.get(str(roles))
+                if exist_net:
+                    self.isolated_net_resources[new_index] = exist_net
+                    del self.isolated_net_resources[str(roles)]
+        return self.get_credentials(roles)
 
     def _clear_isolated_router(self, router_id, router_name):
         net_client = self.network_admin_client

@@ -113,3 +113,7 @@ class CredentialProvider(object):
     @abc.abstractmethod
     def is_multi_tenant(self):
         return
+
+    @abc.abstractmethod
+    def get_creds_by_roles(self, roles, force_new=False):
+        return
