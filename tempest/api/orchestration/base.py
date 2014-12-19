@@ -51,7 +51,7 @@ class BaseOrchestrationTest(tempest.test.BaseTestCase):
 
     @classmethod
     def _get_default_network(cls):
-        _, networks = cls.network_client.list_networks()
+        networks = cls.network_client.list_networks()
         for net in networks['networks']:
             if net['name'] == CONF.compute.fixed_network_name:
                 return net

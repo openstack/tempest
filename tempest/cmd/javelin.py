@@ -509,15 +509,10 @@ def destroy_images(images):
 def _get_router_namespace(client, network):
     network_id = _get_resource_by_name(client.networks,
                                        'networks', network)['id']
-    resp, n_body = client.networks.list_routers()
-    if not resp_ok(resp):
-        raise ValueError("unable to routers list: [%s] %s" % (resp, n_body))
+    n_body = client.networks.list_routers()
     for router in n_body['routers']:
         router_id = router['id']
-        resp, r_body = client.networks.list_router_interfaces(router_id)
-        if not resp_ok(resp):
-            raise ValueError("unable to router interfaces list: [%s] %s" %
-                             (resp, r_body))
+        r_body = client.networks.list_router_interfaces(router_id)
         for port in r_body['ports']:
             if port['network_id'] == network_id:
                 return "qrouter-%s" % router_id
@@ -527,9 +522,12 @@ def _get_resource_by_name(client, resource, name):
     get_resources = getattr(client, 'list_%s' % resource)
     if get_resources is None:
         raise AttributeError("client doesn't have method list_%s" % resource)
-    r, body = get_resources()
-    if not resp_ok(r):
-        raise ValueError("unable to list %s: [%s] %s" % (resource, r, body))
+    # Until all tempest client methods are changed to return only one value,
+    # we cannot assume they all have the same signature so we need to discard
+    # the unused response first value it two values are being returned.
+    body = get_resources()
+    if type(body) == tuple:
+        body = body[1]
     if isinstance(body, dict):
         body = body[resource]
     for res in body:
@@ -544,7 +542,7 @@ def create_networks(networks):
         client = client_for_user(network['owner'])
 
         # only create a network if the name isn't here
-        r, body = client.networks.list_networks()
+        body = client.networks.list_networks()
         if any(item['name'] == network['name'] for item in body['networks']):
             LOG.warning("Dupplicated network name: %s" % network['name'])
             continue
@@ -596,7 +594,7 @@ def create_routers(routers):
         client = client_for_user(router['owner'])
 
         # only create a router if the name isn't here
-        r, body = client.networks.list_routers()
+        body = client.networks.list_routers()
         if any(item['name'] == router['name'] for item in body['routers']):
             LOG.warning("Dupplicated router name: %s" % router['name'])
             continue

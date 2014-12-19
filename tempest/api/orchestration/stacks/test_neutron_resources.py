@@ -107,7 +107,7 @@ class NeutronResourcesTestJSON(base.BaseOrchestrationTest):
     def test_created_network(self):
         """Verifies created network."""
         network_id = self.test_resources.get('Network')['physical_resource_id']
-        _, body = self.network_client.show_network(network_id)
+        body = self.network_client.show_network(network_id)
         network = body['network']
         self.assertIsInstance(network, dict)
         self.assertEqual(network_id, network['id'])
@@ -119,7 +119,7 @@ class NeutronResourcesTestJSON(base.BaseOrchestrationTest):
     def test_created_subnet(self):
         """Verifies created subnet."""
         subnet_id = self.test_resources.get('Subnet')['physical_resource_id']
-        _, body = self.network_client.show_subnet(subnet_id)
+        body = self.network_client.show_subnet(subnet_id)
         subnet = body['subnet']
         network_id = self.test_resources.get('Network')['physical_resource_id']
         self.assertEqual(subnet_id, subnet['id'])
@@ -137,7 +137,7 @@ class NeutronResourcesTestJSON(base.BaseOrchestrationTest):
     def test_created_router(self):
         """Verifies created router."""
         router_id = self.test_resources.get('Router')['physical_resource_id']
-        _, body = self.network_client.show_router(router_id)
+        body = self.network_client.show_router(router_id)
         router = body['router']
         self.assertEqual(self.neutron_basic_template['resources'][
             'Router']['properties']['name'], router['name'])
@@ -152,7 +152,7 @@ class NeutronResourcesTestJSON(base.BaseOrchestrationTest):
         router_id = self.test_resources.get('Router')['physical_resource_id']
         network_id = self.test_resources.get('Network')['physical_resource_id']
         subnet_id = self.test_resources.get('Subnet')['physical_resource_id']
-        _, body = self.network_client.list_ports()
+        body = self.network_client.list_ports()
         ports = body['ports']
         router_ports = filter(lambda port: port['device_id'] ==
                               router_id, ports)

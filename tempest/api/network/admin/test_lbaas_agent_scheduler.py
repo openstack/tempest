@@ -49,13 +49,13 @@ class LBaaSAgentSchedulerTestJSON(base.BaseAdminNetworkTest):
     @test.attr(type='smoke')
     def test_list_pools_on_lbaas_agent(self):
         found = False
-        _, body = self.admin_client.list_agents(
+        body = self.admin_client.list_agents(
             agent_type="Loadbalancer agent")
         agents = body['agents']
         for a in agents:
             msg = 'Load Balancer agent expected'
             self.assertEqual(a['agent_type'], 'Loadbalancer agent', msg)
-            _, body = (
+            body = (
                 self.admin_client.list_pools_hosted_by_one_lbaas_agent(
                     a['id']))
             pools = body['pools']
@@ -66,6 +66,6 @@ class LBaaSAgentSchedulerTestJSON(base.BaseAdminNetworkTest):
 
     @test.attr(type='smoke')
     def test_show_lbaas_agent_hosting_pool(self):
-        _, body = self.admin_client.show_lbaas_agent_hosting_pool(
+        body = self.admin_client.show_lbaas_agent_hosting_pool(
             self.pool['id'])
         self.assertEqual('Loadbalancer agent', body['agent']['agent_type'])

@@ -112,7 +112,7 @@ class BaremetalBasicOps(manager.BaremetalScenarioTest):
     def validate_ports(self):
         for port in self.get_ports(self.node['uuid']):
             n_port_id = port['extra']['vif_port_id']
-            _, body = self.network_client.show_port(n_port_id)
+            body = self.network_client.show_port(n_port_id)
             n_port = body['port']
             self.assertEqual(n_port['device_id'], self.instance['id'])
             self.assertEqual(n_port['mac_address'], port['address'])

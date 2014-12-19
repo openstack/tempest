@@ -92,24 +92,21 @@ class TestTenantIsolation(base.TestCase):
         net_fix = self.useFixture(mockpatch.PatchObject(
             iso_creds.network_admin_client,
             'create_network',
-            return_value=({'status': 200},
-                          {'network': {'id': id, 'name': name}})))
+            return_value={'network': {'id': id, 'name': name}}))
         return net_fix
 
     def _mock_subnet_create(self, iso_creds, id, name):
         subnet_fix = self.useFixture(mockpatch.PatchObject(
             iso_creds.network_admin_client,
             'create_subnet',
-            return_value=({'status': 200},
-                          {'subnet': {'id': id, 'name': name}})))
+            return_value={'subnet': {'id': id, 'name': name}}))
         return subnet_fix
 
     def _mock_router_create(self, id, name):
         router_fix = self.useFixture(mockpatch.PatchObject(
             json_network_client.NetworkClientJSON,
             'create_router',
-            return_value=({'status': 200},
-                          {'router': {'id': id, 'name': name}})))
+            return_value={'router': {'id': id, 'name': name}}))
         return router_fix
 
     @mock.patch('tempest.common.rest_client.RestClient')
@@ -242,12 +239,11 @@ class TestTenantIsolation(base.TestCase):
     @mock.patch('tempest.common.rest_client.RestClient')
     def test_network_cleanup(self, MockRestClient):
         def side_effect(**args):
-            return ({'status': 200},
-                    {"security_groups": [{"tenant_id": args['tenant_id'],
-                                          "name": args['name'],
-                                          "description": args['name'],
-                                          "security_group_rules": [],
-                                          "id": "sg-%s" % args['tenant_id']}]})
+            return {"security_groups": [{"tenant_id": args['tenant_id'],
+                                         "name": args['name'],
+                                         "description": args['name'],
+                                         "security_group_rules": [],
+                                         "id": "sg-%s" % args['tenant_id']}]}
         iso_creds = isolated_creds.IsolatedCreds('test class',
                                                  password='fake_password')
         # Create primary tenant and network

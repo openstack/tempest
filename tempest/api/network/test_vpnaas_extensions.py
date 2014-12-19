@@ -57,13 +57,13 @@ class VPNaaSTestJSON(base.BaseAdminNetworkTest):
     def _delete_ike_policy(self, ike_policy_id):
         # Deletes a ike policy and verifies if it is deleted or not
         ike_list = list()
-        resp, all_ike = self.client.list_ikepolicies()
+        all_ike = self.client.list_ikepolicies()
         for ike in all_ike['ikepolicies']:
             ike_list.append(ike['id'])
         if ike_policy_id in ike_list:
             self.client.delete_ikepolicy(ike_policy_id)
             # Asserting that the policy is not found in list after deletion
-            resp, ikepolicies = self.client.list_ikepolicies()
+            ikepolicies = self.client.list_ikepolicies()
             ike_id_list = list()
             for i in ikepolicies['ikepolicies']:
                 ike_id_list.append(i['id'])
@@ -86,7 +86,7 @@ class VPNaaSTestJSON(base.BaseAdminNetworkTest):
     def _delete_vpn_service(self, vpn_service_id):
         self.client.delete_vpnservice(vpn_service_id)
         # Asserting if vpn service is found in the list after deletion
-        _, body = self.client.list_vpnservices()
+        body = self.client.list_vpnservices()
         vpn_services = [vs['id'] for vs in body['vpnservices']]
         self.assertNotIn(vpn_service_id, vpn_services)
 
@@ -97,7 +97,7 @@ class VPNaaSTestJSON(base.BaseAdminNetworkTest):
         # TODO(jroovers) This is a temporary workaround to get the tenant_id
         # of the the current client. Replace this once tenant_isolation for
         # neutron is fixed.
-        _, body = self.client.show_network(self.network['id'])
+        body = self.client.show_network(self.network['id'])
         return body['network']['tenant_id']
 
     @test.attr(type='smoke')
@@ -105,15 +105,15 @@ class VPNaaSTestJSON(base.BaseAdminNetworkTest):
         tenant_id = self._get_tenant_id()
         # Create IPSec policy for the newly created tenant
         name = data_utils.rand_name('ipsec-policy')
-        _, body = (self.admin_client.
-                   create_ipsecpolicy(name=name, tenant_id=tenant_id))
+        body = (self.admin_client.
+                create_ipsecpolicy(name=name, tenant_id=tenant_id))
         ipsecpolicy = body['ipsecpolicy']
         self.assertIsNotNone(ipsecpolicy['id'])
         self.addCleanup(self.admin_client.delete_ipsecpolicy,
                         ipsecpolicy['id'])
 
         # Assert that created ipsec policy is found in API list call
-        _, body = self.client.list_ipsecpolicies()
+        body = self.client.list_ipsecpolicies()
         ipsecpolicies = [policy['id'] for policy in body['ipsecpolicies']]
         self.assertIn(ipsecpolicy['id'], ipsecpolicies)
 
@@ -128,7 +128,7 @@ class VPNaaSTestJSON(base.BaseAdminNetworkTest):
                                      external_network_id=self.ext_net_id)
         self.create_router_interface(router2['id'], subnet2['id'])
         name = data_utils.rand_name('vpn-service')
-        _, body = self.admin_client.create_vpnservice(
+        body = self.admin_client.create_vpnservice(
             subnet_id=subnet2['id'],
             router_id=router2['id'],
             name=name,
@@ -138,7 +138,7 @@ class VPNaaSTestJSON(base.BaseAdminNetworkTest):
         self.assertIsNotNone(vpnservice['id'])
         self.addCleanup(self.admin_client.delete_vpnservice, vpnservice['id'])
         # Assert that created vpnservice is found in API list call
-        _, body = self.client.list_vpnservices()
+        body = self.client.list_vpnservices()
         vpn_services = [vs['id'] for vs in body['vpnservices']]
         self.assertIn(vpnservice['id'], vpn_services)
 
@@ -148,24 +148,24 @@ class VPNaaSTestJSON(base.BaseAdminNetworkTest):
 
         # Create IKE policy for the newly created tenant
         name = data_utils.rand_name('ike-policy')
-        _, body = (self.admin_client.
-                   create_ikepolicy(name=name, ike_version="v1",
-                                    encryption_algorithm="aes-128",
-                                    auth_algorithm="sha1",
-                                    tenant_id=tenant_id))
+        body = (self.admin_client.
+                create_ikepolicy(name=name, ike_version="v1",
+                                 encryption_algorithm="aes-128",
+                                 auth_algorithm="sha1",
+                                 tenant_id=tenant_id))
         ikepolicy = body['ikepolicy']
         self.assertIsNotNone(ikepolicy['id'])
         self.addCleanup(self.admin_client.delete_ikepolicy, ikepolicy['id'])
 
         # Assert that created ike policy is found in API list call
-        _, body = self.client.list_ikepolicies()
+        body = self.client.list_ikepolicies()
         ikepolicies = [ikp['id'] for ikp in body['ikepolicies']]
         self.assertIn(ikepolicy['id'], ikepolicies)
 
     @test.attr(type='smoke')
     def test_list_vpn_services(self):
         # Verify the VPN service exists in the list of all VPN services
-        _, body = self.client.list_vpnservices()
+        body = self.client.list_vpnservices()
         vpnservices = body['vpnservices']
         self.assertIn(self.vpnservice['id'], [v['id'] for v in vpnservices])
 
@@ -178,14 +178,14 @@ class VPNaaSTestJSON(base.BaseAdminNetworkTest):
                                      external_network_id=self.ext_net_id)
         self.create_router_interface(router1['id'], subnet1['id'])
         name = data_utils.rand_name('vpn-service1')
-        _, body = self.client.create_vpnservice(subnet_id=subnet1['id'],
-                                                router_id=router1['id'],
-                                                name=name,
-                                                admin_state_up=True)
+        body = self.client.create_vpnservice(subnet_id=subnet1['id'],
+                                             router_id=router1['id'],
+                                             name=name,
+                                             admin_state_up=True)
         vpnservice = body['vpnservice']
         self.addCleanup(self._delete_vpn_service, vpnservice['id'])
         # Assert if created vpnservices are not found in vpnservices list
-        resp, body = self.client.list_vpnservices()
+        body = self.client.list_vpnservices()
         vpn_services = [vs['id'] for vs in body['vpnservices']]
         self.assertIsNotNone(vpnservice['id'])
         self.assertIn(vpnservice['id'], vpn_services)
@@ -198,7 +198,7 @@ class VPNaaSTestJSON(base.BaseAdminNetworkTest):
     @test.attr(type='smoke')
     def test_show_vpn_service(self):
         # Verifies the details of a vpn service
-        _, body = self.client.show_vpnservice(self.vpnservice['id'])
+        body = self.client.show_vpnservice(self.vpnservice['id'])
         vpnservice = body['vpnservice']
         self.assertEqual(self.vpnservice['id'], vpnservice['id'])
         self.assertEqual(self.vpnservice['name'], vpnservice['name'])
@@ -214,7 +214,7 @@ class VPNaaSTestJSON(base.BaseAdminNetworkTest):
     @test.attr(type='smoke')
     def test_list_ike_policies(self):
         # Verify the ike policy exists in the list of all IKE policies
-        _, body = self.client.list_ikepolicies()
+        body = self.client.list_ikepolicies()
         ikepolicies = body['ikepolicies']
         self.assertIn(self.ikepolicy['id'], [i['id'] for i in ikepolicies])
 
@@ -222,11 +222,11 @@ class VPNaaSTestJSON(base.BaseAdminNetworkTest):
     def test_create_update_delete_ike_policy(self):
         # Creates a IKE policy
         name = data_utils.rand_name('ike-policy')
-        _, body = (self.client.create_ikepolicy(
-                   name=name,
-                   ike_version="v1",
-                   encryption_algorithm="aes-128",
-                   auth_algorithm="sha1"))
+        body = (self.client.create_ikepolicy(
+                name=name,
+                ike_version="v1",
+                encryption_algorithm="aes-128",
+                auth_algorithm="sha1"))
         ikepolicy = body['ikepolicy']
         self.assertIsNotNone(ikepolicy['id'])
         self.addCleanup(self._delete_ike_policy, ikepolicy['id'])
@@ -240,7 +240,7 @@ class VPNaaSTestJSON(base.BaseAdminNetworkTest):
                    'lifetime': {'units': "seconds", 'value': 2000}}
         self.client.update_ikepolicy(ikepolicy['id'], **new_ike)
         # Confirm that update was successful by verifying using 'show'
-        _, body = self.client.show_ikepolicy(ikepolicy['id'])
+        body = self.client.show_ikepolicy(ikepolicy['id'])
         ike_policy = body['ikepolicy']
         for key, value in new_ike.iteritems():
             self.assertIn(key, ike_policy)
@@ -248,14 +248,14 @@ class VPNaaSTestJSON(base.BaseAdminNetworkTest):
 
         # Verification of ike policy delete
         self.client.delete_ikepolicy(ikepolicy['id'])
-        _, body = self.client.list_ikepolicies()
+        body = self.client.list_ikepolicies()
         ikepolicies = [ikp['id'] for ikp in body['ikepolicies']]
         self.assertNotIn(ike_policy['id'], ikepolicies)
 
     @test.attr(type='smoke')
     def test_show_ike_policy(self):
         # Verifies the details of a ike policy
-        _, body = self.client.show_ikepolicy(self.ikepolicy['id'])
+        body = self.client.show_ikepolicy(self.ikepolicy['id'])
         ikepolicy = body['ikepolicy']
         self.assertEqual(self.ikepolicy['id'], ikepolicy['id'])
         self.assertEqual(self.ikepolicy['name'], ikepolicy['name'])
@@ -277,7 +277,7 @@ class VPNaaSTestJSON(base.BaseAdminNetworkTest):
     @test.attr(type='smoke')
     def test_list_ipsec_policies(self):
         # Verify the ipsec policy exists in the list of all ipsec policies
-        _, body = self.client.list_ipsecpolicies()
+        body = self.client.list_ipsecpolicies()
         ipsecpolicies = body['ipsecpolicies']
         self.assertIn(self.ipsecpolicy['id'], [i['id'] for i in ipsecpolicies])
 
@@ -288,7 +288,7 @@ class VPNaaSTestJSON(base.BaseAdminNetworkTest):
                              'pfs': 'group5',
                              'encryption_algorithm': "aes-128",
                              'auth_algorithm': 'sha1'}
-        _, resp_body = self.client.create_ipsecpolicy(**ipsec_policy_body)
+        resp_body = self.client.create_ipsecpolicy(**ipsec_policy_body)
         ipsecpolicy = resp_body['ipsecpolicy']
         self.addCleanup(self._delete_ipsec_policy, ipsecpolicy['id'])
         self._assertExpected(ipsec_policy_body, ipsecpolicy)
@@ -298,8 +298,8 @@ class VPNaaSTestJSON(base.BaseAdminNetworkTest):
                      'name': data_utils.rand_name("New-IPSec"),
                      'encryption_algorithm': "aes-256",
                      'lifetime': {'units': "seconds", 'value': '2000'}}
-        _, body = self.client.update_ipsecpolicy(ipsecpolicy['id'],
-                                                 **new_ipsec)
+        body = self.client.update_ipsecpolicy(ipsecpolicy['id'],
+                                              **new_ipsec)
         updated_ipsec_policy = body['ipsecpolicy']
         self._assertExpected(new_ipsec, updated_ipsec_policy)
         # Verification of ipsec policy delete
@@ -310,6 +310,6 @@ class VPNaaSTestJSON(base.BaseAdminNetworkTest):
     @test.attr(type='smoke')
     def test_show_ipsec_policy(self):
         # Verifies the details of an ipsec policy
-        _, body = self.client.show_ipsecpolicy(self.ipsecpolicy['id'])
+        body = self.client.show_ipsecpolicy(self.ipsecpolicy['id'])
         ipsecpolicy = body['ipsecpolicy']
         self._assertExpected(self.ipsecpolicy, ipsecpolicy)

@@ -13,6 +13,7 @@
 import time
 import urllib
 
+from tempest.common import rest_client
 from tempest.common.utils import misc
 from tempest import config
 from tempest import exceptions
@@ -113,7 +114,7 @@ class NetworkClientBase(object):
             resp, body = self.get(uri)
             result = {plural_name: self.deserialize_list(body)}
             self.rest_client.expected_success(200, resp.status)
-            return resp, result
+            return rest_client.ResponseBody(resp, result)
 
         return _list
 
@@ -123,7 +124,7 @@ class NetworkClientBase(object):
             uri = '%s/%s' % (self.get_uri(plural), resource_id)
             resp, body = self.delete(uri)
             self.rest_client.expected_success(204, resp.status)
-            return resp, body
+            return rest_client.ResponseBody(resp, body)
 
         return _delete
 
@@ -139,7 +140,7 @@ class NetworkClientBase(object):
             resp, body = self.get(uri)
             body = self.deserialize_single(body)
             self.rest_client.expected_success(200, resp.status)
-            return resp, body
+            return rest_client.ResponseBody(resp, body)
 
         return _show
 
@@ -151,7 +152,7 @@ class NetworkClientBase(object):
             resp, body = self.post(uri, post_data)
             body = self.deserialize_single(body)
             self.rest_client.expected_success(201, resp.status)
-            return resp, body
+            return rest_client.ResponseBody(resp, body)
 
         return _create
 
@@ -163,7 +164,7 @@ class NetworkClientBase(object):
             resp, body = self.put(uri, post_data)
             body = self.deserialize_single(body)
             self.rest_client.expected_success(200, resp.status)
-            return resp, body
+            return rest_client.ResponseBody(resp, body)
 
         return _update
 
@@ -189,7 +190,7 @@ class NetworkClientBase(object):
         resp, body = self.post(uri, body)
         body = {'networks': self.deserialize_list(body)}
         self.rest_client.expected_success(201, resp.status)
-        return resp, body
+        return rest_client.ResponseBody(resp, body)
 
     def create_bulk_subnet(self, subnet_list):
         post_data = {'subnets': subnet_list}
@@ -198,7 +199,7 @@ class NetworkClientBase(object):
         resp, body = self.post(uri, body)
         body = {'subnets': self.deserialize_list(body)}
         self.rest_client.expected_success(201, resp.status)
-        return resp, body
+        return rest_client.ResponseBody(resp, body)
 
     def create_bulk_port(self, port_list):
         post_data = {'ports': port_list}
@@ -207,7 +208,7 @@ class NetworkClientBase(object):
         resp, body = self.post(uri, body)
         body = {'ports': self.deserialize_list(body)}
         self.rest_client.expected_success(201, resp.status)
-        return resp, body
+        return rest_client.ResponseBody(resp, body)
 
     def wait_for_resource_deletion(self, resource_type, id):
         """Waits for a resource to be deleted."""
