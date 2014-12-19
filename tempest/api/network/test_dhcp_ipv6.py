@@ -371,7 +371,6 @@ class NetworksTestDHCPv6(base.BaseNetworkTest):
         for ra_mode, add_mode in (
                 ('dhcpv6-stateful', 'dhcpv6-stateful'),
                 ('dhcpv6-stateful', None),
-                (None, 'dhcpv6-stateful'),
         ):
             kwargs = {'ipv6_ra_mode': ra_mode,
                       'ipv6_address_mode': add_mode}
