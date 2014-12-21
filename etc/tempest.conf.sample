@@ -248,7 +248,9 @@
 # Time in seconds between build status checks. (integer value)
 #build_interval = 1
 
-# Timeout in seconds to wait for an instance to build. (integer value)
+# Timeout in seconds to wait for an instance to build. Other services
+# that do not define build_timeout will inherit this value, for
+# example the image service. (integer value)
 #build_timeout = 300
 
 # Catalog type of the Compute service. (string value)
