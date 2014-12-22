@@ -179,8 +179,16 @@ class IsolatedCreds(cred_provider.CredentialProvider):
         return resp_body['network']
 
     def _create_subnet(self, subnet_name, tenant_id, network_id):
-        base_cidr = netaddr.IPNetwork(CONF.network.tenant_network_cidr)
-        mask_bits = CONF.network.tenant_network_mask_bits
+        if self.network_resources:
+            ip_version = self.network_resources.get('ip_version', 4)
+        else:
+            ip_version = 4
+        if ip_version == 6:
+            base_cidr = netaddr.IPNetwork(CONF.network.tenant_network_v6_cidr)
+            mask_bits = CONF.network.tenant_network_v6_mask_bits
+        else:
+            base_cidr = netaddr.IPNetwork(CONF.network.tenant_network_cidr)
+            mask_bits = CONF.network.tenant_network_mask_bits
         for subnet_cidr in base_cidr.subnet(mask_bits):
             try:
                 if self.network_resources:
@@ -190,14 +198,14 @@ class IsolatedCreds(cred_provider.CredentialProvider):
                             name=subnet_name,
                             tenant_id=tenant_id,
                             enable_dhcp=self.network_resources['dhcp'],
-                            ip_version=4)
+                            ip_version=ip_version)
                 else:
                     resp_body = self.network_admin_client.\
                         create_subnet(network_id=network_id,
                                       cidr=str(subnet_cidr),
                                       name=subnet_name,
                                       tenant_id=tenant_id,
-                                      ip_version=4)
+                                      ip_version=ip_version)
                 break
             except exceptions.BadRequest as e:
                 if 'overlaps with another subnet' not in str(e):

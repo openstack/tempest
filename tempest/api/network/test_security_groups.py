@@ -234,3 +234,27 @@ class SecGroupTest(base.BaseSecGroupTest):
 class SecGroupIPv6Test(SecGroupTest):
     _ip_version = 6
     _tenant_network_cidr = CONF.network.tenant_network_v6_cidr
+
+    @test.attr(type='smoke')
+    def test_create_security_group_rule_with_dufferent_ip_versions(self):
+        # Verify creating security group rule with
+        # different IP versions in the same group
+        sg1_body, _ = self._create_security_group()
+
+        sg_id = sg1_body['security_group']['id']
+        direction = 'ingress'
+        protocol = 'tcp'
+        port_range_min = 76
+        port_range_max = 77
+        versions = {4: {"ip_prefix": CONF.network.tenant_network_cidr,
+                        "ethertype": "IPv4"},
+                    6: {"ip_prefix": CONF.network.tenant_network_v6_cidr,
+                        "ethertype": "IPv6"}}
+        for num in versions:
+            self._create_verify_security_group_rule(
+                sg_id, direction,
+                versions[num]["ethertype"],
+                protocol,
+                port_range_min,
+                port_range_max,
+                remote_ip_prefix=versions[num]["ip_prefix"])
