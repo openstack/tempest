@@ -1,5 +1,4 @@
-# Copyright 2012 OpenStack Foundation
-# All Rights Reserved.
+# Copyright 2014 NEC Corporation.  All rights reserved.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
 #    not use this file except in compliance with the License. You may obtain
@@ -13,22 +12,19 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import json
+from tempest.common import rest_client
+from tempest import config
 
-from tempest.services.volume.json import base
-
-
-class BaseExtensionsClientJSON(base.VolumeClient):
-
-    def list_extensions(self):
-        url = 'extensions'
-        resp, body = self.get(url)
-        body = json.loads(body)
-        self.expected_success(200, resp.status)
-        return resp, body['extensions']
+CONF = config.CONF
 
 
-class ExtensionsClientJSON(BaseExtensionsClientJSON):
+class VolumeClient(rest_client.RestClient):
     """
-    Volume V1 extensions client.
+    Base volume client class
     """
+
+    def __init__(self, auth_provider):
+        super(VolumeClient, self).__init__(auth_provider)
+        self.service = CONF.volume.catalog_type
+        self.build_interval = CONF.volume.build_interval
+        self.build_timeout = CONF.volume.build_timeout

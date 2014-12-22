@@ -17,25 +17,19 @@ import json
 import time
 import urllib
 
-from tempest.common import rest_client
 from tempest import config
 from tempest import exceptions
+from tempest.services.volume.json import base
 
 CONF = config.CONF
 
 
-class BaseVolumesClientJSON(rest_client.RestClient):
+class BaseVolumesClientJSON(base.VolumeClient):
     """
     Base client class to send CRUD Volume API requests to a Cinder endpoint
     """
 
-    def __init__(self, auth_provider):
-        super(BaseVolumesClientJSON, self).__init__(auth_provider)
-
-        self.service = CONF.volume.catalog_type
-        self.build_interval = CONF.volume.build_interval
-        self.build_timeout = CONF.volume.build_timeout
-        self.create_resp = 200
+    create_resp = 200
 
     def get_attachment_from_volume(self, volume):
         """Return the element 'attachment' from input volumes."""
