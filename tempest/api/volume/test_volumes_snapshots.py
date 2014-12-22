@@ -70,11 +70,14 @@ class VolumesV2SnapshotTestJSON(base.BaseVolumeTest):
         self.addCleanup(self.servers_client.delete_server, server['id'])
         self.servers_client.wait_for_server_status(server['id'], 'ACTIVE')
         mountpoint = '/dev/%s' % CONF.compute.volume_device_name
-        _, body = self.volumes_client.attach_volume(
-            self.volume_origin['id'], server['id'], mountpoint)
+        _, body = self.servers_client.attach_volume(
+            server['id'], self.volume_origin['id'], mountpoint)
         self.volumes_client.wait_for_volume_status(self.volume_origin['id'],
                                                    'in-use')
-        self.addCleanup(self._detach, self.volume_origin['id'])
+        self.addCleanup(self.volumes_client.wait_for_volume_status,
+                        self.volume_origin['id'], 'available')
+        self.addCleanup(self.servers_client.detach_volume, server['id'],
+                        self.volume_origin['id'])
         # Snapshot a volume even if it's attached to an instance
         snapshot = self.create_snapshot(self.volume_origin['id'],
                                         force=True)
