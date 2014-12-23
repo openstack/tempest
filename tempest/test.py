@@ -274,8 +274,8 @@ class BaseTestCase(testtools.testcase.WithAttributes,
             cls.resource_setup()
         except Exception:
             etype, value, trace = sys.exc_info()
-            LOG.info("%s in %s.setUpClass. Invoking tearDownClass." % (
-                cls.__name__, etype))
+            LOG.info("%s raised in %s.setUpClass. Invoking tearDownClass." % (
+                     etype, cls.__name__))
             cls.tearDownClass()
             try:
                 raise etype, value, trace
