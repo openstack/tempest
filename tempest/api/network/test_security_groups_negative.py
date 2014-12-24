@@ -164,7 +164,7 @@ class NegativeSecGroupTest(base.BaseSecGroupTest):
         min_port = 66
         max_port = 67
         # Create a rule with valid params
-        resp, _ = self.client.create_security_group_rule(
+        self.client.create_security_group_rule(
             security_group_id=body['security_group']['id'],
             direction='ingress',
             ethertype=self.ethertype,

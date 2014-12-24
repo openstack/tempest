@@ -124,6 +124,9 @@ class ServerMetadataNegativeTestJSON(base.BaseV2ComputeTest):
         # tenant.
         _, quota_set = self.quotas.get_quota_set(self.tenant_id)
         quota_metadata = quota_set['metadata_items']
+        if quota_metadata == -1:
+            raise self.skipException("No limit for metadata_items")
+
         req_metadata = {}
         for num in range(1, quota_metadata + 2):
             req_metadata['key' + str(num)] = 'val' + str(num)

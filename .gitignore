@@ -18,4 +18,3 @@ build
 .coverage*
 !.coveragerc
 cover/
-.idea/

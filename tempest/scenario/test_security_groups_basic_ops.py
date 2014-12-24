@@ -14,7 +14,6 @@
 #    under the License.
 
 from tempest import clients
-from tempest.common import debug
 from tempest.common.utils import data_utils
 from tempest import config
 from tempest.openstack.common import log as logging
@@ -117,14 +116,12 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
     def check_preconditions(cls):
         if CONF.baremetal.driver_enabled:
             msg = ('Not currently supported by baremetal.')
-            cls.enabled = False
             raise cls.skipException(msg)
         super(TestSecurityGroupsBasicOps, cls).check_preconditions()
         if not (CONF.network.tenant_networks_reachable or
                 CONF.network.public_network_id):
             msg = ('Either tenant_networks_reachable must be "true", or '
                    'public_network_id must be defined.')
-            cls.enabled = False
             raise cls.skipException(msg)
 
     @classmethod
@@ -334,15 +331,8 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
             msg = "Timed out waiting for %s to become reachable" % ip
         else:
             msg = "%s is reachable" % ip
-        try:
-            self.assertTrue(self._check_remote_connectivity(access_point, ip,
-                                                            should_succeed),
-                            msg)
-        except test.exceptions.SSHTimeout:
-            raise
-        except Exception:
-            debug.log_net_debug()
-            raise
+        self.assertTrue(self._check_remote_connectivity(access_point, ip,
+                                                        should_succeed), msg)
 
     def _test_in_tenant_block(self, tenant):
         access_point_ssh = self._connect_to_access_point(tenant)

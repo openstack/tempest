@@ -26,13 +26,13 @@ class AgentManagementTestJSON(base.BaseAdminNetworkTest):
         if not test.is_extension_enabled('agent', 'network'):
             msg = "agent extension not enabled."
             raise cls.skipException(msg)
-        resp, body = cls.admin_client.list_agents()
+        body = cls.admin_client.list_agents()
         agents = body['agents']
         cls.agent = agents[0]
 
     @test.attr(type='smoke')
     def test_list_agent(self):
-        _, body = self.admin_client.list_agents()
+        body = self.admin_client.list_agents()
         agents = body['agents']
         # Hearthbeats must be excluded from comparison
         self.agent.pop('heartbeat_timestamp', None)
@@ -44,12 +44,12 @@ class AgentManagementTestJSON(base.BaseAdminNetworkTest):
 
     @test.attr(type=['smoke'])
     def test_list_agents_non_admin(self):
-        _, body = self.client.list_agents()
+        body = self.client.list_agents()
         self.assertEqual(len(body["agents"]), 0)
 
     @test.attr(type='smoke')
     def test_show_agent(self):
-        _, body = self.admin_client.show_agent(self.agent['id'])
+        body = self.admin_client.show_agent(self.agent['id'])
         agent = body['agent']
         self.assertEqual(agent['id'], self.agent['id'])
 
@@ -59,8 +59,8 @@ class AgentManagementTestJSON(base.BaseAdminNetworkTest):
         # Try to update the 'admin_state_up' to the original
         # one to avoid the negative effect.
         agent_status = {'admin_state_up': origin_status}
-        _, body = self.admin_client.update_agent(agent_id=self.agent['id'],
-                                                 agent_info=agent_status)
+        body = self.admin_client.update_agent(agent_id=self.agent['id'],
+                                              agent_info=agent_status)
         updated_status = body['agent']['admin_state_up']
         self.assertEqual(origin_status, updated_status)
 
@@ -69,8 +69,8 @@ class AgentManagementTestJSON(base.BaseAdminNetworkTest):
         self.useFixture(fixtures.LockFixture('agent_description'))
         description = 'description for update agent.'
         agent_description = {'description': description}
-        _, body = self.admin_client.update_agent(agent_id=self.agent['id'],
-                                                 agent_info=agent_description)
+        body = self.admin_client.update_agent(agent_id=self.agent['id'],
+                                              agent_info=agent_description)
         self.addCleanup(self._restore_agent)
         updated_description = body['agent']['description']
         self.assertEqual(updated_description, description)

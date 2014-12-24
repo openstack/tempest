@@ -160,7 +160,7 @@ class NetworksTestJSON(base.BaseNetworkTest):
         self.assertEqual('ACTIVE', network['status'])
         # Verify network update
         new_name = "New_network"
-        _, body = self.client.update_network(net_id, name=new_name)
+        body = self.client.update_network(net_id, name=new_name)
         updated_net = body['network']
         self.assertEqual(updated_net['name'], new_name)
         # Find a cidr that is not in use yet and create a subnet with it
@@ -168,14 +168,14 @@ class NetworksTestJSON(base.BaseNetworkTest):
         subnet_id = subnet['id']
         # Verify subnet update
         new_name = "New_subnet"
-        _, body = self.client.update_subnet(subnet_id, name=new_name)
+        body = self.client.update_subnet(subnet_id, name=new_name)
         updated_subnet = body['subnet']
         self.assertEqual(updated_subnet['name'], new_name)
 
     @test.attr(type='smoke')
     def test_show_network(self):
         # Verify the details of a network
-        _, body = self.client.show_network(self.network['id'])
+        body = self.client.show_network(self.network['id'])
         network = body['network']
         for key in ['id', 'name']:
             self.assertEqual(network[key], self.network[key])
@@ -184,8 +184,8 @@ class NetworksTestJSON(base.BaseNetworkTest):
     def test_show_network_fields(self):
         # Verify specific fields of a network
         fields = ['id', 'name']
-        _, body = self.client.show_network(self.network['id'],
-                                           fields=fields)
+        body = self.client.show_network(self.network['id'],
+                                        fields=fields)
         network = body['network']
         self.assertEqual(sorted(network.keys()), sorted(fields))
         for field_name in fields:
@@ -194,7 +194,7 @@ class NetworksTestJSON(base.BaseNetworkTest):
     @test.attr(type='smoke')
     def test_list_networks(self):
         # Verify the network exists in the list of all networks
-        _, body = self.client.list_networks()
+        body = self.client.list_networks()
         networks = [network['id'] for network in body['networks']
                     if network['id'] == self.network['id']]
         self.assertNotEmpty(networks, "Created network not found in the list")
@@ -203,7 +203,7 @@ class NetworksTestJSON(base.BaseNetworkTest):
     def test_list_networks_fields(self):
         # Verify specific fields of the networks
         fields = ['id', 'name']
-        _, body = self.client.list_networks(fields=fields)
+        body = self.client.list_networks(fields=fields)
         networks = body['networks']
         self.assertNotEmpty(networks, "Network list returned is empty")
         for network in networks:
@@ -212,7 +212,7 @@ class NetworksTestJSON(base.BaseNetworkTest):
     @test.attr(type='smoke')
     def test_show_subnet(self):
         # Verify the details of a subnet
-        _, body = self.client.show_subnet(self.subnet['id'])
+        body = self.client.show_subnet(self.subnet['id'])
         subnet = body['subnet']
         self.assertNotEmpty(subnet, "Subnet returned has no fields")
         for key in ['id', 'cidr']:
@@ -223,8 +223,8 @@ class NetworksTestJSON(base.BaseNetworkTest):
     def test_show_subnet_fields(self):
         # Verify specific fields of a subnet
         fields = ['id', 'network_id']
-        _, body = self.client.show_subnet(self.subnet['id'],
-                                          fields=fields)
+        body = self.client.show_subnet(self.subnet['id'],
+                                       fields=fields)
         subnet = body['subnet']
         self.assertEqual(sorted(subnet.keys()), sorted(fields))
         for field_name in fields:
@@ -233,7 +233,7 @@ class NetworksTestJSON(base.BaseNetworkTest):
     @test.attr(type='smoke')
     def test_list_subnets(self):
         # Verify the subnet exists in the list of all subnets
-        _, body = self.client.list_subnets()
+        body = self.client.list_subnets()
         subnets = [subnet['id'] for subnet in body['subnets']
                    if subnet['id'] == self.subnet['id']]
         self.assertNotEmpty(subnets, "Created subnet not found in the list")
@@ -242,7 +242,7 @@ class NetworksTestJSON(base.BaseNetworkTest):
     def test_list_subnets_fields(self):
         # Verify specific fields of subnets
         fields = ['id', 'network_id']
-        _, body = self.client.list_subnets(fields=fields)
+        body = self.client.list_subnets(fields=fields)
         subnets = body['subnets']
         self.assertNotEmpty(subnets, "Subnet list returned is empty")
         for subnet in subnets:
@@ -260,7 +260,7 @@ class NetworksTestJSON(base.BaseNetworkTest):
     def test_delete_network_with_subnet(self):
         # Creates a network
         name = data_utils.rand_name('network-')
-        _, body = self.client.create_network(name=name)
+        body = self.client.create_network(name=name)
         network = body['network']
         net_id = network['id']
         self.addCleanup(self._try_delete_network, net_id)
@@ -270,7 +270,7 @@ class NetworksTestJSON(base.BaseNetworkTest):
         subnet_id = subnet['id']
 
         # Delete network while the subnet still exists
-        _, body = self.client.delete_network(net_id)
+        body = self.client.delete_network(net_id)
 
         # Verify that the subnet got automatically deleted.
         self.assertRaises(exceptions.NotFound, self.client.show_subnet,
@@ -331,8 +331,8 @@ class NetworksTestJSON(base.BaseNetworkTest):
                   'gateway_ip': new_gateway, 'enable_dhcp': True}
 
         new_name = "New_subnet"
-        _, body = self.client.update_subnet(subnet_id, name=new_name,
-                                            **kwargs)
+        body = self.client.update_subnet(subnet_id, name=new_name,
+                                         **kwargs)
         updated_subnet = body['subnet']
         kwargs['name'] = new_name
         self.assertEqual(sorted(updated_subnet['dns_nameservers']),
@@ -350,7 +350,7 @@ class NetworksTestJSON(base.BaseNetworkTest):
     @test.attr(type='smoke')
     def test_external_network_visibility(self):
         """Verifies user can see external networks but not subnets."""
-        _, body = self.client.list_networks(**{'router:external': True})
+        body = self.client.list_networks(**{'router:external': True})
         networks = [network['id'] for network in body['networks']]
         self.assertNotEmpty(networks, "No external networks found")
 
@@ -364,7 +364,7 @@ class NetworksTestJSON(base.BaseNetworkTest):
         # subnets_iter is a list (iterator) of lists. This flattens it to a
         # list of UUIDs
         public_subnets_iter = itertools.chain(*subnets_iter)
-        _, body = self.client.list_subnets()
+        body = self.client.list_subnets()
         subnets = [sub['id'] for sub in body['subnets']
                    if sub['id'] in public_subnets_iter]
         self.assertEmpty(subnets, "Public subnets visible")
@@ -396,7 +396,7 @@ class BulkNetworkOpsTestJSON(base.BaseNetworkTest):
         for n in created_networks:
             self.client.delete_network(n['id'])
         # Asserting that the networks are not found in the list after deletion
-        resp, body = self.client.list_networks()
+        body = self.client.list_networks()
         networks_list = [network['id'] for network in body['networks']]
         for n in created_networks:
             self.assertNotIn(n['id'], networks_list)
@@ -405,7 +405,7 @@ class BulkNetworkOpsTestJSON(base.BaseNetworkTest):
         for n in created_subnets:
             self.client.delete_subnet(n['id'])
         # Asserting that the subnets are not found in the list after deletion
-        resp, body = self.client.list_subnets()
+        body = self.client.list_subnets()
         subnets_list = [subnet['id'] for subnet in body['subnets']]
         for n in created_subnets:
             self.assertNotIn(n['id'], subnets_list)
@@ -414,7 +414,7 @@ class BulkNetworkOpsTestJSON(base.BaseNetworkTest):
         for n in created_ports:
             self.client.delete_port(n['id'])
         # Asserting that the ports are not found in the list after deletion
-        resp, body = self.client.list_ports()
+        body = self.client.list_ports()
         ports_list = [port['id'] for port in body['ports']]
         for n in created_ports:
             self.assertNotIn(n['id'], ports_list)
@@ -424,11 +424,11 @@ class BulkNetworkOpsTestJSON(base.BaseNetworkTest):
         # Creates 2 networks in one request
         network_names = [data_utils.rand_name('network-'),
                          data_utils.rand_name('network-')]
-        _, body = self.client.create_bulk_network(network_names)
+        body = self.client.create_bulk_network(network_names)
         created_networks = body['networks']
         self.addCleanup(self._delete_networks, created_networks)
         # Asserting that the networks are found in the list after creation
-        resp, body = self.client.list_networks()
+        body = self.client.list_networks()
         networks_list = [network['id'] for network in body['networks']]
         for n in created_networks:
             self.assertIsNotNone(n['id'])
@@ -455,11 +455,11 @@ class BulkNetworkOpsTestJSON(base.BaseNetworkTest):
             }
             subnets_list.append(p1)
         del subnets_list[1]['name']
-        _, body = self.client.create_bulk_subnet(subnets_list)
+        body = self.client.create_bulk_subnet(subnets_list)
         created_subnets = body['subnets']
         self.addCleanup(self._delete_subnets, created_subnets)
         # Asserting that the subnets are found in the list after creation
-        resp, body = self.client.list_subnets()
+        body = self.client.list_subnets()
         subnets_list = [subnet['id'] for subnet in body['subnets']]
         for n in created_subnets:
             self.assertIsNotNone(n['id'])
@@ -480,11 +480,11 @@ class BulkNetworkOpsTestJSON(base.BaseNetworkTest):
             }
             port_list.append(p1)
         del port_list[1]['name']
-        _, body = self.client.create_bulk_port(port_list)
+        body = self.client.create_bulk_port(port_list)
         created_ports = body['ports']
         self.addCleanup(self._delete_ports, created_ports)
         # Asserting that the ports are found in the list after creation
-        resp, body = self.client.list_ports()
+        body = self.client.list_ports()
         ports_list = [port['id'] for port in body['ports']]
         for n in created_ports:
             self.assertIsNotNone(n['id'])
@@ -534,7 +534,7 @@ class NetworksIpV6TestJSON(NetworksTestJSON):
         # Verifies Subnet GW is None in IPv4
         self.assertEqual(subnet2['gateway_ip'], None)
         # Verifies all 2 subnets in the same network
-        _, body = self.client.list_subnets()
+        body = self.client.list_subnets()
         subnets = [sub['id'] for sub in body['subnets']
                    if sub['network_id'] == network['id']]
         test_subnet_ids = [sub['id'] for sub in (subnet1, subnet2)]

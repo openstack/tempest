@@ -35,30 +35,23 @@ class HorizonIpv6Specifics(base.BaseNetworkTest):
         gateway_ip = cidr.replace('/64', '1')
         port1 = cidr.replace('/64', '2')
 
-        resp, body = self.client.create_subnet(network_id=network['id'],
+        body = self.client.create_subnet(network_id=network['id'],
                                                cidr='2014:abcd:ef00::/64',
                                                ip_version=self._ip_version,
                                                enable_dhcp=False)
-        self.assertEqual(expected=str(httplib.CREATED),
-                         observed=resp['status'])
 
-        resp, body = self.client.list_networks()
-        self.assertEqual(expected=str(httplib.OK), observed=resp['status'])
+        body = self.client.list_networks()
         network_names = [net['name'] for net in body['networks']]
         self.assertIn(network['name'], network_names)
 
-        resp, body = self.client.list_subnets()
-        self.assertEqual(expected=str(httplib.OK), observed=resp['status'])
+        body = self.client.list_subnets()
         subnet = body['subnets'][0]
         self.assertEqual(expected=cidr, observed=subnet['cidr'])
         self.assertEqual(expected=gateway_ip, observed=subnet['gateway_ip'])
 
-        resp, body = self.client.create_port(network_id=network['id'])
+        body = self.client.create_port(network_id=network['id'])
         self.port_id = body['port']['id']
-        self.assertEqual(expected=str(httplib.CREATED),
-                         observed=resp['status'])
 
-        resp, body = self.client.list_ports()
-        self.assertEqual(expected=str(httplib.OK), observed=resp['status'])
+        body = self.client.list_ports()
         ips = [port['fixed_ips'][0]['ip_address'] for port in body['ports']]
         self.assertIn(port1, ips)

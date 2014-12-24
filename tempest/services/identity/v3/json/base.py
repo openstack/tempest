@@ -1,5 +1,4 @@
-# Copyright 2014 NEC Corporation.
-# All Rights Reserved.
+# Copyright 2014 NEC Corporation.  All rights reserved.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
 #    not use this file except in compliance with the License. You may obtain
@@ -13,17 +12,19 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest.common import rest_client
+from tempest import config
 
-from tempest.api.compute import base
-from tempest import test
+CONF = config.CONF
 
 
-class VersionV3Test(base.BaseV3ComputeTest):
+class IdentityV3Client(rest_client.RestClient):
+    """
+    Base identity v3 client class
+    """
 
-    @test.attr(type='gate')
-    def test_version(self):
-        # Get version information
-        resp, version = self.version_client.get_version()
-        self.assertEqual(200, resp.status)
-        self.assertIn("id", version)
-        self.assertEqual("v3.0", version["id"])
+    def __init__(self, auth_provider):
+        super(IdentityV3Client, self).__init__(auth_provider)
+        self.service = CONF.identity.catalog_type
+        self.endpoint_url = 'adminURL'
+        self.api_version = "v3"

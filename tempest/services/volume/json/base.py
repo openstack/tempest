@@ -12,18 +12,19 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest.api_schema.response.compute import interfaces as common_schema
+from tempest.common import rest_client
+from tempest import config
 
-list_interfaces = {
-    'status_code': [200],
-    'response_body': {
-        'type': 'object',
-        'properties': {
-            'interface_attachments': {
-                'type': 'array',
-                'items': common_schema.interface_common_info
-            }
-        },
-        'required': ['interface_attachments']
-    }
-}
+CONF = config.CONF
+
+
+class VolumeClient(rest_client.RestClient):
+    """
+    Base volume client class
+    """
+
+    def __init__(self, auth_provider):
+        super(VolumeClient, self).__init__(auth_provider)
+        self.service = CONF.volume.catalog_type
+        self.build_interval = CONF.volume.build_interval
+        self.build_timeout = CONF.volume.build_timeout

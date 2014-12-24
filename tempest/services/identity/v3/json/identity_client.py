@@ -19,17 +19,12 @@ import urllib
 from tempest.common import rest_client
 from tempest import config
 from tempest import exceptions
+from tempest.services.identity.v3.json import base
 
 CONF = config.CONF
 
 
-class IdentityV3ClientJSON(rest_client.RestClient):
-
-    def __init__(self, auth_provider):
-        super(IdentityV3ClientJSON, self).__init__(auth_provider)
-        self.service = CONF.identity.catalog_type
-        self.endpoint_url = 'adminURL'
-        self.api_version = "v3"
+class IdentityV3ClientJSON(base.IdentityV3Client):
 
     def create_user(self, user_name, password=None, project_id=None,
                     email=None, domain_id='default', **kwargs):

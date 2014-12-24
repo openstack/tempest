@@ -58,14 +58,14 @@ class AllowedAddressPairTestJSON(base.BaseNetworkTest):
         # Create port with allowed address pair attribute
         allowed_address_pairs = [{'ip_address': self.ip_address,
                                   'mac_address': self.mac_address}]
-        _, body = self.client.create_port(
+        body = self.client.create_port(
             network_id=self.network['id'],
             allowed_address_pairs=allowed_address_pairs)
         port_id = body['port']['id']
         self.addCleanup(self.client.delete_port, port_id)
 
         # Confirm port was created with allowed address pair attribute
-        _, body = self.client.list_ports()
+        body = self.client.list_ports()
         ports = body['ports']
         port = [p for p in ports if p['id'] == port_id]
         msg = 'Created port not found in list of ports returned by Neutron'
@@ -75,7 +75,7 @@ class AllowedAddressPairTestJSON(base.BaseNetworkTest):
     @test.attr(type='smoke')
     def _update_port_with_address(self, address, mac_address=None, **kwargs):
         # Create a port without allowed address pair
-        _, body = self.client.create_port(network_id=self.network['id'])
+        body = self.client.create_port(network_id=self.network['id'])
         port_id = body['port']['id']
         self.addCleanup(self.client.delete_port, port_id)
         if mac_address is None:
@@ -86,7 +86,7 @@ class AllowedAddressPairTestJSON(base.BaseNetworkTest):
                                   'mac_address': mac_address}]
         if kwargs:
             allowed_address_pairs.append(kwargs['allowed_address_pairs'])
-        _, body = self.client.update_port(
+        body = self.client.update_port(
             port_id, allowed_address_pairs=allowed_address_pairs)
         allowed_address_pair = body['port']['allowed_address_pairs']
         self.assertEqual(allowed_address_pair, allowed_address_pairs)
@@ -105,7 +105,7 @@ class AllowedAddressPairTestJSON(base.BaseNetworkTest):
     @test.attr(type='smoke')
     def test_update_port_with_multiple_ip_mac_address_pair(self):
         # Create an ip _address and mac_address through port create
-        _, resp = self.client.create_port(network_id=self.network['id'])
+        resp = self.client.create_port(network_id=self.network['id'])
         newportid = resp['port']['id']
         self.addCleanup(self.client.delete_port, newportid)
         ipaddress = resp['port']['fixed_ips'][0]['ip_address']

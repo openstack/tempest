@@ -16,26 +16,16 @@
 
 import urllib
 
-from tempest.common import rest_client
-from tempest import config
 from tempest.openstack.common import jsonutils
+from tempest.services.volume.json import base
 
-CONF = config.CONF
 
-
-class BaseVolumeQuotasClientJSON(rest_client.RestClient):
+class BaseVolumeQuotasClientJSON(base.VolumeClient):
     """
     Client class to send CRUD Volume Quotas API requests to a Cinder endpoint
     """
 
     TYPE = "json"
-
-    def __init__(self, auth_provider):
-        super(BaseVolumeQuotasClientJSON, self).__init__(auth_provider)
-
-        self.service = CONF.volume.catalog_type
-        self.build_interval = CONF.volume.build_interval
-        self.build_timeout = CONF.volume.build_timeout
 
     def get_default_quota_set(self, tenant_id):
         """List the default volume quota set for a tenant."""

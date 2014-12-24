@@ -24,7 +24,6 @@ import six
 from tempest import auth
 from tempest import clients
 from tempest.common import credentials
-from tempest.common import debug
 from tempest.common.utils import data_utils
 from tempest.common.utils.linux import remote_client
 from tempest import config
@@ -262,26 +261,12 @@ class ScenarioTest(tempest.test.BaseTestCase):
                 'to_port': 22,
                 'cidr': '0.0.0.0/0',
             },
-             {
-                # ssh -6
-                'ip_proto': 'tcp',
-                'from_port': 22,
-                'to_port': 22,
-                'cidr': '::/0',
-            },
             {
                 # ping
                 'ip_proto': 'icmp',
                 'from_port': -1,
                 'to_port': -1,
                 'cidr': '0.0.0.0/0',
-            },
-            {
-                # ping6
-                'ip_proto': 'icmp',
-                'from_port': -1,
-                'to_port': -1,
-                'cidr': '::/0',
             }
         ]
         rules = list()
@@ -340,7 +325,6 @@ class ScenarioTest(tempest.test.BaseTestCase):
             linux_client.validate_authentication()
         except Exception:
             LOG.exception('Initializing SSH connection to %s failed' % ip)
-            debug.log_net_debug()
             # If we don't explicitely set for which servers we want to
             # log the console output then all the servers will be logged.
             # See the definition of _log_console_output()
@@ -414,7 +398,6 @@ class ScenarioTest(tempest.test.BaseTestCase):
         # network debug is called as part of ssh init
         if not isinstance(exc, exceptions.SSHTimeout):
             LOG.debug('Network information on a devstack host')
-            debug.log_net_debug()
 
     def create_server_snapshot(self, server, name=None):
         # Glance client
@@ -474,10 +457,8 @@ class ScenarioTest(tempest.test.BaseTestCase):
 
     def ping_ip_address(self, ip_address, should_succeed=True,
                         ping_timeout=None):
-        ip_version = netaddr.IPAddress(ip_address).version
-        ping_cmd = 'ping6' if ip_version == 6 else 'ping'
         timeout = ping_timeout or CONF.compute.ping_timeout
-        cmd = [ping_cmd, '-c1', '-w1', ip_address]
+        cmd = ['ping', '-c1', '-w1', ip_address]
 
         def ping():
             proc = subprocess.Popen(cmd,
@@ -526,15 +507,12 @@ class ScenarioTest(tempest.test.BaseTestCase):
                                        username,
                                        private_key,
                                        should_connect=should_connect)
-        except Exception as e:
+        except Exception:
             ex_msg = 'Public network connectivity check failed'
             if msg:
                 ex_msg += ": " + msg
             LOG.exception(ex_msg)
             self._log_console_output(servers)
-            # network debug is called as part of ssh init
-            if not isinstance(e, exceptions.SSHTimeout):
-                debug.log_net_debug()
             raise
 
     def create_floating_ip(self, thing, pool_name=None):
@@ -580,7 +558,7 @@ class NetworkScenarioTest(ScenarioTest):
         if not tenant_id:
             tenant_id = client.rest_client.tenant_id
         name = data_utils.rand_name(namestart)
-        _, result = client.create_network(name=name, tenant_id=tenant_id)
+        result = client.create_network(name=name, tenant_id=tenant_id)
         network = net_resources.DeletableNetwork(client=client,
                                                  **result['network'])
         self.assertEqual(network.name, name)
@@ -607,12 +585,12 @@ class NetworkScenarioTest(ScenarioTest):
         def temp(*args, **kwargs):
             temp_method = self.admin_manager.network_client.__getattr__(
                 'list_%s' % resource_type)
-            _, resource_list = temp_method(*args, **kwargs)
+            resource_list = temp_method(*args, **kwargs)
             return resource_list[resource_type]
         return temp
 
     def _create_subnet(self, network, client=None, namestart='subnet-smoke',
-                       net_max_bits=0, **kwargs):
+                       **kwargs):
         """
         Create a subnet for the given network within the cidr block
         configured for tenant networks.
@@ -627,23 +605,22 @@ class NetworkScenarioTest(ScenarioTest):
             """
             cidr_in_use = self._list_subnets(tenant_id=tenant_id, cidr=cidr)
             return len(cidr_in_use) != 0
-        ip_version = kwargs.get('ip_version', getattr(self, "_ip_version", 4))
-        kwargs.update({'ip_version': ip_version})
+
+        ip_version = kwargs.pop('ip_version', 4)
+
         if ip_version == 6:
-            tenant_cidr = \
-                netaddr.IPNetwork(CONF.network.tenant_network_v6_cidr)
-            network_prefix = CONF.network.tenant_network_v6_mask_bits
+            tenant_cidr = netaddr.IPNetwork(
+                CONF.network.tenant_network_v6_cidr)
+            num_bits = CONF.network.tenant_network_v6_mask_bits
         else:
             tenant_cidr = netaddr.IPNetwork(CONF.network.tenant_network_cidr)
-            network_prefix = CONF.network.tenant_network_mask_bits
-        if net_max_bits:
-            network_prefix = net_max_bits
+            num_bits = CONF.network.tenant_network_mask_bits
 
-        #tenant_cidr = netaddr.IPNetwork(CONF.network.tenant_network_cidr)
         result = None
+        str_cidr = None
         # Repeatedly attempt subnet creation with sequential cidr
         # blocks until an unallocated block is found.
-        for subnet_cidr in tenant_cidr.subnet(network_prefix):
+        for subnet_cidr in tenant_cidr.subnet(num_bits):
             str_cidr = str(subnet_cidr)
             if cidr_in_use(str_cidr, tenant_id=network.tenant_id):
                 continue
@@ -653,10 +630,11 @@ class NetworkScenarioTest(ScenarioTest):
                 network_id=network.id,
                 tenant_id=network.tenant_id,
                 cidr=str_cidr,
+                ip_version=ip_version,
                 **kwargs
             )
             try:
-                _, result = client.create_subnet(**subnet)
+                result = client.create_subnet(**subnet)
                 break
             except exceptions.Conflict as e:
                 is_overlapping_cidr = 'overlaps with another subnet' in str(e)
@@ -673,7 +651,7 @@ class NetworkScenarioTest(ScenarioTest):
         if not client:
             client = self.network_client
         name = data_utils.rand_name(namestart)
-        _, result = client.create_port(
+        result = client.create_port(
             name=name,
             network_id=network.id,
             tenant_id=network.tenant_id)
@@ -683,17 +661,17 @@ class NetworkScenarioTest(ScenarioTest):
         self.addCleanup(self.delete_wrapper, port.delete)
         return port
 
-    def _get_server_port_id_and_ips(self, server, ip_addr=None):
+    def _get_server_port_id_and_ip4(self, server, ip_addr=None):
         ports = self._list_ports(device_id=server['id'],
                                  fixed_ip=ip_addr)
         self.assertEqual(len(ports), 1,
                          "Unable to determine which port to target.")
-        ip4 = None
+        # it might happen here that this port has more then one ip address
+        # as in case of dual stack- when this port is created on 2 subnets
         for ip46 in ports[0]['fixed_ips']:
             ip = ip46['ip_address']
             if netaddr.valid_ipv4(ip):
-                ip4 = ip
-        return ports[0]['id'], ip4
+                return ports[0]['id'], ip
 
     def _get_network_by_name(self, network_name):
         net = self._list_networks(name=network_name)
@@ -709,14 +687,14 @@ class NetworkScenarioTest(ScenarioTest):
         if not client:
             client = self.network_client
         if not port_id:
-            port_id, ip4 = self._get_server_port_id_and_ips(thing)
+            port_id, ip4 = self._get_server_port_id_and_ip4(thing)
         else:
             ip4 = None
-        _, result = client.create_floatingip(
+        result = client.create_floatingip(
             floating_network_id=external_network_id,
             port_id=port_id,
             tenant_id=thing['tenant_id'],
-            fixed_ip_address=ip4  # floating for ipv6 is not supported
+            fixed_ip_address=ip4
         )
         floating_ip = net_resources.DeletableFloatingIp(
             client=client,
@@ -725,7 +703,7 @@ class NetworkScenarioTest(ScenarioTest):
         return floating_ip
 
     def _associate_floating_ip(self, floating_ip, server):
-        port_id = self._get_server_port_id_and_ips(server)[0]
+        port_id, _ = self._get_server_port_id_and_ip4(server)
         floating_ip.update(port_id=port_id)
         self.assertEqual(port_id, floating_ip.port_id)
         return floating_ip
@@ -845,7 +823,7 @@ class NetworkScenarioTest(ScenarioTest):
         sg_dict = dict(name=sg_name,
                        description=sg_desc)
         sg_dict['tenant_id'] = tenant_id
-        _, result = client.create_security_group(**sg_dict)
+        result = client.create_security_group(**sg_dict)
         secgroup = net_resources.DeletableSecurityGroup(
             client=client,
             **result['security_group']
@@ -905,7 +883,7 @@ class NetworkScenarioTest(ScenarioTest):
                        tenant_id=secgroup.tenant_id)
         ruleset.update(kwargs)
 
-        _, sg_rule = client.create_security_group_rule(**ruleset)
+        sg_rule = client.create_security_group_rule(**ruleset)
         sg_rule = net_resources.DeletableSecurityGroupRule(
             client=client,
             **sg_rule['security_group_rule']
@@ -959,9 +937,9 @@ class NetworkScenarioTest(ScenarioTest):
         """Wrapper utility that returns a test pool."""
         client = self.network_client
         name = data_utils.rand_name('pool')
-        _, resp_pool = client.create_pool(protocol=protocol, name=name,
-                                          subnet_id=subnet_id,
-                                          lb_method=lb_method)
+        resp_pool = client.create_pool(protocol=protocol, name=name,
+                                       subnet_id=subnet_id,
+                                       lb_method=lb_method)
         pool = net_resources.DeletablePool(client=client, **resp_pool['pool'])
         self.assertEqual(pool['name'], name)
         self.addCleanup(self.delete_wrapper, pool.delete)
@@ -970,9 +948,9 @@ class NetworkScenarioTest(ScenarioTest):
     def _create_member(self, address, protocol_port, pool_id):
         """Wrapper utility that returns a test member."""
         client = self.network_client
-        _, resp_member = client.create_member(protocol_port=protocol_port,
-                                              pool_id=pool_id,
-                                              address=address)
+        resp_member = client.create_member(protocol_port=protocol_port,
+                                           pool_id=pool_id,
+                                           address=address)
         member = net_resources.DeletableMember(client=client,
                                                **resp_member['member'])
         self.addCleanup(self.delete_wrapper, member.delete)
@@ -982,9 +960,9 @@ class NetworkScenarioTest(ScenarioTest):
         """Wrapper utility that returns a test vip."""
         client = self.network_client
         name = data_utils.rand_name('vip')
-        _, resp_vip = client.create_vip(protocol=protocol, name=name,
-                                        subnet_id=subnet_id, pool_id=pool_id,
-                                        protocol_port=protocol_port)
+        resp_vip = client.create_vip(protocol=protocol, name=name,
+                                     subnet_id=subnet_id, pool_id=pool_id,
+                                     protocol_port=protocol_port)
         vip = net_resources.DeletableVip(client=client, **resp_vip['vip'])
         self.assertEqual(vip['name'], name)
         self.addCleanup(self.delete_wrapper, vip.delete)
@@ -1029,9 +1007,9 @@ class NetworkScenarioTest(ScenarioTest):
         if not tenant_id:
             tenant_id = client.rest_client.tenant_id
         name = data_utils.rand_name(namestart)
-        _, result = client.create_router(name=name,
-                                         admin_state_up=True,
-                                         tenant_id=tenant_id)
+        result = client.create_router(name=name,
+                                      admin_state_up=True,
+                                      tenant_id=tenant_id)
         router = net_resources.DeletableRouter(client=client,
                                                **result['router'])
         self.assertEqual(router.name, name)
@@ -1296,7 +1274,7 @@ class OrchestrationScenarioTest(ScenarioTest):
 
     @classmethod
     def _get_default_network(cls):
-        _, networks = cls.networks_client.list_networks()
+        networks = cls.networks_client.list_networks()
         for net in networks:
             if net['label'] == CONF.compute.fixed_network_name:
                 return net

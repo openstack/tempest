@@ -185,7 +185,9 @@ ComputeGroup = [
                help="Time in seconds between build status checks."),
     cfg.IntOpt('build_timeout',
                default=300,
-               help="Timeout in seconds to wait for an instance to build."),
+               help="Timeout in seconds to wait for an instance to build. "
+                    "Other services that do not define build_timeout will "
+                    "inherit this value, for example the image service."),
     cfg.BoolOpt('run_ssh',
                 default=False,
                 help="Should the tests ssh to instances?"),
@@ -926,9 +928,6 @@ debug_group = cfg.OptGroup(name="debug",
                            title="Debug System")
 
 DebugGroup = [
-    cfg.BoolOpt('enable',
-                default=True,
-                help="Enable diagnostic commands"),
     cfg.StrOpt('trace_requests',
                default='',
                help="""A regex to determine which requests should be traced.

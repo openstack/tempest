@@ -42,7 +42,7 @@ class NetworksTestPortsIPv6JSON(base.BaseNetworkTest):
         cls.network = cls.create_network()
 
     def _clean_network(self):
-        resp, body = self.client.list_ports()
+        body = self.client.list_ports()
         ports = body['ports']
         for port in ports:
             if self.ports:
@@ -53,13 +53,13 @@ class NetworksTestPortsIPv6JSON(base.BaseNetworkTest):
                 )
             else:
                 self.client.delete_port(port['id'])
-        resp, body = self.client.list_subnets()
+        body = self.client.list_subnets()
         subnets = body['subnets']
         for subnet in subnets:
             if self.subnets:
                 self.subnets.pop()
             self.client.delete_subnet(subnet['id'])
-        resp, body = self.client.list_routers()
+        body = self.client.list_routers()
         routers = body['routers']
         for router in routers:
             if self.routers:
@@ -99,8 +99,7 @@ class NetworksTestPortsIPv6JSON(base.BaseNetworkTest):
                                          (None, None)
                                         ]
         for ra_mode, address_mode in ipv6_valid_modes_combinations:
-            resp, body = self.client.create_network(name=name)
-            self.assertEqual('201', resp['status'])
+            body = self.client.create_network(name=name)
             network = body['network']
             net_id = network['id']
             kwargs = {'gateway': 'fe80::1',
@@ -113,8 +112,7 @@ class NetworksTestPortsIPv6JSON(base.BaseNetworkTest):
             self.assertEqual(subnet['ipv6_ra_mode'], ra_mode)
             self.assertEqual(subnet['ipv6_address_mode'], address_mode)
             # Delete network and subnet
-            resp, body = self.client.delete_network(net_id)
-            self.assertEqual('204', resp['status'])
+            body = self.client.delete_network(net_id)
             self.subnets.pop()
 
     @test.attr(type='smoke')
@@ -148,7 +146,7 @@ class NetworksTestPortsIPv6JSON(base.BaseNetworkTest):
             self.assertEqual(2, len(self._port_ips(port)))
             self.client.delete_port(port['id'])
             self.ports.pop()
-            _, body = self.client.list_ports()
+            body = self.client.list_ports()
             ports_id_list = [i['id'] for i in body['ports']]
             self.assertNotIn(port['id'], ports_id_list)
             self._clean_network()

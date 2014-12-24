@@ -137,7 +137,6 @@ def verify_api_versions(os, service, update):
 def get_extension_client(os, service):
     extensions_client = {
         'nova': os.extensions_client,
-        'nova_v3': os.extensions_v3_client,
         'cinder': os.volumes_extension_client,
         'neutron': os.network_client,
         'swift': os.account_client,
@@ -151,7 +150,6 @@ def get_extension_client(os, service):
 def get_enabled_extensions(service):
     extensions_options = {
         'nova': CONF.compute_feature_enabled.api_extensions,
-        'nova_v3': CONF.compute_feature_enabled.api_v3_extensions,
         'cinder': CONF.volume_feature_enabled.api_extensions,
         'neutron': CONF.network_feature_enabled.api_extensions,
         'swift': CONF.object_storage_feature_enabled.discoverable_apis,
@@ -164,7 +162,10 @@ def get_enabled_extensions(service):
 
 def verify_extensions(os, service, results):
     extensions_client = get_extension_client(os, service)
-    __, resp = extensions_client.list_extensions()
+    if service == 'neutron':
+        resp = extensions_client.list_extensions()
+    else:
+        __, resp = extensions_client.list_extensions()
     # For Nova, Cinder and Neutron we use the alias name rather than the
     # 'name' field because the alias is considered to be the canonical
     # name.
@@ -199,7 +200,6 @@ def display_results(results, update, replace):
     update_dict = {
         'swift': 'object-storage-feature-enabled',
         'nova': 'compute-feature-enabled',
-        'nova_v3': 'compute-feature-enabled',
         'cinder': 'volume-feature-enabled',
         'neutron': 'network-feature-enabled',
     }
@@ -233,9 +233,6 @@ def display_results(results, update, replace):
             output_string = ', '.join(output_list)
             if service == 'swift':
                 change_option('discoverable_apis', update_dict[service],
-                              output_string)
-            elif service == 'nova_v3':
-                change_option('api_v3_extensions', update_dict[service],
                               output_string)
             else:
                 change_option('api_extensions', update_dict[service],
@@ -341,10 +338,8 @@ def main():
     os = clients.ComputeAdminManager(interface='json')
     services = check_service_availability(os, update)
     results = {}
-    for service in ['nova', 'nova_v3', 'cinder', 'neutron', 'swift']:
-        if service == 'nova_v3' and 'nova' not in services:
-            continue
-        elif service not in services:
+    for service in ['nova', 'cinder', 'neutron', 'swift']:
+        if service not in services:
             continue
         results = verify_extensions(os, service, results)
 

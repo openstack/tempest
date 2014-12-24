@@ -48,12 +48,10 @@ class TestLoadBalancerBasic(manager.NetworkScenarioTest):
         cfg = config.network
         if not test.is_extension_enabled('lbaas', 'network'):
             msg = 'LBaaS Extension is not enabled'
-            cls.enabled = False
             raise cls.skipException(msg)
         if not (cfg.tenant_networks_reachable or cfg.public_network_id):
             msg = ('Either tenant_networks_reachable must be "true", or '
                    'public_network_id must be defined.')
-            cls.enabled = False
             raise cls.skipException(msg)
 
     @classmethod

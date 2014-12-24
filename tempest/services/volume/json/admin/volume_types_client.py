@@ -16,24 +16,14 @@
 import json
 import urllib
 
-from tempest.common import rest_client
-from tempest import config
 from tempest import exceptions
+from tempest.services.volume.json import base
 
-CONF = config.CONF
 
-
-class BaseVolumeTypesClientJSON(rest_client.RestClient):
+class BaseVolumeTypesClientJSON(base.VolumeClient):
     """
     Client class to send CRUD Volume Types API requests to a Cinder endpoint
     """
-
-    def __init__(self, auth_provider):
-        super(BaseVolumeTypesClientJSON, self).__init__(auth_provider)
-
-        self.service = CONF.volume.catalog_type
-        self.build_interval = CONF.volume.build_interval
-        self.build_timeout = CONF.volume.build_timeout
 
     def is_resource_deleted(self, resource):
         # to use this method self.resource must be defined to respective value

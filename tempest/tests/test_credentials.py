@@ -24,7 +24,6 @@ from tempest import config
 from tempest import exceptions
 from tempest.tests import base
 from tempest.tests import fake_config
-from tempest.tests import fake_http
 from tempest.tests import fake_identity
 
 
@@ -39,8 +38,6 @@ class CredentialsTests(base.TestCase):
 
     def setUp(self):
         super(CredentialsTests, self).setUp()
-        self.fake_http = fake_http.fake_httplib2(return_type=200)
-        self.stubs.Set(http.ClosingHttp, 'request', self.fake_http.request)
         self.useFixture(fake_config.ConfigFixture())
         self.stubs.Set(config, 'TempestConfigPrivate', fake_config.FakePrivate)
 
@@ -83,7 +80,6 @@ class KeystoneV2CredentialsTests(CredentialsTests):
     def setUp(self):
         super(KeystoneV2CredentialsTests, self).setUp()
         self.stubs.Set(http.ClosingHttp, 'request', self.identity_response)
-        self.stubs.Set(config, 'TempestConfigPrivate', fake_config.FakePrivate)
 
     def _verify_credentials(self, credentials_class, filled=True,
                             creds_dict=None):

@@ -16,19 +16,10 @@
 import json
 import urllib
 
-from tempest.common import rest_client
-from tempest import config
-
-CONF = config.CONF
+from tempest.services.identity.v3.json import base
 
 
-class RegionClientJSON(rest_client.RestClient):
-
-    def __init__(self, auth_provider):
-        super(RegionClientJSON, self).__init__(auth_provider)
-        self.service = CONF.identity.catalog_type
-        self.endpoint_url = 'adminURL'
-        self.api_version = "v3"
+class RegionClientJSON(base.IdentityV3Client):
 
     def create_region(self, description, **kwargs):
         """Create region."""

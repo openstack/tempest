@@ -59,33 +59,6 @@ from tempest.services.compute.json.tenant_usages_client import \
     TenantUsagesClientJSON
 from tempest.services.compute.json.volumes_extensions_client import \
     VolumesExtensionsClientJSON
-from tempest.services.compute.v3.json.agents_client import AgentsV3ClientJSON
-from tempest.services.compute.v3.json.aggregates_client import \
-    AggregatesV3ClientJSON
-from tempest.services.compute.v3.json.availability_zone_client import \
-    AvailabilityZoneV3ClientJSON
-from tempest.services.compute.v3.json.certificates_client import \
-    CertificatesV3ClientJSON
-from tempest.services.compute.v3.json.extensions_client import \
-    ExtensionsV3ClientJSON
-from tempest.services.compute.v3.json.flavors_client import FlavorsV3ClientJSON
-from tempest.services.compute.v3.json.hosts_client import HostsV3ClientJSON
-from tempest.services.compute.v3.json.hypervisor_client import \
-    HypervisorV3ClientJSON
-from tempest.services.compute.v3.json.interfaces_client import \
-    InterfacesV3ClientJSON
-from tempest.services.compute.v3.json.keypairs_client import \
-    KeyPairsV3ClientJSON
-from tempest.services.compute.v3.json.migration_client import \
-    MigrationsV3ClientJSON
-from tempest.services.compute.v3.json.quotas_client import \
-    QuotasV3ClientJSON
-from tempest.services.compute.v3.json.servers_client import \
-    ServersV3ClientJSON
-from tempest.services.compute.v3.json.services_client import \
-    ServicesV3ClientJSON
-from tempest.services.compute.v3.json.version_client import \
-    VersionV3ClientJSON
 from tempest.services.data_processing.v1_1.client import DataProcessingClient
 from tempest.services.database.json.flavors_client import \
     DatabaseFlavorsClientJSON
@@ -224,45 +197,28 @@ class Manager(manager.Manager):
 
     def _set_compute_json_clients(self):
         self.certificates_client = CertificatesClientJSON(self.auth_provider)
-        self.certificates_v3_client = CertificatesV3ClientJSON(
-            self.auth_provider)
         self.servers_client = ServersClientJSON(self.auth_provider)
-        self.servers_v3_client = ServersV3ClientJSON(self.auth_provider)
         self.limits_client = LimitsClientJSON(self.auth_provider)
         self.images_client = ImagesClientJSON(self.auth_provider)
         self.keypairs_client = KeyPairsClientJSON(self.auth_provider)
-        self.keypairs_v3_client = KeyPairsV3ClientJSON(self.auth_provider)
         self.quotas_client = QuotasClientJSON(self.auth_provider)
         self.quota_classes_client = QuotaClassesClientJSON(self.auth_provider)
-        self.quotas_v3_client = QuotasV3ClientJSON(self.auth_provider)
         self.flavors_client = FlavorsClientJSON(self.auth_provider)
-        self.flavors_v3_client = FlavorsV3ClientJSON(self.auth_provider)
         self.extensions_client = ExtensionsClientJSON(self.auth_provider)
-        self.extensions_v3_client = ExtensionsV3ClientJSON(self.auth_provider)
         self.volumes_extensions_client = VolumesExtensionsClientJSON(
             self.auth_provider)
         self.floating_ips_client = FloatingIPsClientJSON(self.auth_provider)
         self.security_groups_client = SecurityGroupsClientJSON(
             self.auth_provider)
         self.interfaces_client = InterfacesClientJSON(self.auth_provider)
-        self.interfaces_v3_client = InterfacesV3ClientJSON(self.auth_provider)
         self.fixed_ips_client = FixedIPsClientJSON(self.auth_provider)
         self.availability_zone_client = AvailabilityZoneClientJSON(
             self.auth_provider)
-        self.availability_zone_v3_client = AvailabilityZoneV3ClientJSON(
-            self.auth_provider)
-        self.services_v3_client = ServicesV3ClientJSON(self.auth_provider)
-        self.agents_v3_client = AgentsV3ClientJSON(self.auth_provider)
         self.aggregates_client = AggregatesClientJSON(self.auth_provider)
-        self.aggregates_v3_client = AggregatesV3ClientJSON(self.auth_provider)
         self.services_client = ServicesClientJSON(self.auth_provider)
         self.tenant_usages_client = TenantUsagesClientJSON(self.auth_provider)
-        self.version_v3_client = VersionV3ClientJSON(self.auth_provider)
-        self.migrations_v3_client = MigrationsV3ClientJSON(self.auth_provider)
         self.hosts_client = HostsClientJSON(self.auth_provider)
-        self.hosts_v3_client = HostsV3ClientJSON(self.auth_provider)
         self.hypervisor_client = HypervisorClientJSON(self.auth_provider)
-        self.hypervisor_v3_client = HypervisorV3ClientJSON(self.auth_provider)
         self.instance_usages_audit_log_client = \
             InstanceUsagesAuditLogClientJSON(self.auth_provider)
 

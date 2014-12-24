@@ -46,7 +46,6 @@ class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
                 or CONF.network.public_network_id):
             msg = ('Either tenant_networks_reachable must be "true", or '
                    'public_network_id must be defined.')
-            cls.enabled = False
             raise cls.skipException(msg)
 
     @classmethod

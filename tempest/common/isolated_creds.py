@@ -174,7 +174,7 @@ class IsolatedCreds(cred_provider.CredentialProvider):
         return network, subnet, router
 
     def _create_network(self, name, tenant_id):
-        _, resp_body = self.network_admin_client.create_network(
+        resp_body = self.network_admin_client.create_network(
             name=name, tenant_id=tenant_id)
         return resp_body['network']
 
@@ -192,7 +192,7 @@ class IsolatedCreds(cred_provider.CredentialProvider):
         for subnet_cidr in base_cidr.subnet(mask_bits):
             try:
                 if self.network_resources:
-                    _, resp_body = self.network_admin_client.\
+                    resp_body = self.network_admin_client.\
                         create_subnet(
                             network_id=network_id, cidr=str(subnet_cidr),
                             name=subnet_name,
@@ -200,7 +200,7 @@ class IsolatedCreds(cred_provider.CredentialProvider):
                             enable_dhcp=self.network_resources['dhcp'],
                             ip_version=ip_version)
                 else:
-                    _, resp_body = self.network_admin_client.\
+                    resp_body = self.network_admin_client.\
                         create_subnet(network_id=network_id,
                                       cidr=str(subnet_cidr),
                                       name=subnet_name,
@@ -218,7 +218,7 @@ class IsolatedCreds(cred_provider.CredentialProvider):
     def _create_router(self, router_name, tenant_id):
         external_net_id = dict(
             network_id=CONF.network.public_network_id)
-        _, resp_body = self.network_admin_client.create_router(
+        resp_body = self.network_admin_client.create_router(
             router_name,
             external_gateway_info=external_net_id,
             tenant_id=tenant_id)
@@ -310,8 +310,8 @@ class IsolatedCreds(cred_provider.CredentialProvider):
 
     def _cleanup_default_secgroup(self, tenant):
         net_client = self.network_admin_client
-        _, resp_body = net_client.list_security_groups(tenant_id=tenant,
-                                                       name="default")
+        resp_body = net_client.list_security_groups(tenant_id=tenant,
+                                                    name="default")
         secgroups_to_delete = resp_body['security_groups']
         for secgroup in secgroups_to_delete:
             try:
