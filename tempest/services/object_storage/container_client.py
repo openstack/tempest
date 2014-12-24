@@ -17,20 +17,10 @@ import json
 import urllib
 from xml.etree import ElementTree as etree
 
-from tempest.common import rest_client
-from tempest import config
-
-CONF = config.CONF
+from tempest.services.object_storage import base
 
 
-class ContainerClient(rest_client.RestClient):
-    def __init__(self, auth_provider):
-        super(ContainerClient, self).__init__(auth_provider)
-
-        # Overwrites json-specific header encoding in rest_client.RestClient
-        self.headers = {}
-        self.service = CONF.object_storage.catalog_type
-        self.format = 'json'
+class ContainerClient(base.ObjectStorageClient):
 
     def create_container(
             self, container_name,

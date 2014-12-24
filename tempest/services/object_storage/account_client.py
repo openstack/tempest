@@ -18,17 +18,14 @@ import urllib
 from xml.etree import ElementTree as etree
 
 from tempest.common import http
-from tempest.common import rest_client
 from tempest import config
 from tempest import exceptions
+from tempest.services.object_storage import base
 
 CONF = config.CONF
 
 
-class AccountClient(rest_client.RestClient):
-    def __init__(self, auth_provider):
-        super(AccountClient, self).__init__(auth_provider)
-        self.service = CONF.object_storage.catalog_type
+class AccountClient(base.ObjectStorageClient):
 
     def create_account(self, data=None,
                        params=None,
@@ -167,16 +164,9 @@ class AccountClient(rest_client.RestClient):
         return resp, body
 
 
-class AccountClientCustomizedHeader(rest_client.RestClient):
+class AccountClientCustomizedHeader(base.ObjectStorageClient):
 
     # TODO(andreaf) This class is now redundant, to be removed in next patch
-
-    def __init__(self, auth_provider):
-        super(AccountClientCustomizedHeader, self).__init__(
-            auth_provider)
-        # Overwrites json-specific header encoding in rest_client.RestClient
-        self.service = CONF.object_storage.catalog_type
-        self.format = 'json'
 
     def request(self, method, url, extra_headers=False, headers=None,
                 body=None):
