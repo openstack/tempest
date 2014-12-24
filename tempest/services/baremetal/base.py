@@ -49,8 +49,8 @@ class BaremetalClient(rest_client.RestClient):
     """
 
     def __init__(self, auth_provider):
-        super(BaremetalClient, self).__init__(auth_provider)
-        self.service = CONF.baremetal.catalog_type
+        super(BaremetalClient, self).__init__(
+            auth_provider, CONF.baremetal.catalog_type)
         self.uri_prefix = ''
 
     def serialize(self, object_type, object_dict):

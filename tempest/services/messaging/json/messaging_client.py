@@ -28,8 +28,8 @@ CONF = config.CONF
 class MessagingClientJSON(rest_client.RestClient):
 
     def __init__(self, auth_provider):
-        super(MessagingClientJSON, self).__init__(auth_provider)
-        self.service = CONF.messaging.catalog_type
+        super(MessagingClientJSON, self).__init__(auth_provider,
+                                                  CONF.messaging.catalog_type)
         self.version = '1'
         self.uri_prefix = 'v{0}'.format(self.version)
 

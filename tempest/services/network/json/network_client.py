@@ -38,10 +38,10 @@ class NetworkClientJSON(rest_client.RestClient):
     """
 
     def __init__(self, auth_provider):
-        super(NetworkClientJSON, self).__init__(auth_provider)
-        self.service = CONF.network.catalog_type
-        self.build_timeout = CONF.network.build_timeout
-        self.build_interval = CONF.network.build_interval
+        super(NetworkClientJSON, self).__init__(
+            auth_provider, CONF.network.catalog_type,
+            build_interval=CONF.network.build_interval,
+            build_timeout=CONF.network.build_timeout)
         self.version = '2.0'
         self.uri_prefix = "v%s" % (self.version)
 

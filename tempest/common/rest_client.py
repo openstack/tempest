@@ -78,16 +78,17 @@ class RestClient(object):
 
     LOG = logging.getLogger(__name__)
 
-    def __init__(self, auth_provider):
+    def __init__(self, auth_provider, service,
+                 build_interval=1, build_timeout=60):
         self.auth_provider = auth_provider
+        self.service = service
+        self.build_interval = build_interval
+        self.build_timeout = build_timeout
 
         self.endpoint_url = None
-        self.service = None
         # The version of the API this client implements
         self.api_version = None
         self._skip_path = False
-        self.build_interval = CONF.compute.build_interval
-        self.build_timeout = CONF.compute.build_timeout
         self.general_header_lc = set(('cache-control', 'connection',
                                       'date', 'pragma', 'trailer',
                                       'transfer-encoding', 'via',

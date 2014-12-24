@@ -523,7 +523,7 @@ class IdentityV3ClientJSON(base.IdentityV3Client):
 class V3TokenClientJSON(rest_client.RestClient):
 
     def __init__(self):
-        super(V3TokenClientJSON, self).__init__(None)
+        super(V3TokenClientJSON, self).__init__(None, None)
         auth_url = CONF.identity.uri_v3
         if not auth_url:
             raise exceptions.InvalidConfiguration('you must specify a v3 uri '

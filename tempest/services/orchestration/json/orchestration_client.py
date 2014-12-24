@@ -28,10 +28,11 @@ CONF = config.CONF
 class OrchestrationClient(rest_client.RestClient):
 
     def __init__(self, auth_provider):
-        super(OrchestrationClient, self).__init__(auth_provider)
-        self.service = CONF.orchestration.catalog_type
-        self.build_interval = CONF.orchestration.build_interval
-        self.build_timeout = CONF.orchestration.build_timeout
+        super(OrchestrationClient, self).__init__(
+            auth_provider,
+            CONF.orchestration.catalog_type,
+            build_interval=CONF.orchestration.build_interval,
+            build_timeout=CONF.orchestration.build_timeout)
 
     def list_stacks(self, params=None):
         """Lists all stacks for a user."""

@@ -158,8 +158,7 @@ class Manager(manager.Manager):
             self.telemetry_client = TelemetryClientJSON(
                 self.auth_provider)
         self.negative_client = rest_client.NegativeRestClient(
-            self.auth_provider)
-        self.negative_client.service = service
+            self.auth_provider, service)
 
         # TODO(andreaf) EC2 client still do their auth, v2 only
         ec2_client_args = (self.credentials.username,

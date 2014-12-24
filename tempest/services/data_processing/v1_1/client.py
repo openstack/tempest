@@ -21,9 +21,10 @@ CONF = config.CONF
 
 
 class DataProcessingClient(rest_client.RestClient):
+
     def __init__(self, auth_provider):
-        super(DataProcessingClient, self).__init__(auth_provider)
-        self.service = CONF.data_processing.catalog_type
+        super(DataProcessingClient, self).__init__(
+            auth_provider, CONF.data_processing.catalog_type)
 
     def _request_and_check_resp(self, request_func, uri, resp_status):
         """Make a request using specified request_func and check response

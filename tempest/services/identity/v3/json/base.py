@@ -24,7 +24,7 @@ class IdentityV3Client(rest_client.RestClient):
     """
 
     def __init__(self, auth_provider):
-        super(IdentityV3Client, self).__init__(auth_provider)
-        self.service = CONF.identity.catalog_type
+        super(IdentityV3Client, self).__init__(auth_provider,
+                                               CONF.identity.catalog_type)
         self.endpoint_url = 'adminURL'
         self.api_version = "v3"

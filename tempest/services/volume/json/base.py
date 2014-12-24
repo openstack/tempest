@@ -24,7 +24,8 @@ class VolumeClient(rest_client.RestClient):
     """
 
     def __init__(self, auth_provider):
-        super(VolumeClient, self).__init__(auth_provider)
-        self.service = CONF.volume.catalog_type
-        self.build_interval = CONF.volume.build_interval
-        self.build_timeout = CONF.volume.build_timeout
+        super(VolumeClient, self).__init__(
+            auth_provider,
+            CONF.volume.catalog_type,
+            build_interval=CONF.volume.build_interval,
+            build_timeout=CONF.volume.build_timeout)
