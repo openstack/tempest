@@ -362,23 +362,6 @@ ComputeFeaturesGroup = [
 ]
 
 
-compute_admin_group = cfg.OptGroup(name='compute-admin',
-                                   title="Compute Admin Options")
-
-ComputeAdminGroup = [
-    cfg.StrOpt('username',
-               help="Administrative Username to use for Nova API requests."),
-    cfg.StrOpt('tenant_name',
-               help="Administrative Tenant name to use for Nova API "
-                    "requests."),
-    cfg.StrOpt('password',
-               help="API key to use when authenticating as admin.",
-               secret=True),
-    cfg.StrOpt('domain_name',
-               help="Domain name for authentication as admin (Keystone V3)."
-                    "The same domain applies to user and project"),
-]
-
 image_group = cfg.OptGroup(name='image',
                            title="Image Service Options")
 
@@ -1062,7 +1045,6 @@ _opts = [
     (dashboard_group, DashboardGroup),
     (data_processing_group, DataProcessingGroup),
     (boto_group, BotoGroup),
-    (compute_admin_group, ComputeAdminGroup),
     (stress_group, StressGroup),
     (scenario_group, ScenarioGroup),
     (service_available_group, ServiceAvailableGroup),
@@ -1133,7 +1115,6 @@ class TempestConfigPrivate(object):
         self.dashboard = cfg.CONF.dashboard
         self.data_processing = cfg.CONF.data_processing
         self.boto = cfg.CONF.boto
-        self.compute_admin = cfg.CONF['compute-admin']
         self.stress = cfg.CONF.stress
         self.scenario = cfg.CONF.scenario
         self.service_available = cfg.CONF.service_available
@@ -1142,17 +1123,11 @@ class TempestConfigPrivate(object):
         self.input_scenario = cfg.CONF['input-scenario']
         self.cli = cfg.CONF.cli
         self.negative = cfg.CONF.negative
-        if not self.compute_admin.username:
-            self.compute_admin.username = self.identity.admin_username
-            self.compute_admin.password = self.identity.admin_password
-            self.compute_admin.tenant_name = self.identity.admin_tenant_name
         cfg.CONF.set_default('domain_name', self.identity.admin_domain_name,
                              group='identity')
         cfg.CONF.set_default('alt_domain_name',
                              self.identity.admin_domain_name,
                              group='identity')
-        cfg.CONF.set_default('domain_name', self.identity.admin_domain_name,
-                             group='compute-admin')
 
     def __init__(self, parse_conf=True, config_path=None):
         """Initialize a configuration from a conf directory and conf file."""

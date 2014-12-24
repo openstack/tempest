@@ -194,9 +194,6 @@ class KeystoneV3CredentialsTests(KeystoneV2CredentialsTests):
         for prefix in ['', 'alt_', 'admin_']:
             cfg.CONF.set_default(prefix + 'domain_name', 'fake_domain_name',
                                  group='identity')
-        # Compute Admin group items
-        cfg.CONF.set_default('domain_name', 'fake_domain_name',
-                             group='compute-admin')
 
     def test_default(self):
         self.useFixture(fixtures.LockFixture('auth_version'))

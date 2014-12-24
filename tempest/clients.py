@@ -289,18 +289,3 @@ class AdminManager(Manager):
             credentials=auth.get_default_credentials('identity_admin'),
             interface=interface,
             service=service)
-
-
-class ComputeAdminManager(Manager):
-
-    """
-    Manager object that uses the compute_admin credentials for its
-    managed client objects
-    """
-
-    def __init__(self, interface='json', service=None):
-        base = super(ComputeAdminManager, self)
-        base.__init__(
-            credentials=auth.get_default_credentials('compute_admin'),
-            interface=interface,
-            service=service)

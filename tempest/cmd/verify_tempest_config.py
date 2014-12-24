@@ -335,7 +335,7 @@ def main():
         CONF_PARSER = moves.configparser.SafeConfigParser()
         CONF_PARSER.optionxform = str
         CONF_PARSER.readfp(conf_file)
-    os = clients.ComputeAdminManager(interface='json')
+    os = clients.AdminManager(interface='json')
     services = check_service_availability(os, update)
     results = {}
     for service in ['nova', 'cinder', 'neutron', 'swift']:
