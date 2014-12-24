@@ -17,21 +17,12 @@ import json
 import urllib
 
 from tempest.api_schema.response.compute.v2 import images as schema
-from tempest.common import rest_client
 from tempest.common import waiters
-from tempest import config
 from tempest import exceptions
+from tempest.services.compute.json import base
 
-CONF = config.CONF
 
-
-class ImagesClientJSON(rest_client.RestClient):
-
-    def __init__(self, auth_provider):
-        super(ImagesClientJSON, self).__init__(auth_provider)
-        self.service = CONF.compute.catalog_type
-        self.build_interval = CONF.compute.build_interval
-        self.build_timeout = CONF.compute.build_timeout
+class ImagesClientJSON(base.ComputeClient):
 
     def create_image(self, server_id, name, meta=None):
         """Creates an image of the original server."""
