@@ -320,8 +320,8 @@ class TestTenantIsolation(base.TestCase):
 
         return_values = (fake_http.fake_httplib({}, status=204), {})
         remove_secgroup_mock = self.patch(
-            'tempest.services.network.network_client_base.'
-            'NetworkClientBase.delete', return_value=return_values)
+            'tempest.services.network.json.network_client.'
+            'NetworkClientJSON.delete', return_value=return_values)
         iso_creds.clear_isolated_creds()
         # Verify default security group delete
         calls = remove_secgroup_mock.mock_calls
