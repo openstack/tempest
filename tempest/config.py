@@ -469,7 +469,7 @@ NetworkGroup = [
                     "checks."),
     cfg.ListOpt('dns_servers',
                 default=["8.8.8.8", "8.8.4.4"],
-                help="List of dns servers whichs hould be used"
+                help="List of dns servers which should be used"
                      " for subnet creation")
 ]
 
