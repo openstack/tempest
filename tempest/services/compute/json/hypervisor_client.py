@@ -17,17 +17,10 @@ import json
 
 from tempest.api_schema.response.compute import hypervisors as common_schema
 from tempest.api_schema.response.compute.v2 import hypervisors as v2schema
-from tempest.common import rest_client
-from tempest import config
-
-CONF = config.CONF
+from tempest.services.compute.json import base
 
 
-class HypervisorClientJSON(rest_client.RestClient):
-
-    def __init__(self, auth_provider):
-        super(HypervisorClientJSON, self).__init__(auth_provider)
-        self.service = CONF.compute.catalog_type
+class HypervisorClientJSON(base.ComputeClient):
 
     def get_hypervisor_list(self):
         """List hypervisors information."""

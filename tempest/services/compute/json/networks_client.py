@@ -15,17 +15,10 @@
 
 import json
 
-from tempest.common import rest_client
-from tempest import config
-
-CONF = config.CONF
+from tempest.services.compute.json import base
 
 
-class NetworksClientJSON(rest_client.RestClient):
-
-    def __init__(self, auth_provider):
-        super(NetworksClientJSON, self).__init__(auth_provider)
-        self.service = CONF.compute.catalog_type
+class NetworksClientJSON(base.ComputeClient):
 
     def list_networks(self):
         resp, body = self.get("os-networks")

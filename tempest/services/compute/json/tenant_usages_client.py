@@ -17,17 +17,10 @@ import json
 import urllib
 
 from tempest.api_schema.response.compute.v2 import tenant_usages as schema
-from tempest.common import rest_client
-from tempest import config
-
-CONF = config.CONF
+from tempest.services.compute.json import base
 
 
-class TenantUsagesClientJSON(rest_client.RestClient):
-
-    def __init__(self, auth_provider):
-        super(TenantUsagesClientJSON, self).__init__(auth_provider)
-        self.service = CONF.compute.catalog_type
+class TenantUsagesClientJSON(base.ComputeClient):
 
     def list_tenant_usages(self, params=None):
         url = 'os-simple-tenant-usage'

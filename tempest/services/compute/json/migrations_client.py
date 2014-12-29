@@ -16,17 +16,10 @@ import json
 import urllib
 
 from tempest.api_schema.response.compute import migrations as schema
-from tempest.common import rest_client
-from tempest import config
-
-CONF = config.CONF
+from tempest.services.compute.json import base
 
 
-class MigrationsClientJSON(rest_client.RestClient):
-
-    def __init__(self, auth_provider):
-        super(MigrationsClientJSON, self).__init__(auth_provider)
-        self.service = CONF.compute.catalog_type
+class MigrationsClientJSON(base.ComputeClient):
 
     def list_migrations(self, params=None):
         """Lists all migrations."""
