@@ -750,7 +750,7 @@
 # Catalog type of the Neutron service. (string value)
 #catalog_type = network
 
-# List of dns servers whichs hould be used for subnet creation (list
+# List of dns servers which should be used for subnet creation (list
 # value)
 #dns_servers = 8.8.8.8,8.8.4.4
 
