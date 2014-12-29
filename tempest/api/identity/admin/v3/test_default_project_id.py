@@ -35,13 +35,13 @@ class TestDefaultProjectId (base.BaseIdentityV3AdminTest):
     def test_default_project_id(self):
         # create a domain
         dom_name = data_utils.rand_name('dom')
-        _, domain_body = self.client.create_domain(dom_name)
+        domain_body = self.client.create_domain(dom_name)
         dom_id = domain_body['id']
         self.addCleanup(self._delete_domain, dom_id)
 
         # create a project in the domain
         proj_name = data_utils.rand_name('proj')
-        _, proj_body = self.client.create_project(proj_name, domain_id=dom_id)
+        proj_body = self.client.create_project(proj_name, domain_id=dom_id)
         proj_id = proj_body['id']
         self.addCleanup(self.client.delete_project, proj_id)
         self.assertEqual(proj_body['domain_id'], dom_id,
@@ -51,9 +51,9 @@ class TestDefaultProjectId (base.BaseIdentityV3AdminTest):
         # create a user in the domain, with the previous project as his
         # default project
         user_name = data_utils.rand_name('user')
-        _, user_body = self.client.create_user(user_name, password=user_name,
-                                               domain_id=dom_id,
-                                               default_project_id=proj_id)
+        user_body = self.client.create_user(user_name, password=user_name,
+                                            domain_id=dom_id,
+                                            default_project_id=proj_id)
         user_id = user_body['id']
         self.addCleanup(self.client.delete_user, user_id)
         self.assertEqual(user_body['domain_id'], dom_id,
@@ -79,6 +79,6 @@ class TestDefaultProjectId (base.BaseIdentityV3AdminTest):
 
         # verify the user's token and see that it is scoped to the project
         token, auth_data = admin_client.auth_provider.get_auth()
-        _, result = admin_client.identity_v3_client.get_token(token)
+        result = admin_client.identity_v3_client.get_token(token)
         self.assertEqual(result['project']['domain']['id'], dom_id)
         self.assertEqual(result['project']['id'], proj_id)
