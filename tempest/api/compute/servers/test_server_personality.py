@@ -36,6 +36,8 @@ class ServerPersonalityTestJSON(base.BaseV2ComputeTest):
         personality = []
         max_file_limit = \
             self.user_client.get_specific_absolute_limit("maxPersonality")
+        if max_file_limit == -1:
+            raise self.skipException("No limit for personality files")
         for i in range(0, int(max_file_limit) + 1):
             path = 'etc/test' + str(i) + '.txt'
             personality.append({'path': path,
@@ -52,6 +54,8 @@ class ServerPersonalityTestJSON(base.BaseV2ComputeTest):
         file_contents = 'This is a test file.'
         max_file_limit = \
             self.user_client.get_specific_absolute_limit("maxPersonality")
+        if max_file_limit == -1:
+            raise self.skipException("No limit for personality files")
         person = []
         for i in range(0, int(max_file_limit)):
             path = 'etc/test' + str(i) + '.txt'
