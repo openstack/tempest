@@ -194,7 +194,6 @@ def is_extension_enabled(extension_name, service):
     """
     config_dict = {
         'compute': CONF.compute_feature_enabled.api_extensions,
-        'compute_v3': CONF.compute_feature_enabled.api_v3_extensions,
         'volume': CONF.volume_feature_enabled.api_extensions,
         'network': CONF.network_feature_enabled.api_extensions,
         'object': CONF.object_storage_feature_enabled.discoverable_apis,
