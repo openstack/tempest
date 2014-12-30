@@ -196,7 +196,7 @@ def create_tenants(tenants):
     Don't create the tenants if they already exist.
     """
     admin = keystone_admin()
-    _, body = admin.identity.list_tenants()
+    body = admin.identity.list_tenants()
     existing = [x['name'] for x in body]
     for tenant in tenants:
         if tenant not in existing:
@@ -209,7 +209,7 @@ def destroy_tenants(tenants):
     admin = keystone_admin()
     for tenant in tenants:
         tenant_id = admin.identity.get_tenant_by_name(tenant)['id']
-        r, body = admin.identity.delete_tenant(tenant_id)
+        admin.identity.delete_tenant(tenant_id)
 
 ##############
 #
@@ -237,7 +237,7 @@ def _tenants_from_users(users):
 
 def _assign_swift_role(user):
     admin = keystone_admin()
-    resp, roles = admin.identity.list_roles()
+    roles = admin.identity.list_roles()
     role = next(r for r in roles if r['name'] == 'Member')
     LOG.debug(USERS[user])
     try:
@@ -281,7 +281,7 @@ def destroy_users(users):
         tenant_id = admin.identity.get_tenant_by_name(user['tenant'])['id']
         user_id = admin.identity.get_user_by_username(tenant_id,
                                                       user['name'])['id']
-        r, body = admin.identity.delete_user(user_id)
+        admin.identity.delete_user(user_id)
 
 
 def collect_users(users):
@@ -345,7 +345,7 @@ class JavelinCheck(unittest.TestCase):
         LOG.info("checking users")
         for name, user in self.users.iteritems():
             client = keystone_admin()
-            _, found = client.identity.get_user(user['id'])
+            found = client.identity.get_user(user['id'])
             self.assertEqual(found['name'], user['name'])
             self.assertEqual(found['tenantId'], user['tenant_id'])
 

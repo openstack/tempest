@@ -886,7 +886,7 @@ class UserService(IdentityService):
 
     def list(self):
         client = self.client
-        _, users = client.get_users()
+        users = client.get_users()
 
         if not self.is_save_state:
             users = [user for user in users if user['id']
@@ -929,7 +929,7 @@ class RoleService(IdentityService):
     def list(self):
         client = self.client
         try:
-            _, roles = client.list_roles()
+            roles = client.list_roles()
             # reconcile roles with saved state and never list admin role
             if not self.is_save_state:
                 roles = [role for role in roles if
@@ -967,7 +967,7 @@ class TenantService(IdentityService):
 
     def list(self):
         client = self.client
-        _, tenants = client.list_tenants()
+        tenants = client.list_tenants()
         if not self.is_save_state:
             tenants = [tenant for tenant in tenants if (tenant['id']
                        not in self.saved_state_json['tenants'].keys()
@@ -1009,7 +1009,7 @@ class DomainService(BaseService):
 
     def list(self):
         client = self.client
-        _, domains = client.list_domains()
+        domains = client.list_domains()
         if not self.is_save_state:
             domains = [domain for domain in domains if domain['id']
                        not in self.saved_state_json['domains'].keys()]
