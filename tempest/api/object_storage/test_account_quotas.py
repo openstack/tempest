@@ -43,30 +43,30 @@ class AccountQuotasTest(base.BaseObjectTest):
     def setUp(self):
         super(AccountQuotasTest, self).setUp()
 
-        # Set the reselleradmin auth in headers for next custom_account_client
+        # Set the reselleradmin auth in headers for next account_client
         # request
-        self.custom_account_client.auth_provider.set_alt_auth_data(
+        self.account_client.auth_provider.set_alt_auth_data(
             request_part='headers',
             auth_data=self.reselleradmin_auth_data
         )
         # Set a quota of 20 bytes on the user's account before each test
         headers = {"X-Account-Meta-Quota-Bytes": "20"}
 
-        self.os.custom_account_client.request("POST", url="", headers=headers,
-                                              body="")
+        self.os.account_client.request("POST", url="", headers=headers,
+                                       body="")
 
     def tearDown(self):
-        # Set the reselleradmin auth in headers for next custom_account_client
+        # Set the reselleradmin auth in headers for next account_client
         # request
-        self.custom_account_client.auth_provider.set_alt_auth_data(
+        self.account_client.auth_provider.set_alt_auth_data(
             request_part='headers',
             auth_data=self.reselleradmin_auth_data
         )
         # remove the quota from the container
         headers = {"X-Remove-Account-Meta-Quota-Bytes": "x"}
 
-        self.os.custom_account_client.request("POST", url="", headers=headers,
-                                              body="")
+        self.os.account_client.request("POST", url="", headers=headers,
+                                       body="")
         super(AccountQuotasTest, self).tearDown()
 
     @classmethod
@@ -91,7 +91,7 @@ class AccountQuotasTest(base.BaseObjectTest):
         """Test that the ResellerAdmin is able to modify and remove the quota
         on a user's account.
 
-        Using the custom_account client, the test modifies the quota
+        Using the account client, the test modifies the quota
         successively to:
 
         * "25": a random value different from the initial quota value.
@@ -100,15 +100,15 @@ class AccountQuotasTest(base.BaseObjectTest):
         """
         for quota in ("25", "", "20"):
 
-            self.custom_account_client.auth_provider.set_alt_auth_data(
+            self.account_client.auth_provider.set_alt_auth_data(
                 request_part='headers',
                 auth_data=self.reselleradmin_auth_data
             )
             headers = {"X-Account-Meta-Quota-Bytes": quota}
 
-            resp, _ = self.os.custom_account_client.request("POST", url="",
-                                                            headers=headers,
-                                                            body="")
+            resp, _ = self.os.account_client.request("POST", url="",
+                                                     headers=headers,
+                                                     body="")
 
             self.assertEqual(resp["status"], "204")
             self.assertHeaders(resp, 'Account', 'POST')

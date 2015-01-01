@@ -49,7 +49,6 @@ class BaseObjectTest(tempest.test.BaseTestCase):
         cls.custom_object_client = cls.os.custom_object_client
         cls.token_client = cls.os_admin.token_client
         cls.identity_admin_client = cls.os_admin.identity_client
-        cls.custom_account_client = cls.os.custom_account_client
         cls.object_client_alt = cls.os_alt.object_client
         cls.container_client_alt = cls.os_alt.container_client
         cls.identity_client_alt = cls.os_alt.identity_client
@@ -59,7 +58,6 @@ class BaseObjectTest(tempest.test.BaseTestCase):
         cls.container_client.auth_provider.clear_auth()
         cls.account_client.auth_provider.clear_auth()
         cls.custom_object_client.auth_provider.clear_auth()
-        cls.custom_account_client.auth_provider.clear_auth()
         cls.object_client_alt.auth_provider.clear_auth()
         cls.container_client_alt.auth_provider.clear_auth()
 

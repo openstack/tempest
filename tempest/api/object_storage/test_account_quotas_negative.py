@@ -43,30 +43,30 @@ class AccountQuotasNegativeTest(base.BaseObjectTest):
 
     def setUp(self):
         super(AccountQuotasNegativeTest, self).setUp()
-        # Set the reselleradmin auth in headers for next custom_account_client
+        # Set the reselleradmin auth in headers for next account_client
         # request
-        self.custom_account_client.auth_provider.set_alt_auth_data(
+        self.account_client.auth_provider.set_alt_auth_data(
             request_part='headers',
             auth_data=self.reselleradmin_auth_data
         )
         # Set a quota of 20 bytes on the user's account before each test
         headers = {"X-Account-Meta-Quota-Bytes": "20"}
 
-        self.os.custom_account_client.request("POST", url="", headers=headers,
-                                              body="")
+        self.os.account_client.request("POST", url="", headers=headers,
+                                       body="")
 
     def tearDown(self):
-        # Set the reselleradmin auth in headers for next custom_account_client
+        # Set the reselleradmin auth in headers for next account_client
         # request
-        self.custom_account_client.auth_provider.set_alt_auth_data(
+        self.account_client.auth_provider.set_alt_auth_data(
             request_part='headers',
             auth_data=self.reselleradmin_auth_data
         )
         # remove the quota from the container
         headers = {"X-Remove-Account-Meta-Quota-Bytes": "x"}
 
-        self.os.custom_account_client.request("POST", url="", headers=headers,
-                                              body="")
+        self.os.account_client.request("POST", url="", headers=headers,
+                                       body="")
         super(AccountQuotasNegativeTest, self).tearDown()
 
     @classmethod
