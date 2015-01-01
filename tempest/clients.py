@@ -85,8 +85,6 @@ from tempest.services.network.json.network_client import NetworkClientJSON
 from tempest.services.object_storage.account_client import AccountClient
 from tempest.services.object_storage.container_client import ContainerClient
 from tempest.services.object_storage.object_client import ObjectClient
-from tempest.services.object_storage.object_client import \
-    ObjectClientCustomizedHeader
 from tempest.services.orchestration.json.orchestration_client import \
     OrchestrationClient
 from tempest.services.telemetry.json.telemetry_client import \
@@ -175,8 +173,6 @@ class Manager(manager.Manager):
             self.auth_provider)
         self.ec2api_client = botoclients.APIClientEC2(*ec2_client_args)
         self.s3_client = botoclients.ObjectClientS3(*ec2_client_args)
-        self.custom_object_client = ObjectClientCustomizedHeader(
-            self.auth_provider)
         self.data_processing_client = DataProcessingClient(
             self.auth_provider)
 

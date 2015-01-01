@@ -177,7 +177,7 @@ class ObjectTest(base.BaseObjectTest):
         object_name = data_utils.rand_name(name='TestObject')
         data = data_utils.arbitrary_string()
         metadata = {'Expect': '100-continue'}
-        resp = self.custom_object_client.create_object_continue(
+        resp = self.object_client.create_object_continue(
             self.container_name,
             object_name,
             data,
@@ -186,7 +186,7 @@ class ObjectTest(base.BaseObjectTest):
         self.assertIn('status', resp)
         self.assertEqual(resp['status'], '100')
 
-        self.custom_object_client.create_object_continue(
+        self.object_client.create_object_continue(
             self.container_name,
             object_name,
             data,
@@ -1014,11 +1014,11 @@ class PublicObjectTest(base.BaseObjectTest):
         self.assertEqual(resp_meta['x-container-read'], '.r:*,.rlistings')
 
         # trying to get object with empty headers as it is public readable
-        self.custom_object_client.auth_provider.set_alt_auth_data(
+        self.object_client.auth_provider.set_alt_auth_data(
             request_part='headers',
             auth_data=None
         )
-        resp, body = self.custom_object_client.get_object(
+        resp, body = self.object_client.get_object(
             self.container_name, object_name)
         self.assertHeaders(resp, 'Object', 'GET')
 
@@ -1052,12 +1052,12 @@ class PublicObjectTest(base.BaseObjectTest):
 
         # get auth token of alternative user
         alt_auth_data = self.identity_client_alt.auth_provider.auth_data
-        self.custom_object_client.auth_provider.set_alt_auth_data(
+        self.object_client.auth_provider.set_alt_auth_data(
             request_part='headers',
             auth_data=alt_auth_data
         )
         # access object using alternate user creds
-        resp, body = self.custom_object_client.get_object(
+        resp, body = self.object_client.get_object(
             self.container_name, object_name)
         self.assertHeaders(resp, 'Object', 'GET')
 

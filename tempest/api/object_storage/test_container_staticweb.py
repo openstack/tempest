@@ -17,6 +17,7 @@
 from tempest.api.object_storage import base
 from tempest.common import custom_matchers
 from tempest.common.utils import data_utils
+from tempest import exceptions
 from tempest import test
 
 
@@ -153,13 +154,12 @@ class StaticWebTest(base.BaseObjectTest):
                                          object_data_404)
 
         # Do not set auth in HTTP headers for next request
-        self.custom_object_client.auth_provider.set_alt_auth_data(
+        self.object_client.auth_provider.set_alt_auth_data(
             request_part='headers',
             auth_data=None
         )
 
         # Request non-existing object
-        resp, body = self.custom_object_client.get_object(self.container_name,
-                                                          "notexisting")
-        self.assertEqual(resp['status'], '404')
-        self.assertEqual(body, object_data_404)
+        self.assertRaises(
+            exceptions.NotFound, self.object_client.get_object,
+            self.container_name, "notexisting")
