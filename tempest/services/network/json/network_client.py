@@ -40,6 +40,7 @@ class NetworkClientJSON(rest_client.RestClient):
     def __init__(self, auth_provider):
         super(NetworkClientJSON, self).__init__(
             auth_provider, CONF.network.catalog_type,
+            endpoint_type=CONF.network.endpoint_type,
             build_interval=CONF.network.build_interval,
             build_timeout=CONF.network.build_timeout)
         self.version = '2.0'

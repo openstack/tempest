@@ -27,5 +27,6 @@ class VolumeClient(rest_client.RestClient):
         super(VolumeClient, self).__init__(
             auth_provider,
             CONF.volume.catalog_type,
+            endpoint_type=CONF.volume.endpoint_type,
             build_interval=CONF.volume.build_interval,
             build_timeout=CONF.volume.build_timeout)

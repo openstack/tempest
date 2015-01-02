@@ -29,8 +29,10 @@ CONF = config.CONF
 class ImageClientV2JSON(rest_client.RestClient):
 
     def __init__(self, auth_provider):
-        super(ImageClientV2JSON, self).__init__(auth_provider,
-                                                CONF.image.catalog_type)
+        super(ImageClientV2JSON, self).__init__(
+            auth_provider,
+            CONF.image.catalog_type,
+            endpoint_type=CONF.image.endpoint_type)
         self._http = None
 
     def _get_http(self):

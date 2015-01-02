@@ -31,6 +31,7 @@ class OrchestrationClient(rest_client.RestClient):
         super(OrchestrationClient, self).__init__(
             auth_provider,
             CONF.orchestration.catalog_type,
+            endpoint_type=CONF.orchestration.endpoint_type,
             build_interval=CONF.orchestration.build_interval,
             build_timeout=CONF.orchestration.build_timeout)
 

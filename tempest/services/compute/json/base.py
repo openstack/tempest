@@ -30,7 +30,9 @@ class ComputeClient(rest_client.RestClient):
         if build_timeout is None:
             build_timeout = CONF.compute.build_timeout
 
-        super(ComputeClient, self).__init__(auth_provider,
-                                            CONF.compute.catalog_type,
-                                            build_interval=build_interval,
-                                            build_timeout=build_timeout)
+        super(ComputeClient, self).__init__(
+            auth_provider,
+            CONF.compute.catalog_type,
+            endpoint_type=CONF.compute.endpoint_type,
+            build_interval=build_interval,
+            build_timeout=build_timeout)

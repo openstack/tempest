@@ -78,14 +78,14 @@ class RestClient(object):
 
     LOG = logging.getLogger(__name__)
 
-    def __init__(self, auth_provider, service,
+    def __init__(self, auth_provider, service, endpoint_type='publicURL',
                  build_interval=1, build_timeout=60):
         self.auth_provider = auth_provider
         self.service = service
+        self.endpoint_type = endpoint_type
         self.build_interval = build_interval
         self.build_timeout = build_timeout
 
-        self.endpoint_url = None
         # The version of the API this client implements
         self.api_version = None
         self._skip_path = False
@@ -139,23 +139,6 @@ class RestClient(object):
             service_region = CONF.identity.region
         return service_region
 
-    def _get_endpoint_type(self, service):
-        """
-        Returns the endpoint type for a specific service
-        """
-        # If the client requests a specific endpoint type, then be it
-        if self.endpoint_url:
-            return self.endpoint_url
-        endpoint_type = None
-        for cfgname in dir(CONF._config):
-            # Find all config.FOO.catalog_type and assume FOO is a service.
-            cfg = getattr(CONF, cfgname)
-            catalog_type = getattr(cfg, 'catalog_type', None)
-            if catalog_type == service:
-                endpoint_type = getattr(cfg, 'endpoint_type', 'publicURL')
-                break
-        return endpoint_type
-
     @property
     def user(self):
         return self.auth_provider.credentials.username
@@ -188,7 +171,7 @@ class RestClient(object):
     def filters(self):
         _filters = dict(
             service=self.service,
-            endpoint_type=self._get_endpoint_type(self.service),
+            endpoint_type=self.endpoint_type,
             region=self._get_region(self.service)
         )
         if self.api_version is not None:

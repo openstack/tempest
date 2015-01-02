@@ -35,8 +35,10 @@ LOG = logging.getLogger(__name__)
 class ImageClientJSON(rest_client.RestClient):
 
     def __init__(self, auth_provider):
-        super(ImageClientJSON, self).__init__(auth_provider,
-                                              CONF.image.catalog_type)
+        super(ImageClientJSON, self).__init__(
+            auth_provider,
+            CONF.image.catalog_type,
+            endpoint_type=CONF.image.endpoint_type)
         self._http = None
 
     def _image_meta_from_headers(self, headers):
