@@ -499,7 +499,6 @@ class Credentials(object):
     ATTRIBUTES = []
     TYPES = {
         'identity_admin': ('identity', 'admin'),
-        'compute_admin': ('compute_admin', None),
         'user': ('identity', None),
         'alt_user': ('identity', 'alt')
     }
