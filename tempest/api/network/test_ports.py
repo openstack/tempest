@@ -221,13 +221,17 @@ class PortsTestJSON(base.BaseNetworkTest):
 
     @test.attr(type='smoke')
     def test_create_port_with_no_securitygroups(self):
-        port = self.create_port(self.create_network(), security_groups=[])
+        network = self.create_network()
+        self.create_subnet(network)
+        port = self.create_port(network, security_groups=[])
         self.assertIsNotNone(port['security_groups'])
         self.assertEmpty(port['security_groups'])
 
     @test.attr(type='smoke')
     def test_update_port_with_no_securitygroups(self):
-        port = self.create_port(self.create_network())
+        network = self.create_network()
+        self.create_subnet(network)
+        port = self.create_port(network)
         # Verify that port is created with default security group
         self.assertIsNotNone(port['security_groups'])
         self.assertNotEmpty(port['security_groups'])
