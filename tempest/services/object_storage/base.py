@@ -25,5 +25,6 @@ class ObjectStorageClient(rest_client.RestClient):
 
     def __init__(self, auth_provider):
         super(ObjectStorageClient, self).__init__(
-            auth_provider, CONF.object_storage.catalog_type)
+            auth_provider, CONF.object_storage.catalog_type,
+            endpoint_type=CONF.object_storage.endpoint_type)
         self.format = 'json'

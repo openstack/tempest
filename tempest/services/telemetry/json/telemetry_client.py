@@ -25,8 +25,10 @@ CONF = config.CONF
 class TelemetryClientJSON(rest_client.RestClient):
 
     def __init__(self, auth_provider):
-        super(TelemetryClientJSON, self).__init__(auth_provider,
-                                                  CONF.telemetry.catalog_type)
+        super(TelemetryClientJSON, self).__init__(
+            auth_provider,
+            CONF.telemetry.catalog_type,
+            endpoint_type=CONF.telemetry.endpoint_type)
         self.version = '2'
         self.uri_prefix = "v%s" % self.version
 
