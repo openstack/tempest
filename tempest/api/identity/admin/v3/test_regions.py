@@ -29,7 +29,7 @@ class RegionsTestJSON(base.BaseIdentityV3AdminTest):
         cls.client = cls.region_client
         for i in range(2):
             r_description = data_utils.rand_name('description-')
-            _, region = cls.client.create_region(r_description)
+            region = cls.client.create_region(r_description)
             cls.setup_regions.append(region)
 
     @classmethod
@@ -46,7 +46,7 @@ class RegionsTestJSON(base.BaseIdentityV3AdminTest):
     @test.attr(type='gate')
     def test_create_update_get_delete_region(self):
         r_description = data_utils.rand_name('description-')
-        _, region = self.client.create_region(
+        region = self.client.create_region(
             r_description, parent_region_id=self.setup_regions[0]['id'])
         self.addCleanup(self._delete_region, region['id'])
         self.assertEqual(r_description, region['description'])
@@ -54,7 +54,7 @@ class RegionsTestJSON(base.BaseIdentityV3AdminTest):
                          region['parent_region_id'])
         # Update region with new description and parent ID
         r_alt_description = data_utils.rand_name('description-')
-        _, region = self.client.update_region(
+        region = self.client.update_region(
             region['id'],
             description=r_alt_description,
             parent_region_id=self.setup_regions[1]['id'])
@@ -62,7 +62,7 @@ class RegionsTestJSON(base.BaseIdentityV3AdminTest):
         self.assertEqual(self.setup_regions[1]['id'],
                          region['parent_region_id'])
         # Get the details of region
-        _, region = self.client.get_region(region['id'])
+        region = self.client.get_region(region['id'])
         self.assertEqual(r_alt_description, region['description'])
         self.assertEqual(self.setup_regions[1]['id'],
                          region['parent_region_id'])
@@ -72,7 +72,7 @@ class RegionsTestJSON(base.BaseIdentityV3AdminTest):
         # Create a region with a specific id
         r_region_id = data_utils.rand_uuid()
         r_description = data_utils.rand_name('description-')
-        _, region = self.client.create_region(
+        region = self.client.create_region(
             r_description, unique_region_id=r_region_id)
         self.addCleanup(self._delete_region, region['id'])
         # Asserting Create Region with specific id response body
@@ -82,7 +82,7 @@ class RegionsTestJSON(base.BaseIdentityV3AdminTest):
     @test.attr(type='gate')
     def test_list_regions(self):
         # Get a list of regions
-        _, fetched_regions = self.client.list_regions()
+        fetched_regions = self.client.list_regions()
         missing_regions =\
             [e for e in self.setup_regions if e not in fetched_regions]
         # Asserting List Regions response

@@ -28,23 +28,23 @@ class ListProjectsTestJSON(base.BaseIdentityV3AdminTest):
         cls.data.setup_test_domain()
         # Create project with domain
         cls.p1_name = data_utils.rand_name('project')
-        _, cls.p1 = cls.client.create_project(
+        cls.p1 = cls.client.create_project(
             cls.p1_name, enabled=False, domain_id=cls.data.domain['id'])
         cls.data.projects.append(cls.p1)
         cls.project_ids.append(cls.p1['id'])
         # Create default project
         p2_name = data_utils.rand_name('project')
-        _, cls.p2 = cls.client.create_project(p2_name)
+        cls.p2 = cls.client.create_project(p2_name)
         cls.data.projects.append(cls.p2)
         cls.project_ids.append(cls.p2['id'])
 
     @test.attr(type='gate')
     def test_projects_list(self):
         # List projects
-        resp, list_projects = self.client.list_projects()
+        list_projects = self.client.list_projects()
 
         for p in self.project_ids:
-            _, get_project = self.client.get_project(p)
+            get_project = self.client.get_project(p)
             self.assertIn(get_project, list_projects)
 
     @test.attr(type='gate')
@@ -64,6 +64,6 @@ class ListProjectsTestJSON(base.BaseIdentityV3AdminTest):
         self._list_projects_with_params({'name': self.p1_name}, 'name')
 
     def _list_projects_with_params(self, params, key):
-        resp, body = self.client.list_projects(params)
+        body = self.client.list_projects(params)
         self.assertIn(self.p1[key], map(lambda x: x[key], body))
         self.assertNotIn(self.p2[key], map(lambda x: x[key], body))

@@ -250,9 +250,9 @@ def check_service_availability(os, update):
         'database': 'trove'
     }
     # Get catalog list for endpoints to use for validation
-    __, endpoints = os.endpoints_client.list_endpoints()
+    endpoints = os.endpoints_client.list_endpoints()
     for endpoint in endpoints:
-        __, service = os.service_client.get_service(endpoint['service_id'])
+        service = os.service_client.get_service(endpoint['service_id'])
         services.append(service['type'])
     # Pull all catalog types from config file and compare against endpoint list
     for cfgname in dir(CONF._config):

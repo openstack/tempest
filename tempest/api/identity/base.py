@@ -112,6 +112,27 @@ class BaseIdentityV3AdminTest(BaseIdentityAdminTest):
         cls.data.teardown_all()
         super(BaseIdentityV3AdminTest, cls).resource_cleanup()
 
+    @classmethod
+    def get_user_by_name(cls, name):
+        users = cls.client.get_users()
+        user = [u for u in users if u['name'] == name]
+        if len(user) > 0:
+            return user[0]
+
+    @classmethod
+    def get_tenant_by_name(cls, name):
+        tenants = cls.client.list_projects()
+        tenant = [t for t in tenants if t['name'] == name]
+        if len(tenant) > 0:
+            return tenant[0]
+
+    @classmethod
+    def get_role_by_name(cls, name):
+        roles = cls.client.list_roles()
+        role = [r for r in roles if r['name'] == name]
+        if len(role) > 0:
+            return role[0]
+
 
 class DataGenerator(object):
 
@@ -167,7 +188,7 @@ class DataGenerator(object):
             self.test_user = data_utils.rand_name('test_user_')
             self.test_password = data_utils.rand_name('pass_')
             self.test_email = self.test_user + '@testmail.tm'
-            _, self.v3_user = self.client.create_user(
+            self.v3_user = self.client.create_user(
                 self.test_user,
                 password=self.test_password,
                 project_id=self.project['id'],
@@ -178,7 +199,7 @@ class DataGenerator(object):
             """Set up a test project."""
             self.test_project = data_utils.rand_name('test_project_')
             self.test_description = data_utils.rand_name('desc_')
-            _, self.project = self.client.create_project(
+            self.project = self.client.create_project(
                 name=self.test_project,
                 description=self.test_description)
             self.projects.append(self.project)
@@ -186,14 +207,14 @@ class DataGenerator(object):
         def setup_test_v3_role(self):
             """Set up a test v3 role."""
             self.test_role = data_utils.rand_name('role')
-            _, self.v3_role = self.client.create_role(self.test_role)
+            self.v3_role = self.client.create_role(self.test_role)
             self.v3_roles.append(self.v3_role)
 
         def setup_test_domain(self):
             """Set up a test domain."""
             self.test_domain = data_utils.rand_name('test_domain')
             self.test_description = data_utils.rand_name('desc')
-            _, self.domain = self.client.create_domain(
+            self.domain = self.client.create_domain(
                 name=self.test_domain,
                 description=self.test_description)
             self.domains.append(self.domain)
