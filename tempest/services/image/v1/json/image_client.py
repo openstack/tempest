@@ -38,6 +38,7 @@ class ImageClientJSON(rest_client.RestClient):
         super(ImageClientJSON, self).__init__(
             auth_provider,
             CONF.image.catalog_type,
+            CONF.image.region or CONF.identity.region,
             endpoint_type=CONF.image.endpoint_type)
         self._http = None
 

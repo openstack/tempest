@@ -39,7 +39,9 @@ class NetworkClientJSON(rest_client.RestClient):
 
     def __init__(self, auth_provider):
         super(NetworkClientJSON, self).__init__(
-            auth_provider, CONF.network.catalog_type,
+            auth_provider,
+            CONF.network.catalog_type,
+            CONF.network.region or CONF.identity.region,
             endpoint_type=CONF.network.endpoint_type,
             build_interval=CONF.network.build_interval,
             build_timeout=CONF.network.build_timeout)
