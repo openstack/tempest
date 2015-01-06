@@ -845,7 +845,7 @@ class ImageService(BaseService):
 
     def list(self):
         client = self.client
-        _, images = client.list_images({"all_tenants": True})
+        images = client.list_images({"all_tenants": True})
         if not self.is_save_state:
             images = [image for image in images if image['id']
                       not in self.saved_state_json['images'].keys()]

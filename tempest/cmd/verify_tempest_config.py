@@ -59,7 +59,7 @@ def print_and_or_update(option, group, value, update):
 
 def verify_glance_api_versions(os, update):
     # Check glance api versions
-    __, versions = os.image_client.get_versions()
+    versions = os.image_client.get_versions()
     if CONF.image_feature_enabled.api_v1 != ('v1.1' in versions or 'v1.0' in
                                              versions):
         print_and_or_update('api_v1', 'image_feature_enabled',

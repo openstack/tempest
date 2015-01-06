@@ -20,8 +20,8 @@ class ImagesMemberTest(base.BaseV2MemberImageTest):
     @test.attr(type='gate')
     def test_image_share_accept(self):
         image_id = self._create_image()
-        _, member = self.os_img_client.add_member(image_id,
-                                                  self.alt_tenant_id)
+        member = self.os_img_client.add_member(image_id,
+                                               self.alt_tenant_id)
         self.assertEqual(member['member_id'], self.alt_tenant_id)
         self.assertEqual(member['image_id'], image_id)
         self.assertEqual(member['status'], 'pending')
@@ -30,7 +30,7 @@ class ImagesMemberTest(base.BaseV2MemberImageTest):
                                                  self.alt_tenant_id,
                                                  'accepted')
         self.assertIn(image_id, self._list_image_ids_as_alt())
-        _, body = self.os_img_client.get_image_membership(image_id)
+        body = self.os_img_client.get_image_membership(image_id)
         members = body['members']
         member = members[0]
         self.assertEqual(len(members), 1, str(members))
@@ -41,8 +41,8 @@ class ImagesMemberTest(base.BaseV2MemberImageTest):
     @test.attr(type='gate')
     def test_image_share_reject(self):
         image_id = self._create_image()
-        _, member = self.os_img_client.add_member(image_id,
-                                                  self.alt_tenant_id)
+        member = self.os_img_client.add_member(image_id,
+                                               self.alt_tenant_id)
         self.assertEqual(member['member_id'], self.alt_tenant_id)
         self.assertEqual(member['image_id'], image_id)
         self.assertEqual(member['status'], 'pending')
@@ -62,8 +62,8 @@ class ImagesMemberTest(base.BaseV2MemberImageTest):
                                                  'accepted')
 
         self.assertIn(image_id, self._list_image_ids_as_alt())
-        _, member = self.os_img_client.get_member(image_id,
-                                                  self.alt_tenant_id)
+        member = self.os_img_client.get_member(image_id,
+                                               self.alt_tenant_id)
         self.assertEqual(self.alt_tenant_id, member['member_id'])
         self.assertEqual(image_id, member['image_id'])
         self.assertEqual('accepted', member['status'])
@@ -83,10 +83,10 @@ class ImagesMemberTest(base.BaseV2MemberImageTest):
 
     @test.attr(type='gate')
     def test_get_image_member_schema(self):
-        _, body = self.os_img_client.get_schema("member")
+        body = self.os_img_client.get_schema("member")
         self.assertEqual("member", body['name'])
 
     @test.attr(type='gate')
     def test_get_image_members_schema(self):
-        _, body = self.os_img_client.get_schema("members")
+        body = self.os_img_client.get_schema("members")
         self.assertEqual("members", body['name'])

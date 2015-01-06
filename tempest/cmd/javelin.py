@@ -528,7 +528,7 @@ def _resolve_image(image, imgtype):
 
 
 def _get_image_by_name(client, name):
-    r, body = client.images.image_list()
+    body = client.images.image_list()
     for image in body:
         if name == image['name']:
             return image
@@ -551,19 +551,19 @@ def create_images(images):
         extras = {}
         if image['format'] == 'ami':
             name, fname = _resolve_image(image, 'aki')
-            r, aki = client.images.create_image(
+            aki = client.images.create_image(
                 'javelin_' + name, 'aki', 'aki')
             client.images.store_image(aki.get('id'), open(fname, 'r'))
             extras['kernel_id'] = aki.get('id')
 
             name, fname = _resolve_image(image, 'ari')
-            r, ari = client.images.create_image(
+            ari = client.images.create_image(
                 'javelin_' + name, 'ari', 'ari')
             client.images.store_image(ari.get('id'), open(fname, 'r'))
             extras['ramdisk_id'] = ari.get('id')
 
         _, fname = _resolve_image(image, 'file')
-        r, body = client.images.create_image(
+        body = client.images.create_image(
             image['name'], image['format'], image['format'], **extras)
         image_id = body.get('id')
         client.images.store_image(image_id, open(fname, 'r'))

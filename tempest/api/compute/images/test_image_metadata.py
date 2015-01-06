@@ -37,10 +37,10 @@ class ImagesMetadataTestJSON(base.BaseV2ComputeTest):
         cls.image_id = None
 
         name = data_utils.rand_name('image')
-        resp, body = cls.glance_client.create_image(name=name,
-                                                    container_format='bare',
-                                                    disk_format='raw',
-                                                    is_public=False)
+        body = cls.glance_client.create_image(name=name,
+                                              container_format='bare',
+                                              disk_format='raw',
+                                              is_public=False)
         cls.image_id = body['id']
         cls.images.append(cls.image_id)
         image_file = StringIO.StringIO(('*' * 1024))

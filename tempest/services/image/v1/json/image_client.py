@@ -119,7 +119,7 @@ class ImageClientJSON(rest_client.RestClient):
         self._error_checker('POST', '/v1/images', headers, data, resp,
                             body_iter)
         body = json.loads(''.join([c for c in body_iter]))
-        return resp, body['image']
+        return rest_client.ResponseBody(resp, body['image'])
 
     def _update_with_data(self, image_id, headers, data):
         url = '/v1/images/%s' % image_id
@@ -128,7 +128,7 @@ class ImageClientJSON(rest_client.RestClient):
         self._error_checker('PUT', url, headers, data,
                             resp, body_iter)
         body = json.loads(''.join([c for c in body_iter]))
-        return resp, body['image']
+        return rest_client.ResponseBody(resp, body['image'])
 
     @property
     def http(self):
@@ -159,7 +159,7 @@ class ImageClientJSON(rest_client.RestClient):
         resp, body = self.post('v1/images', None, headers)
         self.expected_success(201, resp.status)
         body = json.loads(body)
-        return resp, body['image']
+        return rest_client.ResponseBody(resp, body['image'])
 
     def update_image(self, image_id, name=None, container_format=None,
                      data=None, properties=None):
@@ -183,13 +183,13 @@ class ImageClientJSON(rest_client.RestClient):
         resp, body = self.put(url, data, headers)
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return resp, body['image']
+        return rest_client.ResponseBody(resp, body['image'])
 
     def delete_image(self, image_id):
         url = 'v1/images/%s' % image_id
         resp, body = self.delete(url)
         self.expected_success(200, resp.status)
-        return resp, body
+        return rest_client.ResponseBody(resp, body)
 
     def image_list(self, **kwargs):
         url = 'v1/images'
@@ -200,7 +200,7 @@ class ImageClientJSON(rest_client.RestClient):
         resp, body = self.get(url)
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return resp, body['images']
+        return rest_client.ResponseBodyList(resp, body['images'])
 
     def image_list_detail(self, properties=dict(), changes_since=None,
                           **kwargs):
@@ -221,19 +221,20 @@ class ImageClientJSON(rest_client.RestClient):
         resp, body = self.get(url)
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return resp, body['images']
+        return rest_client.ResponseBodyList(resp, body['images'])
 
     def get_image_meta(self, image_id):
         url = 'v1/images/%s' % image_id
         resp, __ = self.head(url)
         self.expected_success(200, resp.status)
         body = self._image_meta_from_headers(resp)
-        return resp, body
+        return rest_client.ResponseBody(resp, body)
 
     def get_image(self, image_id):
         url = 'v1/images/%s' % image_id
         resp, body = self.get(url)
         self.expected_success(200, resp.status)
+        # We can't return a ResponseBody because the body is a string
         return resp, body
 
     def is_resource_deleted(self, id):
@@ -253,14 +254,14 @@ class ImageClientJSON(rest_client.RestClient):
         resp, body = self.get(url)
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return resp, body
+        return rest_client.ResponseBody(resp, body)
 
     def get_shared_images(self, member_id):
         url = 'v1/shared-images/%s' % member_id
         resp, body = self.get(url)
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return resp, body
+        return rest_client.ResponseBody(resp, body)
 
     def add_member(self, member_id, image_id, can_share=False):
         url = 'v1/images/%s/members/%s' % (image_id, member_id)
@@ -269,17 +270,17 @@ class ImageClientJSON(rest_client.RestClient):
             body = json.dumps({'member': {'can_share': True}})
         resp, __ = self.put(url, body)
         self.expected_success(204, resp.status)
-        return resp
+        return rest_client.ResponseBody(resp)
 
     def delete_member(self, member_id, image_id):
         url = 'v1/images/%s/members/%s' % (image_id, member_id)
         resp, __ = self.delete(url)
         self.expected_success(204, resp.status)
-        return resp
+        return rest_client.ResponseBody(resp)
 
     # NOTE(afazekas): just for the wait function
     def _get_image_status(self, image_id):
-        resp, meta = self.get_image_meta(image_id)
+        meta = self.get_image_meta(image_id)
         status = meta['status']
         return status
 
