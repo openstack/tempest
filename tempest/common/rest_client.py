@@ -494,6 +494,11 @@ class RestClient(object):
             else:
                 raise exceptions.RateLimitExceeded(resp_body)
 
+        if resp.status == 415:
+            if parse_resp:
+                resp_body = self._parse_resp(resp_body)
+            raise exceptions.InvalidContentType(resp_body)
+
         if resp.status == 422:
             if parse_resp:
                 resp_body = self._parse_resp(resp_body)

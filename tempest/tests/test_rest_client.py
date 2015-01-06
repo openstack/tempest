@@ -339,6 +339,11 @@ class TestRestClientErrorCheckerJSON(base.TestCase):
                           self.rest_client._error_checker,
                           **self.set_data("413"))
 
+    def test_response_415(self):
+        self.assertRaises(exceptions.InvalidContentType,
+                          self.rest_client._error_checker,
+                          **self.set_data("415"))
+
     def test_response_422(self):
         self.assertRaises(exceptions.UnprocessableEntity,
                           self.rest_client._error_checker,
