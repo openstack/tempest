@@ -25,7 +25,9 @@ class DatabaseFlavorsClientJSON(rest_client.RestClient):
 
     def __init__(self, auth_provider):
         super(DatabaseFlavorsClientJSON, self).__init__(
-            auth_provider, CONF.database.catalog_type)
+            auth_provider,
+            CONF.database.catalog_type,
+            CONF.identity.region)
 
     def list_db_flavors(self, params=None):
         url = 'flavors'

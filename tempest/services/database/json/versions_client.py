@@ -25,7 +25,9 @@ class DatabaseVersionsClientJSON(rest_client.RestClient):
 
     def __init__(self, auth_provider):
         super(DatabaseVersionsClientJSON, self).__init__(
-            auth_provider, CONF.database.catalog_type)
+            auth_provider,
+            CONF.database.catalog_type,
+            CONF.identity.region)
         self.skip_path()
 
     def list_db_versions(self, params=None):

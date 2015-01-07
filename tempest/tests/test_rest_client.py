@@ -30,18 +30,13 @@ class BaseRestClientTestClass(base.TestCase):
 
     url = 'fake_endpoint'
 
-    def _get_region(self):
-        return 'fake region'
-
     def setUp(self):
         super(BaseRestClientTestClass, self).setUp()
         self.useFixture(fake_config.ConfigFixture())
         self.stubs.Set(config, 'TempestConfigPrivate', fake_config.FakePrivate)
         self.rest_client = rest_client.RestClient(
-            fake_auth_provider.FakeAuthProvider(), None)
+            fake_auth_provider.FakeAuthProvider(), None, None)
         self.stubs.Set(httplib2.Http, 'request', self.fake_http.request)
-        self.useFixture(mockpatch.PatchObject(self.rest_client, '_get_region',
-                                              side_effect=self._get_region()))
         self.useFixture(mockpatch.PatchObject(self.rest_client,
                                               '_log_request'))
 
@@ -304,7 +299,7 @@ class TestRestClientErrorCheckerJSON(base.TestCase):
         self.useFixture(fake_config.ConfigFixture())
         self.stubs.Set(config, 'TempestConfigPrivate', fake_config.FakePrivate)
         self.rest_client = rest_client.RestClient(
-            fake_auth_provider.FakeAuthProvider(), None)
+            fake_auth_provider.FakeAuthProvider(), None, None)
 
     def test_response_less_than_400(self):
         self.rest_client._error_checker(**self.set_data("399"))

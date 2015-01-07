@@ -28,6 +28,7 @@ class TelemetryClientJSON(rest_client.RestClient):
         super(TelemetryClientJSON, self).__init__(
             auth_provider,
             CONF.telemetry.catalog_type,
+            CONF.identity.region,
             endpoint_type=CONF.telemetry.endpoint_type)
         self.version = '2'
         self.uri_prefix = "v%s" % self.version
