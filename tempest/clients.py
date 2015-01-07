@@ -14,7 +14,7 @@
 #    under the License.
 
 from tempest import auth
-from tempest.common import rest_client
+from tempest.common import negative_rest_client
 from tempest import config
 from tempest import manager
 from tempest.openstack.common import log as logging
@@ -153,7 +153,7 @@ class Manager(manager.Manager):
         if CONF.service_available.ceilometer:
             self.telemetry_client = TelemetryClientJSON(
                 self.auth_provider)
-        self.negative_client = rest_client.NegativeRestClient(
+        self.negative_client = negative_rest_client.NegativeRestClient(
             self.auth_provider, service)
 
         # TODO(andreaf) EC2 client still do their auth, v2 only

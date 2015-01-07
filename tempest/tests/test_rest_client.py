@@ -17,6 +17,7 @@ import json
 import httplib2
 from oslotest import mockpatch
 
+from tempest.common import negative_rest_client
 from tempest.common import rest_client
 from tempest import config
 from tempest import exceptions
@@ -433,7 +434,7 @@ class TestNegativeRestClient(BaseRestClientTestClass):
     def setUp(self):
         self.fake_http = fake_http.fake_httplib2()
         super(TestNegativeRestClient, self).setUp()
-        self.negative_rest_client = rest_client.NegativeRestClient(
+        self.negative_rest_client = negative_rest_client.NegativeRestClient(
             fake_auth_provider.FakeAuthProvider(), None)
         self.useFixture(mockpatch.PatchObject(self.negative_rest_client,
                                               '_log_request'))
