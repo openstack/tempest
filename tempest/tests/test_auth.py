@@ -19,9 +19,10 @@ import datetime
 from oslotest import mockpatch
 
 from tempest import auth
-from tempest.common import http
 from tempest import config
 from tempest import exceptions
+from tempest.services.identity.json import identity_client as v2_client
+from tempest.services.identity.v3.json import identity_client as v3_client
 from tempest.tests import base
 from tempest.tests import fake_auth_provider
 from tempest.tests import fake_config
@@ -45,7 +46,6 @@ class BaseAuthTestsSetUp(base.TestCase):
         self.useFixture(fake_config.ConfigFixture())
         self.stubs.Set(config, 'TempestConfigPrivate', fake_config.FakePrivate)
         self.fake_http = fake_http.fake_httplib2(return_type=200)
-        self.stubs.Set(http.ClosingHttp, 'request', self.fake_http.request)
         self.stubs.Set(auth, 'get_credentials',
                        fake_auth_provider.get_credentials)
         self.stubs.Set(auth, 'get_default_credentials',
@@ -125,7 +125,7 @@ class TestKeystoneV2AuthProvider(BaseAuthTestsSetUp):
 
     def setUp(self):
         super(TestKeystoneV2AuthProvider, self).setUp()
-        self.stubs.Set(http.ClosingHttp, 'request',
+        self.stubs.Set(v2_client.TokenClientJSON, 'raw_request',
                        fake_identity._fake_v2_response)
         self.target_url = 'test_api'
 
@@ -346,7 +346,7 @@ class TestKeystoneV3AuthProvider(TestKeystoneV2AuthProvider):
 
     def setUp(self):
         super(TestKeystoneV3AuthProvider, self).setUp()
-        self.stubs.Set(http.ClosingHttp, 'request',
+        self.stubs.Set(v3_client.V3TokenClientJSON, 'raw_request',
                        fake_identity._fake_v3_response)
 
     def _get_fake_alt_identity(self):
