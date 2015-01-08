@@ -606,8 +606,8 @@ class V3TokenClientJSON(service_client.ServiceClient):
             except (ValueError, TypeError):
                 headers = self.get_headers(accept_type="json")
 
-        resp, resp_body = self.http_obj.request(url, method,
-                                                headers=headers, body=body)
+        resp, resp_body = self.raw_request(url, method,
+                                           headers=headers, body=body)
         self._log_request(method, url, resp)
 
         if resp.status in [401, 403]:
