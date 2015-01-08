@@ -338,7 +338,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
             'is_public': 'False',
         }
         params.update(properties)
-        _, image = self.image_client.create_image(**params)
+        image = self.image_client.create_image(**params)
         self.addCleanup(self.image_client.delete_image, image['id'])
         self.assertEqual("queued", image['status'])
         self.image_client.update_image(image['id'], data=image_file)
@@ -407,7 +407,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
             thing_id=image_id, thing_id_param='id',
             cleanup_callable=self.delete_wrapper,
             cleanup_args=[_image_client.delete_image, image_id])
-        _, snapshot_image = _image_client.get_image_meta(image_id)
+        snapshot_image = _image_client.get_image_meta(image_id)
         image_name = snapshot_image['name']
         self.assertEqual(name, image_name)
         LOG.debug("Created snapshot image %s for server %s",

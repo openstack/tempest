@@ -30,11 +30,11 @@ class CreateRegisterImagesTest(base.BaseV1ImageTest):
     def test_register_then_upload(self):
         # Register, then upload an image
         properties = {'prop1': 'val1'}
-        _, body = self.create_image(name='New Name',
-                                    container_format='bare',
-                                    disk_format='raw',
-                                    is_public=False,
-                                    properties=properties)
+        body = self.create_image(name='New Name',
+                                 container_format='bare',
+                                 disk_format='raw',
+                                 is_public=False,
+                                 properties=properties)
         self.assertIn('id', body)
         image_id = body.get('id')
         self.assertEqual('New Name', body.get('name'))
@@ -45,19 +45,19 @@ class CreateRegisterImagesTest(base.BaseV1ImageTest):
 
         # Now try uploading an image file
         image_file = StringIO.StringIO(data_utils.random_bytes())
-        _, body = self.client.update_image(image_id, data=image_file)
+        body = self.client.update_image(image_id, data=image_file)
         self.assertIn('size', body)
         self.assertEqual(1024, body.get('size'))
 
     @test.attr(type='gate')
     def test_register_remote_image(self):
         # Register a new remote image
-        _, body = self.create_image(name='New Remote Image',
-                                    container_format='bare',
-                                    disk_format='raw', is_public=False,
-                                    location=CONF.image.http_image,
-                                    properties={'key1': 'value1',
-                                                'key2': 'value2'})
+        body = self.create_image(name='New Remote Image',
+                                 container_format='bare',
+                                 disk_format='raw', is_public=False,
+                                 location=CONF.image.http_image,
+                                 properties={'key1': 'value1',
+                                             'key2': 'value2'})
         self.assertIn('id', body)
         self.assertEqual('New Remote Image', body.get('name'))
         self.assertFalse(body.get('is_public'))
@@ -68,10 +68,10 @@ class CreateRegisterImagesTest(base.BaseV1ImageTest):
 
     @test.attr(type='gate')
     def test_register_http_image(self):
-        _, body = self.create_image(name='New Http Image',
-                                    container_format='bare',
-                                    disk_format='raw', is_public=False,
-                                    copy_from=CONF.image.http_image)
+        body = self.create_image(name='New Http Image',
+                                 container_format='bare',
+                                 disk_format='raw', is_public=False,
+                                 copy_from=CONF.image.http_image)
         self.assertIn('id', body)
         image_id = body.get('id')
         self.assertEqual('New Http Image', body.get('name'))
@@ -83,12 +83,12 @@ class CreateRegisterImagesTest(base.BaseV1ImageTest):
     def test_register_image_with_min_ram(self):
         # Register an image with min ram
         properties = {'prop1': 'val1'}
-        _, body = self.create_image(name='New_image_with_min_ram',
-                                    container_format='bare',
-                                    disk_format='raw',
-                                    is_public=False,
-                                    min_ram=40,
-                                    properties=properties)
+        body = self.create_image(name='New_image_with_min_ram',
+                                 container_format='bare',
+                                 disk_format='raw',
+                                 is_public=False,
+                                 min_ram=40,
+                                 properties=properties)
         self.assertIn('id', body)
         self.assertEqual('New_image_with_min_ram', body.get('name'))
         self.assertFalse(body.get('is_public'))
@@ -140,11 +140,11 @@ class ListImagesTest(base.BaseV1ImageTest):
         """
         name = 'New Remote Image %s' % name
         location = CONF.image.http_image
-        _, image = cls.create_image(name=name,
-                                    container_format=container_format,
-                                    disk_format=disk_format,
-                                    is_public=False,
-                                    location=location)
+        image = cls.create_image(name=name,
+                                 container_format=container_format,
+                                 disk_format=disk_format,
+                                 is_public=False,
+                                 location=location)
         image_id = image['id']
         return image_id
 
@@ -158,24 +158,24 @@ class ListImagesTest(base.BaseV1ImageTest):
         """
         image_file = StringIO.StringIO(data_utils.random_bytes(size))
         name = 'New Standard Image %s' % name
-        _, image = cls.create_image(name=name,
-                                    container_format=container_format,
-                                    disk_format=disk_format,
-                                    is_public=False, data=image_file)
+        image = cls.create_image(name=name,
+                                 container_format=container_format,
+                                 disk_format=disk_format,
+                                 is_public=False, data=image_file)
         image_id = image['id']
         return image_id
 
     @test.attr(type='gate')
     def test_index_no_params(self):
         # Simple test to see all fixture images returned
-        _, images_list = self.client.image_list()
+        images_list = self.client.image_list()
         image_list = map(lambda x: x['id'], images_list)
         for image_id in self.created_images:
             self.assertIn(image_id, image_list)
 
     @test.attr(type='gate')
     def test_index_disk_format(self):
-        _, images_list = self.client.image_list(disk_format='ami')
+        images_list = self.client.image_list(disk_format='ami')
         for image in images_list:
             self.assertEqual(image['disk_format'], 'ami')
         result_set = set(map(lambda x: x['id'], images_list))
@@ -184,7 +184,7 @@ class ListImagesTest(base.BaseV1ImageTest):
 
     @test.attr(type='gate')
     def test_index_container_format(self):
-        _, images_list = self.client.image_list(container_format='bare')
+        images_list = self.client.image_list(container_format='bare')
         for image in images_list:
             self.assertEqual(image['container_format'], 'bare')
         result_set = set(map(lambda x: x['id'], images_list))
@@ -193,7 +193,7 @@ class ListImagesTest(base.BaseV1ImageTest):
 
     @test.attr(type='gate')
     def test_index_max_size(self):
-        _, images_list = self.client.image_list(size_max=42)
+        images_list = self.client.image_list(size_max=42)
         for image in images_list:
             self.assertTrue(image['size'] <= 42)
         result_set = set(map(lambda x: x['id'], images_list))
@@ -202,7 +202,7 @@ class ListImagesTest(base.BaseV1ImageTest):
 
     @test.attr(type='gate')
     def test_index_min_size(self):
-        _, images_list = self.client.image_list(size_min=142)
+        images_list = self.client.image_list(size_min=142)
         for image in images_list:
             self.assertTrue(image['size'] >= 142)
         result_set = set(map(lambda x: x['id'], images_list))
@@ -211,9 +211,9 @@ class ListImagesTest(base.BaseV1ImageTest):
 
     @test.attr(type='gate')
     def test_index_status_active_detail(self):
-        _, images_list = self.client.image_list_detail(status='active',
-                                                       sort_key='size',
-                                                       sort_dir='desc')
+        images_list = self.client.image_list_detail(status='active',
+                                                    sort_key='size',
+                                                    sort_dir='desc')
         top_size = images_list[0]['size']  # We have non-zero sized images
         for image in images_list:
             size = image['size']
@@ -223,7 +223,7 @@ class ListImagesTest(base.BaseV1ImageTest):
 
     @test.attr(type='gate')
     def test_index_name(self):
-        _, images_list = self.client.image_list_detail(
+        images_list = self.client.image_list_detail(
             name='New Remote Image dup')
         result_set = set(map(lambda x: x['id'], images_list))
         for image in images_list:
@@ -247,18 +247,18 @@ class UpdateImageMetaTest(base.BaseV1ImageTest):
         """
         image_file = StringIO.StringIO(data_utils.random_bytes(size))
         name = 'New Standard Image %s' % name
-        _, image = cls.create_image(name=name,
-                                    container_format=container_format,
-                                    disk_format=disk_format,
-                                    is_public=False, data=image_file,
-                                    properties={'key1': 'value1'})
+        image = cls.create_image(name=name,
+                                 container_format=container_format,
+                                 disk_format=disk_format,
+                                 is_public=False, data=image_file,
+                                 properties={'key1': 'value1'})
         image_id = image['id']
         return image_id
 
     @test.attr(type='gate')
     def test_list_image_metadata(self):
         # All metadata key/value pairs for an image should be returned
-        _, resp_metadata = self.client.get_image_meta(self.image_id)
+        resp_metadata = self.client.get_image_meta(self.image_id)
         expected = {'key1': 'value1'}
         self.assertEqual(expected, resp_metadata['properties'])
 
@@ -266,12 +266,12 @@ class UpdateImageMetaTest(base.BaseV1ImageTest):
     def test_update_image_metadata(self):
         # The metadata for the image should match the updated values
         req_metadata = {'key1': 'alt1', 'key2': 'value2'}
-        _, metadata = self.client.get_image_meta(self.image_id)
+        metadata = self.client.get_image_meta(self.image_id)
         self.assertEqual(metadata['properties'], {'key1': 'value1'})
         metadata['properties'].update(req_metadata)
-        _, metadata = self.client.update_image(
+        metadata = self.client.update_image(
             self.image_id, properties=metadata['properties'])
 
-        _, resp_metadata = self.client.get_image_meta(self.image_id)
+        resp_metadata = self.client.get_image_meta(self.image_id)
         expected = {'key1': 'alt1', 'key2': 'value2'}
         self.assertEqual(expected, resp_metadata['properties'])
