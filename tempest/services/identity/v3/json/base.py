@@ -12,13 +12,13 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest.common import rest_client
+from tempest.common import service_client
 from tempest import config
 
 CONF = config.CONF
 
 
-class IdentityV3Client(rest_client.RestClient):
+class IdentityV3Client(service_client.ServiceClient):
     """
     Base identity v3 client class
     """

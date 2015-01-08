@@ -20,13 +20,14 @@ import jsonschema
 
 from tempest.common import glance_http
 from tempest.common import rest_client
+from tempest.common import service_client
 from tempest import config
 from tempest import exceptions
 
 CONF = config.CONF
 
 
-class ImageClientV2JSON(rest_client.RestClient):
+class ImageClientV2JSON(service_client.ServiceClient):
 
     def __init__(self, auth_provider):
         super(ImageClientV2JSON, self).__init__(

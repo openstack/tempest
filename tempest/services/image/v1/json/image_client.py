@@ -22,6 +22,7 @@ import urllib
 
 from tempest.common import glance_http
 from tempest.common import rest_client
+from tempest.common import service_client
 from tempest.common.utils import misc as misc_utils
 from tempest import config
 from tempest import exceptions
@@ -32,7 +33,7 @@ CONF = config.CONF
 LOG = logging.getLogger(__name__)
 
 
-class ImageClientJSON(rest_client.RestClient):
+class ImageClientJSON(service_client.ServiceClient):
 
     def __init__(self, auth_provider):
         super(ImageClientJSON, self).__init__(

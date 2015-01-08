@@ -15,6 +15,7 @@ import time
 import urllib
 
 from tempest.common import rest_client
+from tempest.common import service_client
 from tempest.common.utils import misc
 from tempest import config
 from tempest import exceptions
@@ -22,7 +23,7 @@ from tempest import exceptions
 CONF = config.CONF
 
 
-class NetworkClientJSON(rest_client.RestClient):
+class NetworkClientJSON(service_client.ServiceClient):
 
     """
     Tempest REST client for Neutron. Uses v2 of the Neutron API, since the

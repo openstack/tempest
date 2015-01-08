@@ -17,6 +17,7 @@ import json
 import urllib
 
 from tempest.common import rest_client
+from tempest.common import service_client
 from tempest import config
 from tempest import exceptions
 from tempest.services.identity.v3.json import base
@@ -520,7 +521,7 @@ class IdentityV3ClientJSON(base.IdentityV3Client):
         return rest_client.ResponseBody(resp, body)
 
 
-class V3TokenClientJSON(rest_client.RestClient):
+class V3TokenClientJSON(service_client.ServiceClient):
 
     def __init__(self):
         super(V3TokenClientJSON, self).__init__(None, None, None)

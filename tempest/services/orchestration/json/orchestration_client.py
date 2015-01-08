@@ -18,14 +18,14 @@ import re
 import time
 import urllib
 
-from tempest.common import rest_client
+from tempest.common import service_client
 from tempest import config
 from tempest import exceptions
 
 CONF = config.CONF
 
 
-class OrchestrationClient(rest_client.RestClient):
+class OrchestrationClient(service_client.ServiceClient):
 
     def __init__(self, auth_provider):
         super(OrchestrationClient, self).__init__(
