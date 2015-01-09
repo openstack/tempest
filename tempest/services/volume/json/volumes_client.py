@@ -336,6 +336,14 @@ class BaseVolumesClientJSON(service_client.ServiceClient):
         self.expected_success(200, resp.status)
         return service_client.ResponseBody(resp, body)
 
+    def retype_volume(self, volume_id, volume_type, **kwargs):
+        """Updates volume with new volume type."""
+        post_body = {'new_type': volume_type}
+        post_body.update(kwargs)
+        post_body = json.dumps({'os-retype': post_body})
+        resp, body = self.post('volumes/%s/action' % volume_id, post_body)
+        self.expected_success(202, resp.status)
+
 
 class VolumesClientJSON(BaseVolumesClientJSON):
     """
