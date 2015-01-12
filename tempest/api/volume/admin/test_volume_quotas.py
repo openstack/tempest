@@ -100,7 +100,7 @@ class BaseVolumeQuotasAdminV2TestJSON(base.BaseVolumeAdminTest):
         # Admin can delete the resource quota set for a tenant
         tenant_name = data_utils.rand_name('quota_tenant_')
         identity_client = self.os_adm.identity_client
-        tenant = identity_client.create_tenant(tenant_name)[1]
+        tenant = identity_client.create_tenant(tenant_name)
         tenant_id = tenant['id']
         self.addCleanup(identity_client.delete_tenant, tenant_id)
         _, quota_set_default = self.quotas_client.get_default_quota_set(

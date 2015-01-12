@@ -180,7 +180,7 @@ class Cleanup(object):
                                           CONF.identity.admin_username)
         self.admin_id = user['id']
 
-        _, roles = id_cl.list_roles()
+        roles = id_cl.list_roles()
         for role in roles:
             if role['name'] == CONF.identity.admin_role:
                 self.admin_role_id = role['id']
@@ -215,7 +215,7 @@ class Cleanup(object):
     def _add_admin(self, tenant_id):
         id_cl = self.admin_mgr.identity_client
         needs_role = True
-        _, roles = id_cl.list_user_roles(tenant_id, self.admin_id)
+        roles = id_cl.list_user_roles(tenant_id, self.admin_id)
         for role in roles:
             if role['id'] == self.admin_role_id:
                 needs_role = False
