@@ -253,10 +253,6 @@
 # image. (string value)
 #image_alt_ssh_user = root
 
-# Password used to authenticate to an instance using the alternate
-# image. (string value)
-#image_alt_ssh_password = password
-
 # Time in seconds between build status checks. (integer value)
 #build_interval = 1
 
@@ -269,16 +265,16 @@
 #run_ssh = false
 
 # Auth method used for authenticate to the instance. Valid choices
-# are: keypair, configured, adminpass. keypair: start the servers with
-# an ssh keypair. configured: use the configured user and password.
-# adminpass: use the injected adminPass. disabled: avoid using ssh
-# when it is an option. (string value)
+# are: keypair, configured, adminpass and disabled. Keypair: start the
+# servers with a ssh keypair. Configured: use the configured user and
+# password. Adminpass: use the injected adminPass. Disabled: avoid
+# using ssh when it is an option. (string value)
 #ssh_auth_method = keypair
 
 # How to connect to the instance? fixed: using the first ip belongs
-# the fixed network floating: creating and using a floating ip (string
-# value)
-#ssh_connect_method = fixed
+# the fixed network floating: creating and using a floating ip.
+# (string value)
+#ssh_connect_method = floating
 
 # User name used to authenticate to an instance. (string value)
 #ssh_user = root
@@ -301,7 +297,8 @@
 # Name of the fixed network that is visible to all test tenants. If
 # multiple networks are available for a tenant this is the network
 # which will be used for creating servers if tempest does not create a
-# network or a network is not specified elsewhere (string value)
+# network or a network is not specified elsewhere. It may be used for
+# ssh validation only if floating IPs are disabled. (string value)
 #fixed_network_name = <None>
 
 # Network used for SSH connections. Ignored if
@@ -325,10 +322,6 @@
 # The endpoint type to use for the compute service. (string value)
 # Allowed values: public, admin, internal, publicURL, adminURL, internalURL
 #endpoint_type = publicURL
-
-# Path to a private key file for SSH access to remote hosts (string
-# value)
-#path_to_private_key = <None>
 
 # Expected device name when a volume is attached to an instance
 # (string value)
@@ -746,13 +739,18 @@
 # The mask bits for tenant ipv6 subnets (integer value)
 #tenant_network_v6_mask_bits = 64
 
-# Whether tenant network connectivity should be evaluated directly
-# (boolean value)
+# Whether tenant networks can be reached directly from the test
+# client. This must be set to True when the 'fixed' ssh_connect_method
+# is selected. (boolean value)
 #tenant_networks_reachable = false
 
 # Id of the public network that provides external connectivity (string
 # value)
 #public_network_id =
+
+# Default floating network name. Used to allocate floating IPs when
+# neutron is enabled. (string value)
+#floating_network_name = <None>
 
 # Id of the public router that provides external connectivity. This
 # should only be used when Neutron's 'allow_overlapping_ips' is set to
@@ -1069,6 +1067,38 @@
 # This variable is used as flag to enable notification tests (boolean
 # value)
 #too_slow_to_test = true
+
+
+[validation]
+
+#
+# From tempest.config
+#
+
+# Default IP type used for validation: -fixed: uses the first IP
+# belonging to the fixed network -floating: creates and uses a
+# floating IP (string value)
+# Allowed values: fixed, floating
+#connect_method = floating
+
+# Default authentication method to the instance. Only ssh via keypair
+# is supported for now. Additional methods will be handled in a
+# separate spec. (string value)
+# Allowed values: keypair
+#auth_method = keypair
+
+# Default IP version for ssh connections. (integer value)
+#ip_version_for_ssh = 4
+
+# Timeout in seconds to wait for ping to succeed. (integer value)
+#ping_timeout = 120
+
+# Timeout in seconds to wait for the TCP connection to be successful.
+# (integer value)
+#connect_timeout = 60
+
+# Timeout in seconds to wait for the ssh banner. (integer value)
+#ssh_timeout = 300
 
 
 [volume]
