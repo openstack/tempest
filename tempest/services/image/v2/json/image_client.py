@@ -33,7 +33,9 @@ class ImageClientV2JSON(rest_client.RestClient):
             auth_provider,
             CONF.image.catalog_type,
             CONF.image.region or CONF.identity.region,
-            endpoint_type=CONF.image.endpoint_type)
+            endpoint_type=CONF.image.endpoint_type,
+            build_interval=CONF.image.build_interval,
+            build_timeout=CONF.image.build_timeout)
         self._http = None
 
     def _get_http(self):
