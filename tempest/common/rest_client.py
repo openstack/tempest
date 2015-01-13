@@ -25,11 +25,8 @@ import six
 
 from tempest.common import http
 from tempest.common.utils import misc as misc_utils
-from tempest import config
 from tempest import exceptions
 from tempest.openstack.common import log as logging
-
-CONF = config.CONF
 
 # redrive rate limited calls at most twice
 MAX_RECURSION_DEPTH = 2
@@ -80,13 +77,16 @@ class RestClient(object):
 
     def __init__(self, auth_provider, service, region,
                  endpoint_type='publicURL',
-                 build_interval=1, build_timeout=60):
+                 build_interval=1, build_timeout=60,
+                 disable_ssl_certificate_validation=False, ca_certs=None,
+                 trace_requests=''):
         self.auth_provider = auth_provider
         self.service = service
         self.region = region
         self.endpoint_type = endpoint_type
         self.build_interval = build_interval
         self.build_timeout = build_timeout
+        self.trace_requests = trace_requests
 
         # The version of the API this client implements
         self.api_version = None
@@ -99,8 +99,7 @@ class RestClient(object):
                                        'location', 'proxy-authenticate',
                                        'retry-after', 'server',
                                        'vary', 'www-authenticate'))
-        dscv = CONF.identity.disable_ssl_certificate_validation
-        ca_certs = CONF.identity.ca_certificates_file
+        dscv = disable_ssl_certificate_validation
         self.http_obj = http.ClosingHttp(
             disable_ssl_certificate_validation=dscv, ca_certs=ca_certs)
 
@@ -117,10 +116,10 @@ class RestClient(object):
 
     def __str__(self):
         STRING_LIMIT = 80
-        str_format = ("config:%s, service:%s, base_url:%s, "
+        str_format = ("service:%s, base_url:%s, "
                       "filters: %s, build_interval:%s, build_timeout:%s"
                       "\ntoken:%s..., \nheaders:%s...")
-        return str_format % (CONF, self.service, self.base_url,
+        return str_format % (self.service, self.base_url,
                              self.filters, self.build_interval,
                              self.build_timeout,
                              str(self.token)[0:STRING_LIMIT],
@@ -253,8 +252,7 @@ class RestClient(object):
         if req_headers is None:
             req_headers = {}
         caller_name = misc_utils.find_test_caller()
-        trace_regex = CONF.debug.trace_requests
-        if trace_regex and re.search(trace_regex, caller_name):
+        if self.trace_requests and re.search(self.trace_requests, caller_name):
             self.LOG.debug('Starting Request (%s): %s %s' %
                            (caller_name, method, req_url))
 

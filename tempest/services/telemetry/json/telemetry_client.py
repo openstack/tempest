@@ -15,14 +15,14 @@
 
 import urllib
 
-from tempest.common import rest_client
+from tempest.common import service_client
 from tempest import config
 from tempest.openstack.common import jsonutils as json
 
 CONF = config.CONF
 
 
-class TelemetryClientJSON(rest_client.RestClient):
+class TelemetryClientJSON(service_client.ServiceClient):
 
     def __init__(self, auth_provider):
         super(TelemetryClientJSON, self).__init__(

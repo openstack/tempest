@@ -15,13 +15,13 @@
 
 import urllib
 
-from tempest.common import rest_client
+from tempest.common import service_client
 from tempest import config
 
 CONF = config.CONF
 
 
-class DatabaseVersionsClientJSON(rest_client.RestClient):
+class DatabaseVersionsClientJSON(service_client.ServiceClient):
 
     def __init__(self, auth_provider):
         super(DatabaseVersionsClientJSON, self).__init__(

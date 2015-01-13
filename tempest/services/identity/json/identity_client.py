@@ -13,13 +13,14 @@
 import json
 
 from tempest.common import rest_client
+from tempest.common import service_client
 from tempest import config
 from tempest import exceptions
 
 CONF = config.CONF
 
 
-class IdentityClientJSON(rest_client.RestClient):
+class IdentityClientJSON(service_client.ServiceClient):
 
     def __init__(self, auth_provider):
         super(IdentityClientJSON, self).__init__(
