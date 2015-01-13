@@ -12,7 +12,6 @@
 
 import json
 
-from tempest.common import rest_client
 from tempest.common import service_client
 from tempest import config
 from tempest import exceptions
@@ -52,14 +51,14 @@ class IdentityClientJSON(service_client.ServiceClient):
         post_body = json.dumps({'role': post_body})
         resp, body = self.post('OS-KSADM/roles', post_body)
         self.expected_success(200, resp.status)
-        return rest_client.ResponseBody(resp, self._parse_resp(body))
+        return service_client.ResponseBody(resp, self._parse_resp(body))
 
     def get_role(self, role_id):
         """Get a role by its id."""
         resp, body = self.get('OS-KSADM/roles/%s' % role_id)
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return rest_client.ResponseBody(resp, body['role'])
+        return service_client.ResponseBody(resp, body['role'])
 
     def create_tenant(self, name, **kwargs):
         """
@@ -76,7 +75,7 @@ class IdentityClientJSON(service_client.ServiceClient):
         post_body = json.dumps({'tenant': post_body})
         resp, body = self.post('tenants', post_body)
         self.expected_success(200, resp.status)
-        return rest_client.ResponseBody(resp, self._parse_resp(body))
+        return service_client.ResponseBody(resp, self._parse_resp(body))
 
     def delete_role(self, role_id):
         """Delete a role."""
@@ -89,46 +88,46 @@ class IdentityClientJSON(service_client.ServiceClient):
         url = '/tenants/%s/users/%s/roles' % (tenant_id, user_id)
         resp, body = self.get(url)
         self.expected_success(200, resp.status)
-        return rest_client.ResponseBodyList(resp, self._parse_resp(body))
+        return service_client.ResponseBodyList(resp, self._parse_resp(body))
 
     def assign_user_role(self, tenant_id, user_id, role_id):
         """Add roles to a user on a tenant."""
         resp, body = self.put('/tenants/%s/users/%s/roles/OS-KSADM/%s' %
                               (tenant_id, user_id, role_id), "")
         self.expected_success(200, resp.status)
-        return rest_client.ResponseBody(resp, self._parse_resp(body))
+        return service_client.ResponseBody(resp, self._parse_resp(body))
 
     def remove_user_role(self, tenant_id, user_id, role_id):
         """Removes a role assignment for a user on a tenant."""
         resp, body = self.delete('/tenants/%s/users/%s/roles/OS-KSADM/%s' %
                                  (tenant_id, user_id, role_id))
         self.expected_success(204, resp.status)
-        return rest_client.ResponseBody(resp, body)
+        return service_client.ResponseBody(resp, body)
 
     def delete_tenant(self, tenant_id):
         """Delete a tenant."""
         resp, body = self.delete('tenants/%s' % str(tenant_id))
         self.expected_success(204, resp.status)
-        return rest_client.ResponseBody(resp, body)
+        return service_client.ResponseBody(resp, body)
 
     def get_tenant(self, tenant_id):
         """Get tenant details."""
         resp, body = self.get('tenants/%s' % str(tenant_id))
         self.expected_success(200, resp.status)
-        return rest_client.ResponseBody(resp, self._parse_resp(body))
+        return service_client.ResponseBody(resp, self._parse_resp(body))
 
     def list_roles(self):
         """Returns roles."""
         resp, body = self.get('OS-KSADM/roles')
         self.expected_success(200, resp.status)
-        return rest_client.ResponseBodyList(resp, self._parse_resp(body))
+        return service_client.ResponseBodyList(resp, self._parse_resp(body))
 
     def list_tenants(self):
         """Returns tenants."""
         resp, body = self.get('tenants')
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return rest_client.ResponseBodyList(resp, body['tenants'])
+        return service_client.ResponseBodyList(resp, body['tenants'])
 
     def get_tenant_by_name(self, tenant_name):
         tenants = self.list_tenants()
@@ -152,7 +151,7 @@ class IdentityClientJSON(service_client.ServiceClient):
         post_body = json.dumps({'tenant': post_body})
         resp, body = self.post('tenants/%s' % tenant_id, post_body)
         self.expected_success(200, resp.status)
-        return rest_client.ResponseBody(resp, self._parse_resp(body))
+        return service_client.ResponseBody(resp, self._parse_resp(body))
 
     def create_user(self, name, password, tenant_id, email, **kwargs):
         """Create a user."""
@@ -168,32 +167,32 @@ class IdentityClientJSON(service_client.ServiceClient):
         post_body = json.dumps({'user': post_body})
         resp, body = self.post('users', post_body)
         self.expected_success(200, resp.status)
-        return rest_client.ResponseBody(resp, self._parse_resp(body))
+        return service_client.ResponseBody(resp, self._parse_resp(body))
 
     def update_user(self, user_id, **kwargs):
         """Updates a user."""
         put_body = json.dumps({'user': kwargs})
         resp, body = self.put('users/%s' % user_id, put_body)
         self.expected_success(200, resp.status)
-        return rest_client.ResponseBody(resp, self._parse_resp(body))
+        return service_client.ResponseBody(resp, self._parse_resp(body))
 
     def get_user(self, user_id):
         """GET a user."""
         resp, body = self.get("users/%s" % user_id)
         self.expected_success(200, resp.status)
-        return rest_client.ResponseBody(resp, self._parse_resp(body))
+        return service_client.ResponseBody(resp, self._parse_resp(body))
 
     def delete_user(self, user_id):
         """Delete a user."""
         resp, body = self.delete("users/%s" % user_id)
         self.expected_success(204, resp.status)
-        return rest_client.ResponseBody(resp, body)
+        return service_client.ResponseBody(resp, body)
 
     def get_users(self):
         """Get the list of users."""
         resp, body = self.get("users")
         self.expected_success(200, resp.status)
-        return rest_client.ResponseBodyList(resp, self._parse_resp(body))
+        return service_client.ResponseBodyList(resp, self._parse_resp(body))
 
     def enable_disable_user(self, user_id, enabled):
         """Enables or disables a user."""
@@ -203,25 +202,25 @@ class IdentityClientJSON(service_client.ServiceClient):
         put_body = json.dumps({'user': put_body})
         resp, body = self.put('users/%s/enabled' % user_id, put_body)
         self.expected_success(200, resp.status)
-        return rest_client.ResponseBody(resp, self._parse_resp(body))
+        return service_client.ResponseBody(resp, self._parse_resp(body))
 
     def get_token(self, token_id):
         """Get token details."""
         resp, body = self.get("tokens/%s" % token_id)
         self.expected_success(200, resp.status)
-        return rest_client.ResponseBody(resp, self._parse_resp(body))
+        return service_client.ResponseBody(resp, self._parse_resp(body))
 
     def delete_token(self, token_id):
         """Delete a token."""
         resp, body = self.delete("tokens/%s" % token_id)
         self.expected_success(204, resp.status)
-        return rest_client.ResponseBody(resp, body)
+        return service_client.ResponseBody(resp, body)
 
     def list_users_for_tenant(self, tenant_id):
         """List users for a Tenant."""
         resp, body = self.get('/tenants/%s/users' % tenant_id)
         self.expected_success(200, resp.status)
-        return rest_client.ResponseBodyList(resp, self._parse_resp(body))
+        return service_client.ResponseBodyList(resp, self._parse_resp(body))
 
     def get_user_by_username(self, tenant_id, username):
         users = self.list_users_for_tenant(tenant_id)
@@ -240,27 +239,27 @@ class IdentityClientJSON(service_client.ServiceClient):
         post_body = json.dumps({'OS-KSADM:service': post_body})
         resp, body = self.post('/OS-KSADM/services', post_body)
         self.expected_success(200, resp.status)
-        return rest_client.ResponseBody(resp, self._parse_resp(body))
+        return service_client.ResponseBody(resp, self._parse_resp(body))
 
     def get_service(self, service_id):
         """Get Service."""
         url = '/OS-KSADM/services/%s' % service_id
         resp, body = self.get(url)
         self.expected_success(200, resp.status)
-        return rest_client.ResponseBody(resp, self._parse_resp(body))
+        return service_client.ResponseBody(resp, self._parse_resp(body))
 
     def list_services(self):
         """List Service - Returns Services."""
         resp, body = self.get('/OS-KSADM/services')
         self.expected_success(200, resp.status)
-        return rest_client.ResponseBodyList(resp, self._parse_resp(body))
+        return service_client.ResponseBodyList(resp, self._parse_resp(body))
 
     def delete_service(self, service_id):
         """Delete Service."""
         url = '/OS-KSADM/services/%s' % service_id
         resp, body = self.delete(url)
         self.expected_success(204, resp.status)
-        return rest_client.ResponseBody(resp, body)
+        return service_client.ResponseBody(resp, body)
 
     def update_user_password(self, user_id, new_pass):
         """Update User Password."""
@@ -271,14 +270,15 @@ class IdentityClientJSON(service_client.ServiceClient):
         put_body = json.dumps({'user': put_body})
         resp, body = self.put('users/%s/OS-KSADM/password' % user_id, put_body)
         self.expected_success(200, resp.status)
-        return rest_client.ResponseBody(resp, self._parse_resp(body))
+        return service_client.ResponseBody(resp, self._parse_resp(body))
 
     def list_extensions(self):
         """List all the extensions."""
         resp, body = self.get('/extensions')
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return rest_client.ResponseBodyList(resp, body['extensions']['values'])
+        return service_client.ResponseBodyList(resp,
+                                               body['extensions']['values'])
 
 
 class TokenClientJSON(IdentityClientJSON):
@@ -310,7 +310,7 @@ class TokenClientJSON(IdentityClientJSON):
         resp, body = self.post(self.auth_url, body=body)
         self.expected_success(200, resp.status)
 
-        return rest_client.ResponseBody(resp, body['access'])
+        return service_client.ResponseBody(resp, body['access'])
 
     def auth_token(self, token_id, tenant=None):
         creds = {
@@ -328,7 +328,7 @@ class TokenClientJSON(IdentityClientJSON):
         resp, body = self.post(self.auth_url, body=body)
         self.expected_success(200, resp.status)
 
-        return rest_client.ResponseBody(resp, body['access'])
+        return service_client.ResponseBody(resp, body['access'])
 
     def request(self, method, url, extra_headers=False, headers=None,
                 body=None):
