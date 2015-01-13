@@ -373,7 +373,7 @@ class RestClient(object):
         # Do the actual request, and time it
         start = time.time()
         self._log_request_start(method, req_url)
-        resp, resp_body = self.http_obj.request(
+        resp, resp_body = self.raw_request(
             req_url, method, headers=req_headers, body=req_body)
         end = time.time()
         self._log_request(method, req_url, resp, secs=(end - start),
@@ -384,6 +384,10 @@ class RestClient(object):
         self.response_checker(method, resp, resp_body)
 
         return resp, resp_body
+
+    def raw_request(self, url, method, headers=None, body=None):
+        return self.http_obj.request(url, method,
+                                     headers=headers, body=body)
 
     def request(self, method, url, extra_headers=False, headers=None,
                 body=None):
