@@ -386,6 +386,8 @@ class RestClient(object):
         return resp, resp_body
 
     def raw_request(self, url, method, headers=None, body=None):
+        if headers is None:
+            headers = self.get_headers()
         return self.http_obj.request(url, method,
                                      headers=headers, body=body)
 
