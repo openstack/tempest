@@ -16,7 +16,7 @@ import mock
 from oslo.config import cfg
 
 from tempest.common import isolated_creds
-from tempest.common import rest_client
+from tempest.common import service_client
 from tempest import config
 from tempest import exceptions
 from tempest.openstack.common.fixture import mockpatch
@@ -51,7 +51,7 @@ class TestTenantIsolation(base.TestCase):
         user_fix = self.useFixture(mockpatch.PatchObject(
             json_iden_client.IdentityClientJSON,
             'create_user',
-            return_value=(rest_client.ResponseBody
+            return_value=(service_client.ResponseBody
                           (200, {'id': id, 'name': name}))))
         return user_fix
 
@@ -59,7 +59,7 @@ class TestTenantIsolation(base.TestCase):
         tenant_fix = self.useFixture(mockpatch.PatchObject(
             json_iden_client.IdentityClientJSON,
             'create_tenant',
-            return_value=(rest_client.ResponseBody
+            return_value=(service_client.ResponseBody
                           (200, {'id': id, 'name': name}))))
         return tenant_fix
 
@@ -67,7 +67,7 @@ class TestTenantIsolation(base.TestCase):
         roles_fix = self.useFixture(mockpatch.PatchObject(
             json_iden_client.IdentityClientJSON,
             'list_roles',
-            return_value=(rest_client.ResponseBodyList
+            return_value=(service_client.ResponseBodyList
                           (200,
                            [{'id': id, 'name': name},
                             {'id': '1', 'name': 'FakeRole'}]))))
@@ -77,7 +77,7 @@ class TestTenantIsolation(base.TestCase):
         tenant_fix = self.useFixture(mockpatch.PatchObject(
             json_iden_client.IdentityClientJSON,
             'assign_user_role',
-            return_value=(rest_client.ResponseBody
+            return_value=(service_client.ResponseBody
                           (200, {}))))
         return tenant_fix
 
@@ -85,7 +85,7 @@ class TestTenantIsolation(base.TestCase):
         roles_fix = self.useFixture(mockpatch.PatchObject(
             json_iden_client.IdentityClientJSON,
             'list_roles',
-            return_value=(rest_client.ResponseBodyList
+            return_value=(service_client.ResponseBodyList
                           (200, [{'id': '1', 'name': 'FakeRole'}]))))
         return roles_fix
 

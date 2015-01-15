@@ -15,7 +15,7 @@
 
 import json
 
-from tempest.common import rest_client
+from tempest.common import service_client
 from tempest.services.identity.v3.json import base
 
 
@@ -36,7 +36,7 @@ class ServiceClientJSON(base.IdentityV3Client):
         resp, body = self.patch('services/%s' % service_id, patch_body)
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return rest_client.ResponseBody(resp, body['service'])
+        return service_client.ResponseBody(resp, body['service'])
 
     def get_service(self, service_id):
         """Get Service."""
@@ -44,7 +44,7 @@ class ServiceClientJSON(base.IdentityV3Client):
         resp, body = self.get(url)
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return rest_client.ResponseBody(resp, body['service'])
+        return service_client.ResponseBody(resp, body['service'])
 
     def create_service(self, serv_type, name=None, description=None,
                        enabled=True):
@@ -58,16 +58,16 @@ class ServiceClientJSON(base.IdentityV3Client):
         resp, body = self.post("services", body)
         self.expected_success(201, resp.status)
         body = json.loads(body)
-        return rest_client.ResponseBody(resp, body["service"])
+        return service_client.ResponseBody(resp, body["service"])
 
     def delete_service(self, serv_id):
         url = "services/" + serv_id
         resp, body = self.delete(url)
         self.expected_success(204, resp.status)
-        return rest_client.ResponseBody(resp, body)
+        return service_client.ResponseBody(resp, body)
 
     def list_services(self):
         resp, body = self.get('services')
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return rest_client.ResponseBodyList(resp, body['services'])
+        return service_client.ResponseBodyList(resp, body['services'])
