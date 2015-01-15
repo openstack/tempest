@@ -50,13 +50,12 @@ class ImagesMetadataTestJSON(base.BaseV2ComputeTest):
     def setUp(self):
         super(ImagesMetadataTestJSON, self).setUp()
         meta = {'key1': 'value1', 'key2': 'value2'}
-        resp, _ = self.client.set_image_metadata(self.image_id, meta)
-        self.assertEqual(resp.status, 200)
+        self.client.set_image_metadata(self.image_id, meta)
 
     @test.attr(type='gate')
     def test_list_image_metadata(self):
         # All metadata key/value pairs for an image should be returned
-        resp, resp_metadata = self.client.list_image_metadata(self.image_id)
+        resp_metadata = self.client.list_image_metadata(self.image_id)
         expected = {'key1': 'value1', 'key2': 'value2'}
         self.assertEqual(expected, resp_metadata)
 
@@ -64,28 +63,28 @@ class ImagesMetadataTestJSON(base.BaseV2ComputeTest):
     def test_set_image_metadata(self):
         # The metadata for the image should match the new values
         req_metadata = {'meta2': 'value2', 'meta3': 'value3'}
-        resp, body = self.client.set_image_metadata(self.image_id,
-                                                    req_metadata)
+        self.client.set_image_metadata(self.image_id,
+                                       req_metadata)
 
-        resp, resp_metadata = self.client.list_image_metadata(self.image_id)
+        resp_metadata = self.client.list_image_metadata(self.image_id)
         self.assertEqual(req_metadata, resp_metadata)
 
     @test.attr(type='gate')
     def test_update_image_metadata(self):
         # The metadata for the image should match the updated values
         req_metadata = {'key1': 'alt1', 'key3': 'value3'}
-        resp, metadata = self.client.update_image_metadata(self.image_id,
-                                                           req_metadata)
+        self.client.update_image_metadata(self.image_id,
+                                          req_metadata)
 
-        resp, resp_metadata = self.client.list_image_metadata(self.image_id)
+        resp_metadata = self.client.list_image_metadata(self.image_id)
         expected = {'key1': 'alt1', 'key2': 'value2', 'key3': 'value3'}
         self.assertEqual(expected, resp_metadata)
 
     @test.attr(type='gate')
     def test_get_image_metadata_item(self):
         # The value for a specific metadata key should be returned
-        resp, meta = self.client.get_image_metadata_item(self.image_id,
-                                                         'key2')
+        meta = self.client.get_image_metadata_item(self.image_id,
+                                                   'key2')
         self.assertEqual('value2', meta['key2'])
 
     @test.attr(type='gate')
@@ -93,17 +92,17 @@ class ImagesMetadataTestJSON(base.BaseV2ComputeTest):
         # The value provided for the given meta item should be set for
         # the image
         meta = {'key1': 'alt'}
-        resp, body = self.client.set_image_metadata_item(self.image_id,
-                                                         'key1', meta)
-        resp, resp_metadata = self.client.list_image_metadata(self.image_id)
+        self.client.set_image_metadata_item(self.image_id,
+                                            'key1', meta)
+        resp_metadata = self.client.list_image_metadata(self.image_id)
         expected = {'key1': 'alt', 'key2': 'value2'}
         self.assertEqual(expected, resp_metadata)
 
     @test.attr(type='gate')
     def test_delete_image_metadata_item(self):
         # The metadata value/key pair should be deleted from the image
-        resp, body = self.client.delete_image_metadata_item(self.image_id,
-                                                            'key1')
-        resp, resp_metadata = self.client.list_image_metadata(self.image_id)
+        self.client.delete_image_metadata_item(self.image_id,
+                                               'key1')
+        resp_metadata = self.client.list_image_metadata(self.image_id)
         expected = {'key2': 'value2'}
         self.assertEqual(expected, resp_metadata)
