@@ -582,6 +582,9 @@
 # applies to user and project (string value)
 #admin_domain_name = <None>
 
+# Roles to assign to all users created by tempest (list value)
+#tempest_roles =
+
 
 [identity-feature-enabled]
 

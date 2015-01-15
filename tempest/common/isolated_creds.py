@@ -124,6 +124,8 @@ class IsolatedCreds(cred_provider.CredentialProvider):
             self._assign_user_role(tenant, user, swift_operator_role)
         if admin:
             self._assign_user_role(tenant, user, CONF.identity.admin_role)
+        for role in CONF.identity.tempest_roles:
+            self._assign_user_role(tenant, user, role)
         return self._get_credentials(user, tenant)
 
     def _get_credentials(self, user, tenant):
