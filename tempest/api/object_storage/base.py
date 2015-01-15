@@ -122,7 +122,7 @@ class SwiftDataGenerator(base.DataGenerator):
 
     def _get_role_id(self, role_name):
         try:
-            _, roles = self.client.list_roles()
+            roles = self.client.list_roles()
             return next(r['id'] for r in roles if r['name'] == role_name)
         except StopIteration:
             msg = "Role name '%s' is not found" % role_name

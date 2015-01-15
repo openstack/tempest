@@ -28,21 +28,21 @@ class TokensTestJSON(base.BaseIdentityV2AdminTest):
         user_password = data_utils.rand_name(name='pass-')
         # first:create a tenant
         tenant_name = data_utils.rand_name(name='tenant-')
-        _, tenant = self.client.create_tenant(tenant_name)
+        tenant = self.client.create_tenant(tenant_name)
         self.data.tenants.append(tenant)
         # second:create a user
-        _, user = self.client.create_user(user_name, user_password,
-                                          tenant['id'], '')
+        user = self.client.create_user(user_name, user_password,
+                                       tenant['id'], '')
         self.data.users.append(user)
         # then get a token for the user
-        _, body = self.token_client.auth(user_name,
-                                         user_password,
-                                         tenant['name'])
+        body = self.token_client.auth(user_name,
+                                      user_password,
+                                      tenant['name'])
         self.assertEqual(body['token']['tenant']['name'],
                          tenant['name'])
         # Perform GET Token
         token_id = body['token']['id']
-        _, token_details = self.client.get_token(token_id)
+        token_details = self.client.get_token(token_id)
         self.assertEqual(token_id, token_details['token']['id'])
         self.assertEqual(user['id'], token_details['user']['id'])
         self.assertEqual(user_name, token_details['user']['name'])
@@ -62,22 +62,22 @@ class TokensTestJSON(base.BaseIdentityV2AdminTest):
         user_password = data_utils.rand_name(name='pass-')
         tenant_id = None  # No default tenant so will get unscoped token.
         email = ''
-        _, user = self.client.create_user(user_name, user_password,
-                                          tenant_id, email)
+        user = self.client.create_user(user_name, user_password,
+                                       tenant_id, email)
         self.data.users.append(user)
 
         # Create a couple tenants.
         tenant1_name = data_utils.rand_name(name='tenant-')
-        _, tenant1 = self.client.create_tenant(tenant1_name)
+        tenant1 = self.client.create_tenant(tenant1_name)
         self.data.tenants.append(tenant1)
 
         tenant2_name = data_utils.rand_name(name='tenant-')
-        _, tenant2 = self.client.create_tenant(tenant2_name)
+        tenant2 = self.client.create_tenant(tenant2_name)
         self.data.tenants.append(tenant2)
 
         # Create a role
         role_name = data_utils.rand_name(name='role-')
-        _, role = self.client.create_role(role_name)
+        role = self.client.create_role(role_name)
         self.data.roles.append(role)
 
         # Grant the user the role on the tenants.
@@ -88,13 +88,13 @@ class TokensTestJSON(base.BaseIdentityV2AdminTest):
                                      role['id'])
 
         # Get an unscoped token.
-        _, body = self.token_client.auth(user_name, user_password)
+        body = self.token_client.auth(user_name, user_password)
 
         token_id = body['token']['id']
 
         # Use the unscoped token to get a token scoped to tenant1
-        _, body = self.token_client.auth_token(token_id,
-                                               tenant=tenant1_name)
+        body = self.token_client.auth_token(token_id,
+                                            tenant=tenant1_name)
 
         scoped_token_id = body['token']['id']
 
@@ -102,5 +102,5 @@ class TokensTestJSON(base.BaseIdentityV2AdminTest):
         self.client.delete_token(scoped_token_id)
 
         # Use the unscoped token to get a token scoped to tenant2
-        _, body = self.token_client.auth_token(token_id,
-                                               tenant=tenant2_name)
+        body = self.token_client.auth_token(token_id,
+                                            tenant=tenant2_name)

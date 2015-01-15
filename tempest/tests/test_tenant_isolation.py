@@ -15,8 +15,8 @@
 import mock
 from oslo.config import cfg
 
-from tempest.common import http
 from tempest.common import isolated_creds
+from tempest.common import service_client
 from tempest import config
 from tempest import exceptions
 from tempest.openstack.common.fixture import mockpatch
@@ -35,7 +35,7 @@ class TestTenantIsolation(base.TestCase):
         self.useFixture(fake_config.ConfigFixture())
         self.stubs.Set(config, 'TempestConfigPrivate', fake_config.FakePrivate)
         self.fake_http = fake_http.fake_httplib2(return_type=200)
-        self.stubs.Set(http.ClosingHttp, 'request',
+        self.stubs.Set(json_iden_client.TokenClientJSON, 'raw_request',
                        fake_identity._fake_v2_response)
         cfg.CONF.set_default('operator_role', 'FakeRole',
                              group='object-storage')
@@ -51,41 +51,42 @@ class TestTenantIsolation(base.TestCase):
         user_fix = self.useFixture(mockpatch.PatchObject(
             json_iden_client.IdentityClientJSON,
             'create_user',
-            return_value=({'status': 200},
-                          {'id': id, 'name': name})))
+            return_value=(service_client.ResponseBody
+                          (200, {'id': id, 'name': name}))))
         return user_fix
 
     def _mock_tenant_create(self, id, name):
         tenant_fix = self.useFixture(mockpatch.PatchObject(
             json_iden_client.IdentityClientJSON,
             'create_tenant',
-            return_value=({'status': 200},
-                          {'id': id, 'name': name})))
+            return_value=(service_client.ResponseBody
+                          (200, {'id': id, 'name': name}))))
         return tenant_fix
 
     def _mock_list_roles(self, id, name):
         roles_fix = self.useFixture(mockpatch.PatchObject(
             json_iden_client.IdentityClientJSON,
             'list_roles',
-            return_value=({'status': 200},
-                          [{'id': id, 'name': name},
-                           {'id': '1', 'name': 'FakeRole'}])))
+            return_value=(service_client.ResponseBodyList
+                          (200,
+                           [{'id': id, 'name': name},
+                            {'id': '1', 'name': 'FakeRole'}]))))
         return roles_fix
 
     def _mock_assign_user_role(self):
         tenant_fix = self.useFixture(mockpatch.PatchObject(
             json_iden_client.IdentityClientJSON,
             'assign_user_role',
-            return_value=({'status': 200},
-                          {})))
+            return_value=(service_client.ResponseBody
+                          (200, {}))))
         return tenant_fix
 
     def _mock_list_role(self):
         roles_fix = self.useFixture(mockpatch.PatchObject(
             json_iden_client.IdentityClientJSON,
             'list_roles',
-            return_value=({'status': 200},
-                          [{'id': '1', 'name': 'FakeRole'}])))
+            return_value=(service_client.ResponseBodyList
+                          (200, [{'id': '1', 'name': 'FakeRole'}]))))
         return roles_fix
 
     def _mock_network_create(self, iso_creds, id, name):

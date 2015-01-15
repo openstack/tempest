@@ -18,10 +18,11 @@ import copy
 from oslo.config import cfg
 
 from tempest import auth
-from tempest.common import http
 from tempest.common import tempest_fixtures as fixtures
 from tempest import config
 from tempest import exceptions
+from tempest.services.identity.json import identity_client as v2_client
+from tempest.services.identity.v3.json import identity_client as v3_client
 from tempest.tests import base
 from tempest.tests import fake_config
 from tempest.tests import fake_identity
@@ -76,10 +77,12 @@ class KeystoneV2CredentialsTests(CredentialsTests):
 
     identity_response = fake_identity._fake_v2_response
     credentials_class = auth.KeystoneV2Credentials
+    tokenclient_class = v2_client.TokenClientJSON
 
     def setUp(self):
         super(KeystoneV2CredentialsTests, self).setUp()
-        self.stubs.Set(http.ClosingHttp, 'request', self.identity_response)
+        self.stubs.Set(self.tokenclient_class, 'raw_request',
+                       self.identity_response)
 
     def _verify_credentials(self, credentials_class, filled=True,
                             creds_dict=None):
@@ -185,6 +188,7 @@ class KeystoneV3CredentialsTests(KeystoneV2CredentialsTests):
 
     credentials_class = auth.KeystoneV3Credentials
     identity_response = fake_identity._fake_v3_response
+    tokenclient_class = v3_client.V3TokenClientJSON
 
     def setUp(self):
         super(KeystoneV3CredentialsTests, self).setUp()

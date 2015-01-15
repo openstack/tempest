@@ -83,6 +83,24 @@ class RoutersNegativeTest(base.BaseRouterTest):
                           self.client.delete_router,
                           self.router['id'])
 
+    @test.attr(type=['negative', 'smoke'])
+    def test_show_non_existent_router_returns_404(self):
+        router = data_utils.rand_name('non_exist_router')
+        self.assertRaises(exceptions.NotFound, self.client.show_router,
+                          router)
+
+    @test.attr(type=['negative', 'smoke'])
+    def test_update_non_existent_router_returns_404(self):
+        router = data_utils.rand_name('non_exist_router')
+        self.assertRaises(exceptions.NotFound, self.client.update_router,
+                          router, name="new_name")
+
+    @test.attr(type=['negative', 'smoke'])
+    def test_delete_non_existent_router_returns_404(self):
+        router = data_utils.rand_name('non_exist_router')
+        self.assertRaises(exceptions.NotFound, self.client.delete_router,
+                          router)
+
 
 class RoutersNegativeIpV6Test(RoutersNegativeTest):
     _ip_version = 6

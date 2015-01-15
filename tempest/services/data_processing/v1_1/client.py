@@ -14,13 +14,13 @@
 
 import json
 
-from tempest.common import rest_client
+from tempest.common import service_client
 from tempest import config
 
 CONF = config.CONF
 
 
-class DataProcessingClient(rest_client.RestClient):
+class DataProcessingClient(service_client.ServiceClient):
 
     def __init__(self, auth_provider):
         super(DataProcessingClient, self).__init__(

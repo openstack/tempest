@@ -16,7 +16,7 @@ import urllib
 
 import six
 
-from tempest.common import rest_client
+from tempest.common import service_client
 from tempest import config
 
 CONF = config.CONF
@@ -42,7 +42,7 @@ def handle_errors(f):
     return wrapper
 
 
-class BaremetalClient(rest_client.RestClient):
+class BaremetalClient(service_client.ServiceClient):
     """
     Base Tempest REST client for Ironic API.
 

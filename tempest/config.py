@@ -187,7 +187,7 @@ ComputeGroup = [
                default=300,
                help="Timeout in seconds to wait for an instance to build. "
                     "Other services that do not define build_timeout will "
-                    "inherit this value, for example the image service."),
+                    "inherit this value."),
     cfg.BoolOpt('run_ssh',
                 default=False,
                 help="Should the tests ssh to instances?"),
@@ -371,7 +371,15 @@ ImageGroup = [
     cfg.StrOpt('http_image',
                default='http://download.cirros-cloud.net/0.3.1/'
                'cirros-0.3.1-x86_64-uec.tar.gz',
-               help='http accessible image')
+               help='http accessible image'),
+    cfg.IntOpt('build_timeout',
+               default=300,
+               help="Timeout in seconds to wait for an image to "
+                    "become available."),
+    cfg.IntOpt('build_interval',
+               default=1,
+               help="Time in seconds between image operation status "
+                    "checks.")
 ]
 
 image_feature_group = cfg.OptGroup(name='image-feature-enabled',

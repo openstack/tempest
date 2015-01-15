@@ -278,8 +278,8 @@
 #build_interval = 1
 
 # Timeout in seconds to wait for an instance to build. Other services
-# that do not define build_timeout will inherit this value, for
-# example the image service. (integer value)
+# that do not define build_timeout will inherit this value. (integer
+# value)
 #build_timeout = 300
 
 # Should the tests ssh to instances? (boolean value)
@@ -619,6 +619,14 @@
 
 # http accessible image (string value)
 #http_image = http://download.cirros-cloud.net/0.3.1/cirros-0.3.1-x86_64-uec.tar.gz
+
+# Timeout in seconds to wait for an image to become available.
+# (integer value)
+#build_timeout = 300
+
+# Time in seconds between image operation status checks. (integer
+# value)
+#build_interval = 1
 
 
 [image-feature-enabled]

@@ -16,7 +16,7 @@
 import json
 import urllib
 
-from tempest.common import rest_client
+from tempest.common import service_client
 from tempest.services.identity.v3.json import base
 
 
@@ -37,7 +37,7 @@ class RegionClientJSON(base.IdentityV3Client):
             resp, body = self.post('regions', req_body)
         self.expected_success(201, resp.status)
         body = json.loads(body)
-        return rest_client.ResponseBody(resp, body['region'])
+        return service_client.ResponseBody(resp, body['region'])
 
     def update_region(self, region_id, **kwargs):
         """Updates a region."""
@@ -50,7 +50,7 @@ class RegionClientJSON(base.IdentityV3Client):
         resp, body = self.patch('regions/%s' % region_id, post_body)
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return rest_client.ResponseBody(resp, body['region'])
+        return service_client.ResponseBody(resp, body['region'])
 
     def get_region(self, region_id):
         """Get region."""
@@ -58,7 +58,7 @@ class RegionClientJSON(base.IdentityV3Client):
         resp, body = self.get(url)
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return rest_client.ResponseBody(resp, body['region'])
+        return service_client.ResponseBody(resp, body['region'])
 
     def list_regions(self, params=None):
         """List regions."""
@@ -68,10 +68,10 @@ class RegionClientJSON(base.IdentityV3Client):
         resp, body = self.get(url)
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return rest_client.ResponseBodyList(resp, body['regions'])
+        return service_client.ResponseBodyList(resp, body['regions'])
 
     def delete_region(self, region_id):
         """Delete region."""
         resp, body = self.delete('regions/%s' % region_id)
         self.expected_success(204, resp.status)
-        return rest_client.ResponseBody(resp, body)
+        return service_client.ResponseBody(resp, body)

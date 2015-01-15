@@ -42,7 +42,7 @@ class TenantsNegativeTestJSON(base.BaseIdentityV2AdminTest):
     def test_tenant_delete_by_unauthorized_user(self):
         # Non-administrator user should not be able to delete a tenant
         tenant_name = data_utils.rand_name(name='tenant-')
-        _, tenant = self.client.create_tenant(tenant_name)
+        tenant = self.client.create_tenant(tenant_name)
         self.data.tenants.append(tenant)
         self.assertRaises(exceptions.Unauthorized,
                           self.non_admin_client.delete_tenant, tenant['id'])
@@ -51,7 +51,7 @@ class TenantsNegativeTestJSON(base.BaseIdentityV2AdminTest):
     def test_tenant_delete_request_without_token(self):
         # Request to delete a tenant without a valid token should fail
         tenant_name = data_utils.rand_name(name='tenant-')
-        _, tenant = self.client.create_tenant(tenant_name)
+        tenant = self.client.create_tenant(tenant_name)
         self.data.tenants.append(tenant)
         token = self.client.auth_provider.get_token()
         self.client.delete_token(token)
@@ -69,7 +69,7 @@ class TenantsNegativeTestJSON(base.BaseIdentityV2AdminTest):
     def test_tenant_create_duplicate(self):
         # Tenant names should be unique
         tenant_name = data_utils.rand_name(name='tenant-')
-        _, body = self.client.create_tenant(tenant_name)
+        body = self.client.create_tenant(tenant_name)
         tenant = body
         self.data.tenants.append(tenant)
         tenant1_id = body.get('id')
@@ -119,7 +119,7 @@ class TenantsNegativeTestJSON(base.BaseIdentityV2AdminTest):
     def test_tenant_update_by_unauthorized_user(self):
         # Non-administrator user should not be able to update a tenant
         tenant_name = data_utils.rand_name(name='tenant-')
-        _, tenant = self.client.create_tenant(tenant_name)
+        tenant = self.client.create_tenant(tenant_name)
         self.data.tenants.append(tenant)
         self.assertRaises(exceptions.Unauthorized,
                           self.non_admin_client.update_tenant, tenant['id'])
@@ -128,7 +128,7 @@ class TenantsNegativeTestJSON(base.BaseIdentityV2AdminTest):
     def test_tenant_update_request_without_token(self):
         # Request to update a tenant without a valid token should fail
         tenant_name = data_utils.rand_name(name='tenant-')
-        _, tenant = self.client.create_tenant(tenant_name)
+        tenant = self.client.create_tenant(tenant_name)
         self.data.tenants.append(tenant)
         token = self.client.auth_provider.get_token()
         self.client.delete_token(token)
