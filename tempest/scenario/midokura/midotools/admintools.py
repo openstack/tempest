@@ -31,17 +31,19 @@ class TenantAdmin(object):
         # Create a tenant that is enabled
         if not name:
             name = data_utils.rand_name(name='tenant-')
+        else:
+            name = data_utils.rand_name(name)
         if not desc:
             desc = data_utils.rand_name('desc_')
-        resp, tenant = self.client.create_tenant(
+        tenant = self.client.create_tenant(
             name=name,
             description=desc,
             enabled=True)
         user = self.get_user_by_name('admin')
         role = self.get_role_by_name('admin')
-        _, role = self.client.assign_user_role(tenant['id'],
-                                               user['id'],
-                                               role['id'])
+        self.client.assign_user_role(tenant['id'],
+                                     user['id'],
+                                     role['id'])
         creds = self._get_credentials(user, tenant)
         self.tenants.append(tenant)
         return tenant, creds
@@ -57,13 +59,13 @@ class TenantAdmin(object):
             password=self.client.password)
 
     def get_user_by_name(self, name):
-        _, users = self.client.get_users()
+        users = self.client.get_users()
         user = [u for u in users if u['name'] == name]
         if len(user) > 0:
             return user[0]
 
     def get_role_by_name(self, name):
-        _, roles = self.client.list_roles()
+        roles = self.client.list_roles()
         role = [r for r in roles if r['name'] == name]
         if len(role) > 0:
             return role[0]

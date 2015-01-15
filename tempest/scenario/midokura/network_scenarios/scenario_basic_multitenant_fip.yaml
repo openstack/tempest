@@ -11,10 +11,10 @@
 #    under the License.
 
 tenants:
-- name: tenant_1
+- name: tenantfip_1
   description: a tenant 
   scenario: scenario1
-- name: tenant_2
+- name: tenantfip_2
   description: a tenant 
   scenario: scenario1
 

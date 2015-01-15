@@ -52,11 +52,6 @@ class TestNetworkBasicMultitenants(manager.AdvancedNetworkScenarioTest):
         should succeed
     """
 
-    @classmethod
-    def setUpClass(cls):
-        super(TestNetworkBasicMultitenants, cls).setUpClass()
-        cls.check_preconditions()
-
     def setUp(self):
         super(TestNetworkBasicMultitenants, self).setUp()
         self.scenarios = self.setup_topology(
@@ -79,7 +74,7 @@ class TestNetworkBasicMultitenants(manager.AdvancedNetworkScenarioTest):
             self._check_default_gateway(route_out, remote_ip)
             LOG.info(route_out)
         except Exception as inst:
-            LOG.info(inst.args)
+            LOG.info(inst)
             raise
 
     def _check_default_gateway(self, route_out, internal_ip):
@@ -94,7 +89,9 @@ class TestNetworkBasicMultitenants(manager.AdvancedNetworkScenarioTest):
     @test.attr(type='smoke')
     @test.services('compute', 'network')
     def test_network_basic_multitenant(self):
+        LOG.debug("BEFORE LOOP _multitenant_test:\n" + str(self.scenarios))
         for creds_and_scenario in self.scenarios:
+            LOG.debug("BEFORE _multitenant_test:\n" + str(creds_and_scenario))
             self._multitenant_test(creds_and_scenario)
 
     def _multitenant_test(self, creds_and_scenario):

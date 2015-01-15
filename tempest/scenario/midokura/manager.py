@@ -37,18 +37,8 @@ class AdvancedNetworkScenarioTest(manager.NetworkScenarioTest):
     """
 
     @classmethod
-    def setUpClass(cls):
-        super(AdvancedNetworkScenarioTest, cls).setUpClass()
-
-    @classmethod
-    def tearDownClass(cls):
-        try:
-            super(AdvancedNetworkScenarioTest, cls).tearDownClass()
-        finally:
-            cls.clear_creds()
-
-    @classmethod
-    def clear_creds(cls):
+    def clear_isolated_creds(cls):
+        super(AdvancedNetworkScenarioTest, cls).clear_isolated_creds()
         TA = admintools.TenantAdmin()
         TA.teardown_tenants()
 
@@ -83,8 +73,8 @@ class AdvancedNetworkScenarioTest(manager.NetworkScenarioTest):
         port_id = self._get_custom_server_port_id(server,
                                                   ip_addr=server_ip)
         floating_ip = self.create_floating_ip(server,
-                                               public_network_id,
-                                               port_id=port_id)
+                                              public_network_id,
+                                              port_id=port_id)
         return floating_ip
 
     def _create_server(self, name, networks,
@@ -110,8 +100,8 @@ class AdvancedNetworkScenarioTest(manager.NetworkScenarioTest):
         if has_FIP:
             network_names = self._get_network_by_name(networks[0]['name'])
             FIP = self._assign_floating_ip(
-                   server=server,
-                   network_name=network_names[0]['name'])
+                server=server,
+                network_name=network_names[0]['name'])
 
         return dict(server=server, keypair=keypair, FIP=FIP)
 
@@ -169,15 +159,16 @@ class AdvancedNetworkScenarioTest(manager.NetworkScenarioTest):
         # fix for cirros image in order to enable a second eth
         for net in xrange(1, len(server['addresses'].keys())):
             if access_point_ssh.exec_command(
-                    "cat /sys/class/net/eth{0}/operstate".format(net)) \
+                    "cat /sys/class/net/eth{0}/operstate".format(net), 300) \
                     is not 'up\n':
                 try:
                     result = access_point_ssh.exec_command(
-                        "sudo /sbin/cirros-dhcpc up eth{0}".format(net), 
-                        10)
+                        "sudo /sbin/cirros-dhcpc up eth{0}".format(net),
+                        300)
                     LOG.info(result)
-                except exceptions.TimeoutException:
-                    pass
+                except exceptions.TimeoutException as inst:
+                    LOG.warning("Silent TimeoutException!")
+                    LOG.warning(inst)
 
     def build_gateway(self, tenant_id):
         return self._set_access_point(tenant_id)
@@ -220,8 +211,9 @@ class AdvancedNetworkScenarioTest(manager.NetworkScenarioTest):
         _creds = None
         _tenant = TA.get_tenant_by_name(tenant['name'])
         if _tenant is None:
-            _tenant, _creds  = TA.tenant_create_enabled(name=tenant['name'],
-                                              desc=tenant['description'])
+            _tenant, _creds = TA.tenant_create_enabled(
+                name=tenant['name'],
+                desc=tenant['description'])
         else:
             _creds = TA.admin_credentials(_tenant)
         return _tenant, _creds
@@ -230,21 +222,21 @@ class AdvancedNetworkScenarioTest(manager.NetworkScenarioTest):
         if not tenant:
             tenant = self.tenant_id
         client = self.network_client
-        _, sgs = client.list_security_groups(tenant_id=tenant)
+        sgs = client.list_security_groups(tenant_id=tenant)
         return sgs['security_groups']
 
     def _get_tenant_networks(self, tenant=None):
         if not tenant:
             tenant = self.tenant_id
         client = self.network_client
-        _, nets = client.list_networks(tenant_id=tenant)
+        nets = client.list_networks(tenant_id=tenant)
         return nets['networks']
 
     def _get_tenant_routers(self, tenant=None):
         if not tenant:
             tenant = self.tenant_id
         client = self.network_client
-        _, routers = client.list_routers(tenant_id=tenant)
+        routers = client.list_routers(tenant_id=tenant)
         return routers['routers']
 
     def _get_custom_server_port_id(self, server, ip_addr=None):
@@ -261,7 +253,7 @@ class AdvancedNetworkScenarioTest(manager.NetworkScenarioTest):
         routers = self._get_tenant_routers()
         d_router = filter(lambda x: x['name'].startswith(r_name), routers)[0]
         return net_resources.DeletableRouter(**d_router)
-    
+
     def _get_network_by_name(self, net_name):
         nets = self._get_tenant_networks(tenant=self.tenant_id)
         return filter(lambda x: x['name'].startswith(net_name), nets)
@@ -285,17 +277,19 @@ class AdvancedNetworkScenarioTest(manager.NetworkScenarioTest):
         self.network_client = self.mymanager.network_client
 
     def _toggle_dhcp(self, subnet_id, enable=False):
-        _, result = self.network_client.update_subnet(subnet_id, enable_dhcp=enable)
+        result = self.network_client.update_subnet(subnet_id,
+                                                   enable_dhcp=enable)
         subnet = result["subnet"]
         self.assertEqual(subnet["enable_dhcp"], enable)
         LOG.debug(result)
-    
+
     def _ping_through_gateway(self, hops, destination, should_succed=True):
         LOG.info("Trying to ping between %s and %s"
                  % (hops[-1][0], destination[0]))
         ssh_client = self.setup_tunnel(hops)
-        self.assertTrue(self._check_remote_connectivity(
-             ssh_client, destination[0], should_succed))
+        self.assertTrue(self._check_remote_connectivity(ssh_client,
+                                                        destination[0],
+                                                        should_succed))
 
     def _ssh_through_gateway(self, origin, destination):
         try:
@@ -310,12 +304,12 @@ class AdvancedNetworkScenarioTest(manager.NetworkScenarioTest):
         except Exception as inst:
             LOG.info(inst.args)
             raise
-    
+
     def _locate_file(self, path):
         realpath = os.getcwd()
         for root, dirs, _ in os.walk(realpath):
             if path in dirs:
-                return os.path.join(root,path)
+                return os.path.join(root, path)
     """
     YAML parsing methods
     """
@@ -331,20 +325,20 @@ class AdvancedNetworkScenarioTest(manager.NetworkScenarioTest):
                 routers = []
                 for router in subnet['routers']:
                     router_names = [r['name'] for r in
-                                   self._get_tenant_routers()]
+                                    self._get_tenant_routers()]
                     if not any(map(lambda x: router['name'] in x,
-                        router_names)):
+                               router_names)):
                         if router['public']:
                             router = self._get_router(
-                                        client=self.network_client,
-                                        tenant_id=self.tenant_id)
+                                client=self.network_client,
+                                tenant_id=self.tenant_id)
                         else:
                             router = self._create_router(
-                                        namestart=router['name'],
-                                        tenant_id=self.tenant_id)
+                                namestart=router['name'],
+                                tenant_id=self.tenant_id)
                     else:
                         router = \
-                        self._get_tenant_router_by_name(router['name'])
+                            self._get_tenant_router_by_name(router['name'])
                     routers.append(router)
                 subnet_dic = \
                     dict(
@@ -364,13 +358,16 @@ class AdvancedNetworkScenarioTest(manager.NetworkScenarioTest):
         for secgroup in topology['security_groups']:
             sgroups = self._get_tenant_security_groups(self.tenant_id)
             if secgroup['name'] in [r['name'] for r in sgroups]:
-                sg = filter(lambda x: x['name'].startswith(secgroup['name']), sgroups)[0]
+                sg = filter(
+                    lambda x: x['name'].startswith(secgroup['name']),
+                    sgroups)[0]
             else:
-                sg = self._create_empty_security_group(tenant_id=self.tenant_id,
-                                                       namestart=secgroup['name'])
-                rules = \
-                    self._create_security_group_rule_list(rule_dict=secgroup,
-                                                          secgroup=sg)
+                sg = self._create_empty_security_group(
+                    tenant_id=self.tenant_id,
+                    namestart=secgroup['name'])
+                self._create_security_group_rule_list(
+                    rule_dict=secgroup,
+                    secgroup=sg)
         test_topology = []
         for server in topology['servers']:
             s_nets = []
@@ -381,10 +378,12 @@ class AdvancedNetworkScenarioTest(manager.NetworkScenarioTest):
                 s_sg.append(self._get_security_group_by_name(sg['name']))
             for x in range(server['quantity']):
                 name = data_utils.rand_name('server-smoke-')
-                test_topology.append(self._create_server(name=name,
-                                                         networks=s_nets,
-                                                         security_groups=s_sg,
-                                                         has_FIP=server['floating_ip']))
+                s_server = self._create_server(name=name,
+                                               networks=s_nets,
+                                               security_groups=s_sg,
+                                               has_FIP=server['floating_ip'])
+                test_topology.append(s_server)
+
         if 'gateway' in topology.keys() and topology['gateway']:
             test_topology.append(self.build_gateway(self.tenant_id))
 
@@ -400,8 +399,8 @@ class AdvancedNetworkScenarioTest(manager.NetworkScenarioTest):
                 for tenant in topology['tenants']:
                     _tenant, creds = self._get_tenant(tenant)
                     self.set_context(creds)
-                    topo =  [x for x in topology['scenarios'] \
-                                 if x['name'] == tenant['scenario']][0]
+                    topo = [x for x in topology['scenarios']
+                            if x['name'] == tenant['scenario']][0]
                     scenario.append(dict(credentials=creds,
                                          servers_and_keys=self._setup_topology(
                                              topo,

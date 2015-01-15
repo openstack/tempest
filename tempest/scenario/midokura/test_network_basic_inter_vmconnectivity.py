@@ -42,26 +42,23 @@ class TestNetworkBasicInterVMConnectivity(manager.AdvancedNetworkScenarioTest):
         Expected results:
         ping works
     """
-    @classmethod
-    def setUpClass(cls):
-        super(TestNetworkBasicInterVMConnectivity, cls).setUpClass()
-        cls.check_preconditions()
 
     def setUp(self):
         super(TestNetworkBasicInterVMConnectivity, self).setUp()
         self.servers_and_keys = self.setup_topology(
-                os.path.abspath('{0}scenario_basic_inter_vmconnectivity.yaml'.format(SCPATH)))
-        
-   
+            os.path.abspath(
+                '{0}scenario_basic_inter_vmconnectivity.yaml'.format(SCPATH)))
+
     @test.attr(type='smoke')
     @test.services('compute', 'network')
     def test_network_basic_inter_vmssh(self):
         ap_details = self.servers_and_keys[-1]
         ap = ap_details['server']
         networks = ap['addresses']
-        hops=[(ap_details['FIP'].floating_ip_address, ap_details['keypair']['private_key'])]
+        hops = [(ap_details['FIP'].floating_ip_address,
+                 ap_details['keypair']['private_key'])]
         ip_pk = []
-        #the access_point server should be the last one in the list
+        # the access_point server should be the last one in the list
         for element in self.servers_and_keys[:-1]:
             # servers should only have 1 network
             server = element['server']
@@ -75,7 +72,7 @@ class TestNetworkBasicInterVMConnectivity(manager.AdvancedNetworkScenarioTest):
                 LOG.info("FAIL - No ip connectivity to the server ip: %s"
                          % server['addresses'][name][0]['addr'])
                 raise Exception("FAIL - No ip for this network : %s"
-                            % server['addresses'][name])
+                                % server['addresses'][name])
         for pair in itertools.permutations(ip_pk):
             LOG.info("Checking ssh between %s %s"
                      % (pair[0][0], pair[1][0]))

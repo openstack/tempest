@@ -44,23 +44,21 @@ class TestNetworkBasicSecurityGroups(manager.AdvancedNetworkScenarioTest):
             vm3 can ping to vm1 and vm2 but not vice versa
     """
 
-    @classmethod
-    def setUpClass(cls):
-        super(TestNetworkBasicSecurityGroups, cls).setUpClass()
-        cls.check_preconditions()
-
     def setUp(self):
         super(TestNetworkBasicSecurityGroups, self).setUp()
         self.servers_and_keys = self.setup_topology(
-            os.path.abspath('{0}scenario_basic_security_groups.yaml'.format(SCPATH)))
-        
+            os.path.abspath(
+                '{0}scenario_basic_security_groups.yaml'.format(SCPATH)))
+
     def _create_vm3_and_sg1(self):
         # creates the vm3 and assigns it sc "sg1"
         net = self._get_network_by_name('netA')
         sg = self._create_empty_security_group(tenant_id=self.tenant_id,
-                namestart="sg1")
-        server = self._create_server(name="vm3", networks=net,
-                 security_groups=[sg], has_FIP=False)['server']
+                                               namestart="sg1")
+        server = self._create_server(name="vm3",
+                                     networks=net,
+                                     security_groups=[sg],
+                                     has_FIP=False)['server']
         return server
 
     @test.attr(type='smoke')
@@ -70,8 +68,8 @@ class TestNetworkBasicSecurityGroups(manager.AdvancedNetworkScenarioTest):
         ap_details = self.servers_and_keys[-1]
         ap = ap_details['server']
         networks = ap['addresses']
-        hops=[(ap_details['FIP'].floating_ip_address,
-             ap_details['keypair']['private_key'])]
+        hops = [(ap_details['FIP'].floating_ip_address,
+                 ap_details['keypair']['private_key'])]
         ip_pk = []
         for element in self.servers_and_keys[:-1]:
             # servers should only have 1 network
@@ -85,7 +83,7 @@ class TestNetworkBasicSecurityGroups(manager.AdvancedNetworkScenarioTest):
                 LOG.info("FAIL - No ip connectivity to the server ip: %s"
                          % server['addresses'][name][0]['addr'])
                 raise Exception("FAIL - No ip for this network : %s"
-                            % server['addresses'][name])
+                                % server['addresses'][name])
         for pair in itertools.permutations(ip_pk):
             nhops = hops + [pair[0]]
             self._ssh_through_gateway(nhops, pair[1])
@@ -96,13 +94,13 @@ class TestNetworkBasicSecurityGroups(manager.AdvancedNetworkScenarioTest):
     @test.attr(type='smoke')
     @test.services('compute', 'network')
     def test_network_basic_multi_security_group(self):
-        vm3  = self._create_vm3_and_sg1()
+        vm3 = self._create_vm3_and_sg1()
         # we get the access point server
         ap_details = self.servers_and_keys[-1]
         ap = ap_details['server']
         networks = ap['addresses']
-        hops=[(ap_details['FIP'].floating_ip_address,
-             ap_details['keypair']['private_key'])]
+        hops = [(ap_details['FIP'].floating_ip_address,
+                 ap_details['keypair']['private_key'])]
         server = self.servers_and_keys[0]['server']
         name = server['addresses'].keys()[0]
         if any(i in networks.keys() for i in server['addresses'].keys()):
@@ -111,9 +109,9 @@ class TestNetworkBasicSecurityGroups(manager.AdvancedNetworkScenarioTest):
             nhops = hops + [(remote_ip, pk)]
         else:
             LOG.info("FAIL - No ip connectivity to the server ip: %s"
-                         % server['addresse'][name][0]['addr'])
+                     % server['addresses'][name][0]['addr'])
             raise Exception("FAIL - No ip for this network : %s"
                             % server['addresses'][name])
         self._ping_through_gateway(nhops,
-                    vm3['addresses'].values()[0], 
-                    should_succed=False)
+                                   vm3['addresses'].values()[0][0]['addr'],
+                                   should_succed=False)

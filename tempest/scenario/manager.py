@@ -621,8 +621,7 @@ class NetworkScenarioTest(ScenarioTest):
                 network_id=network.id,
                 tenant_id=network.tenant_id,
                 cidr=str_cidr,
-                ip_version=ip_version,
-                **kwargs
+                ip_version=ip_version
             )
             subnet.update(**kwargs)
             try:

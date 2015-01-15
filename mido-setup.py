@@ -41,8 +41,9 @@ def set_context(credentials):
     manager = clients.Manager(credentials=credentials)
     network_client = manager.network_client
     image_client = manager.image_client
-    glance_endpoint = keystone.service_catalog.url_for(service_type='image',
-                                                       endpoint_type='internal')
+    glance_endpoint = keystone.service_catalog.url_for(
+        service_type='image',
+        endpoint_type='internal')
     glance_client =\
         glclient.Client(glance_endpoint,
                         token=keystone.auth_token)
@@ -81,14 +82,15 @@ def upload_cirros(image_client):
         'visibility': 'public',
         'is_public': True,
     }
-    resp, body = image_client.create_image(name='cirros 0.3.3',
-                                                container_format='bare',
-                                                disk_format='raw',
-                                                **kwargs)
-    if resp['status'] != "201":
+    try:
+        resp = image_client.create_image(name='cirros 0.3.3',
+                                         container_format='bare',
+                                         disk_format='raw',
+                                         **kwargs)
+    except:
         raise Exception("Cirros image not created")
-    else:
-        image_ref = body['id']
+
+    image_ref = resp['id']
 
 
 def fix_tempest_conf(network_client):
@@ -102,18 +104,19 @@ def fix_tempest_conf(network_client):
         raise Exception("No config file in %s", _path)
 
     try:
-    	config = simpleconfigparser()
-    	config.read(_path)
+        config = simpleconfigparser()
+        config.read(_path)
     except Exception as e:
         print(str(e))
-    
+
     # get neutron suported extensions
-    _, extensions_dict = network_client.list_extensions()
+    extensions_dict = network_client.list_extensions()
+
     extensions = [x['alias'] for x in extensions_dict['extensions']]
     # setup network extensions
     to_string = ""
     for ex in extensions[:-1]:
-	to_string = str.format("{0},{1}", ex, to_string)
+        to_string = str.format("{0},{1}", ex, to_string)
     to_string = str.format("{0}{1}", to_string, extensions[-1])
 
     if CONF.network_feature_enabled.api_extensions != to_string:
@@ -135,7 +138,6 @@ def fix_tempest_conf(network_client):
 
     with open(_path, 'w') as tempest_conf:
         config.write(tempest_conf)
-
 
 if __name__ == "__main__":
     main()

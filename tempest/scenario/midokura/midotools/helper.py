@@ -92,5 +92,4 @@ class Routetable:
             r = Routetable(line)
             if r.destination:
                 rtable.append(r)
-
         return rtable

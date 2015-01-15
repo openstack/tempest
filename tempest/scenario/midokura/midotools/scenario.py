@@ -72,7 +72,7 @@ class TestScenario(manager.NetworkScenarioTest):
         self.subnets = []
         self.routers = []
         # saving the internal routers in a different list
-        self.internal_routers= []
+        self.internal_routers = []
         self.floating_ips = {}
         self.servers = {}
         self.masterkey = None
@@ -159,17 +159,18 @@ class TestScenario(manager.NetworkScenarioTest):
                 for r in mysubnet['routers']:
                     if not self.internal_routers or not \
                             all(map(lambda x: True if r["name"] in
-                                    x.values() else False, self.internal_routers)):
+                                x.values() else False, self.internal_routers)):
                         if r["public"]:
                             myrouter = self._get_router(mynetwork['tenant_id'])
                         else:
-                            myrouter = \
-                                self._create_custom_router(mynetwork['tenant_id'], name=r["name"])
+                            myrouter = self._create_custom_router(
+                                mynetwork['tenant_id'],
+                                name=r["name"])
                         self.internal_routers.append(myrouter)
                     else:
                         # should have a hit
-                        myrouter = \
-                            [rr for rr in self.internal_routers if rr["name"] in r["name"]][0]
+                        myrouter = [rr for rr in self.internal_routers
+                                    if rr["name"] in r["name"]][0]
                     routers.append(myrouter)
             # subnet needs to be created after the router or
             # the teardown process will fail
@@ -254,7 +255,7 @@ class TestScenario(manager.NetworkScenarioTest):
             if not is_overlapping_cidr:
                 raise
         self.assertIsNotNone(result,
-            'Unable to allocate tenant network')
+                             'Unable to allocate tenant network')
         subnet = net_common.DeletableSubnet(client=self.network_client,
                                             **result['subnet'])
         self.assertEqual(subnet.cidr, str(mysubnet['cidr']))
@@ -346,7 +347,7 @@ class TestScenario(manager.NetworkScenarioTest):
 
     def _toggle_dhcp(self, subnet_id, enable=False):
         subnet = {
-            "subnet":{
+            "subnet": {
                 "enable_dhcp": enable,
             }
         }

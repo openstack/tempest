@@ -49,15 +49,10 @@ class TestNetworkBasicDhcpLease(manager.AdvancedNetworkScenarioTest):
             Packets with the routes and the dns entry should reach the vm.
     """
 
-    @classmethod
-    def setUpClass(cls):
-        super(TestNetworkBasicDhcpLease, cls).setUpClass()
-        cls.check_preconditions()
-
     def setUp(self):
         super(TestNetworkBasicDhcpLease, self).setUp()
-        self.servers_and_keys = \
-            self.setup_topology(os.path.abspath('{0}scenario_basic_dhcp.yaml'.format(SCPATH)))
+        self.servers_and_keys = self.setup_topology(
+            os.path.abspath('{0}scenario_basic_dhcp.yaml'.format(SCPATH)))
 
     def _check_routes(self, hops):
         LOG.info("Obtaining the routes")
@@ -76,8 +71,9 @@ class TestNetworkBasicDhcpLease(manager.AdvancedNetworkScenarioTest):
         LOG.info("Obtaining the routes")
         try:
             ssh_client = self.setup_tunnel(hops)
-            dns = ssh_client.exec_command("cat /etc/resolv.conf | grep nameserver | "
-                                          "awk '{print $2}'").replace("\n", "")
+            dns = ssh_client.exec_command(
+                "cat /etc/resolv.conf | grep nameserver | "
+                "awk '{print $2}'").replace("\n", "")
             LOG.info(dns)
             self.assertEqual(dns, "8.8.8.8")
         except Exception as inst:
@@ -100,7 +96,8 @@ class TestNetworkBasicDhcpLease(manager.AdvancedNetworkScenarioTest):
         ap_details = self.servers_and_keys[-1]
         ap = ap_details['server']
         networks = ap['addresses']
-        hops = [(ap_details['FIP'].floating_ip_address, ap_details['keypair']['private_key'])]
+        hops = [(ap_details['FIP'].floating_ip_address,
+                 ap_details['keypair']['private_key'])]
         # the last element is ignored since it is the gateway
         for element in self.servers_and_keys[:-1]:
             server = element['server']
@@ -135,7 +132,7 @@ class TestNetworkBasicDhcpLease(manager.AdvancedNetworkScenarioTest):
     def test_network_basic_dhcp_lease_full(self):
         self._do_test()
         LOG.info("test full finished, tearing down now ....")
-    
+
     @test.attr(type='smoke')
     @test.services('compute', 'network')
     def test_network_basic_dhcp_lease_dns(self):

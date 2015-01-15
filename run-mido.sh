@@ -1,17 +1,12 @@
-#!/bin/sh
-nosetests -v \
-tempest.scenario.midokura.test_network_advanced_inter_vmconnectivity \
-tempest.scenario.midokura.test_network_advanced_metadata.py \
-tempest.scenario.midokura.test_network_advanced_security_groups \
-tempest.scenario.midokura.test_network_advanced_security_groups_2networks \
-tempest.scenario.midokura.test_network_basic_adminstateup \
-tempest.scenario.midokura.test_network_basic_dhcp_disable \
-tempest.scenario.midokura.test_network_basic_dhcp_lease \
-tempest.scenario.midokura.test_network_basic_inter_vmconnectivity \
-tempest.scenario.midokura.test_network_basic_metadata \
-tempest.scenario.midokura.test_network_basic_multisubnet \
-tempest.scenario.midokura.test_network_basic_security_groups \
-tempest.scenario.midokura.test_network_basic_security_groups_2networks \
-tempest.scenario.midokura.test_network_basic_security_groups_netcat \
-tempest.scenario.midokura.test_network_basic_vmconnectivity \
-2>&1 | tee mido-results-`date +%Y%m%d-%H%M`.log
+#!/bin/bash
+
+if [ $# -ne 1 ]; then
+    echo "Usage ./run-mido.sh [tag]"
+    exit 1
+fi
+
+./run_tempest.sh tempest.api.network \
+    tempest.scenario.test_network_basic_ops \
+    tempest.scenario.test_network_advanced_server_ops \
+    tempest.scenario.test_security_groups_basic_ops \
+    tempest.scenario.midokura 2>&1 | tee test_results_$1_$(date +%Y%d%m-%H%M).log

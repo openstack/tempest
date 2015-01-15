@@ -44,11 +44,6 @@ class TestNetworkBasicSecurityGroupsNetcat(
             check B receives "123"
     """
 
-    @classmethod
-    def setUpClass(cls):
-        super(TestNetworkBasicSecurityGroupsNetcat, cls).setUpClass()
-        cls.check_preconditions()
-
     def setUp(self):
         super(TestNetworkBasicSecurityGroupsNetcat, self).setUp()
         self.servers_and_keys = self.setup_topology(
@@ -82,7 +77,6 @@ class TestNetworkBasicSecurityGroupsNetcat(
             result = self._netcat_test(source[0], ssh_server, ssh_client)
         LOG.info(result)
         self.assertEqual("123\n", result)
-
 
     @test.attr(type='smoke')
     @test.services('compute', 'network')

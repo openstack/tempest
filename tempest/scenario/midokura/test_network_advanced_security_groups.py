@@ -49,15 +49,11 @@ class TestNetworkAdvancedSecurityGroups(manager.AdvancedNetworkScenarioTest):
             -ping does work
     """
 
-    @classmethod
-    def setUpClass(cls):
-        super(TestNetworkAdvancedSecurityGroups, cls).setUpClass()
-        cls.check_preconditions()
-
     def setUp(self):
         super(TestNetworkAdvancedSecurityGroups, self).setUp()
         self.servers_and_keys = self.setup_topology(
-            os.path.abspath('{0}scenario_advanced_security_groups.yaml'.format(SCPATH)))
+            os.path.abspath(
+                '{0}scenario_advanced_security_groups.yaml'.format(SCPATH)))
 
     @test.attr(type='smoke')
     @test.services('compute', 'network')
