@@ -18,11 +18,9 @@ import httplib2
 from oslotest import mockpatch
 
 from tempest.common import rest_client
-from tempest import config
 from tempest import exceptions
 from tempest.tests import base
 from tempest.tests import fake_auth_provider
-from tempest.tests import fake_config
 from tempest.tests import fake_http
 
 
@@ -32,8 +30,6 @@ class BaseRestClientTestClass(base.TestCase):
 
     def setUp(self):
         super(BaseRestClientTestClass, self).setUp()
-        self.useFixture(fake_config.ConfigFixture())
-        self.stubs.Set(config, 'TempestConfigPrivate', fake_config.FakePrivate)
         self.rest_client = rest_client.RestClient(
             fake_auth_provider.FakeAuthProvider(), None, None)
         self.stubs.Set(httplib2.Http, 'request', self.fake_http.request)
@@ -296,8 +292,6 @@ class TestRestClientErrorCheckerJSON(base.TestCase):
 
     def setUp(self):
         super(TestRestClientErrorCheckerJSON, self).setUp()
-        self.useFixture(fake_config.ConfigFixture())
-        self.stubs.Set(config, 'TempestConfigPrivate', fake_config.FakePrivate)
         self.rest_client = rest_client.RestClient(
             fake_auth_provider.FakeAuthProvider(), None, None)
 
