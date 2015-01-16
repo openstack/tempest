@@ -13,6 +13,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import netaddr
 import socket
 
 from tempest.api.network import base
@@ -82,6 +83,34 @@ class PortsTestJSON(base.BaseNetworkTest):
         self.assertEqual(port2['network_id'], network2['id'])
         self.assertTrue(port1['admin_state_up'])
         self.assertTrue(port2['admin_state_up'])
+
+    @classmethod
+    def _get_ipaddress_from_tempest_conf(cls):
+        """Return first subnet gateway for configured CIDR """
+        if cls._ip_version == 4:
+            cidr = netaddr.IPNetwork(CONF.network.tenant_network_cidr)
+
+        elif cls._ip_version == 6:
+            cidr = netaddr.IPNetwork(CONF.network.tenant_network_v6_cidr)
+
+        return netaddr.IPAddress(cidr)
+
+    @test.attr(type='smoke')
+    def test_create_port_in_allowed_allocation_pools(self):
+        network = self.create_network()
+        net_id = network['id']
+        address = self._get_ipaddress_from_tempest_conf()
+        allocation_pools = {'allocation_pools': [{'start': str(address + 4),
+                                                  'end': str(address + 6)}]}
+        self.create_subnet(network, **allocation_pools)
+        body = self.client.create_port(network_id=net_id)
+        self.addCleanup(self.client.delete_port, body['port']['id'])
+        port = body['port']
+        ip_address = port['fixed_ips'][0]['ip_address']
+        start_ip_address = allocation_pools['allocation_pools'][0]['start']
+        end_ip_address = allocation_pools['allocation_pools'][0]['end']
+        ip_range = netaddr.IPRange(start_ip_address, end_ip_address)
+        self.assertIn(ip_address, ip_range)
 
     @test.attr(type='smoke')
     def test_show_port(self):
