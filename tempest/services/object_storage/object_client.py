@@ -17,25 +17,20 @@ import httplib
 import urllib
 import urlparse
 
-from tempest.common import http
-from tempest.common import rest_client
 from tempest import config
-from tempest import exceptions
+from tempest.services.object_storage import base
 
 CONF = config.CONF
 
 
-class ObjectClient(rest_client.RestClient):
-    def __init__(self, auth_provider):
-        super(ObjectClient, self).__init__(auth_provider)
-
-        self.service = CONF.object_storage.catalog_type
+class ObjectClient(base.ObjectStorageClient):
 
     def create_object(self, container, object_name, data,
-                      params=None, metadata=None):
+                      params=None, metadata=None, headers=None):
         """Create storage object."""
 
-        headers = self.get_headers()
+        if headers is None:
+            headers = self.get_headers()
         if not data:
             headers['content-length'] = '0'
         if metadata:
@@ -180,89 +175,6 @@ class ObjectClient(rest_client.RestClient):
         self._error_checker('PUT', None, headers, contents, resp, body)
         self.expected_success(201, resp.status)
         return resp.status, resp.reason, resp_headers
-
-
-class ObjectClientCustomizedHeader(rest_client.RestClient):
-
-    # TODO(andreaf) This class is now redundant, to be removed in next patch
-
-    def __init__(self, auth_provider):
-        super(ObjectClientCustomizedHeader, self).__init__(
-            auth_provider)
-        # Overwrites json-specific header encoding in rest_client.RestClient
-        self.service = CONF.object_storage.catalog_type
-        self.format = 'json'
-
-    def request(self, method, url, extra_headers=False, headers=None,
-                body=None):
-        """A simple HTTP request interface."""
-        dscv = CONF.identity.disable_ssl_certificate_validation
-        ca_certs = CONF.identity.ca_certificates_file
-        self.http_obj = http.ClosingHttp(
-            disable_ssl_certificate_validation=dscv,
-            ca_certs=ca_certs)
-        if headers is None:
-            headers = {}
-        elif extra_headers:
-            try:
-                headers.update(self.get_headers())
-            except (ValueError, TypeError):
-                headers = {}
-
-        # Authorize the request
-        req_url, req_headers, req_body = self.auth_provider.auth_request(
-            method=method, url=url, headers=headers, body=body,
-            filters=self.filters
-        )
-        # Use original method
-        resp, resp_body = self.http_obj.request(req_url, method,
-                                                headers=req_headers,
-                                                body=req_body)
-        self._log_request(method, req_url, resp)
-        if resp.status == 401 or resp.status == 403:
-            raise exceptions.Unauthorized()
-
-        return resp, resp_body
-
-    def get_object(self, container, object_name, metadata=None):
-        """Retrieve object's data."""
-        headers = {}
-        if metadata:
-            for key in metadata:
-                headers[str(key)] = metadata[key]
-
-        url = "{0}/{1}".format(container, object_name)
-        resp, body = self.get(url, headers=headers)
-        self.expected_success(200, resp.status)
-        return resp, body
-
-    def create_object(self, container, object_name, data, metadata=None):
-        """Create storage object."""
-
-        headers = {}
-        if metadata:
-            for key in metadata:
-                headers[str(key)] = metadata[key]
-
-        if not data:
-            headers['content-length'] = '0'
-        url = "%s/%s" % (str(container), str(object_name))
-        resp, body = self.put(url, data, headers=headers)
-        self.expected_success(201, resp.status)
-        return resp, body
-
-    def delete_object(self, container, object_name, metadata=None):
-        """Delete storage object."""
-
-        headers = {}
-        if metadata:
-            for key in metadata:
-                headers[str(key)] = metadata[key]
-
-        url = "%s/%s" % (str(container), str(object_name))
-        resp, body = self.delete(url, headers=headers)
-        self.expected_success(200, resp.status)
-        return resp, body
 
     def create_object_continue(self, container, object_name,
                                data, metadata=None):

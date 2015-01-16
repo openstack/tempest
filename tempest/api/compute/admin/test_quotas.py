@@ -99,8 +99,8 @@ class QuotasAdminTestJSON(base.BaseV2ComputeAdminTest):
         tenant_name = data_utils.rand_name('cpu_quota_tenant_')
         tenant_desc = tenant_name + '-desc'
         identity_client = self.os_adm.identity_client
-        _, tenant = identity_client.create_tenant(name=tenant_name,
-                                                  description=tenant_desc)
+        tenant = identity_client.create_tenant(name=tenant_name,
+                                               description=tenant_desc)
         tenant_id = tenant['id']
         self.addCleanup(identity_client.delete_tenant, tenant_id)
 
@@ -113,10 +113,10 @@ class QuotasAdminTestJSON(base.BaseV2ComputeAdminTest):
         user_name = data_utils.rand_name('cpu_quota_user_')
         password = data_utils.rand_name('password-')
         email = user_name + '@testmail.tm'
-        _, user = identity_client.create_user(name=user_name,
-                                              password=password,
-                                              tenant_id=tenant_id,
-                                              email=email)
+        user = identity_client.create_user(name=user_name,
+                                           password=password,
+                                           tenant_id=tenant_id,
+                                           email=email)
         user_id = user['id']
         self.addCleanup(identity_client.delete_user, user_id)
 
@@ -134,8 +134,8 @@ class QuotasAdminTestJSON(base.BaseV2ComputeAdminTest):
         tenant_name = data_utils.rand_name('ram_quota_tenant_')
         tenant_desc = tenant_name + '-desc'
         identity_client = self.os_adm.identity_client
-        _, tenant = identity_client.create_tenant(name=tenant_name,
-                                                  description=tenant_desc)
+        tenant = identity_client.create_tenant(name=tenant_name,
+                                               description=tenant_desc)
         tenant_id = tenant['id']
         self.addCleanup(identity_client.delete_tenant, tenant_id)
         resp, quota_set_default = self.adm_client.get_quota_set(tenant_id)

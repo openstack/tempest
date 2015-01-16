@@ -17,17 +17,10 @@ import urllib
 
 from tempest.api_schema.response.compute import hosts as schema
 from tempest.api_schema.response.compute.v2 import hosts as v2_schema
-from tempest.common import rest_client
-from tempest import config
-
-CONF = config.CONF
+from tempest.services.compute.json import base
 
 
-class HostsClientJSON(rest_client.RestClient):
-
-    def __init__(self, auth_provider):
-        super(HostsClientJSON, self).__init__(auth_provider)
-        self.service = CONF.compute.catalog_type
+class HostsClientJSON(base.ComputeClient):
 
     def list_hosts(self, params=None):
         """Lists all hosts."""

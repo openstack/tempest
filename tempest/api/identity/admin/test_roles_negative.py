@@ -72,7 +72,7 @@ class RolesNegativeTestJSON(base.BaseIdentityV2AdminTest):
     def test_role_create_duplicate(self):
         # Role names should be unique
         role_name = data_utils.rand_name(name='role-dup-')
-        _, body = self.client.create_role(role_name)
+        body = self.client.create_role(role_name)
         role1_id = body.get('id')
         self.addCleanup(self.client.delete_role, role1_id)
         self.assertRaises(exceptions.Conflict, self.client.create_role,
@@ -82,7 +82,7 @@ class RolesNegativeTestJSON(base.BaseIdentityV2AdminTest):
     def test_delete_role_by_unauthorized_user(self):
         # Non-administrator user should not be able to delete role
         role_name = data_utils.rand_name(name='role-')
-        _, body = self.client.create_role(role_name)
+        body = self.client.create_role(role_name)
         self.data.roles.append(body)
         role_id = body.get('id')
         self.assertRaises(exceptions.Unauthorized,
@@ -92,7 +92,7 @@ class RolesNegativeTestJSON(base.BaseIdentityV2AdminTest):
     def test_delete_role_request_without_token(self):
         # Request to delete role without a valid token should fail
         role_name = data_utils.rand_name(name='role-')
-        _, body = self.client.create_role(role_name)
+        body = self.client.create_role(role_name)
         self.data.roles.append(body)
         role_id = body.get('id')
         token = self.client.auth_provider.get_token()
@@ -158,9 +158,9 @@ class RolesNegativeTestJSON(base.BaseIdentityV2AdminTest):
         # Non-administrator user should not be authorized to
         # remove a user's role
         (user, tenant, role) = self._get_role_params()
-        resp, user_role = self.client.assign_user_role(tenant['id'],
-                                                       user['id'],
-                                                       role['id'])
+        self.client.assign_user_role(tenant['id'],
+                                     user['id'],
+                                     role['id'])
         self.assertRaises(exceptions.Unauthorized,
                           self.non_admin_client.remove_user_role,
                           tenant['id'], user['id'], role['id'])
@@ -169,9 +169,9 @@ class RolesNegativeTestJSON(base.BaseIdentityV2AdminTest):
     def test_remove_user_role_request_without_token(self):
         # Request to remove a user's role without a valid token
         (user, tenant, role) = self._get_role_params()
-        resp, user_role = self.client.assign_user_role(tenant['id'],
-                                                       user['id'],
-                                                       role['id'])
+        self.client.assign_user_role(tenant['id'],
+                                     user['id'],
+                                     role['id'])
         token = self.client.auth_provider.get_token()
         self.client.delete_token(token)
         self.assertRaises(exceptions.Unauthorized,
@@ -183,9 +183,9 @@ class RolesNegativeTestJSON(base.BaseIdentityV2AdminTest):
     def test_remove_user_role_non_existent_role(self):
         # Attempt to delete a non existent role from a user should fail
         (user, tenant, role) = self._get_role_params()
-        resp, user_role = self.client.assign_user_role(tenant['id'],
-                                                       user['id'],
-                                                       role['id'])
+        self.client.assign_user_role(tenant['id'],
+                                     user['id'],
+                                     role['id'])
         non_existent_role = str(uuid.uuid4().hex)
         self.assertRaises(exceptions.NotFound, self.client.remove_user_role,
                           tenant['id'], user['id'], non_existent_role)
@@ -194,9 +194,9 @@ class RolesNegativeTestJSON(base.BaseIdentityV2AdminTest):
     def test_remove_user_role_non_existent_tenant(self):
         # Attempt to remove a role from a non existent tenant should fail
         (user, tenant, role) = self._get_role_params()
-        resp, user_role = self.client.assign_user_role(tenant['id'],
-                                                       user['id'],
-                                                       role['id'])
+        self.client.assign_user_role(tenant['id'],
+                                     user['id'],
+                                     role['id'])
         non_existent_tenant = str(uuid.uuid4().hex)
         self.assertRaises(exceptions.NotFound, self.client.remove_user_role,
                           non_existent_tenant, user['id'], role['id'])

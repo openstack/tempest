@@ -34,10 +34,10 @@ class AccountNegativeTest(base.BaseObjectTest):
         test_auth_provider.auth_data
 
         # Get fresh auth for test user and set it to next auth request for
-        # custom_account_client
+        # account_client
         delattr(test_auth_provider, 'auth_data')
         test_auth_new_data = test_auth_provider.auth_data
-        self.custom_account_client.auth_provider.set_alt_auth_data(
+        self.account_client.auth_provider.set_alt_auth_data(
             request_part='headers',
             auth_data=test_auth_new_data
         )
@@ -45,5 +45,5 @@ class AccountNegativeTest(base.BaseObjectTest):
         params = {'format': 'json'}
         # list containers with non-authorized user token
         self.assertRaises(exceptions.Unauthorized,
-                          self.custom_account_client.list_account_containers,
+                          self.account_client.list_account_containers,
                           params=params)

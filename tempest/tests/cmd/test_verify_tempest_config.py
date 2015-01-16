@@ -15,7 +15,6 @@
 import json
 
 import mock
-from oslo.config import cfg
 
 from tempest.cmd import verify_tempest_config
 from tempest import config
@@ -87,7 +86,7 @@ class TestDiscovery(base.TestCase):
         self.assertIn('v3.0', versions)
 
     def test_verify_api_versions(self):
-        api_services = ['cinder', 'glance', 'keystone', 'nova']
+        api_services = ['cinder', 'glance', 'keystone']
         fake_os = mock.MagicMock()
         for svc in api_services:
             m = 'verify_%s_api_versions' % svc
@@ -96,7 +95,7 @@ class TestDiscovery(base.TestCase):
                 verify_mock.assert_called_once_with(fake_os, True)
 
     def test_verify_api_versions_not_implemented(self):
-        api_services = ['cinder', 'glance', 'keystone', 'nova']
+        api_services = ['cinder', 'glance', 'keystone']
         fake_os = mock.MagicMock()
         for svc in api_services:
             m = 'verify_%s_api_versions' % svc
@@ -170,26 +169,9 @@ class TestDiscovery(base.TestCase):
         print_mock.assert_called_once_with('api_v1', 'volume_feature_enabled',
                                            False, True)
 
-    def test_verify_nova_versions(self):
-        cfg.CONF.set_default('api_v3', True, 'compute-feature-enabled')
-        self.useFixture(mockpatch.PatchObject(
-            verify_tempest_config, '_get_unversioned_endpoint',
-            return_value='http://fake_endpoint:5000'))
-        fake_resp = {'versions': [{'id': 'v2.0'}]}
-        fake_resp = json.dumps(fake_resp)
-        self.useFixture(mockpatch.PatchObject(
-            verify_tempest_config.RAW_HTTP, 'request',
-            return_value=(None, fake_resp)))
-        fake_os = mock.MagicMock()
-        with mock.patch.object(verify_tempest_config,
-                               'print_and_or_update') as print_mock:
-            verify_tempest_config.verify_nova_api_versions(fake_os, True)
-        print_mock.assert_called_once_with('api_v3', 'compute_feature_enabled',
-                                           False, True)
-
     def test_verify_glance_version_no_v2_with_v1_1(self):
         def fake_get_versions():
-            return (None, ['v1.1'])
+            return (['v1.1'])
         fake_os = mock.MagicMock()
         fake_os.image_client.get_versions = fake_get_versions
         with mock.patch.object(verify_tempest_config,
@@ -200,7 +182,7 @@ class TestDiscovery(base.TestCase):
 
     def test_verify_glance_version_no_v2_with_v1_0(self):
         def fake_get_versions():
-            return (None, ['v1.0'])
+            return (['v1.0'])
         fake_os = mock.MagicMock()
         fake_os.image_client.get_versions = fake_get_versions
         with mock.patch.object(verify_tempest_config,
@@ -211,7 +193,7 @@ class TestDiscovery(base.TestCase):
 
     def test_verify_glance_version_no_v1(self):
         def fake_get_versions():
-            return (None, ['v2.0'])
+            return (['v2.0'])
         fake_os = mock.MagicMock()
         fake_os.image_client.get_versions = fake_get_versions
         with mock.patch.object(verify_tempest_config,
@@ -261,9 +243,9 @@ class TestDiscovery(base.TestCase):
 
     def test_verify_extensions_cinder(self):
         def fake_list_extensions():
-            return (None, {'extensions': [{'alias': 'fake1'},
-                                          {'alias': 'fake2'},
-                                          {'alias': 'not_fake'}]})
+            return {'extensions': [{'alias': 'fake1'},
+                                   {'alias': 'fake2'},
+                                   {'alias': 'not_fake'}]}
         fake_os = mock.MagicMock()
         fake_os.volumes_extension_client.list_extensions = fake_list_extensions
         self.useFixture(mockpatch.PatchObject(
@@ -283,9 +265,9 @@ class TestDiscovery(base.TestCase):
 
     def test_verify_extensions_cinder_all(self):
         def fake_list_extensions():
-            return (None, {'extensions': [{'alias': 'fake1'},
-                                          {'alias': 'fake2'},
-                                          {'alias': 'not_fake'}]})
+            return {'extensions': [{'alias': 'fake1'},
+                                   {'alias': 'fake2'},
+                                   {'alias': 'not_fake'}]}
         fake_os = mock.MagicMock()
         fake_os.volumes_extension_client.list_extensions = fake_list_extensions
         self.useFixture(mockpatch.PatchObject(

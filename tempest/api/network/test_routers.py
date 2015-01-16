@@ -94,7 +94,7 @@ class RoutersTest(base.BaseRouterTest):
         # Test creating router from admin user setting tenant_id.
         test_tenant = data_utils.rand_name('test_tenant_')
         test_description = data_utils.rand_name('desc_')
-        _, tenant = self.identity_admin_client.create_tenant(
+        tenant = self.identity_admin_client.create_tenant(
             name=test_tenant, description=test_description)
         tenant_id = tenant['id']
         self.addCleanup(self.identity_admin_client.delete_tenant, tenant_id)

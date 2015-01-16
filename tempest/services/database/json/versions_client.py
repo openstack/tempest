@@ -15,18 +15,20 @@
 
 import urllib
 
-from tempest.common import rest_client
+from tempest.common import service_client
 from tempest import config
 
 CONF = config.CONF
 
 
-class DatabaseVersionsClientJSON(rest_client.RestClient):
+class DatabaseVersionsClientJSON(service_client.ServiceClient):
 
     def __init__(self, auth_provider):
-        super(DatabaseVersionsClientJSON, self).__init__(auth_provider)
+        super(DatabaseVersionsClientJSON, self).__init__(
+            auth_provider,
+            CONF.database.catalog_type,
+            CONF.identity.region)
         self.skip_path()
-        self.service = CONF.database.catalog_type
 
     def list_db_versions(self, params=None):
         """List all versions."""

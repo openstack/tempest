@@ -17,7 +17,7 @@ import json
 import urllib
 
 from tempest.api_schema.response.messaging.v1 import queues as queues_schema
-from tempest.common import rest_client
+from tempest.common import service_client
 from tempest.common.utils import data_utils
 from tempest import config
 
@@ -25,11 +25,13 @@ from tempest import config
 CONF = config.CONF
 
 
-class MessagingClientJSON(rest_client.RestClient):
+class MessagingClientJSON(service_client.ServiceClient):
 
     def __init__(self, auth_provider):
-        super(MessagingClientJSON, self).__init__(auth_provider)
-        self.service = CONF.messaging.catalog_type
+        super(MessagingClientJSON, self).__init__(
+            auth_provider,
+            CONF.messaging.catalog_type,
+            CONF.identity.region)
         self.version = '1'
         self.uri_prefix = 'v{0}'.format(self.version)
 

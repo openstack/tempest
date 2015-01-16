@@ -61,7 +61,7 @@ class AttachVolumeTestJSON(base.BaseV2ComputeTest):
             self.servers_client.list_addresses(self.server['id']))
 
         # Create a volume and wait for it to become ready
-        _, self.volume = self.volumes_client.create_volume(
+        self.volume = self.volumes_client.create_volume(
             1, display_name='test')
         self.addCleanup(self._delete_volume)
         self.volumes_client.wait_for_volume_status(self.volume['id'],

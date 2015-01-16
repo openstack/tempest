@@ -28,7 +28,7 @@ class RolesTestJSON(base.BaseIdentityV2AdminTest):
         super(RolesTestJSON, cls).resource_setup()
         for _ in moves.xrange(5):
             role_name = data_utils.rand_name(name='role-')
-            _, role = cls.client.create_role(role_name)
+            role = cls.client.create_role(role_name)
             cls.data.roles.append(role)
 
     def _get_role_params(self):
@@ -49,7 +49,7 @@ class RolesTestJSON(base.BaseIdentityV2AdminTest):
     @test.attr(type='gate')
     def test_list_roles(self):
         """Return a list of all roles."""
-        _, body = self.client.list_roles()
+        body = self.client.list_roles()
         found = [role for role in body if role in self.data.roles]
         self.assertTrue(any(found))
         self.assertEqual(len(found), len(self.data.roles))
@@ -58,16 +58,16 @@ class RolesTestJSON(base.BaseIdentityV2AdminTest):
     def test_role_create_delete(self):
         """Role should be created, verified, and deleted."""
         role_name = data_utils.rand_name(name='role-test-')
-        _, body = self.client.create_role(role_name)
+        body = self.client.create_role(role_name)
         self.assertEqual(role_name, body['name'])
 
-        _, body = self.client.list_roles()
+        body = self.client.list_roles()
         found = [role for role in body if role['name'] == role_name]
         self.assertTrue(any(found))
 
-        _, body = self.client.delete_role(found[0]['id'])
+        body = self.client.delete_role(found[0]['id'])
 
-        _, body = self.client.list_roles()
+        body = self.client.list_roles()
         found = [role for role in body if role['name'] == role_name]
         self.assertFalse(any(found))
 
@@ -77,7 +77,7 @@ class RolesTestJSON(base.BaseIdentityV2AdminTest):
         self.data.setup_test_role()
         role_id = self.data.role['id']
         role_name = self.data.role['name']
-        _, body = self.client.get_role(role_id)
+        body = self.client.get_role(role_id)
         self.assertEqual(role_id, body['id'])
         self.assertEqual(role_name, body['name'])
 
@@ -86,15 +86,15 @@ class RolesTestJSON(base.BaseIdentityV2AdminTest):
         """Assign a role to a user on a tenant."""
         (user, tenant, role) = self._get_role_params()
         self.client.assign_user_role(tenant['id'], user['id'], role['id'])
-        _, roles = self.client.list_user_roles(tenant['id'], user['id'])
+        roles = self.client.list_user_roles(tenant['id'], user['id'])
         self.assert_role_in_role_list(role, roles)
 
     @test.attr(type='gate')
     def test_remove_user_role(self):
         """Remove a role assigned to a user on a tenant."""
         (user, tenant, role) = self._get_role_params()
-        _, user_role = self.client.assign_user_role(tenant['id'],
-                                                    user['id'], role['id'])
+        user_role = self.client.assign_user_role(tenant['id'],
+                                                 user['id'], role['id'])
         self.client.remove_user_role(tenant['id'], user['id'],
                                      user_role['id'])
 
@@ -103,5 +103,5 @@ class RolesTestJSON(base.BaseIdentityV2AdminTest):
         """List roles assigned to a user on tenant."""
         (user, tenant, role) = self._get_role_params()
         self.client.assign_user_role(tenant['id'], user['id'], role['id'])
-        _, roles = self.client.list_user_roles(tenant['id'], user['id'])
+        roles = self.client.list_user_roles(tenant['id'], user['id'])
         self.assert_role_in_role_list(role, roles)

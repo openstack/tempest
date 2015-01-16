@@ -122,32 +122,20 @@ class AreAllWellFormatted(object):
 
     def match(self, actual):
         for key, value in actual.iteritems():
-            if key == 'content-length' and not value.isdigit():
+            if key in ('content-length', 'x-account-bytes-used',
+                       'x-account-container-count', 'x-account-object-count',
+                       'x-container-bytes-used', 'x-container-object-count')\
+                and not value.isdigit():
+                return InvalidFormat(key, value)
+            elif key in ('content-type', 'date', 'last-modified',
+                         'x-copied-from-last-modified') and not value:
                 return InvalidFormat(key, value)
             elif key == 'x-timestamp' and not re.match("^\d+\.?\d*\Z", value):
                 return InvalidFormat(key, value)
-            elif key == 'x-account-bytes-used' and not value.isdigit():
-                return InvalidFormat(key, value)
-            elif key == 'x-account-container-count' and not value.isdigit():
-                return InvalidFormat(key, value)
-            elif key == 'x-account-object-count' and not value.isdigit():
-                return InvalidFormat(key, value)
-            elif key == 'x-container-bytes-used' and not value.isdigit():
-                return InvalidFormat(key, value)
-            elif key == 'x-container-object-count' and not value.isdigit():
-                return InvalidFormat(key, value)
-            elif key == 'content-type' and not value:
-                return InvalidFormat(key, value)
             elif key == 'x-copied-from' and not re.match("\S+/\S+", value):
-                return InvalidFormat(key, value)
-            elif key == 'x-copied-from-last-modified' and not value:
                 return InvalidFormat(key, value)
             elif key == 'x-trans-id' and \
                 not re.match("^tx[0-9a-f]{21}-[0-9a-f]{10}.*", value):
-                return InvalidFormat(key, value)
-            elif key == 'date' and not value:
-                return InvalidFormat(key, value)
-            elif key == 'last-modified' and not value:
                 return InvalidFormat(key, value)
             elif key == 'accept-ranges' and not value == 'bytes':
                 return InvalidFormat(key, value)

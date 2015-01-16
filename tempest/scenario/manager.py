@@ -14,7 +14,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import logging
 import os
 import subprocess
 
@@ -35,13 +34,6 @@ import tempest.test
 CONF = config.CONF
 
 LOG = log.getLogger(__name__)
-
-# NOTE(afazekas): Workaround for the stdout logging
-LOG_nova_client = logging.getLogger('novaclient.client')
-LOG_nova_client.addHandler(log.NullHandler())
-
-LOG_cinder_client = logging.getLogger('cinderclient.client')
-LOG_cinder_client.addHandler(log.NullHandler())
 
 
 class ScenarioTest(tempest.test.BaseTestCase):
@@ -218,7 +210,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
                       imageRef=None, volume_type=None, wait_on_delete=True):
         if name is None:
             name = data_utils.rand_name(self.__class__.__name__)
-        _, volume = self.volumes_client.create_volume(
+        volume = self.volumes_client.create_volume(
             size=size, display_name=name, snapshot_id=snapshot_id,
             imageRef=imageRef, volume_type=volume_type)
 
@@ -238,7 +230,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
         self.volumes_client.wait_for_volume_status(volume['id'], 'available')
         # The volume retrieved on creation has a non-up-to-date status.
         # Retrieval after it becomes active ensures correct details.
-        _, volume = self.volumes_client.get_volume(volume['id'])
+        volume = self.volumes_client.get_volume(volume['id'])
         return volume
 
     def _create_loginable_secgroup_rule(self, secgroup_id=None):
@@ -346,7 +338,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
             'is_public': 'False',
         }
         params.update(properties)
-        _, image = self.image_client.create_image(**params)
+        image = self.image_client.create_image(**params)
         self.addCleanup(self.image_client.delete_image, image['id'])
         self.assertEqual("queued", image['status'])
         self.image_client.update_image(image['id'], data=image_file)
@@ -415,7 +407,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
             thing_id=image_id, thing_id_param='id',
             cleanup_callable=self.delete_wrapper,
             cleanup_args=[_image_client.delete_image, image_id])
-        _, snapshot_image = _image_client.get_image_meta(image_id)
+        snapshot_image = _image_client.get_image_meta(image_id)
         image_name = snapshot_image['name']
         self.assertEqual(name, image_name)
         LOG.debug("Created snapshot image %s for server %s",
@@ -424,19 +416,19 @@ class ScenarioTest(tempest.test.BaseTestCase):
 
     def nova_volume_attach(self):
         # TODO(andreaf) Device should be here CONF.compute.volume_device_name
-        _, volume = self.servers_client.attach_volume(
-            self.server['id'], self.volume['id'], '/dev/vdb')
+        volume = self.servers_client.attach_volume(
+            self.server['id'], self.volume['id'], '/dev/vdb')[1]
         self.assertEqual(self.volume['id'], volume['id'])
         self.volumes_client.wait_for_volume_status(volume['id'], 'in-use')
         # Refresh the volume after the attachment
-        _, self.volume = self.volumes_client.get_volume(volume['id'])
+        self.volume = self.volumes_client.get_volume(volume['id'])
 
     def nova_volume_detach(self):
         self.servers_client.detach_volume(self.server['id'], self.volume['id'])
         self.volumes_client.wait_for_volume_status(self.volume['id'],
                                                    'available')
 
-        _, volume = self.volumes_client.get_volume(self.volume['id'])
+        volume = self.volumes_client.get_volume(self.volume['id'])
         self.assertEqual('available', volume['status'])
 
     def rebuild_server(self, server_id, image=None,
@@ -556,7 +548,7 @@ class NetworkScenarioTest(ScenarioTest):
         if not client:
             client = self.network_client
         if not tenant_id:
-            tenant_id = client.rest_client.tenant_id
+            tenant_id = client.tenant_id
         name = data_utils.rand_name(namestart)
         result = client.create_network(name=name, tenant_id=tenant_id)
         network = net_resources.DeletableNetwork(client=client,
@@ -751,9 +743,9 @@ class NetworkScenarioTest(ScenarioTest):
         # The target login is assumed to have been configured for
         # key-based authentication by cloud-init.
         try:
-            for net_name, ip_addresses in server['networks'].iteritems():
+            for net_name, ip_addresses in server['addresses'].iteritems():
                 for ip_address in ip_addresses:
-                    self.check_vm_connectivity(ip_address,
+                    self.check_vm_connectivity(ip_address['addr'],
                                                username,
                                                private_key,
                                                should_connect=should_connect)
@@ -791,7 +783,7 @@ class NetworkScenarioTest(ScenarioTest):
         if client is None:
             client = self.network_client
         if tenant_id is None:
-            tenant_id = client.rest_client.tenant_id
+            tenant_id = client.tenant_id
         secgroup = self._create_empty_security_group(namestart=namestart,
                                                      client=client,
                                                      tenant_id=tenant_id)
@@ -817,7 +809,7 @@ class NetworkScenarioTest(ScenarioTest):
         if client is None:
             client = self.network_client
         if not tenant_id:
-            tenant_id = client.rest_client.tenant_id
+            tenant_id = client.tenant_id
         sg_name = data_utils.rand_name(namestart)
         sg_desc = sg_name + " description"
         sg_dict = dict(name=sg_name,
@@ -842,7 +834,7 @@ class NetworkScenarioTest(ScenarioTest):
         if client is None:
             client = self.network_client
         if not tenant_id:
-            tenant_id = client.rest_client.tenant_id
+            tenant_id = client.tenant_id
         sgs = [
             sg for sg in client.list_security_groups().values()[0]
             if sg['tenant_id'] == tenant_id and sg['name'] == 'default'
@@ -874,7 +866,7 @@ class NetworkScenarioTest(ScenarioTest):
         if client is None:
             client = self.network_client
         if not tenant_id:
-            tenant_id = client.rest_client.tenant_id
+            tenant_id = client.tenant_id
         if secgroup is None:
             secgroup = self._default_security_group(client=client,
                                                     tenant_id=tenant_id)
@@ -986,7 +978,7 @@ class NetworkScenarioTest(ScenarioTest):
         if not client:
             client = self.network_client
         if not tenant_id:
-            tenant_id = client.rest_client.tenant_id
+            tenant_id = client.tenant_id
         router_id = CONF.network.public_router_id
         network_id = CONF.network.public_network_id
         if router_id:
@@ -1005,7 +997,7 @@ class NetworkScenarioTest(ScenarioTest):
         if not client:
             client = self.network_client
         if not tenant_id:
-            tenant_id = client.rest_client.tenant_id
+            tenant_id = client.tenant_id
         name = data_utils.rand_name(namestart)
         result = client.create_router(name=name,
                                       admin_state_up=True,
@@ -1224,7 +1216,7 @@ class EncryptionScenarioTest(ScenarioTest):
             name = 'generic'
         randomized_name = data_utils.rand_name('scenario-type-' + name + '-')
         LOG.debug("Creating a volume type: %s", randomized_name)
-        _, body = client.create_volume_type(
+        body = client.create_volume_type(
             randomized_name)
         self.assertIn('id', body)
         self.addCleanup(client.delete_volume_type, body['id'])

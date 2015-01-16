@@ -50,7 +50,7 @@ class QuotasTest(base.BaseAdminNetworkTest):
         # Add a tenant to conduct the test
         test_tenant = data_utils.rand_name('test_tenant_')
         test_description = data_utils.rand_name('desc_')
-        _, tenant = self.identity_admin_client.create_tenant(
+        tenant = self.identity_admin_client.create_tenant(
             name=test_tenant,
             description=test_description)
         tenant_id = tenant['id']

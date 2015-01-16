@@ -59,7 +59,7 @@ def print_and_or_update(option, group, value, update):
 
 def verify_glance_api_versions(os, update):
     # Check glance api versions
-    __, versions = os.image_client.get_versions()
+    versions = os.image_client.get_versions()
     if CONF.image_feature_enabled.api_v1 != ('v1.1' in versions or 'v1.0' in
                                              versions):
         print_and_or_update('api_v1', 'image_feature_enabled',
@@ -104,13 +104,6 @@ def verify_keystone_api_versions(os, update):
                             not CONF.identity_feature_enabled.api_v3, update)
 
 
-def verify_nova_api_versions(os, update):
-    versions = _get_api_versions(os, 'nova')
-    if CONF.compute_feature_enabled.api_v3 != ('v3.0' in versions):
-        print_and_or_update('api_v3', 'compute_feature_enabled',
-                            not CONF.compute_feature_enabled.api_v3, update)
-
-
 def verify_cinder_api_versions(os, update):
     # Check cinder api versions
     versions = _get_api_versions(os, 'cinder')
@@ -127,7 +120,6 @@ def verify_api_versions(os, service, update):
         'cinder': verify_cinder_api_versions,
         'glance': verify_glance_api_versions,
         'keystone': verify_keystone_api_versions,
-        'nova': verify_nova_api_versions,
     }
     if service not in verify:
         return
@@ -162,7 +154,7 @@ def get_enabled_extensions(service):
 
 def verify_extensions(os, service, results):
     extensions_client = get_extension_client(os, service)
-    if service == 'neutron':
+    if service == 'neutron' or service == 'cinder':
         resp = extensions_client.list_extensions()
     else:
         __, resp = extensions_client.list_extensions()
@@ -258,9 +250,9 @@ def check_service_availability(os, update):
         'database': 'trove'
     }
     # Get catalog list for endpoints to use for validation
-    __, endpoints = os.endpoints_client.list_endpoints()
+    endpoints = os.endpoints_client.list_endpoints()
     for endpoint in endpoints:
-        __, service = os.service_client.get_service(endpoint['service_id'])
+        service = os.service_client.get_service(endpoint['service_id'])
         services.append(service['type'])
     # Pull all catalog types from config file and compare against endpoint list
     for cfgname in dir(CONF._config):
@@ -335,7 +327,7 @@ def main():
         CONF_PARSER = moves.configparser.SafeConfigParser()
         CONF_PARSER.optionxform = str
         CONF_PARSER.readfp(conf_file)
-    os = clients.ComputeAdminManager(interface='json')
+    os = clients.AdminManager(interface='json')
     services = check_service_availability(os, update)
     results = {}
     for service in ['nova', 'cinder', 'neutron', 'swift']:

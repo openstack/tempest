@@ -29,7 +29,7 @@ class ExtraSpecsNegativeV2Test(base.BaseVolumeAdminTest):
         super(ExtraSpecsNegativeV2Test, cls).resource_setup()
         vol_type_name = data_utils.rand_name('Volume-type-')
         cls.extra_specs = {"spec1": "val1"}
-        _, cls.volume_type = cls.volume_types_client.create_volume_type(
+        cls.volume_type = cls.volume_types_client.create_volume_type(
             vol_type_name,
             extra_specs=cls.extra_specs)
 

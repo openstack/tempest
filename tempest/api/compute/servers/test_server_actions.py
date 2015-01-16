@@ -290,12 +290,11 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
             'backup_type': "daily",
             'instance_uuid': self.server_id,
         }
-        resp, image_list = self.os.image_client.image_list_detail(
+        image_list = self.os.image_client.image_list_detail(
             properties,
             status='active',
             sort_key='created_at',
             sort_dir='asc')
-        self.assertEqual(200, resp.status)
         self.assertEqual(2, len(image_list))
         self.assertEqual((backup1, backup2),
                          (image_list[0]['name'], image_list[1]['name']))
@@ -315,12 +314,11 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         self.servers_client.wait_for_server_status(self.server_id, 'ACTIVE')
         self.os.image_client.wait_for_resource_deletion(image1_id)
         oldest_backup_exist = False
-        resp, image_list = self.os.image_client.image_list_detail(
+        image_list = self.os.image_client.image_list_detail(
             properties,
             status='active',
             sort_key='created_at',
             sort_dir='asc')
-        self.assertEqual(200, resp.status)
         self.assertEqual(2, len(image_list),
                          'Unexpected number of images for '
                          'v2:test_create_backup; was the oldest backup not '

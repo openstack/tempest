@@ -57,13 +57,13 @@ class AuthorizationTestJSON(base.BaseV2ComputeTest):
         resp, cls.server = cls.client.get_server(server['id'])
 
         name = data_utils.rand_name('image')
-        resp, body = cls.glance_client.create_image(name=name,
-                                                    container_format='bare',
-                                                    disk_format='raw',
-                                                    is_public=False)
+        body = cls.glance_client.create_image(name=name,
+                                              container_format='bare',
+                                              disk_format='raw',
+                                              is_public=False)
         image_id = body['id']
         image_file = StringIO.StringIO(('*' * 1024))
-        resp, body = cls.glance_client.update_image(image_id, data=image_file)
+        body = cls.glance_client.update_image(image_id, data=image_file)
         cls.glance_client.wait_for_image_status(image_id, 'active')
         resp, cls.image = cls.images_client.get_image(image_id)
 

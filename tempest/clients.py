@@ -14,7 +14,7 @@
 #    under the License.
 
 from tempest import auth
-from tempest.common import rest_client
+from tempest.common import negative_rest_client
 from tempest import config
 from tempest import manager
 from tempest.openstack.common import log as logging
@@ -83,12 +83,8 @@ from tempest.services.messaging.json.messaging_client import \
     MessagingClientJSON
 from tempest.services.network.json.network_client import NetworkClientJSON
 from tempest.services.object_storage.account_client import AccountClient
-from tempest.services.object_storage.account_client import \
-    AccountClientCustomizedHeader
 from tempest.services.object_storage.container_client import ContainerClient
 from tempest.services.object_storage.object_client import ObjectClient
-from tempest.services.object_storage.object_client import \
-    ObjectClientCustomizedHeader
 from tempest.services.orchestration.json.orchestration_client import \
     OrchestrationClient
 from tempest.services.telemetry.json.telemetry_client import \
@@ -157,9 +153,8 @@ class Manager(manager.Manager):
         if CONF.service_available.ceilometer:
             self.telemetry_client = TelemetryClientJSON(
                 self.auth_provider)
-        self.negative_client = rest_client.NegativeRestClient(
-            self.auth_provider)
-        self.negative_client.service = service
+        self.negative_client = negative_rest_client.NegativeRestClient(
+            self.auth_provider, service)
 
         # TODO(andreaf) EC2 client still do their auth, v2 only
         ec2_client_args = (self.credentials.username,
@@ -178,10 +173,6 @@ class Manager(manager.Manager):
             self.auth_provider)
         self.ec2api_client = botoclients.APIClientEC2(*ec2_client_args)
         self.s3_client = botoclients.ObjectClientS3(*ec2_client_args)
-        self.custom_object_client = ObjectClientCustomizedHeader(
-            self.auth_provider)
-        self.custom_account_client = \
-            AccountClientCustomizedHeader(self.auth_provider)
         self.data_processing_client = DataProcessingClient(
             self.auth_provider)
 
@@ -287,20 +278,5 @@ class AdminManager(Manager):
     def __init__(self, interface='json', service=None):
         super(AdminManager, self).__init__(
             credentials=auth.get_default_credentials('identity_admin'),
-            interface=interface,
-            service=service)
-
-
-class ComputeAdminManager(Manager):
-
-    """
-    Manager object that uses the compute_admin credentials for its
-    managed client objects
-    """
-
-    def __init__(self, interface='json', service=None):
-        base = super(ComputeAdminManager, self)
-        base.__init__(
-            credentials=auth.get_default_credentials('compute_admin'),
             interface=interface,
             service=service)

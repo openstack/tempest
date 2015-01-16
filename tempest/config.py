@@ -131,6 +131,9 @@ IdentityGroup = [
     cfg.StrOpt('admin_domain_name',
                help="Admin domain name for authentication (Keystone V3)."
                     "The same domain applies to user and project"),
+    cfg.ListOpt('tempest_roles',
+                help="Roles to assign to all users created by tempest",
+                default=[])
 ]
 
 identity_feature_group = cfg.OptGroup(name='identity-feature-enabled',
@@ -187,7 +190,7 @@ ComputeGroup = [
                default=300,
                help="Timeout in seconds to wait for an instance to build. "
                     "Other services that do not define build_timeout will "
-                    "inherit this value, for example the image service."),
+                    "inherit this value."),
     cfg.BoolOpt('run_ssh',
                 default=False,
                 help="Should the tests ssh to instances?"),
@@ -251,9 +254,6 @@ ComputeGroup = [
                choices=['public', 'admin', 'internal',
                         'publicURL', 'adminURL', 'internalURL'],
                help="The endpoint type to use for the compute service."),
-    cfg.StrOpt('catalog_v3_type',
-               default='computev3',
-               help="Catalog type of the Compute v3 service."),
     cfg.StrOpt('path_to_private_key',
                help="Path to a private key file for SSH access to remote "
                     "hosts"),
@@ -280,9 +280,6 @@ compute_features_group = cfg.OptGroup(name='compute-feature-enabled',
                                       title="Enabled Compute Service Features")
 
 ComputeFeaturesGroup = [
-    cfg.BoolOpt('api_v3',
-                default=False,
-                help="If false, skip all nova v3 tests."),
     cfg.BoolOpt('disk_config',
                 default=True,
                 help="If false, skip disk config tests"),
@@ -290,12 +287,6 @@ ComputeFeaturesGroup = [
                 default=['all'],
                 help='A list of enabled compute extensions with a special '
                      'entry all which indicates every extension is enabled. '
-                     'Each extension should be specified with alias name. '
-                     'Empty list indicates all extensions are disabled'),
-    cfg.ListOpt('api_v3_extensions',
-                default=['all'],
-                help='A list of enabled v3 extensions with a special entry all'
-                     ' which indicates every extension is enabled. '
                      'Each extension should be specified with alias name. '
                      'Empty list indicates all extensions are disabled'),
     cfg.BoolOpt('change_password',
@@ -362,23 +353,6 @@ ComputeFeaturesGroup = [
 ]
 
 
-compute_admin_group = cfg.OptGroup(name='compute-admin',
-                                   title="Compute Admin Options")
-
-ComputeAdminGroup = [
-    cfg.StrOpt('username',
-               help="Administrative Username to use for Nova API requests."),
-    cfg.StrOpt('tenant_name',
-               help="Administrative Tenant name to use for Nova API "
-                    "requests."),
-    cfg.StrOpt('password',
-               help="API key to use when authenticating as admin.",
-               secret=True),
-    cfg.StrOpt('domain_name',
-               help="Domain name for authentication as admin (Keystone V3)."
-                    "The same domain applies to user and project"),
-]
-
 image_group = cfg.OptGroup(name='image',
                            title="Image Service Options")
 
@@ -400,7 +374,15 @@ ImageGroup = [
     cfg.StrOpt('http_image',
                default='http://download.cirros-cloud.net/0.3.1/'
                'cirros-0.3.1-x86_64-uec.tar.gz',
-               help='http accessible image')
+               help='http accessible image'),
+    cfg.IntOpt('build_timeout',
+               default=300,
+               help="Timeout in seconds to wait for an image to "
+                    "become available."),
+    cfg.IntOpt('build_interval',
+               default=1,
+               help="Time in seconds between image operation status "
+                    "checks.")
 ]
 
 image_feature_group = cfg.OptGroup(name='image-feature-enabled',
@@ -469,7 +451,7 @@ NetworkGroup = [
                     "checks."),
     cfg.ListOpt('dns_servers',
                 default=["8.8.8.8", "8.8.4.4"],
-                help="List of dns servers whichs hould be used"
+                help="List of dns servers which should be used"
                      " for subnet creation")
 ]
 
@@ -1062,7 +1044,6 @@ _opts = [
     (dashboard_group, DashboardGroup),
     (data_processing_group, DataProcessingGroup),
     (boto_group, BotoGroup),
-    (compute_admin_group, ComputeAdminGroup),
     (stress_group, StressGroup),
     (scenario_group, ScenarioGroup),
     (service_available_group, ServiceAvailableGroup),
@@ -1133,7 +1114,6 @@ class TempestConfigPrivate(object):
         self.dashboard = cfg.CONF.dashboard
         self.data_processing = cfg.CONF.data_processing
         self.boto = cfg.CONF.boto
-        self.compute_admin = cfg.CONF['compute-admin']
         self.stress = cfg.CONF.stress
         self.scenario = cfg.CONF.scenario
         self.service_available = cfg.CONF.service_available
@@ -1142,17 +1122,11 @@ class TempestConfigPrivate(object):
         self.input_scenario = cfg.CONF['input-scenario']
         self.cli = cfg.CONF.cli
         self.negative = cfg.CONF.negative
-        if not self.compute_admin.username:
-            self.compute_admin.username = self.identity.admin_username
-            self.compute_admin.password = self.identity.admin_password
-            self.compute_admin.tenant_name = self.identity.admin_tenant_name
         cfg.CONF.set_default('domain_name', self.identity.admin_domain_name,
                              group='identity')
         cfg.CONF.set_default('alt_domain_name',
                              self.identity.admin_domain_name,
                              group='identity')
-        cfg.CONF.set_default('domain_name', self.identity.admin_domain_name,
-                             group='compute-admin')
 
     def __init__(self, parse_conf=True, config_path=None):
         """Initialize a configuration from a conf directory and conf file."""

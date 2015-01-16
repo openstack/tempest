@@ -12,10 +12,93 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-"""Javelin makes resources that should survive an upgrade.
-
-Javelin is a tool for creating, verifying, and deleting a small set of
+"""Javelin is a tool for creating, verifying, and deleting a small set of
 resources in a declarative way.
+
+Javelin is meant to be used as a way to validate quickly that resources can
+survive an upgrade process.
+
+Authentication
+--------------
+
+Javelin will be creating (and removing) users and tenants so it needs the admin
+credentials of your cloud to operate properly. The corresponding info can be
+given the usual way, either through CLI options or environment variables.
+
+You're probably familiar with these, but just in case::
+
+    +----------+------------------+----------------------+
+    | Param    | CLI              | Environment Variable |
+    +----------+------------------+----------------------+
+    | Username | --os-username    | OS_USERNAME          |
+    | Password | --os-password    | OS_PASSWORD          |
+    | Tenant   | --os-tenant-name | OS_TENANT_NAME       |
+    +----------+------------------+----------------------+
+
+
+Runtime Arguments
+-----------------
+
+**-m/--mode**: (Required) Has to be one of 'check', 'create' or 'destroy'. It
+indicates which actions javelin is going to perform.
+
+**-r/--resources**: (Required) The path to a YAML file describing the resources
+used by Javelin.
+
+**-d/--devstack-base**: (Required) The path to the devstack repo used to
+retrieve artefacts (like images) that will be referenced in the resource files.
+
+**-c/--config-file**: (Optional) The path to a valid Tempest config file
+describing your cloud. Javelin may use this to determine if certain services
+are enabled and modify its behavior accordingly.
+
+
+Resource file
+-------------
+
+The resource file is a valid YAML file describing the resources that will be
+created, checked and destroyed by javelin. Here's a canonical example of a
+resource file::
+
+  tenants:
+    - javelin
+    - discuss
+
+  users:
+    - name: javelin
+      pass: gungnir
+      tenant: javelin
+    - name: javelin2
+      pass: gungnir2
+      tenant: discuss
+
+  # resources that we want to create
+  images:
+    - name: javelin_cirros
+      owner: javelin
+      file: cirros-0.3.2-x86_64-blank.img
+      format: ami
+      aki: cirros-0.3.2-x86_64-vmlinuz
+      ari: cirros-0.3.2-x86_64-initrd
+
+  servers:
+    - name: peltast
+      owner: javelin
+      flavor: m1.small
+      image: javelin_cirros
+    - name: hoplite
+      owner: javelin
+      flavor: m1.medium
+      image: javelin_cirros
+
+
+An important piece of the resource definition is the *owner* field, which is
+the user (that we've created) that is the owner of that resource. All
+operations on that resource will happen as that regular user to ensure that
+admin level access does not mask issues.
+
+The check phase will act like a unit test, using well known assert methods to
+verify that the correct resources exist.
 
 """
 
@@ -113,7 +196,7 @@ def create_tenants(tenants):
     Don't create the tenants if they already exist.
     """
     admin = keystone_admin()
-    _, body = admin.identity.list_tenants()
+    body = admin.identity.list_tenants()
     existing = [x['name'] for x in body]
     for tenant in tenants:
         if tenant not in existing:
@@ -126,7 +209,7 @@ def destroy_tenants(tenants):
     admin = keystone_admin()
     for tenant in tenants:
         tenant_id = admin.identity.get_tenant_by_name(tenant)['id']
-        r, body = admin.identity.delete_tenant(tenant_id)
+        admin.identity.delete_tenant(tenant_id)
 
 ##############
 #
@@ -154,7 +237,7 @@ def _tenants_from_users(users):
 
 def _assign_swift_role(user):
     admin = keystone_admin()
-    resp, roles = admin.identity.list_roles()
+    roles = admin.identity.list_roles()
     role = next(r for r in roles if r['name'] == 'Member')
     LOG.debug(USERS[user])
     try:
@@ -198,7 +281,7 @@ def destroy_users(users):
         tenant_id = admin.identity.get_tenant_by_name(user['tenant'])['id']
         user_id = admin.identity.get_user_by_username(tenant_id,
                                                       user['name'])['id']
-        r, body = admin.identity.delete_user(user_id)
+        admin.identity.delete_user(user_id)
 
 
 def collect_users(users):
@@ -262,7 +345,7 @@ class JavelinCheck(unittest.TestCase):
         LOG.info("checking users")
         for name, user in self.users.iteritems():
             client = keystone_admin()
-            _, found = client.identity.get_user(user['id'])
+            found = client.identity.get_user(user['id'])
             self.assertEqual(found['name'], user['name'])
             self.assertEqual(found['tenantId'], user['tenant_id'])
 
@@ -445,7 +528,7 @@ def _resolve_image(image, imgtype):
 
 
 def _get_image_by_name(client, name):
-    r, body = client.images.image_list()
+    body = client.images.image_list()
     for image in body:
         if name == image['name']:
             return image
@@ -468,19 +551,19 @@ def create_images(images):
         extras = {}
         if image['format'] == 'ami':
             name, fname = _resolve_image(image, 'aki')
-            r, aki = client.images.create_image(
+            aki = client.images.create_image(
                 'javelin_' + name, 'aki', 'aki')
             client.images.store_image(aki.get('id'), open(fname, 'r'))
             extras['kernel_id'] = aki.get('id')
 
             name, fname = _resolve_image(image, 'ari')
-            r, ari = client.images.create_image(
+            ari = client.images.create_image(
                 'javelin_' + name, 'ari', 'ari')
             client.images.store_image(ari.get('id'), open(fname, 'r'))
             extras['ramdisk_id'] = ari.get('id')
 
         _, fname = _resolve_image(image, 'file')
-        r, body = client.images.create_image(
+        body = client.images.create_image(
             image['name'], image['format'], image['format'], **extras)
         image_id = body.get('id')
         client.images.store_image(image_id, open(fname, 'r'))
@@ -753,7 +836,7 @@ def destroy_secgroups(secgroups):
 #######################
 
 def _get_volume_by_name(client, name):
-    r, body = client.volumes.list_volumes()
+    body = client.volumes.list_volumes()
     for volume in body:
         if name == volume['display_name']:
             return volume
@@ -774,8 +857,8 @@ def create_volumes(volumes):
 
         size = volume['gb']
         v_name = volume['name']
-        resp, body = client.volumes.create_volume(size=size,
-                                                  display_name=v_name)
+        body = client.volumes.create_volume(size=size,
+                                            display_name=v_name)
         client.volumes.wait_for_volume_status(body['id'], 'available')
 
 

@@ -46,10 +46,8 @@ class BaseObjectTest(tempest.test.BaseTestCase):
         cls.object_client = cls.os.object_client
         cls.container_client = cls.os.container_client
         cls.account_client = cls.os.account_client
-        cls.custom_object_client = cls.os.custom_object_client
         cls.token_client = cls.os_admin.token_client
         cls.identity_admin_client = cls.os_admin.identity_client
-        cls.custom_account_client = cls.os.custom_account_client
         cls.object_client_alt = cls.os_alt.object_client
         cls.container_client_alt = cls.os_alt.container_client
         cls.identity_client_alt = cls.os_alt.identity_client
@@ -58,8 +56,6 @@ class BaseObjectTest(tempest.test.BaseTestCase):
         cls.object_client.auth_provider.clear_auth()
         cls.container_client.auth_provider.clear_auth()
         cls.account_client.auth_provider.clear_auth()
-        cls.custom_object_client.auth_provider.clear_auth()
-        cls.custom_account_client.auth_provider.clear_auth()
         cls.object_client_alt.auth_provider.clear_auth()
         cls.container_client_alt.auth_provider.clear_auth()
 
@@ -126,7 +122,7 @@ class SwiftDataGenerator(base.DataGenerator):
 
     def _get_role_id(self, role_name):
         try:
-            _, roles = self.client.list_roles()
+            roles = self.client.list_roles()
             return next(r['id'] for r in roles if r['name'] == role_name)
         except StopIteration:
             msg = "Role name '%s' is not found" % role_name
