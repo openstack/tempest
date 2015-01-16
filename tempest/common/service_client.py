@@ -21,13 +21,21 @@ CONF = config.CONF
 class ServiceClient(rest_client.RestClient):
 
     def __init__(self, auth_provider, service, region,
-                 endpoint_type=None, build_interval=None, build_timeout=None):
+                 endpoint_type=None, build_interval=None, build_timeout=None,
+                 disable_ssl_certificate_validation=None, ca_certs=None,
+                 trace_requests=None):
+
+        # TODO(oomichi): This params setting should be removed after all
+        # service clients pass these values, and we can make ServiceClient
+        # free from CONF values.
+        dscv = (disable_ssl_certificate_validation or
+                CONF.identity.disable_ssl_certificate_validation)
         params = {
-            'disable_ssl_certificate_validation':
-                CONF.identity.disable_ssl_certificate_validation,
-            'ca_certs': CONF.identity.ca_certificates_file,
-            'trace_requests': CONF.debug.trace_requests
+            'disable_ssl_certificate_validation': dscv,
+            'ca_certs': ca_certs or CONF.identity.ca_certificates_file,
+            'trace_requests': trace_requests or CONF.debug.trace_requests
         }
+
         if endpoint_type is not None:
             params.update({'endpoint_type': endpoint_type})
         if build_interval is not None:

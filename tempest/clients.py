@@ -133,6 +133,13 @@ class Manager(manager.Manager):
     Top level manager for OpenStack tempest clients
     """
 
+    default_params = {
+        'disable_ssl_certificate_validation':
+            CONF.identity.disable_ssl_certificate_validation,
+        'ca_certs': CONF.identity.ca_certificates_file,
+        'trace_requests': CONF.debug.trace_requests
+    }
+
     def __init__(self, credentials=None, interface='json', service=None):
         # Set interface and client type first
         self.interface = interface
@@ -170,7 +177,14 @@ class Manager(manager.Manager):
         self.container_client = ContainerClient(self.auth_provider)
         self.object_client = ObjectClient(self.auth_provider)
         self.orchestration_client = OrchestrationClient(
-            self.auth_provider)
+            self.auth_provider,
+            CONF.orchestration.catalog_type,
+            CONF.orchestration.region or CONF.identity.region,
+            endpoint_type=CONF.orchestration.endpoint_type,
+            build_interval=CONF.orchestration.build_interval,
+            build_timeout=CONF.orchestration.build_timeout,
+            **self.default_params)
+
         self.ec2api_client = botoclients.APIClientEC2(*ec2_client_args)
         self.s3_client = botoclients.ObjectClientS3(*ec2_client_args)
         self.data_processing_client = DataProcessingClient(
