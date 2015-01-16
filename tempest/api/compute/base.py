@@ -271,7 +271,7 @@ class BaseComputeTest(tempest.test.BaseTestCase):
     def _delete_volume(volumes_client, volume_id):
         """Deletes the given volume and waits for it to be gone."""
         try:
-            resp, _ = volumes_client.delete_volume(volume_id)
+            volumes_client.delete_volume(volume_id)
             # TODO(mriedem): We should move the wait_for_resource_deletion
             # into the delete_volume method as a convenience to the caller.
             volumes_client.wait_for_resource_deletion(volume_id)

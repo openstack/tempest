@@ -57,11 +57,11 @@ class VolumesV2ActionsTest(base.BaseVolumeTest):
     def test_attach_detach_volume_to_instance(self):
         # Volume is attached and detached successfully from an instance
         mountpoint = '/dev/vdc'
-        _, body = self.client.attach_volume(self.volume['id'],
-                                            self.server['id'],
-                                            mountpoint)
+        self.client.attach_volume(self.volume['id'],
+                                  self.server['id'],
+                                  mountpoint)
         self.client.wait_for_volume_status(self.volume['id'], 'in-use')
-        _, body = self.client.detach_volume(self.volume['id'])
+        self.client.detach_volume(self.volume['id'])
         self.client.wait_for_volume_status(self.volume['id'], 'available')
 
     @test.stresstest(class_setup_per='process')
@@ -70,9 +70,9 @@ class VolumesV2ActionsTest(base.BaseVolumeTest):
     def test_get_volume_attachment(self):
         # Verify that a volume's attachment information is retrieved
         mountpoint = '/dev/vdc'
-        _, body = self.client.attach_volume(self.volume['id'],
-                                            self.server['id'],
-                                            mountpoint)
+        self.client.attach_volume(self.volume['id'],
+                                  self.server['id'],
+                                  mountpoint)
         self.client.wait_for_volume_status(self.volume['id'], 'in-use')
         # NOTE(gfidente): added in reverse order because functions will be
         # called in reverse order to the order they are added (LIFO)
@@ -80,7 +80,7 @@ class VolumesV2ActionsTest(base.BaseVolumeTest):
                         self.volume['id'],
                         'available')
         self.addCleanup(self.client.detach_volume, self.volume['id'])
-        _, volume = self.client.get_volume(self.volume['id'])
+        volume = self.client.get_volume(self.volume['id'])
         self.assertIn('attachments', volume)
         attachment = self.client.get_attachment_from_volume(volume)
         self.assertEqual(mountpoint, attachment['device'])
@@ -96,9 +96,9 @@ class VolumesV2ActionsTest(base.BaseVolumeTest):
         # there is no way to delete it from Cinder, so we delete it from Glance
         # using the Glance image_client and from Cinder via tearDownClass.
         image_name = data_utils.rand_name('Image-')
-        _, body = self.client.upload_volume(self.volume['id'],
-                                            image_name,
-                                            CONF.volume.disk_format)
+        body = self.client.upload_volume(self.volume['id'],
+                                         image_name,
+                                         CONF.volume.disk_format)
         image_id = body["image_id"]
         self.addCleanup(self.image_client.delete_image, image_id)
         self.image_client.wait_for_image_status(image_id, 'active')
@@ -107,14 +107,14 @@ class VolumesV2ActionsTest(base.BaseVolumeTest):
     @test.attr(type='gate')
     def test_reserve_unreserve_volume(self):
         # Mark volume as reserved.
-        _, body = self.client.reserve_volume(self.volume['id'])
+        body = self.client.reserve_volume(self.volume['id'])
         # To get the volume info
-        _, body = self.client.get_volume(self.volume['id'])
+        body = self.client.get_volume(self.volume['id'])
         self.assertIn('attaching', body['status'])
         # Unmark volume as reserved.
-        _, body = self.client.unreserve_volume(self.volume['id'])
+        body = self.client.unreserve_volume(self.volume['id'])
         # To get the volume info
-        _, body = self.client.get_volume(self.volume['id'])
+        body = self.client.get_volume(self.volume['id'])
         self.assertIn('available', body['status'])
 
     def _is_true(self, val):
@@ -124,20 +124,19 @@ class VolumesV2ActionsTest(base.BaseVolumeTest):
     def test_volume_readonly_update(self):
         # Update volume readonly true
         readonly = True
-        _, body = self.client.update_volume_readonly(self.volume['id'],
-                                                     readonly)
+        self.client.update_volume_readonly(self.volume['id'],
+                                           readonly)
         # Get Volume information
-        _, fetched_volume = self.client.get_volume(self.volume['id'])
+        fetched_volume = self.client.get_volume(self.volume['id'])
         bool_flag = self._is_true(fetched_volume['metadata']['readonly'])
         self.assertEqual(True, bool_flag)
 
         # Update volume readonly false
         readonly = False
-        _, body = self.client.update_volume_readonly(self.volume['id'],
-                                                     readonly)
+        self.client.update_volume_readonly(self.volume['id'], readonly)
 
         # Get Volume information
-        _, fetched_volume = self.client.get_volume(self.volume['id'])
+        fetched_volume = self.client.get_volume(self.volume['id'])
         bool_flag = self._is_true(fetched_volume['metadata']['readonly'])
         self.assertEqual(False, bool_flag)
 

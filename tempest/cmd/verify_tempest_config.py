@@ -154,7 +154,7 @@ def get_enabled_extensions(service):
 
 def verify_extensions(os, service, results):
     extensions_client = get_extension_client(os, service)
-    if service == 'neutron':
+    if service == 'neutron' or service == 'cinder':
         resp = extensions_client.list_extensions()
     else:
         __, resp = extensions_client.list_extensions()

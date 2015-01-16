@@ -34,7 +34,7 @@ class VolumeTypesV2Test(base.BaseVolumeAdminTest):
     @test.attr(type='smoke')
     def test_volume_type_list(self):
         # List Volume types.
-        _, body = self.volume_types_client.list_volume_types()
+        body = self.volume_types_client.list_volume_types()
         self.assertIsInstance(body, list)
 
     @test.attr(type='smoke')
@@ -49,14 +49,14 @@ class VolumeTypesV2Test(base.BaseVolumeAdminTest):
         extra_specs = {"storage_protocol": proto,
                        "vendor_name": vendor}
         body = {}
-        _, body = self.volume_types_client.create_volume_type(
+        body = self.volume_types_client.create_volume_type(
             vol_type_name,
             extra_specs=extra_specs)
         self.assertIn('id', body)
         self.addCleanup(self._delete_volume_type, body['id'])
         self.assertIn('name', body)
         params = {self.name_field: vol_name, 'volume_type': vol_type_name}
-        _, volume = self.volumes_client.create_volume(
+        volume = self.volumes_client.create_volume(
             size=1, **params)
         self.assertIn('id', volume)
         self.addCleanup(self._delete_volume, volume['id'])
@@ -67,7 +67,7 @@ class VolumeTypesV2Test(base.BaseVolumeAdminTest):
         self.assertTrue(volume['id'] is not None,
                         "Field volume id is empty or not found.")
         self.volumes_client.wait_for_volume_status(volume['id'], 'available')
-        _, fetched_volume = self.volumes_client.get_volume(volume['id'])
+        fetched_volume = self.volumes_client.get_volume(volume['id'])
         self.assertEqual(vol_name, fetched_volume[self.name_field],
                          'The fetched Volume is different '
                          'from the created Volume')
@@ -87,7 +87,7 @@ class VolumeTypesV2Test(base.BaseVolumeAdminTest):
         vendor = CONF.volume.vendor_name
         extra_specs = {"storage_protocol": proto,
                        "vendor_name": vendor}
-        _, body = self.volume_types_client.create_volume_type(
+        body = self.volume_types_client.create_volume_type(
             name,
             extra_specs=extra_specs)
         self.assertIn('id', body)
@@ -98,7 +98,7 @@ class VolumeTypesV2Test(base.BaseVolumeAdminTest):
                          "to the requested name")
         self.assertTrue(body['id'] is not None,
                         "Field volume_type id is empty or not found.")
-        _, fetched_volume_type = self.volume_types_client.get_volume_type(
+        fetched_volume_type = self.volume_types_client.get_volume_type(
             body['id'])
         self.assertEqual(name, fetched_volume_type['name'],
                          'The fetched Volume_type is different '
@@ -116,11 +116,11 @@ class VolumeTypesV2Test(base.BaseVolumeAdminTest):
         provider = "LuksEncryptor"
         control_location = "front-end"
         name = data_utils.rand_name("volume-type-")
-        _, body = self.volume_types_client.create_volume_type(name)
+        body = self.volume_types_client.create_volume_type(name)
         self.addCleanup(self._delete_volume_type, body['id'])
 
         # Create encryption type
-        _, encryption_type = self.volume_types_client.create_encryption_type(
+        encryption_type = self.volume_types_client.create_encryption_type(
             body['id'], provider=provider,
             control_location=control_location)
         self.assertIn('volume_type_id', encryption_type)
@@ -132,7 +132,7 @@ class VolumeTypesV2Test(base.BaseVolumeAdminTest):
                          "equal to the requested control_location")
 
         # Get encryption type
-        _, fetched_encryption_type = (
+        fetched_encryption_type = (
             self.volume_types_client.get_encryption_type(
                 encryption_type['volume_type_id']))
         self.assertEqual(provider,
@@ -150,7 +150,7 @@ class VolumeTypesV2Test(base.BaseVolumeAdminTest):
         resource = {"id": encryption_type['volume_type_id'],
                     "type": "encryption-type"}
         self.volume_types_client.wait_for_resource_deletion(resource)
-        _, deleted_encryption_type = (
+        deleted_encryption_type = (
             self.volume_types_client.get_encryption_type(
                 encryption_type['volume_type_id']))
         self.assertEmpty(deleted_encryption_type)

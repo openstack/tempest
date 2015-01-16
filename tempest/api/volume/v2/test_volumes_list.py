@@ -41,7 +41,7 @@ class VolumesV2ListTestJSON(base.BaseVolumeTest):
         cls.metadata = {'Type': 'work'}
         for i in range(3):
             volume = cls.create_volume(metadata=cls.metadata)
-            _, volume = cls.client.get_volume(volume['id'])
+            volume = cls.client.get_volume(volume['id'])
             cls.volume_list.append(volume)
             cls.volume_id_list.append(volume['id'])
 
@@ -65,7 +65,7 @@ class VolumesV2ListTestJSON(base.BaseVolumeTest):
                       'sort_dir': sort_dir,
                       'sort_key': sort_key
                       }
-            _, fetched_volume = self.client.list_volumes_with_detail(params)
+            fetched_volume = self.client.list_volumes_with_detail(params)
             self.assertEqual(limit, len(fetched_volume),
                              "The count of volumes is %s, expected:%s " %
                              (len(fetched_volume), limit))

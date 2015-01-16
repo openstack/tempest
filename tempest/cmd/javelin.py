@@ -836,7 +836,7 @@ def destroy_secgroups(secgroups):
 #######################
 
 def _get_volume_by_name(client, name):
-    r, body = client.volumes.list_volumes()
+    body = client.volumes.list_volumes()
     for volume in body:
         if name == volume['display_name']:
             return volume
@@ -857,8 +857,8 @@ def create_volumes(volumes):
 
         size = volume['gb']
         v_name = volume['name']
-        resp, body = client.volumes.create_volume(size=size,
-                                                  display_name=v_name)
+        body = client.volumes.create_volume(size=size,
+                                            display_name=v_name)
         client.volumes.wait_for_volume_status(body['id'], 'available')
 
 

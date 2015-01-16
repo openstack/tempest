@@ -31,8 +31,8 @@ class VolumesActionsV2Test(base.BaseVolumeAdminTest):
         cls.name_field = cls.special_fields['name_field']
         params = {cls.name_field: vol_name}
 
-        _, cls.volume = cls.client.create_volume(size=1,
-                                                 **params)
+        cls.volume = cls.client.create_volume(size=1,
+                                              **params)
         cls.client.wait_for_volume_status(cls.volume['id'], 'available')
 
     @classmethod
@@ -45,9 +45,9 @@ class VolumesActionsV2Test(base.BaseVolumeAdminTest):
 
     def _reset_volume_status(self, volume_id, status):
         # Reset the volume status
-        _, body = self.admin_volume_client.reset_volume_status(volume_id,
-                                                               status)
-        return _, body
+        body = self.admin_volume_client.reset_volume_status(volume_id,
+                                                            status)
+        return body
 
     def tearDown(self):
         # Set volume's status to available after test
@@ -58,8 +58,8 @@ class VolumesActionsV2Test(base.BaseVolumeAdminTest):
         # Create a temp volume for force delete tests
         vol_name = utils.rand_name('Volume')
         params = {self.name_field: vol_name}
-        _, temp_volume = self.client.create_volume(size=1,
-                                                   **params)
+        temp_volume = self.client.create_volume(size=1,
+                                                **params)
         self.client.wait_for_volume_status(temp_volume['id'], 'available')
 
         return temp_volume
@@ -68,16 +68,15 @@ class VolumesActionsV2Test(base.BaseVolumeAdminTest):
         # Create volume, reset volume status, and force delete temp volume
         temp_volume = self._create_temp_volume()
         if status:
-            _, body = self._reset_volume_status(temp_volume['id'], status)
-        _, volume_delete = self.admin_volume_client.\
-            force_delete_volume(temp_volume['id'])
+            self._reset_volume_status(temp_volume['id'], status)
+        self.admin_volume_client.force_delete_volume(temp_volume['id'])
         self.client.wait_for_resource_deletion(temp_volume['id'])
 
     @test.attr(type='gate')
     def test_volume_reset_status(self):
         # test volume reset status : available->error->available
-        _, body = self._reset_volume_status(self.volume['id'], 'error')
-        _, volume_get = self.admin_volume_client.get_volume(
+        self._reset_volume_status(self.volume['id'], 'error')
+        volume_get = self.admin_volume_client.get_volume(
             self.volume['id'])
         self.assertEqual('error', volume_get['status'])
 
