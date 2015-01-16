@@ -16,13 +16,12 @@ import json
 
 import httplib2
 from oslotest import mockpatch
+import six
 
 from tempest.common import rest_client
-from tempest import config
 from tempest import exceptions
 from tempest.tests import base
 from tempest.tests import fake_auth_provider
-from tempest.tests import fake_config
 from tempest.tests import fake_http
 
 
@@ -32,8 +31,6 @@ class BaseRestClientTestClass(base.TestCase):
 
     def setUp(self):
         super(BaseRestClientTestClass, self).setUp()
-        self.useFixture(fake_config.ConfigFixture())
-        self.stubs.Set(config, 'TempestConfigPrivate', fake_config.FakePrivate)
         self.rest_client = rest_client.RestClient(
             fake_auth_provider.FakeAuthProvider(), None, None)
         self.stubs.Set(httplib2.Http, 'request', self.fake_http.request)
@@ -94,7 +91,7 @@ class TestRestClientHeadersJSON(TestRestClientHTTPMethods):
 
     def _verify_headers(self, resp):
         self.assertEqual(self.rest_client._get_type(), self.TYPE)
-        resp = dict((k.lower(), v) for k, v in resp.iteritems())
+        resp = dict((k.lower(), v) for k, v in six.iteritems(resp))
         self.assertEqual(self.header_value, resp['accept'])
         self.assertEqual(self.header_value, resp['content-type'])
 
@@ -296,8 +293,6 @@ class TestRestClientErrorCheckerJSON(base.TestCase):
 
     def setUp(self):
         super(TestRestClientErrorCheckerJSON, self).setUp()
-        self.useFixture(fake_config.ConfigFixture())
-        self.stubs.Set(config, 'TempestConfigPrivate', fake_config.FakePrivate)
         self.rest_client = rest_client.RestClient(
             fake_auth_provider.FakeAuthProvider(), None, None)
 

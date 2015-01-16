@@ -24,11 +24,18 @@ from tempest import exceptions
 from tempest.services.identity.json import identity_client as v2_client
 from tempest.services.identity.v3.json import identity_client as v3_client
 from tempest.tests import base
-from tempest.tests import fake_auth_provider
 from tempest.tests import fake_config
 from tempest.tests import fake_credentials
 from tempest.tests import fake_http
 from tempest.tests import fake_identity
+
+
+def fake_get_default_credentials(credential_type, fill_in=True):
+    return fake_credentials.FakeCredentials()
+
+
+def fake_get_credentials(credential_type=None, fill_in=True, **kwargs):
+    return fake_credentials.FakeCredentials()
 
 
 class BaseAuthTestsSetUp(base.TestCase):
@@ -46,10 +53,9 @@ class BaseAuthTestsSetUp(base.TestCase):
         self.useFixture(fake_config.ConfigFixture())
         self.stubs.Set(config, 'TempestConfigPrivate', fake_config.FakePrivate)
         self.fake_http = fake_http.fake_httplib2(return_type=200)
-        self.stubs.Set(auth, 'get_credentials',
-                       fake_auth_provider.get_credentials)
+        self.stubs.Set(auth, 'get_credentials', fake_get_credentials)
         self.stubs.Set(auth, 'get_default_credentials',
-                       fake_auth_provider.get_default_credentials)
+                       fake_get_default_credentials)
         self.auth_provider = self._auth(self.credentials)
 
 
