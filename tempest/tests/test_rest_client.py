@@ -16,6 +16,7 @@ import json
 
 import httplib2
 from oslotest import mockpatch
+import six
 
 from tempest.common import rest_client
 from tempest import config
@@ -94,7 +95,7 @@ class TestRestClientHeadersJSON(TestRestClientHTTPMethods):
 
     def _verify_headers(self, resp):
         self.assertEqual(self.rest_client._get_type(), self.TYPE)
-        resp = dict((k.lower(), v) for k, v in resp.iteritems())
+        resp = dict((k.lower(), v) for k, v in six.iteritems(resp))
         self.assertEqual(self.header_value, resp['accept'])
         self.assertEqual(self.header_value, resp['content-type'])
 
