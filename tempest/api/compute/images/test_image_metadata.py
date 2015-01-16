@@ -49,20 +49,20 @@ class ImagesMetadataTestJSON(base.BaseV2ComputeTest):
 
     def setUp(self):
         super(ImagesMetadataTestJSON, self).setUp()
-        meta = {'key1': 'value1', 'key2': 'value2'}
+        meta = {'os_version': 'value1', 'os_distro': 'value2'}
         self.client.set_image_metadata(self.image_id, meta)
 
     @test.attr(type='gate')
     def test_list_image_metadata(self):
         # All metadata key/value pairs for an image should be returned
         resp_metadata = self.client.list_image_metadata(self.image_id)
-        expected = {'key1': 'value1', 'key2': 'value2'}
+        expected = {'os_version': 'value1', 'os_distro': 'value2'}
         self.assertEqual(expected, resp_metadata)
 
     @test.attr(type='gate')
     def test_set_image_metadata(self):
         # The metadata for the image should match the new values
-        req_metadata = {'meta2': 'value2', 'meta3': 'value3'}
+        req_metadata = {'os_version': 'value2', 'architecture': 'value3'}
         self.client.set_image_metadata(self.image_id,
                                        req_metadata)
 
@@ -72,37 +72,39 @@ class ImagesMetadataTestJSON(base.BaseV2ComputeTest):
     @test.attr(type='gate')
     def test_update_image_metadata(self):
         # The metadata for the image should match the updated values
-        req_metadata = {'key1': 'alt1', 'key3': 'value3'}
+        req_metadata = {'os_version': 'alt1', 'architecture': 'value3'}
         self.client.update_image_metadata(self.image_id,
                                           req_metadata)
 
         resp_metadata = self.client.list_image_metadata(self.image_id)
-        expected = {'key1': 'alt1', 'key2': 'value2', 'key3': 'value3'}
+        expected = {'os_version': 'alt1',
+                    'os_distro': 'value2',
+                    'architecture': 'value3'}
         self.assertEqual(expected, resp_metadata)
 
     @test.attr(type='gate')
     def test_get_image_metadata_item(self):
         # The value for a specific metadata key should be returned
         meta = self.client.get_image_metadata_item(self.image_id,
-                                                   'key2')
-        self.assertEqual('value2', meta['key2'])
+                                                   'os_distro')
+        self.assertEqual('value2', meta['os_distro'])
 
     @test.attr(type='gate')
     def test_set_image_metadata_item(self):
         # The value provided for the given meta item should be set for
         # the image
-        meta = {'key1': 'alt'}
+        meta = {'os_version': 'alt'}
         self.client.set_image_metadata_item(self.image_id,
-                                            'key1', meta)
+                                            'os_version', meta)
         resp_metadata = self.client.list_image_metadata(self.image_id)
-        expected = {'key1': 'alt', 'key2': 'value2'}
+        expected = {'os_version': 'alt', 'os_distro': 'value2'}
         self.assertEqual(expected, resp_metadata)
 
     @test.attr(type='gate')
     def test_delete_image_metadata_item(self):
         # The metadata value/key pair should be deleted from the image
         self.client.delete_image_metadata_item(self.image_id,
-                                               'key1')
+                                               'os_version')
         resp_metadata = self.client.list_image_metadata(self.image_id)
-        expected = {'key2': 'value2'}
+        expected = {'os_distro': 'value2'}
         self.assertEqual(expected, resp_metadata)
