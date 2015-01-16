@@ -30,8 +30,7 @@ class HypervisorAdminTestJSON(base.BaseV2ComputeAdminTest):
 
     def _list_hypervisors(self):
         # List of hypervisors
-        resp, hypers = self.client.get_hypervisor_list()
-        self.assertEqual(200, resp.status)
+        hypers = self.client.get_hypervisor_list()
         return hypers
 
     def assertHypervisors(self, hypers):
@@ -46,8 +45,7 @@ class HypervisorAdminTestJSON(base.BaseV2ComputeAdminTest):
     @test.attr(type='gate')
     def test_get_hypervisor_list_details(self):
         # Display the details of the all hypervisor
-        resp, hypers = self.client.get_hypervisor_list_details()
-        self.assertEqual(200, resp.status)
+        hypers = self.client.get_hypervisor_list_details()
         self.assertHypervisors(hypers)
 
     @test.attr(type='gate')
@@ -56,9 +54,7 @@ class HypervisorAdminTestJSON(base.BaseV2ComputeAdminTest):
         hypers = self._list_hypervisors()
         self.assertHypervisors(hypers)
 
-        resp, details = (self.client.
-                         get_hypervisor_show_details(hypers[0]['id']))
-        self.assertEqual(200, resp.status)
+        details = self.client.get_hypervisor_show_details(hypers[0]['id'])
         self.assertTrue(len(details) > 0)
         self.assertEqual(details['hypervisor_hostname'],
                          hypers[0]['hypervisor_hostname'])
@@ -70,15 +66,13 @@ class HypervisorAdminTestJSON(base.BaseV2ComputeAdminTest):
         self.assertHypervisors(hypers)
 
         hostname = hypers[0]['hypervisor_hostname']
-        resp, hypervisors = self.client.get_hypervisor_servers(hostname)
-        self.assertEqual(200, resp.status)
+        hypervisors = self.client.get_hypervisor_servers(hostname)
         self.assertTrue(len(hypervisors) > 0)
 
     @test.attr(type='gate')
     def test_get_hypervisor_stats(self):
         # Verify the stats of the all hypervisor
-        resp, stats = self.client.get_hypervisor_stats()
-        self.assertEqual(200, resp.status)
+        stats = self.client.get_hypervisor_stats()
         self.assertTrue(len(stats) > 0)
 
     @test.attr(type='gate')
@@ -94,9 +88,7 @@ class HypervisorAdminTestJSON(base.BaseV2ComputeAdminTest):
         ironic_only = True
         hypers_without_ironic = []
         for hyper in hypers:
-            resp, details = (self.client.
-                             get_hypervisor_show_details(hypers[0]['id']))
-            self.assertEqual(200, resp.status)
+            details = self.client.get_hypervisor_show_details(hypers[0]['id'])
             if details['hypervisor_type'] != 'ironic':
                 hypers_without_ironic.append(hyper)
                 ironic_only = False
@@ -110,8 +102,8 @@ class HypervisorAdminTestJSON(base.BaseV2ComputeAdminTest):
             # because hypervisors might be disabled, this loops looking
             # for any good hit.
             try:
-                resp, uptime = self.client.get_hypervisor_uptime(hyper['id'])
-                if (resp.status == 200) and (len(uptime) > 0):
+                uptime = self.client.get_hypervisor_uptime(hyper['id'])
+                if len(uptime) > 0:
                     has_valid_uptime = True
                     break
             except Exception:
@@ -124,7 +116,6 @@ class HypervisorAdminTestJSON(base.BaseV2ComputeAdminTest):
     def test_search_hypervisor(self):
         hypers = self._list_hypervisors()
         self.assertHypervisors(hypers)
-        resp, hypers = self.client.search_hypervisor(
+        hypers = self.client.search_hypervisor(
             hypers[0]['hypervisor_hostname'])
-        self.assertEqual(200, resp.status)
         self.assertHypervisors(hypers)

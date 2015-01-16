@@ -36,7 +36,7 @@ class LiveBlockMigrationTestJSON(base.BaseV2ComputeAdminTest):
         cls.created_server_ids = []
 
     def _get_compute_hostnames(self):
-        _resp, body = self.admin_hosts_client.list_hosts()
+        body = self.admin_hosts_client.list_hosts()
         return [
             host_record['host_name']
             for host_record in body
