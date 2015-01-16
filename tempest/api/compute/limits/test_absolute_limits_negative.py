@@ -46,7 +46,4 @@ class AbsoluteLimitsNegativeTestJSON(base.BaseV2ComputeTest):
         # A 403 Forbidden or 413 Overlimit (old behaviour) exception
         # will be raised when out of quota
         self.assertRaises((exceptions.Unauthorized, exceptions.OverLimit),
-                          self.server_client.create_server,
-                          name='test', meta=meta_data,
-                          flavor_ref=self.flavor_ref,
-                          image_ref=self.image_ref)
+                          self.create_test_server, meta=meta_data)
