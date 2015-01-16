@@ -102,6 +102,7 @@ class BaseVolumesClientJSON(base.VolumeClient):
         """Deletes the Specified Volume."""
         resp, body = self.delete("volumes/%s" % str(volume_id))
         self.expected_success(202, resp.status)
+        return service_client.ResponseBody(resp, body)
 
     def upload_volume(self, volume_id, image_name, disk_format):
         """Uploads a volume in Glance."""
@@ -259,6 +260,7 @@ class BaseVolumesClientJSON(base.VolumeClient):
         """Delete a volume transfer."""
         resp, body = self.delete("os-volume-transfer/%s" % str(transfer_id))
         self.expected_success(202, resp.status)
+        return service_client.ResponseBody(resp, body)
 
     def accept_volume_transfer(self, transfer_id, transfer_auth_key):
         """Accept a volume transfer."""
@@ -330,6 +332,7 @@ class BaseVolumesClientJSON(base.VolumeClient):
         url = "volumes/%s/metadata/%s" % (str(volume_id), str(id))
         resp, body = self.delete(url)
         self.expected_success(200, resp.status)
+        return service_client.ResponseBody(resp, body)
 
 
 class VolumesClientJSON(BaseVolumesClientJSON):
