@@ -17,6 +17,7 @@ import netaddr
 import socket
 
 from tempest.api.network import base
+from tempest.api.network import base_security_groups as sec_base
 from tempest.common import custom_matchers
 from tempest.common.utils import data_utils
 from tempest import config
@@ -25,7 +26,7 @@ from tempest import test
 CONF = config.CONF
 
 
-class PortsTestJSON(base.BaseNetworkTest):
+class PortsTestJSON(sec_base.BaseSecGroupTest):
     _interface = 'json'
 
     """
@@ -175,7 +176,7 @@ class PortsTestJSON(base.BaseNetworkTest):
             self.assertEqual(sorted(fields), sorted(port.keys()))
 
     @test.attr(type='smoke')
-    def test_update_port_with_second_ip(self):
+    def test_create_update_port_with_second_ip(self):
         # Create a network with two subnets
         network = self.create_network()
         subnet_1 = self.create_subnet(network)
@@ -183,23 +184,28 @@ class PortsTestJSON(base.BaseNetworkTest):
         fixed_ip_1 = [{'subnet_id': subnet_1['id']}]
         fixed_ip_2 = [{'subnet_id': subnet_2['id']}]
 
-        # Create a port with a single IP address from first subnet
-        port = self.create_port(network,
-                                fixed_ips=fixed_ip_1)
-        self.assertEqual(1, len(port['fixed_ips']))
-
-        # Update the port with a second IP address from second subnet
         fixed_ips = fixed_ip_1 + fixed_ip_2
-        port = self.update_port(port, fixed_ips=fixed_ips)
+
+        # Create a port with multiple IP addresses
+        port = self.create_port(network,
+                                fixed_ips=fixed_ips)
         self.assertEqual(2, len(port['fixed_ips']))
+        check_fixed_ips = [subnet_1['id'], subnet_2['id']]
+        for item in port['fixed_ips']:
+            self.assertIn(item['subnet_id'], check_fixed_ips)
 
         # Update the port to return to a single IP address
         port = self.update_port(port, fixed_ips=fixed_ip_1)
         self.assertEqual(1, len(port['fixed_ips']))
 
+        # Update the port with a second IP address from second subnet
+        port = self.update_port(port, fixed_ips=fixed_ips)
+        self.assertEqual(2, len(port['fixed_ips']))
+
     def _update_port_with_security_groups(self, security_groups_names):
-        post_body = {"network_id": self.network['id']}
-        self.create_subnet(self.network)
+        subnet_1 = self.create_subnet(self.network)
+        fixed_ip_1 = [{'subnet_id': subnet_1['id']}]
+
         security_groups_list = list()
         for name in security_groups_names:
             group_create_body = self.client.create_security_group(
@@ -209,24 +215,48 @@ class PortsTestJSON(base.BaseNetworkTest):
             security_groups_list.append(group_create_body['security_group']
                                         ['id'])
         # Create a port
+        sec_grp_name = data_utils.rand_name('secgroup')
+        security_group = self.client.create_security_group(name=sec_grp_name)
+        self.addCleanup(self.client.delete_security_group,
+                        security_group['security_group']['id'])
+        post_body = {
+            "name": data_utils.rand_name('port-'),
+            "security_groups": [security_group['security_group']['id']],
+            "network_id": self.network['id'],
+            "admin_state_up": True,
+            "fixed_ips": fixed_ip_1}
         body = self.client.create_port(**post_body)
         self.addCleanup(self.client.delete_port, body['port']['id'])
         port = body['port']
+
         # Update the port with security groups
-        update_body = {"security_groups": security_groups_list}
+        subnet_2 = self.create_subnet(self.network)
+        fixed_ip_2 = [{'subnet_id': subnet_2['id']}]
+        update_body = {"name": data_utils.rand_name('port-'),
+                       "admin_state_up": False,
+                       "fixed_ips": fixed_ip_2,
+                       "security_groups": security_groups_list}
         body = self.client.update_port(port['id'], **update_body)
-        # Verify the security groups updated to port
         port_show = body['port']
+        # Verify the security groups and other attributes updated to port
+        exclude_keys = set(port_show).symmetric_difference(update_body)
+        exclude_keys.add('fixed_ips')
+        exclude_keys.add('security_groups')
+        self.assertThat(port_show, custom_matchers.MatchesDictExceptForKeys(
+                        update_body, exclude_keys))
+        self.assertEqual(fixed_ip_2[0]['subnet_id'],
+                         port_show['fixed_ips'][0]['subnet_id'])
+
         for security_group in security_groups_list:
             self.assertIn(security_group, port_show['security_groups'])
 
     @test.attr(type='smoke')
-    def test_update_port_with_security_group(self):
+    def test_update_port_with_security_group_and_extra_attributes(self):
         self._update_port_with_security_groups(
             [data_utils.rand_name('secgroup')])
 
     @test.attr(type='smoke')
-    def test_update_port_with_two_security_groups(self):
+    def test_update_port_with_two_security_groups_and_extra_attributes(self):
         self._update_port_with_security_groups(
             [data_utils.rand_name('secgroup'),
              data_utils.rand_name('secgroup')])
