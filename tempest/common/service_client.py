@@ -12,8 +12,11 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest.common import rest_client
+from tempest_lib.common import rest_client
+from tempest_lib import exceptions as lib_exceptions
+
 from tempest import config
+from tempest import exceptions
 
 CONF = config.CONF
 
@@ -36,6 +39,42 @@ class ServiceClient(rest_client.RestClient):
             params.update({'build_timeout': build_timeout})
         super(ServiceClient, self).__init__(auth_provider, service, region,
                                             **params)
+
+    def request(self, method, url, extra_headers=False, headers=None,
+                body=None):
+        # TODO(oomichi): This translation is just for avoiding a single
+        # huge patch to migrate rest_client module to tempest-lib.
+        # Ideally(in the future), we need to remove this translation and
+        # replace each API tests with tempest-lib's exceptions.
+        try:
+            return super(ServiceClient, self).request(
+                method, url,
+                extra_headers=extra_headers,
+                headers=headers, body=body)
+        except lib_exceptions.Unauthorized as ex:
+            raise exceptions.Unauthorized(ex)
+        except lib_exceptions.NotFound as ex:
+            raise exceptions.NotFound(ex)
+        except lib_exceptions.BadRequest as ex:
+            raise exceptions.BadRequest(ex)
+        except lib_exceptions.Conflict as ex:
+            raise exceptions.Conflict(ex)
+        except lib_exceptions.OverLimit as ex:
+            raise exceptions.OverLimit(ex)
+        except lib_exceptions.RateLimitExceeded as ex:
+            raise exceptions.RateLimitExceeded(ex)
+        except lib_exceptions.InvalidContentType as ex:
+            raise exceptions.InvalidContentType(ex)
+        except lib_exceptions.UnprocessableEntity as ex:
+            raise exceptions.UnprocessableEntity(ex)
+        except lib_exceptions.InvalidHTTPResponseBody as ex:
+            raise exceptions.InvalidHTTPResponseBody(ex)
+        except lib_exceptions.NotImplemented as ex:
+            raise exceptions.NotImplemented(ex)
+        except lib_exceptions.ServerFault as ex:
+            raise exceptions.ServerFault(ex)
+        except lib_exceptions.UnexpectedResponseCode as ex:
+            raise exceptions.UnexpectedResponseCode(ex)
 
 
 class ResponseBody(dict):
