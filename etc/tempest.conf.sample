@@ -135,6 +135,9 @@
 # concurrent test processes. (boolean value)
 #locking_credentials_provider = false
 
+# Roles to assign to all users created by tempest (list value)
+#tempest_roles =
+
 
 [baremetal]
 
@@ -581,9 +584,6 @@
 # Admin domain name for authentication (Keystone V3).The same domain
 # applies to user and project (string value)
 #admin_domain_name = <None>
-
-# Roles to assign to all users created by tempest (list value)
-#tempest_roles =
 
 
 [identity-feature-enabled]
