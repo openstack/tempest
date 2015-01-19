@@ -16,8 +16,8 @@
 import collections
 import re
 
-from tempest_lib import decorators
 import testtools
+from testtools.tests import matchers
 
 from tempest.common.utils import data_utils
 from tempest import config
@@ -439,7 +439,6 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
                                  act_serv=servers,
                                  trgt_serv=dns_servers))
 
-    @decorators.skip_because(bug="1412325")
     @testtools.skipUnless(CONF.scenario.dhcp_client,
                           "DHCP client is not available.")
     @test.attr(type='smoke')
@@ -469,6 +468,13 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         # arbitrary ip addresses as nameservers, instead of parsing CONF
         initial_dns_server = '1.2.3.4'
         alt_dns_server = '9.8.7.6'
+
+        # renewal should be immediate.
+        # Timeouts are suggested by salvatore-orlando in
+        # https://bugs.launchpad.net/neutron/+bug/1412325/comments/3
+        renew_delay = CONF.network.build_interval
+        renew_timeout = CONF.network.build_timeout
+
         self._setup_network_and_servers(dns_nameservers=[initial_dns_server])
         self.check_public_network_connectivity(should_connect=True)
 
@@ -484,10 +490,26 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         self.assertEqual([alt_dns_server], self.subnet.dns_nameservers,
                          "Failed to update subnet's nameservers")
 
-        # server needs to renew its dhcp lease in order to get the new dns
-        # definitions from subnet
-        ssh_client.renew_lease(fixed_ip=floating_ip['fixed_ip_address'])
-        self._check_dns_server(ssh_client, [alt_dns_server])
+        def check_new_dns_server():
+            """Server needs to renew its dhcp lease in order to get the new dns
+            definitions from subnet
+            NOTE(amuller): we are renewing the lease as part of the retry
+            because Neutron updates dnsmasq asynchronously after the
+            subnet-update API call returns.
+            """
+            ssh_client.renew_lease(fixed_ip=floating_ip['fixed_ip_address'])
+            try:
+                self._check_dns_server(ssh_client, [alt_dns_server])
+            except matchers.MismatchError:
+                LOG.debug("Failed to update DNS nameservers")
+                return False
+            return True
+
+        self.assertTrue(test.call_until_true(check_new_dns_server,
+                                             renew_timeout,
+                                             renew_delay),
+                        msg="DHCP renewal failed to fetch "
+                            "new DNS nameservers")
 
     @test.attr(type='smoke')
     @test.services('compute', 'network')
