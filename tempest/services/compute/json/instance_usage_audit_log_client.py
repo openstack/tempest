@@ -17,10 +17,10 @@ import json
 
 from tempest.api_schema.response.compute.v2 import instance_usage_audit_logs \
     as schema
-from tempest.services.compute.json import base
+from tempest.common import service_client
 
 
-class InstanceUsagesAuditLogClientJSON(base.ComputeClient):
+class InstanceUsagesAuditLogClientJSON(service_client.ServiceClient):
 
     def list_instance_usage_audit_logs(self):
         url = 'os-instance_usage_audit_log'

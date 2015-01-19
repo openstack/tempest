@@ -20,10 +20,9 @@ from tempest.api_schema.response.compute.v2 import images as schema
 from tempest.common import service_client
 from tempest.common import waiters
 from tempest import exceptions
-from tempest.services.compute.json import base
 
 
-class ImagesClientJSON(base.ComputeClient):
+class ImagesClientJSON(service_client.ServiceClient):
 
     def create_image(self, server_id, name, meta=None):
         """Creates an image of the original server."""

@@ -19,10 +19,9 @@ from tempest.api_schema.response.compute import aggregates as schema
 from tempest.api_schema.response.compute.v2 import aggregates as v2_schema
 from tempest.common import service_client
 from tempest import exceptions
-from tempest.services.compute.json import base
 
 
-class AggregatesClientJSON(base.ComputeClient):
+class AggregatesClientJSON(service_client.ServiceClient):
 
     def list_aggregates(self):
         """Get aggregate list."""

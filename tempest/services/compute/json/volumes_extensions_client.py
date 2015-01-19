@@ -18,20 +18,11 @@ import time
 import urllib
 
 from tempest.api_schema.response.compute.v2 import volumes as schema
-from tempest import config
+from tempest.common import service_client
 from tempest import exceptions
-from tempest.services.compute.json import base
-
-CONF = config.CONF
 
 
-class VolumesExtensionsClientJSON(base.ComputeClient):
-
-    def __init__(self, auth_provider):
-        super(VolumesExtensionsClientJSON, self).__init__(
-            auth_provider,
-            build_interval=CONF.volume.build_interval,
-            build_timeout=CONF.volume.build_timeout)
+class VolumesExtensionsClientJSON(service_client.ServiceClient):
 
     def list_volumes(self, params=None):
         """List all the volumes created."""

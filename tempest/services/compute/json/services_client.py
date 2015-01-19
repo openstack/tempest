@@ -19,10 +19,9 @@ import urllib
 
 from tempest.api_schema.response.compute import services as schema
 from tempest.common import service_client
-from tempest.services.compute.json import base
 
 
-class ServicesClientJSON(base.ComputeClient):
+class ServicesClientJSON(service_client.ServiceClient):
 
     def list_services(self, params=None):
         url = 'os-services'

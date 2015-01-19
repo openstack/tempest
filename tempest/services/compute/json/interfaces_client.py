@@ -19,11 +19,11 @@ import time
 from tempest.api_schema.response.compute import interfaces as common_schema
 from tempest.api_schema.response.compute import servers as servers_schema
 from tempest.api_schema.response.compute.v2 import interfaces as schema
+from tempest.common import service_client
 from tempest import exceptions
-from tempest.services.compute.json import base
 
 
-class InterfacesClientJSON(base.ComputeClient):
+class InterfacesClientJSON(service_client.ServiceClient):
 
     def list_interfaces(self, server):
         resp, body = self.get('servers/%s/os-interface' % server)
