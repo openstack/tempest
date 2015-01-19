@@ -139,9 +139,9 @@ class Manager(manager.Manager):
         # super cares for credentials validation
         super(Manager, self).__init__(credentials=credentials)
 
-        self._set_compute_clients(self.interface)
-        self._set_identity_clients(self.interface)
-        self._set_volume_clients(self.interface)
+        self._set_compute_clients()
+        self._set_identity_clients()
+        self._set_volume_clients()
 
         self.baremetal_client = BaremetalClientJSON(self.auth_provider)
         self.network_client = NetworkClientJSON(self.auth_provider)
@@ -176,17 +176,12 @@ class Manager(manager.Manager):
         self.data_processing_client = DataProcessingClient(
             self.auth_provider)
 
-    def _set_compute_clients(self, type):
-        self._set_compute_json_clients()
-
-        # Common compute clients
+    def _set_compute_clients(self):
         self.agents_client = AgentsClientJSON(self.auth_provider)
         self.networks_client = NetworksClientJSON(self.auth_provider)
         self.migrations_client = MigrationsClientJSON(self.auth_provider)
         self.security_group_default_rules_client = (
             SecurityGroupDefaultRulesClientJSON(self.auth_provider))
-
-    def _set_compute_json_clients(self):
         self.certificates_client = CertificatesClientJSON(self.auth_provider)
         self.servers_client = ServersClientJSON(self.auth_provider)
         self.limits_client = LimitsClientJSON(self.auth_provider)
@@ -213,10 +208,7 @@ class Manager(manager.Manager):
         self.instance_usages_audit_log_client = \
             InstanceUsagesAuditLogClientJSON(self.auth_provider)
 
-    def _set_identity_clients(self, type):
-        self._set_identity_json_clients()
-
-    def _set_identity_json_clients(self):
+    def _set_identity_clients(self):
         self.identity_client = IdentityClientJSON(self.auth_provider)
         self.identity_v3_client = IdentityV3ClientJSON(self.auth_provider)
         self.endpoints_client = EndPointClientJSON(self.auth_provider)
@@ -228,20 +220,12 @@ class Manager(manager.Manager):
             self.token_v3_client = V3TokenClientJSON()
         self.credentials_client = CredentialsClientJSON(self.auth_provider)
 
-    def _set_volume_clients(self, type):
-        self._set_volume_json_clients()
-        # Common volume clients
-        # NOTE : As XML clients are not implemented for Qos-specs.
-        # So, setting the qos_client here. Once client are implemented,
-        # qos_client would be moved to its respective if/else.
-        # Bug : 1312553
+    def _set_volume_clients(self):
         self.volume_qos_client = QosSpecsClientJSON(self.auth_provider)
         self.volume_qos_v2_client = QosSpecsV2ClientJSON(
             self.auth_provider)
         self.volume_services_v2_client = VolumesServicesV2ClientJSON(
             self.auth_provider)
-
-    def _set_volume_json_clients(self):
         self.backups_client = BackupsClientJSON(self.auth_provider)
         self.backups_v2_client = BackupsClientV2JSON(self.auth_provider)
         self.snapshots_client = SnapshotsClientJSON(self.auth_provider)
