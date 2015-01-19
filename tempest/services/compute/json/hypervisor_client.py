@@ -17,6 +17,7 @@ import json
 
 from tempest.api_schema.response.compute import hypervisors as common_schema
 from tempest.api_schema.response.compute.v2 import hypervisors as v2schema
+from tempest.common import service_client
 from tempest.services.compute.json import base
 
 
@@ -28,7 +29,7 @@ class HypervisorClientJSON(base.ComputeClient):
         body = json.loads(body)
         self.validate_response(common_schema.common_hypervisors_detail,
                                resp, body)
-        return resp, body['hypervisors']
+        return service_client.ResponseBodyList(resp, body['hypervisors'])
 
     def get_hypervisor_list_details(self):
         """Show detailed hypervisors information."""
@@ -36,7 +37,7 @@ class HypervisorClientJSON(base.ComputeClient):
         body = json.loads(body)
         self.validate_response(common_schema.common_list_hypervisors_detail,
                                resp, body)
-        return resp, body['hypervisors']
+        return service_client.ResponseBodyList(resp, body['hypervisors'])
 
     def get_hypervisor_show_details(self, hyper_id):
         """Display the details of the specified hypervisor."""
@@ -44,28 +45,28 @@ class HypervisorClientJSON(base.ComputeClient):
         body = json.loads(body)
         self.validate_response(common_schema.common_show_hypervisor,
                                resp, body)
-        return resp, body['hypervisor']
+        return service_client.ResponseBody(resp, body['hypervisor'])
 
     def get_hypervisor_servers(self, hyper_name):
         """List instances belonging to the specified hypervisor."""
         resp, body = self.get('os-hypervisors/%s/servers' % hyper_name)
         body = json.loads(body)
         self.validate_response(v2schema.hypervisors_servers, resp, body)
-        return resp, body['hypervisors']
+        return service_client.ResponseBodyList(resp, body['hypervisors'])
 
     def get_hypervisor_stats(self):
         """Get hypervisor statistics over all compute nodes."""
         resp, body = self.get('os-hypervisors/statistics')
         body = json.loads(body)
         self.validate_response(common_schema.hypervisor_statistics, resp, body)
-        return resp, body['hypervisor_statistics']
+        return service_client.ResponseBody(resp, body['hypervisor_statistics'])
 
     def get_hypervisor_uptime(self, hyper_id):
         """Display the uptime of the specified hypervisor."""
         resp, body = self.get('os-hypervisors/%s/uptime' % hyper_id)
         body = json.loads(body)
         self.validate_response(common_schema.hypervisor_uptime, resp, body)
-        return resp, body['hypervisor']
+        return service_client.ResponseBody(resp, body['hypervisor'])
 
     def search_hypervisor(self, hyper_name):
         """Search specified hypervisor."""
@@ -73,4 +74,4 @@ class HypervisorClientJSON(base.ComputeClient):
         body = json.loads(body)
         self.validate_response(common_schema.common_hypervisors_detail,
                                resp, body)
-        return resp, body['hypervisors']
+        return service_client.ResponseBodyList(resp, body['hypervisors'])
