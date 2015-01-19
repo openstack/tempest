@@ -920,6 +920,11 @@
 # operations testing. (integer value)
 #large_ops_number = 0
 
+# DHCP client used by images to renew DCHP lease. If left empty,
+# update operation will be skipped. Supported clients: "udhcpc",
+# "dhclient" (string value)
+#dhcp_client = udhcpc
+
 
 [service_available]
 

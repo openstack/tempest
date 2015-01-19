@@ -860,7 +860,14 @@ ScenarioGroup = [
         'large_ops_number',
         default=0,
         help="specifies how many resources to request at once. Used "
-        "for large operations testing.")
+        "for large operations testing."),
+    # TODO(yfried): add support for dhcpcd
+    cfg.StrOpt('dhcp_client',
+               default='udhcpc',
+               choices=["udhcpc", "dhclient"],
+               help='DHCP client used by images to renew DCHP lease. '
+                    'If left empty, update operation will be skipped. '
+                    'Supported clients: "udhcpc", "dhclient"')
 ]
 
 
