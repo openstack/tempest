@@ -75,6 +75,7 @@ class BaseVolumeQuotasClientJSON(base.VolumeClient):
         """Delete the tenant's quota set."""
         resp, body = self.delete('os-quota-sets/%s' % tenant_id)
         self.expected_success(200, resp.status)
+        return service_client.ResponseBody(resp, body)
 
 
 class VolumeQuotasClientJSON(BaseVolumeQuotasClientJSON):
