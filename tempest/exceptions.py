@@ -51,28 +51,12 @@ class RestClientException(TempestException,
     pass
 
 
-class RFCViolation(RestClientException):
-    message = "RFC Violation"
-
-
 class InvalidConfiguration(TempestException):
     message = "Invalid Configuration"
 
 
 class InvalidCredentials(TempestException):
     message = "Invalid Credentials"
-
-
-class InvalidHttpSuccessCode(RestClientException):
-    message = "The success code is different than the expected one"
-
-
-class NotFound(RestClientException):
-    message = "Object not found"
-
-
-class Unauthorized(RestClientException):
-    message = 'Unauthorized'
 
 
 class InvalidServiceTag(TempestException):
@@ -123,15 +107,7 @@ class StackResourceBuildErrorException(TempestException):
                "'%(resource_status_reason)s'")
 
 
-class BadRequest(RestClientException):
-    message = "Bad request"
-
-
-class UnprocessableEntity(RestClientException):
-    message = "Unprocessable entity"
-
-
-class AuthenticationFailure(RestClientException):
+class AuthenticationFailure(TempestException):
     message = ("Authentication with user %(user)s and password "
                "%(password)s failed auth using tenant %(tenant)s.")
 
@@ -140,32 +116,12 @@ class EndpointNotFound(TempestException):
     message = "Endpoint not found"
 
 
-class RateLimitExceeded(RestClientException):
-    message = "Rate limit exceeded"
-
-
-class OverLimit(RestClientException):
-    message = "Quota exceeded"
-
-
-class ServerFault(RestClientException):
-    message = "Got server fault"
-
-
-class NotImplemented(RestClientException):
-    message = "Got NotImplemented error"
-
-
 class ImageFault(TempestException):
     message = "Got image fault"
 
 
 class IdentityError(TempestException):
     message = "Got identity error"
-
-
-class Conflict(RestClientException):
-    message = "An object with that identifier already exists"
 
 
 class SSHTimeout(TempestException):
@@ -185,6 +141,50 @@ class ServerUnreachable(TempestException):
 
 class TearDownException(TempestException):
     message = "%(num)d cleanUp operation failed"
+
+
+class RFCViolation(RestClientException):
+    message = "RFC Violation"
+
+
+class InvalidHttpSuccessCode(RestClientException):
+    message = "The success code is different than the expected one"
+
+
+class NotFound(RestClientException):
+    message = "Object not found"
+
+
+class Unauthorized(RestClientException):
+    message = 'Unauthorized'
+
+
+class BadRequest(RestClientException):
+    message = "Bad request"
+
+
+class UnprocessableEntity(RestClientException):
+    message = "Unprocessable entity"
+
+
+class RateLimitExceeded(RestClientException):
+    message = "Rate limit exceeded"
+
+
+class OverLimit(RestClientException):
+    message = "Quota exceeded"
+
+
+class ServerFault(RestClientException):
+    message = "Got server fault"
+
+
+class NotImplemented(RestClientException):
+    message = "Got NotImplemented error"
+
+
+class Conflict(RestClientException):
+    message = "An object with that identifier already exists"
 
 
 class ResponseWithNonEmptyBody(RFCViolation):
