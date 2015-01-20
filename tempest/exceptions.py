@@ -209,10 +209,6 @@ class InvalidContentType(RestClientException):
     message = "Invalid content type provided"
 
 
-class UnexpectedResponseCode(RestClientException):
-    message = "Unexpected response code received"
-
-
 class InvalidStructure(TempestException):
     message = "Invalid structure of table with details"
 
