@@ -16,6 +16,8 @@
 import json
 import urllib
 
+from tempest_lib import exceptions as lib_exc
+
 from tempest.common import service_client
 from tempest import exceptions
 from tempest.services.volume.json import base
@@ -40,7 +42,7 @@ class BaseVolumeTypesClientJSON(base.VolumeClient):
                     return True
             else:
                 msg = (" resource value is either not defined or incorrect.")
-                raise exceptions.UnprocessableEntity(msg)
+                raise lib_exc.UnprocessableEntity(msg)
         except exceptions.NotFound:
             return True
         return False

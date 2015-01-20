@@ -13,6 +13,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib import exceptions as lib_exc
+
 from tempest.api.compute.floating_ips import base
 from tempest.common.utils import data_utils
 from tempest import exceptions
@@ -135,7 +137,7 @@ class FloatingIPsTestJSON(base.BaseFloatingIPsTest):
 
         # Make sure no longer associated with old server
         self.assertRaises((exceptions.NotFound,
-                           exceptions.UnprocessableEntity,
+                           lib_exc.UnprocessableEntity,
                            exceptions.Conflict),
                           self.client.disassociate_floating_ip_from_server,
                           self.floating_ip, self.server_id)

@@ -15,6 +15,8 @@
 import json
 import time
 
+from tempest_lib import exceptions as lib_exc
+
 from tempest.common import service_client
 from tempest import exceptions
 from tempest.services.volume.json import base
@@ -60,7 +62,7 @@ class BaseQosSpecsClientJSON(base.VolumeClient):
                     return
             else:
                 msg = (" operation value is either not defined or incorrect.")
-                raise exceptions.UnprocessableEntity(msg)
+                raise lib_exc.UnprocessableEntity(msg)
 
             if int(time.time()) - start_time >= self.build_timeout:
                 raise exceptions.TimeoutException

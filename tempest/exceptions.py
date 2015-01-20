@@ -163,10 +163,6 @@ class BadRequest(RestClientException):
     message = "Bad request"
 
 
-class UnprocessableEntity(RestClientException):
-    message = "Unprocessable entity"
-
-
 class OverLimit(RestClientException):
     message = "Quota exceeded"
 
