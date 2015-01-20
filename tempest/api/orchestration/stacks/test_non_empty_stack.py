@@ -47,7 +47,7 @@ class StacksTestJSON(base.BaseOrchestrationTest):
         cls.client.wait_for_stack_status(cls.stack_id, 'CREATE_COMPLETE')
 
     def _list_stacks(self, expected_num=None, **filter_kwargs):
-        _, stacks = self.client.list_stacks(params=filter_kwargs)
+        stacks = self.client.list_stacks(params=filter_kwargs)
         self.assertIsInstance(stacks, list)
         if expected_num is not None:
             self.assertEqual(expected_num, len(stacks))
@@ -63,7 +63,7 @@ class StacksTestJSON(base.BaseOrchestrationTest):
     @test.attr(type='gate')
     def test_stack_show(self):
         """Getting details about created stack should be possible."""
-        _, stack = self.client.get_stack(self.stack_name)
+        stack = self.client.get_stack(self.stack_name)
         self.assertIsInstance(stack, dict)
         self.assert_fields_in_dict(stack, 'stack_name', 'id', 'links',
                                    'parameters', 'outputs', 'disable_rollback',
@@ -82,10 +82,10 @@ class StacksTestJSON(base.BaseOrchestrationTest):
     @test.attr(type='gate')
     def test_suspend_resume_stack(self):
         """Suspend and resume a stack."""
-        _, suspend_stack = self.client.suspend_stack(self.stack_identifier)
+        self.client.suspend_stack(self.stack_identifier)
         self.client.wait_for_stack_status(self.stack_identifier,
                                           'SUSPEND_COMPLETE')
-        _, resume_stack = self.client.resume_stack(self.stack_identifier)
+        self.client.resume_stack(self.stack_identifier)
         self.client.wait_for_stack_status(self.stack_identifier,
                                           'RESUME_COMPLETE')
 
@@ -99,8 +99,8 @@ class StacksTestJSON(base.BaseOrchestrationTest):
     @test.attr(type='gate')
     def test_show_resource(self):
         """Getting details about created resource should be possible."""
-        _, resource = self.client.get_resource(self.stack_identifier,
-                                               self.resource_name)
+        resource = self.client.get_resource(self.stack_identifier,
+                                            self.resource_name)
         self.assertIsInstance(resource, dict)
         self.assert_fields_in_dict(resource, 'resource_name', 'description',
                                    'links', 'logical_resource_id',
@@ -113,7 +113,7 @@ class StacksTestJSON(base.BaseOrchestrationTest):
     @test.attr(type='gate')
     def test_resource_metadata(self):
         """Getting metadata for created resources should be possible."""
-        _, metadata = self.client.show_resource_metadata(
+        metadata = self.client.show_resource_metadata(
             self.stack_identifier,
             self.resource_name)
         self.assertIsInstance(metadata, dict)
@@ -122,7 +122,7 @@ class StacksTestJSON(base.BaseOrchestrationTest):
     @test.attr(type='gate')
     def test_list_events(self):
         """Getting list of created events for the stack should be possible."""
-        _, events = self.client.list_events(self.stack_identifier)
+        events = self.client.list_events(self.stack_identifier)
         self.assertIsInstance(events, list)
 
         for event in events:
@@ -137,13 +137,13 @@ class StacksTestJSON(base.BaseOrchestrationTest):
     @test.attr(type='gate')
     def test_show_event(self):
         """Getting details about an event should be possible."""
-        _, events = self.client.list_resource_events(self.stack_identifier,
-                                                     self.resource_name)
+        events = self.client.list_resource_events(self.stack_identifier,
+                                                  self.resource_name)
         self.assertNotEqual([], events)
         events.sort(key=lambda event: event['event_time'])
         event_id = events[0]['id']
-        _, event = self.client.show_event(self.stack_identifier,
-                                          self.resource_name, event_id)
+        event = self.client.show_event(self.stack_identifier,
+                                       self.resource_name, event_id)
         self.assertIsInstance(event, dict)
         self.assert_fields_in_dict(event, 'resource_name', 'event_time',
                                    'links', 'logical_resource_id',

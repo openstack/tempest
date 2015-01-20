@@ -43,7 +43,7 @@ class NovaKeyPairResourcesYAMLTest(base.BaseOrchestrationTest):
 
         cls.stack_id = cls.stack_identifier.split('/')[1]
         cls.client.wait_for_stack_status(cls.stack_id, 'CREATE_COMPLETE')
-        _, resources = cls.client.list_resources(cls.stack_identifier)
+        resources = cls.client.list_resources(cls.stack_identifier)
         cls.test_resources = {}
         for resource in resources:
             cls.test_resources[resource['logical_resource_id']] = resource
@@ -70,7 +70,7 @@ class NovaKeyPairResourcesYAMLTest(base.BaseOrchestrationTest):
 
     @test.attr(type='gate')
     def test_stack_keypairs_output(self):
-        _, stack = self.client.get_stack(self.stack_name)
+        stack = self.client.get_stack(self.stack_name)
         self.assertIsInstance(stack, dict)
 
         output_map = {}
