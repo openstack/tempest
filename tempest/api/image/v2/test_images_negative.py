@@ -16,6 +16,8 @@
 
 import uuid
 
+from tempest_lib import exceptions as lib_exc
+
 from tempest.api.image import base
 from tempest import exceptions
 from tempest import test
@@ -39,14 +41,14 @@ class ImagesNegativeTest(base.BaseV2ImageTest):
     def test_get_non_existent_image(self):
         # get the non-existent image
         non_existent_id = str(uuid.uuid4())
-        self.assertRaises(exceptions.NotFound, self.client.get_image,
+        self.assertRaises(lib_exc.NotFound, self.client.get_image,
                           non_existent_id)
 
     @test.attr(type=['negative', 'gate'])
     def test_get_image_null_id(self):
         # get image with image_id = NULL
         image_id = ""
-        self.assertRaises(exceptions.NotFound, self.client.get_image, image_id)
+        self.assertRaises(lib_exc.NotFound, self.client.get_image, image_id)
 
     @test.attr(type=['negative', 'gate'])
     def test_get_delete_deleted_image(self):
@@ -60,24 +62,24 @@ class ImagesNegativeTest(base.BaseV2ImageTest):
         self.client.wait_for_resource_deletion(image_id)
 
         # get the deleted image
-        self.assertRaises(exceptions.NotFound, self.client.get_image, image_id)
+        self.assertRaises(lib_exc.NotFound, self.client.get_image, image_id)
 
         # delete the deleted image
-        self.assertRaises(exceptions.NotFound, self.client.delete_image,
+        self.assertRaises(lib_exc.NotFound, self.client.delete_image,
                           image_id)
 
     @test.attr(type=['negative', 'gate'])
     def test_delete_non_existing_image(self):
         # delete non-existent image
         non_existent_image_id = str(uuid.uuid4())
-        self.assertRaises(exceptions.NotFound, self.client.delete_image,
+        self.assertRaises(lib_exc.NotFound, self.client.delete_image,
                           non_existent_image_id)
 
     @test.attr(type=['negative', 'gate'])
     def test_delete_image_null_id(self):
         # delete image with image_id=NULL
         image_id = ""
-        self.assertRaises(exceptions.NotFound, self.client.delete_image,
+        self.assertRaises(lib_exc.NotFound, self.client.delete_image,
                           image_id)
 
     @test.attr(type=['negative', 'gate'])

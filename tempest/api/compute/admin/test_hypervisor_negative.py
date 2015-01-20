@@ -13,6 +13,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib import exceptions as lib_exc
 import uuid
 
 from tempest.api.compute import base
@@ -43,7 +44,7 @@ class HypervisorAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
         nonexistent_hypervisor_id = str(uuid.uuid4())
 
         self.assertRaises(
-            exceptions.NotFound,
+            lib_exc.NotFound,
             self.client.get_hypervisor_show_details,
             nonexistent_hypervisor_id)
 
@@ -72,7 +73,7 @@ class HypervisorAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
         nonexistent_hypervisor_id = str(uuid.uuid4())
 
         self.assertRaises(
-            exceptions.NotFound,
+            lib_exc.NotFound,
             self.client.get_hypervisor_servers,
             nonexistent_hypervisor_id)
 
@@ -87,7 +88,7 @@ class HypervisorAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
         nonexistent_hypervisor_id = str(uuid.uuid4())
 
         self.assertRaises(
-            exceptions.NotFound,
+            lib_exc.NotFound,
             self.client.get_hypervisor_uptime,
             nonexistent_hypervisor_id)
 
@@ -120,7 +121,7 @@ class HypervisorAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
         nonexistent_hypervisor_name = data_utils.rand_name('test_hypervisor')
 
         self.assertRaises(
-            exceptions.NotFound,
+            lib_exc.NotFound,
             self.client.search_hypervisor,
             nonexistent_hypervisor_name)
 

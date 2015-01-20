@@ -107,7 +107,7 @@ class RolesNegativeTestJSON(base.BaseIdentityV2AdminTest):
     def test_delete_role_non_existent(self):
         # Attempt to delete a non existent role should fail
         non_existent_role = str(uuid.uuid4().hex)
-        self.assertRaises(exceptions.NotFound, self.client.delete_role,
+        self.assertRaises(lib_exc.NotFound, self.client.delete_role,
                           non_existent_role)
 
     @test.attr(type=['negative', 'gate'])
@@ -135,7 +135,7 @@ class RolesNegativeTestJSON(base.BaseIdentityV2AdminTest):
         # Attempt to assign a non existent role to user should fail
         (user, tenant, role) = self._get_role_params()
         non_existent_role = str(uuid.uuid4().hex)
-        self.assertRaises(exceptions.NotFound, self.client.assign_user_role,
+        self.assertRaises(lib_exc.NotFound, self.client.assign_user_role,
                           tenant['id'], user['id'], non_existent_role)
 
     @test.attr(type=['negative', 'gate'])
@@ -143,7 +143,7 @@ class RolesNegativeTestJSON(base.BaseIdentityV2AdminTest):
         # Attempt to assign a role on a non existent tenant should fail
         (user, tenant, role) = self._get_role_params()
         non_existent_tenant = str(uuid.uuid4().hex)
-        self.assertRaises(exceptions.NotFound, self.client.assign_user_role,
+        self.assertRaises(lib_exc.NotFound, self.client.assign_user_role,
                           non_existent_tenant, user['id'], role['id'])
 
     @test.attr(type=['negative', 'gate'])
@@ -188,7 +188,7 @@ class RolesNegativeTestJSON(base.BaseIdentityV2AdminTest):
                                      user['id'],
                                      role['id'])
         non_existent_role = str(uuid.uuid4().hex)
-        self.assertRaises(exceptions.NotFound, self.client.remove_user_role,
+        self.assertRaises(lib_exc.NotFound, self.client.remove_user_role,
                           tenant['id'], user['id'], non_existent_role)
 
     @test.attr(type=['negative', 'gate'])
@@ -199,7 +199,7 @@ class RolesNegativeTestJSON(base.BaseIdentityV2AdminTest):
                                      user['id'],
                                      role['id'])
         non_existent_tenant = str(uuid.uuid4().hex)
-        self.assertRaises(exceptions.NotFound, self.client.remove_user_role,
+        self.assertRaises(lib_exc.NotFound, self.client.remove_user_role,
                           non_existent_tenant, user['id'], role['id'])
 
     @test.attr(type=['negative', 'gate'])

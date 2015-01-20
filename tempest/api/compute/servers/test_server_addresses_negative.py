@@ -13,8 +13,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib import exceptions as lib_exc
+
 from tempest.api.compute import base
-from tempest import exceptions
 from tempest import test
 
 
@@ -32,13 +33,13 @@ class ServerAddressesNegativeTestJSON(base.BaseV2ComputeTest):
     @test.services('network')
     def test_list_server_addresses_invalid_server_id(self):
         # List addresses request should fail if server id not in system
-        self.assertRaises(exceptions.NotFound, self.client.list_addresses,
+        self.assertRaises(lib_exc.NotFound, self.client.list_addresses,
                           '999')
 
     @test.attr(type=['negative', 'gate'])
     @test.services('network')
     def test_list_server_addresses_by_network_neg(self):
         # List addresses by network should fail if network name not valid
-        self.assertRaises(exceptions.NotFound,
+        self.assertRaises(lib_exc.NotFound,
                           self.client.list_addresses_by_network,
                           self.server['id'], 'invalid')

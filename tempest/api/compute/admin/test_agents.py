@@ -12,9 +12,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib import exceptions as lib_exc
+
 from tempest.api.compute import base
 from tempest.common.utils import data_utils
-from tempest import exceptions
 from tempest.openstack.common import log
 from tempest import test
 
@@ -43,7 +44,7 @@ class AgentsAdminTestJSON(base.BaseV2ComputeAdminTest):
     def tearDown(self):
         try:
             self.client.delete_agent(self.agent_id)
-        except exceptions.NotFound:
+        except lib_exc.NotFound:
             pass
         except Exception:
             LOG.exception('Exception raised deleting agent %s', self.agent_id)

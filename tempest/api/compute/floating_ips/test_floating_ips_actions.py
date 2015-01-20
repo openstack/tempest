@@ -17,7 +17,6 @@ from tempest_lib import exceptions as lib_exc
 
 from tempest.api.compute.floating_ips import base
 from tempest.common.utils import data_utils
-from tempest import exceptions
 from tempest import test
 
 
@@ -51,7 +50,7 @@ class FloatingIPsTestJSON(base.BaseFloatingIPsTest):
         try:
             self.client.delete_floating_ip(floating_ip_id)
         # if not found, it depicts it was deleted in the test
-        except exceptions.NotFound:
+        except lib_exc.NotFound:
             pass
 
     @test.attr(type='gate')
@@ -136,7 +135,7 @@ class FloatingIPsTestJSON(base.BaseFloatingIPsTest):
                             self.new_server_id)
 
         # Make sure no longer associated with old server
-        self.assertRaises((exceptions.NotFound,
+        self.assertRaises((lib_exc.NotFound,
                            lib_exc.UnprocessableEntity,
                            lib_exc.Conflict),
                           self.client.disassociate_floating_ip_from_server,

@@ -13,9 +13,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib import exceptions as lib_exc
+
 from tempest.api.compute import base
 from tempest.common.utils import data_utils
-from tempest import exceptions
 from tempest import test
 
 
@@ -32,12 +33,12 @@ class InstanceActionsNegativeTestJSON(base.BaseV2ComputeTest):
     def test_list_instance_actions_non_existent_server(self):
         # List actions of the non-existent server id
         non_existent_server_id = data_utils.rand_uuid()
-        self.assertRaises(exceptions.NotFound,
+        self.assertRaises(lib_exc.NotFound,
                           self.client.list_instance_actions,
                           non_existent_server_id)
 
     @test.attr(type=['negative', 'gate'])
     def test_get_instance_action_invalid_request(self):
         # Get the action details of the provided server with invalid request
-        self.assertRaises(exceptions.NotFound, self.client.get_instance_action,
+        self.assertRaises(lib_exc.NotFound, self.client.get_instance_action,
                           self.server_id, '999')

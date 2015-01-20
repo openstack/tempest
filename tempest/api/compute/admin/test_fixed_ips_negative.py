@@ -12,6 +12,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib import exceptions as lib_exc
+
 from tempest.api.compute import base
 from tempest import config
 from tempest import exceptions
@@ -71,7 +73,7 @@ class FixedIPsNegativeTestJson(base.BaseV2ComputeAdminTest):
         # NOTE(eliqiao): in Juno, the exception is NotFound, but in master, we
         # change the error code to BadRequest, both exceptions should be
         # accepted by tempest
-        self.assertRaises((exceptions.NotFound, exceptions.BadRequest),
+        self.assertRaises((lib_exc.NotFound, exceptions.BadRequest),
                           self.client.reserve_fixed_ip,
                           "my.invalid.ip", body)
 

@@ -27,7 +27,7 @@ class BaseQosSpecsClientJSON(service_client.ServiceClient):
     def is_resource_deleted(self, qos_id):
         try:
             self.get_qos(qos_id)
-        except exceptions.NotFound:
+        except lib_exc.NotFound:
             return True
         return False
 

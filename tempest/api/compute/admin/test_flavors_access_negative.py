@@ -54,7 +54,7 @@ class FlavorsAccessNegativeTestJSON(base.BaseV2ComputeAdminTest):
                                                new_flavor_id,
                                                is_public='True')
         self.addCleanup(self.client.delete_flavor, new_flavor['id'])
-        self.assertRaises(exceptions.NotFound,
+        self.assertRaises(lib_exc.NotFound,
                           self.client.list_flavor_access,
                           new_flavor_id)
 
@@ -131,7 +131,7 @@ class FlavorsAccessNegativeTestJSON(base.BaseV2ComputeAdminTest):
         self.addCleanup(self.client.delete_flavor, new_flavor['id'])
 
         # An exception should be raised when flavor access is not found
-        self.assertRaises(exceptions.NotFound,
+        self.assertRaises(lib_exc.NotFound,
                           self.client.remove_flavor_access,
                           new_flavor['id'],
                           str(uuid.uuid4()))

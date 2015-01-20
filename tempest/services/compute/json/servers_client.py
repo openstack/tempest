@@ -18,6 +18,8 @@ import json
 import time
 import urllib
 
+from tempest_lib import exceptions as lib_exc
+
 from tempest.api_schema.response.compute import servers as common_schema
 from tempest.api_schema.response.compute.v2 import servers as schema
 from tempest.common import service_client
@@ -183,7 +185,7 @@ class ServersClientJSON(service_client.ServiceClient):
         while True:
             try:
                 resp, body = self.get_server(server_id)
-            except exceptions.NotFound:
+            except lib_exc.NotFound:
                 return
 
             server_status = body['status']

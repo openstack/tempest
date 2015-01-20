@@ -106,13 +106,13 @@ class AggregatesAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
     @test.attr(type=['negative', 'gate'])
     def test_aggregate_delete_with_invalid_id(self):
         # Delete an aggregate with invalid id should raise exceptions.
-        self.assertRaises(exceptions.NotFound,
+        self.assertRaises(lib_exc.NotFound,
                           self.client.delete_aggregate, -1)
 
     @test.attr(type=['negative', 'gate'])
     def test_aggregate_get_details_with_invalid_id(self):
         # Get aggregate details with invalid id should raise exceptions.
-        self.assertRaises(exceptions.NotFound,
+        self.assertRaises(lib_exc.NotFound,
                           self.client.get_aggregate, -1)
 
     @test.attr(type=['negative', 'gate'])
@@ -129,7 +129,7 @@ class AggregatesAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
         aggregate = self.client.create_aggregate(name=aggregate_name)
         self.addCleanup(self.client.delete_aggregate, aggregate['id'])
 
-        self.assertRaises(exceptions.NotFound, self.client.add_host,
+        self.assertRaises(lib_exc.NotFound, self.client.add_host,
                           aggregate['id'], non_exist_host)
 
     @test.attr(type=['negative', 'gate'])
@@ -177,5 +177,5 @@ class AggregatesAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
         aggregate = self.client.create_aggregate(name=aggregate_name)
         self.addCleanup(self.client.delete_aggregate, aggregate['id'])
 
-        self.assertRaises(exceptions.NotFound, self.client.remove_host,
+        self.assertRaises(lib_exc.NotFound, self.client.remove_host,
                           aggregate['id'], non_exist_host)

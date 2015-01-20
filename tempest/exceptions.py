@@ -151,10 +151,6 @@ class InvalidHttpSuccessCode(RestClientException):
     message = "The success code is different than the expected one"
 
 
-class NotFound(RestClientException):
-    message = "Object not found"
-
-
 class Unauthorized(RestClientException):
     message = 'Unauthorized'
 

@@ -16,9 +16,10 @@
 import json
 import urllib
 
+from tempest_lib import exceptions as lib_exc
+
 from tempest.api_schema.response.compute.v2 import security_groups as schema
 from tempest.common import service_client
-from tempest import exceptions
 
 
 class SecurityGroupsClientJSON(service_client.ServiceClient):
@@ -128,12 +129,12 @@ class SecurityGroupsClientJSON(service_client.ServiceClient):
         for sg in body['security_groups']:
             if sg['id'] == security_group_id:
                 return service_client.ResponseBodyList(resp, sg['rules'])
-        raise exceptions.NotFound('No such Security Group')
+        raise lib_exc.NotFound('No such Security Group')
 
     def is_resource_deleted(self, id):
         try:
             self.get_security_group(id)
-        except exceptions.NotFound:
+        except lib_exc.NotFound:
             return True
         return False
 

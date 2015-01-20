@@ -39,20 +39,20 @@ class NegativeSecGroupTest(base.BaseSecGroupTest):
     @test.attr(type=['negative', 'gate'])
     def test_show_non_existent_security_group(self):
         non_exist_id = str(uuid.uuid4())
-        self.assertRaises(exceptions.NotFound, self.client.show_security_group,
+        self.assertRaises(lib_exc.NotFound, self.client.show_security_group,
                           non_exist_id)
 
     @test.attr(type=['negative', 'gate'])
     def test_show_non_existent_security_group_rule(self):
         non_exist_id = str(uuid.uuid4())
-        self.assertRaises(exceptions.NotFound,
+        self.assertRaises(lib_exc.NotFound,
                           self.client.show_security_group_rule,
                           non_exist_id)
 
     @test.attr(type=['negative', 'gate'])
     def test_delete_non_existent_security_group(self):
         non_exist_id = str(uuid.uuid4())
-        self.assertRaises(exceptions.NotFound,
+        self.assertRaises(lib_exc.NotFound,
                           self.client.delete_security_group,
                           non_exist_id
                           )
@@ -90,7 +90,7 @@ class NegativeSecGroupTest(base.BaseSecGroupTest):
         group_ids = ['bad_group_id', non_exist_id]
         for remote_group_id in group_ids:
             self.assertRaises(
-                exceptions.NotFound, self.client.create_security_group_rule,
+                lib_exc.NotFound, self.client.create_security_group_rule,
                 security_group_id=group_create_body['security_group']['id'],
                 protocol='tcp', direction='ingress', ethertype=self.ethertype,
                 remote_group_id=remote_group_id)
@@ -186,7 +186,7 @@ class NegativeSecGroupTest(base.BaseSecGroupTest):
     def test_create_security_group_rule_with_non_existent_security_group(self):
         # Create security group rules with not existing security group.
         non_existent_sg = str(uuid.uuid4())
-        self.assertRaises(exceptions.NotFound,
+        self.assertRaises(lib_exc.NotFound,
                           self.client.create_security_group_rule,
                           security_group_id=non_existent_sg,
                           direction='ingress', ethertype=self.ethertype)

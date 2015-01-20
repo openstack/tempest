@@ -109,7 +109,7 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
     def test_resize_nonexistent_server(self):
         # Resize a non-existent server
         nonexistent_server = data_utils.rand_uuid()
-        self.assertRaises(exceptions.NotFound,
+        self.assertRaises(lib_exc.NotFound,
                           self.client.resize,
                           nonexistent_server, self.flavor_ref)
 
@@ -134,7 +134,7 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
     def test_reboot_non_existent_server(self):
         # Reboot a non existent server
         nonexistent_server = data_utils.rand_uuid()
-        self.assertRaises(exceptions.NotFound, self.client.reboot,
+        self.assertRaises(lib_exc.NotFound, self.client.reboot,
                           nonexistent_server, 'SOFT')
 
     @testtools.skipUnless(CONF.compute_feature_enabled.pause,
@@ -156,17 +156,17 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
         self.client.delete_server(server['id'])
         self.client.wait_for_server_termination(server['id'])
 
-        self.assertRaises(exceptions.NotFound,
+        self.assertRaises(lib_exc.NotFound,
                           self.client.rebuild,
                           server['id'], self.image_ref_alt)
-        self.assertRaises(exceptions.NotFound, self.client.reboot,
+        self.assertRaises(lib_exc.NotFound, self.client.reboot,
                           server['id'], 'SOFT')
 
     @test.attr(type=['negative', 'gate'])
     def test_rebuild_non_existent_server(self):
         # Rebuild a non existent server
         nonexistent_server = data_utils.rand_uuid()
-        self.assertRaises(exceptions.NotFound,
+        self.assertRaises(lib_exc.NotFound,
                           self.client.rebuild,
                           nonexistent_server,
                           self.image_ref_alt)
@@ -222,7 +222,7 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
         server_name = data_utils.rand_name('server')
         new_name = data_utils.rand_name('server') + '_updated'
 
-        self.assertRaises(exceptions.NotFound, self.client.update_server,
+        self.assertRaises(lib_exc.NotFound, self.client.update_server,
                           server_name, name=new_name)
 
     @test.attr(type=['negative', 'gate'])
@@ -240,7 +240,7 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
         # Update name of a server that belongs to another tenant
 
         new_name = self.server_id + '_new'
-        self.assertRaises(exceptions.NotFound,
+        self.assertRaises(lib_exc.NotFound,
                           self.alt_client.update_server, self.server_id,
                           name=new_name)
 
@@ -259,13 +259,13 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
         # Delete a non existent server
 
         nonexistent_server = data_utils.rand_uuid()
-        self.assertRaises(exceptions.NotFound, self.client.delete_server,
+        self.assertRaises(lib_exc.NotFound, self.client.delete_server,
                           nonexistent_server)
 
     @test.attr(type=['negative', 'gate'])
     def test_delete_a_server_of_another_tenant(self):
         # Delete a server that belongs to another tenant
-        self.assertRaises(exceptions.NotFound,
+        self.assertRaises(lib_exc.NotFound,
                           self.alt_client.delete_server,
                           self.server_id)
 
@@ -273,13 +273,13 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
     def test_delete_server_pass_negative_id(self):
         # Pass an invalid string parameter to delete server
 
-        self.assertRaises(exceptions.NotFound, self.client.delete_server, -1)
+        self.assertRaises(lib_exc.NotFound, self.client.delete_server, -1)
 
     @test.attr(type=['negative', 'gate'])
     def test_delete_server_pass_id_exceeding_length_limit(self):
         # Pass a server ID that exceeds length limit to delete server
 
-        self.assertRaises(exceptions.NotFound, self.client.delete_server,
+        self.assertRaises(lib_exc.NotFound, self.client.delete_server,
                           sys.maxint + 1)
 
     @test.attr(type=['negative', 'gate'])
@@ -295,14 +295,14 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
     def test_get_non_existent_server(self):
         # Get a non existent server details
         nonexistent_server = data_utils.rand_uuid()
-        self.assertRaises(exceptions.NotFound, self.client.get_server,
+        self.assertRaises(lib_exc.NotFound, self.client.get_server,
                           nonexistent_server)
 
     @test.attr(type=['negative', 'gate'])
     def test_stop_non_existent_server(self):
         # Stop a non existent server
         nonexistent_server = data_utils.rand_uuid()
-        self.assertRaises(exceptions.NotFound, self.servers_client.stop,
+        self.assertRaises(lib_exc.NotFound, self.servers_client.stop,
                           nonexistent_server)
 
     @testtools.skipUnless(CONF.compute_feature_enabled.pause,
@@ -311,7 +311,7 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
     def test_pause_non_existent_server(self):
         # pause a non existent server
         nonexistent_server = data_utils.rand_uuid()
-        self.assertRaises(exceptions.NotFound, self.client.pause_server,
+        self.assertRaises(lib_exc.NotFound, self.client.pause_server,
                           nonexistent_server)
 
     @testtools.skipUnless(CONF.compute_feature_enabled.pause,
@@ -320,7 +320,7 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
     def test_unpause_non_existent_server(self):
         # unpause a non existent server
         nonexistent_server = data_utils.rand_uuid()
-        self.assertRaises(exceptions.NotFound, self.client.unpause_server,
+        self.assertRaises(lib_exc.NotFound, self.client.unpause_server,
                           nonexistent_server)
 
     @testtools.skipUnless(CONF.compute_feature_enabled.pause,
@@ -338,7 +338,7 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
     def test_suspend_non_existent_server(self):
         # suspend a non existent server
         nonexistent_server = data_utils.rand_uuid()
-        self.assertRaises(exceptions.NotFound, self.client.suspend_server,
+        self.assertRaises(lib_exc.NotFound, self.client.suspend_server,
                           nonexistent_server)
 
     @testtools.skipUnless(CONF.compute_feature_enabled.suspend,
@@ -360,7 +360,7 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
     def test_resume_non_existent_server(self):
         # resume a non existent server
         nonexistent_server = data_utils.rand_uuid()
-        self.assertRaises(exceptions.NotFound, self.client.resume_server,
+        self.assertRaises(lib_exc.NotFound, self.client.resume_server,
                           nonexistent_server)
 
     @testtools.skipUnless(CONF.compute_feature_enabled.suspend,
@@ -376,7 +376,7 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
     def test_get_console_output_of_non_existent_server(self):
         # get the console output for a non existent server
         nonexistent_server = data_utils.rand_uuid()
-        self.assertRaises(exceptions.NotFound,
+        self.assertRaises(lib_exc.NotFound,
                           self.client.get_console_output,
                           nonexistent_server, 10)
 
@@ -384,7 +384,7 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
     def test_force_delete_nonexistent_server_id(self):
         # force-delete a non existent server
         nonexistent_server = data_utils.rand_uuid()
-        self.assertRaises(exceptions.NotFound,
+        self.assertRaises(lib_exc.NotFound,
                           self.client.force_delete_server,
                           nonexistent_server)
 
@@ -392,7 +392,7 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
     def test_restore_nonexistent_server_id(self):
         # restore-delete a non existent server
         nonexistent_server = data_utils.rand_uuid()
-        self.assertRaises(exceptions.NotFound,
+        self.assertRaises(lib_exc.NotFound,
                           self.client.restore_soft_deleted_server,
                           nonexistent_server)
 
@@ -409,7 +409,7 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
     def test_shelve_non_existent_server(self):
         # shelve a non existent server
         nonexistent_server = data_utils.rand_uuid()
-        self.assertRaises(exceptions.NotFound, self.client.shelve_server,
+        self.assertRaises(lib_exc.NotFound, self.client.shelve_server,
                           nonexistent_server)
 
     @testtools.skipUnless(CONF.compute_feature_enabled.shelve,
@@ -448,7 +448,7 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
     def test_unshelve_non_existent_server(self):
         # unshelve a non existent server
         nonexistent_server = data_utils.rand_uuid()
-        self.assertRaises(exceptions.NotFound, self.client.unshelve_server,
+        self.assertRaises(lib_exc.NotFound, self.client.unshelve_server,
                           nonexistent_server)
 
     @testtools.skipUnless(CONF.compute_feature_enabled.shelve,

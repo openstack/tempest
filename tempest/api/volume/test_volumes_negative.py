@@ -15,6 +15,8 @@
 
 import uuid
 
+from tempest_lib import exceptions as lib_exc
+
 from tempest.api.volume import base
 from tempest.common.utils import data_utils
 from tempest import exceptions
@@ -37,13 +39,13 @@ class VolumesV2NegativeTest(base.BaseVolumeTest):
     @test.attr(type=['negative', 'gate'])
     def test_volume_get_nonexistent_volume_id(self):
         # Should not be able to get a non-existent volume
-        self.assertRaises(exceptions.NotFound, self.client.get_volume,
+        self.assertRaises(lib_exc.NotFound, self.client.get_volume,
                           str(uuid.uuid4()))
 
     @test.attr(type=['negative', 'gate'])
     def test_volume_delete_nonexistent_volume_id(self):
         # Should not be able to delete a non-existent Volume
-        self.assertRaises(exceptions.NotFound, self.client.delete_volume,
+        self.assertRaises(lib_exc.NotFound, self.client.delete_volume,
                           str(uuid.uuid4()))
 
     @test.attr(type=['negative', 'gate'])
@@ -85,7 +87,7 @@ class VolumesV2NegativeTest(base.BaseVolumeTest):
         # Should not be able to create volume with non-existent volume type
         v_name = data_utils.rand_name('Volume-')
         metadata = {'Type': 'work'}
-        self.assertRaises(exceptions.NotFound, self.client.create_volume,
+        self.assertRaises(lib_exc.NotFound, self.client.create_volume,
                           size='1', volume_type=str(uuid.uuid4()),
                           display_name=v_name, metadata=metadata)
 
@@ -94,7 +96,7 @@ class VolumesV2NegativeTest(base.BaseVolumeTest):
         # Should not be able to create volume with non-existent snapshot
         v_name = data_utils.rand_name('Volume-')
         metadata = {'Type': 'work'}
-        self.assertRaises(exceptions.NotFound, self.client.create_volume,
+        self.assertRaises(lib_exc.NotFound, self.client.create_volume,
                           size='1', snapshot_id=str(uuid.uuid4()),
                           display_name=v_name, metadata=metadata)
 
@@ -103,7 +105,7 @@ class VolumesV2NegativeTest(base.BaseVolumeTest):
         # Should not be able to create volume with non-existent source volume
         v_name = data_utils.rand_name('Volume-')
         metadata = {'Type': 'work'}
-        self.assertRaises(exceptions.NotFound, self.client.create_volume,
+        self.assertRaises(lib_exc.NotFound, self.client.create_volume,
                           size='1', source_volid=str(uuid.uuid4()),
                           display_name=v_name, metadata=metadata)
 
@@ -111,7 +113,7 @@ class VolumesV2NegativeTest(base.BaseVolumeTest):
     def test_update_volume_with_nonexistent_volume_id(self):
         v_name = data_utils.rand_name('Volume-')
         metadata = {'Type': 'work'}
-        self.assertRaises(exceptions.NotFound, self.client.update_volume,
+        self.assertRaises(lib_exc.NotFound, self.client.update_volume,
                           volume_id=str(uuid.uuid4()), display_name=v_name,
                           metadata=metadata)
 
@@ -119,7 +121,7 @@ class VolumesV2NegativeTest(base.BaseVolumeTest):
     def test_update_volume_with_invalid_volume_id(self):
         v_name = data_utils.rand_name('Volume-')
         metadata = {'Type': 'work'}
-        self.assertRaises(exceptions.NotFound, self.client.update_volume,
+        self.assertRaises(lib_exc.NotFound, self.client.update_volume,
                           volume_id='#$%%&^&^', display_name=v_name,
                           metadata=metadata)
 
@@ -127,31 +129,31 @@ class VolumesV2NegativeTest(base.BaseVolumeTest):
     def test_update_volume_with_empty_volume_id(self):
         v_name = data_utils.rand_name('Volume-')
         metadata = {'Type': 'work'}
-        self.assertRaises(exceptions.NotFound, self.client.update_volume,
+        self.assertRaises(lib_exc.NotFound, self.client.update_volume,
                           volume_id='', display_name=v_name,
                           metadata=metadata)
 
     @test.attr(type=['negative', 'gate'])
     def test_get_invalid_volume_id(self):
         # Should not be able to get volume with invalid id
-        self.assertRaises(exceptions.NotFound, self.client.get_volume,
+        self.assertRaises(lib_exc.NotFound, self.client.get_volume,
                           '#$%%&^&^')
 
     @test.attr(type=['negative', 'gate'])
     def test_get_volume_without_passing_volume_id(self):
         # Should not be able to get volume when empty ID is passed
-        self.assertRaises(exceptions.NotFound, self.client.get_volume, '')
+        self.assertRaises(lib_exc.NotFound, self.client.get_volume, '')
 
     @test.attr(type=['negative', 'gate'])
     def test_delete_invalid_volume_id(self):
         # Should not be able to delete volume when invalid ID is passed
-        self.assertRaises(exceptions.NotFound, self.client.delete_volume,
+        self.assertRaises(lib_exc.NotFound, self.client.delete_volume,
                           '!@#$%^&*()')
 
     @test.attr(type=['negative', 'gate'])
     def test_delete_volume_without_passing_volume_id(self):
         # Should not be able to delete volume when empty ID is passed
-        self.assertRaises(exceptions.NotFound, self.client.delete_volume, '')
+        self.assertRaises(lib_exc.NotFound, self.client.delete_volume, '')
 
     @test.attr(type=['negative', 'gate'])
     @test.services('compute')
@@ -162,7 +164,7 @@ class VolumesV2NegativeTest(base.BaseVolumeTest):
                                                          self.flavor_ref)
         self.addCleanup(self.servers_client.delete_server, server['id'])
         self.servers_client.wait_for_server_status(server['id'], 'ACTIVE')
-        self.assertRaises(exceptions.NotFound,
+        self.assertRaises(lib_exc.NotFound,
                           self.client.attach_volume,
                           str(uuid.uuid4()),
                           server['id'],
@@ -170,7 +172,7 @@ class VolumesV2NegativeTest(base.BaseVolumeTest):
 
     @test.attr(type=['negative', 'gate'])
     def test_detach_volumes_with_invalid_volume_id(self):
-        self.assertRaises(exceptions.NotFound,
+        self.assertRaises(lib_exc.NotFound,
                           self.client.detach_volume,
                           'xxx')
 
@@ -199,25 +201,25 @@ class VolumesV2NegativeTest(base.BaseVolumeTest):
     def test_volume_extend_with_nonexistent_volume_id(self):
         # Extend volume size when volume is nonexistent.
         extend_size = int(self.volume['size']) + 1
-        self.assertRaises(exceptions.NotFound, self.client.extend_volume,
+        self.assertRaises(lib_exc.NotFound, self.client.extend_volume,
                           str(uuid.uuid4()), extend_size)
 
     @test.attr(type=['negative', 'gate'])
     def test_volume_extend_without_passing_volume_id(self):
         # Extend volume size when passing volume id is None.
         extend_size = int(self.volume['size']) + 1
-        self.assertRaises(exceptions.NotFound, self.client.extend_volume,
+        self.assertRaises(lib_exc.NotFound, self.client.extend_volume,
                           None, extend_size)
 
     @test.attr(type=['negative', 'gate'])
     def test_reserve_volume_with_nonexistent_volume_id(self):
-        self.assertRaises(exceptions.NotFound,
+        self.assertRaises(lib_exc.NotFound,
                           self.client.reserve_volume,
                           str(uuid.uuid4()))
 
     @test.attr(type=['negative', 'gate'])
     def test_unreserve_volume_with_nonexistent_volume_id(self):
-        self.assertRaises(exceptions.NotFound,
+        self.assertRaises(lib_exc.NotFound,
                           self.client.unreserve_volume,
                           str(uuid.uuid4()))
 

@@ -11,11 +11,11 @@
 #    under the License.
 
 import six
+from tempest_lib import exceptions as lib_exc
 
 from tempest.api.baremetal.admin import base
 from tempest.common.utils import data_utils
 from tempest.common import waiters
-from tempest import exceptions as exc
 from tempest import test
 
 
@@ -62,7 +62,8 @@ class TestNodes(base.BaseBaremetalTest):
 
         self.delete_node(node['uuid'])
 
-        self.assertRaises(exc.NotFound, self.client.show_node, node['uuid'])
+        self.assertRaises(lib_exc.NotFound, self.client.show_node,
+                          node['uuid'])
 
     @test.attr(type='smoke')
     def test_show_node(self):

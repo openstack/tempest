@@ -14,6 +14,8 @@ import json
 import time
 import urllib
 
+from tempest_lib import exceptions as lib_exc
+
 from tempest.common import service_client
 from tempest.common.utils import misc
 from tempest import exceptions
@@ -211,7 +213,7 @@ class NetworkClientJSON(service_client.ServiceClient):
             getattr(self, method)(id)
         except AttributeError:
             raise Exception("Unknown resource type %s " % resource_type)
-        except exceptions.NotFound:
+        except lib_exc.NotFound:
             return True
         return False
 

@@ -15,10 +15,11 @@
 
 import uuid
 
+from tempest_lib import exceptions as lib_exc
+
 from tempest.api.compute import base
 from tempest.common.utils import data_utils
 from tempest import config
-from tempest import exceptions
 from tempest import test
 
 CONF = config.CONF
@@ -41,5 +42,5 @@ class FloatingIPDetailsNegativeTestJSON(base.BaseV2ComputeTest):
             non_exist_id = str(uuid.uuid4())
         else:
             non_exist_id = data_utils.rand_int_id(start=999)
-        self.assertRaises(exceptions.NotFound,
+        self.assertRaises(lib_exc.NotFound,
                           self.client.get_floating_ip_details, non_exist_id)

@@ -12,8 +12,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib import exceptions as lib_exc
+
 from tempest import config
-from tempest import exceptions
 import tempest.test
 
 
@@ -63,7 +64,7 @@ class BaseDataProcessingTest(tempest.test.BaseTestCase):
         for resource_id in resource_id_list:
             try:
                 method(resource_id)
-            except exceptions.NotFound:
+            except lib_exc.NotFound:
                 # ignore errors while auto removing created resource
                 pass
 

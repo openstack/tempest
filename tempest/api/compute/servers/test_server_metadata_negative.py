@@ -60,7 +60,7 @@ class ServerMetadataNegativeTestJSON(base.BaseV2ComputeTest):
     def test_server_metadata_non_existent_server(self):
         # GET on a non-existent server should not succeed
         non_existent_server_id = data_utils.rand_uuid()
-        self.assertRaises(exceptions.NotFound,
+        self.assertRaises(lib_exc.NotFound,
                           self.client.get_server_metadata_item,
                           non_existent_server_id,
                           'test2')
@@ -69,7 +69,7 @@ class ServerMetadataNegativeTestJSON(base.BaseV2ComputeTest):
     def test_list_server_metadata_non_existent_server(self):
         # List metadata on a non-existent server should not succeed
         non_existent_server_id = data_utils.rand_uuid()
-        self.assertRaises(exceptions.NotFound,
+        self.assertRaises(lib_exc.NotFound,
                           self.client.list_server_metadata,
                           non_existent_server_id)
 
@@ -87,7 +87,7 @@ class ServerMetadataNegativeTestJSON(base.BaseV2ComputeTest):
         # Set metadata on a non-existent server should not succeed
         non_existent_server_id = data_utils.rand_uuid()
         meta = {'meta1': 'data1'}
-        self.assertRaises(exceptions.NotFound,
+        self.assertRaises(lib_exc.NotFound,
                           self.client.set_server_metadata,
                           non_existent_server_id,
                           meta)
@@ -97,7 +97,7 @@ class ServerMetadataNegativeTestJSON(base.BaseV2ComputeTest):
         # An update should not happen for a non-existent server
         non_existent_server_id = data_utils.rand_uuid()
         meta = {'key1': 'value1', 'key2': 'value2'}
-        self.assertRaises(exceptions.NotFound,
+        self.assertRaises(lib_exc.NotFound,
                           self.client.update_server_metadata,
                           non_existent_server_id,
                           meta)
@@ -114,7 +114,7 @@ class ServerMetadataNegativeTestJSON(base.BaseV2ComputeTest):
     def test_delete_metadata_non_existent_server(self):
         # Should not be able to delete metadata item from a non-existent server
         non_existent_server_id = data_utils.rand_uuid()
-        self.assertRaises(exceptions.NotFound,
+        self.assertRaises(lib_exc.NotFound,
                           self.client.delete_server_metadata_item,
                           non_existent_server_id,
                           'd')

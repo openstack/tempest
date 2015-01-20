@@ -19,7 +19,6 @@ import testtools
 from tempest.api.compute import base
 from tempest.common.utils import data_utils
 from tempest import config
-from tempest import exceptions
 from tempest import test
 
 CONF = config.CONF
@@ -96,7 +95,7 @@ class ServerRescueNegativeTestJSON(base.BaseV2ComputeTest):
     def test_rescue_non_existent_server(self):
         # Rescue a non-existing server
         non_existent_server = data_utils.rand_uuid()
-        self.assertRaises(exceptions.NotFound,
+        self.assertRaises(lib_exc.NotFound,
                           self.servers_client.rescue_server,
                           non_existent_server)
 

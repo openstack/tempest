@@ -17,6 +17,8 @@ import json
 import time
 import urllib
 
+from tempest_lib import exceptions as lib_exc
+
 from tempest.common import service_client
 from tempest import config
 from tempest import exceptions
@@ -181,7 +183,7 @@ class BaseVolumesClientJSON(service_client.ServiceClient):
     def is_resource_deleted(self, id):
         try:
             self.get_volume(id)
-        except exceptions.NotFound:
+        except lib_exc.NotFound:
             return True
         return False
 

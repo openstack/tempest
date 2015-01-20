@@ -51,7 +51,7 @@ class ServersAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
         while True:
             try:
                 self.flavors_client.get_flavor_details(flavor_id)
-            except exceptions.NotFound:
+            except lib_exc.NotFound:
                 break
             flavor_id = data_utils.rand_int_id(start=1000)
         return flavor_id
@@ -112,7 +112,7 @@ class ServersAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
 
     @test.attr(type=['negative', 'gate'])
     def test_reset_state_server_nonexistent_server(self):
-        self.assertRaises(exceptions.NotFound,
+        self.assertRaises(lib_exc.NotFound,
                           self.client.reset_state, '999')
 
     @test.attr(type=['negative', 'gate'])
@@ -125,7 +125,7 @@ class ServersAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
     @test.attr(type=['negative', 'gate'])
     def test_migrate_non_existent_server(self):
         # migrate a non existent server
-        self.assertRaises(exceptions.NotFound,
+        self.assertRaises(lib_exc.NotFound,
                           self.client.migrate_server,
                           str(uuid.uuid4()))
 

@@ -13,6 +13,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib import exceptions as lib_exc
+
 from tempest import clients
 from tempest.common.utils import data_utils
 from tempest import config
@@ -208,13 +210,13 @@ class BaseVolumeAdminTest(BaseVolumeTest):
         for qos_id in cls.qos_specs:
             try:
                 cls.volume_qos_client.delete_qos(qos_id)
-            except exceptions.NotFound:
+            except lib_exc.NotFound:
                 # The qos_specs may have already been deleted which is OK.
                 pass
 
         for qos_id in cls.qos_specs:
             try:
                 cls.volume_qos_client.wait_for_resource_deletion(qos_id)
-            except exceptions.NotFound:
+            except lib_exc.NotFound:
                 # The qos_specs may have already been deleted which is OK.
                 pass

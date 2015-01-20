@@ -18,6 +18,8 @@ import re
 import time
 import urllib
 
+from tempest_lib import exceptions as lib_exc
+
 from tempest.common import service_client
 from tempest import exceptions
 
@@ -159,7 +161,7 @@ class OrchestrationClient(service_client.ServiceClient):
             try:
                 body = self.get_resource(
                     stack_identifier, resource_name)
-            except exceptions.NotFound:
+            except lib_exc.NotFound:
                 # ignore this, as the resource may not have
                 # been created yet
                 pass
@@ -194,7 +196,7 @@ class OrchestrationClient(service_client.ServiceClient):
         while True:
             try:
                 body = self.get_stack(stack_identifier)
-            except exceptions.NotFound:
+            except lib_exc.NotFound:
                 if status == 'DELETE_COMPLETE':
                     return
             stack_name = body['stack_name']

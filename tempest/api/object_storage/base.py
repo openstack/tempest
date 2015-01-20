@@ -13,13 +13,13 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib import exceptions as lib_exc
 
 from tempest.api.identity import base
 from tempest import clients
 from tempest.common import credentials
 from tempest.common import custom_matchers
 from tempest import config
-from tempest import exceptions
 import tempest.test
 
 CONF = config.CONF
@@ -93,10 +93,10 @@ class BaseObjectTest(tempest.test.BaseTestCase):
                 for obj in objlist:
                     try:
                         object_client.delete_object(cont, obj['name'])
-                    except exceptions.NotFound:
+                    except lib_exc.NotFound:
                         pass
                 container_client.delete_container(cont)
-            except exceptions.NotFound:
+            except lib_exc.NotFound:
                 pass
 
     def assertHeaders(self, resp, target, method):
@@ -126,7 +126,7 @@ class SwiftDataGenerator(base.DataGenerator):
             return next(r['id'] for r in roles if r['name'] == role_name)
         except StopIteration:
             msg = "Role name '%s' is not found" % role_name
-            raise exceptions.NotFound(msg)
+            raise lib_exc.NotFound(msg)
 
     def _assign_role(self, role_id):
         self.client.assign_user_role(self.tenant['id'],

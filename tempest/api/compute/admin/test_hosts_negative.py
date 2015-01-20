@@ -12,6 +12,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib import exceptions as lib_exc
+
 from tempest.api.compute import base
 from tempest.common.utils import data_utils
 from tempest import exceptions
@@ -44,7 +46,7 @@ class HostsAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
     @test.attr(type=['negative', 'gate'])
     def test_show_host_detail_with_nonexistent_hostname(self):
         nonexitent_hostname = data_utils.rand_name('rand_hostname')
-        self.assertRaises(exceptions.NotFound,
+        self.assertRaises(lib_exc.NotFound,
                           self.client.show_host_detail, nonexitent_hostname)
 
     @test.attr(type=['negative', 'gate'])
@@ -112,7 +114,7 @@ class HostsAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
     def test_update_nonexistent_host(self):
         nonexitent_hostname = data_utils.rand_name('rand_hostname')
 
-        self.assertRaises(exceptions.NotFound,
+        self.assertRaises(lib_exc.NotFound,
                           self.client.update_host,
                           nonexitent_hostname,
                           status='enable',
@@ -122,7 +124,7 @@ class HostsAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
     def test_startup_nonexistent_host(self):
         nonexitent_hostname = data_utils.rand_name('rand_hostname')
 
-        self.assertRaises(exceptions.NotFound,
+        self.assertRaises(lib_exc.NotFound,
                           self.client.startup_host,
                           nonexitent_hostname)
 
@@ -138,7 +140,7 @@ class HostsAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
     def test_shutdown_nonexistent_host(self):
         nonexitent_hostname = data_utils.rand_name('rand_hostname')
 
-        self.assertRaises(exceptions.NotFound,
+        self.assertRaises(lib_exc.NotFound,
                           self.client.shutdown_host,
                           nonexitent_hostname)
 
@@ -154,7 +156,7 @@ class HostsAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
     def test_reboot_nonexistent_host(self):
         nonexitent_hostname = data_utils.rand_name('rand_hostname')
 
-        self.assertRaises(exceptions.NotFound,
+        self.assertRaises(lib_exc.NotFound,
                           self.client.reboot_host,
                           nonexitent_hostname)
 

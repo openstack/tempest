@@ -68,7 +68,7 @@ class UsersNegativeTestJSON(base.BaseIdentityV2AdminTest):
     @test.attr(type=['negative', 'gate'])
     def test_create_user_for_non_existent_tenant(self):
         # Attempt to create a user in a non-existent tenant should fail
-        self.assertRaises(exceptions.NotFound, self.client.create_user,
+        self.assertRaises(lib_exc.NotFound, self.client.create_user,
                           self.alt_user, self.alt_password, '49ffgg99999',
                           self.alt_email)
 
@@ -102,7 +102,7 @@ class UsersNegativeTestJSON(base.BaseIdentityV2AdminTest):
         # Attempt to update a user non-existent user should fail
         user_name = data_utils.rand_name('user-')
         non_existent_id = str(uuid.uuid4())
-        self.assertRaises(exceptions.NotFound, self.client.update_user,
+        self.assertRaises(lib_exc.NotFound, self.client.update_user,
                           non_existent_id, name=user_name)
 
     @test.attr(type=['negative', 'gate'])
@@ -137,7 +137,7 @@ class UsersNegativeTestJSON(base.BaseIdentityV2AdminTest):
     @test.attr(type=['negative', 'gate'])
     def test_delete_non_existent_user(self):
         # Attempt to delete a non-existent user should fail
-        self.assertRaises(exceptions.NotFound, self.client.delete_user,
+        self.assertRaises(lib_exc.NotFound, self.client.delete_user,
                           'junk12345123')
 
     @test.attr(type=['negative', 'gate'])
@@ -226,5 +226,5 @@ class UsersNegativeTestJSON(base.BaseIdentityV2AdminTest):
         invalid_id.append('!@#()$%^&*?<>{}[]')
         # List the users with invalid tenant id
         for invalid in invalid_id:
-            self.assertRaises(exceptions.NotFound,
+            self.assertRaises(lib_exc.NotFound,
                               self.client.list_users_for_tenant, invalid)

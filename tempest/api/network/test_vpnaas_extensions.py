@@ -13,10 +13,11 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib import exceptions as lib_exc
+
 from tempest.api.network import base
 from tempest.common.utils import data_utils
 from tempest import config
-from tempest import exceptions
 from tempest import test
 
 CONF = config.CONF
@@ -74,7 +75,7 @@ class VPNaaSTestJSON(base.BaseAdminNetworkTest):
         try:
             self.client.delete_ipsecpolicy(ipsec_policy_id)
 
-        except exceptions.NotFound:
+        except lib_exc.NotFound:
             pass
 
     def _assertExpected(self, expected, actual):
@@ -304,7 +305,7 @@ class VPNaaSTestJSON(base.BaseAdminNetworkTest):
         self._assertExpected(new_ipsec, updated_ipsec_policy)
         # Verification of ipsec policy delete
         self.client.delete_ipsecpolicy(ipsecpolicy['id'])
-        self.assertRaises(exceptions.NotFound,
+        self.assertRaises(lib_exc.NotFound,
                           self.client.delete_ipsecpolicy, ipsecpolicy['id'])
 
     @test.attr(type='smoke')

@@ -13,9 +13,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib import exceptions as lib_exc
+
 from tempest.api.identity import base
 from tempest.common.utils import data_utils
-from tempest import exceptions
 from tempest import test
 
 
@@ -44,7 +45,7 @@ class TokensV3TestJSON(base.BaseIdentityV3AdminTest):
         self.assertEqual(token_details['user']['name'], u_name)
         # Perform Delete Token
         self.client.delete_token(subject_token)
-        self.assertRaises(exceptions.NotFound, self.client.get_token,
+        self.assertRaises(lib_exc.NotFound, self.client.get_token,
                           subject_token)
 
     @test.attr(type='gate')

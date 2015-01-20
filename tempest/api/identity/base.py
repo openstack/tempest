@@ -13,12 +13,12 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib import exceptions as lib_exc
 
 from tempest import auth
 from tempest import clients
 from tempest.common.utils import data_utils
 from tempest import config
-from tempest import exceptions
 from tempest.openstack.common import log as logging
 import tempest.test
 
@@ -226,7 +226,7 @@ class DataGenerator(object):
                     func(item['id'], **kwargs)
                 else:
                     func(item['id'])
-            except exceptions.NotFound:
+            except lib_exc.NotFound:
                 pass
             except Exception:
                 LOG.exception("Unexpected exception occurred in %s deletion."

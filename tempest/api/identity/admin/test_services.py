@@ -14,10 +14,10 @@
 #    under the License.
 
 from six import moves
+from tempest_lib import exceptions as lib_exc
 
 from tempest.api.identity import base
 from tempest.common.utils import data_utils
-from tempest import exceptions
 from tempest import test
 
 
@@ -28,7 +28,7 @@ class ServicesTestJSON(base.BaseIdentityV2AdminTest):
         # Deleting the service created in this method
         self.client.delete_service(service_id)
         # Checking whether service is deleted successfully
-        self.assertRaises(exceptions.NotFound, self.client.get_service,
+        self.assertRaises(lib_exc.NotFound, self.client.get_service,
                           service_id)
 
     @test.attr(type='smoke')

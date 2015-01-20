@@ -11,11 +11,11 @@
 #    under the License.
 
 import functools
+from tempest_lib import exceptions as lib_exc
 
 from tempest import clients
 from tempest.common.utils import data_utils
 from tempest import config
-from tempest import exceptions as exc
 from tempest import test
 
 CONF = config.CONF
@@ -83,7 +83,7 @@ class BaseBaremetalTest(test.BaseTestCase):
                 uuids = cls.created_objects[resource]
                 delete_method = getattr(cls.client, 'delete_%s' % resource)
                 for u in uuids:
-                    delete_method(u, ignore_errors=exc.NotFound)
+                    delete_method(u, ignore_errors=lib_exc.NotFound)
         finally:
             super(BaseBaremetalTest, cls).resource_cleanup()
 
