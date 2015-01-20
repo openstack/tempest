@@ -72,7 +72,7 @@ class ServersAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
                                                        ram, vcpus, disk,
                                                        flavor_id)
         self.addCleanup(self.flavors_client.delete_flavor, flavor_id)
-        self.assertRaises((exceptions.Unauthorized, lib_exc.OverLimit),
+        self.assertRaises((lib_exc.Unauthorized, lib_exc.OverLimit),
                           self.client.resize,
                           self.servers[0]['id'],
                           flavor_ref['id'])
@@ -93,7 +93,7 @@ class ServersAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
                                                        ram, vcpus, disk,
                                                        flavor_id)
         self.addCleanup(self.flavors_client.delete_flavor, flavor_id)
-        self.assertRaises((exceptions.Unauthorized, lib_exc.OverLimit),
+        self.assertRaises((lib_exc.Unauthorized, lib_exc.OverLimit),
                           self.client.resize,
                           self.servers[0]['id'],
                           flavor_ref['id'])
@@ -118,7 +118,7 @@ class ServersAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
     @test.attr(type=['negative', 'gate'])
     def test_get_server_diagnostics_by_non_admin(self):
         # Non-admin user can not view server diagnostics according to policy
-        self.assertRaises(exceptions.Unauthorized,
+        self.assertRaises(lib_exc.Unauthorized,
                           self.non_adm_client.get_server_diagnostics,
                           self.s1_id)
 

@@ -21,7 +21,6 @@ from tempest.api.object_storage import base
 from tempest import clients
 from tempest.common.utils import data_utils
 from tempest import config
-from tempest import exceptions
 from tempest import test
 
 CONF = config.CONF
@@ -86,12 +85,12 @@ class AccountQuotasNegativeTest(base.BaseObjectTest):
         """
 
         # Not able to remove quota
-        self.assertRaises(exceptions.Unauthorized,
+        self.assertRaises(lib_exc.Unauthorized,
                           self.account_client.create_account_metadata,
                           {"Quota-Bytes": ""})
 
         # Not able to modify quota
-        self.assertRaises(exceptions.Unauthorized,
+        self.assertRaises(lib_exc.Unauthorized,
                           self.account_client.create_account_metadata,
                           {"Quota-Bytes": "100"})
 

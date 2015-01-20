@@ -59,8 +59,6 @@ class ServiceClient(rest_client.RestClient):
                 method, url,
                 extra_headers=extra_headers,
                 headers=headers, body=body)
-        except lib_exceptions.Unauthorized as ex:
-            raise exceptions.Unauthorized(ex)
         except lib_exceptions.BadRequest as ex:
             raise exceptions.BadRequest(ex)
         # TODO(oomichi): This is just a workaround for failing gate tests
@@ -68,7 +66,7 @@ class ServiceClient(rest_client.RestClient):
         # We will need to remove this translation and replace negative tests
         # with lib_exceptions.Forbidden in the future.
         except lib_exceptions.Forbidden as ex:
-            raise exceptions.Unauthorized(ex)
+            raise lib_exceptions.Unauthorized(ex)
 
 
 class ResponseBody(dict):

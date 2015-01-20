@@ -14,10 +14,11 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib import exceptions as lib_exc
+
 from tempest.api.object_storage import base
 from tempest import clients
 from tempest.common.utils import data_utils
-from tempest import exceptions
 from tempest import test
 
 
@@ -47,7 +48,7 @@ class ObjectACLsNegativeTest(base.BaseObjectTest):
             request_part='headers',
             auth_data=None
         )
-        self.assertRaises(exceptions.Unauthorized,
+        self.assertRaises(lib_exc.Unauthorized,
                           self.object_client.create_object,
                           self.container_name, object_name, 'data', headers={})
 
@@ -63,7 +64,7 @@ class ObjectACLsNegativeTest(base.BaseObjectTest):
             request_part='headers',
             auth_data=None
         )
-        self.assertRaises(exceptions.Unauthorized,
+        self.assertRaises(lib_exc.Unauthorized,
                           self.object_client.delete_object,
                           self.container_name, object_name)
 
@@ -77,7 +78,7 @@ class ObjectACLsNegativeTest(base.BaseObjectTest):
             request_part='headers',
             auth_data=self.test_auth_data
         )
-        self.assertRaises(exceptions.Unauthorized,
+        self.assertRaises(lib_exc.Unauthorized,
                           self.object_client.create_object,
                           self.container_name, object_name, 'data', headers={})
 
@@ -94,7 +95,7 @@ class ObjectACLsNegativeTest(base.BaseObjectTest):
             request_part='headers',
             auth_data=self.test_auth_data
         )
-        self.assertRaises(exceptions.Unauthorized,
+        self.assertRaises(lib_exc.Unauthorized,
                           self.object_client.get_object,
                           self.container_name, object_name)
 
@@ -111,7 +112,7 @@ class ObjectACLsNegativeTest(base.BaseObjectTest):
             request_part='headers',
             auth_data=self.test_auth_data
         )
-        self.assertRaises(exceptions.Unauthorized,
+        self.assertRaises(lib_exc.Unauthorized,
                           self.object_client.delete_object,
                           self.container_name, object_name)
 
@@ -134,7 +135,7 @@ class ObjectACLsNegativeTest(base.BaseObjectTest):
             request_part='headers',
             auth_data=self.test_auth_data
         )
-        self.assertRaises(exceptions.Unauthorized,
+        self.assertRaises(lib_exc.Unauthorized,
                           self.object_client.get_object,
                           self.container_name, object_name)
 
@@ -153,7 +154,7 @@ class ObjectACLsNegativeTest(base.BaseObjectTest):
             auth_data=self.test_auth_data
         )
         object_name = data_utils.rand_name(name='Object')
-        self.assertRaises(exceptions.Unauthorized,
+        self.assertRaises(lib_exc.Unauthorized,
                           self.object_client.create_object,
                           self.container_name,
                           object_name, 'data', headers={})
@@ -175,7 +176,7 @@ class ObjectACLsNegativeTest(base.BaseObjectTest):
             auth_data=self.test_auth_data
         )
         object_name = data_utils.rand_name(name='Object')
-        self.assertRaises(exceptions.Unauthorized,
+        self.assertRaises(lib_exc.Unauthorized,
                           self.object_client.create_object,
                           self.container_name,
                           object_name, 'data', headers={})
@@ -201,7 +202,7 @@ class ObjectACLsNegativeTest(base.BaseObjectTest):
             request_part='headers',
             auth_data=self.test_auth_data
         )
-        self.assertRaises(exceptions.Unauthorized,
+        self.assertRaises(lib_exc.Unauthorized,
                           self.object_client.delete_object,
                           self.container_name,
                           object_name)
