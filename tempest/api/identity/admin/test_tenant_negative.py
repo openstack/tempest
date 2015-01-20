@@ -13,6 +13,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib import exceptions as lib_exc
 import uuid
 
 from tempest.api.identity import base
@@ -76,7 +77,7 @@ class TenantsNegativeTestJSON(base.BaseIdentityV2AdminTest):
 
         self.addCleanup(self.client.delete_tenant, tenant1_id)
         self.addCleanup(self.data.tenants.remove, tenant)
-        self.assertRaises(exceptions.Conflict, self.client.create_tenant,
+        self.assertRaises(lib_exc.Conflict, self.client.create_tenant,
                           tenant_name)
 
     @test.attr(type=['negative', 'gate'])

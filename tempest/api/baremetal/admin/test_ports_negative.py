@@ -10,6 +10,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib import exceptions as lib_exc
+
 from tempest.api.baremetal.admin import base
 from tempest.common.utils import data_utils
 from tempest import exceptions as exc
@@ -62,7 +64,7 @@ class TestPortsNegative(base.BaseBaremetalTest):
         uuid = data_utils.rand_uuid()
 
         self.create_port(node_id=node_id, address=address, uuid=uuid)
-        self.assertRaises(exc.Conflict, self.create_port, node_id=node_id,
+        self.assertRaises(lib_exc.Conflict, self.create_port, node_id=node_id,
                           address=address, uuid=uuid)
 
     @test.attr(type=['negative', 'smoke'])
@@ -99,7 +101,7 @@ class TestPortsNegative(base.BaseBaremetalTest):
         node_id = self.node['uuid']
         address = data_utils.rand_mac_address()
         self.create_port(node_id=node_id, address=address)
-        self.assertRaises(exc.Conflict,
+        self.assertRaises(lib_exc.Conflict,
                           self.create_port, node_id=node_id,
                           address=address)
 
@@ -190,7 +192,7 @@ class TestPortsNegative(base.BaseBaremetalTest):
         patch = [{'path': '/address',
                   'op': 'replace',
                   'value': address1}]
-        self.assertRaises(exc.Conflict,
+        self.assertRaises(lib_exc.Conflict,
                           self.client.update_port, port_id, patch)
 
     @test.attr(type=['negative', 'smoke'])

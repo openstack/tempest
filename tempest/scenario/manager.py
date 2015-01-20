@@ -19,6 +19,7 @@ import subprocess
 
 import netaddr
 import six
+from tempest_lib import exceptions as lib_exc
 
 from tempest import auth
 from tempest import clients
@@ -628,7 +629,7 @@ class NetworkScenarioTest(ScenarioTest):
             try:
                 result = client.create_subnet(**subnet)
                 break
-            except exceptions.Conflict as e:
+            except lib_exc.Conflict as e:
                 is_overlapping_cidr = 'overlaps with another subnet' in str(e)
                 if not is_overlapping_cidr:
                     raise
@@ -915,7 +916,7 @@ class NetworkScenarioTest(ScenarioTest):
                 try:
                     sg_rule = self._create_security_group_rule(
                         client=client, secgroup=secgroup, **ruleset)
-                except exceptions.Conflict as ex:
+                except lib_exc.Conflict as ex:
                     # if rule already exist - skip rule and continue
                     msg = 'Security group rule already exists'
                     if msg not in ex._error_string:

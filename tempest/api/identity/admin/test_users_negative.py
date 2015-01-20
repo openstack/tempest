@@ -13,6 +13,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib import exceptions as lib_exc
 import uuid
 
 from tempest.api.identity import base
@@ -60,7 +61,7 @@ class UsersNegativeTestJSON(base.BaseIdentityV2AdminTest):
     def test_create_user_with_duplicate_name(self):
         # Duplicate user should not be created
         self.data.setup_test_user()
-        self.assertRaises(exceptions.Conflict, self.client.create_user,
+        self.assertRaises(lib_exc.Conflict, self.client.create_user,
                           self.data.test_user, self.data.test_password,
                           self.data.tenant['id'], self.data.test_email)
 

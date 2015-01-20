@@ -13,6 +13,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib import exceptions as lib_exc
 import uuid
 
 from tempest.api.compute import base
@@ -112,7 +113,7 @@ class FlavorsAccessNegativeTestJSON(base.BaseV2ComputeAdminTest):
 
         # An exception should be raised when adding flavor access to the same
         # tenant
-        self.assertRaises(exceptions.Conflict,
+        self.assertRaises(lib_exc.Conflict,
                           self.client.add_flavor_access,
                           new_flavor['id'],
                           self.tenant_id)

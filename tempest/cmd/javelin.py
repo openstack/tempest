@@ -110,6 +110,7 @@ import sys
 import unittest
 
 import netaddr
+from tempest_lib import exceptions as lib_exc
 import yaml
 
 import tempest.auth
@@ -297,7 +298,7 @@ def _assign_swift_role(user):
             USERS[user]['tenant_id'],
             USERS[user]['id'],
             role['id'])
-    except exceptions.Conflict:
+    except lib_exc.Conflict:
         # don't care if it's already assigned
         pass
 

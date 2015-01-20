@@ -18,6 +18,7 @@ import logging
 import urlparse
 
 from tempest_lib import decorators
+from tempest_lib import exceptions as lib_exc
 import testtools
 
 from tempest.api.compute import base
@@ -464,7 +465,7 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         self.assertEqual(200, resp.status)
         self.assertEqual(server['status'], 'ACTIVE')
         # Locked server is not allowed to be stopped by non-admin user
-        self.assertRaises(exceptions.Conflict,
+        self.assertRaises(lib_exc.Conflict,
                           self.servers_client.stop, self.server_id)
         resp, server = self.servers_client.unlock_server(self.server_id)
         self.assertEqual(202, resp.status)

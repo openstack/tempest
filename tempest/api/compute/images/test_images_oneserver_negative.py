@@ -14,6 +14,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib import exceptions as lib_exc
+
 from tempest.api.compute import base
 from tempest.common.utils import data_utils
 from tempest import config
@@ -102,7 +104,7 @@ class ImagesOneServerNegativeTestJSON(base.BaseV2ComputeTest):
 
         # Create second snapshot
         alt_snapshot_name = data_utils.rand_name('test-snap-')
-        self.assertRaises(exceptions.Conflict, self.client.create_image,
+        self.assertRaises(lib_exc.Conflict, self.client.create_image,
                           self.server_id, alt_snapshot_name)
 
     @test.attr(type=['negative', 'gate'])

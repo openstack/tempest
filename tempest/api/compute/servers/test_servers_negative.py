@@ -144,7 +144,7 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
         # Pause a paused server.
         self.client.pause_server(self.server_id)
         self.client.wait_for_server_status(self.server_id, 'PAUSED')
-        self.assertRaises(exceptions.Conflict,
+        self.assertRaises(lib_exc.Conflict,
                           self.client.pause_server,
                           self.server_id)
         self.client.unpause_server(self.server_id)
@@ -328,7 +328,7 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
     @test.attr(type=['negative', 'gate'])
     def test_unpause_server_invalid_state(self):
         # unpause an active server.
-        self.assertRaises(exceptions.Conflict,
+        self.assertRaises(lib_exc.Conflict,
                           self.client.unpause_server,
                           self.server_id)
 
@@ -349,7 +349,7 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
         resp, _ = self.client.suspend_server(self.server_id)
         self.assertEqual(202, resp.status)
         self.client.wait_for_server_status(self.server_id, 'SUSPENDED')
-        self.assertRaises(exceptions.Conflict,
+        self.assertRaises(lib_exc.Conflict,
                           self.client.suspend_server,
                           self.server_id)
         self.client.resume_server(self.server_id)
@@ -368,7 +368,7 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
     @test.attr(type=['negative', 'gate'])
     def test_resume_server_invalid_state(self):
         # resume an active server.
-        self.assertRaises(exceptions.Conflict,
+        self.assertRaises(lib_exc.Conflict,
                           self.client.resume_server,
                           self.server_id)
 
@@ -399,7 +399,7 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
     @test.attr(type=['negative', 'gate'])
     def test_restore_server_invalid_state(self):
         # we can only restore-delete a server in 'soft-delete' state
-        self.assertRaises(exceptions.Conflict,
+        self.assertRaises(lib_exc.Conflict,
                           self.client.restore_soft_deleted_server,
                           self.server_id)
 
@@ -436,7 +436,7 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
         self.assertEqual(1, len(images))
         self.assertEqual(image_name, images[0]['name'])
 
-        self.assertRaises(exceptions.Conflict,
+        self.assertRaises(lib_exc.Conflict,
                           self.client.shelve_server,
                           self.server_id)
 
@@ -456,6 +456,6 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
     @test.attr(type=['negative', 'gate'])
     def test_unshelve_server_invalid_state(self):
         # unshelve an active server.
-        self.assertRaises(exceptions.Conflict,
+        self.assertRaises(lib_exc.Conflict,
                           self.client.unshelve_server,
                           self.server_id)
