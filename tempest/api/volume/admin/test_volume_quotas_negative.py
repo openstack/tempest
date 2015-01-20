@@ -13,8 +13,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib import exceptions as lib_exc
+
 from tempest.api.volume import base
-from tempest import exceptions
 from tempest import test
 
 
@@ -42,13 +43,13 @@ class BaseVolumeQuotasNegativeV2TestJSON(base.BaseVolumeAdminTest):
 
     @test.attr(type='negative')
     def test_quota_volumes(self):
-        self.assertRaises(exceptions.OverLimit,
+        self.assertRaises(lib_exc.OverLimit,
                           self.volumes_client.create_volume,
                           size=1)
 
     @test.attr(type='negative')
     def test_quota_volume_snapshots(self):
-        self.assertRaises(exceptions.OverLimit,
+        self.assertRaises(lib_exc.OverLimit,
                           self.snapshots_client.create_snapshot,
                           self.volume['id'])
 
@@ -65,7 +66,7 @@ class BaseVolumeQuotasNegativeV2TestJSON(base.BaseVolumeAdminTest):
         self.quotas_client.update_quota_set(
             self.demo_tenant_id,
             **new_quota_set)
-        self.assertRaises(exceptions.OverLimit,
+        self.assertRaises(lib_exc.OverLimit,
                           self.volumes_client.create_volume,
                           size=1)
 
@@ -73,7 +74,7 @@ class BaseVolumeQuotasNegativeV2TestJSON(base.BaseVolumeAdminTest):
         self.quotas_client.update_quota_set(
             self.demo_tenant_id,
             **self.shared_quota_set)
-        self.assertRaises(exceptions.OverLimit,
+        self.assertRaises(lib_exc.OverLimit,
                           self.snapshots_client.create_snapshot,
                           self.volume['id'])
 

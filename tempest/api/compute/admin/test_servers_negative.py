@@ -14,6 +14,7 @@
 
 import uuid
 
+from tempest_lib import exceptions as lib_exc
 import testtools
 
 from tempest.api.compute import base
@@ -71,7 +72,7 @@ class ServersAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
                                                        ram, vcpus, disk,
                                                        flavor_id)
         self.addCleanup(self.flavors_client.delete_flavor, flavor_id)
-        self.assertRaises((exceptions.Unauthorized, exceptions.OverLimit),
+        self.assertRaises((exceptions.Unauthorized, lib_exc.OverLimit),
                           self.client.resize,
                           self.servers[0]['id'],
                           flavor_ref['id'])
@@ -92,7 +93,7 @@ class ServersAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
                                                        ram, vcpus, disk,
                                                        flavor_id)
         self.addCleanup(self.flavors_client.delete_flavor, flavor_id)
-        self.assertRaises((exceptions.Unauthorized, exceptions.OverLimit),
+        self.assertRaises((exceptions.Unauthorized, lib_exc.OverLimit),
                           self.client.resize,
                           self.servers[0]['id'],
                           flavor_ref['id'])

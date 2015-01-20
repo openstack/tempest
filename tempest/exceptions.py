@@ -163,10 +163,6 @@ class BadRequest(RestClientException):
     message = "Bad request"
 
 
-class OverLimit(RestClientException):
-    message = "Quota exceeded"
-
-
 class Conflict(RestClientException):
     message = "An object with that identifier already exists"
 

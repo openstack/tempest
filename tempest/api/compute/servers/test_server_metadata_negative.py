@@ -13,6 +13,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib import exceptions as lib_exc
+
 from tempest.api.compute import base
 from tempest.common.utils import data_utils
 from tempest import exceptions
@@ -40,7 +42,7 @@ class ServerMetadataNegativeTestJSON(base.BaseV2ComputeTest):
         for sz in [256, 257, 511, 1023]:
             key = "k" * sz
             meta = {key: 'data1'}
-            self.assertRaises((exceptions.BadRequest, exceptions.OverLimit),
+            self.assertRaises((exceptions.BadRequest, lib_exc.OverLimit),
                               self.create_test_server,
                               meta=meta)
 
@@ -130,14 +132,14 @@ class ServerMetadataNegativeTestJSON(base.BaseV2ComputeTest):
         req_metadata = {}
         for num in range(1, quota_metadata + 2):
             req_metadata['key' + str(num)] = 'val' + str(num)
-        self.assertRaises((exceptions.OverLimit, exceptions.Unauthorized),
+        self.assertRaises((lib_exc.OverLimit, exceptions.Unauthorized),
                           self.client.set_server_metadata,
                           self.server_id, req_metadata)
 
         # A 403 Forbidden or 413 Overlimit (old behaviour) exception
         # will be raised while exceeding metadata items limit for
         # tenant.
-        self.assertRaises((exceptions.Unauthorized, exceptions.OverLimit),
+        self.assertRaises((exceptions.Unauthorized, lib_exc.OverLimit),
                           self.client.update_server_metadata,
                           self.server_id, req_metadata)
 
