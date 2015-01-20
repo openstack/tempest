@@ -185,10 +185,6 @@ class InvalidHTTPResponseHeader(RestClientException):
     message = "HTTP response header is invalid"
 
 
-class InvalidContentType(RestClientException):
-    message = "Invalid content type provided"
-
-
 class InvalidStructure(TempestException):
     message = "Invalid structure of table with details"
 

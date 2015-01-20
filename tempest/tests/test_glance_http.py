@@ -19,6 +19,7 @@ import socket
 
 import mock
 import six
+from tempest_lib import exceptions as lib_exc
 
 from tempest.common import glance_http
 from tempest import exceptions
@@ -57,18 +58,18 @@ class TestGlanceHTTPClient(base.TestCase):
 
     def test_json_request_without_content_type_header_in_response(self):
         self._set_response_fixture({}, 200, 'fake_response_body')
-        self.assertRaises(exceptions.InvalidContentType,
+        self.assertRaises(lib_exc.InvalidContentType,
                           self.client.json_request, 'GET', '/images')
 
     def test_json_request_with_xml_content_type_header_in_request(self):
-        self.assertRaises(exceptions.InvalidContentType,
+        self.assertRaises(lib_exc.InvalidContentType,
                           self.client.json_request, 'GET', '/images',
                           headers={'Content-Type': 'application/xml'})
 
     def test_json_request_with_xml_content_type_header_in_response(self):
         self._set_response_fixture({'content-type': 'application/xml'},
                                    200, 'fake_response_body')
-        self.assertRaises(exceptions.InvalidContentType,
+        self.assertRaises(lib_exc.InvalidContentType,
                           self.client.json_request, 'GET', '/images')
 
     def test_json_request_with_json_content_type_header_only_in_resp(self):
