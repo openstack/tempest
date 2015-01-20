@@ -46,7 +46,7 @@ class ImageUtils(object):
         self.flavors_client = os.flavors_client
 
     def ssh_user(self, image_id):
-        _, _image = self.images_client.get_image(image_id)
+        _image = self.images_client.get_image(image_id)
         for regex, user in self.ssh_users:
             # First match wins
             if re.match(regex, _image['name']) is not None:
@@ -59,14 +59,14 @@ class ImageUtils(object):
                              string=str(image['name']))
 
     def is_sshable_image(self, image_id):
-        _, _image = self.images_client.get_image(image_id)
+        _image = self.images_client.get_image(image_id)
         return self._is_sshable_image(_image)
 
     def _is_flavor_enough(self, flavor, image):
         return image['minDisk'] <= flavor['disk']
 
     def is_flavor_enough(self, flavor_id, image_id):
-        _, _image = self.images_client.get_image(image_id)
+        _image = self.images_client.get_image(image_id)
         _, _flavor = self.flavors_client.get_flavor_details(flavor_id)
         return self._is_flavor_enough(_flavor, _image)
 
@@ -120,7 +120,7 @@ class InputScenarioUtils(object):
         if not CONF.service_available.glance:
             return []
         if not hasattr(self, '_scenario_images'):
-            _, images = self.images_client.list_images()
+            images = self.images_client.list_images()
             self._scenario_images = [
                 (self._normalize_name(i['name']), dict(image_ref=i['id']))
                 for i in images if re.search(self.image_pattern,

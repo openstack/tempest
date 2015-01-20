@@ -42,8 +42,7 @@ class ImagesTestJSON(base.BaseV2ComputeTest):
         snapshot_name = data_utils.rand_name('test-snap-')
         resp, server = self.create_test_server(wait_until='ACTIVE')
         self.addCleanup(self.servers_client.delete_server, server['id'])
-        resp, image = self.create_image_from_server(server['id'],
-                                                    name=snapshot_name,
-                                                    wait_until='SAVING')
-        resp, body = self.client.delete_image(image['id'])
-        self.assertEqual('204', resp['status'])
+        image = self.create_image_from_server(server['id'],
+                                              name=snapshot_name,
+                                              wait_until='SAVING')
+        self.client.delete_image(image['id'])

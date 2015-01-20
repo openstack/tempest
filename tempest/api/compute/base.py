@@ -293,20 +293,20 @@ class BaseComputeTest(tempest.test.BaseTestCase):
         if 'name' in kwargs:
             name = kwargs.pop('name')
 
-        resp, image = cls.images_client.create_image(server_id, name)
-        image_id = data_utils.parse_image_id(resp['location'])
+        image = cls.images_client.create_image(server_id, name)
+        image_id = data_utils.parse_image_id(image.response['location'])
         cls.images.append(image_id)
 
         if 'wait_until' in kwargs:
             cls.images_client.wait_for_image_status(image_id,
                                                     kwargs['wait_until'])
-            resp, image = cls.images_client.get_image(image_id)
+            image = cls.images_client.get_image(image_id)
 
             if kwargs['wait_until'] == 'ACTIVE':
                 if kwargs.get('wait_for_server', True):
                     cls.servers_client.wait_for_server_status(server_id,
                                                               'ACTIVE')
-        return resp, image
+        return image
 
     @classmethod
     def rebuild_server(cls, server_id, **kwargs):
