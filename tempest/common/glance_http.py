@@ -67,7 +67,7 @@ class HTTPClient(object):
         _kwargs = {'timeout': float(kwargs.get('timeout', 600))}
 
         if scheme == 'https':
-            _kwargs['cacert'] = kwargs.get('cacert', None)
+            _kwargs['ca_certs'] = kwargs.get('ca_certs', None)
             _kwargs['cert_file'] = kwargs.get('cert_file', None)
             _kwargs['key_file'] = kwargs.get('key_file', None)
             _kwargs['insecure'] = kwargs.get('insecure', False)
@@ -232,7 +232,7 @@ class VerifiedHTTPSConnection(httplib.HTTPSConnection):
           with native Python 3.3 code.
     """
     def __init__(self, host, port=None, key_file=None, cert_file=None,
-                 cacert=None, timeout=None, insecure=False,
+                 ca_certs=None, timeout=None, insecure=False,
                  ssl_compression=True):
         httplib.HTTPSConnection.__init__(self, host, port,
                                          key_file=key_file,
@@ -242,7 +242,7 @@ class VerifiedHTTPSConnection(httplib.HTTPSConnection):
         self.timeout = timeout
         self.insecure = insecure
         self.ssl_compression = ssl_compression
-        self.cacert = cacert
+        self.ca_certs = ca_certs
         self.setcontext()
 
     @staticmethod
@@ -326,11 +326,11 @@ class VerifiedHTTPSConnection(httplib.HTTPSConnection):
                 msg = 'Unable to load key from "%s" %s' % (self.key_file, e)
                 raise exc.SSLConfigurationError(msg)
 
-        if self.cacert:
+        if self.ca_certs:
             try:
-                self.context.load_verify_locations(self.cacert)
+                self.context.load_verify_locations(self.ca_certs)
             except Exception as e:
-                msg = 'Unable to load CA from "%s"' % (self.cacert, e)
+                msg = 'Unable to load CA from "%s"' % (self.ca_certs, e)
                 raise exc.SSLConfigurationError(msg)
         else:
             self.context.set_default_verify_paths()
