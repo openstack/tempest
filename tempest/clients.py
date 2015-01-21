@@ -142,6 +142,14 @@ class Manager(manager.Manager):
         'trace_requests': CONF.debug.trace_requests
     }
 
+    # NOTE: Tempest uses timeout values of compute API if project specific
+    # timeout values don't exist.
+    default_params_with_timeout_values = {
+        'build_interval': CONF.compute.build_interval,
+        'build_timeout': CONF.compute.build_timeout
+    }
+    default_params_with_timeout_values.update(default_params)
+
     def __init__(self, credentials=None, interface='json', service=None):
         # Set interface and client type first
         self.interface = interface
@@ -162,9 +170,15 @@ class Manager(manager.Manager):
             build_timeout=CONF.network.build_timeout,
             **self.default_params)
         self.database_flavors_client = DatabaseFlavorsClientJSON(
-            self.auth_provider)
+            self.auth_provider,
+            CONF.database.catalog_type,
+            CONF.identity.region,
+            **self.default_params_with_timeout_values)
         self.database_versions_client = DatabaseVersionsClientJSON(
-            self.auth_provider)
+            self.auth_provider,
+            CONF.database.catalog_type,
+            CONF.identity.region,
+            **self.default_params_with_timeout_values)
         self.messaging_client = MessagingClientJSON(self.auth_provider)
         if CONF.service_available.ceilometer:
             self.telemetry_client = TelemetryClientJSON(
