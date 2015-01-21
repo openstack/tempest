@@ -157,19 +157,24 @@ class InstanceRunTest(boto_test.BotoTestCase):
             instance.add_tag('key1', value='value1')
 
         tags = self.ec2_client.get_all_tags()
-        self.assertEqual(tags[0].name, 'key1')
-        self.assertEqual(tags[0].value, 'value1')
+        td = {item.name: item.value for item in tags}
+
+        self.assertIn('key1', td)
+        self.assertEqual('value1', td['key1'])
 
         tags = self.ec2_client.get_all_tags(filters={'key': 'key1'})
-        self.assertEqual(tags[0].name, 'key1')
-        self.assertEqual(tags[0].value, 'value1')
+        td = {item.name: item.value for item in tags}
+        self.assertIn('key1', td)
+        self.assertEqual('value1', td['key1'])
 
         tags = self.ec2_client.get_all_tags(filters={'value': 'value1'})
-        self.assertEqual(tags[0].name, 'key1')
-        self.assertEqual(tags[0].value, 'value1')
+        td = {item.name: item.value for item in tags}
+        self.assertIn('key1', td)
+        self.assertEqual('value1', td['key1'])
 
         tags = self.ec2_client.get_all_tags(filters={'key': 'value2'})
-        self.assertEqual(len(tags), 0, str(tags))
+        td = {item.name: item.value for item in tags}
+        self.assertNotIn('key1', td)
 
         for instance in reservation.instances:
             instance.remove_tag('key1', value='value1')

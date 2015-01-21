@@ -67,10 +67,10 @@ class BaseImageTest(tempest.test.BaseTestCase):
         container_format = kwargs.pop('container_format')
         disk_format = kwargs.pop('disk_format')
 
-        resp, image = cls.client.create_image(name, container_format,
-                                              disk_format, **kwargs)
+        image = cls.client.create_image(name, container_format,
+                                        disk_format, **kwargs)
         cls.created_images.append(image['id'])
-        return resp, image
+        return image
 
 
 class BaseV1ImageTest(BaseImageTest):
@@ -95,11 +95,10 @@ class BaseV1ImageMembersTest(BaseV1ImageTest):
 
     def _create_image(self):
         image_file = StringIO.StringIO(data_utils.random_bytes())
-        resp, image = self.create_image(container_format='bare',
-                                        disk_format='raw',
-                                        is_public=False,
-                                        data=image_file)
-        self.assertEqual(201, resp.status)
+        image = self.create_image(container_format='bare',
+                                  disk_format='raw',
+                                  is_public=False,
+                                  data=image_file)
         image_id = image['id']
         return image_id
 
@@ -127,15 +126,15 @@ class BaseV2MemberImageTest(BaseV2ImageTest):
         cls.alt_tenant_id = cls.alt_img_client.tenant_id
 
     def _list_image_ids_as_alt(self):
-        _, image_list = self.alt_img_client.image_list()
+        image_list = self.alt_img_client.image_list()
         image_ids = map(lambda x: x['id'], image_list)
         return image_ids
 
     def _create_image(self):
         name = data_utils.rand_name('image')
-        _, image = self.os_img_client.create_image(name,
-                                                   container_format='bare',
-                                                   disk_format='raw')
+        image = self.os_img_client.create_image(name,
+                                                container_format='bare',
+                                                disk_format='raw')
         image_id = image['id']
         self.addCleanup(self.os_img_client.delete_image, image_id)
         return image_id

@@ -15,7 +15,7 @@
 
 import json
 
-from tempest.common import rest_client
+from tempest.common import service_client
 from tempest.services.identity.v3.json import base
 
 
@@ -31,14 +31,14 @@ class PolicyClientJSON(base.IdentityV3Client):
         resp, body = self.post('policies', post_body)
         self.expected_success(201, resp.status)
         body = json.loads(body)
-        return rest_client.ResponseBody(resp, body['policy'])
+        return service_client.ResponseBody(resp, body['policy'])
 
     def list_policies(self):
         """Lists the policies."""
         resp, body = self.get('policies')
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return rest_client.ResponseBodyList(resp, body['policies'])
+        return service_client.ResponseBodyList(resp, body['policies'])
 
     def get_policy(self, policy_id):
         """Lists out the given policy."""
@@ -46,7 +46,7 @@ class PolicyClientJSON(base.IdentityV3Client):
         resp, body = self.get(url)
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return rest_client.ResponseBody(resp, body['policy'])
+        return service_client.ResponseBody(resp, body['policy'])
 
     def update_policy(self, policy_id, **kwargs):
         """Updates a policy."""
@@ -59,11 +59,11 @@ class PolicyClientJSON(base.IdentityV3Client):
         resp, body = self.patch(url, post_body)
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return rest_client.ResponseBody(resp, body['policy'])
+        return service_client.ResponseBody(resp, body['policy'])
 
     def delete_policy(self, policy_id):
         """Deletes the policy."""
         url = "policies/%s" % policy_id
         resp, body = self.delete(url)
         self.expected_success(204, resp.status)
-        return rest_client.ResponseBody(resp, body)
+        return service_client.ResponseBody(resp, body)

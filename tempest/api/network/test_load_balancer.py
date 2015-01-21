@@ -422,5 +422,6 @@ class LoadBalancerTestJSON(base.BaseNetworkTest):
         self.assertEqual(2, member['weight'])
 
 
+@test.skip_because(bug="1402007")
 class LoadBalancerIpV6TestJSON(LoadBalancerTestJSON):
     _ip_version = 6

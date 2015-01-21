@@ -96,6 +96,11 @@ class FloatingIPsTestJSON(base.BaseFloatingIPsTest):
             self.floating_ip,
             self.server_id)
         self.assertEqual(202, resp.status)
+
+        # Check instance_id in the floating_ip body
+        resp, body = self.client.get_floating_ip_details(self.floating_ip_id)
+        self.assertEqual(self.server_id, body['instance_id'])
+
         # Disassociation of floating IP that was associated in this method
         resp, body = self.client.disassociate_floating_ip_from_server(
             self.floating_ip,

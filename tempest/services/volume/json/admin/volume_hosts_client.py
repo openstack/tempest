@@ -16,6 +16,7 @@
 import json
 import urllib
 
+from tempest.common import service_client
 from tempest.services.volume.json import base
 
 
@@ -34,7 +35,7 @@ class BaseVolumeHostsClientJSON(base.VolumeClient):
         resp, body = self.get(url)
         body = json.loads(body)
         self.expected_success(200, resp.status)
-        return resp, body['hosts']
+        return service_client.ResponseBodyList(resp, body['hosts'])
 
 
 class VolumeHostsClientJSON(BaseVolumeHostsClientJSON):

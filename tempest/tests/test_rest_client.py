@@ -16,13 +16,12 @@ import json
 
 import httplib2
 from oslotest import mockpatch
+import six
 
 from tempest.common import rest_client
-from tempest import config
 from tempest import exceptions
 from tempest.tests import base
 from tempest.tests import fake_auth_provider
-from tempest.tests import fake_config
 from tempest.tests import fake_http
 
 
@@ -30,18 +29,11 @@ class BaseRestClientTestClass(base.TestCase):
 
     url = 'fake_endpoint'
 
-    def _get_region(self):
-        return 'fake region'
-
     def setUp(self):
         super(BaseRestClientTestClass, self).setUp()
-        self.useFixture(fake_config.ConfigFixture())
-        self.stubs.Set(config, 'TempestConfigPrivate', fake_config.FakePrivate)
         self.rest_client = rest_client.RestClient(
-            fake_auth_provider.FakeAuthProvider())
+            fake_auth_provider.FakeAuthProvider(), None, None)
         self.stubs.Set(httplib2.Http, 'request', self.fake_http.request)
-        self.useFixture(mockpatch.PatchObject(self.rest_client, '_get_region',
-                                              side_effect=self._get_region()))
         self.useFixture(mockpatch.PatchObject(self.rest_client,
                                               '_log_request'))
 
@@ -99,7 +91,7 @@ class TestRestClientHeadersJSON(TestRestClientHTTPMethods):
 
     def _verify_headers(self, resp):
         self.assertEqual(self.rest_client._get_type(), self.TYPE)
-        resp = dict((k.lower(), v) for k, v in resp.iteritems())
+        resp = dict((k.lower(), v) for k, v in six.iteritems(resp))
         self.assertEqual(self.header_value, resp['accept'])
         self.assertEqual(self.header_value, resp['content-type'])
 
@@ -301,10 +293,8 @@ class TestRestClientErrorCheckerJSON(base.TestCase):
 
     def setUp(self):
         super(TestRestClientErrorCheckerJSON, self).setUp()
-        self.useFixture(fake_config.ConfigFixture())
-        self.stubs.Set(config, 'TempestConfigPrivate', fake_config.FakePrivate)
         self.rest_client = rest_client.RestClient(
-            fake_auth_provider.FakeAuthProvider())
+            fake_auth_provider.FakeAuthProvider(), None, None)
 
     def test_response_less_than_400(self):
         self.rest_client._error_checker(**self.set_data("399"))
@@ -338,6 +328,11 @@ class TestRestClientErrorCheckerJSON(base.TestCase):
         self.assertRaises(exceptions.OverLimit,
                           self.rest_client._error_checker,
                           **self.set_data("413"))
+
+    def test_response_415(self):
+        self.assertRaises(exceptions.InvalidContentType,
+                          self.rest_client._error_checker,
+                          **self.set_data("415"))
 
     def test_response_422(self):
         self.assertRaises(exceptions.UnprocessableEntity,
@@ -426,66 +421,6 @@ class TestRestClientUtils(BaseRestClientTestClass):
         self.assertRaises(NotImplementedError,
                           self.rest_client.wait_for_resource_deletion,
                           '1234')
-
-
-class TestNegativeRestClient(BaseRestClientTestClass):
-
-    def setUp(self):
-        self.fake_http = fake_http.fake_httplib2()
-        super(TestNegativeRestClient, self).setUp()
-        self.negative_rest_client = rest_client.NegativeRestClient(
-            fake_auth_provider.FakeAuthProvider())
-        self.useFixture(mockpatch.PatchObject(self.negative_rest_client,
-                                              '_log_request'))
-
-    def test_post(self):
-        __, return_dict = self.negative_rest_client.send_request('POST',
-                                                                 self.url,
-                                                                 [], {})
-        self.assertEqual('POST', return_dict['method'])
-
-    def test_get(self):
-        __, return_dict = self.negative_rest_client.send_request('GET',
-                                                                 self.url,
-                                                                 [])
-        self.assertEqual('GET', return_dict['method'])
-
-    def test_delete(self):
-        __, return_dict = self.negative_rest_client.send_request('DELETE',
-                                                                 self.url,
-                                                                 [])
-        self.assertEqual('DELETE', return_dict['method'])
-
-    def test_patch(self):
-        __, return_dict = self.negative_rest_client.send_request('PATCH',
-                                                                 self.url,
-                                                                 [], {})
-        self.assertEqual('PATCH', return_dict['method'])
-
-    def test_put(self):
-        __, return_dict = self.negative_rest_client.send_request('PUT',
-                                                                 self.url,
-                                                                 [], {})
-        self.assertEqual('PUT', return_dict['method'])
-
-    def test_head(self):
-        self.useFixture(mockpatch.PatchObject(self.negative_rest_client,
-                                              'response_checker'))
-        __, return_dict = self.negative_rest_client.send_request('HEAD',
-                                                                 self.url,
-                                                                 [])
-        self.assertEqual('HEAD', return_dict['method'])
-
-    def test_copy(self):
-        __, return_dict = self.negative_rest_client.send_request('COPY',
-                                                                 self.url,
-                                                                 [])
-        self.assertEqual('COPY', return_dict['method'])
-
-    def test_other(self):
-        self.assertRaises(AssertionError,
-                          self.negative_rest_client.send_request,
-                          'OTHER', self.url, [])
 
 
 class TestExpectedSuccess(BaseRestClientTestClass):

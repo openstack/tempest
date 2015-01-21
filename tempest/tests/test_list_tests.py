@@ -31,7 +31,7 @@ class TestTestList(base.TestCase):
         ids, err = p.communicate()
         self.assertEqual(0, p.returncode,
                          "test discovery failed, one or more files cause an "
-                         "error on import")
+                         "error on import %s" % ids)
         ids = ids.split('\n')
         for test_id in ids:
             if re.match('(\w+\.){3}\w+', test_id):

@@ -23,7 +23,7 @@ class ImageMembersTest(base.BaseV1ImageMembersTest):
     def test_add_image_member(self):
         image = self._create_image()
         self.client.add_member(self.alt_tenant_id, image)
-        _, body = self.client.get_image_membership(image)
+        body = self.client.get_image_membership(image)
         members = body['members']
         members = map(lambda x: x['member_id'], members)
         self.assertIn(self.alt_tenant_id, members)
@@ -36,7 +36,7 @@ class ImageMembersTest(base.BaseV1ImageMembersTest):
         self.client.add_member(self.alt_tenant_id, image)
         share_image = self._create_image()
         self.client.add_member(self.alt_tenant_id, share_image)
-        _, body = self.client.get_shared_images(self.alt_tenant_id)
+        body = self.client.get_shared_images(self.alt_tenant_id)
         images = body['shared_images']
         images = map(lambda x: x['image_id'], images)
         self.assertIn(share_image, images)
@@ -47,6 +47,6 @@ class ImageMembersTest(base.BaseV1ImageMembersTest):
         image_id = self._create_image()
         self.client.add_member(self.alt_tenant_id, image_id)
         self.client.delete_member(self.alt_tenant_id, image_id)
-        _, body = self.client.get_image_membership(image_id)
+        body = self.client.get_image_membership(image_id)
         members = body['members']
         self.assertEqual(0, len(members), str(members))

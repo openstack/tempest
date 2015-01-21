@@ -12,19 +12,21 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest.common import rest_client
+from tempest.common import service_client
 from tempest import config
 
 CONF = config.CONF
 
 
-class IdentityV3Client(rest_client.RestClient):
+class IdentityV3Client(service_client.ServiceClient):
     """
     Base identity v3 client class
     """
 
     def __init__(self, auth_provider):
-        super(IdentityV3Client, self).__init__(auth_provider)
-        self.service = CONF.identity.catalog_type
-        self.endpoint_url = 'adminURL'
+        super(IdentityV3Client, self).__init__(
+            auth_provider,
+            CONF.identity.catalog_type,
+            CONF.identity.region,
+            endpoint_type='adminURL')
         self.api_version = "v3"

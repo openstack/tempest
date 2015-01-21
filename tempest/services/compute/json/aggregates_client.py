@@ -17,18 +17,11 @@ import json
 
 from tempest.api_schema.response.compute import aggregates as schema
 from tempest.api_schema.response.compute.v2 import aggregates as v2_schema
-from tempest.common import rest_client
-from tempest import config
 from tempest import exceptions
+from tempest.services.compute.json import base
 
-CONF = config.CONF
 
-
-class AggregatesClientJSON(rest_client.RestClient):
-
-    def __init__(self, auth_provider):
-        super(AggregatesClientJSON, self).__init__(auth_provider)
-        self.service = CONF.compute.catalog_type
+class AggregatesClientJSON(base.ComputeClient):
 
     def list_aggregates(self):
         """Get aggregate list."""

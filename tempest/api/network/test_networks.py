@@ -15,7 +15,6 @@
 import itertools
 
 import netaddr
-import testtools
 
 from tempest.api.network import base
 from tempest.common import custom_matchers
@@ -66,7 +65,8 @@ class NetworksTestJSON(base.BaseNetworkTest):
         super(NetworksTestJSON, cls).resource_setup()
         cls.network = cls.create_network()
         cls.name = cls.network['name']
-        cls.subnet = cls.create_subnet(cls.network)
+        cls.subnet = cls._create_subnet_with_last_subnet_block(cls.network,
+                                                               cls._ip_version)
         cls.cidr = cls.subnet['cidr']
         cls._subnet_data = {6: {'gateway':
                                 str(cls._get_gateway_from_tempest_conf(6)),
@@ -94,6 +94,23 @@ class NetworksTestJSON(base.BaseNetworkTest):
                                                      'nexthop':
                                                      '10.100.1.2'}],
                                 'new_dns_nameservers': ['7.8.8.8', '7.8.4.4']}}
+
+    @classmethod
+    def _create_subnet_with_last_subnet_block(cls, network, ip_version):
+        """Derive last subnet CIDR block from tenant CIDR and
+           create the subnet with that derived CIDR
+        """
+        if ip_version == 4:
+            cidr = netaddr.IPNetwork(CONF.network.tenant_network_cidr)
+            mask_bits = CONF.network.tenant_network_mask_bits
+        elif ip_version == 6:
+            cidr = netaddr.IPNetwork(CONF.network.tenant_network_v6_cidr)
+            mask_bits = CONF.network.tenant_network_v6_mask_bits
+
+        subnet_cidr = list(cidr.subnet(mask_bits))[-1]
+        gateway_ip = str(netaddr.IPAddress(subnet_cidr) + 1)
+        return cls.create_subnet(network, gateway=gateway_ip,
+                                 cidr=subnet_cidr, mask_bits=mask_bits)
 
     @classmethod
     def _get_gateway_from_tempest_conf(cls, ip_version):
@@ -129,6 +146,15 @@ class NetworksTestJSON(base.BaseNetworkTest):
         self.assertThat(actual, custom_matchers.MatchesDictExceptForKeys(
                         expected, exclude_keys))
 
+    def _delete_network(self, network):
+        # Deleting network also deletes its subnets if exists
+        self.client.delete_network(network['id'])
+        if network in self.networks:
+            self.networks.remove(network)
+        for subnet in self.subnets:
+            if subnet['network_id'] == network['id']:
+                self.subnets.remove(subnet)
+
     def _create_verify_delete_subnet(self, cidr=None, mask_bits=None,
                                      **kwargs):
         network = self.create_network()
@@ -156,6 +182,7 @@ class NetworksTestJSON(base.BaseNetworkTest):
         # Create a network
         name = data_utils.rand_name('network-')
         network = self.create_network(network_name=name)
+        self.addCleanup(self._delete_network, network)
         net_id = network['id']
         self.assertEqual('ACTIVE', network['status'])
         # Verify network update
@@ -312,6 +339,7 @@ class NetworksTestJSON(base.BaseNetworkTest):
     @test.attr(type='smoke')
     def test_update_subnet_gw_dns_host_routes_dhcp(self):
         network = self.create_network()
+        self.addCleanup(self._delete_network, network)
 
         subnet = self.create_subnet(
             network, **self.subnet_dict(['gateway', 'host_routes',
@@ -542,9 +570,16 @@ class NetworksIpV6TestJSON(NetworksTestJSON):
                               test_subnet_ids,
                               'Subnet are not in the same network')
 
-    @testtools.skipUnless(CONF.network_feature_enabled.ipv6_subnet_attributes,
-                          "IPv6 extended attributes for subnets not "
-                          "available")
+
+class NetworksIpV6TestAttrs(NetworksIpV6TestJSON):
+
+    @classmethod
+    def resource_setup(cls):
+        if not CONF.network_feature_enabled.ipv6_subnet_attributes:
+            raise cls.skipException("IPv6 extended attributes for "
+                                    "subnets not available")
+        super(NetworksIpV6TestAttrs, cls).resource_setup()
+
     @test.attr(type='smoke')
     def test_create_delete_subnet_with_v6_attributes_stateful(self):
         self._create_verify_delete_subnet(
@@ -552,20 +587,54 @@ class NetworksIpV6TestJSON(NetworksTestJSON):
             ipv6_ra_mode='dhcpv6-stateful',
             ipv6_address_mode='dhcpv6-stateful')
 
-    @testtools.skipUnless(CONF.network_feature_enabled.ipv6_subnet_attributes,
-                          "IPv6 extended attributes for subnets not "
-                          "available")
     @test.attr(type='smoke')
     def test_create_delete_subnet_with_v6_attributes_slaac(self):
         self._create_verify_delete_subnet(
             ipv6_ra_mode='slaac',
             ipv6_address_mode='slaac')
 
-    @testtools.skipUnless(CONF.network_feature_enabled.ipv6_subnet_attributes,
-                          "IPv6 extended attributes for subnets not "
-                          "available")
     @test.attr(type='smoke')
     def test_create_delete_subnet_with_v6_attributes_stateless(self):
         self._create_verify_delete_subnet(
             ipv6_ra_mode='dhcpv6-stateless',
             ipv6_address_mode='dhcpv6-stateless')
+
+    def _test_delete_subnet_with_ports(self, mode):
+        """Create subnet and delete it with existing ports"""
+        slaac_network = self.create_network()
+        subnet_slaac = self.create_subnet(slaac_network,
+                                          **{'ipv6_ra_mode': mode,
+                                             'ipv6_address_mode': mode})
+        port = self.create_port(slaac_network)
+        self.assertIsNotNone(port['fixed_ips'][0]['ip_address'])
+        self.client.delete_subnet(subnet_slaac['id'])
+        self.subnets.pop()
+        subnets = self.client.list_subnets()
+        subnet_ids = [subnet['id'] for subnet in subnets['subnets']]
+        self.assertNotIn(subnet_slaac['id'], subnet_ids,
+                         "Subnet wasn't deleted")
+        self.assertRaisesRegexp(
+            exceptions.Conflict,
+            "There are one or more ports still in use on the network",
+            self.client.delete_network,
+            slaac_network['id'])
+
+    @test.attr(type='smoke')
+    def test_create_delete_slaac_subnet_with_ports(self):
+        """Test deleting subnet with SLAAC ports
+
+        Create subnet with SLAAC, create ports in network
+        and then you shall be able to delete subnet without port
+        deletion. But you still can not delete the network.
+        """
+        self._test_delete_subnet_with_ports("slaac")
+
+    @test.attr(type='smoke')
+    def test_create_delete_stateless_subnet_with_ports(self):
+        """Test deleting subnet with DHCPv6 stateless ports
+
+        Create subnet with DHCPv6 stateless, create ports in network
+        and then you shall be able to delete subnet without port
+        deletion. But you still can not delete the network.
+        """
+        self._test_delete_subnet_with_ports("dhcpv6-stateless")

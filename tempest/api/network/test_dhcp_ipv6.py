@@ -27,7 +27,6 @@ CONF = config.CONF
 
 
 class NetworksTestDHCPv6(base.BaseNetworkTest):
-    _interface = 'json'
     _ip_version = 6
 
     """ Test DHCPv6 specific features using SLAAC, stateless and
@@ -41,7 +40,7 @@ class NetworksTestDHCPv6(base.BaseNetworkTest):
     """
 
     @classmethod
-    def resource_setup(cls):
+    def skip_checks(cls):
         msg = None
         if not CONF.network_feature_enabled.ipv6:
             msg = "IPv6 is not enabled"
@@ -49,6 +48,9 @@ class NetworksTestDHCPv6(base.BaseNetworkTest):
             msg = "DHCPv6 attributes are not enabled."
         if msg:
             raise cls.skipException(msg)
+
+    @classmethod
+    def resource_setup(cls):
         super(NetworksTestDHCPv6, cls).resource_setup()
         cls.network = cls.create_network()
 
@@ -411,7 +413,6 @@ class NetworksTestDHCPv6(base.BaseNetworkTest):
         for ra_mode, add_mode in (
                 ('dhcpv6-stateful', 'dhcpv6-stateful'),
                 ('dhcpv6-stateful', None),
-                (None, 'dhcpv6-stateful'),
         ):
             kwargs = {'ipv6_ra_mode': ra_mode,
                       'ipv6_address_mode': add_mode}

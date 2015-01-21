@@ -42,10 +42,10 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
 
         def _create_image():
             name = data_utils.rand_name('image')
-            _, body = cls.glance_client.create_image(name=name,
-                                                     container_format='bare',
-                                                     disk_format='raw',
-                                                     is_public=False)
+            body = cls.glance_client.create_image(name=name,
+                                                  container_format='bare',
+                                                  disk_format='raw',
+                                                  is_public=False)
             image_id = body['id']
             cls.images.append(image_id)
             # Wait 1 second between creation and upload to ensure a delta

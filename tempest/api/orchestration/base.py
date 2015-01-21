@@ -113,9 +113,9 @@ class BaseOrchestrationTest(tempest.test.BaseTestCase):
     def _create_image(cls, name_start='image-heat-', container_format='bare',
                       disk_format='iso'):
         image_name = data_utils.rand_name(name_start)
-        _, body = cls.images_v2_client.create_image(image_name,
-                                                    container_format,
-                                                    disk_format)
+        body = cls.images_v2_client.create_image(image_name,
+                                                 container_format,
+                                                 disk_format)
         image_id = body['id']
         cls.images.append(image_id)
         return body

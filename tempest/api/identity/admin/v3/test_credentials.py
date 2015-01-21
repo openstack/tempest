@@ -32,12 +32,12 @@ class CredentialsTestJSON(base.BaseIdentityV3AdminTest):
         u_email = '%s@testmail.tm' % u_name
         u_password = data_utils.rand_name('pass-')
         for i in range(2):
-            _, cls.project = cls.client.create_project(
+            cls.project = cls.client.create_project(
                 data_utils.rand_name('project-'),
                 description=data_utils.rand_name('project-desc-'))
             cls.projects.append(cls.project['id'])
 
-        _, cls.user_body = cls.client.create_user(
+        cls.user_body = cls.client.create_user(
             u_name, description=u_desc, password=u_password,
             email=u_email, project_id=cls.projects[0])
 
@@ -55,7 +55,7 @@ class CredentialsTestJSON(base.BaseIdentityV3AdminTest):
     def test_credentials_create_get_update_delete(self):
         keys = [data_utils.rand_name('Access-'),
                 data_utils.rand_name('Secret-')]
-        _, cred = self.creds_client.create_credential(
+        cred = self.creds_client.create_credential(
             keys[0], keys[1], self.user_body['id'],
             self.projects[0])
         self.addCleanup(self._delete_credential, cred['id'])
@@ -66,7 +66,7 @@ class CredentialsTestJSON(base.BaseIdentityV3AdminTest):
 
         new_keys = [data_utils.rand_name('NewAccess-'),
                     data_utils.rand_name('NewSecret-')]
-        _, update_body = self.creds_client.update_credential(
+        update_body = self.creds_client.update_credential(
             cred['id'], access_key=new_keys[0], secret_key=new_keys[1],
             project_id=self.projects[1])
         self.assertEqual(cred['id'], update_body['id'])
@@ -75,7 +75,7 @@ class CredentialsTestJSON(base.BaseIdentityV3AdminTest):
         self.assertEqual(update_body['blob']['access'], new_keys[0])
         self.assertEqual(update_body['blob']['secret'], new_keys[1])
 
-        _, get_body = self.creds_client.get_credential(cred['id'])
+        get_body = self.creds_client.get_credential(cred['id'])
         for value1 in self.creds_list[0]:
             self.assertEqual(update_body[value1],
                              get_body[value1])
@@ -89,14 +89,14 @@ class CredentialsTestJSON(base.BaseIdentityV3AdminTest):
         fetched_cred_ids = list()
 
         for i in range(2):
-            _, cred = self.creds_client.create_credential(
+            cred = self.creds_client.create_credential(
                 data_utils.rand_name('Access-'),
                 data_utils.rand_name('Secret-'),
                 self.user_body['id'], self.projects[0])
             created_cred_ids.append(cred['id'])
             self.addCleanup(self._delete_credential, cred['id'])
 
-        _, creds = self.creds_client.list_credentials()
+        creds = self.creds_client.list_credentials()
 
         for i in creds:
             fetched_cred_ids.append(i['id'])

@@ -37,7 +37,7 @@ class AttachInterfacesTestJSON(base.BaseV2ComputeTest):
         cls.client = cls.os.interfaces_client
 
     def _check_interface(self, iface, port_id=None, network_id=None,
-                         fixed_ip=None):
+                         fixed_ip=None, mac_addr=None):
         self.assertIn('port_state', iface)
         if port_id:
             self.assertEqual(iface['port_id'], port_id)
@@ -45,6 +45,8 @@ class AttachInterfacesTestJSON(base.BaseV2ComputeTest):
             self.assertEqual(iface['net_id'], network_id)
         if fixed_ip:
             self.assertEqual(iface['fixed_ips'][0]['ip_address'], fixed_ip)
+        if mac_addr:
+            self.assertEqual(iface['mac_addr'], mac_addr)
 
     def _create_server_get_interfaces(self):
         resp, server = self.create_test_server(wait_until='ACTIVE')
@@ -78,7 +80,10 @@ class AttachInterfacesTestJSON(base.BaseV2ComputeTest):
         resp, _iface = self.client.show_interface(server['id'],
                                                   iface['port_id'])
         self.assertEqual(200, resp.status)
-        self.assertEqual(iface, _iface)
+        self._check_interface(iface, port_id=_iface['port_id'],
+                              network_id=_iface['net_id'],
+                              fixed_ip=_iface['fixed_ips'][0]['ip_address'],
+                              mac_addr=_iface['mac_addr'])
 
     def _test_delete_interface(self, server, ifs):
         # NOTE(danms): delete not the first or last, but one in the middle

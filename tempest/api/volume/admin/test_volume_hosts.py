@@ -22,7 +22,7 @@ class VolumeHostsAdminV2TestsJSON(base.BaseVolumeAdminTest):
 
     @test.attr(type='gate')
     def test_list_hosts(self):
-        _, hosts = self.hosts_client.list_hosts()
+        hosts = self.hosts_client.list_hosts()
         self.assertTrue(len(hosts) >= 2, "No. of hosts are < 2,"
                         "response of list hosts is: % s" % hosts)
 
