@@ -171,7 +171,7 @@ class TestGlanceHTTPClient(base.TestCase):
 
     def test_get_connection_kwargs_set_timeout_for_http(self):
         kwargs = self.client.get_connection_kwargs('http', timeout=10,
-                                                   cacert='foo')
+                                                   ca_certs='foo')
         self.assertEqual(10, kwargs['timeout'])
         # nothing more than timeout is evaluated for http connections
         self.assertEqual(1, len(kwargs.keys()))
@@ -179,7 +179,7 @@ class TestGlanceHTTPClient(base.TestCase):
     def test_get_connection_kwargs_default_for_https(self):
         kwargs = self.client.get_connection_kwargs('https')
         self.assertEqual(600, kwargs['timeout'])
-        self.assertEqual(None, kwargs['cacert'])
+        self.assertEqual(None, kwargs['ca_certs'])
         self.assertEqual(None, kwargs['cert_file'])
         self.assertEqual(None, kwargs['key_file'])
         self.assertEqual(False, kwargs['insecure'])
@@ -188,13 +188,13 @@ class TestGlanceHTTPClient(base.TestCase):
 
     def test_get_connection_kwargs_set_params_for_https(self):
         kwargs = self.client.get_connection_kwargs('https', timeout=10,
-                                                   cacert='foo',
+                                                   ca_certs='foo',
                                                    cert_file='/foo/bar.cert',
                                                    key_file='/foo/key.pem',
                                                    insecure=True,
                                                    ssl_compression=False)
         self.assertEqual(10, kwargs['timeout'])
-        self.assertEqual('foo', kwargs['cacert'])
+        self.assertEqual('foo', kwargs['ca_certs'])
         self.assertEqual('/foo/bar.cert', kwargs['cert_file'])
         self.assertEqual('/foo/key.pem', kwargs['key_file'])
         self.assertEqual(True, kwargs['insecure'])
