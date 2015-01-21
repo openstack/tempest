@@ -153,7 +153,14 @@ class Manager(manager.Manager):
         self._set_volume_clients()
 
         self.baremetal_client = BaremetalClientJSON(self.auth_provider)
-        self.network_client = NetworkClientJSON(self.auth_provider)
+        self.network_client = NetworkClientJSON(
+            self.auth_provider,
+            CONF.network.catalog_type,
+            CONF.network.region or CONF.identity.region,
+            endpoint_type=CONF.network.endpoint_type,
+            build_interval=CONF.network.build_interval,
+            build_timeout=CONF.network.build_timeout,
+            **self.default_params)
         self.database_flavors_client = DatabaseFlavorsClientJSON(
             self.auth_provider)
         self.database_versions_client = DatabaseVersionsClientJSON(

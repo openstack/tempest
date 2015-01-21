@@ -176,7 +176,14 @@ class OSClient(object):
         self.images = image_client.ImageClientV2JSON(_auth)
         self.telemetry = telemetry_client.TelemetryClientJSON(_auth)
         self.volumes = volumes_client.VolumesClientJSON(_auth)
-        self.networks = network_client.NetworkClientJSON(_auth)
+        self.networks = network_client.NetworkClientJSON(
+            _auth,
+            CONF.network.catalog_type,
+            CONF.network.region or CONF.identity.region,
+            endpoint_type=CONF.network.endpoint_type,
+            build_interval=CONF.network.build_interval,
+            build_timeout=CONF.network.build_timeout,
+            **default_params)
 
 
 def load_resources(fname):

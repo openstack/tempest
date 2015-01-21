@@ -16,10 +16,7 @@ import urllib
 
 from tempest.common import service_client
 from tempest.common.utils import misc
-from tempest import config
 from tempest import exceptions
-
-CONF = config.CONF
 
 
 class NetworkClientJSON(service_client.ServiceClient):
@@ -37,16 +34,8 @@ class NetworkClientJSON(service_client.ServiceClient):
     quotas
     """
 
-    def __init__(self, auth_provider):
-        super(NetworkClientJSON, self).__init__(
-            auth_provider,
-            CONF.network.catalog_type,
-            CONF.network.region or CONF.identity.region,
-            endpoint_type=CONF.network.endpoint_type,
-            build_interval=CONF.network.build_interval,
-            build_timeout=CONF.network.build_timeout)
-        self.version = '2.0'
-        self.uri_prefix = "v%s" % (self.version)
+    version = '2.0'
+    uri_prefix = "v2.0"
 
     def get_uri(self, plural_name):
         # get service prefix from resource name
