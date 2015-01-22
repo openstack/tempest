@@ -15,10 +15,10 @@
 
 import json
 import urllib
+import uuid
 
 from tempest.api_schema.response.messaging.v1 import queues as queues_schema
 from tempest.common import service_client
-from tempest.common.utils import data_utils
 
 
 class MessagingClientJSON(service_client.ServiceClient):
@@ -40,7 +40,7 @@ class MessagingClientJSON(service_client.ServiceClient):
         self.version = '1'
         self.uri_prefix = 'v{0}'.format(self.version)
 
-        client_id = data_utils.rand_uuid_hex()
+        client_id = uuid.uuid4().hex
         self.headers = {'Client-ID': client_id}
 
     def list_queues(self):
