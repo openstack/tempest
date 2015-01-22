@@ -19,19 +19,24 @@ import urllib
 from tempest.api_schema.response.messaging.v1 import queues as queues_schema
 from tempest.common import service_client
 from tempest.common.utils import data_utils
-from tempest import config
-
-
-CONF = config.CONF
 
 
 class MessagingClientJSON(service_client.ServiceClient):
 
-    def __init__(self, auth_provider):
+    def __init__(self, auth_provider, service, region,
+                 endpoint_type=None, build_interval=None, build_timeout=None,
+                 disable_ssl_certificate_validation=None, ca_certs=None,
+                 trace_requests=None):
+        dscv = disable_ssl_certificate_validation
         super(MessagingClientJSON, self).__init__(
-            auth_provider,
-            CONF.messaging.catalog_type,
-            CONF.identity.region)
+            auth_provider, service, region,
+            endpoint_type=endpoint_type,
+            build_interval=build_interval,
+            build_timeout=build_timeout,
+            disable_ssl_certificate_validation=dscv,
+            ca_certs=ca_certs,
+            trace_requests=trace_requests)
+
         self.version = '1'
         self.uri_prefix = 'v{0}'.format(self.version)
 
