@@ -43,6 +43,7 @@ class ServersTestJSON(base.BaseV2ComputeTest):
 
     @classmethod
     def resource_setup(cls):
+        cls.set_validation_resources()
         super(ServersTestJSON, cls).resource_setup()
         cls.meta = {'hello': 'world'}
         cls.accessIPv4 = '1.1.1.1'
