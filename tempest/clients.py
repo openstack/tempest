@@ -159,6 +159,7 @@ class Manager(manager.Manager):
         self._set_compute_clients()
         self._set_identity_clients()
         self._set_volume_clients()
+        self._set_object_storage_clients()
 
         self.baremetal_client = BaremetalClientJSON(self.auth_provider)
         self.network_client = NetworkClientJSON(
@@ -193,12 +194,9 @@ class Manager(manager.Manager):
                            self.credentials.tenant_name)
 
         # common clients
-        self.account_client = AccountClient(self.auth_provider)
         if CONF.service_available.glance:
             self.image_client = ImageClientJSON(self.auth_provider)
             self.image_client_v2 = ImageClientV2JSON(self.auth_provider)
-        self.container_client = ContainerClient(self.auth_provider)
-        self.object_client = ObjectClient(self.auth_provider)
         self.orchestration_client = OrchestrationClient(
             self.auth_provider,
             CONF.orchestration.catalog_type,
@@ -314,6 +312,11 @@ class Manager(manager.Manager):
             VolumeV2AvailabilityZoneClientJSON(self.auth_provider)
         self.volume_types_v2_client = VolumeTypesV2ClientJSON(
             self.auth_provider)
+
+    def _set_object_storage_clients(self):
+        self.account_client = AccountClient(self.auth_provider)
+        self.container_client = ContainerClient(self.auth_provider)
+        self.object_client = ObjectClient(self.auth_provider)
 
 
 class AdminManager(Manager):
