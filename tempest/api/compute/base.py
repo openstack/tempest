@@ -174,7 +174,7 @@ class BaseComputeTest(tempest.test.BaseTestCase):
         LOG.debug('Clearing server groups: %s', ','.join(cls.server_groups))
         for server_group_id in cls.server_groups:
             try:
-                cls.client.delete_server_group(server_group_id)
+                cls.servers_client.delete_server_group(server_group_id)
             except exceptions.NotFound:
                 # The server-group may have already been deleted which is OK.
                 pass
