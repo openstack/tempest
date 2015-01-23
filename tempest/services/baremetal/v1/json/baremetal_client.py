@@ -13,12 +13,12 @@
 from tempest.services.baremetal import base
 
 
-class BaremetalClientV1(base.BaremetalClient):
+class BaremetalClientJSON(base.BaremetalClient):
     """
     Base Tempest REST client for Ironic API v1.
     """
     def __init__(self, auth_provider):
-        super(BaremetalClientV1, self).__init__(auth_provider)
+        super(BaremetalClientJSON, self).__init__(auth_provider)
         self.version = '1'
         self.uri_prefix = 'v%s' % self.version
 

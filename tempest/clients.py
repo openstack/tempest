@@ -20,7 +20,8 @@ from tempest.common import negative_rest_client
 from tempest import config
 from tempest import manager
 from tempest.openstack.common import log as logging
-from tempest.services.baremetal.v1.client_json import BaremetalClientJSON
+from tempest.services.baremetal.v1.json.baremetal_client import \
+    BaremetalClientJSON
 from tempest.services import botoclients
 from tempest.services.compute.json.agents_client import \
     AgentsClientJSON
