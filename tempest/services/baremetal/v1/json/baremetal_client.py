@@ -17,10 +17,8 @@ class BaremetalClientJSON(base.BaremetalClient):
     """
     Base Tempest REST client for Ironic API v1.
     """
-    def __init__(self, auth_provider):
-        super(BaremetalClientJSON, self).__init__(auth_provider)
-        self.version = '1'
-        self.uri_prefix = 'v%s' % self.version
+    version = '1'
+    uri_prefix = 'v1'
 
     @base.handle_errors
     def list_nodes(self, **kwargs):

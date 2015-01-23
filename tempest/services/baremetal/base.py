@@ -17,9 +17,6 @@ import urllib
 import six
 
 from tempest.common import service_client
-from tempest import config
-
-CONF = config.CONF
 
 
 def handle_errors(f):
@@ -48,13 +45,7 @@ class BaremetalClient(service_client.ServiceClient):
 
     """
 
-    def __init__(self, auth_provider):
-        super(BaremetalClient, self).__init__(
-            auth_provider,
-            CONF.baremetal.catalog_type,
-            CONF.identity.region,
-            endpoint_type=CONF.baremetal.endpoint_type)
-        self.uri_prefix = ''
+    uri_prefix = ''
 
     def serialize(self, object_dict):
         """Serialize an Ironic object."""

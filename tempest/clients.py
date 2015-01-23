@@ -162,7 +162,12 @@ class Manager(manager.Manager):
         self._set_volume_clients()
         self._set_object_storage_clients()
 
-        self.baremetal_client = BaremetalClientJSON(self.auth_provider)
+        self.baremetal_client = BaremetalClientJSON(
+            self.auth_provider,
+            CONF.baremetal.catalog_type,
+            CONF.identity.region,
+            endpoint_type=CONF.baremetal.endpoint_type,
+            **self.default_params_with_timeout_values)
         self.network_client = NetworkClientJSON(
             self.auth_provider,
             CONF.network.catalog_type,
