@@ -59,6 +59,9 @@ AuthGroup = [
                      "It requires at least `2 * CONC` distinct accounts "
                      "configured in `test_accounts_file`, with CONC == the "
                      "number of concurrent test processes."),
+    cfg.ListOpt('tempest_roles',
+                help="Roles to assign to all users created by tempest",
+                default=[])
 ]
 
 identity_group = cfg.OptGroup(name='identity',
@@ -131,9 +134,6 @@ IdentityGroup = [
     cfg.StrOpt('admin_domain_name',
                help="Admin domain name for authentication (Keystone V3)."
                     "The same domain applies to user and project"),
-    cfg.ListOpt('tempest_roles',
-                help="Roles to assign to all users created by tempest",
-                default=[])
 ]
 
 identity_feature_group = cfg.OptGroup(name='identity-feature-enabled',
@@ -860,7 +860,14 @@ ScenarioGroup = [
         'large_ops_number',
         default=0,
         help="specifies how many resources to request at once. Used "
-        "for large operations testing.")
+        "for large operations testing."),
+    # TODO(yfried): add support for dhcpcd
+    cfg.StrOpt('dhcp_client',
+               default='udhcpc',
+               choices=["udhcpc", "dhclient"],
+               help='DHCP client used by images to renew DCHP lease. '
+                    'If left empty, update operation will be skipped. '
+                    'Supported clients: "udhcpc", "dhclient"')
 ]
 
 

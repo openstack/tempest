@@ -103,7 +103,8 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
         address = self._get_ipaddress_from_tempest_conf()
         allocation_pools = {'allocation_pools': [{'start': str(address + 4),
                                                   'end': str(address + 6)}]}
-        self.create_subnet(network, **allocation_pools)
+        subnet = self.create_subnet(network, **allocation_pools)
+        self.addCleanup(self.client.delete_subnet, subnet['id'])
         body = self.client.create_port(network_id=net_id)
         self.addCleanup(self.client.delete_port, body['port']['id'])
         port = body['port']
@@ -149,8 +150,11 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
     def test_port_list_filter_by_router_id(self):
         # Create a router
         network = self.create_network()
-        self.create_subnet(network)
+        self.addCleanup(self.client.delete_network, network['id'])
+        subnet = self.create_subnet(network)
+        self.addCleanup(self.client.delete_subnet, subnet['id'])
         router = self.create_router(data_utils.rand_name('router-'))
+        self.addCleanup(self.client.delete_router, router['id'])
         port = self.client.create_port(network_id=network['id'])
         # Add router interface to port created above
         self.client.add_router_interface_with_port_id(
@@ -179,8 +183,11 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
     def test_create_update_port_with_second_ip(self):
         # Create a network with two subnets
         network = self.create_network()
+        self.addCleanup(self.client.delete_network, network['id'])
         subnet_1 = self.create_subnet(network)
+        self.addCleanup(self.client.delete_subnet, subnet_1['id'])
         subnet_2 = self.create_subnet(network)
+        self.addCleanup(self.client.delete_subnet, subnet_2['id'])
         fixed_ip_1 = [{'subnet_id': subnet_1['id']}]
         fixed_ip_2 = [{'subnet_id': subnet_2['id']}]
 
@@ -189,6 +196,7 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
         # Create a port with multiple IP addresses
         port = self.create_port(network,
                                 fixed_ips=fixed_ips)
+        self.addCleanup(self.client.delete_port, port['id'])
         self.assertEqual(2, len(port['fixed_ips']))
         check_fixed_ips = [subnet_1['id'], subnet_2['id']]
         for item in port['fixed_ips']:
@@ -204,6 +212,7 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
 
     def _update_port_with_security_groups(self, security_groups_names):
         subnet_1 = self.create_subnet(self.network)
+        self.addCleanup(self.client.delete_subnet, subnet_1['id'])
         fixed_ip_1 = [{'subnet_id': subnet_1['id']}]
 
         security_groups_list = list()
@@ -281,22 +290,13 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
     @test.attr(type='smoke')
     def test_create_port_with_no_securitygroups(self):
         network = self.create_network()
-        self.create_subnet(network)
+        self.addCleanup(self.client.delete_network, network['id'])
+        subnet = self.create_subnet(network)
+        self.addCleanup(self.client.delete_subnet, subnet['id'])
         port = self.create_port(network, security_groups=[])
+        self.addCleanup(self.client.delete_port, port['id'])
         self.assertIsNotNone(port['security_groups'])
         self.assertEmpty(port['security_groups'])
-
-    @test.attr(type='smoke')
-    def test_update_port_with_no_securitygroups(self):
-        network = self.create_network()
-        self.create_subnet(network)
-        port = self.create_port(network)
-        # Verify that port is created with default security group
-        self.assertIsNotNone(port['security_groups'])
-        self.assertNotEmpty(port['security_groups'])
-        updated_port = self.update_port(port, security_groups=[])
-        self.assertIsNotNone(updated_port['security_groups'])
-        self.assertEmpty(updated_port['security_groups'])
 
 
 class PortsAdminExtendedAttrsTestJSON(base.BaseAdminNetworkTest):

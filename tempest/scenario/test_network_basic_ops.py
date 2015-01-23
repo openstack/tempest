@@ -100,10 +100,10 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         self.keypairs = {}
         self.servers = []
 
-    def _setup_network_and_servers(self):
+    def _setup_network_and_servers(self, **kwargs):
         self.security_group = \
             self._create_security_group(tenant_id=self.tenant_id)
-        self.network, self.subnet, self.router = self.create_networks()
+        self.network, self.subnet, self.router = self.create_networks(**kwargs)
         self.check_networks()
 
         name = data_utils.rand_name('server-smoke')
@@ -425,3 +425,62 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         self.check_public_network_connectivity(
             should_connect=True, msg="after updating "
             "admin_state_up of router to True")
+
+    def _check_dns_server(self, ssh_client, dns_servers):
+        servers = ssh_client.get_dns_servers()
+        self.assertEqual(set(dns_servers), set(servers),
+                         'Looking for servers: {trgt_serv}. '
+                         'Retrieved DNS nameservers: {act_serv} '
+                         'From host: {host}.'
+                         .format(host=ssh_client.ssh_client.host,
+                                 act_serv=servers,
+                                 trgt_serv=dns_servers))
+
+    @testtools.skipUnless(CONF.scenario.dhcp_client,
+                          "DHCP client is not available.")
+    @test.attr(type='smoke')
+    @test.services('compute', 'network')
+    def test_subnet_details(self):
+        """Tests that subnet's extra configuration details are affecting
+        the VMs
+
+         NOTE: Neutron subnets push data to servers via dhcp-agent, so any
+         update in subnet requires server to actively renew its DHCP lease.
+
+         1. Configure subnet with dns nameserver
+         2. retrieve the VM's configured dns and verify it matches the one
+         configured for the subnet.
+         3. update subnet's dns
+         4. retrieve the VM's configured dns and verify it matches the new one
+         configured for the subnet.
+
+         TODO(yfried): add host_routes
+
+         any resolution check would be testing either:
+            * l3 forwarding (tested in test_network_basic_ops)
+            * Name resolution of an external DNS nameserver - out of scope for
+            Tempest
+        """
+        # this test check only updates (no actual resolution) so using
+        # arbitrary ip addresses as nameservers, instead of parsing CONF
+        initial_dns_server = '1.2.3.4'
+        alt_dns_server = '9.8.7.6'
+        self._setup_network_and_servers(dns_nameservers=[initial_dns_server])
+        self.check_public_network_connectivity(should_connect=True)
+
+        floating_ip, server = self.floating_ip_tuple
+        ip_address = floating_ip.floating_ip_address
+        private_key = self._get_server_key(server)
+        ssh_client = self._ssh_to_server(ip_address, private_key)
+
+        self._check_dns_server(ssh_client, [initial_dns_server])
+
+        self.subnet.update(dns_nameservers=[alt_dns_server])
+        # asserts that Neutron DB has updated the nameservers
+        self.assertEqual([alt_dns_server], self.subnet.dns_nameservers,
+                         "Failed to update subnet's nameservers")
+
+        # server needs to renew its dhcp lease in order to get the new dns
+        # definitions from subnet
+        ssh_client.renew_lease(fixed_ip=floating_ip['fixed_ip_address'])
+        self._check_dns_server(ssh_client, [alt_dns_server])

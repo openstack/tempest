@@ -1012,12 +1012,16 @@ class NetworkScenarioTest(ScenarioTest):
         router.update(admin_state_up=admin_state_up)
         self.assertEqual(admin_state_up, router.admin_state_up)
 
-    def create_networks(self, client=None, tenant_id=None):
+    def create_networks(self, client=None, tenant_id=None,
+                        dns_nameservers=None):
         """Create a network with a subnet connected to a router.
 
         The baremetal driver is a special case since all nodes are
         on the same shared network.
 
+        :param client: network client to create resources with.
+        :param tenant_id: id of tenant to create resources in.
+        :param dns_nameservers: list of dns servers to send to subnet.
         :returns: network, subnet, router
         """
         if CONF.baremetal.driver_enabled:
@@ -1033,7 +1037,12 @@ class NetworkScenarioTest(ScenarioTest):
         else:
             network = self._create_network(client=client, tenant_id=tenant_id)
             router = self._get_router(client=client, tenant_id=tenant_id)
-            subnet = self._create_subnet(network=network, client=client)
+
+            subnet_kwargs = dict(network=network, client=client)
+            # use explicit check because empty list is a valid option
+            if dns_nameservers is not None:
+                subnet_kwargs['dns_nameservers'] = dns_nameservers
+            subnet = self._create_subnet(**subnet_kwargs)
             subnet.add_to_router(router.id)
         return network, subnet, router
 

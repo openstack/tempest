@@ -17,6 +17,7 @@ import urllib
 
 from tempest.api_schema.response.compute import agents as common_schema
 from tempest.api_schema.response.compute.v2 import agents as schema
+from tempest.common import service_client
 from tempest.services.compute.json import base
 
 
@@ -33,7 +34,7 @@ class AgentsClientJSON(base.ComputeClient):
         resp, body = self.get(url)
         body = json.loads(body)
         self.validate_response(common_schema.list_agents, resp, body)
-        return resp, body['agents']
+        return service_client.ResponseBodyList(resp, body['agents'])
 
     def create_agent(self, **kwargs):
         """Create an agent build."""
@@ -41,16 +42,16 @@ class AgentsClientJSON(base.ComputeClient):
         resp, body = self.post('os-agents', post_body)
         body = json.loads(body)
         self.validate_response(schema.create_agent, resp, body)
-        return resp, body['agent']
+        return service_client.ResponseBody(resp, body['agent'])
 
     def delete_agent(self, agent_id):
         """Delete an existing agent build."""
         resp, body = self.delete("os-agents/%s" % str(agent_id))
         self.validate_response(schema.delete_agent, resp, body)
-        return resp, body
+        return service_client.ResponseBody(resp, body)
 
     def update_agent(self, agent_id, **kwargs):
         """Update an agent build."""
         put_body = json.dumps({'para': kwargs})
         resp, body = self.put('os-agents/%s' % str(agent_id), put_body)
-        return resp, self._parse_resp(body)
+        return service_client.ResponseBody(resp, self._parse_resp(body))

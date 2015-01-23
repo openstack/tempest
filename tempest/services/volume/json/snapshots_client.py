@@ -123,6 +123,7 @@ class BaseSnapshotsClientJSON(base.VolumeClient):
         """Delete Snapshot."""
         resp, body = self.delete("snapshots/%s" % str(snapshot_id))
         self.expected_success(202, resp.status)
+        return service_client.ResponseBody(resp, body)
 
     def is_resource_deleted(self, id):
         try:
@@ -195,6 +196,7 @@ class BaseSnapshotsClientJSON(base.VolumeClient):
         url = "snapshots/%s/metadata/%s" % (str(snapshot_id), str(id))
         resp, body = self.delete(url)
         self.expected_success(200, resp.status)
+        return service_client.ResponseBody(resp, body)
 
     def force_delete_snapshot(self, snapshot_id):
         """Force Delete Snapshot."""

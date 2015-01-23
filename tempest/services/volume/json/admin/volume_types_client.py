@@ -91,6 +91,7 @@ class BaseVolumeTypesClientJSON(base.VolumeClient):
         """Deletes the Specified Volume_type."""
         resp, body = self.delete("types/%s" % str(volume_id))
         self.expected_success(202, resp.status)
+        return service_client.ResponseBody(resp, body)
 
     def list_volume_types_extra_specs(self, vol_type_id, params=None):
         """List all the volume_types extra specs created."""
@@ -130,6 +131,7 @@ class BaseVolumeTypesClientJSON(base.VolumeClient):
         resp, body = self.delete("types/%s/extra_specs/%s" % (
             (str(vol_id)), str(extra_spec_name)))
         self.expected_success(202, resp.status)
+        return service_client.ResponseBody(resp, body)
 
     def update_volume_type_extra_specs(self, vol_type_id, extra_spec_name,
                                        extra_spec):
@@ -183,6 +185,7 @@ class BaseVolumeTypesClientJSON(base.VolumeClient):
         resp, body = self.delete(
             "/types/%s/encryption/provider" % str(vol_type_id))
         self.expected_success(202, resp.status)
+        return service_client.ResponseBody(resp, body)
 
 
 class VolumeTypesClientJSON(BaseVolumeTypesClientJSON):

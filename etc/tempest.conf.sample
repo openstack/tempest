@@ -135,6 +135,9 @@
 # concurrent test processes. (boolean value)
 #locking_credentials_provider = false
 
+# Roles to assign to all users created by tempest (list value)
+#tempest_roles =
+
 
 [baremetal]
 
@@ -582,9 +585,6 @@
 # applies to user and project (string value)
 #admin_domain_name = <None>
 
-# Roles to assign to all users created by tempest (list value)
-#tempest_roles =
-
 
 [identity-feature-enabled]
 
@@ -919,6 +919,11 @@
 # specifies how many resources to request at once. Used for large
 # operations testing. (integer value)
 #large_ops_number = 0
+
+# DHCP client used by images to renew DCHP lease. If left empty,
+# update operation will be skipped. Supported clients: "udhcpc",
+# "dhclient" (string value)
+#dhcp_client = udhcpc
 
 
 [service_available]
