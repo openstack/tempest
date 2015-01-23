@@ -743,6 +743,17 @@ DataProcessingGroup = [
 ]
 
 
+data_processing_feature_group = cfg.OptGroup(
+    name="data_processing-feature-enabled",
+    title="Enabled Data Processing features")
+
+DataProcessingFeaturesGroup = [
+    cfg.ListOpt('plugins',
+                default=["vanilla", "hdp"],
+                help="List of enabled data processing plugins")
+]
+
+
 boto_group = cfg.OptGroup(name='boto',
                           title='EC2/S3 options')
 BotoGroup = [
@@ -1050,6 +1061,7 @@ _opts = [
     (telemetry_group, TelemetryGroup),
     (dashboard_group, DashboardGroup),
     (data_processing_group, DataProcessingGroup),
+    (data_processing_feature_group, DataProcessingFeaturesGroup),
     (boto_group, BotoGroup),
     (stress_group, StressGroup),
     (scenario_group, ScenarioGroup),
@@ -1120,6 +1132,8 @@ class TempestConfigPrivate(object):
         self.telemetry = cfg.CONF.telemetry
         self.dashboard = cfg.CONF.dashboard
         self.data_processing = cfg.CONF.data_processing
+        self.data_processing_feature_enabled = cfg.CONF[
+            'data_processing-feature-enabled']
         self.boto = cfg.CONF.boto
         self.stress = cfg.CONF.stress
         self.scenario = cfg.CONF.scenario
