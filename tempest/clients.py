@@ -187,7 +187,11 @@ class Manager(manager.Manager):
             **self.default_params_with_timeout_values)
         if CONF.service_available.ceilometer:
             self.telemetry_client = TelemetryClientJSON(
-                self.auth_provider)
+                self.auth_provider,
+                CONF.telemetry.catalog_type,
+                CONF.identity.region,
+                endpoint_type=CONF.telemetry.endpoint_type,
+                **self.default_params_with_timeout_values)
         self.negative_client = negative_rest_client.NegativeRestClient(
             self.auth_provider, service)
 
