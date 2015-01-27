@@ -114,6 +114,19 @@ class BaremetalClientV1(base.BaremetalClient):
         """
         return self._show_request('ports', uuid)
 
+    @base.handle_errors
+    def show_port_by_address(self, address):
+        """
+        Gets a specific port by address.
+
+        :param address: MAC address of the port.
+        :return: Serialized port as a dictionary.
+
+        """
+        uri = '/ports/detail?address=%s' % address
+
+        return self._show_request('ports', uuid=None, uri=uri)
+
     def show_driver(self, driver_name):
         """
         Gets a specific driver.
