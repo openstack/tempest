@@ -27,11 +27,15 @@ CONF = config.CONF
 class RoutersNegativeTest(base.BaseRouterTest):
 
     @classmethod
-    def resource_setup(cls):
-        super(RoutersNegativeTest, cls).resource_setup()
+    def skip_checks(cls):
+        super(RoutersNegativeTest, cls).skip_checks()
         if not test.is_extension_enabled('router', 'network'):
             msg = "router extension not enabled."
             raise cls.skipException(msg)
+
+    @classmethod
+    def resource_setup(cls):
+        super(RoutersNegativeTest, cls).resource_setup()
         cls.router = cls.create_router(data_utils.rand_name('router-'))
         cls.network = cls.create_network()
         cls.subnet = cls.create_subnet(cls.network)

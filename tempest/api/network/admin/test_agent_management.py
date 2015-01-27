@@ -20,11 +20,15 @@ from tempest import test
 class AgentManagementTestJSON(base.BaseAdminNetworkTest):
 
     @classmethod
-    def resource_setup(cls):
-        super(AgentManagementTestJSON, cls).resource_setup()
+    def skip_checks(cls):
+        super(AgentManagementTestJSON, cls).skip_checks()
         if not test.is_extension_enabled('agent', 'network'):
             msg = "agent extension not enabled."
             raise cls.skipException(msg)
+
+    @classmethod
+    def resource_setup(cls):
+        super(AgentManagementTestJSON, cls).resource_setup()
         body = cls.admin_client.list_agents()
         agents = body['agents']
         cls.agent = agents[0]

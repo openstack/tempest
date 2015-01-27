@@ -31,10 +31,6 @@ class ExtensionsTestJSON(base.BaseNetworkTest):
 
     """
 
-    @classmethod
-    def resource_setup(cls):
-        super(ExtensionsTestJSON, cls).resource_setup()
-
     @test.attr(type='smoke')
     @test.idempotent_id('ef28c7e6-e646-4979-9d67-deb207bc5564')
     def test_list_show_extensions(self):

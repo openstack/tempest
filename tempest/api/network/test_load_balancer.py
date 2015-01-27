@@ -21,7 +21,6 @@ from tempest import test
 
 
 class LoadBalancerTestJSON(base.BaseNetworkTest):
-
     """
     Tests the following operations in the Neutron API using the REST client for
     Neutron:
@@ -39,11 +38,15 @@ class LoadBalancerTestJSON(base.BaseNetworkTest):
     """
 
     @classmethod
-    def resource_setup(cls):
-        super(LoadBalancerTestJSON, cls).resource_setup()
+    def skip_checks(cls):
+        super(LoadBalancerTestJSON, cls).skip_checks()
         if not test.is_extension_enabled('lbaas', 'network'):
             msg = "lbaas extension not enabled."
             raise cls.skipException(msg)
+
+    @classmethod
+    def resource_setup(cls):
+        super(LoadBalancerTestJSON, cls).resource_setup()
         cls.network = cls.create_network()
         cls.name = cls.network['name']
         cls.subnet = cls.create_subnet(cls.network)

@@ -19,11 +19,15 @@ from tempest import test
 class DHCPAgentSchedulersTestJSON(base.BaseAdminNetworkTest):
 
     @classmethod
-    def resource_setup(cls):
-        super(DHCPAgentSchedulersTestJSON, cls).resource_setup()
+    def skip_checks(cls):
+        super(DHCPAgentSchedulersTestJSON, cls).skip_checks()
         if not test.is_extension_enabled('dhcp_agent_scheduler', 'network'):
             msg = "dhcp_agent_scheduler extension not enabled."
             raise cls.skipException(msg)
+
+    @classmethod
+    def resource_setup(cls):
+        super(DHCPAgentSchedulersTestJSON, cls).resource_setup()
         # Create a network and make sure it will be hosted by a
         # dhcp agent: this is done by creating a regular port
         cls.network = cls.create_network()
