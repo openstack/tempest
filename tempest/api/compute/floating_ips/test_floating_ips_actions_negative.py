@@ -89,7 +89,7 @@ class FloatingIPsNegativeTestJSON(base.BaseFloatingIPsTest):
     @test.services('network')
     def test_associate_ip_to_server_without_passing_floating_ip(self):
         # Negative test:Association of empty floating IP to specific server
-        # should raise NotFound exception
-        self.assertRaises(exceptions.NotFound,
+        # should raise NotFound or BadRequest(In case of Nova V2.1) exception.
+        self.assertRaises((exceptions.NotFound, exceptions.BadRequest),
                           self.client.associate_floating_ip_to_server,
                           '', self.server_id)
