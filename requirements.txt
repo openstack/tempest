@@ -11,7 +11,7 @@ paramiko>=1.13.0
 netaddr>=0.7.12
 python-ceilometerclient>=1.0.6
 python-glanceclient>=0.15.0
-python-keystoneclient>=0.11.1
+python-keystoneclient>=1.0.0
 python-novaclient>=2.18.0
 python-neutronclient>=2.3.6,<3
 python-cinderclient>=1.1.0
@@ -25,4 +25,4 @@ six>=1.7.0
 iso8601>=0.1.9
 fixtures>=0.3.14
 testscenarios>=0.4
-tempest-lib
+tempest-lib>=0.1.0

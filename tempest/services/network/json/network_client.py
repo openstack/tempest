@@ -57,7 +57,7 @@ class NetworkClientJSON(service_client.ServiceClient):
             'ipsecpolicies': 'vpn',
             'vpnservices': 'vpn',
             'ikepolicies': 'vpn',
-            'ipsecpolicies': 'vpn',
+            'ipsec-site-connections': 'vpn',
             'metering_labels': 'metering',
             'metering_label_rules': 'metering',
             'firewall_rules': 'fw',
@@ -85,7 +85,7 @@ class NetworkClientJSON(service_client.ServiceClient):
             'security_group_rules': 'security_group_rules',
             'ipsecpolicy': 'ipsecpolicies',
             'ikepolicy': 'ikepolicies',
-            'ipsecpolicy': 'ipsecpolicies',
+            'ipsec_site_connection': 'ipsec-site-connections',
             'quotas': 'quotas',
             'firewall_policy': 'firewall_policies'
         }

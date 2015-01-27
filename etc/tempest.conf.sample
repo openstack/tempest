@@ -467,6 +467,16 @@
 #endpoint_type = publicURL
 
 
+[data_processing-feature-enabled]
+
+#
+# From tempest.config
+#
+
+# List of enabled data processing plugins (list value)
+#plugins = vanilla,hdp
+
+
 [database]
 
 #
