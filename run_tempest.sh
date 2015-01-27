@@ -16,6 +16,7 @@ function usage {
   echo "  -d, --debug              Run tests with testtools instead of testr. This allows you to use PDB"
   echo "  -l, --logging            Enable logging"
   echo "  -L, --logging-config     Logging config file location.  Default is etc/logging.conf"
+  echo "  -F, --log_file           Output log file"
   echo "  -- [TESTROPTIONS]        After the first '--' you can pass arbitrary arguments to testr "
 }
 
@@ -33,8 +34,9 @@ config_file=""
 update=0
 logging=0
 logging_config=etc/logging.conf
+log_file=test_results
 
-if ! options=$(getopt -o VNnfusthdC:lL: -l virtual-env,no-virtual-env,no-site-packages,force,update,smoke,serial,help,debug,config:,logging,logging-config: -- "$@")
+if ! options=$(getopt -o VNnfusthdC:lL: -l virtual-env,no-virtual-env,no-site-packages,force,update,smoke,serial,help,debug,config:,logging,logging-config,log_file: -- "$@")
 then
     # parse error
     usage
@@ -56,6 +58,7 @@ while [ $# -gt 0 ]; do
     -s|--smoke) testrargs+="smoke";;
     -t|--serial) serial=1;;
     -l|--logging) logging=1;;
+    -F|--log-file) log_file=$2; shift;;
     -L|--logging-config) logging_config=$2; shift;;
     --) [ "yes" == "$first_uu" ] || testrargs="$testrargs $1"; first_uu=no  ;;
     *) testrargs="$testrargs $1";;
@@ -67,6 +70,10 @@ if [ -n "$config_file" ]; then
     config_file=`readlink -f "$config_file"`
     export TEMPEST_CONFIG_DIR=`dirname "$config_file"`
     export TEMPEST_CONFIG=`basename "$config_file"`
+fi
+
+if [ -n "$log_file" ]; then
+    log_file=`readlink -f "$log_file"`
 fi
 
 if [ $logging -eq 1 ]; then
@@ -104,9 +111,9 @@ function run_tests {
   fi
 
   if [ $serial -eq 1 ]; then
-      ${wrapper} testr run --subunit $testrargs | ${wrapper} subunit-2to1 | ${wrapper} tools/colorizer.py
+      ${wrapper} testr run --subunit $testrargs | tee $log_file | ${wrapper} subunit-2to1 | ${wrapper} tools/colorizer.py
   else
-      ${wrapper} testr run --parallel --subunit $testrargs | ${wrapper} subunit-2to1 | ${wrapper} tools/colorizer.py
+      ${wrapper} testr run --parallel --subunit $testrargs | tee $log_file | ${wrapper} subunit-2to1 | ${wrapper} tools/colorizer.py
   fi
 }
 
