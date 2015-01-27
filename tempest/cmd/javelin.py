@@ -187,7 +187,7 @@ class OSClient(object):
 
 
 def load_resources(fname):
-    """Load the expected resources from a yaml flie."""
+    """Load the expected resources from a yaml file."""
     return yaml.load(open(fname, 'r'))
 
 
@@ -423,7 +423,7 @@ class JavelinCheck(unittest.TestCase):
                 self._ping_ip(addr, 60)
 
     def check_secgroups(self):
-        """Check that the security groups are still existing."""
+        """Check that the security groups still exist."""
         LOG.info("Checking security groups")
         for secgroup in self.res['secgroups']:
             client = client_for_user(secgroup['owner'])
