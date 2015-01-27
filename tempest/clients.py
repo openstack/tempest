@@ -304,35 +304,53 @@ class Manager(manager.Manager):
         self.credentials_client = CredentialsClientJSON(self.auth_provider)
 
     def _set_volume_clients(self):
-        self.volume_qos_client = QosSpecsClientJSON(self.auth_provider)
+        params = {
+            'service': CONF.volume.catalog_type,
+            'region': CONF.volume.region or CONF.identity.region,
+            'endpoint_type': CONF.volume.endpoint_type,
+            'build_interval': CONF.volume.build_interval,
+            'build_timeout': CONF.volume.build_timeout
+        }
+        params.update(self.default_params)
+
+        self.volume_qos_client = QosSpecsClientJSON(self.auth_provider,
+                                                    **params)
         self.volume_qos_v2_client = QosSpecsV2ClientJSON(
-            self.auth_provider)
+            self.auth_provider, **params)
         self.volume_services_v2_client = VolumesServicesV2ClientJSON(
-            self.auth_provider)
-        self.backups_client = BackupsClientJSON(self.auth_provider)
-        self.backups_v2_client = BackupsClientV2JSON(self.auth_provider)
-        self.snapshots_client = SnapshotsClientJSON(self.auth_provider)
-        self.snapshots_v2_client = SnapshotsV2ClientJSON(self.auth_provider)
-        self.volumes_client = VolumesClientJSON(self.auth_provider)
-        self.volumes_v2_client = VolumesV2ClientJSON(self.auth_provider)
-        self.volume_types_client = VolumeTypesClientJSON(self.auth_provider)
+            self.auth_provider, **params)
+        self.backups_client = BackupsClientJSON(self.auth_provider, **params)
+        self.backups_v2_client = BackupsClientV2JSON(self.auth_provider,
+                                                     **params)
+        self.snapshots_client = SnapshotsClientJSON(self.auth_provider,
+                                                    **params)
+        self.snapshots_v2_client = SnapshotsV2ClientJSON(self.auth_provider,
+                                                         **params)
+        self.volumes_client = VolumesClientJSON(self.auth_provider, **params)
+        self.volumes_v2_client = VolumesV2ClientJSON(self.auth_provider,
+                                                     **params)
+        self.volume_types_client = VolumeTypesClientJSON(self.auth_provider,
+                                                         **params)
         self.volume_services_client = VolumesServicesClientJSON(
-            self.auth_provider)
-        self.volume_hosts_client = VolumeHostsClientJSON(self.auth_provider)
+            self.auth_provider, **params)
+        self.volume_hosts_client = VolumeHostsClientJSON(self.auth_provider,
+                                                         **params)
         self.volume_hosts_v2_client = VolumeHostsV2ClientJSON(
-            self.auth_provider)
-        self.volume_quotas_client = VolumeQuotasClientJSON(self.auth_provider)
-        self.volume_quotas_v2_client = VolumeQuotasV2Client(self.auth_provider)
+            self.auth_provider, **params)
+        self.volume_quotas_client = VolumeQuotasClientJSON(self.auth_provider,
+                                                           **params)
+        self.volume_quotas_v2_client = VolumeQuotasV2Client(self.auth_provider,
+                                                            **params)
         self.volumes_extension_client = VolumeExtensionClientJSON(
-            self.auth_provider)
+            self.auth_provider, **params)
         self.volumes_v2_extension_client = VolumeV2ExtensionClientJSON(
-            self.auth_provider)
+            self.auth_provider, **params)
         self.volume_availability_zone_client = \
-            VolumeAvailabilityZoneClientJSON(self.auth_provider)
+            VolumeAvailabilityZoneClientJSON(self.auth_provider, **params)
         self.volume_v2_availability_zone_client = \
-            VolumeV2AvailabilityZoneClientJSON(self.auth_provider)
+            VolumeV2AvailabilityZoneClientJSON(self.auth_provider, **params)
         self.volume_types_v2_client = VolumeTypesV2ClientJSON(
-            self.auth_provider)
+            self.auth_provider, **params)
 
     def _set_object_storage_clients(self):
         params = {

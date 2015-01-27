@@ -195,7 +195,14 @@ class OSClient(object):
             CONF.identity.region,
             endpoint_type=CONF.telemetry.endpoint_type,
             **default_params_with_timeout_values)
-        self.volumes = volumes_client.VolumesClientJSON(_auth)
+        self.volumes = volumes_client.VolumesClientJSON(
+            _auth,
+            CONF.volume.catalog_type,
+            CONF.volume.region or CONF.identity.region,
+            endpoint_type=CONF.volume.endpoint_type,
+            build_interval=CONF.volume.build_interval,
+            build_timeout=CONF.volume.build_timeout,
+            **default_params)
         self.networks = network_client.NetworkClientJSON(
             _auth,
             CONF.network.catalog_type,

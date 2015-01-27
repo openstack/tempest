@@ -18,10 +18,9 @@ import urllib
 
 from tempest.common import service_client
 from tempest.openstack.common import jsonutils
-from tempest.services.volume.json import base
 
 
-class BaseVolumeQuotasClientJSON(base.VolumeClient):
+class BaseVolumeQuotasClientJSON(service_client.ServiceClient):
     """
     Client class to send CRUD Volume Quotas API requests to a Cinder endpoint
     """

@@ -20,7 +20,4 @@ class BackupsClientV2JSON(backups_client.BaseBackupsClientJSON):
     """
     Client class to send CRUD Volume V2 API requests to a Cinder endpoint
     """
-
-    def __init__(self, auth_provider):
-        super(BackupsClientV2JSON, self).__init__(auth_provider)
-        self.api_version = "v2"
+    api_version = "v2"
