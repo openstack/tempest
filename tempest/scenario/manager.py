@@ -789,7 +789,8 @@ class NetworkScenarioTest(ScenarioTest):
                                                      tenant_id=tenant_id)
 
         # Add rules to the security group
-        rules = self._create_loginable_secgroup_rule(secgroup=secgroup)
+        rules = self._create_loginable_secgroup_rule(client=client,
+                                                     secgroup=secgroup)
         for rule in rules:
             self.assertEqual(tenant_id, rule.tenant_id)
             self.assertEqual(secgroup.id, rule.security_group_id)
