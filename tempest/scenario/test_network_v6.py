@@ -60,7 +60,7 @@ class TestGettingAddress(manager.NetworkScenarioTest):
         self.sec_grp = self._create_security_group(tenant_id=self.tenant_id)
         self.srv_kwargs = {
             'key_name': self.keypair['name'],
-            'security_groups': [self.sec_grp]}
+            'security_groups': [{'name': self.sec_grp['name']}]}
 
     def prepare_network(self, address6_mode):
         """Creates network with
