@@ -109,9 +109,9 @@ class Accounts(cred_provider.CredentialProvider):
 
     def get_hash(self, creds):
         for _hash in self.hash_dict:
-            # Comparing on the attributes that are expected in the YAML
+            # Comparing on the attributes that were read from the YAML
             if all([getattr(creds, k) == self.hash_dict[_hash][k] for k in
-                    creds.CONF_ATTRIBUTES]):
+                    creds.get_init_attributes()]):
                 return _hash
         raise AttributeError('Invalid credentials %s' % creds)
 
@@ -191,7 +191,8 @@ class NotLockingAccounts(Accounts):
             creds = self.get_creds(0)
             primary_credential = auth.get_credentials(**creds)
         else:
-            primary_credential = auth.get_default_credentials('user')
+            primary_credential = cred_provider.get_configured_credentials(
+                'user')
         self.isolated_creds['primary'] = primary_credential
         return primary_credential
 
@@ -202,7 +203,8 @@ class NotLockingAccounts(Accounts):
             creds = self.get_creds(1)
             alt_credential = auth.get_credentials(**creds)
         else:
-            alt_credential = auth.get_default_credentials('alt_user')
+            alt_credential = cred_provider.get_configured_credentials(
+                'alt_user')
         self.isolated_creds['alt'] = alt_credential
         return alt_credential
 
@@ -210,4 +212,5 @@ class NotLockingAccounts(Accounts):
         self.isolated_creds = {}
 
     def get_admin_creds(self):
-        return auth.get_default_credentials("identity_admin", fill_in=False)
+        return cred_provider.get_configured_credentials(
+            "identity_admin", fill_in=False)

@@ -21,8 +21,8 @@ import unicodedata
 import testscenarios
 import testtools
 
-from tempest import auth
 from tempest import clients
+from tempest.common import cred_provider
 from tempest.common.utils import misc
 from tempest import config
 from tempest import exceptions
@@ -101,7 +101,7 @@ class InputScenarioUtils(object):
 
     def __init__(self):
         os = clients.Manager(
-            auth.get_default_credentials('user', fill_in=False))
+            cred_provider.get_configured_credentials('user', fill_in=False))
         self.images_client = os.images_client
         self.flavors_client = os.flavors_client
         self.image_pattern = CONF.input_scenario.image_regex

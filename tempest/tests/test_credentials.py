@@ -37,6 +37,18 @@ class CredentialsTests(base.TestCase):
             attributes = self.attributes
         return self.credentials_class(**attributes)
 
+    def _check(self, credentials, credentials_class, filled):
+        # Check the right version of credentials has been returned
+        self.assertIsInstance(credentials, credentials_class)
+        # Check the id attributes are filled in
+        attributes = [x for x in credentials.ATTRIBUTES if (
+            '_id' in x and x != 'domain_id')]
+        for attr in attributes:
+            if filled:
+                self.assertIsNotNone(getattr(credentials, attr))
+            else:
+                self.assertIsNone(getattr(credentials, attr))
+
     def setUp(self):
         super(CredentialsTests, self).setUp()
         self.useFixture(fake_config.ConfigFixture())
@@ -50,18 +62,6 @@ class CredentialsTests(base.TestCase):
         self.assertRaises(exceptions.InvalidCredentials,
                           self._get_credentials,
                           attributes=dict(invalid='fake'))
-
-    def test_default(self):
-        self.useFixture(fixtures.LockFixture('auth_version'))
-        for ctype in self.credentials_class.TYPES:
-            self.assertRaises(NotImplementedError,
-                              self.credentials_class.get_default,
-                              credentials_type=ctype)
-
-    def test_invalid_default(self):
-        self.assertRaises(exceptions.InvalidCredentials,
-                          auth.Credentials.get_default,
-                          credentials_type='invalid_type')
 
     def test_is_valid(self):
         creds = self._get_credentials()
@@ -84,33 +84,9 @@ class KeystoneV2CredentialsTests(CredentialsTests):
         self.stubs.Set(self.tokenclient_class, 'raw_request',
                        self.identity_response)
 
-    def _verify_credentials(self, credentials_class, filled=True,
-                            creds_dict=None):
-
-        def _check(credentials):
-            # Check the right version of credentials has been returned
-            self.assertIsInstance(credentials, credentials_class)
-            # Check the id attributes are filled in
-            attributes = [x for x in credentials.ATTRIBUTES if (
-                '_id' in x and x != 'domain_id')]
-            for attr in attributes:
-                if filled:
-                    self.assertIsNotNone(getattr(credentials, attr))
-                else:
-                    self.assertIsNone(getattr(credentials, attr))
-
-        if creds_dict is None:
-            for ctype in auth.Credentials.TYPES:
-                creds = auth.get_default_credentials(credential_type=ctype,
-                                                     fill_in=filled)
-                _check(creds)
-        else:
-            creds = auth.get_credentials(fill_in=filled, **creds_dict)
-            _check(creds)
-
-    def test_get_default_credentials(self):
-        self.useFixture(fixtures.LockFixture('auth_version'))
-        self._verify_credentials(credentials_class=self.credentials_class)
+    def _verify_credentials(self, credentials_class, creds_dict, filled=True):
+        creds = auth.get_credentials(fill_in=filled, **creds_dict)
+        self._check(creds, credentials_class, filled)
 
     def test_get_credentials(self):
         self.useFixture(fixtures.LockFixture('auth_version'))
@@ -120,8 +96,8 @@ class KeystoneV2CredentialsTests(CredentialsTests):
     def test_get_credentials_not_filled(self):
         self.useFixture(fixtures.LockFixture('auth_version'))
         self._verify_credentials(credentials_class=self.credentials_class,
-                                 filled=False,
-                                 creds_dict=self.attributes)
+                                 creds_dict=self.attributes,
+                                 filled=False)
 
     def test_is_valid(self):
         creds = self._get_credentials()
@@ -143,15 +119,6 @@ class KeystoneV2CredentialsTests(CredentialsTests):
         # a tenant_name. So skip that check. See tempest.auth for the valid
         # credential requirements
         self._test_is_not_valid('tenant_name')
-
-    def test_default(self):
-        self.useFixture(fixtures.LockFixture('auth_version'))
-        for ctype in self.credentials_class.TYPES:
-            creds = self.credentials_class.get_default(credentials_type=ctype)
-            for attr in self.attributes.keys():
-                # Default configuration values related to credentials
-                # are defined as fake_* in fake_config.py
-                self.assertEqual(getattr(creds, attr), 'fake_' + attr)
 
     def test_reset_all_attributes(self):
         creds = self._get_credentials()
@@ -198,19 +165,6 @@ class KeystoneV3CredentialsTests(KeystoneV2CredentialsTests):
         for prefix in ['', 'alt_', 'admin_']:
             cfg.CONF.set_default(prefix + 'domain_name', 'fake_domain_name',
                                  group='identity')
-
-    def test_default(self):
-        self.useFixture(fixtures.LockFixture('auth_version'))
-        for ctype in self.credentials_class.TYPES:
-            creds = self.credentials_class.get_default(credentials_type=ctype)
-            for attr in self.attributes.keys():
-                if attr == 'project_name':
-                    config_value = 'fake_tenant_name'
-                elif attr == 'user_domain_name':
-                    config_value = 'fake_domain_name'
-                else:
-                    config_value = 'fake_' + attr
-                self.assertEqual(getattr(creds, attr), config_value)
 
     def test_is_not_valid(self):
         # NOTE(mtreinish) For a Keystone V3 credential object a project name

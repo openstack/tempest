@@ -440,31 +440,23 @@ class KeystoneV3AuthProvider(KeystoneAuthProvider):
             datetime.datetime.utcnow()
 
 
-def get_default_credentials(credential_type, fill_in=True):
-    """
-    Returns configured credentials of the specified type
-    based on the configured auth_version
-    """
-    return get_credentials(fill_in=fill_in, credential_type=credential_type)
-
-
-def get_credentials(credential_type=None, fill_in=True, **kwargs):
+def get_credentials(fill_in=True, **kwargs):
     """
     Builds a credentials object based on the configured auth_version
 
-    :param credential_type (string): requests credentials from tempest
-           configuration file. Valid values are defined in
-           Credentials.TYPE.
-    :param kwargs (dict): take into account only if credential_type is
-           not specified or None. Dict of credential key/value pairs
+    :param fill_in (boolean): obtain a token and fill in all credential
+           details provided by the identity service. When fill_in is not
+           specified, credentials are not validated. Validation can be invoked
+           by invoking ``is_valid()``
+    :param kwargs (dict): Dict of credential key/value pairs
 
     Examples:
 
         Returns credentials from the provided parameters:
         >>> get_credentials(username='foo', password='bar')
 
-        Returns credentials from tempest configuration:
-        >>> get_credentials(credential_type='user')
+        Returns credentials including IDs:
+        >>> get_credentials(username='foo', password='bar', fill_in=True)
     """
     if CONF.identity.auth_version == 'v2':
         credential_class = KeystoneV2Credentials
@@ -474,10 +466,7 @@ def get_credentials(credential_type=None, fill_in=True, **kwargs):
         auth_provider_class = KeystoneV3AuthProvider
     else:
         raise exceptions.InvalidConfiguration('Unsupported auth version')
-    if credential_type is not None:
-        creds = credential_class.get_default(credential_type)
-    else:
-        creds = credential_class(**kwargs)
+    creds = credential_class(**kwargs)
     # Fill in the credentials fields that were not specified
     if fill_in:
         auth_provider = auth_provider_class(creds)
@@ -490,18 +479,9 @@ class Credentials(object):
     Set of credentials for accessing OpenStack services
 
     ATTRIBUTES: list of valid class attributes representing credentials.
-
-    TYPES: types of credentials available in the configuration file.
-           For each key there's a tuple (section, prefix) to match the
-           configuration options.
     """
 
     ATTRIBUTES = []
-    TYPES = {
-        'identity_admin': ('identity', 'admin'),
-        'user': ('identity', None),
-        'alt_user': ('identity', 'alt')
-    }
 
     def __init__(self, **kwargs):
         """
@@ -554,21 +534,8 @@ class Credentials(object):
         except AttributeError:
             return default
 
-    @classmethod
-    def get_default(cls, credentials_type):
-        if credentials_type not in cls.TYPES:
-            raise exceptions.InvalidCredentials()
-        creds = cls._get_default(credentials_type)
-        if not creds.is_valid():
-            msg = ("The %s credentials are incorrectly set in the config file."
-                   " Double check that all required values are assigned" %
-                   credentials_type)
-            raise exceptions.InvalidConfiguration(msg)
-        return creds
-
-    @classmethod
-    def _get_default(cls, credentials_type):
-        raise NotImplementedError
+    def get_init_attributes(self):
+        return self._initial.keys()
 
     def is_valid(self):
         raise NotImplementedError
@@ -584,21 +551,8 @@ class Credentials(object):
 
 class KeystoneV2Credentials(Credentials):
 
-    CONF_ATTRIBUTES = ['username', 'password', 'tenant_name']
-    ATTRIBUTES = ['user_id', 'tenant_id']
-    ATTRIBUTES.extend(CONF_ATTRIBUTES)
-
-    @classmethod
-    def _get_default(cls, credentials_type='user'):
-        params = {}
-        section, prefix = cls.TYPES[credentials_type]
-        for attr in cls.CONF_ATTRIBUTES:
-            _section = getattr(CONF, section)
-            if prefix is None:
-                params[attr] = getattr(_section, attr)
-            else:
-                params[attr] = getattr(_section, prefix + "_" + attr)
-        return cls(**params)
+    ATTRIBUTES = ['username', 'password', 'tenant_name', 'user_id',
+                  'tenant_id']
 
     def is_valid(self):
         """
@@ -608,16 +562,15 @@ class KeystoneV2Credentials(Credentials):
         return None not in (self.username, self.password)
 
 
-class KeystoneV3Credentials(KeystoneV2Credentials):
+class KeystoneV3Credentials(Credentials):
     """
     Credentials suitable for the Keystone Identity V3 API
     """
 
-    CONF_ATTRIBUTES = ['domain_name', 'password', 'tenant_name', 'username']
-    ATTRIBUTES = ['project_domain_id', 'project_domain_name', 'project_id',
+    ATTRIBUTES = ['domain_name', 'password', 'tenant_name', 'username',
+                  'project_domain_id', 'project_domain_name', 'project_id',
                   'project_name', 'tenant_id', 'tenant_name', 'user_domain_id',
                   'user_domain_name', 'user_id']
-    ATTRIBUTES.extend(CONF_ATTRIBUTES)
 
     def __init__(self, **kwargs):
         """
