@@ -16,11 +16,10 @@
 import time
 
 from oslo_log import log as logging
-from oslo_utils import excutils
 from tempest_lib.common.utils import data_utils
 from tempest_lib import exceptions as lib_exc
 
-from tempest.common import fixed_network
+from tempest.common import compute
 from tempest import config
 from tempest import exceptions
 import tempest.test
@@ -192,41 +191,21 @@ class BaseComputeTest(tempest.test.BaseTestCase):
                               server_group_id)
 
     @classmethod
-    def create_test_server(cls, **kwargs):
-        """Wrapper utility that returns a test server."""
-        name = data_utils.rand_name(cls.__name__ + "-instance")
-        if 'name' in kwargs:
-            name = kwargs.pop('name')
-        flavor = kwargs.get('flavor', cls.flavor_ref)
-        image_id = kwargs.get('image_id', cls.image_ref)
+    def create_test_server(cls, validatable=False, **kwargs):
+        """Wrapper utility that returns a test server.
 
-        kwargs = fixed_network.set_networks_kwarg(
-            cls.get_tenant_network(), kwargs) or {}
-        body = cls.servers_client.create_server(
-            name, image_id, flavor, **kwargs)
-
-        # handle the case of multiple servers
-        servers = [body]
-        if 'min_count' in kwargs or 'max_count' in kwargs:
-            # Get servers created which name match with name param.
-            b = cls.servers_client.list_servers()
-            servers = [s for s in b['servers'] if s['name'].startswith(name)]
-
-        if 'wait_until' in kwargs:
-            for server in servers:
-                try:
-                    cls.servers_client.wait_for_server_status(
-                        server['id'], kwargs['wait_until'])
-                except Exception:
-                    with excutils.save_and_reraise_exception():
-                        if ('preserve_server_on_error' not in kwargs
-                            or kwargs['preserve_server_on_error'] is False):
-                            for server in servers:
-                                try:
-                                    cls.servers_client.delete_server(
-                                        server['id'])
-                                except Exception:
-                                    pass
+        This wrapper utility calls the common create test server and
+        returns a test server. The purpose of this wrapper is to minimize
+        the impact on the code of the tests already using this
+        function.
+        """
+        tenant_network = cls.get_tenant_network()
+        body, servers = compute.create_test_server(
+            cls.os,
+            validatable,
+            validation_resources=cls.validation_resources,
+            tenant_network=tenant_network,
+            **kwargs)
 
         cls.servers.extend(servers)
 
