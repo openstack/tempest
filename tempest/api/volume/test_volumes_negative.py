@@ -25,9 +25,13 @@ from tempest import test
 class VolumesV2NegativeTest(base.BaseVolumeTest):
 
     @classmethod
+    def setup_clients(cls):
+        super(VolumesV2NegativeTest, cls).setup_clients()
+        cls.client = cls.volumes_client
+
+    @classmethod
     def resource_setup(cls):
         super(VolumesV2NegativeTest, cls).resource_setup()
-        cls.client = cls.volumes_client
 
         cls.name_field = cls.special_fields['name_field']
 

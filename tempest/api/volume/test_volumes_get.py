@@ -26,9 +26,13 @@ CONF = config.CONF
 class VolumesV2GetTest(base.BaseVolumeTest):
 
     @classmethod
+    def setup_clients(cls):
+        super(VolumesV2GetTest, cls).setup_clients()
+        cls.client = cls.volumes_client
+
+    @classmethod
     def resource_setup(cls):
         super(VolumesV2GetTest, cls).resource_setup()
-        cls.client = cls.volumes_client
 
         cls.name_field = cls.special_fields['name_field']
         cls.descrip_field = cls.special_fields['descrip_field']

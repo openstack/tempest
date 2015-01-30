@@ -21,9 +21,13 @@ from tempest import test
 class SnapshotsActionsV2Test(base.BaseVolumeAdminTest):
 
     @classmethod
+    def setup_clients(cls):
+        super(SnapshotsActionsV2Test, cls).setup_clients()
+        cls.client = cls.snapshots_client
+
+    @classmethod
     def resource_setup(cls):
         super(SnapshotsActionsV2Test, cls).resource_setup()
-        cls.client = cls.snapshots_client
 
         # Create a test shared volume for tests
         vol_name = data_utils.rand_name(cls.__name__ + '-Volume-')
