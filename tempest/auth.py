@@ -22,13 +22,11 @@ import urlparse
 
 import six
 
-from tempest import config
 from tempest.openstack.common import log as logging
 from tempest.services.identity.json import token_client as json_id
 from tempest.services.identity.v3.json import token_client as json_v3id
 
 
-CONF = config.CONF
 LOG = logging.getLogger(__name__)
 
 
@@ -563,16 +561,6 @@ class KeystoneV3Credentials(Credentials):
                   'project_domain_id', 'project_domain_name', 'project_id',
                   'project_name', 'tenant_id', 'tenant_name', 'user_domain_id',
                   'user_domain_name', 'user_id']
-
-    def __init__(self, **kwargs):
-        """
-        If domain is not specified, load the one configured for the
-        identity manager.
-        """
-        domain_fields = set(x for x in self.ATTRIBUTES if 'domain' in x)
-        if not domain_fields.intersection(kwargs.keys()):
-            kwargs['user_domain_name'] = CONF.identity.admin_domain_name
-        super(KeystoneV3Credentials, self).__init__(**kwargs)
 
     def __setattr__(self, key, value):
         parent = super(KeystoneV3Credentials, self)

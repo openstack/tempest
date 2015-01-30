@@ -70,6 +70,12 @@ def get_configured_credentials(credential_type, fill_in=True,
 # is none is specified
 def get_credentials(fill_in=True, identity_version=None, **kwargs):
     identity_version = identity_version or CONF.identity.auth_version
+    # In case of "v3" add the domain from config if not specified
+    if identity_version == 'v3':
+        domain_fields = set(x for x in auth.KeystoneV3Credentials.ATTRIBUTES
+                            if 'domain' in x)
+        if not domain_fields.intersection(kwargs.keys()):
+            kwargs['user_domain_name'] = CONF.identity.admin_domain_name
     return auth.get_credentials(fill_in=fill_in,
                                 identity_version=identity_version,
                                 **kwargs)
