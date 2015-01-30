@@ -56,7 +56,7 @@ def get_configured_credentials(credential_type, fill_in=True,
             params[attr] = getattr(_section, prefix + "_" + attr)
     # Build and validate credentials. We are reading configured credentials,
     # so validate them even if fill_in is False
-    credentials = auth.get_credentials(fill_in=fill_in, **params)
+    credentials = get_credentials(fill_in=fill_in, **params)
     if not fill_in:
         if not credentials.is_valid():
             msg = ("The %s credentials are incorrectly set in the config file."
@@ -64,6 +64,15 @@ def get_configured_credentials(credential_type, fill_in=True,
                    credential_type)
             raise exceptions.InvalidConfiguration(msg)
     return credentials
+
+
+# Wrapper around auth.get_credentials to use the configured identity version
+# is none is specified
+def get_credentials(fill_in=True, identity_version=None, **kwargs):
+    identity_version = identity_version or CONF.identity.auth_version
+    return auth.get_credentials(fill_in=fill_in,
+                                identity_version=identity_version,
+                                **kwargs)
 
 
 @six.add_metaclass(abc.ABCMeta)

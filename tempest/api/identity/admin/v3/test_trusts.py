@@ -14,8 +14,8 @@ import datetime
 import re
 
 from tempest.api.identity import base
-from tempest import auth
 from tempest import clients
+from tempest.common import cred_provider
 from tempest.common.utils import data_utils
 from tempest import config
 from tempest import exceptions
@@ -87,7 +87,7 @@ class BaseTrustsV3Test(base.BaseIdentityV3AdminTest):
         self.assertIsNotNone(self.trustee_user_id)
 
         # Initialize a new client with the trustor credentials
-        creds = auth.get_credentials(
+        creds = cred_provider.get_credentials(
             username=self.trustor_username,
             password=self.trustor_password,
             tenant_name=self.trustor_project_name)
