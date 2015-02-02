@@ -37,15 +37,6 @@ class VolumesV2GetTest(base.BaseVolumeTest):
         self.client.delete_volume(volume_id)
         self.client.wait_for_resource_deletion(volume_id)
 
-    def _is_true(self, val):
-        # NOTE(jdg): Temporary conversion method to get cinder patch
-        # merged.  Then we'll make this strict again and
-        # specifically check "true" or "false"
-        if val in ['true', 'True', True]:
-            return True
-        else:
-            return False
-
     def _volume_create_get_update_delete(self, **kwargs):
         # Create a volume, Get it's details and Delete the volume
         volume = {}
@@ -79,13 +70,10 @@ class VolumesV2GetTest(base.BaseVolumeTest):
                         'The fetched Volume metadata misses data '
                         'from the created Volume')
 
-        # NOTE(jdg): Revert back to strict true/false checking
-        # after fix for bug #1227837 merges
-        boot_flag = self._is_true(fetched_volume['bootable'])
         if 'imageRef' in kwargs:
-            self.assertEqual(boot_flag, True)
+            self.assertEqual('true', fetched_volume['bootable'])
         if 'imageRef' not in kwargs:
-            self.assertEqual(boot_flag, False)
+            self.assertEqual('false', fetched_volume['bootable'])
 
         # Update Volume
         # Test volume update when display_name is same with original value
@@ -125,13 +113,10 @@ class VolumesV2GetTest(base.BaseVolumeTest):
                   self.descrip_field: volume[self.descrip_field]}
         self.client.update_volume(new_volume['id'], **params)
 
-        # NOTE(jdg): Revert back to strict true/false checking
-        # after fix for bug #1227837 merges
-        boot_flag = self._is_true(updated_volume['bootable'])
         if 'imageRef' in kwargs:
-            self.assertEqual(boot_flag, True)
+            self.assertEqual('true', updated_volume['bootable'])
         if 'imageRef' not in kwargs:
-            self.assertEqual(boot_flag, False)
+            self.assertEqual('false', updated_volume['bootable'])
 
     @test.attr(type='smoke')
     def test_volume_create_get_update_delete(self):
