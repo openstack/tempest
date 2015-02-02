@@ -65,7 +65,7 @@ class AuthorizationTestJSON(base.BaseV2ComputeTest):
         image_file = StringIO.StringIO(('*' * 1024))
         body = cls.glance_client.update_image(image_id, data=image_file)
         cls.glance_client.wait_for_image_status(image_id, 'active')
-        resp, cls.image = cls.images_client.get_image(image_id)
+        cls.image = cls.images_client.get_image(image_id)
 
         cls.keypairname = data_utils.rand_name('keypair')
         resp, keypair = \

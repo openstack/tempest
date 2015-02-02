@@ -52,13 +52,13 @@ class CfnInitScenarioTest(manager.OrchestrationScenarioTest):
 
         # create the stack
         self.template = self._load_template(__file__, self.template_name)
-        _, stack = self.client.create_stack(
+        stack = self.client.create_stack(
             name=self.stack_name,
             template=self.template,
             parameters=self.parameters)
         stack = stack['stack']
 
-        _, self.stack = self.client.get_stack(stack['id'])
+        self.stack = self.client.get_stack(stack['id'])
         self.stack_identifier = '%s/%s' % (self.stack_name, self.stack['id'])
         self.addCleanup(self.delete_wrapper,
                         self.orchestration_client.delete_stack,
@@ -77,7 +77,7 @@ class CfnInitScenarioTest(manager.OrchestrationScenarioTest):
         self.client.wait_for_resource_status(
             sid, 'SmokeServer', 'CREATE_COMPLETE')
 
-        _, server_resource = self.client.get_resource(sid, 'SmokeServer')
+        server_resource = self.client.get_resource(sid, 'SmokeServer')
         server_id = server_resource['physical_resource_id']
         _, server = self.servers_client.get_server(server_id)
         server_ip =\
@@ -104,7 +104,7 @@ class CfnInitScenarioTest(manager.OrchestrationScenarioTest):
 
         self.client.wait_for_stack_status(sid, 'CREATE_COMPLETE')
 
-        _, stack = self.client.get_stack(sid)
+        stack = self.client.get_stack(sid)
 
         # This is an assert of great significance, as it means the following
         # has happened:

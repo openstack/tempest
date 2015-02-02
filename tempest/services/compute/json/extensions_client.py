@@ -16,10 +16,10 @@
 import json
 
 from tempest.api_schema.response.compute.v2 import extensions as schema
-from tempest.services.compute.json import base
+from tempest.common import service_client
 
 
-class ExtensionsClientJSON(base.ComputeClient):
+class ExtensionsClientJSON(service_client.ServiceClient):
 
     def list_extensions(self):
         url = 'extensions'

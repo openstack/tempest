@@ -15,10 +15,10 @@
 
 import json
 
-from tempest.services.compute.json import base
+from tempest.common import service_client
 
 
-class NetworksClientJSON(base.ComputeClient):
+class NetworksClientJSON(service_client.ServiceClient):
 
     def list_networks(self):
         resp, body = self.get("os-networks")

@@ -18,10 +18,9 @@ import urllib
 from tempest.api_schema.response.compute import hosts as schema
 from tempest.api_schema.response.compute.v2 import hosts as v2_schema
 from tempest.common import service_client
-from tempest.services.compute.json import base
 
 
-class HostsClientJSON(base.ComputeClient):
+class HostsClientJSON(service_client.ServiceClient):
 
     def list_hosts(self, params=None):
         """Lists all hosts."""

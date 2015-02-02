@@ -72,17 +72,16 @@ class ImagesOneServerTestJSON(base.BaseV2ComputeTest):
         # Create a new image
         name = data_utils.rand_name('image')
         meta = {'image_type': 'test'}
-        resp, body = self.client.create_image(self.server_id, name, meta)
-        self.assertEqual(202, resp.status)
-        image_id = data_utils.parse_image_id(resp['location'])
+        body = self.client.create_image(self.server_id, name, meta)
+        image_id = data_utils.parse_image_id(body.response['location'])
         self.client.wait_for_image_status(image_id, 'ACTIVE')
 
         # Verify the image was created correctly
-        resp, image = self.client.get_image(image_id)
+        image = self.client.get_image(image_id)
         self.assertEqual(name, image['name'])
         self.assertEqual('test', image['metadata']['image_type'])
 
-        resp, original_image = self.client.get_image(self.image_ref)
+        original_image = self.client.get_image(self.image_ref)
 
         # Verify minRAM is the same as the original image
         self.assertEqual(image['minRam'], original_image['minRam'])
@@ -93,8 +92,7 @@ class ImagesOneServerTestJSON(base.BaseV2ComputeTest):
                       (str(original_image['minDisk']), str(flavor_disk_size)))
 
         # Verify the image was deleted correctly
-        resp, body = self.client.delete_image(image_id)
-        self.assertEqual('204', resp['status'])
+        self.client.delete_image(image_id)
         self.client.wait_for_resource_deletion(image_id)
 
     @test.attr(type=['gate'])
@@ -106,7 +104,6 @@ class ImagesOneServerTestJSON(base.BaseV2ComputeTest):
         # #1370954 in glance which will 500 if mysql is used as the
         # backend and it attempts to store a 4 byte utf-8 character
         utf8_name = data_utils.rand_name('\xe2\x82\xa1')
-        resp, body = self.client.create_image(self.server_id, utf8_name)
-        image_id = data_utils.parse_image_id(resp['location'])
+        body = self.client.create_image(self.server_id, utf8_name)
+        image_id = data_utils.parse_image_id(body.response['location'])
         self.addCleanup(self.client.delete_image, image_id)
-        self.assertEqual('202', resp['status'])

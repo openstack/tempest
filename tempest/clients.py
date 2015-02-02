@@ -13,6 +13,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import copy
+
 from tempest import auth
 from tempest.common import negative_rest_client
 from tempest import config
@@ -133,6 +135,21 @@ class Manager(manager.Manager):
     Top level manager for OpenStack tempest clients
     """
 
+    default_params = {
+        'disable_ssl_certificate_validation':
+            CONF.identity.disable_ssl_certificate_validation,
+        'ca_certs': CONF.identity.ca_certificates_file,
+        'trace_requests': CONF.debug.trace_requests
+    }
+
+    # NOTE: Tempest uses timeout values of compute API if project specific
+    # timeout values don't exist.
+    default_params_with_timeout_values = {
+        'build_interval': CONF.compute.build_interval,
+        'build_timeout': CONF.compute.build_timeout
+    }
+    default_params_with_timeout_values.update(default_params)
+
     def __init__(self, credentials=None, interface='json', service=None):
         # Set interface and client type first
         self.interface = interface
@@ -144,11 +161,24 @@ class Manager(manager.Manager):
         self._set_volume_clients()
 
         self.baremetal_client = BaremetalClientJSON(self.auth_provider)
-        self.network_client = NetworkClientJSON(self.auth_provider)
+        self.network_client = NetworkClientJSON(
+            self.auth_provider,
+            CONF.network.catalog_type,
+            CONF.network.region or CONF.identity.region,
+            endpoint_type=CONF.network.endpoint_type,
+            build_interval=CONF.network.build_interval,
+            build_timeout=CONF.network.build_timeout,
+            **self.default_params)
         self.database_flavors_client = DatabaseFlavorsClientJSON(
-            self.auth_provider)
+            self.auth_provider,
+            CONF.database.catalog_type,
+            CONF.identity.region,
+            **self.default_params_with_timeout_values)
         self.database_versions_client = DatabaseVersionsClientJSON(
-            self.auth_provider)
+            self.auth_provider,
+            CONF.database.catalog_type,
+            CONF.identity.region,
+            **self.default_params_with_timeout_values)
         self.messaging_client = MessagingClientJSON(self.auth_provider)
         if CONF.service_available.ceilometer:
             self.telemetry_client = TelemetryClientJSON(
@@ -170,43 +200,77 @@ class Manager(manager.Manager):
         self.container_client = ContainerClient(self.auth_provider)
         self.object_client = ObjectClient(self.auth_provider)
         self.orchestration_client = OrchestrationClient(
-            self.auth_provider)
+            self.auth_provider,
+            CONF.orchestration.catalog_type,
+            CONF.orchestration.region or CONF.identity.region,
+            endpoint_type=CONF.orchestration.endpoint_type,
+            build_interval=CONF.orchestration.build_interval,
+            build_timeout=CONF.orchestration.build_timeout,
+            **self.default_params)
+
         self.ec2api_client = botoclients.APIClientEC2(*ec2_client_args)
         self.s3_client = botoclients.ObjectClientS3(*ec2_client_args)
         self.data_processing_client = DataProcessingClient(
             self.auth_provider)
 
     def _set_compute_clients(self):
-        self.agents_client = AgentsClientJSON(self.auth_provider)
-        self.networks_client = NetworksClientJSON(self.auth_provider)
-        self.migrations_client = MigrationsClientJSON(self.auth_provider)
+        params = {
+            'service': CONF.compute.catalog_type,
+            'region': CONF.compute.region or CONF.identity.region,
+            'endpoint_type': CONF.compute.endpoint_type,
+            'build_interval': CONF.compute.build_interval,
+            'build_timeout': CONF.compute.build_timeout
+        }
+        params.update(self.default_params)
+
+        self.agents_client = AgentsClientJSON(self.auth_provider, **params)
+        self.networks_client = NetworksClientJSON(self.auth_provider, **params)
+        self.migrations_client = MigrationsClientJSON(self.auth_provider,
+                                                      **params)
         self.security_group_default_rules_client = (
-            SecurityGroupDefaultRulesClientJSON(self.auth_provider))
-        self.certificates_client = CertificatesClientJSON(self.auth_provider)
-        self.servers_client = ServersClientJSON(self.auth_provider)
-        self.limits_client = LimitsClientJSON(self.auth_provider)
-        self.images_client = ImagesClientJSON(self.auth_provider)
-        self.keypairs_client = KeyPairsClientJSON(self.auth_provider)
-        self.quotas_client = QuotasClientJSON(self.auth_provider)
-        self.quota_classes_client = QuotaClassesClientJSON(self.auth_provider)
-        self.flavors_client = FlavorsClientJSON(self.auth_provider)
-        self.extensions_client = ExtensionsClientJSON(self.auth_provider)
-        self.volumes_extensions_client = VolumesExtensionsClientJSON(
-            self.auth_provider)
-        self.floating_ips_client = FloatingIPsClientJSON(self.auth_provider)
+            SecurityGroupDefaultRulesClientJSON(self.auth_provider, **params))
+        self.certificates_client = CertificatesClientJSON(self.auth_provider,
+                                                          **params)
+        self.servers_client = ServersClientJSON(self.auth_provider, **params)
+        self.limits_client = LimitsClientJSON(self.auth_provider, **params)
+        self.images_client = ImagesClientJSON(self.auth_provider, **params)
+        self.keypairs_client = KeyPairsClientJSON(self.auth_provider, **params)
+        self.quotas_client = QuotasClientJSON(self.auth_provider, **params)
+        self.quota_classes_client = QuotaClassesClientJSON(self.auth_provider,
+                                                           **params)
+        self.flavors_client = FlavorsClientJSON(self.auth_provider, **params)
+        self.extensions_client = ExtensionsClientJSON(self.auth_provider,
+                                                      **params)
+        self.floating_ips_client = FloatingIPsClientJSON(self.auth_provider,
+                                                         **params)
         self.security_groups_client = SecurityGroupsClientJSON(
-            self.auth_provider)
-        self.interfaces_client = InterfacesClientJSON(self.auth_provider)
-        self.fixed_ips_client = FixedIPsClientJSON(self.auth_provider)
+            self.auth_provider, **params)
+        self.interfaces_client = InterfacesClientJSON(self.auth_provider,
+                                                      **params)
+        self.fixed_ips_client = FixedIPsClientJSON(self.auth_provider,
+                                                   **params)
         self.availability_zone_client = AvailabilityZoneClientJSON(
-            self.auth_provider)
-        self.aggregates_client = AggregatesClientJSON(self.auth_provider)
-        self.services_client = ServicesClientJSON(self.auth_provider)
-        self.tenant_usages_client = TenantUsagesClientJSON(self.auth_provider)
-        self.hosts_client = HostsClientJSON(self.auth_provider)
-        self.hypervisor_client = HypervisorClientJSON(self.auth_provider)
+            self.auth_provider, **params)
+        self.aggregates_client = AggregatesClientJSON(self.auth_provider,
+                                                      **params)
+        self.services_client = ServicesClientJSON(self.auth_provider, **params)
+        self.tenant_usages_client = TenantUsagesClientJSON(self.auth_provider,
+                                                           **params)
+        self.hosts_client = HostsClientJSON(self.auth_provider, **params)
+        self.hypervisor_client = HypervisorClientJSON(self.auth_provider,
+                                                      **params)
         self.instance_usages_audit_log_client = \
-            InstanceUsagesAuditLogClientJSON(self.auth_provider)
+            InstanceUsagesAuditLogClientJSON(self.auth_provider, **params)
+
+        # NOTE: The following client needs special timeout values because
+        # the API is a proxy for the other component.
+        params_volume = copy.deepcopy(params)
+        params_volume.update({
+            'build_interval': CONF.volume.build_interval,
+            'build_timeout': CONF.volume.build_timeout
+        })
+        self.volumes_extensions_client = VolumesExtensionsClientJSON(
+            self.auth_provider, **params_volume)
 
     def _set_identity_clients(self):
         self.identity_client = IdentityClientJSON(self.auth_provider)

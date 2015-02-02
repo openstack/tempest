@@ -17,10 +17,10 @@ import json
 
 from tempest.api_schema.response.compute.v2 import \
     security_group_default_rule as schema
-from tempest.services.compute.json import base
+from tempest.common import service_client
 
 
-class SecurityGroupDefaultRulesClientJSON(base.ComputeClient):
+class SecurityGroupDefaultRulesClientJSON(service_client.ServiceClient):
 
     def create_security_default_group_rule(self, ip_protocol, from_port,
                                            to_port, **kwargs):

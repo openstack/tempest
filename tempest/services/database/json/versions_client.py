@@ -16,18 +16,23 @@
 import urllib
 
 from tempest.common import service_client
-from tempest import config
-
-CONF = config.CONF
 
 
 class DatabaseVersionsClientJSON(service_client.ServiceClient):
 
-    def __init__(self, auth_provider):
+    def __init__(self, auth_provider, service, region,
+                 endpoint_type=None, build_interval=None, build_timeout=None,
+                 disable_ssl_certificate_validation=None, ca_certs=None,
+                 trace_requests=None):
+        dscv = disable_ssl_certificate_validation
         super(DatabaseVersionsClientJSON, self).__init__(
-            auth_provider,
-            CONF.database.catalog_type,
-            CONF.identity.region)
+            auth_provider, service, region,
+            endpoint_type=endpoint_type,
+            build_interval=build_interval,
+            build_timeout=build_timeout,
+            disable_ssl_certificate_validation=dscv,
+            ca_certs=ca_certs,
+            trace_requests=trace_requests)
         self.skip_path()
 
     def list_db_versions(self, params=None):

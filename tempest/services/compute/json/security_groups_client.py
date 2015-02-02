@@ -17,11 +17,11 @@ import json
 import urllib
 
 from tempest.api_schema.response.compute.v2 import security_groups as schema
+from tempest.common import service_client
 from tempest import exceptions
-from tempest.services.compute.json import base
 
 
-class SecurityGroupsClientJSON(base.ComputeClient):
+class SecurityGroupsClientJSON(service_client.ServiceClient):
 
     def list_security_groups(self, params=None):
         """List all security groups for a user."""
