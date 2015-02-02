@@ -87,6 +87,11 @@ class TestPorts(base.BaseBaremetalTest):
         self._assertExpected(self.port, port)
 
     @test.attr(type='smoke')
+    def test_show_port_by_address(self):
+        _, port = self.client.show_port_by_address(self.port['address'])
+        self._assertExpected(self.port, port['ports'][0])
+
+    @test.attr(type='smoke')
     def test_show_port_with_links(self):
         _, port = self.client.show_port(self.port['uuid'])
         self.assertIn('links', port.keys())

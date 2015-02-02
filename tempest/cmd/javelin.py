@@ -144,21 +144,46 @@ class OSClient(object):
     servers = None
 
     def __init__(self, user, pw, tenant):
+        default_params = {
+            'disable_ssl_certificate_validation':
+                CONF.identity.disable_ssl_certificate_validation,
+            'ca_certs': CONF.identity.ca_certificates_file,
+            'trace_requests': CONF.debug.trace_requests
+        }
+        compute_params = {
+            'service': CONF.compute.catalog_type,
+            'region': CONF.compute.region or CONF.identity.region,
+            'endpoint_type': CONF.compute.endpoint_type,
+            'build_interval': CONF.compute.build_interval,
+            'build_timeout': CONF.compute.build_timeout
+        }
+        compute_params.update(default_params)
+
         _creds = tempest.auth.KeystoneV2Credentials(
             username=user,
             password=pw,
             tenant_name=tenant)
         _auth = tempest.auth.KeystoneV2AuthProvider(_creds)
         self.identity = identity_client.IdentityClientJSON(_auth)
-        self.servers = servers_client.ServersClientJSON(_auth)
+        self.servers = servers_client.ServersClientJSON(_auth,
+                                                        **compute_params)
+        self.flavors = flavors_client.FlavorsClientJSON(_auth,
+                                                        **compute_params)
+        self.secgroups = security_groups_client.SecurityGroupsClientJSON(
+            _auth, **compute_params)
         self.objects = object_client.ObjectClient(_auth)
         self.containers = container_client.ContainerClient(_auth)
         self.images = image_client.ImageClientV2JSON(_auth)
-        self.flavors = flavors_client.FlavorsClientJSON(_auth)
         self.telemetry = telemetry_client.TelemetryClientJSON(_auth)
-        self.secgroups = security_groups_client.SecurityGroupsClientJSON(_auth)
         self.volumes = volumes_client.VolumesClientJSON(_auth)
-        self.networks = network_client.NetworkClientJSON(_auth)
+        self.networks = network_client.NetworkClientJSON(
+            _auth,
+            CONF.network.catalog_type,
+            CONF.network.region or CONF.identity.region,
+            endpoint_type=CONF.network.endpoint_type,
+            build_interval=CONF.network.build_interval,
+            build_timeout=CONF.network.build_timeout,
+            **default_params)
 
 
 def load_resources(fname):

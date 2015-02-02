@@ -15,7 +15,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest.common import rest_client
+from tempest_lib.common import rest_client
+
 from tempest import config
 
 CONF = config.CONF

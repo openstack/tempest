@@ -18,10 +18,9 @@ import urllib
 from tempest.api_schema.response.compute import agents as common_schema
 from tempest.api_schema.response.compute.v2 import agents as schema
 from tempest.common import service_client
-from tempest.services.compute.json import base
 
 
-class AgentsClientJSON(base.ComputeClient):
+class AgentsClientJSON(service_client.ServiceClient):
     """
     Tests Agents API
     """

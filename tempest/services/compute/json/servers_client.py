@@ -20,15 +20,15 @@ import urllib
 
 from tempest.api_schema.response.compute import servers as common_schema
 from tempest.api_schema.response.compute.v2 import servers as schema
+from tempest.common import service_client
 from tempest.common import waiters
 from tempest import config
 from tempest import exceptions
-from tempest.services.compute.json import base
 
 CONF = config.CONF
 
 
-class ServersClientJSON(base.ComputeClient):
+class ServersClientJSON(service_client.ServiceClient):
 
     def create_server(self, name, image_ref, flavor_ref, **kwargs):
         """

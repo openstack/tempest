@@ -101,12 +101,12 @@ def wait_for_image_status(client, image_id, status):
     The client should have a get_image(image_id) method to get the image.
     The client should also have build_interval and build_timeout attributes.
     """
-    resp, image = client.get_image(image_id)
+    image = client.get_image(image_id)
     start = int(time.time())
 
     while image['status'] != status:
         time.sleep(client.build_interval)
-        resp, image = client.get_image(image_id)
+        image = client.get_image(image_id)
         status_curr = image['status']
         if status_curr == 'ERROR':
             raise exceptions.AddImageException(image_id=image_id)

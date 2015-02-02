@@ -13,7 +13,10 @@
 #    under the License.
 
 from tempest.api.data_processing import base as dp_base
+from tempest import config
 from tempest import test
+
+CONF = config.CONF
 
 
 class PluginsTest(dp_base.BaseDataProcessingTest):
@@ -24,8 +27,8 @@ class PluginsTest(dp_base.BaseDataProcessingTest):
         """
         _, plugins = self.client.list_plugins()
         plugins_names = [plugin['name'] for plugin in plugins]
-        self.assertIn('vanilla', plugins_names)
-        self.assertIn('hdp', plugins_names)
+        for enabled_plugin in CONF.data_processing_feature_enabled.plugins:
+            self.assertIn(enabled_plugin, plugins_names)
 
         return plugins_names
 

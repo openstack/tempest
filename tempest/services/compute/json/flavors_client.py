@@ -21,10 +21,10 @@ from tempest.api_schema.response.compute import flavors_access as schema_access
 from tempest.api_schema.response.compute import flavors_extra_specs \
     as schema_extra_specs
 from tempest.api_schema.response.compute.v2 import flavors as v2schema
-from tempest.services.compute.json import base
+from tempest.common import service_client
 
 
-class FlavorsClientJSON(base.ComputeClient):
+class FlavorsClientJSON(service_client.ServiceClient):
 
     def list_flavors(self, params=None):
         url = 'flavors'

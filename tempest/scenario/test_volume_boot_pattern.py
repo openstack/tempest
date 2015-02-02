@@ -66,7 +66,7 @@ class TestVolumeBootPattern(manager.ScenarioTest):
 
     def _create_snapshot_from_volume(self, vol_id):
         snap_name = data_utils.rand_name('snapshot')
-        _, snap = self.snapshots_client.create_snapshot(
+        snap = self.snapshots_client.create_snapshot(
             volume_id=vol_id,
             force=True,
             display_name=snap_name)

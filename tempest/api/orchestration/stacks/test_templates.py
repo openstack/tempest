@@ -40,13 +40,13 @@ Resources:
     @test.attr(type='gate')
     def test_show_template(self):
         """Getting template used to create the stack."""
-        _, template = self.client.show_template(self.stack_identifier)
+        self.client.show_template(self.stack_identifier)
 
     @test.attr(type='gate')
     def test_validate_template(self):
         """Validating template passing it content."""
-        _, parameters = self.client.validate_template(self.template,
-                                                      self.parameters)
+        self.client.validate_template(self.template,
+                                      self.parameters)
 
 
 class TemplateAWSTestJSON(TemplateYAMLTestJSON):

@@ -18,10 +18,10 @@ import json
 from tempest.api_schema.response.compute.v2\
     import quota_classes as classes_schema
 from tempest.api_schema.response.compute.v2 import quotas as schema
-from tempest.services.compute.json import base
+from tempest.common import service_client
 
 
-class QuotasClientJSON(base.ComputeClient):
+class QuotasClientJSON(service_client.ServiceClient):
 
     def get_quota_set(self, tenant_id, user_id=None):
         """List the quota set for a tenant."""
@@ -115,7 +115,7 @@ class QuotasClientJSON(base.ComputeClient):
         return resp, body
 
 
-class QuotaClassesClientJSON(base.ComputeClient):
+class QuotaClassesClientJSON(service_client.ServiceClient):
 
     def get_quota_class_set(self, quota_class_id):
         """List the quota class set for a quota class."""

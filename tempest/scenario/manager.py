@@ -399,8 +399,8 @@ class ScenarioTest(tempest.test.BaseTestCase):
         if name is None:
             name = data_utils.rand_name('scenario-snapshot-')
         LOG.debug("Creating a snapshot image for server: %s", server['name'])
-        resp, image = _images_client.create_image(server['id'], name)
-        image_id = resp['location'].split('images/')[1]
+        image = _images_client.create_image(server['id'], name)
+        image_id = image.response['location'].split('images/')[1]
         _image_client.wait_for_image_status(image_id, 'active')
         self.addCleanup_with_wait(
             waiter_callable=_image_client.wait_for_resource_deletion,
@@ -789,7 +789,8 @@ class NetworkScenarioTest(ScenarioTest):
                                                      tenant_id=tenant_id)
 
         # Add rules to the security group
-        rules = self._create_loginable_secgroup_rule(secgroup=secgroup)
+        rules = self._create_loginable_secgroup_rule(client=client,
+                                                     secgroup=secgroup)
         for rule in rules:
             self.assertEqual(tenant_id, rule.tenant_id)
             self.assertEqual(secgroup.id, rule.security_group_id)

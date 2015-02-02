@@ -17,12 +17,12 @@ import json
 import urllib
 
 from tempest.api_schema.response.compute.v2 import images as schema
+from tempest.common import service_client
 from tempest.common import waiters
 from tempest import exceptions
-from tempest.services.compute.json import base
 
 
-class ImagesClientJSON(base.ComputeClient):
+class ImagesClientJSON(service_client.ServiceClient):
 
     def create_image(self, server_id, name, meta=None):
         """Creates an image of the original server."""
@@ -40,7 +40,7 @@ class ImagesClientJSON(base.ComputeClient):
         resp, body = self.post('servers/%s/action' % str(server_id),
                                post_body)
         self.validate_response(schema.create_image, resp, body)
-        return resp, body
+        return service_client.ResponseBody(resp, body)
 
     def list_images(self, params=None):
         """Returns a list of all images filtered by any parameters."""
@@ -51,7 +51,7 @@ class ImagesClientJSON(base.ComputeClient):
         resp, body = self.get(url)
         body = json.loads(body)
         self.validate_response(schema.list_images, resp, body)
-        return resp, body['images']
+        return service_client.ResponseBodyList(resp, body['images'])
 
     def list_images_with_detail(self, params=None):
         """Returns a detailed list of images filtered by any parameters."""
@@ -62,7 +62,7 @@ class ImagesClientJSON(base.ComputeClient):
         resp, body = self.get(url)
         body = json.loads(body)
         self.validate_response(schema.list_images_details, resp, body)
-        return resp, body['images']
+        return service_client.ResponseBodyList(resp, body['images'])
 
     def get_image(self, image_id):
         """Returns the details of a single image."""
@@ -70,13 +70,13 @@ class ImagesClientJSON(base.ComputeClient):
         self.expected_success(200, resp.status)
         body = json.loads(body)
         self.validate_response(schema.get_image, resp, body)
-        return resp, body['image']
+        return service_client.ResponseBody(resp, body['image'])
 
     def delete_image(self, image_id):
         """Deletes the provided image."""
         resp, body = self.delete("images/%s" % str(image_id))
         self.validate_response(schema.delete, resp, body)
-        return resp, body
+        return service_client.ResponseBody(resp, body)
 
     def wait_for_image_status(self, image_id, status):
         """Waits for an image to reach a given status."""
@@ -87,7 +87,7 @@ class ImagesClientJSON(base.ComputeClient):
         resp, body = self.get("images/%s/metadata" % str(image_id))
         body = json.loads(body)
         self.validate_response(schema.image_metadata, resp, body)
-        return resp, body['metadata']
+        return service_client.ResponseBody(resp, body['metadata'])
 
     def set_image_metadata(self, image_id, meta):
         """Sets the metadata for an image."""
@@ -95,7 +95,7 @@ class ImagesClientJSON(base.ComputeClient):
         resp, body = self.put('images/%s/metadata' % str(image_id), post_body)
         body = json.loads(body)
         self.validate_response(schema.image_metadata, resp, body)
-        return resp, body['metadata']
+        return service_client.ResponseBody(resp, body['metadata'])
 
     def update_image_metadata(self, image_id, meta):
         """Updates the metadata for an image."""
@@ -103,14 +103,14 @@ class ImagesClientJSON(base.ComputeClient):
         resp, body = self.post('images/%s/metadata' % str(image_id), post_body)
         body = json.loads(body)
         self.validate_response(schema.image_metadata, resp, body)
-        return resp, body['metadata']
+        return service_client.ResponseBody(resp, body['metadata'])
 
     def get_image_metadata_item(self, image_id, key):
         """Returns the value for a specific image metadata key."""
         resp, body = self.get("images/%s/metadata/%s" % (str(image_id), key))
         body = json.loads(body)
         self.validate_response(schema.image_meta_item, resp, body)
-        return resp, body['meta']
+        return service_client.ResponseBody(resp, body['meta'])
 
     def set_image_metadata_item(self, image_id, key, meta):
         """Sets the value for a specific image metadata key."""
@@ -119,14 +119,14 @@ class ImagesClientJSON(base.ComputeClient):
                               post_body)
         body = json.loads(body)
         self.validate_response(schema.image_meta_item, resp, body)
-        return resp, body['meta']
+        return service_client.ResponseBody(resp, body['meta'])
 
     def delete_image_metadata_item(self, image_id, key):
         """Deletes a single image metadata key/value pair."""
         resp, body = self.delete("images/%s/metadata/%s" %
                                  (str(image_id), key))
         self.validate_response(schema.delete, resp, body)
-        return resp, body
+        return service_client.ResponseBody(resp, body)
 
     def is_resource_deleted(self, id):
         try:

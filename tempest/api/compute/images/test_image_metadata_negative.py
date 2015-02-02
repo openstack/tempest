@@ -36,7 +36,7 @@ class ImagesMetadataTestJSON(base.BaseV2ComputeTest):
     @test.attr(type=['negative', 'gate'])
     def test_update_nonexistent_image_metadata(self):
         # Negative test:An update should not happen for a non-existent image
-        meta = {'key1': 'alt1', 'key2': 'alt2'}
+        meta = {'os_distro': 'alt1', 'os_version': 'alt2'}
         self.assertRaises(exceptions.NotFound,
                           self.client.update_image_metadata,
                           data_utils.rand_uuid(), meta)
@@ -46,12 +46,12 @@ class ImagesMetadataTestJSON(base.BaseV2ComputeTest):
         # Negative test: Get on non-existent image should not happen
         self.assertRaises(exceptions.NotFound,
                           self.client.get_image_metadata_item,
-                          data_utils.rand_uuid(), 'key2')
+                          data_utils.rand_uuid(), 'os_version')
 
     @test.attr(type=['negative', 'gate'])
     def test_set_nonexistent_image_metadata(self):
         # Negative test: Metadata should not be set to a non-existent image
-        meta = {'key1': 'alt1', 'key2': 'alt2'}
+        meta = {'os_distro': 'alt1', 'os_version': 'alt2'}
         self.assertRaises(exceptions.NotFound, self.client.set_image_metadata,
                           data_utils.rand_uuid(), meta)
 
@@ -59,10 +59,10 @@ class ImagesMetadataTestJSON(base.BaseV2ComputeTest):
     def test_set_nonexistent_image_metadata_item(self):
         # Negative test: Metadata item should not be set to a
         # nonexistent image
-        meta = {'key1': 'alt'}
+        meta = {'os_distro': 'alt'}
         self.assertRaises(exceptions.NotFound,
                           self.client.set_image_metadata_item,
-                          data_utils.rand_uuid(), 'key1',
+                          data_utils.rand_uuid(), 'os_distro',
                           meta)
 
     @test.attr(type=['negative', 'gate'])
@@ -71,4 +71,4 @@ class ImagesMetadataTestJSON(base.BaseV2ComputeTest):
         # item from non-existent image
         self.assertRaises(exceptions.NotFound,
                           self.client.delete_image_metadata_item,
-                          data_utils.rand_uuid(), 'key1')
+                          data_utils.rand_uuid(), 'os_distro')

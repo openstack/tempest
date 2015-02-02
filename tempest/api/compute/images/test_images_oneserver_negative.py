@@ -94,10 +94,9 @@ class ImagesOneServerNegativeTestJSON(base.BaseV2ComputeTest):
 
         # Create first snapshot
         snapshot_name = data_utils.rand_name('test-snap-')
-        resp, body = self.client.create_image(self.server_id,
-                                              snapshot_name)
-        self.assertEqual(202, resp.status)
-        image_id = data_utils.parse_image_id(resp['location'])
+        body = self.client.create_image(self.server_id,
+                                        snapshot_name)
+        image_id = data_utils.parse_image_id(body.response['location'])
         self.image_ids.append(image_id)
         self.addCleanup(self._reset_server)
 
@@ -119,15 +118,13 @@ class ImagesOneServerNegativeTestJSON(base.BaseV2ComputeTest):
         # Return an error while trying to delete an image what is creating
 
         snapshot_name = data_utils.rand_name('test-snap-')
-        resp, body = self.client.create_image(self.server_id, snapshot_name)
-        self.assertEqual(202, resp.status)
-        image_id = data_utils.parse_image_id(resp['location'])
+        body = self.client.create_image(self.server_id, snapshot_name)
+        image_id = data_utils.parse_image_id(body.response['location'])
         self.image_ids.append(image_id)
         self.addCleanup(self._reset_server)
 
         # Do not wait, attempt to delete the image, ensure it's successful
-        resp, body = self.client.delete_image(image_id)
-        self.assertEqual('204', resp['status'])
+        self.client.delete_image(image_id)
         self.image_ids.remove(image_id)
 
         self.assertRaises(exceptions.NotFound, self.client.get_image, image_id)

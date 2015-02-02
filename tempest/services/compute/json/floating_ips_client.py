@@ -17,11 +17,11 @@ import json
 import urllib
 
 from tempest.api_schema.response.compute.v2 import floating_ips as schema
+from tempest.common import service_client
 from tempest import exceptions
-from tempest.services.compute.json import base
 
 
-class FloatingIPsClientJSON(base.ComputeClient):
+class FloatingIPsClientJSON(service_client.ServiceClient):
 
     def list_floating_ips(self, params=None):
         """Returns a list of all floating IPs filtered by any parameters."""
