@@ -44,7 +44,7 @@ class BaseComputeTest(tempest.test.BaseTestCase):
         # but only once client lazy load in the manager is done
         cls.os = cls.get_client_manager()
         cls.multi_user = cls.check_multi_user()
-
+        cls.allow_tenant_isolation = CONF.auth.allow_tenant_isolation
         cls.build_interval = CONF.compute.build_interval
         cls.build_timeout = CONF.compute.build_timeout
         cls.ssh_user = CONF.compute.ssh_user
@@ -201,7 +201,7 @@ class BaseComputeTest(tempest.test.BaseTestCase):
             name = kwargs.pop('name')
         flavor = kwargs.get('flavor', cls.flavor_ref)
         image_id = kwargs.get('image_id', cls.image_ref)
-        if 'networks' not in kwargs and cls.fixed_network_name:
+        if 'networks' not in kwargs and cls.fixed_network_name and cls.allow_tenant_isolation == False:
             response, body = cls.network_client.list_networks()
             #self.assertEqual('200', response['status'])
             networks = body['networks']

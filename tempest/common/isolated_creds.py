@@ -89,8 +89,8 @@ class IsolatedCreds(cred_provider.CredentialProvider):
         self.identity_admin_client.delete_user(user)
 
     def _delete_tenant(self, tenant):
-        if CONF.service_available.neutron:
-            self._cleanup_default_secgroup(tenant)
+        #if CONF.service_available.neutron:
+            #self._cleanup_default_secgroup(tenant)
         self.identity_admin_client.delete_tenant(tenant)
 
     def _create_creds(self, suffix="", admin=False):
@@ -212,6 +212,7 @@ class IsolatedCreds(cred_provider.CredentialProvider):
     def _create_router(self, router_name, tenant_id):
         external_net_id = dict(
             network_id=CONF.network.public_network_id)
+        print "***********************************",external_net_id
         resp_body = self.network_admin_client.create_router(
             router_name,
             external_gateway_info=external_net_id,
