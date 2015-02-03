@@ -53,9 +53,8 @@ class BaseBaremetalTest(test.BaseTestCase):
     """Base class for Baremetal API tests."""
 
     @classmethod
-    def resource_setup(cls):
-        super(BaseBaremetalTest, cls).resource_setup()
-
+    def skip_checks(cls):
+        super(BaseBaremetalTest, cls).skip_checks()
         if not CONF.service_available.ironic:
             skip_msg = ('%s skipped as Ironic is not available' % cls.__name__)
             raise cls.skipException(skip_msg)
@@ -65,10 +64,22 @@ class BaseBaremetalTest(test.BaseTestCase):
                         'testing.' %
                         (cls.__name__, CONF.baremetal.driver))
             raise cls.skipException(skip_msg)
-        cls.driver = CONF.baremetal.driver
 
-        mgr = clients.AdminManager()
-        cls.client = mgr.baremetal_client
+    @classmethod
+    def setup_credentials(cls):
+        super(BaseBaremetalTest, cls).setup_credentials()
+        cls.mgr = clients.AdminManager()
+
+    @classmethod
+    def setup_clients(cls):
+        super(BaseBaremetalTest, cls).setup_clients()
+        cls.client = cls.mgr.baremetal_client
+
+    @classmethod
+    def resource_setup(cls):
+        super(BaseBaremetalTest, cls).resource_setup()
+
+        cls.driver = CONF.baremetal.driver
         cls.power_timeout = CONF.baremetal.power_timeout
         cls.created_objects = {}
         for resource in RESOURCE_TYPES:
