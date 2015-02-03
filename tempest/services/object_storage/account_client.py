@@ -17,13 +17,10 @@ import json
 import urllib
 from xml.etree import ElementTree as etree
 
-from tempest import config
-from tempest.services.object_storage import base
-
-CONF = config.CONF
+from tempest.common import service_client
 
 
-class AccountClient(base.ObjectStorageClient):
+class AccountClient(service_client.ServiceClient):
 
     def create_account(self, data=None,
                        params=None,

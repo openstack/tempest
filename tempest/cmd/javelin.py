@@ -159,6 +159,13 @@ class OSClient(object):
         }
         compute_params.update(default_params)
 
+        object_storage_params = {
+            'service': CONF.object_storage.catalog_type,
+            'region': CONF.object_storage.region or CONF.identity.region,
+            'endpoint_type': CONF.object_storage.endpoint_type
+        }
+        object_storage_params.update(default_params)
+
         _creds = tempest.auth.KeystoneV2Credentials(
             username=user,
             password=pw,
@@ -171,8 +178,10 @@ class OSClient(object):
                                                         **compute_params)
         self.secgroups = security_groups_client.SecurityGroupsClientJSON(
             _auth, **compute_params)
-        self.objects = object_client.ObjectClient(_auth)
-        self.containers = container_client.ContainerClient(_auth)
+        self.objects = object_client.ObjectClient(_auth,
+                                                  **object_storage_params)
+        self.containers = container_client.ContainerClient(
+            _auth, **object_storage_params)
         self.images = image_client.ImageClientV2JSON(_auth)
         self.telemetry = telemetry_client.TelemetryClientJSON(_auth)
         self.volumes = volumes_client.VolumesClientJSON(_auth)

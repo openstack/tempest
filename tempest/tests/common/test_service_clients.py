@@ -44,6 +44,9 @@ from tempest.services.compute.json import volumes_extensions_client
 from tempest.services.database.json import flavors_client as db_flavor_client
 from tempest.services.database.json import versions_client as db_version_client
 from tempest.services.network.json import network_client
+from tempest.services.object_storage import account_client
+from tempest.services.object_storage import container_client
+from tempest.services.object_storage import object_client
 from tempest.services.orchestration.json import orchestration_client
 from tempest.tests import base
 
@@ -81,6 +84,9 @@ class TestServiceClient(base.TestCase):
             db_flavor_client.DatabaseFlavorsClientJSON,
             db_version_client.DatabaseVersionsClientJSON,
             network_client.NetworkClientJSON,
+            account_client.AccountClient,
+            container_client.ContainerClient,
+            object_client.ObjectClient,
             orchestration_client.OrchestrationClient]
 
         for client in test_clients:

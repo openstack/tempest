@@ -314,9 +314,16 @@ class Manager(manager.Manager):
             self.auth_provider)
 
     def _set_object_storage_clients(self):
-        self.account_client = AccountClient(self.auth_provider)
-        self.container_client = ContainerClient(self.auth_provider)
-        self.object_client = ObjectClient(self.auth_provider)
+        params = {
+            'service': CONF.object_storage.catalog_type,
+            'region': CONF.object_storage.region or CONF.identity.region,
+            'endpoint_type': CONF.object_storage.endpoint_type
+        }
+        params.update(self.default_params_with_timeout_values)
+
+        self.account_client = AccountClient(self.auth_provider, **params)
+        self.container_client = ContainerClient(self.auth_provider, **params)
+        self.object_client = ObjectClient(self.auth_provider, **params)
 
 
 class AdminManager(Manager):
