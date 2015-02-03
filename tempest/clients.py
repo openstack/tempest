@@ -180,7 +180,11 @@ class Manager(manager.Manager):
             CONF.database.catalog_type,
             CONF.identity.region,
             **self.default_params_with_timeout_values)
-        self.messaging_client = MessagingClientJSON(self.auth_provider)
+        self.messaging_client = MessagingClientJSON(
+            self.auth_provider,
+            CONF.messaging.catalog_type,
+            CONF.identity.region,
+            **self.default_params_with_timeout_values)
         if CONF.service_available.ceilometer:
             self.telemetry_client = TelemetryClientJSON(
                 self.auth_provider)
