@@ -335,7 +335,7 @@ def main():
             continue
         results = verify_extensions(os, service, results)
 
-    # Verify API verisons of all services in the keystone catalog and keystone
+    # Verify API versions of all services in the keystone catalog and keystone
     # itself.
     services.append('keystone')
     for service in services:

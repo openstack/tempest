@@ -17,13 +17,10 @@ import httplib
 import urllib
 import urlparse
 
-from tempest import config
-from tempest.services.object_storage import base
-
-CONF = config.CONF
+from tempest.common import service_client
 
 
-class ObjectClient(base.ObjectStorageClient):
+class ObjectClient(service_client.ServiceClient):
 
     def create_object(self, container, object_name, data,
                       params=None, metadata=None, headers=None):

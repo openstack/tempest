@@ -70,7 +70,7 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
             * test that cross-tenant traffic is enabled once an appropriate
             rule has been created on destination tenant.
             * test that reverse traffic is still blocked
-            * test than revesre traffic is enabled once an appropriate rule has
+            * test than reverse traffic is enabled once an appropriate rule has
             been created on source tenant
         7._test_port_update_new_security_group:
            * test that traffic is blocked with default security group
@@ -85,7 +85,7 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
             to it, and cross tenant check will be done on the private IP of the
             destination tenant
             or
-            * not defined (empty string), in which case each tanant will have
+            * not defined (empty string), in which case each tenant will have
             its own router connected to the public network
     """
 
@@ -466,7 +466,7 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
     def test_port_update_new_security_group(self):
         """
         This test verifies the traffic after updating the vm port with new
-        security group having appropiate rule.
+        security group having appropriate rule.
         """
         new_tenant = self.primary_tenant
 

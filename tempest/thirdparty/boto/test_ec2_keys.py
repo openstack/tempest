@@ -14,7 +14,6 @@
 #    under the License.
 
 from tempest.common.utils import data_utils
-from tempest import test
 from tempest.thirdparty.boto import test as boto_test
 
 
@@ -40,7 +39,6 @@ class EC2KeysTest(boto_test.BotoTestCase):
         self.assertTrue(compare_key_pairs(keypair,
                         self.client.get_key_pair(key_name)))
 
-    @test.skip_because(bug="1072318")
     def test_delete_ec2_keypair(self):
         # EC2 delete KeyPair
         key_name = data_utils.rand_name("keypair-")
