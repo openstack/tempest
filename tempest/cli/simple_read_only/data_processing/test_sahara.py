@@ -16,6 +16,7 @@ import logging
 import re
 
 from tempest_lib import exceptions
+import testtools
 
 from tempest import cli
 from tempest import config
@@ -59,8 +60,12 @@ class SimpleReadOnlySaharaClientTest(cli.ClientTestBase):
             'title'
         ])
 
+    @testtools.skipUnless(CONF.data_processing_feature_enabled.plugins,
+                          'No plugins defined')
     def test_sahara_plugins_show(self):
-        result = self.sahara('plugin-show', params='--name vanilla')
+        name_param = '--name %s' % \
+            (CONF.data_processing_feature_enabled.plugins[0])
+        result = self.sahara('plugin-show', params=name_param)
         plugin = self.parser.listing(result)
         self.assertTableStruct(plugin, [
             'Property',
