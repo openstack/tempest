@@ -16,22 +16,13 @@
 import urllib
 
 from tempest.common import service_client
-from tempest import config
 from tempest.openstack.common import jsonutils as json
-
-CONF = config.CONF
 
 
 class TelemetryClientJSON(service_client.ServiceClient):
 
-    def __init__(self, auth_provider):
-        super(TelemetryClientJSON, self).__init__(
-            auth_provider,
-            CONF.telemetry.catalog_type,
-            CONF.identity.region,
-            endpoint_type=CONF.telemetry.endpoint_type)
-        self.version = '2'
-        self.uri_prefix = "v%s" % self.version
+    version = '2'
+    uri_prefix = "v2"
 
     def deserialize(self, body):
         return json.loads(body.replace("\n", ""))
