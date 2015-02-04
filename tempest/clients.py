@@ -192,16 +192,6 @@ class Manager(manager.Manager):
                 CONF.identity.region,
                 endpoint_type=CONF.telemetry.endpoint_type,
                 **self.default_params_with_timeout_values)
-        self.negative_client = negative_rest_client.NegativeRestClient(
-            self.auth_provider, service)
-
-        # TODO(andreaf) EC2 client still do their auth, v2 only
-        ec2_client_args = (self.credentials.username,
-                           self.credentials.password,
-                           CONF.identity.uri,
-                           self.credentials.tenant_name)
-
-        # common clients
         if CONF.service_available.glance:
             self.image_client = ImageClientJSON(self.auth_provider)
             self.image_client_v2 = ImageClientV2JSON(self.auth_provider)
@@ -213,7 +203,14 @@ class Manager(manager.Manager):
             build_interval=CONF.orchestration.build_interval,
             build_timeout=CONF.orchestration.build_timeout,
             **self.default_params)
+        self.negative_client = negative_rest_client.NegativeRestClient(
+            self.auth_provider, service)
 
+        # TODO(andreaf) EC2 client still do their auth, v2 only
+        ec2_client_args = (self.credentials.username,
+                           self.credentials.password,
+                           CONF.identity.uri,
+                           self.credentials.tenant_name)
         self.ec2api_client = botoclients.APIClientEC2(*ec2_client_args)
         self.s3_client = botoclients.ObjectClientS3(*ec2_client_args)
         self.data_processing_client = DataProcessingClient(
