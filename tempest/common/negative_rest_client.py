@@ -15,18 +15,16 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest_lib.common import rest_client
-
+from tempest.common import service_client
 from tempest import config
 
 CONF = config.CONF
 
 
-class NegativeRestClient(rest_client.RestClient):
+class NegativeRestClient(service_client.ServiceClient):
     """
     Version of RestClient that does not raise exceptions.
     """
-
     def __init__(self, auth_provider, service):
         region = self._get_region(service)
         super(NegativeRestClient, self).__init__(auth_provider,
