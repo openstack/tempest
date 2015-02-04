@@ -23,12 +23,20 @@ CONF = config.CONF
 class FixedIPsTestJson(base.BaseV2ComputeAdminTest):
 
     @classmethod
-    def resource_setup(cls):
-        super(FixedIPsTestJson, cls).resource_setup()
+    def skip_checks(cls):
+        super(FixedIPsTestJson, cls).skip_checks()
         if CONF.service_available.neutron:
             msg = ("%s skipped as neutron is available" % cls.__name__)
             raise cls.skipException(msg)
+
+    @classmethod
+    def setup_clients(cls):
+        super(FixedIPsTestJson, cls).setup_clients()
         cls.client = cls.os_adm.fixed_ips_client
+
+    @classmethod
+    def resource_setup(cls):
+        super(FixedIPsTestJson, cls).resource_setup()
         server = cls.create_test_server(wait_until='ACTIVE')
         server = cls.servers_client.get_server(server['id'])
         for ip_set in server['addresses']:

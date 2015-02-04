@@ -23,8 +23,8 @@ from tempest import test
 class ImagesMetadataTestJSON(base.BaseV2ComputeTest):
 
     @classmethod
-    def resource_setup(cls):
-        super(ImagesMetadataTestJSON, cls).resource_setup()
+    def setup_clients(cls):
+        super(ImagesMetadataTestJSON, cls).setup_clients()
         cls.client = cls.images_client
 
     @test.attr(type=['negative', 'gate'])

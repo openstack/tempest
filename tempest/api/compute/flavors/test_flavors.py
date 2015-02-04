@@ -24,8 +24,8 @@ class FlavorsV2TestJSON(base.BaseComputeTest):
     _min_ram = 'minRam'
 
     @classmethod
-    def resource_setup(cls):
-        super(FlavorsV2TestJSON, cls).resource_setup()
+    def setup_clients(cls):
+        super(FlavorsV2TestJSON, cls).setup_clients()
         cls.client = cls.flavors_client
 
     @test.attr(type='smoke')

@@ -23,11 +23,15 @@ CONF = config.CONF
 class ListImagesTestJSON(base.BaseV2ComputeTest):
 
     @classmethod
-    def resource_setup(cls):
-        super(ListImagesTestJSON, cls).resource_setup()
+    def skip_checks(cls):
+        super(ListImagesTestJSON, cls).skip_checks()
         if not CONF.service_available.glance:
             skip_msg = ("%s skipped as glance is not available" % cls.__name__)
             raise cls.skipException(skip_msg)
+
+    @classmethod
+    def setup_clients(cls):
+        super(ListImagesTestJSON, cls).setup_clients()
         cls.client = cls.images_client
 
     @test.attr(type='smoke')

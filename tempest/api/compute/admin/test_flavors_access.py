@@ -26,14 +26,21 @@ class FlavorsAccessTestJSON(base.BaseV2ComputeAdminTest):
     """
 
     @classmethod
-    def resource_setup(cls):
-        super(FlavorsAccessTestJSON, cls).resource_setup()
+    def skip_checks(cls):
+        super(FlavorsAccessTestJSON, cls).skip_checks()
         if not test.is_extension_enabled('OS-FLV-EXT-DATA', 'compute'):
             msg = "OS-FLV-EXT-DATA extension not enabled."
             raise cls.skipException(msg)
 
-        # Compute admin flavor client
+    @classmethod
+    def setup_clients(cls):
+        super(FlavorsAccessTestJSON, cls).setup_clients()
         cls.client = cls.os_adm.flavors_client
+
+    @classmethod
+    def resource_setup(cls):
+        super(FlavorsAccessTestJSON, cls).resource_setup()
+
         # Non admin tenant ID
         cls.tenant_id = cls.flavors_client.tenant_id
         # Compute admin tenant ID

@@ -34,9 +34,13 @@ class QuotasAdminTestJSON(base.BaseV2ComputeAdminTest):
         super(QuotasAdminTestJSON, self).setUp()
 
     @classmethod
+    def setup_clients(cls):
+        super(QuotasAdminTestJSON, cls).setup_clients()
+        cls.adm_client = cls.os_adm.quotas_client
+
+    @classmethod
     def resource_setup(cls):
         super(QuotasAdminTestJSON, cls).resource_setup()
-        cls.adm_client = cls.os_adm.quotas_client
 
         # NOTE(afazekas): these test cases should always create and use a new
         # tenant most of them should be skipped if we can't do that

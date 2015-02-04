@@ -21,8 +21,8 @@ from tempest import test
 class ServersTestJSON(base.BaseV2ComputeTest):
 
     @classmethod
-    def resource_setup(cls):
-        super(ServersTestJSON, cls).resource_setup()
+    def setup_clients(cls):
+        super(ServersTestJSON, cls).setup_clients()
         cls.client = cls.servers_client
 
     def tearDown(self):

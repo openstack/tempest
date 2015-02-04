@@ -24,8 +24,8 @@ class AZV2TestJSON(base.BaseComputeTest):
     _api_version = 2
 
     @classmethod
-    def resource_setup(cls):
-        super(AZV2TestJSON, cls).resource_setup()
+    def setup_clients(cls):
+        super(AZV2TestJSON, cls).setup_clients()
         cls.client = cls.availability_zone_client
 
     @test.attr(type='gate')

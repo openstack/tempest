@@ -23,8 +23,8 @@ class KeyPairsV2TestJSON(base.BaseComputeTest):
     _api_version = 2
 
     @classmethod
-    def resource_setup(cls):
-        super(KeyPairsV2TestJSON, cls).resource_setup()
+    def setup_clients(cls):
+        super(KeyPairsV2TestJSON, cls).setup_clients()
         cls.client = cls.keypairs_client
 
     def _delete_keypair(self, keypair_name):

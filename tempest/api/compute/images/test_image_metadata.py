@@ -26,14 +26,21 @@ CONF = config.CONF
 class ImagesMetadataTestJSON(base.BaseV2ComputeTest):
 
     @classmethod
-    def resource_setup(cls):
-        super(ImagesMetadataTestJSON, cls).resource_setup()
+    def skip_checks(cls):
+        super(ImagesMetadataTestJSON, cls).skip_checks()
         if not CONF.service_available.glance:
             skip_msg = ("%s skipped as glance is not available" % cls.__name__)
             raise cls.skipException(skip_msg)
 
+    @classmethod
+    def setup_clients(cls):
+        super(ImagesMetadataTestJSON, cls).setup_clients()
         cls.glance_client = cls.os.image_client
         cls.client = cls.images_client
+
+    @classmethod
+    def resource_setup(cls):
+        super(ImagesMetadataTestJSON, cls).resource_setup()
         cls.image_id = None
 
         name = data_utils.rand_name('image')

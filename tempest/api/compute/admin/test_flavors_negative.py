@@ -36,14 +36,21 @@ class FlavorsAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
     """
 
     @classmethod
-    def resource_setup(cls):
-        super(FlavorsAdminNegativeTestJSON, cls).resource_setup()
+    def skip_checks(cls):
+        super(FlavorsAdminNegativeTestJSON, cls).skip_checks()
         if not test.is_extension_enabled('OS-FLV-EXT-DATA', 'compute'):
             msg = "OS-FLV-EXT-DATA extension not enabled."
             raise cls.skipException(msg)
 
+    @classmethod
+    def setup_clients(cls):
+        super(FlavorsAdminNegativeTestJSON, cls).setup_clients()
         cls.client = cls.os_adm.flavors_client
         cls.user_client = cls.os.flavors_client
+
+    @classmethod
+    def resource_setup(cls):
+        super(FlavorsAdminNegativeTestJSON, cls).resource_setup()
         cls.flavor_name_prefix = 'test_flavor_'
         cls.ram = 512
         cls.vcpus = 1
