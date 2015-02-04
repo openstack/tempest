@@ -327,12 +327,11 @@ class NetworksTestDHCPv6(base.BaseNetworkTest):
                                    subnet["allocation_pools"][0]["end"])
         ip = netaddr.IPAddress(random.randrange(
             ip_range.last + 1, ip_range.last + 10)).format()
-        self.assertRaisesRegexp(exceptions.BadRequest,
-                                "not a valid IP for the defined subnet",
-                                self.create_port,
-                                self.network,
-                                fixed_ips=[{'subnet_id': subnet['id'],
-                                            'ip_address': ip}])
+        self.assertRaises(exceptions.BadRequest,
+                          self.create_port,
+                          self.network,
+                          fixed_ips=[{'subnet_id': subnet['id'],
+                                      'ip_address': ip}])
 
     def test_dhcp_stateful_fixedips_duplicate(self):
         """When port gets IP address from fixed IP range it
