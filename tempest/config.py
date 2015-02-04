@@ -601,7 +601,7 @@ ObjectStoreGroup = [
                         'publicURL', 'adminURL', 'internalURL'],
                help="The endpoint type to use for the object-store service."),
     cfg.IntOpt('container_sync_timeout',
-               default=120,
+               default=600,
                help="Number of seconds to time on waiting for a container "
                     "to container synchronization complete."),
     cfg.IntOpt('container_sync_interval',
@@ -615,6 +615,17 @@ ObjectStoreGroup = [
     cfg.StrOpt('reseller_admin_role',
                default='ResellerAdmin',
                help="User role that has reseller admin"),
+    cfg.StrOpt('realm_name',
+               default='realm1',
+               help="Name of sync realm. A sync realm is a set of clusters "
+                    "that have agreed to allow container syncing with each "
+                    "other. Set the same realm name as Swift's "
+                    "container-sync-realms.conf"),
+    cfg.StrOpt('cluster_name',
+               default='name1',
+               help="One name of cluster which is set in the realm whose name "
+                    "is set in 'realm_name' item in this file. Set the "
+                    "same cluster name as Swift's container-sync-realms.conf"),
 ]
 
 object_storage_feature_group = cfg.OptGroup(
