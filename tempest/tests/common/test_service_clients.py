@@ -16,6 +16,7 @@ import mock
 import random
 import six
 
+from tempest.services.baremetal.v1.json import baremetal_client
 from tempest.services.compute.json import agents_client
 from tempest.services.compute.json import aggregates_client
 from tempest.services.compute.json import availability_zone_client
@@ -49,6 +50,7 @@ from tempest.services.object_storage import account_client
 from tempest.services.object_storage import container_client
 from tempest.services.object_storage import object_client
 from tempest.services.orchestration.json import orchestration_client
+from tempest.services.telemetry.json import telemetry_client
 from tempest.tests import base
 
 
@@ -57,6 +59,7 @@ class TestServiceClient(base.TestCase):
     @mock.patch('tempest_lib.common.rest_client.RestClient.__init__')
     def test_service_client_creations_with_specified_args(self, mock_init):
         test_clients = [
+            baremetal_client.BaremetalClientJSON,
             agents_client.AgentsClientJSON,
             aggregates_client.AggregatesClientJSON,
             availability_zone_client.AvailabilityZoneClientJSON,
@@ -89,7 +92,8 @@ class TestServiceClient(base.TestCase):
             account_client.AccountClient,
             container_client.ContainerClient,
             object_client.ObjectClient,
-            orchestration_client.OrchestrationClient]
+            orchestration_client.OrchestrationClient,
+            telemetry_client.TelemetryClientJSON]
 
         for client in test_clients:
             fake_string = six.text_type(random.randint(1, 0x7fffffff))

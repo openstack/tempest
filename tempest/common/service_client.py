@@ -83,6 +83,12 @@ class ServiceClient(rest_client.RestClient):
             raise exceptions.ServerFault(ex)
         except lib_exceptions.UnexpectedResponseCode as ex:
             raise exceptions.UnexpectedResponseCode(ex)
+        # TODO(oomichi): This is just a workaround for failing gate tests
+        # when separating Forbidden from Unauthorized in tempest-lib.
+        # We will need to remove this translation and replace negative tests
+        # with lib_exceptions.Forbidden in the future.
+        except lib_exceptions.Forbidden as ex:
+            raise exceptions.Unauthorized(ex)
 
 
 class ResponseBody(dict):

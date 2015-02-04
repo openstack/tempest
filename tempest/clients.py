@@ -20,7 +20,8 @@ from tempest.common import negative_rest_client
 from tempest import config
 from tempest import manager
 from tempest.openstack.common import log as logging
-from tempest.services.baremetal.v1.client_json import BaremetalClientJSON
+from tempest.services.baremetal.v1.json.baremetal_client import \
+    BaremetalClientJSON
 from tempest.services import botoclients
 from tempest.services.compute.json.agents_client import \
     AgentsClientJSON
@@ -161,7 +162,12 @@ class Manager(manager.Manager):
         self._set_volume_clients()
         self._set_object_storage_clients()
 
-        self.baremetal_client = BaremetalClientJSON(self.auth_provider)
+        self.baremetal_client = BaremetalClientJSON(
+            self.auth_provider,
+            CONF.baremetal.catalog_type,
+            CONF.identity.region,
+            endpoint_type=CONF.baremetal.endpoint_type,
+            **self.default_params_with_timeout_values)
         self.network_client = NetworkClientJSON(
             self.auth_provider,
             CONF.network.catalog_type,
@@ -187,17 +193,11 @@ class Manager(manager.Manager):
             **self.default_params_with_timeout_values)
         if CONF.service_available.ceilometer:
             self.telemetry_client = TelemetryClientJSON(
-                self.auth_provider)
-        self.negative_client = negative_rest_client.NegativeRestClient(
-            self.auth_provider, service)
-
-        # TODO(andreaf) EC2 client still do their auth, v2 only
-        ec2_client_args = (self.credentials.username,
-                           self.credentials.password,
-                           CONF.identity.uri,
-                           self.credentials.tenant_name)
-
-        # common clients
+                self.auth_provider,
+                CONF.telemetry.catalog_type,
+                CONF.identity.region,
+                endpoint_type=CONF.telemetry.endpoint_type,
+                **self.default_params_with_timeout_values)
         if CONF.service_available.glance:
             self.image_client = ImageClientJSON(self.auth_provider)
             self.image_client_v2 = ImageClientV2JSON(self.auth_provider)
@@ -209,7 +209,14 @@ class Manager(manager.Manager):
             build_interval=CONF.orchestration.build_interval,
             build_timeout=CONF.orchestration.build_timeout,
             **self.default_params)
+        self.negative_client = negative_rest_client.NegativeRestClient(
+            self.auth_provider, service)
 
+        # TODO(andreaf) EC2 client still do their auth, v2 only
+        ec2_client_args = (self.credentials.username,
+                           self.credentials.password,
+                           CONF.identity.uri,
+                           self.credentials.tenant_name)
         self.ec2api_client = botoclients.APIClientEC2(*ec2_client_args)
         self.s3_client = botoclients.ObjectClientS3(*ec2_client_args)
         self.data_processing_client = DataProcessingClient(

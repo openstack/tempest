@@ -79,6 +79,24 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
         self.assertIn(self.s2_name, servers_name)
 
     @test.attr(type='gate')
+    def test_list_servers_by_admin_with_specified_tenant(self):
+        # In nova v2, tenant_id is ignored unless all_tenants is specified
+
+        # List the primary tenant but get nothing due to odd specified behavior
+        tenant_id = self.non_admin_client.tenant_id
+        params = {'tenant_id': tenant_id}
+        resp, body = self.client.list_servers_with_detail(params)
+        servers = body['servers']
+        self.assertEqual([], servers)
+
+        # List the admin tenant which has no servers
+        admin_tenant_id = self.client.tenant_id
+        params = {'all_tenants': '', 'tenant_id': admin_tenant_id}
+        resp, body = self.client.list_servers_with_detail(params)
+        servers = body['servers']
+        self.assertEqual([], servers)
+
+    @test.attr(type='gate')
     def test_list_servers_filter_by_exist_host(self):
         # Filter the list of servers by existent host
         name = data_utils.rand_name('server')

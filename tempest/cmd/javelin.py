@@ -150,6 +150,12 @@ class OSClient(object):
             'ca_certs': CONF.identity.ca_certificates_file,
             'trace_requests': CONF.debug.trace_requests
         }
+        default_params_with_timeout_values = {
+            'build_interval': CONF.compute.build_interval,
+            'build_timeout': CONF.compute.build_timeout
+        }
+        default_params_with_timeout_values.update(default_params)
+
         compute_params = {
             'service': CONF.compute.catalog_type,
             'region': CONF.compute.region or CONF.identity.region,
@@ -183,7 +189,12 @@ class OSClient(object):
         self.containers = container_client.ContainerClient(
             _auth, **object_storage_params)
         self.images = image_client.ImageClientV2JSON(_auth)
-        self.telemetry = telemetry_client.TelemetryClientJSON(_auth)
+        self.telemetry = telemetry_client.TelemetryClientJSON(
+            _auth,
+            CONF.telemetry.catalog_type,
+            CONF.identity.region,
+            endpoint_type=CONF.telemetry.endpoint_type,
+            **default_params_with_timeout_values)
         self.volumes = volumes_client.VolumesClientJSON(_auth)
         self.networks = network_client.NetworkClientJSON(
             _auth,
