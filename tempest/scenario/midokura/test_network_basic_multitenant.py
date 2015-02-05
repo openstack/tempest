@@ -13,6 +13,7 @@
 
 import re
 import os
+import pprint
 
 from tempest import config
 from tempest.openstack.common import log as logging
@@ -47,6 +48,8 @@ class TestNetworkBasicMultitenants(manager.AdvancedNetworkScenarioTest):
 
         1. launch VMs with overlapping IP
         2. make sure they are not interfered
+        3. curl http://169.254.169.254/latest/meta-data-instance-id
+           and make sure it correctly identifies the VM
 
         Expected result:
         should succeed
@@ -58,17 +61,15 @@ class TestNetworkBasicMultitenants(manager.AdvancedNetworkScenarioTest):
             os.path.abspath(
                 '{0}scenario_basic_multitenant.yaml'.format(SCPATH)))
 
-    def _route_and_ip_test(self, hops):
+    def _route_and_ip_test(self, ssh_client, remote_ip):
         LOG.info("Trying to get the list of ips")
         try:
-            ssh_client = self.setup_tunnel(hops)
             net_info = ssh_client.get_ip_list()
             LOG.debug(net_info)
             pattern = re.compile(
                 '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}')
             _list = pattern.findall(net_info)
             LOG.debug(_list)
-            remote_ip, _ = hops[-1]
             self.assertIn(remote_ip, _list)
             route_out = ssh_client.exec_command("sudo /sbin/route -n")
             self._check_default_gateway(route_out, remote_ip)
@@ -76,6 +77,15 @@ class TestNetworkBasicMultitenants(manager.AdvancedNetworkScenarioTest):
         except Exception as inst:
             LOG.info(inst)
             raise
+
+    def _check_metadata(self, ssh_client, server):
+        meta_out = ssh_client.exec_command(
+            "curl http://169.254.169.254/latest/meta-data/instance-id")
+        meta_instid = meta_out.split('-')[1]
+        server_instid = server['OS-EXT-SRV-ATTR:instance_name'].split('-')[1]
+        LOG.debug("metadata instance-id: " + meta_instid)
+        LOG.debug("server instance-id: " + server_instid)
+        self.assertTrue(meta_instid == server_instid)
 
     def _check_default_gateway(self, route_out, internal_ip):
         try:
@@ -89,10 +99,9 @@ class TestNetworkBasicMultitenants(manager.AdvancedNetworkScenarioTest):
     @test.attr(type='smoke')
     @test.services('compute', 'network')
     def test_network_basic_multitenant(self):
-        LOG.debug("BEFORE LOOP _multitenant_test:\n" + str(self.scenarios))
         for creds_and_scenario in self.scenarios:
-            LOG.debug("BEFORE _multitenant_test:\n" + str(creds_and_scenario))
             self._multitenant_test(creds_and_scenario)
+        LOG.info("test finished, tearing down now ....")
 
     def _multitenant_test(self, creds_and_scenario):
         # the access_point server should be the last one in the list
@@ -106,9 +115,11 @@ class TestNetworkBasicMultitenants(manager.AdvancedNetworkScenarioTest):
         for element in servers_and_keys[:-1]:
             server = element['server']
             name = server['addresses'].keys()[0]
+            LOG.debug("Server dict\n:" + pprint.pformat(server))
             if any(i in networks.keys() for i in server['addresses'].keys()):
                 remote_ip = server['addresses'][name][0]['addr']
                 privatekey = element['keypair']['private_key']
                 hops.append((remote_ip, privatekey))
-                self._route_and_ip_test(hops)
-        LOG.info("test finished, tearing down now ....")
+                ssh_client = self.setup_tunnel(hops)
+                self._route_and_ip_test(ssh_client, hops[-1][0])
+                self._check_metadata(ssh_client, server)

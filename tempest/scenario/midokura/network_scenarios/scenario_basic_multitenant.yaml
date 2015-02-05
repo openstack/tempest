@@ -44,7 +44,9 @@ scenarios:
       allocation_pools:
       - start:
         end:
-      routers: []
+      routers:
+      - name: router_1
+        public: False
 
   security_groups:
   - description: SSH and ICMP
