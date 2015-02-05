@@ -20,10 +20,6 @@ from tempest import test
 
 class GroupsV3TestJSON(base.BaseIdentityV3AdminTest):
 
-    @classmethod
-    def resource_setup(cls):
-        super(GroupsV3TestJSON, cls).resource_setup()
-
     @test.attr(type='smoke')
     def test_group_create_update_get(self):
         name = data_utils.rand_name('Group')

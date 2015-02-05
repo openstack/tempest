@@ -23,10 +23,14 @@ from tempest import test
 class RegionsTestJSON(base.BaseIdentityV3AdminTest):
 
     @classmethod
+    def setup_clients(cls):
+        super(RegionsTestJSON, cls).setup_clients()
+        cls.client = cls.region_client
+
+    @classmethod
     def resource_setup(cls):
         super(RegionsTestJSON, cls).resource_setup()
         cls.setup_regions = list()
-        cls.client = cls.region_client
         for i in range(2):
             r_description = data_utils.rand_name('description-')
             region = cls.client.create_region(r_description)
