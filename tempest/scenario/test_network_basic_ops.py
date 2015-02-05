@@ -247,9 +247,11 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
 
         if not test.call_until_true(check_ports, CONF.network.build_timeout,
                                     CONF.network.build_interval):
-            raise exceptions.TimeoutException("No new port attached to the "
-                                              "server in time (%s sec) !"
-                                              % CONF.network.build_timeout)
+            raise exceptions.TimeoutException(
+                "No new port attached to the server in time (%s sec)! "
+                "Old port: %s. Number of new ports: %d" % (
+                    CONF.network.build_timeout, old_port,
+                    len(self.new_port_list)))
         new_port = net_resources.DeletablePort(client=self.network_client,
                                                **self.new_port_list[0])
 
