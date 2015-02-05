@@ -65,6 +65,8 @@ from tempest.services.compute.json.volumes_extensions_client import \
 from tempest.services.data_processing.v1_1.client import DataProcessingClient
 from tempest.services.database.json.flavors_client import \
     DatabaseFlavorsClientJSON
+from tempest.services.database.json.limits_client import \
+    DatabaseLimitsClientJSON
 from tempest.services.database.json.versions_client import \
     DatabaseVersionsClientJSON
 from tempest.services.identity.json.identity_client import IdentityClientJSON
@@ -158,6 +160,7 @@ class Manager(manager.Manager):
         super(Manager, self).__init__(credentials=credentials)
 
         self._set_compute_clients()
+        self._set_database_clients()
         self._set_identity_clients()
         self._set_volume_clients()
         self._set_object_storage_clients()
@@ -176,16 +179,6 @@ class Manager(manager.Manager):
             build_interval=CONF.network.build_interval,
             build_timeout=CONF.network.build_timeout,
             **self.default_params)
-        self.database_flavors_client = DatabaseFlavorsClientJSON(
-            self.auth_provider,
-            CONF.database.catalog_type,
-            CONF.identity.region,
-            **self.default_params_with_timeout_values)
-        self.database_versions_client = DatabaseVersionsClientJSON(
-            self.auth_provider,
-            CONF.database.catalog_type,
-            CONF.identity.region,
-            **self.default_params_with_timeout_values)
         self.messaging_client = MessagingClientJSON(
             self.auth_provider,
             CONF.messaging.catalog_type,
@@ -280,6 +273,23 @@ class Manager(manager.Manager):
         })
         self.volumes_extensions_client = VolumesExtensionsClientJSON(
             self.auth_provider, **params_volume)
+
+    def _set_database_clients(self):
+        self.database_flavors_client = DatabaseFlavorsClientJSON(
+            self.auth_provider,
+            CONF.database.catalog_type,
+            CONF.identity.region,
+            **self.default_params_with_timeout_values)
+        self.database_limits_client = DatabaseLimitsClientJSON(
+            self.auth_provider,
+            CONF.database.catalog_type,
+            CONF.identity.region,
+            **self.default_params_with_timeout_values)
+        self.database_versions_client = DatabaseVersionsClientJSON(
+            self.auth_provider,
+            CONF.database.catalog_type,
+            CONF.identity.region,
+            **self.default_params_with_timeout_values)
 
     def _set_identity_clients(self):
         self.identity_client = IdentityClientJSON(self.auth_provider)
