@@ -116,6 +116,10 @@ function run_tests {
   fi
 }
 
+function apply_patches {
+  git apply contrail/bug_1373245.patch
+}
+
 sudo apt-get install -y git sshpass libxml2-dev libxslt-dev python-dev libffi-dev gcc || exit 1
 
 if [ $never_venv -eq 0 ]
@@ -152,6 +156,7 @@ if [ $populate_config -eq 1 ]; then
    (unset http_proxy && ./contrail/contrail-tempest-init.sh)
 fi
 
+apply_patches
 (unset http_proxy && run_tests)
 retval=$?
 

@@ -1,0 +1,12 @@
+diff --git a/tempest/api/compute/servers/test_attach_interfaces.py b/tempest/api/compute/servers/test_attach_interfaces.py
+index 297b300..5538f32 100644
+--- a/tempest/api/compute/servers/test_attach_interfaces.py
++++ b/tempest/api/compute/servers/test_attach_interfaces.py
+@@ -83,6 +83,7 @@ class AttachInterfacesTestJSON(base.BaseV2ComputeTest):
+         iface = ifs[1]
+         resp, _ = self.client.delete_interface(server['id'], iface['port_id'])
+         self.assertEqual(202, resp.status)
++        time.sleep(5)
+         _ifs = self.client.list_interfaces(server['id'])[1]
+         start = int(time.time())
+ 
