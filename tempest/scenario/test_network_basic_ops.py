@@ -485,3 +485,31 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         # definitions from subnet
         ssh_client.renew_lease(fixed_ip=floating_ip['fixed_ip_address'])
         self._check_dns_server(ssh_client, [alt_dns_server])
+
+    @test.attr(type='smoke')
+    @test.services('compute', 'network')
+    def test_update_instance_port_admin_state(self):
+        """
+        1. Check public connectivity before updating
+                admin_state_up attribute of instance port to False
+        2. Check public connectivity after updating
+                admin_state_up attribute of instance port to False
+        3. Check public connectivity after updating
+                admin_state_up attribute of instance port to True
+        """
+        self._setup_network_and_servers()
+        floating_ip, server = self.floating_ip_tuple
+        server_id = server['id']
+        port_id = self._list_ports(device_id=server_id)[0]['id']
+        self.check_public_network_connectivity(
+            should_connect=True, msg="before updating "
+            "admin_state_up of instance port to False")
+        self.network_client.update_port(port_id, admin_state_up=False)
+        self.check_public_network_connectivity(
+            should_connect=False, msg="after updating "
+            "admin_state_up of instance port to False",
+            should_check_floating_ip_status=False)
+        self.network_client.update_port(port_id, admin_state_up=True)
+        self.check_public_network_connectivity(
+            should_connect=True, msg="after updating "
+            "admin_state_up of instance port to True")
