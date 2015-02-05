@@ -316,6 +316,13 @@ class IdentityV3ClientJSON(base.IdentityV3Client):
         body = json.loads(body)
         return service_client.ResponseBody(resp, body['group'])
 
+    def list_groups(self):
+        """Lists the groups."""
+        resp, body = self.get('groups')
+        self.expected_success(200, resp.status)
+        body = json.loads(body)
+        return service_client.ResponseBodyList(resp, body['groups'])
+
     def update_group(self, group_id, **kwargs):
         """Updates a group."""
         body = self.get_group(group_id)
