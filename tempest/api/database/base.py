@@ -27,19 +27,29 @@ class BaseDatabaseTest(tempest.test.BaseTestCase):
     _interface = 'json'
 
     @classmethod
-    def resource_setup(cls):
-        super(BaseDatabaseTest, cls).resource_setup()
+    def skip_checks(cls):
+        super(BaseDatabaseTest, cls).skip_checks()
         if not CONF.service_available.trove:
             skip_msg = ("%s skipped as trove is not available" % cls.__name__)
             raise cls.skipException(skip_msg)
 
-        cls.catalog_type = CONF.database.catalog_type
-        cls.db_flavor_ref = CONF.database.db_flavor_ref
-        cls.db_current_version = CONF.database.db_current_version
+    @classmethod
+    def setup_credentials(cls):
+        super(BaseDatabaseTest, cls).setup_credentials()
+        cls.os = cls.get_client_manager()
 
-        os = cls.get_client_manager()
-        cls.os = os
+    @classmethod
+    def setup_clients(cls):
+        super(BaseDatabaseTest, cls).setup_clients()
         cls.database_flavors_client = cls.os.database_flavors_client
         cls.os_flavors_client = cls.os.flavors_client
         cls.database_limits_client = cls.os.database_limits_client
         cls.database_versions_client = cls.os.database_versions_client
+
+    @classmethod
+    def resource_setup(cls):
+        super(BaseDatabaseTest, cls).resource_setup()
+
+        cls.catalog_type = CONF.database.catalog_type
+        cls.db_flavor_ref = CONF.database.db_flavor_ref
+        cls.db_current_version = CONF.database.db_current_version
