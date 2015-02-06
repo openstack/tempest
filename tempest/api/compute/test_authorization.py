@@ -68,8 +68,7 @@ class AuthorizationTestJSON(base.BaseV2ComputeTest):
         cls.image = cls.images_client.get_image(image_id)
 
         cls.keypairname = data_utils.rand_name('keypair')
-        resp, keypair = \
-            cls.keypairs_client.create_keypair(cls.keypairname)
+        cls.keypairs_client.create_keypair(cls.keypairname)
 
         name = data_utils.rand_name('security')
         description = data_utils.rand_name('description')
@@ -202,7 +201,7 @@ class AuthorizationTestJSON(base.BaseV2ComputeTest):
         finally:
             # Next request the base_url is back to normal
             if (resp['status'] is not None):
-                resp, _ = self.alt_keypairs_client.delete_keypair(k_name)
+                self.alt_keypairs_client.delete_keypair(k_name)
                 LOG.error("Create keypair request should not happen "
                           "if the tenant id does not match the current user")
 

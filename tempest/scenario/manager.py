@@ -160,7 +160,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
             client = self.keypairs_client
         name = data_utils.rand_name(self.__class__.__name__)
         # We don't need to create a keypair by pubkey in scenario
-        resp, body = client.create_keypair(name)
+        body = client.create_keypair(name)
         self.addCleanup(client.delete_keypair, name)
         return body
 

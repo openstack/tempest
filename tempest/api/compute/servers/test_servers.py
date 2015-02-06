@@ -62,8 +62,8 @@ class ServersTestJSON(base.BaseV2ComputeTest):
         # Specify a keypair while creating a server
 
         key_name = data_utils.rand_name('key')
-        resp, keypair = self.keypairs_client.create_keypair(key_name)
-        resp, body = self.keypairs_client.list_keypairs()
+        self.keypairs_client.create_keypair(key_name)
+        self.keypairs_client.list_keypairs()
         resp, server = self.create_test_server(key_name=key_name)
         self.assertEqual('202', resp['status'])
         self.client.wait_for_server_status(server['id'], 'ACTIVE')
