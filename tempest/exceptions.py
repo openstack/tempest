@@ -167,20 +167,8 @@ class UnprocessableEntity(RestClientException):
     message = "Unprocessable entity"
 
 
-class RateLimitExceeded(RestClientException):
-    message = "Rate limit exceeded"
-
-
 class OverLimit(RestClientException):
     message = "Quota exceeded"
-
-
-class ServerFault(RestClientException):
-    message = "Got server fault"
-
-
-class NotImplemented(RestClientException):
-    message = "Got NotImplemented error"
 
 
 class Conflict(RestClientException):
@@ -195,10 +183,6 @@ class ResponseWithNonEmptyBody(RFCViolation):
 class ResponseWithEntity(RFCViolation):
     message = ("RFC Violation! Response with 205 HTTP Status Code "
                "MUST NOT have an entity")
-
-
-class InvalidHTTPResponseBody(RestClientException):
-    message = "HTTP response body is invalid json or xml"
 
 
 class InvalidHTTPResponseHeader(RestClientException):

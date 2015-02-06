@@ -69,18 +69,10 @@ class ServiceClient(rest_client.RestClient):
             raise exceptions.Conflict(ex)
         except lib_exceptions.OverLimit as ex:
             raise exceptions.OverLimit(ex)
-        except lib_exceptions.RateLimitExceeded as ex:
-            raise exceptions.RateLimitExceeded(ex)
         except lib_exceptions.InvalidContentType as ex:
             raise exceptions.InvalidContentType(ex)
         except lib_exceptions.UnprocessableEntity as ex:
             raise exceptions.UnprocessableEntity(ex)
-        except lib_exceptions.InvalidHTTPResponseBody as ex:
-            raise exceptions.InvalidHTTPResponseBody(ex)
-        except lib_exceptions.NotImplemented as ex:
-            raise exceptions.NotImplemented(ex)
-        except lib_exceptions.ServerFault as ex:
-            raise exceptions.ServerFault(ex)
         # TODO(oomichi): This is just a workaround for failing gate tests
         # when separating Forbidden from Unauthorized in tempest-lib.
         # We will need to remove this translation and replace negative tests
