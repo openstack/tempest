@@ -12,6 +12,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib import decorators
+
 from tempest.api.compute import base
 from tempest.common.utils import data_utils
 from tempest import test
@@ -142,7 +144,7 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
         self.assertEqual(server['status'], 'ACTIVE')
 
     @test.attr(type='gate')
-    @test.skip_because(bug="1240043")
+    @decorators.skip_because(bug="1240043")
     def test_get_server_diagnostics_by_admin(self):
         # Retrieve server diagnostics by admin user
         resp, diagnostic = self.client.get_server_diagnostics(self.s1_id)

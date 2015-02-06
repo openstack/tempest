@@ -16,6 +16,7 @@
 import collections
 import re
 
+from tempest_lib import decorators
 import testtools
 
 from tempest.common.utils import data_utils
@@ -438,7 +439,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
                                  act_serv=servers,
                                  trgt_serv=dns_servers))
 
-    @test.skip_because(bug="1412325")
+    @decorators.skip_because(bug="1412325")
     @testtools.skipUnless(CONF.scenario.dhcp_client,
                           "DHCP client is not available.")
     @test.attr(type='smoke')

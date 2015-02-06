@@ -13,6 +13,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib import decorators
 import testtools
 
 from tempest.api.compute.security_groups import base
@@ -55,8 +56,8 @@ class SecurityGroupsNegativeTestJSON(base.BaseSecurityGroupsTest):
         self.assertRaises(exceptions.NotFound, self.client.get_security_group,
                           non_exist_id)
 
-    @test.skip_because(bug="1161411",
-                       condition=CONF.service_available.neutron)
+    @decorators.skip_because(bug="1161411",
+                             condition=CONF.service_available.neutron)
     @test.attr(type=['negative', 'smoke'])
     @test.services('network')
     def test_security_group_create_with_invalid_group_name(self):
@@ -76,8 +77,8 @@ class SecurityGroupsNegativeTestJSON(base.BaseSecurityGroupsTest):
                           self.client.create_security_group, s_name,
                           s_description)
 
-    @test.skip_because(bug="1161411",
-                       condition=CONF.service_available.neutron)
+    @decorators.skip_because(bug="1161411",
+                             condition=CONF.service_available.neutron)
     @test.attr(type=['negative', 'smoke'])
     @test.services('network')
     def test_security_group_create_with_invalid_group_description(self):

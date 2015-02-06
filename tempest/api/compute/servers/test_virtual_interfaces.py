@@ -14,6 +14,7 @@
 #    under the License.
 
 import netaddr
+from tempest_lib import decorators
 
 from tempest.api.compute import base
 from tempest import config
@@ -33,8 +34,8 @@ class VirtualInterfacesTestJSON(base.BaseV2ComputeTest):
         resp, server = cls.create_test_server(wait_until='ACTIVE')
         cls.server_id = server['id']
 
-    @test.skip_because(bug="1183436",
-                       condition=CONF.service_available.neutron)
+    @decorators.skip_because(bug="1183436",
+                             condition=CONF.service_available.neutron)
     @test.attr(type='gate')
     @test.services('network')
     def test_list_virtual_interfaces(self):

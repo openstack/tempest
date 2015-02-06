@@ -12,6 +12,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib import decorators
+
 from tempest.api.compute import base
 from tempest.common.utils import data_utils
 from tempest import config
@@ -91,8 +93,8 @@ class QuotasAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
         self.assertRaises((exceptions.Unauthorized, exceptions.OverLimit),
                           self.create_test_server)
 
-    @test.skip_because(bug="1186354",
-                       condition=CONF.service_available.neutron)
+    @decorators.skip_because(bug="1186354",
+                             condition=CONF.service_available.neutron)
     @test.attr(type='gate')
     @test.services('network')
     def test_security_groups_exceed_limit(self):
@@ -118,8 +120,8 @@ class QuotasAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
                           self.sg_client.create_security_group,
                           "sg-overlimit", "sg-desc")
 
-    @test.skip_because(bug="1186354",
-                       condition=CONF.service_available.neutron)
+    @decorators.skip_because(bug="1186354",
+                             condition=CONF.service_available.neutron)
     @test.attr(type=['negative', 'gate'])
     @test.services('network')
     def test_security_groups_rules_exceed_limit(self):

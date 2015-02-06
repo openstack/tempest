@@ -13,6 +13,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib import decorators
 import testtools
 import time
 import urlparse
@@ -112,7 +113,7 @@ class ContainerSyncTest(base.BaseObjectTest):
                 self.assertEqual(object_content, obj_name[::-1])
 
     @test.attr(type='slow')
-    @test.skip_because(bug='1317133')
+    @decorators.skip_because(bug='1317133')
     @testtools.skipIf(
         not CONF.object_storage_feature_enabled.container_sync,
         'Old-style container sync function is disabled')
