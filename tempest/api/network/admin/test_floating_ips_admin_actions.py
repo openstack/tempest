@@ -16,7 +16,6 @@
 from tempest_lib.common.utils import data_utils
 
 from tempest.api.network import base
-from tempest import clients
 from tempest import config
 from tempest import test
 
@@ -25,11 +24,7 @@ CONF = config.CONF
 
 class FloatingIPAdminTestJSON(base.BaseAdminNetworkTest):
     force_tenant_isolation = True
-
-    @classmethod
-    def setup_credentials(cls):
-        super(FloatingIPAdminTestJSON, cls).setup_credentials()
-        cls.alt_manager = clients.Manager(cls.isolated_creds.get_alt_creds())
+    credentials = ['primary', 'alt', 'admin']
 
     @classmethod
     def setup_clients(cls):

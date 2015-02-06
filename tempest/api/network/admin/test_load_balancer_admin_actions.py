@@ -27,18 +27,14 @@ class LoadBalancerAdminTestJSON(base.BaseAdminNetworkTest):
     Create health monitor for another tenant
     """
 
+    force_tenant_isolation = True
+
     @classmethod
     def skip_checks(cls):
         super(LoadBalancerAdminTestJSON, cls).skip_checks()
         if not test.is_extension_enabled('lbaas', 'network'):
             msg = "lbaas extension not enabled."
             raise cls.skipException(msg)
-
-    @classmethod
-    def setup_credentials(cls):
-        super(LoadBalancerAdminTestJSON, cls).setup_credentials()
-        cls.manager = cls.get_client_manager()
-        cls.primary_creds = cls.isolated_creds.get_primary_creds()
 
     @classmethod
     def setup_clients(cls):
@@ -48,8 +44,7 @@ class LoadBalancerAdminTestJSON(base.BaseAdminNetworkTest):
     @classmethod
     def resource_setup(cls):
         super(LoadBalancerAdminTestJSON, cls).resource_setup()
-        cls.force_tenant_isolation = True
-        cls.tenant_id = cls.primary_creds.tenant_id
+        cls.tenant_id = cls.os.credentials.tenant_id
         cls.network = cls.create_network()
         cls.subnet = cls.create_subnet(cls.network)
         cls.pool = cls.create_pool(data_utils.rand_name('pool-'),

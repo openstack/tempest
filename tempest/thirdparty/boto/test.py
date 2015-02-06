@@ -197,6 +197,8 @@ def friendly_function_call_str(call_able, *args, **kwargs):
 class BotoTestCase(tempest.test.BaseTestCase):
     """Recommended to use as base class for boto related test."""
 
+    credentials = ['primary']
+
     @classmethod
     def skip_checks(cls):
         super(BotoTestCase, cls).skip_checks()
@@ -205,11 +207,6 @@ class BotoTestCase(tempest.test.BaseTestCase):
         if not CONF.identity_feature_enabled.api_v2 or \
                 not CONF.identity.auth_version == 'v2':
             raise cls.skipException("Identity v2 is not available")
-
-    @classmethod
-    def setup_credentials(cls):
-        super(BotoTestCase, cls).setup_credentials()
-        cls.os = cls.get_client_manager()
 
     @classmethod
     def resource_setup(cls):

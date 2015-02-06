@@ -69,3 +69,25 @@ def is_admin_available():
         except exceptions.InvalidConfiguration:
             is_admin = False
     return is_admin
+
+
+# We want a helper function here to check and see if alt credentials
+# are available so we can do a single call from skip_checks if alt
+# creds area vailable.
+def is_alt_available():
+    # If tenant isolation is enabled admin will be available
+    if CONF.auth.allow_tenant_isolation:
+        return True
+    # Check whether test accounts file has the admin specified or not
+    if (CONF.auth.test_accounts_file and
+            os.path.isfile(CONF.auth.test_accounts_file)):
+        check_accounts = accounts.Accounts(name='check_alt')
+    else:
+        check_accounts = accounts.NotLockingAccounts(name='check_alt')
+    try:
+        if not check_accounts.is_multi_user():
+            return False
+        else:
+            return True
+    except exceptions.InvalidConfiguration:
+        return False

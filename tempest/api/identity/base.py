@@ -17,9 +17,7 @@ from oslo_log import log as logging
 from tempest_lib.common.utils import data_utils
 from tempest_lib import exceptions as lib_exc
 
-from tempest import clients
 from tempest.common import cred_provider
-from tempest.common import credentials
 from tempest import config
 import tempest.test
 
@@ -66,6 +64,8 @@ class BaseIdentityTest(tempest.test.BaseTestCase):
 
 class BaseIdentityV2Test(BaseIdentityTest):
 
+    credentials = ['primary']
+
     @classmethod
     def setup_credentials(cls):
         super(BaseIdentityV2Test, cls).setup_credentials()
@@ -94,24 +94,13 @@ class BaseIdentityV2Test(BaseIdentityTest):
 
 class BaseIdentityV2AdminTest(BaseIdentityV2Test):
 
-    @classmethod
-    def setup_credentials(cls):
-        super(BaseIdentityV2AdminTest, cls).setup_credentials()
-        cls.os_adm = clients.Manager(cls.isolated_creds.get_admin_creds())
-
-    @classmethod
-    def skip_checks(cls):
-        if not credentials.is_admin_available():
-            raise cls.skipException('v2 Admin auth disabled')
-        super(BaseIdentityV2AdminTest, cls).skip_checks()
+    credentials = ['admin']
 
     @classmethod
     def setup_clients(cls):
         super(BaseIdentityV2AdminTest, cls).setup_clients()
         cls.client = cls.os_adm.identity_client
         cls.token_client = cls.os_adm.token_client
-        if not cls.client.has_admin_extensions():
-            raise cls.skipException("Admin extensions disabled")
 
     @classmethod
     def resource_setup(cls):
@@ -125,6 +114,8 @@ class BaseIdentityV2AdminTest(BaseIdentityV2Test):
 
 
 class BaseIdentityV3Test(BaseIdentityTest):
+
+    credentials = ['primary']
 
     @classmethod
     def setup_credentials(cls):
@@ -155,16 +146,7 @@ class BaseIdentityV3Test(BaseIdentityTest):
 
 class BaseIdentityV3AdminTest(BaseIdentityV3Test):
 
-    @classmethod
-    def setup_credentials(cls):
-        super(BaseIdentityV3AdminTest, cls).setup_credentials()
-        cls.os_adm = clients.Manager(cls.isolated_creds.get_admin_creds())
-
-    @classmethod
-    def skip_checks(cls):
-        if not credentials.is_admin_available():
-            raise cls.skipException('v3 Admin auth disabled')
-        super(BaseIdentityV3AdminTest, cls).skip_checks()
+    credentials = ['admin']
 
     @classmethod
     def setup_clients(cls):

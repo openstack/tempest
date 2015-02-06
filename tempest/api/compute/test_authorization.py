@@ -20,7 +20,6 @@ from tempest_lib.common.utils import data_utils
 from tempest_lib import exceptions as lib_exc
 
 from tempest.api.compute import base
-from tempest import clients
 from tempest import config
 from tempest import test
 
@@ -30,6 +29,8 @@ LOG = logging.getLogger(__name__)
 
 
 class AuthorizationTestJSON(base.BaseV2ComputeTest):
+
+    credentials = ['primary', 'alt']
 
     @classmethod
     def skip_checks(cls):
@@ -42,12 +43,6 @@ class AuthorizationTestJSON(base.BaseV2ComputeTest):
         # No network resources required for this test
         cls.set_network_resources()
         super(AuthorizationTestJSON, cls).setup_credentials()
-        if not cls.multi_user:
-            msg = "Need >1 user"
-            raise cls.skipException(msg)
-
-        creds = cls.isolated_creds.get_alt_creds()
-        cls.alt_manager = clients.Manager(credentials=creds)
 
     @classmethod
     def setup_clients(cls):
