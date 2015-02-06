@@ -80,16 +80,16 @@ class ExistsAllResponseHeaders(object):
                     return NonExistentHeader('last-modified')
         elif self.method == 'PUT':
             if self.target == 'Object':
-                if 'etag' not in actual:
-                    return NonExistentHeader('etag')
-                #Bug = 1417461
+                "Bug = 1417461"
+                #if 'etag' not in actual:
+                #    return NonExistentHeader('etag')
                 #if 'last-modified' not in actual:
                 #    return NonExistentHeader('last-modified')
         elif self.method == 'COPY':
             if self.target == 'Object':
-                if 'etag' not in actual:
-                    return NonExistentHeader('etag')
-                #Bug = 1417469
+                "Bug = 1417469"
+                #if 'etag' not in actual:
+                #    return NonExistentHeader('etag')
                 #if 'last-modified' not in actual:
                 #    return NonExistentHeader('last-modified')
                 #if 'x-copied-from' not in actual:
