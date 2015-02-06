@@ -844,17 +844,14 @@ def create_secgroups(secgroups):
         # only create a security group if the name isn't here
         # i.e. a security group may be used by another server
         # only create a router if the name isn't here
-        r, body = client.secgroups.list_security_groups()
+        body = client.secgroups.list_security_groups()
         if any(item['name'] == secgroup['name'] for item in body):
             LOG.warning("Security group '%s' already exists" %
                         secgroup['name'])
             continue
 
-        resp, body = client.secgroups.create_security_group(
+        body = client.secgroups.create_security_group(
             secgroup['name'], secgroup['description'])
-        if not resp_ok(resp):
-            raise ValueError("Failed to create security group: [%s] %s" %
-                             (resp, body))
         secgroup_id = body['id']
         # for each security group, create the rules
         for rule in secgroup['rules']:
