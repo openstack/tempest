@@ -24,7 +24,6 @@ CONF = config.CONF
 
 
 class FloatingIPTestJSON(base.BaseNetworkTest):
-    _interface = 'json'
 
     """
     Tests the following operations in the Quantum API using the REST client for

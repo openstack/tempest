@@ -18,7 +18,6 @@ from tempest import test
 
 
 class ExtensionTestJSON(base.BaseIdentityV2AdminTest):
-    _interface = 'json'
 
     @test.attr(type='gate')
     def test_list_extensions(self):

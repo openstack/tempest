@@ -17,7 +17,6 @@ from tempest import test
 
 
 class DHCPAgentSchedulersTestJSON(base.BaseAdminNetworkTest):
-    _interface = 'json'
 
     @classmethod
     def resource_setup(cls):

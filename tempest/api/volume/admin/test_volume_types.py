@@ -22,7 +22,6 @@ CONF = config.CONF
 
 
 class VolumeTypesV2Test(base.BaseVolumeAdminTest):
-    _interface = "json"
 
     def _delete_volume(self, volume_id):
         self.volumes_client.delete_volume(volume_id)

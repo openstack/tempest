@@ -19,7 +19,6 @@ from tempest import test
 
 
 class RolesV3TestJSON(base.BaseIdentityV3AdminTest):
-    _interface = 'json'
 
     @classmethod
     def resource_setup(cls):

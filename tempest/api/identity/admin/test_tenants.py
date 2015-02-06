@@ -21,7 +21,6 @@ from tempest import test
 
 
 class TenantsTestJSON(base.BaseIdentityV2AdminTest):
-    _interface = 'json'
 
     @test.attr(type='gate')
     def test_tenant_list_delete(self):

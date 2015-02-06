@@ -27,7 +27,6 @@ CONF = config.CONF
 
 
 class NetworksTestJSON(base.BaseNetworkTest):
-    _interface = 'json'
 
     """
     Tests the following operations in the Neutron API using the REST client for
@@ -399,7 +398,6 @@ class NetworksTestJSON(base.BaseNetworkTest):
 
 
 class BulkNetworkOpsTestJSON(base.BaseNetworkTest):
-    _interface = 'json'
 
     """
     Tests the following operations in the Neutron API using the REST client for

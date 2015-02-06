@@ -24,8 +24,6 @@ LOG = logging.getLogger(__name__)
 class BaseDatabaseTest(tempest.test.BaseTestCase):
     """Base test case class for all Database API tests."""
 
-    _interface = 'json'
-
     @classmethod
     def resource_setup(cls):
         super(BaseDatabaseTest, cls).resource_setup()

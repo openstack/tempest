@@ -24,7 +24,7 @@ CONF = config.CONF
 
 
 class SecGroupTest(base.BaseSecGroupTest):
-    _interface = 'json'
+
     _tenant_network_cidr = CONF.network.tenant_network_cidr
 
     @classmethod

@@ -23,7 +23,6 @@ CONF = config.CONF
 
 
 class ExternalNetworksAdminNegativeTestJSON(base.BaseAdminNetworkTest):
-    _interface = 'json'
 
     @test.attr(type=['negative'])
     def test_create_port_with_precreated_floatingip_as_fixed_ip(self):

@@ -24,7 +24,6 @@ LOG = logging.getLogger(__name__)
 
 
 class VolumesBackupsV2Test(base.BaseVolumeAdminTest):
-    _interface = "json"
 
     @classmethod
     def resource_setup(cls):

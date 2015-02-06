@@ -31,7 +31,6 @@ class BaseVolumeTest(tempest.test.BaseTestCase):
     """Base test case class for all Cinder API tests."""
 
     _api_version = 2
-    _interface = 'json'
 
     @classmethod
     def resource_setup(cls):
@@ -155,8 +154,7 @@ class BaseVolumeAdminTest(BaseVolumeTest):
 
         try:
             cls.adm_creds = cls.isolated_creds.get_admin_creds()
-            cls.os_adm = clients.Manager(
-                credentials=cls.adm_creds, interface=cls._interface)
+            cls.os_adm = clients.Manager(credentials=cls.adm_creds)
         except NotImplementedError:
             msg = "Missing Volume Admin API credentials in configuration."
             raise cls.skipException(msg)

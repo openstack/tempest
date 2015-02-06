@@ -24,7 +24,6 @@ LOG = logging.getLogger(__name__)
 
 
 class MeteringTestJSON(base.BaseAdminNetworkTest):
-    _interface = 'json'
 
     """
     Tests the following operations in the Neutron API using the REST client for

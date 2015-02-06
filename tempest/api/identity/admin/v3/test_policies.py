@@ -19,7 +19,6 @@ from tempest import test
 
 
 class PoliciesTestJSON(base.BaseIdentityV3AdminTest):
-    _interface = 'json'
 
     def _delete_policy(self, policy_id):
         self.policy_client.delete_policy(policy_id)

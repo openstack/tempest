@@ -18,7 +18,6 @@ from tempest import test
 
 
 class ImagesMemberNegativeTest(base.BaseV2MemberImageTest):
-    _interface = 'json'
 
     @test.attr(type=['negative', 'gate'])
     def test_image_share_invalid_status(self):

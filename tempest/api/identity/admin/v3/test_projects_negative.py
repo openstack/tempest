@@ -22,7 +22,6 @@ from tempest import test
 
 
 class ProjectsNegativeTestJSON(base.BaseIdentityV3AdminTest):
-    _interface = 'json'
 
     @test.attr(type=['negative', 'gate'])
     def test_list_projects_by_unauthorized_user(self):

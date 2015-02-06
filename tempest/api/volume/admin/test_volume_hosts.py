@@ -18,7 +18,6 @@ from tempest import test
 
 
 class VolumeHostsAdminV2TestsJSON(base.BaseVolumeAdminTest):
-    _interface = "json"
 
     @test.attr(type='gate')
     def test_list_hosts(self):

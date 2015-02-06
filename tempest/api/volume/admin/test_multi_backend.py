@@ -22,7 +22,6 @@ LOG = logging.getLogger(__name__)
 
 
 class VolumeMultiBackendV2Test(base.BaseVolumeAdminTest):
-    _interface = "json"
 
     @classmethod
     def resource_setup(cls):

@@ -38,7 +38,7 @@ class VolumesGetTestJSON(base.BaseV2ComputeTest):
     def test_volume_create_get_delete(self):
         # CREATE, GET, DELETE Volume
         volume = None
-        v_name = data_utils.rand_name('Volume-%s-') % self._interface
+        v_name = data_utils.rand_name('Volume')
         metadata = {'Type': 'work'}
         # Create volume
         volume = self.client.create_volume(size=1,

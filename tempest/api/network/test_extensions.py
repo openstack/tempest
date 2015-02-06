@@ -19,7 +19,6 @@ from tempest import test
 
 
 class ExtensionsTestJSON(base.BaseNetworkTest):
-    _interface = 'json'
 
     """
     Tests the following operations in the Neutron API using the REST client for

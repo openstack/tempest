@@ -22,7 +22,6 @@ from tempest import test
 
 
 class EndpointsNegativeTestJSON(base.BaseIdentityV3AdminTest):
-    _interface = 'json'
 
     @classmethod
     def resource_setup(cls):

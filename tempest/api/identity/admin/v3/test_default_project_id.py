@@ -18,7 +18,6 @@ from tempest import test
 
 
 class TestDefaultProjectId (base.BaseIdentityV3AdminTest):
-    _interface = 'json'
 
     @classmethod
     def resource_setup(cls):
@@ -74,8 +73,7 @@ class TestDefaultProjectId (base.BaseIdentityV3AdminTest):
                                            domain_name=dom_name)
         auth_provider = auth.KeystoneV3AuthProvider(creds)
         creds = auth_provider.fill_credentials()
-        admin_client = clients.Manager(interface=self._interface,
-                                       credentials=creds)
+        admin_client = clients.Manager(credentials=creds)
 
         # verify the user's token and see that it is scoped to the project
         token, auth_data = admin_client.auth_provider.get_auth()

@@ -30,13 +30,11 @@ class VolumesV2TransfersTest(base.BaseVolumeTest):
         super(VolumesV2TransfersTest, cls).resource_setup()
 
         # Add another tenant to test volume-transfer
-        cls.os_alt = clients.Manager(cls.isolated_creds.get_alt_creds(),
-                                     interface=cls._interface)
+        cls.os_alt = clients.Manager(cls.isolated_creds.get_alt_creds())
         # Add admin tenant to cleanup resources
         try:
             creds = cls.isolated_creds.get_admin_creds()
-            cls.os_adm = clients.Manager(
-                credentials=creds, interface=cls._interface)
+            cls.os_adm = clients.Manager(credentials=creds)
         except NotImplementedError:
             msg = "Missing Volume Admin API credentials in configuration."
             raise cls.skipException(msg)

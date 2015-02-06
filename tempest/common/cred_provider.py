@@ -68,8 +68,7 @@ def get_configured_credentials(credential_type, fill_in=True,
 
 @six.add_metaclass(abc.ABCMeta)
 class CredentialProvider(object):
-    def __init__(self, name, interface='json', password='pass',
-                 network_resources=None):
+    def __init__(self, name, password='pass', network_resources=None):
         self.name = name
 
     @abc.abstractmethod

@@ -155,10 +155,7 @@ class Manager(manager.Manager):
     }
     default_params_with_timeout_values.update(default_params)
 
-    def __init__(self, credentials=None, interface='json', service=None):
-        # Set interface and client type first
-        self.interface = interface
-        # super cares for credentials validation
+    def __init__(self, credentials=None, service=None):
         super(Manager, self).__init__(credentials=credentials)
 
         self._set_compute_clients()
@@ -376,9 +373,8 @@ class AdminManager(Manager):
     managed client objects
     """
 
-    def __init__(self, interface='json', service=None):
+    def __init__(self, service=None):
         super(AdminManager, self).__init__(
             credentials=cred_provider.get_configured_credentials(
                 'identity_admin'),
-            interface=interface,
             service=service)

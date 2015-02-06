@@ -18,7 +18,6 @@ from tempest import test
 
 
 class DatabaseVersionsTest(base.BaseDatabaseTest):
-    _interface = 'json'
 
     @classmethod
     def resource_setup(cls):
