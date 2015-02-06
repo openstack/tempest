@@ -19,13 +19,13 @@ import os
 from tempest import clients
 from tempest import exceptions
 from neutronclient.common import exceptions as NeutronClientException
+from tempest.common import credentials
 from tempest.common.utils import data_utils
 from tempest.common.utils.linux import remote_client
 from tempest import config
 from tempest.openstack.common import log
 from tempest.scenario import manager
 from tempest.services.network import resources as net_resources
-from tempest.scenario.midokura.midotools import admintools
 
 CONF = config.CONF
 LOG = log.getLogger(__name__)
@@ -37,10 +37,10 @@ class AdvancedNetworkScenarioTest(manager.NetworkScenarioTest):
     """
 
     @classmethod
-    def clear_isolated_creds(cls):
-        super(AdvancedNetworkScenarioTest, cls).clear_isolated_creds()
-        TA = admintools.TenantAdmin()
-        TA.teardown_tenants()
+    def resource_setup(cls):
+        # Create no network resources for these tests.
+        cls.set_network_resources()
+        super(AdvancedNetworkScenarioTest, cls).resource_setup()
 
     """
     Creation Methods
@@ -98,10 +98,12 @@ class AdvancedNetworkScenarioTest(manager.NetworkScenarioTest):
                                     create_kwargs=create_kwargs)
         FIP = None
         if has_FIP:
-            network_names = self._get_network_by_name(networks[0]['name'])
+            # FIXME: when cirros is gone
+            # We bind the fip to the first network, which is the first
+            # nic on cirros image (the one attached to the "gateway network")
             FIP = self._assign_floating_ip(
                 server=server,
-                network_name=network_names[0]['name'])
+                network_name=networks[0]['name'])
 
         return dict(server=server, keypair=keypair, FIP=FIP)
 
@@ -114,19 +116,16 @@ class AdvancedNetworkScenarioTest(manager.NetworkScenarioTest):
         in order to access tenant internal network
         workaround ip namespace
         """
-        network, _, _ = \
-            self.create_networks(tenant_id=tenant)
+        networks = self._get_tenant_networks(tenant)
+        network, _, _ = self.create_networks(tenant_id=tenant)
+        # FIXME: look as soon as we change cirros image
+        # cirros only ifup the first interface, thus we need to put
+        # the "gateway" network at the front (so it's the first to ifup)
+        networks.insert(0, network)
+
         name = 'access_point'
         name = data_utils.rand_name(name)
 
-        networks = self._get_tenant_networks(tenant)
-        if networks[0]['name'] != network['name']:
-            for i in xrange(len(networks)):
-                if networks[i]['name'] == \
-                        network['name'] and i != 0:
-                            net = networks[i]
-                            networks[i] = networks[0]
-                            networks[0] = net
         self._create_security_group(tenant_id=tenant,
                                     namestart='gateway')
         security_groups = self._get_tenant_security_groups(tenant)
@@ -136,6 +135,7 @@ class AdvancedNetworkScenarioTest(manager.NetworkScenarioTest):
                                         has_FIP=True)
 
         tupla = (serv_dict['FIP'], serv_dict['server'])
+        # FIXME: look as soon as we change cirros image
         self._fix_access_point(tupla,
                                serv_dict['keypair'])
         return serv_dict
@@ -147,8 +147,6 @@ class AdvancedNetworkScenarioTest(manager.NetworkScenarioTest):
         access_point_ip, server = access_point
         private_key = keypair['private_key']
         ip = access_point_ip.floating_ip_address
-        self.servers_client.wait_for_server_status(server_id=server['id'],
-                                                   status='ACTIVE')
         access_point_ssh = \
             remote_client.RemoteClient(
                 server=ip,
@@ -159,12 +157,13 @@ class AdvancedNetworkScenarioTest(manager.NetworkScenarioTest):
         # fix for cirros image in order to enable a second eth
         for net in xrange(1, len(server['addresses'].keys())):
             if access_point_ssh.exec_command(
-                    "cat /sys/class/net/eth{0}/operstate".format(net), 300) \
+                    "cat /sys/class/net/eth{0}/operstate".format(net),
+                    cmd_timeout=300) \
                     is not 'up\n':
                 try:
                     result = access_point_ssh.exec_command(
                         "sudo /sbin/cirros-dhcpc up eth{0}".format(net),
-                        300)
+                        cmd_timeout=300)
                     LOG.info(result)
                 except exceptions.TimeoutException as inst:
                     LOG.warning("Silent TimeoutException!")
@@ -206,17 +205,11 @@ class AdvancedNetworkScenarioTest(manager.NetworkScenarioTest):
     Get Methods
     """
     def _get_tenant(self, tenant):
-        TA = admintools.TenantAdmin()
-        _tenant = None
-        _creds = None
-        _tenant = TA.get_tenant_by_name(tenant['name'])
-        if _tenant is None:
-            _tenant, _creds = TA.tenant_create_enabled(
-                name=tenant['name'],
-                desc=tenant['description'])
-        else:
-            _creds = TA.admin_credentials(_tenant)
-        return _tenant, _creds
+        iso_creds = credentials.get_isolated_credentials(tenant)
+        self.addCleanup(iso_creds.clear_isolated_creds)
+        # Get admin credentials to be able to create resources
+        tenant_admin_creds = iso_creds.get_credentials('admin')
+        return tenant_admin_creds
 
     def _get_tenant_security_groups(self, tenant=None):
         if not tenant:
@@ -267,14 +260,15 @@ class AdvancedNetworkScenarioTest(manager.NetworkScenarioTest):
     Tool methods
     """
     def set_context(self, credentials):
+        # TODO: we may need to get other clients to avoid auth problems
         self.mymanager = clients.Manager(credentials=credentials)
         self.floating_ips_client = self.mymanager.floating_ips_client
         self.keypairs_client = self.mymanager.keypairs_client
-        self.networks_client = self.mymanager.networks_client
         self.security_groups_client = self.mymanager.security_groups_client
         self.servers_client = self.mymanager.servers_client
         self.interface_client = self.mymanager.interfaces_client
         self.network_client = self.mymanager.network_client
+        self.networks_client = self.mymanager.networks_client
 
     def _toggle_dhcp(self, subnet_id, enable=False):
         result = self.network_client.update_subnet(subnet_id,
@@ -313,7 +307,7 @@ class AdvancedNetworkScenarioTest(manager.NetworkScenarioTest):
     """
     YAML parsing methods
     """
-    def _setup_topology(self, topology, tenant_id=None):
+    def _setup_topology(self, topology, tenant_id=None, tenant_name=None):
         if tenant_id:
             self.tenant_id = tenant_id
         networks = [n for n in topology['networks']]
@@ -397,14 +391,15 @@ class AdvancedNetworkScenarioTest(manager.NetworkScenarioTest):
             scenario = list()
             if 'tenants' in topology.keys():
                 for tenant in topology['tenants']:
-                    _tenant, creds = self._get_tenant(tenant)
-                    self.set_context(creds)
+                    tenant_creds = self._get_tenant(tenant['name'])
+                    self.set_context(tenant_creds)
                     topo = [x for x in topology['scenarios']
                             if x['name'] == tenant['scenario']][0]
-                    scenario.append(dict(credentials=creds,
+                    scenario.append(dict(credentials=tenant_creds,
                                          servers_and_keys=self._setup_topology(
                                              topo,
-                                             tenant_id=_tenant['id'])))
+                                             tenant_id=getattr(tenant_creds,
+                                                               'tenant_id'))))
             else:
                 scenario = self._setup_topology(topology)
         return scenario

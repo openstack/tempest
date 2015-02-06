@@ -16,8 +16,8 @@ except DistributionNotFound:
     pip.main(['install', 'SimpleConfigParser'])
 
 from simpleconfigparser import simpleconfigparser
+from tempest import auth
 from tempest import clients
-from tempest.scenario.midokura.midotools import admintools
 from tempest import config
 
 CONF = config.CONF
@@ -26,10 +26,7 @@ tenant = None
 
 
 def main():
-    admin = admintools.TenantAdmin()
-    tenant_name = CONF.identity.admin_tenant_name
-    tenant = admin.get_tenant_by_name(tenant_name)
-    credentials = admin.admin_credentials(tenant)
+    credentials = auth.get_default_credentials('identity_admin')
     network_client, image_client, glance_client = set_context(credentials)
     # Start to config
     fix_cirros(glance_client, image_client)
@@ -113,8 +110,8 @@ def fix_tempest_conf(network_client):
     extensions_dict = network_client.list_extensions()
     extensions_unfiltered = [x['alias'] for x in extensions_dict['extensions']]
     # setup network extensions
-    extensions = [x for x in extensions_unfiltered if x not in
-    ['lbaas','fwaas']]
+    extensions = [x for x in extensions_unfiltered
+                  if x not in ['lbaas', 'fwaas']]
     to_string = ""
     for ex in extensions[:-1]:
         if ex != "lbaas" or ex != "fwaas":
@@ -137,6 +134,10 @@ def fix_tempest_conf(network_client):
     except:
         if not config.get('compute', 'allow_tenant_isolation'):
             config.set('compute', 'allow_tenant_isolation', 'True')
+
+    # increase ssh timeouts to minimize false gateway failures
+    config.set('compute', 'ssh_timeout', '300')
+    config.set('compute', 'ssh_channel_timeout', '60')
 
     with open(_path, 'w') as tempest_conf:
         config.write(tempest_conf)
