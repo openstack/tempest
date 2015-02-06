@@ -41,33 +41,38 @@ class ExistsAllResponseHeaders(object):
         param: actual HTTP response headers
         """
         # Check common headers for all HTTP methods
-        if 'content-length' not in actual:
-            return NonExistentHeader('content-length')
+        #Bug = 1417461
+        #if 'content-length' not in actual:
+        #    return NonExistentHeader('content-length')
         if 'content-type' not in actual:
             return NonExistentHeader('content-type')
-        if 'x-trans-id' not in actual:
-            return NonExistentHeader('x-trans-id')
+        #Bug = 1417455, 1417461, 1417465, 1417474
+        #if 'x-trans-id' not in actual:
+        #    return NonExistentHeader('x-trans-id')
         if 'date' not in actual:
             return NonExistentHeader('date')
 
         # Check headers for a specific method or target
         if self.method == 'GET' or self.method == 'HEAD':
-            if 'x-timestamp' not in actual:
-                return NonExistentHeader('x-timestamp')
+            #Bug = 1417455
+            #if 'x-timestamp' not in actual:
+            #    return NonExistentHeader('x-timestamp')
             if 'accept-ranges' not in actual:
                 return NonExistentHeader('accept-ranges')
             if self.target == 'Account':
-                if 'x-account-bytes-used' not in actual:
-                    return NonExistentHeader('x-account-bytes-used')
-                if 'x-account-container-count' not in actual:
-                    return NonExistentHeader('x-account-container-count')
-                if 'x-account-object-count' not in actual:
-                    return NonExistentHeader('x-account-object-count')
+                'Bug = 1417482'
+                #if 'x-account-bytes-used' not in actual:
+                #    return NonExistentHeader('x-account-bytes-used')
+                #if 'x-account-container-count' not in actual:
+                #    return NonExistentHeader('x-account-container-count')
+                #if 'x-account-object-count' not in actual:
+                #    return NonExistentHeader('x-account-object-count')
             elif self.target == 'Container':
-                if 'x-container-bytes-used' not in actual:
-                    return NonExistentHeader('x-container-bytes-used')
-                if 'x-container-object-count' not in actual:
-                    return NonExistentHeader('x-container-object-count')
+                "Bug = 1417474"
+                #if 'x-container-bytes-used' not in actual:
+                #    return NonExistentHeader('x-container-bytes-used')
+                #if 'x-container-object-count' not in actual:
+                #    return NonExistentHeader('x-container-object-count')
             elif self.target == 'Object':
                 if 'etag' not in actual:
                     return NonExistentHeader('etag')
@@ -77,18 +82,20 @@ class ExistsAllResponseHeaders(object):
             if self.target == 'Object':
                 if 'etag' not in actual:
                     return NonExistentHeader('etag')
-                if 'last-modified' not in actual:
-                    return NonExistentHeader('last-modified')
+                #Bug = 1417461
+                #if 'last-modified' not in actual:
+                #    return NonExistentHeader('last-modified')
         elif self.method == 'COPY':
             if self.target == 'Object':
                 if 'etag' not in actual:
                     return NonExistentHeader('etag')
-                if 'last-modified' not in actual:
-                    return NonExistentHeader('last-modified')
-                if 'x-copied-from' not in actual:
-                    return NonExistentHeader('x-copied-from')
-                if 'x-copied-from-last-modified' not in actual:
-                    return NonExistentHeader('x-copied-from-last-modified')
+                #Bug = 1417469
+                #if 'last-modified' not in actual:
+                #    return NonExistentHeader('last-modified')
+                #if 'x-copied-from' not in actual:
+                #    return NonExistentHeader('x-copied-from')
+                #if 'x-copied-from-last-modified' not in actual:
+                #    return NonExistentHeader('x-copied-from-last-modified')
 
         return None
 
