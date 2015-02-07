@@ -35,13 +35,25 @@ class BaseMessagingTest(test.BaseTestCase):
     """
 
     @classmethod
-    def resource_setup(cls):
-        super(BaseMessagingTest, cls).resource_setup()
+    def skip_checks(cls):
+        super(BaseMessagingTest, cls).skip_checks()
         if not CONF.service_available.zaqar:
             raise cls.skipException("Zaqar support is required")
-        os = cls.get_client_manager()
+
+    @classmethod
+    def setup_credentials(cls):
+        super(BaseMessagingTest, cls).setup_credentials()
+        cls.os = cls.get_client_manager()
+
+    @classmethod
+    def setup_clients(cls):
+        super(BaseMessagingTest, cls).setup_clients()
+        cls.client = cls.os.messaging_client
+
+    @classmethod
+    def resource_setup(cls):
+        super(BaseMessagingTest, cls).resource_setup()
         cls.messaging_cfg = CONF.messaging
-        cls.client = os.messaging_client
 
     @classmethod
     def create_queue(cls, queue_name):
