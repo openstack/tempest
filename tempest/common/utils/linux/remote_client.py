@@ -30,10 +30,10 @@ class RemoteClient(object):
 
     # NOTE(afazekas): It should always get an address instead of server
     def __init__(self, server, username, password=None, pkey=None):
-        ssh_timeout = CONF.compute.ssh_timeout
+        ssh_timeout = CONF.validation.ssh_timeout
         network = CONF.compute.network_for_ssh
-        ip_version = CONF.compute.ip_version_for_ssh
-        ssh_channel_timeout = CONF.compute.ssh_channel_timeout
+        ip_version = CONF.validation.ip_version_for_ssh
+        connect_timeout = CONF.validation.connect_timeout
         if isinstance(server, six.string_types):
             ip_address = server
         else:
@@ -46,7 +46,7 @@ class RemoteClient(object):
                 raise exceptions.ServerUnreachable()
         self.ssh_client = ssh.Client(ip_address, username, password,
                                      ssh_timeout, pkey=pkey,
-                                     channel_timeout=ssh_channel_timeout)
+                                     channel_timeout=connect_timeout)
 
     def exec_command(self, cmd):
         # Shell options below add more clearness on failures,

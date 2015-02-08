@@ -28,9 +28,9 @@ class TestRemoteClient(base.TestCase):
         super(TestRemoteClient, self).setUp()
         self.useFixture(fake_config.ConfigFixture())
         self.stubs.Set(config, 'TempestConfigPrivate', fake_config.FakePrivate)
-        cfg.CONF.set_default('ip_version_for_ssh', 4, group='compute')
+        cfg.CONF.set_default('ip_version_for_ssh', 4, group='validation')
         cfg.CONF.set_default('network_for_ssh', 'public', group='compute')
-        cfg.CONF.set_default('ssh_channel_timeout', 1, group='compute')
+        cfg.CONF.set_default('connect_timeout', 1, group='validation')
 
         self.conn = remote_client.RemoteClient('127.0.0.1', 'user', 'pass')
         self.ssh_mock = self.useFixture(mockpatch.PatchObject(self.conn,

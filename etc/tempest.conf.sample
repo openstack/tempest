@@ -284,17 +284,9 @@
 # (integer value)
 #ping_count = 1
 
-# Timeout in seconds to wait for authentication to succeed. (integer
-# value)
-#ssh_timeout = 300
-
 # Additional wait time for clean state, when there is no OS-EXT-STS
 # extension available (integer value)
 #ready_wait = 0
-
-# Timeout in seconds to wait for output from ssh channel. (integer
-# value)
-#ssh_channel_timeout = 60
 
 # Name of the fixed network that is visible to all test tenants. If
 # multiple networks are available for a tenant this is the network
@@ -306,9 +298,6 @@
 # Network used for SSH connections. Ignored if
 # use_floatingip_for_ssh=true or run_validation=false. (string value)
 #network_for_ssh = public
-
-# IP version used for SSH connections. (integer value)
-#ip_version_for_ssh = 4
 
 # Does SSH use Floating IPs? (boolean value)
 #use_floatingip_for_ssh = true
@@ -1115,6 +1104,7 @@
 #auth_method = keypair
 
 # Default IP version for ssh connections. (integer value)
+# Deprecated group/name - [compute]/ip_version_for_ssh
 #ip_version_for_ssh = 4
 
 # Timeout in seconds to wait for ping to succeed. (integer value)
@@ -1122,9 +1112,11 @@
 
 # Timeout in seconds to wait for the TCP connection to be successful.
 # (integer value)
+# Deprecated group/name - [compute]/ssh_channel_timeout
 #connect_timeout = 60
 
 # Timeout in seconds to wait for the ssh banner. (integer value)
+# Deprecated group/name - [compute]/ssh_timeout
 #ssh_timeout = 300
 
 
