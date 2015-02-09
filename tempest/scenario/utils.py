@@ -67,7 +67,7 @@ class ImageUtils(object):
 
     def is_flavor_enough(self, flavor_id, image_id):
         _image = self.images_client.get_image(image_id)
-        _, _flavor = self.flavors_client.get_flavor_details(flavor_id)
+        _flavor = self.flavors_client.get_flavor_details(flavor_id)
         return self._is_flavor_enough(_flavor, _image)
 
 
@@ -134,7 +134,7 @@ class InputScenarioUtils(object):
         :return: a scenario with name and uuid of flavors
         """
         if not hasattr(self, '_scenario_flavors'):
-            _, flavors = self.flavors_client.list_flavors()
+            flavors = self.flavors_client.list_flavors()
             self._scenario_flavors = [
                 (self._normalize_name(f['name']), dict(flavor_ref=f['id']))
                 for f in flavors if re.search(self.flavor_pattern,

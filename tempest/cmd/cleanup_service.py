@@ -805,7 +805,7 @@ class FlavorService(BaseService):
 
     def list(self):
         client = self.client
-        _, flavors = client.list_flavors({"is_public": None})
+        flavors = client.list_flavors({"is_public": None})
         if not self.is_save_state:
             # recreate list removing saved flavors
             flavors = [flavor for flavor in flavors if flavor['id']

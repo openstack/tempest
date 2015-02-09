@@ -63,7 +63,7 @@ class ImagesOneServerTestJSON(base.BaseV2ComputeTest):
         cls.server_id = server['id']
 
     def _get_default_flavor_disk_size(self, flavor_id):
-        resp, flavor = self.flavors_client.get_flavor_details(flavor_id)
+        flavor = self.flavors_client.get_flavor_details(flavor_id)
         return flavor['disk']
 
     @test.attr(type='smoke')
