@@ -302,16 +302,27 @@ class Manager(manager.Manager):
             **self.default_params_with_timeout_values)
 
     def _set_identity_clients(self):
-        self.identity_client = IdentityClientJSON(self.auth_provider)
-        self.identity_v3_client = IdentityV3ClientJSON(self.auth_provider)
-        self.endpoints_client = EndPointClientJSON(self.auth_provider)
-        self.service_client = ServiceClientJSON(self.auth_provider)
-        self.policy_client = PolicyClientJSON(self.auth_provider)
-        self.region_client = RegionClientJSON(self.auth_provider)
+        params = {
+            'service': CONF.identity.catalog_type,
+            'region': CONF.identity.region,
+            'endpoint_type': 'adminURL'
+        }
+        params.update(self.default_params_with_timeout_values)
+
+        self.identity_client = IdentityClientJSON(self.auth_provider,
+                                                  **params)
+        self.identity_v3_client = IdentityV3ClientJSON(self.auth_provider,
+                                                       **params)
+        self.endpoints_client = EndPointClientJSON(self.auth_provider,
+                                                   **params)
+        self.service_client = ServiceClientJSON(self.auth_provider, **params)
+        self.policy_client = PolicyClientJSON(self.auth_provider, **params)
+        self.region_client = RegionClientJSON(self.auth_provider, **params)
+        self.credentials_client = CredentialsClientJSON(self.auth_provider,
+                                                        **params)
         self.token_client = TokenClientJSON()
         if CONF.identity_feature_enabled.api_v3:
             self.token_v3_client = V3TokenClientJSON()
-        self.credentials_client = CredentialsClientJSON(self.auth_provider)
 
     def _set_volume_clients(self):
         params = {

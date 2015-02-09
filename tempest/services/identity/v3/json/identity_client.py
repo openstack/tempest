@@ -17,10 +17,10 @@ import json
 import urllib
 
 from tempest.common import service_client
-from tempest.services.identity.v3.json import base
 
 
-class IdentityV3ClientJSON(base.IdentityV3Client):
+class IdentityV3ClientJSON(service_client.ServiceClient):
+    api_version = "v3"
 
     def create_user(self, user_name, password=None, project_id=None,
                     email=None, domain_id='default', **kwargs):
