@@ -58,6 +58,8 @@ from tempest.services.compute.json.security_groups_client import \
     SecurityGroupsClientJSON
 from tempest.services.compute.json.servers_client import ServersClientJSON
 from tempest.services.compute.json.services_client import ServicesClientJSON
+from tempest.services.compute.json.tenant_networks_client import \
+    TenantNetworksClientJSON
 from tempest.services.compute.json.tenant_usages_client import \
     TenantUsagesClientJSON
 from tempest.services.compute.json.volumes_extensions_client import \
@@ -263,6 +265,8 @@ class Manager(manager.Manager):
                                                       **params)
         self.instance_usages_audit_log_client = \
             InstanceUsagesAuditLogClientJSON(self.auth_provider, **params)
+        self.tenant_networks_client = \
+            TenantNetworksClientJSON(self.auth_provider, **params)
 
         # NOTE: The following client needs special timeout values because
         # the API is a proxy for the other component.
