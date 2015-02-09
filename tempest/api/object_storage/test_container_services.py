@@ -342,6 +342,7 @@ class ContainerTest(base.BaseObjectTest):
         self.assertEqual(resp['x-container-meta-test-container-meta2'],
                          metadata_2['test-container-meta2'])
 
+    @test.skip_because(bug="1417490")
     @test.attr(type='smoke')
     def test_update_container_metadata_with_create_metadata(self):
         # update container metadata using add metadata

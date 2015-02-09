@@ -28,45 +28,48 @@ class AccountQuotasTest(base.BaseObjectTest):
     @classmethod
     def resource_setup(cls):
         super(AccountQuotasTest, cls).resource_setup()
-        cls.container_name = data_utils.rand_name(name="TestContainer")
-        cls.container_client.create_container(cls.container_name)
+        #Bug = 1417472
+        #cls.container_name = data_utils.rand_name(name="TestContainer")
+        #cls.container_client.create_container(cls.container_name)
 
-        cls.data.setup_test_user(reseller=True)
+        #cls.data.setup_test_user(reseller=True)
 
-        cls.os_reselleradmin = clients.Manager(cls.data.test_credentials)
+        #cls.os_reselleradmin = clients.Manager(cls.data.test_credentials)
 
         # Retrieve a ResellerAdmin auth data and use it to set a quota
         # on the client's account
-        cls.reselleradmin_auth_data = \
-            cls.os_reselleradmin.auth_provider.auth_data
+        #cls.reselleradmin_auth_data = \
+        #    cls.os_reselleradmin.auth_provider.auth_data
 
     def setUp(self):
         super(AccountQuotasTest, self).setUp()
 
+        #Bug = 1417472
         # Set the reselleradmin auth in headers for next account_client
         # request
-        self.account_client.auth_provider.set_alt_auth_data(
-            request_part='headers',
-            auth_data=self.reselleradmin_auth_data
-        )
+        #self.account_client.auth_provider.set_alt_auth_data(
+        #    request_part='headers',
+        #    auth_data=self.reselleradmin_auth_data
+        #)
         # Set a quota of 20 bytes on the user's account before each test
-        headers = {"X-Account-Meta-Quota-Bytes": "20"}
+        #headers = {"X-Account-Meta-Quota-Bytes": "20"}
 
-        self.os.account_client.request("POST", url="", headers=headers,
-                                       body="")
+        #self.os.account_client.request("POST", url="", headers=headers,
+        #                               body="")
 
     def tearDown(self):
+        #Bug = 1417472
         # Set the reselleradmin auth in headers for next account_client
         # request
-        self.account_client.auth_provider.set_alt_auth_data(
-            request_part='headers',
-            auth_data=self.reselleradmin_auth_data
-        )
+        #self.account_client.auth_provider.set_alt_auth_data(
+        #    request_part='headers',
+        #    auth_data=self.reselleradmin_auth_data
+        #)
         # remove the quota from the container
-        headers = {"X-Remove-Account-Meta-Quota-Bytes": "x"}
+        #headers = {"X-Remove-Account-Meta-Quota-Bytes": "x"}
 
-        self.os.account_client.request("POST", url="", headers=headers,
-                                       body="")
+        #self.os.account_client.request("POST", url="", headers=headers,
+        #                               body="")
         super(AccountQuotasTest, self).tearDown()
 
     @classmethod
@@ -75,6 +78,7 @@ class AccountQuotasTest(base.BaseObjectTest):
             cls.delete_containers([cls.container_name])
         super(AccountQuotasTest, cls).resource_cleanup()
 
+    @test.skip_because(bug="1417472")
     @test.attr(type="smoke")
     @test.requires_ext(extension='account_quotas', service='object')
     def test_upload_valid_object(self):

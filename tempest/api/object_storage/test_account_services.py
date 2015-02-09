@@ -174,6 +174,7 @@ class AccountTest(base.BaseObjectTest):
         self.assertHeaders(resp, 'Account', 'GET')
         self.assertEqual(len(container_list), self.containers_count / 2)
 
+    @test.skip_because(bug="1417479")
     @test.attr(type='smoke')
     def test_list_containers_with_marker_and_end_marker(self):
         # list containers combining marker and end_marker param

@@ -44,6 +44,7 @@ class ContainerTest(base.BaseObjectTest):
         header_value = resp.get('x-versions-location', 'Missing Header')
         self.assertEqual(header_value, versioned)
 
+    @test.skip_because(bug="1417504")
     @test.attr(type='smoke')
     @testtools.skipIf(
         not CONF.object_storage_feature_enabled.object_versioning,

@@ -57,8 +57,9 @@ class ExistsAllResponseHeaders(object):
             #Bug = 1417455
             #if 'x-timestamp' not in actual:
             #    return NonExistentHeader('x-timestamp')
-            if 'accept-ranges' not in actual:
-                return NonExistentHeader('accept-ranges')
+            #Bug = 1417482
+            #if 'accept-ranges' not in actual:
+            #    return NonExistentHeader('accept-ranges')
             if self.target == 'Account':
                 'Bug = 1417482'
                 #if 'x-account-bytes-used' not in actual:

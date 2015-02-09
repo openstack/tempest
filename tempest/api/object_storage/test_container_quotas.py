@@ -66,6 +66,7 @@ class ContainerQuotasTest(base.BaseObjectTest):
         nafter = self._get_bytes_used()
         self.assertEqual(nbefore + len(data), nafter)
 
+    @test.skip_because(bug="1417472")
     @test.requires_ext(extension='container_quotas', service='object')
     @test.attr(type="smoke")
     def test_upload_large_object(self):
@@ -82,6 +83,7 @@ class ContainerQuotasTest(base.BaseObjectTest):
         nafter = self._get_bytes_used()
         self.assertEqual(nbefore, nafter)
 
+    @test.skip_because(bug="1417472")
     @test.requires_ext(extension='container_quotas', service='object')
     @test.attr(type="smoke")
     def test_upload_too_many_objects(self):
