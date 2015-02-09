@@ -85,6 +85,7 @@ class AccountQuotasTest(base.BaseObjectTest):
 
         self.assertHeaders(resp, 'Object', 'PUT')
 
+    @test.skip_because(bug="1417472")
     @test.attr(type=["smoke"])
     @test.requires_ext(extension='account_quotas', service='object')
     def test_admin_modify_quota(self):

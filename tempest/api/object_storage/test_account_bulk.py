@@ -65,6 +65,7 @@ class BulkTest(base.BaseObjectTest):
         self.assertHeaders(resp, 'Account', 'GET')
         self.assertNotIn(container_name, body)
 
+    @test.skip_because(bug="1417457")
     @test.attr(type='gate')
     @test.requires_ext(extension='bulk', service='object')
     def test_extract_archive(self):
@@ -101,6 +102,7 @@ class BulkTest(base.BaseObjectTest):
 
         self.assertIn(object_name, [c['name'] for c in contents_list])
 
+    @test.skip_because(bug="1417457")
     @test.attr(type='gate')
     @test.requires_ext(extension='bulk', service='object')
     def test_bulk_delete(self):
@@ -128,6 +130,7 @@ class BulkTest(base.BaseObjectTest):
         # Check if uploaded contents are completely deleted
         self._check_contents_deleted(container_name)
 
+    @test.skip_because(bug="1417457")
     @test.attr(type='gate')
     @test.requires_ext(extension='bulk', service='object')
     def test_bulk_delete_by_POST(self):
