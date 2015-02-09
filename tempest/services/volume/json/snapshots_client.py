@@ -17,13 +17,12 @@ import urllib
 from tempest.common import service_client
 from tempest import exceptions
 from tempest.openstack.common import log as logging
-from tempest.services.volume.json import base
 
 
 LOG = logging.getLogger(__name__)
 
 
-class BaseSnapshotsClientJSON(base.VolumeClient):
+class BaseSnapshotsClientJSON(service_client.ServiceClient):
     """Base Client class to send CRUD Volume API requests."""
 
     create_resp = 200

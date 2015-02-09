@@ -18,10 +18,9 @@ import urllib
 
 from tempest.common import service_client
 from tempest import exceptions
-from tempest.services.volume.json import base
 
 
-class BaseVolumeTypesClientJSON(base.VolumeClient):
+class BaseVolumeTypesClientJSON(service_client.ServiceClient):
     """
     Client class to send CRUD Volume Types API requests to a Cinder endpoint
     """

@@ -17,10 +17,9 @@ import time
 
 from tempest.common import service_client
 from tempest import exceptions
-from tempest.services.volume.json import base
 
 
-class BaseQosSpecsClientJSON(base.VolumeClient):
+class BaseQosSpecsClientJSON(service_client.ServiceClient):
     """Client class to send CRUD QoS API requests"""
 
     def is_resource_deleted(self, qos_id):
