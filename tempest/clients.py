@@ -72,18 +72,18 @@ from tempest.services.database.json.limits_client import \
 from tempest.services.database.json.versions_client import \
     DatabaseVersionsClientJSON
 from tempest.services.identity.json.identity_client import IdentityClientJSON
-from tempest.services.identity.json.identity_client import TokenClientJSON
+from tempest.services.identity.json.token_client import TokenClientJSON
 from tempest.services.identity.v3.json.credentials_client import \
     CredentialsClientJSON
 from tempest.services.identity.v3.json.endpoints_client import \
     EndPointClientJSON
 from tempest.services.identity.v3.json.identity_client import \
     IdentityV3ClientJSON
-from tempest.services.identity.v3.json.identity_client import V3TokenClientJSON
 from tempest.services.identity.v3.json.policy_client import PolicyClientJSON
 from tempest.services.identity.v3.json.region_client import RegionClientJSON
 from tempest.services.identity.v3.json.service_client import \
     ServiceClientJSON
+from tempest.services.identity.v3.json.token_client import V3TokenClientJSON
 from tempest.services.image.v1.json.image_client import ImageClientJSON
 from tempest.services.image.v2.json.image_client import ImageClientV2JSON
 from tempest.services.messaging.json.messaging_client import \

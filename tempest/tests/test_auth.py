@@ -21,8 +21,8 @@ from oslotest import mockpatch
 from tempest import auth
 from tempest import config
 from tempest import exceptions
-from tempest.services.identity.json import identity_client as v2_client
-from tempest.services.identity.v3.json import identity_client as v3_client
+from tempest.services.identity.json import token_client as v2_client
+from tempest.services.identity.v3.json import token_client as v3_client
 from tempest.tests import base
 from tempest.tests import fake_config
 from tempest.tests import fake_credentials

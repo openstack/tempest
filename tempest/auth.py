@@ -24,8 +24,8 @@ import six
 
 from tempest import config
 from tempest.openstack.common import log as logging
-from tempest.services.identity.json import identity_client as json_id
-from tempest.services.identity.v3.json import identity_client as json_v3id
+from tempest.services.identity.json import token_client as json_id
+from tempest.services.identity.v3.json import token_client as json_v3id
 
 
 CONF = config.CONF
