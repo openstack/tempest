@@ -778,7 +778,7 @@ class TelemetryAlarmService(BaseService):
 
     def list(self):
         client = self.client
-        _, alarms = client.list_alarms()
+        alarms = client.list_alarms()
         LOG.debug("List count, %s Alarms" % len(alarms))
         return alarms
 
