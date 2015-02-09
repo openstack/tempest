@@ -69,6 +69,7 @@ class ObjectExpiryTest(base.BaseObjectTest):
         self.assertRaises(exceptions.NotFound, self.object_client.get_object,
                           self.container_name, self.object_name)
 
+    @test.skip_because(bug="1417494")
     @test.attr(type='gate')
     def test_get_object_after_expiry_time(self):
         # the 10s is important, because the get calls can take 3s each
@@ -76,6 +77,7 @@ class ObjectExpiryTest(base.BaseObjectTest):
         metadata = {'X-Delete-After': '10'}
         self._test_object_expiry(metadata)
 
+    @test.skip_because(bug="1417494")
     @test.attr(type='gate')
     def test_get_object_at_expiry_time(self):
         metadata = {'X-Delete-At': str(int(time.time()) + 10)}
