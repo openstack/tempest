@@ -439,6 +439,9 @@
 # running instances? (boolean value)
 #snapshot = true
 
+# Does the test environment have the ec2 api running? (boolean value)
+#ec2_api = true
+
 
 [dashboard]
 
