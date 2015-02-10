@@ -41,11 +41,10 @@ class VolumesGetTestJSON(base.BaseV2ComputeTest):
         v_name = data_utils.rand_name('Volume-%s-') % self._interface
         metadata = {'Type': 'work'}
         # Create volume
-        resp, volume = self.client.create_volume(size=1,
-                                                 display_name=v_name,
-                                                 metadata=metadata)
+        volume = self.client.create_volume(size=1,
+                                           display_name=v_name,
+                                           metadata=metadata)
         self.addCleanup(self.delete_volume, volume['id'])
-        self.assertEqual(200, resp.status)
         self.assertIn('id', volume)
         self.assertIn('displayName', volume)
         self.assertEqual(volume['displayName'], v_name,
@@ -56,8 +55,7 @@ class VolumesGetTestJSON(base.BaseV2ComputeTest):
         # Wait for Volume status to become ACTIVE
         self.client.wait_for_volume_status(volume['id'], 'available')
         # GET Volume
-        resp, fetched_volume = self.client.get_volume(volume['id'])
-        self.assertEqual(200, resp.status)
+        fetched_volume = self.client.get_volume(volume['id'])
         # Verification of details of fetched Volume
         self.assertEqual(v_name,
                          fetched_volume['displayName'],

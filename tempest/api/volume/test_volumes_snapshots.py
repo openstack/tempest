@@ -70,7 +70,7 @@ class VolumesV2SnapshotTestJSON(base.BaseVolumeTest):
         self.addCleanup(self.servers_client.delete_server, server['id'])
         self.servers_client.wait_for_server_status(server['id'], 'ACTIVE')
         mountpoint = '/dev/%s' % CONF.compute.volume_device_name
-        _, body = self.servers_client.attach_volume(
+        self.servers_client.attach_volume(
             server['id'], self.volume_origin['id'], mountpoint)
         self.volumes_client.wait_for_volume_status(self.volume_origin['id'],
                                                    'in-use')

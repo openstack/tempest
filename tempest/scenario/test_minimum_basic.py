@@ -78,7 +78,7 @@ class TestMinimumBasicScenario(manager.ScenarioTest):
     def nova_volume_attach(self):
         volume_device_path = '/dev/' + CONF.compute.volume_device_name
         volume = self.servers_client.attach_volume(
-            self.server['id'], self.volume['id'], volume_device_path)[1]
+            self.server['id'], self.volume['id'], volume_device_path)
         self.assertEqual(self.volume['id'], volume['id'])
         self.volumes_client.wait_for_volume_status(volume['id'], 'in-use')
         # Refresh the volume after the attachment

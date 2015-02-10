@@ -49,7 +49,7 @@ class ServerRescueNegativeTestJSON(base.BaseV2ComputeTest):
         cls.servers_client.wait_for_server_status(cls.server_id, 'ACTIVE')
 
     def _create_volume(self):
-        resp, volume = self.volumes_extensions_client.create_volume(
+        volume = self.volumes_extensions_client.create_volume(
             1, display_name=data_utils.rand_name(
                 self.__class__.__name__ + '_volume'))
         self.addCleanup(self.delete_volume, volume['id'])
