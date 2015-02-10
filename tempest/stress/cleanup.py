@@ -37,7 +37,7 @@ def cleanup():
         except Exception:
             pass
 
-    _, keypairs = admin_manager.keypairs_client.list_keypairs()
+    keypairs = admin_manager.keypairs_client.list_keypairs()
     LOG.info("Cleanup::remove %s keypairs" % len(keypairs))
     for k in keypairs:
         try:

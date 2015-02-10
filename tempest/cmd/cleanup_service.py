@@ -244,7 +244,7 @@ class KeyPairService(BaseService):
 
     def list(self):
         client = self.client
-        _, keypairs = client.list_keypairs()
+        keypairs = client.list_keypairs()
         LOG.debug("List count, %s Keypairs" % len(keypairs))
         return keypairs
 

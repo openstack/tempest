@@ -66,13 +66,11 @@ class KeyPairsNegativeTestJSON(base.BaseV2ComputeTest):
     def test_create_keypair_with_duplicate_name(self):
         # Keypairs with duplicate names should not be created
         k_name = data_utils.rand_name('keypair-')
-        resp, _ = self.client.create_keypair(k_name)
-        self.assertEqual(200, resp.status)
+        self.client.create_keypair(k_name)
         # Now try the same keyname to create another key
         self.assertRaises(exceptions.Conflict, self._create_keypair,
                           k_name)
-        resp, _ = self.client.delete_keypair(k_name)
-        self.assertEqual(202, resp.status)
+        self.client.delete_keypair(k_name)
 
     @test.attr(type=['negative', 'gate'])
     def test_create_keypair_with_empty_name_string(self):
