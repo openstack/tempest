@@ -49,7 +49,7 @@ class ServersAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
         flavor_id = data_utils.rand_int_id(start=1000)
         while True:
             try:
-                resp, body = self.flavors_client.get_flavor_details(flavor_id)
+                self.flavors_client.get_flavor_details(flavor_id)
             except exceptions.NotFound:
                 break
             flavor_id = data_utils.rand_int_id(start=1000)
@@ -68,9 +68,9 @@ class ServersAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
         ram = int(quota_set['ram']) + 1
         vcpus = 8
         disk = 10
-        resp, flavor_ref = self.flavors_client.create_flavor(flavor_name,
-                                                             ram, vcpus, disk,
-                                                             flavor_id)
+        flavor_ref = self.flavors_client.create_flavor(flavor_name,
+                                                       ram, vcpus, disk,
+                                                       flavor_id)
         self.addCleanup(self.flavors_client.delete_flavor, flavor_id)
         self.assertRaises((exceptions.Unauthorized, exceptions.OverLimit),
                           self.client.resize,
@@ -90,9 +90,9 @@ class ServersAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
             self.tenant_id)
         vcpus = int(quota_set['cores']) + 1
         disk = 10
-        resp, flavor_ref = self.flavors_client.create_flavor(flavor_name,
-                                                             ram, vcpus, disk,
-                                                             flavor_id)
+        flavor_ref = self.flavors_client.create_flavor(flavor_name,
+                                                       ram, vcpus, disk,
+                                                       flavor_id)
         self.addCleanup(self.flavors_client.delete_flavor, flavor_id)
         self.assertRaises((exceptions.Unauthorized, exceptions.OverLimit),
                           self.client.resize,

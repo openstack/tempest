@@ -47,13 +47,12 @@ class FlavorsAccessNegativeTestJSON(base.BaseV2ComputeAdminTest):
         # Test to list flavor access with exceptions by querying public flavor
         flavor_name = data_utils.rand_name(self.flavor_name_prefix)
         new_flavor_id = data_utils.rand_int_id(start=1000)
-        resp, new_flavor = self.client.create_flavor(flavor_name,
-                                                     self.ram, self.vcpus,
-                                                     self.disk,
-                                                     new_flavor_id,
-                                                     is_public='True')
+        new_flavor = self.client.create_flavor(flavor_name,
+                                               self.ram, self.vcpus,
+                                               self.disk,
+                                               new_flavor_id,
+                                               is_public='True')
         self.addCleanup(self.client.delete_flavor, new_flavor['id'])
-        self.assertEqual(resp.status, 200)
         self.assertRaises(exceptions.NotFound,
                           self.client.list_flavor_access,
                           new_flavor_id)
@@ -63,11 +62,11 @@ class FlavorsAccessNegativeTestJSON(base.BaseV2ComputeAdminTest):
         # Test to add flavor access as a user without admin privileges.
         flavor_name = data_utils.rand_name(self.flavor_name_prefix)
         new_flavor_id = data_utils.rand_int_id(start=1000)
-        resp, new_flavor = self.client.create_flavor(flavor_name,
-                                                     self.ram, self.vcpus,
-                                                     self.disk,
-                                                     new_flavor_id,
-                                                     is_public='False')
+        new_flavor = self.client.create_flavor(flavor_name,
+                                               self.ram, self.vcpus,
+                                               self.disk,
+                                               new_flavor_id,
+                                               is_public='False')
         self.addCleanup(self.client.delete_flavor, new_flavor['id'])
         self.assertRaises(exceptions.Unauthorized,
                           self.flavors_client.add_flavor_access,
@@ -79,11 +78,11 @@ class FlavorsAccessNegativeTestJSON(base.BaseV2ComputeAdminTest):
         # Test to remove flavor access as a user without admin privileges.
         flavor_name = data_utils.rand_name(self.flavor_name_prefix)
         new_flavor_id = data_utils.rand_int_id(start=1000)
-        resp, new_flavor = self.client.create_flavor(flavor_name,
-                                                     self.ram, self.vcpus,
-                                                     self.disk,
-                                                     new_flavor_id,
-                                                     is_public='False')
+        new_flavor = self.client.create_flavor(flavor_name,
+                                               self.ram, self.vcpus,
+                                               self.disk,
+                                               new_flavor_id,
+                                               is_public='False')
         self.addCleanup(self.client.delete_flavor, new_flavor['id'])
         # Add flavor access to a tenant.
         self.client.add_flavor_access(new_flavor['id'], self.tenant_id)
@@ -99,11 +98,11 @@ class FlavorsAccessNegativeTestJSON(base.BaseV2ComputeAdminTest):
         # Create a new flavor.
         flavor_name = data_utils.rand_name(self.flavor_name_prefix)
         new_flavor_id = data_utils.rand_int_id(start=1000)
-        resp, new_flavor = self.client.create_flavor(flavor_name,
-                                                     self.ram, self.vcpus,
-                                                     self.disk,
-                                                     new_flavor_id,
-                                                     is_public='False')
+        new_flavor = self.client.create_flavor(flavor_name,
+                                               self.ram, self.vcpus,
+                                               self.disk,
+                                               new_flavor_id,
+                                               is_public='False')
         self.addCleanup(self.client.delete_flavor, new_flavor['id'])
 
         # Add flavor access to a tenant.
@@ -123,11 +122,11 @@ class FlavorsAccessNegativeTestJSON(base.BaseV2ComputeAdminTest):
         # Create a new flavor.
         flavor_name = data_utils.rand_name(self.flavor_name_prefix)
         new_flavor_id = data_utils.rand_int_id(start=1000)
-        resp, new_flavor = self.client.create_flavor(flavor_name,
-                                                     self.ram, self.vcpus,
-                                                     self.disk,
-                                                     new_flavor_id,
-                                                     is_public='False')
+        new_flavor = self.client.create_flavor(flavor_name,
+                                               self.ram, self.vcpus,
+                                               self.disk,
+                                               new_flavor_id,
+                                               is_public='False')
         self.addCleanup(self.client.delete_flavor, new_flavor['id'])
 
         # An exception should be raised when flavor access is not found
