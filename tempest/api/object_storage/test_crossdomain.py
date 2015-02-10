@@ -38,6 +38,7 @@ class CrossdomainTest(base.BaseObjectTest):
         # Turning http://.../v1/foobar into http://.../
         self.account_client.skip_path()
 
+    @test.skip_because(bug="1417502")
     @test.attr('gate')
     @test.requires_ext(extension='crossdomain', service='object')
     def test_get_crossdomain_policy(self):

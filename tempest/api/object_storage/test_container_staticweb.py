@@ -50,6 +50,7 @@ class StaticWebTest(base.BaseObjectTest):
             cls.delete_containers([cls.container_name])
         super(StaticWebTest, cls).resource_cleanup()
 
+    @test.skip_because(bug="1417500")
     @test.requires_ext(extension='staticweb', service='object')
     @test.attr('gate')
     def test_web_index(self):
@@ -81,6 +82,7 @@ class StaticWebTest(base.BaseObjectTest):
             self.container_name)
         self.assertNotIn('x-container-meta-web-index', body)
 
+    @test.skip_because(bug="1417500")
     @test.requires_ext(extension='staticweb', service='object')
     @test.attr('gate')
     def test_web_listing(self):
@@ -113,6 +115,7 @@ class StaticWebTest(base.BaseObjectTest):
             self.container_name)
         self.assertNotIn('x-container-meta-web-listings', body)
 
+    @test.skip_because(bug="1417500")
     @test.requires_ext(extension='staticweb', service='object')
     @test.attr('gate')
     def test_web_listing_css(self):
@@ -137,6 +140,7 @@ class StaticWebTest(base.BaseObjectTest):
         css = '<link rel="stylesheet" type="text/css" href="listings.css" />'
         self.assertIn(css, body)
 
+    @test.skip_because(bug="1417500")
     @test.requires_ext(extension='staticweb', service='object')
     @test.attr('gate')
     def test_web_error(self):

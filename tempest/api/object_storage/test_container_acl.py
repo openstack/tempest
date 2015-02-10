@@ -36,6 +36,7 @@ class ObjectTestACLs(base.BaseObjectTest):
         self.delete_containers([self.container_name])
         super(ObjectTestACLs, self).tearDown()
 
+    @test.skip_because(bug="1417498")
     @test.attr(type='smoke')
     def test_read_object_with_rights(self):
         # attempt to read object using authorized user
@@ -60,6 +61,7 @@ class ObjectTestACLs(base.BaseObjectTest):
             self.container_name, object_name)
         self.assertHeaders(resp, 'Object', 'GET')
 
+    @test.skip_because(bug="1417498")
     @test.attr(type='smoke')
     def test_write_object_with_rights(self):
         # attempt to write object using authorized user

@@ -108,6 +108,7 @@ class ObjectSloTest(base.BaseObjectTest):
         resp['etag'] = resp['etag'].strip('"')
         self.assertHeaders(resp, 'Object', method)
 
+    @test.skip_because(bug="1417497")
     @test.attr(type='gate')
     def test_upload_manifest(self):
         # create static large object from multipart manifest
@@ -122,6 +123,7 @@ class ObjectSloTest(base.BaseObjectTest):
 
         self._assertHeadersSLO(resp, 'PUT')
 
+    @test.skip_because(bug="1417497")
     @test.attr(type='gate')
     def test_list_large_object_metadata(self):
         # list static large object metadata using multipart manifest
@@ -133,6 +135,7 @@ class ObjectSloTest(base.BaseObjectTest):
 
         self._assertHeadersSLO(resp, 'HEAD')
 
+    @test.skip_because(bug="1417497")
     @test.attr(type='gate')
     def test_retrieve_large_object(self):
         # list static large object using multipart manifest
@@ -147,6 +150,7 @@ class ObjectSloTest(base.BaseObjectTest):
         sum_data = self.content + self.content
         self.assertEqual(body, sum_data)
 
+    @test.skip_because(bug="1417497")
     @test.attr(type='gate')
     def test_delete_large_object(self):
         # delete static large object using multipart manifest
