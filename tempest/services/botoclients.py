@@ -39,7 +39,7 @@ class BotoClientBase(object):
         # FIXME(andreaf) replace credentials and auth_url with auth_provider
 
         insecure_ssl = CONF.identity.disable_ssl_certificate_validation
-        ca_cert = CONF.identity.ca_certificates_file
+        self.ca_cert = CONF.identity.ca_certificates_file
 
         self.connection_timeout = str(CONF.boto.http_socket_timeout)
         self.num_retries = str(CONF.boto.num_retries)
@@ -49,7 +49,7 @@ class BotoClientBase(object):
                         "auth_url": auth_url,
                         "tenant_name": tenant_name,
                         "insecure": insecure_ssl,
-                        "cacert": ca_cert}
+                        "cacert": self.ca_cert}
 
     def _keystone_aws_get(self):
         # FIXME(andreaf) Move EC2 credentials to AuthProvider
@@ -77,6 +77,16 @@ class BotoClientBase(object):
         boto.config.set("Boto", "http_socket_timeout", timeout)
         boto.config.set("Boto", "num_retries", retries)
 
+    def _config_boto_ca_certificates_file(self, ca_cert):
+        if ca_cert is None:
+            return
+
+        try:
+            boto.config.add_section("Boto")
+        except ConfigParser.DuplicateSectionError:
+            pass
+        boto.config.set("Boto", "ca_certificates_file", ca_cert)
+
     def __getattr__(self, name):
         """Automatically creates methods for the allowed methods set."""
         if name in self.ALLOWED_METHODS:
@@ -94,6 +104,7 @@ class BotoClientBase(object):
 
     def get_connection(self):
         self._config_boto_timeout(self.connection_timeout, self.num_retries)
+        self._config_boto_ca_certificates_file(self.ca_cert)
         if not all((self.connection_data["aws_access_key_id"],
                    self.connection_data["aws_secret_access_key"])):
             if all([self.ks_cred.get('auth_url'),
