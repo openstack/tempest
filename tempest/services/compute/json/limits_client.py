@@ -25,7 +25,7 @@ class LimitsClientJSON(service_client.ServiceClient):
         resp, body = self.get("limits")
         body = json.loads(body)
         self.validate_response(schema.get_limit, resp, body)
-        return resp, body['limits']['absolute']
+        return service_client.ResponseBody(resp, body['limits']['absolute'])
 
     def get_specific_absolute_limit(self, absolute_limit):
         resp, body = self.get("limits")
