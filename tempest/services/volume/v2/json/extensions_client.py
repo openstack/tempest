@@ -17,8 +17,4 @@ from tempest.services.volume.json import extensions_client
 
 
 class ExtensionsV2ClientJSON(extensions_client.BaseExtensionsClientJSON):
-
-    def __init__(self, auth_provider):
-        super(ExtensionsV2ClientJSON, self).__init__(auth_provider)
-
-        self.api_version = "v2"
+    api_version = "v2"

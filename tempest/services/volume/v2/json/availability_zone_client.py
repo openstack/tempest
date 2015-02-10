@@ -18,9 +18,4 @@ from tempest.services.volume.json import availability_zone_client
 
 class VolumeV2AvailabilityZoneClientJSON(
         availability_zone_client.BaseVolumeAvailabilityZoneClientJSON):
-
-    def __init__(self, auth_provider):
-        super(VolumeV2AvailabilityZoneClientJSON, self).__init__(
-            auth_provider)
-
-        self.api_version = "v2"
+    api_version = "v2"

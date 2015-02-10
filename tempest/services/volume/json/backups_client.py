@@ -18,10 +18,9 @@ import time
 
 from tempest.common import service_client
 from tempest import exceptions
-from tempest.services.volume.json import base
 
 
-class BaseBackupsClientJSON(base.VolumeClient):
+class BaseBackupsClientJSON(service_client.ServiceClient):
     """
     Client class to send CRUD Volume backup API requests to a Cinder endpoint
     """

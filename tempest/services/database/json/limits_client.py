@@ -1,4 +1,5 @@
-# Copyright 2014 NEC Corporation.  All rights reserved.
+# Copyright 2014 OpenStack Foundation
+# All Rights Reserved.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
 #    not use this file except in compliance with the License. You may obtain
@@ -12,22 +13,21 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest.common import service_client
+import urllib
+
 from tempest import config
+from tempest_lib.common import rest_client
 
 CONF = config.CONF
 
 
-class VolumeClient(service_client.ServiceClient):
-    """
-    Base volume client class
-    """
+class DatabaseLimitsClientJSON(rest_client.RestClient):
 
-    def __init__(self, auth_provider):
-        super(VolumeClient, self).__init__(
-            auth_provider,
-            CONF.volume.catalog_type,
-            CONF.volume.region or CONF.identity.region,
-            endpoint_type=CONF.volume.endpoint_type,
-            build_interval=CONF.volume.build_interval,
-            build_timeout=CONF.volume.build_timeout)
+    def list_db_limits(self, params=None):
+        """List all limits."""
+        url = 'limits'
+        if params:
+            url += '?%s' % urllib.urlencode(params)
+        resp, body = self.get(url)
+        self.expected_success(200, resp.status)
+        return resp, self._parse_resp(body)

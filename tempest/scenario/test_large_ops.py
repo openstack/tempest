@@ -74,7 +74,7 @@ class TestLargeOpsScenario(manager.ScenarioTest):
         # Explicitly create secgroup to avoid cleanup at the end of testcases.
         # Since no traffic is tested, we don't need to actually add rules to
         # secgroup
-        _, secgroup = self.security_groups_client.create_security_group(
+        secgroup = self.security_groups_client.create_security_group(
             'secgroup-%s' % name, 'secgroup-desc-%s' % name)
         self.addCleanupClass(self.security_groups_client.delete_security_group,
                              secgroup['id'])

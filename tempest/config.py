@@ -349,7 +349,10 @@ ComputeFeaturesGroup = [
     cfg.BoolOpt('snapshot',
                 default=True,
                 help='Does the test environment support creating snapshot '
-                     'images of running instances?')
+                     'images of running instances?'),
+    cfg.BoolOpt('ec2_api',
+                default=True,
+                help='Does the test environment have the ec2 api running?')
 ]
 
 

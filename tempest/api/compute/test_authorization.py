@@ -73,14 +73,14 @@ class AuthorizationTestJSON(base.BaseV2ComputeTest):
 
         name = data_utils.rand_name('security')
         description = data_utils.rand_name('description')
-        resp, cls.security_group = cls.security_client.create_security_group(
+        cls.security_group = cls.security_client.create_security_group(
             name, description)
 
         parent_group_id = cls.security_group['id']
         ip_protocol = 'tcp'
         from_port = 22
         to_port = 22
-        resp, cls.rule = cls.security_client.create_security_group_rule(
+        cls.rule = cls.security_client.create_security_group_rule(
             parent_group_id, ip_protocol, from_port, to_port)
 
     @classmethod

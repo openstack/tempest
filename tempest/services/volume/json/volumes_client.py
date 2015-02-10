@@ -20,12 +20,11 @@ import urllib
 from tempest.common import service_client
 from tempest import config
 from tempest import exceptions
-from tempest.services.volume.json import base
 
 CONF = config.CONF
 
 
-class BaseVolumesClientJSON(base.VolumeClient):
+class BaseVolumesClientJSON(service_client.ServiceClient):
     """
     Base client class to send CRUD Volume API requests to a Cinder endpoint
     """

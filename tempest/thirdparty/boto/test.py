@@ -195,6 +195,12 @@ class BotoTestCase(tempest.test.BaseTestCase):
     """Recommended to use as base class for boto related test."""
 
     @classmethod
+    def skip_checks(cls):
+        super(BotoTestCase, cls).skip_checks()
+        if not CONF.compute_feature_enabled.ec2_api:
+            raise cls.skipException("The EC2 API is not available")
+
+    @classmethod
     def resource_setup(cls):
         super(BotoTestCase, cls).resource_setup()
         cls.conclusion = decision_maker()

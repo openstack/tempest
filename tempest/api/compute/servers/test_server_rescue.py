@@ -40,7 +40,7 @@ class ServerRescueTestJSON(base.BaseV2ComputeTest):
         # Security group creation
         cls.sg_name = data_utils.rand_name('sg')
         cls.sg_desc = data_utils.rand_name('sg-desc')
-        resp, cls.sg = \
+        cls.sg = \
             cls.security_groups_client.create_security_group(cls.sg_name,
                                                              cls.sg_desc)
         cls.sg_id = cls.sg['id']
@@ -58,7 +58,7 @@ class ServerRescueTestJSON(base.BaseV2ComputeTest):
     def resource_cleanup(cls):
         # Deleting the floating IP which is created in this method
         cls.floating_ips_client.delete_floating_ip(cls.floating_ip_id)
-        resp, cls.sg = cls.security_groups_client.delete_security_group(
+        cls.sg = cls.security_groups_client.delete_security_group(
             cls.sg_id)
         super(ServerRescueTestJSON, cls).resource_cleanup()
 

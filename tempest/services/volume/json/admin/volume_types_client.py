@@ -16,12 +16,13 @@
 import json
 import urllib
 
+from tempest_lib import exceptions as lib_exc
+
 from tempest.common import service_client
 from tempest import exceptions
-from tempest.services.volume.json import base
 
 
-class BaseVolumeTypesClientJSON(base.VolumeClient):
+class BaseVolumeTypesClientJSON(service_client.ServiceClient):
     """
     Client class to send CRUD Volume Types API requests to a Cinder endpoint
     """
@@ -40,7 +41,7 @@ class BaseVolumeTypesClientJSON(base.VolumeClient):
                     return True
             else:
                 msg = (" resource value is either not defined or incorrect.")
-                raise exceptions.UnprocessableEntity(msg)
+                raise lib_exc.UnprocessableEntity(msg)
         except exceptions.NotFound:
             return True
         return False
