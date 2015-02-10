@@ -30,8 +30,7 @@ class InstanceUsageAuditLogTestJSON(base.BaseV2ComputeAdminTest):
     @test.attr(type='gate')
     def test_list_instance_usage_audit_logs(self):
         # list instance usage audit logs
-        resp, body = self.adm_client.list_instance_usage_audit_logs()
-        self.assertEqual(200, resp.status)
+        body = self.adm_client.list_instance_usage_audit_logs()
         expected_items = ['total_errors', 'total_instances', 'log',
                           'num_hosts_running', 'num_hosts_done',
                           'num_hosts', 'hosts_not_run', 'overall_status',
@@ -44,10 +43,9 @@ class InstanceUsageAuditLogTestJSON(base.BaseV2ComputeAdminTest):
     def test_get_instance_usage_audit_log(self):
         # Get instance usage audit log before specified time
         now = datetime.datetime.now()
-        resp, body = self.adm_client.get_instance_usage_audit_log(
+        body = self.adm_client.get_instance_usage_audit_log(
             urllib.quote(now.strftime("%Y-%m-%d %H:%M:%S")))
 
-        self.assertEqual(200, resp.status)
         expected_items = ['total_errors', 'total_instances', 'log',
                           'num_hosts_running', 'num_hosts_done', 'num_hosts',
                           'hosts_not_run', 'overall_status', 'period_ending',

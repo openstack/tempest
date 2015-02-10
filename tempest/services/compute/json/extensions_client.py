@@ -26,14 +26,14 @@ class ExtensionsClientJSON(service_client.ServiceClient):
         resp, body = self.get(url)
         body = json.loads(body)
         self.validate_response(schema.list_extensions, resp, body)
-        return resp, body['extensions']
+        return service_client.ResponseBodyList(resp, body['extensions'])
 
     def is_enabled(self, extension):
-        _, extensions = self.list_extensions()
+        extensions = self.list_extensions()
         exts = extensions['extensions']
         return any([e for e in exts if e['name'] == extension])
 
     def get_extension(self, extension_alias):
         resp, body = self.get('extensions/%s' % extension_alias)
         body = json.loads(body)
-        return resp, body['extension']
+        return service_client.ResponseBody(resp, body['extension'])
