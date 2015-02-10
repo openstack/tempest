@@ -46,7 +46,7 @@ def cleanup():
             pass
 
     secgrp_client = admin_manager.security_groups_client
-    _, secgrp = secgrp_client.list_security_groups({"all_tenants": True})
+    secgrp = secgrp_client.list_security_groups({"all_tenants": True})
     secgrp_del = [grp for grp in secgrp if grp['name'] != 'default']
     LOG.info("Cleanup::remove %s Security Group" % len(secgrp_del))
     for g in secgrp_del:

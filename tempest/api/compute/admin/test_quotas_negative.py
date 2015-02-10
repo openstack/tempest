@@ -142,7 +142,7 @@ class QuotasAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
 
         s_name = data_utils.rand_name('securitygroup-')
         s_description = data_utils.rand_name('description-')
-        resp, securitygroup =\
+        securitygroup =\
             self.sg_client.create_security_group(s_name, s_description)
         self.addCleanup(self.sg_client.delete_security_group,
                         securitygroup['id'])
