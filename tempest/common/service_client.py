@@ -94,6 +94,18 @@ class ResponseBody(dict):
         return "response: %s\nBody: %s" % (self.response, body)
 
 
+class ResponseBodyData(object):
+    """Class that wraps an http response and string data into a single value.
+    """
+
+    def __init__(self, response, data):
+        self.response = response
+        self.data = data
+
+    def __str__(self):
+        return "response: %s\nBody: %s" % (self.response, self.data)
+
+
 class ResponseBodyList(list):
     """Class that wraps an http response and list body into a single value.
 

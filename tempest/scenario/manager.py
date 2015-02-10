@@ -512,7 +512,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
         Nova clients
         """
 
-        _, floating_ip = self.floating_ips_client.create_floating_ip(pool_name)
+        floating_ip = self.floating_ips_client.create_floating_ip(pool_name)
         self.addCleanup(self.delete_wrapper,
                         self.floating_ips_client.delete_floating_ip,
                         floating_ip['id'])

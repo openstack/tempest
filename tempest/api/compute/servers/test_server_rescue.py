@@ -33,7 +33,7 @@ class ServerRescueTestJSON(base.BaseV2ComputeTest):
         super(ServerRescueTestJSON, cls).resource_setup()
 
         # Floating IP creation
-        resp, body = cls.floating_ips_client.create_floating_ip()
+        body = cls.floating_ips_client.create_floating_ip()
         cls.floating_ip_id = str(body['id']).strip()
         cls.floating_ip = str(body['ip']).strip()
 
@@ -90,15 +90,12 @@ class ServerRescueTestJSON(base.BaseV2ComputeTest):
 
         # Association of floating IP to a rescued vm
         client = self.floating_ips_client
-        resp, body = client.associate_floating_ip_to_server(self.floating_ip,
-                                                            self.server_id)
-        self.assertEqual(202, resp.status)
+        client.associate_floating_ip_to_server(self.floating_ip,
+                                               self.server_id)
 
         # Disassociation of floating IP that was associated in this method
-        resp, body = \
-            client.disassociate_floating_ip_from_server(self.floating_ip,
-                                                        self.server_id)
-        self.assertEqual(202, resp.status)
+        client.disassociate_floating_ip_from_server(self.floating_ip,
+                                                    self.server_id)
 
     @test.attr(type='gate')
     def test_rescued_vm_add_remove_security_group(self):

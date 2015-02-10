@@ -37,7 +37,7 @@ class FloatingIPsNegativeTestJSON(base.BaseFloatingIPsTest):
         cls.server_id = server['id']
         # Generating a nonexistent floatingIP id
         cls.floating_ip_ids = []
-        resp, body = cls.client.list_floating_ips()
+        body = cls.client.list_floating_ips()
         for i in range(len(body)):
             cls.floating_ip_ids.append(body[i]['id'])
         while True:
