@@ -79,7 +79,7 @@ def decision_maker():
 
     except keystoneclient.exceptions.Unauthorized:
         EC2_CAN_CONNECT_ERROR = "AWS credentials not set," +\
-                                " faild to get them even by keystoneclient"
+                                " failed to get them even by keystoneclient"
     except Exception as exc:
         EC2_CAN_CONNECT_ERROR = str(exc)
 
@@ -96,7 +96,7 @@ def decision_maker():
         S3_CAN_CONNECT_ERROR = str(exc)
     except keystoneclient.exceptions.Unauthorized:
         S3_CAN_CONNECT_ERROR = "AWS credentials not set," +\
-                               " faild to get them even by keystoneclient"
+                               " failed to get them even by keystoneclient"
     boto_logger.logger.setLevel(level)
     return {'A_I_IMAGES_READY': A_I_IMAGES_READY,
             'S3_CAN_CONNECT_ERROR': S3_CAN_CONNECT_ERROR,
