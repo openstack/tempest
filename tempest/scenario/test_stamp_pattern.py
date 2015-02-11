@@ -15,6 +15,7 @@
 
 import time
 
+from tempest_lib import decorators
 import testtools
 
 from tempest.common.utils import data_utils
@@ -137,7 +138,7 @@ class TestStampPattern(manager.ScenarioTest):
         got_timestamp = ssh_client.exec_command('sudo cat /mnt/timestamp')
         self.assertEqual(self.timestamp, got_timestamp)
 
-    @tempest.test.skip_because(bug="1205344")
+    @decorators.skip_because(bug="1205344")
     @testtools.skipUnless(CONF.compute_feature_enabled.snapshot,
                           'Snapshotting is not available.')
     @tempest.test.services('compute', 'network', 'volume', 'image')

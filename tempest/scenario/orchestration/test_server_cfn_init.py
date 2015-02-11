@@ -12,6 +12,8 @@
 
 import json
 
+from tempest_lib import decorators
+
 from tempest import config
 from tempest import exceptions
 from tempest.openstack.common import log as logging
@@ -123,7 +125,7 @@ class CfnInitScenarioTest(manager.OrchestrationScenarioTest):
                                    log_console_of_servers=[server])
 
     @test.attr(type='slow')
-    @test.skip_because(bug='1374175')
+    @decorators.skip_because(bug='1374175')
     @test.services('orchestration', 'compute')
     def test_server_cfn_init(self):
         self.assign_keypair()

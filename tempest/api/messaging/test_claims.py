@@ -16,6 +16,8 @@
 import logging
 import urlparse
 
+from tempest_lib import decorators
+
 from tempest.api.messaging import base
 from tempest.common.utils import data_utils
 from tempest import config
@@ -65,7 +67,7 @@ class TestClaims(base.BaseMessagingTest):
         # Delete Claimed message
         self.client.delete_messages(claimed_message_uri)
 
-    @test.skip_because(bug="1331517")
+    @decorators.skip_because(bug="1331517")
     @test.attr(type='smoke')
     def test_query_claim(self):
         # Post a Claim
@@ -79,7 +81,7 @@ class TestClaims(base.BaseMessagingTest):
         claimed_message_uri = body[0]['href']
         self.delete_messages(claimed_message_uri)
 
-    @test.skip_because(bug="1328111")
+    @decorators.skip_because(bug="1328111")
     @test.attr(type='smoke')
     def test_update_claim(self):
         # Post a Claim

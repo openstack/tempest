@@ -13,13 +13,13 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib import decorators
 from tempest_lib import exceptions
 import testtools
 
 from tempest import cli
 from tempest import config
 from tempest.openstack.common import log as logging
-import tempest.test
 
 CONF = config.CONF
 
@@ -82,7 +82,7 @@ class SimpleReadOnlyNovaClientTest(cli.ClientTestBase):
     def test_admin_dns_domains(self):
         self.nova('dns-domains')
 
-    @tempest.test.skip_because(bug="1157349")
+    @decorators.skip_because(bug="1157349")
     def test_admin_dns_list(self):
         self.nova('dns-list')
 
@@ -120,7 +120,7 @@ class SimpleReadOnlyNovaClientTest(cli.ClientTestBase):
     def test_admin_image_list(self):
         self.nova('image-list')
 
-    @tempest.test.skip_because(bug="1157349")
+    @decorators.skip_because(bug="1157349")
     def test_admin_interface_list(self):
         self.nova('interface-list')
 
@@ -145,7 +145,7 @@ class SimpleReadOnlyNovaClientTest(cli.ClientTestBase):
     def test_admin_secgroup_list(self):
         self.nova('secgroup-list')
 
-    @tempest.test.skip_because(bug="1157349")
+    @decorators.skip_because(bug="1157349")
     def test_admin_secgroup_list_rules(self):
         self.nova('secgroup-list-rules')
 
