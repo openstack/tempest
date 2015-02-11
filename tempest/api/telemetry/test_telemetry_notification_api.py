@@ -35,8 +35,7 @@ class TelemetryNotificationAPITestJSON(base.BaseTelemetryTest):
                       "Nova is not available.")
     def test_check_nova_notification(self):
 
-        resp, body = self.create_server()
-        self.assertEqual(resp.status, 202)
+        body = self.create_server()
 
         query = ('resource', 'eq', body['id'])
 

@@ -35,7 +35,7 @@ class FloatingIPsNegativeTestJSON(base.BaseFloatingIPsTest):
         cls.client = cls.floating_ips_client
 
         # Server creation
-        resp, server = cls.create_test_server(wait_until='ACTIVE')
+        server = cls.create_test_server(wait_until='ACTIVE')
         cls.server_id = server['id']
         # Generating a nonexistent floatingIP id
         cls.floating_ip_ids = []

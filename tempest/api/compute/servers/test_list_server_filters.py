@@ -59,18 +59,18 @@ class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
                                cls.image_ref_alt)
 
         cls.s1_name = data_utils.rand_name(cls.__name__ + '-instance')
-        resp, cls.s1 = cls.create_test_server(name=cls.s1_name,
-                                              wait_until='ACTIVE')
+        cls.s1 = cls.create_test_server(name=cls.s1_name,
+                                        wait_until='ACTIVE')
 
         cls.s2_name = data_utils.rand_name(cls.__name__ + '-instance')
-        resp, cls.s2 = cls.create_test_server(name=cls.s2_name,
-                                              image_id=cls.image_ref_alt,
-                                              wait_until='ACTIVE')
+        cls.s2 = cls.create_test_server(name=cls.s2_name,
+                                        image_id=cls.image_ref_alt,
+                                        wait_until='ACTIVE')
 
         cls.s3_name = data_utils.rand_name(cls.__name__ + '-instance')
-        resp, cls.s3 = cls.create_test_server(name=cls.s3_name,
-                                              flavor=cls.flavor_ref_alt,
-                                              wait_until='ACTIVE')
+        cls.s3 = cls.create_test_server(name=cls.s3_name,
+                                        flavor=cls.flavor_ref_alt,
+                                        wait_until='ACTIVE')
 
         cls.fixed_network_name = CONF.compute.fixed_network_name
         if CONF.service_available.neutron:
@@ -261,7 +261,7 @@ class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
     def test_list_servers_filtered_by_ip(self):
         # Filter servers by ip
         # Here should be listed 1 server
-        resp, self.s1 = self.client.get_server(self.s1['id'])
+        self.s1 = self.client.get_server(self.s1['id'])
         ip = self.s1['addresses'][self.fixed_network_name][0]['addr']
         params = {'ip': ip}
         resp, body = self.client.list_servers(params)
@@ -278,7 +278,7 @@ class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
         # Filter servers by regex ip
         # List all servers filtered by part of ip address.
         # Here should be listed all servers
-        resp, self.s1 = self.client.get_server(self.s1['id'])
+        self.s1 = self.client.get_server(self.s1['id'])
         ip = self.s1['addresses'][self.fixed_network_name][0]['addr'][0:-3]
         params = {'ip': ip}
         resp, body = self.client.list_servers(params)

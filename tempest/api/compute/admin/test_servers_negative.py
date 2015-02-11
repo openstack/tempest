@@ -42,8 +42,8 @@ class ServersAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
         cls.tenant_id = cls.client.tenant_id
 
         cls.s1_name = data_utils.rand_name('server')
-        resp, server = cls.create_test_server(name=cls.s1_name,
-                                              wait_until='ACTIVE')
+        server = cls.create_test_server(name=cls.s1_name,
+                                        wait_until='ACTIVE')
         cls.s1_id = server['id']
 
     def _get_unused_flavor_id(self):
@@ -136,8 +136,7 @@ class ServersAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
     @test.attr(type=['negative', 'gate'])
     def test_migrate_server_invalid_state(self):
         # create server.
-        resp, server = self.create_test_server(wait_until='ACTIVE')
-        self.assertEqual(202, resp.status)
+        server = self.create_test_server(wait_until='ACTIVE')
         server_id = server['id']
         # suspend the server.
         resp, _ = self.client.suspend_server(server_id)

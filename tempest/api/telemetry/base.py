@@ -62,12 +62,12 @@ class BaseTelemetryTest(tempest.test.BaseTestCase):
 
     @classmethod
     def create_server(cls):
-        resp, body = cls.servers_client.create_server(
+        body = cls.servers_client.create_server(
             data_utils.rand_name('ceilometer-instance'),
             CONF.compute.image_ref, CONF.compute.flavor_ref,
             wait_until='ACTIVE')
         cls.server_ids.append(body['id'])
-        return resp, body
+        return body
 
     @classmethod
     def create_image(cls, client):

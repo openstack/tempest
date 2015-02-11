@@ -45,7 +45,7 @@ class LiveBlockMigrationNegativeTestJSON(base.BaseV2ComputeAdminTest):
     def test_invalid_host_for_migration(self):
         # Migrating to an invalid host should not change the status
         target_host = data_utils.rand_name('host-')
-        _, server = self.create_test_server(wait_until="ACTIVE")
+        server = self.create_test_server(wait_until="ACTIVE")
         server_id = server['id']
 
         self.assertRaises(exceptions.BadRequest, self._migrate_server_to,

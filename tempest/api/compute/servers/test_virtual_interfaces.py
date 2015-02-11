@@ -31,7 +31,7 @@ class VirtualInterfacesTestJSON(base.BaseV2ComputeTest):
         cls.set_network_resources(network=True, subnet=True)
         super(VirtualInterfacesTestJSON, cls).resource_setup()
         cls.client = cls.servers_client
-        resp, server = cls.create_test_server(wait_until='ACTIVE')
+        server = cls.create_test_server(wait_until='ACTIVE')
         cls.server_id = server['id']
 
     @decorators.skip_because(bug="1183436",

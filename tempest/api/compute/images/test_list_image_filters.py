@@ -69,8 +69,8 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
             return
 
         # Create instances and snapshots via nova
-        resp, cls.server1 = cls.create_test_server()
-        resp, cls.server2 = cls.create_test_server(wait_until='ACTIVE')
+        cls.server1 = cls.create_test_server()
+        cls.server2 = cls.create_test_server(wait_until='ACTIVE')
         # NOTE(sdague) this is faster than doing the sync wait_util on both
         cls.servers_client.wait_for_server_status(cls.server1['id'],
                                                   'ACTIVE')

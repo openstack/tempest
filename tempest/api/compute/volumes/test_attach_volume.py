@@ -53,8 +53,8 @@ class AttachVolumeTestJSON(base.BaseV2ComputeTest):
     def _create_and_attach(self):
         # Start a server and wait for it to become ready
         admin_pass = self.image_ssh_password
-        _, self.server = self.create_test_server(wait_until='ACTIVE',
-                                                 adminPass=admin_pass)
+        self.server = self.create_test_server(wait_until='ACTIVE',
+                                              adminPass=admin_pass)
 
         # Record addresses so that we can ssh later
         _, self.server['addresses'] = (

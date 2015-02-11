@@ -204,8 +204,8 @@ class AggregatesAdminTestJSON(base.BaseV2ComputeAdminTest):
         self.addCleanup(self.client.remove_host, aggregate['id'], self.host)
         server_name = data_utils.rand_name('test_server_')
         admin_servers_client = self.os_adm.servers_client
-        resp, server = self.create_test_server(name=server_name,
-                                               availability_zone=az_name,
-                                               wait_until='ACTIVE')
-        resp, body = admin_servers_client.get_server(server['id'])
+        server = self.create_test_server(name=server_name,
+                                         availability_zone=az_name,
+                                         wait_until='ACTIVE')
+        body = admin_servers_client.get_server(server['id'])
         self.assertEqual(self.host, body[self._host_key])

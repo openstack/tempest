@@ -187,8 +187,8 @@ class ScenarioTest(tempest.test.BaseTestCase):
 
         LOG.debug("Creating a server (name: %s, image: %s, flavor: %s)",
                   name, image, flavor)
-        _, server = self.servers_client.create_server(name, image, flavor,
-                                                      **create_kwargs)
+        server = self.servers_client.create_server(name, image, flavor,
+                                                   **create_kwargs)
         if wait_on_delete:
             self.addCleanup(self.servers_client.wait_for_server_termination,
                             server['id'])
@@ -203,7 +203,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
         # The instance retrieved on creation is missing network
         # details, necessitating retrieval after it becomes active to
         # ensure correct details.
-        _, server = self.servers_client.get_server(server['id'])
+        server = self.servers_client.get_server(server['id'])
         self.assertEqual(server['name'], name)
         return server
 
@@ -1249,7 +1249,7 @@ class BaremetalScenarioTest(ScenarioTest):
         self.servers_client.wait_for_server_status(self.instance['id'],
                                                    'ACTIVE')
         self.node = self.get_node(instance_id=self.instance['id'])
-        _, self.instance = self.servers_client.get_server(self.instance['id'])
+        self.instance = self.servers_client.get_server(self.instance['id'])
 
     def terminate_instance(self):
         self.servers_client.delete_server(self.instance['id'])

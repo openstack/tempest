@@ -63,5 +63,4 @@ class ServerPersonalityTestJSON(base.BaseV2ComputeTest):
                 'path': path,
                 'contents': base64.b64encode(file_contents),
             })
-        resp, server = self.create_test_server(personality=person)
-        self.assertEqual('202', resp['status'])
+        self.create_test_server(personality=person)

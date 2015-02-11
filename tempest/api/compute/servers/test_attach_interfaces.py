@@ -49,7 +49,7 @@ class AttachInterfacesTestJSON(base.BaseV2ComputeTest):
             self.assertEqual(iface['mac_addr'], mac_addr)
 
     def _create_server_get_interfaces(self):
-        resp, server = self.create_test_server(wait_until='ACTIVE')
+        server = self.create_test_server(wait_until='ACTIVE')
         resp, ifs = self.client.list_interfaces(server['id'])
         self.assertEqual(200, resp.status)
         resp, body = self.client.wait_for_interface_status(
@@ -148,7 +148,7 @@ class AttachInterfacesTestJSON(base.BaseV2ComputeTest):
                                               network_id)
         self.assertEqual(202, resp.status)
         # Remove the fixed IP from server.
-        server_resp, server_detail = self.os.servers_client.get_server(
+        server_detail = self.os.servers_client.get_server(
             server['id'])
         # Get the Fixed IP from server.
         fixed_ip = None

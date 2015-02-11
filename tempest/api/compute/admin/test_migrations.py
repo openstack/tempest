@@ -39,7 +39,7 @@ class MigrationsAdminTest(base.BaseV2ComputeAdminTest):
     @test.attr(type='gate')
     def test_list_migrations_in_flavor_resize_situation(self):
         # Admin can get the migrations list which contains the resized server
-        resp, server = self.create_test_server(wait_until="ACTIVE")
+        server = self.create_test_server(wait_until="ACTIVE")
         server_id = server['id']
 
         resp, _ = self.servers_client.resize(server_id, self.flavor_ref_alt)

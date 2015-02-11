@@ -24,7 +24,7 @@ class ServerMetadataTestJSON(base.BaseV2ComputeTest):
         super(ServerMetadataTestJSON, cls).resource_setup()
         cls.client = cls.servers_client
         cls.quotas = cls.quotas_client
-        resp, server = cls.create_test_server(meta={}, wait_until='ACTIVE')
+        server = cls.create_test_server(meta={}, wait_until='ACTIVE')
         cls.server_id = server['id']
 
     def setUp(self):

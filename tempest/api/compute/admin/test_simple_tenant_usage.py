@@ -30,7 +30,7 @@ class TenantUsagesTestJSON(base.BaseV2ComputeAdminTest):
         cls.tenant_id = cls.client.tenant_id
 
         # Create a server in the demo tenant
-        resp, server = cls.create_test_server(wait_until='ACTIVE')
+        cls.create_test_server(wait_until='ACTIVE')
         time.sleep(2)
 
         now = datetime.datetime.now()
