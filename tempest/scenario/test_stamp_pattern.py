@@ -102,7 +102,7 @@ class TestStampPattern(manager.ScenarioTest):
 
     def _attach_volume(self, server, volume):
         # TODO(andreaf) we should use device from config instead if vdb
-        _, attached_volume = self.servers_client.attach_volume(
+        attached_volume = self.servers_client.attach_volume(
             server['id'], volume['id'], device='/dev/vdb')
         self.assertEqual(volume['id'], attached_volume['id'])
         self._wait_for_volume_status(attached_volume, 'in-use')

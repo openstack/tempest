@@ -68,7 +68,7 @@ class AttachVolumeTestJSON(base.BaseV2ComputeTest):
                                                    'available')
 
         # Attach the volume to the server
-        _, self.attachment = self.servers_client.attach_volume(
+        self.attachment = self.servers_client.attach_volume(
             self.server['id'],
             self.volume['id'],
             device='/dev/%s' % self.device)
@@ -116,13 +116,13 @@ class AttachVolumeTestJSON(base.BaseV2ComputeTest):
         # Create Server, Volume and attach that Volume to Server
         self._create_and_attach()
         # List Volume attachment of the server
-        _, body = self.servers_client.list_volume_attachments(
+        body = self.servers_client.list_volume_attachments(
             self.server['id'])
         self.assertEqual(1, len(body))
         self.assertIn(self.attachment, body)
 
         # Get Volume attachment of the server
-        _, body = self.servers_client.get_volume_attachment(
+        body = self.servers_client.get_volume_attachment(
             self.server['id'],
             self.attachment['id'])
         self.assertEqual(self.server['id'], body['serverId'])

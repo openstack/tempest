@@ -95,7 +95,7 @@ def cleanup():
         except Exception:
             pass
 
-    _, vols = admin_manager.volumes_client.list_volumes({"all_tenants": True})
+    vols = admin_manager.volumes_client.list_volumes({"all_tenants": True})
     LOG.info("Cleanup::remove %s volumes" % len(vols))
     for v in vols:
         try:
