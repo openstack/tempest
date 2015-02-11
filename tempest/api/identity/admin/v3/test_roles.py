@@ -140,9 +140,11 @@ class RolesV3TestJSON(base.BaseIdentityV3AdminTest):
         self.client.add_group_user(self.group_body['id'], self.user_body['id'])
         self.addCleanup(self.client.delete_group_user,
                         self.group_body['id'], self.user_body['id'])
-        body = self.token.auth(self.user_body['id'], self.u_password,
-                               self.project['name'],
-                               domain=self.domain['name'])
+        body = self.token.auth(user=self.user_body['id'],
+                               password=self.u_password,
+                               user_domain=self.domain['name'],
+                               project=self.project['name'],
+                               project_domain=self.domain['name'])
         roles = body['token']['roles']
         self.assertEqual(len(roles), 1)
         self.assertEqual(roles[0]['id'], self.role['id'])
