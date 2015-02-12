@@ -779,6 +779,10 @@
 # value)
 #dns_servers = 8.8.8.8,8.8.4.4
 
+# vnic_type to use when Launching instances with pre-configured ports.
+# Supported ports are: ['normal','direct','macvtap'] (string value)
+#port_vnic_type = <None>
+
 
 [network-feature-enabled]
 
