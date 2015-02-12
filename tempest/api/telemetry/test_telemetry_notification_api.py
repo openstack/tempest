@@ -71,3 +71,27 @@ class TelemetryNotificationAPITestJSON(base.BaseTelemetryTest):
 
         for metric in self.glance_v2_notifications:
             self.await_samples(metric, query)
+
+
+class TelemetryNotificationAdminAPITestJSON(base.BaseTelemetryAdminTest):
+
+    @classmethod
+    def skip_checks(cls):
+        super(TelemetryNotificationAdminAPITestJSON, cls).skip_checks()
+        if CONF.telemetry.too_slow_to_test:
+            raise cls.skipException("Ceilometer feature for fast work mysql "
+                                    "is disabled")
+
+    @test.idempotent_id('29604198-8b45-4fc0-8af8-1cae4f94ebe9')
+    @test.services('compute')
+    def test_check_nova_notification_event_and_meter(self):
+
+        body = self.create_server()
+
+        if CONF.telemetry_feature_enabled.events:
+            query = ('instance_id', 'eq', body['id'])
+            self.await_events(query)
+
+        query = ('resource', 'eq', body['id'])
+        for metric in self.nova_notifications:
+            self.await_samples(metric, query)

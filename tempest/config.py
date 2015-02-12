@@ -826,6 +826,16 @@ TelemetryGroup = [
 ]
 
 
+telemetry_feature_group = cfg.OptGroup(name='telemetry-feature-enabled',
+                                       title='Enabled Ceilometer Features')
+
+TelemetryFeaturesGroup = [
+    cfg.BoolOpt('events',
+                default=False,
+                help="Runs Ceilometer event-related tests"),
+]
+
+
 dashboard_group = cfg.OptGroup(name="dashboard",
                                title="Dashboard options")
 
@@ -1157,6 +1167,7 @@ _opts = [
     (database_group, DatabaseGroup),
     (orchestration_group, OrchestrationGroup),
     (telemetry_group, TelemetryGroup),
+    (telemetry_feature_group, TelemetryFeaturesGroup),
     (dashboard_group, DashboardGroup),
     (data_processing_group, DataProcessingGroup),
     (data_processing_feature_group, DataProcessingFeaturesGroup),
@@ -1219,6 +1230,7 @@ class TempestConfigPrivate(object):
         self.orchestration = _CONF.orchestration
         self.messaging = _CONF.messaging
         self.telemetry = _CONF.telemetry
+        self.telemetry_feature_enabled = _CONF['telemetry-feature-enabled']
         self.dashboard = _CONF.dashboard
         self.data_processing = _CONF.data_processing
         self.data_processing_feature_enabled = _CONF[

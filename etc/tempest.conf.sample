@@ -1092,6 +1092,16 @@
 #too_slow_to_test = true
 
 
+[telemetry-feature-enabled]
+
+#
+# From tempest.config
+#
+
+# Runs Ceilometer event-related tests (boolean value)
+#events = false
+
+
 [validation]
 
 #
