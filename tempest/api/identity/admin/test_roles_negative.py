@@ -13,6 +13,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib import exceptions as lib_exc
 import uuid
 
 from tempest.api.identity import base
@@ -75,7 +76,7 @@ class RolesNegativeTestJSON(base.BaseIdentityV2AdminTest):
         body = self.client.create_role(role_name)
         role1_id = body.get('id')
         self.addCleanup(self.client.delete_role, role1_id)
-        self.assertRaises(exceptions.Conflict, self.client.create_role,
+        self.assertRaises(lib_exc.Conflict, self.client.create_role,
                           role_name)
 
     @test.attr(type=['negative', 'gate'])
@@ -150,7 +151,7 @@ class RolesNegativeTestJSON(base.BaseIdentityV2AdminTest):
         # Duplicate user role should not get assigned
         (user, tenant, role) = self._get_role_params()
         self.client.assign_user_role(tenant['id'], user['id'], role['id'])
-        self.assertRaises(exceptions.Conflict, self.client.assign_user_role,
+        self.assertRaises(lib_exc.Conflict, self.client.assign_user_role,
                           tenant['id'], user['id'], role['id'])
 
     @test.attr(type=['negative', 'gate'])

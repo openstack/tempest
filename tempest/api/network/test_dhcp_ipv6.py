@@ -16,6 +16,8 @@
 import netaddr
 import random
 
+from tempest_lib import exceptions as lib_exc
+
 from tempest.api.network import base
 from tempest.common.utils import data_utils
 from tempest import config
@@ -348,7 +350,7 @@ class NetworksTestDHCPv6(base.BaseNetworkTest):
                          fixed_ips=[
                              {'subnet_id': subnet['id'],
                               'ip_address': ip}])
-        self.assertRaisesRegexp(exceptions.Conflict,
+        self.assertRaisesRegexp(lib_exc.Conflict,
                                 "object with that identifier already exists",
                                 self.create_port,
                                 self.network,

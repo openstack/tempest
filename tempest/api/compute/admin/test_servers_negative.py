@@ -144,6 +144,6 @@ class ServersAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
         self.assertEqual(202, resp.status)
         self.client.wait_for_server_status(server_id, 'SUSPENDED')
         # migrate an suspended server should fail
-        self.assertRaises(exceptions.Conflict,
+        self.assertRaises(lib_exc.Conflict,
                           self.client.migrate_server,
                           server_id)

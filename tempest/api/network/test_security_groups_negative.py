@@ -15,6 +15,8 @@
 
 import uuid
 
+from tempest_lib import exceptions as lib_exc
+
 from tempest.api.network import base_security_groups as base
 from tempest import config
 from tempest import exceptions
@@ -152,7 +154,7 @@ class NegativeSecGroupTest(base.BaseSecGroupTest):
     def test_create_additional_default_security_group_fails(self):
         # Create security group named 'default', it should be failed.
         name = 'default'
-        self.assertRaises(exceptions.Conflict,
+        self.assertRaises(lib_exc.Conflict,
                           self.client.create_security_group,
                           name=name)
 
@@ -175,7 +177,7 @@ class NegativeSecGroupTest(base.BaseSecGroupTest):
 
         # Try creating the same security group rule, it should fail
         self.assertRaises(
-            exceptions.Conflict, self.client.create_security_group_rule,
+            lib_exc.Conflict, self.client.create_security_group_rule,
             security_group_id=body['security_group']['id'],
             protocol='tcp', direction='ingress', ethertype=self.ethertype,
             port_range_min=min_port, port_range_max=max_port)

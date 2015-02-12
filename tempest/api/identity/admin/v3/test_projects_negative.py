@@ -13,6 +13,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib import exceptions as lib_exc
+
 from tempest.api.identity import base
 from tempest.common.utils import data_utils
 from tempest import exceptions
@@ -36,7 +38,7 @@ class ProjectsNegativeTestJSON(base.BaseIdentityV3AdminTest):
         self.data.projects.append(project)
 
         self.assertRaises(
-            exceptions.Conflict, self.client.create_project, project_name)
+            lib_exc.Conflict, self.client.create_project, project_name)
 
     @test.attr(type=['negative', 'gate'])
     def test_create_project_by_unauthorized_user(self):

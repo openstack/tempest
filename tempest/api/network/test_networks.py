@@ -15,6 +15,7 @@
 import itertools
 
 import netaddr
+from tempest_lib import exceptions as lib_exc
 
 from tempest.api.network import base
 from tempest.common import custom_matchers
@@ -614,7 +615,7 @@ class NetworksIpV6TestAttrs(NetworksIpV6TestJSON):
         self.assertNotIn(subnet_slaac['id'], subnet_ids,
                          "Subnet wasn't deleted")
         self.assertRaisesRegexp(
-            exceptions.Conflict,
+            lib_exc.Conflict,
             "There are one or more ports still in use on the network",
             self.client.delete_network,
             slaac_network['id'])

@@ -163,10 +163,6 @@ class BadRequest(RestClientException):
     message = "Bad request"
 
 
-class Conflict(RestClientException):
-    message = "An object with that identifier already exists"
-
-
 class ResponseWithNonEmptyBody(RFCViolation):
     message = ("RFC Violation! Response with %(status)d HTTP Status Code "
                "MUST NOT have a body")

@@ -13,6 +13,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib import exceptions as lib_exc
+
 from tempest.api.compute import base
 from tempest.common import tempest_fixtures as fixtures
 from tempest.common.utils import data_utils
@@ -69,7 +71,7 @@ class AggregatesAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
         aggregate = self.client.create_aggregate(name=aggregate_name)
         self.addCleanup(self.client.delete_aggregate, aggregate['id'])
 
-        self.assertRaises(exceptions.Conflict,
+        self.assertRaises(lib_exc.Conflict,
                           self.client.create_aggregate,
                           name=aggregate_name)
 
@@ -151,7 +153,7 @@ class AggregatesAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
         self.client.add_host(aggregate['id'], self.host)
         self.addCleanup(self.client.remove_host, aggregate['id'], self.host)
 
-        self.assertRaises(exceptions.Conflict, self.client.add_host,
+        self.assertRaises(lib_exc.Conflict, self.client.add_host,
                           aggregate['id'], self.host)
 
     @test.attr(type=['negative', 'gate'])

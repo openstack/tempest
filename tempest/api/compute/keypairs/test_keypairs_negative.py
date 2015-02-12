@@ -14,6 +14,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib import exceptions as lib_exc
+
 from tempest.api.compute import base
 from tempest.common.utils import data_utils
 from tempest import exceptions
@@ -68,7 +70,7 @@ class KeyPairsNegativeTestJSON(base.BaseV2ComputeTest):
         k_name = data_utils.rand_name('keypair-')
         self.client.create_keypair(k_name)
         # Now try the same keyname to create another key
-        self.assertRaises(exceptions.Conflict, self._create_keypair,
+        self.assertRaises(lib_exc.Conflict, self._create_keypair,
                           k_name)
         self.client.delete_keypair(k_name)
 

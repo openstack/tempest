@@ -65,8 +65,6 @@ class ServiceClient(rest_client.RestClient):
             raise exceptions.NotFound(ex)
         except lib_exceptions.BadRequest as ex:
             raise exceptions.BadRequest(ex)
-        except lib_exceptions.Conflict as ex:
-            raise exceptions.Conflict(ex)
         # TODO(oomichi): This is just a workaround for failing gate tests
         # when separating Forbidden from Unauthorized in tempest-lib.
         # We will need to remove this translation and replace negative tests
