@@ -30,11 +30,7 @@ from tempest.tests import fake_http
 from tempest.tests import fake_identity
 
 
-def fake_get_default_credentials(credential_type, fill_in=True):
-    return fake_credentials.FakeCredentials()
-
-
-def fake_get_credentials(credential_type=None, fill_in=True, **kwargs):
+def fake_get_credentials(fill_in=True, **kwargs):
     return fake_credentials.FakeCredentials()
 
 
@@ -54,8 +50,6 @@ class BaseAuthTestsSetUp(base.TestCase):
         self.stubs.Set(config, 'TempestConfigPrivate', fake_config.FakePrivate)
         self.fake_http = fake_http.fake_httplib2(return_type=200)
         self.stubs.Set(auth, 'get_credentials', fake_get_credentials)
-        self.stubs.Set(auth, 'get_default_credentials',
-                       fake_get_default_credentials)
         self.auth_provider = self._auth(self.credentials)
 
 

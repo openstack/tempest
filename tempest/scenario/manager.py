@@ -21,8 +21,8 @@ import netaddr
 import six
 from tempest_lib import exceptions as lib_exc
 
-from tempest import auth
 from tempest import clients
+from tempest.common import cred_provider
 from tempest.common import credentials
 from tempest.common.utils import data_utils
 from tempest.common.utils.linux import remote_client
@@ -1321,8 +1321,9 @@ class OrchestrationScenarioTest(ScenarioTest):
 
     @classmethod
     def credentials(cls):
-        admin_creds = auth.get_default_credentials('identity_admin')
-        creds = auth.get_default_credentials('user')
+        admin_creds = cred_provider.get_configured_credentials(
+            'identity_admin')
+        creds = cred_provider.get_configured_credentials('user')
         admin_creds.tenant_name = creds.tenant_name
         return admin_creds
 

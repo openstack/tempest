@@ -15,7 +15,7 @@
 
 import copy
 
-from tempest import auth
+from tempest.common import cred_provider
 from tempest.common import negative_rest_client
 from tempest import config
 from tempest import manager
@@ -378,6 +378,7 @@ class AdminManager(Manager):
 
     def __init__(self, interface='json', service=None):
         super(AdminManager, self).__init__(
-            credentials=auth.get_default_credentials('identity_admin'),
+            credentials=cred_provider.get_configured_credentials(
+                'identity_admin'),
             interface=interface,
             service=service)
