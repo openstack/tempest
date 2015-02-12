@@ -63,7 +63,7 @@ class TenantsNegativeTestJSON(base.BaseIdentityV2AdminTest):
     @test.attr(type=['negative', 'gate'])
     def test_delete_non_existent_tenant(self):
         # Attempt to delete a non existent tenant should fail
-        self.assertRaises(exceptions.NotFound, self.client.delete_tenant,
+        self.assertRaises(lib_exc.NotFound, self.client.delete_tenant,
                           str(uuid.uuid4().hex))
 
     @test.attr(type=['negative', 'gate'])
@@ -113,7 +113,7 @@ class TenantsNegativeTestJSON(base.BaseIdentityV2AdminTest):
     @test.attr(type=['negative', 'gate'])
     def test_update_non_existent_tenant(self):
         # Attempt to update a non existent tenant should fail
-        self.assertRaises(exceptions.NotFound, self.client.update_tenant,
+        self.assertRaises(lib_exc.NotFound, self.client.update_tenant,
                           str(uuid.uuid4().hex))
 
     @test.attr(type=['negative', 'gate'])

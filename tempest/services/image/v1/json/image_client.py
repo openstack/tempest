@@ -20,6 +20,8 @@ import os
 import time
 import urllib
 
+from tempest_lib import exceptions as lib_exc
+
 from tempest.common import glance_http
 from tempest.common import service_client
 from tempest.common.utils import misc as misc_utils
@@ -243,7 +245,7 @@ class ImageClientJSON(service_client.ServiceClient):
     def is_resource_deleted(self, id):
         try:
             self.get_image_meta(id)
-        except exceptions.NotFound:
+        except lib_exc.NotFound:
             return True
         return False
 

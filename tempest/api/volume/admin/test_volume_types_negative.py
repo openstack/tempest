@@ -15,6 +15,8 @@
 
 import uuid
 
+from tempest_lib import exceptions as lib_exc
+
 from tempest.api.volume import base
 from tempest import exceptions
 from tempest import test
@@ -29,7 +31,7 @@ class VolumeTypesNegativeV2Test(base.BaseVolumeAdminTest):
         self.name_field = self.special_fields['name_field']
         params = {self.name_field: str(uuid.uuid4()),
                   'volume_type': str(uuid.uuid4())}
-        self.assertRaises(exceptions.NotFound,
+        self.assertRaises(lib_exc.NotFound,
                           self.volumes_client.create_volume, size=1,
                           **params)
 
@@ -42,14 +44,14 @@ class VolumeTypesNegativeV2Test(base.BaseVolumeAdminTest):
     @test.attr(type='gate')
     def test_get_nonexistent_type_id(self):
         # Should not be able to get volume type with nonexistent type id.
-        self.assertRaises(exceptions.NotFound,
+        self.assertRaises(lib_exc.NotFound,
                           self.volume_types_client.get_volume_type,
                           str(uuid.uuid4()))
 
     @test.attr(type='gate')
     def test_delete_nonexistent_type_id(self):
         # Should not be able to delete volume type with nonexistent type id.
-        self.assertRaises(exceptions.NotFound,
+        self.assertRaises(lib_exc.NotFound,
                           self.volume_types_client.delete_volume_type,
                           str(uuid.uuid4()))
 

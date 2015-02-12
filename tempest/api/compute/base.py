@@ -13,6 +13,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib import exceptions as lib_exc
 import time
 
 from tempest import clients
@@ -107,7 +108,7 @@ class BaseComputeTest(tempest.test.BaseTestCase):
         for server in cls.servers:
             try:
                 cls.servers_client.delete_server(server['id'])
-            except exceptions.NotFound:
+            except lib_exc.NotFound:
                 # Something else already cleaned up the server, nothing to be
                 # worried about
                 pass
@@ -147,7 +148,7 @@ class BaseComputeTest(tempest.test.BaseTestCase):
         for image_id in cls.images:
             try:
                 cls.images_client.delete_image(image_id)
-            except exceptions.NotFound:
+            except lib_exc.NotFound:
                 # The image may have already been deleted which is OK.
                 pass
             except Exception:
@@ -160,7 +161,7 @@ class BaseComputeTest(tempest.test.BaseTestCase):
         for sg in cls.security_groups:
             try:
                 cls.security_groups_client.delete_security_group(sg['id'])
-            except exceptions.NotFound:
+            except lib_exc.NotFound:
                 # The security group may have already been deleted which is OK.
                 pass
             except Exception as exc:
@@ -174,7 +175,7 @@ class BaseComputeTest(tempest.test.BaseTestCase):
         for server_group_id in cls.server_groups:
             try:
                 cls.servers_client.delete_server_group(server_group_id)
-            except exceptions.NotFound:
+            except lib_exc.NotFound:
                 # The server-group may have already been deleted which is OK.
                 pass
             except Exception:
@@ -274,7 +275,7 @@ class BaseComputeTest(tempest.test.BaseTestCase):
             # TODO(mriedem): We should move the wait_for_resource_deletion
             # into the delete_volume method as a convenience to the caller.
             volumes_client.wait_for_resource_deletion(volume_id)
-        except exceptions.NotFound:
+        except lib_exc.NotFound:
             LOG.warn("Unable to delete volume '%s' since it was not found. "
                      "Maybe it was already deleted?" % volume_id)
 

@@ -16,6 +16,7 @@
 import time
 
 from tempest_lib import decorators
+from tempest_lib import exceptions as lib_exc
 import testtools
 
 from tempest.common.utils import data_utils
@@ -85,7 +86,7 @@ class TestStampPattern(manager.ScenarioTest):
             try:
                 while self.snapshots_client.get_snapshot(snapshot['id']):
                     time.sleep(1)
-            except exceptions.NotFound:
+            except lib_exc.NotFound:
                 pass
         self.addCleanup(cleaner)
         self._wait_for_volume_status(volume, 'available')

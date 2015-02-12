@@ -43,7 +43,7 @@ class RoutersNegativeTest(base.BaseRouterTest):
 
     @test.attr(type=['negative', 'smoke'])
     def test_router_add_gateway_invalid_network_returns_404(self):
-        self.assertRaises(exceptions.NotFound,
+        self.assertRaises(lib_exc.NotFound,
                           self.client.update_router,
                           self.router['id'],
                           external_gateway_info={
@@ -87,19 +87,19 @@ class RoutersNegativeTest(base.BaseRouterTest):
     @test.attr(type=['negative', 'smoke'])
     def test_show_non_existent_router_returns_404(self):
         router = data_utils.rand_name('non_exist_router')
-        self.assertRaises(exceptions.NotFound, self.client.show_router,
+        self.assertRaises(lib_exc.NotFound, self.client.show_router,
                           router)
 
     @test.attr(type=['negative', 'smoke'])
     def test_update_non_existent_router_returns_404(self):
         router = data_utils.rand_name('non_exist_router')
-        self.assertRaises(exceptions.NotFound, self.client.update_router,
+        self.assertRaises(lib_exc.NotFound, self.client.update_router,
                           router, name="new_name")
 
     @test.attr(type=['negative', 'smoke'])
     def test_delete_non_existent_router_returns_404(self):
         router = data_utils.rand_name('non_exist_router')
-        self.assertRaises(exceptions.NotFound, self.client.delete_router,
+        self.assertRaises(lib_exc.NotFound, self.client.delete_router,
                           router)
 
 

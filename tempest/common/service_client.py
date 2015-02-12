@@ -61,8 +61,6 @@ class ServiceClient(rest_client.RestClient):
                 headers=headers, body=body)
         except lib_exceptions.Unauthorized as ex:
             raise exceptions.Unauthorized(ex)
-        except lib_exceptions.NotFound as ex:
-            raise exceptions.NotFound(ex)
         except lib_exceptions.BadRequest as ex:
             raise exceptions.BadRequest(ex)
         # TODO(oomichi): This is just a workaround for failing gate tests

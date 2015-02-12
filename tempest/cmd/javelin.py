@@ -314,14 +314,14 @@ def create_users(users):
     for u in users:
         try:
             tenant = admin.identity.get_tenant_by_name(u['tenant'])
-        except exceptions.NotFound:
+        except lib_exc.NotFound:
             LOG.error("Tenant: %s - not found" % u['tenant'])
             continue
         try:
             admin.identity.get_user_by_username(tenant['id'], u['name'])
             LOG.warn("User '%s' already exists in this environment"
                      % u['name'])
-        except exceptions.NotFound:
+        except lib_exc.NotFound:
             admin.identity.create_user(
                 u['name'], u['pass'], tenant['id'],
                 "%s@%s" % (u['name'], tenant['id']),

@@ -14,9 +14,10 @@
 
 import uuid
 
+from tempest_lib import exceptions as lib_exc
+
 from tempest.api.image import base
 from tempest.common.utils import data_utils
-from tempest import exceptions
 from tempest import test
 
 
@@ -27,7 +28,7 @@ class ImagesTagsNegativeTest(base.BaseV2ImageTest):
         # Update tag with non existing image.
         tag = data_utils.rand_name('tag-')
         non_exist_image = str(uuid.uuid4())
-        self.assertRaises(exceptions.NotFound, self.client.add_image_tag,
+        self.assertRaises(lib_exc.NotFound, self.client.add_image_tag,
                           non_exist_image, tag)
 
     @test.attr(type=['negative', 'gate'])
@@ -40,5 +41,5 @@ class ImagesTagsNegativeTest(base.BaseV2ImageTest):
         image_id = body['id']
         tag = data_utils.rand_name('non-exist-tag-')
         self.addCleanup(self.client.delete_image, image_id)
-        self.assertRaises(exceptions.NotFound, self.client.delete_image_tag,
+        self.assertRaises(lib_exc.NotFound, self.client.delete_image_tag,
                           image_id, tag)

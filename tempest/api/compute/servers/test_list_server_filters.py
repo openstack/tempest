@@ -14,12 +14,12 @@
 #    under the License.
 
 from tempest_lib import decorators
+from tempest_lib import exceptions as lib_exc
 
 from tempest.api.compute import base
 from tempest.api import utils
 from tempest.common.utils import data_utils
 from tempest import config
-from tempest import exceptions
 from tempest import test
 
 CONF = config.CONF
@@ -48,13 +48,13 @@ class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
         # not exist, fail early since the tests won't work...
         try:
             cls.images_client.get_image(cls.image_ref)
-        except exceptions.NotFound:
+        except lib_exc.NotFound:
             raise RuntimeError("Image %s (image_ref) was not found!" %
                                cls.image_ref)
 
         try:
             cls.images_client.get_image(cls.image_ref_alt)
-        except exceptions.NotFound:
+        except lib_exc.NotFound:
             raise RuntimeError("Image %s (image_ref_alt) was not found!" %
                                cls.image_ref_alt)
 

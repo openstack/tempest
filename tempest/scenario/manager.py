@@ -111,7 +111,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
             # Tempest clients return dicts, so there is no common delete
             # method available. Using a callable instead
             delete_thing(*args, **kwargs)
-        except exceptions.NotFound:
+        except lib_exc.NotFound:
             # If the resource is already missing, mission accomplished.
             pass
 
@@ -1186,7 +1186,7 @@ class BaremetalScenarioTest(ScenarioTest):
             node = None
             try:
                 node = self.get_node(instance_id=instance_id)
-            except exceptions.NotFound:
+            except lib_exc.NotFound:
                 pass
             return node is not None
 

@@ -49,7 +49,7 @@ class TestPortsNegative(base.BaseBaremetalTest):
 
     @test.attr(type=['negative', 'smoke'])
     def test_show_port_nonexistent_uuid(self):
-        self.assertRaises(exc.NotFound, self.client.show_port,
+        self.assertRaises(lib_exc.NotFound, self.client.show_port,
                           data_utils.rand_uuid())
 
     @test.attr(type=['negative', 'smoke'])
@@ -136,7 +136,7 @@ class TestPortsNegative(base.BaseBaremetalTest):
         patch = [{'path': '/extra/key',
                   'op': 'replace',
                   'value': 'new-value'}]
-        self.assertRaises(exc.NotFound,
+        self.assertRaises(lib_exc.NotFound,
                           self.client.update_port, port_id, patch)
 
     @test.attr(type=['negative', 'smoke'])

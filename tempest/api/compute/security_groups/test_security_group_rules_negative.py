@@ -13,6 +13,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib import exceptions as lib_exc
+
 from tempest.api.compute.security_groups import base
 from tempest.common.utils import data_utils
 from tempest import config
@@ -46,7 +48,7 @@ class SecurityGroupRulesNegativeTestJSON(base.BaseSecurityGroupsTest):
         ip_protocol = 'tcp'
         from_port = 22
         to_port = 22
-        self.assertRaises(exceptions.NotFound,
+        self.assertRaises(lib_exc.NotFound,
                           self.client.create_security_group_rule,
                           parent_group_id, ip_protocol, from_port, to_port)
 
@@ -158,6 +160,6 @@ class SecurityGroupRulesNegativeTestJSON(base.BaseSecurityGroupsTest):
         # Negative test: Deletion of Security Group rule should be FAIL
         # with non existent id
         non_existent_rule_id = not_existing_id()
-        self.assertRaises(exceptions.NotFound,
+        self.assertRaises(lib_exc.NotFound,
                           self.client.delete_security_group_rule,
                           non_existent_rule_id)

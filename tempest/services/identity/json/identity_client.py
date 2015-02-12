@@ -11,10 +11,10 @@
 #    under the License.
 
 import json
+from tempest_lib import exceptions as lib_exc
 
 from tempest.common import service_client
 from tempest import config
-from tempest import exceptions
 
 CONF = config.CONF
 
@@ -134,7 +134,7 @@ class IdentityClientJSON(service_client.ServiceClient):
         for tenant in tenants:
             if tenant['name'] == tenant_name:
                 return tenant
-        raise exceptions.NotFound('No such tenant')
+        raise lib_exc.NotFound('No such tenant')
 
     def update_tenant(self, tenant_id, **kwargs):
         """Updates a tenant."""
@@ -227,7 +227,7 @@ class IdentityClientJSON(service_client.ServiceClient):
         for user in users:
             if user['name'] == username:
                 return user
-        raise exceptions.NotFound('No such user')
+        raise lib_exc.NotFound('No such user')
 
     def create_service(self, name, type, **kwargs):
         """Create a service."""

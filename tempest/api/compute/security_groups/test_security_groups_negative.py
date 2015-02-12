@@ -14,6 +14,7 @@
 #    under the License.
 
 from tempest_lib import decorators
+from tempest_lib import exceptions as lib_exc
 import testtools
 
 from tempest.api.compute.security_groups import base
@@ -53,7 +54,7 @@ class SecurityGroupsNegativeTestJSON(base.BaseSecurityGroupsTest):
         # Negative test:Should not be able to GET the details
         # of non-existent Security Group
         non_exist_id = self._generate_a_non_existent_security_group_id()
-        self.assertRaises(exceptions.NotFound, self.client.get_security_group,
+        self.assertRaises(lib_exc.NotFound, self.client.get_security_group,
                           non_exist_id)
 
     @decorators.skip_because(bug="1161411",
@@ -132,7 +133,7 @@ class SecurityGroupsNegativeTestJSON(base.BaseSecurityGroupsTest):
     def test_delete_nonexistent_security_group(self):
         # Negative test:Deletion of a non-existent Security Group should fail
         non_exist_id = self._generate_a_non_existent_security_group_id()
-        self.assertRaises(exceptions.NotFound,
+        self.assertRaises(lib_exc.NotFound,
                           self.client.delete_security_group, non_exist_id)
 
     @test.attr(type=['negative', 'smoke'])
@@ -140,7 +141,7 @@ class SecurityGroupsNegativeTestJSON(base.BaseSecurityGroupsTest):
     def test_delete_security_group_without_passing_id(self):
         # Negative test:Deletion of a Security Group with out passing ID
         # should Fail
-        self.assertRaises(exceptions.NotFound,
+        self.assertRaises(lib_exc.NotFound,
                           self.client.delete_security_group, '')
 
     @testtools.skipIf(CONF.service_available.neutron,
@@ -194,7 +195,7 @@ class SecurityGroupsNegativeTestJSON(base.BaseSecurityGroupsTest):
         non_exist_id = self._generate_a_non_existent_security_group_id()
         s_name = data_utils.rand_name('sg-')
         s_description = data_utils.rand_name('description-')
-        self.assertRaises(exceptions.NotFound,
+        self.assertRaises(lib_exc.NotFound,
                           self.client.update_security_group,
                           non_exist_id, name=s_name,
                           description=s_description)

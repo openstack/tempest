@@ -14,6 +14,7 @@
 #    under the License.
 
 import netaddr
+from tempest_lib import exceptions as lib_exc
 
 from tempest import clients
 from tempest.common.utils import data_utils
@@ -177,7 +178,7 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
         try:
             delete_callable(*args, **kwargs)
         # if resource is not found, this means it was deleted in the test
-        except exceptions.NotFound:
+        except lib_exc.NotFound:
             pass
 
     @classmethod
@@ -399,7 +400,7 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
             try:
                 cls.client.remove_router_interface_with_subnet_id(
                     router['id'], i['fixed_ips'][0]['subnet_id'])
-            except exceptions.NotFound:
+            except lib_exc.NotFound:
                 pass
         cls.client.delete_router(router['id'])
 

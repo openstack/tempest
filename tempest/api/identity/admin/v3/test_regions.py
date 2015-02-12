@@ -13,9 +13,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib import exceptions as lib_exc
+
 from tempest.api.identity import base
 from tempest.common.utils import data_utils
-from tempest import exceptions
 from tempest import test
 
 
@@ -40,7 +41,7 @@ class RegionsTestJSON(base.BaseIdentityV3AdminTest):
 
     def _delete_region(self, region_id):
         self.client.delete_region(region_id)
-        self.assertRaises(exceptions.NotFound,
+        self.assertRaises(lib_exc.NotFound,
                           self.client.get_region, region_id)
 
     @test.attr(type='gate')

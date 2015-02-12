@@ -16,9 +16,10 @@
 import json
 import urllib
 
+from tempest_lib import exceptions as lib_exc
+
 from tempest.api_schema.response.compute.v2 import floating_ips as schema
 from tempest.common import service_client
-from tempest import exceptions
 
 
 class FloatingIPsClientJSON(service_client.ServiceClient):
@@ -40,7 +41,7 @@ class FloatingIPsClientJSON(service_client.ServiceClient):
         resp, body = self.get(url)
         body = json.loads(body)
         if resp.status == 404:
-            raise exceptions.NotFound(body)
+            raise lib_exc.NotFound(body)
         self.validate_response(schema.floating_ip, resp, body)
         return resp, body['floating_ip']
 
@@ -92,7 +93,7 @@ class FloatingIPsClientJSON(service_client.ServiceClient):
     def is_resource_deleted(self, id):
         try:
             self.get_floating_ip_details(id)
-        except exceptions.NotFound:
+        except lib_exc.NotFound:
             return True
         return False
 

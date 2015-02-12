@@ -12,11 +12,11 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib import exceptions as lib_exc
 import testtools
 
 from tempest.api.compute import base
 from tempest import config
-from tempest import exceptions
 from tempest import test
 
 CONF = config.CONF
@@ -59,7 +59,7 @@ class SecurityGroupDefaultRulesTest(base.BaseV2ComputeAdminTest):
             rule = self._create_security_group_default_rules(ip_protocol)
             # Delete Security Group default rule
             self.adm_client.delete_security_group_default_rule(rule['id'])
-            self.assertRaises(exceptions.NotFound,
+            self.assertRaises(lib_exc.NotFound,
                               self.adm_client.get_security_group_default_rule,
                               rule['id'])
 

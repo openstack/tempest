@@ -14,6 +14,7 @@
 #    under the License.
 
 import datetime
+from tempest_lib import exceptions as lib_exc
 
 from tempest.api.compute import base
 from tempest import exceptions
@@ -42,7 +43,7 @@ class TenantUsagesNegativeTestJSON(base.BaseV2ComputeAdminTest):
         # Get usage for a specific tenant empty
         params = {'start': self.start,
                   'end': self.end}
-        self.assertRaises(exceptions.NotFound,
+        self.assertRaises(lib_exc.NotFound,
                           self.adm_client.get_tenant_usage,
                           '', params)
 

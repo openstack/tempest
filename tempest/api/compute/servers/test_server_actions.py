@@ -25,7 +25,6 @@ from tempest.api.compute import base
 from tempest.common.utils import data_utils
 from tempest.common.utils.linux import remote_client
 from tempest import config
-from tempest import exceptions
 from tempest import test
 
 CONF = config.CONF
@@ -263,7 +262,7 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
             if oldest_backup_exist:
                 try:
                     self.os.image_client.delete_image(oldest_backup)
-                except exceptions.NotFound:
+                except lib_exc.NotFound:
                     pass
                 else:
                     LOG.warning("Deletion of oldest backup %s should not have "

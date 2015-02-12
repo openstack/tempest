@@ -15,6 +15,7 @@
 
 import ConfigParser
 import contextlib
+from tempest_lib import exceptions as lib_exc
 import types
 import urlparse
 
@@ -65,7 +66,7 @@ class BotoClientBase(object):
             ec2_cred = keystone.ec2.create(keystone.auth_user_id,
                                            keystone.auth_tenant_id)
         if not all((ec2_cred, ec2_cred.access, ec2_cred.secret)):
-            raise exceptions.NotFound("Unable to get access and secret keys")
+            raise lib_exc.NotFound("Unable to get access and secret keys")
         return ec2_cred
 
     def _config_boto_timeout(self, timeout, retries):

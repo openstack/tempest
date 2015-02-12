@@ -10,9 +10,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib import exceptions as lib_exc
+
 from tempest.api.telemetry import base
 from tempest.common.utils import data_utils
-from tempest import exceptions
 from tempest import test
 
 
@@ -70,7 +71,7 @@ class TelemetryAlarmingAPITestJSON(base.BaseTelemetryTest):
         self.assertDictContainsSubset(new_rule, body['threshold_rule'])
         # Delete alarm and verify if deleted
         self.telemetry_client.delete_alarm(alarm_id)
-        self.assertRaises(exceptions.NotFound,
+        self.assertRaises(lib_exc.NotFound,
                           self.telemetry_client.get_alarm, alarm_id)
 
     @test.attr(type="gate")
@@ -101,5 +102,5 @@ class TelemetryAlarmingAPITestJSON(base.BaseTelemetryTest):
         self.assertDictContainsSubset(rule, body['combination_rule'])
         # Verify alarm delete
         self.telemetry_client.delete_alarm(alarm_id)
-        self.assertRaises(exceptions.NotFound,
+        self.assertRaises(lib_exc.NotFound,
                           self.telemetry_client.get_alarm, alarm_id)

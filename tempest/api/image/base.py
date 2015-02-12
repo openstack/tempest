@@ -13,12 +13,12 @@
 #    under the License.
 
 import cStringIO as StringIO
+from tempest_lib import exceptions as lib_exc
 
 from tempest import clients
 from tempest.common import credentials
 from tempest.common.utils import data_utils
 from tempest import config
-from tempest import exceptions
 from tempest.openstack.common import log as logging
 import tempest.test
 
@@ -48,7 +48,7 @@ class BaseImageTest(tempest.test.BaseTestCase):
         for image_id in cls.created_images:
             try:
                 cls.client.delete_image(image_id)
-            except exceptions.NotFound:
+            except lib_exc.NotFound:
                 pass
 
         for image_id in cls.created_images:

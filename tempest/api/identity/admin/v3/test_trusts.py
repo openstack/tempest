@@ -13,6 +13,8 @@
 import datetime
 import re
 
+from tempest_lib import exceptions as lib_exc
+
 from tempest.api.identity import base
 from tempest import auth
 from tempest import clients
@@ -166,19 +168,19 @@ class BaseTrustsV3Test(base.BaseIdentityV3AdminTest):
             self.trust_id, self.delegated_role_id)
 
         # And that we don't find not_delegated_role
-        self.assertRaises(exceptions.NotFound,
+        self.assertRaises(lib_exc.NotFound,
                           self.trustor_client.get_trust_role,
                           self.trust_id,
                           self.not_delegated_role_id)
 
-        self.assertRaises(exceptions.NotFound,
+        self.assertRaises(lib_exc.NotFound,
                           self.trustor_client.check_trust_role,
                           self.trust_id,
                           self.not_delegated_role_id)
 
     def delete_trust(self):
         self.trustor_client.delete_trust(self.trust_id)
-        self.assertRaises(exceptions.NotFound,
+        self.assertRaises(lib_exc.NotFound,
                           self.trustor_client.get_trust,
                           self.trust_id)
         self.trust_id = None

@@ -15,6 +15,8 @@
 
 import uuid
 
+from tempest_lib import exceptions as lib_exc
+
 from tempest.api.volume import base
 from tempest.common.utils import data_utils
 from tempest import exceptions
@@ -83,7 +85,7 @@ class ExtraSpecsNegativeV2Test(base.BaseVolumeAdminTest):
             # type id.
         extra_specs = {"spec2": "val1"}
         self.assertRaises(
-            exceptions.NotFound,
+            lib_exc.NotFound,
             self.volume_types_client.create_volume_type_extra_specs,
             str(uuid.uuid4()), extra_specs)
 
@@ -109,7 +111,7 @@ class ExtraSpecsNegativeV2Test(base.BaseVolumeAdminTest):
             # type id.
         extra_specs = {"spec1": "val1"}
         self.assertRaises(
-            exceptions.NotFound,
+            lib_exc.NotFound,
             self.volume_types_client.delete_volume_type_extra_specs,
             str(uuid.uuid4()), extra_specs.keys()[0])
 
@@ -117,7 +119,7 @@ class ExtraSpecsNegativeV2Test(base.BaseVolumeAdminTest):
     def test_list_nonexistent_volume_type_id(self):
         # Should not list volume type extra spec for nonexistent type id.
         self.assertRaises(
-            exceptions.NotFound,
+            lib_exc.NotFound,
             self.volume_types_client.list_volume_types_extra_specs,
             str(uuid.uuid4()))
 
@@ -126,7 +128,7 @@ class ExtraSpecsNegativeV2Test(base.BaseVolumeAdminTest):
         # Should not get volume type extra spec for nonexistent type id.
         extra_specs = {"spec1": "val1"}
         self.assertRaises(
-            exceptions.NotFound,
+            lib_exc.NotFound,
             self.volume_types_client.get_volume_type_extra_specs,
             str(uuid.uuid4()), extra_specs.keys()[0])
 
@@ -135,7 +137,7 @@ class ExtraSpecsNegativeV2Test(base.BaseVolumeAdminTest):
         # Should not get volume type extra spec for nonexistent extra spec
             # id.
         self.assertRaises(
-            exceptions.NotFound,
+            lib_exc.NotFound,
             self.volume_types_client.get_volume_type_extra_specs,
             self.volume_type['id'], str(uuid.uuid4()))
 

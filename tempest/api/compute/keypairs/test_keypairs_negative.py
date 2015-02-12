@@ -45,7 +45,7 @@ class KeyPairsNegativeTestJSON(base.BaseV2ComputeTest):
     def test_keypair_delete_nonexistent_key(self):
         # Non-existent key deletion should throw a proper error
         k_name = data_utils.rand_name("keypair-non-existent-")
-        self.assertRaises(exceptions.NotFound, self.client.delete_keypair,
+        self.assertRaises(lib_exc.NotFound, self.client.delete_keypair,
                           k_name)
 
     @test.attr(type=['negative', 'gate'])

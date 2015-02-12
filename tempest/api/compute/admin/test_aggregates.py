@@ -13,10 +13,11 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib import exceptions as lib_exc
+
 from tempest.api.compute import base
 from tempest.common import tempest_fixtures as fixtures
 from tempest.common.utils import data_utils
-from tempest import exceptions
 from tempest import test
 
 
@@ -45,7 +46,7 @@ class AggregatesAdminTestJSON(base.BaseV2ComputeAdminTest):
         try:
             self.client.delete_aggregate(aggregate_id)
         # if aggregate not found, it depict it was deleted in the test
-        except exceptions.NotFound:
+        except lib_exc.NotFound:
             pass
 
     @test.attr(type='gate')

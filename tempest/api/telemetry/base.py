@@ -12,6 +12,8 @@
 
 import time
 
+from tempest_lib import exceptions as lib_exc
+
 from tempest.common.utils import data_utils
 from tempest import config
 from tempest import exceptions
@@ -80,7 +82,7 @@ class BaseTelemetryTest(tempest.test.BaseTestCase):
         for resource_id in list_of_ids:
             try:
                 method(resource_id)
-            except exceptions.NotFound:
+            except lib_exc.NotFound:
                 pass
 
     @classmethod
