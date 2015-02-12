@@ -15,6 +15,7 @@
 # under the License.
 
 from tempest_lib import decorators
+from tempest_lib import exceptions as lib_exc
 
 from tempest.api.object_storage import base
 from tempest import clients
@@ -100,6 +101,6 @@ class AccountQuotasNegativeTest(base.BaseObjectTest):
     def test_upload_large_object(self):
         object_name = data_utils.rand_name(name="TestObject")
         data = data_utils.arbitrary_string(30)
-        self.assertRaises(exceptions.OverLimit,
+        self.assertRaises(lib_exc.OverLimit,
                           self.object_client.create_object,
                           self.container_name, object_name, data)

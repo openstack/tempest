@@ -15,6 +15,7 @@
 
 import sys
 
+from tempest_lib import exceptions as lib_exc
 import testtools
 
 from tempest.api.compute import base
@@ -210,7 +211,7 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
         # Pass really long metadata while creating a server
 
         metadata = {'a': 'b' * 260}
-        self.assertRaises((exceptions.BadRequest, exceptions.OverLimit),
+        self.assertRaises((exceptions.BadRequest, lib_exc.OverLimit),
                           self.create_test_server,
                           meta=metadata)
 
