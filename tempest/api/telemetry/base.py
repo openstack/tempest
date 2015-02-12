@@ -52,11 +52,11 @@ class BaseTelemetryTest(tempest.test.BaseTestCase):
 
     @classmethod
     def create_alarm(cls, **kwargs):
-        resp, body = cls.telemetry_client.create_alarm(
+        body = cls.telemetry_client.create_alarm(
             name=data_utils.rand_name('telemetry_alarm'),
             type='threshold', **kwargs)
         cls.alarm_ids.append(body['alarm_id'])
-        return resp, body
+        return body
 
     @classmethod
     def create_server(cls):
@@ -100,10 +100,9 @@ class BaseTelemetryTest(tempest.test.BaseTestCase):
         timeout = CONF.compute.build_timeout
         start = timeutils.utcnow()
         while timeutils.delta_seconds(start, timeutils.utcnow()) < timeout:
-            resp, body = self.telemetry_client.list_samples(metric, query)
-            self.assertEqual(resp.status, 200)
+            body = self.telemetry_client.list_samples(metric, query)
             if body:
-                return resp, body
+                return body
             time.sleep(CONF.compute.build_interval)
 
         raise exceptions.TimeoutException(

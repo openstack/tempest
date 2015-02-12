@@ -439,6 +439,9 @@
 # running instances? (boolean value)
 #snapshot = true
 
+# Does the test environment have the ec2 api running? (boolean value)
+#ec2_api = true
+
 
 [dashboard]
 
@@ -816,7 +819,7 @@
 
 # Number of seconds to time on waiting for a container to container
 # synchronization complete. (integer value)
-#container_sync_timeout = 120
+#container_sync_timeout = 600
 
 # Number of seconds to wait while looping to check the status of a
 # container to container synchronization (integer value)
@@ -828,6 +831,16 @@
 
 # User role that has reseller admin (string value)
 #reseller_admin_role = ResellerAdmin
+
+# Name of sync realm. A sync realm is a set of clusters that have
+# agreed to allow container syncing with each other. Set the same
+# realm name as Swift's container-sync-realms.conf (string value)
+#realm_name = realm1
+
+# One name of cluster which is set in the realm whose name is set in
+# 'realm_name' item in this file. Set the same cluster name as Swift's
+# container-sync-realms.conf (string value)
+#cluster_name = name1
 
 
 [object-storage-feature-enabled]

@@ -40,7 +40,7 @@ class SecurityGroupDefaultRulesTest(base.BaseV2ComputeAdminTest):
                                              from_port=22, to_port=22,
                                              cidr='10.10.0.0/24'):
         # Create Security Group default rule
-        _, rule = self.adm_client.create_security_default_group_rule(
+        rule = self.adm_client.create_security_default_group_rule(
             ip_protocol,
             from_port,
             to_port,
@@ -68,7 +68,7 @@ class SecurityGroupDefaultRulesTest(base.BaseV2ComputeAdminTest):
         ip_protocol = 'udp'
         from_port = 80
         to_port = 80
-        _, rule = self.adm_client.create_security_default_group_rule(
+        rule = self.adm_client.create_security_default_group_rule(
             ip_protocol,
             from_port,
             to_port)
@@ -83,7 +83,7 @@ class SecurityGroupDefaultRulesTest(base.BaseV2ComputeAdminTest):
         from_port = 10
         to_port = 10
         cidr = ''
-        _, rule = self.adm_client.create_security_default_group_rule(
+        rule = self.adm_client.create_security_default_group_rule(
             ip_protocol,
             from_port,
             to_port,
@@ -105,7 +105,7 @@ class SecurityGroupDefaultRulesTest(base.BaseV2ComputeAdminTest):
                                                          cidr)
         self.addCleanup(self.adm_client.delete_security_group_default_rule,
                         rule['id'])
-        _, rules = self.adm_client.list_security_group_default_rules()
+        rules = self.adm_client.list_security_group_default_rules()
         self.assertNotEqual(0, len(rules))
         self.assertIn(rule, rules)
 
@@ -121,6 +121,6 @@ class SecurityGroupDefaultRulesTest(base.BaseV2ComputeAdminTest):
                                                          cidr)
         self.addCleanup(self.adm_client.delete_security_group_default_rule,
                         rule['id'])
-        _, fetched_rule = self.adm_client.get_security_group_default_rule(
+        fetched_rule = self.adm_client.get_security_group_default_rule(
             rule['id'])
         self.assertEqual(rule, fetched_rule)

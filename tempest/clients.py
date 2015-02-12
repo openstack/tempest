@@ -20,7 +20,8 @@ from tempest.common import negative_rest_client
 from tempest import config
 from tempest import manager
 from tempest.openstack.common import log as logging
-from tempest.services.baremetal.v1.client_json import BaremetalClientJSON
+from tempest.services.baremetal.v1.json.baremetal_client import \
+    BaremetalClientJSON
 from tempest.services import botoclients
 from tempest.services.compute.json.agents_client import \
     AgentsClientJSON
@@ -57,6 +58,8 @@ from tempest.services.compute.json.security_groups_client import \
     SecurityGroupsClientJSON
 from tempest.services.compute.json.servers_client import ServersClientJSON
 from tempest.services.compute.json.services_client import ServicesClientJSON
+from tempest.services.compute.json.tenant_networks_client import \
+    TenantNetworksClientJSON
 from tempest.services.compute.json.tenant_usages_client import \
     TenantUsagesClientJSON
 from tempest.services.compute.json.volumes_extensions_client import \
@@ -64,21 +67,23 @@ from tempest.services.compute.json.volumes_extensions_client import \
 from tempest.services.data_processing.v1_1.client import DataProcessingClient
 from tempest.services.database.json.flavors_client import \
     DatabaseFlavorsClientJSON
+from tempest.services.database.json.limits_client import \
+    DatabaseLimitsClientJSON
 from tempest.services.database.json.versions_client import \
     DatabaseVersionsClientJSON
 from tempest.services.identity.json.identity_client import IdentityClientJSON
-from tempest.services.identity.json.identity_client import TokenClientJSON
+from tempest.services.identity.json.token_client import TokenClientJSON
 from tempest.services.identity.v3.json.credentials_client import \
     CredentialsClientJSON
 from tempest.services.identity.v3.json.endpoints_client import \
     EndPointClientJSON
 from tempest.services.identity.v3.json.identity_client import \
     IdentityV3ClientJSON
-from tempest.services.identity.v3.json.identity_client import V3TokenClientJSON
 from tempest.services.identity.v3.json.policy_client import PolicyClientJSON
 from tempest.services.identity.v3.json.region_client import RegionClientJSON
 from tempest.services.identity.v3.json.service_client import \
     ServiceClientJSON
+from tempest.services.identity.v3.json.token_client import V3TokenClientJSON
 from tempest.services.image.v1.json.image_client import ImageClientJSON
 from tempest.services.image.v2.json.image_client import ImageClientV2JSON
 from tempest.services.messaging.json.messaging_client import \
@@ -157,10 +162,17 @@ class Manager(manager.Manager):
         super(Manager, self).__init__(credentials=credentials)
 
         self._set_compute_clients()
+        self._set_database_clients()
         self._set_identity_clients()
         self._set_volume_clients()
+        self._set_object_storage_clients()
 
-        self.baremetal_client = BaremetalClientJSON(self.auth_provider)
+        self.baremetal_client = BaremetalClientJSON(
+            self.auth_provider,
+            CONF.baremetal.catalog_type,
+            CONF.identity.region,
+            endpoint_type=CONF.baremetal.endpoint_type,
+            **self.default_params_with_timeout_values)
         self.network_client = NetworkClientJSON(
             self.auth_provider,
             CONF.network.catalog_type,
@@ -169,36 +181,21 @@ class Manager(manager.Manager):
             build_interval=CONF.network.build_interval,
             build_timeout=CONF.network.build_timeout,
             **self.default_params)
-        self.database_flavors_client = DatabaseFlavorsClientJSON(
+        self.messaging_client = MessagingClientJSON(
             self.auth_provider,
-            CONF.database.catalog_type,
+            CONF.messaging.catalog_type,
             CONF.identity.region,
             **self.default_params_with_timeout_values)
-        self.database_versions_client = DatabaseVersionsClientJSON(
-            self.auth_provider,
-            CONF.database.catalog_type,
-            CONF.identity.region,
-            **self.default_params_with_timeout_values)
-        self.messaging_client = MessagingClientJSON(self.auth_provider)
         if CONF.service_available.ceilometer:
             self.telemetry_client = TelemetryClientJSON(
-                self.auth_provider)
-        self.negative_client = negative_rest_client.NegativeRestClient(
-            self.auth_provider, service)
-
-        # TODO(andreaf) EC2 client still do their auth, v2 only
-        ec2_client_args = (self.credentials.username,
-                           self.credentials.password,
-                           CONF.identity.uri,
-                           self.credentials.tenant_name)
-
-        # common clients
-        self.account_client = AccountClient(self.auth_provider)
+                self.auth_provider,
+                CONF.telemetry.catalog_type,
+                CONF.identity.region,
+                endpoint_type=CONF.telemetry.endpoint_type,
+                **self.default_params_with_timeout_values)
         if CONF.service_available.glance:
             self.image_client = ImageClientJSON(self.auth_provider)
             self.image_client_v2 = ImageClientV2JSON(self.auth_provider)
-        self.container_client = ContainerClient(self.auth_provider)
-        self.object_client = ObjectClient(self.auth_provider)
         self.orchestration_client = OrchestrationClient(
             self.auth_provider,
             CONF.orchestration.catalog_type,
@@ -207,7 +204,14 @@ class Manager(manager.Manager):
             build_interval=CONF.orchestration.build_interval,
             build_timeout=CONF.orchestration.build_timeout,
             **self.default_params)
+        self.negative_client = negative_rest_client.NegativeRestClient(
+            self.auth_provider, service)
 
+        # TODO(andreaf) EC2 client still do their auth, v2 only
+        ec2_client_args = (self.credentials.username,
+                           self.credentials.password,
+                           CONF.identity.uri,
+                           self.credentials.tenant_name)
         self.ec2api_client = botoclients.APIClientEC2(*ec2_client_args)
         self.s3_client = botoclients.ObjectClientS3(*ec2_client_args)
         self.data_processing_client = DataProcessingClient(
@@ -261,6 +265,8 @@ class Manager(manager.Manager):
                                                       **params)
         self.instance_usages_audit_log_client = \
             InstanceUsagesAuditLogClientJSON(self.auth_provider, **params)
+        self.tenant_networks_client = \
+            TenantNetworksClientJSON(self.auth_provider, **params)
 
         # NOTE: The following client needs special timeout values because
         # the API is a proxy for the other component.
@@ -271,6 +277,23 @@ class Manager(manager.Manager):
         })
         self.volumes_extensions_client = VolumesExtensionsClientJSON(
             self.auth_provider, **params_volume)
+
+    def _set_database_clients(self):
+        self.database_flavors_client = DatabaseFlavorsClientJSON(
+            self.auth_provider,
+            CONF.database.catalog_type,
+            CONF.identity.region,
+            **self.default_params_with_timeout_values)
+        self.database_limits_client = DatabaseLimitsClientJSON(
+            self.auth_provider,
+            CONF.database.catalog_type,
+            CONF.identity.region,
+            **self.default_params_with_timeout_values)
+        self.database_versions_client = DatabaseVersionsClientJSON(
+            self.auth_provider,
+            CONF.database.catalog_type,
+            CONF.identity.region,
+            **self.default_params_with_timeout_values)
 
     def _set_identity_clients(self):
         self.identity_client = IdentityClientJSON(self.auth_provider)
@@ -285,35 +308,65 @@ class Manager(manager.Manager):
         self.credentials_client = CredentialsClientJSON(self.auth_provider)
 
     def _set_volume_clients(self):
-        self.volume_qos_client = QosSpecsClientJSON(self.auth_provider)
+        params = {
+            'service': CONF.volume.catalog_type,
+            'region': CONF.volume.region or CONF.identity.region,
+            'endpoint_type': CONF.volume.endpoint_type,
+            'build_interval': CONF.volume.build_interval,
+            'build_timeout': CONF.volume.build_timeout
+        }
+        params.update(self.default_params)
+
+        self.volume_qos_client = QosSpecsClientJSON(self.auth_provider,
+                                                    **params)
         self.volume_qos_v2_client = QosSpecsV2ClientJSON(
-            self.auth_provider)
+            self.auth_provider, **params)
         self.volume_services_v2_client = VolumesServicesV2ClientJSON(
-            self.auth_provider)
-        self.backups_client = BackupsClientJSON(self.auth_provider)
-        self.backups_v2_client = BackupsClientV2JSON(self.auth_provider)
-        self.snapshots_client = SnapshotsClientJSON(self.auth_provider)
-        self.snapshots_v2_client = SnapshotsV2ClientJSON(self.auth_provider)
-        self.volumes_client = VolumesClientJSON(self.auth_provider)
-        self.volumes_v2_client = VolumesV2ClientJSON(self.auth_provider)
-        self.volume_types_client = VolumeTypesClientJSON(self.auth_provider)
+            self.auth_provider, **params)
+        self.backups_client = BackupsClientJSON(self.auth_provider, **params)
+        self.backups_v2_client = BackupsClientV2JSON(self.auth_provider,
+                                                     **params)
+        self.snapshots_client = SnapshotsClientJSON(self.auth_provider,
+                                                    **params)
+        self.snapshots_v2_client = SnapshotsV2ClientJSON(self.auth_provider,
+                                                         **params)
+        self.volumes_client = VolumesClientJSON(self.auth_provider, **params)
+        self.volumes_v2_client = VolumesV2ClientJSON(self.auth_provider,
+                                                     **params)
+        self.volume_types_client = VolumeTypesClientJSON(self.auth_provider,
+                                                         **params)
         self.volume_services_client = VolumesServicesClientJSON(
-            self.auth_provider)
-        self.volume_hosts_client = VolumeHostsClientJSON(self.auth_provider)
+            self.auth_provider, **params)
+        self.volume_hosts_client = VolumeHostsClientJSON(self.auth_provider,
+                                                         **params)
         self.volume_hosts_v2_client = VolumeHostsV2ClientJSON(
-            self.auth_provider)
-        self.volume_quotas_client = VolumeQuotasClientJSON(self.auth_provider)
-        self.volume_quotas_v2_client = VolumeQuotasV2Client(self.auth_provider)
+            self.auth_provider, **params)
+        self.volume_quotas_client = VolumeQuotasClientJSON(self.auth_provider,
+                                                           **params)
+        self.volume_quotas_v2_client = VolumeQuotasV2Client(self.auth_provider,
+                                                            **params)
         self.volumes_extension_client = VolumeExtensionClientJSON(
-            self.auth_provider)
+            self.auth_provider, **params)
         self.volumes_v2_extension_client = VolumeV2ExtensionClientJSON(
-            self.auth_provider)
+            self.auth_provider, **params)
         self.volume_availability_zone_client = \
-            VolumeAvailabilityZoneClientJSON(self.auth_provider)
+            VolumeAvailabilityZoneClientJSON(self.auth_provider, **params)
         self.volume_v2_availability_zone_client = \
-            VolumeV2AvailabilityZoneClientJSON(self.auth_provider)
+            VolumeV2AvailabilityZoneClientJSON(self.auth_provider, **params)
         self.volume_types_v2_client = VolumeTypesV2ClientJSON(
-            self.auth_provider)
+            self.auth_provider, **params)
+
+    def _set_object_storage_clients(self):
+        params = {
+            'service': CONF.object_storage.catalog_type,
+            'region': CONF.object_storage.region or CONF.identity.region,
+            'endpoint_type': CONF.object_storage.endpoint_type
+        }
+        params.update(self.default_params_with_timeout_values)
+
+        self.account_client = AccountClient(self.auth_provider, **params)
+        self.container_client = ContainerClient(self.auth_provider, **params)
+        self.object_client = ObjectClient(self.auth_provider, **params)
 
 
 class AdminManager(Manager):

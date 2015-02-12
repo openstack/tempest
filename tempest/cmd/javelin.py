@@ -150,6 +150,12 @@ class OSClient(object):
             'ca_certs': CONF.identity.ca_certificates_file,
             'trace_requests': CONF.debug.trace_requests
         }
+        default_params_with_timeout_values = {
+            'build_interval': CONF.compute.build_interval,
+            'build_timeout': CONF.compute.build_timeout
+        }
+        default_params_with_timeout_values.update(default_params)
+
         compute_params = {
             'service': CONF.compute.catalog_type,
             'region': CONF.compute.region or CONF.identity.region,
@@ -158,6 +164,13 @@ class OSClient(object):
             'build_timeout': CONF.compute.build_timeout
         }
         compute_params.update(default_params)
+
+        object_storage_params = {
+            'service': CONF.object_storage.catalog_type,
+            'region': CONF.object_storage.region or CONF.identity.region,
+            'endpoint_type': CONF.object_storage.endpoint_type
+        }
+        object_storage_params.update(default_params)
 
         _creds = tempest.auth.KeystoneV2Credentials(
             username=user,
@@ -171,11 +184,25 @@ class OSClient(object):
                                                         **compute_params)
         self.secgroups = security_groups_client.SecurityGroupsClientJSON(
             _auth, **compute_params)
-        self.objects = object_client.ObjectClient(_auth)
-        self.containers = container_client.ContainerClient(_auth)
+        self.objects = object_client.ObjectClient(_auth,
+                                                  **object_storage_params)
+        self.containers = container_client.ContainerClient(
+            _auth, **object_storage_params)
         self.images = image_client.ImageClientV2JSON(_auth)
-        self.telemetry = telemetry_client.TelemetryClientJSON(_auth)
-        self.volumes = volumes_client.VolumesClientJSON(_auth)
+        self.telemetry = telemetry_client.TelemetryClientJSON(
+            _auth,
+            CONF.telemetry.catalog_type,
+            CONF.identity.region,
+            endpoint_type=CONF.telemetry.endpoint_type,
+            **default_params_with_timeout_values)
+        self.volumes = volumes_client.VolumesClientJSON(
+            _auth,
+            CONF.volume.catalog_type,
+            CONF.volume.region or CONF.identity.region,
+            endpoint_type=CONF.volume.endpoint_type,
+            build_interval=CONF.volume.build_interval,
+            build_timeout=CONF.volume.build_timeout,
+            **default_params)
         self.networks = network_client.NetworkClientJSON(
             _auth,
             CONF.network.catalog_type,
@@ -187,7 +214,7 @@ class OSClient(object):
 
 
 def load_resources(fname):
-    """Load the expected resources from a yaml flie."""
+    """Load the expected resources from a yaml file."""
     return yaml.load(open(fname, 'r'))
 
 
@@ -423,7 +450,7 @@ class JavelinCheck(unittest.TestCase):
                 self._ping_ip(addr, 60)
 
     def check_secgroups(self):
-        """Check that the security groups are still existing."""
+        """Check that the security groups still exist."""
         LOG.info("Checking security groups")
         for secgroup in self.res['secgroups']:
             client = client_for_user(secgroup['owner'])
@@ -447,11 +474,10 @@ class JavelinCheck(unittest.TestCase):
         LOG.info("checking telemetry")
         for server in self.res['servers']:
             client = client_for_user(server['owner'])
-            response, body = client.telemetry.list_samples(
+            body = client.telemetry.list_samples(
                 'instance',
                 query=('metadata.display_name', 'eq', server['name'])
             )
-            self.assertEqual(response.status, 200)
             self.assertTrue(len(body) >= 1, 'expecting at least one sample')
             self._confirm_telemetry_sample(server, body[-1])
 
@@ -762,7 +788,7 @@ def _get_server_by_name(client, name):
 
 
 def _get_flavor_by_name(client, name):
-    r, body = client.flavors.list_flavors()
+    body = client.flavors.list_flavors()
     for flavor in body:
         if name == flavor['name']:
             return flavor
@@ -824,17 +850,14 @@ def create_secgroups(secgroups):
         # only create a security group if the name isn't here
         # i.e. a security group may be used by another server
         # only create a router if the name isn't here
-        r, body = client.secgroups.list_security_groups()
+        body = client.secgroups.list_security_groups()
         if any(item['name'] == secgroup['name'] for item in body):
             LOG.warning("Security group '%s' already exists" %
                         secgroup['name'])
             continue
 
-        resp, body = client.secgroups.create_security_group(
+        body = client.secgroups.create_security_group(
             secgroup['name'], secgroup['description'])
-        if not resp_ok(resp):
-            raise ValueError("Failed to create security group: [%s] %s" %
-                             (resp, body))
         secgroup_id = body['id']
         # for each security group, create the rules
         for rule in secgroup['rules']:

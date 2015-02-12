@@ -163,24 +163,8 @@ class BadRequest(RestClientException):
     message = "Bad request"
 
 
-class UnprocessableEntity(RestClientException):
-    message = "Unprocessable entity"
-
-
-class RateLimitExceeded(RestClientException):
-    message = "Rate limit exceeded"
-
-
 class OverLimit(RestClientException):
     message = "Quota exceeded"
-
-
-class ServerFault(RestClientException):
-    message = "Got server fault"
-
-
-class NotImplemented(RestClientException):
-    message = "Got NotImplemented error"
 
 
 class Conflict(RestClientException):
@@ -197,20 +181,8 @@ class ResponseWithEntity(RFCViolation):
                "MUST NOT have an entity")
 
 
-class InvalidHTTPResponseBody(RestClientException):
-    message = "HTTP response body is invalid json or xml"
-
-
 class InvalidHTTPResponseHeader(RestClientException):
     message = "HTTP response header is invalid"
-
-
-class InvalidContentType(RestClientException):
-    message = "Invalid content type provided"
-
-
-class UnexpectedResponseCode(RestClientException):
-    message = "Unexpected response code received"
 
 
 class InvalidStructure(TempestException):

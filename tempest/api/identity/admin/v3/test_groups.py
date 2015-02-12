@@ -91,3 +91,22 @@ class GroupsV3TestJSON(base.BaseIdentityV3AdminTest):
         user_groups = self.client.list_user_groups(user['id'])
         self.assertEqual(sorted(groups), sorted(user_groups))
         self.assertEqual(2, len(user_groups))
+
+    @test.attr(type='smoke')
+    def test_list_groups(self):
+        # Test to list groups
+        group_ids = list()
+        fetched_ids = list()
+        for _ in range(3):
+            name = data_utils.rand_name('Group')
+            description = data_utils.rand_name('Description')
+            group = self.client.create_group(name,
+                                             description=description)
+            self.addCleanup(self.client.delete_group, group['id'])
+            group_ids.append(group['id'])
+        # List and Verify Groups
+        body = self.client.list_groups()
+        for g in body:
+            fetched_ids.append(g['id'])
+        missing_groups = [g for g in group_ids if g not in fetched_ids]
+        self.assertEqual([], missing_groups)

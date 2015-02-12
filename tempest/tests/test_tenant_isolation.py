@@ -21,6 +21,7 @@ from tempest import config
 from tempest import exceptions
 from tempest.openstack.common.fixture import mockpatch
 from tempest.services.identity.json import identity_client as json_iden_client
+from tempest.services.identity.json import token_client as json_token_client
 from tempest.services.network.json import network_client as json_network_client
 from tempest.tests import base
 from tempest.tests import fake_config
@@ -35,7 +36,7 @@ class TestTenantIsolation(base.TestCase):
         self.useFixture(fake_config.ConfigFixture())
         self.stubs.Set(config, 'TempestConfigPrivate', fake_config.FakePrivate)
         self.fake_http = fake_http.fake_httplib2(return_type=200)
-        self.stubs.Set(json_iden_client.TokenClientJSON, 'raw_request',
+        self.stubs.Set(json_token_client.TokenClientJSON, 'raw_request',
                        fake_identity._fake_v2_response)
         cfg.CONF.set_default('operator_role', 'FakeRole',
                              group='object-storage')

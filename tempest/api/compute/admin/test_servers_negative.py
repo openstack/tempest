@@ -49,7 +49,7 @@ class ServersAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
         flavor_id = data_utils.rand_int_id(start=1000)
         while True:
             try:
-                resp, body = self.flavors_client.get_flavor_details(flavor_id)
+                self.flavors_client.get_flavor_details(flavor_id)
             except exceptions.NotFound:
                 break
             flavor_id = data_utils.rand_int_id(start=1000)
@@ -63,14 +63,13 @@ class ServersAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
         self.useFixture(fixtures.LockFixture('compute_quotas'))
         flavor_name = data_utils.rand_name("flavor-")
         flavor_id = self._get_unused_flavor_id()
-        resp, quota_set = self.quotas_client.get_default_quota_set(
-            self.tenant_id)
+        quota_set = self.quotas_client.get_default_quota_set(self.tenant_id)
         ram = int(quota_set['ram']) + 1
         vcpus = 8
         disk = 10
-        resp, flavor_ref = self.flavors_client.create_flavor(flavor_name,
-                                                             ram, vcpus, disk,
-                                                             flavor_id)
+        flavor_ref = self.flavors_client.create_flavor(flavor_name,
+                                                       ram, vcpus, disk,
+                                                       flavor_id)
         self.addCleanup(self.flavors_client.delete_flavor, flavor_id)
         self.assertRaises((exceptions.Unauthorized, exceptions.OverLimit),
                           self.client.resize,
@@ -86,13 +85,12 @@ class ServersAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
         flavor_name = data_utils.rand_name("flavor-")
         flavor_id = self._get_unused_flavor_id()
         ram = 512
-        resp, quota_set = self.quotas_client.get_default_quota_set(
-            self.tenant_id)
+        quota_set = self.quotas_client.get_default_quota_set(self.tenant_id)
         vcpus = int(quota_set['cores']) + 1
         disk = 10
-        resp, flavor_ref = self.flavors_client.create_flavor(flavor_name,
-                                                             ram, vcpus, disk,
-                                                             flavor_id)
+        flavor_ref = self.flavors_client.create_flavor(flavor_name,
+                                                       ram, vcpus, disk,
+                                                       flavor_id)
         self.addCleanup(self.flavors_client.delete_flavor, flavor_id)
         self.assertRaises((exceptions.Unauthorized, exceptions.OverLimit),
                           self.client.resize,

@@ -381,14 +381,14 @@ class ServersClientJSON(service_client.ServiceClient):
                                post_body)
         body = json.loads(body)
         self.validate_response(schema.attach_volume, resp, body)
-        return resp, body['volumeAttachment']
+        return service_client.ResponseBody(resp, body['volumeAttachment'])
 
     def detach_volume(self, server_id, volume_id):
         """Detaches a volume from a server instance."""
         resp, body = self.delete('servers/%s/os-volume_attachments/%s' %
                                  (server_id, volume_id))
         self.validate_response(schema.detach_volume, resp, body)
-        return resp, body
+        return service_client.ResponseBody(resp, body)
 
     def get_volume_attachment(self, server_id, attach_id):
         """Return details about the given volume attachment."""
@@ -396,7 +396,7 @@ class ServersClientJSON(service_client.ServiceClient):
             str(server_id), attach_id))
         body = json.loads(body)
         self.validate_response(schema.get_volume_attachment, resp, body)
-        return resp, body['volumeAttachment']
+        return service_client.ResponseBody(resp, body['volumeAttachment'])
 
     def list_volume_attachments(self, server_id):
         """Returns the list of volume attachments for a given instance."""
@@ -404,7 +404,7 @@ class ServersClientJSON(service_client.ServiceClient):
             str(server_id)))
         body = json.loads(body)
         self.validate_response(schema.list_volume_attachments, resp, body)
-        return resp, body['volumeAttachments']
+        return service_client.ResponseBodyList(resp, body['volumeAttachments'])
 
     def add_security_group(self, server_id, name):
         """Adds a security group to the server."""

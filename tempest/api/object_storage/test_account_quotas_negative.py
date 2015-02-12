@@ -14,6 +14,8 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+from tempest_lib import decorators
+
 from tempest.api.object_storage import base
 from tempest import clients
 from tempest.common.utils import data_utils
@@ -93,7 +95,7 @@ class AccountQuotasNegativeTest(base.BaseObjectTest):
                           {"Quota-Bytes": "100"})
 
     @test.attr(type=["negative", "smoke"])
-    @test.skip_because(bug="1310597")
+    @decorators.skip_because(bug="1310597")
     @test.requires_ext(extension='account_quotas', service='object')
     def test_upload_large_object(self):
         object_name = data_utils.rand_name(name="TestObject")

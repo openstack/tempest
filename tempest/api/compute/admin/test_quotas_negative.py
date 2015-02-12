@@ -12,6 +12,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib import decorators
+
 from tempest.api.compute import base
 from tempest.common.utils import data_utils
 from tempest import config
@@ -47,13 +49,13 @@ class QuotasAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
     @test.attr(type=['negative', 'gate'])
     def test_create_server_when_cpu_quota_is_full(self):
         # Disallow server creation when tenant's vcpu quota is full
-        resp, quota_set = self.adm_client.get_quota_set(self.demo_tenant_id)
+        quota_set = self.adm_client.get_quota_set(self.demo_tenant_id)
         default_vcpu_quota = quota_set['cores']
         vcpu_quota = 0  # Set the quota to zero to conserve resources
 
-        resp, quota_set = self.adm_client.update_quota_set(self.demo_tenant_id,
-                                                           force=True,
-                                                           cores=vcpu_quota)
+        quota_set = self.adm_client.update_quota_set(self.demo_tenant_id,
+                                                     force=True,
+                                                     cores=vcpu_quota)
 
         self.addCleanup(self.adm_client.update_quota_set, self.demo_tenant_id,
                         cores=default_vcpu_quota)
@@ -63,7 +65,7 @@ class QuotasAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
     @test.attr(type=['negative', 'gate'])
     def test_create_server_when_memory_quota_is_full(self):
         # Disallow server creation when tenant's memory quota is full
-        resp, quota_set = self.adm_client.get_quota_set(self.demo_tenant_id)
+        quota_set = self.adm_client.get_quota_set(self.demo_tenant_id)
         default_mem_quota = quota_set['ram']
         mem_quota = 0  # Set the quota to zero to conserve resources
 
@@ -79,7 +81,7 @@ class QuotasAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
     @test.attr(type=['negative', 'gate'])
     def test_create_server_when_instances_quota_is_full(self):
         # Once instances quota limit is reached, disallow server creation
-        resp, quota_set = self.adm_client.get_quota_set(self.demo_tenant_id)
+        quota_set = self.adm_client.get_quota_set(self.demo_tenant_id)
         default_instances_quota = quota_set['instances']
         instances_quota = 0  # Set quota to zero to disallow server creation
 
@@ -91,18 +93,18 @@ class QuotasAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
         self.assertRaises((exceptions.Unauthorized, exceptions.OverLimit),
                           self.create_test_server)
 
-    @test.skip_because(bug="1186354",
-                       condition=CONF.service_available.neutron)
+    @decorators.skip_because(bug="1186354",
+                             condition=CONF.service_available.neutron)
     @test.attr(type='gate')
     @test.services('network')
     def test_security_groups_exceed_limit(self):
         # Negative test: Creation Security Groups over limit should FAIL
 
-        resp, quota_set = self.adm_client.get_quota_set(self.demo_tenant_id)
+        quota_set = self.adm_client.get_quota_set(self.demo_tenant_id)
         default_sg_quota = quota_set['security_groups']
         sg_quota = 0  # Set the quota to zero to conserve resources
 
-        resp, quota_set =\
+        quota_set =\
             self.adm_client.update_quota_set(self.demo_tenant_id,
                                              force=True,
                                              security_groups=sg_quota)
@@ -118,19 +120,19 @@ class QuotasAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
                           self.sg_client.create_security_group,
                           "sg-overlimit", "sg-desc")
 
-    @test.skip_because(bug="1186354",
-                       condition=CONF.service_available.neutron)
+    @decorators.skip_because(bug="1186354",
+                             condition=CONF.service_available.neutron)
     @test.attr(type=['negative', 'gate'])
     @test.services('network')
     def test_security_groups_rules_exceed_limit(self):
         # Negative test: Creation of Security Group Rules should FAIL
         # when we reach limit maxSecurityGroupRules
 
-        resp, quota_set = self.adm_client.get_quota_set(self.demo_tenant_id)
+        quota_set = self.adm_client.get_quota_set(self.demo_tenant_id)
         default_sg_rules_quota = quota_set['security_group_rules']
         sg_rules_quota = 0  # Set the quota to zero to conserve resources
 
-        resp, quota_set =\
+        quota_set =\
             self.adm_client.update_quota_set(
                 self.demo_tenant_id,
                 force=True,
@@ -142,7 +144,7 @@ class QuotasAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
 
         s_name = data_utils.rand_name('securitygroup-')
         s_description = data_utils.rand_name('description-')
-        resp, securitygroup =\
+        securitygroup =\
             self.sg_client.create_security_group(s_name, s_description)
         self.addCleanup(self.sg_client.delete_security_group,
                         securitygroup['id'])

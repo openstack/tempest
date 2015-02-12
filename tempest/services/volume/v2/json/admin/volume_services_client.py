@@ -20,7 +20,4 @@ class VolumesServicesV2ClientJSON(vs_cli.BaseVolumesServicesClientJSON):
     """
     Client class to send CRUD Volume V2 API requests to a Cinder endpoint
     """
-
-    def __init__(self, auth_provider):
-        super(VolumesServicesV2ClientJSON, self).__init__(auth_provider)
-        self.api_version = "v2"
+    api_version = "v2"
