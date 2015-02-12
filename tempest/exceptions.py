@@ -151,10 +151,6 @@ class InvalidHttpSuccessCode(RestClientException):
     message = "The success code is different than the expected one"
 
 
-class Unauthorized(RestClientException):
-    message = 'Unauthorized'
-
-
 class BadRequest(RestClientException):
     message = "Bad request"
 

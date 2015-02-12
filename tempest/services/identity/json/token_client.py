@@ -13,6 +13,7 @@
 #    under the License.
 
 import json
+from tempest_lib import exceptions as lib_exc
 
 from tempest.common import service_client
 from tempest import config
@@ -87,7 +88,7 @@ class TokenClientJSON(service_client.ServiceClient):
 
         if resp.status in [401, 403]:
             resp_body = json.loads(resp_body)
-            raise exceptions.Unauthorized(resp_body['error']['message'])
+            raise lib_exc.Unauthorized(resp_body['error']['message'])
         elif resp.status not in [200, 201]:
             raise exceptions.IdentityError(
                 'Unexpected status code {0}'.format(resp.status))

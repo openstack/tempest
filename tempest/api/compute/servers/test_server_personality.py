@@ -17,7 +17,6 @@ import base64
 from tempest_lib import exceptions as lib_exc
 
 from tempest.api.compute import base
-from tempest import exceptions
 from tempest import test
 
 
@@ -45,7 +44,7 @@ class ServerPersonalityTestJSON(base.BaseV2ComputeTest):
                                 'contents': base64.b64encode(file_contents)})
         # A 403 Forbidden or 413 Overlimit (old behaviour) exception
         # will be raised when out of quota
-        self.assertRaises((exceptions.Unauthorized, lib_exc.OverLimit),
+        self.assertRaises((lib_exc.Unauthorized, lib_exc.OverLimit),
                           self.create_test_server, personality=personality)
 
     @test.attr(type='gate')

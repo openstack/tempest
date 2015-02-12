@@ -12,8 +12,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib import exceptions as lib_exc
+
 from tempest.api.compute import base
-from tempest import exceptions
 from tempest import test
 
 
@@ -31,7 +32,7 @@ class ServicesAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
 
     @test.attr(type=['negative', 'gate'])
     def test_list_services_with_non_admin_user(self):
-        self.assertRaises(exceptions.Unauthorized,
+        self.assertRaises(lib_exc.Unauthorized,
                           self.non_admin_client.list_services)
 
     @test.attr(type=['negative', 'gate'])

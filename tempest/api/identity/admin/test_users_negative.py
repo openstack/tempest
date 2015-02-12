@@ -36,7 +36,7 @@ class UsersNegativeTestJSON(base.BaseIdentityV2AdminTest):
     def test_create_user_by_unauthorized_user(self):
         # Non-administrator should not be authorized to create a user
         self.data.setup_test_tenant()
-        self.assertRaises(exceptions.Unauthorized,
+        self.assertRaises(lib_exc.Unauthorized,
                           self.non_admin_client.create_user, self.alt_user,
                           self.alt_password, self.data.tenant['id'],
                           self.alt_email)
@@ -80,7 +80,7 @@ class UsersNegativeTestJSON(base.BaseIdentityV2AdminTest):
         token = self.client.auth_provider.get_token()
         # Delete the token from database
         self.client.delete_token(token)
-        self.assertRaises(exceptions.Unauthorized, self.client.create_user,
+        self.assertRaises(lib_exc.Unauthorized, self.client.create_user,
                           self.alt_user, self.alt_password,
                           self.data.tenant['id'], self.alt_email)
 
@@ -113,7 +113,7 @@ class UsersNegativeTestJSON(base.BaseIdentityV2AdminTest):
         token = self.client.auth_provider.get_token()
         # Delete the token from database
         self.client.delete_token(token)
-        self.assertRaises(exceptions.Unauthorized, self.client.update_user,
+        self.assertRaises(lib_exc.Unauthorized, self.client.update_user,
                           self.alt_user)
 
         # Unset the token to allow further tests to generate a new token
@@ -123,14 +123,14 @@ class UsersNegativeTestJSON(base.BaseIdentityV2AdminTest):
     def test_update_user_by_unauthorized_user(self):
         # Non-administrator should not be authorized to update user
         self.data.setup_test_tenant()
-        self.assertRaises(exceptions.Unauthorized,
+        self.assertRaises(lib_exc.Unauthorized,
                           self.non_admin_client.update_user, self.alt_user)
 
     @test.attr(type=['negative', 'gate'])
     def test_delete_users_by_unauthorized_user(self):
         # Non-administrator user should not be authorized to delete a user
         self.data.setup_test_user()
-        self.assertRaises(exceptions.Unauthorized,
+        self.assertRaises(lib_exc.Unauthorized,
                           self.non_admin_client.delete_user,
                           self.data.user['id'])
 
@@ -148,7 +148,7 @@ class UsersNegativeTestJSON(base.BaseIdentityV2AdminTest):
         token = self.client.auth_provider.get_token()
         # Delete the token from database
         self.client.delete_token(token)
-        self.assertRaises(exceptions.Unauthorized, self.client.delete_user,
+        self.assertRaises(lib_exc.Unauthorized, self.client.delete_user,
                           self.alt_user)
 
         # Unset the token to allow further tests to generate a new token
@@ -159,7 +159,7 @@ class UsersNegativeTestJSON(base.BaseIdentityV2AdminTest):
         # Disabled user's token should not get authenticated
         self.data.setup_test_user()
         self.disable_user(self.data.test_user)
-        self.assertRaises(exceptions.Unauthorized, self.token_client.auth,
+        self.assertRaises(lib_exc.Unauthorized, self.token_client.auth,
                           self.data.test_user,
                           self.data.test_password,
                           self.data.test_tenant)
@@ -169,7 +169,7 @@ class UsersNegativeTestJSON(base.BaseIdentityV2AdminTest):
         # User's token for a disabled tenant should not be authenticated
         self.data.setup_test_user()
         self.disable_tenant(self.data.test_tenant)
-        self.assertRaises(exceptions.Unauthorized, self.token_client.auth,
+        self.assertRaises(lib_exc.Unauthorized, self.token_client.auth,
                           self.data.test_user,
                           self.data.test_password,
                           self.data.test_tenant)
@@ -178,7 +178,7 @@ class UsersNegativeTestJSON(base.BaseIdentityV2AdminTest):
     def test_authentication_with_invalid_tenant(self):
         # User's token for an invalid tenant should not be authenticated
         self.data.setup_test_user()
-        self.assertRaises(exceptions.Unauthorized, self.token_client.auth,
+        self.assertRaises(lib_exc.Unauthorized, self.token_client.auth,
                           self.data.test_user,
                           self.data.test_password,
                           'junktenant1234')
@@ -187,7 +187,7 @@ class UsersNegativeTestJSON(base.BaseIdentityV2AdminTest):
     def test_authentication_with_invalid_username(self):
         # Non-existent user's token should not get authenticated
         self.data.setup_test_user()
-        self.assertRaises(exceptions.Unauthorized, self.token_client.auth,
+        self.assertRaises(lib_exc.Unauthorized, self.token_client.auth,
                           'junkuser123', self.data.test_password,
                           self.data.test_tenant)
 
@@ -195,7 +195,7 @@ class UsersNegativeTestJSON(base.BaseIdentityV2AdminTest):
     def test_authentication_with_invalid_password(self):
         # User's token with invalid password should not be authenticated
         self.data.setup_test_user()
-        self.assertRaises(exceptions.Unauthorized, self.token_client.auth,
+        self.assertRaises(lib_exc.Unauthorized, self.token_client.auth,
                           self.data.test_user, 'junkpass1234',
                           self.data.test_tenant)
 
@@ -203,7 +203,7 @@ class UsersNegativeTestJSON(base.BaseIdentityV2AdminTest):
     def test_get_users_by_unauthorized_user(self):
         # Non-administrator user should not be authorized to get user list
         self.data.setup_test_user()
-        self.assertRaises(exceptions.Unauthorized,
+        self.assertRaises(lib_exc.Unauthorized,
                           self.non_admin_client.get_users)
 
     @test.attr(type=['negative', 'gate'])
@@ -211,7 +211,7 @@ class UsersNegativeTestJSON(base.BaseIdentityV2AdminTest):
         # Request to get list of users without a valid token should fail
         token = self.client.auth_provider.get_token()
         self.client.delete_token(token)
-        self.assertRaises(exceptions.Unauthorized, self.client.get_users)
+        self.assertRaises(lib_exc.Unauthorized, self.client.get_users)
         self.client.auth_provider.clear_auth()
 
     @test.attr(type=['negative', 'gate'])

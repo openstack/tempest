@@ -45,14 +45,14 @@ class FixedIPsNegativeTestJson(base.BaseV2ComputeAdminTest):
     @test.attr(type=['negative', 'gate'])
     @test.services('network')
     def test_list_fixed_ip_details_with_non_admin_user(self):
-        self.assertRaises(exceptions.Unauthorized,
+        self.assertRaises(lib_exc.Unauthorized,
                           self.non_admin_client.get_fixed_ip_details, self.ip)
 
     @test.attr(type=['negative', 'gate'])
     @test.services('network')
     def test_set_reserve_with_non_admin_user(self):
         body = {"reserve": "None"}
-        self.assertRaises(exceptions.Unauthorized,
+        self.assertRaises(lib_exc.Unauthorized,
                           self.non_admin_client.reserve_fixed_ip,
                           self.ip, body)
 
@@ -60,7 +60,7 @@ class FixedIPsNegativeTestJson(base.BaseV2ComputeAdminTest):
     @test.services('network')
     def test_set_unreserve_with_non_admin_user(self):
         body = {"unreserve": "None"}
-        self.assertRaises(exceptions.Unauthorized,
+        self.assertRaises(lib_exc.Unauthorized,
                           self.non_admin_client.reserve_fixed_ip,
                           self.ip, body)
 

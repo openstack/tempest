@@ -18,7 +18,6 @@ import uuid
 
 from tempest.api.compute import base
 from tempest.common.utils import data_utils
-from tempest import exceptions
 from tempest import test
 
 
@@ -69,7 +68,7 @@ class FlavorsAccessNegativeTestJSON(base.BaseV2ComputeAdminTest):
                                                new_flavor_id,
                                                is_public='False')
         self.addCleanup(self.client.delete_flavor, new_flavor['id'])
-        self.assertRaises(exceptions.Unauthorized,
+        self.assertRaises(lib_exc.Unauthorized,
                           self.flavors_client.add_flavor_access,
                           new_flavor['id'],
                           self.tenant_id)
@@ -89,7 +88,7 @@ class FlavorsAccessNegativeTestJSON(base.BaseV2ComputeAdminTest):
         self.client.add_flavor_access(new_flavor['id'], self.tenant_id)
         self.addCleanup(self.client.remove_flavor_access,
                         new_flavor['id'], self.tenant_id)
-        self.assertRaises(exceptions.Unauthorized,
+        self.assertRaises(lib_exc.Unauthorized,
                           self.flavors_client.remove_flavor_access,
                           new_flavor['id'],
                           self.tenant_id)
