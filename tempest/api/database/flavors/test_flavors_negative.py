@@ -22,8 +22,8 @@ from tempest import test
 class DatabaseFlavorsNegativeTest(base.BaseDatabaseTest):
 
     @classmethod
-    def resource_setup(cls):
-        super(DatabaseFlavorsNegativeTest, cls).resource_setup()
+    def setup_clients(cls):
+        super(DatabaseFlavorsNegativeTest, cls).setup_clients()
         cls.client = cls.database_flavors_client
 
     @test.attr(type=['negative', 'gate'])
