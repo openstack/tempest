@@ -333,6 +333,7 @@ class IsolatedCreds(cred_provider.CredentialProvider):
             if (not self.network_resources or
                 self.network_resources.get('network')):
                 self._clear_isolated_network(network['id'], network['name'])
+        self.isolated_net_resources = {}
 
     def clear_isolated_creds(self):
         if not self.isolated_creds:
@@ -349,6 +350,7 @@ class IsolatedCreds(cred_provider.CredentialProvider):
             except lib_exc.NotFound:
                 LOG.warn("tenant with name: %s not found for delete" %
                          creds.tenant_name)
+        self.isolated_creds = {}
 
     def is_multi_user(self):
         return True
