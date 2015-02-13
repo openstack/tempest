@@ -297,7 +297,7 @@ class FloatingIpService(BaseService):
 
     def list(self):
         client = self.client
-        _, floating_ips = client.list_floating_ips()
+        floating_ips = client.list_floating_ips()
         LOG.debug("List count, %s Floating IPs" % len(floating_ips))
         return floating_ips
 

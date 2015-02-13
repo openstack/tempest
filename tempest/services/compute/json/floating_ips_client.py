@@ -33,7 +33,7 @@ class FloatingIPsClientJSON(service_client.ServiceClient):
         resp, body = self.get(url)
         body = json.loads(body)
         self.validate_response(schema.list_floating_ips, resp, body)
-        return resp, body['floating_ips']
+        return service_client.ResponseBodyList(resp, body['floating_ips'])
 
     def get_floating_ip_details(self, floating_ip_id):
         """Get the details of a floating IP."""
@@ -43,7 +43,7 @@ class FloatingIPsClientJSON(service_client.ServiceClient):
         if resp.status == 404:
             raise lib_exc.NotFound(body)
         self.validate_response(schema.floating_ip, resp, body)
-        return resp, body['floating_ip']
+        return service_client.ResponseBody(resp, body['floating_ip'])
 
     def create_floating_ip(self, pool_name=None):
         """Allocate a floating IP to the project."""
@@ -53,14 +53,14 @@ class FloatingIPsClientJSON(service_client.ServiceClient):
         resp, body = self.post(url, post_body)
         body = json.loads(body)
         self.validate_response(schema.floating_ip, resp, body)
-        return resp, body['floating_ip']
+        return service_client.ResponseBody(resp, body['floating_ip'])
 
     def delete_floating_ip(self, floating_ip_id):
         """Deletes the provided floating IP from the project."""
         url = "os-floating-ips/%s" % str(floating_ip_id)
         resp, body = self.delete(url)
         self.validate_response(schema.add_remove_floating_ip, resp, body)
-        return resp, body
+        return service_client.ResponseBody(resp, body)
 
     def associate_floating_ip_to_server(self, floating_ip, server_id):
         """Associate the provided floating IP to a specific server."""
@@ -74,7 +74,7 @@ class FloatingIPsClientJSON(service_client.ServiceClient):
         post_body = json.dumps(post_body)
         resp, body = self.post(url, post_body)
         self.validate_response(schema.add_remove_floating_ip, resp, body)
-        return resp, body
+        return service_client.ResponseBody(resp, body)
 
     def disassociate_floating_ip_from_server(self, floating_ip, server_id):
         """Disassociate the provided floating IP from a specific server."""
@@ -88,7 +88,7 @@ class FloatingIPsClientJSON(service_client.ServiceClient):
         post_body = json.dumps(post_body)
         resp, body = self.post(url, post_body)
         self.validate_response(schema.add_remove_floating_ip, resp, body)
-        return resp, body
+        return service_client.ResponseBody(resp, body)
 
     def is_resource_deleted(self, id):
         try:
@@ -111,7 +111,7 @@ class FloatingIPsClientJSON(service_client.ServiceClient):
         resp, body = self.get(url)
         body = json.loads(body)
         self.validate_response(schema.floating_ip_pools, resp, body)
-        return resp, body['floating_ip_pools']
+        return service_client.ResponseBodyList(resp, body['floating_ip_pools'])
 
     def create_floating_ips_bulk(self, ip_range, pool, interface):
         """Allocate floating IPs in bulk."""
@@ -124,14 +124,15 @@ class FloatingIPsClientJSON(service_client.ServiceClient):
         resp, body = self.post('os-floating-ips-bulk', post_body)
         body = json.loads(body)
         self.validate_response(schema.create_floating_ips_bulk, resp, body)
-        return resp, body['floating_ips_bulk_create']
+        return service_client.ResponseBody(resp,
+                                           body['floating_ips_bulk_create'])
 
     def list_floating_ips_bulk(self):
         """Returns a list of all floating IPs bulk."""
         resp, body = self.get('os-floating-ips-bulk')
         body = json.loads(body)
         self.validate_response(schema.list_floating_ips_bulk, resp, body)
-        return resp, body['floating_ip_info']
+        return service_client.ResponseBodyList(resp, body['floating_ip_info'])
 
     def delete_floating_ips_bulk(self, ip_range):
         """Deletes the provided floating IPs bulk."""
@@ -139,4 +140,5 @@ class FloatingIPsClientJSON(service_client.ServiceClient):
         resp, body = self.put('os-floating-ips-bulk/delete', post_body)
         body = json.loads(body)
         self.validate_response(schema.delete_floating_ips_bulk, resp, body)
-        return resp, body['floating_ips_bulk_delete']
+        data = body['floating_ips_bulk_delete']
+        return service_client.ResponseBodyData(resp, data)
