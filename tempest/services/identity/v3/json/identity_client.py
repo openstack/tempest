@@ -17,10 +17,7 @@ import json
 import urllib
 
 from tempest.common import service_client
-from tempest import config
 from tempest.services.identity.v3.json import base
-
-CONF = config.CONF
 
 
 class IdentityV3ClientJSON(base.IdentityV3Client):
