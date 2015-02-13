@@ -20,10 +20,7 @@ import urllib
 from tempest_lib import exceptions as lib_exc
 
 from tempest.common import service_client
-from tempest import config
 from tempest import exceptions
-
-CONF = config.CONF
 
 
 class BaseVolumesClientJSON(service_client.ServiceClient):
@@ -32,6 +29,12 @@ class BaseVolumesClientJSON(service_client.ServiceClient):
     """
 
     create_resp = 200
+
+    def __init__(self, auth_provider, service, region,
+                 default_volume_size=1, **kwargs):
+        super(BaseVolumesClientJSON, self).__init__(
+            auth_provider, service, region, **kwargs)
+        self.default_volume_size = default_volume_size
 
     def get_attachment_from_volume(self, volume):
         """Return the element 'attachment' from input volumes."""
@@ -79,10 +82,8 @@ class BaseVolumesClientJSON(service_client.ServiceClient):
         snapshot_id: When specified the volume is created from this snapshot
         imageRef: When specified the volume is created from this image
         """
-        # for bug #1293885:
-        # If no size specified, read volume size from CONF
         if size is None:
-            size = CONF.volume.volume_size
+            size = self.default_volume_size
         post_body = {'size': size}
         post_body.update(kwargs)
         post_body = json.dumps({'volume': post_body})
