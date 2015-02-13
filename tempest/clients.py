@@ -332,9 +332,12 @@ class Manager(manager.Manager):
                                                     **params)
         self.snapshots_v2_client = SnapshotsV2ClientJSON(self.auth_provider,
                                                          **params)
-        self.volumes_client = VolumesClientJSON(self.auth_provider, **params)
-        self.volumes_v2_client = VolumesV2ClientJSON(self.auth_provider,
-                                                     **params)
+        self.volumes_client = VolumesClientJSON(
+            self.auth_provider, default_volume_size=CONF.volume.volume_size,
+            **params)
+        self.volumes_v2_client = VolumesV2ClientJSON(
+            self.auth_provider, default_volume_size=CONF.volume.volume_size,
+            **params)
         self.volume_types_client = VolumeTypesClientJSON(self.auth_provider,
                                                          **params)
         self.volume_services_client = VolumesServicesClientJSON(
