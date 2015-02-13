@@ -35,7 +35,6 @@ class BaseImageTest(tempest.test.BaseTestCase):
         cls.set_network_resources()
         super(BaseImageTest, cls).resource_setup()
         cls.created_images = []
-        cls._interface = 'json'
         cls.isolated_creds = credentials.get_isolated_credentials(
             cls.__name__, network_resources=cls.network_resources)
         if not CONF.service_available.glance:

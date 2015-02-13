@@ -77,8 +77,7 @@ def get_credentials(fill_in=True, identity_version=None, **kwargs):
 
 @six.add_metaclass(abc.ABCMeta)
 class CredentialProvider(object):
-    def __init__(self, name, interface='json', password='pass',
-                 network_resources=None):
+    def __init__(self, name, password='pass', network_resources=None):
         self.name = name
 
     @abc.abstractmethod

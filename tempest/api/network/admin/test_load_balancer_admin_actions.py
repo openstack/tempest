@@ -19,7 +19,6 @@ from tempest import test
 
 
 class LoadBalancerAdminTestJSON(base.BaseAdminNetworkTest):
-    _interface = 'json'
 
     """
     Test admin actions for load balancer.

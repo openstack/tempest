@@ -48,7 +48,6 @@ class TestQueues(base.BaseMessagingTest):
 
 
 class TestManageQueue(base.BaseMessagingTest):
-    _interface = 'json'
 
     @classmethod
     def resource_setup(cls):

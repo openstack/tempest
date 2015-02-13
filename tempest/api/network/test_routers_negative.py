@@ -26,7 +26,6 @@ CONF = config.CONF
 
 
 class RoutersNegativeTest(base.BaseRouterTest):
-    _interface = 'json'
 
     @classmethod
     def resource_setup(cls):

@@ -23,7 +23,6 @@ from tempest import test
 
 
 class VolumeTypesNegativeV2Test(base.BaseVolumeAdminTest):
-    _interface = 'json'
 
     @test.attr(type='gate')
     def test_create_with_nonexistent_volume_type(self):

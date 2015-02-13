@@ -22,7 +22,6 @@ from tempest import test
 
 
 class NetworksNegativeTestJSON(base.BaseNetworkTest):
-    _interface = 'json'
 
     @test.attr(type=['negative', 'smoke'])
     def test_show_non_existent_network(self):

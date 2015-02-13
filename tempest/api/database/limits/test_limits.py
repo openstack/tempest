@@ -18,7 +18,6 @@ from tempest import test
 
 
 class DatabaseLimitsTest(base.BaseDatabaseTest):
-    _interface = 'json'
 
     @classmethod
     def resource_setup(cls):

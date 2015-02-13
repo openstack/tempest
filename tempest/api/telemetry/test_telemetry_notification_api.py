@@ -21,7 +21,6 @@ CONF = config.CONF
 
 
 class TelemetryNotificationAPITestJSON(base.BaseTelemetryTest):
-    _interface = 'json'
 
     @classmethod
     def resource_setup(cls):

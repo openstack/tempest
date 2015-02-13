@@ -23,7 +23,6 @@ QUOTA_USAGE_KEYS = ['reserved', 'limit', 'in_use']
 
 
 class BaseVolumeQuotasAdminV2TestJSON(base.BaseVolumeAdminTest):
-    _interface = "json"
     force_tenant_isolation = True
 
     @classmethod

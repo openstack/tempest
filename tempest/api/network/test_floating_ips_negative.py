@@ -26,7 +26,7 @@ CONF = config.CONF
 
 
 class FloatingIPNegativeTestJSON(base.BaseNetworkTest):
-    _interface = 'json'
+
     """
     Test the following negative  operations for floating ips:
 

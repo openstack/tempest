@@ -38,26 +38,21 @@ class AuthProvider(object):
     Provide authentication
     """
 
-    def __init__(self, credentials, interface=None):
+    def __init__(self, credentials):
         """
         :param credentials: credentials for authentication
-        :param interface: 'json' or 'xml'. Applicable for tempest client only
-            (deprecated: only json now supported)
         """
         if self.check_credentials(credentials):
             self.credentials = credentials
         else:
             raise TypeError("Invalid credentials")
-        self.interface = 'json'
         self.cache = None
         self.alt_auth_data = None
         self.alt_part = None
 
     def __str__(self):
-        return "Creds :{creds}, interface: {interface}, " \
-               "cached auth data: {cache}".format(
-                   creds=self.credentials, interface=self.interface,
-                   cache=self.cache)
+        return "Creds :{creds}, cached auth data: {cache}".format(
+            creds=self.credentials, cache=self.cache)
 
     @abc.abstractmethod
     def _decorate_request(self, filters, method, url, headers=None, body=None,
@@ -193,8 +188,8 @@ class KeystoneAuthProvider(AuthProvider):
 
     token_expiry_threshold = datetime.timedelta(seconds=60)
 
-    def __init__(self, credentials, interface=None):
-        super(KeystoneAuthProvider, self).__init__(credentials, interface)
+    def __init__(self, credentials):
+        super(KeystoneAuthProvider, self).__init__(credentials)
         self.auth_client = self._auth_client()
 
     def _decorate_request(self, filters, method, url, headers=None, body=None,

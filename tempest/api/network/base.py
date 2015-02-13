@@ -50,7 +50,6 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
         neutron as True
     """
 
-    _interface = 'json'
     force_tenant_isolation = False
 
     # Default to ipv4.
@@ -421,8 +420,7 @@ class BaseAdminNetworkTest(BaseNetworkTest):
 
         try:
             creds = cls.isolated_creds.get_admin_creds()
-            cls.os_adm = clients.Manager(
-                credentials=creds, interface=cls._interface)
+            cls.os_adm = clients.Manager(credentials=creds)
         except NotImplementedError:
             msg = ("Missing Administrative Network API credentials "
                    "in configuration.")

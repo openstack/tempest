@@ -106,6 +106,5 @@ class FlavorsAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
 @test.SimpleNegativeAutoTest
 class FlavorCreateNegativeTestJSON(base.BaseV2ComputeAdminTest,
                                    test.NegativeAutoTest):
-    _interface = 'json'
     _service = CONF.compute.catalog_type
     _schema = flavors.flavor_create

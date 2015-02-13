@@ -93,9 +93,7 @@ class BaseTrustsV3Test(base.BaseIdentityV3AdminTest):
             username=self.trustor_username,
             password=self.trustor_password,
             tenant_name=self.trustor_project_name)
-        os = clients.Manager(
-            credentials=creds,
-            interface=self._interface)
+        os = clients.Manager(credentials=creds)
         self.trustor_client = os.identity_v3_client
 
     def cleanup_user_and_roles(self):
@@ -187,7 +185,6 @@ class BaseTrustsV3Test(base.BaseIdentityV3AdminTest):
 
 
 class TrustsV3TestJSON(BaseTrustsV3Test):
-    _interface = 'json'
 
     def setUp(self):
         super(TrustsV3TestJSON, self).setUp()

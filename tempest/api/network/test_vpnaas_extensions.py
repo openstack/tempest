@@ -24,7 +24,6 @@ CONF = config.CONF
 
 
 class VPNaaSTestJSON(base.BaseAdminNetworkTest):
-    _interface = 'json'
 
     """
     Tests the following operations in the Neutron API using the REST client for

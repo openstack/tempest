@@ -20,7 +20,6 @@ from tempest import test
 
 
 class BaseVolumeQuotasNegativeV2TestJSON(base.BaseVolumeAdminTest):
-    _interface = "json"
     force_tenant_isolation = True
 
     @classmethod

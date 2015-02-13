@@ -22,7 +22,6 @@ CONF = config.CONF
 
 
 class BaseDataProcessingTest(tempest.test.BaseTestCase):
-    _interface = 'json'
 
     @classmethod
     def skip_checks(cls):

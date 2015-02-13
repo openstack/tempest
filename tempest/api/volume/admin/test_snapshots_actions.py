@@ -19,7 +19,6 @@ from tempest import test
 
 
 class SnapshotsActionsV2Test(base.BaseVolumeAdminTest):
-    _interface = "json"
 
     @classmethod
     def resource_setup(cls):

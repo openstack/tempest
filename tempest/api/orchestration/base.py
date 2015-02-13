@@ -59,7 +59,7 @@ class BaseOrchestrationTest(tempest.test.BaseTestCase):
     @classmethod
     def _get_identity_admin_client(cls):
         """Returns an instance of the Identity Admin API client."""
-        manager = clients.AdminManager(interface=cls._interface)
+        manager = clients.AdminManager()
         admin_client = manager.identity_client
         return admin_client
 

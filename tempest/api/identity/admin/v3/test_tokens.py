@@ -21,7 +21,6 @@ from tempest import test
 
 
 class TokensV3TestJSON(base.BaseIdentityV3AdminTest):
-    _interface = 'json'
 
     @test.attr(type='smoke')
     def test_tokens(self):

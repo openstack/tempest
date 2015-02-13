@@ -359,7 +359,7 @@ class BaseTestCase(testtools.testcase.WithAttributes,
                                                    level=None))
 
     @classmethod
-    def get_client_manager(cls, interface=None):
+    def get_client_manager(cls):
         """
         Returns an OpenStack client manager
         """
@@ -373,12 +373,7 @@ class BaseTestCase(testtools.testcase.WithAttributes,
             )
 
         creds = cls.isolated_creds.get_primary_creds()
-        params = dict(credentials=creds, service=cls._service)
-        if getattr(cls, '_interface', None):
-            interface = cls._interface
-        if interface:
-            params['interface'] = interface
-        os = clients.Manager(**params)
+        os = clients.Manager(credentials=creds, service=cls._service)
         return os
 
     @classmethod
@@ -394,8 +389,7 @@ class BaseTestCase(testtools.testcase.WithAttributes,
         """
         Returns an instance of the Identity Admin API client
         """
-        os = clients.AdminManager(interface=cls._interface,
-                                  service=cls._service)
+        os = clients.AdminManager(service=cls._service)
         admin_client = os.identity_client
         return admin_client
 
@@ -436,8 +430,7 @@ class NegativeAutoTest(BaseTestCase):
         super(NegativeAutoTest, cls).setUpClass()
         os = cls.get_client_manager()
         cls.client = os.negative_client
-        os_admin = clients.AdminManager(interface=cls._interface,
-                                        service=cls._service)
+        os_admin = clients.AdminManager(service=cls._service)
         cls.admin_client = os_admin.negative_client
 
     @staticmethod

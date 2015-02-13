@@ -18,7 +18,6 @@ from tempest import test
 
 
 class L3AgentSchedulerTestJSON(base.BaseAdminNetworkTest):
-    _interface = 'json'
 
     """
     Tests the following operations in the Neutron API using the REST client for

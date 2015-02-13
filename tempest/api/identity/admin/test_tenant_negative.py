@@ -23,7 +23,6 @@ from tempest import test
 
 
 class TenantsNegativeTestJSON(base.BaseIdentityV2AdminTest):
-    _interface = 'json'
 
     @test.attr(type=['negative', 'gate'])
     def test_list_tenants_by_unauthorized_user(self):

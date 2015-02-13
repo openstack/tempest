@@ -21,7 +21,6 @@ from tempest import test
 
 
 class ServicesTestJSON(base.BaseIdentityV3AdminTest):
-    _interface = 'json'
 
     def _del_service(self, service_id):
         # Used for deleting the services created in this class

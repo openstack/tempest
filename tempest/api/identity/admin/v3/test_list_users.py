@@ -19,7 +19,6 @@ from tempest import test
 
 
 class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
-    _interface = 'json'
 
     def _list_users_with_params(self, params, key, expected, not_expected):
         # Helper method to list users filtered with params and

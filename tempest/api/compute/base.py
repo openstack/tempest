@@ -329,20 +329,17 @@ class BaseComputeTest(tempest.test.BaseTestCase):
 
 class BaseV2ComputeTest(BaseComputeTest):
     _api_version = 2
-    _interface = "json"
 
 
 class BaseComputeAdminTest(BaseComputeTest):
     """Base test case class for Compute Admin API tests."""
-    _interface = "json"
 
     @classmethod
     def resource_setup(cls):
         super(BaseComputeAdminTest, cls).resource_setup()
         try:
             creds = cls.isolated_creds.get_admin_creds()
-            cls.os_adm = clients.Manager(
-                credentials=creds, interface=cls._interface)
+            cls.os_adm = clients.Manager(credentials=creds)
         except NotImplementedError:
             msg = ("Missing Compute Admin API credentials in configuration.")
             raise cls.skipException(msg)

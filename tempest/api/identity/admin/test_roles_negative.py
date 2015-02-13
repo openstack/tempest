@@ -23,7 +23,6 @@ from tempest import test
 
 
 class RolesNegativeTestJSON(base.BaseIdentityV2AdminTest):
-    _interface = 'json'
 
     def _get_role_params(self):
         self.data.setup_test_user()

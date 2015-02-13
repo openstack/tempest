@@ -27,7 +27,6 @@ CONF = config.CONF
 
 
 class PortsTestJSON(sec_base.BaseSecGroupTest):
-    _interface = 'json'
 
     """
     Test the following operations for ports:
@@ -300,7 +299,6 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
 
 
 class PortsAdminExtendedAttrsTestJSON(base.BaseAdminNetworkTest):
-    _interface = 'json'
 
     @classmethod
     def resource_setup(cls):

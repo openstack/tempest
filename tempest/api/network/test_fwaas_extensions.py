@@ -24,7 +24,6 @@ CONF = config.CONF
 
 
 class FWaaSExtensionTestJSON(base.BaseNetworkTest):
-    _interface = 'json'
 
     """
     Tests the following operations in the Neutron API using the REST client for

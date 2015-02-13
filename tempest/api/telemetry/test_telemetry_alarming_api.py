@@ -18,7 +18,6 @@ from tempest import test
 
 
 class TelemetryAlarmingAPITestJSON(base.BaseTelemetryTest):
-    _interface = 'json'
 
     @classmethod
     def resource_setup(cls):

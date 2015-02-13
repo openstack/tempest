@@ -31,8 +31,8 @@ class BaseIdentityAdminTest(tempest.test.BaseTestCase):
     @classmethod
     def resource_setup(cls):
         super(BaseIdentityAdminTest, cls).resource_setup()
-        cls.os_adm = clients.AdminManager(interface=cls._interface)
-        cls.os = clients.Manager(interface=cls._interface)
+        cls.os_adm = clients.AdminManager()
+        cls.os = clients.Manager()
 
     @classmethod
     def disable_user(cls, user_name):
