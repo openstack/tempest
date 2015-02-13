@@ -31,17 +31,16 @@ class ServerDiskConfigTestJSON(base.BaseV2ComputeTest):
             raise cls.skipException(msg)
         super(ServerDiskConfigTestJSON, cls).resource_setup()
         cls.client = cls.os.servers_client
-        resp, server = cls.create_test_server(wait_until='ACTIVE')
+        server = cls.create_test_server(wait_until='ACTIVE')
         cls.server_id = server['id']
 
     def _update_server_with_disk_config(self, disk_config):
-        resp, server = self.client.get_server(self.server_id)
+        server = self.client.get_server(self.server_id)
         if disk_config != server['OS-DCF:diskConfig']:
-            resp, server = self.client.update_server(self.server_id,
-                                                     disk_config=disk_config)
-            self.assertEqual(200, resp.status)
+            server = self.client.update_server(self.server_id,
+                                               disk_config=disk_config)
             self.client.wait_for_server_status(server['id'], 'ACTIVE')
-            resp, server = self.client.get_server(server['id'])
+            server = self.client.get_server(server['id'])
             self.assertEqual(disk_config, server['OS-DCF:diskConfig'])
 
     @test.attr(type='gate')
@@ -57,7 +56,7 @@ class ServerDiskConfigTestJSON(base.BaseV2ComputeTest):
         self.client.wait_for_server_status(server['id'], 'ACTIVE')
 
         # Verify the specified attributes are set correctly
-        resp, server = self.client.get_server(server['id'])
+        server = self.client.get_server(server['id'])
         self.assertEqual('MANUAL', server['OS-DCF:diskConfig'])
 
     @test.attr(type='gate')
@@ -73,11 +72,11 @@ class ServerDiskConfigTestJSON(base.BaseV2ComputeTest):
         self.client.wait_for_server_status(server['id'], 'ACTIVE')
 
         # Verify the specified attributes are set correctly
-        resp, server = self.client.get_server(server['id'])
+        server = self.client.get_server(server['id'])
         self.assertEqual('AUTO', server['OS-DCF:diskConfig'])
 
     def _get_alternative_flavor(self):
-        resp, server = self.client.get_server(self.server_id)
+        server = self.client.get_server(self.server_id)
 
         if server['flavor']['id'] == self.flavor_ref:
             return self.flavor_ref_alt
@@ -98,7 +97,7 @@ class ServerDiskConfigTestJSON(base.BaseV2ComputeTest):
         self.client.confirm_resize(self.server_id)
         self.client.wait_for_server_status(self.server_id, 'ACTIVE')
 
-        resp, server = self.client.get_server(self.server_id)
+        server = self.client.get_server(self.server_id)
         self.assertEqual('AUTO', server['OS-DCF:diskConfig'])
 
     @testtools.skipUnless(CONF.compute_feature_enabled.resize,
@@ -115,7 +114,7 @@ class ServerDiskConfigTestJSON(base.BaseV2ComputeTest):
         self.client.confirm_resize(self.server_id)
         self.client.wait_for_server_status(self.server_id, 'ACTIVE')
 
-        resp, server = self.client.get_server(self.server_id)
+        server = self.client.get_server(self.server_id)
         self.assertEqual('MANUAL', server['OS-DCF:diskConfig'])
 
     @test.attr(type='gate')
@@ -124,11 +123,10 @@ class ServerDiskConfigTestJSON(base.BaseV2ComputeTest):
         self._update_server_with_disk_config(disk_config='AUTO')
 
         # Update the disk_config attribute to manual
-        resp, server = self.client.update_server(self.server_id,
-                                                 disk_config='MANUAL')
-        self.assertEqual(200, resp.status)
+        server = self.client.update_server(self.server_id,
+                                           disk_config='MANUAL')
         self.client.wait_for_server_status(server['id'], 'ACTIVE')
 
         # Verify the disk_config attribute is set correctly
-        resp, server = self.client.get_server(server['id'])
+        server = self.client.get_server(server['id'])
         self.assertEqual('MANUAL', server['OS-DCF:diskConfig'])

@@ -55,8 +55,8 @@ class AuthorizationTestJSON(base.BaseV2ComputeTest):
         cls.alt_keypairs_client = cls.alt_manager.keypairs_client
         cls.alt_security_client = cls.alt_manager.security_groups_client
 
-        resp, server = cls.create_test_server(wait_until='ACTIVE')
-        resp, cls.server = cls.client.get_server(server['id'])
+        server = cls.create_test_server(wait_until='ACTIVE')
+        cls.server = cls.client.get_server(server['id'])
 
         name = data_utils.rand_name('image')
         body = cls.glance_client.create_image(name=name,

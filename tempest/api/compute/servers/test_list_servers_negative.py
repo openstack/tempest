@@ -35,10 +35,10 @@ class ListServersNegativeTestJSON(base.BaseV2ComputeTest):
         cls.existing_fixtures = []
         cls.deleted_fixtures = []
         for x in moves.xrange(2):
-            resp, srv = cls.create_test_server(wait_until='ACTIVE')
+            srv = cls.create_test_server(wait_until='ACTIVE')
             cls.existing_fixtures.append(srv)
 
-        resp, srv = cls.create_test_server()
+        srv = cls.create_test_server()
         cls.client.delete_server(srv['id'])
         # We ignore errors on termination because the server may
         # be put into ERROR status on a quick spawn, then delete,

@@ -47,7 +47,7 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
         cls.client = cls.servers_client
         cls.alt_os = clients.Manager(cls.isolated_creds.get_alt_creds())
         cls.alt_client = cls.alt_os.servers_client
-        resp, server = cls.create_test_server(wait_until='ACTIVE')
+        server = cls.create_test_server(wait_until='ACTIVE')
         cls.server_id = server['id']
 
     @test.attr(type=['negative', 'gate'])
@@ -152,7 +152,7 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
     @test.attr(type=['negative', 'gate'])
     def test_rebuild_reboot_deleted_server(self):
         # Rebuild and Reboot a deleted server
-        _, server = self.create_test_server()
+        server = self.create_test_server()
         self.client.delete_server(server['id'])
         self.client.wait_for_server_termination(server['id'])
 
@@ -429,7 +429,7 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
             self.client.wait_for_server_status(self.server_id,
                                                'SHELVED')
 
-        resp, server = self.client.get_server(self.server_id)
+        server = self.client.get_server(self.server_id)
         image_name = server['name'] + '-shelved'
         params = {'name': image_name}
         images = self.images_client.list_images(params)

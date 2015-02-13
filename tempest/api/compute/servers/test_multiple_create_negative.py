@@ -31,9 +31,9 @@ class MultipleCreateNegativeTestJSON(base.BaseV2ComputeTest):
         created servers into the servers list to be cleaned up after all.
         """
         kwargs['name'] = kwargs.get('name', self._generate_name())
-        resp, body = self.create_test_server(**kwargs)
+        body = self.create_test_server(**kwargs)
 
-        return resp, body
+        return body
 
     @test.attr(type=['negative', 'gate'])
     def test_min_count_less_than_one(self):

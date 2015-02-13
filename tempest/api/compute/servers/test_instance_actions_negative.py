@@ -26,7 +26,7 @@ class InstanceActionsNegativeTestJSON(base.BaseV2ComputeTest):
     def resource_setup(cls):
         super(InstanceActionsNegativeTestJSON, cls).resource_setup()
         cls.client = cls.servers_client
-        resp, server = cls.create_test_server(wait_until='ACTIVE')
+        server = cls.create_test_server(wait_until='ACTIVE')
         cls.server_id = server['id']
 
     @test.attr(type=['negative', 'gate'])

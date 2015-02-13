@@ -29,7 +29,7 @@ class ServerMetadataNegativeTestJSON(base.BaseV2ComputeTest):
         cls.client = cls.servers_client
         cls.quotas = cls.quotas_client
         cls.tenant_id = cls.client.tenant_id
-        resp, server = cls.create_test_server(meta={}, wait_until='ACTIVE')
+        server = cls.create_test_server(meta={}, wait_until='ACTIVE')
 
         cls.server_id = server['id']
 

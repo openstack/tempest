@@ -92,13 +92,13 @@ class ServersClientJSON(service_client.ServiceClient):
         # NOTE(maurosr): this deals with the case of multiple server create
         # with return reservation id set True
         if 'reservation_id' in body:
-            return resp, body
+            return service_client.ResponseBody(resp, body)
         if CONF.compute_feature_enabled.enable_instance_password:
             create_schema = schema.create_server_with_admin_pass
         else:
             create_schema = schema.create_server
         self.validate_response(create_schema, resp, body)
-        return resp, body['server']
+        return service_client.ResponseBody(resp, body['server'])
 
     def update_server(self, server_id, name=None, meta=None, accessIPv4=None,
                       accessIPv6=None, disk_config=None):
@@ -132,20 +132,20 @@ class ServersClientJSON(service_client.ServiceClient):
         resp, body = self.put("servers/%s" % str(server_id), post_body)
         body = json.loads(body)
         self.validate_response(schema.update_server, resp, body)
-        return resp, body['server']
+        return service_client.ResponseBody(resp, body['server'])
 
     def get_server(self, server_id):
         """Returns the details of an existing server."""
         resp, body = self.get("servers/%s" % str(server_id))
         body = json.loads(body)
         self.validate_response(schema.get_server, resp, body)
-        return resp, body['server']
+        return service_client.ResponseBody(resp, body['server'])
 
     def delete_server(self, server_id):
         """Deletes the given server."""
         resp, body = self.delete("servers/%s" % str(server_id))
         self.validate_response(common_schema.delete_server, resp, body)
-        return resp, body
+        return service_client.ResponseBody(resp, body)
 
     def list_servers(self, params=None):
         """Lists all servers for a user."""
@@ -184,7 +184,7 @@ class ServersClientJSON(service_client.ServiceClient):
         start_time = int(time.time())
         while True:
             try:
-                resp, body = self.get_server(server_id)
+                body = self.get_server(server_id)
             except lib_exc.NotFound:
                 return
 

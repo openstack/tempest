@@ -35,13 +35,13 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
         cls.flavors_client = cls.os_adm.flavors_client
 
         cls.s1_name = data_utils.rand_name('server')
-        resp, server = cls.create_test_server(name=cls.s1_name,
-                                              wait_until='ACTIVE')
+        server = cls.create_test_server(name=cls.s1_name,
+                                        wait_until='ACTIVE')
         cls.s1_id = server['id']
 
         cls.s2_name = data_utils.rand_name('server')
-        resp, server = cls.create_test_server(name=cls.s2_name,
-                                              wait_until='ACTIVE')
+        server = cls.create_test_server(name=cls.s2_name,
+                                        wait_until='ACTIVE')
         cls.s2_id = server['id']
 
     @test.attr(type='gate')
@@ -61,7 +61,7 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
         # Reset server's state to 'active'
         resp, server = self.client.reset_state(self.s1_id, state='active')
         # Verify server's state
-        resp, server = self.client.get_server(self.s1_id)
+        server = self.client.get_server(self.s1_id)
         self.assertEqual(server['status'], 'ACTIVE')
         servers = body['servers']
         # Verify error server in list result
@@ -104,12 +104,10 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
         name = data_utils.rand_name('server')
         flavor = self.flavor_ref
         image_id = self.image_ref
-        resp, test_server = self.client.create_server(
-            name, image_id, flavor)
-        self.assertEqual('202', resp['status'])
+        test_server = self.client.create_server(name, image_id, flavor)
         self.addCleanup(self.client.delete_server, test_server['id'])
         self.client.wait_for_server_status(test_server['id'], 'ACTIVE')
-        resp, server = self.client.get_server(test_server['id'])
+        server = self.client.get_server(test_server['id'])
         self.assertEqual(server['status'], 'ACTIVE')
         hostname = server[self._host_key]
         params = {'host': hostname}
@@ -132,7 +130,7 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
         self.assertEqual(202, resp.status)
 
         # Verify server's state
-        resp, server = self.client.get_server(self.s1_id)
+        server = self.client.get_server(self.s1_id)
         self.assertEqual(server['status'], 'ERROR')
 
         # Reset server's state to 'active'
@@ -140,7 +138,7 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
         self.assertEqual(202, resp.status)
 
         # Verify server's state
-        resp, server = self.client.get_server(self.s1_id)
+        server = self.client.get_server(self.s1_id)
         self.assertEqual(server['status'], 'ACTIVE')
 
     @test.attr(type='gate')
@@ -179,14 +177,14 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
                                                      'ACTIVE',
                                                      raise_on_error=False)
         # Verify the server properties after rebuilding
-        resp, server = self.non_admin_client.get_server(rebuilt_server['id'])
+        server = self.non_admin_client.get_server(rebuilt_server['id'])
         rebuilt_image_id = server['image']['id']
         self.assertEqual(self.image_ref_alt, rebuilt_image_id)
 
     @test.attr(type='gate')
     def test_reset_network_inject_network_info(self):
         # Reset Network of a Server
-        resp, server = self.create_test_server(wait_until='ACTIVE')
+        server = self.create_test_server(wait_until='ACTIVE')
         resp, server_body = self.client.reset_network(server['id'])
         self.assertEqual(202, resp.status)
         # Inject the Network Info into Server
@@ -199,6 +197,5 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
         hints = {
             'same_host': self.s1_id
         }
-        resp, server = self.create_test_server(sched_hints=hints,
-                                               wait_until='ACTIVE')
-        self.assertEqual('202', resp['status'])
+        self.create_test_server(sched_hints=hints,
+                                wait_until='ACTIVE')

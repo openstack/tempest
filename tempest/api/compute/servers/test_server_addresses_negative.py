@@ -27,7 +27,7 @@ class ServerAddressesNegativeTestJSON(base.BaseV2ComputeTest):
         super(ServerAddressesNegativeTestJSON, cls).resource_setup()
         cls.client = cls.servers_client
 
-        resp, cls.server = cls.create_test_server(wait_until='ACTIVE')
+        cls.server = cls.create_test_server(wait_until='ACTIVE')
 
     @test.attr(type=['negative', 'gate'])
     @test.services('network')

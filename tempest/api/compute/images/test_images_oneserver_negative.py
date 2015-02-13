@@ -69,7 +69,7 @@ class ImagesOneServerNegativeTestJSON(base.BaseV2ComputeTest):
                         % cls.__name__)
             raise cls.skipException(skip_msg)
 
-        resp, server = cls.create_test_server(wait_until='ACTIVE')
+        server = cls.create_test_server(wait_until='ACTIVE')
         cls.server_id = server['id']
 
         cls.image_ids = []

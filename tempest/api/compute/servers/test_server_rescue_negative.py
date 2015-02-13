@@ -37,8 +37,8 @@ class ServerRescueNegativeTestJSON(base.BaseV2ComputeTest):
         cls.device = CONF.compute.volume_device_name
 
         # Server for negative tests
-        resp, server = cls.create_test_server(wait_until='BUILD')
-        resp, resc_server = cls.create_test_server(wait_until='ACTIVE')
+        server = cls.create_test_server(wait_until='BUILD')
+        resc_server = cls.create_test_server(wait_until='ACTIVE')
         cls.server_id = server['id']
         cls.password = server['adminPass']
         cls.rescue_id = resc_server['id']

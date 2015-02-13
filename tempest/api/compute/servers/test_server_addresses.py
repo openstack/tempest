@@ -26,7 +26,7 @@ class ServerAddressesTestJSON(base.BaseV2ComputeTest):
         super(ServerAddressesTestJSON, cls).resource_setup()
         cls.client = cls.servers_client
 
-        resp, cls.server = cls.create_test_server(wait_until='ACTIVE')
+        cls.server = cls.create_test_server(wait_until='ACTIVE')
 
     @test.attr(type='smoke')
     @test.services('network')

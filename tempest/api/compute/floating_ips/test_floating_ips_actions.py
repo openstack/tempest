@@ -31,7 +31,7 @@ class FloatingIPsTestJSON(base.BaseFloatingIPsTest):
         cls.floating_ip_id = None
 
         # Server creation
-        resp, server = cls.create_test_server(wait_until='ACTIVE')
+        server = cls.create_test_server(wait_until='ACTIVE')
         cls.server_id = server['id']
         # Floating IP creation
         resp, body = cls.client.create_floating_ip()
@@ -115,7 +115,7 @@ class FloatingIPsTestJSON(base.BaseFloatingIPsTest):
         # to specific server should change the association of the Floating IP
         # Create server so as to use for Multiple association
         new_name = data_utils.rand_name('floating_server')
-        resp, body = self.create_test_server(name=new_name)
+        body = self.create_test_server(name=new_name)
         self.servers_client.wait_for_server_status(body['id'], 'ACTIVE')
         self.new_server_id = body['id']
 

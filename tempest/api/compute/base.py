@@ -199,7 +199,7 @@ class BaseComputeTest(tempest.test.BaseTestCase):
         flavor = kwargs.get('flavor', cls.flavor_ref)
         image_id = kwargs.get('image_id', cls.image_ref)
 
-        resp, body = cls.servers_client.create_server(
+        body = cls.servers_client.create_server(
             name, image_id, flavor, **kwargs)
 
         # handle the case of multiple servers
@@ -227,7 +227,7 @@ class BaseComputeTest(tempest.test.BaseTestCase):
 
         cls.servers.extend(servers)
 
-        return resp, body
+        return body
 
     @classmethod
     def create_security_group(cls, name=None, description=None):
@@ -317,7 +317,7 @@ class BaseComputeTest(tempest.test.BaseTestCase):
                 cls.servers_client.wait_for_server_termination(server_id)
             except Exception:
                 LOG.exception('Failed to delete server %s' % server_id)
-        resp, server = cls.create_test_server(wait_until='ACTIVE', **kwargs)
+        server = cls.create_test_server(wait_until='ACTIVE', **kwargs)
         cls.password = server['adminPass']
         return server['id']
 
