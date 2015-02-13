@@ -54,9 +54,9 @@ import argparse
 import json
 import sys
 
-from tempest import auth
 from tempest import clients
 from tempest.cmd import cleanup_service
+from tempest.common import cred_provider
 from tempest import config
 from tempest.openstack.common import log as logging
 
@@ -159,7 +159,8 @@ class Cleanup(object):
         kwargs = {"username": CONF.identity.admin_username,
                   "password": CONF.identity.admin_password,
                   "tenant_name": tenant['name']}
-        mgr = clients.Manager(credentials=auth.get_credentials(**kwargs))
+        mgr = clients.Manager(credentials=cred_provider.get_credentials(
+            **kwargs))
         kwargs = {'data': tenant_data,
                   'is_dry_run': is_dry_run,
                   'saved_state_json': None,

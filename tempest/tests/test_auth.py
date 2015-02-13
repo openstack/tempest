@@ -30,7 +30,7 @@ from tempest.tests import fake_http
 from tempest.tests import fake_identity
 
 
-def fake_get_credentials(fill_in=True, **kwargs):
+def fake_get_credentials(fill_in=True, identity_version='v2', **kwargs):
     return fake_credentials.FakeCredentials()
 
 
@@ -80,11 +80,6 @@ class TestBaseAuthProvider(BaseAuthTestsSetUp):
 
     def test_check_credentials_bad_type(self):
         self.assertFalse(self.auth_provider.check_credentials([]))
-
-    def test_instantiate_with_dict(self):
-        # Dict credentials are only supported for backward compatibility
-        auth_provider = self._auth(credentials={})
-        self.assertIsInstance(auth_provider.credentials, auth.Credentials)
 
     def test_auth_data_property_when_cache_exists(self):
         self.auth_provider.cache = 'foo'

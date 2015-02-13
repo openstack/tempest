@@ -63,6 +63,10 @@ class InvalidServiceTag(TempestException):
     message = "Invalid service tag"
 
 
+class InvalidIdentityVersion(TempestException):
+    message = "Invalid version %(identity_version) of the identity service"
+
+
 class TimeoutException(TempestException):
     message = "Request timed out"
 

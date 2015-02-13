@@ -17,7 +17,6 @@ import os
 
 import yaml
 
-from tempest import auth
 from tempest.common import cred_provider
 from tempest import config
 from tempest import exceptions
@@ -123,7 +122,7 @@ class Accounts(cred_provider.CredentialProvider):
         if self.isolated_creds.get('primary'):
             return self.isolated_creds.get('primary')
         creds = self._get_creds()
-        primary_credential = auth.get_credentials(**creds)
+        primary_credential = cred_provider.get_credentials(**creds)
         self.isolated_creds['primary'] = primary_credential
         return primary_credential
 
@@ -131,7 +130,7 @@ class Accounts(cred_provider.CredentialProvider):
         if self.isolated_creds.get('alt'):
             return self.isolated_creds.get('alt')
         creds = self._get_creds()
-        alt_credential = auth.get_credentials(**creds)
+        alt_credential = cred_provider.get_credentials(**creds)
         self.isolated_creds['alt'] = alt_credential
         return alt_credential
 
@@ -189,7 +188,7 @@ class NotLockingAccounts(Accounts):
             return self.isolated_creds.get('primary')
         if not self.use_default_creds:
             creds = self.get_creds(0)
-            primary_credential = auth.get_credentials(**creds)
+            primary_credential = cred_provider.get_credentials(**creds)
         else:
             primary_credential = cred_provider.get_configured_credentials(
                 'user')
@@ -201,7 +200,7 @@ class NotLockingAccounts(Accounts):
             return self.isolated_creds.get('alt')
         if not self.use_default_creds:
             creds = self.get_creds(1)
-            alt_credential = auth.get_credentials(**creds)
+            alt_credential = cred_provider.get_credentials(**creds)
         else:
             alt_credential = cred_provider.get_configured_credentials(
                 'alt_user')

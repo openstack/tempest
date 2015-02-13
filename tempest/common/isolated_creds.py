@@ -15,7 +15,6 @@
 import netaddr
 from tempest_lib import exceptions as lib_exc
 
-from tempest import auth
 from tempest import clients
 from tempest.common import cred_provider
 from tempest.common.utils import data_utils
@@ -130,7 +129,7 @@ class IsolatedCreds(cred_provider.CredentialProvider):
         return self._get_credentials(user, tenant)
 
     def _get_credentials(self, user, tenant):
-        return auth.get_credentials(
+        return cred_provider.get_credentials(
             username=user['name'], user_id=user['id'],
             tenant_name=tenant['name'], tenant_id=tenant['id'],
             password=self.password)
