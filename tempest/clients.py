@@ -64,7 +64,8 @@ from tempest.services.compute.json.tenant_usages_client import \
     TenantUsagesClientJSON
 from tempest.services.compute.json.volumes_extensions_client import \
     VolumesExtensionsClientJSON
-from tempest.services.data_processing.v1_1.client import DataProcessingClient
+from tempest.services.data_processing.v1_1.data_processing_client import \
+    DataProcessingClient
 from tempest.services.database.json.flavors_client import \
     DatabaseFlavorsClientJSON
 from tempest.services.database.json.limits_client import \
