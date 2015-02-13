@@ -15,10 +15,7 @@
 
 import urllib
 
-from tempest import config
 from tempest_lib.common import rest_client
-
-CONF = config.CONF
 
 
 class DatabaseLimitsClientJSON(rest_client.RestClient):
