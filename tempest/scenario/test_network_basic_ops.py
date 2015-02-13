@@ -243,7 +243,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         def check_ports():
             self.new_port_list = [port for port in
                                   self._list_ports(device_id=server['id'])
-                                  if port != old_port]
+                                  if port['id'] != old_port['id']]
             return len(self.new_port_list) == 1
 
         if not test.call_until_true(check_ports, CONF.network.build_timeout,
