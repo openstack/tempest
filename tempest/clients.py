@@ -202,6 +202,12 @@ class Manager(manager.Manager):
             build_interval=CONF.orchestration.build_interval,
             build_timeout=CONF.orchestration.build_timeout,
             **self.default_params)
+        self.data_processing_client = DataProcessingClient(
+            self.auth_provider,
+            CONF.data_processing.catalog_type,
+            CONF.identity.region,
+            endpoint_type=CONF.data_processing.endpoint_type,
+            **self.default_params_with_timeout_values)
         self.negative_client = negative_rest_client.NegativeRestClient(
             self.auth_provider, service)
 
@@ -212,8 +218,6 @@ class Manager(manager.Manager):
                            self.credentials.tenant_name)
         self.ec2api_client = botoclients.APIClientEC2(*ec2_client_args)
         self.s3_client = botoclients.ObjectClientS3(*ec2_client_args)
-        self.data_processing_client = DataProcessingClient(
-            self.auth_provider)
 
     def _set_compute_clients(self):
         params = {

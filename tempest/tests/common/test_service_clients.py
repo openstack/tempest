@@ -43,6 +43,7 @@ from tempest.services.compute.json import services_client
 from tempest.services.compute.json import tenant_usages_client
 from tempest.services.compute.json import volumes_extensions_client \
     as compute_volumes_extensions_client
+from tempest.services.data_processing.v1_1 import data_processing_client
 from tempest.services.database.json import flavors_client as db_flavor_client
 from tempest.services.database.json import versions_client as db_version_client
 from tempest.services.messaging.json import messaging_client
@@ -117,6 +118,7 @@ class TestServiceClient(base.TestCase):
             services_client.ServicesClientJSON,
             tenant_usages_client.TenantUsagesClientJSON,
             compute_volumes_extensions_client.VolumesExtensionsClientJSON,
+            data_processing_client.DataProcessingClient,
             db_flavor_client.DatabaseFlavorsClientJSON,
             db_version_client.DatabaseVersionsClientJSON,
             messaging_client.MessagingClientJSON,
