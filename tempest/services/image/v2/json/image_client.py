@@ -141,8 +141,7 @@ class ImageClientV2JSON(service_client.ServiceClient):
         url = 'v2/images/%s/file' % image_id
         resp, body = self.get(url)
         self.expected_success(200, resp.status)
-        # We can't return a ResponseBody because the body is a string
-        return resp, body
+        return service_client.ResponseBodyData(resp, body)
 
     def add_image_tag(self, image_id, tag):
         url = 'v2/images/%s/tags/%s' % (image_id, tag)
