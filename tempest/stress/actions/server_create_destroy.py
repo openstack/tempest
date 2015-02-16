@@ -28,7 +28,7 @@ class ServerCreateDestroyTest(stressaction.StressAction):
     def run(self):
         name = data_utils.rand_name("instance")
         self.logger.info("creating %s" % name)
-        _, server = self.manager.servers_client.create_server(
+        server = self.manager.servers_client.create_server(
             name, self.image, self.flavor)
         server_id = server['id']
         self.manager.servers_client.wait_for_server_status(server_id,
