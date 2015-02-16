@@ -394,7 +394,7 @@ class BaseTestCase(testtools.testcase.WithAttributes,
         return admin_client
 
     @classmethod
-    def set_network_resources(self, network=False, router=False, subnet=False,
+    def set_network_resources(cls, network=False, router=False, subnet=False,
                               dhcp=False):
         """Specify which network resources should be created
 
@@ -407,8 +407,8 @@ class BaseTestCase(testtools.testcase.WithAttributes,
         # in order to ensure that even if it's called multiple times in
         # a chain of overloaded methods, the attribute is set only
         # in the leaf class
-        if not self.network_resources:
-            self.network_resources = {
+        if not cls.network_resources:
+            cls.network_resources = {
                 'network': network,
                 'router': router,
                 'subnet': subnet,
