@@ -86,12 +86,12 @@ class AccountQuotasNegativeTest(base.BaseObjectTest):
         """
 
         # Not able to remove quota
-        self.assertRaises(lib_exc.Unauthorized,
+        self.assertRaises(lib_exc.Forbidden,
                           self.account_client.create_account_metadata,
                           {"Quota-Bytes": ""})
 
         # Not able to modify quota
-        self.assertRaises(lib_exc.Unauthorized,
+        self.assertRaises(lib_exc.Forbidden,
                           self.account_client.create_account_metadata,
                           {"Quota-Bytes": "100"})
 

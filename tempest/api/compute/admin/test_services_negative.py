@@ -33,7 +33,7 @@ class ServicesAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
     @test.attr(type=['negative', 'gate'])
     @test.idempotent_id('1126d1f8-266e-485f-a687-adc547492646')
     def test_list_services_with_non_admin_user(self):
-        self.assertRaises(lib_exc.Unauthorized,
+        self.assertRaises(lib_exc.Forbidden,
                           self.non_admin_client.list_services)
 
     @test.attr(type=['negative', 'gate'])

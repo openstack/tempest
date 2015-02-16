@@ -35,7 +35,7 @@ class UsersNegativeTestJSON(base.BaseIdentityV2AdminTest):
     def test_create_user_by_unauthorized_user(self):
         # Non-administrator should not be authorized to create a user
         self.data.setup_test_tenant()
-        self.assertRaises(lib_exc.Unauthorized,
+        self.assertRaises(lib_exc.Forbidden,
                           self.non_admin_client.create_user, self.alt_user,
                           self.alt_password, self.data.tenant['id'],
                           self.alt_email)
@@ -131,7 +131,7 @@ class UsersNegativeTestJSON(base.BaseIdentityV2AdminTest):
     def test_update_user_by_unauthorized_user(self):
         # Non-administrator should not be authorized to update user
         self.data.setup_test_tenant()
-        self.assertRaises(lib_exc.Unauthorized,
+        self.assertRaises(lib_exc.Forbidden,
                           self.non_admin_client.update_user, self.alt_user)
 
     @test.attr(type=['negative', 'gate'])
@@ -139,7 +139,7 @@ class UsersNegativeTestJSON(base.BaseIdentityV2AdminTest):
     def test_delete_users_by_unauthorized_user(self):
         # Non-administrator user should not be authorized to delete a user
         self.data.setup_test_user()
-        self.assertRaises(lib_exc.Unauthorized,
+        self.assertRaises(lib_exc.Forbidden,
                           self.non_admin_client.delete_user,
                           self.data.user['id'])
 
@@ -220,7 +220,7 @@ class UsersNegativeTestJSON(base.BaseIdentityV2AdminTest):
     def test_get_users_by_unauthorized_user(self):
         # Non-administrator user should not be authorized to get user list
         self.data.setup_test_user()
-        self.assertRaises(lib_exc.Unauthorized,
+        self.assertRaises(lib_exc.Forbidden,
                           self.non_admin_client.get_users)
 
     @test.attr(type=['negative', 'gate'])

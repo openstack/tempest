@@ -64,5 +64,5 @@ class TenantUsagesNegativeTestJSON(base.BaseV2ComputeAdminTest):
         params = {'start': self.start,
                   'end': self.end,
                   'detailed': int(bool(True))}
-        self.assertRaises(lib_exc.Unauthorized,
+        self.assertRaises(lib_exc.Forbidden,
                           self.client.list_tenant_usages, params)

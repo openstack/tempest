@@ -27,7 +27,7 @@ class TenantsNegativeTestJSON(base.BaseIdentityV2AdminTest):
     @test.idempotent_id('ca9bb202-63dd-4240-8a07-8ef9c19c04bb')
     def test_list_tenants_by_unauthorized_user(self):
         # Non-administrator user should not be able to list tenants
-        self.assertRaises(lib_exc.Unauthorized,
+        self.assertRaises(lib_exc.Forbidden,
                           self.non_admin_client.list_tenants)
 
     @test.attr(type=['negative', 'gate'])
@@ -46,7 +46,7 @@ class TenantsNegativeTestJSON(base.BaseIdentityV2AdminTest):
         tenant_name = data_utils.rand_name(name='tenant-')
         tenant = self.client.create_tenant(tenant_name)
         self.data.tenants.append(tenant)
-        self.assertRaises(lib_exc.Unauthorized,
+        self.assertRaises(lib_exc.Forbidden,
                           self.non_admin_client.delete_tenant, tenant['id'])
 
     @test.attr(type=['negative', 'gate'])
@@ -89,7 +89,7 @@ class TenantsNegativeTestJSON(base.BaseIdentityV2AdminTest):
     def test_create_tenant_by_unauthorized_user(self):
         # Non-administrator user should not be authorized to create a tenant
         tenant_name = data_utils.rand_name(name='tenant-')
-        self.assertRaises(lib_exc.Unauthorized,
+        self.assertRaises(lib_exc.Forbidden,
                           self.non_admin_client.create_tenant, tenant_name)
 
     @test.attr(type=['negative', 'gate'])
@@ -132,7 +132,7 @@ class TenantsNegativeTestJSON(base.BaseIdentityV2AdminTest):
         tenant_name = data_utils.rand_name(name='tenant-')
         tenant = self.client.create_tenant(tenant_name)
         self.data.tenants.append(tenant)
-        self.assertRaises(lib_exc.Unauthorized,
+        self.assertRaises(lib_exc.Forbidden,
                           self.non_admin_client.update_tenant, tenant['id'])
 
     @test.attr(type=['negative', 'gate'])

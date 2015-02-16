@@ -141,14 +141,14 @@ class ServerMetadataNegativeTestJSON(base.BaseV2ComputeTest):
         req_metadata = {}
         for num in range(1, quota_metadata + 2):
             req_metadata['key' + str(num)] = 'val' + str(num)
-        self.assertRaises((lib_exc.OverLimit, lib_exc.Unauthorized),
+        self.assertRaises((lib_exc.OverLimit, lib_exc.Forbidden),
                           self.client.set_server_metadata,
                           self.server_id, req_metadata)
 
         # A 403 Forbidden or 413 Overlimit (old behaviour) exception
         # will be raised while exceeding metadata items limit for
         # tenant.
-        self.assertRaises((lib_exc.Unauthorized, lib_exc.OverLimit),
+        self.assertRaises((lib_exc.Forbidden, lib_exc.OverLimit),
                           self.client.update_server_metadata,
                           self.server_id, req_metadata)
 

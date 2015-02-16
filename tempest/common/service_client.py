@@ -13,7 +13,6 @@
 #    under the License.
 
 from tempest_lib.common import rest_client
-from tempest_lib import exceptions as lib_exceptions
 
 from tempest import config
 
@@ -46,24 +45,6 @@ class ServiceClient(rest_client.RestClient):
             params.update({'build_timeout': build_timeout})
         super(ServiceClient, self).__init__(auth_provider, service, region,
                                             **params)
-
-    def request(self, method, url, extra_headers=False, headers=None,
-                body=None):
-        # TODO(oomichi): This translation is just for avoiding a single
-        # huge patch to migrate rest_client module to tempest-lib.
-        # Ideally(in the future), we need to remove this translation and
-        # replace each API tests with tempest-lib's exceptions.
-        try:
-            return super(ServiceClient, self).request(
-                method, url,
-                extra_headers=extra_headers,
-                headers=headers, body=body)
-        # TODO(oomichi): This is just a workaround for failing gate tests
-        # when separating Forbidden from Unauthorized in tempest-lib.
-        # We will need to remove this translation and replace negative tests
-        # with lib_exceptions.Forbidden in the future.
-        except lib_exceptions.Forbidden as ex:
-            raise lib_exceptions.Unauthorized(ex)
 
 
 class ResponseBody(dict):
