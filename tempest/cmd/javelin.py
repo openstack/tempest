@@ -233,9 +233,6 @@ def client_for_user(name):
         LOG.error("%s not found in USERS: %s" % (name, USERS))
 
 
-def resp_ok(response):
-    return 200 >= int(response['status']) < 300
-
 ###################
 #
 # TENANTS
