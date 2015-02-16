@@ -162,7 +162,7 @@ class SecGroupTest(base.BaseSecGroupTest):
         """Verify security group rule for icmp protocol works.
 
         Specify icmp type (port_range_min) and icmp code
-        (port_range_max) with different values. A seperate testcase
+        (port_range_max) with different values. A separate testcase
         is added for icmp protocol as icmp validation would be
         different from tcp/udp.
         """

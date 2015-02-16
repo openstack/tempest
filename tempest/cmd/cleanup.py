@@ -222,7 +222,7 @@ class Cleanup(object):
                 needs_role = False
                 LOG.debug("User already had admin privilege for this tenant")
         if needs_role:
-            LOG.debug("Adding admin priviledge for : %s" % tenant_id)
+            LOG.debug("Adding admin privilege for : %s" % tenant_id)
             id_cl.assign_user_role(tenant_id, self.admin_id,
                                    self.admin_role_id)
             self.admin_role_added.append(tenant_id)
