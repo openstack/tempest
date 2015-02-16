@@ -16,7 +16,6 @@
 from tempest_lib import exceptions as lib_exc
 
 from tempest.api.image import base
-from tempest import exceptions
 from tempest import test
 
 
@@ -26,12 +25,12 @@ class CreateDeleteImagesNegativeTest(base.BaseV1ImageTest):
     @test.attr(type=['negative', 'gate'])
     def test_register_with_invalid_container_format(self):
         # Negative tests for invalid data supplied to POST /images
-        self.assertRaises(exceptions.BadRequest, self.client.create_image,
+        self.assertRaises(lib_exc.BadRequest, self.client.create_image,
                           'test', 'wrong', 'vhd')
 
     @test.attr(type=['negative', 'gate'])
     def test_register_with_invalid_disk_format(self):
-        self.assertRaises(exceptions.BadRequest, self.client.create_image,
+        self.assertRaises(lib_exc.BadRequest, self.client.create_image,
                           'test', 'bare', 'wrong')
 
     @test.attr(type=['negative', 'gate'])

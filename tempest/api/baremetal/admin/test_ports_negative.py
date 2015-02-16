@@ -14,7 +14,6 @@ from tempest_lib import exceptions as lib_exc
 
 from tempest.api.baremetal.admin import base
 from tempest.common.utils import data_utils
-from tempest import exceptions as exc
 from tempest import test
 
 
@@ -32,19 +31,19 @@ class TestPortsNegative(base.BaseBaremetalTest):
         node_id = self.node['uuid']
         address = 'malformed:mac'
 
-        self.assertRaises(exc.BadRequest,
+        self.assertRaises(lib_exc.BadRequest,
                           self.create_port, node_id=node_id, address=address)
 
     @test.attr(type=['negative', 'smoke'])
     def test_create_port_nonexsistent_node_id(self):
         node_id = str(data_utils.rand_uuid())
         address = data_utils.rand_mac_address()
-        self.assertRaises(exc.BadRequest, self.create_port, node_id=node_id,
-                          address=address)
+        self.assertRaises(lib_exc.BadRequest, self.create_port,
+                          node_id=node_id, address=address)
 
     @test.attr(type=['negative', 'smoke'])
     def test_show_port_malformed_uuid(self):
-        self.assertRaises(exc.BadRequest, self.client.show_port,
+        self.assertRaises(lib_exc.BadRequest, self.client.show_port,
                           'malformed:uuid')
 
     @test.attr(type=['negative', 'smoke'])
@@ -54,7 +53,7 @@ class TestPortsNegative(base.BaseBaremetalTest):
 
     @test.attr(type=['negative', 'smoke'])
     def test_show_port_by_mac_not_allowed(self):
-        self.assertRaises(exc.BadRequest, self.client.show_port,
+        self.assertRaises(lib_exc.BadRequest, self.client.show_port,
                           data_utils.rand_mac_address())
 
     @test.attr(type=['negative', 'smoke'])
@@ -71,15 +70,15 @@ class TestPortsNegative(base.BaseBaremetalTest):
     def test_create_port_no_mandatory_field_node_id(self):
         address = data_utils.rand_mac_address()
 
-        self.assertRaises(exc.BadRequest, self.create_port, node_id=None,
+        self.assertRaises(lib_exc.BadRequest, self.create_port, node_id=None,
                           address=address)
 
     @test.attr(type=['negative', 'smoke'])
     def test_create_port_no_mandatory_field_mac(self):
         node_id = self.node['uuid']
 
-        self.assertRaises(exc.BadRequest, self.create_port, node_id=node_id,
-                          address=None)
+        self.assertRaises(lib_exc.BadRequest, self.create_port,
+                          node_id=node_id, address=None)
 
     @test.attr(type=['negative', 'smoke'])
     def test_create_port_malformed_port_uuid(self):
@@ -87,13 +86,13 @@ class TestPortsNegative(base.BaseBaremetalTest):
         address = data_utils.rand_mac_address()
         uuid = 'malformed:uuid'
 
-        self.assertRaises(exc.BadRequest, self.create_port, node_id=node_id,
-                          address=address, uuid=uuid)
+        self.assertRaises(lib_exc.BadRequest, self.create_port,
+                          node_id=node_id, address=address, uuid=uuid)
 
     @test.attr(type=['negative', 'smoke'])
     def test_create_port_malformed_node_id(self):
         address = data_utils.rand_mac_address()
-        self.assertRaises(exc.BadRequest, self.create_port,
+        self.assertRaises(lib_exc.BadRequest, self.create_port,
                           node_id='malformed:nodeid', address=address)
 
     @test.attr(type=['negative', 'smoke'])
@@ -117,7 +116,7 @@ class TestPortsNegative(base.BaseBaremetalTest):
                   'op': 'replace',
                   'value': 'new-value'}]
 
-        self.assertRaises(exc.BadRequest,
+        self.assertRaises(lib_exc.BadRequest,
                           self.client.update_port, address,
                           patch)
 
@@ -147,7 +146,7 @@ class TestPortsNegative(base.BaseBaremetalTest):
         self.create_port(node_id=node_id, address=address)
 
         new_address = data_utils.rand_mac_address()
-        self.assertRaises(exc.BadRequest, self.client.update_port,
+        self.assertRaises(lib_exc.BadRequest, self.client.update_port,
                           uuid='malformed:uuid',
                           patch=[{'path': '/address', 'op': 'replace',
                                   'value': new_address}])
@@ -160,7 +159,7 @@ class TestPortsNegative(base.BaseBaremetalTest):
         _, port = self.create_port(node_id=node_id, address=address)
         port_id = port['uuid']
 
-        self.assertRaises(exc.BadRequest, self.client.update_port, port_id,
+        self.assertRaises(lib_exc.BadRequest, self.client.update_port, port_id,
                           [{'path': '/nonexistent', ' op': 'add',
                             'value': 'value'}])
 
@@ -175,7 +174,7 @@ class TestPortsNegative(base.BaseBaremetalTest):
         patch = [{'path': '/node_uuid',
                   'op': 'replace',
                   'value': 'malformed:node_uuid'}]
-        self.assertRaises(exc.BadRequest,
+        self.assertRaises(lib_exc.BadRequest,
                           self.client.update_port, port_id, patch)
 
     @test.attr(type=['negative', 'smoke'])
@@ -206,7 +205,7 @@ class TestPortsNegative(base.BaseBaremetalTest):
         patch = [{'path': '/node_uuid',
                   'op': 'replace',
                   'value': data_utils.rand_uuid()}]
-        self.assertRaises(exc.BadRequest,
+        self.assertRaises(lib_exc.BadRequest,
                           self.client.update_port, port_id, patch)
 
     @test.attr(type=['negative', 'smoke'])
@@ -221,7 +220,7 @@ class TestPortsNegative(base.BaseBaremetalTest):
                   'op': 'replace',
                   'value': 'malformed:mac'}]
 
-        self.assertRaises(exc.BadRequest,
+        self.assertRaises(lib_exc.BadRequest,
                           self.client.update_port, port_id, patch)
 
     @test.attr(type=['negative', 'smoke'])
@@ -234,7 +233,7 @@ class TestPortsNegative(base.BaseBaremetalTest):
 
         patch = [{'path': '/nonexistent', ' op': 'replace', 'value': 'value'}]
 
-        self.assertRaises(exc.BadRequest,
+        self.assertRaises(lib_exc.BadRequest,
                           self.client.update_port, port_id, patch)
 
     @test.attr(type=['negative', 'smoke'])
@@ -245,7 +244,7 @@ class TestPortsNegative(base.BaseBaremetalTest):
         _, port = self.create_port(node_id=node_id, address=address)
         port_id = port['uuid']
 
-        self.assertRaises(exc.BadRequest, self.client.update_port, port_id,
+        self.assertRaises(lib_exc.BadRequest, self.client.update_port, port_id,
                           [{'path': '/address', 'op': 'remove'}])
 
     @test.attr(type=['negative', 'smoke'])
@@ -256,7 +255,7 @@ class TestPortsNegative(base.BaseBaremetalTest):
         _, port = self.create_port(node_id=node_id, address=address)
         port_id = port['uuid']
 
-        self.assertRaises(exc.BadRequest, self.client.update_port, port_id,
+        self.assertRaises(lib_exc.BadRequest, self.client.update_port, port_id,
                           [{'path': '/uuid', 'op': 'remove'}])
 
     @test.attr(type=['negative', 'smoke'])
@@ -267,7 +266,7 @@ class TestPortsNegative(base.BaseBaremetalTest):
         _, port = self.create_port(node_id=node_id, address=address)
         port_id = port['uuid']
 
-        self.assertRaises(exc.BadRequest, self.client.update_port, port_id,
+        self.assertRaises(lib_exc.BadRequest, self.client.update_port, port_id,
                           [{'path': '/nonexistent', 'op': 'remove'}])
 
     @test.attr(type=['negative', 'smoke'])
@@ -276,7 +275,7 @@ class TestPortsNegative(base.BaseBaremetalTest):
         address = data_utils.rand_mac_address()
 
         self.create_port(node_id=node_id, address=address)
-        self.assertRaises(exc.BadRequest, self.client.delete_port, address)
+        self.assertRaises(lib_exc.BadRequest, self.client.delete_port, address)
 
     @test.attr(type=['negative', 'smoke'])
     def test_update_port_mixed_ops_integrity(self):
@@ -306,7 +305,7 @@ class TestPortsNegative(base.BaseBaremetalTest):
                   'op': 'replace',
                   'value': 'value'}]
 
-        self.assertRaises(exc.BadRequest, self.client.update_port, port_id,
+        self.assertRaises(lib_exc.BadRequest, self.client.update_port, port_id,
                           patch)
 
         # patch should not be applied

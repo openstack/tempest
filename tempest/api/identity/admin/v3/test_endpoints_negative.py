@@ -14,10 +14,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib import exceptions as lib_exc
 
 from tempest.api.identity import base
 from tempest.common.utils import data_utils
-from tempest import exceptions
 from tempest import test
 
 
@@ -50,7 +50,7 @@ class EndpointsNegativeTestJSON(base.BaseIdentityV3AdminTest):
         interface = 'public'
         url = data_utils.rand_url()
         region = data_utils.rand_name('region')
-        self.assertRaises(exceptions.BadRequest, self.client.create_endpoint,
+        self.assertRaises(lib_exc.BadRequest, self.client.create_endpoint,
                           self.service_id, interface, url, region=region,
                           force_enabled='False')
 
@@ -60,7 +60,7 @@ class EndpointsNegativeTestJSON(base.BaseIdentityV3AdminTest):
         interface = 'public'
         url = data_utils.rand_url()
         region = data_utils.rand_name('region')
-        self.assertRaises(exceptions.BadRequest, self.client.create_endpoint,
+        self.assertRaises(lib_exc.BadRequest, self.client.create_endpoint,
                           self.service_id, interface, url, region=region,
                           force_enabled='True')
 
@@ -75,7 +75,7 @@ class EndpointsNegativeTestJSON(base.BaseIdentityV3AdminTest):
                                         url1, region=region1, enabled=True))
         self.addCleanup(self.client.delete_endpoint, endpoint_for_update['id'])
 
-        self.assertRaises(exceptions.BadRequest, self.client.update_endpoint,
+        self.assertRaises(lib_exc.BadRequest, self.client.update_endpoint,
                           endpoint_for_update['id'], force_enabled=enabled)
 
     @test.attr(type=['negative', 'gate'])

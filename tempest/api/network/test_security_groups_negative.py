@@ -19,7 +19,6 @@ from tempest_lib import exceptions as lib_exc
 
 from tempest.api.network import base_security_groups as base
 from tempest import config
-from tempest import exceptions
 from tempest import test
 
 CONF = config.CONF
@@ -64,7 +63,7 @@ class NegativeSecGroupTest(base.BaseSecGroupTest):
         # Create rule with bad protocol name
         pname = 'bad_protocol_name'
         self.assertRaises(
-            exceptions.BadRequest, self.client.create_security_group_rule,
+            lib_exc.BadRequest, self.client.create_security_group_rule,
             security_group_id=group_create_body['security_group']['id'],
             protocol=pname, direction='ingress', ethertype=self.ethertype)
 
@@ -76,7 +75,7 @@ class NegativeSecGroupTest(base.BaseSecGroupTest):
         prefix = ['192.168.1./24', '192.168.1.1/33', 'bad_prefix', '256']
         for remote_ip_prefix in prefix:
             self.assertRaises(
-                exceptions.BadRequest, self.client.create_security_group_rule,
+                lib_exc.BadRequest, self.client.create_security_group_rule,
                 security_group_id=group_create_body['security_group']['id'],
                 protocol='tcp', direction='ingress', ethertype=self.ethertype,
                 remote_ip_prefix=remote_ip_prefix)
@@ -103,7 +102,7 @@ class NegativeSecGroupTest(base.BaseSecGroupTest):
         # Create rule specifying both remote_ip_prefix and remote_group_id
         prefix = self._tenant_network_cidr
         self.assertRaises(
-            exceptions.BadRequest, self.client.create_security_group_rule,
+            lib_exc.BadRequest, self.client.create_security_group_rule,
             security_group_id=sg1_body['security_group']['id'],
             protocol='tcp', direction='ingress',
             ethertype=self.ethertype, remote_ip_prefix=prefix,
@@ -116,7 +115,7 @@ class NegativeSecGroupTest(base.BaseSecGroupTest):
         # Create rule with bad ethertype
         ethertype = 'bad_ethertype'
         self.assertRaises(
-            exceptions.BadRequest, self.client.create_security_group_rule,
+            lib_exc.BadRequest, self.client.create_security_group_rule,
             security_group_id=group_create_body['security_group']['id'],
             protocol='udp', direction='ingress', ethertype=ethertype)
 
@@ -132,7 +131,7 @@ class NegativeSecGroupTest(base.BaseSecGroupTest):
                   (-16, 65536, 'Invalid value for port')]
         for pmin, pmax, msg in states:
             ex = self.assertRaises(
-                exceptions.BadRequest, self.client.create_security_group_rule,
+                lib_exc.BadRequest, self.client.create_security_group_rule,
                 security_group_id=group_create_body['security_group']['id'],
                 protocol='tcp', port_range_min=pmin, port_range_max=pmax,
                 direction='ingress', ethertype=self.ethertype)
@@ -144,7 +143,7 @@ class NegativeSecGroupTest(base.BaseSecGroupTest):
                   (300, 1, 'Invalid value for ICMP type')]
         for pmin, pmax, msg in states:
             ex = self.assertRaises(
-                exceptions.BadRequest, self.client.create_security_group_rule,
+                lib_exc.BadRequest, self.client.create_security_group_rule,
                 security_group_id=group_create_body['security_group']['id'],
                 protocol='icmp', port_range_min=pmin, port_range_max=pmax,
                 direction='ingress', ethertype=self.ethertype)
@@ -207,7 +206,7 @@ class NegativeSecGroupIPv6Test(NegativeSecGroupTest):
                   'ip_prefix': CONF.network.tenant_network_v6_cidr})
         for pair in pairs:
             self.assertRaisesRegexp(
-                exceptions.BadRequest,
+                lib_exc.BadRequest,
                 "Conflicting value ethertype",
                 self.client.create_security_group_rule,
                 security_group_id=group_create_body['security_group']['id'],

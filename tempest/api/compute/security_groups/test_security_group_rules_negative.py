@@ -18,7 +18,6 @@ from tempest_lib import exceptions as lib_exc
 from tempest.api.compute.security_groups import base
 from tempest.common.utils import data_utils
 from tempest import config
-from tempest import exceptions
 from tempest import test
 
 CONF = config.CONF
@@ -62,7 +61,7 @@ class SecurityGroupRulesNegativeTestJSON(base.BaseSecurityGroupsTest):
         ip_protocol = 'tcp'
         from_port = 22
         to_port = 22
-        self.assertRaises(exceptions.BadRequest,
+        self.assertRaises(lib_exc.BadRequest,
                           self.client.create_security_group_rule,
                           parent_group_id, ip_protocol, from_port, to_port)
 
@@ -85,7 +84,7 @@ class SecurityGroupRulesNegativeTestJSON(base.BaseSecurityGroupsTest):
                                                    to_port)
         self.addCleanup(self.client.delete_security_group_rule, rule['id'])
         # Add the same rule to the group should fail
-        self.assertRaises(exceptions.BadRequest,
+        self.assertRaises(lib_exc.BadRequest,
                           self.client.create_security_group_rule,
                           parent_group_id, ip_protocol, from_port, to_port)
 
@@ -102,7 +101,7 @@ class SecurityGroupRulesNegativeTestJSON(base.BaseSecurityGroupsTest):
         from_port = 22
         to_port = 22
 
-        self.assertRaises(exceptions.BadRequest,
+        self.assertRaises(lib_exc.BadRequest,
                           self.client.create_security_group_rule,
                           parent_group_id, ip_protocol, from_port, to_port)
 
@@ -118,7 +117,7 @@ class SecurityGroupRulesNegativeTestJSON(base.BaseSecurityGroupsTest):
         ip_protocol = 'tcp'
         from_port = data_utils.rand_int_id(start=65536)
         to_port = 22
-        self.assertRaises(exceptions.BadRequest,
+        self.assertRaises(lib_exc.BadRequest,
                           self.client.create_security_group_rule,
                           parent_group_id, ip_protocol, from_port, to_port)
 
@@ -134,7 +133,7 @@ class SecurityGroupRulesNegativeTestJSON(base.BaseSecurityGroupsTest):
         ip_protocol = 'tcp'
         from_port = 22
         to_port = data_utils.rand_int_id(start=65536)
-        self.assertRaises(exceptions.BadRequest,
+        self.assertRaises(lib_exc.BadRequest,
                           self.client.create_security_group_rule,
                           parent_group_id, ip_protocol, from_port, to_port)
 
@@ -150,7 +149,7 @@ class SecurityGroupRulesNegativeTestJSON(base.BaseSecurityGroupsTest):
         ip_protocol = 'tcp'
         from_port = 22
         to_port = 21
-        self.assertRaises(exceptions.BadRequest,
+        self.assertRaises(lib_exc.BadRequest,
                           self.client.create_security_group_rule,
                           secgroup_id, ip_protocol, from_port, to_port)
 

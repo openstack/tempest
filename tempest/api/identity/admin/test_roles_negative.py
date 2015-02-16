@@ -18,7 +18,6 @@ import uuid
 
 from tempest.api.identity import base
 from tempest.common.utils import data_utils
-from tempest import exceptions
 from tempest import test
 
 
@@ -49,7 +48,7 @@ class RolesNegativeTestJSON(base.BaseIdentityV2AdminTest):
     @test.attr(type=['negative', 'gate'])
     def test_role_create_blank_name(self):
         # Should not be able to create a role with a blank name
-        self.assertRaises(exceptions.BadRequest, self.client.create_role, '')
+        self.assertRaises(lib_exc.BadRequest, self.client.create_role, '')
 
     @test.attr(type=['negative', 'gate'])
     def test_create_role_by_unauthorized_user(self):

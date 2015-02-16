@@ -13,11 +13,11 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib import exceptions as lib_exc
 import uuid
 
 from tempest.api.compute import base
 from tempest.common.utils import data_utils
-from tempest import exceptions
 from tempest import test
 
 
@@ -210,7 +210,7 @@ class FlavorsAdminTestJSON(base.BaseV2ComputeAdminTest):
         self.addCleanup(self.flavor_clean_up, flavor['id'])
 
         # Verify flavor is not used by other user
-        self.assertRaises(exceptions.BadRequest,
+        self.assertRaises(lib_exc.BadRequest,
                           self.os.servers_client.create_server,
                           'test', self.image_ref, flavor['id'])
 

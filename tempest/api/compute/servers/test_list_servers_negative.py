@@ -14,9 +14,9 @@
 #    under the License.
 
 from six import moves
+from tempest_lib import exceptions as lib_exc
 
 from tempest.api.compute import base
-from tempest import exceptions
 from tempest import test
 
 
@@ -113,19 +113,19 @@ class ListServersNegativeTestJSON(base.BaseV2ComputeTest):
     @test.attr(type=['negative', 'gate'])
     def test_list_servers_by_limits_pass_string(self):
         # Return an error if a string value is passed for limit
-        self.assertRaises(exceptions.BadRequest, self.client.list_servers,
+        self.assertRaises(lib_exc.BadRequest, self.client.list_servers,
                           {'limit': 'testing'})
 
     @test.attr(type=['negative', 'gate'])
     def test_list_servers_by_limits_pass_negative_value(self):
         # Return an error if a negative value for limit is passed
-        self.assertRaises(exceptions.BadRequest, self.client.list_servers,
+        self.assertRaises(lib_exc.BadRequest, self.client.list_servers,
                           {'limit': -1})
 
     @test.attr(type=['negative', 'gate'])
     def test_list_servers_by_changes_since_invalid_date(self):
         # Return an error when invalid date format is passed
-        self.assertRaises(exceptions.BadRequest, self.client.list_servers,
+        self.assertRaises(lib_exc.BadRequest, self.client.list_servers,
                           {'changes-since': '2011/01/01'})
 
     @test.attr(type=['negative', 'gate'])

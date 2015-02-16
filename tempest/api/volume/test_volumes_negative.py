@@ -19,7 +19,6 @@ from tempest_lib import exceptions as lib_exc
 
 from tempest.api.volume import base
 from tempest.common.utils import data_utils
-from tempest import exceptions
 from tempest import test
 
 
@@ -54,7 +53,7 @@ class VolumesV2NegativeTest(base.BaseVolumeTest):
         # in request
         v_name = data_utils.rand_name('Volume-')
         metadata = {'Type': 'work'}
-        self.assertRaises(exceptions.BadRequest, self.client.create_volume,
+        self.assertRaises(lib_exc.BadRequest, self.client.create_volume,
                           size='#$%', display_name=v_name, metadata=metadata)
 
     @test.attr(type=['negative', 'gate'])
@@ -63,7 +62,7 @@ class VolumesV2NegativeTest(base.BaseVolumeTest):
         # in request
         v_name = data_utils.rand_name('Volume-')
         metadata = {'Type': 'work'}
-        self.assertRaises(exceptions.BadRequest, self.client.create_volume,
+        self.assertRaises(lib_exc.BadRequest, self.client.create_volume,
                           size='', display_name=v_name, metadata=metadata)
 
     @test.attr(type=['negative', 'gate'])
@@ -71,7 +70,7 @@ class VolumesV2NegativeTest(base.BaseVolumeTest):
         # Should not be able to create volume with size zero
         v_name = data_utils.rand_name('Volume-')
         metadata = {'Type': 'work'}
-        self.assertRaises(exceptions.BadRequest, self.client.create_volume,
+        self.assertRaises(lib_exc.BadRequest, self.client.create_volume,
                           size='0', display_name=v_name, metadata=metadata)
 
     @test.attr(type=['negative', 'gate'])
@@ -79,7 +78,7 @@ class VolumesV2NegativeTest(base.BaseVolumeTest):
         # Should not be able to create volume with size negative
         v_name = data_utils.rand_name('Volume-')
         metadata = {'Type': 'work'}
-        self.assertRaises(exceptions.BadRequest, self.client.create_volume,
+        self.assertRaises(lib_exc.BadRequest, self.client.create_volume,
                           size='-1', display_name=v_name, metadata=metadata)
 
     @test.attr(type=['negative', 'gate'])
@@ -180,21 +179,21 @@ class VolumesV2NegativeTest(base.BaseVolumeTest):
     def test_volume_extend_with_size_smaller_than_original_size(self):
         # Extend volume with smaller size than original size.
         extend_size = 0
-        self.assertRaises(exceptions.BadRequest, self.client.extend_volume,
+        self.assertRaises(lib_exc.BadRequest, self.client.extend_volume,
                           self.volume['id'], extend_size)
 
     @test.attr(type=['negative', 'gate'])
     def test_volume_extend_with_non_number_size(self):
         # Extend volume when size is non number.
         extend_size = 'abc'
-        self.assertRaises(exceptions.BadRequest, self.client.extend_volume,
+        self.assertRaises(lib_exc.BadRequest, self.client.extend_volume,
                           self.volume['id'], extend_size)
 
     @test.attr(type=['negative', 'gate'])
     def test_volume_extend_with_None_size(self):
         # Extend volume with None size.
         extend_size = None
-        self.assertRaises(exceptions.BadRequest, self.client.extend_volume,
+        self.assertRaises(lib_exc.BadRequest, self.client.extend_volume,
                           self.volume['id'], extend_size)
 
     @test.attr(type=['negative', 'gate'])
@@ -228,7 +227,7 @@ class VolumesV2NegativeTest(base.BaseVolumeTest):
         # Mark volume as reserved.
         self.client.reserve_volume(self.volume['id'])
         # Mark volume which is marked as reserved before
-        self.assertRaises(exceptions.BadRequest,
+        self.assertRaises(lib_exc.BadRequest,
                           self.client.reserve_volume,
                           self.volume['id'])
         # Unmark volume as reserved.

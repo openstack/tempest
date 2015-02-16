@@ -18,7 +18,6 @@ import uuid
 
 from tempest.api.identity import base
 from tempest.common.utils import data_utils
-from tempest import exceptions
 from tempest import test
 
 
@@ -99,14 +98,14 @@ class TenantsNegativeTestJSON(base.BaseIdentityV2AdminTest):
     @test.attr(type=['negative', 'gate'])
     def test_create_tenant_with_empty_name(self):
         # Tenant name should not be empty
-        self.assertRaises(exceptions.BadRequest, self.client.create_tenant,
+        self.assertRaises(lib_exc.BadRequest, self.client.create_tenant,
                           name='')
 
     @test.attr(type=['negative', 'gate'])
     def test_create_tenants_name_length_over_64(self):
         # Tenant name length should not be greater than 64 characters
         tenant_name = 'a' * 65
-        self.assertRaises(exceptions.BadRequest, self.client.create_tenant,
+        self.assertRaises(lib_exc.BadRequest, self.client.create_tenant,
                           tenant_name)
 
     @test.attr(type=['negative', 'gate'])

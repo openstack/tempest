@@ -223,7 +223,7 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
                     gateway_ip=gateway_ip,
                     **kwargs)
                 break
-            except exceptions.BadRequest as e:
+            except lib_exc.BadRequest as e:
                 is_overlapping_cidr = 'overlaps with another subnet' in str(e)
                 if not is_overlapping_cidr:
                     raise

@@ -18,7 +18,6 @@ from tempest_lib import exceptions as lib_exc
 
 from tempest.api.compute import base
 from tempest.common.utils import data_utils
-from tempest import exceptions
 from tempest import test
 
 
@@ -38,7 +37,7 @@ class KeyPairsNegativeTestJSON(base.BaseV2ComputeTest):
         # Keypair should not be created with a non RSA public key
         k_name = data_utils.rand_name('keypair-')
         pub_key = "ssh-rsa JUNK nova@ubuntu"
-        self.assertRaises(exceptions.BadRequest,
+        self.assertRaises(lib_exc.BadRequest,
                           self._create_keypair, k_name, pub_key)
 
     @test.attr(type=['negative', 'gate'])
@@ -53,7 +52,7 @@ class KeyPairsNegativeTestJSON(base.BaseV2ComputeTest):
         # Keypair should not be created with an empty public key
         k_name = data_utils.rand_name("keypair-")
         pub_key = ' '
-        self.assertRaises(exceptions.BadRequest, self._create_keypair,
+        self.assertRaises(lib_exc.BadRequest, self._create_keypair,
                           k_name, pub_key)
 
     @test.attr(type=['negative', 'gate'])
@@ -61,7 +60,7 @@ class KeyPairsNegativeTestJSON(base.BaseV2ComputeTest):
         # Keypair should not be created when public key bits are too long
         k_name = data_utils.rand_name("keypair-")
         pub_key = 'ssh-rsa ' + 'A' * 2048 + ' openstack@ubuntu'
-        self.assertRaises(exceptions.BadRequest, self._create_keypair,
+        self.assertRaises(lib_exc.BadRequest, self._create_keypair,
                           k_name, pub_key)
 
     @test.attr(type=['negative', 'gate'])
@@ -77,19 +76,19 @@ class KeyPairsNegativeTestJSON(base.BaseV2ComputeTest):
     @test.attr(type=['negative', 'gate'])
     def test_create_keypair_with_empty_name_string(self):
         # Keypairs with name being an empty string should not be created
-        self.assertRaises(exceptions.BadRequest, self._create_keypair,
+        self.assertRaises(lib_exc.BadRequest, self._create_keypair,
                           '')
 
     @test.attr(type=['negative', 'gate'])
     def test_create_keypair_with_long_keynames(self):
         # Keypairs with name longer than 255 chars should not be created
         k_name = 'keypair-'.ljust(260, '0')
-        self.assertRaises(exceptions.BadRequest, self._create_keypair,
+        self.assertRaises(lib_exc.BadRequest, self._create_keypair,
                           k_name)
 
     @test.attr(type=['negative', 'gate'])
     def test_create_keypair_invalid_name(self):
         # Keypairs with name being an invalid name should not be created
         k_name = 'key_/.\@:'
-        self.assertRaises(exceptions.BadRequest, self._create_keypair,
+        self.assertRaises(lib_exc.BadRequest, self._create_keypair,
                           k_name)

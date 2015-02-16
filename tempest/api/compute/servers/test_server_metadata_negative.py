@@ -17,7 +17,6 @@ from tempest_lib import exceptions as lib_exc
 
 from tempest.api.compute import base
 from tempest.common.utils import data_utils
-from tempest import exceptions
 from tempest import test
 
 
@@ -42,7 +41,7 @@ class ServerMetadataNegativeTestJSON(base.BaseV2ComputeTest):
         for sz in [256, 257, 511, 1023]:
             key = "k" * sz
             meta = {key: 'data1'}
-            self.assertRaises((exceptions.BadRequest, lib_exc.OverLimit),
+            self.assertRaises((lib_exc.BadRequest, lib_exc.OverLimit),
                               self.create_test_server,
                               meta=meta)
 
@@ -52,7 +51,7 @@ class ServerMetadataNegativeTestJSON(base.BaseV2ComputeTest):
     def test_create_server_metadata_blank_key(self):
         # Blank key should trigger an error.
         meta = {'': 'data1'}
-        self.assertRaises(exceptions.BadRequest,
+        self.assertRaises(lib_exc.BadRequest,
                           self.create_test_server,
                           meta=meta)
 
@@ -78,7 +77,7 @@ class ServerMetadataNegativeTestJSON(base.BaseV2ComputeTest):
         # Raise BadRequest if key in uri does not match
         # the key passed in body.
         meta = {'testkey': 'testvalue'}
-        self.assertRaises(exceptions.BadRequest,
+        self.assertRaises(lib_exc.BadRequest,
                           self.client.set_server_metadata_item,
                           self.server_id, 'key', meta)
 
@@ -106,7 +105,7 @@ class ServerMetadataNegativeTestJSON(base.BaseV2ComputeTest):
     def test_update_metadata_with_blank_key(self):
         # Blank key should trigger an error
         meta = {'': 'data1'}
-        self.assertRaises(exceptions.BadRequest,
+        self.assertRaises(lib_exc.BadRequest,
                           self.client.update_server_metadata,
                           self.server_id, meta=meta)
 
@@ -148,7 +147,7 @@ class ServerMetadataNegativeTestJSON(base.BaseV2ComputeTest):
         # Raise a bad request error for blank key.
         # set_server_metadata will replace all metadata with new value
         meta = {'': 'data1'}
-        self.assertRaises(exceptions.BadRequest,
+        self.assertRaises(lib_exc.BadRequest,
                           self.client.set_server_metadata,
                           self.server_id, meta=meta)
 
@@ -157,6 +156,6 @@ class ServerMetadataNegativeTestJSON(base.BaseV2ComputeTest):
         # Raise a bad request error for a missing metadata field
         # set_server_metadata will replace all metadata with new value
         meta = {'meta1': 'data1'}
-        self.assertRaises(exceptions.BadRequest,
+        self.assertRaises(lib_exc.BadRequest,
                           self.client.set_server_metadata,
                           self.server_id, meta=meta, no_metadata_field=True)

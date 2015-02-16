@@ -20,7 +20,6 @@ from tempest import clients
 from tempest.common import cred_provider
 from tempest.common.utils import data_utils
 from tempest import config
-from tempest import exceptions
 from tempest.openstack.common import timeutils
 from tempest import test
 
@@ -237,7 +236,7 @@ class TrustsV3TestJSON(BaseTrustsV3Test):
         # is rejected with the correct error
         # with an expiry specified
         expires_str = 'bad.123Z'
-        self.assertRaises(exceptions.BadRequest,
+        self.assertRaises(lib_exc.BadRequest,
                           self.create_trust,
                           expires=expires_str)
 

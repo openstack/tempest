@@ -19,7 +19,6 @@ from tempest_lib import exceptions as lib_exc
 from tempest.api.network import base
 from tempest.common.utils import data_utils
 from tempest import config
-from tempest import exceptions
 from tempest import test
 
 CONF = config.CONF
@@ -59,7 +58,7 @@ class FloatingIPNegativeTestJSON(base.BaseNetworkTest):
 
     @test.attr(type=['negative', 'smoke'])
     def test_create_floatingip_in_private_network(self):
-        self.assertRaises(exceptions.BadRequest,
+        self.assertRaises(lib_exc.BadRequest,
                           self.client.create_floatingip,
                           floating_network_id=self.network['id'],
                           port_id=self.port['id'],

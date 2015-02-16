@@ -16,7 +16,6 @@ from tempest_lib import exceptions as lib_exc
 
 from tempest.api.compute import base
 from tempest.common.utils import data_utils
-from tempest import exceptions
 from tempest import test
 
 
@@ -72,7 +71,7 @@ class HostsAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
         # only 'status' and 'maintenance_mode' are the valid params.
         hostname = self._get_host_name()
 
-        self.assertRaises(exceptions.BadRequest,
+        self.assertRaises(lib_exc.BadRequest,
                           self.client.update_host,
                           hostname,
                           status='enable',
@@ -84,7 +83,7 @@ class HostsAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
         # 'status' can only be 'enable' or 'disable'
         hostname = self._get_host_name()
 
-        self.assertRaises(exceptions.BadRequest,
+        self.assertRaises(lib_exc.BadRequest,
                           self.client.update_host,
                           hostname,
                           status='invalid',
@@ -95,7 +94,7 @@ class HostsAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
         # 'maintenance_mode' can only be 'enable' or 'disable'
         hostname = self._get_host_name()
 
-        self.assertRaises(exceptions.BadRequest,
+        self.assertRaises(lib_exc.BadRequest,
                           self.client.update_host,
                           hostname,
                           status='enable',
@@ -106,7 +105,7 @@ class HostsAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
         # 'status' or 'maintenance_mode' needed for host update
         hostname = self._get_host_name()
 
-        self.assertRaises(exceptions.BadRequest,
+        self.assertRaises(lib_exc.BadRequest,
                           self.client.update_host,
                           hostname)
 

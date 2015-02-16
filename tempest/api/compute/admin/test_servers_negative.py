@@ -21,7 +21,6 @@ from tempest.api.compute import base
 from tempest.common import tempest_fixtures as fixtures
 from tempest.common.utils import data_utils
 from tempest import config
-from tempest import exceptions
 from tempest import test
 
 CONF = config.CONF
@@ -100,13 +99,13 @@ class ServersAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
 
     @test.attr(type=['negative', 'gate'])
     def test_reset_state_server_invalid_state(self):
-        self.assertRaises(exceptions.BadRequest,
+        self.assertRaises(lib_exc.BadRequest,
                           self.client.reset_state, self.s1_id,
                           state='invalid')
 
     @test.attr(type=['negative', 'gate'])
     def test_reset_state_server_invalid_type(self):
-        self.assertRaises(exceptions.BadRequest,
+        self.assertRaises(lib_exc.BadRequest,
                           self.client.reset_state, self.s1_id,
                           state=1)
 

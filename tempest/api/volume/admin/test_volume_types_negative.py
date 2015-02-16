@@ -18,7 +18,6 @@ import uuid
 from tempest_lib import exceptions as lib_exc
 
 from tempest.api.volume import base
-from tempest import exceptions
 from tempest import test
 
 
@@ -37,7 +36,7 @@ class VolumeTypesNegativeV2Test(base.BaseVolumeAdminTest):
     @test.attr(type='gate')
     def test_create_with_empty_name(self):
         # Should not be able to create volume type with an empty name.
-        self.assertRaises(exceptions.BadRequest,
+        self.assertRaises(lib_exc.BadRequest,
                           self.volume_types_client.create_volume_type, '')
 
     @test.attr(type='gate')
