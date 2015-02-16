@@ -31,6 +31,5 @@ class AZV2TestJSON(base.BaseComputeTest):
     @test.attr(type='gate')
     def test_get_availability_zone_list_with_non_admin_user(self):
         # List of availability zone with non-administrator user
-        resp, availability_zone = self.client.get_availability_zone_list()
-        self.assertEqual(200, resp.status)
+        availability_zone = self.client.get_availability_zone_list()
         self.assertTrue(len(availability_zone) > 0)

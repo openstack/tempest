@@ -32,8 +32,7 @@ class ExtensionsTestJSON(base.BaseV2ComputeTest):
         # List of all extensions
         if len(CONF.compute_feature_enabled.api_extensions) == 0:
             raise self.skipException('There are not any extensions configured')
-        resp, extensions = self.extensions_client.list_extensions()
-        self.assertEqual(200, resp.status)
+        extensions = self.extensions_client.list_extensions()
         ext = CONF.compute_feature_enabled.api_extensions[0]
         if ext == 'all':
             self.assertIn('Hosts', map(lambda x: x['name'], extensions))
@@ -49,6 +48,5 @@ class ExtensionsTestJSON(base.BaseV2ComputeTest):
     @test.attr(type='gate')
     def test_get_extension(self):
         # get the specified extensions
-        resp, extension = self.extensions_client.get_extension('os-consoles')
-        self.assertEqual(200, resp.status)
+        extension = self.extensions_client.get_extension('os-consoles')
         self.assertEqual('os-consoles', extension['alias'])

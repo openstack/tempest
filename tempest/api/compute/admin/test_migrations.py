@@ -31,8 +31,7 @@ class MigrationsAdminTest(base.BaseV2ComputeAdminTest):
     @test.attr(type='gate')
     def test_list_migrations(self):
         # Admin can get the migrations list
-        resp, _ = self.client.list_migrations()
-        self.assertEqual(200, resp.status)
+        self.client.list_migrations()
 
     @testtools.skipUnless(CONF.compute_feature_enabled.resize,
                           'Resize not available.')
@@ -48,8 +47,7 @@ class MigrationsAdminTest(base.BaseV2ComputeAdminTest):
         self.servers_client.confirm_resize(server_id)
         self.servers_client.wait_for_server_status(server_id, 'ACTIVE')
 
-        resp, body = self.client.list_migrations()
-        self.assertEqual(200, resp.status)
+        body = self.client.list_migrations()
 
         instance_uuids = [x['instance_uuid'] for x in body]
         self.assertIn(server_id, instance_uuids)

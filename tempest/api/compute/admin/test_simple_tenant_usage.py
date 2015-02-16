@@ -48,8 +48,7 @@ class TenantUsagesTestJSON(base.BaseV2ComputeAdminTest):
         params = {'start': self.start,
                   'end': self.end,
                   'detailed': int(bool(True))}
-        resp, tenant_usage = self.adm_client.list_tenant_usages(params)
-        self.assertEqual(200, resp.status)
+        tenant_usage = self.adm_client.list_tenant_usages(params)
         self.assertEqual(len(tenant_usage), 8)
 
     @test.attr(type='gate')
@@ -57,10 +56,9 @@ class TenantUsagesTestJSON(base.BaseV2ComputeAdminTest):
         # Get usage for a specific tenant
         params = {'start': self.start,
                   'end': self.end}
-        resp, tenant_usage = self.adm_client.get_tenant_usage(
+        tenant_usage = self.adm_client.get_tenant_usage(
             self.tenant_id, params)
 
-        self.assertEqual(200, resp.status)
         self.assertEqual(len(tenant_usage), 8)
 
     @test.attr(type='gate')
@@ -68,8 +66,7 @@ class TenantUsagesTestJSON(base.BaseV2ComputeAdminTest):
         # Get usage for a specific tenant with non admin user
         params = {'start': self.start,
                   'end': self.end}
-        resp, tenant_usage = self.client.get_tenant_usage(
+        tenant_usage = self.client.get_tenant_usage(
             self.tenant_id, params)
 
-        self.assertEqual(200, resp.status)
         self.assertEqual(len(tenant_usage), 8)
