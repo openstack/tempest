@@ -29,6 +29,8 @@ from tempest.services.compute.json.aggregates_client import \
     AggregatesClientJSON
 from tempest.services.compute.json.availability_zone_client import \
     AvailabilityZoneClientJSON
+from tempest.services.compute.json.baremetal_nodes_client import \
+    BaremetalNodesClientJSON
 from tempest.services.compute.json.certificates_client import \
     CertificatesClientJSON
 from tempest.services.compute.json.extensions_client import \
@@ -269,6 +271,8 @@ class Manager(manager.Manager):
             InstanceUsagesAuditLogClientJSON(self.auth_provider, **params)
         self.tenant_networks_client = \
             TenantNetworksClientJSON(self.auth_provider, **params)
+        self.baremetal_nodes_client = BaremetalNodesClientJSON(
+            self.auth_provider, **params)
 
         # NOTE: The following client needs special timeout values because
         # the API is a proxy for the other component.
