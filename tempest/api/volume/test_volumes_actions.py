@@ -38,6 +38,7 @@ class VolumesV2ActionsTest(base.BaseVolumeTest):
 
         # Create a test shared volume for attach/detach tests
         cls.volume = cls.create_volume()
+        cls.client.wait_for_volume_status(cls.volume['id'], 'available')
 
     def _delete_image_with_wait(self, image_id):
         self.image_client.delete_image(image_id)
