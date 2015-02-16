@@ -75,8 +75,8 @@ class NeutronResourcesTestJSON(base.BaseOrchestrationTest):
                                                'Server')
                 server_id = body['physical_resource_id']
                 LOG.debug('Console output for %s', server_id)
-                _, output = cls.servers_client.get_console_output(
-                    server_id, None)
+                output = cls.servers_client.get_console_output(
+                    server_id, None).data
                 LOG.debug(output)
             raise e
 

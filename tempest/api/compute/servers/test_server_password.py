@@ -28,10 +28,8 @@ class ServerPasswordTestJSON(base.BaseV2ComputeTest):
 
     @test.attr(type='gate')
     def test_get_server_password(self):
-        resp, body = self.client.get_password(self.server['id'])
-        self.assertEqual(200, resp.status)
+        self.client.get_password(self.server['id'])
 
     @test.attr(type='gate')
     def test_delete_server_password(self):
-        resp, body = self.client.delete_password(self.server['id'])
-        self.assertEqual(204, resp.status)
+        self.client.delete_password(self.server['id'])

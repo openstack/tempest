@@ -83,7 +83,7 @@ class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
     def test_list_servers_filter_by_image(self):
         # Filter the list of servers by image
         params = {'image': self.image_ref}
-        resp, body = self.client.list_servers(params)
+        body = self.client.list_servers(params)
         servers = body['servers']
 
         self.assertIn(self.s1['id'], map(lambda x: x['id'], servers))
@@ -94,7 +94,7 @@ class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
     def test_list_servers_filter_by_flavor(self):
         # Filter the list of servers by flavor
         params = {'flavor': self.flavor_ref_alt}
-        resp, body = self.client.list_servers(params)
+        body = self.client.list_servers(params)
         servers = body['servers']
 
         self.assertNotIn(self.s1['id'], map(lambda x: x['id'], servers))
@@ -105,7 +105,7 @@ class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
     def test_list_servers_filter_by_server_name(self):
         # Filter the list of servers by server name
         params = {'name': self.s1_name}
-        resp, body = self.client.list_servers(params)
+        body = self.client.list_servers(params)
         servers = body['servers']
 
         self.assertIn(self.s1_name, map(lambda x: x['name'], servers))
@@ -116,7 +116,7 @@ class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
     def test_list_servers_filter_by_server_status(self):
         # Filter the list of servers by server status
         params = {'status': 'active'}
-        resp, body = self.client.list_servers(params)
+        body = self.client.list_servers(params)
         servers = body['servers']
 
         self.assertIn(self.s1['id'], map(lambda x: x['id'], servers))
@@ -130,7 +130,7 @@ class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
         self.client.stop(self.s1['id'])
         self.client.wait_for_server_status(self.s1['id'],
                                            'SHUTOFF')
-        resp, body = self.client.list_servers(params)
+        body = self.client.list_servers(params)
         self.client.start(self.s1['id'])
         self.client.wait_for_server_status(self.s1['id'],
                                            'ACTIVE')
@@ -144,22 +144,22 @@ class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
     def test_list_servers_filter_by_limit(self):
         # Verify only the expected number of servers are returned
         params = {'limit': 1}
-        resp, servers = self.client.list_servers(params)
+        servers = self.client.list_servers(params)
         self.assertEqual(1, len([x for x in servers['servers'] if 'id' in x]))
 
     @test.attr(type='gate')
     def test_list_servers_filter_by_zero_limit(self):
         # Verify only the expected number of servers are returned
         params = {'limit': 0}
-        resp, servers = self.client.list_servers(params)
+        servers = self.client.list_servers(params)
         self.assertEqual(0, len(servers['servers']))
 
     @test.attr(type='gate')
     def test_list_servers_filter_by_exceed_limit(self):
         # Verify only the expected number of servers are returned
         params = {'limit': 100000}
-        resp, servers = self.client.list_servers(params)
-        resp, all_servers = self.client.list_servers()
+        servers = self.client.list_servers(params)
+        all_servers = self.client.list_servers()
         self.assertEqual(len([x for x in all_servers['servers'] if 'id' in x]),
                          len([x for x in servers['servers'] if 'id' in x]))
 
@@ -179,7 +179,7 @@ class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
     def test_list_servers_detailed_filter_by_flavor(self):
         # Filter the detailed list of servers by flavor
         params = {'flavor': self.flavor_ref_alt}
-        resp, body = self.client.list_servers_with_detail(params)
+        body = self.client.list_servers_with_detail(params)
         servers = body['servers']
 
         self.assertNotIn(self.s1['id'], map(lambda x: x['id'], servers))
@@ -190,7 +190,7 @@ class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
     def test_list_servers_detailed_filter_by_server_name(self):
         # Filter the detailed list of servers by server name
         params = {'name': self.s1_name}
-        resp, body = self.client.list_servers_with_detail(params)
+        body = self.client.list_servers_with_detail(params)
         servers = body['servers']
 
         self.assertIn(self.s1_name, map(lambda x: x['name'], servers))
@@ -201,7 +201,7 @@ class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
     def test_list_servers_detailed_filter_by_server_status(self):
         # Filter the detailed list of servers by server status
         params = {'status': 'active'}
-        resp, body = self.client.list_servers_with_detail(params)
+        body = self.client.list_servers_with_detail(params)
         servers = body['servers']
         test_ids = [s['id'] for s in (self.s1, self.s2, self.s3)]
 
@@ -215,7 +215,7 @@ class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
     def test_list_servers_filtered_by_name_wildcard(self):
         # List all servers that contains '-instance' in name
         params = {'name': '-instance'}
-        resp, body = self.client.list_servers(params)
+        body = self.client.list_servers(params)
         servers = body['servers']
 
         self.assertIn(self.s1_name, map(lambda x: x['name'], servers))
@@ -226,7 +226,7 @@ class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
         part_name = self.s1_name[6:-1]
 
         params = {'name': part_name}
-        resp, body = self.client.list_servers(params)
+        body = self.client.list_servers(params)
         servers = body['servers']
 
         self.assertIn(self.s1_name, map(lambda x: x['name'], servers))
@@ -239,7 +239,7 @@ class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
         regexes = ['^.*\-instance\-[0-9]+$', '^.*\-instance\-.*$']
         for regex in regexes:
             params = {'name': regex}
-            resp, body = self.client.list_servers(params)
+            body = self.client.list_servers(params)
             servers = body['servers']
 
             self.assertIn(self.s1_name, map(lambda x: x['name'], servers))
@@ -250,7 +250,7 @@ class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
         part_name = self.s1_name[-10:]
 
         params = {'name': part_name}
-        resp, body = self.client.list_servers(params)
+        body = self.client.list_servers(params)
         servers = body['servers']
 
         self.assertIn(self.s1_name, map(lambda x: x['name'], servers))
@@ -264,7 +264,7 @@ class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
         self.s1 = self.client.get_server(self.s1['id'])
         ip = self.s1['addresses'][self.fixed_network_name][0]['addr']
         params = {'ip': ip}
-        resp, body = self.client.list_servers(params)
+        body = self.client.list_servers(params)
         servers = body['servers']
 
         self.assertIn(self.s1_name, map(lambda x: x['name'], servers))
@@ -281,7 +281,7 @@ class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
         self.s1 = self.client.get_server(self.s1['id'])
         ip = self.s1['addresses'][self.fixed_network_name][0]['addr'][0:-3]
         params = {'ip': ip}
-        resp, body = self.client.list_servers(params)
+        body = self.client.list_servers(params)
         servers = body['servers']
 
         self.assertIn(self.s1_name, map(lambda x: x['name'], servers))
@@ -292,5 +292,5 @@ class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
     def test_list_servers_detailed_limit_results(self):
         # Verify only the expected number of detailed results are returned
         params = {'limit': 1}
-        resp, servers = self.client.list_servers_with_detail(params)
+        servers = self.client.list_servers_with_detail(params)
         self.assertEqual(1, len(servers['servers']))

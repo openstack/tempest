@@ -48,9 +48,9 @@ class ServerDiskConfigTestJSON(base.BaseV2ComputeTest):
         # A server should be rebuilt using the manual disk config option
         self._update_server_with_disk_config(disk_config='AUTO')
 
-        resp, server = self.client.rebuild(self.server_id,
-                                           self.image_ref_alt,
-                                           disk_config='MANUAL')
+        server = self.client.rebuild(self.server_id,
+                                     self.image_ref_alt,
+                                     disk_config='MANUAL')
 
         # Wait for the server to become active
         self.client.wait_for_server_status(server['id'], 'ACTIVE')
@@ -64,9 +64,9 @@ class ServerDiskConfigTestJSON(base.BaseV2ComputeTest):
         # A server should be rebuilt using the auto disk config option
         self._update_server_with_disk_config(disk_config='MANUAL')
 
-        resp, server = self.client.rebuild(self.server_id,
-                                           self.image_ref_alt,
-                                           disk_config='AUTO')
+        server = self.client.rebuild(self.server_id,
+                                     self.image_ref_alt,
+                                     disk_config='AUTO')
 
         # Wait for the server to become active
         self.client.wait_for_server_status(server['id'], 'ACTIVE')

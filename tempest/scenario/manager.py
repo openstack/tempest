@@ -379,13 +379,13 @@ class ScenarioTest(tempest.test.BaseTestCase):
             LOG.debug('Console output not supported, cannot log')
             return
         if not servers:
-            _, servers = self.servers_client.list_servers()
+            servers = self.servers_client.list_servers()
             servers = servers['servers']
         for server in servers:
             console_output = self.servers_client.get_console_output(
-                server['id'], length=None)
-            LOG.debug('Console output for %s\nhead=%s\nbody=\n%s',
-                      server['id'], console_output[0], console_output[1])
+                server['id'], length=None).data
+            LOG.debug('Console output for %s\nbody=\n%s',
+                      server['id'], console_output)
 
     def _log_net_info(self, exc):
         # network debug is called as part of ssh init

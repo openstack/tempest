@@ -130,7 +130,7 @@ class AuthorizationTestJSON(base.BaseV2ComputeTest):
         # show on alternate tenant
         # Listing servers from alternate tenant
         alt_server_ids = []
-        resp, body = self.alt_client.list_servers()
+        body = self.alt_client.list_servers()
         alt_server_ids = [s['id'] for s in body['servers']]
         self.assertNotIn(self.server['id'], alt_server_ids)
 

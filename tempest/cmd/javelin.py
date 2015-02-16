@@ -403,8 +403,7 @@ class JavelinCheck(unittest.TestCase):
             # on the cloud. We don't care about the results except that it
             # remains authorized.
             client = client_for_user(user['name'])
-            resp, body = client.servers.list_servers()
-            self.assertEqual(resp['status'], '200')
+            client.servers.list_servers()
 
     def check_objects(self):
         """Check that the objects created are still there."""
@@ -778,7 +777,7 @@ def add_router_interface(routers):
 #######################
 
 def _get_server_by_name(client, name):
-    r, body = client.servers.list_servers()
+    body = client.servers.list_servers()
     for server in body['servers']:
         if name == server['name']:
             return server

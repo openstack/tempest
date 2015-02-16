@@ -34,8 +34,7 @@ class ServerAddressesTestJSON(base.BaseV2ComputeTest):
         # All public and private addresses for
         # a server should be returned
 
-        resp, addresses = self.client.list_addresses(self.server['id'])
-        self.assertEqual('200', resp['status'])
+        addresses = self.client.list_addresses(self.server['id'])
 
         # We do not know the exact network configuration, but an instance
         # should at least have a single public or private address
@@ -52,15 +51,14 @@ class ServerAddressesTestJSON(base.BaseV2ComputeTest):
         # Providing a network type should filter
         # the addresses return by that type
 
-        resp, addresses = self.client.list_addresses(self.server['id'])
+        addresses = self.client.list_addresses(self.server['id'])
 
         # Once again we don't know the environment's exact network config,
         # but the response for each individual network should be the same
         # as the partial result of the full address list
         id = self.server['id']
         for addr_type in addresses:
-            resp, addr = self.client.list_addresses_by_network(id, addr_type)
-            self.assertEqual('200', resp['status'])
+            addr = self.client.list_addresses_by_network(id, addr_type)
 
             addr = addr[addr_type]
             for address in addresses[addr_type]:

@@ -64,13 +64,11 @@ class ServerRescueNegativeTestJSON(base.BaseV2ComputeTest):
                                                               'available')
 
     def _unrescue(self, server_id):
-        resp, body = self.servers_client.unrescue_server(server_id)
-        self.assertEqual(202, resp.status)
+        self.servers_client.unrescue_server(server_id)
         self.servers_client.wait_for_server_status(server_id, 'ACTIVE')
 
     def _unpause(self, server_id):
-        resp, body = self.servers_client.unpause_server(server_id)
-        self.assertEqual(202, resp.status)
+        self.servers_client.unpause_server(server_id)
         self.servers_client.wait_for_server_status(server_id, 'ACTIVE')
 
     @testtools.skipUnless(CONF.compute_feature_enabled.pause,
@@ -78,9 +76,8 @@ class ServerRescueNegativeTestJSON(base.BaseV2ComputeTest):
     @test.attr(type=['negative', 'gate'])
     def test_rescue_paused_instance(self):
         # Rescue a paused server
-        resp, body = self.servers_client.pause_server(self.server_id)
+        self.servers_client.pause_server(self.server_id)
         self.addCleanup(self._unpause, self.server_id)
-        self.assertEqual(202, resp.status)
         self.servers_client.wait_for_server_status(self.server_id, 'PAUSED')
         self.assertRaises(lib_exc.Conflict,
                           self.servers_client.rescue_server,

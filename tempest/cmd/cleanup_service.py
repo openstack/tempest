@@ -168,7 +168,7 @@ class ServerService(BaseService):
 
     def list(self):
         client = self.client
-        _, servers_body = client.list_servers()
+        servers_body = client.list_servers()
         servers = servers_body['servers']
         LOG.debug("List count, %s Servers" % len(servers))
         return servers
@@ -192,7 +192,7 @@ class ServerGroupService(ServerService):
 
     def list(self):
         client = self.client
-        _, sgs = client.list_server_groups()
+        sgs = client.list_server_groups()
         LOG.debug("List count, %s Server Groups" % len(sgs))
         return sgs
 

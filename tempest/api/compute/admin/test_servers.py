@@ -47,19 +47,18 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
     @test.attr(type='gate')
     def test_list_servers_by_admin(self):
         # Listing servers by admin user returns empty list by default
-        resp, body = self.client.list_servers_with_detail()
+        body = self.client.list_servers_with_detail()
         servers = body['servers']
-        self.assertEqual('200', resp['status'])
         self.assertEqual([], servers)
 
     @test.attr(type='gate')
     def test_list_servers_filter_by_error_status(self):
         # Filter the list of servers by server error status
         params = {'status': 'error'}
-        resp, server = self.client.reset_state(self.s1_id, state='error')
-        resp, body = self.non_admin_client.list_servers(params)
+        self.client.reset_state(self.s1_id, state='error')
+        body = self.non_admin_client.list_servers(params)
         # Reset server's state to 'active'
-        resp, server = self.client.reset_state(self.s1_id, state='active')
+        self.client.reset_state(self.s1_id, state='active')
         # Verify server's state
         server = self.client.get_server(self.s1_id)
         self.assertEqual(server['status'], 'ACTIVE')
@@ -73,7 +72,7 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
         # Listing servers by admin user with all tenants parameter
         # Here should be listed all servers
         params = {'all_tenants': ''}
-        resp, body = self.client.list_servers_with_detail(params)
+        body = self.client.list_servers_with_detail(params)
         servers = body['servers']
         servers_name = map(lambda x: x['name'], servers)
 
@@ -87,14 +86,14 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
         # List the primary tenant but get nothing due to odd specified behavior
         tenant_id = self.non_admin_client.tenant_id
         params = {'tenant_id': tenant_id}
-        resp, body = self.client.list_servers_with_detail(params)
+        body = self.client.list_servers_with_detail(params)
         servers = body['servers']
         self.assertEqual([], servers)
 
         # List the admin tenant which has no servers
         admin_tenant_id = self.client.tenant_id
         params = {'all_tenants': '', 'tenant_id': admin_tenant_id}
-        resp, body = self.client.list_servers_with_detail(params)
+        body = self.client.list_servers_with_detail(params)
         servers = body['servers']
         self.assertEqual([], servers)
 
@@ -111,13 +110,10 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
         self.assertEqual(server['status'], 'ACTIVE')
         hostname = server[self._host_key]
         params = {'host': hostname}
-        resp, body = self.client.list_servers(params)
-        self.assertEqual('200', resp['status'])
+        body = self.client.list_servers(params)
         servers = body['servers']
         nonexistent_params = {'host': 'nonexistent_host'}
-        resp, nonexistent_body = self.client.list_servers(
-            nonexistent_params)
-        self.assertEqual('200', resp['status'])
+        nonexistent_body = self.client.list_servers(nonexistent_params)
         nonexistent_servers = nonexistent_body['servers']
         self.assertIn(test_server['id'], map(lambda x: x['id'], servers))
         self.assertNotIn(test_server['id'],
@@ -126,16 +122,14 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
     @test.attr(type='gate')
     def test_reset_state_server(self):
         # Reset server's state to 'error'
-        resp, server = self.client.reset_state(self.s1_id)
-        self.assertEqual(202, resp.status)
+        self.client.reset_state(self.s1_id)
 
         # Verify server's state
         server = self.client.get_server(self.s1_id)
         self.assertEqual(server['status'], 'ERROR')
 
         # Reset server's state to 'active'
-        resp, server = self.client.reset_state(self.s1_id, state='active')
-        self.assertEqual(202, resp.status)
+        self.client.reset_state(self.s1_id, state='active')
 
         # Verify server's state
         server = self.client.get_server(self.s1_id)
@@ -145,8 +139,7 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
     @decorators.skip_because(bug="1240043")
     def test_get_server_diagnostics_by_admin(self):
         # Retrieve server diagnostics by admin user
-        resp, diagnostic = self.client.get_server_diagnostics(self.s1_id)
-        self.assertEqual(200, resp.status)
+        diagnostic = self.client.get_server_diagnostics(self.s1_id)
         basic_attrs = ['rx_packets', 'rx_errors', 'rx_drop',
                        'tx_packets', 'tx_errors', 'tx_drop',
                        'read_req', 'write_req', 'cpu', 'memory']
@@ -159,9 +152,8 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
         # image and changed to ACTIVE state
 
         # resetting vm state require admin privilege
-        resp, server = self.client.reset_state(self.s1_id, state='error')
-        self.assertEqual(202, resp.status)
-        resp, rebuilt_server = self.non_admin_client.rebuild(
+        self.client.reset_state(self.s1_id, state='error')
+        rebuilt_server = self.non_admin_client.rebuild(
             self.s1_id, self.image_ref_alt)
         self.addCleanup(self.non_admin_client.wait_for_server_status,
                         self.s1_id, 'ACTIVE')
@@ -185,11 +177,9 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
     def test_reset_network_inject_network_info(self):
         # Reset Network of a Server
         server = self.create_test_server(wait_until='ACTIVE')
-        resp, server_body = self.client.reset_network(server['id'])
-        self.assertEqual(202, resp.status)
+        self.client.reset_network(server['id'])
         # Inject the Network Info into Server
-        resp, server_body = self.client.inject_network_info(server['id'])
-        self.assertEqual(202, resp.status)
+        self.client.inject_network_info(server['id'])
 
     @test.attr(type='gate')
     def test_create_server_with_scheduling_hint(self):

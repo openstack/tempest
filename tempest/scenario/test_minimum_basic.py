@@ -53,7 +53,7 @@ class TestMinimumBasicScenario(manager.ScenarioTest):
                                          create_kwargs=create_kwargs)
 
     def nova_list(self):
-        _, servers = self.servers_client.list_servers()
+        servers = self.servers_client.list_servers()
         # The list servers in the compute client is inconsistent...
         servers = servers['servers']
         self.assertIn(self.server['id'], [x['id'] for x in servers])
