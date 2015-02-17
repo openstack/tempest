@@ -80,12 +80,12 @@ class TelemetryAlarmingAPITestJSON(base.BaseTelemetryTest):
         # Set alarm state and verify
         new_state =\
             [elem for elem in alarm_states if elem != alarm['state']][0]
-        _, state = self.telemetry_client.alarm_set_state(alarm['alarm_id'],
-                                                         new_state)
-        self.assertEqual(new_state, state)
+        state = self.telemetry_client.alarm_set_state(alarm['alarm_id'],
+                                                      new_state)
+        self.assertEqual(new_state, state.data)
         # Get alarm state and verify
-        _, state = self.telemetry_client.alarm_get_state(alarm['alarm_id'])
-        self.assertEqual(new_state, state)
+        state = self.telemetry_client.alarm_get_state(alarm['alarm_id'])
+        self.assertEqual(new_state, state.data)
 
     @test.attr(type="gate")
     def test_create_delete_alarm_with_combination_rule(self):

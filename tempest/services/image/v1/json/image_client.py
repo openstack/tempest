@@ -239,8 +239,7 @@ class ImageClientJSON(service_client.ServiceClient):
         url = 'v1/images/%s' % image_id
         resp, body = self.get(url)
         self.expected_success(200, resp.status)
-        # We can't return a ResponseBody because the body is a string
-        return resp, body
+        return service_client.ResponseBodyData(resp, body)
 
     def is_resource_deleted(self, id):
         try:
