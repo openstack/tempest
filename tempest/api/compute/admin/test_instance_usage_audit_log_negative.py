@@ -19,7 +19,6 @@ import urllib
 from tempest_lib import exceptions as lib_exc
 
 from tempest.api.compute import base
-from tempest import exceptions
 from tempest import test
 
 
@@ -44,6 +43,6 @@ class InstanceUsageAuditLogNegativeTestJSON(base.BaseV2ComputeAdminTest):
 
     @test.attr(type=['negative', 'gate'])
     def test_get_instance_usage_audit_logs_with_invalid_time(self):
-        self.assertRaises(exceptions.BadRequest,
+        self.assertRaises(lib_exc.BadRequest,
                           self.adm_client.get_instance_usage_audit_log,
                           "invalid_time")

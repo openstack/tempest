@@ -20,7 +20,6 @@ import testtools
 from tempest.api.compute.security_groups import base
 from tempest.common.utils import data_utils
 from tempest import config
-from tempest import exceptions
 from tempest import test
 
 CONF = config.CONF
@@ -66,15 +65,15 @@ class SecurityGroupsNegativeTestJSON(base.BaseSecurityGroupsTest):
         # as an empty string/with white spaces/chars more than 255
         s_description = data_utils.rand_name('description-')
         # Create Security Group with empty string as group name
-        self.assertRaises(exceptions.BadRequest,
+        self.assertRaises(lib_exc.BadRequest,
                           self.client.create_security_group, "", s_description)
         # Create Security Group with white space in group name
-        self.assertRaises(exceptions.BadRequest,
+        self.assertRaises(lib_exc.BadRequest,
                           self.client.create_security_group, " ",
                           s_description)
         # Create Security Group with group name longer than 255 chars
         s_name = 'securitygroup-'.ljust(260, '0')
-        self.assertRaises(exceptions.BadRequest,
+        self.assertRaises(lib_exc.BadRequest,
                           self.client.create_security_group, s_name,
                           s_description)
 
@@ -87,14 +86,14 @@ class SecurityGroupsNegativeTestJSON(base.BaseSecurityGroupsTest):
         # as an empty string/with white spaces/chars more than 255
         s_name = data_utils.rand_name('securitygroup-')
         # Create Security Group with empty string as description
-        self.assertRaises(exceptions.BadRequest,
+        self.assertRaises(lib_exc.BadRequest,
                           self.client.create_security_group, s_name, "")
         # Create Security Group with white space in description
-        self.assertRaises(exceptions.BadRequest,
+        self.assertRaises(lib_exc.BadRequest,
                           self.client.create_security_group, s_name, " ")
         # Create Security Group with group description longer than 255 chars
         s_description = 'description-'.ljust(260, '0')
-        self.assertRaises(exceptions.BadRequest,
+        self.assertRaises(lib_exc.BadRequest,
                           self.client.create_security_group, s_name,
                           s_description)
 
@@ -109,7 +108,7 @@ class SecurityGroupsNegativeTestJSON(base.BaseSecurityGroupsTest):
         s_description = data_utils.rand_name('description-')
         self.create_security_group(s_name, s_description)
         # Now try the Security Group with the same 'Name'
-        self.assertRaises(exceptions.BadRequest,
+        self.assertRaises(lib_exc.BadRequest,
                           self.client.create_security_group, s_name,
                           s_description)
 
@@ -124,7 +123,7 @@ class SecurityGroupsNegativeTestJSON(base.BaseSecurityGroupsTest):
                 default_security_group_id = body[i]['id']
                 break
         # Deleting the "default" Security Group
-        self.assertRaises(exceptions.BadRequest,
+        self.assertRaises(lib_exc.BadRequest,
                           self.client.delete_security_group,
                           default_security_group_id)
 
@@ -154,7 +153,7 @@ class SecurityGroupsNegativeTestJSON(base.BaseSecurityGroupsTest):
         s_description = data_utils.rand_name('description-')
         # Create a non int sg_id
         sg_id_invalid = data_utils.rand_name('sg-')
-        self.assertRaises(exceptions.BadRequest,
+        self.assertRaises(lib_exc.BadRequest,
                           self.client.update_security_group, sg_id_invalid,
                           name=s_name, description=s_description)
 
@@ -169,7 +168,7 @@ class SecurityGroupsNegativeTestJSON(base.BaseSecurityGroupsTest):
         securitygroup_id = securitygroup['id']
         # Update Security Group with group name longer than 255 chars
         s_new_name = 'securitygroup-'.ljust(260, '0')
-        self.assertRaises(exceptions.BadRequest,
+        self.assertRaises(lib_exc.BadRequest,
                           self.client.update_security_group,
                           securitygroup_id, name=s_new_name)
 
@@ -184,7 +183,7 @@ class SecurityGroupsNegativeTestJSON(base.BaseSecurityGroupsTest):
         securitygroup_id = securitygroup['id']
         # Update Security Group with group description longer than 255 chars
         s_new_des = 'des-'.ljust(260, '0')
-        self.assertRaises(exceptions.BadRequest,
+        self.assertRaises(lib_exc.BadRequest,
                           self.client.update_security_group,
                           securitygroup_id, description=s_new_des)
 

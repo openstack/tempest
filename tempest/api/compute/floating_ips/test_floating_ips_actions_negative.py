@@ -20,7 +20,6 @@ from tempest_lib import exceptions as lib_exc
 from tempest.api.compute.floating_ips import base
 from tempest.common.utils import data_utils
 from tempest import config
-from tempest import exceptions
 from tempest import test
 
 CONF = config.CONF
@@ -92,6 +91,6 @@ class FloatingIPsNegativeTestJSON(base.BaseFloatingIPsTest):
     def test_associate_ip_to_server_without_passing_floating_ip(self):
         # Negative test:Association of empty floating IP to specific server
         # should raise NotFound or BadRequest(In case of Nova V2.1) exception.
-        self.assertRaises((lib_exc.NotFound, exceptions.BadRequest),
+        self.assertRaises((lib_exc.NotFound, lib_exc.BadRequest),
                           self.client.associate_floating_ip_to_server,
                           '', self.server_id)

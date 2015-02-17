@@ -19,7 +19,6 @@ from tempest_lib import exceptions as lib_exc
 from tempest.api.network import base_routers as base
 from tempest.common.utils import data_utils
 from tempest import config
-from tempest import exceptions
 from tempest import test
 
 CONF = config.CONF
@@ -54,7 +53,7 @@ class RoutersNegativeTest(base.BaseRouterTest):
             network_name=data_utils.rand_name('router-negative-'))
         sub_cidr = netaddr.IPNetwork(self.tenant_cidr).next()
         self.create_subnet(alt_network, cidr=sub_cidr)
-        self.assertRaises(exceptions.BadRequest,
+        self.assertRaises(lib_exc.BadRequest,
                           self.client.update_router,
                           self.router['id'],
                           external_gateway_info={
@@ -70,7 +69,7 @@ class RoutersNegativeTest(base.BaseRouterTest):
         subnet02 = self.create_subnet(network02)
         self._add_router_interface_with_subnet_id(self.router['id'],
                                                   subnet01['id'])
-        self.assertRaises(exceptions.BadRequest,
+        self.assertRaises(lib_exc.BadRequest,
                           self._add_router_interface_with_subnet_id,
                           self.router['id'],
                           subnet02['id'])

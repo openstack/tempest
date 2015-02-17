@@ -16,7 +16,6 @@ from tempest_lib.common import rest_client
 from tempest_lib import exceptions as lib_exceptions
 
 from tempest import config
-from tempest import exceptions
 
 CONF = config.CONF
 
@@ -59,8 +58,6 @@ class ServiceClient(rest_client.RestClient):
                 method, url,
                 extra_headers=extra_headers,
                 headers=headers, body=body)
-        except lib_exceptions.BadRequest as ex:
-            raise exceptions.BadRequest(ex)
         # TODO(oomichi): This is just a workaround for failing gate tests
         # when separating Forbidden from Unauthorized in tempest-lib.
         # We will need to remove this translation and replace negative tests

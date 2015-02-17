@@ -17,7 +17,6 @@ from tempest_lib import exceptions as lib_exc
 
 from tempest.api.identity import base
 from tempest.common.utils import data_utils
-from tempest import exceptions
 from tempest import test
 
 
@@ -50,14 +49,14 @@ class ProjectsNegativeTestJSON(base.BaseIdentityV3AdminTest):
     @test.attr(type=['negative', 'gate'])
     def test_create_project_with_empty_name(self):
         # Project name should not be empty
-        self.assertRaises(exceptions.BadRequest, self.client.create_project,
+        self.assertRaises(lib_exc.BadRequest, self.client.create_project,
                           name='')
 
     @test.attr(type=['negative', 'gate'])
     def test_create_projects_name_length_over_64(self):
         # Project name length should not be greater than 64 characters
         project_name = 'a' * 65
-        self.assertRaises(exceptions.BadRequest, self.client.create_project,
+        self.assertRaises(lib_exc.BadRequest, self.client.create_project,
                           project_name)
 
     @test.attr(type=['negative', 'gate'])

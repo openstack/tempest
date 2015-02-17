@@ -18,7 +18,6 @@ from tempest_lib import exceptions as lib_exc
 
 from tempest.api.compute import base
 from tempest.common.utils import data_utils
-from tempest import exceptions
 from tempest import test
 
 
@@ -110,7 +109,7 @@ class FlavorsExtraSpecsNegativeTestJSON(base.BaseV2ComputeAdminTest):
     @test.attr(type=['negative', 'gate'])
     def test_flavor_update_mismatch_key(self):
         # the key will be updated should be match the key in the body
-        self.assertRaises(exceptions.BadRequest,
+        self.assertRaises(lib_exc.BadRequest,
                           self.client.update_flavor_extra_spec,
                           self.flavor['id'],
                           "key2",
@@ -119,7 +118,7 @@ class FlavorsExtraSpecsNegativeTestJSON(base.BaseV2ComputeAdminTest):
     @test.attr(type=['negative', 'gate'])
     def test_flavor_update_more_key(self):
         # there should be just one item in the request body
-        self.assertRaises(exceptions.BadRequest,
+        self.assertRaises(lib_exc.BadRequest,
                           self.client.update_flavor_extra_spec,
                           self.flavor['id'],
                           "key1",

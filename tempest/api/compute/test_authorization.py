@@ -21,7 +21,6 @@ from tempest.api.compute import base
 from tempest import clients
 from tempest.common.utils import data_utils
 from tempest import config
-from tempest import exceptions
 from tempest.openstack.common import log as logging
 from tempest import test
 
@@ -168,7 +167,7 @@ class AuthorizationTestJSON(base.BaseV2ComputeTest):
     @test.attr(type='gate')
     def test_create_server_with_unauthorized_image(self):
         # Server creation with another user's image should fail
-        self.assertRaises(exceptions.BadRequest, self.alt_client.create_server,
+        self.assertRaises(lib_exc.BadRequest, self.alt_client.create_server,
                           'test', self.image['id'], self.flavor_ref)
 
     @test.attr(type='gate')
@@ -180,7 +179,7 @@ class AuthorizationTestJSON(base.BaseV2ComputeTest):
             request_part='url',
             auth_data=self.client.auth_provider.auth_data
         )
-        self.assertRaises(exceptions.BadRequest,
+        self.assertRaises(lib_exc.BadRequest,
                           self.alt_client.create_server, 'test',
                           self.image['id'], self.flavor_ref)
 
@@ -198,7 +197,7 @@ class AuthorizationTestJSON(base.BaseV2ComputeTest):
             )
             resp = {}
             resp['status'] = None
-            self.assertRaises(exceptions.BadRequest,
+            self.assertRaises(lib_exc.BadRequest,
                               self.alt_keypairs_client.create_keypair, k_name)
         finally:
             # Next request the base_url is back to normal
@@ -249,7 +248,7 @@ class AuthorizationTestJSON(base.BaseV2ComputeTest):
             )
             resp = {}
             resp['status'] = None
-            self.assertRaises(exceptions.BadRequest,
+            self.assertRaises(lib_exc.BadRequest,
                               self.alt_security_client.create_security_group,
                               s_name, s_description)
         finally:
@@ -290,7 +289,7 @@ class AuthorizationTestJSON(base.BaseV2ComputeTest):
             )
             resp = {}
             resp['status'] = None
-            self.assertRaises(exceptions.BadRequest,
+            self.assertRaises(lib_exc.BadRequest,
                               self.alt_security_client.
                               create_security_group_rule,
                               parent_group_id, ip_protocol, from_port,

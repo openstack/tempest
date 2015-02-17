@@ -16,7 +16,6 @@ from tempest_lib import exceptions as lib_exc
 
 from tempest.api.compute import base
 from tempest import config
-from tempest import exceptions
 from tempest import test
 
 CONF = config.CONF
@@ -73,7 +72,7 @@ class FixedIPsNegativeTestJson(base.BaseV2ComputeAdminTest):
         # NOTE(eliqiao): in Juno, the exception is NotFound, but in master, we
         # change the error code to BadRequest, both exceptions should be
         # accepted by tempest
-        self.assertRaises((lib_exc.NotFound, exceptions.BadRequest),
+        self.assertRaises((lib_exc.NotFound, lib_exc.BadRequest),
                           self.client.reserve_fixed_ip,
                           "my.invalid.ip", body)
 
@@ -81,6 +80,6 @@ class FixedIPsNegativeTestJson(base.BaseV2ComputeAdminTest):
     @test.services('network')
     def test_fixed_ip_with_invalid_action(self):
         body = {"invalid_action": "None"}
-        self.assertRaises(exceptions.BadRequest,
+        self.assertRaises(lib_exc.BadRequest,
                           self.client.reserve_fixed_ip,
                           self.ip, body)

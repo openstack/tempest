@@ -13,11 +13,11 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib import exceptions as lib_exc
 
 from tempest.api.compute import base
 from tempest.common.utils import data_utils
 from tempest import config
-from tempest import exceptions
 from tempest import test
 
 CONF = config.CONF
@@ -48,6 +48,6 @@ class LiveBlockMigrationNegativeTestJSON(base.BaseV2ComputeAdminTest):
         server = self.create_test_server(wait_until="ACTIVE")
         server_id = server['id']
 
-        self.assertRaises(exceptions.BadRequest, self._migrate_server_to,
+        self.assertRaises(lib_exc.BadRequest, self._migrate_server_to,
                           server_id, target_host)
         self.servers_client.wait_for_server_status(server_id, 'ACTIVE')

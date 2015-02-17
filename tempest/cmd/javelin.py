@@ -115,7 +115,6 @@ import yaml
 
 import tempest.auth
 from tempest import config
-from tempest import exceptions
 from tempest.openstack.common import log as logging
 from tempest.openstack.common import timeutils
 from tempest.services.compute.json import flavors_client
@@ -705,7 +704,7 @@ def create_subnets(subnets):
                                           cidr=subnet['range'],
                                           name=subnet['name'],
                                           ip_version=ip_version)
-        except exceptions.BadRequest as e:
+        except lib_exc.BadRequest as e:
             is_overlapping_cidr = 'overlaps with another subnet' in str(e)
             if not is_overlapping_cidr:
                 raise

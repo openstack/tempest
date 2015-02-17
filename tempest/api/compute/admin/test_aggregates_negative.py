@@ -18,7 +18,6 @@ from tempest_lib import exceptions as lib_exc
 from tempest.api.compute import base
 from tempest.common import tempest_fixtures as fixtures
 from tempest.common.utils import data_utils
-from tempest import exceptions
 from tempest import test
 
 
@@ -52,7 +51,7 @@ class AggregatesAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
     @test.attr(type=['negative', 'gate'])
     def test_aggregate_create_aggregate_name_length_less_than_1(self):
         # the length of aggregate name should >= 1 and <=255
-        self.assertRaises(exceptions.BadRequest,
+        self.assertRaises(lib_exc.BadRequest,
                           self.client.create_aggregate,
                           name='')
 
@@ -60,7 +59,7 @@ class AggregatesAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
     def test_aggregate_create_aggregate_name_length_exceeds_255(self):
         # the length of aggregate name should >= 1 and <=255
         aggregate_name = 'a' * 256
-        self.assertRaises(exceptions.BadRequest,
+        self.assertRaises(lib_exc.BadRequest,
                           self.client.create_aggregate,
                           name=aggregate_name)
 

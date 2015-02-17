@@ -198,7 +198,7 @@ class IsolatedCreds(cred_provider.CredentialProvider):
                                       tenant_id=tenant_id,
                                       ip_version=4)
                 break
-            except exceptions.BadRequest as e:
+            except lib_exc.BadRequest as e:
                 if 'overlaps with another subnet' not in str(e):
                     raise
         else:

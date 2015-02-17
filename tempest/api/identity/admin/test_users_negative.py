@@ -18,7 +18,6 @@ import uuid
 
 from tempest.api.identity import base
 from tempest.common.utils import data_utils
-from tempest import exceptions
 from tempest import test
 
 
@@ -44,7 +43,7 @@ class UsersNegativeTestJSON(base.BaseIdentityV2AdminTest):
     def test_create_user_with_empty_name(self):
         # User with an empty name should not be created
         self.data.setup_test_tenant()
-        self.assertRaises(exceptions.BadRequest, self.client.create_user, '',
+        self.assertRaises(lib_exc.BadRequest, self.client.create_user, '',
                           self.alt_password, self.data.tenant['id'],
                           self.alt_email)
 
@@ -52,7 +51,7 @@ class UsersNegativeTestJSON(base.BaseIdentityV2AdminTest):
     def test_create_user_with_name_length_over_255(self):
         # Length of user name filed should be restricted to 255 characters
         self.data.setup_test_tenant()
-        self.assertRaises(exceptions.BadRequest, self.client.create_user,
+        self.assertRaises(lib_exc.BadRequest, self.client.create_user,
                           'a' * 256, self.alt_password,
                           self.data.tenant['id'], self.alt_email)
 
@@ -91,7 +90,7 @@ class UsersNegativeTestJSON(base.BaseIdentityV2AdminTest):
         # Attempt to create a user with valid enabled para should fail
         self.data.setup_test_tenant()
         name = data_utils.rand_name('test_user_')
-        self.assertRaises(exceptions.BadRequest, self.client.create_user,
+        self.assertRaises(lib_exc.BadRequest, self.client.create_user,
                           name, self.alt_password,
                           self.data.tenant['id'],
                           self.alt_email, enabled=3)

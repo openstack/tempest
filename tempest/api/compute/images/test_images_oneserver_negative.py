@@ -19,7 +19,6 @@ from tempest_lib import exceptions as lib_exc
 from tempest.api.compute import base
 from tempest.common.utils import data_utils
 from tempest import config
-from tempest import exceptions
 from tempest.openstack.common import log as logging
 from tempest import test
 
@@ -79,7 +78,7 @@ class ImagesOneServerNegativeTestJSON(base.BaseV2ComputeTest):
         # Return an error when creating image with invalid metadata
         snapshot_name = data_utils.rand_name('test-snap-')
         meta = {'': ''}
-        self.assertRaises(exceptions.BadRequest, self.client.create_image,
+        self.assertRaises(lib_exc.BadRequest, self.client.create_image,
                           self.server_id, snapshot_name, meta)
 
     @test.attr(type=['negative', 'gate'])
@@ -87,7 +86,7 @@ class ImagesOneServerNegativeTestJSON(base.BaseV2ComputeTest):
         # Return an error when creating image with meta data over 256 chars
         snapshot_name = data_utils.rand_name('test-snap-')
         meta = {'a' * 260: 'b' * 260}
-        self.assertRaises(exceptions.BadRequest, self.client.create_image,
+        self.assertRaises(lib_exc.BadRequest, self.client.create_image,
                           self.server_id, snapshot_name, meta)
 
     @test.attr(type=['negative', 'gate'])
@@ -112,7 +111,7 @@ class ImagesOneServerNegativeTestJSON(base.BaseV2ComputeTest):
         # Return an error if snapshot name over 256 characters is passed
 
         snapshot_name = data_utils.rand_name('a' * 260)
-        self.assertRaises(exceptions.BadRequest, self.client.create_image,
+        self.assertRaises(lib_exc.BadRequest, self.client.create_image,
                           self.server_id, snapshot_name)
 
     @test.attr(type=['negative', 'gate'])

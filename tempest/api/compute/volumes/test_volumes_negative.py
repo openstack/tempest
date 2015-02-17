@@ -20,7 +20,6 @@ from tempest_lib import exceptions as lib_exc
 from tempest.api.compute import base
 from tempest.common.utils import data_utils
 from tempest import config
-from tempest import exceptions
 from tempest import test
 
 CONF = config.CONF
@@ -58,7 +57,7 @@ class VolumesNegativeTest(base.BaseV2ComputeTest):
         # in request
         v_name = data_utils.rand_name('Volume-')
         metadata = {'Type': 'work'}
-        self.assertRaises(exceptions.BadRequest, self.client.create_volume,
+        self.assertRaises(lib_exc.BadRequest, self.client.create_volume,
                           size='#$%', display_name=v_name, metadata=metadata)
 
     @test.attr(type=['negative', 'gate'])
@@ -67,7 +66,7 @@ class VolumesNegativeTest(base.BaseV2ComputeTest):
         # in request
         v_name = data_utils.rand_name('Volume-')
         metadata = {'Type': 'work'}
-        self.assertRaises(exceptions.BadRequest, self.client.create_volume,
+        self.assertRaises(lib_exc.BadRequest, self.client.create_volume,
                           size='', display_name=v_name, metadata=metadata)
 
     @test.attr(type=['negative', 'gate'])
@@ -75,7 +74,7 @@ class VolumesNegativeTest(base.BaseV2ComputeTest):
         # Negative: Should not be able to create volume with size zero
         v_name = data_utils.rand_name('Volume-')
         metadata = {'Type': 'work'}
-        self.assertRaises(exceptions.BadRequest, self.client.create_volume,
+        self.assertRaises(lib_exc.BadRequest, self.client.create_volume,
                           size='0', display_name=v_name, metadata=metadata)
 
     @test.attr(type=['negative', 'gate'])
