@@ -30,15 +30,27 @@ LOG = logging.getLogger(__name__)
 class NeutronResourcesTestJSON(base.BaseOrchestrationTest):
 
     @classmethod
-    def resource_setup(cls):
-        super(NeutronResourcesTestJSON, cls).resource_setup()
+    def skip_checks(cls):
+        super(NeutronResourcesTestJSON, cls).skip_checks()
         if not CONF.orchestration.image_ref:
             raise cls.skipException("No image available to test")
-        os = clients.Manager()
         if not CONF.service_available.neutron:
             raise cls.skipException("Neutron support is required")
+
+    @classmethod
+    def setup_credentials(cls):
+        super(NeutronResourcesTestJSON, cls).setup_credentials()
+        cls.os = clients.Manager()
+
+    @classmethod
+    def setup_clients(cls):
+        super(NeutronResourcesTestJSON, cls).setup_clients()
+        cls.network_client = cls.os.network_client
+
+    @classmethod
+    def resource_setup(cls):
+        super(NeutronResourcesTestJSON, cls).resource_setup()
         cls.neutron_basic_template = cls.load_template('neutron_basic')
-        cls.network_client = os.network_client
         cls.stack_name = data_utils.rand_name('heat')
         template = cls.read_template('neutron_basic')
         cls.keypair_name = (CONF.orchestration.keypair_name or
