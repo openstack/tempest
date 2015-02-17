@@ -219,6 +219,14 @@ ComputeGroup = [
                default=120,
                help="Timeout in seconds to wait for ping to "
                     "succeed."),
+    cfg.IntOpt('ping_size',
+               default=56,
+               help="The packet size for ping packets originating "
+                    "from remote linux hosts"),
+    cfg.IntOpt('ping_count',
+               default=1,
+               help="The number of ping packets originating from remote "
+                    "linux hosts"),
     cfg.IntOpt('ssh_timeout',
                default=300,
                help="Timeout in seconds to wait for authentication to "

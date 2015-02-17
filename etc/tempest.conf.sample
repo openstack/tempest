@@ -282,6 +282,14 @@
 # Timeout in seconds to wait for ping to succeed. (integer value)
 #ping_timeout = 120
 
+# The packet size for ping packets originating from remote linux hosts
+# (integer value)
+#ping_size = 56
+
+# The number of ping packets originating from remote linux hosts
+# (integer value)
+#ping_count = 1
+
 # Timeout in seconds to wait for authentication to succeed. (integer
 # value)
 #ssh_timeout = 300
