@@ -108,8 +108,8 @@ class TokensV3TestJSON(base.BaseIdentityV3AdminTest):
 
         # Use the unscoped token to get a scoped token.
         token_auth = self.token.auth(token=token_id,
-                                     tenant=project1_name,
-                                     domain='Default')
+                                     project=project1_name,
+                                     project_domain='Default')
         token1_id = token_auth.response['x-subject-token']
 
         self.assertEqual(orig_expires_at, token_auth['token']['expires_at'],
@@ -138,8 +138,8 @@ class TokensV3TestJSON(base.BaseIdentityV3AdminTest):
 
         # Now get another scoped token using the unscoped token.
         token_auth = self.token.auth(token=token_id,
-                                     tenant=project2_name,
-                                     domain='Default')
+                                     project=project2_name,
+                                     project_domain='Default')
 
         self.assertEqual(project2['id'],
                          token_auth['token']['project']['id'])

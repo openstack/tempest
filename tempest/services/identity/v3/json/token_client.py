@@ -36,23 +36,22 @@ class V3TokenClientJSON(service_client.ServiceClient):
 
         self.auth_url = auth_url
 
-    def auth(self, user=None, password=None, tenant=None, user_type='id',
-             domain=None, token=None):
+    def auth(self, user=None, password=None, project=None, user_type='id',
+             user_domain=None, project_domain=None, token=None):
         """
         :param user: user id or name, as specified in user_type
-        :param domain: the user and tenant domain
+        :param user_domain: the user domain
+        :param project_domain: the project domain
         :param token: a token to re-scope.
 
         Accepts different combinations of credentials. Restrictions:
-        - tenant and domain are only name (no id)
-        - user domain and tenant domain are assumed identical
-        - domain scope is not supported here
+        - project and domain are only name (no id)
         Sample sample valid combinations:
         - token
-        - token, tenant, domain
+        - token, project, project_domain
         - user_id, password
-        - username, password, domain
-        - username, password, tenant, domain
+        - username, password, user_domain
+        - username, password, project, user_domain, project_domain
         Validation is left to the server side.
         """
         creds = {
@@ -79,13 +78,13 @@ class V3TokenClientJSON(service_client.ServiceClient):
                 id_obj['password']['user']['id'] = user
             else:
                 id_obj['password']['user']['name'] = user
-            if domain is not None:
-                _domain = dict(name=domain)
+            if user_domain is not None:
+                _domain = dict(name=user_domain)
                 id_obj['password']['user']['domain'] = _domain
-        if tenant is not None:
-            _domain = dict(name=domain)
-            project = dict(name=tenant, domain=_domain)
-            scope = dict(project=project)
+        if project is not None:
+            _domain = dict(name=project_domain)
+            _project = dict(name=project, domain=_domain)
+            scope = dict(project=_project)
             creds['auth']['scope'] = scope
 
         body = json.dumps(creds)
@@ -120,14 +119,15 @@ class V3TokenClientJSON(service_client.ServiceClient):
 
         return resp, json.loads(resp_body)
 
-    def get_token(self, user, password, tenant, domain='Default',
-                  auth_data=False):
+    def get_token(self, user, password, project=None, project_domain='Default',
+                  user_domain='Default', auth_data=False):
         """
         :param user: username
         Returns (token id, token data) for supplied credentials
         """
-        body = self.auth(user, password, tenant, user_type='name',
-                         domain=domain)
+        body = self.auth(user, password, project, user_type='name',
+                         user_domain=user_domain,
+                         project_domain=project_domain)
 
         token = body.response.get('x-subject-token')
         if auth_data:
