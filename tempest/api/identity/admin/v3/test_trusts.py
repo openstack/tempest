@@ -119,13 +119,10 @@ class BaseTrustsV3Test(base.BaseIdentityV3AdminTest):
                        summary=False):
         self.assertIsNotNone(trust['id'])
         self.assertEqual(impersonate, trust['impersonation'])
-        # FIXME(shardy): ref bug #1246383 we can't check the
-        # microsecond component of the expiry time, because mysql
-        # <5.6.4 doesn't support microseconds.
-        # expected format 2013-12-20T16:08:36.036987Z
         if expires is not None:
-            expires_nousec = re.sub(r'\.([0-9]){6}Z', '', expires)
-            self.assertTrue(trust['expires_at'].startswith(expires_nousec))
+            # Omit microseconds of the expiry time
+            trust_expires_at = re.sub(r'\.([0-9]){6}', '', trust['expires_at'])
+            self.assertEqual(expires, trust_expires_at)
         else:
             self.assertIsNone(trust['expires_at'])
         self.assertEqual(self.trustor_user_id, trust['trustor_user_id'])
@@ -219,7 +216,13 @@ class TrustsV3TestJSON(BaseTrustsV3Test):
         # Test case to check we can create, get and delete a trust
         # with an expiry specified
         expires_at = timeutils.utcnow() + datetime.timedelta(hours=1)
-        expires_str = timeutils.isotime(at=expires_at, subsecond=True)
+        # NOTE(ylobankov) In some cases the expiry time may be rounded up
+        # because of microseconds. For example, we have the following expiry
+        # time for a trust: 2015-02-17T17:34:01.907051Z. However, if we make
+        # a GET request on the trust, the response may contain the time
+        # rounded up to 2015-02-17T17:34:02.000000Z. That is why we should
+        # omit microseconds when creating a trust.
+        expires_str = timeutils.isotime(at=expires_at)
 
         trust = self.create_trust(expires=expires_str)
         self.validate_trust(trust, expires=expires_str)
