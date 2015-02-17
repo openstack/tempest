@@ -71,8 +71,6 @@ class LiveBlockMigrationTestJSON(base.BaseV2ComputeAdminTest):
         else:
             server = self.create_test_server(wait_until="ACTIVE")
             server_id = server['id']
-            self.password = server['adminPass']
-            self.password = 'password'
             self.created_server_ids.append(server_id)
             return server_id
 
