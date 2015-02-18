@@ -33,7 +33,7 @@ class TestQueues(base.BaseMessagingTest):
     def test_create_delete_queue(self):
         # Create & Delete Queue
         queue_name = data_utils.rand_name('test-')
-        _, body = self.create_queue(queue_name)
+        body = self.create_queue(queue_name)
 
         self.addCleanup(self.client.delete_queue, queue_name)
         # NOTE(gmann): create_queue returns response status code as 201
@@ -74,7 +74,7 @@ class TestManageQueue(base.BaseMessagingTest):
     @test.attr(type='smoke')
     def test_list_queues(self):
         # Listing queues
-        _, body = self.list_queues()
+        body = self.list_queues()
         self.assertEqual(len(body['queues']), len(self.queues))
         for item in body['queues']:
             self.assertIn(item['name'], self.queues)
@@ -85,7 +85,7 @@ class TestManageQueue(base.BaseMessagingTest):
         queue_name = self.queues[data_utils.rand_int_id(0,
                                                         len(self.queues) - 1)]
         # Get Queue Stats for a newly created Queue
-        _, body = self.get_queue_stats(queue_name)
+        body = self.get_queue_stats(queue_name)
         msgs = body['messages']
         for element in ('free', 'claimed', 'total'):
             self.assertEqual(0, msgs[element])
@@ -98,7 +98,7 @@ class TestManageQueue(base.BaseMessagingTest):
         queue_name = self.queues[data_utils.rand_int_id(0,
                                                         len(self.queues) - 1)]
         # Check the Queue has no metadata
-        _, body = self.get_queue_metadata(queue_name)
+        body = self.get_queue_metadata(queue_name)
         self.assertThat(body, matchers.HasLength(0))
         # Create metadata
         key3 = [0, 1, 2, 3, 4]
@@ -112,7 +112,7 @@ class TestManageQueue(base.BaseMessagingTest):
         self.set_queue_metadata(queue_name, req_body)
 
         # Get Queue Metadata
-        _, body = self.get_queue_metadata(queue_name)
+        body = self.get_queue_metadata(queue_name)
         self.assertThat(body, matchers.Equals(req_body))
 
     @classmethod

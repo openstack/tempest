@@ -49,14 +49,14 @@ class TestClaims(base.BaseMessagingTest):
         claim_grace = data_utils.\
             rand_int_id(start=60, end=CONF.messaging.max_claim_grace)
         claim_body = {"ttl": claim_ttl, "grace": claim_grace}
-        resp, body = self.client.post_claims(queue_name=self.queue_name,
-                                             rbody=claim_body)
+        body = self.client.post_claims(queue_name=self.queue_name,
+                                       rbody=claim_body)
 
-        return resp, body
+        return body
 
     @test.attr(type='smoke')
     def test_post_claim(self):
-        _, body = self._post_and_claim_messages(queue_name=self.queue_name)
+        body = self._post_and_claim_messages(queue_name=self.queue_name)
         claimed_message_uri = body[0]['href']
 
         # Skipping this step till bug-1331517  is fixed
@@ -70,10 +70,10 @@ class TestClaims(base.BaseMessagingTest):
     @test.attr(type='smoke')
     def test_query_claim(self):
         # Post a Claim
-        resp, body = self._post_and_claim_messages(queue_name=self.queue_name)
+        body = self._post_and_claim_messages(queue_name=self.queue_name)
 
         # Query Claim
-        claim_uri = resp['location']
+        claim_uri = body.response['location']
         self.client.query_claim(claim_uri)
 
         # Delete Claimed message
@@ -84,9 +84,9 @@ class TestClaims(base.BaseMessagingTest):
     @test.attr(type='smoke')
     def test_update_claim(self):
         # Post a Claim
-        resp, body = self._post_and_claim_messages(queue_name=self.queue_name)
+        body = self._post_and_claim_messages(queue_name=self.queue_name)
 
-        claim_uri = resp['location']
+        claim_uri = body.response['location']
         claimed_message_uri = body[0]['href']
 
         # Update Claim
@@ -97,7 +97,7 @@ class TestClaims(base.BaseMessagingTest):
         self.client.update_claim(claim_uri, rbody=update_rbody)
 
         # Verify claim ttl >= updated ttl value
-        _, body = self.client.query_claim(claim_uri)
+        body = self.client.query_claim(claim_uri)
         updated_claim_ttl = body["ttl"]
         self.assertTrue(updated_claim_ttl >= claim_ttl)
 
@@ -107,8 +107,8 @@ class TestClaims(base.BaseMessagingTest):
     @test.attr(type='smoke')
     def test_release_claim(self):
         # Post a Claim
-        resp, body = self._post_and_claim_messages(queue_name=self.queue_name)
-        claim_uri = resp['location']
+        body = self._post_and_claim_messages(queue_name=self.queue_name)
+        claim_uri = body.response['location']
 
         # Release Claim
         self.client.release_claim(claim_uri)
