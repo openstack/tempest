@@ -23,12 +23,17 @@ from tempest import test
 
 
 class ObjectACLsNegativeTest(base.BaseObjectTest):
+
+    @classmethod
+    def setup_credentials(cls):
+        super(ObjectACLsNegativeTest, cls).setup_credentials()
+        cls.data.setup_test_user()
+        cls.test_os = clients.Manager(cls.data.test_credentials)
+
     @classmethod
     def resource_setup(cls):
         super(ObjectACLsNegativeTest, cls).resource_setup()
-        cls.data.setup_test_user()
-        test_os = clients.Manager(cls.data.test_credentials)
-        cls.test_auth_data = test_os.auth_provider.auth_data
+        cls.test_auth_data = cls.test_os.auth_provider.auth_data
 
     def setUp(self):
         super(ObjectACLsNegativeTest, self).setUp()

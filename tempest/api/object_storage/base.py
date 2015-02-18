@@ -28,20 +28,30 @@ CONF = config.CONF
 class BaseObjectTest(tempest.test.BaseTestCase):
 
     @classmethod
-    def resource_setup(cls):
-        cls.set_network_resources()
-        super(BaseObjectTest, cls).resource_setup()
+    def skip_checks(cls):
+        super(BaseObjectTest, cls).skip_checks()
         if not CONF.service_available.swift:
             skip_msg = ("%s skipped as swift is not available" % cls.__name__)
             raise cls.skipException(skip_msg)
+
+    @classmethod
+    def setup_credentials(cls):
+        cls.set_network_resources()
+        super(BaseObjectTest, cls).setup_credentials()
+
         cls.isolated_creds = credentials.get_isolated_credentials(
             cls.__name__, network_resources=cls.network_resources)
         # Get isolated creds for normal user
         cls.os = clients.Manager(cls.isolated_creds.get_primary_creds())
         # Get isolated creds for admin user
         cls.os_admin = clients.Manager(cls.isolated_creds.get_admin_creds())
+        cls.data = SwiftDataGenerator(cls.os_admin.identity_client)
         # Get isolated creds for alt user
         cls.os_alt = clients.Manager(cls.isolated_creds.get_alt_creds())
+
+    @classmethod
+    def setup_clients(cls):
+        super(BaseObjectTest, cls).setup_clients()
 
         cls.object_client = cls.os.object_client
         cls.container_client = cls.os.container_client
@@ -52,14 +62,16 @@ class BaseObjectTest(tempest.test.BaseTestCase):
         cls.container_client_alt = cls.os_alt.container_client
         cls.identity_client_alt = cls.os_alt.identity_client
 
+    @classmethod
+    def resource_setup(cls):
+        super(BaseObjectTest, cls).resource_setup()
+
         # Make sure we get fresh auth data after assigning swift role
         cls.object_client.auth_provider.clear_auth()
         cls.container_client.auth_provider.clear_auth()
         cls.account_client.auth_provider.clear_auth()
         cls.object_client_alt.auth_provider.clear_auth()
         cls.container_client_alt.auth_provider.clear_auth()
-
-        cls.data = SwiftDataGenerator(cls.identity_admin_client)
 
     @classmethod
     def resource_cleanup(cls):
