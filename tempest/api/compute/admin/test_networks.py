@@ -34,7 +34,7 @@ class NetworksTest(base.BaseComputeAdminTest):
         cls.client = cls.os_adm.networks_client
 
     def test_get_network(self):
-        resp, networks = self.client.list_networks()
+        networks = self.client.list_networks()
         configured_network = [x for x in networks if x['label'] ==
                               CONF.compute.fixed_network_name]
         self.assertEqual(1, len(configured_network),
@@ -42,11 +42,11 @@ class NetworksTest(base.BaseComputeAdminTest):
                              len(configured_network),
                              CONF.compute.fixed_network_name))
         configured_network = configured_network[0]
-        _, network = self.client.get_network(configured_network['id'])
+        network = self.client.get_network(configured_network['id'])
         self.assertEqual(configured_network['label'], network['label'])
 
     def test_list_all_networks(self):
-        _, networks = self.client.list_networks()
+        networks = self.client.list_networks()
         # Check the configured network is in the list
         configured_network = CONF.compute.fixed_network_name
         self.assertIn(configured_network, [x['label'] for x in networks])

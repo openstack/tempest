@@ -230,7 +230,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         port_list = self._list_ports(device_id=server['id'])
         self.assertEqual(1, len(port_list))
         old_port = port_list[0]
-        _, interface = self.interface_client.create_interface(
+        interface = self.interface_client.create_interface(
             server=server['id'],
             network_id=self.new_net.id)
         self.addCleanup(self.network_client.wait_for_resource_deletion,

@@ -29,5 +29,5 @@ class NetworksTestJSON(base.BaseV2ComputeTest):
 
     @test.attr(type='gate')
     def test_list_networks(self):
-        _, networks = self.client.list_networks()
+        networks = self.client.list_networks()
         self.assertNotEmpty(networks, "No networks found.")
