@@ -492,6 +492,9 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         ssh_client.renew_lease(fixed_ip=floating_ip['fixed_ip_address'])
         self._check_dns_server(ssh_client, [alt_dns_server])
 
+    @testtools.skipIf(CONF.baremetal.driver_enabled,
+                      'admin_state of instance ports cannot be altered '
+                      'for baremetal nodes')
     @test.attr(type='smoke')
     @test.services('compute', 'network')
     def test_update_instance_port_admin_state(self):
