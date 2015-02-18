@@ -23,9 +23,13 @@ CONF = config.CONF
 class SecurityGroupRulesTestJSON(base.BaseSecurityGroupsTest):
 
     @classmethod
+    def setup_clients(cls):
+        super(SecurityGroupRulesTestJSON, cls).setup_clients()
+        cls.client = cls.security_groups_client
+
+    @classmethod
     def resource_setup(cls):
         super(SecurityGroupRulesTestJSON, cls).resource_setup()
-        cls.client = cls.security_groups_client
         cls.neutron_available = CONF.service_available.neutron
         cls.ip_protocol = 'tcp'
         cls.from_port = 22

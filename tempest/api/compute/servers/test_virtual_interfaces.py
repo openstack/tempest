@@ -26,11 +26,19 @@ CONF = config.CONF
 class VirtualInterfacesTestJSON(base.BaseV2ComputeTest):
 
     @classmethod
-    def resource_setup(cls):
+    def setup_credentials(cls):
         # This test needs a network and a subnet
         cls.set_network_resources(network=True, subnet=True)
-        super(VirtualInterfacesTestJSON, cls).resource_setup()
+        super(VirtualInterfacesTestJSON, cls).setup_credentials()
+
+    @classmethod
+    def setup_clients(cls):
+        super(VirtualInterfacesTestJSON, cls).setup_clients()
         cls.client = cls.servers_client
+
+    @classmethod
+    def resource_setup(cls):
+        super(VirtualInterfacesTestJSON, cls).resource_setup()
         server = cls.create_test_server(wait_until='ACTIVE')
         cls.server_id = server['id']
 

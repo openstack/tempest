@@ -27,12 +27,19 @@ CONF = config.CONF
 class ServerRescueNegativeTestJSON(base.BaseV2ComputeTest):
 
     @classmethod
-    def resource_setup(cls):
+    def skip_checks(cls):
+        super(ServerRescueNegativeTestJSON, cls).skip_checks()
         if not CONF.compute_feature_enabled.rescue:
             msg = "Server rescue not available."
             raise cls.skipException(msg)
 
+    @classmethod
+    def setup_credentials(cls):
         cls.set_network_resources(network=True, subnet=True, router=True)
+        super(ServerRescueNegativeTestJSON, cls).setup_credentials()
+
+    @classmethod
+    def resource_setup(cls):
         super(ServerRescueNegativeTestJSON, cls).resource_setup()
         cls.device = CONF.compute.volume_device_name
 

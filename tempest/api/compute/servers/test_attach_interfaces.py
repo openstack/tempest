@@ -26,14 +26,22 @@ CONF = config.CONF
 class AttachInterfacesTestJSON(base.BaseV2ComputeTest):
 
     @classmethod
-    def resource_setup(cls):
+    def skip_checks(cls):
+        super(AttachInterfacesTestJSON, cls).skip_checks()
         if not CONF.service_available.neutron:
             raise cls.skipException("Neutron is required")
         if not CONF.compute_feature_enabled.interface_attach:
             raise cls.skipException("Interface attachment is not available.")
+
+    @classmethod
+    def setup_credentials(cls):
         # This test class requires network and subnet
         cls.set_network_resources(network=True, subnet=True)
-        super(AttachInterfacesTestJSON, cls).resource_setup()
+        super(AttachInterfacesTestJSON, cls).setup_credentials()
+
+    @classmethod
+    def setup_clients(cls):
+        super(AttachInterfacesTestJSON, cls).setup_clients()
         cls.client = cls.os.interfaces_client
 
     def _check_interface(self, iface, port_id=None, network_id=None,

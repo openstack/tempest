@@ -23,8 +23,8 @@ from tempest import test
 class SecurityGroupsTestJSON(base.BaseSecurityGroupsTest):
 
     @classmethod
-    def resource_setup(cls):
-        super(SecurityGroupsTestJSON, cls).resource_setup()
+    def setup_clients(cls):
+        super(SecurityGroupsTestJSON, cls).setup_clients()
         cls.client = cls.security_groups_client
 
     @test.attr(type='smoke')
