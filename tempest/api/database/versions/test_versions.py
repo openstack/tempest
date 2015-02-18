@@ -26,7 +26,7 @@ class DatabaseVersionsTest(base.BaseDatabaseTest):
 
     @test.attr(type='smoke')
     def test_list_db_versions(self):
-        _, versions = self.client.list_db_versions()
+        versions = self.client.list_db_versions()
         self.assertTrue(len(versions) > 0, "No database versions found")
         # List of all versions should contain the current version, and there
         # should only be one 'current' version
