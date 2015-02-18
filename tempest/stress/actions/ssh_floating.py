@@ -74,9 +74,9 @@ class FloatingStress(stressaction.StressAction):
         self.logger.info("creating %s" % name)
         vm_args = self.vm_extra_args.copy()
         vm_args['security_groups'] = [self.sec_grp]
-        _, server = servers_client.create_server(name, self.image,
-                                                 self.flavor,
-                                                 **vm_args)
+        server = servers_client.create_server(name, self.image,
+                                              self.flavor,
+                                              **vm_args)
         self.server_id = server['id']
         if self.wait_after_vm_create:
             self.manager.servers_client.wait_for_server_status(self.server_id,
@@ -104,7 +104,7 @@ class FloatingStress(stressaction.StressAction):
 
     def _create_floating_ip(self):
         floating_cli = self.manager.floating_ips_client
-        _, self.floating = floating_cli.create_floating_ip(self.floating_pool)
+        self.floating = floating_cli.create_floating_ip(self.floating_pool)
 
     def _destroy_floating_ip(self):
         cli = self.manager.floating_ips_client
@@ -144,7 +144,7 @@ class FloatingStress(stressaction.StressAction):
         cli = self.manager.floating_ips_client
 
         def func():
-            _, floating = cli.get_floating_ip_details(self.floating['id'])
+            floating = cli.get_floating_ip_details(self.floating['id'])
             return floating['instance_id'] is None
 
         if not tempest.test.call_until_true(func, self.check_timeout,
