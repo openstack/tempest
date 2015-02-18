@@ -84,7 +84,8 @@ class KeystoneV2CredentialsTests(CredentialsTests):
                        self.identity_response)
 
     def _verify_credentials(self, credentials_class, creds_dict, filled=True):
-        creds = auth.get_credentials(fill_in=filled,
+        creds = auth.get_credentials(fake_identity.FAKE_AUTH_URL,
+                                     fill_in=filled,
                                      identity_version=self.identity_version,
                                      **creds_dict)
         self._check(creds, credentials_class, filled)

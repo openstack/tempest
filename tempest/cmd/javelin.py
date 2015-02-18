@@ -176,7 +176,7 @@ class OSClient(object):
             username=user,
             password=pw,
             tenant_name=tenant)
-        _auth = tempest.auth.KeystoneV2AuthProvider(_creds)
+        _auth = tempest.auth.KeystoneV2AuthProvider(_creds, CONF.identity.uri)
         self.identity = identity_client.IdentityClientJSON(
             _auth,
             CONF.identity.catalog_type,

@@ -38,11 +38,11 @@ class BaseAuthTestsSetUp(base.TestCase):
     _auth_provider_class = None
     credentials = fake_credentials.FakeCredentials()
 
-    def _auth(self, credentials, **params):
+    def _auth(self, credentials, auth_url, **params):
         """
         returns auth method according to keystone
         """
-        return self._auth_provider_class(credentials, **params)
+        return self._auth_provider_class(credentials, auth_url, **params)
 
     def setUp(self):
         super(BaseAuthTestsSetUp, self).setUp()
@@ -50,7 +50,8 @@ class BaseAuthTestsSetUp(base.TestCase):
         self.stubs.Set(config, 'TempestConfigPrivate', fake_config.FakePrivate)
         self.fake_http = fake_http.fake_httplib2(return_type=200)
         self.stubs.Set(auth, 'get_credentials', fake_get_credentials)
-        self.auth_provider = self._auth(self.credentials)
+        self.auth_provider = self._auth(self.credentials,
+                                        fake_identity.FAKE_AUTH_URL)
 
 
 class TestBaseAuthProvider(BaseAuthTestsSetUp):
@@ -77,6 +78,12 @@ class TestBaseAuthProvider(BaseAuthTestsSetUp):
             pass
 
     _auth_provider_class = FakeAuthProviderImpl
+
+    def _auth(self, credentials, auth_url, **params):
+        """
+        returns auth method according to keystone
+        """
+        return self._auth_provider_class(credentials, **params)
 
     def test_check_credentials_bad_type(self):
         self.assertFalse(self.auth_provider.check_credentials([]))

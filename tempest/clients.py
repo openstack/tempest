@@ -320,9 +320,9 @@ class Manager(manager.Manager):
         self.region_client = RegionClientJSON(self.auth_provider, **params)
         self.credentials_client = CredentialsClientJSON(self.auth_provider,
                                                         **params)
-        self.token_client = TokenClientJSON()
+        self.token_client = TokenClientJSON(CONF.identity.uri)
         if CONF.identity_feature_enabled.api_v3:
-            self.token_v3_client = V3TokenClientJSON()
+            self.token_v3_client = V3TokenClientJSON(CONF.identity.uri_v3)
 
     def _set_volume_clients(self):
         params = {

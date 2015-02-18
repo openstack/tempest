@@ -16,17 +16,13 @@ import json
 from tempest_lib import exceptions as lib_exc
 
 from tempest.common import service_client
-from tempest import config
 from tempest import exceptions
-
-CONF = config.CONF
 
 
 class V3TokenClientJSON(service_client.ServiceClient):
 
-    def __init__(self):
+    def __init__(self, auth_url):
         super(V3TokenClientJSON, self).__init__(None, None, None)
-        auth_url = CONF.identity.uri_v3
         if not auth_url:
             raise exceptions.InvalidConfiguration('you must specify a v3 uri '
                                                   'if using the v3 identity '
