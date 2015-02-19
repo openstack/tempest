@@ -24,6 +24,7 @@ import urllib
 import uuid
 
 import fixtures
+import six
 import testscenarios
 import testtools
 
@@ -59,6 +60,23 @@ def attr(*args, **kwargs):
                     f = testtools.testcase.attr('gate')(f)
         return f
 
+    return decorator
+
+
+def idempotent_id(id):
+    """Stub for metadata decorator"""
+    if not isinstance(id, six.string_types):
+        raise TypeError('Test idempotent_id must be string not %s'
+                        '' % type(id).__name__)
+    uuid.UUID(id)
+
+    def decorator(f):
+        f = testtools.testcase.attr('id-%s' % id)(f)
+        if f.__doc__:
+            f.__doc__ = 'Test idempotent id: %s\n%s' % (id, f.__doc__)
+        else:
+            f.__doc__ = 'Test idempotent id: %s' % id
+        return f
     return decorator
 
 
