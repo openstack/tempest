@@ -76,6 +76,8 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
            * test that traffic is blocked with default security group
            * test that traffic is enabled after updating port with new security
            group having appropriate rule
+        8. _test_multiple_security_groups: test multiple security groups can be
+           associated with the vm
 
     assumptions:
         1. alt_tenant/user existed and is different from primary_tenant/user
@@ -512,3 +514,37 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
             for tenant in self.tenants.values():
                 self._log_console_output(servers=tenant.servers)
             raise
+
+    @test.attr(type='smoke')
+    @test.services('compute', 'network')
+    def test_multiple_security_groups(self):
+        """
+        This test verifies multiple security groups and checks that rules
+        provided in the both the groups is applied onto VM
+        """
+        tenant = self.primary_tenant
+        ip = self._get_server_ip(tenant.access_point,
+                                 floating=self.floating_ip_access)
+        ssh_login = CONF.compute.image_ssh_user
+        private_key = tenant.keypair['private_key']
+        self.check_vm_connectivity(ip,
+                                   should_connect=False)
+        ruleset = dict(
+            protocol='icmp',
+            direction='ingress'
+        )
+        self._create_security_group_rule(
+            secgroup=tenant.security_groups['default'],
+            **ruleset
+        )
+        """
+        Vm now has 2 security groups one with ssh rule(
+        already added in setUp() method),and other with icmp rule
+        (added in the above step).The check_vm_connectivity tests
+        -that vm ping test is successful
+        -ssh to vm is successful
+        """
+        self.check_vm_connectivity(ip,
+                                   username=ssh_login,
+                                   private_key=private_key,
+                                   should_connect=True)
