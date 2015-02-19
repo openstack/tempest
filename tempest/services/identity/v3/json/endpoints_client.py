@@ -16,10 +16,10 @@
 import json
 
 from tempest.common import service_client
-from tempest.services.identity.v3.json import base
 
 
-class EndPointClientJSON(base.IdentityV3Client):
+class EndPointClientJSON(service_client.ServiceClient):
+    api_version = "v3"
 
     def list_endpoints(self):
         """GET endpoints."""

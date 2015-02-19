@@ -177,7 +177,12 @@ class OSClient(object):
             password=pw,
             tenant_name=tenant)
         _auth = tempest.auth.KeystoneV2AuthProvider(_creds)
-        self.identity = identity_client.IdentityClientJSON(_auth)
+        self.identity = identity_client.IdentityClientJSON(
+            _auth,
+            CONF.identity.catalog_type,
+            CONF.identity.region,
+            endpoint_type='adminURL',
+            **default_params_with_timeout_values)
         self.servers = servers_client.ServersClientJSON(_auth,
                                                         **compute_params)
         self.flavors = flavors_client.FlavorsClientJSON(_auth,

@@ -14,19 +14,9 @@ import json
 from tempest_lib import exceptions as lib_exc
 
 from tempest.common import service_client
-from tempest import config
-
-CONF = config.CONF
 
 
 class IdentityClientJSON(service_client.ServiceClient):
-
-    def __init__(self, auth_provider):
-        super(IdentityClientJSON, self).__init__(
-            auth_provider,
-            CONF.identity.catalog_type,
-            CONF.identity.region,
-            endpoint_type='adminURL')
 
     def has_admin_extensions(self):
         """
