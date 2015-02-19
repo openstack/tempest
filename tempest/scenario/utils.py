@@ -120,12 +120,15 @@ class InputScenarioUtils(object):
         if not CONF.service_available.glance:
             return []
         if not hasattr(self, '_scenario_images'):
-            images = self.images_client.list_images()
-            self._scenario_images = [
-                (self._normalize_name(i['name']), dict(image_ref=i['id']))
-                for i in images if re.search(self.image_pattern,
-                                             str(i['name']))
-            ]
+            try:
+                images = self.images_client.list_images()
+                self._scenario_images = [
+                    (self._normalize_name(i['name']), dict(image_ref=i['id']))
+                    for i in images if re.search(self.image_pattern,
+                                                 str(i['name']))
+                ]
+            except Exception:
+                self._scenario_images = []
         return self._scenario_images
 
     @property
@@ -134,12 +137,15 @@ class InputScenarioUtils(object):
         :return: a scenario with name and uuid of flavors
         """
         if not hasattr(self, '_scenario_flavors'):
-            flavors = self.flavors_client.list_flavors()
-            self._scenario_flavors = [
-                (self._normalize_name(f['name']), dict(flavor_ref=f['id']))
-                for f in flavors if re.search(self.flavor_pattern,
-                                              str(f['name']))
-            ]
+            try:
+                flavors = self.flavors_client.list_flavors()
+                self._scenario_flavors = [
+                    (self._normalize_name(f['name']), dict(flavor_ref=f['id']))
+                    for f in flavors if re.search(self.flavor_pattern,
+                                                  str(f['name']))
+                ]
+            except Exception:
+                self._scenario_flavors = []
         return self._scenario_flavors
 
 
