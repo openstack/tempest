@@ -40,8 +40,6 @@ class FloatingIPsClientJSON(service_client.ServiceClient):
         url = "os-floating-ips/%s" % str(floating_ip_id)
         resp, body = self.get(url)
         body = json.loads(body)
-        if resp.status == 404:
-            raise lib_exc.NotFound(body)
         self.validate_response(schema.floating_ip, resp, body)
         return service_client.ResponseBody(resp, body['floating_ip'])
 
