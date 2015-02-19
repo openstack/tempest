@@ -464,20 +464,23 @@ class BulkNetworkOpsTestJSON(base.BaseNetworkTest):
     def test_bulk_create_delete_subnet(self):
         networks = [self.create_network(), self.create_network()]
         # Creates 2 subnets in one request
-        cidr = netaddr.IPNetwork(CONF.network.tenant_network_cidr)
-        mask_bits = CONF.network.tenant_network_mask_bits
+        if self._ip_version == 4:
+            cidr = netaddr.IPNetwork(CONF.network.tenant_network_cidr)
+            mask_bits = CONF.network.tenant_network_mask_bits
+        else:
+            cidr = netaddr.IPNetwork(CONF.network.tenant_network_v6_cidr)
+            mask_bits = CONF.network.tenant_network_v6_mask_bits
+
         cidrs = [subnet_cidr for subnet_cidr in cidr.subnet(mask_bits)]
+
         names = [data_utils.rand_name('subnet-') for i in range(len(networks))]
         subnets_list = []
-        # TODO(raies): "for IPv6, version list [4, 6] will be used.
-        # and cidr for IPv6 will be of IPv6"
-        ip_version = [4, 4]
         for i in range(len(names)):
             p1 = {
                 'network_id': networks[i]['id'],
                 'cidr': str(cidrs[(i)]),
                 'name': names[i],
-                'ip_version': ip_version[i]
+                'ip_version': self._ip_version
             }
             subnets_list.append(p1)
         del subnets_list[1]['name']
@@ -515,6 +518,10 @@ class BulkNetworkOpsTestJSON(base.BaseNetworkTest):
         for n in created_ports:
             self.assertIsNotNone(n['id'])
             self.assertIn(n['id'], ports_list)
+
+
+class BulkNetworkOpsIpV6TestJSON(BulkNetworkOpsTestJSON):
+    _ip_version = 6
 
 
 class NetworksIpV6TestJSON(NetworksTestJSON):
