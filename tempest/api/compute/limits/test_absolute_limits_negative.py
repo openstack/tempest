@@ -28,8 +28,8 @@ class AbsoluteLimitsNegativeTestJSON(base.BaseV2ComputeTest):
         super(AbsoluteLimitsNegativeTestJSON, self).setUp()
 
     @classmethod
-    def resource_setup(cls):
-        super(AbsoluteLimitsNegativeTestJSON, cls).resource_setup()
+    def setup_clients(cls):
+        super(AbsoluteLimitsNegativeTestJSON, cls).setup_clients()
         cls.client = cls.limits_client
         cls.server_client = cls.servers_client
 
