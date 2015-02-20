@@ -23,12 +23,15 @@ CONF = config.CONF
 class VolumesV2SnapshotTestJSON(base.BaseVolumeTest):
 
     @classmethod
+    def skip_checks(cls):
+        super(VolumesV2SnapshotTestJSON, cls).skip_checks()
+        if not CONF.volume_feature_enabled.snapshot:
+            raise cls.skipException("Cinder volume snapshots are disabled")
+
+    @classmethod
     def resource_setup(cls):
         super(VolumesV2SnapshotTestJSON, cls).resource_setup()
         cls.volume_origin = cls.create_volume()
-
-        if not CONF.volume_feature_enabled.snapshot:
-            raise cls.skipException("Cinder volume snapshots are disabled")
 
         cls.name_field = cls.special_fields['name_field']
         cls.descrip_field = cls.special_fields['descrip_field']

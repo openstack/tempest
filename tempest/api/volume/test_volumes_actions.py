@@ -24,10 +24,14 @@ CONF = config.CONF
 class VolumesV2ActionsTest(base.BaseVolumeTest):
 
     @classmethod
-    def resource_setup(cls):
-        super(VolumesV2ActionsTest, cls).resource_setup()
+    def setup_clients(cls):
+        super(VolumesV2ActionsTest, cls).setup_clients()
         cls.client = cls.volumes_client
         cls.image_client = cls.os.image_client
+
+    @classmethod
+    def resource_setup(cls):
+        super(VolumesV2ActionsTest, cls).resource_setup()
 
         # Create a test shared instance
         srv_name = data_utils.rand_name(cls.__name__ + '-Instance-')

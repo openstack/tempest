@@ -25,9 +25,8 @@ CONF = config.CONF
 class VolumesV2SnapshotNegativeTestJSON(base.BaseVolumeTest):
 
     @classmethod
-    def resource_setup(cls):
-        super(VolumesV2SnapshotNegativeTestJSON, cls).resource_setup()
-
+    def skip_checks(cls):
+        super(VolumesV2SnapshotNegativeTestJSON, cls).skip_checks()
         if not CONF.volume_feature_enabled.snapshot:
             raise cls.skipException("Cinder volume snapshots are disabled")
 

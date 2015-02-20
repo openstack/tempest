@@ -23,10 +23,14 @@ class BaseVolumeQuotasNegativeV2TestJSON(base.BaseVolumeAdminTest):
     force_tenant_isolation = True
 
     @classmethod
+    def setup_credentials(cls):
+        super(BaseVolumeQuotasNegativeV2TestJSON, cls).setup_credentials()
+        cls.demo_user = cls.isolated_creds.get_primary_creds()
+        cls.demo_tenant_id = cls.demo_user.tenant_id
+
+    @classmethod
     def resource_setup(cls):
         super(BaseVolumeQuotasNegativeV2TestJSON, cls).resource_setup()
-        demo_user = cls.isolated_creds.get_primary_creds()
-        cls.demo_tenant_id = demo_user.tenant_id
         cls.shared_quota_set = {'gigabytes': 3, 'volumes': 1, 'snapshots': 1}
 
         # NOTE(gfidente): no need to restore original quota set

@@ -55,9 +55,13 @@ class VolumesV2ListTestJSON(base.BaseVolumeTest):
                              [str_vol(v) for v in fetched_list]))
 
     @classmethod
+    def setup_clients(cls):
+        super(VolumesV2ListTestJSON, cls).setup_clients()
+        cls.client = cls.volumes_client
+
+    @classmethod
     def resource_setup(cls):
         super(VolumesV2ListTestJSON, cls).resource_setup()
-        cls.client = cls.volumes_client
         cls.name = cls.VOLUME_FIELDS[1]
 
         # Create 3 test volumes

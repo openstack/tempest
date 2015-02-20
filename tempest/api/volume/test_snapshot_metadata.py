@@ -20,9 +20,13 @@ from tempest import test
 class SnapshotV2MetadataTestJSON(base.BaseVolumeTest):
 
     @classmethod
+    def setup_clients(cls):
+        super(SnapshotV2MetadataTestJSON, cls).setup_clients()
+        cls.client = cls.snapshots_client
+
+    @classmethod
     def resource_setup(cls):
         super(SnapshotV2MetadataTestJSON, cls).resource_setup()
-        cls.client = cls.snapshots_client
         # Create a volume
         cls.volume = cls.create_volume()
         # Create a snapshot
