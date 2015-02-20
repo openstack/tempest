@@ -13,7 +13,8 @@
 
 import time
 
-from tempest.common.utils import misc as misc_utils
+from tempest_lib.common.utils import misc as misc_utils
+
 from tempest import config
 from tempest import exceptions
 from tempest.openstack.common import log as logging

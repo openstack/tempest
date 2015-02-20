@@ -17,8 +17,9 @@ import hmac
 import time
 import urlparse
 
+from tempest_lib.common.utils import data_utils
+
 from tempest.api.object_storage import base
-from tempest.common.utils import data_utils
 from tempest import test
 
 

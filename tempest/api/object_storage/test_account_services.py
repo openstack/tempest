@@ -14,13 +14,14 @@
 #    under the License.
 
 import random
+
 from six import moves
+from tempest_lib.common.utils import data_utils
 import testtools
 
 from tempest.api.object_storage import base
 from tempest import clients
 from tempest.common import custom_matchers
-from tempest.common.utils import data_utils
 from tempest import config
 from tempest import test
 

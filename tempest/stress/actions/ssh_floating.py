@@ -13,7 +13,8 @@
 import socket
 import subprocess
 
-from tempest.common.utils import data_utils
+from tempest_lib.common.utils import data_utils
+
 from tempest import config
 import tempest.stress.stressaction as stressaction
 import tempest.test

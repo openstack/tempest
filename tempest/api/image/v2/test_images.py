@@ -17,8 +17,9 @@
 import cStringIO as StringIO
 import random
 
+from tempest_lib.common.utils import data_utils
+
 from tempest.api.image import base
-from tempest.common.utils import data_utils
 from tempest import test
 
 

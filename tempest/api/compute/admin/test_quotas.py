@@ -14,11 +14,11 @@
 #    under the License.
 
 import six
+from tempest_lib.common.utils import data_utils
 from testtools import matchers
 
 from tempest.api.compute import base
 from tempest.common import tempest_fixtures as fixtures
-from tempest.common.utils import data_utils
 from tempest.openstack.common import log as logging
 from tempest import test
 

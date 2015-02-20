@@ -13,10 +13,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib.common.utils import data_utils
 from testtools import matchers
 
 from tempest.api.identity import base
-from tempest.common.utils import data_utils
 from tempest import test
 
 

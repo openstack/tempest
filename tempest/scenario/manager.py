@@ -19,12 +19,12 @@ import subprocess
 
 import netaddr
 import six
+from tempest_lib.common.utils import data_utils
 from tempest_lib import exceptions as lib_exc
 
 from tempest import clients
 from tempest.common import cred_provider
 from tempest.common import credentials
-from tempest.common.utils import data_utils
 from tempest.common.utils.linux import remote_client
 from tempest import config
 from tempest import exceptions
