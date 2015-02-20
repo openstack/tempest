@@ -16,7 +16,7 @@ except DistributionNotFound:
     pip.main(['install', 'SimpleConfigParser'])
 
 from simpleconfigparser import simpleconfigparser
-from tempest import auth
+from tempest.common import cred_provider
 from tempest import clients
 from tempest import config
 
@@ -26,7 +26,7 @@ tenant = None
 
 
 def main():
-    credentials = auth.get_default_credentials('identity_admin')
+    credentials = cred_provider.get_configured_credentials('identity_admin')
     network_client, image_client, glance_client = set_context(credentials)
     # Start to config
     fix_cirros(glance_client, image_client)
