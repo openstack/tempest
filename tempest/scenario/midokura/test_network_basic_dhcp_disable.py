@@ -63,7 +63,7 @@ class TestNetworkBasicDhcpDisable(manager.AdvancedNetworkScenarioTest):
     def _get_ip(self, hops, timeout=0, shouldFail=False):
         try:
             ssh_client = self.setup_tunnel(hops)
-            net_info = ssh_client.get_ip_list(timeout)
+            net_info = ssh_client.get_ip_list()
             LOG.debug(net_info)
             remote_ip, _ = hops[-1]
             pattern = re.compile(
