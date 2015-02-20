@@ -12,6 +12,8 @@
 
 import os
 
+from tempest_lib import decorators
+
 from tempest import config
 from tempest.openstack.common import log as logging
 from tempest.scenario.midokura import manager
@@ -81,7 +83,7 @@ class TestAdminStateUp(manager.AdvancedNetworkScenarioTest):
         self._check_connection(True)
         LOG.info("End of Rotuer test")
 
-    @test.skip_because(bug="1237807")
+    @decorators.skip_because(bug="1237807")
     @test.attr(type='smoke')
     @test.services('compute', 'network')
     def test_network_adminstateup_network(self):
