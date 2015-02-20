@@ -32,12 +32,20 @@ class VolumesTestJSON(base.BaseV2ComputeTest):
     """
 
     @classmethod
-    def resource_setup(cls):
-        super(VolumesTestJSON, cls).resource_setup()
-        cls.client = cls.volumes_extensions_client
+    def skip_checks(cls):
+        super(VolumesTestJSON, cls).skip_checks()
         if not CONF.service_available.cinder:
             skip_msg = ("%s skipped as Cinder is not available" % cls.__name__)
             raise cls.skipException(skip_msg)
+
+    @classmethod
+    def setup_clients(cls):
+        super(VolumesTestJSON, cls).setup_clients()
+        cls.client = cls.volumes_extensions_client
+
+    @classmethod
+    def resource_setup(cls):
+        super(VolumesTestJSON, cls).resource_setup()
         # Create 3 Volumes
         cls.volume_list = []
         cls.volume_id_list = []

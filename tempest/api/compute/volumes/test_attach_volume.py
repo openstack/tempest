@@ -30,13 +30,21 @@ class AttachVolumeTestJSON(base.BaseV2ComputeTest):
         self.attachment = None
 
     @classmethod
-    def resource_setup(cls):
-        cls.prepare_instance_network()
-        super(AttachVolumeTestJSON, cls).resource_setup()
-        cls.device = CONF.compute.volume_device_name
+    def skip_checks(cls):
+        super(AttachVolumeTestJSON, cls).skip_checks()
         if not CONF.service_available.cinder:
             skip_msg = ("%s skipped as Cinder is not available" % cls.__name__)
             raise cls.skipException(skip_msg)
+
+    @classmethod
+    def setup_credentials(cls):
+        cls.prepare_instance_network()
+        super(AttachVolumeTestJSON, cls).setup_credentials()
+
+    @classmethod
+    def resource_setup(cls):
+        super(AttachVolumeTestJSON, cls).resource_setup()
+        cls.device = CONF.compute.volume_device_name
 
     def _detach(self, server_id, volume_id):
         if self.attachment:
