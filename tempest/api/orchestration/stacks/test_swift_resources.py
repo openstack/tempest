@@ -26,15 +26,27 @@ CONF = config.CONF
 
 class SwiftResourcesTestJSON(base.BaseOrchestrationTest):
     @classmethod
+    def skip_checks(cls):
+        super(SwiftResourcesTestJSON, cls).skip_checks()
+        if not CONF.service_available.swift:
+            raise cls.skipException("Swift support is required")
+
+    @classmethod
+    def setup_credentials(cls):
+        super(SwiftResourcesTestJSON, cls).setup_credentials()
+        cls.os = clients.Manager()
+
+    @classmethod
+    def setup_clients(cls):
+        super(SwiftResourcesTestJSON, cls).setup_clients()
+        cls.account_client = cls.os.account_client
+        cls.container_client = cls.os.container_client
+
+    @classmethod
     def resource_setup(cls):
         super(SwiftResourcesTestJSON, cls).resource_setup()
         cls.stack_name = data_utils.rand_name('heat')
         template = cls.read_template('swift_basic')
-        os = clients.Manager()
-        if not CONF.service_available.swift:
-            raise cls.skipException("Swift support is required")
-        cls.account_client = os.account_client
-        cls.container_client = os.container_client
         # create the stack
         cls.stack_identifier = cls.create_stack(
             cls.stack_name,
@@ -42,7 +54,7 @@ class SwiftResourcesTestJSON(base.BaseOrchestrationTest):
         cls.stack_id = cls.stack_identifier.split('/')[1]
         cls.client.wait_for_stack_status(cls.stack_id, 'CREATE_COMPLETE')
         cls.test_resources = {}
-        _, resources = cls.client.list_resources(cls.stack_identifier)
+        resources = cls.client.list_resources(cls.stack_identifier)
         for resource in resources:
             cls.test_resources[resource['logical_resource_id']] = resource
 

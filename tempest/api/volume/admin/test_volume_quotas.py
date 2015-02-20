@@ -23,7 +23,6 @@ QUOTA_USAGE_KEYS = ['reserved', 'limit', 'in_use']
 
 
 class BaseVolumeQuotasAdminV2TestJSON(base.BaseVolumeAdminTest):
-    _interface = "json"
     force_tenant_isolation = True
 
     @classmethod
@@ -33,13 +32,13 @@ class BaseVolumeQuotasAdminV2TestJSON(base.BaseVolumeAdminTest):
 
     @test.attr(type='gate')
     def test_list_quotas(self):
-        _, quotas = self.quotas_client.get_quota_set(self.demo_tenant_id)
+        quotas = self.quotas_client.get_quota_set(self.demo_tenant_id)
         for key in QUOTA_KEYS:
             self.assertIn(key, quotas)
 
     @test.attr(type='gate')
     def test_list_default_quotas(self):
-        _, quotas = self.quotas_client.get_default_quota_set(
+        quotas = self.quotas_client.get_default_quota_set(
             self.demo_tenant_id)
         for key in QUOTA_KEYS:
             self.assertIn(key, quotas)
@@ -47,14 +46,14 @@ class BaseVolumeQuotasAdminV2TestJSON(base.BaseVolumeAdminTest):
     @test.attr(type='gate')
     def test_update_all_quota_resources_for_tenant(self):
         # Admin can update all the resource quota limits for a tenant
-        _, default_quota_set = self.quotas_client.get_default_quota_set(
+        default_quota_set = self.quotas_client.get_default_quota_set(
             self.demo_tenant_id)
         new_quota_set = {'gigabytes': 1009,
                          'volumes': 11,
                          'snapshots': 11}
 
         # Update limits for all quota resources
-        _, quota_set = self.quotas_client.update_quota_set(
+        quota_set = self.quotas_client.update_quota_set(
             self.demo_tenant_id,
             **new_quota_set)
 
@@ -70,7 +69,7 @@ class BaseVolumeQuotasAdminV2TestJSON(base.BaseVolumeAdminTest):
 
     @test.attr(type='gate')
     def test_show_quota_usage(self):
-        _, quota_usage = self.quotas_client.get_quota_usage(
+        quota_usage = self.quotas_client.get_quota_usage(
             self.os_adm.credentials.tenant_id)
         for key in QUOTA_KEYS:
             self.assertIn(key, quota_usage)
@@ -79,14 +78,14 @@ class BaseVolumeQuotasAdminV2TestJSON(base.BaseVolumeAdminTest):
 
     @test.attr(type='gate')
     def test_quota_usage(self):
-        _, quota_usage = self.quotas_client.get_quota_usage(
+        quota_usage = self.quotas_client.get_quota_usage(
             self.demo_tenant_id)
 
         volume = self.create_volume(size=1)
         self.addCleanup(self.admin_volume_client.delete_volume,
                         volume['id'])
 
-        _, new_quota_usage = self.quotas_client.get_quota_usage(
+        new_quota_usage = self.quotas_client.get_quota_usage(
             self.demo_tenant_id)
 
         self.assertEqual(quota_usage['volumes']['in_use'] + 1,
@@ -103,7 +102,7 @@ class BaseVolumeQuotasAdminV2TestJSON(base.BaseVolumeAdminTest):
         tenant = identity_client.create_tenant(tenant_name)
         tenant_id = tenant['id']
         self.addCleanup(identity_client.delete_tenant, tenant_id)
-        _, quota_set_default = self.quotas_client.get_default_quota_set(
+        quota_set_default = self.quotas_client.get_default_quota_set(
             tenant_id)
         volume_default = quota_set_default['volumes']
 
@@ -111,7 +110,7 @@ class BaseVolumeQuotasAdminV2TestJSON(base.BaseVolumeAdminTest):
                                             volumes=(int(volume_default) + 5))
 
         self.quotas_client.delete_quota_set(tenant_id)
-        _, quota_set_new = self.quotas_client.get_quota_set(tenant_id)
+        quota_set_new = self.quotas_client.get_quota_set(tenant_id)
         self.assertEqual(volume_default, quota_set_new['volumes'])
 
 

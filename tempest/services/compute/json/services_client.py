@@ -18,10 +18,10 @@ import json
 import urllib
 
 from tempest.api_schema.response.compute import services as schema
-from tempest.services.compute.json import base
+from tempest.common import service_client
 
 
-class ServicesClientJSON(base.ComputeClient):
+class ServicesClientJSON(service_client.ServiceClient):
 
     def list_services(self, params=None):
         url = 'os-services'
@@ -31,7 +31,7 @@ class ServicesClientJSON(base.ComputeClient):
         resp, body = self.get(url)
         body = json.loads(body)
         self.validate_response(schema.list_services, resp, body)
-        return resp, body['services']
+        return service_client.ResponseBodyList(resp, body['services'])
 
     def enable_service(self, host_name, binary):
         """
@@ -43,7 +43,7 @@ class ServicesClientJSON(base.ComputeClient):
         resp, body = self.put('os-services/enable', post_body)
         body = json.loads(body)
         self.validate_response(schema.enable_service, resp, body)
-        return resp, body['service']
+        return service_client.ResponseBody(resp, body['service'])
 
     def disable_service(self, host_name, binary):
         """
@@ -54,4 +54,4 @@ class ServicesClientJSON(base.ComputeClient):
         post_body = json.dumps({'binary': binary, 'host': host_name})
         resp, body = self.put('os-services/disable', post_body)
         body = json.loads(body)
-        return resp, body['service']
+        return service_client.ResponseBody(resp, body['service'])

@@ -17,10 +17,10 @@ import json
 import urllib
 from xml.etree import ElementTree as etree
 
-from tempest.services.object_storage import base
+from tempest.common import service_client
 
 
-class ContainerClient(base.ObjectStorageClient):
+class ContainerClient(service_client.ServiceClient):
 
     def create_container(
             self, container_name,

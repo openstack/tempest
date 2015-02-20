@@ -14,6 +14,7 @@
 #    under the License.
 
 import netaddr
+from tempest_lib import decorators
 
 from tempest.api.compute import base
 from tempest import config
@@ -25,16 +26,24 @@ CONF = config.CONF
 class VirtualInterfacesTestJSON(base.BaseV2ComputeTest):
 
     @classmethod
-    def resource_setup(cls):
+    def setup_credentials(cls):
         # This test needs a network and a subnet
         cls.set_network_resources(network=True, subnet=True)
-        super(VirtualInterfacesTestJSON, cls).resource_setup()
+        super(VirtualInterfacesTestJSON, cls).setup_credentials()
+
+    @classmethod
+    def setup_clients(cls):
+        super(VirtualInterfacesTestJSON, cls).setup_clients()
         cls.client = cls.servers_client
-        resp, server = cls.create_test_server(wait_until='ACTIVE')
+
+    @classmethod
+    def resource_setup(cls):
+        super(VirtualInterfacesTestJSON, cls).resource_setup()
+        server = cls.create_test_server(wait_until='ACTIVE')
         cls.server_id = server['id']
 
-    @test.skip_because(bug="1183436",
-                       condition=CONF.service_available.neutron)
+    @decorators.skip_because(bug="1183436",
+                             condition=CONF.service_available.neutron)
     @test.attr(type='gate')
     @test.services('network')
     def test_list_virtual_interfaces(self):

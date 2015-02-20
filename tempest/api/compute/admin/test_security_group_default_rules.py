@@ -12,11 +12,11 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib import exceptions as lib_exc
 import testtools
 
 from tempest.api.compute import base
 from tempest import config
-from tempest import exceptions
 from tempest import test
 
 CONF = config.CONF
@@ -30,17 +30,21 @@ class SecurityGroupDefaultRulesTest(base.BaseV2ComputeAdminTest):
     @testtools.skipIf(CONF.service_available.neutron,
                       "Skip as this functionality is not yet "
                       "implemented in Neutron. Related Bug#1311500")
-    def resource_setup(cls):
+    def setup_credentials(cls):
         # A network and a subnet will be created for these tests
         cls.set_network_resources(network=True, subnet=True)
-        super(SecurityGroupDefaultRulesTest, cls).resource_setup()
+        super(SecurityGroupDefaultRulesTest, cls).setup_credentials()
+
+    @classmethod
+    def setup_clients(cls):
+        super(SecurityGroupDefaultRulesTest, cls).setup_clients()
         cls.adm_client = cls.os_adm.security_group_default_rules_client
 
     def _create_security_group_default_rules(self, ip_protocol='tcp',
                                              from_port=22, to_port=22,
                                              cidr='10.10.0.0/24'):
         # Create Security Group default rule
-        _, rule = self.adm_client.create_security_default_group_rule(
+        rule = self.adm_client.create_security_default_group_rule(
             ip_protocol,
             from_port,
             to_port,
@@ -59,7 +63,7 @@ class SecurityGroupDefaultRulesTest(base.BaseV2ComputeAdminTest):
             rule = self._create_security_group_default_rules(ip_protocol)
             # Delete Security Group default rule
             self.adm_client.delete_security_group_default_rule(rule['id'])
-            self.assertRaises(exceptions.NotFound,
+            self.assertRaises(lib_exc.NotFound,
                               self.adm_client.get_security_group_default_rule,
                               rule['id'])
 
@@ -68,7 +72,7 @@ class SecurityGroupDefaultRulesTest(base.BaseV2ComputeAdminTest):
         ip_protocol = 'udp'
         from_port = 80
         to_port = 80
-        _, rule = self.adm_client.create_security_default_group_rule(
+        rule = self.adm_client.create_security_default_group_rule(
             ip_protocol,
             from_port,
             to_port)
@@ -83,7 +87,7 @@ class SecurityGroupDefaultRulesTest(base.BaseV2ComputeAdminTest):
         from_port = 10
         to_port = 10
         cidr = ''
-        _, rule = self.adm_client.create_security_default_group_rule(
+        rule = self.adm_client.create_security_default_group_rule(
             ip_protocol,
             from_port,
             to_port,
@@ -105,7 +109,7 @@ class SecurityGroupDefaultRulesTest(base.BaseV2ComputeAdminTest):
                                                          cidr)
         self.addCleanup(self.adm_client.delete_security_group_default_rule,
                         rule['id'])
-        _, rules = self.adm_client.list_security_group_default_rules()
+        rules = self.adm_client.list_security_group_default_rules()
         self.assertNotEqual(0, len(rules))
         self.assertIn(rule, rules)
 
@@ -121,6 +125,6 @@ class SecurityGroupDefaultRulesTest(base.BaseV2ComputeAdminTest):
                                                          cidr)
         self.addCleanup(self.adm_client.delete_security_group_default_rule,
                         rule['id'])
-        _, fetched_rule = self.adm_client.get_security_group_default_rule(
+        fetched_rule = self.adm_client.get_security_group_default_rule(
             rule['id'])
         self.assertEqual(rule, fetched_rule)

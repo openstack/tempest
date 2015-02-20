@@ -13,12 +13,13 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib import decorators
+from tempest_lib import exceptions as lib_exc
 import testtools
 
 from tempest.api.compute.security_groups import base
 from tempest.common.utils import data_utils
 from tempest import config
-from tempest import exceptions
 from tempest import test
 
 CONF = config.CONF
@@ -27,14 +28,18 @@ CONF = config.CONF
 class SecurityGroupsNegativeTestJSON(base.BaseSecurityGroupsTest):
 
     @classmethod
+    def setup_clients(cls):
+        super(SecurityGroupsNegativeTestJSON, cls).setup_clients()
+        cls.client = cls.security_groups_client
+
+    @classmethod
     def resource_setup(cls):
         super(SecurityGroupsNegativeTestJSON, cls).resource_setup()
-        cls.client = cls.security_groups_client
         cls.neutron_available = CONF.service_available.neutron
 
     def _generate_a_non_existent_security_group_id(self):
         security_group_id = []
-        resp, body = self.client.list_security_groups()
+        body = self.client.list_security_groups()
         for i in range(len(body)):
             security_group_id.append(body[i]['id'])
         # Generate a non-existent security group id
@@ -52,11 +57,11 @@ class SecurityGroupsNegativeTestJSON(base.BaseSecurityGroupsTest):
         # Negative test:Should not be able to GET the details
         # of non-existent Security Group
         non_exist_id = self._generate_a_non_existent_security_group_id()
-        self.assertRaises(exceptions.NotFound, self.client.get_security_group,
+        self.assertRaises(lib_exc.NotFound, self.client.get_security_group,
                           non_exist_id)
 
-    @test.skip_because(bug="1161411",
-                       condition=CONF.service_available.neutron)
+    @decorators.skip_because(bug="1161411",
+                             condition=CONF.service_available.neutron)
     @test.attr(type=['negative', 'smoke'])
     @test.services('network')
     def test_security_group_create_with_invalid_group_name(self):
@@ -64,20 +69,20 @@ class SecurityGroupsNegativeTestJSON(base.BaseSecurityGroupsTest):
         # as an empty string/with white spaces/chars more than 255
         s_description = data_utils.rand_name('description-')
         # Create Security Group with empty string as group name
-        self.assertRaises(exceptions.BadRequest,
+        self.assertRaises(lib_exc.BadRequest,
                           self.client.create_security_group, "", s_description)
         # Create Security Group with white space in group name
-        self.assertRaises(exceptions.BadRequest,
+        self.assertRaises(lib_exc.BadRequest,
                           self.client.create_security_group, " ",
                           s_description)
         # Create Security Group with group name longer than 255 chars
         s_name = 'securitygroup-'.ljust(260, '0')
-        self.assertRaises(exceptions.BadRequest,
+        self.assertRaises(lib_exc.BadRequest,
                           self.client.create_security_group, s_name,
                           s_description)
 
-    @test.skip_because(bug="1161411",
-                       condition=CONF.service_available.neutron)
+    @decorators.skip_because(bug="1161411",
+                             condition=CONF.service_available.neutron)
     @test.attr(type=['negative', 'smoke'])
     @test.services('network')
     def test_security_group_create_with_invalid_group_description(self):
@@ -85,14 +90,14 @@ class SecurityGroupsNegativeTestJSON(base.BaseSecurityGroupsTest):
         # as an empty string/with white spaces/chars more than 255
         s_name = data_utils.rand_name('securitygroup-')
         # Create Security Group with empty string as description
-        self.assertRaises(exceptions.BadRequest,
+        self.assertRaises(lib_exc.BadRequest,
                           self.client.create_security_group, s_name, "")
         # Create Security Group with white space in description
-        self.assertRaises(exceptions.BadRequest,
+        self.assertRaises(lib_exc.BadRequest,
                           self.client.create_security_group, s_name, " ")
         # Create Security Group with group description longer than 255 chars
         s_description = 'description-'.ljust(260, '0')
-        self.assertRaises(exceptions.BadRequest,
+        self.assertRaises(lib_exc.BadRequest,
                           self.client.create_security_group, s_name,
                           s_description)
 
@@ -105,11 +110,9 @@ class SecurityGroupsNegativeTestJSON(base.BaseSecurityGroupsTest):
         # be created
         s_name = data_utils.rand_name('securitygroup-')
         s_description = data_utils.rand_name('description-')
-        resp, security_group =\
-            self.create_security_group(s_name, s_description)
-        self.assertEqual(200, resp.status)
+        self.create_security_group(s_name, s_description)
         # Now try the Security Group with the same 'Name'
-        self.assertRaises(exceptions.BadRequest,
+        self.assertRaises(lib_exc.BadRequest,
                           self.client.create_security_group, s_name,
                           s_description)
 
@@ -118,13 +121,13 @@ class SecurityGroupsNegativeTestJSON(base.BaseSecurityGroupsTest):
     def test_delete_the_default_security_group(self):
         # Negative test:Deletion of the "default" Security Group should Fail
         default_security_group_id = None
-        resp, body = self.client.list_security_groups()
+        body = self.client.list_security_groups()
         for i in range(len(body)):
             if body[i]['name'] == 'default':
                 default_security_group_id = body[i]['id']
                 break
         # Deleting the "default" Security Group
-        self.assertRaises(exceptions.BadRequest,
+        self.assertRaises(lib_exc.BadRequest,
                           self.client.delete_security_group,
                           default_security_group_id)
 
@@ -133,7 +136,7 @@ class SecurityGroupsNegativeTestJSON(base.BaseSecurityGroupsTest):
     def test_delete_nonexistent_security_group(self):
         # Negative test:Deletion of a non-existent Security Group should fail
         non_exist_id = self._generate_a_non_existent_security_group_id()
-        self.assertRaises(exceptions.NotFound,
+        self.assertRaises(lib_exc.NotFound,
                           self.client.delete_security_group, non_exist_id)
 
     @test.attr(type=['negative', 'smoke'])
@@ -141,7 +144,7 @@ class SecurityGroupsNegativeTestJSON(base.BaseSecurityGroupsTest):
     def test_delete_security_group_without_passing_id(self):
         # Negative test:Deletion of a Security Group with out passing ID
         # should Fail
-        self.assertRaises(exceptions.NotFound,
+        self.assertRaises(lib_exc.NotFound,
                           self.client.delete_security_group, '')
 
     @testtools.skipIf(CONF.service_available.neutron,
@@ -154,7 +157,7 @@ class SecurityGroupsNegativeTestJSON(base.BaseSecurityGroupsTest):
         s_description = data_utils.rand_name('description-')
         # Create a non int sg_id
         sg_id_invalid = data_utils.rand_name('sg-')
-        self.assertRaises(exceptions.BadRequest,
+        self.assertRaises(lib_exc.BadRequest,
                           self.client.update_security_group, sg_id_invalid,
                           name=s_name, description=s_description)
 
@@ -164,13 +167,12 @@ class SecurityGroupsNegativeTestJSON(base.BaseSecurityGroupsTest):
     @test.services('network')
     def test_update_security_group_with_invalid_sg_name(self):
         # Update security_group with invalid sg_name should fail
-        resp, securitygroup = self.create_security_group()
-        self.assertEqual(200, resp.status)
+        securitygroup = self.create_security_group()
         self.assertIn('id', securitygroup)
         securitygroup_id = securitygroup['id']
         # Update Security Group with group name longer than 255 chars
         s_new_name = 'securitygroup-'.ljust(260, '0')
-        self.assertRaises(exceptions.BadRequest,
+        self.assertRaises(lib_exc.BadRequest,
                           self.client.update_security_group,
                           securitygroup_id, name=s_new_name)
 
@@ -180,13 +182,12 @@ class SecurityGroupsNegativeTestJSON(base.BaseSecurityGroupsTest):
     @test.services('network')
     def test_update_security_group_with_invalid_sg_des(self):
         # Update security_group with invalid sg_des should fail
-        resp, securitygroup = self.create_security_group()
-        self.assertEqual(200, resp.status)
+        securitygroup = self.create_security_group()
         self.assertIn('id', securitygroup)
         securitygroup_id = securitygroup['id']
         # Update Security Group with group description longer than 255 chars
         s_new_des = 'des-'.ljust(260, '0')
-        self.assertRaises(exceptions.BadRequest,
+        self.assertRaises(lib_exc.BadRequest,
                           self.client.update_security_group,
                           securitygroup_id, description=s_new_des)
 
@@ -197,7 +198,7 @@ class SecurityGroupsNegativeTestJSON(base.BaseSecurityGroupsTest):
         non_exist_id = self._generate_a_non_existent_security_group_id()
         s_name = data_utils.rand_name('sg-')
         s_description = data_utils.rand_name('description-')
-        self.assertRaises(exceptions.NotFound,
+        self.assertRaises(lib_exc.NotFound,
                           self.client.update_security_group,
                           non_exist_id, name=s_name,
                           description=s_description)

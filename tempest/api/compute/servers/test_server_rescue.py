@@ -24,29 +24,36 @@ CONF = config.CONF
 class ServerRescueTestJSON(base.BaseV2ComputeTest):
 
     @classmethod
-    def resource_setup(cls):
+    def skip_checks(cls):
+        super(ServerRescueTestJSON, cls).skip_checks()
         if not CONF.compute_feature_enabled.rescue:
             msg = "Server rescue not available."
             raise cls.skipException(msg)
 
+    @classmethod
+    def setup_credentials(cls):
         cls.set_network_resources(network=True, subnet=True, router=True)
+        super(ServerRescueTestJSON, cls).setup_credentials()
+
+    @classmethod
+    def resource_setup(cls):
         super(ServerRescueTestJSON, cls).resource_setup()
 
         # Floating IP creation
-        resp, body = cls.floating_ips_client.create_floating_ip()
+        body = cls.floating_ips_client.create_floating_ip()
         cls.floating_ip_id = str(body['id']).strip()
         cls.floating_ip = str(body['ip']).strip()
 
         # Security group creation
         cls.sg_name = data_utils.rand_name('sg')
         cls.sg_desc = data_utils.rand_name('sg-desc')
-        resp, cls.sg = \
+        cls.sg = \
             cls.security_groups_client.create_security_group(cls.sg_name,
                                                              cls.sg_desc)
         cls.sg_id = cls.sg['id']
 
         # Server for positive tests
-        resp, server = cls.create_test_server(wait_until='BUILD')
+        server = cls.create_test_server(wait_until='BUILD')
         cls.server_id = server['id']
         cls.password = server['adminPass']
         cls.servers_client.wait_for_server_status(cls.server_id, 'ACTIVE')
@@ -58,7 +65,7 @@ class ServerRescueTestJSON(base.BaseV2ComputeTest):
     def resource_cleanup(cls):
         # Deleting the floating IP which is created in this method
         cls.floating_ips_client.delete_floating_ip(cls.floating_ip_id)
-        resp, cls.sg = cls.security_groups_client.delete_security_group(
+        cls.sg = cls.security_groups_client.delete_security_group(
             cls.sg_id)
         super(ServerRescueTestJSON, cls).resource_cleanup()
 
@@ -90,15 +97,12 @@ class ServerRescueTestJSON(base.BaseV2ComputeTest):
 
         # Association of floating IP to a rescued vm
         client = self.floating_ips_client
-        resp, body = client.associate_floating_ip_to_server(self.floating_ip,
-                                                            self.server_id)
-        self.assertEqual(202, resp.status)
+        client.associate_floating_ip_to_server(self.floating_ip,
+                                               self.server_id)
 
         # Disassociation of floating IP that was associated in this method
-        resp, body = \
-            client.disassociate_floating_ip_from_server(self.floating_ip,
-                                                        self.server_id)
-        self.assertEqual(202, resp.status)
+        client.disassociate_floating_ip_from_server(self.floating_ip,
+                                                    self.server_id)
 
     @test.attr(type='gate')
     def test_rescued_vm_add_remove_security_group(self):

@@ -18,17 +18,19 @@ import json
 import time
 import urllib
 
+from tempest_lib import exceptions as lib_exc
+
 from tempest.api_schema.response.compute import servers as common_schema
 from tempest.api_schema.response.compute.v2 import servers as schema
+from tempest.common import service_client
 from tempest.common import waiters
 from tempest import config
 from tempest import exceptions
-from tempest.services.compute.json import base
 
 CONF = config.CONF
 
 
-class ServersClientJSON(base.ComputeClient):
+class ServersClientJSON(service_client.ServiceClient):
 
     def create_server(self, name, image_ref, flavor_ref, **kwargs):
         """
@@ -90,13 +92,13 @@ class ServersClientJSON(base.ComputeClient):
         # NOTE(maurosr): this deals with the case of multiple server create
         # with return reservation id set True
         if 'reservation_id' in body:
-            return resp, body
+            return service_client.ResponseBody(resp, body)
         if CONF.compute_feature_enabled.enable_instance_password:
             create_schema = schema.create_server_with_admin_pass
         else:
             create_schema = schema.create_server
         self.validate_response(create_schema, resp, body)
-        return resp, body['server']
+        return service_client.ResponseBody(resp, body['server'])
 
     def update_server(self, server_id, name=None, meta=None, accessIPv4=None,
                       accessIPv6=None, disk_config=None):
@@ -130,20 +132,20 @@ class ServersClientJSON(base.ComputeClient):
         resp, body = self.put("servers/%s" % str(server_id), post_body)
         body = json.loads(body)
         self.validate_response(schema.update_server, resp, body)
-        return resp, body['server']
+        return service_client.ResponseBody(resp, body['server'])
 
     def get_server(self, server_id):
         """Returns the details of an existing server."""
         resp, body = self.get("servers/%s" % str(server_id))
         body = json.loads(body)
         self.validate_response(schema.get_server, resp, body)
-        return resp, body['server']
+        return service_client.ResponseBody(resp, body['server'])
 
     def delete_server(self, server_id):
         """Deletes the given server."""
         resp, body = self.delete("servers/%s" % str(server_id))
         self.validate_response(common_schema.delete_server, resp, body)
-        return resp, body
+        return service_client.ResponseBody(resp, body)
 
     def list_servers(self, params=None):
         """Lists all servers for a user."""
@@ -182,8 +184,8 @@ class ServersClientJSON(base.ComputeClient):
         start_time = int(time.time())
         while True:
             try:
-                resp, body = self.get_server(server_id)
-            except exceptions.NotFound:
+                body = self.get_server(server_id)
+            except lib_exc.NotFound:
                 return
 
             server_status = body['status']
@@ -364,14 +366,14 @@ class ServersClientJSON(base.ComputeClient):
                                post_body)
         body = json.loads(body)
         self.validate_response(schema.attach_volume, resp, body)
-        return resp, body['volumeAttachment']
+        return service_client.ResponseBody(resp, body['volumeAttachment'])
 
     def detach_volume(self, server_id, volume_id):
         """Detaches a volume from a server instance."""
         resp, body = self.delete('servers/%s/os-volume_attachments/%s' %
                                  (server_id, volume_id))
         self.validate_response(schema.detach_volume, resp, body)
-        return resp, body
+        return service_client.ResponseBody(resp, body)
 
     def get_volume_attachment(self, server_id, attach_id):
         """Return details about the given volume attachment."""
@@ -379,7 +381,7 @@ class ServersClientJSON(base.ComputeClient):
             str(server_id), attach_id))
         body = json.loads(body)
         self.validate_response(schema.get_volume_attachment, resp, body)
-        return resp, body['volumeAttachment']
+        return service_client.ResponseBody(resp, body['volumeAttachment'])
 
     def list_volume_attachments(self, server_id):
         """Returns the list of volume attachments for a given instance."""
@@ -387,7 +389,7 @@ class ServersClientJSON(base.ComputeClient):
             str(server_id)))
         body = json.loads(body)
         self.validate_response(schema.list_volume_attachments, resp, body)
-        return resp, body['volumeAttachments']
+        return service_client.ResponseBodyList(resp, body['volumeAttachments'])
 
     def add_security_group(self, server_id, name):
         """Adds a security group to the server."""

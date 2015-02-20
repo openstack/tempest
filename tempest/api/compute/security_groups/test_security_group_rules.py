@@ -23,9 +23,13 @@ CONF = config.CONF
 class SecurityGroupRulesTestJSON(base.BaseSecurityGroupsTest):
 
     @classmethod
+    def setup_clients(cls):
+        super(SecurityGroupRulesTestJSON, cls).setup_clients()
+        cls.client = cls.security_groups_client
+
+    @classmethod
     def resource_setup(cls):
         super(SecurityGroupRulesTestJSON, cls).resource_setup()
-        cls.client = cls.security_groups_client
         cls.neutron_available = CONF.service_available.neutron
         cls.ip_protocol = 'tcp'
         cls.from_port = 22
@@ -61,10 +65,10 @@ class SecurityGroupRulesTestJSON(base.BaseSecurityGroupsTest):
         # Positive test: Creation of Security Group rule
         # should be successful
         # Creating a Security Group to add rules to it
-        _, security_group = self.create_security_group()
+        security_group = self.create_security_group()
         securitygroup_id = security_group['id']
         # Adding rules to the created Security Group
-        _, rule = \
+        rule = \
             self.client.create_security_group_rule(securitygroup_id,
                                                    self.ip_protocol,
                                                    self.from_port,
@@ -81,12 +85,12 @@ class SecurityGroupRulesTestJSON(base.BaseSecurityGroupsTest):
         # should be successful
 
         # Creating a Security Group to add rules to it
-        _, security_group = self.create_security_group()
+        security_group = self.create_security_group()
         parent_group_id = security_group['id']
 
         # Adding rules to the created Security Group with optional cidr
         cidr = '10.2.3.124/24'
-        _, rule = \
+        rule = \
             self.client.create_security_group_rule(parent_group_id,
                                                    self.ip_protocol,
                                                    self.from_port,
@@ -104,16 +108,16 @@ class SecurityGroupRulesTestJSON(base.BaseSecurityGroupsTest):
         # should be successful
 
         # Creating a Security Group to add rules to it
-        _, security_group = self.create_security_group()
+        security_group = self.create_security_group()
         parent_group_id = security_group['id']
 
         # Creating a Security Group so as to assign group_id to the rule
-        _, security_group = self.create_security_group()
+        security_group = self.create_security_group()
         group_id = security_group['id']
         group_name = security_group['name']
 
         # Adding rules to the created Security Group with optional group_id
-        _, rule = \
+        rule = \
             self.client.create_security_group_rule(parent_group_id,
                                                    self.ip_protocol,
                                                    self.from_port,
@@ -130,11 +134,11 @@ class SecurityGroupRulesTestJSON(base.BaseSecurityGroupsTest):
         # Positive test: Created Security Group rules should be
         # in the list of all rules
         # Creating a Security Group to add rules to it
-        resp, security_group = self.create_security_group()
+        security_group = self.create_security_group()
         securitygroup_id = security_group['id']
 
         # Add a first rule to the created Security Group
-        resp, rule = \
+        rule = \
             self.client.create_security_group_rule(securitygroup_id,
                                                    self.ip_protocol,
                                                    self.from_port,
@@ -145,7 +149,7 @@ class SecurityGroupRulesTestJSON(base.BaseSecurityGroupsTest):
         ip_protocol2 = 'icmp'
         from_port2 = -1
         to_port2 = -1
-        resp, rule = \
+        rule = \
             self.client.create_security_group_rule(securitygroup_id,
                                                    ip_protocol2,
                                                    from_port2, to_port2)
@@ -154,7 +158,7 @@ class SecurityGroupRulesTestJSON(base.BaseSecurityGroupsTest):
         self.addCleanup(self.client.delete_security_group_rule, rule2_id)
 
         # Get rules of the created Security Group
-        resp, rules = \
+        rules = \
             self.client.list_security_group_rules(securitygroup_id)
         self.assertTrue(any([i for i in rules if i['id'] == rule1_id]))
         self.assertTrue(any([i for i in rules if i['id'] == rule2_id]))
@@ -164,25 +168,22 @@ class SecurityGroupRulesTestJSON(base.BaseSecurityGroupsTest):
     def test_security_group_rules_delete_when_peer_group_deleted(self):
         # Positive test:rule will delete when peer group deleting
         # Creating a Security Group to add rules to it
-        resp, security_group = self.create_security_group()
+        security_group = self.create_security_group()
         sg1_id = security_group['id']
         # Creating other Security Group to access to group1
-        resp, security_group = self.create_security_group()
+        security_group = self.create_security_group()
         sg2_id = security_group['id']
         # Adding rules to the Group1
-        resp, rule = \
-            self.client.create_security_group_rule(sg1_id,
-                                                   self.ip_protocol,
-                                                   self.from_port,
-                                                   self.to_port,
-                                                   group_id=sg2_id)
+        self.client.create_security_group_rule(sg1_id,
+                                               self.ip_protocol,
+                                               self.from_port,
+                                               self.to_port,
+                                               group_id=sg2_id)
 
-        self.assertEqual(200, resp.status)
         # Delete group2
-        resp, body = self.client.delete_security_group(sg2_id)
-        self.assertEqual(202, resp.status)
+        self.client.delete_security_group(sg2_id)
         # Get rules of the Group1
-        resp, rules = \
+        rules = \
             self.client.list_security_group_rules(sg1_id)
         # The group1 has no rules because group2 has deleted
         self.assertEqual(0, len(rules))

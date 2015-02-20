@@ -16,16 +16,16 @@
 import json
 
 from tempest.api_schema.response.compute.v2 import limits as schema
-from tempest.services.compute.json import base
+from tempest.common import service_client
 
 
-class LimitsClientJSON(base.ComputeClient):
+class LimitsClientJSON(service_client.ServiceClient):
 
     def get_absolute_limits(self):
         resp, body = self.get("limits")
         body = json.loads(body)
         self.validate_response(schema.get_limit, resp, body)
-        return resp, body['limits']['absolute']
+        return service_client.ResponseBody(resp, body['limits']['absolute'])
 
     def get_specific_absolute_limit(self, absolute_limit):
         resp, body = self.get("limits")

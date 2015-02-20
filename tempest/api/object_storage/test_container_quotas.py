@@ -13,10 +13,11 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib import exceptions as lib_exc
+
 from tempest.api.object_storage import base
 from tempest.common.utils import data_utils
 from tempest import config
-from tempest import exceptions
 from tempest import test
 
 CONF = config.CONF
@@ -75,7 +76,7 @@ class ContainerQuotasTest(base.BaseObjectTest):
 
         nbefore = self._get_bytes_used()
 
-        self.assertRaises(exceptions.OverLimit,
+        self.assertRaises(lib_exc.OverLimit,
                           self.object_client.create_object,
                           self.container_name, object_name, data)
 
@@ -93,7 +94,7 @@ class ContainerQuotasTest(base.BaseObjectTest):
         nbefore = self._get_object_count()
         self.assertEqual(nbefore, QUOTA_COUNT)
 
-        self.assertRaises(exceptions.OverLimit,
+        self.assertRaises(lib_exc.OverLimit,
                           self.object_client.create_object,
                           self.container_name, "OverQuotaObject", "")
 

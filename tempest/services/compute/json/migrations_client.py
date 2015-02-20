@@ -16,10 +16,10 @@ import json
 import urllib
 
 from tempest.api_schema.response.compute import migrations as schema
-from tempest.services.compute.json import base
+from tempest.common import service_client
 
 
-class MigrationsClientJSON(base.ComputeClient):
+class MigrationsClientJSON(service_client.ServiceClient):
 
     def list_migrations(self, params=None):
         """Lists all migrations."""
@@ -31,4 +31,4 @@ class MigrationsClientJSON(base.ComputeClient):
         resp, body = self.get(url)
         body = json.loads(body)
         self.validate_response(schema.list_migrations, resp, body)
-        return resp, body['migrations']
+        return service_client.ResponseBodyList(resp, body['migrations'])

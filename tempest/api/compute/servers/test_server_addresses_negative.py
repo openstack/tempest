@@ -13,32 +13,40 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib import exceptions as lib_exc
+
 from tempest.api.compute import base
-from tempest import exceptions
 from tempest import test
 
 
 class ServerAddressesNegativeTestJSON(base.BaseV2ComputeTest):
 
     @classmethod
-    def resource_setup(cls):
+    def setup_credentials(cls):
         cls.set_network_resources(network=True, subnet=True)
-        super(ServerAddressesNegativeTestJSON, cls).resource_setup()
+        super(ServerAddressesNegativeTestJSON, cls).setup_credentials()
+
+    @classmethod
+    def setup_clients(cls):
+        super(ServerAddressesNegativeTestJSON, cls).setup_clients()
         cls.client = cls.servers_client
 
-        resp, cls.server = cls.create_test_server(wait_until='ACTIVE')
+    @classmethod
+    def resource_setup(cls):
+        super(ServerAddressesNegativeTestJSON, cls).resource_setup()
+        cls.server = cls.create_test_server(wait_until='ACTIVE')
 
     @test.attr(type=['negative', 'gate'])
     @test.services('network')
     def test_list_server_addresses_invalid_server_id(self):
         # List addresses request should fail if server id not in system
-        self.assertRaises(exceptions.NotFound, self.client.list_addresses,
+        self.assertRaises(lib_exc.NotFound, self.client.list_addresses,
                           '999')
 
     @test.attr(type=['negative', 'gate'])
     @test.services('network')
     def test_list_server_addresses_by_network_neg(self):
         # List addresses by network should fail if network name not valid
-        self.assertRaises(exceptions.NotFound,
+        self.assertRaises(lib_exc.NotFound,
                           self.client.list_addresses_by_network,
                           self.server['id'], 'invalid')

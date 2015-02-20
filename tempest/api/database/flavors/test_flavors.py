@@ -20,8 +20,8 @@ from tempest import test
 class DatabaseFlavorsTest(base.BaseDatabaseTest):
 
     @classmethod
-    def resource_setup(cls):
-        super(DatabaseFlavorsTest, cls).resource_setup()
+    def setup_clients(cls):
+        super(DatabaseFlavorsTest, cls).setup_clients()
         cls.client = cls.database_flavors_client
 
     @test.attr(type='smoke')
@@ -55,7 +55,7 @@ class DatabaseFlavorsTest(base.BaseDatabaseTest):
     @test.services('compute')
     def test_compare_db_flavors_with_os(self):
         _, db_flavors = self.client.list_db_flavors()
-        _, os_flavors = self.os_flavors_client.list_flavors_with_detail()
+        os_flavors = self.os_flavors_client.list_flavors_with_detail()
         self.assertEqual(len(os_flavors), len(db_flavors),
                          "OS flavors %s do not match DB flavors %s" %
                          (os_flavors, db_flavors))

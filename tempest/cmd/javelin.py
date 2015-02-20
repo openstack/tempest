@@ -110,11 +110,11 @@ import sys
 import unittest
 
 import netaddr
+from tempest_lib import exceptions as lib_exc
 import yaml
 
 import tempest.auth
 from tempest import config
-from tempest import exceptions
 from tempest.openstack.common import log as logging
 from tempest.openstack.common import timeutils
 from tempest.services.compute.json import flavors_client
@@ -144,25 +144,82 @@ class OSClient(object):
     servers = None
 
     def __init__(self, user, pw, tenant):
+        default_params = {
+            'disable_ssl_certificate_validation':
+                CONF.identity.disable_ssl_certificate_validation,
+            'ca_certs': CONF.identity.ca_certificates_file,
+            'trace_requests': CONF.debug.trace_requests
+        }
+        default_params_with_timeout_values = {
+            'build_interval': CONF.compute.build_interval,
+            'build_timeout': CONF.compute.build_timeout
+        }
+        default_params_with_timeout_values.update(default_params)
+
+        compute_params = {
+            'service': CONF.compute.catalog_type,
+            'region': CONF.compute.region or CONF.identity.region,
+            'endpoint_type': CONF.compute.endpoint_type,
+            'build_interval': CONF.compute.build_interval,
+            'build_timeout': CONF.compute.build_timeout
+        }
+        compute_params.update(default_params)
+
+        object_storage_params = {
+            'service': CONF.object_storage.catalog_type,
+            'region': CONF.object_storage.region or CONF.identity.region,
+            'endpoint_type': CONF.object_storage.endpoint_type
+        }
+        object_storage_params.update(default_params)
+
         _creds = tempest.auth.KeystoneV2Credentials(
             username=user,
             password=pw,
             tenant_name=tenant)
         _auth = tempest.auth.KeystoneV2AuthProvider(_creds)
-        self.identity = identity_client.IdentityClientJSON(_auth)
-        self.servers = servers_client.ServersClientJSON(_auth)
-        self.objects = object_client.ObjectClient(_auth)
-        self.containers = container_client.ContainerClient(_auth)
+        self.identity = identity_client.IdentityClientJSON(
+            _auth,
+            CONF.identity.catalog_type,
+            CONF.identity.region,
+            endpoint_type='adminURL',
+            **default_params_with_timeout_values)
+        self.servers = servers_client.ServersClientJSON(_auth,
+                                                        **compute_params)
+        self.flavors = flavors_client.FlavorsClientJSON(_auth,
+                                                        **compute_params)
+        self.secgroups = security_groups_client.SecurityGroupsClientJSON(
+            _auth, **compute_params)
+        self.objects = object_client.ObjectClient(_auth,
+                                                  **object_storage_params)
+        self.containers = container_client.ContainerClient(
+            _auth, **object_storage_params)
         self.images = image_client.ImageClientV2JSON(_auth)
-        self.flavors = flavors_client.FlavorsClientJSON(_auth)
-        self.telemetry = telemetry_client.TelemetryClientJSON(_auth)
-        self.secgroups = security_groups_client.SecurityGroupsClientJSON(_auth)
-        self.volumes = volumes_client.VolumesClientJSON(_auth)
-        self.networks = network_client.NetworkClientJSON(_auth)
+        self.telemetry = telemetry_client.TelemetryClientJSON(
+            _auth,
+            CONF.telemetry.catalog_type,
+            CONF.identity.region,
+            endpoint_type=CONF.telemetry.endpoint_type,
+            **default_params_with_timeout_values)
+        self.volumes = volumes_client.VolumesClientJSON(
+            _auth,
+            CONF.volume.catalog_type,
+            CONF.volume.region or CONF.identity.region,
+            endpoint_type=CONF.volume.endpoint_type,
+            build_interval=CONF.volume.build_interval,
+            build_timeout=CONF.volume.build_timeout,
+            **default_params)
+        self.networks = network_client.NetworkClientJSON(
+            _auth,
+            CONF.network.catalog_type,
+            CONF.network.region or CONF.identity.region,
+            endpoint_type=CONF.network.endpoint_type,
+            build_interval=CONF.network.build_interval,
+            build_timeout=CONF.network.build_timeout,
+            **default_params)
 
 
 def load_resources(fname):
-    """Load the expected resources from a yaml flie."""
+    """Load the expected resources from a yaml file."""
     return yaml.load(open(fname, 'r'))
 
 
@@ -179,9 +236,6 @@ def client_for_user(name):
     else:
         LOG.error("%s not found in USERS: %s" % (name, USERS))
 
-
-def resp_ok(response):
-    return 200 >= int(response['status']) < 300
 
 ###################
 #
@@ -245,7 +299,7 @@ def _assign_swift_role(user):
             USERS[user]['tenant_id'],
             USERS[user]['id'],
             role['id'])
-    except exceptions.Conflict:
+    except lib_exc.Conflict:
         # don't care if it's already assigned
         pass
 
@@ -261,14 +315,14 @@ def create_users(users):
     for u in users:
         try:
             tenant = admin.identity.get_tenant_by_name(u['tenant'])
-        except exceptions.NotFound:
+        except lib_exc.NotFound:
             LOG.error("Tenant: %s - not found" % u['tenant'])
             continue
         try:
             admin.identity.get_user_by_username(tenant['id'], u['name'])
             LOG.warn("User '%s' already exists in this environment"
                      % u['name'])
-        except exceptions.NotFound:
+        except lib_exc.NotFound:
             admin.identity.create_user(
                 u['name'], u['pass'], tenant['id'],
                 "%s@%s" % (u['name'], tenant['id']),
@@ -380,7 +434,7 @@ class JavelinCheck(unittest.TestCase):
                 found,
                 "Couldn't find expected server %s" % server['name'])
 
-            r, found = client.servers.get_server(found['id'])
+            found = client.servers.get_server(found['id'])
             # validate neutron is enabled and ironic disabled:
             if (CONF.service_available.neutron and
                     not CONF.baremetal.driver_enabled):
@@ -398,7 +452,7 @@ class JavelinCheck(unittest.TestCase):
                 self._ping_ip(addr, 60)
 
     def check_secgroups(self):
-        """Check that the security groups are still existing."""
+        """Check that the security groups still exist."""
         LOG.info("Checking security groups")
         for secgroup in self.res['secgroups']:
             client = client_for_user(secgroup['owner'])
@@ -422,11 +476,10 @@ class JavelinCheck(unittest.TestCase):
         LOG.info("checking telemetry")
         for server in self.res['servers']:
             client = client_for_user(server['owner'])
-            response, body = client.telemetry.list_samples(
+            body = client.telemetry.list_samples(
                 'instance',
                 query=('metadata.display_name', 'eq', server['name'])
             )
-            self.assertEqual(response.status, 200)
             self.assertTrue(len(body) >= 1, 'expecting at least one sample')
             self._confirm_telemetry_sample(server, body[-1])
 
@@ -656,7 +709,7 @@ def create_subnets(subnets):
                                           cidr=subnet['range'],
                                           name=subnet['name'],
                                           ip_version=ip_version)
-        except exceptions.BadRequest as e:
+        except lib_exc.BadRequest as e:
             is_overlapping_cidr = 'overlaps with another subnet' in str(e)
             if not is_overlapping_cidr:
                 raise
@@ -737,7 +790,7 @@ def _get_server_by_name(client, name):
 
 
 def _get_flavor_by_name(client, name):
-    r, body = client.flavors.list_flavors()
+    body = client.flavors.list_flavors()
     for flavor in body:
         if name == flavor['name']:
             return flavor
@@ -765,7 +818,7 @@ def create_servers(servers):
                 client.networks, 'networks', x)['id'])
             kwargs['networks'] = [{'uuid': get_net_id(network)}
                                   for network in server['networks']]
-        resp, body = client.servers.create_server(
+        body = client.servers.create_server(
             server['name'], image_id, flavor_id, **kwargs)
         server_id = body['id']
         client.servers.wait_for_server_status(server_id, 'ACTIVE')
@@ -799,17 +852,14 @@ def create_secgroups(secgroups):
         # only create a security group if the name isn't here
         # i.e. a security group may be used by another server
         # only create a router if the name isn't here
-        r, body = client.secgroups.list_security_groups()
+        body = client.secgroups.list_security_groups()
         if any(item['name'] == secgroup['name'] for item in body):
             LOG.warning("Security group '%s' already exists" %
                         secgroup['name'])
             continue
 
-        resp, body = client.secgroups.create_security_group(
+        body = client.secgroups.create_security_group(
             secgroup['name'], secgroup['description'])
-        if not resp_ok(resp):
-            raise ValueError("Failed to create security group: [%s] %s" %
-                             (resp, body))
         secgroup_id = body['id']
         # for each security group, create the rules
         for rule in secgroup['rules']:
@@ -836,7 +886,7 @@ def destroy_secgroups(secgroups):
 #######################
 
 def _get_volume_by_name(client, name):
-    r, body = client.volumes.list_volumes()
+    body = client.volumes.list_volumes()
     for volume in body:
         if name == volume['display_name']:
             return volume
@@ -857,8 +907,8 @@ def create_volumes(volumes):
 
         size = volume['gb']
         v_name = volume['name']
-        resp, body = client.volumes.create_volume(size=size,
-                                                  display_name=v_name)
+        body = client.volumes.create_volume(size=size,
+                                            display_name=v_name)
         client.volumes.wait_for_volume_status(body['id'], 'available')
 
 

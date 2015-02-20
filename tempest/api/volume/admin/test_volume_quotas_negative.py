@@ -13,13 +13,13 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib import exceptions as lib_exc
+
 from tempest.api.volume import base
-from tempest import exceptions
 from tempest import test
 
 
 class BaseVolumeQuotasNegativeV2TestJSON(base.BaseVolumeAdminTest):
-    _interface = "json"
     force_tenant_isolation = True
 
     @classmethod
@@ -31,7 +31,7 @@ class BaseVolumeQuotasNegativeV2TestJSON(base.BaseVolumeAdminTest):
 
         # NOTE(gfidente): no need to restore original quota set
         # after the tests as they only work with tenant isolation.
-        _, quota_set = cls.quotas_client.update_quota_set(
+        cls.quotas_client.update_quota_set(
             cls.demo_tenant_id,
             **cls.shared_quota_set)
 
@@ -42,13 +42,13 @@ class BaseVolumeQuotasNegativeV2TestJSON(base.BaseVolumeAdminTest):
 
     @test.attr(type='negative')
     def test_quota_volumes(self):
-        self.assertRaises(exceptions.OverLimit,
+        self.assertRaises(lib_exc.OverLimit,
                           self.volumes_client.create_volume,
                           size=1)
 
     @test.attr(type='negative')
     def test_quota_volume_snapshots(self):
-        self.assertRaises(exceptions.OverLimit,
+        self.assertRaises(lib_exc.OverLimit,
                           self.snapshots_client.create_snapshot,
                           self.volume['id'])
 
@@ -62,18 +62,18 @@ class BaseVolumeQuotasNegativeV2TestJSON(base.BaseVolumeAdminTest):
                         **self.shared_quota_set)
 
         new_quota_set = {'gigabytes': 2, 'volumes': 2, 'snapshots': 1}
-        _, quota_set = self.quotas_client.update_quota_set(
+        self.quotas_client.update_quota_set(
             self.demo_tenant_id,
             **new_quota_set)
-        self.assertRaises(exceptions.OverLimit,
+        self.assertRaises(lib_exc.OverLimit,
                           self.volumes_client.create_volume,
                           size=1)
 
         new_quota_set = {'gigabytes': 2, 'volumes': 1, 'snapshots': 2}
-        _, quota_set = self.quotas_client.update_quota_set(
+        self.quotas_client.update_quota_set(
             self.demo_tenant_id,
             **self.shared_quota_set)
-        self.assertRaises(exceptions.OverLimit,
+        self.assertRaises(lib_exc.OverLimit,
                           self.snapshots_client.create_snapshot,
                           self.volume['id'])
 

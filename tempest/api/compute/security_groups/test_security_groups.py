@@ -13,17 +13,18 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib import exceptions as lib_exc
+
 from tempest.api.compute.security_groups import base
 from tempest.common.utils import data_utils
-from tempest import exceptions
 from tempest import test
 
 
 class SecurityGroupsTestJSON(base.BaseSecurityGroupsTest):
 
     @classmethod
-    def resource_setup(cls):
-        super(SecurityGroupsTestJSON, cls).resource_setup()
+    def setup_clients(cls):
+        super(SecurityGroupsTestJSON, cls).setup_clients()
         cls.client = cls.security_groups_client
 
     @test.attr(type='smoke')
@@ -33,13 +34,11 @@ class SecurityGroupsTestJSON(base.BaseSecurityGroupsTest):
         # Create 3 Security Groups
         security_group_list = []
         for i in range(3):
-            resp, body = self.create_security_group()
-            self.assertEqual(200, resp.status)
+            body = self.create_security_group()
             security_group_list.append(body)
         # Fetch all Security Groups and verify the list
         # has all created Security Groups
-        resp, fetched_list = self.client.list_security_groups()
-        self.assertEqual(200, resp.status)
+        fetched_list = self.client.list_security_groups()
         # Now check if all the created Security Groups are in fetched list
         missing_sgs = \
             [sg for sg in security_group_list if sg not in fetched_list]
@@ -49,11 +48,10 @@ class SecurityGroupsTestJSON(base.BaseSecurityGroupsTest):
                                             for m_group in missing_sgs))
         # Delete all security groups
         for sg in security_group_list:
-            resp, _ = self.client.delete_security_group(sg['id'])
-            self.assertEqual(202, resp.status)
+            self.client.delete_security_group(sg['id'])
             self.client.wait_for_resource_deletion(sg['id'])
         # Now check if all the created Security Groups are deleted
-        resp, fetched_list = self.client.list_security_groups()
+        fetched_list = self.client.list_security_groups()
         deleted_sgs = \
             [sg for sg in security_group_list if sg in fetched_list]
         self.assertFalse(deleted_sgs,
@@ -68,22 +66,19 @@ class SecurityGroupsTestJSON(base.BaseSecurityGroupsTest):
         # with char space between name along with
         # leading and trailing spaces
         s_name = ' %s ' % data_utils.rand_name('securitygroup ')
-        resp, securitygroup = self.create_security_group(name=s_name)
-        self.assertEqual(200, resp.status)
+        securitygroup = self.create_security_group(name=s_name)
         self.assertIn('name', securitygroup)
         securitygroup_name = securitygroup['name']
         self.assertEqual(securitygroup_name, s_name,
                          "The created Security Group name is "
                          "not equal to the requested name")
         # Now fetch the created Security Group by its 'id'
-        resp, fetched_group = \
+        fetched_group = \
             self.client.get_security_group(securitygroup['id'])
-        self.assertEqual(200, resp.status)
         self.assertEqual(securitygroup, fetched_group,
                          "The fetched Security Group is different "
                          "from the created Group")
-        resp, _ = self.client.delete_security_group(securitygroup['id'])
-        self.assertEqual(202, resp.status)
+        self.client.delete_security_group(securitygroup['id'])
         self.client.wait_for_resource_deletion(securitygroup['id'])
 
     @test.attr(type='smoke')
@@ -93,13 +88,13 @@ class SecurityGroupsTestJSON(base.BaseSecurityGroupsTest):
         # and not deleted if the server is active.
         # Create a couple security groups that we will use
         # for the server resource this test creates
-        resp, sg = self.create_security_group()
-        resp, sg2 = self.create_security_group()
+        sg = self.create_security_group()
+        sg2 = self.create_security_group()
 
         # Create server and add the security group created
         # above to the server we just created
         server_name = data_utils.rand_name('server')
-        resp, server = self.create_test_server(name=server_name)
+        server = self.create_test_server(name=server_name)
         server_id = server['id']
         self.servers_client.wait_for_server_status(server_id, 'ACTIVE')
         resp, body = self.servers_client.add_security_group(server_id,
@@ -107,7 +102,7 @@ class SecurityGroupsTestJSON(base.BaseSecurityGroupsTest):
 
         # Check that we are not able to delete the security
         # group since it is in use by an active server
-        self.assertRaises(exceptions.BadRequest,
+        self.assertRaises(lib_exc.BadRequest,
                           self.client.delete_security_group,
                           sg['id'])
 
@@ -119,7 +114,7 @@ class SecurityGroupsTestJSON(base.BaseSecurityGroupsTest):
 
         # Check that we are not able to delete the other security
         # group since it is in use by an active server
-        self.assertRaises(exceptions.BadRequest,
+        self.assertRaises(lib_exc.BadRequest,
                           self.client.delete_security_group,
                           sg2['id'])
 
@@ -128,30 +123,25 @@ class SecurityGroupsTestJSON(base.BaseSecurityGroupsTest):
         self.servers_client.delete_server(server_id)
         self.servers_client.wait_for_server_termination(server_id)
 
-        resp, _ = self.client.delete_security_group(sg['id'])
-        self.assertEqual(202, resp.status)
-        resp, _ = self.client.delete_security_group(sg2['id'])
-        self.assertEqual(202, resp.status)
+        self.client.delete_security_group(sg['id'])
+        self.client.delete_security_group(sg2['id'])
 
     @test.attr(type='smoke')
     @test.services('network')
     def test_update_security_groups(self):
         # Update security group name and description
         # Create a security group
-        resp, securitygroup = self.create_security_group()
-        self.assertEqual(200, resp.status)
+        securitygroup = self.create_security_group()
         self.assertIn('id', securitygroup)
         securitygroup_id = securitygroup['id']
         # Update the name and description
         s_new_name = data_utils.rand_name('sg-hth-')
         s_new_des = data_utils.rand_name('description-hth-')
-        resp, sg_new = \
-            self.client.update_security_group(securitygroup_id,
-                                              name=s_new_name,
-                                              description=s_new_des)
-        self.assertEqual(200, resp.status)
+        self.client.update_security_group(securitygroup_id,
+                                          name=s_new_name,
+                                          description=s_new_des)
         # get the security group
-        resp, fetched_group = \
+        fetched_group = \
             self.client.get_security_group(securitygroup_id)
         self.assertEqual(s_new_name, fetched_group['name'])
         self.assertEqual(s_new_des, fetched_group['description'])

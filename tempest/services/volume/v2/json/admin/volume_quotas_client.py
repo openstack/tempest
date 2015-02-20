@@ -20,8 +20,4 @@ class VolumeQuotasV2Client(volume_quotas_client.BaseVolumeQuotasClientJSON):
     """
     Client class to send CRUD Volume V2 API requests to a Cinder endpoint
     """
-
-    def __init__(self, auth_provider):
-        super(VolumeQuotasV2Client, self).__init__(auth_provider)
-
-        self.api_version = "v2"
+    api_version = "v2"

@@ -20,13 +20,17 @@ from tempest import test
 class FloatingIPDetailsTestJSON(base.BaseV2ComputeTest):
 
     @classmethod
+    def setup_clients(cls):
+        super(FloatingIPDetailsTestJSON, cls).setup_clients()
+        cls.client = cls.floating_ips_client
+
+    @classmethod
     def resource_setup(cls):
         super(FloatingIPDetailsTestJSON, cls).resource_setup()
-        cls.client = cls.floating_ips_client
         cls.floating_ip = []
         cls.floating_ip_id = []
         for i in range(3):
-            resp, body = cls.client.create_floating_ip()
+            body = cls.client.create_floating_ip()
             cls.floating_ip.append(body)
             cls.floating_ip_id.append(body['id'])
 
@@ -40,8 +44,7 @@ class FloatingIPDetailsTestJSON(base.BaseV2ComputeTest):
     @test.services('network')
     def test_list_floating_ips(self):
         # Positive test:Should return the list of floating IPs
-        resp, body = self.client.list_floating_ips()
-        self.assertEqual(200, resp.status)
+        body = self.client.list_floating_ips()
         floating_ips = body
         self.assertNotEqual(0, len(floating_ips),
                             "Expected floating IPs. Got zero.")
@@ -53,16 +56,14 @@ class FloatingIPDetailsTestJSON(base.BaseV2ComputeTest):
     def test_get_floating_ip_details(self):
         # Positive test:Should be able to GET the details of floatingIP
         # Creating a floating IP for which details are to be checked
-        resp, body = self.client.create_floating_ip()
+        body = self.client.create_floating_ip()
         floating_ip_id = body['id']
         self.addCleanup(self.client.delete_floating_ip,
                         floating_ip_id)
         floating_ip_instance_id = body['instance_id']
         floating_ip_ip = body['ip']
         floating_ip_fixed_ip = body['fixed_ip']
-        resp, body = \
-            self.client.get_floating_ip_details(floating_ip_id)
-        self.assertEqual(200, resp.status)
+        body = self.client.get_floating_ip_details(floating_ip_id)
         # Comparing the details of floating IP
         self.assertEqual(floating_ip_instance_id,
                          body['instance_id'])
@@ -75,7 +76,6 @@ class FloatingIPDetailsTestJSON(base.BaseV2ComputeTest):
     @test.services('network')
     def test_list_floating_ip_pools(self):
         # Positive test:Should return the list of floating IP Pools
-        resp, floating_ip_pools = self.client.list_floating_ip_pools()
-        self.assertEqual(200, resp.status)
+        floating_ip_pools = self.client.list_floating_ip_pools()
         self.assertNotEqual(0, len(floating_ip_pools),
                             "Expected floating IP Pools. Got zero.")

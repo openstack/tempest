@@ -71,7 +71,7 @@ class TestSwiftTelemetry(manager.SwiftScenarioTest):
             Otherwise returning False will case _check_samples to be
             called again.
             """
-            _, results = self.telemetry_client.list_samples(
+            results = self.telemetry_client.list_samples(
                 'storage.api.request')
             LOG.debug('got samples %s', results)
 

@@ -20,7 +20,6 @@ from tempest import test
 
 
 class DomainsTestJSON(base.BaseIdentityV3AdminTest):
-    _interface = 'json'
 
     def _delete_domain(self, domain_id):
         # It is necessary to disable the domain before deleting,
@@ -62,10 +61,7 @@ class DomainsTestJSON(base.BaseIdentityV3AdminTest):
         self.assertIsNotNone(domain['id'])
         self.assertEqual(d_name, domain['name'])
         self.assertEqual(d_desc, domain['description'])
-        if self._interface == "json":
-            self.assertEqual(True, domain['enabled'])
-        else:
-            self.assertEqual('true', str(domain['enabled']).lower())
+        self.assertEqual(True, domain['enabled'])
         new_desc = data_utils.rand_name('new-desc-')
         new_name = data_utils.rand_name('new-name-')
 

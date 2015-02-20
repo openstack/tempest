@@ -142,7 +142,7 @@ class SnapshotService(BaseService):
 
     def list(self):
         client = self.client
-        __, snaps = client.list_snapshots()
+        snaps = client.list_snapshots()
         LOG.debug("List count, %s Snapshots" % len(snaps))
         return snaps
 
@@ -218,7 +218,7 @@ class StackService(BaseService):
 
     def list(self):
         client = self.client
-        _, stacks = client.list_stacks()
+        stacks = client.list_stacks()
         LOG.debug("List count, %s Stacks" % len(stacks))
         return stacks
 
@@ -244,7 +244,7 @@ class KeyPairService(BaseService):
 
     def list(self):
         client = self.client
-        _, keypairs = client.list_keypairs()
+        keypairs = client.list_keypairs()
         LOG.debug("List count, %s Keypairs" % len(keypairs))
         return keypairs
 
@@ -271,7 +271,7 @@ class SecurityGroupService(BaseService):
 
     def list(self):
         client = self.client
-        _, secgrps = client.list_security_groups()
+        secgrps = client.list_security_groups()
         secgrp_del = [grp for grp in secgrps if grp['name'] != 'default']
         LOG.debug("List count, %s Security Groups" % len(secgrp_del))
         return secgrp_del
@@ -297,7 +297,7 @@ class FloatingIpService(BaseService):
 
     def list(self):
         client = self.client
-        _, floating_ips = client.list_floating_ips()
+        floating_ips = client.list_floating_ips()
         LOG.debug("List count, %s Floating IPs" % len(floating_ips))
         return floating_ips
 
@@ -323,7 +323,7 @@ class VolumeService(BaseService):
 
     def list(self):
         client = self.client
-        _, vols = client.list_volumes()
+        vols = client.list_volumes()
         LOG.debug("List count, %s Volumes" % len(vols))
         return vols
 
@@ -778,7 +778,7 @@ class TelemetryAlarmService(BaseService):
 
     def list(self):
         client = self.client
-        _, alarms = client.list_alarms()
+        alarms = client.list_alarms()
         LOG.debug("List count, %s Alarms" % len(alarms))
         return alarms
 
@@ -805,7 +805,7 @@ class FlavorService(BaseService):
 
     def list(self):
         client = self.client
-        _, flavors = client.list_flavors({"is_public": None})
+        flavors = client.list_flavors({"is_public": None})
         if not self.is_save_state:
             # recreate list removing saved flavors
             flavors = [flavor for flavor in flavors if flavor['id']

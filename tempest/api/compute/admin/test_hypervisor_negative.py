@@ -13,11 +13,11 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib import exceptions as lib_exc
 import uuid
 
 from tempest.api.compute import base
 from tempest.common.utils import data_utils
-from tempest import exceptions
 from tempest import test
 
 
@@ -35,8 +35,7 @@ class HypervisorAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
 
     def _list_hypervisors(self):
         # List of hypervisors
-        resp, hypers = self.client.get_hypervisor_list()
-        self.assertEqual(200, resp.status)
+        hypers = self.client.get_hypervisor_list()
         return hypers
 
     @test.attr(type=['negative', 'gate'])
@@ -44,7 +43,7 @@ class HypervisorAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
         nonexistent_hypervisor_id = str(uuid.uuid4())
 
         self.assertRaises(
-            exceptions.NotFound,
+            lib_exc.NotFound,
             self.client.get_hypervisor_show_details,
             nonexistent_hypervisor_id)
 
@@ -54,7 +53,7 @@ class HypervisorAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
         self.assertTrue(len(hypers) > 0)
 
         self.assertRaises(
-            exceptions.Unauthorized,
+            lib_exc.Unauthorized,
             self.non_adm_client.get_hypervisor_show_details,
             hypers[0]['id'])
 
@@ -64,7 +63,7 @@ class HypervisorAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
         self.assertTrue(len(hypers) > 0)
 
         self.assertRaises(
-            exceptions.Unauthorized,
+            lib_exc.Unauthorized,
             self.non_adm_client.get_hypervisor_servers,
             hypers[0]['id'])
 
@@ -73,14 +72,14 @@ class HypervisorAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
         nonexistent_hypervisor_id = str(uuid.uuid4())
 
         self.assertRaises(
-            exceptions.NotFound,
+            lib_exc.NotFound,
             self.client.get_hypervisor_servers,
             nonexistent_hypervisor_id)
 
     @test.attr(type=['negative', 'gate'])
     def test_get_hypervisor_stats_with_non_admin_user(self):
         self.assertRaises(
-            exceptions.Unauthorized,
+            lib_exc.Unauthorized,
             self.non_adm_client.get_hypervisor_stats)
 
     @test.attr(type=['negative', 'gate'])
@@ -88,7 +87,7 @@ class HypervisorAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
         nonexistent_hypervisor_id = str(uuid.uuid4())
 
         self.assertRaises(
-            exceptions.NotFound,
+            lib_exc.NotFound,
             self.client.get_hypervisor_uptime,
             nonexistent_hypervisor_id)
 
@@ -98,7 +97,7 @@ class HypervisorAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
         self.assertTrue(len(hypers) > 0)
 
         self.assertRaises(
-            exceptions.Unauthorized,
+            lib_exc.Unauthorized,
             self.non_adm_client.get_hypervisor_uptime,
             hypers[0]['id'])
 
@@ -106,14 +105,14 @@ class HypervisorAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
     def test_get_hypervisor_list_with_non_admin_user(self):
         # List of hypervisor and available services with non admin user
         self.assertRaises(
-            exceptions.Unauthorized,
+            lib_exc.Unauthorized,
             self.non_adm_client.get_hypervisor_list)
 
     @test.attr(type=['negative', 'gate'])
     def test_get_hypervisor_list_details_with_non_admin_user(self):
         # List of hypervisor details and available services with non admin user
         self.assertRaises(
-            exceptions.Unauthorized,
+            lib_exc.Unauthorized,
             self.non_adm_client.get_hypervisor_list_details)
 
     @test.attr(type=['negative', 'gate'])
@@ -121,7 +120,7 @@ class HypervisorAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
         nonexistent_hypervisor_name = data_utils.rand_name('test_hypervisor')
 
         self.assertRaises(
-            exceptions.NotFound,
+            lib_exc.NotFound,
             self.client.search_hypervisor,
             nonexistent_hypervisor_name)
 
@@ -131,6 +130,6 @@ class HypervisorAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
         self.assertTrue(len(hypers) > 0)
 
         self.assertRaises(
-            exceptions.Unauthorized,
+            lib_exc.Unauthorized,
             self.non_adm_client.search_hypervisor,
             hypers[0]['hypervisor_hostname'])

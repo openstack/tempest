@@ -11,11 +11,11 @@
 #    under the License.
 
 import logging
+from tempest_lib import exceptions as lib_exc
 
 from tempest.api.orchestration import base
 from tempest.common.utils import data_utils
 from tempest import config
-from tempest import exceptions
 from tempest import test
 
 CONF = config.CONF
@@ -34,7 +34,7 @@ HeatTemplateFormatVersion: '2012-12-12'
 Description: '%s'
 Outputs:
   Foo: bar''' % fill
-        ex = self.assertRaises(exceptions.BadRequest, self.create_stack,
+        ex = self.assertRaises(lib_exc.BadRequest, self.create_stack,
                                stack_name, template)
         self.assertIn('Template exceeds maximum allowed size', str(ex))
 
@@ -48,6 +48,6 @@ Outputs:
         for i in range(num_resources):
             template += rsrc_snippet % i
 
-        ex = self.assertRaises(exceptions.BadRequest, self.create_stack,
+        ex = self.assertRaises(lib_exc.BadRequest, self.create_stack,
                                stack_name, template)
         self.assertIn('Maximum resources per stack exceeded', str(ex))

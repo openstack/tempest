@@ -22,13 +22,11 @@ import urlparse
 
 import six
 
-from tempest import config
 from tempest.openstack.common import log as logging
-from tempest.services.identity.json import identity_client as json_id
-from tempest.services.identity.v3.json import identity_client as json_v3id
+from tempest.services.identity.json import token_client as json_id
+from tempest.services.identity.v3.json import token_client as json_v3id
 
 
-CONF = config.CONF
 LOG = logging.getLogger(__name__)
 
 
@@ -38,34 +36,21 @@ class AuthProvider(object):
     Provide authentication
     """
 
-    def __init__(self, credentials, interface=None):
+    def __init__(self, credentials):
         """
         :param credentials: credentials for authentication
-        :param interface: 'json' or 'xml'. Applicable for tempest client only
-            (deprecated: only json now supported)
         """
-        credentials = self._convert_credentials(credentials)
         if self.check_credentials(credentials):
             self.credentials = credentials
         else:
             raise TypeError("Invalid credentials")
-        self.interface = 'json'
         self.cache = None
         self.alt_auth_data = None
         self.alt_part = None
 
-    def _convert_credentials(self, credentials):
-        # Support dict credentials for backwards compatibility
-        if isinstance(credentials, dict):
-            return get_credentials(**credentials)
-        else:
-            return credentials
-
     def __str__(self):
-        return "Creds :{creds}, interface: {interface}, " \
-               "cached auth data: {cache}".format(
-                   creds=self.credentials, interface=self.interface,
-                   cache=self.cache)
+        return "Creds :{creds}, cached auth data: {cache}".format(
+            creds=self.credentials, cache=self.cache)
 
     @abc.abstractmethod
     def _decorate_request(self, filters, method, url, headers=None, body=None,
@@ -201,8 +186,8 @@ class KeystoneAuthProvider(AuthProvider):
 
     token_expiry_threshold = datetime.timedelta(seconds=60)
 
-    def __init__(self, credentials, interface=None):
-        super(KeystoneAuthProvider, self).__init__(credentials, interface)
+    def __init__(self, credentials):
+        super(KeystoneAuthProvider, self).__init__(credentials)
         self.auth_client = self._auth_client()
 
     def _decorate_request(self, filters, method, url, headers=None, body=None,
@@ -336,8 +321,9 @@ class KeystoneV3AuthProvider(KeystoneAuthProvider):
         return dict(
             user=self.credentials.username,
             password=self.credentials.password,
-            tenant=self.credentials.tenant_name,
-            domain=self.credentials.user_domain_name,
+            project=self.credentials.tenant_name,
+            user_domain=self.credentials.user_domain_name,
+            project_domain=self.credentials.project_domain_name,
             auth_data=True)
 
     def _fill_credentials(self, auth_data_body):
@@ -440,44 +426,38 @@ class KeystoneV3AuthProvider(KeystoneAuthProvider):
             datetime.datetime.utcnow()
 
 
-def get_default_credentials(credential_type, fill_in=True):
-    """
-    Returns configured credentials of the specified type
-    based on the configured auth_version
-    """
-    return get_credentials(fill_in=fill_in, credential_type=credential_type)
+def is_identity_version_supported(identity_version):
+    return identity_version in IDENTITY_VERSION
 
 
-def get_credentials(credential_type=None, fill_in=True, **kwargs):
+def get_credentials(fill_in=True, identity_version='v2', **kwargs):
     """
     Builds a credentials object based on the configured auth_version
 
-    :param credential_type (string): requests credentials from tempest
-           configuration file. Valid values are defined in
-           Credentials.TYPE.
-    :param kwargs (dict): take into account only if credential_type is
-           not specified or None. Dict of credential key/value pairs
+    :param fill_in (boolean): obtain a token and fill in all credential
+           details provided by the identity service. When fill_in is not
+           specified, credentials are not validated. Validation can be invoked
+           by invoking ``is_valid()``
+    :param identity_version (string): identity API version is used to
+           select the matching auth provider and credentials class
+    :param kwargs (dict): Dict of credential key/value pairs
 
     Examples:
 
         Returns credentials from the provided parameters:
         >>> get_credentials(username='foo', password='bar')
 
-        Returns credentials from tempest configuration:
-        >>> get_credentials(credential_type='user')
+        Returns credentials including IDs:
+        >>> get_credentials(username='foo', password='bar', fill_in=True)
     """
-    if CONF.identity.auth_version == 'v2':
-        credential_class = KeystoneV2Credentials
-        auth_provider_class = KeystoneV2AuthProvider
-    elif CONF.identity.auth_version == 'v3':
-        credential_class = KeystoneV3Credentials
-        auth_provider_class = KeystoneV3AuthProvider
-    else:
-        raise exceptions.InvalidConfiguration('Unsupported auth version')
-    if credential_type is not None:
-        creds = credential_class.get_default(credential_type)
-    else:
-        creds = credential_class(**kwargs)
+    if not is_identity_version_supported(identity_version):
+        raise exceptions.InvalidIdentityVersion(
+            identity_version=identity_version)
+
+    credential_class, auth_provider_class = IDENTITY_VERSION.get(
+        identity_version)
+
+    creds = credential_class(**kwargs)
     # Fill in the credentials fields that were not specified
     if fill_in:
         auth_provider = auth_provider_class(creds)
@@ -490,18 +470,9 @@ class Credentials(object):
     Set of credentials for accessing OpenStack services
 
     ATTRIBUTES: list of valid class attributes representing credentials.
-
-    TYPES: types of credentials available in the configuration file.
-           For each key there's a tuple (section, prefix) to match the
-           configuration options.
     """
 
     ATTRIBUTES = []
-    TYPES = {
-        'identity_admin': ('identity', 'admin'),
-        'user': ('identity', None),
-        'alt_user': ('identity', 'alt')
-    }
 
     def __init__(self, **kwargs):
         """
@@ -554,21 +525,8 @@ class Credentials(object):
         except AttributeError:
             return default
 
-    @classmethod
-    def get_default(cls, credentials_type):
-        if credentials_type not in cls.TYPES:
-            raise exceptions.InvalidCredentials()
-        creds = cls._get_default(credentials_type)
-        if not creds.is_valid():
-            msg = ("The %s credentials are incorrectly set in the config file."
-                   " Double check that all required values are assigned" %
-                   credentials_type)
-            raise exceptions.InvalidConfiguration(msg)
-        return creds
-
-    @classmethod
-    def _get_default(cls, credentials_type):
-        raise NotImplementedError
+    def get_init_attributes(self):
+        return self._initial.keys()
 
     def is_valid(self):
         raise NotImplementedError
@@ -584,21 +542,8 @@ class Credentials(object):
 
 class KeystoneV2Credentials(Credentials):
 
-    CONF_ATTRIBUTES = ['username', 'password', 'tenant_name']
-    ATTRIBUTES = ['user_id', 'tenant_id']
-    ATTRIBUTES.extend(CONF_ATTRIBUTES)
-
-    @classmethod
-    def _get_default(cls, credentials_type='user'):
-        params = {}
-        section, prefix = cls.TYPES[credentials_type]
-        for attr in cls.CONF_ATTRIBUTES:
-            _section = getattr(CONF, section)
-            if prefix is None:
-                params[attr] = getattr(_section, attr)
-            else:
-                params[attr] = getattr(_section, prefix + "_" + attr)
-        return cls(**params)
+    ATTRIBUTES = ['username', 'password', 'tenant_name', 'user_id',
+                  'tenant_id']
 
     def is_valid(self):
         """
@@ -608,26 +553,15 @@ class KeystoneV2Credentials(Credentials):
         return None not in (self.username, self.password)
 
 
-class KeystoneV3Credentials(KeystoneV2Credentials):
+class KeystoneV3Credentials(Credentials):
     """
     Credentials suitable for the Keystone Identity V3 API
     """
 
-    CONF_ATTRIBUTES = ['domain_name', 'password', 'tenant_name', 'username']
-    ATTRIBUTES = ['project_domain_id', 'project_domain_name', 'project_id',
+    ATTRIBUTES = ['domain_name', 'password', 'tenant_name', 'username',
+                  'project_domain_id', 'project_domain_name', 'project_id',
                   'project_name', 'tenant_id', 'tenant_name', 'user_domain_id',
                   'user_domain_name', 'user_id']
-    ATTRIBUTES.extend(CONF_ATTRIBUTES)
-
-    def __init__(self, **kwargs):
-        """
-        If domain is not specified, load the one configured for the
-        identity manager.
-        """
-        domain_fields = set(x for x in self.ATTRIBUTES if 'domain' in x)
-        if not domain_fields.intersection(kwargs.keys()):
-            kwargs['user_domain_name'] = CONF.identity.admin_domain_name
-        super(KeystoneV3Credentials, self).__init__(**kwargs)
 
     def __setattr__(self, key, value):
         parent = super(KeystoneV3Credentials, self)
@@ -685,3 +619,7 @@ class KeystoneV3Credentials(KeystoneV2Credentials):
              self.project_id is not None,
              self.project_name is not None and valid_project_domain])
         return all([self.password is not None, valid_user, valid_project])
+
+
+IDENTITY_VERSION = {'v2': (KeystoneV2Credentials, KeystoneV2AuthProvider),
+                    'v3': (KeystoneV3Credentials, KeystoneV3AuthProvider)}

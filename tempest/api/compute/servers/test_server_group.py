@@ -13,6 +13,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib import decorators
+
 from tempest.api.compute import base
 from tempest.common.utils import data_utils
 from tempest import test
@@ -74,7 +76,7 @@ class ServerGroupTestJSON(base.BaseV2ComputeTest):
         policy = ['anti-affinity']
         self._create_delete_server_group(policy)
 
-    @test.skip_because(bug="1324348")
+    @decorators.skip_because(bug="1324348")
     @test.attr(type='gate')
     def test_create_delete_server_group_with_multiple_policies(self):
         # Create and Delete the server-group with multiple policies

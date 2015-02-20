@@ -19,8 +19,8 @@ from tempest.api.compute import base
 class BaseFloatingIPsTest(base.BaseV2ComputeTest):
 
     @classmethod
-    def resource_setup(cls):
+    def setup_credentials(cls):
         # Floating IP actions might need a full network configuration
         cls.set_network_resources(network=True, subnet=True,
                                   router=True, dhcp=True)
-        super(BaseFloatingIPsTest, cls).resource_setup()
+        super(BaseFloatingIPsTest, cls).setup_credentials()

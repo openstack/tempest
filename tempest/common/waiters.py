@@ -32,7 +32,7 @@ def wait_for_server_status(client, server_id, status, ready_wait=True,
 
     # NOTE(afazekas): UNKNOWN status possible on ERROR
     # or in a very early stage.
-    resp, body = client.get_server(server_id)
+    body = client.get_server(server_id)
     old_status = server_status = body['status']
     old_task_state = task_state = _get_task_state(body)
     start_time = int(time.time())
@@ -59,7 +59,7 @@ def wait_for_server_status(client, server_id, status, ready_wait=True,
                 return
 
         time.sleep(client.build_interval)
-        resp, body = client.get_server(server_id)
+        body = client.get_server(server_id)
         server_status = body['status']
         task_state = _get_task_state(body)
         if (server_status != old_status) or (task_state != old_task_state):
@@ -101,12 +101,12 @@ def wait_for_image_status(client, image_id, status):
     The client should have a get_image(image_id) method to get the image.
     The client should also have build_interval and build_timeout attributes.
     """
-    resp, image = client.get_image(image_id)
+    image = client.get_image(image_id)
     start = int(time.time())
 
     while image['status'] != status:
         time.sleep(client.build_interval)
-        resp, image = client.get_image(image_id)
+        image = client.get_image(image_id)
         status_curr = image['status']
         if status_curr == 'ERROR':
             raise exceptions.AddImageException(image_id=image_id)

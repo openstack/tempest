@@ -24,7 +24,7 @@ from tempest import auth
 from tempest.common import accounts
 from tempest import config
 from tempest import exceptions
-from tempest.services.identity.json import identity_client
+from tempest.services.identity.json import token_client
 from tempest.tests import base
 from tempest.tests import fake_config
 from tempest.tests import fake_identity
@@ -68,7 +68,7 @@ class TestAccount(base.TestCase):
         return hash_list
 
     def test_get_hash(self):
-        self.stubs.Set(identity_client.TokenClientJSON, 'raw_request',
+        self.stubs.Set(token_client.TokenClientJSON, 'raw_request',
                        fake_identity._fake_v2_response)
         test_account_class = accounts.Accounts('test_name')
         hash_list = self._get_hash_list(self.test_accounts)

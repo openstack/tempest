@@ -135,6 +135,9 @@
 # concurrent test processes. (boolean value)
 #locking_credentials_provider = false
 
+# Roles to assign to all users created by tempest (list value)
+#tempest_roles =
+
 
 [baremetal]
 
@@ -436,6 +439,9 @@
 # running instances? (boolean value)
 #snapshot = true
 
+# Does the test environment have the ec2 api running? (boolean value)
+#ec2_api = true
+
 
 [dashboard]
 
@@ -462,6 +468,16 @@
 # The endpoint type to use for the data processing service. (string
 # value)
 #endpoint_type = publicURL
+
+
+[data_processing-feature-enabled]
+
+#
+# From tempest.config
+#
+
+# List of enabled data processing plugins (list value)
+#plugins = vanilla,hdp
 
 
 [database]
@@ -763,6 +779,10 @@
 # value)
 #dns_servers = 8.8.8.8,8.8.4.4
 
+# vnic_type to use when Launching instances with pre-configured ports.
+# Supported ports are: ['normal','direct','macvtap'] (string value)
+#port_vnic_type = <None>
+
 
 [network-feature-enabled]
 
@@ -803,7 +823,7 @@
 
 # Number of seconds to time on waiting for a container to container
 # synchronization complete. (integer value)
-#container_sync_timeout = 120
+#container_sync_timeout = 600
 
 # Number of seconds to wait while looping to check the status of a
 # container to container synchronization (integer value)
@@ -815,6 +835,16 @@
 
 # User role that has reseller admin (string value)
 #reseller_admin_role = ResellerAdmin
+
+# Name of sync realm. A sync realm is a set of clusters that have
+# agreed to allow container syncing with each other. Set the same
+# realm name as Swift's container-sync-realms.conf (string value)
+#realm_name = realm1
+
+# One name of cluster which is set in the realm whose name is set in
+# 'realm_name' item in this file. Set the same cluster name as Swift's
+# container-sync-realms.conf (string value)
+#cluster_name = name1
 
 
 [object-storage-feature-enabled]
@@ -916,6 +946,11 @@
 # specifies how many resources to request at once. Used for large
 # operations testing. (integer value)
 #large_ops_number = 0
+
+# DHCP client used by images to renew DCHP lease. If left empty,
+# update operation will be skipped. Supported clients: "udhcpc",
+# "dhclient" (string value)
+#dhcp_client = udhcpc
 
 
 [service_available]

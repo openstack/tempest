@@ -24,7 +24,6 @@ LOG = logging.getLogger(__name__)
 
 
 class VolumesBackupsV2Test(base.BaseVolumeAdminTest):
-    _interface = "json"
 
     @classmethod
     def resource_setup(cls):
@@ -40,8 +39,8 @@ class VolumesBackupsV2Test(base.BaseVolumeAdminTest):
         # Create backup
         backup_name = data_utils.rand_name('Backup')
         create_backup = self.backups_adm_client.create_backup
-        _, backup = create_backup(self.volume['id'],
-                                  name=backup_name)
+        backup = create_backup(self.volume['id'],
+                               name=backup_name)
         self.addCleanup(self.backups_adm_client.delete_backup,
                         backup['id'])
         self.assertEqual(backup_name, backup['name'])
@@ -51,16 +50,16 @@ class VolumesBackupsV2Test(base.BaseVolumeAdminTest):
                                                        'available')
 
         # Get a given backup
-        _, backup = self.backups_adm_client.get_backup(backup['id'])
+        backup = self.backups_adm_client.get_backup(backup['id'])
         self.assertEqual(backup_name, backup['name'])
 
         # Get all backups with detail
-        _, backups = self.backups_adm_client.list_backups_with_detail()
+        backups = self.backups_adm_client.list_backups_with_detail()
         self.assertIn((backup['name'], backup['id']),
                       [(m['name'], m['id']) for m in backups])
 
         # Restore backup
-        _, restore = self.backups_adm_client.restore_backup(backup['id'])
+        restore = self.backups_adm_client.restore_backup(backup['id'])
 
         # Delete backup
         self.addCleanup(self.admin_volume_client.delete_volume,

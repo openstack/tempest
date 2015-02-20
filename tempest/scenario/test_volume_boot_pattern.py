@@ -10,6 +10,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib import decorators
+
 from tempest.common.utils import data_utils
 from tempest import config
 from tempest.openstack.common import log
@@ -66,7 +68,7 @@ class TestVolumeBootPattern(manager.ScenarioTest):
 
     def _create_snapshot_from_volume(self, vol_id):
         snap_name = data_utils.rand_name('snapshot')
-        _, snap = self.snapshots_client.create_snapshot(
+        snap = self.snapshots_client.create_snapshot(
             volume_id=vol_id,
             force=True,
             display_name=snap_name)
@@ -99,7 +101,7 @@ class TestVolumeBootPattern(manager.ScenarioTest):
 
     def _ssh_to_server(self, server, keypair):
         if CONF.compute.use_floatingip_for_ssh:
-            _, floating_ip = self.floating_ips_client.create_floating_ip()
+            floating_ip = self.floating_ips_client.create_floating_ip()
             self.addCleanup(self.delete_wrapper,
                             self.floating_ips_client.delete_floating_ip,
                             floating_ip['id'])
@@ -130,7 +132,7 @@ class TestVolumeBootPattern(manager.ScenarioTest):
         actual = self._get_content(ssh_client)
         self.assertEqual(expected, actual)
 
-    @test.skip_because(bug='1373513')
+    @decorators.skip_because(bug='1373513')
     @test.services('compute', 'volume', 'image')
     def test_volume_boot_pattern(self):
         keypair = self.create_keypair()

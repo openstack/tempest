@@ -16,20 +16,22 @@
 import json
 
 from tempest.api_schema.response.compute.v2 import availability_zone as schema
-from tempest.services.compute.json import base
+from tempest.common import service_client
 
 
-class AvailabilityZoneClientJSON(base.ComputeClient):
+class AvailabilityZoneClientJSON(service_client.ServiceClient):
 
     def get_availability_zone_list(self):
         resp, body = self.get('os-availability-zone')
         body = json.loads(body)
         self.validate_response(schema.get_availability_zone_list, resp, body)
-        return resp, body['availabilityZoneInfo']
+        return service_client.ResponseBodyList(resp,
+                                               body['availabilityZoneInfo'])
 
     def get_availability_zone_list_detail(self):
         resp, body = self.get('os-availability-zone/detail')
         body = json.loads(body)
         self.validate_response(schema.get_availability_zone_list_detail, resp,
                                body)
-        return resp, body['availabilityZoneInfo']
+        return service_client.ResponseBodyList(resp,
+                                               body['availabilityZoneInfo'])

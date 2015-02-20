@@ -19,7 +19,6 @@ from tempest import test
 
 
 class ProjectsTestJSON(base.BaseIdentityV3AdminTest):
-    _interface = 'json'
 
     @test.attr(type='gate')
     def test_project_create_with_description(self):

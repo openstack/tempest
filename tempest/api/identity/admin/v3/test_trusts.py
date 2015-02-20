@@ -13,12 +13,13 @@
 import datetime
 import re
 
+from tempest_lib import exceptions as lib_exc
+
 from tempest.api.identity import base
-from tempest import auth
 from tempest import clients
+from tempest.common import cred_provider
 from tempest.common.utils import data_utils
 from tempest import config
-from tempest import exceptions
 from tempest.openstack.common import timeutils
 from tempest import test
 
@@ -87,13 +88,11 @@ class BaseTrustsV3Test(base.BaseIdentityV3AdminTest):
         self.assertIsNotNone(self.trustee_user_id)
 
         # Initialize a new client with the trustor credentials
-        creds = auth.get_credentials(
+        creds = cred_provider.get_credentials(
             username=self.trustor_username,
             password=self.trustor_password,
             tenant_name=self.trustor_project_name)
-        os = clients.Manager(
-            credentials=creds,
-            interface=self._interface)
+        os = clients.Manager(credentials=creds)
         self.trustor_client = os.identity_v3_client
 
     def cleanup_user_and_roles(self):
@@ -166,26 +165,25 @@ class BaseTrustsV3Test(base.BaseIdentityV3AdminTest):
             self.trust_id, self.delegated_role_id)
 
         # And that we don't find not_delegated_role
-        self.assertRaises(exceptions.NotFound,
+        self.assertRaises(lib_exc.NotFound,
                           self.trustor_client.get_trust_role,
                           self.trust_id,
                           self.not_delegated_role_id)
 
-        self.assertRaises(exceptions.NotFound,
+        self.assertRaises(lib_exc.NotFound,
                           self.trustor_client.check_trust_role,
                           self.trust_id,
                           self.not_delegated_role_id)
 
     def delete_trust(self):
         self.trustor_client.delete_trust(self.trust_id)
-        self.assertRaises(exceptions.NotFound,
+        self.assertRaises(lib_exc.NotFound,
                           self.trustor_client.get_trust,
                           self.trust_id)
         self.trust_id = None
 
 
 class TrustsV3TestJSON(BaseTrustsV3Test):
-    _interface = 'json'
 
     def setUp(self):
         super(TrustsV3TestJSON, self).setUp()
@@ -238,7 +236,7 @@ class TrustsV3TestJSON(BaseTrustsV3Test):
         # is rejected with the correct error
         # with an expiry specified
         expires_str = 'bad.123Z'
-        self.assertRaises(exceptions.BadRequest,
+        self.assertRaises(lib_exc.BadRequest,
                           self.create_trust,
                           expires=expires_str)
 

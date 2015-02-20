@@ -15,17 +15,17 @@
 
 import json
 
-from tempest.services.volume.json import base
+from tempest.common import service_client
 
 
-class BaseExtensionsClientJSON(base.VolumeClient):
+class BaseExtensionsClientJSON(service_client.ServiceClient):
 
     def list_extensions(self):
         url = 'extensions'
         resp, body = self.get(url)
         body = json.loads(body)
         self.expected_success(200, resp.status)
-        return resp, body['extensions']
+        return service_client.ResponseBodyList(resp, body['extensions'])
 
 
 class ExtensionsClientJSON(BaseExtensionsClientJSON):

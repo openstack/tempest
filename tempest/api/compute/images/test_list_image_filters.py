@@ -54,7 +54,7 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
             image_file = StringIO.StringIO(('*' * 1024))
             cls.glance_client.update_image(image_id, data=image_file)
             cls.client.wait_for_image_status(image_id, 'ACTIVE')
-            _, body = cls.client.get_image(image_id)
+            body = cls.client.get_image(image_id)
             return body
 
         # Create non-snapshot images via glance
@@ -69,26 +69,26 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
             return
 
         # Create instances and snapshots via nova
-        resp, cls.server1 = cls.create_test_server()
-        resp, cls.server2 = cls.create_test_server(wait_until='ACTIVE')
+        cls.server1 = cls.create_test_server()
+        cls.server2 = cls.create_test_server(wait_until='ACTIVE')
         # NOTE(sdague) this is faster than doing the sync wait_util on both
         cls.servers_client.wait_for_server_status(cls.server1['id'],
                                                   'ACTIVE')
 
         # Create images to be used in the filter tests
-        resp, cls.snapshot1 = cls.create_image_from_server(
+        cls.snapshot1 = cls.create_image_from_server(
             cls.server1['id'], wait_until='ACTIVE')
         cls.snapshot1_id = cls.snapshot1['id']
 
         # Servers have a hidden property for when they are being imaged
         # Performing back-to-back create image calls on a single
         # server will sometimes cause failures
-        resp, cls.snapshot3 = cls.create_image_from_server(
+        cls.snapshot3 = cls.create_image_from_server(
             cls.server2['id'], wait_until='ACTIVE')
         cls.snapshot3_id = cls.snapshot3['id']
 
         # Wait for the server to be active after the image upload
-        resp, cls.snapshot2 = cls.create_image_from_server(
+        cls.snapshot2 = cls.create_image_from_server(
             cls.server1['id'], wait_until='ACTIVE')
         cls.snapshot2_id = cls.snapshot2['id']
 
@@ -97,7 +97,7 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
         # The list of images should contain only images with the
         # provided status
         params = {'status': 'ACTIVE'}
-        resp, images = self.client.list_images(params)
+        images = self.client.list_images(params)
 
         self.assertTrue(any([i for i in images if i['id'] == self.image1_id]))
         self.assertTrue(any([i for i in images if i['id'] == self.image2_id]))
@@ -108,7 +108,7 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
         # List of all images should contain the expected images filtered
         # by name
         params = {'name': self.image1['name']}
-        resp, images = self.client.list_images(params)
+        images = self.client.list_images(params)
 
         self.assertTrue(any([i for i in images if i['id'] == self.image1_id]))
         self.assertFalse(any([i for i in images if i['id'] == self.image2_id]))
@@ -120,7 +120,7 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
     def test_list_images_filter_by_server_id(self):
         # The images should contain images filtered by server id
         params = {'server': self.server1['id']}
-        resp, images = self.client.list_images(params)
+        images = self.client.list_images(params)
 
         self.assertTrue(any([i for i in images
                              if i['id'] == self.snapshot1_id]),
@@ -141,7 +141,7 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
         # Try all server link types
         for link in server_links:
             params = {'server': link['href']}
-            resp, images = self.client.list_images(params)
+            images = self.client.list_images(params)
 
             self.assertFalse(any([i for i in images
                                   if i['id'] == self.snapshot1_id]))
@@ -156,7 +156,7 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
     def test_list_images_filter_by_type(self):
         # The list of servers should be filtered by image type
         params = {'type': 'snapshot'}
-        resp, images = self.client.list_images(params)
+        images = self.client.list_images(params)
 
         self.assertTrue(any([i for i in images
                              if i['id'] == self.snapshot1_id]))
@@ -171,9 +171,7 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
     def test_list_images_limit_results(self):
         # Verify only the expected number of results are returned
         params = {'limit': '1'}
-        resp, images = self.client.list_images(params)
-        # when _interface='xml', one element for images_links in images
-        # ref: Question #224349
+        images = self.client.list_images(params)
         self.assertEqual(1, len([x for x in images if 'id' in x]))
 
     @test.attr(type='gate')
@@ -183,7 +181,7 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
         # Becoming ACTIVE will modify the updated time
         # Filter by the image's created time
         params = {'changes-since': self.image3['created']}
-        resp, images = self.client.list_images(params)
+        images = self.client.list_images(params)
         found = any([i for i in images if i['id'] == self.image3_id])
         self.assertTrue(found)
 
@@ -192,7 +190,7 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
         # Detailed list of all images should only contain images
         # with the provided status
         params = {'status': 'ACTIVE'}
-        resp, images = self.client.list_images_with_detail(params)
+        images = self.client.list_images_with_detail(params)
 
         self.assertTrue(any([i for i in images if i['id'] == self.image1_id]))
         self.assertTrue(any([i for i in images if i['id'] == self.image2_id]))
@@ -203,7 +201,7 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
         # Detailed list of all images should contain the expected
         # images filtered by name
         params = {'name': self.image1['name']}
-        resp, images = self.client.list_images_with_detail(params)
+        images = self.client.list_images_with_detail(params)
 
         self.assertTrue(any([i for i in images if i['id'] == self.image1_id]))
         self.assertFalse(any([i for i in images if i['id'] == self.image2_id]))
@@ -214,7 +212,7 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
         # Verify only the expected number of results (with full details)
         # are returned
         params = {'limit': '1'}
-        resp, images = self.client.list_images_with_detail(params)
+        images = self.client.list_images_with_detail(params)
         self.assertEqual(1, len(images))
 
     @testtools.skipUnless(CONF.compute_feature_enabled.snapshot,
@@ -227,7 +225,7 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
         # Try all server link types
         for link in server_links:
             params = {'server': link['href']}
-            resp, images = self.client.list_images_with_detail(params)
+            images = self.client.list_images_with_detail(params)
 
             self.assertFalse(any([i for i in images
                                   if i['id'] == self.snapshot1_id]))
@@ -242,8 +240,8 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
     def test_list_images_with_detail_filter_by_type(self):
         # The detailed list of servers should be filtered by image type
         params = {'type': 'snapshot'}
-        resp, images = self.client.list_images_with_detail(params)
-        resp, image4 = self.client.get_image(self.image_ref)
+        images = self.client.list_images_with_detail(params)
+        self.client.get_image(self.image_ref)
 
         self.assertTrue(any([i for i in images
                              if i['id'] == self.snapshot1_id]))
@@ -261,5 +259,5 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
         # Becoming ACTIVE will modify the updated time
         # Filter by the image's created time
         params = {'changes-since': self.image1['created']}
-        resp, images = self.client.list_images_with_detail(params)
+        images = self.client.list_images_with_detail(params)
         self.assertTrue(any([i for i in images if i['id'] == self.image1_id]))

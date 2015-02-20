@@ -14,6 +14,7 @@
 #    under the License.
 
 from tempest import auth
+from tempest.common import cred_provider
 from tempest import config
 from tempest import exceptions
 
@@ -39,7 +40,7 @@ class Manager(object):
         """
         self.auth_version = CONF.identity.auth_version
         if credentials is None:
-            self.credentials = auth.get_default_credentials('user')
+            self.credentials = cred_provider.get_configured_credentials('user')
         else:
             self.credentials = credentials
         # Check if passed or default credentials are valid
@@ -63,5 +64,4 @@ class Manager(object):
                 'Credentials must be specified')
         auth_provider_class = self.get_auth_provider_class(credentials)
         return auth_provider_class(
-            interface=getattr(self, 'interface', None),
             credentials=credentials)

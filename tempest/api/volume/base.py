@@ -13,6 +13,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib import exceptions as lib_exc
+
 from tempest import clients
 from tempest.common.utils import data_utils
 from tempest import config
@@ -29,7 +31,6 @@ class BaseVolumeTest(tempest.test.BaseTestCase):
     """Base test case class for all Cinder API tests."""
 
     _api_version = 2
-    _interface = 'json'
 
     @classmethod
     def resource_setup(cls):
@@ -97,7 +98,7 @@ class BaseVolumeTest(tempest.test.BaseTestCase):
         name_field = cls.special_fields['name_field']
 
         kwargs[name_field] = name
-        _, volume = cls.volumes_client.create_volume(size, **kwargs)
+        volume = cls.volumes_client.create_volume(size, **kwargs)
 
         cls.volumes.append(volume)
         cls.volumes_client.wait_for_volume_status(volume['id'], 'available')
@@ -106,8 +107,8 @@ class BaseVolumeTest(tempest.test.BaseTestCase):
     @classmethod
     def create_snapshot(cls, volume_id=1, **kwargs):
         """Wrapper utility that returns a test snapshot."""
-        _, snapshot = cls.snapshots_client.create_snapshot(volume_id,
-                                                           **kwargs)
+        snapshot = cls.snapshots_client.create_snapshot(volume_id,
+                                                        **kwargs)
         cls.snapshots.append(snapshot)
         cls.snapshots_client.wait_for_snapshot_status(snapshot['id'],
                                                       'available')
@@ -153,8 +154,7 @@ class BaseVolumeAdminTest(BaseVolumeTest):
 
         try:
             cls.adm_creds = cls.isolated_creds.get_admin_creds()
-            cls.os_adm = clients.Manager(
-                credentials=cls.adm_creds, interface=cls._interface)
+            cls.os_adm = clients.Manager(credentials=cls.adm_creds)
         except NotImplementedError:
             msg = "Missing Volume Admin API credentials in configuration."
             raise cls.skipException(msg)
@@ -198,8 +198,8 @@ class BaseVolumeAdminTest(BaseVolumeTest):
         """create a test Qos-Specs."""
         name = name or data_utils.rand_name(cls.__name__ + '-QoS')
         consumer = consumer or 'front-end'
-        _, qos_specs = cls.volume_qos_client.create_qos(name, consumer,
-                                                        **kwargs)
+        qos_specs = cls.volume_qos_client.create_qos(name, consumer,
+                                                     **kwargs)
         cls.qos_specs.append(qos_specs['id'])
         return qos_specs
 
@@ -208,13 +208,13 @@ class BaseVolumeAdminTest(BaseVolumeTest):
         for qos_id in cls.qos_specs:
             try:
                 cls.volume_qos_client.delete_qos(qos_id)
-            except exceptions.NotFound:
+            except lib_exc.NotFound:
                 # The qos_specs may have already been deleted which is OK.
                 pass
 
         for qos_id in cls.qos_specs:
             try:
                 cls.volume_qos_client.wait_for_resource_deletion(qos_id)
-            except exceptions.NotFound:
+            except lib_exc.NotFound:
                 # The qos_specs may have already been deleted which is OK.
                 pass

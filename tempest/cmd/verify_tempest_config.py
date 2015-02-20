@@ -154,7 +154,7 @@ def get_enabled_extensions(service):
 
 def verify_extensions(os, service, results):
     extensions_client = get_extension_client(os, service)
-    if service == 'neutron':
+    if service != 'swift':
         resp = extensions_client.list_extensions()
     else:
         __, resp = extensions_client.list_extensions()
@@ -327,7 +327,7 @@ def main():
         CONF_PARSER = moves.configparser.SafeConfigParser()
         CONF_PARSER.optionxform = str
         CONF_PARSER.readfp(conf_file)
-    os = clients.AdminManager(interface='json')
+    os = clients.AdminManager()
     services = check_service_availability(os, update)
     results = {}
     for service in ['nova', 'cinder', 'neutron', 'swift']:
@@ -335,7 +335,7 @@ def main():
             continue
         results = verify_extensions(os, service, results)
 
-    # Verify API verisons of all services in the keystone catalog and keystone
+    # Verify API versions of all services in the keystone catalog and keystone
     # itself.
     services.append('keystone')
     for service in services:

@@ -19,7 +19,6 @@ from tempest import test
 
 
 class SnapshotsActionsV2Test(base.BaseVolumeAdminTest):
-    _interface = "json"
 
     @classmethod
     def resource_setup(cls):
@@ -30,7 +29,7 @@ class SnapshotsActionsV2Test(base.BaseVolumeAdminTest):
         vol_name = data_utils.rand_name(cls.__name__ + '-Volume-')
         cls.name_field = cls.special_fields['name_field']
         params = {cls.name_field: vol_name}
-        _, cls.volume = \
+        cls.volume = \
             cls.volumes_client.create_volume(size=1, **params)
         cls.volumes_client.wait_for_volume_status(cls.volume['id'],
                                                   'available')
@@ -38,7 +37,7 @@ class SnapshotsActionsV2Test(base.BaseVolumeAdminTest):
         # Create a test shared snapshot for tests
         snap_name = data_utils.rand_name(cls.__name__ + '-Snapshot-')
         params = {cls.name_field: snap_name}
-        _, cls.snapshot = \
+        cls.snapshot = \
             cls.client.create_snapshot(cls.volume['id'], **params)
         cls.client.wait_for_snapshot_status(cls.snapshot['id'],
                                             'available')
@@ -68,9 +67,9 @@ class SnapshotsActionsV2Test(base.BaseVolumeAdminTest):
         # and force delete temp snapshot
         temp_snapshot = self.create_snapshot(self.volume['id'])
         if status:
-            _, body = self.admin_snapshots_client.\
+            self.admin_snapshots_client.\
                 reset_snapshot_status(temp_snapshot['id'], status)
-        _, volume_delete = self.admin_snapshots_client.\
+        self.admin_snapshots_client.\
             force_delete_snapshot(temp_snapshot['id'])
         self.client.wait_for_resource_deletion(temp_snapshot['id'])
 
@@ -81,9 +80,9 @@ class SnapshotsActionsV2Test(base.BaseVolumeAdminTest):
     def test_reset_snapshot_status(self):
         # Reset snapshot status to creating
         status = 'creating'
-        _, body = self.admin_snapshots_client.\
+        self.admin_snapshots_client.\
             reset_snapshot_status(self.snapshot['id'], status)
-        _, snapshot_get \
+        snapshot_get \
             = self.admin_snapshots_client.get_snapshot(self.snapshot['id'])
         self.assertEqual(status, snapshot_get['status'])
 
@@ -98,9 +97,9 @@ class SnapshotsActionsV2Test(base.BaseVolumeAdminTest):
         progress = '80%'
         status = 'error'
         progress_alias = self._get_progress_alias()
-        _, body = self.client.update_snapshot_status(self.snapshot['id'],
-                                                     status, progress)
-        _, snapshot_get \
+        self.client.update_snapshot_status(self.snapshot['id'],
+                                           status, progress)
+        snapshot_get \
             = self.admin_snapshots_client.get_snapshot(self.snapshot['id'])
         self.assertEqual(status, snapshot_get['status'])
         self.assertEqual(progress, snapshot_get[progress_alias])

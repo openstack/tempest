@@ -70,12 +70,14 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
             * test that cross-tenant traffic is enabled once an appropriate
             rule has been created on destination tenant.
             * test that reverse traffic is still blocked
-            * test than revesre traffic is enabled once an appropriate rule has
+            * test than reverse traffic is enabled once an appropriate rule has
             been created on source tenant
         7._test_port_update_new_security_group:
            * test that traffic is blocked with default security group
            * test that traffic is enabled after updating port with new security
            group having appropriate rule
+        8. _test_multiple_security_groups: test multiple security groups can be
+           associated with the vm
 
     assumptions:
         1. alt_tenant/user existed and is different from primary_tenant/user
@@ -85,7 +87,7 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
             to it, and cross tenant check will be done on the private IP of the
             destination tenant
             or
-            * not defined (empty string), in which case each tanant will have
+            * not defined (empty string), in which case each tenant will have
             its own router connected to the public network
     """
 
@@ -238,7 +240,8 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
             ],
             'key_name': tenant.keypair['name'],
             'security_groups': security_groups_names,
-            'tenant_id': tenant.creds.tenant_id
+            'tenant_id': tenant.creds.tenant_id,
+            'network_client': tenant.manager.network_client
         }
         server = self.create_server(name=name, create_kwargs=create_kwargs)
         self.assertEqual(
@@ -466,7 +469,7 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
     def test_port_update_new_security_group(self):
         """
         This test verifies the traffic after updating the vm port with new
-        security group having appropiate rule.
+        security group having appropriate rule.
         """
         new_tenant = self.primary_tenant
 
@@ -511,3 +514,37 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
             for tenant in self.tenants.values():
                 self._log_console_output(servers=tenant.servers)
             raise
+
+    @test.attr(type='smoke')
+    @test.services('compute', 'network')
+    def test_multiple_security_groups(self):
+        """
+        This test verifies multiple security groups and checks that rules
+        provided in the both the groups is applied onto VM
+        """
+        tenant = self.primary_tenant
+        ip = self._get_server_ip(tenant.access_point,
+                                 floating=self.floating_ip_access)
+        ssh_login = CONF.compute.image_ssh_user
+        private_key = tenant.keypair['private_key']
+        self.check_vm_connectivity(ip,
+                                   should_connect=False)
+        ruleset = dict(
+            protocol='icmp',
+            direction='ingress'
+        )
+        self._create_security_group_rule(
+            secgroup=tenant.security_groups['default'],
+            **ruleset
+        )
+        """
+        Vm now has 2 security groups one with ssh rule(
+        already added in setUp() method),and other with icmp rule
+        (added in the above step).The check_vm_connectivity tests
+        -that vm ping test is successful
+        -ssh to vm is successful
+        """
+        self.check_vm_connectivity(ip,
+                                   username=ssh_login,
+                                   private_key=private_key,
+                                   should_connect=True)

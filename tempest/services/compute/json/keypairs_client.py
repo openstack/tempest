@@ -17,10 +17,10 @@ import json
 
 from tempest.api_schema.response.compute import keypairs as common_schema
 from tempest.api_schema.response.compute.v2 import keypairs as schema
-from tempest.services.compute.json import base
+from tempest.common import service_client
 
 
-class KeyPairsClientJSON(base.ComputeClient):
+class KeyPairsClientJSON(service_client.ServiceClient):
 
     def list_keypairs(self):
         resp, body = self.get("os-keypairs")
@@ -31,13 +31,13 @@ class KeyPairsClientJSON(base.ComputeClient):
         # For now we shall adhere to the spec, but the spec for keypairs
         # is yet to be found
         self.validate_response(common_schema.list_keypairs, resp, body)
-        return resp, body['keypairs']
+        return service_client.ResponseBodyList(resp, body['keypairs'])
 
     def get_keypair(self, key_name):
         resp, body = self.get("os-keypairs/%s" % str(key_name))
         body = json.loads(body)
         self.validate_response(schema.get_keypair, resp, body)
-        return resp, body['keypair']
+        return service_client.ResponseBody(resp, body['keypair'])
 
     def create_keypair(self, name, pub_key=None):
         post_body = {'keypair': {'name': name}}
@@ -47,9 +47,9 @@ class KeyPairsClientJSON(base.ComputeClient):
         resp, body = self.post("os-keypairs", body=post_body)
         body = json.loads(body)
         self.validate_response(schema.create_keypair, resp, body)
-        return resp, body['keypair']
+        return service_client.ResponseBody(resp, body['keypair'])
 
     def delete_keypair(self, key_name):
         resp, body = self.delete("os-keypairs/%s" % str(key_name))
         self.validate_response(schema.delete_keypair, resp, body)
-        return resp, body
+        return service_client.ResponseBody(resp, body)

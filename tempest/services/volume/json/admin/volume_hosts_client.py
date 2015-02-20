@@ -16,10 +16,10 @@
 import json
 import urllib
 
-from tempest.services.volume.json import base
+from tempest.common import service_client
 
 
-class BaseVolumeHostsClientJSON(base.VolumeClient):
+class BaseVolumeHostsClientJSON(service_client.ServiceClient):
     """
     Client class to send CRUD Volume Hosts API requests to a Cinder endpoint
     """
@@ -34,7 +34,7 @@ class BaseVolumeHostsClientJSON(base.VolumeClient):
         resp, body = self.get(url)
         body = json.loads(body)
         self.expected_success(200, resp.status)
-        return resp, body['hosts']
+        return service_client.ResponseBodyList(resp, body['hosts'])
 
 
 class VolumeHostsClientJSON(BaseVolumeHostsClientJSON):

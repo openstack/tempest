@@ -161,7 +161,7 @@ class TestLoadBalancerBasic(manager.NetworkScenarioTest):
         """
         for server_id, ip in self.server_ips.iteritems():
             private_key = self.servers_keypairs[server_id]['private_key']
-            server_name = self.servers_client.get_server(server_id)[1]['name']
+            server_name = self.servers_client.get_server(server_id)['name']
             username = config.scenario.ssh_user
             ssh_client = self.get_remote_client(
                 server_or_ip=ip,
@@ -185,7 +185,7 @@ class TestLoadBalancerBasic(manager.NetworkScenarioTest):
 
             # Start netcat
             start_server = ('while true; do '
-                            'sudo nc -l -p %(port)s -e sh /tmp/%(script)s; '
+                            'sudo nc -ll -p %(port)s -e sh /tmp/%(script)s; '
                             'done &')
             cmd = start_server % {'port': self.port1,
                                   'script': 'script1'}

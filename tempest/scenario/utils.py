@@ -21,8 +21,8 @@ import unicodedata
 import testscenarios
 import testtools
 
-from tempest import auth
 from tempest import clients
+from tempest.common import cred_provider
 from tempest.common.utils import misc
 from tempest import config
 from tempest import exceptions
@@ -46,7 +46,7 @@ class ImageUtils(object):
         self.flavors_client = os.flavors_client
 
     def ssh_user(self, image_id):
-        _, _image = self.images_client.get_image(image_id)
+        _image = self.images_client.get_image(image_id)
         for regex, user in self.ssh_users:
             # First match wins
             if re.match(regex, _image['name']) is not None:
@@ -59,15 +59,15 @@ class ImageUtils(object):
                              string=str(image['name']))
 
     def is_sshable_image(self, image_id):
-        _, _image = self.images_client.get_image(image_id)
+        _image = self.images_client.get_image(image_id)
         return self._is_sshable_image(_image)
 
     def _is_flavor_enough(self, flavor, image):
         return image['minDisk'] <= flavor['disk']
 
     def is_flavor_enough(self, flavor_id, image_id):
-        _, _image = self.images_client.get_image(image_id)
-        _, _flavor = self.flavors_client.get_flavor_details(flavor_id)
+        _image = self.images_client.get_image(image_id)
+        _flavor = self.flavors_client.get_flavor_details(flavor_id)
         return self._is_flavor_enough(_flavor, _image)
 
 
@@ -101,7 +101,7 @@ class InputScenarioUtils(object):
 
     def __init__(self):
         os = clients.Manager(
-            auth.get_default_credentials('user', fill_in=False))
+            cred_provider.get_configured_credentials('user', fill_in=False))
         self.images_client = os.images_client
         self.flavors_client = os.flavors_client
         self.image_pattern = CONF.input_scenario.image_regex
@@ -120,12 +120,15 @@ class InputScenarioUtils(object):
         if not CONF.service_available.glance:
             return []
         if not hasattr(self, '_scenario_images'):
-            _, images = self.images_client.list_images()
-            self._scenario_images = [
-                (self._normalize_name(i['name']), dict(image_ref=i['id']))
-                for i in images if re.search(self.image_pattern,
-                                             str(i['name']))
-            ]
+            try:
+                images = self.images_client.list_images()
+                self._scenario_images = [
+                    (self._normalize_name(i['name']), dict(image_ref=i['id']))
+                    for i in images if re.search(self.image_pattern,
+                                                 str(i['name']))
+                ]
+            except Exception:
+                self._scenario_images = []
         return self._scenario_images
 
     @property
@@ -134,12 +137,15 @@ class InputScenarioUtils(object):
         :return: a scenario with name and uuid of flavors
         """
         if not hasattr(self, '_scenario_flavors'):
-            _, flavors = self.flavors_client.list_flavors()
-            self._scenario_flavors = [
-                (self._normalize_name(f['name']), dict(flavor_ref=f['id']))
-                for f in flavors if re.search(self.flavor_pattern,
-                                              str(f['name']))
-            ]
+            try:
+                flavors = self.flavors_client.list_flavors()
+                self._scenario_flavors = [
+                    (self._normalize_name(f['name']), dict(flavor_ref=f['id']))
+                    for f in flavors if re.search(self.flavor_pattern,
+                                                  str(f['name']))
+                ]
+            except Exception:
+                self._scenario_flavors = []
         return self._scenario_flavors
 
 

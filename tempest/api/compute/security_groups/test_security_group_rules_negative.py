@@ -13,10 +13,11 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib import exceptions as lib_exc
+
 from tempest.api.compute.security_groups import base
 from tempest.common.utils import data_utils
 from tempest import config
-from tempest import exceptions
 from tempest import test
 
 CONF = config.CONF
@@ -32,8 +33,8 @@ def not_existing_id():
 class SecurityGroupRulesNegativeTestJSON(base.BaseSecurityGroupsTest):
 
     @classmethod
-    def resource_setup(cls):
-        super(SecurityGroupRulesNegativeTestJSON, cls).resource_setup()
+    def setup_clients(cls):
+        super(SecurityGroupRulesNegativeTestJSON, cls).setup_clients()
         cls.client = cls.security_groups_client
 
     @test.attr(type=['negative', 'smoke'])
@@ -46,7 +47,7 @@ class SecurityGroupRulesNegativeTestJSON(base.BaseSecurityGroupsTest):
         ip_protocol = 'tcp'
         from_port = 22
         to_port = 22
-        self.assertRaises(exceptions.NotFound,
+        self.assertRaises(lib_exc.NotFound,
                           self.client.create_security_group_rule,
                           parent_group_id, ip_protocol, from_port, to_port)
 
@@ -60,7 +61,7 @@ class SecurityGroupRulesNegativeTestJSON(base.BaseSecurityGroupsTest):
         ip_protocol = 'tcp'
         from_port = 22
         to_port = 22
-        self.assertRaises(exceptions.BadRequest,
+        self.assertRaises(lib_exc.BadRequest,
                           self.client.create_security_group_rule,
                           parent_group_id, ip_protocol, from_port, to_port)
 
@@ -69,22 +70,21 @@ class SecurityGroupRulesNegativeTestJSON(base.BaseSecurityGroupsTest):
     def test_create_security_group_rule_duplicate(self):
         # Negative test: Create Security Group rule duplicate should fail
         # Creating a Security Group to add rule to it
-        resp, sg = self.create_security_group()
+        sg = self.create_security_group()
         # Adding rules to the created Security Group
         parent_group_id = sg['id']
         ip_protocol = 'tcp'
         from_port = 22
         to_port = 22
 
-        resp, rule = \
+        rule = \
             self.client.create_security_group_rule(parent_group_id,
                                                    ip_protocol,
                                                    from_port,
                                                    to_port)
         self.addCleanup(self.client.delete_security_group_rule, rule['id'])
-        self.assertEqual(200, resp.status)
         # Add the same rule to the group should fail
-        self.assertRaises(exceptions.BadRequest,
+        self.assertRaises(lib_exc.BadRequest,
                           self.client.create_security_group_rule,
                           parent_group_id, ip_protocol, from_port, to_port)
 
@@ -94,14 +94,14 @@ class SecurityGroupRulesNegativeTestJSON(base.BaseSecurityGroupsTest):
         # Negative test: Creation of Security Group rule should FAIL
         # with invalid ip_protocol
         # Creating a Security Group to add rule to it
-        resp, sg = self.create_security_group()
+        sg = self.create_security_group()
         # Adding rules to the created Security Group
         parent_group_id = sg['id']
         ip_protocol = data_utils.rand_name('999')
         from_port = 22
         to_port = 22
 
-        self.assertRaises(exceptions.BadRequest,
+        self.assertRaises(lib_exc.BadRequest,
                           self.client.create_security_group_rule,
                           parent_group_id, ip_protocol, from_port, to_port)
 
@@ -111,13 +111,13 @@ class SecurityGroupRulesNegativeTestJSON(base.BaseSecurityGroupsTest):
         # Negative test: Creation of Security Group rule should FAIL
         # with invalid from_port
         # Creating a Security Group to add rule to it
-        resp, sg = self.create_security_group()
+        sg = self.create_security_group()
         # Adding rules to the created Security Group
         parent_group_id = sg['id']
         ip_protocol = 'tcp'
         from_port = data_utils.rand_int_id(start=65536)
         to_port = 22
-        self.assertRaises(exceptions.BadRequest,
+        self.assertRaises(lib_exc.BadRequest,
                           self.client.create_security_group_rule,
                           parent_group_id, ip_protocol, from_port, to_port)
 
@@ -127,13 +127,13 @@ class SecurityGroupRulesNegativeTestJSON(base.BaseSecurityGroupsTest):
         # Negative test: Creation of Security Group rule should FAIL
         # with invalid to_port
         # Creating a Security Group to add rule to it
-        resp, sg = self.create_security_group()
+        sg = self.create_security_group()
         # Adding rules to the created Security Group
         parent_group_id = sg['id']
         ip_protocol = 'tcp'
         from_port = 22
         to_port = data_utils.rand_int_id(start=65536)
-        self.assertRaises(exceptions.BadRequest,
+        self.assertRaises(lib_exc.BadRequest,
                           self.client.create_security_group_rule,
                           parent_group_id, ip_protocol, from_port, to_port)
 
@@ -143,13 +143,13 @@ class SecurityGroupRulesNegativeTestJSON(base.BaseSecurityGroupsTest):
         # Negative test: Creation of Security Group rule should FAIL
         # with invalid port range.
         # Creating a Security Group to add rule to it.
-        resp, sg = self.create_security_group()
+        sg = self.create_security_group()
         # Adding a rule to the created Security Group
         secgroup_id = sg['id']
         ip_protocol = 'tcp'
         from_port = 22
         to_port = 21
-        self.assertRaises(exceptions.BadRequest,
+        self.assertRaises(lib_exc.BadRequest,
                           self.client.create_security_group_rule,
                           secgroup_id, ip_protocol, from_port, to_port)
 
@@ -159,6 +159,6 @@ class SecurityGroupRulesNegativeTestJSON(base.BaseSecurityGroupsTest):
         # Negative test: Deletion of Security Group rule should be FAIL
         # with non existent id
         non_existent_rule_id = not_existing_id()
-        self.assertRaises(exceptions.NotFound,
+        self.assertRaises(lib_exc.NotFound,
                           self.client.delete_security_group_rule,
                           non_existent_rule_id)

@@ -13,16 +13,16 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib import exceptions as lib_exc
+
 from tempest.api.network import base
 from tempest import config
-from tempest import exceptions
 from tempest import test
 
 CONF = config.CONF
 
 
 class ExternalNetworksAdminNegativeTestJSON(base.BaseAdminNetworkTest):
-    _interface = 'json'
 
     @test.attr(type=['negative'])
     def test_create_port_with_precreated_floatingip_as_fixed_ip(self):
@@ -47,7 +47,7 @@ class ExternalNetworksAdminNegativeTestJSON(base.BaseAdminNetworkTest):
         fixed_ips = [{'ip_address': floating_ip_address}]
 
         # create a port which will internally create an instance-ip
-        self.assertRaises(exceptions.Conflict,
+        self.assertRaises(lib_exc.Conflict,
                           client.create_port,
                           network_id=CONF.network.public_network_id,
                           fixed_ips=fixed_ips)

@@ -30,15 +30,27 @@ LOG = logging.getLogger(__name__)
 class NeutronResourcesTestJSON(base.BaseOrchestrationTest):
 
     @classmethod
-    def resource_setup(cls):
-        super(NeutronResourcesTestJSON, cls).resource_setup()
+    def skip_checks(cls):
+        super(NeutronResourcesTestJSON, cls).skip_checks()
         if not CONF.orchestration.image_ref:
             raise cls.skipException("No image available to test")
-        os = clients.Manager()
         if not CONF.service_available.neutron:
             raise cls.skipException("Neutron support is required")
+
+    @classmethod
+    def setup_credentials(cls):
+        super(NeutronResourcesTestJSON, cls).setup_credentials()
+        cls.os = clients.Manager()
+
+    @classmethod
+    def setup_clients(cls):
+        super(NeutronResourcesTestJSON, cls).setup_clients()
+        cls.network_client = cls.os.network_client
+
+    @classmethod
+    def resource_setup(cls):
+        super(NeutronResourcesTestJSON, cls).resource_setup()
         cls.neutron_basic_template = cls.load_template('neutron_basic')
-        cls.network_client = os.network_client
         cls.stack_name = data_utils.rand_name('heat')
         template = cls.read_template('neutron_basic')
         cls.keypair_name = (CONF.orchestration.keypair_name or
@@ -65,14 +77,14 @@ class NeutronResourcesTestJSON(base.BaseOrchestrationTest):
         cls.stack_id = cls.stack_identifier.split('/')[1]
         try:
             cls.client.wait_for_stack_status(cls.stack_id, 'CREATE_COMPLETE')
-            _, resources = cls.client.list_resources(cls.stack_identifier)
+            resources = cls.client.list_resources(cls.stack_identifier)
         except exceptions.TimeoutException as e:
             if CONF.compute_feature_enabled.console_output:
                 # attempt to log the server console to help with debugging
                 # the cause of the server not signalling the waitcondition
                 # to heat.
-                _, body = cls.client.get_resource(cls.stack_identifier,
-                                                  'Server')
+                body = cls.client.get_resource(cls.stack_identifier,
+                                               'Server')
                 server_id = body['physical_resource_id']
                 LOG.debug('Console output for %s', server_id)
                 _, output = cls.servers_client.get_console_output(
@@ -173,7 +185,7 @@ class NeutronResourcesTestJSON(base.BaseOrchestrationTest):
     def test_created_server(self):
         """Verifies created sever."""
         server_id = self.test_resources.get('Server')['physical_resource_id']
-        _, server = self.servers_client.get_server(server_id)
+        server = self.servers_client.get_server(server_id)
         self.assertEqual(self.keypair_name, server['key_name'])
         self.assertEqual('ACTIVE', server['status'])
         network = server['addresses'][self.neutron_basic_template['resources'][

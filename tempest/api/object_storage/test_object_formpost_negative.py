@@ -18,9 +18,10 @@ import hmac
 import time
 import urlparse
 
+from tempest_lib import exceptions as lib_exc
+
 from tempest.api.object_storage import base
 from tempest.common.utils import data_utils
-from tempest import exceptions
 from tempest import test
 
 
@@ -117,7 +118,7 @@ class ObjectFormPostNegativeTest(base.BaseObjectTest):
 
         url = "%s/%s" % (self.container_name, self.object_name)
         exc = self.assertRaises(
-            exceptions.Unauthorized,
+            lib_exc.Unauthorized,
             self.object_client.post,
             url, body, headers=headers)
         self.assertIn('FormPost: Form Expired', str(exc))
@@ -133,7 +134,7 @@ class ObjectFormPostNegativeTest(base.BaseObjectTest):
 
         url = "%s/%s" % (self.container_name, self.object_name)
         exc = self.assertRaises(
-            exceptions.Unauthorized,
+            lib_exc.Unauthorized,
             self.object_client.post,
             url, body, headers=headers)
         self.assertIn('FormPost: Invalid Signature', str(exc))

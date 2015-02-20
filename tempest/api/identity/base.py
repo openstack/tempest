@@ -13,12 +13,12 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib import exceptions as lib_exc
 
-from tempest import auth
 from tempest import clients
+from tempest.common import cred_provider
 from tempest.common.utils import data_utils
 from tempest import config
-from tempest import exceptions
 from tempest.openstack.common import log as logging
 import tempest.test
 
@@ -31,8 +31,8 @@ class BaseIdentityAdminTest(tempest.test.BaseTestCase):
     @classmethod
     def resource_setup(cls):
         super(BaseIdentityAdminTest, cls).resource_setup()
-        cls.os_adm = clients.AdminManager(interface=cls._interface)
-        cls.os = clients.Manager(interface=cls._interface)
+        cls.os_adm = clients.AdminManager()
+        cls.os = clients.Manager()
 
     @classmethod
     def disable_user(cls, user_name):
@@ -149,11 +149,11 @@ class DataGenerator(object):
 
         @property
         def test_credentials(self):
-            return auth.get_credentials(username=self.test_user,
-                                        user_id=self.user['id'],
-                                        password=self.test_password,
-                                        tenant_name=self.test_tenant,
-                                        tenant_id=self.tenant['id'])
+            return cred_provider.get_credentials(username=self.test_user,
+                                                 user_id=self.user['id'],
+                                                 password=self.test_password,
+                                                 tenant_name=self.test_tenant,
+                                                 tenant_id=self.tenant['id'])
 
         def setup_test_user(self):
             """Set up a test user."""
@@ -226,7 +226,7 @@ class DataGenerator(object):
                     func(item['id'], **kwargs)
                 else:
                     func(item['id'])
-            except exceptions.NotFound:
+            except lib_exc.NotFound:
                 pass
             except Exception:
                 LOG.exception("Unexpected exception occurred in %s deletion."

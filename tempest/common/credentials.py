@@ -12,6 +12,7 @@
 #    limitations under the License.
 
 from tempest.common import accounts
+from tempest.common import cred_provider
 from tempest.common import isolated_creds
 from tempest import config
 
@@ -37,3 +38,22 @@ def get_isolated_credentials(name, network_resources=None,
             return accounts.Accounts(name=name)
         else:
             return accounts.NotLockingAccounts(name=name)
+
+
+# We want a helper function here to check and see if admin credentials
+# are available so we can do a single call from skip_checks if admin
+# creds area vailable.
+def is_admin_available():
+    is_admin = True
+    # In the case of a pre-provisioned account, if even if creds were
+    # configured, the admin credentials won't be available
+    if (CONF.auth.locking_credentials_provider and
+        not CONF.auth.allow_tenant_isolation):
+        is_admin = False
+    else:
+        try:
+            cred_provider.get_configured_credentials('identity_admin')
+        except NotImplementedError:
+            is_admin = False
+
+    return is_admin

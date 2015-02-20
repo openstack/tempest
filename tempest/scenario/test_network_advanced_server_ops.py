@@ -13,6 +13,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib import decorators
 import testtools
 
 from tempest.common.utils import data_utils
@@ -92,7 +93,7 @@ class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
         self.servers_client.wait_for_server_status(self.server['id'], 'ACTIVE')
         self._check_network_connectivity()
 
-    @test.skip_because(bug="1323658")
+    @decorators.skip_because(bug="1323658")
     @test.services('compute', 'network')
     def test_server_connectivity_stop_start(self):
         self._setup_network_and_servers()
@@ -140,7 +141,7 @@ class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
         self.servers_client.resume_server(self.server['id'])
         self._wait_server_status_and_check_network_connectivity()
 
-    @test.skip_because(bug="1323658")
+    @decorators.skip_because(bug="1323658")
     @testtools.skipUnless(CONF.compute_feature_enabled.resize,
                           'Resize is not available.')
     @test.services('compute', 'network')

@@ -12,9 +12,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib import exceptions as lib_exc
+
 from tempest.api.compute import base
 from tempest.common.utils import data_utils
-from tempest import exceptions
 from tempest import test
 
 
@@ -31,28 +32,27 @@ class HostsAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
         cls.non_admin_client = cls.os.hosts_client
 
     def _get_host_name(self):
-        resp, hosts = self.client.list_hosts()
-        self.assertEqual(200, resp.status)
+        hosts = self.client.list_hosts()
         self.assertTrue(len(hosts) >= 1)
         hostname = hosts[0]['host_name']
         return hostname
 
     @test.attr(type=['negative', 'gate'])
     def test_list_hosts_with_non_admin_user(self):
-        self.assertRaises(exceptions.Unauthorized,
+        self.assertRaises(lib_exc.Unauthorized,
                           self.non_admin_client.list_hosts)
 
     @test.attr(type=['negative', 'gate'])
     def test_show_host_detail_with_nonexistent_hostname(self):
         nonexitent_hostname = data_utils.rand_name('rand_hostname')
-        self.assertRaises(exceptions.NotFound,
+        self.assertRaises(lib_exc.NotFound,
                           self.client.show_host_detail, nonexitent_hostname)
 
     @test.attr(type=['negative', 'gate'])
     def test_show_host_detail_with_non_admin_user(self):
         hostname = self._get_host_name()
 
-        self.assertRaises(exceptions.Unauthorized,
+        self.assertRaises(lib_exc.Unauthorized,
                           self.non_admin_client.show_host_detail,
                           hostname)
 
@@ -60,7 +60,7 @@ class HostsAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
     def test_update_host_with_non_admin_user(self):
         hostname = self._get_host_name()
 
-        self.assertRaises(exceptions.Unauthorized,
+        self.assertRaises(lib_exc.Unauthorized,
                           self.non_admin_client.update_host,
                           hostname,
                           status='enable',
@@ -71,7 +71,7 @@ class HostsAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
         # only 'status' and 'maintenance_mode' are the valid params.
         hostname = self._get_host_name()
 
-        self.assertRaises(exceptions.BadRequest,
+        self.assertRaises(lib_exc.BadRequest,
                           self.client.update_host,
                           hostname,
                           status='enable',
@@ -83,7 +83,7 @@ class HostsAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
         # 'status' can only be 'enable' or 'disable'
         hostname = self._get_host_name()
 
-        self.assertRaises(exceptions.BadRequest,
+        self.assertRaises(lib_exc.BadRequest,
                           self.client.update_host,
                           hostname,
                           status='invalid',
@@ -94,7 +94,7 @@ class HostsAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
         # 'maintenance_mode' can only be 'enable' or 'disable'
         hostname = self._get_host_name()
 
-        self.assertRaises(exceptions.BadRequest,
+        self.assertRaises(lib_exc.BadRequest,
                           self.client.update_host,
                           hostname,
                           status='enable',
@@ -105,7 +105,7 @@ class HostsAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
         # 'status' or 'maintenance_mode' needed for host update
         hostname = self._get_host_name()
 
-        self.assertRaises(exceptions.BadRequest,
+        self.assertRaises(lib_exc.BadRequest,
                           self.client.update_host,
                           hostname)
 
@@ -113,7 +113,7 @@ class HostsAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
     def test_update_nonexistent_host(self):
         nonexitent_hostname = data_utils.rand_name('rand_hostname')
 
-        self.assertRaises(exceptions.NotFound,
+        self.assertRaises(lib_exc.NotFound,
                           self.client.update_host,
                           nonexitent_hostname,
                           status='enable',
@@ -123,7 +123,7 @@ class HostsAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
     def test_startup_nonexistent_host(self):
         nonexitent_hostname = data_utils.rand_name('rand_hostname')
 
-        self.assertRaises(exceptions.NotFound,
+        self.assertRaises(lib_exc.NotFound,
                           self.client.startup_host,
                           nonexitent_hostname)
 
@@ -131,7 +131,7 @@ class HostsAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
     def test_startup_host_with_non_admin_user(self):
         hostname = self._get_host_name()
 
-        self.assertRaises(exceptions.Unauthorized,
+        self.assertRaises(lib_exc.Unauthorized,
                           self.non_admin_client.startup_host,
                           hostname)
 
@@ -139,7 +139,7 @@ class HostsAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
     def test_shutdown_nonexistent_host(self):
         nonexitent_hostname = data_utils.rand_name('rand_hostname')
 
-        self.assertRaises(exceptions.NotFound,
+        self.assertRaises(lib_exc.NotFound,
                           self.client.shutdown_host,
                           nonexitent_hostname)
 
@@ -147,7 +147,7 @@ class HostsAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
     def test_shutdown_host_with_non_admin_user(self):
         hostname = self._get_host_name()
 
-        self.assertRaises(exceptions.Unauthorized,
+        self.assertRaises(lib_exc.Unauthorized,
                           self.non_admin_client.shutdown_host,
                           hostname)
 
@@ -155,7 +155,7 @@ class HostsAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
     def test_reboot_nonexistent_host(self):
         nonexitent_hostname = data_utils.rand_name('rand_hostname')
 
-        self.assertRaises(exceptions.NotFound,
+        self.assertRaises(lib_exc.NotFound,
                           self.client.reboot_host,
                           nonexitent_hostname)
 
@@ -163,6 +163,6 @@ class HostsAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
     def test_reboot_host_with_non_admin_user(self):
         hostname = self._get_host_name()
 
-        self.assertRaises(exceptions.Unauthorized,
+        self.assertRaises(lib_exc.Unauthorized,
                           self.non_admin_client.reboot_host,
                           hostname)

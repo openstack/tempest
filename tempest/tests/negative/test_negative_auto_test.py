@@ -21,7 +21,6 @@ from tempest.tests import fake_config
 
 class TestNegativeAutoTest(base.TestCase):
     # Fake entries
-    _interface = 'json'
     _service = 'compute'
 
     fake_input_desc = {"name": "list-flavors-with-detail",

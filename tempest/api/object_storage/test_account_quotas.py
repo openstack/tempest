@@ -26,14 +26,16 @@ CONF = config.CONF
 class AccountQuotasTest(base.BaseObjectTest):
 
     @classmethod
+    def setup_credentials(cls):
+        super(AccountQuotasTest, cls).setup_credentials()
+        cls.data.setup_test_user(reseller=True)
+        cls.os_reselleradmin = clients.Manager(cls.data.test_credentials)
+
+    @classmethod
     def resource_setup(cls):
         super(AccountQuotasTest, cls).resource_setup()
         cls.container_name = data_utils.rand_name(name="TestContainer")
         cls.container_client.create_container(cls.container_name)
-
-        cls.data.setup_test_user(reseller=True)
-
-        cls.os_reselleradmin = clients.Manager(cls.data.test_credentials)
 
         # Retrieve a ResellerAdmin auth data and use it to set a quota
         # on the client's account

@@ -21,14 +21,17 @@ from oslotest import mockpatch
 from tempest import auth
 from tempest import config
 from tempest import exceptions
-from tempest.services.identity.json import identity_client as v2_client
-from tempest.services.identity.v3.json import identity_client as v3_client
+from tempest.services.identity.json import token_client as v2_client
+from tempest.services.identity.v3.json import token_client as v3_client
 from tempest.tests import base
-from tempest.tests import fake_auth_provider
 from tempest.tests import fake_config
 from tempest.tests import fake_credentials
 from tempest.tests import fake_http
 from tempest.tests import fake_identity
+
+
+def fake_get_credentials(fill_in=True, identity_version='v2', **kwargs):
+    return fake_credentials.FakeCredentials()
 
 
 class BaseAuthTestsSetUp(base.TestCase):
@@ -46,10 +49,7 @@ class BaseAuthTestsSetUp(base.TestCase):
         self.useFixture(fake_config.ConfigFixture())
         self.stubs.Set(config, 'TempestConfigPrivate', fake_config.FakePrivate)
         self.fake_http = fake_http.fake_httplib2(return_type=200)
-        self.stubs.Set(auth, 'get_credentials',
-                       fake_auth_provider.get_credentials)
-        self.stubs.Set(auth, 'get_default_credentials',
-                       fake_auth_provider.get_default_credentials)
+        self.stubs.Set(auth, 'get_credentials', fake_get_credentials)
         self.auth_provider = self._auth(self.credentials)
 
 
@@ -80,11 +80,6 @@ class TestBaseAuthProvider(BaseAuthTestsSetUp):
 
     def test_check_credentials_bad_type(self):
         self.assertFalse(self.auth_provider.check_credentials([]))
-
-    def test_instantiate_with_dict(self):
-        # Dict credentials are only supported for backward compatibility
-        auth_provider = self._auth(credentials={})
-        self.assertIsInstance(auth_provider.credentials, auth.Credentials)
 
     def test_auth_data_property_when_cache_exists(self):
         self.auth_provider.cache = 'foo'

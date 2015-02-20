@@ -17,21 +17,14 @@ import json
 import time
 import urllib
 
+from tempest_lib import exceptions as lib_exc
+
 from tempest.api_schema.response.compute.v2 import volumes as schema
-from tempest import config
+from tempest.common import service_client
 from tempest import exceptions
-from tempest.services.compute.json import base
-
-CONF = config.CONF
 
 
-class VolumesExtensionsClientJSON(base.ComputeClient):
-
-    def __init__(self, auth_provider):
-        super(VolumesExtensionsClientJSON, self).__init__(
-            auth_provider,
-            build_interval=CONF.volume.build_interval,
-            build_timeout=CONF.volume.build_timeout)
+class VolumesExtensionsClientJSON(service_client.ServiceClient):
 
     def list_volumes(self, params=None):
         """List all the volumes created."""
@@ -42,7 +35,7 @@ class VolumesExtensionsClientJSON(base.ComputeClient):
         resp, body = self.get(url)
         body = json.loads(body)
         self.validate_response(schema.list_volumes, resp, body)
-        return resp, body['volumes']
+        return service_client.ResponseBodyList(resp, body['volumes'])
 
     def list_volumes_with_detail(self, params=None):
         """List all the details of volumes."""
@@ -53,7 +46,7 @@ class VolumesExtensionsClientJSON(base.ComputeClient):
         resp, body = self.get(url)
         body = json.loads(body)
         self.validate_response(schema.list_volumes, resp, body)
-        return resp, body['volumes']
+        return service_client.ResponseBodyList(resp, body['volumes'])
 
     def get_volume(self, volume_id):
         """Returns the details of a single volume."""
@@ -61,7 +54,7 @@ class VolumesExtensionsClientJSON(base.ComputeClient):
         resp, body = self.get(url)
         body = json.loads(body)
         self.validate_response(schema.create_get_volume, resp, body)
-        return resp, body['volume']
+        return service_client.ResponseBody(resp, body['volume'])
 
     def create_volume(self, size, **kwargs):
         """
@@ -80,23 +73,23 @@ class VolumesExtensionsClientJSON(base.ComputeClient):
         resp, body = self.post('os-volumes', post_body)
         body = json.loads(body)
         self.validate_response(schema.create_get_volume, resp, body)
-        return resp, body['volume']
+        return service_client.ResponseBody(resp, body['volume'])
 
     def delete_volume(self, volume_id):
         """Deletes the Specified Volume."""
         resp, body = self.delete("os-volumes/%s" % str(volume_id))
         self.validate_response(schema.delete_volume, resp, body)
-        return resp, body
+        return service_client.ResponseBody(resp, body)
 
     def wait_for_volume_status(self, volume_id, status):
         """Waits for a Volume to reach a given status."""
-        resp, body = self.get_volume(volume_id)
+        body = self.get_volume(volume_id)
         volume_status = body['status']
         start = int(time.time())
 
         while volume_status != status:
             time.sleep(self.build_interval)
-            resp, body = self.get_volume(volume_id)
+            body = self.get_volume(volume_id)
             volume_status = body['status']
             if volume_status == 'error':
                 raise exceptions.VolumeBuildErrorException(volume_id=volume_id)
@@ -111,7 +104,7 @@ class VolumesExtensionsClientJSON(base.ComputeClient):
     def is_resource_deleted(self, id):
         try:
             self.get_volume(id)
-        except exceptions.NotFound:
+        except lib_exc.NotFound:
             return True
         return False
 

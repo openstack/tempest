@@ -31,7 +31,7 @@ class AvailabilityZoneV2TestJSON(base.BaseVolumeTest):
     @test.attr(type='gate')
     def test_get_availability_zone_list(self):
         # List of availability zone
-        _, availability_zone = self.client.get_availability_zone_list()
+        availability_zone = self.client.get_availability_zone_list()
         self.assertTrue(len(availability_zone) > 0)
 
 

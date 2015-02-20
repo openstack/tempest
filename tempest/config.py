@@ -59,6 +59,9 @@ AuthGroup = [
                      "It requires at least `2 * CONC` distinct accounts "
                      "configured in `test_accounts_file`, with CONC == the "
                      "number of concurrent test processes."),
+    cfg.ListOpt('tempest_roles',
+                help="Roles to assign to all users created by tempest",
+                default=[])
 ]
 
 identity_group = cfg.OptGroup(name='identity',
@@ -346,7 +349,10 @@ ComputeFeaturesGroup = [
     cfg.BoolOpt('snapshot',
                 default=True,
                 help='Does the test environment support creating snapshot '
-                     'images of running instances?')
+                     'images of running instances?'),
+    cfg.BoolOpt('ec2_api',
+                default=True,
+                help='Does the test environment have the ec2 api running?')
 ]
 
 
@@ -449,7 +455,13 @@ NetworkGroup = [
     cfg.ListOpt('dns_servers',
                 default=["8.8.8.8", "8.8.4.4"],
                 help="List of dns servers which should be used"
-                     " for subnet creation")
+                     " for subnet creation"),
+    cfg.StrOpt('port_vnic_type',
+               choices=[None, 'normal', 'direct', 'macvtap'],
+               help="vnic_type to use when Launching instances"
+                    " with pre-configured ports."
+                    " Supported ports are:"
+                    " ['normal','direct','macvtap']"),
 ]
 
 network_feature_group = cfg.OptGroup(name='network-feature-enabled',
@@ -598,7 +610,7 @@ ObjectStoreGroup = [
                         'publicURL', 'adminURL', 'internalURL'],
                help="The endpoint type to use for the object-store service."),
     cfg.IntOpt('container_sync_timeout',
-               default=120,
+               default=600,
                help="Number of seconds to time on waiting for a container "
                     "to container synchronization complete."),
     cfg.IntOpt('container_sync_interval',
@@ -612,6 +624,17 @@ ObjectStoreGroup = [
     cfg.StrOpt('reseller_admin_role',
                default='ResellerAdmin',
                help="User role that has reseller admin"),
+    cfg.StrOpt('realm_name',
+               default='realm1',
+               help="Name of sync realm. A sync realm is a set of clusters "
+                    "that have agreed to allow container syncing with each "
+                    "other. Set the same realm name as Swift's "
+                    "container-sync-realms.conf"),
+    cfg.StrOpt('cluster_name',
+               default='name1',
+               help="One name of cluster which is set in the realm whose name "
+                    "is set in 'realm_name' item in this file. Set the "
+                    "same cluster name as Swift's container-sync-realms.conf"),
 ]
 
 object_storage_feature_group = cfg.OptGroup(
@@ -740,6 +763,17 @@ DataProcessingGroup = [
 ]
 
 
+data_processing_feature_group = cfg.OptGroup(
+    name="data_processing-feature-enabled",
+    title="Enabled Data Processing features")
+
+DataProcessingFeaturesGroup = [
+    cfg.ListOpt('plugins',
+                default=["vanilla", "hdp"],
+                help="List of enabled data processing plugins")
+]
+
+
 boto_group = cfg.OptGroup(name='boto',
                           title='EC2/S3 options')
 BotoGroup = [
@@ -857,7 +891,14 @@ ScenarioGroup = [
         'large_ops_number',
         default=0,
         help="specifies how many resources to request at once. Used "
-        "for large operations testing.")
+        "for large operations testing."),
+    # TODO(yfried): add support for dhcpcd
+    cfg.StrOpt('dhcp_client',
+               default='udhcpc',
+               choices=["udhcpc", "dhclient"],
+               help='DHCP client used by images to renew DCHP lease. '
+                    'If left empty, update operation will be skipped. '
+                    'Supported clients: "udhcpc", "dhclient"')
 ]
 
 
@@ -1040,6 +1081,7 @@ _opts = [
     (telemetry_group, TelemetryGroup),
     (dashboard_group, DashboardGroup),
     (data_processing_group, DataProcessingGroup),
+    (data_processing_feature_group, DataProcessingFeaturesGroup),
     (boto_group, BotoGroup),
     (stress_group, StressGroup),
     (scenario_group, ScenarioGroup),
@@ -1110,6 +1152,8 @@ class TempestConfigPrivate(object):
         self.telemetry = cfg.CONF.telemetry
         self.dashboard = cfg.CONF.dashboard
         self.data_processing = cfg.CONF.data_processing
+        self.data_processing_feature_enabled = cfg.CONF[
+            'data_processing-feature-enabled']
         self.boto = cfg.CONF.boto
         self.stress = cfg.CONF.stress
         self.scenario = cfg.CONF.scenario

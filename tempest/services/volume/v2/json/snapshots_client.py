@@ -15,9 +15,5 @@ from tempest.services.volume.json import snapshots_client
 
 class SnapshotsV2ClientJSON(snapshots_client.BaseSnapshotsClientJSON):
     """Client class to send CRUD Volume V2 API requests."""
-
-    def __init__(self, auth_provider):
-        super(SnapshotsV2ClientJSON, self).__init__(auth_provider)
-
-        self.api_version = "v2"
-        self.create_resp = 202
+    api_version = "v2"
+    create_resp = 202

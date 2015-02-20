@@ -13,16 +13,23 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib import exceptions as lib_exc
+
 from tempest.api.compute import base
-from tempest import exceptions
+from tempest.common import tempest_fixtures as fixtures
 from tempest import test
 
 
 class AbsoluteLimitsNegativeTestJSON(base.BaseV2ComputeTest):
 
+    def setUp(self):
+        # NOTE(mriedem): Avoid conflicts with os-quota-class-sets tests.
+        self.useFixture(fixtures.LockFixture('compute_quotas'))
+        super(AbsoluteLimitsNegativeTestJSON, self).setUp()
+
     @classmethod
-    def resource_setup(cls):
-        super(AbsoluteLimitsNegativeTestJSON, cls).resource_setup()
+    def setup_clients(cls):
+        super(AbsoluteLimitsNegativeTestJSON, cls).setup_clients()
         cls.client = cls.limits_client
         cls.server_client = cls.servers_client
 
@@ -45,8 +52,5 @@ class AbsoluteLimitsNegativeTestJSON(base.BaseV2ComputeTest):
 
         # A 403 Forbidden or 413 Overlimit (old behaviour) exception
         # will be raised when out of quota
-        self.assertRaises((exceptions.Unauthorized, exceptions.OverLimit),
-                          self.server_client.create_server,
-                          name='test', meta=meta_data,
-                          flavor_ref=self.flavor_ref,
-                          image_ref=self.image_ref)
+        self.assertRaises((lib_exc.Unauthorized, lib_exc.OverLimit),
+                          self.create_test_server, meta=meta_data)

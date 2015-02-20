@@ -12,7 +12,7 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
-from tempest_lib import exceptions
+from tempest_lib import exceptions as lib_exc
 
 from tempest.common.utils import data_utils
 from tempest import config
@@ -54,7 +54,7 @@ class TestLargeOpsScenario(manager.ScenarioTest):
             function, args, kwargs = cls._cleanup_resources.pop(-1)
             try:
                 function(*args, **kwargs)
-            except exceptions.NotFound:
+            except lib_exc.NotFound:
                 pass
         super(TestLargeOpsScenario, cls).resource_cleanup()
 
@@ -74,7 +74,7 @@ class TestLargeOpsScenario(manager.ScenarioTest):
         # Explicitly create secgroup to avoid cleanup at the end of testcases.
         # Since no traffic is tested, we don't need to actually add rules to
         # secgroup
-        _, secgroup = self.security_groups_client.create_security_group(
+        secgroup = self.security_groups_client.create_security_group(
             'secgroup-%s' % name, 'secgroup-desc-%s' % name)
         self.addCleanupClass(self.security_groups_client.delete_security_group,
                              secgroup['id'])

@@ -21,7 +21,6 @@ from tempest import test
 
 
 class UsersTestJSON(base.BaseIdentityV2AdminTest):
-    _interface = 'json'
 
     @classmethod
     def resource_setup(cls):

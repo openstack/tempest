@@ -16,12 +16,13 @@
 import json
 import urllib
 
+from tempest_lib import exceptions as lib_exc
+
 from tempest.api_schema.response.compute.v2 import security_groups as schema
-from tempest import exceptions
-from tempest.services.compute.json import base
+from tempest.common import service_client
 
 
-class SecurityGroupsClientJSON(base.ComputeClient):
+class SecurityGroupsClientJSON(service_client.ServiceClient):
 
     def list_security_groups(self, params=None):
         """List all security groups for a user."""
@@ -33,7 +34,7 @@ class SecurityGroupsClientJSON(base.ComputeClient):
         resp, body = self.get(url)
         body = json.loads(body)
         self.validate_response(schema.list_security_groups, resp, body)
-        return resp, body['security_groups']
+        return service_client.ResponseBodyList(resp, body['security_groups'])
 
     def get_security_group(self, security_group_id):
         """Get the details of a Security Group."""
@@ -41,7 +42,7 @@ class SecurityGroupsClientJSON(base.ComputeClient):
         resp, body = self.get(url)
         body = json.loads(body)
         self.validate_response(schema.get_security_group, resp, body)
-        return resp, body['security_group']
+        return service_client.ResponseBody(resp, body['security_group'])
 
     def create_security_group(self, name, description):
         """
@@ -57,7 +58,7 @@ class SecurityGroupsClientJSON(base.ComputeClient):
         resp, body = self.post('os-security-groups', post_body)
         body = json.loads(body)
         self.validate_response(schema.get_security_group, resp, body)
-        return resp, body['security_group']
+        return service_client.ResponseBody(resp, body['security_group'])
 
     def update_security_group(self, security_group_id, name=None,
                               description=None):
@@ -77,14 +78,14 @@ class SecurityGroupsClientJSON(base.ComputeClient):
                               post_body)
         body = json.loads(body)
         self.validate_response(schema.update_security_group, resp, body)
-        return resp, body['security_group']
+        return service_client.ResponseBody(resp, body['security_group'])
 
     def delete_security_group(self, security_group_id):
         """Deletes the provided Security Group."""
         resp, body = self.delete(
             'os-security-groups/%s' % str(security_group_id))
         self.validate_response(schema.delete_security_group, resp, body)
-        return resp, body
+        return service_client.ResponseBody(resp, body)
 
     def create_security_group_rule(self, parent_group_id, ip_proto, from_port,
                                    to_port, **kwargs):
@@ -111,14 +112,14 @@ class SecurityGroupsClientJSON(base.ComputeClient):
         resp, body = self.post(url, post_body)
         body = json.loads(body)
         self.validate_response(schema.create_security_group_rule, resp, body)
-        return resp, body['security_group_rule']
+        return service_client.ResponseBody(resp, body['security_group_rule'])
 
     def delete_security_group_rule(self, group_rule_id):
         """Deletes the provided Security Group rule."""
         resp, body = self.delete('os-security-group-rules/%s' %
                                  str(group_rule_id))
         self.validate_response(schema.delete_security_group_rule, resp, body)
-        return resp, body
+        return service_client.ResponseBody(resp, body)
 
     def list_security_group_rules(self, security_group_id):
         """List all rules for a security group."""
@@ -127,13 +128,13 @@ class SecurityGroupsClientJSON(base.ComputeClient):
         self.validate_response(schema.list_security_groups, resp, body)
         for sg in body['security_groups']:
             if sg['id'] == security_group_id:
-                return resp, sg['rules']
-        raise exceptions.NotFound('No such Security Group')
+                return service_client.ResponseBodyList(resp, sg['rules'])
+        raise lib_exc.NotFound('No such Security Group')
 
     def is_resource_deleted(self, id):
         try:
             self.get_security_group(id)
-        except exceptions.NotFound:
+        except lib_exc.NotFound:
             return True
         return False
 

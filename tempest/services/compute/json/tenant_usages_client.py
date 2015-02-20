@@ -17,10 +17,10 @@ import json
 import urllib
 
 from tempest.api_schema.response.compute.v2 import tenant_usages as schema
-from tempest.services.compute.json import base
+from tempest.common import service_client
 
 
-class TenantUsagesClientJSON(base.ComputeClient):
+class TenantUsagesClientJSON(service_client.ServiceClient):
 
     def list_tenant_usages(self, params=None):
         url = 'os-simple-tenant-usage'
@@ -30,7 +30,7 @@ class TenantUsagesClientJSON(base.ComputeClient):
         resp, body = self.get(url)
         body = json.loads(body)
         self.validate_response(schema.list_tenant, resp, body)
-        return resp, body['tenant_usages'][0]
+        return service_client.ResponseBodyList(resp, body['tenant_usages'][0])
 
     def get_tenant_usage(self, tenant_id, params=None):
         url = 'os-simple-tenant-usage/%s' % tenant_id
@@ -40,4 +40,4 @@ class TenantUsagesClientJSON(base.ComputeClient):
         resp, body = self.get(url)
         body = json.loads(body)
         self.validate_response(schema.get_tenant, resp, body)
-        return resp, body['tenant_usage']
+        return service_client.ResponseBodyList(resp, body['tenant_usage'])

@@ -15,25 +15,25 @@
 import json
 
 from tempest.common import service_client
-from tempest import config
-
-CONF = config.CONF
 
 
 class DataProcessingClient(service_client.ServiceClient):
-
-    def __init__(self, auth_provider):
-        super(DataProcessingClient, self).__init__(
-            auth_provider,
-            CONF.data_processing.catalog_type,
-            CONF.identity.region,
-            endpoint_type=CONF.data_processing.endpoint_type)
 
     def _request_and_check_resp(self, request_func, uri, resp_status):
         """Make a request using specified request_func and check response
         status code.
 
-        It returns pair: resp and response body.
+        It returns a ResponseBody.
+        """
+        resp, body = request_func(uri)
+        self.expected_success(resp_status, resp.status)
+        return service_client.ResponseBody(resp, body)
+
+    def _request_and_check_resp_data(self, request_func, uri, resp_status):
+        """Make a request using specified request_func and check response
+        status code.
+
+        It returns pair: resp and response data.
         """
         resp, body = request_func(uri)
         self.expected_success(resp_status, resp.status)
@@ -44,20 +44,35 @@ class DataProcessingClient(service_client.ServiceClient):
         """Make a request using specified request_func, check response status
         code and parse response body.
 
-        It returns pair: resp and parsed resource(s) body.
+        It returns a ResponseBody.
         """
         headers = {'Content-Type': 'application/json'}
         resp, body = request_func(uri, headers=headers, *args, **kwargs)
         self.expected_success(resp_status, resp.status)
         body = json.loads(body)
-        return resp, body[resource_name]
+        return service_client.ResponseBody(resp, body[resource_name])
+
+    def _request_check_and_parse_resp_list(self, request_func, uri,
+                                           resp_status, resource_name,
+                                           *args, **kwargs):
+        """Make a request using specified request_func, check response status
+        code and parse response body.
+
+        It returns a ResponseBodyList.
+        """
+        headers = {'Content-Type': 'application/json'}
+        resp, body = request_func(uri, headers=headers, *args, **kwargs)
+        self.expected_success(resp_status, resp.status)
+        body = json.loads(body)
+        return service_client.ResponseBodyList(resp, body[resource_name])
 
     def list_node_group_templates(self):
         """List all node group templates for a user."""
 
         uri = 'node-group-templates'
-        return self._request_check_and_parse_resp(self.get, uri,
-                                                  200, 'node_group_templates')
+        return self._request_check_and_parse_resp_list(self.get, uri,
+                                                       200,
+                                                       'node_group_templates')
 
     def get_node_group_template(self, tmpl_id):
         """Returns the details of a single node group template."""
@@ -98,8 +113,8 @@ class DataProcessingClient(service_client.ServiceClient):
         """List all enabled plugins."""
 
         uri = 'plugins'
-        return self._request_check_and_parse_resp(self.get,
-                                                  uri, 200, 'plugins')
+        return self._request_check_and_parse_resp_list(self.get,
+                                                       uri, 200, 'plugins')
 
     def get_plugin(self, plugin_name, plugin_version=None):
         """Returns the details of a single plugin."""
@@ -113,8 +128,9 @@ class DataProcessingClient(service_client.ServiceClient):
         """List all cluster templates for a user."""
 
         uri = 'cluster-templates'
-        return self._request_check_and_parse_resp(self.get, uri,
-                                                  200, 'cluster_templates')
+        return self._request_check_and_parse_resp_list(self.get, uri,
+                                                       200,
+                                                       'cluster_templates')
 
     def get_cluster_template(self, tmpl_id):
         """Returns the details of a single cluster template."""
@@ -154,8 +170,9 @@ class DataProcessingClient(service_client.ServiceClient):
         """List all data sources for a user."""
 
         uri = 'data-sources'
-        return self._request_check_and_parse_resp(self.get,
-                                                  uri, 200, 'data_sources')
+        return self._request_check_and_parse_resp_list(self.get,
+                                                       uri, 200,
+                                                       'data_sources')
 
     def get_data_source(self, source_id):
         """Returns the details of a single data source."""
@@ -191,8 +208,8 @@ class DataProcessingClient(service_client.ServiceClient):
         """List all job binary internals for a user."""
 
         uri = 'job-binary-internals'
-        return self._request_check_and_parse_resp(self.get,
-                                                  uri, 200, 'binaries')
+        return self._request_check_and_parse_resp_list(self.get,
+                                                       uri, 200, 'binaries')
 
     def get_job_binary_internal(self, job_binary_id):
         """Returns the details of a single job binary internal."""
@@ -218,14 +235,14 @@ class DataProcessingClient(service_client.ServiceClient):
         """Returns data of a single job binary internal."""
 
         uri = 'job-binary-internals/%s/data' % job_binary_id
-        return self._request_and_check_resp(self.get, uri, 200)
+        return self._request_and_check_resp_data(self.get, uri, 200)
 
     def list_job_binaries(self):
         """List all job binaries for a user."""
 
         uri = 'job-binaries'
-        return self._request_check_and_parse_resp(self.get,
-                                                  uri, 200, 'binaries')
+        return self._request_check_and_parse_resp_list(self.get,
+                                                       uri, 200, 'binaries')
 
     def get_job_binary(self, job_binary_id):
         """Returns the details of a single job binary."""
@@ -261,13 +278,14 @@ class DataProcessingClient(service_client.ServiceClient):
         """Returns data of a single job binary."""
 
         uri = 'job-binaries/%s/data' % job_binary_id
-        return self._request_and_check_resp(self.get, uri, 200)
+        return self._request_and_check_resp_data(self.get, uri, 200)
 
     def list_jobs(self):
         """List all jobs for a user."""
 
         uri = 'jobs'
-        return self._request_check_and_parse_resp(self.get, uri, 200, 'jobs')
+        return self._request_check_and_parse_resp_list(self.get,
+                                                       uri, 200, 'jobs')
 
     def get_job(self, job_id):
         """Returns the details of a single job."""

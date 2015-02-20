@@ -15,11 +15,12 @@
 
 import uuid
 
+from tempest_lib import exceptions as lib_exc
+
 from tempest.api.compute import base
 from tempest.api_schema.request.compute.v2 import flavors
 from tempest.common.utils import data_utils
 from tempest import config
-from tempest import exceptions
 from tempest import test
 
 
@@ -59,27 +60,23 @@ class FlavorsAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
 
         # no need to specify flavor_id, we can get the flavor_id from a
         # response of create_flavor() call.
-        resp, flavor = self.client.create_flavor(flavor_name,
-                                                 self.ram,
-                                                 self.vcpus, self.disk,
-                                                 None,
-                                                 ephemeral=self.ephemeral,
-                                                 swap=self.swap,
-                                                 rxtx=self.rxtx)
+        flavor = self.client.create_flavor(flavor_name,
+                                           self.ram,
+                                           self.vcpus, self.disk,
+                                           None,
+                                           ephemeral=self.ephemeral,
+                                           swap=self.swap,
+                                           rxtx=self.rxtx)
         # Delete the flavor
         new_flavor_id = flavor['id']
-        resp_delete, body = self.client.delete_flavor(new_flavor_id)
-        self.assertEqual(200, resp.status)
-        self.assertEqual(202, resp_delete.status)
+        self.client.delete_flavor(new_flavor_id)
 
         # Deleted flavors can be seen via detailed GET
-        resp, flavor = self.client.get_flavor_details(new_flavor_id)
-        self.assertEqual(resp.status, 200)
+        flavor = self.client.get_flavor_details(new_flavor_id)
         self.assertEqual(flavor['name'], flavor_name)
 
         # Deleted flavors should not show up in a list however
-        resp, flavors = self.client.list_flavors_with_detail()
-        self.assertEqual(resp.status, 200)
+        flavors = self.client.list_flavors_with_detail()
         flag = True
         for flavor in flavors:
             if flavor['name'] == flavor_name:
@@ -92,7 +89,7 @@ class FlavorsAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
         flavor_name = data_utils.rand_name(self.flavor_name_prefix)
         new_flavor_id = str(uuid.uuid4())
 
-        self.assertRaises(exceptions.Unauthorized,
+        self.assertRaises(lib_exc.Unauthorized,
                           self.user_client.create_flavor,
                           flavor_name, self.ram, self.vcpus, self.disk,
                           new_flavor_id, ephemeral=self.ephemeral,
@@ -101,7 +98,7 @@ class FlavorsAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
     @test.attr(type=['negative', 'gate'])
     def test_delete_flavor_as_user(self):
         # only admin user can delete a flavor
-        self.assertRaises(exceptions.Unauthorized,
+        self.assertRaises(lib_exc.Unauthorized,
                           self.user_client.delete_flavor,
                           self.flavor_ref_alt)
 
@@ -109,6 +106,5 @@ class FlavorsAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
 @test.SimpleNegativeAutoTest
 class FlavorCreateNegativeTestJSON(base.BaseV2ComputeAdminTest,
                                    test.NegativeAutoTest):
-    _interface = 'json'
     _service = CONF.compute.catalog_type
     _schema = flavors.flavor_create

@@ -16,10 +16,10 @@
 import json
 import urllib
 
-from tempest.services.volume.json import base
+from tempest.common import service_client
 
 
-class BaseVolumesServicesClientJSON(base.VolumeClient):
+class BaseVolumesServicesClientJSON(service_client.ServiceClient):
 
     def list_services(self, params=None):
         url = 'os-services'
@@ -29,7 +29,7 @@ class BaseVolumesServicesClientJSON(base.VolumeClient):
         resp, body = self.get(url)
         body = json.loads(body)
         self.expected_success(200, resp.status)
-        return resp, body['services']
+        return service_client.ResponseBodyList(resp, body['services'])
 
 
 class VolumesServicesClientJSON(BaseVolumesServicesClientJSON):
