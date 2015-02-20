@@ -115,21 +115,22 @@ class BaseBaremetalTest(test.BaseTestCase):
 
     @classmethod
     @creates('node')
-    def create_node(cls, chassis_id, cpu_arch='x86', cpu_num=8, storage=1024,
-                    memory=4096):
+    def create_node(cls, chassis_id, cpu_arch='x86', cpus=8, local_gb=10,
+                    memory_mb=4096):
         """
         Wrapper utility for creating test baremetal nodes.
 
         :param cpu_arch: CPU architecture of the node. Default: x86.
-        :param cpu_num: Number of CPUs. Default: 8.
-        :param storage: Disk size. Default: 1024.
-        :param memory: Available RAM. Default: 4096.
+        :param cpus: Number of CPUs. Default: 8.
+        :param local_gb: Disk size. Default: 10.
+        :param memory_mb: Available RAM. Default: 4096.
         :return: Created node.
 
         """
         resp, body = cls.client.create_node(chassis_id, cpu_arch=cpu_arch,
-                                            cpu_num=cpu_num, storage=storage,
-                                            memory=memory, driver=cls.driver)
+                                            cpus=cpus, local_gb=local_gb,
+                                            memory_mb=memory_mb,
+                                            driver=cls.driver)
 
         return resp, body
 
