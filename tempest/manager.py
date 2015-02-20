@@ -54,14 +54,14 @@ class Manager(object):
     @classmethod
     def get_auth_provider_class(cls, credentials):
         if isinstance(credentials, auth.KeystoneV3Credentials):
-            return auth.KeystoneV3AuthProvider
+            return auth.KeystoneV3AuthProvider, CONF.identity.uri_v3
         else:
-            return auth.KeystoneV2AuthProvider
+            return auth.KeystoneV2AuthProvider, CONF.identity.uri
 
     def get_auth_provider(self, credentials):
         if credentials is None:
             raise exceptions.InvalidCredentials(
                 'Credentials must be specified')
-        auth_provider_class = self.get_auth_provider_class(credentials)
-        return auth_provider_class(
-            credentials=credentials)
+        auth_provider_class, auth_url = self.get_auth_provider_class(
+            credentials)
+        return auth_provider_class(credentials, auth_url)

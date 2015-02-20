@@ -76,7 +76,11 @@ def get_credentials(fill_in=True, identity_version=None, **kwargs):
                             if 'domain' in x)
         if not domain_fields.intersection(kwargs.keys()):
             kwargs['user_domain_name'] = CONF.identity.admin_domain_name
-    return auth.get_credentials(fill_in=fill_in,
+        auth_url = CONF.identity.uri_v3
+    else:
+        auth_url = CONF.identity.uri
+    return auth.get_credentials(auth_url,
+                                fill_in=fill_in,
                                 identity_version=identity_version,
                                 **kwargs)
 

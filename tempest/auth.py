@@ -186,9 +186,9 @@ class KeystoneAuthProvider(AuthProvider):
 
     token_expiry_threshold = datetime.timedelta(seconds=60)
 
-    def __init__(self, credentials):
+    def __init__(self, credentials, auth_url):
         super(KeystoneAuthProvider, self).__init__(credentials)
-        self.auth_client = self._auth_client()
+        self.auth_client = self._auth_client(auth_url)
 
     def _decorate_request(self, filters, method, url, headers=None, body=None,
                           auth_data=None):
@@ -236,8 +236,8 @@ class KeystoneV2AuthProvider(KeystoneAuthProvider):
 
     EXPIRY_DATE_FORMAT = '%Y-%m-%dT%H:%M:%SZ'
 
-    def _auth_client(self):
-        return json_id.TokenClientJSON()
+    def _auth_client(self, auth_url):
+        return json_id.TokenClientJSON(auth_url)
 
     def _auth_params(self):
         return dict(
@@ -314,8 +314,8 @@ class KeystoneV3AuthProvider(KeystoneAuthProvider):
 
     EXPIRY_DATE_FORMAT = '%Y-%m-%dT%H:%M:%S.%fZ'
 
-    def _auth_client(self):
-        return json_v3id.V3TokenClientJSON()
+    def _auth_client(self, auth_url):
+        return json_v3id.V3TokenClientJSON(auth_url)
 
     def _auth_params(self):
         return dict(
@@ -430,10 +430,12 @@ def is_identity_version_supported(identity_version):
     return identity_version in IDENTITY_VERSION
 
 
-def get_credentials(fill_in=True, identity_version='v2', **kwargs):
+def get_credentials(auth_url, fill_in=True, identity_version='v2', **kwargs):
     """
     Builds a credentials object based on the configured auth_version
 
+    :param auth_url (string): Full URI of the OpenStack Identity API(Keystone)
+           which is used to fetch the token from Identity service.
     :param fill_in (boolean): obtain a token and fill in all credential
            details provided by the identity service. When fill_in is not
            specified, credentials are not validated. Validation can be invoked
@@ -460,7 +462,7 @@ def get_credentials(fill_in=True, identity_version='v2', **kwargs):
     creds = credential_class(**kwargs)
     # Fill in the credentials fields that were not specified
     if fill_in:
-        auth_provider = auth_provider_class(creds)
+        auth_provider = auth_provider_class(creds, auth_url)
         creds = auth_provider.fill_credentials()
     return creds
 

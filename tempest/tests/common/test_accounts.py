@@ -73,7 +73,8 @@ class TestAccount(base.TestCase):
         test_account_class = accounts.Accounts('test_name')
         hash_list = self._get_hash_list(self.test_accounts)
         test_cred_dict = self.test_accounts[3]
-        test_creds = auth.get_credentials(**test_cred_dict)
+        test_creds = auth.get_credentials(fake_identity.FAKE_AUTH_URL,
+                                          **test_cred_dict)
         results = test_account_class.get_hash(test_creds)
         self.assertEqual(hash_list[3], results)
 

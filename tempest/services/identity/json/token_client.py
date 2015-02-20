@@ -16,17 +16,13 @@ import json
 from tempest_lib import exceptions as lib_exc
 
 from tempest.common import service_client
-from tempest import config
 from tempest import exceptions
-
-CONF = config.CONF
 
 
 class TokenClientJSON(service_client.ServiceClient):
 
-    def __init__(self):
+    def __init__(self, auth_url):
         super(TokenClientJSON, self).__init__(None, None, None)
-        auth_url = CONF.identity.uri
 
         # Normalize URI to ensure /tokens is in it.
         if 'tokens' not in auth_url:
