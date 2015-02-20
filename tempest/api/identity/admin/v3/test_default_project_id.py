@@ -23,9 +23,9 @@ CONF = config.CONF
 class TestDefaultProjectId (base.BaseIdentityV3AdminTest):
 
     @classmethod
-    def resource_setup(cls):
+    def setup_credentials(cls):
         cls.set_network_resources()
-        super(TestDefaultProjectId, cls).resource_setup()
+        super(TestDefaultProjectId, cls).setup_credentials()
 
     def _delete_domain(self, domain_id):
         # It is necessary to disable the domain before deleting,

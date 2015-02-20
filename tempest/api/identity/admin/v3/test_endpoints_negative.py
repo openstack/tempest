@@ -24,10 +24,14 @@ from tempest import test
 class EndpointsNegativeTestJSON(base.BaseIdentityV3AdminTest):
 
     @classmethod
-    def resource_setup(cls):
-        super(EndpointsNegativeTestJSON, cls).resource_setup()
+    def setup_clients(cls):
+        super(EndpointsNegativeTestJSON, cls).setup_clients()
         cls.identity_client = cls.client
         cls.client = cls.endpoints_client
+
+    @classmethod
+    def resource_setup(cls):
+        super(EndpointsNegativeTestJSON, cls).resource_setup()
         cls.service_ids = list()
         s_name = data_utils.rand_name('service-')
         s_type = data_utils.rand_name('type--')

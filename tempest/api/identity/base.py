@@ -29,8 +29,8 @@ LOG = logging.getLogger(__name__)
 class BaseIdentityAdminTest(tempest.test.BaseTestCase):
 
     @classmethod
-    def resource_setup(cls):
-        super(BaseIdentityAdminTest, cls).resource_setup()
+    def setup_credentials(cls):
+        super(BaseIdentityAdminTest, cls).setup_credentials()
         cls.os_adm = clients.AdminManager()
         cls.os = clients.Manager()
 
@@ -72,16 +72,25 @@ class BaseIdentityAdminTest(tempest.test.BaseTestCase):
 class BaseIdentityV2AdminTest(BaseIdentityAdminTest):
 
     @classmethod
-    def resource_setup(cls):
+    def skip_checks(cls):
+        super(BaseIdentityV2AdminTest, cls).skip_checks()
         if not CONF.identity_feature_enabled.api_v2:
             raise cls.skipException("Identity api v2 is not enabled")
-        super(BaseIdentityV2AdminTest, cls).resource_setup()
+
+    @classmethod
+    def setup_clients(cls):
+        super(BaseIdentityV2AdminTest, cls).setup_clients()
         cls.client = cls.os_adm.identity_client
         cls.token_client = cls.os_adm.token_client
         if not cls.client.has_admin_extensions():
             raise cls.skipException("Admin extensions disabled")
-        cls.data = DataGenerator(cls.client)
+
         cls.non_admin_client = cls.os.identity_client
+
+    @classmethod
+    def resource_setup(cls):
+        super(BaseIdentityV2AdminTest, cls).resource_setup()
+        cls.data = DataGenerator(cls.client)
 
     @classmethod
     def resource_cleanup(cls):
@@ -92,10 +101,14 @@ class BaseIdentityV2AdminTest(BaseIdentityAdminTest):
 class BaseIdentityV3AdminTest(BaseIdentityAdminTest):
 
     @classmethod
-    def resource_setup(cls):
+    def skip_checks(cls):
+        super(BaseIdentityV3AdminTest, cls).skip_checks()
         if not CONF.identity_feature_enabled.api_v3:
             raise cls.skipException("Identity api v3 is not enabled")
-        super(BaseIdentityV3AdminTest, cls).resource_setup()
+
+    @classmethod
+    def setup_clients(cls):
+        super(BaseIdentityV3AdminTest, cls).setup_clients()
         cls.client = cls.os_adm.identity_v3_client
         cls.token = cls.os_adm.token_v3_client
         cls.endpoints_client = cls.os_adm.endpoints_client
