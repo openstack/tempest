@@ -28,8 +28,13 @@ common_quota_set = {
                     'metadata_items': {'type': 'integer'},
                     'key_pairs': {'type': 'integer'},
                     'security_groups': {'type': 'integer'},
-                    'security_group_rules': {'type': 'integer'}
+                    'security_group_rules': {'type': 'integer'},
+                    'server_group_members': {'type': 'integer'},
+                    'server_groups': {'type': 'integer'},
                 },
+                # NOTE: server_group_members and server_groups are represented
+                # when enabling quota_server_group extension. So they should
+                # not be required.
                 'required': ['instances', 'cores', 'ram',
                              'floating_ips', 'fixed_ips',
                              'metadata_items', 'key_pairs',
