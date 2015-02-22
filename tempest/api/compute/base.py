@@ -201,9 +201,8 @@ class BaseComputeTest(tempest.test.BaseTestCase):
         flavor = kwargs.get('flavor', cls.flavor_ref)
         image_id = kwargs.get('image_id', cls.image_ref)
         if 'networks' not in kwargs and cls.fixed_network_name and cls.allow_tenant_isolation == False:
-            response, body = cls.network_client.list_networks()
-            #self.assertEqual('200', response['status'])
-            networks = body['networks']
+            response = cls.network_client.list_networks()
+            networks = response['networks']
             # If several networks found, set the NetID on which to connect the
             # server to avoid the following error "Multiple possible netwo
             # found, use a Network ID to be more specific."
