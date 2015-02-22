@@ -18,11 +18,10 @@ from tempest import test
 
 
 class DatabaseVersionsTest(base.BaseDatabaseTest):
-    _interface = 'json'
 
     @classmethod
-    def resource_setup(cls):
-        super(DatabaseVersionsTest, cls).resource_setup()
+    def setup_clients(cls):
+        super(DatabaseVersionsTest, cls).setup_clients()
         cls.client = cls.database_versions_client
 
     @test.attr(type='smoke')

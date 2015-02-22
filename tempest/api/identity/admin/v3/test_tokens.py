@@ -13,14 +13,14 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib import exceptions as lib_exc
+
 from tempest.api.identity import base
 from tempest.common.utils import data_utils
-from tempest import exceptions
 from tempest import test
 
 
 class TokensV3TestJSON(base.BaseIdentityV3AdminTest):
-    _interface = 'json'
 
     @test.attr(type='smoke')
     def test_tokens(self):
@@ -44,7 +44,7 @@ class TokensV3TestJSON(base.BaseIdentityV3AdminTest):
         self.assertEqual(token_details['user']['name'], u_name)
         # Perform Delete Token
         self.client.delete_token(subject_token)
-        self.assertRaises(exceptions.NotFound, self.client.get_token,
+        self.assertRaises(lib_exc.NotFound, self.client.get_token,
                           subject_token)
 
     @test.attr(type='gate')
@@ -108,8 +108,8 @@ class TokensV3TestJSON(base.BaseIdentityV3AdminTest):
 
         # Use the unscoped token to get a scoped token.
         token_auth = self.token.auth(token=token_id,
-                                     tenant=project1_name,
-                                     domain='Default')
+                                     project=project1_name,
+                                     project_domain='Default')
         token1_id = token_auth.response['x-subject-token']
 
         self.assertEqual(orig_expires_at, token_auth['token']['expires_at'],
@@ -138,8 +138,8 @@ class TokensV3TestJSON(base.BaseIdentityV3AdminTest):
 
         # Now get another scoped token using the unscoped token.
         token_auth = self.token.auth(token=token_id,
-                                     tenant=project2_name,
-                                     domain='Default')
+                                     project=project2_name,
+                                     project_domain='Default')
 
         self.assertEqual(project2['id'],
                          token_auth['token']['project']['id'])

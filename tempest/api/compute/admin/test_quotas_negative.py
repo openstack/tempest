@@ -12,10 +12,12 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib import decorators
+from tempest_lib import exceptions as lib_exc
+
 from tempest.api.compute import base
 from tempest.common.utils import data_utils
 from tempest import config
-from tempest import exceptions
 from tempest import test
 
 CONF = config.CONF
@@ -37,7 +39,7 @@ class QuotasAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
 
     @test.attr(type=['negative', 'gate'])
     def test_update_quota_normal_user(self):
-        self.assertRaises(exceptions.Unauthorized,
+        self.assertRaises(lib_exc.Unauthorized,
                           self.client.update_quota_set,
                           self.demo_tenant_id,
                           ram=0)
@@ -47,23 +49,23 @@ class QuotasAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
     @test.attr(type=['negative', 'gate'])
     def test_create_server_when_cpu_quota_is_full(self):
         # Disallow server creation when tenant's vcpu quota is full
-        resp, quota_set = self.adm_client.get_quota_set(self.demo_tenant_id)
+        quota_set = self.adm_client.get_quota_set(self.demo_tenant_id)
         default_vcpu_quota = quota_set['cores']
         vcpu_quota = 0  # Set the quota to zero to conserve resources
 
-        resp, quota_set = self.adm_client.update_quota_set(self.demo_tenant_id,
-                                                           force=True,
-                                                           cores=vcpu_quota)
+        quota_set = self.adm_client.update_quota_set(self.demo_tenant_id,
+                                                     force=True,
+                                                     cores=vcpu_quota)
 
         self.addCleanup(self.adm_client.update_quota_set, self.demo_tenant_id,
                         cores=default_vcpu_quota)
-        self.assertRaises((exceptions.Unauthorized, exceptions.OverLimit),
+        self.assertRaises((lib_exc.Unauthorized, lib_exc.OverLimit),
                           self.create_test_server)
 
     @test.attr(type=['negative', 'gate'])
     def test_create_server_when_memory_quota_is_full(self):
         # Disallow server creation when tenant's memory quota is full
-        resp, quota_set = self.adm_client.get_quota_set(self.demo_tenant_id)
+        quota_set = self.adm_client.get_quota_set(self.demo_tenant_id)
         default_mem_quota = quota_set['ram']
         mem_quota = 0  # Set the quota to zero to conserve resources
 
@@ -73,13 +75,13 @@ class QuotasAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
 
         self.addCleanup(self.adm_client.update_quota_set, self.demo_tenant_id,
                         ram=default_mem_quota)
-        self.assertRaises((exceptions.Unauthorized, exceptions.OverLimit),
+        self.assertRaises((lib_exc.Unauthorized, lib_exc.OverLimit),
                           self.create_test_server)
 
     @test.attr(type=['negative', 'gate'])
     def test_create_server_when_instances_quota_is_full(self):
         # Once instances quota limit is reached, disallow server creation
-        resp, quota_set = self.adm_client.get_quota_set(self.demo_tenant_id)
+        quota_set = self.adm_client.get_quota_set(self.demo_tenant_id)
         default_instances_quota = quota_set['instances']
         instances_quota = 0  # Set quota to zero to disallow server creation
 
@@ -88,21 +90,21 @@ class QuotasAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
                                          instances=instances_quota)
         self.addCleanup(self.adm_client.update_quota_set, self.demo_tenant_id,
                         instances=default_instances_quota)
-        self.assertRaises((exceptions.Unauthorized, exceptions.OverLimit),
+        self.assertRaises((lib_exc.Unauthorized, lib_exc.OverLimit),
                           self.create_test_server)
 
-    @test.skip_because(bug="1186354",
-                       condition=CONF.service_available.neutron)
+    @decorators.skip_because(bug="1186354",
+                             condition=CONF.service_available.neutron)
     @test.attr(type='gate')
     @test.services('network')
     def test_security_groups_exceed_limit(self):
         # Negative test: Creation Security Groups over limit should FAIL
 
-        resp, quota_set = self.adm_client.get_quota_set(self.demo_tenant_id)
+        quota_set = self.adm_client.get_quota_set(self.demo_tenant_id)
         default_sg_quota = quota_set['security_groups']
         sg_quota = 0  # Set the quota to zero to conserve resources
 
-        resp, quota_set =\
+        quota_set =\
             self.adm_client.update_quota_set(self.demo_tenant_id,
                                              force=True,
                                              security_groups=sg_quota)
@@ -114,23 +116,23 @@ class QuotasAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
         # Check we cannot create anymore
         # A 403 Forbidden or 413 Overlimit (old behaviour) exception
         # will be raised when out of quota
-        self.assertRaises((exceptions.Unauthorized, exceptions.OverLimit),
+        self.assertRaises((lib_exc.Unauthorized, lib_exc.OverLimit),
                           self.sg_client.create_security_group,
                           "sg-overlimit", "sg-desc")
 
-    @test.skip_because(bug="1186354",
-                       condition=CONF.service_available.neutron)
+    @decorators.skip_because(bug="1186354",
+                             condition=CONF.service_available.neutron)
     @test.attr(type=['negative', 'gate'])
     @test.services('network')
     def test_security_groups_rules_exceed_limit(self):
         # Negative test: Creation of Security Group Rules should FAIL
         # when we reach limit maxSecurityGroupRules
 
-        resp, quota_set = self.adm_client.get_quota_set(self.demo_tenant_id)
+        quota_set = self.adm_client.get_quota_set(self.demo_tenant_id)
         default_sg_rules_quota = quota_set['security_group_rules']
         sg_rules_quota = 0  # Set the quota to zero to conserve resources
 
-        resp, quota_set =\
+        quota_set =\
             self.adm_client.update_quota_set(
                 self.demo_tenant_id,
                 force=True,
@@ -153,6 +155,6 @@ class QuotasAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
         # Check we cannot create SG rule anymore
         # A 403 Forbidden or 413 Overlimit (old behaviour) exception
         # will be raised when out of quota
-        self.assertRaises((exceptions.OverLimit, exceptions.Unauthorized),
+        self.assertRaises((lib_exc.OverLimit, lib_exc.Unauthorized),
                           self.sg_client.create_security_group_rule,
                           secgroup_id, ip_protocol, 1025, 1025)

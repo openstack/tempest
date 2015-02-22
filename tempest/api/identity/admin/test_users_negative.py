@@ -13,16 +13,15 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib import exceptions as lib_exc
 import uuid
 
 from tempest.api.identity import base
 from tempest.common.utils import data_utils
-from tempest import exceptions
 from tempest import test
 
 
 class UsersNegativeTestJSON(base.BaseIdentityV2AdminTest):
-    _interface = 'json'
 
     @classmethod
     def resource_setup(cls):
@@ -35,7 +34,7 @@ class UsersNegativeTestJSON(base.BaseIdentityV2AdminTest):
     def test_create_user_by_unauthorized_user(self):
         # Non-administrator should not be authorized to create a user
         self.data.setup_test_tenant()
-        self.assertRaises(exceptions.Unauthorized,
+        self.assertRaises(lib_exc.Unauthorized,
                           self.non_admin_client.create_user, self.alt_user,
                           self.alt_password, self.data.tenant['id'],
                           self.alt_email)
@@ -44,7 +43,7 @@ class UsersNegativeTestJSON(base.BaseIdentityV2AdminTest):
     def test_create_user_with_empty_name(self):
         # User with an empty name should not be created
         self.data.setup_test_tenant()
-        self.assertRaises(exceptions.BadRequest, self.client.create_user, '',
+        self.assertRaises(lib_exc.BadRequest, self.client.create_user, '',
                           self.alt_password, self.data.tenant['id'],
                           self.alt_email)
 
@@ -52,7 +51,7 @@ class UsersNegativeTestJSON(base.BaseIdentityV2AdminTest):
     def test_create_user_with_name_length_over_255(self):
         # Length of user name filed should be restricted to 255 characters
         self.data.setup_test_tenant()
-        self.assertRaises(exceptions.BadRequest, self.client.create_user,
+        self.assertRaises(lib_exc.BadRequest, self.client.create_user,
                           'a' * 256, self.alt_password,
                           self.data.tenant['id'], self.alt_email)
 
@@ -60,14 +59,14 @@ class UsersNegativeTestJSON(base.BaseIdentityV2AdminTest):
     def test_create_user_with_duplicate_name(self):
         # Duplicate user should not be created
         self.data.setup_test_user()
-        self.assertRaises(exceptions.Conflict, self.client.create_user,
+        self.assertRaises(lib_exc.Conflict, self.client.create_user,
                           self.data.test_user, self.data.test_password,
                           self.data.tenant['id'], self.data.test_email)
 
     @test.attr(type=['negative', 'gate'])
     def test_create_user_for_non_existent_tenant(self):
         # Attempt to create a user in a non-existent tenant should fail
-        self.assertRaises(exceptions.NotFound, self.client.create_user,
+        self.assertRaises(lib_exc.NotFound, self.client.create_user,
                           self.alt_user, self.alt_password, '49ffgg99999',
                           self.alt_email)
 
@@ -79,7 +78,7 @@ class UsersNegativeTestJSON(base.BaseIdentityV2AdminTest):
         token = self.client.auth_provider.get_token()
         # Delete the token from database
         self.client.delete_token(token)
-        self.assertRaises(exceptions.Unauthorized, self.client.create_user,
+        self.assertRaises(lib_exc.Unauthorized, self.client.create_user,
                           self.alt_user, self.alt_password,
                           self.data.tenant['id'], self.alt_email)
 
@@ -91,7 +90,7 @@ class UsersNegativeTestJSON(base.BaseIdentityV2AdminTest):
         # Attempt to create a user with valid enabled para should fail
         self.data.setup_test_tenant()
         name = data_utils.rand_name('test_user_')
-        self.assertRaises(exceptions.BadRequest, self.client.create_user,
+        self.assertRaises(lib_exc.BadRequest, self.client.create_user,
                           name, self.alt_password,
                           self.data.tenant['id'],
                           self.alt_email, enabled=3)
@@ -101,7 +100,7 @@ class UsersNegativeTestJSON(base.BaseIdentityV2AdminTest):
         # Attempt to update a user non-existent user should fail
         user_name = data_utils.rand_name('user-')
         non_existent_id = str(uuid.uuid4())
-        self.assertRaises(exceptions.NotFound, self.client.update_user,
+        self.assertRaises(lib_exc.NotFound, self.client.update_user,
                           non_existent_id, name=user_name)
 
     @test.attr(type=['negative', 'gate'])
@@ -112,7 +111,7 @@ class UsersNegativeTestJSON(base.BaseIdentityV2AdminTest):
         token = self.client.auth_provider.get_token()
         # Delete the token from database
         self.client.delete_token(token)
-        self.assertRaises(exceptions.Unauthorized, self.client.update_user,
+        self.assertRaises(lib_exc.Unauthorized, self.client.update_user,
                           self.alt_user)
 
         # Unset the token to allow further tests to generate a new token
@@ -122,21 +121,21 @@ class UsersNegativeTestJSON(base.BaseIdentityV2AdminTest):
     def test_update_user_by_unauthorized_user(self):
         # Non-administrator should not be authorized to update user
         self.data.setup_test_tenant()
-        self.assertRaises(exceptions.Unauthorized,
+        self.assertRaises(lib_exc.Unauthorized,
                           self.non_admin_client.update_user, self.alt_user)
 
     @test.attr(type=['negative', 'gate'])
     def test_delete_users_by_unauthorized_user(self):
         # Non-administrator user should not be authorized to delete a user
         self.data.setup_test_user()
-        self.assertRaises(exceptions.Unauthorized,
+        self.assertRaises(lib_exc.Unauthorized,
                           self.non_admin_client.delete_user,
                           self.data.user['id'])
 
     @test.attr(type=['negative', 'gate'])
     def test_delete_non_existent_user(self):
         # Attempt to delete a non-existent user should fail
-        self.assertRaises(exceptions.NotFound, self.client.delete_user,
+        self.assertRaises(lib_exc.NotFound, self.client.delete_user,
                           'junk12345123')
 
     @test.attr(type=['negative', 'gate'])
@@ -147,7 +146,7 @@ class UsersNegativeTestJSON(base.BaseIdentityV2AdminTest):
         token = self.client.auth_provider.get_token()
         # Delete the token from database
         self.client.delete_token(token)
-        self.assertRaises(exceptions.Unauthorized, self.client.delete_user,
+        self.assertRaises(lib_exc.Unauthorized, self.client.delete_user,
                           self.alt_user)
 
         # Unset the token to allow further tests to generate a new token
@@ -158,7 +157,7 @@ class UsersNegativeTestJSON(base.BaseIdentityV2AdminTest):
         # Disabled user's token should not get authenticated
         self.data.setup_test_user()
         self.disable_user(self.data.test_user)
-        self.assertRaises(exceptions.Unauthorized, self.token_client.auth,
+        self.assertRaises(lib_exc.Unauthorized, self.token_client.auth,
                           self.data.test_user,
                           self.data.test_password,
                           self.data.test_tenant)
@@ -168,7 +167,7 @@ class UsersNegativeTestJSON(base.BaseIdentityV2AdminTest):
         # User's token for a disabled tenant should not be authenticated
         self.data.setup_test_user()
         self.disable_tenant(self.data.test_tenant)
-        self.assertRaises(exceptions.Unauthorized, self.token_client.auth,
+        self.assertRaises(lib_exc.Unauthorized, self.token_client.auth,
                           self.data.test_user,
                           self.data.test_password,
                           self.data.test_tenant)
@@ -177,7 +176,7 @@ class UsersNegativeTestJSON(base.BaseIdentityV2AdminTest):
     def test_authentication_with_invalid_tenant(self):
         # User's token for an invalid tenant should not be authenticated
         self.data.setup_test_user()
-        self.assertRaises(exceptions.Unauthorized, self.token_client.auth,
+        self.assertRaises(lib_exc.Unauthorized, self.token_client.auth,
                           self.data.test_user,
                           self.data.test_password,
                           'junktenant1234')
@@ -186,7 +185,7 @@ class UsersNegativeTestJSON(base.BaseIdentityV2AdminTest):
     def test_authentication_with_invalid_username(self):
         # Non-existent user's token should not get authenticated
         self.data.setup_test_user()
-        self.assertRaises(exceptions.Unauthorized, self.token_client.auth,
+        self.assertRaises(lib_exc.Unauthorized, self.token_client.auth,
                           'junkuser123', self.data.test_password,
                           self.data.test_tenant)
 
@@ -194,7 +193,7 @@ class UsersNegativeTestJSON(base.BaseIdentityV2AdminTest):
     def test_authentication_with_invalid_password(self):
         # User's token with invalid password should not be authenticated
         self.data.setup_test_user()
-        self.assertRaises(exceptions.Unauthorized, self.token_client.auth,
+        self.assertRaises(lib_exc.Unauthorized, self.token_client.auth,
                           self.data.test_user, 'junkpass1234',
                           self.data.test_tenant)
 
@@ -202,7 +201,7 @@ class UsersNegativeTestJSON(base.BaseIdentityV2AdminTest):
     def test_get_users_by_unauthorized_user(self):
         # Non-administrator user should not be authorized to get user list
         self.data.setup_test_user()
-        self.assertRaises(exceptions.Unauthorized,
+        self.assertRaises(lib_exc.Unauthorized,
                           self.non_admin_client.get_users)
 
     @test.attr(type=['negative', 'gate'])
@@ -210,7 +209,7 @@ class UsersNegativeTestJSON(base.BaseIdentityV2AdminTest):
         # Request to get list of users without a valid token should fail
         token = self.client.auth_provider.get_token()
         self.client.delete_token(token)
-        self.assertRaises(exceptions.Unauthorized, self.client.get_users)
+        self.assertRaises(lib_exc.Unauthorized, self.client.get_users)
         self.client.auth_provider.clear_auth()
 
     @test.attr(type=['negative', 'gate'])
@@ -225,5 +224,5 @@ class UsersNegativeTestJSON(base.BaseIdentityV2AdminTest):
         invalid_id.append('!@#()$%^&*?<>{}[]')
         # List the users with invalid tenant id
         for invalid in invalid_id:
-            self.assertRaises(exceptions.NotFound,
+            self.assertRaises(lib_exc.NotFound,
                               self.client.list_users_for_tenant, invalid)

@@ -22,7 +22,6 @@ CONF = config.CONF
 
 
 class VolumeTypesV2Test(base.BaseVolumeAdminTest):
-    _interface = "json"
 
     def _delete_volume(self, volume_id):
         self.volumes_client.delete_volume(volume_id)
@@ -38,43 +37,52 @@ class VolumeTypesV2Test(base.BaseVolumeAdminTest):
         self.assertIsInstance(body, list)
 
     @test.attr(type='smoke')
-    def test_create_get_delete_volume_with_volume_type_and_extra_specs(self):
-        # Create/get/delete volume with volume_type and extra spec.
-        volume = {}
+    def test_volume_crud_with_volume_type_and_extra_specs(self):
+        # Create/update/get/delete volume with volume_type and extra spec.
+        volume_types = list()
         vol_name = data_utils.rand_name("volume-")
-        vol_type_name = data_utils.rand_name("volume-type-")
         self.name_field = self.special_fields['name_field']
         proto = CONF.volume.storage_protocol
         vendor = CONF.volume.vendor_name
         extra_specs = {"storage_protocol": proto,
                        "vendor_name": vendor}
-        body = {}
-        body = self.volume_types_client.create_volume_type(
-            vol_type_name,
-            extra_specs=extra_specs)
-        self.assertIn('id', body)
-        self.addCleanup(self._delete_volume_type, body['id'])
-        self.assertIn('name', body)
-        params = {self.name_field: vol_name, 'volume_type': vol_type_name}
-        volume = self.volumes_client.create_volume(
-            size=1, **params)
-        self.assertIn('id', volume)
+        # Create two volume_types
+        for i in range(2):
+            vol_type_name = data_utils.rand_name("volume-type-")
+            vol_type = self.volume_types_client.create_volume_type(
+                vol_type_name,
+                extra_specs=extra_specs)
+            volume_types.append(vol_type)
+            self.addCleanup(self._delete_volume_type, vol_type['id'])
+        params = {self.name_field: vol_name,
+                  'volume_type': volume_types[0]['id']}
+
+        # Create volume
+        volume = self.volumes_client.create_volume(size=1, **params)
         self.addCleanup(self._delete_volume, volume['id'])
-        self.assertIn(self.name_field, volume)
+        self.assertEqual(volume_types[0]['name'], volume["volume_type"])
         self.assertEqual(volume[self.name_field], vol_name,
                          "The created volume name is not equal "
                          "to the requested name")
-        self.assertTrue(volume['id'] is not None,
-                        "Field volume id is empty or not found.")
+        self.assertIsNotNone(volume['id'],
+                             "Field volume id is empty or not found.")
         self.volumes_client.wait_for_volume_status(volume['id'], 'available')
+
+        # Update volume with new volume_type
+        self.volumes_client.retype_volume(volume['id'],
+                                          volume_type=volume_types[1]['id'])
+        self.volumes_client.wait_for_volume_status(volume['id'], 'available')
+
+        # Get volume details and Verify
         fetched_volume = self.volumes_client.get_volume(volume['id'])
+        self.assertEqual(volume_types[1]['name'],
+                         fetched_volume['volume_type'],
+                         'The fetched Volume type is different '
+                         'from updated volume type')
         self.assertEqual(vol_name, fetched_volume[self.name_field],
                          'The fetched Volume is different '
                          'from the created Volume')
         self.assertEqual(volume['id'], fetched_volume['id'],
-                         'The fetched Volume is different '
-                         'from the created Volume')
-        self.assertEqual(vol_type_name, fetched_volume['volume_type'],
                          'The fetched Volume is different '
                          'from the created Volume')
 

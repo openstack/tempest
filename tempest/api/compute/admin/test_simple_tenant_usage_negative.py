@@ -14,9 +14,9 @@
 #    under the License.
 
 import datetime
+from tempest_lib import exceptions as lib_exc
 
 from tempest.api.compute import base
-from tempest import exceptions
 from tempest import test
 
 
@@ -42,7 +42,7 @@ class TenantUsagesNegativeTestJSON(base.BaseV2ComputeAdminTest):
         # Get usage for a specific tenant empty
         params = {'start': self.start,
                   'end': self.end}
-        self.assertRaises(exceptions.NotFound,
+        self.assertRaises(lib_exc.NotFound,
                           self.adm_client.get_tenant_usage,
                           '', params)
 
@@ -51,7 +51,7 @@ class TenantUsagesNegativeTestJSON(base.BaseV2ComputeAdminTest):
         # Get usage for tenant with invalid date
         params = {'start': self.end,
                   'end': self.start}
-        self.assertRaises(exceptions.BadRequest,
+        self.assertRaises(lib_exc.BadRequest,
                           self.adm_client.get_tenant_usage,
                           self.client.tenant_id, params)
 
@@ -61,5 +61,5 @@ class TenantUsagesNegativeTestJSON(base.BaseV2ComputeAdminTest):
         params = {'start': self.start,
                   'end': self.end,
                   'detailed': int(bool(True))}
-        self.assertRaises(exceptions.Unauthorized,
+        self.assertRaises(lib_exc.Unauthorized,
                           self.client.list_tenant_usages, params)

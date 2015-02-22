@@ -20,6 +20,8 @@ import os
 import time
 import urllib
 
+from tempest_lib import exceptions as lib_exc
+
 from tempest.common import glance_http
 from tempest.common import service_client
 from tempest.common.utils import misc as misc_utils
@@ -237,13 +239,12 @@ class ImageClientJSON(service_client.ServiceClient):
         url = 'v1/images/%s' % image_id
         resp, body = self.get(url)
         self.expected_success(200, resp.status)
-        # We can't return a ResponseBody because the body is a string
-        return resp, body
+        return service_client.ResponseBodyData(resp, body)
 
     def is_resource_deleted(self, id):
         try:
             self.get_image_meta(id)
-        except exceptions.NotFound:
+        except lib_exc.NotFound:
             return True
         return False
 

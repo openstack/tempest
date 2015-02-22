@@ -19,9 +19,10 @@ import subprocess
 
 import netaddr
 import six
+from tempest_lib import exceptions as lib_exc
 
-from tempest import auth
 from tempest import clients
+from tempest.common import cred_provider
 from tempest.common import credentials
 from tempest.common.utils import data_utils
 from tempest.common.utils.linux import remote_client
@@ -110,7 +111,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
             # Tempest clients return dicts, so there is no common delete
             # method available. Using a callable instead
             delete_thing(*args, **kwargs)
-        except exceptions.NotFound:
+        except lib_exc.NotFound:
             # If the resource is already missing, mission accomplished.
             pass
 
@@ -160,7 +161,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
             client = self.keypairs_client
         name = data_utils.rand_name(self.__class__.__name__)
         # We don't need to create a keypair by pubkey in scenario
-        resp, body = client.create_keypair(name)
+        body = client.create_keypair(name)
         self.addCleanup(client.delete_keypair, name)
         return body
 
@@ -186,8 +187,8 @@ class ScenarioTest(tempest.test.BaseTestCase):
 
         LOG.debug("Creating a server (name: %s, image: %s, flavor: %s)",
                   name, image, flavor)
-        _, server = self.servers_client.create_server(name, image, flavor,
-                                                      **create_kwargs)
+        server = self.servers_client.create_server(name, image, flavor,
+                                                   **create_kwargs)
         if wait_on_delete:
             self.addCleanup(self.servers_client.wait_for_server_termination,
                             server['id'])
@@ -202,7 +203,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
         # The instance retrieved on creation is missing network
         # details, necessitating retrieval after it becomes active to
         # ensure correct details.
-        _, server = self.servers_client.get_server(server['id'])
+        server = self.servers_client.get_server(server['id'])
         self.assertEqual(server['name'], name)
         return server
 
@@ -417,7 +418,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
     def nova_volume_attach(self):
         # TODO(andreaf) Device should be here CONF.compute.volume_device_name
         volume = self.servers_client.attach_volume(
-            self.server['id'], self.volume['id'], '/dev/vdb')[1]
+            self.server['id'], self.volume['id'], '/dev/vdb')
         self.assertEqual(self.volume['id'], volume['id'])
         self.volumes_client.wait_for_volume_status(volume['id'], 'in-use')
         # Refresh the volume after the attachment
@@ -512,7 +513,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
         Nova clients
         """
 
-        _, floating_ip = self.floating_ips_client.create_floating_ip(pool_name)
+        floating_ip = self.floating_ips_client.create_floating_ip(pool_name)
         self.addCleanup(self.delete_wrapper,
                         self.floating_ips_client.delete_floating_ip,
                         floating_ip['id'])
@@ -628,7 +629,7 @@ class NetworkScenarioTest(ScenarioTest):
             try:
                 result = client.create_subnet(**subnet)
                 break
-            except exceptions.Conflict as e:
+            except lib_exc.Conflict as e:
                 is_overlapping_cidr = 'overlaps with another subnet' in str(e)
                 if not is_overlapping_cidr:
                     raise
@@ -639,14 +640,15 @@ class NetworkScenarioTest(ScenarioTest):
         self.addCleanup(self.delete_wrapper, subnet.delete)
         return subnet
 
-    def _create_port(self, network, client=None, namestart='port-quotatest'):
+    def _create_port(self, network_id, client=None, namestart='port-quotatest',
+                     **kwargs):
         if not client:
             client = self.network_client
         name = data_utils.rand_name(namestart)
         result = client.create_port(
             name=name,
-            network_id=network.id,
-            tenant_id=network.tenant_id)
+            network_id=network_id,
+            **kwargs)
         self.assertIsNotNone(result, 'Unable to allocate port')
         port = net_resources.DeletablePort(client=client,
                                            **result['port'])
@@ -915,7 +917,7 @@ class NetworkScenarioTest(ScenarioTest):
                 try:
                     sg_rule = self._create_security_group_rule(
                         client=client, secgroup=secgroup, **ruleset)
-                except exceptions.Conflict as ex:
+                except lib_exc.Conflict as ex:
                     # if rule already exist - skip rule and continue
                     msg = 'Security group rule already exists'
                     if msg not in ex._error_string:
@@ -1047,6 +1049,66 @@ class NetworkScenarioTest(ScenarioTest):
             subnet.add_to_router(router.id)
         return network, subnet, router
 
+    def create_server(self, name=None, image=None, flavor=None,
+                      wait_on_boot=True, wait_on_delete=True,
+                      create_kwargs=None):
+        vnic_type = CONF.network.port_vnic_type
+
+        # If vnic_type is configured create port for
+        # every network
+        if vnic_type:
+            ports = []
+            networks = []
+            create_port_body = {'binding:vnic_type': vnic_type,
+                                'namestart': 'port-smoke'}
+            if create_kwargs:
+                net_client = create_kwargs.get("network_client",
+                                               self.network_client)
+
+                # Convert security group names to security group ids
+                # to pass to create_port
+                if create_kwargs.get('security_groups'):
+                    security_groups = net_client.list_security_groups().get(
+                        'security_groups')
+                    sec_dict = dict([(s['name'], s['id'])
+                                    for s in security_groups])
+
+                    sec_groups_names = [s['name'] for s in create_kwargs[
+                        'security_groups']]
+                    security_groups_ids = [sec_dict[s]
+                                           for s in sec_groups_names]
+
+                    if security_groups_ids:
+                        create_port_body[
+                            'security_groups'] = security_groups_ids
+                networks = create_kwargs.get('networks')
+            else:
+                net_client = self.network_client
+            # If there are no networks passed to us we look up
+            # for the tenant's private networks and create a port
+            # if there is only one private network. The same behaviour
+            # as we would expect when passing the call to the clients
+            # with no networks
+            if not networks:
+                networks = net_client.list_networks(filters={
+                    'router:external': False})
+                self.assertEqual(1, len(networks),
+                                 "There is more than one"
+                                 " network for the tenant")
+            for net in networks:
+                net_id = net['uuid']
+                port = self._create_port(network_id=net_id,
+                                         client=net_client,
+                                         **create_port_body)
+                ports.append({'port': port.id})
+            if ports:
+                create_kwargs['networks'] = ports
+
+        return super(NetworkScenarioTest, self).create_server(
+            name=name, image=image, flavor=flavor,
+            wait_on_boot=wait_on_boot, wait_on_delete=wait_on_delete,
+            create_kwargs=create_kwargs)
+
 
 # power/provision states as of icehouse
 class BaremetalPowerStates(object):
@@ -1124,7 +1186,7 @@ class BaremetalScenarioTest(ScenarioTest):
             node = None
             try:
                 node = self.get_node(instance_id=instance_id)
-            except exceptions.NotFound:
+            except lib_exc.NotFound:
                 pass
             return node is not None
 
@@ -1187,7 +1249,7 @@ class BaremetalScenarioTest(ScenarioTest):
         self.servers_client.wait_for_server_status(self.instance['id'],
                                                    'ACTIVE')
         self.node = self.get_node(instance_id=self.instance['id'])
-        _, self.instance = self.servers_client.get_server(self.instance['id'])
+        self.instance = self.servers_client.get_server(self.instance['id'])
 
     def terminate_instance(self):
         self.servers_client.delete_server(self.instance['id'])
@@ -1259,8 +1321,9 @@ class OrchestrationScenarioTest(ScenarioTest):
 
     @classmethod
     def credentials(cls):
-        admin_creds = auth.get_default_credentials('identity_admin')
-        creds = auth.get_default_credentials('user')
+        admin_creds = cred_provider.get_configured_credentials(
+            'identity_admin')
+        creds = cred_provider.get_configured_credentials('user')
         admin_creds.tenant_name = creds.tenant_name
         return admin_creds
 

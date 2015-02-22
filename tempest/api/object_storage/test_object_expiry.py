@@ -13,11 +13,11 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib import exceptions as lib_exc
 import time
 
 from tempest.api.object_storage import base
 from tempest.common.utils import data_utils
-from tempest import exceptions
 from tempest import test
 
 
@@ -66,7 +66,7 @@ class ObjectExpiryTest(base.BaseObjectTest):
         time.sleep(sleepy_time + 3)
 
         # object should not be there anymore
-        self.assertRaises(exceptions.NotFound, self.object_client.get_object,
+        self.assertRaises(lib_exc.NotFound, self.object_client.get_object,
                           self.container_name, self.object_name)
 
     @test.skip_because(bug="1417494")

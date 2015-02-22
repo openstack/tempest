@@ -12,8 +12,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib import exceptions as lib_exc
+
 from tempest.api.compute import base
-from tempest import exceptions
 from tempest import test
 
 
@@ -33,5 +34,5 @@ class AZAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
         # List of availability zones and available services with
         # non-administrator user
         self.assertRaises(
-            exceptions.Unauthorized,
+            lib_exc.Unauthorized,
             self.non_adm_client.get_availability_zone_list_detail)

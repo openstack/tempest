@@ -16,11 +16,11 @@
 import logging
 
 from six import moves
+from tempest_lib import exceptions as lib_exc
 from testtools import matchers
 
 from tempest.api.messaging import base
 from tempest.common.utils import data_utils
-from tempest import exceptions
 from tempest import test
 
 
@@ -42,13 +42,12 @@ class TestQueues(base.BaseMessagingTest):
         self.assertEqual('', body)
 
         self.delete_queue(queue_name)
-        self.assertRaises(exceptions.NotFound,
+        self.assertRaises(lib_exc.NotFound,
                           self.client.get_queue,
                           queue_name)
 
 
 class TestManageQueue(base.BaseMessagingTest):
-    _interface = 'json'
 
     @classmethod
     def resource_setup(cls):

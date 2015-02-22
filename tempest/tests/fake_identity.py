@@ -17,6 +17,7 @@ import json
 
 import httplib2
 
+FAKE_AUTH_URL = 'http://fake_uri.com/auth'
 
 TOKEN = "fake_token"
 ALT_TOKEN = "alt_fake_token"

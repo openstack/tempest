@@ -19,12 +19,15 @@ from tempest import test
 
 
 class VolumesActionsV2Test(base.BaseVolumeAdminTest):
-    _interface = "json"
+
+    @classmethod
+    def setup_clients(cls):
+        super(VolumesActionsV2Test, cls).setup_clients()
+        cls.client = cls.volumes_client
 
     @classmethod
     def resource_setup(cls):
         super(VolumesActionsV2Test, cls).resource_setup()
-        cls.client = cls.volumes_client
 
         # Create a test shared volume for tests
         vol_name = utils.rand_name(cls.__name__ + '-Volume-')

@@ -13,19 +13,19 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib import exceptions as lib_exc
+
 from tempest.api.identity import base
 from tempest.common.utils import data_utils
-from tempest import exceptions
 from tempest import test
 
 
 class ProjectsNegativeTestJSON(base.BaseIdentityV3AdminTest):
-    _interface = 'json'
 
     @test.attr(type=['negative', 'gate'])
     def test_list_projects_by_unauthorized_user(self):
         # Non-admin user should not be able to list projects
-        self.assertRaises(exceptions.Unauthorized,
+        self.assertRaises(lib_exc.Unauthorized,
                           self.non_admin_client.list_projects)
 
     @test.attr(type=['negative', 'gate'])
@@ -36,27 +36,27 @@ class ProjectsNegativeTestJSON(base.BaseIdentityV3AdminTest):
         self.data.projects.append(project)
 
         self.assertRaises(
-            exceptions.Conflict, self.client.create_project, project_name)
+            lib_exc.Conflict, self.client.create_project, project_name)
 
     @test.attr(type=['negative', 'gate'])
     def test_create_project_by_unauthorized_user(self):
         # Non-admin user should not be authorized to create a project
         project_name = data_utils.rand_name('project-')
         self.assertRaises(
-            exceptions.Unauthorized, self.non_admin_client.create_project,
+            lib_exc.Unauthorized, self.non_admin_client.create_project,
             project_name)
 
     @test.attr(type=['negative', 'gate'])
     def test_create_project_with_empty_name(self):
         # Project name should not be empty
-        self.assertRaises(exceptions.BadRequest, self.client.create_project,
+        self.assertRaises(lib_exc.BadRequest, self.client.create_project,
                           name='')
 
     @test.attr(type=['negative', 'gate'])
     def test_create_projects_name_length_over_64(self):
         # Project name length should not be greater than 64 characters
         project_name = 'a' * 65
-        self.assertRaises(exceptions.BadRequest, self.client.create_project,
+        self.assertRaises(lib_exc.BadRequest, self.client.create_project,
                           project_name)
 
     @test.attr(type=['negative', 'gate'])
@@ -66,11 +66,11 @@ class ProjectsNegativeTestJSON(base.BaseIdentityV3AdminTest):
         project = self.client.create_project(project_name)
         self.data.projects.append(project)
         self.assertRaises(
-            exceptions.Unauthorized, self.non_admin_client.delete_project,
+            lib_exc.Unauthorized, self.non_admin_client.delete_project,
             project['id'])
 
     @test.attr(type=['negative', 'gate'])
     def test_delete_non_existent_project(self):
         # Attempt to delete a non existent project should fail
-        self.assertRaises(exceptions.NotFound, self.client.delete_project,
+        self.assertRaises(lib_exc.NotFound, self.client.delete_project,
                           data_utils.rand_uuid_hex())

@@ -10,6 +10,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib import decorators
 import testtools
 
 from tempest.api.telemetry import base
@@ -20,22 +21,20 @@ CONF = config.CONF
 
 
 class TelemetryNotificationAPITestJSON(base.BaseTelemetryTest):
-    _interface = 'json'
 
     @classmethod
-    def resource_setup(cls):
+    def skip_checks(cls):
+        super(TelemetryNotificationAPITestJSON, cls).skip_checks()
         if CONF.telemetry.too_slow_to_test:
             raise cls.skipException("Ceilometer feature for fast work mysql "
                                     "is disabled")
-        super(TelemetryNotificationAPITestJSON, cls).resource_setup()
 
     @test.attr(type="gate")
     @testtools.skipIf(not CONF.service_available.nova,
                       "Nova is not available.")
     def test_check_nova_notification(self):
 
-        resp, body = self.create_server()
-        self.assertEqual(resp.status, 202)
+        body = self.create_server()
 
         query = ('resource', 'eq', body['id'])
 
@@ -46,7 +45,7 @@ class TelemetryNotificationAPITestJSON(base.BaseTelemetryTest):
     @test.services("image")
     @testtools.skipIf(not CONF.image_feature_enabled.api_v1,
                       "Glance api v1 is disabled")
-    @test.skip_because(bug='1351627')
+    @decorators.skip_because(bug='1351627')
     def test_check_glance_v1_notifications(self):
         body = self.create_image(self.image_client)
         self.image_client.update_image(body['id'], data='data')
@@ -62,7 +61,7 @@ class TelemetryNotificationAPITestJSON(base.BaseTelemetryTest):
     @test.services("image")
     @testtools.skipIf(not CONF.image_feature_enabled.api_v2,
                       "Glance api v2 is disabled")
-    @test.skip_because(bug='1351627')
+    @decorators.skip_because(bug='1351627')
     def test_check_glance_v2_notifications(self):
         body = self.create_image(self.image_client_v2)
 

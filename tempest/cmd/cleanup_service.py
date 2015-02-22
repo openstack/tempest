@@ -244,7 +244,7 @@ class KeyPairService(BaseService):
 
     def list(self):
         client = self.client
-        _, keypairs = client.list_keypairs()
+        keypairs = client.list_keypairs()
         LOG.debug("List count, %s Keypairs" % len(keypairs))
         return keypairs
 
@@ -297,7 +297,7 @@ class FloatingIpService(BaseService):
 
     def list(self):
         client = self.client
-        _, floating_ips = client.list_floating_ips()
+        floating_ips = client.list_floating_ips()
         LOG.debug("List count, %s Floating IPs" % len(floating_ips))
         return floating_ips
 
@@ -778,7 +778,7 @@ class TelemetryAlarmService(BaseService):
 
     def list(self):
         client = self.client
-        _, alarms = client.list_alarms()
+        alarms = client.list_alarms()
         LOG.debug("List count, %s Alarms" % len(alarms))
         return alarms
 
@@ -805,7 +805,7 @@ class FlavorService(BaseService):
 
     def list(self):
         client = self.client
-        _, flavors = client.list_flavors({"is_public": None})
+        flavors = client.list_flavors({"is_public": None})
         if not self.is_save_state:
             # recreate list removing saved flavors
             flavors = [flavor for flavor in flavors if flavor['id']

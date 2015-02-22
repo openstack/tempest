@@ -15,18 +15,23 @@
 
 import uuid
 
+from tempest_lib import exceptions as lib_exc
+
 from tempest.api.compute import base
-from tempest import exceptions
 from tempest import test
 
 
 class VirtualInterfacesNegativeTestJSON(base.BaseV2ComputeTest):
 
     @classmethod
-    def resource_setup(cls):
+    def setup_credentials(cls):
         # For this test no network resources are needed
         cls.set_network_resources()
-        super(VirtualInterfacesNegativeTestJSON, cls).resource_setup()
+        super(VirtualInterfacesNegativeTestJSON, cls).setup_credentials()
+
+    @classmethod
+    def setup_clients(cls):
+        super(VirtualInterfacesNegativeTestJSON, cls).setup_clients()
         cls.client = cls.servers_client
 
     @test.attr(type=['negative', 'gate'])
@@ -35,6 +40,6 @@ class VirtualInterfacesNegativeTestJSON(base.BaseV2ComputeTest):
         # Negative test: Should not be able to GET virtual interfaces
         # for an invalid server_id
         invalid_server_id = str(uuid.uuid4())
-        self.assertRaises(exceptions.NotFound,
+        self.assertRaises(lib_exc.NotFound,
                           self.client.list_virtual_interfaces,
                           invalid_server_id)

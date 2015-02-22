@@ -11,9 +11,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib import exceptions as lib_exc
+
 from tempest.api.baremetal.admin import base
 from tempest.common.utils import data_utils
-from tempest import exceptions as exc
 from tempest import test
 
 
@@ -63,7 +64,7 @@ class TestChassis(base.BaseBaremetalTest):
         uuid = body['uuid']
 
         self.delete_chassis(uuid)
-        self.assertRaises(exc.NotFound, self.client.show_chassis, uuid)
+        self.assertRaises(lib_exc.NotFound, self.client.show_chassis, uuid)
 
     @test.attr(type='smoke')
     def test_update_chassis(self):

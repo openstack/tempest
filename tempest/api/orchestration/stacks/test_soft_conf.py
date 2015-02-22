@@ -10,10 +10,11 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib import exceptions as lib_exc
+
 from tempest.api.orchestration import base
 from tempest.common.utils import data_utils
 from tempest import config
-from tempest import exceptions
 from tempest.openstack.common import log as logging
 from tempest import test
 
@@ -70,14 +71,14 @@ class TestSoftwareConfig(base.BaseOrchestrationTest):
         self.client.delete_software_deploy(deploy_id)
         # Testing that it is really gone
         self.assertRaises(
-            exceptions.NotFound, self.client.get_software_deploy,
+            lib_exc.NotFound, self.client.get_software_deploy,
             self.deployment_id)
 
     def _config_delete(self, config_id):
         self.client.delete_software_config(config_id)
         # Testing that it is really gone
         self.assertRaises(
-            exceptions.NotFound, self.client.get_software_config, config_id)
+            lib_exc.NotFound, self.client.get_software_config, config_id)
 
     @test.attr(type='smoke')
     def test_get_software_config(self):

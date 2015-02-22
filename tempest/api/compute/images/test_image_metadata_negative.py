@@ -13,9 +13,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib import exceptions as lib_exc
+
 from tempest.api.compute import base
 from tempest.common.utils import data_utils
-from tempest import exceptions
 from tempest import test
 
 
@@ -30,21 +31,21 @@ class ImagesMetadataTestJSON(base.BaseV2ComputeTest):
     def test_list_nonexistent_image_metadata(self):
         # Negative test: List on nonexistent image
         # metadata should not happen
-        self.assertRaises(exceptions.NotFound, self.client.list_image_metadata,
+        self.assertRaises(lib_exc.NotFound, self.client.list_image_metadata,
                           data_utils.rand_uuid())
 
     @test.attr(type=['negative', 'gate'])
     def test_update_nonexistent_image_metadata(self):
         # Negative test:An update should not happen for a non-existent image
         meta = {'os_distro': 'alt1', 'os_version': 'alt2'}
-        self.assertRaises(exceptions.NotFound,
+        self.assertRaises(lib_exc.NotFound,
                           self.client.update_image_metadata,
                           data_utils.rand_uuid(), meta)
 
     @test.attr(type=['negative', 'gate'])
     def test_get_nonexistent_image_metadata_item(self):
         # Negative test: Get on non-existent image should not happen
-        self.assertRaises(exceptions.NotFound,
+        self.assertRaises(lib_exc.NotFound,
                           self.client.get_image_metadata_item,
                           data_utils.rand_uuid(), 'os_version')
 
@@ -52,7 +53,7 @@ class ImagesMetadataTestJSON(base.BaseV2ComputeTest):
     def test_set_nonexistent_image_metadata(self):
         # Negative test: Metadata should not be set to a non-existent image
         meta = {'os_distro': 'alt1', 'os_version': 'alt2'}
-        self.assertRaises(exceptions.NotFound, self.client.set_image_metadata,
+        self.assertRaises(lib_exc.NotFound, self.client.set_image_metadata,
                           data_utils.rand_uuid(), meta)
 
     @test.attr(type=['negative', 'gate'])
@@ -60,7 +61,7 @@ class ImagesMetadataTestJSON(base.BaseV2ComputeTest):
         # Negative test: Metadata item should not be set to a
         # nonexistent image
         meta = {'os_distro': 'alt'}
-        self.assertRaises(exceptions.NotFound,
+        self.assertRaises(lib_exc.NotFound,
                           self.client.set_image_metadata_item,
                           data_utils.rand_uuid(), 'os_distro',
                           meta)
@@ -69,6 +70,6 @@ class ImagesMetadataTestJSON(base.BaseV2ComputeTest):
     def test_delete_nonexistent_image_metadata_item(self):
         # Negative test: Shouldn't be able to delete metadata
         # item from non-existent image
-        self.assertRaises(exceptions.NotFound,
+        self.assertRaises(lib_exc.NotFound,
                           self.client.delete_image_metadata_item,
                           data_utils.rand_uuid(), 'os_distro')

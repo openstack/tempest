@@ -16,6 +16,7 @@
 import collections
 import re
 
+from tempest_lib import decorators
 import testtools
 
 from tempest.common.utils import data_utils
@@ -242,7 +243,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         def check_ports():
             self.new_port_list = [port for port in
                                   self._list_ports(device_id=server['id'])
-                                  if port != old_port]
+                                  if port['id'] != old_port['id']]
             return len(self.new_port_list) == 1
 
         if not test.call_until_true(check_ports, CONF.network.build_timeout,
@@ -380,6 +381,9 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
 
     @testtools.skipUnless(CONF.compute_feature_enabled.interface_attach,
                           'NIC hotplug not available')
+    @testtools.skipIf(CONF.network.port_vnic_type in ['direct', 'macvtap'],
+                      'NIC hotplug not supported for '
+                      'vnic_type direct or macvtap')
     @test.attr(type='smoke')
     @test.services('compute', 'network')
     def test_hotplug_nic(self):
@@ -438,7 +442,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
                                  act_serv=servers,
                                  trgt_serv=dns_servers))
 
-    @test.skip_because(bug="1412325")
+    @decorators.skip_because(bug="1412325")
     @testtools.skipUnless(CONF.scenario.dhcp_client,
                           "DHCP client is not available.")
     @test.attr(type='smoke')
@@ -488,6 +492,9 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         ssh_client.renew_lease(fixed_ip=floating_ip['fixed_ip_address'])
         self._check_dns_server(ssh_client, [alt_dns_server])
 
+    @testtools.skipIf(CONF.baremetal.driver_enabled,
+                      'admin_state of instance ports cannot be altered '
+                      'for baremetal nodes')
     @test.attr(type='smoke')
     @test.services('compute', 'network')
     def test_update_instance_port_admin_state(self):

@@ -19,7 +19,6 @@ from tempest import test
 
 
 class ExtraDHCPOptionsTestJSON(base.BaseNetworkTest):
-    _interface = 'json'
 
     """
     Tests the following operations with the Extra DHCP Options Neutron API

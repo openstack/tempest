@@ -14,10 +14,11 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+from tempest_lib import exceptions as lib_exc
+
 from tempest.api.object_storage import base
 from tempest.common import custom_matchers
 from tempest.common.utils import data_utils
-from tempest import exceptions
 from tempest import test
 
 
@@ -165,5 +166,5 @@ class StaticWebTest(base.BaseObjectTest):
 
         # Request non-existing object
         self.assertRaises(
-            exceptions.NotFound, self.object_client.get_object,
+            lib_exc.NotFound, self.object_client.get_object,
             self.container_name, "notexisting")

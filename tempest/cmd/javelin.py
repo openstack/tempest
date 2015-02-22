@@ -110,11 +110,11 @@ import sys
 import unittest
 
 import netaddr
+from tempest_lib import exceptions as lib_exc
 import yaml
 
 import tempest.auth
 from tempest import config
-from tempest import exceptions
 from tempest.openstack.common import log as logging
 from tempest.openstack.common import timeutils
 from tempest.services.compute.json import flavors_client
@@ -176,8 +176,13 @@ class OSClient(object):
             username=user,
             password=pw,
             tenant_name=tenant)
-        _auth = tempest.auth.KeystoneV2AuthProvider(_creds)
-        self.identity = identity_client.IdentityClientJSON(_auth)
+        _auth = tempest.auth.KeystoneV2AuthProvider(_creds, CONF.identity.uri)
+        self.identity = identity_client.IdentityClientJSON(
+            _auth,
+            CONF.identity.catalog_type,
+            CONF.identity.region,
+            endpoint_type='adminURL',
+            **default_params_with_timeout_values)
         self.servers = servers_client.ServersClientJSON(_auth,
                                                         **compute_params)
         self.flavors = flavors_client.FlavorsClientJSON(_auth,
@@ -231,9 +236,6 @@ def client_for_user(name):
     else:
         LOG.error("%s not found in USERS: %s" % (name, USERS))
 
-
-def resp_ok(response):
-    return 200 >= int(response['status']) < 300
 
 ###################
 #
@@ -297,7 +299,7 @@ def _assign_swift_role(user):
             USERS[user]['tenant_id'],
             USERS[user]['id'],
             role['id'])
-    except exceptions.Conflict:
+    except lib_exc.Conflict:
         # don't care if it's already assigned
         pass
 
@@ -313,14 +315,14 @@ def create_users(users):
     for u in users:
         try:
             tenant = admin.identity.get_tenant_by_name(u['tenant'])
-        except exceptions.NotFound:
+        except lib_exc.NotFound:
             LOG.error("Tenant: %s - not found" % u['tenant'])
             continue
         try:
             admin.identity.get_user_by_username(tenant['id'], u['name'])
             LOG.warn("User '%s' already exists in this environment"
                      % u['name'])
-        except exceptions.NotFound:
+        except lib_exc.NotFound:
             admin.identity.create_user(
                 u['name'], u['pass'], tenant['id'],
                 "%s@%s" % (u['name'], tenant['id']),
@@ -432,7 +434,7 @@ class JavelinCheck(unittest.TestCase):
                 found,
                 "Couldn't find expected server %s" % server['name'])
 
-            r, found = client.servers.get_server(found['id'])
+            found = client.servers.get_server(found['id'])
             # validate neutron is enabled and ironic disabled:
             if (CONF.service_available.neutron and
                     not CONF.baremetal.driver_enabled):
@@ -474,11 +476,10 @@ class JavelinCheck(unittest.TestCase):
         LOG.info("checking telemetry")
         for server in self.res['servers']:
             client = client_for_user(server['owner'])
-            response, body = client.telemetry.list_samples(
+            body = client.telemetry.list_samples(
                 'instance',
                 query=('metadata.display_name', 'eq', server['name'])
             )
-            self.assertEqual(response.status, 200)
             self.assertTrue(len(body) >= 1, 'expecting at least one sample')
             self._confirm_telemetry_sample(server, body[-1])
 
@@ -708,7 +709,7 @@ def create_subnets(subnets):
                                           cidr=subnet['range'],
                                           name=subnet['name'],
                                           ip_version=ip_version)
-        except exceptions.BadRequest as e:
+        except lib_exc.BadRequest as e:
             is_overlapping_cidr = 'overlaps with another subnet' in str(e)
             if not is_overlapping_cidr:
                 raise
@@ -789,7 +790,7 @@ def _get_server_by_name(client, name):
 
 
 def _get_flavor_by_name(client, name):
-    r, body = client.flavors.list_flavors()
+    body = client.flavors.list_flavors()
     for flavor in body:
         if name == flavor['name']:
             return flavor
@@ -817,7 +818,7 @@ def create_servers(servers):
                 client.networks, 'networks', x)['id'])
             kwargs['networks'] = [{'uuid': get_net_id(network)}
                                   for network in server['networks']]
-        resp, body = client.servers.create_server(
+        body = client.servers.create_server(
             server['name'], image_id, flavor_id, **kwargs)
         server_id = body['id']
         client.servers.wait_for_server_status(server_id, 'ACTIVE')

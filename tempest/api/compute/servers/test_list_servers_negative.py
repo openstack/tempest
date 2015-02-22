@@ -14,9 +14,9 @@
 #    under the License.
 
 from six import moves
+from tempest_lib import exceptions as lib_exc
 
 from tempest.api.compute import base
-from tempest import exceptions
 from tempest import test
 
 
@@ -35,10 +35,10 @@ class ListServersNegativeTestJSON(base.BaseV2ComputeTest):
         cls.existing_fixtures = []
         cls.deleted_fixtures = []
         for x in moves.xrange(2):
-            resp, srv = cls.create_test_server(wait_until='ACTIVE')
+            srv = cls.create_test_server(wait_until='ACTIVE')
             cls.existing_fixtures.append(srv)
 
-        resp, srv = cls.create_test_server()
+        srv = cls.create_test_server()
         cls.client.delete_server(srv['id'])
         # We ignore errors on termination because the server may
         # be put into ERROR status on a quick spawn, then delete,
@@ -101,7 +101,6 @@ class ListServersNegativeTestJSON(base.BaseV2ComputeTest):
         # List servers by specifying limits
         resp, body = self.client.list_servers({'limit': 1})
         self.assertEqual('200', resp['status'])
-        # when _interface='xml', one element for servers_links in servers
         self.assertEqual(1, len([x for x in body['servers'] if 'id' in x]))
 
     @test.attr(type=['negative', 'gate'])
@@ -114,19 +113,19 @@ class ListServersNegativeTestJSON(base.BaseV2ComputeTest):
     @test.attr(type=['negative', 'gate'])
     def test_list_servers_by_limits_pass_string(self):
         # Return an error if a string value is passed for limit
-        self.assertRaises(exceptions.BadRequest, self.client.list_servers,
+        self.assertRaises(lib_exc.BadRequest, self.client.list_servers,
                           {'limit': 'testing'})
 
     @test.attr(type=['negative', 'gate'])
     def test_list_servers_by_limits_pass_negative_value(self):
         # Return an error if a negative value for limit is passed
-        self.assertRaises(exceptions.BadRequest, self.client.list_servers,
+        self.assertRaises(lib_exc.BadRequest, self.client.list_servers,
                           {'limit': -1})
 
     @test.attr(type=['negative', 'gate'])
     def test_list_servers_by_changes_since_invalid_date(self):
         # Return an error when invalid date format is passed
-        self.assertRaises(exceptions.BadRequest, self.client.list_servers,
+        self.assertRaises(lib_exc.BadRequest, self.client.list_servers,
                           {'changes-since': '2011/01/01'})
 
     @test.attr(type=['negative', 'gate'])

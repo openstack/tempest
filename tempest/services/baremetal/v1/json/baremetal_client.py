@@ -136,18 +136,18 @@ class BaremetalClientJSON(base.BaremetalClient):
         Create a baremetal node with the specified parameters.
 
         :param cpu_arch: CPU architecture of the node. Default: x86_64.
-        :param cpu_num: Number of CPUs. Default: 8.
-        :param storage: Disk size. Default: 1024.
-        :param memory: Available RAM. Default: 4096.
+        :param cpus: Number of CPUs. Default: 8.
+        :param local_gb: Disk size. Default: 1024.
+        :param memory_mb: Available RAM. Default: 4096.
         :param driver: Driver name. Default: "fake"
         :return: A tuple with the server response and the created node.
 
         """
         node = {'chassis_uuid': chassis_id,
                 'properties': {'cpu_arch': kwargs.get('cpu_arch', 'x86_64'),
-                               'cpu_num': kwargs.get('cpu_num', 8),
-                               'storage': kwargs.get('storage', 1024),
-                               'memory': kwargs.get('memory', 4096)},
+                               'cpus': kwargs.get('cpus', 8),
+                               'local_gb': kwargs.get('local_gb', 1024),
+                               'memory_mb': kwargs.get('memory_mb', 4096)},
                 'driver': kwargs.get('driver', 'fake')}
 
         return self._create_request('nodes', node)
@@ -232,9 +232,9 @@ class BaremetalClientJSON(base.BaremetalClient):
 
         """
         node_attributes = ('properties/cpu_arch',
-                           'properties/cpu_num',
-                           'properties/storage',
-                           'properties/memory',
+                           'properties/cpus',
+                           'properties/local_gb',
+                           'properties/memory_mb',
                            'driver',
                            'instance_uuid')
 

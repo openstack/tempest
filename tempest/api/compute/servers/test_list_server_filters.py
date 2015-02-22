@@ -13,11 +13,13 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib import decorators
+from tempest_lib import exceptions as lib_exc
+
 from tempest.api.compute import base
 from tempest.api import utils
 from tempest.common.utils import data_utils
 from tempest import config
-from tempest import exceptions
 from tempest import test
 
 CONF = config.CONF
@@ -26,10 +28,18 @@ CONF = config.CONF
 class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
 
     @classmethod
-    def resource_setup(cls):
+    def setup_credentials(cls):
         cls.set_network_resources(network=True, subnet=True, dhcp=True)
-        super(ListServerFiltersTestJSON, cls).resource_setup()
+        super(ListServerFiltersTestJSON, cls).setup_credentials()
+
+    @classmethod
+    def setup_clients(cls):
+        super(ListServerFiltersTestJSON, cls).setup_clients()
         cls.client = cls.servers_client
+
+    @classmethod
+    def resource_setup(cls):
+        super(ListServerFiltersTestJSON, cls).resource_setup()
 
         # Check to see if the alternate image ref actually exists...
         images_client = cls.images_client
@@ -46,29 +56,29 @@ class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
         # not exist, fail early since the tests won't work...
         try:
             cls.images_client.get_image(cls.image_ref)
-        except exceptions.NotFound:
+        except lib_exc.NotFound:
             raise RuntimeError("Image %s (image_ref) was not found!" %
                                cls.image_ref)
 
         try:
             cls.images_client.get_image(cls.image_ref_alt)
-        except exceptions.NotFound:
+        except lib_exc.NotFound:
             raise RuntimeError("Image %s (image_ref_alt) was not found!" %
                                cls.image_ref_alt)
 
         cls.s1_name = data_utils.rand_name(cls.__name__ + '-instance')
-        resp, cls.s1 = cls.create_test_server(name=cls.s1_name,
-                                              wait_until='ACTIVE')
+        cls.s1 = cls.create_test_server(name=cls.s1_name,
+                                        wait_until='ACTIVE')
 
         cls.s2_name = data_utils.rand_name(cls.__name__ + '-instance')
-        resp, cls.s2 = cls.create_test_server(name=cls.s2_name,
-                                              image_id=cls.image_ref_alt,
-                                              wait_until='ACTIVE')
+        cls.s2 = cls.create_test_server(name=cls.s2_name,
+                                        image_id=cls.image_ref_alt,
+                                        wait_until='ACTIVE')
 
         cls.s3_name = data_utils.rand_name(cls.__name__ + '-instance')
-        resp, cls.s3 = cls.create_test_server(name=cls.s3_name,
-                                              flavor=cls.flavor_ref_alt,
-                                              wait_until='ACTIVE')
+        cls.s3 = cls.create_test_server(name=cls.s3_name,
+                                        flavor=cls.flavor_ref_alt,
+                                        wait_until='ACTIVE')
 
         cls.fixed_network_name = CONF.compute.fixed_network_name
         if CONF.service_available.neutron:
@@ -259,7 +269,7 @@ class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
     def test_list_servers_filtered_by_ip(self):
         # Filter servers by ip
         # Here should be listed 1 server
-        resp, self.s1 = self.client.get_server(self.s1['id'])
+        self.s1 = self.client.get_server(self.s1['id'])
         ip = self.s1['addresses'][self.fixed_network_name][0]['addr']
         params = {'ip': ip}
         resp, body = self.client.list_servers(params)
@@ -269,14 +279,14 @@ class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
         self.assertNotIn(self.s2_name, map(lambda x: x['name'], servers))
         self.assertNotIn(self.s3_name, map(lambda x: x['name'], servers))
 
-    @test.skip_because(bug="1182883",
-                       condition=CONF.service_available.neutron)
+    @decorators.skip_because(bug="1182883",
+                             condition=CONF.service_available.neutron)
     @test.attr(type='gate')
     def test_list_servers_filtered_by_ip_regex(self):
         # Filter servers by regex ip
         # List all servers filtered by part of ip address.
         # Here should be listed all servers
-        resp, self.s1 = self.client.get_server(self.s1['id'])
+        self.s1 = self.client.get_server(self.s1['id'])
         ip = self.s1['addresses'][self.fixed_network_name][0]['addr'][0:-3]
         params = {'ip': ip}
         resp, body = self.client.list_servers(params)

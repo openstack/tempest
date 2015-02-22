@@ -31,9 +31,13 @@ class VolumesV2ListTestJSON(base.BaseVolumeTest):
     """
 
     @classmethod
+    def setup_clients(cls):
+        super(VolumesV2ListTestJSON, cls).setup_clients()
+        cls.client = cls.volumes_client
+
+    @classmethod
     def resource_setup(cls):
         super(VolumesV2ListTestJSON, cls).resource_setup()
-        cls.client = cls.volumes_client
 
         # Create 3 test volumes
         cls.volume_list = []

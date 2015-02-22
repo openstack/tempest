@@ -19,7 +19,6 @@ from tempest import test
 
 
 class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
-    _interface = 'json'
 
     @test.attr(type='gate')
     def test_user_update(self):

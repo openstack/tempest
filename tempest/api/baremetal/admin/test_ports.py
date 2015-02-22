@@ -10,9 +10,11 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib import decorators
+from tempest_lib import exceptions as lib_exc
+
 from tempest.api.baremetal.admin import base
 from tempest.common.utils import data_utils
-from tempest import exceptions as exc
 from tempest import test
 
 
@@ -57,7 +59,7 @@ class TestPorts(base.BaseBaremetalTest):
         _, body = self.client.show_port(uuid)
         self._assertExpected(port, body)
 
-    @test.skip_because(bug='1398350')
+    @decorators.skip_because(bug='1398350')
     @test.attr(type='smoke')
     def test_create_port_with_extra(self):
         node_id = self.node['uuid']
@@ -79,7 +81,8 @@ class TestPorts(base.BaseBaremetalTest):
 
         self.delete_port(port['uuid'])
 
-        self.assertRaises(exc.NotFound, self.client.show_port, port['uuid'])
+        self.assertRaises(lib_exc.NotFound, self.client.show_port,
+                          port['uuid'])
 
     @test.attr(type='smoke')
     def test_show_port(self):
@@ -231,7 +234,7 @@ class TestPorts(base.BaseBaremetalTest):
         _, body = self.client.show_port(port['uuid'])
         self.assertEqual(extra, body['extra'])
 
-    @test.skip_because(bug='1398350')
+    @decorators.skip_because(bug='1398350')
     @test.attr(type='smoke')
     def test_update_port_mixed_ops(self):
         node_id = self.node['uuid']

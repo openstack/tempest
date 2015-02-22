@@ -59,7 +59,7 @@ class TestMinimumBasicScenario(manager.ScenarioTest):
         self.assertIn(self.server['id'], [x['id'] for x in servers])
 
     def nova_show(self):
-        _, got_server = self.servers_client.get_server(self.server['id'])
+        got_server = self.servers_client.get_server(self.server['id'])
         self.assertThat(
             self.server, custom_matchers.MatchesDictExceptForKeys(
                 got_server, excluded_keys=['OS-EXT-AZ:availability_zone']))
@@ -78,7 +78,7 @@ class TestMinimumBasicScenario(manager.ScenarioTest):
     def nova_volume_attach(self):
         volume_device_path = '/dev/' + CONF.compute.volume_device_name
         volume = self.servers_client.attach_volume(
-            self.server['id'], self.volume['id'], volume_device_path)[1]
+            self.server['id'], self.volume['id'], volume_device_path)
         self.assertEqual(self.volume['id'], volume['id'])
         self.volumes_client.wait_for_volume_status(volume['id'], 'in-use')
         # Refresh the volume after the attachment
@@ -109,7 +109,7 @@ class TestMinimumBasicScenario(manager.ScenarioTest):
                         self.server['id'], secgroup['name'])
 
         def wait_for_secgroup_add():
-            _, body = self.servers_client.get_server(self.server['id'])
+            body = self.servers_client.get_server(self.server['id'])
             return {'name': secgroup['name']} in body['security_groups']
 
         if not test.call_until_true(wait_for_secgroup_add,

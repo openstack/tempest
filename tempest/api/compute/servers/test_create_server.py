@@ -43,16 +43,16 @@ class ServersTestJSON(base.BaseV2ComputeTest):
                        'contents': base64.b64encode(file_contents)}]
         cls.client = cls.servers_client
         cls.network_client = cls.os.network_client
-        cli_resp = cls.create_test_server(name=cls.name,
-                                          meta=cls.meta,
-                                          accessIPv4=cls.accessIPv4,
-                                          accessIPv6=cls.accessIPv6,
-                                          personality=personality,
-                                          disk_config=cls.disk_config)
-        cls.resp, cls.server_initial = cli_resp
+        disk_config = cls.disk_config
+        cls.server_initial = cls.create_test_server(name=cls.name,
+                                                    meta=cls.meta,
+                                                    accessIPv4=cls.accessIPv4,
+                                                    accessIPv6=cls.accessIPv6,
+                                                    personality=personality,
+                                                    disk_config=disk_config)
         cls.password = cls.server_initial['adminPass']
         cls.client.wait_for_server_status(cls.server_initial['id'], 'ACTIVE')
-        resp, cls.server = cls.client.get_server(cls.server_initial['id'])
+        cls.server = cls.client.get_server(cls.server_initial['id'])
 
     @test.attr(type='smoke')
     def test_verify_server_details(self):
@@ -89,7 +89,7 @@ class ServersTestJSON(base.BaseV2ComputeTest):
     def test_verify_created_server_vcpus(self):
         # Verify that the number of vcpus reported by the instance matches
         # the amount stated by the flavor
-        resp, flavor = self.flavors_client.get_flavor_details(self.flavor_ref)
+        flavor = self.flavors_client.get_flavor_details(self.flavor_ref)
         linux_client = remote_client.RemoteClient(self.server, self.ssh_user,
                                                   self.password)
         self.assertEqual(flavor['vcpus'], linux_client.get_number_of_vcpus())
@@ -115,9 +115,8 @@ class ServersTestJSON(base.BaseV2ComputeTest):
         self.addCleanup(self.client.delete_server_group, group_id)
 
         hints = {'group': group_id}
-        resp, server = self.create_test_server(sched_hints=hints,
-                                               wait_until='ACTIVE')
-        self.assertEqual(202, resp.status)
+        server = self.create_test_server(sched_hints=hints,
+                                         wait_until='ACTIVE')
 
         # Check a server is in the group
         resp, server_group = self.client.get_server_group(group_id)
@@ -156,7 +155,7 @@ class ServersTestJSON(base.BaseV2ComputeTest):
         networks = [{'uuid': net1['network']['id']},
                     {'uuid': net2['network']['id']}]
 
-        _, server_multi_nics = self.create_test_server(
+        server_multi_nics = self.create_test_server(
             networks=networks, wait_until='ACTIVE')
 
         # Cleanup server; this is needed in the test case because with the LIFO
@@ -210,13 +209,12 @@ class ServersWithSpecificFlavorTestJSON(base.BaseV2ComputeAdminTest):
             disk = 0
 
             # Create a flavor with extra specs
-            resp, flavor = (self.flavor_client.
-                            create_flavor(flavor_with_eph_disk_name,
-                                          ram, vcpus, disk,
-                                          flavor_with_eph_disk_id,
-                                          ephemeral=1))
+            flavor = (self.flavor_client.
+                      create_flavor(flavor_with_eph_disk_name,
+                                    ram, vcpus, disk,
+                                    flavor_with_eph_disk_id,
+                                    ephemeral=1))
             self.addCleanup(flavor_clean_up, flavor['id'])
-            self.assertEqual(200, resp.status)
 
             return flavor['id']
 
@@ -229,18 +227,16 @@ class ServersWithSpecificFlavorTestJSON(base.BaseV2ComputeAdminTest):
             disk = 0
 
             # Create a flavor without extra specs
-            resp, flavor = (self.flavor_client.
-                            create_flavor(flavor_no_eph_disk_name,
-                                          ram, vcpus, disk,
-                                          flavor_no_eph_disk_id))
+            flavor = (self.flavor_client.
+                      create_flavor(flavor_no_eph_disk_name,
+                                    ram, vcpus, disk,
+                                    flavor_no_eph_disk_id))
             self.addCleanup(flavor_clean_up, flavor['id'])
-            self.assertEqual(200, resp.status)
 
             return flavor['id']
 
         def flavor_clean_up(flavor_id):
-            resp, body = self.flavor_client.delete_flavor(flavor_id)
-            self.assertEqual(resp.status, 202)
+            self.flavor_client.delete_flavor(flavor_id)
             self.flavor_client.wait_for_resource_deletion(flavor_id)
 
         flavor_with_eph_disk_id = create_flavor_with_extra_specs()
@@ -248,22 +244,22 @@ class ServersWithSpecificFlavorTestJSON(base.BaseV2ComputeAdminTest):
 
         admin_pass = self.image_ssh_password
 
-        resp, server_no_eph_disk = (self.create_test_server(
-                                    wait_until='ACTIVE',
-                                    adminPass=admin_pass,
-                                    flavor=flavor_no_eph_disk_id))
-        resp, server_with_eph_disk = (self.create_test_server(
-                                      wait_until='ACTIVE',
-                                      adminPass=admin_pass,
-                                      flavor=flavor_with_eph_disk_id))
+        server_no_eph_disk = (self.create_test_server(
+                              wait_until='ACTIVE',
+                              adminPass=admin_pass,
+                              flavor=flavor_no_eph_disk_id))
+        server_with_eph_disk = (self.create_test_server(
+                                wait_until='ACTIVE',
+                                adminPass=admin_pass,
+                                flavor=flavor_with_eph_disk_id))
         # Get partition number of server without extra specs.
-        _, server_no_eph_disk = self.client.get_server(
+        server_no_eph_disk = self.client.get_server(
             server_no_eph_disk['id'])
         linux_client = remote_client.RemoteClient(server_no_eph_disk,
                                                   self.ssh_user, admin_pass)
         partition_num = len(linux_client.get_partitions().split('\n'))
 
-        _, server_with_eph_disk = self.client.get_server(
+        server_with_eph_disk = self.client.get_server(
             server_with_eph_disk['id'])
         linux_client = remote_client.RemoteClient(server_with_eph_disk,
                                                   self.ssh_user, admin_pass)

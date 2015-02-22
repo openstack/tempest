@@ -54,9 +54,9 @@ import argparse
 import json
 import sys
 
-from tempest import auth
 from tempest import clients
 from tempest.cmd import cleanup_service
+from tempest.common import cred_provider
 from tempest import config
 from tempest.openstack.common import log as logging
 
@@ -159,7 +159,8 @@ class Cleanup(object):
         kwargs = {"username": CONF.identity.admin_username,
                   "password": CONF.identity.admin_password,
                   "tenant_name": tenant['name']}
-        mgr = clients.Manager(credentials=auth.get_credentials(**kwargs))
+        mgr = clients.Manager(credentials=cred_provider.get_credentials(
+            **kwargs))
         kwargs = {'data': tenant_data,
                   'is_dry_run': is_dry_run,
                   'saved_state_json': None,
@@ -221,7 +222,7 @@ class Cleanup(object):
                 needs_role = False
                 LOG.debug("User already had admin privilege for this tenant")
         if needs_role:
-            LOG.debug("Adding admin priviledge for : %s" % tenant_id)
+            LOG.debug("Adding admin privilege for : %s" % tenant_id)
             id_cl.assign_user_role(tenant_id, self.admin_id,
                                    self.admin_role_id)
             self.admin_role_added.append(tenant_id)

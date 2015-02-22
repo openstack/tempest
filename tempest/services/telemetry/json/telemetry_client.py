@@ -45,8 +45,9 @@ class TelemetryClientJSON(service_client.ServiceClient):
         uri = "%s/meters/%s" % (self.uri_prefix, meter_name)
         body = self.serialize(sample_list)
         resp, body = self.post(uri, body)
+        self.expected_success(200, resp.status)
         body = self.deserialize(body)
-        return resp, body
+        return service_client.ResponseBody(resp, body)
 
     def helper_list(self, uri, query=None, period=None):
         uri_dict = {}
@@ -59,8 +60,9 @@ class TelemetryClientJSON(service_client.ServiceClient):
         if uri_dict:
             uri += "?%s" % urllib.urlencode(uri_dict)
         resp, body = self.get(uri)
+        self.expected_success(200, resp.status)
         body = self.deserialize(body)
-        return resp, body
+        return service_client.ResponseBodyList(resp, body)
 
     def list_resources(self, query=None):
         uri = '%s/resources' % self.uri_prefix
@@ -85,45 +87,52 @@ class TelemetryClientJSON(service_client.ServiceClient):
     def get_resource(self, resource_id):
         uri = '%s/resources/%s' % (self.uri_prefix, resource_id)
         resp, body = self.get(uri)
+        self.expected_success(200, resp.status)
         body = self.deserialize(body)
-        return resp, body
+        return service_client.ResponseBody(resp, body)
 
     def get_alarm(self, alarm_id):
         uri = '%s/alarms/%s' % (self.uri_prefix, alarm_id)
         resp, body = self.get(uri)
+        self.expected_success(200, resp.status)
         body = self.deserialize(body)
-        return resp, body
+        return service_client.ResponseBody(resp, body)
 
     def delete_alarm(self, alarm_id):
         uri = "%s/alarms/%s" % (self.uri_prefix, alarm_id)
         resp, body = self.delete(uri)
+        self.expected_success(204, resp.status)
         if body:
             body = self.deserialize(body)
-        return resp, body
+        return service_client.ResponseBody(resp, body)
 
     def create_alarm(self, **kwargs):
         uri = "%s/alarms" % self.uri_prefix
         body = self.serialize(kwargs)
         resp, body = self.post(uri, body)
+        self.expected_success(201, resp.status)
         body = self.deserialize(body)
-        return resp, body
+        return service_client.ResponseBody(resp, body)
 
     def update_alarm(self, alarm_id, **kwargs):
         uri = "%s/alarms/%s" % (self.uri_prefix, alarm_id)
         body = self.serialize(kwargs)
         resp, body = self.put(uri, body)
+        self.expected_success(200, resp.status)
         body = self.deserialize(body)
-        return resp, body
+        return service_client.ResponseBody(resp, body)
 
     def alarm_get_state(self, alarm_id):
         uri = "%s/alarms/%s/state" % (self.uri_prefix, alarm_id)
         resp, body = self.get(uri)
+        self.expected_success(200, resp.status)
         body = self.deserialize(body)
-        return resp, body
+        return service_client.ResponseBodyData(resp, body)
 
     def alarm_set_state(self, alarm_id, state):
         uri = "%s/alarms/%s/state" % (self.uri_prefix, alarm_id)
         body = self.serialize(state)
         resp, body = self.put(uri, body)
+        self.expected_success(200, resp.status)
         body = self.deserialize(body)
-        return resp, body
+        return service_client.ResponseBodyData(resp, body)

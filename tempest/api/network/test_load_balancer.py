@@ -13,13 +13,14 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib import decorators
+
 from tempest.api.network import base
 from tempest.common.utils import data_utils
 from tempest import test
 
 
 class LoadBalancerTestJSON(base.BaseNetworkTest):
-    _interface = 'json'
 
     """
     Tests the following operations in the Neutron API using the REST client for
@@ -422,6 +423,6 @@ class LoadBalancerTestJSON(base.BaseNetworkTest):
         self.assertEqual(2, member['weight'])
 
 
-@test.skip_because(bug="1402007")
+@decorators.skip_because(bug="1402007")
 class LoadBalancerIpV6TestJSON(LoadBalancerTestJSON):
     _ip_version = 6

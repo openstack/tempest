@@ -13,17 +13,18 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib import exceptions as lib_exc
+
 from tempest.api.compute.security_groups import base
 from tempest.common.utils import data_utils
-from tempest import exceptions
 from tempest import test
 
 
 class SecurityGroupsTestJSON(base.BaseSecurityGroupsTest):
 
     @classmethod
-    def resource_setup(cls):
-        super(SecurityGroupsTestJSON, cls).resource_setup()
+    def setup_clients(cls):
+        super(SecurityGroupsTestJSON, cls).setup_clients()
         cls.client = cls.security_groups_client
 
     @test.attr(type='smoke')
@@ -93,7 +94,7 @@ class SecurityGroupsTestJSON(base.BaseSecurityGroupsTest):
         # Create server and add the security group created
         # above to the server we just created
         server_name = data_utils.rand_name('server')
-        resp, server = self.create_test_server(name=server_name)
+        server = self.create_test_server(name=server_name)
         server_id = server['id']
         self.servers_client.wait_for_server_status(server_id, 'ACTIVE')
         resp, body = self.servers_client.add_security_group(server_id,
@@ -101,7 +102,7 @@ class SecurityGroupsTestJSON(base.BaseSecurityGroupsTest):
 
         # Check that we are not able to delete the security
         # group since it is in use by an active server
-        self.assertRaises(exceptions.BadRequest,
+        self.assertRaises(lib_exc.BadRequest,
                           self.client.delete_security_group,
                           sg['id'])
 
@@ -113,7 +114,7 @@ class SecurityGroupsTestJSON(base.BaseSecurityGroupsTest):
 
         # Check that we are not able to delete the other security
         # group since it is in use by an active server
-        self.assertRaises(exceptions.BadRequest,
+        self.assertRaises(lib_exc.BadRequest,
                           self.client.delete_security_group,
                           sg2['id'])
 

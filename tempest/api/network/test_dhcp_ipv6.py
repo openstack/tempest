@@ -16,10 +16,11 @@
 import netaddr
 import random
 
+from tempest_lib import exceptions as lib_exc
+
 from tempest.api.network import base
 from tempest.common.utils import data_utils
 from tempest import config
-from tempest import exceptions
 
 CONF = config.CONF
 
@@ -144,7 +145,7 @@ class NetworksTestDHCPv6(base.BaseNetworkTest):
         ):
             kwargs = {'ipv6_ra_mode': ra_mode,
                       'ipv6_address_mode': add_mode}
-            self.assertRaises(exceptions.BadRequest,
+            self.assertRaises(lib_exc.BadRequest,
                               self.create_subnet,
                               self.network,
                               **kwargs)
@@ -327,7 +328,7 @@ class NetworksTestDHCPv6(base.BaseNetworkTest):
                                    subnet["allocation_pools"][0]["end"])
         ip = netaddr.IPAddress(random.randrange(
             ip_range.last + 1, ip_range.last + 10)).format()
-        self.assertRaises(exceptions.BadRequest,
+        self.assertRaises(lib_exc.BadRequest,
                           self.create_port,
                           self.network,
                           fixed_ips=[{'subnet_id': subnet['id'],
@@ -348,7 +349,7 @@ class NetworksTestDHCPv6(base.BaseNetworkTest):
                          fixed_ips=[
                              {'subnet_id': subnet['id'],
                               'ip_address': ip}])
-        self.assertRaisesRegexp(exceptions.Conflict,
+        self.assertRaisesRegexp(lib_exc.Conflict,
                                 "object with that identifier already exists",
                                 self.create_port,
                                 self.network,

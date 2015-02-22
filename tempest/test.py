@@ -39,9 +39,6 @@ LOG = logging.getLogger(__name__)
 
 CONF = config.CONF
 
-# All the successful HTTP status codes from RFC 2616
-HTTP_SUCCESS = (200, 201, 202, 203, 204, 205, 206)
-
 
 def attr(*args, **kwargs):
     """A decorator which applies the  testtools attr decorator
@@ -137,35 +134,6 @@ def stresstest(*args, **kwargs):
             setattr(f, "st_allow_inheritance", False)
         attr(type='stress')(f)
         return f
-    return decorator
-
-
-def skip_because(*args, **kwargs):
-    """A decorator useful to skip tests hitting known bugs
-
-    @param bug: bug number causing the test to skip
-    @param condition: optional condition to be True for the skip to have place
-    @param interface: skip the test if it is the same as self._interface
-    """
-    def decorator(f):
-        @functools.wraps(f)
-        def wrapper(self, *func_args, **func_kwargs):
-            skip = False
-            if "condition" in kwargs:
-                if kwargs["condition"] is True:
-                    skip = True
-            elif "interface" in kwargs:
-                if kwargs["interface"] == self._interface:
-                    skip = True
-            else:
-                skip = True
-            if "bug" in kwargs and skip is True:
-                if not kwargs['bug'].isdigit():
-                    raise ValueError('bug must be a valid bug number')
-                msg = "Skipped until Bug: %s is resolved." % kwargs["bug"]
-                raise testtools.TestCase.skipException(msg)
-            return f(self, *func_args, **func_kwargs)
-        return wrapper
     return decorator
 
 
@@ -391,7 +359,7 @@ class BaseTestCase(testtools.testcase.WithAttributes,
                                                    level=None))
 
     @classmethod
-    def get_client_manager(cls, interface=None):
+    def get_client_manager(cls):
         """
         Returns an OpenStack client manager
         """
@@ -405,12 +373,7 @@ class BaseTestCase(testtools.testcase.WithAttributes,
             )
 
         creds = cls.isolated_creds.get_primary_creds()
-        params = dict(credentials=creds, service=cls._service)
-        if getattr(cls, '_interface', None):
-            interface = cls._interface
-        if interface:
-            params['interface'] = interface
-        os = clients.Manager(**params)
+        os = clients.Manager(credentials=creds, service=cls._service)
         return os
 
     @classmethod
@@ -426,13 +389,12 @@ class BaseTestCase(testtools.testcase.WithAttributes,
         """
         Returns an instance of the Identity Admin API client
         """
-        os = clients.AdminManager(interface=cls._interface,
-                                  service=cls._service)
+        os = clients.AdminManager(service=cls._service)
         admin_client = os.identity_client
         return admin_client
 
     @classmethod
-    def set_network_resources(self, network=False, router=False, subnet=False,
+    def set_network_resources(cls, network=False, router=False, subnet=False,
                               dhcp=False):
         """Specify which network resources should be created
 
@@ -445,8 +407,8 @@ class BaseTestCase(testtools.testcase.WithAttributes,
         # in order to ensure that even if it's called multiple times in
         # a chain of overloaded methods, the attribute is set only
         # in the leaf class
-        if not self.network_resources:
-            self.network_resources = {
+        if not cls.network_resources:
+            cls.network_resources = {
                 'network': network,
                 'router': router,
                 'subnet': subnet,
@@ -468,8 +430,7 @@ class NegativeAutoTest(BaseTestCase):
         super(NegativeAutoTest, cls).setUpClass()
         os = cls.get_client_manager()
         cls.client = os.negative_client
-        os_admin = clients.AdminManager(interface=cls._interface,
-                                        service=cls._service)
+        os_admin = clients.AdminManager(service=cls._service)
         cls.admin_client = os_admin.negative_client
 
     @staticmethod

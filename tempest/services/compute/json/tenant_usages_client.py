@@ -30,7 +30,7 @@ class TenantUsagesClientJSON(service_client.ServiceClient):
         resp, body = self.get(url)
         body = json.loads(body)
         self.validate_response(schema.list_tenant, resp, body)
-        return resp, body['tenant_usages'][0]
+        return service_client.ResponseBodyList(resp, body['tenant_usages'][0])
 
     def get_tenant_usage(self, tenant_id, params=None):
         url = 'os-simple-tenant-usage/%s' % tenant_id
@@ -40,4 +40,4 @@ class TenantUsagesClientJSON(service_client.ServiceClient):
         resp, body = self.get(url)
         body = json.loads(body)
         self.validate_response(schema.get_tenant, resp, body)
-        return resp, body['tenant_usage']
+        return service_client.ResponseBodyList(resp, body['tenant_usage'])

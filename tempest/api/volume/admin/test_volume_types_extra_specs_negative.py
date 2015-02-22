@@ -15,14 +15,14 @@
 
 import uuid
 
+from tempest_lib import exceptions as lib_exc
+
 from tempest.api.volume import base
 from tempest.common.utils import data_utils
-from tempest import exceptions
 from tempest import test
 
 
 class ExtraSpecsNegativeV2Test(base.BaseVolumeAdminTest):
-    _interface = 'json'
 
     @classmethod
     def resource_setup(cls):
@@ -43,7 +43,7 @@ class ExtraSpecsNegativeV2Test(base.BaseVolumeAdminTest):
         # Should not update volume type extra specs with no body
         extra_spec = {"spec1": "val2"}
         self.assertRaises(
-            exceptions.BadRequest,
+            lib_exc.BadRequest,
             self.volume_types_client.update_volume_type_extra_specs,
             self.volume_type['id'], extra_spec.keys()[0], None)
 
@@ -52,7 +52,7 @@ class ExtraSpecsNegativeV2Test(base.BaseVolumeAdminTest):
         # Should not update volume type extra specs with nonexistent id.
         extra_spec = {"spec1": "val2"}
         self.assertRaises(
-            exceptions.BadRequest,
+            lib_exc.BadRequest,
             self.volume_types_client.update_volume_type_extra_specs,
             self.volume_type['id'], str(uuid.uuid4()),
             extra_spec)
@@ -62,7 +62,7 @@ class ExtraSpecsNegativeV2Test(base.BaseVolumeAdminTest):
         # Should not update volume type extra specs with none id.
         extra_spec = {"spec1": "val2"}
         self.assertRaises(
-            exceptions.BadRequest,
+            lib_exc.BadRequest,
             self.volume_types_client.update_volume_type_extra_specs,
             self.volume_type['id'], None, extra_spec)
 
@@ -72,7 +72,7 @@ class ExtraSpecsNegativeV2Test(base.BaseVolumeAdminTest):
             # body.
         extra_spec = {"spec1": "val2", 'spec2': 'val1'}
         self.assertRaises(
-            exceptions.BadRequest,
+            lib_exc.BadRequest,
             self.volume_types_client.update_volume_type_extra_specs,
             self.volume_type['id'], extra_spec.keys()[0],
             extra_spec)
@@ -83,7 +83,7 @@ class ExtraSpecsNegativeV2Test(base.BaseVolumeAdminTest):
             # type id.
         extra_specs = {"spec2": "val1"}
         self.assertRaises(
-            exceptions.NotFound,
+            lib_exc.NotFound,
             self.volume_types_client.create_volume_type_extra_specs,
             str(uuid.uuid4()), extra_specs)
 
@@ -91,7 +91,7 @@ class ExtraSpecsNegativeV2Test(base.BaseVolumeAdminTest):
     def test_create_none_body(self):
         # Should not create volume type extra spec for none POST body.
         self.assertRaises(
-            exceptions.BadRequest,
+            lib_exc.BadRequest,
             self.volume_types_client.create_volume_type_extra_specs,
             self.volume_type['id'], None)
 
@@ -99,7 +99,7 @@ class ExtraSpecsNegativeV2Test(base.BaseVolumeAdminTest):
     def test_create_invalid_body(self):
         # Should not create volume type extra spec for invalid POST body.
         self.assertRaises(
-            exceptions.BadRequest,
+            lib_exc.BadRequest,
             self.volume_types_client.create_volume_type_extra_specs,
             self.volume_type['id'], ['invalid'])
 
@@ -109,7 +109,7 @@ class ExtraSpecsNegativeV2Test(base.BaseVolumeAdminTest):
             # type id.
         extra_specs = {"spec1": "val1"}
         self.assertRaises(
-            exceptions.NotFound,
+            lib_exc.NotFound,
             self.volume_types_client.delete_volume_type_extra_specs,
             str(uuid.uuid4()), extra_specs.keys()[0])
 
@@ -117,7 +117,7 @@ class ExtraSpecsNegativeV2Test(base.BaseVolumeAdminTest):
     def test_list_nonexistent_volume_type_id(self):
         # Should not list volume type extra spec for nonexistent type id.
         self.assertRaises(
-            exceptions.NotFound,
+            lib_exc.NotFound,
             self.volume_types_client.list_volume_types_extra_specs,
             str(uuid.uuid4()))
 
@@ -126,7 +126,7 @@ class ExtraSpecsNegativeV2Test(base.BaseVolumeAdminTest):
         # Should not get volume type extra spec for nonexistent type id.
         extra_specs = {"spec1": "val1"}
         self.assertRaises(
-            exceptions.NotFound,
+            lib_exc.NotFound,
             self.volume_types_client.get_volume_type_extra_specs,
             str(uuid.uuid4()), extra_specs.keys()[0])
 
@@ -135,7 +135,7 @@ class ExtraSpecsNegativeV2Test(base.BaseVolumeAdminTest):
         # Should not get volume type extra spec for nonexistent extra spec
             # id.
         self.assertRaises(
-            exceptions.NotFound,
+            lib_exc.NotFound,
             self.volume_types_client.get_volume_type_extra_specs,
             self.volume_type['id'], str(uuid.uuid4()))
 

@@ -20,14 +20,14 @@ from tempest import test
 class AbsoluteLimitsTestJSON(base.BaseV2ComputeTest):
 
     @classmethod
-    def resource_setup(cls):
-        super(AbsoluteLimitsTestJSON, cls).resource_setup()
+    def setup_clients(cls):
+        super(AbsoluteLimitsTestJSON, cls).setup_clients()
         cls.client = cls.limits_client
 
     @test.attr(type='gate')
     def test_absLimits_get(self):
         # To check if all limits are present in the response
-        resp, absolute_limits = self.client.get_absolute_limits()
+        absolute_limits = self.client.get_absolute_limits()
         expected_elements = ['maxImageMeta', 'maxPersonality',
                              'maxPersonalitySize',
                              'maxServerMeta', 'maxTotalCores',

@@ -31,14 +31,11 @@ class AZAdminV2TestJSON(base.BaseComputeAdminTest):
     @test.attr(type='gate')
     def test_get_availability_zone_list(self):
         # List of availability zone
-        resp, availability_zone = self.client.get_availability_zone_list()
-        self.assertEqual(200, resp.status)
+        availability_zone = self.client.get_availability_zone_list()
         self.assertTrue(len(availability_zone) > 0)
 
     @test.attr(type='gate')
     def test_get_availability_zone_list_detail(self):
         # List of availability zones and available services
-        resp, availability_zone = \
-            self.client.get_availability_zone_list_detail()
-        self.assertEqual(200, resp.status)
+        availability_zone = self.client.get_availability_zone_list_detail()
         self.assertTrue(len(availability_zone) > 0)

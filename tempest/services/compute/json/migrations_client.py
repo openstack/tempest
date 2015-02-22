@@ -31,4 +31,4 @@ class MigrationsClientJSON(service_client.ServiceClient):
         resp, body = self.get(url)
         body = json.loads(body)
         self.validate_response(schema.list_migrations, resp, body)
-        return resp, body['migrations']
+        return service_client.ResponseBodyList(resp, body['migrations'])

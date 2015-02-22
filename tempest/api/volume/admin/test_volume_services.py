@@ -22,7 +22,6 @@ class VolumesServicesV2TestJSON(base.BaseVolumeAdminTest):
     Tests Volume Services API.
     volume service list requires admin privileges.
     """
-    _interface = "json"
 
     @classmethod
     def resource_setup(cls):

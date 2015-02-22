@@ -25,11 +25,13 @@ class AvailabilityZoneClientJSON(service_client.ServiceClient):
         resp, body = self.get('os-availability-zone')
         body = json.loads(body)
         self.validate_response(schema.get_availability_zone_list, resp, body)
-        return resp, body['availabilityZoneInfo']
+        return service_client.ResponseBodyList(resp,
+                                               body['availabilityZoneInfo'])
 
     def get_availability_zone_list_detail(self):
         resp, body = self.get('os-availability-zone/detail')
         body = json.loads(body)
         self.validate_response(schema.get_availability_zone_list_detail, resp,
                                body)
-        return resp, body['availabilityZoneInfo']
+        return service_client.ResponseBodyList(resp,
+                                               body['availabilityZoneInfo'])

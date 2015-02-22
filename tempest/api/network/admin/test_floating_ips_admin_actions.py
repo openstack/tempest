@@ -22,7 +22,7 @@ CONF = config.CONF
 
 
 class FloatingIPAdminTestJSON(base.BaseAdminNetworkTest):
-    _interface = 'json'
+
     force_tenant_isolation = True
 
     @classmethod

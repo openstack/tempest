@@ -19,7 +19,6 @@ from tempest import test
 
 
 class TokensTestJSON(base.BaseIdentityV2AdminTest):
-    _interface = 'json'
 
     @test.attr(type='gate')
     def test_create_get_delete_token(self):

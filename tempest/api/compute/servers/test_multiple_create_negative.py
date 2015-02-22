@@ -13,9 +13,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib import exceptions as lib_exc
+
 from tempest.api.compute import base
 from tempest.common.utils import data_utils
-from tempest import exceptions
 from tempest import test
 
 
@@ -31,38 +32,38 @@ class MultipleCreateNegativeTestJSON(base.BaseV2ComputeTest):
         created servers into the servers list to be cleaned up after all.
         """
         kwargs['name'] = kwargs.get('name', self._generate_name())
-        resp, body = self.create_test_server(**kwargs)
+        body = self.create_test_server(**kwargs)
 
-        return resp, body
+        return body
 
     @test.attr(type=['negative', 'gate'])
     def test_min_count_less_than_one(self):
         invalid_min_count = 0
-        self.assertRaises(exceptions.BadRequest, self._create_multiple_servers,
+        self.assertRaises(lib_exc.BadRequest, self._create_multiple_servers,
                           min_count=invalid_min_count)
 
     @test.attr(type=['negative', 'gate'])
     def test_min_count_non_integer(self):
         invalid_min_count = 2.5
-        self.assertRaises(exceptions.BadRequest, self._create_multiple_servers,
+        self.assertRaises(lib_exc.BadRequest, self._create_multiple_servers,
                           min_count=invalid_min_count)
 
     @test.attr(type=['negative', 'gate'])
     def test_max_count_less_than_one(self):
         invalid_max_count = 0
-        self.assertRaises(exceptions.BadRequest, self._create_multiple_servers,
+        self.assertRaises(lib_exc.BadRequest, self._create_multiple_servers,
                           max_count=invalid_max_count)
 
     @test.attr(type=['negative', 'gate'])
     def test_max_count_non_integer(self):
         invalid_max_count = 2.5
-        self.assertRaises(exceptions.BadRequest, self._create_multiple_servers,
+        self.assertRaises(lib_exc.BadRequest, self._create_multiple_servers,
                           max_count=invalid_max_count)
 
     @test.attr(type=['negative', 'gate'])
     def test_max_count_less_than_min_count(self):
         min_count = 3
         max_count = 2
-        self.assertRaises(exceptions.BadRequest, self._create_multiple_servers,
+        self.assertRaises(lib_exc.BadRequest, self._create_multiple_servers,
                           min_count=min_count,
                           max_count=max_count)

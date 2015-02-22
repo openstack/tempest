@@ -65,8 +65,8 @@ class BasicOperationsImagesTest(base.BaseV2ImageTest):
         self.assertEqual(1024, body.get('size'))
 
         # Now try get image file
-        _, body = self.client.get_image_file(image_id)
-        self.assertEqual(file_content, body)
+        body = self.client.get_image_file(image_id)
+        self.assertEqual(file_content, body.data)
 
     @test.attr(type='gate')
     def test_delete_image(self):

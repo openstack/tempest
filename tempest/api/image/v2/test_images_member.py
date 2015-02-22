@@ -15,7 +15,6 @@ from tempest import test
 
 
 class ImagesMemberTest(base.BaseV2MemberImageTest):
-    _interface = 'json'
 
     @test.attr(type='gate')
     def test_image_share_accept(self):

@@ -24,14 +24,16 @@ LOG = logging.getLogger(__name__)
 
 
 class VolumesBackupsV2Test(base.BaseVolumeAdminTest):
-    _interface = "json"
+
+    @classmethod
+    def skip_checks(cls):
+        super(VolumesBackupsV2Test, cls).skip_checks()
+        if not CONF.volume_feature_enabled.backup:
+            raise cls.skipException("Cinder backup feature disabled")
 
     @classmethod
     def resource_setup(cls):
         super(VolumesBackupsV2Test, cls).resource_setup()
-
-        if not CONF.volume_feature_enabled.backup:
-            raise cls.skipException("Cinder backup feature disabled")
 
         cls.volume = cls.create_volume()
 

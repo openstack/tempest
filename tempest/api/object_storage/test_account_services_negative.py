@@ -14,9 +14,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib import exceptions as lib_exc
+
 from tempest.api.object_storage import base
 from tempest import clients
-from tempest import exceptions
 from tempest import test
 
 
@@ -44,6 +45,6 @@ class AccountNegativeTest(base.BaseObjectTest):
 
         params = {'format': 'json'}
         # list containers with non-authorized user token
-        self.assertRaises(exceptions.Unauthorized,
+        self.assertRaises(lib_exc.Unauthorized,
                           self.account_client.list_account_containers,
                           params=params)

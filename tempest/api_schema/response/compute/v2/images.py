@@ -12,7 +12,12 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import copy
+
 from tempest.api_schema.response.compute import parameter_types
+
+image_links = copy.deepcopy(parameter_types.links)
+image_links['items']['properties'].update({'type': {'type': 'string'}})
 
 common_image_schema = {
     'type': 'object',
@@ -20,7 +25,7 @@ common_image_schema = {
         'id': {'type': 'string'},
         'status': {'type': 'string'},
         'updated': {'type': 'string'},
-        'links': parameter_types.links,
+        'links': image_links,
         'name': {'type': 'string'},
         'created': {'type': 'string'},
         'minDisk': {'type': 'integer'},
@@ -67,7 +72,7 @@ list_images = {
                     'type': 'object',
                     'properties': {
                         'id': {'type': 'string'},
-                        'links': parameter_types.links,
+                        'links': image_links,
                         'name': {'type': 'string'}
                     },
                     'required': ['id', 'links', 'name']
