@@ -222,7 +222,7 @@ class BaseComputeTest(tempest.test.BaseTestCase):
                            "random network.") % cls.fixed_network_name
                      LOG.info(msg)
                                                      
-        resp, body = cls.servers_client.create_server(
+        body = cls.servers_client.create_server(
             name, image_id, flavor, **kwargs)
 
         # handle the case of multiple servers
