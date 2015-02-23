@@ -19,6 +19,7 @@ from tempest.api.object_storage import base
 from tempest.common.utils import data_utils
 from tempest import config
 from tempest import test
+from tempest_lib import decorators
 
 CONF = config.CONF
 QUOTA_BYTES = 10
@@ -67,7 +68,7 @@ class ContainerQuotasTest(base.BaseObjectTest):
         nafter = self._get_bytes_used()
         self.assertEqual(nbefore + len(data), nafter)
 
-    @test.skip_because(bug="1417472")
+    @decorators.skip_because(bug="1417472")
     @test.requires_ext(extension='container_quotas', service='object')
     @test.attr(type="smoke")
     def test_upload_large_object(self):
@@ -84,7 +85,7 @@ class ContainerQuotasTest(base.BaseObjectTest):
         nafter = self._get_bytes_used()
         self.assertEqual(nbefore, nafter)
 
-    @test.skip_because(bug="1417472")
+    @decorators.skip_because(bug="1417472")
     @test.requires_ext(extension='container_quotas', service='object')
     @test.attr(type="smoke")
     def test_upload_too_many_objects(self):

@@ -22,6 +22,7 @@ import urlparse
 from tempest.api.object_storage import base
 from tempest.common.utils import data_utils
 from tempest import test
+from tempest_lib import decorators
 
 
 class ObjectFormPostTest(base.BaseObjectTest):
@@ -108,7 +109,7 @@ class ObjectFormPostTest(base.BaseObjectTest):
         content_type = 'multipart/form-data; boundary=%s' % boundary
         return body, content_type
 
-    @test.skip_because(bug="1417485")
+    @decorators.skip_because(bug="1417485")
     @test.requires_ext(extension='formpost', service='object')
     @test.attr(type='gate')
     def test_post_object_using_form(self):

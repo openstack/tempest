@@ -23,6 +23,7 @@ from tempest.common import custom_matchers
 from tempest.common.utils import data_utils
 from tempest import config
 from tempest import test
+from tempest_lib import decorators
 
 CONF = config.CONF
 
@@ -114,7 +115,7 @@ class AccountTest(base.BaseObjectTest):
         self.assertEqual(container_list.find(".//count").tag, 'count')
         self.assertEqual(container_list.find(".//bytes").tag, 'bytes')
 
-    @test.skip_because(bug="1419600")
+    @decorators.skip_because(bug="1419600")
     @test.attr(type='smoke')
     @testtools.skipIf(
         not CONF.object_storage_feature_enabled.discoverability,
@@ -155,7 +156,7 @@ class AccountTest(base.BaseObjectTest):
 
         self.assertEqual(len(container_list), self.containers_count / 2 - 1)
 
-    @test.skip_because(bug="1417479")
+    @decorators.skip_because(bug="1417479")
     @test.attr(type='smoke')
     def test_list_containers_with_end_marker(self):
         # list containers using end_marker param
@@ -174,7 +175,7 @@ class AccountTest(base.BaseObjectTest):
         self.assertHeaders(resp, 'Account', 'GET')
         self.assertEqual(len(container_list), self.containers_count / 2)
 
-    @test.skip_because(bug="1417479")
+    @decorators.skip_because(bug="1417479")
     @test.attr(type='smoke')
     def test_list_containers_with_marker_and_end_marker(self):
         # list containers combining marker and end_marker param
@@ -200,7 +201,7 @@ class AccountTest(base.BaseObjectTest):
 
             self.assertTrue(len(container_list) <= limit, str(container_list))
 
-    @test.skip_because(bug="1417479")
+    @decorators.skip_because(bug="1417479")
     @test.attr(type='smoke')
     def test_list_containers_with_limit_and_end_marker(self):
         # list containers combining limit and end_marker param
@@ -213,7 +214,7 @@ class AccountTest(base.BaseObjectTest):
         self.assertEqual(len(container_list),
                          min(limit, self.containers_count / 2))
 
-    @test.skip_because(bug="1417479")
+    @decorators.skip_because(bug="1417479")
     @test.attr(type='smoke')
     def test_list_containers_with_limit_and_marker_and_end_marker(self):
         # list containers combining limit, marker and end_marker param
@@ -227,7 +228,7 @@ class AccountTest(base.BaseObjectTest):
         self.assertEqual(len(container_list),
                          min(limit, self.containers_count - 2))
 
-    @test.skip_because(bug="1417506")
+    @decorators.skip_because(bug="1417506")
     @test.attr(type='smoke')
     def test_list_account_metadata(self):
         # list all account metadata
@@ -250,7 +251,7 @@ class AccountTest(base.BaseObjectTest):
         self.assertHeaders(resp, 'Account', 'HEAD')
         self.assertNotIn('x-account-meta-', str(resp))
 
-    @test.skip_because(bug="1417506")
+    @decorators.skip_because(bug="1417506")
     @test.attr(type='smoke')
     def test_update_account_metadata_with_create_metadata(self):
         # add metadata to account
@@ -265,7 +266,7 @@ class AccountTest(base.BaseObjectTest):
 
         self.account_client.delete_account_metadata(metadata)
 
-    @test.skip_because(bug="1417506")
+    @decorators.skip_because(bug="1417506")
     @test.attr(type='smoke')
     def test_update_account_metadata_with_delete_matadata(self):
         # delete metadata from account
@@ -277,7 +278,7 @@ class AccountTest(base.BaseObjectTest):
         resp, _ = self.account_client.list_account_metadata()
         self.assertNotIn('x-account-meta-test-account-meta1', resp)
 
-    @test.skip_because(bug="1417506")
+    @decorators.skip_because(bug="1417506")
     @test.attr(type='smoke')
     def test_update_account_metadata_with_create_matadata_key(self):
         # if the value of metadata is not set, the metadata is not
@@ -289,7 +290,7 @@ class AccountTest(base.BaseObjectTest):
         resp, _ = self.account_client.list_account_metadata()
         self.assertNotIn('x-account-meta-test-account-meta1', resp)
 
-    @test.skip_because(bug="1417506")
+    @decorators.skip_because(bug="1417506")
     @test.attr(type='smoke')
     def test_update_account_metadata_with_delete_matadata_key(self):
         # Although the value of metadata is not set, the feature of
@@ -303,7 +304,7 @@ class AccountTest(base.BaseObjectTest):
         resp, _ = self.account_client.list_account_metadata()
         self.assertNotIn('x-account-meta-test-account-meta1', resp)
 
-    @test.skip_because(bug="1417506")
+    @decorators.skip_because(bug="1417506")
     @test.attr(type='smoke')
     def test_update_account_metadata_with_create_and_delete_metadata(self):
         # Send a request adding and deleting metadata requests simultaneously

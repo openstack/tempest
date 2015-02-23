@@ -19,6 +19,7 @@ import time
 from tempest.api.object_storage import base
 from tempest.common.utils import data_utils
 from tempest import test
+from tempest_lib import decorators
 
 
 class ObjectExpiryTest(base.BaseObjectTest):
@@ -69,7 +70,7 @@ class ObjectExpiryTest(base.BaseObjectTest):
         self.assertRaises(lib_exc.NotFound, self.object_client.get_object,
                           self.container_name, self.object_name)
 
-    @test.skip_because(bug="1417494")
+    @decorators.skip_because(bug="1417494")
     @test.attr(type='gate')
     def test_get_object_after_expiry_time(self):
         # the 10s is important, because the get calls can take 3s each
@@ -77,7 +78,7 @@ class ObjectExpiryTest(base.BaseObjectTest):
         metadata = {'X-Delete-After': '10'}
         self._test_object_expiry(metadata)
 
-    @test.skip_because(bug="1417494")
+    @decorators.skip_because(bug="1417494")
     @test.attr(type='gate')
     def test_get_object_at_expiry_time(self):
         metadata = {'X-Delete-At': str(int(time.time()) + 10)}

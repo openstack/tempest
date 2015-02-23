@@ -24,6 +24,7 @@ from tempest_lib import exceptions as lib_exc
 from tempest.api.object_storage import base
 from tempest.common.utils import data_utils
 from tempest import test
+from tempest_lib import decorators
 
 
 class ObjectTempUrlNegativeTest(base.BaseObjectTest):
@@ -94,7 +95,7 @@ class ObjectTempUrlNegativeTest(base.BaseObjectTest):
 
         return url
 
-    @test.skip_because(bug="1417478")
+    @decorators.skip_because(bug="1417478")
     @test.attr(type=['gate', 'negative'])
     @test.requires_ext(extension='tempurl', service='object')
     def test_get_object_after_expiration_time(self):
