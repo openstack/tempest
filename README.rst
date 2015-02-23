@@ -124,14 +124,14 @@ run the unit tests with the corresponding version of python.
 Python 2.6
 ----------
 
-Tempest can be run with Python 2.6 however the unit tests and the gate
-currently only run with Python 2.7, so there are no guarantees about the state
-of tempest when running with Python 2.6. Additionally, to enable testr to work
-with tempest using python 2.6 the discover module from the unittest-ext
-project has to be patched to switch the unittest.TestSuite to use
-unittest2.TestSuite instead. See:
-
-https://code.google.com/p/unittest-ext/issues/detail?id=79
+Starting in the kilo release the OpenStack services dropped all support for
+python 2.6. This change has been mirrored in tempest, starting after the
+tempest-2 tag. This means that proposed changes to tempest which only fix
+python 2.6 compatibility will be rejected, and moving forward more features not
+present in python 2.6 will be used. If you're running you're OpenStack services
+on an earlier release with python 2.6 you can easily run tempest against it
+from a remote system running python 2.7. (or deploy a cloud guest in your cloud
+that has python 2.7)
 
 Branchless Tempest Considerations
 ---------------------------------
