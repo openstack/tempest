@@ -4,6 +4,7 @@
 
 import glanceclient.v2.client as glclient
 import keystoneclient.v2_0.client as ksclient
+import novaclient.v2.client as nvclient
 import os
 import pip
 
@@ -27,14 +28,15 @@ tenant = None
 
 def main():
     credentials = cred_provider.get_configured_credentials('identity_admin')
-    network_client, image_client, glance_client = set_context(credentials)
+    network_client, image_client, glance_client, nova_client = set_context(credentials)
     # Start to config
     fix_cirros(glance_client, image_client)
-    fix_tempest_conf(network_client)
+    fix_tempest_conf(network_client, nova_client)
 
 
 def set_context(credentials):
-    keystone = ksclient.Client(**_get_keystone_credentials(credentials))
+    kscreds = _get_keystone_credentials(credentials)
+    keystone = ksclient.Client(**kscreds)
     manager = clients.Manager(credentials=credentials)
     network_client = manager.network_client
     image_client = manager.image_client
@@ -44,7 +46,11 @@ def set_context(credentials):
     glance_client =\
         glclient.Client(glance_endpoint,
                         token=keystone.auth_token)
-    return network_client, image_client, glance_client
+    nova_client = nvclient.Client(kscreds['username'],
+                                  kscreds['password'],  # api_key in method
+                                  kscreds['tenant_name'],
+                                  kscreds['auth_url'])
+    return network_client, image_client, glance_client, nova_client
 
 
 def _get_keystone_credentials(credentials):
@@ -90,7 +96,7 @@ def upload_cirros(image_client):
     image_ref = resp['id']
 
 
-def fix_tempest_conf(network_client):
+def fix_tempest_conf(network_client, nova_client):
     DEFAULT_CONFIG_DIR = os.path.join(
         os.path.abspath(os.path.dirname(os.path.dirname(__file__))),
         "etc")
@@ -127,6 +133,14 @@ def fix_tempest_conf(network_client):
     if image_ref:
         config.set('compute', 'image_ref', image_ref)
 
+    # set up flavor_ref
+    nova_flavors = nova_client.flavors.list()
+    nova_flavors.sort(key=lambda x: x.ram)
+    smallest_flavor = nova_flavors[0]
+    if smallest_flavor.ram > 64:
+        print "WARNING: smallest flavor available is greater than 64 mb"
+    config.set('compute', 'flavor_ref', smallest_flavor.id)
+
     # set up allow_tenant_isolation
     try:
         if not config.get('auth', 'allow_tenant_isolation'):
@@ -134,10 +148,6 @@ def fix_tempest_conf(network_client):
     except:
         if not config.get('compute', 'allow_tenant_isolation'):
             config.set('compute', 'allow_tenant_isolation', 'True')
-
-    # increase ssh timeouts to minimize false gateway failures
-    config.set('compute', 'ssh_timeout', '300')
-    config.set('compute', 'ssh_channel_timeout', '60')
 
     with open(_path, 'w') as tempest_conf:
         config.write(tempest_conf)
