@@ -15,6 +15,7 @@ from tempest.common import accounts
 from tempest.common import cred_provider
 from tempest.common import isolated_creds
 from tempest import config
+from tempest import exceptions
 
 CONF = config.CONF
 
@@ -53,7 +54,16 @@ def is_admin_available():
     else:
         try:
             cred_provider.get_configured_credentials('identity_admin')
+        # NOTE(mtreinish) This should never be caught because of the if above.
+        # NotImplementedError is only raised if admin credentials are requested
+        # and the locking test accounts cred provider is being used.
         except NotImplementedError:
+            is_admin = False
+        # NOTE(mtreinish): This will be raised by the non-locking accounts
+        # provider if there aren't admin credentials provided in the config
+        # file. This exception originates from the auth call to get configured
+        # credentials
+        except exceptions.InvalidConfiguration:
             is_admin = False
 
     return is_admin
