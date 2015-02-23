@@ -15,10 +15,10 @@
 
 import urllib
 
-from tempest_lib.common import rest_client
+from tempest.common import service_client
 
 
-class DatabaseLimitsClientJSON(rest_client.RestClient):
+class DatabaseLimitsClientJSON(service_client.ServiceClient):
 
     def list_db_limits(self, params=None):
         """List all limits."""
@@ -27,4 +27,4 @@ class DatabaseLimitsClientJSON(rest_client.RestClient):
             url += '?%s' % urllib.urlencode(params)
         resp, body = self.get(url)
         self.expected_success(200, resp.status)
-        return resp, self._parse_resp(body)
+        return service_client.ResponseBodyList(resp, self._parse_resp(body))

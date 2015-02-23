@@ -27,9 +27,9 @@ class DatabaseFlavorsClientJSON(service_client.ServiceClient):
 
         resp, body = self.get(url)
         self.expected_success(200, resp.status)
-        return resp, self._parse_resp(body)
+        return service_client.ResponseBodyList(resp, self._parse_resp(body))
 
     def get_db_flavor_details(self, db_flavor_id):
         resp, body = self.get("flavors/%s" % str(db_flavor_id))
         self.expected_success(200, resp.status)
-        return resp, self._parse_resp(body)
+        return service_client.ResponseBody(resp, self._parse_resp(body))
