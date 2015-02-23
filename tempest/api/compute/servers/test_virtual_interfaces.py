@@ -49,8 +49,7 @@ class VirtualInterfacesTestJSON(base.BaseV2ComputeTest):
     def test_list_virtual_interfaces(self):
         # Positive test:Should be able to GET the virtual interfaces list
         # for a given server_id
-        resp, output = self.client.list_virtual_interfaces(self.server_id)
-        self.assertEqual(200, resp.status)
+        output = self.client.list_virtual_interfaces(self.server_id)
         self.assertIsNotNone(output)
         virt_ifaces = output
         self.assertNotEqual(0, len(virt_ifaces['virtual_interfaces']),

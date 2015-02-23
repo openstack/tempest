@@ -41,8 +41,7 @@ class MigrationsAdminTest(base.BaseV2ComputeAdminTest):
         server = self.create_test_server(wait_until="ACTIVE")
         server_id = server['id']
 
-        resp, _ = self.servers_client.resize(server_id, self.flavor_ref_alt)
-        self.assertEqual(202, resp.status)
+        self.servers_client.resize(server_id, self.flavor_ref_alt)
         self.servers_client.wait_for_server_status(server_id, 'VERIFY_RESIZE')
         self.servers_client.confirm_resize(server_id)
         self.servers_client.wait_for_server_status(server_id, 'ACTIVE')

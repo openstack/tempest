@@ -70,7 +70,7 @@ class ServersTestJSON(base.BaseV2ComputeTest):
     @test.attr(type='smoke')
     def test_list_servers(self):
         # The created server should be in the list of all servers
-        resp, body = self.client.list_servers()
+        body = self.client.list_servers()
         servers = body['servers']
         found = any([i for i in servers if i['id'] == self.server['id']])
         self.assertTrue(found)
@@ -78,7 +78,7 @@ class ServersTestJSON(base.BaseV2ComputeTest):
     @test.attr(type='smoke')
     def test_list_servers_with_detail(self):
         # The created server should be in the detailed list of all servers
-        resp, body = self.client.list_servers_with_detail()
+        body = self.client.list_servers_with_detail()
         servers = body['servers']
         found = any([i for i in servers if i['id'] == self.server['id']])
         self.assertTrue(found)
@@ -108,9 +108,8 @@ class ServersTestJSON(base.BaseV2ComputeTest):
         # Create a server with the scheduler hint "group".
         name = data_utils.rand_name('server_group')
         policies = ['affinity']
-        resp, body = self.client.create_server_group(name=name,
-                                                     policies=policies)
-        self.assertEqual(200, resp.status)
+        body = self.client.create_server_group(name=name,
+                                               policies=policies)
         group_id = body['id']
         self.addCleanup(self.client.delete_server_group, group_id)
 
@@ -119,8 +118,7 @@ class ServersTestJSON(base.BaseV2ComputeTest):
                                          wait_until='ACTIVE')
 
         # Check a server is in the group
-        resp, server_group = self.client.get_server_group(group_id)
-        self.assertEqual(200, resp.status)
+        server_group = self.client.get_server_group(group_id)
         self.assertIn(server['id'], server_group['members'])
 
     @testtools.skipUnless(CONF.service_available.neutron,
@@ -170,7 +168,7 @@ class ServersTestJSON(base.BaseV2ComputeTest):
 
         self.addCleanup(cleanup_server)
 
-        _, addresses = self.client.list_addresses(server_multi_nics['id'])
+        addresses = self.client.list_addresses(server_multi_nics['id'])
 
         # We can't predict the ip addresses assigned to the server on networks.
         # Sometimes the assigned addresses are ['19.80.0.2', '19.86.0.2'], at

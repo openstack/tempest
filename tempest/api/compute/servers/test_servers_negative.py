@@ -345,8 +345,7 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
     @test.attr(type=['negative', 'gate'])
     def test_suspend_server_invalid_state(self):
         # suspend a suspended server.
-        resp, _ = self.client.suspend_server(self.server_id)
-        self.assertEqual(202, resp.status)
+        self.client.suspend_server(self.server_id)
         self.client.wait_for_server_status(self.server_id, 'SUSPENDED')
         self.assertRaises(lib_exc.Conflict,
                           self.client.suspend_server,
@@ -416,8 +415,7 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
     @test.attr(type=['negative', 'gate'])
     def test_shelve_shelved_server(self):
         # shelve a shelved server.
-        resp, server = self.client.shelve_server(self.server_id)
-        self.assertEqual(202, resp.status)
+        self.client.shelve_server(self.server_id)
 
         offload_time = CONF.compute.shelved_offload_time
         if offload_time >= 0:

@@ -50,7 +50,7 @@ class DeleteServersTestJSON(base.BaseV2ComputeTest):
     def test_delete_server_while_in_shutoff_state(self):
         # Delete a server while it's VM state is Shutoff
         server = self.create_test_server(wait_until='ACTIVE')
-        resp, body = self.client.stop(server['id'])
+        self.client.stop(server['id'])
         self.client.wait_for_server_status(server['id'], 'SHUTOFF')
         self.client.delete_server(server['id'])
         self.client.wait_for_server_termination(server['id'])
@@ -61,7 +61,7 @@ class DeleteServersTestJSON(base.BaseV2ComputeTest):
     def test_delete_server_while_in_pause_state(self):
         # Delete a server while it's VM state is Pause
         server = self.create_test_server(wait_until='ACTIVE')
-        resp, body = self.client.pause_server(server['id'])
+        self.client.pause_server(server['id'])
         self.client.wait_for_server_status(server['id'], 'PAUSED')
         self.client.delete_server(server['id'])
         self.client.wait_for_server_termination(server['id'])
@@ -83,8 +83,7 @@ class DeleteServersTestJSON(base.BaseV2ComputeTest):
     def test_delete_server_while_in_shelved_state(self):
         # Delete a server while it's VM state is Shelved
         server = self.create_test_server(wait_until='ACTIVE')
-        resp, body = self.client.shelve_server(server['id'])
-        self.assertEqual(202, resp.status)
+        self.client.shelve_server(server['id'])
 
         offload_time = CONF.compute.shelved_offload_time
         if offload_time >= 0:
@@ -103,8 +102,7 @@ class DeleteServersTestJSON(base.BaseV2ComputeTest):
     def test_delete_server_while_in_verify_resize_state(self):
         # Delete a server while it's VM state is VERIFY_RESIZE
         server = self.create_test_server(wait_until='ACTIVE')
-        resp, body = self.client.resize(server['id'], self.flavor_ref_alt)
-        self.assertEqual(202, resp.status)
+        self.client.resize(server['id'], self.flavor_ref_alt)
         self.client.wait_for_server_status(server['id'], 'VERIFY_RESIZE')
         self.client.delete_server(server['id'])
         self.client.wait_for_server_termination(server['id'])
@@ -144,8 +142,7 @@ class DeleteServersAdminTestJSON(base.BaseV2ComputeAdminTest):
     def test_delete_server_while_in_error_state(self):
         # Delete a server while it's VM state is error
         server = self.create_test_server(wait_until='ACTIVE')
-        resp, body = self.admin_client.reset_state(server['id'], state='error')
-        self.assertEqual(202, resp.status)
+        self.admin_client.reset_state(server['id'], state='error')
         # Verify server's state
         server = self.non_admin_client.get_server(server['id'])
         self.assertEqual(server['status'], 'ERROR')

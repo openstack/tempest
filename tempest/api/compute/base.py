@@ -218,7 +218,7 @@ class BaseComputeTest(tempest.test.BaseTestCase):
         servers = [body]
         if 'min_count' in kwargs or 'max_count' in kwargs:
             # Get servers created which name match with name param.
-            r, b = cls.servers_client.list_servers()
+            b = cls.servers_client.list_servers()
             servers = [s for s in b['servers'] if s['name'].startswith(name)]
 
         if 'wait_until' in kwargs:
@@ -260,9 +260,9 @@ class BaseComputeTest(tempest.test.BaseTestCase):
             name = data_utils.rand_name(cls.__name__ + "-Server-Group")
         if policy is None:
             policy = ['affinity']
-        resp, body = cls.servers_client.create_server_group(name, policy)
+        body = cls.servers_client.create_server_group(name, policy)
         cls.server_groups.append(body['id'])
-        return resp, body
+        return body
 
     def wait_for(self, condition):
         """Repeatedly calls condition() until a timeout."""

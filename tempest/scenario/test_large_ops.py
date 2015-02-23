@@ -87,7 +87,7 @@ class TestLargeOpsScenario(manager.ScenarioTest):
             security_groups=[{'name': secgroup['name']}])
         # needed because of bug 1199788
         params = {'name': name}
-        _, server_list = self.servers_client.list_servers(params)
+        server_list = self.servers_client.list_servers(params)
         self.servers = server_list['servers']
         for server in self.servers:
             # after deleting all servers - wait for all servers to clear

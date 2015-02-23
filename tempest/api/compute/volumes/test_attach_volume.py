@@ -65,7 +65,7 @@ class AttachVolumeTestJSON(base.BaseV2ComputeTest):
                                               adminPass=admin_pass)
 
         # Record addresses so that we can ssh later
-        _, self.server['addresses'] = (
+        self.server['addresses'] = (
             self.servers_client.list_addresses(self.server['id']))
 
         # Create a volume and wait for it to become ready
