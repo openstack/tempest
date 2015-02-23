@@ -58,114 +58,114 @@ class BaseMessagingTest(test.BaseTestCase):
     @classmethod
     def create_queue(cls, queue_name):
         """Wrapper utility that returns a test queue."""
-        resp, body = cls.client.create_queue(queue_name)
-        return resp, body
+        body = cls.client.create_queue(queue_name)
+        return body
 
     @classmethod
     def delete_queue(cls, queue_name):
         """Wrapper utility that deletes a test queue."""
-        resp, body = cls.client.delete_queue(queue_name)
-        return resp, body
+        body = cls.client.delete_queue(queue_name)
+        return body
 
     @classmethod
     def check_queue_exists(cls, queue_name):
         """Wrapper utility that checks the existence of a test queue."""
-        resp, body = cls.client.get_queue(queue_name)
-        return resp, body
+        body = cls.client.get_queue(queue_name)
+        return body
 
     @classmethod
     def check_queue_exists_head(cls, queue_name):
         """Wrapper utility checks the head of a queue via http HEAD."""
-        resp, body = cls.client.head_queue(queue_name)
-        return resp, body
+        body = cls.client.head_queue(queue_name)
+        return body
 
     @classmethod
     def list_queues(cls):
         """Wrapper utility that lists queues."""
-        resp, body = cls.client.list_queues()
-        return resp, body
+        body = cls.client.list_queues()
+        return body
 
     @classmethod
     def get_queue_stats(cls, queue_name):
         """Wrapper utility that returns the queue stats."""
-        resp, body = cls.client.get_queue_stats(queue_name)
-        return resp, body
+        body = cls.client.get_queue_stats(queue_name)
+        return body
 
     @classmethod
     def get_queue_metadata(cls, queue_name):
         """Wrapper utility that gets a queue metadata."""
-        resp, body = cls.client.get_queue_metadata(queue_name)
-        return resp, body
+        body = cls.client.get_queue_metadata(queue_name)
+        return body
 
     @classmethod
     def set_queue_metadata(cls, queue_name, rbody):
         """Wrapper utility that sets the metadata of a queue."""
-        resp, body = cls.client.set_queue_metadata(queue_name, rbody)
-        return resp, body
+        body = cls.client.set_queue_metadata(queue_name, rbody)
+        return body
 
     @classmethod
     def post_messages(cls, queue_name, rbody):
         """Wrapper utility that posts messages to a queue."""
-        resp, body = cls.client.post_messages(queue_name, rbody)
+        body = cls.client.post_messages(queue_name, rbody)
 
-        return resp, body
+        return body
 
     @classmethod
     def list_messages(cls, queue_name):
         """Wrapper utility that lists the messages in a queue."""
-        resp, body = cls.client.list_messages(queue_name)
+        body = cls.client.list_messages(queue_name)
 
-        return resp, body
+        return body
 
     @classmethod
     def get_single_message(cls, message_uri):
         """Wrapper utility that gets a single message."""
-        resp, body = cls.client.get_single_message(message_uri)
+        body = cls.client.get_single_message(message_uri)
 
-        return resp, body
+        return body
 
     @classmethod
     def get_multiple_messages(cls, message_uri):
         """Wrapper utility that gets multiple messages."""
-        resp, body = cls.client.get_multiple_messages(message_uri)
+        body = cls.client.get_multiple_messages(message_uri)
 
-        return resp, body
+        return body
 
     @classmethod
     def delete_messages(cls, message_uri):
         """Wrapper utility that deletes messages."""
-        resp, body = cls.client.delete_messages(message_uri)
+        body = cls.client.delete_messages(message_uri)
 
-        return resp, body
+        return body
 
     @classmethod
     def post_claims(cls, queue_name, rbody, url_params=False):
         """Wrapper utility that claims messages."""
-        resp, body = cls.client.post_claims(
+        body = cls.client.post_claims(
             queue_name, rbody, url_params=False)
 
-        return resp, body
+        return body
 
     @classmethod
     def query_claim(cls, claim_uri):
         """Wrapper utility that gets a claim."""
-        resp, body = cls.client.query_claim(claim_uri)
+        body = cls.client.query_claim(claim_uri)
 
-        return resp, body
+        return body
 
     @classmethod
     def update_claim(cls, claim_uri, rbody):
         """Wrapper utility that updates a claim."""
-        resp, body = cls.client.update_claim(claim_uri, rbody)
+        body = cls.client.update_claim(claim_uri, rbody)
 
-        return resp, body
+        return body
 
     @classmethod
     def release_claim(cls, claim_uri):
         """Wrapper utility that deletes a claim."""
-        resp, body = cls.client.release_claim(claim_uri)
+        body = cls.client.release_claim(claim_uri)
 
-        return resp, body
+        return body
 
     @classmethod
     def generate_message_body(cls, repeat=1):
