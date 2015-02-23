@@ -19,7 +19,7 @@ from tempest import auth
 from tempest.common import tempest_fixtures as fixtures
 from tempest import config
 from tempest import exceptions
-from tempest.services.identity.json import token_client as v2_client
+from tempest.services.identity.v2.json import token_client as v2_client
 from tempest.services.identity.v3.json import token_client as v3_client
 from tempest.tests import base
 from tempest.tests import fake_config
