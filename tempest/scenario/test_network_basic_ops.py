@@ -17,7 +17,6 @@ import collections
 import re
 
 import testtools
-from testtools.tests import matchers
 
 from tempest.common.utils import data_utils
 from tempest import config
@@ -432,16 +431,6 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
             should_connect=True, msg="after updating "
             "admin_state_up of router to True")
 
-    def _check_dns_server(self, ssh_client, dns_servers):
-        servers = ssh_client.get_dns_servers()
-        self.assertEqual(set(dns_servers), set(servers),
-                         'Looking for servers: {trgt_serv}. '
-                         'Retrieved DNS nameservers: {act_serv} '
-                         'From host: {host}.'
-                         .format(host=ssh_client.ssh_client.host,
-                                 act_serv=servers,
-                                 trgt_serv=dns_servers))
-
     @testtools.skipUnless(CONF.scenario.dhcp_client,
                           "DHCP client is not available.")
     @test.attr(type='smoke')
@@ -486,7 +475,15 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         private_key = self._get_server_key(server)
         ssh_client = self._ssh_to_server(ip_address, private_key)
 
-        self._check_dns_server(ssh_client, [initial_dns_server])
+        dns_servers = [initial_dns_server]
+        servers = ssh_client.get_dns_servers()
+        self.assertEqual(set(dns_servers), set(servers),
+                         'Looking for servers: {trgt_serv}. '
+                         'Retrieved DNS nameservers: {act_serv} '
+                         'From host: {host}.'
+                         .format(host=ssh_client.ssh_client.host,
+                                 act_serv=servers,
+                                 trgt_serv=dns_servers))
 
         self.subnet.update(dns_nameservers=[alt_dns_server])
         # asserts that Neutron DB has updated the nameservers
@@ -501,9 +498,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
             subnet-update API call returns.
             """
             ssh_client.renew_lease(fixed_ip=floating_ip['fixed_ip_address'])
-            try:
-                self._check_dns_server(ssh_client, [alt_dns_server])
-            except matchers.MismatchError:
+            if ssh_client.get_dns_servers() != [alt_dns_server]:
                 LOG.debug("Failed to update DNS nameservers")
                 return False
             return True
