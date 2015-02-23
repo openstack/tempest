@@ -45,10 +45,11 @@ class BaseTrustsV3Test(base.BaseIdentityV3AdminTest):
         super(BaseTrustsV3Test, self).tearDown()
 
     def create_trustor_and_roles(self):
-        # Get trustor project ID, use the admin project
-        self.trustor_project_name = self.client.tenant_name
-        self.trustor_project_id = self.get_tenant_by_name(
-            self.trustor_project_name)['id']
+        # create a project that trusts will be granted on
+        self.trustor_project_name = data_utils.rand_name(name='project-')
+        project = self.client.create_project(self.trustor_project_name,
+                                             domain_id='default')
+        self.trustor_project_id = project['id']
         self.assertIsNotNone(self.trustor_project_id)
 
         # Create a trustor User
@@ -61,7 +62,8 @@ class BaseTrustsV3Test(base.BaseIdentityV3AdminTest):
             description=u_desc,
             password=self.trustor_password,
             email=u_email,
-            project_id=self.trustor_project_id)
+            project_id=self.trustor_project_id,
+            domain_id='default')
         self.trustor_user_id = user['id']
 
         # And two roles, one we'll delegate and one we won't
@@ -89,15 +91,20 @@ class BaseTrustsV3Test(base.BaseIdentityV3AdminTest):
 
         # Initialize a new client with the trustor credentials
         creds = cred_provider.get_credentials(
+            identity_version='v3',
             username=self.trustor_username,
             password=self.trustor_password,
-            tenant_name=self.trustor_project_name)
+            user_domain_id='default',
+            tenant_name=self.trustor_project_name,
+            project_domain_id='default')
         os = clients.Manager(credentials=creds)
         self.trustor_client = os.identity_v3_client
 
     def cleanup_user_and_roles(self):
         if self.trustor_user_id:
             self.client.delete_user(self.trustor_user_id)
+        if self.trustor_project_id:
+            self.client.delete_project(self.trustor_project_id)
         if self.delegated_role_id:
             self.client.delete_role(self.delegated_role_id)
         if self.not_delegated_role_id:
