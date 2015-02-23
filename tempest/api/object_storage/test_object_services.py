@@ -26,6 +26,7 @@ from tempest.api.object_storage import base
 from tempest.common import custom_matchers
 from tempest.common.utils import data_utils
 from tempest import test
+from tempest_lib import decorators
 
 
 class ObjectTest(base.BaseObjectTest):
@@ -197,7 +198,7 @@ class ObjectTest(base.BaseObjectTest):
                                                 object_name)
         self.assertEqual(data, body)
 
-    @test.skip_because(bug="1417492")
+    @decorators.skip_because(bug="1417492")
     @test.attr(type='gate')
     def test_create_object_with_transfer_encoding(self):
         # create object with transfer_encoding

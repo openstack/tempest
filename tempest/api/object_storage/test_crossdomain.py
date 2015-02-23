@@ -17,6 +17,7 @@
 from tempest.api.object_storage import base
 from tempest.common import custom_matchers
 from tempest import test
+from tempest_lib import decorators
 
 
 class CrossdomainTest(base.BaseObjectTest):
@@ -38,7 +39,7 @@ class CrossdomainTest(base.BaseObjectTest):
         # Turning http://.../v1/foobar into http://.../
         self.account_client.skip_path()
 
-    @test.skip_because(bug="1417502")
+    @decorators.skip_because(bug="1417502")
     @test.attr('gate')
     @test.requires_ext(extension='crossdomain', service='object')
     def test_get_crossdomain_policy(self):

@@ -23,6 +23,7 @@ from tempest_lib import exceptions as lib_exc
 from tempest.api.object_storage import base
 from tempest.common.utils import data_utils
 from tempest import test
+from tempest_lib import decorators
 
 
 class ObjectFormPostNegativeTest(base.BaseObjectTest):
@@ -109,7 +110,7 @@ class ObjectFormPostNegativeTest(base.BaseObjectTest):
         content_type = 'multipart/form-data; boundary=%s' % boundary
         return body, content_type
 
-    @test.skip_because(bug="1417485")
+    @decorators.skip_because(bug="1417485")
     @test.requires_ext(extension='formpost', service='object')
     @test.attr(type=['gate', 'negative'])
     def test_post_object_using_form_expired(self):
@@ -126,7 +127,7 @@ class ObjectFormPostNegativeTest(base.BaseObjectTest):
             url, body, headers=headers)
         self.assertIn('FormPost: Form Expired', str(exc))
 
-    @test.skip_because(bug="1417485")
+    @decorators.skip_because(bug="1417485")
     @test.requires_ext(extension='formpost', service='object')
     @test.attr(type='gate')
     def test_post_object_using_form_invalid_signature(self):
