@@ -833,9 +833,9 @@ class FlavorService(BaseService):
 
     def save_state(self):
         flavors = self.list()
-        flavor_data = self.data['flavors'] = {}
+        self.data['flavors'] = {}
         for flavor in flavors:
-            flavor_data[flavor['id']] = flavor['name']
+            self.data['flavors'][flavor['id']] = flavor['name']
 
 
 class ImageService(BaseService):
@@ -871,9 +871,9 @@ class ImageService(BaseService):
 
     def save_state(self):
         images = self.list()
-        image_data = self.data['images'] = {}
+        self.data['images'] = {}
         for image in images:
-            image_data[image['id']] = image['name']
+            self.data['images'][image['id']] = image['name']
 
 
 class IdentityService(BaseService):
@@ -919,9 +919,9 @@ class UserService(IdentityService):
 
     def save_state(self):
         users = self.list()
-        user_data = self.data['users'] = {}
+        self.data['users'] = {}
         for user in users:
-            user_data[user['id']] = user['name']
+            self.data['users'][user['id']] = user['name']
 
 
 class RoleService(IdentityService):
@@ -958,9 +958,9 @@ class RoleService(IdentityService):
 
     def save_state(self):
         roles = self.list()
-        role_data = self.data['roles'] = {}
+        self.data['roles'] = {}
         for role in roles:
-            role_data[role['id']] = role['name']
+            self.data['roles'][role['id']] = role['name']
 
 
 class TenantService(IdentityService):
@@ -996,9 +996,9 @@ class TenantService(IdentityService):
 
     def save_state(self):
         tenants = self.list()
-        tenant_data = self.data['tenants'] = {}
+        self.data['tenants'] = {}
         for tenant in tenants:
-            tenant_data[tenant['id']] = tenant['name']
+            self.data['tenants'][tenant['id']] = tenant['name']
 
 
 class DomainService(BaseService):
@@ -1034,9 +1034,9 @@ class DomainService(BaseService):
 
     def save_state(self):
         domains = self.list()
-        domain_data = self.data['domains'] = {}
+        self.data['domains'] = {}
         for domain in domains:
-            domain_data[domain['id']] = domain['name']
+            self.data['domains'][domain['id']] = domain['name']
 
 
 def get_tenant_cleanup_services():
