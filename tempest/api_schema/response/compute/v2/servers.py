@@ -93,6 +93,15 @@ get_server['response_body']['properties']['server']['required'].append(
     # these attributes. So they are not 'required'.
     'hostId'
 )
+# NOTE(gmann): Update OS-EXT-IPS:type and OS-EXT-IPS-MAC:mac_addr
+# attributes in server address. Those are API extension,
+# and some environments return a response without
+# these attributes. So they are not 'required'.
+get_server['response_body']['properties']['server']['properties'][
+    'addresses']['patternProperties']['^[a-zA-Z0-9-_.]+$']['items'][
+    'properties'].update({
+        'OS-EXT-IPS:type': {'type': 'string'},
+        'OS-EXT-IPS-MAC:mac_addr': parameter_types.mac_address})
 
 list_virtual_interfaces = {
     'status_code': [200],
@@ -293,11 +302,21 @@ list_servers_detail['response_body']['properties']['servers']['items'][
         'accessIPv4': parameter_types.access_ip_v4,
         'accessIPv6': parameter_types.access_ip_v6
     })
-# NOTE(GMann): OS-DCF:diskConfig, security_groups and accessIPv4/v6 are API
-# extensions, and some environments return a response
+# NOTE(GMann): OS-DCF:diskConfig, security_groups and accessIPv4/v6
+# are API extensions, and some environments return a response
 # without these attributes. So they are not 'required'.
 list_servers_detail['response_body']['properties']['servers']['items'][
     'required'].append('hostId')
+# NOTE(gmann): Update OS-EXT-IPS:type and OS-EXT-IPS-MAC:mac_addr
+# attributes in server address. Those are API extension,
+# and some environments return a response without
+# these attributes. So they are not 'required'.
+list_servers_detail['response_body']['properties']['servers']['items'][
+    'properties']['addresses']['patternProperties']['^[a-zA-Z0-9-_.]+$'][
+    'items']['properties'].update({
+        'OS-EXT-IPS:type': {'type': 'string'},
+        'OS-EXT-IPS-MAC:mac_addr': parameter_types.mac_address})
+
 
 rebuild_server = copy.deepcopy(update_server)
 rebuild_server['status_code'] = [202]
