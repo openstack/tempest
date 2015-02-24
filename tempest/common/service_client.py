@@ -79,7 +79,7 @@ class ResponseBody(dict):
         self.response = response
 
     def __str__(self):
-        body = super.__str__(self)
+        body = super(ResponseBody, self).__str__()
         return "response: %s\nBody: %s" % (self.response, body)
 
 
@@ -108,5 +108,5 @@ class ResponseBodyList(list):
         self.response = response
 
     def __str__(self):
-        body = super.__str__(self)
+        body = super(ResponseBodyList, self).__str__()
         return "response: %s\nBody: %s" % (self.response, body)
