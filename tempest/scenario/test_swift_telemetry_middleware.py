@@ -76,19 +76,22 @@ class TestSwiftTelemetry(manager.SwiftScenarioTest):
             LOG.debug('got samples %s', results)
 
             # Extract container info from samples.
-            containers = [sample['resource_metadata']['container']
-                          for sample in results
-                          if sample['resource_metadata']['container']
-                          != 'None']
-            # Extract object info from samples.
-            objects = [sample['resource_metadata']['object']
-                       for sample in results
-                       if sample['resource_metadata']['object'] != 'None']
+            containers, objects = [], []
+            for sample in results:
+                meta = sample['resource_metadata']
+                if meta.get('container') and meta['container'] != 'None':
+                    containers.append(meta['container'])
+                elif (meta.get('target') and
+                      meta['target']['metadata']['container'] != 'None'):
+                    containers.append(meta['target']['metadata']['container'])
 
-            return (containers
-                    and objects
-                    and container_name in containers
-                    and obj_name in objects)
+                if meta.get('object') and meta['object'] != 'None':
+                    objects.append(meta['object'])
+                elif (meta.get('target') and
+                      meta['target']['metadata']['object'] != 'None'):
+                    objects.append(meta['target']['metadata']['object'])
+
+            return (container_name in containers and obj_name in objects)
 
         self.assertTrue(test.call_until_true(_check_samples,
                                              NOTIFICATIONS_WAIT,
