@@ -13,8 +13,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib.common.utils import data_utils
+
 from tempest.api.volume import base
-from tempest.common.utils import data_utils
 from tempest import config
 from tempest import test
 
@@ -56,6 +57,7 @@ class VolumesV2ActionsTest(base.BaseVolumeTest):
 
         super(VolumesV2ActionsTest, cls).resource_cleanup()
 
+    @test.idempotent_id('fff42874-7db5-4487-a8e1-ddda5fb5288d')
     @test.stresstest(class_setup_per='process')
     @test.attr(type='smoke')
     @test.services('compute')
@@ -69,6 +71,7 @@ class VolumesV2ActionsTest(base.BaseVolumeTest):
         self.client.detach_volume(self.volume['id'])
         self.client.wait_for_volume_status(self.volume['id'], 'available')
 
+    @test.idempotent_id('9516a2c8-9135-488c-8dd6-5677a7e5f371')
     @test.stresstest(class_setup_per='process')
     @test.attr(type='gate')
     @test.services('compute')
@@ -94,6 +97,7 @@ class VolumesV2ActionsTest(base.BaseVolumeTest):
         self.assertEqual(self.volume['id'], attachment['volume_id'])
 
     @test.attr(type='gate')
+    @test.idempotent_id('d8f1ca95-3d5b-44a3-b8ca-909691c9532d')
     @test.services('image')
     def test_volume_upload(self):
         # NOTE(gfidente): the volume uploaded in Glance comes from setUpClass,
@@ -110,6 +114,7 @@ class VolumesV2ActionsTest(base.BaseVolumeTest):
         self.client.wait_for_volume_status(self.volume['id'], 'available')
 
     @test.attr(type='gate')
+    @test.idempotent_id('92c4ef64-51b2-40c0-9f7e-4749fbaaba33')
     def test_reserve_unreserve_volume(self):
         # Mark volume as reserved.
         body = self.client.reserve_volume(self.volume['id'])
@@ -126,6 +131,7 @@ class VolumesV2ActionsTest(base.BaseVolumeTest):
         return val in ['true', 'True', True]
 
     @test.attr(type='gate')
+    @test.idempotent_id('fff74e1e-5bd3-4b33-9ea9-24c103bc3f59')
     def test_volume_readonly_update(self):
         # Update volume readonly true
         readonly = True

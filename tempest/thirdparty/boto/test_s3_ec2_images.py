@@ -15,8 +15,10 @@
 
 import os
 
-from tempest.common.utils import data_utils
+from tempest_lib.common.utils import data_utils
+
 from tempest import config
+from tempest import test
 from tempest.thirdparty.boto import test as boto_test
 from tempest.thirdparty.boto.utils import s3
 
@@ -26,13 +28,17 @@ CONF = config.CONF
 class S3ImagesTest(boto_test.BotoTestCase):
 
     @classmethod
+    def setup_clients(cls):
+        super(S3ImagesTest, cls).setup_clients()
+        cls.s3_client = cls.os.s3_client
+        cls.images_client = cls.os.ec2api_client
+
+    @classmethod
     def resource_setup(cls):
         super(S3ImagesTest, cls).resource_setup()
         if not cls.conclusion['A_I_IMAGES_READY']:
             raise cls.skipException("".join(("EC2 ", cls.__name__,
                                     ": requires ami/aki/ari manifest")))
-        cls.s3_client = cls.os.s3_client
-        cls.images_client = cls.os.ec2api_client
         cls.materials_path = CONF.boto.s3_materials_path
         cls.ami_manifest = CONF.boto.ami_manifest
         cls.aki_manifest = CONF.boto.aki_manifest
@@ -47,6 +53,7 @@ class S3ImagesTest(boto_test.BotoTestCase):
                                cls.bucket_name)
         s3.s3_upload_dir(bucket, cls.materials_path)
 
+    @test.idempotent_id('f9d360a5-0188-4c77-9db2-4c34c28d12a5')
     def test_register_get_deregister_ami_image(self):
         # Register and deregister ami image
         image = {"name": data_utils.rand_name("ami-name-"),
@@ -70,6 +77,7 @@ class S3ImagesTest(boto_test.BotoTestCase):
             self.images_client.get_all_images()))
         self.cancelResourceCleanUp(image["cleanUp"])
 
+    @test.idempotent_id('42cca5b0-453b-4618-b99f-dbc039db426f')
     def test_register_get_deregister_aki_image(self):
         # Register and deregister aki image
         image = {"name": data_utils.rand_name("aki-name-"),
@@ -93,6 +101,7 @@ class S3ImagesTest(boto_test.BotoTestCase):
             self.images_client.get_all_images()))
         self.cancelResourceCleanUp(image["cleanUp"])
 
+    @test.idempotent_id('1359e860-841c-43bb-80f3-bb389cbfd81d')
     def test_register_get_deregister_ari_image(self):
         # Register and deregister ari image
         image = {"name": data_utils.rand_name("ari-name-"),

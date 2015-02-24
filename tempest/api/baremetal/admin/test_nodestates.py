@@ -12,9 +12,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from oslo_utils import timeutils
+
 from tempest.api.baremetal.admin import base
 from tempest import exceptions
-from tempest.openstack.common import timeutils
 from tempest import test
 
 
@@ -42,12 +43,14 @@ class TestNodeStates(base.BaseBaremetalTest):
         raise exceptions.TimeoutException(message)
 
     @test.attr(type='smoke')
+    @test.idempotent_id('cd8afa5e-3f57-4e43-8185-beb83d3c9015')
     def test_list_nodestates(self):
         _, nodestates = self.client.list_nodestates(self.node['uuid'])
         for key in nodestates:
             self.assertEqual(nodestates[key], self.node[key])
 
     @test.attr(type='smoke')
+    @test.idempotent_id('fc5b9320-0c98-4e5a-8848-877fe5a0322c')
     def test_set_node_power_state(self):
         _, node = self.create_node(self.chassis['uuid'])
         states = ["power on", "rebooting", "power off"]

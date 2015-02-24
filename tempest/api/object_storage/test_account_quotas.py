@@ -1,7 +1,5 @@
 # Copyright (C) 2013 eNovance SAS <licensing@enovance.com>
 #
-# Author: Joe H. Rahme <joe.hakim.rahme@enovance.com>
-#
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
 # a copy of the License at
@@ -14,9 +12,10 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+from tempest_lib.common.utils import data_utils
+
 from tempest.api.object_storage import base
 from tempest import clients
-from tempest.common.utils import data_utils
 from tempest import config
 from tempest import test
 
@@ -28,8 +27,16 @@ class AccountQuotasTest(base.BaseObjectTest):
     @classmethod
     def setup_credentials(cls):
         super(AccountQuotasTest, cls).setup_credentials()
-        cls.data.setup_test_user(reseller=True)
-        cls.os_reselleradmin = clients.Manager(cls.data.test_credentials)
+        reseller_admin_role = CONF.object_storage.reseller_admin_role
+        if not cls.isolated_creds.is_role_available(reseller_admin_role):
+            skip_msg = ("%s skipped because the configured credential provider"
+                        " is not able to provide credentials with the %s role "
+                        "assigned." % (cls.__name__, reseller_admin_role))
+            raise cls.skipException(skip_msg)
+        else:
+            cls.os_reselleradmin = clients.Manager(
+                cls.isolated_creds.get_creds_by_roles(
+                    roles=[reseller_admin_role]))
 
     @classmethod
     def resource_setup(cls):
@@ -78,6 +85,7 @@ class AccountQuotasTest(base.BaseObjectTest):
         super(AccountQuotasTest, cls).resource_cleanup()
 
     @test.attr(type="smoke")
+    @test.idempotent_id('a22ef352-a342-4587-8f47-3bbdb5b039c4')
     @test.requires_ext(extension='account_quotas', service='object')
     def test_upload_valid_object(self):
         object_name = data_utils.rand_name(name="TestObject")
@@ -88,6 +96,7 @@ class AccountQuotasTest(base.BaseObjectTest):
         self.assertHeaders(resp, 'Object', 'PUT')
 
     @test.attr(type=["smoke"])
+    @test.idempotent_id('63f51f9f-5f1d-4fc6-b5be-d454d70949d6')
     @test.requires_ext(extension='account_quotas', service='object')
     def test_admin_modify_quota(self):
         """Test that the ResellerAdmin is able to modify and remove the quota

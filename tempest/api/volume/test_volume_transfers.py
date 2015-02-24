@@ -57,6 +57,7 @@ class VolumesV2TransfersTest(base.BaseVolumeTest):
         self.adm_client.wait_for_resource_deletion(volume_id)
 
     @test.attr(type='gate')
+    @test.idempotent_id('4d75b645-a478-48b1-97c8-503f64242f1a')
     def test_create_get_list_accept_volume_transfer(self):
         # Create a volume first
         volume = self.create_volume()
@@ -83,6 +84,7 @@ class VolumesV2TransfersTest(base.BaseVolumeTest):
                                                       auth_key)
         self.alt_client.wait_for_volume_status(volume['id'], 'available')
 
+    @test.idempotent_id('ab526943-b725-4c07-b875-8e8ef87a2c30')
     def test_create_list_delete_volume_transfer(self):
         # Create a volume first
         volume = self.create_volume()

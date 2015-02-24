@@ -13,8 +13,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib.common.utils import data_utils
+
 from tempest.api.volume import base
-from tempest.common.utils import data_utils
 from tempest import test
 
 
@@ -33,6 +34,7 @@ class VolumeTypesExtraSpecsV2Test(base.BaseVolumeAdminTest):
         super(VolumeTypesExtraSpecsV2Test, cls).resource_cleanup()
 
     @test.attr(type='smoke')
+    @test.idempotent_id('b42923e9-0452-4945-be5b-d362ae533e60')
     def test_volume_type_extra_specs_list(self):
         # List Volume types extra specs.
         extra_specs = {"spec1": "val1"}
@@ -46,6 +48,7 @@ class VolumeTypesExtraSpecsV2Test(base.BaseVolumeAdminTest):
         self.assertIn('spec1', body)
 
     @test.attr(type='gate')
+    @test.idempotent_id('0806db36-b4a0-47a1-b6f3-c2e7f194d017')
     def test_volume_type_extra_specs_update(self):
         # Update volume type extra specs
         extra_specs = {"spec2": "val1"}
@@ -64,6 +67,7 @@ class VolumeTypesExtraSpecsV2Test(base.BaseVolumeAdminTest):
                          "Volume type extra spec incorrectly updated")
 
     @test.attr(type='smoke')
+    @test.idempotent_id('d4772798-601f-408a-b2a5-29e8a59d1220')
     def test_volume_type_extra_spec_create_get_delete(self):
         # Create/Get/Delete volume type extra spec.
         extra_specs = {"spec3": "val1"}

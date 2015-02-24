@@ -13,10 +13,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib.common.utils import data_utils
 from testtools import matchers
 
 from tempest.api.compute import base
-from tempest.common.utils import data_utils
 from tempest import config
 from tempest import test
 
@@ -39,14 +39,14 @@ class VolumesGetTestJSON(base.BaseV2ComputeTest):
         cls.client = cls.volumes_extensions_client
 
     @test.attr(type='smoke')
+    @test.idempotent_id('f10f25eb-9775-4d9d-9cbe-1cf54dae9d5f')
     def test_volume_create_get_delete(self):
         # CREATE, GET, DELETE Volume
         volume = None
         v_name = data_utils.rand_name('Volume')
         metadata = {'Type': 'work'}
         # Create volume
-        volume = self.client.create_volume(size=1,
-                                           display_name=v_name,
+        volume = self.client.create_volume(display_name=v_name,
                                            metadata=metadata)
         self.addCleanup(self.delete_volume, volume['id'])
         self.assertIn('id', volume)

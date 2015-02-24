@@ -68,6 +68,7 @@ class BulkTest(base.BaseObjectTest):
 
     @decorators.skip_because(bug="1417457")
     @test.attr(type='gate')
+    @test.idempotent_id('a407de51-1983-47cc-9f14-47c2b059413c')
     @test.requires_ext(extension='bulk', service='object')
     def test_extract_archive(self):
         # Test bulk operation of file upload with an archived file
@@ -105,6 +106,7 @@ class BulkTest(base.BaseObjectTest):
 
     @decorators.skip_because(bug="1417457")
     @test.attr(type='gate')
+    @test.idempotent_id('c075e682-0d2a-43b2-808d-4116200d736d')
     @test.requires_ext(extension='bulk', service='object')
     def test_bulk_delete(self):
         # Test bulk operation of deleting multiple files
@@ -133,6 +135,7 @@ class BulkTest(base.BaseObjectTest):
 
     @decorators.skip_because(bug="1417457")
     @test.attr(type='gate')
+    @test.idempotent_id('dbea2bcb-efbb-4674-ac8a-a5a0e33d1d79')
     @test.requires_ext(extension='bulk', service='object')
     def test_bulk_delete_by_POST(self):
         # Test bulk operation of deleting multiple files

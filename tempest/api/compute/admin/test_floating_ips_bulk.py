@@ -31,9 +31,13 @@ class FloatingIPsBulkAdminTestJSON(base.BaseV2ComputeAdminTest):
     """
 
     @classmethod
+    def setup_clients(cls):
+        super(FloatingIPsBulkAdminTestJSON, cls).setup_clients()
+        cls.client = cls.os_adm.floating_ips_client
+
+    @classmethod
     def resource_setup(cls):
         super(FloatingIPsBulkAdminTestJSON, cls).resource_setup()
-        cls.client = cls.os_adm.floating_ips_client
         cls.ip_range = CONF.compute.floating_ip_range
         cls.verify_unallocated_floating_ip_range(cls.ip_range)
 
@@ -57,6 +61,7 @@ class FloatingIPsBulkAdminTestJSON(base.BaseV2ComputeAdminTest):
             pass
 
     @test.attr(type='gate')
+    @test.idempotent_id('2c8f145f-8012-4cb8-ac7e-95a587f0e4ab')
     @test.services('network')
     def test_create_list_delete_floating_ips_bulk(self):
         # Create, List  and delete the Floating IPs Bulk

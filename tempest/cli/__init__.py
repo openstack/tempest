@@ -68,14 +68,22 @@ def min_client_version(*args, **kwargs):
 
 
 class ClientTestBase(test.BaseTestCase):
+
+    @classmethod
+    def skip_checks(cls):
+        super(ClientTestBase, cls).skip_checks()
+        if not CONF.identity_feature_enabled.api_v2:
+            raise cls.skipException("CLI clients rely on identity v2 API, "
+                                    "which is configured as not available")
+
     @classmethod
     def resource_setup(cls):
         if not CONF.cli.enabled:
             msg = "cli testing disabled"
             raise cls.skipException(msg)
         super(ClientTestBase, cls).resource_setup()
-        cls.cred_prov = credentials.get_isolated_credentials(cls.__name__)
-        cls.creds = cls.cred_prov.get_admin_creds()
+        cls.isolated_creds = credentials.get_isolated_credentials(cls.__name__)
+        cls.creds = cls.isolated_creds.get_admin_creds()
 
     def _get_clients(self):
         clients = base.CLIClient(self.creds.username,

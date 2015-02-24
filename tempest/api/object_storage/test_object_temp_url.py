@@ -1,7 +1,5 @@
 # Copyright (C) 2013 eNovance SAS <licensing@enovance.com>
 #
-# Author: Joe H. Rahme <joe.hakim.rahme@enovance.com>
-#
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
 # a copy of the License at
@@ -19,8 +17,9 @@ import hmac
 import time
 import urlparse
 
+from tempest_lib.common.utils import data_utils
+
 from tempest.api.object_storage import base
-from tempest.common.utils import data_utils
 from tempest import config
 from tempest import test
 
@@ -96,6 +95,7 @@ class ObjectTempUrlTest(base.BaseObjectTest):
         return url
 
     @test.attr(type='gate')
+    @test.idempotent_id('f91c96d4-1230-4bba-8eb9-84476d18d991')
     @test.requires_ext(extension='tempurl', service='object')
     def test_get_object_using_temp_url(self):
         expires = self._get_expiry_date()
@@ -115,6 +115,7 @@ class ObjectTempUrlTest(base.BaseObjectTest):
         self.assertHeaders(resp, 'Object', 'HEAD')
 
     @test.attr(type='gate')
+    @test.idempotent_id('671f9583-86bd-4128-a034-be282a68c5d8')
     @test.requires_ext(extension='tempurl', service='object')
     def test_get_object_using_temp_url_key_2(self):
         key2 = 'Meta2-'
@@ -140,6 +141,7 @@ class ObjectTempUrlTest(base.BaseObjectTest):
         self.assertEqual(body, self.content)
 
     @test.attr(type='gate')
+    @test.idempotent_id('9b08dade-3571-4152-8a4f-a4f2a873a735')
     @test.requires_ext(extension='tempurl', service='object')
     def test_put_object_using_temp_url(self):
         new_data = data_utils.arbitrary_string(
@@ -168,6 +170,7 @@ class ObjectTempUrlTest(base.BaseObjectTest):
         self.assertEqual(body, new_data)
 
     @test.attr(type='gate')
+    @test.idempotent_id('249a0111-5ad3-4534-86a7-1993d55f9185')
     @test.requires_ext(extension='tempurl', service='object')
     def test_head_object_using_temp_url(self):
         expires = self._get_expiry_date()
@@ -182,6 +185,7 @@ class ObjectTempUrlTest(base.BaseObjectTest):
         self.assertHeaders(resp, 'Object', 'HEAD')
 
     @test.attr(type='gate')
+    @test.idempotent_id('9d9cfd90-708b-465d-802c-e4a8090b823d')
     @test.requires_ext(extension='tempurl', service='object')
     def test_get_object_using_temp_url_with_inline_query_parameter(self):
         expires = self._get_expiry_date()

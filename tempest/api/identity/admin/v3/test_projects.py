@@ -13,14 +13,16 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib.common.utils import data_utils
+
 from tempest.api.identity import base
-from tempest.common.utils import data_utils
 from tempest import test
 
 
 class ProjectsTestJSON(base.BaseIdentityV3AdminTest):
 
     @test.attr(type='gate')
+    @test.idempotent_id('0ecf465c-0dc4-4532-ab53-91ffeb74d12d')
     def test_project_create_with_description(self):
         # Create project with a description
         project_name = data_utils.rand_name('project-')
@@ -38,6 +40,7 @@ class ProjectsTestJSON(base.BaseIdentityV3AdminTest):
                          'to be set')
 
     @test.attr(type='gate')
+    @test.idempotent_id('5f50fe07-8166-430b-a882-3b2ee0abe26f')
     def test_project_create_with_domain(self):
         # Create project with a domain
         self.data.setup_test_domain()
@@ -53,6 +56,7 @@ class ProjectsTestJSON(base.BaseIdentityV3AdminTest):
         self.assertEqual(self.data.domain['id'], body['domain_id'])
 
     @test.attr(type='gate')
+    @test.idempotent_id('1f66dc76-50cc-4741-a200-af984509e480')
     def test_project_create_enabled(self):
         # Create a project that is enabled
         project_name = data_utils.rand_name('project-')
@@ -67,6 +71,7 @@ class ProjectsTestJSON(base.BaseIdentityV3AdminTest):
         self.assertTrue(en2, 'Enable should be True in lookup')
 
     @test.attr(type='gate')
+    @test.idempotent_id('78f96a9c-e0e0-4ee6-a3ba-fbf6dfd03207')
     def test_project_create_not_enabled(self):
         # Create a project that is not enabled
         project_name = data_utils.rand_name('project-')
@@ -82,6 +87,7 @@ class ProjectsTestJSON(base.BaseIdentityV3AdminTest):
                          'Enable should be False in lookup')
 
     @test.attr(type='gate')
+    @test.idempotent_id('f608f368-048c-496b-ad63-d286c26dab6b')
     def test_project_update_name(self):
         # Update name attribute of a project
         p_name1 = data_utils.rand_name('project-')
@@ -103,6 +109,7 @@ class ProjectsTestJSON(base.BaseIdentityV3AdminTest):
         self.assertEqual(resp2_name, resp3_name)
 
     @test.attr(type='gate')
+    @test.idempotent_id('f138b715-255e-4a7d-871d-351e1ef2e153')
     def test_project_update_desc(self):
         # Update description attribute of a project
         p_name = data_utils.rand_name('project-')
@@ -126,6 +133,7 @@ class ProjectsTestJSON(base.BaseIdentityV3AdminTest):
         self.assertEqual(resp2_desc, resp3_desc)
 
     @test.attr(type='gate')
+    @test.idempotent_id('b6b25683-c97f-474d-a595-55d410b68100')
     def test_project_update_enable(self):
         # Update the enabled attribute of a project
         p_name = data_utils.rand_name('project-')
@@ -149,6 +157,7 @@ class ProjectsTestJSON(base.BaseIdentityV3AdminTest):
         self.assertEqual(resp2_en, resp3_en)
 
     @test.attr(type='gate')
+    @test.idempotent_id('59398d4a-5dc5-4f86-9a4c-c26cc804d6c6')
     def test_associate_user_to_project(self):
         # Associate a user to a project
         # Create a Project

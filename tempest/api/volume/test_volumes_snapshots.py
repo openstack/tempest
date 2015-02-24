@@ -10,10 +10,11 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from oslo_log import log as logging
+from tempest_lib.common.utils import data_utils
+
 from tempest.api.volume import base
-from tempest.common.utils import data_utils
 from tempest import config
-from tempest.openstack.common import log as logging
 from tempest import test
 
 LOG = logging.getLogger(__name__)
@@ -62,6 +63,7 @@ class VolumesV2SnapshotTestJSON(base.BaseVolumeTest):
                 self.assertEqual(params[key], snap[key], msg)
 
     @test.attr(type='gate')
+    @test.idempotent_id('b467b54c-07a4-446d-a1cf-651dedcc3ff1')
     @test.services('compute')
     def test_snapshot_create_with_volume_in_use(self):
         # Create a snapshot when volume status is in-use
@@ -90,6 +92,7 @@ class VolumesV2SnapshotTestJSON(base.BaseVolumeTest):
         self.snapshots.remove(snapshot)
 
     @test.attr(type='gate')
+    @test.idempotent_id('2a8abbe4-d871-46db-b049-c41f5af8216e')
     def test_snapshot_create_get_list_update_delete(self):
         # Create a snapshot
         s_name = data_utils.rand_name('snap')
@@ -130,6 +133,7 @@ class VolumesV2SnapshotTestJSON(base.BaseVolumeTest):
         self.snapshots.remove(snapshot)
 
     @test.attr(type='gate')
+    @test.idempotent_id('59f41f43-aebf-48a9-ab5d-d76340fab32b')
     def test_snapshots_list_with_params(self):
         """list snapshots with params."""
         # Create a snapshot
@@ -151,6 +155,7 @@ class VolumesV2SnapshotTestJSON(base.BaseVolumeTest):
         self._list_by_param_values_and_assert(params)
 
     @test.attr(type='gate')
+    @test.idempotent_id('220a1022-1fcd-4a74-a7bd-6b859156cda2')
     def test_snapshots_list_details_with_params(self):
         """list snapshot details with params."""
         # Create a snapshot
@@ -170,13 +175,13 @@ class VolumesV2SnapshotTestJSON(base.BaseVolumeTest):
         self._list_by_param_values_and_assert(params, with_detail=True)
 
     @test.attr(type='gate')
+    @test.idempotent_id('677863d1-3142-456d-b6ac-9924f667a7f4')
     def test_volume_from_snapshot(self):
         # Create a temporary snap using wrapper method from base, then
         # create a snap based volume and deletes it
         snapshot = self.create_snapshot(self.volume_origin['id'])
         # NOTE(gfidente): size is required also when passing snapshot_id
         volume = self.volumes_client.create_volume(
-            size=1,
             snapshot_id=snapshot['id'])
         self.volumes_client.wait_for_volume_status(volume['id'], 'available')
         self.volumes_client.delete_volume(volume['id'])

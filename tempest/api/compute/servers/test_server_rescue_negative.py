@@ -13,11 +13,11 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib.common.utils import data_utils
 from tempest_lib import exceptions as lib_exc
 import testtools
 
 from tempest.api.compute import base
-from tempest.common.utils import data_utils
 from tempest import config
 from tempest import test
 
@@ -58,7 +58,7 @@ class ServerRescueNegativeTestJSON(base.BaseV2ComputeTest):
 
     def _create_volume(self):
         volume = self.volumes_extensions_client.create_volume(
-            1, display_name=data_utils.rand_name(
+            CONF.volume.volume_size, display_name=data_utils.rand_name(
                 self.__class__.__name__ + '_volume'))
         self.addCleanup(self.delete_volume, volume['id'])
         self.volumes_extensions_client.wait_for_volume_status(
@@ -71,34 +71,34 @@ class ServerRescueNegativeTestJSON(base.BaseV2ComputeTest):
                                                               'available')
 
     def _unrescue(self, server_id):
-        resp, body = self.servers_client.unrescue_server(server_id)
-        self.assertEqual(202, resp.status)
+        self.servers_client.unrescue_server(server_id)
         self.servers_client.wait_for_server_status(server_id, 'ACTIVE')
 
     def _unpause(self, server_id):
-        resp, body = self.servers_client.unpause_server(server_id)
-        self.assertEqual(202, resp.status)
+        self.servers_client.unpause_server(server_id)
         self.servers_client.wait_for_server_status(server_id, 'ACTIVE')
 
+    @test.idempotent_id('cc3a883f-43c0-4fb6-a9bb-5579d64984ed')
     @testtools.skipUnless(CONF.compute_feature_enabled.pause,
                           'Pause is not available.')
     @test.attr(type=['negative', 'gate'])
     def test_rescue_paused_instance(self):
         # Rescue a paused server
-        resp, body = self.servers_client.pause_server(self.server_id)
+        self.servers_client.pause_server(self.server_id)
         self.addCleanup(self._unpause, self.server_id)
-        self.assertEqual(202, resp.status)
         self.servers_client.wait_for_server_status(self.server_id, 'PAUSED')
         self.assertRaises(lib_exc.Conflict,
                           self.servers_client.rescue_server,
                           self.server_id)
 
     @test.attr(type=['negative', 'gate'])
+    @test.idempotent_id('db22b618-f157-4566-a317-1b6d467a8094')
     def test_rescued_vm_reboot(self):
         self.assertRaises(lib_exc.Conflict, self.servers_client.reboot,
                           self.rescue_id, 'HARD')
 
     @test.attr(type=['negative', 'gate'])
+    @test.idempotent_id('6dfc0a55-3a77-4564-a144-1587b7971dde')
     def test_rescue_non_existent_server(self):
         # Rescue a non-existing server
         non_existent_server = data_utils.rand_uuid()
@@ -107,12 +107,14 @@ class ServerRescueNegativeTestJSON(base.BaseV2ComputeTest):
                           non_existent_server)
 
     @test.attr(type=['negative', 'gate'])
+    @test.idempotent_id('70cdb8a1-89f8-437d-9448-8844fd82bf46')
     def test_rescued_vm_rebuild(self):
         self.assertRaises(lib_exc.Conflict,
                           self.servers_client.rebuild,
                           self.rescue_id,
                           self.image_ref_alt)
 
+    @test.idempotent_id('d0ccac79-0091-4cf4-a1ce-26162d0cc55f')
     @test.services('volume')
     @test.attr(type=['negative', 'gate'])
     def test_rescued_vm_attach_volume(self):
@@ -131,6 +133,7 @@ class ServerRescueNegativeTestJSON(base.BaseV2ComputeTest):
                           volume['id'],
                           device='/dev/%s' % self.device)
 
+    @test.idempotent_id('f56e465b-fe10-48bf-b75d-646cda3a8bc9')
     @test.services('volume')
     @test.attr(type=['negative', 'gate'])
     def test_rescued_vm_detach_volume(self):

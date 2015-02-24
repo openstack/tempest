@@ -19,9 +19,9 @@ node = {
         'interfaces': {'type': 'array'},
         'host': {'type': 'string'},
         'task_state': {'type': ['string', 'null']},
-        'cpus': {'type': 'integer'},
-        'memory_mb': {'type': 'integer'},
-        'disk_gb': {'type': 'integer'},
+        'cpus': {'type': ['integer', 'string']},
+        'memory_mb': {'type': ['integer', 'string']},
+        'disk_gb': {'type': ['integer', 'string']},
     },
     'required': ['id', 'interfaces', 'host', 'task_state', 'cpus', 'memory_mb',
                  'disk_gb']

@@ -13,10 +13,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib.common.utils import data_utils
 from tempest_lib import exceptions as lib_exc
 
 from tempest.api.identity import base
-from tempest.common.utils import data_utils
 from tempest import test
 
 
@@ -48,6 +48,7 @@ class RegionsTestJSON(base.BaseIdentityV3AdminTest):
                           self.client.get_region, region_id)
 
     @test.attr(type='gate')
+    @test.idempotent_id('56186092-82e4-43f2-b954-91013218ba42')
     def test_create_update_get_delete_region(self):
         r_description = data_utils.rand_name('description-')
         region = self.client.create_region(
@@ -72,6 +73,7 @@ class RegionsTestJSON(base.BaseIdentityV3AdminTest):
                          region['parent_region_id'])
 
     @test.attr(type='smoke')
+    @test.idempotent_id('2c12c5b5-efcf-4aa5-90c5-bff1ab0cdbe2')
     def test_create_region_with_specific_id(self):
         # Create a region with a specific id
         r_region_id = data_utils.rand_uuid()
@@ -84,6 +86,7 @@ class RegionsTestJSON(base.BaseIdentityV3AdminTest):
         self.assertEqual(r_description, region['description'])
 
     @test.attr(type='gate')
+    @test.idempotent_id('d180bf99-544a-445c-ad0d-0c0d27663796')
     def test_list_regions(self):
         # Get a list of regions
         fetched_regions = self.client.list_regions()

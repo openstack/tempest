@@ -13,14 +13,14 @@
 import datetime
 import re
 
+from oslo_utils import timeutils
+from tempest_lib.common.utils import data_utils
 from tempest_lib import exceptions as lib_exc
 
 from tempest.api.identity import base
 from tempest import clients
 from tempest.common import cred_provider
-from tempest.common.utils import data_utils
 from tempest import config
-from tempest.openstack.common import timeutils
 from tempest import test
 
 CONF = config.CONF
@@ -119,13 +119,10 @@ class BaseTrustsV3Test(base.BaseIdentityV3AdminTest):
                        summary=False):
         self.assertIsNotNone(trust['id'])
         self.assertEqual(impersonate, trust['impersonation'])
-        # FIXME(shardy): ref bug #1246383 we can't check the
-        # microsecond component of the expiry time, because mysql
-        # <5.6.4 doesn't support microseconds.
-        # expected format 2013-12-20T16:08:36.036987Z
         if expires is not None:
-            expires_nousec = re.sub(r'\.([0-9]){6}Z', '', expires)
-            self.assertTrue(trust['expires_at'].startswith(expires_nousec))
+            # Omit microseconds component of the expiry time
+            trust_expires_at = re.sub(r'\.([0-9]){6}', '', trust['expires_at'])
+            self.assertEqual(expires, trust_expires_at)
         else:
             self.assertIsNone(trust['expires_at'])
         self.assertEqual(self.trustor_user_id, trust['trustor_user_id'])
@@ -191,6 +188,7 @@ class TrustsV3TestJSON(BaseTrustsV3Test):
         self.addCleanup(self.cleanup_user_and_roles)
 
     @test.attr(type='smoke')
+    @test.idempotent_id('5a0a91a4-baef-4a14-baba-59bf4d7fcace')
     def test_trust_impersonate(self):
         # Test case to check we can create, get and delete a trust
         # updates are not supported for trusts
@@ -203,6 +201,7 @@ class TrustsV3TestJSON(BaseTrustsV3Test):
         self.check_trust_roles()
 
     @test.attr(type='smoke')
+    @test.idempotent_id('ed2a8779-a7ac-49dc-afd7-30f32f936ed2')
     def test_trust_noimpersonate(self):
         # Test case to check we can create, get and delete a trust
         # with impersonation=False
@@ -215,11 +214,21 @@ class TrustsV3TestJSON(BaseTrustsV3Test):
         self.check_trust_roles()
 
     @test.attr(type='smoke')
+    @test.idempotent_id('0ed14b66-cefd-4b5c-a964-65759453e292')
     def test_trust_expire(self):
         # Test case to check we can create, get and delete a trust
         # with an expiry specified
         expires_at = timeutils.utcnow() + datetime.timedelta(hours=1)
-        expires_str = timeutils.isotime(at=expires_at, subsecond=True)
+        # NOTE(ylobankov) In some cases the expiry time may be rounded up
+        # because of microseconds. In fact, it depends on database and its
+        # version. At least MySQL 5.6.16 does this.
+        # For example, when creating a trust, we will set the expiry time of
+        # the trust to 2015-02-17T17:34:01.907051Z. However, if we make a GET
+        # request on the trust, the response will contain the time rounded up
+        # to 2015-02-17T17:34:02.000000Z. That is why we shouldn't set flag
+        # "subsecond" to True when we invoke timeutils.isotime(...) to avoid
+        # problems with rounding.
+        expires_str = timeutils.isotime(at=expires_at)
 
         trust = self.create_trust(expires=expires_str)
         self.validate_trust(trust, expires=expires_str)
@@ -231,6 +240,7 @@ class TrustsV3TestJSON(BaseTrustsV3Test):
         self.check_trust_roles()
 
     @test.attr(type='smoke')
+    @test.idempotent_id('3e48f95d-e660-4fa9-85e0-5a3d85594384')
     def test_trust_expire_invalid(self):
         # Test case to check we can check an invlaid expiry time
         # is rejected with the correct error
@@ -241,6 +251,7 @@ class TrustsV3TestJSON(BaseTrustsV3Test):
                           expires=expires_str)
 
     @test.attr(type='smoke')
+    @test.idempotent_id('6268b345-87ca-47c0-9ce3-37792b43403a')
     def test_get_trusts_query(self):
         self.create_trust()
         trusts_get = self.trustor_client.get_trusts(
@@ -249,6 +260,7 @@ class TrustsV3TestJSON(BaseTrustsV3Test):
         self.validate_trust(trusts_get[0], summary=True)
 
     @test.attr(type='smoke')
+    @test.idempotent_id('4773ebd5-ecbf-4255-b8d8-b63e6f72b65d')
     def test_get_trusts_all(self):
         self.create_trust()
         trusts_get = self.client.get_trusts()

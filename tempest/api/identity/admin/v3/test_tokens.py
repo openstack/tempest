@@ -13,16 +13,17 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib.common.utils import data_utils
 from tempest_lib import exceptions as lib_exc
 
 from tempest.api.identity import base
-from tempest.common.utils import data_utils
 from tempest import test
 
 
 class TokensV3TestJSON(base.BaseIdentityV3AdminTest):
 
     @test.attr(type='smoke')
+    @test.idempotent_id('0f9f5a5f-d5cd-4a86-8a5b-c5ded151f212')
     def test_tokens(self):
         # Valid user's token is authenticated
         # Create a User
@@ -48,6 +49,7 @@ class TokensV3TestJSON(base.BaseIdentityV3AdminTest):
                           subject_token)
 
     @test.attr(type='gate')
+    @test.idempotent_id('565fa210-1da1-4563-999b-f7b5b67cf112')
     def test_rescope_token(self):
         """Rescope a token.
 

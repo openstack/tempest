@@ -12,8 +12,9 @@
 
 import logging
 
+from tempest_lib.common.utils import data_utils
+
 from tempest.api.orchestration import base
-from tempest.common.utils import data_utils
 from tempest import config
 from tempest import test
 
@@ -25,6 +26,7 @@ LOG = logging.getLogger(__name__)
 class StackEnvironmentTest(base.BaseOrchestrationTest):
 
     @test.attr(type='gate')
+    @test.idempotent_id('37d4346b-1abd-4442-b7b1-2a4e5749a1e3')
     def test_environment_parameter(self):
         """Test passing a stack parameter via the environment."""
         stack_name = data_utils.rand_name('heat')
@@ -42,6 +44,7 @@ class StackEnvironmentTest(base.BaseOrchestrationTest):
         self.assertEqual(20, len(random_value))
 
     @test.attr(type='gate')
+    @test.idempotent_id('73bce717-ad22-4853-bbef-6ed89b632701')
     def test_environment_provider_resource(self):
         """Test passing resource_registry defining a provider resource."""
         stack_name = data_utils.rand_name('heat')
@@ -71,6 +74,7 @@ outputs:
         self.assertEqual(expected_length, len(random_value))
 
     @test.attr(type='gate')
+    @test.idempotent_id('9d682e5a-f4bb-47d5-8472-9d3cacb855df')
     def test_files_provider_resource(self):
         """Test untyped defining of a provider resource via "files"."""
         # It's also possible to specify the filename directly in the template.

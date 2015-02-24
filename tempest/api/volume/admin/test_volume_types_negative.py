@@ -24,22 +24,24 @@ from tempest import test
 class VolumeTypesNegativeV2Test(base.BaseVolumeAdminTest):
 
     @test.attr(type='gate')
+    @test.idempotent_id('b48c98f2-e662-4885-9b71-032256906314')
     def test_create_with_nonexistent_volume_type(self):
         # Should not be able to create volume with nonexistent volume_type.
         self.name_field = self.special_fields['name_field']
         params = {self.name_field: str(uuid.uuid4()),
                   'volume_type': str(uuid.uuid4())}
         self.assertRaises(lib_exc.NotFound,
-                          self.volumes_client.create_volume, size=1,
-                          **params)
+                          self.volumes_client.create_volume, **params)
 
     @test.attr(type='gate')
+    @test.idempotent_id('878b4e57-faa2-4659-b0d1-ce740a06ae81')
     def test_create_with_empty_name(self):
         # Should not be able to create volume type with an empty name.
         self.assertRaises(lib_exc.BadRequest,
                           self.volume_types_client.create_volume_type, '')
 
     @test.attr(type='gate')
+    @test.idempotent_id('994610d6-0476-4018-a644-a2602ef5d4aa')
     def test_get_nonexistent_type_id(self):
         # Should not be able to get volume type with nonexistent type id.
         self.assertRaises(lib_exc.NotFound,
@@ -47,6 +49,7 @@ class VolumeTypesNegativeV2Test(base.BaseVolumeAdminTest):
                           str(uuid.uuid4()))
 
     @test.attr(type='gate')
+    @test.idempotent_id('6b3926d2-7d73-4896-bc3d-e42dfd11a9f6')
     def test_delete_nonexistent_type_id(self):
         # Should not be able to delete volume type with nonexistent type id.
         self.assertRaises(lib_exc.NotFound,

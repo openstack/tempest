@@ -27,11 +27,14 @@ class LiveBlockMigrationTestJSON(base.BaseV2ComputeAdminTest):
     _host_key = 'OS-EXT-SRV-ATTR:host'
 
     @classmethod
-    def resource_setup(cls):
-        super(LiveBlockMigrationTestJSON, cls).resource_setup()
-
+    def setup_clients(cls):
+        super(LiveBlockMigrationTestJSON, cls).setup_clients()
         cls.admin_hosts_client = cls.os_adm.hosts_client
         cls.admin_servers_client = cls.os_adm.servers_client
+
+    @classmethod
+    def resource_setup(cls):
+        super(LiveBlockMigrationTestJSON, cls).resource_setup()
 
         cls.created_server_ids = []
 
@@ -51,7 +54,7 @@ class LiveBlockMigrationTestJSON(base.BaseV2ComputeAdminTest):
         return self._get_server_details(server_id)[self._host_key]
 
     def _migrate_server_to(self, server_id, dest_host):
-        _resp, body = self.admin_servers_client.live_migrate_server(
+        body = self.admin_servers_client.live_migrate_server(
             server_id, dest_host,
             CONF.compute_feature_enabled.block_migration_for_live_migration)
         return body
@@ -81,6 +84,7 @@ class LiveBlockMigrationTestJSON(base.BaseV2ComputeAdminTest):
             self.volumes_client.wait_for_volume_status(volume_id, 'available')
         self.volumes_client.delete_volume(volume_id)
 
+    @test.idempotent_id('1dce86b8-eb04-4c03-a9d8-9c1dc3ee0c7b')
     @testtools.skipIf(not CONF.compute_feature_enabled.live_migration,
                       'Live migration not available')
     @test.attr(type='gate')
@@ -96,6 +100,7 @@ class LiveBlockMigrationTestJSON(base.BaseV2ComputeAdminTest):
         self.servers_client.wait_for_server_status(server_id, 'ACTIVE')
         self.assertEqual(target_host, self._get_host_for_server(server_id))
 
+    @test.idempotent_id('e19c0cc6-6720-4ed8-be83-b6603ed5c812')
     @testtools.skipIf(not CONF.compute_feature_enabled.live_migration or not
                       CONF.compute_feature_enabled.
                       block_migration_for_live_migration,
@@ -113,7 +118,7 @@ class LiveBlockMigrationTestJSON(base.BaseV2ComputeAdminTest):
         actual_host = self._get_host_for_server(server_id)
         target_host = self._get_host_other_than(actual_host)
 
-        volume = self.volumes_client.create_volume(1, display_name='test')
+        volume = self.volumes_client.create_volume(display_name='test')
 
         self.volumes_client.wait_for_volume_status(volume['id'],
                                                    'available')

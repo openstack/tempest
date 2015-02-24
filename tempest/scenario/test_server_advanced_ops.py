@@ -13,10 +13,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from oslo_log import log as logging
 import testtools
 
 from tempest import config
-from tempest.openstack.common import log as logging
 from tempest.scenario import manager
 from tempest import test
 
@@ -35,13 +35,18 @@ class TestServerAdvancedOps(manager.ScenarioTest):
     """
 
     @classmethod
-    def resource_setup(cls):
+    def skip_checks(cls):
+        super(TestServerAdvancedOps, cls).skip_checks()
         if CONF.compute.flavor_ref_alt == CONF.compute.flavor_ref:
             msg = "Skipping test - flavor_ref and flavor_ref_alt are identical"
             raise cls.skipException(msg)
-        cls.set_network_resources()
-        super(TestServerAdvancedOps, cls).resource_setup()
 
+    @classmethod
+    def setup_credentials(cls):
+        cls.set_network_resources()
+        super(TestServerAdvancedOps, cls).setup_credentials()
+
+    @test.idempotent_id('e6c28180-7454-4b59-b188-0257af08a63b')
     @testtools.skipUnless(CONF.compute_feature_enabled.resize,
                           'Resize is not available.')
     @test.services('compute')
@@ -62,6 +67,7 @@ class TestServerAdvancedOps(manager.ScenarioTest):
         self.servers_client.wait_for_server_status(instance_id,
                                                    'ACTIVE')
 
+    @test.idempotent_id('949da7d5-72c8-4808-8802-e3d70df98e2c')
     @testtools.skipUnless(CONF.compute_feature_enabled.suspend,
                           'Suspend is not available.')
     @test.services('compute')

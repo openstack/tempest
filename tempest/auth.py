@@ -20,10 +20,10 @@ import exceptions
 import re
 import urlparse
 
+from oslo_log import log as logging
 import six
 
-from tempest.openstack.common import log as logging
-from tempest.services.identity.json import token_client as json_id
+from tempest.services.identity.v2.json import token_client as json_v2id
 from tempest.services.identity.v3.json import token_client as json_v3id
 
 
@@ -186,8 +186,13 @@ class KeystoneAuthProvider(AuthProvider):
 
     token_expiry_threshold = datetime.timedelta(seconds=60)
 
-    def __init__(self, credentials, auth_url):
+    def __init__(self, credentials, auth_url,
+                 disable_ssl_certificate_validation=None,
+                 ca_certs=None, trace_requests=None):
         super(KeystoneAuthProvider, self).__init__(credentials)
+        self.dsvm = disable_ssl_certificate_validation
+        self.ca_certs = ca_certs
+        self.trace_requests = trace_requests
         self.auth_client = self._auth_client(auth_url)
 
     def _decorate_request(self, filters, method, url, headers=None, body=None,
@@ -237,7 +242,9 @@ class KeystoneV2AuthProvider(KeystoneAuthProvider):
     EXPIRY_DATE_FORMAT = '%Y-%m-%dT%H:%M:%SZ'
 
     def _auth_client(self, auth_url):
-        return json_id.TokenClientJSON(auth_url)
+        return json_v2id.TokenClientJSON(
+            auth_url, disable_ssl_certificate_validation=self.dsvm,
+            ca_certs=self.ca_certs, trace_requests=self.trace_requests)
 
     def _auth_params(self):
         return dict(
@@ -315,7 +322,9 @@ class KeystoneV3AuthProvider(KeystoneAuthProvider):
     EXPIRY_DATE_FORMAT = '%Y-%m-%dT%H:%M:%S.%fZ'
 
     def _auth_client(self, auth_url):
-        return json_v3id.V3TokenClientJSON(auth_url)
+        return json_v3id.V3TokenClientJSON(
+            auth_url, disable_ssl_certificate_validation=self.dsvm,
+            ca_certs=self.ca_certs, trace_requests=self.trace_requests)
 
     def _auth_params(self):
         return dict(
@@ -430,7 +439,9 @@ def is_identity_version_supported(identity_version):
     return identity_version in IDENTITY_VERSION
 
 
-def get_credentials(auth_url, fill_in=True, identity_version='v2', **kwargs):
+def get_credentials(auth_url, fill_in=True, identity_version='v2',
+                    disable_ssl_certificate_validation=None, ca_certs=None,
+                    trace_requests=None, **kwargs):
     """
     Builds a credentials object based on the configured auth_version
 
@@ -442,6 +453,11 @@ def get_credentials(auth_url, fill_in=True, identity_version='v2', **kwargs):
            by invoking ``is_valid()``
     :param identity_version (string): identity API version is used to
            select the matching auth provider and credentials class
+    :param disable_ssl_certificate_validation: whether to enforce SSL
+           certificate validation in SSL API requests to the auth system
+    :param ca_certs: CA certificate bundle for validation of certificates
+           in SSL API requests to the auth system
+    :param trace_requests: trace in log API requests to the auth system
     :param kwargs (dict): Dict of credential key/value pairs
 
     Examples:
@@ -462,7 +478,10 @@ def get_credentials(auth_url, fill_in=True, identity_version='v2', **kwargs):
     creds = credential_class(**kwargs)
     # Fill in the credentials fields that were not specified
     if fill_in:
-        auth_provider = auth_provider_class(creds, auth_url)
+        dsvm = disable_ssl_certificate_validation
+        auth_provider = auth_provider_class(
+            creds, auth_url, disable_ssl_certificate_validation=dsvm,
+            ca_certs=ca_certs, trace_requests=trace_requests)
         creds = auth_provider.fill_credentials()
     return creds
 

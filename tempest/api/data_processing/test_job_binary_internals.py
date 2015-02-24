@@ -12,8 +12,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib.common.utils import data_utils
+
 from tempest.api.data_processing import base as dp_base
-from tempest.common.utils import data_utils
 from tempest import test
 
 
@@ -47,10 +48,12 @@ class JobBinaryInternalTest(dp_base.BaseDataProcessingTest):
         return resp_body['id'], binary_name
 
     @test.attr(type='smoke')
+    @test.idempotent_id('249c4dc2-946f-4939-83e6-212ddb6ea0be')
     def test_job_binary_internal_create(self):
         self._create_job_binary_internal()
 
     @test.attr(type='smoke')
+    @test.idempotent_id('1e3c2ecd-5673-499d-babe-4fe2fcdf64ee')
     def test_job_binary_internal_list(self):
         binary_info = self._create_job_binary_internal()
 
@@ -60,6 +63,7 @@ class JobBinaryInternalTest(dp_base.BaseDataProcessingTest):
         self.assertIn(binary_info, binaries_info)
 
     @test.attr(type='smoke')
+    @test.idempotent_id('a2046a53-386c-43ab-be35-df54b19db776')
     def test_job_binary_internal_get(self):
         binary_id, binary_name = self._create_job_binary_internal()
 
@@ -68,6 +72,7 @@ class JobBinaryInternalTest(dp_base.BaseDataProcessingTest):
         self.assertEqual(binary_name, binary['name'])
 
     @test.attr(type='smoke')
+    @test.idempotent_id('b3568c33-4eed-40d5-aae4-6ff3b2ac58f5')
     def test_job_binary_internal_delete(self):
         binary_id, _ = self._create_job_binary_internal()
 
@@ -75,6 +80,7 @@ class JobBinaryInternalTest(dp_base.BaseDataProcessingTest):
         self.client.delete_job_binary_internal(binary_id)
 
     @test.attr(type='smoke')
+    @test.idempotent_id('8871f2b0-5782-4d66-9bb9-6f95bcb839ea')
     def test_job_binary_internal_get_data(self):
         binary_id, _ = self._create_job_binary_internal()
 

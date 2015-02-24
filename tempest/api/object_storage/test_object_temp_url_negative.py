@@ -1,7 +1,5 @@
 # Copyright (C) 2013 eNovance SAS <licensing@enovance.com>
 #
-# Author: Joe H. Rahme <joe.hakim.rahme@enovance.com>
-#
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
 # a copy of the License at
@@ -19,10 +17,10 @@ import hmac
 import time
 import urlparse
 
+from tempest_lib.common.utils import data_utils
 from tempest_lib import exceptions as lib_exc
 
 from tempest.api.object_storage import base
-from tempest.common.utils import data_utils
 from tempest import test
 from tempest_lib import decorators
 
@@ -97,6 +95,7 @@ class ObjectTempUrlNegativeTest(base.BaseObjectTest):
 
     @decorators.skip_because(bug="1417478")
     @test.attr(type=['gate', 'negative'])
+    @test.idempotent_id('5a583aca-c804-41ba-9d9a-e7be132bdf0b')
     @test.requires_ext(extension='tempurl', service='object')
     def test_get_object_after_expiration_time(self):
 

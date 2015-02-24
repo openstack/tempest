@@ -13,13 +13,16 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest_lib import decorators
-import testtools
 import time
 import urlparse
 
+from tempest_lib.common.utils import data_utils
+from tempest_lib import decorators
+import testtools
+
+
 from tempest.api.object_storage import base
-from tempest.common.utils import data_utils
+from tempest import clients
 from tempest import config
 from tempest import test
 
@@ -34,6 +37,18 @@ CONF = config.CONF
 
 class ContainerSyncTest(base.BaseObjectTest):
     clients = {}
+
+    @classmethod
+    def setup_credentials(cls):
+        super(ContainerSyncTest, cls).setup_credentials()
+        cls.os_alt = clients.Manager(cls.isolated_creds.get_creds_by_roles(
+            [CONF.object_storage.operator_role], force_new=True))
+
+    @classmethod
+    def setup_clients(cls):
+        super(ContainerSyncTest, cls).setup_clients()
+        cls.object_client_alt = cls.os_alt.object_client
+        cls.container_client_alt = cls.os_alt.container_client
 
     @classmethod
     def resource_setup(cls):
@@ -114,6 +129,7 @@ class ContainerSyncTest(base.BaseObjectTest):
 
     @test.attr(type='slow')
     @decorators.skip_because(bug='1317133')
+    @test.idempotent_id('be008325-1bba-4925-b7dd-93b58f22ce9b')
     @testtools.skipIf(
         not CONF.object_storage_feature_enabled.container_sync,
         'Old-style container sync function is disabled')

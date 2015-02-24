@@ -12,10 +12,10 @@
 
 import uuid
 
+from tempest_lib.common.utils import data_utils
 from tempest_lib import exceptions as lib_exc
 
 from tempest.api.volume import base
-from tempest.common.utils import data_utils
 from tempest import config
 from tempest import test
 
@@ -31,6 +31,7 @@ class VolumesV2SnapshotNegativeTestJSON(base.BaseVolumeTest):
             raise cls.skipException("Cinder volume snapshots are disabled")
 
     @test.attr(type=['negative', 'gate'])
+    @test.idempotent_id('e3e466af-70ab-4f4b-a967-ab04e3532ea7')
     def test_create_snapshot_with_nonexistent_volume_id(self):
         # Create a snapshot with nonexistent volume id
         s_name = data_utils.rand_name('snap')
@@ -39,6 +40,7 @@ class VolumesV2SnapshotNegativeTestJSON(base.BaseVolumeTest):
                           str(uuid.uuid4()), display_name=s_name)
 
     @test.attr(type=['negative', 'gate'])
+    @test.idempotent_id('bb9da53e-d335-4309-9c15-7e76fd5e4d6d')
     def test_create_snapshot_without_passing_volume_id(self):
         # Create a snapshot without passing volume id
         s_name = data_utils.rand_name('snap')

@@ -33,10 +33,12 @@ class PluginsTest(dp_base.BaseDataProcessingTest):
         return plugins_names
 
     @test.attr(type='smoke')
+    @test.idempotent_id('01a005a3-426c-4c0b-9617-d09475403e09')
     def test_plugin_list(self):
         self._list_all_plugin_names()
 
     @test.attr(type='smoke')
+    @test.idempotent_id('53cf6487-2cfb-4a6f-8671-97c542c6e901')
     def test_plugin_get(self):
         for plugin_name in self._list_all_plugin_names():
             plugin = self.client.get_plugin(plugin_name)

@@ -34,6 +34,7 @@ class VolumesV2MetadataTest(base.BaseVolumeTest):
         super(VolumesV2MetadataTest, self).tearDown()
 
     @test.attr(type='gate')
+    @test.idempotent_id('6f5b125b-f664-44bf-910f-751591fe5769')
     def test_create_get_delete_volume_metadata(self):
         # Create metadata for the volume
         metadata = {"key1": "value1",
@@ -55,6 +56,7 @@ class VolumesV2MetadataTest(base.BaseVolumeTest):
         self.assertThat(body.items(), matchers.ContainsAll(metadata.items()))
 
     @test.attr(type='gate')
+    @test.idempotent_id('774d2918-9beb-4f30-b3d1-2a4e8179ec0a')
     def test_update_volume_metadata(self):
         # Update metadata for the volume
         metadata = {"key1": "value1",
@@ -78,6 +80,7 @@ class VolumesV2MetadataTest(base.BaseVolumeTest):
         self.assertThat(body.items(), matchers.ContainsAll(update.items()))
 
     @test.attr(type='gate')
+    @test.idempotent_id('862261c5-8df4-475a-8c21-946e50e36a20')
     def test_update_volume_metadata_item(self):
         # Update metadata item for the volume
         metadata = {"key1": "value1",

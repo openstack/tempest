@@ -13,8 +13,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib.common.utils import data_utils
+
 from tempest.api.volume import base
-from tempest.common.utils import data_utils
 from tempest import config
 from tempest import test
 
@@ -31,12 +32,14 @@ class VolumeTypesV2Test(base.BaseVolumeAdminTest):
         self.volume_types_client.delete_volume_type(volume_type_id)
 
     @test.attr(type='smoke')
+    @test.idempotent_id('9d9b28e3-1b2e-4483-a2cc-24aa0ea1de54')
     def test_volume_type_list(self):
         # List Volume types.
         body = self.volume_types_client.list_volume_types()
         self.assertIsInstance(body, list)
 
     @test.attr(type='smoke')
+    @test.idempotent_id('c03cc62c-f4e9-4623-91ec-64ce2f9c1260')
     def test_volume_crud_with_volume_type_and_extra_specs(self):
         # Create/update/get/delete volume with volume_type and extra spec.
         volume_types = list()
@@ -58,7 +61,7 @@ class VolumeTypesV2Test(base.BaseVolumeAdminTest):
                   'volume_type': volume_types[0]['id']}
 
         # Create volume
-        volume = self.volumes_client.create_volume(size=1, **params)
+        volume = self.volumes_client.create_volume(**params)
         self.addCleanup(self._delete_volume, volume['id'])
         self.assertEqual(volume_types[0]['name'], volume["volume_type"])
         self.assertEqual(volume[self.name_field], vol_name,
@@ -87,6 +90,7 @@ class VolumeTypesV2Test(base.BaseVolumeAdminTest):
                          'from the created Volume')
 
     @test.attr(type='smoke')
+    @test.idempotent_id('4e955c3b-49db-4515-9590-0c99f8e471ad')
     def test_volume_type_create_get_delete(self):
         # Create/get volume type.
         body = {}
@@ -119,6 +123,7 @@ class VolumeTypesV2Test(base.BaseVolumeAdminTest):
                          'from the created Volume_type')
 
     @test.attr(type='smoke')
+    @test.idempotent_id('7830abd0-ff99-4793-a265-405684a54d46')
     def test_volume_type_encryption_create_get_delete(self):
         # Create/get/delete encryption type.
         provider = "LuksEncryptor"

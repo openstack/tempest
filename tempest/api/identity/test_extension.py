@@ -20,6 +20,7 @@ from tempest import test
 class ExtensionTestJSON(base.BaseIdentityV2AdminTest):
 
     @test.attr(type='gate')
+    @test.idempotent_id('85f3f661-f54c-4d48-b563-72ae952b9383')
     def test_list_extensions(self):
         # List all the extensions
         body = self.non_admin_client.list_extensions()

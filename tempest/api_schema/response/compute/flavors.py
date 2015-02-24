@@ -30,8 +30,11 @@ list_flavors = {
                     },
                     'required': ['name', 'links', 'id']
                 }
-            }
+            },
+            'flavors_links': parameter_types.links
         },
+        # NOTE(gmann): flavors_links attribute is not necessary
+        # to be present always So it is not 'required'.
         'required': ['flavors']
     }
 }

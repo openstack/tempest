@@ -23,12 +23,13 @@ from tempest import test
 class ServerPersonalityTestJSON(base.BaseV2ComputeTest):
 
     @classmethod
-    def resource_setup(cls):
-        super(ServerPersonalityTestJSON, cls).resource_setup()
+    def setup_clients(cls):
+        super(ServerPersonalityTestJSON, cls).setup_clients()
         cls.client = cls.servers_client
         cls.user_client = cls.limits_client
 
     @test.attr(type='gate')
+    @test.idempotent_id('176cd8c9-b9e8-48ee-a480-180beab292bf')
     def test_personality_files_exceed_limit(self):
         # Server creation should fail if greater than the maximum allowed
         # number of files are injected into the server.
@@ -44,10 +45,11 @@ class ServerPersonalityTestJSON(base.BaseV2ComputeTest):
                                 'contents': base64.b64encode(file_contents)})
         # A 403 Forbidden or 413 Overlimit (old behaviour) exception
         # will be raised when out of quota
-        self.assertRaises((lib_exc.Unauthorized, lib_exc.OverLimit),
+        self.assertRaises((lib_exc.Forbidden, lib_exc.OverLimit),
                           self.create_test_server, personality=personality)
 
     @test.attr(type='gate')
+    @test.idempotent_id('52f12ee8-5180-40cc-b417-31572ea3d555')
     def test_can_create_server_with_max_number_personality_files(self):
         # Server should be created successfully if maximum allowed number of
         # files is injected into the server during creation.

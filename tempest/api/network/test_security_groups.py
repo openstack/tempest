@@ -14,9 +14,9 @@
 #    under the License.
 
 import six
+from tempest_lib.common.utils import data_utils
 
 from tempest.api.network import base_security_groups as base
-from tempest.common.utils import data_utils
 from tempest import config
 from tempest import test
 
@@ -69,6 +69,7 @@ class SecGroupTest(base.BaseSecGroupTest):
                              (key, value))
 
     @test.attr(type='smoke')
+    @test.idempotent_id('e30abd17-fef9-4739-8617-dc26da88e686')
     def test_list_security_groups(self):
         # Verify the that security group belonging to tenant exist in list
         body = self.client.list_security_groups()
@@ -81,6 +82,7 @@ class SecGroupTest(base.BaseSecGroupTest):
         self.assertIsNotNone(found, msg)
 
     @test.attr(type='smoke')
+    @test.idempotent_id('bfd128e5-3c92-44b6-9d66-7fe29d22c802')
     def test_create_list_update_show_delete_security_group(self):
         group_create_body, name = self._create_security_group()
 
@@ -109,6 +111,7 @@ class SecGroupTest(base.BaseSecGroupTest):
                          new_description)
 
     @test.attr(type='smoke')
+    @test.idempotent_id('cfb99e0e-7410-4a3d-8a0c-959a63ee77e9')
     def test_create_show_delete_security_group_rule(self):
         group_create_body, _ = self._create_security_group()
 
@@ -140,6 +143,7 @@ class SecGroupTest(base.BaseSecGroupTest):
                           rule_list)
 
     @test.attr(type='smoke')
+    @test.idempotent_id('87dfbcf9-1849-43ea-b1e4-efa3eeae9f71')
     def test_create_security_group_rule_with_additional_args(self):
         """Verify security group rule with additional arguments works.
 
@@ -158,6 +162,7 @@ class SecGroupTest(base.BaseSecGroupTest):
                                                 port_range_max)
 
     @test.attr(type='smoke')
+    @test.idempotent_id('c9463db8-b44d-4f52-b6c0-8dbda99f26ce')
     def test_create_security_group_rule_with_icmp_type_code(self):
         """Verify security group rule for icmp protocol works.
 
@@ -171,13 +176,14 @@ class SecGroupTest(base.BaseSecGroupTest):
         sg_id = group_create_body['security_group']['id']
         direction = 'ingress'
         protocol = 'icmp'
-        icmp_type_codes = [(3, 2), (2, 3), (3, 0), (2, None)]
+        icmp_type_codes = [(3, 2), (3, 0), (8, 0), (0, 0), (11, None)]
         for icmp_type, icmp_code in icmp_type_codes:
             self._create_verify_security_group_rule(sg_id, direction,
                                                     self.ethertype, protocol,
                                                     icmp_type, icmp_code)
 
     @test.attr(type='smoke')
+    @test.idempotent_id('c2ed2deb-7a0c-44d8-8b4c-a5825b5c310b')
     def test_create_security_group_rule_with_remote_group_id(self):
         # Verify creating security group rule with remote_group_id works
         sg1_body, _ = self._create_security_group()
@@ -196,6 +202,7 @@ class SecGroupTest(base.BaseSecGroupTest):
                                                 remote_group_id=remote_id)
 
     @test.attr(type='smoke')
+    @test.idempotent_id('16459776-5da2-4634-bce4-4b55ee3ec188')
     def test_create_security_group_rule_with_remote_ip_prefix(self):
         # Verify creating security group rule with remote_ip_prefix works
         sg1_body, _ = self._create_security_group()
@@ -213,6 +220,7 @@ class SecGroupTest(base.BaseSecGroupTest):
                                                 remote_ip_prefix=ip_prefix)
 
     @test.attr(type='smoke')
+    @test.idempotent_id('0a307599-6655-4220-bebc-fd70c64f2290')
     def test_create_security_group_rule_with_protocol_integer_value(self):
         # Verify creating security group rule with the
         # protocol as integer value

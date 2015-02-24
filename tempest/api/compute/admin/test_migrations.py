@@ -24,15 +24,17 @@ CONF = config.CONF
 class MigrationsAdminTest(base.BaseV2ComputeAdminTest):
 
     @classmethod
-    def resource_setup(cls):
-        super(MigrationsAdminTest, cls).resource_setup()
+    def setup_clients(cls):
+        super(MigrationsAdminTest, cls).setup_clients()
         cls.client = cls.os_adm.migrations_client
 
     @test.attr(type='gate')
+    @test.idempotent_id('75c0b83d-72a0-4cf8-a153-631e83e7d53f')
     def test_list_migrations(self):
         # Admin can get the migrations list
         self.client.list_migrations()
 
+    @test.idempotent_id('1b512062-8093-438e-b47a-37d2f597cd64')
     @testtools.skipUnless(CONF.compute_feature_enabled.resize,
                           'Resize not available.')
     @test.attr(type='gate')
@@ -41,8 +43,7 @@ class MigrationsAdminTest(base.BaseV2ComputeAdminTest):
         server = self.create_test_server(wait_until="ACTIVE")
         server_id = server['id']
 
-        resp, _ = self.servers_client.resize(server_id, self.flavor_ref_alt)
-        self.assertEqual(202, resp.status)
+        self.servers_client.resize(server_id, self.flavor_ref_alt)
         self.servers_client.wait_for_server_status(server_id, 'VERIFY_RESIZE')
         self.servers_client.confirm_resize(server_id)
         self.servers_client.wait_for_server_status(server_id, 'ACTIVE')

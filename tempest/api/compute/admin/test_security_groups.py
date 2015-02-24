@@ -13,10 +13,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib.common.utils import data_utils
 import testtools
 
 from tempest.api.compute import base
-from tempest.common.utils import data_utils
 from tempest import config
 from tempest import test
 
@@ -26,8 +26,8 @@ CONF = config.CONF
 class SecurityGroupsTestAdminJSON(base.BaseV2ComputeAdminTest):
 
     @classmethod
-    def resource_setup(cls):
-        super(SecurityGroupsTestAdminJSON, cls).resource_setup()
+    def setup_clients(cls):
+        super(SecurityGroupsTestAdminJSON, cls).setup_clients()
         cls.adm_client = cls.os_adm.security_groups_client
         cls.client = cls.security_groups_client
 
@@ -37,6 +37,7 @@ class SecurityGroupsTestAdminJSON(base.BaseV2ComputeAdminTest):
         else:
             self.client.delete_security_group(securitygroup_id)
 
+    @test.idempotent_id('49667619-5af9-4c63-ab5d-2cfdd1c8f7f1')
     @testtools.skipIf(CONF.service_available.neutron,
                       "Skipped because neutron do not support all_tenants"
                       "search filter.")

@@ -12,8 +12,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib.common.utils import data_utils
+
 from tempest.api.network import base
-from tempest.common.utils import data_utils
 from tempest import test
 
 
@@ -50,10 +51,12 @@ class L3AgentSchedulerTestJSON(base.BaseAdminNetworkTest):
             raise cls.skipException(msg)
 
     @test.attr(type='smoke')
+    @test.idempotent_id('b7ce6e89-e837-4ded-9b78-9ed3c9c6a45a')
     def test_list_routers_on_l3_agent(self):
         self.admin_client.list_routers_on_l3_agent(self.agent['id'])
 
     @test.attr(type='smoke')
+    @test.idempotent_id('9464e5e7-8625-49c3-8fd1-89c52be59d66')
     def test_add_list_remove_router_on_l3_agent(self):
         l3_agent_ids = list()
         name = data_utils.rand_name('router1-')

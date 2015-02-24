@@ -16,12 +16,12 @@
 import StringIO
 import time
 
+from oslo_log import log as logging
+from tempest_lib.common.utils import data_utils
 import testtools
 
 from tempest.api.compute import base
-from tempest.common.utils import data_utils
 from tempest import config
-from tempest.openstack.common import log as logging
 from tempest import test
 
 CONF = config.CONF
@@ -32,13 +32,21 @@ LOG = logging.getLogger(__name__)
 class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
 
     @classmethod
-    def resource_setup(cls):
-        super(ListImageFiltersTestJSON, cls).resource_setup()
+    def skip_checks(cls):
+        super(ListImageFiltersTestJSON, cls).skip_checks()
         if not CONF.service_available.glance:
             skip_msg = ("%s skipped as glance is not available" % cls.__name__)
             raise cls.skipException(skip_msg)
+
+    @classmethod
+    def setup_clients(cls):
+        super(ListImageFiltersTestJSON, cls).setup_clients()
         cls.client = cls.images_client
         cls.glance_client = cls.os.image_client
+
+    @classmethod
+    def resource_setup(cls):
+        super(ListImageFiltersTestJSON, cls).resource_setup()
 
         def _create_image():
             name = data_utils.rand_name('image')
@@ -93,6 +101,7 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
         cls.snapshot2_id = cls.snapshot2['id']
 
     @test.attr(type='gate')
+    @test.idempotent_id('a3f5b513-aeb3-42a9-b18e-f091ef73254d')
     def test_list_images_filter_by_status(self):
         # The list of images should contain only images with the
         # provided status
@@ -104,6 +113,7 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
         self.assertTrue(any([i for i in images if i['id'] == self.image3_id]))
 
     @test.attr(type='gate')
+    @test.idempotent_id('33163b73-79f5-4d07-a7ea-9213bcc468ff')
     def test_list_images_filter_by_name(self):
         # List of all images should contain the expected images filtered
         # by name
@@ -114,6 +124,7 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
         self.assertFalse(any([i for i in images if i['id'] == self.image2_id]))
         self.assertFalse(any([i for i in images if i['id'] == self.image3_id]))
 
+    @test.idempotent_id('9f238683-c763-45aa-b848-232ec3ce3105')
     @testtools.skipUnless(CONF.compute_feature_enabled.snapshot,
                           'Snapshotting is not available.')
     @test.attr(type='gate')
@@ -131,6 +142,7 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
         self.assertFalse(any([i for i in images
                               if i['id'] == self.snapshot3_id]))
 
+    @test.idempotent_id('05a377b8-28cf-4734-a1e6-2ab5c38bf606')
     @testtools.skipUnless(CONF.compute_feature_enabled.snapshot,
                           'Snapshotting is not available.')
     @test.attr(type='gate')
@@ -150,6 +162,7 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
             self.assertTrue(any([i for i in images
                                  if i['id'] == self.snapshot3_id]))
 
+    @test.idempotent_id('e3356918-4d3e-4756-81d5-abc4524ba29f')
     @testtools.skipUnless(CONF.compute_feature_enabled.snapshot,
                           'Snapshotting is not available.')
     @test.attr(type='gate')
@@ -168,6 +181,7 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
                               if i['id'] == self.image_ref]))
 
     @test.attr(type='gate')
+    @test.idempotent_id('3a484ca9-67ba-451e-b494-7fcf28d32d62')
     def test_list_images_limit_results(self):
         # Verify only the expected number of results are returned
         params = {'limit': '1'}
@@ -175,6 +189,7 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
         self.assertEqual(1, len([x for x in images if 'id' in x]))
 
     @test.attr(type='gate')
+    @test.idempotent_id('18bac3ae-da27-436c-92a9-b22474d13aab')
     def test_list_images_filter_by_changes_since(self):
         # Verify only updated images are returned in the detailed list
 
@@ -186,6 +201,7 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
         self.assertTrue(found)
 
     @test.attr(type='gate')
+    @test.idempotent_id('9b0ea018-6185-4f71-948a-a123a107988e')
     def test_list_images_with_detail_filter_by_status(self):
         # Detailed list of all images should only contain images
         # with the provided status
@@ -197,6 +213,7 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
         self.assertTrue(any([i for i in images if i['id'] == self.image3_id]))
 
     @test.attr(type='gate')
+    @test.idempotent_id('644ea267-9bd9-4f3b-af9f-dffa02396a17')
     def test_list_images_with_detail_filter_by_name(self):
         # Detailed list of all images should contain the expected
         # images filtered by name
@@ -208,6 +225,7 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
         self.assertFalse(any([i for i in images if i['id'] == self.image3_id]))
 
     @test.attr(type='gate')
+    @test.idempotent_id('ba2fa9a9-b672-47cc-b354-3b4c0600e2cb')
     def test_list_images_with_detail_limit_results(self):
         # Verify only the expected number of results (with full details)
         # are returned
@@ -215,6 +233,7 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
         images = self.client.list_images_with_detail(params)
         self.assertEqual(1, len(images))
 
+    @test.idempotent_id('8c78f822-203b-4bf6-8bba-56ebd551cf84')
     @testtools.skipUnless(CONF.compute_feature_enabled.snapshot,
                           'Snapshotting is not available.')
     @test.attr(type='gate')
@@ -234,6 +253,7 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
             self.assertTrue(any([i for i in images
                                  if i['id'] == self.snapshot3_id]))
 
+    @test.idempotent_id('888c0cc0-7223-43c5-9db0-b125fd0a393b')
     @testtools.skipUnless(CONF.compute_feature_enabled.snapshot,
                           'Snapshotting is not available.')
     @test.attr(type='gate')
@@ -253,6 +273,7 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
                               if i['id'] == self.image_ref]))
 
     @test.attr(type='gate')
+    @test.idempotent_id('7d439e18-ac2e-4827-b049-7e18004712c4')
     def test_list_images_with_detail_filter_by_changes_since(self):
         # Verify an update image is returned
 

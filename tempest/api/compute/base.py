@@ -13,16 +13,17 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest_lib import exceptions as lib_exc
 import time
+
+from oslo_log import log as logging
+from oslo_utils import excutils
+from tempest_lib.common.utils import data_utils
+from tempest_lib import exceptions as lib_exc
 
 from tempest import clients
 from tempest.common import credentials
-from tempest.common.utils import data_utils
 from tempest import config
 from tempest import exceptions
-from tempest.openstack.common import excutils
-from tempest.openstack.common import log as logging
 import tempest.test
 import  random
 CONF = config.CONF
@@ -245,7 +246,7 @@ class BaseComputeTest(tempest.test.BaseTestCase):
         servers = [body]
         if 'min_count' in kwargs or 'max_count' in kwargs:
             # Get servers created which name match with name param.
-            r, b = cls.servers_client.list_servers()
+            b = cls.servers_client.list_servers()
             servers = [s for s in b['servers'] if s['name'].startswith(name)]
 
         if 'wait_until' in kwargs:
@@ -287,9 +288,9 @@ class BaseComputeTest(tempest.test.BaseTestCase):
             name = data_utils.rand_name(cls.__name__ + "-Server-Group")
         if policy is None:
             policy = ['affinity']
-        resp, body = cls.servers_client.create_server_group(name, policy)
+        body = cls.servers_client.create_server_group(name, policy)
         cls.server_groups.append(body['id'])
-        return resp, body
+        return body
 
     def wait_for(self, condition):
         """Repeatedly calls condition() until a timeout."""

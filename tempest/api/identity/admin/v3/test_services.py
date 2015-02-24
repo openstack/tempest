@@ -13,10 +13,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib.common.utils import data_utils
 from tempest_lib import exceptions as lib_exc
 
 from tempest.api.identity import base
-from tempest.common.utils import data_utils
 from tempest import test
 
 
@@ -30,6 +30,7 @@ class ServicesTestJSON(base.BaseIdentityV3AdminTest):
                           service_id)
 
     @test.attr(type='smoke')
+    @test.idempotent_id('5193aad5-bcb7-411d-85b0-b3b61b96ef06')
     def test_create_update_get_service(self):
         # Creating a Service
         name = data_utils.rand_name('service')
@@ -62,6 +63,7 @@ class ServicesTestJSON(base.BaseIdentityV3AdminTest):
         self.assertDictContainsSubset(update_service, fetched_service)
 
     @test.attr(type='smoke')
+    @test.idempotent_id('d1dcb1a1-2b6b-4da8-bbb8-5532ef6e8269')
     def test_create_service_without_description(self):
         # Create a service only with name and type
         name = data_utils.rand_name('service')
@@ -74,6 +76,7 @@ class ServicesTestJSON(base.BaseIdentityV3AdminTest):
         self.assertDictContainsSubset(expected_data, service)
 
     @test.attr(type='smoke')
+    @test.idempotent_id('e55908e8-360e-439e-8719-c3230a3e179e')
     def test_list_services(self):
         # Create, List, Verify and Delete Services
         service_ids = list()

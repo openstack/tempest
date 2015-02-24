@@ -13,10 +13,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib.common.utils import data_utils
 from testtools import matchers
 
 from tempest.api.identity import base
-from tempest.common.utils import data_utils
 from tempest import test
 
 
@@ -30,6 +30,7 @@ class UsersTestJSON(base.BaseIdentityV2AdminTest):
         cls.alt_email = cls.alt_user + '@testmail.tm'
 
     @test.attr(type='smoke')
+    @test.idempotent_id('2d55a71e-da1d-4b43-9c03-d269fd93d905')
     def test_create_user(self):
         # Create a user
         self.data.setup_test_tenant()
@@ -40,6 +41,7 @@ class UsersTestJSON(base.BaseIdentityV2AdminTest):
         self.assertEqual(self.alt_user, user['name'])
 
     @test.attr(type='smoke')
+    @test.idempotent_id('89d9fdb8-15c2-4304-a429-48715d0af33d')
     def test_create_user_with_enabled(self):
         # Create a user with enabled : False
         self.data.setup_test_tenant()
@@ -53,6 +55,7 @@ class UsersTestJSON(base.BaseIdentityV2AdminTest):
         self.assertEqual(self.alt_email, user['email'])
 
     @test.attr(type='smoke')
+    @test.idempotent_id('39d05857-e8a5-4ed4-ba83-0b52d3ab97ee')
     def test_update_user(self):
         # Test case to check if updating of user attributes is successful.
         test_user = data_utils.rand_name('test_user_')
@@ -79,6 +82,7 @@ class UsersTestJSON(base.BaseIdentityV2AdminTest):
         self.assertEqual('false', str(updated_user['enabled']).lower())
 
     @test.attr(type='smoke')
+    @test.idempotent_id('29ed26f4-a74e-4425-9a85-fdb49fa269d2')
     def test_delete_user(self):
         # Delete a user
         test_user = data_utils.rand_name('test_user_')
@@ -89,6 +93,7 @@ class UsersTestJSON(base.BaseIdentityV2AdminTest):
         self.client.delete_user(user['id'])
 
     @test.attr(type='smoke')
+    @test.idempotent_id('aca696c3-d645-4f45-b728-63646045beb1')
     def test_user_authentication(self):
         # Valid user's token is authenticated
         self.data.setup_test_user()
@@ -101,6 +106,7 @@ class UsersTestJSON(base.BaseIdentityV2AdminTest):
                                self.data.test_tenant)
 
     @test.attr(type='gate')
+    @test.idempotent_id('5d1fa498-4c2d-4732-a8fe-2b054598cfdd')
     def test_authentication_request_without_token(self):
         # Request for token authentication with a valid token in header
         self.data.setup_test_user()
@@ -117,6 +123,7 @@ class UsersTestJSON(base.BaseIdentityV2AdminTest):
         self.client.auth_provider.clear_auth()
 
     @test.attr(type='smoke')
+    @test.idempotent_id('a149c02e-e5e0-4b89-809e-7e8faf33ccda')
     def test_get_users(self):
         # Get a list of users and find the test user
         self.data.setup_test_user()
@@ -126,6 +133,7 @@ class UsersTestJSON(base.BaseIdentityV2AdminTest):
                         "Could not find %s" % self.data.test_user)
 
     @test.attr(type='gate')
+    @test.idempotent_id('6e317209-383a-4bed-9f10-075b7c82c79a')
     def test_list_users_for_tenant(self):
         # Return a list of all users for a tenant
         self.data.setup_test_tenant()
@@ -156,6 +164,7 @@ class UsersTestJSON(base.BaseIdentityV2AdminTest):
                          ', '.join(m_user for m_user in missing_users))
 
     @test.attr(type='gate')
+    @test.idempotent_id('a8b54974-40e1-41c0-b812-50fc90827971')
     def test_list_users_with_roles_for_tenant(self):
         # Return list of users on tenant when roles are assigned to users
         self.data.setup_test_user()
@@ -191,6 +200,7 @@ class UsersTestJSON(base.BaseIdentityV2AdminTest):
                          ', '.join(m_user for m_user in missing_users))
 
     @test.attr(type='smoke')
+    @test.idempotent_id('1aeb25ac-6ec5-4d8b-97cb-7ac3567a989f')
     def test_update_user_password(self):
         # Test case to check if updating of user password is successful.
         self.data.setup_test_user()

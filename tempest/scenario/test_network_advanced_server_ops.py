@@ -13,12 +13,12 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from oslo_log import log as logging
+from tempest_lib.common.utils import data_utils
 from tempest_lib import decorators
 import testtools
 
-from tempest.common.utils import data_utils
 from tempest import config
-from tempest.openstack.common import log as logging
 from tempest.scenario import manager
 from tempest import test
 
@@ -41,8 +41,8 @@ class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
     """
 
     @classmethod
-    def check_preconditions(cls):
-        super(TestNetworkAdvancedServerOps, cls).check_preconditions()
+    def skip_checks(cls):
+        super(TestNetworkAdvancedServerOps, cls).skip_checks()
         if not (CONF.network.tenant_networks_reachable
                 or CONF.network.public_network_id):
             msg = ('Either tenant_networks_reachable must be "true", or '
@@ -50,10 +50,10 @@ class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
             raise cls.skipException(msg)
 
     @classmethod
-    def resource_setup(cls):
+    def setup_credentials(cls):
         # Create no network resources for these tests.
         cls.set_network_resources()
-        super(TestNetworkAdvancedServerOps, cls).resource_setup()
+        super(TestNetworkAdvancedServerOps, cls).setup_credentials()
 
     def _setup_network_and_servers(self):
         self.keypair = self.create_keypair()
@@ -84,16 +84,18 @@ class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
             should_connect=should_connect,
             servers_for_debug=[self.server])
         floating_ip = self.floating_ip.floating_ip_address
+        # Check FloatingIP status before checking the connectivity
+        self.check_floating_ip_status(self.floating_ip, 'ACTIVE')
         self.check_public_network_connectivity(floating_ip, username,
                                                private_key, should_connect,
                                                servers=[self.server])
-        self.check_floating_ip_status(self.floating_ip, 'ACTIVE')
 
     def _wait_server_status_and_check_network_connectivity(self):
         self.servers_client.wait_for_server_status(self.server['id'], 'ACTIVE')
         self._check_network_connectivity()
 
     @decorators.skip_because(bug="1323658")
+    @test.idempotent_id('61f1aa9a-1573-410e-9054-afa557cab021')
     @test.services('compute', 'network')
     def test_server_connectivity_stop_start(self):
         self._setup_network_and_servers()
@@ -104,12 +106,14 @@ class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
         self.servers_client.start(self.server['id'])
         self._wait_server_status_and_check_network_connectivity()
 
+    @test.idempotent_id('7b6860c2-afa3-4846-9522-adeb38dfbe08')
     @test.services('compute', 'network')
     def test_server_connectivity_reboot(self):
         self._setup_network_and_servers()
         self.servers_client.reboot(self.server['id'], reboot_type='SOFT')
         self._wait_server_status_and_check_network_connectivity()
 
+    @test.idempotent_id('88a529c2-1daa-4c85-9aec-d541ba3eb699')
     @test.services('compute', 'network')
     def test_server_connectivity_rebuild(self):
         self._setup_network_and_servers()
@@ -118,6 +122,7 @@ class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
                                     image_ref=image_ref_alt)
         self._wait_server_status_and_check_network_connectivity()
 
+    @test.idempotent_id('2b2642db-6568-4b35-b812-eceed3fa20ce')
     @testtools.skipUnless(CONF.compute_feature_enabled.pause,
                           'Pause is not available.')
     @test.services('compute', 'network')
@@ -129,6 +134,7 @@ class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
         self.servers_client.unpause_server(self.server['id'])
         self._wait_server_status_and_check_network_connectivity()
 
+    @test.idempotent_id('5cdf9499-541d-4923-804e-b9a60620a7f0')
     @testtools.skipUnless(CONF.compute_feature_enabled.suspend,
                           'Suspend is not available.')
     @test.services('compute', 'network')
@@ -142,6 +148,7 @@ class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
         self._wait_server_status_and_check_network_connectivity()
 
     @decorators.skip_because(bug="1323658")
+    @test.idempotent_id('719eb59d-2f42-4b66-b8b1-bb1254473967')
     @testtools.skipUnless(CONF.compute_feature_enabled.resize,
                           'Resize is not available.')
     @test.services('compute', 'network')

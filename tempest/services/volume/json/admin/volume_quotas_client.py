@@ -1,7 +1,5 @@
 # Copyright (C) 2014 eNovance SAS <licensing@enovance.com>
 #
-# Author: Sylvain Baubeau <sylvain.baubeau@enovance.com>
-#
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
 #    not use this file except in compliance with the License. You may obtain
 #    a copy of the License at
@@ -16,8 +14,9 @@
 
 import urllib
 
+from oslo_serialization import jsonutils
+
 from tempest.common import service_client
-from tempest.openstack.common import jsonutils
 
 
 class BaseVolumeQuotasClientJSON(service_client.ServiceClient):

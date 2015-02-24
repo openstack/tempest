@@ -12,8 +12,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib.common.utils import data_utils
+
 from tempest.api.network import base
-from tempest.common.utils import data_utils
 from tempest import test
 
 
@@ -46,6 +47,7 @@ class LBaaSAgentSchedulerTestJSON(base.BaseAdminNetworkTest):
                                    "HTTP", cls.subnet)
 
     @test.attr(type='smoke')
+    @test.idempotent_id('e5ea8b15-4f44-4350-963c-e0fcb533ee79')
     def test_list_pools_on_lbaas_agent(self):
         found = False
         body = self.admin_client.list_agents(
@@ -64,6 +66,7 @@ class LBaaSAgentSchedulerTestJSON(base.BaseAdminNetworkTest):
         self.assertTrue(found, msg)
 
     @test.attr(type='smoke')
+    @test.idempotent_id('e2745593-fd79-4b98-a262-575fd7865796')
     def test_show_lbaas_agent_hosting_pool(self):
         body = self.admin_client.show_lbaas_agent_hosting_pool(
             self.pool['id'])

@@ -36,6 +36,7 @@ Resources:
         cls.parameters = {}
 
     @test.attr(type=['gate', 'negative'])
+    @test.idempotent_id('5586cbca-ddc4-4152-9db8-fa1ce5fc1876')
     def test_validate_template_url(self):
         """Validating template passing url to it."""
         self.assertRaises(lib_exc.BadRequest,

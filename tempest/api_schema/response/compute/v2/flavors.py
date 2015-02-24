@@ -15,6 +15,7 @@
 import copy
 
 from tempest.api_schema.response.compute import flavors
+from tempest.api_schema.response.compute import parameter_types
 
 list_flavors_details = copy.deepcopy(flavors.common_flavor_list_details)
 
@@ -22,6 +23,12 @@ list_flavors_details = copy.deepcopy(flavors.common_flavor_list_details)
 # So defining type of as string and integer.
 list_flavors_details['response_body']['properties']['flavors']['items'][
     'properties']['swap'] = {'type': ['string', 'integer']}
+
+# Defining 'flavors_links' attributes for V2 flavor schema
+list_flavors_details['response_body'][
+    'properties'].update({'flavors_links': parameter_types.links})
+# NOTE(gmann): flavors_links attribute is not necessary to be
+# present always So it is not 'required'.
 
 # Defining extra attributes for V2 flavor schema
 list_flavors_details['response_body']['properties']['flavors']['items'][

@@ -24,17 +24,19 @@ class AZAdminV2TestJSON(base.BaseComputeAdminTest):
     _api_version = 2
 
     @classmethod
-    def resource_setup(cls):
-        super(AZAdminV2TestJSON, cls).resource_setup()
+    def setup_clients(cls):
+        super(AZAdminV2TestJSON, cls).setup_clients()
         cls.client = cls.availability_zone_admin_client
 
     @test.attr(type='gate')
+    @test.idempotent_id('d3431479-8a09-4f76-aa2d-26dc580cb27c')
     def test_get_availability_zone_list(self):
         # List of availability zone
         availability_zone = self.client.get_availability_zone_list()
         self.assertTrue(len(availability_zone) > 0)
 
     @test.attr(type='gate')
+    @test.idempotent_id('ef726c58-530f-44c2-968c-c7bed22d5b8c')
     def test_get_availability_zone_list_detail(self):
         # List of availability zones and available services
         availability_zone = self.client.get_availability_zone_list_detail()

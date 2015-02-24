@@ -31,11 +31,13 @@ class VolumesServicesV2TestJSON(base.BaseVolumeAdminTest):
         cls.binary_name = cls.services[0]['binary']
 
     @test.attr(type='gate')
+    @test.idempotent_id('e0218299-0a59-4f43-8b2b-f1c035b3d26d')
     def test_list_services(self):
         services = self.admin_volume_services_client.list_services()
         self.assertNotEqual(0, len(services))
 
     @test.attr(type='gate')
+    @test.idempotent_id('63a3e1ca-37ee-4983-826d-83276a370d25')
     def test_get_service_by_service_binary_name(self):
         params = {'binary': self.binary_name}
         services = self.admin_volume_services_client.list_services(params)
@@ -44,6 +46,7 @@ class VolumesServicesV2TestJSON(base.BaseVolumeAdminTest):
             self.assertEqual(self.binary_name, service['binary'])
 
     @test.attr(type='gate')
+    @test.idempotent_id('178710e4-7596-4e08-9333-745cb8bc4f8d')
     def test_get_service_by_host_name(self):
         services_on_host = [service for service in self.services if
                             service['host'] == self.host_name]
@@ -60,6 +63,7 @@ class VolumesServicesV2TestJSON(base.BaseVolumeAdminTest):
         self.assertEqual(sorted(s1), sorted(s2))
 
     @test.attr(type='gate')
+    @test.idempotent_id('ffa6167c-4497-4944-a464-226bbdb53908')
     def test_get_service_by_service_and_host_name(self):
         params = {'host': self.host_name, 'binary': self.binary_name}
 

@@ -15,7 +15,6 @@
 
 from tempest_lib import exceptions as lib_exc
 
-from tempest.api.identity import base
 from tempest import clients
 from tempest.common import credentials
 from tempest.common import custom_matchers
@@ -38,29 +37,25 @@ class BaseObjectTest(tempest.test.BaseTestCase):
     def setup_credentials(cls):
         cls.set_network_resources()
         super(BaseObjectTest, cls).setup_credentials()
-
         cls.isolated_creds = credentials.get_isolated_credentials(
             cls.__name__, network_resources=cls.network_resources)
-        # Get isolated creds for normal user
-        cls.os = clients.Manager(cls.isolated_creds.get_primary_creds())
-        # Get isolated creds for admin user
-        cls.os_admin = clients.Manager(cls.isolated_creds.get_admin_creds())
-        cls.data = SwiftDataGenerator(cls.os_admin.identity_client)
-        # Get isolated creds for alt user
-        cls.os_alt = clients.Manager(cls.isolated_creds.get_alt_creds())
+        operator_role = CONF.object_storage.operator_role
+        if not cls.isolated_creds.is_role_available(operator_role):
+            skip_msg = ("%s skipped because the configured credential provider"
+                        " is not able to provide credentials with the %s role "
+                        "assigned." % (cls.__name__, operator_role))
+            raise cls.skipException(skip_msg)
+        else:
+            # Get isolated creds for normal user
+            cls.os = clients.Manager(cls.isolated_creds.get_creds_by_roles(
+                [operator_role]))
 
     @classmethod
     def setup_clients(cls):
         super(BaseObjectTest, cls).setup_clients()
-
         cls.object_client = cls.os.object_client
         cls.container_client = cls.os.container_client
         cls.account_client = cls.os.account_client
-        cls.token_client = cls.os_admin.token_client
-        cls.identity_admin_client = cls.os_admin.identity_client
-        cls.object_client_alt = cls.os_alt.object_client
-        cls.container_client_alt = cls.os_alt.container_client
-        cls.identity_client_alt = cls.os_alt.identity_client
 
     @classmethod
     def resource_setup(cls):
@@ -70,12 +65,9 @@ class BaseObjectTest(tempest.test.BaseTestCase):
         cls.object_client.auth_provider.clear_auth()
         cls.container_client.auth_provider.clear_auth()
         cls.account_client.auth_provider.clear_auth()
-        cls.object_client_alt.auth_provider.clear_auth()
-        cls.container_client_alt.auth_provider.clear_auth()
 
     @classmethod
     def resource_cleanup(cls):
-        cls.data.teardown_all()
         cls.isolated_creds.clear_isolated_creds()
         super(BaseObjectTest, cls).resource_cleanup()
 
@@ -119,28 +111,3 @@ class BaseObjectTest(tempest.test.BaseTestCase):
         self.assertThat(resp, custom_matchers.ExistsAllResponseHeaders(
                         target, method))
         self.assertThat(resp, custom_matchers.AreAllWellFormatted())
-
-
-class SwiftDataGenerator(base.DataGenerator):
-
-    def setup_test_user(self, reseller=False):
-        super(SwiftDataGenerator, self).setup_test_user()
-        if reseller:
-            role_name = CONF.object_storage.reseller_admin_role
-        else:
-            role_name = CONF.object_storage.operator_role
-        role_id = self._get_role_id(role_name)
-        self._assign_role(role_id)
-
-    def _get_role_id(self, role_name):
-        try:
-            roles = self.client.list_roles()
-            return next(r['id'] for r in roles if r['name'] == role_name)
-        except StopIteration:
-            msg = "Role name '%s' is not found" % role_name
-            raise lib_exc.NotFound(msg)
-
-    def _assign_role(self, role_id):
-        self.client.assign_user_role(self.tenant['id'],
-                                     self.user['id'],
-                                     role_id)

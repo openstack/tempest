@@ -23,10 +23,14 @@ from tempest import test
 class TenantUsagesTestJSON(base.BaseV2ComputeAdminTest):
 
     @classmethod
-    def resource_setup(cls):
-        super(TenantUsagesTestJSON, cls).resource_setup()
+    def setup_clients(cls):
+        super(TenantUsagesTestJSON, cls).setup_clients()
         cls.adm_client = cls.os_adm.tenant_usages_client
         cls.client = cls.os.tenant_usages_client
+
+    @classmethod
+    def resource_setup(cls):
+        super(TenantUsagesTestJSON, cls).resource_setup()
         cls.tenant_id = cls.client.tenant_id
 
         # Create a server in the demo tenant
@@ -43,6 +47,7 @@ class TenantUsagesTestJSON(base.BaseV2ComputeAdminTest):
         return at.strftime('%Y-%m-%dT%H:%M:%S.%f')
 
     @test.attr(type='gate')
+    @test.idempotent_id('062c8ae9-9912-4249-8b51-e38d664e926e')
     def test_list_usage_all_tenants(self):
         # Get usage for all tenants
         params = {'start': self.start,
@@ -52,6 +57,7 @@ class TenantUsagesTestJSON(base.BaseV2ComputeAdminTest):
         self.assertEqual(len(tenant_usage), 8)
 
     @test.attr(type='gate')
+    @test.idempotent_id('94135049-a4c5-4934-ad39-08fa7da4f22e')
     def test_get_usage_tenant(self):
         # Get usage for a specific tenant
         params = {'start': self.start,
@@ -62,6 +68,7 @@ class TenantUsagesTestJSON(base.BaseV2ComputeAdminTest):
         self.assertEqual(len(tenant_usage), 8)
 
     @test.attr(type='gate')
+    @test.idempotent_id('9d00a412-b40e-4fd9-8eba-97b496316116')
     def test_get_usage_tenant_with_non_admin_user(self):
         # Get usage for a specific tenant with non admin user
         params = {'start': self.start,

@@ -110,17 +110,17 @@ import sys
 import unittest
 
 import netaddr
+from oslo_log import log as logging
+from oslo_utils import timeutils
 from tempest_lib import exceptions as lib_exc
 import yaml
 
 import tempest.auth
 from tempest import config
-from tempest.openstack.common import log as logging
-from tempest.openstack.common import timeutils
 from tempest.services.compute.json import flavors_client
 from tempest.services.compute.json import security_groups_client
 from tempest.services.compute.json import servers_client
-from tempest.services.identity.json import identity_client
+from tempest.services.identity.v2.json import identity_client
 from tempest.services.image.v2.json import image_client
 from tempest.services.network.json import network_client
 from tempest.services.object_storage import container_client
@@ -176,7 +176,14 @@ class OSClient(object):
             username=user,
             password=pw,
             tenant_name=tenant)
-        _auth = tempest.auth.KeystoneV2AuthProvider(_creds, CONF.identity.uri)
+        auth_provider_params = {
+            'disable_ssl_certificate_validation':
+                CONF.identity.disable_ssl_certificate_validation,
+            'ca_certs': CONF.identity.ca_certificates_file,
+            'trace_requests': CONF.debug.trace_requests
+        }
+        _auth = tempest.auth.KeystoneV2AuthProvider(
+            _creds, CONF.identity.uri, **auth_provider_params)
         self.identity = identity_client.IdentityClientJSON(
             _auth,
             CONF.identity.catalog_type,
@@ -193,7 +200,14 @@ class OSClient(object):
                                                   **object_storage_params)
         self.containers = container_client.ContainerClient(
             _auth, **object_storage_params)
-        self.images = image_client.ImageClientV2JSON(_auth)
+        self.images = image_client.ImageClientV2JSON(
+            _auth,
+            CONF.image.catalog_type,
+            CONF.image.region or CONF.identity.region,
+            endpoint_type=CONF.image.endpoint_type,
+            build_interval=CONF.image.build_interval,
+            build_timeout=CONF.image.build_timeout,
+            **default_params)
         self.telemetry = telemetry_client.TelemetryClientJSON(
             _auth,
             CONF.telemetry.catalog_type,
@@ -407,8 +421,7 @@ class JavelinCheck(unittest.TestCase):
             # on the cloud. We don't care about the results except that it
             # remains authorized.
             client = client_for_user(user['name'])
-            resp, body = client.servers.list_servers()
-            self.assertEqual(resp['status'], '200')
+            client.servers.list_servers()
 
     def check_objects(self):
         """Check that the objects created are still there."""
@@ -782,7 +795,7 @@ def add_router_interface(routers):
 #######################
 
 def _get_server_by_name(client, name):
-    r, body = client.servers.list_servers()
+    body = client.servers.list_servers()
     for server in body['servers']:
         if name == server['name']:
             return server
@@ -1025,7 +1038,7 @@ def get_options():
 
 def setup_logging():
     global LOG
-    logging.setup(__name__)
+    logging.setup(CONF, __name__)
     LOG = logging.getLogger(__name__)
 
 

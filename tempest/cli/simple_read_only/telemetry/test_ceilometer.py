@@ -13,9 +13,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from oslo_log import log as logging
+
 from tempest import cli
 from tempest import config
-from tempest.openstack.common import log as logging
 from tempest import test
 
 CONF = config.CONF
@@ -43,15 +44,19 @@ class SimpleReadOnlyCeilometerClientTest(cli.ClientTestBase):
         return self.clients.ceilometer(
             *args, endpoint_type=CONF.telemetry.endpoint_type, **kwargs)
 
+    @test.idempotent_id('ab717d43-a9c4-4dcf-bad8-c4777933a970')
     def test_ceilometer_meter_list(self):
         self.ceilometer('meter-list')
 
     @test.attr(type='slow')
+    @test.idempotent_id('fe2e52a4-a99b-426e-a52d-d0bde50f3e4c')
     def test_ceilometer_resource_list(self):
         self.ceilometer('resource-list')
 
+    @test.idempotent_id('eede695c-f3bf-449f-a420-02f3cc426d52')
     def test_ceilometermeter_alarm_list(self):
         self.ceilometer('alarm-list')
 
+    @test.idempotent_id('0586bcc4-8e35-415f-8f23-77b590042684')
     def test_ceilometer_version(self):
         self.ceilometer('', flags='--version')

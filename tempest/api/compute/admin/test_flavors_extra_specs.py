@@ -13,8 +13,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib.common.utils import data_utils
+
 from tempest.api.compute import base
-from tempest.common.utils import data_utils
 from tempest import test
 
 
@@ -27,13 +28,20 @@ class FlavorsExtraSpecsTestJSON(base.BaseV2ComputeAdminTest):
     """
 
     @classmethod
-    def resource_setup(cls):
-        super(FlavorsExtraSpecsTestJSON, cls).resource_setup()
+    def skip_checks(cls):
+        super(FlavorsExtraSpecsTestJSON, cls).skip_checks()
         if not test.is_extension_enabled('OS-FLV-EXT-DATA', 'compute'):
             msg = "OS-FLV-EXT-DATA extension not enabled."
             raise cls.skipException(msg)
 
+    @classmethod
+    def setup_clients(cls):
+        super(FlavorsExtraSpecsTestJSON, cls).setup_clients()
         cls.client = cls.os_adm.flavors_client
+
+    @classmethod
+    def resource_setup(cls):
+        super(FlavorsExtraSpecsTestJSON, cls).resource_setup()
         flavor_name = data_utils.rand_name('test_flavor')
         ram = 512
         vcpus = 1
@@ -57,6 +65,7 @@ class FlavorsExtraSpecsTestJSON(base.BaseV2ComputeAdminTest):
         super(FlavorsExtraSpecsTestJSON, cls).resource_cleanup()
 
     @test.attr(type='gate')
+    @test.idempotent_id('0b2f9d4b-1ca2-4b99-bb40-165d4bb94208')
     def test_flavor_set_get_update_show_unset_keys(self):
         # Test to SET, GET, UPDATE, SHOW, UNSET flavor extra
         # spec as a user with admin privileges.
@@ -87,6 +96,7 @@ class FlavorsExtraSpecsTestJSON(base.BaseV2ComputeAdminTest):
         self.client.unset_flavor_extra_spec(self.flavor['id'], "key2")
 
     @test.attr(type='gate')
+    @test.idempotent_id('a99dad88-ae1c-4fba-aeb4-32f898218bd0')
     def test_flavor_non_admin_get_all_keys(self):
         specs = {"key1": "value1", "key2": "value2"}
         self.client.set_flavor_extra_spec(self.flavor['id'], specs)
@@ -96,6 +106,7 @@ class FlavorsExtraSpecsTestJSON(base.BaseV2ComputeAdminTest):
             self.assertEqual(body[key], specs[key])
 
     @test.attr(type='gate')
+    @test.idempotent_id('12805a7f-39a3-4042-b989-701d5cad9c90')
     def test_flavor_non_admin_get_specific_key(self):
         specs = {"key1": "value1", "key2": "value2"}
         body = self.client.set_flavor_extra_spec(self.flavor['id'], specs)

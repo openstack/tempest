@@ -13,8 +13,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib.common.utils import data_utils
+
 from tempest.api.compute import base
-from tempest.common.utils import data_utils
 from tempest import test
 
 
@@ -26,14 +27,21 @@ class FlavorsAccessTestJSON(base.BaseV2ComputeAdminTest):
     """
 
     @classmethod
-    def resource_setup(cls):
-        super(FlavorsAccessTestJSON, cls).resource_setup()
+    def skip_checks(cls):
+        super(FlavorsAccessTestJSON, cls).skip_checks()
         if not test.is_extension_enabled('OS-FLV-EXT-DATA', 'compute'):
             msg = "OS-FLV-EXT-DATA extension not enabled."
             raise cls.skipException(msg)
 
-        # Compute admin flavor client
+    @classmethod
+    def setup_clients(cls):
+        super(FlavorsAccessTestJSON, cls).setup_clients()
         cls.client = cls.os_adm.flavors_client
+
+    @classmethod
+    def resource_setup(cls):
+        super(FlavorsAccessTestJSON, cls).resource_setup()
+
         # Non admin tenant ID
         cls.tenant_id = cls.flavors_client.tenant_id
         # Compute admin tenant ID
@@ -44,6 +52,7 @@ class FlavorsAccessTestJSON(base.BaseV2ComputeAdminTest):
         cls.disk = 10
 
     @test.attr(type='gate')
+    @test.idempotent_id('ea2c2211-29fa-4db9-97c3-906d36fad3e0')
     def test_flavor_access_list_with_private_flavor(self):
         # Test to make sure that list flavor access on a newly created
         # private flavor will return an empty access list
@@ -59,6 +68,7 @@ class FlavorsAccessTestJSON(base.BaseV2ComputeAdminTest):
         self.assertEqual(len(flavor_access), 0, str(flavor_access))
 
     @test.attr(type='gate')
+    @test.idempotent_id('59e622f6-bdf6-45e3-8ba8-fedad905a6b4')
     def test_flavor_access_add_remove(self):
         # Test to add and remove flavor access to a given tenant.
         flavor_name = data_utils.rand_name(self.flavor_name_prefix)

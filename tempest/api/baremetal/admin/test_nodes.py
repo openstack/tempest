@@ -11,10 +11,10 @@
 #    under the License.
 
 import six
+from tempest_lib.common.utils import data_utils
 from tempest_lib import exceptions as lib_exc
 
 from tempest.api.baremetal.admin import base
-from tempest.common.utils import data_utils
 from tempest.common import waiters
 from tempest import test
 
@@ -47,6 +47,7 @@ class TestNodes(base.BaseBaremetalTest):
         return instance_uuid
 
     @test.attr(type='smoke')
+    @test.idempotent_id('4e939eb2-8a69-4e84-8652-6fffcbc9db8f')
     def test_create_node(self):
         params = {'cpu_arch': 'x86_64',
                   'cpus': '12',
@@ -57,6 +58,7 @@ class TestNodes(base.BaseBaremetalTest):
         self._assertExpected(params, body['properties'])
 
     @test.attr(type='smoke')
+    @test.idempotent_id('9ade60a4-505e-4259-9ec4-71352cbbaf47')
     def test_delete_node(self):
         _, node = self.create_node(self.chassis['uuid'])
 
@@ -66,17 +68,20 @@ class TestNodes(base.BaseBaremetalTest):
                           node['uuid'])
 
     @test.attr(type='smoke')
+    @test.idempotent_id('55451300-057c-4ecf-8255-ba42a83d3a03')
     def test_show_node(self):
         _, loaded_node = self.client.show_node(self.node['uuid'])
         self._assertExpected(self.node, loaded_node)
 
     @test.attr(type='smoke')
+    @test.idempotent_id('4ca123c4-160d-4d8d-a3f7-15feda812263')
     def test_list_nodes(self):
         _, body = self.client.list_nodes()
         self.assertIn(self.node['uuid'],
                       [i['uuid'] for i in body['nodes']])
 
     @test.attr(type='smoke')
+    @test.idempotent_id('85b1f6e0-57fd-424c-aeff-c3422920556f')
     def test_list_nodes_association(self):
         _, body = self.client.list_nodes(associated=True)
         self.assertNotIn(self.node['uuid'],
@@ -91,6 +96,7 @@ class TestNodes(base.BaseBaremetalTest):
         self.assertNotIn(self.node['uuid'], [n['uuid'] for n in body['nodes']])
 
     @test.attr(type='smoke')
+    @test.idempotent_id('18c4ebd8-f83a-4df7-9653-9fb33a329730')
     def test_node_port_list(self):
         _, port = self.create_port(self.node['uuid'],
                                    data_utils.rand_mac_address())
@@ -99,12 +105,14 @@ class TestNodes(base.BaseBaremetalTest):
                       [p['uuid'] for p in body['ports']])
 
     @test.attr(type='smoke')
+    @test.idempotent_id('72591acb-f215-49db-8395-710d14eb86ab')
     def test_node_port_list_no_ports(self):
         _, node = self.create_node(self.chassis['uuid'])
         _, body = self.client.list_node_ports(node['uuid'])
         self.assertEmpty(body['ports'])
 
     @test.attr(type='smoke')
+    @test.idempotent_id('4fed270a-677a-4d19-be87-fd38ae490320')
     def test_update_node(self):
         props = {'cpu_arch': 'x86_64',
                  'cpus': '12',
@@ -123,6 +131,7 @@ class TestNodes(base.BaseBaremetalTest):
         self._assertExpected(new_p, node['properties'])
 
     @test.attr(type='smoke')
+    @test.idempotent_id('cbf1f515-5f4b-4e49-945c-86bcaccfeb1d')
     def test_validate_driver_interface(self):
         _, body = self.client.validate_driver_interface(self.node['uuid'])
         core_interfaces = ['power', 'deploy']
@@ -130,10 +139,12 @@ class TestNodes(base.BaseBaremetalTest):
             self.assertIn(interface, body)
 
     @test.attr(type='smoke')
+    @test.idempotent_id('5519371c-26a2-46e9-aa1a-f74226e9d71f')
     def test_set_node_boot_device(self):
         self.client.set_node_boot_device(self.node['uuid'], 'pxe')
 
     @test.attr(type='smoke')
+    @test.idempotent_id('9ea73775-f578-40b9-bc34-efc639c4f21f')
     def test_get_node_boot_device(self):
         body = self.client.get_node_boot_device(self.node['uuid'])
         self.assertIn('boot_device', body)
@@ -142,12 +153,14 @@ class TestNodes(base.BaseBaremetalTest):
         self.assertTrue(isinstance(body['persistent'], bool))
 
     @test.attr(type='smoke')
+    @test.idempotent_id('3622bc6f-3589-4bc2-89f3-50419c66b133')
     def test_get_node_supported_boot_devices(self):
         body = self.client.get_node_supported_boot_devices(self.node['uuid'])
         self.assertIn('supported_boot_devices', body)
         self.assertTrue(isinstance(body['supported_boot_devices'], list))
 
     @test.attr(type='smoke')
+    @test.idempotent_id('f63b6288-1137-4426-8cfe-0d5b7eb87c06')
     def test_get_console(self):
         _, body = self.client.get_console(self.node['uuid'])
         con_info = ['console_enabled', 'console_info']
@@ -155,6 +168,7 @@ class TestNodes(base.BaseBaremetalTest):
             self.assertIn(key, body)
 
     @test.attr(type='smoke')
+    @test.idempotent_id('80504575-9b21-4670-92d1-143b948f9437')
     def test_set_console_mode(self):
         self.client.set_console_mode(self.node['uuid'], True)
 
@@ -162,6 +176,7 @@ class TestNodes(base.BaseBaremetalTest):
         self.assertEqual(True, body['console_enabled'])
 
     @test.attr(type='smoke')
+    @test.idempotent_id('b02a4f38-5e8b-44b2-aed2-a69a36ecfd69')
     def test_get_node_by_instance_uuid(self):
         instance_uuid = self._associate_node_with_instance()
         _, body = self.client.show_node_by_instance_uuid(instance_uuid)

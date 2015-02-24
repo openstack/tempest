@@ -13,8 +13,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib.common.utils import data_utils
+
 from tempest.api.network import base
-from tempest.common.utils import data_utils
 from tempest import test
 
 
@@ -54,6 +55,7 @@ class ExtraDHCPOptionsTestJSON(base.BaseNetworkTest):
         ]
 
     @test.attr(type='smoke')
+    @test.idempotent_id('d2c17063-3767-4a24-be4f-a23dbfa133c9')
     def test_create_list_port_with_extra_dhcp_options(self):
         # Create a port with Extra DHCP Options
         body = self.client.create_port(
@@ -70,6 +72,7 @@ class ExtraDHCPOptionsTestJSON(base.BaseNetworkTest):
         self._confirm_extra_dhcp_options(port[0], self.extra_dhcp_opts)
 
     @test.attr(type='smoke')
+    @test.idempotent_id('9a6aebf4-86ee-4f47-b07a-7f7232c55607')
     def test_update_show_port_with_extra_dhcp_options(self):
         # Update port with extra dhcp options
         name = data_utils.rand_name('new-port-name')

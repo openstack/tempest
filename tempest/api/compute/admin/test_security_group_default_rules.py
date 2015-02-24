@@ -56,6 +56,7 @@ class SecurityGroupDefaultRulesTest(base.BaseV2ComputeAdminTest):
         return rule
 
     @test.attr(type='smoke')
+    @test.idempotent_id('6d880615-eec3-4d29-97c5-7a074dde239d')
     def test_create_delete_security_group_default_rules(self):
         # Create and delete Security Group default rule
         ip_protocols = ['tcp', 'udp', 'icmp']
@@ -68,6 +69,7 @@ class SecurityGroupDefaultRulesTest(base.BaseV2ComputeAdminTest):
                               rule['id'])
 
     @test.attr(type='smoke')
+    @test.idempotent_id('4d752e0a-33a1-4c3a-b498-ff8667ca22e5')
     def test_create_security_group_default_rule_without_cidr(self):
         ip_protocol = 'udp'
         from_port = 80
@@ -82,6 +84,7 @@ class SecurityGroupDefaultRulesTest(base.BaseV2ComputeAdminTest):
         self.assertEqual('0.0.0.0/0', rule['ip_range']['cidr'])
 
     @test.attr(type='smoke')
+    @test.idempotent_id('29f2d218-69b0-4a95-8f3d-6bd0ef732b3a')
     def test_create_security_group_default_rule_with_blank_cidr(self):
         ip_protocol = 'icmp'
         from_port = 10
@@ -98,6 +101,7 @@ class SecurityGroupDefaultRulesTest(base.BaseV2ComputeAdminTest):
         self.assertEqual('0.0.0.0/0', rule['ip_range']['cidr'])
 
     @test.attr(type='smoke')
+    @test.idempotent_id('6e6de55e-9146-4ae0-89f2-3569586e0b9b')
     def test_security_group_default_rules_list(self):
         ip_protocol = 'tcp'
         from_port = 22
@@ -114,6 +118,7 @@ class SecurityGroupDefaultRulesTest(base.BaseV2ComputeAdminTest):
         self.assertIn(rule, rules)
 
     @test.attr(type='smoke')
+    @test.idempotent_id('15cbb349-86b4-4f71-a048-04b7ef3f150b')
     def test_default_security_group_default_rule_show(self):
         ip_protocol = 'tcp'
         from_port = 22

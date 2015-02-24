@@ -14,8 +14,9 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
+from oslo_log import log as logging
+
 from tempest import clients
-from tempest.openstack.common import log as logging
 
 LOG = logging.getLogger(__name__)
 
@@ -23,7 +24,7 @@ LOG = logging.getLogger(__name__)
 def cleanup():
     admin_manager = clients.AdminManager()
 
-    _, body = admin_manager.servers_client.list_servers({"all_tenants": True})
+    body = admin_manager.servers_client.list_servers({"all_tenants": True})
     LOG.info("Cleanup::remove %s servers" % len(body['servers']))
     for s in body['servers']:
         try:

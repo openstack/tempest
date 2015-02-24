@@ -33,6 +33,7 @@ class BaremetalNodesAdminTestJSON(base.BaseV2ComputeAdminTest):
         cls.client = cls.os_adm.baremetal_nodes_client
 
     @test.attr(type='smoke')
+    @test.idempotent_id('e475aa6e-416d-4fa4-b3af-28d5e84250fb')
     def test_list_baremetal_nodes(self):
         # List all baremetal nodes.
         baremetal_nodes = self.client.list_baremetal_nodes()

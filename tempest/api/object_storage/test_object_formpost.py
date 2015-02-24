@@ -1,7 +1,5 @@
 # Copyright (C) 2013 eNovance SAS <licensing@enovance.com>
 #
-# Author: Christian Schwede <christian.schwede@enovance.com>
-#
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
 # a copy of the License at
@@ -19,8 +17,9 @@ import hmac
 import time
 import urlparse
 
+from tempest_lib.common.utils import data_utils
+
 from tempest.api.object_storage import base
-from tempest.common.utils import data_utils
 from tempest import test
 from tempest_lib import decorators
 
@@ -110,6 +109,7 @@ class ObjectFormPostTest(base.BaseObjectTest):
         return body, content_type
 
     @decorators.skip_because(bug="1417485")
+    @test.idempotent_id('80fac02b-6e54-4f7b-be0d-a965b5cbef76')
     @test.requires_ext(extension='formpost', service='object')
     @test.attr(type='gate')
     def test_post_object_using_form(self):

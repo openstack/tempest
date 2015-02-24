@@ -18,12 +18,12 @@ import re
 import string
 import unicodedata
 
+from tempest_lib.common.utils import misc
 import testscenarios
 import testtools
 
 from tempest import clients
 from tempest.common import cred_provider
-from tempest.common.utils import misc
 from tempest import config
 from tempest import exceptions
 

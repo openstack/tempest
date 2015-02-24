@@ -12,14 +12,16 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+from tempest_lib.common.utils import data_utils
+
 from tempest.api.image import base
-from tempest.common.utils import data_utils
 from tempest import test
 
 
 class ImagesTagsTest(base.BaseV2ImageTest):
 
     @test.attr(type='gate')
+    @test.idempotent_id('10407036-6059-4f95-a2cd-cbbbee7ed329')
     def test_update_delete_tags_for_image(self):
         body = self.create_image(container_format='bare',
                                  disk_format='raw',

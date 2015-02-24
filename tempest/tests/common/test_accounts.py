@@ -14,17 +14,17 @@
 
 import hashlib
 import os
-import tempfile
 
 import mock
-from oslo.config import cfg
+from oslo_concurrency.fixture import lockutils as lockutils_fixtures
+from oslo_config import cfg
 from oslotest import mockpatch
 
 from tempest import auth
 from tempest.common import accounts
 from tempest import config
 from tempest import exceptions
-from tempest.services.identity.json import token_client
+from tempest.services.identity.v2.json import token_client
 from tempest.tests import base
 from tempest.tests import fake_config
 from tempest.tests import fake_identity
@@ -36,9 +36,7 @@ class TestAccount(base.TestCase):
         super(TestAccount, self).setUp()
         self.useFixture(fake_config.ConfigFixture())
         self.stubs.Set(config, 'TempestConfigPrivate', fake_config.FakePrivate)
-        self.temp_dir = tempfile.mkdtemp()
-        cfg.CONF.set_default('lock_path', self.temp_dir)
-        self.addCleanup(os.rmdir, self.temp_dir)
+        self.useFixture(lockutils_fixtures.ExternalLockFixture())
         self.test_accounts = [
             {'username': 'test_user1', 'tenant_name': 'test_tenant1',
              'password': 'p'},
@@ -51,7 +49,19 @@ class TestAccount(base.TestCase):
             {'username': 'test_user5', 'tenant_name': 'test_tenant5',
              'password': 'p'},
             {'username': 'test_user6', 'tenant_name': 'test_tenant6',
-             'password': 'p'},
+             'password': 'p', 'roles': ['role1', 'role2']},
+            {'username': 'test_user7', 'tenant_name': 'test_tenant7',
+             'password': 'p', 'roles': ['role2', 'role3']},
+            {'username': 'test_user8', 'tenant_name': 'test_tenant8',
+             'password': 'p', 'roles': ['role4', 'role1']},
+            {'username': 'test_user9', 'tenant_name': 'test_tenant9',
+             'password': 'p', 'roles': ['role1', 'role2', 'role3', 'role4']},
+            {'username': 'test_user10', 'tenant_name': 'test_tenant10',
+             'password': 'p', 'roles': ['role1', 'role2', 'role3', 'role4']},
+            {'username': 'test_user11', 'tenant_name': 'test_tenant11',
+             'password': 'p', 'roles': [cfg.CONF.identity.admin_role]},
+            {'username': 'test_user12', 'tenant_name': 'test_tenant12',
+             'password': 'p', 'roles': [cfg.CONF.identity.admin_role]},
         ]
         self.useFixture(mockpatch.Patch(
             'tempest.common.accounts.read_accounts_yaml',
@@ -64,7 +74,8 @@ class TestAccount(base.TestCase):
         for account in accounts_list:
             hash = hashlib.md5()
             hash.update(str(account))
-            hash_list.append(hash.hexdigest())
+            temp_hash = hash.hexdigest()
+            hash_list.append(temp_hash)
         return hash_list
 
     def test_get_hash(self):
@@ -83,8 +94,8 @@ class TestAccount(base.TestCase):
         hash_dict = test_account_class.get_hash_dict(self.test_accounts)
         hash_list = self._get_hash_list(self.test_accounts)
         for hash in hash_list:
-            self.assertIn(hash, hash_dict.keys())
-            self.assertIn(hash_dict[hash], self.test_accounts)
+            self.assertIn(hash, hash_dict['creds'].keys())
+            self.assertIn(hash_dict['creds'][hash], self.test_accounts)
 
     def test_create_hash_file_previous_file(self):
         # Emulate the lock existing on the filesystem
@@ -104,7 +115,7 @@ class TestAccount(base.TestCase):
         self.assertTrue(res, "_create_hash_file should return True if the "
                         "pseudo-lock doesn't already exist")
 
-    @mock.patch('tempest.openstack.common.lockutils.lock')
+    @mock.patch('oslo_concurrency.lockutils.lock')
     def test_get_free_hash_no_previous_accounts(self, lock_mock):
         # Emulate no pre-existing lock
         self.useFixture(mockpatch.Patch('os.path.isdir', return_value=False))
@@ -115,13 +126,21 @@ class TestAccount(base.TestCase):
         with mock.patch('__builtin__.open', mock.mock_open(),
                         create=True) as open_mock:
             test_account_class._get_free_hash(hash_list)
-            lock_path = os.path.join(accounts.CONF.lock_path, 'test_accounts',
+            # FIXME(dhellmann): The configuration option is not part
+            # of the API of the library, because if we change the
+            # option name or group it will break this use. Tempest
+            # needs to set this value somewhere that it owns, and then
+            # use lockutils.set_defaults() to tell oslo.concurrency
+            # what value to use.
+            lock_path = os.path.join(accounts.CONF.oslo_concurrency.lock_path,
+                                     'test_accounts',
                                      hash_list[0])
             open_mock.assert_called_once_with(lock_path, 'w')
-        mkdir_path = os.path.join(accounts.CONF.lock_path, 'test_accounts')
+        mkdir_path = os.path.join(accounts.CONF.oslo_concurrency.lock_path,
+                                  'test_accounts')
         mkdir_mock.mock.assert_called_once_with(mkdir_path)
 
-    @mock.patch('tempest.openstack.common.lockutils.lock')
+    @mock.patch('oslo_concurrency.lockutils.lock')
     def test_get_free_hash_no_free_accounts(self, lock_mock):
         hash_list = self._get_hash_list(self.test_accounts)
         # Emulate pre-existing lock dir
@@ -129,10 +148,11 @@ class TestAccount(base.TestCase):
         # Emulate all lcoks in list are in use
         self.useFixture(mockpatch.Patch('os.path.isfile', return_value=True))
         test_account_class = accounts.Accounts('test_name')
-        self.assertRaises(exceptions.InvalidConfiguration,
-                          test_account_class._get_free_hash, hash_list)
+        with mock.patch('__builtin__.open', mock.mock_open(), create=True):
+            self.assertRaises(exceptions.InvalidConfiguration,
+                              test_account_class._get_free_hash, hash_list)
 
-    @mock.patch('tempest.openstack.common.lockutils.lock')
+    @mock.patch('oslo_concurrency.lockutils.lock')
     def test_get_free_hash_some_in_use_accounts(self, lock_mock):
         # Emulate no pre-existing lock
         self.useFixture(mockpatch.Patch('os.path.isdir', return_value=True))
@@ -150,11 +170,18 @@ class TestAccount(base.TestCase):
         with mock.patch('__builtin__.open', mock.mock_open(),
                         create=True) as open_mock:
             test_account_class._get_free_hash(hash_list)
-            lock_path = os.path.join(accounts.CONF.lock_path, 'test_accounts',
+            # FIXME(dhellmann): The configuration option is not part
+            # of the API of the library, because if we change the
+            # option name or group it will break this use. Tempest
+            # needs to set this value somewhere that it owns, and then
+            # use lockutils.set_defaults() to tell oslo.concurrency
+            # what value to use.
+            lock_path = os.path.join(accounts.CONF.oslo_concurrency.lock_path,
+                                     'test_accounts',
                                      hash_list[3])
-            open_mock.assert_called_once_with(lock_path, 'w')
+            open_mock.assert_has_calls([mock.call(lock_path, 'w')])
 
-    @mock.patch('tempest.openstack.common.lockutils.lock')
+    @mock.patch('oslo_concurrency.lockutils.lock')
     def test_remove_hash_last_account(self, lock_mock):
         hash_list = self._get_hash_list(self.test_accounts)
         # Pretend the pseudo-lock is there
@@ -165,13 +192,21 @@ class TestAccount(base.TestCase):
         remove_mock = self.useFixture(mockpatch.Patch('os.remove'))
         rmdir_mock = self.useFixture(mockpatch.Patch('os.rmdir'))
         test_account_class.remove_hash(hash_list[2])
-        hash_path = os.path.join(accounts.CONF.lock_path, 'test_accounts',
+        # FIXME(dhellmann): The configuration option is not part of
+        # the API of the library, because if we change the option name
+        # or group it will break this use. Tempest needs to set this
+        # value somewhere that it owns, and then use
+        # lockutils.set_defaults() to tell oslo.concurrency what value
+        # to use.
+        hash_path = os.path.join(accounts.CONF.oslo_concurrency.lock_path,
+                                 'test_accounts',
                                  hash_list[2])
-        lock_path = os.path.join(accounts.CONF.lock_path, 'test_accounts')
+        lock_path = os.path.join(accounts.CONF.oslo_concurrency.lock_path,
+                                 'test_accounts')
         remove_mock.mock.assert_called_once_with(hash_path)
         rmdir_mock.mock.assert_called_once_with(lock_path)
 
-    @mock.patch('tempest.openstack.common.lockutils.lock')
+    @mock.patch('oslo_concurrency.lockutils.lock')
     def test_remove_hash_not_last_account(self, lock_mock):
         hash_list = self._get_hash_list(self.test_accounts)
         # Pretend the pseudo-lock is there
@@ -183,7 +218,14 @@ class TestAccount(base.TestCase):
         remove_mock = self.useFixture(mockpatch.Patch('os.remove'))
         rmdir_mock = self.useFixture(mockpatch.Patch('os.rmdir'))
         test_account_class.remove_hash(hash_list[2])
-        hash_path = os.path.join(accounts.CONF.lock_path, 'test_accounts',
+        # FIXME(dhellmann): The configuration option is not part of
+        # the API of the library, because if we change the option name
+        # or group it will break this use. Tempest needs to set this
+        # value somewhere that it owns, and then use
+        # lockutils.set_defaults() to tell oslo.concurrency what value
+        # to use.
+        hash_path = os.path.join(accounts.CONF.oslo_concurrency.lock_path,
+                                 'test_accounts',
                                  hash_list[2])
         remove_mock.mock.assert_called_once_with(hash_path)
         rmdir_mock.mock.assert_not_called()
@@ -200,6 +242,62 @@ class TestAccount(base.TestCase):
         test_accounts_class = accounts.Accounts('test_name')
         self.assertFalse(test_accounts_class.is_multi_user())
 
+    def test__get_creds_by_roles_one_role(self):
+        self.useFixture(mockpatch.Patch(
+            'tempest.common.accounts.read_accounts_yaml',
+            return_value=self.test_accounts))
+        test_accounts_class = accounts.Accounts('test_name')
+        hashes = test_accounts_class.hash_dict['roles']['role4']
+        temp_hash = hashes[0]
+        get_free_hash_mock = self.useFixture(mockpatch.PatchObject(
+            test_accounts_class, '_get_free_hash', return_value=temp_hash))
+        # Test a single role returns all matching roles
+        test_accounts_class._get_creds(roles=['role4'])
+        calls = get_free_hash_mock.mock.mock_calls
+        self.assertEqual(len(calls), 1)
+        args = calls[0][1][0]
+        for i in hashes:
+            self.assertIn(i, args)
+
+    def test__get_creds_by_roles_list_role(self):
+        self.useFixture(mockpatch.Patch(
+            'tempest.common.accounts.read_accounts_yaml',
+            return_value=self.test_accounts))
+        test_accounts_class = accounts.Accounts('test_name')
+        hashes = test_accounts_class.hash_dict['roles']['role4']
+        hashes2 = test_accounts_class.hash_dict['roles']['role2']
+        hashes = list(set(hashes) & set(hashes2))
+        temp_hash = hashes[0]
+        get_free_hash_mock = self.useFixture(mockpatch.PatchObject(
+            test_accounts_class, '_get_free_hash', return_value=temp_hash))
+        # Test an intersection of multiple roles
+        test_accounts_class._get_creds(roles=['role2', 'role4'])
+        calls = get_free_hash_mock.mock.mock_calls
+        self.assertEqual(len(calls), 1)
+        args = calls[0][1][0]
+        for i in hashes:
+            self.assertIn(i, args)
+
+    def test__get_creds_by_roles_no_admin(self):
+        self.useFixture(mockpatch.Patch(
+            'tempest.common.accounts.read_accounts_yaml',
+            return_value=self.test_accounts))
+        test_accounts_class = accounts.Accounts('test_name')
+        hashes = test_accounts_class.hash_dict['creds'].keys()
+        admin_hashes = test_accounts_class.hash_dict['roles'][
+            cfg.CONF.identity.admin_role]
+        temp_hash = hashes[0]
+        get_free_hash_mock = self.useFixture(mockpatch.PatchObject(
+            test_accounts_class, '_get_free_hash', return_value=temp_hash))
+        # Test an intersection of multiple roles
+        test_accounts_class._get_creds()
+        calls = get_free_hash_mock.mock.mock_calls
+        self.assertEqual(len(calls), 1)
+        args = calls[0][1][0]
+        self.assertEqual(len(args), 10)
+        for i in admin_hashes:
+            self.assertNotIn(i, args)
+
 
 class TestNotLockingAccount(base.TestCase):
 
@@ -207,9 +305,7 @@ class TestNotLockingAccount(base.TestCase):
         super(TestNotLockingAccount, self).setUp()
         self.useFixture(fake_config.ConfigFixture())
         self.stubs.Set(config, 'TempestConfigPrivate', fake_config.FakePrivate)
-        self.temp_dir = tempfile.mkdtemp()
-        cfg.CONF.set_default('lock_path', self.temp_dir)
-        self.addCleanup(os.rmdir, self.temp_dir)
+        self.useFixture(lockutils_fixtures.ExternalLockFixture())
         self.test_accounts = [
             {'username': 'test_user1', 'tenant_name': 'test_tenant1',
              'password': 'p'},

@@ -43,8 +43,8 @@ class TestLoadBalancerBasic(manager.NetworkScenarioTest):
     """
 
     @classmethod
-    def check_preconditions(cls):
-        super(TestLoadBalancerBasic, cls).check_preconditions()
+    def skip_checks(cls):
+        super(TestLoadBalancerBasic, cls).skip_checks()
         cfg = config.network
         if not test.is_extension_enabled('lbaas', 'network'):
             msg = 'LBaaS Extension is not enabled'
@@ -57,7 +57,6 @@ class TestLoadBalancerBasic(manager.NetworkScenarioTest):
     @classmethod
     def resource_setup(cls):
         super(TestLoadBalancerBasic, cls).resource_setup()
-        cls.check_preconditions()
         cls.servers_keypairs = {}
         cls.members = []
         cls.floating_ips = {}
@@ -262,6 +261,8 @@ class TestLoadBalancerBasic(manager.NetworkScenarioTest):
                                               port_id=port_id)
         self.floating_ips.setdefault(vip.id, [])
         self.floating_ips[vip.id].append(floating_ip)
+        # Check for floating ip status before you check load-balancer
+        self.check_floating_ip_status(floating_ip, "ACTIVE")
 
     def _create_load_balancer(self):
         self._create_pool()
@@ -309,6 +310,7 @@ class TestLoadBalancerBasic(manager.NetworkScenarioTest):
         for member, counter in counters.iteritems():
             self.assertGreater(counter, 0, 'Member %s never balanced' % member)
 
+    @test.idempotent_id('c0c6f1ca-603b-4509-9c0f-2c63f0d838ee')
     @test.services('compute', 'network')
     def test_load_balancer_basic(self):
         self._create_server('server1')

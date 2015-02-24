@@ -37,13 +37,13 @@ class ServerAddressesTestJSON(base.BaseV2ComputeTest):
         cls.server = cls.create_test_server(wait_until='ACTIVE')
 
     @test.attr(type='smoke')
+    @test.idempotent_id('6eb718c0-02d9-4d5e-acd1-4e0c269cef39')
     @test.services('network')
     def test_list_server_addresses(self):
         # All public and private addresses for
         # a server should be returned
 
-        resp, addresses = self.client.list_addresses(self.server['id'])
-        self.assertEqual('200', resp['status'])
+        addresses = self.client.list_addresses(self.server['id'])
 
         # We do not know the exact network configuration, but an instance
         # should at least have a single public or private address
@@ -55,20 +55,20 @@ class ServerAddressesTestJSON(base.BaseV2ComputeTest):
                 self.assertTrue(address['version'])
 
     @test.attr(type='smoke')
+    @test.idempotent_id('87bbc374-5538-4f64-b673-2b0e4443cc30')
     @test.services('network')
     def test_list_server_addresses_by_network(self):
         # Providing a network type should filter
         # the addresses return by that type
 
-        resp, addresses = self.client.list_addresses(self.server['id'])
+        addresses = self.client.list_addresses(self.server['id'])
 
         # Once again we don't know the environment's exact network config,
         # but the response for each individual network should be the same
         # as the partial result of the full address list
         id = self.server['id']
         for addr_type in addresses:
-            resp, addr = self.client.list_addresses_by_network(id, addr_type)
-            self.assertEqual('200', resp['status'])
+            addr = self.client.list_addresses_by_network(id, addr_type)
 
             addr = addr[addr_type]
             for address in addresses[addr_type]:

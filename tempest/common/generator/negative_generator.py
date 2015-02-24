@@ -15,9 +15,10 @@
 
 import copy
 
+from oslo_log import log as logging
+
 import tempest.common.generator.base_generator as base
 import tempest.common.generator.valid_generator as valid
-from tempest.openstack.common import log as logging
 
 LOG = logging.getLogger(__name__)
 

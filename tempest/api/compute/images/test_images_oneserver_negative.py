@@ -14,12 +14,12 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from oslo_log import log as logging
+from tempest_lib.common.utils import data_utils
 from tempest_lib import exceptions as lib_exc
 
 from tempest.api.compute import base
-from tempest.common.utils import data_utils
 from tempest import config
-from tempest.openstack.common import log as logging
 from tempest import test
 
 CONF = config.CONF
@@ -56,9 +56,8 @@ class ImagesOneServerNegativeTestJSON(base.BaseV2ComputeTest):
         self.__class__.server_id = self.rebuild_server(self.server_id)
 
     @classmethod
-    def resource_setup(cls):
-        super(ImagesOneServerNegativeTestJSON, cls).resource_setup()
-        cls.client = cls.images_client
+    def skip_checks(cls):
+        super(ImagesOneServerNegativeTestJSON, cls).skip_checks()
         if not CONF.service_available.glance:
             skip_msg = ("%s skipped as glance is not available" % cls.__name__)
             raise cls.skipException(skip_msg)
@@ -68,12 +67,21 @@ class ImagesOneServerNegativeTestJSON(base.BaseV2ComputeTest):
                         % cls.__name__)
             raise cls.skipException(skip_msg)
 
+    @classmethod
+    def setup_clients(cls):
+        super(ImagesOneServerNegativeTestJSON, cls).setup_clients()
+        cls.client = cls.images_client
+
+    @classmethod
+    def resource_setup(cls):
+        super(ImagesOneServerNegativeTestJSON, cls).resource_setup()
         server = cls.create_test_server(wait_until='ACTIVE')
         cls.server_id = server['id']
 
         cls.image_ids = []
 
     @test.attr(type=['negative', 'gate'])
+    @test.idempotent_id('55d1d38c-dd66-4933-9c8e-7d92aeb60ddc')
     def test_create_image_specify_invalid_metadata(self):
         # Return an error when creating image with invalid metadata
         snapshot_name = data_utils.rand_name('test-snap-')
@@ -82,6 +90,7 @@ class ImagesOneServerNegativeTestJSON(base.BaseV2ComputeTest):
                           self.server_id, snapshot_name, meta)
 
     @test.attr(type=['negative', 'gate'])
+    @test.idempotent_id('3d24d11f-5366-4536-bd28-cff32b748eca')
     def test_create_image_specify_metadata_over_limits(self):
         # Return an error when creating image with meta data over 256 chars
         snapshot_name = data_utils.rand_name('test-snap-')
@@ -90,6 +99,7 @@ class ImagesOneServerNegativeTestJSON(base.BaseV2ComputeTest):
                           self.server_id, snapshot_name, meta)
 
     @test.attr(type=['negative', 'gate'])
+    @test.idempotent_id('0460efcf-ee88-4f94-acef-1bf658695456')
     def test_create_second_image_when_first_image_is_being_saved(self):
         # Disallow creating another image when first image is being saved
 
@@ -107,6 +117,7 @@ class ImagesOneServerNegativeTestJSON(base.BaseV2ComputeTest):
                           self.server_id, alt_snapshot_name)
 
     @test.attr(type=['negative', 'gate'])
+    @test.idempotent_id('084f0cbc-500a-4963-8a4e-312905862581')
     def test_create_image_specify_name_over_256_chars(self):
         # Return an error if snapshot name over 256 characters is passed
 
@@ -115,6 +126,7 @@ class ImagesOneServerNegativeTestJSON(base.BaseV2ComputeTest):
                           self.server_id, snapshot_name)
 
     @test.attr(type=['negative', 'gate'])
+    @test.idempotent_id('0894954d-2db2-4195-a45b-ffec0bc0187e')
     def test_delete_image_that_is_not_yet_active(self):
         # Return an error while trying to delete an image what is creating
 

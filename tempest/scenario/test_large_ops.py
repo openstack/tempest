@@ -12,11 +12,12 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
+
+from oslo_log import log as logging
+from tempest_lib.common.utils import data_utils
 from tempest_lib import exceptions as lib_exc
 
-from tempest.common.utils import data_utils
 from tempest import config
-from tempest.openstack.common import log as logging
 from tempest.scenario import manager
 from tempest import test
 
@@ -39,11 +40,19 @@ class TestLargeOpsScenario(manager.ScenarioTest):
     """
 
     @classmethod
-    def resource_setup(cls):
+    def skip_checks(cls):
+        super(TestLargeOpsScenario, cls).skip_checks()
         if CONF.scenario.large_ops_number < 1:
             raise cls.skipException("large_ops_number not set to multiple "
                                     "instances")
+
+    @classmethod
+    def setup_credentials(cls):
         cls.set_network_resources()
+        super(TestLargeOpsScenario, cls).setup_credentials()
+
+    @classmethod
+    def resource_setup(cls):
         super(TestLargeOpsScenario, cls).resource_setup()
         # list of cleanup calls to be executed in reverse order
         cls._cleanup_resources = []
@@ -87,7 +96,7 @@ class TestLargeOpsScenario(manager.ScenarioTest):
             security_groups=[{'name': secgroup['name']}])
         # needed because of bug 1199788
         params = {'name': name}
-        _, server_list = self.servers_client.list_servers(params)
+        server_list = self.servers_client.list_servers(params)
         self.servers = server_list['servers']
         for server in self.servers:
             # after deleting all servers - wait for all servers to clear
@@ -104,14 +113,17 @@ class TestLargeOpsScenario(manager.ScenarioTest):
         self.glance_image_create()
         self.nova_boot()
 
+    @test.idempotent_id('14ba0e78-2ed9-4d17-9659-a48f4756ecb3')
     @test.services('compute', 'image')
     def test_large_ops_scenario_1(self):
         self._large_ops_scenario()
 
+    @test.idempotent_id('b9b79b88-32aa-42db-8f8f-dcc8f4b4ccfe')
     @test.services('compute', 'image')
     def test_large_ops_scenario_2(self):
         self._large_ops_scenario()
 
+    @test.idempotent_id('3aab7e82-2de3-419a-9da1-9f3a070668fb')
     @test.services('compute', 'image')
     def test_large_ops_scenario_3(self):
         self._large_ops_scenario()

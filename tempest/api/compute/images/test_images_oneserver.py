@@ -13,11 +13,11 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from oslo_log import log as logging
+from tempest_lib.common.utils import data_utils
 
 from tempest.api.compute import base
-from tempest.common.utils import data_utils
 from tempest import config
-from tempest.openstack.common import log as logging
 from tempest import test
 
 CONF = config.CONF
@@ -47,9 +47,8 @@ class ImagesOneServerTestJSON(base.BaseV2ComputeTest):
             self.__class__.server_id = self.rebuild_server(self.server_id)
 
     @classmethod
-    def resource_setup(cls):
-        super(ImagesOneServerTestJSON, cls).resource_setup()
-        cls.client = cls.images_client
+    def skip_checks(cls):
+        super(ImagesOneServerTestJSON, cls).skip_checks()
         if not CONF.service_available.glance:
             skip_msg = ("%s skipped as glance is not available" % cls.__name__)
             raise cls.skipException(skip_msg)
@@ -59,6 +58,14 @@ class ImagesOneServerTestJSON(base.BaseV2ComputeTest):
                         % cls.__name__)
             raise cls.skipException(skip_msg)
 
+    @classmethod
+    def setup_clients(cls):
+        super(ImagesOneServerTestJSON, cls).setup_clients()
+        cls.client = cls.images_client
+
+    @classmethod
+    def resource_setup(cls):
+        super(ImagesOneServerTestJSON, cls).resource_setup()
         server = cls.create_test_server(wait_until='ACTIVE')
         cls.server_id = server['id']
 
@@ -67,6 +74,7 @@ class ImagesOneServerTestJSON(base.BaseV2ComputeTest):
         return flavor['disk']
 
     @test.attr(type='smoke')
+    @test.idempotent_id('3731d080-d4c5-4872-b41a-64d0d0021314')
     def test_create_delete_image(self):
 
         # Create a new image
@@ -96,6 +104,7 @@ class ImagesOneServerTestJSON(base.BaseV2ComputeTest):
         self.client.wait_for_resource_deletion(image_id)
 
     @test.attr(type=['gate'])
+    @test.idempotent_id('3b7c6fe4-dfe7-477c-9243-b06359db51e6')
     def test_create_image_specify_multibyte_character_image_name(self):
         # prefix character is:
         # http://www.fileformat.info/info/unicode/char/1F4A9/index.htm

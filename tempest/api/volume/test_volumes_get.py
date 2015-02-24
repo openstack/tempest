@@ -13,10 +13,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib.common.utils import data_utils
 from testtools import matchers
 
 from tempest.api.volume import base
-from tempest.common.utils import data_utils
 from tempest import config
 from tempest import test
 
@@ -108,7 +108,7 @@ class VolumesV2GetTest(base.BaseVolumeTest):
         new_v_desc = data_utils.rand_name('@#$%^* description')
         params = {self.descrip_field: new_v_desc,
                   'availability_zone': volume['availability_zone']}
-        new_volume = self.client.create_volume(size=1, **params)
+        new_volume = self.client.create_volume(**params)
         self.assertIn('id', new_volume)
         self.addCleanup(self._delete_volume, new_volume['id'])
         self.client.wait_for_volume_status(new_volume['id'], 'available')
@@ -123,15 +123,18 @@ class VolumesV2GetTest(base.BaseVolumeTest):
             self.assertEqual('false', updated_volume['bootable'])
 
     @test.attr(type='smoke')
+    @test.idempotent_id('27fb0e9f-fb64-41dd-8bdb-1ffa762f0d51')
     def test_volume_create_get_update_delete(self):
         self._volume_create_get_update_delete()
 
     @test.attr(type='smoke')
+    @test.idempotent_id('54a01030-c7fc-447c-86ee-c1182beae638')
     @test.services('image')
     def test_volume_create_get_update_delete_from_image(self):
         self._volume_create_get_update_delete(imageRef=CONF.compute.image_ref)
 
     @test.attr(type='gate')
+    @test.idempotent_id('3f591b4a-7dc6-444c-bd51-77469506b3a1')
     def test_volume_create_get_update_delete_as_clone(self):
         origin = self.create_volume()
         self._volume_create_get_update_delete(source_volid=origin['id'])

@@ -13,11 +13,13 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest.common.utils import data_utils
+from oslo_log import log as logging
+from tempest_lib.common.utils import data_utils
+
 from tempest.common.utils.linux import remote_client
 from tempest import config
 from tempest import exceptions
-from tempest.openstack.common import log as logging
+from tempest import test
 from tempest.thirdparty.boto import test as boto_test
 from tempest.thirdparty.boto.utils import s3
 from tempest.thirdparty.boto.utils import wait
@@ -30,13 +32,17 @@ LOG = logging.getLogger(__name__)
 class InstanceRunTest(boto_test.BotoTestCase):
 
     @classmethod
+    def setup_clients(cls):
+        super(InstanceRunTest, cls).setup_clients()
+        cls.s3_client = cls.os.s3_client
+        cls.ec2_client = cls.os.ec2api_client
+
+    @classmethod
     def resource_setup(cls):
         super(InstanceRunTest, cls).resource_setup()
         if not cls.conclusion['A_I_IMAGES_READY']:
             raise cls.skipException("".join(("EC2 ", cls.__name__,
                                     ": requires ami/aki/ari manifest")))
-        cls.s3_client = cls.os.s3_client
-        cls.ec2_client = cls.os.ec2api_client
         cls.zone = CONF.boto.aws_zone
         cls.materials_path = CONF.boto.s3_materials_path
         ami_manifest = CONF.boto.ami_manifest
@@ -87,6 +93,7 @@ class InstanceRunTest(boto_test.BotoTestCase):
             self.assertInstanceStateWait(instance, '_GONE')
         self.cancelResourceCleanUp(rcuk)
 
+    @test.idempotent_id('c881fbb7-d56e-4054-9d76-1c3a60a207b0')
     def test_run_idempotent_instances(self):
         # EC2 run instances idempotently
 
@@ -119,6 +126,7 @@ class InstanceRunTest(boto_test.BotoTestCase):
         self._terminate_reservation(reservation_1, rcuk_1)
         self._terminate_reservation(reservation_2, rcuk_2)
 
+    @test.idempotent_id('2ea26a39-f96c-48fc-8374-5c10ec184c67')
     def test_run_stop_terminate_instance(self):
         # EC2 run, stop and terminate instance
         image_ami = self.ec2_client.get_image(self.images["ami"]
@@ -141,6 +149,7 @@ class InstanceRunTest(boto_test.BotoTestCase):
 
         self._terminate_reservation(reservation, rcuk)
 
+    @test.idempotent_id('3d77225a-5cec-4e54-a017-9ebf11a266e6')
     def test_run_stop_terminate_instance_with_tags(self):
         # EC2 run, stop and terminate instance with tags
         image_ami = self.ec2_client.get_image(self.images["ami"]
@@ -193,6 +202,7 @@ class InstanceRunTest(boto_test.BotoTestCase):
 
         self._terminate_reservation(reservation, rcuk)
 
+    @test.idempotent_id('252945b5-3294-4fda-ae21-928a42f63f76')
     def test_run_terminate_instance(self):
         # EC2 run, terminate immediately
         image_ami = self.ec2_client.get_image(self.images["ami"]
@@ -205,6 +215,7 @@ class InstanceRunTest(boto_test.BotoTestCase):
             instance.terminate()
         self.assertInstanceStateWait(instance, '_GONE')
 
+    @test.idempotent_id('ab836c29-737b-4101-9fb9-87045eaf89e9')
     def test_compute_with_volumes(self):
         # EC2 1. integration test (not strict)
         image_ami = self.ec2_client.get_image(self.images["ami"]["image_id"])
@@ -239,7 +250,8 @@ class InstanceRunTest(boto_test.BotoTestCase):
 
         self.addResourceCleanUp(self.destroy_reservation,
                                 reservation)
-        volume = self.ec2_client.create_volume(1, self.zone)
+        volume = self.ec2_client.create_volume(CONF.volume.volume_size,
+                                               self.zone)
         LOG.debug("Volume created - status: %s", volume.status)
 
         self.addResourceCleanUp(self.destroy_volume_wait, volume)

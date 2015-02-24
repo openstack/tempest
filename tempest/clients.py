@@ -15,11 +15,12 @@
 
 import copy
 
+from oslo_log import log as logging
+
 from tempest.common import cred_provider
 from tempest.common import negative_rest_client
 from tempest import config
 from tempest import manager
-from tempest.openstack.common import log as logging
 from tempest.services.baremetal.v1.json.baremetal_client import \
     BaremetalClientJSON
 from tempest.services import botoclients
@@ -74,8 +75,9 @@ from tempest.services.database.json.limits_client import \
     DatabaseLimitsClientJSON
 from tempest.services.database.json.versions_client import \
     DatabaseVersionsClientJSON
-from tempest.services.identity.json.identity_client import IdentityClientJSON
-from tempest.services.identity.json.token_client import TokenClientJSON
+from tempest.services.identity.v2.json.identity_client import \
+    IdentityClientJSON
+from tempest.services.identity.v2.json.token_client import TokenClientJSON
 from tempest.services.identity.v3.json.credentials_client import \
     CredentialsClientJSON
 from tempest.services.identity.v3.json.endpoints_client import \
@@ -194,8 +196,22 @@ class Manager(manager.Manager):
                 endpoint_type=CONF.telemetry.endpoint_type,
                 **self.default_params_with_timeout_values)
         if CONF.service_available.glance:
-            self.image_client = ImageClientJSON(self.auth_provider)
-            self.image_client_v2 = ImageClientV2JSON(self.auth_provider)
+            self.image_client = ImageClientJSON(
+                self.auth_provider,
+                CONF.image.catalog_type,
+                CONF.image.region or CONF.identity.region,
+                endpoint_type=CONF.image.endpoint_type,
+                build_interval=CONF.image.build_interval,
+                build_timeout=CONF.image.build_timeout,
+                **self.default_params)
+            self.image_client_v2 = ImageClientV2JSON(
+                self.auth_provider,
+                CONF.image.catalog_type,
+                CONF.image.region or CONF.identity.region,
+                endpoint_type=CONF.image.endpoint_type,
+                build_interval=CONF.image.build_interval,
+                build_timeout=CONF.image.build_timeout,
+                **self.default_params)
         self.orchestration_client = OrchestrationClient(
             self.auth_provider,
             CONF.orchestration.catalog_type,
@@ -213,13 +229,14 @@ class Manager(manager.Manager):
         self.negative_client = negative_rest_client.NegativeRestClient(
             self.auth_provider, service)
 
-        # TODO(andreaf) EC2 client still do their auth, v2 only
-        ec2_client_args = (self.credentials.username,
-                           self.credentials.password,
-                           CONF.identity.uri,
-                           self.credentials.tenant_name)
-        self.ec2api_client = botoclients.APIClientEC2(*ec2_client_args)
-        self.s3_client = botoclients.ObjectClientS3(*ec2_client_args)
+        # Generating EC2 credentials in tempest is only supported
+        # with identity v2
+        if CONF.identity_feature_enabled.api_v2 and \
+                CONF.identity.auth_version == 'v2':
+            # EC2 and S3 clients, if used, will check onfigured AWS credentials
+            # and generate new ones if needed
+            self.ec2api_client = botoclients.APIClientEC2(self.identity_client)
+            self.s3_client = botoclients.ObjectClientS3(self.identity_client)
 
     def _set_compute_clients(self):
         params = {
@@ -239,7 +256,11 @@ class Manager(manager.Manager):
             SecurityGroupDefaultRulesClientJSON(self.auth_provider, **params))
         self.certificates_client = CertificatesClientJSON(self.auth_provider,
                                                           **params)
-        self.servers_client = ServersClientJSON(self.auth_provider, **params)
+        self.servers_client = ServersClientJSON(
+            self.auth_provider,
+            enable_instance_password=CONF.compute_feature_enabled
+                .enable_instance_password,
+            **params)
         self.limits_client = LimitsClientJSON(self.auth_provider, **params)
         self.images_client = ImagesClientJSON(self.auth_provider, **params)
         self.keypairs_client = KeyPairsClientJSON(self.auth_provider, **params)
@@ -282,7 +303,8 @@ class Manager(manager.Manager):
             'build_timeout': CONF.volume.build_timeout
         })
         self.volumes_extensions_client = VolumesExtensionsClientJSON(
-            self.auth_provider, **params_volume)
+            self.auth_provider, default_volume_size=CONF.volume.volume_size,
+            **params_volume)
 
     def _set_database_clients(self):
         self.database_flavors_client = DatabaseFlavorsClientJSON(
@@ -320,9 +342,12 @@ class Manager(manager.Manager):
         self.region_client = RegionClientJSON(self.auth_provider, **params)
         self.credentials_client = CredentialsClientJSON(self.auth_provider,
                                                         **params)
-        self.token_client = TokenClientJSON(CONF.identity.uri)
+        # Token clients do not use the catalog. They only need default_params.
+        self.token_client = TokenClientJSON(CONF.identity.uri,
+                                            **self.default_params)
         if CONF.identity_feature_enabled.api_v3:
-            self.token_v3_client = V3TokenClientJSON(CONF.identity.uri_v3)
+            self.token_v3_client = V3TokenClientJSON(CONF.identity.uri_v3,
+                                                     **self.default_params)
 
     def _set_volume_clients(self):
         params = {

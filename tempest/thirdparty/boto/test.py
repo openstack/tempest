@@ -24,13 +24,15 @@ from boto import ec2
 from boto import exception
 from boto import s3
 import keystoneclient.exceptions
+from oslo_log import log as logging
 import six
+
+from tempest_lib import exceptions as lib_exc
 
 import tempest.clients
 from tempest.common.utils import file_utils
 from tempest import config
 from tempest import exceptions
-from tempest.openstack.common import log as logging
 import tempest.test
 from tempest.thirdparty.boto.utils import wait
 
@@ -65,6 +67,8 @@ def decision_maker():
         if not secret_matcher.match(connection_data["aws_secret_access_key"]):
             raise Exception("Invalid AWS secret Key")
         raise Exception("Unknown (Authentication?) Error")
+    # NOTE(andreaf) Setting up an extra manager here is redundant,
+    # and should be removed.
     openstack = tempest.clients.Manager()
     try:
         if urlparse.urlparse(CONF.boto.ec2_url).hostname is None:
@@ -77,7 +81,7 @@ def decision_maker():
                     raise Exception("EC2 target does not looks EC2 service")
                 _cred_sub_check(ec2client.connection_data)
 
-    except keystoneclient.exceptions.Unauthorized:
+    except lib_exc.Unauthorized:
         EC2_CAN_CONNECT_ERROR = "AWS credentials not set," +\
                                 " failed to get them even by keystoneclient"
     except Exception as exc:
@@ -201,10 +205,14 @@ class BotoTestCase(tempest.test.BaseTestCase):
             raise cls.skipException("The EC2 API is not available")
 
     @classmethod
+    def setup_credentials(cls):
+        super(BotoTestCase, cls).setup_credentials()
+        cls.os = cls.get_client_manager()
+
+    @classmethod
     def resource_setup(cls):
         super(BotoTestCase, cls).resource_setup()
         cls.conclusion = decision_maker()
-        cls.os = cls.get_client_manager()
         # The trash contains cleanup functions and paramaters in tuples
         # (function, *args, **kwargs)
         cls._resource_trash_bin = {}

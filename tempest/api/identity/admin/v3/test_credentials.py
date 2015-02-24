@@ -13,8 +13,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib.common.utils import data_utils
+
 from tempest.api.identity import base
-from tempest.common.utils import data_utils
 from tempest import test
 
 
@@ -51,6 +52,7 @@ class CredentialsTestJSON(base.BaseIdentityV3AdminTest):
         self.creds_client.delete_credential(cred_id)
 
     @test.attr(type='smoke')
+    @test.idempotent_id('7cd59bf9-bda4-4c72-9467-d21cab278355')
     def test_credentials_create_get_update_delete(self):
         keys = [data_utils.rand_name('Access-'),
                 data_utils.rand_name('Secret-')]
@@ -83,6 +85,7 @@ class CredentialsTestJSON(base.BaseIdentityV3AdminTest):
                              get_body['blob'][value2])
 
     @test.attr(type='smoke')
+    @test.idempotent_id('13202c00-0021-42a1-88d4-81b44d448aab')
     def test_credentials_list_delete(self):
         created_cred_ids = list()
         fetched_cred_ids = list()

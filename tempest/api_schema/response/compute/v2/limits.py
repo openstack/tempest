@@ -38,8 +38,15 @@ get_limit = {
                             'maxSecurityGroupRules': {'type': 'integer'},
                             'maxTotalKeypairs': {'type': 'integer'},
                             'totalRAMUsed': {'type': 'integer'},
-                            'totalInstancesUsed': {'type': 'integer'}
+                            'totalInstancesUsed': {'type': 'integer'},
+                            'maxServerGroupMembers': {'type': 'integer'},
+                            'maxServerGroups': {'type': 'integer'},
+                            'totalServerGroupsUsed': {'type': 'integer'}
                         },
+                        # NOTE(gmann): maxServerGroupMembers,  maxServerGroups
+                        # and totalServerGroupsUsed are API extension,
+                        # and some environments return a response without these
+                        # attributes.So they are not 'required'.
                         'required': ['maxImageMeta',
                                      'maxPersonality',
                                      'maxPersonalitySize',
