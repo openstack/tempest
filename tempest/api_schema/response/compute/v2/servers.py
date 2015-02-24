@@ -30,10 +30,10 @@ create_server = {
                     'links': parameter_types.links,
                     'OS-DCF:diskConfig': {'type': 'string'}
                 },
-                # NOTE: OS-DCF:diskConfig is API extension, and some
-                # environments return a response without the attribute.
-                # So it is not 'required'.
-                'required': ['id', 'security_groups', 'links']
+                # NOTE: OS-DCF:diskConfig & security_groups are API extension,
+                # and some environments return a response without these
+                # attributes.So they are not 'required'.
+                'required': ['id', 'links']
             }
         },
         'required': ['server']
@@ -64,6 +64,7 @@ get_server = copy.deepcopy(servers.base_update_get_server)
 get_server['response_body']['properties']['server']['properties'].update({
     'key_name': {'type': ['string', 'null']},
     'hostId': {'type': 'string'},
+    'security_groups': {'type': 'array'},
 
     # NOTE: Non-admin users also can see "OS-SRV-USG" and "OS-EXT-AZ"
     # attributes.
@@ -288,10 +289,11 @@ list_servers_detail['response_body']['properties']['servers']['items'][
     'properties'].update({
         'hostId': {'type': 'string'},
         'OS-DCF:diskConfig': {'type': 'string'},
+        'security_groups': {'type': 'array'},
         'accessIPv4': parameter_types.access_ip_v4,
         'accessIPv6': parameter_types.access_ip_v6
     })
-# NOTE(GMann): OS-DCF:diskConfig and accessIPv4/v6 are API
+# NOTE(GMann): OS-DCF:diskConfig, security_groups and accessIPv4/v6 are API
 # extensions, and some environments return a response
 # without these attributes. So they are not 'required'.
 list_servers_detail['response_body']['properties']['servers']['items'][
