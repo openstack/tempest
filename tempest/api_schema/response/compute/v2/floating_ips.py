@@ -146,8 +146,14 @@ list_floating_ips_bulk = {
                         'instance_uuid': {'type': ['string', 'null']},
                         'interface': {'type': ['string', 'null']},
                         'pool': {'type': ['string', 'null']},
-                        'project_id': {'type': ['string', 'null']}
+                        'project_id': {'type': ['string', 'null']},
+                        'fixed_ip': {
+                            'type': ['string', 'null'],
+                            'format': 'ip-address'
+                        }
                     },
+                    # NOTE: fixed_ip is introduced after JUNO release,
+                    # So it is not defined as 'required'.
                     'required': ['address', 'instance_uuid', 'interface',
                                  'pool', 'project_id']
                 }
