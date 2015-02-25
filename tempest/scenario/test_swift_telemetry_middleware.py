@@ -79,15 +79,15 @@ class TestSwiftTelemetry(manager.SwiftScenarioTest):
                 meta = sample['resource_metadata']
                 if meta.get('container') and meta['container'] != 'None':
                     containers.append(meta['container'])
-                elif (meta.get('target') and
-                      meta['target']['metadata']['container'] != 'None'):
-                    containers.append(meta['target']['metadata']['container'])
+                elif (meta.get('target.metadata:container') and
+                      meta['target.metadata:container'] != 'None'):
+                    containers.append(meta['target.metadata:container'])
 
                 if meta.get('object') and meta['object'] != 'None':
                     objects.append(meta['object'])
-                elif (meta.get('target') and
-                      meta['target']['metadata']['object'] != 'None'):
-                    objects.append(meta['target']['metadata']['object'])
+                elif (meta.get('target.metadata:object') and
+                      meta['target.metadata:object'] != 'None'):
+                    objects.append(meta['target.metadata:object'])
 
             return (container_name in containers and obj_name in objects)
 
