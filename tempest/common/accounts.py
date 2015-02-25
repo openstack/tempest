@@ -100,7 +100,7 @@ class Accounts(cred_provider.CredentialProvider):
         hash_path = os.path.join(self.accounts_dir, hash_string)
         if not os.path.isfile(hash_path):
             LOG.warning('Expected an account lock file %s to remove, but '
-                        'one did not exist')
+                        'one did not exist' % hash_path)
         else:
             os.remove(hash_path)
             if not os.listdir(self.accounts_dir):
