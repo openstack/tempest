@@ -57,11 +57,15 @@ class TestDashboardBasicOps(manager.ScenarioTest):
     """
 
     @classmethod
-    def resource_setup(cls):
+    def skip_checks(cls):
+        super(TestDashboardBasicOps, cls).skip_checks()
         if not CONF.service_available.horizon:
             raise cls.skipException("Horizon support is required")
+
+    @classmethod
+    def setup_credentials(cls):
         cls.set_network_resources()
-        super(TestDashboardBasicOps, cls).resource_setup()
+        super(TestDashboardBasicOps, cls).setup_credentials()
 
     def check_login_page(self):
         response = urllib2.urlopen(CONF.dashboard.dashboard_url)

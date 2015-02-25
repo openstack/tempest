@@ -41,8 +41,8 @@ class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
     """
 
     @classmethod
-    def check_preconditions(cls):
-        super(TestNetworkAdvancedServerOps, cls).check_preconditions()
+    def skip_checks(cls):
+        super(TestNetworkAdvancedServerOps, cls).skip_checks()
         if not (CONF.network.tenant_networks_reachable
                 or CONF.network.public_network_id):
             msg = ('Either tenant_networks_reachable must be "true", or '
@@ -50,10 +50,10 @@ class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
             raise cls.skipException(msg)
 
     @classmethod
-    def resource_setup(cls):
+    def setup_credentials(cls):
         # Create no network resources for these tests.
         cls.set_network_resources()
-        super(TestNetworkAdvancedServerOps, cls).resource_setup()
+        super(TestNetworkAdvancedServerOps, cls).setup_credentials()
 
     def _setup_network_and_servers(self):
         self.keypair = self.create_keypair()

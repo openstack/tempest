@@ -38,10 +38,10 @@ class TestVolumeBootPattern(manager.ScenarioTest):
      * Check written content in the instance booted from snapshot
     """
     @classmethod
-    def resource_setup(cls):
+    def skip_checks(cls):
+        super(TestVolumeBootPattern, cls).skip_checks()
         if not CONF.volume_feature_enabled.snapshot:
             raise cls.skipException("Cinder volume snapshots are disabled")
-        super(TestVolumeBootPattern, cls).resource_setup()
 
     def _create_volume_from_image(self):
         img_uuid = CONF.compute.image_ref

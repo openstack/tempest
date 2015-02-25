@@ -77,23 +77,23 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
     """
 
     @classmethod
-    def check_preconditions(cls):
-        super(TestNetworkBasicOps, cls).check_preconditions()
+    def skip_checks(cls):
+        super(TestNetworkBasicOps, cls).skip_checks()
         if not (CONF.network.tenant_networks_reachable
                 or CONF.network.public_network_id):
             msg = ('Either tenant_networks_reachable must be "true", or '
                    'public_network_id must be defined.')
             raise cls.skipException(msg)
-
-    @classmethod
-    def resource_setup(cls):
         for ext in ['router', 'security-group']:
             if not test.is_extension_enabled(ext, 'network'):
                 msg = "%s extension not enabled." % ext
                 raise cls.skipException(msg)
+
+    @classmethod
+    def setup_credentials(cls):
         # Create no network resources for these tests.
         cls.set_network_resources()
-        super(TestNetworkBasicOps, cls).resource_setup()
+        super(TestNetworkBasicOps, cls).setup_credentials()
 
     def setUp(self):
         super(TestNetworkBasicOps, self).setUp()

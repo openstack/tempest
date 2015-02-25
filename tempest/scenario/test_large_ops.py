@@ -39,11 +39,19 @@ class TestLargeOpsScenario(manager.ScenarioTest):
     """
 
     @classmethod
-    def resource_setup(cls):
+    def skip_checks(cls):
+        super(TestLargeOpsScenario, cls).skip_checks()
         if CONF.scenario.large_ops_number < 1:
             raise cls.skipException("large_ops_number not set to multiple "
                                     "instances")
+
+    @classmethod
+    def setup_credentials(cls):
         cls.set_network_resources()
+        super(TestLargeOpsScenario, cls).setup_credentials()
+
+    @classmethod
+    def resource_setup(cls):
         super(TestLargeOpsScenario, cls).resource_setup()
         # list of cleanup calls to be executed in reverse order
         cls._cleanup_resources = []
