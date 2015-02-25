@@ -296,15 +296,34 @@ get_instance_action = {
 list_servers_detail = copy.deepcopy(servers.base_list_servers_detail)
 list_servers_detail['response_body']['properties']['servers']['items'][
     'properties'].update({
+        'key_name': {'type': ['string', 'null']},
         'hostId': {'type': 'string'},
         'OS-DCF:diskConfig': {'type': 'string'},
         'security_groups': {'type': 'array'},
+
+        # NOTE: Non-admin users also can see "OS-SRV-USG" and "OS-EXT-AZ"
+        # attributes.
+        'OS-SRV-USG:launched_at': {'type': ['string', 'null']},
+        'OS-SRV-USG:terminated_at': {'type': ['string', 'null']},
+        'OS-EXT-AZ:availability_zone': {'type': 'string'},
+
+        # NOTE: Admin users only can see "OS-EXT-STS" and "OS-EXT-SRV-ATTR"
+        # attributes.
+        'OS-EXT-STS:task_state': {'type': ['string', 'null']},
+        'OS-EXT-STS:vm_state': {'type': 'string'},
+        'OS-EXT-STS:power_state': {'type': 'integer'},
+        'OS-EXT-SRV-ATTR:host': {'type': ['string', 'null']},
+        'OS-EXT-SRV-ATTR:instance_name': {'type': 'string'},
+        'OS-EXT-SRV-ATTR:hypervisor_hostname': {'type': ['string', 'null']},
+        'os-extended-volumes:volumes_attached': {'type': 'array'},
         'accessIPv4': parameter_types.access_ip_v4,
-        'accessIPv6': parameter_types.access_ip_v6
+        'accessIPv6': parameter_types.access_ip_v6,
+        'config_drive': {'type': 'string'}
     })
-# NOTE(GMann): OS-DCF:diskConfig, security_groups and accessIPv4/v6
-# are API extensions, and some environments return a response
-# without these attributes. So they are not 'required'.
+# NOTE(GMann): OS-SRV-USG, OS-EXT-AZ, OS-EXT-STS, OS-EXT-SRV-ATTR,
+# os-extended-volumes, OS-DCF and accessIPv4/v6 are API
+# extensions, and some environments return a response without
+# these attributes. So they are not 'required'.
 list_servers_detail['response_body']['properties']['servers']['items'][
     'required'].append('hostId')
 # NOTE(gmann): Update OS-EXT-IPS:type and OS-EXT-IPS-MAC:mac_addr
