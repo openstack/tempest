@@ -31,8 +31,9 @@ class AccountQuotasNegativeTest(base.BaseObjectTest):
     @classmethod
     def setup_credentials(cls):
         super(AccountQuotasNegativeTest, cls).setup_credentials()
-        cls.data.setup_test_user(reseller=True)
-        cls.os_reselleradmin = clients.Manager(cls.data.test_credentials)
+        cls.os_reselleradmin = clients.Manager(
+            cls.isolated_creds.get_creds_by_roles(
+                roles=[CONF.object_storage.reseller_admin_role]))
 
     @classmethod
     def resource_setup(cls):
