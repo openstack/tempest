@@ -144,8 +144,11 @@ list_servers = {
                     },
                     'required': ['id', 'links', 'name']
                 }
-            }
+            },
+            'servers_links': parameter_types.links
         },
+        # NOTE(gmann): servers_links attribute is not necessary to be
+        # present always So it is not 'required'.
         'required': ['servers']
     }
 }
