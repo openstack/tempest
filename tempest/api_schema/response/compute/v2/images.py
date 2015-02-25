@@ -40,11 +40,12 @@ common_image_schema = {
             },
             'required': ['id', 'links']
         },
-        'OS-EXT-IMG-SIZE:size': {'type': 'integer'}
+        'OS-EXT-IMG-SIZE:size': {'type': 'integer'},
+        'OS-DCF:diskConfig': {'type': 'string'}
     },
     # 'server' attributes only comes in response body if image is
-    # associated with any server. 'OS-EXT-IMG-SIZE:size' is API
-    # extension, So those are not defined as 'required'.
+    # associated with any server. 'OS-EXT-IMG-SIZE:size' & 'OS-DCF:diskConfig'
+    # are API extension,  So those are not defined as 'required'.
     'required': ['id', 'status', 'updated', 'links', 'name',
                  'created', 'minDisk', 'minRam', 'progress',
                  'metadata']
