@@ -47,21 +47,28 @@ class Manager(object):
         if not self.credentials.is_valid():
             raise exceptions.InvalidCredentials()
         # Creates an auth provider for the credentials
-        self.auth_provider = self.get_auth_provider(self.credentials)
+        self.auth_provider = get_auth_provider(self.credentials)
         # FIXME(andreaf) unused
         self.client_attr_names = []
 
-    @classmethod
-    def get_auth_provider_class(cls, credentials):
-        if isinstance(credentials, auth.KeystoneV3Credentials):
-            return auth.KeystoneV3AuthProvider, CONF.identity.uri_v3
-        else:
-            return auth.KeystoneV2AuthProvider, CONF.identity.uri
 
-    def get_auth_provider(self, credentials):
-        if credentials is None:
-            raise exceptions.InvalidCredentials(
-                'Credentials must be specified')
-        auth_provider_class, auth_url = self.get_auth_provider_class(
-            credentials)
-        return auth_provider_class(credentials, auth_url)
+def get_auth_provider_class(credentials):
+    if isinstance(credentials, auth.KeystoneV3Credentials):
+        return auth.KeystoneV3AuthProvider, CONF.identity.uri_v3
+    else:
+        return auth.KeystoneV2AuthProvider, CONF.identity.uri
+
+
+def get_auth_provider(credentials):
+    default_params = {
+        'disable_ssl_certificate_validation':
+            CONF.identity.disable_ssl_certificate_validation,
+        'ca_certs': CONF.identity.ca_certificates_file,
+        'trace_requests': CONF.debug.trace_requests
+    }
+    if credentials is None:
+        raise exceptions.InvalidCredentials(
+            'Credentials must be specified')
+    auth_provider_class, auth_url = get_auth_provider_class(
+        credentials)
+    return auth_provider_class(credentials, auth_url, **default_params)
