@@ -36,18 +36,18 @@ class TestMessages(base.BaseMessagingTest):
 
     def _post_messages(self, repeat=CONF.messaging.max_messages_per_page):
         message_body = self.generate_message_body(repeat=repeat)
-        body = self.post_messages(queue_name=self.queue_name,
-                                  rbody=message_body)
-        return body
+        resp, body = self.post_messages(queue_name=self.queue_name,
+                                        rbody=message_body)
+        return resp, body
 
     @test.attr(type='smoke')
     def test_post_messages(self):
         # Post Messages
-        resp = self._post_messages().response
+        resp, _ = self._post_messages()
 
         # Get on the posted messages
         message_uri = resp['location']
-        resp = self.client.get_multiple_messages(message_uri).response
+        resp, _ = self.client.get_multiple_messages(message_uri)
         # The test has an assertion here, because the response cannot be 204
         # in this case (the client allows 200 or 204 for this API call).
         self.assertEqual('200', resp['status'])
@@ -58,7 +58,7 @@ class TestMessages(base.BaseMessagingTest):
         self._post_messages()
 
         # List Messages
-        resp = self.list_messages(queue_name=self.queue_name).response
+        resp, _ = self.list_messages(queue_name=self.queue_name)
         # The test has an assertion here, because the response cannot be 204
         # in this case (the client allows 200 or 204 for this API call).
         self.assertEqual('200', resp['status'])
@@ -66,11 +66,11 @@ class TestMessages(base.BaseMessagingTest):
     @test.attr(type='smoke')
     def test_get_message(self):
         # Post Messages
-        body = self._post_messages()
+        _, body = self._post_messages()
         message_uri = body['resources'][0]
 
         # Get posted message
-        resp = self.client.get_single_message(message_uri).response
+        resp, _ = self.client.get_single_message(message_uri)
         # The test has an assertion here, because the response cannot be 204
         # in this case (the client allows 200 or 204 for this API call).
         self.assertEqual('200', resp['status'])
@@ -78,11 +78,11 @@ class TestMessages(base.BaseMessagingTest):
     @test.attr(type='smoke')
     def test_get_multiple_messages(self):
         # Post Messages
-        resp = self._post_messages().response
+        resp, _ = self._post_messages()
         message_uri = resp['location']
 
         # Get posted messages
-        resp = self.client.get_multiple_messages(message_uri).response
+        resp, _ = self.client.get_multiple_messages(message_uri)
         # The test has an assertion here, because the response cannot be 204
         # in this case (the client allows 200 or 204 for this API call).
         self.assertEqual('200', resp['status'])
@@ -90,14 +90,14 @@ class TestMessages(base.BaseMessagingTest):
     @test.attr(type='smoke')
     def test_delete_single_message(self):
         # Post Messages
-        body = self._post_messages()
+        _, body = self._post_messages()
         message_uri = body['resources'][0]
 
         # Delete posted message & verify the delete operration
         self.client.delete_messages(message_uri)
 
         message_uri = message_uri.replace('/messages/', '/messages?ids=')
-        resp = self.client.get_multiple_messages(message_uri).response
+        resp, _ = self.client.get_multiple_messages(message_uri)
         # The test has an assertion here, because the response has to be 204
         # in this case (the client allows 200 or 204 for this API call).
         self.assertEqual('204', resp['status'])
@@ -105,12 +105,12 @@ class TestMessages(base.BaseMessagingTest):
     @test.attr(type='smoke')
     def test_delete_multiple_messages(self):
         # Post Messages
-        resp = self._post_messages().response
+        resp, _ = self._post_messages()
         message_uri = resp['location']
 
         # Delete multiple messages
         self.client.delete_messages(message_uri)
-        resp = self.client.get_multiple_messages(message_uri).response
+        resp, _ = self.client.get_multiple_messages(message_uri)
         # The test has an assertion here, because the response has to be 204
         # in this case (the client allows 200 or 204 for this API call).
         self.assertEqual('204', resp['status'])
