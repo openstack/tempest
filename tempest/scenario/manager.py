@@ -909,6 +909,11 @@ class NetworkScenarioTest(ScenarioTest):
             dict(
                 # ping
                 protocol='icmp',
+            ),
+            dict(
+                # ipv6-icmp for ping6
+                protocol='icmp',
+                ethertype='IPv6',
             )
         ]
         for ruleset in rulesets:
