@@ -91,7 +91,7 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
             its own router connected to the public network
     """
 
-    class TenantProperties():
+    class TenantProperties(object):
         """
         helper class to save tenant details
             id
