@@ -71,6 +71,18 @@ common_show_server = {
             },
             'required': ['id', 'links']
         },
+        'fault': {
+            'type': 'object',
+            'properties': {
+                'code': {'type': 'integer'},
+                'created': {'type': 'string'},
+                'message': {'type': 'string'},
+                'details': {'type': 'string'},
+            },
+            # NOTE(gmann): 'details' is not necessary to be present
+            #  in the 'fault'. So it is not defined as 'required'.
+            'required': ['code', 'created', 'message']
+        },
         'user_id': {'type': 'string'},
         'tenant_id': {'type': 'string'},
         'created': {'type': 'string'},
@@ -83,7 +95,9 @@ common_show_server = {
     # NOTE(GMann): 'progress' attribute is present in the response
     # only when server's status is one of the progress statuses
     # ("ACTIVE","BUILD", "REBUILD", "RESIZE","VERIFY_RESIZE")
-    # So it is not defined as 'required'.
+    # 'fault' attribute is present in the response
+    # only when server's status is one of the  "ERROR", "DELETED".
+    # So they are not defined as 'required'.
     'required': ['id', 'name', 'status', 'image', 'flavor',
                  'user_id', 'tenant_id', 'created', 'updated',
                  'metadata', 'links', 'addresses']
