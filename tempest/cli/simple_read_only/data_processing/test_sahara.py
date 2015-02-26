@@ -47,11 +47,13 @@ class SimpleReadOnlySaharaClientTest(cli.ClientTestBase):
             *args, endpoint_type=CONF.data_processing.endpoint_type, **kwargs)
 
     @test.attr(type='negative')
+    @test.idempotent_id('c8809259-710f-43f9-b452-54b2be3115a9')
     def test_sahara_fake_action(self):
         self.assertRaises(exceptions.CommandFailed,
                           self.sahara,
                           'this-does-not-exist')
 
+    @test.idempotent_id('39afe90c-0fd8-456e-89e2-da6de9680fff')
     def test_sahara_plugins_list(self):
         plugins = self.parser.listing(self.sahara('plugin-list'))
         self.assertTableStruct(plugins, [
@@ -60,6 +62,7 @@ class SimpleReadOnlySaharaClientTest(cli.ClientTestBase):
             'title'
         ])
 
+    @test.idempotent_id('3eb36fd8-bb06-4004-9e90-84ddf4dbcf5b')
     @testtools.skipUnless(CONF.data_processing_feature_enabled.plugins,
                           'No plugins defined')
     def test_sahara_plugins_show(self):
@@ -72,6 +75,7 @@ class SimpleReadOnlySaharaClientTest(cli.ClientTestBase):
             'Value'
         ])
 
+    @test.idempotent_id('502b684b-3d41-4619-aa6c-4db3465ae79d')
     def test_sahara_node_group_template_list(self):
         result = self.sahara('node-group-template-list')
         node_group_templates = self.parser.listing(result)
@@ -83,6 +87,7 @@ class SimpleReadOnlySaharaClientTest(cli.ClientTestBase):
             'description'
         ])
 
+    @test.idempotent_id('6c36fe4d-3b88-4b0d-b702-2a051db7dae7')
     def test_sahara_cluster_template_list(self):
         result = self.sahara('cluster-template-list')
         cluster_templates = self.parser.listing(result)
@@ -94,6 +99,7 @@ class SimpleReadOnlySaharaClientTest(cli.ClientTestBase):
             'description'
         ])
 
+    @test.idempotent_id('b951949d-b9a6-49db-add5-8a18ac533810')
     def test_sahara_cluster_list(self):
         result = self.sahara('cluster-list')
         clusters = self.parser.listing(result)
@@ -104,6 +110,7 @@ class SimpleReadOnlySaharaClientTest(cli.ClientTestBase):
             'node_count'
         ])
 
+    @test.idempotent_id('dbc83a8c-15b6-4aa8-b274-5896577397e1')
     def test_sahara_data_source_list(self):
         result = self.sahara('data-source-list')
         data_sources = self.parser.listing(result)
@@ -114,6 +121,7 @@ class SimpleReadOnlySaharaClientTest(cli.ClientTestBase):
             'description'
         ])
 
+    @test.idempotent_id('a8f77e05-d4bf-45c3-8245-57835d0de37b')
     def test_sahara_job_binary_data_list(self):
         result = self.sahara('job-binary-data-list')
         job_binary_data_list = self.parser.listing(result)
@@ -122,6 +130,7 @@ class SimpleReadOnlySaharaClientTest(cli.ClientTestBase):
             'name'
         ])
 
+    @test.idempotent_id('a8f4d0f3-fa1c-49ce-b73f-d624d89dc381')
     def test_sahara_job_binary_list(self):
         result = self.sahara('job-binary-list')
         job_binaries = self.parser.listing(result)
@@ -131,6 +140,7 @@ class SimpleReadOnlySaharaClientTest(cli.ClientTestBase):
             'description'
         ])
 
+    @test.idempotent_id('91164ca4-d049-49e0-a52a-686b408196ff')
     def test_sahara_job_template_list(self):
         result = self.sahara('job-template-list')
         job_templates = self.parser.listing(result)
@@ -140,6 +150,7 @@ class SimpleReadOnlySaharaClientTest(cli.ClientTestBase):
             'description'
         ])
 
+    @test.idempotent_id('6829c251-a8b6-449d-af86-7dd98b69a7ce')
     def test_sahara_job_list(self):
         result = self.sahara('job-list')
         jobs = self.parser.listing(result)
@@ -149,10 +160,12 @@ class SimpleReadOnlySaharaClientTest(cli.ClientTestBase):
             'status'
         ])
 
+    @test.idempotent_id('e4bd5d3b-474b-4b7a-82ab-f6bb0bc89faf')
     def test_sahara_bash_completion(self):
         self.sahara('bash-completion')
 
     # Optional arguments
+    @test.idempotent_id('699c14e5-632e-46b8-91e5-6bff8c8307e5')
     def test_sahara_help(self):
         help_text = self.sahara('help')
         lines = help_text.split('\n')
@@ -172,6 +185,7 @@ class SimpleReadOnlySaharaClientTest(cli.ClientTestBase):
                                'plugin-list', 'job-binary-create', 'help'))
         self.assertFalse(wanted_commands - commands)
 
+    @test.idempotent_id('84a18ea6-6379-4024-af6b-0e938f60dfc2')
     def test_sahara_version(self):
         version = self.sahara('', flags='--version')
         self.assertTrue(re.search('[0-9.]+', version))

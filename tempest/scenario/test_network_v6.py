@@ -142,10 +142,12 @@ class TestGettingAddress(manager.NetworkScenarioTest):
         else:
             LOG.warning('Ping6 is not available, skipping')
 
+    @test.idempotent_id('2c92df61-29f0-4eaa-bee3-7c65bef62a43')
     @test.services('compute', 'network')
     def test_slaac_from_os(self):
         self._prepare_and_test(address6_mode='slaac')
 
+    @test.idempotent_id('d7e1f858-187c-45a6-89c9-bdafde619a9f')
     @test.services('compute', 'network')
     def test_dhcp6_stateless_from_os(self):
         self._prepare_and_test(address6_mode='dhcpv6-stateless')

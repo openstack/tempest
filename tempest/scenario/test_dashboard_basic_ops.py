@@ -89,6 +89,7 @@ class TestDashboardBasicOps(manager.ScenarioTest):
         response = self.opener.open(CONF.dashboard.dashboard_url)
         self.assertIn('Overview', response.read())
 
+    @test.idempotent_id('4f8851b1-0e69-482b-b63b-84c6e76f6c80')
     @test.services('dashboard')
     def test_basic_scenario(self):
         creds = self.credentials()

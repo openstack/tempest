@@ -39,6 +39,7 @@ class VolumesGetTestJSON(base.BaseV2ComputeTest):
         cls.client = cls.volumes_extensions_client
 
     @test.attr(type='smoke')
+    @test.idempotent_id('f10f25eb-9775-4d9d-9cbe-1cf54dae9d5f')
     def test_volume_create_get_delete(self):
         # CREATE, GET, DELETE Volume
         volume = None

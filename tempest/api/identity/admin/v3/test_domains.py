@@ -28,6 +28,7 @@ class DomainsTestJSON(base.BaseIdentityV3AdminTest):
         self.client.delete_domain(domain_id)
 
     @test.attr(type='smoke')
+    @test.idempotent_id('8cf516ef-2114-48f1-907b-d32726c734d4')
     def test_list_domains(self):
         # Test to list domains
         domain_ids = list()
@@ -47,6 +48,7 @@ class DomainsTestJSON(base.BaseIdentityV3AdminTest):
         self.assertEqual(0, len(missing_doms))
 
     @test.attr(type='smoke')
+    @test.idempotent_id('f2f5b44a-82e8-4dad-8084-0661ea3b18cf')
     def test_create_update_delete_domain(self):
         d_name = data_utils.rand_name('domain-')
         d_desc = data_utils.rand_name('domain-desc-')

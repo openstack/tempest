@@ -42,6 +42,7 @@ class TestServerAdvancedOps(manager.ScenarioTest):
         cls.set_network_resources()
         super(TestServerAdvancedOps, cls).resource_setup()
 
+    @test.idempotent_id('e6c28180-7454-4b59-b188-0257af08a63b')
     @testtools.skipUnless(CONF.compute_feature_enabled.resize,
                           'Resize is not available.')
     @test.services('compute')
@@ -62,6 +63,7 @@ class TestServerAdvancedOps(manager.ScenarioTest):
         self.servers_client.wait_for_server_status(instance_id,
                                                    'ACTIVE')
 
+    @test.idempotent_id('949da7d5-72c8-4808-8802-e3d70df98e2c')
     @testtools.skipUnless(CONF.compute_feature_enabled.suspend,
                           'Suspend is not available.')
     @test.services('compute')

@@ -99,6 +99,7 @@ class TestSwiftTelemetry(manager.SwiftScenarioTest):
                         'Correct notifications were not received after '
                         '%s seconds.' % NOTIFICATIONS_WAIT)
 
+    @test.idempotent_id('6d6b88e5-3e38-41bc-b34a-79f713a6cb84')
     @test.services('object_storage', 'telemetry')
     def test_swift_middleware_notifies(self):
         container_name = self.create_container()

@@ -27,6 +27,7 @@ class DatabaseFlavorsNegativeTest(base.BaseDatabaseTest):
         cls.client = cls.database_flavors_client
 
     @test.attr(type=['negative', 'gate'])
+    @test.idempotent_id('f8e7b721-373f-4a64-8e9c-5327e975af3e')
     def test_get_non_existent_db_flavor(self):
         # flavor details are not returned for non-existent flavors
         self.assertRaises(lib_exc.NotFound,

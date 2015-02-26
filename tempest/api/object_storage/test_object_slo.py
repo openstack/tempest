@@ -110,6 +110,7 @@ class ObjectSloTest(base.BaseObjectTest):
         self.assertHeaders(resp, 'Object', method)
 
     @test.attr(type='gate')
+    @test.idempotent_id('2c3f24a6-36e8-4711-9aa2-800ee1fc7b5b')
     def test_upload_manifest(self):
         # create static large object from multipart manifest
         manifest = self._create_manifest()
@@ -124,6 +125,7 @@ class ObjectSloTest(base.BaseObjectTest):
         self._assertHeadersSLO(resp, 'PUT')
 
     @test.attr(type='gate')
+    @test.idempotent_id('e69ad766-e1aa-44a2-bdd2-bf62c09c1456')
     def test_list_large_object_metadata(self):
         # list static large object metadata using multipart manifest
         object_name = self._create_large_object()
@@ -135,6 +137,7 @@ class ObjectSloTest(base.BaseObjectTest):
         self._assertHeadersSLO(resp, 'HEAD')
 
     @test.attr(type='gate')
+    @test.idempotent_id('49bc49bc-dd1b-4c0f-904e-d9f10b830ee8')
     def test_retrieve_large_object(self):
         # list static large object using multipart manifest
         object_name = self._create_large_object()
@@ -149,6 +152,7 @@ class ObjectSloTest(base.BaseObjectTest):
         self.assertEqual(body, sum_data)
 
     @test.attr(type='gate')
+    @test.idempotent_id('87b6dfa1-abe9-404d-8bf0-6c3751e6aa77')
     def test_delete_large_object(self):
         # delete static large object using multipart manifest
         object_name = self._create_large_object()

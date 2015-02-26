@@ -80,6 +80,7 @@ class AccountQuotasNegativeTest(base.BaseObjectTest):
         super(AccountQuotasNegativeTest, cls).resource_cleanup()
 
     @test.attr(type=["negative", "smoke"])
+    @test.idempotent_id('d1dc5076-555e-4e6d-9697-28f1fe976324')
     @test.requires_ext(extension='account_quotas', service='object')
     def test_user_modify_quota(self):
         """Test that a user is not able to modify or remove a quota on
@@ -98,6 +99,7 @@ class AccountQuotasNegativeTest(base.BaseObjectTest):
 
     @test.attr(type=["negative", "smoke"])
     @decorators.skip_because(bug="1310597")
+    @test.idempotent_id('cf9e21f5-3aa4-41b1-9462-28ac550d8d3f')
     @test.requires_ext(extension='account_quotas', service='object')
     def test_upload_large_object(self):
         object_name = data_utils.rand_name(name="TestObject")

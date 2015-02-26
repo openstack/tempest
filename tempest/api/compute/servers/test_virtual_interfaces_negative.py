@@ -35,6 +35,7 @@ class VirtualInterfacesNegativeTestJSON(base.BaseV2ComputeTest):
         cls.client = cls.servers_client
 
     @test.attr(type=['negative', 'gate'])
+    @test.idempotent_id('64ebd03c-1089-4306-93fa-60f5eb5c803c')
     @test.services('network')
     def test_list_virtual_interfaces_invalid_server_id(self):
         # Negative test: Should not be able to GET virtual interfaces

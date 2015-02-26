@@ -96,6 +96,7 @@ class TestAggregatesBasicOps(manager.ScenarioTest):
         self.assertEqual(aggregate['availability_zone'], availability_zone)
         return aggregate
 
+    @test.idempotent_id('cb2b4c4f-0c7c-4164-bdde-6285b302a081')
     @test.services('compute')
     def test_aggregate_basic_ops(self):
         self.useFixture(fixtures.LockFixture('availability_zone'))

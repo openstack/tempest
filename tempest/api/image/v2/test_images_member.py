@@ -17,6 +17,7 @@ from tempest import test
 class ImagesMemberTest(base.BaseV2MemberImageTest):
 
     @test.attr(type='gate')
+    @test.idempotent_id('5934c6ea-27dc-4d6e-9421-eeb5e045494a')
     def test_image_share_accept(self):
         image_id = self._create_image()
         member = self.os_img_client.add_member(image_id,
@@ -38,6 +39,7 @@ class ImagesMemberTest(base.BaseV2MemberImageTest):
         self.assertEqual(member['status'], 'accepted')
 
     @test.attr(type='gate')
+    @test.idempotent_id('d9e83e5f-3524-4b38-a900-22abcb26e90e')
     def test_image_share_reject(self):
         image_id = self._create_image()
         member = self.os_img_client.add_member(image_id,
@@ -52,6 +54,7 @@ class ImagesMemberTest(base.BaseV2MemberImageTest):
         self.assertNotIn(image_id, self._list_image_ids_as_alt())
 
     @test.attr(type='gate')
+    @test.idempotent_id('a6ee18b9-4378-465e-9ad9-9a6de58a3287')
     def test_get_image_member(self):
         image_id = self._create_image()
         self.os_img_client.add_member(image_id,
@@ -68,6 +71,7 @@ class ImagesMemberTest(base.BaseV2MemberImageTest):
         self.assertEqual('accepted', member['status'])
 
     @test.attr(type='gate')
+    @test.idempotent_id('72989bc7-2268-48ed-af22-8821e835c914')
     def test_remove_image_member(self):
         image_id = self._create_image()
         self.os_img_client.add_member(image_id,
@@ -81,11 +85,13 @@ class ImagesMemberTest(base.BaseV2MemberImageTest):
         self.assertNotIn(image_id, self._list_image_ids_as_alt())
 
     @test.attr(type='gate')
+    @test.idempotent_id('634dcc3f-f6e2-4409-b8fd-354a0bb25d83')
     def test_get_image_member_schema(self):
         body = self.os_img_client.get_schema("member")
         self.assertEqual("member", body['name'])
 
     @test.attr(type='gate')
+    @test.idempotent_id('6ae916ef-1052-4e11-8d36-b3ae14853cbb')
     def test_get_image_members_schema(self):
         body = self.os_img_client.get_schema("members")
         self.assertEqual("members", body['name'])

@@ -328,6 +328,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
                 raise
 
     @test.attr(type='smoke')
+    @test.idempotent_id('f323b3ba-82f8-4db7-8ea6-6a895869ec49')
     @test.services('compute', 'network')
     def test_network_basic_ops(self):
         """
@@ -378,6 +379,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
                                                msg="after re-associate "
                                                    "floating ip")
 
+    @test.idempotent_id('c5adff73-e961-41f1-b4a9-343614f18cfa')
     @testtools.skipUnless(CONF.compute_feature_enabled.interface_attach,
                           'NIC hotplug not available')
     @testtools.skipIf(CONF.network.port_vnic_type in ['direct', 'macvtap'],
@@ -400,6 +402,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         self._hotplug_server()
         self._check_network_internal_connectivity(network=self.new_net)
 
+    @test.idempotent_id('04b9fe4e-85e8-4aea-b937-ea93885ac59f')
     @testtools.skipIf(CONF.baremetal.driver_enabled,
                       'Router state cannot be altered on a shared baremetal '
                       'network')
@@ -431,6 +434,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
             should_connect=True, msg="after updating "
             "admin_state_up of router to True")
 
+    @test.idempotent_id('d8bb918e-e2df-48b2-97cd-b73c95450980')
     @testtools.skipUnless(CONF.scenario.dhcp_client,
                           "DHCP client is not available.")
     @test.attr(type='smoke')
@@ -509,6 +513,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
                         msg="DHCP renewal failed to fetch "
                             "new DNS nameservers")
 
+    @test.idempotent_id('f5dfcc22-45fd-409f-954c-5bd500d7890b')
     @testtools.skipIf(CONF.baremetal.driver_enabled,
                       'admin_state of instance ports cannot be altered '
                       'for baremetal nodes')

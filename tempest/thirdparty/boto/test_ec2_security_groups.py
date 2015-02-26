@@ -14,6 +14,7 @@
 #    under the License.
 
 from tempest.common.utils import data_utils
+from tempest import test
 from tempest.thirdparty.boto import test as boto_test
 
 
@@ -24,6 +25,7 @@ class EC2SecurityGroupTest(boto_test.BotoTestCase):
         super(EC2SecurityGroupTest, cls).resource_setup()
         cls.client = cls.os.ec2api_client
 
+    @test.idempotent_id('519b566e-0c38-4629-905e-7d6b6355f524')
     def test_create_authorize_security_group(self):
         # EC2 Create, authorize/revoke security group
         group_name = data_utils.rand_name("securty_group-")

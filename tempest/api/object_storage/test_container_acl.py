@@ -42,6 +42,7 @@ class ObjectTestACLs(base.BaseObjectTest):
         super(ObjectTestACLs, self).tearDown()
 
     @test.attr(type='smoke')
+    @test.idempotent_id('a3270f3f-7640-4944-8448-c7ea783ea5b6')
     def test_read_object_with_rights(self):
         # attempt to read object using authorized user
         # update X-Container-Read metadata ACL
@@ -66,6 +67,7 @@ class ObjectTestACLs(base.BaseObjectTest):
         self.assertHeaders(resp, 'Object', 'GET')
 
     @test.attr(type='smoke')
+    @test.idempotent_id('aa58bfa5-40d9-4bc3-82b4-d07f4a9e392a')
     def test_write_object_with_rights(self):
         # attempt to write object using authorized user
         # update X-Container-Write metadata ACL

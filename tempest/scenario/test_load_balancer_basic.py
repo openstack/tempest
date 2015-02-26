@@ -309,6 +309,7 @@ class TestLoadBalancerBasic(manager.NetworkScenarioTest):
         for member, counter in counters.iteritems():
             self.assertGreater(counter, 0, 'Member %s never balanced' % member)
 
+    @test.idempotent_id('c0c6f1ca-603b-4509-9c0f-2c63f0d838ee')
     @test.services('compute', 'network')
     def test_load_balancer_basic(self):
         self._create_server('server1')

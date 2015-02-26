@@ -61,10 +61,12 @@ class NodeGroupTemplateTest(dp_base.BaseDataProcessingTest):
         return resp_body['id'], template_name
 
     @test.attr(type='smoke')
+    @test.idempotent_id('63164051-e46d-4387-9741-302ef4791cbd')
     def test_node_group_template_create(self):
         self._create_node_group_template()
 
     @test.attr(type='smoke')
+    @test.idempotent_id('eb39801d-2612-45e5-88b1-b5d70b329185')
     def test_node_group_template_list(self):
         template_info = self._create_node_group_template()
 
@@ -75,6 +77,7 @@ class NodeGroupTemplateTest(dp_base.BaseDataProcessingTest):
         self.assertIn(template_info, templates_info)
 
     @test.attr(type='smoke')
+    @test.idempotent_id('6ee31539-a708-466f-9c26-4093ce09a836')
     def test_node_group_template_get(self):
         template_id, template_name = self._create_node_group_template()
 
@@ -84,6 +87,7 @@ class NodeGroupTemplateTest(dp_base.BaseDataProcessingTest):
         self.assertDictContainsSubset(self.node_group_template, template)
 
     @test.attr(type='smoke')
+    @test.idempotent_id('f4f5cb82-708d-4031-81c4-b0618a706a2f')
     def test_node_group_template_delete(self):
         template_id, _ = self._create_node_group_template()
 

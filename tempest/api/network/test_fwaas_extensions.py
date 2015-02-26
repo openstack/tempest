@@ -99,6 +99,7 @@ class FWaaSExtensionTestJSON(base.BaseNetworkTest):
                  (fw_id, target_states))
             raise exceptions.TimeoutException(m)
 
+    @test.idempotent_id('1b84cf01-9c09-4ce7-bc72-b15e39076468')
     def test_list_firewall_rules(self):
         # List firewall rules
         fw_rules = self.client.list_firewall_rules()
@@ -116,6 +117,7 @@ class FWaaSExtensionTestJSON(base.BaseNetworkTest):
                         m['ip_version'],
                         m['enabled']) for m in fw_rules])
 
+    @test.idempotent_id('563564f7-7077-4f5e-8cdc-51f37ae5a2b9')
     def test_create_update_delete_firewall_rule(self):
         # Create firewall rule
         body = self.client.create_firewall_rule(
@@ -136,12 +138,14 @@ class FWaaSExtensionTestJSON(base.BaseNetworkTest):
         self.assertNotIn(fw_rule_id,
                          [m['id'] for m in fw_rules['firewall_rules']])
 
+    @test.idempotent_id('3ff8c08e-26ff-4034-ae48-810ed213a998')
     def test_show_firewall_rule(self):
         # show a created firewall rule
         fw_rule = self.client.show_firewall_rule(self.fw_rule['id'])
         for key, value in fw_rule['firewall_rule'].iteritems():
             self.assertEqual(self.fw_rule[key], value)
 
+    @test.idempotent_id('1086dd93-a4c0-4bbb-a1bd-6d4bc62c199f')
     def test_list_firewall_policies(self):
         fw_policies = self.client.list_firewall_policies()
         fw_policies = fw_policies['firewall_policies']
@@ -152,6 +156,7 @@ class FWaaSExtensionTestJSON(base.BaseNetworkTest):
                         m['name'],
                         m['firewall_rules']) for m in fw_policies])
 
+    @test.idempotent_id('bbf37b6c-498c-421e-9c95-45897d3ed775')
     def test_create_update_delete_firewall_policy(self):
         # Create firewall policy
         body = self.client.create_firewall_policy(
@@ -174,6 +179,7 @@ class FWaaSExtensionTestJSON(base.BaseNetworkTest):
         fw_policies = fw_policies['firewall_policies']
         self.assertNotIn(fw_policy_id, [m['id'] for m in fw_policies])
 
+    @test.idempotent_id('1df59b3a-517e-41d4-96f6-fc31cf4ecff2')
     def test_show_firewall_policy(self):
         # show a created firewall policy
         fw_policy = self.client.show_firewall_policy(self.fw_policy['id'])
@@ -181,6 +187,7 @@ class FWaaSExtensionTestJSON(base.BaseNetworkTest):
         for key, value in fw_policy.iteritems():
             self.assertEqual(self.fw_policy[key], value)
 
+    @test.idempotent_id('02082a03-3cdd-4789-986a-1327dd80bfb7')
     def test_create_show_delete_firewall(self):
         # Create tenant network resources required for an ACTIVE firewall
         network = self.create_network()
@@ -225,6 +232,7 @@ class FWaaSExtensionTestJSON(base.BaseNetworkTest):
         self.client.delete_firewall(firewall_id)
 
     @test.attr(type='smoke')
+    @test.idempotent_id('53305b4b-9897-4e01-87c0-2ae386083180')
     def test_firewall_rule_insertion_position_removal_rule_from_policy(self):
         # Create firewall rule
         body = self.client.create_firewall_rule(
@@ -291,6 +299,7 @@ class FWaaSExtensionTestJSON(base.BaseNetworkTest):
         return [ruleid for ruleid in fw_policy['firewall_policy']
                 ['firewall_rules']]
 
+    @test.idempotent_id('8515ca8a-0d2f-4298-b5ff-6f924e4587ca')
     def test_update_firewall_policy_audited_attribute(self):
         # Create firewall rule
         body = self.client.create_firewall_rule(

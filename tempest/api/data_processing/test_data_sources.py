@@ -79,22 +79,26 @@ class DataSourceTest(dp_base.BaseDataProcessingTest):
         self.assertDictContainsSubset(source_body, source)
 
     @test.attr(type='smoke')
+    @test.idempotent_id('9e0e836d-c372-4fca-91b7-b66c3e9646c8')
     def test_swift_data_source_create(self):
         self._create_data_source(self.swift_data_source_with_creds)
 
     @test.attr(type='smoke')
+    @test.idempotent_id('3cb87a4a-0534-4b97-9edc-8bbc822b68a0')
     def test_swift_data_source_list(self):
         source_info = (
             self._create_data_source(self.swift_data_source_with_creds))
         self._list_data_sources(source_info)
 
     @test.attr(type='smoke')
+    @test.idempotent_id('fc07409b-6477-4cb3-9168-e633c46b227f')
     def test_swift_data_source_get(self):
         source_id, source_name = (
             self._create_data_source(self.swift_data_source_with_creds))
         self._get_data_source(source_id, source_name, self.swift_data_source)
 
     @test.attr(type='smoke')
+    @test.idempotent_id('df53669c-0cd1-4cf7-b408-4cf215d8beb8')
     def test_swift_data_source_delete(self):
         source_id, _ = (
             self._create_data_source(self.swift_data_source_with_creds))
@@ -103,15 +107,18 @@ class DataSourceTest(dp_base.BaseDataProcessingTest):
         self.client.delete_data_source(source_id)
 
     @test.attr(type='smoke')
+    @test.idempotent_id('88505d52-db01-4229-8f1d-a1137da5fe2d')
     def test_local_hdfs_data_source_create(self):
         self._create_data_source(self.local_hdfs_data_source)
 
     @test.attr(type='smoke')
+    @test.idempotent_id('81d7d42a-d7f6-4d9b-b38c-0801a4dfe3c2')
     def test_local_hdfs_data_source_list(self):
         source_info = self._create_data_source(self.local_hdfs_data_source)
         self._list_data_sources(source_info)
 
     @test.attr(type='smoke')
+    @test.idempotent_id('ec0144c6-db1e-4169-bb06-7abae14a8443')
     def test_local_hdfs_data_source_get(self):
         source_id, source_name = (
             self._create_data_source(self.local_hdfs_data_source))
@@ -119,6 +126,7 @@ class DataSourceTest(dp_base.BaseDataProcessingTest):
             source_id, source_name, self.local_hdfs_data_source)
 
     @test.attr(type='smoke')
+    @test.idempotent_id('e398308b-4230-4f86-ba10-9b0b60a59c8d')
     def test_local_hdfs_data_source_delete(self):
         source_id, _ = self._create_data_source(self.local_hdfs_data_source)
 
@@ -126,15 +134,18 @@ class DataSourceTest(dp_base.BaseDataProcessingTest):
         self.client.delete_data_source(source_id)
 
     @test.attr(type='smoke')
+    @test.idempotent_id('bfd91128-e642-4d95-a973-3e536962180c')
     def test_external_hdfs_data_source_create(self):
         self._create_data_source(self.external_hdfs_data_source)
 
     @test.attr(type='smoke')
+    @test.idempotent_id('92e2be72-f7ab-499d-ae01-fb9943c90d8e')
     def test_external_hdfs_data_source_list(self):
         source_info = self._create_data_source(self.external_hdfs_data_source)
         self._list_data_sources(source_info)
 
     @test.attr(type='smoke')
+    @test.idempotent_id('a31edb1b-6bc6-4f42-871f-70cd243184ac')
     def test_external_hdfs_data_source_get(self):
         source_id, source_name = (
             self._create_data_source(self.external_hdfs_data_source))
@@ -142,6 +153,7 @@ class DataSourceTest(dp_base.BaseDataProcessingTest):
             source_id, source_name, self.external_hdfs_data_source)
 
     @test.attr(type='smoke')
+    @test.idempotent_id('295924cd-a085-4b45-aea8-0707cdb2da7e')
     def test_external_hdfs_data_source_delete(self):
         source_id, _ = self._create_data_source(self.external_hdfs_data_source)
 

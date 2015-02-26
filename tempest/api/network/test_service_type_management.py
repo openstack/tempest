@@ -27,6 +27,7 @@ class ServiceTypeManagementTestJSON(base.BaseNetworkTest):
 
     @decorators.skip_because(bug="1400370")
     @test.attr(type='smoke')
+    @test.idempotent_id('2cbbeea9-f010-40f6-8df5-4eaa0c918ea6')
     def test_service_provider_list(self):
         body = self.client.list_service_providers()
         self.assertIsInstance(body['service_providers'], list)

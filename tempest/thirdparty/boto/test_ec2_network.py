@@ -13,6 +13,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest import test
 from tempest.thirdparty.boto import test as boto_test
 
 
@@ -24,6 +25,7 @@ class EC2NetworkTest(boto_test.BotoTestCase):
         cls.ec2_client = cls.os.ec2api_client
 
     # Note(afazekas): these tests for things duable without an instance
+    @test.idempotent_id('48b912af-9403-4b4f-aa69-fa76d690a81f')
     def test_disassociate_not_associated_floating_ip(self):
         # EC2 disassociate not associated floating ip
         ec2_codes = self.ec2_error_code

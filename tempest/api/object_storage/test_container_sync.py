@@ -114,6 +114,7 @@ class ContainerSyncTest(base.BaseObjectTest):
 
     @test.attr(type='slow')
     @decorators.skip_because(bug='1317133')
+    @test.idempotent_id('be008325-1bba-4925-b7dd-93b58f22ce9b')
     @testtools.skipIf(
         not CONF.object_storage_feature_enabled.container_sync,
         'Old-style container sync function is disabled')

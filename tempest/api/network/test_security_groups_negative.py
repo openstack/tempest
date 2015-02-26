@@ -36,12 +36,14 @@ class NegativeSecGroupTest(base.BaseSecGroupTest):
             raise cls.skipException(msg)
 
     @test.attr(type=['negative', 'gate'])
+    @test.idempotent_id('424fd5c3-9ddc-486a-b45f-39bf0c820fc6')
     def test_show_non_existent_security_group(self):
         non_exist_id = str(uuid.uuid4())
         self.assertRaises(lib_exc.NotFound, self.client.show_security_group,
                           non_exist_id)
 
     @test.attr(type=['negative', 'gate'])
+    @test.idempotent_id('4c094c09-000b-4e41-8100-9617600c02a6')
     def test_show_non_existent_security_group_rule(self):
         non_exist_id = str(uuid.uuid4())
         self.assertRaises(lib_exc.NotFound,
@@ -49,6 +51,7 @@ class NegativeSecGroupTest(base.BaseSecGroupTest):
                           non_exist_id)
 
     @test.attr(type=['negative', 'gate'])
+    @test.idempotent_id('1f1bb89d-5664-4956-9fcd-83ee0fa603df')
     def test_delete_non_existent_security_group(self):
         non_exist_id = str(uuid.uuid4())
         self.assertRaises(lib_exc.NotFound,
@@ -57,6 +60,7 @@ class NegativeSecGroupTest(base.BaseSecGroupTest):
                           )
 
     @test.attr(type=['negative', 'gate'])
+    @test.idempotent_id('981bdc22-ce48-41ed-900a-73148b583958')
     def test_create_security_group_rule_with_bad_protocol(self):
         group_create_body, _ = self._create_security_group()
 
@@ -68,6 +72,7 @@ class NegativeSecGroupTest(base.BaseSecGroupTest):
             protocol=pname, direction='ingress', ethertype=self.ethertype)
 
     @test.attr(type=['negative', 'gate'])
+    @test.idempotent_id('5f8daf69-3c5f-4aaa-88c9-db1d66f68679')
     def test_create_security_group_rule_with_bad_remote_ip_prefix(self):
         group_create_body, _ = self._create_security_group()
 
@@ -81,6 +86,7 @@ class NegativeSecGroupTest(base.BaseSecGroupTest):
                 remote_ip_prefix=remote_ip_prefix)
 
     @test.attr(type=['negative', 'gate'])
+    @test.idempotent_id('4bf786fd-2f02-443c-9716-5b98e159a49a')
     def test_create_security_group_rule_with_non_existent_remote_groupid(self):
         group_create_body, _ = self._create_security_group()
         non_exist_id = str(uuid.uuid4())
@@ -95,6 +101,7 @@ class NegativeSecGroupTest(base.BaseSecGroupTest):
                 remote_group_id=remote_group_id)
 
     @test.attr(type=['negative', 'gate'])
+    @test.idempotent_id('b5c4b247-6b02-435b-b088-d10d45650881')
     def test_create_security_group_rule_with_remote_ip_and_group(self):
         sg1_body, _ = self._create_security_group()
         sg2_body, _ = self._create_security_group()
@@ -109,6 +116,7 @@ class NegativeSecGroupTest(base.BaseSecGroupTest):
             remote_group_id=sg2_body['security_group']['id'])
 
     @test.attr(type=['negative', 'gate'])
+    @test.idempotent_id('5666968c-fff3-40d6-9efc-df1c8bd01abb')
     def test_create_security_group_rule_with_bad_ethertype(self):
         group_create_body, _ = self._create_security_group()
 
@@ -120,6 +128,7 @@ class NegativeSecGroupTest(base.BaseSecGroupTest):
             protocol='udp', direction='ingress', ethertype=ethertype)
 
     @test.attr(type=['negative', 'gate'])
+    @test.idempotent_id('0d9c7791-f2ad-4e2f-ac73-abf2373b0d2d')
     def test_create_security_group_rule_with_invalid_ports(self):
         group_create_body, _ = self._create_security_group()
 
@@ -150,6 +159,7 @@ class NegativeSecGroupTest(base.BaseSecGroupTest):
             self.assertIn(msg, str(ex))
 
     @test.attr(type=['negative', 'smoke'])
+    @test.idempotent_id('2323061e-9fbf-4eb0-b547-7e8fafc90849')
     def test_create_additional_default_security_group_fails(self):
         # Create security group named 'default', it should be failed.
         name = 'default'
@@ -158,6 +168,7 @@ class NegativeSecGroupTest(base.BaseSecGroupTest):
                           name=name)
 
     @test.attr(type=['negative', 'smoke'])
+    @test.idempotent_id('8fde898f-ce88-493b-adc9-4e4692879fc5')
     def test_create_duplicate_security_group_rule_fails(self):
         # Create duplicate security group rule, it should fail.
         body, _ = self._create_security_group()
@@ -182,6 +193,7 @@ class NegativeSecGroupTest(base.BaseSecGroupTest):
             port_range_min=min_port, port_range_max=max_port)
 
     @test.attr(type=['negative', 'smoke'])
+    @test.idempotent_id('be308db6-a7cf-4d5c-9baf-71bafd73f35e')
     def test_create_security_group_rule_with_non_existent_security_group(self):
         # Create security group rules with not existing security group.
         non_existent_sg = str(uuid.uuid4())
@@ -196,6 +208,7 @@ class NegativeSecGroupIPv6Test(NegativeSecGroupTest):
     _tenant_network_cidr = CONF.network.tenant_network_v6_cidr
 
     @test.attr(type=['negative', 'gate'])
+    @test.idempotent_id('7607439c-af73-499e-bf64-f687fd12a842')
     def test_create_security_group_rule_wrong_ip_prefix_version(self):
         group_create_body, _ = self._create_security_group()
 

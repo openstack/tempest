@@ -28,6 +28,7 @@ DECORATOR_IMPORT = 'tempest.%s' % DECORATOR_MODULE
 IMPORT_LINE = 'from tempest import %s' % DECORATOR_MODULE
 DECORATOR_TEMPLATE = "@%s.%s('%%s')" % (DECORATOR_MODULE,
                                         DECORATOR_NAME)
+UNIT_TESTS_EXCLUDE = 'tempest.tests'
 
 
 class SourcePatcher(object):
@@ -103,8 +104,10 @@ class TestChecker(object):
             root_package = self._path_to_package(root)
             for item in files:
                 if item.endswith('.py'):
-                    modules.append('.'.join((root_package,
-                                             os.path.splitext(item)[0])))
+                    module_name = '.'.join((root_package,
+                                           os.path.splitext(item)[0]))
+                    if not module_name.startswith(UNIT_TESTS_EXCLUDE):
+                        modules.append(module_name)
         return modules
 
     @staticmethod
@@ -343,7 +346,9 @@ def run():
     else:
         errors = checker.report_untagged(untagged) or errors
     if errors:
-        sys.exit('@test.idempotent_id existence and uniqueness checks failed')
+        sys.exit("@test.idempotent_id existence and uniqueness checks failed\n"
+                 "Run 'tox -v -euuidgen' to automatically fix tests with\n"
+                 "missing @test.idempotent_id decorators.")
 
 if __name__ == '__main__':
     run()

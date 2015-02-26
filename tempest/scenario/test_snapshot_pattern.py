@@ -57,6 +57,7 @@ class TestSnapshotPattern(manager.ScenarioTest):
         got_timestamp = ssh_client.exec_command('cat /tmp/timestamp')
         self.assertEqual(self.timestamp, got_timestamp)
 
+    @test.idempotent_id('608e604b-1d63-4a82-8e3e-91bc665c90b4')
     @testtools.skipUnless(CONF.compute_feature_enabled.snapshot,
                           'Snapshotting is not available.')
     @test.services('compute', 'network', 'image')

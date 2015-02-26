@@ -37,6 +37,7 @@ class ServerAddressesTestJSON(base.BaseV2ComputeTest):
         cls.server = cls.create_test_server(wait_until='ACTIVE')
 
     @test.attr(type='smoke')
+    @test.idempotent_id('6eb718c0-02d9-4d5e-acd1-4e0c269cef39')
     @test.services('network')
     def test_list_server_addresses(self):
         # All public and private addresses for
@@ -54,6 +55,7 @@ class ServerAddressesTestJSON(base.BaseV2ComputeTest):
                 self.assertTrue(address['version'])
 
     @test.attr(type='smoke')
+    @test.idempotent_id('87bbc374-5538-4f64-b673-2b0e4443cc30')
     @test.services('network')
     def test_list_server_addresses_by_network(self):
         # Providing a network type should filter

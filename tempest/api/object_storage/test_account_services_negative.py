@@ -24,6 +24,7 @@ from tempest import test
 class AccountNegativeTest(base.BaseObjectTest):
 
     @test.attr(type=['negative', 'gate'])
+    @test.idempotent_id('070e6aca-6152-4867-868d-1118d68fb38c')
     def test_list_containers_with_non_authorized_user(self):
         # list containers using non-authorized user
 

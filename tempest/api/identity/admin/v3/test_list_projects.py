@@ -38,6 +38,7 @@ class ListProjectsTestJSON(base.BaseIdentityV3AdminTest):
         cls.project_ids.append(cls.p2['id'])
 
     @test.attr(type='gate')
+    @test.idempotent_id('1d830662-22ad-427c-8c3e-4ec854b0af44')
     def test_projects_list(self):
         # List projects
         list_projects = self.client.list_projects()
@@ -47,17 +48,20 @@ class ListProjectsTestJSON(base.BaseIdentityV3AdminTest):
             self.assertIn(get_project, list_projects)
 
     @test.attr(type='gate')
+    @test.idempotent_id('fab13f3c-f6a6-4b9f-829b-d32fd44fdf10')
     def test_list_projects_with_domains(self):
         # List projects with domain
         self._list_projects_with_params(
             {'domain_id': self.data.domain['id']}, 'domain_id')
 
     @test.attr(type='gate')
+    @test.idempotent_id('0fe7a334-675a-4509-b00e-1c4b95d5dae8')
     def test_list_projects_with_enabled(self):
         # List the projects with enabled
         self._list_projects_with_params({'enabled': False}, 'enabled')
 
     @test.attr(type='gate')
+    @test.idempotent_id('fa178524-4e6d-4925-907c-7ab9f42c7e26')
     def test_list_projects_with_name(self):
         # List projects with name
         self._list_projects_with_params({'name': self.p1_name}, 'name')

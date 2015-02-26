@@ -53,6 +53,7 @@ class FlavorsAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
         cls.rxtx = 2
 
     @test.attr(type=['negative', 'gate'])
+    @test.idempotent_id('404451c0-c1ae-4448-8d50-d74f26f93ec8')
     def test_get_flavor_details_for_deleted_flavor(self):
         # Delete a flavor and ensure it is not listed
         # Create a test flavor
@@ -84,6 +85,7 @@ class FlavorsAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
         self.assertTrue(flag)
 
     @test.attr(type=['negative', 'gate'])
+    @test.idempotent_id('6f56e7b7-7500-4d0c-9913-880ca1efed87')
     def test_create_flavor_as_user(self):
         # only admin user can create a flavor
         flavor_name = data_utils.rand_name(self.flavor_name_prefix)
@@ -96,6 +98,7 @@ class FlavorsAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
                           swap=self.swap, rxtx=self.rxtx)
 
     @test.attr(type=['negative', 'gate'])
+    @test.idempotent_id('a9a6dc02-8c14-4e05-a1ca-3468d4214882')
     def test_delete_flavor_as_user(self):
         # only admin user can delete a flavor
         self.assertRaises(lib_exc.Unauthorized,

@@ -78,6 +78,7 @@ class AccountQuotasTest(base.BaseObjectTest):
         super(AccountQuotasTest, cls).resource_cleanup()
 
     @test.attr(type="smoke")
+    @test.idempotent_id('a22ef352-a342-4587-8f47-3bbdb5b039c4')
     @test.requires_ext(extension='account_quotas', service='object')
     def test_upload_valid_object(self):
         object_name = data_utils.rand_name(name="TestObject")
@@ -88,6 +89,7 @@ class AccountQuotasTest(base.BaseObjectTest):
         self.assertHeaders(resp, 'Object', 'PUT')
 
     @test.attr(type=["smoke"])
+    @test.idempotent_id('63f51f9f-5f1d-4fc6-b5be-d454d70949d6')
     @test.requires_ext(extension='account_quotas', service='object')
     def test_admin_modify_quota(self):
         """Test that the ResellerAdmin is able to modify and remove the quota

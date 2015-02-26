@@ -58,6 +58,7 @@ class VolumesV2ListTestJSON(base.BaseVolumeTest):
         super(VolumesV2ListTestJSON, cls).resource_cleanup()
 
     @test.attr(type='gate')
+    @test.idempotent_id('2a7064eb-b9c3-429b-b888-33928fc5edd3')
     def test_volume_list_details_with_multiple_params(self):
         # List volumes detail using combined condition
         def _list_details_with_multiple_params(limit=2,

@@ -101,18 +101,21 @@ class VolumeMultiBackendV2Test(base.BaseVolumeAdminTest):
         super(VolumeMultiBackendV2Test, cls).resource_cleanup()
 
     @test.attr(type='smoke')
+    @test.idempotent_id('c1a41f3f-9dad-493e-9f09-3ff197d477cc')
     def test_backend_name_reporting(self):
         # get volume id which created by type without prefix
         volume_id = self.volume_id_list_without_prefix[0]
         self._test_backend_name_reporting_by_volume_id(volume_id)
 
     @test.attr(type='smoke')
+    @test.idempotent_id('f38e647f-ab42-4a31-a2e7-ca86a6485215')
     def test_backend_name_reporting_with_prefix(self):
         # get volume id which created by type with prefix
         volume_id = self.volume_id_list_with_prefix[0]
         self._test_backend_name_reporting_by_volume_id(volume_id)
 
     @test.attr(type='gate')
+    @test.idempotent_id('46435ab1-a0af-4401-8373-f14e66b0dd58')
     def test_backend_name_distinction(self):
         if self.backend1_name == self.backend2_name:
             raise self.skipException("backends configured with same name")
@@ -122,6 +125,7 @@ class VolumeMultiBackendV2Test(base.BaseVolumeAdminTest):
         self._test_backend_name_distinction(volume1_id, volume2_id)
 
     @test.attr(type='gate')
+    @test.idempotent_id('4236305b-b65a-4bfc-a9d2-69cb5b2bf2ed')
     def test_backend_name_distinction_with_prefix(self):
         if self.backend1_name == self.backend2_name:
             raise self.skipException("backends configured with same name")

@@ -430,6 +430,7 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
         self.assertIn((subnet_id, server_ip, mac_addr), port_detail_list)
 
     @test.attr(type='smoke')
+    @test.idempotent_id('e79f879e-debb-440c-a7e4-efeda05b6848')
     @test.services('compute', 'network')
     def test_cross_tenant_traffic(self):
         if not self.isolated_creds.is_multi_tenant():
@@ -451,6 +452,7 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
             raise
 
     @test.attr(type='smoke')
+    @test.idempotent_id('63163892-bbf6-4249-aa12-d5ea1f8f421b')
     @test.services('compute', 'network')
     def test_in_tenant_traffic(self):
         try:
@@ -465,6 +467,7 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
             raise
 
     @test.attr(type='smoke')
+    @test.idempotent_id('f4d556d7-1526-42ad-bafb-6bebf48568f6')
     @test.services('compute', 'network')
     def test_port_update_new_security_group(self):
         """
@@ -516,6 +519,7 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
             raise
 
     @test.attr(type='smoke')
+    @test.idempotent_id('d2f77418-fcc4-439d-b935-72eca704e293')
     @test.services('compute', 'network')
     def test_multiple_security_groups(self):
         """

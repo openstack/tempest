@@ -188,6 +188,7 @@ class TrustsV3TestJSON(BaseTrustsV3Test):
         self.addCleanup(self.cleanup_user_and_roles)
 
     @test.attr(type='smoke')
+    @test.idempotent_id('5a0a91a4-baef-4a14-baba-59bf4d7fcace')
     def test_trust_impersonate(self):
         # Test case to check we can create, get and delete a trust
         # updates are not supported for trusts
@@ -200,6 +201,7 @@ class TrustsV3TestJSON(BaseTrustsV3Test):
         self.check_trust_roles()
 
     @test.attr(type='smoke')
+    @test.idempotent_id('ed2a8779-a7ac-49dc-afd7-30f32f936ed2')
     def test_trust_noimpersonate(self):
         # Test case to check we can create, get and delete a trust
         # with impersonation=False
@@ -212,6 +214,7 @@ class TrustsV3TestJSON(BaseTrustsV3Test):
         self.check_trust_roles()
 
     @test.attr(type='smoke')
+    @test.idempotent_id('0ed14b66-cefd-4b5c-a964-65759453e292')
     def test_trust_expire(self):
         # Test case to check we can create, get and delete a trust
         # with an expiry specified
@@ -234,6 +237,7 @@ class TrustsV3TestJSON(BaseTrustsV3Test):
         self.check_trust_roles()
 
     @test.attr(type='smoke')
+    @test.idempotent_id('3e48f95d-e660-4fa9-85e0-5a3d85594384')
     def test_trust_expire_invalid(self):
         # Test case to check we can check an invlaid expiry time
         # is rejected with the correct error
@@ -244,6 +248,7 @@ class TrustsV3TestJSON(BaseTrustsV3Test):
                           expires=expires_str)
 
     @test.attr(type='smoke')
+    @test.idempotent_id('6268b345-87ca-47c0-9ce3-37792b43403a')
     def test_get_trusts_query(self):
         self.create_trust()
         trusts_get = self.trustor_client.get_trusts(
@@ -252,6 +257,7 @@ class TrustsV3TestJSON(BaseTrustsV3Test):
         self.validate_trust(trusts_get[0], summary=True)
 
     @test.attr(type='smoke')
+    @test.idempotent_id('4773ebd5-ecbf-4255-b8d8-b63e6f72b65d')
     def test_get_trusts_all(self):
         self.create_trust()
         trusts_get = self.client.get_trusts()

@@ -59,6 +59,7 @@ class FlavorsExtraSpecsNegativeTestJSON(base.BaseV2ComputeAdminTest):
         super(FlavorsExtraSpecsNegativeTestJSON, cls).resource_cleanup()
 
     @test.attr(type=['negative', 'gate'])
+    @test.idempotent_id('a00a3b81-5641-45a8-ab2b-4a8ec41e1d7d')
     def test_flavor_non_admin_set_keys(self):
         # Test to SET flavor extra spec as a user without admin privileges.
         specs = {"key1": "value1", "key2": "value2"}
@@ -68,6 +69,7 @@ class FlavorsExtraSpecsNegativeTestJSON(base.BaseV2ComputeAdminTest):
                           specs)
 
     @test.attr(type=['negative', 'gate'])
+    @test.idempotent_id('1ebf4ef8-759e-48fe-a801-d451d80476fb')
     def test_flavor_non_admin_update_specific_key(self):
         # non admin user is not allowed to update flavor extra spec
         specs = {"key1": "value1", "key2": "value2"}
@@ -82,6 +84,7 @@ class FlavorsExtraSpecsNegativeTestJSON(base.BaseV2ComputeAdminTest):
                           key1='value1_new')
 
     @test.attr(type=['negative', 'gate'])
+    @test.idempotent_id('28f12249-27c7-44c1-8810-1f382f316b11')
     def test_flavor_non_admin_unset_keys(self):
         specs = {"key1": "value1", "key2": "value2"}
         self.client.set_flavor_extra_spec(self.flavor['id'], specs)
@@ -92,6 +95,7 @@ class FlavorsExtraSpecsNegativeTestJSON(base.BaseV2ComputeAdminTest):
                           'key1')
 
     @test.attr(type=['negative', 'gate'])
+    @test.idempotent_id('440b9f3f-3c7f-4293-a106-0ceda350f8de')
     def test_flavor_unset_nonexistent_key(self):
         nonexistent_key = data_utils.rand_name('flavor_key')
         self.assertRaises(lib_exc.NotFound,
@@ -100,6 +104,7 @@ class FlavorsExtraSpecsNegativeTestJSON(base.BaseV2ComputeAdminTest):
                           nonexistent_key)
 
     @test.attr(type=['negative', 'gate'])
+    @test.idempotent_id('329a7be3-54b2-48be-8052-bf2ce4afd898')
     def test_flavor_get_nonexistent_key(self):
         self.assertRaises(lib_exc.NotFound,
                           self.flavors_client.get_flavor_extra_spec_with_key,
@@ -107,6 +112,7 @@ class FlavorsExtraSpecsNegativeTestJSON(base.BaseV2ComputeAdminTest):
                           "nonexistent_key")
 
     @test.attr(type=['negative', 'gate'])
+    @test.idempotent_id('25b822b8-9f49-44f6-80de-d99f0482e5cb')
     def test_flavor_update_mismatch_key(self):
         # the key will be updated should be match the key in the body
         self.assertRaises(lib_exc.BadRequest,
@@ -116,6 +122,7 @@ class FlavorsExtraSpecsNegativeTestJSON(base.BaseV2ComputeAdminTest):
                           key1="value")
 
     @test.attr(type=['negative', 'gate'])
+    @test.idempotent_id('f5889590-bf66-41cc-b4b1-6e6370cfd93f')
     def test_flavor_update_more_key(self):
         # there should be just one item in the request body
         self.assertRaises(lib_exc.BadRequest,

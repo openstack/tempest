@@ -57,6 +57,7 @@ class EndPointsTestJSON(base.BaseIdentityV3AdminTest):
         super(EndPointsTestJSON, cls).resource_cleanup()
 
     @test.attr(type='gate')
+    @test.idempotent_id('c19ecf90-240e-4e23-9966-21cee3f6a618')
     def test_list_endpoints(self):
         # Get a list of endpoints
         fetched_endpoints = self.client.list_endpoints()
@@ -68,6 +69,7 @@ class EndPointsTestJSON(base.BaseIdentityV3AdminTest):
                          ', '.join(str(e) for e in missing_endpoints))
 
     @test.attr(type='gate')
+    @test.idempotent_id('0e2446d2-c1fd-461b-a729-b9e73e3e3b37')
     def test_create_list_delete_endpoint(self):
         region = data_utils.rand_name('region')
         url = data_utils.rand_url()
@@ -91,6 +93,7 @@ class EndPointsTestJSON(base.BaseIdentityV3AdminTest):
         self.assertNotIn(endpoint['id'], fetched_endpoints_id)
 
     @test.attr(type='smoke')
+    @test.idempotent_id('37e8f15e-ee7c-4657-a1e7-f6b61e375eff')
     def test_update_endpoint(self):
         # Creating an endpoint so as to check update endpoint
         # with new values

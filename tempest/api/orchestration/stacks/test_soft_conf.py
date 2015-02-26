@@ -81,6 +81,7 @@ class TestSoftwareConfig(base.BaseOrchestrationTest):
             lib_exc.NotFound, self.client.get_software_config, config_id)
 
     @test.attr(type='smoke')
+    @test.idempotent_id('136162ed-9445-4b9c-b7fc-306af8b5da99')
     def test_get_software_config(self):
         """Testing software config get."""
         for conf in self.configs:
@@ -88,6 +89,7 @@ class TestSoftwareConfig(base.BaseOrchestrationTest):
             self._validate_config(conf, api_config)
 
     @test.attr(type='smoke')
+    @test.idempotent_id('1275c835-c967-4a2c-8d5d-ad533447ed91')
     def test_get_deployment_list(self):
         """Getting a list of all deployments"""
         deploy_list = self.client.get_software_deploy_list()
@@ -96,6 +98,7 @@ class TestSoftwareConfig(base.BaseOrchestrationTest):
         self.assertIn(self.deployment_id, deploy_ids)
 
     @test.attr(type='smoke')
+    @test.idempotent_id('fe7cd9f9-54b1-429c-a3b7-7df8451db913')
     def test_get_deployment_metadata(self):
         """Testing deployment metadata get"""
         metadata = self.client.get_software_deploy_meta(self.server_id)
@@ -112,6 +115,7 @@ class TestSoftwareConfig(base.BaseOrchestrationTest):
                          deployment['software_deployment']['config_id'])
 
     @test.attr(type='smoke')
+    @test.idempotent_id('f29d21f3-ed75-47cf-8cdc-ef1bdeb4c674')
     def test_software_deployment_create_validate(self):
         """Testing software deployment was created as expected."""
         # Asserting that all fields were created
@@ -124,6 +128,7 @@ class TestSoftwareConfig(base.BaseOrchestrationTest):
                                   self.status_reason, self.configs[0]['id'])
 
     @test.attr(type='smoke')
+    @test.idempotent_id('2ac43ab3-34f2-415d-be2e-eabb4d14ee32')
     def test_software_deployment_update_no_metadata_change(self):
         """Testing software deployment update without metadata change."""
         metadata = self.client.get_software_deploy_meta(self.server_id)
@@ -147,6 +152,7 @@ class TestSoftwareConfig(base.BaseOrchestrationTest):
                 test_metadata['metadata'][0][key])
 
     @test.attr(type='smoke')
+    @test.idempotent_id('92c48944-d79d-4595-a840-8e1a581c1a72')
     def test_software_deployment_update_with_metadata_change(self):
         """Testing software deployment update with metadata change."""
         metadata = self.client.get_software_deploy_meta(self.server_id)

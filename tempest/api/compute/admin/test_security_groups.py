@@ -37,6 +37,7 @@ class SecurityGroupsTestAdminJSON(base.BaseV2ComputeAdminTest):
         else:
             self.client.delete_security_group(securitygroup_id)
 
+    @test.idempotent_id('49667619-5af9-4c63-ab5d-2cfdd1c8f7f1')
     @testtools.skipIf(CONF.service_available.neutron,
                       "Skipped because neutron do not support all_tenants"
                       "search filter.")

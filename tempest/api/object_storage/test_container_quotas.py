@@ -51,6 +51,7 @@ class ContainerQuotasTest(base.BaseObjectTest):
         self.delete_containers([self.container_name])
         super(ContainerQuotasTest, self).tearDown()
 
+    @test.idempotent_id('9a0fb034-86af-4df0-86fa-f8bd7db21ae0')
     @test.requires_ext(extension='container_quotas', service='object')
     @test.attr(type="smoke")
     def test_upload_valid_object(self):
@@ -67,6 +68,7 @@ class ContainerQuotasTest(base.BaseObjectTest):
         nafter = self._get_bytes_used()
         self.assertEqual(nbefore + len(data), nafter)
 
+    @test.idempotent_id('22eeeb2b-3668-4160-baef-44790f65a5a0')
     @test.requires_ext(extension='container_quotas', service='object')
     @test.attr(type="smoke")
     def test_upload_large_object(self):
@@ -83,6 +85,7 @@ class ContainerQuotasTest(base.BaseObjectTest):
         nafter = self._get_bytes_used()
         self.assertEqual(nbefore, nafter)
 
+    @test.idempotent_id('3a387039-697a-44fc-a9c0-935de31f426b')
     @test.requires_ext(extension='container_quotas', service='object')
     @test.attr(type="smoke")
     def test_upload_too_many_objects(self):

@@ -54,6 +54,7 @@ class StacksTestJSON(base.BaseOrchestrationTest):
         return stacks
 
     @test.attr(type='gate')
+    @test.idempotent_id('065c652a-720d-4760-9132-06aedeb8e3ab')
     def test_stack_list(self):
         """Created stack should be in the list of existing stacks."""
         stacks = self._list_stacks()
@@ -61,6 +62,7 @@ class StacksTestJSON(base.BaseOrchestrationTest):
         self.assertIn(self.stack_name, stacks_names)
 
     @test.attr(type='gate')
+    @test.idempotent_id('992f96e3-41ee-4ff6-91c7-bcfb670c0919')
     def test_stack_show(self):
         """Getting details about created stack should be possible."""
         stack = self.client.get_stack(self.stack_name)
@@ -80,6 +82,7 @@ class StacksTestJSON(base.BaseOrchestrationTest):
         self.assertEqual('fluffy', stack['outputs'][0]['output_key'])
 
     @test.attr(type='gate')
+    @test.idempotent_id('fe719f7a-305a-44d8-bbb5-c91e93d9da17')
     def test_suspend_resume_stack(self):
         """Suspend and resume a stack."""
         self.client.suspend_stack(self.stack_identifier)
@@ -90,6 +93,7 @@ class StacksTestJSON(base.BaseOrchestrationTest):
                                           'RESUME_COMPLETE')
 
     @test.attr(type='gate')
+    @test.idempotent_id('c951d55e-7cce-4c1f-83a0-bad735437fa6')
     def test_list_resources(self):
         """Getting list of created resources for the stack should be possible.
         """
@@ -97,6 +101,7 @@ class StacksTestJSON(base.BaseOrchestrationTest):
         self.assertEqual({self.resource_name: self.resource_type}, resources)
 
     @test.attr(type='gate')
+    @test.idempotent_id('2aba03b3-392f-4237-900b-1f5a5e9bd962')
     def test_show_resource(self):
         """Getting details about created resource should be possible."""
         resource = self.client.get_resource(self.stack_identifier,
@@ -111,6 +116,7 @@ class StacksTestJSON(base.BaseOrchestrationTest):
         self.assertEqual(self.resource_type, resource['resource_type'])
 
     @test.attr(type='gate')
+    @test.idempotent_id('898070a9-eba5-4fae-b7d6-cf3ffa03090f')
     def test_resource_metadata(self):
         """Getting metadata for created resources should be possible."""
         metadata = self.client.show_resource_metadata(
@@ -120,6 +126,7 @@ class StacksTestJSON(base.BaseOrchestrationTest):
         self.assertEqual(['Tom', 'Stinky'], metadata.get('kittens', None))
 
     @test.attr(type='gate')
+    @test.idempotent_id('46567533-0a7f-483b-8942-fa19e0f17839')
     def test_list_events(self):
         """Getting list of created events for the stack should be possible."""
         events = self.client.list_events(self.stack_identifier)
@@ -135,6 +142,7 @@ class StacksTestJSON(base.BaseOrchestrationTest):
         self.assertIn('CREATE_COMPLETE', resource_statuses)
 
     @test.attr(type='gate')
+    @test.idempotent_id('92465723-1673-400a-909d-4773757a3f21')
     def test_show_event(self):
         """Getting details about an event should be possible."""
         events = self.client.list_resource_events(self.stack_identifier,
