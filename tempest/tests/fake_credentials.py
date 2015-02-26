@@ -43,7 +43,8 @@ class FakeKeystoneV3Credentials(auth.KeystoneV3Credentials):
             username='fake_username',
             password='fake_password',
             user_domain_name='fake_domain_name',
-            project_name='fake_tenant_name'
+            project_name='fake_tenant_name',
+            project_domain_name='fake_domain_name'
         )
         super(FakeKeystoneV3Credentials, self).__init__(**creds)
 
