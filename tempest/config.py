@@ -60,7 +60,13 @@ AuthGroup = [
                      "number of concurrent test processes."),
     cfg.ListOpt('tempest_roles',
                 help="Roles to assign to all users created by tempest",
-                default=[])
+                default=[]),
+    cfg.StrOpt('tenant_isolation_domain_name',
+               default=None,
+               help="Only applicable when identity.auth_version is v3."
+                    "Domain within which isolated credentials are provisioned."
+                    "The default \"None\" means that the domain from the"
+                    "admin user is used instead.")
 ]
 
 identity_group = cfg.OptGroup(name='identity',

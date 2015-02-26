@@ -81,7 +81,7 @@ class TestAccount(base.TestCase):
     def test_get_hash(self):
         self.stubs.Set(token_client.TokenClientJSON, 'raw_request',
                        fake_identity._fake_v2_response)
-        test_account_class = accounts.Accounts('test_name')
+        test_account_class = accounts.Accounts('v2', 'test_name')
         hash_list = self._get_hash_list(self.test_accounts)
         test_cred_dict = self.test_accounts[3]
         test_creds = auth.get_credentials(fake_identity.FAKE_AUTH_URL,
@@ -90,7 +90,7 @@ class TestAccount(base.TestCase):
         self.assertEqual(hash_list[3], results)
 
     def test_get_hash_dict(self):
-        test_account_class = accounts.Accounts('test_name')
+        test_account_class = accounts.Accounts('v2', 'test_name')
         hash_dict = test_account_class.get_hash_dict(self.test_accounts)
         hash_list = self._get_hash_list(self.test_accounts)
         for hash in hash_list:
@@ -101,7 +101,7 @@ class TestAccount(base.TestCase):
         # Emulate the lock existing on the filesystem
         self.useFixture(mockpatch.Patch('os.path.isfile', return_value=True))
         with mock.patch('__builtin__.open', mock.mock_open(), create=True):
-            test_account_class = accounts.Accounts('test_name')
+            test_account_class = accounts.Accounts('v2', 'test_name')
             res = test_account_class._create_hash_file('12345')
         self.assertFalse(res, "_create_hash_file should return False if the "
                          "pseudo-lock file already exists")
@@ -110,7 +110,7 @@ class TestAccount(base.TestCase):
         # Emulate the lock not existing on the filesystem
         self.useFixture(mockpatch.Patch('os.path.isfile', return_value=False))
         with mock.patch('__builtin__.open', mock.mock_open(), create=True):
-            test_account_class = accounts.Accounts('test_name')
+            test_account_class = accounts.Accounts('v2', 'test_name')
             res = test_account_class._create_hash_file('12345')
         self.assertTrue(res, "_create_hash_file should return True if the "
                         "pseudo-lock doesn't already exist")
@@ -122,7 +122,7 @@ class TestAccount(base.TestCase):
         hash_list = self._get_hash_list(self.test_accounts)
         mkdir_mock = self.useFixture(mockpatch.Patch('os.mkdir'))
         self.useFixture(mockpatch.Patch('os.path.isfile', return_value=False))
-        test_account_class = accounts.Accounts('test_name')
+        test_account_class = accounts.Accounts('v2', 'test_name')
         with mock.patch('__builtin__.open', mock.mock_open(),
                         create=True) as open_mock:
             test_account_class._get_free_hash(hash_list)
@@ -147,7 +147,7 @@ class TestAccount(base.TestCase):
         self.useFixture(mockpatch.Patch('os.path.isdir', return_value=True))
         # Emulate all lcoks in list are in use
         self.useFixture(mockpatch.Patch('os.path.isfile', return_value=True))
-        test_account_class = accounts.Accounts('test_name')
+        test_account_class = accounts.Accounts('v2', 'test_name')
         with mock.patch('__builtin__.open', mock.mock_open(), create=True):
             self.assertRaises(exceptions.InvalidConfiguration,
                               test_account_class._get_free_hash, hash_list)
@@ -157,7 +157,7 @@ class TestAccount(base.TestCase):
         # Emulate no pre-existing lock
         self.useFixture(mockpatch.Patch('os.path.isdir', return_value=True))
         hash_list = self._get_hash_list(self.test_accounts)
-        test_account_class = accounts.Accounts('test_name')
+        test_account_class = accounts.Accounts('v2', 'test_name')
 
         def _fake_is_file(path):
             # Fake isfile() to return that the path exists unless a specific
@@ -188,7 +188,7 @@ class TestAccount(base.TestCase):
         self.useFixture(mockpatch.Patch('os.path.isfile', return_value=True))
         # Pretend the lock dir is empty
         self.useFixture(mockpatch.Patch('os.listdir', return_value=[]))
-        test_account_class = accounts.Accounts('test_name')
+        test_account_class = accounts.Accounts('v2', 'test_name')
         remove_mock = self.useFixture(mockpatch.Patch('os.remove'))
         rmdir_mock = self.useFixture(mockpatch.Patch('os.rmdir'))
         test_account_class.remove_hash(hash_list[2])
@@ -214,7 +214,7 @@ class TestAccount(base.TestCase):
         # Pretend the lock dir is empty
         self.useFixture(mockpatch.Patch('os.listdir', return_value=[
             hash_list[1], hash_list[4]]))
-        test_account_class = accounts.Accounts('test_name')
+        test_account_class = accounts.Accounts('v2', 'test_name')
         remove_mock = self.useFixture(mockpatch.Patch('os.remove'))
         rmdir_mock = self.useFixture(mockpatch.Patch('os.rmdir'))
         test_account_class.remove_hash(hash_list[2])
@@ -231,7 +231,7 @@ class TestAccount(base.TestCase):
         rmdir_mock.mock.assert_not_called()
 
     def test_is_multi_user(self):
-        test_accounts_class = accounts.Accounts('test_name')
+        test_accounts_class = accounts.Accounts('v2', 'test_name')
         self.assertTrue(test_accounts_class.is_multi_user())
 
     def test_is_not_multi_user(self):
@@ -239,14 +239,14 @@ class TestAccount(base.TestCase):
         self.useFixture(mockpatch.Patch(
             'tempest.common.accounts.read_accounts_yaml',
             return_value=self.test_accounts))
-        test_accounts_class = accounts.Accounts('test_name')
+        test_accounts_class = accounts.Accounts('v2', 'test_name')
         self.assertFalse(test_accounts_class.is_multi_user())
 
     def test__get_creds_by_roles_one_role(self):
         self.useFixture(mockpatch.Patch(
             'tempest.common.accounts.read_accounts_yaml',
             return_value=self.test_accounts))
-        test_accounts_class = accounts.Accounts('test_name')
+        test_accounts_class = accounts.Accounts('v2', 'test_name')
         hashes = test_accounts_class.hash_dict['roles']['role4']
         temp_hash = hashes[0]
         get_free_hash_mock = self.useFixture(mockpatch.PatchObject(
@@ -263,7 +263,7 @@ class TestAccount(base.TestCase):
         self.useFixture(mockpatch.Patch(
             'tempest.common.accounts.read_accounts_yaml',
             return_value=self.test_accounts))
-        test_accounts_class = accounts.Accounts('test_name')
+        test_accounts_class = accounts.Accounts('v2', 'test_name')
         hashes = test_accounts_class.hash_dict['roles']['role4']
         hashes2 = test_accounts_class.hash_dict['roles']['role2']
         hashes = list(set(hashes) & set(hashes2))
@@ -282,7 +282,7 @@ class TestAccount(base.TestCase):
         self.useFixture(mockpatch.Patch(
             'tempest.common.accounts.read_accounts_yaml',
             return_value=self.test_accounts))
-        test_accounts_class = accounts.Accounts('test_name')
+        test_accounts_class = accounts.Accounts('v2', 'test_name')
         hashes = test_accounts_class.hash_dict['creds'].keys()
         admin_hashes = test_accounts_class.hash_dict['roles'][
             cfg.CONF.identity.admin_role]
@@ -321,7 +321,7 @@ class TestNotLockingAccount(base.TestCase):
         self.useFixture(mockpatch.Patch('os.path.isfile', return_value=True))
 
     def test_get_creds(self):
-        test_accounts_class = accounts.NotLockingAccounts('test_name')
+        test_accounts_class = accounts.NotLockingAccounts('v2', 'test_name')
         for i in xrange(len(self.test_accounts)):
             creds = test_accounts_class.get_creds(i)
             msg = "Empty credentials returned for ID %s" % str(i)

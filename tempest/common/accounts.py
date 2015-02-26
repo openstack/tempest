@@ -35,9 +35,9 @@ def read_accounts_yaml(path):
 
 class Accounts(cred_provider.CredentialProvider):
 
-    def __init__(self, name):
-        super(Accounts, self).__init__(name)
-        self.name = name
+    def __init__(self, identity_version=None, name=None):
+        super(Accounts, self).__init__(identity_version=identity_version,
+                                       name=name)
         if os.path.isfile(CONF.auth.test_accounts_file):
             accounts = read_accounts_yaml(CONF.auth.test_accounts_file)
             self.use_default_creds = False
@@ -208,7 +208,8 @@ class Accounts(cred_provider.CredentialProvider):
         if self.isolated_creds.get('primary'):
             return self.isolated_creds.get('primary')
         creds = self._get_creds()
-        primary_credential = cred_provider.get_credentials(**creds)
+        primary_credential = cred_provider.get_credentials(
+            identity_version=self.identity_version, **creds)
         self.isolated_creds['primary'] = primary_credential
         return primary_credential
 
@@ -216,7 +217,8 @@ class Accounts(cred_provider.CredentialProvider):
         if self.isolated_creds.get('alt'):
             return self.isolated_creds.get('alt')
         creds = self._get_creds()
-        alt_credential = cred_provider.get_credentials(**creds)
+        alt_credential = cred_provider.get_credentials(
+            identity_version=self.identity_version, **creds)
         self.isolated_creds['alt'] = alt_credential
         return alt_credential
 
@@ -232,7 +234,8 @@ class Accounts(cred_provider.CredentialProvider):
             new_index = str(roles) + '-' + str(len(self.isolated_creds))
             self.isolated_creds[new_index] = exist_creds
         creds = self._get_creds(roles=roles)
-        role_credential = cred_provider.get_credentials(**creds)
+        role_credential = cred_provider.get_credentials(
+            identity_version=self.identity_version, **creds)
         self.isolated_creds[str(roles)] = role_credential
         return role_credential
 
@@ -300,10 +303,11 @@ class NotLockingAccounts(Accounts):
             return self.isolated_creds.get('primary')
         if not self.use_default_creds:
             creds = self.get_creds(0)
-            primary_credential = cred_provider.get_credentials(**creds)
+            primary_credential = cred_provider.get_credentials(
+                identity_version=self.identity_version, **creds)
         else:
             primary_credential = cred_provider.get_configured_credentials(
-                'user')
+                credential_type='user', identity_version=self.identity_version)
         self.isolated_creds['primary'] = primary_credential
         return primary_credential
 
@@ -312,10 +316,12 @@ class NotLockingAccounts(Accounts):
             return self.isolated_creds.get('alt')
         if not self.use_default_creds:
             creds = self.get_creds(1)
-            alt_credential = cred_provider.get_credentials(**creds)
+            alt_credential = cred_provider.get_credentials(
+                identity_version=self.identity_version, **creds)
         else:
             alt_credential = cred_provider.get_configured_credentials(
-                'alt_user')
+                credential_type='alt_user',
+                identity_version=self.identity_version)
         self.isolated_creds['alt'] = alt_credential
         return alt_credential
 
