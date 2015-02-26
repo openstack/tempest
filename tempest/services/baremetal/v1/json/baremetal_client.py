@@ -13,18 +13,12 @@
 from tempest.services.baremetal import base
 
 
-class BaremetalClientV1(base.BaremetalClient):
+class BaremetalClientJSON(base.BaremetalClient):
     """
     Base Tempest REST client for Ironic API v1.
-
-    Specific implementations must implement serialize and deserialize
-    methods in order to send requests to Ironic.
-
     """
-    def __init__(self, auth_provider):
-        super(BaremetalClientV1, self).__init__(auth_provider)
-        self.version = '1'
-        self.uri_prefix = 'v%s' % self.version
+    version = '1'
+    uri_prefix = 'v1'
 
     @base.handle_errors
     def list_nodes(self, **kwargs):
@@ -156,7 +150,7 @@ class BaremetalClientV1(base.BaremetalClient):
                                'memory': kwargs.get('memory', 4096)},
                 'driver': kwargs.get('driver', 'fake')}
 
-        return self._create_request('nodes', 'node', node)
+        return self._create_request('nodes', node)
 
     @base.handle_errors
     def create_chassis(self, **kwargs):
@@ -170,7 +164,7 @@ class BaremetalClientV1(base.BaremetalClient):
         """
         chassis = {'description': kwargs.get('description', 'test-chassis')}
 
-        return self._create_request('chassis', 'chassis', chassis)
+        return self._create_request('chassis', chassis)
 
     @base.handle_errors
     def create_port(self, node_id, **kwargs):
@@ -193,7 +187,7 @@ class BaremetalClientV1(base.BaremetalClient):
         if kwargs['address'] is not None:
             port['address'] = kwargs['address']
 
-        return self._create_request('ports', 'port', port)
+        return self._create_request('ports', port)
 
     @base.handle_errors
     def delete_node(self, uuid):

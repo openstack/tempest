@@ -17,6 +17,7 @@ import base64
 import logging
 import urlparse
 
+from tempest_lib import decorators
 import testtools
 
 from tempest.api.compute import base
@@ -100,7 +101,7 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         # The server should be power cycled
         self._test_reboot_server('HARD')
 
-    @test.skip_because(bug="1014647")
+    @decorators.skip_because(bug="1014647")
     @test.attr(type='smoke')
     def test_reboot_server_soft(self):
         # The server should be signaled to reboot gracefully

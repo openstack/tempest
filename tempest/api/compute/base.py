@@ -159,8 +159,7 @@ class BaseComputeTest(tempest.test.BaseTestCase):
             str(sg['id']) for sg in cls.security_groups))
         for sg in cls.security_groups:
             try:
-                resp, body =\
-                    cls.security_groups_client.delete_security_group(sg['id'])
+                cls.security_groups_client.delete_security_group(sg['id'])
             except exceptions.NotFound:
                 # The security group may have already been deleted which is OK.
                 pass
@@ -235,12 +234,12 @@ class BaseComputeTest(tempest.test.BaseTestCase):
             name = data_utils.rand_name(cls.__name__ + "-securitygroup")
         if description is None:
             description = data_utils.rand_name('description-')
-        resp, body = \
+        body = \
             cls.security_groups_client.create_security_group(name,
                                                              description)
         cls.security_groups.append(body)
 
-        return resp, body
+        return body
 
     @classmethod
     def create_test_server_group(cls, name="", policy=None):

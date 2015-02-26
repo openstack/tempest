@@ -59,27 +59,23 @@ class FlavorsAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
 
         # no need to specify flavor_id, we can get the flavor_id from a
         # response of create_flavor() call.
-        resp, flavor = self.client.create_flavor(flavor_name,
-                                                 self.ram,
-                                                 self.vcpus, self.disk,
-                                                 None,
-                                                 ephemeral=self.ephemeral,
-                                                 swap=self.swap,
-                                                 rxtx=self.rxtx)
+        flavor = self.client.create_flavor(flavor_name,
+                                           self.ram,
+                                           self.vcpus, self.disk,
+                                           None,
+                                           ephemeral=self.ephemeral,
+                                           swap=self.swap,
+                                           rxtx=self.rxtx)
         # Delete the flavor
         new_flavor_id = flavor['id']
-        resp_delete, body = self.client.delete_flavor(new_flavor_id)
-        self.assertEqual(200, resp.status)
-        self.assertEqual(202, resp_delete.status)
+        self.client.delete_flavor(new_flavor_id)
 
         # Deleted flavors can be seen via detailed GET
-        resp, flavor = self.client.get_flavor_details(new_flavor_id)
-        self.assertEqual(resp.status, 200)
+        flavor = self.client.get_flavor_details(new_flavor_id)
         self.assertEqual(flavor['name'], flavor_name)
 
         # Deleted flavors should not show up in a list however
-        resp, flavors = self.client.list_flavors_with_detail()
-        self.assertEqual(resp.status, 200)
+        flavors = self.client.list_flavors_with_detail()
         flag = True
         for flavor in flavors:
             if flavor['name'] == flavor_name:

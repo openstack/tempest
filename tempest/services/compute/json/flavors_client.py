@@ -34,7 +34,7 @@ class FlavorsClientJSON(service_client.ServiceClient):
         resp, body = self.get(url)
         body = json.loads(body)
         self.validate_response(common_schema.list_flavors, resp, body)
-        return resp, body['flavors']
+        return service_client.ResponseBodyList(resp, body['flavors'])
 
     def list_flavors_with_detail(self, params=None):
         url = 'flavors/detail'
@@ -44,13 +44,13 @@ class FlavorsClientJSON(service_client.ServiceClient):
         resp, body = self.get(url)
         body = json.loads(body)
         self.validate_response(v2schema.list_flavors_details, resp, body)
-        return resp, body['flavors']
+        return service_client.ResponseBodyList(resp, body['flavors'])
 
     def get_flavor_details(self, flavor_id):
         resp, body = self.get("flavors/%s" % str(flavor_id))
         body = json.loads(body)
         self.validate_response(v2schema.create_get_flavor_details, resp, body)
-        return resp, body['flavor']
+        return service_client.ResponseBody(resp, body['flavor'])
 
     def create_flavor(self, name, ram, vcpus, disk, flavor_id, **kwargs):
         """Creates a new flavor or instance type."""
@@ -74,19 +74,19 @@ class FlavorsClientJSON(service_client.ServiceClient):
 
         body = json.loads(body)
         self.validate_response(v2schema.create_get_flavor_details, resp, body)
-        return resp, body['flavor']
+        return service_client.ResponseBody(resp, body['flavor'])
 
     def delete_flavor(self, flavor_id):
         """Deletes the given flavor."""
         resp, body = self.delete("flavors/{0}".format(flavor_id))
         self.validate_response(v2schema.delete_flavor, resp, body)
-        return resp, body
+        return service_client.ResponseBody(resp, body)
 
     def is_resource_deleted(self, id):
         # Did not use get_flavor_details(id) for verification as it gives
         # 200 ok even for deleted id. LP #981263
         # we can remove the loop here and use get by ID when bug gets sortedout
-        resp, flavors = self.list_flavors_with_detail()
+        flavors = self.list_flavors_with_detail()
         for flavor in flavors:
             if flavor['id'] == id:
                 return False
@@ -105,7 +105,7 @@ class FlavorsClientJSON(service_client.ServiceClient):
         body = json.loads(body)
         self.validate_response(schema_extra_specs.flavor_extra_specs,
                                resp, body)
-        return resp, body['extra_specs']
+        return service_client.ResponseBody(resp, body['extra_specs'])
 
     def get_flavor_extra_spec(self, flavor_id):
         """Gets extra Specs details of the mentioned flavor."""
@@ -113,7 +113,7 @@ class FlavorsClientJSON(service_client.ServiceClient):
         body = json.loads(body)
         self.validate_response(schema_extra_specs.flavor_extra_specs,
                                resp, body)
-        return resp, body['extra_specs']
+        return service_client.ResponseBody(resp, body['extra_specs'])
 
     def get_flavor_extra_spec_with_key(self, flavor_id, key):
         """Gets extra Specs key-value of the mentioned flavor and key."""
@@ -122,7 +122,7 @@ class FlavorsClientJSON(service_client.ServiceClient):
         body = json.loads(body)
         self.validate_response(schema_extra_specs.flavor_extra_specs_key,
                                resp, body)
-        return resp, body
+        return service_client.ResponseBody(resp, body)
 
     def update_flavor_extra_spec(self, flavor_id, key, **kwargs):
         """Update specified extra Specs of the mentioned flavor and key."""
@@ -131,14 +131,14 @@ class FlavorsClientJSON(service_client.ServiceClient):
         body = json.loads(body)
         self.validate_response(schema_extra_specs.flavor_extra_specs_key,
                                resp, body)
-        return resp, body
+        return service_client.ResponseBody(resp, body)
 
     def unset_flavor_extra_spec(self, flavor_id, key):
         """Unsets extra Specs from the mentioned flavor."""
         resp, body = self.delete('flavors/%s/os-extra_specs/%s' %
                                  (str(flavor_id), key))
         self.validate_response(v2schema.unset_flavor_extra_specs, resp, body)
-        return resp, body
+        return service_client.ResponseBody(resp, body)
 
     def list_flavor_access(self, flavor_id):
         """Gets flavor access information given the flavor id."""
@@ -146,7 +146,7 @@ class FlavorsClientJSON(service_client.ServiceClient):
         body = json.loads(body)
         self.validate_response(schema_access.add_remove_list_flavor_access,
                                resp, body)
-        return resp, body['flavor_access']
+        return service_client.ResponseBodyList(resp, body['flavor_access'])
 
     def add_flavor_access(self, flavor_id, tenant_id):
         """Add flavor access for the specified tenant."""
@@ -160,7 +160,7 @@ class FlavorsClientJSON(service_client.ServiceClient):
         body = json.loads(body)
         self.validate_response(schema_access.add_remove_list_flavor_access,
                                resp, body)
-        return resp, body['flavor_access']
+        return service_client.ResponseBodyList(resp, body['flavor_access'])
 
     def remove_flavor_access(self, flavor_id, tenant_id):
         """Remove flavor access from the specified tenant."""
@@ -174,4 +174,4 @@ class FlavorsClientJSON(service_client.ServiceClient):
         body = json.loads(body)
         self.validate_response(schema_access.add_remove_list_flavor_access,
                                resp, body)
-        return resp, body['flavor_access']
+        return service_client.ResponseBody(resp, body['flavor_access'])

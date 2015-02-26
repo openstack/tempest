@@ -160,7 +160,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
             client = self.keypairs_client
         name = data_utils.rand_name(self.__class__.__name__)
         # We don't need to create a keypair by pubkey in scenario
-        resp, body = client.create_keypair(name)
+        body = client.create_keypair(name)
         self.addCleanup(client.delete_keypair, name)
         return body
 
@@ -236,7 +236,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
     def _create_loginable_secgroup_rule(self, secgroup_id=None):
         _client = self.security_groups_client
         if secgroup_id is None:
-            _, sgs = _client.list_security_groups()
+            sgs = _client.list_security_groups()
             for sg in sgs:
                 if sg['name'] == 'default':
                     secgroup_id = sg['id']
@@ -263,8 +263,8 @@ class ScenarioTest(tempest.test.BaseTestCase):
         ]
         rules = list()
         for ruleset in rulesets:
-            _, sg_rule = _client.create_security_group_rule(secgroup_id,
-                                                            **ruleset)
+            sg_rule = _client.create_security_group_rule(secgroup_id,
+                                                         **ruleset)
             self.addCleanup(self.delete_wrapper,
                             _client.delete_security_group_rule,
                             sg_rule['id'])
@@ -275,7 +275,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
         # Create security group
         sg_name = data_utils.rand_name(self.__class__.__name__)
         sg_desc = sg_name + " description"
-        _, secgroup = self.security_groups_client.create_security_group(
+        secgroup = self.security_groups_client.create_security_group(
             sg_name, sg_desc)
         self.assertEqual(secgroup['name'], sg_name)
         self.assertEqual(secgroup['description'], sg_desc)
@@ -417,7 +417,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
     def nova_volume_attach(self):
         # TODO(andreaf) Device should be here CONF.compute.volume_device_name
         volume = self.servers_client.attach_volume(
-            self.server['id'], self.volume['id'], '/dev/vdb')[1]
+            self.server['id'], self.volume['id'], '/dev/vdb')
         self.assertEqual(self.volume['id'], volume['id'])
         self.volumes_client.wait_for_volume_status(volume['id'], 'in-use')
         # Refresh the volume after the attachment

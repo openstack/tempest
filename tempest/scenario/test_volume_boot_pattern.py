@@ -10,6 +10,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib import decorators
+
 from tempest.common.utils import data_utils
 from tempest import config
 from tempest.openstack.common import log
@@ -130,7 +132,7 @@ class TestVolumeBootPattern(manager.ScenarioTest):
         actual = self._get_content(ssh_client)
         self.assertEqual(expected, actual)
 
-    @test.skip_because(bug='1373513')
+    @decorators.skip_because(bug='1373513')
     @test.services('compute', 'volume', 'image')
     def test_volume_boot_pattern(self):
         keypair = self.create_keypair()

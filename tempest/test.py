@@ -39,9 +39,6 @@ LOG = logging.getLogger(__name__)
 
 CONF = config.CONF
 
-# All the successful HTTP status codes from RFC 2616
-HTTP_SUCCESS = (200, 201, 202, 203, 204, 205, 206)
-
 
 def attr(*args, **kwargs):
     """A decorator which applies the  testtools attr decorator
@@ -137,35 +134,6 @@ def stresstest(*args, **kwargs):
             setattr(f, "st_allow_inheritance", False)
         attr(type='stress')(f)
         return f
-    return decorator
-
-
-def skip_because(*args, **kwargs):
-    """A decorator useful to skip tests hitting known bugs
-
-    @param bug: bug number causing the test to skip
-    @param condition: optional condition to be True for the skip to have place
-    @param interface: skip the test if it is the same as self._interface
-    """
-    def decorator(f):
-        @functools.wraps(f)
-        def wrapper(self, *func_args, **func_kwargs):
-            skip = False
-            if "condition" in kwargs:
-                if kwargs["condition"] is True:
-                    skip = True
-            elif "interface" in kwargs:
-                if kwargs["interface"] == self._interface:
-                    skip = True
-            else:
-                skip = True
-            if "bug" in kwargs and skip is True:
-                if not kwargs['bug'].isdigit():
-                    raise ValueError('bug must be a valid bug number')
-                msg = "Skipped until Bug: %s is resolved." % kwargs["bug"]
-                raise testtools.TestCase.skipException(msg)
-            return f(self, *func_args, **func_kwargs)
-        return wrapper
     return decorator
 
 

@@ -27,7 +27,7 @@ class AbsoluteLimitsTestJSON(base.BaseV2ComputeTest):
     @test.attr(type='gate')
     def test_absLimits_get(self):
         # To check if all limits are present in the response
-        resp, absolute_limits = self.client.get_absolute_limits()
+        absolute_limits = self.client.get_absolute_limits()
         expected_elements = ['maxImageMeta', 'maxPersonality',
                              'maxPersonalitySize',
                              'maxServerMeta', 'maxTotalCores',

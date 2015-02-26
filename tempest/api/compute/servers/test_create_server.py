@@ -89,7 +89,7 @@ class ServersTestJSON(base.BaseV2ComputeTest):
     def test_verify_created_server_vcpus(self):
         # Verify that the number of vcpus reported by the instance matches
         # the amount stated by the flavor
-        resp, flavor = self.flavors_client.get_flavor_details(self.flavor_ref)
+        flavor = self.flavors_client.get_flavor_details(self.flavor_ref)
         linux_client = remote_client.RemoteClient(self.server, self.ssh_user,
                                                   self.password)
         self.assertEqual(flavor['vcpus'], linux_client.get_number_of_vcpus())
@@ -173,12 +173,17 @@ class ServersTestJSON(base.BaseV2ComputeTest):
 
         _, addresses = self.client.list_addresses(server_multi_nics['id'])
 
-        expected_addr = ['19.80.0.2', '19.86.0.2']
-
+        # We can't predict the ip addresses assigned to the server on networks.
+        # Sometimes the assigned addresses are ['19.80.0.2', '19.86.0.2'], at
+        # other times ['19.80.0.3', '19.86.0.3']. So we check if the first
+        # address is in first network, similarly second address is in second
+        # network.
         addr = [addresses[name_net1][0]['addr'],
                 addresses[name_net2][0]['addr']]
-
-        self.assertEqual(expected_addr, addr)
+        networks = [netaddr.IPNetwork('19.80.0.0/24'),
+                    netaddr.IPNetwork('19.86.0.0/24')]
+        for address, network in zip(addr, networks):
+            self.assertIn(address, network)
 
 
 class ServersWithSpecificFlavorTestJSON(base.BaseV2ComputeAdminTest):
@@ -205,13 +210,12 @@ class ServersWithSpecificFlavorTestJSON(base.BaseV2ComputeAdminTest):
             disk = 0
 
             # Create a flavor with extra specs
-            resp, flavor = (self.flavor_client.
-                            create_flavor(flavor_with_eph_disk_name,
-                                          ram, vcpus, disk,
-                                          flavor_with_eph_disk_id,
-                                          ephemeral=1))
+            flavor = (self.flavor_client.
+                      create_flavor(flavor_with_eph_disk_name,
+                                    ram, vcpus, disk,
+                                    flavor_with_eph_disk_id,
+                                    ephemeral=1))
             self.addCleanup(flavor_clean_up, flavor['id'])
-            self.assertEqual(200, resp.status)
 
             return flavor['id']
 
@@ -224,18 +228,16 @@ class ServersWithSpecificFlavorTestJSON(base.BaseV2ComputeAdminTest):
             disk = 0
 
             # Create a flavor without extra specs
-            resp, flavor = (self.flavor_client.
-                            create_flavor(flavor_no_eph_disk_name,
-                                          ram, vcpus, disk,
-                                          flavor_no_eph_disk_id))
+            flavor = (self.flavor_client.
+                      create_flavor(flavor_no_eph_disk_name,
+                                    ram, vcpus, disk,
+                                    flavor_no_eph_disk_id))
             self.addCleanup(flavor_clean_up, flavor['id'])
-            self.assertEqual(200, resp.status)
 
             return flavor['id']
 
         def flavor_clean_up(flavor_id):
-            resp, body = self.flavor_client.delete_flavor(flavor_id)
-            self.assertEqual(resp.status, 202)
+            self.flavor_client.delete_flavor(flavor_id)
             self.flavor_client.wait_for_resource_deletion(flavor_id)
 
         flavor_with_eph_disk_id = create_flavor_with_extra_specs()

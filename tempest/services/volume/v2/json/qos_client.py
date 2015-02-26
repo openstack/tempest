@@ -16,8 +16,4 @@ from tempest.services.volume.json import qos_client
 
 
 class QosSpecsV2ClientJSON(qos_client.BaseQosSpecsClientJSON):
-
-    def __init__(self, auth_provider):
-        super(QosSpecsV2ClientJSON, self).__init__(auth_provider)
-
-        self.api_version = "v2"
+    api_version = "v2"

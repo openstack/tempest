@@ -120,7 +120,7 @@ class ClusterTemplateTest(dp_base.BaseDataProcessingTest):
         template_info = self._create_cluster_template()
 
         # check for cluster template in list
-        _, templates = self.client.list_cluster_templates()
+        templates = self.client.list_cluster_templates()
         templates_info = [(template['id'], template['name'])
                           for template in templates]
         self.assertIn(template_info, templates_info)
@@ -130,7 +130,7 @@ class ClusterTemplateTest(dp_base.BaseDataProcessingTest):
         template_id, template_name = self._create_cluster_template()
 
         # check cluster template fetch by id
-        _, template = self.client.get_cluster_template(template_id)
+        template = self.client.get_cluster_template(template_id)
         self.assertEqual(template_name, template['name'])
         self.assertDictContainsSubset(self.cluster_template, template)
 

@@ -16,10 +16,9 @@
 import json
 
 from tempest.common import service_client
-from tempest.services.volume.json import base
 
 
-class BaseExtensionsClientJSON(base.VolumeClient):
+class BaseExtensionsClientJSON(service_client.ServiceClient):
 
     def list_extensions(self):
         url = 'extensions'

@@ -122,7 +122,7 @@ class ServerMetadataNegativeTestJSON(base.BaseV2ComputeTest):
         # A 403 Forbidden or 413 Overlimit (old behaviour) exception
         # will be raised while exceeding metadata items limit for
         # tenant.
-        _, quota_set = self.quotas.get_quota_set(self.tenant_id)
+        quota_set = self.quotas.get_quota_set(self.tenant_id)
         quota_metadata = quota_set['metadata_items']
         if quota_metadata == -1:
             raise self.skipException("No limit for metadata_items")

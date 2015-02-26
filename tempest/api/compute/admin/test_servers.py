@@ -12,6 +12,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib import decorators
+
 from tempest.api.compute import base
 from tempest.common.utils import data_utils
 from tempest import test
@@ -79,6 +81,24 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
         self.assertIn(self.s2_name, servers_name)
 
     @test.attr(type='gate')
+    def test_list_servers_by_admin_with_specified_tenant(self):
+        # In nova v2, tenant_id is ignored unless all_tenants is specified
+
+        # List the primary tenant but get nothing due to odd specified behavior
+        tenant_id = self.non_admin_client.tenant_id
+        params = {'tenant_id': tenant_id}
+        resp, body = self.client.list_servers_with_detail(params)
+        servers = body['servers']
+        self.assertEqual([], servers)
+
+        # List the admin tenant which has no servers
+        admin_tenant_id = self.client.tenant_id
+        params = {'all_tenants': '', 'tenant_id': admin_tenant_id}
+        resp, body = self.client.list_servers_with_detail(params)
+        servers = body['servers']
+        self.assertEqual([], servers)
+
+    @test.attr(type='gate')
     def test_list_servers_filter_by_exist_host(self):
         # Filter the list of servers by existent host
         name = data_utils.rand_name('server')
@@ -124,7 +144,7 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
         self.assertEqual(server['status'], 'ACTIVE')
 
     @test.attr(type='gate')
-    @test.skip_because(bug="1240043")
+    @decorators.skip_because(bug="1240043")
     def test_get_server_diagnostics_by_admin(self):
         # Retrieve server diagnostics by admin user
         resp, diagnostic = self.client.get_server_diagnostics(self.s1_id)
