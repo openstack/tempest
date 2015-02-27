@@ -12,6 +12,7 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
+import functools
 import netaddr
 from tempest import config
 from tempest.openstack.common import log as logging
@@ -118,14 +119,28 @@ class TestGettingAddress(manager.NetworkScenarioTest):
         ssh1, srv1 = self.prepare_server()
         ssh2, srv2 = self.prepare_server()
 
+        def guest_has_address(ssh, addr):
+            return addr in ssh.get_ip_list()
+
+        srv1_v6_addr_assigned = functools.partial(
+            guest_has_address, ssh1, srv1['accessIPv6'])
+        srv2_v6_addr_assigned = functools.partial(
+            guest_has_address, ssh2, srv2['accessIPv6'])
+
         result = ssh1.get_ip_list()
         self.assertIn(srv1['accessIPv4'], result)
         # v6 should be configured since the image supports it
-        self.assertIn(srv1['accessIPv6'], result)
+        # It can take time for ipv6 automatic address to get assigned
+        self.assertTrue(
+            test.call_until_true(srv1_v6_addr_assigned,
+                                 CONF.compute.ping_timeout, 1))
         result = ssh2.get_ip_list()
         self.assertIn(srv2['accessIPv4'], result)
         # v6 should be configured since the image supports it
-        self.assertIn(srv2['accessIPv6'], result)
+        # It can take time for ipv6 automatic address to get assigned
+        self.assertTrue(
+            test.call_until_true(srv2_v6_addr_assigned,
+                                 CONF.compute.ping_timeout, 1))
         result = ssh1.ping_host(srv2['accessIPv4'])
         self.assertIn('0% packet loss', result)
         result = ssh2.ping_host(srv1['accessIPv4'])
