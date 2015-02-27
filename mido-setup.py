@@ -142,13 +142,10 @@ def fix_tempest_conf(network_client, nova_client):
     config.set('compute', 'flavor_ref', smallest_flavor.id)
 
     # set up allow_tenant_isolation
-    try:
-        if not config.get('auth', 'allow_tenant_isolation'):
-            config.set('auth', 'allow_tenant_isolation', 'True')
-    except:
-        if not config.get('compute', 'allow_tenant_isolation'):
-            config.set('compute', 'allow_tenant_isolation', 'True')
-
+    if not config.has_section('auth'):
+        config.add_section('auth')
+    config.set('auth', 'allow_tenant_isolation', 'True')
+    
     with open(_path, 'w') as tempest_conf:
         config.write(tempest_conf)
 
