@@ -1,0 +1,22 @@
+language: python
+
+python:
+  - "2.7"
+
+# whitelist branches
+branches:
+  only:
+    - proposed
+
+# command to install dependencies, e.g. pip install -r
+# Install tox for testing tempest builds.
+install:
+    - pip install -r requirements.txt
+    - pip install -r test-requirements.txt
+
+# command to run tests, e.g. python setup.py test
+# Running tempest unit tests for python
+script: 
+    - cp etc/tempest.conf.sample etc/tempest.conf
+    - testr init
+    - OS_TEST_PATH=./tempest/tests testr run --parallel
