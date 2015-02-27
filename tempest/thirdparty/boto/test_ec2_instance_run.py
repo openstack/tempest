@@ -245,7 +245,8 @@ class InstanceRunTest(boto_test.BotoTestCase):
 
         self.addResourceCleanUp(self.destroy_reservation,
                                 reservation)
-        volume = self.ec2_client.create_volume(1, self.zone)
+        volume = self.ec2_client.create_volume(CONF.volume.volume_size,
+                                               self.zone)
         LOG.debug("Volume created - status: %s", volume.status)
 
         self.addResourceCleanUp(self.destroy_volume_wait, volume)

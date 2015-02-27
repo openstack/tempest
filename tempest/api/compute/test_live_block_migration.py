@@ -115,7 +115,7 @@ class LiveBlockMigrationTestJSON(base.BaseV2ComputeAdminTest):
         actual_host = self._get_host_for_server(server_id)
         target_host = self._get_host_other_than(actual_host)
 
-        volume = self.volumes_client.create_volume(1, display_name='test')
+        volume = self.volumes_client.create_volume(display_name='test')
 
         self.volumes_client.wait_for_volume_status(volume['id'],
                                                    'available')

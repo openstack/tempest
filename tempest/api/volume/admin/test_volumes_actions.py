@@ -34,8 +34,7 @@ class VolumesActionsV2Test(base.BaseVolumeAdminTest):
         cls.name_field = cls.special_fields['name_field']
         params = {cls.name_field: vol_name}
 
-        cls.volume = cls.client.create_volume(size=1,
-                                              **params)
+        cls.volume = cls.client.create_volume(**params)
         cls.client.wait_for_volume_status(cls.volume['id'], 'available')
 
     @classmethod
@@ -61,8 +60,7 @@ class VolumesActionsV2Test(base.BaseVolumeAdminTest):
         # Create a temp volume for force delete tests
         vol_name = utils.rand_name('Volume')
         params = {self.name_field: vol_name}
-        temp_volume = self.client.create_volume(size=1,
-                                                **params)
+        temp_volume = self.client.create_volume(**params)
         self.client.wait_for_volume_status(temp_volume['id'], 'available')
 
         return temp_volume

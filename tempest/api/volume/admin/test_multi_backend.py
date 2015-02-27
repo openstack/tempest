@@ -70,8 +70,7 @@ class VolumeMultiBackendV2Test(base.BaseVolumeAdminTest):
 
         params = {self.name_field: vol_name, 'volume_type': type_name}
 
-        self.volume = self.admin_volume_client.create_volume(size=1,
-                                                             **params)
+        self.volume = self.admin_volume_client.create_volume(**params)
         if with_prefix:
             self.volume_id_list_with_prefix.append(self.volume['id'])
         else:

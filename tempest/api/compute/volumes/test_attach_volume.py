@@ -70,7 +70,7 @@ class AttachVolumeTestJSON(base.BaseV2ComputeTest):
 
         # Create a volume and wait for it to become ready
         self.volume = self.volumes_client.create_volume(
-            1, display_name='test')
+            CONF.volume.volume_size, display_name='test')
         self.addCleanup(self._delete_volume)
         self.volumes_client.wait_for_volume_status(self.volume['id'],
                                                    'available')

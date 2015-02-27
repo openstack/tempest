@@ -31,8 +31,7 @@ class VolumeTypesNegativeV2Test(base.BaseVolumeAdminTest):
         params = {self.name_field: str(uuid.uuid4()),
                   'volume_type': str(uuid.uuid4())}
         self.assertRaises(lib_exc.NotFound,
-                          self.volumes_client.create_volume, size=1,
-                          **params)
+                          self.volumes_client.create_volume, **params)
 
     @test.attr(type='gate')
     @test.idempotent_id('878b4e57-faa2-4659-b0d1-ce740a06ae81')

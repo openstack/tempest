@@ -86,7 +86,7 @@ class BaseVolumeQuotasAdminV2TestJSON(base.BaseVolumeAdminTest):
         quota_usage = self.quotas_client.get_quota_usage(
             self.demo_tenant_id)
 
-        volume = self.create_volume(size=1)
+        volume = self.create_volume()
         self.addCleanup(self.admin_volume_client.delete_volume,
                         volume['id'])
 
