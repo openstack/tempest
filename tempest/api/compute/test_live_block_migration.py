@@ -44,14 +44,14 @@ class LiveBlockMigrationTestJSON(base.BaseV2ComputeAdminTest):
         ]
 
     def _get_server_details(self, server_id):
-        _resp, body = self.admin_servers_client.get_server(server_id)
+        body = self.admin_servers_client.get_server(server_id)
         return body
 
     def _get_host_for_server(self, server_id):
         return self._get_server_details(server_id)[self._host_key]
 
     def _migrate_server_to(self, server_id, dest_host):
-        _resp, body = self.admin_servers_client.live_migrate_server(
+        body = self.admin_servers_client.live_migrate_server(
             server_id, dest_host,
             CONF.compute_feature_enabled.block_migration_for_live_migration)
         return body
@@ -69,10 +69,8 @@ class LiveBlockMigrationTestJSON(base.BaseV2ComputeAdminTest):
             if 'ACTIVE' == self._get_server_status(server_id):
                 return server_id
         else:
-            _, server = self.create_test_server(wait_until="ACTIVE")
+            server = self.create_test_server(wait_until="ACTIVE")
             server_id = server['id']
-            self.password = server['adminPass']
-            self.password = 'password'
             self.created_server_ids.append(server_id)
             return server_id
 

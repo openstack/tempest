@@ -12,9 +12,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib import exceptions as lib_exc
+
 from tempest.api.compute import base
 from tempest import config
-from tempest import exceptions
 from tempest import test
 
 CONF = config.CONF
@@ -30,8 +31,8 @@ class FixedIPsNegativeTestJson(base.BaseV2ComputeAdminTest):
             raise cls.skipException(msg)
         cls.client = cls.os_adm.fixed_ips_client
         cls.non_admin_client = cls.fixed_ips_client
-        resp, server = cls.create_test_server(wait_until='ACTIVE')
-        resp, server = cls.servers_client.get_server(server['id'])
+        server = cls.create_test_server(wait_until='ACTIVE')
+        server = cls.servers_client.get_server(server['id'])
         for ip_set in server['addresses']:
             for ip in server['addresses'][ip_set]:
                 if ip['OS-EXT-IPS:type'] == 'fixed':
@@ -43,14 +44,14 @@ class FixedIPsNegativeTestJson(base.BaseV2ComputeAdminTest):
     @test.attr(type=['negative', 'gate'])
     @test.services('network')
     def test_list_fixed_ip_details_with_non_admin_user(self):
-        self.assertRaises(exceptions.Unauthorized,
+        self.assertRaises(lib_exc.Unauthorized,
                           self.non_admin_client.get_fixed_ip_details, self.ip)
 
     @test.attr(type=['negative', 'gate'])
     @test.services('network')
     def test_set_reserve_with_non_admin_user(self):
         body = {"reserve": "None"}
-        self.assertRaises(exceptions.Unauthorized,
+        self.assertRaises(lib_exc.Unauthorized,
                           self.non_admin_client.reserve_fixed_ip,
                           self.ip, body)
 
@@ -58,7 +59,7 @@ class FixedIPsNegativeTestJson(base.BaseV2ComputeAdminTest):
     @test.services('network')
     def test_set_unreserve_with_non_admin_user(self):
         body = {"unreserve": "None"}
-        self.assertRaises(exceptions.Unauthorized,
+        self.assertRaises(lib_exc.Unauthorized,
                           self.non_admin_client.reserve_fixed_ip,
                           self.ip, body)
 
@@ -71,7 +72,7 @@ class FixedIPsNegativeTestJson(base.BaseV2ComputeAdminTest):
         # NOTE(eliqiao): in Juno, the exception is NotFound, but in master, we
         # change the error code to BadRequest, both exceptions should be
         # accepted by tempest
-        self.assertRaises((exceptions.NotFound, exceptions.BadRequest),
+        self.assertRaises((lib_exc.NotFound, lib_exc.BadRequest),
                           self.client.reserve_fixed_ip,
                           "my.invalid.ip", body)
 
@@ -79,6 +80,6 @@ class FixedIPsNegativeTestJson(base.BaseV2ComputeAdminTest):
     @test.services('network')
     def test_fixed_ip_with_invalid_action(self):
         body = {"invalid_action": "None"}
-        self.assertRaises(exceptions.BadRequest,
+        self.assertRaises(lib_exc.BadRequest,
                           self.client.reserve_fixed_ip,
                           self.ip, body)

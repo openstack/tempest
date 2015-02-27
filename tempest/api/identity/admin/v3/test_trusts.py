@@ -13,12 +13,13 @@
 import datetime
 import re
 
+from tempest_lib import exceptions as lib_exc
+
 from tempest.api.identity import base
-from tempest import auth
 from tempest import clients
+from tempest.common import cred_provider
 from tempest.common.utils import data_utils
 from tempest import config
-from tempest import exceptions
 from tempest.openstack.common import timeutils
 from tempest import test
 
@@ -87,13 +88,11 @@ class BaseTrustsV3Test(base.BaseIdentityV3AdminTest):
         self.assertIsNotNone(self.trustee_user_id)
 
         # Initialize a new client with the trustor credentials
-        creds = auth.get_credentials(
+        creds = cred_provider.get_credentials(
             username=self.trustor_username,
             password=self.trustor_password,
             tenant_name=self.trustor_project_name)
-        os = clients.Manager(
-            credentials=creds,
-            interface=self._interface)
+        os = clients.Manager(credentials=creds)
         self.trustor_client = os.identity_v3_client
 
     def cleanup_user_and_roles(self):
@@ -120,13 +119,10 @@ class BaseTrustsV3Test(base.BaseIdentityV3AdminTest):
                        summary=False):
         self.assertIsNotNone(trust['id'])
         self.assertEqual(impersonate, trust['impersonation'])
-        # FIXME(shardy): ref bug #1246383 we can't check the
-        # microsecond component of the expiry time, because mysql
-        # <5.6.4 doesn't support microseconds.
-        # expected format 2013-12-20T16:08:36.036987Z
         if expires is not None:
-            expires_nousec = re.sub(r'\.([0-9]){6}Z', '', expires)
-            self.assertTrue(trust['expires_at'].startswith(expires_nousec))
+            # Omit microseconds of the expiry time
+            trust_expires_at = re.sub(r'\.([0-9]){6}', '', trust['expires_at'])
+            self.assertEqual(expires, trust_expires_at)
         else:
             self.assertIsNone(trust['expires_at'])
         self.assertEqual(self.trustor_user_id, trust['trustor_user_id'])
@@ -166,26 +162,25 @@ class BaseTrustsV3Test(base.BaseIdentityV3AdminTest):
             self.trust_id, self.delegated_role_id)
 
         # And that we don't find not_delegated_role
-        self.assertRaises(exceptions.NotFound,
+        self.assertRaises(lib_exc.NotFound,
                           self.trustor_client.get_trust_role,
                           self.trust_id,
                           self.not_delegated_role_id)
 
-        self.assertRaises(exceptions.NotFound,
+        self.assertRaises(lib_exc.NotFound,
                           self.trustor_client.check_trust_role,
                           self.trust_id,
                           self.not_delegated_role_id)
 
     def delete_trust(self):
         self.trustor_client.delete_trust(self.trust_id)
-        self.assertRaises(exceptions.NotFound,
+        self.assertRaises(lib_exc.NotFound,
                           self.trustor_client.get_trust,
                           self.trust_id)
         self.trust_id = None
 
 
 class TrustsV3TestJSON(BaseTrustsV3Test):
-    _interface = 'json'
 
     def setUp(self):
         super(TrustsV3TestJSON, self).setUp()
@@ -221,7 +216,13 @@ class TrustsV3TestJSON(BaseTrustsV3Test):
         # Test case to check we can create, get and delete a trust
         # with an expiry specified
         expires_at = timeutils.utcnow() + datetime.timedelta(hours=1)
-        expires_str = timeutils.isotime(at=expires_at, subsecond=True)
+        # NOTE(ylobankov) In some cases the expiry time may be rounded up
+        # because of microseconds. For example, we have the following expiry
+        # time for a trust: 2015-02-17T17:34:01.907051Z. However, if we make
+        # a GET request on the trust, the response may contain the time
+        # rounded up to 2015-02-17T17:34:02.000000Z. That is why we should
+        # omit microseconds when creating a trust.
+        expires_str = timeutils.isotime(at=expires_at)
 
         trust = self.create_trust(expires=expires_str)
         self.validate_trust(trust, expires=expires_str)
@@ -238,7 +239,7 @@ class TrustsV3TestJSON(BaseTrustsV3Test):
         # is rejected with the correct error
         # with an expiry specified
         expires_str = 'bad.123Z'
-        self.assertRaises(exceptions.BadRequest,
+        self.assertRaises(lib_exc.BadRequest,
                           self.create_trust,
                           expires=expires_str)
 

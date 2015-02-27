@@ -14,6 +14,8 @@ import json
 import time
 import urllib
 
+from tempest_lib import exceptions as lib_exc
+
 from tempest.common import service_client
 from tempest import exceptions
 from tempest.openstack.common import log as logging
@@ -127,7 +129,7 @@ class BaseSnapshotsClientJSON(service_client.ServiceClient):
     def is_resource_deleted(self, id):
         try:
             self.get_snapshot(id)
-        except exceptions.NotFound:
+        except lib_exc.NotFound:
             return True
         return False
 

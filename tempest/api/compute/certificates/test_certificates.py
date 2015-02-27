@@ -24,14 +24,13 @@ class CertificatesV2TestJSON(base.BaseComputeTest):
     @test.attr(type='gate')
     def test_create_root_certificate(self):
         # create certificates
-        resp, body = self.certificates_client.create_certificate()
+        body = self.certificates_client.create_certificate()
         self.assertIn('data', body)
         self.assertIn('private_key', body)
 
     @test.attr(type='gate')
     def test_get_root_certificate(self):
         # get the root certificate
-        resp, body = self.certificates_client.get_certificate('root')
-        self.assertEqual(200, resp.status)
+        body = self.certificates_client.get_certificate('root')
         self.assertIn('data', body)
         self.assertIn('private_key', body)

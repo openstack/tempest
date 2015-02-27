@@ -14,9 +14,9 @@
 #    under the License.
 
 from six import moves
+from tempest_lib import exceptions as lib_exc
 
 from tempest.api.compute import base
-from tempest import exceptions
 from tempest import test
 
 
@@ -35,10 +35,10 @@ class ListServersNegativeTestJSON(base.BaseV2ComputeTest):
         cls.existing_fixtures = []
         cls.deleted_fixtures = []
         for x in moves.xrange(2):
-            resp, srv = cls.create_test_server(wait_until='ACTIVE')
+            srv = cls.create_test_server(wait_until='ACTIVE')
             cls.existing_fixtures.append(srv)
 
-        resp, srv = cls.create_test_server()
+        srv = cls.create_test_server()
         cls.client.delete_server(srv['id'])
         # We ignore errors on termination because the server may
         # be put into ERROR status on a quick spawn, then delete,
@@ -52,98 +52,88 @@ class ListServersNegativeTestJSON(base.BaseV2ComputeTest):
     def test_list_servers_with_a_deleted_server(self):
         # Verify deleted servers do not show by default in list servers
         # List servers and verify server not returned
-        resp, body = self.client.list_servers()
+        body = self.client.list_servers()
         servers = body['servers']
         deleted_ids = [s['id'] for s in self.deleted_fixtures]
         actual = [srv for srv in servers
                   if srv['id'] in deleted_ids]
-        self.assertEqual('200', resp['status'])
         self.assertEqual([], actual)
 
     @test.attr(type=['negative', 'gate'])
     def test_list_servers_by_non_existing_image(self):
         # Listing servers for a non existing image returns empty list
         non_existing_image = '1234abcd-zzz0-aaa9-ppp3-0987654abcde'
-        resp, body = self.client.list_servers(dict(image=non_existing_image))
+        body = self.client.list_servers(dict(image=non_existing_image))
         servers = body['servers']
-        self.assertEqual('200', resp['status'])
         self.assertEqual([], servers)
 
     @test.attr(type=['negative', 'gate'])
     def test_list_servers_by_non_existing_flavor(self):
         # Listing servers by non existing flavor returns empty list
         non_existing_flavor = 1234
-        resp, body = self.client.list_servers(dict(flavor=non_existing_flavor))
+        body = self.client.list_servers(dict(flavor=non_existing_flavor))
         servers = body['servers']
-        self.assertEqual('200', resp['status'])
         self.assertEqual([], servers)
 
     @test.attr(type=['negative', 'gate'])
     def test_list_servers_by_non_existing_server_name(self):
         # Listing servers for a non existent server name returns empty list
         non_existing_name = 'junk_server_1234'
-        resp, body = self.client.list_servers(dict(name=non_existing_name))
+        body = self.client.list_servers(dict(name=non_existing_name))
         servers = body['servers']
-        self.assertEqual('200', resp['status'])
         self.assertEqual([], servers)
 
     @test.attr(type=['negative', 'gate'])
     def test_list_servers_status_non_existing(self):
         # Return an empty list when invalid status is specified
         non_existing_status = 'BALONEY'
-        resp, body = self.client.list_servers(dict(status=non_existing_status))
+        body = self.client.list_servers(dict(status=non_existing_status))
         servers = body['servers']
-        self.assertEqual('200', resp['status'])
         self.assertEqual([], servers)
 
     @test.attr(type='gate')
     def test_list_servers_by_limits(self):
         # List servers by specifying limits
-        resp, body = self.client.list_servers({'limit': 1})
-        self.assertEqual('200', resp['status'])
-        # when _interface='xml', one element for servers_links in servers
+        body = self.client.list_servers({'limit': 1})
         self.assertEqual(1, len([x for x in body['servers'] if 'id' in x]))
 
     @test.attr(type=['negative', 'gate'])
     def test_list_servers_by_limits_greater_than_actual_count(self):
         # List servers by specifying a greater value for limit
-        resp, body = self.client.list_servers({'limit': 100})
-        self.assertEqual('200', resp['status'])
+        body = self.client.list_servers({'limit': 100})
         self.assertEqual(len(self.existing_fixtures), len(body['servers']))
 
     @test.attr(type=['negative', 'gate'])
     def test_list_servers_by_limits_pass_string(self):
         # Return an error if a string value is passed for limit
-        self.assertRaises(exceptions.BadRequest, self.client.list_servers,
+        self.assertRaises(lib_exc.BadRequest, self.client.list_servers,
                           {'limit': 'testing'})
 
     @test.attr(type=['negative', 'gate'])
     def test_list_servers_by_limits_pass_negative_value(self):
         # Return an error if a negative value for limit is passed
-        self.assertRaises(exceptions.BadRequest, self.client.list_servers,
+        self.assertRaises(lib_exc.BadRequest, self.client.list_servers,
                           {'limit': -1})
 
     @test.attr(type=['negative', 'gate'])
     def test_list_servers_by_changes_since_invalid_date(self):
         # Return an error when invalid date format is passed
-        self.assertRaises(exceptions.BadRequest, self.client.list_servers,
+        self.assertRaises(lib_exc.BadRequest, self.client.list_servers,
                           {'changes-since': '2011/01/01'})
 
     @test.attr(type=['negative', 'gate'])
     def test_list_servers_by_changes_since_future_date(self):
         # Return an empty list when a date in the future is passed
         changes_since = {'changes-since': '2051-01-01T12:34:00Z'}
-        resp, body = self.client.list_servers(changes_since)
-        self.assertEqual('200', resp['status'])
+        body = self.client.list_servers(changes_since)
         self.assertEqual(0, len(body['servers']))
 
     @test.attr(type=['negative', 'gate'])
     def test_list_servers_detail_server_is_deleted(self):
         # Server details are not listed for a deleted server
         deleted_ids = [s['id'] for s in self.deleted_fixtures]
-        resp, body = self.client.list_servers_with_detail()
+        body = self.client.list_servers_with_detail()
         servers = body['servers']
         actual = [srv for srv in servers
                   if srv['id'] in deleted_ids]
-        self.assertEqual('200', resp['status'])
         self.assertEqual([], actual)

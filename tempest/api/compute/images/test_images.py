@@ -40,7 +40,7 @@ class ImagesTestJSON(base.BaseV2ComputeTest):
     @test.attr(type='gate')
     def test_delete_saving_image(self):
         snapshot_name = data_utils.rand_name('test-snap-')
-        resp, server = self.create_test_server(wait_until='ACTIVE')
+        server = self.create_test_server(wait_until='ACTIVE')
         self.addCleanup(self.servers_client.delete_server, server['id'])
         image = self.create_image_from_server(server['id'],
                                               name=snapshot_name,

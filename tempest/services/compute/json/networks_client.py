@@ -24,10 +24,10 @@ class NetworksClientJSON(service_client.ServiceClient):
         resp, body = self.get("os-networks")
         body = json.loads(body)
         self.expected_success(200, resp.status)
-        return resp, body['networks']
+        return service_client.ResponseBodyList(resp, body['networks'])
 
     def get_network(self, network_id):
         resp, body = self.get("os-networks/%s" % str(network_id))
         body = json.loads(body)
         self.expected_success(200, resp.status)
-        return resp, body['network']
+        return service_client.ResponseBody(resp, body['network'])

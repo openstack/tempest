@@ -53,13 +53,13 @@ class TestMinimumBasicScenario(manager.ScenarioTest):
                                          create_kwargs=create_kwargs)
 
     def nova_list(self):
-        _, servers = self.servers_client.list_servers()
+        servers = self.servers_client.list_servers()
         # The list servers in the compute client is inconsistent...
         servers = servers['servers']
         self.assertIn(self.server['id'], [x['id'] for x in servers])
 
     def nova_show(self):
-        _, got_server = self.servers_client.get_server(self.server['id'])
+        got_server = self.servers_client.get_server(self.server['id'])
         self.assertThat(
             self.server, custom_matchers.MatchesDictExceptForKeys(
                 got_server, excluded_keys=['OS-EXT-AZ:availability_zone']))
@@ -109,7 +109,7 @@ class TestMinimumBasicScenario(manager.ScenarioTest):
                         self.server['id'], secgroup['name'])
 
         def wait_for_secgroup_add():
-            _, body = self.servers_client.get_server(self.server['id'])
+            body = self.servers_client.get_server(self.server['id'])
             return {'name': secgroup['name']} in body['security_groups']
 
         if not test.call_until_true(wait_for_secgroup_add,

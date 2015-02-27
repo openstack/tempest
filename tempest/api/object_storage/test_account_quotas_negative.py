@@ -15,12 +15,12 @@
 # under the License.
 
 from tempest_lib import decorators
+from tempest_lib import exceptions as lib_exc
 
 from tempest.api.object_storage import base
 from tempest import clients
 from tempest.common.utils import data_utils
 from tempest import config
-from tempest import exceptions
 from tempest import test
 
 CONF = config.CONF
@@ -29,14 +29,16 @@ CONF = config.CONF
 class AccountQuotasNegativeTest(base.BaseObjectTest):
 
     @classmethod
+    def setup_credentials(cls):
+        super(AccountQuotasNegativeTest, cls).setup_credentials()
+        cls.data.setup_test_user(reseller=True)
+        cls.os_reselleradmin = clients.Manager(cls.data.test_credentials)
+
+    @classmethod
     def resource_setup(cls):
         super(AccountQuotasNegativeTest, cls).resource_setup()
         cls.container_name = data_utils.rand_name(name="TestContainer")
         cls.container_client.create_container(cls.container_name)
-
-        cls.data.setup_test_user(reseller=True)
-
-        cls.os_reselleradmin = clients.Manager(cls.data.test_credentials)
 
         # Retrieve a ResellerAdmin auth data and use it to set a quota
         # on the client's account
@@ -85,12 +87,12 @@ class AccountQuotasNegativeTest(base.BaseObjectTest):
         """
 
         # Not able to remove quota
-        self.assertRaises(exceptions.Unauthorized,
+        self.assertRaises(lib_exc.Unauthorized,
                           self.account_client.create_account_metadata,
                           {"Quota-Bytes": ""})
 
         # Not able to modify quota
-        self.assertRaises(exceptions.Unauthorized,
+        self.assertRaises(lib_exc.Unauthorized,
                           self.account_client.create_account_metadata,
                           {"Quota-Bytes": "100"})
 
@@ -100,6 +102,6 @@ class AccountQuotasNegativeTest(base.BaseObjectTest):
     def test_upload_large_object(self):
         object_name = data_utils.rand_name(name="TestObject")
         data = data_utils.arbitrary_string(30)
-        self.assertRaises(exceptions.OverLimit,
+        self.assertRaises(lib_exc.OverLimit,
                           self.object_client.create_object,
                           self.container_name, object_name, data)

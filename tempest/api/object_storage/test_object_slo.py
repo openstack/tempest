@@ -15,10 +15,11 @@
 import hashlib
 import json
 
+from tempest_lib import exceptions as lib_exc
+
 from tempest.api.object_storage import base
 from tempest.common import custom_matchers
 from tempest.common.utils import data_utils
-from tempest import exceptions
 from tempest import test
 
 # Each segment, except for the final one, must be at least 1 megabyte
@@ -39,7 +40,7 @@ class ObjectSloTest(base.BaseObjectTest):
                 self.object_client.delete_object(
                     self.container_name,
                     obj)
-            except exceptions.NotFound:
+            except lib_exc.NotFound:
                 pass
         self.container_client.delete_container(self.container_name)
         super(ObjectSloTest, self).tearDown()

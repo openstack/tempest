@@ -29,7 +29,6 @@ CONF = config.CONF
 
 
 class TestClaims(base.BaseMessagingTest):
-    _interface = 'json'
 
     @classmethod
     def resource_setup(cls):

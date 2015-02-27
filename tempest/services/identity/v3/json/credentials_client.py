@@ -16,10 +16,10 @@
 import json
 
 from tempest.common import service_client
-from tempest.services.identity.v3.json import base
 
 
-class CredentialsClientJSON(base.IdentityV3Client):
+class CredentialsClientJSON(service_client.ServiceClient):
+    api_version = "v3"
 
     def create_credential(self, access_key, secret_key, user_id, project_id):
         """Creates a credential."""

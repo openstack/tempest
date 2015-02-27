@@ -21,22 +21,20 @@ CONF = config.CONF
 
 
 class TelemetryNotificationAPITestJSON(base.BaseTelemetryTest):
-    _interface = 'json'
 
     @classmethod
-    def resource_setup(cls):
+    def skip_checks(cls):
+        super(TelemetryNotificationAPITestJSON, cls).skip_checks()
         if CONF.telemetry.too_slow_to_test:
             raise cls.skipException("Ceilometer feature for fast work mysql "
                                     "is disabled")
-        super(TelemetryNotificationAPITestJSON, cls).resource_setup()
 
     @test.attr(type="gate")
     @testtools.skipIf(not CONF.service_available.nova,
                       "Nova is not available.")
     def test_check_nova_notification(self):
 
-        resp, body = self.create_server()
-        self.assertEqual(resp.status, 202)
+        body = self.create_server()
 
         query = ('resource', 'eq', body['id'])
 

@@ -13,19 +13,16 @@
 #    under the License.
 
 import json
+from tempest_lib import exceptions as lib_exc
 
 from tempest.common import service_client
-from tempest import config
 from tempest import exceptions
-
-CONF = config.CONF
 
 
 class TokenClientJSON(service_client.ServiceClient):
 
-    def __init__(self):
+    def __init__(self, auth_url):
         super(TokenClientJSON, self).__init__(None, None, None)
-        auth_url = CONF.identity.uri
 
         # Normalize URI to ensure /tokens is in it.
         if 'tokens' not in auth_url:
@@ -87,7 +84,7 @@ class TokenClientJSON(service_client.ServiceClient):
 
         if resp.status in [401, 403]:
             resp_body = json.loads(resp_body)
-            raise exceptions.Unauthorized(resp_body['error']['message'])
+            raise lib_exc.Unauthorized(resp_body['error']['message'])
         elif resp.status not in [200, 201]:
             raise exceptions.IdentityError(
                 'Unexpected status code {0}'.format(resp.status))

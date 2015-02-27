@@ -13,11 +13,11 @@
 #    under the License.
 
 from tempest_lib import decorators
+from tempest_lib import exceptions as lib_exc
 
 from tempest.api.compute import base
 from tempest.common.utils import data_utils
 from tempest import config
-from tempest import exceptions
 from tempest import test
 
 CONF = config.CONF
@@ -39,7 +39,7 @@ class QuotasAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
 
     @test.attr(type=['negative', 'gate'])
     def test_update_quota_normal_user(self):
-        self.assertRaises(exceptions.Unauthorized,
+        self.assertRaises(lib_exc.Unauthorized,
                           self.client.update_quota_set,
                           self.demo_tenant_id,
                           ram=0)
@@ -59,7 +59,7 @@ class QuotasAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
 
         self.addCleanup(self.adm_client.update_quota_set, self.demo_tenant_id,
                         cores=default_vcpu_quota)
-        self.assertRaises((exceptions.Unauthorized, exceptions.OverLimit),
+        self.assertRaises((lib_exc.Unauthorized, lib_exc.OverLimit),
                           self.create_test_server)
 
     @test.attr(type=['negative', 'gate'])
@@ -75,7 +75,7 @@ class QuotasAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
 
         self.addCleanup(self.adm_client.update_quota_set, self.demo_tenant_id,
                         ram=default_mem_quota)
-        self.assertRaises((exceptions.Unauthorized, exceptions.OverLimit),
+        self.assertRaises((lib_exc.Unauthorized, lib_exc.OverLimit),
                           self.create_test_server)
 
     @test.attr(type=['negative', 'gate'])
@@ -90,7 +90,7 @@ class QuotasAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
                                          instances=instances_quota)
         self.addCleanup(self.adm_client.update_quota_set, self.demo_tenant_id,
                         instances=default_instances_quota)
-        self.assertRaises((exceptions.Unauthorized, exceptions.OverLimit),
+        self.assertRaises((lib_exc.Unauthorized, lib_exc.OverLimit),
                           self.create_test_server)
 
     @decorators.skip_because(bug="1186354",
@@ -116,7 +116,7 @@ class QuotasAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
         # Check we cannot create anymore
         # A 403 Forbidden or 413 Overlimit (old behaviour) exception
         # will be raised when out of quota
-        self.assertRaises((exceptions.Unauthorized, exceptions.OverLimit),
+        self.assertRaises((lib_exc.Unauthorized, lib_exc.OverLimit),
                           self.sg_client.create_security_group,
                           "sg-overlimit", "sg-desc")
 
@@ -155,6 +155,6 @@ class QuotasAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
         # Check we cannot create SG rule anymore
         # A 403 Forbidden or 413 Overlimit (old behaviour) exception
         # will be raised when out of quota
-        self.assertRaises((exceptions.OverLimit, exceptions.Unauthorized),
+        self.assertRaises((lib_exc.OverLimit, lib_exc.Unauthorized),
                           self.sg_client.create_security_group_rule,
                           secgroup_id, ip_protocol, 1025, 1025)

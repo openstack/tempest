@@ -24,20 +24,25 @@ CONF = config.CONF
 class VolumesV2ActionsTest(base.BaseVolumeTest):
 
     @classmethod
-    def resource_setup(cls):
-        super(VolumesV2ActionsTest, cls).resource_setup()
+    def setup_clients(cls):
+        super(VolumesV2ActionsTest, cls).setup_clients()
         cls.client = cls.volumes_client
         cls.image_client = cls.os.image_client
 
+    @classmethod
+    def resource_setup(cls):
+        super(VolumesV2ActionsTest, cls).resource_setup()
+
         # Create a test shared instance
         srv_name = data_utils.rand_name(cls.__name__ + '-Instance-')
-        resp, cls.server = cls.servers_client.create_server(srv_name,
-                                                            cls.image_ref,
-                                                            cls.flavor_ref)
+        cls.server = cls.servers_client.create_server(srv_name,
+                                                      cls.image_ref,
+                                                      cls.flavor_ref)
         cls.servers_client.wait_for_server_status(cls.server['id'], 'ACTIVE')
 
         # Create a test shared volume for attach/detach tests
         cls.volume = cls.create_volume()
+        cls.client.wait_for_volume_status(cls.volume['id'], 'available')
 
     def _delete_image_with_wait(self, image_id):
         self.image_client.delete_image(image_id)

@@ -12,10 +12,11 @@
 
 import logging
 
+from tempest_lib import exceptions as lib_exc
+
 from tempest.api.orchestration import base
 from tempest.common.utils import data_utils
 from tempest import config
-from tempest import exceptions
 from tempest import test
 
 
@@ -26,8 +27,8 @@ LOG = logging.getLogger(__name__)
 class CinderResourcesTest(base.BaseOrchestrationTest):
 
     @classmethod
-    def resource_setup(cls):
-        super(CinderResourcesTest, cls).resource_setup()
+    def skip_checks(cls):
+        super(CinderResourcesTest, cls).skip_checks()
         if not CONF.service_available.cinder:
             raise cls.skipException('Cinder support is required')
 
@@ -73,7 +74,7 @@ class CinderResourcesTest(base.BaseOrchestrationTest):
         # Delete the stack and ensure the volume is gone
         self.client.delete_stack(stack_identifier)
         self.client.wait_for_stack_status(stack_identifier, 'DELETE_COMPLETE')
-        self.assertRaises(exceptions.NotFound,
+        self.assertRaises(lib_exc.NotFound,
                           self.volumes_client.get_volume,
                           volume_id)
 

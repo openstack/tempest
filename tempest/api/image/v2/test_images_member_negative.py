@@ -10,13 +10,13 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib import exceptions as lib_exc
+
 from tempest.api.image import base
-from tempest import exceptions
 from tempest import test
 
 
 class ImagesMemberNegativeTest(base.BaseV2MemberImageTest):
-    _interface = 'json'
 
     @test.attr(type=['negative', 'gate'])
     def test_image_share_invalid_status(self):
@@ -24,7 +24,7 @@ class ImagesMemberNegativeTest(base.BaseV2MemberImageTest):
         member = self.os_img_client.add_member(image_id,
                                                self.alt_tenant_id)
         self.assertEqual(member['status'], 'pending')
-        self.assertRaises(exceptions.BadRequest,
+        self.assertRaises(lib_exc.BadRequest,
                           self.alt_img_client.update_member_status,
                           image_id, self.alt_tenant_id, 'notavalidstatus')
 
@@ -35,7 +35,7 @@ class ImagesMemberNegativeTest(base.BaseV2MemberImageTest):
                                                self.alt_tenant_id)
         self.assertEqual(member['status'], 'pending')
         self.assertNotIn(image_id, self._list_image_ids_as_alt())
-        self.assertRaises(exceptions.Unauthorized,
+        self.assertRaises(lib_exc.Unauthorized,
                           self.os_img_client.update_member_status,
                           image_id, self.alt_tenant_id, 'accepted')
         self.assertNotIn(image_id, self._list_image_ids_as_alt())

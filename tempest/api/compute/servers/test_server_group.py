@@ -37,26 +37,23 @@ class ServerGroupTestJSON(base.BaseV2ComputeTest):
         server_group_name = data_utils.rand_name('server-group')
         cls.policy = ['affinity']
 
-        _, cls.created_server_group = cls.create_test_server_group(
+        cls.created_server_group = cls.create_test_server_group(
             server_group_name,
             cls.policy)
 
     def _create_server_group(self, name, policy):
         # create the test server-group with given policy
         server_group = {'name': name, 'policies': policy}
-        resp, body = self.create_test_server_group(name, policy)
-        self.assertEqual(200, resp.status)
+        body = self.create_test_server_group(name, policy)
         for key in ['name', 'policies']:
             self.assertEqual(server_group[key], body[key])
         return body
 
     def _delete_server_group(self, server_group):
         # delete the test server-group
-        resp, _ = self.client.delete_server_group(server_group['id'])
-        self.assertEqual(204, resp.status)
+        self.client.delete_server_group(server_group['id'])
         # validation of server-group deletion
-        resp, server_group_list = self.client.list_server_groups()
-        self.assertEqual(200, resp.status)
+        server_group_list = self.client.list_server_groups()
         self.assertNotIn(server_group, server_group_list)
 
     def _create_delete_server_group(self, policy):
@@ -101,14 +98,12 @@ class ServerGroupTestJSON(base.BaseV2ComputeTest):
     @test.attr(type='gate')
     def test_get_server_group(self):
         # Get the server-group
-        resp, body = self.client.get_server_group(
+        body = self.client.get_server_group(
             self.created_server_group['id'])
-        self.assertEqual(200, resp.status)
         self.assertEqual(self.created_server_group, body)
 
     @test.attr(type='gate')
     def test_list_server_groups(self):
         # List the server-group
-        resp, body = self.client.list_server_groups()
-        self.assertEqual(200, resp.status)
+        body = self.client.list_server_groups()
         self.assertIn(self.created_server_group, body)

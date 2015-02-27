@@ -14,9 +14,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib import exceptions as lib_exc
+
 from tempest.api.compute import base
 from tempest.common.utils import data_utils
-from tempest import exceptions
 from tempest import test
 
 
@@ -61,7 +62,7 @@ class FlavorsExtraSpecsNegativeTestJSON(base.BaseV2ComputeAdminTest):
     def test_flavor_non_admin_set_keys(self):
         # Test to SET flavor extra spec as a user without admin privileges.
         specs = {"key1": "value1", "key2": "value2"}
-        self.assertRaises(exceptions.Unauthorized,
+        self.assertRaises(lib_exc.Unauthorized,
                           self.flavors_client.set_flavor_extra_spec,
                           self.flavor['id'],
                           specs)
@@ -73,7 +74,7 @@ class FlavorsExtraSpecsNegativeTestJSON(base.BaseV2ComputeAdminTest):
         body = self.client.set_flavor_extra_spec(
             self.flavor['id'], specs)
         self.assertEqual(body['key1'], 'value1')
-        self.assertRaises(exceptions.Unauthorized,
+        self.assertRaises(lib_exc.Unauthorized,
                           self.flavors_client.
                           update_flavor_extra_spec,
                           self.flavor['id'],
@@ -85,7 +86,7 @@ class FlavorsExtraSpecsNegativeTestJSON(base.BaseV2ComputeAdminTest):
         specs = {"key1": "value1", "key2": "value2"}
         self.client.set_flavor_extra_spec(self.flavor['id'], specs)
 
-        self.assertRaises(exceptions.Unauthorized,
+        self.assertRaises(lib_exc.Unauthorized,
                           self.flavors_client.unset_flavor_extra_spec,
                           self.flavor['id'],
                           'key1')
@@ -93,14 +94,14 @@ class FlavorsExtraSpecsNegativeTestJSON(base.BaseV2ComputeAdminTest):
     @test.attr(type=['negative', 'gate'])
     def test_flavor_unset_nonexistent_key(self):
         nonexistent_key = data_utils.rand_name('flavor_key')
-        self.assertRaises(exceptions.NotFound,
+        self.assertRaises(lib_exc.NotFound,
                           self.client.unset_flavor_extra_spec,
                           self.flavor['id'],
                           nonexistent_key)
 
     @test.attr(type=['negative', 'gate'])
     def test_flavor_get_nonexistent_key(self):
-        self.assertRaises(exceptions.NotFound,
+        self.assertRaises(lib_exc.NotFound,
                           self.flavors_client.get_flavor_extra_spec_with_key,
                           self.flavor['id'],
                           "nonexistent_key")
@@ -108,7 +109,7 @@ class FlavorsExtraSpecsNegativeTestJSON(base.BaseV2ComputeAdminTest):
     @test.attr(type=['negative', 'gate'])
     def test_flavor_update_mismatch_key(self):
         # the key will be updated should be match the key in the body
-        self.assertRaises(exceptions.BadRequest,
+        self.assertRaises(lib_exc.BadRequest,
                           self.client.update_flavor_extra_spec,
                           self.flavor['id'],
                           "key2",
@@ -117,7 +118,7 @@ class FlavorsExtraSpecsNegativeTestJSON(base.BaseV2ComputeAdminTest):
     @test.attr(type=['negative', 'gate'])
     def test_flavor_update_more_key(self):
         # there should be just one item in the request body
-        self.assertRaises(exceptions.BadRequest,
+        self.assertRaises(lib_exc.BadRequest,
                           self.client.update_flavor_extra_spec,
                           self.flavor['id'],
                           "key1",

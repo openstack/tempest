@@ -17,11 +17,10 @@ import json
 import time
 import urllib
 
-from tempest.common import service_client
-from tempest import config
-from tempest import exceptions
+from tempest_lib import exceptions as lib_exc
 
-CONF = config.CONF
+from tempest.common import service_client
+from tempest import exceptions
 
 
 class BaseVolumesClientJSON(service_client.ServiceClient):
@@ -30,6 +29,12 @@ class BaseVolumesClientJSON(service_client.ServiceClient):
     """
 
     create_resp = 200
+
+    def __init__(self, auth_provider, service, region,
+                 default_volume_size=1, **kwargs):
+        super(BaseVolumesClientJSON, self).__init__(
+            auth_provider, service, region, **kwargs)
+        self.default_volume_size = default_volume_size
 
     def get_attachment_from_volume(self, volume):
         """Return the element 'attachment' from input volumes."""
@@ -77,10 +82,8 @@ class BaseVolumesClientJSON(service_client.ServiceClient):
         snapshot_id: When specified the volume is created from this snapshot
         imageRef: When specified the volume is created from this image
         """
-        # for bug #1293885:
-        # If no size specified, read volume size from CONF
         if size is None:
-            size = CONF.volume.volume_size
+            size = self.default_volume_size
         post_body = {'size': size}
         post_body.update(kwargs)
         post_body = json.dumps({'volume': post_body})
@@ -181,7 +184,7 @@ class BaseVolumesClientJSON(service_client.ServiceClient):
     def is_resource_deleted(self, id):
         try:
             self.get_volume(id)
-        except exceptions.NotFound:
+        except lib_exc.NotFound:
             return True
         return False
 
@@ -332,6 +335,14 @@ class BaseVolumesClientJSON(service_client.ServiceClient):
         resp, body = self.delete(url)
         self.expected_success(200, resp.status)
         return service_client.ResponseBody(resp, body)
+
+    def retype_volume(self, volume_id, volume_type, **kwargs):
+        """Updates volume with new volume type."""
+        post_body = {'new_type': volume_type}
+        post_body.update(kwargs)
+        post_body = json.dumps({'os-retype': post_body})
+        resp, body = self.post('volumes/%s/action' % volume_id, post_body)
+        self.expected_success(202, resp.status)
 
 
 class VolumesClientJSON(BaseVolumesClientJSON):

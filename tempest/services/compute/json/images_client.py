@@ -16,10 +16,11 @@
 import json
 import urllib
 
+from tempest_lib import exceptions as lib_exc
+
 from tempest.api_schema.response.compute.v2 import images as schema
 from tempest.common import service_client
 from tempest.common import waiters
-from tempest import exceptions
 
 
 class ImagesClientJSON(service_client.ServiceClient):
@@ -131,7 +132,7 @@ class ImagesClientJSON(service_client.ServiceClient):
     def is_resource_deleted(self, id):
         try:
             self.get_image(id)
-        except exceptions.NotFound:
+        except lib_exc.NotFound:
             return True
         return False
 

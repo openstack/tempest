@@ -18,7 +18,6 @@ from tempest import test
 
 
 class AgentManagementTestJSON(base.BaseAdminNetworkTest):
-    _interface = 'json'
 
     @classmethod
     def resource_setup(cls):

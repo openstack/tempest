@@ -160,9 +160,14 @@ common_hypervisors_detail = {
                 'items': {
                     'type': 'object',
                     'properties': {
+                        'status': {'type': 'string'},
+                        'state': {'type': 'string'},
                         'id': {'type': ['integer', 'string']},
                         'hypervisor_hostname': {'type': 'string'}
                     },
+                    # NOTE: When loading os-hypervisor-status extension,
+                    # a response contains status and state. So these params
+                    # should not be required.
                     'required': ['id', 'hypervisor_hostname']
                 }
             }

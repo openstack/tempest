@@ -69,8 +69,8 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
             return
 
         # Create instances and snapshots via nova
-        resp, cls.server1 = cls.create_test_server()
-        resp, cls.server2 = cls.create_test_server(wait_until='ACTIVE')
+        cls.server1 = cls.create_test_server()
+        cls.server2 = cls.create_test_server(wait_until='ACTIVE')
         # NOTE(sdague) this is faster than doing the sync wait_util on both
         cls.servers_client.wait_for_server_status(cls.server1['id'],
                                                   'ACTIVE')
@@ -172,8 +172,6 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
         # Verify only the expected number of results are returned
         params = {'limit': '1'}
         images = self.client.list_images(params)
-        # when _interface='xml', one element for images_links in images
-        # ref: Question #224349
         self.assertEqual(1, len([x for x in images if 'id' in x]))
 
     @test.attr(type='gate')

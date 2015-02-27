@@ -13,8 +13,8 @@
 #    under the License.
 
 import netaddr
+from tempest_lib import exceptions as lib_exc
 
-from tempest import auth
 from tempest import clients
 from tempest.common import cred_provider
 from tempest.common.utils import data_utils
@@ -28,15 +28,12 @@ LOG = logging.getLogger(__name__)
 
 class IsolatedCreds(cred_provider.CredentialProvider):
 
-    def __init__(self, name, interface='json', password='pass',
-                 network_resources=None):
-        super(IsolatedCreds, self).__init__(name, interface, password,
-                                            network_resources)
+    def __init__(self, name, password='pass', network_resources=None):
+        super(IsolatedCreds, self).__init__(name, password, network_resources)
         self.network_resources = network_resources
         self.isolated_creds = {}
         self.isolated_net_resources = {}
         self.ports = []
-        self.interface = interface
         self.password = password
         self.identity_admin_client, self.network_admin_client = (
             self._get_admin_clients())
@@ -48,7 +45,7 @@ class IsolatedCreds(cred_provider.CredentialProvider):
             identity
             network
         """
-        os = clients.AdminManager(interface=self.interface)
+        os = clients.AdminManager()
         return os.identity_client, os.network_client
 
     def _create_tenant(self, name, description):
@@ -81,7 +78,7 @@ class IsolatedCreds(cred_provider.CredentialProvider):
             role = next(r for r in roles if r['name'] == role_name)
         except StopIteration:
             msg = 'No "%s" role found' % role_name
-            raise exceptions.NotFound(msg)
+            raise lib_exc.NotFound(msg)
         self.identity_admin_client.assign_user_role(tenant['id'], user['id'],
                                                     role['id'])
 
@@ -129,7 +126,7 @@ class IsolatedCreds(cred_provider.CredentialProvider):
         return self._get_credentials(user, tenant)
 
     def _get_credentials(self, user, tenant):
-        return auth.get_credentials(
+        return cred_provider.get_credentials(
             username=user['name'], user_id=user['id'],
             tenant_name=tenant['name'], tenant_id=tenant['id'],
             password=self.password)
@@ -209,7 +206,7 @@ class IsolatedCreds(cred_provider.CredentialProvider):
                                       tenant_id=tenant_id,
                                       ip_version=ip_version)
                 break
-            except exceptions.BadRequest as e:
+            except lib_exc.BadRequest as e:
                 if 'overlaps with another subnet' not in str(e):
                     raise
         else:
@@ -290,7 +287,7 @@ class IsolatedCreds(cred_provider.CredentialProvider):
         net_client = self.network_admin_client
         try:
             net_client.delete_router(router_id)
-        except exceptions.NotFound:
+        except lib_exc.NotFound:
             LOG.warn('router with name: %s not found for delete' %
                      router_name)
 
@@ -298,7 +295,7 @@ class IsolatedCreds(cred_provider.CredentialProvider):
         net_client = self.network_admin_client
         try:
             net_client.delete_subnet(subnet_id)
-        except exceptions.NotFound:
+        except lib_exc.NotFound:
             LOG.warn('subnet with name: %s not found for delete' %
                      subnet_name)
 
@@ -306,7 +303,7 @@ class IsolatedCreds(cred_provider.CredentialProvider):
         net_client = self.network_admin_client
         try:
             net_client.delete_network(network_id)
-        except exceptions.NotFound:
+        except lib_exc.NotFound:
             LOG.warn('network with name: %s not found for delete' %
                      network_name)
 
@@ -318,7 +315,7 @@ class IsolatedCreds(cred_provider.CredentialProvider):
         for secgroup in secgroups_to_delete:
             try:
                 net_client.delete_security_group(secgroup['id'])
-            except exceptions.NotFound:
+            except lib_exc.NotFound:
                 LOG.warn('Security group %s, id %s not found for clean-up' %
                          (secgroup['name'], secgroup['id']))
 
@@ -334,7 +331,7 @@ class IsolatedCreds(cred_provider.CredentialProvider):
                 try:
                     net_client.remove_router_interface_with_subnet_id(
                         router['id'], subnet['id'])
-                except exceptions.NotFound:
+                except lib_exc.NotFound:
                     LOG.warn('router with name: %s not found for delete' %
                              router['name'])
                 self._clear_isolated_router(router['id'], router['name'])
@@ -344,6 +341,7 @@ class IsolatedCreds(cred_provider.CredentialProvider):
             if (not self.network_resources or
                 self.network_resources.get('network')):
                 self._clear_isolated_network(network['id'], network['name'])
+        self.isolated_net_resources = {}
 
     def clear_isolated_creds(self):
         if not self.isolated_creds:
@@ -352,14 +350,15 @@ class IsolatedCreds(cred_provider.CredentialProvider):
         for creds in self.isolated_creds.itervalues():
             try:
                 self._delete_user(creds.user_id)
-            except exceptions.NotFound:
+            except lib_exc.NotFound:
                 LOG.warn("user with name: %s not found for delete" %
                          creds.username)
             try:
                 self._delete_tenant(creds.tenant_id)
-            except exceptions.NotFound:
+            except lib_exc.NotFound:
                 LOG.warn("tenant with name: %s not found for delete" %
                          creds.tenant_name)
+        self.isolated_creds = {}
 
     def is_multi_user(self):
         return True

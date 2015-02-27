@@ -43,8 +43,18 @@ from tempest.services.compute.json import services_client
 from tempest.services.compute.json import tenant_usages_client
 from tempest.services.compute.json import volumes_extensions_client \
     as compute_volumes_extensions_client
+from tempest.services.data_processing.v1_1 import data_processing_client
 from tempest.services.database.json import flavors_client as db_flavor_client
 from tempest.services.database.json import versions_client as db_version_client
+from tempest.services.identity.json import identity_client as \
+    identity_v2_identity_client
+from tempest.services.identity.v3.json import credentials_client
+from tempest.services.identity.v3.json import endpoints_client
+from tempest.services.identity.v3.json import identity_client as \
+    identity_v3_identity_client
+from tempest.services.identity.v3.json import policy_client
+from tempest.services.identity.v3.json import region_client
+from tempest.services.identity.v3.json import service_client
 from tempest.services.messaging.json import messaging_client
 from tempest.services.network.json import network_client
 from tempest.services.object_storage import account_client
@@ -117,6 +127,7 @@ class TestServiceClient(base.TestCase):
             services_client.ServicesClientJSON,
             tenant_usages_client.TenantUsagesClientJSON,
             compute_volumes_extensions_client.VolumesExtensionsClientJSON,
+            data_processing_client.DataProcessingClient,
             db_flavor_client.DatabaseFlavorsClientJSON,
             db_version_client.DatabaseVersionsClientJSON,
             messaging_client.MessagingClientJSON,
@@ -146,6 +157,13 @@ class TestServiceClient(base.TestCase):
             volume_v2_qos_client.QosSpecsV2ClientJSON,
             volume_v2_snapshots_client.SnapshotsV2ClientJSON,
             volume_v2_volumes_client.VolumesV2ClientJSON,
+            identity_v2_identity_client.IdentityClientJSON,
+            credentials_client.CredentialsClientJSON,
+            endpoints_client.EndPointClientJSON,
+            identity_v3_identity_client.IdentityV3ClientJSON,
+            policy_client.PolicyClientJSON,
+            region_client.RegionClientJSON,
+            service_client.ServiceClientJSON
         ]
 
         for client in test_clients:

@@ -15,7 +15,7 @@
 
 import copy
 
-from tempest import auth
+from tempest.common import cred_provider
 from tempest.common import negative_rest_client
 from tempest import config
 from tempest import manager
@@ -29,6 +29,8 @@ from tempest.services.compute.json.aggregates_client import \
     AggregatesClientJSON
 from tempest.services.compute.json.availability_zone_client import \
     AvailabilityZoneClientJSON
+from tempest.services.compute.json.baremetal_nodes_client import \
+    BaremetalNodesClientJSON
 from tempest.services.compute.json.certificates_client import \
     CertificatesClientJSON
 from tempest.services.compute.json.extensions_client import \
@@ -64,7 +66,8 @@ from tempest.services.compute.json.tenant_usages_client import \
     TenantUsagesClientJSON
 from tempest.services.compute.json.volumes_extensions_client import \
     VolumesExtensionsClientJSON
-from tempest.services.data_processing.v1_1.client import DataProcessingClient
+from tempest.services.data_processing.v1_1.data_processing_client import \
+    DataProcessingClient
 from tempest.services.database.json.flavors_client import \
     DatabaseFlavorsClientJSON
 from tempest.services.database.json.limits_client import \
@@ -155,10 +158,7 @@ class Manager(manager.Manager):
     }
     default_params_with_timeout_values.update(default_params)
 
-    def __init__(self, credentials=None, interface='json', service=None):
-        # Set interface and client type first
-        self.interface = interface
-        # super cares for credentials validation
+    def __init__(self, credentials=None, service=None):
         super(Manager, self).__init__(credentials=credentials)
 
         self._set_compute_clients()
@@ -204,6 +204,12 @@ class Manager(manager.Manager):
             build_interval=CONF.orchestration.build_interval,
             build_timeout=CONF.orchestration.build_timeout,
             **self.default_params)
+        self.data_processing_client = DataProcessingClient(
+            self.auth_provider,
+            CONF.data_processing.catalog_type,
+            CONF.identity.region,
+            endpoint_type=CONF.data_processing.endpoint_type,
+            **self.default_params_with_timeout_values)
         self.negative_client = negative_rest_client.NegativeRestClient(
             self.auth_provider, service)
 
@@ -214,8 +220,6 @@ class Manager(manager.Manager):
                            self.credentials.tenant_name)
         self.ec2api_client = botoclients.APIClientEC2(*ec2_client_args)
         self.s3_client = botoclients.ObjectClientS3(*ec2_client_args)
-        self.data_processing_client = DataProcessingClient(
-            self.auth_provider)
 
     def _set_compute_clients(self):
         params = {
@@ -267,6 +271,8 @@ class Manager(manager.Manager):
             InstanceUsagesAuditLogClientJSON(self.auth_provider, **params)
         self.tenant_networks_client = \
             TenantNetworksClientJSON(self.auth_provider, **params)
+        self.baremetal_nodes_client = BaremetalNodesClientJSON(
+            self.auth_provider, **params)
 
         # NOTE: The following client needs special timeout values because
         # the API is a proxy for the other component.
@@ -296,16 +302,27 @@ class Manager(manager.Manager):
             **self.default_params_with_timeout_values)
 
     def _set_identity_clients(self):
-        self.identity_client = IdentityClientJSON(self.auth_provider)
-        self.identity_v3_client = IdentityV3ClientJSON(self.auth_provider)
-        self.endpoints_client = EndPointClientJSON(self.auth_provider)
-        self.service_client = ServiceClientJSON(self.auth_provider)
-        self.policy_client = PolicyClientJSON(self.auth_provider)
-        self.region_client = RegionClientJSON(self.auth_provider)
-        self.token_client = TokenClientJSON()
+        params = {
+            'service': CONF.identity.catalog_type,
+            'region': CONF.identity.region,
+            'endpoint_type': 'adminURL'
+        }
+        params.update(self.default_params_with_timeout_values)
+
+        self.identity_client = IdentityClientJSON(self.auth_provider,
+                                                  **params)
+        self.identity_v3_client = IdentityV3ClientJSON(self.auth_provider,
+                                                       **params)
+        self.endpoints_client = EndPointClientJSON(self.auth_provider,
+                                                   **params)
+        self.service_client = ServiceClientJSON(self.auth_provider, **params)
+        self.policy_client = PolicyClientJSON(self.auth_provider, **params)
+        self.region_client = RegionClientJSON(self.auth_provider, **params)
+        self.credentials_client = CredentialsClientJSON(self.auth_provider,
+                                                        **params)
+        self.token_client = TokenClientJSON(CONF.identity.uri)
         if CONF.identity_feature_enabled.api_v3:
-            self.token_v3_client = V3TokenClientJSON()
-        self.credentials_client = CredentialsClientJSON(self.auth_provider)
+            self.token_v3_client = V3TokenClientJSON(CONF.identity.uri_v3)
 
     def _set_volume_clients(self):
         params = {
@@ -330,9 +347,12 @@ class Manager(manager.Manager):
                                                     **params)
         self.snapshots_v2_client = SnapshotsV2ClientJSON(self.auth_provider,
                                                          **params)
-        self.volumes_client = VolumesClientJSON(self.auth_provider, **params)
-        self.volumes_v2_client = VolumesV2ClientJSON(self.auth_provider,
-                                                     **params)
+        self.volumes_client = VolumesClientJSON(
+            self.auth_provider, default_volume_size=CONF.volume.volume_size,
+            **params)
+        self.volumes_v2_client = VolumesV2ClientJSON(
+            self.auth_provider, default_volume_size=CONF.volume.volume_size,
+            **params)
         self.volume_types_client = VolumeTypesClientJSON(self.auth_provider,
                                                          **params)
         self.volume_services_client = VolumesServicesClientJSON(
@@ -376,8 +396,8 @@ class AdminManager(Manager):
     managed client objects
     """
 
-    def __init__(self, interface='json', service=None):
+    def __init__(self, service=None):
         super(AdminManager, self).__init__(
-            credentials=auth.get_default_credentials('identity_admin'),
-            interface=interface,
+            credentials=cred_provider.get_configured_credentials(
+                'identity_admin'),
             service=service)

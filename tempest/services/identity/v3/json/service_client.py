@@ -16,10 +16,10 @@
 import json
 
 from tempest.common import service_client
-from tempest.services.identity.v3.json import base
 
 
-class ServiceClientJSON(base.IdentityV3Client):
+class ServiceClientJSON(service_client.ServiceClient):
+    api_version = "v3"
 
     def update_service(self, service_id, **kwargs):
         """Updates a service."""

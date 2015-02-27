@@ -40,7 +40,7 @@ class FloatingIPsBulkAdminTestJSON(base.BaseV2ComputeAdminTest):
     @classmethod
     def verify_unallocated_floating_ip_range(cls, ip_range):
         # Verify whether configure floating IP range is not already allocated.
-        _, body = cls.client.list_floating_ips_bulk()
+        body = cls.client.list_floating_ips_bulk()
         allocated_ips_list = map(lambda x: x['address'], body)
         for ip_addr in netaddr.IPNetwork(ip_range).iter_hosts():
             if str(ip_addr) in allocated_ips_list:
@@ -65,18 +65,14 @@ class FloatingIPsBulkAdminTestJSON(base.BaseV2ComputeAdminTest):
         # anywhere. Using the below mentioned interface which is not ever
         # expected to be used. Clean Up has been done for created IP range
         interface = 'eth0'
-        resp, body = self.client.create_floating_ips_bulk(self.ip_range,
-                                                          pool,
-                                                          interface)
-
-        self.assertEqual(200, resp.status)
+        body = self.client.create_floating_ips_bulk(self.ip_range,
+                                                    pool,
+                                                    interface)
         self.addCleanup(self._delete_floating_ips_bulk, self.ip_range)
         self.assertEqual(self.ip_range, body['ip_range'])
-        resp, ips_list = self.client.list_floating_ips_bulk()
-        self.assertEqual(200, resp.status)
+        ips_list = self.client.list_floating_ips_bulk()
         self.assertNotEqual(0, len(ips_list))
         for ip in netaddr.IPNetwork(self.ip_range).iter_hosts():
             self.assertIn(str(ip), map(lambda x: x['address'], ips_list))
-        resp, body = self.client.delete_floating_ips_bulk(self.ip_range)
-        self.assertEqual(200, resp.status)
-        self.assertEqual(self.ip_range, body)
+        body = self.client.delete_floating_ips_bulk(self.ip_range)
+        self.assertEqual(self.ip_range, body.data)

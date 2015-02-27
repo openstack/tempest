@@ -17,11 +17,11 @@ import json
 import urllib
 
 import jsonschema
+from tempest_lib import exceptions as lib_exc
 
 from tempest.common import glance_http
 from tempest.common import service_client
 from tempest import config
-from tempest import exceptions
 
 CONF = config.CONF
 
@@ -120,7 +120,7 @@ class ImageClientV2JSON(service_client.ServiceClient):
     def is_resource_deleted(self, id):
         try:
             self.get_image(id)
-        except exceptions.NotFound:
+        except lib_exc.NotFound:
             return True
         return False
 
@@ -141,8 +141,7 @@ class ImageClientV2JSON(service_client.ServiceClient):
         url = 'v2/images/%s/file' % image_id
         resp, body = self.get(url)
         self.expected_success(200, resp.status)
-        # We can't return a ResponseBody because the body is a string
-        return resp, body
+        return service_client.ResponseBodyData(resp, body)
 
     def add_image_tag(self, image_id, tag):
         url = 'v2/images/%s/tags/%s' % (image_id, tag)

@@ -455,7 +455,13 @@ NetworkGroup = [
     cfg.ListOpt('dns_servers',
                 default=["8.8.8.8", "8.8.4.4"],
                 help="List of dns servers which should be used"
-                     " for subnet creation")
+                     " for subnet creation"),
+    cfg.StrOpt('port_vnic_type',
+               choices=[None, 'normal', 'direct', 'macvtap'],
+               help="vnic_type to use when Launching instances"
+                    " with pre-configured ports."
+                    " Supported ports are:"
+                    " ['normal','direct','macvtap']"),
 ]
 
 network_feature_group = cfg.OptGroup(name='network-feature-enabled',

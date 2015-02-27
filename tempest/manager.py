@@ -14,6 +14,7 @@
 #    under the License.
 
 from tempest import auth
+from tempest.common import cred_provider
 from tempest import config
 from tempest import exceptions
 
@@ -39,7 +40,7 @@ class Manager(object):
         """
         self.auth_version = CONF.identity.auth_version
         if credentials is None:
-            self.credentials = auth.get_default_credentials('user')
+            self.credentials = cred_provider.get_configured_credentials('user')
         else:
             self.credentials = credentials
         # Check if passed or default credentials are valid
@@ -53,15 +54,14 @@ class Manager(object):
     @classmethod
     def get_auth_provider_class(cls, credentials):
         if isinstance(credentials, auth.KeystoneV3Credentials):
-            return auth.KeystoneV3AuthProvider
+            return auth.KeystoneV3AuthProvider, CONF.identity.uri_v3
         else:
-            return auth.KeystoneV2AuthProvider
+            return auth.KeystoneV2AuthProvider, CONF.identity.uri
 
     def get_auth_provider(self, credentials):
         if credentials is None:
             raise exceptions.InvalidCredentials(
                 'Credentials must be specified')
-        auth_provider_class = self.get_auth_provider_class(credentials)
-        return auth_provider_class(
-            interface=getattr(self, 'interface', None),
-            credentials=credentials)
+        auth_provider_class, auth_url = self.get_auth_provider_class(
+            credentials)
+        return auth_provider_class(credentials, auth_url)

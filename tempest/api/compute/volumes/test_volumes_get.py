@@ -27,18 +27,22 @@ CONF = config.CONF
 class VolumesGetTestJSON(base.BaseV2ComputeTest):
 
     @classmethod
-    def resource_setup(cls):
-        super(VolumesGetTestJSON, cls).resource_setup()
-        cls.client = cls.volumes_extensions_client
+    def skip_checks(cls):
+        super(VolumesGetTestJSON, cls).skip_checks()
         if not CONF.service_available.cinder:
             skip_msg = ("%s skipped as Cinder is not available" % cls.__name__)
             raise cls.skipException(skip_msg)
+
+    @classmethod
+    def setup_clients(cls):
+        super(VolumesGetTestJSON, cls).setup_clients()
+        cls.client = cls.volumes_extensions_client
 
     @test.attr(type='smoke')
     def test_volume_create_get_delete(self):
         # CREATE, GET, DELETE Volume
         volume = None
-        v_name = data_utils.rand_name('Volume-%s-') % self._interface
+        v_name = data_utils.rand_name('Volume')
         metadata = {'Type': 'work'}
         # Create volume
         volume = self.client.create_volume(size=1,

@@ -12,8 +12,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib import exceptions as lib_exc
+
 from tempest.api.orchestration import base
-from tempest import exceptions
 from tempest import test
 
 
@@ -37,7 +38,7 @@ Resources:
     @test.attr(type=['gate', 'negative'])
     def test_validate_template_url(self):
         """Validating template passing url to it."""
-        self.assertRaises(exceptions.BadRequest,
+        self.assertRaises(lib_exc.BadRequest,
                           self.client.validate_template_url,
                           template_url=self.invalid_template_url,
                           parameters=self.parameters)

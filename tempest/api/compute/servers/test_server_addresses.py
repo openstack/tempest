@@ -20,13 +20,21 @@ from tempest import test
 class ServerAddressesTestJSON(base.BaseV2ComputeTest):
 
     @classmethod
-    def resource_setup(cls):
+    def setup_credentials(cls):
         # This test module might use a network and a subnet
         cls.set_network_resources(network=True, subnet=True)
-        super(ServerAddressesTestJSON, cls).resource_setup()
+        super(ServerAddressesTestJSON, cls).setup_credentials()
+
+    @classmethod
+    def setup_clients(cls):
+        super(ServerAddressesTestJSON, cls).setup_clients()
         cls.client = cls.servers_client
 
-        resp, cls.server = cls.create_test_server(wait_until='ACTIVE')
+    @classmethod
+    def resource_setup(cls):
+        super(ServerAddressesTestJSON, cls).resource_setup()
+
+        cls.server = cls.create_test_server(wait_until='ACTIVE')
 
     @test.attr(type='smoke')
     @test.services('network')
@@ -34,8 +42,7 @@ class ServerAddressesTestJSON(base.BaseV2ComputeTest):
         # All public and private addresses for
         # a server should be returned
 
-        resp, addresses = self.client.list_addresses(self.server['id'])
-        self.assertEqual('200', resp['status'])
+        addresses = self.client.list_addresses(self.server['id'])
 
         # We do not know the exact network configuration, but an instance
         # should at least have a single public or private address
@@ -52,15 +59,14 @@ class ServerAddressesTestJSON(base.BaseV2ComputeTest):
         # Providing a network type should filter
         # the addresses return by that type
 
-        resp, addresses = self.client.list_addresses(self.server['id'])
+        addresses = self.client.list_addresses(self.server['id'])
 
         # Once again we don't know the environment's exact network config,
         # but the response for each individual network should be the same
         # as the partial result of the full address list
         id = self.server['id']
         for addr_type in addresses:
-            resp, addr = self.client.list_addresses_by_network(id, addr_type)
-            self.assertEqual('200', resp['status'])
+            addr = self.client.list_addresses_by_network(id, addr_type)
 
             addr = addr[addr_type]
             for address in addresses[addr_type]:

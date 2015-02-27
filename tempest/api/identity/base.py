@@ -13,12 +13,12 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib import exceptions as lib_exc
 
-from tempest import auth
 from tempest import clients
+from tempest.common import cred_provider
 from tempest.common.utils import data_utils
 from tempest import config
-from tempest import exceptions
 from tempest.openstack.common import log as logging
 import tempest.test
 
@@ -29,10 +29,10 @@ LOG = logging.getLogger(__name__)
 class BaseIdentityAdminTest(tempest.test.BaseTestCase):
 
     @classmethod
-    def resource_setup(cls):
-        super(BaseIdentityAdminTest, cls).resource_setup()
-        cls.os_adm = clients.AdminManager(interface=cls._interface)
-        cls.os = clients.Manager(interface=cls._interface)
+    def setup_credentials(cls):
+        super(BaseIdentityAdminTest, cls).setup_credentials()
+        cls.os_adm = clients.AdminManager()
+        cls.os = clients.Manager()
 
     @classmethod
     def disable_user(cls, user_name):
@@ -72,16 +72,25 @@ class BaseIdentityAdminTest(tempest.test.BaseTestCase):
 class BaseIdentityV2AdminTest(BaseIdentityAdminTest):
 
     @classmethod
-    def resource_setup(cls):
+    def skip_checks(cls):
+        super(BaseIdentityV2AdminTest, cls).skip_checks()
         if not CONF.identity_feature_enabled.api_v2:
             raise cls.skipException("Identity api v2 is not enabled")
-        super(BaseIdentityV2AdminTest, cls).resource_setup()
+
+    @classmethod
+    def setup_clients(cls):
+        super(BaseIdentityV2AdminTest, cls).setup_clients()
         cls.client = cls.os_adm.identity_client
         cls.token_client = cls.os_adm.token_client
         if not cls.client.has_admin_extensions():
             raise cls.skipException("Admin extensions disabled")
-        cls.data = DataGenerator(cls.client)
+
         cls.non_admin_client = cls.os.identity_client
+
+    @classmethod
+    def resource_setup(cls):
+        super(BaseIdentityV2AdminTest, cls).resource_setup()
+        cls.data = DataGenerator(cls.client)
 
     @classmethod
     def resource_cleanup(cls):
@@ -92,10 +101,14 @@ class BaseIdentityV2AdminTest(BaseIdentityAdminTest):
 class BaseIdentityV3AdminTest(BaseIdentityAdminTest):
 
     @classmethod
-    def resource_setup(cls):
+    def skip_checks(cls):
+        super(BaseIdentityV3AdminTest, cls).skip_checks()
         if not CONF.identity_feature_enabled.api_v3:
             raise cls.skipException("Identity api v3 is not enabled")
-        super(BaseIdentityV3AdminTest, cls).resource_setup()
+
+    @classmethod
+    def setup_clients(cls):
+        super(BaseIdentityV3AdminTest, cls).setup_clients()
         cls.client = cls.os_adm.identity_v3_client
         cls.token = cls.os_adm.token_v3_client
         cls.endpoints_client = cls.os_adm.endpoints_client
@@ -149,11 +162,11 @@ class DataGenerator(object):
 
         @property
         def test_credentials(self):
-            return auth.get_credentials(username=self.test_user,
-                                        user_id=self.user['id'],
-                                        password=self.test_password,
-                                        tenant_name=self.test_tenant,
-                                        tenant_id=self.tenant['id'])
+            return cred_provider.get_credentials(username=self.test_user,
+                                                 user_id=self.user['id'],
+                                                 password=self.test_password,
+                                                 tenant_name=self.test_tenant,
+                                                 tenant_id=self.tenant['id'])
 
         def setup_test_user(self):
             """Set up a test user."""
@@ -226,7 +239,7 @@ class DataGenerator(object):
                     func(item['id'], **kwargs)
                 else:
                     func(item['id'])
-            except exceptions.NotFound:
+            except lib_exc.NotFound:
                 pass
             except Exception:
                 LOG.exception("Unexpected exception occurred in %s deletion."

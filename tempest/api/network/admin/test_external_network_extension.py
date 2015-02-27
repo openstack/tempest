@@ -15,7 +15,6 @@ from tempest.common.utils import data_utils
 
 
 class ExternalNetworksTestJSON(base.BaseAdminNetworkTest):
-    _interface = 'json'
 
     @classmethod
     def resource_setup(cls):

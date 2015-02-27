@@ -12,6 +12,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib import exceptions as lib_exc
+
 from tempest.api.network import base
 from tempest.common.utils import data_utils
 from tempest import config
@@ -22,7 +24,6 @@ CONF = config.CONF
 
 
 class FWaaSExtensionTestJSON(base.BaseNetworkTest):
-    _interface = 'json'
 
     """
     Tests the following operations in the Neutron API using the REST client for
@@ -63,7 +64,7 @@ class FWaaSExtensionTestJSON(base.BaseNetworkTest):
         try:
             self.client.delete_firewall_policy(policy_id)
         # if policy is not found, this means it was deleted in the test
-        except exceptions.NotFound:
+        except lib_exc.NotFound:
             pass
 
     def _try_delete_rule(self, rule_id):
@@ -71,7 +72,7 @@ class FWaaSExtensionTestJSON(base.BaseNetworkTest):
         try:
             self.client.delete_firewall_rule(rule_id)
         # if rule is not found, this means it was deleted in the test
-        except exceptions.NotFound:
+        except lib_exc.NotFound:
             pass
 
     def _try_delete_firewall(self, fw_id):
@@ -79,7 +80,7 @@ class FWaaSExtensionTestJSON(base.BaseNetworkTest):
         try:
             self.client.delete_firewall(fw_id)
         # if firewall is not found, this means it was deleted in the test
-        except exceptions.NotFound:
+        except lib_exc.NotFound:
             pass
 
         self.client.wait_for_resource_deletion('firewall', fw_id)

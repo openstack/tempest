@@ -13,20 +13,24 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib import exceptions as lib_exc
+
 from tempest.api.volume import base
-from tempest import exceptions
 from tempest import test
 
 
 class BaseVolumeQuotasNegativeV2TestJSON(base.BaseVolumeAdminTest):
-    _interface = "json"
     force_tenant_isolation = True
+
+    @classmethod
+    def setup_credentials(cls):
+        super(BaseVolumeQuotasNegativeV2TestJSON, cls).setup_credentials()
+        cls.demo_user = cls.isolated_creds.get_primary_creds()
+        cls.demo_tenant_id = cls.demo_user.tenant_id
 
     @classmethod
     def resource_setup(cls):
         super(BaseVolumeQuotasNegativeV2TestJSON, cls).resource_setup()
-        demo_user = cls.isolated_creds.get_primary_creds()
-        cls.demo_tenant_id = demo_user.tenant_id
         cls.shared_quota_set = {'gigabytes': 3, 'volumes': 1, 'snapshots': 1}
 
         # NOTE(gfidente): no need to restore original quota set
@@ -42,13 +46,13 @@ class BaseVolumeQuotasNegativeV2TestJSON(base.BaseVolumeAdminTest):
 
     @test.attr(type='negative')
     def test_quota_volumes(self):
-        self.assertRaises(exceptions.OverLimit,
+        self.assertRaises(lib_exc.OverLimit,
                           self.volumes_client.create_volume,
                           size=1)
 
     @test.attr(type='negative')
     def test_quota_volume_snapshots(self):
-        self.assertRaises(exceptions.OverLimit,
+        self.assertRaises(lib_exc.OverLimit,
                           self.snapshots_client.create_snapshot,
                           self.volume['id'])
 
@@ -65,7 +69,7 @@ class BaseVolumeQuotasNegativeV2TestJSON(base.BaseVolumeAdminTest):
         self.quotas_client.update_quota_set(
             self.demo_tenant_id,
             **new_quota_set)
-        self.assertRaises(exceptions.OverLimit,
+        self.assertRaises(lib_exc.OverLimit,
                           self.volumes_client.create_volume,
                           size=1)
 
@@ -73,7 +77,7 @@ class BaseVolumeQuotasNegativeV2TestJSON(base.BaseVolumeAdminTest):
         self.quotas_client.update_quota_set(
             self.demo_tenant_id,
             **self.shared_quota_set)
-        self.assertRaises(exceptions.OverLimit,
+        self.assertRaises(lib_exc.OverLimit,
                           self.snapshots_client.create_snapshot,
                           self.volume['id'])
 

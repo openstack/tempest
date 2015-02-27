@@ -59,7 +59,7 @@ class ImagesOneServerTestJSON(base.BaseV2ComputeTest):
                         % cls.__name__)
             raise cls.skipException(skip_msg)
 
-        resp, server = cls.create_test_server(wait_until='ACTIVE')
+        server = cls.create_test_server(wait_until='ACTIVE')
         cls.server_id = server['id']
 
     def _get_default_flavor_disk_size(self, flavor_id):

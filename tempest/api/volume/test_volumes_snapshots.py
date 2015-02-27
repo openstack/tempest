@@ -23,12 +23,15 @@ CONF = config.CONF
 class VolumesV2SnapshotTestJSON(base.BaseVolumeTest):
 
     @classmethod
+    def skip_checks(cls):
+        super(VolumesV2SnapshotTestJSON, cls).skip_checks()
+        if not CONF.volume_feature_enabled.snapshot:
+            raise cls.skipException("Cinder volume snapshots are disabled")
+
+    @classmethod
     def resource_setup(cls):
         super(VolumesV2SnapshotTestJSON, cls).resource_setup()
         cls.volume_origin = cls.create_volume()
-
-        if not CONF.volume_feature_enabled.snapshot:
-            raise cls.skipException("Cinder volume snapshots are disabled")
 
         cls.name_field = cls.special_fields['name_field']
         cls.descrip_field = cls.special_fields['descrip_field']
@@ -64,9 +67,9 @@ class VolumesV2SnapshotTestJSON(base.BaseVolumeTest):
         # Create a snapshot when volume status is in-use
         # Create a test instance
         server_name = data_utils.rand_name('instance-')
-        resp, server = self.servers_client.create_server(server_name,
-                                                         self.image_ref,
-                                                         self.flavor_ref)
+        server = self.servers_client.create_server(server_name,
+                                                   self.image_ref,
+                                                   self.flavor_ref)
         self.addCleanup(self.servers_client.delete_server, server['id'])
         self.servers_client.wait_for_server_status(server['id'], 'ACTIVE')
         mountpoint = '/dev/%s' % CONF.compute.volume_device_name

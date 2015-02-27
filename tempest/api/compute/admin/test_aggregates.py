@@ -13,10 +13,11 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib import exceptions as lib_exc
+
 from tempest.api.compute import base
 from tempest.common import tempest_fixtures as fixtures
 from tempest.common.utils import data_utils
-from tempest import exceptions
 from tempest import test
 
 
@@ -45,7 +46,7 @@ class AggregatesAdminTestJSON(base.BaseV2ComputeAdminTest):
         try:
             self.client.delete_aggregate(aggregate_id)
         # if aggregate not found, it depict it was deleted in the test
-        except exceptions.NotFound:
+        except lib_exc.NotFound:
             pass
 
     @test.attr(type='gate')
@@ -203,8 +204,8 @@ class AggregatesAdminTestJSON(base.BaseV2ComputeAdminTest):
         self.addCleanup(self.client.remove_host, aggregate['id'], self.host)
         server_name = data_utils.rand_name('test_server_')
         admin_servers_client = self.os_adm.servers_client
-        resp, server = self.create_test_server(name=server_name,
-                                               availability_zone=az_name,
-                                               wait_until='ACTIVE')
-        resp, body = admin_servers_client.get_server(server['id'])
+        server = self.create_test_server(name=server_name,
+                                         availability_zone=az_name,
+                                         wait_until='ACTIVE')
+        body = admin_servers_client.get_server(server['id'])
         self.assertEqual(self.host, body[self._host_key])

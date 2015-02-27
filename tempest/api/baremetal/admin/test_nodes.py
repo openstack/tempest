@@ -11,11 +11,11 @@
 #    under the License.
 
 import six
+from tempest_lib import exceptions as lib_exc
 
 from tempest.api.baremetal.admin import base
 from tempest.common.utils import data_utils
 from tempest.common import waiters
-from tempest import exceptions as exc
 from tempest import test
 
 
@@ -49,9 +49,9 @@ class TestNodes(base.BaseBaremetalTest):
     @test.attr(type='smoke')
     def test_create_node(self):
         params = {'cpu_arch': 'x86_64',
-                  'cpu_num': '12',
-                  'storage': '10240',
-                  'memory': '1024'}
+                  'cpus': '12',
+                  'local_gb': '10',
+                  'memory_mb': '1024'}
 
         _, body = self.create_node(self.chassis['uuid'], **params)
         self._assertExpected(params, body['properties'])
@@ -62,7 +62,8 @@ class TestNodes(base.BaseBaremetalTest):
 
         self.delete_node(node['uuid'])
 
-        self.assertRaises(exc.NotFound, self.client.show_node, node['uuid'])
+        self.assertRaises(lib_exc.NotFound, self.client.show_node,
+                          node['uuid'])
 
     @test.attr(type='smoke')
     def test_show_node(self):
@@ -106,16 +107,16 @@ class TestNodes(base.BaseBaremetalTest):
     @test.attr(type='smoke')
     def test_update_node(self):
         props = {'cpu_arch': 'x86_64',
-                 'cpu_num': '12',
-                 'storage': '10',
-                 'memory': '128'}
+                 'cpus': '12',
+                 'local_gb': '10',
+                 'memory_mb': '128'}
 
         _, node = self.create_node(self.chassis['uuid'], **props)
 
         new_p = {'cpu_arch': 'x86',
-                 'cpu_num': '1',
-                 'storage': '10000',
-                 'memory': '12300'}
+                 'cpus': '1',
+                 'local_gb': '10000',
+                 'memory_mb': '12300'}
 
         _, body = self.client.update_node(node['uuid'], properties=new_p)
         _, node = self.client.show_node(node['uuid'])

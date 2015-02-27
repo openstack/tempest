@@ -22,13 +22,17 @@ LOG = logging.getLogger(__name__)
 
 
 class VolumeMultiBackendV2Test(base.BaseVolumeAdminTest):
-    _interface = "json"
+
+    @classmethod
+    def skip_checks(cls):
+        super(VolumeMultiBackendV2Test, cls).skip_checks()
+
+        if not CONF.volume_feature_enabled.multi_backend:
+            raise cls.skipException("Cinder multi-backend feature disabled")
 
     @classmethod
     def resource_setup(cls):
         super(VolumeMultiBackendV2Test, cls).resource_setup()
-        if not CONF.volume_feature_enabled.multi_backend:
-            raise cls.skipException("Cinder multi-backend feature disabled")
 
         cls.backend1_name = CONF.volume.backend1_name
         cls.backend2_name = CONF.volume.backend2_name

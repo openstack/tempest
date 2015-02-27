@@ -26,12 +26,20 @@ CONF = config.CONF
 class VirtualInterfacesTestJSON(base.BaseV2ComputeTest):
 
     @classmethod
-    def resource_setup(cls):
+    def setup_credentials(cls):
         # This test needs a network and a subnet
         cls.set_network_resources(network=True, subnet=True)
-        super(VirtualInterfacesTestJSON, cls).resource_setup()
+        super(VirtualInterfacesTestJSON, cls).setup_credentials()
+
+    @classmethod
+    def setup_clients(cls):
+        super(VirtualInterfacesTestJSON, cls).setup_clients()
         cls.client = cls.servers_client
-        resp, server = cls.create_test_server(wait_until='ACTIVE')
+
+    @classmethod
+    def resource_setup(cls):
+        super(VirtualInterfacesTestJSON, cls).resource_setup()
+        server = cls.create_test_server(wait_until='ACTIVE')
         cls.server_id = server['id']
 
     @decorators.skip_because(bug="1183436",
@@ -41,8 +49,7 @@ class VirtualInterfacesTestJSON(base.BaseV2ComputeTest):
     def test_list_virtual_interfaces(self):
         # Positive test:Should be able to GET the virtual interfaces list
         # for a given server_id
-        resp, output = self.client.list_virtual_interfaces(self.server_id)
-        self.assertEqual(200, resp.status)
+        output = self.client.list_virtual_interfaces(self.server_id)
         self.assertIsNotNone(output)
         virt_ifaces = output
         self.assertNotEqual(0, len(virt_ifaces['virtual_interfaces']),

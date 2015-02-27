@@ -127,7 +127,7 @@ class TelemetryClientJSON(service_client.ServiceClient):
         resp, body = self.get(uri)
         self.expected_success(200, resp.status)
         body = self.deserialize(body)
-        return resp, body
+        return service_client.ResponseBodyData(resp, body)
 
     def alarm_set_state(self, alarm_id, state):
         uri = "%s/alarms/%s/state" % (self.uri_prefix, alarm_id)
@@ -135,4 +135,4 @@ class TelemetryClientJSON(service_client.ServiceClient):
         resp, body = self.put(uri, body)
         self.expected_success(200, resp.status)
         body = self.deserialize(body)
-        return resp, body
+        return service_client.ResponseBodyData(resp, body)

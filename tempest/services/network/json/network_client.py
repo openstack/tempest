@@ -14,6 +14,8 @@ import json
 import time
 import urllib
 
+from tempest_lib import exceptions as lib_exc
+
 from tempest.common import service_client
 from tempest.common.utils import misc
 from tempest import exceptions
@@ -211,7 +213,7 @@ class NetworkClientJSON(service_client.ServiceClient):
             getattr(self, method)(id)
         except AttributeError:
             raise Exception("Unknown resource type %s " % resource_type)
-        except exceptions.NotFound:
+        except lib_exc.NotFound:
             return True
         return False
 
@@ -318,6 +320,8 @@ class NetworkClientJSON(service_client.ServiceClient):
                 cur_gw_info.pop('enable_snat', None)
         update_body['external_gateway_info'] = kwargs.get(
             'external_gateway_info', body['router']['external_gateway_info'])
+        if 'distributed' in kwargs:
+            update_body['distributed'] = kwargs['distributed']
         update_body = dict(router=update_body)
         update_body = json.dumps(update_body)
         resp, body = self.put(uri, update_body)

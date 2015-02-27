@@ -15,10 +15,11 @@
 
 import json
 
+from tempest_lib import exceptions as lib_exc
+
 from tempest.api_schema.response.compute import aggregates as schema
 from tempest.api_schema.response.compute.v2 import aggregates as v2_schema
 from tempest.common import service_client
-from tempest import exceptions
 
 
 class AggregatesClientJSON(service_client.ServiceClient):
@@ -68,7 +69,7 @@ class AggregatesClientJSON(service_client.ServiceClient):
     def is_resource_deleted(self, id):
         try:
             self.get_aggregate(id)
-        except exceptions.NotFound:
+        except lib_exc.NotFound:
             return True
         return False
 

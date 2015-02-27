@@ -43,4 +43,4 @@ class DatabaseVersionsClientJSON(service_client.ServiceClient):
 
         resp, body = self.get(url)
         self.expected_success(200, resp.status)
-        return resp, self._parse_resp(body)
+        return service_client.ResponseBodyList(resp, self._parse_resp(body))

@@ -20,8 +20,8 @@ from tempest import test
 class AbsoluteLimitsTestJSON(base.BaseV2ComputeTest):
 
     @classmethod
-    def resource_setup(cls):
-        super(AbsoluteLimitsTestJSON, cls).resource_setup()
+    def setup_clients(cls):
+        super(AbsoluteLimitsTestJSON, cls).setup_clients()
         cls.client = cls.limits_client
 
     @test.attr(type='gate')

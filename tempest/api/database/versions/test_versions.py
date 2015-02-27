@@ -18,16 +18,15 @@ from tempest import test
 
 
 class DatabaseVersionsTest(base.BaseDatabaseTest):
-    _interface = 'json'
 
     @classmethod
-    def resource_setup(cls):
-        super(DatabaseVersionsTest, cls).resource_setup()
+    def setup_clients(cls):
+        super(DatabaseVersionsTest, cls).setup_clients()
         cls.client = cls.database_versions_client
 
     @test.attr(type='smoke')
     def test_list_db_versions(self):
-        _, versions = self.client.list_db_versions()
+        versions = self.client.list_db_versions()
         self.assertTrue(len(versions) > 0, "No database versions found")
         # List of all versions should contain the current version, and there
         # should only be one 'current' version

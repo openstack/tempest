@@ -16,7 +16,6 @@
 import collections
 import re
 
-from tempest_lib import decorators
 import testtools
 
 from tempest.common.utils import data_utils
@@ -230,7 +229,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         port_list = self._list_ports(device_id=server['id'])
         self.assertEqual(1, len(port_list))
         old_port = port_list[0]
-        _, interface = self.interface_client.create_interface(
+        interface = self.interface_client.create_interface(
             server=server['id'],
             network_id=self.new_net.id)
         self.addCleanup(self.network_client.wait_for_resource_deletion,
@@ -243,7 +242,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         def check_ports():
             self.new_port_list = [port for port in
                                   self._list_ports(device_id=server['id'])
-                                  if port != old_port]
+                                  if port['id'] != old_port['id']]
             return len(self.new_port_list) == 1
 
         if not test.call_until_true(check_ports, CONF.network.build_timeout,
@@ -381,6 +380,9 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
 
     @testtools.skipUnless(CONF.compute_feature_enabled.interface_attach,
                           'NIC hotplug not available')
+    @testtools.skipIf(CONF.network.port_vnic_type in ['direct', 'macvtap'],
+                      'NIC hotplug not supported for '
+                      'vnic_type direct or macvtap')
     @test.attr(type='smoke')
     @test.services('compute', 'network')
     def test_hotplug_nic(self):
@@ -429,17 +431,6 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
             should_connect=True, msg="after updating "
             "admin_state_up of router to True")
 
-    def _check_dns_server(self, ssh_client, dns_servers):
-        servers = ssh_client.get_dns_servers()
-        self.assertEqual(set(dns_servers), set(servers),
-                         'Looking for servers: {trgt_serv}. '
-                         'Retrieved DNS nameservers: {act_serv} '
-                         'From host: {host}.'
-                         .format(host=ssh_client.ssh_client.host,
-                                 act_serv=servers,
-                                 trgt_serv=dns_servers))
-
-    @decorators.skip_because(bug="1412325")
     @testtools.skipUnless(CONF.scenario.dhcp_client,
                           "DHCP client is not available.")
     @test.attr(type='smoke')
@@ -469,6 +460,13 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         # arbitrary ip addresses as nameservers, instead of parsing CONF
         initial_dns_server = '1.2.3.4'
         alt_dns_server = '9.8.7.6'
+
+        # renewal should be immediate.
+        # Timeouts are suggested by salvatore-orlando in
+        # https://bugs.launchpad.net/neutron/+bug/1412325/comments/3
+        renew_delay = CONF.network.build_interval
+        renew_timeout = CONF.network.build_timeout
+
         self._setup_network_and_servers(dns_nameservers=[initial_dns_server])
         self.check_public_network_connectivity(should_connect=True)
 
@@ -477,18 +475,43 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         private_key = self._get_server_key(server)
         ssh_client = self._ssh_to_server(ip_address, private_key)
 
-        self._check_dns_server(ssh_client, [initial_dns_server])
+        dns_servers = [initial_dns_server]
+        servers = ssh_client.get_dns_servers()
+        self.assertEqual(set(dns_servers), set(servers),
+                         'Looking for servers: {trgt_serv}. '
+                         'Retrieved DNS nameservers: {act_serv} '
+                         'From host: {host}.'
+                         .format(host=ssh_client.ssh_client.host,
+                                 act_serv=servers,
+                                 trgt_serv=dns_servers))
 
         self.subnet.update(dns_nameservers=[alt_dns_server])
         # asserts that Neutron DB has updated the nameservers
         self.assertEqual([alt_dns_server], self.subnet.dns_nameservers,
                          "Failed to update subnet's nameservers")
 
-        # server needs to renew its dhcp lease in order to get the new dns
-        # definitions from subnet
-        ssh_client.renew_lease(fixed_ip=floating_ip['fixed_ip_address'])
-        self._check_dns_server(ssh_client, [alt_dns_server])
+        def check_new_dns_server():
+            """Server needs to renew its dhcp lease in order to get the new dns
+            definitions from subnet
+            NOTE(amuller): we are renewing the lease as part of the retry
+            because Neutron updates dnsmasq asynchronously after the
+            subnet-update API call returns.
+            """
+            ssh_client.renew_lease(fixed_ip=floating_ip['fixed_ip_address'])
+            if ssh_client.get_dns_servers() != [alt_dns_server]:
+                LOG.debug("Failed to update DNS nameservers")
+                return False
+            return True
 
+        self.assertTrue(test.call_until_true(check_new_dns_server,
+                                             renew_timeout,
+                                             renew_delay),
+                        msg="DHCP renewal failed to fetch "
+                            "new DNS nameservers")
+
+    @testtools.skipIf(CONF.baremetal.driver_enabled,
+                      'admin_state of instance ports cannot be altered '
+                      'for baremetal nodes')
     @test.attr(type='smoke')
     @test.services('compute', 'network')
     def test_update_instance_port_admin_state(self):

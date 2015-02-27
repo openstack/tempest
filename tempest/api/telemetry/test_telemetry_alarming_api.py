@@ -10,14 +10,14 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib import exceptions as lib_exc
+
 from tempest.api.telemetry import base
 from tempest.common.utils import data_utils
-from tempest import exceptions
 from tempest import test
 
 
 class TelemetryAlarmingAPITestJSON(base.BaseTelemetryTest):
-    _interface = 'json'
 
     @classmethod
     def resource_setup(cls):
@@ -70,7 +70,7 @@ class TelemetryAlarmingAPITestJSON(base.BaseTelemetryTest):
         self.assertDictContainsSubset(new_rule, body['threshold_rule'])
         # Delete alarm and verify if deleted
         self.telemetry_client.delete_alarm(alarm_id)
-        self.assertRaises(exceptions.NotFound,
+        self.assertRaises(lib_exc.NotFound,
                           self.telemetry_client.get_alarm, alarm_id)
 
     @test.attr(type="gate")
@@ -80,12 +80,12 @@ class TelemetryAlarmingAPITestJSON(base.BaseTelemetryTest):
         # Set alarm state and verify
         new_state =\
             [elem for elem in alarm_states if elem != alarm['state']][0]
-        _, state = self.telemetry_client.alarm_set_state(alarm['alarm_id'],
-                                                         new_state)
-        self.assertEqual(new_state, state)
+        state = self.telemetry_client.alarm_set_state(alarm['alarm_id'],
+                                                      new_state)
+        self.assertEqual(new_state, state.data)
         # Get alarm state and verify
-        _, state = self.telemetry_client.alarm_get_state(alarm['alarm_id'])
-        self.assertEqual(new_state, state)
+        state = self.telemetry_client.alarm_get_state(alarm['alarm_id'])
+        self.assertEqual(new_state, state.data)
 
     @test.attr(type="gate")
     def test_create_delete_alarm_with_combination_rule(self):
@@ -101,5 +101,5 @@ class TelemetryAlarmingAPITestJSON(base.BaseTelemetryTest):
         self.assertDictContainsSubset(rule, body['combination_rule'])
         # Verify alarm delete
         self.telemetry_client.delete_alarm(alarm_id)
-        self.assertRaises(exceptions.NotFound,
+        self.assertRaises(lib_exc.NotFound,
                           self.telemetry_client.get_alarm, alarm_id)

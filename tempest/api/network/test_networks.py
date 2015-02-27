@@ -15,19 +15,18 @@
 import itertools
 
 import netaddr
+from tempest_lib import exceptions as lib_exc
 
 from tempest.api.network import base
 from tempest.common import custom_matchers
 from tempest.common.utils import data_utils
 from tempest import config
-from tempest import exceptions
 from tempest import test
 
 CONF = config.CONF
 
 
 class NetworksTestJSON(base.BaseNetworkTest):
-    _interface = 'json'
 
     """
     Tests the following operations in the Neutron API using the REST client for
@@ -280,7 +279,7 @@ class NetworksTestJSON(base.BaseNetworkTest):
         try:
             self.client.delete_network(net_id)
         # if network is not found, this means it was deleted in the test
-        except exceptions.NotFound:
+        except lib_exc.NotFound:
             pass
 
     @test.attr(type='smoke')
@@ -300,7 +299,7 @@ class NetworksTestJSON(base.BaseNetworkTest):
         body = self.client.delete_network(net_id)
 
         # Verify that the subnet got automatically deleted.
-        self.assertRaises(exceptions.NotFound, self.client.show_subnet,
+        self.assertRaises(lib_exc.NotFound, self.client.show_subnet,
                           subnet_id)
 
         # Since create_subnet adds the subnet to the delete list, and it is
@@ -399,7 +398,6 @@ class NetworksTestJSON(base.BaseNetworkTest):
 
 
 class BulkNetworkOpsTestJSON(base.BaseNetworkTest):
-    _interface = 'json'
 
     """
     Tests the following operations in the Neutron API using the REST client for
@@ -466,20 +464,23 @@ class BulkNetworkOpsTestJSON(base.BaseNetworkTest):
     def test_bulk_create_delete_subnet(self):
         networks = [self.create_network(), self.create_network()]
         # Creates 2 subnets in one request
-        cidr = netaddr.IPNetwork(CONF.network.tenant_network_cidr)
-        mask_bits = CONF.network.tenant_network_mask_bits
+        if self._ip_version == 4:
+            cidr = netaddr.IPNetwork(CONF.network.tenant_network_cidr)
+            mask_bits = CONF.network.tenant_network_mask_bits
+        else:
+            cidr = netaddr.IPNetwork(CONF.network.tenant_network_v6_cidr)
+            mask_bits = CONF.network.tenant_network_v6_mask_bits
+
         cidrs = [subnet_cidr for subnet_cidr in cidr.subnet(mask_bits)]
+
         names = [data_utils.rand_name('subnet-') for i in range(len(networks))]
         subnets_list = []
-        # TODO(raies): "for IPv6, version list [4, 6] will be used.
-        # and cidr for IPv6 will be of IPv6"
-        ip_version = [4, 4]
         for i in range(len(names)):
             p1 = {
                 'network_id': networks[i]['id'],
                 'cidr': str(cidrs[(i)]),
                 'name': names[i],
-                'ip_version': ip_version[i]
+                'ip_version': self._ip_version
             }
             subnets_list.append(p1)
         del subnets_list[1]['name']
@@ -517,6 +518,10 @@ class BulkNetworkOpsTestJSON(base.BaseNetworkTest):
         for n in created_ports:
             self.assertIsNotNone(n['id'])
             self.assertIn(n['id'], ports_list)
+
+
+class BulkNetworkOpsIpV6TestJSON(BulkNetworkOpsTestJSON):
+    _ip_version = 6
 
 
 class NetworksIpV6TestJSON(NetworksTestJSON):
@@ -614,7 +619,7 @@ class NetworksIpV6TestAttrs(NetworksIpV6TestJSON):
         self.assertNotIn(subnet_slaac['id'], subnet_ids,
                          "Subnet wasn't deleted")
         self.assertRaisesRegexp(
-            exceptions.Conflict,
+            lib_exc.Conflict,
             "There are one or more ports still in use on the network",
             self.client.delete_network,
             slaac_network['id'])

@@ -12,8 +12,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib import exceptions as lib_exc
+
 from tempest import config
-from tempest import exceptions
 import tempest.test
 
 
@@ -21,16 +22,26 @@ CONF = config.CONF
 
 
 class BaseDataProcessingTest(tempest.test.BaseTestCase):
-    _interface = 'json'
+
+    @classmethod
+    def skip_checks(cls):
+        super(BaseDataProcessingTest, cls).skip_checks()
+        if not CONF.service_available.sahara:
+            raise cls.skipException('Sahara support is required')
+
+    @classmethod
+    def setup_credentials(cls):
+        super(BaseDataProcessingTest, cls).setup_credentials()
+        cls.os = cls.get_client_manager()
+
+    @classmethod
+    def setup_clients(cls):
+        super(BaseDataProcessingTest, cls).setup_clients()
+        cls.client = cls.os.data_processing_client
 
     @classmethod
     def resource_setup(cls):
         super(BaseDataProcessingTest, cls).resource_setup()
-        if not CONF.service_available.sahara:
-            raise cls.skipException('Sahara support is required')
-
-        cls.os = cls.get_client_manager()
-        cls.client = cls.os.data_processing_client
 
         cls.flavor_ref = CONF.compute.flavor_ref
 
@@ -63,7 +74,7 @@ class BaseDataProcessingTest(tempest.test.BaseTestCase):
         for resource_id in resource_id_list:
             try:
                 method(resource_id)
-            except exceptions.NotFound:
+            except lib_exc.NotFound:
                 # ignore errors while auto removing created resource
                 pass
 

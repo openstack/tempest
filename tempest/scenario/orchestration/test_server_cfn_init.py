@@ -81,7 +81,7 @@ class CfnInitScenarioTest(manager.OrchestrationScenarioTest):
 
         server_resource = self.client.get_resource(sid, 'SmokeServer')
         server_id = server_resource['physical_resource_id']
-        _, server = self.servers_client.get_server(server_id)
+        server = self.servers_client.get_server(server_id)
         server_ip =\
             server['addresses'][CONF.compute.network_for_ssh][0]['addr']
 

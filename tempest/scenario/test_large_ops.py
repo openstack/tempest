@@ -12,7 +12,7 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
-from tempest_lib import exceptions
+from tempest_lib import exceptions as lib_exc
 
 from tempest.common.utils import data_utils
 from tempest import config
@@ -54,7 +54,7 @@ class TestLargeOpsScenario(manager.ScenarioTest):
             function, args, kwargs = cls._cleanup_resources.pop(-1)
             try:
                 function(*args, **kwargs)
-            except exceptions.NotFound:
+            except lib_exc.NotFound:
                 pass
         super(TestLargeOpsScenario, cls).resource_cleanup()
 
@@ -87,7 +87,7 @@ class TestLargeOpsScenario(manager.ScenarioTest):
             security_groups=[{'name': secgroup['name']}])
         # needed because of bug 1199788
         params = {'name': name}
-        _, server_list = self.servers_client.list_servers(params)
+        server_list = self.servers_client.list_servers(params)
         self.servers = server_list['servers']
         for server in self.servers:
             # after deleting all servers - wait for all servers to clear

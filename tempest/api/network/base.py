@@ -14,6 +14,7 @@
 #    under the License.
 
 import netaddr
+from tempest_lib import exceptions as lib_exc
 
 from tempest import clients
 from tempest.common.utils import data_utils
@@ -49,7 +50,6 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
         neutron as True
     """
 
-    _interface = 'json'
     force_tenant_isolation = False
 
     # Default to ipv4.
@@ -177,7 +177,7 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
         try:
             delete_callable(*args, **kwargs)
         # if resource is not found, this means it was deleted in the test
-        except exceptions.NotFound:
+        except lib_exc.NotFound:
             pass
 
     @classmethod
@@ -223,7 +223,7 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
                     gateway_ip=gateway_ip,
                     **kwargs)
                 break
-            except exceptions.BadRequest as e:
+            except lib_exc.BadRequest as e:
                 is_overlapping_cidr = 'overlaps with another subnet' in str(e)
                 if not is_overlapping_cidr:
                     raise
@@ -399,7 +399,7 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
             try:
                 cls.client.remove_router_interface_with_subnet_id(
                     router['id'], i['fixed_ips'][0]['subnet_id'])
-            except exceptions.NotFound:
+            except lib_exc.NotFound:
                 pass
         cls.client.delete_router(router['id'])
 
@@ -420,8 +420,7 @@ class BaseAdminNetworkTest(BaseNetworkTest):
 
         try:
             creds = cls.isolated_creds.get_admin_creds()
-            cls.os_adm = clients.Manager(
-                credentials=creds, interface=cls._interface)
+            cls.os_adm = clients.Manager(credentials=creds)
         except NotImplementedError:
             msg = ("Missing Administrative Network API credentials "
                    "in configuration.")

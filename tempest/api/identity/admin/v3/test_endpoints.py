@@ -19,13 +19,16 @@ from tempest import test
 
 
 class EndPointsTestJSON(base.BaseIdentityV3AdminTest):
-    _interface = 'json'
+
+    @classmethod
+    def setup_clients(cls):
+        super(EndPointsTestJSON, cls).setup_clients()
+        cls.identity_client = cls.client
+        cls.client = cls.endpoints_client
 
     @classmethod
     def resource_setup(cls):
         super(EndPointsTestJSON, cls).resource_setup()
-        cls.identity_client = cls.client
-        cls.client = cls.endpoints_client
         cls.service_ids = list()
         s_name = data_utils.rand_name('service-')
         s_type = data_utils.rand_name('type--')

@@ -23,7 +23,7 @@ LOG = logging.getLogger(__name__)
 def cleanup():
     admin_manager = clients.AdminManager()
 
-    _, body = admin_manager.servers_client.list_servers({"all_tenants": True})
+    body = admin_manager.servers_client.list_servers({"all_tenants": True})
     LOG.info("Cleanup::remove %s servers" % len(body['servers']))
     for s in body['servers']:
         try:
@@ -55,7 +55,7 @@ def cleanup():
         except Exception:
             pass
 
-    _, floating_ips = admin_manager.floating_ips_client.list_floating_ips()
+    floating_ips = admin_manager.floating_ips_client.list_floating_ips()
     LOG.info("Cleanup::remove %s floating ips" % len(floating_ips))
     for f in floating_ips:
         try:

@@ -19,9 +19,10 @@ import hmac
 import time
 import urlparse
 
+from tempest_lib import exceptions as lib_exc
+
 from tempest.api.object_storage import base
 from tempest.common.utils import data_utils
-from tempest import exceptions
 from tempest import test
 
 
@@ -104,5 +105,5 @@ class ObjectTempUrlNegativeTest(base.BaseObjectTest):
         # temp URL is valid for 1 seconds, let's wait 2
         time.sleep(2)
 
-        self.assertRaises(exceptions.Unauthorized,
+        self.assertRaises(lib_exc.Unauthorized,
                           self.object_client.get, url)
