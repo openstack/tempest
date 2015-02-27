@@ -19,8 +19,8 @@ from tempest.thirdparty.boto import test as boto_test
 class EC2NetworkTest(boto_test.BotoTestCase):
 
     @classmethod
-    def resource_setup(cls):
-        super(EC2NetworkTest, cls).resource_setup()
+    def setup_clients(cls):
+        super(EC2NetworkTest, cls).setup_clients()
         cls.ec2_client = cls.os.ec2api_client
 
     # Note(afazekas): these tests for things duable without an instance

@@ -24,8 +24,8 @@ from tempest.thirdparty.boto import test as boto_test
 class S3BucketsTest(boto_test.BotoTestCase):
 
     @classmethod
-    def resource_setup(cls):
-        super(S3BucketsTest, cls).resource_setup()
+    def setup_clients(cls):
+        super(S3BucketsTest, cls).setup_clients()
         cls.client = cls.os.s3_client
 
     def test_create_get_delete_object(self):

@@ -29,14 +29,20 @@ def compare_volumes(a, b):
 class EC2VolumesTest(boto_test.BotoTestCase):
 
     @classmethod
-    def resource_setup(cls):
-        super(EC2VolumesTest, cls).resource_setup()
-
+    def skip_checks(cls):
+        super(EC2VolumesTest, cls).skip_checks()
         if not CONF.service_available.cinder:
             skip_msg = ("%s skipped as Cinder is not available" % cls.__name__)
             raise cls.skipException(skip_msg)
 
+    @classmethod
+    def setup_clients(cls):
+        super(EC2VolumesTest, cls).setup_clients()
         cls.client = cls.os.ec2api_client
+
+    @classmethod
+    def resource_setup(cls):
+        super(EC2VolumesTest, cls).resource_setup()
         cls.zone = CONF.boto.aws_zone
 
     def test_create_get_delete(self):

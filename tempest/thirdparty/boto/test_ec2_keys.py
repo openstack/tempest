@@ -25,9 +25,13 @@ def compare_key_pairs(a, b):
 class EC2KeysTest(boto_test.BotoTestCase):
 
     @classmethod
+    def setup_clients(cls):
+        super(EC2KeysTest, cls).setup_clients()
+        cls.client = cls.os.ec2api_client
+
+    @classmethod
     def resource_setup(cls):
         super(EC2KeysTest, cls).resource_setup()
-        cls.client = cls.os.ec2api_client
         cls.ec = cls.ec2_error_code
 
 # TODO(afazekas): merge create, delete, get test cases
