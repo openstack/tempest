@@ -190,12 +190,13 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         if should_connect:
             private_key = self._get_server_key(server)
             floatingip_status = 'ACTIVE'
+        # Check FloatingIP Status before initiating a connection
+        if should_check_floating_ip_status:
+            self.check_floating_ip_status(floating_ip, floatingip_status)
         # call the common method in the parent class
         super(TestNetworkBasicOps, self).check_public_network_connectivity(
             ip_address, ssh_login, private_key, should_connect, msg,
             self.servers)
-        if should_check_floating_ip_status:
-            self.check_floating_ip_status(floating_ip, floatingip_status)
 
     def _disassociate_floating_ips(self):
         floating_ip, server = self.floating_ip_tuple
