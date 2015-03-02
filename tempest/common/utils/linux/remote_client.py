@@ -145,7 +145,7 @@ class RemoteClient():
 
     def _renew_lease_dhclient(self, fixed_ip=None):
         """Renews DHCP lease via dhclient client. """
-        cmd = "sudo /sbin/dhclient -r && /sbin/dhclient"
+        cmd = "sudo /sbin/dhclient -r && sudo /sbin/dhclient"
         self.exec_command(cmd)
 
     def renew_lease(self, fixed_ip=None):
