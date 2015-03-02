@@ -176,7 +176,14 @@ class OSClient(object):
             username=user,
             password=pw,
             tenant_name=tenant)
-        _auth = tempest.auth.KeystoneV2AuthProvider(_creds, CONF.identity.uri)
+        auth_provider_params = {
+            'disable_ssl_certificate_validation':
+                CONF.identity.disable_ssl_certificate_validation,
+            'ca_certs': CONF.identity.ca_certificates_file,
+            'trace_requests': CONF.debug.trace_requests
+        }
+        _auth = tempest.auth.KeystoneV2AuthProvider(
+            _creds, CONF.identity.uri, **auth_provider_params)
         self.identity = identity_client.IdentityClientJSON(
             _auth,
             CONF.identity.catalog_type,

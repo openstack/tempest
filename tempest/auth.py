@@ -186,8 +186,13 @@ class KeystoneAuthProvider(AuthProvider):
 
     token_expiry_threshold = datetime.timedelta(seconds=60)
 
-    def __init__(self, credentials, auth_url):
+    def __init__(self, credentials, auth_url,
+                 disable_ssl_certificate_validation=None,
+                 ca_certs=None, trace_requests=None):
         super(KeystoneAuthProvider, self).__init__(credentials)
+        self.dsvm = disable_ssl_certificate_validation
+        self.ca_certs = ca_certs
+        self.trace_requests = trace_requests
         self.auth_client = self._auth_client(auth_url)
 
     def _decorate_request(self, filters, method, url, headers=None, body=None,
@@ -237,7 +242,9 @@ class KeystoneV2AuthProvider(KeystoneAuthProvider):
     EXPIRY_DATE_FORMAT = '%Y-%m-%dT%H:%M:%SZ'
 
     def _auth_client(self, auth_url):
-        return json_id.TokenClientJSON(auth_url)
+        return json_id.TokenClientJSON(
+            auth_url, disable_ssl_certificate_validation=self.dsvm,
+            ca_certs=self.ca_certs, trace_requests=self.trace_requests)
 
     def _auth_params(self):
         return dict(
@@ -315,7 +322,9 @@ class KeystoneV3AuthProvider(KeystoneAuthProvider):
     EXPIRY_DATE_FORMAT = '%Y-%m-%dT%H:%M:%S.%fZ'
 
     def _auth_client(self, auth_url):
-        return json_v3id.V3TokenClientJSON(auth_url)
+        return json_v3id.V3TokenClientJSON(
+            auth_url, disable_ssl_certificate_validation=self.dsvm,
+            ca_certs=self.ca_certs, trace_requests=self.trace_requests)
 
     def _auth_params(self):
         return dict(
