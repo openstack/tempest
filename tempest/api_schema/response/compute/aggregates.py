@@ -14,6 +14,29 @@
 
 import copy
 
+# create-aggregate api doesn't have 'hosts' and 'metadata' attributes.
+aggregate_for_create = {
+    'type': 'object',
+    'properties': {
+        'availability_zone': {'type': ['string', 'null']},
+        'created_at': {'type': 'string'},
+        'deleted': {'type': 'boolean'},
+        'deleted_at': {'type': ['string', 'null']},
+        'id': {'type': 'integer'},
+        'name': {'type': 'string'},
+        'updated_at': {'type': ['string', 'null']}
+    },
+    'required': ['availability_zone', 'created_at', 'deleted',
+                 'deleted_at', 'id', 'name', 'updated_at']
+}
+
+aggregate = copy.deepcopy(aggregate_for_create)
+aggregate['properties'].update({
+    'hosts': {'type': 'array'},
+    'metadata': {'type': 'object'}
+})
+aggregate['required'].extend(['hosts', 'metadata'])
+
 aggregate = {
     'type': 'object',
     'properties': {
@@ -69,18 +92,10 @@ common_create_aggregate = {
     'response_body': {
         'type': 'object',
         'properties': {
-            'aggregate': aggregate
+            'aggregate': aggregate_for_create
         },
         'required': ['aggregate']
     }
 }
-# create-aggregate api doesn't have 'hosts' and 'metadata' attributes.
-del common_create_aggregate['response_body']['properties']['aggregate'][
-    'properties']['hosts']
-del common_create_aggregate['response_body']['properties']['aggregate'][
-    'properties']['metadata']
-common_create_aggregate['response_body']['properties']['aggregate'][
-    'required'] = ['availability_zone', 'created_at', 'deleted', 'deleted_at',
-                   'id', 'name', 'updated_at']
 
 aggregate_add_remove_host = get_aggregate
