@@ -194,8 +194,22 @@ class Manager(manager.Manager):
                 endpoint_type=CONF.telemetry.endpoint_type,
                 **self.default_params_with_timeout_values)
         if CONF.service_available.glance:
-            self.image_client = ImageClientJSON(self.auth_provider)
-            self.image_client_v2 = ImageClientV2JSON(self.auth_provider)
+            self.image_client = ImageClientJSON(
+                self.auth_provider,
+                CONF.image.catalog_type,
+                CONF.image.region or CONF.identity.region,
+                endpoint_type=CONF.image.endpoint_type,
+                build_interval=CONF.image.build_interval,
+                build_timeout=CONF.image.build_timeout,
+                **self.default_params)
+            self.image_client_v2 = ImageClientV2JSON(
+                self.auth_provider,
+                CONF.image.catalog_type,
+                CONF.image.region or CONF.identity.region,
+                endpoint_type=CONF.image.endpoint_type,
+                build_interval=CONF.image.build_interval,
+                build_timeout=CONF.image.build_timeout,
+                **self.default_params)
         self.orchestration_client = OrchestrationClient(
             self.auth_provider,
             CONF.orchestration.catalog_type,
