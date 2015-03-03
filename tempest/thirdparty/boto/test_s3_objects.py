@@ -25,8 +25,8 @@ from tempest.thirdparty.boto import test as boto_test
 class S3BucketsTest(boto_test.BotoTestCase):
 
     @classmethod
-    def resource_setup(cls):
-        super(S3BucketsTest, cls).resource_setup()
+    def setup_clients(cls):
+        super(S3BucketsTest, cls).setup_clients()
         cls.client = cls.os.s3_client
 
     @test.idempotent_id('4eea567a-b46a-405b-a475-6097e1faebde')

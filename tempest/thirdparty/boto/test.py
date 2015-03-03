@@ -201,10 +201,14 @@ class BotoTestCase(tempest.test.BaseTestCase):
             raise cls.skipException("The EC2 API is not available")
 
     @classmethod
+    def setup_credentials(cls):
+        super(BotoTestCase, cls).setup_credentials()
+        cls.os = cls.get_client_manager()
+
+    @classmethod
     def resource_setup(cls):
         super(BotoTestCase, cls).resource_setup()
         cls.conclusion = decision_maker()
-        cls.os = cls.get_client_manager()
         # The trash contains cleanup functions and paramaters in tuples
         # (function, *args, **kwargs)
         cls._resource_trash_bin = {}

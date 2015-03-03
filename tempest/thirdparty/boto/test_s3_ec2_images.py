@@ -27,13 +27,17 @@ CONF = config.CONF
 class S3ImagesTest(boto_test.BotoTestCase):
 
     @classmethod
+    def setup_clients(cls):
+        super(S3ImagesTest, cls).setup_clients()
+        cls.s3_client = cls.os.s3_client
+        cls.images_client = cls.os.ec2api_client
+
+    @classmethod
     def resource_setup(cls):
         super(S3ImagesTest, cls).resource_setup()
         if not cls.conclusion['A_I_IMAGES_READY']:
             raise cls.skipException("".join(("EC2 ", cls.__name__,
                                     ": requires ami/aki/ari manifest")))
-        cls.s3_client = cls.os.s3_client
-        cls.images_client = cls.os.ec2api_client
         cls.materials_path = CONF.boto.s3_materials_path
         cls.ami_manifest = CONF.boto.ami_manifest
         cls.aki_manifest = CONF.boto.aki_manifest

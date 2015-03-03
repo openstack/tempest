@@ -31,13 +31,17 @@ LOG = logging.getLogger(__name__)
 class InstanceRunTest(boto_test.BotoTestCase):
 
     @classmethod
+    def setup_clients(cls):
+        super(InstanceRunTest, cls).setup_clients()
+        cls.s3_client = cls.os.s3_client
+        cls.ec2_client = cls.os.ec2api_client
+
+    @classmethod
     def resource_setup(cls):
         super(InstanceRunTest, cls).resource_setup()
         if not cls.conclusion['A_I_IMAGES_READY']:
             raise cls.skipException("".join(("EC2 ", cls.__name__,
                                     ": requires ami/aki/ari manifest")))
-        cls.s3_client = cls.os.s3_client
-        cls.ec2_client = cls.os.ec2api_client
         cls.zone = CONF.boto.aws_zone
         cls.materials_path = CONF.boto.s3_materials_path
         ami_manifest = CONF.boto.ami_manifest
