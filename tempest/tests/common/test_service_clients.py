@@ -46,7 +46,7 @@ from tempest.services.compute.json import volumes_extensions_client \
 from tempest.services.data_processing.v1_1 import data_processing_client
 from tempest.services.database.json import flavors_client as db_flavor_client
 from tempest.services.database.json import versions_client as db_version_client
-from tempest.services.identity.json import identity_client as \
+from tempest.services.identity.v2.json import identity_client as \
     identity_v2_identity_client
 from tempest.services.identity.v3.json import credentials_client
 from tempest.services.identity.v3.json import endpoints_client

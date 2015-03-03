@@ -74,8 +74,9 @@ from tempest.services.database.json.limits_client import \
     DatabaseLimitsClientJSON
 from tempest.services.database.json.versions_client import \
     DatabaseVersionsClientJSON
-from tempest.services.identity.json.identity_client import IdentityClientJSON
-from tempest.services.identity.json.token_client import TokenClientJSON
+from tempest.services.identity.v2.json.identity_client import \
+    IdentityClientJSON
+from tempest.services.identity.v2.json.token_client import TokenClientJSON
 from tempest.services.identity.v3.json.credentials_client import \
     CredentialsClientJSON
 from tempest.services.identity.v3.json.endpoints_client import \

@@ -23,7 +23,7 @@ import urlparse
 import six
 
 from tempest.openstack.common import log as logging
-from tempest.services.identity.json import token_client as json_id
+from tempest.services.identity.v2.json import token_client as json_v2id
 from tempest.services.identity.v3.json import token_client as json_v3id
 
 
@@ -242,7 +242,7 @@ class KeystoneV2AuthProvider(KeystoneAuthProvider):
     EXPIRY_DATE_FORMAT = '%Y-%m-%dT%H:%M:%SZ'
 
     def _auth_client(self, auth_url):
-        return json_id.TokenClientJSON(
+        return json_v2id.TokenClientJSON(
             auth_url, disable_ssl_certificate_validation=self.dsvm,
             ca_certs=self.ca_certs, trace_requests=self.trace_requests)
 

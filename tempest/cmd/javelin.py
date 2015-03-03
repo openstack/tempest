@@ -120,7 +120,7 @@ from tempest.openstack.common import timeutils
 from tempest.services.compute.json import flavors_client
 from tempest.services.compute.json import security_groups_client
 from tempest.services.compute.json import servers_client
-from tempest.services.identity.json import identity_client
+from tempest.services.identity.v2.json import identity_client
 from tempest.services.image.v2.json import image_client
 from tempest.services.network.json import network_client
 from tempest.services.object_storage import container_client

@@ -24,7 +24,7 @@ from tempest import auth
 from tempest.common import accounts
 from tempest import config
 from tempest import exceptions
-from tempest.services.identity.json import token_client
+from tempest.services.identity.v2.json import token_client
 from tempest.tests import base
 from tempest.tests import fake_config
 from tempest.tests import fake_identity
