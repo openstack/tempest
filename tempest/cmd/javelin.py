@@ -200,7 +200,14 @@ class OSClient(object):
                                                   **object_storage_params)
         self.containers = container_client.ContainerClient(
             _auth, **object_storage_params)
-        self.images = image_client.ImageClientV2JSON(_auth)
+        self.images = image_client.ImageClientV2JSON(
+            _auth,
+            CONF.image.catalog_type,
+            CONF.image.region or CONF.identity.region,
+            endpoint_type=CONF.image.endpoint_type,
+            build_interval=CONF.image.build_interval,
+            build_timeout=CONF.image.build_timeout,
+            **default_params)
         self.telemetry = telemetry_client.TelemetryClientJSON(
             _auth,
             CONF.telemetry.catalog_type,

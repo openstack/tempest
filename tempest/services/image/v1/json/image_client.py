@@ -25,26 +25,32 @@ from tempest_lib import exceptions as lib_exc
 from tempest.common import glance_http
 from tempest.common import service_client
 from tempest.common.utils import misc as misc_utils
-from tempest import config
 from tempest import exceptions
 from tempest.openstack.common import log as logging
-
-CONF = config.CONF
 
 LOG = logging.getLogger(__name__)
 
 
 class ImageClientJSON(service_client.ServiceClient):
 
-    def __init__(self, auth_provider):
+    def __init__(self, auth_provider, catalog_type, region, endpoint_type=None,
+                 build_interval=None, build_timeout=None,
+                 disable_ssl_certificate_validation=None,
+                 ca_certs=None, **kwargs):
         super(ImageClientJSON, self).__init__(
             auth_provider,
-            CONF.image.catalog_type,
-            CONF.image.region or CONF.identity.region,
-            endpoint_type=CONF.image.endpoint_type,
-            build_interval=CONF.image.build_interval,
-            build_timeout=CONF.image.build_timeout)
+            catalog_type,
+            region,
+            endpoint_type=endpoint_type,
+            build_interval=build_interval,
+            build_timeout=build_timeout,
+            disable_ssl_certificate_validation=(
+                disable_ssl_certificate_validation),
+            ca_certs=ca_certs,
+            **kwargs)
         self._http = None
+        self.dscv = disable_ssl_certificate_validation
+        self.ca_certs = ca_certs
 
     def _image_meta_from_headers(self, headers):
         meta = {'properties': {}}
@@ -112,11 +118,10 @@ class ImageClientJSON(service_client.ServiceClient):
             return None
 
     def _get_http(self):
-        dscv = CONF.identity.disable_ssl_certificate_validation
-        ca_certs = CONF.identity.ca_certificates_file
         return glance_http.HTTPClient(auth_provider=self.auth_provider,
                                       filters=self.filters,
-                                      insecure=dscv, ca_certs=ca_certs)
+                                      insecure=self.dscv,
+                                      ca_certs=self.ca_certs)
 
     def _create_with_data(self, headers, data):
         resp, body_iter = self.http.raw_request('POST', '/v1/images',
@@ -138,8 +143,7 @@ class ImageClientJSON(service_client.ServiceClient):
     @property
     def http(self):
         if self._http is None:
-            if CONF.service_available.glance:
-                self._http = self._get_http()
+            self._http = self._get_http()
         return self._http
 
     def create_image(self, name, container_format, disk_format, **kwargs):
