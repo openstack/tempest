@@ -43,5 +43,7 @@ class ResourceTypesTest(base.BaseOrchestrationTest):
         """Verify it is possible to get template about resource types."""
         type_template = self.client.get_resource_type_template(
             'OS::Nova::Server')
-        self.assert_fields_in_dict(type_template, 'Outputs',
+        self.assert_fields_in_dict(
+            type_template,
+            'Outputs',
             'Parameters', 'Resources')
