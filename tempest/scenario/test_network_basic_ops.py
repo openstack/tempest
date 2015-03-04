@@ -435,13 +435,15 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
             "admin_state_up of router to True")
 
     @test.idempotent_id('d8bb918e-e2df-48b2-97cd-b73c95450980')
+    @testtools.skipIf(CONF.baremetal.driver_enabled,
+                      'network isolation not available for baremetal nodes')
     @testtools.skipUnless(CONF.scenario.dhcp_client,
                           "DHCP client is not available.")
     @test.attr(type='smoke')
     @test.services('compute', 'network')
     def test_subnet_details(self):
         """Tests that subnet's extra configuration details are affecting
-        the VMs
+        the VMs. This test relies on non-shared, isolated tenant networks.
 
          NOTE: Neutron subnets push data to servers via dhcp-agent, so any
          update in subnet requires server to actively renew its DHCP lease.
