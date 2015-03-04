@@ -24,13 +24,16 @@ from tempest.api_schema.response.compute import servers as common_schema
 from tempest.api_schema.response.compute.v2 import servers as schema
 from tempest.common import service_client
 from tempest.common import waiters
-from tempest import config
 from tempest import exceptions
-
-CONF = config.CONF
 
 
 class ServersClientJSON(service_client.ServiceClient):
+
+    def __init__(self, auth_provider, service, region,
+                 enable_instance_password=True, **kwargs):
+        super(ServersClientJSON, self).__init__(
+            auth_provider, service, region, **kwargs)
+        self.enable_instance_password = enable_instance_password
 
     def create_server(self, name, image_ref, flavor_ref, **kwargs):
         """
@@ -93,7 +96,7 @@ class ServersClientJSON(service_client.ServiceClient):
         # with return reservation id set True
         if 'reservation_id' in body:
             return service_client.ResponseBody(resp, body)
-        if CONF.compute_feature_enabled.enable_instance_password:
+        if self.enable_instance_password:
             create_schema = schema.create_server_with_admin_pass
         else:
             create_schema = schema.create_server
@@ -275,7 +278,7 @@ class ServersClientJSON(service_client.ServiceClient):
         if 'disk_config' in kwargs:
             kwargs['OS-DCF:diskConfig'] = kwargs['disk_config']
             del kwargs['disk_config']
-        if CONF.compute_feature_enabled.enable_instance_password:
+        if self.enable_instance_password:
             rebuild_schema = schema.rebuild_server_with_admin_pass
         else:
             rebuild_schema = schema.rebuild_server

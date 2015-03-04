@@ -240,7 +240,11 @@ class Manager(manager.Manager):
             SecurityGroupDefaultRulesClientJSON(self.auth_provider, **params))
         self.certificates_client = CertificatesClientJSON(self.auth_provider,
                                                           **params)
-        self.servers_client = ServersClientJSON(self.auth_provider, **params)
+        self.servers_client = ServersClientJSON(
+            self.auth_provider,
+            enable_instance_password=CONF.compute_feature_enabled
+                .enable_instance_password,
+            **params)
         self.limits_client = LimitsClientJSON(self.auth_provider, **params)
         self.images_client = ImagesClientJSON(self.auth_provider, **params)
         self.keypairs_client = KeyPairsClientJSON(self.auth_provider, **params)
