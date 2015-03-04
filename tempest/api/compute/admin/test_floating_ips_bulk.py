@@ -17,6 +17,7 @@ import netaddr
 
 from tempest.api.compute import base
 from tempest import config
+from tempest import exceptions
 from tempest import test
 
 CONF = config.CONF
@@ -47,7 +48,7 @@ class FloatingIPsBulkAdminTestJSON(base.BaseV2ComputeAdminTest):
                 msg = ("Configured unallocated floating IP range is already "
                        "allocated. Configure the correct unallocated range "
                        "as 'floating_ip_range'")
-                raise cls.skipException(msg)
+                raise exceptions.InvalidConfiguration(msg)
         return
 
     def _delete_floating_ips_bulk(self, ip_range):
