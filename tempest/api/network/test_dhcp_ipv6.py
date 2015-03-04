@@ -21,9 +21,7 @@ from tempest_lib import exceptions as lib_exc
 from tempest.api.network import base
 from tempest.common.utils import data_utils
 from tempest import config
-from tempest.openstack.common import log as logging
 
-LOG = logging.getLogger(__name__)
 CONF = config.CONF
 
 
@@ -163,33 +161,6 @@ class NetworksTestDHCPv6(base.BaseNetworkTest):
                              'ipv6_ra_mode=Off and ipv6_address_mode=Off,'
                              'but shall be taken from fixed IPs') % (
                                 real_ip, eui_ip))
-
-    def test_dhcpv6_stateless_two_subnets(self):
-        """When 2 subnets configured with dnsmasq SLAAC and DHCP stateless
-        and there is radvd, port shall receive IP addresses calculated
-        from its MAC and mask of subnet from both subnets.
-        """
-        for ra_mode, add_mode in (
-                ('slaac', 'slaac'),
-                ('dhcpv6-stateless', 'dhcpv6-stateless'),
-        ):
-            kwargs = {'ipv6_ra_mode': ra_mode,
-                      'ipv6_address_mode': add_mode}
-            subnet1 = self.create_subnet(self.network, **kwargs)
-            subnet2 = self.create_subnet(self.network, **kwargs)
-            port_mac = data_utils.rand_mac_address()
-            port = self.create_port(self.network, mac_address=port_mac)
-            real_ips = [i['ip_address'] for i in port['fixed_ips']]
-            eui_ips = [
-                data_utils.get_ipv6_addr_by_EUI64(i['cidr'],
-                                                  port_mac).format()
-                for i in (subnet1, subnet2)
-            ]
-            self._clean_network()
-            self.assertSequenceEqual(sorted(real_ips), sorted(eui_ips),
-                                     ('Real port IPs %s,%s are not equal to'
-                                      ' SLAAC IPs: %s,%s') % tuple(real_ips +
-                                                                   eui_ips))
 
     def test_dhcpv6_two_subnets(self):
         """When one IPv6 subnet configured with dnsmasq SLAAC or DHCP stateless
@@ -395,17 +366,6 @@ class NetworksTestDHCPv6(base.BaseNetworkTest):
         body = self.client.show_port(port['port_id'])
         return subnet, body['port']
 
-    def _create_custom_subnet(self, kwargs):
-        net_cidr = netaddr.IPNetwork(CONF.network.tenant_network_v6_cidr)
-        mask_bits = CONF.network.tenant_network_v6_mask_bits
-        cidr = str(next(iter(net_cidr.subnet(mask_bits))))
-        kwargs.update({
-            'network_id': self.network['id'],
-            'cidr': cidr})
-        body = self.client.create_subnet(**kwargs)
-        self.subnets.append(body['subnet'])
-        return body['subnet']
-
     def test_dhcp_stateful_router(self):
         """With all options below the router interface shall
         receive DHCPv6 IP address from allocation pool.
@@ -424,72 +384,6 @@ class NetworksTestDHCPv6(base.BaseNetworkTest):
                              ("Port IP %s is not as first IP from "
                               "subnets allocation pool: %s") % (
                                  port_ip, subnet['gateway_ip']))
-
-    def test_dhcp_stateless_router(self):
-        """With all options below the router interface shall
-        receive first address in allocation pool of subnet,
-        because gateway is set explicitly to first IP in
-        'create_subnet' function.
-        """
-        for ra_mode, add_mode in (
-                ('dhcpv6-stateless', 'dhcpv6-stateless'),
-                ('dhcpv6-stateless', None),
-                (None, 'dhcpv6-stateless'),
-                ('slaac', 'slaac'),
-                ('slaac', None),
-                (None, 'slaac')
-        ):
-            kwargs = {'ipv6_ra_mode': ra_mode,
-                      'ipv6_address_mode': add_mode}
-            kwargs = {k: v for k, v in kwargs.iteritems() if v}
-            subnet, port = self._create_subnet_router(kwargs)
-            port_ip = next(iter(port['fixed_ips']), None)['ip_address']
-            self._clean_network()
-            eui64_ip = data_utils.get_ipv6_addr_by_EUI64(
-                subnet['cidr'],
-                port['mac_address']).format()
-            self.assertNotEqual(port_ip, eui64_ip,
-                                ("Port IP %s is the same as EUI64 "
-                                 "addressl: %s") % (port_ip, eui64_ip))
-            self.assertEqual(port_ip, subnet['gateway_ip'],
-                             ("Port IP %s is not as first IP from "
-                              "subnets allocation pool: %s") % (
-                                 port_ip, subnet['gateway_ip']))
-
-    def test_dhcp_stateless_router_wogw(self):
-        """With all options below the router interface shall
-        receive DHCPv6 IP SLAAC address according to its MAC,
-        because gateway is not set explicitly in local function
-        '_create_custom_subnet' and default is used.
-        """
-        for ra_mode, add_mode in (
-                ('dhcpv6-stateless', 'dhcpv6-stateless'),
-                # ('dhcpv6-stateless', None),
-                (None, 'dhcpv6-stateless'),
-                ('slaac', 'slaac'),
-                # ('slaac', None),
-                (None, 'slaac')
-        ):
-            kwargs = {'ipv6_ra_mode': ra_mode,
-                      'ipv6_address_mode': add_mode,
-                      'ip_version': 6}
-            kwargs = {k: v for k, v in kwargs.iteritems() if v}
-            subnet = self._create_custom_subnet(kwargs)
-            router = self.create_router(
-                router_name=data_utils.rand_name("routerv6-"),
-                admin_state_up=True)
-            port = self.create_router_interface(router['id'],
-                                                subnet['id'])
-            body = self.client.show_port(port['port_id'])
-            port = body['port']
-            port_ip = next(iter(port['fixed_ips']))['ip_address']
-            eui64_ip = data_utils.get_ipv6_addr_by_EUI64(
-                subnet['cidr'],
-                port['mac_address']).format()
-            self._clean_network()
-            self.assertEqual(port_ip, eui64_ip,
-                             ("Port IP %s is not SLAAC %s") % (
-                                 port_ip, eui64_ip))
 
     def tearDown(self):
         self._clean_network()
