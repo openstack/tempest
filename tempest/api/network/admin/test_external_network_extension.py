@@ -101,7 +101,8 @@ class ExternalNetworksTestJSON(base.BaseAdminNetworkTest):
         self.addCleanup(self._try_delete_resource,
                         client.delete_network,
                         external_network['id'])
-        subnet = self.create_subnet(external_network, client=client)
+        subnet = self.create_subnet(external_network, client=client,
+                                    enable_dhcp=False)
         body = client.create_floatingip(
             floating_network_id=external_network['id'])
         created_floating_ip = body['floatingip']
