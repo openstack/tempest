@@ -176,7 +176,7 @@ class SecGroupTest(base.BaseSecGroupTest):
         sg_id = group_create_body['security_group']['id']
         direction = 'ingress'
         protocol = 'icmp'
-        icmp_type_codes = [(3, 2), (2, 3), (3, 0), (2, None)]
+        icmp_type_codes = [(3, 2), (3, 0), (8, 0), (0, 0), (11, None)]
         for icmp_type, icmp_code in icmp_type_codes:
             self._create_verify_security_group_rule(sg_id, direction,
                                                     self.ethertype, protocol,
