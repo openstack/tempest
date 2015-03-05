@@ -1,7 +1,5 @@
 # Copyright (C) 2013 eNovance SAS <licensing@enovance.com>
 #
-# Author: Joe H. Rahme <joe.hakim.rahme@enovance.com>
-#
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
 # a copy of the License at
@@ -39,6 +37,7 @@ class CrossdomainTest(base.BaseObjectTest):
         self.account_client.skip_path()
 
     @test.attr('gate')
+    @test.idempotent_id('d1b8b031-b622-4010-82f9-ff78a9e915c7')
     @test.requires_ext(extension='crossdomain', service='object')
     def test_get_crossdomain_policy(self):
         resp, body = self.account_client.get("crossdomain.xml", {})

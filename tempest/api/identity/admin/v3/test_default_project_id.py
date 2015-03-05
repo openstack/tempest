@@ -15,6 +15,7 @@ from tempest import auth
 from tempest import clients
 from tempest.common.utils import data_utils
 from tempest import config
+from tempest import manager
 from tempest import test
 
 CONF = config.CONF
@@ -34,6 +35,7 @@ class TestDefaultProjectId (base.BaseIdentityV3AdminTest):
         self.client.delete_domain(domain_id)
 
     @test.attr(type='smoke')
+    @test.idempotent_id('d6110661-6a71-49a7-a453-b5e26640ff6d')
     def test_default_project_id(self):
         # create a domain
         dom_name = data_utils.rand_name('dom')
@@ -74,8 +76,7 @@ class TestDefaultProjectId (base.BaseIdentityV3AdminTest):
         creds = auth.KeystoneV3Credentials(username=user_name,
                                            password=user_name,
                                            domain_name=dom_name)
-        auth_provider = auth.KeystoneV3AuthProvider(creds,
-                                                    CONF.identity.uri_v3)
+        auth_provider = manager.get_auth_provider(creds)
         creds = auth_provider.fill_credentials()
         admin_client = clients.Manager(credentials=creds)
 

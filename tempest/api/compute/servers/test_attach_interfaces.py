@@ -117,6 +117,7 @@ class AttachInterfacesTestJSON(base.BaseV2ComputeTest):
         self.assertEqual(sorted(list1), sorted(list2))
 
     @test.attr(type='smoke')
+    @test.idempotent_id('73fe8f02-590d-4bf1-b184-e9ca81065051')
     @test.services('network')
     def test_create_list_show_delete_interfaces(self):
         server, ifs = self._create_server_get_interfaces()
@@ -139,6 +140,7 @@ class AttachInterfacesTestJSON(base.BaseV2ComputeTest):
         self.assertEqual(len(ifs) - 1, len(_ifs))
 
     @test.attr(type='smoke')
+    @test.idempotent_id('c7e0e60b-ee45-43d0-abeb-8596fd42a2f9')
     @test.services('network')
     def test_add_remove_fixed_ip(self):
         # Add and Remove the fixed IP to server.

@@ -30,11 +30,13 @@ class ServicesAdminTestJSON(base.BaseV2ComputeAdminTest):
         cls.client = cls.os_adm.services_client
 
     @test.attr(type='gate')
+    @test.idempotent_id('5be41ef4-53d1-41cc-8839-5c2a48a1b283')
     def test_list_services(self):
         services = self.client.list_services()
         self.assertNotEqual(0, len(services))
 
     @test.attr(type='gate')
+    @test.idempotent_id('f345b1ec-bc6e-4c38-a527-3ca2bc00bef5')
     def test_get_service_by_service_binary_name(self):
         binary_name = 'nova-compute'
         params = {'binary': binary_name}
@@ -44,6 +46,7 @@ class ServicesAdminTestJSON(base.BaseV2ComputeAdminTest):
             self.assertEqual(binary_name, service['binary'])
 
     @test.attr(type='gate')
+    @test.idempotent_id('affb42d5-5b4b-43c8-8b0b-6dca054abcca')
     def test_get_service_by_host_name(self):
         services = self.client.list_services()
         host_name = services[0]['host']
@@ -63,6 +66,7 @@ class ServicesAdminTestJSON(base.BaseV2ComputeAdminTest):
         self.assertEqual(sorted(s1), sorted(s2))
 
     @test.attr(type='gate')
+    @test.idempotent_id('39397f6f-37b8-4234-8671-281e44c74025')
     def test_get_service_by_service_and_host_name(self):
         services = self.client.list_services()
         host_name = services[0]['host']

@@ -83,10 +83,12 @@ class QuotasTest(base.BaseAdminNetworkTest):
             self.assertNotEqual(tenant_id, q['tenant_id'])
 
     @test.attr(type='gate')
+    @test.idempotent_id('2390f766-836d-40ef-9aeb-e810d78207fb')
     def test_quotas(self):
         new_quotas = {'network': 0, 'security_group': 0}
         self._check_quotas(new_quotas)
 
+    @test.idempotent_id('a7add2b1-691e-44d6-875f-697d9685f091')
     @test.requires_ext(extension='lbaas', service='network')
     @test.attr(type='gate')
     def test_lbaas_quotas(self):

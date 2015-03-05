@@ -27,11 +27,13 @@ class StacksTestJSON(base.BaseOrchestrationTest):
         super(StacksTestJSON, cls).resource_setup()
 
     @test.attr(type='smoke')
+    @test.idempotent_id('d35d628c-07f6-4674-85a1-74db9919e986')
     def test_stack_list_responds(self):
         stacks = self.client.list_stacks()
         self.assertIsInstance(stacks, list)
 
     @test.attr(type='smoke')
+    @test.idempotent_id('10498bd5-a83e-4b62-a817-ce24afe938fe')
     def test_stack_crud_no_resources(self):
         stack_name = data_utils.rand_name('heat')
 

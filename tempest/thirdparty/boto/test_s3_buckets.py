@@ -14,16 +14,18 @@
 #    under the License.
 
 from tempest.common.utils import data_utils
+from tempest import test
 from tempest.thirdparty.boto import test as boto_test
 
 
 class S3BucketsTest(boto_test.BotoTestCase):
 
     @classmethod
-    def resource_setup(cls):
-        super(S3BucketsTest, cls).resource_setup()
+    def setup_clients(cls):
+        super(S3BucketsTest, cls).setup_clients()
         cls.client = cls.os.s3_client
 
+    @test.idempotent_id('4678525d-8da0-4518-81c1-f1f67d595b00')
     def test_create_and_get_delete_bucket(self):
         # S3 Create, get and delete bucket
         bucket_name = data_utils.rand_name("s3bucket-")

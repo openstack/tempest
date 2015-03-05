@@ -12,6 +12,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import uuid
 
 import mock
 from oslo.config import cfg
@@ -62,6 +63,43 @@ class TestAttrDecorator(BaseDecoratorsTest):
 
     def test_attr_decorator_with_duplicated_type(self):
         self._test_attr_helper(expected_attrs=['foo'], type=['foo', 'foo'])
+
+
+class TestIdempotentIdDecorator(BaseDecoratorsTest):
+
+    def _test_helper(self, _id, **decorator_args):
+        @test.idempotent_id(_id)
+        def foo():
+            """Docstring"""
+            pass
+
+        return foo
+
+    def _test_helper_without_doc(self, _id, **decorator_args):
+        @test.idempotent_id(_id)
+        def foo():
+            pass
+
+        return foo
+
+    def test_positive(self):
+        _id = str(uuid.uuid4())
+        foo = self._test_helper(_id)
+        self.assertIn('id-%s' % _id, getattr(foo, '__testtools_attrs'))
+        self.assertTrue(foo.__doc__.startswith('Test idempotent id: %s' % _id))
+
+    def test_positive_without_doc(self):
+        _id = str(uuid.uuid4())
+        foo = self._test_helper_without_doc(_id)
+        self.assertTrue(foo.__doc__.startswith('Test idempotent id: %s' % _id))
+
+    def test_idempotent_id_not_str(self):
+        _id = 42
+        self.assertRaises(TypeError, self._test_helper, _id)
+
+    def test_idempotent_id_not_valid_uuid(self):
+        _id = '42'
+        self.assertRaises(ValueError, self._test_helper, _id)
 
 
 class TestServicesDecorator(BaseDecoratorsTest):

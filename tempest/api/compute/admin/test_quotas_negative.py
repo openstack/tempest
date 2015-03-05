@@ -38,6 +38,7 @@ class QuotasAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
         cls.demo_tenant_id = cls.client.tenant_id
 
     @test.attr(type=['negative', 'gate'])
+    @test.idempotent_id('733abfe8-166e-47bb-8363-23dbd7ff3476')
     def test_update_quota_normal_user(self):
         self.assertRaises(lib_exc.Unauthorized,
                           self.client.update_quota_set,
@@ -47,6 +48,7 @@ class QuotasAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
     # TODO(afazekas): Add dedicated tenant to the skiped quota tests
     # it can be moved into the setUpClass as well
     @test.attr(type=['negative', 'gate'])
+    @test.idempotent_id('91058876-9947-4807-9f22-f6eb17140d9b')
     def test_create_server_when_cpu_quota_is_full(self):
         # Disallow server creation when tenant's vcpu quota is full
         quota_set = self.adm_client.get_quota_set(self.demo_tenant_id)
@@ -63,6 +65,7 @@ class QuotasAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
                           self.create_test_server)
 
     @test.attr(type=['negative', 'gate'])
+    @test.idempotent_id('6fdd7012-584d-4327-a61c-49122e0d5864')
     def test_create_server_when_memory_quota_is_full(self):
         # Disallow server creation when tenant's memory quota is full
         quota_set = self.adm_client.get_quota_set(self.demo_tenant_id)
@@ -79,6 +82,7 @@ class QuotasAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
                           self.create_test_server)
 
     @test.attr(type=['negative', 'gate'])
+    @test.idempotent_id('7c6be468-0274-449a-81c3-ac1c32ee0161')
     def test_create_server_when_instances_quota_is_full(self):
         # Once instances quota limit is reached, disallow server creation
         quota_set = self.adm_client.get_quota_set(self.demo_tenant_id)
@@ -96,6 +100,7 @@ class QuotasAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
     @decorators.skip_because(bug="1186354",
                              condition=CONF.service_available.neutron)
     @test.attr(type='gate')
+    @test.idempotent_id('7c6c8f3b-2bf6-4918-b240-57b136a66aa0')
     @test.services('network')
     def test_security_groups_exceed_limit(self):
         # Negative test: Creation Security Groups over limit should FAIL
@@ -123,6 +128,7 @@ class QuotasAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
     @decorators.skip_because(bug="1186354",
                              condition=CONF.service_available.neutron)
     @test.attr(type=['negative', 'gate'])
+    @test.idempotent_id('6e9f436d-f1ed-4f8e-a493-7275dfaa4b4d')
     @test.services('network')
     def test_security_groups_rules_exceed_limit(self):
         # Negative test: Creation of Security Group Rules should FAIL

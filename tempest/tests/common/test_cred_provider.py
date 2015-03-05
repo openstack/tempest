@@ -17,7 +17,7 @@ from oslo.config import cfg
 from tempest import auth
 from tempest.common import cred_provider
 from tempest.common import tempest_fixtures as fixtures
-from tempest.services.identity.json import token_client as v2_client
+from tempest.services.identity.v2.json import token_client as v2_client
 from tempest.services.identity.v3.json import token_client as v3_client
 from tempest.tests import fake_identity
 # Note: eventually the auth module will move to tempest-lib, and so wil its

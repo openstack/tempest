@@ -13,16 +13,21 @@
 #    under the License.
 
 import json
+from tempest_lib.common import rest_client
 from tempest_lib import exceptions as lib_exc
 
 from tempest.common import service_client
 from tempest import exceptions
 
 
-class TokenClientJSON(service_client.ServiceClient):
+class TokenClientJSON(rest_client.RestClient):
 
-    def __init__(self, auth_url):
-        super(TokenClientJSON, self).__init__(None, None, None)
+    def __init__(self, auth_url, disable_ssl_certificate_validation=None,
+                 ca_certs=None, trace_requests=None):
+        dscv = disable_ssl_certificate_validation
+        super(TokenClientJSON, self).__init__(
+            None, None, None, disable_ssl_certificate_validation=dscv,
+            ca_certs=ca_certs, trace_requests=trace_requests)
 
         # Normalize URI to ensure /tokens is in it.
         if 'tokens' not in auth_url:

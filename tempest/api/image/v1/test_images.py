@@ -27,6 +27,7 @@ class CreateRegisterImagesTest(base.BaseV1ImageTest):
     """Here we test the registration and creation of images."""
 
     @test.attr(type='gate')
+    @test.idempotent_id('3027f8e6-3492-4a11-8575-c3293017af4d')
     def test_register_then_upload(self):
         # Register, then upload an image
         properties = {'prop1': 'val1'}
@@ -50,6 +51,7 @@ class CreateRegisterImagesTest(base.BaseV1ImageTest):
         self.assertEqual(1024, body.get('size'))
 
     @test.attr(type='gate')
+    @test.idempotent_id('69da74d9-68a9-404b-9664-ff7164ccb0f5')
     def test_register_remote_image(self):
         # Register a new remote image
         body = self.create_image(name='New Remote Image',
@@ -67,6 +69,7 @@ class CreateRegisterImagesTest(base.BaseV1ImageTest):
         self.assertEqual(properties['key2'], 'value2')
 
     @test.attr(type='gate')
+    @test.idempotent_id('6d0e13a7-515b-460c-b91f-9f4793f09816')
     def test_register_http_image(self):
         body = self.create_image(name='New Http Image',
                                  container_format='bare',
@@ -80,6 +83,7 @@ class CreateRegisterImagesTest(base.BaseV1ImageTest):
         self.client.get_image(image_id)
 
     @test.attr(type='gate')
+    @test.idempotent_id('05b19d55-140c-40d0-b36b-fafd774d421b')
     def test_register_image_with_min_ram(self):
         # Register an image with min ram
         properties = {'prop1': 'val1'}
@@ -166,6 +170,7 @@ class ListImagesTest(base.BaseV1ImageTest):
         return image_id
 
     @test.attr(type='gate')
+    @test.idempotent_id('246178ab-3b33-4212-9a4b-a7fe8261794d')
     def test_index_no_params(self):
         # Simple test to see all fixture images returned
         images_list = self.client.image_list()
@@ -174,6 +179,7 @@ class ListImagesTest(base.BaseV1ImageTest):
             self.assertIn(image_id, image_list)
 
     @test.attr(type='gate')
+    @test.idempotent_id('f1755589-63d6-4468-b098-589820eb4031')
     def test_index_disk_format(self):
         images_list = self.client.image_list(disk_format='ami')
         for image in images_list:
@@ -183,6 +189,7 @@ class ListImagesTest(base.BaseV1ImageTest):
         self.assertFalse(self.created_set - self.ami_set <= result_set)
 
     @test.attr(type='gate')
+    @test.idempotent_id('2143655d-96d9-4bec-9188-8674206b4b3b')
     def test_index_container_format(self):
         images_list = self.client.image_list(container_format='bare')
         for image in images_list:
@@ -192,6 +199,7 @@ class ListImagesTest(base.BaseV1ImageTest):
         self.assertFalse(self.created_set - self.bare_set <= result_set)
 
     @test.attr(type='gate')
+    @test.idempotent_id('feb32ac6-22bb-4a16-afd8-9454bb714b14')
     def test_index_max_size(self):
         images_list = self.client.image_list(size_max=42)
         for image in images_list:
@@ -201,6 +209,7 @@ class ListImagesTest(base.BaseV1ImageTest):
         self.assertFalse(self.created_set - self.size42_set <= result_set)
 
     @test.attr(type='gate')
+    @test.idempotent_id('6ffc16d0-4cbf-4401-95c8-4ac63eac34d8')
     def test_index_min_size(self):
         images_list = self.client.image_list(size_min=142)
         for image in images_list:
@@ -210,6 +219,7 @@ class ListImagesTest(base.BaseV1ImageTest):
         self.assertFalse(self.size42_set <= result_set)
 
     @test.attr(type='gate')
+    @test.idempotent_id('e5dc26d9-9aa2-48dd-bda5-748e1445da98')
     def test_index_status_active_detail(self):
         images_list = self.client.image_list_detail(status='active',
                                                     sort_key='size',
@@ -222,6 +232,7 @@ class ListImagesTest(base.BaseV1ImageTest):
             self.assertEqual(image['status'], 'active')
 
     @test.attr(type='gate')
+    @test.idempotent_id('097af10a-bae8-4342-bff4-edf89969ed2a')
     def test_index_name(self):
         images_list = self.client.image_list_detail(
             name='New Remote Image dup')
@@ -256,6 +267,7 @@ class UpdateImageMetaTest(base.BaseV1ImageTest):
         return image_id
 
     @test.attr(type='gate')
+    @test.idempotent_id('01752c1c-0275-4de3-9e5b-876e44541928')
     def test_list_image_metadata(self):
         # All metadata key/value pairs for an image should be returned
         resp_metadata = self.client.get_image_meta(self.image_id)
@@ -263,6 +275,7 @@ class UpdateImageMetaTest(base.BaseV1ImageTest):
         self.assertEqual(expected, resp_metadata['properties'])
 
     @test.attr(type='gate')
+    @test.idempotent_id('d6d7649c-08ce-440d-9ea7-e3dda552f33c')
     def test_update_image_metadata(self):
         # The metadata for the image should match the updated values
         req_metadata = {'key1': 'alt1', 'key2': 'value2'}

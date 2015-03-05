@@ -101,6 +101,7 @@ class VPNaaSTestJSON(base.BaseAdminNetworkTest):
         return body['network']['tenant_id']
 
     @test.attr(type='smoke')
+    @test.idempotent_id('14311574-0737-4e53-ac05-f7ae27742eed')
     def test_admin_create_ipsec_policy_for_tenant(self):
         tenant_id = self._get_tenant_id()
         # Create IPSec policy for the newly created tenant
@@ -118,6 +119,7 @@ class VPNaaSTestJSON(base.BaseAdminNetworkTest):
         self.assertIn(ipsecpolicy['id'], ipsecpolicies)
 
     @test.attr(type='smoke')
+    @test.idempotent_id('b62acdc6-0c53-4d84-84aa-859b22b79799')
     def test_admin_create_vpn_service_for_tenant(self):
         tenant_id = self._get_tenant_id()
 
@@ -143,6 +145,7 @@ class VPNaaSTestJSON(base.BaseAdminNetworkTest):
         self.assertIn(vpnservice['id'], vpn_services)
 
     @test.attr(type='smoke')
+    @test.idempotent_id('58cc4a1c-443b-4f39-8fb6-c19d39f343ab')
     def test_admin_create_ike_policy_for_tenant(self):
         tenant_id = self._get_tenant_id()
 
@@ -163,6 +166,7 @@ class VPNaaSTestJSON(base.BaseAdminNetworkTest):
         self.assertIn(ikepolicy['id'], ikepolicies)
 
     @test.attr(type='smoke')
+    @test.idempotent_id('de5bb04c-3a1f-46b1-b329-7a8abba5c7f1')
     def test_list_vpn_services(self):
         # Verify the VPN service exists in the list of all VPN services
         body = self.client.list_vpnservices()
@@ -170,6 +174,7 @@ class VPNaaSTestJSON(base.BaseAdminNetworkTest):
         self.assertIn(self.vpnservice['id'], [v['id'] for v in vpnservices])
 
     @test.attr(type='smoke')
+    @test.idempotent_id('aacb13b1-fdc7-41fd-bab2-32621aee1878')
     def test_create_update_delete_vpn_service(self):
         # Creates a VPN service and sets up deletion
         network1 = self.create_network()
@@ -196,6 +201,7 @@ class VPNaaSTestJSON(base.BaseAdminNetworkTest):
         # should be "ACTIVE" not "PENDING*"
 
     @test.attr(type='smoke')
+    @test.idempotent_id('0dedfc1d-f8ee-4e2a-bfd4-7997b9dc17ff')
     def test_show_vpn_service(self):
         # Verifies the details of a vpn service
         body = self.client.show_vpnservice(self.vpnservice['id'])
@@ -212,6 +218,7 @@ class VPNaaSTestJSON(base.BaseAdminNetworkTest):
         self.assertIn(vpnservice['status'], valid_status)
 
     @test.attr(type='smoke')
+    @test.idempotent_id('e0fb6200-da3d-4869-8340-a8c1956ca618')
     def test_list_ike_policies(self):
         # Verify the ike policy exists in the list of all IKE policies
         body = self.client.list_ikepolicies()
@@ -219,6 +226,7 @@ class VPNaaSTestJSON(base.BaseAdminNetworkTest):
         self.assertIn(self.ikepolicy['id'], [i['id'] for i in ikepolicies])
 
     @test.attr(type='smoke')
+    @test.idempotent_id('d61f29a5-160c-487d-bc0d-22e32e731b44')
     def test_create_update_delete_ike_policy(self):
         # Creates a IKE policy
         name = data_utils.rand_name('ike-policy')
@@ -253,6 +261,7 @@ class VPNaaSTestJSON(base.BaseAdminNetworkTest):
         self.assertNotIn(ike_policy['id'], ikepolicies)
 
     @test.attr(type='smoke')
+    @test.idempotent_id('b5fcf3a3-9407-452d-b8a8-e7c6c32baea8')
     def test_show_ike_policy(self):
         # Verifies the details of a ike policy
         body = self.client.show_ikepolicy(self.ikepolicy['id'])
@@ -275,6 +284,7 @@ class VPNaaSTestJSON(base.BaseAdminNetworkTest):
                          ikepolicy['ike_version'])
 
     @test.attr(type='smoke')
+    @test.idempotent_id('19ea0a2f-add9-44be-b732-ffd8a7b42f37')
     def test_list_ipsec_policies(self):
         # Verify the ipsec policy exists in the list of all ipsec policies
         body = self.client.list_ipsecpolicies()
@@ -282,6 +292,7 @@ class VPNaaSTestJSON(base.BaseAdminNetworkTest):
         self.assertIn(self.ipsecpolicy['id'], [i['id'] for i in ipsecpolicies])
 
     @test.attr(type='smoke')
+    @test.idempotent_id('9c1701c9-329a-4e5d-930a-1ead1b3f86ad')
     def test_create_update_delete_ipsec_policy(self):
         # Creates an ipsec policy
         ipsec_policy_body = {'name': data_utils.rand_name('ipsec-policy'),
@@ -308,6 +319,7 @@ class VPNaaSTestJSON(base.BaseAdminNetworkTest):
                           self.client.delete_ipsecpolicy, ipsecpolicy['id'])
 
     @test.attr(type='smoke')
+    @test.idempotent_id('601f8a05-9d3c-4539-a400-1c4b3a21b03b')
     def test_show_ipsec_policy(self):
         # Verifies the details of an ipsec policy
         body = self.client.show_ipsecpolicy(self.ipsecpolicy['id'])

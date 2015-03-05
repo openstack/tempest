@@ -27,9 +27,11 @@ class ServerPasswordTestJSON(base.BaseV2ComputeTest):
         cls.server = cls.create_test_server(wait_until="ACTIVE")
 
     @test.attr(type='gate')
+    @test.idempotent_id('f83b582f-62a8-4f22-85b0-0dee50ff783a')
     def test_get_server_password(self):
         self.client.get_password(self.server['id'])
 
     @test.attr(type='gate')
+    @test.idempotent_id('f8229e8b-b625-4493-800a-bde86ac611ea')
     def test_delete_server_password(self):
         self.client.delete_password(self.server['id'])

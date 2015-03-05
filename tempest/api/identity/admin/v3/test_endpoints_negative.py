@@ -49,6 +49,7 @@ class EndpointsNegativeTestJSON(base.BaseIdentityV3AdminTest):
         super(EndpointsNegativeTestJSON, cls).resource_cleanup()
 
     @test.attr(type=['negative', 'gate'])
+    @test.idempotent_id('ac6c137e-4d3d-448f-8c83-4f13d0942651')
     def test_create_with_enabled_False(self):
         # Enabled should be a boolean, not a string like 'False'
         interface = 'public'
@@ -59,6 +60,7 @@ class EndpointsNegativeTestJSON(base.BaseIdentityV3AdminTest):
                           force_enabled='False')
 
     @test.attr(type=['negative', 'gate'])
+    @test.idempotent_id('9c43181e-0627-484a-8c79-923e8a59598b')
     def test_create_with_enabled_True(self):
         # Enabled should be a boolean, not a string like 'True'
         interface = 'public'
@@ -83,11 +85,13 @@ class EndpointsNegativeTestJSON(base.BaseIdentityV3AdminTest):
                           endpoint_for_update['id'], force_enabled=enabled)
 
     @test.attr(type=['negative', 'gate'])
+    @test.idempotent_id('65e41f32-5eb7-498f-a92a-a6ccacf7439a')
     def test_update_with_enabled_False(self):
         # Enabled should be a boolean, not a string like 'False'
         self._assert_update_raises_bad_request('False')
 
     @test.attr(type=['negative', 'gate'])
+    @test.idempotent_id('faba3587-f066-4757-a48e-b4a3f01803bb')
     def test_update_with_enabled_True(self):
         # Enabled should be a boolean, not a string like 'True'
         self._assert_update_raises_bad_request('True')

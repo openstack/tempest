@@ -93,6 +93,7 @@ class TestServerBasicOps(manager.ScenarioTest):
                 username=self.image_utils.ssh_user(self.image_ref),
                 private_key=self.keypair['private_key'])
 
+    @test.idempotent_id('7fff3fb3-91d8-4fd0-bd7d-0204f1f180ba')
     @test.services('compute', 'network')
     def test_server_basicops(self):
         self.add_keypair()

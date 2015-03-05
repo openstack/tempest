@@ -46,6 +46,7 @@ class AccountTest(base.BaseObjectTest):
         super(AccountTest, cls).resource_cleanup()
 
     @test.attr(type='smoke')
+    @test.idempotent_id('3499406a-ae53-4f8c-b43a-133d4dc6fe3f')
     def test_list_containers(self):
         # list of all containers should not be empty
         resp, container_list = self.account_client.list_account_containers()
@@ -56,6 +57,7 @@ class AccountTest(base.BaseObjectTest):
             self.assertIn(container_name, container_list)
 
     @test.attr(type='smoke')
+    @test.idempotent_id('884ec421-fbad-4fcc-916b-0580f2699565')
     def test_list_no_containers(self):
         # List request to empty account
 
@@ -87,6 +89,7 @@ class AccountTest(base.BaseObjectTest):
         self.assertEqual(len(container_list), 0)
 
     @test.attr(type='smoke')
+    @test.idempotent_id('1c7efa35-e8a2-4b0b-b5ff-862c7fd83704')
     def test_list_containers_with_format_json(self):
         # list containers setting format parameter to 'json'
         params = {'format': 'json'}
@@ -99,6 +102,7 @@ class AccountTest(base.BaseObjectTest):
         self.assertTrue([c['bytes'] for c in container_list])
 
     @test.attr(type='smoke')
+    @test.idempotent_id('4477b609-1ca6-4d4b-b25d-ad3f01086089')
     def test_list_containers_with_format_xml(self):
         # list containers setting format parameter to 'xml'
         params = {'format': 'xml'}
@@ -114,6 +118,7 @@ class AccountTest(base.BaseObjectTest):
         self.assertEqual(container_list.find(".//bytes").tag, 'bytes')
 
     @test.attr(type='smoke')
+    @test.idempotent_id('6eb04a6a-4860-4e31-ba91-ea3347d76b58')
     @testtools.skipIf(
         not CONF.object_storage_feature_enabled.discoverability,
         'Discoverability function is disabled')
@@ -123,6 +128,7 @@ class AccountTest(base.BaseObjectTest):
         self.assertThat(resp, custom_matchers.AreAllWellFormatted())
 
     @test.attr(type='smoke')
+    @test.idempotent_id('5cfa4ab2-4373-48dd-a41f-a532b12b08b2')
     def test_list_containers_with_limit(self):
         # list containers one of them, half of them then all of them
         for limit in (1, self.containers_count / 2, self.containers_count):
@@ -134,6 +140,7 @@ class AccountTest(base.BaseObjectTest):
             self.assertEqual(len(container_list), limit)
 
     @test.attr(type='smoke')
+    @test.idempotent_id('638f876d-6a43-482a-bbb3-0840bca101c6')
     def test_list_containers_with_marker(self):
         # list containers using marker param
         # first expect to get 0 container as we specified last
@@ -154,6 +161,7 @@ class AccountTest(base.BaseObjectTest):
         self.assertEqual(len(container_list), self.containers_count / 2 - 1)
 
     @test.attr(type='smoke')
+    @test.idempotent_id('5ca164e4-7bde-43fa-bafb-913b53b9e786')
     def test_list_containers_with_end_marker(self):
         # list containers using end_marker param
         # first expect to get 0 container as we specified first container as
@@ -172,6 +180,7 @@ class AccountTest(base.BaseObjectTest):
         self.assertEqual(len(container_list), self.containers_count / 2)
 
     @test.attr(type='smoke')
+    @test.idempotent_id('ac8502c2-d4e4-4f68-85a6-40befea2ef5e')
     def test_list_containers_with_marker_and_end_marker(self):
         # list containers combining marker and end_marker param
         params = {'marker': self.containers[0],
@@ -182,6 +191,7 @@ class AccountTest(base.BaseObjectTest):
         self.assertEqual(len(container_list), self.containers_count - 2)
 
     @test.attr(type='smoke')
+    @test.idempotent_id('f7064ae8-dbcc-48da-b594-82feef6ea5af')
     def test_list_containers_with_limit_and_marker(self):
         # list containers combining marker and limit param
         # result are always limitated by the limit whatever the marker
@@ -196,6 +206,7 @@ class AccountTest(base.BaseObjectTest):
             self.assertTrue(len(container_list) <= limit, str(container_list))
 
     @test.attr(type='smoke')
+    @test.idempotent_id('888a3f0e-7214-4806-8e50-5e0c9a69bb5e')
     def test_list_containers_with_limit_and_end_marker(self):
         # list containers combining limit and end_marker param
         limit = random.randint(1, self.containers_count)
@@ -208,6 +219,7 @@ class AccountTest(base.BaseObjectTest):
                          min(limit, self.containers_count / 2))
 
     @test.attr(type='smoke')
+    @test.idempotent_id('8cf98d9c-e3a0-4e44-971b-c87656fdddbd')
     def test_list_containers_with_limit_and_marker_and_end_marker(self):
         # list containers combining limit, marker and end_marker param
         limit = random.randint(1, self.containers_count)
@@ -221,6 +233,7 @@ class AccountTest(base.BaseObjectTest):
                          min(limit, self.containers_count - 2))
 
     @test.attr(type='smoke')
+    @test.idempotent_id('4894c312-6056-4587-8d6f-86ffbf861f80')
     def test_list_account_metadata(self):
         # list all account metadata
 
@@ -236,6 +249,7 @@ class AccountTest(base.BaseObjectTest):
         self.account_client.delete_account_metadata(metadata)
 
     @test.attr(type='smoke')
+    @test.idempotent_id('b904c2e3-24c2-4dba-ad7d-04e90a761be5')
     def test_list_no_account_metadata(self):
         # list no account metadata
         resp, _ = self.account_client.list_account_metadata()
@@ -243,6 +257,7 @@ class AccountTest(base.BaseObjectTest):
         self.assertNotIn('x-account-meta-', str(resp))
 
     @test.attr(type='smoke')
+    @test.idempotent_id('e2a08b5f-3115-4768-a3ee-d4287acd6c08')
     def test_update_account_metadata_with_create_metadata(self):
         # add metadata to account
         metadata = {'test-account-meta1': 'Meta1'}
@@ -257,6 +272,7 @@ class AccountTest(base.BaseObjectTest):
         self.account_client.delete_account_metadata(metadata)
 
     @test.attr(type='smoke')
+    @test.idempotent_id('9f60348d-c46f-4465-ae06-d51dbd470953')
     def test_update_account_metadata_with_delete_matadata(self):
         # delete metadata from account
         metadata = {'test-account-meta1': 'Meta1'}
@@ -268,6 +284,7 @@ class AccountTest(base.BaseObjectTest):
         self.assertNotIn('x-account-meta-test-account-meta1', resp)
 
     @test.attr(type='smoke')
+    @test.idempotent_id('64fd53f3-adbd-4639-af54-436e4982dbfb')
     def test_update_account_metadata_with_create_matadata_key(self):
         # if the value of metadata is not set, the metadata is not
         # registered at a server
@@ -279,6 +296,7 @@ class AccountTest(base.BaseObjectTest):
         self.assertNotIn('x-account-meta-test-account-meta1', resp)
 
     @test.attr(type='smoke')
+    @test.idempotent_id('d4d884d3-4696-4b85-bc98-4f57c4dd2bf1')
     def test_update_account_metadata_with_delete_matadata_key(self):
         # Although the value of metadata is not set, the feature of
         # deleting metadata is valid
@@ -292,6 +310,7 @@ class AccountTest(base.BaseObjectTest):
         self.assertNotIn('x-account-meta-test-account-meta1', resp)
 
     @test.attr(type='smoke')
+    @test.idempotent_id('8e5fc073-59b9-42ee-984a-29ed11b2c749')
     def test_update_account_metadata_with_create_and_delete_metadata(self):
         # Send a request adding and deleting metadata requests simultaneously
         metadata_1 = {'test-account-meta1': 'Meta1'}

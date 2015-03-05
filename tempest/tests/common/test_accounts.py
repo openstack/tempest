@@ -24,7 +24,7 @@ from tempest import auth
 from tempest.common import accounts
 from tempest import config
 from tempest import exceptions
-from tempest.services.identity.json import token_client
+from tempest.services.identity.v2.json import token_client
 from tempest.tests import base
 from tempest.tests import fake_config
 from tempest.tests import fake_identity
@@ -129,8 +129,9 @@ class TestAccount(base.TestCase):
         # Emulate all lcoks in list are in use
         self.useFixture(mockpatch.Patch('os.path.isfile', return_value=True))
         test_account_class = accounts.Accounts('test_name')
-        self.assertRaises(exceptions.InvalidConfiguration,
-                          test_account_class._get_free_hash, hash_list)
+        with mock.patch('__builtin__.open', mock.mock_open(), create=True):
+            self.assertRaises(exceptions.InvalidConfiguration,
+                              test_account_class._get_free_hash, hash_list)
 
     @mock.patch('tempest.openstack.common.lockutils.lock')
     def test_get_free_hash_some_in_use_accounts(self, lock_mock):
@@ -152,7 +153,7 @@ class TestAccount(base.TestCase):
             test_account_class._get_free_hash(hash_list)
             lock_path = os.path.join(accounts.CONF.lock_path, 'test_accounts',
                                      hash_list[3])
-            open_mock.assert_called_once_with(lock_path, 'w')
+            open_mock.assert_has_calls([mock.call(lock_path, 'w')])
 
     @mock.patch('tempest.openstack.common.lockutils.lock')
     def test_remove_hash_last_account(self, lock_mock):

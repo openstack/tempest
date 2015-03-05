@@ -53,6 +53,7 @@ class FloatingIPsNegativeTestJSON(base.BaseFloatingIPsTest):
                 break
 
     @test.attr(type=['negative', 'gate'])
+    @test.idempotent_id('6e0f059b-e4dd-48fb-8207-06e3bba5b074')
     @test.services('network')
     def test_allocate_floating_ip_from_nonexistent_pool(self):
         # Negative test:Allocation of a new floating IP from a nonexistent_pool
@@ -62,6 +63,7 @@ class FloatingIPsNegativeTestJSON(base.BaseFloatingIPsTest):
                           "non_exist_pool")
 
     @test.attr(type=['negative', 'gate'])
+    @test.idempotent_id('ae1c55a8-552b-44d4-bfb6-2a115a15d0ba')
     @test.services('network')
     def test_delete_nonexistent_floating_ip(self):
         # Negative test:Deletion of a nonexistent floating IP
@@ -72,6 +74,7 @@ class FloatingIPsNegativeTestJSON(base.BaseFloatingIPsTest):
                           self.non_exist_id)
 
     @test.attr(type=['negative', 'gate'])
+    @test.idempotent_id('595fa616-1a71-4670-9614-46564ac49a4c')
     @test.services('network')
     def test_associate_nonexistent_floating_ip(self):
         # Negative test:Association of a non existent floating IP
@@ -82,6 +85,7 @@ class FloatingIPsNegativeTestJSON(base.BaseFloatingIPsTest):
                           "0.0.0.0", self.server_id)
 
     @test.attr(type=['negative', 'gate'])
+    @test.idempotent_id('0a081a66-e568-4e6b-aa62-9587a876dca8')
     @test.services('network')
     def test_dissociate_nonexistent_floating_ip(self):
         # Negative test:Dissociation of a non existent floating IP should fail
@@ -91,6 +95,7 @@ class FloatingIPsNegativeTestJSON(base.BaseFloatingIPsTest):
                           "0.0.0.0", self.server_id)
 
     @test.attr(type=['negative', 'gate'])
+    @test.idempotent_id('804b4fcb-bbf5-412f-925d-896672b61eb3')
     @test.services('network')
     def test_associate_ip_to_server_without_passing_floating_ip(self):
         # Negative test:Association of empty floating IP to specific server

@@ -125,7 +125,7 @@
 # achieved configuring a list of test accounts (boolean value)
 # Deprecated group/name - [compute]/allow_tenant_isolation
 # Deprecated group/name - [orchestration]/allow_tenant_isolation
-#allow_tenant_isolation = false
+#allow_tenant_isolation = true
 
 # If set to True it enables the Accounts provider, which locks
 # credentials to allow for parallel execution with pre-provisioned

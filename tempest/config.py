@@ -40,7 +40,7 @@ AuthGroup = [
                help="Path to the yaml file that contains the list of "
                     "credentials to use for running tests"),
     cfg.BoolOpt('allow_tenant_isolation',
-                default=False,
+                default=True,
                 help="Allows test cases to create/destroy tenants and "
                      "users. This option requires that OpenStack Identity "
                      "API admin credentials are known. If false, isolated "

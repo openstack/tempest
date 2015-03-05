@@ -1,7 +1,5 @@
 # Copyright (C) 2013 eNovance SAS <licensing@enovance.com>
 #
-# Author: Christian Schwede <christian.schwede@enovance.com>
-#
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
 # a copy of the License at
@@ -106,6 +104,7 @@ class ObjectFormPostTest(base.BaseObjectTest):
         content_type = 'multipart/form-data; boundary=%s' % boundary
         return body, content_type
 
+    @test.idempotent_id('80fac02b-6e54-4f7b-be0d-a965b5cbef76')
     @test.requires_ext(extension='formpost', service='object')
     @test.attr(type='gate')
     def test_post_object_using_form(self):

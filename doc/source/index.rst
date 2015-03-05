@@ -29,6 +29,15 @@ where your test contributions should go.
    field_guide/thirdparty
    field_guide/unit_tests
 
+---------------------------
+Tempest Configuration Guide
+---------------------------
+
+.. toctree::
+   :maxdepth: 2
+
+   configuration
+
 ---------------------
 Command Documentation
 ---------------------

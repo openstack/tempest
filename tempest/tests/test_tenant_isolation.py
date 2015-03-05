@@ -20,8 +20,9 @@ from tempest.common import service_client
 from tempest import config
 from tempest import exceptions
 from tempest.openstack.common.fixture import mockpatch
-from tempest.services.identity.json import identity_client as json_iden_client
-from tempest.services.identity.json import token_client as json_token_client
+from tempest.services.identity.v2.json import identity_client as \
+    json_iden_client
+from tempest.services.identity.v2.json import token_client as json_token_client
 from tempest.services.network.json import network_client as json_network_client
 from tempest.tests import base
 from tempest.tests import fake_config
@@ -175,10 +176,10 @@ class TestTenantIsolation(base.TestCase):
         self._mock_list_roles('123456', 'admin')
         iso_creds.get_admin_creds()
         user_mock = self.patch(
-            'tempest.services.identity.json.identity_client.'
+            'tempest.services.identity.v2.json.identity_client.'
             'IdentityClientJSON.delete_user')
         tenant_mock = self.patch(
-            'tempest.services.identity.json.identity_client.'
+            'tempest.services.identity.v2.json.identity_client.'
             'IdentityClientJSON.delete_tenant')
         iso_creds.clear_isolated_creds()
         # Verify user delete calls
@@ -293,9 +294,9 @@ class TestTenantIsolation(base.TestCase):
         router_fix = self._mock_router_create('123456', 'fake_admin_router')
         self._mock_list_roles('123456', 'admin')
         iso_creds.get_admin_creds()
-        self.patch('tempest.services.identity.json.identity_client.'
+        self.patch('tempest.services.identity.v2.json.identity_client.'
                    'IdentityClientJSON.delete_user')
-        self.patch('tempest.services.identity.json.identity_client.'
+        self.patch('tempest.services.identity.v2.json.identity_client.'
                    'IdentityClientJSON.delete_tenant')
         net = mock.patch.object(iso_creds.network_admin_client,
                                 'delete_network')

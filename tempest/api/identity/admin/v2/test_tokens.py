@@ -21,6 +21,7 @@ from tempest import test
 class TokensTestJSON(base.BaseIdentityV2AdminTest):
 
     @test.attr(type='gate')
+    @test.idempotent_id('453ad4d5-e486-4b2f-be72-cffc8149e586')
     def test_create_get_delete_token(self):
         # get a token by username and password
         user_name = data_utils.rand_name(name='user-')
@@ -51,6 +52,7 @@ class TokensTestJSON(base.BaseIdentityV2AdminTest):
         self.client.delete_token(token_id)
 
     @test.attr(type='gate')
+    @test.idempotent_id('25ba82ee-8a32-4ceb-8f50-8b8c71e8765e')
     def test_rescope_token(self):
         """An unscoped token can be requested, that token can be used to
            request a scoped token.

@@ -25,6 +25,7 @@ class DatabaseFlavorsTest(base.BaseDatabaseTest):
         cls.client = cls.database_flavors_client
 
     @test.attr(type='smoke')
+    @test.idempotent_id('c94b825e-0132-4686-8049-8a4a2bc09525')
     def test_get_db_flavor(self):
         # The expected flavor details should be returned
         flavor = self.client.get_db_flavor_details(self.db_flavor_ref)
@@ -34,6 +35,7 @@ class DatabaseFlavorsTest(base.BaseDatabaseTest):
         self.assertIn('name', flavor)
 
     @test.attr(type='smoke')
+    @test.idempotent_id('685025d6-0cec-4673-8a8d-995cb8e0d3bb')
     def test_list_db_flavors(self):
         flavor = self.client.get_db_flavor_details(self.db_flavor_ref)
         # List of all flavors should contain the expected flavor
@@ -52,6 +54,7 @@ class DatabaseFlavorsTest(base.BaseDatabaseTest):
                 self.assertNotIn(name, db_flavor)
 
     @test.attr(type='smoke')
+    @test.idempotent_id('afb2667f-4ec2-4925-bcb7-313fdcffb80d')
     @test.services('compute')
     def test_compare_db_flavors_with_os(self):
         db_flavors = self.client.list_db_flavors()

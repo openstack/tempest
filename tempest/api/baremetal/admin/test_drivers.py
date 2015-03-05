@@ -27,12 +27,14 @@ class TestDrivers(base.BaseBaremetalTest):
         cls.driver_name = CONF.baremetal.driver
 
     @test.attr(type="smoke")
+    @test.idempotent_id('5aed2790-7592-4655-9b16-99abcc2e6ec5')
     def test_list_drivers(self):
         _, drivers = self.client.list_drivers()
         self.assertIn(self.driver_name,
                       [d['name'] for d in drivers['drivers']])
 
     @test.attr(type="smoke")
+    @test.idempotent_id('fb3287a3-c4d7-44bf-ae9d-1eef906d78ce')
     def test_show_driver(self):
         _, driver = self.client.show_driver(self.driver_name)
         self.assertEqual(self.driver_name, driver['name'])

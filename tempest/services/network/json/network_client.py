@@ -262,9 +262,8 @@ class NetworkClientJSON(service_client.ServiceClient):
         # expecting response in form
         # {'resources': [ res1, res2] } => when pagination disabled
         # {'resources': [..], 'resources_links': {}} => if pagination enabled
-        pagination_suffix = "_links"
         for k in res.keys():
-            if k[-len(pagination_suffix):] == pagination_suffix:
+            if k.endswith("_links"):
                 continue
             return res[k]
 

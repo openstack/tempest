@@ -104,14 +104,17 @@ class TestLargeOpsScenario(manager.ScenarioTest):
         self.glance_image_create()
         self.nova_boot()
 
+    @test.idempotent_id('14ba0e78-2ed9-4d17-9659-a48f4756ecb3')
     @test.services('compute', 'image')
     def test_large_ops_scenario_1(self):
         self._large_ops_scenario()
 
+    @test.idempotent_id('b9b79b88-32aa-42db-8f8f-dcc8f4b4ccfe')
     @test.services('compute', 'image')
     def test_large_ops_scenario_2(self):
         self._large_ops_scenario()
 
+    @test.idempotent_id('3aab7e82-2de3-419a-9da1-9f3a070668fb')
     @test.services('compute', 'image')
     def test_large_ops_scenario_3(self):
         self._large_ops_scenario()

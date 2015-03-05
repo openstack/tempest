@@ -37,6 +37,7 @@ class Accounts(cred_provider.CredentialProvider):
 
     def __init__(self, name):
         super(Accounts, self).__init__(name)
+        self.name = name
         if os.path.isfile(CONF.auth.test_accounts_file):
             accounts = read_accounts_yaml(CONF.auth.test_accounts_file)
             self.use_default_creds = False
@@ -70,7 +71,8 @@ class Accounts(cred_provider.CredentialProvider):
     def _create_hash_file(self, hash_string):
         path = os.path.join(os.path.join(self.accounts_dir, hash_string))
         if not os.path.isfile(path):
-            open(path, 'w').close()
+            with open(path, 'w') as fd:
+                fd.write(self.name)
             return True
         return False
 
@@ -81,11 +83,18 @@ class Accounts(cred_provider.CredentialProvider):
             # Create File from first hash (since none are in use)
             self._create_hash_file(hashes[0])
             return hashes[0]
+        names = []
         for _hash in hashes:
             res = self._create_hash_file(_hash)
             if res:
                 return _hash
-        msg = 'Insufficient number of users provided'
+            else:
+                path = os.path.join(os.path.join(self.accounts_dir,
+                                                 _hash))
+                with open(path, 'r') as fd:
+                    names.append(fd.read())
+        msg = ('Insufficient number of users provided. %s have allocated all '
+               'the credentials for this allocation request' % ','.join(names))
         raise exceptions.InvalidConfiguration(msg)
 
     def _get_creds(self):

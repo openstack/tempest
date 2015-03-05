@@ -46,7 +46,7 @@ from tempest.services.compute.json import volumes_extensions_client \
 from tempest.services.data_processing.v1_1 import data_processing_client
 from tempest.services.database.json import flavors_client as db_flavor_client
 from tempest.services.database.json import versions_client as db_version_client
-from tempest.services.identity.json import identity_client as \
+from tempest.services.identity.v2.json import identity_client as \
     identity_v2_identity_client
 from tempest.services.identity.v3.json import credentials_client
 from tempest.services.identity.v3.json import endpoints_client
@@ -55,6 +55,8 @@ from tempest.services.identity.v3.json import identity_client as \
 from tempest.services.identity.v3.json import policy_client
 from tempest.services.identity.v3.json import region_client
 from tempest.services.identity.v3.json import service_client
+from tempest.services.image.v1.json import image_client
+from tempest.services.image.v2.json import image_client as image_v2_client
 from tempest.services.messaging.json import messaging_client
 from tempest.services.network.json import network_client
 from tempest.services.object_storage import account_client
@@ -163,7 +165,9 @@ class TestServiceClient(base.TestCase):
             identity_v3_identity_client.IdentityV3ClientJSON,
             policy_client.PolicyClientJSON,
             region_client.RegionClientJSON,
-            service_client.ServiceClientJSON
+            service_client.ServiceClientJSON,
+            image_client.ImageClientJSON,
+            image_v2_client.ImageClientV2JSON
         ]
 
         for client in test_clients:

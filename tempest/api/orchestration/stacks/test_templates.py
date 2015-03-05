@@ -38,11 +38,13 @@ Resources:
         cls.parameters = {}
 
     @test.attr(type='gate')
+    @test.idempotent_id('47430699-c368-495e-a1db-64c26fd967d7')
     def test_show_template(self):
         """Getting template used to create the stack."""
         self.client.show_template(self.stack_identifier)
 
     @test.attr(type='gate')
+    @test.idempotent_id('ed53debe-8727-46c5-ab58-eba6090ec4de')
     def test_validate_template(self):
         """Validating template passing it content."""
         self.client.validate_template(self.template,

@@ -24,6 +24,7 @@ from tempest import config
 from tempest import exceptions
 from tempest.openstack.common import log as logging
 from tempest.scenario import manager
+from tempest import test
 import tempest.test
 
 CONF = config.CONF
@@ -140,6 +141,7 @@ class TestStampPattern(manager.ScenarioTest):
         self.assertEqual(self.timestamp, got_timestamp)
 
     @decorators.skip_because(bug="1205344")
+    @test.idempotent_id('10fd234a-515c-41e5-b092-8323060598c5')
     @testtools.skipUnless(CONF.compute_feature_enabled.snapshot,
                           'Snapshotting is not available.')
     @tempest.test.services('compute', 'network', 'volume', 'image')

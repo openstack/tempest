@@ -61,10 +61,12 @@ class JobTest(dp_base.BaseDataProcessingTest):
         return resp_body['id'], job_name
 
     @test.attr(type='smoke')
+    @test.idempotent_id('8cf785ca-adf4-473d-8281-fb9a5efa3073')
     def test_job_create(self):
         self._create_job()
 
     @test.attr(type='smoke')
+    @test.idempotent_id('41e253fe-b02a-41a0-b186-5ff1f0463ba3')
     def test_job_list(self):
         job_info = self._create_job()
 
@@ -74,6 +76,7 @@ class JobTest(dp_base.BaseDataProcessingTest):
         self.assertIn(job_info, jobs_info)
 
     @test.attr(type='smoke')
+    @test.idempotent_id('3faf17fa-bc94-4a60-b1c3-79e53674c16c')
     def test_job_get(self):
         job_id, job_name = self._create_job()
 
@@ -82,6 +85,7 @@ class JobTest(dp_base.BaseDataProcessingTest):
         self.assertEqual(job_name, job['name'])
 
     @test.attr(type='smoke')
+    @test.idempotent_id('dff85e62-7dda-4ad8-b1ee-850adecb0c6e')
     def test_job_delete(self):
         job_id, _ = self._create_job()
 

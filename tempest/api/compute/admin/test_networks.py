@@ -15,6 +15,7 @@
 
 from tempest.api.compute import base
 from tempest import config
+from tempest import test
 
 CONF = config.CONF
 
@@ -33,6 +34,7 @@ class NetworksTest(base.BaseComputeAdminTest):
         super(NetworksTest, cls).resource_setup()
         cls.client = cls.os_adm.networks_client
 
+    @test.idempotent_id('d206d211-8912-486f-86e2-a9d090d1f416')
     def test_get_network(self):
         networks = self.client.list_networks()
         configured_network = [x for x in networks if x['label'] ==
@@ -45,6 +47,7 @@ class NetworksTest(base.BaseComputeAdminTest):
         network = self.client.get_network(configured_network['id'])
         self.assertEqual(configured_network['label'], network['label'])
 
+    @test.idempotent_id('df3d1046-6fa5-4b2c-ad0c-cfa46a351cb9')
     def test_list_all_networks(self):
         networks = self.client.list_networks()
         # Check the configured network is in the list

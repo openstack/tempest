@@ -60,6 +60,7 @@ class TestShelveInstance(manager.ScenarioTest):
         self.servers_client.unshelve_server(server['id'])
         self.servers_client.wait_for_server_status(server['id'], 'ACTIVE')
 
+    @test.idempotent_id('1164e700-0af0-4a4c-8792-35909a88743c')
     @testtools.skipUnless(CONF.compute_feature_enabled.shelve,
                           'Shelve is not available.')
     @test.services('compute', 'network', 'image')

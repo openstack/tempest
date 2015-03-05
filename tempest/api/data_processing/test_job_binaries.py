@@ -70,10 +70,12 @@ class JobBinaryTest(dp_base.BaseDataProcessingTest):
         return resp_body['id'], binary_name
 
     @test.attr(type='smoke')
+    @test.idempotent_id('c00d43f8-4360-45f8-b280-af1a201b12d3')
     def test_swift_job_binary_create(self):
         self._create_job_binary(self.swift_job_binary_with_extra)
 
     @test.attr(type='smoke')
+    @test.idempotent_id('f8809352-e79d-4748-9359-ce1efce89f2a')
     def test_swift_job_binary_list(self):
         binary_info = self._create_job_binary(self.swift_job_binary_with_extra)
 
@@ -83,6 +85,7 @@ class JobBinaryTest(dp_base.BaseDataProcessingTest):
         self.assertIn(binary_info, binaries_info)
 
     @test.attr(type='smoke')
+    @test.idempotent_id('2d4a670f-e8f1-413c-b5ac-50c1bfe9e1b1')
     def test_swift_job_binary_get(self):
         binary_id, binary_name = (
             self._create_job_binary(self.swift_job_binary_with_extra))
@@ -93,6 +96,7 @@ class JobBinaryTest(dp_base.BaseDataProcessingTest):
         self.assertDictContainsSubset(self.swift_job_binary, binary)
 
     @test.attr(type='smoke')
+    @test.idempotent_id('9b0e8f38-04f3-4616-b399-cfa7eb2677ed')
     def test_swift_job_binary_delete(self):
         binary_id, _ = (
             self._create_job_binary(self.swift_job_binary_with_extra))
@@ -101,10 +105,12 @@ class JobBinaryTest(dp_base.BaseDataProcessingTest):
         self.client.delete_job_binary(binary_id)
 
     @test.attr(type='smoke')
+    @test.idempotent_id('63662f6d-8291-407e-a6fc-f654522ebab6')
     def test_internal_db_job_binary_create(self):
         self._create_job_binary(self.internal_db_job_binary)
 
     @test.attr(type='smoke')
+    @test.idempotent_id('38731e7b-6d9d-4ffa-8fd1-193c453e88b1')
     def test_internal_db_job_binary_list(self):
         binary_info = self._create_job_binary(self.internal_db_job_binary)
 
@@ -114,6 +120,7 @@ class JobBinaryTest(dp_base.BaseDataProcessingTest):
         self.assertIn(binary_info, binaries_info)
 
     @test.attr(type='smoke')
+    @test.idempotent_id('1b32199b-c3f5-43e1-a37a-3797e57b7066')
     def test_internal_db_job_binary_get(self):
         binary_id, binary_name = (
             self._create_job_binary(self.internal_db_job_binary))
@@ -124,6 +131,7 @@ class JobBinaryTest(dp_base.BaseDataProcessingTest):
         self.assertDictContainsSubset(self.internal_db_job_binary, binary)
 
     @test.attr(type='smoke')
+    @test.idempotent_id('3c42b0c3-3e03-46a5-adf0-df0650271a4e')
     def test_internal_db_job_binary_delete(self):
         binary_id, _ = self._create_job_binary(self.internal_db_job_binary)
 
@@ -131,6 +139,7 @@ class JobBinaryTest(dp_base.BaseDataProcessingTest):
         self.client.delete_job_binary(binary_id)
 
     @test.attr(type='smoke')
+    @test.idempotent_id('d5d47659-7e2c-4ea7-b292-5b3e559e8587')
     def test_job_binary_get_data(self):
         binary_id, _ = self._create_job_binary(self.internal_db_job_binary)
 

@@ -55,6 +55,7 @@ class ServersTestJSON(base.BaseV2ComputeTest):
         cls.server = cls.client.get_server(cls.server_initial['id'])
 
     @test.attr(type='smoke')
+    @test.idempotent_id('5de47127-9977-400a-936f-abcfbec1218f')
     def test_verify_server_details(self):
         # Verify the specified server attributes are set correctly
         self.assertEqual(self.accessIPv4, self.server['accessIPv4'])
@@ -68,6 +69,7 @@ class ServersTestJSON(base.BaseV2ComputeTest):
         self.assertEqual(self.meta, self.server['metadata'])
 
     @test.attr(type='smoke')
+    @test.idempotent_id('9a438d88-10c6-4bcd-8b5b-5b6e25e1346f')
     def test_list_servers(self):
         # The created server should be in the list of all servers
         body = self.client.list_servers()
@@ -76,6 +78,7 @@ class ServersTestJSON(base.BaseV2ComputeTest):
         self.assertTrue(found)
 
     @test.attr(type='smoke')
+    @test.idempotent_id('585e934c-448e-43c4-acbf-d06a9b899997')
     def test_list_servers_with_detail(self):
         # The created server should be in the detailed list of all servers
         body = self.client.list_servers_with_detail()
@@ -83,6 +86,7 @@ class ServersTestJSON(base.BaseV2ComputeTest):
         found = any([i for i in servers if i['id'] == self.server['id']])
         self.assertTrue(found)
 
+    @test.idempotent_id('cbc0f52f-05aa-492b-bdc1-84b575ca294b')
     @testtools.skipUnless(CONF.compute.run_ssh,
                           'Instance validation tests are disabled.')
     @test.attr(type='gate')
@@ -94,6 +98,7 @@ class ServersTestJSON(base.BaseV2ComputeTest):
                                                   self.password)
         self.assertEqual(flavor['vcpus'], linux_client.get_number_of_vcpus())
 
+    @test.idempotent_id('ac1ad47f-984b-4441-9274-c9079b7a0666')
     @testtools.skipUnless(CONF.compute.run_ssh,
                           'Instance validation tests are disabled.')
     @test.attr(type='gate')
@@ -104,6 +109,7 @@ class ServersTestJSON(base.BaseV2ComputeTest):
         self.assertTrue(linux_client.hostname_equals_servername(self.name))
 
     @test.attr(type='gate')
+    @test.idempotent_id('ed20d3fb-9d1f-4329-b160-543fbd5d9811')
     def test_create_server_with_scheduler_hint_group(self):
         # Create a server with the scheduler hint "group".
         name = data_utils.rand_name('server_group')
@@ -121,6 +127,7 @@ class ServersTestJSON(base.BaseV2ComputeTest):
         server_group = self.client.get_server_group(group_id)
         self.assertIn(server['id'], server_group['members'])
 
+    @test.idempotent_id('0578d144-ed74-43f8-8e57-ab10dbf9b3c2')
     @testtools.skipUnless(CONF.service_available.neutron,
                           'Neutron service must be available.')
     def test_verify_multiple_nics_order(self):
@@ -193,6 +200,7 @@ class ServersWithSpecificFlavorTestJSON(base.BaseV2ComputeAdminTest):
         cls.flavor_client = cls.os_adm.flavors_client
         cls.client = cls.servers_client
 
+    @test.idempotent_id('b3c7bcfc-bb5b-4e22-b517-c7f686b802ca')
     @testtools.skipUnless(CONF.compute.run_ssh,
                           'Instance validation tests are disabled.')
     @test.attr(type='gate')

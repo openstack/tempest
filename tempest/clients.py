@@ -74,8 +74,9 @@ from tempest.services.database.json.limits_client import \
     DatabaseLimitsClientJSON
 from tempest.services.database.json.versions_client import \
     DatabaseVersionsClientJSON
-from tempest.services.identity.json.identity_client import IdentityClientJSON
-from tempest.services.identity.json.token_client import TokenClientJSON
+from tempest.services.identity.v2.json.identity_client import \
+    IdentityClientJSON
+from tempest.services.identity.v2.json.token_client import TokenClientJSON
 from tempest.services.identity.v3.json.credentials_client import \
     CredentialsClientJSON
 from tempest.services.identity.v3.json.endpoints_client import \
@@ -194,8 +195,22 @@ class Manager(manager.Manager):
                 endpoint_type=CONF.telemetry.endpoint_type,
                 **self.default_params_with_timeout_values)
         if CONF.service_available.glance:
-            self.image_client = ImageClientJSON(self.auth_provider)
-            self.image_client_v2 = ImageClientV2JSON(self.auth_provider)
+            self.image_client = ImageClientJSON(
+                self.auth_provider,
+                CONF.image.catalog_type,
+                CONF.image.region or CONF.identity.region,
+                endpoint_type=CONF.image.endpoint_type,
+                build_interval=CONF.image.build_interval,
+                build_timeout=CONF.image.build_timeout,
+                **self.default_params)
+            self.image_client_v2 = ImageClientV2JSON(
+                self.auth_provider,
+                CONF.image.catalog_type,
+                CONF.image.region or CONF.identity.region,
+                endpoint_type=CONF.image.endpoint_type,
+                build_interval=CONF.image.build_interval,
+                build_timeout=CONF.image.build_timeout,
+                **self.default_params)
         self.orchestration_client = OrchestrationClient(
             self.auth_provider,
             CONF.orchestration.catalog_type,
@@ -239,7 +254,11 @@ class Manager(manager.Manager):
             SecurityGroupDefaultRulesClientJSON(self.auth_provider, **params))
         self.certificates_client = CertificatesClientJSON(self.auth_provider,
                                                           **params)
-        self.servers_client = ServersClientJSON(self.auth_provider, **params)
+        self.servers_client = ServersClientJSON(
+            self.auth_provider,
+            enable_instance_password=CONF.compute_feature_enabled
+                .enable_instance_password,
+            **params)
         self.limits_client = LimitsClientJSON(self.auth_provider, **params)
         self.images_client = ImagesClientJSON(self.auth_provider, **params)
         self.keypairs_client = KeyPairsClientJSON(self.auth_provider, **params)
@@ -320,9 +339,12 @@ class Manager(manager.Manager):
         self.region_client = RegionClientJSON(self.auth_provider, **params)
         self.credentials_client = CredentialsClientJSON(self.auth_provider,
                                                         **params)
-        self.token_client = TokenClientJSON(CONF.identity.uri)
+        # Token clients do not use the catalog. They only need default_params.
+        self.token_client = TokenClientJSON(CONF.identity.uri,
+                                            **self.default_params)
         if CONF.identity_feature_enabled.api_v3:
-            self.token_v3_client = V3TokenClientJSON(CONF.identity.uri_v3)
+            self.token_v3_client = V3TokenClientJSON(CONF.identity.uri_v3,
+                                                     **self.default_params)
 
     def _set_volume_clients(self):
         params = {

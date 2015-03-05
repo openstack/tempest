@@ -30,6 +30,7 @@ LOG = logging.getLogger(__name__)
 class TestQueues(base.BaseMessagingTest):
 
     @test.attr(type='smoke')
+    @test.idempotent_id('9f1c4c72-80c5-4dac-acf3-188cef42e36c')
     def test_create_delete_queue(self):
         # Create & Delete Queue
         queue_name = data_utils.rand_name('test-')
@@ -60,18 +61,21 @@ class TestManageQueue(base.BaseMessagingTest):
             cls.client.create_queue(queue_name)
 
     @test.attr(type='smoke')
+    @test.idempotent_id('ccd3d69e-f156-4c5f-8a12-b4f24bee44e1')
     def test_check_queue_existence(self):
         # Checking Queue Existence
         for queue_name in self.queues:
             self.check_queue_exists(queue_name)
 
     @test.attr(type='smoke')
+    @test.idempotent_id('e27634d8-9c8f-47d8-a677-655c47658d3e')
     def test_check_queue_head(self):
         # Checking Queue Existence by calling HEAD
         for queue_name in self.queues:
             self.check_queue_exists_head(queue_name)
 
     @test.attr(type='smoke')
+    @test.idempotent_id('0a0feeca-7768-4303-806d-82bbbb796ad3')
     def test_list_queues(self):
         # Listing queues
         _, body = self.list_queues()
@@ -80,6 +84,7 @@ class TestManageQueue(base.BaseMessagingTest):
             self.assertIn(item['name'], self.queues)
 
     @test.attr(type='smoke')
+    @test.idempotent_id('8fb66602-077d-49d6-ae1a-5f2091739178')
     def test_get_queue_stats(self):
         # Retrieve random queue
         queue_name = self.queues[data_utils.rand_int_id(0,
@@ -93,6 +98,7 @@ class TestManageQueue(base.BaseMessagingTest):
             self.assertNotIn(element, msgs)
 
     @test.attr(type='smoke')
+    @test.idempotent_id('0e2441e6-6593-4bdb-a3c0-20e66eeb3fff')
     def test_set_and_get_queue_metadata(self):
         # Retrieve random queue
         queue_name = self.queues[data_utils.rand_int_id(0,
