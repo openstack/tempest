@@ -106,7 +106,7 @@ class BaseVolumeTest(tempest.test.BaseTestCase):
         super(BaseVolumeTest, cls).resource_cleanup()
 
     @classmethod
-    def create_volume(cls, size=1, **kwargs):
+    def create_volume(cls, size=None, **kwargs):
         """Wrapper utility that returns a test volume."""
         name = data_utils.rand_name('Volume')
 

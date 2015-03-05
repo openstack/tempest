@@ -181,7 +181,6 @@ class VolumesV2SnapshotTestJSON(base.BaseVolumeTest):
         snapshot = self.create_snapshot(self.volume_origin['id'])
         # NOTE(gfidente): size is required also when passing snapshot_id
         volume = self.volumes_client.create_volume(
-            size=1,
             snapshot_id=snapshot['id'])
         self.volumes_client.wait_for_volume_status(volume['id'], 'available')
         self.volumes_client.delete_volume(volume['id'])

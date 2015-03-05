@@ -123,7 +123,7 @@ class DeleteServersTestJSON(base.BaseV2ComputeTest):
         device = '/dev/%s' % CONF.compute.volume_device_name
         server = self.create_test_server(wait_until='ACTIVE')
 
-        volume = volumes_client.create_volume(1)
+        volume = volumes_client.create_volume()
         self.addCleanup(volumes_client.delete_volume, volume['id'])
         volumes_client.wait_for_volume_status(volume['id'], 'available')
         self.client.attach_volume(server['id'],

@@ -78,7 +78,6 @@ class VolumeVerifyStress(stressaction.StressAction):
         self.logger.info("creating volume: %s" % name)
         volumes_client = self.manager.volumes_client
         self.volume = volumes_client.create_volume(
-            size=1,
             display_name=name)
         volumes_client.wait_for_volume_status(self.volume['id'],
                                               'available')

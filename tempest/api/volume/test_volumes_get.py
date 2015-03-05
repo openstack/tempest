@@ -108,7 +108,7 @@ class VolumesV2GetTest(base.BaseVolumeTest):
         new_v_desc = data_utils.rand_name('@#$%^* description')
         params = {self.descrip_field: new_v_desc,
                   'availability_zone': volume['availability_zone']}
-        new_volume = self.client.create_volume(size=1, **params)
+        new_volume = self.client.create_volume(**params)
         self.assertIn('id', new_volume)
         self.addCleanup(self._delete_volume, new_volume['id'])
         self.client.wait_for_volume_status(new_volume['id'], 'available')

@@ -207,7 +207,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
         self.assertEqual(server['name'], name)
         return server
 
-    def create_volume(self, size=1, name=None, snapshot_id=None,
+    def create_volume(self, size=None, name=None, snapshot_id=None,
                       imageRef=None, volume_type=None, wait_on_delete=True):
         if name is None:
             name = data_utils.rand_name(self.__class__.__name__)

@@ -46,8 +46,7 @@ class VolumesGetTestJSON(base.BaseV2ComputeTest):
         v_name = data_utils.rand_name('Volume')
         metadata = {'Type': 'work'}
         # Create volume
-        volume = self.client.create_volume(size=1,
-                                           display_name=v_name,
+        volume = self.client.create_volume(display_name=v_name,
                                            metadata=metadata)
         self.addCleanup(self.delete_volume, volume['id'])
         self.assertIn('id', volume)
