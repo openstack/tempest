@@ -70,7 +70,7 @@ class FlavorsAccessNegativeTestJSON(base.BaseV2ComputeAdminTest):
                                                new_flavor_id,
                                                is_public='False')
         self.addCleanup(self.client.delete_flavor, new_flavor['id'])
-        self.assertRaises(lib_exc.Unauthorized,
+        self.assertRaises(lib_exc.Forbidden,
                           self.flavors_client.add_flavor_access,
                           new_flavor['id'],
                           self.tenant_id)
@@ -91,7 +91,7 @@ class FlavorsAccessNegativeTestJSON(base.BaseV2ComputeAdminTest):
         self.client.add_flavor_access(new_flavor['id'], self.tenant_id)
         self.addCleanup(self.client.remove_flavor_access,
                         new_flavor['id'], self.tenant_id)
-        self.assertRaises(lib_exc.Unauthorized,
+        self.assertRaises(lib_exc.Forbidden,
                           self.flavors_client.remove_flavor_access,
                           new_flavor['id'],
                           self.tenant_id)

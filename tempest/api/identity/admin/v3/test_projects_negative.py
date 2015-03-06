@@ -26,7 +26,7 @@ class ProjectsNegativeTestJSON(base.BaseIdentityV3AdminTest):
     @test.idempotent_id('24c49279-45dd-4155-887a-cb738c2385aa')
     def test_list_projects_by_unauthorized_user(self):
         # Non-admin user should not be able to list projects
-        self.assertRaises(lib_exc.Unauthorized,
+        self.assertRaises(lib_exc.Forbidden,
                           self.non_admin_client.list_projects)
 
     @test.attr(type=['negative', 'gate'])
@@ -46,7 +46,7 @@ class ProjectsNegativeTestJSON(base.BaseIdentityV3AdminTest):
         # Non-admin user should not be authorized to create a project
         project_name = data_utils.rand_name('project-')
         self.assertRaises(
-            lib_exc.Unauthorized, self.non_admin_client.create_project,
+            lib_exc.Forbidden, self.non_admin_client.create_project,
             project_name)
 
     @test.attr(type=['negative', 'gate'])
@@ -72,7 +72,7 @@ class ProjectsNegativeTestJSON(base.BaseIdentityV3AdminTest):
         project = self.client.create_project(project_name)
         self.data.projects.append(project)
         self.assertRaises(
-            lib_exc.Unauthorized, self.non_admin_client.delete_project,
+            lib_exc.Forbidden, self.non_admin_client.delete_project,
             project['id'])
 
     @test.attr(type=['negative', 'gate'])

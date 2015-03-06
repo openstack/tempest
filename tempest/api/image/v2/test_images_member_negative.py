@@ -37,7 +37,7 @@ class ImagesMemberNegativeTest(base.BaseV2MemberImageTest):
                                                self.alt_tenant_id)
         self.assertEqual(member['status'], 'pending')
         self.assertNotIn(image_id, self._list_image_ids_as_alt())
-        self.assertRaises(lib_exc.Unauthorized,
+        self.assertRaises(lib_exc.Forbidden,
                           self.os_img_client.update_member_status,
                           image_id, self.alt_tenant_id, 'accepted')
         self.assertNotIn(image_id, self._list_image_ids_as_alt())

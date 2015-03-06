@@ -40,7 +40,7 @@ class QuotasAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
     @test.attr(type=['negative', 'gate'])
     @test.idempotent_id('733abfe8-166e-47bb-8363-23dbd7ff3476')
     def test_update_quota_normal_user(self):
-        self.assertRaises(lib_exc.Unauthorized,
+        self.assertRaises(lib_exc.Forbidden,
                           self.client.update_quota_set,
                           self.demo_tenant_id,
                           ram=0)
@@ -61,7 +61,7 @@ class QuotasAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
 
         self.addCleanup(self.adm_client.update_quota_set, self.demo_tenant_id,
                         cores=default_vcpu_quota)
-        self.assertRaises((lib_exc.Unauthorized, lib_exc.OverLimit),
+        self.assertRaises((lib_exc.Forbidden, lib_exc.OverLimit),
                           self.create_test_server)
 
     @test.attr(type=['negative', 'gate'])
@@ -78,7 +78,7 @@ class QuotasAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
 
         self.addCleanup(self.adm_client.update_quota_set, self.demo_tenant_id,
                         ram=default_mem_quota)
-        self.assertRaises((lib_exc.Unauthorized, lib_exc.OverLimit),
+        self.assertRaises((lib_exc.Forbidden, lib_exc.OverLimit),
                           self.create_test_server)
 
     @test.attr(type=['negative', 'gate'])
@@ -94,7 +94,7 @@ class QuotasAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
                                          instances=instances_quota)
         self.addCleanup(self.adm_client.update_quota_set, self.demo_tenant_id,
                         instances=default_instances_quota)
-        self.assertRaises((lib_exc.Unauthorized, lib_exc.OverLimit),
+        self.assertRaises((lib_exc.Forbidden, lib_exc.OverLimit),
                           self.create_test_server)
 
     @decorators.skip_because(bug="1186354",
@@ -121,7 +121,7 @@ class QuotasAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
         # Check we cannot create anymore
         # A 403 Forbidden or 413 Overlimit (old behaviour) exception
         # will be raised when out of quota
-        self.assertRaises((lib_exc.Unauthorized, lib_exc.OverLimit),
+        self.assertRaises((lib_exc.Forbidden, lib_exc.OverLimit),
                           self.sg_client.create_security_group,
                           "sg-overlimit", "sg-desc")
 
@@ -161,6 +161,6 @@ class QuotasAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
         # Check we cannot create SG rule anymore
         # A 403 Forbidden or 413 Overlimit (old behaviour) exception
         # will be raised when out of quota
-        self.assertRaises((lib_exc.OverLimit, lib_exc.Unauthorized),
+        self.assertRaises((lib_exc.OverLimit, lib_exc.Forbidden),
                           self.sg_client.create_security_group_rule,
                           secgroup_id, ip_protocol, 1025, 1025)

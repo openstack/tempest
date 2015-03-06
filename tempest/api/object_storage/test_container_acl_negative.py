@@ -88,7 +88,7 @@ class ObjectACLsNegativeTest(base.BaseObjectTest):
             request_part='headers',
             auth_data=self.test_auth_data
         )
-        self.assertRaises(lib_exc.Unauthorized,
+        self.assertRaises(lib_exc.Forbidden,
                           self.object_client.create_object,
                           self.container_name, object_name, 'data', headers={})
 
@@ -106,7 +106,7 @@ class ObjectACLsNegativeTest(base.BaseObjectTest):
             request_part='headers',
             auth_data=self.test_auth_data
         )
-        self.assertRaises(lib_exc.Unauthorized,
+        self.assertRaises(lib_exc.Forbidden,
                           self.object_client.get_object,
                           self.container_name, object_name)
 
@@ -124,7 +124,7 @@ class ObjectACLsNegativeTest(base.BaseObjectTest):
             request_part='headers',
             auth_data=self.test_auth_data
         )
-        self.assertRaises(lib_exc.Unauthorized,
+        self.assertRaises(lib_exc.Forbidden,
                           self.object_client.delete_object,
                           self.container_name, object_name)
 
@@ -148,7 +148,7 @@ class ObjectACLsNegativeTest(base.BaseObjectTest):
             request_part='headers',
             auth_data=self.test_auth_data
         )
-        self.assertRaises(lib_exc.Unauthorized,
+        self.assertRaises(lib_exc.Forbidden,
                           self.object_client.get_object,
                           self.container_name, object_name)
 
@@ -168,7 +168,7 @@ class ObjectACLsNegativeTest(base.BaseObjectTest):
             auth_data=self.test_auth_data
         )
         object_name = data_utils.rand_name(name='Object')
-        self.assertRaises(lib_exc.Unauthorized,
+        self.assertRaises(lib_exc.Forbidden,
                           self.object_client.create_object,
                           self.container_name,
                           object_name, 'data', headers={})
@@ -193,7 +193,7 @@ class ObjectACLsNegativeTest(base.BaseObjectTest):
             auth_data=self.test_auth_data
         )
         object_name = data_utils.rand_name(name='Object')
-        self.assertRaises(lib_exc.Unauthorized,
+        self.assertRaises(lib_exc.Forbidden,
                           self.object_client.create_object,
                           self.container_name,
                           object_name, 'data', headers={})
@@ -222,7 +222,7 @@ class ObjectACLsNegativeTest(base.BaseObjectTest):
             request_part='headers',
             auth_data=self.test_auth_data
         )
-        self.assertRaises(lib_exc.Unauthorized,
+        self.assertRaises(lib_exc.Forbidden,
                           self.object_client.delete_object,
                           self.container_name,
                           object_name)

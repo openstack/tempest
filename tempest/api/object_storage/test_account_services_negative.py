@@ -51,6 +51,6 @@ class AccountNegativeTest(base.BaseObjectTest):
 
         params = {'format': 'json'}
         # list containers with non-authorized user token
-        self.assertRaises(lib_exc.Unauthorized,
+        self.assertRaises(lib_exc.Forbidden,
                           self.account_client.list_account_containers,
                           params=params)

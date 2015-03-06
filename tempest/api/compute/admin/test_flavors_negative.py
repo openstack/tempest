@@ -91,7 +91,7 @@ class FlavorsAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
         flavor_name = data_utils.rand_name(self.flavor_name_prefix)
         new_flavor_id = str(uuid.uuid4())
 
-        self.assertRaises(lib_exc.Unauthorized,
+        self.assertRaises(lib_exc.Forbidden,
                           self.user_client.create_flavor,
                           flavor_name, self.ram, self.vcpus, self.disk,
                           new_flavor_id, ephemeral=self.ephemeral,
@@ -101,7 +101,7 @@ class FlavorsAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
     @test.idempotent_id('a9a6dc02-8c14-4e05-a1ca-3468d4214882')
     def test_delete_flavor_as_user(self):
         # only admin user can delete a flavor
-        self.assertRaises(lib_exc.Unauthorized,
+        self.assertRaises(lib_exc.Forbidden,
                           self.user_client.delete_flavor,
                           self.flavor_ref_alt)
 
