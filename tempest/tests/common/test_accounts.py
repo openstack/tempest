@@ -51,7 +51,19 @@ class TestAccount(base.TestCase):
             {'username': 'test_user5', 'tenant_name': 'test_tenant5',
              'password': 'p'},
             {'username': 'test_user6', 'tenant_name': 'test_tenant6',
-             'password': 'p'},
+             'password': 'p', 'roles': ['role1', 'role2']},
+            {'username': 'test_user7', 'tenant_name': 'test_tenant7',
+             'password': 'p', 'roles': ['role2', 'role3']},
+            {'username': 'test_user8', 'tenant_name': 'test_tenant8',
+             'password': 'p', 'roles': ['role4', 'role1']},
+            {'username': 'test_user9', 'tenant_name': 'test_tenant9',
+             'password': 'p', 'roles': ['role1', 'role2', 'role3', 'role4']},
+            {'username': 'test_user10', 'tenant_name': 'test_tenant10',
+             'password': 'p', 'roles': ['role1', 'role2', 'role3', 'role4']},
+            {'username': 'test_user11', 'tenant_name': 'test_tenant11',
+             'password': 'p', 'roles': [cfg.CONF.identity.admin_role]},
+            {'username': 'test_user12', 'tenant_name': 'test_tenant12',
+             'password': 'p', 'roles': [cfg.CONF.identity.admin_role]},
         ]
         self.useFixture(mockpatch.Patch(
             'tempest.common.accounts.read_accounts_yaml',
@@ -64,7 +76,8 @@ class TestAccount(base.TestCase):
         for account in accounts_list:
             hash = hashlib.md5()
             hash.update(str(account))
-            hash_list.append(hash.hexdigest())
+            temp_hash = hash.hexdigest()
+            hash_list.append(temp_hash)
         return hash_list
 
     def test_get_hash(self):
@@ -83,8 +96,8 @@ class TestAccount(base.TestCase):
         hash_dict = test_account_class.get_hash_dict(self.test_accounts)
         hash_list = self._get_hash_list(self.test_accounts)
         for hash in hash_list:
-            self.assertIn(hash, hash_dict.keys())
-            self.assertIn(hash_dict[hash], self.test_accounts)
+            self.assertIn(hash, hash_dict['creds'].keys())
+            self.assertIn(hash_dict['creds'][hash], self.test_accounts)
 
     def test_create_hash_file_previous_file(self):
         # Emulate the lock existing on the filesystem
@@ -200,6 +213,62 @@ class TestAccount(base.TestCase):
             return_value=self.test_accounts))
         test_accounts_class = accounts.Accounts('test_name')
         self.assertFalse(test_accounts_class.is_multi_user())
+
+    def test__get_creds_by_roles_one_role(self):
+        self.useFixture(mockpatch.Patch(
+            'tempest.common.accounts.read_accounts_yaml',
+            return_value=self.test_accounts))
+        test_accounts_class = accounts.Accounts('test_name')
+        hashes = test_accounts_class.hash_dict['roles']['role4']
+        temp_hash = hashes[0]
+        get_free_hash_mock = self.useFixture(mockpatch.PatchObject(
+            test_accounts_class, '_get_free_hash', return_value=temp_hash))
+        # Test a single role returns all matching roles
+        test_accounts_class._get_creds(roles=['role4'])
+        calls = get_free_hash_mock.mock.mock_calls
+        self.assertEqual(len(calls), 1)
+        args = calls[0][1][0]
+        for i in hashes:
+            self.assertIn(i, args)
+
+    def test__get_creds_by_roles_list_role(self):
+        self.useFixture(mockpatch.Patch(
+            'tempest.common.accounts.read_accounts_yaml',
+            return_value=self.test_accounts))
+        test_accounts_class = accounts.Accounts('test_name')
+        hashes = test_accounts_class.hash_dict['roles']['role4']
+        hashes2 = test_accounts_class.hash_dict['roles']['role2']
+        hashes = list(set(hashes) & set(hashes2))
+        temp_hash = hashes[0]
+        get_free_hash_mock = self.useFixture(mockpatch.PatchObject(
+            test_accounts_class, '_get_free_hash', return_value=temp_hash))
+        # Test an intersection of multiple roles
+        test_accounts_class._get_creds(roles=['role2', 'role4'])
+        calls = get_free_hash_mock.mock.mock_calls
+        self.assertEqual(len(calls), 1)
+        args = calls[0][1][0]
+        for i in hashes:
+            self.assertIn(i, args)
+
+    def test__get_creds_by_roles_no_admin(self):
+        self.useFixture(mockpatch.Patch(
+            'tempest.common.accounts.read_accounts_yaml',
+            return_value=self.test_accounts))
+        test_accounts_class = accounts.Accounts('test_name')
+        hashes = test_accounts_class.hash_dict['creds'].keys()
+        admin_hashes = test_accounts_class.hash_dict['roles'][
+            cfg.CONF.identity.admin_role]
+        temp_hash = hashes[0]
+        get_free_hash_mock = self.useFixture(mockpatch.PatchObject(
+            test_accounts_class, '_get_free_hash', return_value=temp_hash))
+        # Test an intersection of multiple roles
+        test_accounts_class._get_creds()
+        calls = get_free_hash_mock.mock.mock_calls
+        self.assertEqual(len(calls), 1)
+        args = calls[0][1][0]
+        self.assertEqual(len(args), 10)
+        for i in admin_hashes:
+            self.assertNotIn(i, args)
 
 
 class TestNotLockingAccount(base.TestCase):

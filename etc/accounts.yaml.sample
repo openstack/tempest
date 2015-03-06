@@ -9,3 +9,27 @@
 - username: 'user_2'
   tenant_name: 'test_tenant_2'
   password: 'test_password'
+
+# To specify which roles a user has list them under the roles field
+- username: 'multi_role_user'
+  tenant_name: 'test_tenant_42'
+  password: 'test_password'
+  roles:
+    - 'fun_role'
+    - 'not_an_admin'
+    - 'an_admin'
+
+# To specify a user has a role specified in the config file you can use the
+# type field to specify it, valid values are admin, operator, and reseller_admin
+- username: 'swift_pseudo_admin_user_1'
+  tenant_name: 'admin_tenant_1'
+  password: 'test_password'
+  types:
+     - 'reseller_admin'
+     - 'operator'
+
+- username: 'admin_user_1'
+  tenant_name: 'admin_tenant_1'
+  password: 'test_password'
+  types:
+     - 'admin'
