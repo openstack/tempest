@@ -65,7 +65,7 @@ class TestDefaultProjectId (base.BaseIdentityV3AdminTest):
                          "doesn't have domain id " + dom_id)
 
         # get roles and find the admin role
-        admin_role = self.get_role_by_name("admin")
+        admin_role = self.get_role_by_name(CONF.identity.admin_role)
         admin_role_id = admin_role['id']
 
         # grant the admin role to the user on his project
