@@ -41,6 +41,7 @@ class TestTenantIsolation(base.TestCase):
                        fake_identity._fake_v2_response)
         cfg.CONF.set_default('operator_role', 'FakeRole',
                              group='object-storage')
+        self._mock_list_ec2_credentials('fake_user_id', 'fake_tenant_id')
 
     def test_tempest_client(self):
         iso_creds = isolated_creds.IsolatedCreds('test class')
@@ -101,6 +102,18 @@ class TestTenantIsolation(base.TestCase):
             return_value=(service_client.ResponseBodyList
                           (200, [{'id': '1', 'name': 'FakeRole'}]))))
         return roles_fix
+
+    def _mock_list_ec2_credentials(self, user_id, tenant_id):
+        ec2_creds_fix = self.useFixture(mockpatch.PatchObject(
+            json_iden_client.IdentityClientJSON,
+            'list_user_ec2_credentials',
+            return_value=(service_client.ResponseBodyList
+                          (200, [{'access': 'fake_access',
+                                  'secret': 'fake_secret',
+                                  'tenant_id': tenant_id,
+                                  'user_id': user_id,
+                                  'trust_id': None}]))))
+        return ec2_creds_fix
 
     def _mock_network_create(self, iso_creds, id, name):
         net_fix = self.useFixture(mockpatch.PatchObject(
