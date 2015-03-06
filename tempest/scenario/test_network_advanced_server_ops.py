@@ -84,10 +84,11 @@ class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
             should_connect=should_connect,
             servers_for_debug=[self.server])
         floating_ip = self.floating_ip.floating_ip_address
+        # Check FloatingIP status before checking the connectivity
+        self.check_floating_ip_status(self.floating_ip, 'ACTIVE')
         self.check_public_network_connectivity(floating_ip, username,
                                                private_key, should_connect,
                                                servers=[self.server])
-        self.check_floating_ip_status(self.floating_ip, 'ACTIVE')
 
     def _wait_server_status_and_check_network_connectivity(self):
         self.servers_client.wait_for_server_status(self.server['id'], 'ACTIVE')
