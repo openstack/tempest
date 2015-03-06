@@ -19,6 +19,7 @@ import time
 import urlparse
 
 from tempest.api.object_storage import base
+from tempest import clients
 from tempest.common.utils import data_utils
 from tempest import config
 from tempest import test
@@ -34,6 +35,18 @@ CONF = config.CONF
 
 class ContainerSyncTest(base.BaseObjectTest):
     clients = {}
+
+    @classmethod
+    def setup_credentials(cls):
+        super(ContainerSyncTest, cls).setup_credentials()
+        cls.os_alt = clients.Manager(cls.isolated_creds.get_creds_by_roles(
+            [CONF.object_storage.operator_role], force_new=True))
+
+    @classmethod
+    def setup_clients(cls):
+        super(ContainerSyncTest, cls).setup_clients()
+        cls.object_client_alt = cls.os_alt.object_client
+        cls.container_client_alt = cls.os_alt.container_client
 
     @classmethod
     def resource_setup(cls):

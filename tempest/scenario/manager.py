@@ -1372,10 +1372,13 @@ class SwiftScenarioTest(ScenarioTest):
             raise cls.skipException(skip_msg)
         cls.set_network_resources()
         super(SwiftScenarioTest, cls).resource_setup()
+        cls.os_operator = clients.Manager(
+            cls.isolated_creds.get_creds_by_roles(
+                [CONF.object_storage.operator_role]))
         # Clients for Swift
-        cls.account_client = cls.manager.account_client
-        cls.container_client = cls.manager.container_client
-        cls.object_client = cls.manager.object_client
+        cls.account_client = cls.os_operator.account_client
+        cls.container_client = cls.os_operator.container_client
+        cls.object_client = cls.os_operator.object_client
 
     def get_swift_stat(self):
         """get swift status for our user account."""

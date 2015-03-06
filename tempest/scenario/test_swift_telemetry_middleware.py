@@ -53,7 +53,7 @@ class TestSwiftTelemetry(manager.SwiftScenarioTest):
             skip_msg = "Ceilometer feature for fast work mysql is disabled"
             raise cls.skipException(skip_msg)
         super(TestSwiftTelemetry, cls).resource_setup()
-        cls.telemetry_client = cls.manager.telemetry_client
+        cls.telemetry_client = cls.os_operator.telemetry_client
 
     def _confirm_notifications(self, container_name, obj_name):
         """

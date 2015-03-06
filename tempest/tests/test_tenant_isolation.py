@@ -156,7 +156,6 @@ class TestTenantIsolation(base.TestCase):
                                'assign_user_role') as user_mock:
             admin_creds = iso_creds.get_admin_creds()
         user_mock.assert_has_calls([
-            mock.call('1234', '1234', '1'),
             mock.call('1234', '1234', '1234')])
         self.assertEqual(admin_creds.username, 'fake_admin_user')
         self.assertEqual(admin_creds.tenant_name, 'fake_admin_tenant')
@@ -182,9 +181,8 @@ class TestTenantIsolation(base.TestCase):
             role_creds = iso_creds.get_creds_by_roles(roles=['role1', 'role2'])
         calls = user_mock.mock_calls
         # Assert that the role creation is called with the 2 specified roles
-        self.assertEqual(len(calls), 3)
+        self.assertEqual(len(calls), 2)
         args = map(lambda x: x[1], calls)
-        self.assertIn(('1234', '1234', '1'), args)
         self.assertIn(('1234', '1234', '1234'), args)
         self.assertIn(('1234', '1234', '12345'), args)
         self.assertEqual(role_creds.username, 'fake_role_user')

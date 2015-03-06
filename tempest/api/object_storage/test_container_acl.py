@@ -16,7 +16,10 @@
 from tempest.api.object_storage import base
 from tempest import clients
 from tempest.common.utils import data_utils
+from tempest import config
 from tempest import test
+
+CONF = config.CONF
 
 
 class ObjectTestACLs(base.BaseObjectTest):
@@ -24,13 +27,14 @@ class ObjectTestACLs(base.BaseObjectTest):
     @classmethod
     def setup_credentials(cls):
         super(ObjectTestACLs, cls).setup_credentials()
-        cls.data.setup_test_user()
-        cls.test_os = clients.Manager(cls.data.test_credentials)
+        cls.os_operator = clients.Manager(
+            cls.isolated_creds.get_creds_by_roles(
+                roles=[CONF.object_storage.operator_role], force_new=True))
 
     @classmethod
     def resource_setup(cls):
         super(ObjectTestACLs, cls).resource_setup()
-        cls.test_auth_data = cls.test_os.auth_provider.auth_data
+        cls.test_auth_data = cls.os_operator.auth_provider.auth_data
 
     def setUp(self):
         super(ObjectTestACLs, self).setUp()
@@ -46,8 +50,9 @@ class ObjectTestACLs(base.BaseObjectTest):
     def test_read_object_with_rights(self):
         # attempt to read object using authorized user
         # update X-Container-Read metadata ACL
-        cont_headers = {'X-Container-Read':
-                        self.data.test_tenant + ':' + self.data.test_user}
+        tenant_name = self.os_operator.credentials.tenant_name
+        username = self.os_operator.credentials.username
+        cont_headers = {'X-Container-Read': tenant_name + ':' + username}
         resp_meta, body = self.container_client.update_container_metadata(
             self.container_name, metadata=cont_headers,
             metadata_prefix='')
@@ -71,8 +76,9 @@ class ObjectTestACLs(base.BaseObjectTest):
     def test_write_object_with_rights(self):
         # attempt to write object using authorized user
         # update X-Container-Write metadata ACL
-        cont_headers = {'X-Container-Write':
-                        self.data.test_tenant + ':' + self.data.test_user}
+        tenant_name = self.os_operator.credentials.tenant_name
+        username = self.os_operator.credentials.username
+        cont_headers = {'X-Container-Write': tenant_name + ':' + username}
         resp_meta, body = self.container_client.update_container_metadata(
             self.container_name, metadata=cont_headers,
             metadata_prefix='')

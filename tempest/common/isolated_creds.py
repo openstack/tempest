@@ -79,8 +79,15 @@ class IsolatedCreds(cred_provider.CredentialProvider):
         except StopIteration:
             msg = 'No "%s" role found' % role_name
             raise lib_exc.NotFound(msg)
-        self.identity_admin_client.assign_user_role(tenant['id'], user['id'],
-                                                    role['id'])
+        try:
+            self.identity_admin_client.assign_user_role(tenant['id'],
+                                                        user['id'],
+                                                        role['id'])
+        except lib_exc.Conflict:
+            LOG.warning('Trying to add %s for user %s in tenant %s but they '
+                        ' were already granted that role' % (role_name,
+                                                             user['name'],
+                                                             tenant['name']))
 
     def _delete_user(self, user):
         self.identity_admin_client.delete_user(user)
@@ -114,11 +121,6 @@ class IsolatedCreds(cred_provider.CredentialProvider):
         email = data_utils.rand_name(root) + suffix + "@example.com"
         user = self._create_user(username, self.password,
                                  tenant, email)
-        if CONF.service_available.swift:
-            # NOTE(andrey-mp): user needs this role to create containers
-            # in swift
-            swift_operator_role = CONF.object_storage.operator_role
-            self._assign_user_role(tenant, user, swift_operator_role)
         if admin:
             self._assign_user_role(tenant, user, CONF.identity.admin_role)
         # Add roles specified in config file
