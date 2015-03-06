@@ -262,6 +262,8 @@ class TestLoadBalancerBasic(manager.NetworkScenarioTest):
                                               port_id=port_id)
         self.floating_ips.setdefault(vip.id, [])
         self.floating_ips[vip.id].append(floating_ip)
+        # Check for floating ip status before you check load-balancer
+        self.check_floating_ip_status(floating_ip, "ACTIVE")
 
     def _create_load_balancer(self):
         self._create_pool()
