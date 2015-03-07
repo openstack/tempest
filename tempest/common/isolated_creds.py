@@ -387,3 +387,6 @@ class IsolatedCreds(cred_provider.CredentialProvider):
 
     def is_multi_tenant(self):
         return True
+
+    def is_role_available(self, role):
+        return True

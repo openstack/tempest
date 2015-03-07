@@ -236,10 +236,16 @@ class Accounts(cred_provider.CredentialProvider):
     def get_admin_creds(self):
         return self.get_creds_by_roles([CONF.identity.admin_role])
 
-    def admin_available(self):
-        if not self.hash_dict['roles'].get(CONF.identity.admin_role):
+    def is_role_available(self, role):
+        if self.use_default_creds:
             return False
-        return True
+        else:
+            if self.hash_dict['roles'].get(role):
+                return True
+            return False
+
+    def admin_available(self):
+        return self.is_role_available(CONF.identity.admin_role)
 
 
 class NotLockingAccounts(Accounts):

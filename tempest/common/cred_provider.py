@@ -117,3 +117,7 @@ class CredentialProvider(object):
     @abc.abstractmethod
     def get_creds_by_roles(self, roles, force_new=False):
         return
+
+    @abc.abstractmethod
+    def is_role_available(self, role):
+        return

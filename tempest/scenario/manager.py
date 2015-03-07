@@ -1372,9 +1372,16 @@ class SwiftScenarioTest(ScenarioTest):
             raise cls.skipException(skip_msg)
         cls.set_network_resources()
         super(SwiftScenarioTest, cls).resource_setup()
-        cls.os_operator = clients.Manager(
-            cls.isolated_creds.get_creds_by_roles(
-                [CONF.object_storage.operator_role]))
+        operator_role = CONF.object_storage.operator_role
+        if not cls.isolated_creds.is_role_available(operator_role):
+            skip_msg = ("%s skipped because the configured credential provider"
+                        " is not able to provide credentials with the %s role "
+                        "assigned." % (cls.__name__, operator_role))
+            raise cls.skipException(skip_msg)
+        else:
+            cls.os_operator = clients.Manager(
+                cls.isolated_creds.get_creds_by_roles(
+                    [operator_role]))
         # Clients for Swift
         cls.account_client = cls.os_operator.account_client
         cls.container_client = cls.os_operator.container_client

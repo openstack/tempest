@@ -32,22 +32,23 @@ class BaseObjectTest(tempest.test.BaseTestCase):
         if not CONF.service_available.swift:
             skip_msg = ("%s skipped as swift is not available" % cls.__name__)
             raise cls.skipException(skip_msg)
-        if not CONF.auth.allow_tenant_isolation and \
-            not CONF.auth.locking_credentials_provider:
-            skip_msg = ("%s skipped because a credential provider able to "
-                        "provide credentials by role is needed" % cls.__name__)
-            raise cls.skipException(skip_msg)
 
     @classmethod
     def setup_credentials(cls):
         cls.set_network_resources()
         super(BaseObjectTest, cls).setup_credentials()
-
         cls.isolated_creds = credentials.get_isolated_credentials(
             cls.__name__, network_resources=cls.network_resources)
-        # Get isolated creds for normal user
-        cls.os = clients.Manager(cls.isolated_creds.get_creds_by_roles(
-            [CONF.object_storage.operator_role]))
+        operator_role = CONF.object_storage.operator_role
+        if not cls.isolated_creds.is_role_available(operator_role):
+            skip_msg = ("%s skipped because the configured credential provider"
+                        " is not able to provide credentials with the %s role "
+                        "assigned." % (cls.__name__, operator_role))
+            raise cls.skipException(skip_msg)
+        else:
+            # Get isolated creds for normal user
+            cls.os = clients.Manager(cls.isolated_creds.get_creds_by_roles(
+                [operator_role]))
 
     @classmethod
     def setup_clients(cls):

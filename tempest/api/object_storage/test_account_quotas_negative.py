@@ -29,9 +29,16 @@ class AccountQuotasNegativeTest(base.BaseObjectTest):
     @classmethod
     def setup_credentials(cls):
         super(AccountQuotasNegativeTest, cls).setup_credentials()
-        cls.os_reselleradmin = clients.Manager(
-            cls.isolated_creds.get_creds_by_roles(
-                roles=[CONF.object_storage.reseller_admin_role]))
+        reseller_admin_role = CONF.object_storage.reseller_admin_role
+        if not cls.isolated_creds.is_role_available(reseller_admin_role):
+            skip_msg = ("%s skipped because the configured credential provider"
+                        " is not able to provide credentials with the %s role "
+                        "assigned." % (cls.__name__, reseller_admin_role))
+            raise cls.skipException(skip_msg)
+        else:
+            cls.os_reselleradmin = clients.Manager(
+                cls.isolated_creds.get_creds_by_roles(
+                    roles=[reseller_admin_role]))
 
     @classmethod
     def resource_setup(cls):
