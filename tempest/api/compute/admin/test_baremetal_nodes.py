@@ -31,14 +31,26 @@ class BaremetalNodesAdminTestJSON(base.BaseV2ComputeAdminTest):
             skip_msg = ('%s skipped as Ironic is not available' % cls.__name__)
             raise cls.skipException(skip_msg)
         cls.client = cls.os_adm.baremetal_nodes_client
+        cls.ironic_client = cls.os_adm.baremetal_client
 
-    @test.attr(type='smoke')
+    @test.attr(type=['smoke', 'baremetal'])
     @test.idempotent_id('e475aa6e-416d-4fa4-b3af-28d5e84250fb')
-    def test_list_baremetal_nodes(self):
-        # List all baremetal nodes.
-        baremetal_nodes = self.client.list_baremetal_nodes()
-        self.assertNotEmpty(baremetal_nodes, "No baremetal nodes found.")
+    def test_list_get_baremetal_nodes(self):
+        # Create some test nodes in Ironic directly
+        test_nodes = []
+        for i in range(0, 3):
+            _, node = self.ironic_client.create_node()
+            test_nodes.append(node)
+            self.addCleanup(self.ironic_client.delete_node, node['uuid'])
 
-        for node in baremetal_nodes:
-            baremetal_node = self.client.get_baremetal_node(node['id'])
-            self.assertEqual(node['id'], baremetal_node['id'])
+        # List all baremetal nodes and ensure our created test nodes are
+        # listed
+        bm_node_ids = set([n['id'] for n in
+                           self.client.list_baremetal_nodes()])
+        test_node_ids = set([n['uuid'] for n in test_nodes])
+        self.assertTrue(test_node_ids.issubset(bm_node_ids))
+
+        # Test getting each individually
+        for node in test_nodes:
+            baremetal_node = self.client.get_baremetal_node(node['uuid'])
+            self.assertEqual(node['uuid'], baremetal_node['id'])
