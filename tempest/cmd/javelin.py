@@ -77,7 +77,8 @@ resource file::
     - name: javelin_cirros
       owner: javelin
       file: cirros-0.3.2-x86_64-blank.img
-      format: ami
+      disk_format: ami
+      container_format: ami
       aki: cirros-0.3.2-x86_64-vmlinuz
       ari: cirros-0.3.2-x86_64-initrd
 
@@ -608,6 +609,15 @@ def create_images(images):
     for image in images:
         client = client_for_user(image['owner'])
 
+        # DEPRECATED: 'format' was used for ami images
+        # Use 'disk_format' and 'container_format' instead
+        if 'format' in image:
+            LOG.warning("Deprecated: 'format' is deprecated for images "
+                        "description. Please use 'disk_format' and 'container_"
+                        "format' instead.")
+            image['disk_format'] = image['format']
+            image['container_format'] = image['format']
+
         # only upload a new image if the name isn't there
         if _get_image_by_name(client, image['name']):
             LOG.info("Image '%s' already exists" % image['name'])
@@ -615,7 +625,7 @@ def create_images(images):
 
         # special handling for 3 part image
         extras = {}
-        if image['format'] == 'ami':
+        if image['disk_format'] == 'ami':
             name, fname = _resolve_image(image, 'aki')
             aki = client.images.create_image(
                 'javelin_' + name, 'aki', 'aki')
@@ -630,7 +640,8 @@ def create_images(images):
 
         _, fname = _resolve_image(image, 'file')
         body = client.images.create_image(
-            image['name'], image['format'], image['format'], **extras)
+            image['name'], image['container_format'],
+            image['disk_format'], **extras)
         image_id = body.get('id')
         client.images.store_image(image_id, open(fname, 'r'))
 
