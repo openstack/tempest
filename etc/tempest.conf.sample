@@ -156,6 +156,7 @@
 
 # The endpoint type to use for the baremetal provisioning service
 # (string value)
+# Allowed values: public, admin, internal, publicURL, adminURL, internalURL
 #endpoint_type = publicURL
 
 # Timeout for Ironic node to completely provision (integer value)
@@ -341,6 +342,7 @@
 #region =
 
 # The endpoint type to use for the compute service. (string value)
+# Allowed values: public, admin, internal, publicURL, adminURL, internalURL
 #endpoint_type = publicURL
 
 # Path to a private key file for SSH access to remote hosts (string
@@ -467,6 +469,7 @@
 
 # The endpoint type to use for the data processing service. (string
 # value)
+# Allowed values: public, admin, internal, publicURL, adminURL, internalURL
 #endpoint_type = publicURL
 
 
@@ -550,6 +553,7 @@
 #region = RegionOne
 
 # The endpoint type to use for the identity service. (string value)
+# Allowed values: public, admin, internal, publicURL, adminURL, internalURL
 #endpoint_type = publicURL
 
 # Username to use for Nova API requests. (string value)
@@ -631,6 +635,7 @@
 #region =
 
 # The endpoint type to use for the image service. (string value)
+# Allowed values: public, admin, internal, publicURL, adminURL, internalURL
 #endpoint_type = publicURL
 
 # http accessible image (string value)
@@ -739,6 +744,7 @@
 #region =
 
 # The endpoint type to use for the network service. (string value)
+# Allowed values: public, admin, internal, publicURL, adminURL, internalURL
 #endpoint_type = publicURL
 
 # The cidr block to allocate tenant ipv4 subnets from (string value)
@@ -781,6 +787,7 @@
 
 # vnic_type to use when Launching instances with pre-configured ports.
 # Supported ports are: ['normal','direct','macvtap'] (string value)
+# Allowed values: <None>, normal, direct, macvtap
 #port_vnic_type = <None>
 
 
@@ -819,6 +826,7 @@
 
 # The endpoint type to use for the object-store service. (string
 # value)
+# Allowed values: public, admin, internal, publicURL, adminURL, internalURL
 #endpoint_type = publicURL
 
 # Number of seconds to time on waiting for a container to container
@@ -884,6 +892,7 @@
 
 # The endpoint type to use for the orchestration service. (string
 # value)
+# Allowed values: public, admin, internal, publicURL, adminURL, internalURL
 #endpoint_type = publicURL
 
 # Time in seconds between build status checks. (integer value)
@@ -950,6 +959,7 @@
 # DHCP client used by images to renew DCHP lease. If left empty,
 # update operation will be skipped. Supported clients: "udhcpc",
 # "dhclient" (string value)
+# Allowed values: udhcpc, dhclient
 #dhcp_client = udhcpc
 
 
@@ -1049,6 +1059,7 @@
 #catalog_type = metering
 
 # The endpoint type to use for the telemetry service. (string value)
+# Allowed values: public, admin, internal, publicURL, adminURL, internalURL
 #endpoint_type = publicURL
 
 # This variable is used as flag to enable notification tests (boolean
@@ -1078,6 +1089,7 @@
 #region =
 
 # The endpoint type to use for the volume service. (string value)
+# Allowed values: public, admin, internal, publicURL, adminURL, internalURL
 #endpoint_type = publicURL
 
 # Name of the backend1 (must be declared in cinder.conf) (string
