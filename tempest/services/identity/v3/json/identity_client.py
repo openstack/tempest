@@ -22,6 +22,13 @@ from tempest.common import service_client
 class IdentityV3ClientJSON(service_client.ServiceClient):
     api_version = "v3"
 
+    def get_api_description(self):
+        """Retrieves info about the v3 Identity API"""
+        url = ''
+        resp, body = self.get(url)
+        self.expected_success(200, resp.status)
+        return service_client.ResponseBody(resp, self._parse_resp(body))
+
     def create_user(self, user_name, password=None, project_id=None,
                     email=None, domain_id='default', **kwargs):
         """Creates a user."""
