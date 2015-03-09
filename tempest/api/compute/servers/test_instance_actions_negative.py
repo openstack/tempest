@@ -23,9 +23,13 @@ from tempest import test
 class InstanceActionsNegativeTestJSON(base.BaseV2ComputeTest):
 
     @classmethod
+    def setup_clients(cls):
+        super(InstanceActionsNegativeTestJSON, cls).setup_clients()
+        cls.client = cls.servers_client
+
+    @classmethod
     def resource_setup(cls):
         super(InstanceActionsNegativeTestJSON, cls).resource_setup()
-        cls.client = cls.servers_client
         server = cls.create_test_server(wait_until='ACTIVE')
         cls.server_id = server['id']
 

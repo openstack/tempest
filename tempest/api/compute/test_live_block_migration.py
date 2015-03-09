@@ -27,11 +27,14 @@ class LiveBlockMigrationTestJSON(base.BaseV2ComputeAdminTest):
     _host_key = 'OS-EXT-SRV-ATTR:host'
 
     @classmethod
-    def resource_setup(cls):
-        super(LiveBlockMigrationTestJSON, cls).resource_setup()
-
+    def setup_clients(cls):
+        super(LiveBlockMigrationTestJSON, cls).setup_clients()
         cls.admin_hosts_client = cls.os_adm.hosts_client
         cls.admin_servers_client = cls.os_adm.servers_client
+
+    @classmethod
+    def resource_setup(cls):
+        super(LiveBlockMigrationTestJSON, cls).resource_setup()
 
         cls.created_server_ids = []
 

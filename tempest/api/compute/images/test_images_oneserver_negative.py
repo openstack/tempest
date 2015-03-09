@@ -56,9 +56,8 @@ class ImagesOneServerNegativeTestJSON(base.BaseV2ComputeTest):
         self.__class__.server_id = self.rebuild_server(self.server_id)
 
     @classmethod
-    def resource_setup(cls):
-        super(ImagesOneServerNegativeTestJSON, cls).resource_setup()
-        cls.client = cls.images_client
+    def skip_checks(cls):
+        super(ImagesOneServerNegativeTestJSON, cls).skip_checks()
         if not CONF.service_available.glance:
             skip_msg = ("%s skipped as glance is not available" % cls.__name__)
             raise cls.skipException(skip_msg)
@@ -68,6 +67,14 @@ class ImagesOneServerNegativeTestJSON(base.BaseV2ComputeTest):
                         % cls.__name__)
             raise cls.skipException(skip_msg)
 
+    @classmethod
+    def setup_clients(cls):
+        super(ImagesOneServerNegativeTestJSON, cls).setup_clients()
+        cls.client = cls.images_client
+
+    @classmethod
+    def resource_setup(cls):
+        super(ImagesOneServerNegativeTestJSON, cls).resource_setup()
         server = cls.create_test_server(wait_until='ACTIVE')
         cls.server_id = server['id']
 

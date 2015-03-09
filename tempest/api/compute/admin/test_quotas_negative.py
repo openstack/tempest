@@ -27,12 +27,15 @@ class QuotasAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
     force_tenant_isolation = True
 
     @classmethod
-    def resource_setup(cls):
-        super(QuotasAdminNegativeTestJSON, cls).resource_setup()
+    def setup_clients(cls):
+        super(QuotasAdminNegativeTestJSON, cls).setup_clients()
         cls.client = cls.os.quotas_client
         cls.adm_client = cls.os_adm.quotas_client
         cls.sg_client = cls.security_groups_client
 
+    @classmethod
+    def resource_setup(cls):
+        super(QuotasAdminNegativeTestJSON, cls).resource_setup()
         # NOTE(afazekas): these test cases should always create and use a new
         # tenant most of them should be skipped if we can't do that
         cls.demo_tenant_id = cls.client.tenant_id

@@ -21,10 +21,14 @@ CONF = config.CONF
 
 class NetworksTestJSON(base.BaseV2ComputeTest):
     @classmethod
-    def resource_setup(cls):
+    def skip_checks(cls):
+        super(NetworksTestJSON, cls).skip_checks()
         if CONF.service_available.neutron:
             raise cls.skipException('nova-network is not available.')
-        super(NetworksTestJSON, cls).resource_setup()
+
+    @classmethod
+    def setup_clients(cls):
+        super(NetworksTestJSON, cls).setup_clients()
         cls.client = cls.os.networks_client
 
     @test.attr(type='gate')

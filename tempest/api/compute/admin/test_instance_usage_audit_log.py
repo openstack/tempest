@@ -23,8 +23,8 @@ from tempest import test
 class InstanceUsageAuditLogTestJSON(base.BaseV2ComputeAdminTest):
 
     @classmethod
-    def resource_setup(cls):
-        super(InstanceUsageAuditLogTestJSON, cls).resource_setup()
+    def setup_clients(cls):
+        super(InstanceUsageAuditLogTestJSON, cls).setup_clients()
         cls.adm_client = cls.os_adm.instance_usages_audit_log_client
 
     @test.attr(type='gate')

@@ -24,8 +24,8 @@ class AZAdminV2TestJSON(base.BaseComputeAdminTest):
     _api_version = 2
 
     @classmethod
-    def resource_setup(cls):
-        super(AZAdminV2TestJSON, cls).resource_setup()
+    def setup_clients(cls):
+        super(AZAdminV2TestJSON, cls).setup_clients()
         cls.client = cls.availability_zone_admin_client
 
     @test.attr(type='gate')
