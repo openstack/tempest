@@ -439,7 +439,9 @@ def is_identity_version_supported(identity_version):
     return identity_version in IDENTITY_VERSION
 
 
-def get_credentials(auth_url, fill_in=True, identity_version='v2', **kwargs):
+def get_credentials(auth_url, fill_in=True, identity_version='v2',
+                    disable_ssl_certificate_validation=None, ca_certs=None,
+                    trace_requests=None, **kwargs):
     """
     Builds a credentials object based on the configured auth_version
 
@@ -451,6 +453,11 @@ def get_credentials(auth_url, fill_in=True, identity_version='v2', **kwargs):
            by invoking ``is_valid()``
     :param identity_version (string): identity API version is used to
            select the matching auth provider and credentials class
+    :param disable_ssl_certificate_validation: whether to enforce SSL
+           certificate validation in SSL API requests to the auth system
+    :param ca_certs: CA certificate bundle for validation of certificates
+           in SSL API requests to the auth system
+    :param trace_requests: trace in log API requests to the auth system
     :param kwargs (dict): Dict of credential key/value pairs
 
     Examples:
@@ -471,7 +478,10 @@ def get_credentials(auth_url, fill_in=True, identity_version='v2', **kwargs):
     creds = credential_class(**kwargs)
     # Fill in the credentials fields that were not specified
     if fill_in:
-        auth_provider = auth_provider_class(creds, auth_url)
+        dsvm = disable_ssl_certificate_validation
+        auth_provider = auth_provider_class(
+            creds, auth_url, disable_ssl_certificate_validation=dsvm,
+            ca_certs=ca_certs, trace_requests=trace_requests)
         creds = auth_provider.fill_credentials()
     return creds
 
