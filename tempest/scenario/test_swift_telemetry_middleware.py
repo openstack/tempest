@@ -44,7 +44,8 @@ class TestSwiftTelemetry(manager.SwiftScenarioTest):
     """
 
     @classmethod
-    def resource_setup(cls):
+    def skip_checks(cls):
+        super(TestSwiftTelemetry, cls).skip_checks()
         if not CONF.service_available.ceilometer:
             skip_msg = ("%s skipped as ceilometer is not available" %
                         cls.__name__)
@@ -52,7 +53,10 @@ class TestSwiftTelemetry(manager.SwiftScenarioTest):
         elif CONF.telemetry.too_slow_to_test:
             skip_msg = "Ceilometer feature for fast work mysql is disabled"
             raise cls.skipException(skip_msg)
-        super(TestSwiftTelemetry, cls).resource_setup()
+
+    @classmethod
+    def setup_clients(cls):
+        super(TestSwiftTelemetry, cls).setup_clients()
         cls.telemetry_client = cls.os_operator.telemetry_client
 
     def _confirm_notifications(self, container_name, obj_name):

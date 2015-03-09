@@ -43,8 +43,8 @@ class TestLoadBalancerBasic(manager.NetworkScenarioTest):
     """
 
     @classmethod
-    def check_preconditions(cls):
-        super(TestLoadBalancerBasic, cls).check_preconditions()
+    def skip_checks(cls):
+        super(TestLoadBalancerBasic, cls).skip_checks()
         cfg = config.network
         if not test.is_extension_enabled('lbaas', 'network'):
             msg = 'LBaaS Extension is not enabled'
@@ -57,7 +57,6 @@ class TestLoadBalancerBasic(manager.NetworkScenarioTest):
     @classmethod
     def resource_setup(cls):
         super(TestLoadBalancerBasic, cls).resource_setup()
-        cls.check_preconditions()
         cls.servers_keypairs = {}
         cls.members = []
         cls.floating_ips = {}
