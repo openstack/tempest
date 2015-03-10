@@ -701,9 +701,6 @@ OrchestrationGroup = [
                default='m1.micro',
                help="Instance type for tests. Needs to be big enough for a "
                     "full OS plus the test workload"),
-    cfg.StrOpt('image_ref',
-               help="Name of heat-cfntools enabled image to use when "
-                    "launching test instances."),
     cfg.StrOpt('keypair_name',
                help="Name of existing keypair to launch servers with."),
     cfg.IntOpt('max_template_size',

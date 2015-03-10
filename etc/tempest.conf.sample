@@ -905,10 +905,6 @@
 # the test workload (string value)
 #instance_type = m1.micro
 
-# Name of heat-cfntools enabled image to use when launching test
-# instances. (string value)
-#image_ref = <None>
-
 # Name of existing keypair to launch servers with. (string value)
 #keypair_name = <None>
 

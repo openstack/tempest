@@ -32,8 +32,6 @@ class NeutronResourcesTestJSON(base.BaseOrchestrationTest):
     @classmethod
     def skip_checks(cls):
         super(NeutronResourcesTestJSON, cls).skip_checks()
-        if not CONF.orchestration.image_ref:
-            raise cls.skipException("No image available to test")
         if not CONF.service_available.neutron:
             raise cls.skipException("Neutron support is required")
 
@@ -68,7 +66,7 @@ class NeutronResourcesTestJSON(base.BaseOrchestrationTest):
             parameters={
                 'KeyName': cls.keypair_name,
                 'InstanceType': CONF.orchestration.instance_type,
-                'ImageId': CONF.orchestration.image_ref,
+                'ImageId': CONF.compute.image_ref,
                 'ExternalNetworkId': cls.external_network_id,
                 'timeout': CONF.orchestration.build_timeout,
                 'DNSServers': CONF.network.dns_servers,
