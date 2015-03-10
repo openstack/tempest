@@ -16,9 +16,9 @@
 import collections
 import re
 
+from tempest_lib.common.utils import data_utils
 import testtools
 
-from tempest.common.utils import data_utils
 from tempest import config
 from tempest import exceptions
 from tempest.openstack.common import log as logging

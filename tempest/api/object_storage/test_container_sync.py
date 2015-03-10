@@ -13,14 +13,16 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest_lib import decorators
-import testtools
 import time
 import urlparse
 
+from tempest_lib.common.utils import data_utils
+from tempest_lib import decorators
+import testtools
+
+
 from tempest.api.object_storage import base
 from tempest import clients
-from tempest.common.utils import data_utils
 from tempest import config
 from tempest import test
 

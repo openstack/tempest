@@ -10,13 +10,15 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-from tempest.common.utils import data_utils
+import re
+
+from tempest_lib.common.utils import data_utils
+
 from tempest.common.utils.linux import remote_client
 from tempest import config
 import tempest.stress.stressaction as stressaction
 import tempest.test
 
-import re
 CONF = config.CONF
 
 

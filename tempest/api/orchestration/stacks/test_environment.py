@@ -12,8 +12,9 @@
 
 import logging
 
+from tempest_lib.common.utils import data_utils
+
 from tempest.api.orchestration import base
-from tempest.common.utils import data_utils
 from tempest import config
 from tempest import test
 

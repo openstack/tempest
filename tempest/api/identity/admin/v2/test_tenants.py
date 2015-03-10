@@ -14,9 +14,9 @@
 #    under the License.
 
 from six import moves
+from tempest_lib.common.utils import data_utils
 
 from tempest.api.identity import base
-from tempest.common.utils import data_utils
 from tempest import test
 
 

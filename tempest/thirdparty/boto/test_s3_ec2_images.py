@@ -15,7 +15,8 @@
 
 import os
 
-from tempest.common.utils import data_utils
+from tempest_lib.common.utils import data_utils
+
 from tempest import config
 from tempest import test
 from tempest.thirdparty.boto import test as boto_test

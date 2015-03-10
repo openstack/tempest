@@ -20,11 +20,11 @@ import os
 import time
 import urllib
 
+from tempest_lib.common.utils import misc as misc_utils
 from tempest_lib import exceptions as lib_exc
 
 from tempest.common import glance_http
 from tempest.common import service_client
-from tempest.common.utils import misc as misc_utils
 from tempest import exceptions
 from tempest.openstack.common import log as logging
 

@@ -10,11 +10,11 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib.common.utils import data_utils
 from tempest_lib import decorators
 from tempest_lib import exceptions as lib_exc
 
 from tempest.api.baremetal.admin import base
-from tempest.common.utils import data_utils
 from tempest import test
 
 

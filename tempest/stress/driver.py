@@ -18,11 +18,11 @@ import signal
 import time
 
 from six import moves
+from tempest_lib.common.utils import data_utils
 
 from tempest import clients
 from tempest.common import cred_provider
 from tempest.common import ssh
-from tempest.common.utils import data_utils
 from tempest import config
 from tempest import exceptions
 from tempest.openstack.common import importutils
