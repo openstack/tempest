@@ -31,7 +31,9 @@ class BaseVolumeQuotasNegativeV2TestJSON(base.BaseVolumeAdminTest):
     @classmethod
     def resource_setup(cls):
         super(BaseVolumeQuotasNegativeV2TestJSON, cls).resource_setup()
-        cls.shared_quota_set = {'gigabytes': 3, 'volumes': 1, 'snapshots': 1}
+        cls.default_volume_size = cls.volumes_client.default_volume_size
+        cls.shared_quota_set = {'gigabytes': 3 * cls.default_volume_size,
+                                'volumes': 1, 'snapshots': 1}
 
         # NOTE(gfidente): no need to restore original quota set
         # after the tests as they only work with tenant isolation.
@@ -67,14 +69,16 @@ class BaseVolumeQuotasNegativeV2TestJSON(base.BaseVolumeAdminTest):
                         self.demo_tenant_id,
                         **self.shared_quota_set)
 
-        new_quota_set = {'gigabytes': 2, 'volumes': 2, 'snapshots': 1}
+        new_quota_set = {'gigabytes': 2 * self.default_volume_size,
+                         'volumes': 2, 'snapshots': 1}
         self.quotas_client.update_quota_set(
             self.demo_tenant_id,
             **new_quota_set)
         self.assertRaises(lib_exc.OverLimit,
                           self.volumes_client.create_volume)
 
-        new_quota_set = {'gigabytes': 2, 'volumes': 1, 'snapshots': 2}
+        new_quota_set = {'gigabytes': 2 * self.default_volume_size,
+                         'volumes': 1, 'snapshots': 2}
         self.quotas_client.update_quota_set(
             self.demo_tenant_id,
             **self.shared_quota_set)

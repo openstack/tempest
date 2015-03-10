@@ -94,7 +94,8 @@ class BaseVolumeQuotasAdminV2TestJSON(base.BaseVolumeAdminTest):
         self.assertEqual(quota_usage['volumes']['in_use'] + 1,
                          new_quota_usage['volumes']['in_use'])
 
-        self.assertEqual(quota_usage['gigabytes']['in_use'] + 1,
+        self.assertEqual(quota_usage['gigabytes']['in_use'] +
+                         volume["size"],
                          new_quota_usage['gigabytes']['in_use'])
 
     @test.attr(type='gate')
