@@ -432,6 +432,11 @@
 # value)
 #attach_encrypted_volume = true
 
+# Does the test environment support creating instances with multiple
+# ports on the same network? This is only valid when using Neutron.
+# (boolean value)
+#allow_duplicate_networks = false
+
 
 [dashboard]
 

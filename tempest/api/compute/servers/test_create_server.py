@@ -65,6 +65,20 @@ class ServersTestJSON(base.BaseV2ComputeTest):
         cls.password = cls.server_initial['adminPass']
         cls.server = cls.client.show_server(cls.server_initial['id'])
 
+    def _create_net_subnet_ret_net_from_cidr(self, cidr):
+        name_net = data_utils.rand_name(self.__class__.__name__)
+        net = self.network_client.create_network(name=name_net)
+        self.addCleanup(self.network_client.delete_network,
+                        net['network']['id'])
+
+        subnet = self.network_client.create_subnet(
+            network_id=net['network']['id'],
+            cidr=cidr,
+            ip_version=4)
+        self.addCleanup(self.network_client.delete_subnet,
+                        subnet['subnet']['id'])
+        return net
+
     @test.attr(type='smoke')
     @test.idempotent_id('5de47127-9977-400a-936f-abcfbec1218f')
     def test_verify_server_details(self):
@@ -147,29 +161,8 @@ class ServersTestJSON(base.BaseV2ComputeTest):
     def test_verify_multiple_nics_order(self):
         # Verify that the networks order given at the server creation is
         # preserved within the server.
-        name_net1 = data_utils.rand_name(self.__class__.__name__)
-        net1 = self.network_client.create_network(name=name_net1)
-        self.addCleanup(self.network_client.delete_network,
-                        net1['network']['id'])
-
-        name_net2 = data_utils.rand_name(self.__class__.__name__)
-        net2 = self.network_client.create_network(name=name_net2)
-        self.addCleanup(self.network_client.delete_network,
-                        net2['network']['id'])
-
-        subnet1 = self.network_client.create_subnet(
-            network_id=net1['network']['id'],
-            cidr='19.80.0.0/24',
-            ip_version=4)
-        self.addCleanup(self.network_client.delete_subnet,
-                        subnet1['subnet']['id'])
-
-        subnet2 = self.network_client.create_subnet(
-            network_id=net2['network']['id'],
-            cidr='19.86.0.0/24',
-            ip_version=4)
-        self.addCleanup(self.network_client.delete_subnet,
-                        subnet2['subnet']['id'])
+        net1 = self._create_net_subnet_ret_net_from_cidr('19.80.0.0/24')
+        net2 = self._create_net_subnet_ret_net_from_cidr('19.86.0.0/24')
 
         networks = [{'uuid': net1['network']['id']},
                     {'uuid': net2['network']['id']}]
@@ -196,10 +189,47 @@ class ServersTestJSON(base.BaseV2ComputeTest):
         # other times ['19.80.0.3', '19.86.0.3']. So we check if the first
         # address is in first network, similarly second address is in second
         # network.
-        addr = [addresses[name_net1][0]['addr'],
-                addresses[name_net2][0]['addr']]
+        addr = [addresses[net1['network']['name']][0]['addr'],
+                addresses[net2['network']['name']][0]['addr']]
         networks = [netaddr.IPNetwork('19.80.0.0/24'),
                     netaddr.IPNetwork('19.86.0.0/24')]
+        for address, network in zip(addr, networks):
+            self.assertIn(address, network)
+
+    @test.idempotent_id('1678d144-ed74-43f8-8e57-ab10dbf9b3c2')
+    @testtools.skipUnless(CONF.service_available.neutron,
+                          'Neutron service must be available.')
+    # The below skipUnless should be removed once Kilo-eol happens.
+    @testtools.skipUnless(CONF.compute_feature_enabled.
+                          allow_duplicate_networks,
+                          'Duplicate networks must be allowed')
+    def test_verify_duplicate_network_nics(self):
+        # Verify that server creation does not fail when more than one nic
+        # is created on the same network.
+        net1 = self._create_net_subnet_ret_net_from_cidr('19.80.0.0/24')
+        net2 = self._create_net_subnet_ret_net_from_cidr('19.86.0.0/24')
+
+        networks = [{'uuid': net1['network']['id']},
+                    {'uuid': net2['network']['id']},
+                    {'uuid': net1['network']['id']}]
+
+        server_multi_nics = self.create_test_server(
+            networks=networks, wait_until='ACTIVE')
+
+        def cleanup_server():
+            self.client.delete_server(server_multi_nics['id'])
+            self.client.wait_for_server_termination(server_multi_nics['id'])
+
+        self.addCleanup(cleanup_server)
+
+        addresses = self.client.list_addresses(server_multi_nics['id'])
+
+        addr = [addresses[net1['network']['name']][0]['addr'],
+                addresses[net2['network']['name']][0]['addr'],
+                addresses[net1['network']['name']][1]['addr']]
+        networks = [netaddr.IPNetwork('19.80.0.0/24'),
+                    netaddr.IPNetwork('19.86.0.0/24'),
+                    netaddr.IPNetwork('19.80.0.0/24')]
         for address, network in zip(addr, networks):
             self.assertIn(address, network)
 
