@@ -18,6 +18,7 @@ import os
 import subprocess
 
 import netaddr
+from oslo_log import log
 import six
 from tempest_lib.common.utils import data_utils
 from tempest_lib import exceptions as lib_exc
@@ -28,7 +29,6 @@ from tempest.common import credentials
 from tempest.common.utils.linux import remote_client
 from tempest import config
 from tempest import exceptions
-from tempest.openstack.common import log
 from tempest.services.network import resources as net_resources
 import tempest.test
 

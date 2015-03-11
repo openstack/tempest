@@ -110,13 +110,13 @@ import sys
 import unittest
 
 import netaddr
+from oslo_log import log as logging
+from oslo_utils import timeutils
 from tempest_lib import exceptions as lib_exc
 import yaml
 
 import tempest.auth
 from tempest import config
-from tempest.openstack.common import log as logging
-from tempest.openstack.common import timeutils
 from tempest.services.compute.json import flavors_client
 from tempest.services.compute.json import security_groups_client
 from tempest.services.compute.json import servers_client
@@ -1038,7 +1038,7 @@ def get_options():
 
 def setup_logging():
     global LOG
-    logging.setup(__name__)
+    logging.setup(CONF, __name__)
     LOG = logging.getLogger(__name__)
 
 

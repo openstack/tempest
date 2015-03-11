@@ -18,7 +18,7 @@ import sys
 
 import six
 
-from tempest.openstack.common import log as logging
+from oslo_log import log as logging
 
 
 @six.add_metaclass(abc.ABCMeta)

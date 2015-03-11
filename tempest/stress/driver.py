@@ -17,6 +17,8 @@ import os
 import signal
 import time
 
+from oslo_log import log as logging
+from oslo_utils import importutils
 from six import moves
 from tempest_lib.common.utils import data_utils
 
@@ -25,8 +27,6 @@ from tempest.common import cred_provider
 from tempest.common import ssh
 from tempest import config
 from tempest import exceptions
-from tempest.openstack.common import importutils
-from tempest.openstack.common import log as logging
 from tempest.stress import cleanup
 
 CONF = config.CONF

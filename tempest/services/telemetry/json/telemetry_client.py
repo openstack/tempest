@@ -15,8 +15,9 @@
 
 import urllib
 
+from oslo_serialization import jsonutils as json
+
 from tempest.common import service_client
-from tempest.openstack.common import jsonutils as json
 
 
 class TelemetryClientJSON(service_client.ServiceClient):

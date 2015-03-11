@@ -14,11 +14,11 @@
 
 import time
 
-from oslo.config import cfg
+from oslo_config import cfg
+from oslotest import mockpatch
 
 from tempest.common.utils.linux import remote_client
 from tempest import config
-from tempest.openstack.common.fixture import mockpatch
 from tempest.tests import base
 from tempest.tests import fake_config
 

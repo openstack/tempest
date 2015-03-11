@@ -18,7 +18,7 @@ import subprocess
 
 from tempest_lib import exceptions
 
-from tempest.openstack.common import log as logging
+from oslo_log import log as logging
 from tempest.tests import base
 
 LOG = logging.getLogger(__name__)

@@ -14,12 +14,12 @@
 
 import abc
 
+from oslo_log import log as logging
 import six
 
 from tempest import auth
 from tempest import config
 from tempest import exceptions
-from tempest.openstack.common import log as logging
 
 CONF = config.CONF
 LOG = logging.getLogger(__name__)

@@ -24,6 +24,8 @@ import urllib
 import uuid
 
 import fixtures
+from oslo_log import log as logging
+from oslo_utils import importutils
 import six
 import testscenarios
 import testtools
@@ -33,8 +35,6 @@ from tempest.common import credentials
 import tempest.common.generator.valid_generator as valid
 from tempest import config
 from tempest import exceptions
-from tempest.openstack.common import importutils
-from tempest.openstack.common import log as logging
 
 LOG = logging.getLogger(__name__)
 
