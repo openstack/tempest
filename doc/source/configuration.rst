@@ -1,6 +1,21 @@
 Tempest Configuration Guide
 ===========================
 
+This guide is a starting point for configuring tempest. It aims to elaborate
+on and explain some of the mandatory and common configuration settings and how
+they are used in conjunction. The source of truth on each option is the sample
+config file which explains the purpose of each individual option.
+
+Lock Path
+---------
+
+There are some tests and operations inside of tempest that need to be
+externally locked when running in parallel to prevent them from running at
+the same time. This is a mandatory step for configuring tempest and is still
+needed even when running serially. All that is needed to do this is:
+
+ #. Set the lock_path option in the oslo_concurrency group
+
 Auth/Credentials
 ----------------
 
