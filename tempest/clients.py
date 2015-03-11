@@ -228,13 +228,14 @@ class Manager(manager.Manager):
         self.negative_client = negative_rest_client.NegativeRestClient(
             self.auth_provider, service)
 
-        # TODO(andreaf) EC2 client still do their auth, v2 only
-        ec2_client_args = (self.credentials.username,
-                           self.credentials.password,
-                           CONF.identity.uri,
-                           self.credentials.tenant_name)
-        self.ec2api_client = botoclients.APIClientEC2(*ec2_client_args)
-        self.s3_client = botoclients.ObjectClientS3(*ec2_client_args)
+        # Generating EC2 credentials in tempest is only supported
+        # with identity v2
+        if CONF.identity_feature_enabled.api_v2 and \
+                CONF.identity.auth_version == 'v2':
+            # EC2 and S3 clients, if used, will check onfigured AWS credentials
+            # and generate new ones if needed
+            self.ec2api_client = botoclients.APIClientEC2(self.identity_client)
+            self.s3_client = botoclients.ObjectClientS3(self.identity_client)
 
     def _set_compute_clients(self):
         params = {
