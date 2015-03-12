@@ -1199,7 +1199,6 @@ class TempestConfigProxy(object):
     _path = None
 
     _extra_log_defaults = [
-        ('keystoneclient.session', std_logging.INFO),
         ('paramiko.transport', std_logging.INFO),
         ('requests.packages.urllib3.connectionpool', std_logging.WARN),
     ]
