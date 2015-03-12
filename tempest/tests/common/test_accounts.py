@@ -17,6 +17,7 @@ import os
 
 import mock
 from oslo_concurrency.fixture import lockutils as lockutils_fixtures
+from oslo_concurrency import lockutils
 from oslo_config import cfg
 from oslotest import mockpatch
 
@@ -126,13 +127,7 @@ class TestAccount(base.TestCase):
         with mock.patch('__builtin__.open', mock.mock_open(),
                         create=True) as open_mock:
             test_account_class._get_free_hash(hash_list)
-            # FIXME(dhellmann): The configuration option is not part
-            # of the API of the library, because if we change the
-            # option name or group it will break this use. Tempest
-            # needs to set this value somewhere that it owns, and then
-            # use lockutils.set_defaults() to tell oslo.concurrency
-            # what value to use.
-            lock_path = os.path.join(accounts.CONF.oslo_concurrency.lock_path,
+            lock_path = os.path.join(lockutils.get_lock_path(accounts.CONF),
                                      'test_accounts',
                                      hash_list[0])
             open_mock.assert_called_once_with(lock_path, 'w')
@@ -170,13 +165,7 @@ class TestAccount(base.TestCase):
         with mock.patch('__builtin__.open', mock.mock_open(),
                         create=True) as open_mock:
             test_account_class._get_free_hash(hash_list)
-            # FIXME(dhellmann): The configuration option is not part
-            # of the API of the library, because if we change the
-            # option name or group it will break this use. Tempest
-            # needs to set this value somewhere that it owns, and then
-            # use lockutils.set_defaults() to tell oslo.concurrency
-            # what value to use.
-            lock_path = os.path.join(accounts.CONF.oslo_concurrency.lock_path,
+            lock_path = os.path.join(lockutils.get_lock_path(accounts.CONF),
                                      'test_accounts',
                                      hash_list[3])
             open_mock.assert_has_calls([mock.call(lock_path, 'w')])
@@ -192,13 +181,7 @@ class TestAccount(base.TestCase):
         remove_mock = self.useFixture(mockpatch.Patch('os.remove'))
         rmdir_mock = self.useFixture(mockpatch.Patch('os.rmdir'))
         test_account_class.remove_hash(hash_list[2])
-        # FIXME(dhellmann): The configuration option is not part of
-        # the API of the library, because if we change the option name
-        # or group it will break this use. Tempest needs to set this
-        # value somewhere that it owns, and then use
-        # lockutils.set_defaults() to tell oslo.concurrency what value
-        # to use.
-        hash_path = os.path.join(accounts.CONF.oslo_concurrency.lock_path,
+        hash_path = os.path.join(lockutils.get_lock_path(accounts.CONF),
                                  'test_accounts',
                                  hash_list[2])
         lock_path = os.path.join(accounts.CONF.oslo_concurrency.lock_path,
@@ -218,13 +201,7 @@ class TestAccount(base.TestCase):
         remove_mock = self.useFixture(mockpatch.Patch('os.remove'))
         rmdir_mock = self.useFixture(mockpatch.Patch('os.rmdir'))
         test_account_class.remove_hash(hash_list[2])
-        # FIXME(dhellmann): The configuration option is not part of
-        # the API of the library, because if we change the option name
-        # or group it will break this use. Tempest needs to set this
-        # value somewhere that it owns, and then use
-        # lockutils.set_defaults() to tell oslo.concurrency what value
-        # to use.
-        hash_path = os.path.join(accounts.CONF.oslo_concurrency.lock_path,
+        hash_path = os.path.join(lockutils.get_lock_path(accounts.CONF),
                                  'test_accounts',
                                  hash_list[2])
         remove_mock.mock.assert_called_once_with(hash_path)
