@@ -53,7 +53,7 @@ def get_configured_credentials(credential_type, fill_in=True,
     if identity_version == 'v3':
         conf_attributes.append('domain_name')
     # Read the parts of credentials from config
-    params = DEFAULT_PARAMS
+    params = DEFAULT_PARAMS.copy()
     section, prefix = CREDENTIAL_TYPES[credential_type]
     for attr in conf_attributes:
         _section = getattr(CONF, section)
