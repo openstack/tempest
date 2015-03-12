@@ -393,6 +393,8 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
                                                    "floating ip")
 
     @test.idempotent_id('1546850e-fbaa-42f5-8b5f-03d8a6a95f15')
+    @testtools.skipIf(CONF.baremetal.driver_enabled,
+                      'Baremetal relies on a shared physical network.')
     @test.attr(type='smoke')
     @test.services('compute', 'network')
     def test_connectivity_between_vms_on_different_networks(self):
