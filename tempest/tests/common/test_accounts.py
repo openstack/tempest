@@ -14,10 +14,10 @@
 
 import hashlib
 import os
-import tempfile
 
 import mock
-from oslo.config import cfg
+from oslo_concurrency.fixture import lockutils as lockutils_fixtures
+from oslo_config import cfg
 from oslotest import mockpatch
 
 from tempest import auth
@@ -36,9 +36,7 @@ class TestAccount(base.TestCase):
         super(TestAccount, self).setUp()
         self.useFixture(fake_config.ConfigFixture())
         self.stubs.Set(config, 'TempestConfigPrivate', fake_config.FakePrivate)
-        self.temp_dir = tempfile.mkdtemp()
-        cfg.CONF.set_default('lock_path', self.temp_dir)
-        self.addCleanup(os.rmdir, self.temp_dir)
+        self.useFixture(lockutils_fixtures.ExternalLockFixture())
         self.test_accounts = [
             {'username': 'test_user1', 'tenant_name': 'test_tenant1',
              'password': 'p'},
@@ -117,7 +115,7 @@ class TestAccount(base.TestCase):
         self.assertTrue(res, "_create_hash_file should return True if the "
                         "pseudo-lock doesn't already exist")
 
-    @mock.patch('tempest.openstack.common.lockutils.lock')
+    @mock.patch('oslo_concurrency.lockutils.lock')
     def test_get_free_hash_no_previous_accounts(self, lock_mock):
         # Emulate no pre-existing lock
         self.useFixture(mockpatch.Patch('os.path.isdir', return_value=False))
@@ -128,13 +126,21 @@ class TestAccount(base.TestCase):
         with mock.patch('__builtin__.open', mock.mock_open(),
                         create=True) as open_mock:
             test_account_class._get_free_hash(hash_list)
-            lock_path = os.path.join(accounts.CONF.lock_path, 'test_accounts',
+            # FIXME(dhellmann): The configuration option is not part
+            # of the API of the library, because if we change the
+            # option name or group it will break this use. Tempest
+            # needs to set this value somewhere that it owns, and then
+            # use lockutils.set_defaults() to tell oslo.concurrency
+            # what value to use.
+            lock_path = os.path.join(accounts.CONF.oslo_concurrency.lock_path,
+                                     'test_accounts',
                                      hash_list[0])
             open_mock.assert_called_once_with(lock_path, 'w')
-        mkdir_path = os.path.join(accounts.CONF.lock_path, 'test_accounts')
+        mkdir_path = os.path.join(accounts.CONF.oslo_concurrency.lock_path,
+                                  'test_accounts')
         mkdir_mock.mock.assert_called_once_with(mkdir_path)
 
-    @mock.patch('tempest.openstack.common.lockutils.lock')
+    @mock.patch('oslo_concurrency.lockutils.lock')
     def test_get_free_hash_no_free_accounts(self, lock_mock):
         hash_list = self._get_hash_list(self.test_accounts)
         # Emulate pre-existing lock dir
@@ -146,7 +152,7 @@ class TestAccount(base.TestCase):
             self.assertRaises(exceptions.InvalidConfiguration,
                               test_account_class._get_free_hash, hash_list)
 
-    @mock.patch('tempest.openstack.common.lockutils.lock')
+    @mock.patch('oslo_concurrency.lockutils.lock')
     def test_get_free_hash_some_in_use_accounts(self, lock_mock):
         # Emulate no pre-existing lock
         self.useFixture(mockpatch.Patch('os.path.isdir', return_value=True))
@@ -164,11 +170,18 @@ class TestAccount(base.TestCase):
         with mock.patch('__builtin__.open', mock.mock_open(),
                         create=True) as open_mock:
             test_account_class._get_free_hash(hash_list)
-            lock_path = os.path.join(accounts.CONF.lock_path, 'test_accounts',
+            # FIXME(dhellmann): The configuration option is not part
+            # of the API of the library, because if we change the
+            # option name or group it will break this use. Tempest
+            # needs to set this value somewhere that it owns, and then
+            # use lockutils.set_defaults() to tell oslo.concurrency
+            # what value to use.
+            lock_path = os.path.join(accounts.CONF.oslo_concurrency.lock_path,
+                                     'test_accounts',
                                      hash_list[3])
             open_mock.assert_has_calls([mock.call(lock_path, 'w')])
 
-    @mock.patch('tempest.openstack.common.lockutils.lock')
+    @mock.patch('oslo_concurrency.lockutils.lock')
     def test_remove_hash_last_account(self, lock_mock):
         hash_list = self._get_hash_list(self.test_accounts)
         # Pretend the pseudo-lock is there
@@ -179,13 +192,21 @@ class TestAccount(base.TestCase):
         remove_mock = self.useFixture(mockpatch.Patch('os.remove'))
         rmdir_mock = self.useFixture(mockpatch.Patch('os.rmdir'))
         test_account_class.remove_hash(hash_list[2])
-        hash_path = os.path.join(accounts.CONF.lock_path, 'test_accounts',
+        # FIXME(dhellmann): The configuration option is not part of
+        # the API of the library, because if we change the option name
+        # or group it will break this use. Tempest needs to set this
+        # value somewhere that it owns, and then use
+        # lockutils.set_defaults() to tell oslo.concurrency what value
+        # to use.
+        hash_path = os.path.join(accounts.CONF.oslo_concurrency.lock_path,
+                                 'test_accounts',
                                  hash_list[2])
-        lock_path = os.path.join(accounts.CONF.lock_path, 'test_accounts')
+        lock_path = os.path.join(accounts.CONF.oslo_concurrency.lock_path,
+                                 'test_accounts')
         remove_mock.mock.assert_called_once_with(hash_path)
         rmdir_mock.mock.assert_called_once_with(lock_path)
 
-    @mock.patch('tempest.openstack.common.lockutils.lock')
+    @mock.patch('oslo_concurrency.lockutils.lock')
     def test_remove_hash_not_last_account(self, lock_mock):
         hash_list = self._get_hash_list(self.test_accounts)
         # Pretend the pseudo-lock is there
@@ -197,7 +218,14 @@ class TestAccount(base.TestCase):
         remove_mock = self.useFixture(mockpatch.Patch('os.remove'))
         rmdir_mock = self.useFixture(mockpatch.Patch('os.rmdir'))
         test_account_class.remove_hash(hash_list[2])
-        hash_path = os.path.join(accounts.CONF.lock_path, 'test_accounts',
+        # FIXME(dhellmann): The configuration option is not part of
+        # the API of the library, because if we change the option name
+        # or group it will break this use. Tempest needs to set this
+        # value somewhere that it owns, and then use
+        # lockutils.set_defaults() to tell oslo.concurrency what value
+        # to use.
+        hash_path = os.path.join(accounts.CONF.oslo_concurrency.lock_path,
+                                 'test_accounts',
                                  hash_list[2])
         remove_mock.mock.assert_called_once_with(hash_path)
         rmdir_mock.mock.assert_not_called()
@@ -277,9 +305,7 @@ class TestNotLockingAccount(base.TestCase):
         super(TestNotLockingAccount, self).setUp()
         self.useFixture(fake_config.ConfigFixture())
         self.stubs.Set(config, 'TempestConfigPrivate', fake_config.FakePrivate)
-        self.temp_dir = tempfile.mkdtemp()
-        cfg.CONF.set_default('lock_path', self.temp_dir)
-        self.addCleanup(os.rmdir, self.temp_dir)
+        self.useFixture(lockutils_fixtures.ExternalLockFixture())
         self.test_accounts = [
             {'username': 'test_user1', 'tenant_name': 'test_tenant1',
              'password': 'p'},

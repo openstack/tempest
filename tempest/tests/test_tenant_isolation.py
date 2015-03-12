@@ -13,13 +13,13 @@
 #    under the License.
 
 import mock
-from oslo.config import cfg
+from oslo_config import cfg
+from oslotest import mockpatch
 
 from tempest.common import isolated_creds
 from tempest.common import service_client
 from tempest import config
 from tempest import exceptions
-from tempest.openstack.common.fixture import mockpatch
 from tempest.services.identity.v2.json import identity_client as \
     json_iden_client
 from tempest.services.identity.v2.json import token_client as json_token_client

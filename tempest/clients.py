@@ -15,11 +15,12 @@
 
 import copy
 
+from oslo_log import log as logging
+
 from tempest.common import cred_provider
 from tempest.common import negative_rest_client
 from tempest import config
 from tempest import manager
-from tempest.openstack.common import log as logging
 from tempest.services.baremetal.v1.json.baremetal_client import \
     BaremetalClientJSON
 from tempest.services import botoclients

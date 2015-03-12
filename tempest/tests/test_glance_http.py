@@ -18,12 +18,12 @@ import json
 import socket
 
 import mock
+from oslotest import mockpatch
 import six
 from tempest_lib import exceptions as lib_exc
 
 from tempest.common import glance_http
 from tempest import exceptions
-from tempest.openstack.common.fixture import mockpatch
 from tempest.tests import base
 from tempest.tests import fake_auth_provider
 from tempest.tests import fake_http

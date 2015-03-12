@@ -15,6 +15,8 @@
 
 import time
 
+from oslo_log import log as logging
+from oslo_utils import excutils
 from tempest_lib.common.utils import data_utils
 from tempest_lib import exceptions as lib_exc
 
@@ -22,8 +24,6 @@ from tempest import clients
 from tempest.common import credentials
 from tempest import config
 from tempest import exceptions
-from tempest.openstack.common import excutils
-from tempest.openstack.common import log as logging
 import tempest.test
 
 CONF = config.CONF

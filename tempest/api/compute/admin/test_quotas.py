@@ -13,13 +13,13 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from oslo_log import log as logging
 import six
 from tempest_lib.common.utils import data_utils
 from testtools import matchers
 
 from tempest.api.compute import base
 from tempest.common import tempest_fixtures as fixtures
-from tempest.openstack.common import log as logging
 from tempest import test
 
 LOG = logging.getLogger(__name__)

@@ -1,17 +1,7 @@
 [DEFAULT]
 
 #
-# From tempest.config
-#
-
-# Whether to disable inter-process locks (boolean value)
-#disable_process_locking = false
-
-# Directory to use for lock files. (string value)
-#lock_path = <None>
-
-#
-# From tempest.config
+# From oslo.log
 #
 
 # Print debugging output (set logging level to DEBUG instead of
@@ -21,10 +11,6 @@
 # Print more verbose output (set logging level to INFO instead of
 # default WARNING level). (boolean value)
 #verbose = false
-
-#
-# From tempest.config
-#
 
 # The name of a logging configuration file. This file is appended to
 # any existing logging configuration files. For details about logging
@@ -66,16 +52,8 @@
 # Syslog facility to receive log lines. (string value)
 #syslog_log_facility = LOG_USER
 
-#
-# From tempest.config
-#
-
 # Log output to standard error. (boolean value)
 #use_stderr = true
-
-#
-# From tempest.config
-#
 
 # Format string to use for log messages with context. (string value)
 #logging_context_format_string = %(asctime)s.%(msecs)03d %(process)d %(levelname)s %(name)s [%(request_id)s %(user_identity)s] %(instance)s%(message)s
@@ -92,7 +70,7 @@
 #logging_exception_prefix = %(asctime)s.%(msecs)03d %(process)d TRACE %(name)s %(instance)s
 
 # List of logger=LEVEL pairs. (list value)
-#default_log_levels = amqp=WARN,amqplib=WARN,boto=WARN,qpid=WARN,sqlalchemy=WARN,suds=INFO,oslo.messaging=INFO,iso8601=WARN,requests.packages.urllib3.connectionpool=WARN,urllib3.connectionpool=WARN,websocket=WARN,keystonemiddleware=WARN,routes.middleware=WARN,stevedore=WARN
+#default_log_levels = amqp=WARN,amqplib=WARN,boto=WARN,qpid=WARN,sqlalchemy=WARN,suds=INFO,oslo.messaging=INFO,iso8601=WARN,requests.packages.urllib3.connectionpool=WARN,urllib3.connectionpool=WARN,websocket=WARN,requests.packages.urllib3.util.retry=WARN,urllib3.util.retry=WARN,keystonemiddleware=WARN,routes.middleware=WARN,stevedore=WARN
 
 # Enables or disables publication of error events. (boolean value)
 #publish_errors = false
@@ -915,6 +893,24 @@
 # Value must match heat configuration of the same name. (integer
 # value)
 #max_resources_per_stack = 1000
+
+
+[oslo_concurrency]
+
+#
+# From oslo.concurrency
+#
+
+# Enables or disables inter-process locks. (boolean value)
+# Deprecated group/name - [DEFAULT]/disable_process_locking
+#disable_process_locking = false
+
+# Directory to use for lock files.  For security, the specified
+# directory should only be writable by the user running the processes
+# that need locking. Defaults to environment variable OSLO_LOCK_PATH.
+# If external locks are used, a lock path must be set. (string value)
+# Deprecated group/name - [DEFAULT]/lock_path
+#lock_path = <None>
 
 
 [scenario]

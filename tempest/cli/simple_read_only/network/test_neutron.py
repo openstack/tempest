@@ -15,11 +15,11 @@
 
 import re
 
+from oslo_log import log as logging
 from tempest_lib import exceptions
 
 from tempest import cli
 from tempest import config
-from tempest.openstack.common import log as logging
 from tempest import test
 
 CONF = config.CONF

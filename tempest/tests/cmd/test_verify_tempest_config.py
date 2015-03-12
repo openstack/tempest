@@ -15,10 +15,10 @@
 import json
 
 import mock
+from oslotest import mockpatch
 
 from tempest.cmd import verify_tempest_config
 from tempest import config
-from tempest.openstack.common.fixture import mockpatch
 from tempest.tests import base
 from tempest.tests import fake_config
 

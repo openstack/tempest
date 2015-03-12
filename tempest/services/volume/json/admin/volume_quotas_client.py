@@ -14,8 +14,9 @@
 
 import urllib
 
+from oslo_serialization import jsonutils
+
 from tempest.common import service_client
-from tempest.openstack.common import jsonutils
 
 
 class BaseVolumeQuotasClientJSON(service_client.ServiceClient):

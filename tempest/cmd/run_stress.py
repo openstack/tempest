@@ -26,7 +26,7 @@ except ImportError:
 
 from testtools import testsuite
 
-from tempest.openstack.common import log as logging
+from oslo_log import log as logging
 from tempest.stress import driver
 
 LOG = logging.getLogger(__name__)

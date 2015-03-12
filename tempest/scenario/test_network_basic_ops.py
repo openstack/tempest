@@ -16,12 +16,12 @@
 import collections
 import re
 
+from oslo_log import log as logging
 from tempest_lib.common.utils import data_utils
 import testtools
 
 from tempest import config
 from tempest import exceptions
-from tempest.openstack.common import log as logging
 from tempest.scenario import manager
 from tempest.services.network import resources as net_resources
 from tempest import test

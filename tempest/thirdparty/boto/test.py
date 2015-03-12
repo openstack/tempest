@@ -24,6 +24,7 @@ from boto import ec2
 from boto import exception
 from boto import s3
 import keystoneclient.exceptions
+from oslo_log import log as logging
 import six
 
 from tempest_lib import exceptions as lib_exc
@@ -32,7 +33,6 @@ import tempest.clients
 from tempest.common.utils import file_utils
 from tempest import config
 from tempest import exceptions
-from tempest.openstack.common import log as logging
 import tempest.test
 from tempest.thirdparty.boto.utils import wait
 

@@ -14,8 +14,10 @@
 #    under the License.
 import functools
 import netaddr
+
+from oslo_log import log as logging
+
 from tempest import config
-from tempest.openstack.common import log as logging
 from tempest.scenario import manager
 from tempest import test
 
