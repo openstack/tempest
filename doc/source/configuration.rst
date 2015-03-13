@@ -1,3 +1,5 @@
+.. _tempest-configuration:
+
 Tempest Configuration Guide
 ===========================
 
