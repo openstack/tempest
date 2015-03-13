@@ -101,19 +101,13 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         self.servers = []
 
     def _setup_network_and_servers(self, **kwargs):
-        boot_with_port = kwargs.pop('boot_with_port', False)
         self.security_group = \
             self._create_security_group(tenant_id=self.tenant_id)
         self.network, self.subnet, self.router = self.create_networks(**kwargs)
         self.check_networks()
 
-        self.port_id = None
-        if boot_with_port:
-            # create a port on the network and boot with that
-            self.port_id = self._create_port(self.network['id']).id
-
         name = data_utils.rand_name('server-smoke')
-        server = self._create_server(name, self.network, self.port_id)
+        server = self._create_server(name, self.network)
         self._check_tenant_network_connectivity()
 
         floating_ip = self.create_floating_ip(server)
@@ -147,7 +141,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
             self.assertIn(self.router.id,
                           seen_router_ids)
 
-    def _create_server(self, name, network, port_id=None):
+    def _create_server(self, name, network):
         keypair = self.create_keypair()
         self.keypairs[keypair['name']] = keypair
         security_groups = [{'name': self.security_group['name']}]
@@ -158,8 +152,6 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
             'key_name': keypair['name'],
             'security_groups': security_groups,
         }
-        if port_id is not None:
-            create_kwargs['networks'][0]['port'] = port_id
         server = self.create_server(name=name, create_kwargs=create_kwargs)
         self.servers.append(server)
         return server
@@ -611,36 +603,3 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         self.check_public_network_connectivity(
             should_connect=True, msg="after updating "
             "admin_state_up of instance port to True")
-
-    @test.idempotent_id('759462e1-8535-46b0-ab3a-33aa45c55aaa')
-    @test.attr(type='smoke')
-    @test.services('compute', 'network')
-    def test_preserve_preexisting_port(self):
-        """Tests that a pre-existing port provided on server boot is not
-        deleted if the server is deleted.
-
-        Nova should unbind the port from the instance on delete if the port was
-        not created by Nova as part of the boot request.
-        """
-        # Setup the network, create a port and boot the server from that port.
-        self._setup_network_and_servers(boot_with_port=True)
-        _, server = self.floating_ip_tuple
-        self.assertIsNotNone(self.port_id,
-                             'Server should have been created from a '
-                             'pre-existing port.')
-        # Assert the port is bound to the server.
-        port_list = self._list_ports(device_id=server['id'],
-                                     network_id=self.network['id'])
-        self.assertEqual(1, len(port_list),
-                         'There should only be one port created for '
-                         'server %s.' % server['id'])
-        self.assertEqual(self.port_id, port_list[0]['id'])
-        # Delete the server.
-        self.servers_client.delete_server(server['id'])
-        self.servers_client.wait_for_server_termination(server['id'])
-        # Assert the port still exists on the network but is unbound from
-        # the deleted server.
-        port = self.network_client.show_port(self.port_id)['port']
-        self.assertEqual(self.network['id'], port['network_id'])
-        self.assertEqual('', port['device_id'])
-        self.assertEqual('', port['device_owner'])
