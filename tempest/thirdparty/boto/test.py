@@ -203,6 +203,9 @@ class BotoTestCase(tempest.test.BaseTestCase):
         super(BotoTestCase, cls).skip_checks()
         if not CONF.compute_feature_enabled.ec2_api:
             raise cls.skipException("The EC2 API is not available")
+        if not CONF.identity_feature_enabled.api_v2 or \
+                not CONF.identity.auth_version == 'v2':
+            raise cls.skipException("Identity v2 is not available")
 
     @classmethod
     def setup_credentials(cls):
