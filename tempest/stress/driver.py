@@ -132,7 +132,14 @@ def stress_openstack(tests, duration, max_runs=None, stop_on_error=False):
         computes = _get_compute_nodes(controller, ssh_user, ssh_key)
         for node in computes:
             do_ssh("rm -f %s" % logfiles, node, ssh_user, ssh_key)
+    skip = False
     for test in tests:
+        for service in test.get('required_services', []):
+            if not CONF.service_available.get(service):
+                skip = True
+                break
+        if skip:
+            break
         if test.get('use_admin', False):
             manager = admin_manager
         else:

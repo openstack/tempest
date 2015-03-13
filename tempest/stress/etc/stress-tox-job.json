@@ -15,5 +15,14 @@
   "use_admin": false,
   "use_isolated_tenants": false,
   "kwargs": {}
+  },
+  {"action": "tempest.stress.actions.unit_test.UnitTest",
+  "threads": 4,
+  "use_admin": false,
+  "use_isolated_tenants": false,
+  "required_services": ["neutron"],
+  "kwargs": {"test_method": "tempest.scenario.test_network_advanced_server_ops.TestNetworkAdvancedServerOps.test_server_connectivity_stop_start",
+             "class_setup_per": "process"}
   }
 ]
+
