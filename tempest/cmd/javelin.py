@@ -874,6 +874,7 @@ def destroy_servers(servers):
         if not res:
             LOG.info("Server '%s' does not exist" % server['name'])
             continue
+        res = client.servers.get_server(res['id'])
 
         # we iterate all interfaces until we find a floating IP
         # and stop looping after dropping it.
