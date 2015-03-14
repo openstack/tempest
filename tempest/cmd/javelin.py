@@ -462,7 +462,7 @@ class JavelinCheck(unittest.TestCase):
                         # you want to use the floating IP to reach the server,
                         # fallback to fixed IP, then other type.
                         # This is useful in multi-node environment.
-                        if CONF.use_floatingip_for_ssh:
+                        if CONF.compute.use_floatingip_for_ssh:
                             if addr.get('OS-EXT-IPS:type',
                                         'floating') == 'floating':
                                 self._ping_ip(ip, 60)
@@ -475,7 +475,7 @@ class JavelinCheck(unittest.TestCase):
                             self._ping_ip(ip, 60)
                 # if floatingip_for_ssh is at True, validate found a
                 # floating IP and ping worked.
-                if CONF.use_floatingip_for_ssh:
+                if CONF.compute.use_floatingip_for_ssh:
                     self.assertTrue(_floating_is_alive,
                                     "Server %s has no floating IP." %
                                     server['name'])
@@ -880,7 +880,7 @@ def destroy_servers(servers):
         def _find_first_floating():
             if (CONF.service_available.neutron and
                     not CONF.baremetal.driver_enabled and
-                    CONF.use_floatingip_for_ssh):
+                    CONF.compute.use_floatingip_for_ssh):
                 for body in res['addresses'].items():
                     for addr in body:
                         ip = addr['addr']
