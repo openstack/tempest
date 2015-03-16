@@ -15,10 +15,10 @@
 import collections
 import netaddr
 import random
-from tempest.common.utils import data_utils
+from tempest_lib.common.utils import data_utils
 from tempest import config
-from tempest import exceptions as exc
-from tempest.openstack.common import log as logging
+from tempest_lib import exceptions as lib_exc
+from oslo_log import log as logging
 from tempest.scenario import manager
 from tempest.services.network import resources as net_resources
 from tempest import test
@@ -150,9 +150,9 @@ class TestNetworkVpnaas(manager.NetworkScenarioTest):
                                         CONF.network.build_interval):
                 m = ("Timed out waiting for ipsec site connection %s "
                      "to reach %s state" % (site_id, status))
-                raise exc.TimeoutException(m)
+                raise lib_exc.TimeoutException(m)
             return self.show_ipsec_site_connection(site_id)
-        except exc.NotFound as ex:
+        except lib_exc.NotFound as ex:
             if status:
                 raise ex
 

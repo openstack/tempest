@@ -16,9 +16,9 @@
 import netaddr
 
 from tempest.api.network import base
-from tempest.common.utils import data_utils
+from tempest_lib.common.utils import data_utils
 from tempest import config
-from tempest.openstack.common import log as logging
+from oslo_log import log as logging
 from tempest import test
 
 CONF = config.CONF
