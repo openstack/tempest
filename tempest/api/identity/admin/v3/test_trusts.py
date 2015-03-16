@@ -13,14 +13,14 @@
 import datetime
 import re
 
+from oslo_utils import timeutils
+from tempest_lib.common.utils import data_utils
 from tempest_lib import exceptions as lib_exc
 
 from tempest.api.identity import base
 from tempest import clients
 from tempest.common import cred_provider
-from tempest.common.utils import data_utils
 from tempest import config
-from tempest.openstack.common import timeutils
 from tempest import test
 
 CONF = config.CONF

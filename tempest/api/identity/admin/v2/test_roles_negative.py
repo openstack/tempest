@@ -13,11 +13,12 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest_lib import exceptions as lib_exc
 import uuid
 
+from tempest_lib.common.utils import data_utils
+from tempest_lib import exceptions as lib_exc
+
 from tempest.api.identity import base
-from tempest.common.utils import data_utils
 from tempest import test
 
 
@@ -35,7 +36,7 @@ class RolesNegativeTestJSON(base.BaseIdentityV2AdminTest):
     @test.idempotent_id('d5d5f1df-f8ca-4de0-b2ef-259c1cc67025')
     def test_list_roles_by_unauthorized_user(self):
         # Non-administrator user should not be able to list roles
-        self.assertRaises(lib_exc.Unauthorized,
+        self.assertRaises(lib_exc.Forbidden,
                           self.non_admin_client.list_roles)
 
     @test.attr(type=['negative', 'gate'])
@@ -58,7 +59,7 @@ class RolesNegativeTestJSON(base.BaseIdentityV2AdminTest):
     def test_create_role_by_unauthorized_user(self):
         # Non-administrator user should not be able to create role
         role_name = data_utils.rand_name(name='role-')
-        self.assertRaises(lib_exc.Unauthorized,
+        self.assertRaises(lib_exc.Forbidden,
                           self.non_admin_client.create_role, role_name)
 
     @test.attr(type=['negative', 'gate'])
@@ -91,7 +92,7 @@ class RolesNegativeTestJSON(base.BaseIdentityV2AdminTest):
         body = self.client.create_role(role_name)
         self.data.roles.append(body)
         role_id = body.get('id')
-        self.assertRaises(lib_exc.Unauthorized,
+        self.assertRaises(lib_exc.Forbidden,
                           self.non_admin_client.delete_role, role_id)
 
     @test.attr(type=['negative', 'gate'])
@@ -123,7 +124,7 @@ class RolesNegativeTestJSON(base.BaseIdentityV2AdminTest):
         # Non-administrator user should not be authorized to
         # assign a role to user
         (user, tenant, role) = self._get_role_params()
-        self.assertRaises(lib_exc.Unauthorized,
+        self.assertRaises(lib_exc.Forbidden,
                           self.non_admin_client.assign_user_role,
                           tenant['id'], user['id'], role['id'])
 
@@ -175,7 +176,7 @@ class RolesNegativeTestJSON(base.BaseIdentityV2AdminTest):
         self.client.assign_user_role(tenant['id'],
                                      user['id'],
                                      role['id'])
-        self.assertRaises(lib_exc.Unauthorized,
+        self.assertRaises(lib_exc.Forbidden,
                           self.non_admin_client.remove_user_role,
                           tenant['id'], user['id'], role['id'])
 
@@ -225,7 +226,7 @@ class RolesNegativeTestJSON(base.BaseIdentityV2AdminTest):
         # a user's roles
         (user, tenant, role) = self._get_role_params()
         self.client.assign_user_role(tenant['id'], user['id'], role['id'])
-        self.assertRaises(lib_exc.Unauthorized,
+        self.assertRaises(lib_exc.Forbidden,
                           self.non_admin_client.list_user_roles, tenant['id'],
                           user['id'])
 

@@ -24,8 +24,8 @@ CONF = config.CONF
 class MigrationsAdminTest(base.BaseV2ComputeAdminTest):
 
     @classmethod
-    def resource_setup(cls):
-        super(MigrationsAdminTest, cls).resource_setup()
+    def setup_clients(cls):
+        super(MigrationsAdminTest, cls).setup_clients()
         cls.client = cls.os_adm.migrations_client
 
     @test.attr(type='gate')

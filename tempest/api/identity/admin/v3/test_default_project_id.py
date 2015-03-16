@@ -10,10 +10,11 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib.common.utils import data_utils
+
 from tempest.api.identity import base
 from tempest import auth
 from tempest import clients
-from tempest.common.utils import data_utils
 from tempest import config
 from tempest import manager
 from tempest import test
@@ -65,7 +66,7 @@ class TestDefaultProjectId (base.BaseIdentityV3AdminTest):
                          "doesn't have domain id " + dom_id)
 
         # get roles and find the admin role
-        admin_role = self.get_role_by_name("admin")
+        admin_role = self.get_role_by_name(CONF.identity.admin_role)
         admin_role_id = admin_role['id']
 
         # grant the admin role to the user on his project
@@ -75,7 +76,7 @@ class TestDefaultProjectId (base.BaseIdentityV3AdminTest):
         # create a new client with user's credentials (NOTE: unscoped token!)
         creds = auth.KeystoneV3Credentials(username=user_name,
                                            password=user_name,
-                                           domain_name=dom_name)
+                                           user_domain_name=dom_name)
         auth_provider = manager.get_auth_provider(creds)
         creds = auth_provider.fill_credentials()
         admin_client = clients.Manager(credentials=creds)

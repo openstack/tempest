@@ -16,12 +16,12 @@
 import collections
 import re
 
+from oslo_log import log as logging
+from tempest_lib.common.utils import data_utils
 import testtools
 
-from tempest.common.utils import data_utils
 from tempest import config
 from tempest import exceptions
-from tempest.openstack.common import log as logging
 from tempest.scenario import manager
 from tempest.services.network import resources as net_resources
 from tempest import test
@@ -77,23 +77,23 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
     """
 
     @classmethod
-    def check_preconditions(cls):
-        super(TestNetworkBasicOps, cls).check_preconditions()
+    def skip_checks(cls):
+        super(TestNetworkBasicOps, cls).skip_checks()
         if not (CONF.network.tenant_networks_reachable
                 or CONF.network.public_network_id):
             msg = ('Either tenant_networks_reachable must be "true", or '
                    'public_network_id must be defined.')
             raise cls.skipException(msg)
-
-    @classmethod
-    def resource_setup(cls):
         for ext in ['router', 'security-group']:
             if not test.is_extension_enabled(ext, 'network'):
                 msg = "%s extension not enabled." % ext
                 raise cls.skipException(msg)
+
+    @classmethod
+    def setup_credentials(cls):
         # Create no network resources for these tests.
         cls.set_network_resources()
-        super(TestNetworkBasicOps, cls).resource_setup()
+        super(TestNetworkBasicOps, cls).setup_credentials()
 
     def setUp(self):
         super(TestNetworkBasicOps, self).setUp()
@@ -190,12 +190,13 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         if should_connect:
             private_key = self._get_server_key(server)
             floatingip_status = 'ACTIVE'
+        # Check FloatingIP Status before initiating a connection
+        if should_check_floating_ip_status:
+            self.check_floating_ip_status(floating_ip, floatingip_status)
         # call the common method in the parent class
         super(TestNetworkBasicOps, self).check_public_network_connectivity(
             ip_address, ssh_login, private_key, should_connect, msg,
             self.servers)
-        if should_check_floating_ip_status:
-            self.check_floating_ip_status(floating_ip, floatingip_status)
 
     def _disassociate_floating_ips(self):
         floating_ip, server = self.floating_ip_tuple
@@ -212,11 +213,15 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         self.floating_ip_tuple = Floating_IP_tuple(
             floating_ip, server)
 
-    def _create_new_network(self):
+    def _create_new_network(self, create_gateway=False):
         self.new_net = self._create_network(tenant_id=self.tenant_id)
-        self.new_subnet = self._create_subnet(
-            network=self.new_net,
-            gateway_ip=None)
+        if create_gateway:
+            self.new_subnet = self._create_subnet(
+                network=self.new_net)
+        else:
+            self.new_subnet = self._create_subnet(
+                network=self.new_net,
+                gateway_ip=None)
 
     def _hotplug_server(self):
         old_floating_ip, server = self.floating_ip_tuple
@@ -276,7 +281,8 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         ipatxt = ssh_client.get_ip_list()
         return reg.findall(ipatxt)
 
-    def _check_network_internal_connectivity(self, network):
+    def _check_network_internal_connectivity(self, network,
+                                             should_connect=True):
         """
         via ssh check VM internal connectivity:
         - ping internal gateway and DHCP port, implying in-tenant connectivity
@@ -290,7 +296,9 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
                                          network_id=network.id)
                         if p['device_owner'].startswith('network'))
 
-        self._check_server_connectivity(floating_ip, internal_ips)
+        self._check_server_connectivity(floating_ip,
+                                        internal_ips,
+                                        should_connect)
 
     def _check_network_external_connectivity(self):
         """
@@ -310,17 +318,22 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         self._check_server_connectivity(self.floating_ip_tuple.floating_ip,
                                         external_ips)
 
-    def _check_server_connectivity(self, floating_ip, address_list):
+    def _check_server_connectivity(self, floating_ip, address_list,
+                                   should_connect=True):
         ip_address = floating_ip.floating_ip_address
         private_key = self._get_server_key(self.floating_ip_tuple.server)
         ssh_source = self._ssh_to_server(ip_address, private_key)
 
         for remote_ip in address_list:
+            if should_connect:
+                msg = "Timed out waiting for "
+                "%s to become reachable" % remote_ip
+            else:
+                msg = "ip address %s is reachable" % remote_ip
             try:
-                self.assertTrue(self._check_remote_connectivity(ssh_source,
-                                                                remote_ip),
-                                "Timed out waiting for %s to become "
-                                "reachable" % remote_ip)
+                self.assertTrue(self._check_remote_connectivity
+                                (ssh_source, remote_ip, should_connect),
+                                msg)
             except Exception:
                 LOG.exception("Unable to access {dest} via ssh to "
                               "floating-ip {src}".format(dest=remote_ip,
@@ -378,6 +391,52 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         self.check_public_network_connectivity(should_connect=True,
                                                msg="after re-associate "
                                                    "floating ip")
+
+    @test.idempotent_id('1546850e-fbaa-42f5-8b5f-03d8a6a95f15')
+    @testtools.skipIf(CONF.baremetal.driver_enabled,
+                      'Baremetal relies on a shared physical network.')
+    @test.attr(type='smoke')
+    @test.services('compute', 'network')
+    def test_connectivity_between_vms_on_different_networks(self):
+        """
+        For a freshly-booted VM with an IP address ("port") on a given
+            network:
+
+        - the Tempest host can ping the IP address.
+
+        - the Tempest host can ssh into the VM via the IP address and
+         successfully execute the following:
+
+         - ping an external IP address, implying external connectivity.
+
+         - ping an external hostname, implying that dns is correctly
+           configured.
+
+         - ping an internal IP address, implying connectivity to another
+           VM on the same network.
+
+        - Create another network on the same tenant with subnet, create
+        an VM on the new network.
+
+         - Ping the new VM from previous VM failed since the new network
+         was not attached to router yet.
+
+         - Attach the new network to the router, Ping the new VM from
+         previous VM succeed.
+
+        """
+        self._setup_network_and_servers()
+        self.check_public_network_connectivity(should_connect=True)
+        self._check_network_internal_connectivity(network=self.network)
+        self._check_network_external_connectivity()
+        self._create_new_network(create_gateway=True)
+        name = data_utils.rand_name('server-smoke')
+        self._create_server(name, self.new_net)
+        self._check_network_internal_connectivity(network=self.new_net,
+                                                  should_connect=False)
+        self.new_subnet.add_to_router(self.router.id)
+        self._check_network_internal_connectivity(network=self.new_net,
+                                                  should_connect=True)
 
     @test.idempotent_id('c5adff73-e961-41f1-b4a9-343614f18cfa')
     @testtools.skipUnless(CONF.compute_feature_enabled.interface_attach,

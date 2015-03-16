@@ -13,11 +13,11 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib.common.utils import data_utils
 from tempest_lib import exceptions as lib_exc
 
 from tempest.api.compute import base
 from tempest.common import tempest_fixtures as fixtures
-from tempest.common.utils import data_utils
 from tempest import test
 
 
@@ -28,10 +28,14 @@ class AggregatesAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
     """
 
     @classmethod
-    def resource_setup(cls):
-        super(AggregatesAdminNegativeTestJSON, cls).resource_setup()
+    def setup_clients(cls):
+        super(AggregatesAdminNegativeTestJSON, cls).setup_clients()
         cls.client = cls.os_adm.aggregates_client
         cls.user_client = cls.aggregates_client
+
+    @classmethod
+    def resource_setup(cls):
+        super(AggregatesAdminNegativeTestJSON, cls).resource_setup()
         cls.aggregate_name_prefix = 'test_aggregate_'
         cls.az_name_prefix = 'test_az_'
 
@@ -45,7 +49,7 @@ class AggregatesAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
     def test_aggregate_create_as_user(self):
         # Regular user is not allowed to create an aggregate.
         aggregate_name = data_utils.rand_name(self.aggregate_name_prefix)
-        self.assertRaises(lib_exc.Unauthorized,
+        self.assertRaises(lib_exc.Forbidden,
                           self.user_client.create_aggregate,
                           name=aggregate_name)
 
@@ -86,7 +90,7 @@ class AggregatesAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
         aggregate = self.client.create_aggregate(name=aggregate_name)
         self.addCleanup(self.client.delete_aggregate, aggregate['id'])
 
-        self.assertRaises(lib_exc.Unauthorized,
+        self.assertRaises(lib_exc.Forbidden,
                           self.user_client.delete_aggregate,
                           aggregate['id'])
 
@@ -94,7 +98,7 @@ class AggregatesAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
     @test.idempotent_id('b7d475a6-5dcd-4ff4-b70a-cd9de66a6672')
     def test_aggregate_list_as_user(self):
         # Regular user is not allowed to list aggregates.
-        self.assertRaises(lib_exc.Unauthorized,
+        self.assertRaises(lib_exc.Forbidden,
                           self.user_client.list_aggregates)
 
     @test.attr(type=['negative', 'gate'])
@@ -105,7 +109,7 @@ class AggregatesAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
         aggregate = self.client.create_aggregate(name=aggregate_name)
         self.addCleanup(self.client.delete_aggregate, aggregate['id'])
 
-        self.assertRaises(lib_exc.Unauthorized,
+        self.assertRaises(lib_exc.Forbidden,
                           self.user_client.get_aggregate,
                           aggregate['id'])
 
@@ -149,7 +153,7 @@ class AggregatesAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
         aggregate = self.client.create_aggregate(name=aggregate_name)
         self.addCleanup(self.client.delete_aggregate, aggregate['id'])
 
-        self.assertRaises(lib_exc.Unauthorized,
+        self.assertRaises(lib_exc.Forbidden,
                           self.user_client.add_host,
                           aggregate['id'], self.host)
 
@@ -178,7 +182,7 @@ class AggregatesAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
         self.client.add_host(aggregate['id'], self.host)
         self.addCleanup(self.client.remove_host, aggregate['id'], self.host)
 
-        self.assertRaises(lib_exc.Unauthorized,
+        self.assertRaises(lib_exc.Forbidden,
                           self.user_client.remove_host,
                           aggregate['id'], self.host)
 

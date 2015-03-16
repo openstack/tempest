@@ -12,10 +12,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib.common.utils import data_utils
 from tempest_lib import exceptions as lib_exc
 
 from tempest.api.compute import base
-from tempest.common.utils import data_utils
 from tempest import config
 from tempest import test
 
@@ -25,11 +25,15 @@ CONF = config.CONF
 class ListImageFiltersNegativeTestJSON(base.BaseV2ComputeTest):
 
     @classmethod
-    def resource_setup(cls):
-        super(ListImageFiltersNegativeTestJSON, cls).resource_setup()
+    def skip_checks(cls):
+        super(ListImageFiltersNegativeTestJSON, cls).skip_checks()
         if not CONF.service_available.glance:
             skip_msg = ("%s skipped as glance is not available" % cls.__name__)
             raise cls.skipException(skip_msg)
+
+    @classmethod
+    def setup_clients(cls):
+        super(ListImageFiltersNegativeTestJSON, cls).setup_clients()
         cls.client = cls.images_client
 
     @test.attr(type=['negative', 'gate'])

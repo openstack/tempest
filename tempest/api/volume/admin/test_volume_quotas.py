@@ -12,8 +12,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib.common.utils import data_utils
+
 from tempest.api.volume import base
-from tempest.common.utils import data_utils
 from tempest import test
 
 QUOTA_KEYS = ['gigabytes', 'snapshots', 'volumes']
@@ -84,7 +85,7 @@ class BaseVolumeQuotasAdminV2TestJSON(base.BaseVolumeAdminTest):
         quota_usage = self.quotas_client.get_quota_usage(
             self.demo_tenant_id)
 
-        volume = self.create_volume(size=1)
+        volume = self.create_volume()
         self.addCleanup(self.admin_volume_client.delete_volume,
                         volume['id'])
 
@@ -94,7 +95,8 @@ class BaseVolumeQuotasAdminV2TestJSON(base.BaseVolumeAdminTest):
         self.assertEqual(quota_usage['volumes']['in_use'] + 1,
                          new_quota_usage['volumes']['in_use'])
 
-        self.assertEqual(quota_usage['gigabytes']['in_use'] + 1,
+        self.assertEqual(quota_usage['gigabytes']['in_use'] +
+                         volume["size"],
                          new_quota_usage['gigabytes']['in_use'])
 
     @test.attr(type='gate')

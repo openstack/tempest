@@ -25,8 +25,8 @@ class AZAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
     """
 
     @classmethod
-    def resource_setup(cls):
-        super(AZAdminNegativeTestJSON, cls).resource_setup()
+    def setup_clients(cls):
+        super(AZAdminNegativeTestJSON, cls).setup_clients()
         cls.non_adm_client = cls.availability_zone_client
 
     @test.attr(type=['negative', 'gate'])
@@ -35,5 +35,5 @@ class AZAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
         # List of availability zones and available services with
         # non-administrator user
         self.assertRaises(
-            lib_exc.Unauthorized,
+            lib_exc.Forbidden,
             self.non_adm_client.get_availability_zone_list_detail)

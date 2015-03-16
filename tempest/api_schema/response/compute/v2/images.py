@@ -40,11 +40,12 @@ common_image_schema = {
             },
             'required': ['id', 'links']
         },
-        'OS-EXT-IMG-SIZE:size': {'type': 'integer'}
+        'OS-EXT-IMG-SIZE:size': {'type': 'integer'},
+        'OS-DCF:diskConfig': {'type': 'string'}
     },
     # 'server' attributes only comes in response body if image is
-    # associated with any server. 'OS-EXT-IMG-SIZE:size' is API
-    # extension, So those are not defined as 'required'.
+    # associated with any server. 'OS-EXT-IMG-SIZE:size' & 'OS-DCF:diskConfig'
+    # are API extension,  So those are not defined as 'required'.
     'required': ['id', 'status', 'updated', 'links', 'name',
                  'created', 'minDisk', 'minRam', 'progress',
                  'metadata']
@@ -77,8 +78,11 @@ list_images = {
                     },
                     'required': ['id', 'links', 'name']
                 }
-            }
+            },
+            'images_links': parameter_types.links
         },
+        # NOTE(gmann): images_links attribute is not necessary to be
+        # present always So it is not 'required'.
         'required': ['images']
     }
 }
@@ -131,8 +135,11 @@ list_images_details = {
             'images': {
                 'type': 'array',
                 'items': common_image_schema
-            }
+            },
+            'images_links': parameter_types.links
         },
+        # NOTE(gmann): images_links attribute is not necessary to be
+        # present always So it is not 'required'.
         'required': ['images']
     }
 }

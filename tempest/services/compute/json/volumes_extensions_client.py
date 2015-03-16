@@ -26,6 +26,12 @@ from tempest import exceptions
 
 class VolumesExtensionsClientJSON(service_client.ServiceClient):
 
+    def __init__(self, auth_provider, service, region,
+                 default_volume_size=1, **kwargs):
+        super(VolumesExtensionsClientJSON, self).__init__(
+            auth_provider, service, region, **kwargs)
+        self.default_volume_size = default_volume_size
+
     def list_volumes(self, params=None):
         """List all the volumes created."""
         url = 'os-volumes'
@@ -56,7 +62,7 @@ class VolumesExtensionsClientJSON(service_client.ServiceClient):
         self.validate_response(schema.create_get_volume, resp, body)
         return service_client.ResponseBody(resp, body['volume'])
 
-    def create_volume(self, size, **kwargs):
+    def create_volume(self, size=None, **kwargs):
         """
         Creates a new Volume.
         size(Required): Size of volume in GB.
@@ -64,6 +70,8 @@ class VolumesExtensionsClientJSON(service_client.ServiceClient):
         display_name: Optional Volume Name.
         metadata: A dictionary of values to be used as metadata.
         """
+        if size is None:
+            size = self.default_volume_size
         post_body = {
             'size': size
         }

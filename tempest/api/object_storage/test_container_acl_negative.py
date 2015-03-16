@@ -12,12 +12,15 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib.common.utils import data_utils
 from tempest_lib import exceptions as lib_exc
 
 from tempest.api.object_storage import base
 from tempest import clients
-from tempest.common.utils import data_utils
+from tempest import config
 from tempest import test
+
+CONF = config.CONF
 
 
 class ObjectACLsNegativeTest(base.BaseObjectTest):
@@ -25,13 +28,14 @@ class ObjectACLsNegativeTest(base.BaseObjectTest):
     @classmethod
     def setup_credentials(cls):
         super(ObjectACLsNegativeTest, cls).setup_credentials()
-        cls.data.setup_test_user()
-        cls.test_os = clients.Manager(cls.data.test_credentials)
+        cls.os_operator = clients.Manager(
+            cls.isolated_creds.get_creds_by_roles(
+                roles=[CONF.object_storage.operator_role], force_new=True))
 
     @classmethod
     def resource_setup(cls):
         super(ObjectACLsNegativeTest, cls).resource_setup()
-        cls.test_auth_data = cls.test_os.auth_provider.auth_data
+        cls.test_auth_data = cls.os_operator.auth_provider.auth_data
 
     def setUp(self):
         super(ObjectACLsNegativeTest, self).setUp()
@@ -84,7 +88,7 @@ class ObjectACLsNegativeTest(base.BaseObjectTest):
             request_part='headers',
             auth_data=self.test_auth_data
         )
-        self.assertRaises(lib_exc.Unauthorized,
+        self.assertRaises(lib_exc.Forbidden,
                           self.object_client.create_object,
                           self.container_name, object_name, 'data', headers={})
 
@@ -102,7 +106,7 @@ class ObjectACLsNegativeTest(base.BaseObjectTest):
             request_part='headers',
             auth_data=self.test_auth_data
         )
-        self.assertRaises(lib_exc.Unauthorized,
+        self.assertRaises(lib_exc.Forbidden,
                           self.object_client.get_object,
                           self.container_name, object_name)
 
@@ -120,7 +124,7 @@ class ObjectACLsNegativeTest(base.BaseObjectTest):
             request_part='headers',
             auth_data=self.test_auth_data
         )
-        self.assertRaises(lib_exc.Unauthorized,
+        self.assertRaises(lib_exc.Forbidden,
                           self.object_client.delete_object,
                           self.container_name, object_name)
 
@@ -144,7 +148,7 @@ class ObjectACLsNegativeTest(base.BaseObjectTest):
             request_part='headers',
             auth_data=self.test_auth_data
         )
-        self.assertRaises(lib_exc.Unauthorized,
+        self.assertRaises(lib_exc.Forbidden,
                           self.object_client.get_object,
                           self.container_name, object_name)
 
@@ -164,7 +168,7 @@ class ObjectACLsNegativeTest(base.BaseObjectTest):
             auth_data=self.test_auth_data
         )
         object_name = data_utils.rand_name(name='Object')
-        self.assertRaises(lib_exc.Unauthorized,
+        self.assertRaises(lib_exc.Forbidden,
                           self.object_client.create_object,
                           self.container_name,
                           object_name, 'data', headers={})
@@ -174,8 +178,10 @@ class ObjectACLsNegativeTest(base.BaseObjectTest):
     def test_write_object_without_write_rights(self):
         # attempt to write object using non-authorized user
         # update X-Container-Read and X-Container-Write metadata ACL
+        tenant_name = self.os_operator.credentials.tenant_name
+        username = self.os_operator.credentials.username
         cont_headers = {'X-Container-Read':
-                        self.data.test_tenant + ':' + self.data.test_user,
+                        tenant_name + ':' + username,
                         'X-Container-Write': ''}
         resp_meta, body = self.container_client.update_container_metadata(
             self.container_name, metadata=cont_headers,
@@ -187,7 +193,7 @@ class ObjectACLsNegativeTest(base.BaseObjectTest):
             auth_data=self.test_auth_data
         )
         object_name = data_utils.rand_name(name='Object')
-        self.assertRaises(lib_exc.Unauthorized,
+        self.assertRaises(lib_exc.Forbidden,
                           self.object_client.create_object,
                           self.container_name,
                           object_name, 'data', headers={})
@@ -197,8 +203,10 @@ class ObjectACLsNegativeTest(base.BaseObjectTest):
     def test_delete_object_without_write_rights(self):
         # attempt to delete object using non-authorized user
         # update X-Container-Read and X-Container-Write metadata ACL
+        tenant_name = self.os_operator.credentials.tenant_name
+        username = self.os_operator.credentials.username
         cont_headers = {'X-Container-Read':
-                        self.data.test_tenant + ':' + self.data.test_user,
+                        tenant_name + ':' + username,
                         'X-Container-Write': ''}
         resp_meta, body = self.container_client.update_container_metadata(
             self.container_name, metadata=cont_headers,
@@ -214,7 +222,7 @@ class ObjectACLsNegativeTest(base.BaseObjectTest):
             request_part='headers',
             auth_data=self.test_auth_data
         )
-        self.assertRaises(lib_exc.Unauthorized,
+        self.assertRaises(lib_exc.Forbidden,
                           self.object_client.delete_object,
                           self.container_name,
                           object_name)

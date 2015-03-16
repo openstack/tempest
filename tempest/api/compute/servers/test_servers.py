@@ -13,16 +13,17 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib.common.utils import data_utils
+
 from tempest.api.compute import base
-from tempest.common.utils import data_utils
 from tempest import test
 
 
 class ServersTestJSON(base.BaseV2ComputeTest):
 
     @classmethod
-    def resource_setup(cls):
-        super(ServersTestJSON, cls).resource_setup()
+    def setup_clients(cls):
+        super(ServersTestJSON, cls).setup_clients()
         cls.client = cls.servers_client
 
     def tearDown(self):

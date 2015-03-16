@@ -28,11 +28,11 @@ import urlparse
 
 
 import OpenSSL
+from oslo_log import log as logging
 from six import moves
 from tempest_lib import exceptions as lib_exc
 
 from tempest import exceptions as exc
-from tempest.openstack.common import log as logging
 
 LOG = logging.getLogger(__name__)
 USER_AGENT = 'tempest'

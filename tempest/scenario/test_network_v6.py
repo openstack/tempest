@@ -14,8 +14,10 @@
 #    under the License.
 import functools
 import netaddr
+
+from oslo_log import log as logging
+
 from tempest import config
-from tempest.openstack.common import log as logging
 from tempest.scenario import manager
 from tempest import test
 
@@ -34,13 +36,8 @@ class TestGettingAddress(manager.NetworkScenarioTest):
     """
 
     @classmethod
-    def resource_setup(cls):
-        # Create no network resources for these tests.
-        cls.set_network_resources()
-        super(TestGettingAddress, cls).resource_setup()
-
-    @classmethod
-    def check_preconditions(cls):
+    def skip_checks(cls):
+        super(TestGettingAddress, cls).skip_checks()
         if not (CONF.network_feature_enabled.ipv6
                 and CONF.network_feature_enabled.ipv6_subnet_attributes):
             raise cls.skipException('IPv6 or its attributes not supported')
@@ -53,7 +50,11 @@ class TestGettingAddress(manager.NetworkScenarioTest):
             msg = ('Baremetal does not currently support network isolation')
             raise cls.skipException(msg)
 
-        super(TestGettingAddress, cls).check_preconditions()
+    @classmethod
+    def setup_credentials(cls):
+        # Create no network resources for these tests.
+        cls.set_network_resources()
+        super(TestGettingAddress, cls).setup_credentials()
 
     def setUp(self):
         super(TestGettingAddress, self).setUp()

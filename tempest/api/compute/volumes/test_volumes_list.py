@@ -13,8 +13,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib.common.utils import data_utils
+
 from tempest.api.compute import base
-from tempest.common.utils import data_utils
 from tempest import config
 from tempest import test
 
@@ -53,8 +54,7 @@ class VolumesTestJSON(base.BaseV2ComputeTest):
             v_name = data_utils.rand_name('volume')
             metadata = {'Type': 'work'}
             try:
-                volume = cls.client.create_volume(size=1,
-                                                  display_name=v_name,
+                volume = cls.client.create_volume(display_name=v_name,
                                                   metadata=metadata)
                 cls.client.wait_for_volume_status(volume['id'], 'available')
                 volume = cls.client.get_volume(volume['id'])

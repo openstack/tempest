@@ -11,7 +11,8 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-from tempest.common.utils import data_utils
+from tempest_lib.common.utils import data_utils
+
 from tempest import config
 import tempest.stress.stressaction as stressaction
 
@@ -29,7 +30,6 @@ class VolumeAttachDeleteTest(stressaction.StressAction):
         name = data_utils.rand_name("volume")
         self.logger.info("creating volume: %s" % name)
         volume = self.manager.volumes_client.create_volume(
-            size=1,
             display_name=name)
         self.manager.volumes_client.wait_for_volume_status(volume['id'],
                                                            'available')

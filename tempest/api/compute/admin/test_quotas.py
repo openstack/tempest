@@ -13,13 +13,13 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from oslo_log import log as logging
 import six
+from tempest_lib.common.utils import data_utils
 from testtools import matchers
 
 from tempest.api.compute import base
 from tempest.common import tempest_fixtures as fixtures
-from tempest.common.utils import data_utils
-from tempest.openstack.common import log as logging
 from tempest import test
 
 LOG = logging.getLogger(__name__)
@@ -34,9 +34,13 @@ class QuotasAdminTestJSON(base.BaseV2ComputeAdminTest):
         super(QuotasAdminTestJSON, self).setUp()
 
     @classmethod
+    def setup_clients(cls):
+        super(QuotasAdminTestJSON, cls).setup_clients()
+        cls.adm_client = cls.os_adm.quotas_client
+
+    @classmethod
     def resource_setup(cls):
         super(QuotasAdminTestJSON, cls).resource_setup()
-        cls.adm_client = cls.os_adm.quotas_client
 
         # NOTE(afazekas): these test cases should always create and use a new
         # tenant most of them should be skipped if we can't do that

@@ -14,11 +14,11 @@ import json
 import time
 import urllib
 
+from oslo_log import log as logging
 from tempest_lib import exceptions as lib_exc
 
 from tempest.common import service_client
 from tempest import exceptions
-from tempest.openstack.common import log as logging
 
 
 LOG = logging.getLogger(__name__)

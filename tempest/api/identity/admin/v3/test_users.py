@@ -13,8 +13,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib.common.utils import data_utils
+
 from tempest.api.identity import base
-from tempest.common.utils import data_utils
 from tempest import test
 
 
@@ -78,7 +79,8 @@ class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
         new_password = data_utils.rand_name('pass1')
         self.client.update_user_password(user['id'], new_password,
                                          original_password)
-        resp = self.token.auth(user['id'], new_password).response
+        resp = self.token.auth(user_id=user['id'],
+                               password=new_password).response
         subject_token = resp['x-subject-token']
         # Perform GET Token to verify and confirm password is updated
         token_details = self.client.get_token(subject_token)

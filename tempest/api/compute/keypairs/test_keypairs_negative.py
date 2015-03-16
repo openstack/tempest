@@ -14,18 +14,18 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib.common.utils import data_utils
 from tempest_lib import exceptions as lib_exc
 
 from tempest.api.compute import base
-from tempest.common.utils import data_utils
 from tempest import test
 
 
 class KeyPairsNegativeTestJSON(base.BaseV2ComputeTest):
 
     @classmethod
-    def resource_setup(cls):
-        super(KeyPairsNegativeTestJSON, cls).resource_setup()
+    def setup_clients(cls):
+        super(KeyPairsNegativeTestJSON, cls).setup_clients()
         cls.client = cls.keypairs_client
 
     def _create_keypair(self, keypair_name, pub_key=None):

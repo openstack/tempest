@@ -14,13 +14,14 @@
 #    under the License.
 
 import random
+
 from six import moves
+from tempest_lib.common.utils import data_utils
 import testtools
 
 from tempest.api.object_storage import base
 from tempest import clients
 from tempest.common import custom_matchers
-from tempest.common.utils import data_utils
 from tempest import config
 from tempest import test
 
@@ -30,6 +31,13 @@ CONF = config.CONF
 class AccountTest(base.BaseObjectTest):
 
     containers = []
+
+    @classmethod
+    def setup_credentials(cls):
+        super(AccountTest, cls).setup_credentials()
+        cls.os_operator = clients.Manager(
+            cls.isolated_creds.get_creds_by_roles(
+                roles=[CONF.object_storage.operator_role], force_new=True))
 
     @classmethod
     def resource_setup(cls):
@@ -63,12 +71,9 @@ class AccountTest(base.BaseObjectTest):
 
         # To test listing no containers, create new user other than
         # the base user of this instance.
-        self.data.setup_test_user()
-
-        os_test_user = clients.Manager(self.data.test_credentials)
 
         resp, container_list = \
-            os_test_user.account_client.list_account_containers()
+            self.os_operator.account_client.list_account_containers()
 
         # When sending a request to an account which has not received a PUT
         # container request, the response does not contain 'accept-ranges'

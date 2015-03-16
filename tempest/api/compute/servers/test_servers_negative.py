@@ -15,12 +15,12 @@
 
 import sys
 
+from tempest_lib.common.utils import data_utils
 from tempest_lib import exceptions as lib_exc
 import testtools
 
 from tempest.api.compute import base
 from tempest import clients
-from tempest.common.utils import data_utils
 from tempest import config
 from tempest import test
 
@@ -41,11 +41,19 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
         super(ServersNegativeTestJSON, self).tearDown()
 
     @classmethod
+    def setup_credentials(cls):
+        super(ServersNegativeTestJSON, cls).setup_credentials()
+        cls.alt_os = clients.Manager(cls.isolated_creds.get_alt_creds())
+
+    @classmethod
+    def setup_clients(cls):
+        super(ServersNegativeTestJSON, cls).setup_clients()
+        cls.client = cls.servers_client
+        cls.alt_client = cls.alt_os.servers_client
+
+    @classmethod
     def resource_setup(cls):
         super(ServersNegativeTestJSON, cls).resource_setup()
-        cls.client = cls.servers_client
-        cls.alt_os = clients.Manager(cls.isolated_creds.get_alt_creds())
-        cls.alt_client = cls.alt_os.servers_client
         server = cls.create_test_server(wait_until='ACTIVE')
         cls.server_id = server['id']
 

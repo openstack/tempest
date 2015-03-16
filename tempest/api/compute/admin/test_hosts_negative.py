@@ -12,10 +12,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib.common.utils import data_utils
 from tempest_lib import exceptions as lib_exc
 
 from tempest.api.compute import base
-from tempest.common.utils import data_utils
 from tempest import test
 
 
@@ -26,8 +26,8 @@ class HostsAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
     """
 
     @classmethod
-    def resource_setup(cls):
-        super(HostsAdminNegativeTestJSON, cls).resource_setup()
+    def setup_clients(cls):
+        super(HostsAdminNegativeTestJSON, cls).setup_clients()
         cls.client = cls.os_adm.hosts_client
         cls.non_admin_client = cls.os.hosts_client
 
@@ -40,7 +40,7 @@ class HostsAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
     @test.attr(type=['negative', 'gate'])
     @test.idempotent_id('dd032027-0210-4d9c-860e-69b1b8deed5f')
     def test_list_hosts_with_non_admin_user(self):
-        self.assertRaises(lib_exc.Unauthorized,
+        self.assertRaises(lib_exc.Forbidden,
                           self.non_admin_client.list_hosts)
 
     @test.attr(type=['negative', 'gate'])
@@ -55,7 +55,7 @@ class HostsAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
     def test_show_host_detail_with_non_admin_user(self):
         hostname = self._get_host_name()
 
-        self.assertRaises(lib_exc.Unauthorized,
+        self.assertRaises(lib_exc.Forbidden,
                           self.non_admin_client.show_host_detail,
                           hostname)
 
@@ -64,7 +64,7 @@ class HostsAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
     def test_update_host_with_non_admin_user(self):
         hostname = self._get_host_name()
 
-        self.assertRaises(lib_exc.Unauthorized,
+        self.assertRaises(lib_exc.Forbidden,
                           self.non_admin_client.update_host,
                           hostname,
                           status='enable',
@@ -142,7 +142,7 @@ class HostsAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
     def test_startup_host_with_non_admin_user(self):
         hostname = self._get_host_name()
 
-        self.assertRaises(lib_exc.Unauthorized,
+        self.assertRaises(lib_exc.Forbidden,
                           self.non_admin_client.startup_host,
                           hostname)
 
@@ -160,7 +160,7 @@ class HostsAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
     def test_shutdown_host_with_non_admin_user(self):
         hostname = self._get_host_name()
 
-        self.assertRaises(lib_exc.Unauthorized,
+        self.assertRaises(lib_exc.Forbidden,
                           self.non_admin_client.shutdown_host,
                           hostname)
 
@@ -178,6 +178,6 @@ class HostsAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
     def test_reboot_host_with_non_admin_user(self):
         hostname = self._get_host_name()
 
-        self.assertRaises(lib_exc.Unauthorized,
+        self.assertRaises(lib_exc.Forbidden,
                           self.non_admin_client.reboot_host,
                           hostname)

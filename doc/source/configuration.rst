@@ -1,3 +1,5 @@
+.. _tempest-configuration:
+
 Tempest Configuration Guide
 ===========================
 
@@ -45,6 +47,8 @@ To enable and use tenant isolation you only need to configure 2 things:
  #. To enable tenant_isolation in the auth section with the
     allow_tenant_isolation option.
 
+This is also the currently the default credential provider enabled by tempest,
+due to it's common use and ease of configuration.
 
 Locking Test Accounts
 """""""""""""""""""""
@@ -58,9 +62,8 @@ test accounts each test class will reserve a set of credentials from the
 accounts.yaml before executing any of its tests so that each class is isolated
 like in tenant isolation.
 
-Currently, this mechanism has some limitations, first only non-admin users with
-the same role set can be used at one time. The second limitation is around
-networking, locking test accounts will only work with a single flat network as
+Currently, this mechanism has some limitations, mostly around networking. The
+locking test accounts provider will only work with a single flat network as
 the default for each tenant/project. If another network configuration is used
 in your cloud you might face unexpected failures.
 
@@ -73,6 +76,8 @@ To enable and use locking test accounts you need do a few things:
     starvation issue when running in parallel make sure you have at least 2
     times the number of parallel workers you are using to execute tempest
     available in the file.
+
+    You can check the sample file packaged in tempest for the yaml format
  #. Provide tempest with the location of you accounts.yaml file with the
     test_accounts_file option in the auth section
 
@@ -85,8 +90,7 @@ This mechanism is the non-locking test accounts provider. It only makes sense
 to use it if parallel execution isn't needed. If the role restrictions were too
 limiting with the locking accounts provider and tenant isolation is not wanted
 then you can use the non-locking test accounts credential provider without the
-accounts.yaml file. This is also the currently the default configuration for
-tempest, since it doesn't require elevated permissions or the extra file.
+accounts.yaml file.
 
 To use the non-locking test accounts provider you have 2 ways to configure it.
 First you can specify the sets of credentials in the configuration file like
@@ -102,14 +106,19 @@ detailed above with following 9 options in the identity section:
  #. alt_password
  #. alt_tenant_name
 
-You should use this if you need to specify credentials with different roles.
-(i.e. you want to use admin credentials) However, this isn't a requirement for
-its usage.
+The only restriction with using the traditional config options for credentials
+is that if a test requires specific roles on accounts these tests can not be
+run. This is because the config options do not give sufficient flexibility to
+describe the roles assigned to a user for running the tests.
 
 You also can use the accounts.yaml file to specify the credentials used for
 testing. This will just allocate them serially so you only need to provide
 a pair of credentials. Do note that all the restrictions associated with
-locking test accounts applies to using the accounts.yaml file this way too.
+locking test accounts applies to using the accounts.yaml file this way too,
+except since you can't run in parallel only 2 of each type of credential is
+required to run. However, the limitation on tests which require specific roles
+does not apply here.
+
 The procedure for doing this is very similar to with the locking accounts
 provider just don't set the locking_credentials_provider to true and you
 only should need a single pair of credentials.

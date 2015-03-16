@@ -10,10 +10,11 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from oslo_log import log as logging
+from tempest_lib.common.utils import data_utils
+
 from tempest.api.volume import base
-from tempest.common.utils import data_utils
 from tempest import config
-from tempest.openstack.common import log as logging
 from tempest import test
 
 CONF = config.CONF
@@ -70,8 +71,7 @@ class VolumeMultiBackendV2Test(base.BaseVolumeAdminTest):
 
         params = {self.name_field: vol_name, 'volume_type': type_name}
 
-        self.volume = self.admin_volume_client.create_volume(size=1,
-                                                             **params)
+        self.volume = self.admin_volume_client.create_volume(**params)
         if with_prefix:
             self.volume_id_list_with_prefix.append(self.volume['id'])
         else:

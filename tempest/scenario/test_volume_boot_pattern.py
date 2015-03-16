@@ -10,11 +10,11 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from oslo_log import log
+from tempest_lib.common.utils import data_utils
 from tempest_lib import decorators
 
-from tempest.common.utils import data_utils
 from tempest import config
-from tempest.openstack.common import log
 from tempest.scenario import manager
 from tempest import test
 
@@ -38,10 +38,10 @@ class TestVolumeBootPattern(manager.ScenarioTest):
      * Check written content in the instance booted from snapshot
     """
     @classmethod
-    def resource_setup(cls):
+    def skip_checks(cls):
+        super(TestVolumeBootPattern, cls).skip_checks()
         if not CONF.volume_feature_enabled.snapshot:
             raise cls.skipException("Cinder volume snapshots are disabled")
-        super(TestVolumeBootPattern, cls).resource_setup()
 
     def _create_volume_from_image(self):
         img_uuid = CONF.compute.image_ref

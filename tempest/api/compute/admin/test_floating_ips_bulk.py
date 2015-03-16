@@ -31,9 +31,13 @@ class FloatingIPsBulkAdminTestJSON(base.BaseV2ComputeAdminTest):
     """
 
     @classmethod
+    def setup_clients(cls):
+        super(FloatingIPsBulkAdminTestJSON, cls).setup_clients()
+        cls.client = cls.os_adm.floating_ips_client
+
+    @classmethod
     def resource_setup(cls):
         super(FloatingIPsBulkAdminTestJSON, cls).resource_setup()
-        cls.client = cls.os_adm.floating_ips_client
         cls.ip_range = CONF.compute.floating_ip_range
         cls.verify_unallocated_floating_ip_range(cls.ip_range)
 

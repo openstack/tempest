@@ -12,12 +12,12 @@
 
 import time
 
+from oslo_utils import timeutils
+from tempest_lib.common.utils import data_utils
 from tempest_lib import exceptions as lib_exc
 
-from tempest.common.utils import data_utils
 from tempest import config
 from tempest import exceptions
-from tempest.openstack.common import timeutils
 import tempest.test
 
 CONF = config.CONF

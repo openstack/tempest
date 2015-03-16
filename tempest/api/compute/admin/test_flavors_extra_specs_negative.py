@@ -14,10 +14,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib.common.utils import data_utils
 from tempest_lib import exceptions as lib_exc
 
 from tempest.api.compute import base
-from tempest.common.utils import data_utils
 from tempest import test
 
 
@@ -29,13 +29,21 @@ class FlavorsExtraSpecsNegativeTestJSON(base.BaseV2ComputeAdminTest):
     """
 
     @classmethod
-    def resource_setup(cls):
-        super(FlavorsExtraSpecsNegativeTestJSON, cls).resource_setup()
+    def skip_checks(cls):
+        super(FlavorsExtraSpecsNegativeTestJSON, cls).skip_checks()
         if not test.is_extension_enabled('OS-FLV-EXT-DATA', 'compute'):
             msg = "OS-FLV-EXT-DATA extension not enabled."
             raise cls.skipException(msg)
 
+    @classmethod
+    def setup_clients(cls):
+        super(FlavorsExtraSpecsNegativeTestJSON, cls).setup_clients()
         cls.client = cls.os_adm.flavors_client
+
+    @classmethod
+    def resource_setup(cls):
+        super(FlavorsExtraSpecsNegativeTestJSON, cls).resource_setup()
+
         flavor_name = data_utils.rand_name('test_flavor')
         ram = 512
         vcpus = 1
@@ -63,7 +71,7 @@ class FlavorsExtraSpecsNegativeTestJSON(base.BaseV2ComputeAdminTest):
     def test_flavor_non_admin_set_keys(self):
         # Test to SET flavor extra spec as a user without admin privileges.
         specs = {"key1": "value1", "key2": "value2"}
-        self.assertRaises(lib_exc.Unauthorized,
+        self.assertRaises(lib_exc.Forbidden,
                           self.flavors_client.set_flavor_extra_spec,
                           self.flavor['id'],
                           specs)
@@ -76,7 +84,7 @@ class FlavorsExtraSpecsNegativeTestJSON(base.BaseV2ComputeAdminTest):
         body = self.client.set_flavor_extra_spec(
             self.flavor['id'], specs)
         self.assertEqual(body['key1'], 'value1')
-        self.assertRaises(lib_exc.Unauthorized,
+        self.assertRaises(lib_exc.Forbidden,
                           self.flavors_client.
                           update_flavor_extra_spec,
                           self.flavor['id'],
@@ -89,7 +97,7 @@ class FlavorsExtraSpecsNegativeTestJSON(base.BaseV2ComputeAdminTest):
         specs = {"key1": "value1", "key2": "value2"}
         self.client.set_flavor_extra_spec(self.flavor['id'], specs)
 
-        self.assertRaises(lib_exc.Unauthorized,
+        self.assertRaises(lib_exc.Forbidden,
                           self.flavors_client.unset_flavor_extra_spec,
                           self.flavor['id'],
                           'key1')

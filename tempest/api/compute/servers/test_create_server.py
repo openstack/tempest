@@ -16,10 +16,10 @@
 import base64
 
 import netaddr
+from tempest_lib.common.utils import data_utils
 import testtools
 
 from tempest.api.compute import base
-from tempest.common.utils import data_utils
 from tempest.common.utils.linux import remote_client
 from tempest import config
 from tempest import test
@@ -31,8 +31,18 @@ class ServersTestJSON(base.BaseV2ComputeTest):
     disk_config = 'AUTO'
 
     @classmethod
-    def resource_setup(cls):
+    def setup_credentials(cls):
         cls.prepare_instance_network()
+        super(ServersTestJSON, cls).setup_credentials()
+
+    @classmethod
+    def setup_clients(cls):
+        super(ServersTestJSON, cls).setup_clients()
+        cls.client = cls.servers_client
+        cls.network_client = cls.os.network_client
+
+    @classmethod
+    def resource_setup(cls):
         super(ServersTestJSON, cls).resource_setup()
         cls.meta = {'hello': 'world'}
         cls.accessIPv4 = '1.1.1.1'
@@ -41,8 +51,6 @@ class ServersTestJSON(base.BaseV2ComputeTest):
         file_contents = 'This is a test file.'
         personality = [{'path': '/test.txt',
                        'contents': base64.b64encode(file_contents)}]
-        cls.client = cls.servers_client
-        cls.network_client = cls.os.network_client
         disk_config = cls.disk_config
         cls.server_initial = cls.create_test_server(name=cls.name,
                                                     meta=cls.meta,
@@ -194,9 +202,9 @@ class ServersWithSpecificFlavorTestJSON(base.BaseV2ComputeAdminTest):
     disk_config = 'AUTO'
 
     @classmethod
-    def resource_setup(cls):
+    def setup_clients(cls):
         cls.prepare_instance_network()
-        super(ServersWithSpecificFlavorTestJSON, cls).resource_setup()
+        super(ServersWithSpecificFlavorTestJSON, cls).setup_clients()
         cls.flavor_client = cls.os_adm.flavors_client
         cls.client = cls.servers_client
 
@@ -277,8 +285,8 @@ class ServersTestManualDisk(ServersTestJSON):
     disk_config = 'MANUAL'
 
     @classmethod
-    def resource_setup(cls):
+    def skip_checks(cls):
+        super(ServersTestManualDisk, cls).skip_checks()
         if not CONF.compute_feature_enabled.disk_config:
             msg = "DiskConfig extension not enabled."
             raise cls.skipException(msg)
-        super(ServersTestManualDisk, cls).resource_setup()

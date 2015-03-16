@@ -23,11 +23,14 @@ from tempest import test
 class TenantUsagesNegativeTestJSON(base.BaseV2ComputeAdminTest):
 
     @classmethod
-    def resource_setup(cls):
-        super(TenantUsagesNegativeTestJSON, cls).resource_setup()
+    def setup_clients(cls):
+        super(TenantUsagesNegativeTestJSON, cls).setup_clients()
         cls.adm_client = cls.os_adm.tenant_usages_client
         cls.client = cls.os.tenant_usages_client
-        cls.identity_client = cls._get_identity_admin_client()
+
+    @classmethod
+    def resource_setup(cls):
+        super(TenantUsagesNegativeTestJSON, cls).resource_setup()
         now = datetime.datetime.now()
         cls.start = cls._parse_strtime(now - datetime.timedelta(days=1))
         cls.end = cls._parse_strtime(now + datetime.timedelta(days=1))
@@ -64,5 +67,5 @@ class TenantUsagesNegativeTestJSON(base.BaseV2ComputeAdminTest):
         params = {'start': self.start,
                   'end': self.end,
                   'detailed': int(bool(True))}
-        self.assertRaises(lib_exc.Unauthorized,
+        self.assertRaises(lib_exc.Forbidden,
                           self.client.list_tenant_usages, params)

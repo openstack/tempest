@@ -17,10 +17,10 @@ import re
 import time
 
 import boto.exception
+from oslo_log import log as logging
 import testtools
 
 from tempest import config
-from tempest.openstack.common import log as logging
 
 CONF = config.CONF
 LOG = logging.getLogger(__name__)

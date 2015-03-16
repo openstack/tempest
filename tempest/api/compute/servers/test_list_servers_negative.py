@@ -24,9 +24,13 @@ class ListServersNegativeTestJSON(base.BaseV2ComputeTest):
     force_tenant_isolation = True
 
     @classmethod
+    def setup_clients(cls):
+        super(ListServersNegativeTestJSON, cls).setup_clients()
+        cls.client = cls.servers_client
+
+    @classmethod
     def resource_setup(cls):
         super(ListServersNegativeTestJSON, cls).resource_setup()
-        cls.client = cls.servers_client
 
         # The following servers are created for use
         # by the test methods in this class. These

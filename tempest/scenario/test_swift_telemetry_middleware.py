@@ -14,9 +14,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from oslo_log import log as logging
 
 from tempest import config
-from tempest.openstack.common import log as logging
 from tempest.scenario import manager
 from tempest import test
 
@@ -44,7 +44,8 @@ class TestSwiftTelemetry(manager.SwiftScenarioTest):
     """
 
     @classmethod
-    def resource_setup(cls):
+    def skip_checks(cls):
+        super(TestSwiftTelemetry, cls).skip_checks()
         if not CONF.service_available.ceilometer:
             skip_msg = ("%s skipped as ceilometer is not available" %
                         cls.__name__)
@@ -52,8 +53,11 @@ class TestSwiftTelemetry(manager.SwiftScenarioTest):
         elif CONF.telemetry.too_slow_to_test:
             skip_msg = "Ceilometer feature for fast work mysql is disabled"
             raise cls.skipException(skip_msg)
-        super(TestSwiftTelemetry, cls).resource_setup()
-        cls.telemetry_client = cls.manager.telemetry_client
+
+    @classmethod
+    def setup_clients(cls):
+        super(TestSwiftTelemetry, cls).setup_clients()
+        cls.telemetry_client = cls.os_operator.telemetry_client
 
     def _confirm_notifications(self, container_name, obj_name):
         """
@@ -79,15 +83,15 @@ class TestSwiftTelemetry(manager.SwiftScenarioTest):
                 meta = sample['resource_metadata']
                 if meta.get('container') and meta['container'] != 'None':
                     containers.append(meta['container'])
-                elif (meta.get('target') and
-                      meta['target']['metadata']['container'] != 'None'):
-                    containers.append(meta['target']['metadata']['container'])
+                elif (meta.get('target.metadata:container') and
+                      meta['target.metadata:container'] != 'None'):
+                    containers.append(meta['target.metadata:container'])
 
                 if meta.get('object') and meta['object'] != 'None':
                     objects.append(meta['object'])
-                elif (meta.get('target') and
-                      meta['target']['metadata']['object'] != 'None'):
-                    objects.append(meta['target']['metadata']['object'])
+                elif (meta.get('target.metadata:object') and
+                      meta['target.metadata:object'] != 'None'):
+                    objects.append(meta['target.metadata:object'])
 
             return (container_name in containers and obj_name in objects)
 

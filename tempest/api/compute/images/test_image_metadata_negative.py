@@ -13,18 +13,18 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib.common.utils import data_utils
 from tempest_lib import exceptions as lib_exc
 
 from tempest.api.compute import base
-from tempest.common.utils import data_utils
 from tempest import test
 
 
 class ImagesMetadataTestJSON(base.BaseV2ComputeTest):
 
     @classmethod
-    def resource_setup(cls):
-        super(ImagesMetadataTestJSON, cls).resource_setup()
+    def setup_clients(cls):
+        super(ImagesMetadataTestJSON, cls).setup_clients()
         cls.client = cls.images_client
 
     @test.attr(type=['negative', 'gate'])

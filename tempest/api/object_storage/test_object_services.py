@@ -21,14 +21,19 @@ import time
 import zlib
 
 import six
+from tempest_lib.common.utils import data_utils
 
 from tempest.api.object_storage import base
+from tempest import clients
 from tempest.common import custom_matchers
-from tempest.common.utils import data_utils
+from tempest import config
 from tempest import test
+
+CONF = config.CONF
 
 
 class ObjectTest(base.BaseObjectTest):
+
     @classmethod
     def resource_setup(cls):
         super(ObjectTest, cls).resource_setup()
@@ -1016,6 +1021,19 @@ class ObjectTest(base.BaseObjectTest):
 
 
 class PublicObjectTest(base.BaseObjectTest):
+
+    @classmethod
+    def setup_credentials(cls):
+        super(PublicObjectTest, cls).setup_credentials()
+        cls.os_alt = clients.Manager(
+            cls.isolated_creds.get_creds_by_roles(
+                roles=[CONF.object_storage.operator_role], force_new=True))
+
+    @classmethod
+    def setup_clients(cls):
+        super(PublicObjectTest, cls).setup_clients()
+        cls.identity_client_alt = cls.os_alt.identity_client
+
     def setUp(self):
         super(PublicObjectTest, self).setUp()
         self.container_name = data_utils.rand_name(name='TestContainer')

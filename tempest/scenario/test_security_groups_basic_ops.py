@@ -13,10 +13,11 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from oslo_log import log as logging
+from tempest_lib.common.utils import data_utils
+
 from tempest import clients
-from tempest.common.utils import data_utils
 from tempest import config
-from tempest.openstack.common import log as logging
 from tempest.scenario import manager
 from tempest import test
 
@@ -119,11 +120,11 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
             self.router = router
 
     @classmethod
-    def check_preconditions(cls):
+    def skip_checks(cls):
+        super(TestSecurityGroupsBasicOps, cls).skip_checks()
         if CONF.baremetal.driver_enabled:
             msg = ('Not currently supported by baremetal.')
             raise cls.skipException(msg)
-        super(TestSecurityGroupsBasicOps, cls).check_preconditions()
         if not (CONF.network.tenant_networks_reachable or
                 CONF.network.public_network_id):
             msg = ('Either tenant_networks_reachable must be "true", or '
@@ -131,10 +132,10 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
             raise cls.skipException(msg)
 
     @classmethod
-    def resource_setup(cls):
+    def setup_credentials(cls):
         # Create no network resources for these tests.
         cls.set_network_resources()
-        super(TestSecurityGroupsBasicOps, cls).resource_setup()
+        super(TestSecurityGroupsBasicOps, cls).setup_credentials()
         # TODO(mnewby) Consider looking up entities as needed instead
         # of storing them as collections on the class.
 
@@ -144,6 +145,9 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
         # Credentials from the manager are filled with both IDs and Names
         cls.alt_creds = cls.alt_manager.credentials
 
+    @classmethod
+    def resource_setup(cls):
+        super(TestSecurityGroupsBasicOps, cls).resource_setup()
         cls.floating_ips = {}
         cls.tenants = {}
         creds = cls.credentials()
@@ -151,6 +155,7 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
         cls.alt_tenant = cls.TenantProperties(cls.alt_creds)
         for tenant in [cls.primary_tenant, cls.alt_tenant]:
             cls.tenants[tenant.creds.tenant_id] = tenant
+
         cls.floating_ip_access = not CONF.network.public_router_id
 
     def cleanup_wrapper(self, resource):

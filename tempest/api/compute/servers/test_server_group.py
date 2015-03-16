@@ -13,10 +13,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib.common.utils import data_utils
 from tempest_lib import decorators
 
 from tempest.api.compute import base
-from tempest.common.utils import data_utils
 from tempest import test
 
 
@@ -28,12 +28,20 @@ class ServerGroupTestJSON(base.BaseV2ComputeTest):
     It also adds the tests for list and get details of server-groups
     """
     @classmethod
-    def resource_setup(cls):
-        super(ServerGroupTestJSON, cls).resource_setup()
+    def skip_checks(cls):
+        super(ServerGroupTestJSON, cls).skip_checks()
         if not test.is_extension_enabled('os-server-groups', 'compute'):
             msg = "os-server-groups extension is not enabled."
             raise cls.skipException(msg)
+
+    @classmethod
+    def setup_clients(cls):
+        super(ServerGroupTestJSON, cls).setup_clients()
         cls.client = cls.servers_client
+
+    @classmethod
+    def resource_setup(cls):
+        super(ServerGroupTestJSON, cls).resource_setup()
         server_group_name = data_utils.rand_name('server-group')
         cls.policy = ['affinity']
 

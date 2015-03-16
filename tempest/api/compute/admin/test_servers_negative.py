@@ -14,12 +14,12 @@
 
 import uuid
 
+from tempest_lib.common.utils import data_utils
 from tempest_lib import exceptions as lib_exc
 import testtools
 
 from tempest.api.compute import base
 from tempest.common import tempest_fixtures as fixtures
-from tempest.common.utils import data_utils
 from tempest import config
 from tempest import test
 
@@ -33,11 +33,15 @@ class ServersAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
     """
 
     @classmethod
-    def resource_setup(cls):
-        super(ServersAdminNegativeTestJSON, cls).resource_setup()
+    def setup_clients(cls):
+        super(ServersAdminNegativeTestJSON, cls).setup_clients()
         cls.client = cls.os_adm.servers_client
         cls.non_adm_client = cls.servers_client
         cls.flavors_client = cls.os_adm.flavors_client
+
+    @classmethod
+    def resource_setup(cls):
+        super(ServersAdminNegativeTestJSON, cls).resource_setup()
         cls.tenant_id = cls.client.tenant_id
 
         cls.s1_name = data_utils.rand_name('server')
@@ -72,7 +76,7 @@ class ServersAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
                                                        ram, vcpus, disk,
                                                        flavor_id)
         self.addCleanup(self.flavors_client.delete_flavor, flavor_id)
-        self.assertRaises((lib_exc.Unauthorized, lib_exc.OverLimit),
+        self.assertRaises((lib_exc.Forbidden, lib_exc.OverLimit),
                           self.client.resize,
                           self.servers[0]['id'],
                           flavor_ref['id'])
@@ -94,7 +98,7 @@ class ServersAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
                                                        ram, vcpus, disk,
                                                        flavor_id)
         self.addCleanup(self.flavors_client.delete_flavor, flavor_id)
-        self.assertRaises((lib_exc.Unauthorized, lib_exc.OverLimit),
+        self.assertRaises((lib_exc.Forbidden, lib_exc.OverLimit),
                           self.client.resize,
                           self.servers[0]['id'],
                           flavor_ref['id'])
@@ -123,7 +127,7 @@ class ServersAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
     @test.idempotent_id('e84e2234-60d2-42fa-8b30-e2d3049724ac')
     def test_get_server_diagnostics_by_non_admin(self):
         # Non-admin user can not view server diagnostics according to policy
-        self.assertRaises(lib_exc.Unauthorized,
+        self.assertRaises(lib_exc.Forbidden,
                           self.non_adm_client.get_server_diagnostics,
                           self.s1_id)
 

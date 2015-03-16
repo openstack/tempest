@@ -12,9 +12,10 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+from tempest_lib.common.utils import data_utils
+
 from tempest.api.object_storage import base
 from tempest import clients
-from tempest.common.utils import data_utils
 from tempest import config
 from tempest import test
 
@@ -26,8 +27,16 @@ class AccountQuotasTest(base.BaseObjectTest):
     @classmethod
     def setup_credentials(cls):
         super(AccountQuotasTest, cls).setup_credentials()
-        cls.data.setup_test_user(reseller=True)
-        cls.os_reselleradmin = clients.Manager(cls.data.test_credentials)
+        reseller_admin_role = CONF.object_storage.reseller_admin_role
+        if not cls.isolated_creds.is_role_available(reseller_admin_role):
+            skip_msg = ("%s skipped because the configured credential provider"
+                        " is not able to provide credentials with the %s role "
+                        "assigned." % (cls.__name__, reseller_admin_role))
+            raise cls.skipException(skip_msg)
+        else:
+            cls.os_reselleradmin = clients.Manager(
+                cls.isolated_creds.get_creds_by_roles(
+                    roles=[reseller_admin_role]))
 
     @classmethod
     def resource_setup(cls):

@@ -28,8 +28,8 @@ class DeleteServersTestJSON(base.BaseV2ComputeTest):
     # for preventing "Quota exceeded for instances"
 
     @classmethod
-    def resource_setup(cls):
-        super(DeleteServersTestJSON, cls).resource_setup()
+    def setup_clients(cls):
+        super(DeleteServersTestJSON, cls).setup_clients()
         cls.client = cls.servers_client
 
     @test.attr(type='gate')
@@ -123,7 +123,7 @@ class DeleteServersTestJSON(base.BaseV2ComputeTest):
         device = '/dev/%s' % CONF.compute.volume_device_name
         server = self.create_test_server(wait_until='ACTIVE')
 
-        volume = volumes_client.create_volume(1)
+        volume = volumes_client.create_volume()
         self.addCleanup(volumes_client.delete_volume, volume['id'])
         volumes_client.wait_for_volume_status(volume['id'], 'available')
         self.client.attach_volume(server['id'],
@@ -141,8 +141,8 @@ class DeleteServersAdminTestJSON(base.BaseV2ComputeAdminTest):
     # for preventing "Quota exceeded for instances".
 
     @classmethod
-    def resource_setup(cls):
-        super(DeleteServersAdminTestJSON, cls).resource_setup()
+    def setup_clients(cls):
+        super(DeleteServersAdminTestJSON, cls).setup_clients()
         cls.non_admin_client = cls.servers_client
         cls.admin_client = cls.os_adm.servers_client
 

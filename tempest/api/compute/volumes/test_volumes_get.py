@@ -13,10 +13,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib.common.utils import data_utils
 from testtools import matchers
 
 from tempest.api.compute import base
-from tempest.common.utils import data_utils
 from tempest import config
 from tempest import test
 
@@ -46,8 +46,7 @@ class VolumesGetTestJSON(base.BaseV2ComputeTest):
         v_name = data_utils.rand_name('Volume')
         metadata = {'Type': 'work'}
         # Create volume
-        volume = self.client.create_volume(size=1,
-                                           display_name=v_name,
+        volume = self.client.create_volume(display_name=v_name,
                                            metadata=metadata)
         self.addCleanup(self.delete_volume, volume['id'])
         self.assertIn('id', volume)

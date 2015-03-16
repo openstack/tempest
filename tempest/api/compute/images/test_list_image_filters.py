@@ -16,12 +16,12 @@
 import StringIO
 import time
 
+from oslo_log import log as logging
+from tempest_lib.common.utils import data_utils
 import testtools
 
 from tempest.api.compute import base
-from tempest.common.utils import data_utils
 from tempest import config
-from tempest.openstack.common import log as logging
 from tempest import test
 
 CONF = config.CONF
@@ -32,13 +32,21 @@ LOG = logging.getLogger(__name__)
 class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
 
     @classmethod
-    def resource_setup(cls):
-        super(ListImageFiltersTestJSON, cls).resource_setup()
+    def skip_checks(cls):
+        super(ListImageFiltersTestJSON, cls).skip_checks()
         if not CONF.service_available.glance:
             skip_msg = ("%s skipped as glance is not available" % cls.__name__)
             raise cls.skipException(skip_msg)
+
+    @classmethod
+    def setup_clients(cls):
+        super(ListImageFiltersTestJSON, cls).setup_clients()
         cls.client = cls.images_client
         cls.glance_client = cls.os.image_client
+
+    @classmethod
+    def resource_setup(cls):
+        super(ListImageFiltersTestJSON, cls).resource_setup()
 
         def _create_image():
             name = data_utils.rand_name('image')

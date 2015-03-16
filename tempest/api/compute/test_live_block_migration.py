@@ -27,11 +27,14 @@ class LiveBlockMigrationTestJSON(base.BaseV2ComputeAdminTest):
     _host_key = 'OS-EXT-SRV-ATTR:host'
 
     @classmethod
-    def resource_setup(cls):
-        super(LiveBlockMigrationTestJSON, cls).resource_setup()
-
+    def setup_clients(cls):
+        super(LiveBlockMigrationTestJSON, cls).setup_clients()
         cls.admin_hosts_client = cls.os_adm.hosts_client
         cls.admin_servers_client = cls.os_adm.servers_client
+
+    @classmethod
+    def resource_setup(cls):
+        super(LiveBlockMigrationTestJSON, cls).resource_setup()
 
         cls.created_server_ids = []
 
@@ -115,7 +118,7 @@ class LiveBlockMigrationTestJSON(base.BaseV2ComputeAdminTest):
         actual_host = self._get_host_for_server(server_id)
         target_host = self._get_host_other_than(actual_host)
 
-        volume = self.volumes_client.create_volume(1, display_name='test')
+        volume = self.volumes_client.create_volume(display_name='test')
 
         self.volumes_client.wait_for_volume_status(volume['id'],
                                                    'available')

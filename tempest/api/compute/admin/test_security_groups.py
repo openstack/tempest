@@ -13,10 +13,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib.common.utils import data_utils
 import testtools
 
 from tempest.api.compute import base
-from tempest.common.utils import data_utils
 from tempest import config
 from tempest import test
 
@@ -26,8 +26,8 @@ CONF = config.CONF
 class SecurityGroupsTestAdminJSON(base.BaseV2ComputeAdminTest):
 
     @classmethod
-    def resource_setup(cls):
-        super(SecurityGroupsTestAdminJSON, cls).resource_setup()
+    def setup_clients(cls):
+        super(SecurityGroupsTestAdminJSON, cls).setup_clients()
         cls.adm_client = cls.os_adm.security_groups_client
         cls.client = cls.security_groups_client
 

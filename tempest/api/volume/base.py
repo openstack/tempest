@@ -13,13 +13,13 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from oslo_log import log as logging
+from tempest_lib.common.utils import data_utils
 from tempest_lib import exceptions as lib_exc
 
 from tempest import clients
-from tempest.common.utils import data_utils
 from tempest import config
 from tempest import exceptions
-from tempest.openstack.common import log as logging
 import tempest.test
 
 CONF = config.CONF
@@ -106,7 +106,7 @@ class BaseVolumeTest(tempest.test.BaseTestCase):
         super(BaseVolumeTest, cls).resource_cleanup()
 
     @classmethod
-    def create_volume(cls, size=1, **kwargs):
+    def create_volume(cls, size=None, **kwargs):
         """Wrapper utility that returns a test volume."""
         name = data_utils.rand_name('Volume')
 

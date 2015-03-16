@@ -13,8 +13,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib.common.utils import data_utils
+
 from tempest.api.volume import base
-from tempest.common.utils import data_utils
 from tempest import test
 
 
@@ -34,7 +35,7 @@ class SnapshotsActionsV2Test(base.BaseVolumeAdminTest):
         cls.name_field = cls.special_fields['name_field']
         params = {cls.name_field: vol_name}
         cls.volume = \
-            cls.volumes_client.create_volume(size=1, **params)
+            cls.volumes_client.create_volume(**params)
         cls.volumes_client.wait_for_volume_status(cls.volume['id'],
                                                   'available')
 

@@ -14,10 +14,10 @@ import json
 import time
 import urllib
 
+from tempest_lib.common.utils import misc
 from tempest_lib import exceptions as lib_exc
 
 from tempest.common import service_client
-from tempest.common.utils import misc
 from tempest import exceptions
 
 

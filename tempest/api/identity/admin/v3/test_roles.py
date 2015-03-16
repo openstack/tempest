@@ -13,8 +13,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib.common.utils import data_utils
+
 from tempest.api.identity import base
-from tempest.common.utils import data_utils
 from tempest import test
 
 
@@ -143,11 +144,11 @@ class RolesV3TestJSON(base.BaseIdentityV3AdminTest):
         self.client.add_group_user(self.group_body['id'], self.user_body['id'])
         self.addCleanup(self.client.delete_group_user,
                         self.group_body['id'], self.user_body['id'])
-        body = self.token.auth(user=self.user_body['id'],
+        body = self.token.auth(user_id=self.user_body['id'],
                                password=self.u_password,
-                               user_domain=self.domain['name'],
-                               project=self.project['name'],
-                               project_domain=self.domain['name'])
+                               user_domain_name=self.domain['name'],
+                               project_name=self.project['name'],
+                               project_domain_name=self.domain['name'])
         roles = body['token']['roles']
         self.assertEqual(len(roles), 1)
         self.assertEqual(roles[0]['id'], self.role['id'])

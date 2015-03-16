@@ -13,8 +13,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib.common.utils import data_utils
+
 from tempest.api.compute import base
-from tempest.common.utils import data_utils
 from tempest import test
 
 
@@ -23,8 +24,8 @@ class KeyPairsV2TestJSON(base.BaseComputeTest):
     _api_version = 2
 
     @classmethod
-    def resource_setup(cls):
-        super(KeyPairsV2TestJSON, cls).resource_setup()
+    def setup_clients(cls):
+        super(KeyPairsV2TestJSON, cls).setup_clients()
         cls.client = cls.keypairs_client
 
     def _delete_keypair(self, keypair_name):

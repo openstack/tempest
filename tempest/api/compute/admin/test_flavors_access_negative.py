@@ -13,11 +13,12 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest_lib import exceptions as lib_exc
 import uuid
 
+from tempest_lib.common.utils import data_utils
+from tempest_lib import exceptions as lib_exc
+
 from tempest.api.compute import base
-from tempest.common.utils import data_utils
 from tempest import test
 
 
@@ -29,13 +30,21 @@ class FlavorsAccessNegativeTestJSON(base.BaseV2ComputeAdminTest):
     """
 
     @classmethod
-    def resource_setup(cls):
-        super(FlavorsAccessNegativeTestJSON, cls).resource_setup()
+    def skip_checks(cls):
+        super(FlavorsAccessNegativeTestJSON, cls).skip_checks()
         if not test.is_extension_enabled('OS-FLV-EXT-DATA', 'compute'):
             msg = "OS-FLV-EXT-DATA extension not enabled."
             raise cls.skipException(msg)
 
+    @classmethod
+    def setup_clients(cls):
+        super(FlavorsAccessNegativeTestJSON, cls).setup_clients()
         cls.client = cls.os_adm.flavors_client
+
+    @classmethod
+    def resource_setup(cls):
+        super(FlavorsAccessNegativeTestJSON, cls).resource_setup()
+
         cls.tenant_id = cls.flavors_client.tenant_id
         cls.flavor_name_prefix = 'test_flavor_access_'
         cls.ram = 512
@@ -70,7 +79,7 @@ class FlavorsAccessNegativeTestJSON(base.BaseV2ComputeAdminTest):
                                                new_flavor_id,
                                                is_public='False')
         self.addCleanup(self.client.delete_flavor, new_flavor['id'])
-        self.assertRaises(lib_exc.Unauthorized,
+        self.assertRaises(lib_exc.Forbidden,
                           self.flavors_client.add_flavor_access,
                           new_flavor['id'],
                           self.tenant_id)
@@ -91,7 +100,7 @@ class FlavorsAccessNegativeTestJSON(base.BaseV2ComputeAdminTest):
         self.client.add_flavor_access(new_flavor['id'], self.tenant_id)
         self.addCleanup(self.client.remove_flavor_access,
                         new_flavor['id'], self.tenant_id)
-        self.assertRaises(lib_exc.Unauthorized,
+        self.assertRaises(lib_exc.Forbidden,
                           self.flavors_client.remove_flavor_access,
                           new_flavor['id'],
                           self.tenant_id)

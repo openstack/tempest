@@ -13,10 +13,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib.common.utils import data_utils
 from tempest_lib import exceptions as lib_exc
 
 from tempest.api.compute import base
-from tempest.common.utils import data_utils
 from tempest import config
 from tempest import test
 
@@ -27,10 +27,14 @@ class LiveBlockMigrationNegativeTestJSON(base.BaseV2ComputeAdminTest):
     _host_key = 'OS-EXT-SRV-ATTR:host'
 
     @classmethod
-    def resource_setup(cls):
-        super(LiveBlockMigrationNegativeTestJSON, cls).resource_setup()
+    def skip_checks(cls):
+        super(LiveBlockMigrationNegativeTestJSON, cls).skip_checks()
         if not CONF.compute_feature_enabled.live_migration:
             raise cls.skipException("Live migration is not enabled")
+
+    @classmethod
+    def setup_clients(cls):
+        super(LiveBlockMigrationNegativeTestJSON, cls).setup_clients()
         cls.admin_hosts_client = cls.os_adm.hosts_client
         cls.admin_servers_client = cls.os_adm.servers_client
 

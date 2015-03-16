@@ -15,11 +15,12 @@
 
 import copy
 
+from oslo_log import log as logging
+
 from tempest.common import cred_provider
 from tempest.common import negative_rest_client
 from tempest import config
 from tempest import manager
-from tempest.openstack.common import log as logging
 from tempest.services.baremetal.v1.json.baremetal_client import \
     BaremetalClientJSON
 from tempest.services import botoclients
@@ -228,13 +229,14 @@ class Manager(manager.Manager):
         self.negative_client = negative_rest_client.NegativeRestClient(
             self.auth_provider, service)
 
-        # TODO(andreaf) EC2 client still do their auth, v2 only
-        ec2_client_args = (self.credentials.username,
-                           self.credentials.password,
-                           CONF.identity.uri,
-                           self.credentials.tenant_name)
-        self.ec2api_client = botoclients.APIClientEC2(*ec2_client_args)
-        self.s3_client = botoclients.ObjectClientS3(*ec2_client_args)
+        # Generating EC2 credentials in tempest is only supported
+        # with identity v2
+        if CONF.identity_feature_enabled.api_v2 and \
+                CONF.identity.auth_version == 'v2':
+            # EC2 and S3 clients, if used, will check onfigured AWS credentials
+            # and generate new ones if needed
+            self.ec2api_client = botoclients.APIClientEC2(self.identity_client)
+            self.s3_client = botoclients.ObjectClientS3(self.identity_client)
 
     def _set_compute_clients(self):
         params = {
@@ -301,7 +303,8 @@ class Manager(manager.Manager):
             'build_timeout': CONF.volume.build_timeout
         })
         self.volumes_extensions_client = VolumesExtensionsClientJSON(
-            self.auth_provider, **params_volume)
+            self.auth_provider, default_volume_size=CONF.volume.volume_size,
+            **params_volume)
 
     def _set_database_clients(self):
         self.database_flavors_client = DatabaseFlavorsClientJSON(

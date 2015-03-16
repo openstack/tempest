@@ -25,15 +25,15 @@ class ServicesAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
     """
 
     @classmethod
-    def resource_setup(cls):
-        super(ServicesAdminNegativeTestJSON, cls).resource_setup()
+    def setup_clients(cls):
+        super(ServicesAdminNegativeTestJSON, cls).setup_clients()
         cls.client = cls.os_adm.services_client
         cls.non_admin_client = cls.services_client
 
     @test.attr(type=['negative', 'gate'])
     @test.idempotent_id('1126d1f8-266e-485f-a687-adc547492646')
     def test_list_services_with_non_admin_user(self):
-        self.assertRaises(lib_exc.Unauthorized,
+        self.assertRaises(lib_exc.Forbidden,
                           self.non_admin_client.list_services)
 
     @test.attr(type=['negative', 'gate'])

@@ -30,8 +30,8 @@ class NetworksTest(base.BaseComputeAdminTest):
     """
 
     @classmethod
-    def resource_setup(cls):
-        super(NetworksTest, cls).resource_setup()
+    def setup_clients(cls):
+        super(NetworksTest, cls).setup_clients()
         cls.client = cls.os_adm.networks_client
 
     @test.idempotent_id('d206d211-8912-486f-86e2-a9d090d1f416')

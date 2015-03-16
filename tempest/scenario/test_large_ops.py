@@ -12,11 +12,12 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
+
+from oslo_log import log as logging
+from tempest_lib.common.utils import data_utils
 from tempest_lib import exceptions as lib_exc
 
-from tempest.common.utils import data_utils
 from tempest import config
-from tempest.openstack.common import log as logging
 from tempest.scenario import manager
 from tempest import test
 
@@ -39,11 +40,19 @@ class TestLargeOpsScenario(manager.ScenarioTest):
     """
 
     @classmethod
-    def resource_setup(cls):
+    def skip_checks(cls):
+        super(TestLargeOpsScenario, cls).skip_checks()
         if CONF.scenario.large_ops_number < 1:
             raise cls.skipException("large_ops_number not set to multiple "
                                     "instances")
+
+    @classmethod
+    def setup_credentials(cls):
         cls.set_network_resources()
+        super(TestLargeOpsScenario, cls).setup_credentials()
+
+    @classmethod
+    def resource_setup(cls):
         super(TestLargeOpsScenario, cls).resource_setup()
         # list of cleanup calls to be executed in reverse order
         cls._cleanup_resources = []

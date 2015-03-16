@@ -13,13 +13,13 @@
 #    under the License.
 
 import mock
-from oslo.config import cfg
+from oslo_config import cfg
+from oslotest import mockpatch
 
 from tempest.common import isolated_creds
 from tempest.common import service_client
 from tempest import config
 from tempest import exceptions
-from tempest.openstack.common.fixture import mockpatch
 from tempest.services.identity.v2.json import identity_client as \
     json_iden_client
 from tempest.services.identity.v2.json import token_client as json_token_client
@@ -41,6 +41,7 @@ class TestTenantIsolation(base.TestCase):
                        fake_identity._fake_v2_response)
         cfg.CONF.set_default('operator_role', 'FakeRole',
                              group='object-storage')
+        self._mock_list_ec2_credentials('fake_user_id', 'fake_tenant_id')
 
     def test_tempest_client(self):
         iso_creds = isolated_creds.IsolatedCreds('test class')
@@ -75,6 +76,17 @@ class TestTenantIsolation(base.TestCase):
                             {'id': '1', 'name': 'FakeRole'}]))))
         return roles_fix
 
+    def _mock_list_2_roles(self):
+        roles_fix = self.useFixture(mockpatch.PatchObject(
+            json_iden_client.IdentityClientJSON,
+            'list_roles',
+            return_value=(service_client.ResponseBodyList
+                          (200,
+                           [{'id': '1234', 'name': 'role1'},
+                            {'id': '1', 'name': 'FakeRole'},
+                            {'id': '12345', 'name': 'role2'}]))))
+        return roles_fix
+
     def _mock_assign_user_role(self):
         tenant_fix = self.useFixture(mockpatch.PatchObject(
             json_iden_client.IdentityClientJSON,
@@ -90,6 +102,18 @@ class TestTenantIsolation(base.TestCase):
             return_value=(service_client.ResponseBodyList
                           (200, [{'id': '1', 'name': 'FakeRole'}]))))
         return roles_fix
+
+    def _mock_list_ec2_credentials(self, user_id, tenant_id):
+        ec2_creds_fix = self.useFixture(mockpatch.PatchObject(
+            json_iden_client.IdentityClientJSON,
+            'list_user_ec2_credentials',
+            return_value=(service_client.ResponseBodyList
+                          (200, [{'access': 'fake_access',
+                                  'secret': 'fake_secret',
+                                  'tenant_id': tenant_id,
+                                  'user_id': user_id,
+                                  'trust_id': None}]))))
+        return ec2_creds_fix
 
     def _mock_network_create(self, iso_creds, id, name):
         net_fix = self.useFixture(mockpatch.PatchObject(
@@ -145,13 +169,40 @@ class TestTenantIsolation(base.TestCase):
                                'assign_user_role') as user_mock:
             admin_creds = iso_creds.get_admin_creds()
         user_mock.assert_has_calls([
-            mock.call('1234', '1234', '1'),
             mock.call('1234', '1234', '1234')])
         self.assertEqual(admin_creds.username, 'fake_admin_user')
         self.assertEqual(admin_creds.tenant_name, 'fake_admin_tenant')
         # Verify IDs
         self.assertEqual(admin_creds.tenant_id, '1234')
         self.assertEqual(admin_creds.user_id, '1234')
+
+    @mock.patch('tempest_lib.common.rest_client.RestClient')
+    def test_role_creds(self, MockRestClient):
+        cfg.CONF.set_default('neutron', False, 'service_available')
+        iso_creds = isolated_creds.IsolatedCreds('test class',
+                                                 password='fake_password')
+        self._mock_list_2_roles()
+        self._mock_user_create('1234', 'fake_role_user')
+        self._mock_tenant_create('1234', 'fake_role_tenant')
+
+        user_mock = mock.patch.object(json_iden_client.IdentityClientJSON,
+                                      'assign_user_role')
+        user_mock.start()
+        self.addCleanup(user_mock.stop)
+        with mock.patch.object(json_iden_client.IdentityClientJSON,
+                               'assign_user_role') as user_mock:
+            role_creds = iso_creds.get_creds_by_roles(roles=['role1', 'role2'])
+        calls = user_mock.mock_calls
+        # Assert that the role creation is called with the 2 specified roles
+        self.assertEqual(len(calls), 2)
+        args = map(lambda x: x[1], calls)
+        self.assertIn(('1234', '1234', '1234'), args)
+        self.assertIn(('1234', '1234', '12345'), args)
+        self.assertEqual(role_creds.username, 'fake_role_user')
+        self.assertEqual(role_creds.tenant_name, 'fake_role_tenant')
+        # Verify IDs
+        self.assertEqual(role_creds.tenant_id, '1234')
+        self.assertEqual(role_creds.user_id, '1234')
 
     @mock.patch('tempest_lib.common.rest_client.RestClient')
     def test_all_cred_cleanup(self, MockRestClient):

@@ -13,11 +13,11 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib.common.utils import data_utils
 from tempest_lib import exceptions as lib_exc
 
 from tempest.api.compute import base
 from tempest.common import tempest_fixtures as fixtures
-from tempest.common.utils import data_utils
 from tempest import test
 
 
@@ -30,9 +30,13 @@ class AggregatesAdminTestJSON(base.BaseV2ComputeAdminTest):
     _host_key = 'OS-EXT-SRV-ATTR:host'
 
     @classmethod
+    def setup_clients(cls):
+        super(AggregatesAdminTestJSON, cls).setup_clients()
+        cls.client = cls.os_adm.aggregates_client
+
+    @classmethod
     def resource_setup(cls):
         super(AggregatesAdminTestJSON, cls).resource_setup()
-        cls.client = cls.os_adm.aggregates_client
         cls.aggregate_name_prefix = 'test_aggregate_'
         cls.az_name_prefix = 'test_az_'
 

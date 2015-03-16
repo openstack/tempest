@@ -16,20 +16,27 @@ from tempest_lib import exceptions as lib_exc
 
 from tempest.api.object_storage import base
 from tempest import clients
+from tempest import config
 from tempest import test
+
+CONF = config.CONF
 
 
 class AccountNegativeTest(base.BaseObjectTest):
+
+    @classmethod
+    def setup_credentials(cls):
+        super(AccountNegativeTest, cls).setup_credentials()
+        cls.os_operator = clients.Manager(
+            cls.isolated_creds.get_creds_by_roles(
+                roles=[CONF.object_storage.operator_role], force_new=True))
 
     @test.attr(type=['negative', 'gate'])
     @test.idempotent_id('070e6aca-6152-4867-868d-1118d68fb38c')
     def test_list_containers_with_non_authorized_user(self):
         # list containers using non-authorized user
 
-        # create user
-        self.data.setup_test_user()
-        test_os = clients.Manager(self.data.test_credentials)
-        test_auth_provider = test_os.auth_provider
+        test_auth_provider = self.os_operator.auth_provider
         # Get auth for the test user
         test_auth_provider.auth_data
 
@@ -44,6 +51,6 @@ class AccountNegativeTest(base.BaseObjectTest):
 
         params = {'format': 'json'}
         # list containers with non-authorized user token
-        self.assertRaises(lib_exc.Unauthorized,
+        self.assertRaises(lib_exc.Forbidden,
                           self.account_client.list_account_containers,
                           params=params)

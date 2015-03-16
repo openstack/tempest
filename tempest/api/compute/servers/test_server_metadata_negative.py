@@ -13,20 +13,24 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib.common.utils import data_utils
 from tempest_lib import exceptions as lib_exc
 
 from tempest.api.compute import base
-from tempest.common.utils import data_utils
 from tempest import test
 
 
 class ServerMetadataNegativeTestJSON(base.BaseV2ComputeTest):
 
     @classmethod
-    def resource_setup(cls):
-        super(ServerMetadataNegativeTestJSON, cls).resource_setup()
+    def setup_clients(cls):
+        super(ServerMetadataNegativeTestJSON, cls).setup_clients()
         cls.client = cls.servers_client
         cls.quotas = cls.quotas_client
+
+    @classmethod
+    def resource_setup(cls):
+        super(ServerMetadataNegativeTestJSON, cls).resource_setup()
         cls.tenant_id = cls.client.tenant_id
         server = cls.create_test_server(meta={}, wait_until='ACTIVE')
 
@@ -141,14 +145,14 @@ class ServerMetadataNegativeTestJSON(base.BaseV2ComputeTest):
         req_metadata = {}
         for num in range(1, quota_metadata + 2):
             req_metadata['key' + str(num)] = 'val' + str(num)
-        self.assertRaises((lib_exc.OverLimit, lib_exc.Unauthorized),
+        self.assertRaises((lib_exc.OverLimit, lib_exc.Forbidden),
                           self.client.set_server_metadata,
                           self.server_id, req_metadata)
 
         # A 403 Forbidden or 413 Overlimit (old behaviour) exception
         # will be raised while exceeding metadata items limit for
         # tenant.
-        self.assertRaises((lib_exc.Unauthorized, lib_exc.OverLimit),
+        self.assertRaises((lib_exc.Forbidden, lib_exc.OverLimit),
                           self.client.update_server_metadata,
                           self.server_id, req_metadata)
 

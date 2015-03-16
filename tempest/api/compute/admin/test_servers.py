@@ -12,10 +12,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib.common.utils import data_utils
 from tempest_lib import decorators
 
 from tempest.api.compute import base
-from tempest.common.utils import data_utils
 from tempest import test
 
 
@@ -28,11 +28,15 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
     _host_key = 'OS-EXT-SRV-ATTR:host'
 
     @classmethod
-    def resource_setup(cls):
-        super(ServersAdminTestJSON, cls).resource_setup()
+    def setup_clients(cls):
+        super(ServersAdminTestJSON, cls).setup_clients()
         cls.client = cls.os_adm.servers_client
         cls.non_admin_client = cls.servers_client
         cls.flavors_client = cls.os_adm.flavors_client
+
+    @classmethod
+    def resource_setup(cls):
+        super(ServersAdminTestJSON, cls).resource_setup()
 
         cls.s1_name = data_utils.rand_name('server')
         server = cls.create_test_server(name=cls.s1_name,

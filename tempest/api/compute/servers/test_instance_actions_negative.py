@@ -13,19 +13,23 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib.common.utils import data_utils
 from tempest_lib import exceptions as lib_exc
 
 from tempest.api.compute import base
-from tempest.common.utils import data_utils
 from tempest import test
 
 
 class InstanceActionsNegativeTestJSON(base.BaseV2ComputeTest):
 
     @classmethod
+    def setup_clients(cls):
+        super(InstanceActionsNegativeTestJSON, cls).setup_clients()
+        cls.client = cls.servers_client
+
+    @classmethod
     def resource_setup(cls):
         super(InstanceActionsNegativeTestJSON, cls).resource_setup()
-        cls.client = cls.servers_client
         server = cls.create_test_server(wait_until='ACTIVE')
         cls.server_id = server['id']
 

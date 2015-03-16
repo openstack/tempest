@@ -13,12 +13,12 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from oslo_log import log as logging
+from tempest_lib.common.utils import data_utils
 from tempest_lib import decorators
 import testtools
 
-from tempest.common.utils import data_utils
 from tempest import config
-from tempest.openstack.common import log as logging
 from tempest.scenario import manager
 from tempest import test
 
@@ -41,8 +41,8 @@ class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
     """
 
     @classmethod
-    def check_preconditions(cls):
-        super(TestNetworkAdvancedServerOps, cls).check_preconditions()
+    def skip_checks(cls):
+        super(TestNetworkAdvancedServerOps, cls).skip_checks()
         if not (CONF.network.tenant_networks_reachable
                 or CONF.network.public_network_id):
             msg = ('Either tenant_networks_reachable must be "true", or '
@@ -50,10 +50,10 @@ class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
             raise cls.skipException(msg)
 
     @classmethod
-    def resource_setup(cls):
+    def setup_credentials(cls):
         # Create no network resources for these tests.
         cls.set_network_resources()
-        super(TestNetworkAdvancedServerOps, cls).resource_setup()
+        super(TestNetworkAdvancedServerOps, cls).setup_credentials()
 
     def _setup_network_and_servers(self):
         self.keypair = self.create_keypair()
@@ -84,10 +84,11 @@ class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
             should_connect=should_connect,
             servers_for_debug=[self.server])
         floating_ip = self.floating_ip.floating_ip_address
+        # Check FloatingIP status before checking the connectivity
+        self.check_floating_ip_status(self.floating_ip, 'ACTIVE')
         self.check_public_network_connectivity(floating_ip, username,
                                                private_key, should_connect,
                                                servers=[self.server])
-        self.check_floating_ip_status(self.floating_ip, 'ACTIVE')
 
     def _wait_server_status_and_check_network_connectivity(self):
         self.servers_client.wait_for_server_status(self.server['id'], 'ACTIVE')

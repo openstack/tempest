@@ -17,12 +17,12 @@ import base64
 import logging
 import urlparse
 
+from tempest_lib.common.utils import data_utils
 from tempest_lib import decorators
 from tempest_lib import exceptions as lib_exc
 import testtools
 
 from tempest.api.compute import base
-from tempest.common.utils import data_utils
 from tempest.common.utils.linux import remote_client
 from tempest import config
 from tempest import test
@@ -53,10 +53,14 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         super(ServerActionsTestJSON, self).tearDown()
 
     @classmethod
+    def setup_clients(cls):
+        super(ServerActionsTestJSON, cls).setup_clients()
+        cls.client = cls.servers_client
+
+    @classmethod
     def resource_setup(cls):
         cls.prepare_instance_network()
         super(ServerActionsTestJSON, cls).resource_setup()
-        cls.client = cls.servers_client
         cls.server_id = cls.rebuild_server(None)
 
     @test.idempotent_id('6158df09-4b82-4ab3-af6d-29cf36af858d')

@@ -13,10 +13,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib.common.utils import data_utils
 from tempest_lib import exceptions as lib_exc
 
 from tempest.api.identity import base
-from tempest.common.utils import data_utils
 from tempest import test
 
 
@@ -36,7 +36,8 @@ class TokensV3TestJSON(base.BaseIdentityV3AdminTest):
             email=u_email)
         self.addCleanup(self.client.delete_user, user['id'])
         # Perform Authentication
-        resp = self.token.auth(user['id'], u_password).response
+        resp = self.token.auth(user_id=user['id'],
+                               password=u_password).response
         subject_token = resp['x-subject-token']
         # Perform GET Token
         token_details = self.client.get_token(subject_token)
@@ -87,7 +88,7 @@ class TokensV3TestJSON(base.BaseIdentityV3AdminTest):
                                      role['id'])
 
         # Get an unscoped token.
-        token_auth = self.token.auth(user=user['id'],
+        token_auth = self.token.auth(user_id=user['id'],
                                      password=user_password)
 
         token_id = token_auth.response['x-subject-token']
@@ -110,8 +111,8 @@ class TokensV3TestJSON(base.BaseIdentityV3AdminTest):
 
         # Use the unscoped token to get a scoped token.
         token_auth = self.token.auth(token=token_id,
-                                     project=project1_name,
-                                     project_domain='Default')
+                                     project_name=project1_name,
+                                     project_domain_name='Default')
         token1_id = token_auth.response['x-subject-token']
 
         self.assertEqual(orig_expires_at, token_auth['token']['expires_at'],
@@ -140,8 +141,8 @@ class TokensV3TestJSON(base.BaseIdentityV3AdminTest):
 
         # Now get another scoped token using the unscoped token.
         token_auth = self.token.auth(token=token_id,
-                                     project=project2_name,
-                                     project_domain='Default')
+                                     project_name=project2_name,
+                                     project_domain_name='Default')
 
         self.assertEqual(project2['id'],
                          token_auth['token']['project']['id'])

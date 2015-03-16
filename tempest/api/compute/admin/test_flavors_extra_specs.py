@@ -13,8 +13,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib.common.utils import data_utils
+
 from tempest.api.compute import base
-from tempest.common.utils import data_utils
 from tempest import test
 
 
@@ -27,13 +28,20 @@ class FlavorsExtraSpecsTestJSON(base.BaseV2ComputeAdminTest):
     """
 
     @classmethod
-    def resource_setup(cls):
-        super(FlavorsExtraSpecsTestJSON, cls).resource_setup()
+    def skip_checks(cls):
+        super(FlavorsExtraSpecsTestJSON, cls).skip_checks()
         if not test.is_extension_enabled('OS-FLV-EXT-DATA', 'compute'):
             msg = "OS-FLV-EXT-DATA extension not enabled."
             raise cls.skipException(msg)
 
+    @classmethod
+    def setup_clients(cls):
+        super(FlavorsExtraSpecsTestJSON, cls).setup_clients()
         cls.client = cls.os_adm.flavors_client
+
+    @classmethod
+    def resource_setup(cls):
+        super(FlavorsExtraSpecsTestJSON, cls).resource_setup()
         flavor_name = data_utils.rand_name('test_flavor')
         ram = 512
         vcpus = 1

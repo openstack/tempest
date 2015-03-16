@@ -21,9 +21,13 @@ from tempest import test
 class ServerPasswordTestJSON(base.BaseV2ComputeTest):
 
     @classmethod
+    def setup_clients(cls):
+        super(ServerPasswordTestJSON, cls).setup_clients()
+        cls.client = cls.servers_client
+
+    @classmethod
     def resource_setup(cls):
         super(ServerPasswordTestJSON, cls).resource_setup()
-        cls.client = cls.servers_client
         cls.server = cls.create_test_server(wait_until="ACTIVE")
 
     @test.attr(type='gate')

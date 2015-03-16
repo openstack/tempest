@@ -13,11 +13,12 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest.common.utils import data_utils
+from oslo_log import log as logging
+from tempest_lib.common.utils import data_utils
+
 from tempest.common.utils.linux import remote_client
 from tempest import config
 from tempest import exceptions
-from tempest.openstack.common import log as logging
 from tempest import test
 from tempest.thirdparty.boto import test as boto_test
 from tempest.thirdparty.boto.utils import s3
@@ -251,7 +252,8 @@ class InstanceRunTest(boto_test.BotoTestCase):
 
         self.addResourceCleanUp(self.destroy_reservation,
                                 reservation)
-        volume = self.ec2_client.create_volume(1, self.zone)
+        volume = self.ec2_client.create_volume(CONF.volume.volume_size,
+                                               self.zone)
         LOG.debug("Volume created - status: %s", volume.status)
 
         self.addResourceCleanUp(self.destroy_volume_wait, volume)

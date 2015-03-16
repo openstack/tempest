@@ -24,9 +24,9 @@ except ImportError:
     # unittest in python 2.6 does not contain loader, so uses unittest2
     from unittest2 import loader
 
+from oslo_log import log as logging
 from testtools import testsuite
 
-from tempest.openstack.common import log as logging
 from tempest.stress import driver
 
 LOG = logging.getLogger(__name__)

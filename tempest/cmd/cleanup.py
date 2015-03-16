@@ -54,11 +54,12 @@ import argparse
 import json
 import sys
 
+from oslo_log import log as logging
+
 from tempest import clients
 from tempest.cmd import cleanup_service
 from tempest.common import cred_provider
 from tempest import config
-from tempest.openstack.common import log as logging
 
 SAVED_STATE_JSON = "saved_state.json"
 DRY_RUN_JSON = "dry_run.json"

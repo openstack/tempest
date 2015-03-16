@@ -13,11 +13,11 @@
 import json
 import os
 
+from oslo_log import log as logging
 import yaml
 
 import tempest.cli
 from tempest import config
-from tempest.openstack.common import log as logging
 from tempest import test
 
 CONF = config.CONF

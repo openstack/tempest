@@ -13,9 +13,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from oslo_log import log as logging
+from tempest_lib.common.utils import data_utils
+
 from tempest.common import tempest_fixtures as fixtures
-from tempest.common.utils import data_utils
-from tempest.openstack.common import log as logging
 from tempest.scenario import manager
 from tempest import test
 
@@ -33,8 +34,8 @@ class TestAggregatesBasicOps(manager.ScenarioTest):
     Deletes aggregate
     """
     @classmethod
-    def resource_setup(cls):
-        super(TestAggregatesBasicOps, cls).resource_setup()
+    def setup_clients(cls):
+        super(TestAggregatesBasicOps, cls).setup_clients()
         cls.aggregates_client = cls.manager.aggregates_client
         cls.hosts_client = cls.manager.hosts_client
 

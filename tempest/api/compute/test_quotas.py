@@ -26,9 +26,13 @@ class QuotasTestJSON(base.BaseV2ComputeTest):
         super(QuotasTestJSON, self).setUp()
 
     @classmethod
+    def setup_clients(cls):
+        super(QuotasTestJSON, cls).setup_clients()
+        cls.client = cls.quotas_client
+
+    @classmethod
     def resource_setup(cls):
         super(QuotasTestJSON, cls).resource_setup()
-        cls.client = cls.quotas_client
         cls.tenant_id = cls.client.tenant_id
         cls.user_id = cls.client.user_id
         cls.default_quota_set = set(('injected_file_content_bytes',

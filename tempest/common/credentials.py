@@ -11,6 +11,8 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
+import os
+
 from tempest.common import accounts
 from tempest.common import cred_provider
 from tempest.common import isolated_creds
@@ -46,24 +48,18 @@ def get_isolated_credentials(name, network_resources=None,
 # creds area vailable.
 def is_admin_available():
     is_admin = True
-    # In the case of a pre-provisioned account, if even if creds were
-    # configured, the admin credentials won't be available
-    if (CONF.auth.locking_credentials_provider and
-        not CONF.auth.allow_tenant_isolation):
-        is_admin = False
+    # If tenant isolation is enabled admin will be available
+    if CONF.auth.allow_tenant_isolation:
+        return is_admin
+    # Check whether test accounts file has the admin specified or not
+    elif os.path.isfile(CONF.auth.test_accounts_file):
+        check_accounts = accounts.Accounts(name='check_admin')
+        if not check_accounts.admin_available():
+            is_admin = False
     else:
         try:
-            cred_provider.get_configured_credentials('identity_admin')
-        # NOTE(mtreinish) This should never be caught because of the if above.
-        # NotImplementedError is only raised if admin credentials are requested
-        # and the locking test accounts cred provider is being used.
-        except NotImplementedError:
-            is_admin = False
-        # NOTE(mtreinish): This will be raised by the non-locking accounts
-        # provider if there aren't admin credentials provided in the config
-        # file. This exception originates from the auth call to get configured
-        # credentials
+            cred_provider.get_configured_credentials('identity_admin',
+                                                     fill_in=False)
         except exceptions.InvalidConfiguration:
             is_admin = False
-
     return is_admin

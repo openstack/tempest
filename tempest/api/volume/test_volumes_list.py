@@ -15,11 +15,11 @@
 #    under the License.
 import operator
 
+from oslo_log import log as logging
+from tempest_lib.common.utils import data_utils
 from testtools import matchers
 
 from tempest.api.volume import base
-from tempest.common.utils import data_utils
-from tempest.openstack.common import log as logging
 from tempest import test
 
 LOG = logging.getLogger(__name__)

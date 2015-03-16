@@ -24,6 +24,8 @@ import urllib
 import uuid
 
 import fixtures
+from oslo_log import log as logging
+from oslo_utils import importutils
 import six
 import testscenarios
 import testtools
@@ -33,8 +35,6 @@ from tempest.common import credentials
 import tempest.common.generator.valid_generator as valid
 from tempest import config
 from tempest import exceptions
-from tempest.openstack.common import importutils
-from tempest.openstack.common import log as logging
 
 LOG = logging.getLogger(__name__)
 
@@ -94,7 +94,8 @@ def get_service_list():
         'object_storage': CONF.service_available.swift,
         'dashboard': CONF.service_available.horizon,
         'telemetry': CONF.service_available.ceilometer,
-        'data_processing': CONF.service_available.sahara
+        'data_processing': CONF.service_available.sahara,
+        'database': CONF.service_available.trove
     }
     return service_list
 
@@ -108,7 +109,7 @@ def services(*args, **kwargs):
     def decorator(f):
         services = ['compute', 'image', 'baremetal', 'volume', 'orchestration',
                     'network', 'identity', 'object_storage', 'dashboard',
-                    'telemetry', 'data_processing']
+                    'telemetry', 'data_processing', 'database']
         for service in args:
             if service not in services:
                 raise exceptions.InvalidServiceTag('%s is not a valid '
