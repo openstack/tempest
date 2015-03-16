@@ -882,7 +882,7 @@ def destroy_servers(servers):
             if (CONF.service_available.neutron and
                     not CONF.baremetal.driver_enabled and
                     CONF.compute.use_floatingip_for_ssh):
-                for body in res['addresses'].items():
+                for network_name, body in res['addresses'].items():
                     for addr in body:
                         ip = addr['addr']
                         if addr.get('OS-EXT-IPS:type',
