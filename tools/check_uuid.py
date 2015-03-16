@@ -119,8 +119,10 @@ class TestChecker(object):
         idempotent_id = None
         for decorator in test_node.decorator_list:
             if (hasattr(decorator, 'func') and
-                    decorator.func.attr == DECORATOR_NAME and
-                    decorator.func.value.id == DECORATOR_MODULE):
+                hasattr(decorator.func, 'attr') and
+                decorator.func.attr == DECORATOR_NAME and
+                hasattr(decorator.func, 'value') and
+                decorator.func.value.id == DECORATOR_MODULE):
                 for arg in decorator.args:
                     idempotent_id = ast.literal_eval(arg)
         return idempotent_id
