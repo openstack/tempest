@@ -28,7 +28,8 @@ LOG = logging.getLogger(__name__)
 
 
 def create_test_server(clients, validatable=False, validation_resources=None,
-                       tenant_network=None, wait_until=None, **kwargs):
+                       tenant_network=None, wait_until=None,
+                       volume_backed=False, **kwargs):
     """Common wrapper utility returning a test server.
 
     This method is a common wrapper returning a test server that can be
@@ -41,6 +42,7 @@ def create_test_server(clients, validatable=False, validation_resources=None,
     :param tenant_network: Tenant network to be used for creating a server.
     :param wait_until: Server status to wait for the server to reach after
     its creation.
+    :param volume_backed: Whether the instance is volume backed or not.
     :returns a tuple
     """
 
@@ -84,6 +86,26 @@ def create_test_server(clients, validatable=False, validation_resources=None,
         if CONF.validation.connect_method == 'floating':
             if wait_until is None:
                 wait_until = 'ACTIVE'
+
+    if volume_backed:
+        volume_name = data_utils.rand_name('volume')
+        volume = clients.volumes_client.create_volume(
+            display_name=volume_name,
+            imageRef=image_id)
+        clients.volumes_client.wait_for_volume_status(volume['volume']['id'],
+                                                      'available')
+
+        bd_map_v2 = [{
+            'uuid': volume['volume']['id'],
+            'source_type': 'volume',
+            'destination_type': 'volume',
+            'boot_index': 0,
+            'delete_on_termination': True}]
+        kwargs['block_device_mapping_v2'] = bd_map_v2
+
+        # Since this is boot from volume an image does not need
+        # to be specified.
+        image_id = ''
 
     body = clients.servers_client.create_server(name=name, imageRef=image_id,
                                                 flavorRef=flavor,

@@ -203,13 +203,17 @@ class BaseComputeTest(tempest.test.BaseTestCase):
                               server_group_id)
 
     @classmethod
-    def create_test_server(cls, validatable=False, **kwargs):
+    def create_test_server(cls, validatable=False, volume_backed=False,
+                           **kwargs):
         """Wrapper utility that returns a test server.
 
         This wrapper utility calls the common create test server and
         returns a test server. The purpose of this wrapper is to minimize
         the impact on the code of the tests already using this
         function.
+
+        :param validatable: Whether the server will be pingable or sshable.
+        :param volume_backed: Whether the instance is volume backed or not.
         """
         tenant_network = cls.get_tenant_network()
         body, servers = compute.create_test_server(
@@ -217,6 +221,7 @@ class BaseComputeTest(tempest.test.BaseTestCase):
             validatable,
             validation_resources=cls.validation_resources,
             tenant_network=tenant_network,
+            volume_backed=volume_backed,
             **kwargs)
 
         cls.servers.extend(servers)
