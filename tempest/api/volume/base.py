@@ -102,7 +102,6 @@ class BaseVolumeTest(tempest.test.BaseTestCase):
     def resource_cleanup(cls):
         cls.clear_snapshots()
         cls.clear_volumes()
-        cls.clear_isolated_creds()
         super(BaseVolumeTest, cls).resource_cleanup()
 
     @classmethod

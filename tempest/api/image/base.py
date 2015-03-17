@@ -61,7 +61,6 @@ class BaseImageTest(tempest.test.BaseTestCase):
 
         for image_id in cls.created_images:
                 cls.client.wait_for_resource_deletion(image_id)
-        cls.isolated_creds.clear_isolated_creds()
         super(BaseImageTest, cls).resource_cleanup()
 
     @classmethod
