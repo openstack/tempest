@@ -67,11 +67,6 @@ class BaseObjectTest(tempest.test.BaseTestCase):
         cls.account_client.auth_provider.clear_auth()
 
     @classmethod
-    def resource_cleanup(cls):
-        cls.isolated_creds.clear_isolated_creds()
-        super(BaseObjectTest, cls).resource_cleanup()
-
-    @classmethod
     def delete_containers(cls, containers, container_client=None,
                           object_client=None):
         """Remove given containers and all objects in them.

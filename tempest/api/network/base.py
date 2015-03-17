@@ -157,7 +157,6 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
             for network in cls.networks:
                 cls._try_delete_resource(cls.client.delete_network,
                                          network['id'])
-            cls.clear_isolated_creds()
         super(BaseNetworkTest, cls).resource_cleanup()
 
     @classmethod

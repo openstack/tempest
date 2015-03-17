@@ -280,7 +280,6 @@ class BotoTestCase(tempest.test.BaseTestCase):
                 LOG.exception("Cleanup failed %s" % func_name)
             finally:
                 del cls._resource_trash_bin[key]
-        cls.clear_isolated_creds()
         super(BotoTestCase, cls).resource_cleanup()
         # NOTE(afazekas): let the super called even on exceptions
         # The real exceptions already logged, if the super throws another,
