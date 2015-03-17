@@ -325,7 +325,8 @@ ComputeFeaturesGroup = [
     cfg.BoolOpt('block_migrate_cinder_iscsi',
                 default=False,
                 help="Does the test environment block migration support "
-                     "cinder iSCSI volumes"),
+                "cinder iSCSI volumes. Note, libvirt doesn't support this, "
+                "see https://bugs.launchpad.net/nova/+bug/1398999"),
     cfg.BoolOpt('vnc_console',
                 default=False,
                 help='Enable VNC console. This configuration value should '
