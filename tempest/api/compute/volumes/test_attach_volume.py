@@ -43,6 +43,8 @@ class AttachVolumeTestJSON(base.BaseV2ComputeTest):
 
     @classmethod
     def resource_setup(cls):
+        cls.set_validation_resources()
+
         super(AttachVolumeTestJSON, cls).resource_setup()
         cls.device = CONF.compute.volume_device_name
 
@@ -61,8 +63,10 @@ class AttachVolumeTestJSON(base.BaseV2ComputeTest):
     def _create_and_attach(self):
         # Start a server and wait for it to become ready
         admin_pass = self.image_ssh_password
-        self.server = self.create_test_server(wait_until='ACTIVE',
-                                              adminPass=admin_pass)
+        self.server = self.create_test_server(
+            validatable=True,
+            wait_until='ACTIVE',
+            adminPass=admin_pass)
 
         # Record addresses so that we can ssh later
         self.server['addresses'] = (
@@ -99,9 +103,12 @@ class AttachVolumeTestJSON(base.BaseV2ComputeTest):
         self.servers_client.start(self.server['id'])
         self.servers_client.wait_for_server_status(self.server['id'], 'ACTIVE')
 
-        linux_client = remote_client.RemoteClient(self.server,
-                                                  self.image_ssh_user,
-                                                  self.server['adminPass'])
+        linux_client = remote_client.RemoteClient(
+            self.get_server_ip(self.server),
+            self.image_ssh_user,
+            self.server['adminPass'],
+            self.validation_resources['keypair']['private_key'])
+
         partitions = linux_client.get_partitions()
         self.assertIn(self.device, partitions)
 
@@ -114,9 +121,12 @@ class AttachVolumeTestJSON(base.BaseV2ComputeTest):
         self.servers_client.start(self.server['id'])
         self.servers_client.wait_for_server_status(self.server['id'], 'ACTIVE')
 
-        linux_client = remote_client.RemoteClient(self.server,
-                                                  self.image_ssh_user,
-                                                  self.server['adminPass'])
+        linux_client = remote_client.RemoteClient(
+            self.get_server_ip(self.server),
+            self.image_ssh_user,
+            self.server['adminPass'],
+            self.validation_resources['keypair']['private_key'])
+
         partitions = linux_client.get_partitions()
         self.assertNotIn(self.device, partitions)
 

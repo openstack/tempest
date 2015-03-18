@@ -109,7 +109,10 @@ class QuotasAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
 
         quota_set = self.adm_client.show_quota_set(self.demo_tenant_id)
         default_sg_quota = quota_set['security_groups']
-        sg_quota = 0  # Set the quota to zero to conserve resources
+
+        # Set the quota to number of used security groups
+        sg_quota = self.limits_client.show_limits()['absolute'][
+            'totalSecurityGroupsUsed']
 
         quota_set =\
             self.adm_client.update_quota_set(self.demo_tenant_id,

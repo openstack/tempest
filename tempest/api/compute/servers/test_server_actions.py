@@ -44,15 +44,23 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
             self.client.wait_for_server_status(self.server_id, 'ACTIVE')
         except lib_exc.NotFound:
             # The server was deleted by previous test, create a new one
-            server = self.create_test_server(wait_until='ACTIVE')
+            server = self.create_test_server(
+                validatable=True,
+                wait_until='ACTIVE')
             self.__class__.server_id = server['id']
         except Exception:
             # Rebuild server if something happened to it during a test
-            self.__class__.server_id = self.rebuild_server(self.server_id)
+            self.__class__.server_id = self.rebuild_server(self.server_id,
+                                                           validatable=True)
 
     def tearDown(self):
         self.server_check_teardown()
         super(ServerActionsTestJSON, self).tearDown()
+
+    @classmethod
+    def setup_credentials(cls):
+        cls.prepare_instance_network()
+        super(ServerActionsTestJSON, cls).setup_credentials()
 
     @classmethod
     def setup_clients(cls):
@@ -61,9 +69,10 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
 
     @classmethod
     def resource_setup(cls):
-        cls.prepare_instance_network()
+        cls.set_validation_resources()
+
         super(ServerActionsTestJSON, cls).resource_setup()
-        cls.server_id = cls.rebuild_server(None)
+        cls.server_id = cls.rebuild_server(None, validatable=True)
 
     @test.idempotent_id('6158df09-4b82-4ab3-af6d-29cf36af858d')
     @testtools.skipUnless(CONF.compute_feature_enabled.change_password,
@@ -74,28 +83,36 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         self.client.change_password(self.server_id, new_password)
         self.client.wait_for_server_status(self.server_id, 'ACTIVE')
 
-        if self.run_ssh:
+        if CONF.validation.run_validation:
             # Verify that the user can authenticate with the new password
             server = self.client.show_server(self.server_id)
-            linux_client = remote_client.RemoteClient(server, self.ssh_user,
-                                                      new_password)
+            linux_client = remote_client.RemoteClient(
+                self.get_server_ip(server),
+                self.ssh_user,
+                new_password)
             linux_client.validate_authentication()
 
     def _test_reboot_server(self, reboot_type):
-        if self.run_ssh:
+        if CONF.validation.run_validation:
             # Get the time the server was last rebooted,
             server = self.client.show_server(self.server_id)
-            linux_client = remote_client.RemoteClient(server, self.ssh_user,
-                                                      self.password)
+            linux_client = remote_client.RemoteClient(
+                self.get_server_ip(server),
+                self.ssh_user,
+                self.password,
+                self.validation_resources['keypair']['private_key'])
             boot_time = linux_client.get_boot_time()
 
         self.client.reboot(self.server_id, reboot_type)
         self.client.wait_for_server_status(self.server_id, 'ACTIVE')
 
-        if self.run_ssh:
+        if CONF.validation.run_validation:
             # Log in and verify the boot time has changed
-            linux_client = remote_client.RemoteClient(server, self.ssh_user,
-                                                      self.password)
+            linux_client = remote_client.RemoteClient(
+                self.get_server_ip(server),
+                self.ssh_user,
+                self.password,
+                self.validation_resources['keypair']['private_key'])
             new_boot_time = linux_client.get_boot_time()
             self.assertTrue(new_boot_time > boot_time,
                             '%s > %s' % (new_boot_time, boot_time))
@@ -154,10 +171,13 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         self.assertTrue(self.image_ref_alt.endswith(rebuilt_image_id))
         self.assertEqual(new_name, server['name'])
 
-        if self.run_ssh:
-            # Verify that the user can authenticate with the provided password
-            linux_client = remote_client.RemoteClient(server, self.ssh_user,
-                                                      password)
+        if CONF.validation.run_validation:
+            # TODO(jlanoux) add authentication with the provided password
+            linux_client = remote_client.RemoteClient(
+                self.get_server_ip(rebuilt_server),
+                self.ssh_user,
+                self.password,
+                self.validation_resources['keypair']['private_key'])
             linux_client.validate_authentication()
 
     @test.idempotent_id('30449a88-5aff-4f9b-9866-6ee9b17f906d')

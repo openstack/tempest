@@ -68,6 +68,11 @@ class ImagesOneServerNegativeTestJSON(base.BaseV2ComputeTest):
             raise cls.skipException(skip_msg)
 
     @classmethod
+    def setup_credentials(cls):
+        cls.prepare_instance_network()
+        super(ImagesOneServerNegativeTestJSON, cls).setup_credentials()
+
+    @classmethod
     def setup_clients(cls):
         super(ImagesOneServerNegativeTestJSON, cls).setup_clients()
         cls.client = cls.images_client

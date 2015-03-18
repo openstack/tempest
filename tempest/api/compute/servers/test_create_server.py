@@ -103,8 +103,11 @@ class ServersTestJSON(base.BaseV2ComputeTest):
         # Verify that the number of vcpus reported by the instance matches
         # the amount stated by the flavor
         flavor = self.flavors_client.show_flavor(self.flavor_ref)
-        linux_client = remote_client.RemoteClient(self.server, self.ssh_user,
-                                                  self.password)
+        linux_client = remote_client.RemoteClient(
+            self.get_server_ip(self.server),
+            self.ssh_user,
+            self.password,
+            self.validation_resources['keypair']['private_key'])
         self.assertEqual(flavor['vcpus'], linux_client.get_number_of_vcpus())
 
     @test.idempotent_id('ac1ad47f-984b-4441-9274-c9079b7a0666')
@@ -112,8 +115,11 @@ class ServersTestJSON(base.BaseV2ComputeTest):
                           'Instance validation tests are disabled.')
     def test_host_name_is_same_as_server_name(self):
         # Verify the instance host name is the same as the server name
-        linux_client = remote_client.RemoteClient(self.server, self.ssh_user,
-                                                  self.password)
+        linux_client = remote_client.RemoteClient(
+            self.get_server_ip(self.server),
+            self.ssh_user,
+            self.password,
+            self.validation_resources['keypair']['private_key'])
         self.assertTrue(linux_client.hostname_equals_servername(self.name))
 
     @test.idempotent_id('ed20d3fb-9d1f-4329-b160-543fbd5d9811')
@@ -202,11 +208,21 @@ class ServersWithSpecificFlavorTestJSON(base.BaseV2ComputeAdminTest):
     disk_config = 'AUTO'
 
     @classmethod
-    def setup_clients(cls):
+    def setup_credentials(cls):
         cls.prepare_instance_network()
+        super(ServersWithSpecificFlavorTestJSON, cls).setup_credentials()
+
+    @classmethod
+    def setup_clients(cls):
         super(ServersWithSpecificFlavorTestJSON, cls).setup_clients()
         cls.flavor_client = cls.os_adm.flavors_client
         cls.client = cls.servers_client
+
+    @classmethod
+    def resource_setup(cls):
+        cls.set_validation_resources()
+
+        super(ServersWithSpecificFlavorTestJSON, cls).resource_setup()
 
     @test.idempotent_id('b3c7bcfc-bb5b-4e22-b517-c7f686b802ca')
     @testtools.skipUnless(CONF.validation.run_validation,
@@ -258,24 +274,37 @@ class ServersWithSpecificFlavorTestJSON(base.BaseV2ComputeAdminTest):
         admin_pass = self.image_ssh_password
 
         server_no_eph_disk = (self.create_test_server(
+                              validatable=True,
                               wait_until='ACTIVE',
                               adminPass=admin_pass,
                               flavor=flavor_no_eph_disk_id))
-        server_with_eph_disk = (self.create_test_server(
-                                wait_until='ACTIVE',
-                                adminPass=admin_pass,
-                                flavor=flavor_with_eph_disk_id))
+
         # Get partition number of server without extra specs.
         server_no_eph_disk = self.client.show_server(
             server_no_eph_disk['id'])
-        linux_client = remote_client.RemoteClient(server_no_eph_disk,
-                                                  self.ssh_user, admin_pass)
+        linux_client = remote_client.RemoteClient(
+            self.get_server_ip(server_no_eph_disk),
+            self.ssh_user,
+            admin_pass,
+            self.validation_resources['keypair']['private_key'])
         partition_num = len(linux_client.get_partitions().split('\n'))
+
+        # Explicit server deletion necessary for Juno compatibility
+        self.client.delete_server(server_no_eph_disk['id'])
+
+        server_with_eph_disk = (self.create_test_server(
+                                validatable=True,
+                                wait_until='ACTIVE',
+                                adminPass=admin_pass,
+                                flavor=flavor_with_eph_disk_id))
 
         server_with_eph_disk = self.client.show_server(
             server_with_eph_disk['id'])
-        linux_client = remote_client.RemoteClient(server_with_eph_disk,
-                                                  self.ssh_user, admin_pass)
+        linux_client = remote_client.RemoteClient(
+            self.get_server_ip(server_with_eph_disk),
+            self.ssh_user,
+            admin_pass,
+            self.validation_resources['keypair']['private_key'])
         partition_num_emph = len(linux_client.get_partitions().split('\n'))
         self.assertEqual(partition_num + 1, partition_num_emph)
 
