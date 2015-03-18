@@ -11,7 +11,6 @@ paramiko>=1.13.0
 netaddr>=0.7.12
 python-ceilometerclient>=1.0.6
 python-glanceclient>=0.15.0
-python-keystoneclient>=1.1.0
 python-cinderclient>=1.1.0
 python-heatclient>=0.3.0
 python-ironicclient>=0.2.1
