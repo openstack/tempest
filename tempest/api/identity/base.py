@@ -31,8 +31,8 @@ class BaseIdentityAdminTest(tempest.test.BaseTestCase):
     @classmethod
     def setup_credentials(cls):
         super(BaseIdentityAdminTest, cls).setup_credentials()
-        cls.os_adm = clients.AdminManager()
-        cls.os = clients.Manager()
+        cls.os = cls.get_client_manager()
+        cls.os_adm = clients.Manager(cls.isolated_creds.get_admin_creds())
 
     @classmethod
     def disable_user(cls, user_name):

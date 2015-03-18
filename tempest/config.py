@@ -690,6 +690,8 @@ OrchestrationGroup = [
                choices=['public', 'admin', 'internal',
                         'publicURL', 'adminURL', 'internalURL'],
                help="The endpoint type to use for the orchestration service."),
+    cfg.StrOpt('stack_owner_role', default='heat_stack_owner',
+               help='Role required for users to be able to manage stacks'),
     cfg.IntOpt('build_interval',
                default=1,
                help="Time in seconds between build status checks."),

@@ -16,6 +16,7 @@ from tempest_lib.common.utils import data_utils
 from tempest_lib import exceptions as lib_exc
 
 from tempest import clients
+from tempest.common import credentials
 from tempest import config
 from tempest import test
 
@@ -69,7 +70,11 @@ class BaseBaremetalTest(test.BaseTestCase):
     @classmethod
     def setup_credentials(cls):
         super(BaseBaremetalTest, cls).setup_credentials()
-        cls.mgr = clients.AdminManager()
+        if (not hasattr(cls, 'isolated_creds') or
+            not cls.isolated_creds.name == cls.__name__):
+            cls.isolated_creds = credentials.get_isolated_credentials(
+                name=cls.__name__, network_resources=cls.network_resources)
+        cls.mgr = clients.Manager(cls.isolated_creds.get_admin_creds())
 
     @classmethod
     def setup_clients(cls):

@@ -873,6 +873,9 @@
 # Allowed values: public, admin, internal, publicURL, adminURL, internalURL
 #endpoint_type = publicURL
 
+# Role required for users to be able to manage stacks (string value)
+#stack_owner_role = heat_stack_owner
+
 # Time in seconds between build status checks. (integer value)
 #build_interval = 1
 
