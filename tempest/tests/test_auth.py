@@ -19,12 +19,10 @@ import datetime
 from oslotest import mockpatch
 
 from tempest import auth
-from tempest import config
 from tempest import exceptions
 from tempest.services.identity.v2.json import token_client as v2_client
 from tempest.services.identity.v3.json import token_client as v3_client
 from tempest.tests import base
-from tempest.tests import fake_config
 from tempest.tests import fake_credentials
 from tempest.tests import fake_http
 from tempest.tests import fake_identity
@@ -46,8 +44,6 @@ class BaseAuthTestsSetUp(base.TestCase):
 
     def setUp(self):
         super(BaseAuthTestsSetUp, self).setUp()
-        self.useFixture(fake_config.ConfigFixture())
-        self.stubs.Set(config, 'TempestConfigPrivate', fake_config.FakePrivate)
         self.fake_http = fake_http.fake_httplib2(return_type=200)
         self.stubs.Set(auth, 'get_credentials', fake_get_credentials)
         self.auth_provider = self._auth(self.credentials,
