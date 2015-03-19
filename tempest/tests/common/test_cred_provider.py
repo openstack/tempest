@@ -13,21 +13,21 @@
 #    under the License.
 
 from oslo_config import cfg
+from tempest_lib import auth
+from tempest_lib import exceptions as lib_exc
+from tempest_lib.services.identity.v2 import token_client as v2_client
+from tempest_lib.services.identity.v3 import token_client as v3_client
 
-from tempest import auth
+
 from tempest.common import cred_provider
 from tempest.common import tempest_fixtures as fixtures
 from tempest import config
-from tempest.services.identity.v2.json import token_client as v2_client
-from tempest.services.identity.v3.json import token_client as v3_client
+from tempest.tests import base
 from tempest.tests import fake_config
 from tempest.tests import fake_identity
-# Note(andreaf): once credentials tests move to tempest-lib, I will copy the
-# parts of them required by these here.
-from tempest.tests import test_credentials as test_creds
 
 
-class ConfiguredV2CredentialsTests(test_creds.CredentialsTests):
+class ConfiguredV2CredentialsTests(base.TestCase):
     attributes = {
         'username': 'fake_username',
         'password': 'fake_password',
@@ -46,6 +46,23 @@ class ConfiguredV2CredentialsTests(test_creds.CredentialsTests):
         self.stubs.Set(self.tokenclient_class, 'raw_request',
                        self.identity_response)
 
+    def _get_credentials(self, attributes=None):
+        if attributes is None:
+            attributes = self.attributes
+        return self.credentials_class(**attributes)
+
+    def _check(self, credentials, credentials_class, filled):
+        # Check the right version of credentials has been returned
+        self.assertIsInstance(credentials, credentials_class)
+        # Check the id attributes are filled in
+        attributes = [x for x in credentials.ATTRIBUTES if (
+            '_id' in x and x != 'domain_id')]
+        for attr in attributes:
+            if filled:
+                self.assertIsNotNone(getattr(credentials, attr))
+            else:
+                self.assertIsNone(getattr(credentials, attr))
+
     def _verify_credentials(self, credentials_class, filled=True,
                             identity_version=None):
         for ctype in cred_provider.CREDENTIAL_TYPES:
@@ -57,6 +74,15 @@ class ConfiguredV2CredentialsTests(test_creds.CredentialsTests):
                     credential_type=ctype, fill_in=filled,
                     identity_version=identity_version)
             self._check(creds, credentials_class, filled)
+
+    def test_create(self):
+        creds = self._get_credentials()
+        self.assertEqual(self.attributes, creds._initial)
+
+    def test_create_invalid_attr(self):
+        self.assertRaises(lib_exc.InvalidCredentials,
+                          self._get_credentials,
+                          attributes=dict(invalid='fake'))
 
     def test_get_configured_credentials(self):
         self.useFixture(fixtures.LockFixture('auth_version'))

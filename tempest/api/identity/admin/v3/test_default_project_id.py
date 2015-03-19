@@ -10,10 +10,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib import auth
 from tempest_lib.common.utils import data_utils
 
 from tempest.api.identity import base
-from tempest import auth
 from tempest import clients
 from tempest import config
 from tempest import manager

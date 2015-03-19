@@ -114,10 +114,10 @@ import unittest
 import netaddr
 from oslo_log import log as logging
 from oslo_utils import timeutils
+from tempest_lib import auth
 from tempest_lib import exceptions as lib_exc
 import yaml
 
-import tempest.auth
 from tempest import config
 from tempest.services.compute.json import flavors_client
 from tempest.services.compute.json import floating_ips_client
@@ -175,7 +175,7 @@ class OSClient(object):
         }
         object_storage_params.update(default_params)
 
-        _creds = tempest.auth.KeystoneV2Credentials(
+        _creds = auth.KeystoneV2Credentials(
             username=user,
             password=pw,
             tenant_name=tenant)
@@ -185,7 +185,7 @@ class OSClient(object):
             'ca_certs': CONF.identity.ca_certificates_file,
             'trace_requests': CONF.debug.trace_requests
         }
-        _auth = tempest.auth.KeystoneV2AuthProvider(
+        _auth = auth.KeystoneV2AuthProvider(
             _creds, CONF.identity.uri, **auth_provider_params)
         self.identity = identity_client.IdentityClientJSON(
             _auth,
