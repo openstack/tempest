@@ -16,7 +16,7 @@ import json
 import urllib
 
 from tempest.api_schema.response.compute import agents as common_schema
-from tempest.api_schema.response.compute.v2 import agents as schema
+from tempest.api_schema.response.compute.v2_1 import agents as schema
 from tempest.common import service_client
 
 

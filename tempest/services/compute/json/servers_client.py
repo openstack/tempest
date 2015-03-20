@@ -21,7 +21,7 @@ import urllib
 from tempest_lib import exceptions as lib_exc
 
 from tempest.api_schema.response.compute import servers as common_schema
-from tempest.api_schema.response.compute.v2 import servers as schema
+from tempest.api_schema.response.compute.v2_1 import servers as schema
 from tempest.common import service_client
 from tempest.common import waiters
 from tempest import exceptions
