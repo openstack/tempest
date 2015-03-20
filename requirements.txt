@@ -9,7 +9,6 @@ testtools>=0.9.36,!=1.2.0
 boto>=2.32.1
 paramiko>=1.13.0
 netaddr>=0.7.12
-python-ceilometerclient>=1.0.6
 python-glanceclient>=0.15.0
 python-cinderclient>=1.1.0
 python-heatclient>=0.3.0
