@@ -18,7 +18,7 @@ import urllib
 
 from tempest_lib import exceptions as lib_exc
 
-from tempest.api_schema.response.compute.v2 import images as schema
+from tempest.api_schema.response.compute.v2_1 import images as schema
 from tempest.common import service_client
 from tempest.common import waiters
 

@@ -15,7 +15,7 @@
 
 import json
 
-from tempest.api_schema.response.compute.v2 import extensions as schema
+from tempest.api_schema.response.compute.v2_1 import extensions as schema
 from tempest.common import service_client
 
 

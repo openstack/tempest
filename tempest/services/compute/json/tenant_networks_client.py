@@ -14,7 +14,7 @@
 
 import json
 
-from tempest.api_schema.response.compute.v2 import tenant_networks as schema
+from tempest.api_schema.response.compute.v2_1 import tenant_networks as schema
 from tempest.common import service_client
 
 

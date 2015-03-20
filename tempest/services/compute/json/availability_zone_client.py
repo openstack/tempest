@@ -15,7 +15,8 @@
 
 import json
 
-from tempest.api_schema.response.compute.v2 import availability_zone as schema
+from tempest.api_schema.response.compute.v2_1 import availability_zone \
+    as schema
 from tempest.common import service_client
 
 

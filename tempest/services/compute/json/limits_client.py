@@ -15,7 +15,7 @@
 
 import json
 
-from tempest.api_schema.response.compute.v2 import limits as schema
+from tempest.api_schema.response.compute.v2_1 import limits as schema
 from tempest.common import service_client
 
 
