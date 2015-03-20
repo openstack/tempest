@@ -15,7 +15,6 @@
 
 from oslo_log import log as logging
 from tempest_lib.common.utils import data_utils
-from tempest_lib import decorators
 import testtools
 
 from tempest import config
@@ -94,7 +93,6 @@ class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
         self.servers_client.wait_for_server_status(self.server['id'], 'ACTIVE')
         self._check_network_connectivity()
 
-    @decorators.skip_because(bug="1323658")
     @test.idempotent_id('61f1aa9a-1573-410e-9054-afa557cab021')
     @test.services('compute', 'network')
     def test_server_connectivity_stop_start(self):
@@ -147,7 +145,6 @@ class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
         self.servers_client.resume_server(self.server['id'])
         self._wait_server_status_and_check_network_connectivity()
 
-    @decorators.skip_because(bug="1323658")
     @test.idempotent_id('719eb59d-2f42-4b66-b8b1-bb1254473967')
     @testtools.skipUnless(CONF.compute_feature_enabled.resize,
                           'Resize is not available.')
