@@ -19,6 +19,7 @@ from tempest_lib import exceptions as lib_exc
 
 from tempest import clients
 from tempest.common import cred_provider
+from tempest.common import credentials
 from tempest import config
 import tempest.test
 
@@ -26,13 +27,7 @@ CONF = config.CONF
 LOG = logging.getLogger(__name__)
 
 
-class BaseIdentityAdminTest(tempest.test.BaseTestCase):
-
-    @classmethod
-    def setup_credentials(cls):
-        super(BaseIdentityAdminTest, cls).setup_credentials()
-        cls.os = cls.get_client_manager()
-        cls.os_adm = clients.Manager(cls.isolated_creds.get_admin_creds())
+class BaseIdentityTest(tempest.test.BaseTestCase):
 
     @classmethod
     def disable_user(cls, user_name):
@@ -69,13 +64,46 @@ class BaseIdentityAdminTest(tempest.test.BaseTestCase):
             return role[0]
 
 
-class BaseIdentityV2AdminTest(BaseIdentityAdminTest):
+class BaseIdentityV2Test(BaseIdentityTest):
+
+    @classmethod
+    def setup_credentials(cls):
+        super(BaseIdentityV2Test, cls).setup_credentials()
+        cls.os = cls.get_client_manager(identity_version='v2')
 
     @classmethod
     def skip_checks(cls):
-        super(BaseIdentityV2AdminTest, cls).skip_checks()
+        super(BaseIdentityV2Test, cls).skip_checks()
         if not CONF.identity_feature_enabled.api_v2:
             raise cls.skipException("Identity api v2 is not enabled")
+
+    @classmethod
+    def setup_clients(cls):
+        super(BaseIdentityV2Test, cls).setup_clients()
+        cls.non_admin_client = cls.os.identity_client
+        cls.non_admin_token_client = cls.os.token_client
+
+    @classmethod
+    def resource_setup(cls):
+        super(BaseIdentityV2Test, cls).resource_setup()
+
+    @classmethod
+    def resource_cleanup(cls):
+        super(BaseIdentityV2Test, cls).resource_cleanup()
+
+
+class BaseIdentityV2AdminTest(BaseIdentityV2Test):
+
+    @classmethod
+    def setup_credentials(cls):
+        super(BaseIdentityV2AdminTest, cls).setup_credentials()
+        cls.os_adm = clients.Manager(cls.isolated_creds.get_admin_creds())
+
+    @classmethod
+    def skip_checks(cls):
+        if not credentials.is_admin_available():
+            raise cls.skipException('v2 Admin auth disabled')
+        super(BaseIdentityV2AdminTest, cls).skip_checks()
 
     @classmethod
     def setup_clients(cls):
@@ -84,8 +112,6 @@ class BaseIdentityV2AdminTest(BaseIdentityAdminTest):
         cls.token_client = cls.os_adm.token_client
         if not cls.client.has_admin_extensions():
             raise cls.skipException("Admin extensions disabled")
-
-        cls.non_admin_client = cls.os.identity_client
 
     @classmethod
     def resource_setup(cls):
@@ -98,13 +124,47 @@ class BaseIdentityV2AdminTest(BaseIdentityAdminTest):
         super(BaseIdentityV2AdminTest, cls).resource_cleanup()
 
 
-class BaseIdentityV3AdminTest(BaseIdentityAdminTest):
+class BaseIdentityV3Test(BaseIdentityTest):
+
+    @classmethod
+    def setup_credentials(cls):
+        super(BaseIdentityV3Test, cls).setup_credentials()
+        cls.os = cls.get_client_manager(identity_version='v3')
 
     @classmethod
     def skip_checks(cls):
-        super(BaseIdentityV3AdminTest, cls).skip_checks()
+        super(BaseIdentityV3Test, cls).skip_checks()
         if not CONF.identity_feature_enabled.api_v3:
             raise cls.skipException("Identity api v3 is not enabled")
+
+    @classmethod
+    def setup_clients(cls):
+        super(BaseIdentityV3Test, cls).setup_clients()
+        cls.non_admin_client = cls.os.identity_v3_client
+        cls.non_admin_token = cls.os.token_v3_client
+        cls.non_admin_endpoints_client = cls.os.endpoints_client
+        cls.non_admin_region_client = cls.os.region_client
+        cls.non_admin_service_client = cls.os.service_client
+        cls.non_admin_policy_client = cls.os.policy_client
+        cls.non_admin_creds_client = cls.os.credentials_client
+
+    @classmethod
+    def resource_cleanup(cls):
+        super(BaseIdentityV3Test, cls).resource_cleanup()
+
+
+class BaseIdentityV3AdminTest(BaseIdentityV3Test):
+
+    @classmethod
+    def setup_credentials(cls):
+        super(BaseIdentityV3AdminTest, cls).setup_credentials()
+        cls.os_adm = clients.Manager(cls.isolated_creds.get_admin_creds())
+
+    @classmethod
+    def skip_checks(cls):
+        if not credentials.is_admin_available():
+            raise cls.skipException('v3 Admin auth disabled')
+        super(BaseIdentityV3AdminTest, cls).skip_checks()
 
     @classmethod
     def setup_clients(cls):
@@ -114,11 +174,9 @@ class BaseIdentityV3AdminTest(BaseIdentityAdminTest):
         cls.endpoints_client = cls.os_adm.endpoints_client
         cls.region_client = cls.os_adm.region_client
         cls.data = DataGenerator(cls.client)
-        cls.non_admin_client = cls.os.identity_v3_client
         cls.service_client = cls.os_adm.service_client
         cls.policy_client = cls.os_adm.policy_client
         cls.creds_client = cls.os_adm.credentials_client
-        cls.non_admin_client = cls.os.identity_v3_client
 
     @classmethod
     def resource_cleanup(cls):
