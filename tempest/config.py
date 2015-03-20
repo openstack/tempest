@@ -351,7 +351,13 @@ ComputeFeaturesGroup = [
                      'images of running instances?'),
     cfg.BoolOpt('ec2_api',
                 default=True,
-                help='Does the test environment have the ec2 api running?')
+                help='Does the test environment have the ec2 api running?'),
+    # TODO(mriedem): Remove preserve_ports once juno-eol happens.
+    cfg.BoolOpt('preserve_ports',
+                default=False,
+                help='Does Nova preserve preexisting ports from Neutron '
+                     'when deleting an instance? This should be set to True '
+                     'if testing Kilo+ Nova.')
 ]
 
 

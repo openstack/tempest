@@ -422,6 +422,11 @@
 # Does the test environment have the ec2 api running? (boolean value)
 #ec2_api = true
 
+# Does Nova preserve preexisting ports from Neutron when deleting an
+# instance? This should be set to True if testing Kilo+ Nova. (boolean
+# value)
+#preserve_ports = false
+
 
 [dashboard]
 
