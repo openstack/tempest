@@ -20,12 +20,12 @@ from tempest.api_schema.response.compute.v2_1 import quotas
 # NOTE(mriedem): os-quota-class-sets responses are the same as os-quota-sets
 # except for the key in the response body is quota_class_set instead of
 # quota_set, so update this copy of the schema from os-quota-sets.
-quota_set = copy.deepcopy(quotas.quota_set)
-quota_set['response_body']['properties']['quota_class_set'] = (
-    quota_set['response_body']['properties'].pop('quota_set'))
-quota_set['response_body']['required'] = ['quota_class_set']
+get_quota_class_set = copy.deepcopy(quotas.get_quota_set)
+get_quota_class_set['response_body']['properties']['quota_class_set'] = (
+    get_quota_class_set['response_body']['properties'].pop('quota_set'))
+get_quota_class_set['response_body']['required'] = ['quota_class_set']
 
-quota_set_update = copy.deepcopy(quotas.quota_set_update)
-quota_set_update['response_body']['properties']['quota_class_set'] = (
-    quota_set_update['response_body']['properties'].pop('quota_set'))
-quota_set_update['response_body']['required'] = ['quota_class_set']
+update_quota_class_set = copy.deepcopy(quotas.update_quota_set)
+update_quota_class_set['response_body']['properties']['quota_class_set'] = (
+    update_quota_class_set['response_body']['properties'].pop('quota_set'))
+update_quota_class_set['response_body']['required'] = ['quota_class_set']
