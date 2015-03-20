@@ -15,7 +15,6 @@
 import json
 import urllib
 
-from tempest.api_schema.response.compute import agents as common_schema
 from tempest.api_schema.response.compute.v2_1 import agents as schema
 from tempest.common import service_client
 
@@ -32,7 +31,7 @@ class AgentsClientJSON(service_client.ServiceClient):
             url += '?%s' % urllib.urlencode(params)
         resp, body = self.get(url)
         body = json.loads(body)
-        self.validate_response(common_schema.list_agents, resp, body)
+        self.validate_response(schema.list_agents, resp, body)
         return service_client.ResponseBodyList(resp, body['agents'])
 
     def create_agent(self, **kwargs):

@@ -12,11 +12,44 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest.api_schema.response.compute import agents
+common_agent_info = {
+    'type': 'object',
+    'properties': {
+        'agent_id': {'type': ['integer', 'string']},
+        'hypervisor': {'type': 'string'},
+        'os': {'type': 'string'},
+        'architecture': {'type': 'string'},
+        'version': {'type': 'string'},
+        'url': {'type': 'string', 'format': 'uri'},
+        'md5hash': {'type': 'string'}
+    },
+    'required': ['agent_id', 'hypervisor', 'os', 'architecture',
+                 'version', 'url', 'md5hash']
+}
+
+list_agents = {
+    'status_code': [200],
+    'response_body': {
+        'type': 'object',
+        'properties': {
+            'agents': {
+                'type': 'array',
+                'items': common_agent_info
+            }
+        },
+        'required': ['agents']
+    }
+}
 
 create_agent = {
     'status_code': [200],
-    'response_body': agents.common_create_agent
+    'response_body': {
+        'type': 'object',
+        'properties': {
+            'agent': common_agent_info
+        },
+        'required': ['agent']
+    }
 }
 
 delete_agent = {
