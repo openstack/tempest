@@ -25,10 +25,10 @@ class TokensTestJSON(base.BaseIdentityV2AdminTest):
     @test.idempotent_id('453ad4d5-e486-4b2f-be72-cffc8149e586')
     def test_create_get_delete_token(self):
         # get a token by username and password
-        user_name = data_utils.rand_name(name='user-')
-        user_password = data_utils.rand_name(name='pass-')
+        user_name = data_utils.rand_name(name='user')
+        user_password = data_utils.rand_name(name='pass')
         # first:create a tenant
-        tenant_name = data_utils.rand_name(name='tenant-')
+        tenant_name = data_utils.rand_name(name='tenant')
         tenant = self.client.create_tenant(tenant_name)
         self.data.tenants.append(tenant)
         # second:create a user
@@ -60,8 +60,8 @@ class TokensTestJSON(base.BaseIdentityV2AdminTest):
         """
 
         # Create a user.
-        user_name = data_utils.rand_name(name='user-')
-        user_password = data_utils.rand_name(name='pass-')
+        user_name = data_utils.rand_name(name='user')
+        user_password = data_utils.rand_name(name='pass')
         tenant_id = None  # No default tenant so will get unscoped token.
         email = ''
         user = self.client.create_user(user_name, user_password,
@@ -69,16 +69,16 @@ class TokensTestJSON(base.BaseIdentityV2AdminTest):
         self.data.users.append(user)
 
         # Create a couple tenants.
-        tenant1_name = data_utils.rand_name(name='tenant-')
+        tenant1_name = data_utils.rand_name(name='tenant')
         tenant1 = self.client.create_tenant(tenant1_name)
         self.data.tenants.append(tenant1)
 
-        tenant2_name = data_utils.rand_name(name='tenant-')
+        tenant2_name = data_utils.rand_name(name='tenant')
         tenant2 = self.client.create_tenant(tenant2_name)
         self.data.tenants.append(tenant2)
 
         # Create a role
-        role_name = data_utils.rand_name(name='role-')
+        role_name = data_utils.rand_name(name='role')
         role = self.client.create_role(role_name)
         self.data.roles.append(role)
 
