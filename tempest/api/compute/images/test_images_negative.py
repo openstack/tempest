@@ -77,7 +77,7 @@ class ImagesNegativeTestJSON(base.BaseV2ComputeTest):
         self.servers_client.wait_for_server_status(server['id'],
                                                    'SHUTOFF')
         self.addCleanup(self.servers_client.delete_server, server['id'])
-        snapshot_name = data_utils.rand_name('test-snap-')
+        snapshot_name = data_utils.rand_name('test-snap')
         image = self.create_image_from_server(server['id'],
                                               name=snapshot_name,
                                               wait_until='ACTIVE',
@@ -89,7 +89,7 @@ class ImagesNegativeTestJSON(base.BaseV2ComputeTest):
     @test.idempotent_id('ec176029-73dc-4037-8d72-2e4ff60cf538')
     def test_create_image_specify_uuid_35_characters_or_less(self):
         # Return an error if Image ID passed is 35 characters or less
-        snapshot_name = data_utils.rand_name('test-snap-')
+        snapshot_name = data_utils.rand_name('test-snap')
         test_uuid = ('a' * 35)
         self.assertRaises(lib_exc.NotFound, self.client.create_image,
                           test_uuid, snapshot_name)
@@ -98,7 +98,7 @@ class ImagesNegativeTestJSON(base.BaseV2ComputeTest):
     @test.idempotent_id('36741560-510e-4cc2-8641-55fe4dfb2437')
     def test_create_image_specify_uuid_37_characters_or_more(self):
         # Return an error if Image ID passed is 37 characters or more
-        snapshot_name = data_utils.rand_name('test-snap-')
+        snapshot_name = data_utils.rand_name('test-snap')
         test_uuid = ('a' * 37)
         self.assertRaises(lib_exc.NotFound, self.client.create_image,
                           test_uuid, snapshot_name)

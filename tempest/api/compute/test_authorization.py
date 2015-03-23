@@ -214,7 +214,7 @@ class AuthorizationTestJSON(base.BaseV2ComputeTest):
         # A create keypair request should fail if the tenant id does not match
         # the current user
         # POST keypair with other user tenant
-        k_name = data_utils.rand_name('keypair-')
+        k_name = data_utils.rand_name('keypair')
         try:
             # Change the base URL to impersonate another user
             self.alt_keypairs_client.auth_provider.set_alt_auth_data(
@@ -269,7 +269,7 @@ class AuthorizationTestJSON(base.BaseV2ComputeTest):
         # A create security group request should fail if the tenant id does not
         # match the current user
         # POST security group with other user tenant
-        s_name = data_utils.rand_name('security-')
+        s_name = data_utils.rand_name('security')
         s_description = data_utils.rand_name('security')
         try:
             # Change the base URL to impersonate another user

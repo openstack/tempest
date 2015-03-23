@@ -66,7 +66,7 @@ class ServersAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
     def test_resize_server_using_overlimit_ram(self):
         # NOTE(mriedem): Avoid conflicts with os-quota-class-sets tests.
         self.useFixture(fixtures.LockFixture('compute_quotas'))
-        flavor_name = data_utils.rand_name("flavor-")
+        flavor_name = data_utils.rand_name("flavor")
         flavor_id = self._get_unused_flavor_id()
         quota_set = self.quotas_client.get_default_quota_set(self.tenant_id)
         ram = int(quota_set['ram']) + 1
@@ -88,7 +88,7 @@ class ServersAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
     def test_resize_server_using_overlimit_vcpus(self):
         # NOTE(mriedem): Avoid conflicts with os-quota-class-sets tests.
         self.useFixture(fixtures.LockFixture('compute_quotas'))
-        flavor_name = data_utils.rand_name("flavor-")
+        flavor_name = data_utils.rand_name("flavor")
         flavor_id = self._get_unused_flavor_id()
         ram = 512
         quota_set = self.quotas_client.get_default_quota_set(self.tenant_id)

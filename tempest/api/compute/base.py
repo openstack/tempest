@@ -247,7 +247,7 @@ class BaseComputeTest(tempest.test.BaseTestCase):
         if name is None:
             name = data_utils.rand_name(cls.__name__ + "-securitygroup")
         if description is None:
-            description = data_utils.rand_name('description-')
+            description = data_utils.rand_name('description')
         body = \
             cls.security_groups_client.create_security_group(name,
                                                              description)
