@@ -14,6 +14,26 @@
 
 import copy
 
-from tempest.api_schema.response.compute import certificates
+_common_schema = {
+    'status_code': [200],
+    'response_body': {
+        'type': 'object',
+        'properties': {
+            'certificate': {
+                'type': 'object',
+                'properties': {
+                    'data': {'type': 'string'},
+                    'private_key': {'type': 'string'},
+                },
+                'required': ['data', 'private_key']
+            }
+        },
+        'required': ['certificate']
+    }
+}
 
-create_certificate = copy.deepcopy(certificates._common_schema)
+get_certificate = copy.deepcopy(_common_schema)
+get_certificate['response_body']['properties']['certificate'][
+    'properties']['private_key'].update({'type': 'null'})
+
+create_certificate = copy.deepcopy(_common_schema)
