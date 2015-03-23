@@ -31,7 +31,7 @@ class SnapshotsActionsV2Test(base.BaseVolumeAdminTest):
         super(SnapshotsActionsV2Test, cls).resource_setup()
 
         # Create a test shared volume for tests
-        vol_name = data_utils.rand_name(cls.__name__ + '-Volume-')
+        vol_name = data_utils.rand_name(cls.__name__ + '-Volume')
         cls.name_field = cls.special_fields['name_field']
         params = {cls.name_field: vol_name}
         cls.volume = \
@@ -40,7 +40,7 @@ class SnapshotsActionsV2Test(base.BaseVolumeAdminTest):
                                                   'available')
 
         # Create a test shared snapshot for tests
-        snap_name = data_utils.rand_name(cls.__name__ + '-Snapshot-')
+        snap_name = data_utils.rand_name(cls.__name__ + '-Snapshot')
         params = {cls.name_field: snap_name}
         cls.snapshot = \
             cls.client.create_snapshot(cls.volume['id'], **params)
