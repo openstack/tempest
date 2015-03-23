@@ -78,7 +78,7 @@ class TestStampPattern(manager.ScenarioTest):
         return self.get_remote_client(server_or_ip)
 
     def _create_volume_snapshot(self, volume):
-        snapshot_name = data_utils.rand_name('scenario-snapshot-')
+        snapshot_name = data_utils.rand_name('scenario-snapshot')
         _, snapshot = self.snapshots_client.create_snapshot(
             volume['id'], display_name=snapshot_name)
 
