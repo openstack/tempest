@@ -14,12 +14,70 @@
 
 import copy
 
-from tempest.api_schema.response.compute import hosts
 
+list_hosts = {
+    'status_code': [200],
+    'response_body': {
+        'type': 'object',
+        'properties': {
+            'hosts': {
+                'type': 'array',
+                'items': {
+                    'type': 'object',
+                    'properties': {
+                        'host_name': {'type': 'string'},
+                        'service': {'type': 'string'},
+                        'zone': {'type': 'string'}
+                    },
+                    'required': ['host_name', 'service', 'zone']
+                }
+            }
+        },
+        'required': ['hosts']
+    }
+}
+
+get_host_detail = {
+    'status_code': [200],
+    'response_body': {
+        'type': 'object',
+        'properties': {
+            'host': {
+                'type': 'array',
+                'item': {
+                    'type': 'object',
+                    'properties': {
+                        'resource': {
+                            'type': 'object',
+                            'properties': {
+                                'cpu': {'type': 'integer'},
+                                'disk_gb': {'type': 'integer'},
+                                'host': {'type': 'string'},
+                                'memory_mb': {'type': 'integer'},
+                                'project': {'type': 'string'}
+                            },
+                            'required': ['cpu', 'disk_gb', 'host',
+                                         'memory_mb', 'project']
+                        }
+                    },
+                    'required': ['resource']
+                }
+            }
+        },
+        'required': ['host']
+    }
+}
 
 startup_host = {
     'status_code': [200],
-    'response_body': hosts.common_start_up_body
+    'response_body': {
+        'type': 'object',
+        'properties': {
+            'host': {'type': 'string'},
+            'power_action': {'enum': ['startup']}
+        },
+        'required': ['host', 'power_action']
+    }
 }
 
 # The 'power_action' attribute of 'shutdown_host' API is 'shutdown'
@@ -38,5 +96,14 @@ reboot_host['response_body']['properties']['power_action'] = {
 
 update_host = {
     'status_code': [200],
-    'response_body': hosts.update_host_common
+    'response_body': {
+        'type': 'object',
+        'properties': {
+            'host': {'type': 'string'},
+            'maintenance_mode': {'enum': ['on_maintenance',
+                                          'off_maintenance']},
+            'status': {'enum': ['enabled', 'disabled']}
+        },
+        'required': ['host', 'maintenance_mode', 'status']
+    }
 }
