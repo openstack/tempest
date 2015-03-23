@@ -16,7 +16,6 @@
 import json
 import time
 
-from tempest.api_schema.response.compute import interfaces as common_schema
 from tempest.api_schema.response.compute import servers as servers_schema
 from tempest.api_schema.response.compute.v2_1 import interfaces as schema
 from tempest.common import service_client
@@ -46,17 +45,19 @@ class InterfacesClientJSON(service_client.ServiceClient):
         resp, body = self.post('servers/%s/os-interface' % server,
                                body=post_body)
         body = json.loads(body)
+        self.validate_response(schema.get_create_interfaces, resp, body)
         return service_client.ResponseBody(resp, body['interfaceAttachment'])
 
     def show_interface(self, server, port_id):
         resp, body = self.get('servers/%s/os-interface/%s' % (server, port_id))
         body = json.loads(body)
+        self.validate_response(schema.get_create_interfaces, resp, body)
         return service_client.ResponseBody(resp, body['interfaceAttachment'])
 
     def delete_interface(self, server, port_id):
         resp, body = self.delete('servers/%s/os-interface/%s' % (server,
                                                                  port_id))
-        self.validate_response(common_schema.delete_interface, resp, body)
+        self.validate_response(schema.delete_interface, resp, body)
         return service_client.ResponseBody(resp, body)
 
     def wait_for_interface_status(self, server, port_id, status):
