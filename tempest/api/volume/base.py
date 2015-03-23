@@ -18,6 +18,7 @@ from tempest_lib.common.utils import data_utils
 from tempest_lib import exceptions as lib_exc
 
 from tempest import clients
+from tempest.common import credentials
 from tempest.common import fixed_network
 from tempest import config
 from tempest import exceptions
@@ -175,14 +176,17 @@ class BaseVolumeAdminTest(BaseVolumeTest):
     """Base test case class for all Volume Admin API tests."""
 
     @classmethod
+    def skip_checks(cls):
+        super(BaseVolumeAdminTest, cls).skip_checks()
+        if not credentials.is_admin_available():
+            msg = ("Missing Identity Admin API credentials in configuration.")
+            raise cls.skipException(msg)
+
+    @classmethod
     def setup_credentials(cls):
         super(BaseVolumeAdminTest, cls).setup_credentials()
-        try:
-            cls.adm_creds = cls.isolated_creds.get_admin_creds()
-            cls.os_adm = clients.Manager(credentials=cls.adm_creds)
-        except NotImplementedError:
-            msg = "Missing Volume Admin API credentials in configuration."
-            raise cls.skipException(msg)
+        cls.adm_creds = cls.isolated_creds.get_admin_creds()
+        cls.os_adm = clients.Manager(credentials=cls.adm_creds)
 
     @classmethod
     def setup_clients(cls):
