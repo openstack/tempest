@@ -13,7 +13,6 @@ python-ceilometerclient>=1.0.6
 python-glanceclient>=0.15.0
 python-cinderclient>=1.1.0
 python-heatclient>=0.3.0
-python-ironicclient>=0.2.1
 python-saharaclient>=0.7.6
 python-swiftclient>=2.2.0
 testrepository>=0.0.18
