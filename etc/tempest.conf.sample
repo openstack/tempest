@@ -116,6 +116,11 @@
 # Roles to assign to all users created by tempest (list value)
 #tempest_roles =
 
+# Only applicable when identity.auth_version is v3.Domain within which
+# isolated credentials are provisioned.The default "None" means that
+# the domain from theadmin user is used instead. (string value)
+#tenant_isolation_domain_name = <None>
+
 
 [baremetal]
 

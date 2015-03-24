@@ -44,7 +44,7 @@ class TestTenantIsolation(base.TestCase):
         self._mock_list_ec2_credentials('fake_user_id', 'fake_tenant_id')
 
     def test_tempest_client(self):
-        iso_creds = isolated_creds.IsolatedCreds('test class')
+        iso_creds = isolated_creds.IsolatedCreds(name='test class')
         self.assertTrue(isinstance(iso_creds.identity_admin_client,
                                    json_iden_client.IdentityClientJSON))
         self.assertTrue(isinstance(iso_creds.network_admin_client,
@@ -139,7 +139,7 @@ class TestTenantIsolation(base.TestCase):
     @mock.patch('tempest_lib.common.rest_client.RestClient')
     def test_primary_creds(self, MockRestClient):
         cfg.CONF.set_default('neutron', False, 'service_available')
-        iso_creds = isolated_creds.IsolatedCreds('test class',
+        iso_creds = isolated_creds.IsolatedCreds(name='test class',
                                                  password='fake_password')
         self._mock_assign_user_role()
         self._mock_list_role()
@@ -155,7 +155,7 @@ class TestTenantIsolation(base.TestCase):
     @mock.patch('tempest_lib.common.rest_client.RestClient')
     def test_admin_creds(self, MockRestClient):
         cfg.CONF.set_default('neutron', False, 'service_available')
-        iso_creds = isolated_creds.IsolatedCreds('test class',
+        iso_creds = isolated_creds.IsolatedCreds(name='test class',
                                                  password='fake_password')
         self._mock_list_roles('1234', 'admin')
         self._mock_user_create('1234', 'fake_admin_user')
@@ -179,7 +179,7 @@ class TestTenantIsolation(base.TestCase):
     @mock.patch('tempest_lib.common.rest_client.RestClient')
     def test_role_creds(self, MockRestClient):
         cfg.CONF.set_default('neutron', False, 'service_available')
-        iso_creds = isolated_creds.IsolatedCreds('test class',
+        iso_creds = isolated_creds.IsolatedCreds('v2', 'test class',
                                                  password='fake_password')
         self._mock_list_2_roles()
         self._mock_user_create('1234', 'fake_role_user')
@@ -207,7 +207,7 @@ class TestTenantIsolation(base.TestCase):
     @mock.patch('tempest_lib.common.rest_client.RestClient')
     def test_all_cred_cleanup(self, MockRestClient):
         cfg.CONF.set_default('neutron', False, 'service_available')
-        iso_creds = isolated_creds.IsolatedCreds('test class',
+        iso_creds = isolated_creds.IsolatedCreds(name='test class',
                                                  password='fake_password')
         self._mock_assign_user_role()
         roles_fix = self._mock_list_role()
@@ -251,7 +251,7 @@ class TestTenantIsolation(base.TestCase):
     @mock.patch('tempest_lib.common.rest_client.RestClient')
     def test_alt_creds(self, MockRestClient):
         cfg.CONF.set_default('neutron', False, 'service_available')
-        iso_creds = isolated_creds.IsolatedCreds('test class',
+        iso_creds = isolated_creds.IsolatedCreds(name='test class',
                                                  password='fake_password')
         self._mock_assign_user_role()
         self._mock_list_role()
@@ -266,7 +266,7 @@ class TestTenantIsolation(base.TestCase):
 
     @mock.patch('tempest_lib.common.rest_client.RestClient')
     def test_network_creation(self, MockRestClient):
-        iso_creds = isolated_creds.IsolatedCreds('test class',
+        iso_creds = isolated_creds.IsolatedCreds(name='test class',
                                                  password='fake_password')
         self._mock_assign_user_role()
         self._mock_list_role()
@@ -298,7 +298,7 @@ class TestTenantIsolation(base.TestCase):
                                          "description": args['name'],
                                          "security_group_rules": [],
                                          "id": "sg-%s" % args['tenant_id']}]}
-        iso_creds = isolated_creds.IsolatedCreds('test class',
+        iso_creds = isolated_creds.IsolatedCreds(name='test class',
                                                  password='fake_password')
         # Create primary tenant and network
         self._mock_assign_user_role()
@@ -415,7 +415,7 @@ class TestTenantIsolation(base.TestCase):
 
     @mock.patch('tempest_lib.common.rest_client.RestClient')
     def test_network_alt_creation(self, MockRestClient):
-        iso_creds = isolated_creds.IsolatedCreds('test class',
+        iso_creds = isolated_creds.IsolatedCreds(name='test class',
                                                  password='fake_password')
         self._mock_assign_user_role()
         self._mock_list_role()
@@ -441,7 +441,7 @@ class TestTenantIsolation(base.TestCase):
 
     @mock.patch('tempest_lib.common.rest_client.RestClient')
     def test_network_admin_creation(self, MockRestClient):
-        iso_creds = isolated_creds.IsolatedCreds('test class',
+        iso_creds = isolated_creds.IsolatedCreds(name='test class',
                                                  password='fake_password')
         self._mock_assign_user_role()
         self._mock_user_create('1234', 'fake_admin_user')
@@ -473,7 +473,7 @@ class TestTenantIsolation(base.TestCase):
             'subnet': False,
             'dhcp': False,
         }
-        iso_creds = isolated_creds.IsolatedCreds('test class',
+        iso_creds = isolated_creds.IsolatedCreds(name='test class',
                                                  password='fake_password',
                                                  network_resources=net_dict)
         self._mock_assign_user_role()
@@ -509,7 +509,7 @@ class TestTenantIsolation(base.TestCase):
             'subnet': False,
             'dhcp': False,
         }
-        iso_creds = isolated_creds.IsolatedCreds('test class',
+        iso_creds = isolated_creds.IsolatedCreds(name='test class',
                                                  password='fake_password',
                                                  network_resources=net_dict)
         self._mock_assign_user_role()
@@ -527,7 +527,7 @@ class TestTenantIsolation(base.TestCase):
             'subnet': True,
             'dhcp': False,
         }
-        iso_creds = isolated_creds.IsolatedCreds('test class',
+        iso_creds = isolated_creds.IsolatedCreds(name='test class',
                                                  password='fake_password',
                                                  network_resources=net_dict)
         self._mock_assign_user_role()
@@ -545,7 +545,7 @@ class TestTenantIsolation(base.TestCase):
             'subnet': False,
             'dhcp': True,
         }
-        iso_creds = isolated_creds.IsolatedCreds('test class',
+        iso_creds = isolated_creds.IsolatedCreds(name='test class',
                                                  password='fake_password',
                                                  network_resources=net_dict)
         self._mock_assign_user_role()
