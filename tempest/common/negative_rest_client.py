@@ -25,25 +25,39 @@ class NegativeRestClient(service_client.ServiceClient):
     """
     Version of RestClient that does not raise exceptions.
     """
-    def __init__(self, auth_provider, service):
-        region = self._get_region(service)
-        super(NegativeRestClient, self).__init__(auth_provider,
-                                                 service, region)
+    def __init__(self, auth_provider, service,
+                 build_interval=None, build_timeout=None,
+                 disable_ssl_certificate_validation=None,
+                 ca_certs=None, trace_requests=None):
+        region, endpoint_type = self._get_region_and_endpoint_type(service)
+        super(NegativeRestClient, self).__init__(
+            auth_provider,
+            service,
+            region,
+            endpoint_type=endpoint_type,
+            build_interval=build_interval,
+            build_timeout=build_timeout,
+            disable_ssl_certificate_validation=(
+                disable_ssl_certificate_validation),
+            ca_certs=ca_certs,
+            trace_requests=trace_requests)
 
-    def _get_region(self, service):
+    def _get_region_and_endpoint_type(self, service):
         """
         Returns the region for a specific service
         """
         service_region = None
+        service_endpoint_type = None
         for cfgname in dir(CONF._config):
             # Find all config.FOO.catalog_type and assume FOO is a service.
             cfg = getattr(CONF, cfgname)
             catalog_type = getattr(cfg, 'catalog_type', None)
             if catalog_type == service:
                 service_region = getattr(cfg, 'region', None)
+                service_endpoint_type = getattr(cfg, 'endpoint_type', None)
         if not service_region:
             service_region = CONF.identity.region
-        return service_region
+        return service_region, service_endpoint_type
 
     def _error_checker(self, method, url,
                        headers, body, resp, resp_body):
