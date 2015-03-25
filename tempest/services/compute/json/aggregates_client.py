@@ -17,8 +17,7 @@ import json
 
 from tempest_lib import exceptions as lib_exc
 
-from tempest.api_schema.response.compute import aggregates as schema
-from tempest.api_schema.response.compute.v2_1 import aggregates as v2_schema
+from tempest.api_schema.response.compute.v2_1 import aggregates as schema
 from tempest.common import service_client
 
 
@@ -44,7 +43,7 @@ class AggregatesClientJSON(service_client.ServiceClient):
         resp, body = self.post('os-aggregates', post_body)
 
         body = json.loads(body)
-        self.validate_response(v2_schema.create_aggregate, resp, body)
+        self.validate_response(schema.create_aggregate, resp, body)
         return service_client.ResponseBody(resp, body['aggregate'])
 
     def update_aggregate(self, aggregate_id, name, availability_zone=None):
@@ -63,7 +62,7 @@ class AggregatesClientJSON(service_client.ServiceClient):
     def delete_aggregate(self, aggregate_id):
         """Deletes the given aggregate."""
         resp, body = self.delete("os-aggregates/%s" % str(aggregate_id))
-        self.validate_response(v2_schema.delete_aggregate, resp, body)
+        self.validate_response(schema.delete_aggregate, resp, body)
         return service_client.ResponseBody(resp, body)
 
     def is_resource_deleted(self, id):
