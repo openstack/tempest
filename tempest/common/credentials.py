@@ -26,7 +26,8 @@ CONF = config.CONF
 # Dropping interface and password, as they are never used anyways
 # TODO(andreaf) Drop them from the CredentialsProvider interface completely
 def get_isolated_credentials(name, network_resources=None,
-                             force_tenant_isolation=False):
+                             force_tenant_isolation=False,
+                             identity_version=None):
     # If a test requires a new account to work, it can have it via forcing
     # tenant isolation. A new account will be produced only for that test.
     # In case admin credentials are not available for the account creation,
@@ -34,13 +35,16 @@ def get_isolated_credentials(name, network_resources=None,
     if CONF.auth.allow_tenant_isolation or force_tenant_isolation:
         return isolated_creds.IsolatedCreds(
             name=name,
-            network_resources=network_resources)
+            network_resources=network_resources,
+            identity_version=identity_version)
     else:
         if CONF.auth.locking_credentials_provider:
             # Most params are not relevant for pre-created accounts
-            return accounts.Accounts(name=name)
+            return accounts.Accounts(name=name,
+                                     identity_version=identity_version)
         else:
-            return accounts.NotLockingAccounts(name=name)
+            return accounts.NotLockingAccounts(
+                name=name, identity_version=identity_version)
 
 
 # We want a helper function here to check and see if admin credentials

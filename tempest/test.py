@@ -378,17 +378,19 @@ class BaseTestCase(testtools.testcase.WithAttributes,
                                                    level=None))
 
     @classmethod
-    def get_client_manager(cls):
+    def get_client_manager(cls, identity_version=None):
         """
         Returns an OpenStack client manager
         """
         force_tenant_isolation = getattr(cls, 'force_tenant_isolation', None)
+        identity_version = identity_version or CONF.identity.auth_version
 
         if (not hasattr(cls, 'isolated_creds') or
             not cls.isolated_creds.name == cls.__name__):
             cls.isolated_creds = credentials.get_isolated_credentials(
                 name=cls.__name__, network_resources=cls.network_resources,
                 force_tenant_isolation=force_tenant_isolation,
+                identity_version=identity_version
             )
 
         creds = cls.isolated_creds.get_primary_creds()
