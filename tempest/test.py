@@ -32,6 +32,7 @@ import testtools
 
 from tempest import clients
 from tempest.common import credentials
+from tempest.common import fixed_network
 import tempest.common.generator.valid_generator as valid
 from tempest import config
 from tempest import exceptions
@@ -434,6 +435,21 @@ class BaseTestCase(testtools.testcase.WithAttributes,
                 'router': router,
                 'subnet': subnet,
                 'dhcp': dhcp}
+
+    @classmethod
+    def get_tenant_network(cls):
+        """Get the network to be used in testing
+
+        :return: network dict including 'id' and 'name'
+        """
+        # Make sure isolated_creds exists and get a network client
+        networks_client = cls.get_client_manager().networks_client
+        isolated_creds = getattr(cls, 'isolated_creds', None)
+        if credentials.is_admin_available():
+            admin_creds = isolated_creds.get_admin_creds()
+            networks_client = clients.Manager(admin_creds).networks_client
+        return fixed_network.get_tenant_network(isolated_creds,
+                                                networks_client)
 
     def assertEmpty(self, list, msg=None):
         self.assertTrue(len(list) == 0, msg)
