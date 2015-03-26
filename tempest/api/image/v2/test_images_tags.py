@@ -27,7 +27,7 @@ class ImagesTagsTest(base.BaseV2ImageTest):
                                  disk_format='raw',
                                  visibility='private')
         image_id = body['id']
-        tag = data_utils.rand_name('tag-')
+        tag = data_utils.rand_name('tag')
         self.addCleanup(self.client.delete_image, image_id)
 
         # Creating image tag and verify it.
