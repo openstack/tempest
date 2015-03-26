@@ -115,7 +115,7 @@ class BaseBaremetalTest(test.BaseTestCase):
         :return: Created chassis.
 
         """
-        description = description or data_utils.rand_name('test-chassis-')
+        description = description or data_utils.rand_name('test-chassis')
         resp, body = cls.client.create_chassis(description=description)
         return resp, body
 
