@@ -43,7 +43,7 @@ class VolumeTypesV2Test(base.BaseVolumeAdminTest):
     def test_volume_crud_with_volume_type_and_extra_specs(self):
         # Create/update/get/delete volume with volume_type and extra spec.
         volume_types = list()
-        vol_name = data_utils.rand_name("volume-")
+        vol_name = data_utils.rand_name("volume")
         self.name_field = self.special_fields['name_field']
         proto = CONF.volume.storage_protocol
         vendor = CONF.volume.vendor_name
@@ -51,7 +51,7 @@ class VolumeTypesV2Test(base.BaseVolumeAdminTest):
                        "vendor_name": vendor}
         # Create two volume_types
         for i in range(2):
-            vol_type_name = data_utils.rand_name("volume-type-")
+            vol_type_name = data_utils.rand_name("volume-type")
             vol_type = self.volume_types_client.create_volume_type(
                 vol_type_name,
                 extra_specs=extra_specs)
@@ -94,7 +94,7 @@ class VolumeTypesV2Test(base.BaseVolumeAdminTest):
     def test_volume_type_create_get_delete(self):
         # Create/get volume type.
         body = {}
-        name = data_utils.rand_name("volume-type-")
+        name = data_utils.rand_name("volume-type")
         proto = CONF.volume.storage_protocol
         vendor = CONF.volume.vendor_name
         extra_specs = {"storage_protocol": proto,
@@ -128,7 +128,7 @@ class VolumeTypesV2Test(base.BaseVolumeAdminTest):
         # Create/get/delete encryption type.
         provider = "LuksEncryptor"
         control_location = "front-end"
-        name = data_utils.rand_name("volume-type-")
+        name = data_utils.rand_name("volume-type")
         body = self.volume_types_client.create_volume_type(name)
         self.addCleanup(self._delete_volume_type, body['id'])
 

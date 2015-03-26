@@ -31,7 +31,7 @@ class VolumesActionsV2Test(base.BaseVolumeAdminTest):
         super(VolumesActionsV2Test, cls).resource_setup()
 
         # Create a test shared volume for tests
-        vol_name = utils.rand_name(cls.__name__ + '-Volume-')
+        vol_name = utils.rand_name(cls.__name__ + '-Volume')
         cls.name_field = cls.special_fields['name_field']
         params = {cls.name_field: vol_name}
 
