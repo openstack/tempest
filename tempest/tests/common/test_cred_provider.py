@@ -17,11 +17,13 @@ from oslo_config import cfg
 from tempest import auth
 from tempest.common import cred_provider
 from tempest.common import tempest_fixtures as fixtures
+from tempest import config
 from tempest.services.identity.v2.json import token_client as v2_client
 from tempest.services.identity.v3.json import token_client as v3_client
+from tempest.tests import fake_config
 from tempest.tests import fake_identity
-# Note: eventually the auth module will move to tempest-lib, and so wil its
-# unit tests. *CredentialsTests will be imported from tempest-lib then.
+# Note(andreaf): once credentials tests move to tempest-lib, I will copy the
+# parts of them required by these here.
 from tempest.tests import test_credentials as test_creds
 
 
@@ -39,6 +41,8 @@ class ConfiguredV2CredentialsTests(test_creds.CredentialsTests):
 
     def setUp(self):
         super(ConfiguredV2CredentialsTests, self).setUp()
+        self.useFixture(fake_config.ConfigFixture())
+        self.stubs.Set(config, 'TempestConfigPrivate', fake_config.FakePrivate)
         self.stubs.Set(self.tokenclient_class, 'raw_request',
                        self.identity_response)
 
