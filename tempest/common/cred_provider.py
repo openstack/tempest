@@ -63,7 +63,8 @@ def get_configured_credentials(credential_type, fill_in=True,
             params[attr] = getattr(_section, prefix + "_" + attr)
     # Build and validate credentials. We are reading configured credentials,
     # so validate them even if fill_in is False
-    credentials = get_credentials(fill_in=fill_in, **params)
+    credentials = get_credentials(fill_in=fill_in,
+                                  identity_version=identity_version, **params)
     if not fill_in:
         if not credentials.is_valid():
             msg = ("The %s credentials are incorrectly set in the config file."
