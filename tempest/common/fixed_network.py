@@ -16,6 +16,7 @@ from oslo_log import log as logging
 from tempest_lib import exceptions as lib_exc
 
 from tempest import config
+from tempest import exceptions
 
 CONF = config.CONF
 
@@ -34,6 +35,7 @@ def get_tenant_network(creds_provider, compute_networks_client):
     :return a dict with 'id' and 'name' of the network
     """
     fixed_network_name = CONF.compute.fixed_network_name
+    network = None
     # NOTE(andreaf) get_primary_network will always be available once
     # bp test-accounts-continued is implemented
     if (CONF.auth.allow_tenant_isolation and
@@ -51,7 +53,11 @@ def get_tenant_network(creds_provider, compute_networks_client):
                     networks = resp['networks']
                 else:
                     raise lib_exc.NotFound()
-                network = networks[0]
+                if len(networks) > 0:
+                    network = networks[0]
+                else:
+                    msg = "Configured fixed_network_name not found"
+                    raise exceptions.InvalidConfiguration(msg)
                 # To be consistent with network isolation, add name is only
                 # label is available
                 network['name'] = network.get('name', network.get('label'))

@@ -232,9 +232,11 @@ ComputeGroup = [
                help="Timeout in seconds to wait for output from ssh "
                     "channel."),
     cfg.StrOpt('fixed_network_name',
-               default='private',
                help="Name of the fixed network that is visible to all test "
-                    "tenants."),
+                    "tenants. If multiple networks are available for a tenant"
+                    " this is the network which will be used for creating "
+                    "servers if tempest does not create a network or a "
+                    "network is not specified elsewhere"),
     cfg.StrOpt('network_for_ssh',
                default='public',
                help="Network used for SSH connections. Ignored if "

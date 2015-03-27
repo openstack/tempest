@@ -302,9 +302,11 @@
 # value)
 #ssh_channel_timeout = 60
 
-# Name of the fixed network that is visible to all test tenants.
-# (string value)
-#fixed_network_name = private
+# Name of the fixed network that is visible to all test tenants. If
+# multiple networks are available for a tenant this is the network
+# which will be used for creating servers if tempest does not create a
+# network or a network is not specified elsewhere (string value)
+#fixed_network_name = <None>
 
 # Network used for SSH connections. Ignored if
 # use_floatingip_for_ssh=true or run_ssh=false. (string value)
