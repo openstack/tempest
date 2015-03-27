@@ -24,16 +24,23 @@ CONF = config.CONF
 
 
 class FloatingIPAdminTestJSON(base.BaseAdminNetworkTest):
-
     force_tenant_isolation = True
+
+    @classmethod
+    def setup_credentials(cls):
+        super(FloatingIPAdminTestJSON, cls).setup_credentials()
+        cls.alt_manager = clients.Manager(cls.isolated_creds.get_alt_creds())
+
+    @classmethod
+    def setup_clients(cls):
+        super(FloatingIPAdminTestJSON, cls).setup_clients()
+        cls.alt_client = cls.alt_manager.network_client
 
     @classmethod
     def resource_setup(cls):
         super(FloatingIPAdminTestJSON, cls).resource_setup()
         cls.ext_net_id = CONF.network.public_network_id
         cls.floating_ip = cls.create_floatingip(cls.ext_net_id)
-        cls.alt_manager = clients.Manager(cls.isolated_creds.get_alt_creds())
-        cls.alt_client = cls.alt_manager.network_client
         cls.network = cls.create_network()
         cls.subnet = cls.create_subnet(cls.network)
         cls.router = cls.create_router(data_utils.rand_name('router-'),

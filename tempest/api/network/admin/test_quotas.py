@@ -20,7 +20,6 @@ from tempest import test
 
 
 class QuotasTest(base.BaseAdminNetworkTest):
-
     """
     Tests the following operations in the Neutron API using the REST client for
     Neutron:
@@ -38,11 +37,15 @@ class QuotasTest(base.BaseAdminNetworkTest):
     """
 
     @classmethod
-    def resource_setup(cls):
-        super(QuotasTest, cls).resource_setup()
+    def skip_checks(cls):
+        super(QuotasTest, cls).skip_checks()
         if not test.is_extension_enabled('quotas', 'network'):
             msg = "quotas extension not enabled."
             raise cls.skipException(msg)
+
+    @classmethod
+    def setup_clients(cls):
+        super(QuotasTest, cls).setup_clients()
         cls.identity_admin_client = cls.os_adm.identity_client
 
     def _check_quotas(self, new_quotas):

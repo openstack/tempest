@@ -15,11 +15,11 @@
 from tempest_lib.common.utils import data_utils
 
 from tempest.api.network import base
+from tempest import exceptions
 from tempest import test
 
 
 class L3AgentSchedulerTestJSON(base.BaseAdminNetworkTest):
-
     """
     Tests the following operations in the Neutron API using the REST client for
     Neutron:
@@ -34,12 +34,15 @@ class L3AgentSchedulerTestJSON(base.BaseAdminNetworkTest):
     """
 
     @classmethod
-    def resource_setup(cls):
-        super(L3AgentSchedulerTestJSON, cls).resource_setup()
+    def skip_checks(cls):
+        super(L3AgentSchedulerTestJSON, cls).skip_checks()
         if not test.is_extension_enabled('l3_agent_scheduler', 'network'):
             msg = "L3 Agent Scheduler Extension not enabled."
             raise cls.skipException(msg)
-        # Trying to get agent details for L3 Agent
+
+    @classmethod
+    def resource_setup(cls):
+        super(L3AgentSchedulerTestJSON, cls).resource_setup()
         body = cls.admin_client.list_agents()
         agents = body['agents']
         for agent in agents:
@@ -47,8 +50,8 @@ class L3AgentSchedulerTestJSON(base.BaseAdminNetworkTest):
                 cls.agent = agent
                 break
         else:
-            msg = "L3 Agent not found"
-            raise cls.skipException(msg)
+            msg = "L3 Agent Scheduler enabled in conf, but L3 Agent not found"
+            raise exceptions.InvalidConfiguration(msg)
 
     @test.attr(type='smoke')
     @test.idempotent_id('b7ce6e89-e837-4ded-9b78-9ed3c9c6a45a')

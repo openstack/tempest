@@ -24,7 +24,6 @@ CONF = config.CONF
 
 
 class FWaaSExtensionTestJSON(base.BaseNetworkTest):
-
     """
     Tests the following operations in the Neutron API using the REST client for
     Neutron:
@@ -51,11 +50,15 @@ class FWaaSExtensionTestJSON(base.BaseNetworkTest):
     """
 
     @classmethod
-    def resource_setup(cls):
-        super(FWaaSExtensionTestJSON, cls).resource_setup()
+    def skip_checks(cls):
+        super(FWaaSExtensionTestJSON, cls).skip_checks()
         if not test.is_extension_enabled('fwaas', 'network'):
             msg = "FWaaS Extension not enabled."
             raise cls.skipException(msg)
+
+    @classmethod
+    def resource_setup(cls):
+        super(FWaaSExtensionTestJSON, cls).resource_setup()
         cls.fw_rule = cls.create_firewall_rule("allow", "tcp")
         cls.fw_policy = cls.create_firewall_policy()
 

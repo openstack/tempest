@@ -19,7 +19,6 @@ from tempest import test
 
 
 class LBaaSAgentSchedulerTestJSON(base.BaseAdminNetworkTest):
-
     """
     Tests the following operations in the Neutron API using the REST client for
     Neutron:
@@ -35,11 +34,15 @@ class LBaaSAgentSchedulerTestJSON(base.BaseAdminNetworkTest):
     """
 
     @classmethod
-    def resource_setup(cls):
-        super(LBaaSAgentSchedulerTestJSON, cls).resource_setup()
+    def skip_checks(cls):
+        super(LBaaSAgentSchedulerTestJSON, cls).skip_checks()
         if not test.is_extension_enabled('lbaas_agent_scheduler', 'network'):
             msg = "LBaaS Agent Scheduler Extension not enabled."
             raise cls.skipException(msg)
+
+    @classmethod
+    def resource_setup(cls):
+        super(LBaaSAgentSchedulerTestJSON, cls).resource_setup()
         cls.network = cls.create_network()
         cls.subnet = cls.create_subnet(cls.network)
         pool_name = data_utils.rand_name('pool-')

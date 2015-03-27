@@ -24,7 +24,6 @@ CONF = config.CONF
 
 
 class FloatingIPTestJSON(base.BaseNetworkTest):
-
     """
     Tests the following operations in the Quantum API using the REST client for
     Neutron:
@@ -45,11 +44,15 @@ class FloatingIPTestJSON(base.BaseNetworkTest):
     """
 
     @classmethod
-    def resource_setup(cls):
-        super(FloatingIPTestJSON, cls).resource_setup()
+    def skip_checks(cls):
+        super(FloatingIPTestJSON, cls).skip_checks()
         if not test.is_extension_enabled('router', 'network'):
             msg = "router extension not enabled."
             raise cls.skipException(msg)
+
+    @classmethod
+    def resource_setup(cls):
+        super(FloatingIPTestJSON, cls).resource_setup()
         cls.ext_net_id = CONF.network.public_network_id
 
         # Create network, subnet, router and add interface

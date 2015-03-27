@@ -24,12 +24,11 @@ CONF = config.CONF
 
 
 class SecGroupTest(base.BaseSecGroupTest):
-
     _tenant_network_cidr = CONF.network.tenant_network_cidr
 
     @classmethod
-    def resource_setup(cls):
-        super(SecGroupTest, cls).resource_setup()
+    def skip_checks(cls):
+        super(SecGroupTest, cls).skip_checks()
         if not test.is_extension_enabled('security-group', 'network'):
             msg = "security-group extension not enabled."
             raise cls.skipException(msg)
