@@ -46,7 +46,7 @@ class S3ImagesTest(boto_test.BotoTestCase):
         cls.ami_path = cls.materials_path + os.sep + cls.ami_manifest
         cls.aki_path = cls.materials_path + os.sep + cls.aki_manifest
         cls.ari_path = cls.materials_path + os.sep + cls.ari_manifest
-        cls.bucket_name = data_utils.rand_name("bucket-")
+        cls.bucket_name = data_utils.rand_name("bucket")
         bucket = cls.s3_client.create_bucket(cls.bucket_name)
         cls.addResourceCleanUp(cls.destroy_bucket,
                                cls.s3_client.connection_data,
@@ -56,7 +56,7 @@ class S3ImagesTest(boto_test.BotoTestCase):
     @test.idempotent_id('f9d360a5-0188-4c77-9db2-4c34c28d12a5')
     def test_register_get_deregister_ami_image(self):
         # Register and deregister ami image
-        image = {"name": data_utils.rand_name("ami-name-"),
+        image = {"name": data_utils.rand_name("ami-name"),
                  "location": self.bucket_name + "/" + self.ami_manifest,
                  "type": "ami"}
         image["image_id"] = self.images_client.register_image(
@@ -80,7 +80,7 @@ class S3ImagesTest(boto_test.BotoTestCase):
     @test.idempotent_id('42cca5b0-453b-4618-b99f-dbc039db426f')
     def test_register_get_deregister_aki_image(self):
         # Register and deregister aki image
-        image = {"name": data_utils.rand_name("aki-name-"),
+        image = {"name": data_utils.rand_name("aki-name"),
                  "location": self.bucket_name + "/" + self.aki_manifest,
                  "type": "aki"}
         image["image_id"] = self.images_client.register_image(
@@ -104,7 +104,7 @@ class S3ImagesTest(boto_test.BotoTestCase):
     @test.idempotent_id('1359e860-841c-43bb-80f3-bb389cbfd81d')
     def test_register_get_deregister_ari_image(self):
         # Register and deregister ari image
-        image = {"name": data_utils.rand_name("ari-name-"),
+        image = {"name": data_utils.rand_name("ari-name"),
                  "location": "/" + self.bucket_name + "/" + self.ari_manifest,
                  "type": "ari"}
         image["image_id"] = self.images_client.register_image(
