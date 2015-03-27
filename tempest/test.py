@@ -438,15 +438,6 @@ class BaseTestCase(testtools.testcase.WithAttributes,
             cls.isolated_creds.clear_isolated_creds()
 
     @classmethod
-    def _get_identity_admin_client(cls):
-        """
-        Returns an instance of the Identity Admin API client
-        """
-        os = clients.AdminManager(service=cls._service)
-        admin_client = os.identity_client
-        return admin_client
-
-    @classmethod
     def set_network_resources(cls, network=False, router=False, subnet=False,
                               dhcp=False):
         """Specify which network resources should be created
