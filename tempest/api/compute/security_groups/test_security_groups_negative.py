@@ -69,7 +69,7 @@ class SecurityGroupsNegativeTestJSON(base.BaseSecurityGroupsTest):
     def test_security_group_create_with_invalid_group_name(self):
         # Negative test: Security Group should not be created with group name
         # as an empty string/with white spaces/chars more than 255
-        s_description = data_utils.rand_name('description-')
+        s_description = data_utils.rand_name('description')
         # Create Security Group with empty string as group name
         self.assertRaises(lib_exc.BadRequest,
                           self.client.create_security_group, "", s_description)
@@ -91,7 +91,7 @@ class SecurityGroupsNegativeTestJSON(base.BaseSecurityGroupsTest):
     def test_security_group_create_with_invalid_group_description(self):
         # Negative test:Security Group should not be created with description
         # as an empty string/with white spaces/chars more than 255
-        s_name = data_utils.rand_name('securitygroup-')
+        s_name = data_utils.rand_name('securitygroup')
         # Create Security Group with empty string as description
         self.assertRaises(lib_exc.BadRequest,
                           self.client.create_security_group, s_name, "")
@@ -112,8 +112,8 @@ class SecurityGroupsNegativeTestJSON(base.BaseSecurityGroupsTest):
     def test_security_group_create_with_duplicate_name(self):
         # Negative test:Security Group with duplicate name should not
         # be created
-        s_name = data_utils.rand_name('securitygroup-')
-        s_description = data_utils.rand_name('description-')
+        s_name = data_utils.rand_name('securitygroup')
+        s_description = data_utils.rand_name('description')
         self.create_security_group(s_name, s_description)
         # Now try the Security Group with the same 'Name'
         self.assertRaises(lib_exc.BadRequest,
@@ -161,10 +161,10 @@ class SecurityGroupsNegativeTestJSON(base.BaseSecurityGroupsTest):
     @test.services('network')
     def test_update_security_group_with_invalid_sg_id(self):
         # Update security_group with invalid sg_id should fail
-        s_name = data_utils.rand_name('sg-')
-        s_description = data_utils.rand_name('description-')
+        s_name = data_utils.rand_name('sg')
+        s_description = data_utils.rand_name('description')
         # Create a non int sg_id
-        sg_id_invalid = data_utils.rand_name('sg-')
+        sg_id_invalid = data_utils.rand_name('sg')
         self.assertRaises(lib_exc.BadRequest,
                           self.client.update_security_group, sg_id_invalid,
                           name=s_name, description=s_description)
@@ -207,8 +207,8 @@ class SecurityGroupsNegativeTestJSON(base.BaseSecurityGroupsTest):
     def test_update_non_existent_security_group(self):
         # Update a non-existent Security Group should Fail
         non_exist_id = self._generate_a_non_existent_security_group_id()
-        s_name = data_utils.rand_name('sg-')
-        s_description = data_utils.rand_name('description-')
+        s_name = data_utils.rand_name('sg')
+        s_description = data_utils.rand_name('description')
         self.assertRaises(lib_exc.NotFound,
                           self.client.update_security_group,
                           non_exist_id, name=s_name,

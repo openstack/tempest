@@ -101,7 +101,7 @@ class QuotasAdminTestJSON(base.BaseV2ComputeAdminTest):
     @test.idempotent_id('ce9e0815-8091-4abd-8345-7fe5b85faa1d')
     def test_get_updated_quotas(self):
         # Verify that GET shows the updated quota set of tenant
-        tenant_name = data_utils.rand_name('cpu_quota_tenant_')
+        tenant_name = data_utils.rand_name('cpu_quota_tenant')
         tenant_desc = tenant_name + '-desc'
         identity_client = self.os_adm.identity_client
         tenant = identity_client.create_tenant(name=tenant_name,
@@ -114,8 +114,8 @@ class QuotasAdminTestJSON(base.BaseV2ComputeAdminTest):
         self.assertEqual(5120, quota_set['ram'])
 
         # Verify that GET shows the updated quota set of user
-        user_name = data_utils.rand_name('cpu_quota_user_')
-        password = data_utils.rand_name('password-')
+        user_name = data_utils.rand_name('cpu_quota_user')
+        password = data_utils.rand_name('password')
         email = user_name + '@testmail.tm'
         user = identity_client.create_user(name=user_name,
                                            password=password,
@@ -135,7 +135,7 @@ class QuotasAdminTestJSON(base.BaseV2ComputeAdminTest):
     @test.idempotent_id('389d04f0-3a41-405f-9317-e5f86e3c44f0')
     def test_delete_quota(self):
         # Admin can delete the resource quota set for a tenant
-        tenant_name = data_utils.rand_name('ram_quota_tenant_')
+        tenant_name = data_utils.rand_name('ram_quota_tenant')
         tenant_desc = tenant_name + '-desc'
         identity_client = self.os_adm.identity_client
         tenant = identity_client.create_tenant(name=tenant_name,
