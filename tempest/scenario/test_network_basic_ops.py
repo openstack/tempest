@@ -586,6 +586,9 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
     @testtools.skipIf(CONF.baremetal.driver_enabled,
                       'admin_state of instance ports cannot be altered '
                       'for baremetal nodes')
+    @testtools.skipUnless(CONF.network_feature_enabled.port_admin_state_change,
+                          "Changing a port's admin state is not supported "
+                          "by the test environment")
     @test.attr(type='smoke')
     @test.services('compute', 'network')
     def test_update_instance_port_admin_state(self):
