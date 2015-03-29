@@ -86,6 +86,7 @@ resource file::
       owner: javelin
       flavor: m1.small
       image: javelin_cirros
+      floating_ip_pool: public
     - name: hoplite
       owner: javelin
       flavor: m1.medium
@@ -858,7 +859,9 @@ def create_servers(servers):
         for secgroup in server['secgroups']:
             client.servers.add_security_group(server_id, secgroup)
         if CONF.compute.use_floatingip_for_ssh:
-            floating_ip = client.floating_ips.create_floating_ip()
+            floating_ip_pool = server.get('floating_ip_pool')
+            floating_ip = client.floating_ips.create_floating_ip(
+                pool_name=floating_ip_pool)
             client.floating_ips.associate_floating_ip_to_server(
                 floating_ip['ip'], server_id)
 
