@@ -68,7 +68,10 @@ class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
                                cls.image_ref_alt)
 
         network = cls.get_tenant_network()
-        cls.fixed_network_name = network['name']
+        if network:
+            cls.fixed_network_name = network['name']
+        else:
+            cls.fixed_network_name = None
         network_kwargs = fixed_network.set_networks_kwarg(network)
         cls.s1_name = data_utils.rand_name(cls.__name__ + '-instance')
         cls.s1 = cls.create_test_server(name=cls.s1_name,
@@ -283,6 +286,9 @@ class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
     def test_list_servers_filtered_by_ip(self):
         # Filter servers by ip
         # Here should be listed 1 server
+        if not self.fixed_network_name:
+            msg = 'fixed_network_name needs to be configured to run this test'
+            raise self.skipException(msg)
         self.s1 = self.client.get_server(self.s1['id'])
         ip = self.s1['addresses'][self.fixed_network_name][0]['addr']
         params = {'ip': ip}
@@ -301,6 +307,9 @@ class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
         # Filter servers by regex ip
         # List all servers filtered by part of ip address.
         # Here should be listed all servers
+        if not self.fixed_network_name:
+            msg = 'fixed_network_name needs to be configured to run this test'
+            raise self.skipException(msg)
         self.s1 = self.client.get_server(self.s1['id'])
         ip = self.s1['addresses'][self.fixed_network_name][0]['addr'][0:-3]
         params = {'ip': ip}
