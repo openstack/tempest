@@ -680,6 +680,8 @@ class NetworkScenarioTest(ScenarioTest):
 
     def _get_network_by_name(self, network_name):
         net = self._list_networks(name=network_name)
+        self.assertNotEqual(len(net), 0,
+                            "Unable to get network by name: %s" % network_name)
         return net_resources.AttributeDict(net[0])
 
     def create_floating_ip(self, thing, external_network_id=None,
@@ -1049,6 +1051,9 @@ class NetworkScenarioTest(ScenarioTest):
             # not (the current baremetal case). Likely can be removed when
             # test account mgmt is reworked:
             # https://blueprints.launchpad.net/tempest/+spec/test-accounts
+            if not CONF.compute.fixed_network_name:
+                m = 'fixed_network_name must be specified in config'
+                raise exceptions.InvalidConfiguration(m)
             network = self._get_network_by_name(
                 CONF.compute.fixed_network_name)
             router = None
