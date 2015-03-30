@@ -16,13 +16,10 @@
 import copy
 
 from tempest import auth
-from tempest.common import tempest_fixtures as fixtures
-from tempest import config
 from tempest import exceptions
 from tempest.services.identity.v2.json import token_client as v2_client
 from tempest.services.identity.v3.json import token_client as v3_client
 from tempest.tests import base
-from tempest.tests import fake_config
 from tempest.tests import fake_identity
 
 
@@ -46,11 +43,6 @@ class CredentialsTests(base.TestCase):
                 self.assertIsNotNone(getattr(credentials, attr))
             else:
                 self.assertIsNone(getattr(credentials, attr))
-
-    def setUp(self):
-        super(CredentialsTests, self).setUp()
-        self.useFixture(fake_config.ConfigFixture())
-        self.stubs.Set(config, 'TempestConfigPrivate', fake_config.FakePrivate)
 
     def test_create(self):
         creds = self._get_credentials()
@@ -91,12 +83,10 @@ class KeystoneV2CredentialsTests(CredentialsTests):
         self._check(creds, credentials_class, filled)
 
     def test_get_credentials(self):
-        self.useFixture(fixtures.LockFixture('auth_version'))
         self._verify_credentials(credentials_class=self.credentials_class,
                                  creds_dict=self.attributes)
 
     def test_get_credentials_not_filled(self):
-        self.useFixture(fixtures.LockFixture('auth_version'))
         self._verify_credentials(credentials_class=self.credentials_class,
                                  creds_dict=self.attributes,
                                  filled=False)

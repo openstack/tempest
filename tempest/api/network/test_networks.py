@@ -27,7 +27,6 @@ CONF = config.CONF
 
 
 class NetworksTestJSON(base.BaseNetworkTest):
-
     """
     Tests the following operations in the Neutron API using the REST client for
     Neutron:
@@ -417,7 +416,6 @@ class NetworksTestJSON(base.BaseNetworkTest):
 
 
 class BulkNetworkOpsTestJSON(base.BaseNetworkTest):
-
     """
     Tests the following operations in the Neutron API using the REST client for
     Neutron:
@@ -604,11 +602,11 @@ class NetworksIpV6TestJSON(NetworksTestJSON):
 class NetworksIpV6TestAttrs(NetworksIpV6TestJSON):
 
     @classmethod
-    def resource_setup(cls):
+    def skip_checks(cls):
+        super(NetworksIpV6TestAttrs, cls).skip_checks()
         if not CONF.network_feature_enabled.ipv6_subnet_attributes:
             raise cls.skipException("IPv6 extended attributes for "
                                     "subnets not available")
-        super(NetworksIpV6TestAttrs, cls).resource_setup()
 
     @test.attr(type='smoke')
     @test.idempotent_id('da40cd1b-a833-4354-9a85-cd9b8a3b74ca')

@@ -18,6 +18,7 @@ from tempest_lib.common.utils import data_utils
 from tempest_lib import exceptions as lib_exc
 
 from tempest import clients
+from tempest.common import fixed_network
 from tempest import config
 from tempest import exceptions
 import tempest.test
@@ -62,6 +63,7 @@ class BaseVolumeTest(tempest.test.BaseTestCase):
         super(BaseVolumeTest, cls).setup_clients()
 
         cls.servers_client = cls.os.servers_client
+        cls.networks_client = cls.os.networks_client
 
         if cls._api_version == 1:
             cls.snapshots_client = cls.os.snapshots_client
@@ -102,7 +104,6 @@ class BaseVolumeTest(tempest.test.BaseTestCase):
     def resource_cleanup(cls):
         cls.clear_snapshots()
         cls.clear_volumes()
-        cls.clear_isolated_creds()
         super(BaseVolumeTest, cls).resource_cleanup()
 
     @classmethod
@@ -159,6 +160,15 @@ class BaseVolumeTest(tempest.test.BaseTestCase):
                 cls.snapshots_client.wait_for_resource_deletion(snapshot['id'])
             except Exception:
                 pass
+
+    @classmethod
+    def create_server(cls, name, **kwargs):
+        network = cls.get_tenant_network()
+        network_kwargs = fixed_network.set_networks_kwarg(network, kwargs)
+        return cls.servers_client.create_server(name,
+                                                cls.image_ref,
+                                                cls.flavor_ref,
+                                                **network_kwargs)
 
 
 class BaseVolumeAdminTest(BaseVolumeTest):

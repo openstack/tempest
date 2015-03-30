@@ -23,7 +23,6 @@ LOG = logging.getLogger(__name__)
 
 
 class MeteringTestJSON(base.BaseAdminNetworkTest):
-
     """
     Tests the following operations in the Neutron API using the REST client for
     Neutron:
@@ -33,11 +32,15 @@ class MeteringTestJSON(base.BaseAdminNetworkTest):
     """
 
     @classmethod
-    def resource_setup(cls):
-        super(MeteringTestJSON, cls).resource_setup()
+    def skip_checks(cls):
+        super(MeteringTestJSON, cls).skip_checks()
         if not test.is_extension_enabled('metering', 'network'):
             msg = "metering extension not enabled."
             raise cls.skipException(msg)
+
+    @classmethod
+    def resource_setup(cls):
+        super(MeteringTestJSON, cls).resource_setup()
         description = "metering label created by tempest"
         name = data_utils.rand_name("metering-label")
         cls.metering_label = cls.create_metering_label(name, description)

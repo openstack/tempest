@@ -36,8 +36,8 @@ class AggregatesAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
     @classmethod
     def resource_setup(cls):
         super(AggregatesAdminNegativeTestJSON, cls).resource_setup()
-        cls.aggregate_name_prefix = 'test_aggregate_'
-        cls.az_name_prefix = 'test_az_'
+        cls.aggregate_name_prefix = 'test_aggregate'
+        cls.az_name_prefix = 'test_az'
 
         hosts_all = cls.os_adm.hosts_client.list_hosts()
         hosts = map(lambda x: x['host_name'],
@@ -134,7 +134,7 @@ class AggregatesAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
         hosts_all = self.os_adm.hosts_client.list_hosts()
         hosts = map(lambda x: x['host_name'], hosts_all)
         while True:
-            non_exist_host = data_utils.rand_name('nonexist_host_')
+            non_exist_host = data_utils.rand_name('nonexist_host')
             if non_exist_host not in hosts:
                 break
 
@@ -189,7 +189,7 @@ class AggregatesAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
     @test.attr(type=['negative', 'gate'])
     @test.idempotent_id('95d6a6fa-8da9-4426-84d0-eec0329f2e4d')
     def test_aggregate_remove_nonexistent_host(self):
-        non_exist_host = data_utils.rand_name('nonexist_host_')
+        non_exist_host = data_utils.rand_name('nonexist_host')
         aggregate_name = data_utils.rand_name(self.aggregate_name_prefix)
         aggregate = self.client.create_aggregate(name=aggregate_name)
         self.addCleanup(self.client.delete_aggregate, aggregate['id'])

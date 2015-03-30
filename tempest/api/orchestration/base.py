@@ -18,6 +18,7 @@ from tempest_lib import exceptions as lib_exc
 import yaml
 
 from tempest import clients
+from tempest.common import credentials
 from tempest import config
 import tempest.test
 
@@ -38,7 +39,19 @@ class BaseOrchestrationTest(tempest.test.BaseTestCase):
     @classmethod
     def setup_credentials(cls):
         super(BaseOrchestrationTest, cls).setup_credentials()
-        cls.os = clients.Manager()
+        if (not hasattr(cls, 'isolated_creds') or
+            not cls.isolated_creds.name == cls.__name__):
+            cls.isolated_creds = credentials.get_isolated_credentials(
+                name=cls.__name__, network_resources=cls.network_resources)
+        stack_owner_role = CONF.orchestration.stack_owner_role
+        if not cls.isolated_creds.is_role_available(stack_owner_role):
+            skip_msg = ("%s skipped because the configured credential provider"
+                        " is not able to provide credentials with the %s role "
+                        "assigned." % (cls.__name__, stack_owner_role))
+            raise cls.skipException(skip_msg)
+        else:
+            cls.os = clients.Manager(cls.isolated_creds.get_creds_by_roles(
+                [stack_owner_role]))
 
     @classmethod
     def setup_clients(cls):
@@ -70,7 +83,7 @@ class BaseOrchestrationTest(tempest.test.BaseTestCase):
     @classmethod
     def _get_identity_admin_client(cls):
         """Returns an instance of the Identity Admin API client."""
-        manager = clients.AdminManager()
+        manager = clients.Manager(cls.isolated_creds.get_admin_creds())
         admin_client = manager.identity_client
         return admin_client
 

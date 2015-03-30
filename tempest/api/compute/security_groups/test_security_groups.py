@@ -137,8 +137,8 @@ class SecurityGroupsTestJSON(base.BaseSecurityGroupsTest):
         self.assertIn('id', securitygroup)
         securitygroup_id = securitygroup['id']
         # Update the name and description
-        s_new_name = data_utils.rand_name('sg-hth-')
-        s_new_des = data_utils.rand_name('description-hth-')
+        s_new_name = data_utils.rand_name('sg-hth')
+        s_new_des = data_utils.rand_name('description-hth')
         self.client.update_security_group(securitygroup_id,
                                           name=s_new_name,
                                           description=s_new_des)

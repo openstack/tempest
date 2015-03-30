@@ -23,7 +23,6 @@ import boto
 from boto import ec2
 from boto import exception
 from boto import s3
-import keystoneclient.exceptions
 from oslo_log import log as logging
 import six
 
@@ -83,7 +82,7 @@ def decision_maker():
 
     except lib_exc.Unauthorized:
         EC2_CAN_CONNECT_ERROR = "AWS credentials not set," +\
-                                " failed to get them even by keystoneclient"
+                                " also failed to get it from keystone"
     except Exception as exc:
         EC2_CAN_CONNECT_ERROR = str(exc)
 
@@ -98,7 +97,7 @@ def decision_maker():
                 _cred_sub_check(s3client.connection_data)
     except Exception as exc:
         S3_CAN_CONNECT_ERROR = str(exc)
-    except keystoneclient.exceptions.Unauthorized:
+    except lib_exc.Unauthorized:
         S3_CAN_CONNECT_ERROR = "AWS credentials not set," +\
                                " failed to get them even by keystoneclient"
     boto_logger.logger.setLevel(level)
@@ -280,7 +279,6 @@ class BotoTestCase(tempest.test.BaseTestCase):
                 LOG.exception("Cleanup failed %s" % func_name)
             finally:
                 del cls._resource_trash_bin[key]
-        cls.clear_isolated_creds()
         super(BotoTestCase, cls).resource_cleanup()
         # NOTE(afazekas): let the super called even on exceptions
         # The real exceptions already logged, if the super throws another,

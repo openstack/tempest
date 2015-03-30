@@ -32,6 +32,7 @@ import testtools
 
 from tempest import clients
 from tempest.common import credentials
+from tempest.common import fixed_network
 import tempest.common.generator.valid_generator as valid
 from tempest import config
 from tempest import exceptions
@@ -378,17 +379,19 @@ class BaseTestCase(testtools.testcase.WithAttributes,
                                                    level=None))
 
     @classmethod
-    def get_client_manager(cls):
+    def get_client_manager(cls, identity_version=None):
         """
         Returns an OpenStack client manager
         """
         force_tenant_isolation = getattr(cls, 'force_tenant_isolation', None)
+        identity_version = identity_version or CONF.identity.auth_version
 
         if (not hasattr(cls, 'isolated_creds') or
             not cls.isolated_creds.name == cls.__name__):
             cls.isolated_creds = credentials.get_isolated_credentials(
                 name=cls.__name__, network_resources=cls.network_resources,
                 force_tenant_isolation=force_tenant_isolation,
+                identity_version=identity_version
             )
 
         creds = cls.isolated_creds.get_primary_creds()
@@ -432,6 +435,21 @@ class BaseTestCase(testtools.testcase.WithAttributes,
                 'router': router,
                 'subnet': subnet,
                 'dhcp': dhcp}
+
+    @classmethod
+    def get_tenant_network(cls):
+        """Get the network to be used in testing
+
+        :return: network dict including 'id' and 'name'
+        """
+        # Make sure isolated_creds exists and get a network client
+        networks_client = cls.get_client_manager().networks_client
+        isolated_creds = getattr(cls, 'isolated_creds', None)
+        if credentials.is_admin_available():
+            admin_creds = isolated_creds.get_admin_creds()
+            networks_client = clients.Manager(admin_creds).networks_client
+        return fixed_network.get_tenant_network(isolated_creds,
+                                                networks_client)
 
     def assertEmpty(self, list, msg=None):
         self.assertTrue(len(list) == 0, msg)

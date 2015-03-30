@@ -52,10 +52,10 @@ class BaseTrustsV3Test(base.BaseIdentityV3AdminTest):
         self.assertIsNotNone(self.trustor_project_id)
 
         # Create a trustor User
-        self.trustor_username = data_utils.rand_name('user-')
+        self.trustor_username = data_utils.rand_name('user')
         u_desc = self.trustor_username + 'description'
         u_email = self.trustor_username + '@testmail.xx'
-        self.trustor_password = data_utils.rand_name('pass-')
+        self.trustor_password = data_utils.rand_name('pass')
         user = self.client.create_user(
             self.trustor_username,
             description=u_desc,
@@ -65,8 +65,8 @@ class BaseTrustsV3Test(base.BaseIdentityV3AdminTest):
         self.trustor_user_id = user['id']
 
         # And two roles, one we'll delegate and one we won't
-        self.delegated_role = data_utils.rand_name('DelegatedRole-')
-        self.not_delegated_role = data_utils.rand_name('NotDelegatedRole-')
+        self.delegated_role = data_utils.rand_name('DelegatedRole')
+        self.not_delegated_role = data_utils.rand_name('NotDelegatedRole')
 
         role = self.client.create_role(self.delegated_role)
         self.delegated_role_id = role['id']

@@ -16,6 +16,7 @@ from tempest_lib.common.utils import data_utils
 from tempest_lib import decorators
 
 from tempest.api.compute import base
+from tempest.common import fixed_network
 from tempest import test
 
 
@@ -112,7 +113,10 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
         name = data_utils.rand_name('server')
         flavor = self.flavor_ref
         image_id = self.image_ref
-        test_server = self.client.create_server(name, image_id, flavor)
+        network = self.get_tenant_network()
+        network_kwargs = fixed_network.set_networks_kwarg(network)
+        test_server = self.client.create_server(name, image_id, flavor,
+                                                **network_kwargs)
         self.addCleanup(self.client.delete_server, test_server['id'])
         self.client.wait_for_server_status(test_server['id'], 'ACTIVE')
         server = self.client.get_server(test_server['id'])

@@ -27,7 +27,7 @@ class ImagesTagsNegativeTest(base.BaseV2ImageTest):
     @test.idempotent_id('8cd30f82-6f9a-4c6e-8034-c1b51fba43d9')
     def test_update_tags_for_non_existing_image(self):
         # Update tag with non existing image.
-        tag = data_utils.rand_name('tag-')
+        tag = data_utils.rand_name('tag')
         non_exist_image = str(uuid.uuid4())
         self.assertRaises(lib_exc.NotFound, self.client.add_image_tag,
                           non_exist_image, tag)
@@ -41,7 +41,7 @@ class ImagesTagsNegativeTest(base.BaseV2ImageTest):
                                  visibility='private'
                                  )
         image_id = body['id']
-        tag = data_utils.rand_name('non-exist-tag-')
+        tag = data_utils.rand_name('non-exist-tag')
         self.addCleanup(self.client.delete_image, image_id)
         self.assertRaises(lib_exc.NotFound, self.client.delete_image_tag,
                           image_id, tag)

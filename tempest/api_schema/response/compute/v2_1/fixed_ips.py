@@ -12,7 +12,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-fixed_ips = {
+get_fixed_ip = {
     'status_code': [200],
     'response_body': {
         'type': 'object',
@@ -35,7 +35,7 @@ fixed_ips = {
     }
 }
 
-fixed_ip_action = {
+reserve_fixed_ip = {
     'status_code': [202],
     'response_body': {'type': 'string'}
 }

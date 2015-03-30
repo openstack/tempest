@@ -58,7 +58,7 @@ class VolumesV2NegativeTest(base.BaseVolumeTest):
     def test_create_volume_with_invalid_size(self):
         # Should not be able to create volume with invalid size
         # in request
-        v_name = data_utils.rand_name('Volume-')
+        v_name = data_utils.rand_name('Volume')
         metadata = {'Type': 'work'}
         self.assertRaises(lib_exc.BadRequest, self.client.create_volume,
                           size='#$%', display_name=v_name, metadata=metadata)
@@ -68,7 +68,7 @@ class VolumesV2NegativeTest(base.BaseVolumeTest):
     def test_create_volume_with_out_passing_size(self):
         # Should not be able to create volume without passing size
         # in request
-        v_name = data_utils.rand_name('Volume-')
+        v_name = data_utils.rand_name('Volume')
         metadata = {'Type': 'work'}
         self.assertRaises(lib_exc.BadRequest, self.client.create_volume,
                           size='', display_name=v_name, metadata=metadata)
@@ -77,7 +77,7 @@ class VolumesV2NegativeTest(base.BaseVolumeTest):
     @test.idempotent_id('41331caa-eaf4-4001-869d-bc18c1869360')
     def test_create_volume_with_size_zero(self):
         # Should not be able to create volume with size zero
-        v_name = data_utils.rand_name('Volume-')
+        v_name = data_utils.rand_name('Volume')
         metadata = {'Type': 'work'}
         self.assertRaises(lib_exc.BadRequest, self.client.create_volume,
                           size='0', display_name=v_name, metadata=metadata)
@@ -86,7 +86,7 @@ class VolumesV2NegativeTest(base.BaseVolumeTest):
     @test.idempotent_id('8b472729-9eba-446e-a83b-916bdb34bef7')
     def test_create_volume_with_size_negative(self):
         # Should not be able to create volume with size negative
-        v_name = data_utils.rand_name('Volume-')
+        v_name = data_utils.rand_name('Volume')
         metadata = {'Type': 'work'}
         self.assertRaises(lib_exc.BadRequest, self.client.create_volume,
                           size='-1', display_name=v_name, metadata=metadata)
@@ -95,7 +95,7 @@ class VolumesV2NegativeTest(base.BaseVolumeTest):
     @test.idempotent_id('10254ed8-3849-454e-862e-3ab8e6aa01d2')
     def test_create_volume_with_nonexistent_volume_type(self):
         # Should not be able to create volume with non-existent volume type
-        v_name = data_utils.rand_name('Volume-')
+        v_name = data_utils.rand_name('Volume')
         metadata = {'Type': 'work'}
         self.assertRaises(lib_exc.NotFound, self.client.create_volume,
                           size='1', volume_type=str(uuid.uuid4()),
@@ -105,7 +105,7 @@ class VolumesV2NegativeTest(base.BaseVolumeTest):
     @test.idempotent_id('0c36f6ae-4604-4017-b0a9-34fdc63096f9')
     def test_create_volume_with_nonexistent_snapshot_id(self):
         # Should not be able to create volume with non-existent snapshot
-        v_name = data_utils.rand_name('Volume-')
+        v_name = data_utils.rand_name('Volume')
         metadata = {'Type': 'work'}
         self.assertRaises(lib_exc.NotFound, self.client.create_volume,
                           size='1', snapshot_id=str(uuid.uuid4()),
@@ -115,7 +115,7 @@ class VolumesV2NegativeTest(base.BaseVolumeTest):
     @test.idempotent_id('47c73e08-4be8-45bb-bfdf-0c4e79b88344')
     def test_create_volume_with_nonexistent_source_volid(self):
         # Should not be able to create volume with non-existent source volume
-        v_name = data_utils.rand_name('Volume-')
+        v_name = data_utils.rand_name('Volume')
         metadata = {'Type': 'work'}
         self.assertRaises(lib_exc.NotFound, self.client.create_volume,
                           size='1', source_volid=str(uuid.uuid4()),
@@ -124,7 +124,7 @@ class VolumesV2NegativeTest(base.BaseVolumeTest):
     @test.attr(type=['negative', 'gate'])
     @test.idempotent_id('0186422c-999a-480e-a026-6a665744c30c')
     def test_update_volume_with_nonexistent_volume_id(self):
-        v_name = data_utils.rand_name('Volume-')
+        v_name = data_utils.rand_name('Volume')
         metadata = {'Type': 'work'}
         self.assertRaises(lib_exc.NotFound, self.client.update_volume,
                           volume_id=str(uuid.uuid4()), display_name=v_name,
@@ -133,7 +133,7 @@ class VolumesV2NegativeTest(base.BaseVolumeTest):
     @test.attr(type=['negative', 'gate'])
     @test.idempotent_id('e66e40d6-65e6-4e75-bdc7-636792fa152d')
     def test_update_volume_with_invalid_volume_id(self):
-        v_name = data_utils.rand_name('Volume-')
+        v_name = data_utils.rand_name('Volume')
         metadata = {'Type': 'work'}
         self.assertRaises(lib_exc.NotFound, self.client.update_volume,
                           volume_id='#$%%&^&^', display_name=v_name,
@@ -142,7 +142,7 @@ class VolumesV2NegativeTest(base.BaseVolumeTest):
     @test.attr(type=['negative', 'gate'])
     @test.idempotent_id('72aeca85-57a5-4c1f-9057-f320f9ea575b')
     def test_update_volume_with_empty_volume_id(self):
-        v_name = data_utils.rand_name('Volume-')
+        v_name = data_utils.rand_name('Volume')
         metadata = {'Type': 'work'}
         self.assertRaises(lib_exc.NotFound, self.client.update_volume,
                           volume_id='', display_name=v_name,
@@ -178,10 +178,8 @@ class VolumesV2NegativeTest(base.BaseVolumeTest):
     @test.idempotent_id('f5e56b0a-5d02-43c1-a2a7-c9b792c2e3f6')
     @test.services('compute')
     def test_attach_volumes_with_nonexistent_volume_id(self):
-        srv_name = data_utils.rand_name('Instance-')
-        server = self.servers_client.create_server(srv_name,
-                                                   self.image_ref,
-                                                   self.flavor_ref)
+        srv_name = data_utils.rand_name('Instance')
+        server = self.create_server(srv_name)
         self.addCleanup(self.servers_client.delete_server, server['id'])
         self.servers_client.wait_for_server_status(server['id'], 'ACTIVE')
         self.assertRaises(lib_exc.NotFound,
@@ -266,7 +264,7 @@ class VolumesV2NegativeTest(base.BaseVolumeTest):
     @test.attr(type=['negative', 'gate'])
     @test.idempotent_id('0f4aa809-8c7b-418f-8fb3-84c7a5dfc52f')
     def test_list_volumes_with_nonexistent_name(self):
-        v_name = data_utils.rand_name('Volume-')
+        v_name = data_utils.rand_name('Volume')
         params = {self.name_field: v_name}
         fetched_volume = self.client.list_volumes(params)
         self.assertEqual(0, len(fetched_volume))
@@ -274,7 +272,7 @@ class VolumesV2NegativeTest(base.BaseVolumeTest):
     @test.attr(type=['negative', 'gate'])
     @test.idempotent_id('9ca17820-a0e7-4cbd-a7fa-f4468735e359')
     def test_list_volumes_detail_with_nonexistent_name(self):
-        v_name = data_utils.rand_name('Volume-')
+        v_name = data_utils.rand_name('Volume')
         params = {self.name_field: v_name}
         fetched_volume = \
             self.client.list_volumes_with_detail(params)

@@ -31,9 +31,9 @@ class EndPointsTestJSON(base.BaseIdentityV3AdminTest):
     def resource_setup(cls):
         super(EndPointsTestJSON, cls).resource_setup()
         cls.service_ids = list()
-        s_name = data_utils.rand_name('service-')
-        s_type = data_utils.rand_name('type--')
-        s_description = data_utils.rand_name('description-')
+        s_name = data_utils.rand_name('service')
+        s_type = data_utils.rand_name('type')
+        s_description = data_utils.rand_name('description')
         cls.service_data =\
             cls.service_client.create_service(s_name, s_type,
                                               description=s_description)
@@ -107,9 +107,9 @@ class EndPointsTestJSON(base.BaseIdentityV3AdminTest):
                                         enabled=True)
         self.addCleanup(self.client.delete_endpoint, endpoint_for_update['id'])
         # Creating service so as update endpoint with new service ID
-        s_name = data_utils.rand_name('service-')
-        s_type = data_utils.rand_name('type--')
-        s_description = data_utils.rand_name('description-')
+        s_name = data_utils.rand_name('service')
+        s_type = data_utils.rand_name('type')
+        s_description = data_utils.rand_name('description')
         service2 =\
             self.service_client.create_service(s_name, s_type,
                                                description=s_description)

@@ -27,10 +27,10 @@ class TokensV3TestJSON(base.BaseIdentityV3AdminTest):
     def test_tokens(self):
         # Valid user's token is authenticated
         # Create a User
-        u_name = data_utils.rand_name('user-')
+        u_name = data_utils.rand_name('user')
         u_desc = '%s-description' % u_name
         u_email = '%s@testmail.tm' % u_name
-        u_password = data_utils.rand_name('pass-')
+        u_password = data_utils.rand_name('pass')
         user = self.client.create_user(
             u_name, description=u_desc, password=u_password,
             email=u_email)
@@ -61,22 +61,22 @@ class TokensV3TestJSON(base.BaseIdentityV3AdminTest):
         """
 
         # Create a user.
-        user_name = data_utils.rand_name(name='user-')
-        user_password = data_utils.rand_name(name='pass-')
+        user_name = data_utils.rand_name(name='user')
+        user_password = data_utils.rand_name(name='pass')
         user = self.client.create_user(user_name, password=user_password)
         self.addCleanup(self.client.delete_user, user['id'])
 
         # Create a couple projects
-        project1_name = data_utils.rand_name(name='project-')
+        project1_name = data_utils.rand_name(name='project')
         project1 = self.client.create_project(project1_name)
         self.addCleanup(self.client.delete_project, project1['id'])
 
-        project2_name = data_utils.rand_name(name='project-')
+        project2_name = data_utils.rand_name(name='project')
         project2 = self.client.create_project(project2_name)
         self.addCleanup(self.client.delete_project, project2['id'])
 
         # Create a role
-        role_name = data_utils.rand_name(name='role-')
+        role_name = data_utils.rand_name(name='role')
         role = self.client.create_role(role_name)
         self.addCleanup(self.client.delete_role, role['id'])
 

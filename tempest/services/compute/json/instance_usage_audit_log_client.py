@@ -15,8 +15,8 @@
 
 import json
 
-from tempest.api_schema.response.compute.v2 import instance_usage_audit_logs \
-    as schema
+from tempest.api_schema.response.compute.v2_1 import \
+    instance_usage_audit_logs as schema
 from tempest.common import service_client
 
 

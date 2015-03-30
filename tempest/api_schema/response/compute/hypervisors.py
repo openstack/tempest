@@ -80,8 +80,12 @@ common_list_hypervisors_detail = {
                             'type': 'object',
                             'properties': {
                                 'host': {'type': 'string'},
-                                'id': {'type': ['integer', 'string']}
+                                'id': {'type': ['integer', 'string']},
+                                'disabled_reason': {'type': ['string', 'null']}
                             },
+                            # NOTE(gmann): 'disabled_reason' is updated in
+                            # 'service' dict if 'os-hypervisor-status'
+                            # extension is loaded. So this is not required.
                             'required': ['host', 'id']
                         },
                         'vcpus': {'type': 'integer'},
@@ -137,8 +141,12 @@ common_show_hypervisor = {
                         'type': 'object',
                         'properties': {
                             'host': {'type': 'string'},
-                            'id': {'type': ['integer', 'string']}
+                            'id': {'type': ['integer', 'string']},
+                            'disabled_reason': {'type': ['string', 'null']}
                         },
+                        # NOTE: 'disabled_reason' is updated in 'service'
+                        # dict if os-hypervisor-status' extension is loaded.
+                        # So this is not required.
                         'required': ['host', 'id']
                     },
                     'vcpus': {'type': 'integer'},

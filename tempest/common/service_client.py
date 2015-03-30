@@ -14,10 +14,6 @@
 
 from tempest_lib.common import rest_client
 
-from tempest import config
-
-CONF = config.CONF
-
 
 class ServiceClient(rest_client.RestClient):
 
@@ -26,15 +22,11 @@ class ServiceClient(rest_client.RestClient):
                  disable_ssl_certificate_validation=None, ca_certs=None,
                  trace_requests=None):
 
-        # TODO(oomichi): This params setting should be removed after all
-        # service clients pass these values, and we can make ServiceClient
-        # free from CONF values.
-        dscv = (disable_ssl_certificate_validation or
-                CONF.identity.disable_ssl_certificate_validation)
+        dscv = disable_ssl_certificate_validation
         params = {
             'disable_ssl_certificate_validation': dscv,
-            'ca_certs': ca_certs or CONF.identity.ca_certificates_file,
-            'trace_requests': trace_requests or CONF.debug.trace_requests
+            'ca_certs': ca_certs,
+            'trace_requests': trace_requests
         }
 
         if endpoint_type is not None:

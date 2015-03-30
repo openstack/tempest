@@ -66,7 +66,6 @@ class BaseDataProcessingTest(tempest.test.BaseTestCase):
                               cls.client.delete_job_binary_internal)
         cls.cleanup_resources(getattr(cls, '_data_sources', []),
                               cls.client.delete_data_source)
-        cls.clear_isolated_creds()
         super(BaseDataProcessingTest, cls).resource_cleanup()
 
     @staticmethod

@@ -36,7 +36,7 @@ class ImageClientJSON(service_client.ServiceClient):
     def __init__(self, auth_provider, catalog_type, region, endpoint_type=None,
                  build_interval=None, build_timeout=None,
                  disable_ssl_certificate_validation=None,
-                 ca_certs=None, **kwargs):
+                 ca_certs=None, trace_requests=None):
         super(ImageClientJSON, self).__init__(
             auth_provider,
             catalog_type,
@@ -47,7 +47,7 @@ class ImageClientJSON(service_client.ServiceClient):
             disable_ssl_certificate_validation=(
                 disable_ssl_certificate_validation),
             ca_certs=ca_certs,
-            **kwargs)
+            trace_requests=trace_requests)
         self._http = None
         self.dscv = disable_ssl_certificate_validation
         self.ca_certs = ca_certs

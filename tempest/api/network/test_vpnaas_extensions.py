@@ -24,7 +24,6 @@ CONF = config.CONF
 
 
 class VPNaaSTestJSON(base.BaseAdminNetworkTest):
-
     """
     Tests the following operations in the Neutron API using the REST client for
     Neutron:
@@ -34,10 +33,14 @@ class VPNaaSTestJSON(base.BaseAdminNetworkTest):
     """
 
     @classmethod
-    def resource_setup(cls):
+    def skip_checks(cls):
+        super(VPNaaSTestJSON, cls).skip_checks()
         if not test.is_extension_enabled('vpnaas', 'network'):
             msg = "vpnaas extension not enabled."
             raise cls.skipException(msg)
+
+    @classmethod
+    def resource_setup(cls):
         super(VPNaaSTestJSON, cls).resource_setup()
         cls.ext_net_id = CONF.network.public_network_id
         cls.network = cls.create_network()

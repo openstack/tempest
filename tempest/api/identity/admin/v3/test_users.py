@@ -26,10 +26,10 @@ class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
     def test_user_update(self):
         # Test case to check if updating of user attributes is successful.
         # Creating first user
-        u_name = data_utils.rand_name('user-')
+        u_name = data_utils.rand_name('user')
         u_desc = u_name + 'description'
         u_email = u_name + '@testmail.tm'
-        u_password = data_utils.rand_name('pass-')
+        u_password = data_utils.rand_name('pass')
         user = self.client.create_user(
             u_name, description=u_desc, password=u_password,
             email=u_email, enabled=False)
@@ -37,12 +37,12 @@ class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
         self.addCleanup(self.client.delete_user, user['id'])
         # Creating second project for updation
         project = self.client.create_project(
-            data_utils.rand_name('project-'),
-            description=data_utils.rand_name('project-desc-'))
+            data_utils.rand_name('project'),
+            description=data_utils.rand_name('project-desc'))
         # Delete the Project at the end of this method
         self.addCleanup(self.client.delete_project, project['id'])
         # Updating user details with new values
-        u_name2 = data_utils.rand_name('user2-')
+        u_name2 = data_utils.rand_name('user2')
         u_email2 = u_name2 + '@testmail.tm'
         u_description2 = u_name2 + ' description'
         update_user = self.client.update_user(
@@ -95,15 +95,15 @@ class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
         assigned_project_ids = list()
         fetched_project_ids = list()
         u_project = self.client.create_project(
-            data_utils.rand_name('project-'),
-            description=data_utils.rand_name('project-desc-'))
+            data_utils.rand_name('project'),
+            description=data_utils.rand_name('project-desc'))
         # Delete the Project at the end of this method
         self.addCleanup(self.client.delete_project, u_project['id'])
         # Create a user.
-        u_name = data_utils.rand_name('user-')
+        u_name = data_utils.rand_name('user')
         u_desc = u_name + 'description'
         u_email = u_name + '@testmail.tm'
-        u_password = data_utils.rand_name('pass-')
+        u_password = data_utils.rand_name('pass')
         user_body = self.client.create_user(
             u_name, description=u_desc, password=u_password,
             email=u_email, enabled=False, project_id=u_project['id'])
@@ -111,7 +111,7 @@ class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
         self.addCleanup(self.client.delete_user, user_body['id'])
         # Creating Role
         role_body = self.client.create_role(
-            data_utils.rand_name('role-'))
+            data_utils.rand_name('role'))
         # Delete the Role at the end of this method
         self.addCleanup(self.client.delete_role, role_body['id'])
 
@@ -120,8 +120,8 @@ class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
         for i in range(2):
             # Creating project so as to assign role
             project_body = self.client.create_project(
-                data_utils.rand_name('project-'),
-                description=data_utils.rand_name('project-desc-'))
+                data_utils.rand_name('project'),
+                description=data_utils.rand_name('project-desc'))
             project = self.client.get_project(project_body['id'])
             # Delete the Project at the end of this method
             self.addCleanup(self.client.delete_project, project_body['id'])

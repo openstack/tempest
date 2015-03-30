@@ -870,32 +870,14 @@ def destroy_servers(servers):
     for server in servers:
         client = client_for_user(server['owner'])
 
-        res = _get_server_by_name(client, server['name'])
-        if not res:
+        response = _get_server_by_name(client, server['name'])
+        if not response:
             LOG.info("Server '%s' does not exist" % server['name'])
             continue
-        res = client.servers.get_server(res['id'])
 
-        # we iterate all interfaces until we find a floating IP
-        # and stop looping after dropping it.
-        def _find_first_floating():
-            if (CONF.service_available.neutron and
-                    not CONF.baremetal.driver_enabled and
-                    CONF.compute.use_floatingip_for_ssh):
-                for body in res['addresses'].items():
-                    for addr in body:
-                        ip = addr['addr']
-                        if addr.get('OS-EXT-IPS:type',
-                                    'floating') == 'floating':
-                            (client.floating_ips.
-                             disassociate_floating_ip_from_server(
-                                 ip, res['id']))
-                            client.floating_ips.delete_floating_ip(ip)
-                            return
-
-        _find_first_floating()
-        client.servers.delete_server(res['id'])
-        client.servers.wait_for_server_termination(res['id'],
+        # TODO(EmilienM): disassociate floating IP from server and release it.
+        client.servers.delete_server(response['id'])
+        client.servers.wait_for_server_termination(response['id'],
                                                    ignore_error=True)
 
 

@@ -27,8 +27,8 @@ class UsersNegativeTestJSON(base.BaseIdentityV2AdminTest):
     @classmethod
     def resource_setup(cls):
         super(UsersNegativeTestJSON, cls).resource_setup()
-        cls.alt_user = data_utils.rand_name('test_user_')
-        cls.alt_password = data_utils.rand_name('pass_')
+        cls.alt_user = data_utils.rand_name('test_user')
+        cls.alt_password = data_utils.rand_name('pass')
         cls.alt_email = cls.alt_user + '@testmail.tm'
 
     @test.attr(type=['negative', 'gate'])
@@ -97,7 +97,7 @@ class UsersNegativeTestJSON(base.BaseIdentityV2AdminTest):
     def test_create_user_with_enabled_non_bool(self):
         # Attempt to create a user with valid enabled para should fail
         self.data.setup_test_tenant()
-        name = data_utils.rand_name('test_user_')
+        name = data_utils.rand_name('test_user')
         self.assertRaises(lib_exc.BadRequest, self.client.create_user,
                           name, self.alt_password,
                           self.data.tenant['id'],
@@ -107,7 +107,7 @@ class UsersNegativeTestJSON(base.BaseIdentityV2AdminTest):
     @test.idempotent_id('3d07e294-27a0-4144-b780-a2a1bf6fee19')
     def test_update_user_for_non_existent_user(self):
         # Attempt to update a user non-existent user should fail
-        user_name = data_utils.rand_name('user-')
+        user_name = data_utils.rand_name('user')
         non_existent_id = str(uuid.uuid4())
         self.assertRaises(lib_exc.NotFound, self.client.update_user,
                           non_existent_id, name=user_name)

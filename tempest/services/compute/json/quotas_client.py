@@ -15,9 +15,9 @@
 
 import json
 
-from tempest.api_schema.response.compute.v2\
+from tempest.api_schema.response.compute.v2_1\
     import quota_classes as classes_schema
-from tempest.api_schema.response.compute.v2 import quotas as schema
+from tempest.api_schema.response.compute.v2_1 import quotas as schema
 from tempest.common import service_client
 
 

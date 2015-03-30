@@ -17,7 +17,6 @@ import netaddr
 from tempest_lib.common.utils import data_utils
 
 from tempest.api.network import base_routers as base
-from tempest import clients
 from tempest import config
 from tempest import test
 
@@ -27,13 +26,20 @@ CONF = config.CONF
 class RoutersTest(base.BaseRouterTest):
 
     @classmethod
-    def resource_setup(cls):
-        super(RoutersTest, cls).resource_setup()
+    def skip_checks(cls):
+        super(RoutersTest, cls).skip_checks()
         if not test.is_extension_enabled('router', 'network'):
             msg = "router extension not enabled."
             raise cls.skipException(msg)
-        admin_manager = clients.AdminManager()
-        cls.identity_admin_client = admin_manager.identity_client
+
+    @classmethod
+    def setup_clients(cls):
+        super(RoutersTest, cls).setup_clients()
+        cls.identity_admin_client = cls.os_adm.identity_client
+
+    @classmethod
+    def resource_setup(cls):
+        super(RoutersTest, cls).resource_setup()
         cls.tenant_cidr = (CONF.network.tenant_network_cidr
                            if cls._ip_version == 4 else
                            CONF.network.tenant_network_v6_cidr)

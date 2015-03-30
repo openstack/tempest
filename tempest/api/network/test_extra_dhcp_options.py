@@ -20,7 +20,6 @@ from tempest import test
 
 
 class ExtraDHCPOptionsTestJSON(base.BaseNetworkTest):
-
     """
     Tests the following operations with the Extra DHCP Options Neutron API
     extension:
@@ -36,11 +35,15 @@ class ExtraDHCPOptionsTestJSON(base.BaseNetworkTest):
     """
 
     @classmethod
-    def resource_setup(cls):
-        super(ExtraDHCPOptionsTestJSON, cls).resource_setup()
+    def skip_checks(cls):
+        super(ExtraDHCPOptionsTestJSON, cls).skip_checks()
         if not test.is_extension_enabled('extra_dhcp_opt', 'network'):
             msg = "Extra DHCP Options extension not enabled."
             raise cls.skipException(msg)
+
+    @classmethod
+    def resource_setup(cls):
+        super(ExtraDHCPOptionsTestJSON, cls).resource_setup()
         cls.network = cls.create_network()
         cls.subnet = cls.create_subnet(cls.network)
         cls.port = cls.create_port(cls.network)

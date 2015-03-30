@@ -150,7 +150,7 @@ class ListImagesTest(base.BaseV2ImageTest):
         """
         size = random.randint(1024, 4096)
         image_file = StringIO.StringIO(data_utils.random_bytes(size))
-        name = data_utils.rand_name('image-')
+        name = data_utils.rand_name('image')
         body = cls.create_image(name=name,
                                 container_format=container_format,
                                 disk_format=disk_format,

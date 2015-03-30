@@ -101,7 +101,6 @@ class BaseTelemetryTest(tempest.test.BaseTestCase):
         cls.cleanup_resources(cls.telemetry_client.delete_alarm, cls.alarm_ids)
         cls.cleanup_resources(cls.servers_client.delete_server, cls.server_ids)
         cls.cleanup_resources(cls.image_client.delete_image, cls.image_ids)
-        cls.clear_isolated_creds()
         super(BaseTelemetryTest, cls).resource_cleanup()
 
     def await_samples(self, metric, query):

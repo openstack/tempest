@@ -54,13 +54,13 @@ and reference data to be used in testing.
 
 .. note::
 
-    If you have a running devstack environment, tempest will be
+    If you have a running devstack environment, Tempest will be
     automatically configured and placed in ``/opt/stack/tempest``. It
     will have a configuration file already set up to work with your
     devstack installation.
 
 Tempest is not tied to any single test runner, but `testr`_ is the most commonly
-used tool. Also, the nosetests test runner is **not** recommended to run tempest.
+used tool. Also, the nosetests test runner is **not** recommended to run Tempest.
 
 After setting up your configuration file, you can execute the set of Tempest
 tests by using ``testr`` ::
@@ -80,7 +80,7 @@ job configurations. For example::
    $> tox -efull
 
 which will run the same set of tests as the OpenStack gate. (it's exactly how
-the gate invokes tempest) Or::
+the gate invokes Tempest) Or::
 
   $> tox -esmoke
 
@@ -90,13 +90,13 @@ to run the tests tagged as smoke.
 Configuration
 -------------
 
-Detailed configuration of tempest is beyond the scope of this
+Detailed configuration of Tempest is beyond the scope of this
 document see :ref:`tempest-configuration` for more details on configuring
-tempest. The etc/tempest.conf.sample attempts to be a self documenting version
+Tempest. The etc/tempest.conf.sample attempts to be a self documenting version
 of the configuration.
 
 You can generate a new sample tempest.conf file, run the following
-command from the top level of the tempest directory:
+command from the top level of the Tempest directory:
 
   tox -egenconfig
 
@@ -106,7 +106,7 @@ endpoint, and basic flavors and images needed to run tests.
 Unit Tests
 ----------
 
-Tempest also has a set of unit tests which test the tempest code itself. These
+Tempest also has a set of unit tests which test the Tempest code itself. These
 tests can be run by specifing the test discovery path::
 
     $> OS_TEST_PATH=./tempest/tests testr run --parallel
@@ -114,7 +114,7 @@ tests can be run by specifing the test discovery path::
 By setting OS_TEST_PATH to ./tempest/tests it specifies that test discover
 should only be run on the unit test directory. The default value of OS_TEST_PATH
 is OS_TEST_PATH=./tempest/test_discover which will only run test discover on the
-tempest suite.
+Tempest suite.
 
 Alternatively, you can use the run_tests.sh script which will create a venv and
 run the unit tests. There are also the py26, py27, or py33 tox jobs which will
@@ -124,10 +124,10 @@ Python 2.6
 ----------
 
 Starting in the kilo release the OpenStack services dropped all support for
-python 2.6. This change has been mirrored in tempest, starting after the
-tempest-2 tag. This means that proposed changes to tempest which only fix
+python 2.6. This change has been mirrored in Tempest, starting after the
+tempest-2 tag. This means that proposed changes to Tempest which only fix
 python 2.6 compatibility will be rejected, and moving forward more features not
-present in python 2.6 will be used. If you're running you're OpenStack services
-on an earlier release with python 2.6 you can easily run tempest against it
+present in python 2.6 will be used. If you're running your OpenStack services
+on an earlier release with python 2.6 you can easily run Tempest against it
 from a remote system running python 2.7. (or deploy a cloud guest in your cloud
 that has python 2.7)

@@ -91,15 +91,16 @@ create_image = {
     'status_code': [202],
     'response_header': {
         'type': 'object',
-        'properties': {
-            'location': {
-                'type': 'string',
-                'format': 'uri'
-            }
-        },
-        'required': ['location']
+        'properties': parameter_types.response_header
     }
 }
+create_image['response_header']['properties'].update(
+    {'location': {
+        'type': 'string',
+        'format': 'uri'}
+     }
+)
+create_image['response_header']['required'] = ['location']
 
 delete = {
     'status_code': [204]

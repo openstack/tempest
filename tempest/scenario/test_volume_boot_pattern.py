@@ -119,7 +119,7 @@ class TestVolumeBootPattern(manager.ScenarioTest):
         return ssh_client.exec_command('cat /tmp/text')
 
     def _write_text(self, ssh_client):
-        text = data_utils.rand_name('text-')
+        text = data_utils.rand_name('text')
         ssh_client.exec_command('echo "%s" > /tmp/text; sync' % (text))
 
         return self._get_content(ssh_client)

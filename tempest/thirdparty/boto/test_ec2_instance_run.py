@@ -51,8 +51,8 @@ class InstanceRunTest(boto_test.BotoTestCase):
         aki_manifest = CONF.boto.aki_manifest
         ari_manifest = CONF.boto.ari_manifest
         cls.instance_type = CONF.boto.instance_type
-        cls.bucket_name = data_utils.rand_name("s3bucket-")
-        cls.keypair_name = data_utils.rand_name("keypair-")
+        cls.bucket_name = data_utils.rand_name("s3bucket")
+        cls.keypair_name = data_utils.rand_name("keypair")
         cls.keypair = cls.ec2_client.create_key_pair(cls.keypair_name)
         cls.addResourceCleanUp(cls.ec2_client.delete_key_pair,
                                cls.keypair_name)
@@ -62,13 +62,13 @@ class InstanceRunTest(boto_test.BotoTestCase):
                                cls.bucket_name)
         s3.s3_upload_dir(bucket, cls.materials_path)
         cls.images = {"ami":
-                      {"name": data_utils.rand_name("ami-name-"),
+                      {"name": data_utils.rand_name("ami-name"),
                        "location": cls.bucket_name + "/" + ami_manifest},
                       "aki":
-                      {"name": data_utils.rand_name("aki-name-"),
+                      {"name": data_utils.rand_name("aki-name"),
                        "location": cls.bucket_name + "/" + aki_manifest},
                       "ari":
-                      {"name": data_utils.rand_name("ari-name-"),
+                      {"name": data_utils.rand_name("ari-name"),
                        "location": cls.bucket_name + "/" + ari_manifest}}
         for image in cls.images.itervalues():
             image["image_id"] = cls.ec2_client.register_image(
@@ -221,7 +221,7 @@ class InstanceRunTest(boto_test.BotoTestCase):
     def test_compute_with_volumes(self):
         # EC2 1. integration test (not strict)
         image_ami = self.ec2_client.get_image(self.images["ami"]["image_id"])
-        sec_group_name = data_utils.rand_name("securitygroup-")
+        sec_group_name = data_utils.rand_name("securitygroup")
         group_desc = sec_group_name + " security group description "
         security_group = self.ec2_client.create_security_group(sec_group_name,
                                                                group_desc)
@@ -275,7 +275,7 @@ class InstanceRunTest(boto_test.BotoTestCase):
         ssh = remote_client.RemoteClient(address.public_ip,
                                          CONF.compute.ssh_user,
                                          pkey=self.keypair.material)
-        text = data_utils.rand_name("Pattern text for console output -")
+        text = data_utils.rand_name("Pattern text for console output")
         resp = ssh.write_to_console(text)
         self.assertFalse(resp)
 

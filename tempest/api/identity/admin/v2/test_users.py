@@ -25,8 +25,8 @@ class UsersTestJSON(base.BaseIdentityV2AdminTest):
     @classmethod
     def resource_setup(cls):
         super(UsersTestJSON, cls).resource_setup()
-        cls.alt_user = data_utils.rand_name('test_user_')
-        cls.alt_password = data_utils.rand_name('pass_')
+        cls.alt_user = data_utils.rand_name('test_user')
+        cls.alt_password = data_utils.rand_name('pass')
         cls.alt_email = cls.alt_user + '@testmail.tm'
 
     @test.attr(type='smoke')
@@ -45,7 +45,7 @@ class UsersTestJSON(base.BaseIdentityV2AdminTest):
     def test_create_user_with_enabled(self):
         # Create a user with enabled : False
         self.data.setup_test_tenant()
-        name = data_utils.rand_name('test_user_')
+        name = data_utils.rand_name('test_user')
         user = self.client.create_user(name, self.alt_password,
                                        self.data.tenant['id'],
                                        self.alt_email, enabled=False)
@@ -58,7 +58,7 @@ class UsersTestJSON(base.BaseIdentityV2AdminTest):
     @test.idempotent_id('39d05857-e8a5-4ed4-ba83-0b52d3ab97ee')
     def test_update_user(self):
         # Test case to check if updating of user attributes is successful.
-        test_user = data_utils.rand_name('test_user_')
+        test_user = data_utils.rand_name('test_user')
         self.data.setup_test_tenant()
         user = self.client.create_user(test_user, self.alt_password,
                                        self.data.tenant['id'],
@@ -66,7 +66,7 @@ class UsersTestJSON(base.BaseIdentityV2AdminTest):
         # Delete the User at the end of this method
         self.addCleanup(self.client.delete_user, user['id'])
         # Updating user details with new values
-        u_name2 = data_utils.rand_name('user2-')
+        u_name2 = data_utils.rand_name('user2')
         u_email2 = u_name2 + '@testmail.tm'
         update_user = self.client.update_user(user['id'], name=u_name2,
                                               email=u_email2,
@@ -85,7 +85,7 @@ class UsersTestJSON(base.BaseIdentityV2AdminTest):
     @test.idempotent_id('29ed26f4-a74e-4425-9a85-fdb49fa269d2')
     def test_delete_user(self):
         # Delete a user
-        test_user = data_utils.rand_name('test_user_')
+        test_user = data_utils.rand_name('test_user')
         self.data.setup_test_tenant()
         user = self.client.create_user(test_user, self.alt_password,
                                        self.data.tenant['id'],
@@ -139,14 +139,14 @@ class UsersTestJSON(base.BaseIdentityV2AdminTest):
         self.data.setup_test_tenant()
         user_ids = list()
         fetched_user_ids = list()
-        alt_tenant_user1 = data_utils.rand_name('tenant_user1_')
+        alt_tenant_user1 = data_utils.rand_name('tenant_user1')
         user1 = self.client.create_user(alt_tenant_user1, 'password1',
                                         self.data.tenant['id'],
                                         'user1@123')
         user_ids.append(user1['id'])
         self.data.users.append(user1)
 
-        alt_tenant_user2 = data_utils.rand_name('tenant_user2_')
+        alt_tenant_user2 = data_utils.rand_name('tenant_user2')
         user2 = self.client.create_user(alt_tenant_user2, 'password2',
                                         self.data.tenant['id'],
                                         'user2@123')
@@ -179,7 +179,7 @@ class UsersTestJSON(base.BaseIdentityV2AdminTest):
         role = self.client.assign_user_role(tenant['id'], user['id'],
                                             role['id'])
 
-        alt_user2 = data_utils.rand_name('second_user_')
+        alt_user2 = data_utils.rand_name('second_user')
         second_user = self.client.create_user(alt_user2, 'password1',
                                               self.data.tenant['id'],
                                               'user2@123')
@@ -205,7 +205,7 @@ class UsersTestJSON(base.BaseIdentityV2AdminTest):
         # Test case to check if updating of user password is successful.
         self.data.setup_test_user()
         # Updating the user with new password
-        new_pass = data_utils.rand_name('pass-')
+        new_pass = data_utils.rand_name('pass')
         update_user = self.client.update_user_password(
             self.data.user['id'], new_pass)
         self.assertEqual(update_user['id'], self.data.user['id'])
