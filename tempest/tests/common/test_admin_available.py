@@ -52,6 +52,8 @@ class TestAdminAvailable(base.TestCase):
             self.useFixture(mockpatch.Patch(
                 'tempest.common.accounts.read_accounts_yaml',
                 return_value=accounts))
+            cfg.CONF.set_default('test_accounts_file',
+                                 use_accounts_file, group='auth')
             self.useFixture(mockpatch.Patch('os.path.isfile',
                                             return_value=True))
         else:
