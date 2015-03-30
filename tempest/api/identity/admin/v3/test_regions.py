@@ -32,7 +32,7 @@ class RegionsTestJSON(base.BaseIdentityV3AdminTest):
         super(RegionsTestJSON, cls).resource_setup()
         cls.setup_regions = list()
         for i in range(2):
-            r_description = data_utils.rand_name('description-')
+            r_description = data_utils.rand_name('description')
             region = cls.client.create_region(r_description)
             cls.setup_regions.append(region)
 
@@ -50,7 +50,7 @@ class RegionsTestJSON(base.BaseIdentityV3AdminTest):
     @test.attr(type='gate')
     @test.idempotent_id('56186092-82e4-43f2-b954-91013218ba42')
     def test_create_update_get_delete_region(self):
-        r_description = data_utils.rand_name('description-')
+        r_description = data_utils.rand_name('description')
         region = self.client.create_region(
             r_description, parent_region_id=self.setup_regions[0]['id'])
         self.addCleanup(self._delete_region, region['id'])
@@ -58,7 +58,7 @@ class RegionsTestJSON(base.BaseIdentityV3AdminTest):
         self.assertEqual(self.setup_regions[0]['id'],
                          region['parent_region_id'])
         # Update region with new description and parent ID
-        r_alt_description = data_utils.rand_name('description-')
+        r_alt_description = data_utils.rand_name('description')
         region = self.client.update_region(
             region['id'],
             description=r_alt_description,
@@ -77,7 +77,7 @@ class RegionsTestJSON(base.BaseIdentityV3AdminTest):
     def test_create_region_with_specific_id(self):
         # Create a region with a specific id
         r_region_id = data_utils.rand_uuid()
-        r_description = data_utils.rand_name('description-')
+        r_description = data_utils.rand_name('description')
         region = self.client.create_region(
             r_description, unique_region_id=r_region_id)
         self.addCleanup(self._delete_region, region['id'])
