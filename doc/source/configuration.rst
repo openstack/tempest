@@ -84,13 +84,11 @@ in your cloud you might face unexpected failures.
 
 To enable and use locking test accounts you need do a few things:
 
- #. Enable the locking test account provider with the
-    locking_credentials_provider option in the auth section
  #. Create a accounts.yaml file which contains the set of pre-existing
     credentials to use for testing. To make sure you don't have a credentials
     starvation issue when running in parallel make sure you have at least 2
-    times the number of parallel workers you are using to execute tempest
-    available in the file.
+    times the number of worker processes you are using to execute tempest
+    available in the file. (if running serially the worker count is 1)
 
     You can check the sample file packaged in tempest for the yaml format
  #. Provide tempest with the location of you accounts.yaml file with the
@@ -125,15 +123,3 @@ The only restriction with using the traditional config options for credentials
 is that if a test requires specific roles on accounts these tests can not be
 run. This is because the config options do not give sufficient flexibility to
 describe the roles assigned to a user for running the tests.
-
-You also can use the accounts.yaml file to specify the credentials used for
-testing. This will just allocate them serially so you only need to provide
-a pair of credentials. Do note that all the restrictions associated with
-locking test accounts applies to using the accounts.yaml file this way too,
-except since you can't run in parallel only 2 of each type of credential is
-required to run. However, the limitation on tests which require specific roles
-does not apply here.
-
-The procedure for doing this is very similar to with the locking accounts
-provider just don't set the locking_credentials_provider to true and you
-only should need a single pair of credentials.

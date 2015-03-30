@@ -35,9 +35,14 @@ auth_group = cfg.OptGroup(name='auth',
 
 AuthGroup = [
     cfg.StrOpt('test_accounts_file',
-               default='etc/accounts.yaml',
                help="Path to the yaml file that contains the list of "
-                    "credentials to use for running tests"),
+                    "credentials to use for running tests. If used when "
+                    "running in parallel you have to make sure sufficient "
+                    "credentials are provided in the accounts file. For "
+                    "example if no tests with roles are being run it requires "
+                    "at least `2 * CONC` distinct accounts configured in "
+                    " the `test_accounts_file`, with CONC == the "
+                    "number of concurrent test processes."),
     cfg.BoolOpt('allow_tenant_isolation',
                 default=True,
                 help="Allows test cases to create/destroy tenants and "
@@ -49,15 +54,6 @@ AuthGroup = [
                                                    group='compute'),
                                  cfg.DeprecatedOpt('allow_tenant_isolation',
                                                    group='orchestration')]),
-    cfg.BoolOpt('locking_credentials_provider',
-                default=False,
-                help="If set to True it enables the Accounts provider, "
-                     "which locks credentials to allow for parallel execution "
-                     "with pre-provisioned accounts. It can only be used to "
-                     "run tests that ensure credentials cleanup happens. "
-                     "It requires at least `2 * CONC` distinct accounts "
-                     "configured in `test_accounts_file`, with CONC == the "
-                     "number of concurrent test processes."),
     cfg.ListOpt('tempest_roles',
                 help="Roles to assign to all users created by tempest",
                 default=[]),

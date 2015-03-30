@@ -94,8 +94,12 @@
 #
 
 # Path to the yaml file that contains the list of credentials to use
-# for running tests (string value)
-#test_accounts_file = etc/accounts.yaml
+# for running tests. If used when running in parallel you have to make
+# sure sufficient credentials are provided in the accounts file. For
+# example if no tests with roles are being run it requires at least `2
+# * CONC` distinct accounts configured in  the `test_accounts_file`,
+# with CONC == the number of concurrent test processes. (string value)
+#test_accounts_file = <None>
 
 # Allows test cases to create/destroy tenants and users. This option
 # requires that OpenStack Identity API admin credentials are known. If
@@ -104,14 +108,6 @@
 # Deprecated group/name - [compute]/allow_tenant_isolation
 # Deprecated group/name - [orchestration]/allow_tenant_isolation
 #allow_tenant_isolation = true
-
-# If set to True it enables the Accounts provider, which locks
-# credentials to allow for parallel execution with pre-provisioned
-# accounts. It can only be used to run tests that ensure credentials
-# cleanup happens. It requires at least `2 * CONC` distinct accounts
-# configured in `test_accounts_file`, with CONC == the number of
-# concurrent test processes. (boolean value)
-#locking_credentials_provider = false
 
 # Roles to assign to all users created by tempest (list value)
 #tempest_roles =

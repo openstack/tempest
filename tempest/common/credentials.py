@@ -38,7 +38,7 @@ def get_isolated_credentials(name, network_resources=None,
             network_resources=network_resources,
             identity_version=identity_version)
     else:
-        if CONF.auth.locking_credentials_provider:
+        if os.path.isfile(CONF.auth.test_accounts_file):
             # Most params are not relevant for pre-created accounts
             return accounts.Accounts(name=name,
                                      identity_version=identity_version)
