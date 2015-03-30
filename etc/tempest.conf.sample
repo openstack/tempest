@@ -395,7 +395,8 @@
 #block_migration_for_live_migration = false
 
 # Does the test environment block migration support cinder iSCSI
-# volumes (boolean value)
+# volumes. Note, libvirt doesn't support this, see
+# https://bugs.launchpad.net/nova/+bug/1398999 (boolean value)
 #block_migrate_cinder_iscsi = false
 
 # Enable VNC console. This configuration value should be same as
