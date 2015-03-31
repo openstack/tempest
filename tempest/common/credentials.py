@@ -38,7 +38,8 @@ def get_isolated_credentials(name, network_resources=None,
             network_resources=network_resources,
             identity_version=identity_version)
     else:
-        if os.path.isfile(CONF.auth.test_accounts_file):
+        if (CONF.auth.test_accounts_file and
+                os.path.isfile(CONF.auth.test_accounts_file)):
             # Most params are not relevant for pre-created accounts
             return accounts.Accounts(name=name,
                                      identity_version=identity_version)
@@ -56,7 +57,8 @@ def is_admin_available():
     if CONF.auth.allow_tenant_isolation:
         return is_admin
     # Check whether test accounts file has the admin specified or not
-    elif os.path.isfile(CONF.auth.test_accounts_file):
+    elif (CONF.auth.test_accounts_file and
+            os.path.isfile(CONF.auth.test_accounts_file)):
         check_accounts = accounts.Accounts(name='check_admin')
         if not check_accounts.admin_available():
             is_admin = False
