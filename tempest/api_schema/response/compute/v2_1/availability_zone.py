@@ -14,8 +14,6 @@
 
 import copy
 
-from tempest.api_schema.response.compute import availability_zone as common
-
 
 base = {
     'status_code': [200],
@@ -47,8 +45,30 @@ base = {
     }
 }
 
-get_availability_zone_list = copy.deepcopy(base)
+detail = {
+    'type': 'object',
+    'patternProperties': {
+        # NOTE: Here is for a hostname
+        '^[a-zA-Z0-9-_.]+$': {
+            'type': 'object',
+            'patternProperties': {
+                # NOTE: Here is for a service name
+                '^.*$': {
+                    'type': 'object',
+                    'properties': {
+                        'available': {'type': 'boolean'},
+                        'active': {'type': 'boolean'},
+                        'updated_at': {'type': ['string', 'null']}
+                    },
+                    'required': ['available', 'active', 'updated_at']
+                }
+            }
+        }
+    }
+}
 
-get_availability_zone_list_detail = copy.deepcopy(base)
-get_availability_zone_list_detail['response_body']['properties'][
-    'availabilityZoneInfo']['items']['properties']['hosts'] = common.detail
+list_availability_zone_list = copy.deepcopy(base)
+
+list_availability_zone_list_detail = copy.deepcopy(base)
+list_availability_zone_list_detail['response_body']['properties'][
+    'availabilityZoneInfo']['items']['properties']['hosts'] = detail

@@ -67,7 +67,7 @@ class TestAccount(base.TestCase):
         self.useFixture(mockpatch.Patch(
             'tempest.common.accounts.read_accounts_yaml',
             return_value=self.test_accounts))
-        cfg.CONF.set_default('test_accounts_file', '', group='auth')
+        cfg.CONF.set_default('test_accounts_file', 'fake_path', group='auth')
         self.useFixture(mockpatch.Patch('os.path.isfile', return_value=True))
 
     def _get_hash_list(self, accounts_list):
@@ -297,12 +297,8 @@ class TestNotLockingAccount(base.TestCase):
         cfg.CONF.set_default('test_accounts_file', '', group='auth')
         self.useFixture(mockpatch.Patch('os.path.isfile', return_value=True))
 
-    def test_get_creds(self):
+    def test_get_creds_roles_nonlocking_invalid(self):
         test_accounts_class = accounts.NotLockingAccounts('v2', 'test_name')
-        for i in xrange(len(self.test_accounts)):
-            creds = test_accounts_class.get_creds(i)
-            msg = "Empty credentials returned for ID %s" % str(i)
-            self.assertIsNotNone(creds, msg)
         self.assertRaises(exceptions.InvalidConfiguration,
-                          test_accounts_class.get_creds,
-                          id=len(self.test_accounts))
+                          test_accounts_class.get_creds_by_roles,
+                          ['fake_role'])
