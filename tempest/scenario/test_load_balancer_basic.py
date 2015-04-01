@@ -185,7 +185,7 @@ class TestLoadBalancerBasic(manager.NetworkScenarioTest):
             # Start netcat
             start_server = ('while true; do '
                             'sudo nc -ll -p %(port)s -e sh /tmp/%(script)s; '
-                            'done &')
+                            'done > /dev/null &')
             cmd = start_server % {'port': self.port1,
                                   'script': 'script1'}
             ssh_client.exec_command(cmd)
