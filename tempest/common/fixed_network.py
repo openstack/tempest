@@ -15,6 +15,7 @@ from oslo_log import log as logging
 
 from tempest_lib import exceptions as lib_exc
 
+from tempest.common import isolated_creds
 from tempest import config
 from tempest import exceptions
 
@@ -38,7 +39,7 @@ def get_tenant_network(creds_provider, compute_networks_client):
     network = None
     # NOTE(andreaf) get_primary_network will always be available once
     # bp test-accounts-continued is implemented
-    if (CONF.auth.allow_tenant_isolation and
+    if (isinstance(creds_provider, isolated_creds.IsolatedCreds) and
         (CONF.service_available.neutron and
          not CONF.service_available.ironic)):
         network = creds_provider.get_primary_network()
