@@ -213,6 +213,14 @@ ComputeGroup = [
                default=120,
                help="Timeout in seconds to wait for ping to "
                     "succeed."),
+    cfg.IntOpt('ping_size',
+               default=56,
+               help="The packet size for ping packets originating "
+                    "from remote linux hosts"),
+    cfg.IntOpt('ping_count',
+               default=1,
+               help="The number of ping packets originating from remote "
+                    "linux hosts"),
     cfg.IntOpt('ssh_timeout',
                default=300,
                help="Timeout in seconds to wait for authentication to "
@@ -894,7 +902,17 @@ ScenarioGroup = [
                choices=["udhcpc", "dhclient"],
                help='DHCP client used by images to renew DCHP lease. '
                     'If left empty, update operation will be skipped. '
-                    'Supported clients: "udhcpc", "dhclient"')
+                    'Supported clients: "udhcpc", "dhclient"'),
+    cfg.ListOpt('test_packet_sizes',
+                default=['56', '1456'],
+                help='A list of ICMP packet sizes used during testing'),
+    cfg.IntOpt('test_packet_count',
+               default=1,
+               help='The number of packets to send for each packet size'),
+    cfg.IntOpt('max_instances_per_tenant',
+               default=9,
+               help='The maximum number of instances for one tenant'),
+
 ]
 
 

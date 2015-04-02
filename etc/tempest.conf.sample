@@ -285,6 +285,14 @@
 # Timeout in seconds to wait for ping to succeed. (integer value)
 #ping_timeout = 120
 
+# The packet size for ping packets originating from remote linux hosts
+# (integer value)
+#ping_size = 56
+
+# The number of ping packets originating from remote linux hosts
+# (integer value)
+#ping_count = 1
+
 # Timeout in seconds to wait for authentication to succeed. (integer
 # value)
 #ssh_timeout = 300
@@ -953,6 +961,15 @@
 # "dhclient" (string value)
 # Allowed values: udhcpc, dhclient
 #dhcp_client = udhcpc
+
+# A list of ICMP packet sizes used during testing (list value)
+#test_packet_sizes = 56,1456
+
+# The number of packets to send for each packet size (integer value)
+#test_packet_count = 1
+
+# The maximum number of instances for one tenant (integer value)
+#max_instances_per_tenant = 9
 
 
 [service_available]
