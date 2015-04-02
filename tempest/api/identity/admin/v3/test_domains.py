@@ -35,8 +35,8 @@ class DomainsTestJSON(base.BaseIdentityV3AdminTest):
         fetched_ids = list()
         for _ in range(3):
             domain = self.client.create_domain(
-                data_utils.rand_name('domain-'),
-                description=data_utils.rand_name('domain-desc-'))
+                data_utils.rand_name('domain'),
+                description=data_utils.rand_name('domain-desc'))
             # Delete the domain at the end of this method
             self.addCleanup(self._delete_domain, domain['id'])
             domain_ids.append(domain['id'])
@@ -50,8 +50,8 @@ class DomainsTestJSON(base.BaseIdentityV3AdminTest):
     @test.attr(type='smoke')
     @test.idempotent_id('f2f5b44a-82e8-4dad-8084-0661ea3b18cf')
     def test_create_update_delete_domain(self):
-        d_name = data_utils.rand_name('domain-')
-        d_desc = data_utils.rand_name('domain-desc-')
+        d_name = data_utils.rand_name('domain')
+        d_desc = data_utils.rand_name('domain-desc')
         domain = self.client.create_domain(
             d_name, description=d_desc)
         self.addCleanup(self._delete_domain, domain['id'])
@@ -64,8 +64,8 @@ class DomainsTestJSON(base.BaseIdentityV3AdminTest):
         self.assertEqual(d_name, domain['name'])
         self.assertEqual(d_desc, domain['description'])
         self.assertEqual(True, domain['enabled'])
-        new_desc = data_utils.rand_name('new-desc-')
-        new_name = data_utils.rand_name('new-name-')
+        new_desc = data_utils.rand_name('new-desc')
+        new_name = data_utils.rand_name('new-name')
 
         updated_domain = self.client.update_domain(
             domain['id'], name=new_name, description=new_desc)
@@ -88,8 +88,8 @@ class DomainsTestJSON(base.BaseIdentityV3AdminTest):
     @test.idempotent_id('036df86e-bb5d-42c0-a7c2-66b9db3a6046')
     def test_create_domain_with_disabled_status(self):
         # Create domain with enabled status as false
-        d_name = data_utils.rand_name('domain-')
-        d_desc = data_utils.rand_name('domain-desc-')
+        d_name = data_utils.rand_name('domain')
+        d_desc = data_utils.rand_name('domain-desc')
         domain = self.client.create_domain(
             d_name, description=d_desc, enabled=False)
         self.addCleanup(self.client.delete_domain, domain['id'])

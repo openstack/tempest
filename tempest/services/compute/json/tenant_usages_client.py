@@ -16,7 +16,7 @@
 import json
 import urllib
 
-from tempest.api_schema.response.compute.v2 import tenant_usages as schema
+from tempest.api_schema.response.compute.v2_1 import tenant_usages as schema
 from tempest.common import service_client
 
 

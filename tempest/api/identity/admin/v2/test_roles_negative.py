@@ -58,7 +58,7 @@ class RolesNegativeTestJSON(base.BaseIdentityV2AdminTest):
     @test.idempotent_id('585c8998-a8a4-4641-a5dd-abef7a8ced00')
     def test_create_role_by_unauthorized_user(self):
         # Non-administrator user should not be able to create role
-        role_name = data_utils.rand_name(name='role-')
+        role_name = data_utils.rand_name(name='role')
         self.assertRaises(lib_exc.Forbidden,
                           self.non_admin_client.create_role, role_name)
 
@@ -68,7 +68,7 @@ class RolesNegativeTestJSON(base.BaseIdentityV2AdminTest):
         # Request to create role without a valid token should fail
         token = self.client.auth_provider.get_token()
         self.client.delete_token(token)
-        role_name = data_utils.rand_name(name='role-')
+        role_name = data_utils.rand_name(name='role')
         self.assertRaises(lib_exc.Unauthorized,
                           self.client.create_role, role_name)
         self.client.auth_provider.clear_auth()
@@ -77,7 +77,7 @@ class RolesNegativeTestJSON(base.BaseIdentityV2AdminTest):
     @test.idempotent_id('c0cde2c8-81c1-4bb0-8fe2-cf615a3547a8')
     def test_role_create_duplicate(self):
         # Role names should be unique
-        role_name = data_utils.rand_name(name='role-dup-')
+        role_name = data_utils.rand_name(name='role-dup')
         body = self.client.create_role(role_name)
         role1_id = body.get('id')
         self.addCleanup(self.client.delete_role, role1_id)
@@ -88,7 +88,7 @@ class RolesNegativeTestJSON(base.BaseIdentityV2AdminTest):
     @test.idempotent_id('15347635-b5b1-4a87-a280-deb2bd6d865e')
     def test_delete_role_by_unauthorized_user(self):
         # Non-administrator user should not be able to delete role
-        role_name = data_utils.rand_name(name='role-')
+        role_name = data_utils.rand_name(name='role')
         body = self.client.create_role(role_name)
         self.data.roles.append(body)
         role_id = body.get('id')
@@ -99,7 +99,7 @@ class RolesNegativeTestJSON(base.BaseIdentityV2AdminTest):
     @test.idempotent_id('44b60b20-70de-4dac-beaf-a3fc2650a16b')
     def test_delete_role_request_without_token(self):
         # Request to delete role without a valid token should fail
-        role_name = data_utils.rand_name(name='role-')
+        role_name = data_utils.rand_name(name='role')
         body = self.client.create_role(role_name)
         self.data.roles.append(body)
         role_id = body.get('id')

@@ -16,7 +16,7 @@ import json
 import urllib
 
 from tempest.api_schema.response.compute import hosts as schema
-from tempest.api_schema.response.compute.v2 import hosts as v2_schema
+from tempest.api_schema.response.compute.v2_1 import hosts as v2_schema
 from tempest.common import service_client
 
 

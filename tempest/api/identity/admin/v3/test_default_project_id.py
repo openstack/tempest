@@ -76,7 +76,7 @@ class TestDefaultProjectId (base.BaseIdentityV3AdminTest):
         # create a new client with user's credentials (NOTE: unscoped token!)
         creds = auth.KeystoneV3Credentials(username=user_name,
                                            password=user_name,
-                                           domain_name=dom_name)
+                                           user_domain_name=dom_name)
         auth_provider = manager.get_auth_provider(creds)
         creds = auth_provider.fill_credentials()
         admin_client = clients.Manager(credentials=creds)

@@ -25,8 +25,8 @@ class ProjectsTestJSON(base.BaseIdentityV3AdminTest):
     @test.idempotent_id('0ecf465c-0dc4-4532-ab53-91ffeb74d12d')
     def test_project_create_with_description(self):
         # Create project with a description
-        project_name = data_utils.rand_name('project-')
-        project_desc = data_utils.rand_name('desc-')
+        project_name = data_utils.rand_name('project')
+        project_desc = data_utils.rand_name('desc')
         project = self.client.create_project(
             project_name, description=project_desc)
         self.data.projects.append(project)
@@ -59,7 +59,7 @@ class ProjectsTestJSON(base.BaseIdentityV3AdminTest):
     @test.idempotent_id('1f66dc76-50cc-4741-a200-af984509e480')
     def test_project_create_enabled(self):
         # Create a project that is enabled
-        project_name = data_utils.rand_name('project-')
+        project_name = data_utils.rand_name('project')
         project = self.client.create_project(
             project_name, enabled=True)
         self.data.projects.append(project)
@@ -74,7 +74,7 @@ class ProjectsTestJSON(base.BaseIdentityV3AdminTest):
     @test.idempotent_id('78f96a9c-e0e0-4ee6-a3ba-fbf6dfd03207')
     def test_project_create_not_enabled(self):
         # Create a project that is not enabled
-        project_name = data_utils.rand_name('project-')
+        project_name = data_utils.rand_name('project')
         project = self.client.create_project(
             project_name, enabled=False)
         self.data.projects.append(project)
@@ -90,13 +90,13 @@ class ProjectsTestJSON(base.BaseIdentityV3AdminTest):
     @test.idempotent_id('f608f368-048c-496b-ad63-d286c26dab6b')
     def test_project_update_name(self):
         # Update name attribute of a project
-        p_name1 = data_utils.rand_name('project-')
+        p_name1 = data_utils.rand_name('project')
         project = self.client.create_project(p_name1)
         self.data.projects.append(project)
 
         resp1_name = project['name']
 
-        p_name2 = data_utils.rand_name('project2-')
+        p_name2 = data_utils.rand_name('project2')
         body = self.client.update_project(project['id'], name=p_name2)
         resp2_name = body['name']
         self.assertNotEqual(resp1_name, resp2_name)
@@ -112,14 +112,14 @@ class ProjectsTestJSON(base.BaseIdentityV3AdminTest):
     @test.idempotent_id('f138b715-255e-4a7d-871d-351e1ef2e153')
     def test_project_update_desc(self):
         # Update description attribute of a project
-        p_name = data_utils.rand_name('project-')
-        p_desc = data_utils.rand_name('desc-')
+        p_name = data_utils.rand_name('project')
+        p_desc = data_utils.rand_name('desc')
         project = self.client.create_project(
             p_name, description=p_desc)
         self.data.projects.append(project)
         resp1_desc = project['description']
 
-        p_desc2 = data_utils.rand_name('desc2-')
+        p_desc2 = data_utils.rand_name('desc2')
         body = self.client.update_project(
             project['id'], description=p_desc2)
         resp2_desc = body['description']
@@ -136,7 +136,7 @@ class ProjectsTestJSON(base.BaseIdentityV3AdminTest):
     @test.idempotent_id('b6b25683-c97f-474d-a595-55d410b68100')
     def test_project_update_enable(self):
         # Update the enabled attribute of a project
-        p_name = data_utils.rand_name('project-')
+        p_name = data_utils.rand_name('project')
         p_en = False
         project = self.client.create_project(p_name, enabled=p_en)
         self.data.projects.append(project)
@@ -161,15 +161,15 @@ class ProjectsTestJSON(base.BaseIdentityV3AdminTest):
     def test_associate_user_to_project(self):
         # Associate a user to a project
         # Create a Project
-        p_name = data_utils.rand_name('project-')
+        p_name = data_utils.rand_name('project')
         project = self.client.create_project(p_name)
         self.data.projects.append(project)
 
         # Create a User
-        u_name = data_utils.rand_name('user-')
+        u_name = data_utils.rand_name('user')
         u_desc = u_name + 'description'
         u_email = u_name + '@testmail.tm'
-        u_password = data_utils.rand_name('pass-')
+        u_password = data_utils.rand_name('pass')
         user = self.client.create_user(
             u_name, description=u_desc, password=u_password,
             email=u_email, project_id=project['id'])

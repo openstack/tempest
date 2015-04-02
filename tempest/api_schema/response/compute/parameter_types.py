@@ -65,3 +65,17 @@ addresses = {
         }
     }
 }
+
+response_header = {
+    'connection': {'type': 'string'},
+    'content-length': {'type': 'string'},
+    'content-type': {'type': 'string'},
+    'status': {'type': 'string'},
+    'x-compute-request-id': {'type': 'string'},
+    'vary': {'type': 'string'},
+    'x-openstack-nova-api-version': {'type': 'string'},
+    'date': {
+        'type': 'string',
+        'format': 'data-time'
+    }
+}

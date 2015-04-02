@@ -28,7 +28,6 @@ CONF = config.CONF
 
 
 class PortsTestJSON(sec_base.BaseSecGroupTest):
-
     """
     Test the following operations for ports:
 
@@ -315,13 +314,17 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
 class PortsAdminExtendedAttrsTestJSON(base.BaseAdminNetworkTest):
 
     @classmethod
+    def setup_clients(cls):
+        super(PortsAdminExtendedAttrsTestJSON, cls).setup_clients()
+        cls.identity_client = cls.os_adm.identity_client
+
+    @classmethod
     def resource_setup(cls):
         super(PortsAdminExtendedAttrsTestJSON, cls).resource_setup()
-        cls.identity_client = cls._get_identity_admin_client()
-        cls.tenant = cls.identity_client.get_tenant_by_name(
-            CONF.identity.tenant_name)
         cls.network = cls.create_network()
         cls.host_id = socket.gethostname()
+        cls.tenant = cls.identity_client.get_tenant_by_name(
+            CONF.identity.tenant_name)
 
     @test.attr(type='smoke')
     @test.idempotent_id('8e8569c1-9ac7-44db-8bc1-f5fb2814f29b')

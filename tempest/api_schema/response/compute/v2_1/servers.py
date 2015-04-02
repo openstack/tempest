@@ -335,7 +335,11 @@ list_servers_detail['response_body']['properties']['servers']['items'][
     'items']['properties'].update({
         'OS-EXT-IPS:type': {'type': 'string'},
         'OS-EXT-IPS-MAC:mac_addr': parameter_types.mac_address})
-
+# Defining 'servers_links' attributes for V2 server schema
+list_servers_detail['response_body'][
+    'properties'].update({'servers_links': parameter_types.links})
+# NOTE(gmann): servers_links attribute is not necessary to be
+# present always So it is not 'required'.
 
 rebuild_server = copy.deepcopy(update_server)
 rebuild_server['status_code'] = [202]

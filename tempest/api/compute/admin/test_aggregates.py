@@ -37,8 +37,8 @@ class AggregatesAdminTestJSON(base.BaseV2ComputeAdminTest):
     @classmethod
     def resource_setup(cls):
         super(AggregatesAdminTestJSON, cls).resource_setup()
-        cls.aggregate_name_prefix = 'test_aggregate_'
-        cls.az_name_prefix = 'test_az_'
+        cls.aggregate_name_prefix = 'test_aggregate'
+        cls.az_name_prefix = 'test_az'
 
         hosts_all = cls.os_adm.hosts_client.list_hosts()
         hosts = map(lambda x: x['host_name'],
@@ -215,7 +215,7 @@ class AggregatesAdminTestJSON(base.BaseV2ComputeAdminTest):
         self.addCleanup(self.client.delete_aggregate, aggregate['id'])
         self.client.add_host(aggregate['id'], self.host)
         self.addCleanup(self.client.remove_host, aggregate['id'], self.host)
-        server_name = data_utils.rand_name('test_server_')
+        server_name = data_utils.rand_name('test_server')
         admin_servers_client = self.os_adm.servers_client
         server = self.create_test_server(name=server_name,
                                          availability_zone=az_name,

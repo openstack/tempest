@@ -40,7 +40,7 @@ class EC2KeysTest(boto_test.BotoTestCase):
     @test.idempotent_id('54236804-01b7-4cfe-a6f9-bce1340feec8')
     def test_create_ec2_keypair(self):
         # EC2 create KeyPair
-        key_name = data_utils.rand_name("keypair-")
+        key_name = data_utils.rand_name("keypair")
         self.addResourceCleanUp(self.client.delete_key_pair, key_name)
         keypair = self.client.create_key_pair(key_name)
         self.assertTrue(compare_key_pairs(keypair,
@@ -49,7 +49,7 @@ class EC2KeysTest(boto_test.BotoTestCase):
     @test.idempotent_id('3283b898-f90c-4952-b238-3e42b8c3f34f')
     def test_delete_ec2_keypair(self):
         # EC2 delete KeyPair
-        key_name = data_utils.rand_name("keypair-")
+        key_name = data_utils.rand_name("keypair")
         self.client.create_key_pair(key_name)
         self.client.delete_key_pair(key_name)
         self.assertIsNone(self.client.get_key_pair(key_name))
@@ -57,7 +57,7 @@ class EC2KeysTest(boto_test.BotoTestCase):
     @test.idempotent_id('fd89bd26-4d4d-4cf3-a303-65dd9158fcdc')
     def test_get_ec2_keypair(self):
         # EC2 get KeyPair
-        key_name = data_utils.rand_name("keypair-")
+        key_name = data_utils.rand_name("keypair")
         self.addResourceCleanUp(self.client.delete_key_pair, key_name)
         keypair = self.client.create_key_pair(key_name)
         self.assertTrue(compare_key_pairs(keypair,
@@ -66,7 +66,7 @@ class EC2KeysTest(boto_test.BotoTestCase):
     @test.idempotent_id('daa73da1-e11c-4558-8d76-a716be79a401')
     def test_duplicate_ec2_keypair(self):
         # EC2 duplicate KeyPair
-        key_name = data_utils.rand_name("keypair-")
+        key_name = data_utils.rand_name("keypair")
         self.addResourceCleanUp(self.client.delete_key_pair, key_name)
         keypair = self.client.create_key_pair(key_name)
         self.assertBotoError(self.ec.client.InvalidKeyPair.Duplicate,

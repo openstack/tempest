@@ -36,7 +36,7 @@ class TestChassis(base.BaseBaremetalTest):
     @test.attr(type='smoke')
     @test.idempotent_id('7c5a2e09-699c-44be-89ed-2bc189992d42')
     def test_create_chassis(self):
-        descr = data_utils.rand_name('test-chassis-')
+        descr = data_utils.rand_name('test-chassis')
         _, chassis = self.create_chassis(description=descr)
         self.assertEqual(chassis['description'], descr)
 
@@ -77,7 +77,7 @@ class TestChassis(base.BaseBaremetalTest):
         _, body = self.create_chassis()
         uuid = body['uuid']
 
-        new_description = data_utils.rand_name('new-description-')
+        new_description = data_utils.rand_name('new-description')
         _, body = (self.client.update_chassis(uuid,
                    description=new_description))
         _, chassis = self.client.show_chassis(uuid)

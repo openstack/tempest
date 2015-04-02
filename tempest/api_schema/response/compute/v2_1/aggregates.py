@@ -27,33 +27,15 @@ aggregate_for_create = {
         'updated_at': {'type': ['string', 'null']}
     },
     'required': ['availability_zone', 'created_at', 'deleted',
-                 'deleted_at', 'id', 'name', 'updated_at']
+                 'deleted_at', 'id', 'name', 'updated_at'],
 }
 
-aggregate = copy.deepcopy(aggregate_for_create)
-aggregate['properties'].update({
+common_aggregate_info = copy.deepcopy(aggregate_for_create)
+common_aggregate_info['properties'].update({
     'hosts': {'type': 'array'},
     'metadata': {'type': 'object'}
 })
-aggregate['required'].extend(['hosts', 'metadata'])
-
-aggregate = {
-    'type': 'object',
-    'properties': {
-        'availability_zone': {'type': ['string', 'null']},
-        'created_at': {'type': 'string'},
-        'deleted': {'type': 'boolean'},
-        'deleted_at': {'type': ['string', 'null']},
-        'hosts': {'type': 'array'},
-        'id': {'type': 'integer'},
-        'metadata': {'type': 'object'},
-        'name': {'type': 'string'},
-        'updated_at': {'type': ['string', 'null']}
-    },
-    'required': ['availability_zone', 'created_at', 'deleted',
-                 'deleted_at', 'hosts', 'id', 'metadata',
-                 'name', 'updated_at']
-}
+common_aggregate_info['required'].extend(['hosts', 'metadata'])
 
 list_aggregates = {
     'status_code': [200],
@@ -62,10 +44,10 @@ list_aggregates = {
         'properties': {
             'aggregates': {
                 'type': 'array',
-                'items': aggregate
+                'items': common_aggregate_info
             }
         },
-        'required': ['aggregates']
+        'required': ['aggregates'],
     }
 }
 
@@ -74,9 +56,9 @@ get_aggregate = {
     'response_body': {
         'type': 'object',
         'properties': {
-            'aggregate': aggregate
+            'aggregate': common_aggregate_info
         },
-        'required': ['aggregate']
+        'required': ['aggregate'],
     }
 }
 
@@ -88,13 +70,18 @@ update_aggregate['response_body']['properties']['aggregate']['properties'][
         'type': 'string'
     }
 
-common_create_aggregate = {
+delete_aggregate = {
+    'status_code': [200]
+}
+
+create_aggregate = {
+    'status_code': [200],
     'response_body': {
         'type': 'object',
         'properties': {
             'aggregate': aggregate_for_create
         },
-        'required': ['aggregate']
+        'required': ['aggregate'],
     }
 }
 

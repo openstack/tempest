@@ -20,7 +20,7 @@ from tempest.api_schema.response.compute import flavors as common_schema
 from tempest.api_schema.response.compute import flavors_access as schema_access
 from tempest.api_schema.response.compute import flavors_extra_specs \
     as schema_extra_specs
-from tempest.api_schema.response.compute.v2 import flavors as v2schema
+from tempest.api_schema.response.compute.v2_1 import flavors as v2schema
 from tempest.common import service_client
 
 

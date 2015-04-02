@@ -12,6 +12,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import copy
+
 node = {
     'type': 'object',
     'properties': {
@@ -41,7 +43,7 @@ list_baremetal_nodes = {
     }
 }
 
-get_baremetal_node = {
+baremetal_node = {
     'status_code': [200],
     'response_body': {
         'type': 'object',
@@ -51,3 +53,8 @@ get_baremetal_node = {
         'required': ['node']
     }
 }
+get_baremetal_node = copy.deepcopy(baremetal_node)
+get_baremetal_node['response_body']['properties']['node'][
+    'properties'].update({'instance_uuid': {'type': ['string', 'null']}})
+get_baremetal_node['response_body']['properties']['node'][
+    'required'].append('instance_uuid')

@@ -26,7 +26,7 @@ class RolesTestJSON(base.BaseIdentityV2AdminTest):
     def resource_setup(cls):
         super(RolesTestJSON, cls).resource_setup()
         for _ in moves.xrange(5):
-            role_name = data_utils.rand_name(name='role-')
+            role_name = data_utils.rand_name(name='role')
             role = cls.client.create_role(role_name)
             cls.data.roles.append(role)
 
@@ -58,7 +58,7 @@ class RolesTestJSON(base.BaseIdentityV2AdminTest):
     @test.idempotent_id('c62d909d-6c21-48c0-ae40-0a0760e6db5e')
     def test_role_create_delete(self):
         """Role should be created, verified, and deleted."""
-        role_name = data_utils.rand_name(name='role-test-')
+        role_name = data_utils.rand_name(name='role-test')
         body = self.client.create_role(role_name)
         self.assertEqual(role_name, body['name'])
 

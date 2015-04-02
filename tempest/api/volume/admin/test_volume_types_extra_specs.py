@@ -24,7 +24,7 @@ class VolumeTypesExtraSpecsV2Test(base.BaseVolumeAdminTest):
     @classmethod
     def resource_setup(cls):
         super(VolumeTypesExtraSpecsV2Test, cls).resource_setup()
-        vol_type_name = data_utils.rand_name('Volume-type-')
+        vol_type_name = data_utils.rand_name('Volume-type')
         cls.volume_type = cls.volume_types_client.create_volume_type(
             vol_type_name)
 

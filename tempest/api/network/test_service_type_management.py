@@ -19,8 +19,8 @@ from tempest import test
 class ServiceTypeManagementTestJSON(base.BaseNetworkTest):
 
     @classmethod
-    def resource_setup(cls):
-        super(ServiceTypeManagementTestJSON, cls).resource_setup()
+    def skip_checks(cls):
+        super(ServiceTypeManagementTestJSON, cls).skip_checks()
         if not test.is_extension_enabled('service-type', 'network'):
             msg = "Neutron Service Type Management not enabled."
             raise cls.skipException(msg)

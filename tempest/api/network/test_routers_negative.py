@@ -27,11 +27,15 @@ CONF = config.CONF
 class RoutersNegativeTest(base.BaseRouterTest):
 
     @classmethod
-    def resource_setup(cls):
-        super(RoutersNegativeTest, cls).resource_setup()
+    def skip_checks(cls):
+        super(RoutersNegativeTest, cls).skip_checks()
         if not test.is_extension_enabled('router', 'network'):
             msg = "router extension not enabled."
             raise cls.skipException(msg)
+
+    @classmethod
+    def resource_setup(cls):
+        super(RoutersNegativeTest, cls).resource_setup()
         cls.router = cls.create_router(data_utils.rand_name('router-'))
         cls.network = cls.create_network()
         cls.subnet = cls.create_subnet(cls.network)
@@ -110,3 +114,28 @@ class RoutersNegativeTest(base.BaseRouterTest):
 
 class RoutersNegativeIpV6Test(RoutersNegativeTest):
     _ip_version = 6
+
+
+class DvrRoutersNegativeTest(base.BaseRouterTest):
+
+    @classmethod
+    def skip_checks(cls):
+        super(DvrRoutersNegativeTest, cls).skip_checks()
+        if not test.is_extension_enabled('dvr', 'network'):
+            msg = "DVR extension not enabled."
+            raise cls.skipException(msg)
+
+    @classmethod
+    def resource_setup(cls):
+        super(DvrRoutersNegativeTest, cls).resource_setup()
+        cls.router = cls.create_router(data_utils.rand_name('router'))
+        cls.network = cls.create_network()
+        cls.subnet = cls.create_subnet(cls.network)
+
+    @test.attr(type=['negative', 'smoke'])
+    @test.idempotent_id('4990b055-8fc7-48ab-bba7-aa28beaad0b9')
+    def test_router_create_tenant_distributed_returns_forbidden(self):
+        self.assertRaises(lib_exc.Forbidden,
+                          self.create_router,
+                          data_utils.rand_name('router'),
+                          distributed=True)

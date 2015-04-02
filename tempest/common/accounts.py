@@ -35,23 +35,18 @@ def read_accounts_yaml(path):
 
 class Accounts(cred_provider.CredentialProvider):
 
-    def __init__(self, name):
-        super(Accounts, self).__init__(name)
-        self.name = name
-        if os.path.isfile(CONF.auth.test_accounts_file):
+    def __init__(self, identity_version=None, name=None):
+        super(Accounts, self).__init__(identity_version=identity_version,
+                                       name=name)
+        if (CONF.auth.test_accounts_file and
+                os.path.isfile(CONF.auth.test_accounts_file)):
             accounts = read_accounts_yaml(CONF.auth.test_accounts_file)
             self.use_default_creds = False
         else:
             accounts = {}
             self.use_default_creds = True
         self.hash_dict = self.get_hash_dict(accounts)
-        # FIXME(dhellmann): The configuration option is not part of
-        # the API of the library, because if we change the option name
-        # or group it will break this use. Tempest needs to set this
-        # value somewhere that it owns, and then use
-        # lockutils.set_defaults() to tell oslo.concurrency what value
-        # to use.
-        self.accounts_dir = os.path.join(CONF.oslo_concurrency.lock_path,
+        self.accounts_dir = os.path.join(lockutils.get_lock_path(CONF),
                                          'test_accounts')
         self.isolated_creds = {}
 
@@ -208,7 +203,8 @@ class Accounts(cred_provider.CredentialProvider):
         if self.isolated_creds.get('primary'):
             return self.isolated_creds.get('primary')
         creds = self._get_creds()
-        primary_credential = cred_provider.get_credentials(**creds)
+        primary_credential = cred_provider.get_credentials(
+            identity_version=self.identity_version, **creds)
         self.isolated_creds['primary'] = primary_credential
         return primary_credential
 
@@ -216,7 +212,8 @@ class Accounts(cred_provider.CredentialProvider):
         if self.isolated_creds.get('alt'):
             return self.isolated_creds.get('alt')
         creds = self._get_creds()
-        alt_credential = cred_provider.get_credentials(**creds)
+        alt_credential = cred_provider.get_credentials(
+            identity_version=self.identity_version, **creds)
         self.isolated_creds['alt'] = alt_credential
         return alt_credential
 
@@ -232,7 +229,8 @@ class Accounts(cred_provider.CredentialProvider):
             new_index = str(roles) + '-' + str(len(self.isolated_creds))
             self.isolated_creds[new_index] = exist_creds
         creds = self._get_creds(roles=roles)
-        role_credential = cred_provider.get_credentials(**creds)
+        role_credential = cred_provider.get_credentials(
+            identity_version=self.identity_version, **creds)
         self.isolated_creds[str(roles)] = role_credential
         return role_credential
 
@@ -264,18 +262,14 @@ class NotLockingAccounts(Accounts):
 
     def _unique_creds(self, cred_arg=None):
         """Verify that the configured credentials are valid and distinct """
-        if self.use_default_creds:
-            try:
-                user = self.get_primary_creds()
-                alt_user = self.get_alt_creds()
-                return getattr(user, cred_arg) != getattr(alt_user, cred_arg)
-            except exceptions.InvalidCredentials as ic:
-                msg = "At least one of the configured credentials is " \
-                      "not valid: %s" % ic.message
-                raise exceptions.InvalidConfiguration(msg)
-        else:
-            # TODO(andreaf) Add a uniqueness check here
-            return len(self.hash_dict['creds']) > 1
+        try:
+            user = self.get_primary_creds()
+            alt_user = self.get_alt_creds()
+            return getattr(user, cred_arg) != getattr(alt_user, cred_arg)
+        except exceptions.InvalidCredentials as ic:
+            msg = "At least one of the configured credentials is " \
+                  "not valid: %s" % ic.message
+            raise exceptions.InvalidConfiguration(msg)
 
     def is_multi_user(self):
         return self._unique_creds('username')
@@ -283,39 +277,20 @@ class NotLockingAccounts(Accounts):
     def is_multi_tenant(self):
         return self._unique_creds('tenant_id')
 
-    def get_creds(self, id, roles=None):
-        try:
-            hashes = self._get_match_hash_list(roles)
-            # No need to sort the dict as within the same python process
-            # the HASH seed won't change, so subsequent calls to keys()
-            # will return the same result
-            _hash = hashes[id]
-        except IndexError:
-            msg = 'Insufficient number of users provided'
-            raise exceptions.InvalidConfiguration(msg)
-        return self.hash_dict['creds'][_hash]
-
     def get_primary_creds(self):
         if self.isolated_creds.get('primary'):
             return self.isolated_creds.get('primary')
-        if not self.use_default_creds:
-            creds = self.get_creds(0)
-            primary_credential = cred_provider.get_credentials(**creds)
-        else:
-            primary_credential = cred_provider.get_configured_credentials(
-                'user')
+        primary_credential = cred_provider.get_configured_credentials(
+            credential_type='user', identity_version=self.identity_version)
         self.isolated_creds['primary'] = primary_credential
         return primary_credential
 
     def get_alt_creds(self):
         if self.isolated_creds.get('alt'):
             return self.isolated_creds.get('alt')
-        if not self.use_default_creds:
-            creds = self.get_creds(1)
-            alt_credential = cred_provider.get_credentials(**creds)
-        else:
-            alt_credential = cred_provider.get_configured_credentials(
-                'alt_user')
+        alt_credential = cred_provider.get_configured_credentials(
+            credential_type='alt_user',
+            identity_version=self.identity_version)
         self.isolated_creds['alt'] = alt_credential
         return alt_credential
 
@@ -323,35 +298,14 @@ class NotLockingAccounts(Accounts):
         self.isolated_creds = {}
 
     def get_admin_creds(self):
-        if not self.use_default_creds:
-            return self.get_creds_by_roles([CONF.identity.admin_role])
-        else:
-            creds = cred_provider.get_configured_credentials(
-                "identity_admin", fill_in=False)
-            self.isolated_creds['admin'] = creds
-            return creds
+        creds = cred_provider.get_configured_credentials(
+            "identity_admin", fill_in=False)
+        self.isolated_creds['admin'] = creds
+        return creds
 
     def get_creds_by_roles(self, roles, force_new=False):
-        roles = list(set(roles))
-        exist_creds = self.isolated_creds.get(str(roles), None)
-        index = 0
-        if exist_creds and not force_new:
-            return exist_creds
-        elif exist_creds and force_new:
-            new_index = str(roles) + '-' + str(len(self.isolated_creds))
-            self.isolated_creds[new_index] = exist_creds
-            # Figure out how many existing creds for this roles set are present
-            # use this as the index the returning hash list to ensure separate
-            # creds are returned with force_new being True
-            for creds_names in self.isolated_creds:
-                if str(roles) in creds_names:
-                    index = index + 1
-        if not self.use_default_creds:
-            creds = self.get_creds(index, roles=roles)
-            role_credential = cred_provider.get_credentials(**creds)
-            self.isolated_creds[str(roles)] = role_credential
-        else:
-            msg = "Default credentials can not be used with specifying "\
-                  "credentials by roles"
-            raise exceptions.InvalidConfiguration(msg)
-        return role_credential
+        msg = "Credentials being specified through the config file can not be"\
+              " used with tests that specify using credentials by roles. "\
+              "Either exclude/skip the tests doing this or use either an "\
+              "test_accounts_file or tenant isolation."
+        raise exceptions.InvalidConfiguration(msg)

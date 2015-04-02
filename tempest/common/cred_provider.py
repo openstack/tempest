@@ -53,7 +53,7 @@ def get_configured_credentials(credential_type, fill_in=True,
     if identity_version == 'v3':
         conf_attributes.append('domain_name')
     # Read the parts of credentials from config
-    params = DEFAULT_PARAMS
+    params = DEFAULT_PARAMS.copy()
     section, prefix = CREDENTIAL_TYPES[credential_type]
     for attr in conf_attributes:
         _section = getattr(CONF, section)
@@ -63,7 +63,8 @@ def get_configured_credentials(credential_type, fill_in=True,
             params[attr] = getattr(_section, prefix + "_" + attr)
     # Build and validate credentials. We are reading configured credentials,
     # so validate them even if fill_in is False
-    credentials = get_credentials(fill_in=fill_in, **params)
+    credentials = get_credentials(fill_in=fill_in,
+                                  identity_version=identity_version, **params)
     if not fill_in:
         if not credentials.is_valid():
             msg = ("The %s credentials are incorrectly set in the config file."
@@ -83,7 +84,7 @@ def get_credentials(fill_in=True, identity_version=None, **kwargs):
         domain_fields = set(x for x in auth.KeystoneV3Credentials.ATTRIBUTES
                             if 'domain' in x)
         if not domain_fields.intersection(kwargs.keys()):
-            kwargs['user_domain_name'] = CONF.identity.admin_domain_name
+            params['user_domain_name'] = CONF.identity.admin_domain_name
         auth_url = CONF.identity.uri_v3
     else:
         auth_url = CONF.identity.uri
@@ -95,8 +96,25 @@ def get_credentials(fill_in=True, identity_version=None, **kwargs):
 
 @six.add_metaclass(abc.ABCMeta)
 class CredentialProvider(object):
-    def __init__(self, name, password='pass', network_resources=None):
-        self.name = name
+    def __init__(self, identity_version=None, name=None, password='pass',
+                 network_resources=None):
+        """A CredentialProvider supplies credentials to test classes.
+        :param identity_version If specified it will return credentials of the
+                                corresponding identity version, otherwise it
+                                uses auth_version from configuration
+        :param name Name of the calling test. Included in provisioned
+                    credentials when credentials are provisioned on the fly
+        :param password Used for provisioned credentials when credentials are
+                        provisioned on the fly
+        :param network_resources Network resources required for the credentials
+        """
+        # TODO(andreaf) name and password are tenant isolation specific, and
+        # could be removed from this abstract class
+        self.name = name or "test_creds"
+        self.identity_version = identity_version or CONF.identity.auth_version
+        if not auth.is_identity_version_supported(self.identity_version):
+            raise exceptions.InvalidIdentityVersion(
+                identity_version=self.identity_version)
 
     @abc.abstractmethod
     def get_primary_creds(self):

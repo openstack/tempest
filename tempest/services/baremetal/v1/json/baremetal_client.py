@@ -131,7 +131,7 @@ class BaremetalClientJSON(base.BaremetalClient):
         return self._show_request('drivers', driver_name)
 
     @base.handle_errors
-    def create_node(self, chassis_id, **kwargs):
+    def create_node(self, chassis_id=None, **kwargs):
         """
         Create a baremetal node with the specified parameters.
 

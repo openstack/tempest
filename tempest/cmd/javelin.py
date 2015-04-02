@@ -118,6 +118,7 @@ import yaml
 import tempest.auth
 from tempest import config
 from tempest.services.compute.json import flavors_client
+from tempest.services.compute.json import floating_ips_client
 from tempest.services.compute.json import security_groups_client
 from tempest.services.compute.json import servers_client
 from tempest.services.identity.v2.json import identity_client
@@ -194,6 +195,8 @@ class OSClient(object):
                                                         **compute_params)
         self.flavors = flavors_client.FlavorsClientJSON(_auth,
                                                         **compute_params)
+        self.floating_ips = floating_ips_client.FloatingIPsClientJSON(
+            _auth, **compute_params)
         self.secgroups = security_groups_client.SecurityGroupsClientJSON(
             _auth, **compute_params)
         self.objects = object_client.ObjectClient(_auth,
@@ -451,15 +454,31 @@ class JavelinCheck(unittest.TestCase):
             # validate neutron is enabled and ironic disabled:
             if (CONF.service_available.neutron and
                     not CONF.baremetal.driver_enabled):
+                _floating_is_alive = False
                 for network_name, body in found['addresses'].items():
                     for addr in body:
                         ip = addr['addr']
-                        if addr.get('OS-EXT-IPS:type', 'fixed') == 'fixed':
+                        # If floatingip_for_ssh is at True, it's assumed
+                        # you want to use the floating IP to reach the server,
+                        # fallback to fixed IP, then other type.
+                        # This is useful in multi-node environment.
+                        if CONF.compute.use_floatingip_for_ssh:
+                            if addr.get('OS-EXT-IPS:type',
+                                        'floating') == 'floating':
+                                self._ping_ip(ip, 60)
+                                _floating_is_alive = True
+                        elif addr.get('OS-EXT-IPS:type', 'fixed') == 'fixed':
                             namespace = _get_router_namespace(client,
                                                               network_name)
                             self._ping_ip(ip, 60, namespace)
                         else:
                             self._ping_ip(ip, 60)
+                # if floatingip_for_ssh is at True, validate found a
+                # floating IP and ping worked.
+                if CONF.compute.use_floatingip_for_ssh:
+                    self.assertTrue(_floating_is_alive,
+                                    "Server %s has no floating IP." %
+                                    server['name'])
             else:
                 addr = found['addresses']['private'][0]['addr']
                 self._ping_ip(addr, 60)
@@ -838,6 +857,10 @@ def create_servers(servers):
         # create to security group(s) after server spawning
         for secgroup in server['secgroups']:
             client.servers.add_security_group(server_id, secgroup)
+        if CONF.compute.use_floatingip_for_ssh:
+            floating_ip = client.floating_ips.create_floating_ip()
+            client.floating_ips.associate_floating_ip_to_server(
+                floating_ip['ip'], server_id)
 
 
 def destroy_servers(servers):
@@ -852,6 +875,7 @@ def destroy_servers(servers):
             LOG.info("Server '%s' does not exist" % server['name'])
             continue
 
+        # TODO(EmilienM): disassociate floating IP from server and release it.
         client.servers.delete_server(response['id'])
         client.servers.wait_for_server_termination(response['id'],
                                                    ignore_error=True)

@@ -84,7 +84,7 @@ class ImagesOneServerNegativeTestJSON(base.BaseV2ComputeTest):
     @test.idempotent_id('55d1d38c-dd66-4933-9c8e-7d92aeb60ddc')
     def test_create_image_specify_invalid_metadata(self):
         # Return an error when creating image with invalid metadata
-        snapshot_name = data_utils.rand_name('test-snap-')
+        snapshot_name = data_utils.rand_name('test-snap')
         meta = {'': ''}
         self.assertRaises(lib_exc.BadRequest, self.client.create_image,
                           self.server_id, snapshot_name, meta)
@@ -93,7 +93,7 @@ class ImagesOneServerNegativeTestJSON(base.BaseV2ComputeTest):
     @test.idempotent_id('3d24d11f-5366-4536-bd28-cff32b748eca')
     def test_create_image_specify_metadata_over_limits(self):
         # Return an error when creating image with meta data over 256 chars
-        snapshot_name = data_utils.rand_name('test-snap-')
+        snapshot_name = data_utils.rand_name('test-snap')
         meta = {'a' * 260: 'b' * 260}
         self.assertRaises(lib_exc.BadRequest, self.client.create_image,
                           self.server_id, snapshot_name, meta)
@@ -104,7 +104,7 @@ class ImagesOneServerNegativeTestJSON(base.BaseV2ComputeTest):
         # Disallow creating another image when first image is being saved
 
         # Create first snapshot
-        snapshot_name = data_utils.rand_name('test-snap-')
+        snapshot_name = data_utils.rand_name('test-snap')
         body = self.client.create_image(self.server_id,
                                         snapshot_name)
         image_id = data_utils.parse_image_id(body.response['location'])
@@ -112,7 +112,7 @@ class ImagesOneServerNegativeTestJSON(base.BaseV2ComputeTest):
         self.addCleanup(self._reset_server)
 
         # Create second snapshot
-        alt_snapshot_name = data_utils.rand_name('test-snap-')
+        alt_snapshot_name = data_utils.rand_name('test-snap')
         self.assertRaises(lib_exc.Conflict, self.client.create_image,
                           self.server_id, alt_snapshot_name)
 
@@ -130,7 +130,7 @@ class ImagesOneServerNegativeTestJSON(base.BaseV2ComputeTest):
     def test_delete_image_that_is_not_yet_active(self):
         # Return an error while trying to delete an image what is creating
 
-        snapshot_name = data_utils.rand_name('test-snap-')
+        snapshot_name = data_utils.rand_name('test-snap')
         body = self.client.create_image(self.server_id, snapshot_name)
         image_id = data_utils.parse_image_id(body.response['location'])
         self.image_ids.append(image_id)

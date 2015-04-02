@@ -242,9 +242,12 @@ class IdentityV3ClientJSON(service_client.ServiceClient):
         self.expected_success(204, resp.status)
         return service_client.ResponseBody(resp, body)
 
-    def list_domains(self):
+    def list_domains(self, params=None):
         """List Domains."""
-        resp, body = self.get('domains')
+        url = 'domains'
+        if params:
+            url += '?%s' % urllib.urlencode(params)
+        resp, body = self.get(url)
         self.expected_success(200, resp.status)
         body = json.loads(body)
         return service_client.ResponseBodyList(resp, body['domains'])

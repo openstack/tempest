@@ -12,8 +12,39 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-# NOTE: This is the detail information for "get az detail" API.
-# The information is the same between v2 and v3 APIs.
+import copy
+
+
+base = {
+    'status_code': [200],
+    'response_body': {
+        'type': 'object',
+        'properties': {
+            'availabilityZoneInfo': {
+                'type': 'array',
+                'items': {
+                    'type': 'object',
+                    'properties': {
+                        'zoneName': {'type': 'string'},
+                        'zoneState': {
+                            'type': 'object',
+                            'properties': {
+                                'available': {'type': 'boolean'}
+                            },
+                            'required': ['available']
+                        },
+                        # NOTE: Here is the difference between detail and
+                        # non-detail.
+                        'hosts': {'type': 'null'}
+                    },
+                    'required': ['zoneName', 'zoneState', 'hosts']
+                }
+            }
+        },
+        'required': ['availabilityZoneInfo']
+    }
+}
+
 detail = {
     'type': 'object',
     'patternProperties': {
@@ -35,3 +66,9 @@ detail = {
         }
     }
 }
+
+list_availability_zone_list = copy.deepcopy(base)
+
+list_availability_zone_list_detail = copy.deepcopy(base)
+list_availability_zone_list_detail['response_body']['properties'][
+    'availabilityZoneInfo']['items']['properties']['hosts'] = detail

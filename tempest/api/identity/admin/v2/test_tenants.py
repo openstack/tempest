@@ -49,8 +49,8 @@ class TenantsTestJSON(base.BaseIdentityV2AdminTest):
     @test.idempotent_id('d25e9f24-1310-4d29-b61b-d91299c21d6d')
     def test_tenant_create_with_description(self):
         # Create tenant with a description
-        tenant_name = data_utils.rand_name(name='tenant-')
-        tenant_desc = data_utils.rand_name(name='desc-')
+        tenant_name = data_utils.rand_name(name='tenant')
+        tenant_desc = data_utils.rand_name(name='desc')
         body = self.client.create_tenant(tenant_name,
                                          description=tenant_desc)
         tenant = body
@@ -70,7 +70,7 @@ class TenantsTestJSON(base.BaseIdentityV2AdminTest):
     @test.idempotent_id('670bdddc-1cd7-41c7-b8e2-751cfb67df50')
     def test_tenant_create_enabled(self):
         # Create a tenant that is enabled
-        tenant_name = data_utils.rand_name(name='tenant-')
+        tenant_name = data_utils.rand_name(name='tenant')
         body = self.client.create_tenant(tenant_name, enabled=True)
         tenant = body
         self.data.tenants.append(tenant)
@@ -87,7 +87,7 @@ class TenantsTestJSON(base.BaseIdentityV2AdminTest):
     @test.idempotent_id('3be22093-b30f-499d-b772-38340e5e16fb')
     def test_tenant_create_not_enabled(self):
         # Create a tenant that is not enabled
-        tenant_name = data_utils.rand_name(name='tenant-')
+        tenant_name = data_utils.rand_name(name='tenant')
         body = self.client.create_tenant(tenant_name, enabled=False)
         tenant = body
         self.data.tenants.append(tenant)
@@ -106,7 +106,7 @@ class TenantsTestJSON(base.BaseIdentityV2AdminTest):
     @test.idempotent_id('781f2266-d128-47f3-8bdb-f70970add238')
     def test_tenant_update_name(self):
         # Update name attribute of a tenant
-        t_name1 = data_utils.rand_name(name='tenant-')
+        t_name1 = data_utils.rand_name(name='tenant')
         body = self.client.create_tenant(t_name1)
         tenant = body
         self.data.tenants.append(tenant)
@@ -114,7 +114,7 @@ class TenantsTestJSON(base.BaseIdentityV2AdminTest):
         t_id = body['id']
         resp1_name = body['name']
 
-        t_name2 = data_utils.rand_name(name='tenant2-')
+        t_name2 = data_utils.rand_name(name='tenant2')
         body = self.client.update_tenant(t_id, name=t_name2)
         resp2_name = body['name']
         self.assertNotEqual(resp1_name, resp2_name)
@@ -133,8 +133,8 @@ class TenantsTestJSON(base.BaseIdentityV2AdminTest):
     @test.idempotent_id('859fcfe1-3a03-41ef-86f9-b19a47d1cd87')
     def test_tenant_update_desc(self):
         # Update description attribute of a tenant
-        t_name = data_utils.rand_name(name='tenant-')
-        t_desc = data_utils.rand_name(name='desc-')
+        t_name = data_utils.rand_name(name='tenant')
+        t_desc = data_utils.rand_name(name='desc')
         body = self.client.create_tenant(t_name, description=t_desc)
         tenant = body
         self.data.tenants.append(tenant)
@@ -142,7 +142,7 @@ class TenantsTestJSON(base.BaseIdentityV2AdminTest):
         t_id = body['id']
         resp1_desc = body['description']
 
-        t_desc2 = data_utils.rand_name(name='desc2-')
+        t_desc2 = data_utils.rand_name(name='desc2')
         body = self.client.update_tenant(t_id, description=t_desc2)
         resp2_desc = body['description']
         self.assertNotEqual(resp1_desc, resp2_desc)
@@ -161,7 +161,7 @@ class TenantsTestJSON(base.BaseIdentityV2AdminTest):
     @test.idempotent_id('8fc8981f-f12d-4c66-9972-2bdcf2bc2e1a')
     def test_tenant_update_enable(self):
         # Update the enabled attribute of a tenant
-        t_name = data_utils.rand_name(name='tenant-')
+        t_name = data_utils.rand_name(name='tenant')
         t_en = False
         body = self.client.create_tenant(t_name, enabled=t_en)
         tenant = body

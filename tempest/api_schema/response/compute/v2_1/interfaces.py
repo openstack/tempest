@@ -14,10 +14,6 @@
 
 from tempest.api_schema.response.compute import parameter_types
 
-delete_interface = {
-    'status_code': [202]
-}
-
 interface_common_info = {
     'type': 'object',
     'properties': {
@@ -44,4 +40,33 @@ interface_common_info = {
         'mac_addr': parameter_types.mac_address
     },
     'required': ['port_state', 'fixed_ips', 'port_id', 'net_id', 'mac_addr']
+}
+
+get_create_interfaces = {
+    'status_code': [200],
+    'response_body': {
+        'type': 'object',
+        'properties': {
+            'interfaceAttachment': interface_common_info
+        },
+        'required': ['interfaceAttachment']
+    }
+}
+
+list_interfaces = {
+    'status_code': [200],
+    'response_body': {
+        'type': 'object',
+        'properties': {
+            'interfaceAttachments': {
+                'type': 'array',
+                'items': interface_common_info
+            }
+        },
+        'required': ['interfaceAttachments']
+    }
+}
+
+delete_interface = {
+    'status_code': [202]
 }

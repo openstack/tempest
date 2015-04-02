@@ -15,7 +15,7 @@
 
 import json
 
-from tempest.api_schema.response.compute.v2 import \
+from tempest.api_schema.response.compute.v2_1 import \
     security_group_default_rule as schema
 from tempest.common import service_client
 

@@ -19,6 +19,7 @@ from tempest_lib import exceptions as lib_exc
 
 from tempest.api.compute import base
 from tempest.api import utils
+from tempest.common import fixed_network
 from tempest import config
 from tempest import test
 
@@ -66,9 +67,16 @@ class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
             raise RuntimeError("Image %s (image_ref_alt) was not found!" %
                                cls.image_ref_alt)
 
+        network = cls.get_tenant_network()
+        if network:
+            cls.fixed_network_name = network['name']
+        else:
+            cls.fixed_network_name = None
+        network_kwargs = fixed_network.set_networks_kwarg(network)
         cls.s1_name = data_utils.rand_name(cls.__name__ + '-instance')
         cls.s1 = cls.create_test_server(name=cls.s1_name,
-                                        wait_until='ACTIVE')
+                                        wait_until='ACTIVE',
+                                        **network_kwargs)
 
         cls.s2_name = data_utils.rand_name(cls.__name__ + '-instance')
         cls.s2 = cls.create_test_server(name=cls.s2_name,
@@ -79,12 +87,6 @@ class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
         cls.s3 = cls.create_test_server(name=cls.s3_name,
                                         flavor=cls.flavor_ref_alt,
                                         wait_until='ACTIVE')
-
-        cls.fixed_network_name = CONF.compute.fixed_network_name
-        if CONF.service_available.neutron:
-            if hasattr(cls.isolated_creds, 'get_primary_network'):
-                network = cls.isolated_creds.get_primary_network()
-                cls.fixed_network_name = network['name']
 
     @test.idempotent_id('05e8a8e7-9659-459a-989d-92c2f501f4ba')
     @utils.skip_unless_attr('multiple_images', 'Only one image found')
@@ -284,6 +286,9 @@ class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
     def test_list_servers_filtered_by_ip(self):
         # Filter servers by ip
         # Here should be listed 1 server
+        if not self.fixed_network_name:
+            msg = 'fixed_network_name needs to be configured to run this test'
+            raise self.skipException(msg)
         self.s1 = self.client.get_server(self.s1['id'])
         ip = self.s1['addresses'][self.fixed_network_name][0]['addr']
         params = {'ip': ip}
@@ -302,6 +307,9 @@ class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
         # Filter servers by regex ip
         # List all servers filtered by part of ip address.
         # Here should be listed all servers
+        if not self.fixed_network_name:
+            msg = 'fixed_network_name needs to be configured to run this test'
+            raise self.skipException(msg)
         self.s1 = self.client.get_server(self.s1['id'])
         ip = self.s1['addresses'][self.fixed_network_name][0]['addr'][0:-3]
         params = {'ip': ip}

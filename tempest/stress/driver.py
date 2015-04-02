@@ -23,7 +23,7 @@ from six import moves
 from tempest_lib.common.utils import data_utils
 
 from tempest import clients
-from tempest.common import cred_provider
+from tempest.common import isolated_creds
 from tempest.common import ssh
 from tempest import config
 from tempest import exceptions
@@ -132,7 +132,14 @@ def stress_openstack(tests, duration, max_runs=None, stop_on_error=False):
         computes = _get_compute_nodes(controller, ssh_user, ssh_key)
         for node in computes:
             do_ssh("rm -f %s" % logfiles, node, ssh_user, ssh_key)
+    skip = False
     for test in tests:
+        for service in test.get('required_services', []):
+            if not CONF.service_available.get(service):
+                skip = True
+                break
+        if skip:
+            break
         if test.get('use_admin', False):
             manager = admin_manager
         else:
@@ -142,15 +149,22 @@ def stress_openstack(tests, duration, max_runs=None, stop_on_error=False):
                 username = data_utils.rand_name("stress_user")
                 tenant_name = data_utils.rand_name("stress_tenant")
                 password = "pass"
-                identity_client = admin_manager.identity_client
-                tenant = identity_client.create_tenant(name=tenant_name)
-                identity_client.create_user(username,
-                                            password,
-                                            tenant['id'],
-                                            "email")
-                creds = cred_provider.get_credentials(username=username,
-                                                      password=password,
-                                                      tenant_name=tenant_name)
+                if CONF.identity.auth_version == 'v2':
+                    identity_client = admin_manager.identity_client
+                else:
+                    identity_client = admin_manager.identity_v3_client
+                credentials_client = isolated_creds.get_creds_client(
+                    identity_client)
+                project = credentials_client.create_project(
+                    name=tenant_name, description=tenant_name)
+                user = credentials_client.create_user(username, password,
+                                                      project['id'], "email")
+                # Add roles specified in config file
+                for conf_role in CONF.auth.tempest_roles:
+                    credentials_client.assign_user_role(user, project,
+                                                        conf_role)
+                creds = credentials_client.get_credentials(user, project,
+                                                           password)
                 manager = clients.Manager(credentials=creds)
 
             test_obj = importutils.import_class(test['action'])

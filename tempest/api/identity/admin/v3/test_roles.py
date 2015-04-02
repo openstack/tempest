@@ -25,30 +25,30 @@ class RolesV3TestJSON(base.BaseIdentityV3AdminTest):
     def resource_setup(cls):
         super(RolesV3TestJSON, cls).resource_setup()
         for _ in range(3):
-            role_name = data_utils.rand_name(name='role-')
+            role_name = data_utils.rand_name(name='role')
             role = cls.client.create_role(role_name)
             cls.data.v3_roles.append(role)
         cls.fetched_role_ids = list()
-        u_name = data_utils.rand_name('user-')
+        u_name = data_utils.rand_name('user')
         u_desc = '%s description' % u_name
         u_email = '%s@testmail.tm' % u_name
-        cls.u_password = data_utils.rand_name('pass-')
+        cls.u_password = data_utils.rand_name('pass')
         cls.domain = cls.client.create_domain(
-            data_utils.rand_name('domain-'),
-            description=data_utils.rand_name('domain-desc-'))
+            data_utils.rand_name('domain'),
+            description=data_utils.rand_name('domain-desc'))
         cls.project = cls.client.create_project(
-            data_utils.rand_name('project-'),
-            description=data_utils.rand_name('project-desc-'),
+            data_utils.rand_name('project'),
+            description=data_utils.rand_name('project-desc'),
             domain_id=cls.domain['id'])
         cls.group_body = cls.client.create_group(
-            data_utils.rand_name('Group-'), project_id=cls.project['id'],
+            data_utils.rand_name('Group'), project_id=cls.project['id'],
             domain_id=cls.domain['id'])
         cls.user_body = cls.client.create_user(
             u_name, description=u_desc, password=cls.u_password,
             email=u_email, project_id=cls.project['id'],
             domain_id=cls.domain['id'])
         cls.role = cls.client.create_role(
-            data_utils.rand_name('Role-'))
+            data_utils.rand_name('Role'))
 
     @classmethod
     def resource_cleanup(cls):
@@ -69,13 +69,13 @@ class RolesV3TestJSON(base.BaseIdentityV3AdminTest):
     @test.attr(type='smoke')
     @test.idempotent_id('18afc6c0-46cf-4911-824e-9989cc056c3a')
     def test_role_create_update_get_list(self):
-        r_name = data_utils.rand_name('Role-')
+        r_name = data_utils.rand_name('Role')
         role = self.client.create_role(r_name)
         self.addCleanup(self.client.delete_role, role['id'])
         self.assertIn('name', role)
         self.assertEqual(role['name'], r_name)
 
-        new_name = data_utils.rand_name('NewRole-')
+        new_name = data_utils.rand_name('NewRole')
         updated_role = self.client.update_role(new_name, role['id'])
         self.assertIn('name', updated_role)
         self.assertIn('id', updated_role)
@@ -144,11 +144,11 @@ class RolesV3TestJSON(base.BaseIdentityV3AdminTest):
         self.client.add_group_user(self.group_body['id'], self.user_body['id'])
         self.addCleanup(self.client.delete_group_user,
                         self.group_body['id'], self.user_body['id'])
-        body = self.token.auth(user=self.user_body['id'],
+        body = self.token.auth(user_id=self.user_body['id'],
                                password=self.u_password,
-                               user_domain=self.domain['name'],
-                               project=self.project['name'],
-                               project_domain=self.domain['name'])
+                               user_domain_name=self.domain['name'],
+                               project_name=self.project['name'],
+                               project_domain_name=self.domain['name'])
         roles = body['token']['roles']
         self.assertEqual(len(roles), 1)
         self.assertEqual(roles[0]['id'], self.role['id'])

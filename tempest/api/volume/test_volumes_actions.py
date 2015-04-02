@@ -35,10 +35,8 @@ class VolumesV2ActionsTest(base.BaseVolumeTest):
         super(VolumesV2ActionsTest, cls).resource_setup()
 
         # Create a test shared instance
-        srv_name = data_utils.rand_name(cls.__name__ + '-Instance-')
-        cls.server = cls.servers_client.create_server(srv_name,
-                                                      cls.image_ref,
-                                                      cls.flavor_ref)
+        srv_name = data_utils.rand_name(cls.__name__ + '-Instance')
+        cls.server = cls.create_server(srv_name)
         cls.servers_client.wait_for_server_status(cls.server['id'], 'ACTIVE')
 
         # Create a test shared volume for attach/detach tests
@@ -104,7 +102,7 @@ class VolumesV2ActionsTest(base.BaseVolumeTest):
         # it is shared with the other tests. After it is uploaded in Glance,
         # there is no way to delete it from Cinder, so we delete it from Glance
         # using the Glance image_client and from Cinder via tearDownClass.
-        image_name = data_utils.rand_name('Image-')
+        image_name = data_utils.rand_name('Image')
         body = self.client.upload_volume(self.volume['id'],
                                          image_name,
                                          CONF.volume.disk_format)

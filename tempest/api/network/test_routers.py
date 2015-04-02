@@ -17,7 +17,6 @@ import netaddr
 from tempest_lib.common.utils import data_utils
 
 from tempest.api.network import base_routers as base
-from tempest import clients
 from tempest import config
 from tempest import test
 
@@ -27,28 +26,23 @@ CONF = config.CONF
 class RoutersTest(base.BaseRouterTest):
 
     @classmethod
-    def resource_setup(cls):
-        super(RoutersTest, cls).resource_setup()
+    def skip_checks(cls):
+        super(RoutersTest, cls).skip_checks()
         if not test.is_extension_enabled('router', 'network'):
             msg = "router extension not enabled."
             raise cls.skipException(msg)
-        admin_manager = clients.AdminManager()
-        cls.identity_admin_client = admin_manager.identity_client
+
+    @classmethod
+    def setup_clients(cls):
+        super(RoutersTest, cls).setup_clients()
+        cls.identity_admin_client = cls.os_adm.identity_client
+
+    @classmethod
+    def resource_setup(cls):
+        super(RoutersTest, cls).resource_setup()
         cls.tenant_cidr = (CONF.network.tenant_network_cidr
                            if cls._ip_version == 4 else
                            CONF.network.tenant_network_v6_cidr)
-
-    def _cleanup_router(self, router):
-        self.delete_router(router)
-        self.routers.remove(router)
-
-    def _create_router(self, name, admin_state_up=False,
-                       external_network_id=None, enable_snat=None):
-        # associate a cleanup with created routers to avoid quota limits
-        router = self.create_router(name, admin_state_up,
-                                    external_network_id, enable_snat)
-        self.addCleanup(self._cleanup_router, router)
-        return router
 
     @test.attr(type='smoke')
     @test.idempotent_id('f64403e2-8483-4b34-8ccd-b09a87bcc68c')
@@ -357,3 +351,37 @@ class RoutersTest(base.BaseRouterTest):
 
 class RoutersIpV6Test(RoutersTest):
     _ip_version = 6
+
+
+class DvrRoutersTest(base.BaseRouterTest):
+
+    @classmethod
+    def skip_checks(cls):
+        super(DvrRoutersTest, cls).skip_checks()
+        if not test.is_extension_enabled('dvr', 'network'):
+            msg = "DVR extension not enabled."
+            raise cls.skipException(msg)
+
+    @test.attr(type='smoke')
+    @test.idempotent_id('141297aa-3424-455d-aa8d-f2d95731e00a')
+    def test_create_distributed_router(self):
+        name = data_utils.rand_name('router')
+        create_body = self.admin_client.create_router(
+            name, distributed=True)
+        self.addCleanup(self._delete_router,
+                        create_body['router']['id'],
+                        self.admin_client)
+        self.assertTrue(create_body['router']['distributed'])
+
+    @test.attr(type='smoke')
+    @test.idempotent_id('644d7a4a-01a1-4b68-bb8d-0c0042cb1729')
+    def test_convert_centralized_router(self):
+        router = self._create_router(data_utils.rand_name('router'))
+        self.assertNotIn('distributed', router)
+        update_body = self.admin_client.update_router(router['id'],
+                                                      distributed=True)
+        self.assertTrue(update_body['router']['distributed'])
+        show_body = self.admin_client.show_router(router['id'])
+        self.assertTrue(show_body['router']['distributed'])
+        show_body = self.client.show_router(router['id'])
+        self.assertNotIn('distributed', show_body['router'])

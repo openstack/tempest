@@ -78,8 +78,11 @@ list_images = {
                     },
                     'required': ['id', 'links', 'name']
                 }
-            }
+            },
+            'images_links': parameter_types.links
         },
+        # NOTE(gmann): images_links attribute is not necessary to be
+        # present always So it is not 'required'.
         'required': ['images']
     }
 }
@@ -88,15 +91,16 @@ create_image = {
     'status_code': [202],
     'response_header': {
         'type': 'object',
-        'properties': {
-            'location': {
-                'type': 'string',
-                'format': 'uri'
-            }
-        },
-        'required': ['location']
+        'properties': parameter_types.response_header
     }
 }
+create_image['response_header']['properties'].update(
+    {'location': {
+        'type': 'string',
+        'format': 'uri'}
+     }
+)
+create_image['response_header']['required'] = ['location']
 
 delete = {
     'status_code': [204]
@@ -132,8 +136,11 @@ list_images_details = {
             'images': {
                 'type': 'array',
                 'items': common_image_schema
-            }
+            },
+            'images_links': parameter_types.links
         },
+        # NOTE(gmann): images_links attribute is not necessary to be
+        # present always So it is not 'required'.
         'required': ['images']
     }
 }

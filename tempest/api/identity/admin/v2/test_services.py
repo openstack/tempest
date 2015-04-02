@@ -35,9 +35,9 @@ class ServicesTestJSON(base.BaseIdentityV2AdminTest):
     def test_create_get_delete_service(self):
         # GET Service
         # Creating a Service
-        name = data_utils.rand_name('service-')
-        type = data_utils.rand_name('type--')
-        description = data_utils.rand_name('description-')
+        name = data_utils.rand_name('service')
+        type = data_utils.rand_name('type')
+        description = data_utils.rand_name('description')
         service_data = self.client.create_service(
             name, type, description=description)
         self.assertFalse(service_data['id'] is None)
@@ -67,8 +67,8 @@ class ServicesTestJSON(base.BaseIdentityV2AdminTest):
     @test.idempotent_id('5d3252c8-e555-494b-a6c8-e11d7335da42')
     def test_create_service_without_description(self):
         # Create a service only with name and type
-        name = data_utils.rand_name('service-')
-        type = data_utils.rand_name('type--')
+        name = data_utils.rand_name('service')
+        type = data_utils.rand_name('type')
         service = self.client.create_service(name, type)
         self.assertIn('id', service)
         self.addCleanup(self._del_service, service['id'])
@@ -83,9 +83,9 @@ class ServicesTestJSON(base.BaseIdentityV2AdminTest):
         # Create, List, Verify and Delete Services
         services = []
         for _ in moves.xrange(3):
-            name = data_utils.rand_name('service-')
-            type = data_utils.rand_name('type--')
-            description = data_utils.rand_name('description-')
+            name = data_utils.rand_name('service')
+            type = data_utils.rand_name('type')
+            description = data_utils.rand_name('description')
             service = self.client.create_service(
                 name, type, description=description)
             services.append(service)

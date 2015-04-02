@@ -227,7 +227,7 @@ class Manager(manager.Manager):
             endpoint_type=CONF.data_processing.endpoint_type,
             **self.default_params_with_timeout_values)
         self.negative_client = negative_rest_client.NegativeRestClient(
-            self.auth_provider, service)
+            self.auth_provider, service, **self.default_params)
 
         # Generating EC2 credentials in tempest is only supported
         # with identity v2

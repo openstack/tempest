@@ -12,8 +12,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import abc
 import netaddr
 from oslo_log import log as logging
+import six
 from tempest_lib.common.utils import data_utils
 from tempest_lib import exceptions as lib_exc
 
@@ -21,22 +23,142 @@ from tempest import clients
 from tempest.common import cred_provider
 from tempest import config
 from tempest import exceptions
+from tempest.services.identity.v2.json import identity_client as v2_identity
 
 CONF = config.CONF
 LOG = logging.getLogger(__name__)
 
 
+@six.add_metaclass(abc.ABCMeta)
+class CredsClient(object):
+    """This class is a wrapper around the identity clients, to provide a
+     single interface for managing credentials in both v2 and v3 cases.
+     It's not bound to created credentials, only to a specific set of admin
+     credentials used for generating credentials.
+    """
+
+    def __init__(self, identity_client):
+        # The client implies version and credentials
+        self.identity_client = identity_client
+        self.credentials = self.identity_client.auth_provider.credentials
+
+    def create_user(self, username, password, project, email):
+        user = self.identity_client.create_user(
+            username, password, project['id'], email)
+        return user
+
+    @abc.abstractmethod
+    def create_project(self, name, description):
+        pass
+
+    def assign_user_role(self, user, project, role_name):
+        try:
+            roles = self._list_roles()
+            role = next(r for r in roles if r['name'] == role_name)
+        except StopIteration:
+            msg = 'No "%s" role found' % role_name
+            raise lib_exc.NotFound(msg)
+        try:
+            self.identity_client.assign_user_role(project['id'], user['id'],
+                                                  role['id'])
+        except lib_exc.Conflict:
+            LOG.debug("Role %s already assigned on project %s for user %s" % (
+                role['id'], project['id'], user['id']))
+
+    @abc.abstractmethod
+    def get_credentials(self, user, project, password):
+        pass
+
+    def delete_user(self, user_id):
+        self.identity_client.delete_user(user_id)
+
+    def _list_roles(self):
+        roles = self.identity_client.list_roles()
+        return roles
+
+
+class V2CredsClient(CredsClient):
+
+    def create_project(self, name, description):
+        tenant = self.identity_client.create_tenant(
+            name=name, description=description)
+        return tenant
+
+    def get_credentials(self, user, project, password):
+        return cred_provider.get_credentials(
+            identity_version='v2',
+            username=user['name'], user_id=user['id'],
+            tenant_name=project['name'], tenant_id=project['id'],
+            password=password)
+
+    def delete_project(self, project_id):
+        self.identity_client.delete_tenant(project_id)
+
+
+class V3CredsClient(CredsClient):
+
+    def __init__(self, identity_client, domain_name):
+        super(V3CredsClient, self).__init__(identity_client)
+        try:
+            # Domain names must be unique, in any case a list is returned,
+            # selecting the first (and only) element
+            self.creds_domain = self.identity_client.list_domains(
+                params={'name': domain_name})[0]
+        except lib_exc.NotFound:
+            # TODO(andrea) we could probably create the domain on the fly
+            msg = "Configured domain %s could not be found" % domain_name
+            raise exceptions.InvalidConfiguration(msg)
+
+    def create_project(self, name, description):
+        project = self.identity_client.create_project(
+            name=name, description=description,
+            domain_id=self.creds_domain['id'])
+        return project
+
+    def get_credentials(self, user, project, password):
+        return cred_provider.get_credentials(
+            identity_version='v3',
+            username=user['name'], user_id=user['id'],
+            project_name=project['name'], project_id=project['id'],
+            password=password,
+            project_domain_name=self.creds_domain['name'])
+
+    def delete_project(self, project_id):
+        self.identity_client.delete_project(project_id)
+
+
+def get_creds_client(identity_client, project_domain_name=None):
+    if isinstance(identity_client, v2_identity.IdentityClientJSON):
+        return V2CredsClient(identity_client)
+    else:
+        return V3CredsClient(identity_client, project_domain_name)
+
+
 class IsolatedCreds(cred_provider.CredentialProvider):
 
-    def __init__(self, name, password='pass', network_resources=None):
-        super(IsolatedCreds, self).__init__(name, password, network_resources)
+    def __init__(self, identity_version=None, name=None, password='pass',
+                 network_resources=None):
+        super(IsolatedCreds, self).__init__(identity_version, name, password,
+                                            network_resources)
         self.network_resources = network_resources
         self.isolated_creds = {}
         self.isolated_net_resources = {}
         self.ports = []
         self.password = password
+        self.default_admin_creds = cred_provider.get_configured_credentials(
+            'identity_admin', fill_in=True,
+            identity_version=self.identity_version)
         self.identity_admin_client, self.network_admin_client = (
             self._get_admin_clients())
+        # Domain where isolated credentials are provisioned (v3 only).
+        # Use that of the admin account is None is configured.
+        self.creds_domain_name = None
+        if self.identity_version == 'v3':
+            self.creds_domain_name = (
+                CONF.auth.tenant_isolation_domain_name or
+                self.default_admin_creds.project_domain_name)
+        self.creds_client = get_creds_client(
+            self.identity_admin_client, self.creds_domain_name)
 
     def _get_admin_clients(self):
         """
@@ -96,6 +218,11 @@ class IsolatedCreds(cred_provider.CredentialProvider):
         #if CONF.service_available.neutron:
             #self._cleanup_default_secgroup(tenant)
         self.identity_admin_client.delete_tenant(tenant)
+        os = clients.Manager(self.default_admin_creds)
+        if self.identity_version == 'v2':
+            return os.identity_client, os.network_client
+        else:
+            return os.identity_v3_client, os.network_client
 
     def _create_creds(self, suffix="", admin=False, roles=None):
         """Create random credentials under the following schema.
@@ -112,31 +239,26 @@ class IsolatedCreds(cred_provider.CredentialProvider):
         else:
             root = self.name
 
-        tenant_name = data_utils.rand_name(root) + suffix
-        tenant_desc = tenant_name + "-desc"
-        tenant = self._create_tenant(name=tenant_name,
-                                     description=tenant_desc)
+        project_name = data_utils.rand_name(root) + suffix
+        project_desc = project_name + "-desc"
+        project = self.creds_client.create_project(
+            name=project_name, description=project_desc)
 
         username = data_utils.rand_name(root) + suffix
         email = data_utils.rand_name(root) + suffix + "@example.com"
-        user = self._create_user(username, self.password,
-                                 tenant, email)
+        user = self.creds_client.create_user(
+            username, self.password, project, email)
         if admin:
-            self._assign_user_role(tenant, user, CONF.identity.admin_role)
+            self.creds_client.assign_user_role(user, project,
+                                               CONF.identity.admin_role)
         # Add roles specified in config file
         for conf_role in CONF.auth.tempest_roles:
-            self._assign_user_role(tenant, user, conf_role)
+            self.creds_client.assign_user_role(user, project, conf_role)
         # Add roles requested by caller
         if roles:
             for role in roles:
-                self._assign_user_role(tenant, user, role)
-        return self._get_credentials(user, tenant)
-
-    def _get_credentials(self, user, tenant):
-        return cred_provider.get_credentials(
-            username=user['name'], user_id=user['id'],
-            tenant_name=tenant['name'], tenant_id=tenant['id'],
-            password=self.password)
+                self.creds_client.assign_user_role(user, project, role)
+        return self.creds_client.get_credentials(user, project, self.password)
 
     def _create_network_resources(self, tenant_id):
         network = None
@@ -372,12 +494,14 @@ class IsolatedCreds(cred_provider.CredentialProvider):
         self._clear_isolated_net_resources()
         for creds in self.isolated_creds.itervalues():
             try:
-                self._delete_user(creds.user_id)
+                self.creds_client.delete_user(creds.user_id)
             except lib_exc.NotFound:
                 LOG.warn("user with name: %s not found for delete" %
                          creds.username)
             try:
-                self._delete_tenant(creds.tenant_id)
+                if CONF.service_available.neutron:
+                    self._cleanup_default_secgroup(creds.tenant_id)
+                self.creds_client.delete_project(creds.tenant_id)
             except lib_exc.NotFound:
                 LOG.warn("tenant with name: %s not found for delete" %
                          creds.tenant_name)
