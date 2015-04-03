@@ -995,7 +995,7 @@ InputScenarioGroup = [
                help="SSH verification in tests is skipped"
                     "for matching images"),
     cfg.StrOpt('ssh_user_regex',
-               default="[[\"^.*[Cc]irros.*$\", \"root\"]]",
+               default="[[\"^.*[Cc]irros.*$\", \"cirros\"]]",
                help="List of user mapped to regex "
                     "to matching image names."),
 ]

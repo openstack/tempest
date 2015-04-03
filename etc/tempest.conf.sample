@@ -667,7 +667,7 @@
 #non_ssh_image_regex = ^.*[Ww]in.*$
 
 # List of user mapped to regex to matching image names. (string value)
-#ssh_user_regex = [["^.*[Cc]irros.*$", "root"]]
+#ssh_user_regex = [["^.*[Cc]irros.*$", "cirros"]]
 
 
 [messaging]
