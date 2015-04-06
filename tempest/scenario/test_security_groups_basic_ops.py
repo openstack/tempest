@@ -256,7 +256,7 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
 
     def _create_tenant_servers(self, tenant, num=1):
         for i in range(num):
-            name = 'server-{tenant}-gen-{num}-'.format(
+            name = 'server-{tenant}-gen-{num}'.format(
                    tenant=tenant.creds.tenant_name,
                    num=i
             )
@@ -271,7 +271,7 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
         workaround ip namespace
         """
         secgroups = tenant.security_groups.values()
-        name = 'server-{tenant}-access_point-'.format(
+        name = 'server-{tenant}-access_point'.format(
             tenant=tenant.creds.tenant_name)
         name = data_utils.rand_name(name)
         server = self._create_server(name, tenant,
@@ -497,7 +497,7 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
         new_tenant.security_groups.update(new_sg=new_sg)
 
         # Create server with default security group
-        name = 'server-{tenant}-gen-1-'.format(
+        name = 'server-{tenant}-gen-1'.format(
                tenant=new_tenant.creds.tenant_name
         )
         name = data_utils.rand_name(name)

@@ -214,7 +214,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
 
     def _reassociate_floating_ips(self):
         floating_ip, server = self.floating_ip_tuple
-        name = data_utils.rand_name('new_server-smoke-')
+        name = data_utils.rand_name('new_server-smoke')
         # create a new server for the floating ip
         server = self._create_server(name, self.network)
         self._associate_floating_ip(floating_ip, server)

@@ -401,7 +401,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
         # Compute client
         _images_client = self.images_client
         if name is None:
-            name = data_utils.rand_name('scenario-snapshot-')
+            name = data_utils.rand_name('scenario-snapshot')
         LOG.debug("Creating a snapshot image for server: %s", server['name'])
         image = _images_client.create_image(server['id'], name)
         image_id = image.response['location'].split('images/')[1]
@@ -1322,7 +1322,7 @@ class EncryptionScenarioTest(ScenarioTest):
             client = self.admin_volume_types_client
         if not name:
             name = 'generic'
-        randomized_name = data_utils.rand_name('scenario-type-' + name + '-')
+        randomized_name = data_utils.rand_name('scenario-type-' + name)
         LOG.debug("Creating a volume type: %s", randomized_name)
         body = client.create_volume_type(
             randomized_name)
