@@ -50,7 +50,7 @@ class VolumesV2SnapshotTestJSON(base.BaseVolumeTest):
         if with_detail:
             fetched_snap_list = \
                 self.snapshots_client.\
-                list_snapshots_with_detail(params=params)
+                list_snapshots(detail=True, params=params)
         else:
             fetched_snap_list = \
                 self.snapshots_client.list_snapshots(params=params)
@@ -98,7 +98,7 @@ class VolumesV2SnapshotTestJSON(base.BaseVolumeTest):
         snapshot = self.create_snapshot(self.volume_origin['id'], **params)
 
         # Get the snap and check for some of its details
-        snap_get = self.snapshots_client.get_snapshot(snapshot['id'])
+        snap_get = self.snapshots_client.show_snapshot(snapshot['id'])
         self.assertEqual(self.volume_origin['id'],
                          snap_get['volume_id'],
                          "Referred volume origin mismatch")
@@ -119,9 +119,9 @@ class VolumesV2SnapshotTestJSON(base.BaseVolumeTest):
         # Assert response body for update_snapshot method
         self.assertEqual(new_s_name, update_snapshot[self.name_field])
         self.assertEqual(new_desc, update_snapshot[self.descrip_field])
-        # Assert response body for get_snapshot method
+        # Assert response body for show_snapshot method
         updated_snapshot = \
-            self.snapshots_client.get_snapshot(snapshot['id'])
+            self.snapshots_client.show_snapshot(snapshot['id'])
         self.assertEqual(new_s_name, updated_snapshot[self.name_field])
         self.assertEqual(new_desc, updated_snapshot[self.descrip_field])
 

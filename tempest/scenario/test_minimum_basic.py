@@ -73,7 +73,7 @@ class TestMinimumBasicScenario(manager.ScenarioTest):
         self.assertIn(self.volume['id'], [x['id'] for x in volumes])
 
     def cinder_show(self):
-        volume = self.volumes_client.get_volume(self.volume['id'])
+        volume = self.volumes_client.show_volume(self.volume['id'])
         self.assertEqual(self.volume, volume)
 
     def nova_volume_attach(self):
@@ -83,7 +83,7 @@ class TestMinimumBasicScenario(manager.ScenarioTest):
         self.assertEqual(self.volume['id'], volume['id'])
         self.volumes_client.wait_for_volume_status(volume['id'], 'in-use')
         # Refresh the volume after the attachment
-        self.volume = self.volumes_client.get_volume(volume['id'])
+        self.volume = self.volumes_client.show_volume(volume['id'])
 
     def nova_reboot(self):
         self.servers_client.reboot(self.server['id'], 'SOFT')
@@ -99,7 +99,7 @@ class TestMinimumBasicScenario(manager.ScenarioTest):
         self.volumes_client.wait_for_volume_status(self.volume['id'],
                                                    'available')
 
-        volume = self.volumes_client.get_volume(self.volume['id'])
+        volume = self.volumes_client.show_volume(self.volume['id'])
         self.assertEqual('available', volume['status'])
 
     def create_and_add_security_group(self):

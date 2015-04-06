@@ -56,7 +56,7 @@ class BaseBackupsClientJSON(service_client.ServiceClient):
         self.expected_success(202, resp.status)
         return service_client.ResponseBody(resp, body)
 
-    def get_backup(self, backup_id):
+    def show_backup(self, backup_id):
         """Returns the details of a single backup."""
         url = "backups/%s" % str(backup_id)
         resp, body = self.get(url)
@@ -64,9 +64,11 @@ class BaseBackupsClientJSON(service_client.ServiceClient):
         self.expected_success(200, resp.status)
         return service_client.ResponseBody(resp, body['backup'])
 
-    def list_backups_with_detail(self):
+    def list_backups(self, detail=False):
         """Information for all the tenant's backups."""
-        url = "backups/detail"
+        url = "backups"
+        if detail:
+            url += "/detail"
         resp, body = self.get(url)
         body = json.loads(body)
         self.expected_success(200, resp.status)
@@ -74,13 +76,13 @@ class BaseBackupsClientJSON(service_client.ServiceClient):
 
     def wait_for_backup_status(self, backup_id, status):
         """Waits for a Backup to reach a given status."""
-        body = self.get_backup(backup_id)
+        body = self.show_backup(backup_id)
         backup_status = body['status']
         start = int(time.time())
 
         while backup_status != status:
             time.sleep(self.build_interval)
-            body = self.get_backup(backup_id)
+            body = self.show_backup(backup_id)
             backup_status = body['status']
             if backup_status == 'error':
                 raise exceptions.VolumeBackupException(backup_id=backup_id)
