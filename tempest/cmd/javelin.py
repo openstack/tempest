@@ -992,9 +992,13 @@ def create_resources():
         add_router_interface(RES['routers'])
 
     create_secgroups(RES['secgroups'])
-    create_servers(RES['servers'])
     create_volumes(RES['volumes'])
-    attach_volumes(RES['volumes'])
+
+    # Only attempt attaching the volumes if servers are defined in the
+    # resourcefile
+    if 'servers' in RES:
+        create_servers(RES['servers'])
+        attach_volumes(RES['volumes'])
 
 
 def destroy_resources():
