@@ -105,7 +105,7 @@ class OrchestrationClient(service_client.ServiceClient):
         headers['X-Auth-User'] = self.user
         return headers, body
 
-    def get_stack(self, stack_identifier):
+    def show_stack(self, stack_identifier):
         """Returns the details of a single stack."""
         url = "stacks/%s" % stack_identifier
         resp, body = self.get(url)
@@ -137,7 +137,7 @@ class OrchestrationClient(service_client.ServiceClient):
         body = json.loads(body)
         return service_client.ResponseBodyList(resp, body['resources'])
 
-    def get_resource(self, stack_identifier, resource_name):
+    def show_resource(self, stack_identifier, resource_name):
         """Returns the details of a single resource."""
         url = "stacks/%s/resources/%s" % (stack_identifier, resource_name)
         resp, body = self.get(url)
@@ -159,7 +159,7 @@ class OrchestrationClient(service_client.ServiceClient):
 
         while True:
             try:
-                body = self.get_resource(
+                body = self.show_resource(
                     stack_identifier, resource_name)
             except lib_exc.NotFound:
                 # ignore this, as the resource may not have
@@ -195,7 +195,7 @@ class OrchestrationClient(service_client.ServiceClient):
 
         while True:
             try:
-                body = self.get_stack(stack_identifier)
+                body = self.show_stack(stack_identifier)
             except lib_exc.NotFound:
                 if status == 'DELETE_COMPLETE':
                     return
@@ -295,14 +295,14 @@ class OrchestrationClient(service_client.ServiceClient):
         body = json.loads(body)
         return service_client.ResponseBodyList(resp, body['resource_types'])
 
-    def get_resource_type(self, resource_type_name):
+    def show_resource_type(self, resource_type_name):
         """Return the schema of a resource type."""
         url = 'resource_types/%s' % resource_type_name
         resp, body = self.get(url)
         self.expected_success(200, resp.status)
         return service_client.ResponseBody(resp, json.loads(body))
 
-    def get_resource_type_template(self, resource_type_name):
+    def show_resource_type_template(self, resource_type_name):
         """Return the template of a resource type."""
         url = 'resource_types/%s/template' % resource_type_name
         resp, body = self.get(url)
@@ -320,7 +320,7 @@ class OrchestrationClient(service_client.ServiceClient):
         body = json.loads(body)
         return service_client.ResponseBody(resp, body)
 
-    def get_software_config(self, conf_id):
+    def show_software_config(self, conf_id):
         """Returns a software configuration resource."""
         url = 'software_configs/%s' % str(conf_id)
         resp, body = self.get(url)
@@ -365,7 +365,7 @@ class OrchestrationClient(service_client.ServiceClient):
         body = json.loads(body)
         return service_client.ResponseBody(resp, body)
 
-    def get_software_deploy_list(self):
+    def list_software_deployments(self):
         """Returns a list of all deployments."""
         url = 'software_deployments'
         resp, body = self.get(url)
@@ -373,7 +373,7 @@ class OrchestrationClient(service_client.ServiceClient):
         body = json.loads(body)
         return service_client.ResponseBody(resp, body)
 
-    def get_software_deploy(self, deploy_id):
+    def show_software_deployment(self, deploy_id):
         """Returns a specific software deployment."""
         url = 'software_deployments/%s' % str(deploy_id)
         resp, body = self.get(url)
@@ -381,7 +381,7 @@ class OrchestrationClient(service_client.ServiceClient):
         body = json.loads(body)
         return service_client.ResponseBody(resp, body)
 
-    def get_software_deploy_meta(self, server_id):
+    def show_software_deployment_metadata(self, server_id):
         """Return a config metadata for a specific server."""
         url = 'software_deployments/metadata/%s' % server_id
         resp, body = self.get(url)
