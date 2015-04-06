@@ -44,7 +44,7 @@ class TestQueues(base.BaseMessagingTest):
 
         self.delete_queue(queue_name)
         self.assertRaises(lib_exc.NotFound,
-                          self.client.get_queue,
+                          self.client.show_queue,
                           queue_name)
 
 
