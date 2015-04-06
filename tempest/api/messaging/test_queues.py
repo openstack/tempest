@@ -33,7 +33,7 @@ class TestQueues(base.BaseMessagingTest):
     @test.idempotent_id('9f1c4c72-80c5-4dac-acf3-188cef42e36c')
     def test_create_delete_queue(self):
         # Create & Delete Queue
-        queue_name = data_utils.rand_name('test-')
+        queue_name = data_utils.rand_name('test')
         _, body = self.create_queue(queue_name)
 
         self.addCleanup(self.client.delete_queue, queue_name)

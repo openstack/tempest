@@ -14,6 +14,7 @@ Tempest Specific Commandments
 - [T105] Tests cannot use setUpClass/tearDownClass
 - [T106] vim configuration should not be kept in source files.
 - [T107] Check that a service tag isn't in the module path
+- [T108] Check no hyphen at the end of rand_name() argument
 - [N322] Method's default argument shouldn't be mutable
 
 Test Data/Configuration
