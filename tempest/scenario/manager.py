@@ -186,7 +186,8 @@ class ScenarioTest(tempest.test.BaseTestCase):
         if create_kwargs is None:
             create_kwargs = {}
         network = self.get_tenant_network()
-        fixed_network.set_networks_kwarg(network, create_kwargs)
+        create_kwargs = fixed_network.set_networks_kwarg(network,
+                                                         create_kwargs)
 
         LOG.debug("Creating a server (name: %s, image: %s, flavor: %s)",
                   name, image, flavor)
