@@ -306,10 +306,10 @@ def _tenants_from_users(users):
     return tenants
 
 
-def _assign_swift_role(user):
+def _assign_swift_role(user, swift_role):
     admin = keystone_admin()
     roles = admin.identity.list_roles()
-    role = next(r for r in roles if r['name'] == 'Member')
+    role = next(r for r in roles if r['name'] == swift_role)
     LOG.debug(USERS[user])
     try:
         admin.identity.assign_user_role(
@@ -583,7 +583,8 @@ def create_objects(objects):
     LOG.info("Creating objects")
     for obj in objects:
         LOG.debug("Object %s" % obj)
-        _assign_swift_role(obj['owner'])
+        swift_role = obj.get('swift_role', 'Member')
+        _assign_swift_role(obj['owner'], swift_role)
         client = client_for_user(obj['owner'])
         client.containers.create_container(obj['container'])
         client.objects.create_object(
