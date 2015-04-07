@@ -87,10 +87,11 @@ class RemoteClient(object):
         cmd = 'sudo sh -c "echo \\"%s\\" >/dev/console"' % message
         return self.exec_command(cmd)
 
-    def ping_host(self, host):
+    def ping_host(self, host, count=CONF.compute.ping_count,
+                  size=CONF.compute.ping_size):
         addr = netaddr.IPAddress(host)
         cmd = 'ping6' if addr.version == 6 else 'ping'
-        cmd += ' -c1 -w1 {0}'.format(host)
+        cmd += ' -c{0} -w{0} -s{1} {2}'.format(count, size, host)
         return self.exec_command(cmd)
 
     def get_mac_address(self):
