@@ -147,3 +147,25 @@ class CredentialProvider(object):
     @abc.abstractmethod
     def is_role_available(self, role):
         return
+
+
+class TestResources(object):
+    """Readonly Credentials, with network resources added."""
+
+    def __init__(self, credentials):
+        self._credentials = credentials
+        self.network = None
+        self.subnet = None
+        self.router = None
+
+    def __getattr__(self, item):
+        return getattr(self._credentials, item)
+
+    def set_resources(self, **kwargs):
+        for key in kwargs.keys():
+            if hasattr(self, key):
+                setattr(self, key, kwargs[key])
+
+    @property
+    def credentials(self):
+        return self._credentials

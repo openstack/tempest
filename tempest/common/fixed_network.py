@@ -42,7 +42,8 @@ def get_tenant_network(creds_provider, compute_networks_client):
     if (isinstance(creds_provider, isolated_creds.IsolatedCreds) and
         (CONF.service_available.neutron and
          not CONF.service_available.ironic)):
-        network = creds_provider.get_primary_network()
+        # tenant_allow_isolation == True, so network is defined
+        network = creds_provider.get_primary_creds().network
     else:
         if fixed_network_name:
             try:
