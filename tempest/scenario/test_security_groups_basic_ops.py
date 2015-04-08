@@ -125,6 +125,10 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
         if CONF.baremetal.driver_enabled:
             msg = ('Not currently supported by baremetal.')
             raise cls.skipException(msg)
+        if CONF.network.port_vnic_type in ['direct', 'macvtap']:
+            msg = ('Not currently supported when using vnic_type'
+                   ' direct or macvtap')
+            raise cls.skipException(msg)
         if not (CONF.network.tenant_networks_reachable or
                 CONF.network.public_network_id):
             msg = ('Either tenant_networks_reachable must be "true", or '
