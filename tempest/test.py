@@ -445,7 +445,12 @@ class BaseTestCase(testtools.testcase.WithAttributes,
         # Make sure isolated_creds exists and get a network client
         networks_client = cls.get_client_manager().networks_client
         isolated_creds = getattr(cls, 'isolated_creds', None)
-        if credentials.is_admin_available():
+        # In case of nova network, isolated tenants are not able to list the
+        # network configured in fixed_network_name, even if the can use it
+        # for their servers, so using an admin network client to validate
+        # the network name
+        if (not CONF.service_available.neutron and
+                credentials.is_admin_available()):
             admin_creds = isolated_creds.get_admin_creds()
             networks_client = clients.Manager(admin_creds).networks_client
         return fixed_network.get_tenant_network(isolated_creds,
