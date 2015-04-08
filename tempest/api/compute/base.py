@@ -27,6 +27,7 @@ from tempest import config
 from tempest import exceptions
 import tempest.test
 import  random
+from httplib2 import Response
 CONF = config.CONF
 
 LOG = logging.getLogger(__name__)
@@ -212,9 +213,33 @@ class BaseComputeTest(tempest.test.BaseTestCase):
             name = kwargs.pop('name')
         flavor = kwargs.get('flavor', cls.flavor_ref)
         image_id = kwargs.get('image_id', cls.image_ref)
+#         Changes related to the volume_id
+        create_kwargs ={}
+        if True:
+        
+            if 'volume_size' in kwargs:
+                size = kwargs.pop('volume_size')
+            else:
+                size = 2
+        
+            if 'volume_id' in kwargs:
+                volume_id = kwargs.pop('volume_id')
+            else:
+                response = cls.volumes_client.create_volume(
+                size=size, imageRef=image_id)
+                volume_id = response['id']
+            bd_map = [{
+            'device_name': 'vda',
+            'volume_id': volume_id,
+            'delete_on_termination': '0'}]
+        
+            create_kwargs = {
+            'block_device_mapping': bd_map
+            }
 
         kwargs = fixed_network.set_networks_kwarg(
             cls.get_tenant_network(), kwargs) or {}
+        kwargs.update(create_kwargs)
         body = cls.servers_client.create_server(
             name, image_id, flavor, **kwargs)
 
