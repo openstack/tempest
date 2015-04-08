@@ -253,10 +253,9 @@ def check_service_availability(os, update):
         'database': 'trove'
     }
     # Get catalog list for endpoints to use for validation
-    endpoints = os.endpoints_client.list_endpoints()
-    for endpoint in endpoints:
-        service = os.service_client.get_service(endpoint['service_id'])
-        services.append(service['type'])
+    _token, auth_data = os.auth_provider.get_auth()
+    for entry in auth_data['serviceCatalog']:
+        services.append(entry['type'])
     # Pull all catalog types from config file and compare against endpoint list
     for cfgname in dir(CONF._config):
         cfg = getattr(CONF, cfgname)
@@ -330,7 +329,7 @@ def main():
         CONF_PARSER = moves.configparser.SafeConfigParser()
         CONF_PARSER.optionxform = str
         CONF_PARSER.readfp(conf_file)
-    os = clients.AdminManager()
+    os = clients.Manager()
     services = check_service_availability(os, update)
     results = {}
     for service in ['nova', 'cinder', 'neutron', 'swift']:
