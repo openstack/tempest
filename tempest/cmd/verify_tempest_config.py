@@ -24,6 +24,7 @@ import httplib2
 from six import moves
 
 from tempest import clients
+from tempest.common import credentials
 from tempest import config
 
 
@@ -254,7 +255,11 @@ def check_service_availability(os, update):
     }
     # Get catalog list for endpoints to use for validation
     _token, auth_data = os.auth_provider.get_auth()
-    for entry in auth_data['serviceCatalog']:
+    if os.auth_version == 'v2':
+        catalog_key = 'serviceCatalog'
+    else:
+        catalog_key = 'catalog'
+    for entry in auth_data[catalog_key]:
         services.append(entry['type'])
     # Pull all catalog types from config file and compare against endpoint list
     for cfgname in dir(CONF._config):
@@ -329,7 +334,8 @@ def main():
         CONF_PARSER = moves.configparser.SafeConfigParser()
         CONF_PARSER.optionxform = str
         CONF_PARSER.readfp(conf_file)
-    os = clients.Manager()
+    icreds = credentials.get_isolated_credentials('verify_tempest_config')
+    os = clients.Manager(icreds.get_primary_creds())
     services = check_service_availability(os, update)
     results = {}
     for service in ['nova', 'cinder', 'neutron', 'swift']:
