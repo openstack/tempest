@@ -229,7 +229,9 @@ class BaseTestCase(testtools.testcase.WithAttributes,
     _service = None
 
     # NOTE(andreaf) credentials holds a list of the credentials to be allocated
-    # at class setup time. Credential types can be 'primary', 'alt' or 'admin'
+    # at class setup time. Credential types can be 'primary', 'alt', 'admin' or
+    # a list of roles - the first element of the list being a label, and the
+    # rest the actual roles
     credentials = []
     network_resources = {}
 
@@ -341,19 +343,24 @@ class BaseTestCase(testtools.testcase.WithAttributes,
             # This may raise an exception in case credentials are not available
             # In that case we want to let the exception through and the test
             # fail accordingly
-            manager = cls.get_client_manager(
-                credential_type=credentials_type)
-            setattr(cls, 'os_%s' % credentials_type, manager)
-            # Setup some common aliases
-            # TODO(andreaf) The aliases below are a temporary hack
-            # to avoid changing too much code in one patch. They should
-            # be removed eventually
-            if credentials_type == 'primary':
-                cls.os = cls.manager = cls.os_primary
-            if credentials_type == 'admin':
-                cls.os_adm = cls.admin_manager = cls.os_admin
-            if credentials_type == 'alt':
-                cls.alt_manager = cls.os_alt
+            if isinstance(credentials_type, six.string_types):
+                manager = cls.get_client_manager(
+                    credential_type=credentials_type)
+                setattr(cls, 'os_%s' % credentials_type, manager)
+                # Setup some common aliases
+                # TODO(andreaf) The aliases below are a temporary hack
+                # to avoid changing too much code in one patch. They should
+                # be removed eventually
+                if credentials_type == 'primary':
+                    cls.os = cls.manager = cls.os_primary
+                if credentials_type == 'admin':
+                    cls.os_adm = cls.admin_manager = cls.os_admin
+                if credentials_type == 'alt':
+                    cls.alt_manager = cls.os_alt
+            elif isinstance(credentials_type, list):
+                manager = cls.get_client_manager(roles=credentials_type[1:],
+                                                 force_new=True)
+                setattr(cls, 'os_roles_%s' % credentials_type[0], manager)
 
     @classmethod
     def setup_clients(cls):
