@@ -472,8 +472,6 @@ class NegativeAutoTest(BaseTestCase):
         super(NegativeAutoTest, cls).setUpClass()
         os = cls.get_client_manager()
         cls.client = os.negative_client
-        os_admin = clients.AdminManager(service=cls._service)
-        cls.admin_client = os_admin.negative_client
 
     @staticmethod
     def load_tests(*args):
@@ -601,7 +599,13 @@ class NegativeAutoTest(BaseTestCase):
                             "mechanism")
 
         if "admin_client" in description and description["admin_client"]:
-            client = self.admin_client
+            if not credentials.is_admin_available():
+                msg = ("Missing Identity Admin API credentials in"
+                       "configuration.")
+                raise self.skipException(msg)
+            creds = self.isolated_creds.get_admin_creds()
+            os_adm = clients.Manager(credentials=creds)
+            client = os_adm.negative_client
         else:
             client = self.client
         resp, resp_body = client.send_request(method, new_url,

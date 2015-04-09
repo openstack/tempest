@@ -16,6 +16,7 @@
 from oslo_log import log as logging
 from tempest_lib.common.utils import data_utils
 
+from tempest.common import credentials
 from tempest.common import tempest_fixtures as fixtures
 from tempest.scenario import manager
 from tempest import test
@@ -33,6 +34,13 @@ class TestAggregatesBasicOps(manager.ScenarioTest):
     Removes host from aggregate
     Deletes aggregate
     """
+    @classmethod
+    def skip_checks(cls):
+        super(TestAggregatesBasicOps, cls).skip_checks()
+        if not credentials.is_admin_available():
+            msg = ("Missing Identity Admin API credentials in configuration.")
+            raise cls.skipException(msg)
+
     @classmethod
     def setup_clients(cls):
         super(TestAggregatesBasicOps, cls).setup_clients()

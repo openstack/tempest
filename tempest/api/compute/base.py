@@ -352,10 +352,10 @@ class BaseComputeAdminTest(BaseComputeTest):
 
     @classmethod
     def skip_checks(cls):
+        super(BaseComputeAdminTest, cls).skip_checks()
         if not credentials.is_admin_available():
             msg = ("Missing Identity Admin API credentials in configuration.")
             raise cls.skipException(msg)
-        super(BaseComputeAdminTest, cls).skip_checks()
 
     @classmethod
     def setup_credentials(cls):
