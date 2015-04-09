@@ -191,10 +191,11 @@ def create_resources(opts, resources):
     if network_admin:
         for u in resources['users']:
             tenant = identity_admin.get_tenant_by_name(u['tenant'])
-            network_name = create_network_resources(network_admin,
-                                                    tenant['id'],
-                                                    u['name'])
+            network_name, router_name = create_network_resources(network_admin,
+                                                                 tenant['id'],
+                                                                 u['name'])
             u['network'] = network_name
+            u['router'] = router_name
         LOG.info('Networks created')
     for u in resources['users']:
         try:
@@ -266,7 +267,7 @@ def create_network_resources(network_admin_client, tenant_id, name):
     router_name = name + "-router"
     router = _create_router(router_name)
     _add_router_interface(router['id'], subnet['id'])
-    return network_name
+    return network_name, router_name
 
 
 def random_user_name(tag, prefix):
@@ -330,8 +331,12 @@ def dump_accounts(opts, resources):
             'password': user['pass'],
             'roles': user['roles']
         }
+        if 'network' or 'router' in user:
+            account['resources'] = {}
         if 'network' in user:
-            account['resources'] = {'network': user['network']}
+            account['resources']['network'] = user['network']
+        if 'router' in user:
+            account['resources']['router'] = user['router']
         accounts.append(account)
     if os.path.exists(opts.accounts):
         os.rename(opts.accounts, '.'.join((opts.accounts, 'bak')))
