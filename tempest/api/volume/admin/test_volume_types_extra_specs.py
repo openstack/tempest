@@ -77,7 +77,7 @@ class VolumeTypesExtraSpecsV2Test(base.BaseVolumeAdminTest):
         self.assertEqual(extra_specs, body,
                          "Volume type extra spec incorrectly created")
 
-        self.volume_types_client.get_volume_type_extra_specs(
+        self.volume_types_client.show_volume_type_extra_specs(
             self.volume_type['id'],
             extra_specs.keys()[0])
         self.assertEqual(extra_specs, body,

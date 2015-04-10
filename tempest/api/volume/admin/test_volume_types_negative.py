@@ -45,7 +45,7 @@ class VolumeTypesNegativeV2Test(base.BaseVolumeAdminTest):
     def test_get_nonexistent_type_id(self):
         # Should not be able to get volume type with nonexistent type id.
         self.assertRaises(lib_exc.NotFound,
-                          self.volume_types_client.get_volume_type,
+                          self.volume_types_client.show_volume_type,
                           str(uuid.uuid4()))
 
     @test.attr(type='gate')

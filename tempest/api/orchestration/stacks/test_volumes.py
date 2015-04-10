@@ -34,7 +34,7 @@ class CinderResourcesTest(base.BaseOrchestrationTest):
 
     def _cinder_verify(self, volume_id, template):
         self.assertIsNotNone(volume_id)
-        volume = self.volumes_client.get_volume(volume_id)
+        volume = self.volumes_client.show_volume(volume_id)
         self.assertEqual('available', volume.get('status'))
         self.assertEqual(template['resources']['volume']['properties'][
             'size'], volume.get('size'))
@@ -76,7 +76,7 @@ class CinderResourcesTest(base.BaseOrchestrationTest):
         self.client.delete_stack(stack_identifier)
         self.client.wait_for_stack_status(stack_identifier, 'DELETE_COMPLETE')
         self.assertRaises(lib_exc.NotFound,
-                          self.volumes_client.get_volume,
+                          self.volumes_client.show_volume,
                           volume_id)
 
     def _cleanup_volume(self, volume_id):

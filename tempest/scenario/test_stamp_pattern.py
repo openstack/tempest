@@ -85,7 +85,7 @@ class TestStampPattern(manager.ScenarioTest):
         def cleaner():
             self.snapshots_client.delete_snapshot(snapshot['id'])
             try:
-                while self.snapshots_client.get_snapshot(snapshot['id']):
+                while self.snapshots_client.show_snapshot(snapshot['id']):
                     time.sleep(1)
             except lib_exc.NotFound:
                 pass

@@ -29,29 +29,20 @@ class BaseSnapshotsClientJSON(service_client.ServiceClient):
 
     create_resp = 200
 
-    def list_snapshots(self, params=None):
+    def list_snapshots(self, detail=False, params=None):
         """List all the snapshot."""
         url = 'snapshots'
+        if detail:
+            url += '/detail'
         if params:
-                url += '?%s' % urllib.urlencode(params)
+            url += '?%s' % urllib.urlencode(params)
 
         resp, body = self.get(url)
         body = json.loads(body)
         self.expected_success(200, resp.status)
         return service_client.ResponseBodyList(resp, body['snapshots'])
 
-    def list_snapshots_with_detail(self, params=None):
-        """List the details of all snapshots."""
-        url = 'snapshots/detail'
-        if params:
-                url += '?%s' % urllib.urlencode(params)
-
-        resp, body = self.get(url)
-        body = json.loads(body)
-        self.expected_success(200, resp.status)
-        return service_client.ResponseBodyList(resp, body['snapshots'])
-
-    def get_snapshot(self, snapshot_id):
+    def show_snapshot(self, snapshot_id):
         """Returns the details of a single snapshot."""
         url = "snapshots/%s" % str(snapshot_id)
         resp, body = self.get(url)
@@ -85,7 +76,7 @@ class BaseSnapshotsClientJSON(service_client.ServiceClient):
 
     # NOTE(afazekas): just for the wait function
     def _get_snapshot_status(self, snapshot_id):
-        body = self.get_snapshot(snapshot_id)
+        body = self.show_snapshot(snapshot_id)
         status = body['status']
         # NOTE(afazekas): snapshot can reach an "error"
         # state in a "normal" lifecycle
@@ -128,7 +119,7 @@ class BaseSnapshotsClientJSON(service_client.ServiceClient):
 
     def is_resource_deleted(self, id):
         try:
-            self.get_snapshot(id)
+            self.show_snapshot(id)
         except lib_exc.NotFound:
             return True
         return False
@@ -166,7 +157,7 @@ class BaseSnapshotsClientJSON(service_client.ServiceClient):
         self.expected_success(200, resp.status)
         return service_client.ResponseBody(resp, body['metadata'])
 
-    def get_snapshot_metadata(self, snapshot_id):
+    def show_snapshot_metadata(self, snapshot_id):
         """Get metadata of the snapshot."""
         url = "snapshots/%s/metadata" % str(snapshot_id)
         resp, body = self.get(url)

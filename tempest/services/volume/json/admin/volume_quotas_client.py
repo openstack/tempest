@@ -26,7 +26,7 @@ class BaseVolumeQuotasClientJSON(service_client.ServiceClient):
 
     TYPE = "json"
 
-    def get_default_quota_set(self, tenant_id):
+    def show_default_quota_set(self, tenant_id):
         """List the default volume quota set for a tenant."""
 
         url = 'os-quota-sets/%s/defaults' % tenant_id
@@ -34,7 +34,7 @@ class BaseVolumeQuotasClientJSON(service_client.ServiceClient):
         self.expected_success(200, resp.status)
         return service_client.ResponseBody(resp, self._parse_resp(body))
 
-    def get_quota_set(self, tenant_id, params=None):
+    def show_quota_set(self, tenant_id, params=None):
         """List the quota set for a tenant."""
 
         url = 'os-quota-sets/%s' % tenant_id
@@ -45,10 +45,10 @@ class BaseVolumeQuotasClientJSON(service_client.ServiceClient):
         self.expected_success(200, resp.status)
         return service_client.ResponseBody(resp, self._parse_resp(body))
 
-    def get_quota_usage(self, tenant_id):
+    def show_quota_usage(self, tenant_id):
         """List the quota set for a tenant."""
 
-        body = self.get_quota_set(tenant_id, params={'usage': True})
+        body = self.show_quota_set(tenant_id, params={'usage': True})
         return body
 
     def update_quota_set(self, tenant_id, gigabytes=None, volumes=None,
