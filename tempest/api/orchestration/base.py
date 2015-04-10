@@ -199,5 +199,5 @@ class BaseOrchestrationTest(tempest.test.BaseTestCase):
                     for r in resources)
 
     def get_stack_output(self, stack_identifier, output_key):
-        body = self.client.get_stack(stack_identifier)
+        body = self.client.show_stack(stack_identifier)
         return self.stack_output(body, output_key)

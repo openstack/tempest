@@ -81,8 +81,8 @@ class NeutronResourcesTestJSON(base.BaseOrchestrationTest):
                 # attempt to log the server console to help with debugging
                 # the cause of the server not signalling the waitcondition
                 # to heat.
-                body = cls.client.get_resource(cls.stack_identifier,
-                                               'Server')
+                body = cls.client.show_resource(cls.stack_identifier,
+                                                'Server')
                 server_id = body['physical_resource_id']
                 LOG.debug('Console output for %s', server_id)
                 output = cls.servers_client.get_console_output(
