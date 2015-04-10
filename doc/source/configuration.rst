@@ -123,3 +123,91 @@ The only restriction with using the traditional config options for credentials
 is that if a test requires specific roles on accounts these tests can not be
 run. This is because the config options do not give sufficient flexibility to
 describe the roles assigned to a user for running the tests.
+
+Networking
+----------
+OpenStack has a myriad of different networking configurations possible and
+depending on which of the 2 network backends, nova-network or neutron, you are
+using things can vary drastically. Due to this complexity Tempest has to provide
+a certain level of flexibility in it's configuration to ensure it will work
+against any cloud. This ends up causing a large number of permutations in
+Tempest's config around network configuration.
+
+
+Enabling Remote Access to Created Servers
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+When Tempest creates servers for testing, some tests require being able to
+connect those servers. Depending on the configuration of the cloud, the methods
+for doing this can be different. In certain configurations it is required to
+specify a single network with server create calls. Accordingly, Tempest provides
+a few different methods for providing this information in configuration to try
+and ensure that regardless of the clouds configuration it'll still be able to
+run. This section covers the different methods of configuring Tempest to provide
+a network when creating servers.
+
+Fixed Network Name
+""""""""""""""""""
+This is the simplest method of specifying how networks should be used. You can
+just specify a single network name/label to use for all server creations. The
+limitation with this is that all tenants/projects and users must be able to see
+that network name/label if they were to perform a network list and be able to
+use it.
+
+If no network name is assigned in the config file and none of the below
+alternatives are used, then Tempest will not specify a network on server
+creations, which depending on the cloud configuration might prevent them from
+booting.
+
+To set a fixed network name simply do:
+
+ #. Set the fixed_network_name option in the compute group
+
+In the case that the configured fixed network name can not be found by a user
+network list call, it will be treated like one was not provided except that a
+warning will be logged stating that it couldn't be found.
+
+
+Accounts File
+"""""""""""""
+If you are using an accounts file to provide credentials for running Tempest
+then you can leverage it to also specify which network should be used with
+server creations on a per tenant/project and user pair basis. This provides
+the necessary flexibility to work with more intricate networking configurations
+by enabling the user to specify exactly which network to use for which
+tenants/projects. You can refer to the accounts.yaml sample file included in
+the tempest repo for the syntax around specifying networks in the file.
+
+However, specifying a network is not required when using an accounts file. If
+one is not specified you can use a fixed network name to specify the network to
+use when creating servers just as without an accounts file. However, any network
+specified in the accounts file will take precedence over the fixed network name
+provided. If no network is provided in the accounts file and a fixed network
+name is not set then no network will be included in create server requests.
+
+If a fixed network is provided and the accounts.yaml file also contains networks
+this has the benefit of enabling a couple more tests which require a static
+network to perform operations like server lists with a network filter. If a
+fixed network name is not provided these tests are skipped. Additionally, if a
+fixed network name is provided it will serve as a fallback in case of a
+misconfiguration or a missing network in the accounts file.
+
+
+With Tenant Isolation
+"""""""""""""""""""""
+With tenant isolation enabled and using nova-network then nothing changes. Your
+only option for configuration is to either set a fixed network name or not.
+However, in most cases it shouldn't matter because nova-network should have no
+problem booting a server with multiple networks. If this is not the case for
+your cloud then using an accounts file is recommended because it provides the
+necessary flexibility to describe your configuration. Tenant isolation is not
+able to dynamically allocate things as necessary if neutron is not enabled.
+
+With neutron and tenant isolation enabled there should not be any additional
+configuration necessary to enable Tempest to create servers with working
+networking, assuming you have properly configured the network section to work
+for your cloud. Tempest will dynamically create the neutron resources necessary
+to enable using servers with that network. Also, just as with the accounts
+file, if you specify a fixed network name while using neutron and tenant
+isolation it will enable running tests which require a static network and it
+will additionally be used as a fallback for server creation. However, unlike
+accounts.yaml this should never be triggered.
