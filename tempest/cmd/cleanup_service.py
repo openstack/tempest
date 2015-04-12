@@ -76,12 +76,12 @@ def init_conf():
                   CONF.identity.alt_username]
 
     if IS_NEUTRON:
-        CONF_PRIV_NETWORK = _get_priv_net_id(CONF.compute.fixed_network_name,
-                                             CONF.identity.tenant_name)
+        CONF_PRIV_NETWORK = _get_network_id(CONF.compute.fixed_network_name,
+                                            CONF.identity.tenant_name)
         CONF_NETWORKS = [CONF_PUB_NETWORK, CONF_PRIV_NETWORK]
 
 
-def _get_priv_net_id(prv_net_name, tenant_name):
+def _get_network_id(net_name, tenant_name):
     am = clients.AdminManager()
     net_cl = am.network_client
     id_cl = am.identity_client
@@ -91,7 +91,7 @@ def _get_priv_net_id(prv_net_name, tenant_name):
     t_id = tenant['id']
     n_id = None
     for net in networks['networks']:
-        if (net['tenant_id'] == t_id and net['name'] == prv_net_name):
+        if (net['tenant_id'] == t_id and net['name'] == net_name):
             n_id = net['id']
             break
     return n_id
@@ -102,6 +102,10 @@ class BaseService(object):
         self.client = None
         for key, value in kwargs.items():
             setattr(self, key, value)
+
+        self.tenant_filter = {}
+        if hasattr(self, 'tenant_id'):
+            self.tenant_filter['tenant_id'] = self.tenant_id
 
     def _filter_by_tenant_id(self, item_list):
         if (item_list is None
@@ -396,8 +400,8 @@ class NetworkService(BaseService):
 
     def list(self):
         client = self.client
-        networks = client.list_networks()
-        networks = self._filter_by_tenant_id(networks['networks'])
+        networks = client.list_networks(**self.tenant_filter)
+        networks = networks['networks']
         # filter out networks declared in tempest.conf
         if self.is_preserve:
             networks = [network for network in networks
@@ -424,9 +428,8 @@ class NetworkFloatingIpService(NetworkService):
 
     def list(self):
         client = self.client
-        flips = client.list_floatingips()
+        flips = client.list_floatingips(**self.tenant_filter)
         flips = flips['floatingips']
-        flips = self._filter_by_tenant_id(flips)
         LOG.debug("List count, %s Network Floating IPs" % len(flips))
         return flips
 
@@ -449,9 +452,8 @@ class NetworkRouterService(NetworkService):
 
     def list(self):
         client = self.client
-        routers = client.list_routers()
+        routers = client.list_routers(**self.tenant_filter)
         routers = routers['routers']
-        routers = self._filter_by_tenant_id(routers)
         if self.is_preserve:
             routers = [router for router in routers
                        if router['id'] != CONF_PUB_ROUTER]
@@ -465,11 +467,12 @@ class NetworkRouterService(NetworkService):
         for router in routers:
             try:
                 rid = router['id']
-                ports = client.list_router_interfaces(rid)
-                ports = ports['ports']
+                ports = [port for port
+                         in client.list_router_interfaces(rid)['ports']
+                         if port["device_owner"] == "network:router_interface"]
                 for port in ports:
-                    subid = port['fixed_ips'][0]['subnet_id']
-                    client.remove_router_interface_with_subnet_id(rid, subid)
+                    client.remove_router_interface_with_port_id(rid,
+                                                                port['id'])
                 client.delete_router(rid)
             except Exception as e:
                 LOG.exception("Delete Router exception: %s" % e)
@@ -634,11 +637,14 @@ class NetworkPortService(NetworkService):
 
     def list(self):
         client = self.client
-        ports = client.list_ports()
-        ports = ports['ports']
-        ports = self._filter_by_tenant_id(ports)
+        ports = [port for port in
+                 client.list_ports(**self.tenant_filter)['ports']
+                 if port["device_owner"] == "" or
+                 port["device_owner"].startswith("compute:")]
+
         if self.is_preserve:
             ports = self._filter_by_conf_networks(ports)
+
         LOG.debug("List count, %s Ports" % len(ports))
         return ports
 
@@ -657,13 +663,40 @@ class NetworkPortService(NetworkService):
         self.data['ports'] = ports
 
 
+class NetworkSecGroupService(NetworkService):
+    def list(self):
+        client = self.client
+        filter = self.tenant_filter
+        # cannot delete default sec group so never show it.
+        secgroups = [secgroup for secgroup in
+                     client.list_security_groups(**filter)['security_groups']
+                     if secgroup['name'] != 'default']
+
+        if self.is_preserve:
+            secgroups = self._filter_by_conf_networks(secgroups)
+        LOG.debug("List count, %s securtiy_groups" % len(secgroups))
+        return secgroups
+
+    def delete(self):
+        client = self.client
+        secgroups = self.list()
+        for secgroup in secgroups:
+            try:
+                client.delete_secgroup(secgroup['id'])
+            except Exception:
+                LOG.exception("Delete security_group exception.")
+
+    def dry_run(self):
+        secgroups = self.list()
+        self.data['secgroups'] = secgroups
+
+
 class NetworkSubnetService(NetworkService):
 
     def list(self):
         client = self.client
-        subnets = client.list_subnets()
+        subnets = client.list_subnets(**self.tenant_filter)
         subnets = subnets['subnets']
-        subnets = self._filter_by_tenant_id(subnets)
         if self.is_preserve:
             subnets = self._filter_by_conf_networks(subnets)
         LOG.debug("List count, %s Subnets" % len(subnets))
@@ -784,8 +817,8 @@ class ImageService(BaseService):
         self.data['images'] = images
 
     def save_state(self):
-        images = self.list()
         self.data['images'] = {}
+        images = self.list()
         for image in images:
             self.data['images'][image['id']] = image['name']
 
@@ -955,7 +988,6 @@ class DomainService(BaseService):
 
 def get_tenant_cleanup_services():
     tenant_services = []
-
     if IS_CEILOMETER:
         tenant_services.append(TelemetryAlarmService)
     if IS_NOVA:
@@ -969,14 +1001,15 @@ def get_tenant_cleanup_services():
     if IS_HEAT:
         tenant_services.append(StackService)
     if IS_NEUTRON:
+        tenant_services.append(NetworkFloatingIpService)
         if test.is_extension_enabled('metering', 'network'):
             tenant_services.append(NetworkMeteringLabelRuleService)
             tenant_services.append(NetworkMeteringLabelService)
         tenant_services.append(NetworkRouterService)
-        tenant_services.append(NetworkFloatingIpService)
         tenant_services.append(NetworkPortService)
         tenant_services.append(NetworkSubnetService)
         tenant_services.append(NetworkService)
+        tenant_services.append(NetworkSecGroupService)
     if IS_CINDER:
         tenant_services.append(SnapshotService)
         tenant_services.append(VolumeService)
