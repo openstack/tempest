@@ -190,8 +190,15 @@ class Accounts(cred_provider.CredentialProvider):
     def get_hash(self, creds):
         for _hash in self.hash_dict['creds']:
             # Comparing on the attributes that are expected in the YAML
-            if all([getattr(creds, k) == self.hash_dict['creds'][_hash][k] for
-                   k in creds.get_init_attributes()]):
+            init_attributes = creds.get_init_attributes()
+            hash_attributes = self.hash_dict['creds'][_hash].copy()
+            if ('user_domain_name' in init_attributes and 'user_domain_name'
+                    not in hash_attributes):
+                # Allow for the case of domain_name populated from config
+                domain_name = CONF.identity.admin_domain_name
+                hash_attributes['user_domain_name'] = domain_name
+            if all([getattr(creds, k) == hash_attributes[k] for
+                   k in init_attributes]):
                 return _hash
         raise AttributeError('Invalid credentials %s' % creds)
 
