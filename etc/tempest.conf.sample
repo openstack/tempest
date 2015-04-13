@@ -161,8 +161,9 @@
 # Timeout for Ironic power transitions. (integer value)
 #power_timeout = 60
 
-# Timeout for unprovisioning an Ironic node. (integer value)
-#unprovision_timeout = 60
+# Timeout for unprovisioning an Ironic node. Takes longer since Kilo
+# as Ironic performs an extra step in Node cleaning. (integer value)
+#unprovision_timeout = 300
 
 
 [boto]
