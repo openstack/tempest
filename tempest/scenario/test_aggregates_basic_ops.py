@@ -80,7 +80,7 @@ class TestAggregatesBasicOps(manager.ScenarioTest):
 
     def _check_aggregate_details(self, aggregate, aggregate_name, azone,
                                  hosts, metadata):
-        aggregate = self.aggregates_client.get_aggregate(aggregate['id'])
+        aggregate = self.aggregates_client.show_aggregate(aggregate['id'])
         self.assertEqual(aggregate_name, aggregate['name'])
         self.assertEqual(azone, aggregate['availability_zone'])
         self.assertEqual(hosts, aggregate['hosts'])

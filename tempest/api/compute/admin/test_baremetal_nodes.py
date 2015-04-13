@@ -52,5 +52,5 @@ class BaremetalNodesAdminTestJSON(base.BaseV2ComputeAdminTest):
 
         # Test getting each individually
         for node in test_nodes:
-            baremetal_node = self.client.get_baremetal_node(node['uuid'])
+            baremetal_node = self.client.show_baremetal_node(node['uuid'])
             self.assertEqual(node['uuid'], baremetal_node['id'])

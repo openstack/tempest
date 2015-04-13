@@ -110,7 +110,7 @@ class AggregatesAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
         self.addCleanup(self.client.delete_aggregate, aggregate['id'])
 
         self.assertRaises(lib_exc.Forbidden,
-                          self.user_client.get_aggregate,
+                          self.user_client.show_aggregate,
                           aggregate['id'])
 
     @test.attr(type=['negative', 'gate'])
@@ -125,7 +125,7 @@ class AggregatesAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
     def test_aggregate_get_details_with_invalid_id(self):
         # Get aggregate details with invalid id should raise exceptions.
         self.assertRaises(lib_exc.NotFound,
-                          self.client.get_aggregate, -1)
+                          self.client.show_aggregate, -1)
 
     @test.attr(type=['negative', 'gate'])
     @test.idempotent_id('0ef07828-12b4-45ba-87cc-41425faf5711')

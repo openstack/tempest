@@ -50,5 +50,5 @@ class ExtensionsTestJSON(base.BaseV2ComputeTest):
     @test.attr(type='gate')
     def test_get_extension(self):
         # get the specified extensions
-        extension = self.extensions_client.get_extension('os-consoles')
+        extension = self.extensions_client.show_extension('os-consoles')
         self.assertEqual('os-consoles', extension['alias'])

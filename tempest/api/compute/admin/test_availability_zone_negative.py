@@ -36,4 +36,4 @@ class AZAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
         # non-administrator user
         self.assertRaises(
             lib_exc.Forbidden,
-            self.non_adm_client.get_availability_zone_list_detail)
+            self.non_adm_client.list_availability_zones, detail=True)

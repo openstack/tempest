@@ -102,7 +102,7 @@ class AggregatesAdminTestJSON(base.BaseV2ComputeAdminTest):
         aggregate = self.client.create_aggregate(name=aggregate_name)
         self.addCleanup(self.client.delete_aggregate, aggregate['id'])
 
-        body = self.client.get_aggregate(aggregate['id'])
+        body = self.client.show_aggregate(aggregate['id'])
         self.assertEqual(aggregate['name'], body['name'])
         self.assertEqual(aggregate['availability_zone'],
                          body['availability_zone'])
@@ -114,7 +114,7 @@ class AggregatesAdminTestJSON(base.BaseV2ComputeAdminTest):
         self.assertEqual(meta, body["metadata"])
 
         # verify the metadata has been set
-        body = self.client.get_aggregate(aggregate['id'])
+        body = self.client.show_aggregate(aggregate['id'])
         self.assertEqual(meta, body["metadata"])
 
     @test.attr(type='gate')
@@ -198,7 +198,7 @@ class AggregatesAdminTestJSON(base.BaseV2ComputeAdminTest):
         self.client.add_host(aggregate['id'], self.host)
         self.addCleanup(self.client.remove_host, aggregate['id'], self.host)
 
-        body = self.client.get_aggregate(aggregate['id'])
+        body = self.client.show_aggregate(aggregate['id'])
         self.assertEqual(aggregate_name, body['name'])
         self.assertIsNone(body['availability_zone'])
         self.assertIn(self.host, body['hosts'])

@@ -33,6 +33,6 @@ class CertificatesV2TestJSON(base.BaseComputeTest):
     @test.idempotent_id('3ac273d0-92d2-4632-bdfc-afbc21d4606c')
     def test_get_root_certificate(self):
         # get the root certificate
-        body = self.certificates_client.get_certificate('root')
+        body = self.certificates_client.show_certificate('root')
         self.assertIn('data', body)
         self.assertIn('private_key', body)
