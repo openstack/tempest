@@ -309,8 +309,13 @@ class ScenarioTest(tempest.test.BaseTestCase):
         if isinstance(server_or_ip, six.string_types):
             ip = server_or_ip
         else:
-            addr = server_or_ip['addresses'][CONF.compute.network_for_ssh][0]
-            ip = addr['addr']
+            addrs = server_or_ip['addresses'][CONF.compute.network_for_ssh]
+            try:
+                ip = (addr['addr'] for addr in addrs if
+                      netaddr.valid_ipv4(addr['addr'])).next()
+            except StopIteration:
+                raise lib_exc.NotFound("No IPv4 addresses to use for SSH to "
+                                       "remote server.")
 
         if username is None:
             username = CONF.scenario.ssh_user
