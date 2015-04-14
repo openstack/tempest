@@ -12,6 +12,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+# import mock
 import os
 
 import fixtures
@@ -39,9 +40,19 @@ class TestTempestInit(base.TestCase):
         self.addCleanup(conf_file.close)
         self.assertEqual(conf_file.read(), testr_conf_file)
 
+    def test_create_working_dir_with_existing_local_dir(self):
+        fake_local_dir = self.useFixture(fixtures.TempDir())
+        fake_local_conf_dir = self.useFixture(fixtures.TempDir())
+        _init = init.TempestInit(None, None)
+        self.assertRaises(OSError,
+                          _init.create_working_dir,
+                          fake_local_dir.path,
+                          fake_local_conf_dir.path)
+
     def test_create_working_dir(self):
         fake_local_dir = self.useFixture(fixtures.TempDir())
         fake_local_conf_dir = self.useFixture(fixtures.TempDir())
+        os.rmdir(fake_local_dir.path)
         # Create a fake conf file
         fake_file = fake_local_conf_dir.join('conf_file.conf')
         open(fake_file, 'w').close()

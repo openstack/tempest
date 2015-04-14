@@ -52,17 +52,21 @@ def get_tempest_default_config_dir():
     real_prefix = getattr(sys, 'real_prefix', None)
     base_prefix = getattr(sys, 'base_prefix', None)
     prefix = sys.prefix
-    if real_prefix is None and base_prefix is None:
-        # Not running in a virtual environnment of any kind
-        return '/etc/tempest'
-    elif (real_prefix is None and base_prefix is not None and
-            base_prefix == prefix):
-        # Probably not running in a virtual environment
+    if (real_prefix is None and
+            (base_prefix is None or base_prefix == prefix)):
+        # Probably not running in a virtual environment.
         # NOTE(andreaf) we cannot distinguish this case from the case of
         # a virtual environment created with virtualenv, and running python3.
-        return '/etc/tempest'
+        # Also if it appears we are not in virtual env and fail to find
+        # global config: '/etc/tempest', fall back to
+        # '[sys.prefix]/etc/tempest'
+        global_conf_dir = '/etc/tempest'
+        if os.path.isdir(global_conf_dir):
+            return global_conf_dir
+        else:
+            return os.path.join(prefix, 'etc/tempest')
     else:
-        return os.path.join(sys.prefix, 'etc/tempest')
+        return os.path.join(prefix, 'etc/tempest')
 
 
 class TempestInit(command.Command):
@@ -99,9 +103,12 @@ class TempestInit(command.Command):
     def copy_config(self, etc_dir, config_dir):
         shutil.copytree(config_dir, etc_dir)
 
-    def generate_sample_config(self, local_dir):
+    def generate_sample_config(self, local_dir, config_dir):
+        conf_generator = os.path.join(config_dir,
+                                      'config-generator.tempest.conf')
+
         subprocess.call(['oslo-config-generator', '--config-file',
-                         'tools/config/config-generator.tempest.conf'],
+                         conf_generator],
                         cwd=local_dir)
 
     def create_working_dir(self, local_dir, config_dir):
@@ -109,6 +116,10 @@ class TempestInit(command.Command):
         if not os.path.isdir(local_dir):
             LOG.debug('Creating local working dir: %s' % local_dir)
             os.mkdir(local_dir)
+        else:
+            raise OSError("Directory you are trying to initialize already "
+                          "exists: %s" % local_dir)
+
         lock_dir = os.path.join(local_dir, 'tempest_lock')
         etc_dir = os.path.join(local_dir, 'etc')
         config_path = os.path.join(etc_dir, 'tempest.conf')
@@ -125,7 +136,7 @@ class TempestInit(command.Command):
         # Create and copy local etc dir
         self.copy_config(etc_dir, config_dir)
         # Generate the sample config file
-        self.generate_sample_config(local_dir)
+        self.generate_sample_config(local_dir, config_dir)
         # Update local confs to reflect local paths
         self.update_local_conf(config_path, lock_dir, log_dir)
         # Generate a testr conf file
