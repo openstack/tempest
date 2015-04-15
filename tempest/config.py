@@ -187,10 +187,6 @@ ComputeGroup = [
                default="root",
                help="User name used to authenticate to an instance using "
                     "the alternate image."),
-    cfg.StrOpt('image_alt_ssh_password',
-               default="password",
-               help="Password used to authenticate to an instance using "
-                    "the alternate image."),
     cfg.IntOpt('build_interval',
                default=1,
                help="Time in seconds between build status checks."),
@@ -205,16 +201,17 @@ ComputeGroup = [
     cfg.StrOpt('ssh_auth_method',
                default='keypair',
                help="Auth method used for authenticate to the instance. "
-                    "Valid choices are: keypair, configured, adminpass. "
-                    "keypair: start the servers with an ssh keypair. "
-                    "configured: use the configured user and password. "
-                    "adminpass: use the injected adminPass. "
-                    "disabled: avoid using ssh when it is an option."),
+                    "Valid choices are: keypair, configured, adminpass "
+                    "and disabled. "
+                    "Keypair: start the servers with a ssh keypair. "
+                    "Configured: use the configured user and password. "
+                    "Adminpass: use the injected adminPass. "
+                    "Disabled: avoid using ssh when it is an option."),
     cfg.StrOpt('ssh_connect_method',
-               default='fixed',
+               default='floating',
                help="How to connect to the instance? "
                     "fixed: using the first ip belongs the fixed network "
-                    "floating: creating and using a floating ip"),
+                    "floating: creating and using a floating ip."),
     cfg.StrOpt('ssh_user',
                default='root',
                help="User name used to authenticate to an instance."),
@@ -239,7 +236,8 @@ ComputeGroup = [
                     "tenants. If multiple networks are available for a tenant"
                     " this is the network which will be used for creating "
                     "servers if tempest does not create a network or a "
-                    "network is not specified elsewhere"),
+                    "network is not specified elsewhere. It may be used for "
+                    "ssh validation only if floating IPs are disabled."),
     cfg.StrOpt('network_for_ssh',
                default='public',
                help="Network used for SSH connections. Ignored if "
@@ -264,9 +262,6 @@ ComputeGroup = [
                choices=['public', 'admin', 'internal',
                         'publicURL', 'adminURL', 'internalURL'],
                help="The endpoint type to use for the compute service."),
-    cfg.StrOpt('path_to_private_key',
-               help="Path to a private key file for SSH access to remote "
-                    "hosts"),
     cfg.StrOpt('volume_device_name',
                default='vdb',
                help="Expected device name when a volume is attached to "
@@ -449,12 +444,16 @@ NetworkGroup = [
                help="The mask bits for tenant ipv6 subnets"),
     cfg.BoolOpt('tenant_networks_reachable',
                 default=False,
-                help="Whether tenant network connectivity should be "
-                     "evaluated directly"),
+                help="Whether tenant networks can be reached directly from "
+                     "the test client. This must be set to True when the "
+                     "'fixed' ssh_connect_method is selected."),
     cfg.StrOpt('public_network_id',
                default="",
                help="Id of the public network that provides external "
                     "connectivity"),
+    cfg.StrOpt('floating_network_name',
+               help="Default floating network name. Used to allocate floating "
+                    "IPs when neutron is enabled."),
     cfg.StrOpt('public_router_id',
                default="",
                help="Id of the public router that provides external "
@@ -534,6 +533,37 @@ MessagingGroup = [
     cfg.IntOpt('max_claim_grace',
                default=43200,
                help='The maximum grace period for a claim'),
+]
+
+validation_group = cfg.OptGroup(name='validation',
+                                title='SSH Validation options')
+
+ValidationGroup = [
+    cfg.StrOpt('connect_method',
+               default='floating',
+               choices=['fixed', 'floating'],
+               help='Default IP type used for validation: '
+                    '-fixed: uses the first IP belonging to the fixed network '
+                    '-floating: creates and uses a floating IP'),
+    cfg.StrOpt('auth_method',
+               default='keypair',
+               choices=['keypair'],
+               help='Default authentication method to the instance. '
+                    'Only ssh via keypair is supported for now. '
+                    'Additional methods will be handled in a separate spec.'),
+    cfg.IntOpt('ip_version_for_ssh',
+               default=4,
+               help='Default IP version for ssh connections.'),
+    cfg.IntOpt('ping_timeout',
+               default=120,
+               help='Timeout in seconds to wait for ping to succeed.'),
+    cfg.IntOpt('connect_timeout',
+               default=60,
+               help='Timeout in seconds to wait for the TCP connection to be '
+                    'successful.'),
+    cfg.IntOpt('ssh_timeout',
+               default=300,
+               help='Timeout in seconds to wait for the ssh banner.'),
 ]
 
 volume_group = cfg.OptGroup(name='volume',
@@ -1088,6 +1118,7 @@ _opts = [
     (network_group, NetworkGroup),
     (network_feature_group, NetworkFeaturesGroup),
     (messaging_group, MessagingGroup),
+    (validation_group, ValidationGroup),
     (volume_group, VolumeGroup),
     (volume_feature_group, VolumeFeaturesGroup),
     (object_storage_group, ObjectStoreGroup),
@@ -1148,6 +1179,7 @@ class TempestConfigPrivate(object):
         self.image_feature_enabled = _CONF['image-feature-enabled']
         self.network = _CONF.network
         self.network_feature_enabled = _CONF['network-feature-enabled']
+        self.validation = _CONF.validation
         self.volume = _CONF.volume
         self.volume_feature_enabled = _CONF['volume-feature-enabled']
         self.object_storage = _CONF['object-storage']
