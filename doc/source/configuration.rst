@@ -296,6 +296,47 @@ isolation it will enable running tests which require a static network and it
 will additionally be used as a fallback for server creation. However, unlike
 accounts.yaml this should never be triggered.
 
+Configuring Available Services
+------------------------------
+OpenStack is really a constellation of several different projects which
+are running together to create a cloud. However which projects you're running
+is not set in stone, and which services are running is up to the deployer.
+Tempest however needs to know which services are available so it can figure
+out which tests it is able to run and certain setup steps which differ based
+on the available services.
+
+The *service_available* section of the config file is used to set which
+services are available. It contains a boolean option for each service (except
+for keystone which is a hard requirement) set it to True if the service is
+available or False if it is not.
+
+Service Catalog
+^^^^^^^^^^^^^^^
+Each project which has its own REST API contains an entry in the service
+catalog. Like most things in OpenStack this is also completely configurable.
+However, for tempest to be able to figure out the endpoints to send REST API
+calls for each service to it needs to know how that project is defined in the
+service catalog. There are 3 options for each service section to accomplish
+this:
+
+ #. catalog_type
+ #. endpoint_type
+ #. region
+
+Setting *catalog_type* and *endpoint_type* should normally give Tempest enough
+information to determine which endpoint it should pull from the service
+catalog to use for talking to that particular service. However, if you're cloud
+has multiple regions available and you need to specify a particular one to use
+a service you can set the *region* option in that service's section.
+
+It should also be noted that the default values for these options are set
+to what devstack uses. (which is a de facto standard for service catalog
+entries) So often nothing actually needs to be set on these options to enable
+communication to a particular service. It is only if you are either not using
+the same *catalog_type* as devstack or you want Tempest to talk to a different
+endpoint type instead of publicURL for a service that these need to be changed.
+
+
 Service feature configuration
 -----------------------------
 
