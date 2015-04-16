@@ -14,34 +14,49 @@
 
 import copy
 
-from tempest.api_schema.response.compute import quotas
+update_quota_set = {
+    'status_code': [200],
+    'response_body': {
+        'type': 'object',
+        'properties': {
+            'quota_set': {
+                'type': 'object',
+                'properties': {
+                    'instances': {'type': 'integer'},
+                    'cores': {'type': 'integer'},
+                    'ram': {'type': 'integer'},
+                    'floating_ips': {'type': 'integer'},
+                    'fixed_ips': {'type': 'integer'},
+                    'metadata_items': {'type': 'integer'},
+                    'key_pairs': {'type': 'integer'},
+                    'security_groups': {'type': 'integer'},
+                    'security_group_rules': {'type': 'integer'},
+                    'server_group_members': {'type': 'integer'},
+                    'server_groups': {'type': 'integer'},
+                    'injected_files': {'type': 'integer'},
+                    'injected_file_content_bytes': {'type': 'integer'},
+                    'injected_file_path_bytes': {'type': 'integer'}
+                },
+                # NOTE: server_group_members and server_groups are represented
+                # when enabling quota_server_group extension. So they should
+                # not be required.
+                'required': ['instances', 'cores', 'ram',
+                             'floating_ips', 'fixed_ips',
+                             'metadata_items', 'key_pairs',
+                             'security_groups', 'security_group_rules',
+                             'injected_files', 'injected_file_content_bytes',
+                             'injected_file_path_bytes']
+            }
+        },
+        'required': ['quota_set']
+    }
+}
 
-quota_set = copy.deepcopy(quotas.common_quota_set)
-quota_set['response_body']['properties']['quota_set']['properties'][
+get_quota_set = copy.deepcopy(update_quota_set)
+get_quota_set['response_body']['properties']['quota_set']['properties'][
     'id'] = {'type': 'string'}
-quota_set['response_body']['properties']['quota_set']['properties'][
-    'injected_files'] = {'type': 'integer'}
-quota_set['response_body']['properties']['quota_set']['properties'][
-    'injected_file_content_bytes'] = {'type': 'integer'}
-quota_set['response_body']['properties']['quota_set']['properties'][
-    'injected_file_path_bytes'] = {'type': 'integer'}
-quota_set['response_body']['properties']['quota_set']['required'].extend([
-    'id',
-    'injected_files',
-    'injected_file_content_bytes',
-    'injected_file_path_bytes'])
-
-quota_set_update = copy.deepcopy(quotas.common_quota_set)
-quota_set_update['response_body']['properties']['quota_set']['properties'][
-    'injected_files'] = {'type': 'integer'}
-quota_set_update['response_body']['properties']['quota_set']['properties'][
-    'injected_file_content_bytes'] = {'type': 'integer'}
-quota_set_update['response_body']['properties']['quota_set']['properties'][
-    'injected_file_path_bytes'] = {'type': 'integer'}
-quota_set_update['response_body']['properties']['quota_set'][
-    'required'].extend(['injected_files',
-                        'injected_file_content_bytes',
-                        'injected_file_path_bytes'])
+get_quota_set['response_body']['properties']['quota_set']['required'].extend([
+    'id'])
 
 delete_quota = {
     'status_code': [202]

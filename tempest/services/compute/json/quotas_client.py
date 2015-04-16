@@ -31,7 +31,7 @@ class QuotasClientJSON(service_client.ServiceClient):
             url += '?user_id=%s' % str(user_id)
         resp, body = self.get(url)
         body = json.loads(body)
-        self.validate_response(schema.quota_set, resp, body)
+        self.validate_response(schema.get_quota_set, resp, body)
         return service_client.ResponseBody(resp, body['quota_set'])
 
     def get_default_quota_set(self, tenant_id):
@@ -40,7 +40,7 @@ class QuotasClientJSON(service_client.ServiceClient):
         url = 'os-quota-sets/%s/defaults' % str(tenant_id)
         resp, body = self.get(url)
         body = json.loads(body)
-        self.validate_response(schema.quota_set, resp, body)
+        self.validate_response(schema.get_quota_set, resp, body)
         return service_client.ResponseBody(resp, body['quota_set'])
 
     def update_quota_set(self, tenant_id, user_id=None,
@@ -105,7 +105,7 @@ class QuotasClientJSON(service_client.ServiceClient):
                                   post_body)
 
         body = json.loads(body)
-        self.validate_response(schema.quota_set_update, resp, body)
+        self.validate_response(schema.update_quota_set, resp, body)
         return service_client.ResponseBody(resp, body['quota_set'])
 
     def delete_quota_set(self, tenant_id):
@@ -123,7 +123,7 @@ class QuotaClassesClientJSON(service_client.ServiceClient):
         url = 'os-quota-class-sets/%s' % str(quota_class_id)
         resp, body = self.get(url)
         body = json.loads(body)
-        self.validate_response(classes_schema.quota_set, resp, body)
+        self.validate_response(classes_schema.get_quota_class_set, resp, body)
         return service_client.ResponseBody(resp, body['quota_class_set'])
 
     def update_quota_class_set(self, quota_class_id, **kwargs):
@@ -136,5 +136,6 @@ class QuotaClassesClientJSON(service_client.ServiceClient):
                               post_body)
 
         body = json.loads(body)
-        self.validate_response(classes_schema.quota_set_update, resp, body)
+        self.validate_response(classes_schema.update_quota_class_set,
+                               resp, body)
         return service_client.ResponseBody(resp, body['quota_class_set'])
