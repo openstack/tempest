@@ -15,7 +15,6 @@
 
 import json
 
-from tempest.api_schema.response.compute import keypairs as common_schema
 from tempest.api_schema.response.compute.v2_1 import keypairs as schema
 from tempest.common import service_client
 
@@ -30,7 +29,7 @@ class KeyPairsClientJSON(service_client.ServiceClient):
         # servers, etc. A bug?
         # For now we shall adhere to the spec, but the spec for keypairs
         # is yet to be found
-        self.validate_response(common_schema.list_keypairs, resp, body)
+        self.validate_response(schema.list_keypairs, resp, body)
         return service_client.ResponseBodyList(resp, body['keypairs'])
 
     def get_keypair(self, key_name):
