@@ -283,8 +283,11 @@ class Accounts(cred_provider.CredentialProvider):
         net_clients = clients.Manager(credentials=credential)
         compute_network_client = net_clients.networks_client
         net_name = self.hash_dict['networks'].get(hash, None)
-        network = fixed_network.get_network_from_name(
-            net_name, compute_network_client)
+        try:
+            network = fixed_network.get_network_from_name(
+                net_name, compute_network_client)
+        except exceptions.InvalidConfiguration:
+            network = {}
         net_creds.set_resources(network=network)
         return net_creds
 
