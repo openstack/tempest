@@ -19,7 +19,9 @@ from oslo_concurrency import lockutils
 from oslo_log import log as logging
 import yaml
 
+from tempest import clients
 from tempest.common import cred_provider
+from tempest.common import fixed_network
 from tempest import config
 from tempest import exceptions
 
@@ -60,15 +62,18 @@ class Accounts(cred_provider.CredentialProvider):
 
     @classmethod
     def get_hash_dict(cls, accounts):
-        hash_dict = {'roles': {}, 'creds': {}}
+        hash_dict = {'roles': {}, 'creds': {}, 'networks': {}}
         # Loop over the accounts read from the yaml file
         for account in accounts:
             roles = []
             types = []
+            resources = []
             if 'roles' in account:
                 roles = account.pop('roles')
             if 'types' in account:
                 types = account.pop('types')
+            if 'resources' in account:
+                resources = account.pop('resources')
             temp_hash = hashlib.md5()
             temp_hash.update(str(account))
             temp_hash_key = temp_hash.hexdigest()
@@ -91,6 +96,13 @@ class Accounts(cred_provider.CredentialProvider):
                         CONF.object_storage.reseller_admin_role,
                         temp_hash_key,
                         hash_dict)
+            # Populate the network subdict
+            for resource in resources:
+                if resource == 'network':
+                    hash_dict['networks'][temp_hash_key] = resources[resource]
+                else:
+                    LOG.warning('Unkown resource type %s, ignoring this field'
+                                % resource)
         return hash_dict
 
     def is_multi_user(self):
@@ -174,7 +186,7 @@ class Accounts(cred_provider.CredentialProvider):
                 "Account file %s doesn't exist" % CONF.auth.test_accounts_file)
         useable_hashes = self._get_match_hash_list(roles)
         free_hash = self._get_free_hash(useable_hashes)
-        return self.hash_dict['creds'][free_hash]
+        return self._wrap_creds_with_network(free_hash)
 
     @lockutils.synchronized('test_accounts_io', external=True)
     def remove_hash(self, hash_string):
@@ -209,20 +221,16 @@ class Accounts(cred_provider.CredentialProvider):
     def get_primary_creds(self):
         if self.isolated_creds.get('primary'):
             return self.isolated_creds.get('primary')
-        creds = self._get_creds()
-        primary_credential = cred_provider.get_credentials(
-            identity_version=self.identity_version, **creds)
-        self.isolated_creds['primary'] = primary_credential
-        return primary_credential
+        net_creds = self._get_creds()
+        self.isolated_creds['primary'] = net_creds
+        return net_creds
 
     def get_alt_creds(self):
         if self.isolated_creds.get('alt'):
             return self.isolated_creds.get('alt')
-        creds = self._get_creds()
-        alt_credential = cred_provider.get_credentials(
-            identity_version=self.identity_version, **creds)
-        self.isolated_creds['alt'] = alt_credential
-        return alt_credential
+        net_creds = self._get_creds()
+        self.isolated_creds['alt'] = net_creds
+        return net_creds
 
     def get_creds_by_roles(self, roles, force_new=False):
         roles = list(set(roles))
@@ -235,11 +243,9 @@ class Accounts(cred_provider.CredentialProvider):
         elif exist_creds and force_new:
             new_index = str(roles) + '-' + str(len(self.isolated_creds))
             self.isolated_creds[new_index] = exist_creds
-        creds = self._get_creds(roles=roles)
-        role_credential = cred_provider.get_credentials(
-            identity_version=self.identity_version, **creds)
-        self.isolated_creds[str(roles)] = role_credential
-        return role_credential
+        net_creds = self._get_creds(roles=roles)
+        self.isolated_creds[str(roles)] = net_creds
+        return net_creds
 
     def clear_isolated_creds(self):
         for creds in self.isolated_creds.values():
@@ -258,6 +264,19 @@ class Accounts(cred_provider.CredentialProvider):
 
     def admin_available(self):
         return self.is_role_available(CONF.identity.admin_role)
+
+    def _wrap_creds_with_network(self, hash):
+        creds_dict = self.hash_dict['creds'][hash]
+        credential = cred_provider.get_credentials(
+            identity_version=self.identity_version, **creds_dict)
+        net_creds = cred_provider.TestResources(credential)
+        net_clients = clients.Manager(credentials=credential)
+        compute_network_client = net_clients.networks_client
+        net_name = self.hash_dict['networks'].get(hash, None)
+        network = fixed_network.get_network_from_name(
+            net_name, compute_network_client)
+        net_creds.set_resources(network=network)
+        return net_creds
 
 
 class NotLockingAccounts(Accounts):
@@ -289,8 +308,9 @@ class NotLockingAccounts(Accounts):
             return self.isolated_creds.get('primary')
         primary_credential = cred_provider.get_configured_credentials(
             credential_type='user', identity_version=self.identity_version)
-        self.isolated_creds['primary'] = primary_credential
-        return primary_credential
+        self.isolated_creds['primary'] = cred_provider.TestResources(
+            primary_credential)
+        return self.isolated_creds['primary']
 
     def get_alt_creds(self):
         if self.isolated_creds.get('alt'):
@@ -298,8 +318,9 @@ class NotLockingAccounts(Accounts):
         alt_credential = cred_provider.get_configured_credentials(
             credential_type='alt_user',
             identity_version=self.identity_version)
-        self.isolated_creds['alt'] = alt_credential
-        return alt_credential
+        self.isolated_creds['alt'] = cred_provider.TestResources(
+            alt_credential)
+        return self.isolated_creds['alt']
 
     def clear_isolated_creds(self):
         self.isolated_creds = {}
@@ -307,8 +328,8 @@ class NotLockingAccounts(Accounts):
     def get_admin_creds(self):
         creds = cred_provider.get_configured_credentials(
             "identity_admin", fill_in=False)
-        self.isolated_creds['admin'] = creds
-        return creds
+        self.isolated_creds['admin'] = cred_provider.TestResources(creds)
+        return self.isolated_creds['admin']
 
     def get_creds_by_roles(self, roles, force_new=False):
         msg = "Credentials being specified through the config file can not be"\
