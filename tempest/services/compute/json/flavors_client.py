@@ -16,11 +16,10 @@
 import json
 import urllib
 
-from tempest.api_schema.response.compute import flavors as common_schema
 from tempest.api_schema.response.compute import flavors_access as schema_access
 from tempest.api_schema.response.compute import flavors_extra_specs \
     as schema_extra_specs
-from tempest.api_schema.response.compute.v2_1 import flavors as v2schema
+from tempest.api_schema.response.compute.v2_1 import flavors as schema
 from tempest.common import service_client
 
 
@@ -33,7 +32,7 @@ class FlavorsClientJSON(service_client.ServiceClient):
 
         resp, body = self.get(url)
         body = json.loads(body)
-        self.validate_response(common_schema.list_flavors, resp, body)
+        self.validate_response(schema.list_flavors, resp, body)
         return service_client.ResponseBodyList(resp, body['flavors'])
 
     def list_flavors_with_detail(self, params=None):
@@ -43,13 +42,13 @@ class FlavorsClientJSON(service_client.ServiceClient):
 
         resp, body = self.get(url)
         body = json.loads(body)
-        self.validate_response(v2schema.list_flavors_details, resp, body)
+        self.validate_response(schema.list_flavors_details, resp, body)
         return service_client.ResponseBodyList(resp, body['flavors'])
 
     def get_flavor_details(self, flavor_id):
         resp, body = self.get("flavors/%s" % str(flavor_id))
         body = json.loads(body)
-        self.validate_response(v2schema.create_get_flavor_details, resp, body)
+        self.validate_response(schema.create_get_flavor_details, resp, body)
         return service_client.ResponseBody(resp, body['flavor'])
 
     def create_flavor(self, name, ram, vcpus, disk, flavor_id, **kwargs):
@@ -73,13 +72,13 @@ class FlavorsClientJSON(service_client.ServiceClient):
         resp, body = self.post('flavors', post_body)
 
         body = json.loads(body)
-        self.validate_response(v2schema.create_get_flavor_details, resp, body)
+        self.validate_response(schema.create_get_flavor_details, resp, body)
         return service_client.ResponseBody(resp, body['flavor'])
 
     def delete_flavor(self, flavor_id):
         """Deletes the given flavor."""
         resp, body = self.delete("flavors/{0}".format(flavor_id))
-        self.validate_response(v2schema.delete_flavor, resp, body)
+        self.validate_response(schema.delete_flavor, resp, body)
         return service_client.ResponseBody(resp, body)
 
     def is_resource_deleted(self, id):
@@ -137,7 +136,7 @@ class FlavorsClientJSON(service_client.ServiceClient):
         """Unsets extra Specs from the mentioned flavor."""
         resp, body = self.delete('flavors/%s/os-extra_specs/%s' %
                                  (str(flavor_id), key))
-        self.validate_response(v2schema.unset_flavor_extra_specs, resp, body)
+        self.validate_response(schema.unset_flavor_extra_specs, resp, body)
         return service_client.ResponseBody(resp, body)
 
     def list_flavor_access(self, flavor_id):
