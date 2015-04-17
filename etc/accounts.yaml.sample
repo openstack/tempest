@@ -33,3 +33,5 @@
   password: 'test_password'
   types:
      - 'admin'
+  resources:
+    network: 'public'

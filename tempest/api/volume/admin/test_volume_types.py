@@ -77,7 +77,7 @@ class VolumeTypesV2Test(base.BaseVolumeAdminTest):
         self.volumes_client.wait_for_volume_status(volume['id'], 'available')
 
         # Get volume details and Verify
-        fetched_volume = self.volumes_client.get_volume(volume['id'])
+        fetched_volume = self.volumes_client.show_volume(volume['id'])
         self.assertEqual(volume_types[1]['name'],
                          fetched_volume['volume_type'],
                          'The fetched Volume type is different '
@@ -110,7 +110,7 @@ class VolumeTypesV2Test(base.BaseVolumeAdminTest):
                          "to the requested name")
         self.assertTrue(body['id'] is not None,
                         "Field volume_type id is empty or not found.")
-        fetched_volume_type = self.volume_types_client.get_volume_type(
+        fetched_volume_type = self.volume_types_client.show_volume_type(
             body['id'])
         self.assertEqual(name, fetched_volume_type['name'],
                          'The fetched Volume_type is different '
@@ -146,7 +146,7 @@ class VolumeTypesV2Test(base.BaseVolumeAdminTest):
 
         # Get encryption type
         fetched_encryption_type = (
-            self.volume_types_client.get_encryption_type(
+            self.volume_types_client.show_encryption_type(
                 encryption_type['volume_type_id']))
         self.assertEqual(provider,
                          fetched_encryption_type['provider'],
@@ -164,7 +164,7 @@ class VolumeTypesV2Test(base.BaseVolumeAdminTest):
                     "type": "encryption-type"}
         self.volume_types_client.wait_for_resource_deletion(resource)
         deleted_encryption_type = (
-            self.volume_types_client.get_encryption_type(
+            self.volume_types_client.show_encryption_type(
                 encryption_type['volume_type_id']))
         self.assertEmpty(deleted_encryption_type)
 

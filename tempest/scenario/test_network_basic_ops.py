@@ -214,7 +214,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
 
     def _reassociate_floating_ips(self):
         floating_ip, server = self.floating_ip_tuple
-        name = data_utils.rand_name('new_server-smoke-')
+        name = data_utils.rand_name('new_server-smoke')
         # create a new server for the floating ip
         server = self._create_server(name, self.network)
         self._associate_floating_ip(floating_ip, server)
@@ -318,11 +318,15 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
             LOG.info(msg)
             return
 
-        subnet = self._list_subnets(
-            network_id=CONF.network.public_network_id)
-        self.assertEqual(1, len(subnet), "Found %d subnets" % len(subnet))
+        # We ping the external IP from the instance using its floating IP
+        # which is always IPv4, so we must only test connectivity to
+        # external IPv4 IPs if the external network is dualstack.
+        v4_subnets = [s for s in self._list_subnets(
+            network_id=CONF.network.public_network_id) if s['ip_version'] == 4]
+        self.assertEqual(1, len(v4_subnets),
+                         "Found %d IPv4 subnets" % len(v4_subnets))
 
-        external_ips = [subnet[0]['gateway_ip']]
+        external_ips = [v4_subnets[0]['gateway_ip']]
         self._check_server_connectivity(self.floating_ip_tuple.floating_ip,
                                         external_ips)
 
@@ -649,3 +653,22 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         self.assertEqual(self.network['id'], port['network_id'])
         self.assertEqual('', port['device_id'])
         self.assertEqual('', port['device_owner'])
+
+    @test.idempotent_id('51641c7d-119a-44cd-aac6-b5b9f86dd808')
+    @test.services('compute', 'network')
+    def test_creation_of_server_attached_to_user_created_port(self):
+        self.security_group = (
+            self._create_security_group(tenant_id=self.tenant_id))
+        network, subnet, router = self.create_networks()
+        kwargs = {
+            'security_groups': [self.security_group['id']],
+        }
+
+        port = self._create_port(network.id, **kwargs)
+        name = data_utils.rand_name('server-smoke')
+        server = self._create_server(name, network, port.id)
+        self._check_tenant_network_connectivity()
+        floating_ip = self.create_floating_ip(server)
+        self.floating_ip_tuple = Floating_IP_tuple(floating_ip, server)
+        self.check_public_network_connectivity(
+            should_connect=True)

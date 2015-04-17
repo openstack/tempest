@@ -12,8 +12,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest.api_schema.response.compute import keypairs
-
 get_keypair = {
     'status_code': [200],
     'response_body': {
@@ -47,9 +45,56 @@ get_keypair = {
 
 create_keypair = {
     'status_code': [200],
-    'response_body': keypairs.create_keypair
+    'response_body': {
+        'type': 'object',
+        'properties': {
+            'keypair': {
+                'type': 'object',
+                'properties': {
+                    'fingerprint': {'type': 'string'},
+                    'name': {'type': 'string'},
+                    'public_key': {'type': 'string'},
+                    'user_id': {'type': 'string'},
+                    'private_key': {'type': 'string'}
+                },
+                # When create keypair API is being called with 'Public key'
+                # (Importing keypair) then, response body does not contain
+                # 'private_key' So it is not defined as 'required'
+                'required': ['fingerprint', 'name', 'public_key', 'user_id']
+            }
+        },
+        'required': ['keypair']
+    }
 }
 
 delete_keypair = {
     'status_code': [202],
+}
+
+list_keypairs = {
+    'status_code': [200],
+    'response_body': {
+        'type': 'object',
+        'properties': {
+            'keypairs': {
+                'type': 'array',
+                'items': {
+                    'type': 'object',
+                    'properties': {
+                        'keypair': {
+                            'type': 'object',
+                            'properties': {
+                                'public_key': {'type': 'string'},
+                                'name': {'type': 'string'},
+                                'fingerprint': {'type': 'string'}
+                            },
+                            'required': ['public_key', 'name', 'fingerprint']
+                        }
+                    },
+                    'required': ['keypair']
+                }
+            }
+        },
+        'required': ['keypairs']
+    }
 }

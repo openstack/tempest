@@ -80,7 +80,7 @@ def cleanup():
     # volume deletion may block
 
     _, snaps = admin_manager.snapshots_client.\
-        list_snapshots({"all_tenants": True})
+        list_snapshots(params={"all_tenants": True})
     LOG.info("Cleanup::remove %s snapshots" % len(snaps))
     for v in snaps:
         try:
@@ -96,7 +96,8 @@ def cleanup():
         except Exception:
             pass
 
-    vols = admin_manager.volumes_client.list_volumes({"all_tenants": True})
+    vols = admin_manager.volumes_client.list_volumes(
+        params={"all_tenants": True})
     LOG.info("Cleanup::remove %s volumes" % len(vols))
     for v in vols:
         try:

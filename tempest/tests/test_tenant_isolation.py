@@ -278,11 +278,11 @@ class TestTenantIsolation(base.TestCase):
         router_interface_mock = self.patch(
             'tempest.services.network.json.network_client.NetworkClientJSON.'
             'add_router_interface_with_subnet_id')
-        iso_creds.get_primary_creds()
+        primary_creds = iso_creds.get_primary_creds()
         router_interface_mock.called_once_with('1234', '1234')
-        network = iso_creds.get_primary_network()
-        subnet = iso_creds.get_primary_subnet()
-        router = iso_creds.get_primary_router()
+        network = primary_creds.network
+        subnet = primary_creds.subnet
+        router = primary_creds.router
         self.assertEqual(network['id'], '1234')
         self.assertEqual(network['name'], 'fake_net')
         self.assertEqual(subnet['id'], '1234')
@@ -427,11 +427,11 @@ class TestTenantIsolation(base.TestCase):
         router_interface_mock = self.patch(
             'tempest.services.network.json.network_client.NetworkClientJSON.'
             'add_router_interface_with_subnet_id')
-        iso_creds.get_alt_creds()
+        alt_creds = iso_creds.get_alt_creds()
         router_interface_mock.called_once_with('1234', '1234')
-        network = iso_creds.get_alt_network()
-        subnet = iso_creds.get_alt_subnet()
-        router = iso_creds.get_alt_router()
+        network = alt_creds.network
+        subnet = alt_creds.subnet
+        router = alt_creds.router
         self.assertEqual(network['id'], '1234')
         self.assertEqual(network['name'], 'fake_alt_net')
         self.assertEqual(subnet['id'], '1234')
@@ -453,11 +453,11 @@ class TestTenantIsolation(base.TestCase):
             'tempest.services.network.json.network_client.NetworkClientJSON.'
             'add_router_interface_with_subnet_id')
         self._mock_list_roles('123456', 'admin')
-        iso_creds.get_admin_creds()
+        admin_creds = iso_creds.get_admin_creds()
         router_interface_mock.called_once_with('1234', '1234')
-        network = iso_creds.get_admin_network()
-        subnet = iso_creds.get_admin_subnet()
-        router = iso_creds.get_admin_router()
+        network = admin_creds.network
+        subnet = admin_creds.subnet
+        router = admin_creds.router
         self.assertEqual(network['id'], '1234')
         self.assertEqual(network['name'], 'fake_admin_net')
         self.assertEqual(subnet['id'], '1234')
@@ -490,13 +490,13 @@ class TestTenantIsolation(base.TestCase):
                                    'delete_router')
         router_mock = router.start()
 
-        iso_creds.get_primary_creds()
+        primary_creds = iso_creds.get_primary_creds()
         self.assertEqual(net_mock.mock_calls, [])
         self.assertEqual(subnet_mock.mock_calls, [])
         self.assertEqual(router_mock.mock_calls, [])
-        network = iso_creds.get_primary_network()
-        subnet = iso_creds.get_primary_subnet()
-        router = iso_creds.get_primary_router()
+        network = primary_creds.network
+        subnet = primary_creds.subnet
+        router = primary_creds.router
         self.assertIsNone(network)
         self.assertIsNone(subnet)
         self.assertIsNone(router)

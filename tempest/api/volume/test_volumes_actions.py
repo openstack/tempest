@@ -86,7 +86,7 @@ class VolumesV2ActionsTest(base.BaseVolumeTest):
                         self.volume['id'],
                         'available')
         self.addCleanup(self.client.detach_volume, self.volume['id'])
-        volume = self.client.get_volume(self.volume['id'])
+        volume = self.client.show_volume(self.volume['id'])
         self.assertIn('attachments', volume)
         attachment = self.client.get_attachment_from_volume(volume)
         self.assertEqual(mountpoint, attachment['device'])
@@ -117,12 +117,12 @@ class VolumesV2ActionsTest(base.BaseVolumeTest):
         # Mark volume as reserved.
         body = self.client.reserve_volume(self.volume['id'])
         # To get the volume info
-        body = self.client.get_volume(self.volume['id'])
+        body = self.client.show_volume(self.volume['id'])
         self.assertIn('attaching', body['status'])
         # Unmark volume as reserved.
         body = self.client.unreserve_volume(self.volume['id'])
         # To get the volume info
-        body = self.client.get_volume(self.volume['id'])
+        body = self.client.show_volume(self.volume['id'])
         self.assertIn('available', body['status'])
 
     def _is_true(self, val):
@@ -136,7 +136,7 @@ class VolumesV2ActionsTest(base.BaseVolumeTest):
         self.client.update_volume_readonly(self.volume['id'],
                                            readonly)
         # Get Volume information
-        fetched_volume = self.client.get_volume(self.volume['id'])
+        fetched_volume = self.client.show_volume(self.volume['id'])
         bool_flag = self._is_true(fetched_volume['metadata']['readonly'])
         self.assertEqual(True, bool_flag)
 
@@ -145,7 +145,7 @@ class VolumesV2ActionsTest(base.BaseVolumeTest):
         self.client.update_volume_readonly(self.volume['id'], readonly)
 
         # Get Volume information
-        fetched_volume = self.client.get_volume(self.volume['id'])
+        fetched_volume = self.client.show_volume(self.volume['id'])
         bool_flag = self._is_true(fetched_volume['metadata']['readonly'])
         self.assertEqual(False, bool_flag)
 

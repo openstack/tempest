@@ -43,7 +43,7 @@ class VolumesV2NegativeTest(base.BaseVolumeTest):
     @test.idempotent_id('f131c586-9448-44a4-a8b0-54ca838aa43e')
     def test_volume_get_nonexistent_volume_id(self):
         # Should not be able to get a non-existent volume
-        self.assertRaises(lib_exc.NotFound, self.client.get_volume,
+        self.assertRaises(lib_exc.NotFound, self.client.show_volume,
                           str(uuid.uuid4()))
 
     @test.attr(type=['negative', 'gate'])
@@ -152,14 +152,14 @@ class VolumesV2NegativeTest(base.BaseVolumeTest):
     @test.idempotent_id('30799cfd-7ee4-446c-b66c-45b383ed211b')
     def test_get_invalid_volume_id(self):
         # Should not be able to get volume with invalid id
-        self.assertRaises(lib_exc.NotFound, self.client.get_volume,
+        self.assertRaises(lib_exc.NotFound, self.client.show_volume,
                           '#$%%&^&^')
 
     @test.attr(type=['negative', 'gate'])
     @test.idempotent_id('c6c3db06-29ad-4e91-beb0-2ab195fe49e3')
     def test_get_volume_without_passing_volume_id(self):
         # Should not be able to get volume when empty ID is passed
-        self.assertRaises(lib_exc.NotFound, self.client.get_volume, '')
+        self.assertRaises(lib_exc.NotFound, self.client.show_volume, '')
 
     @test.attr(type=['negative', 'gate'])
     @test.idempotent_id('1f035827-7c32-4019-9240-b4ec2dbd9dfd')
@@ -266,7 +266,7 @@ class VolumesV2NegativeTest(base.BaseVolumeTest):
     def test_list_volumes_with_nonexistent_name(self):
         v_name = data_utils.rand_name('Volume')
         params = {self.name_field: v_name}
-        fetched_volume = self.client.list_volumes(params)
+        fetched_volume = self.client.list_volumes(params=params)
         self.assertEqual(0, len(fetched_volume))
 
     @test.attr(type=['negative', 'gate'])
@@ -275,14 +275,14 @@ class VolumesV2NegativeTest(base.BaseVolumeTest):
         v_name = data_utils.rand_name('Volume')
         params = {self.name_field: v_name}
         fetched_volume = \
-            self.client.list_volumes_with_detail(params)
+            self.client.list_volumes(detail=True, params=params)
         self.assertEqual(0, len(fetched_volume))
 
     @test.attr(type=['negative', 'gate'])
     @test.idempotent_id('143b279b-7522-466b-81be-34a87d564a7c')
     def test_list_volumes_with_invalid_status(self):
         params = {'status': 'null'}
-        fetched_volume = self.client.list_volumes(params)
+        fetched_volume = self.client.list_volumes(params=params)
         self.assertEqual(0, len(fetched_volume))
 
     @test.attr(type=['negative', 'gate'])
@@ -290,7 +290,7 @@ class VolumesV2NegativeTest(base.BaseVolumeTest):
     def test_list_volumes_detail_with_invalid_status(self):
         params = {'status': 'null'}
         fetched_volume = \
-            self.client.list_volumes_with_detail(params)
+            self.client.list_volumes(detail=True, params=params)
         self.assertEqual(0, len(fetched_volume))
 
 

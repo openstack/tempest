@@ -84,6 +84,8 @@ def get_credentials(fill_in=True, identity_version=None, **kwargs):
         domain_fields = set(x for x in auth.KeystoneV3Credentials.ATTRIBUTES
                             if 'domain' in x)
         if not domain_fields.intersection(kwargs.keys()):
+            # TODO(andreaf) It might be better here to use a dedicated config
+            # option such as CONF.auth.tenant_isolation_domain_name
             params['user_domain_name'] = CONF.identity.admin_domain_name
         auth_url = CONF.identity.uri_v3
     else:
@@ -147,3 +149,25 @@ class CredentialProvider(object):
     @abc.abstractmethod
     def is_role_available(self, role):
         return
+
+
+class TestResources(object):
+    """Readonly Credentials, with network resources added."""
+
+    def __init__(self, credentials):
+        self._credentials = credentials
+        self.network = None
+        self.subnet = None
+        self.router = None
+
+    def __getattr__(self, item):
+        return getattr(self._credentials, item)
+
+    def set_resources(self, **kwargs):
+        for key in kwargs.keys():
+            if hasattr(self, key):
+                setattr(self, key, kwargs[key])
+
+    @property
+    def credentials(self):
+        return self._credentials

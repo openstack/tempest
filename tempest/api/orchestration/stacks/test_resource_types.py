@@ -32,7 +32,7 @@ class ResourceTypesTest(base.BaseOrchestrationTest):
         self.assertNotEmpty(resource_types)
 
         for resource_type in resource_types:
-            type_schema = self.client.get_resource_type(resource_type)
+            type_schema = self.client.show_resource_type(resource_type)
             self.assert_fields_in_dict(type_schema, 'properties',
                                        'attributes', 'resource_type')
             self.assertEqual(resource_type, type_schema['resource_type'])
@@ -41,7 +41,7 @@ class ResourceTypesTest(base.BaseOrchestrationTest):
     @test.idempotent_id('8401821d-65fe-4d43-9fa3-57d5ce3a35c7')
     def test_resource_type_template(self):
         """Verify it is possible to get template about resource types."""
-        type_template = self.client.get_resource_type_template(
+        type_template = self.client.show_resource_type_template(
             'OS::Nova::Server')
         self.assert_fields_in_dict(
             type_template,

@@ -100,15 +100,17 @@ class TestRemoteClient(base.TestCase):
         self._assert_exec_called_with('cut -f1 -d. /proc/uptime')
 
     def test_ping_host(self):
-        ping_response = """PING localhost (127.0.0.1) 56(84) bytes of data.
-64 bytes from localhost (127.0.0.1): icmp_req=1 ttl=64 time=0.048 ms
+        ping_response = """PING localhost (127.0.0.1) 70(98) bytes of data.
+78 bytes from localhost (127.0.0.1): icmp_req=1 ttl=64 time=0.048 ms
+78 bytes from localhost (127.0.0.1): icmp_req=2 ttl=64 time=0.048 ms
 
 --- localhost ping statistics ---
-1 packets transmitted, 1 received, 0% packet loss, time 0ms
+2 packets transmitted, 2 received, 0% packet loss, time 0ms
 rtt min/avg/max/mdev = 0.048/0.048/0.048/0.000 ms"""
         self.ssh_mock.mock.exec_command.return_value = ping_response
-        self.assertEqual(self.conn.ping_host('127.0.0.1'), ping_response)
-        self._assert_exec_called_with('ping -c1 -w1 127.0.0.1')
+        self.assertEqual(self.conn.ping_host('127.0.0.1', count=2, size=70),
+                         ping_response)
+        self._assert_exec_called_with('ping -c2 -w2 -s70 127.0.0.1')
 
     def test_get_mac_address(self):
         macs = """0a:0b:0c:0d:0e:0f

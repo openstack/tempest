@@ -125,6 +125,10 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
         if CONF.baremetal.driver_enabled:
             msg = ('Not currently supported by baremetal.')
             raise cls.skipException(msg)
+        if CONF.network.port_vnic_type in ['direct', 'macvtap']:
+            msg = ('Not currently supported when using vnic_type'
+                   ' direct or macvtap')
+            raise cls.skipException(msg)
         if not (CONF.network.tenant_networks_reachable or
                 CONF.network.public_network_id):
             msg = ('Either tenant_networks_reachable must be "true", or '
@@ -256,7 +260,7 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
 
     def _create_tenant_servers(self, tenant, num=1):
         for i in range(num):
-            name = 'server-{tenant}-gen-{num}-'.format(
+            name = 'server-{tenant}-gen-{num}'.format(
                    tenant=tenant.creds.tenant_name,
                    num=i
             )
@@ -271,7 +275,7 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
         workaround ip namespace
         """
         secgroups = tenant.security_groups.values()
-        name = 'server-{tenant}-access_point-'.format(
+        name = 'server-{tenant}-access_point'.format(
             tenant=tenant.creds.tenant_name)
         name = data_utils.rand_name(name)
         server = self._create_server(name, tenant,
@@ -497,7 +501,7 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
         new_tenant.security_groups.update(new_sg=new_sg)
 
         # Create server with default security group
-        name = 'server-{tenant}-gen-1-'.format(
+        name = 'server-{tenant}-gen-1'.format(
                tenant=new_tenant.creds.tenant_name
         )
         name = data_utils.rand_name(name)

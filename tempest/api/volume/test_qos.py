@@ -64,7 +64,7 @@ class QosSpecsV2TestJSON(base.BaseVolumeAdminTest):
             self.created_qos['id'], vol_type_id)
 
     def _test_get_association_qos(self):
-        body = self.volume_qos_client.get_association_qos(
+        body = self.volume_qos_client.show_association_qos(
             self.created_qos['id'])
 
         associations = []
@@ -102,7 +102,7 @@ class QosSpecsV2TestJSON(base.BaseVolumeAdminTest):
     @test.idempotent_id('7aa214cc-ac1a-4397-931f-3bb2e83bb0fd')
     def test_get_qos(self):
         """Tests the detail of a given qos-specs"""
-        body = self.volume_qos_client.get_qos(self.created_qos['id'])
+        body = self.volume_qos_client.show_qos(self.created_qos['id'])
         self.assertEqual(self.qos_name, body['name'])
         self.assertEqual(self.qos_consumer, body['consumer'])
 
@@ -121,7 +121,7 @@ class QosSpecsV2TestJSON(base.BaseVolumeAdminTest):
         body = self.volume_qos_client.set_qos_key(self.created_qos['id'],
                                                   iops_bytes='500')
         self.assertEqual(args, body)
-        body = self.volume_qos_client.get_qos(self.created_qos['id'])
+        body = self.volume_qos_client.show_qos(self.created_qos['id'])
         self.assertEqual(args['iops_bytes'], body['specs']['iops_bytes'])
 
         # test the deletion of a specs key from qos-specs
@@ -130,7 +130,7 @@ class QosSpecsV2TestJSON(base.BaseVolumeAdminTest):
         operation = 'qos-key-unset'
         self.volume_qos_client.wait_for_qos_operations(self.created_qos['id'],
                                                        operation, keys)
-        body = self.volume_qos_client.get_qos(self.created_qos['id'])
+        body = self.volume_qos_client.show_qos(self.created_qos['id'])
         self.assertNotIn(keys[0], body['specs'])
 
     @test.attr(type='smoke')

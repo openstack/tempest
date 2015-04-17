@@ -445,7 +445,12 @@ class BaseTestCase(testtools.testcase.WithAttributes,
         # Make sure isolated_creds exists and get a network client
         networks_client = cls.get_client_manager().networks_client
         isolated_creds = getattr(cls, 'isolated_creds', None)
-        if credentials.is_admin_available():
+        # In case of nova network, isolated tenants are not able to list the
+        # network configured in fixed_network_name, even if the can use it
+        # for their servers, so using an admin network client to validate
+        # the network name
+        if (not CONF.service_available.neutron and
+                credentials.is_admin_available()):
             admin_creds = isolated_creds.get_admin_creds()
             networks_client = clients.Manager(admin_creds).networks_client
         return fixed_network.get_tenant_network(isolated_creds,
@@ -467,8 +472,6 @@ class NegativeAutoTest(BaseTestCase):
         super(NegativeAutoTest, cls).setUpClass()
         os = cls.get_client_manager()
         cls.client = os.negative_client
-        os_admin = clients.AdminManager(service=cls._service)
-        cls.admin_client = os_admin.negative_client
 
     @staticmethod
     def load_tests(*args):
@@ -596,7 +599,13 @@ class NegativeAutoTest(BaseTestCase):
                             "mechanism")
 
         if "admin_client" in description and description["admin_client"]:
-            client = self.admin_client
+            if not credentials.is_admin_available():
+                msg = ("Missing Identity Admin API credentials in"
+                       "configuration.")
+                raise self.skipException(msg)
+            creds = self.isolated_creds.get_admin_creds()
+            os_adm = clients.Manager(credentials=creds)
+            client = os_adm.negative_client
         else:
             client = self.client
         resp, resp_body = client.send_request(method, new_url,

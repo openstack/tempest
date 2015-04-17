@@ -139,7 +139,7 @@ class VolumeMultiBackendV2Test(base.BaseVolumeAdminTest):
         # the multi backend feature has been enabled
         # if multi-backend is enabled: os-vol-attr:host should be like:
         # host@backend_name
-        volume = self.admin_volume_client.get_volume(volume_id)
+        volume = self.admin_volume_client.show_volume(volume_id)
 
         volume1_host = volume['os-vol-host-attr:host']
         msg = ("multi-backend reporting incorrect values for volume %s" %
@@ -150,10 +150,10 @@ class VolumeMultiBackendV2Test(base.BaseVolumeAdminTest):
         # this test checks that the two volumes created at setUp don't
         # belong to the same backend (if they are, than the
         # volume backend distinction is not working properly)
-        volume = self.admin_volume_client.get_volume(volume1_id)
+        volume = self.admin_volume_client.show_volume(volume1_id)
         volume1_host = volume['os-vol-host-attr:host']
 
-        volume = self.admin_volume_client.get_volume(volume2_id)
+        volume = self.admin_volume_client.show_volume(volume2_id)
         volume2_host = volume['os-vol-host-attr:host']
 
         msg = ("volumes %s and %s were created in the same backend" %
