@@ -79,12 +79,12 @@ class DomainsTestJSON(base.BaseIdentityV3AdminTest):
         self.assertIsNotNone(updated_domain['id'])
         self.assertEqual(new_name, updated_domain['name'])
         self.assertEqual(new_desc, updated_domain['description'])
-        self.assertEqual('true', str(updated_domain['enabled']).lower())
+        self.assertEqual(True, updated_domain['enabled'])
 
         fetched_domain = self.client.get_domain(domain['id'])
         self.assertEqual(new_name, fetched_domain['name'])
         self.assertEqual(new_desc, fetched_domain['description'])
-        self.assertEqual('true', str(fetched_domain['enabled']).lower())
+        self.assertEqual(True, fetched_domain['enabled'])
 
     @test.idempotent_id('036df86e-bb5d-42c0-a7c2-66b9db3a6046')
     def test_create_domain_with_disabled_status(self):
