@@ -802,6 +802,10 @@
 # attributes ipv6_ra_mode and ipv6_address_mode (boolean value)
 #ipv6_subnet_attributes = false
 
+# Does the test environment support changing port admin state (boolean
+# value)
+#port_admin_state_change = true
+
 
 [object-storage]
 
