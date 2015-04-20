@@ -58,7 +58,7 @@ class MessagingClientJSON(service_client.ServiceClient):
         self.expected_success(201, resp.status)
         return resp, body
 
-    def get_queue(self, queue_name):
+    def show_queue(self, queue_name):
         uri = '{0}/queues/{1}'.format(self.uri_prefix, queue_name)
         resp, body = self.get(uri)
         self.expected_success(204, resp.status)
@@ -76,14 +76,14 @@ class MessagingClientJSON(service_client.ServiceClient):
         self.expected_success(204, resp.status)
         return resp, body
 
-    def get_queue_stats(self, queue_name):
+    def show_queue_stats(self, queue_name):
         uri = '{0}/queues/{1}/stats'.format(self.uri_prefix, queue_name)
         resp, body = self.get(uri)
         body = json.loads(body)
         self.validate_response(queues_schema.queue_stats, resp, body)
         return resp, body
 
-    def get_queue_metadata(self, queue_name):
+    def show_queue_metadata(self, queue_name):
         uri = '{0}/queues/{1}/metadata'.format(self.uri_prefix, queue_name)
         resp, body = self.get(uri)
         self.expected_success(200, resp.status)
@@ -117,7 +117,7 @@ class MessagingClientJSON(service_client.ServiceClient):
 
         return resp, body
 
-    def get_single_message(self, message_uri):
+    def show_single_message(self, message_uri):
         resp, body = self.get(message_uri, extra_headers=True,
                               headers=self.headers)
         if resp['status'] != '204':
@@ -126,7 +126,7 @@ class MessagingClientJSON(service_client.ServiceClient):
                                    body)
         return resp, body
 
-    def get_multiple_messages(self, message_uri):
+    def show_multiple_messages(self, message_uri):
         resp, body = self.get(message_uri, extra_headers=True,
                               headers=self.headers)
 
