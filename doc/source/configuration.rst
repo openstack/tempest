@@ -123,17 +123,12 @@ To enable and use locking test accounts you need do a few things:
 
 Non-locking test accounts
 """""""""""""""""""""""""
-When tempest was refactored to allow for locking test accounts, the original
-non-tenant isolated case was converted to support the new accounts.yaml file.
-This mechanism is the non-locking test accounts provider. It only makes sense
-to use it if parallel execution isn't needed. If the role restrictions were too
-limiting with the locking accounts provider and tenant isolation is not wanted
-then you can use the non-locking test accounts credential provider without the
-accounts.yaml file.
-
-To use the non-locking test accounts provider you have 2 ways to configure it.
-First you can specify the sets of credentials in the configuration file like
-detailed above with following 9 options in the identity section:
+When Tempest was refactored to allow for locking test accounts, the original
+non-tenant isolated case was converted to internally work similarly to the
+accounts.yaml file. This mechanism was then called the non-locking test accounts
+provider. To use the non-locking test accounts provider you can specify the sets
+of credentials in the configuration file like detailed above with following 9
+options in the identity section:
 
  #. username
  #. password
@@ -145,10 +140,14 @@ detailed above with following 9 options in the identity section:
  #. alt_password
  #. alt_tenant_name
 
-The only restriction with using the traditional config options for credentials
-is that if a test requires specific roles on accounts these tests can not be
-run. This is because the config options do not give sufficient flexibility to
-describe the roles assigned to a user for running the tests.
+It only makes sense to use it if parallel execution isn't needed, since tempest
+won't be able to properly isolate tests using this. Additionally, using the
+traditional config options for credentials is not able to provide credentials to
+tests which requires specific roles on accounts. This is because the config
+options do not give sufficient flexibility to describe the roles assigned to a
+user for running the tests. There are additional limitations with regard to
+network configuration when using this credential provider mechanism, see the
+`Networking`_ section below.
 
 Compute
 -------
