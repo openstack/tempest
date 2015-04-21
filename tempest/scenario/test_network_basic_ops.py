@@ -214,7 +214,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
 
     def _reassociate_floating_ips(self):
         floating_ip, server = self.floating_ip_tuple
-        name = data_utils.rand_name('new_server-smoke-')
+        name = data_utils.rand_name('new_server-smoke')
         # create a new server for the floating ip
         server = self._create_server(name, self.network)
         self._associate_floating_ip(floating_ip, server)
@@ -318,11 +318,15 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
             LOG.info(msg)
             return
 
-        subnet = self._list_subnets(
-            network_id=CONF.network.public_network_id)
-        self.assertEqual(1, len(subnet), "Found %d subnets" % len(subnet))
+        # We ping the external IP from the instance using its floating IP
+        # which is always IPv4, so we must only test connectivity to
+        # external IPv4 IPs if the external network is dualstack.
+        v4_subnets = [s for s in self._list_subnets(
+            network_id=CONF.network.public_network_id) if s['ip_version'] == 4]
+        self.assertEqual(1, len(v4_subnets),
+                         "Found %d IPv4 subnets" % len(v4_subnets))
 
-        external_ips = [subnet[0]['gateway_ip']]
+        external_ips = [v4_subnets[0]['gateway_ip']]
         self._check_server_connectivity(self.floating_ip_tuple.floating_ip,
                                         external_ips)
 
@@ -586,6 +590,9 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
     @testtools.skipIf(CONF.baremetal.driver_enabled,
                       'admin_state of instance ports cannot be altered '
                       'for baremetal nodes')
+    @testtools.skipUnless(CONF.network_feature_enabled.port_admin_state_change,
+                          "Changing a port's admin state is not supported "
+                          "by the test environment")
     @test.attr(type='smoke')
     @test.services('compute', 'network')
     def test_update_instance_port_admin_state(self):

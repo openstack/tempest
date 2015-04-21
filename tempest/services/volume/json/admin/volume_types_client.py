@@ -33,9 +33,9 @@ class BaseVolumeTypesClientJSON(service_client.ServiceClient):
         #             "type": resource_type}
         try:
             if resource['type'] == "volume-type":
-                self.get_volume_type(resource['id'])
+                self.show_volume_type(resource['id'])
             elif resource['type'] == "encryption-type":
-                body = self.get_encryption_type(resource['id'])
+                body = self.show_encryption_type(resource['id'])
                 if not body:
                     return True
             else:
@@ -61,7 +61,7 @@ class BaseVolumeTypesClientJSON(service_client.ServiceClient):
         self.expected_success(200, resp.status)
         return service_client.ResponseBodyList(resp, body['volume_types'])
 
-    def get_volume_type(self, volume_id):
+    def show_volume_type(self, volume_id):
         """Returns the details of a single volume_type."""
         url = "types/%s" % str(volume_id)
         resp, body = self.get(url)
@@ -104,7 +104,7 @@ class BaseVolumeTypesClientJSON(service_client.ServiceClient):
         self.expected_success(200, resp.status)
         return service_client.ResponseBody(resp, body['extra_specs'])
 
-    def get_volume_type_extra_specs(self, vol_type_id, extra_spec_name):
+    def show_volume_type_extra_specs(self, vol_type_id, extra_spec_name):
         """Returns the details of a single volume_type extra spec."""
         url = "types/%s/extra_specs/%s" % (str(vol_type_id),
                                            str(extra_spec_name))
@@ -150,7 +150,7 @@ class BaseVolumeTypesClientJSON(service_client.ServiceClient):
         self.expected_success(200, resp.status)
         return service_client.ResponseBody(resp, body)
 
-    def get_encryption_type(self, vol_type_id):
+    def show_encryption_type(self, vol_type_id):
         """
         Get the volume encryption type for the specified volume type.
         vol_type_id: Id of volume_type.

@@ -15,8 +15,7 @@
 import json
 import urllib
 
-from tempest.api_schema.response.compute import hosts as schema
-from tempest.api_schema.response.compute.v2_1 import hosts as v2_schema
+from tempest.api_schema.response.compute.v2_1 import hosts as schema
 from tempest.common import service_client
 
 
@@ -39,7 +38,7 @@ class HostsClientJSON(service_client.ServiceClient):
 
         resp, body = self.get("os-hosts/%s" % str(hostname))
         body = json.loads(body)
-        self.validate_response(schema.show_host_detail, resp, body)
+        self.validate_response(schema.get_host_detail, resp, body)
         return service_client.ResponseBodyList(resp, body['host'])
 
     def update_host(self, hostname, **kwargs):
@@ -54,7 +53,7 @@ class HostsClientJSON(service_client.ServiceClient):
 
         resp, body = self.put("os-hosts/%s" % str(hostname), request_body)
         body = json.loads(body)
-        self.validate_response(v2_schema.update_host, resp, body)
+        self.validate_response(schema.update_host, resp, body)
         return service_client.ResponseBody(resp, body)
 
     def startup_host(self, hostname):
@@ -62,7 +61,7 @@ class HostsClientJSON(service_client.ServiceClient):
 
         resp, body = self.get("os-hosts/%s/startup" % str(hostname))
         body = json.loads(body)
-        self.validate_response(v2_schema.startup_host, resp, body)
+        self.validate_response(schema.startup_host, resp, body)
         return service_client.ResponseBody(resp, body['host'])
 
     def shutdown_host(self, hostname):
@@ -70,7 +69,7 @@ class HostsClientJSON(service_client.ServiceClient):
 
         resp, body = self.get("os-hosts/%s/shutdown" % str(hostname))
         body = json.loads(body)
-        self.validate_response(v2_schema.shutdown_host, resp, body)
+        self.validate_response(schema.shutdown_host, resp, body)
         return service_client.ResponseBody(resp, body['host'])
 
     def reboot_host(self, hostname):
@@ -78,5 +77,5 @@ class HostsClientJSON(service_client.ServiceClient):
 
         resp, body = self.get("os-hosts/%s/reboot" % str(hostname))
         body = json.loads(body)
-        self.validate_response(v2_schema.reboot_host, resp, body)
+        self.validate_response(schema.reboot_host, resp, body)
         return service_client.ResponseBody(resp, body['host'])

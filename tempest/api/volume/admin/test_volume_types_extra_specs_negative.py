@@ -137,7 +137,7 @@ class ExtraSpecsNegativeV2Test(base.BaseVolumeAdminTest):
         extra_specs = {"spec1": "val1"}
         self.assertRaises(
             lib_exc.NotFound,
-            self.volume_types_client.get_volume_type_extra_specs,
+            self.volume_types_client.show_volume_type_extra_specs,
             str(uuid.uuid4()), extra_specs.keys()[0])
 
     @test.attr(type='gate')
@@ -147,7 +147,7 @@ class ExtraSpecsNegativeV2Test(base.BaseVolumeAdminTest):
             # id.
         self.assertRaises(
             lib_exc.NotFound,
-            self.volume_types_client.get_volume_type_extra_specs,
+            self.volume_types_client.show_volume_type_extra_specs,
             self.volume_type['id'], str(uuid.uuid4()))
 
 

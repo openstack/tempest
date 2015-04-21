@@ -73,7 +73,7 @@ class NovaKeyPairResourcesYAMLTest(base.BaseOrchestrationTest):
     @test.attr(type='gate')
     @test.idempotent_id('8d77dec7-91fd-45a6-943d-5abd45e338a4')
     def test_stack_keypairs_output(self):
-        stack = self.client.get_stack(self.stack_name)
+        stack = self.client.show_stack(self.stack_name)
         self.assertIsInstance(stack, dict)
 
         output_map = {}

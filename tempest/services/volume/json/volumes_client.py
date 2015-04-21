@@ -40,29 +40,20 @@ class BaseVolumesClientJSON(service_client.ServiceClient):
         """Return the element 'attachment' from input volumes."""
         return volume['attachments'][0]
 
-    def list_volumes(self, params=None):
+    def list_volumes(self, detail=False, params=None):
         """List all the volumes created."""
         url = 'volumes'
+        if detail:
+            url += '/detail'
         if params:
-                url += '?%s' % urllib.urlencode(params)
+            url += '?%s' % urllib.urlencode(params)
 
         resp, body = self.get(url)
         body = json.loads(body)
         self.expected_success(200, resp.status)
         return service_client.ResponseBodyList(resp, body['volumes'])
 
-    def list_volumes_with_detail(self, params=None):
-        """List the details of all volumes."""
-        url = 'volumes/detail'
-        if params:
-                url += '?%s' % urllib.urlencode(params)
-
-        resp, body = self.get(url)
-        body = json.loads(body)
-        self.expected_success(200, resp.status)
-        return service_client.ResponseBodyList(resp, body['volumes'])
-
-    def get_volume(self, volume_id):
+    def show_volume(self, volume_id):
         """Returns the details of a single volume."""
         url = "volumes/%s" % str(volume_id)
         resp, body = self.get(url)
@@ -161,13 +152,13 @@ class BaseVolumesClientJSON(service_client.ServiceClient):
 
     def wait_for_volume_status(self, volume_id, status):
         """Waits for a Volume to reach a given status."""
-        body = self.get_volume(volume_id)
+        body = self.show_volume(volume_id)
         volume_status = body['status']
         start = int(time.time())
 
         while volume_status != status:
             time.sleep(self.build_interval)
-            body = self.get_volume(volume_id)
+            body = self.show_volume(volume_id)
             volume_status = body['status']
             if volume_status == 'error':
                 raise exceptions.VolumeBuildErrorException(volume_id=volume_id)
@@ -183,7 +174,7 @@ class BaseVolumesClientJSON(service_client.ServiceClient):
 
     def is_resource_deleted(self, id):
         try:
-            self.get_volume(id)
+            self.show_volume(id)
         except lib_exc.NotFound:
             return True
         return False
@@ -240,7 +231,7 @@ class BaseVolumesClientJSON(service_client.ServiceClient):
         self.expected_success(202, resp.status)
         return service_client.ResponseBody(resp, body['transfer'])
 
-    def get_volume_transfer(self, transfer_id):
+    def show_volume_transfer(self, transfer_id):
         """Returns the details of a volume transfer."""
         url = "os-volume-transfer/%s" % str(transfer_id)
         resp, body = self.get(url)
@@ -303,7 +294,7 @@ class BaseVolumesClientJSON(service_client.ServiceClient):
         self.expected_success(200, resp.status)
         return service_client.ResponseBody(resp, body['metadata'])
 
-    def get_volume_metadata(self, volume_id):
+    def show_volume_metadata(self, volume_id):
         """Get metadata of the volume."""
         url = "volumes/%s/metadata" % str(volume_id)
         resp, body = self.get(url)

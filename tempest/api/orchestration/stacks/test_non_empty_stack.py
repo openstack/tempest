@@ -66,7 +66,7 @@ class StacksTestJSON(base.BaseOrchestrationTest):
     @test.idempotent_id('992f96e3-41ee-4ff6-91c7-bcfb670c0919')
     def test_stack_show(self):
         """Getting details about created stack should be possible."""
-        stack = self.client.get_stack(self.stack_name)
+        stack = self.client.show_stack(self.stack_name)
         self.assertIsInstance(stack, dict)
         self.assert_fields_in_dict(stack, 'stack_name', 'id', 'links',
                                    'parameters', 'outputs', 'disable_rollback',
@@ -105,8 +105,8 @@ class StacksTestJSON(base.BaseOrchestrationTest):
     @test.idempotent_id('2aba03b3-392f-4237-900b-1f5a5e9bd962')
     def test_show_resource(self):
         """Getting details about created resource should be possible."""
-        resource = self.client.get_resource(self.stack_identifier,
-                                            self.resource_name)
+        resource = self.client.show_resource(self.stack_identifier,
+                                             self.resource_name)
         self.assertIsInstance(resource, dict)
         self.assert_fields_in_dict(resource, 'resource_name', 'description',
                                    'links', 'logical_resource_id',

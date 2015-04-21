@@ -55,11 +55,11 @@ class VolumesBackupsV2Test(base.BaseVolumeAdminTest):
                                                        'available')
 
         # Get a given backup
-        backup = self.backups_adm_client.get_backup(backup['id'])
+        backup = self.backups_adm_client.show_backup(backup['id'])
         self.assertEqual(backup_name, backup['name'])
 
         # Get all backups with detail
-        backups = self.backups_adm_client.list_backups_with_detail()
+        backups = self.backups_adm_client.list_backups(detail=True)
         self.assertIn((backup['name'], backup['id']),
                       [(m['name'], m['id']) for m in backups])
 

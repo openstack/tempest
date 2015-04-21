@@ -78,14 +78,14 @@ class TestStampPattern(manager.ScenarioTest):
         return self.get_remote_client(server_or_ip)
 
     def _create_volume_snapshot(self, volume):
-        snapshot_name = data_utils.rand_name('scenario-snapshot-')
+        snapshot_name = data_utils.rand_name('scenario-snapshot')
         _, snapshot = self.snapshots_client.create_snapshot(
             volume['id'], display_name=snapshot_name)
 
         def cleaner():
             self.snapshots_client.delete_snapshot(snapshot['id'])
             try:
-                while self.snapshots_client.get_snapshot(snapshot['id']):
+                while self.snapshots_client.show_snapshot(snapshot['id']):
                     time.sleep(1)
             except lib_exc.NotFound:
                 pass

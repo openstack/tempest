@@ -142,7 +142,6 @@ class IsolatedCreds(cred_provider.CredentialProvider):
                                             network_resources)
         self.network_resources = network_resources
         self.isolated_creds = {}
-        self.isolated_net_resources = {}
         self.ports = []
         self.password = password
         self.default_admin_creds = cred_provider.get_configured_credentials(
@@ -258,7 +257,8 @@ class IsolatedCreds(cred_provider.CredentialProvider):
         if roles:
             for role in roles:
                 self.creds_client.assign_user_role(user, project, role)
-        return self.creds_client.get_credentials(user, project, self.password)
+        creds = self.creds_client.get_credentials(user, project, self.password)
+        return cred_provider.TestResources(creds)
 
     def _create_network_resources(self, tenant_id):
         network = None
@@ -349,33 +349,6 @@ class IsolatedCreds(cred_provider.CredentialProvider):
         self.network_admin_client.add_router_interface_with_subnet_id(
             router_id, subnet_id)
 
-    def get_primary_network(self):
-        return self.isolated_net_resources.get('primary')[0]
-
-    def get_primary_subnet(self):
-        return self.isolated_net_resources.get('primary')[1]
-
-    def get_primary_router(self):
-        return self.isolated_net_resources.get('primary')[2]
-
-    def get_admin_network(self):
-        return self.isolated_net_resources.get('admin')[0]
-
-    def get_admin_subnet(self):
-        return self.isolated_net_resources.get('admin')[1]
-
-    def get_admin_router(self):
-        return self.isolated_net_resources.get('admin')[2]
-
-    def get_alt_network(self):
-        return self.isolated_net_resources.get('alt')[0]
-
-    def get_alt_subnet(self):
-        return self.isolated_net_resources.get('alt')[1]
-
-    def get_alt_router(self):
-        return self.isolated_net_resources.get('alt')[2]
-
     def get_credentials(self, credential_type):
         if self.isolated_creds.get(str(credential_type)):
             credentials = self.isolated_creds[str(credential_type)]
@@ -393,8 +366,8 @@ class IsolatedCreds(cred_provider.CredentialProvider):
                 not CONF.baremetal.driver_enabled):
                 network, subnet, router = self._create_network_resources(
                     credentials.tenant_id)
-                self.isolated_net_resources[str(credential_type)] = (
-                    network, subnet, router,)
+                credentials.set_resources(network=network, subnet=subnet,
+                                          router=router)
                 LOG.info("Created isolated network resources for : \n"
                          + " credentials: %s" % credentials)
         return credentials
@@ -420,12 +393,6 @@ class IsolatedCreds(cred_provider.CredentialProvider):
             new_index = str(roles) + '-' + str(len(self.isolated_creds))
             self.isolated_creds[new_index] = exist_creds
             del self.isolated_creds[str(roles)]
-            # Handle isolated neutron resouces if they exist too
-            if CONF.service_available.neutron:
-                exist_net = self.isolated_net_resources.get(str(roles))
-                if exist_net:
-                    self.isolated_net_resources[new_index] = exist_net
-                    del self.isolated_net_resources[str(roles)]
         return self.get_credentials(roles)
 
     def _clear_isolated_router(self, router_id, router_name):
@@ -466,27 +433,33 @@ class IsolatedCreds(cred_provider.CredentialProvider):
 
     def _clear_isolated_net_resources(self):
         net_client = self.network_admin_client
-        for cred in self.isolated_net_resources:
-            network, subnet, router = self.isolated_net_resources.get(cred)
+        for cred in self.isolated_creds:
+            creds = self.isolated_creds.get(cred)
+            if (not creds or not any([creds.router, creds.network,
+                                      creds.subnet])):
+                continue
             LOG.debug("Clearing network: %(network)s, "
                       "subnet: %(subnet)s, router: %(router)s",
-                      {'network': network, 'subnet': subnet, 'router': router})
+                      {'network': creds.network, 'subnet': creds.subnet,
+                       'router': creds.router})
             if (not self.network_resources or
-                self.network_resources.get('router')):
+                    (self.network_resources.get('router') and creds.subnet)):
                 try:
                     net_client.remove_router_interface_with_subnet_id(
-                        router['id'], subnet['id'])
+                        creds.router['id'], creds.subnet['id'])
                 except lib_exc.NotFound:
                     LOG.warn('router with name: %s not found for delete' %
-                             router['name'])
-                self._clear_isolated_router(router['id'], router['name'])
+                             creds.router['name'])
+                self._clear_isolated_router(creds.router['id'],
+                                            creds.router['name'])
             if (not self.network_resources or
                 self.network_resources.get('subnet')):
-                self._clear_isolated_subnet(subnet['id'], subnet['name'])
+                self._clear_isolated_subnet(creds.subnet['id'],
+                                            creds.subnet['name'])
             if (not self.network_resources or
                 self.network_resources.get('network')):
-                self._clear_isolated_network(network['id'], network['name'])
-        self.isolated_net_resources = {}
+                self._clear_isolated_network(creds.network['id'],
+                                             creds.network['name'])
 
     def clear_isolated_creds(self):
         if not self.isolated_creds:

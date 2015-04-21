@@ -275,7 +275,7 @@ class TestChecker(object):
             if not test_uuid:
                 return
             if test_uuid in uuids:
-                error_str = "%s:%s\n uuid %s collision: %s<->%s\n%s:%s\n" % (
+                error_str = "%s:%s\n uuid %s collision: %s<->%s\n%s:%s" % (
                     tests[module_name]['source_path'],
                     tests[module_name]['tests'][test_name].lineno,
                     test_uuid,
@@ -285,6 +285,8 @@ class TestChecker(object):
                     uuids[test_uuid]['test_node'].lineno,
                 )
                 print(error_str)
+                print("cannot automatically resolve the collision, please "
+                      "manually remove the duplicate value on the new test.")
                 return True
             else:
                 uuids[test_uuid] = {

@@ -78,7 +78,7 @@ class TestLargeOpsScenario(manager.ScenarioTest):
             self.servers_client.wait_for_server_status(server['id'], status)
 
     def nova_boot(self):
-        name = data_utils.rand_name('scenario-server-')
+        name = data_utils.rand_name('scenario-server')
         flavor_id = CONF.compute.flavor_ref
         # Explicitly create secgroup to avoid cleanup at the end of testcases.
         # Since no traffic is tested, we don't need to actually add rules to

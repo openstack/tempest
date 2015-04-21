@@ -89,7 +89,7 @@ class SnapshotsActionsV2Test(base.BaseVolumeAdminTest):
         self.admin_snapshots_client.\
             reset_snapshot_status(self.snapshot['id'], status)
         snapshot_get \
-            = self.admin_snapshots_client.get_snapshot(self.snapshot['id'])
+            = self.admin_snapshots_client.show_snapshot(self.snapshot['id'])
         self.assertEqual(status, snapshot_get['status'])
 
     @test.attr(type='gate')
@@ -107,7 +107,7 @@ class SnapshotsActionsV2Test(base.BaseVolumeAdminTest):
         self.client.update_snapshot_status(self.snapshot['id'],
                                            status, progress)
         snapshot_get \
-            = self.admin_snapshots_client.get_snapshot(self.snapshot['id'])
+            = self.admin_snapshots_client.show_snapshot(self.snapshot['id'])
         self.assertEqual(status, snapshot_get['status'])
         self.assertEqual(progress, snapshot_get[progress_alias])
 

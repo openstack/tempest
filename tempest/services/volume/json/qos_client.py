@@ -26,7 +26,7 @@ class BaseQosSpecsClientJSON(service_client.ServiceClient):
 
     def is_resource_deleted(self, qos_id):
         try:
-            self.get_qos(qos_id)
+            self.show_qos(qos_id)
         except lib_exc.NotFound:
             return True
         return False
@@ -48,15 +48,15 @@ class BaseQosSpecsClientJSON(service_client.ServiceClient):
         start_time = int(time.time())
         while True:
             if operation == 'qos-key-unset':
-                body = self.get_qos(qos_id)
+                body = self.show_qos(qos_id)
                 if not any(key in body['specs'] for key in args):
                     return
             elif operation == 'disassociate':
-                body = self.get_association_qos(qos_id)
+                body = self.show_association_qos(qos_id)
                 if not any(args in body[i]['id'] for i in range(0, len(body))):
                     return
             elif operation == 'disassociate-all':
-                body = self.get_association_qos(qos_id)
+                body = self.show_association_qos(qos_id)
                 if not body:
                     return
             else:
@@ -96,7 +96,7 @@ class BaseQosSpecsClientJSON(service_client.ServiceClient):
         self.expected_success(200, resp.status)
         return service_client.ResponseBodyList(resp, body['qos_specs'])
 
-    def get_qos(self, qos_id):
+    def show_qos(self, qos_id):
         """Get the specified QoS specification."""
         url = "qos-specs/%s" % str(qos_id)
         resp, body = self.get(url)
@@ -133,7 +133,7 @@ class BaseQosSpecsClientJSON(service_client.ServiceClient):
         self.expected_success(202, resp.status)
         return service_client.ResponseBody(resp, body)
 
-    def get_association_qos(self, qos_id):
+    def show_association_qos(self, qos_id):
         """Get the association of the specified QoS specification."""
         url = "qos-specs/%s/associations" % str(qos_id)
         resp, body = self.get(url)

@@ -71,7 +71,7 @@ class VolumesV2TransfersTest(base.BaseVolumeTest):
                                            'awaiting-transfer')
 
         # Get a volume transfer
-        body = self.client.get_volume_transfer(transfer_id)
+        body = self.client.show_volume_transfer(transfer_id)
         self.assertEqual(volume['id'], body['volume_id'])
 
         # List volume transfers, the result should be greater than

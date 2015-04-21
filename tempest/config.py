@@ -23,6 +23,13 @@ from oslo_config import cfg
 from oslo_log import log as logging
 
 
+# TODO(marun) Replace use of oslo_config's global ConfigOpts
+# (cfg.CONF) instance with a local instance (cfg.ConfigOpts()) once
+# the cli tests move to the clients.  The cli tests rely on oslo
+# incubator modules that use the global cfg.CONF.
+_CONF = cfg.CONF
+
+
 def register_opt_group(conf, opt_group, options):
     conf.register_group(opt_group)
     for opt in options:
@@ -180,10 +187,6 @@ ComputeGroup = [
                default="root",
                help="User name used to authenticate to an instance using "
                     "the alternate image."),
-    cfg.StrOpt('image_alt_ssh_password',
-               default="password",
-               help="Password used to authenticate to an instance using "
-                    "the alternate image."),
     cfg.IntOpt('build_interval',
                default=1,
                help="Time in seconds between build status checks."),
@@ -198,16 +201,17 @@ ComputeGroup = [
     cfg.StrOpt('ssh_auth_method',
                default='keypair',
                help="Auth method used for authenticate to the instance. "
-                    "Valid choices are: keypair, configured, adminpass. "
-                    "keypair: start the servers with an ssh keypair. "
-                    "configured: use the configured user and password. "
-                    "adminpass: use the injected adminPass. "
-                    "disabled: avoid using ssh when it is an option."),
+                    "Valid choices are: keypair, configured, adminpass "
+                    "and disabled. "
+                    "Keypair: start the servers with a ssh keypair. "
+                    "Configured: use the configured user and password. "
+                    "Adminpass: use the injected adminPass. "
+                    "Disabled: avoid using ssh when it is an option."),
     cfg.StrOpt('ssh_connect_method',
-               default='fixed',
+               default='floating',
                help="How to connect to the instance? "
                     "fixed: using the first ip belongs the fixed network "
-                    "floating: creating and using a floating ip"),
+                    "floating: creating and using a floating ip."),
     cfg.StrOpt('ssh_user',
                default='root',
                help="User name used to authenticate to an instance."),
@@ -215,6 +219,14 @@ ComputeGroup = [
                default=120,
                help="Timeout in seconds to wait for ping to "
                     "succeed."),
+    cfg.IntOpt('ping_size',
+               default=56,
+               help="The packet size for ping packets originating "
+                    "from remote linux hosts"),
+    cfg.IntOpt('ping_count',
+               default=1,
+               help="The number of ping packets originating from remote "
+                    "linux hosts"),
     cfg.IntOpt('ssh_timeout',
                default=300,
                help="Timeout in seconds to wait for authentication to "
@@ -232,7 +244,8 @@ ComputeGroup = [
                     "tenants. If multiple networks are available for a tenant"
                     " this is the network which will be used for creating "
                     "servers if tempest does not create a network or a "
-                    "network is not specified elsewhere"),
+                    "network is not specified elsewhere. It may be used for "
+                    "ssh validation only if floating IPs are disabled."),
     cfg.StrOpt('network_for_ssh',
                default='public',
                help="Network used for SSH connections. Ignored if "
@@ -257,9 +270,6 @@ ComputeGroup = [
                choices=['public', 'admin', 'internal',
                         'publicURL', 'adminURL', 'internalURL'],
                help="The endpoint type to use for the compute service."),
-    cfg.StrOpt('path_to_private_key',
-               help="Path to a private key file for SSH access to remote "
-                    "hosts"),
     cfg.StrOpt('volume_device_name',
                default='vdb',
                help="Expected device name when a volume is attached to "
@@ -442,12 +452,16 @@ NetworkGroup = [
                help="The mask bits for tenant ipv6 subnets"),
     cfg.BoolOpt('tenant_networks_reachable',
                 default=False,
-                help="Whether tenant network connectivity should be "
-                     "evaluated directly"),
+                help="Whether tenant networks can be reached directly from "
+                     "the test client. This must be set to True when the "
+                     "'fixed' ssh_connect_method is selected."),
     cfg.StrOpt('public_network_id',
                default="",
                help="Id of the public network that provides external "
                     "connectivity"),
+    cfg.StrOpt('floating_network_name',
+               help="Default floating network name. Used to allocate floating "
+                    "IPs when neutron is enabled."),
     cfg.StrOpt('public_router_id',
                default="",
                help="Id of the public router that provides external "
@@ -492,6 +506,10 @@ NetworkFeaturesGroup = [
                      "the extended IPv6 attributes ipv6_ra_mode "
                      "and ipv6_address_mode"
                 ),
+    cfg.BoolOpt('port_admin_state_change',
+                default=True,
+                help="Does the test environment support changing"
+                     " port admin state"),
 ]
 
 messaging_group = cfg.OptGroup(name='messaging',
@@ -527,6 +545,37 @@ MessagingGroup = [
     cfg.IntOpt('max_claim_grace',
                default=43200,
                help='The maximum grace period for a claim'),
+]
+
+validation_group = cfg.OptGroup(name='validation',
+                                title='SSH Validation options')
+
+ValidationGroup = [
+    cfg.StrOpt('connect_method',
+               default='floating',
+               choices=['fixed', 'floating'],
+               help='Default IP type used for validation: '
+                    '-fixed: uses the first IP belonging to the fixed network '
+                    '-floating: creates and uses a floating IP'),
+    cfg.StrOpt('auth_method',
+               default='keypair',
+               choices=['keypair'],
+               help='Default authentication method to the instance. '
+                    'Only ssh via keypair is supported for now. '
+                    'Additional methods will be handled in a separate spec.'),
+    cfg.IntOpt('ip_version_for_ssh',
+               default=4,
+               help='Default IP version for ssh connections.'),
+    cfg.IntOpt('ping_timeout',
+               default=120,
+               help='Timeout in seconds to wait for ping to succeed.'),
+    cfg.IntOpt('connect_timeout',
+               default=60,
+               help='Timeout in seconds to wait for the TCP connection to be '
+                    'successful.'),
+    cfg.IntOpt('ssh_timeout',
+               default=300,
+               help='Timeout in seconds to wait for the ssh banner.'),
 ]
 
 volume_group = cfg.OptGroup(name='volume',
@@ -995,7 +1044,7 @@ InputScenarioGroup = [
                help="SSH verification in tests is skipped"
                     "for matching images"),
     cfg.StrOpt('ssh_user_regex',
-               default="[[\"^.*[Cc]irros.*$\", \"root\"]]",
+               default="[[\"^.*[Cc]irros.*$\", \"cirros\"]]",
                help="List of user mapped to regex "
                     "to matching image names."),
 ]
@@ -1081,6 +1130,7 @@ _opts = [
     (network_group, NetworkGroup),
     (network_feature_group, NetworkFeaturesGroup),
     (messaging_group, MessagingGroup),
+    (validation_group, ValidationGroup),
     (volume_group, VolumeGroup),
     (volume_feature_group, VolumeFeaturesGroup),
     (object_storage_group, ObjectStoreGroup),
@@ -1105,7 +1155,7 @@ _opts = [
 
 def register_opts():
     for g, o in _opts:
-        register_opt_group(cfg.CONF, g, o)
+        register_opt_group(_CONF, g, o)
 
 
 def list_opts():
@@ -1129,45 +1179,45 @@ class TempestConfigPrivate(object):
 
     def __getattr__(self, attr):
         # Handles config options from the default group
-        return getattr(cfg.CONF, attr)
+        return getattr(_CONF, attr)
 
     def _set_attrs(self):
-        self.auth = cfg.CONF.auth
-        self.compute = cfg.CONF.compute
-        self.compute_feature_enabled = cfg.CONF['compute-feature-enabled']
-        self.identity = cfg.CONF.identity
-        self.identity_feature_enabled = cfg.CONF['identity-feature-enabled']
-        self.image = cfg.CONF.image
-        self.image_feature_enabled = cfg.CONF['image-feature-enabled']
-        self.network = cfg.CONF.network
-        self.network_feature_enabled = cfg.CONF['network-feature-enabled']
-        self.volume = cfg.CONF.volume
-        self.volume_feature_enabled = cfg.CONF['volume-feature-enabled']
-        self.object_storage = cfg.CONF['object-storage']
-        self.object_storage_feature_enabled = cfg.CONF[
+        self.auth = _CONF.auth
+        self.compute = _CONF.compute
+        self.compute_feature_enabled = _CONF['compute-feature-enabled']
+        self.identity = _CONF.identity
+        self.identity_feature_enabled = _CONF['identity-feature-enabled']
+        self.image = _CONF.image
+        self.image_feature_enabled = _CONF['image-feature-enabled']
+        self.network = _CONF.network
+        self.network_feature_enabled = _CONF['network-feature-enabled']
+        self.validation = _CONF.validation
+        self.volume = _CONF.volume
+        self.volume_feature_enabled = _CONF['volume-feature-enabled']
+        self.object_storage = _CONF['object-storage']
+        self.object_storage_feature_enabled = _CONF[
             'object-storage-feature-enabled']
-        self.database = cfg.CONF.database
-        self.orchestration = cfg.CONF.orchestration
-        self.messaging = cfg.CONF.messaging
-        self.telemetry = cfg.CONF.telemetry
-        self.dashboard = cfg.CONF.dashboard
-        self.data_processing = cfg.CONF.data_processing
-        self.data_processing_feature_enabled = cfg.CONF[
+        self.database = _CONF.database
+        self.orchestration = _CONF.orchestration
+        self.messaging = _CONF.messaging
+        self.telemetry = _CONF.telemetry
+        self.dashboard = _CONF.dashboard
+        self.data_processing = _CONF.data_processing
+        self.data_processing_feature_enabled = _CONF[
             'data_processing-feature-enabled']
-        self.boto = cfg.CONF.boto
-        self.stress = cfg.CONF.stress
-        self.scenario = cfg.CONF.scenario
-        self.service_available = cfg.CONF.service_available
-        self.debug = cfg.CONF.debug
-        self.baremetal = cfg.CONF.baremetal
-        self.input_scenario = cfg.CONF['input-scenario']
-        self.cli = cfg.CONF.cli
-        self.negative = cfg.CONF.negative
-        cfg.CONF.set_default('domain_name', self.identity.admin_domain_name,
-                             group='identity')
-        cfg.CONF.set_default('alt_domain_name',
-                             self.identity.admin_domain_name,
-                             group='identity')
+        self.boto = _CONF.boto
+        self.stress = _CONF.stress
+        self.scenario = _CONF.scenario
+        self.service_available = _CONF.service_available
+        self.debug = _CONF.debug
+        self.baremetal = _CONF.baremetal
+        self.input_scenario = _CONF['input-scenario']
+        self.cli = _CONF.cli
+        self.negative = _CONF.negative
+        _CONF.set_default('domain_name', self.identity.admin_domain_name,
+                          group='identity')
+        _CONF.set_default('alt_domain_name', self.identity.admin_domain_name,
+                          group='identity')
 
     def __init__(self, parse_conf=True, config_path=None):
         """Initialize a configuration from a conf directory and conf file."""
@@ -1193,18 +1243,18 @@ class TempestConfigPrivate(object):
         # to remove an issue with the config file up to date checker.
         if parse_conf:
             config_files.append(path)
-        logging.register_options(cfg.CONF)
+        logging.register_options(_CONF)
         if os.path.isfile(path):
-            cfg.CONF([], project='tempest', default_config_files=config_files)
+            _CONF([], project='tempest', default_config_files=config_files)
         else:
-            cfg.CONF([], project='tempest')
-        logging.setup(cfg.CONF, 'tempest')
+            _CONF([], project='tempest')
+        logging.setup(_CONF, 'tempest')
         LOG = logging.getLogger('tempest')
         LOG.info("Using tempest config file %s" % path)
         register_opts()
         self._set_attrs()
         if parse_conf:
-            cfg.CONF.log_opt_values(LOG, std_logging.DEBUG)
+            _CONF.log_opt_values(LOG, std_logging.DEBUG)
 
 
 class TempestConfigProxy(object):

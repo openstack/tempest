@@ -52,15 +52,15 @@ class StacksTestJSON(base.BaseOrchestrationTest):
         self.assertIn(stack_id, list_ids)
 
         # fetch the stack
-        stack = self.client.get_stack(stack_identifier)
+        stack = self.client.show_stack(stack_identifier)
         self.assertEqual('CREATE_COMPLETE', stack['stack_status'])
 
         # fetch the stack by name
-        stack = self.client.get_stack(stack_name)
+        stack = self.client.show_stack(stack_name)
         self.assertEqual('CREATE_COMPLETE', stack['stack_status'])
 
         # fetch the stack by id
-        stack = self.client.get_stack(stack_id)
+        stack = self.client.show_stack(stack_id)
         self.assertEqual('CREATE_COMPLETE', stack['stack_status'])
 
         # delete the stack
