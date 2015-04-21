@@ -217,6 +217,35 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
 
         self.client.start_server(self.server_id)
 
+    @test.idempotent_id('b68bd8d6-855d-4212-b59b-2e704044dace')
+    @test.services('volume')
+    def test_rebuild_server_with_volume_attached(self):
+        # create a new volume and attach it to the server
+        volume = self.volumes_client.create_volume(
+            size=CONF.volume.volume_size)
+        volume = volume['volume']
+        self.addCleanup(self.volumes_client.delete_volume, volume['id'])
+        waiters.wait_for_volume_status(self.volumes_client, volume['id'],
+                                       'available')
+
+        self.client.attach_volume(self.server_id, volumeId=volume['id'])
+        self.addCleanup(waiters.wait_for_volume_status, self.volumes_client,
+                        volume['id'], 'available')
+        self.addCleanup(self.client.detach_volume,
+                        self.server_id, volume['id'])
+        waiters.wait_for_volume_status(self.volumes_client, volume['id'],
+                                       'in-use')
+
+        # run general rebuild test
+        self.test_rebuild_server()
+
+        # make sure the volume is attached to the instance after rebuild
+        vol_after_rebuild = self.volumes_client.show_volume(volume['id'])
+        vol_after_rebuild = vol_after_rebuild['volume']
+        self.assertEqual('in-use', vol_after_rebuild['status'])
+        self.assertEqual(self.server_id,
+                         vol_after_rebuild['attachments'][0]['server_id'])
+
     def _test_resize_server_confirm(self, stop=False):
         # The server's RAM and disk space should be modified to that of
         # the provided flavor
