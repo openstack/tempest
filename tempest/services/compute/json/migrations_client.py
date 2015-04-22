@@ -16,7 +16,7 @@ import json
 
 from six.moves.urllib import parse as urllib
 
-from tempest.api_schema.response.compute import migrations as schema
+from tempest.api_schema.response.compute.v2_1 import migrations as schema
 from tempest.common import service_client
 
 

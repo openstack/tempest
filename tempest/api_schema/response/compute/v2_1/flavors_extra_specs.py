@@ -12,7 +12,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-flavor_extra_specs = {
+set_get_flavor_extra_specs = {
     'status_code': [200],
     'response_body': {
         'type': 'object',
@@ -28,7 +28,7 @@ flavor_extra_specs = {
     }
 }
 
-flavor_extra_specs_key = {
+set_get_flavor_extra_specs_key = {
     'status_code': [200],
     'response_body': {
         'type': 'object',
