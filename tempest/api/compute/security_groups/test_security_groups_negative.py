@@ -156,7 +156,7 @@ class SecurityGroupsNegativeTestJSON(base.BaseSecurityGroupsTest):
 
     @test.idempotent_id('00579617-fe04-4e1c-9d08-ca7467d2e34b')
     @testtools.skipIf(CONF.service_available.neutron,
-                      "Neutron not check the security_group_id")
+                      "Neutron does not check the security group ID")
     @test.attr(type=['negative', 'smoke'])
     @test.services('network')
     def test_update_security_group_with_invalid_sg_id(self):
@@ -171,7 +171,7 @@ class SecurityGroupsNegativeTestJSON(base.BaseSecurityGroupsTest):
 
     @test.idempotent_id('cda8d8b4-59f8-4087-821d-20cf5a03b3b1')
     @testtools.skipIf(CONF.service_available.neutron,
-                      "Neutron not check the security_group_name")
+                      "Neutron does not check the security group name")
     @test.attr(type=['negative', 'smoke'])
     @test.services('network')
     def test_update_security_group_with_invalid_sg_name(self):
@@ -187,7 +187,7 @@ class SecurityGroupsNegativeTestJSON(base.BaseSecurityGroupsTest):
 
     @test.idempotent_id('97d12b1c-a610-4194-93f1-ba859e718b45')
     @testtools.skipIf(CONF.service_available.neutron,
-                      "Neutron not check the security_group_description")
+                      "Neutron does not check the security group description")
     @test.attr(type=['negative', 'smoke'])
     @test.services('network')
     def test_update_security_group_with_invalid_sg_des(self):
