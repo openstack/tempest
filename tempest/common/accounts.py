@@ -17,6 +17,7 @@ import os
 
 from oslo_concurrency import lockutils
 from oslo_log import log as logging
+import six
 import yaml
 
 from tempest import clients
@@ -75,7 +76,7 @@ class Accounts(cred_provider.CredentialProvider):
             if 'resources' in account:
                 resources = account.pop('resources')
             temp_hash = hashlib.md5()
-            temp_hash.update(str(account))
+            temp_hash.update(six.text_type(account).encode('utf-8'))
             temp_hash_key = temp_hash.hexdigest()
             hash_dict['creds'][temp_hash_key] = account
             for role in roles:
@@ -244,17 +245,19 @@ class Accounts(cred_provider.CredentialProvider):
 
     def get_creds_by_roles(self, roles, force_new=False):
         roles = list(set(roles))
-        exist_creds = self.isolated_creds.get(str(roles), None)
+        exist_creds = self.isolated_creds.get(six.text_type(roles).encode(
+            'utf-8'), None)
         # The force kwarg is used to allocate an additional set of creds with
         # the same role list. The index used for the previously allocation
         # in the isolated_creds dict will be moved.
         if exist_creds and not force_new:
             return exist_creds
         elif exist_creds and force_new:
-            new_index = str(roles) + '-' + str(len(self.isolated_creds))
+            new_index = six.text_type(roles).encode('utf-8') + '-' + \
+                six.text_type(len(self.isolated_creds)).encode('utf-8')
             self.isolated_creds[new_index] = exist_creds
         net_creds = self._get_creds(roles=roles)
-        self.isolated_creds[str(roles)] = net_creds
+        self.isolated_creds[six.text_type(roles).encode('utf-8')] = net_creds
         return net_creds
 
     def clear_isolated_creds(self):

@@ -20,6 +20,7 @@ from oslo_concurrency.fixture import lockutils as lockutils_fixtures
 from oslo_concurrency import lockutils
 from oslo_config import cfg
 from oslotest import mockpatch
+import six
 from tempest_lib import auth
 from tempest_lib.services.identity.v2 import token_client
 
@@ -79,7 +80,7 @@ class TestAccount(base.TestCase):
         hash_list = []
         for account in accounts_list:
             hash = hashlib.md5()
-            hash.update(str(account))
+            hash.update(six.text_type(account).encode('utf-8'))
             temp_hash = hash.hexdigest()
             hash_list.append(temp_hash)
         return hash_list
@@ -265,7 +266,7 @@ class TestAccount(base.TestCase):
             'tempest.common.accounts.read_accounts_yaml',
             return_value=self.test_accounts))
         test_accounts_class = accounts.Accounts('v2', 'test_name')
-        hashes = test_accounts_class.hash_dict['creds'].keys()
+        hashes = list(test_accounts_class.hash_dict['creds'].keys())
         admin_hashes = test_accounts_class.hash_dict['roles'][
             cfg.CONF.identity.admin_role]
         temp_hash = hashes[0]
