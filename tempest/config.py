@@ -17,9 +17,10 @@ from __future__ import print_function
 
 import logging as std_logging
 import os
+import tempfile
 
+from oslo_concurrency import lockutils
 from oslo_config import cfg
-
 from oslo_log import log as logging
 
 from tempest.test_discover import plugins
@@ -1462,6 +1463,8 @@ class TempestConfigProxy(object):
     def __getattr__(self, attr):
         if not self._config:
             self._fix_log_levels()
+            lock_dir = os.path.join(tempfile.gettempdir(), 'tempest-lock')
+            lockutils.set_defaults(lock_dir)
             self._config = TempestConfigPrivate(config_path=self._path)
 
         return getattr(self._config, attr)
