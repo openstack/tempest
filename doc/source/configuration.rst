@@ -40,6 +40,24 @@ are running. This will be addressed in the future, but is a current limitation.
 Eventually the config options for providing credentials to tempest will be
 deprecated and removed in favor of the accounts.yaml file.
 
+Keystone Connection Info
+^^^^^^^^^^^^^^^^^^^^^^^^
+In order for tempest to be able to talk to your OpenStack deployment you need
+to provide it with information about how it communicates with keystone.
+This involves configuring the following options in the identity section:
+
+ #. auth_version
+ #. uri
+ #. uri_v3
+
+The *auth_version* option is used to tell tempest whether it should be using
+keystone's v2 or v3 api for communicating with keystone. (except for the
+identity api tests which will test a specific version) The 2 uri options are
+used to tell tempest the url of the keystone endpoint. The *uri* option is used
+for keystone v2 request and *uri_v3* is used for keystone v3. You want to ensure
+that which ever version you set for *auth_version* has its uri option defined.
+
+
 Credential Provider Mechanisms
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -123,6 +141,72 @@ The only restriction with using the traditional config options for credentials
 is that if a test requires specific roles on accounts these tests can not be
 run. This is because the config options do not give sufficient flexibility to
 describe the roles assigned to a user for running the tests.
+
+Compute
+-------
+
+Flavors
+^^^^^^^
+For tempest to be able to create servers you need to specify flavors that it
+can use to boot the servers with. There are 2 options in the tempest config
+for doing this:
+
+ #. flavor_ref
+ #. flavor_ref_alt
+
+Both of these options are in the compute section of the config file and take
+in the flavor id (not the name) from nova. The *flavor_ref* option is what will
+be used for booting almost all of the guests, *flavor_ref_alt* is only used in
+tests where 2 different sized servers are required. (for example a resize test)
+
+Using a smaller flavor is generally recommended, when larger flavors are used
+the extra time required to bring up servers will likely affect total run time
+and probably require tweaking timeout values to ensure tests have ample time to
+finish.
+
+Images
+^^^^^^
+Just like with flavors, tempest needs to know which images to use for booting
+servers. There are 2 options in the compute section just like with flavors:
+
+ #. image_ref
+ #. image_ref_alt
+
+Both options are expecting an image id (not name) from nova. The *image_ref*
+option is what what will be used for booting the majority of servers in tempest.
+*image_ref_alt* is used for tests that require 2 images such as rebuild. If 2
+images are not available you can set both options to the same image_ref and
+those tests will be skipped.
+
+There are also options in the scenario section for images:
+
+ #. img_file
+ #. img_dir
+ #. aki_img_file
+ #. ari_img_file
+ #. ami_img_file
+ #. img_container_format
+ #. img_disk_format
+
+however unlike the other image options these are used for a very small subset
+of scenario tests which are uploading an image. These options are used to tell
+tempest where an image file is located and describe it's metadata for when it's
+uploaded.
+
+The behavior of these options is a bit convoluted (which will likely be fixed
+in future versions). You first need to specify *img_dir*, which is the directory
+tempest will look for the image files in. First it will check if the filename
+set for *img_file* could be found in *img_dir*. If it is found then the
+*img_container_format* and *img_disk_format* options are used to upload that
+image to glance. However if it's not found tempest will look for the 3 uec image
+file name options as a fallback. If neither is found the tests requiring an
+image to upload will fail.
+
+It is worth pointing out that using `cirros`_ is a very good choice for running
+tempest. It's what is used for upstream testing, they boot quickly and have a
+small footprint.
+
+.. _cirros: https://launchpad.net/cirros
 
 Networking
 ----------
