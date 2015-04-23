@@ -12,9 +12,9 @@
 
 import functools
 import json
-import urllib
 
 import six
+from six.moves.urllib import parse as urllib
 
 from tempest.common import service_client
 

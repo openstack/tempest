@@ -14,8 +14,9 @@
 #    under the License.
 
 import json
-import urllib
 from xml.etree import ElementTree as etree
+
+from six.moves.urllib import parse as urllib
 
 from tempest.common import service_client
 

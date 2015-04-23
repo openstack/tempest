@@ -14,7 +14,8 @@
 #    under the License.
 
 import datetime
-import urllib
+
+from six.moves.urllib import parse as urllib
 
 from tempest.api.compute import base
 from tempest import test

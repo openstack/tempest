@@ -14,9 +14,9 @@
 #    under the License.
 
 import json
-import urllib
 
 import jsonschema
+from six.moves.urllib import parse as urllib
 from tempest_lib import exceptions as lib_exc
 
 from tempest.common import glance_http

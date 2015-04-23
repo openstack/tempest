@@ -16,7 +16,8 @@
 
 import tempfile
 import time
-import urllib2
+
+from six.moves.urllib import request as urllib2
 
 from tempest.common import commands
 from tempest import config

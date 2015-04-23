@@ -14,7 +14,8 @@
 #    under the License.
 
 import json
-import urllib
+
+from six.moves.urllib import parse as urllib
 
 from tempest.api_schema.response.compute import flavors_access as schema_access
 from tempest.api_schema.response.compute import flavors_extra_specs \

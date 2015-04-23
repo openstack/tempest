@@ -18,9 +18,9 @@ import errno
 import json
 import os
 import time
-import urllib
 
 from oslo_log import log as logging
+from six.moves.urllib import parse as urllib
 from tempest_lib.common.utils import misc as misc_utils
 from tempest_lib import exceptions as lib_exc
 
