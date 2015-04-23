@@ -29,7 +29,7 @@ class TestSshClient(base.TestCase):
     def test_pkey_calls_paramiko_RSAKey(self):
         with contextlib.nested(
             mock.patch('paramiko.RSAKey.from_private_key'),
-            mock.patch('cStringIO.StringIO')) as (rsa_mock, cs_mock):
+            mock.patch('six.moves.cStringIO')) as (rsa_mock, cs_mock):
             cs_mock.return_value = mock.sentinel.csio
             pkey = 'mykey'
             ssh.Client('localhost', 'root', pkey=pkey)

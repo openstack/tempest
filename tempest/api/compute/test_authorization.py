@@ -13,7 +13,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import StringIO
+import six
 
 from oslo_log import log as logging
 from tempest_lib.common.utils import data_utils
@@ -75,7 +75,7 @@ class AuthorizationTestJSON(base.BaseV2ComputeTest):
                                               disk_format='raw',
                                               is_public=False)
         image_id = body['id']
-        image_file = StringIO.StringIO(('*' * 1024))
+        image_file = six.StringIO(('*' * 1024))
         body = cls.glance_client.update_image(image_id, data=image_file)
         cls.glance_client.wait_for_image_status(image_id, 'active')
         cls.image = cls.images_client.get_image(image_id)

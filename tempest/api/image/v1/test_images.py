@@ -13,8 +13,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import cStringIO as StringIO
-
+from six import moves
 from tempest_lib.common.utils import data_utils
 
 from tempest.api.image import base
@@ -46,7 +45,7 @@ class CreateRegisterImagesTest(base.BaseV1ImageTest):
             self.assertEqual(val, body.get('properties')[key])
 
         # Now try uploading an image file
-        image_file = StringIO.StringIO(data_utils.random_bytes())
+        image_file = moves.cStringIO(data_utils.random_bytes())
         body = self.client.update_image(image_id, data=image_file)
         self.assertIn('size', body)
         self.assertEqual(1024, body.get('size'))
@@ -161,7 +160,7 @@ class ListImagesTest(base.BaseV1ImageTest):
         image. Note that the size of the new image is a random number between
         1024 and 4096
         """
-        image_file = StringIO.StringIO(data_utils.random_bytes(size))
+        image_file = moves.cStringIO(data_utils.random_bytes(size))
         name = 'New Standard Image %s' % name
         image = cls.create_image(name=name,
                                  container_format=container_format,
@@ -257,7 +256,7 @@ class UpdateImageMetaTest(base.BaseV1ImageTest):
         Create a new standard image and return the ID of the newly-registered
         image.
         """
-        image_file = StringIO.StringIO(data_utils.random_bytes(size))
+        image_file = moves.cStringIO(data_utils.random_bytes(size))
         name = 'New Standard Image %s' % name
         image = cls.create_image(name=name,
                                  container_format=container_format,

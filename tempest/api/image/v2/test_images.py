@@ -14,9 +14,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import cStringIO as StringIO
 import random
 
+from six import moves
 from tempest_lib.common.utils import data_utils
 
 from tempest.api.image import base
@@ -55,7 +55,7 @@ class BasicOperationsImagesTest(base.BaseV2ImageTest):
 
         # Now try uploading an image file
         file_content = data_utils.random_bytes()
-        image_file = StringIO.StringIO(file_content)
+        image_file = moves.cStringIO(file_content)
         self.client.store_image(image_id, image_file)
 
         # Now try to get image details
@@ -108,7 +108,7 @@ class BasicOperationsImagesTest(base.BaseV2ImageTest):
         image_id = body['id']
 
         # Now try uploading an image file
-        image_file = StringIO.StringIO(data_utils.random_bytes())
+        image_file = moves.cStringIO(data_utils.random_bytes())
         self.client.store_image(image_id, image_file)
 
         # Update Image
@@ -149,7 +149,7 @@ class ListImagesTest(base.BaseV2ImageTest):
         1024 and 4096
         """
         size = random.randint(1024, 4096)
-        image_file = StringIO.StringIO(data_utils.random_bytes(size))
+        image_file = moves.cStringIO(data_utils.random_bytes(size))
         name = data_utils.rand_name('image')
         body = cls.create_image(name=name,
                                 container_format=container_format,

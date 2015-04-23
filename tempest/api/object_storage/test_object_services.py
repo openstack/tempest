@@ -13,7 +13,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import cStringIO as StringIO
 import hashlib
 import random
 import re
@@ -21,6 +20,7 @@ import time
 import zlib
 
 import six
+from six import moves
 from tempest_lib.common.utils import data_utils
 
 from tempest.api.object_storage import base
@@ -216,7 +216,7 @@ class ObjectTest(base.BaseObjectTest):
         status, _, resp_headers = self.object_client.put_object_with_chunk(
             container=self.container_name,
             name=object_name,
-            contents=StringIO.StringIO(data),
+            contents=moves.cStringIO(data),
             chunk_size=512)
         self.assertHeaders(resp_headers, 'Object', 'PUT')
 
