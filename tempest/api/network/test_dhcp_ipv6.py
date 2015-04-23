@@ -203,8 +203,8 @@ class NetworksTestDHCPv6(base.BaseNetworkTest):
                 real_ips = dict([(k['subnet_id'], k['ip_address'])
                                  for k in port['fixed_ips']])
                 real_dhcp_ip, real_eui_ip = [real_ips[sub['id']]
-                                             for sub in subnet_dhcp,
-                                             subnet_slaac]
+                                             for sub in [subnet_dhcp,
+                                             subnet_slaac]]
                 self.client.delete_port(port['id'])
                 self.ports.pop()
                 body = self.client.list_ports()
@@ -256,8 +256,8 @@ class NetworksTestDHCPv6(base.BaseNetworkTest):
                 real_ips = dict([(k['subnet_id'], k['ip_address'])
                                  for k in port['fixed_ips']])
                 real_dhcp_ip, real_eui_ip = [real_ips[sub['id']]
-                                             for sub in subnet_dhcp,
-                                             subnet_slaac]
+                                             for sub in [subnet_dhcp,
+                                             subnet_slaac]]
                 self._clean_network()
                 self.assertTrue({real_eui_ip,
                                  real_dhcp_ip}.issubset([eui_ip] + dhcp_ip))
