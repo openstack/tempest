@@ -23,13 +23,12 @@ import posixpath
 import re
 import socket
 import struct
-import urlparse
-
 
 import OpenSSL
 from oslo_log import log as logging
 import six
 from six import moves
+from six.moves.urllib import parse as urlparse
 from tempest_lib import exceptions as lib_exc
 
 from tempest import exceptions as exc

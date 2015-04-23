@@ -15,15 +15,15 @@
 
 import ConfigParser
 import contextlib
-from tempest_lib import exceptions as lib_exc
 import types
-import urlparse
-
-from tempest import config
 
 import boto
 import boto.ec2
 import boto.s3.connection
+from six.moves.urllib import parse as urlparse
+from tempest_lib import exceptions as lib_exc
+
+from tempest import config
 
 CONF = config.CONF
 

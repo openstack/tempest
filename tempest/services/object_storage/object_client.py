@@ -15,7 +15,8 @@
 
 import httplib
 import urllib
-import urlparse
+
+from six.moves.urllib import parse as urlparse
 
 from tempest.common import service_client
 

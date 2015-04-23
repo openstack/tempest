@@ -17,7 +17,6 @@ import contextlib
 import logging as orig_logging
 import os
 import re
-import urlparse
 
 import boto
 from boto import ec2
@@ -25,7 +24,7 @@ from boto import exception
 from boto import s3
 from oslo_log import log as logging
 import six
-
+from six.moves.urllib import parse as urlparse
 from tempest_lib import exceptions as lib_exc
 
 import tempest.clients
