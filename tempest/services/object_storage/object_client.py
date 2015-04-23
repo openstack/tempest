@@ -13,6 +13,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import six
 from six.moves import http_client as httplib
 from six.moves.urllib import parse as urlparse
 
@@ -232,7 +233,7 @@ def put_object_connection(base_url, container, name, contents=None,
         headers = {}
     if hasattr(contents, 'read'):
         conn.putrequest('PUT', path)
-        for header, value in headers.iteritems():
+        for header, value in six.iteritems(headers):
             conn.putheader(header, value)
         if 'Content-Length' not in headers:
             if 'Transfer-Encoding' not in headers:

@@ -16,6 +16,7 @@ import functools
 import netaddr
 
 from oslo_log import log as logging
+import six
 
 from tempest import config
 from tempest.scenario import manager
@@ -93,7 +94,7 @@ class TestGettingAddress(manager.NetworkScenarioTest):
 
     @staticmethod
     def define_server_ips(srv):
-        for net_name, nics in srv['addresses'].iteritems():
+        for net_name, nics in six.iteritems(srv['addresses']):
             for nic in nics:
                 if nic['version'] == 6:
                     srv['accessIPv6'] = nic['addr']

@@ -741,7 +741,7 @@ class NetworkScenarioTest(ScenarioTest):
         # The target login is assumed to have been configured for
         # key-based authentication by cloud-init.
         try:
-            for net_name, ip_addresses in server['addresses'].iteritems():
+            for net_name, ip_addresses in six.iteritems(server['addresses']):
                 for ip_address in ip_addresses:
                     self.check_vm_connectivity(ip_address['addr'],
                                                username,

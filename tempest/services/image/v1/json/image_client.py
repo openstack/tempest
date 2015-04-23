@@ -20,6 +20,7 @@ import os
 import time
 
 from oslo_log import log as logging
+import six
 from six.moves.urllib import parse as urllib
 from tempest_lib.common.utils import misc as misc_utils
 from tempest_lib import exceptions as lib_exc
@@ -54,7 +55,7 @@ class ImageClientJSON(service_client.ServiceClient):
 
     def _image_meta_from_headers(self, headers):
         meta = {'properties': {}}
-        for key, value in headers.iteritems():
+        for key, value in six.iteritems(headers):
             if key.startswith('x-image-meta-property-'):
                 _key = key[22:]
                 meta['properties'][_key] = value
@@ -80,11 +81,11 @@ class ImageClientJSON(service_client.ServiceClient):
         copy_from = fields_copy.pop('copy_from', None)
         if copy_from is not None:
             headers['x-glance-api-copy-from'] = copy_from
-        for key, value in fields_copy.pop('properties', {}).iteritems():
+        for key, value in six.iteritems(fields_copy.pop('properties', {})):
             headers['x-image-meta-property-%s' % key] = str(value)
-        for key, value in fields_copy.pop('api', {}).iteritems():
+        for key, value in six.iteritems(fields_copy.pop('api', {})):
             headers['x-glance-api-property-%s' % key] = str(value)
-        for key, value in fields_copy.iteritems():
+        for key, value in six.iteritems(fields_copy):
             headers['x-image-meta-%s' % key] = str(value)
         return headers
 

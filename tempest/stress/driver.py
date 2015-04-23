@@ -19,6 +19,7 @@ import time
 
 from oslo_log import log as logging
 from oslo_utils import importutils
+import six
 from six import moves
 from tempest_lib.common import ssh
 from tempest_lib.common.utils import data_utils
@@ -171,7 +172,7 @@ def stress_openstack(tests, duration, max_runs=None, stop_on_error=False):
             test_run = test_obj(manager, max_runs, stop_on_error)
 
             kwargs = test.get('kwargs', {})
-            test_run.setUp(**dict(kwargs.iteritems()))
+            test_run.setUp(**dict(six.iteritems(kwargs)))
 
             LOG.debug("calling Target Object %s" %
                       test_run.__class__.__name__)
