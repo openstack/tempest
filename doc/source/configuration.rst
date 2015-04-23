@@ -295,3 +295,38 @@ file, if you specify a fixed network name while using neutron and tenant
 isolation it will enable running tests which require a static network and it
 will additionally be used as a fallback for server creation. However, unlike
 accounts.yaml this should never be triggered.
+
+Service feature configuration
+-----------------------------
+
+OpenStack provides its deployers a myriad of different configuration options
+to enable anyone deploying it to create a cloud tailor-made for any individual
+use case. It provides options for several different backend type, databases,
+message queues, etc. However, the downside to this configurability is that
+certain operations and features aren't supported depending on the configuration.
+These features may or may not be discoverable from the API so the burden is
+often on the user to figure out what the cloud they're talking to supports.
+Besides the obvious interoperability issues with this it also leaves Tempest
+in an interesting situation trying to figure out which tests are expected to
+work. However, Tempest tests do not rely on dynamic api discovery for a feature
+(assuming one exists). Instead Tempest has to be explicitly configured as to
+which optional features are enabled. This is in order to prevent bugs in the
+discovery mechanisms from masking failures.
+
+The service feature-enabled config sections are how Tempest addresses the
+optional feature question. Each service that has tests for optional features
+contains one of these sections. The only options in it are boolean options
+with the name of a feature which is used. If it is set to false any test which
+depends on that functionality will be skipped. For a complete list of all these
+options refer to the sample config file.
+
+
+API Extensions
+^^^^^^^^^^^^^^
+The service feature-enabled sections often contain an *api-extensions* option
+(or in the case of swift a *discoverable_apis* option) this is used to tell
+tempest which api extensions (or configurable middleware) is used in your
+deployment. It has 2 valid config states, either it contains a single value
+"all" (which is the default) which means that every api extension is assumed
+to be enabled, or it is set to a list of each individual extension that is
+enabled for that service.
