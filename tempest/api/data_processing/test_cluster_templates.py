@@ -15,6 +15,7 @@
 from tempest_lib.common.utils import data_utils
 
 from tempest.api.data_processing import base as dp_base
+from tempest import exceptions
 from tempest import test
 
 
@@ -23,55 +24,30 @@ class ClusterTemplateTest(dp_base.BaseDataProcessingTest):
     sahara/restapi/rest_api_v1.0.html#cluster-templates
     """
     @classmethod
+    def skip_checks(cls):
+        super(ClusterTemplateTest, cls).skip_checks()
+        if cls.default_plugin is None:
+            raise cls.skipException("No Sahara plugins configured")
+
+    @classmethod
     def resource_setup(cls):
         super(ClusterTemplateTest, cls).resource_setup()
-        # create node group template
-        node_group_template = {
-            'name': data_utils.rand_name('sahara-ng-template'),
-            'description': 'Test node group template',
-            'plugin_name': 'vanilla',
-            'hadoop_version': '1.2.1',
-            'node_processes': ['datanode'],
-            'flavor_id': cls.flavor_ref,
-            'node_configs': {
-                'HDFS': {
-                    'Data Node Heap Size': 1024
-                }
-            }
-        }
-        resp_body = cls.create_node_group_template(**node_group_template)
-        node_group_template_id = resp_body['id']
 
-        cls.full_cluster_template = {
-            'description': 'Test cluster template',
-            'plugin_name': 'vanilla',
-            'hadoop_version': '1.2.1',
-            'cluster_configs': {
-                'HDFS': {
-                    'dfs.replication': 2
-                },
-                'MapReduce': {
-                    'mapred.map.tasks.speculative.execution': False,
-                    'mapred.child.java.opts': '-Xmx500m'
-                },
-                'general': {
-                    'Enable Swift': False
-                }
-            },
-            'node_groups': [
-                {
-                    'name': 'master-node',
-                    'flavor_id': cls.flavor_ref,
-                    'node_processes': ['namenode'],
-                    'count': 1
-                },
-                {
-                    'name': 'worker-node',
-                    'node_group_template_id': node_group_template_id,
-                    'count': 3
-                }
-            ]
-        }
+        # pre-define a node group templates
+        node_group_template_w = cls.get_node_group_template('worker1')
+        if node_group_template_w is None:
+            raise exceptions.InvalidConfiguration(
+                message="No known Sahara plugin was found")
+
+        node_group_template_w['name'] = data_utils.rand_name(
+            'sahara-ng-template')
+        resp_body = cls.create_node_group_template(**node_group_template_w)
+        node_group_template_id = resp_body['id']
+        configured_node_group_templates = {'worker1': node_group_template_id}
+
+        cls.full_cluster_template = cls.get_cluster_template(
+            configured_node_group_templates)
+
         # create cls.cluster_template variable to use for comparison to cluster
         # template response body. The 'node_groups' field in the response body
         # has some extra info that post body does not have. The 'node_groups'
