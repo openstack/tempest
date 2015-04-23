@@ -13,13 +13,13 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import httplib
 import json
 import socket
 
 import mock
 from oslotest import mockpatch
 import six
+from six.moves import http_client as httplib
 from tempest_lib import exceptions as lib_exc
 
 from tempest.common import glance_http
