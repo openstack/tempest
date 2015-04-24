@@ -180,12 +180,20 @@ class Accounts(cred_provider.CredentialProvider):
             useable_hashes = hashes
         return useable_hashes
 
+    def _sanitize_creds(self, creds):
+        temp_creds = creds.copy()
+        temp_creds.pop('password')
+        return temp_creds
+
     def _get_creds(self, roles=None):
         if self.use_default_creds:
             raise exceptions.InvalidConfiguration(
                 "Account file %s doesn't exist" % CONF.auth.test_accounts_file)
         useable_hashes = self._get_match_hash_list(roles)
         free_hash = self._get_free_hash(useable_hashes)
+        clean_creds = self._sanitize_creds(
+            self.hash_dict['creds'][free_hash])
+        LOG.info('%s allocated creds:\n%s' % (self.name, clean_creds))
         return self._wrap_creds_with_network(free_hash)
 
     @lockutils.synchronized('test_accounts_io', external=True)
@@ -216,7 +224,9 @@ class Accounts(cred_provider.CredentialProvider):
 
     def remove_credentials(self, creds):
         _hash = self.get_hash(creds)
+        clean_creds = self._sanitize_creds(self.hash_dict['creds'][_hash])
         self.remove_hash(_hash)
+        LOG.info("%s returned allocated creds:\n%s" % (self.name, clean_creds))
 
     def get_primary_creds(self):
         if self.isolated_creds.get('primary'):
