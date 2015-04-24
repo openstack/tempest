@@ -108,7 +108,7 @@ class ImagesNegativeTestJSON(base.BaseV2ComputeTest):
     def test_delete_image_with_invalid_image_id(self):
         # An image should not be deleted with invalid image id
         self.assertRaises(lib_exc.NotFound, self.client.delete_image,
-                          '!@$%^&*()')
+                          '!@$^&*()')
 
     @test.attr(type=['negative'])
     @test.idempotent_id('137aef61-39f7-44a1-8ddf-0adf82511701')
