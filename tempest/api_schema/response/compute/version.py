@@ -45,8 +45,12 @@ version = {
                         }
                     },
                     'status': {'type': 'string'},
-                    'updated': {'type': 'string', 'format': 'date-time'}
+                    'updated': {'type': 'string', 'format': 'date-time'},
+                    'version': {'type': 'string'},
+                    'min_version': {'type': 'string'}
                 },
+                # NOTE: version and min_version have been added since Kilo,
+                # so they should not be required.
                 'required': ['id', 'links', 'media-types', 'status', 'updated']
             }
         },
