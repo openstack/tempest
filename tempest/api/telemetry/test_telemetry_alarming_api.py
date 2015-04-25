@@ -67,13 +67,13 @@ class TelemetryAlarmingAPITestJSON(base.BaseTelemetryTest):
         self.assertEqual(alarm_name, body['name'])
         self.assertDictContainsSubset(new_rule, body['threshold_rule'])
         # Get and verify details of an alarm after update
-        body = self.telemetry_client.get_alarm(alarm_id)
+        body = self.telemetry_client.show_alarm(alarm_id)
         self.assertEqual(alarm_name, body['name'])
         self.assertDictContainsSubset(new_rule, body['threshold_rule'])
         # Delete alarm and verify if deleted
         self.telemetry_client.delete_alarm(alarm_id)
         self.assertRaises(lib_exc.NotFound,
-                          self.telemetry_client.get_alarm, alarm_id)
+                          self.telemetry_client.show_alarm, alarm_id)
 
     @test.attr(type="gate")
     @test.idempotent_id('aca49486-70bb-4016-87e0-f6131374f741')
@@ -87,7 +87,7 @@ class TelemetryAlarmingAPITestJSON(base.BaseTelemetryTest):
                                                       new_state)
         self.assertEqual(new_state, state.data)
         # Get alarm state and verify
-        state = self.telemetry_client.alarm_get_state(alarm['alarm_id'])
+        state = self.telemetry_client.show_alarm_state(alarm['alarm_id'])
         self.assertEqual(new_state, state.data)
 
     @test.attr(type="gate")
@@ -106,4 +106,4 @@ class TelemetryAlarmingAPITestJSON(base.BaseTelemetryTest):
         # Verify alarm delete
         self.telemetry_client.delete_alarm(alarm_id)
         self.assertRaises(lib_exc.NotFound,
-                          self.telemetry_client.get_alarm, alarm_id)
+                          self.telemetry_client.show_alarm, alarm_id)

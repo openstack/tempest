@@ -85,14 +85,14 @@ class TelemetryClientJSON(service_client.ServiceClient):
         uri = '%s/meters/%s' % (self.uri_prefix, meter_id)
         return self._helper_list(uri, query)
 
-    def get_resource(self, resource_id):
+    def show_resource(self, resource_id):
         uri = '%s/resources/%s' % (self.uri_prefix, resource_id)
         resp, body = self.get(uri)
         self.expected_success(200, resp.status)
         body = self.deserialize(body)
         return service_client.ResponseBody(resp, body)
 
-    def get_alarm(self, alarm_id):
+    def show_alarm(self, alarm_id):
         uri = '%s/alarms/%s' % (self.uri_prefix, alarm_id)
         resp, body = self.get(uri)
         self.expected_success(200, resp.status)
@@ -123,7 +123,7 @@ class TelemetryClientJSON(service_client.ServiceClient):
         body = self.deserialize(body)
         return service_client.ResponseBody(resp, body)
 
-    def alarm_get_state(self, alarm_id):
+    def show_alarm_state(self, alarm_id):
         uri = "%s/alarms/%s/state" % (self.uri_prefix, alarm_id)
         resp, body = self.get(uri)
         self.expected_success(200, resp.status)
