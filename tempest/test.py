@@ -52,13 +52,9 @@ def attr(*args, **kwargs):
     def decorator(f):
         if 'type' in kwargs and isinstance(kwargs['type'], str):
             f = testtools.testcase.attr(kwargs['type'])(f)
-            if kwargs['type'] == 'smoke':
-                f = testtools.testcase.attr('gate')(f)
         elif 'type' in kwargs and isinstance(kwargs['type'], list):
             for attr in kwargs['type']:
                 f = testtools.testcase.attr(attr)(f)
-                if attr == 'smoke':
-                    f = testtools.testcase.attr('gate')(f)
         return f
 
     return decorator
@@ -665,7 +661,7 @@ def SimpleNegativeAutoTest(klass):
     """
     This decorator registers a test function on basis of the class name.
     """
-    @attr(type=['negative', 'gate'])
+    @attr(type=['negative'])
     def generic_test(self):
         if hasattr(self, '_schema'):
             self.execute(self._schema)
