@@ -15,8 +15,8 @@
 import hashlib
 import hmac
 import time
-import urlparse
 
+from six.moves.urllib import parse as urlparse
 from tempest_lib.common.utils import data_utils
 
 from tempest.api.object_storage import base

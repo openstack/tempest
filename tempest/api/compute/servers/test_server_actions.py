@@ -15,8 +15,8 @@
 
 import base64
 import logging
-import urlparse
 
+from six.moves.urllib import parse as urlparse
 from tempest_lib.common.utils import data_utils
 from tempest_lib import decorators
 from tempest_lib import exceptions as lib_exc
