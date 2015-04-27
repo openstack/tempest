@@ -319,10 +319,18 @@ class ScenarioTest(tempest.test.BaseTestCase):
 
         if username is None:
             username = CONF.scenario.ssh_user
-        if private_key is None:
-            private_key = self.keypair['private_key']
+        # Set this with 'keypair' or others to log in with keypair or
+        # username/password.
+        if CONF.compute.ssh_auth_method == 'keypair':
+            password = None
+            if private_key is None:
+                private_key = self.keypair['private_key']
+        else:
+            password = CONF.compute.image_ssh_password
+            private_key = None
         linux_client = remote_client.RemoteClient(ip, username,
-                                                  pkey=private_key)
+                                                  pkey=private_key,
+                                                  password=password)
         try:
             linux_client.validate_authentication()
         except Exception:
