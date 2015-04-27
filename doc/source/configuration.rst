@@ -91,8 +91,8 @@ isolation. This option will not have any effect when set and tempest is not
 configured to use tenant isolation.
 
 
-Locking Test Accounts
-"""""""""""""""""""""
+Locking Test Accounts (aka accounts.yaml or accounts file)
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 For a long time using tenant isolation was the only method available if you
 wanted to enable parallel execution of tempest tests. However this was
 insufficient for certain use cases because of the admin credentials requirement
@@ -102,11 +102,6 @@ using the list of credentials instead of creating them on demand. With locking
 test accounts each test class will reserve a set of credentials from the
 accounts.yaml before executing any of its tests so that each class is isolated
 like in tenant isolation.
-
-Currently, this mechanism has some limitations, mostly around networking. The
-locking test accounts provider will only work with a single flat network as
-the default for each tenant/project. If another network configuration is used
-in your cloud you might face unexpected failures.
 
 To enable and use locking test accounts you need do a few things:
 
@@ -120,9 +115,14 @@ To enable and use locking test accounts you need do a few things:
  #. Provide tempest with the location of you accounts.yaml file with the
     test_accounts_file option in the auth section
 
+It is worth pointing out that each set of credentials in the accounts.yaml
+should have a unique tenant. This is required to provide proper isolation
+to the tests using the credentials, and failure to do this will likely cause
+unexpected failures in some tests.
 
-Non-locking test accounts
-"""""""""""""""""""""""""
+
+Non-locking test accounts (aka credentials config options)
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 When Tempest was refactored to allow for locking test accounts, the original
 non-tenant isolated case was converted to internally work similarly to the
 accounts.yaml file. This mechanism was then called the non-locking test accounts
