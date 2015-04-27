@@ -157,7 +157,7 @@ class NegativeSecGroupTest(base.BaseSecGroupTest):
                 direction='ingress', ethertype=self.ethertype)
             self.assertIn(msg, str(ex))
 
-    @test.attr(type=['negative', 'smoke'])
+    @test.attr(type=['negative'])
     @test.idempotent_id('2323061e-9fbf-4eb0-b547-7e8fafc90849')
     def test_create_additional_default_security_group_fails(self):
         # Create security group named 'default', it should be failed.
@@ -166,7 +166,7 @@ class NegativeSecGroupTest(base.BaseSecGroupTest):
                           self.client.create_security_group,
                           name=name)
 
-    @test.attr(type=['negative', 'smoke'])
+    @test.attr(type=['negative'])
     @test.idempotent_id('8fde898f-ce88-493b-adc9-4e4692879fc5')
     def test_create_duplicate_security_group_rule_fails(self):
         # Create duplicate security group rule, it should fail.
@@ -191,7 +191,7 @@ class NegativeSecGroupTest(base.BaseSecGroupTest):
             protocol='tcp', direction='ingress', ethertype=self.ethertype,
             port_range_min=min_port, port_range_max=max_port)
 
-    @test.attr(type=['negative', 'smoke'])
+    @test.attr(type=['negative'])
     @test.idempotent_id('be308db6-a7cf-4d5c-9baf-71bafd73f35e')
     def test_create_security_group_rule_with_non_existent_security_group(self):
         # Create security group rules with not existing security group.

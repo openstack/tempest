@@ -85,7 +85,7 @@ class AccountQuotasNegativeTest(base.BaseObjectTest):
             cls.delete_containers([cls.container_name])
         super(AccountQuotasNegativeTest, cls).resource_cleanup()
 
-    @test.attr(type=["negative", "smoke"])
+    @test.attr(type=["negative"])
     @test.idempotent_id('d1dc5076-555e-4e6d-9697-28f1fe976324')
     @test.requires_ext(extension='account_quotas', service='object')
     def test_user_modify_quota(self):
@@ -103,7 +103,7 @@ class AccountQuotasNegativeTest(base.BaseObjectTest):
                           self.account_client.create_account_metadata,
                           {"Quota-Bytes": "100"})
 
-    @test.attr(type=["negative", "smoke"])
+    @test.attr(type=["negative"])
     @decorators.skip_because(bug="1310597")
     @test.idempotent_id('cf9e21f5-3aa4-41b1-9462-28ac550d8d3f')
     @test.requires_ext(extension='account_quotas', service='object')

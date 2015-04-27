@@ -128,7 +128,7 @@ class ObjectACLsNegativeTest(base.BaseObjectTest):
                           self.object_client.delete_object,
                           self.container_name, object_name)
 
-    @test.attr(type=['negative', 'smoke'])
+    @test.attr(type=['negative'])
     @test.idempotent_id('9ed01334-01e9-41ea-87ea-e6f465582823')
     def test_read_object_without_rights(self):
         # attempt to read object using non-authorized user
@@ -152,7 +152,7 @@ class ObjectACLsNegativeTest(base.BaseObjectTest):
                           self.object_client.get_object,
                           self.container_name, object_name)
 
-    @test.attr(type=['negative', 'smoke'])
+    @test.attr(type=['negative'])
     @test.idempotent_id('a3a585a7-d8cf-4b65-a1a0-edc2b1204f85')
     def test_write_object_without_rights(self):
         # attempt to write object using non-authorized user
@@ -173,7 +173,7 @@ class ObjectACLsNegativeTest(base.BaseObjectTest):
                           self.container_name,
                           object_name, 'data', headers={})
 
-    @test.attr(type=['negative', 'smoke'])
+    @test.attr(type=['negative'])
     @test.idempotent_id('8ba512ad-aa6e-444e-b882-2906a0ea2052')
     def test_write_object_without_write_rights(self):
         # attempt to write object using non-authorized user
@@ -198,7 +198,7 @@ class ObjectACLsNegativeTest(base.BaseObjectTest):
                           self.container_name,
                           object_name, 'data', headers={})
 
-    @test.attr(type=['negative', 'smoke'])
+    @test.attr(type=['negative'])
     @test.idempotent_id('b4e366f8-f185-47ab-b789-df4416f9ecdb')
     def test_delete_object_without_write_rights(self):
         # attempt to delete object using non-authorized user
