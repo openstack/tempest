@@ -134,6 +134,7 @@ class TestVolumeBootPattern(manager.ScenarioTest):
         self.assertEqual(expected, actual)
 
     @test.idempotent_id('557cd2c2-4eb8-4dce-98be-f86765ff311b')
+    @test.attr(type='smoke')
     @test.services('compute', 'volume', 'image')
     def test_volume_boot_pattern(self):
         keypair = self.create_keypair()
