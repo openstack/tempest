@@ -83,6 +83,14 @@ To enable and use tenant isolation you only need to configure 2 things:
 This is also the currently the default credential provider enabled by tempest,
 due to it's common use and ease of configuration.
 
+It is worth pointing out that depending on your cloud configuration you might
+need to assign a role to each of the users created Tempest's tenant isolation.
+This can be set using the *tempest_roles* option. It takes in a list of role
+names each of which will be assigned to each of the users created by tenant
+isolation. This option will not have any effect when set and tempest is not
+configured to use tenant isolation.
+
+
 Locking Test Accounts
 """""""""""""""""""""
 For a long time using tenant isolation was the only method available if you
