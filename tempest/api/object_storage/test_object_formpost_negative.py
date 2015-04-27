@@ -125,7 +125,6 @@ class ObjectFormPostNegativeTest(base.BaseObjectTest):
 
     @test.idempotent_id('b277257f-113c-4499-b8d1-5fead79f7360')
     @test.requires_ext(extension='formpost', service='object')
-    @test.attr(type='gate')
     def test_post_object_using_form_invalid_signature(self):
         self.key = "Wrong"
         body, content_type = self.get_multipart_form()

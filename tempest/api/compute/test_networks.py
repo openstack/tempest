@@ -31,7 +31,6 @@ class NetworksTestJSON(base.BaseV2ComputeTest):
         super(NetworksTestJSON, cls).setup_clients()
         cls.client = cls.os.networks_client
 
-    @test.attr(type='gate')
     @test.idempotent_id('3fe07175-312e-49a5-a623-5f52eeada4c2')
     def test_list_networks(self):
         networks = self.client.list_networks()

@@ -26,7 +26,6 @@ LOG = logging.getLogger(__name__)
 
 class TestServerStackLimits(base.BaseOrchestrationTest):
 
-    @test.attr(type='gate')
     @test.idempotent_id('ec9bed71-c460-45c9-ab98-295caa9fd76b')
     def test_exceed_max_template_size_fails(self):
         stack_name = data_utils.rand_name('heat')
@@ -40,7 +39,6 @@ Outputs:
                                stack_name, template)
         self.assertIn('Template exceeds maximum allowed size', str(ex))
 
-    @test.attr(type='gate')
     @test.idempotent_id('d1b83e73-7cad-4a22-9839-036548c5387c')
     def test_exceed_max_resources_per_stack(self):
         stack_name = data_utils.rand_name('heat')

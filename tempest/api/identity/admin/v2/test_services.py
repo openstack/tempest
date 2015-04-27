@@ -63,7 +63,6 @@ class ServicesTestJSON(base.BaseIdentityV2AdminTest):
         self.assertEqual(fetched_service['description'],
                          service_data['description'])
 
-    @test.attr(type='gate')
     @test.idempotent_id('5d3252c8-e555-494b-a6c8-e11d7335da42')
     def test_create_service_without_description(self):
         # Create a service only with name and type

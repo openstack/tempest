@@ -74,7 +74,6 @@ class VolumesActionsV2Test(base.BaseVolumeAdminTest):
         self.admin_volume_client.force_delete_volume(temp_volume['id'])
         self.client.wait_for_resource_deletion(temp_volume['id'])
 
-    @test.attr(type='gate')
     @test.idempotent_id('d063f96e-a2e0-4f34-8b8a-395c42de1845')
     def test_volume_reset_status(self):
         # test volume reset status : available->error->available
@@ -93,7 +92,6 @@ class VolumesActionsV2Test(base.BaseVolumeAdminTest):
         # test force delete when status of volume is attaching
         self._create_reset_and_force_delete_temp_volume('attaching')
 
-    @test.attr(type='gate')
     @test.idempotent_id('3e33a8a8-afd4-4d64-a86b-c27a185c5a4a')
     def test_volume_force_delete_when_volume_is_error(self):
         # test force delete when status of volume is error

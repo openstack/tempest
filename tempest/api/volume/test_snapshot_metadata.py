@@ -38,7 +38,6 @@ class SnapshotV2MetadataTestJSON(base.BaseVolumeTest):
         self.client.update_snapshot_metadata(self.snapshot_id, {})
         super(SnapshotV2MetadataTestJSON, self).tearDown()
 
-    @test.attr(type='gate')
     @test.idempotent_id('a2f20f99-e363-4584-be97-bc33afb1a56c')
     def test_create_get_delete_snapshot_metadata(self):
         # Create metadata for the snapshot
@@ -58,7 +57,6 @@ class SnapshotV2MetadataTestJSON(base.BaseVolumeTest):
         body = self.client.show_snapshot_metadata(self.snapshot_id)
         self.assertEqual(expected, body)
 
-    @test.attr(type='gate')
     @test.idempotent_id('bd2363bc-de92-48a4-bc98-28943c6e4be1')
     def test_update_snapshot_metadata(self):
         # Update metadata for the snapshot
@@ -80,7 +78,6 @@ class SnapshotV2MetadataTestJSON(base.BaseVolumeTest):
         body = self.client.show_snapshot_metadata(self.snapshot_id)
         self.assertEqual(update, body)
 
-    @test.attr(type='gate')
     @test.idempotent_id('e8ff85c5-8f97-477f-806a-3ac364a949ed')
     def test_update_snapshot_metadata_item(self):
         # Update metadata item for the snapshot

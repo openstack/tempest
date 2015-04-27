@@ -114,7 +114,6 @@ class VolumeMultiBackendV2Test(base.BaseVolumeAdminTest):
         volume_id = self.volume_id_list_with_prefix[0]
         self._test_backend_name_reporting_by_volume_id(volume_id)
 
-    @test.attr(type='gate')
     @test.idempotent_id('46435ab1-a0af-4401-8373-f14e66b0dd58')
     def test_backend_name_distinction(self):
         if self.backend1_name == self.backend2_name:
@@ -124,7 +123,6 @@ class VolumeMultiBackendV2Test(base.BaseVolumeAdminTest):
         volume2_id = self.volume_id_list_without_prefix[1]
         self._test_backend_name_distinction(volume1_id, volume2_id)
 
-    @test.attr(type='gate')
     @test.idempotent_id('4236305b-b65a-4bfc-a9d2-69cb5b2bf2ed')
     def test_backend_name_distinction_with_prefix(self):
         if self.backend1_name == self.backend2_name:

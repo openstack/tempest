@@ -47,7 +47,6 @@ class VolumeTypesExtraSpecsV2Test(base.BaseVolumeAdminTest):
         self.assertIsInstance(body, dict)
         self.assertIn('spec1', body)
 
-    @test.attr(type='gate')
     @test.idempotent_id('0806db36-b4a0-47a1-b6f3-c2e7f194d017')
     def test_volume_type_extra_specs_update(self):
         # Update volume type extra specs

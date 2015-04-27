@@ -86,7 +86,6 @@ class AttachVolumeTestJSON(base.BaseV2ComputeTest):
 
     @test.idempotent_id('52e9045a-e90d-4c0d-9087-79d657faffff')
     @testtools.skipUnless(CONF.compute.run_ssh, 'SSH required for this test')
-    @test.attr(type='gate')
     def test_attach_detach_volume(self):
         # Stop and Start a server with an attached volume, ensuring that
         # the volume remains attached.
@@ -120,7 +119,6 @@ class AttachVolumeTestJSON(base.BaseV2ComputeTest):
         partitions = linux_client.get_partitions()
         self.assertNotIn(self.device, partitions)
 
-    @test.attr(type='gate')
     @test.idempotent_id('7fa563fe-f0f7-43eb-9e22-a1ece036b513')
     def test_list_get_volume_attachments(self):
         # Create Server, Volume and attach that Volume to Server

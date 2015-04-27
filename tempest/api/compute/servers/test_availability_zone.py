@@ -28,7 +28,6 @@ class AZV2TestJSON(base.BaseComputeTest):
         super(AZV2TestJSON, cls).setup_clients()
         cls.client = cls.availability_zone_client
 
-    @test.attr(type='gate')
     @test.idempotent_id('a8333aa2-205c-449f-a828-d38c2489bf25')
     def test_get_availability_zone_list_with_non_admin_user(self):
         # List of availability zone with non-administrator user

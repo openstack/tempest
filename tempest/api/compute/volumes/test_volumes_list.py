@@ -83,7 +83,6 @@ class VolumesTestJSON(base.BaseV2ComputeTest):
             cls.delete_volume(volume['id'])
         super(VolumesTestJSON, cls).resource_cleanup()
 
-    @test.attr(type='gate')
     @test.idempotent_id('bc2dd1a0-15af-48e5-9990-f2e75a48325d')
     def test_volume_list(self):
         # Should return the list of Volumes
@@ -99,7 +98,6 @@ class VolumesTestJSON(base.BaseV2ComputeTest):
                          ', '.join(m_vol['displayName']
                                    for m_vol in missing_volumes))
 
-    @test.attr(type='gate')
     @test.idempotent_id('bad0567a-5a4f-420b-851e-780b55bb867c')
     def test_volume_list_with_details(self):
         # Should return the list of Volumes with details
@@ -115,7 +113,6 @@ class VolumesTestJSON(base.BaseV2ComputeTest):
                          ', '.join(m_vol['displayName']
                                    for m_vol in missing_volumes))
 
-    @test.attr(type='gate')
     @test.idempotent_id('1048ed81-2baf-487a-b284-c0622b86e7b8')
     def test_volume_list_param_limit(self):
         # Return the list of volumes based on limit set
@@ -125,7 +122,6 @@ class VolumesTestJSON(base.BaseV2ComputeTest):
         self.assertEqual(len(fetched_vol_list), params['limit'],
                          "Failed to list volumes by limit set")
 
-    @test.attr(type='gate')
     @test.idempotent_id('33985568-4965-49d5-9bcc-0aa007ca5b7a')
     def test_volume_list_with_detail_param_limit(self):
         # Return the list of volumes with details based on limit set.
@@ -135,7 +131,6 @@ class VolumesTestJSON(base.BaseV2ComputeTest):
         self.assertEqual(len(fetched_vol_list), params['limit'],
                          "Failed to list volume details by limit set")
 
-    @test.attr(type='gate')
     @test.idempotent_id('51c22651-a074-4ea7-af0b-094f9331303e')
     def test_volume_list_param_offset_and_limit(self):
         # Return the list of volumes based on offset and limit set.
@@ -153,7 +148,6 @@ class VolumesTestJSON(base.BaseV2ComputeTest):
                              all_vol_list[index + params['offset']]['id'],
                              "Failed to list volumes by offset and limit")
 
-    @test.attr(type='gate')
     @test.idempotent_id('06b6abc4-3f10-48e9-a7a1-3facc98f03e5')
     def test_volume_list_with_detail_param_offset_and_limit(self):
         # Return the list of volumes details based on offset and limit set.

@@ -56,7 +56,6 @@ class VolumesV2TransfersTest(base.BaseVolumeTest):
         self.adm_client.delete_volume(volume_id)
         self.adm_client.wait_for_resource_deletion(volume_id)
 
-    @test.attr(type='gate')
     @test.idempotent_id('4d75b645-a478-48b1-97c8-503f64242f1a')
     def test_create_get_list_accept_volume_transfer(self):
         # Create a volume first

@@ -40,7 +40,6 @@ class ImagesTestJSON(base.BaseV2ComputeTest):
         cls.client = cls.images_client
         cls.servers_client = cls.servers_client
 
-    @test.attr(type='gate')
     @test.idempotent_id('aa06b52b-2db5-4807-b218-9441f75d74e3')
     def test_delete_saving_image(self):
         snapshot_name = data_utils.rand_name('test-snap')

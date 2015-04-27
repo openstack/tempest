@@ -71,7 +71,6 @@ class VolumesV2ActionsTest(base.BaseVolumeTest):
 
     @test.idempotent_id('9516a2c8-9135-488c-8dd6-5677a7e5f371')
     @test.stresstest(class_setup_per='process')
-    @test.attr(type='gate')
     @test.services('compute')
     def test_get_volume_attachment(self):
         # Verify that a volume's attachment information is retrieved
@@ -94,7 +93,6 @@ class VolumesV2ActionsTest(base.BaseVolumeTest):
         self.assertEqual(self.volume['id'], attachment['id'])
         self.assertEqual(self.volume['id'], attachment['volume_id'])
 
-    @test.attr(type='gate')
     @test.idempotent_id('d8f1ca95-3d5b-44a3-b8ca-909691c9532d')
     @test.services('image')
     def test_volume_upload(self):
@@ -111,7 +109,6 @@ class VolumesV2ActionsTest(base.BaseVolumeTest):
         self.image_client.wait_for_image_status(image_id, 'active')
         self.client.wait_for_volume_status(self.volume['id'], 'available')
 
-    @test.attr(type='gate')
     @test.idempotent_id('92c4ef64-51b2-40c0-9f7e-4749fbaaba33')
     def test_reserve_unreserve_volume(self):
         # Mark volume as reserved.
@@ -128,7 +125,6 @@ class VolumesV2ActionsTest(base.BaseVolumeTest):
     def _is_true(self, val):
         return val in ['true', 'True', True]
 
-    @test.attr(type='gate')
     @test.idempotent_id('fff74e1e-5bd3-4b33-9ea9-24c103bc3f59')
     def test_volume_readonly_update(self):
         # Update volume readonly true
