@@ -105,13 +105,11 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         self._test_reboot_server('HARD')
 
     @decorators.skip_because(bug="1014647")
-    @test.attr(type='smoke')
     @test.idempotent_id('4640e3ef-a5df-482e-95a1-ceeeb0faa84d')
     def test_reboot_server_soft(self):
         # The server should be signaled to reboot gracefully
         self._test_reboot_server('SOFT')
 
-    @test.attr(type='smoke')
     @test.idempotent_id('aaa6cdf3-55a7-461a-add9-1c8596b9a07c')
     def test_rebuild_server(self):
         # The server should be rebuilt using the provided image and data
@@ -220,14 +218,12 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
     @test.idempotent_id('1499262a-9328-4eda-9068-db1ac57498d2')
     @testtools.skipUnless(CONF.compute_feature_enabled.resize,
                           'Resize not available.')
-    @test.attr(type='smoke')
     def test_resize_server_confirm(self):
         self._test_resize_server_confirm(stop=False)
 
     @test.idempotent_id('138b131d-66df-48c9-a171-64f45eb92962')
     @testtools.skipUnless(CONF.compute_feature_enabled.resize,
                           'Resize not available.')
-    @test.attr(type='smoke')
     def test_resize_server_confirm_from_stopped(self):
         self._test_resize_server_confirm(stop=True)
 

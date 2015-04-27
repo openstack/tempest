@@ -77,7 +77,6 @@ class ServerRescueTestJSON(base.BaseV2ComputeTest):
         self.servers_client.unrescue_server(server_id)
         self.servers_client.wait_for_server_status(server_id, 'ACTIVE')
 
-    @test.attr(type='smoke')
     @test.idempotent_id('fd032140-714c-42e4-a8fd-adcd8df06be6')
     def test_rescue_unrescue_instance(self):
         self.servers_client.rescue_server(

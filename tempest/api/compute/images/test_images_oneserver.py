@@ -73,7 +73,6 @@ class ImagesOneServerTestJSON(base.BaseV2ComputeTest):
         flavor = self.flavors_client.get_flavor_details(flavor_id)
         return flavor['disk']
 
-    @test.attr(type='smoke')
     @test.idempotent_id('3731d080-d4c5-4872-b41a-64d0d0021314')
     def test_create_delete_image(self):
 

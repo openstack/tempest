@@ -38,7 +38,6 @@ class FlavorsV2TestJSON(base.BaseComputeTest):
                              'name': flavor['name']}
         self.assertIn(flavor_min_detail, flavors)
 
-    @test.attr(type='smoke')
     @test.idempotent_id('6e85fde4-b3cd-4137-ab72-ed5f418e8c24')
     def test_list_flavors_with_detail(self):
         # Detailed list of all flavors should contain the expected flavor
