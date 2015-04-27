@@ -81,7 +81,7 @@ class ServerRescueNegativeTestJSON(base.BaseV2ComputeTest):
     @test.idempotent_id('cc3a883f-43c0-4fb6-a9bb-5579d64984ed')
     @testtools.skipUnless(CONF.compute_feature_enabled.pause,
                           'Pause is not available.')
-    @test.attr(type=['negative', 'gate'])
+    @test.attr(type=['negative'])
     def test_rescue_paused_instance(self):
         # Rescue a paused server
         self.servers_client.pause_server(self.server_id)
@@ -91,13 +91,13 @@ class ServerRescueNegativeTestJSON(base.BaseV2ComputeTest):
                           self.servers_client.rescue_server,
                           self.server_id)
 
-    @test.attr(type=['negative', 'gate'])
+    @test.attr(type=['negative'])
     @test.idempotent_id('db22b618-f157-4566-a317-1b6d467a8094')
     def test_rescued_vm_reboot(self):
         self.assertRaises(lib_exc.Conflict, self.servers_client.reboot,
                           self.rescue_id, 'HARD')
 
-    @test.attr(type=['negative', 'gate'])
+    @test.attr(type=['negative'])
     @test.idempotent_id('6dfc0a55-3a77-4564-a144-1587b7971dde')
     def test_rescue_non_existent_server(self):
         # Rescue a non-existing server
@@ -106,7 +106,7 @@ class ServerRescueNegativeTestJSON(base.BaseV2ComputeTest):
                           self.servers_client.rescue_server,
                           non_existent_server)
 
-    @test.attr(type=['negative', 'gate'])
+    @test.attr(type=['negative'])
     @test.idempotent_id('70cdb8a1-89f8-437d-9448-8844fd82bf46')
     def test_rescued_vm_rebuild(self):
         self.assertRaises(lib_exc.Conflict,
@@ -116,7 +116,7 @@ class ServerRescueNegativeTestJSON(base.BaseV2ComputeTest):
 
     @test.idempotent_id('d0ccac79-0091-4cf4-a1ce-26162d0cc55f')
     @test.services('volume')
-    @test.attr(type=['negative', 'gate'])
+    @test.attr(type=['negative'])
     def test_rescued_vm_attach_volume(self):
         volume = self._create_volume()
 
@@ -135,7 +135,7 @@ class ServerRescueNegativeTestJSON(base.BaseV2ComputeTest):
 
     @test.idempotent_id('f56e465b-fe10-48bf-b75d-646cda3a8bc9')
     @test.services('volume')
-    @test.attr(type=['negative', 'gate'])
+    @test.attr(type=['negative'])
     def test_rescued_vm_detach_volume(self):
         volume = self._create_volume()
 

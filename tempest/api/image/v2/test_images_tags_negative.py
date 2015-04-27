@@ -23,7 +23,7 @@ from tempest import test
 
 class ImagesTagsNegativeTest(base.BaseV2ImageTest):
 
-    @test.attr(type=['negative', 'gate'])
+    @test.attr(type=['negative'])
     @test.idempotent_id('8cd30f82-6f9a-4c6e-8034-c1b51fba43d9')
     def test_update_tags_for_non_existing_image(self):
         # Update tag with non existing image.
@@ -32,7 +32,7 @@ class ImagesTagsNegativeTest(base.BaseV2ImageTest):
         self.assertRaises(lib_exc.NotFound, self.client.add_image_tag,
                           non_exist_image, tag)
 
-    @test.attr(type=['negative', 'gate'])
+    @test.attr(type=['negative'])
     @test.idempotent_id('39c023a2-325a-433a-9eea-649bf1414b19')
     def test_delete_non_existing_tag(self):
         # Delete non existing tag.
