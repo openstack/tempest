@@ -12,9 +12,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import cStringIO as StringIO
-
 from oslo_log import log as logging
+from six import moves
 from tempest_lib.common.utils import data_utils
 from tempest_lib import exceptions as lib_exc
 
@@ -113,7 +112,7 @@ class BaseV1ImageMembersTest(BaseV1ImageTest):
         cls.alt_tenant_id = cls.alt_img_cli.tenant_id
 
     def _create_image(self):
-        image_file = StringIO.StringIO(data_utils.random_bytes())
+        image_file = moves.cStringIO(data_utils.random_bytes())
         image = self.create_image(container_format='bare',
                                   disk_format='raw',
                                   is_public=False,

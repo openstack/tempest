@@ -13,10 +13,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import StringIO
 import time
 
 from oslo_log import log as logging
+import six
 from tempest_lib.common.utils import data_utils
 import testtools
 
@@ -59,7 +59,7 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
             # Wait 1 second between creation and upload to ensure a delta
             # between created_at and updated_at.
             time.sleep(1)
-            image_file = StringIO.StringIO(('*' * 1024))
+            image_file = six.StringIO(('*' * 1024))
             cls.glance_client.update_image(image_id, data=image_file)
             cls.client.wait_for_image_status(image_id, 'ACTIVE')
             body = cls.client.get_image(image_id)

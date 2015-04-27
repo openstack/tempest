@@ -13,7 +13,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import StringIO
+import six
 
 from tempest_lib.common.utils import data_utils
 
@@ -51,7 +51,7 @@ class ImagesMetadataTestJSON(base.BaseV2ComputeTest):
                                               is_public=False)
         cls.image_id = body['id']
         cls.images.append(cls.image_id)
-        image_file = StringIO.StringIO(('*' * 1024))
+        image_file = six.StringIO(('*' * 1024))
         cls.glance_client.update_image(cls.image_id, data=image_file)
         cls.client.wait_for_image_status(cls.image_id, 'ACTIVE')
 

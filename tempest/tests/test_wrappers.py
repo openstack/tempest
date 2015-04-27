@@ -14,9 +14,10 @@
 
 import os
 import shutil
-import StringIO
 import subprocess
 import tempfile
+
+import six
 
 from tempest.tests import base
 
@@ -50,8 +51,8 @@ class TestWrappers(base.TestCase):
         shutil.copy('tools/pretty_tox_serial.sh',
                     os.path.join(self.directory, 'pretty_tox_serial.sh'))
 
-        self.stdout = StringIO.StringIO()
-        self.stderr = StringIO.StringIO()
+        self.stdout = six.StringIO()
+        self.stderr = six.StringIO()
         # Change directory, run wrapper and check result
         self.addCleanup(os.chdir, os.path.abspath(os.curdir))
         os.chdir(self.directory)
