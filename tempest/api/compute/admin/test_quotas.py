@@ -54,7 +54,6 @@ class QuotasAdminTestJSON(base.BaseV2ComputeAdminTest):
                                      'instances', 'security_group_rules',
                                      'cores', 'security_groups'))
 
-    @test.attr(type='smoke')
     @test.idempotent_id('3b0a7c8f-cf58-46b8-a60c-715a32a8ba7d')
     def test_get_default_quotas(self):
         # Admin can get the default resource quota set for a tenant

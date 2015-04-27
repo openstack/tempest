@@ -43,7 +43,6 @@ class FloatingIPAdminTestJSON(base.BaseAdminNetworkTest):
         cls.create_router_interface(cls.router['id'], cls.subnet['id'])
         cls.port = cls.create_port(cls.network)
 
-    @test.attr(type='smoke')
     @test.idempotent_id('64f2100b-5471-4ded-b46c-ddeeeb4f231b')
     def test_list_floating_ips_from_admin_and_nonadmin(self):
         # Create floating ip from admin user
@@ -75,7 +74,6 @@ class FloatingIPAdminTestJSON(base.BaseAdminNetworkTest):
                          floating_ip_ids)
         self.assertNotIn(floating_ip_alt['id'], floating_ip_ids)
 
-    @test.attr(type='smoke')
     @test.idempotent_id('32727cc3-abe2-4485-a16e-48f2d54c14f2')
     def test_create_list_show_floating_ip_with_tenant_id_by_admin(self):
         # Creates a floating IP

@@ -27,7 +27,6 @@ class DomainsTestJSON(base.BaseIdentityV3AdminTest):
         self.client.update_domain(domain_id, enabled=False)
         self.client.delete_domain(domain_id)
 
-    @test.attr(type='smoke')
     @test.idempotent_id('8cf516ef-2114-48f1-907b-d32726c734d4')
     def test_list_domains(self):
         # Test to list domains
@@ -84,7 +83,6 @@ class DomainsTestJSON(base.BaseIdentityV3AdminTest):
         self.assertEqual(new_desc, fetched_domain['description'])
         self.assertEqual('true', str(fetched_domain['enabled']).lower())
 
-    @test.attr(type='smoke')
     @test.idempotent_id('036df86e-bb5d-42c0-a7c2-66b9db3a6046')
     def test_create_domain_with_disabled_status(self):
         # Create domain with enabled status as false
@@ -97,7 +95,6 @@ class DomainsTestJSON(base.BaseIdentityV3AdminTest):
         self.assertFalse(domain['enabled'])
         self.assertEqual(d_desc, domain['description'])
 
-    @test.attr(type='smoke')
     @test.idempotent_id('2abf8764-309a-4fa9-bc58-201b799817ad')
     def test_create_domain_without_description(self):
         # Create domain only with name

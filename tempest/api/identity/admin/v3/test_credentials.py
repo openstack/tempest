@@ -84,7 +84,6 @@ class CredentialsTestJSON(base.BaseIdentityV3AdminTest):
             self.assertEqual(update_body['blob'][value2],
                              get_body['blob'][value2])
 
-    @test.attr(type='smoke')
     @test.idempotent_id('13202c00-0021-42a1-88d4-81b44d448aab')
     def test_credentials_list_delete(self):
         created_cred_ids = list()

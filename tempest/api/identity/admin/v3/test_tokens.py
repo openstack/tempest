@@ -22,7 +22,6 @@ from tempest import test
 
 class TokensV3TestJSON(base.BaseIdentityV3AdminTest):
 
-    @test.attr(type='smoke')
     @test.idempotent_id('0f9f5a5f-d5cd-4a86-8a5b-c5ded151f212')
     def test_tokens(self):
         # Valid user's token is authenticated

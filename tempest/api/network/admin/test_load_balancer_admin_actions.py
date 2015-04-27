@@ -50,7 +50,6 @@ class LoadBalancerAdminTestJSON(base.BaseAdminNetworkTest):
         cls.pool = cls.create_pool(data_utils.rand_name('pool-'),
                                    "ROUND_ROBIN", "HTTP", cls.subnet)
 
-    @test.attr(type='smoke')
     @test.idempotent_id('6b0a20d8-4fcd-455e-b54f-ec4db5199518')
     def test_create_vip_as_admin_for_another_tenant(self):
         name = data_utils.rand_name('vip-')
@@ -77,7 +76,6 @@ class LoadBalancerAdminTestJSON(base.BaseAdminNetworkTest):
         self.assertEqual(vip['id'], show_vip['id'])
         self.assertEqual(vip['name'], show_vip['name'])
 
-    @test.attr(type='smoke')
     @test.idempotent_id('74552cfc-ab78-4fb6-825b-f67bca379921')
     def test_create_health_monitor_as_admin_for_another_tenant(self):
         body = (
@@ -95,7 +93,6 @@ class LoadBalancerAdminTestJSON(base.BaseAdminNetworkTest):
         show_health_monitor = body['health_monitor']
         self.assertEqual(health_monitor['id'], show_health_monitor['id'])
 
-    @test.attr(type='smoke')
     @test.idempotent_id('266a192d-3c22-46c4-a8fb-802450301e82')
     def test_create_pool_from_admin_user_other_tenant(self):
         body = self.admin_client.create_pool(
@@ -109,7 +106,6 @@ class LoadBalancerAdminTestJSON(base.BaseAdminNetworkTest):
         self.assertIsNotNone(pool['id'])
         self.assertEqual(self.tenant_id, pool['tenant_id'])
 
-    @test.attr(type='smoke')
     @test.idempotent_id('158bb272-b9ed-4cfc-803c-661dac46f783')
     def test_create_member_from_admin_user_other_tenant(self):
         body = self.admin_client.create_member(address="10.0.9.47",

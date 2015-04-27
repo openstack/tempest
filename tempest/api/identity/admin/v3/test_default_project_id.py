@@ -35,7 +35,6 @@ class TestDefaultProjectId (base.BaseIdentityV3AdminTest):
         self.client.update_domain(domain_id, enabled=False)
         self.client.delete_domain(domain_id)
 
-    @test.attr(type='smoke')
     @test.idempotent_id('d6110661-6a71-49a7-a453-b5e26640ff6d')
     def test_default_project_id(self):
         # create a domain
