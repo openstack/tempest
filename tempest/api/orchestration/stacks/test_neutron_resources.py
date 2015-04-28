@@ -94,7 +94,6 @@ class NeutronResourcesTestJSON(base.BaseOrchestrationTest):
         for resource in resources:
             cls.test_resources[resource['logical_resource_id']] = resource
 
-    @test.attr(type='gate')
     @test.idempotent_id('f9e2664c-bc44-4eef-98b6-495e4f9d74b3')
     def test_created_resources(self):
         """Verifies created neutron resources."""
@@ -113,7 +112,6 @@ class NeutronResourcesTestJSON(base.BaseOrchestrationTest):
             self.assertEqual(resource_type, resource['resource_type'])
             self.assertEqual('CREATE_COMPLETE', resource['resource_status'])
 
-    @test.attr(type='gate')
     @test.idempotent_id('c572b915-edb1-4e90-b196-c7199a6848c0')
     @test.services('network')
     def test_created_network(self):
@@ -126,7 +124,6 @@ class NeutronResourcesTestJSON(base.BaseOrchestrationTest):
         self.assertEqual(self.neutron_basic_template['resources'][
             'Network']['properties']['name'], network['name'])
 
-    @test.attr(type='gate')
     @test.idempotent_id('e8f84b96-f9d7-4684-ad5f-340203e9f2c2')
     @test.services('network')
     def test_created_subnet(self):
@@ -145,7 +142,6 @@ class NeutronResourcesTestJSON(base.BaseOrchestrationTest):
             'Subnet']['properties']['ip_version'], subnet['ip_version'])
         self.assertEqual(str(self.subnet_cidr), subnet['cidr'])
 
-    @test.attr(type='gate')
     @test.idempotent_id('96af4c7f-5069-44bc-bdcf-c0390f8a67d1')
     @test.services('network')
     def test_created_router(self):
@@ -159,7 +155,6 @@ class NeutronResourcesTestJSON(base.BaseOrchestrationTest):
                          router['external_gateway_info']['network_id'])
         self.assertEqual(True, router['admin_state_up'])
 
-    @test.attr(type='gate')
     @test.idempotent_id('89f605bd-153e-43ee-a0ed-9919b63423c5')
     @test.services('network')
     def test_created_router_interface(self):
@@ -183,7 +178,6 @@ class NeutronResourcesTestJSON(base.BaseOrchestrationTest):
         self.assertEqual(str(self.subnet_cidr.iter_hosts().next()),
                          router_interface_ip)
 
-    @test.attr(type='gate')
     @test.idempotent_id('75d85316-4ac2-4c0e-a1a9-edd2148fc10e')
     @test.services('compute', 'network')
     def test_created_server(self):

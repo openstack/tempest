@@ -24,7 +24,6 @@ class AbsoluteLimitsTestJSON(base.BaseV2ComputeTest):
         super(AbsoluteLimitsTestJSON, cls).setup_clients()
         cls.client = cls.limits_client
 
-    @test.attr(type='gate')
     @test.idempotent_id('b54c66af-6ab6-4cf0-a9e5-a0cb58d75e0b')
     def test_absLimits_get(self):
         # To check if all limits are present in the response

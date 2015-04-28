@@ -133,7 +133,6 @@ class VolumesV2GetTest(base.BaseVolumeTest):
     def test_volume_create_get_update_delete_from_image(self):
         self._volume_create_get_update_delete(imageRef=CONF.compute.image_ref)
 
-    @test.attr(type='gate')
     @test.idempotent_id('3f591b4a-7dc6-444c-bd51-77469506b3a1')
     def test_volume_create_get_update_delete_as_clone(self):
         origin = self.create_volume()

@@ -36,7 +36,6 @@ class CrossdomainTest(base.BaseObjectTest):
         # Turning http://.../v1/foobar into http://.../
         self.account_client.skip_path()
 
-    @test.attr('gate')
     @test.idempotent_id('d1b8b031-b622-4010-82f9-ff78a9e915c7')
     @test.requires_ext(extension='crossdomain', service='object')
     def test_get_crossdomain_policy(self):

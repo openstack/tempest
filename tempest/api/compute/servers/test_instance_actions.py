@@ -31,7 +31,6 @@ class InstanceActionsTestJSON(base.BaseV2ComputeTest):
         cls.request_id = server.response['x-compute-request-id']
         cls.server_id = server['id']
 
-    @test.attr(type='gate')
     @test.idempotent_id('77ca5cc5-9990-45e0-ab98-1de8fead201a')
     def test_list_instance_actions(self):
         # List actions of the provided server
@@ -43,7 +42,6 @@ class InstanceActionsTestJSON(base.BaseV2ComputeTest):
         self.assertTrue(any([i for i in body if i['action'] == 'create']))
         self.assertTrue(any([i for i in body if i['action'] == 'reboot']))
 
-    @test.attr(type='gate')
     @test.idempotent_id('aacc71ca-1d70-4aa5-bbf6-0ff71470e43c')
     def test_get_instance_action(self):
         # Get the action details of the provided server

@@ -21,7 +21,6 @@ from tempest import test
 
 class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
 
-    @test.attr(type='gate')
     @test.idempotent_id('b537d090-afb9-4519-b95d-270b0708e87e')
     def test_user_update(self):
         # Test case to check if updating of user attributes is successful.
@@ -65,7 +64,6 @@ class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
         self.assertEqual(u_email2, new_user_get['email'])
         self.assertEqual('false', str(new_user_get['enabled']).lower())
 
-    @test.attr(type='gate')
     @test.idempotent_id('2d223a0e-e457-4a70-9fb1-febe027a0ff9')
     def test_update_user_password(self):
         # Creating User to check password updation
@@ -88,7 +86,6 @@ class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
         self.assertEqual(token_details['user']['id'], user['id'])
         self.assertEqual(token_details['user']['name'], u_name)
 
-    @test.attr(type='gate')
     @test.idempotent_id('a831e70c-e35b-430b-92ed-81ebbc5437b8')
     def test_list_user_projects(self):
         # List the projects that a user has access upon
@@ -142,7 +139,6 @@ class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
                          ', '.join(m_project for m_project
                                    in missing_projects))
 
-    @test.attr(type='gate')
     @test.idempotent_id('c10dcd90-461d-4b16-8e23-4eb836c00644')
     def test_get_user(self):
         # Get a user detail

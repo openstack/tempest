@@ -100,7 +100,6 @@ class ListServersNegativeTestJSON(base.BaseV2ComputeTest):
         servers = body['servers']
         self.assertEqual([], servers)
 
-    @test.attr(type='gate')
     @test.idempotent_id('12c80a9f-2dec-480e-882b-98ba15757659')
     def test_list_servers_by_limits(self):
         # List servers by specifying limits

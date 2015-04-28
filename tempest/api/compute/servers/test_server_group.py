@@ -70,13 +70,11 @@ class ServerGroupTestJSON(base.BaseV2ComputeTest):
         server_group = self._create_server_group(name, policy)
         self._delete_server_group(server_group)
 
-    @test.attr(type='gate')
     @test.idempotent_id('5dc57eda-35b7-4af7-9e5f-3c2be3d2d68b')
     def test_create_delete_server_group_with_affinity_policy(self):
         # Create and Delete the server-group with affinity policy
         self._create_delete_server_group(self.policy)
 
-    @test.attr(type='gate')
     @test.idempotent_id('3645a102-372f-4140-afad-13698d850d23')
     def test_create_delete_server_group_with_anti_affinity_policy(self):
         # Create and Delete the server-group with anti-affinity policy
@@ -84,14 +82,12 @@ class ServerGroupTestJSON(base.BaseV2ComputeTest):
         self._create_delete_server_group(policy)
 
     @decorators.skip_because(bug="1324348")
-    @test.attr(type='gate')
     @test.idempotent_id('6d9bae05-eb32-425d-a673-e14e1b1c6306')
     def test_create_delete_server_group_with_multiple_policies(self):
         # Create and Delete the server-group with multiple policies
         policies = ['affinity', 'affinity']
         self._create_delete_server_group(policies)
 
-    @test.attr(type='gate')
     @test.idempotent_id('154dc5a4-a2fe-44b5-b99e-f15806a4a113')
     def test_create_delete_multiple_server_groups_with_same_name_policy(self):
         # Create and Delete the server-groups with same name and same policy
@@ -107,7 +103,6 @@ class ServerGroupTestJSON(base.BaseV2ComputeTest):
         for i in range(0, 2):
             self._delete_server_group(server_groups[i])
 
-    @test.attr(type='gate')
     @test.idempotent_id('b3545034-dd78-48f0-bdc2-a4adfa6d0ead')
     def test_get_server_group(self):
         # Get the server-group
@@ -115,7 +110,6 @@ class ServerGroupTestJSON(base.BaseV2ComputeTest):
             self.created_server_group['id'])
         self.assertEqual(self.created_server_group, body)
 
-    @test.attr(type='gate')
     @test.idempotent_id('d4874179-27b4-4d7d-80e4-6c560cdfe321')
     def test_list_server_groups(self):
         # List the server-group

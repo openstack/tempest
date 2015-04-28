@@ -102,7 +102,6 @@ class QuotasAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
 
     @decorators.skip_because(bug="1186354",
                              condition=CONF.service_available.neutron)
-    @test.attr(type='gate')
     @test.idempotent_id('7c6c8f3b-2bf6-4918-b240-57b136a66aa0')
     @test.services('network')
     def test_security_groups_exceed_limit(self):

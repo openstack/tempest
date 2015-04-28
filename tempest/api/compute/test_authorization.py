@@ -103,35 +103,30 @@ class AuthorizationTestJSON(base.BaseV2ComputeTest):
             cls.security_client.delete_security_group(cls.security_group['id'])
         super(AuthorizationTestJSON, cls).resource_cleanup()
 
-    @test.attr(type='gate')
     @test.idempotent_id('56816e4a-bd34-47b5-aee9-268c3efeb5d4')
     def test_get_server_for_alt_account_fails(self):
         # A GET request for a server on another user's account should fail
         self.assertRaises(lib_exc.NotFound, self.alt_client.get_server,
                           self.server['id'])
 
-    @test.attr(type='gate')
     @test.idempotent_id('fb8a4870-6d9d-44ad-8375-95d52e98d9f6')
     def test_delete_server_for_alt_account_fails(self):
         # A DELETE request for another user's server should fail
         self.assertRaises(lib_exc.NotFound, self.alt_client.delete_server,
                           self.server['id'])
 
-    @test.attr(type='gate')
     @test.idempotent_id('d792f91f-1d49-4eb5-b1ff-b229c4b9dc64')
     def test_update_server_for_alt_account_fails(self):
         # An update server request for another user's server should fail
         self.assertRaises(lib_exc.NotFound, self.alt_client.update_server,
                           self.server['id'], name='test')
 
-    @test.attr(type='gate')
     @test.idempotent_id('488f24df-d7f7-4207-949a-f17fcb8e8769')
     def test_list_server_addresses_for_alt_account_fails(self):
         # A list addresses request for another user's server should fail
         self.assertRaises(lib_exc.NotFound, self.alt_client.list_addresses,
                           self.server['id'])
 
-    @test.attr(type='gate')
     @test.idempotent_id('00b442d0-2e72-40e7-9b1f-31772e36da01')
     def test_list_server_addresses_by_network_for_alt_account_fails(self):
         # A list address/network request for another user's server should fail
@@ -140,7 +135,6 @@ class AuthorizationTestJSON(base.BaseV2ComputeTest):
                           self.alt_client.list_addresses_by_network, server_id,
                           'public')
 
-    @test.attr(type='gate')
     @test.idempotent_id('cc90b35a-19f0-45d2-b680-2aabf934aa22')
     def test_list_servers_with_alternate_tenant(self):
         # A list on servers from one tenant should not
@@ -151,35 +145,30 @@ class AuthorizationTestJSON(base.BaseV2ComputeTest):
         alt_server_ids = [s['id'] for s in body['servers']]
         self.assertNotIn(self.server['id'], alt_server_ids)
 
-    @test.attr(type='gate')
     @test.idempotent_id('376dbc16-0779-4384-a723-752774799641')
     def test_change_password_for_alt_account_fails(self):
         # A change password request for another user's server should fail
         self.assertRaises(lib_exc.NotFound, self.alt_client.change_password,
                           self.server['id'], 'newpass')
 
-    @test.attr(type='gate')
     @test.idempotent_id('14cb5ff5-f646-45ca-8f51-09081d6c0c24')
     def test_reboot_server_for_alt_account_fails(self):
         # A reboot request for another user's server should fail
         self.assertRaises(lib_exc.NotFound, self.alt_client.reboot,
                           self.server['id'], 'HARD')
 
-    @test.attr(type='gate')
     @test.idempotent_id('8a0bce51-cd00-480b-88ba-dbc7d8408a37')
     def test_rebuild_server_for_alt_account_fails(self):
         # A rebuild request for another user's server should fail
         self.assertRaises(lib_exc.NotFound, self.alt_client.rebuild,
                           self.server['id'], self.image_ref_alt)
 
-    @test.attr(type='gate')
     @test.idempotent_id('e4da647e-f982-4e61-9dad-1d1abebfb933')
     def test_resize_server_for_alt_account_fails(self):
         # A resize request for another user's server should fail
         self.assertRaises(lib_exc.NotFound, self.alt_client.resize,
                           self.server['id'], self.flavor_ref_alt)
 
-    @test.attr(type='gate')
     @test.idempotent_id('a9fe8112-0ffa-4902-b061-f892bd5fe0d3')
     def test_create_image_for_alt_account_fails(self):
         # A create image request for another user's server should fail
@@ -187,14 +176,12 @@ class AuthorizationTestJSON(base.BaseV2ComputeTest):
                           self.alt_images_client.create_image,
                           self.server['id'], 'testImage')
 
-    @test.attr(type='gate')
     @test.idempotent_id('95d445f6-babc-4f2e-aea3-aa24ec5e7f0d')
     def test_create_server_with_unauthorized_image(self):
         # Server creation with another user's image should fail
         self.assertRaises(lib_exc.BadRequest, self.alt_client.create_server,
                           'test', self.image['id'], self.flavor_ref)
 
-    @test.attr(type='gate')
     @test.idempotent_id('acf8724b-142b-4044-82c3-78d31a533f24')
     def test_create_server_fails_when_tenant_incorrect(self):
         # A create server request should fail if the tenant id does not match
@@ -208,7 +195,6 @@ class AuthorizationTestJSON(base.BaseV2ComputeTest):
                           self.alt_client.create_server, 'test',
                           self.image['id'], self.flavor_ref)
 
-    @test.attr(type='gate')
     @test.idempotent_id('f03d1ded-7fd4-4d29-bc13-e2391f29c625')
     def test_create_keypair_in_analt_user_tenant(self):
         # A create keypair request should fail if the tenant id does not match
@@ -232,7 +218,6 @@ class AuthorizationTestJSON(base.BaseV2ComputeTest):
                 LOG.error("Create keypair request should not happen "
                           "if the tenant id does not match the current user")
 
-    @test.attr(type='gate')
     @test.idempotent_id('85bcdd8f-56b4-4868-ae56-63fbf6f7e405')
     def test_get_keypair_of_alt_account_fails(self):
         # A GET request for another user's keypair should fail
@@ -240,7 +225,6 @@ class AuthorizationTestJSON(base.BaseV2ComputeTest):
                           self.alt_keypairs_client.get_keypair,
                           self.keypairname)
 
-    @test.attr(type='gate')
     @test.idempotent_id('6d841683-a8e0-43da-a1b8-b339f7692b61')
     def test_delete_keypair_of_alt_account_fails(self):
         # A DELETE request for another user's keypair should fail
@@ -248,14 +232,12 @@ class AuthorizationTestJSON(base.BaseV2ComputeTest):
                           self.alt_keypairs_client.delete_keypair,
                           self.keypairname)
 
-    @test.attr(type='gate')
     @test.idempotent_id('fcb2e144-36e3-4dfb-9f9f-e72fcdec5656')
     def test_get_image_for_alt_account_fails(self):
         # A GET request for an image on another user's account should fail
         self.assertRaises(lib_exc.NotFound,
                           self.alt_images_client.get_image, self.image['id'])
 
-    @test.attr(type='gate')
     @test.idempotent_id('9facb962-f043-4a9d-b9ee-166a32dea098')
     def test_delete_image_for_alt_account_fails(self):
         # A DELETE request for another user's image should fail
@@ -263,7 +245,6 @@ class AuthorizationTestJSON(base.BaseV2ComputeTest):
                           self.alt_images_client.delete_image,
                           self.image['id'])
 
-    @test.attr(type='gate')
     @test.idempotent_id('752c917e-83be-499d-a422-3559127f7d3c')
     def test_create_security_group_in_analt_user_tenant(self):
         # A create security group request should fail if the tenant id does not
@@ -289,7 +270,6 @@ class AuthorizationTestJSON(base.BaseV2ComputeTest):
                 LOG.error("Create Security Group request should not happen if"
                           "the tenant id does not match the current user")
 
-    @test.attr(type='gate')
     @test.idempotent_id('9db3590f-4d15-4e5f-985e-b28514919a6f')
     def test_get_security_group_of_alt_account_fails(self):
         # A GET request for another user's security group should fail
@@ -297,7 +277,6 @@ class AuthorizationTestJSON(base.BaseV2ComputeTest):
                           self.alt_security_client.get_security_group,
                           self.security_group['id'])
 
-    @test.attr(type='gate')
     @test.idempotent_id('155387a5-2bbc-4acf-ab06-698dae537ea5')
     def test_delete_security_group_of_alt_account_fails(self):
         # A DELETE request for another user's security group should fail
@@ -305,7 +284,6 @@ class AuthorizationTestJSON(base.BaseV2ComputeTest):
                           self.alt_security_client.delete_security_group,
                           self.security_group['id'])
 
-    @test.attr(type='gate')
     @test.idempotent_id('b2b76de0-210a-4089-b921-591c9ec552f6')
     def test_create_security_group_rule_in_analt_user_tenant(self):
         # A create security group rule request should fail if the tenant id
@@ -336,7 +314,6 @@ class AuthorizationTestJSON(base.BaseV2ComputeTest):
                           "happen if the tenant id does not match the"
                           " current user")
 
-    @test.attr(type='gate')
     @test.idempotent_id('c6044177-37ef-4ce4-b12c-270ddf26d7da')
     def test_delete_security_group_rule_of_alt_account_fails(self):
         # A DELETE request for another user's security group rule
@@ -345,7 +322,6 @@ class AuthorizationTestJSON(base.BaseV2ComputeTest):
                           self.alt_security_client.delete_security_group_rule,
                           self.rule['id'])
 
-    @test.attr(type='gate')
     @test.idempotent_id('c5f52351-53d9-4fc9-83e5-917f7f5e3d71')
     def test_set_metadata_of_alt_account_server_fails(self):
         # A set metadata for another user's server should fail
@@ -355,7 +331,6 @@ class AuthorizationTestJSON(base.BaseV2ComputeTest):
                           self.server['id'],
                           req_metadata)
 
-    @test.attr(type='gate')
     @test.idempotent_id('fb6f51e9-df15-4939-898d-1aca38c258f0')
     def test_set_metadata_of_alt_account_image_fails(self):
         # A set metadata for another user's image should fail
@@ -364,7 +339,6 @@ class AuthorizationTestJSON(base.BaseV2ComputeTest):
                           self.alt_images_client.set_image_metadata,
                           self.image['id'], req_metadata)
 
-    @test.attr(type='gate')
     @test.idempotent_id('dea1936a-473d-49f2-92ad-97bb7aded22e')
     def test_get_metadata_of_alt_account_server_fails(self):
         # A get metadata for another user's server should fail
@@ -376,7 +350,6 @@ class AuthorizationTestJSON(base.BaseV2ComputeTest):
                           self.alt_client.get_server_metadata_item,
                           self.server['id'], 'meta1')
 
-    @test.attr(type='gate')
     @test.idempotent_id('16b2d724-0d3b-4216-a9fa-97bd4d9cf670')
     def test_get_metadata_of_alt_account_image_fails(self):
         # A get metadata for another user's image should fail
@@ -389,7 +362,6 @@ class AuthorizationTestJSON(base.BaseV2ComputeTest):
                           self.alt_images_client.get_image_metadata_item,
                           self.image['id'], 'meta1')
 
-    @test.attr(type='gate')
     @test.idempotent_id('79531e2e-e721-493c-8b30-a35db36fdaa6')
     def test_delete_metadata_of_alt_account_server_fails(self):
         # A delete metadata for another user's server should fail
@@ -401,7 +373,6 @@ class AuthorizationTestJSON(base.BaseV2ComputeTest):
                           self.alt_client.delete_server_metadata_item,
                           self.server['id'], 'meta1')
 
-    @test.attr(type='gate')
     @test.idempotent_id('a5175dcf-cef8-43d6-9b77-3cb707d62e94')
     def test_delete_metadata_of_alt_account_image_fails(self):
         # A delete metadata for another user's image should fail
@@ -414,7 +385,6 @@ class AuthorizationTestJSON(base.BaseV2ComputeTest):
                           self.alt_images_client.delete_image_metadata_item,
                           self.image['id'], 'meta1')
 
-    @test.attr(type='gate')
     @test.idempotent_id('b0c1e7a0-8853-40fd-8384-01f93d116cae')
     def test_get_console_output_of_alt_account_server_fails(self):
         # A Get Console Output for another user's server should fail

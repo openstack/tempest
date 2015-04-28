@@ -49,7 +49,6 @@ class TokensV3TestJSON(base.BaseIdentityV3AdminTest):
         self.assertRaises(lib_exc.NotFound, self.client.get_token,
                           subject_token)
 
-    @test.attr(type='gate')
     @test.idempotent_id('565fa210-1da1-4563-999b-f7b5b67cf112')
     def test_rescope_token(self):
         """Rescope a token.

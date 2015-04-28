@@ -29,7 +29,6 @@ class TelemetryNotificationAPITestJSON(base.BaseTelemetryTest):
             raise cls.skipException("Ceilometer feature for fast work mysql "
                                     "is disabled")
 
-    @test.attr(type="gate")
     @test.idempotent_id('d7f8c1c8-d470-4731-8604-315d3956caad')
     @testtools.skipIf(not CONF.service_available.nova,
                       "Nova is not available.")

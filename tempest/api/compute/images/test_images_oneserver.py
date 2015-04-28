@@ -103,7 +103,6 @@ class ImagesOneServerTestJSON(base.BaseV2ComputeTest):
         self.client.delete_image(image_id)
         self.client.wait_for_resource_deletion(image_id)
 
-    @test.attr(type=['gate'])
     @test.idempotent_id('3b7c6fe4-dfe7-477c-9243-b06359db51e6')
     def test_create_image_specify_multibyte_character_image_name(self):
         # prefix character is:

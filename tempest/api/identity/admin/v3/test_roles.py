@@ -174,7 +174,6 @@ class RolesV3TestJSON(base.BaseIdentityV3AdminTest):
         self.client.revoke_role_from_group_on_domain(
             self.domain['id'], self.group_body['id'], self.role['id'])
 
-    @test.attr(type='gate')
     @test.idempotent_id('f5654bcc-08c4-4f71-88fe-05d64e06de94')
     def test_list_roles(self):
         # Return a list of all roles

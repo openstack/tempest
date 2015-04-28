@@ -28,7 +28,6 @@ class ServerPersonalityTestJSON(base.BaseV2ComputeTest):
         cls.client = cls.servers_client
         cls.user_client = cls.limits_client
 
-    @test.attr(type='gate')
     @test.idempotent_id('176cd8c9-b9e8-48ee-a480-180beab292bf')
     def test_personality_files_exceed_limit(self):
         # Server creation should fail if greater than the maximum allowed
@@ -48,7 +47,6 @@ class ServerPersonalityTestJSON(base.BaseV2ComputeTest):
         self.assertRaises((lib_exc.Forbidden, lib_exc.OverLimit),
                           self.create_test_server, personality=personality)
 
-    @test.attr(type='gate')
     @test.idempotent_id('52f12ee8-5180-40cc-b417-31572ea3d555')
     def test_can_create_server_with_max_number_personality_files(self):
         # Server should be created successfully if maximum allowed number of

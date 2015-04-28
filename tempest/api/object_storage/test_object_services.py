@@ -89,7 +89,6 @@ class ObjectTest(base.BaseObjectTest):
             for meta_key in not_in_meta:
                 self.assertNotIn('x-object-meta-' + meta_key, resp)
 
-    @test.attr(type='gate')
     @test.idempotent_id('5b4ce26f-3545-46c9-a2ba-5754358a4c62')
     def test_create_object(self):
         # create object
@@ -109,7 +108,6 @@ class ObjectTest(base.BaseObjectTest):
                                                 object_name)
         self.assertEqual(data, body)
 
-    @test.attr(type='gate')
     @test.idempotent_id('5daebb1d-f0d5-4dc9-b541-69672eff00b0')
     def test_create_object_with_content_disposition(self):
         # create object with content_disposition
@@ -132,7 +130,6 @@ class ObjectTest(base.BaseObjectTest):
         self.assertEqual(resp['content-disposition'], 'inline')
         self.assertEqual(body, data)
 
-    @test.attr(type='gate')
     @test.idempotent_id('605f8317-f945-4bee-ae91-013f1da8f0a0')
     def test_create_object_with_content_encoding(self):
         # create object with content_encoding
@@ -160,7 +157,6 @@ class ObjectTest(base.BaseObjectTest):
             metadata=metadata)
         self.assertEqual(body, data_before)
 
-    @test.attr(type='gate')
     @test.idempotent_id('73820093-0503-40b1-a478-edf0e69c7d1f')
     def test_create_object_with_etag(self):
         # create object with etag
@@ -180,7 +176,6 @@ class ObjectTest(base.BaseObjectTest):
                                                 object_name)
         self.assertEqual(data, body)
 
-    @test.attr(type='gate')
     @test.idempotent_id('84dafe57-9666-4f6d-84c8-0814d37923b8')
     def test_create_object_with_expect_continue(self):
         # create object with expect_continue
@@ -207,7 +202,6 @@ class ObjectTest(base.BaseObjectTest):
                                                 object_name)
         self.assertEqual(data, body)
 
-    @test.attr(type='gate')
     @test.idempotent_id('4f84422a-e2f2-4403-b601-726a4220b54e')
     def test_create_object_with_transfer_encoding(self):
         # create object with transfer_encoding
@@ -225,7 +219,6 @@ class ObjectTest(base.BaseObjectTest):
                                                 object_name)
         self.assertEqual(data, body)
 
-    @test.attr(type='gate')
     @test.idempotent_id('0f3d62a6-47e3-4554-b0e5-1a5dc372d501')
     def test_create_object_with_x_fresh_metadata(self):
         # create object with x_fresh_metadata
@@ -252,7 +245,6 @@ class ObjectTest(base.BaseObjectTest):
         self.assertNotIn('x-object-meta-test-meta', resp)
         self.assertEqual(data, body)
 
-    @test.attr(type='gate')
     @test.idempotent_id('1c7ed3e4-2099-406b-b843-5301d4811baf')
     def test_create_object_with_x_object_meta(self):
         # create object with object_meta
@@ -272,7 +264,6 @@ class ObjectTest(base.BaseObjectTest):
         self.assertEqual(resp['x-object-meta-test-meta'], 'Meta')
         self.assertEqual(data, body)
 
-    @test.attr(type='gate')
     @test.idempotent_id('e4183917-33db-4153-85cc-4dacbb938865')
     def test_create_object_with_x_object_metakey(self):
         # create object with the blank value of metadata
@@ -292,7 +283,6 @@ class ObjectTest(base.BaseObjectTest):
         self.assertEqual(resp['x-object-meta-test-meta'], '')
         self.assertEqual(data, body)
 
-    @test.attr(type='gate')
     @test.idempotent_id('ce798afc-b278-45de-a5ce-2ea124b98b99')
     def test_create_object_with_x_remove_object_meta(self):
         # create object with x_remove_object_meta
@@ -316,7 +306,6 @@ class ObjectTest(base.BaseObjectTest):
         self.assertNotIn('x-object-meta-test-meta', resp)
         self.assertEqual(data, body)
 
-    @test.attr(type='gate')
     @test.idempotent_id('ad21e342-7916-4f9e-ab62-a1f885f2aaf9')
     def test_create_object_with_x_remove_object_metakey(self):
         # create object with the blank value of remove metadata
@@ -340,7 +329,6 @@ class ObjectTest(base.BaseObjectTest):
         self.assertNotIn('x-object-meta-test-meta', resp)
         self.assertEqual(data, body)
 
-    @test.attr(type='gate')
     @test.idempotent_id('17738d45-03bd-4d45-9e0b-7b2f58f98687')
     def test_delete_object(self):
         # create object
@@ -944,7 +932,6 @@ class ObjectTest(base.BaseObjectTest):
         # check destination object
         self._check_copied_obj(dst_obj_name, data, in_meta=["test", "src"])
 
-    @test.attr(type='gate')
     @test.idempotent_id('e3e6a64a-9f50-4955-b987-6ce6767c97fb')
     def test_object_upload_in_segments(self):
         # create object
@@ -987,7 +974,6 @@ class ObjectTest(base.BaseObjectTest):
             self.container_name, object_name)
         self.assertEqual(''.join(data_segments), body)
 
-    @test.attr(type='gate')
     @test.idempotent_id('50d01f12-526f-4360-9ac2-75dd508d7b68')
     def test_get_object_if_different(self):
         # http://en.wikipedia.org/wiki/HTTP_ETag

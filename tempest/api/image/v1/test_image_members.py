@@ -19,7 +19,6 @@ from tempest import test
 
 class ImageMembersTest(base.BaseV1ImageMembersTest):
 
-    @test.attr(type='gate')
     @test.idempotent_id('1d6ef640-3a20-4c84-8710-d95828fdb6ad')
     def test_add_image_member(self):
         image = self._create_image()
@@ -31,7 +30,6 @@ class ImageMembersTest(base.BaseV1ImageMembersTest):
         # get image as alt user
         self.alt_img_cli.get_image(image)
 
-    @test.attr(type='gate')
     @test.idempotent_id('6a5328a5-80e8-4b82-bd32-6c061f128da9')
     def test_get_shared_images(self):
         image = self._create_image()
@@ -44,7 +42,6 @@ class ImageMembersTest(base.BaseV1ImageMembersTest):
         self.assertIn(share_image, images)
         self.assertIn(image, images)
 
-    @test.attr(type='gate')
     @test.idempotent_id('a76a3191-8948-4b44-a9d6-4053e5f2b138')
     def test_remove_member(self):
         image_id = self._create_image()

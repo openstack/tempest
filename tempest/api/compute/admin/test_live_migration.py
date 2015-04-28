@@ -87,7 +87,6 @@ class LiveBlockMigrationTestJSON(base.BaseV2ComputeAdminTest):
     @test.idempotent_id('1dce86b8-eb04-4c03-a9d8-9c1dc3ee0c7b')
     @testtools.skipIf(not CONF.compute_feature_enabled.live_migration,
                       'Live migration not available')
-    @test.attr(type='gate')
     def test_live_block_migration(self):
         # Live block migrate an instance to another host
         if len(self._get_compute_hostnames()) < 2:
@@ -108,7 +107,6 @@ class LiveBlockMigrationTestJSON(base.BaseV2ComputeAdminTest):
     @testtools.skipIf(not CONF.compute_feature_enabled.
                       block_migrate_cinder_iscsi,
                       'Block Live migration not configured for iSCSI')
-    @test.attr(type='gate')
     def test_iscsi_volume(self):
         # Live block migrate an instance to another host
         if len(self._get_compute_hostnames()) < 2:

@@ -105,7 +105,6 @@ class UsersTestJSON(base.BaseIdentityV2AdminTest):
                                self.data.test_password,
                                self.data.test_tenant)
 
-    @test.attr(type='gate')
     @test.idempotent_id('5d1fa498-4c2d-4732-a8fe-2b054598cfdd')
     def test_authentication_request_without_token(self):
         # Request for token authentication with a valid token in header
@@ -132,7 +131,6 @@ class UsersTestJSON(base.BaseIdentityV2AdminTest):
                         matchers.Contains(self.data.test_user),
                         "Could not find %s" % self.data.test_user)
 
-    @test.attr(type='gate')
     @test.idempotent_id('6e317209-383a-4bed-9f10-075b7c82c79a')
     def test_list_users_for_tenant(self):
         # Return a list of all users for a tenant
@@ -163,7 +161,6 @@ class UsersTestJSON(base.BaseIdentityV2AdminTest):
                          "Failed to find user %s in fetched list" %
                          ', '.join(m_user for m_user in missing_users))
 
-    @test.attr(type='gate')
     @test.idempotent_id('a8b54974-40e1-41c0-b812-50fc90827971')
     def test_list_users_with_roles_for_tenant(self):
         # Return list of users on tenant when roles are assigned to users
