@@ -943,6 +943,8 @@ ScenarioGroup = [
     cfg.StrOpt('img_container_format',
                default='bare',
                help='Image container format'),
+    cfg.DictOpt('img_properties', help='Glance image properties. '
+                'Use for custom images which require them'),
     cfg.StrOpt('ami_img_file',
                default='cirros-0.3.1-x86_64-blank.img',
                help='AMI image file name'),

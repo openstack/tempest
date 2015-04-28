@@ -935,6 +935,10 @@
 # Image container format (string value)
 #img_container_format = bare
 
+# Glance image properties. Use for custom images which require them
+# (dict value)
+#img_properties = <None>
+
 # AMI image file name (string value)
 #ami_img_file = cirros-0.3.1-x86_64-blank.img
 
