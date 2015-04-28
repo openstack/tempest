@@ -31,7 +31,7 @@ class AccountNegativeTest(base.BaseObjectTest):
             cls.isolated_creds.get_creds_by_roles(
                 roles=[CONF.object_storage.operator_role], force_new=True))
 
-    @test.attr(type=['negative', 'gate'])
+    @test.attr(type=['negative'])
     @test.idempotent_id('070e6aca-6152-4867-868d-1118d68fb38c')
     def test_list_containers_with_non_authorized_user(self):
         # list containers using non-authorized user

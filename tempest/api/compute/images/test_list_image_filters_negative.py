@@ -36,7 +36,7 @@ class ListImageFiltersNegativeTestJSON(base.BaseV2ComputeTest):
         super(ListImageFiltersNegativeTestJSON, cls).setup_clients()
         cls.client = cls.images_client
 
-    @test.attr(type=['negative', 'gate'])
+    @test.attr(type=['negative'])
     @test.idempotent_id('391b0440-432c-4d4b-b5da-c5096aa247eb')
     def test_get_nonexistent_image(self):
         # Check raises a NotFound

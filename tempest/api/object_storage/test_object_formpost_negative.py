@@ -108,7 +108,7 @@ class ObjectFormPostNegativeTest(base.BaseObjectTest):
 
     @test.idempotent_id('d3fb3c4d-e627-48ce-9379-a1631f21336d')
     @test.requires_ext(extension='formpost', service='object')
-    @test.attr(type=['gate', 'negative'])
+    @test.attr(type=['negative'])
     def test_post_object_using_form_expired(self):
         body, content_type = self.get_multipart_form(expires=1)
         time.sleep(2)

@@ -49,14 +49,14 @@ class FixedIPsNegativeTestJson(base.BaseV2ComputeAdminTest):
             if cls.ip:
                 break
 
-    @test.attr(type=['negative', 'gate'])
+    @test.attr(type=['negative'])
     @test.idempotent_id('9f17f47d-daad-4adc-986e-12370c93e407')
     @test.services('network')
     def test_list_fixed_ip_details_with_non_admin_user(self):
         self.assertRaises(lib_exc.Forbidden,
                           self.non_admin_client.get_fixed_ip_details, self.ip)
 
-    @test.attr(type=['negative', 'gate'])
+    @test.attr(type=['negative'])
     @test.idempotent_id('ce60042c-fa60-4836-8d43-1c8e3359dc47')
     @test.services('network')
     def test_set_reserve_with_non_admin_user(self):
@@ -65,7 +65,7 @@ class FixedIPsNegativeTestJson(base.BaseV2ComputeAdminTest):
                           self.non_admin_client.reserve_fixed_ip,
                           self.ip, body)
 
-    @test.attr(type=['negative', 'gate'])
+    @test.attr(type=['negative'])
     @test.idempotent_id('f1f7a35b-0390-48c5-9803-5f27461439db')
     @test.services('network')
     def test_set_unreserve_with_non_admin_user(self):
@@ -74,7 +74,7 @@ class FixedIPsNegativeTestJson(base.BaseV2ComputeAdminTest):
                           self.non_admin_client.reserve_fixed_ip,
                           self.ip, body)
 
-    @test.attr(type=['negative', 'gate'])
+    @test.attr(type=['negative'])
     @test.idempotent_id('f51cf464-7fc5-4352-bc3e-e75cfa2cb717')
     @test.services('network')
     def test_set_reserve_with_invalid_ip(self):
@@ -88,7 +88,7 @@ class FixedIPsNegativeTestJson(base.BaseV2ComputeAdminTest):
                           self.client.reserve_fixed_ip,
                           "my.invalid.ip", body)
 
-    @test.attr(type=['negative', 'gate'])
+    @test.attr(type=['negative'])
     @test.idempotent_id('fd26ef50-f135-4232-9d32-281aab3f9176')
     @test.services('network')
     def test_fixed_ip_with_invalid_action(self):
