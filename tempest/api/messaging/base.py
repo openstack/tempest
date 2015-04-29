@@ -35,16 +35,13 @@ class BaseMessagingTest(test.BaseTestCase):
         messaging as True
     """
 
+    credentials = ['primary']
+
     @classmethod
     def skip_checks(cls):
         super(BaseMessagingTest, cls).skip_checks()
         if not CONF.service_available.zaqar:
             raise cls.skipException("Zaqar support is required")
-
-    @classmethod
-    def setup_credentials(cls):
-        super(BaseMessagingTest, cls).setup_credentials()
-        cls.os = cls.get_client_manager()
 
     @classmethod
     def setup_clients(cls):

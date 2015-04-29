@@ -228,6 +228,9 @@ class BaseTestCase(testtools.testcase.WithAttributes,
     setUpClassCalled = False
     _service = None
 
+    # NOTE(andreaf) credentials holds a list of the credentials to be allocated
+    # at class setup time. Credential types can be 'primary', 'alt' or 'admin'
+    credentials = []
     network_resources = {}
 
     # NOTE(sdague): log_format is defined inline here instead of using the oslo
@@ -313,15 +316,37 @@ class BaseTestCase(testtools.testcase.WithAttributes,
         If one is really needed it may be implemented either in the
         resource_setup or at test level.
         """
-        pass
+        if 'admin' in cls.credentials and not credentials.is_admin_available():
+            msg = "Missing Identity Admin API credentials in configuration."
+            raise cls.skipException(msg)
+        if 'alt' is cls.credentials and not credentials.is_alt_available():
+            msg = "Missing a 2nd set of API credentials in configuration."
+            raise cls.skipException(msg)
 
     @classmethod
     def setup_credentials(cls):
-        """Allocate credentials and the client managers from them."""
-        # TODO(andreaf) There is a fair amount of code that could me moved from
-        # base / test classes in here. Ideally tests should be able to only
-        # specify a list of (additional) credentials the need to use.
-        pass
+        """Allocate credentials and the client managers from them.
+        A test class that requires network resources must override
+        setup_credentials and defined the required resources before super
+        is invoked.
+        """
+        for credentials_type in cls.credentials:
+            # This may raise an exception in case credentials are not available
+            # In that case we want to let the exception through and the test
+            # fail accordingly
+            manager = cls.get_client_manager(
+                credential_type=credentials_type)
+            setattr(cls, 'os_%s' % credentials_type, manager)
+            # Setup some common aliases
+            # TODO(andreaf) The aliases below are a temporary hack
+            # to avoid changing too much code in one patch. They should
+            # be removed eventually
+            if credentials_type == 'primary':
+                cls.os = cls.manager = cls.os_primary
+            if credentials_type == 'admin':
+                cls.os_adm = cls.admin_manager = cls.os_admin
+            if credentials_type == 'alt':
+                cls.alt_manager = cls.os_alt
 
     @classmethod
     def setup_clients(cls):
@@ -375,7 +400,8 @@ class BaseTestCase(testtools.testcase.WithAttributes,
                                                    level=None))
 
     @classmethod
-    def get_client_manager(cls, identity_version=None):
+    def get_client_manager(cls, identity_version=None,
+                           credential_type='primary'):
         """
         Returns an OpenStack client manager
         """
@@ -390,7 +416,12 @@ class BaseTestCase(testtools.testcase.WithAttributes,
                 identity_version=identity_version
             )
 
-        creds = cls.isolated_creds.get_primary_creds()
+        credentials_method = 'get_%s_creds' % credential_type
+        if hasattr(cls.isolated_creds, credentials_method):
+            creds = getattr(cls.isolated_creds, credentials_method)()
+        else:
+            raise exceptions.InvalidCredentials(
+                "Invalid credentials type %s" % credential_type)
         os = clients.Manager(credentials=creds, service=cls._service)
         return os
 
@@ -466,7 +497,7 @@ class NegativeAutoTest(BaseTestCase):
     @classmethod
     def setUpClass(cls):
         super(NegativeAutoTest, cls).setUpClass()
-        os = cls.get_client_manager()
+        os = cls.get_client_manager(credential_type='primary')
         cls.client = os.negative_client
 
     @staticmethod

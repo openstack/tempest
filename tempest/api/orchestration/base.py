@@ -18,7 +18,6 @@ from tempest_lib import exceptions as lib_exc
 import yaml
 
 from tempest import clients
-from tempest.common import credentials
 from tempest import config
 import tempest.test
 
@@ -30,6 +29,8 @@ LOG = logging.getLogger(__name__)
 class BaseOrchestrationTest(tempest.test.BaseTestCase):
     """Base test case class for all Orchestration API tests."""
 
+    credentials = ['primary']
+
     @classmethod
     def skip_checks(cls):
         super(BaseOrchestrationTest, cls).skip_checks()
@@ -39,10 +40,6 @@ class BaseOrchestrationTest(tempest.test.BaseTestCase):
     @classmethod
     def setup_credentials(cls):
         super(BaseOrchestrationTest, cls).setup_credentials()
-        if (not hasattr(cls, 'isolated_creds') or
-            not cls.isolated_creds.name == cls.__name__):
-            cls.isolated_creds = credentials.get_isolated_credentials(
-                name=cls.__name__, network_resources=cls.network_resources)
         stack_owner_role = CONF.orchestration.stack_owner_role
         if not cls.isolated_creds.is_role_available(stack_owner_role):
             skip_msg = ("%s skipped because the configured credential provider"

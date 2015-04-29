@@ -225,17 +225,14 @@ DEFAULT_TEMPLATES = {
 
 class BaseDataProcessingTest(tempest.test.BaseTestCase):
 
+    credentials = ['primary']
+
     @classmethod
     def skip_checks(cls):
         super(BaseDataProcessingTest, cls).skip_checks()
         if not CONF.service_available.sahara:
             raise cls.skipException('Sahara support is required')
         cls.default_plugin = cls._get_default_plugin()
-
-    @classmethod
-    def setup_credentials(cls):
-        super(BaseDataProcessingTest, cls).setup_credentials()
-        cls.os = cls.get_client_manager()
 
     @classmethod
     def setup_clients(cls):

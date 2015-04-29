@@ -20,8 +20,6 @@ from oslo_utils import excutils
 from tempest_lib.common.utils import data_utils
 from tempest_lib import exceptions as lib_exc
 
-from tempest import clients
-from tempest.common import credentials
 from tempest.common import fixed_network
 from tempest import config
 from tempest import exceptions
@@ -38,6 +36,10 @@ class BaseComputeTest(tempest.test.BaseTestCase):
     _api_version = 2
     force_tenant_isolation = False
 
+    # TODO(andreaf) We should care also for the alt_manager here
+    # but only once client lazy load in the manager is done
+    credentials = ['primary']
+
     @classmethod
     def skip_checks(cls):
         super(BaseComputeTest, cls).skip_checks()
@@ -50,12 +52,6 @@ class BaseComputeTest(tempest.test.BaseTestCase):
     def setup_credentials(cls):
         cls.set_network_resources()
         super(BaseComputeTest, cls).setup_credentials()
-        # TODO(andreaf) WE should care also for the alt_manager here
-        # but only once client lazy load in the manager is done
-        cls.os = cls.get_client_manager()
-        # Note that we put this here and not in skip_checks because in
-        # the case of preprovisioned users we won't know if we can get
-        # two distinct users until we go and lock them
         cls.multi_user = cls.check_multi_user()
 
     @classmethod
@@ -350,18 +346,7 @@ class BaseV2ComputeTest(BaseComputeTest):
 class BaseComputeAdminTest(BaseComputeTest):
     """Base test case class for Compute Admin API tests."""
 
-    @classmethod
-    def skip_checks(cls):
-        super(BaseComputeAdminTest, cls).skip_checks()
-        if not credentials.is_admin_available():
-            msg = ("Missing Identity Admin API credentials in configuration.")
-            raise cls.skipException(msg)
-
-    @classmethod
-    def setup_credentials(cls):
-        super(BaseComputeAdminTest, cls).setup_credentials()
-        creds = cls.isolated_creds.get_admin_creds()
-        cls.os_adm = clients.Manager(credentials=creds)
+    credentials = ['primary', 'admin']
 
     @classmethod
     def setup_clients(cls):

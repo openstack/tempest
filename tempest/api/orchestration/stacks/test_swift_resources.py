@@ -16,7 +16,6 @@
 from tempest_lib.common.utils import data_utils
 
 from tempest.api.orchestration import base
-from tempest import clients
 from tempest import config
 from tempest import test
 
@@ -30,11 +29,6 @@ class SwiftResourcesTestJSON(base.BaseOrchestrationTest):
         super(SwiftResourcesTestJSON, cls).skip_checks()
         if not CONF.service_available.swift:
             raise cls.skipException("Swift support is required")
-
-    @classmethod
-    def setup_credentials(cls):
-        super(SwiftResourcesTestJSON, cls).setup_credentials()
-        cls.os = clients.Manager()
 
     @classmethod
     def setup_clients(cls):

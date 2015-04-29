@@ -92,6 +92,8 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
             its own router connected to the public network
     """
 
+    credentials = ['primary', 'alt', 'admin']
+
     class TenantProperties(object):
         """
         helper class to save tenant details
@@ -143,9 +145,6 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
         # TODO(mnewby) Consider looking up entities as needed instead
         # of storing them as collections on the class.
 
-        # get credentials for secondary tenant
-        cls.alt_creds = cls.isolated_creds.get_alt_creds()
-        cls.alt_manager = clients.Manager(cls.alt_creds)
         # Credentials from the manager are filled with both IDs and Names
         cls.alt_creds = cls.alt_manager.credentials
 
@@ -154,7 +153,7 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
         super(TestSecurityGroupsBasicOps, cls).resource_setup()
         cls.floating_ips = {}
         cls.tenants = {}
-        creds = cls.credentials()
+        creds = cls.manager.credentials
         cls.primary_tenant = cls.TenantProperties(creds)
         cls.alt_tenant = cls.TenantProperties(cls.alt_creds)
         for tenant in [cls.primary_tenant, cls.alt_tenant]:

@@ -37,9 +37,11 @@ class BaseObjectTest(tempest.test.BaseTestCase):
     def setup_credentials(cls):
         cls.set_network_resources()
         super(BaseObjectTest, cls).setup_credentials()
+        operator_role = CONF.object_storage.operator_role
+        # There are no credentials by type used by object storage tests so
+        # isolated_creds must still be initialized
         cls.isolated_creds = credentials.get_isolated_credentials(
             cls.__name__, network_resources=cls.network_resources)
-        operator_role = CONF.object_storage.operator_role
         if not cls.isolated_creds.is_role_available(operator_role):
             skip_msg = ("%s skipped because the configured credential provider"
                         " is not able to provide credentials with the %s role "

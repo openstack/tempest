@@ -27,7 +27,7 @@ class BaseVolumeQuotasAdminV2TestJSON(base.BaseVolumeAdminTest):
     @classmethod
     def setup_credentials(cls):
         super(BaseVolumeQuotasAdminV2TestJSON, cls).setup_credentials()
-        cls.demo_tenant_id = cls.isolated_creds.get_primary_creds().tenant_id
+        cls.demo_tenant_id = cls.os.credentials.tenant_id
 
     @test.idempotent_id('59eada70-403c-4cef-a2a3-a8ce2f1b07a0')
     def test_list_quotas(self):
