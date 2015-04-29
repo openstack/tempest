@@ -201,27 +201,6 @@
 #build_interval = 1
 
 
-[cli]
-
-#
-# From tempest.config
-#
-
-# enable cli tests (boolean value)
-#enabled = true
-
-# directory where python client binaries are located (string value)
-#cli_dir = /usr/local/bin
-
-# Whether the tempest run location has access to the *-manage
-# commands. In a pure blackbox environment it will not. (boolean
-# value)
-#has_manage = true
-
-# Number of seconds to wait on a CLI timeout (integer value)
-#timeout = 15
-
-
 [compute]
 
 #

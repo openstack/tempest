@@ -1091,25 +1091,6 @@ BaremetalGroup = [
                help="Timeout for unprovisioning an Ironic node.")
 ]
 
-cli_group = cfg.OptGroup(name='cli', title="cli Configuration Options")
-
-CLIGroup = [
-    cfg.BoolOpt('enabled',
-                default=True,
-                help="enable cli tests"),
-    cfg.StrOpt('cli_dir',
-               default='/usr/local/bin',
-               help="directory where python client binaries are located"),
-    cfg.BoolOpt('has_manage',
-                default=True,
-                help=("Whether the tempest run location has access to the "
-                      "*-manage commands. In a pure blackbox environment "
-                      "it will not.")),
-    cfg.IntOpt('timeout',
-               default=15,
-               help="Number of seconds to wait on a CLI timeout"),
-]
-
 negative_group = cfg.OptGroup(name='negative', title="Negative Test Options")
 
 NegativeGroup = [
@@ -1148,7 +1129,6 @@ _opts = [
     (debug_group, DebugGroup),
     (baremetal_group, BaremetalGroup),
     (input_scenario_group, InputScenarioGroup),
-    (cli_group, CLIGroup),
     (negative_group, NegativeGroup)
 ]
 
@@ -1212,7 +1192,6 @@ class TempestConfigPrivate(object):
         self.debug = _CONF.debug
         self.baremetal = _CONF.baremetal
         self.input_scenario = _CONF['input-scenario']
-        self.cli = _CONF.cli
         self.negative = _CONF.negative
         _CONF.set_default('domain_name', self.identity.admin_domain_name,
                           group='identity')
