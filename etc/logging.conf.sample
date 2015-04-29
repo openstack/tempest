@@ -34,7 +34,7 @@ args=(sys.stdout,)
 formatter=simple
 
 [formatter_tests]
-class = tempest.openstack.common.log.ContextFormatter
+class = oslo_log.formatters.ContextFormatter
 
 [formatter_simple]
 format=%(asctime)s.%(msecs)03d %(process)d %(levelname)s: %(message)s
