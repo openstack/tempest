@@ -128,17 +128,6 @@ class IdentityError(TempestException):
     message = "Got identity error"
 
 
-class SSHTimeout(TempestException):
-    message = ("Connection to the %(host)s via SSH timed out.\n"
-               "User: %(user)s, Password: %(password)s")
-
-
-class SSHExecCommandFailed(TempestException):
-    """Raised when remotely executed command returns nonzero status."""
-    message = ("Command '%(command)s', exit status: %(exit_status)d, "
-               "Error:\n%(strerror)s")
-
-
 class ServerUnreachable(TempestException):
     message = "The server is not reachable via the configured network"
 

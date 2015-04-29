@@ -15,8 +15,8 @@ import re
 import time
 
 import six
+from tempest_lib.common import ssh
 
-from tempest.common import ssh
 from tempest import config
 from tempest import exceptions
 
