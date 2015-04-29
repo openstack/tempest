@@ -71,20 +71,6 @@ class BaseOrchestrationTest(tempest.test.BaseTestCase):
         cls.images = []
 
     @classmethod
-    def _get_default_network(cls):
-        networks = cls.network_client.list_networks()
-        for net in networks['networks']:
-            if net['name'] == CONF.compute.fixed_network_name:
-                return net
-
-    @classmethod
-    def _get_identity_admin_client(cls):
-        """Returns an instance of the Identity Admin API client."""
-        manager = clients.Manager(cls.isolated_creds.get_admin_creds())
-        admin_client = manager.identity_client
-        return admin_client
-
-    @classmethod
     def create_stack(cls, stack_name, template_data, parameters=None,
                      environment=None, files=None):
         if parameters is None:
