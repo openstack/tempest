@@ -128,6 +128,12 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
                                              personality=personality,
                                              adminPass=password)
 
+        # If the server was rebuilt on a different image, restore it to the
+        # original image once the test ends
+        if self.image_ref_alt != self.image_ref:
+            self.addCleanup(self.client.rebuild,
+                            (self.server_id, self.image_ref))
+
         # Verify the properties in the initial response are correct
         self.assertEqual(self.server_id, rebuilt_server['id'])
         rebuilt_image_id = rebuilt_server['image']['id']
@@ -146,8 +152,6 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
             linux_client = remote_client.RemoteClient(server, self.ssh_user,
                                                       password)
             linux_client.validate_authentication()
-        if self.image_ref_alt != self.image_ref:
-            self.client.rebuild(self.server_id, self.image_ref)
 
     @test.idempotent_id('30449a88-5aff-4f9b-9866-6ee9b17f906d')
     def test_rebuild_server_in_stop_state(self):
