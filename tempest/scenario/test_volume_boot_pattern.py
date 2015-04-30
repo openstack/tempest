@@ -73,11 +73,9 @@ class TestVolumeBootPattern(manager.ScenarioTest):
             volume_id=vol_id,
             force=True,
             display_name=snap_name)
-        self.addCleanup_with_wait(
-            waiter_callable=self.snapshots_client.wait_for_resource_deletion,
-            thing_id=snap['id'], thing_id_param='id',
-            cleanup_callable=self.delete_wrapper,
-            cleanup_args=[self.snapshots_client.delete_snapshot, snap['id']])
+        self.addCleanup(
+            self.snapshots_client.wait_for_resource_deletion, snap['id'])
+        self.addCleanup(self.snapshots_client.delete_snapshot, snap['id'])
         self.snapshots_client.wait_for_snapshot_status(snap['id'], 'available')
         self.assertEqual(snap_name, snap['display_name'])
         return snap
