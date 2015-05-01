@@ -69,10 +69,7 @@ class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
 
         network = cls.get_tenant_network()
         if network:
-            if network.get('name'):
-                cls.fixed_network_name = network['name']
-            else:
-                cls.fixed_network_name = None
+            cls.fixed_network_name = network.get('name')
         else:
             cls.fixed_network_name = None
         network_kwargs = fixed_network.set_networks_kwarg(network)
