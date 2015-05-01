@@ -310,7 +310,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
             linux_client.validate_authentication()
         except Exception:
             LOG.exception('Initializing SSH connection to %s failed' % ip)
-            # If we don't explicitely set for which servers we want to
+            # If we don't explicitly set for which servers we want to
             # log the console output then all the servers will be logged.
             # See the definition of _log_console_output()
             self._log_console_output(log_console_of_servers)
