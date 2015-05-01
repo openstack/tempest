@@ -275,8 +275,14 @@ class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
             msg = 'fixed_network_name needs to be configured to run this test'
             raise self.skipException(msg)
         self.s1 = self.client.get_server(self.s1['id'])
-        ip = self.s1['addresses'][self.fixed_network_name][0]['addr']
-        params = {'ip': ip}
+        for addr_spec in self.s1['addresses'][self.fixed_network_name]:
+            ip = addr_spec['addr']
+            if addr_spec['version'] == 4:
+                params = {'ip': ip}
+                break
+        else:
+            msg = "Skipped until bug 1450859 is resolved"
+            raise self.skipException(msg)
         body = self.client.list_servers(params)
         servers = body['servers']
 
@@ -295,8 +301,12 @@ class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
             msg = 'fixed_network_name needs to be configured to run this test'
             raise self.skipException(msg)
         self.s1 = self.client.get_server(self.s1['id'])
-        ip = self.s1['addresses'][self.fixed_network_name][0]['addr'][0:-3]
-        params = {'ip': ip}
+        addr_spec = self.s1['addresses'][self.fixed_network_name][0]
+        ip = addr_spec['addr'][0:-3]
+        if addr_spec['version'] == 4:
+            params = {'ip': ip}
+        else:
+            params = {'ip6': ip}
         body = self.client.list_servers(params)
         servers = body['servers']
 
