@@ -13,7 +13,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest import auth
+from tempest_lib import auth
+
 from tempest.common import cred_provider
 from tempest import config
 from tempest import exceptions

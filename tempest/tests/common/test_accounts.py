@@ -20,13 +20,13 @@ from oslo_concurrency.fixture import lockutils as lockutils_fixtures
 from oslo_concurrency import lockutils
 from oslo_config import cfg
 from oslotest import mockpatch
+from tempest_lib import auth
+from tempest_lib.services.identity.v2 import token_client
 
-from tempest import auth
 from tempest.common import accounts
 from tempest.common import cred_provider
 from tempest import config
 from tempest import exceptions
-from tempest.services.identity.v2.json import token_client
 from tempest.tests import base
 from tempest.tests import fake_config
 from tempest.tests import fake_http

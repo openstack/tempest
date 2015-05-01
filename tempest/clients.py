@@ -16,6 +16,8 @@
 import copy
 
 from oslo_log import log as logging
+from tempest_lib.services.identity.v2.token_client import TokenClientJSON
+from tempest_lib.services.identity.v3.token_client import V3TokenClientJSON
 
 from tempest.common import cred_provider
 from tempest.common import negative_rest_client
@@ -77,7 +79,6 @@ from tempest.services.database.json.versions_client import \
     DatabaseVersionsClientJSON
 from tempest.services.identity.v2.json.identity_client import \
     IdentityClientJSON
-from tempest.services.identity.v2.json.token_client import TokenClientJSON
 from tempest.services.identity.v3.json.credentials_client import \
     CredentialsClientJSON
 from tempest.services.identity.v3.json.endpoints_client import \
@@ -88,7 +89,6 @@ from tempest.services.identity.v3.json.policy_client import PolicyClientJSON
 from tempest.services.identity.v3.json.region_client import RegionClientJSON
 from tempest.services.identity.v3.json.service_client import \
     ServiceClientJSON
-from tempest.services.identity.v3.json.token_client import V3TokenClientJSON
 from tempest.services.image.v1.json.image_client import ImageClientJSON
 from tempest.services.image.v2.json.image_client import ImageClientV2JSON
 from tempest.services.messaging.json.messaging_client import \
