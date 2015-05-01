@@ -28,6 +28,7 @@ class BasicOperationsImagesTest(base.BaseV2ImageTest):
     Here we test the basic operations of images
     """
 
+    @test.attr(type='smoke')
     @test.idempotent_id('139b765e-7f3d-4b3d-8b37-3ca3876ee318')
     def test_register_upload_get_image_file(self):
 
@@ -69,6 +70,7 @@ class BasicOperationsImagesTest(base.BaseV2ImageTest):
         body = self.client.get_image_file(image_id)
         self.assertEqual(file_content, body.data)
 
+    @test.attr(type='smoke')
     @test.idempotent_id('f848bb94-1c6e-45a4-8726-39e3a5b23535')
     def test_delete_image(self):
         # Deletes an image by image_id
@@ -90,6 +92,7 @@ class BasicOperationsImagesTest(base.BaseV2ImageTest):
         images_id = [item['id'] for item in images]
         self.assertNotIn(image_id, images_id)
 
+    @test.attr(type='smoke')
     @test.idempotent_id('f66891a7-a35c-41a8-b590-a065c2a1caa6')
     def test_update_image(self):
         # Updates an image by image_id
