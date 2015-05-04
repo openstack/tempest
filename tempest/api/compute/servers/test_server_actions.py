@@ -181,27 +181,16 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
             self.client.wait_for_server_status(self.server_id, 'SHUTOFF')
         self.client.start(self.server_id)
 
-    def _detect_server_image_flavor(self, server_id):
-        # Detects the current server image flavor ref.
-        server = self.client.get_server(server_id)
-        current_flavor = server['flavor']['id']
-        new_flavor_ref = self.flavor_ref_alt \
-            if current_flavor == self.flavor_ref else self.flavor_ref
-        return current_flavor, new_flavor_ref
-
     def _test_resize_server_confirm(self, stop=False):
         # The server's RAM and disk space should be modified to that of
         # the provided flavor
-
-        previous_flavor_ref, new_flavor_ref = \
-            self._detect_server_image_flavor(self.server_id)
 
         if stop:
             self.servers_client.stop(self.server_id)
             self.servers_client.wait_for_server_status(self.server_id,
                                                        'SHUTOFF')
 
-        self.client.resize(self.server_id, new_flavor_ref)
+        self.client.resize(self.server_id, self.flavor_ref_alt)
         self.client.wait_for_server_status(self.server_id, 'VERIFY_RESIZE')
 
         self.client.confirm_resize(self.server_id)
@@ -209,11 +198,15 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         self.client.wait_for_server_status(self.server_id, expected_status)
 
         server = self.client.get_server(self.server_id)
-        self.assertEqual(new_flavor_ref, server['flavor']['id'])
+        self.assertEqual(self.flavor_ref_alt, server['flavor']['id'])
 
         if stop:
             # NOTE(mriedem): tearDown requires the server to be started.
             self.client.start(self.server_id)
+
+        # NOTE(jlk): Explicitly delete the server to get a new one for later
+        # tests. Avoids resize down race issues.
+        self.addCleanup(self.delete_server, self.server_id)
 
     @test.idempotent_id('1499262a-9328-4eda-9068-db1ac57498d2')
     @testtools.skipUnless(CONF.compute_feature_enabled.resize,
@@ -234,17 +227,14 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         # The server's RAM and disk space should return to its original
         # values after a resize is reverted
 
-        previous_flavor_ref, new_flavor_ref = \
-            self._detect_server_image_flavor(self.server_id)
-
-        self.client.resize(self.server_id, new_flavor_ref)
+        self.client.resize(self.server_id, self.flavor_ref_alt)
         self.client.wait_for_server_status(self.server_id, 'VERIFY_RESIZE')
 
         self.client.revert_resize(self.server_id)
         self.client.wait_for_server_status(self.server_id, 'ACTIVE')
 
         server = self.client.get_server(self.server_id)
-        self.assertEqual(previous_flavor_ref, server['flavor']['id'])
+        self.assertEqual(self.flavor_ref, server['flavor']['id'])
 
     @test.idempotent_id('b963d4f1-94b3-4c40-9e97-7b583f46e470')
     @testtools.skipUnless(CONF.compute_feature_enabled.snapshot,
