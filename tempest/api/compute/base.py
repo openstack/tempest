@@ -334,6 +334,15 @@ class BaseComputeTest(tempest.test.BaseTestCase):
         return server['id']
 
     @classmethod
+    def delete_server(cls, server_id):
+        """Deletes an existing server and waits for it to be gone."""
+        try:
+            cls.servers_client.delete_server(server_id)
+            cls.servers_client.wait_for_server_termination(server_id)
+        except Exception:
+            LOG.exception('Failed to delete server %s' % server_id)
+
+    @classmethod
     def delete_volume(cls, volume_id):
         """Deletes the given volume and waits for it to be gone."""
         cls._delete_volume(cls.volumes_extensions_client, volume_id)
