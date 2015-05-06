@@ -19,7 +19,6 @@ from tempest import test
 
 class VolumeHostsAdminV2TestsJSON(base.BaseVolumeAdminTest):
 
-    @test.attr(type='gate')
     @test.idempotent_id('d5f3efa2-6684-4190-9ced-1c2f526352ad')
     def test_list_hosts(self):
         hosts = self.hosts_client.list_hosts()

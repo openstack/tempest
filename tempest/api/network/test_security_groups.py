@@ -141,7 +141,6 @@ class SecGroupTest(base.BaseSecGroupTest):
             self.assertIn(rule_create_body['security_group_rule']['id'],
                           rule_list)
 
-    @test.attr(type='smoke')
     @test.idempotent_id('87dfbcf9-1849-43ea-b1e4-efa3eeae9f71')
     def test_create_security_group_rule_with_additional_args(self):
         """Verify security group rule with additional arguments works.
@@ -160,7 +159,6 @@ class SecGroupTest(base.BaseSecGroupTest):
                                                 port_range_min,
                                                 port_range_max)
 
-    @test.attr(type='smoke')
     @test.idempotent_id('c9463db8-b44d-4f52-b6c0-8dbda99f26ce')
     def test_create_security_group_rule_with_icmp_type_code(self):
         """Verify security group rule for icmp protocol works.
@@ -181,7 +179,6 @@ class SecGroupTest(base.BaseSecGroupTest):
                                                     self.ethertype, protocol,
                                                     icmp_type, icmp_code)
 
-    @test.attr(type='smoke')
     @test.idempotent_id('c2ed2deb-7a0c-44d8-8b4c-a5825b5c310b')
     def test_create_security_group_rule_with_remote_group_id(self):
         # Verify creating security group rule with remote_group_id works
@@ -200,7 +197,6 @@ class SecGroupTest(base.BaseSecGroupTest):
                                                 port_range_max,
                                                 remote_group_id=remote_id)
 
-    @test.attr(type='smoke')
     @test.idempotent_id('16459776-5da2-4634-bce4-4b55ee3ec188')
     def test_create_security_group_rule_with_remote_ip_prefix(self):
         # Verify creating security group rule with remote_ip_prefix works
@@ -218,7 +214,6 @@ class SecGroupTest(base.BaseSecGroupTest):
                                                 port_range_max,
                                                 remote_ip_prefix=ip_prefix)
 
-    @test.attr(type='smoke')
     @test.idempotent_id('0a307599-6655-4220-bebc-fd70c64f2290')
     def test_create_security_group_rule_with_protocol_integer_value(self):
         # Verify creating security group rule with the

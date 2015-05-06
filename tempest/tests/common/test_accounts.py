@@ -20,13 +20,13 @@ from oslo_concurrency.fixture import lockutils as lockutils_fixtures
 from oslo_concurrency import lockutils
 from oslo_config import cfg
 from oslotest import mockpatch
+from tempest_lib import auth
+from tempest_lib.services.identity.v2 import token_client
 
-from tempest import auth
 from tempest.common import accounts
 from tempest.common import cred_provider
 from tempest import config
 from tempest import exceptions
-from tempest.services.identity.v2.json import token_client
 from tempest.tests import base
 from tempest.tests import fake_config
 from tempest.tests import fake_http
@@ -68,13 +68,8 @@ class TestAccount(base.TestCase):
              'password': 'p', 'roles': [cfg.CONF.identity.admin_role]},
             {'username': 'test_user12', 'tenant_name': 'test_tenant12',
              'password': 'p', 'roles': [cfg.CONF.identity.admin_role]},
-            {'username': 'test_user13', 'tenant_name': 'test_tenant13',
-             'password': 'p', 'resources': {'network': 'network-1'}},
-            {'username': 'test_user14', 'tenant_name': 'test_tenant14',
-             'password': 'p', 'roles': ['role-7', 'role-11'],
-             'resources': {'network': 'network-2'}},
         ]
-        self.useFixture(mockpatch.Patch(
+        self.accounts_mock = self.useFixture(mockpatch.Patch(
             'tempest.common.accounts.read_accounts_yaml',
             return_value=self.test_accounts))
         cfg.CONF.set_default('test_accounts_file', 'fake_path', group='auth')
@@ -281,14 +276,22 @@ class TestAccount(base.TestCase):
         calls = get_free_hash_mock.mock.mock_calls
         self.assertEqual(len(calls), 1)
         args = calls[0][1][0]
-        self.assertEqual(len(args), 12)
+        self.assertEqual(len(args), 10)
         for i in admin_hashes:
             self.assertNotIn(i, args)
 
     def test_networks_returned_with_creds(self):
+        test_accounts = [
+            {'username': 'test_user13', 'tenant_name': 'test_tenant13',
+             'password': 'p', 'resources': {'network': 'network-1'}},
+            {'username': 'test_user14', 'tenant_name': 'test_tenant14',
+             'password': 'p', 'roles': ['role-7', 'role-11'],
+             'resources': {'network': 'network-2'}}]
+        # Clear previous mock using self.test_accounts
+        self.accounts_mock.cleanUp()
         self.useFixture(mockpatch.Patch(
             'tempest.common.accounts.read_accounts_yaml',
-            return_value=self.test_accounts))
+            return_value=test_accounts))
         test_accounts_class = accounts.Accounts('v2', 'test_name')
         with mock.patch('tempest.services.compute.json.networks_client.'
                         'NetworksClientJSON.list_networks',

@@ -70,12 +70,21 @@ class InstanceRunTest(boto_test.BotoTestCase):
                       "ari":
                       {"name": data_utils.rand_name("ari-name"),
                        "location": cls.bucket_name + "/" + ari_manifest}}
-        for image in cls.images.itervalues():
+        for image_type in ("aki", "ari"):
+            image = cls.images[image_type]
             image["image_id"] = cls.ec2_client.register_image(
                 name=image["name"],
                 image_location=image["location"])
             cls.addResourceCleanUp(cls.ec2_client.deregister_image,
                                    image["image_id"])
+        image = cls.images["ami"]
+        image["image_id"] = cls.ec2_client.register_image(
+            name=image["name"],
+            image_location=image["location"],
+            kernel_id=cls.images["aki"]["image_id"],
+            ramdisk_id=cls.images["ari"]["image_id"])
+        cls.addResourceCleanUp(cls.ec2_client.deregister_image,
+                               image["image_id"])
 
         for image in cls.images.itervalues():
             def _state():

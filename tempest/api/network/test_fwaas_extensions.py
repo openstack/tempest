@@ -234,7 +234,6 @@ class FWaaSExtensionTestJSON(base.BaseNetworkTest):
         # Delete firewall
         self.client.delete_firewall(firewall_id)
 
-    @test.attr(type='smoke')
     @test.idempotent_id('53305b4b-9897-4e01-87c0-2ae386083180')
     def test_firewall_rule_insertion_position_removal_rule_from_policy(self):
         # Create firewall rule

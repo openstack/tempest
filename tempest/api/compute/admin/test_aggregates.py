@@ -53,7 +53,6 @@ class AggregatesAdminTestJSON(base.BaseV2ComputeAdminTest):
         except lib_exc.NotFound:
             pass
 
-    @test.attr(type='gate')
     @test.idempotent_id('0d148aa3-d54c-4317-aa8d-42040a475e20')
     def test_aggregate_create_delete(self):
         # Create and delete an aggregate.
@@ -66,7 +65,6 @@ class AggregatesAdminTestJSON(base.BaseV2ComputeAdminTest):
         self.client.delete_aggregate(aggregate['id'])
         self.client.wait_for_resource_deletion(aggregate['id'])
 
-    @test.attr(type='gate')
     @test.idempotent_id('5873a6f8-671a-43ff-8838-7ce430bb6d0b')
     def test_aggregate_create_delete_with_az(self):
         # Create and delete an aggregate.
@@ -81,7 +79,6 @@ class AggregatesAdminTestJSON(base.BaseV2ComputeAdminTest):
         self.client.delete_aggregate(aggregate['id'])
         self.client.wait_for_resource_deletion(aggregate['id'])
 
-    @test.attr(type='gate')
     @test.idempotent_id('68089c38-04b1-4758-bdf0-cf0daec4defd')
     def test_aggregate_create_verify_entry_in_list(self):
         # Create an aggregate and ensure it is listed.
@@ -94,7 +91,6 @@ class AggregatesAdminTestJSON(base.BaseV2ComputeAdminTest):
                       map(lambda x: (x['id'], x['availability_zone']),
                           aggregates))
 
-    @test.attr(type='gate')
     @test.idempotent_id('36ec92ca-7a73-43bc-b920-7531809e8540')
     def test_aggregate_create_update_metadata_get_details(self):
         # Create an aggregate and ensure its details are returned.
@@ -102,7 +98,7 @@ class AggregatesAdminTestJSON(base.BaseV2ComputeAdminTest):
         aggregate = self.client.create_aggregate(name=aggregate_name)
         self.addCleanup(self.client.delete_aggregate, aggregate['id'])
 
-        body = self.client.get_aggregate(aggregate['id'])
+        body = self.client.show_aggregate(aggregate['id'])
         self.assertEqual(aggregate['name'], body['name'])
         self.assertEqual(aggregate['availability_zone'],
                          body['availability_zone'])
@@ -114,10 +110,9 @@ class AggregatesAdminTestJSON(base.BaseV2ComputeAdminTest):
         self.assertEqual(meta, body["metadata"])
 
         # verify the metadata has been set
-        body = self.client.get_aggregate(aggregate['id'])
+        body = self.client.show_aggregate(aggregate['id'])
         self.assertEqual(meta, body["metadata"])
 
-    @test.attr(type='gate')
     @test.idempotent_id('4d2b2004-40fa-40a1-aab2-66f4dab81beb')
     def test_aggregate_create_update_with_az(self):
         # Update an aggregate and ensure properties are updated correctly
@@ -147,7 +142,6 @@ class AggregatesAdminTestJSON(base.BaseV2ComputeAdminTest):
                           (x['id'], x['name'], x['availability_zone']),
                           aggregates))
 
-    @test.attr(type='gate')
     @test.idempotent_id('c8e85064-e79b-4906-9931-c11c24294d02')
     def test_aggregate_add_remove_host(self):
         # Add an host to the given aggregate and remove.
@@ -168,7 +162,6 @@ class AggregatesAdminTestJSON(base.BaseV2ComputeAdminTest):
                          body['availability_zone'])
         self.assertNotIn(self.host, body['hosts'])
 
-    @test.attr(type='gate')
     @test.idempotent_id('7f6a1cc5-2446-4cdb-9baa-b6ae0a919b72')
     def test_aggregate_add_host_list(self):
         # Add an host to the given aggregate and list.
@@ -187,7 +180,6 @@ class AggregatesAdminTestJSON(base.BaseV2ComputeAdminTest):
         self.assertIsNone(agg['availability_zone'])
         self.assertIn(self.host, agg['hosts'])
 
-    @test.attr(type='gate')
     @test.idempotent_id('eeef473c-7c52-494d-9f09-2ed7fc8fc036')
     def test_aggregate_add_host_get_details(self):
         # Add an host to the given aggregate and get details.
@@ -198,12 +190,11 @@ class AggregatesAdminTestJSON(base.BaseV2ComputeAdminTest):
         self.client.add_host(aggregate['id'], self.host)
         self.addCleanup(self.client.remove_host, aggregate['id'], self.host)
 
-        body = self.client.get_aggregate(aggregate['id'])
+        body = self.client.show_aggregate(aggregate['id'])
         self.assertEqual(aggregate_name, body['name'])
         self.assertIsNone(body['availability_zone'])
         self.assertIn(self.host, body['hosts'])
 
-    @test.attr(type='gate')
     @test.idempotent_id('96be03c7-570d-409c-90f8-e4db3c646996')
     def test_aggregate_add_host_create_server_with_az(self):
         # Add an host to the given aggregate and create a server.

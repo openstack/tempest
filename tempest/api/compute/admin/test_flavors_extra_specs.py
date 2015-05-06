@@ -64,7 +64,6 @@ class FlavorsExtraSpecsTestJSON(base.BaseV2ComputeAdminTest):
         cls.client.wait_for_resource_deletion(cls.flavor['id'])
         super(FlavorsExtraSpecsTestJSON, cls).resource_cleanup()
 
-    @test.attr(type='gate')
     @test.idempotent_id('0b2f9d4b-1ca2-4b99-bb40-165d4bb94208')
     def test_flavor_set_get_update_show_unset_keys(self):
         # Test to SET, GET, UPDATE, SHOW, UNSET flavor extra
@@ -95,7 +94,6 @@ class FlavorsExtraSpecsTestJSON(base.BaseV2ComputeAdminTest):
         self.client.unset_flavor_extra_spec(self.flavor['id'], "key1")
         self.client.unset_flavor_extra_spec(self.flavor['id'], "key2")
 
-    @test.attr(type='gate')
     @test.idempotent_id('a99dad88-ae1c-4fba-aeb4-32f898218bd0')
     def test_flavor_non_admin_get_all_keys(self):
         specs = {"key1": "value1", "key2": "value2"}
@@ -105,7 +103,6 @@ class FlavorsExtraSpecsTestJSON(base.BaseV2ComputeAdminTest):
         for key in specs:
             self.assertEqual(body[key], specs[key])
 
-    @test.attr(type='gate')
     @test.idempotent_id('12805a7f-39a3-4042-b989-701d5cad9c90')
     def test_flavor_non_admin_get_specific_key(self):
         specs = {"key1": "value1", "key2": "value2"}

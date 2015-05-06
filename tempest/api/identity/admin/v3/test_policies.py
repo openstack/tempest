@@ -24,7 +24,6 @@ class PoliciesTestJSON(base.BaseIdentityV3AdminTest):
     def _delete_policy(self, policy_id):
         self.policy_client.delete_policy(policy_id)
 
-    @test.attr(type='smoke')
     @test.idempotent_id('1a0ad286-2d06-4123-ab0d-728893a76201')
     def test_list_policies(self):
         # Test to list policies

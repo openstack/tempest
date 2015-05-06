@@ -49,13 +49,9 @@ class TestAttrDecorator(BaseDecoratorsTest):
     def test_attr_without_type(self):
         self._test_attr_helper(expected_attrs='baz', bar='baz')
 
-    def test_attr_decorator_with_smoke_type(self):
-        # smoke passed as type, so smoke and gate must have been set.
-        self._test_attr_helper(expected_attrs=['smoke', 'gate'], type='smoke')
-
     def test_attr_decorator_with_list_type(self):
-        # if type is 'smoke' we'll get the original list of types plus 'gate'
-        self._test_attr_helper(expected_attrs=['smoke', 'foo', 'gate'],
+        # if type is 'smoke' we'll get the original list of types
+        self._test_attr_helper(expected_attrs=['smoke', 'foo'],
                                type=['smoke', 'foo'])
 
     def test_attr_decorator_with_unknown_type(self):

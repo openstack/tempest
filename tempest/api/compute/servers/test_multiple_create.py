@@ -35,7 +35,6 @@ class MultipleCreateTestJSON(base.BaseV2ComputeTest):
 
         return body
 
-    @test.attr(type='gate')
     @test.idempotent_id('61e03386-89c3-449c-9bb1-a06f423fd9d1')
     def test_multiple_create(self):
         body = self._create_multiple_servers(wait_until='ACTIVE',
@@ -46,7 +45,6 @@ class MultipleCreateTestJSON(base.BaseV2ComputeTest):
         # contains return_reservation_id=False
         self.assertNotIn('reservation_id', body)
 
-    @test.attr(type='gate')
     @test.idempotent_id('864777fb-2f1e-44e3-b5b9-3eb6fa84f2f7')
     def test_multiple_create_with_reservation_return(self):
         body = self._create_multiple_servers(wait_until='ACTIVE',

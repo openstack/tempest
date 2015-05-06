@@ -19,27 +19,16 @@ from tempest import test
 
 
 class NodeGroupTemplateTest(dp_base.BaseDataProcessingTest):
+
+    @classmethod
+    def skip_checks(cls):
+        super(NodeGroupTemplateTest, cls).skip_checks()
+        if cls.default_plugin is None:
+            raise cls.skipException("No Sahara plugins configured")
+
     @classmethod
     def resource_setup(cls):
         super(NodeGroupTemplateTest, cls).resource_setup()
-        cls.node_group_template = {
-            'description': 'Test node group template',
-            'plugin_name': 'vanilla',
-            'hadoop_version': '1.2.1',
-            'node_processes': [
-                'datanode',
-                'tasktracker'
-            ],
-            'flavor_id': cls.flavor_ref,
-            'node_configs': {
-                'HDFS': {
-                    'Data Node Heap Size': 1024
-                },
-                'MapReduce': {
-                    'Task Tracker Heap Size': 1024
-                }
-            }
-        }
 
     def _create_node_group_template(self, template_name=None):
         """Creates Node Group Template with optional name specified.
@@ -47,6 +36,10 @@ class NodeGroupTemplateTest(dp_base.BaseDataProcessingTest):
         It creates template, ensures template name and response body.
         Returns id and name of created template.
         """
+        self.node_group_template = self.get_node_group_template()
+        self.assertIsNotNone(self.node_group_template,
+                             "No known Sahara plugin was found")
+
         if not template_name:
             # generate random name if it's not specified
             template_name = data_utils.rand_name('sahara-ng-template')

@@ -60,7 +60,6 @@ class SecurityGroupsTestJSON(base.BaseSecurityGroupsTest):
                          "list" % ', '.join(m_group['name']
                                             for m_group in deleted_sgs))
 
-    @test.attr(type='smoke')
     @test.idempotent_id('ecc0da4a-2117-48af-91af-993cca39a615')
     @test.services('network')
     def test_security_group_create_get_delete(self):
@@ -83,7 +82,6 @@ class SecurityGroupsTestJSON(base.BaseSecurityGroupsTest):
         self.client.delete_security_group(securitygroup['id'])
         self.client.wait_for_resource_deletion(securitygroup['id'])
 
-    @test.attr(type='smoke')
     @test.idempotent_id('fe4abc0d-83f5-4c50-ad11-57a1127297a2')
     @test.services('network')
     def test_server_security_groups(self):
@@ -127,7 +125,6 @@ class SecurityGroupsTestJSON(base.BaseSecurityGroupsTest):
         self.client.delete_security_group(sg['id'])
         self.client.delete_security_group(sg2['id'])
 
-    @test.attr(type='smoke')
     @test.idempotent_id('7d4e1d3c-3209-4d6d-b020-986304ebad1f')
     @test.services('network')
     def test_update_security_groups(self):

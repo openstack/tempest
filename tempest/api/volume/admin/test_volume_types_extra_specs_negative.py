@@ -38,7 +38,6 @@ class ExtraSpecsNegativeV2Test(base.BaseVolumeAdminTest):
         cls.volume_types_client.delete_volume_type(cls.volume_type['id'])
         super(ExtraSpecsNegativeV2Test, cls).resource_cleanup()
 
-    @test.attr(type='gate')
     @test.idempotent_id('08961d20-5cbb-4910-ac0f-89ad6dbb2da1')
     def test_update_no_body(self):
         # Should not update volume type extra specs with no body
@@ -48,7 +47,6 @@ class ExtraSpecsNegativeV2Test(base.BaseVolumeAdminTest):
             self.volume_types_client.update_volume_type_extra_specs,
             self.volume_type['id'], extra_spec.keys()[0], None)
 
-    @test.attr(type='gate')
     @test.idempotent_id('25e5a0ee-89b3-4c53-8310-236f76c75365')
     def test_update_nonexistent_extra_spec_id(self):
         # Should not update volume type extra specs with nonexistent id.
@@ -59,7 +57,6 @@ class ExtraSpecsNegativeV2Test(base.BaseVolumeAdminTest):
             self.volume_type['id'], str(uuid.uuid4()),
             extra_spec)
 
-    @test.attr(type='gate')
     @test.idempotent_id('9bf7a657-b011-4aec-866d-81c496fbe5c8')
     def test_update_none_extra_spec_id(self):
         # Should not update volume type extra specs with none id.
@@ -69,7 +66,6 @@ class ExtraSpecsNegativeV2Test(base.BaseVolumeAdminTest):
             self.volume_types_client.update_volume_type_extra_specs,
             self.volume_type['id'], None, extra_spec)
 
-    @test.attr(type='gate')
     @test.idempotent_id('a77dfda2-9100-448e-9076-ed1711f4bdfc')
     def test_update_multiple_extra_spec(self):
         # Should not update volume type extra specs with multiple specs as
@@ -81,7 +77,6 @@ class ExtraSpecsNegativeV2Test(base.BaseVolumeAdminTest):
             self.volume_type['id'], extra_spec.keys()[0],
             extra_spec)
 
-    @test.attr(type='gate')
     @test.idempotent_id('49d5472c-a53d-4eab-a4d3-450c4db1c545')
     def test_create_nonexistent_type_id(self):
         # Should not create volume type extra spec for nonexistent volume
@@ -92,7 +87,6 @@ class ExtraSpecsNegativeV2Test(base.BaseVolumeAdminTest):
             self.volume_types_client.create_volume_type_extra_specs,
             str(uuid.uuid4()), extra_specs)
 
-    @test.attr(type='gate')
     @test.idempotent_id('c821bdc8-43a4-4bf4-86c8-82f3858d5f7d')
     def test_create_none_body(self):
         # Should not create volume type extra spec for none POST body.
@@ -101,7 +95,6 @@ class ExtraSpecsNegativeV2Test(base.BaseVolumeAdminTest):
             self.volume_types_client.create_volume_type_extra_specs,
             self.volume_type['id'], None)
 
-    @test.attr(type='gate')
     @test.idempotent_id('bc772c71-1ed4-4716-b945-8b5ed0f15e87')
     def test_create_invalid_body(self):
         # Should not create volume type extra spec for invalid POST body.
@@ -110,7 +103,6 @@ class ExtraSpecsNegativeV2Test(base.BaseVolumeAdminTest):
             self.volume_types_client.create_volume_type_extra_specs,
             self.volume_type['id'], ['invalid'])
 
-    @test.attr(type='gate')
     @test.idempotent_id('031cda8b-7d23-4246-8bf6-bbe73fd67074')
     def test_delete_nonexistent_volume_type_id(self):
         # Should not delete volume type extra spec for nonexistent
@@ -121,7 +113,6 @@ class ExtraSpecsNegativeV2Test(base.BaseVolumeAdminTest):
             self.volume_types_client.delete_volume_type_extra_specs,
             str(uuid.uuid4()), extra_specs.keys()[0])
 
-    @test.attr(type='gate')
     @test.idempotent_id('dee5cf0c-cdd6-4353-b70c-e847050d71fb')
     def test_list_nonexistent_volume_type_id(self):
         # Should not list volume type extra spec for nonexistent type id.
@@ -130,7 +121,6 @@ class ExtraSpecsNegativeV2Test(base.BaseVolumeAdminTest):
             self.volume_types_client.list_volume_types_extra_specs,
             str(uuid.uuid4()))
 
-    @test.attr(type='gate')
     @test.idempotent_id('9f402cbd-1838-4eb4-9554-126a6b1908c9')
     def test_get_nonexistent_volume_type_id(self):
         # Should not get volume type extra spec for nonexistent type id.
@@ -140,7 +130,6 @@ class ExtraSpecsNegativeV2Test(base.BaseVolumeAdminTest):
             self.volume_types_client.show_volume_type_extra_specs,
             str(uuid.uuid4()), extra_specs.keys()[0])
 
-    @test.attr(type='gate')
     @test.idempotent_id('c881797d-12ff-4f1a-b09d-9f6212159753')
     def test_get_nonexistent_extra_spec_id(self):
         # Should not get volume type extra spec for nonexistent extra spec

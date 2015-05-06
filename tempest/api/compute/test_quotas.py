@@ -43,7 +43,6 @@ class QuotasTestJSON(base.BaseV2ComputeTest):
                                      'instances', 'security_group_rules',
                                      'cores', 'security_groups'))
 
-    @test.attr(type='smoke')
     @test.idempotent_id('f1ef0a97-dbbb-4cca-adc5-c9fbc4f76107')
     def test_get_quotas(self):
         # User can get the quota set for it's tenant
@@ -60,7 +59,6 @@ class QuotasTestJSON(base.BaseV2ComputeTest):
         for quota in expected_quota_set:
             self.assertIn(quota, quota_set.keys())
 
-    @test.attr(type='smoke')
     @test.idempotent_id('9bfecac7-b966-4f47-913f-1a9e2c12134a')
     def test_get_default_quotas(self):
         # User can get the default quota set for it's tenant
@@ -70,7 +68,6 @@ class QuotasTestJSON(base.BaseV2ComputeTest):
         for quota in expected_quota_set:
             self.assertIn(quota, quota_set.keys())
 
-    @test.attr(type='smoke')
     @test.idempotent_id('cd65d997-f7e4-4966-a7e9-d5001b674fdc')
     def test_compare_tenant_quotas_with_default_quotas(self):
         # Tenants are created with the default quota values

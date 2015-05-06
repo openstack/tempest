@@ -506,6 +506,10 @@ NetworkFeaturesGroup = [
                      "the extended IPv6 attributes ipv6_ra_mode "
                      "and ipv6_address_mode"
                 ),
+    cfg.BoolOpt('port_admin_state_change',
+                default=True,
+                help="Does the test environment support changing"
+                     " port admin state"),
 ]
 
 messaging_group = cfg.OptGroup(name='messaging',

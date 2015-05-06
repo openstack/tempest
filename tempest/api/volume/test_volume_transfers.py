@@ -16,8 +16,6 @@
 from testtools import matchers
 
 from tempest.api.volume import base
-from tempest import clients
-from tempest.common import credentials
 from tempest import config
 from tempest import test
 
@@ -26,21 +24,7 @@ CONF = config.CONF
 
 class VolumesV2TransfersTest(base.BaseVolumeTest):
 
-    @classmethod
-    def skip_checks(cls):
-        super(VolumesV2TransfersTest, cls).skip_checks()
-        if not credentials.is_admin_available():
-            msg = "Missing Volume Admin API credentials in configuration."
-            raise cls.skipException(msg)
-
-    @classmethod
-    def setup_credentials(cls):
-        super(VolumesV2TransfersTest, cls).setup_credentials()
-        # Add another tenant to test volume-transfer
-        cls.os_alt = clients.Manager(cls.isolated_creds.get_alt_creds())
-        # Add admin tenant to cleanup resources
-        creds = cls.isolated_creds.get_admin_creds()
-        cls.os_adm = clients.Manager(credentials=creds)
+    credentials = ['primary', 'alt', 'admin']
 
     @classmethod
     def setup_clients(cls):
@@ -56,7 +40,6 @@ class VolumesV2TransfersTest(base.BaseVolumeTest):
         self.adm_client.delete_volume(volume_id)
         self.adm_client.wait_for_resource_deletion(volume_id)
 
-    @test.attr(type='gate')
     @test.idempotent_id('4d75b645-a478-48b1-97c8-503f64242f1a')
     def test_create_get_list_accept_volume_transfer(self):
         # Create a volume first

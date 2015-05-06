@@ -15,8 +15,8 @@
 
 import base64
 import logging
-import urlparse
 
+from six.moves.urllib import parse as urlparse
 from tempest_lib.common.utils import data_utils
 from tempest_lib import decorators
 from tempest_lib import exceptions as lib_exc
@@ -66,7 +66,6 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
     @test.idempotent_id('6158df09-4b82-4ab3-af6d-29cf36af858d')
     @testtools.skipUnless(CONF.compute_feature_enabled.change_password,
                           'Change password not available.')
-    @test.attr(type='gate')
     def test_change_server_password(self):
         # The server's password should be set to the provided password
         new_password = 'Newpass1234'
@@ -106,13 +105,11 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         self._test_reboot_server('HARD')
 
     @decorators.skip_because(bug="1014647")
-    @test.attr(type='smoke')
     @test.idempotent_id('4640e3ef-a5df-482e-95a1-ceeeb0faa84d')
     def test_reboot_server_soft(self):
         # The server should be signaled to reboot gracefully
         self._test_reboot_server('SOFT')
 
-    @test.attr(type='smoke')
     @test.idempotent_id('aaa6cdf3-55a7-461a-add9-1c8596b9a07c')
     def test_rebuild_server(self):
         # The server should be rebuilt using the provided image and data
@@ -128,6 +125,12 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
                                              metadata=meta,
                                              personality=personality,
                                              adminPass=password)
+
+        # If the server was rebuilt on a different image, restore it to the
+        # original image once the test ends
+        if self.image_ref_alt != self.image_ref:
+            self.addCleanup(self.client.rebuild,
+                            (self.server_id, self.image_ref))
 
         # Verify the properties in the initial response are correct
         self.assertEqual(self.server_id, rebuilt_server['id'])
@@ -147,10 +150,7 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
             linux_client = remote_client.RemoteClient(server, self.ssh_user,
                                                       password)
             linux_client.validate_authentication()
-        if self.image_ref_alt != self.image_ref:
-            self.client.rebuild(self.server_id, self.image_ref)
 
-    @test.attr(type='gate')
     @test.idempotent_id('30449a88-5aff-4f9b-9866-6ee9b17f906d')
     def test_rebuild_server_in_stop_state(self):
         # The server in stop state  should be rebuilt using the provided
@@ -218,21 +218,18 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
     @test.idempotent_id('1499262a-9328-4eda-9068-db1ac57498d2')
     @testtools.skipUnless(CONF.compute_feature_enabled.resize,
                           'Resize not available.')
-    @test.attr(type='smoke')
     def test_resize_server_confirm(self):
         self._test_resize_server_confirm(stop=False)
 
     @test.idempotent_id('138b131d-66df-48c9-a171-64f45eb92962')
     @testtools.skipUnless(CONF.compute_feature_enabled.resize,
                           'Resize not available.')
-    @test.attr(type='smoke')
     def test_resize_server_confirm_from_stopped(self):
         self._test_resize_server_confirm(stop=True)
 
     @test.idempotent_id('c03aab19-adb1-44f5-917d-c419577e9e68')
     @testtools.skipUnless(CONF.compute_feature_enabled.resize,
                           'Resize not available.')
-    @test.attr(type='gate')
     def test_resize_server_revert(self):
         # The server's RAM and disk space should return to its original
         # values after a resize is reverted
@@ -252,7 +249,6 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
     @test.idempotent_id('b963d4f1-94b3-4c40-9e97-7b583f46e470')
     @testtools.skipUnless(CONF.compute_feature_enabled.snapshot,
                           'Snapshotting not available, backup not possible.')
-    @test.attr(type='gate')
     @test.services('image')
     def test_create_backup(self):
         # Positive test:create backup successfully and rotate backups correctly
@@ -342,7 +338,6 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
     @test.idempotent_id('4b8867e6-fffa-4d54-b1d1-6fdda57be2f3')
     @testtools.skipUnless(CONF.compute_feature_enabled.console_output,
                           'Console output not supported.')
-    @test.attr(type='gate')
     def test_get_console_output(self):
         # Positive test:Should be able to GET the console output
         # for a given server_id and number of lines
@@ -360,7 +355,6 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
     @test.idempotent_id('89104062-69d8-4b19-a71b-f47b7af093d7')
     @testtools.skipUnless(CONF.compute_feature_enabled.console_output,
                           'Console output not supported.')
-    @test.attr(type='gate')
     def test_get_console_output_with_unlimited_size(self):
         server = self.create_test_server(wait_until='ACTIVE')
 
@@ -380,7 +374,6 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
     @test.idempotent_id('5b65d4e7-4ecd-437c-83c0-d6b79d927568')
     @testtools.skipUnless(CONF.compute_feature_enabled.console_output,
                           'Console output not supported.')
-    @test.attr(type='gate')
     def test_get_console_output_server_id_in_shutoff_status(self):
         # Positive test:Should be able to GET the console output
         # for a given server_id in SHUTOFF status
@@ -399,7 +392,6 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
     @test.idempotent_id('bd61a9fd-062f-4670-972b-2d6c3e3b9e73')
     @testtools.skipUnless(CONF.compute_feature_enabled.pause,
                           'Pause is not available.')
-    @test.attr(type='gate')
     def test_pause_unpause_server(self):
         self.client.pause_server(self.server_id)
         self.client.wait_for_server_status(self.server_id, 'PAUSED')
@@ -409,7 +401,6 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
     @test.idempotent_id('0d8ee21e-b749-462d-83da-b85b41c86c7f')
     @testtools.skipUnless(CONF.compute_feature_enabled.suspend,
                           'Suspend is not available.')
-    @test.attr(type='gate')
     def test_suspend_resume_server(self):
         self.client.suspend_server(self.server_id)
         self.client.wait_for_server_status(self.server_id, 'SUSPENDED')
@@ -419,7 +410,6 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
     @test.idempotent_id('77eba8e0-036e-4635-944b-f7a8f3b78dc9')
     @testtools.skipUnless(CONF.compute_feature_enabled.shelve,
                           'Shelve is not available.')
-    @test.attr(type='gate')
     def test_shelve_unshelve_server(self):
         self.client.shelve_server(self.server_id)
 
@@ -446,7 +436,6 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         self.client.unshelve_server(self.server_id)
         self.client.wait_for_server_status(self.server_id, 'ACTIVE')
 
-    @test.attr(type='gate')
     @test.idempotent_id('af8eafd4-38a7-4a4b-bdbc-75145a580560')
     def test_stop_start_server(self):
         self.servers_client.stop(self.server_id)
@@ -454,7 +443,6 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         self.servers_client.start(self.server_id)
         self.servers_client.wait_for_server_status(self.server_id, 'ACTIVE')
 
-    @test.attr(type='gate')
     @test.idempotent_id('80a8094c-211e-440a-ab88-9e59d556c7ee')
     def test_lock_unlock_server(self):
         # Lock the server,try server stop(exceptions throw),unlock it and retry
@@ -480,7 +468,6 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
     @test.idempotent_id('c6bc11bf-592e-4015-9319-1c98dc64daf5')
     @testtools.skipUnless(CONF.compute_feature_enabled.vnc_console,
                           'VNC Console feature is disabled.')
-    @test.attr(type='gate')
     def test_get_vnc_console(self):
         # Get the VNC console of type 'novnc' and 'xvpvnc'
         console_types = ['novnc', 'xvpvnc']

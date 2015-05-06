@@ -49,7 +49,6 @@ class NovaKeyPairResourcesYAMLTest(base.BaseOrchestrationTest):
         for resource in resources:
             cls.test_resources[resource['logical_resource_id']] = resource
 
-    @test.attr(type='gate')
     @test.idempotent_id('b476eac2-a302-4815-961f-18c410a2a537')
     def test_created_resources(self):
         """Verifies created keypair resource."""
@@ -70,7 +69,6 @@ class NovaKeyPairResourcesYAMLTest(base.BaseOrchestrationTest):
             self.assertEqual(resource_type, resource['resource_type'])
             self.assertEqual('CREATE_COMPLETE', resource['resource_status'])
 
-    @test.attr(type='gate')
     @test.idempotent_id('8d77dec7-91fd-45a6-943d-5abd45e338a4')
     def test_stack_keypairs_output(self):
         stack = self.client.show_stack(self.stack_name)

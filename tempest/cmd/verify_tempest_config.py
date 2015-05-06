@@ -18,10 +18,10 @@ import argparse
 import json
 import os
 import sys
-import urlparse
 
 import httplib2
 from six import moves
+from six.moves.urllib import parse as urlparse
 
 from tempest import clients
 from tempest.common import credentials

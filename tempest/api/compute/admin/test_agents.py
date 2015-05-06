@@ -60,7 +60,6 @@ class AgentsAdminTestJSON(base.BaseV2ComputeAdminTest):
             kwargs[rand_key] = data_utils.rand_name(kwargs[rand_key])
         return kwargs
 
-    @test.attr(type='gate')
     @test.idempotent_id('1fc6bdc8-0b6d-4cc7-9f30-9b04fabe5b90')
     def test_create_agent(self):
         # Create an agent.
@@ -73,7 +72,6 @@ class AgentsAdminTestJSON(base.BaseV2ComputeAdminTest):
         for expected_item, value in params.items():
             self.assertEqual(value, body[expected_item])
 
-    @test.attr(type='gate')
     @test.idempotent_id('dc9ffd51-1c50-4f0e-a820-ae6d2a568a9e')
     def test_update_agent(self):
         # Update an agent.
@@ -84,7 +82,6 @@ class AgentsAdminTestJSON(base.BaseV2ComputeAdminTest):
         for expected_item, value in params.items():
             self.assertEqual(value, body[expected_item])
 
-    @test.attr(type='gate')
     @test.idempotent_id('470e0b89-386f-407b-91fd-819737d0b335')
     def test_delete_agent(self):
         # Delete an agent.
@@ -94,7 +91,6 @@ class AgentsAdminTestJSON(base.BaseV2ComputeAdminTest):
         agents = self.client.list_agents()
         self.assertNotIn(self.agent_id, map(lambda x: x['agent_id'], agents))
 
-    @test.attr(type='gate')
     @test.idempotent_id('6a326c69-654b-438a-80a3-34bcc454e138')
     def test_list_agents(self):
         # List all agents.
@@ -102,7 +98,6 @@ class AgentsAdminTestJSON(base.BaseV2ComputeAdminTest):
         self.assertTrue(len(agents) > 0, 'Cannot get any agents.(%s)' % agents)
         self.assertIn(self.agent_id, map(lambda x: x['agent_id'], agents))
 
-    @test.attr(type='gate')
     @test.idempotent_id('eabadde4-3cd7-4ec4-a4b5-5a936d2d4408')
     def test_list_agents_with_filter(self):
         # List the agent builds by the filter.

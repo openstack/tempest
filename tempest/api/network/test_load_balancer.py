@@ -83,7 +83,6 @@ class LoadBalancerTestJSON(base.BaseNetworkTest):
                 objs = [v[key] for v in body[obj_name + 's']]
                 self.assertIn(value, objs)
 
-    @test.attr(type='smoke')
     @test.idempotent_id('c96dbfab-4a80-4e74-a535-e950b5bedd47')
     def test_list_vips(self):
         # Verify the vIP exists in the list of all vIPs
@@ -91,7 +90,6 @@ class LoadBalancerTestJSON(base.BaseNetworkTest):
         vips = body['vips']
         self.assertIn(self.vip['id'], [v['id'] for v in vips])
 
-    @test.attr(type='smoke')
     @test.idempotent_id('b8853f65-5089-4e69-befd-041a143427ff')
     def test_list_vips_with_filter(self):
         name = data_utils.rand_name('vip-')
@@ -109,7 +107,6 @@ class LoadBalancerTestJSON(base.BaseNetworkTest):
             description=data_utils.rand_name('description-'),
             admin_state_up=False)
 
-    @test.attr(type='smoke')
     @test.idempotent_id('27f56083-9af9-4a48-abe9-ca1bcc6c9035')
     def test_create_update_delete_pool_vip(self):
         # Creates a vip
@@ -166,7 +163,6 @@ class LoadBalancerTestJSON(base.BaseNetworkTest):
         self.assertEqual('LEAST_CONNECTIONS', updated_pool['lb_method'])
         self.client.delete_pool(pool['id'])
 
-    @test.attr(type='smoke')
     @test.idempotent_id('0435a95e-1d19-4d90-9e9f-3b979e9ad089')
     def test_show_vip(self):
         # Verifies the details of a vip
@@ -177,7 +173,6 @@ class LoadBalancerTestJSON(base.BaseNetworkTest):
             if key != 'status':
                 self.assertEqual(self.vip[key], value)
 
-    @test.attr(type='smoke')
     @test.idempotent_id('6e7a7d31-8451-456d-b24a-e50479ce42a7')
     def test_show_pool(self):
         # Here we need to new pool without any dependence with vips
@@ -195,7 +190,6 @@ class LoadBalancerTestJSON(base.BaseNetworkTest):
             if key != 'status':
                 self.assertEqual(value, shown_pool[key])
 
-    @test.attr(type='smoke')
     @test.idempotent_id('d1ab1ffa-e06a-487f-911f-56418cb27727')
     def test_list_pools(self):
         # Verify the pool exists in the list of all pools
@@ -203,7 +197,6 @@ class LoadBalancerTestJSON(base.BaseNetworkTest):
         pools = body['pools']
         self.assertIn(self.pool['id'], [p['id'] for p in pools])
 
-    @test.attr(type='smoke')
     @test.idempotent_id('27cc4c1a-caac-4273-b983-2acb4afaad4f')
     def test_list_pools_with_filters(self):
         attr_exceptions = ['status', 'vip_id', 'members', 'provider',
@@ -215,7 +208,6 @@ class LoadBalancerTestJSON(base.BaseNetworkTest):
             description=data_utils.rand_name('description-'),
             admin_state_up=False)
 
-    @test.attr(type='smoke')
     @test.idempotent_id('282d0dfd-5c3a-4c9b-b39c-c99782f39193')
     def test_list_members(self):
         # Verify the member exists in the list of all members
@@ -223,7 +215,6 @@ class LoadBalancerTestJSON(base.BaseNetworkTest):
         members = body['members']
         self.assertIn(self.member['id'], [m['id'] for m in members])
 
-    @test.attr(type='smoke')
     @test.idempotent_id('243b5126-24c6-4879-953e-7c7e32d8a57f')
     def test_list_members_with_filters(self):
         attr_exceptions = ['status', 'status_description']
@@ -232,7 +223,6 @@ class LoadBalancerTestJSON(base.BaseNetworkTest):
                                      protocol_port=80,
                                      pool_id=self.pool['id'])
 
-    @test.attr(type='smoke')
     @test.idempotent_id('fb833ee8-9e69-489f-b540-a409762b78b2')
     def test_create_update_delete_member(self):
         # Creates a member
@@ -248,7 +238,6 @@ class LoadBalancerTestJSON(base.BaseNetworkTest):
         # Verification of member delete
         self.client.delete_member(member['id'])
 
-    @test.attr(type='smoke')
     @test.idempotent_id('893cd71f-a7dd-4485-b162-f6ab9a534914')
     def test_show_member(self):
         # Verifies the details of a member
@@ -259,7 +248,6 @@ class LoadBalancerTestJSON(base.BaseNetworkTest):
             if key != 'status':
                 self.assertEqual(self.member[key], value)
 
-    @test.attr(type='smoke')
     @test.idempotent_id('8e5822c5-68a4-4224-8d6c-a617741ebc2d')
     def test_list_health_monitors(self):
         # Verify the health monitor exists in the list of all health monitors
@@ -268,7 +256,6 @@ class LoadBalancerTestJSON(base.BaseNetworkTest):
         self.assertIn(self.health_monitor['id'],
                       [h['id'] for h in health_monitors])
 
-    @test.attr(type='smoke')
     @test.idempotent_id('49bac58a-511c-4875-b794-366698211d25')
     def test_list_health_monitors_with_filters(self):
         attr_exceptions = ['status', 'status_description', 'pools']
@@ -276,7 +263,6 @@ class LoadBalancerTestJSON(base.BaseNetworkTest):
                                      delay=5, max_retries=4, type="TCP",
                                      timeout=2)
 
-    @test.attr(type='smoke')
     @test.idempotent_id('e8ce05c4-d554-4d1e-a257-ad32ce134bb5')
     def test_create_update_delete_health_monitor(self):
         # Creates a health_monitor
@@ -294,7 +280,6 @@ class LoadBalancerTestJSON(base.BaseNetworkTest):
         # Verification of health_monitor delete
         body = self.client.delete_health_monitor(health_monitor['id'])
 
-    @test.attr(type='smoke')
     @test.idempotent_id('d3e1aebc-06c2-49b3-9816-942af54012eb')
     def test_create_health_monitor_http_type(self):
         hm_type = "HTTP"
@@ -307,7 +292,6 @@ class LoadBalancerTestJSON(base.BaseNetworkTest):
                         health_monitor['id'])
         self.assertEqual(hm_type, health_monitor['type'])
 
-    @test.attr(type='smoke')
     @test.idempotent_id('0eff9f67-90fb-4bb1-b4ed-c5fda99fff0c')
     def test_update_health_monitor_http_method(self):
         body = self.client.create_health_monitor(delay=4,
@@ -327,7 +311,6 @@ class LoadBalancerTestJSON(base.BaseNetworkTest):
         self.assertEqual("/home/user", updated_health_monitor['url_path'])
         self.assertEqual("290", updated_health_monitor['expected_codes'])
 
-    @test.attr(type='smoke')
     @test.idempotent_id('08e126ab-1407-483f-a22e-b11cc032ca7c')
     def test_show_health_monitor(self):
         # Verifies the details of a health_monitor
@@ -338,7 +321,6 @@ class LoadBalancerTestJSON(base.BaseNetworkTest):
             if key != 'status':
                 self.assertEqual(self.health_monitor[key], value)
 
-    @test.attr(type='smoke')
     @test.idempotent_id('87f7628e-8918-493d-af50-0602845dbb5b')
     def test_associate_disassociate_health_monitor_with_pool(self):
         # Verify that a health monitor can be associated with a pool
@@ -364,7 +346,6 @@ class LoadBalancerTestJSON(base.BaseNetworkTest):
         self.assertNotIn(pool['id'],
                          [p['pool_id'] for p in health_monitor['pools']])
 
-    @test.attr(type='smoke')
     @test.idempotent_id('525fc7dc-be24-408d-938d-822e9783e027')
     def test_get_lb_pool_stats(self):
         # Verify the details of pool stats
@@ -375,7 +356,6 @@ class LoadBalancerTestJSON(base.BaseNetworkTest):
         self.assertIn("active_connections", stats)
         self.assertIn("bytes_out", stats)
 
-    @test.attr(type='smoke')
     @test.idempotent_id('66236be2-5121-4047-8cde-db4b83b110a5')
     def test_update_list_of_health_monitors_associated_with_pool(self):
         (self.client.associate_health_monitor_with_pool
@@ -390,7 +370,6 @@ class LoadBalancerTestJSON(base.BaseNetworkTest):
             (self.client.disassociate_health_monitor_with_pool
                 (self.health_monitor['id'], self.pool['id']))
 
-    @test.attr(type='smoke')
     @test.idempotent_id('44ec9b40-b501-41e2-951f-4fc673b15ac0')
     def test_update_admin_state_up_of_pool(self):
         self.client.update_pool(self.pool['id'],
@@ -399,7 +378,6 @@ class LoadBalancerTestJSON(base.BaseNetworkTest):
         pool = body['pool']
         self.assertFalse(pool['admin_state_up'])
 
-    @test.attr(type='smoke')
     @test.idempotent_id('466a9d4c-37c6-4ea2-b807-133437beb48c')
     def test_show_vip_associated_with_pool(self):
         body = self.client.show_pool(self.pool['id'])
@@ -409,7 +387,6 @@ class LoadBalancerTestJSON(base.BaseNetworkTest):
         self.assertEqual(self.vip['name'], vip['name'])
         self.assertEqual(self.vip['id'], vip['id'])
 
-    @test.attr(type='smoke')
     @test.idempotent_id('7b97694e-69d0-4151-b265-e1052a465aa8')
     def test_show_members_associated_with_pool(self):
         body = self.client.show_pool(self.pool['id'])
@@ -420,7 +397,6 @@ class LoadBalancerTestJSON(base.BaseNetworkTest):
             self.assertEqual(member_id, body['member']['id'])
             self.assertIsNotNone(body['member']['admin_state_up'])
 
-    @test.attr(type='smoke')
     @test.idempotent_id('73ed6f27-595b-4b2c-969c-dbdda6b8ab34')
     def test_update_pool_related_to_member(self):
         # Create new pool
@@ -441,7 +417,6 @@ class LoadBalancerTestJSON(base.BaseNetworkTest):
         body = self.client.update_member(self.member['id'],
                                          pool_id=self.pool['id'])
 
-    @test.attr(type='smoke')
     @test.idempotent_id('cf63f071-bbe3-40ba-97a0-a33e11923162')
     def test_update_member_weight(self):
         self.client.update_member(self.member['id'],

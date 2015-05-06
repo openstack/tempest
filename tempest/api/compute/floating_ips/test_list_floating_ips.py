@@ -40,7 +40,6 @@ class FloatingIPDetailsTestJSON(base.BaseV2ComputeTest):
             cls.client.delete_floating_ip(cls.floating_ip_id[i])
         super(FloatingIPDetailsTestJSON, cls).resource_cleanup()
 
-    @test.attr(type='gate')
     @test.idempotent_id('16db31c3-fb85-40c9-bbe2-8cf7b67ff99f')
     @test.services('network')
     def test_list_floating_ips(self):
@@ -52,7 +51,6 @@ class FloatingIPDetailsTestJSON(base.BaseV2ComputeTest):
         for i in range(3):
             self.assertIn(self.floating_ip[i], floating_ips)
 
-    @test.attr(type='gate')
     @test.idempotent_id('eef497e0-8ff7-43c8-85ef-558440574f84')
     @test.services('network')
     def test_get_floating_ip_details(self):
@@ -74,7 +72,6 @@ class FloatingIPDetailsTestJSON(base.BaseV2ComputeTest):
                          body['fixed_ip'])
         self.assertEqual(floating_ip_id, body['id'])
 
-    @test.attr(type='gate')
     @test.idempotent_id('df389fc8-56f5-43cc-b290-20eda39854d3')
     @test.services('network')
     def test_list_floating_ip_pools(self):

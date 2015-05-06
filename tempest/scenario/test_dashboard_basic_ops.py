@@ -96,7 +96,7 @@ class TestDashboardBasicOps(manager.ScenarioTest):
     @test.idempotent_id('4f8851b1-0e69-482b-b63b-84c6e76f6c80')
     @test.services('dashboard')
     def test_basic_scenario(self):
-        creds = self.credentials()
+        creds = self.os.credentials
         self.check_login_page()
         self.user_login(creds.username, creds.password)
         self.check_home_page()

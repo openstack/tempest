@@ -23,7 +23,6 @@ from tempest_lib.common.utils import data_utils
 from tempest_lib import exceptions as lib_exc
 
 from tempest import clients
-from tempest.common import credentials
 from tempest.common import fixed_network
 from tempest.common.utils.linux import remote_client
 from tempest import config
@@ -39,16 +38,7 @@ LOG = log.getLogger(__name__)
 class ScenarioTest(tempest.test.BaseTestCase):
     """Base class for scenario tests. Uses tempest own clients. """
 
-    @classmethod
-    def setup_credentials(cls):
-        super(ScenarioTest, cls).setup_credentials()
-        # TODO(andreaf) Some of the code from this resource_setup could be
-        # moved into `BaseTestCase`
-        cls.isolated_creds = credentials.get_isolated_credentials(
-            cls.__name__, network_resources=cls.network_resources)
-        cls.manager = clients.Manager(
-            credentials=cls.credentials()
-        )
+    credentials = ['primary']
 
     @classmethod
     def setup_clients(cls):
@@ -71,21 +61,6 @@ class ScenarioTest(tempest.test.BaseTestCase):
         cls.network_client = cls.manager.network_client
         # Heat client
         cls.orchestration_client = cls.manager.orchestration_client
-
-    @classmethod
-    def credentials(cls):
-        return cls.isolated_creds.get_primary_creds()
-
-    @classmethod
-    def alt_credentials(cls):
-        return cls.isolated_creds.get_alt_creds()
-
-    @classmethod
-    def admin_credentials(cls):
-        try:
-            return cls.isolated_creds.get_admin_creds()
-        except NotImplementedError:
-            raise cls.skipException('Admin Credentials are not available')
 
     # ## Methods to handle sync and async deletes
 
@@ -319,15 +294,23 @@ class ScenarioTest(tempest.test.BaseTestCase):
 
         if username is None:
             username = CONF.scenario.ssh_user
-        if private_key is None:
-            private_key = self.keypair['private_key']
+        # Set this with 'keypair' or others to log in with keypair or
+        # username/password.
+        if CONF.compute.ssh_auth_method == 'keypair':
+            password = None
+            if private_key is None:
+                private_key = self.keypair['private_key']
+        else:
+            password = CONF.compute.image_ssh_password
+            private_key = None
         linux_client = remote_client.RemoteClient(ip, username,
-                                                  pkey=private_key)
+                                                  pkey=private_key,
+                                                  password=password)
         try:
             linux_client.validate_authentication()
         except Exception:
             LOG.exception('Initializing SSH connection to %s failed' % ip)
-            # If we don't explicitely set for which servers we want to
+            # If we don't explicitly set for which servers we want to
             # log the console output then all the servers will be logged.
             # See the definition of _log_console_output()
             self._log_console_output(log_console_of_servers)
@@ -542,19 +525,13 @@ class NetworkScenarioTest(ScenarioTest):
 
     """
 
+    credentials = ['primary', 'admin']
+
     @classmethod
     def skip_checks(cls):
         super(NetworkScenarioTest, cls).skip_checks()
         if not CONF.service_available.neutron:
             raise cls.skipException('Neutron not available')
-        if not credentials.is_admin_available():
-            msg = ("Missing Identity Admin API credentials in configuration.")
-            raise cls.skipException(msg)
-
-    @classmethod
-    def setup_credentials(cls):
-        super(NetworkScenarioTest, cls).setup_credentials()
-        cls.admin_manager = clients.Manager(cls.admin_credentials())
 
     @classmethod
     def resource_setup(cls):
@@ -1162,6 +1139,9 @@ class BaremetalProvisionStates(object):
 
 
 class BaremetalScenarioTest(ScenarioTest):
+
+    credentials = ['primary', 'admin']
+
     @classmethod
     def skip_checks(cls):
         super(BaremetalScenarioTest, cls).skip_checks()
@@ -1171,14 +1151,10 @@ class BaremetalScenarioTest(ScenarioTest):
             raise cls.skipException(msg)
 
     @classmethod
-    def setup_credentials(cls):
-        super(BaremetalScenarioTest, cls).setup_credentials()
+    def setup_clients(cls):
+        super(BaremetalScenarioTest, cls).setup_clients()
 
-        # use an admin client manager for baremetal client
-        manager = clients.Manager(
-            credentials=cls.admin_credentials()
-        )
-        cls.baremetal_client = manager.baremetal_client
+        cls.baremetal_client = cls.admin_manager.baremetal_client
 
     @classmethod
     def resource_setup(cls):
@@ -1300,18 +1276,12 @@ class EncryptionScenarioTest(ScenarioTest):
     Base class for encryption scenario tests
     """
 
-    @classmethod
-    def skip_checks(cls):
-        super(EncryptionScenarioTest, cls).skip_checks()
-        if not credentials.is_admin_available():
-            msg = ("Missing Identity Admin API credentials in configuration.")
-            raise cls.skipException(msg)
+    credentials = ['primary', 'admin']
 
     @classmethod
     def setup_clients(cls):
         super(EncryptionScenarioTest, cls).setup_clients()
-        admin_manager = clients.Manager(cls.admin_credentials())
-        cls.admin_volume_types_client = admin_manager.volume_types_client
+        cls.admin_volume_types_client = cls.os_adm.volume_types_client
 
     def _wait_for_volume_status(self, status):
         self.status_timeout(

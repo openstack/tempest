@@ -49,7 +49,7 @@ class TestMessages(base.BaseMessagingTest):
 
         # Get on the posted messages
         message_uri = resp['location']
-        resp, _ = self.client.get_multiple_messages(message_uri)
+        resp, _ = self.client.show_multiple_messages(message_uri)
         # The test has an assertion here, because the response cannot be 204
         # in this case (the client allows 200 or 204 for this API call).
         self.assertEqual('200', resp['status'])
@@ -74,7 +74,7 @@ class TestMessages(base.BaseMessagingTest):
         message_uri = body['resources'][0]
 
         # Get posted message
-        resp, _ = self.client.get_single_message(message_uri)
+        resp, _ = self.client.show_single_message(message_uri)
         # The test has an assertion here, because the response cannot be 204
         # in this case (the client allows 200 or 204 for this API call).
         self.assertEqual('200', resp['status'])
@@ -87,7 +87,7 @@ class TestMessages(base.BaseMessagingTest):
         message_uri = resp['location']
 
         # Get posted messages
-        resp, _ = self.client.get_multiple_messages(message_uri)
+        resp, _ = self.client.show_multiple_messages(message_uri)
         # The test has an assertion here, because the response cannot be 204
         # in this case (the client allows 200 or 204 for this API call).
         self.assertEqual('200', resp['status'])
@@ -103,7 +103,7 @@ class TestMessages(base.BaseMessagingTest):
         self.client.delete_messages(message_uri)
 
         message_uri = message_uri.replace('/messages/', '/messages?ids=')
-        resp, _ = self.client.get_multiple_messages(message_uri)
+        resp, _ = self.client.show_multiple_messages(message_uri)
         # The test has an assertion here, because the response has to be 204
         # in this case (the client allows 200 or 204 for this API call).
         self.assertEqual('204', resp['status'])
@@ -117,7 +117,7 @@ class TestMessages(base.BaseMessagingTest):
 
         # Delete multiple messages
         self.client.delete_messages(message_uri)
-        resp, _ = self.client.get_multiple_messages(message_uri)
+        resp, _ = self.client.show_multiple_messages(message_uri)
         # The test has an assertion here, because the response has to be 204
         # in this case (the client allows 200 or 204 for this API call).
         self.assertEqual('204', resp['status'])

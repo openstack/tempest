@@ -13,8 +13,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-
-import cStringIO
 import select
 import socket
 import time
@@ -22,6 +20,7 @@ import warnings
 
 from oslo_log import log as logging
 import six
+from six import moves
 
 from tempest import exceptions
 
@@ -43,7 +42,7 @@ class Client(object):
         self.password = password
         if isinstance(pkey, six.string_types):
             pkey = paramiko.RSAKey.from_private_key(
-                cStringIO.StringIO(str(pkey)))
+                moves.cStringIO(str(pkey)))
         self.pkey = pkey
         self.look_for_keys = look_for_keys
         self.key_filename = key_filename

@@ -15,8 +15,8 @@
 import hashlib
 import hmac
 import time
-import urlparse
 
+from six.moves.urllib import parse as urlparse
 from tempest_lib.common.utils import data_utils
 from tempest_lib import exceptions as lib_exc
 
@@ -108,7 +108,7 @@ class ObjectFormPostNegativeTest(base.BaseObjectTest):
 
     @test.idempotent_id('d3fb3c4d-e627-48ce-9379-a1631f21336d')
     @test.requires_ext(extension='formpost', service='object')
-    @test.attr(type=['gate', 'negative'])
+    @test.attr(type=['negative'])
     def test_post_object_using_form_expired(self):
         body, content_type = self.get_multipart_form(expires=1)
         time.sleep(2)
@@ -125,7 +125,6 @@ class ObjectFormPostNegativeTest(base.BaseObjectTest):
 
     @test.idempotent_id('b277257f-113c-4499-b8d1-5fead79f7360')
     @test.requires_ext(extension='formpost', service='object')
-    @test.attr(type='gate')
     def test_post_object_using_form_invalid_signature(self):
         self.key = "Wrong"
         body, content_type = self.get_multipart_form()

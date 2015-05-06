@@ -34,7 +34,7 @@ class BaremetalNodesClientJSON(service_client.ServiceClient):
         self.validate_response(schema.list_baremetal_nodes, resp, body)
         return service_client.ResponseBodyList(resp, body['nodes'])
 
-    def get_baremetal_node(self, baremetal_node_id):
+    def show_baremetal_node(self, baremetal_node_id):
         """Returns the details of a single baremetal node."""
         url = 'os-baremetal-nodes/%s' % baremetal_node_id
         resp, body = self.get(url)

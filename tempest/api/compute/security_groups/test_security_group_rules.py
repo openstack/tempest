@@ -78,7 +78,6 @@ class SecurityGroupRulesTestJSON(base.BaseSecurityGroupsTest):
         self.expected['ip_range'] = {'cidr': '0.0.0.0/0'}
         self._check_expected_response(rule)
 
-    @test.attr(type='smoke')
     @test.idempotent_id('7a01873e-3c38-4f30-80be-31a043cfe2fd')
     @test.services('network')
     def test_security_group_rules_create_with_optional_cidr(self):
@@ -102,7 +101,6 @@ class SecurityGroupRulesTestJSON(base.BaseSecurityGroupsTest):
         self.expected['ip_range'] = {'cidr': cidr}
         self._check_expected_response(rule)
 
-    @test.attr(type='smoke')
     @test.idempotent_id('7f5d2899-7705-4d4b-8458-4505188ffab6')
     @test.services('network')
     def test_security_group_rules_create_with_optional_group_id(self):
@@ -167,7 +165,6 @@ class SecurityGroupRulesTestJSON(base.BaseSecurityGroupsTest):
         self.assertTrue(any([i for i in rules if i['id'] == rule1_id]))
         self.assertTrue(any([i for i in rules if i['id'] == rule2_id]))
 
-    @test.attr(type='smoke')
     @test.idempotent_id('fc5c5acf-2091-43a6-a6ae-e42760e9ffaf')
     @test.services('network')
     def test_security_group_rules_delete_when_peer_group_deleted(self):

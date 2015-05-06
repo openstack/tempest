@@ -18,7 +18,6 @@ from tempest_lib import exceptions as lib_exc
 import yaml
 
 from tempest import clients
-from tempest.common import credentials
 from tempest import config
 import tempest.test
 
@@ -30,6 +29,8 @@ LOG = logging.getLogger(__name__)
 class BaseOrchestrationTest(tempest.test.BaseTestCase):
     """Base test case class for all Orchestration API tests."""
 
+    credentials = ['primary']
+
     @classmethod
     def skip_checks(cls):
         super(BaseOrchestrationTest, cls).skip_checks()
@@ -39,10 +40,6 @@ class BaseOrchestrationTest(tempest.test.BaseTestCase):
     @classmethod
     def setup_credentials(cls):
         super(BaseOrchestrationTest, cls).setup_credentials()
-        if (not hasattr(cls, 'isolated_creds') or
-            not cls.isolated_creds.name == cls.__name__):
-            cls.isolated_creds = credentials.get_isolated_credentials(
-                name=cls.__name__, network_resources=cls.network_resources)
         stack_owner_role = CONF.orchestration.stack_owner_role
         if not cls.isolated_creds.is_role_available(stack_owner_role):
             skip_msg = ("%s skipped because the configured credential provider"
@@ -72,20 +69,6 @@ class BaseOrchestrationTest(tempest.test.BaseTestCase):
         cls.stacks = []
         cls.keypairs = []
         cls.images = []
-
-    @classmethod
-    def _get_default_network(cls):
-        networks = cls.network_client.list_networks()
-        for net in networks['networks']:
-            if net['name'] == CONF.compute.fixed_network_name:
-                return net
-
-    @classmethod
-    def _get_identity_admin_client(cls):
-        """Returns an instance of the Identity Admin API client."""
-        manager = clients.Manager(cls.isolated_creds.get_admin_creds())
-        admin_client = manager.identity_client
-        return admin_client
 
     @classmethod
     def create_stack(cls, stack_name, template_data, parameters=None,

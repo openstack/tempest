@@ -27,16 +27,14 @@ class BaseVolumeQuotasAdminV2TestJSON(base.BaseVolumeAdminTest):
     @classmethod
     def setup_credentials(cls):
         super(BaseVolumeQuotasAdminV2TestJSON, cls).setup_credentials()
-        cls.demo_tenant_id = cls.isolated_creds.get_primary_creds().tenant_id
+        cls.demo_tenant_id = cls.os.credentials.tenant_id
 
-    @test.attr(type='gate')
     @test.idempotent_id('59eada70-403c-4cef-a2a3-a8ce2f1b07a0')
     def test_list_quotas(self):
         quotas = self.quotas_client.show_quota_set(self.demo_tenant_id)
         for key in QUOTA_KEYS:
             self.assertIn(key, quotas)
 
-    @test.attr(type='gate')
     @test.idempotent_id('2be020a2-5fdd-423d-8d35-a7ffbc36e9f7')
     def test_list_default_quotas(self):
         quotas = self.quotas_client.show_default_quota_set(
@@ -44,7 +42,6 @@ class BaseVolumeQuotasAdminV2TestJSON(base.BaseVolumeAdminTest):
         for key in QUOTA_KEYS:
             self.assertIn(key, quotas)
 
-    @test.attr(type='gate')
     @test.idempotent_id('3d45c99e-cc42-4424-a56e-5cbd212b63a6')
     def test_update_all_quota_resources_for_tenant(self):
         # Admin can update all the resource quota limits for a tenant
@@ -69,7 +66,6 @@ class BaseVolumeQuotasAdminV2TestJSON(base.BaseVolumeAdminTest):
         # would be no other values in there.
         self.assertDictContainsSubset(new_quota_set, quota_set)
 
-    @test.attr(type='gate')
     @test.idempotent_id('18c51ae9-cb03-48fc-b234-14a19374dbed')
     def test_show_quota_usage(self):
         quota_usage = self.quotas_client.show_quota_usage(
@@ -79,7 +75,6 @@ class BaseVolumeQuotasAdminV2TestJSON(base.BaseVolumeAdminTest):
             for usage_key in QUOTA_USAGE_KEYS:
                 self.assertIn(usage_key, quota_usage[key])
 
-    @test.attr(type='gate')
     @test.idempotent_id('ae8b6091-48ad-4bfa-a188-bbf5cc02115f')
     def test_quota_usage(self):
         quota_usage = self.quotas_client.show_quota_usage(
@@ -99,7 +94,6 @@ class BaseVolumeQuotasAdminV2TestJSON(base.BaseVolumeAdminTest):
                          volume["size"],
                          new_quota_usage['gigabytes']['in_use'])
 
-    @test.attr(type='gate')
     @test.idempotent_id('874b35a9-51f1-4258-bec5-cd561b6690d3')
     def test_delete_quota(self):
         # Admin can delete the resource quota set for a tenant
