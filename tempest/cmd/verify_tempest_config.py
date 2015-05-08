@@ -335,25 +335,28 @@ def main():
         CONF_PARSER.optionxform = str
         CONF_PARSER.readfp(conf_file)
     icreds = credentials.get_isolated_credentials('verify_tempest_config')
-    os = clients.Manager(icreds.get_primary_creds())
-    services = check_service_availability(os, update)
-    results = {}
-    for service in ['nova', 'cinder', 'neutron', 'swift']:
-        if service not in services:
-            continue
-        results = verify_extensions(os, service, results)
+    try:
+        os = clients.Manager(icreds.get_primary_creds())
+        services = check_service_availability(os, update)
+        results = {}
+        for service in ['nova', 'cinder', 'neutron', 'swift']:
+            if service not in services:
+                continue
+            results = verify_extensions(os, service, results)
 
-    # Verify API versions of all services in the keystone catalog and keystone
-    # itself.
-    services.append('keystone')
-    for service in services:
-        verify_api_versions(os, service, update)
+        # Verify API versions of all services in the keystone catalog and
+        # keystone itself.
+        services.append('keystone')
+        for service in services:
+            verify_api_versions(os, service, update)
 
-    display_results(results, update, replace)
-    if update:
-        conf_file.close()
-        CONF_PARSER.write(outfile)
-    outfile.close()
+        display_results(results, update, replace)
+        if update:
+            conf_file.close()
+            CONF_PARSER.write(outfile)
+        outfile.close()
+    finally:
+        icreds.clear_isolated_creds()
 
 
 if __name__ == "__main__":
