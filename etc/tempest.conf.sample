@@ -375,6 +375,11 @@
 # https://bugs.launchpad.net/nova/+bug/1398999 (boolean value)
 #block_migrate_cinder_iscsi = false
 
+# Does the test system allow live-migration of paused instances? Note,
+# this is more than just the ANDing of paused and live_migrate, but
+# all 3 should be set to True to run those tests (boolean value)
+#live_migrate_paused_instances = false
+
 # Enable VNC console. This configuration value should be same as
 # [nova.vnc]->vnc_enabled in nova.conf (boolean value)
 #vnc_console = false

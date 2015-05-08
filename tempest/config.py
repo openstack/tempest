@@ -335,6 +335,13 @@ ComputeFeaturesGroup = [
                 help="Does the test environment block migration support "
                 "cinder iSCSI volumes. Note, libvirt doesn't support this, "
                 "see https://bugs.launchpad.net/nova/+bug/1398999"),
+    # TODO(gilliard): Remove live_migrate_paused_instances at juno-eol.
+    cfg.BoolOpt('live_migrate_paused_instances',
+                default=False,
+                help="Does the test system allow live-migration of paused "
+                "instances? Note, this is more than just the ANDing of "
+                "paused and live_migrate, but all 3 should be set to True "
+                "to run those tests"),
     cfg.BoolOpt('vnc_console',
                 default=False,
                 help='Enable VNC console. This configuration value should '
