@@ -381,7 +381,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
 
     def _log_net_info(self, exc):
         # network debug is called as part of ssh init
-        if not isinstance(exc, exceptions.SSHTimeout):
+        if not isinstance(exc, lib_exc.SSHTimeout):
             LOG.debug('Network information on a devstack host')
 
     def create_server_snapshot(self, server, name=None):
@@ -766,7 +766,7 @@ class NetworkScenarioTest(ScenarioTest):
         def ping_remote():
             try:
                 source.ping_host(dest)
-            except exceptions.SSHExecCommandFailed:
+            except lib_exc.SSHExecCommandFailed:
                 LOG.warn('Failed to ping IP: %s via a ssh connection from: %s.'
                          % (dest, source.ssh_client.host))
                 return not should_succeed
