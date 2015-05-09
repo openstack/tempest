@@ -23,7 +23,7 @@ import testscenarios
 import testtools
 
 from tempest import clients
-from tempest.common import cred_provider
+from tempest.common import credentials
 from tempest import config
 from tempest import exceptions
 
@@ -41,7 +41,10 @@ class ImageUtils(object):
         self.non_ssh_image_pattern = \
             CONF.input_scenario.non_ssh_image_regex
         # Setup clients
-        os = clients.Manager()
+        self.isolated_creds = credentials.get_isolated_credentials(
+            name='ScenarioImageUtils',
+            identity_version=CONF.identity.auth_version)
+        os = clients.Manager(self.isolated_creds.get_primary_creds())
         self.images_client = os.images_client
         self.flavors_client = os.flavors_client
 
@@ -100,8 +103,10 @@ class InputScenarioUtils(object):
                                             digit=string.digits)
 
     def __init__(self):
-        os = clients.Manager(
-            cred_provider.get_configured_credentials('user', fill_in=False))
+        self.isolated_creds = credentials.get_isolated_credentials(
+            name='InputScenarioUtils',
+            identity_version=CONF.identity.auth_version)
+        os = clients.Manager(self.isolated_creds.get_primary_creds())
         self.images_client = os.images_client
         self.flavors_client = os.flavors_client
         self.image_pattern = CONF.input_scenario.image_regex
@@ -162,7 +167,7 @@ def load_tests_input_scenario_utils(*args):
         scenario_utils = InputScenarioUtils()
         scenario_flavor = scenario_utils.scenario_flavors
         scenario_image = scenario_utils.scenario_images
-    except exceptions.InvalidConfiguration:
+    except (exceptions.InvalidConfiguration, TypeError):
         return standard_tests
     for test in testtools.iterate_tests(standard_tests):
         setattr(test, 'scenarios', testscenarios.multiply_scenarios(
