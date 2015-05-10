@@ -94,7 +94,7 @@ def _get_api_versions(os, service):
         versions = map(lambda x: x['id'], body['versions']['values'])
     else:
         versions = map(lambda x: x['id'], body['versions'])
-    return versions
+    return list(versions)
 
 
 def verify_keystone_api_versions(os, update):
@@ -175,6 +175,7 @@ def verify_extensions(os, service, results):
 
     else:
         extensions = map(lambda x: x['alias'], resp)
+    extensions = list(extensions)
     if not results.get(service):
         results[service] = {}
     extensions_opt = get_enabled_extensions(service)

@@ -137,7 +137,7 @@ class TestGlanceHTTPClient(base.TestCase):
         resp, body = self.client.raw_request('PUT', '/images', body=req_body)
         self.assertEqual(200, resp.status)
         self.assertEqual('fake_response_body', body.read())
-        httplib.HTTPConnection.send.assert_call_count(req_body.len)
+        httplib.HTTPConnection.send.assert_call_count(req_body.tell())
 
     def test_get_connection_class_for_https(self):
         conn_class = self.client.get_connection_class('https')
