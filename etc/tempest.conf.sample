@@ -240,9 +240,6 @@
 # value)
 #build_timeout = 300
 
-# Should the tests ssh to instances? (boolean value)
-#run_ssh = false
-
 # Auth method used for authenticate to the instance. Valid choices
 # are: keypair, configured, adminpass and disabled. Keypair: start the
 # servers with a ssh keypair. Configured: use the configured user and
@@ -289,7 +286,7 @@
 #fixed_network_name = <None>
 
 # Network used for SSH connections. Ignored if
-# use_floatingip_for_ssh=true or run_ssh=false. (string value)
+# use_floatingip_for_ssh=true or run_validation=false. (string value)
 #network_for_ssh = public
 
 # IP version used for SSH connections. (integer value)
@@ -1070,6 +1067,11 @@
 #
 # From tempest.config
 #
+
+# Enable ssh on created servers and creation of additional validation
+# resources to enable remote access (boolean value)
+# Deprecated group/name - [compute]/run_ssh
+#run_validation = false
 
 # Default IP type used for validation: -fixed: uses the first IP
 # belonging to the fixed network -floating: creates and uses a

@@ -464,6 +464,8 @@ class BaseTestCase(testtools.testcase.WithAttributes,
         @param security_group_rules
         @param floating_ip
         """
+        if not CONF.validation.run_validation:
+            return
         if keypair is None:
             if CONF.validation.auth_method.lower() == "keypair":
                 keypair = True
