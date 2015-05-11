@@ -654,6 +654,10 @@ VolumeFeaturesGroup = [
     cfg.BoolOpt('api_v2',
                 default=True,
                 help="Is the v2 volume API enabled"),
+    cfg.BoolOpt('bootable',
+                default=False,
+                help='Update bootable status of a volume '
+                     'Not implemented on icehouse ')
 ]
 
 
