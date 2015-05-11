@@ -115,6 +115,8 @@ To enable and use locking test accounts you need do a few things:
  #. Provide tempest with the location of you accounts.yaml file with the
     test_accounts_file option in the auth section
 
+ #. Set allow_tenant_isolation = False in the auth group
+
 It is worth pointing out that each set of credentials in the accounts.yaml
 should have a unique tenant. This is required to provide proper isolation
 to the tests using the credentials, and failure to do this will likely cause
@@ -139,6 +141,11 @@ options in the identity section:
  #. alt_username
  #. alt_password
  #. alt_tenant_name
+
+And in the auth secion:
+
+ #. allow_tenant_isolation = False
+ #. comment out 'test_accounts_file' or keep it as empty
 
 It only makes sense to use it if parallel execution isn't needed, since tempest
 won't be able to properly isolate tests using this. Additionally, using the
