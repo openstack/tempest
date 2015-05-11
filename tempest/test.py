@@ -34,6 +34,7 @@ from tempest import clients
 from tempest.common import credentials
 from tempest.common import fixed_network
 import tempest.common.generator.valid_generator as valid
+import tempest.common.validation_resources as vresources
 from tempest import config
 from tempest import exceptions
 
@@ -231,6 +232,8 @@ class BaseTestCase(testtools.testcase.WithAttributes,
     # NOTE(andreaf) credentials holds a list of the credentials to be allocated
     # at class setup time. Credential types can be 'primary', 'alt' or 'admin'
     credentials = []
+    # Resources required to validate a server using ssh
+    validation_resources = {}
     network_resources = {}
 
     # NOTE(sdague): log_format is defined inline here instead of using the oslo
@@ -360,7 +363,12 @@ class BaseTestCase(testtools.testcase.WithAttributes,
     def resource_setup(cls):
         """Class level resource setup for test cases.
         """
-        pass
+        if hasattr(cls, "os"):
+            cls.validation_resources = vresources.create_validation_resources(
+                cls.os, cls.validation_resources)
+        else:
+            LOG.warn("Client manager not found, validation resources not"
+                     " created")
 
     @classmethod
     def resource_cleanup(cls):
@@ -368,7 +376,14 @@ class BaseTestCase(testtools.testcase.WithAttributes,
         Resource cleanup must be able to handle the case of partially setup
         resources, in case a failure during `resource_setup` should happen.
         """
-        pass
+        if cls.validation_resources:
+            if hasattr(cls, "os"):
+                vresources.clear_validation_resources(cls.os,
+                                                      cls.validation_resources)
+                cls.validation_resources = {}
+            else:
+                LOG.warn("Client manager not found, validation resources not"
+                         " deleted")
 
     def setUp(self):
         super(BaseTestCase, self).setUp()
@@ -432,6 +447,43 @@ class BaseTestCase(testtools.testcase.WithAttributes,
         """
         if hasattr(cls, 'isolated_creds'):
             cls.isolated_creds.clear_isolated_creds()
+
+    @classmethod
+    def set_validation_resources(cls, keypair=None, floating_ip=None,
+                                 security_group=None,
+                                 security_group_rules=None):
+        """Specify which ssh server validation resources should be created.
+        Each of the argument must be set to either None, True or False, with
+        None - use default from config (security groups and security group
+               rules get created when set to None)
+        False - Do not create the validation resource
+        True - create the validation resource
+
+        @param keypair
+        @param security_group
+        @param security_group_rules
+        @param floating_ip
+        """
+        if keypair is None:
+            if CONF.validation.auth_method.lower() == "keypair":
+                keypair = True
+            else:
+                keypair = False
+        if floating_ip is None:
+            if CONF.validation.connect_method.lower() == "floating":
+                floating_ip = True
+            else:
+                floating_ip = False
+        if security_group is None:
+            security_group = True
+        if security_group_rules is None:
+            security_group_rules = True
+        if not cls.validation_resources:
+            cls.validation_resources = {
+                'keypair': keypair,
+                'security_group': security_group,
+                'security_group_rules': security_group_rules,
+                'floating_ip': floating_ip}
 
     @classmethod
     def set_network_resources(cls, network=False, router=False, subnet=False,
