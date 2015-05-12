@@ -401,10 +401,25 @@ class BaseTestCase(testtools.testcase.WithAttributes,
 
     @classmethod
     def get_client_manager(cls, identity_version=None,
-                           credential_type='primary'):
+                           credential_type=None, roles=None, force_new=None):
+        """Returns an OpenStack client manager
+
+        Returns an OpenStack client manager based on either credential_type
+        or a list of roles. If neither is specified, it defaults to
+        credential_type 'primary'
+        :param identity_version: string - v2 or v3
+        :param credential_type: string - primary, alt or admin
+        :param roles: list of roles
+
+        :returns the created client manager
+        :raises skipException: if the requested credentials are not available
         """
-        Returns an OpenStack client manager
-        """
+        if all([roles, credential_type]):
+            msg = "Cannot get credentials by type and roles at the same time"
+            raise ValueError(msg)
+        if not any([roles, credential_type]):
+            credential_type = 'primary'
+
         force_tenant_isolation = getattr(cls, 'force_tenant_isolation', None)
         identity_version = identity_version or CONF.identity.auth_version
 
@@ -416,14 +431,26 @@ class BaseTestCase(testtools.testcase.WithAttributes,
                 identity_version=identity_version
             )
 
-        credentials_method = 'get_%s_creds' % credential_type
-        if hasattr(cls.isolated_creds, credentials_method):
-            creds = getattr(cls.isolated_creds, credentials_method)()
+        if roles:
+            for role in roles:
+                if not cls.isolated_creds.is_role_available(role):
+                    skip_msg = (
+                        "%s skipped because the configured credential provider"
+                        " is not able to provide credentials with the %s role "
+                        "assigned." % (cls.__name__, role))
+                    raise cls.skipException(skip_msg)
+            params = dict(roles=roles)
+            if force_new is not None:
+                params.update(force_new=force_new)
+            creds = cls.isolated_creds.get_creds_by_roles(**params)
         else:
-            raise exceptions.InvalidCredentials(
-                "Invalid credentials type %s" % credential_type)
-        os = clients.Manager(credentials=creds, service=cls._service)
-        return os
+            credentials_method = 'get_%s_creds' % credential_type
+            if hasattr(cls.isolated_creds, credentials_method):
+                creds = getattr(cls.isolated_creds, credentials_method)()
+            else:
+                raise exceptions.InvalidCredentials(
+                    "Invalid credentials type %s" % credential_type)
+        return clients.Manager(credentials=creds, service=cls._service)
 
     @classmethod
     def clear_isolated_creds(cls):
