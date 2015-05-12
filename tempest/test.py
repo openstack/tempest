@@ -322,6 +322,13 @@ class BaseTestCase(testtools.testcase.WithAttributes,
         if 'alt' is cls.credentials and not credentials.is_alt_available():
             msg = "Missing a 2nd set of API credentials in configuration."
             raise cls.skipException(msg)
+        if hasattr(cls, 'identity_version'):
+            if cls.identity_version == 'v2':
+                if not CONF.identity_feature_enabled.api_v2:
+                    raise cls.skipException("Identity api v2 is not enabled")
+            elif cls.identity_version == 'v3':
+                if not CONF.identity_feature_enabled.api_v3:
+                    raise cls.skipException("Identity api v3 is not enabled")
 
     @classmethod
     def setup_credentials(cls):
@@ -424,14 +431,13 @@ class BaseTestCase(testtools.testcase.WithAttributes,
         return cls._creds_provider
 
     @classmethod
-    def get_client_manager(cls, identity_version=None,
-                           credential_type=None, roles=None, force_new=None):
+    def get_client_manager(cls, credential_type=None, roles=None,
+                           force_new=None):
         """Returns an OpenStack client manager
 
         Returns an OpenStack client manager based on either credential_type
         or a list of roles. If neither is specified, it defaults to
         credential_type 'primary'
-        :param identity_version: string - v2 or v3
         :param credential_type: string - primary, alt or admin
         :param roles: list of roles
 
@@ -443,7 +449,6 @@ class BaseTestCase(testtools.testcase.WithAttributes,
             raise ValueError(msg)
         if not any([roles, credential_type]):
             credential_type = 'primary'
-        cls.identity_version = identity_version
         cred_provider = cls._get_credentials_provider()
         if roles:
             for role in roles:
