@@ -195,9 +195,6 @@ ComputeGroup = [
                help="Timeout in seconds to wait for an instance to build. "
                     "Other services that do not define build_timeout will "
                     "inherit this value."),
-    cfg.BoolOpt('run_ssh',
-                default=False,
-                help="Should the tests ssh to instances?"),
     cfg.StrOpt('ssh_auth_method',
                default='keypair',
                help="Auth method used for authenticate to the instance. "
@@ -249,7 +246,7 @@ ComputeGroup = [
     cfg.StrOpt('network_for_ssh',
                default='public',
                help="Network used for SSH connections. Ignored if "
-                    "use_floatingip_for_ssh=true or run_ssh=false."),
+                    "use_floatingip_for_ssh=true or run_validation=false."),
     cfg.IntOpt('ip_version_for_ssh',
                default=4,
                help="IP version used for SSH connections."),
@@ -558,6 +555,12 @@ validation_group = cfg.OptGroup(name='validation',
                                 title='SSH Validation options')
 
 ValidationGroup = [
+    cfg.BoolOpt('run_validation',
+                default=False,
+                help='Enable ssh on created servers and creation of additional'
+                     ' validation resources to enable remote access',
+                deprecated_opts=[cfg.DeprecatedOpt('run_ssh',
+                                                   group='compute')]),
     cfg.StrOpt('connect_method',
                default='floating',
                choices=['fixed', 'floating'],

@@ -85,7 +85,8 @@ class AttachVolumeTestJSON(base.BaseV2ComputeTest):
         self.addCleanup(self._detach, self.server['id'], self.volume['id'])
 
     @test.idempotent_id('52e9045a-e90d-4c0d-9087-79d657faffff')
-    @testtools.skipUnless(CONF.compute.run_ssh, 'SSH required for this test')
+    @testtools.skipUnless(CONF.validation.run_validation,
+                          'SSH required for this test')
     def test_attach_detach_volume(self):
         # Stop and Start a server with an attached volume, ensuring that
         # the volume remains attached.
