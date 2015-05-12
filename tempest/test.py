@@ -399,6 +399,30 @@ class BaseTestCase(testtools.testcase.WithAttributes,
                                                    format=self.log_format,
                                                    level=None))
 
+    @property
+    def credentials_provider(self):
+        return self._get_credentials_provider()
+
+    @classmethod
+    def _get_credentials_provider(cls):
+        """Returns a credentials provider
+
+        If no credential provider exists yet creates one.
+        It uses self.identity_version if defined, or the configuration value
+        """
+        if (not hasattr(cls, '_creds_provider') or not cls._creds_provider or
+                not cls._creds_provider.name == cls.__name__):
+            force_tenant_isolation = getattr(cls, 'force_tenant_isolation',
+                                             False)
+            identity_version = getattr(cls, 'identity_version', None)
+            identity_version = identity_version or CONF.identity.auth_version
+
+            cls._creds_provider = credentials.get_isolated_credentials(
+                name=cls.__name__, network_resources=cls.network_resources,
+                force_tenant_isolation=force_tenant_isolation,
+                identity_version=identity_version)
+        return cls._creds_provider
+
     @classmethod
     def get_client_manager(cls, identity_version=None,
                            credential_type=None, roles=None, force_new=None):
@@ -419,21 +443,11 @@ class BaseTestCase(testtools.testcase.WithAttributes,
             raise ValueError(msg)
         if not any([roles, credential_type]):
             credential_type = 'primary'
-
-        force_tenant_isolation = getattr(cls, 'force_tenant_isolation', None)
-        identity_version = identity_version or CONF.identity.auth_version
-
-        if (not hasattr(cls, 'isolated_creds') or
-            not cls.isolated_creds.name == cls.__name__):
-            cls.isolated_creds = credentials.get_isolated_credentials(
-                name=cls.__name__, network_resources=cls.network_resources,
-                force_tenant_isolation=force_tenant_isolation,
-                identity_version=identity_version
-            )
-
+        cls.identity_version = identity_version
+        cred_provider = cls._get_credentials_provider()
         if roles:
             for role in roles:
-                if not cls.isolated_creds.is_role_available(role):
+                if not cred_provider.is_role_available(role):
                     skip_msg = (
                         "%s skipped because the configured credential provider"
                         " is not able to provide credentials with the %s role "
@@ -442,11 +456,11 @@ class BaseTestCase(testtools.testcase.WithAttributes,
             params = dict(roles=roles)
             if force_new is not None:
                 params.update(force_new=force_new)
-            creds = cls.isolated_creds.get_creds_by_roles(**params)
+            creds = cred_provider.get_creds_by_roles(**params)
         else:
             credentials_method = 'get_%s_creds' % credential_type
-            if hasattr(cls.isolated_creds, credentials_method):
-                creds = getattr(cls.isolated_creds, credentials_method)()
+            if hasattr(cred_provider, credentials_method):
+                creds = getattr(cred_provider, credentials_method)()
             else:
                 raise exceptions.InvalidCredentials(
                     "Invalid credentials type %s" % credential_type)
@@ -457,8 +471,8 @@ class BaseTestCase(testtools.testcase.WithAttributes,
         """
         Clears isolated creds if set
         """
-        if hasattr(cls, 'isolated_creds'):
-            cls.isolated_creds.clear_isolated_creds()
+        if hasattr(cls, '_cred_provider'):
+            cls._creds_provider.clear_isolated_creds()
 
     @classmethod
     def set_network_resources(cls, network=False, router=False, subnet=False,
@@ -489,16 +503,16 @@ class BaseTestCase(testtools.testcase.WithAttributes,
         """
         # Make sure isolated_creds exists and get a network client
         networks_client = cls.get_client_manager().networks_client
-        isolated_creds = getattr(cls, 'isolated_creds', None)
+        cred_provider = cls._get_credentials_provider()
         # In case of nova network, isolated tenants are not able to list the
         # network configured in fixed_network_name, even if the can use it
         # for their servers, so using an admin network client to validate
         # the network name
         if (not CONF.service_available.neutron and
                 credentials.is_admin_available()):
-            admin_creds = isolated_creds.get_admin_creds()
+            admin_creds = cred_provider.get_admin_creds()
             networks_client = clients.Manager(admin_creds).networks_client
-        return fixed_network.get_tenant_network(isolated_creds,
+        return fixed_network.get_tenant_network(cred_provider,
                                                 networks_client)
 
     def assertEmpty(self, list, msg=None):
@@ -648,7 +662,7 @@ class NegativeAutoTest(BaseTestCase):
                 msg = ("Missing Identity Admin API credentials in"
                        "configuration.")
                 raise self.skipException(msg)
-            creds = self.isolated_creds.get_admin_creds()
+            creds = self.credentials_provider.get_admin_creds()
             os_adm = clients.Manager(credentials=creds)
             client = os_adm.negative_client
         else:

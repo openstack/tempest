@@ -441,7 +441,7 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
     @test.idempotent_id('e79f879e-debb-440c-a7e4-efeda05b6848')
     @test.services('compute', 'network')
     def test_cross_tenant_traffic(self):
-        if not self.isolated_creds.is_multi_tenant():
+        if not self.credentials_provider.is_multi_tenant():
             raise self.skipException("No secondary tenant defined")
         try:
             # deploy new tenant

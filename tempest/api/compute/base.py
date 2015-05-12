@@ -52,7 +52,6 @@ class BaseComputeTest(tempest.test.BaseTestCase):
     def setup_credentials(cls):
         cls.set_network_resources()
         super(BaseComputeTest, cls).setup_credentials()
-        cls.multi_user = cls.check_multi_user()
 
     @classmethod
     def setup_clients(cls):
@@ -110,14 +109,6 @@ class BaseComputeTest(tempest.test.BaseTestCase):
         cls.clear_security_groups()
         cls.clear_server_groups()
         super(BaseComputeTest, cls).resource_cleanup()
-
-    @classmethod
-    def check_multi_user(cls):
-        # We have a list of accounts now, so just checking if the list is gt 2
-        if not cls.isolated_creds.is_multi_user():
-            msg = "Not enough users available for multi-user testing"
-            raise exceptions.InvalidConfiguration(msg)
-        return True
 
     @classmethod
     def clear_servers(cls):
