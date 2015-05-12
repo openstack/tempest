@@ -117,8 +117,8 @@ is OS_TEST_PATH=./tempest/test_discover which will only run test discover on the
 Tempest suite.
 
 Alternatively, you can use the run_tests.sh script which will create a venv and
-run the unit tests. There are also the py26, py27, or py33 tox jobs which will
-run the unit tests with the corresponding version of python.
+run the unit tests. There are also the py27 and py34 tox jobs which will run
+the unit tests with the corresponding version of python.
 
 Python 2.6
 ----------
@@ -131,3 +131,16 @@ present in python 2.6 will be used. If you're running your OpenStack services
 on an earlier release with python 2.6 you can easily run Tempest against it
 from a remote system running python 2.7. (or deploy a cloud guest in your cloud
 that has python 2.7)
+
+Python 3.4
+----------
+
+Starting during the Liberty release development cycle work began on enabling
+Tempest to run under both Python 2.7 and Python 3.4. Tempest strives to fully
+support running with Python 3.4. A gating unit test job was added to also run
+Tempest's unit tests under Python 3.4. This means that the Tempest code at
+least imports under Python 3.4 and things that have unit test coverage will
+work on Python 3.4. However, because large parts of Tempest are self verifying
+there might be uncaught issues running on Python 3.4. So until there is a gating
+job which does a full Tempest run using Python 3.4 there isn't any guarantee
+that running Tempest under Python 3.4 is bug free.
