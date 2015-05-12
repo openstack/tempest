@@ -107,7 +107,8 @@ class TestAccount(base.TestCase):
     def test_create_hash_file_previous_file(self):
         # Emulate the lock existing on the filesystem
         self.useFixture(mockpatch.Patch('os.path.isfile', return_value=True))
-        with mock.patch('__builtin__.open', mock.mock_open(), create=True):
+        with mock.patch('six.moves.builtins.open', mock.mock_open(),
+                        create=True):
             test_account_class = accounts.Accounts('v2', 'test_name')
             res = test_account_class._create_hash_file('12345')
         self.assertFalse(res, "_create_hash_file should return False if the "
@@ -116,7 +117,8 @@ class TestAccount(base.TestCase):
     def test_create_hash_file_no_previous_file(self):
         # Emulate the lock not existing on the filesystem
         self.useFixture(mockpatch.Patch('os.path.isfile', return_value=False))
-        with mock.patch('__builtin__.open', mock.mock_open(), create=True):
+        with mock.patch('six.moves.builtins.open', mock.mock_open(),
+                        create=True):
             test_account_class = accounts.Accounts('v2', 'test_name')
             res = test_account_class._create_hash_file('12345')
         self.assertTrue(res, "_create_hash_file should return True if the "
@@ -130,7 +132,7 @@ class TestAccount(base.TestCase):
         mkdir_mock = self.useFixture(mockpatch.Patch('os.mkdir'))
         self.useFixture(mockpatch.Patch('os.path.isfile', return_value=False))
         test_account_class = accounts.Accounts('v2', 'test_name')
-        with mock.patch('__builtin__.open', mock.mock_open(),
+        with mock.patch('six.moves.builtins.open', mock.mock_open(),
                         create=True) as open_mock:
             test_account_class._get_free_hash(hash_list)
             lock_path = os.path.join(lockutils.get_lock_path(accounts.CONF),
@@ -149,7 +151,8 @@ class TestAccount(base.TestCase):
         # Emulate all lcoks in list are in use
         self.useFixture(mockpatch.Patch('os.path.isfile', return_value=True))
         test_account_class = accounts.Accounts('v2', 'test_name')
-        with mock.patch('__builtin__.open', mock.mock_open(), create=True):
+        with mock.patch('six.moves.builtins.open', mock.mock_open(),
+                        create=True):
             self.assertRaises(exceptions.InvalidConfiguration,
                               test_account_class._get_free_hash, hash_list)
 
@@ -168,7 +171,7 @@ class TestAccount(base.TestCase):
             return True
 
         self.stubs.Set(os.path, 'isfile', _fake_is_file)
-        with mock.patch('__builtin__.open', mock.mock_open(),
+        with mock.patch('six.moves.builtins.open', mock.mock_open(),
                         create=True) as open_mock:
             test_account_class._get_free_hash(hash_list)
             lock_path = os.path.join(lockutils.get_lock_path(accounts.CONF),
