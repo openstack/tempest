@@ -92,9 +92,11 @@ class AuthorizationTestJSON(base.BaseV2ComputeTest):
 
     @classmethod
     def resource_cleanup(cls):
-        if cls.multi_user:
+        if hasattr(cls, 'image'):
             cls.images_client.delete_image(cls.image['id'])
+        if hasattr(cls, 'keypairname'):
             cls.keypairs_client.delete_keypair(cls.keypairname)
+        if hasattr(cls, 'security_group'):
             cls.security_client.delete_security_group(cls.security_group['id'])
         super(AuthorizationTestJSON, cls).resource_cleanup()
 
