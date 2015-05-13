@@ -267,7 +267,7 @@ class BaseTestCase(testtools.testcase.WithAttributes,
                      etype, cls.__name__))
             cls.tearDownClass()
             try:
-                raise etype, value, trace
+                six.reraise(etype, value, trace)
             finally:
                 del trace  # to avoid circular refs
 
@@ -305,7 +305,7 @@ class BaseTestCase(testtools.testcase.WithAttributes,
         # the first one
         if re_raise and etype is not None:
             try:
-                raise etype, value, trace
+                six.reraise(etype, value, trace)
             finally:
                 del trace  # to avoid circular refs
 
