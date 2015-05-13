@@ -17,7 +17,6 @@ from tempest_lib import decorators
 from tempest_lib import exceptions as lib_exc
 
 from tempest.api.object_storage import base
-from tempest import clients
 from tempest import config
 from tempest import test
 
@@ -30,15 +29,8 @@ class AccountQuotasNegativeTest(base.BaseObjectTest):
     def setup_credentials(cls):
         super(AccountQuotasNegativeTest, cls).setup_credentials()
         reseller_admin_role = CONF.object_storage.reseller_admin_role
-        if not cls.isolated_creds.is_role_available(reseller_admin_role):
-            skip_msg = ("%s skipped because the configured credential provider"
-                        " is not able to provide credentials with the %s role "
-                        "assigned." % (cls.__name__, reseller_admin_role))
-            raise cls.skipException(skip_msg)
-        else:
-            cls.os_reselleradmin = clients.Manager(
-                cls.isolated_creds.get_creds_by_roles(
-                    roles=[reseller_admin_role]))
+        cls.os_reselleradmin = cls.get_client_manager(
+            roles=[reseller_admin_role])
 
     @classmethod
     def resource_setup(cls):

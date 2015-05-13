@@ -22,7 +22,6 @@ import six
 from tempest_lib.common.utils import data_utils
 from tempest_lib import exceptions as lib_exc
 
-from tempest import clients
 from tempest.common import fixed_network
 from tempest.common.utils.linux import remote_client
 from tempest import config
@@ -1341,15 +1340,7 @@ class SwiftScenarioTest(ScenarioTest):
         cls.set_network_resources()
         super(SwiftScenarioTest, cls).setup_credentials()
         operator_role = CONF.object_storage.operator_role
-        if not cls.isolated_creds.is_role_available(operator_role):
-            skip_msg = ("%s skipped because the configured credential provider"
-                        " is not able to provide credentials with the %s role "
-                        "assigned." % (cls.__name__, operator_role))
-            raise cls.skipException(skip_msg)
-        else:
-            cls.os_operator = clients.Manager(
-                cls.isolated_creds.get_creds_by_roles(
-                    [operator_role]))
+        cls.os_operator = cls.get_client_manager(roles=[operator_role])
 
     @classmethod
     def setup_clients(cls):
