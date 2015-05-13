@@ -14,8 +14,8 @@
 # limitations under the License.
 
 from oslo_log import log as logging
-from tempest_lib.common.utils import data_utils
 
+from tempest.common.utils import data_utils
 from tempest import config
 from tempest import test
 

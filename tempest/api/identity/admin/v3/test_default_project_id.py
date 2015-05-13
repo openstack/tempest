@@ -11,10 +11,10 @@
 #    under the License.
 
 from tempest_lib import auth
-from tempest_lib.common.utils import data_utils
 
 from tempest.api.identity import base
 from tempest import clients
+from tempest.common.utils import data_utils
 from tempest import config
 from tempest import manager
 from tempest import test

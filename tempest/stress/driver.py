@@ -22,10 +22,11 @@ from oslo_utils import importutils
 import six
 from six import moves
 from tempest_lib.common import ssh
-from tempest_lib.common.utils import data_utils
+
 
 from tempest import clients
 from tempest.common import isolated_creds
+from tempest.common.utils import data_utils
 from tempest import config
 from tempest import exceptions
 from tempest.stress import cleanup
