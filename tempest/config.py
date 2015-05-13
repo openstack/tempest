@@ -31,9 +31,10 @@ _CONF = cfg.CONF
 
 
 def register_opt_group(conf, opt_group, options):
-    conf.register_group(opt_group)
+    if opt_group:
+        conf.register_group(opt_group)
     for opt in options:
-        conf.register_opt(opt, group=opt_group.name)
+        conf.register_opt(opt, group=getattr(opt_group, 'name', None))
 
 
 auth_group = cfg.OptGroup(name='auth',
@@ -1133,6 +1134,15 @@ NegativeGroup = [
                help="Test generator class for all negative tests"),
 ]
 
+DefaultGroup = [
+    cfg.StrOpt('resources_prefix',
+               default='tempest',
+               help="Prefix to be added when generating the name for "
+                    "test resources. It can be used to discover all "
+                    "resources associated with a specific test run when "
+                    "running tempest on a real-life cloud"),
+]
+
 _opts = [
     (auth_group, AuthGroup),
     (compute_group, ComputeGroup),
@@ -1162,7 +1172,8 @@ _opts = [
     (debug_group, DebugGroup),
     (baremetal_group, BaremetalGroup),
     (input_scenario_group, InputScenarioGroup),
-    (negative_group, NegativeGroup)
+    (negative_group, NegativeGroup),
+    (None, DefaultGroup)
 ]
 
 
@@ -1177,7 +1188,7 @@ def list_opts():
     The purpose of this is to allow tools like the Oslo sample config file
     generator to discover the options exposed to users.
     """
-    return [(g.name, o) for g, o in _opts]
+    return [(getattr(g, 'name', None), o) for g, o in _opts]
 
 
 # this should never be called outside of this class
