@@ -41,9 +41,16 @@ class ImageUtils(object):
         self.non_ssh_image_pattern = \
             CONF.input_scenario.non_ssh_image_regex
         # Setup clients
+        network_resources = {
+            'network': False,
+            'router': False,
+            'subnet': False,
+            'dhcp': False,
+        }
         self.isolated_creds = credentials.get_isolated_credentials(
             name='ScenarioImageUtils',
-            identity_version=CONF.identity.auth_version)
+            identity_version=CONF.identity.auth_version,
+            network_resources=network_resources)
         os = clients.Manager(self.isolated_creds.get_primary_creds())
         self.images_client = os.images_client
         self.flavors_client = os.flavors_client
@@ -103,9 +110,16 @@ class InputScenarioUtils(object):
                                             digit=string.digits)
 
     def __init__(self):
+        network_resources = {
+            'network': False,
+            'router': False,
+            'subnet': False,
+            'dhcp': False,
+        }
         self.isolated_creds = credentials.get_isolated_credentials(
             name='InputScenarioUtils',
-            identity_version=CONF.identity.auth_version)
+            identity_version=CONF.identity.auth_version,
+            network_resources=network_resources)
         os = clients.Manager(self.isolated_creds.get_primary_creds())
         self.images_client = os.images_client
         self.flavors_client = os.flavors_client
