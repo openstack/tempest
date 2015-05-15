@@ -96,6 +96,18 @@ class ImageClientV2JSON(service_client.ServiceClient):
         body = json.loads(body)
         return service_client.ResponseBody(resp, body)
 
+    def deactivate_image(self, image_id):
+        url = 'v2/images/%s/actions/deactivate' % image_id
+        resp, body = self.post(url, None)
+        self.expected_success(204, resp.status)
+        return service_client.ResponseBody(resp, body)
+
+    def reactivate_image(self, image_id):
+        url = 'v2/images/%s/actions/reactivate' % image_id
+        resp, body = self.post(url, None)
+        self.expected_success(204, resp.status)
+        return service_client.ResponseBody(resp, body)
+
     def delete_image(self, image_id):
         url = 'v2/images/%s' % image_id
         resp, _ = self.delete(url)
