@@ -22,6 +22,7 @@ from tempest_lib.services.identity.v3.token_client import V3TokenClientJSON
 from tempest.common import cred_provider
 from tempest.common import negative_rest_client
 from tempest import config
+from tempest import exceptions
 from tempest import manager
 from tempest.services.baremetal.v1.json.baremetal_client import \
     BaremetalClientJSON
@@ -343,11 +344,22 @@ class Manager(manager.Manager):
         self.credentials_client = CredentialsClientJSON(self.auth_provider,
                                                         **params)
         # Token clients do not use the catalog. They only need default_params.
-        self.token_client = TokenClientJSON(CONF.identity.uri,
-                                            **self.default_params)
+        # They read auth_url, so they should only be set if the corresponding
+        # API version is marked as enabled
+        if CONF.identity_feature_enabled.api_v2:
+            if CONF.identity.uri:
+                self.token_client = TokenClientJSON(
+                    CONF.identity.uri, **self.default_params)
+            else:
+                msg = 'Identity v2 API enabled, but no identity.uri set'
+                raise exceptions.InvalidConfiguration(msg)
         if CONF.identity_feature_enabled.api_v3:
-            self.token_v3_client = V3TokenClientJSON(CONF.identity.uri_v3,
-                                                     **self.default_params)
+            if CONF.identity.uri_v3:
+                self.token_v3_client = V3TokenClientJSON(
+                    CONF.identity.uri_v3, **self.default_params)
+            else:
+                msg = 'Identity v3 API enabled, but no identity.uri_v3 set'
+                raise exceptions.InvalidConfiguration(msg)
 
     def _set_volume_clients(self):
         params = {
