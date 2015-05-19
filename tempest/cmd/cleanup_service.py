@@ -667,7 +667,7 @@ class NetworkPoolService(NetworkService):
         self.data['pools'] = pools
 
 
-class NetworMeteringLabelRuleService(NetworkService):
+class NetworkMeteringLabelRuleService(NetworkService):
 
     def list(self):
         client = self.client
@@ -692,7 +692,7 @@ class NetworMeteringLabelRuleService(NetworkService):
         self.data['rules'] = rules
 
 
-class NetworMeteringLabelService(NetworkService):
+class NetworkMeteringLabelService(NetworkService):
 
     def list(self):
         client = self.client
@@ -1068,8 +1068,8 @@ def get_tenant_cleanup_services():
             tenant_services.append(NetworkVipService)
             tenant_services.append(NetworkPoolService)
         if test.is_extension_enabled('metering', 'network'):
-            tenant_services.append(NetworMeteringLabelRuleService)
-            tenant_services.append(NetworMeteringLabelService)
+            tenant_services.append(NetworkMeteringLabelRuleService)
+            tenant_services.append(NetworkMeteringLabelService)
         tenant_services.append(NetworkRouterService)
         tenant_services.append(NetworkFloatingIpService)
         tenant_services.append(NetworkPortService)
