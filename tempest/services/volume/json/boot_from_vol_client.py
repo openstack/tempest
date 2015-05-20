@@ -122,5 +122,5 @@ def get_cleanBFV_obj(auth_provider):
         'build_timeout': CONF.volume.build_timeout
     }
     params.update(default_params)
-    CleanBFVResource(auth_provider, **params)
+    return CleanBFVResource(auth_provider, **params)
 

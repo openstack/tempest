@@ -157,10 +157,11 @@ class ServersClientJSON(service_client.ServiceClient):
         server = self.get_server(server_id)
         resp, body = self.delete("servers/%s" % str(server_id))
         self.validate_response(common_schema.delete_server, resp, body)
-        self.wait_for_server_termination(server_id, True)
-        if server['os-extended-volumes:volumes_attached']:
-            self.bfv_cleanup.clean_bfv_resource([server[
-                'os-extended-volumes:volumes_attached'][0]['id']])
+        if CONF.compute_feature_enabled.boot_from_volume_only:
+            self.wait_for_server_termination(server_id, True)
+            if server['os-extended-volumes:volumes_attached']:
+                self.bfv_cleanup.clean_bfv_resource([server[
+                  'os-extended-volumes:volumes_attached'][0]['id']])
         return service_client.ResponseBody(resp, body)
 
     def list_servers(self, params=None):

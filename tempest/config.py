@@ -293,6 +293,10 @@ compute_features_group = cfg.OptGroup(name='compute-feature-enabled',
                                       title="Enabled Compute Service Features")
 
 ComputeFeaturesGroup = [
+    cfg.BoolOpt('boot_from_volume_only',
+                default=True,
+                help="if true, then all the servers will boot from volume "\
+                "only not from image"),
     cfg.BoolOpt('disk_config',
                 default=True,
                 help="If false, skip disk config tests"),
