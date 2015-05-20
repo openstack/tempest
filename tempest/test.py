@@ -486,7 +486,7 @@ class BaseTestCase(testtools.testcase.WithAttributes,
         """
         Clears isolated creds if set
         """
-        if hasattr(cls, '_cred_provider'):
+        if hasattr(cls, '_creds_provider'):
             cls._creds_provider.clear_isolated_creds()
 
     @classmethod
