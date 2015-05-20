@@ -66,16 +66,9 @@ class BaseIdentityV2Test(BaseIdentityTest):
 
     credentials = ['primary']
 
-    @classmethod
-    def setup_credentials(cls):
-        super(BaseIdentityV2Test, cls).setup_credentials()
-        cls.os = cls.get_client_manager(identity_version='v2')
-
-    @classmethod
-    def skip_checks(cls):
-        super(BaseIdentityV2Test, cls).skip_checks()
-        if not CONF.identity_feature_enabled.api_v2:
-            raise cls.skipException("Identity api v2 is not enabled")
+    # identity v2 tests should obtain tokens and create accounts via v2
+    # regardless of the configured CONF.identity.auth_version
+    identity_version = 'v2'
 
     @classmethod
     def setup_clients(cls):
@@ -94,7 +87,7 @@ class BaseIdentityV2Test(BaseIdentityTest):
 
 class BaseIdentityV2AdminTest(BaseIdentityV2Test):
 
-    credentials = ['admin']
+    credentials = ['primary', 'admin']
 
     @classmethod
     def setup_clients(cls):
@@ -117,16 +110,9 @@ class BaseIdentityV3Test(BaseIdentityTest):
 
     credentials = ['primary']
 
-    @classmethod
-    def setup_credentials(cls):
-        super(BaseIdentityV3Test, cls).setup_credentials()
-        cls.os = cls.get_client_manager(identity_version='v3')
-
-    @classmethod
-    def skip_checks(cls):
-        super(BaseIdentityV3Test, cls).skip_checks()
-        if not CONF.identity_feature_enabled.api_v3:
-            raise cls.skipException("Identity api v3 is not enabled")
+    # identity v3 tests should obtain tokens and create accounts via v3
+    # regardless of the configured CONF.identity.auth_version
+    identity_version = 'v3'
 
     @classmethod
     def setup_clients(cls):
@@ -146,7 +132,7 @@ class BaseIdentityV3Test(BaseIdentityTest):
 
 class BaseIdentityV3AdminTest(BaseIdentityV3Test):
 
-    credentials = ['admin']
+    credentials = ['primary', 'admin']
 
     @classmethod
     def setup_clients(cls):
