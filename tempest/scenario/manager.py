@@ -20,6 +20,7 @@ import netaddr
 from oslo_log import log
 import six
 from tempest_lib.common.utils import data_utils
+from tempest_lib.common.utils import misc as misc_utils
 from tempest_lib import exceptions as lib_exc
 
 from tempest.common import fixed_network
@@ -307,8 +308,13 @@ class ScenarioTest(tempest.test.BaseTestCase):
                                                   password=password)
         try:
             linux_client.validate_authentication()
-        except Exception:
-            LOG.exception('Initializing SSH connection to %s failed' % ip)
+        except Exception as e:
+            message = ('Initializing SSH connection to %(ip)s failed. '
+                       'Error: %(error)s' % {'ip': ip, 'error': e})
+            caller = misc_utils.find_test_caller()
+            if caller:
+                message = '(%s) %s' % (caller, message)
+            LOG.exception(message)
             # If we don't explicitly set for which servers we want to
             # log the console output then all the servers will be logged.
             # See the definition of _log_console_output()
