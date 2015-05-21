@@ -24,6 +24,8 @@ CONF = config.CONF
 
 class BaseObjectTest(tempest.test.BaseTestCase):
 
+    credentials = [['operator', CONF.object_storage.operator_role]]
+
     @classmethod
     def skip_checks(cls):
         super(BaseObjectTest, cls).skip_checks()
@@ -35,8 +37,9 @@ class BaseObjectTest(tempest.test.BaseTestCase):
     def setup_credentials(cls):
         cls.set_network_resources()
         super(BaseObjectTest, cls).setup_credentials()
-        operator_role = CONF.object_storage.operator_role
-        cls.os = cls.get_client_manager(roles=[operator_role])
+        # credentials may be overwritten by children classes
+        if hasattr(cls, 'os_roles_operator'):
+            cls.os = cls.os_roles_operator
 
     @classmethod
     def setup_clients(cls):

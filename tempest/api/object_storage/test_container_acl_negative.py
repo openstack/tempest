@@ -24,11 +24,14 @@ CONF = config.CONF
 
 class ObjectACLsNegativeTest(base.BaseObjectTest):
 
+    credentials = [['operator', CONF.object_storage.operator_role],
+                   ['operator_alt', CONF.object_storage.operator_role]]
+
     @classmethod
     def setup_credentials(cls):
         super(ObjectACLsNegativeTest, cls).setup_credentials()
-        cls.os_operator = cls.get_client_manager(
-            roles=[CONF.object_storage.operator_role], force_new=True)
+        cls.os = cls.os_roles_operator
+        cls.os_operator = cls.os_roles_operator_alt
 
     @classmethod
     def resource_setup(cls):

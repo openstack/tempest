@@ -25,12 +25,14 @@ CONF = config.CONF
 
 class AccountQuotasNegativeTest(base.BaseObjectTest):
 
+    credentials = [['operator', CONF.object_storage.operator_role],
+                   ['reseller', CONF.object_storage.reseller_admin_role]]
+
     @classmethod
     def setup_credentials(cls):
         super(AccountQuotasNegativeTest, cls).setup_credentials()
-        reseller_admin_role = CONF.object_storage.reseller_admin_role
-        cls.os_reselleradmin = cls.get_client_manager(
-            roles=[reseller_admin_role])
+        cls.os = cls.os_roles_operator
+        cls.os_reselleradmin = cls.os_roles_reseller
 
     @classmethod
     def resource_setup(cls):
