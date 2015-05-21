@@ -123,6 +123,15 @@ class BaseVolumesClientJSON(service_client.ServiceClient):
         self.expected_success(202, resp.status)
         return service_client.ResponseBody(resp, body)
 
+    def set_bootable_volume(self, volume_id, bootable):
+        """set a bootable flag for a volume - true or false."""
+        post_body = {"bootable": bootable}
+        post_body = json.dumps({'os-set_bootable': post_body})
+        url = 'volumes/%s/action' % (volume_id)
+        resp, body = self.post(url, post_body)
+        self.expected_success(200, resp.status)
+        return service_client.ResponseBody(resp, body)
+
     def detach_volume(self, volume_id):
         """Detaches a volume from an instance."""
         post_body = {}

@@ -1171,3 +1171,7 @@
 
 # Is the v2 volume API enabled (boolean value)
 #api_v2 = true
+
+# Update bootable status of a volume Not implemented on icehouse
+# (boolean value)
+#bootable = false
