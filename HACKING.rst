@@ -136,7 +136,7 @@ by test classes. Set-up stages are:
 Tear-down is also split in a series of steps (teardown stages), which are
 stacked for execution only if the corresponding setup stage had been
 reached during the setup phase. Tear-down stages are:
-- `clear_isolated_creds` (defined in the base test class)
+- `clear_credentials` (defined in the base test class)
 - `resource_cleanup`
 
 Skipping Tests
@@ -206,9 +206,10 @@ Parallel Test Execution
 -----------------------
 Tempest by default runs its tests in parallel this creates the possibility for
 interesting interactions between tests which can cause unexpected failures.
-Tenant isolation provides protection from most of the potential race conditions
-between tests outside the same class. But there are still a few of things to
-watch out for to try to avoid issues when running your tests in parallel.
+Dynamic credentials provides protection from most of the potential race
+conditions between tests outside the same class. But there are still a few of
+things to watch out for to try to avoid issues when running your tests in
+parallel.
 
 - Resources outside of a tenant scope still have the potential to conflict. This
   is a larger concern for the admin tests since most resources and actions that

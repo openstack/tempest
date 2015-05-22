@@ -15,7 +15,7 @@ import os
 
 from tempest.common import accounts
 from tempest.common import cred_provider
-from tempest.common import isolated_creds
+from tempest.common import dynamic_creds
 from tempest import config
 from tempest import exceptions
 
@@ -25,15 +25,15 @@ CONF = config.CONF
 # Return the right implementation of CredentialProvider based on config
 # Dropping interface and password, as they are never used anyways
 # TODO(andreaf) Drop them from the CredentialsProvider interface completely
-def get_isolated_credentials(name, network_resources=None,
+def get_credentials_provider(name, network_resources=None,
                              force_tenant_isolation=False,
                              identity_version=None):
     # If a test requires a new account to work, it can have it via forcing
-    # tenant isolation. A new account will be produced only for that test.
+    # dynamic credentials. A new account will be produced only for that test.
     # In case admin credentials are not available for the account creation,
     # the test should be skipped else it would fail.
-    if CONF.auth.allow_tenant_isolation or force_tenant_isolation:
-        return isolated_creds.IsolatedCreds(
+    if CONF.auth.use_dynamic_credentials or force_tenant_isolation:
+        return dynamic_creds.DynamicCredentialProvider(
             name=name,
             network_resources=network_resources,
             identity_version=identity_version)
@@ -53,8 +53,8 @@ def get_isolated_credentials(name, network_resources=None,
 # creds area vailable.
 def is_admin_available():
     is_admin = True
-    # If tenant isolation is enabled admin will be available
-    if CONF.auth.allow_tenant_isolation:
+    # If dynamic credentials is enabled admin will be available
+    if CONF.auth.use_dynamic_credentials:
         return is_admin
     # Check whether test accounts file has the admin specified or not
     elif (CONF.auth.test_accounts_file and
@@ -75,8 +75,8 @@ def is_admin_available():
 # are available so we can do a single call from skip_checks if alt
 # creds area vailable.
 def is_alt_available():
-    # If tenant isolation is enabled admin will be available
-    if CONF.auth.allow_tenant_isolation:
+    # If dynamic credentials is enabled admin will be available
+    if CONF.auth.use_dynamic_credentials:
         return True
     # Check whether test accounts file has the admin specified or not
     if (CONF.auth.test_accounts_file and

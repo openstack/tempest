@@ -30,7 +30,7 @@ class TestAdminAvailable(base.TestCase):
 
     def run_test(self, tenant_isolation, use_accounts_file, admin_creds):
 
-        cfg.CONF.set_default('allow_tenant_isolation',
+        cfg.CONF.set_default('use_dynamic_credentials',
                              tenant_isolation, group='auth')
         if use_accounts_file:
             accounts = [{'username': 'u1',

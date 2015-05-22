@@ -348,7 +348,7 @@ def main():
         CONF_PARSER = moves.configparser.SafeConfigParser()
         CONF_PARSER.optionxform = str
         CONF_PARSER.readfp(conf_file)
-    icreds = credentials.get_isolated_credentials('verify_tempest_config')
+    icreds = credentials.get_credentials_provider('verify_tempest_config')
     try:
         os = clients.Manager(icreds.get_primary_creds())
         services = check_service_availability(os, update)
@@ -370,7 +370,7 @@ def main():
             CONF_PARSER.write(outfile)
         outfile.close()
     finally:
-        icreds.clear_isolated_creds()
+        icreds.clear_creds()
 
 
 if __name__ == "__main__":

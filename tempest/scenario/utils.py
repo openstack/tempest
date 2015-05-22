@@ -104,11 +104,11 @@ class InputScenarioUtils(object):
             'subnet': False,
             'dhcp': False,
         }
-        self.isolated_creds = credentials.get_isolated_credentials(
+        self.cred_provider = credentials.get_credentials_provider(
             name='InputScenarioUtils',
             identity_version=CONF.identity.auth_version,
             network_resources=network_resources)
-        os = clients.Manager(self.isolated_creds.get_primary_creds())
+        os = clients.Manager(self.cred_provider.get_primary_creds())
         self.images_client = os.images_client
         self.flavors_client = os.flavors_client
         self.image_pattern = CONF.input_scenario.image_regex
@@ -120,7 +120,7 @@ class InputScenarioUtils(object):
         return nname
 
     def clear_creds(self):
-        self.isolated_creds.clear_isolated_creds()
+        self.cred_provider.clear_creds()
 
     @property
     def scenario_images(self):

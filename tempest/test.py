@@ -224,7 +224,7 @@ class BaseTestCase(testtools.testcase.WithAttributes,
     Tear-down is also split in a series of steps (teardown stages), which are
     stacked for execution only if the corresponding setup stage had been
     reached during the setup phase. Tear-down stages are:
-    - clear_isolated_creds (defined in the base test class)
+    - clear_credentials (defined in the base test class)
     - resource_cleanup
     """
 
@@ -258,7 +258,7 @@ class BaseTestCase(testtools.testcase.WithAttributes,
         cls.skip_checks()
         try:
             # Allocation of all required credentials and client managers
-            cls.teardowns.append(('credentials', cls.clear_isolated_creds))
+            cls.teardowns.append(('credentials', cls.clear_credentials))
             cls.setup_credentials()
             # Shortcuts to clients
             cls.setup_clients()
@@ -467,7 +467,7 @@ class BaseTestCase(testtools.testcase.WithAttributes,
             identity_version = getattr(cls, 'identity_version', None)
             identity_version = identity_version or CONF.identity.auth_version
 
-            cls._creds_provider = credentials.get_isolated_credentials(
+            cls._creds_provider = credentials.get_credentials_provider(
                 name=cls.__name__, network_resources=cls.network_resources,
                 force_tenant_isolation=force_tenant_isolation,
                 identity_version=identity_version)
@@ -515,12 +515,12 @@ class BaseTestCase(testtools.testcase.WithAttributes,
         return clients.Manager(credentials=creds, service=cls._service)
 
     @classmethod
-    def clear_isolated_creds(cls):
+    def clear_credentials(cls):
         """
-        Clears isolated creds if set
+        Clears creds if set
         """
         if hasattr(cls, '_creds_provider'):
-            cls._creds_provider.clear_isolated_creds()
+            cls._creds_provider.clear_creds()
 
     @classmethod
     def set_validation_resources(cls, keypair=None, floating_ip=None,
@@ -589,7 +589,7 @@ class BaseTestCase(testtools.testcase.WithAttributes,
 
         :return: network dict including 'id' and 'name'
         """
-        # Make sure isolated_creds exists and get a network client
+        # Make sure cred_provider exists and get a network client
         networks_client = cls.get_client_manager().compute_networks_client
         cred_provider = cls._get_credentials_provider()
         # In case of nova network, isolated tenants are not able to list the

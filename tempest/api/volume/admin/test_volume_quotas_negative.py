@@ -35,7 +35,7 @@ class BaseVolumeQuotasNegativeV2TestJSON(base.BaseVolumeAdminTest):
                                 'volumes': 1, 'snapshots': 1}
 
         # NOTE(gfidente): no need to restore original quota set
-        # after the tests as they only work with tenant isolation.
+        # after the tests as they only work with dynamic credentials.
         cls.quotas_client.update_quota_set(
             cls.demo_tenant_id,
             **cls.shared_quota_set)

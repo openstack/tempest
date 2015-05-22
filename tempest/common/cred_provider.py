@@ -128,7 +128,7 @@ class CredentialProvider(object):
         return
 
     @abc.abstractmethod
-    def clear_isolated_creds(self):
+    def clear_creds(self):
         return
 
     @abc.abstractmethod
