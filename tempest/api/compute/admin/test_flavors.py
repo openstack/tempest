@@ -82,7 +82,7 @@ class FlavorsAdminTestJSON(base.BaseV2ComputeAdminTest):
         self.assertEqual(flavor['os-flavor-access:is_public'], True)
 
         # Verify flavor is retrieved
-        flavor = self.client.get_flavor_details(flavor['id'])
+        flavor = self.client.show_flavor(flavor['id'])
         self.assertEqual(flavor['name'], flavor_name)
 
         return flavor['id']
@@ -160,7 +160,7 @@ class FlavorsAdminTestJSON(base.BaseV2ComputeAdminTest):
         verify_flavor_response_extension(flavor)
 
         # Verify flavor is retrieved
-        flavor = self.client.get_flavor_details(new_flavor_id)
+        flavor = self.client.show_flavor(new_flavor_id)
         self.assertEqual(flavor['name'], flavor_name)
         verify_flavor_response_extension(flavor)
 

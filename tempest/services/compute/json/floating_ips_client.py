@@ -35,7 +35,7 @@ class FloatingIPsClientJSON(service_client.ServiceClient):
         self.validate_response(schema.list_floating_ips, resp, body)
         return service_client.ResponseBodyList(resp, body['floating_ips'])
 
-    def get_floating_ip_details(self, floating_ip_id):
+    def show_floating_ip(self, floating_ip_id):
         """Get the details of a floating IP."""
         url = "os-floating-ips/%s" % str(floating_ip_id)
         resp, body = self.get(url)
@@ -90,7 +90,7 @@ class FloatingIPsClientJSON(service_client.ServiceClient):
 
     def is_resource_deleted(self, id):
         try:
-            self.get_floating_ip_details(id)
+            self.show_floating_ip(id)
         except lib_exc.NotFound:
             return True
         return False

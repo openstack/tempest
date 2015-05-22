@@ -100,7 +100,7 @@ class ServersTestJSON(base.BaseV2ComputeTest):
     def test_verify_created_server_vcpus(self):
         # Verify that the number of vcpus reported by the instance matches
         # the amount stated by the flavor
-        flavor = self.flavors_client.get_flavor_details(self.flavor_ref)
+        flavor = self.flavors_client.show_flavor(self.flavor_ref)
         linux_client = remote_client.RemoteClient(self.server, self.ssh_user,
                                                   self.password)
         self.assertEqual(flavor['vcpus'], linux_client.get_number_of_vcpus())

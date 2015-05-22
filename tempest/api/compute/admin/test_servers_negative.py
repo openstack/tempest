@@ -53,7 +53,7 @@ class ServersAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
         flavor_id = data_utils.rand_int_id(start=1000)
         while True:
             try:
-                self.flavors_client.get_flavor_details(flavor_id)
+                self.flavors_client.show_flavor(flavor_id)
             except lib_exc.NotFound:
                 break
             flavor_id = data_utils.rand_int_id(start=1000)
