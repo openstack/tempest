@@ -66,7 +66,7 @@ _tenant_usage_get['required'] = ['server_usages', 'start', 'stop', 'tenant_id',
                                  'total_hours', 'total_local_gb_usage',
                                  'total_memory_mb_usage', 'total_vcpus_usage']
 
-list_tenant = {
+list_tenant_usage = {
     'status_code': [200],
     'response_body': {
         'type': 'object',
@@ -80,7 +80,7 @@ list_tenant = {
     }
 }
 
-get_tenant = {
+get_tenant_usage = {
     'status_code': [200],
     'response_body': {
         'type': 'object',

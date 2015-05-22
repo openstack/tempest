@@ -40,7 +40,7 @@ class FloatingIPsClientJSON(service_client.ServiceClient):
         url = "os-floating-ips/%s" % str(floating_ip_id)
         resp, body = self.get(url)
         body = json.loads(body)
-        self.validate_response(schema.floating_ip, resp, body)
+        self.validate_response(schema.create_get_floating_ip, resp, body)
         return service_client.ResponseBody(resp, body['floating_ip'])
 
     def create_floating_ip(self, pool_name=None):
@@ -50,7 +50,7 @@ class FloatingIPsClientJSON(service_client.ServiceClient):
         post_body = json.dumps(post_body)
         resp, body = self.post(url, post_body)
         body = json.loads(body)
-        self.validate_response(schema.floating_ip, resp, body)
+        self.validate_response(schema.create_get_floating_ip, resp, body)
         return service_client.ResponseBody(resp, body['floating_ip'])
 
     def delete_floating_ip(self, floating_ip_id):
@@ -108,7 +108,7 @@ class FloatingIPsClientJSON(service_client.ServiceClient):
 
         resp, body = self.get(url)
         body = json.loads(body)
-        self.validate_response(schema.floating_ip_pools, resp, body)
+        self.validate_response(schema.list_floating_ip_pools, resp, body)
         return service_client.ResponseBodyList(resp, body['floating_ip_pools'])
 
     def create_floating_ips_bulk(self, ip_range, pool, interface):
