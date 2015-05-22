@@ -52,5 +52,5 @@ class ImageMembersNegativeTest(base.BaseV1ImageMembersTest):
         # Image is hidden from another tenants.
         image_id = self._create_image()
         self.assertRaises(lib_exc.NotFound,
-                          self.alt_img_cli.get_image,
+                          self.alt_img_cli.show_image,
                           image_id)

@@ -77,7 +77,7 @@ class CreateRegisterImagesTest(base.BaseV1ImageTest):
         self.assertEqual('New Http Image', body.get('name'))
         self.assertFalse(body.get('is_public'))
         self.client.wait_for_image_status(image_id, 'active')
-        self.client.get_image(image_id)
+        self.client.show_image(image_id)
 
     @test.idempotent_id('05b19d55-140c-40d0-b36b-fafd774d421b')
     def test_register_image_with_min_ram(self):

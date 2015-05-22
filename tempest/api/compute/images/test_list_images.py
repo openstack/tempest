@@ -37,7 +37,7 @@ class ListImagesTestJSON(base.BaseV2ComputeTest):
     @test.idempotent_id('490d0898-e12a-463f-aef0-c50156b9f789')
     def test_get_image(self):
         # Returns the correct details for a single image
-        image = self.client.get_image(self.image_ref)
+        image = self.client.show_image(self.image_ref)
         self.assertEqual(self.image_ref, image['id'])
 
     @test.idempotent_id('fd51b7f4-d4a3-4331-9885-866658112a6f')

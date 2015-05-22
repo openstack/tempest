@@ -44,7 +44,7 @@ class ImageUtils(object):
         self.flavors_client = os.flavors_client
 
     def ssh_user(self, image_id):
-        _image = self.images_client.get_image(image_id)
+        _image = self.images_client.show_image(image_id)
         for regex, user in self.ssh_users:
             # First match wins
             if re.match(regex, _image['name']) is not None:
@@ -57,14 +57,14 @@ class ImageUtils(object):
                              string=str(image['name']))
 
     def is_sshable_image(self, image_id):
-        _image = self.images_client.get_image(image_id)
+        _image = self.images_client.show_image(image_id)
         return self._is_sshable_image(_image)
 
     def _is_flavor_enough(self, flavor, image):
         return image['minDisk'] <= flavor['disk']
 
     def is_flavor_enough(self, flavor_id, image_id):
-        _image = self.images_client.get_image(image_id)
+        _image = self.images_client.show_image(image_id)
         _flavor = self.flavors_client.get_flavor_details(flavor_id)
         return self._is_flavor_enough(_flavor, _image)
 

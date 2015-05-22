@@ -240,7 +240,7 @@ class ImageClientJSON(service_client.ServiceClient):
         body = self._image_meta_from_headers(resp)
         return service_client.ResponseBody(resp, body)
 
-    def get_image(self, image_id):
+    def show_image(self, image_id):
         url = 'v1/images/%s' % image_id
         resp, body = self.get(url)
         self.expected_success(200, resp.status)

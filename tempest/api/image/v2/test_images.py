@@ -59,7 +59,7 @@ class BasicOperationsImagesTest(base.BaseV2ImageTest):
         self.client.store_image(image_id, image_file)
 
         # Now try to get image details
-        body = self.client.get_image(image_id)
+        body = self.client.show_image(image_id)
         self.assertEqual(image_id, body['id'])
         self.assertEqual(image_name, body['name'])
         self.assertEqual(uuid, body['ramdisk_id'])
@@ -118,7 +118,7 @@ class BasicOperationsImagesTest(base.BaseV2ImageTest):
 
         # Verifying updating
 
-        body = self.client.get_image(image_id)
+        body = self.client.show_image(image_id)
         self.assertEqual(image_id, body['id'])
         self.assertEqual(new_image_name, body['name'])
 
@@ -203,7 +203,7 @@ class ListImagesTest(base.BaseV2ImageTest):
         # Test to get all images by size
         image_id = self.created_images[1]
         # Get image metadata
-        image = self.client.get_image(image_id)
+        image = self.client.show_image(image_id)
 
         params = {"size": image['size']}
         self._list_by_param_value_and_assert(params)
@@ -213,7 +213,7 @@ class ListImagesTest(base.BaseV2ImageTest):
         # Test to get all images with size between 2000 to 3000
         image_id = self.created_images[1]
         # Get image metadata
-        image = self.client.get_image(image_id)
+        image = self.client.show_image(image_id)
 
         size = image['size']
         params = {"size_min": size - 500, "size_max": size + 500}
