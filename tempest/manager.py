@@ -47,8 +47,8 @@ class Manager(object):
         # Check if passed or default credentials are valid
         if not self.credentials.is_valid():
             raise exceptions.InvalidCredentials()
-        # Tenant isolation creates TestResources, but Accounts and some tests
-        # creates Credentials
+        # Tenant isolation creates TestResources, but
+        # PreProvisionedCredentialProvider and some tests create Credentials
         if isinstance(credentials, cred_provider.TestResources):
             creds = self.credentials.credentials
         else:

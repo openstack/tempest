@@ -50,7 +50,7 @@ class TestAdminAvailable(base.TestCase):
                                  'password': 'p',
                                  'types': ['admin']})
             self.useFixture(mockpatch.Patch(
-                'tempest.common.accounts.read_accounts_yaml',
+                'tempest.common.preprov_creds.read_accounts_yaml',
                 return_value=accounts))
             cfg.CONF.set_default('test_accounts_file',
                                  use_accounts_file, group='auth')

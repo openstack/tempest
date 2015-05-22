@@ -24,8 +24,8 @@ import six
 from tempest_lib import auth
 from tempest_lib.services.identity.v2 import token_client
 
-from tempest.common import accounts
 from tempest.common import cred_provider
+from tempest.common import preprov_creds
 from tempest import config
 from tempest import exceptions
 from tempest.tests import base
@@ -34,10 +34,10 @@ from tempest.tests import fake_http
 from tempest.tests import fake_identity
 
 
-class TestAccount(base.TestCase):
+class TestPreProvisionedCredentials(base.TestCase):
 
     def setUp(self):
-        super(TestAccount, self).setUp()
+        super(TestPreProvisionedCredentials, self).setUp()
         self.useFixture(fake_config.ConfigFixture())
         self.stubs.Set(config, 'TempestConfigPrivate', fake_config.FakePrivate)
         self.fake_http = fake_http.fake_httplib2(return_type=200)
@@ -71,7 +71,7 @@ class TestAccount(base.TestCase):
              'password': 'p', 'roles': [cfg.CONF.identity.admin_role]},
         ]
         self.accounts_mock = self.useFixture(mockpatch.Patch(
-            'tempest.common.accounts.read_accounts_yaml',
+            'tempest.common.preprov_creds.read_accounts_yaml',
             return_value=self.test_accounts))
         cfg.CONF.set_default('test_accounts_file', 'fake_path', group='auth')
         self.useFixture(mockpatch.Patch('os.path.isfile', return_value=True))
@@ -88,7 +88,8 @@ class TestAccount(base.TestCase):
     def test_get_hash(self):
         self.stubs.Set(token_client.TokenClient, 'raw_request',
                        fake_identity._fake_v2_response)
-        test_account_class = accounts.Accounts('v2', 'test_name')
+        test_account_class = preprov_creds.PreProvisionedCredentialProvider(
+            'v2', 'test_name')
         hash_list = self._get_hash_list(self.test_accounts)
         test_cred_dict = self.test_accounts[3]
         test_creds = auth.get_credentials(fake_identity.FAKE_AUTH_URL,
@@ -97,7 +98,8 @@ class TestAccount(base.TestCase):
         self.assertEqual(hash_list[3], results)
 
     def test_get_hash_dict(self):
-        test_account_class = accounts.Accounts('v2', 'test_name')
+        test_account_class = preprov_creds.PreProvisionedCredentialProvider(
+            'v2', 'test_name')
         hash_dict = test_account_class.get_hash_dict(self.test_accounts)
         hash_list = self._get_hash_list(self.test_accounts)
         for hash in hash_list:
@@ -109,7 +111,9 @@ class TestAccount(base.TestCase):
         self.useFixture(mockpatch.Patch('os.path.isfile', return_value=True))
         with mock.patch('six.moves.builtins.open', mock.mock_open(),
                         create=True):
-            test_account_class = accounts.Accounts('v2', 'test_name')
+            test_account_class = (
+                preprov_creds.PreProvisionedCredentialProvider(
+                    'v2', 'test_name'))
             res = test_account_class._create_hash_file('12345')
         self.assertFalse(res, "_create_hash_file should return False if the "
                          "pseudo-lock file already exists")
@@ -119,7 +123,9 @@ class TestAccount(base.TestCase):
         self.useFixture(mockpatch.Patch('os.path.isfile', return_value=False))
         with mock.patch('six.moves.builtins.open', mock.mock_open(),
                         create=True):
-            test_account_class = accounts.Accounts('v2', 'test_name')
+            test_account_class = (
+                preprov_creds.PreProvisionedCredentialProvider(
+                    'v2', 'test_name'))
             res = test_account_class._create_hash_file('12345')
         self.assertTrue(res, "_create_hash_file should return True if the "
                         "pseudo-lock doesn't already exist")
@@ -131,16 +137,16 @@ class TestAccount(base.TestCase):
         hash_list = self._get_hash_list(self.test_accounts)
         mkdir_mock = self.useFixture(mockpatch.Patch('os.mkdir'))
         self.useFixture(mockpatch.Patch('os.path.isfile', return_value=False))
-        test_account_class = accounts.Accounts('v2', 'test_name')
+        test_account_class = preprov_creds.PreProvisionedCredentialProvider(
+            'v2', 'test_name')
         with mock.patch('six.moves.builtins.open', mock.mock_open(),
                         create=True) as open_mock:
             test_account_class._get_free_hash(hash_list)
-            lock_path = os.path.join(lockutils.get_lock_path(accounts.CONF),
-                                     'test_accounts',
-                                     hash_list[0])
+            lock_path = os.path.join(lockutils.get_lock_path(
+                preprov_creds.CONF), 'test_accounts', hash_list[0])
             open_mock.assert_called_once_with(lock_path, 'w')
-        mkdir_path = os.path.join(accounts.CONF.oslo_concurrency.lock_path,
-                                  'test_accounts')
+        mkdir_path = os.path.join(
+            preprov_creds.CONF.oslo_concurrency.lock_path, 'test_accounts')
         mkdir_mock.mock.assert_called_once_with(mkdir_path)
 
     @mock.patch('oslo_concurrency.lockutils.lock')
@@ -150,7 +156,8 @@ class TestAccount(base.TestCase):
         self.useFixture(mockpatch.Patch('os.path.isdir', return_value=True))
         # Emulate all lcoks in list are in use
         self.useFixture(mockpatch.Patch('os.path.isfile', return_value=True))
-        test_account_class = accounts.Accounts('v2', 'test_name')
+        test_account_class = preprov_creds.PreProvisionedCredentialProvider(
+            'v2', 'test_name')
         with mock.patch('six.moves.builtins.open', mock.mock_open(),
                         create=True):
             self.assertRaises(exceptions.InvalidConfiguration,
@@ -161,7 +168,8 @@ class TestAccount(base.TestCase):
         # Emulate no pre-existing lock
         self.useFixture(mockpatch.Patch('os.path.isdir', return_value=True))
         hash_list = self._get_hash_list(self.test_accounts)
-        test_account_class = accounts.Accounts('v2', 'test_name')
+        test_account_class = preprov_creds.PreProvisionedCredentialProvider(
+            'v2', 'test_name')
 
         def _fake_is_file(path):
             # Fake isfile() to return that the path exists unless a specific
@@ -174,9 +182,9 @@ class TestAccount(base.TestCase):
         with mock.patch('six.moves.builtins.open', mock.mock_open(),
                         create=True) as open_mock:
             test_account_class._get_free_hash(hash_list)
-            lock_path = os.path.join(lockutils.get_lock_path(accounts.CONF),
-                                     'test_accounts',
-                                     hash_list[3])
+            lock_path = os.path.join(
+                lockutils.get_lock_path(preprov_creds.CONF),
+                'test_accounts', hash_list[3])
             open_mock.assert_has_calls([mock.call(lock_path, 'w')])
 
     @mock.patch('oslo_concurrency.lockutils.lock')
@@ -186,14 +194,15 @@ class TestAccount(base.TestCase):
         self.useFixture(mockpatch.Patch('os.path.isfile', return_value=True))
         # Pretend the lock dir is empty
         self.useFixture(mockpatch.Patch('os.listdir', return_value=[]))
-        test_account_class = accounts.Accounts('v2', 'test_name')
+        test_account_class = preprov_creds.PreProvisionedCredentialProvider(
+            'v2', 'test_name')
         remove_mock = self.useFixture(mockpatch.Patch('os.remove'))
         rmdir_mock = self.useFixture(mockpatch.Patch('os.rmdir'))
         test_account_class.remove_hash(hash_list[2])
-        hash_path = os.path.join(lockutils.get_lock_path(accounts.CONF),
+        hash_path = os.path.join(lockutils.get_lock_path(preprov_creds.CONF),
                                  'test_accounts',
                                  hash_list[2])
-        lock_path = os.path.join(accounts.CONF.oslo_concurrency.lock_path,
+        lock_path = os.path.join(preprov_creds.CONF.oslo_concurrency.lock_path,
                                  'test_accounts')
         remove_mock.mock.assert_called_once_with(hash_path)
         rmdir_mock.mock.assert_called_once_with(lock_path)
@@ -206,33 +215,37 @@ class TestAccount(base.TestCase):
         # Pretend the lock dir is empty
         self.useFixture(mockpatch.Patch('os.listdir', return_value=[
             hash_list[1], hash_list[4]]))
-        test_account_class = accounts.Accounts('v2', 'test_name')
+        test_account_class = preprov_creds.PreProvisionedCredentialProvider(
+            'v2', 'test_name')
         remove_mock = self.useFixture(mockpatch.Patch('os.remove'))
         rmdir_mock = self.useFixture(mockpatch.Patch('os.rmdir'))
         test_account_class.remove_hash(hash_list[2])
-        hash_path = os.path.join(lockutils.get_lock_path(accounts.CONF),
+        hash_path = os.path.join(lockutils.get_lock_path(preprov_creds.CONF),
                                  'test_accounts',
                                  hash_list[2])
         remove_mock.mock.assert_called_once_with(hash_path)
         rmdir_mock.mock.assert_not_called()
 
     def test_is_multi_user(self):
-        test_accounts_class = accounts.Accounts('v2', 'test_name')
+        test_accounts_class = preprov_creds.PreProvisionedCredentialProvider(
+            'v2', 'test_name')
         self.assertTrue(test_accounts_class.is_multi_user())
 
     def test_is_not_multi_user(self):
         self.test_accounts = [self.test_accounts[0]]
         self.useFixture(mockpatch.Patch(
-            'tempest.common.accounts.read_accounts_yaml',
+            'tempest.common.preprov_creds.read_accounts_yaml',
             return_value=self.test_accounts))
-        test_accounts_class = accounts.Accounts('v2', 'test_name')
+        test_accounts_class = preprov_creds.PreProvisionedCredentialProvider(
+            'v2', 'test_name')
         self.assertFalse(test_accounts_class.is_multi_user())
 
     def test__get_creds_by_roles_one_role(self):
         self.useFixture(mockpatch.Patch(
-            'tempest.common.accounts.read_accounts_yaml',
+            'tempest.common.preprov_creds.read_accounts_yaml',
             return_value=self.test_accounts))
-        test_accounts_class = accounts.Accounts('v2', 'test_name')
+        test_accounts_class = preprov_creds.PreProvisionedCredentialProvider(
+            'v2', 'test_name')
         hashes = test_accounts_class.hash_dict['roles']['role4']
         temp_hash = hashes[0]
         get_free_hash_mock = self.useFixture(mockpatch.PatchObject(
@@ -247,9 +260,10 @@ class TestAccount(base.TestCase):
 
     def test__get_creds_by_roles_list_role(self):
         self.useFixture(mockpatch.Patch(
-            'tempest.common.accounts.read_accounts_yaml',
+            'tempest.common.preprov_creds.read_accounts_yaml',
             return_value=self.test_accounts))
-        test_accounts_class = accounts.Accounts('v2', 'test_name')
+        test_accounts_class = preprov_creds.PreProvisionedCredentialProvider(
+            'v2', 'test_name')
         hashes = test_accounts_class.hash_dict['roles']['role4']
         hashes2 = test_accounts_class.hash_dict['roles']['role2']
         hashes = list(set(hashes) & set(hashes2))
@@ -266,9 +280,10 @@ class TestAccount(base.TestCase):
 
     def test__get_creds_by_roles_no_admin(self):
         self.useFixture(mockpatch.Patch(
-            'tempest.common.accounts.read_accounts_yaml',
+            'tempest.common.preprov_creds.read_accounts_yaml',
             return_value=self.test_accounts))
-        test_accounts_class = accounts.Accounts('v2', 'test_name')
+        test_accounts_class = preprov_creds.PreProvisionedCredentialProvider(
+            'v2', 'test_name')
         hashes = list(test_accounts_class.hash_dict['creds'].keys())
         admin_hashes = test_accounts_class.hash_dict['roles'][
             cfg.CONF.identity.admin_role]
@@ -292,9 +307,10 @@ class TestAccount(base.TestCase):
              'password': 'p', 'roles': ['role-7', 'role-11'],
              'resources': {'network': 'network-2'}}]
         self.useFixture(mockpatch.Patch(
-            'tempest.common.accounts.read_accounts_yaml',
+            'tempest.common.preprov_creds.read_accounts_yaml',
             return_value=test_accounts))
-        test_accounts_class = accounts.Accounts('v2', 'test_name')
+        test_accounts_class = preprov_creds.PreProvisionedCredentialProvider(
+            'v2', 'test_name')
         with mock.patch('tempest.services.compute.json.networks_client.'
                         'NetworksClient.list_networks',
                         return_value={'networks': [{'name': 'network-2',
@@ -326,13 +342,14 @@ class TestNotLockingAccount(base.TestCase):
              'password': 'p'},
         ]
         self.useFixture(mockpatch.Patch(
-            'tempest.common.accounts.read_accounts_yaml',
+            'tempest.common.preprov_creds.read_accounts_yaml',
             return_value=self.test_accounts))
         cfg.CONF.set_default('test_accounts_file', '', group='auth')
         self.useFixture(mockpatch.Patch('os.path.isfile', return_value=True))
 
     def test_get_creds_roles_nonlocking_invalid(self):
-        test_accounts_class = accounts.NotLockingAccounts('v2', 'test_name')
+        test_accounts_class = preprov_creds.NonLockingCredentialProvider(
+            'v2', 'test_name')
         self.assertRaises(exceptions.InvalidConfiguration,
                           test_accounts_class.get_creds_by_roles,
                           ['fake_role'])

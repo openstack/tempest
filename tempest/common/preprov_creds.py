@@ -36,11 +36,11 @@ def read_accounts_yaml(path):
     return accounts
 
 
-class Accounts(cred_provider.CredentialProvider):
+class PreProvisionedCredentialProvider(cred_provider.CredentialProvider):
 
     def __init__(self, identity_version=None, name=None):
-        super(Accounts, self).__init__(identity_version=identity_version,
-                                       name=name)
+        super(PreProvisionedCredentialProvider, self).__init__(
+            identity_version=identity_version, name=name)
         if (CONF.auth.test_accounts_file and
                 os.path.isfile(CONF.auth.test_accounts_file)):
             accounts = read_accounts_yaml(CONF.auth.test_accounts_file)
@@ -295,7 +295,7 @@ class Accounts(cred_provider.CredentialProvider):
         return net_creds
 
 
-class NotLockingAccounts(Accounts):
+class NonLockingCredentialProvider(PreProvisionedCredentialProvider):
     """Credentials provider which always returns the first and second
     configured accounts as primary and alt users.
     This credential provider can be used in case of serial test execution
