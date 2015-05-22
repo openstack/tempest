@@ -617,7 +617,7 @@ def _resolve_image(image, imgtype):
 
 
 def _get_image_by_name(client, name):
-    body = client.images.image_list()
+    body = client.images.list_images()
     for image in body:
         if name == image['name']:
             return image

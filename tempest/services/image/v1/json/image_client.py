@@ -201,7 +201,7 @@ class ImageClientJSON(service_client.ServiceClient):
         self.expected_success(200, resp.status)
         return service_client.ResponseBody(resp, body)
 
-    def image_list(self, **kwargs):
+    def list_images(self, **kwargs):
         url = 'v1/images'
 
         if len(kwargs) > 0:
