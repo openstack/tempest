@@ -324,7 +324,7 @@ class BaseTestCase(testtools.testcase.WithAttributes,
         if 'admin' in cls.credentials and not credentials.is_admin_available():
             msg = "Missing Identity Admin API credentials in configuration."
             raise cls.skipException(msg)
-        if 'alt' is cls.credentials and not credentials.is_alt_available():
+        if 'alt' in cls.credentials and not credentials.is_alt_available():
             msg = "Missing a 2nd set of API credentials in configuration."
             raise cls.skipException(msg)
         if hasattr(cls, 'identity_version'):
