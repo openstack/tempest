@@ -159,7 +159,7 @@ class ImageClientV2JSON(service_client.ServiceClient):
         self.expected_success(204, resp.status)
         return service_client.ResponseBody(resp)
 
-    def get_image_membership(self, image_id):
+    def list_image_members(self, image_id):
         url = 'v2/images/%s/members' % image_id
         resp, body = self.get(url)
         self.expected_success(200, resp.status)

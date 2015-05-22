@@ -258,7 +258,7 @@ class ImageClientJSON(service_client.ServiceClient):
         """Returns the primary type of resource this client works with."""
         return 'image_meta'
 
-    def get_image_membership(self, image_id):
+    def list_image_members(self, image_id):
         url = 'v1/images/%s/members' % image_id
         resp, body = self.get(url)
         self.expected_success(200, resp.status)
