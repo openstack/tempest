@@ -172,6 +172,12 @@ class BaseIdentityV3AdminTest(BaseIdentityV3Test):
         if len(role) > 0:
             return role[0]
 
+    def delete_domain(self, domain_id):
+        # NOTE(mpavlase) It is necessary to disable the domain before deleting
+        # otherwise it raises Forbidden exception
+        self.client.update_domain(domain_id, enabled=False)
+        self.client.delete_domain(domain_id)
+
 
 class DataGenerator(object):
 
