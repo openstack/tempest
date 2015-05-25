@@ -323,7 +323,8 @@ class ScenarioTest(tempest.test.BaseTestCase):
 
         return linux_client
 
-    def _image_create(self, name, fmt, path, properties=None):
+    def _image_create(self, name, fmt, path,
+                      disk_format=None, properties=None):
         if properties is None:
             properties = {}
         name = data_utils.rand_name('%s-' % name)
@@ -332,10 +333,10 @@ class ScenarioTest(tempest.test.BaseTestCase):
         params = {
             'name': name,
             'container_format': fmt,
-            'disk_format': fmt,
+            'disk_format': disk_format or fmt,
             'is_public': 'False',
         }
-        params.update(properties)
+        params['properties'] = properties
         image = self.image_client.create_image(**params)
         self.addCleanup(self.image_client.delete_image, image['id'])
         self.assertEqual("queued", image['status'])
@@ -349,23 +350,22 @@ class ScenarioTest(tempest.test.BaseTestCase):
         ami_img_path = CONF.scenario.img_dir + "/" + CONF.scenario.ami_img_file
         img_container_format = CONF.scenario.img_container_format
         img_disk_format = CONF.scenario.img_disk_format
+        img_properties = CONF.scenario.img_properties
         LOG.debug("paths: img: %s, container_fomat: %s, disk_format: %s, "
-                  "ami: %s, ari: %s, aki: %s" %
+                  "properties: %s, ami: %s, ari: %s, aki: %s" %
                   (img_path, img_container_format, img_disk_format,
-                   ami_img_path, ari_img_path, aki_img_path))
+                   img_properties, ami_img_path, ari_img_path, aki_img_path))
         try:
             self.image = self._image_create('scenario-img',
                                             img_container_format,
                                             img_path,
-                                            properties={'disk_format':
-                                                        img_disk_format})
+                                            disk_format=img_disk_format,
+                                            properties=img_properties)
         except IOError:
             LOG.debug("A qcow2 image was not found. Try to get a uec image.")
             kernel = self._image_create('scenario-aki', 'aki', aki_img_path)
             ramdisk = self._image_create('scenario-ari', 'ari', ari_img_path)
-            properties = {
-                'properties': {'kernel_id': kernel, 'ramdisk_id': ramdisk}
-            }
+            properties = {'kernel_id': kernel, 'ramdisk_id': ramdisk}
             self.image = self._image_create('scenario-ami', 'ami',
                                             path=ami_img_path,
                                             properties=properties)
