@@ -54,12 +54,11 @@ class CleanBFVResource(BaseVolumesClientJSON, BaseSnapshotsClientJSON):
                     raise exceptions.TimeoutException(message)
 
     def _delete_attached_snapshots(self,volume_id):
-        self.bfv_snapshots = self.list_snapshots()
-        for snapshot in self.bfv_snapshots:
+        bfv_snapshots = self.list_snapshots()
+        for snapshot in bfv_snapshots:
             if snapshot['volume_id'] == volume_id:
                 self.delete_snapshot(snapshot['id'])
                 self._wait_for_snapshot_deletion(snapshot['id'])
-                self.bfv_snapshots.remove(snapshot)
 
     def volume_not_deletable(self, volume):
         """This will return true if either volume does not exist
