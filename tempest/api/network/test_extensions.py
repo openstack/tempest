@@ -35,10 +35,8 @@ class ExtensionsTestJSON(base.BaseNetworkTest):
     @test.idempotent_id('ef28c7e6-e646-4979-9d67-deb207bc5564')
     def test_list_show_extensions(self):
         # List available extensions for the tenant
-        expected_alias = ['security-group', 'l3_agent_scheduler',
-                          'ext-gw-mode', 'binding', 'quotas',
-                          'agent', 'dhcp_agent_scheduler', 'provider',
-                          'router', 'extraroute', 'external-net',
+        expected_alias = ['security-group', 'binding', 'quotas',
+                          'agent', 'router', 'external-net',
                           'allowed-address-pairs', 'extra_dhcp_opt']
         expected_alias = [ext for ext in expected_alias if
                           test.is_extension_enabled(ext, 'network')]
