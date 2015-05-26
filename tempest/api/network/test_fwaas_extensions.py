@@ -99,8 +99,13 @@ class FWaaSExtensionTestJSON(base.BaseNetworkTest):
 
         if not test.call_until_true(_wait, CONF.network.build_timeout,
                                     CONF.network.build_interval):
-            m = ("Timed out waiting for firewall %s to reach %s state(s)" %
-                 (fw_id, target_states))
+            status = self.client.show_firewall(fw_id)['firewall']['status']
+            m = ("Timed out waiting for firewall %s to reach %s state(s) "
+                 "after %ss, currently in %s state." %
+                 (fw_id,
+                  target_states,
+                  CONF.network.build_interval,
+                  status))
             raise exceptions.TimeoutException(m)
 
     @test.idempotent_id('1b84cf01-9c09-4ce7-bc72-b15e39076468')
