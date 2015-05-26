@@ -41,8 +41,6 @@ class TestVolumeBootPattern(manager.ScenarioTest):
         super(TestVolumeBootPattern, cls).skip_checks()
         if not CONF.volume_feature_enabled.snapshot:
             raise cls.skipException("Cinder volume snapshots are disabled")
-        if CONF.volume.storage_protocol == 'ceph':
-            raise cls.skipException('Skip until bug 1439371 is fixed.')
 
     def _create_volume_from_image(self):
         img_uuid = CONF.compute.image_ref
