@@ -47,8 +47,6 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
             self.__class__.server_id = self.rebuild_server(self.server_id)
 
     def tearDown(self):
-        server = self.client.get_server(self.server_id)
-        self.assertEqual(self.image_ref, server['image']['id'])
         self.server_check_teardown()
         super(ServerActionsTestJSON, self).tearDown()
 
@@ -110,6 +108,14 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         # The server should be signaled to reboot gracefully
         self._test_reboot_server('SOFT')
 
+    def _rebuild_server_and_check(self, image_ref):
+        rebuilt_server = self.client.rebuild(self.server_id, image_ref)
+        self.client.wait_for_server_status(self.server_id, 'ACTIVE')
+        msg = ('Server was not rebuilt to the original image. '
+               'The original image: {0}. The current image: {1}'
+               .format(image_ref, rebuilt_server['image']['id']))
+        self.assertEqual(image_ref, rebuilt_server['image']['id'], msg)
+
     @test.idempotent_id('aaa6cdf3-55a7-461a-add9-1c8596b9a07c')
     def test_rebuild_server(self):
         # The server should be rebuilt using the provided image and data
@@ -129,8 +135,7 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         # If the server was rebuilt on a different image, restore it to the
         # original image once the test ends
         if self.image_ref_alt != self.image_ref:
-            self.addCleanup(self.client.rebuild,
-                            (self.server_id, self.image_ref))
+            self.addCleanup(self._rebuild_server_and_check, self.image_ref)
 
         # Verify the properties in the initial response are correct
         self.assertEqual(self.server_id, rebuilt_server['id'])
@@ -157,11 +162,15 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         # image and remain in SHUTOFF state
         server = self.client.get_server(self.server_id)
         old_image = server['image']['id']
-        new_image = self.image_ref_alt \
-            if old_image == self.image_ref else self.image_ref
+        new_image = (self.image_ref_alt
+                     if old_image == self.image_ref else self.image_ref)
         self.client.stop(self.server_id)
         self.client.wait_for_server_status(self.server_id, 'SHUTOFF')
         rebuilt_server = self.client.rebuild(self.server_id, new_image)
+        # If the server was rebuilt on a different image, restore it to the
+        # original image once the test ends
+        if self.image_ref_alt != self.image_ref:
+            self.addCleanup(self._rebuild_server_and_check, old_image)
 
         # Verify the properties in the initial response are correct
         self.assertEqual(self.server_id, rebuilt_server['id'])
@@ -175,10 +184,6 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         rebuilt_image_id = server['image']['id']
         self.assertEqual(new_image, rebuilt_image_id)
 
-        # Restore to the original image (The tearDown will test it again)
-        if self.image_ref_alt != self.image_ref:
-            self.client.rebuild(self.server_id, old_image)
-            self.client.wait_for_server_status(self.server_id, 'SHUTOFF')
         self.client.start(self.server_id)
 
     def _test_resize_server_confirm(self, stop=False):
