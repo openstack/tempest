@@ -991,7 +991,7 @@ class NetworkScenarioTest(ScenarioTest):
         router_id = CONF.network.public_router_id
         network_id = CONF.network.public_network_id
         if router_id:
-            resp, body = client.show_router(router_id)
+            body = client.show_router(router_id)
             return net_resources.AttributeDict(**body['router'])
         elif network_id:
             router = self._create_router(client, tenant_id)
