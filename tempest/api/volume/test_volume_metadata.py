@@ -75,7 +75,7 @@ class VolumesV2MetadataTest(base.BaseVolumeTest):
             self.volume_id, update)
         # Get the metadata of the volume
         body = self.volumes_client.show_volume_metadata(self.volume_id)
-        self.assertThat(body.items(), matchers.ContainsAll(update.items()))
+        self.assertEqual(update, body)
 
     @test.idempotent_id('862261c5-8df4-475a-8c21-946e50e36a20')
     def test_update_volume_metadata_item(self):
