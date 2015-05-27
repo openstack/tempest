@@ -14,6 +14,74 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+"""
+Utility for creating **accounts.yaml** file for concurrent test runs.
+Creates one primary user, one alt user, one swift admin, one stack owner
+and one admin (optionally) for each concurrent thread. The utility creates
+user for each tenant. The **accounts.yaml** file will be valid and contain
+credentials for created users, so each user will be in separate tenant and
+have the username, tenant_name, password and roles.
+
+**Usage:** ``tempest-account-generator [-h] [OPTIONS] accounts_file.yaml``.
+
+Positional Arguments
+-----------------
+**accounts_file.yaml** (Required) Provide an output accounts yaml file. Utility
+creates a .yaml file in the directory where the command is ran. The appropriate
+name for the file is *accounts.yaml* and it should be placed in *tempest/etc*
+directory.
+
+Authentication
+--------------
+
+Account generator creates users and tenants so it needs the admin credentials
+of your cloud to operate properly. The corresponding info can be given either
+through CLI options or environment variables.
+
+You're probably familiar with these, but just to remind::
+
+    +----------+------------------+----------------------+
+    | Param    | CLI              | Environment Variable |
+    +----------+------------------+----------------------+
+    | Username | --os-username    | OS_USERNAME          |
+    | Password | --os-password    | OS_PASSWORD          |
+    | Tenant   | --os-tenant-name | OS_TENANT_NAME       |
+    +----------+------------------+----------------------+
+
+Optional Arguments
+-----------------
+**-h**, **--help** (Optional) Shows help message with the description of
+utility and its arguments, and exits.
+
+**c /etc/tempest.conf**, **--config-file /etc/tempest.conf** (Optional) Path to
+tempest config file.
+
+**--os-username <auth-user-name>** (Optional) Name used for authentication with
+the OpenStack Identity service. Defaults to env[OS_USERNAME]. Note: User should
+have permissions to create new user accounts and tenants.
+
+**--os-password <auth-password>** (Optional) Password used for authentication
+with the OpenStack Identity service. Defaults to env[OS_PASSWORD].
+
+**--os-tenant-name <auth-tenant-name>** (Optional) Tenant to request
+authorization on. Defaults to env[OS_TENANT_NAME].
+
+**--tag TAG** (Optional) Resources tag. Each created resource (user, project)
+will have the prefix with the given TAG in its name. Using tag is recommended
+for the further using, cleaning resources.
+
+**-r CONCURRENCY**, **--concurrency CONCURRENCY** (Required) Concurrency count
+(default: 1). The number of accounts required can be estimated as
+CONCURRENCY x 2. Each user provided in *accounts.yaml* file will be in
+a different tenant. This is required to provide isolation between test for
+running in parallel.
+
+**--with-admin** (Optional) Creates admin for each concurrent group
+(default: False).
+
+To see help on specific argument, please do: ``tempest-account-generator
+[OPTIONS] <accounts_file.yaml> -h``.
+"""
 import argparse
 import os
 
@@ -199,9 +267,9 @@ def dump_accounts(opts, resources):
 
 
 def get_options():
-    usage_string = ('account_generator [-h] <ARG> ...\n\n'
+    usage_string = ('tempest-account-generator [-h] <ARG> ...\n\n'
                     'To see help on specific argument, do:\n'
-                    'account_generator <ARG> -h')
+                    'tempest-account-generator <ARG> -h')
     parser = argparse.ArgumentParser(
         description='Create accounts.yaml file for concurrent test runs. '
                     'One primary user, one alt user, '
@@ -218,7 +286,7 @@ def get_options():
     parser.add_argument('--os-username',
                         metavar='<auth-user-name>',
                         default=os.environ.get('OS_USERNAME'),
-                        help='User should have permitions '
+                        help='User should have permissions '
                              'to create new user accounts and '
                              'tenants. Defaults to env[OS_USERNAME].')
     parser.add_argument('--os-password',
@@ -243,7 +311,7 @@ def get_options():
     parser.add_argument('--with-admin',
                         action='store_true',
                         dest='admin',
-                        help='Create admin in every tenant')
+                        help='Creates admin for each concurrent group')
     parser.add_argument('accounts',
                         metavar='accounts_file.yaml',
                         help='Output accounts yaml file')

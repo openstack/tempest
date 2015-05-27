@@ -45,6 +45,7 @@ Command Documentation
 .. toctree::
    :maxdepth: 1
 
+   account_generator
    cleanup
    javelin
 
