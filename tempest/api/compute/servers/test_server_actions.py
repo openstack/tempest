@@ -42,6 +42,10 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         # Check if the server is in a clean state after test
         try:
             self.client.wait_for_server_status(self.server_id, 'ACTIVE')
+        except lib_exc.NotFound:
+            # The server was deleted by previous test, create a new one
+            server = self.create_test_server(wait_until='ACTIVE')
+            self.__class__.server_id = server['id']
         except Exception:
             # Rebuild server if something happened to it during a test
             self.__class__.server_id = self.rebuild_server(self.server_id)
