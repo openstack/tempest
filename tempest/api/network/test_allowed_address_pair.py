@@ -15,6 +15,7 @@
 
 import netaddr
 
+from tempest_lib import decorators
 from tempest.api.network import base
 from tempest import config
 from tempest import test
@@ -96,6 +97,7 @@ class AllowedAddressPairTestJSON(base.BaseNetworkTest):
 
     @test.attr(type='smoke')
     @test.idempotent_id('9599b337-272c-47fd-b3cf-509414414ac4')
+    @decorators.skip_because(bug="1351979")
     def test_update_port_with_address_pair(self):
         # Update port with allowed address pair
         self._update_port_with_address(self.ip_address)
@@ -109,6 +111,7 @@ class AllowedAddressPairTestJSON(base.BaseNetworkTest):
 
     @test.attr(type='smoke')
     @test.idempotent_id('b3f20091-6cd5-472b-8487-3516137df933')
+    @decorators.skip_because(bug="1351979")
     def test_update_port_with_multiple_ip_mac_address_pair(self):
         # Create an ip _address and mac_address through port create
         resp = self.client.create_port(network_id=self.network['id'])

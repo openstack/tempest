@@ -15,6 +15,7 @@
 
 import netaddr
 from tempest_lib.common.utils import data_utils
+from tempest_lib import decorators
 
 from tempest.api.network import base
 from tempest import config
@@ -123,6 +124,7 @@ class FloatingIPTestJSON(base.BaseNetworkTest):
 
     @test.attr(type='smoke')
     @test.idempotent_id('e1f6bffd-442f-4668-b30e-df13f2705e77')
+    @decorators.skip_because(bug="1375955")
     def test_floating_ip_delete_port(self):
         # Create a floating IP
         body = self.client.create_floatingip(
@@ -149,6 +151,7 @@ class FloatingIPTestJSON(base.BaseNetworkTest):
 
     @test.attr(type='smoke')
     @test.idempotent_id('1bb2f731-fe5a-4b8c-8409-799ade1bed4d')
+    @decorators.skip_because(bug="1375955")
     def test_floating_ip_update_different_router(self):
         # Associate a floating IP to a port on a router
         body = self.client.create_floatingip(
@@ -194,6 +197,7 @@ class FloatingIPTestJSON(base.BaseNetworkTest):
 
     @test.attr(type='smoke')
     @test.idempotent_id('45c4c683-ea97-41ef-9c51-5e9802f2f3d7')
+    @decorators.skip_because(bug="1375955")
     def test_create_update_floatingip_with_port_multiple_ip_address(self):
         # Find out ips that can be used for tests
         ips = list(netaddr.IPNetwork(self.subnet['cidr']))
