@@ -102,7 +102,7 @@ class ImageClientV2JSON(service_client.ServiceClient):
         self.expected_success(204, resp.status)
         return service_client.ResponseBody(resp)
 
-    def image_list(self, params=None):
+    def list_images(self, params=None):
         url = 'v2/images'
 
         if params:
