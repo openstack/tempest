@@ -268,6 +268,36 @@ class TestTenantIsolation(base.TestCase):
         self.assertEqual(alt_creds.user_id, '1234')
 
     @mock.patch('tempest_lib.common.rest_client.RestClient')
+    def test_no_network_creation_with_config_set(self, MockRestClient):
+        cfg.CONF.set_default('create_isolated_networks', False, group='auth')
+        iso_creds = isolated_creds.IsolatedCreds(name='test class',
+                                                 password='fake_password')
+        self._mock_assign_user_role()
+        self._mock_list_role()
+        self._mock_user_create('1234', 'fake_prim_user')
+        self._mock_tenant_create('1234', 'fake_prim_tenant')
+        net = mock.patch.object(iso_creds.network_admin_client,
+                                'delete_network')
+        net_mock = net.start()
+        subnet = mock.patch.object(iso_creds.network_admin_client,
+                                   'delete_subnet')
+        subnet_mock = subnet.start()
+        router = mock.patch.object(iso_creds.network_admin_client,
+                                   'delete_router')
+        router_mock = router.start()
+
+        primary_creds = iso_creds.get_primary_creds()
+        self.assertEqual(net_mock.mock_calls, [])
+        self.assertEqual(subnet_mock.mock_calls, [])
+        self.assertEqual(router_mock.mock_calls, [])
+        network = primary_creds.network
+        subnet = primary_creds.subnet
+        router = primary_creds.router
+        self.assertIsNone(network)
+        self.assertIsNone(subnet)
+        self.assertIsNone(router)
+
+    @mock.patch('tempest_lib.common.rest_client.RestClient')
     def test_network_creation(self, MockRestClient):
         iso_creds = isolated_creds.IsolatedCreds(name='test class',
                                                  password='fake_password')

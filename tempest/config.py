@@ -69,7 +69,15 @@ AuthGroup = [
                help="Only applicable when identity.auth_version is v3."
                     "Domain within which isolated credentials are provisioned."
                     "The default \"None\" means that the domain from the"
-                    "admin user is used instead.")
+                    "admin user is used instead."),
+    cfg.BoolOpt('create_isolated_networks',
+                default=True,
+                help="If allow_tenant_isolation is set to True and Neutron is "
+                     "enabled Tempest will try to create a useable network, "
+                     "subnet, and router when needed for each tenant it  "
+                     "creates. However in some neutron configurations, like "
+                     "with VLAN provider networks, this doesn't work. So if "
+                     "set to False the isolated networks will not be created"),
 ]
 
 identity_group = cfg.OptGroup(name='identity',

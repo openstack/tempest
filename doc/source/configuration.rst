@@ -310,6 +310,12 @@ isolation it will enable running tests which require a static network and it
 will additionally be used as a fallback for server creation. However, unlike
 accounts.yaml this should never be triggered.
 
+However, there is an option *create_isolated_networks* to disable tenant
+isolation's automatic provisioning of network resources. If this option is
+used you will have to either rely on there only being a single/default network
+available for the server creation, or use *fixed_network_name* to inform
+Tempest which network to use.
+
 Configuring Available Services
 ------------------------------
 OpenStack is really a constellation of several different projects which
