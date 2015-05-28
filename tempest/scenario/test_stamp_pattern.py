@@ -103,9 +103,9 @@ class TestStampPattern(manager.ScenarioTest):
         return self.create_volume(snapshot_id=snapshot_id)
 
     def _attach_volume(self, server, volume):
-        # TODO(andreaf) we should use device from config instead if vdb
         attached_volume = self.servers_client.attach_volume(
-            server['id'], volume['id'], device='/dev/vdb')
+            server['id'], volume['id'], device='/dev/%s'
+            % CONF.compute.volume_device_name)
         self.assertEqual(volume['id'], attached_volume['id'])
         self._wait_for_volume_status(attached_volume, 'in-use')
 
@@ -119,7 +119,7 @@ class TestStampPattern(manager.ScenarioTest):
         def _func():
             part = ssh.get_partitions()
             LOG.debug("Partitions:%s" % part)
-            return 'vdb' in part
+            return CONF.compute.volume_device_name in part
 
         if not tempest.test.call_until_true(_func,
                                             CONF.compute.build_timeout,
@@ -128,15 +128,18 @@ class TestStampPattern(manager.ScenarioTest):
 
     def _create_timestamp(self, server_or_ip):
         ssh_client = self._ssh_to_server(server_or_ip)
-        ssh_client.exec_command('sudo /usr/sbin/mkfs.ext4 /dev/vdb')
-        ssh_client.exec_command('sudo mount /dev/vdb /mnt')
+        ssh_client.exec_command('sudo /usr/sbin/mkfs.ext4 /dev/%s'
+                                % CONF.compute.volume_device_name)
+        ssh_client.exec_command('sudo mount /dev/%s /mnt'
+                                % CONF.compute.volume_device_name)
         ssh_client.exec_command('sudo sh -c "date > /mnt/timestamp;sync"')
         self.timestamp = ssh_client.exec_command('sudo cat /mnt/timestamp')
         ssh_client.exec_command('sudo umount /mnt')
 
     def _check_timestamp(self, server_or_ip):
         ssh_client = self._ssh_to_server(server_or_ip)
-        ssh_client.exec_command('sudo mount /dev/vdb /mnt')
+        ssh_client.exec_command('sudo mount /dev/%s /mnt'
+                                % CONF.compute.volume_device_name)
         got_timestamp = ssh_client.exec_command('sudo cat /mnt/timestamp')
         self.assertEqual(self.timestamp, got_timestamp)
 

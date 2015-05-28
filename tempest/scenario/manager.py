@@ -413,9 +413,9 @@ class ScenarioTest(tempest.test.BaseTestCase):
         return snapshot_image
 
     def nova_volume_attach(self):
-        # TODO(andreaf) Device should be here CONF.compute.volume_device_name
         volume = self.servers_client.attach_volume(
-            self.server['id'], self.volume['id'], '/dev/vdb')
+            self.server['id'], self.volume['id'], '/dev/%s'
+            % CONF.compute.volume_device_name)
         self.assertEqual(self.volume['id'], volume['id'])
         self.volumes_client.wait_for_volume_status(volume['id'], 'in-use')
         # Refresh the volume after the attachment
