@@ -123,10 +123,6 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
             for floating_ip in cls.floating_ips:
                 cls._try_delete_resource(cls.client.delete_floatingip,
                                          floating_ip['id'])
-            # Clean up routers
-            for router in cls.routers:
-                cls._try_delete_resource(cls.delete_router,
-                                         router)
 
             # Clean up health monitors
             for health_monitor in cls.health_monitors:
@@ -158,6 +154,10 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
             for port in cls.ports:
                 cls._try_delete_resource(cls.client.delete_port,
                                          port['id'])
+            # Clean up routers
+            for router in cls.routers:
+                cls._try_delete_resource(cls.delete_router,
+                                         router)
             # Clean up subnets
             for subnet in cls.subnets:
                 cls._try_delete_resource(cls.client.delete_subnet,
