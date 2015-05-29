@@ -150,6 +150,34 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
                  if port['id'] == self.port['id']]
         self.assertNotEmpty(ports, "Created port not found in the list")
 
+    @test.idempotent_id('e7fe260b-1e79-4dd3-86d9-bec6a7959fc5')
+    def test_port_list_filter_by_ip(self):
+        # Create network and subnet
+        network = self.create_network()
+        subnet = self.create_subnet(network)
+        self.addCleanup(self.client.delete_subnet, subnet['id'])
+        # Create two ports specifying a fixed_ips
+        address = self._get_ipaddress_from_tempest_conf()
+        _fixed_ip_1 = str(address + 3)
+        _fixed_ip_2 = str(address + 4)
+        fixed_ips_1 = [{'ip_address': _fixed_ip_1}]
+        port_1 = self.client.create_port(network_id=network['id'],
+                                         fixed_ips=fixed_ips_1)
+        self.addCleanup(self.client.delete_port, port_1['port']['id'])
+        fixed_ips_2 = [{'ip_address': _fixed_ip_2}]
+        port_2 = self.client.create_port(network_id=network['id'],
+                                         fixed_ips=fixed_ips_2)
+        self.addCleanup(self.client.delete_port, port_2['port']['id'])
+        # List ports filtered by fixed_ips
+        fixed_ips = 'ip_address=' + _fixed_ip_1
+        port_list = self.client.list_ports(fixed_ips=fixed_ips)
+        ports = port_list['ports']
+        self.assertEqual(len(ports), 1)
+        self.assertEqual(ports[0]['id'], port_1['port']['id'])
+        self.assertEqual(ports[0]['fixed_ips'][0]['ip_address'],
+                         _fixed_ip_1)
+        self.assertEqual(ports[0]['network_id'], network['id'])
+
     @test.idempotent_id('5ad01ed0-0e6e-4c5d-8194-232801b15c72')
     def test_port_list_filter_by_router_id(self):
         # Create a router
