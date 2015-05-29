@@ -28,7 +28,7 @@ class ImageMembersTest(base.BaseV1ImageMembersTest):
         members = map(lambda x: x['member_id'], members)
         self.assertIn(self.alt_tenant_id, members)
         # get image as alt user
-        self.alt_img_cli.get_image(image)
+        self.alt_img_cli.show_image(image)
 
     @test.idempotent_id('6a5328a5-80e8-4b82-bd32-6c061f128da9')
     def test_get_shared_images(self):

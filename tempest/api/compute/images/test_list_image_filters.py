@@ -62,7 +62,7 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
             image_file = six.StringIO(('*' * 1024))
             cls.glance_client.update_image(image_id, data=image_file)
             cls.client.wait_for_image_status(image_id, 'ACTIVE')
-            body = cls.client.get_image(image_id)
+            body = cls.client.show_image(image_id)
             return body
 
         # Create non-snapshot images via glance
@@ -249,7 +249,7 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
         # The detailed list of servers should be filtered by image type
         params = {'type': 'snapshot'}
         images = self.client.list_images_with_detail(params)
-        self.client.get_image(self.image_ref)
+        self.client.show_image(self.image_ref)
 
         self.assertTrue(any([i for i in images
                              if i['id'] == self.snapshot1_id]))

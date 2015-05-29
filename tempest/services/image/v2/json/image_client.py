@@ -114,7 +114,7 @@ class ImageClientV2JSON(service_client.ServiceClient):
         self._validate_schema(body, type='images')
         return service_client.ResponseBodyList(resp, body['images'])
 
-    def get_image(self, image_id):
+    def show_image(self, image_id):
         url = 'v2/images/%s' % image_id
         resp, body = self.get(url)
         self.expected_success(200, resp.status)
@@ -123,7 +123,7 @@ class ImageClientV2JSON(service_client.ServiceClient):
 
     def is_resource_deleted(self, id):
         try:
-            self.get_image(id)
+            self.show_image(id)
         except lib_exc.NotFound:
             return True
         return False

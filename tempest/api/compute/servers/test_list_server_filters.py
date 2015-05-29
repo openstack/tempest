@@ -56,13 +56,13 @@ class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
         # Do some sanity checks here. If one of the images does
         # not exist, fail early since the tests won't work...
         try:
-            cls.images_client.get_image(cls.image_ref)
+            cls.images_client.show_image(cls.image_ref)
         except lib_exc.NotFound:
             raise RuntimeError("Image %s (image_ref) was not found!" %
                                cls.image_ref)
 
         try:
-            cls.images_client.get_image(cls.image_ref_alt)
+            cls.images_client.show_image(cls.image_ref_alt)
         except lib_exc.NotFound:
             raise RuntimeError("Image %s (image_ref_alt) was not found!" %
                                cls.image_ref_alt)
