@@ -393,7 +393,9 @@ class NetworksTestJSON(base.BaseNetworkTest):
                                       " in filtered list (%s)." % nonexternal)
         self.assertIn(CONF.network.public_network_id, networks)
 
-        subnets_iter = (network['subnets'] for network in body['networks'])
+        subnets_iter = (network['subnets']
+                        for network in body['networks']
+                        if not network['shared'])
         # subnets_iter is a list (iterator) of lists. This flattens it to a
         # list of UUIDs
         public_subnets_iter = itertools.chain(*subnets_iter)
