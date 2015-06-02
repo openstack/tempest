@@ -12,6 +12,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest.api_schema.response.compute.v2_1 import parameter_types
+
 common_floating_ip_info = {
     'type': 'object',
     'properties': {
@@ -21,14 +23,8 @@ common_floating_ip_info = {
         'id': {'type': ['integer', 'string']},
         'pool': {'type': ['string', 'null']},
         'instance_id': {'type': ['string', 'null']},
-        'ip': {
-            'type': 'string',
-            'format': 'ip-address'
-        },
-        'fixed_ip': {
-            'type': ['string', 'null'],
-            'format': 'ip-address'
-        }
+        'ip': parameter_types.ip_address,
+        'fixed_ip': parameter_types.ip_address
     },
     'additionalProperties': False,
     'required': ['id', 'pool', 'instance_id',
@@ -131,18 +127,12 @@ list_floating_ips_bulk = {
                 'items': {
                     'type': 'object',
                     'properties': {
-                        'address': {
-                            'type': 'string',
-                            'format': 'ip-address'
-                        },
+                        'address': parameter_types.ip_address,
                         'instance_uuid': {'type': ['string', 'null']},
                         'interface': {'type': ['string', 'null']},
                         'pool': {'type': ['string', 'null']},
                         'project_id': {'type': ['string', 'null']},
-                        'fixed_ip': {
-                            'type': ['string', 'null'],
-                            'format': 'ip-address'
-                        }
+                        'fixed_ip': parameter_types.ip_address
                     },
                     'additionalProperties': False,
                     # NOTE: fixed_ip is introduced after JUNO release,

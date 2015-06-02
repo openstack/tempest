@@ -27,10 +27,7 @@ interface_common_info = {
                         'type': 'string',
                         'format': 'uuid'
                     },
-                    'ip_address': {
-                        'type': 'string',
-                        'format': 'ipv4'
-                    }
+                    'ip_address': parameter_types.ip_address
                 },
                 'additionalProperties': False,
                 'required': ['subnet_id', 'ip_address']
