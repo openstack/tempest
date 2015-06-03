@@ -28,6 +28,39 @@ class JavelinUnitTest(base.TestCase):
         self.fake_client = mock.MagicMock()
         self.fake_object = mock.MagicMock()
 
+    def test_load_resources(self):
+        with mock.patch('six.moves.builtins.open', mock.mock_open(),
+                        create=True) as open_mock:
+            with mock.patch('yaml.load', mock.MagicMock(),
+                            create=True) as load_mock:
+                javelin.load_resources(self.fake_object)
+                load_mock.assert_called_once_with(open_mock(self.fake_object))
+
+    def test_keystone_admin(self):
+        self.useFixture(mockpatch.PatchObject(javelin, "OSClient"))
+        javelin.OPTS = self.fake_object
+        javelin.keystone_admin()
+        javelin.OSClient.assert_called_once_with(
+            self.fake_object.os_username,
+            self.fake_object.os_password,
+            self.fake_object.os_tenant_name)
+
+    def test_client_for_user(self):
+        fake_user = mock.MagicMock()
+        javelin.USERS = {fake_user['name']: fake_user}
+        self.useFixture(mockpatch.PatchObject(javelin, "OSClient"))
+        javelin.client_for_user(fake_user['name'])
+        javelin.OSClient.assert_called_once_with(
+            fake_user['name'], fake_user['pass'], fake_user['tenant'])
+
+    def test_client_for_non_existing_user(self):
+        fake_non_existing_user = self.fake_object
+        fake_user = mock.MagicMock()
+        javelin.USERS = {fake_user['name']: fake_user}
+        self.useFixture(mockpatch.PatchObject(javelin, "OSClient"))
+        javelin.client_for_user(fake_non_existing_user['name'])
+        self.assertFalse(javelin.OSClient.called)
+
 
 class TestCreateResources(JavelinUnitTest):
     def test_create_tenants(self):
