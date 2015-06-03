@@ -17,6 +17,7 @@ import itertools
 import netaddr
 from tempest_lib.common.utils import data_utils
 from tempest_lib import exceptions as lib_exc
+from tempest_lib import decorators
 
 from tempest.api.network import base
 from tempest.common import custom_matchers
@@ -318,6 +319,7 @@ class NetworksTestJSON(base.BaseNetworkTest):
 
     @test.attr(type='smoke')
     @test.idempotent_id('d2d596e2-8e76-47a9-ac51-d4648009f4d3')
+    @decorators.skip_because(bug="1352278")
     def test_create_delete_subnet_without_gateway(self):
         self._create_verify_delete_subnet()
 
@@ -341,6 +343,7 @@ class NetworksTestJSON(base.BaseNetworkTest):
 
     @test.attr(type='smoke')
     @test.idempotent_id('d830de0a-be47-468f-8f02-1fd996118289')
+    @decorators.skip_because(bug="1352278")
     def test_create_delete_subnet_with_host_routes_and_dns_nameservers(self):
         self._create_verify_delete_subnet(
             **self.subnet_dict(['host_routes', 'dns_nameservers']))
@@ -352,6 +355,7 @@ class NetworksTestJSON(base.BaseNetworkTest):
 
     @test.attr(type='smoke')
     @test.idempotent_id('3d3852eb-3009-49ec-97ac-5ce83b73010a')
+    @decorators.skip_because(bug="1352278")
     def test_update_subnet_gw_dns_host_routes_dhcp(self):
         network = self.create_network()
         self.addCleanup(self._delete_network, network)
