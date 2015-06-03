@@ -1114,8 +1114,10 @@ BaremetalGroup = [
                default=60,
                help="Timeout for Ironic power transitions."),
     cfg.IntOpt('unprovision_timeout',
-               default=60,
-               help="Timeout for unprovisioning an Ironic node.")
+               default=300,
+               help="Timeout for unprovisioning an Ironic node. "
+                    "Takes longer since Kilo as Ironic performs an extra "
+                    "step in Node cleaning.")
 ]
 
 negative_group = cfg.OptGroup(name='negative', title="Negative Test Options")
