@@ -89,15 +89,10 @@ class SecurityGroupsNegativeTestJSON(base.BaseSecurityGroupsTest):
     @test.idempotent_id('777b6f14-aca9-4758-9e84-38783cfa58bc')
     @test.services('network')
     def test_security_group_create_with_invalid_group_description(self):
-        # Negative test:Security Group should not be created with description
-        # as an empty string/with white spaces/chars more than 255
+        # Negative test: Security Group should not be created with description
+        # longer than 255 chars. Empty description is allowed by the API
+        # reference, however.
         s_name = data_utils.rand_name('securitygroup')
-        # Create Security Group with empty string as description
-        self.assertRaises(lib_exc.BadRequest,
-                          self.client.create_security_group, s_name, "")
-        # Create Security Group with white space in description
-        self.assertRaises(lib_exc.BadRequest,
-                          self.client.create_security_group, s_name, " ")
         # Create Security Group with group description longer than 255 chars
         s_description = 'description-'.ljust(260, '0')
         self.assertRaises(lib_exc.BadRequest,
