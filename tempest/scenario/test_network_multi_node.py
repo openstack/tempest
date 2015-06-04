@@ -63,9 +63,7 @@ class TestNetworkMultiNode(manager.NetworkScenarioTest):
       network delete events from the ML2 driver to be captured and verified.
     """
 
-    @classmethod
-    def credentials(cls):
-        return cls.admin_credentials()
+    credentials = ['primary', 'admin']
 
     @classmethod
     def resource_setup(cls):
@@ -74,7 +72,8 @@ class TestNetworkMultiNode(manager.NetworkScenarioTest):
         super(TestNetworkMultiNode, cls).resource_setup()
 
     @classmethod
-    def check_preconditions(cls):
+    def skip_checks(cls):
+        super(TestNetworkMultiNode, cls).skip_checks()
         if not (CONF.network.tenant_networks_reachable
                 or CONF.network.public_network_id):
             msg = ('Either tenant_networks_reachable must be "true", or '
@@ -87,7 +86,13 @@ class TestNetworkMultiNode(manager.NetworkScenarioTest):
                 msg = "%s extension not enabled." % ext
                 raise exceptions.InvalidConfiguration(msg)
 
-        super(TestNetworkMultiNode, cls).check_preconditions()
+    @classmethod
+    def setup_credentials(cls):
+        # Create no network resources for these tests.
+        cls.set_network_resources()
+        super(TestNetworkMultiNode, cls).setup_credentials()
+        # Use admin client by default
+        cls.manager = cls.admin_manager
 
     def _delete_aggregate(self, aggregate):
         self.aggregates_client.delete_aggregate(aggregate['id'])
@@ -318,10 +323,10 @@ class TestNetworkMultiNode(manager.NetworkScenarioTest):
                                                      size=size).splitlines()
                 break
             except exceptions.SSHExecCommandFailed:
-                LOG.debug("SSHExecComandFaild - retrying")
-                self.setup_linux_client()
+                LOG.debug("SSHExecCommandFailed - retrying")
 
-        self.assertIsNotNone(ping_result)
+        self.assertIsNotNone(ping_result,
+                             "SSHExecCommandFailed - ping failed")
         if ping_result is not None and len(ping_result) >= count:
             for line in ping_result:
 
