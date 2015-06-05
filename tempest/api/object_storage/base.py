@@ -15,8 +15,6 @@
 
 from tempest_lib import exceptions as lib_exc
 
-from tempest import clients
-from tempest.common import credentials
 from tempest.common import custom_matchers
 from tempest import config
 import tempest.test
@@ -25,6 +23,8 @@ CONF = config.CONF
 
 
 class BaseObjectTest(tempest.test.BaseTestCase):
+
+    credentials = [['operator', CONF.object_storage.operator_role]]
 
     @classmethod
     def skip_checks(cls):
@@ -37,20 +37,9 @@ class BaseObjectTest(tempest.test.BaseTestCase):
     def setup_credentials(cls):
         cls.set_network_resources()
         super(BaseObjectTest, cls).setup_credentials()
-        operator_role = CONF.object_storage.operator_role
-        # There are no credentials by type used by object storage tests so
-        # isolated_creds must still be initialized
-        cls.isolated_creds = credentials.get_isolated_credentials(
-            cls.__name__, network_resources=cls.network_resources)
-        if not cls.isolated_creds.is_role_available(operator_role):
-            skip_msg = ("%s skipped because the configured credential provider"
-                        " is not able to provide credentials with the %s role "
-                        "assigned." % (cls.__name__, operator_role))
-            raise cls.skipException(skip_msg)
-        else:
-            # Get isolated creds for normal user
-            cls.os = clients.Manager(cls.isolated_creds.get_creds_by_roles(
-                [operator_role]))
+        # credentials may be overwritten by children classes
+        if hasattr(cls, 'os_roles_operator'):
+            cls.os = cls.os_roles_operator
 
     @classmethod
     def setup_clients(cls):

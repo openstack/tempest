@@ -140,4 +140,4 @@ class ImagesOneServerNegativeTestJSON(base.BaseV2ComputeTest):
         self.client.delete_image(image_id)
         self.image_ids.remove(image_id)
 
-        self.assertRaises(lib_exc.NotFound, self.client.get_image, image_id)
+        self.assertRaises(lib_exc.NotFound, self.client.show_image, image_id)

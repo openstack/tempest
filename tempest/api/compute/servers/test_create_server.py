@@ -43,6 +43,7 @@ class ServersTestJSON(base.BaseV2ComputeTest):
 
     @classmethod
     def resource_setup(cls):
+        cls.set_validation_resources()
         super(ServersTestJSON, cls).resource_setup()
         cls.meta = {'hello': 'world'}
         cls.accessIPv4 = '1.1.1.1'
@@ -94,7 +95,7 @@ class ServersTestJSON(base.BaseV2ComputeTest):
         self.assertTrue(found)
 
     @test.idempotent_id('cbc0f52f-05aa-492b-bdc1-84b575ca294b')
-    @testtools.skipUnless(CONF.compute.run_ssh,
+    @testtools.skipUnless(CONF.validation.run_validation,
                           'Instance validation tests are disabled.')
     def test_verify_created_server_vcpus(self):
         # Verify that the number of vcpus reported by the instance matches
@@ -105,7 +106,7 @@ class ServersTestJSON(base.BaseV2ComputeTest):
         self.assertEqual(flavor['vcpus'], linux_client.get_number_of_vcpus())
 
     @test.idempotent_id('ac1ad47f-984b-4441-9274-c9079b7a0666')
-    @testtools.skipUnless(CONF.compute.run_ssh,
+    @testtools.skipUnless(CONF.validation.run_validation,
                           'Instance validation tests are disabled.')
     def test_host_name_is_same_as_server_name(self):
         # Verify the instance host name is the same as the server name
@@ -205,7 +206,7 @@ class ServersWithSpecificFlavorTestJSON(base.BaseV2ComputeAdminTest):
         cls.client = cls.servers_client
 
     @test.idempotent_id('b3c7bcfc-bb5b-4e22-b517-c7f686b802ca')
-    @testtools.skipUnless(CONF.compute.run_ssh,
+    @testtools.skipUnless(CONF.validation.run_validation,
                           'Instance validation tests are disabled.')
     def test_verify_created_server_ephemeral_disk(self):
         # Verify that the ephemeral disk is created when creating server

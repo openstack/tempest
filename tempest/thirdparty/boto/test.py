@@ -252,9 +252,9 @@ class BotoTestCase(tempest.test.BaseTestCase):
         except exception.BotoServerError as exc:
             error_msg = excMatcher.match(exc)
             if error_msg is not None:
-                raise self.failureException, error_msg
+                raise self.failureException(error_msg)
         else:
-            raise self.failureException, "BotoServerError not raised"
+            raise self.failureException("BotoServerError not raised")
 
     @classmethod
     def resource_cleanup(cls):

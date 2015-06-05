@@ -77,7 +77,7 @@ class CreateRegisterImagesTest(base.BaseV1ImageTest):
         self.assertEqual('New Http Image', body.get('name'))
         self.assertFalse(body.get('is_public'))
         self.client.wait_for_image_status(image_id, 'active')
-        self.client.get_image(image_id)
+        self.client.show_image(image_id)
 
     @test.idempotent_id('05b19d55-140c-40d0-b36b-fafd774d421b')
     def test_register_image_with_min_ram(self):
@@ -168,14 +168,14 @@ class ListImagesTest(base.BaseV1ImageTest):
     @test.idempotent_id('246178ab-3b33-4212-9a4b-a7fe8261794d')
     def test_index_no_params(self):
         # Simple test to see all fixture images returned
-        images_list = self.client.image_list()
+        images_list = self.client.list_images()
         image_list = map(lambda x: x['id'], images_list)
         for image_id in self.created_images:
             self.assertIn(image_id, image_list)
 
     @test.idempotent_id('f1755589-63d6-4468-b098-589820eb4031')
     def test_index_disk_format(self):
-        images_list = self.client.image_list(disk_format='ami')
+        images_list = self.client.list_images(disk_format='ami')
         for image in images_list:
             self.assertEqual(image['disk_format'], 'ami')
         result_set = set(map(lambda x: x['id'], images_list))
@@ -184,7 +184,7 @@ class ListImagesTest(base.BaseV1ImageTest):
 
     @test.idempotent_id('2143655d-96d9-4bec-9188-8674206b4b3b')
     def test_index_container_format(self):
-        images_list = self.client.image_list(container_format='bare')
+        images_list = self.client.list_images(container_format='bare')
         for image in images_list:
             self.assertEqual(image['container_format'], 'bare')
         result_set = set(map(lambda x: x['id'], images_list))
@@ -193,7 +193,7 @@ class ListImagesTest(base.BaseV1ImageTest):
 
     @test.idempotent_id('feb32ac6-22bb-4a16-afd8-9454bb714b14')
     def test_index_max_size(self):
-        images_list = self.client.image_list(size_max=42)
+        images_list = self.client.list_images(size_max=42)
         for image in images_list:
             self.assertTrue(image['size'] <= 42)
         result_set = set(map(lambda x: x['id'], images_list))
@@ -202,7 +202,7 @@ class ListImagesTest(base.BaseV1ImageTest):
 
     @test.idempotent_id('6ffc16d0-4cbf-4401-95c8-4ac63eac34d8')
     def test_index_min_size(self):
-        images_list = self.client.image_list(size_min=142)
+        images_list = self.client.list_images(size_min=142)
         for image in images_list:
             self.assertTrue(image['size'] >= 142)
         result_set = set(map(lambda x: x['id'], images_list))

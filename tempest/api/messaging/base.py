@@ -116,20 +116,6 @@ class BaseMessagingTest(test.BaseTestCase):
         return resp, body
 
     @classmethod
-    def get_single_message(cls, message_uri):
-        """Wrapper utility that gets a single message."""
-        resp, body = cls.client.show_single_message(message_uri)
-
-        return resp, body
-
-    @classmethod
-    def get_multiple_messages(cls, message_uri):
-        """Wrapper utility that gets multiple messages."""
-        resp, body = cls.client.show_multiple_messages(message_uri)
-
-        return resp, body
-
-    @classmethod
     def delete_messages(cls, message_uri):
         """Wrapper utility that deletes messages."""
         resp, body = cls.client.delete_messages(message_uri)

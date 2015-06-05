@@ -14,7 +14,7 @@
 
 import copy
 
-from tempest.api_schema.response.compute import parameter_types
+from tempest.api_schema.response.compute.v2_1 import parameter_types
 
 image_links = copy.deepcopy(parameter_types.links)
 image_links['items']['properties'].update({'type': {'type': 'string'}})

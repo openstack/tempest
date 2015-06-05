@@ -18,6 +18,7 @@ from tempest_lib.common.utils import data_utils
 from tempest.api.volume import base
 from tempest import config
 from tempest import test
+import testtools
 
 CONF = config.CONF
 
@@ -68,6 +69,18 @@ class VolumesV2ActionsTest(base.BaseVolumeTest):
         self.client.wait_for_volume_status(self.volume['id'], 'in-use')
         self.client.detach_volume(self.volume['id'])
         self.client.wait_for_volume_status(self.volume['id'], 'available')
+
+    @test.idempotent_id('63e21b4c-0a0c-41f6-bfc3-7c2816815599')
+    @testtools.skipUnless(CONF.volume_feature_enabled.bootable,
+                          'Update bootable status of a volume is not enabled.')
+    def test_volume_bootable(self):
+        # Verify that a volume bootable flag is retrieved
+        for bool_bootable in [True, False]:
+            self.client.set_bootable_volume(self.volume['id'], bool_bootable)
+            fetched_volume = self.client.show_volume(self.volume['id'])
+            # Get Volume information
+            bool_flag = self._is_true(fetched_volume['bootable'])
+            self.assertEqual(bool_bootable, bool_flag)
 
     @test.idempotent_id('9516a2c8-9135-488c-8dd6-5677a7e5f371')
     @test.stresstest(class_setup_per='process')

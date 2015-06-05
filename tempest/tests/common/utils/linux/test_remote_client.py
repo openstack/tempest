@@ -73,6 +73,7 @@ class TestRemoteClient(base.TestCase):
     # the information using gnu/linux tools.
 
     def _assert_exec_called_with(self, cmd):
+        cmd = "set -eu -o pipefail; PATH=$PATH:/sbin; " + cmd
         self.ssh_mock.mock.exec_command.assert_called_with(cmd)
 
     def test_get_number_of_vcpus(self):
@@ -119,7 +120,7 @@ a0:b0:c0:d0:e0:f0"""
 
         self.assertEqual(self.conn.get_mac_address(), macs)
         self._assert_exec_called_with(
-            "/bin/ip addr | awk '/ether/ {print $2}'")
+            "ip addr | awk '/ether/ {print $2}'")
 
     def test_get_ip_list(self):
         ips = """1: lo: <LOOPBACK,UP,LOWER_UP> mtu 16436 qdisc noqueue
@@ -136,7 +137,7 @@ a0:b0:c0:d0:e0:f0"""
        valid_lft forever preferred_lft forever"""
         self.ssh_mock.mock.exec_command.return_value = ips
         self.assertEqual(self.conn.get_ip_list(), ips)
-        self._assert_exec_called_with('/bin/ip address')
+        self._assert_exec_called_with('ip address')
 
     def test_assign_static_ip(self):
         self.ssh_mock.mock.exec_command.return_value = ''
@@ -144,9 +145,10 @@ a0:b0:c0:d0:e0:f0"""
         nic = 'eth0'
         self.assertEqual(self.conn.assign_static_ip(nic, ip), '')
         self._assert_exec_called_with(
-            "sudo /bin/ip addr add %s/%s dev %s" % (ip, '28', nic))
+            "sudo ip addr add %s/%s dev %s" % (ip, '28', nic))
 
     def test_turn_nic_on(self):
         nic = 'eth0'
         self.conn.turn_nic_on(nic)
-        self._assert_exec_called_with('sudo /bin/ip link set %s up' % nic)
+        self._assert_exec_called_with(
+            'sudo ip link set %s up' % nic)

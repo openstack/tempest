@@ -41,5 +41,5 @@ class ListImageFiltersNegativeTestJSON(base.BaseV2ComputeTest):
     def test_get_nonexistent_image(self):
         # Check raises a NotFound
         nonexistent_image = data_utils.rand_uuid()
-        self.assertRaises(lib_exc.NotFound, self.client.get_image,
+        self.assertRaises(lib_exc.NotFound, self.client.show_image,
                           nonexistent_image)

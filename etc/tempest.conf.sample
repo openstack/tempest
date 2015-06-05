@@ -40,14 +40,16 @@
 #log_dir = <None>
 
 # Use syslog for logging. Existing syslog format is DEPRECATED during
-# I, and will change in J to honor RFC5424. (boolean value)
+# I, and changed in J to honor RFC5424. (boolean value)
 #use_syslog = false
 
 # (Optional) Enables or disables syslog rfc5424 format for logging. If
 # enabled, prefixes the MSG part of the syslog message with APP-NAME
-# (RFC5424). The format without the APP-NAME is deprecated in I, and
-# will be removed in J. (boolean value)
-#use_syslog_rfc_format = false
+# (RFC5424). The format without the APP-NAME is deprecated in K, and
+# will be removed in M, along with this option. (boolean value)
+# This option is deprecated for removal.
+# Its value may be silently ignored in the future.
+#use_syslog_rfc_format = true
 
 # Syslog facility to receive log lines. (string value)
 #syslog_log_facility = LOG_USER
@@ -67,7 +69,7 @@
 
 # Prefix each line of exception output with this format. (string
 # value)
-#logging_exception_prefix = %(asctime)s.%(msecs)03d %(process)d TRACE %(name)s %(instance)s
+#logging_exception_prefix = %(asctime)s.%(msecs)03d %(process)d ERROR %(name)s %(instance)s
 
 # List of logger=LEVEL pairs. (list value)
 #default_log_levels = amqp=WARN,amqplib=WARN,boto=WARN,qpid=WARN,sqlalchemy=WARN,suds=INFO,oslo.messaging=INFO,iso8601=WARN,requests.packages.urllib3.connectionpool=WARN,urllib3.connectionpool=WARN,websocket=WARN,requests.packages.urllib3.util.retry=WARN,urllib3.util.retry=WARN,keystonemiddleware=WARN,routes.middleware=WARN,stevedore=WARN
@@ -85,6 +87,9 @@
 # The format for an instance UUID that is passed with the log message.
 # (string value)
 #instance_uuid_format = "[instance: %(uuid)s] "
+
+# Enables or disables fatal status of deprecations. (boolean value)
+#fatal_deprecations = false
 
 
 [auth]
@@ -117,6 +122,14 @@
 # the domain from theadmin user is used instead. (string value)
 #tenant_isolation_domain_name = <None>
 
+# If allow_tenant_isolation is set to True and Neutron is enabled
+# Tempest will try to create a useable network, subnet, and router
+# when needed for each tenant it  creates. However in some neutron
+# configurations, like with VLAN provider networks, this doesn't work.
+# So if set to False the isolated networks will not be created
+# (boolean value)
+#create_isolated_networks = true
+
 
 [baremetal]
 
@@ -148,8 +161,9 @@
 # Timeout for Ironic power transitions. (integer value)
 #power_timeout = 60
 
-# Timeout for unprovisioning an Ironic node. (integer value)
-#unprovision_timeout = 60
+# Timeout for unprovisioning an Ironic node. Takes longer since Kilo
+# as Ironic performs an extra step in Node cleaning. (integer value)
+#unprovision_timeout = 300
 
 
 [boto]
@@ -201,27 +215,6 @@
 #build_interval = 1
 
 
-[cli]
-
-#
-# From tempest.config
-#
-
-# enable cli tests (boolean value)
-#enabled = true
-
-# directory where python client binaries are located (string value)
-#cli_dir = /usr/local/bin
-
-# Whether the tempest run location has access to the *-manage
-# commands. In a pure blackbox environment it will not. (boolean
-# value)
-#has_manage = true
-
-# Number of seconds to wait on a CLI timeout (integer value)
-#timeout = 15
-
-
 [compute]
 
 #
@@ -260,9 +253,6 @@
 # that do not define build_timeout will inherit this value. (integer
 # value)
 #build_timeout = 300
-
-# Should the tests ssh to instances? (boolean value)
-#run_ssh = false
 
 # Auth method used for authenticate to the instance. Valid choices
 # are: keypair, configured, adminpass and disabled. Keypair: start the
@@ -310,7 +300,7 @@
 #fixed_network_name = <None>
 
 # Network used for SSH connections. Ignored if
-# use_floatingip_for_ssh=true or run_ssh=false. (string value)
+# use_floatingip_for_ssh=true or run_validation=false. (string value)
 #network_for_ssh = public
 
 # IP version used for SSH connections. (integer value)
@@ -395,6 +385,11 @@
 # volumes. Note, libvirt doesn't support this, see
 # https://bugs.launchpad.net/nova/+bug/1398999 (boolean value)
 #block_migrate_cinder_iscsi = false
+
+# Does the test system allow live-migration of paused instances? Note,
+# this is more than just the ANDing of paused and live_migrate, but
+# all 3 should be set to True to run those tests (boolean value)
+#live_migrate_paused_instances = false
 
 # Enable VNC console. This configuration value should be same as
 # [nova.vnc]->vnc_enabled in nova.conf (boolean value)
@@ -589,6 +584,9 @@
 # Admin domain name for authentication (Keystone V3).The same domain
 # applies to user and project (string value)
 #admin_domain_name = <None>
+
+# ID of the default domain (string value)
+#default_domain_id = default
 
 
 [identity-feature-enabled]
@@ -954,6 +952,10 @@
 # Image container format (string value)
 #img_container_format = bare
 
+# Glance image properties. Use for custom images which require them
+# (dict value)
+#img_properties = <None>
+
 # AMI image file name (string value)
 #ami_img_file = cirros-0.3.1-x86_64-blank.img
 
@@ -1096,6 +1098,11 @@
 # From tempest.config
 #
 
+# Enable ssh on created servers and creation of additional validation
+# resources to enable remote access (boolean value)
+# Deprecated group/name - [compute]/run_ssh
+#run_validation = false
+
 # Default IP type used for validation: -fixed: uses the first IP
 # belonging to the fixed network -floating: creates and uses a
 # floating IP (string value)
@@ -1194,3 +1201,7 @@
 
 # Is the v2 volume API enabled (boolean value)
 #api_v2 = true
+
+# Update bootable status of a volume Not implemented on icehouse
+# (boolean value)
+#bootable = false

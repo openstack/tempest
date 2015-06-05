@@ -52,7 +52,6 @@ class BaseComputeTest(tempest.test.BaseTestCase):
     def setup_credentials(cls):
         cls.set_network_resources()
         super(BaseComputeTest, cls).setup_credentials()
-        cls.multi_user = cls.check_multi_user()
 
     @classmethod
     def setup_clients(cls):
@@ -110,14 +109,6 @@ class BaseComputeTest(tempest.test.BaseTestCase):
         cls.clear_security_groups()
         cls.clear_server_groups()
         super(BaseComputeTest, cls).resource_cleanup()
-
-    @classmethod
-    def check_multi_user(cls):
-        # We have a list of accounts now, so just checking if the list is gt 2
-        if not cls.isolated_creds.is_multi_user():
-            msg = "Not enough users available for multi-user testing"
-            raise exceptions.InvalidConfiguration(msg)
-        return True
 
     @classmethod
     def clear_servers(cls):
@@ -312,7 +303,7 @@ class BaseComputeTest(tempest.test.BaseTestCase):
         if 'wait_until' in kwargs:
             cls.images_client.wait_for_image_status(image_id,
                                                     kwargs['wait_until'])
-            image = cls.images_client.get_image(image_id)
+            image = cls.images_client.show_image(image_id)
 
             if kwargs['wait_until'] == 'ACTIVE':
                 if kwargs.get('wait_for_server', True):
@@ -332,6 +323,15 @@ class BaseComputeTest(tempest.test.BaseTestCase):
         server = cls.create_test_server(wait_until='ACTIVE', **kwargs)
         cls.password = server['adminPass']
         return server['id']
+
+    @classmethod
+    def delete_server(cls, server_id):
+        """Deletes an existing server and waits for it to be gone."""
+        try:
+            cls.servers_client.delete_server(server_id)
+            cls.servers_client.wait_for_server_termination(server_id)
+        except Exception:
+            LOG.exception('Failed to delete server %s' % server_id)
 
     @classmethod
     def delete_volume(cls, volume_id):

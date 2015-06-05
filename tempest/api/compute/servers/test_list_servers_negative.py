@@ -21,7 +21,6 @@ from tempest import test
 
 
 class ListServersNegativeTestJSON(base.BaseV2ComputeTest):
-    force_tenant_isolation = True
 
     @classmethod
     def setup_clients(cls):

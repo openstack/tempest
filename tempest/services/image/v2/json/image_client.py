@@ -14,9 +14,9 @@
 #    under the License.
 
 import json
-import urllib
 
 import jsonschema
+from six.moves.urllib import parse as urllib
 from tempest_lib import exceptions as lib_exc
 
 from tempest.common import glance_http
@@ -102,7 +102,7 @@ class ImageClientV2JSON(service_client.ServiceClient):
         self.expected_success(204, resp.status)
         return service_client.ResponseBody(resp)
 
-    def image_list(self, params=None):
+    def list_images(self, params=None):
         url = 'v2/images'
 
         if params:
@@ -114,7 +114,7 @@ class ImageClientV2JSON(service_client.ServiceClient):
         self._validate_schema(body, type='images')
         return service_client.ResponseBodyList(resp, body['images'])
 
-    def get_image(self, image_id):
+    def show_image(self, image_id):
         url = 'v2/images/%s' % image_id
         resp, body = self.get(url)
         self.expected_success(200, resp.status)
@@ -123,7 +123,7 @@ class ImageClientV2JSON(service_client.ServiceClient):
 
     def is_resource_deleted(self, id):
         try:
-            self.get_image(id)
+            self.show_image(id)
         except lib_exc.NotFound:
             return True
         return False
@@ -159,7 +159,7 @@ class ImageClientV2JSON(service_client.ServiceClient):
         self.expected_success(204, resp.status)
         return service_client.ResponseBody(resp)
 
-    def get_image_membership(self, image_id):
+    def list_image_members(self, image_id):
         url = 'v2/images/%s/members' % image_id
         resp, body = self.get(url)
         self.expected_success(200, resp.status)

@@ -29,7 +29,7 @@ class TestImageWaiters(base.TestCase):
         self.client.build_interval = 1
 
     def test_wait_for_image_status(self):
-        self.client.get_image.return_value = ({'status': 'active'})
+        self.client.show_image.return_value = ({'status': 'active'})
         start_time = int(time.time())
         waiters.wait_for_image_status(self.client, 'fake_image_id', 'active')
         end_time = int(time.time())
@@ -37,13 +37,13 @@ class TestImageWaiters(base.TestCase):
         self.assertTrue((end_time - start_time) < 10)
 
     def test_wait_for_image_status_timeout(self):
-        self.client.get_image.return_value = ({'status': 'saving'})
+        self.client.show_image.return_value = ({'status': 'saving'})
         self.assertRaises(exceptions.TimeoutException,
                           waiters.wait_for_image_status,
                           self.client, 'fake_image_id', 'active')
 
     def test_wait_for_image_status_error_on_image_create(self):
-        self.client.get_image.return_value = ({'status': 'ERROR'})
+        self.client.show_image.return_value = ({'status': 'ERROR'})
         self.assertRaises(exceptions.AddImageException,
                           waiters.wait_for_image_status,
                           self.client, 'fake_image_id', 'active')

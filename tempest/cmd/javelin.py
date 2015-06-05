@@ -114,6 +114,7 @@ import unittest
 import netaddr
 from oslo_log import log as logging
 from oslo_utils import timeutils
+import six
 from tempest_lib import auth
 from tempest_lib import exceptions as lib_exc
 import yaml
@@ -416,7 +417,7 @@ class JavelinCheck(unittest.TestCase):
         that things like tenantId didn't drift across versions.
         """
         LOG.info("checking users")
-        for name, user in self.users.iteritems():
+        for name, user in six.iteritems(self.users):
             client = keystone_admin()
             found = client.identity.get_user(user['id'])
             self.assertEqual(found['name'], user['name'])
@@ -616,7 +617,7 @@ def _resolve_image(image, imgtype):
 
 
 def _get_image_by_name(client, name):
-    body = client.images.image_list()
+    body = client.images.list_images()
     for image in body:
         if name == image['name']:
             return image

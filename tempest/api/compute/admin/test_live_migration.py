@@ -84,10 +84,15 @@ class LiveBlockMigrationTestJSON(base.BaseV2ComputeAdminTest):
             self.volumes_client.wait_for_volume_status(volume_id, 'available')
         self.volumes_client.delete_volume(volume_id)
 
-    @test.idempotent_id('1dce86b8-eb04-4c03-a9d8-9c1dc3ee0c7b')
-    @testtools.skipIf(not CONF.compute_feature_enabled.live_migration,
-                      'Live migration not available')
-    def test_live_block_migration(self):
+    def _test_live_block_migration(self, state='ACTIVE'):
+        """Tests live block migration between two hosts.
+
+        Requires CONF.compute_feature_enabled.live_migration to be True.
+
+        :param state: The vm_state the migrated server should be in before and
+                      after the live migration. Supported values are 'ACTIVE'
+                      and 'PAUSED'.
+        """
         # Live block migrate an instance to another host
         if len(self._get_compute_hostnames()) < 2:
             raise self.skipTest(
@@ -95,9 +100,32 @@ class LiveBlockMigrationTestJSON(base.BaseV2ComputeAdminTest):
         server_id = self._get_an_active_server()
         actual_host = self._get_host_for_server(server_id)
         target_host = self._get_host_other_than(actual_host)
+
+        if state == 'PAUSED':
+            self.admin_servers_client.pause_server(server_id)
+            self.admin_servers_client.wait_for_server_status(server_id, state)
+
         self._migrate_server_to(server_id, target_host)
-        self.servers_client.wait_for_server_status(server_id, 'ACTIVE')
+        self.servers_client.wait_for_server_status(server_id, state)
         self.assertEqual(target_host, self._get_host_for_server(server_id))
+
+    @test.idempotent_id('1dce86b8-eb04-4c03-a9d8-9c1dc3ee0c7b')
+    @testtools.skipUnless(CONF.compute_feature_enabled.live_migration,
+                          'Live migration not available')
+    def test_live_block_migration(self):
+        self._test_live_block_migration()
+
+    @test.idempotent_id('1e107f21-61b2-4988-8f22-b196e938ab88')
+    @testtools.skipUnless(CONF.compute_feature_enabled.live_migration,
+                          'Live migration not available')
+    @testtools.skipUnless(CONF.compute_feature_enabled.pause,
+                          'Pause is not available.')
+    @testtools.skipUnless(CONF.compute_feature_enabled
+                              .live_migrate_paused_instances,
+                          'Live migration of paused instances is not '
+                          'available.')
+    def test_live_block_migration_paused(self):
+        self._test_live_block_migration(state='PAUSED')
 
     @test.idempotent_id('e19c0cc6-6720-4ed8-be83-b6603ed5c812')
     @testtools.skipIf(not CONF.compute_feature_enabled.live_migration or not

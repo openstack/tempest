@@ -14,7 +14,6 @@
 #    under the License.
 
 from tempest_lib.common.utils import data_utils
-from tempest_lib import decorators
 from tempest_lib import exceptions as lib_exc
 
 from tempest.api.compute import base
@@ -56,13 +55,13 @@ class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
         # Do some sanity checks here. If one of the images does
         # not exist, fail early since the tests won't work...
         try:
-            cls.images_client.get_image(cls.image_ref)
+            cls.images_client.show_image(cls.image_ref)
         except lib_exc.NotFound:
             raise RuntimeError("Image %s (image_ref) was not found!" %
                                cls.image_ref)
 
         try:
-            cls.images_client.get_image(cls.image_ref_alt)
+            cls.images_client.show_image(cls.image_ref_alt)
         except lib_exc.NotFound:
             raise RuntimeError("Image %s (image_ref_alt) was not found!" %
                                cls.image_ref_alt)
@@ -275,8 +274,14 @@ class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
             msg = 'fixed_network_name needs to be configured to run this test'
             raise self.skipException(msg)
         self.s1 = self.client.get_server(self.s1['id'])
-        ip = self.s1['addresses'][self.fixed_network_name][0]['addr']
-        params = {'ip': ip}
+        for addr_spec in self.s1['addresses'][self.fixed_network_name]:
+            ip = addr_spec['addr']
+            if addr_spec['version'] == 4:
+                params = {'ip': ip}
+                break
+        else:
+            msg = "Skipped until bug 1450859 is resolved"
+            raise self.skipException(msg)
         body = self.client.list_servers(params)
         servers = body['servers']
 
@@ -284,8 +289,6 @@ class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
         self.assertNotIn(self.s2_name, map(lambda x: x['name'], servers))
         self.assertNotIn(self.s3_name, map(lambda x: x['name'], servers))
 
-    @decorators.skip_because(bug="1182883",
-                             condition=CONF.service_available.neutron)
     @test.idempotent_id('a905e287-c35e-42f2-b132-d02b09f3654a')
     def test_list_servers_filtered_by_ip_regex(self):
         # Filter servers by regex ip
@@ -295,8 +298,12 @@ class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
             msg = 'fixed_network_name needs to be configured to run this test'
             raise self.skipException(msg)
         self.s1 = self.client.get_server(self.s1['id'])
-        ip = self.s1['addresses'][self.fixed_network_name][0]['addr'][0:-3]
-        params = {'ip': ip}
+        addr_spec = self.s1['addresses'][self.fixed_network_name][0]
+        ip = addr_spec['addr'][0:-3]
+        if addr_spec['version'] == 4:
+            params = {'ip': ip}
+        else:
+            params = {'ip6': ip}
         body = self.client.list_servers(params)
         servers = body['servers']
 

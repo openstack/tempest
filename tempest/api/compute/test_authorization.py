@@ -73,7 +73,7 @@ class AuthorizationTestJSON(base.BaseV2ComputeTest):
         image_file = six.StringIO(('*' * 1024))
         body = cls.glance_client.update_image(image_id, data=image_file)
         cls.glance_client.wait_for_image_status(image_id, 'active')
-        cls.image = cls.images_client.get_image(image_id)
+        cls.image = cls.images_client.show_image(image_id)
 
         cls.keypairname = data_utils.rand_name('keypair')
         cls.keypairs_client.create_keypair(cls.keypairname)
@@ -92,9 +92,11 @@ class AuthorizationTestJSON(base.BaseV2ComputeTest):
 
     @classmethod
     def resource_cleanup(cls):
-        if cls.multi_user:
+        if hasattr(cls, 'image'):
             cls.images_client.delete_image(cls.image['id'])
+        if hasattr(cls, 'keypairname'):
             cls.keypairs_client.delete_keypair(cls.keypairname)
+        if hasattr(cls, 'security_group'):
             cls.security_client.delete_security_group(cls.security_group['id'])
         super(AuthorizationTestJSON, cls).resource_cleanup()
 
@@ -231,7 +233,7 @@ class AuthorizationTestJSON(base.BaseV2ComputeTest):
     def test_get_image_for_alt_account_fails(self):
         # A GET request for an image on another user's account should fail
         self.assertRaises(lib_exc.NotFound,
-                          self.alt_images_client.get_image, self.image['id'])
+                          self.alt_images_client.show_image, self.image['id'])
 
     @test.idempotent_id('9facb962-f043-4a9d-b9ee-166a32dea098')
     def test_delete_image_for_alt_account_fails(self):

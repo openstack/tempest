@@ -31,6 +31,14 @@ class SwiftResourcesTestJSON(base.BaseOrchestrationTest):
             raise cls.skipException("Swift support is required")
 
     @classmethod
+    def setup_credentials(cls):
+        super(SwiftResourcesTestJSON, cls).setup_credentials()
+        stack_owner_role = CONF.orchestration.stack_owner_role
+        operator_role = CONF.object_storage.operator_role
+        cls.os = cls.get_client_manager(
+            roles=[stack_owner_role, operator_role])
+
+    @classmethod
     def setup_clients(cls):
         super(SwiftResourcesTestJSON, cls).setup_clients()
         cls.account_client = cls.os.account_client

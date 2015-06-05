@@ -16,7 +16,6 @@
 from tempest_lib.common.utils import data_utils
 
 from tempest.api.object_storage import base
-from tempest import clients
 from tempest import config
 from tempest import test
 
@@ -25,12 +24,14 @@ CONF = config.CONF
 
 class ObjectTestACLs(base.BaseObjectTest):
 
+    credentials = [['operator', CONF.object_storage.operator_role],
+                   ['operator_alt', CONF.object_storage.operator_role]]
+
     @classmethod
     def setup_credentials(cls):
         super(ObjectTestACLs, cls).setup_credentials()
-        cls.os_operator = clients.Manager(
-            cls.isolated_creds.get_creds_by_roles(
-                roles=[CONF.object_storage.operator_role], force_new=True))
+        cls.os = cls.os_roles_operator
+        cls.os_operator = cls.os_roles_operator_alt
 
     @classmethod
     def resource_setup(cls):
@@ -46,7 +47,6 @@ class ObjectTestACLs(base.BaseObjectTest):
         self.delete_containers([self.container_name])
         super(ObjectTestACLs, self).tearDown()
 
-    @test.attr(type='smoke')
     @test.idempotent_id('a3270f3f-7640-4944-8448-c7ea783ea5b6')
     def test_read_object_with_rights(self):
         # attempt to read object using authorized user
@@ -72,7 +72,6 @@ class ObjectTestACLs(base.BaseObjectTest):
             self.container_name, object_name)
         self.assertHeaders(resp, 'Object', 'GET')
 
-    @test.attr(type='smoke')
     @test.idempotent_id('aa58bfa5-40d9-4bc3-82b4-d07f4a9e392a')
     def test_write_object_with_rights(self):
         # attempt to write object using authorized user

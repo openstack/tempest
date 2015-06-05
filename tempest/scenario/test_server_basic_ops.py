@@ -48,7 +48,7 @@ class TestServerBasicOps(manager.ScenarioTest):
             self.image_ref = CONF.compute.image_ref
         if not hasattr(self, 'flavor_ref'):
             self.flavor_ref = CONF.compute.flavor_ref
-        self.image_utils = test_utils.ImageUtils()
+        self.image_utils = test_utils.ImageUtils(self.manager)
         if not self.image_utils.is_flavor_enough(self.flavor_ref,
                                                  self.image_ref):
             raise self.skipException(
@@ -56,7 +56,7 @@ class TestServerBasicOps(manager.ScenarioTest):
                     image=self.image_ref, flavor=self.flavor_ref
                 )
             )
-        self.run_ssh = CONF.compute.run_ssh and \
+        self.run_ssh = CONF.validation.run_validation and \
             self.image_utils.is_sshable_image(self.image_ref)
         self.ssh_user = self.image_utils.ssh_user(self.image_ref)
         LOG.debug('Starting test for i:{image}, f:{flavor}. '

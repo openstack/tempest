@@ -17,6 +17,7 @@ from tempest_lib.common.utils import misc as misc_utils
 from tempest_lib import exceptions as lib_exc
 
 from tempest import config
+from tempest import exceptions
 
 CONF = config.CONF
 
@@ -29,51 +30,59 @@ def get_network_from_name(name, compute_networks_client):
     :param str name: the name of the network to use
     :param NetworksClientJSON compute_networks_client: The network client
         object to use for making the network lists api request
-    :return: The full dictionary for the network in question, unless the
-        network for the supplied name can not be found. In which case a dict
-        with just the name will be returned.
+    :return: The full dictionary for the network in question
     :rtype: dict
+    :raises InvalidConfiguration: If the name provided is invalid, the networks
+        list returns a 404, there are no found networks, or the found network
+        is invalid
     """
     caller = misc_utils.find_test_caller()
+
     if not name:
-        network = {'name': name}
+        raise exceptions.InvalidConfiguration()
+
+    try:
+        networks = compute_networks_client.list_networks(name=name)
+    except lib_exc.NotFound:
+        # In case of nova network, if the fixed_network_name is not
+        # owned by the tenant, and the network client is not an admin
+        # one, list_networks will not find it
+        msg = ('Unable to find network %s. '
+               'Starting instance without specifying a network.' %
+               name)
+        if caller:
+            msg = '(%s) %s' % (caller, msg)
+        LOG.info(msg)
+        raise exceptions.InvalidConfiguration()
+
+    # Check that a network exists, else raise an InvalidConfigurationException
+    if len(networks) == 1:
+        network = sorted(networks)[0]
+    elif len(networks) > 1:
+        msg = ("Network with name: %s had multiple matching networks in the "
+               "list response: %s\n Unable to specify a single network" % (
+                   name, networks))
+        if caller:
+            msg = '(%s) %s' % (caller, msg)
+        LOG.warn(msg)
+        raise exceptions.InvalidConfiguration()
     else:
-        try:
-            resp = compute_networks_client.list_networks(name=name)
-            if isinstance(resp, list):
-                networks = resp
-            elif isinstance(resp, dict):
-                networks = resp['networks']
-            else:
-                raise lib_exc.NotFound()
-            if len(networks) > 0:
-                network = networks[0]
-            else:
-                msg = "Network with name: %s not found" % name
-                if caller:
-                    LOG.warn('(%s) %s' % (caller, msg))
-                else:
-                    LOG.warn(msg)
-                raise lib_exc.NotFound()
-            # To be consistent with network isolation, add name is only
-            # label is available
-            name = network.get('name', network.get('label'))
-            if name:
-                network['name'] = name
-            else:
-                raise lib_exc.NotFound()
-        except lib_exc.NotFound:
-            # In case of nova network, if the fixed_network_name is not
-            # owned by the tenant, and the network client is not an admin
-            # one, list_networks will not find it
-            msg = ('Unable to find network %s. '
-                   'Starting instance without specifying a network.' %
-                   name)
-            if caller:
-                LOG.info('(%s) %s' % (caller, msg))
-            else:
-                LOG.info(msg)
-            network = {'name': name}
+        msg = "Network with name: %s not found" % name
+        if caller:
+            msg = '(%s) %s' % (caller, msg)
+        LOG.warn(msg)
+        raise exceptions.InvalidConfiguration()
+    # To be consistent between neutron and nova network always use name even
+    # if label is used in the api response. If neither is present than then
+    # the returned network is invalid.
+    name = network.get('name') or network.get('label')
+    if not name:
+        msg = "Network found from list doesn't contain a valid name or label"
+        if caller:
+            msg = '(%s) %s' % (caller, msg)
+        LOG.warn(msg)
+        raise exceptions.InvalidConfiguration()
+    network['name'] = name
     return network
 
 
@@ -97,16 +106,17 @@ def get_tenant_network(creds_provider, compute_networks_client):
             msg = ('No valid network provided or created, defaulting to '
                    'fixed_network_name')
             if caller:
-                LOG.debug('(%s) %s' % (caller, msg))
-            else:
-                LOG.debug(msg)
-            network = get_network_from_name(fixed_network_name,
-                                            compute_networks_client)
+                msg = '(%s) %s' % (caller, msg)
+            LOG.debug(msg)
+            try:
+                network = get_network_from_name(fixed_network_name,
+                                                compute_networks_client)
+            except exceptions.InvalidConfiguration:
+                network = {}
     msg = ('Found network %s available for tenant' % network)
     if caller:
-        LOG.info('(%s) %s' % (caller, msg))
-    else:
-        LOG.info(msg)
+        msg = '(%s) %s' % (caller, msg)
+    LOG.info(msg)
     return network
 
 

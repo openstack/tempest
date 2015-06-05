@@ -15,7 +15,6 @@
 from tempest_lib import exceptions as lib_exc
 
 from tempest.api.object_storage import base
-from tempest import clients
 from tempest import config
 from tempest import test
 
@@ -24,12 +23,14 @@ CONF = config.CONF
 
 class AccountNegativeTest(base.BaseObjectTest):
 
+    credentials = [['operator', CONF.object_storage.operator_role],
+                   ['operator_alt', CONF.object_storage.operator_role]]
+
     @classmethod
     def setup_credentials(cls):
         super(AccountNegativeTest, cls).setup_credentials()
-        cls.os_operator = clients.Manager(
-            cls.isolated_creds.get_creds_by_roles(
-                roles=[CONF.object_storage.operator_role], force_new=True))
+        cls.os = cls.os_roles_operator
+        cls.os_operator = cls.os_roles_operator_alt
 
     @test.attr(type=['negative'])
     @test.idempotent_id('070e6aca-6152-4867-868d-1118d68fb38c')
