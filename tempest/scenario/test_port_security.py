@@ -25,23 +25,6 @@ LOG = logging.getLogger(__name__)
 
 
 class TestPortSecurityExtension(manager.NetworkScenarioTest):
-    @classmethod
-    def skip_checks(cls):
-        super(TestPortSecurityExtension, cls).skip_checks()
-        if not CONF.network_feature_enabled.port_security:
-            raise cls.skipException('Port security ML2 extension '
-                                    'is not supported')
-
-    @classmethod
-    def resource_setup(cls):
-        super(TestPortSecurityExtension, cls).resource_setup()
-
-    @classmethod
-    def setup_credentials(cls):
-        super(TestPortSecurityExtension, cls).setup_credentials()
-
-    def setUp(self):
-        super(TestPortSecurityExtension, self).setUp()
 
     @test.idempotent_id('eaed2e09-7228-4e37-9286-7eeb0975ac01')
     @test.services('compute', 'network')
