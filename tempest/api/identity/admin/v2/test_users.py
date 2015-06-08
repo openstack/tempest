@@ -50,7 +50,7 @@ class UsersTestJSON(base.BaseIdentityV2AdminTest):
                                        self.alt_email, enabled=False)
         self.data.users.append(user)
         self.assertEqual(name, user['name'])
-        self.assertEqual('false', str(user['enabled']).lower())
+        self.assertEqual(False, user['enabled'])
         self.assertEqual(self.alt_email, user['email'])
 
     @test.idempotent_id('39d05857-e8a5-4ed4-ba83-0b52d3ab97ee')
@@ -71,13 +71,13 @@ class UsersTestJSON(base.BaseIdentityV2AdminTest):
                                               enabled=False)
         self.assertEqual(u_name2, update_user['name'])
         self.assertEqual(u_email2, update_user['email'])
-        self.assertEqual('false', str(update_user['enabled']).lower())
+        self.assertEqual(False, update_user['enabled'])
         # GET by id after updating
         updated_user = self.client.get_user(user['id'])
         # Assert response body of GET after updating
         self.assertEqual(u_name2, updated_user['name'])
         self.assertEqual(u_email2, updated_user['email'])
-        self.assertEqual('false', str(updated_user['enabled']).lower())
+        self.assertEqual(False, update_user['enabled'])
 
     @test.idempotent_id('29ed26f4-a74e-4425-9a85-fdb49fa269d2')
     def test_delete_user(self):
