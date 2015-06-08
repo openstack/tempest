@@ -28,13 +28,11 @@ class HostsAdminTestJSON(base.BaseV2ComputeAdminTest):
         super(HostsAdminTestJSON, cls).setup_clients()
         cls.client = cls.os_adm.hosts_client
 
-    @test.attr(type='gate')
     @test.idempotent_id('9bfaf98d-e2cb-44b0-a07e-2558b2821e4f')
     def test_list_hosts(self):
         hosts = self.client.list_hosts()
         self.assertTrue(len(hosts) >= 2, str(hosts))
 
-    @test.attr(type='gate')
     @test.idempotent_id('5dc06f5b-d887-47a2-bb2a-67762ef3c6de')
     def test_list_hosts_with_zone(self):
         self.useFixture(fixtures.LockFixture('availability_zone'))
@@ -46,7 +44,6 @@ class HostsAdminTestJSON(base.BaseV2ComputeAdminTest):
         self.assertTrue(len(hosts) >= 1)
         self.assertIn(host, hosts)
 
-    @test.attr(type='gate')
     @test.idempotent_id('9af3c171-fbf4-4150-a624-22109733c2a6')
     def test_list_hosts_with_a_blank_zone(self):
         # If send the request with a blank zone, the request will be successful
@@ -55,7 +52,6 @@ class HostsAdminTestJSON(base.BaseV2ComputeAdminTest):
         hosts = self.client.list_hosts(params)
         self.assertNotEqual(0, len(hosts))
 
-    @test.attr(type='gate')
     @test.idempotent_id('c6ddbadb-c94e-4500-b12f-8ffc43843ff8')
     def test_list_hosts_with_nonexistent_zone(self):
         # If send the request with a nonexistent zone, the request will be
@@ -64,7 +60,6 @@ class HostsAdminTestJSON(base.BaseV2ComputeAdminTest):
         hosts = self.client.list_hosts(params)
         self.assertEqual(0, len(hosts))
 
-    @test.attr(type='gate')
     @test.idempotent_id('38adbb12-aee2-4498-8aec-329c72423aa4')
     def test_show_host_detail(self):
         hosts = self.client.list_hosts()

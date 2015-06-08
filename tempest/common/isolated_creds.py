@@ -363,7 +363,8 @@ class IsolatedCreds(cred_provider.CredentialProvider):
             LOG.info("Acquired isolated creds:\n credentials: %s"
                      % credentials)
             if (CONF.service_available.neutron and
-                not CONF.baremetal.driver_enabled):
+                not CONF.baremetal.driver_enabled and
+                CONF.auth.create_isolated_networks):
                 network, subnet, router = self._create_network_resources(
                     credentials.tenant_id)
                 credentials.set_resources(network=network, subnet=subnet,
@@ -465,7 +466,7 @@ class IsolatedCreds(cred_provider.CredentialProvider):
         if not self.isolated_creds:
             return
         self._clear_isolated_net_resources()
-        for creds in self.isolated_creds.itervalues():
+        for creds in six.itervalues(self.isolated_creds):
             try:
                 self.creds_client.delete_user(creds.user_id)
             except lib_exc.NotFound:

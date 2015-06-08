@@ -47,7 +47,6 @@ class RegionsTestJSON(base.BaseIdentityV3AdminTest):
         self.assertRaises(lib_exc.NotFound,
                           self.client.get_region, region_id)
 
-    @test.attr(type='gate')
     @test.idempotent_id('56186092-82e4-43f2-b954-91013218ba42')
     def test_create_update_get_delete_region(self):
         r_description = data_utils.rand_name('description')
@@ -85,7 +84,6 @@ class RegionsTestJSON(base.BaseIdentityV3AdminTest):
         self.assertEqual(r_region_id, region['id'])
         self.assertEqual(r_description, region['description'])
 
-    @test.attr(type='gate')
     @test.idempotent_id('d180bf99-544a-445c-ad0d-0c0d27663796')
     def test_list_regions(self):
         # Get a list of regions

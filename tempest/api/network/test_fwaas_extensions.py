@@ -12,6 +12,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import six
 from tempest_lib.common.utils import data_utils
 from tempest_lib import exceptions as lib_exc
 
@@ -98,8 +99,13 @@ class FWaaSExtensionTestJSON(base.BaseNetworkTest):
 
         if not test.call_until_true(_wait, CONF.network.build_timeout,
                                     CONF.network.build_interval):
-            m = ("Timed out waiting for firewall %s to reach %s state(s)" %
-                 (fw_id, target_states))
+            status = self.client.show_firewall(fw_id)['firewall']['status']
+            m = ("Timed out waiting for firewall %s to reach %s state(s) "
+                 "after %ss, currently in %s state." %
+                 (fw_id,
+                  target_states,
+                  CONF.network.build_interval,
+                  status))
             raise exceptions.TimeoutException(m)
 
     @test.idempotent_id('1b84cf01-9c09-4ce7-bc72-b15e39076468')
@@ -145,7 +151,7 @@ class FWaaSExtensionTestJSON(base.BaseNetworkTest):
     def test_show_firewall_rule(self):
         # show a created firewall rule
         fw_rule = self.client.show_firewall_rule(self.fw_rule['id'])
-        for key, value in fw_rule['firewall_rule'].iteritems():
+        for key, value in six.iteritems(fw_rule['firewall_rule']):
             self.assertEqual(self.fw_rule[key], value)
 
     @test.idempotent_id('1086dd93-a4c0-4bbb-a1bd-6d4bc62c199f')
@@ -187,7 +193,7 @@ class FWaaSExtensionTestJSON(base.BaseNetworkTest):
         # show a created firewall policy
         fw_policy = self.client.show_firewall_policy(self.fw_policy['id'])
         fw_policy = fw_policy['firewall_policy']
-        for key, value in fw_policy.iteritems():
+        for key, value in six.iteritems(fw_policy):
             self.assertEqual(self.fw_policy[key], value)
 
     @test.idempotent_id('02082a03-3cdd-4789-986a-1327dd80bfb7')
@@ -216,7 +222,7 @@ class FWaaSExtensionTestJSON(base.BaseNetworkTest):
         firewall = self.client.show_firewall(firewall_id)
         firewall = firewall['firewall']
 
-        for key, value in firewall.iteritems():
+        for key, value in six.iteritems(firewall):
             if key == 'status':
                 continue
             self.assertEqual(created_firewall[key], value)
@@ -234,7 +240,6 @@ class FWaaSExtensionTestJSON(base.BaseNetworkTest):
         # Delete firewall
         self.client.delete_firewall(firewall_id)
 
-    @test.attr(type='smoke')
     @test.idempotent_id('53305b4b-9897-4e01-87c0-2ae386083180')
     def test_firewall_rule_insertion_position_removal_rule_from_policy(self):
         # Create firewall rule

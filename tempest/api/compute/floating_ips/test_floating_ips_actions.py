@@ -57,7 +57,6 @@ class FloatingIPsTestJSON(base.BaseFloatingIPsTest):
         except lib_exc.NotFound:
             pass
 
-    @test.attr(type='gate')
     @test.idempotent_id('f7bfb946-297e-41b8-9e8c-aba8e9bb5194')
     @test.services('network')
     def test_allocate_floating_ip(self):
@@ -73,7 +72,6 @@ class FloatingIPsTestJSON(base.BaseFloatingIPsTest):
         body = self.client.list_floating_ips()
         self.assertIn(floating_ip_details, body)
 
-    @test.attr(type='gate')
     @test.idempotent_id('de45e989-b5ca-4a9b-916b-04a52e7bbb8b')
     @test.services('network')
     def test_delete_floating_ip(self):
@@ -87,7 +85,6 @@ class FloatingIPsTestJSON(base.BaseFloatingIPsTest):
         # Check it was really deleted.
         self.client.wait_for_resource_deletion(floating_ip_body['id'])
 
-    @test.attr(type='gate')
     @test.idempotent_id('307efa27-dc6f-48a0-8cd2-162ce3ef0b52')
     @test.services('network')
     def test_associate_disassociate_floating_ip(self):
@@ -108,7 +105,6 @@ class FloatingIPsTestJSON(base.BaseFloatingIPsTest):
             self.floating_ip,
             self.server_id)
 
-    @test.attr(type='gate')
     @test.idempotent_id('6edef4b2-aaf1-4abc-bbe3-993e2561e0fe')
     @test.services('network')
     def test_associate_already_associated_floating_ip(self):

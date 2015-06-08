@@ -17,7 +17,6 @@ from tempest_lib import decorators
 from tempest_lib import exceptions as lib_exc
 
 from tempest.api.object_storage import base
-from tempest import clients
 from tempest import config
 from tempest import test
 
@@ -26,19 +25,14 @@ CONF = config.CONF
 
 class AccountQuotasNegativeTest(base.BaseObjectTest):
 
+    credentials = [['operator', CONF.object_storage.operator_role],
+                   ['reseller', CONF.object_storage.reseller_admin_role]]
+
     @classmethod
     def setup_credentials(cls):
         super(AccountQuotasNegativeTest, cls).setup_credentials()
-        reseller_admin_role = CONF.object_storage.reseller_admin_role
-        if not cls.isolated_creds.is_role_available(reseller_admin_role):
-            skip_msg = ("%s skipped because the configured credential provider"
-                        " is not able to provide credentials with the %s role "
-                        "assigned." % (cls.__name__, reseller_admin_role))
-            raise cls.skipException(skip_msg)
-        else:
-            cls.os_reselleradmin = clients.Manager(
-                cls.isolated_creds.get_creds_by_roles(
-                    roles=[reseller_admin_role]))
+        cls.os = cls.os_roles_operator
+        cls.os_reselleradmin = cls.os_roles_reseller
 
     @classmethod
     def resource_setup(cls):
@@ -87,7 +81,7 @@ class AccountQuotasNegativeTest(base.BaseObjectTest):
         #    cls.delete_containers([cls.container_name])
         super(AccountQuotasNegativeTest, cls).resource_cleanup()
 
-    @test.attr(type=["negative", "smoke"])
+    @test.attr(type=["negative"])
     @test.idempotent_id('d1dc5076-555e-4e6d-9697-28f1fe976324')
     @test.requires_ext(extension='account_quotas', service='object')
     def test_user_modify_quota(self):
@@ -105,7 +99,7 @@ class AccountQuotasNegativeTest(base.BaseObjectTest):
                           self.account_client.create_account_metadata,
                           {"Quota-Bytes": "100"})
 
-    @test.attr(type=["negative", "smoke"])
+    @test.attr(type=["negative"])
     @decorators.skip_because(bug="1310597")
     @test.idempotent_id('cf9e21f5-3aa4-41b1-9462-28ac550d8d3f')
     @test.requires_ext(extension='account_quotas', service='object')

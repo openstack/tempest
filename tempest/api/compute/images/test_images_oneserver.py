@@ -73,7 +73,6 @@ class ImagesOneServerTestJSON(base.BaseV2ComputeTest):
         flavor = self.flavors_client.get_flavor_details(flavor_id)
         return flavor['disk']
 
-    @test.attr(type='smoke')
     @test.idempotent_id('3731d080-d4c5-4872-b41a-64d0d0021314')
     def test_create_delete_image(self):
 
@@ -85,11 +84,11 @@ class ImagesOneServerTestJSON(base.BaseV2ComputeTest):
         self.client.wait_for_image_status(image_id, 'ACTIVE')
 
         # Verify the image was created correctly
-        image = self.client.get_image(image_id)
+        image = self.client.show_image(image_id)
         self.assertEqual(name, image['name'])
         self.assertEqual('test', image['metadata']['image_type'])
 
-        original_image = self.client.get_image(self.image_ref)
+        original_image = self.client.show_image(self.image_ref)
 
         # Verify minRAM is the same as the original image
         self.assertEqual(image['minRam'], original_image['minRam'])
@@ -103,7 +102,6 @@ class ImagesOneServerTestJSON(base.BaseV2ComputeTest):
         self.client.delete_image(image_id)
         self.client.wait_for_resource_deletion(image_id)
 
-    @test.attr(type=['gate'])
     @test.idempotent_id('3b7c6fe4-dfe7-477c-9243-b06359db51e6')
     def test_create_image_specify_multibyte_character_image_name(self):
         # prefix character is:

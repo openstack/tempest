@@ -16,7 +16,9 @@
 
 import tempfile
 import time
-import urllib2
+
+import six
+from six.moves.urllib import request as urllib2
 
 from tempest.common import commands
 from tempest import config
@@ -158,7 +160,7 @@ class TestLoadBalancerBasic(manager.NetworkScenarioTest):
         1. SSH to the instance
         2. Start two http backends listening on ports 80 and 88 respectively
         """
-        for server_id, ip in self.server_ips.iteritems():
+        for server_id, ip in six.iteritems(self.server_ips):
             private_key = self.servers_keypairs[server_id]['private_key']
             server_name = self.servers_client.get_server(server_id)['name']
             username = config.scenario.ssh_user
@@ -185,7 +187,7 @@ class TestLoadBalancerBasic(manager.NetworkScenarioTest):
             # Start netcat
             start_server = ('while true; do '
                             'sudo nc -ll -p %(port)s -e sh /tmp/%(script)s; '
-                            'done &')
+                            'done > /dev/null &')
             cmd = start_server % {'port': self.port1,
                                   'script': 'script1'}
             ssh_client.exec_command(cmd)
@@ -238,7 +240,7 @@ class TestLoadBalancerBasic(manager.NetworkScenarioTest):
         but with different ports to listen on.
         """
 
-        for server_id, ip in self.server_fixed_ips.iteritems():
+        for server_id, ip in six.iteritems(self.server_fixed_ips):
             if len(self.server_fixed_ips) == 1:
                 member1 = self._create_member(address=ip,
                                               protocol_port=self.port1,
@@ -307,7 +309,7 @@ class TestLoadBalancerBasic(manager.NetworkScenarioTest):
             except urllib2.HTTPError:
                 continue
         # Assert that each member of the pool gets balanced at least once
-        for member, counter in counters.iteritems():
+        for member, counter in six.iteritems(counters):
             self.assertGreater(counter, 0, 'Member %s never balanced' % member)
 
     @test.idempotent_id('c0c6f1ca-603b-4509-9c0f-2c63f0d838ee')

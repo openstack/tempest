@@ -35,16 +35,13 @@ class BaseMessagingTest(test.BaseTestCase):
         messaging as True
     """
 
+    credentials = ['primary']
+
     @classmethod
     def skip_checks(cls):
         super(BaseMessagingTest, cls).skip_checks()
         if not CONF.service_available.zaqar:
             raise cls.skipException("Zaqar support is required")
-
-    @classmethod
-    def setup_credentials(cls):
-        super(BaseMessagingTest, cls).setup_credentials()
-        cls.os = cls.get_client_manager()
 
     @classmethod
     def setup_clients(cls):
@@ -115,20 +112,6 @@ class BaseMessagingTest(test.BaseTestCase):
     def list_messages(cls, queue_name):
         """Wrapper utility that lists the messages in a queue."""
         resp, body = cls.client.list_messages(queue_name)
-
-        return resp, body
-
-    @classmethod
-    def get_single_message(cls, message_uri):
-        """Wrapper utility that gets a single message."""
-        resp, body = cls.client.show_single_message(message_uri)
-
-        return resp, body
-
-    @classmethod
-    def get_multiple_messages(cls, message_uri):
-        """Wrapper utility that gets multiple messages."""
-        resp, body = cls.client.show_multiple_messages(message_uri)
 
         return resp, body
 

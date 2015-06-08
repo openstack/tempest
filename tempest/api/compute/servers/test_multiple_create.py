@@ -30,12 +30,13 @@ class MultipleCreateTestJSON(base.BaseV2ComputeTest):
         This is the right way to create_multiple servers and manage to get the
         created servers into the servers list to be cleaned up after all.
         """
-        kwargs['name'] = kwargs.get('name', self._generate_name())
+        kwargs['name'] = name if name else self._generate_name()
+        if wait_until:
+            kwargs['wait_until'] = wait_until
         body = self.create_test_server(**kwargs)
 
         return body
 
-    @test.attr(type='gate')
     @test.idempotent_id('61e03386-89c3-449c-9bb1-a06f423fd9d1')
     def test_multiple_create(self):
         body = self._create_multiple_servers(wait_until='ACTIVE',
@@ -46,7 +47,6 @@ class MultipleCreateTestJSON(base.BaseV2ComputeTest):
         # contains return_reservation_id=False
         self.assertNotIn('reservation_id', body)
 
-    @test.attr(type='gate')
     @test.idempotent_id('864777fb-2f1e-44e3-b5b9-3eb6fa84f2f7')
     def test_multiple_create_with_reservation_return(self):
         body = self._create_multiple_servers(wait_until='ACTIVE',

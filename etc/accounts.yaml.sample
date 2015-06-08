@@ -1,4 +1,7 @@
 # The number of accounts required can be estimated as CONCURRENCY x 2
+# It is expected that each user provided here will be in a different tenant.
+# This is required to provide isolation between test for running in parallel
+#
 # Valid fields for credentials are defined in the descendants of
 # auth.Credentials - see KeystoneV[2|3]Credentials.CONF_ATTRIBUTES
 
@@ -27,6 +30,9 @@
   types:
      - 'reseller_admin'
      - 'operator'
+
+# Networks can be specified to tell tempest which network it should use when
+# creating servers with an account
 
 - username: 'admin_user_1'
   tenant_name: 'admin_tenant_1'

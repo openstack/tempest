@@ -77,7 +77,6 @@ class ServerRescueTestJSON(base.BaseV2ComputeTest):
         self.servers_client.unrescue_server(server_id)
         self.servers_client.wait_for_server_status(server_id, 'ACTIVE')
 
-    @test.attr(type='smoke')
     @test.idempotent_id('fd032140-714c-42e4-a8fd-adcd8df06be6')
     def test_rescue_unrescue_instance(self):
         self.servers_client.rescue_server(
@@ -86,7 +85,6 @@ class ServerRescueTestJSON(base.BaseV2ComputeTest):
         self.servers_client.unrescue_server(self.server_id)
         self.servers_client.wait_for_server_status(self.server_id, 'ACTIVE')
 
-    @test.attr(type='gate')
     @test.idempotent_id('4842e0cf-e87d-4d9d-b61f-f4791da3cacc')
     def test_rescued_vm_associate_dissociate_floating_ip(self):
         # Rescue the server
@@ -104,7 +102,6 @@ class ServerRescueTestJSON(base.BaseV2ComputeTest):
         client.disassociate_floating_ip_from_server(self.floating_ip,
                                                     self.server_id)
 
-    @test.attr(type='gate')
     @test.idempotent_id('affca41f-7195-492d-8065-e09eee245404')
     def test_rescued_vm_add_remove_security_group(self):
         # Rescue the server

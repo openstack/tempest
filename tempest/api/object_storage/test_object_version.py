@@ -46,7 +46,6 @@ class ContainerTest(base.BaseObjectTest):
         header_value = resp.get('x-versions-location', 'Missing Header')
         self.assertEqual(header_value, versioned)
 
-    @decorators.skip_because(bug="1417504")
     @test.attr(type='smoke')
     @test.idempotent_id('a151e158-dcbf-4a1f-a1e7-46cd65895a6f')
     @testtools.skipIf(

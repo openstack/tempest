@@ -48,7 +48,7 @@ list_floating_ips = {
     }
 }
 
-floating_ip = {
+create_get_floating_ip = {
     'status_code': [200],
     'response_body': {
         'type': 'object',
@@ -59,7 +59,7 @@ floating_ip = {
     }
 }
 
-floating_ip_pools = {
+list_floating_ip_pools = {
     'status_code': [200],
     'response_body': {
         'type': 'object',

@@ -29,7 +29,6 @@ class TelemetryAlarmingAPITestJSON(base.BaseTelemetryTest):
         for i in range(2):
             cls.create_alarm(threshold_rule=cls.rule)
 
-    @test.attr(type="gate")
     @test.idempotent_id('1c918e06-210b-41eb-bd45-14676dd77cd6')
     def test_alarm_list(self):
         # List alarms
@@ -43,7 +42,6 @@ class TelemetryAlarmingAPITestJSON(base.BaseTelemetryTest):
                          " in a fetched list: %s" %
                          ', '.join(str(a) for a in missing_alarms))
 
-    @test.attr(type="gate")
     @test.idempotent_id('1297b095-39c1-4e74-8a1f-4ae998cedd67')
     def test_create_update_get_delete_alarm(self):
         # Create an alarm
@@ -67,15 +65,14 @@ class TelemetryAlarmingAPITestJSON(base.BaseTelemetryTest):
         self.assertEqual(alarm_name, body['name'])
         self.assertDictContainsSubset(new_rule, body['threshold_rule'])
         # Get and verify details of an alarm after update
-        body = self.telemetry_client.get_alarm(alarm_id)
+        body = self.telemetry_client.show_alarm(alarm_id)
         self.assertEqual(alarm_name, body['name'])
         self.assertDictContainsSubset(new_rule, body['threshold_rule'])
         # Delete alarm and verify if deleted
         self.telemetry_client.delete_alarm(alarm_id)
         self.assertRaises(lib_exc.NotFound,
-                          self.telemetry_client.get_alarm, alarm_id)
+                          self.telemetry_client.show_alarm, alarm_id)
 
-    @test.attr(type="gate")
     @test.idempotent_id('aca49486-70bb-4016-87e0-f6131374f741')
     def test_set_get_alarm_state(self):
         alarm_states = ['ok', 'alarm', 'insufficient data']
@@ -87,10 +84,9 @@ class TelemetryAlarmingAPITestJSON(base.BaseTelemetryTest):
                                                       new_state)
         self.assertEqual(new_state, state.data)
         # Get alarm state and verify
-        state = self.telemetry_client.alarm_get_state(alarm['alarm_id'])
+        state = self.telemetry_client.show_alarm_state(alarm['alarm_id'])
         self.assertEqual(new_state, state.data)
 
-    @test.attr(type="gate")
     @test.idempotent_id('08d7e45a-1344-4e5c-ba6f-f6cbb77f55b9')
     def test_create_delete_alarm_with_combination_rule(self):
         rule = {"alarm_ids": self.alarm_ids,
@@ -106,4 +102,4 @@ class TelemetryAlarmingAPITestJSON(base.BaseTelemetryTest):
         # Verify alarm delete
         self.telemetry_client.delete_alarm(alarm_id)
         self.assertRaises(lib_exc.NotFound,
-                          self.telemetry_client.get_alarm, alarm_id)
+                          self.telemetry_client.show_alarm, alarm_id)

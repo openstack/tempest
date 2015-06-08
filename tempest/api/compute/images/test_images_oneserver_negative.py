@@ -80,7 +80,7 @@ class ImagesOneServerNegativeTestJSON(base.BaseV2ComputeTest):
 
         cls.image_ids = []
 
-    @test.attr(type=['negative', 'gate'])
+    @test.attr(type=['negative'])
     @test.idempotent_id('55d1d38c-dd66-4933-9c8e-7d92aeb60ddc')
     def test_create_image_specify_invalid_metadata(self):
         # Return an error when creating image with invalid metadata
@@ -89,7 +89,7 @@ class ImagesOneServerNegativeTestJSON(base.BaseV2ComputeTest):
         self.assertRaises(lib_exc.BadRequest, self.client.create_image,
                           self.server_id, snapshot_name, meta)
 
-    @test.attr(type=['negative', 'gate'])
+    @test.attr(type=['negative'])
     @test.idempotent_id('3d24d11f-5366-4536-bd28-cff32b748eca')
     def test_create_image_specify_metadata_over_limits(self):
         # Return an error when creating image with meta data over 256 chars
@@ -98,7 +98,7 @@ class ImagesOneServerNegativeTestJSON(base.BaseV2ComputeTest):
         self.assertRaises(lib_exc.BadRequest, self.client.create_image,
                           self.server_id, snapshot_name, meta)
 
-    @test.attr(type=['negative', 'gate'])
+    @test.attr(type=['negative'])
     @test.idempotent_id('0460efcf-ee88-4f94-acef-1bf658695456')
     def test_create_second_image_when_first_image_is_being_saved(self):
         # Disallow creating another image when first image is being saved
@@ -116,7 +116,7 @@ class ImagesOneServerNegativeTestJSON(base.BaseV2ComputeTest):
         self.assertRaises(lib_exc.Conflict, self.client.create_image,
                           self.server_id, alt_snapshot_name)
 
-    @test.attr(type=['negative', 'gate'])
+    @test.attr(type=['negative'])
     @test.idempotent_id('084f0cbc-500a-4963-8a4e-312905862581')
     def test_create_image_specify_name_over_256_chars(self):
         # Return an error if snapshot name over 256 characters is passed
@@ -125,7 +125,7 @@ class ImagesOneServerNegativeTestJSON(base.BaseV2ComputeTest):
         self.assertRaises(lib_exc.BadRequest, self.client.create_image,
                           self.server_id, snapshot_name)
 
-    @test.attr(type=['negative', 'gate'])
+    @test.attr(type=['negative'])
     @test.idempotent_id('0894954d-2db2-4195-a45b-ffec0bc0187e')
     def test_delete_image_that_is_not_yet_active(self):
         # Return an error while trying to delete an image what is creating
@@ -140,4 +140,4 @@ class ImagesOneServerNegativeTestJSON(base.BaseV2ComputeTest):
         self.client.delete_image(image_id)
         self.image_ids.remove(image_id)
 
-        self.assertRaises(lib_exc.NotFound, self.client.get_image, image_id)
+        self.assertRaises(lib_exc.NotFound, self.client.show_image, image_id)

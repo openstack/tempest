@@ -15,8 +15,8 @@ import re
 import time
 
 import six
+from tempest_lib.common import ssh
 
-from tempest.common import ssh
 from tempest import config
 from tempest import exceptions
 
@@ -46,6 +46,9 @@ class RemoteClient(object):
                                      channel_timeout=ssh_channel_timeout)
 
     def exec_command(self, cmd):
+        # Shell options below add more clearness on failures,
+        # path is extended for some non-cirros guest oses (centos7)
+        cmd = "set -eu -o pipefail; PATH=$PATH:/sbin; " + cmd
         return self.ssh_client.exec_command(cmd)
 
     def validate_authentication(self):
@@ -95,26 +98,26 @@ class RemoteClient(object):
         return self.exec_command(cmd)
 
     def get_mac_address(self):
-        cmd = "/bin/ip addr | awk '/ether/ {print $2}'"
+        cmd = "ip addr | awk '/ether/ {print $2}'"
         return self.exec_command(cmd)
 
     def get_nic_name(self, address):
-        cmd = "/bin/ip -o addr | awk '/%s/ {print $2}'" % address
+        cmd = "ip -o addr | awk '/%s/ {print $2}'" % address
         return self.exec_command(cmd)
 
     def get_ip_list(self):
-        cmd = "/bin/ip address"
+        cmd = "ip address"
         return self.exec_command(cmd)
 
     def assign_static_ip(self, nic, addr):
-        cmd = "sudo /bin/ip addr add {ip}/{mask} dev {nic}".format(
+        cmd = "sudo ip addr add {ip}/{mask} dev {nic}".format(
             ip=addr, mask=CONF.network.tenant_network_mask_bits,
             nic=nic
         )
         return self.exec_command(cmd)
 
     def turn_nic_on(self, nic):
-        cmd = "sudo /bin/ip link set {nic} up".format(nic=nic)
+        cmd = "sudo ip link set {nic} up".format(nic=nic)
         return self.exec_command(cmd)
 
     def get_pids(self, pr_name):

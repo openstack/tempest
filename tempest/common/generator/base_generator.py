@@ -17,8 +17,8 @@ import copy
 import functools
 
 import jsonschema
-
 from oslo_log import log as logging
+import six
 
 LOG = logging.getLogger(__name__)
 
@@ -122,7 +122,7 @@ class BasicGeneratorSet(object):
 
         if schema_type == 'object':
             properties = schema["properties"]
-            for attribute, definition in properties.iteritems():
+            for attribute, definition in six.iteritems(properties):
                 current_path = copy.copy(path)
                 if path is not None:
                     current_path.append(attribute)

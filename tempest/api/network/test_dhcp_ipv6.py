@@ -16,6 +16,7 @@
 import netaddr
 import random
 
+import six
 from tempest_lib.common.utils import data_utils
 from tempest_lib import exceptions as lib_exc
 
@@ -127,7 +128,7 @@ class NetworksTestDHCPv6(base.BaseNetworkTest):
         ):
             kwargs = {'ipv6_ra_mode': ra_mode,
                       'ipv6_address_mode': add_mode}
-            kwargs = {k: v for k, v in kwargs.iteritems() if v}
+            kwargs = {k: v for k, v in six.iteritems(kwargs) if v}
             real_ip, eui_ip = self._get_ips_from_subnet(**kwargs)
             self._clean_network()
             self.assertEqual(eui_ip, real_ip,
@@ -192,19 +193,16 @@ class NetworksTestDHCPv6(base.BaseNetworkTest):
                         self.network, **kwargs_dhcp)
                     subnet_slaac = self.create_subnet(self.network, **kwargs)
                 port_mac = data_utils.rand_mac_address()
-                dhcp_ip = subnet_dhcp["allocation_pools"][0]["start"]
                 eui_ip = data_utils.get_ipv6_addr_by_EUI64(
                     subnet_slaac['cidr'],
                     port_mac
                 ).format()
-                # TODO(sergsh): remove this when 1219795 is fixed
-                dhcp_ip = [dhcp_ip, (netaddr.IPAddress(dhcp_ip) + 1).format()]
                 port = self.create_port(self.network, mac_address=port_mac)
                 real_ips = dict([(k['subnet_id'], k['ip_address'])
                                  for k in port['fixed_ips']])
                 real_dhcp_ip, real_eui_ip = [real_ips[sub['id']]
-                                             for sub in subnet_dhcp,
-                                             subnet_slaac]
+                                             for sub in [subnet_dhcp,
+                                             subnet_slaac]]
                 self.client.delete_port(port['id'])
                 self.ports.pop()
                 body = self.client.list_ports()
@@ -216,11 +214,10 @@ class NetworksTestDHCPv6(base.BaseNetworkTest):
                                  'Real IP is {0}, but shall be {1}'.format(
                                      real_eui_ip,
                                      eui_ip))
-                self.assertIn(
-                    real_dhcp_ip, dhcp_ip,
-                    'Real IP is {0}, but shall be one from {1}'.format(
-                        real_dhcp_ip,
-                        str(dhcp_ip)))
+                msg = ('Real IP address is {0} and it is NOT on '
+                       'subnet {1}'.format(real_dhcp_ip, subnet_dhcp['cidr']))
+                self.assertIn(netaddr.IPAddress(real_dhcp_ip),
+                              netaddr.IPNetwork(subnet_dhcp['cidr']), msg)
 
     @test.idempotent_id('4256c61d-c538-41ea-9147-3c450c36669e')
     def test_dhcpv6_64_subnets(self):
@@ -245,37 +242,31 @@ class NetworksTestDHCPv6(base.BaseNetworkTest):
                         self.network, ip_version=4)
                     subnet_slaac = self.create_subnet(self.network, **kwargs)
                 port_mac = data_utils.rand_mac_address()
-                dhcp_ip = subnet_dhcp["allocation_pools"][0]["start"]
                 eui_ip = data_utils.get_ipv6_addr_by_EUI64(
                     subnet_slaac['cidr'],
                     port_mac
                 ).format()
-                # TODO(sergsh): remove this when 1219795 is fixed
-                dhcp_ip = [dhcp_ip, (netaddr.IPAddress(dhcp_ip) + 1).format()]
                 port = self.create_port(self.network, mac_address=port_mac)
                 real_ips = dict([(k['subnet_id'], k['ip_address'])
                                  for k in port['fixed_ips']])
                 real_dhcp_ip, real_eui_ip = [real_ips[sub['id']]
-                                             for sub in subnet_dhcp,
-                                             subnet_slaac]
+                                             for sub in [subnet_dhcp,
+                                             subnet_slaac]]
                 self._clean_network()
-                self.assertTrue({real_eui_ip,
-                                 real_dhcp_ip}.issubset([eui_ip] + dhcp_ip))
                 self.assertEqual(real_eui_ip,
                                  eui_ip,
                                  'Real IP is {0}, but shall be {1}'.format(
                                      real_eui_ip,
                                      eui_ip))
-                self.assertIn(
-                    real_dhcp_ip, dhcp_ip,
-                    'Real IP is {0}, but shall be one from {1}'.format(
-                        real_dhcp_ip,
-                        str(dhcp_ip)))
+                msg = ('Real IP address is {0} and it is NOT on '
+                       'subnet {1}'.format(real_dhcp_ip, subnet_dhcp['cidr']))
+                self.assertIn(netaddr.IPAddress(real_dhcp_ip),
+                              netaddr.IPNetwork(subnet_dhcp['cidr']), msg)
 
     @test.idempotent_id('4ab211a0-276f-4552-9070-51e27f58fecf')
     def test_dhcp_stateful(self):
-        """With all options below, DHCPv6 shall allocate first
-        address from subnet pool to port.
+        """With all options below, DHCPv6 shall allocate address
+        from subnet pool to port.
         """
         for ra_mode, add_mode in (
                 ('dhcpv6-stateful', 'dhcpv6-stateful'),
@@ -284,19 +275,15 @@ class NetworksTestDHCPv6(base.BaseNetworkTest):
         ):
             kwargs = {'ipv6_ra_mode': ra_mode,
                       'ipv6_address_mode': add_mode}
-            kwargs = {k: v for k, v in kwargs.iteritems() if v}
+            kwargs = {k: v for k, v in six.iteritems(kwargs) if v}
             subnet = self.create_subnet(self.network, **kwargs)
             port = self.create_port(self.network)
             port_ip = next(iter(port['fixed_ips']), None)['ip_address']
-            dhcp_ip = subnet["allocation_pools"][0]["start"]
-            # TODO(sergsh): remove this when 1219795 is fixed
-            dhcp_ip = [dhcp_ip, (netaddr.IPAddress(dhcp_ip) + 1).format()]
             self._clean_network()
-            self.assertIn(
-                port_ip, dhcp_ip,
-                'Real IP is {0}, but shall be one from {1}'.format(
-                    port_ip,
-                    str(dhcp_ip)))
+            msg = ('Real IP address is {0} and it is NOT on '
+                   'subnet {1}'.format(port_ip, subnet['cidr']))
+            self.assertIn(netaddr.IPAddress(port_ip),
+                          netaddr.IPNetwork(subnet['cidr']), msg)
 
     @test.idempotent_id('51a5e97f-f02e-4e4e-9a17-a69811d300e3')
     def test_dhcp_stateful_fixedips(self):
@@ -311,7 +298,7 @@ class NetworksTestDHCPv6(base.BaseNetworkTest):
         ):
             kwargs = {'ipv6_ra_mode': ra_mode,
                       'ipv6_address_mode': add_mode}
-            kwargs = {k: v for k, v in kwargs.iteritems() if v}
+            kwargs = {k: v for k, v in six.iteritems(kwargs) if v}
             subnet = self.create_subnet(self.network, **kwargs)
             ip_range = netaddr.IPRange(subnet["allocation_pools"][0]["start"],
                                        subnet["allocation_pools"][0]["end"])
@@ -389,7 +376,7 @@ class NetworksTestDHCPv6(base.BaseNetworkTest):
         ):
             kwargs = {'ipv6_ra_mode': ra_mode,
                       'ipv6_address_mode': add_mode}
-            kwargs = {k: v for k, v in kwargs.iteritems() if v}
+            kwargs = {k: v for k, v in six.iteritems(kwargs) if v}
             subnet, port = self._create_subnet_router(kwargs)
             port_ip = next(iter(port['fixed_ips']), None)['ip_address']
             self._clean_network()

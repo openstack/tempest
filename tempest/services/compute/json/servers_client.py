@@ -16,11 +16,10 @@
 
 import json
 import time
-import urllib
 
+from six.moves.urllib import parse as urllib
 from tempest_lib import exceptions as lib_exc
 
-from tempest.api_schema.response.compute import servers as common_schema
 from tempest.api_schema.response.compute.v2_1 import servers as schema
 from tempest.common import service_client
 from tempest.common import waiters
@@ -147,7 +146,7 @@ class ServersClientJSON(service_client.ServiceClient):
     def delete_server(self, server_id):
         """Deletes the given server."""
         resp, body = self.delete("servers/%s" % str(server_id))
-        self.validate_response(common_schema.delete_server, resp, body)
+        self.validate_response(schema.delete_server, resp, body)
         return service_client.ResponseBody(resp, body)
 
     def list_servers(self, params=None):
@@ -159,7 +158,7 @@ class ServersClientJSON(service_client.ServiceClient):
 
         resp, body = self.get(url)
         body = json.loads(body)
-        self.validate_response(common_schema.list_servers, resp, body)
+        self.validate_response(schema.list_servers, resp, body)
         return service_client.ResponseBody(resp, body)
 
     def list_servers_with_detail(self, params=None):
@@ -216,7 +215,7 @@ class ServersClientJSON(service_client.ServiceClient):
         return service_client.ResponseBody(resp, body)
 
     def action(self, server_id, action_name, response_key,
-               schema=common_schema.server_actions_common_schema,
+               schema=schema.server_actions_common_schema,
                response_class=service_client.ResponseBody, **kwargs):
         post_body = json.dumps({action_name: kwargs})
         resp, body = self.post('servers/%s/action' % str(server_id),
@@ -253,7 +252,7 @@ class ServersClientJSON(service_client.ServiceClient):
         resp, body = self.get("servers/%s/os-server-password" %
                               str(server_id))
         body = json.loads(body)
-        self.validate_response(common_schema.get_password, resp, body)
+        self.validate_response(schema.get_password, resp, body)
         return service_client.ResponseBody(resp, body)
 
     def delete_password(self, server_id):
@@ -264,7 +263,7 @@ class ServersClientJSON(service_client.ServiceClient):
         """
         resp, body = self.delete("servers/%s/os-server-password" %
                                  str(server_id))
-        self.validate_response(common_schema.server_actions_delete_password,
+        self.validate_response(schema.server_actions_delete_password,
                                resp, body)
         return service_client.ResponseBody(resp, body)
 
@@ -306,7 +305,7 @@ class ServersClientJSON(service_client.ServiceClient):
     def list_server_metadata(self, server_id):
         resp, body = self.get("servers/%s/metadata" % str(server_id))
         body = json.loads(body)
-        self.validate_response(common_schema.list_server_metadata, resp, body)
+        self.validate_response(schema.list_server_metadata, resp, body)
         return service_client.ResponseBody(resp, body['metadata'])
 
     def set_server_metadata(self, server_id, meta, no_metadata_field=False):
@@ -317,7 +316,7 @@ class ServersClientJSON(service_client.ServiceClient):
         resp, body = self.put('servers/%s/metadata' % str(server_id),
                               post_body)
         body = json.loads(body)
-        self.validate_response(common_schema.set_server_metadata, resp, body)
+        self.validate_response(schema.set_server_metadata, resp, body)
         return service_client.ResponseBody(resp, body['metadata'])
 
     def update_server_metadata(self, server_id, meta):
@@ -325,7 +324,7 @@ class ServersClientJSON(service_client.ServiceClient):
         resp, body = self.post('servers/%s/metadata' % str(server_id),
                                post_body)
         body = json.loads(body)
-        self.validate_response(common_schema.update_server_metadata,
+        self.validate_response(schema.update_server_metadata,
                                resp, body)
         return service_client.ResponseBody(resp, body['metadata'])
 
@@ -348,7 +347,7 @@ class ServersClientJSON(service_client.ServiceClient):
     def delete_server_metadata_item(self, server_id, key):
         resp, body = self.delete("servers/%s/metadata/%s" %
                                  (str(server_id), key))
-        self.validate_response(common_schema.delete_server_metadata_item,
+        self.validate_response(schema.delete_server_metadata_item,
                                resp, body)
         return service_client.ResponseBody(resp, body)
 
@@ -415,7 +414,7 @@ class ServersClientJSON(service_client.ServiceClient):
         req_body = json.dumps({'os-migrateLive': migrate_params})
 
         resp, body = self.post("servers/%s/action" % str(server_id), req_body)
-        self.validate_response(common_schema.server_actions_common_schema,
+        self.validate_response(schema.server_actions_common_schema,
                                resp, body)
         return service_client.ResponseBody(resp, body)
 
@@ -466,7 +465,7 @@ class ServersClientJSON(service_client.ServiceClient):
     def get_console_output(self, server_id, length):
         kwargs = {'length': length} if length else {}
         return self.action(server_id, 'os-getConsoleOutput', 'output',
-                           common_schema.get_console_output,
+                           schema.get_console_output,
                            response_class=service_client.ResponseBodyData,
                            **kwargs)
 
@@ -531,7 +530,7 @@ class ServersClientJSON(service_client.ServiceClient):
     def get_vnc_console(self, server_id, console_type):
         """Get URL of VNC console."""
         return self.action(server_id, "os-getVNCConsole",
-                           "console", common_schema.get_vnc_console,
+                           "console", schema.get_vnc_console,
                            type=console_type)
 
     def create_server_group(self, name, policies):

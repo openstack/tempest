@@ -20,7 +20,6 @@ from tempest_lib.common.utils import data_utils
 import testtools
 
 from tempest.api.object_storage import base
-from tempest import clients
 from tempest.common import custom_matchers
 from tempest import config
 from tempest import test
@@ -31,14 +30,15 @@ CONF = config.CONF
 
 class AccountTest(base.BaseObjectTest):
 
+    credentials = [['operator', CONF.object_storage.operator_role],
+                   ['operator_alt', CONF.object_storage.operator_role]]
     containers = []
 
     @classmethod
     def setup_credentials(cls):
         super(AccountTest, cls).setup_credentials()
-        cls.os_operator = clients.Manager(
-            cls.isolated_creds.get_creds_by_roles(
-                roles=[CONF.object_storage.operator_role], force_new=True))
+        cls.os = cls.os_roles_operator
+        cls.os_operator = cls.os_roles_operator_alt
 
     @classmethod
     def resource_setup(cls):
@@ -65,7 +65,6 @@ class AccountTest(base.BaseObjectTest):
         for container_name in self.containers:
             self.assertIn(container_name, container_list)
 
-    @test.attr(type='smoke')
     @test.idempotent_id('884ec421-fbad-4fcc-916b-0580f2699565')
     def test_list_no_containers(self):
         # List request to empty account
@@ -95,7 +94,6 @@ class AccountTest(base.BaseObjectTest):
 
         self.assertEqual(len(container_list), 0)
 
-    @test.attr(type='smoke')
     @test.idempotent_id('1c7efa35-e8a2-4b0b-b5ff-862c7fd83704')
     def test_list_containers_with_format_json(self):
         # list containers setting format parameter to 'json'
@@ -108,7 +106,6 @@ class AccountTest(base.BaseObjectTest):
         self.assertTrue([c['count'] for c in container_list])
         self.assertTrue([c['bytes'] for c in container_list])
 
-    @test.attr(type='smoke')
     @test.idempotent_id('4477b609-1ca6-4d4b-b25d-ad3f01086089')
     def test_list_containers_with_format_xml(self):
         # list containers setting format parameter to 'xml'
@@ -124,7 +121,6 @@ class AccountTest(base.BaseObjectTest):
         self.assertEqual(container_list.find(".//count").tag, 'count')
         self.assertEqual(container_list.find(".//bytes").tag, 'bytes')
 
-    @decorators.skip_because(bug="1419600")
     @test.attr(type='smoke')
     @test.idempotent_id('6eb04a6a-4860-4e31-ba91-ea3347d76b58')
     @testtools.skipIf(
@@ -135,7 +131,6 @@ class AccountTest(base.BaseObjectTest):
 
         self.assertThat(resp, custom_matchers.AreAllWellFormatted())
 
-    @test.attr(type='smoke')
     @test.idempotent_id('5cfa4ab2-4373-48dd-a41f-a532b12b08b2')
     def test_list_containers_with_limit(self):
         # list containers one of them, half of them then all of them
@@ -147,7 +142,6 @@ class AccountTest(base.BaseObjectTest):
 
             self.assertEqual(len(container_list), limit)
 
-    @test.attr(type='smoke')
     @test.idempotent_id('638f876d-6a43-482a-bbb3-0840bca101c6')
     def test_list_containers_with_marker(self):
         # list containers using marker param
@@ -200,7 +194,6 @@ class AccountTest(base.BaseObjectTest):
         self.assertHeaders(resp, 'Account', 'GET')
         self.assertEqual(len(container_list), self.containers_count - 2)
 
-    @test.attr(type='smoke')
     @test.idempotent_id('f7064ae8-dbcc-48da-b594-82feef6ea5af')
     def test_list_containers_with_limit_and_marker(self):
         # list containers combining marker and limit param
@@ -262,7 +255,6 @@ class AccountTest(base.BaseObjectTest):
         self.assertIn('x-account-meta-test-account-meta2', resp)
         self.account_client.delete_account_metadata(metadata)
 
-    @test.attr(type='smoke')
     @test.idempotent_id('b904c2e3-24c2-4dba-ad7d-04e90a761be5')
     def test_list_no_account_metadata(self):
         # list no account metadata

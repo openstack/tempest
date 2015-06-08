@@ -14,7 +14,8 @@
 #    under the License.
 
 import json
-import urllib
+
+from six.moves.urllib import parse as urllib
 
 from tempest.api_schema.response.compute.v2_1 import tenant_usages as schema
 from tempest.common import service_client
@@ -29,7 +30,7 @@ class TenantUsagesClientJSON(service_client.ServiceClient):
 
         resp, body = self.get(url)
         body = json.loads(body)
-        self.validate_response(schema.list_tenant, resp, body)
+        self.validate_response(schema.list_tenant_usage, resp, body)
         return service_client.ResponseBodyList(resp, body['tenant_usages'][0])
 
     def get_tenant_usage(self, tenant_id, params=None):
@@ -39,5 +40,5 @@ class TenantUsagesClientJSON(service_client.ServiceClient):
 
         resp, body = self.get(url)
         body = json.loads(body)
-        self.validate_response(schema.get_tenant, resp, body)
+        self.validate_response(schema.get_tenant_usage, resp, body)
         return service_client.ResponseBodyList(resp, body['tenant_usage'])

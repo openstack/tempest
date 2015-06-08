@@ -121,7 +121,6 @@ class FloatingIPTestJSON(base.BaseNetworkTest):
         self.assertIsNone(updated_floating_ip['fixed_ip_address'])
         self.assertIsNone(updated_floating_ip['router_id'])
 
-    @test.attr(type='smoke')
     @test.idempotent_id('e1f6bffd-442f-4668-b30e-df13f2705e77')
     def test_floating_ip_delete_port(self):
         # Create a floating IP
@@ -147,7 +146,6 @@ class FloatingIPTestJSON(base.BaseNetworkTest):
         self.assertIsNone(shown_floating_ip['fixed_ip_address'])
         self.assertIsNone(shown_floating_ip['router_id'])
 
-    @test.attr(type='smoke')
     @test.idempotent_id('1bb2f731-fe5a-4b8c-8409-799ade1bed4d')
     def test_floating_ip_update_different_router(self):
         # Associate a floating IP to a port on a router
@@ -192,7 +190,6 @@ class FloatingIPTestJSON(base.BaseNetworkTest):
             port_id=None)
         self.assertIsNone(floating_ip['floatingip']['port_id'])
 
-    @test.attr(type='smoke')
     @test.idempotent_id('45c4c683-ea97-41ef-9c51-5e9802f2f3d7')
     def test_create_update_floatingip_with_port_multiple_ip_address(self):
         # Find out ips that can be used for tests

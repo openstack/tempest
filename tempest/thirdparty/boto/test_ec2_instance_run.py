@@ -68,12 +68,21 @@ class InstanceRunTest(boto_test.BotoTestCase):
                       "ari":
                       {"name": data_utils.rand_name("ari-name"),
                        "location": cls.bucket_name + "/" + ari_manifest}}
-        for image in cls.images.itervalues():
+        for image_type in ("aki", "ari"):
+            image = cls.images[image_type]
             image["image_id"] = cls.ec2_client.register_image(
                 name=image["name"],
                 image_location=image["location"])
             cls.addResourceCleanUp(cls.ec2_client.deregister_image,
                                    image["image_id"])
+        image = cls.images["ami"]
+        image["image_id"] = cls.ec2_client.register_image(
+            name=image["name"],
+            image_location=image["location"],
+            kernel_id=cls.images["aki"]["image_id"],
+            ramdisk_id=cls.images["ari"]["image_id"])
+        cls.addResourceCleanUp(cls.ec2_client.deregister_image,
+                               image["image_id"])
 
         for image in cls.images.itervalues():
             def _state():
@@ -274,7 +283,17 @@ class InstanceRunTest(boto_test.BotoTestCase):
                                          CONF.compute.ssh_user,
                                          pkey=self.keypair.material)
         text = data_utils.rand_name("Pattern text for console output")
-        resp = ssh.write_to_console(text)
+        try:
+            resp = ssh.write_to_console(text)
+        except Exception:
+            if not CONF.compute_feature_enabled.console_output:
+                LOG.debug('Console output not supported, cannot log')
+            else:
+                console_output = instance.get_console_output().output
+                LOG.debug('Console output for %s\nbody=\n%s',
+                          instance.id, console_output)
+            raise
+
         self.assertFalse(resp)
 
         def _output():

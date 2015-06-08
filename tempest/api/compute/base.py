@@ -20,8 +20,6 @@ from oslo_utils import excutils
 from tempest_lib.common.utils import data_utils
 from tempest_lib import exceptions as lib_exc
 
-from tempest import clients
-from tempest.common import credentials
 from tempest.common import fixed_network
 from tempest import config
 from tempest import exceptions
@@ -38,6 +36,10 @@ class BaseComputeTest(tempest.test.BaseTestCase):
     _api_version = 2
     force_tenant_isolation = False
 
+    # TODO(andreaf) We should care also for the alt_manager here
+    # but only once client lazy load in the manager is done
+    credentials = ['primary']
+
     @classmethod
     def skip_checks(cls):
         super(BaseComputeTest, cls).skip_checks()
@@ -50,13 +52,6 @@ class BaseComputeTest(tempest.test.BaseTestCase):
     def setup_credentials(cls):
         cls.set_network_resources()
         super(BaseComputeTest, cls).setup_credentials()
-        # TODO(andreaf) WE should care also for the alt_manager here
-        # but only once client lazy load in the manager is done
-        cls.os = cls.get_client_manager()
-        # Note that we put this here and not in skip_checks because in
-        # the case of preprovisioned users we won't know if we can get
-        # two distinct users until we go and lock them
-        cls.multi_user = cls.check_multi_user()
 
     @classmethod
     def setup_clients(cls):
@@ -114,14 +109,6 @@ class BaseComputeTest(tempest.test.BaseTestCase):
         cls.clear_security_groups()
         cls.clear_server_groups()
         super(BaseComputeTest, cls).resource_cleanup()
-
-    @classmethod
-    def check_multi_user(cls):
-        # We have a list of accounts now, so just checking if the list is gt 2
-        if not cls.isolated_creds.is_multi_user():
-            msg = "Not enough users available for multi-user testing"
-            raise exceptions.InvalidConfiguration(msg)
-        return True
 
     @classmethod
     def clear_servers(cls):
@@ -316,7 +303,7 @@ class BaseComputeTest(tempest.test.BaseTestCase):
         if 'wait_until' in kwargs:
             cls.images_client.wait_for_image_status(image_id,
                                                     kwargs['wait_until'])
-            image = cls.images_client.get_image(image_id)
+            image = cls.images_client.show_image(image_id)
 
             if kwargs['wait_until'] == 'ACTIVE':
                 if kwargs.get('wait_for_server', True):
@@ -338,6 +325,15 @@ class BaseComputeTest(tempest.test.BaseTestCase):
         return server['id']
 
     @classmethod
+    def delete_server(cls, server_id):
+        """Deletes an existing server and waits for it to be gone."""
+        try:
+            cls.servers_client.delete_server(server_id)
+            cls.servers_client.wait_for_server_termination(server_id)
+        except Exception:
+            LOG.exception('Failed to delete server %s' % server_id)
+
+    @classmethod
     def delete_volume(cls, volume_id):
         """Deletes the given volume and waits for it to be gone."""
         cls._delete_volume(cls.volumes_extensions_client, volume_id)
@@ -350,18 +346,7 @@ class BaseV2ComputeTest(BaseComputeTest):
 class BaseComputeAdminTest(BaseComputeTest):
     """Base test case class for Compute Admin API tests."""
 
-    @classmethod
-    def skip_checks(cls):
-        super(BaseComputeAdminTest, cls).skip_checks()
-        if not credentials.is_admin_available():
-            msg = ("Missing Identity Admin API credentials in configuration.")
-            raise cls.skipException(msg)
-
-    @classmethod
-    def setup_credentials(cls):
-        super(BaseComputeAdminTest, cls).setup_credentials()
-        creds = cls.isolated_creds.get_admin_creds()
-        cls.os_adm = clients.Manager(credentials=creds)
+    credentials = ['primary', 'admin']
 
     @classmethod
     def setup_clients(cls):

@@ -13,8 +13,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import cStringIO as StringIO
-
+from six import moves
 from tempest_lib.common.utils import data_utils
 
 from tempest.api.image import base
@@ -27,7 +26,6 @@ CONF = config.CONF
 class CreateRegisterImagesTest(base.BaseV1ImageTest):
     """Here we test the registration and creation of images."""
 
-    @test.attr(type='gate')
     @test.idempotent_id('3027f8e6-3492-4a11-8575-c3293017af4d')
     def test_register_then_upload(self):
         # Register, then upload an image
@@ -46,12 +44,11 @@ class CreateRegisterImagesTest(base.BaseV1ImageTest):
             self.assertEqual(val, body.get('properties')[key])
 
         # Now try uploading an image file
-        image_file = StringIO.StringIO(data_utils.random_bytes())
+        image_file = moves.cStringIO(data_utils.random_bytes())
         body = self.client.update_image(image_id, data=image_file)
         self.assertIn('size', body)
         self.assertEqual(1024, body.get('size'))
 
-    @test.attr(type='gate')
     @test.idempotent_id('69da74d9-68a9-404b-9664-ff7164ccb0f5')
     def test_register_remote_image(self):
         # Register a new remote image
@@ -69,7 +66,6 @@ class CreateRegisterImagesTest(base.BaseV1ImageTest):
         self.assertEqual(properties['key1'], 'value1')
         self.assertEqual(properties['key2'], 'value2')
 
-    @test.attr(type='gate')
     @test.idempotent_id('6d0e13a7-515b-460c-b91f-9f4793f09816')
     def test_register_http_image(self):
         body = self.create_image(name='New Http Image',
@@ -81,9 +77,8 @@ class CreateRegisterImagesTest(base.BaseV1ImageTest):
         self.assertEqual('New Http Image', body.get('name'))
         self.assertFalse(body.get('is_public'))
         self.client.wait_for_image_status(image_id, 'active')
-        self.client.get_image(image_id)
+        self.client.show_image(image_id)
 
-    @test.attr(type='gate')
     @test.idempotent_id('05b19d55-140c-40d0-b36b-fafd774d421b')
     def test_register_image_with_min_ram(self):
         # Register an image with min ram
@@ -161,7 +156,7 @@ class ListImagesTest(base.BaseV1ImageTest):
         image. Note that the size of the new image is a random number between
         1024 and 4096
         """
-        image_file = StringIO.StringIO(data_utils.random_bytes(size))
+        image_file = moves.cStringIO(data_utils.random_bytes(size))
         name = 'New Standard Image %s' % name
         image = cls.create_image(name=name,
                                  container_format=container_format,
@@ -170,56 +165,50 @@ class ListImagesTest(base.BaseV1ImageTest):
         image_id = image['id']
         return image_id
 
-    @test.attr(type='gate')
     @test.idempotent_id('246178ab-3b33-4212-9a4b-a7fe8261794d')
     def test_index_no_params(self):
         # Simple test to see all fixture images returned
-        images_list = self.client.image_list()
+        images_list = self.client.list_images()
         image_list = map(lambda x: x['id'], images_list)
         for image_id in self.created_images:
             self.assertIn(image_id, image_list)
 
-    @test.attr(type='gate')
     @test.idempotent_id('f1755589-63d6-4468-b098-589820eb4031')
     def test_index_disk_format(self):
-        images_list = self.client.image_list(disk_format='ami')
+        images_list = self.client.list_images(disk_format='ami')
         for image in images_list:
             self.assertEqual(image['disk_format'], 'ami')
         result_set = set(map(lambda x: x['id'], images_list))
         self.assertTrue(self.ami_set <= result_set)
         self.assertFalse(self.created_set - self.ami_set <= result_set)
 
-    @test.attr(type='gate')
     @test.idempotent_id('2143655d-96d9-4bec-9188-8674206b4b3b')
     def test_index_container_format(self):
-        images_list = self.client.image_list(container_format='bare')
+        images_list = self.client.list_images(container_format='bare')
         for image in images_list:
             self.assertEqual(image['container_format'], 'bare')
         result_set = set(map(lambda x: x['id'], images_list))
         self.assertTrue(self.bare_set <= result_set)
         self.assertFalse(self.created_set - self.bare_set <= result_set)
 
-    @test.attr(type='gate')
     @test.idempotent_id('feb32ac6-22bb-4a16-afd8-9454bb714b14')
     def test_index_max_size(self):
-        images_list = self.client.image_list(size_max=42)
+        images_list = self.client.list_images(size_max=42)
         for image in images_list:
             self.assertTrue(image['size'] <= 42)
         result_set = set(map(lambda x: x['id'], images_list))
         self.assertTrue(self.size42_set <= result_set)
         self.assertFalse(self.created_set - self.size42_set <= result_set)
 
-    @test.attr(type='gate')
     @test.idempotent_id('6ffc16d0-4cbf-4401-95c8-4ac63eac34d8')
     def test_index_min_size(self):
-        images_list = self.client.image_list(size_min=142)
+        images_list = self.client.list_images(size_min=142)
         for image in images_list:
             self.assertTrue(image['size'] >= 142)
         result_set = set(map(lambda x: x['id'], images_list))
         self.assertTrue(self.size142_set <= result_set)
         self.assertFalse(self.size42_set <= result_set)
 
-    @test.attr(type='gate')
     @test.idempotent_id('e5dc26d9-9aa2-48dd-bda5-748e1445da98')
     def test_index_status_active_detail(self):
         images_list = self.client.image_list_detail(status='active',
@@ -232,7 +221,6 @@ class ListImagesTest(base.BaseV1ImageTest):
             top_size = size
             self.assertEqual(image['status'], 'active')
 
-    @test.attr(type='gate')
     @test.idempotent_id('097af10a-bae8-4342-bff4-edf89969ed2a')
     def test_index_name(self):
         images_list = self.client.image_list_detail(
@@ -257,7 +245,7 @@ class UpdateImageMetaTest(base.BaseV1ImageTest):
         Create a new standard image and return the ID of the newly-registered
         image.
         """
-        image_file = StringIO.StringIO(data_utils.random_bytes(size))
+        image_file = moves.cStringIO(data_utils.random_bytes(size))
         name = 'New Standard Image %s' % name
         image = cls.create_image(name=name,
                                  container_format=container_format,
@@ -267,7 +255,6 @@ class UpdateImageMetaTest(base.BaseV1ImageTest):
         image_id = image['id']
         return image_id
 
-    @test.attr(type='gate')
     @test.idempotent_id('01752c1c-0275-4de3-9e5b-876e44541928')
     def test_list_image_metadata(self):
         # All metadata key/value pairs for an image should be returned
@@ -275,7 +262,6 @@ class UpdateImageMetaTest(base.BaseV1ImageTest):
         expected = {'key1': 'value1'}
         self.assertEqual(expected, resp_metadata['properties'])
 
-    @test.attr(type='gate')
     @test.idempotent_id('d6d7649c-08ce-440d-9ea7-e3dda552f33c')
     def test_update_image_metadata(self):
         # The metadata for the image should match the updated values

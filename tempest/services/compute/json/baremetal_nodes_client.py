@@ -13,9 +13,11 @@
 #    under the License.
 
 import json
-import urllib
 
-from tempest.api_schema.response.compute import baremetal_nodes as schema
+from six.moves.urllib import parse as urllib
+
+from tempest.api_schema.response.compute.v2_1 import baremetal_nodes \
+    as schema
 from tempest.common import service_client
 
 
@@ -34,7 +36,7 @@ class BaremetalNodesClientJSON(service_client.ServiceClient):
         self.validate_response(schema.list_baremetal_nodes, resp, body)
         return service_client.ResponseBodyList(resp, body['nodes'])
 
-    def get_baremetal_node(self, baremetal_node_id):
+    def show_baremetal_node(self, baremetal_node_id):
         """Returns the details of a single baremetal node."""
         url = 'os-baremetal-nodes/%s' % baremetal_node_id
         resp, body = self.get(url)

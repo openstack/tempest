@@ -17,7 +17,6 @@ from tempest import test
 class TestApiDiscovery(base.BaseBaremetalTest):
     """Tests for API discovery features."""
 
-    @test.attr(type='smoke')
     @test.idempotent_id('a3c27e94-f56c-42c4-8600-d6790650b9c5')
     def test_api_versions(self):
         _, descr = self.client.get_api_description()
@@ -27,14 +26,12 @@ class TestApiDiscovery(base.BaseBaremetalTest):
         for v in expected_versions:
             self.assertIn(v, versions)
 
-    @test.attr(type='smoke')
     @test.idempotent_id('896283a6-488e-4f31-af78-6614286cbe0d')
     def test_default_version(self):
         _, descr = self.client.get_api_description()
         default_version = descr['default_version']
         self.assertEqual(default_version['id'], 'v1')
 
-    @test.attr(type='smoke')
     @test.idempotent_id('abc0b34d-e684-4546-9728-ab7a9ad9f174')
     def test_version_1_resources(self):
         _, descr = self.client.get_version_description(version='v1')

@@ -16,7 +16,6 @@
 from tempest_lib.common.utils import data_utils
 
 from tempest.api.orchestration import base
-from tempest import clients
 from tempest import config
 from tempest import test
 
@@ -34,7 +33,10 @@ class SwiftResourcesTestJSON(base.BaseOrchestrationTest):
     @classmethod
     def setup_credentials(cls):
         super(SwiftResourcesTestJSON, cls).setup_credentials()
-        cls.os = clients.Manager()
+        stack_owner_role = CONF.orchestration.stack_owner_role
+        operator_role = CONF.object_storage.operator_role
+        cls.os = cls.get_client_manager(
+            roles=[stack_owner_role, operator_role])
 
     @classmethod
     def setup_clients(cls):

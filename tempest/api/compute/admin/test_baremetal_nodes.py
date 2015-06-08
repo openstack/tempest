@@ -33,7 +33,7 @@ class BaremetalNodesAdminTestJSON(base.BaseV2ComputeAdminTest):
         cls.client = cls.os_adm.baremetal_nodes_client
         cls.ironic_client = cls.os_adm.baremetal_client
 
-    @test.attr(type=['smoke', 'baremetal'])
+    @test.attr(type=['baremetal'])
     @test.idempotent_id('e475aa6e-416d-4fa4-b3af-28d5e84250fb')
     def test_list_get_baremetal_nodes(self):
         # Create some test nodes in Ironic directly
@@ -52,5 +52,5 @@ class BaremetalNodesAdminTestJSON(base.BaseV2ComputeAdminTest):
 
         # Test getting each individually
         for node in test_nodes:
-            baremetal_node = self.client.get_baremetal_node(node['uuid'])
+            baremetal_node = self.client.show_baremetal_node(node['uuid'])
             self.assertEqual(node['uuid'], baremetal_node['id'])

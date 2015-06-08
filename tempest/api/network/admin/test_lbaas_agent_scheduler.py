@@ -49,7 +49,6 @@ class LBaaSAgentSchedulerTestJSON(base.BaseAdminNetworkTest):
         cls.pool = cls.create_pool(pool_name, "ROUND_ROBIN",
                                    "HTTP", cls.subnet)
 
-    @test.attr(type='smoke')
     @test.idempotent_id('e5ea8b15-4f44-4350-963c-e0fcb533ee79')
     def test_list_pools_on_lbaas_agent(self):
         found = False
@@ -68,7 +67,6 @@ class LBaaSAgentSchedulerTestJSON(base.BaseAdminNetworkTest):
         msg = 'Unable to find Load Balancer agent hosting pool'
         self.assertTrue(found, msg)
 
-    @test.attr(type='smoke')
     @test.idempotent_id('e2745593-fd79-4b98-a262-575fd7865796')
     def test_show_lbaas_agent_hosting_pool(self):
         body = self.admin_client.show_lbaas_agent_hosting_pool(

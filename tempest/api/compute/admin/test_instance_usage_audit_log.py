@@ -14,7 +14,8 @@
 #    under the License.
 
 import datetime
-import urllib
+
+from six.moves.urllib import parse as urllib
 
 from tempest.api.compute import base
 from tempest import test
@@ -27,7 +28,6 @@ class InstanceUsageAuditLogTestJSON(base.BaseV2ComputeAdminTest):
         super(InstanceUsageAuditLogTestJSON, cls).setup_clients()
         cls.adm_client = cls.os_adm.instance_usages_audit_log_client
 
-    @test.attr(type='gate')
     @test.idempotent_id('25319919-33d9-424f-9f99-2c203ee48b9d')
     def test_list_instance_usage_audit_logs(self):
         # list instance usage audit logs
@@ -40,7 +40,6 @@ class InstanceUsageAuditLogTestJSON(base.BaseV2ComputeAdminTest):
         for item in expected_items:
             self.assertIn(item, body)
 
-    @test.attr(type='gate')
     @test.idempotent_id('6e40459d-7c5f-400b-9e83-449fbc8e7feb')
     def test_get_instance_usage_audit_log(self):
         # Get instance usage audit log before specified time

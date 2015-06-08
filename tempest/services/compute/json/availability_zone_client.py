@@ -22,17 +22,15 @@ from tempest.common import service_client
 
 class AvailabilityZoneClientJSON(service_client.ServiceClient):
 
-    def get_availability_zone_list(self):
-        resp, body = self.get('os-availability-zone')
-        body = json.loads(body)
-        self.validate_response(schema.list_availability_zone_list, resp, body)
-        return service_client.ResponseBodyList(resp,
-                                               body['availabilityZoneInfo'])
+    def list_availability_zones(self, detail=False):
+        url = 'os-availability-zone'
+        schema_list = schema.list_availability_zone_list
+        if detail:
+            url += '/detail'
+            schema_list = schema.list_availability_zone_list_detail
 
-    def get_availability_zone_list_detail(self):
-        resp, body = self.get('os-availability-zone/detail')
+        resp, body = self.get(url)
         body = json.loads(body)
-        self.validate_response(schema.list_availability_zone_list_detail, resp,
-                               body)
+        self.validate_response(schema_list, resp, body)
         return service_client.ResponseBodyList(resp,
                                                body['availabilityZoneInfo'])

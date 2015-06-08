@@ -18,9 +18,10 @@ import errno
 import json
 import os
 import time
-import urllib
 
 from oslo_log import log as logging
+import six
+from six.moves.urllib import parse as urllib
 from tempest_lib.common.utils import misc as misc_utils
 from tempest_lib import exceptions as lib_exc
 
@@ -54,7 +55,7 @@ class ImageClientJSON(service_client.ServiceClient):
 
     def _image_meta_from_headers(self, headers):
         meta = {'properties': {}}
-        for key, value in headers.iteritems():
+        for key, value in six.iteritems(headers):
             if key.startswith('x-image-meta-property-'):
                 _key = key[22:]
                 meta['properties'][_key] = value
@@ -80,11 +81,11 @@ class ImageClientJSON(service_client.ServiceClient):
         copy_from = fields_copy.pop('copy_from', None)
         if copy_from is not None:
             headers['x-glance-api-copy-from'] = copy_from
-        for key, value in fields_copy.pop('properties', {}).iteritems():
+        for key, value in six.iteritems(fields_copy.pop('properties', {})):
             headers['x-image-meta-property-%s' % key] = str(value)
-        for key, value in fields_copy.pop('api', {}).iteritems():
+        for key, value in six.iteritems(fields_copy.pop('api', {})):
             headers['x-glance-api-property-%s' % key] = str(value)
-        for key, value in fields_copy.iteritems():
+        for key, value in six.iteritems(fields_copy):
             headers['x-image-meta-%s' % key] = str(value)
         return headers
 
@@ -200,7 +201,7 @@ class ImageClientJSON(service_client.ServiceClient):
         self.expected_success(200, resp.status)
         return service_client.ResponseBody(resp, body)
 
-    def image_list(self, **kwargs):
+    def list_images(self, **kwargs):
         url = 'v1/images'
 
         if len(kwargs) > 0:
@@ -239,7 +240,7 @@ class ImageClientJSON(service_client.ServiceClient):
         body = self._image_meta_from_headers(resp)
         return service_client.ResponseBody(resp, body)
 
-    def get_image(self, image_id):
+    def show_image(self, image_id):
         url = 'v1/images/%s' % image_id
         resp, body = self.get(url)
         self.expected_success(200, resp.status)
@@ -257,7 +258,7 @@ class ImageClientJSON(service_client.ServiceClient):
         """Returns the primary type of resource this client works with."""
         return 'image_meta'
 
-    def get_image_membership(self, image_id):
+    def list_image_members(self, image_id):
         url = 'v1/images/%s/members' % image_id
         resp, body = self.get(url)
         self.expected_success(200, resp.status)

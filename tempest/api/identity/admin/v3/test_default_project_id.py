@@ -10,10 +10,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib import auth
 from tempest_lib.common.utils import data_utils
 
 from tempest.api.identity import base
-from tempest import auth
 from tempest import clients
 from tempest import config
 from tempest import manager
@@ -35,7 +35,6 @@ class TestDefaultProjectId (base.BaseIdentityV3AdminTest):
         self.client.update_domain(domain_id, enabled=False)
         self.client.delete_domain(domain_id)
 
-    @test.attr(type='smoke')
     @test.idempotent_id('d6110661-6a71-49a7-a453-b5e26640ff6d')
     def test_default_project_id(self):
         # create a domain
