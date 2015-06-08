@@ -44,7 +44,7 @@ class BasicAdminOperationsImagesTest(base.BaseV2ImageAdminTest):
         self.addCleanup(self.client.delete_image, image_id)
         # upload an image file
         image_file = moves.cStringIO(data_utils.random_bytes())
-        self.client.store_image(image_id, image_file)
+        self.client.store_image_file(image_id, image_file)
         # deactivate image
         self.admin_client.deactivate_image(image_id)
         body = self.client.show_image(image_id)

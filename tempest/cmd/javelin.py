@@ -651,13 +651,13 @@ def create_images(images):
             name, fname = _resolve_image(image, 'aki')
             aki = client.images.create_image(
                 'javelin_' + name, 'aki', 'aki')
-            client.images.store_image(aki.get('id'), open(fname, 'r'))
+            client.images.store_image_file(aki.get('id'), open(fname, 'r'))
             extras['kernel_id'] = aki.get('id')
 
             name, fname = _resolve_image(image, 'ari')
             ari = client.images.create_image(
                 'javelin_' + name, 'ari', 'ari')
-            client.images.store_image(ari.get('id'), open(fname, 'r'))
+            client.images.store_image_file(ari.get('id'), open(fname, 'r'))
             extras['ramdisk_id'] = ari.get('id')
 
         _, fname = _resolve_image(image, 'file')
@@ -665,7 +665,7 @@ def create_images(images):
             image['name'], image['container_format'],
             image['disk_format'], **extras)
         image_id = body.get('id')
-        client.images.store_image(image_id, open(fname, 'r'))
+        client.images.store_image_file(image_id, open(fname, 'r'))
 
 
 def destroy_images(images):
