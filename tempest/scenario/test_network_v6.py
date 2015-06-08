@@ -13,7 +13,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 import functools
-import netaddr
 
 from oslo_log import log as logging
 import six
@@ -28,12 +27,13 @@ LOG = logging.getLogger(__name__)
 
 
 class TestGettingAddress(manager.NetworkScenarioTest):
-    """Create network with 2 subnets: IPv4 and IPv6 in a given address mode
+    """Create network with subnets: one IPv4 and
+    one or few IPv6 in a given address mode
     Boot 2 VMs on this network
     Allocate and assign 2 FIP4
-    Check that vNIC of server matches port data from OpenStack DB
-    Ping4 tenant IPv4 of one VM from another one
-    Will do the same with ping6 when available in VM
+    Check that vNICs of all VMs gets all addresses actually assigned
+    Ping4 to one VM from another one
+    If ping6 available in VM, do ping6 to all v6 addresses
     """
 
     @classmethod
@@ -65,41 +65,41 @@ class TestGettingAddress(manager.NetworkScenarioTest):
             'key_name': self.keypair['name'],
             'security_groups': [{'name': self.sec_grp['name']}]}
 
-    def prepare_network(self, address6_mode):
+    def prepare_network(self, address6_mode, n_subnets6=1):
         """Creates network with
-         one IPv6 subnet in the given mode and
+         given number of IPv6 subnets in the given mode and
          one IPv4 subnet
-         Creates router with ports on both subnets
+         Creates router with ports on all subnets
         """
         self.network = self._create_network(tenant_id=self.tenant_id)
         sub4 = self._create_subnet(network=self.network,
                                    namestart='sub4',
                                    ip_version=4,)
-        # since https://bugs.launchpad.net/neutron/+bug/1394112 we need
-        # to specify gateway_ip manually
-        net_range = netaddr.IPNetwork(CONF.network.tenant_network_v6_cidr)
-        gateway_ip = (netaddr.IPAddress(net_range) + 1).format()
-        sub6 = self._create_subnet(network=self.network,
-                                   namestart='sub6',
-                                   ip_version=6,
-                                   gateway_ip=gateway_ip,
-                                   ipv6_ra_mode=address6_mode,
-                                   ipv6_address_mode=address6_mode)
 
         router = self._get_router(tenant_id=self.tenant_id)
         sub4.add_to_router(router_id=router['id'])
-        sub6.add_to_router(router_id=router['id'])
         self.addCleanup(sub4.delete)
-        self.addCleanup(sub6.delete)
+
+        for _ in range(n_subnets6):
+            sub6 = self._create_subnet(network=self.network,
+                                       namestart='sub6',
+                                       ip_version=6,
+                                       ipv6_ra_mode=address6_mode,
+                                       ipv6_address_mode=address6_mode)
+
+            sub6.add_to_router(router_id=router['id'])
+            self.addCleanup(sub6.delete)
 
     @staticmethod
     def define_server_ips(srv):
+        ips = {'4': None, '6': []}
         for net_name, nics in six.iteritems(srv['addresses']):
             for nic in nics:
                 if nic['version'] == 6:
-                    srv['accessIPv6'] = nic['addr']
+                    ips['6'].append(nic['addr'])
                 else:
-                    srv['accessIPv4'] = nic['addr']
+                    ips['4'] = nic['addr']
+        return ips
 
     def prepare_server(self):
         username = CONF.compute.image_ssh_user
@@ -109,53 +109,56 @@ class TestGettingAddress(manager.NetworkScenarioTest):
 
         srv = self.create_server(create_kwargs=create_kwargs)
         fip = self.create_floating_ip(thing=srv)
-        self.define_server_ips(srv=srv)
+        ips = self.define_server_ips(srv=srv)
         ssh = self.get_remote_client(
             server_or_ip=fip.floating_ip_address,
             username=username)
-        return ssh, srv
+        return ssh, ips
 
-    def _prepare_and_test(self, address6_mode):
-        self.prepare_network(address6_mode=address6_mode)
+    def _prepare_and_test(self, address6_mode, n_subnets6=1):
+        self.prepare_network(address6_mode=address6_mode,
+                             n_subnets6=n_subnets6)
 
-        ssh1, srv1 = self.prepare_server()
-        ssh2, srv2 = self.prepare_server()
+        sshv4_1, ips_from_api_1 = self.prepare_server()
+        sshv4_2, ips_from_api_2 = self.prepare_server()
 
         def guest_has_address(ssh, addr):
             return addr in ssh.get_ip_list()
 
-        srv1_v6_addr_assigned = functools.partial(
-            guest_has_address, ssh1, srv1['accessIPv6'])
-        srv2_v6_addr_assigned = functools.partial(
-            guest_has_address, ssh2, srv2['accessIPv6'])
+        # get addresses assigned to vNIC as reported by 'ip address' utility
+        ips_from_ip_1 = sshv4_1.get_ip_list()
+        ips_from_ip_2 = sshv4_2.get_ip_list()
+        self.assertIn(ips_from_api_1['4'], ips_from_ip_1)
+        self.assertIn(ips_from_api_2['4'], ips_from_ip_2)
+        for i in range(n_subnets6):
+            # v6 should be configured since the image supports it
+            # It can take time for ipv6 automatic address to get assigned
+            srv1_v6_addr_assigned = functools.partial(
+                guest_has_address, sshv4_1, ips_from_api_1['6'][i])
 
-        result = ssh1.get_ip_list()
-        self.assertIn(srv1['accessIPv4'], result)
-        # v6 should be configured since the image supports it
-        # It can take time for ipv6 automatic address to get assigned
-        self.assertTrue(
-            test.call_until_true(srv1_v6_addr_assigned,
-                                 CONF.compute.ping_timeout, 1))
-        result = ssh2.get_ip_list()
-        self.assertIn(srv2['accessIPv4'], result)
-        # v6 should be configured since the image supports it
-        # It can take time for ipv6 automatic address to get assigned
-        self.assertTrue(
-            test.call_until_true(srv2_v6_addr_assigned,
-                                 CONF.compute.ping_timeout, 1))
-        result = ssh1.ping_host(srv2['accessIPv4'])
+            srv2_v6_addr_assigned = functools.partial(
+                guest_has_address, sshv4_2, ips_from_api_2['6'][i])
+
+            self.assertTrue(test.call_until_true(srv1_v6_addr_assigned,
+                                                 CONF.compute.ping_timeout, 1))
+
+            self.assertTrue(test.call_until_true(srv2_v6_addr_assigned,
+                                                 CONF.compute.ping_timeout, 1))
+
+        result = sshv4_1.ping_host(ips_from_api_2['4'])
         self.assertIn('0% packet loss', result)
-        result = ssh2.ping_host(srv1['accessIPv4'])
+        result = sshv4_2.ping_host(ips_from_api_1['4'])
         self.assertIn('0% packet loss', result)
 
         # Some VM (like cirros) may not have ping6 utility
-        result = ssh1.exec_command('whereis ping6')
+        result = sshv4_1.exec_command('whereis ping6')
         is_ping6 = False if result == 'ping6:\n' else True
         if is_ping6:
-            result = ssh1.ping_host(srv2['accessIPv6'])
-            self.assertIn('0% packet loss', result)
-            result = ssh2.ping_host(srv1['accessIPv6'])
-            self.assertIn('0% packet loss', result)
+            for i in range(n_subnets6):
+                result = sshv4_1.ping_host(ips_from_api_2['6'][i])
+                self.assertIn('0% packet loss', result)
+                result = sshv4_2.ping_host(ips_from_api_1['6'][i])
+                self.assertIn('0% packet loss', result)
         else:
             LOG.warning('Ping6 is not available, skipping')
 
@@ -168,3 +171,13 @@ class TestGettingAddress(manager.NetworkScenarioTest):
     @test.services('compute', 'network')
     def test_dhcp6_stateless_from_os(self):
         self._prepare_and_test(address6_mode='dhcpv6-stateless')
+
+    @test.idempotent_id('7ab23f41-833b-4a16-a7c9-5b42fe6d4123')
+    @test.services('compute', 'network')
+    def test_multi_prefix_dhcpv6_stateless(self):
+        self._prepare_and_test(address6_mode='dhcpv6-stateless', n_subnets6=2)
+
+    @test.idempotent_id('dec222b1-180c-4098-b8c5-cc1b8342d611')
+    @test.services('compute', 'network')
+    def test_multi_prefix_slaac(self):
+        self._prepare_and_test(address6_mode='slaac', n_subnets6=2)
