@@ -201,20 +201,12 @@ class ImageClientJSON(service_client.ServiceClient):
         self.expected_success(200, resp.status)
         return service_client.ResponseBody(resp, body)
 
-    def list_images(self, **kwargs):
+    def list_images(self, detail=False, properties=dict(),
+                    changes_since=None, **kwargs):
         url = 'v1/images'
 
-        if len(kwargs) > 0:
-            url += '?%s' % urllib.urlencode(kwargs)
-
-        resp, body = self.get(url)
-        self.expected_success(200, resp.status)
-        body = json.loads(body)
-        return service_client.ResponseBodyList(resp, body['images'])
-
-    def image_list_detail(self, properties=dict(), changes_since=None,
-                          **kwargs):
-        url = 'v1/images/detail'
+        if detail:
+            url += '/detail'
 
         params = {}
         for key, value in properties.items():
@@ -265,8 +257,9 @@ class ImageClientJSON(service_client.ServiceClient):
         body = json.loads(body)
         return service_client.ResponseBody(resp, body)
 
-    def get_shared_images(self, member_id):
-        url = 'v1/shared-images/%s' % member_id
+    def list_shared_images(self, tenant_id):
+        """List shared images with the specified tenant"""
+        url = 'v1/shared-images/%s' % tenant_id
         resp, body = self.get(url)
         self.expected_success(200, resp.status)
         body = json.loads(body)

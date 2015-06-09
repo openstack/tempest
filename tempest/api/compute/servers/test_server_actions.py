@@ -291,8 +291,9 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
             'backup_type': "daily",
             'instance_uuid': self.server_id,
         }
-        image_list = self.os.image_client.image_list_detail(
-            properties,
+        image_list = self.os.image_client.list_images(
+            detail=True,
+            properties=properties,
             status='active',
             sort_key='created_at',
             sort_dir='asc')
@@ -314,8 +315,9 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         self.servers_client.wait_for_server_status(self.server_id, 'ACTIVE')
         self.os.image_client.wait_for_resource_deletion(image1_id)
         oldest_backup_exist = False
-        image_list = self.os.image_client.image_list_detail(
-            properties,
+        image_list = self.os.image_client.list_images(
+            detail=True,
+            properties=properties,
             status='active',
             sort_key='created_at',
             sort_dir='asc')

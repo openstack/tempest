@@ -36,7 +36,7 @@ class ImageMembersTest(base.BaseV1ImageMembersTest):
         self.client.add_member(self.alt_tenant_id, image)
         share_image = self._create_image()
         self.client.add_member(self.alt_tenant_id, share_image)
-        body = self.client.get_shared_images(self.alt_tenant_id)
+        body = self.client.list_shared_images(self.alt_tenant_id)
         images = body['shared_images']
         images = map(lambda x: x['image_id'], images)
         self.assertIn(share_image, images)
