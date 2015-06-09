@@ -278,6 +278,12 @@ ComputeGroup = [
                choices=['public', 'admin', 'internal',
                         'publicURL', 'adminURL', 'internalURL'],
                help="The endpoint type to use for the compute service."),
+    cfg.StrOpt('path_to_private_key',
+               default='',
+               help="Path of private key file."),
+    cfg.StrOpt('keypair_name',
+               default='',
+               help="Name of existing keypair to launch servers with."),
     cfg.StrOpt('volume_device_name',
                default='vdb',
                help="Expected device name when a volume is attached to "

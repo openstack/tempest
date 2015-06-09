@@ -45,6 +45,8 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         except Exception:
             # Rebuild server if something happened to it during a test
             self.__class__.server_id = self.rebuild_server(self.server_id)
+            self.__class__.ip_addr = self.create_assign_floating_ip(
+                                                            self.server_id)
 
     def tearDown(self):
         self.server_check_teardown()
@@ -60,6 +62,7 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         cls.prepare_instance_network()
         super(ServerActionsTestJSON, cls).resource_setup()
         cls.server_id = cls.rebuild_server(None)
+        cls.ip_addr = cls.create_assign_floating_ip(cls.server_id)
 
     @test.idempotent_id('6158df09-4b82-4ab3-af6d-29cf36af858d')
     @testtools.skipUnless(CONF.compute_feature_enabled.change_password,
@@ -73,16 +76,16 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         if self.run_ssh:
             # Verify that the user can authenticate with the new password
             server = self.client.get_server(self.server_id)
-            linux_client = remote_client.RemoteClient(server, self.ssh_user,
-                                                      new_password)
+            linux_client = remote_client.RemoteClient(self.ip_addr,
+                                              self.ssh_user, new_password)
             linux_client.validate_authentication()
 
     def _test_reboot_server(self, reboot_type):
         if self.run_ssh:
             # Get the time the server was last rebooted,
             server = self.client.get_server(self.server_id)
-            linux_client = remote_client.RemoteClient(server, self.ssh_user,
-                                                      self.password)
+            linux_client = remote_client.RemoteClient(self.ip_addr,
+                                        self.ssh_user, self.password)
             boot_time = linux_client.get_boot_time()
 
         self.client.reboot(self.server_id, reboot_type)
@@ -90,8 +93,8 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
 
         if self.run_ssh:
             # Log in and verify the boot time has changed
-            linux_client = remote_client.RemoteClient(server, self.ssh_user,
-                                                      self.password)
+            linux_client = remote_client.RemoteClient(self.ip_addr,
+                                    self.ssh_user, self.password)
             new_boot_time = linux_client.get_boot_time()
             self.assertTrue(new_boot_time > boot_time,
                             '%s > %s' % (new_boot_time, boot_time))
@@ -152,8 +155,8 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
 
         if self.run_ssh:
             # Verify that the user can authenticate with the provided password
-            linux_client = remote_client.RemoteClient(server, self.ssh_user,
-                                                      password)
+            linux_client = remote_client.RemoteClient(self.ip_addr,
+                                        self.ssh_user, password)
             linux_client.validate_authentication()
 
     @test.idempotent_id('30449a88-5aff-4f9b-9866-6ee9b17f906d')

@@ -99,9 +99,9 @@ class AttachVolumeTestJSON(base.BaseV2ComputeTest):
         self.servers_client.start(self.server['id'])
         self.servers_client.wait_for_server_status(self.server['id'], 'ACTIVE')
 
-        linux_client = remote_client.RemoteClient(self.server,
-                                                  self.image_ssh_user,
-                                                  self.server['adminPass'])
+        ip_addr = self.create_assign_floating_ip(self.server['id'])
+        linux_client = remote_client.RemoteClient(ip_addr,
+                                self.ssh_user, self.server['adminPass'])
         partitions = linux_client.get_partitions()
         self.assertIn(self.device, partitions)
 
@@ -114,9 +114,8 @@ class AttachVolumeTestJSON(base.BaseV2ComputeTest):
         self.servers_client.start(self.server['id'])
         self.servers_client.wait_for_server_status(self.server['id'], 'ACTIVE')
 
-        linux_client = remote_client.RemoteClient(self.server,
-                                                  self.image_ssh_user,
-                                                  self.server['adminPass'])
+        linux_client = remote_client.RemoteClient(ip_addr,
+                              self.ssh_user, self.server['adminPass'])
         partitions = linux_client.get_partitions()
         self.assertNotIn(self.device, partitions)
 
