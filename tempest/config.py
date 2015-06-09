@@ -424,6 +424,9 @@ ComputeFeaturesGroup = [
                 help='Does the test environment support creating instances '
                      'with multiple ports on the same network? This is only '
                      'valid when using Neutron.'),
+    cfg.BoolOpt('config_drive',
+                default=True,
+                help='Enable special configuration drive with metadata.'),
 ]
 
 
