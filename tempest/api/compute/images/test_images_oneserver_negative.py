@@ -17,6 +17,7 @@
 from oslo_log import log as logging
 from tempest_lib.common.utils import data_utils
 from tempest_lib import exceptions as lib_exc
+from tempest_lib import decorators
 
 from tempest.api.compute import base
 from tempest import config
@@ -100,6 +101,7 @@ class ImagesOneServerNegativeTestJSON(base.BaseV2ComputeTest):
 
     @test.attr(type=['negative'])
     @test.idempotent_id('0460efcf-ee88-4f94-acef-1bf658695456')
+    @decorators.skip_because(bug="1461483")
     def test_create_second_image_when_first_image_is_being_saved(self):
         # Disallow creating another image when first image is being saved
 

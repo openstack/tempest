@@ -42,7 +42,7 @@ class ImagesTestJSON(base.BaseV2ComputeTest):
         cls.servers_client = cls.servers_client
 
     @test.idempotent_id('aa06b52b-2db5-4807-b218-9441f75d74e3')
-    @decorators.skip_because(bug="1417457")
+    @decorators.skip_because(bug="1461483")
     def test_delete_saving_image(self):
         snapshot_name = data_utils.rand_name('test-snap')
         server = self.create_test_server(wait_until='ACTIVE')

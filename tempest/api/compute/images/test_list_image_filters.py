@@ -18,6 +18,7 @@ import time
 from oslo_log import log as logging
 import six
 from tempest_lib.common.utils import data_utils
+from tempest_lib import decorators
 import testtools
 
 from tempest.api.compute import base
@@ -122,6 +123,7 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
         self.assertFalse(any([i for i in images if i['id'] == self.image2_id]))
         self.assertFalse(any([i for i in images if i['id'] == self.image3_id]))
 
+    @decorators.skip_because(bug="1461483")
     @test.idempotent_id('9f238683-c763-45aa-b848-232ec3ce3105')
     @testtools.skipUnless(CONF.compute_feature_enabled.snapshot,
                           'Snapshotting is not available.')
@@ -139,6 +141,7 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
         self.assertFalse(any([i for i in images
                               if i['id'] == self.snapshot3_id]))
 
+    @decorators.skip_because(bug="1461483")
     @test.idempotent_id('05a377b8-28cf-4734-a1e6-2ab5c38bf606')
     @testtools.skipUnless(CONF.compute_feature_enabled.snapshot,
                           'Snapshotting is not available.')
@@ -158,6 +161,7 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
             self.assertTrue(any([i for i in images
                                  if i['id'] == self.snapshot3_id]))
 
+    @decorators.skip_because(bug="1461483")
     @test.idempotent_id('e3356918-4d3e-4756-81d5-abc4524ba29f')
     @testtools.skipUnless(CONF.compute_feature_enabled.snapshot,
                           'Snapshotting is not available.')
@@ -223,6 +227,7 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
         images = self.client.list_images_with_detail(params)
         self.assertEqual(1, len(images))
 
+    @decorators.skip_because(bug="1461483")
     @test.idempotent_id('8c78f822-203b-4bf6-8bba-56ebd551cf84')
     @testtools.skipUnless(CONF.compute_feature_enabled.snapshot,
                           'Snapshotting is not available.')
@@ -242,6 +247,7 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
             self.assertTrue(any([i for i in images
                                  if i['id'] == self.snapshot3_id]))
 
+    @decorators.skip_because(bug="1461483")
     @test.idempotent_id('888c0cc0-7223-43c5-9db0-b125fd0a393b')
     @testtools.skipUnless(CONF.compute_feature_enabled.snapshot,
                           'Snapshotting is not available.')
