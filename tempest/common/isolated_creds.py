@@ -136,14 +136,13 @@ def get_creds_client(identity_client, project_domain_name=None):
 
 class IsolatedCreds(cred_provider.CredentialProvider):
 
-    def __init__(self, identity_version=None, name=None, password='pass',
+    def __init__(self, identity_version=None, name=None,
                  network_resources=None):
-        super(IsolatedCreds, self).__init__(identity_version, name, password,
+        super(IsolatedCreds, self).__init__(identity_version, name,
                                             network_resources)
         self.network_resources = network_resources
         self.isolated_creds = {}
         self.ports = []
-        self.password = password
         self.default_admin_creds = cred_provider.get_configured_credentials(
             'identity_admin', fill_in=True,
             identity_version=self.identity_version)
@@ -193,9 +192,10 @@ class IsolatedCreds(cred_provider.CredentialProvider):
             name=project_name, description=project_desc)
 
         username = data_utils.rand_name(root) + suffix
+        user_password = data_utils.rand_password()
         email = data_utils.rand_name(root) + suffix + "@example.com"
         user = self.creds_client.create_user(
-            username, self.password, project, email)
+            username, user_password, project, email)
         if admin:
             self.creds_client.assign_user_role(user, project,
                                                CONF.identity.admin_role)
@@ -206,7 +206,7 @@ class IsolatedCreds(cred_provider.CredentialProvider):
         if roles:
             for role in roles:
                 self.creds_client.assign_user_role(user, project, role)
-        creds = self.creds_client.get_credentials(user, project, self.password)
+        creds = self.creds_client.get_credentials(user, project, user_password)
         return cred_provider.TestResources(creds)
 
     def _create_network_resources(self, tenant_id):
