@@ -166,7 +166,7 @@ class ImageClientV2JSON(service_client.ServiceClient):
         body = json.loads(body)
         return service_client.ResponseBody(resp, body)
 
-    def add_member(self, image_id, member_id):
+    def add_image_member(self, image_id, member_id):
         url = 'v2/images/%s/members' % image_id
         data = json.dumps({'member': member_id})
         resp, body = self.post(url, data)
@@ -174,22 +174,21 @@ class ImageClientV2JSON(service_client.ServiceClient):
         body = json.loads(body)
         return service_client.ResponseBody(resp, body)
 
-    def update_member_status(self, image_id, member_id, status):
-        """Valid status are: ``pending``, ``accepted``,  ``rejected``."""
+    def update_image_member(self, image_id, member_id, body):
         url = 'v2/images/%s/members/%s' % (image_id, member_id)
-        data = json.dumps({'status': status})
+        data = json.dumps(body)
         resp, body = self.put(url, data)
         self.expected_success(200, resp.status)
         body = json.loads(body)
         return service_client.ResponseBody(resp, body)
 
-    def get_member(self, image_id, member_id):
+    def show_image_member(self, image_id, member_id):
         url = 'v2/images/%s/members/%s' % (image_id, member_id)
         resp, body = self.get(url)
         self.expected_success(200, resp.status)
         return service_client.ResponseBody(resp, json.loads(body))
 
-    def remove_member(self, image_id, member_id):
+    def remove_image_member(self, image_id, member_id):
         url = 'v2/images/%s/members/%s' % (image_id, member_id)
         resp, _ = self.delete(url)
         self.expected_success(204, resp.status)
