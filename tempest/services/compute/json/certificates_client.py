@@ -21,7 +21,7 @@ from tempest.common import service_client
 
 class CertificatesClientJSON(service_client.ServiceClient):
 
-    def get_certificate(self, id):
+    def show_certificate(self, id):
         url = "os-certificates/%s" % (id)
         resp, body = self.get(url)
         body = json.loads(body)

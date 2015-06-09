@@ -13,9 +13,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import httplib
-import urllib
-import urlparse
+import six
+from six.moves import http_client as httplib
+from six.moves.urllib import parse as urlparse
 
 from tempest.common import service_client
 
@@ -35,7 +35,7 @@ class ObjectClient(service_client.ServiceClient):
                 headers[str(key)] = metadata[key]
         url = "%s/%s" % (str(container), str(object_name))
         if params:
-            url += '?%s' % urllib.urlencode(params)
+            url += '?%s' % urlparse.urlencode(params)
 
         resp, body = self.put(url, data, headers)
         self.expected_success(201, resp.status)
@@ -51,7 +51,7 @@ class ObjectClient(service_client.ServiceClient):
         """Delete storage object."""
         url = "%s/%s" % (str(container), str(object_name))
         if params:
-            url += '?%s' % urllib.urlencode(params)
+            url += '?%s' % urlparse.urlencode(params)
         resp, body = self.delete(url, headers={})
         self.expected_success([200, 204], resp.status)
         return resp, body
@@ -233,7 +233,7 @@ def put_object_connection(base_url, container, name, contents=None,
         headers = {}
     if hasattr(contents, 'read'):
         conn.putrequest('PUT', path)
-        for header, value in headers.iteritems():
+        for header, value in six.iteritems(headers):
             conn.putheader(header, value)
         if 'Content-Length' not in headers:
             if 'Transfer-Encoding' not in headers:

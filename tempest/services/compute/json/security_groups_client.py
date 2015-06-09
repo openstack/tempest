@@ -14,8 +14,8 @@
 #    under the License.
 
 import json
-import urllib
 
+from six.moves.urllib import parse as urllib
 from tempest_lib import exceptions as lib_exc
 
 from tempest.api_schema.response.compute.v2_1 import security_groups as schema

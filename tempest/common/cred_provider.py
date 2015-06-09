@@ -16,8 +16,8 @@ import abc
 
 from oslo_log import log as logging
 import six
+from tempest_lib import auth
 
-from tempest import auth
 from tempest import config
 from tempest import exceptions
 

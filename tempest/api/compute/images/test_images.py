@@ -41,7 +41,6 @@ class ImagesTestJSON(base.BaseV2ComputeTest):
         cls.client = cls.images_client
         cls.servers_client = cls.servers_client
 
-    @test.attr(type='gate')
     @test.idempotent_id('aa06b52b-2db5-4807-b218-9441f75d74e3')
     @decorators.skip_because(bug="1417457")
     def test_delete_saving_image(self):

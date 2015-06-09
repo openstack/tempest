@@ -13,6 +13,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import six
 from tempest_lib.common.utils import data_utils
 
 from tempest.api.network import base
@@ -62,7 +63,7 @@ class QuotasTest(base.BaseAdminNetworkTest):
         quota_set = self.admin_client.update_quotas(tenant_id,
                                                     **new_quotas)
         self.addCleanup(self.admin_client.reset_quotas, tenant_id)
-        for key, value in new_quotas.iteritems():
+        for key, value in six.iteritems(new_quotas):
             self.assertEqual(value, quota_set[key])
 
         # Confirm our tenant is listed among tenants with non default quotas
@@ -76,7 +77,7 @@ class QuotasTest(base.BaseAdminNetworkTest):
         # Confirm from API quotas were changed as requested for tenant
         quota_set = self.admin_client.show_quotas(tenant_id)
         quota_set = quota_set['quota']
-        for key, value in new_quotas.iteritems():
+        for key, value in six.iteritems(new_quotas):
             self.assertEqual(value, quota_set[key])
 
         # Reset quotas to default and confirm
@@ -85,7 +86,6 @@ class QuotasTest(base.BaseAdminNetworkTest):
         for q in non_default_quotas['quotas']:
             self.assertNotEqual(tenant_id, q['tenant_id'])
 
-    @test.attr(type='gate')
     @test.idempotent_id('2390f766-836d-40ef-9aeb-e810d78207fb')
     def test_quotas(self):
         new_quotas = {'network': 0, 'security_group': 0}
@@ -93,7 +93,6 @@ class QuotasTest(base.BaseAdminNetworkTest):
 
     @test.idempotent_id('a7add2b1-691e-44d6-875f-697d9685f091')
     @test.requires_ext(extension='lbaas', service='network')
-    @test.attr(type='gate')
     def test_lbaas_quotas(self):
         new_quotas = {'vip': 1, 'pool': 2,
                       'member': 3, 'health_monitor': 4}

@@ -89,7 +89,6 @@ class RolesV3TestJSON(base.BaseIdentityV3AdminTest):
         roles = self.client.list_roles()
         self.assertIn(role['id'], [r['id'] for r in roles])
 
-    @test.attr(type='smoke')
     @test.idempotent_id('c6b80012-fe4a-498b-9ce8-eb391c05169f')
     def test_grant_list_revoke_role_to_user_on_project(self):
         self.client.assign_user_role_on_project(
@@ -107,7 +106,6 @@ class RolesV3TestJSON(base.BaseIdentityV3AdminTest):
         self.client.revoke_role_from_user_on_project(
             self.project['id'], self.user_body['id'], self.role['id'])
 
-    @test.attr(type='smoke')
     @test.idempotent_id('6c9a2940-3625-43a3-ac02-5dcec62ef3bd')
     def test_grant_list_revoke_role_to_user_on_domain(self):
         self.client.assign_user_role_on_domain(
@@ -125,7 +123,6 @@ class RolesV3TestJSON(base.BaseIdentityV3AdminTest):
         self.client.revoke_role_from_user_on_domain(
             self.domain['id'], self.user_body['id'], self.role['id'])
 
-    @test.attr(type='smoke')
     @test.idempotent_id('cbf11737-1904-4690-9613-97bcbb3df1c4')
     def test_grant_list_revoke_role_to_group_on_project(self):
         # Grant role to group on project
@@ -156,7 +153,6 @@ class RolesV3TestJSON(base.BaseIdentityV3AdminTest):
         self.client.revoke_role_from_group_on_project(
             self.project['id'], self.group_body['id'], self.role['id'])
 
-    @test.attr(type='smoke')
     @test.idempotent_id('4bf8a70b-e785-413a-ad53-9f91ce02faa7')
     def test_grant_list_revoke_role_to_group_on_domain(self):
         self.client.assign_group_role_on_domain(
@@ -174,7 +170,6 @@ class RolesV3TestJSON(base.BaseIdentityV3AdminTest):
         self.client.revoke_role_from_group_on_domain(
             self.domain['id'], self.group_body['id'], self.role['id'])
 
-    @test.attr(type='gate')
     @test.idempotent_id('f5654bcc-08c4-4f71-88fe-05d64e06de94')
     def test_list_roles(self):
         # Return a list of all roles

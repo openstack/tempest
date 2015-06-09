@@ -25,17 +25,14 @@ LOG = logging.getLogger(__name__)
 class BaseDatabaseTest(tempest.test.BaseTestCase):
     """Base test case class for all Database API tests."""
 
+    credentials = ['primary']
+
     @classmethod
     def skip_checks(cls):
         super(BaseDatabaseTest, cls).skip_checks()
         if not CONF.service_available.trove:
             skip_msg = ("%s skipped as trove is not available" % cls.__name__)
             raise cls.skipException(skip_msg)
-
-    @classmethod
-    def setup_credentials(cls):
-        super(BaseDatabaseTest, cls).setup_credentials()
-        cls.os = cls.get_client_manager()
 
     @classmethod
     def setup_clients(cls):

@@ -22,7 +22,8 @@ from tempest.tests import base
 class TestFileUtils(base.TestCase):
 
     def test_have_effective_read_path(self):
-        with mock.patch('__builtin__.open', mock.mock_open(), create=True):
+        with mock.patch('six.moves.builtins.open', mock.mock_open(),
+                        create=True):
             result = file_utils.have_effective_read_access('fake_path')
         self.assertTrue(result)
 

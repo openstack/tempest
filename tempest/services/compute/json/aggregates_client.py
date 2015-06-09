@@ -30,7 +30,7 @@ class AggregatesClientJSON(service_client.ServiceClient):
         self.validate_response(schema.list_aggregates, resp, body)
         return service_client.ResponseBodyList(resp, body['aggregates'])
 
-    def get_aggregate(self, aggregate_id):
+    def show_aggregate(self, aggregate_id):
         """Get details of the given aggregate."""
         resp, body = self.get("os-aggregates/%s" % str(aggregate_id))
         body = json.loads(body)
@@ -67,7 +67,7 @@ class AggregatesClientJSON(service_client.ServiceClient):
 
     def is_resource_deleted(self, id):
         try:
-            self.get_aggregate(id)
+            self.show_aggregate(id)
         except lib_exc.NotFound:
             return True
         return False

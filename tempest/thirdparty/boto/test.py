@@ -17,7 +17,6 @@ import contextlib
 import logging as orig_logging
 import os
 import re
-import urlparse
 
 import boto
 from boto import ec2
@@ -25,7 +24,7 @@ from boto import exception
 from boto import s3
 from oslo_log import log as logging
 import six
-
+from six.moves.urllib import parse as urlparse
 from tempest_lib import exceptions as lib_exc
 
 import tempest.clients
@@ -197,6 +196,8 @@ def friendly_function_call_str(call_able, *args, **kwargs):
 class BotoTestCase(tempest.test.BaseTestCase):
     """Recommended to use as base class for boto related test."""
 
+    credentials = ['primary']
+
     @classmethod
     def skip_checks(cls):
         super(BotoTestCase, cls).skip_checks()
@@ -205,11 +206,6 @@ class BotoTestCase(tempest.test.BaseTestCase):
         if not CONF.identity_feature_enabled.api_v2 or \
                 not CONF.identity.auth_version == 'v2':
             raise cls.skipException("Identity v2 is not available")
-
-    @classmethod
-    def setup_credentials(cls):
-        super(BotoTestCase, cls).setup_credentials()
-        cls.os = cls.get_client_manager()
 
     @classmethod
     def resource_setup(cls):
@@ -256,9 +252,9 @@ class BotoTestCase(tempest.test.BaseTestCase):
         except exception.BotoServerError as exc:
             error_msg = excMatcher.match(exc)
             if error_msg is not None:
-                raise self.failureException, error_msg
+                raise self.failureException(error_msg)
         else:
-            raise self.failureException, "BotoServerError not raised"
+            raise self.failureException("BotoServerError not raised")
 
     @classmethod
     def resource_cleanup(cls):

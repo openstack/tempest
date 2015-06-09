@@ -38,7 +38,6 @@ class VolumesBackupsV2Test(base.BaseVolumeAdminTest):
 
         cls.volume = cls.create_volume()
 
-    @test.attr(type='smoke')
     @test.idempotent_id('a66eb488-8ee1-47d4-8e9f-575a095728c6')
     def test_volume_backup_create_get_detailed_list_restore_delete(self):
         # Create backup

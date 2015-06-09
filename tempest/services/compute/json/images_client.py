@@ -14,8 +14,8 @@
 #    under the License.
 
 import json
-import urllib
 
+from six.moves.urllib import parse as urllib
 from tempest_lib import exceptions as lib_exc
 
 from tempest.api_schema.response.compute.v2_1 import images as schema
@@ -65,7 +65,7 @@ class ImagesClientJSON(service_client.ServiceClient):
         self.validate_response(schema.list_images_details, resp, body)
         return service_client.ResponseBodyList(resp, body['images'])
 
-    def get_image(self, image_id):
+    def show_image(self, image_id):
         """Returns the details of a single image."""
         resp, body = self.get("images/%s" % str(image_id))
         self.expected_success(200, resp.status)
@@ -131,7 +131,7 @@ class ImagesClientJSON(service_client.ServiceClient):
 
     def is_resource_deleted(self, id):
         try:
-            self.get_image(id)
+            self.show_image(id)
         except lib_exc.NotFound:
             return True
         return False

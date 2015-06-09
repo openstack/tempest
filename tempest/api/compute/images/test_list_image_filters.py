@@ -13,10 +13,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import StringIO
 import time
 
 from oslo_log import log as logging
+import six
 from tempest_lib.common.utils import data_utils
 import testtools
 
@@ -59,10 +59,10 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
             # Wait 1 second between creation and upload to ensure a delta
             # between created_at and updated_at.
             time.sleep(1)
-            image_file = StringIO.StringIO(('*' * 1024))
+            image_file = six.StringIO(('*' * 1024))
             cls.glance_client.update_image(image_id, data=image_file)
             cls.client.wait_for_image_status(image_id, 'ACTIVE')
-            body = cls.client.get_image(image_id)
+            body = cls.client.show_image(image_id)
             return body
 
         # Create non-snapshot images via glance
@@ -100,7 +100,6 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
             cls.server1['id'], wait_until='ACTIVE')
         cls.snapshot2_id = cls.snapshot2['id']
 
-    @test.attr(type='gate')
     @test.idempotent_id('a3f5b513-aeb3-42a9-b18e-f091ef73254d')
     def test_list_images_filter_by_status(self):
         # The list of images should contain only images with the
@@ -112,7 +111,6 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
         self.assertTrue(any([i for i in images if i['id'] == self.image2_id]))
         self.assertTrue(any([i for i in images if i['id'] == self.image3_id]))
 
-    @test.attr(type='gate')
     @test.idempotent_id('33163b73-79f5-4d07-a7ea-9213bcc468ff')
     def test_list_images_filter_by_name(self):
         # List of all images should contain the expected images filtered
@@ -127,7 +125,6 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
     @test.idempotent_id('9f238683-c763-45aa-b848-232ec3ce3105')
     @testtools.skipUnless(CONF.compute_feature_enabled.snapshot,
                           'Snapshotting is not available.')
-    @test.attr(type='gate')
     def test_list_images_filter_by_server_id(self):
         # The images should contain images filtered by server id
         params = {'server': self.server1['id']}
@@ -145,7 +142,6 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
     @test.idempotent_id('05a377b8-28cf-4734-a1e6-2ab5c38bf606')
     @testtools.skipUnless(CONF.compute_feature_enabled.snapshot,
                           'Snapshotting is not available.')
-    @test.attr(type='gate')
     def test_list_images_filter_by_server_ref(self):
         # The list of servers should be filtered by server ref
         server_links = self.server2['links']
@@ -165,7 +161,6 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
     @test.idempotent_id('e3356918-4d3e-4756-81d5-abc4524ba29f')
     @testtools.skipUnless(CONF.compute_feature_enabled.snapshot,
                           'Snapshotting is not available.')
-    @test.attr(type='gate')
     def test_list_images_filter_by_type(self):
         # The list of servers should be filtered by image type
         params = {'type': 'snapshot'}
@@ -180,7 +175,6 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
         self.assertFalse(any([i for i in images
                               if i['id'] == self.image_ref]))
 
-    @test.attr(type='gate')
     @test.idempotent_id('3a484ca9-67ba-451e-b494-7fcf28d32d62')
     def test_list_images_limit_results(self):
         # Verify only the expected number of results are returned
@@ -188,7 +182,6 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
         images = self.client.list_images(params)
         self.assertEqual(1, len([x for x in images if 'id' in x]))
 
-    @test.attr(type='gate')
     @test.idempotent_id('18bac3ae-da27-436c-92a9-b22474d13aab')
     def test_list_images_filter_by_changes_since(self):
         # Verify only updated images are returned in the detailed list
@@ -200,7 +193,6 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
         found = any([i for i in images if i['id'] == self.image3_id])
         self.assertTrue(found)
 
-    @test.attr(type='gate')
     @test.idempotent_id('9b0ea018-6185-4f71-948a-a123a107988e')
     def test_list_images_with_detail_filter_by_status(self):
         # Detailed list of all images should only contain images
@@ -212,7 +204,6 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
         self.assertTrue(any([i for i in images if i['id'] == self.image2_id]))
         self.assertTrue(any([i for i in images if i['id'] == self.image3_id]))
 
-    @test.attr(type='gate')
     @test.idempotent_id('644ea267-9bd9-4f3b-af9f-dffa02396a17')
     def test_list_images_with_detail_filter_by_name(self):
         # Detailed list of all images should contain the expected
@@ -224,7 +215,6 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
         self.assertFalse(any([i for i in images if i['id'] == self.image2_id]))
         self.assertFalse(any([i for i in images if i['id'] == self.image3_id]))
 
-    @test.attr(type='gate')
     @test.idempotent_id('ba2fa9a9-b672-47cc-b354-3b4c0600e2cb')
     def test_list_images_with_detail_limit_results(self):
         # Verify only the expected number of results (with full details)
@@ -236,7 +226,6 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
     @test.idempotent_id('8c78f822-203b-4bf6-8bba-56ebd551cf84')
     @testtools.skipUnless(CONF.compute_feature_enabled.snapshot,
                           'Snapshotting is not available.')
-    @test.attr(type='gate')
     def test_list_images_with_detail_filter_by_server_ref(self):
         # Detailed list of servers should be filtered by server ref
         server_links = self.server2['links']
@@ -256,12 +245,11 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
     @test.idempotent_id('888c0cc0-7223-43c5-9db0-b125fd0a393b')
     @testtools.skipUnless(CONF.compute_feature_enabled.snapshot,
                           'Snapshotting is not available.')
-    @test.attr(type='gate')
     def test_list_images_with_detail_filter_by_type(self):
         # The detailed list of servers should be filtered by image type
         params = {'type': 'snapshot'}
         images = self.client.list_images_with_detail(params)
-        self.client.get_image(self.image_ref)
+        self.client.show_image(self.image_ref)
 
         self.assertTrue(any([i for i in images
                              if i['id'] == self.snapshot1_id]))
@@ -272,7 +260,6 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
         self.assertFalse(any([i for i in images
                               if i['id'] == self.image_ref]))
 
-    @test.attr(type='gate')
     @test.idempotent_id('7d439e18-ac2e-4827-b049-7e18004712c4')
     def test_list_images_with_detail_filter_by_changes_since(self):
         # Verify an update image is returned

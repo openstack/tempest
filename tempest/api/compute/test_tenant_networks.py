@@ -23,7 +23,6 @@ class NetworksTestJSON(base.BaseV2ComputeTest):
         super(NetworksTestJSON, cls).resource_setup()
         cls.client = cls.os.tenant_networks_client
 
-    @test.attr(type='gate')
     @test.idempotent_id('edfea98e-bbe3-4c7a-9739-87b986baff26')
     def test_list_show_tenant_networks(self):
         tenant_networks = self.client.list_tenant_networks()

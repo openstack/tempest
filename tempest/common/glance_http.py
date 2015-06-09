@@ -17,19 +17,18 @@
 
 import copy
 import hashlib
-import httplib
 import json
 import posixpath
 import re
 import socket
-import StringIO
 import struct
-import urlparse
-
 
 import OpenSSL
 from oslo_log import log as logging
+import six
 from six import moves
+from six.moves import http_client as httplib
+from six.moves.urllib import parse as urlparse
 from tempest_lib import exceptions as lib_exc
 
 from tempest import exceptions as exc
@@ -129,7 +128,7 @@ class HTTPClient(object):
         # Read body into string if it isn't obviously image data
         if resp.getheader('content-type', None) != 'application/octet-stream':
             body_str = ''.join([body_chunk for body_chunk in body_iter])
-            body_iter = StringIO.StringIO(body_str)
+            body_iter = six.StringIO(body_str)
             self._log_response(resp, None)
         else:
             self._log_response(resp, body_iter)

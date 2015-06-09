@@ -118,7 +118,6 @@ class AttachInterfacesTestJSON(base.BaseV2ComputeTest):
 
         self.assertEqual(sorted(list1), sorted(list2))
 
-    @test.attr(type='smoke')
     @test.idempotent_id('73fe8f02-590d-4bf1-b184-e9ca81065051')
     @test.services('network')
     def test_create_list_show_delete_interfaces(self):

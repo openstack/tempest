@@ -37,7 +37,7 @@ class SecurityGroupRulesNegativeTestJSON(base.BaseSecurityGroupsTest):
         super(SecurityGroupRulesNegativeTestJSON, cls).setup_clients()
         cls.client = cls.security_groups_client
 
-    @test.attr(type=['negative', 'smoke'])
+    @test.attr(type=['negative'])
     @test.idempotent_id('1d507e98-7951-469b-82c3-23f1e6b8c254')
     @test.services('network')
     def test_create_security_group_rule_with_non_existent_id(self):
@@ -52,7 +52,7 @@ class SecurityGroupRulesNegativeTestJSON(base.BaseSecurityGroupsTest):
                           self.client.create_security_group_rule,
                           parent_group_id, ip_protocol, from_port, to_port)
 
-    @test.attr(type=['negative', 'smoke'])
+    @test.attr(type=['negative'])
     @test.idempotent_id('2244d7e4-adb7-4ecb-9930-2d77e123ce4f')
     @test.services('network')
     def test_create_security_group_rule_with_invalid_id(self):
@@ -67,7 +67,7 @@ class SecurityGroupRulesNegativeTestJSON(base.BaseSecurityGroupsTest):
                           self.client.create_security_group_rule,
                           parent_group_id, ip_protocol, from_port, to_port)
 
-    @test.attr(type=['negative', 'smoke'])
+    @test.attr(type=['negative'])
     @test.idempotent_id('8bd56d02-3ffa-4d67-9933-b6b9a01d6089')
     @test.services('network')
     def test_create_security_group_rule_duplicate(self):
@@ -91,7 +91,7 @@ class SecurityGroupRulesNegativeTestJSON(base.BaseSecurityGroupsTest):
                           self.client.create_security_group_rule,
                           parent_group_id, ip_protocol, from_port, to_port)
 
-    @test.attr(type=['negative', 'smoke'])
+    @test.attr(type=['negative'])
     @test.idempotent_id('84c81249-9f6e-439c-9bbf-cbb0d2cddbdf')
     @test.services('network')
     def test_create_security_group_rule_with_invalid_ip_protocol(self):
@@ -109,7 +109,7 @@ class SecurityGroupRulesNegativeTestJSON(base.BaseSecurityGroupsTest):
                           self.client.create_security_group_rule,
                           parent_group_id, ip_protocol, from_port, to_port)
 
-    @test.attr(type=['negative', 'smoke'])
+    @test.attr(type=['negative'])
     @test.idempotent_id('12bbc875-1045-4f7a-be46-751277baedb9')
     @test.services('network')
     def test_create_security_group_rule_with_invalid_from_port(self):
@@ -126,7 +126,7 @@ class SecurityGroupRulesNegativeTestJSON(base.BaseSecurityGroupsTest):
                           self.client.create_security_group_rule,
                           parent_group_id, ip_protocol, from_port, to_port)
 
-    @test.attr(type=['negative', 'smoke'])
+    @test.attr(type=['negative'])
     @test.idempotent_id('ff88804d-144f-45d1-bf59-dd155838a43a')
     @test.services('network')
     def test_create_security_group_rule_with_invalid_to_port(self):
@@ -143,7 +143,7 @@ class SecurityGroupRulesNegativeTestJSON(base.BaseSecurityGroupsTest):
                           self.client.create_security_group_rule,
                           parent_group_id, ip_protocol, from_port, to_port)
 
-    @test.attr(type=['negative', 'smoke'])
+    @test.attr(type=['negative'])
     @test.idempotent_id('00296fa9-0576-496a-ae15-fbab843189e0')
     @test.services('network')
     def test_create_security_group_rule_with_invalid_port_range(self):
@@ -160,7 +160,7 @@ class SecurityGroupRulesNegativeTestJSON(base.BaseSecurityGroupsTest):
                           self.client.create_security_group_rule,
                           secgroup_id, ip_protocol, from_port, to_port)
 
-    @test.attr(type=['negative', 'smoke'])
+    @test.attr(type=['negative'])
     @test.idempotent_id('56fddcca-dbb8-4494-a0db-96e9f869527c')
     @test.services('network')
     def test_delete_security_group_rule_with_non_existent_id(self):

@@ -14,15 +14,14 @@
 #    under the License.
 
 import time
-import urlparse
 
+from six.moves.urllib import parse as urlparse
 from tempest_lib.common.utils import data_utils
 from tempest_lib import decorators
 import testtools
 
 
 from tempest.api.object_storage import base
-from tempest import clients
 from tempest import config
 from tempest import test
 
@@ -38,11 +37,14 @@ CONF = config.CONF
 class ContainerSyncTest(base.BaseObjectTest):
     clients = {}
 
+    credentials = [['operator', CONF.object_storage.operator_role],
+                   ['operator_alt', CONF.object_storage.operator_role]]
+
     @classmethod
     def setup_credentials(cls):
         super(ContainerSyncTest, cls).setup_credentials()
-        cls.os_alt = clients.Manager(cls.isolated_creds.get_creds_by_roles(
-            [CONF.object_storage.operator_role], force_new=True))
+        cls.os = cls.os_roles_operator
+        cls.os_alt = cls.os_roles_operator_alt
 
     @classmethod
     def setup_clients(cls):

@@ -343,6 +343,44 @@ class VolumeService(BaseService):
         self.data['volumes'] = vols
 
 
+class VolumeQuotaService(BaseService):
+    def __init__(self, manager, **kwargs):
+        super(VolumeQuotaService, self).__init__(kwargs)
+        self.client = manager.volume_quotas_client
+
+    def delete(self):
+        client = self.client
+        try:
+            client.delete_quota_set(self.tenant_id)
+        except Exception as e:
+            LOG.exception("Delete Volume Quotas exception: %s" % e)
+            pass
+
+    def dry_run(self):
+        quotas = self.client.show_quota_usage(self.tenant_id)
+        self.data['volume_quotas'] = quotas
+
+
+class NovaQuotaService(BaseService):
+    def __init__(self, manager, **kwargs):
+        super(NovaQuotaService, self).__init__(kwargs)
+        self.client = manager.quotas_client
+        self.limits_client = manager.limits_client
+
+    def delete(self):
+        client = self.client
+        try:
+            client.delete_quota_set(self.tenant_id)
+        except Exception as e:
+            LOG.exception("Delete Quotas exception: %s" % e)
+            pass
+
+    def dry_run(self):
+        client = self.limits_client
+        quotas = client.get_absolute_limits()
+        self.data['compute_quotas'] = quotas
+
+
 # Begin network service classes
 class NetworkService(BaseService):
     def __init__(self, manager, **kwargs):
@@ -667,7 +705,7 @@ class NetworkPoolService(NetworkService):
         self.data['pools'] = pools
 
 
-class NetworMeteringLabelRuleService(NetworkService):
+class NetworkMeteringLabelRuleService(NetworkService):
 
     def list(self):
         client = self.client
@@ -692,7 +730,7 @@ class NetworMeteringLabelRuleService(NetworkService):
         self.data['rules'] = rules
 
 
-class NetworMeteringLabelService(NetworkService):
+class NetworkMeteringLabelService(NetworkService):
 
     def list(self):
         client = self.client
@@ -1052,6 +1090,7 @@ def get_tenant_cleanup_services():
         tenant_services.append(ServerGroupService)
         if not IS_NEUTRON:
             tenant_services.append(FloatingIpService)
+        tenant_services.append(NovaQuotaService)
     if IS_HEAT:
         tenant_services.append(StackService)
     if IS_NEUTRON:
@@ -1068,8 +1107,8 @@ def get_tenant_cleanup_services():
             tenant_services.append(NetworkVipService)
             tenant_services.append(NetworkPoolService)
         if test.is_extension_enabled('metering', 'network'):
-            tenant_services.append(NetworMeteringLabelRuleService)
-            tenant_services.append(NetworMeteringLabelService)
+            tenant_services.append(NetworkMeteringLabelRuleService)
+            tenant_services.append(NetworkMeteringLabelService)
         tenant_services.append(NetworkRouterService)
         tenant_services.append(NetworkFloatingIpService)
         tenant_services.append(NetworkPortService)
@@ -1078,6 +1117,7 @@ def get_tenant_cleanup_services():
     if IS_CINDER:
         tenant_services.append(SnapshotService)
         tenant_services.append(VolumeService)
+        tenant_services.append(VolumeQuotaService)
     return tenant_services
 
 

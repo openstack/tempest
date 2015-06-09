@@ -17,9 +17,7 @@ from oslo_log import log as logging
 from tempest_lib.common.utils import data_utils
 from tempest_lib import exceptions as lib_exc
 
-from tempest import clients
 from tempest.common import cred_provider
-from tempest.common import credentials
 from tempest import config
 import tempest.test
 
@@ -66,16 +64,11 @@ class BaseIdentityTest(tempest.test.BaseTestCase):
 
 class BaseIdentityV2Test(BaseIdentityTest):
 
-    @classmethod
-    def setup_credentials(cls):
-        super(BaseIdentityV2Test, cls).setup_credentials()
-        cls.os = cls.get_client_manager(identity_version='v2')
+    credentials = ['primary']
 
-    @classmethod
-    def skip_checks(cls):
-        super(BaseIdentityV2Test, cls).skip_checks()
-        if not CONF.identity_feature_enabled.api_v2:
-            raise cls.skipException("Identity api v2 is not enabled")
+    # identity v2 tests should obtain tokens and create accounts via v2
+    # regardless of the configured CONF.identity.auth_version
+    identity_version = 'v2'
 
     @classmethod
     def setup_clients(cls):
@@ -94,24 +87,13 @@ class BaseIdentityV2Test(BaseIdentityTest):
 
 class BaseIdentityV2AdminTest(BaseIdentityV2Test):
 
-    @classmethod
-    def setup_credentials(cls):
-        super(BaseIdentityV2AdminTest, cls).setup_credentials()
-        cls.os_adm = clients.Manager(cls.isolated_creds.get_admin_creds())
-
-    @classmethod
-    def skip_checks(cls):
-        if not credentials.is_admin_available():
-            raise cls.skipException('v2 Admin auth disabled')
-        super(BaseIdentityV2AdminTest, cls).skip_checks()
+    credentials = ['primary', 'admin']
 
     @classmethod
     def setup_clients(cls):
         super(BaseIdentityV2AdminTest, cls).setup_clients()
         cls.client = cls.os_adm.identity_client
         cls.token_client = cls.os_adm.token_client
-        if not cls.client.has_admin_extensions():
-            raise cls.skipException("Admin extensions disabled")
 
     @classmethod
     def resource_setup(cls):
@@ -126,16 +108,11 @@ class BaseIdentityV2AdminTest(BaseIdentityV2Test):
 
 class BaseIdentityV3Test(BaseIdentityTest):
 
-    @classmethod
-    def setup_credentials(cls):
-        super(BaseIdentityV3Test, cls).setup_credentials()
-        cls.os = cls.get_client_manager(identity_version='v3')
+    credentials = ['primary']
 
-    @classmethod
-    def skip_checks(cls):
-        super(BaseIdentityV3Test, cls).skip_checks()
-        if not CONF.identity_feature_enabled.api_v3:
-            raise cls.skipException("Identity api v3 is not enabled")
+    # identity v3 tests should obtain tokens and create accounts via v3
+    # regardless of the configured CONF.identity.auth_version
+    identity_version = 'v3'
 
     @classmethod
     def setup_clients(cls):
@@ -155,16 +132,7 @@ class BaseIdentityV3Test(BaseIdentityTest):
 
 class BaseIdentityV3AdminTest(BaseIdentityV3Test):
 
-    @classmethod
-    def setup_credentials(cls):
-        super(BaseIdentityV3AdminTest, cls).setup_credentials()
-        cls.os_adm = clients.Manager(cls.isolated_creds.get_admin_creds())
-
-    @classmethod
-    def skip_checks(cls):
-        if not credentials.is_admin_available():
-            raise cls.skipException('v3 Admin auth disabled')
-        super(BaseIdentityV3AdminTest, cls).skip_checks()
+    credentials = ['primary', 'admin']
 
     @classmethod
     def setup_clients(cls):
@@ -203,6 +171,12 @@ class BaseIdentityV3AdminTest(BaseIdentityV3Test):
         role = [r for r in roles if r['name'] == name]
         if len(role) > 0:
             return role[0]
+
+    def delete_domain(self, domain_id):
+        # NOTE(mpavlase) It is necessary to disable the domain before deleting
+        # otherwise it raises Forbidden exception
+        self.client.update_domain(domain_id, enabled=False)
+        self.client.delete_domain(domain_id)
 
 
 class DataGenerator(object):

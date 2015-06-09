@@ -17,6 +17,7 @@ import copy
 
 import jsonschema
 import mock
+import six
 
 from tempest.common.generator import base_generator
 from tempest.common.generator import negative_generator
@@ -101,11 +102,11 @@ class BaseNegativeGenerator(object):
 
     class fake_test_class(object):
         def __init__(self, scenario):
-            for k, v in scenario.iteritems():
+            for k, v in six.iteritems(scenario):
                 setattr(self, k, v)
 
     def _validate_result(self, valid_schema, invalid_schema):
-        for k, v in valid_schema.iteritems():
+        for k, v in six.iteritems(valid_schema):
             self.assertTrue(k in invalid_schema)
 
     def test_generator_mandatory_functions(self):

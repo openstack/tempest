@@ -27,6 +27,8 @@ class BaseTelemetryTest(tempest.test.BaseTestCase):
 
     """Base test case class for all Telemetry API tests."""
 
+    credentials = ['primary']
+
     @classmethod
     def skip_checks(cls):
         super(BaseTelemetryTest, cls).skip_checks()
@@ -37,7 +39,6 @@ class BaseTelemetryTest(tempest.test.BaseTestCase):
     def setup_credentials(cls):
         cls.set_network_resources()
         super(BaseTelemetryTest, cls).setup_credentials()
-        cls.os = cls.get_client_manager()
 
     @classmethod
     def setup_clients(cls):

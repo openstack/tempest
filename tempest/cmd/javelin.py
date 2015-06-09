@@ -114,10 +114,11 @@ import unittest
 import netaddr
 from oslo_log import log as logging
 from oslo_utils import timeutils
+import six
+from tempest_lib import auth
 from tempest_lib import exceptions as lib_exc
 import yaml
 
-import tempest.auth
 from tempest import config
 from tempest.services.compute.json import flavors_client
 from tempest.services.compute.json import floating_ips_client
@@ -175,7 +176,7 @@ class OSClient(object):
         }
         object_storage_params.update(default_params)
 
-        _creds = tempest.auth.KeystoneV2Credentials(
+        _creds = auth.KeystoneV2Credentials(
             username=user,
             password=pw,
             tenant_name=tenant)
@@ -185,7 +186,7 @@ class OSClient(object):
             'ca_certs': CONF.identity.ca_certificates_file,
             'trace_requests': CONF.debug.trace_requests
         }
-        _auth = tempest.auth.KeystoneV2AuthProvider(
+        _auth = auth.KeystoneV2AuthProvider(
             _creds, CONF.identity.uri, **auth_provider_params)
         self.identity = identity_client.IdentityClientJSON(
             _auth,
@@ -416,7 +417,7 @@ class JavelinCheck(unittest.TestCase):
         that things like tenantId didn't drift across versions.
         """
         LOG.info("checking users")
-        for name, user in self.users.iteritems():
+        for name, user in six.iteritems(self.users):
             client = keystone_admin()
             found = client.identity.get_user(user['id'])
             self.assertEqual(found['name'], user['name'])
@@ -616,7 +617,7 @@ def _resolve_image(image, imgtype):
 
 
 def _get_image_by_name(client, name):
-    body = client.images.image_list()
+    body = client.images.list_images()
     for image in body:
         if name == image['name']:
             return image

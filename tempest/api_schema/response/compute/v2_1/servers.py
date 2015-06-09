@@ -14,8 +14,7 @@
 
 import copy
 
-from tempest.api_schema.response.compute import parameter_types
-from tempest.api_schema.response.compute import servers
+from tempest.api_schema.response.compute.v2_1 import parameter_types
 
 create_server = {
     'status_code': [202],
@@ -46,24 +45,110 @@ create_server_with_admin_pass['response_body']['properties']['server'][
 create_server_with_admin_pass['response_body']['properties']['server'][
     'required'].append('adminPass')
 
-update_server = copy.deepcopy(servers.base_update_get_server)
-update_server['response_body']['properties']['server']['properties'].update({
-    'hostId': {'type': 'string'},
-    'OS-DCF:diskConfig': {'type': 'string'},
-    'accessIPv4': parameter_types.access_ip_v4,
-    'accessIPv6': parameter_types.access_ip_v6
-})
-update_server['response_body']['properties']['server']['required'].append(
-    # NOTE: OS-DCF:diskConfig and accessIPv4/v6 are API
-    # extensions, and some environments return a response
-    # without these attributes. So they are not 'required'.
-    'hostId'
-)
+list_servers = {
+    'status_code': [200],
+    'response_body': {
+        'type': 'object',
+        'properties': {
+            'servers': {
+                'type': 'array',
+                'items': {
+                    'type': 'object',
+                    'properties': {
+                        'id': {'type': 'string'},
+                        'links': parameter_types.links,
+                        'name': {'type': 'string'}
+                    },
+                    'required': ['id', 'links', 'name']
+                }
+            },
+            'servers_links': parameter_types.links
+        },
+        # NOTE(gmann): servers_links attribute is not necessary to be
+        # present always So it is not 'required'.
+        'required': ['servers']
+    }
+}
 
-get_server = copy.deepcopy(servers.base_update_get_server)
-get_server['response_body']['properties']['server']['properties'].update({
+delete_server = {
+    'status_code': [204],
+}
+
+common_show_server = {
+    'type': 'object',
+    'properties': {
+        'id': {'type': 'string'},
+        'name': {'type': 'string'},
+        'status': {'type': 'string'},
+        'image': {'oneOf': [
+            {'type': 'object',
+                'properties': {
+                    'id': {'type': 'string'},
+                    'links': parameter_types.links
+                },
+                'required': ['id', 'links']},
+            {'type': ['string', 'null']}
+        ]},
+        'flavor': {
+            'type': 'object',
+            'properties': {
+                'id': {'type': 'string'},
+                'links': parameter_types.links
+            },
+            'required': ['id', 'links']
+        },
+        'fault': {
+            'type': 'object',
+            'properties': {
+                'code': {'type': 'integer'},
+                'created': {'type': 'string'},
+                'message': {'type': 'string'},
+                'details': {'type': 'string'},
+            },
+            # NOTE(gmann): 'details' is not necessary to be present
+            #  in the 'fault'. So it is not defined as 'required'.
+            'required': ['code', 'created', 'message']
+        },
+        'user_id': {'type': 'string'},
+        'tenant_id': {'type': 'string'},
+        'created': {'type': 'string'},
+        'updated': {'type': 'string'},
+        'progress': {'type': 'integer'},
+        'metadata': {'type': 'object'},
+        'links': parameter_types.links,
+        'addresses': parameter_types.addresses,
+        'hostId': {'type': 'string'},
+        'OS-DCF:diskConfig': {'type': 'string'},
+        'accessIPv4': parameter_types.access_ip_v4,
+        'accessIPv6': parameter_types.access_ip_v6
+    },
+    # NOTE(GMann): 'progress' attribute is present in the response
+    # only when server's status is one of the progress statuses
+    # ("ACTIVE","BUILD", "REBUILD", "RESIZE","VERIFY_RESIZE")
+    # 'fault' attribute is present in the response
+    # only when server's status is one of the  "ERROR", "DELETED".
+    # OS-DCF:diskConfig and accessIPv4/v6 are API
+    # extensions, and some environments return a response
+    # without these attributes.So these are not defined as 'required'.
+    'required': ['id', 'name', 'status', 'image', 'flavor',
+                 'user_id', 'tenant_id', 'created', 'updated',
+                 'metadata', 'links', 'addresses', 'hostId']
+}
+
+update_server = {
+    'status_code': [200],
+    'response_body': {
+        'type': 'object',
+        'properties': {
+            'server': common_show_server
+        },
+        'required': ['server']
+    }
+}
+
+server_detail = copy.deepcopy(common_show_server)
+server_detail['properties'].update({
     'key_name': {'type': ['string', 'null']},
-    'hostId': {'type': 'string'},
     'security_groups': {'type': 'array'},
 
     # NOTE: Non-admin users also can see "OS-SRV-USG" and "OS-EXT-AZ"
@@ -81,27 +166,64 @@ get_server['response_body']['properties']['server']['properties'].update({
     'OS-EXT-SRV-ATTR:instance_name': {'type': 'string'},
     'OS-EXT-SRV-ATTR:hypervisor_hostname': {'type': ['string', 'null']},
     'os-extended-volumes:volumes_attached': {'type': 'array'},
-    'OS-DCF:diskConfig': {'type': 'string'},
-    'accessIPv4': parameter_types.access_ip_v4,
-    'accessIPv6': parameter_types.access_ip_v6,
     'config_drive': {'type': 'string'}
 })
-get_server['response_body']['properties']['server']['required'].append(
-    # NOTE: OS-SRV-USG, OS-EXT-AZ, OS-EXT-STS, OS-EXT-SRV-ATTR,
-    # os-extended-volumes, OS-DCF and accessIPv4/v6 are API
-    # extension, and some environments return a response without
-    # these attributes. So they are not 'required'.
-    'hostId'
-)
+server_detail['properties']['addresses']['patternProperties'][
+    '^[a-zA-Z0-9-_.]+$']['items']['properties'].update({
+        'OS-EXT-IPS:type': {'type': 'string'},
+        'OS-EXT-IPS-MAC:mac_addr': parameter_types.mac_address})
 # NOTE(gmann): Update OS-EXT-IPS:type and OS-EXT-IPS-MAC:mac_addr
 # attributes in server address. Those are API extension,
 # and some environments return a response without
 # these attributes. So they are not 'required'.
-get_server['response_body']['properties']['server']['properties'][
-    'addresses']['patternProperties']['^[a-zA-Z0-9-_.]+$']['items'][
-    'properties'].update({
-        'OS-EXT-IPS:type': {'type': 'string'},
-        'OS-EXT-IPS-MAC:mac_addr': parameter_types.mac_address})
+
+get_server = {
+    'status_code': [200],
+    'response_body': {
+        'type': 'object',
+        'properties': {
+            'server': server_detail
+        },
+        'required': ['server']
+    }
+}
+
+list_servers_detail = {
+    'status_code': [200],
+    'response_body': {
+        'type': 'object',
+        'properties': {
+            'servers': {
+                'type': 'array',
+                'items': server_detail
+            },
+            'servers_links': parameter_types.links
+        },
+        # NOTE(gmann): servers_links attribute is not necessary to be
+        # present always So it is not 'required'.
+        'required': ['servers']
+    }
+}
+
+rebuild_server = copy.deepcopy(update_server)
+rebuild_server['status_code'] = [202]
+
+rebuild_server_with_admin_pass = copy.deepcopy(rebuild_server)
+rebuild_server_with_admin_pass['response_body']['properties']['server'][
+    'properties'].update({'adminPass': {'type': 'string'}})
+rebuild_server_with_admin_pass['response_body']['properties']['server'][
+    'required'].append('adminPass')
+
+rescue_server = {
+    'status_code': [200],
+    'response_body': {
+        'type': 'object',
+        'properties': {
+            'adminPass': {'type': 'string'}
+        },
+        'required': ['adminPass']
+    }
+}
 
 list_virtual_interfaces = {
     'status_code': [200],
@@ -174,29 +296,10 @@ list_volume_attachments['response_body']['properties'][
     'volumeAttachments']['items']['properties'].update(
     {'serverId': {'type': 'string'}})
 
-set_get_server_metadata_item = {
-    'status_code': [200],
-    'response_body': {
-        'type': 'object',
-        'properties': {
-            'meta': {
-                'type': 'object',
-                'patternProperties': {
-                    '^.+$': {'type': 'string'}
-                }
-            }
-        },
-        'required': ['meta']
-    }
-}
-
 list_addresses_by_network = {
     'status_code': [200],
     'response_body': parameter_types.addresses
 }
-
-server_actions_confirm_resize = copy.deepcopy(
-    servers.server_actions_delete_password)
 
 list_addresses = {
     'status_code': [200],
@@ -258,10 +361,36 @@ list_server_groups = {
     }
 }
 
-instance_actions_object = copy.deepcopy(servers.common_instance_actions)
-instance_actions_object[
-    'properties'].update({'instance_uuid': {'type': 'string'}})
-instance_actions_object['required'].extend(['instance_uuid'])
+instance_actions = {
+    'type': 'object',
+    'properties': {
+        'action': {'type': 'string'},
+        'request_id': {'type': 'string'},
+        'user_id': {'type': 'string'},
+        'project_id': {'type': 'string'},
+        'start_time': {'type': 'string'},
+        'message': {'type': ['string', 'null']},
+        'instance_uuid': {'type': 'string'}
+    },
+    'required': ['action', 'request_id', 'user_id', 'project_id',
+                 'start_time', 'message', 'instance_uuid']
+}
+
+instance_action_events = {
+    'type': 'array',
+    'items': {
+        'type': 'object',
+        'properties': {
+            'event': {'type': 'string'},
+            'start_time': {'type': 'string'},
+            'finish_time': {'type': 'string'},
+            'result': {'type': 'string'},
+            'traceback': {'type': ['string', 'null']}
+        },
+        'required': ['event', 'start_time', 'finish_time', 'result',
+                     'traceback']
+    }
+}
 
 list_instance_actions = {
     'status_code': [200],
@@ -270,93 +399,120 @@ list_instance_actions = {
         'properties': {
             'instanceActions': {
                 'type': 'array',
-                'items': instance_actions_object
+                'items': instance_actions
             }
         },
         'required': ['instanceActions']
     }
 }
 
-get_instance_actions_object = copy.deepcopy(servers.common_get_instance_action)
-get_instance_actions_object[
-    'properties'].update({'instance_uuid': {'type': 'string'}})
-get_instance_actions_object['required'].extend(['instance_uuid'])
+instance_actions_with_events = copy.deepcopy(instance_actions)
+instance_actions_with_events['properties'].update({
+    'events': instance_action_events})
+# 'events' does not come in response body always so it is not
+# defined as 'required'
 
 get_instance_action = {
     'status_code': [200],
     'response_body': {
         'type': 'object',
         'properties': {
-            'instanceAction': get_instance_actions_object
+            'instanceAction': instance_actions_with_events
         },
         'required': ['instanceAction']
     }
 }
 
-list_servers_detail = copy.deepcopy(servers.base_list_servers_detail)
-list_servers_detail['response_body']['properties']['servers']['items'][
-    'properties'].update({
-        'key_name': {'type': ['string', 'null']},
-        'hostId': {'type': 'string'},
-        'OS-DCF:diskConfig': {'type': 'string'},
-        'security_groups': {'type': 'array'},
-
-        # NOTE: Non-admin users also can see "OS-SRV-USG" and "OS-EXT-AZ"
-        # attributes.
-        'OS-SRV-USG:launched_at': {'type': ['string', 'null']},
-        'OS-SRV-USG:terminated_at': {'type': ['string', 'null']},
-        'OS-EXT-AZ:availability_zone': {'type': 'string'},
-
-        # NOTE: Admin users only can see "OS-EXT-STS" and "OS-EXT-SRV-ATTR"
-        # attributes.
-        'OS-EXT-STS:task_state': {'type': ['string', 'null']},
-        'OS-EXT-STS:vm_state': {'type': 'string'},
-        'OS-EXT-STS:power_state': {'type': 'integer'},
-        'OS-EXT-SRV-ATTR:host': {'type': ['string', 'null']},
-        'OS-EXT-SRV-ATTR:instance_name': {'type': 'string'},
-        'OS-EXT-SRV-ATTR:hypervisor_hostname': {'type': ['string', 'null']},
-        'os-extended-volumes:volumes_attached': {'type': 'array'},
-        'accessIPv4': parameter_types.access_ip_v4,
-        'accessIPv6': parameter_types.access_ip_v6,
-        'config_drive': {'type': 'string'}
-    })
-# NOTE(GMann): OS-SRV-USG, OS-EXT-AZ, OS-EXT-STS, OS-EXT-SRV-ATTR,
-# os-extended-volumes, OS-DCF and accessIPv4/v6 are API
-# extensions, and some environments return a response without
-# these attributes. So they are not 'required'.
-list_servers_detail['response_body']['properties']['servers']['items'][
-    'required'].append('hostId')
-# NOTE(gmann): Update OS-EXT-IPS:type and OS-EXT-IPS-MAC:mac_addr
-# attributes in server address. Those are API extension,
-# and some environments return a response without
-# these attributes. So they are not 'required'.
-list_servers_detail['response_body']['properties']['servers']['items'][
-    'properties']['addresses']['patternProperties']['^[a-zA-Z0-9-_.]+$'][
-    'items']['properties'].update({
-        'OS-EXT-IPS:type': {'type': 'string'},
-        'OS-EXT-IPS-MAC:mac_addr': parameter_types.mac_address})
-# Defining 'servers_links' attributes for V2 server schema
-list_servers_detail['response_body'][
-    'properties'].update({'servers_links': parameter_types.links})
-# NOTE(gmann): servers_links attribute is not necessary to be
-# present always So it is not 'required'.
-
-rebuild_server = copy.deepcopy(update_server)
-rebuild_server['status_code'] = [202]
-
-rebuild_server_with_admin_pass = copy.deepcopy(rebuild_server)
-rebuild_server_with_admin_pass['response_body']['properties']['server'][
-    'properties'].update({'adminPass': {'type': 'string'}})
-rebuild_server_with_admin_pass['response_body']['properties']['server'][
-    'required'].append('adminPass')
-
-rescue_server = {
+get_password = {
     'status_code': [200],
     'response_body': {
         'type': 'object',
         'properties': {
-            'adminPass': {'type': 'string'}
+            'password': {'type': 'string'}
         },
-        'required': ['adminPass']
+        'required': ['password']
     }
 }
+
+get_vnc_console = {
+    'status_code': [200],
+    'response_body': {
+        'type': 'object',
+        'properties': {
+            'console': {
+                'type': 'object',
+                'properties': {
+                    'type': {'type': 'string'},
+                    'url': {
+                        'type': 'string',
+                        'format': 'uri'
+                    }
+                },
+                'required': ['type', 'url']
+            }
+        },
+        'required': ['console']
+    }
+}
+
+get_console_output = {
+    'status_code': [200],
+    'response_body': {
+        'type': 'object',
+        'properties': {
+            'output': {'type': 'string'}
+        },
+        'required': ['output']
+    }
+}
+
+set_server_metadata = {
+    'status_code': [200],
+    'response_body': {
+        'type': 'object',
+        'properties': {
+            'metadata': {
+                'type': 'object',
+                'patternProperties': {
+                    '^.+$': {'type': 'string'}
+                }
+            }
+        },
+        'required': ['metadata']
+    }
+}
+
+list_server_metadata = copy.deepcopy(set_server_metadata)
+
+update_server_metadata = copy.deepcopy(set_server_metadata)
+
+delete_server_metadata_item = {
+    'status_code': [204]
+}
+
+set_get_server_metadata_item = {
+    'status_code': [200],
+    'response_body': {
+        'type': 'object',
+        'properties': {
+            'meta': {
+                'type': 'object',
+                'patternProperties': {
+                    '^.+$': {'type': 'string'}
+                }
+            }
+        },
+        'required': ['meta']
+    }
+}
+
+server_actions_common_schema = {
+    'status_code': [202]
+}
+
+server_actions_delete_password = {
+    'status_code': [204]
+}
+
+server_actions_confirm_resize = copy.deepcopy(
+    server_actions_delete_password)

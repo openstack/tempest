@@ -62,7 +62,6 @@ class ServicesTestJSON(base.BaseIdentityV3AdminTest):
         self.assertEqual(resp2_desc, resp3_desc)
         self.assertDictContainsSubset(update_service, fetched_service)
 
-    @test.attr(type='smoke')
     @test.idempotent_id('d1dcb1a1-2b6b-4da8-bbb8-5532ef6e8269')
     def test_create_service_without_description(self):
         # Create a service only with name and type
@@ -75,7 +74,6 @@ class ServicesTestJSON(base.BaseIdentityV3AdminTest):
         expected_data = {'name': name, 'type': serv_type}
         self.assertDictContainsSubset(expected_data, service)
 
-    @test.attr(type='smoke')
     @test.idempotent_id('e55908e8-360e-439e-8719-c3230a3e179e')
     def test_list_services(self):
         # Create, List, Verify and Delete Services

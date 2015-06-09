@@ -18,8 +18,6 @@ from oslo_log import log as logging
 from tempest_lib.common.utils import data_utils
 from tempest_lib import exceptions as lib_exc
 
-from tempest import clients
-from tempest.common import credentials
 from tempest import config
 from tempest import exceptions
 import tempest.test
@@ -52,6 +50,7 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
     """
 
     force_tenant_isolation = False
+    credentials = ['primary']
 
     # Default to ipv4.
     _ip_version = 4
@@ -69,7 +68,6 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
         # Create no network resources for these test.
         cls.set_network_resources()
         super(BaseNetworkTest, cls).setup_credentials()
-        cls.os = cls.get_client_manager()
 
     @classmethod
     def setup_clients(cls):
@@ -79,7 +77,6 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
     @classmethod
     def resource_setup(cls):
         super(BaseNetworkTest, cls).resource_setup()
-
         cls.network_cfg = CONF.network
         cls.networks = []
         cls.subnets = []
@@ -126,10 +123,6 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
             for floating_ip in cls.floating_ips:
                 cls._try_delete_resource(cls.client.delete_floatingip,
                                          floating_ip['id'])
-            # Clean up routers
-            for router in cls.routers:
-                cls._try_delete_resource(cls.delete_router,
-                                         router)
 
             # Clean up health monitors
             for health_monitor in cls.health_monitors:
@@ -161,6 +154,10 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
             for port in cls.ports:
                 cls._try_delete_resource(cls.client.delete_port,
                                          port['id'])
+            # Clean up routers
+            for router in cls.routers:
+                cls._try_delete_resource(cls.delete_router,
+                                         router)
             # Clean up subnets
             for subnet in cls.subnets:
                 cls._try_delete_resource(cls.client.delete_subnet,
@@ -426,19 +423,7 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
 
 class BaseAdminNetworkTest(BaseNetworkTest):
 
-    @classmethod
-    def skip_checks(cls):
-        super(BaseAdminNetworkTest, cls).skip_checks()
-        if not credentials.is_admin_available():
-            msg = ("Missing Administrative Network API credentials "
-                   "in configuration.")
-            raise cls.skipException(msg)
-
-    @classmethod
-    def setup_credentials(cls):
-        super(BaseAdminNetworkTest, cls).setup_credentials()
-        creds = cls.isolated_creds.get_admin_creds()
-        cls.os_adm = clients.Manager(credentials=creds)
+    credentials = ['primary', 'admin']
 
     @classmethod
     def setup_clients(cls):

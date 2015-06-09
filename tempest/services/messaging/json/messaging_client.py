@@ -14,8 +14,9 @@
 # limitations under the License.
 
 import json
-import urllib
 import uuid
+
+from six.moves.urllib import parse as urllib
 
 from tempest.api_schema.response.messaging.v1 import queues as queues_schema
 from tempest.common import service_client

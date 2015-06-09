@@ -16,10 +16,13 @@
 import copy
 
 from oslo_log import log as logging
+from tempest_lib.services.identity.v2.token_client import TokenClientJSON
+from tempest_lib.services.identity.v3.token_client import V3TokenClientJSON
 
 from tempest.common import cred_provider
 from tempest.common import negative_rest_client
 from tempest import config
+from tempest import exceptions
 from tempest import manager
 from tempest.services.baremetal.v1.json.baremetal_client import \
     BaremetalClientJSON
@@ -77,7 +80,6 @@ from tempest.services.database.json.versions_client import \
     DatabaseVersionsClientJSON
 from tempest.services.identity.v2.json.identity_client import \
     IdentityClientJSON
-from tempest.services.identity.v2.json.token_client import TokenClientJSON
 from tempest.services.identity.v3.json.credentials_client import \
     CredentialsClientJSON
 from tempest.services.identity.v3.json.endpoints_client import \
@@ -88,7 +90,6 @@ from tempest.services.identity.v3.json.policy_client import PolicyClientJSON
 from tempest.services.identity.v3.json.region_client import RegionClientJSON
 from tempest.services.identity.v3.json.service_client import \
     ServiceClientJSON
-from tempest.services.identity.v3.json.token_client import V3TokenClientJSON
 from tempest.services.image.v1.json.image_client import ImageClientJSON
 from tempest.services.image.v2.json.image_client import ImageClientV2JSON
 from tempest.services.messaging.json.messaging_client import \
@@ -343,11 +344,22 @@ class Manager(manager.Manager):
         self.credentials_client = CredentialsClientJSON(self.auth_provider,
                                                         **params)
         # Token clients do not use the catalog. They only need default_params.
-        self.token_client = TokenClientJSON(CONF.identity.uri,
-                                            **self.default_params)
+        # They read auth_url, so they should only be set if the corresponding
+        # API version is marked as enabled
+        if CONF.identity_feature_enabled.api_v2:
+            if CONF.identity.uri:
+                self.token_client = TokenClientJSON(
+                    CONF.identity.uri, **self.default_params)
+            else:
+                msg = 'Identity v2 API enabled, but no identity.uri set'
+                raise exceptions.InvalidConfiguration(msg)
         if CONF.identity_feature_enabled.api_v3:
-            self.token_v3_client = V3TokenClientJSON(CONF.identity.uri_v3,
-                                                     **self.default_params)
+            if CONF.identity.uri_v3:
+                self.token_v3_client = V3TokenClientJSON(
+                    CONF.identity.uri_v3, **self.default_params)
+            else:
+                msg = 'Identity v3 API enabled, but no identity.uri_v3 set'
+                raise exceptions.InvalidConfiguration(msg)
 
     def _set_volume_clients(self):
         params = {

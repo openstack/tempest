@@ -11,6 +11,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import six
 from tempest_lib.common.utils import data_utils
 from tempest_lib import exceptions as lib_exc
 
@@ -28,19 +29,17 @@ class TestChassis(base.BaseBaremetalTest):
 
     def _assertExpected(self, expected, actual):
         # Check if not expected keys/values exists in actual response body
-        for key, value in expected.iteritems():
+        for key, value in six.iteritems(expected):
             if key not in ('created_at', 'updated_at'):
                 self.assertIn(key, actual)
                 self.assertEqual(value, actual[key])
 
-    @test.attr(type='smoke')
     @test.idempotent_id('7c5a2e09-699c-44be-89ed-2bc189992d42')
     def test_create_chassis(self):
         descr = data_utils.rand_name('test-chassis')
         _, chassis = self.create_chassis(description=descr)
         self.assertEqual(chassis['description'], descr)
 
-    @test.attr(type='smoke')
     @test.idempotent_id('cabe9c6f-dc16-41a7-b6b9-0a90c212edd5')
     def test_create_chassis_unicode_description(self):
         # Use a unicode string for testing:
@@ -49,20 +48,17 @@ class TestChassis(base.BaseBaremetalTest):
         _, chassis = self.create_chassis(description=descr)
         self.assertEqual(chassis['description'], descr)
 
-    @test.attr(type='smoke')
     @test.idempotent_id('c84644df-31c4-49db-a307-8942881f41c0')
     def test_show_chassis(self):
         _, chassis = self.client.show_chassis(self.chassis['uuid'])
         self._assertExpected(self.chassis, chassis)
 
-    @test.attr(type="smoke")
     @test.idempotent_id('29c9cd3f-19b5-417b-9864-99512c3b33b3')
     def test_list_chassis(self):
         _, body = self.client.list_chassis()
         self.assertIn(self.chassis['uuid'],
                       [i['uuid'] for i in body['chassis']])
 
-    @test.attr(type='smoke')
     @test.idempotent_id('5ae649ad-22d1-4fe1-bbc6-97227d199fb3')
     def test_delete_chassis(self):
         _, body = self.create_chassis()
@@ -71,7 +67,6 @@ class TestChassis(base.BaseBaremetalTest):
         self.delete_chassis(uuid)
         self.assertRaises(lib_exc.NotFound, self.client.show_chassis, uuid)
 
-    @test.attr(type='smoke')
     @test.idempotent_id('cda8a41f-6be2-4cbf-840c-994b00a89b44')
     def test_update_chassis(self):
         _, body = self.create_chassis()
@@ -83,7 +78,6 @@ class TestChassis(base.BaseBaremetalTest):
         _, chassis = self.client.show_chassis(uuid)
         self.assertEqual(chassis['description'], new_description)
 
-    @test.attr(type='smoke')
     @test.idempotent_id('76305e22-a4e2-4ab3-855c-f4e2368b9335')
     def test_chassis_node_list(self):
         _, node = self.create_node(self.chassis['uuid'])

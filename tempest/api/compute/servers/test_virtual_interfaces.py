@@ -44,7 +44,6 @@ class VirtualInterfacesTestJSON(base.BaseV2ComputeTest):
 
     @decorators.skip_because(bug="1183436",
                              condition=CONF.service_available.neutron)
-    @test.attr(type='gate')
     @test.idempotent_id('96c4e2ef-5e4d-4d7f-87f5-fed6dca18016')
     @test.services('network')
     def test_list_virtual_interfaces(self):

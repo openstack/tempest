@@ -17,6 +17,7 @@ from oslo_log import log as logging
 from tempest_lib.common.utils import data_utils
 from tempest_lib import exceptions as lib_exc
 
+from tempest.common import fixed_network
 from tempest import config
 from tempest.scenario import manager
 from tempest import test
@@ -87,13 +88,18 @@ class TestLargeOpsScenario(manager.ScenarioTest):
             'secgroup-%s' % name, 'secgroup-desc-%s' % name)
         self.addCleanupClass(self.security_groups_client.delete_security_group,
                              secgroup['id'])
-
+        create_kwargs = {
+            'min_count': CONF.scenario.large_ops_number,
+            'security_groups': [{'name': secgroup['name']}]
+            }
+        network = self.get_tenant_network()
+        create_kwargs = fixed_network.set_networks_kwarg(network,
+                                                         create_kwargs)
         self.servers_client.create_server(
             name,
             self.image,
             flavor_id,
-            min_count=CONF.scenario.large_ops_number,
-            security_groups=[{'name': secgroup['name']}])
+            **create_kwargs)
         # needed because of bug 1199788
         params = {'name': name}
         server_list = self.servers_client.list_servers(params)

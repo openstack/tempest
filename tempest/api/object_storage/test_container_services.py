@@ -56,7 +56,6 @@ class ContainerTest(base.BaseObjectTest):
         self.containers.append(container_name)
         self.assertHeaders(resp, 'Container', 'PUT')
 
-    @test.attr(type='smoke')
     @test.idempotent_id('49f866ed-d6af-4395-93e7-4187eb56d322')
     def test_create_container_overwrite(self):
         # overwrite container with the same name
@@ -67,7 +66,6 @@ class ContainerTest(base.BaseObjectTest):
         resp, _ = self.container_client.create_container(container_name)
         self.assertHeaders(resp, 'Container', 'PUT')
 
-    @test.attr(type='smoke')
     @test.idempotent_id('c2ac4d59-d0f5-40d5-ba19-0635056d48cd')
     def test_create_container_with_metadata_key(self):
         # create container with the blank value of metadata
@@ -105,7 +103,6 @@ class ContainerTest(base.BaseObjectTest):
         self.assertEqual(resp['x-container-meta-test-container-meta'],
                          metadata['test-container-meta'])
 
-    @test.attr(type='smoke')
     @test.idempotent_id('24d16451-1c0c-4e4f-b59c-9840a3aba40e')
     def test_create_container_with_remove_metadata_key(self):
         # create container with the blank value of remove metadata
@@ -126,7 +123,6 @@ class ContainerTest(base.BaseObjectTest):
             container_name)
         self.assertNotIn('x-container-meta-test-container-meta', resp)
 
-    @test.attr(type='smoke')
     @test.idempotent_id('8a21ebad-a5c7-4e29-b428-384edc8cd156')
     def test_create_container_with_remove_metadata_value(self):
         # create container with remove metadata
@@ -145,7 +141,6 @@ class ContainerTest(base.BaseObjectTest):
             container_name)
         self.assertNotIn('x-container-meta-test-container-meta', resp)
 
-    @test.attr(type='smoke')
     @test.idempotent_id('95d3a249-b702-4082-a2c4-14bb860cf06a')
     def test_delete_container(self):
         # create a container
@@ -167,7 +162,6 @@ class ContainerTest(base.BaseObjectTest):
         self.assertHeaders(resp, 'Container', 'GET')
         self.assertEqual(object_name, object_list.strip('\n'))
 
-    @test.attr(type='smoke')
     @test.idempotent_id('4646ac2d-9bfb-4c7d-a3c5-0f527402b3df')
     def test_list_container_contents_with_no_object(self):
         # get empty container contents list
@@ -178,7 +172,6 @@ class ContainerTest(base.BaseObjectTest):
         self.assertHeaders(resp, 'Container', 'GET')
         self.assertEqual('', object_list.strip('\n'))
 
-    @test.attr(type='smoke')
     @test.idempotent_id('fe323a32-57b9-4704-a996-2e68f83b09bc')
     def test_list_container_contents_with_delimiter(self):
         # get container contents list using delimiter param
@@ -193,7 +186,6 @@ class ContainerTest(base.BaseObjectTest):
         self.assertHeaders(resp, 'Container', 'GET')
         self.assertEqual(object_name.split('/')[0], object_list.strip('/\n'))
 
-    @test.attr(type='smoke')
     @test.idempotent_id('55b4fa5c-e12e-4ca9-8fcf-a79afe118522')
     def test_list_container_contents_with_end_marker(self):
         # get container contents list using end_marker param
@@ -207,7 +199,6 @@ class ContainerTest(base.BaseObjectTest):
         self.assertHeaders(resp, 'Container', 'GET')
         self.assertEqual(object_name, object_list.strip('\n'))
 
-    @test.attr(type='smoke')
     @test.idempotent_id('196f5034-6ab0-4032-9da9-a937bbb9fba9')
     def test_list_container_contents_with_format_json(self):
         # get container contents list using format_json param
@@ -227,7 +218,6 @@ class ContainerTest(base.BaseObjectTest):
         self.assertTrue([c['content_type'] for c in object_list])
         self.assertTrue([c['last_modified'] for c in object_list])
 
-    @test.attr(type='smoke')
     @test.idempotent_id('655a53ca-4d15-408c-a377-f4c6dbd0a1fa')
     def test_list_container_contents_with_format_xml(self):
         # get container contents list using format_xml param
@@ -252,7 +242,6 @@ class ContainerTest(base.BaseObjectTest):
         self.assertEqual(object_list.find(".//last_modified").tag,
                          'last_modified')
 
-    @test.attr(type='smoke')
     @test.idempotent_id('297ec38b-2b61-4ff4-bcd1-7fa055e97b61')
     def test_list_container_contents_with_limit(self):
         # get container contents list using limit param
@@ -266,7 +255,6 @@ class ContainerTest(base.BaseObjectTest):
         self.assertHeaders(resp, 'Container', 'GET')
         self.assertEqual(object_name, object_list.strip('\n'))
 
-    @test.attr(type='smoke')
     @test.idempotent_id('c31ddc63-2a58-4f6b-b25c-94d2937e6867')
     def test_list_container_contents_with_marker(self):
         # get container contents list using marker param
@@ -280,7 +268,6 @@ class ContainerTest(base.BaseObjectTest):
         self.assertHeaders(resp, 'Container', 'GET')
         self.assertEqual(object_name, object_list.strip('\n'))
 
-    @test.attr(type='smoke')
     @test.idempotent_id('58ca6cc9-6af0-408d-aaec-2a6a7b2f0df9')
     def test_list_container_contents_with_path(self):
         # get container contents list using path param
@@ -295,7 +282,6 @@ class ContainerTest(base.BaseObjectTest):
         self.assertHeaders(resp, 'Container', 'GET')
         self.assertEqual(object_name, object_list.strip('\n'))
 
-    @test.attr(type='smoke')
     @test.idempotent_id('77e742c7-caf2-4ec9-8aa4-f7d509a3344c')
     def test_list_container_contents_with_prefix(self):
         # get container contents list using prefix param
@@ -328,7 +314,6 @@ class ContainerTest(base.BaseObjectTest):
         self.assertIn('x-container-meta-name', resp)
         self.assertEqual(resp['x-container-meta-name'], metadata['name'])
 
-    @test.attr(type='smoke')
     @test.idempotent_id('a2faf936-6b13-4f8d-92a2-c2278355821e')
     def test_list_no_container_metadata(self):
         # HEAD container without metadata

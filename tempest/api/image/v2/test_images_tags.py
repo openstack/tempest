@@ -20,7 +20,6 @@ from tempest import test
 
 class ImagesTagsTest(base.BaseV2ImageTest):
 
-    @test.attr(type='gate')
     @test.idempotent_id('10407036-6059-4f95-a2cd-cbbbee7ed329')
     def test_update_delete_tags_for_image(self):
         body = self.create_image(container_format='bare',
@@ -32,10 +31,10 @@ class ImagesTagsTest(base.BaseV2ImageTest):
 
         # Creating image tag and verify it.
         self.client.add_image_tag(image_id, tag)
-        body = self.client.get_image(image_id)
+        body = self.client.show_image(image_id)
         self.assertIn(tag, body['tags'])
 
         # Deleting image tag and verify it.
         self.client.delete_image_tag(image_id, tag)
-        body = self.client.get_image(image_id)
+        body = self.client.show_image(image_id)
         self.assertNotIn(tag, body['tags'])

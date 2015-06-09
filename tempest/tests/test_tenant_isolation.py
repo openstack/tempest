@@ -15,6 +15,7 @@
 import mock
 from oslo_config import cfg
 from oslotest import mockpatch
+from tempest_lib.services.identity.v2 import token_client as json_token_client
 
 from tempest.common import isolated_creds
 from tempest.common import service_client
@@ -22,7 +23,6 @@ from tempest import config
 from tempest import exceptions
 from tempest.services.identity.v2.json import identity_client as \
     json_iden_client
-from tempest.services.identity.v2.json import token_client as json_token_client
 from tempest.services.network.json import network_client as json_network_client
 from tempest.tests import base
 from tempest.tests import fake_config
@@ -196,6 +196,7 @@ class TestTenantIsolation(base.TestCase):
         # Assert that the role creation is called with the 2 specified roles
         self.assertEqual(len(calls), 2)
         args = map(lambda x: x[1], calls)
+        args = list(args)
         self.assertIn(('1234', '1234', '1234'), args)
         self.assertIn(('1234', '1234', '12345'), args)
         self.assertEqual(role_creds.username, 'fake_role_user')
@@ -237,6 +238,7 @@ class TestTenantIsolation(base.TestCase):
         calls = user_mock.mock_calls
         self.assertEqual(len(calls), 3)
         args = map(lambda x: x[1][0], calls)
+        args = list(args)
         self.assertIn('1234', args)
         self.assertIn('12345', args)
         self.assertIn('123456', args)
@@ -244,6 +246,7 @@ class TestTenantIsolation(base.TestCase):
         calls = tenant_mock.mock_calls
         self.assertEqual(len(calls), 3)
         args = map(lambda x: x[1][0], calls)
+        args = list(args)
         self.assertIn('1234', args)
         self.assertIn('12345', args)
         self.assertIn('123456', args)
@@ -263,6 +266,36 @@ class TestTenantIsolation(base.TestCase):
         # Verify IDs
         self.assertEqual(alt_creds.tenant_id, '1234')
         self.assertEqual(alt_creds.user_id, '1234')
+
+    @mock.patch('tempest_lib.common.rest_client.RestClient')
+    def test_no_network_creation_with_config_set(self, MockRestClient):
+        cfg.CONF.set_default('create_isolated_networks', False, group='auth')
+        iso_creds = isolated_creds.IsolatedCreds(name='test class',
+                                                 password='fake_password')
+        self._mock_assign_user_role()
+        self._mock_list_role()
+        self._mock_user_create('1234', 'fake_prim_user')
+        self._mock_tenant_create('1234', 'fake_prim_tenant')
+        net = mock.patch.object(iso_creds.network_admin_client,
+                                'delete_network')
+        net_mock = net.start()
+        subnet = mock.patch.object(iso_creds.network_admin_client,
+                                   'delete_subnet')
+        subnet_mock = subnet.start()
+        router = mock.patch.object(iso_creds.network_admin_client,
+                                   'delete_router')
+        router_mock = router.start()
+
+        primary_creds = iso_creds.get_primary_creds()
+        self.assertEqual(net_mock.mock_calls, [])
+        self.assertEqual(subnet_mock.mock_calls, [])
+        self.assertEqual(router_mock.mock_calls, [])
+        network = primary_creds.network
+        subnet = primary_creds.subnet
+        router = primary_creds.router
+        self.assertIsNone(network)
+        self.assertIsNone(subnet)
+        self.assertIsNone(router)
 
     @mock.patch('tempest_lib.common.rest_client.RestClient')
     def test_network_creation(self, MockRestClient):
@@ -381,6 +414,7 @@ class TestTenantIsolation(base.TestCase):
         calls = remove_secgroup_mock.mock_calls
         self.assertEqual(len(calls), 3)
         args = map(lambda x: x[1][0], calls)
+        args = list(args)
         self.assertIn('v2.0/security-groups/sg-1234', args)
         self.assertIn('v2.0/security-groups/sg-12345', args)
         self.assertIn('v2.0/security-groups/sg-123456', args)
@@ -388,6 +422,7 @@ class TestTenantIsolation(base.TestCase):
         calls = remove_router_interface_mock.mock_calls
         self.assertEqual(len(calls), 3)
         args = map(lambda x: x[1], calls)
+        args = list(args)
         self.assertIn(('1234', '1234'), args)
         self.assertIn(('12345', '12345'), args)
         self.assertIn(('123456', '123456'), args)
@@ -395,6 +430,7 @@ class TestTenantIsolation(base.TestCase):
         calls = net_mock.mock_calls
         self.assertEqual(len(calls), 3)
         args = map(lambda x: x[1][0], calls)
+        args = list(args)
         self.assertIn('1234', args)
         self.assertIn('12345', args)
         self.assertIn('123456', args)
@@ -402,6 +438,7 @@ class TestTenantIsolation(base.TestCase):
         calls = subnet_mock.mock_calls
         self.assertEqual(len(calls), 3)
         args = map(lambda x: x[1][0], calls)
+        args = list(args)
         self.assertIn('1234', args)
         self.assertIn('12345', args)
         self.assertIn('123456', args)
@@ -409,6 +446,7 @@ class TestTenantIsolation(base.TestCase):
         calls = router_mock.mock_calls
         self.assertEqual(len(calls), 3)
         args = map(lambda x: x[1][0], calls)
+        args = list(args)
         self.assertIn('1234', args)
         self.assertIn('12345', args)
         self.assertIn('123456', args)

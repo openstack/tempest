@@ -22,7 +22,6 @@ from tempest import test
 
 class TenantsTestJSON(base.BaseIdentityV2AdminTest):
 
-    @test.attr(type='gate')
     @test.idempotent_id('16c6e05c-6112-4b0e-b83f-5e43f221b6b0')
     def test_tenant_list_delete(self):
         # Create several tenants and delete them
@@ -45,7 +44,6 @@ class TenantsTestJSON(base.BaseIdentityV2AdminTest):
         found = [tenant for tenant in body if tenant['id'] in tenant_ids]
         self.assertFalse(any(found), 'Tenants failed to delete')
 
-    @test.attr(type='gate')
     @test.idempotent_id('d25e9f24-1310-4d29-b61b-d91299c21d6d')
     def test_tenant_create_with_description(self):
         # Create tenant with a description
@@ -66,7 +64,6 @@ class TenantsTestJSON(base.BaseIdentityV2AdminTest):
         self.client.delete_tenant(tenant_id)
         self.data.tenants.remove(tenant)
 
-    @test.attr(type='gate')
     @test.idempotent_id('670bdddc-1cd7-41c7-b8e2-751cfb67df50')
     def test_tenant_create_enabled(self):
         # Create a tenant that is enabled
@@ -83,7 +80,6 @@ class TenantsTestJSON(base.BaseIdentityV2AdminTest):
         self.client.delete_tenant(tenant_id)
         self.data.tenants.remove(tenant)
 
-    @test.attr(type='gate')
     @test.idempotent_id('3be22093-b30f-499d-b772-38340e5e16fb')
     def test_tenant_create_not_enabled(self):
         # Create a tenant that is not enabled
@@ -102,7 +98,6 @@ class TenantsTestJSON(base.BaseIdentityV2AdminTest):
         self.client.delete_tenant(tenant_id)
         self.data.tenants.remove(tenant)
 
-    @test.attr(type='gate')
     @test.idempotent_id('781f2266-d128-47f3-8bdb-f70970add238')
     def test_tenant_update_name(self):
         # Update name attribute of a tenant
@@ -129,7 +124,6 @@ class TenantsTestJSON(base.BaseIdentityV2AdminTest):
         self.client.delete_tenant(t_id)
         self.data.tenants.remove(tenant)
 
-    @test.attr(type='gate')
     @test.idempotent_id('859fcfe1-3a03-41ef-86f9-b19a47d1cd87')
     def test_tenant_update_desc(self):
         # Update description attribute of a tenant
@@ -157,7 +151,6 @@ class TenantsTestJSON(base.BaseIdentityV2AdminTest):
         self.client.delete_tenant(t_id)
         self.data.tenants.remove(tenant)
 
-    @test.attr(type='gate')
     @test.idempotent_id('8fc8981f-f12d-4c66-9972-2bdcf2bc2e1a')
     def test_tenant_update_enable(self):
         # Update the enabled attribute of a tenant
