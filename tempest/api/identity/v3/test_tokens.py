@@ -13,6 +13,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from oslo_utils import timeutils
+import six
 from tempest.api.identity import base
 from tempest import test
 
@@ -26,8 +28,25 @@ class TokensV3Test(base.BaseIdentityV3Test):
         user_id = creds.user_id
         username = creds.username
         password = creds.password
-        resp = self.non_admin_token.auth(user_id=user_id,
-                                         password=password)
 
-        subject_name = resp['token']['user']['name']
+        token_id, resp = self.non_admin_token.get_token(user_id=user_id,
+                                                        password=password,
+                                                        auth_data=True)
+
+        self.assertNotEmpty(token_id)
+        self.assertIsInstance(token_id, six.string_types)
+
+        now = timeutils.utcnow()
+        expires_at = timeutils.normalize_time(
+            timeutils.parse_isotime(resp['expires_at']))
+        self.assertGreater(resp['expires_at'],
+                           resp['issued_at'])
+        self.assertGreater(expires_at, now)
+
+        subject_id = resp['user']['id']
+        self.assertEqual(subject_id, user_id)
+
+        subject_name = resp['user']['name']
         self.assertEqual(subject_name, username)
+
+        self.assertEqual(resp['methods'][0], 'password')
