@@ -112,7 +112,7 @@ To enable and use locking test accounts you need do a few things:
     available in the file. (if running serially the worker count is 1)
 
     You can check the sample file packaged in tempest for the yaml format
- #. Provide tempest with the location of you accounts.yaml file with the
+ #. Provide tempest with the location of your accounts.yaml file with the
     test_accounts_file option in the auth section
 
  #. Set allow_tenant_isolation = False in the auth group
