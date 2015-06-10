@@ -21,7 +21,7 @@ from tempest.common import service_client
 
 class FixedIPsClientJSON(service_client.ServiceClient):
 
-    def get_fixed_ip_details(self, fixed_ip):
+    def show_fixed_ip(self, fixed_ip):
         url = "os-fixed-ips/%s" % (fixed_ip)
         resp, body = self.get(url)
         body = json.loads(body)

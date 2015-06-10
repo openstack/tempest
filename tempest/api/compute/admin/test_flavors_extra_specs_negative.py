@@ -115,7 +115,7 @@ class FlavorsExtraSpecsNegativeTestJSON(base.BaseV2ComputeAdminTest):
     @test.idempotent_id('329a7be3-54b2-48be-8052-bf2ce4afd898')
     def test_flavor_get_nonexistent_key(self):
         self.assertRaises(lib_exc.NotFound,
-                          self.flavors_client.get_flavor_extra_spec_with_key,
+                          self.flavors_client.show_flavor_extra_spec,
                           self.flavor['id'],
                           "nonexistent_key")
 

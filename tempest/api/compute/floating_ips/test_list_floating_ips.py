@@ -63,7 +63,7 @@ class FloatingIPDetailsTestJSON(base.BaseV2ComputeTest):
         floating_ip_instance_id = body['instance_id']
         floating_ip_ip = body['ip']
         floating_ip_fixed_ip = body['fixed_ip']
-        body = self.client.get_floating_ip_details(floating_ip_id)
+        body = self.client.show_floating_ip(floating_ip_id)
         # Comparing the details of floating IP
         self.assertEqual(floating_ip_instance_id,
                          body['instance_id'])

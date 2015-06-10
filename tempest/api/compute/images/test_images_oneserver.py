@@ -70,7 +70,7 @@ class ImagesOneServerTestJSON(base.BaseV2ComputeTest):
         cls.server_id = server['id']
 
     def _get_default_flavor_disk_size(self, flavor_id):
-        flavor = self.flavors_client.get_flavor_details(flavor_id)
+        flavor = self.flavors_client.show_flavor(flavor_id)
         return flavor['disk']
 
     @test.idempotent_id('3731d080-d4c5-4872-b41a-64d0d0021314')
