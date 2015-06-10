@@ -433,6 +433,10 @@ ImageFeaturesGroup = [
     cfg.BoolOpt('api_v1',
                 default=True,
                 help="Is the v1 image API enabled"),
+    cfg.BoolOpt('deactivate_image',
+                default=False,
+                help="Is the deactivate-image feature enabled."
+                     " The feature has been integrated since Kilo."),
 ]
 
 network_group = cfg.OptGroup(name='network',
