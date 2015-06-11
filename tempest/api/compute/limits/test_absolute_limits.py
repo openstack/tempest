@@ -27,7 +27,7 @@ class AbsoluteLimitsTestJSON(base.BaseV2ComputeTest):
     @test.idempotent_id('b54c66af-6ab6-4cf0-a9e5-a0cb58d75e0b')
     def test_absLimits_get(self):
         # To check if all limits are present in the response
-        absolute_limits = self.client.get_absolute_limits()
+        absolute_limits = self.client.show_limits()
         expected_elements = ['maxImageMeta', 'maxPersonality',
                              'maxPersonalitySize',
                              'maxServerMeta', 'maxTotalCores',
