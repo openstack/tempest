@@ -48,7 +48,7 @@ class HostsAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
     def test_show_host_detail_with_nonexistent_hostname(self):
         nonexitent_hostname = data_utils.rand_name('rand_hostname')
         self.assertRaises(lib_exc.NotFound,
-                          self.client.show_host_detail, nonexitent_hostname)
+                          self.client.show_host, nonexitent_hostname)
 
     @test.attr(type=['negative'])
     @test.idempotent_id('19ebe09c-bfd4-4b7c-81a2-e2e0710f59cc')
@@ -56,7 +56,7 @@ class HostsAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
         hostname = self._get_host_name()
 
         self.assertRaises(lib_exc.Forbidden,
-                          self.non_admin_client.show_host_detail,
+                          self.non_admin_client.show_host,
                           hostname)
 
     @test.attr(type=['negative'])

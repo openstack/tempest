@@ -34,7 +34,7 @@ class HostsClientJSON(service_client.ServiceClient):
         self.validate_response(schema.list_hosts, resp, body)
         return service_client.ResponseBodyList(resp, body['hosts'])
 
-    def show_host_detail(self, hostname):
+    def show_host(self, hostname):
         """Show detail information for the host."""
 
         resp, body = self.get("os-hosts/%s" % str(hostname))
