@@ -512,9 +512,10 @@ NetworkFeaturesGroup = [
                 help="Allow the execution of IPv6 tests"),
     cfg.ListOpt('api_extensions',
                 default=['all'],
-                help='A list of enabled network extensions with a special '
-                     'entry all which indicates every extension is enabled. '
-                     'Empty list indicates all extensions are disabled'),
+                help="A list of enabled network extensions with a special "
+                     "entry all which indicates every extension is enabled. "
+                     "Empty list indicates all extensions are disabled. "
+                     "To get the list of extensions run: 'neutron ext-list'"),
     cfg.BoolOpt('ipv6_subnet_attributes',
                 default=False,
                 help="Allow the execution of IPv6 subnet tests that use "
