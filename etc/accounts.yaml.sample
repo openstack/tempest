@@ -41,3 +41,4 @@
      - 'admin'
   resources:
     network: 'public'
+    router: 'admin_tenant_1-router'
