@@ -378,7 +378,7 @@ class NovaQuotaService(BaseService):
     def dry_run(self):
         client = self.limits_client
         quotas = client.show_limits()
-        self.data['compute_quotas'] = quotas
+        self.data['compute_quotas'] = quotas['absolute']
 
 
 # Begin network service classes
