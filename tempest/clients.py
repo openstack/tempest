@@ -56,7 +56,8 @@ from tempest.services.compute.json.limits_client import LimitsClientJSON
 from tempest.services.compute.json.migrations_client import \
     MigrationsClientJSON
 from tempest.services.compute.json.networks_client import NetworksClientJSON
-from tempest.services.compute.json.quotas_client import QuotaClassesClientJSON
+from tempest.services.compute.json.quota_classes_client import \
+    QuotaClassesClientJSON
 from tempest.services.compute.json.quotas_client import QuotasClientJSON
 from tempest.services.compute.json.security_group_default_rules_client import \
     SecurityGroupDefaultRulesClientJSON
