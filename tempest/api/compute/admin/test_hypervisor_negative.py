@@ -36,7 +36,7 @@ class HypervisorAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
 
     def _list_hypervisors(self):
         # List of hypervisors
-        hypers = self.client.get_hypervisor_list()
+        hypers = self.client.list_hypervisors()
         return hypers
 
     @test.attr(type=['negative'])
@@ -46,7 +46,7 @@ class HypervisorAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
 
         self.assertRaises(
             lib_exc.NotFound,
-            self.client.get_hypervisor_show_details,
+            self.client.show_hypervisor,
             nonexistent_hypervisor_id)
 
     @test.attr(type=['negative'])
@@ -57,7 +57,7 @@ class HypervisorAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
 
         self.assertRaises(
             lib_exc.Forbidden,
-            self.non_adm_client.get_hypervisor_show_details,
+            self.non_adm_client.show_hypervisor,
             hypers[0]['id'])
 
     @test.attr(type=['negative'])
@@ -68,7 +68,7 @@ class HypervisorAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
 
         self.assertRaises(
             lib_exc.Forbidden,
-            self.non_adm_client.get_hypervisor_servers,
+            self.non_adm_client.list_servers_on_hypervisor,
             hypers[0]['id'])
 
     @test.attr(type=['negative'])
@@ -78,7 +78,7 @@ class HypervisorAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
 
         self.assertRaises(
             lib_exc.NotFound,
-            self.client.get_hypervisor_servers,
+            self.client.list_servers_on_hypervisor,
             nonexistent_hypervisor_id)
 
     @test.attr(type=['negative'])
@@ -86,7 +86,7 @@ class HypervisorAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
     def test_get_hypervisor_stats_with_non_admin_user(self):
         self.assertRaises(
             lib_exc.Forbidden,
-            self.non_adm_client.get_hypervisor_stats)
+            self.non_adm_client.show_hypervisor_statistics)
 
     @test.attr(type=['negative'])
     @test.idempotent_id('f60aa680-9a3a-4c7d-90e1-fae3a4891303')
@@ -95,7 +95,7 @@ class HypervisorAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
 
         self.assertRaises(
             lib_exc.NotFound,
-            self.client.get_hypervisor_uptime,
+            self.client.show_hypervisor_uptime,
             nonexistent_hypervisor_id)
 
     @test.attr(type=['negative'])
@@ -106,7 +106,7 @@ class HypervisorAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
 
         self.assertRaises(
             lib_exc.Forbidden,
-            self.non_adm_client.get_hypervisor_uptime,
+            self.non_adm_client.show_hypervisor_uptime,
             hypers[0]['id'])
 
     @test.attr(type=['negative'])
@@ -115,7 +115,7 @@ class HypervisorAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
         # List of hypervisor and available services with non admin user
         self.assertRaises(
             lib_exc.Forbidden,
-            self.non_adm_client.get_hypervisor_list)
+            self.non_adm_client.list_hypervisors)
 
     @test.attr(type=['negative'])
     @test.idempotent_id('dc02db05-e801-4c5f-bc8e-d915290ab345')
@@ -123,7 +123,7 @@ class HypervisorAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
         # List of hypervisor details and available services with non admin user
         self.assertRaises(
             lib_exc.Forbidden,
-            self.non_adm_client.get_hypervisor_list_details)
+            self.non_adm_client.list_hypervisors, detail=True)
 
     @test.attr(type=['negative'])
     @test.idempotent_id('19a45cc1-1000-4055-b6d2-28e8b2ec4faa')
