@@ -61,6 +61,26 @@ class JavelinUnitTest(base.TestCase):
         javelin.client_for_user(fake_non_existing_user['name'])
         self.assertFalse(javelin.OSClient.called)
 
+    def test_attach_volumes(self):
+        self.useFixture(mockpatch.PatchObject(javelin, "client_for_user",
+                                              return_value=self.fake_client))
+
+        self.useFixture(mockpatch.PatchObject(
+            javelin, "_get_volume_by_name",
+            return_value=self.fake_object.volume))
+
+        self.useFixture(mockpatch.PatchObject(
+            javelin, "_get_server_by_name",
+            return_value=self.fake_object.server))
+
+        javelin.attach_volumes([self.fake_object])
+
+        mocked_function = self.fake_client.volumes.attach_volume
+        mocked_function.assert_called_once_with(
+            self.fake_object.volume['id'],
+            self.fake_object.server['id'],
+            self.fake_object['device'])
+
 
 class TestCreateResources(JavelinUnitTest):
     def test_create_tenants(self):
@@ -190,6 +210,41 @@ class TestCreateResources(JavelinUnitTest):
                                                 name=self.fake_object['name'],
                                                 ip_version=fake_version)
 
+    def test_create_volumes(self):
+
+        self.useFixture(mockpatch.PatchObject(javelin, "client_for_user",
+                                              return_value=self.fake_client))
+        self.useFixture(mockpatch.PatchObject(javelin, "_get_volume_by_name",
+                                              return_value=None))
+        self.fake_client.volumes.create_volume.return_value = \
+            self.fake_object.body
+
+        javelin.create_volumes([self.fake_object])
+
+        mocked_function = self.fake_client.volumes.create_volume
+        mocked_function.assert_called_once_with(
+            size=self.fake_object['gb'],
+            display_name=self.fake_object['name'])
+        mocked_function = self.fake_client.volumes.wait_for_volume_status
+        mocked_function.assert_called_once_with(
+            self.fake_object.body['id'],
+            'available')
+
+    def test_create_volume_existing(self):
+        self.useFixture(mockpatch.PatchObject(javelin, "client_for_user",
+                                              return_value=self.fake_client))
+        self.useFixture(mockpatch.PatchObject(javelin, "_get_volume_by_name",
+                                              return_value=self.fake_object))
+        self.fake_client.volumes.create_volume.return_value = \
+            self.fake_object.body
+
+        javelin.create_volumes([self.fake_object])
+
+        mocked_function = self.fake_client.volumes.create_volume
+        self.assertFalse(mocked_function.called)
+        mocked_function = self.fake_client.volumes.wait_for_volume_status
+        self.assertFalse(mocked_function.called)
+
 
 class TestDestroyResources(JavelinUnitTest):
 
@@ -264,3 +319,18 @@ class TestDestroyResources(JavelinUnitTest):
         mocked_function = fake_client.networks.delete_network
         mocked_function.assert_called_once_with(
             self.fake_object['resource']['id'])
+
+    def test_destroy_volumes(self):
+        self.useFixture(mockpatch.PatchObject(javelin, "client_for_user",
+                                              return_value=self.fake_client))
+
+        self.useFixture(mockpatch.PatchObject(
+            javelin, "_get_volume_by_name",
+            return_value=self.fake_object.volume))
+
+        javelin.destroy_volumes([self.fake_object])
+
+        mocked_function = self.fake_client.volumes.detach_volume
+        mocked_function.assert_called_once_with(self.fake_object.volume['id'])
+        mocked_function = self.fake_client.volumes.delete_volume
+        mocked_function.assert_called_once_with(self.fake_object.volume['id'])
