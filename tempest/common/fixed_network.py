@@ -14,7 +14,6 @@ import copy
 from oslo_log import log as logging
 
 from tempest_lib.common.utils import misc as misc_utils
-from tempest_lib import exceptions as lib_exc
 
 from tempest import config
 from tempest import exceptions
@@ -41,19 +40,7 @@ def get_network_from_name(name, compute_networks_client):
     if not name:
         raise exceptions.InvalidConfiguration()
 
-    try:
-        networks = compute_networks_client.list_networks(name=name)
-    except lib_exc.NotFound:
-        # In case of nova network, if the fixed_network_name is not
-        # owned by the tenant, and the network client is not an admin
-        # one, list_networks will not find it
-        msg = ('Unable to find network %s. '
-               'Starting instance without specifying a network.' %
-               name)
-        if caller:
-            msg = '(%s) %s' % (caller, msg)
-        LOG.info(msg)
-        raise exceptions.InvalidConfiguration()
+    networks = compute_networks_client.list_networks(name=name)
 
     # Check that a network exists, else raise an InvalidConfigurationException
     if len(networks) == 1:
