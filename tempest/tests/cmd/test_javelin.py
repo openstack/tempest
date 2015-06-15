@@ -152,7 +152,7 @@ class TestCreateResources(JavelinUnitTest):
                                                 self.fake_object['format'],
                                                 self.fake_object['format'])
 
-        mocked_function = self.fake_client.images.store_image
+        mocked_function = self.fake_client.images.store_image_file
         fake_image_id = self.fake_object['body'].get('id')
         mocked_function.assert_called_once_with(fake_image_id, open_mock())
 

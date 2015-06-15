@@ -67,8 +67,8 @@ class TelemetryNotificationAPITestJSON(base.BaseTelemetryTest):
     def test_check_glance_v2_notifications(self):
         body = self.create_image(self.image_client_v2)
 
-        self.image_client_v2.store_image(body['id'], "file")
-        self.image_client_v2.get_image_file(body['id'])
+        self.image_client_v2.store_image_file(body['id'], "file")
+        self.image_client_v2.load_image_file(body['id'])
 
         query = 'resource', 'eq', body['id']
 

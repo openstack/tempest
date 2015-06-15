@@ -52,7 +52,7 @@ class ImageClientV2JSON(service_client.ServiceClient):
 
     def _validate_schema(self, body, type='image'):
         if type in ['image', 'images']:
-            schema = self.get_schema(type)
+            schema = self.show_schema(type)
         else:
             raise ValueError("%s is not a valid schema type" % type)
 
@@ -145,7 +145,7 @@ class ImageClientV2JSON(service_client.ServiceClient):
         """Returns the primary type of resource this client works with."""
         return 'image'
 
-    def store_image(self, image_id, data):
+    def store_image_file(self, image_id, data):
         url = 'v2/images/%s/file' % image_id
         headers = {'Content-Type': 'application/octet-stream'}
         resp, body = self.http.raw_request('PUT', url, headers=headers,
@@ -153,7 +153,7 @@ class ImageClientV2JSON(service_client.ServiceClient):
         self.expected_success(204, resp.status)
         return service_client.ResponseBody(resp, body)
 
-    def get_image_file(self, image_id):
+    def load_image_file(self, image_id):
         url = 'v2/images/%s/file' % image_id
         resp, body = self.get(url)
         self.expected_success(200, resp.status)
@@ -206,7 +206,7 @@ class ImageClientV2JSON(service_client.ServiceClient):
         self.expected_success(204, resp.status)
         return service_client.ResponseBody(resp)
 
-    def get_schema(self, schema):
+    def show_schema(self, schema):
         url = 'v2/schemas/%s' % schema
         resp, body = self.get(url)
         self.expected_success(200, resp.status)

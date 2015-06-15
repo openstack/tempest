@@ -56,7 +56,7 @@ class BasicOperationsImagesTest(base.BaseV2ImageTest):
         # Now try uploading an image file
         file_content = data_utils.random_bytes()
         image_file = moves.cStringIO(file_content)
-        self.client.store_image(image_id, image_file)
+        self.client.store_image_file(image_id, image_file)
 
         # Now try to get image details
         body = self.client.show_image(image_id)
@@ -67,7 +67,7 @@ class BasicOperationsImagesTest(base.BaseV2ImageTest):
         self.assertEqual(1024, body.get('size'))
 
         # Now try get image file
-        body = self.client.get_image_file(image_id)
+        body = self.client.load_image_file(image_id)
         self.assertEqual(file_content, body.data)
 
     @test.attr(type='smoke')
@@ -109,7 +109,7 @@ class BasicOperationsImagesTest(base.BaseV2ImageTest):
 
         # Now try uploading an image file
         image_file = moves.cStringIO(data_utils.random_bytes())
-        self.client.store_image(image_id, image_file)
+        self.client.store_image_file(image_id, image_file)
 
         # Update Image
         new_image_name = data_utils.rand_name('new-image')
@@ -156,7 +156,7 @@ class ListImagesTest(base.BaseV2ImageTest):
                                 disk_format=disk_format,
                                 visibility='private')
         image_id = body['id']
-        cls.client.store_image(image_id, data=image_file)
+        cls.client.store_image_file(image_id, data=image_file)
 
         return image_id
 
@@ -244,12 +244,12 @@ class ListImagesTest(base.BaseV2ImageTest):
     def test_get_image_schema(self):
         # Test to get image schema
         schema = "image"
-        body = self.client.get_schema(schema)
+        body = self.client.show_schema(schema)
         self.assertEqual("image", body['name'])
 
     @test.idempotent_id('25c8d7b2-df21-460f-87ac-93130bcdc684')
     def test_get_images_schema(self):
         # Test to get images schema
         schema = "images"
-        body = self.client.get_schema(schema)
+        body = self.client.show_schema(schema)
         self.assertEqual("images", body['name'])
