@@ -501,6 +501,10 @@ NetworkGroup = [
                     " with pre-configured ports."
                     " Supported ports are:"
                     " ['normal','direct','macvtap']"),
+    cfg.StrOpt('leaf1',
+               help='The name of leaf switch 1'),
+    cfg.StrOpt('leaf2',
+               help='The name of leaf switch 2'),
 ]
 
 network_feature_group = cfg.OptGroup(name='network-feature-enabled',
@@ -993,7 +997,18 @@ ScenarioGroup = [
     cfg.IntOpt('max_instances_per_tenant',
                default=9,
                help='The maximum number of instances for one tenant'),
-
+    cfg.IntOpt('number_vm_flap_interations',
+               default=2,
+               help='The number of times VMs are deleted/added during test'),
+    cfg.BoolOpt('network_node_segments_deleted',
+                default=True,
+                help='Indicates if VLAN/VxLANs associated with the network '
+                     'node are deleted when VMs are deleted'),
+    cfg.BoolOpt('advanced_vm_capabilities',
+                default=False,
+                help='Indicates if the VM has advanced testing features.'),
+    cfg.StrOpt('test_bed_id',
+               help='A file containing details for a test bed'),
 ]
 
 

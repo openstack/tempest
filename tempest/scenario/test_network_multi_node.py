@@ -19,7 +19,7 @@ from oslo_log import log as logging
 from tempest_lib.common.utils import data_utils
 
 from tempest import config
-from tempest import exceptions
+from tempest_lib import exceptions
 from tempest.scenario import manager
 from tempest import test
 
@@ -318,9 +318,17 @@ class TestNetworkMultiNode(manager.NetworkScenarioTest):
         ping_result = None
         for x in range(0, 3):
             try:
-                ping_result = linux_client.ping_host(target_ip,
-                                                     count=count,
-                                                     size=size).splitlines()
+                if CONF.scenario.advanced_vm_capabilities:
+                    ping_result = linux_client.ping_host(
+                        target_ip,
+                        count=count,
+                        size=size,
+                        interval=.2).splitlines()
+                else:
+                    ping_result = linux_client.ping_host(
+                        target_ip,
+                        count=count,
+                        size=size).splitlines()
                 break
             except exceptions.SSHExecCommandFailed:
                 LOG.debug("SSHExecCommandFailed - retrying")
@@ -453,6 +461,13 @@ class TestNetworkMultiNode(manager.NetworkScenarioTest):
             floating_ip = self.create_floating_ip(server)
             self.floating_ip_tuple = Floating_IP_tuple(floating_ip, server)
             self.floating_ip_tuples.append(self.floating_ip_tuple)
+
+    def delete_floating_ips(self):
+        if self.floating_ip_tuples is not None:
+            for i in range(0, len(self.floating_ip_tuples)):
+                fip_tuple = self.floating_ip_tuples.pop()
+                floating_ip, server = fip_tuple
+                self._disassociate_floating_ip(floating_ip)
 
     def verify_vm_connectivity(self):
         if self.floating_ip_tuples is not None:
