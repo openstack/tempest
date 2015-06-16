@@ -72,7 +72,7 @@ class ServersClientJSON(service_client.ServiceClient):
         if CONF.compute_feature_enabled.boot_from_volume_only:
             kwargs = boot_from_vol_client.set_block_device_mapping_args(
                      image_ref, kwargs)
-        if 'key_name' not in kwargs and CONF.compute.run_ssh and \
+        if 'key_name' not in kwargs and CONF.validation.run_validation and \
             CONF.compute.ssh_auth_method == 'keypair' and CONF.compute.keypair_name:
             kwargs['key_name'] = CONF.compute.keypair_name
 
@@ -291,6 +291,9 @@ class ServersClientJSON(service_client.ServiceClient):
     def rebuild(self, server_id, image_ref, **kwargs):
         """Rebuilds a server with a new image."""
         kwargs['imageRef'] = image_ref
+        if 'key_name' not in kwargs and CONF.validation.run_validation and \
+            CONF.compute.ssh_auth_method == 'keypair' and CONF.compute.keypair_name:
+            kwargs['key_name'] = CONF.compute.keypair_name
         if 'disk_config' in kwargs:
             kwargs['OS-DCF:diskConfig'] = kwargs['disk_config']
             del kwargs['disk_config']
