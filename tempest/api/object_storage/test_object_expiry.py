@@ -56,18 +56,33 @@ class ObjectExpiryTest(base.BaseObjectTest):
         # we want to ensure that we will sleep long enough for things to
         # actually expire, so figure out how many secs in the future that is.
         sleepy_time = int(resp['x-delete-at']) - int(time.time())
-
+        sleepy_time = sleepy_time if sleepy_time > 0 else 0
         resp, body = self.object_client.get_object(self.container_name,
                                                    self.object_name)
         self.assertHeaders(resp, 'Object', 'GET')
         self.assertIn('x-delete-at', resp)
 
-        # add a couple of seconds for safety.
-        time.sleep(sleepy_time + 3)
+        # add several seconds for safety.
+        time.sleep(sleepy_time)
+
+        # Checking whether object still exists for several seconds:
+        # sometimes object is not deleted immediately, so we are making
+        # get calls for an approximately 1 minute in a total. Get calls
+        # can take 3s each sometimes so we are making the requests in
+        # exponential periodicity
+        for i in range(1, 6):
+            time.sleep(2 ** i)
+            try:
+                self.object_client.get_object(self.container_name,
+                                              self.object_name)
+            except lib_exc.NotFound:
+                break
 
         # object should not be there anymore
-        self.assertRaises(lib_exc.NotFound, self.object_client.get_object,
-                          self.container_name, self.object_name)
+        self.assertRaises(lib_exc.NotFound,
+                          self.object_client.get_object,
+                          self.container_name,
+                          self.object_name)
 
     @test.idempotent_id('fb024a42-37f3-4ba5-9684-4f40a7910b41')
     def test_get_object_after_expiry_time(self):
