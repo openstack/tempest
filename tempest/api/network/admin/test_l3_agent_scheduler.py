@@ -27,6 +27,7 @@ AGENT_MODES = (
 
 class L3AgentSchedulerTestJSON(base.BaseAdminNetworkTest):
     _agent_mode = 'legacy'
+    is_dvr_router = False
 
     """
     Tests the following operations in the Neutron API using the REST client for
