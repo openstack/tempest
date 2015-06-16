@@ -20,17 +20,13 @@ from tempest.common import service_client
 
 class NetworksClientJSON(service_client.ServiceClient):
 
-    def list_networks(self, name=None):
+    def list_networks(self):
         resp, body = self.get("os-networks")
         body = json.loads(body)
         self.expected_success(200, resp.status)
-        if name:
-            networks = [n for n in body['networks'] if n['label'] == name]
-        else:
-            networks = body['networks']
-        return service_client.ResponseBodyList(resp, networks)
+        return service_client.ResponseBodyList(resp, body['networks'])
 
-    def get_network(self, network_id):
+    def show_network(self, network_id):
         resp, body = self.get("os-networks/%s" % str(network_id))
         body = json.loads(body)
         self.expected_success(200, resp.status)

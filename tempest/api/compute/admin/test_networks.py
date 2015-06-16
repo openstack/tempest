@@ -47,7 +47,7 @@ class NetworksTest(base.BaseComputeAdminTest):
         else:
             configured_network = networks
         configured_network = configured_network[0]
-        network = self.client.get_network(configured_network['id'])
+        network = self.client.show_network(configured_network['id'])
         self.assertEqual(configured_network['label'], network['label'])
 
     @test.idempotent_id('df3d1046-6fa5-4b2c-ad0c-cfa46a351cb9')
