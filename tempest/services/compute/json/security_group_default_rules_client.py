@@ -49,7 +49,7 @@ class SecurityGroupDefaultRulesClientJSON(service_client.ServiceClient):
     def delete_security_group_default_rule(self,
                                            security_group_default_rule_id):
         """Deletes the provided Security Group default rule."""
-        resp, body = self.delete('os-security-group-default-rules/%s' % str(
+        resp, body = self.delete('os-security-group-default-rules/%s' % (
             security_group_default_rule_id))
         self.validate_response(schema.delete_security_group_default_rule,
                                resp, body)
@@ -64,10 +64,10 @@ class SecurityGroupDefaultRulesClientJSON(service_client.ServiceClient):
         rules = body['security_group_default_rules']
         return service_client.ResponseBodyList(resp, rules)
 
-    def get_security_group_default_rule(self, security_group_default_rule_id):
+    def show_security_group_default_rule(self, security_group_default_rule_id):
         """Return the details of provided Security Group default rule."""
-        resp, body = self.get('os-security-group-default-rules/%s' % str(
-            security_group_default_rule_id))
+        resp, body = self.get('os-security-group-default-rules/%s' %
+                              security_group_default_rule_id)
         body = json.loads(body)
         self.validate_response(schema.create_get_security_group_default_rule,
                                resp, body)

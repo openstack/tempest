@@ -36,9 +36,9 @@ class SecurityGroupsClientJSON(service_client.ServiceClient):
         self.validate_response(schema.list_security_groups, resp, body)
         return service_client.ResponseBodyList(resp, body['security_groups'])
 
-    def get_security_group(self, security_group_id):
+    def show_security_group(self, security_group_id):
         """Get the details of a Security Group."""
-        url = "os-security-groups/%s" % str(security_group_id)
+        url = "os-security-groups/%s" % security_group_id
         resp, body = self.get(url)
         body = json.loads(body)
         self.validate_response(schema.get_security_group, resp, body)
@@ -74,7 +74,7 @@ class SecurityGroupsClientJSON(service_client.ServiceClient):
         if description:
             post_body['description'] = description
         post_body = json.dumps({'security_group': post_body})
-        resp, body = self.put('os-security-groups/%s' % str(security_group_id),
+        resp, body = self.put('os-security-groups/%s' % security_group_id,
                               post_body)
         body = json.loads(body)
         self.validate_response(schema.update_security_group, resp, body)
@@ -83,7 +83,7 @@ class SecurityGroupsClientJSON(service_client.ServiceClient):
     def delete_security_group(self, security_group_id):
         """Deletes the provided Security Group."""
         resp, body = self.delete(
-            'os-security-groups/%s' % str(security_group_id))
+            'os-security-groups/%s' % security_group_id)
         self.validate_response(schema.delete_security_group, resp, body)
         return service_client.ResponseBody(resp, body)
 
@@ -117,7 +117,7 @@ class SecurityGroupsClientJSON(service_client.ServiceClient):
     def delete_security_group_rule(self, group_rule_id):
         """Deletes the provided Security Group rule."""
         resp, body = self.delete('os-security-group-rules/%s' %
-                                 str(group_rule_id))
+                                 group_rule_id)
         self.validate_response(schema.delete_security_group_rule, resp, body)
         return service_client.ResponseBody(resp, body)
 
@@ -133,7 +133,7 @@ class SecurityGroupsClientJSON(service_client.ServiceClient):
 
     def is_resource_deleted(self, id):
         try:
-            self.get_security_group(id)
+            self.show_security_group(id)
         except lib_exc.NotFound:
             return True
         return False
