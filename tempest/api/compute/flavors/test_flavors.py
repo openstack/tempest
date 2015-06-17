@@ -41,7 +41,7 @@ class FlavorsV2TestJSON(base.BaseComputeTest):
     @test.idempotent_id('6e85fde4-b3cd-4137-ab72-ed5f418e8c24')
     def test_list_flavors_with_detail(self):
         # Detailed list of all flavors should contain the expected flavor
-        flavors = self.client.list_flavors_with_detail()
+        flavors = self.client.list_flavors(detail=True)
         flavor = self.client.show_flavor(self.flavor_ref)
         self.assertIn(flavor, flavors)
 
@@ -56,14 +56,14 @@ class FlavorsV2TestJSON(base.BaseComputeTest):
     def test_list_flavors_limit_results(self):
         # Only the expected number of flavors should be returned
         params = {'limit': 1}
-        flavors = self.client.list_flavors(params)
+        flavors = self.client.list_flavors(**params)
         self.assertEqual(1, len(flavors))
 
     @test.idempotent_id('b26f6327-2886-467a-82be-cef7a27709cb')
     def test_list_flavors_detailed_limit_results(self):
         # Only the expected number of flavors (detailed) should be returned
         params = {'limit': 1}
-        flavors = self.client.list_flavors_with_detail(params)
+        flavors = self.client.list_flavors(detail=True, **params)
         self.assertEqual(1, len(flavors))
 
     @test.idempotent_id('e800f879-9828-4bd0-8eae-4f17189951fb')
@@ -73,7 +73,7 @@ class FlavorsV2TestJSON(base.BaseComputeTest):
         flavor_id = flavor['id']
 
         params = {'marker': flavor_id}
-        flavors = self.client.list_flavors(params)
+        flavors = self.client.list_flavors(**params)
         self.assertFalse(any([i for i in flavors if i['id'] == flavor_id]),
                          'The list of flavors did not start after the marker.')
 
@@ -84,7 +84,7 @@ class FlavorsV2TestJSON(base.BaseComputeTest):
         flavor_id = flavor['id']
 
         params = {'marker': flavor_id}
-        flavors = self.client.list_flavors_with_detail(params)
+        flavors = self.client.list_flavors(detail=True, **params)
         self.assertFalse(any([i for i in flavors if i['id'] == flavor_id]),
                          'The list of flavors did not start after the marker.')
 
@@ -95,7 +95,7 @@ class FlavorsV2TestJSON(base.BaseComputeTest):
         flavor_id = flavor['id']
 
         params = {self._min_disk: flavor['disk'] + 1}
-        flavors = self.client.list_flavors_with_detail(params)
+        flavors = self.client.list_flavors(detail=True, **params)
         self.assertFalse(any([i for i in flavors if i['id'] == flavor_id]))
 
     @test.idempotent_id('09fe7509-b4ee-4b34-bf8b-39532dc47292')
@@ -105,7 +105,7 @@ class FlavorsV2TestJSON(base.BaseComputeTest):
         flavor_id = flavor['id']
 
         params = {self._min_ram: flavor['ram'] + 1}
-        flavors = self.client.list_flavors_with_detail(params)
+        flavors = self.client.list_flavors(detail=True, **params)
         self.assertFalse(any([i for i in flavors if i['id'] == flavor_id]))
 
     @test.idempotent_id('10645a4d-96f5-443f-831b-730711e11dd4')
@@ -115,7 +115,7 @@ class FlavorsV2TestJSON(base.BaseComputeTest):
         flavor_id = flavor['id']
 
         params = {self._min_disk: flavor['disk'] + 1}
-        flavors = self.client.list_flavors(params)
+        flavors = self.client.list_flavors(**params)
         self.assertFalse(any([i for i in flavors if i['id'] == flavor_id]))
 
     @test.idempotent_id('935cf550-e7c8-4da6-8002-00f92d5edfaa')
@@ -125,5 +125,5 @@ class FlavorsV2TestJSON(base.BaseComputeTest):
         flavor_id = flavor['id']
 
         params = {self._min_ram: flavor['ram'] + 1}
-        flavors = self.client.list_flavors(params)
+        flavors = self.client.list_flavors(**params)
         self.assertFalse(any([i for i in flavors if i['id'] == flavor_id]))

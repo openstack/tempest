@@ -27,24 +27,19 @@ from tempest.common import service_client
 
 class FlavorsClientJSON(service_client.ServiceClient):
 
-    def list_flavors(self, params=None):
+    def list_flavors(self, detail=False, **params):
         url = 'flavors'
+        _schema = schema.list_flavors
+
+        if detail:
+            url += '/detail'
+            _schema = schema.list_flavors_details
         if params:
             url += '?%s' % urllib.urlencode(params)
 
         resp, body = self.get(url)
         body = json.loads(body)
-        self.validate_response(schema.list_flavors, resp, body)
-        return service_client.ResponseBodyList(resp, body['flavors'])
-
-    def list_flavors_with_detail(self, params=None):
-        url = 'flavors/detail'
-        if params:
-            url += '?%s' % urllib.urlencode(params)
-
-        resp, body = self.get(url)
-        body = json.loads(body)
-        self.validate_response(schema.list_flavors_details, resp, body)
+        self.validate_response(_schema, resp, body)
         return service_client.ResponseBodyList(resp, body['flavors'])
 
     def show_flavor(self, flavor_id):
@@ -87,7 +82,7 @@ class FlavorsClientJSON(service_client.ServiceClient):
         # Did not use show_flavor(id) for verification as it gives
         # 200 ok even for deleted id. LP #981263
         # we can remove the loop here and use get by ID when bug gets sortedout
-        flavors = self.list_flavors_with_detail()
+        flavors = self.list_flavors(detail=True)
         for flavor in flavors:
             if flavor['id'] == id:
                 return False
