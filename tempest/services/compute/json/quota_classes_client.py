@@ -22,10 +22,10 @@ from tempest.common import service_client
 
 class QuotaClassesClientJSON(service_client.ServiceClient):
 
-    def get_quota_class_set(self, quota_class_id):
+    def show_quota_class_set(self, quota_class_id):
         """List the quota class set for a quota class."""
 
-        url = 'os-quota-class-sets/%s' % str(quota_class_id)
+        url = 'os-quota-class-sets/%s' % quota_class_id
         resp, body = self.get(url)
         body = json.loads(body)
         self.validate_response(classes_schema.get_quota_class_set, resp, body)
@@ -37,7 +37,7 @@ class QuotaClassesClientJSON(service_client.ServiceClient):
         """
         post_body = json.dumps({'quota_class_set': kwargs})
 
-        resp, body = self.put('os-quota-class-sets/%s' % str(quota_class_id),
+        resp, body = self.put('os-quota-class-sets/%s' % quota_class_id,
                               post_body)
 
         body = json.loads(body)
