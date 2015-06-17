@@ -49,7 +49,7 @@ class ImagesMetadataTestJSON(base.BaseV2ComputeTest):
     def test_get_nonexistent_image_metadata_item(self):
         # Negative test: Get on non-existent image should not happen
         self.assertRaises(lib_exc.NotFound,
-                          self.client.get_image_metadata_item,
+                          self.client.show_image_metadata_item,
                           data_utils.rand_uuid(), 'os_version')
 
     @test.attr(type=['negative'])

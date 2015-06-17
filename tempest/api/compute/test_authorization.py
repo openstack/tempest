@@ -219,7 +219,7 @@ class AuthorizationTestJSON(base.BaseV2ComputeTest):
     def test_get_keypair_of_alt_account_fails(self):
         # A GET request for another user's keypair should fail
         self.assertRaises(lib_exc.NotFound,
-                          self.alt_keypairs_client.get_keypair,
+                          self.alt_keypairs_client.show_keypair,
                           self.keypairname)
 
     @test.idempotent_id('6d841683-a8e0-43da-a1b8-b339f7692b61')
@@ -356,7 +356,7 @@ class AuthorizationTestJSON(base.BaseV2ComputeTest):
         self.images_client.set_image_metadata(self.image['id'],
                                               req_metadata)
         self.assertRaises(lib_exc.NotFound,
-                          self.alt_images_client.get_image_metadata_item,
+                          self.alt_images_client.show_image_metadata_item,
                           self.image['id'], 'meta1')
 
     @test.idempotent_id('79531e2e-e721-493c-8b30-a35db36fdaa6')
