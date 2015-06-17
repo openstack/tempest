@@ -111,17 +111,13 @@ class NetworkClientJSON(service_client.ServiceClient):
 
         return _show
 
-    def _creater(self, resource_name):
-        def _create(**kwargs):
-            plural = self.pluralize(resource_name)
-            uri = self.get_uri(plural)
-            post_data = self.serialize({resource_name: kwargs})
-            resp, body = self.post(uri, post_data)
-            body = self.deserialize_single(body)
-            self.expected_success(201, resp.status)
-            return service_client.ResponseBody(resp, body)
-
-        return _create
+    def _create_resource(self, uri, post_data):
+        req_uri = self.uri_prefix + uri
+        req_post_data = self.serialize(post_data)
+        resp, body = self.post(req_uri, req_post_data)
+        body = self.deserialize_single(body)
+        self.expected_success(201, resp.status)
+        return service_client.ResponseBody(resp, body)
 
     def _updater(self, resource_name):
         def _update(res_id, **kwargs):
@@ -136,17 +132,56 @@ class NetworkClientJSON(service_client.ServiceClient):
         return _update
 
     def __getattr__(self, name):
-        method_prefixes = ["list_", "delete_", "show_", "create_", "update_"]
+        method_prefixes = ["list_", "delete_", "show_", "update_"]
         method_functors = [self._lister,
                            self._deleter,
                            self._shower,
-                           self._creater,
                            self._updater]
         for index, prefix in enumerate(method_prefixes):
             prefix_len = len(prefix)
             if name[:prefix_len] == prefix:
                 return method_functors[index](name[prefix_len:])
         raise AttributeError(name)
+
+    def create_network(self, **kwargs):
+        uri = '/networks'
+        post_data = {'network': kwargs}
+        return self._create_resource(uri, post_data)
+
+    def create_subnet(self, **kwargs):
+        uri = '/subnets'
+        post_data = {'subnet': kwargs}
+        return self._create_resource(uri, post_data)
+
+    def create_port(self, **kwargs):
+        uri = '/ports'
+        post_data = {'port': kwargs}
+        return self._create_resource(uri, post_data)
+
+    def create_floatingip(self, **kwargs):
+        uri = '/floatingips'
+        post_data = {'floatingip': kwargs}
+        return self._create_resource(uri, post_data)
+
+    def create_metering_label(self, **kwargs):
+        uri = '/metering/metering-labels'
+        post_data = {'metering_label': kwargs}
+        return self._create_resource(uri, post_data)
+
+    def create_metering_label_rule(self, **kwargs):
+        uri = '/metering/metering-label-rules'
+        post_data = {'metering_label_rule': kwargs}
+        return self._create_resource(uri, post_data)
+
+    def create_security_group(self, **kwargs):
+        uri = '/security-groups'
+        post_data = {'security_group': kwargs}
+        return self._create_resource(uri, post_data)
+
+    def create_security_group_rule(self, **kwargs):
+        uri = '/security-group-rules'
+        post_data = {'security_group_rule': kwargs}
+        return self._create_resource(uri, post_data)
 
     # Common methods that are hard to automate
     def create_bulk_network(self, names):
