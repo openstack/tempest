@@ -91,9 +91,15 @@ class RemoteClient(object):
         return self.exec_command(cmd)
 
     def ping_host(self, host, count=CONF.compute.ping_count,
-                  size=CONF.compute.ping_size):
+                  size=CONF.compute.ping_size, interface=None, interval=None):
         addr = netaddr.IPAddress(host)
         cmd = 'ping6' if addr.version == 6 else 'ping'
+        if interface:
+            cmd += ' -I{0} '.format(interface)
+
+        if interval:
+            cmd += ' -i{0} '.format(interval)
+
         cmd += ' -c{0} -w{0} -s{1} {2}'.format(count, size, host)
         return self.exec_command(cmd)
 
