@@ -32,6 +32,7 @@ interface_common_info = {
                         'format': 'ipv4'
                     }
                 },
+                'additionalProperties': False,
                 'required': ['subnet_id', 'ip_address']
             }
         },
@@ -39,6 +40,7 @@ interface_common_info = {
         'net_id': {'type': 'string', 'format': 'uuid'},
         'mac_addr': parameter_types.mac_address
     },
+    'additionalProperties': False,
     'required': ['port_state', 'fixed_ips', 'port_id', 'net_id', 'mac_addr']
 }
 
@@ -49,6 +51,7 @@ get_create_interfaces = {
         'properties': {
             'interfaceAttachment': interface_common_info
         },
+        'additionalProperties': False,
         'required': ['interfaceAttachment']
     }
 }
@@ -63,6 +66,7 @@ list_interfaces = {
                 'items': interface_common_info
             }
         },
+        'additionalProperties': False,
         'required': ['interfaceAttachments']
     }
 }

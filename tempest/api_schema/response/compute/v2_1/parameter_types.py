@@ -23,6 +23,7 @@ links = {
             },
             'rel': {'type': 'string'}
         },
+        'additionalProperties': False,
         'required': ['href', 'rel']
     }
 }
@@ -60,6 +61,7 @@ addresses = {
                         ]
                     }
                 },
+                'additionalProperties': False,
                 'required': ['version', 'addr']
             }
         }

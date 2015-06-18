@@ -28,9 +28,11 @@ get_fixed_ip = {
                     'host': {'type': 'string'},
                     'hostname': {'type': 'string'}
                 },
+                'additionalProperties': False,
                 'required': ['address', 'cidr', 'host', 'hostname']
             }
         },
+        'additionalProperties': False,
         'required': ['fixed_ip']
     }
 }

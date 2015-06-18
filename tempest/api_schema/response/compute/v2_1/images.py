@@ -38,11 +38,13 @@ common_image_schema = {
                 'id': {'type': 'string'},
                 'links': parameter_types.links
             },
+            'additionalProperties': False,
             'required': ['id', 'links']
         },
         'OS-EXT-IMG-SIZE:size': {'type': 'integer'},
         'OS-DCF:diskConfig': {'type': 'string'}
     },
+    'additionalProperties': False,
     # 'server' attributes only comes in response body if image is
     # associated with any server. 'OS-EXT-IMG-SIZE:size' & 'OS-DCF:diskConfig'
     # are API extension,  So those are not defined as 'required'.
@@ -58,6 +60,7 @@ get_image = {
         'properties': {
             'image': common_image_schema
         },
+        'additionalProperties': False,
         'required': ['image']
     }
 }
@@ -76,11 +79,13 @@ list_images = {
                         'links': image_links,
                         'name': {'type': 'string'}
                     },
+                    'additionalProperties': False,
                     'required': ['id', 'links', 'name']
                 }
             },
             'images_links': parameter_types.links
         },
+        'additionalProperties': False,
         # NOTE(gmann): images_links attribute is not necessary to be
         # present always So it is not 'required'.
         'required': ['images']
@@ -113,6 +118,7 @@ image_metadata = {
         'properties': {
             'metadata': {'type': 'object'}
         },
+        'additionalProperties': False,
         'required': ['metadata']
     }
 }
@@ -124,6 +130,7 @@ image_meta_item = {
         'properties': {
             'meta': {'type': 'object'}
         },
+        'additionalProperties': False,
         'required': ['meta']
     }
 }
@@ -139,6 +146,7 @@ list_images_details = {
             },
             'images_links': parameter_types.links
         },
+        'additionalProperties': False,
         # NOTE(gmann): images_links attribute is not necessary to be
         # present always So it is not 'required'.
         'required': ['images']

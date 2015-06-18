@@ -35,6 +35,7 @@ list_migrations = {
                         'created_at': {'type': 'string'},
                         'updated_at': {'type': ['string', 'null']}
                     },
+                    'additionalProperties': False,
                     'required': [
                         'id', 'status', 'instance_uuid', 'source_node',
                         'source_compute', 'dest_node', 'dest_compute',
@@ -44,6 +45,7 @@ list_migrations = {
                 }
             }
         },
+        'additionalProperties': False,
         'required': ['migrations']
     }
 }

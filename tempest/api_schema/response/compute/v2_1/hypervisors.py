@@ -35,6 +35,7 @@ get_hypervisor_statistics = {
                     'vcpus': {'type': 'integer'},
                     'vcpus_used': {'type': 'integer'}
                 },
+                'additionalProperties': False,
                 'required': ['count', 'current_workload',
                              'disk_available_least', 'free_disk_gb',
                              'free_ram_mb', 'local_gb', 'local_gb_used',
@@ -42,6 +43,7 @@ get_hypervisor_statistics = {
                              'vcpus', 'vcpus_used']
             }
         },
+        'additionalProperties': False,
         'required': ['hypervisor_statistics']
     }
 }
@@ -77,11 +79,13 @@ hypervisor_detail = {
                 'id': {'type': ['integer', 'string']},
                 'disabled_reason': {'type': ['string', 'null']}
             },
+            'additionalProperties': False,
             'required': ['host', 'id']
         },
         'vcpus': {'type': 'integer'},
         'vcpus_used': {'type': 'integer'}
     },
+    'additionalProperties': False,
     # NOTE: When loading os-hypervisor-status extension,
     # a response contains status and state. So these params
     # should not be required.
@@ -104,6 +108,7 @@ list_hypervisors_detail = {
                 'items': hypervisor_detail
             }
         },
+        'additionalProperties': False,
         'required': ['hypervisors']
     }
 }
@@ -115,6 +120,7 @@ get_hypervisor = {
         'properties': {
             'hypervisor': hypervisor_detail
         },
+        'additionalProperties': False,
         'required': ['hypervisor']
     }
 }
@@ -134,6 +140,7 @@ list_search_hypervisors = {
                         'id': {'type': ['integer', 'string']},
                         'hypervisor_hostname': {'type': 'string'}
                     },
+                    'additionalProperties': False,
                     # NOTE: When loading os-hypervisor-status extension,
                     # a response contains status and state. So these params
                     # should not be required.
@@ -141,6 +148,7 @@ list_search_hypervisors = {
                 }
             }
         },
+        'additionalProperties': False,
         'required': ['hypervisors']
     }
 }
@@ -159,12 +167,14 @@ get_hypervisor_uptime = {
                     'hypervisor_hostname': {'type': 'string'},
                     'uptime': {'type': 'string'}
                 },
+                'additionalProperties': False,
                 # NOTE: When loading os-hypervisor-status extension,
                 # a response contains status and state. So these params
                 # should not be required.
                 'required': ['id', 'hypervisor_hostname', 'uptime']
             }
         },
+        'additionalProperties': False,
         'required': ['hypervisor']
     }
 }
@@ -178,7 +188,8 @@ get_hypervisors_servers['response_body']['properties']['hypervisors']['items'][
             'properties': {
                 'uuid': {'type': 'string'},
                 'name': {'type': 'string'}
-            }
+            },
+            'additionalProperties': False,
         }
     }
 # In V2 API, if there is no servers (VM) on the Hypervisor host then 'servers'

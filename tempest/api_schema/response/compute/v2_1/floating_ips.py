@@ -30,6 +30,7 @@ common_floating_ip_info = {
             'format': 'ip-address'
         }
     },
+    'additionalProperties': False,
     'required': ['id', 'pool', 'instance_id',
                  'ip', 'fixed_ip'],
 
@@ -44,6 +45,7 @@ list_floating_ips = {
                 'items': common_floating_ip_info
             },
         },
+        'additionalProperties': False,
         'required': ['floating_ips'],
     }
 }
@@ -55,6 +57,7 @@ create_get_floating_ip = {
         'properties': {
             'floating_ip': common_floating_ip_info
         },
+        'additionalProperties': False,
         'required': ['floating_ip'],
     }
 }
@@ -71,10 +74,12 @@ list_floating_ip_pools = {
                     'properties': {
                         'name': {'type': 'string'}
                     },
+                    'additionalProperties': False,
                     'required': ['name'],
                 }
             }
         },
+        'additionalProperties': False,
         'required': ['floating_ip_pools'],
     }
 }
@@ -95,9 +100,11 @@ create_floating_ips_bulk = {
                     'ip_range': {'type': 'string'},
                     'pool': {'type': ['string', 'null']},
                 },
+                'additionalProperties': False,
                 'required': ['interface', 'ip_range', 'pool'],
             }
         },
+        'additionalProperties': False,
         'required': ['floating_ips_bulk_create'],
     }
 }
@@ -109,6 +116,7 @@ delete_floating_ips_bulk = {
         'properties': {
             'floating_ips_bulk_delete': {'type': 'string'}
         },
+        'additionalProperties': False,
         'required': ['floating_ips_bulk_delete'],
     }
 }
@@ -136,6 +144,7 @@ list_floating_ips_bulk = {
                             'format': 'ip-address'
                         }
                     },
+                    'additionalProperties': False,
                     # NOTE: fixed_ip is introduced after JUNO release,
                     # So it is not defined as 'required'.
                     'required': ['address', 'instance_uuid', 'interface',
@@ -143,6 +152,7 @@ list_floating_ips_bulk = {
                 }
             }
         },
+        'additionalProperties': False,
         'required': ['floating_ip_info'],
     }
 }

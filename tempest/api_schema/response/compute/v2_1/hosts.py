@@ -29,10 +29,12 @@ list_hosts = {
                         'service': {'type': 'string'},
                         'zone': {'type': 'string'}
                     },
+                    'additionalProperties': False,
                     'required': ['host_name', 'service', 'zone']
                 }
             }
         },
+        'additionalProperties': False,
         'required': ['hosts']
     }
 }
@@ -56,14 +58,17 @@ get_host_detail = {
                                 'memory_mb': {'type': 'integer'},
                                 'project': {'type': 'string'}
                             },
+                            'additionalProperties': False,
                             'required': ['cpu', 'disk_gb', 'host',
                                          'memory_mb', 'project']
                         }
                     },
+                    'additionalProperties': False,
                     'required': ['resource']
                 }
             }
         },
+        'additionalProperties': False,
         'required': ['host']
     }
 }
@@ -76,6 +81,7 @@ startup_host = {
             'host': {'type': 'string'},
             'power_action': {'enum': ['startup']}
         },
+        'additionalProperties': False,
         'required': ['host', 'power_action']
     }
 }
@@ -104,6 +110,7 @@ update_host = {
                                           'off_maintenance']},
             'status': {'enum': ['enabled', 'disabled']}
         },
+        'additionalProperties': False,
         'required': ['host', 'maintenance_mode', 'status']
     }
 }
