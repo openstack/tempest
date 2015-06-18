@@ -206,6 +206,10 @@ ComputeGroup = [
                help="Timeout in seconds to wait for an instance to build. "
                     "Other services that do not define build_timeout will "
                     "inherit this value."),
+    cfg.StrOpt('ssh_shell_prologue',
+               default="set -eu -o pipefail; PATH=$$PATH:/sbin;",
+               help="Shell fragments to use before executing a command "
+                    "when sshing to a guest."),
     cfg.StrOpt('ssh_auth_method',
                default='keypair',
                help="Auth method used for authenticate to the instance. "

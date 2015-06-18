@@ -14,6 +14,7 @@ import netaddr
 import re
 import time
 
+from oslo_log import log as logging
 import six
 from tempest_lib.common import ssh
 
@@ -21,6 +22,8 @@ from tempest import config
 from tempest import exceptions
 
 CONF = config.CONF
+
+LOG = logging.getLogger(__name__)
 
 
 class RemoteClient(object):
@@ -48,7 +51,8 @@ class RemoteClient(object):
     def exec_command(self, cmd):
         # Shell options below add more clearness on failures,
         # path is extended for some non-cirros guest oses (centos7)
-        cmd = "set -eu -o pipefail; PATH=$PATH:/sbin; " + cmd
+        cmd = CONF.compute.ssh_shell_prologue + " " + cmd
+        LOG.debug("Remote command: %s" % cmd)
         return self.ssh_client.exec_command(cmd)
 
     def validate_authentication(self):
