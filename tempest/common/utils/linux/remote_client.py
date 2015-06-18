@@ -26,7 +26,8 @@ CONF = config.CONF
 class RemoteClient(object):
 
     # NOTE(afazekas): It should always get an address instead of server
-    def __init__(self, server, username, password=None, pkey=None):
+    def __init__(self, server, username, password=None, pkey=None,
+                                                key_filename=None):
         ssh_timeout = CONF.compute.ssh_timeout
         network = CONF.compute.network_for_ssh
         ip_version = CONF.compute.ip_version_for_ssh
@@ -41,8 +42,12 @@ class RemoteClient(object):
                     break
             else:
                 raise exceptions.ServerUnreachable()
-        self.ssh_client = ssh.Client(ip_address, username, password,
-                                     ssh_timeout, pkey=pkey,
+        if CONF.compute.ssh_auth_method == 'keypair' and pkey == None:
+            key_filename = CONF.compute.path_to_private_key if \
+                CONF.compute.path_to_private_key else None
+        self.ssh_client = ssh.Client(ip_address, username, password=None,
+                                     timeout=ssh_timeout, pkey=pkey,
+                                     key_filename=key_filename,
                                      channel_timeout=ssh_channel_timeout)
 
     def exec_command(self, cmd):

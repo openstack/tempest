@@ -20,11 +20,14 @@ import time
 from six.moves.urllib import parse as urllib
 from tempest_lib import exceptions as lib_exc
 
+from tempest.services.volume.json import boot_from_vol_client
 from tempest.api_schema.response.compute.v2_1 import servers as schema
 from tempest.common import service_client
 from tempest.common import waiters
 from tempest import exceptions
+from tempest import config
 
+CONF = config.CONF
 
 class ServersClientJSON(service_client.ServiceClient):
 
@@ -33,6 +36,7 @@ class ServersClientJSON(service_client.ServiceClient):
         super(ServersClientJSON, self).__init__(
             auth_provider, service, region, **kwargs)
         self.enable_instance_password = enable_instance_password
+        self.bfv_cleanup = boot_from_vol_client.get_cleanBFV_obj(auth_provider)
 
     def create_server(self, name, image_ref, flavor_ref, **kwargs):
         """
@@ -64,6 +68,13 @@ class ServersClientJSON(service_client.ServiceClient):
             'imageRef': image_ref,
             'flavorRef': flavor_ref
         }
+
+        if CONF.compute_feature_enabled.boot_from_volume_only:
+            kwargs = boot_from_vol_client.set_block_device_mapping_args(
+                     image_ref, kwargs)
+        if 'key_name' not in kwargs and CONF.validation.run_validation and \
+            CONF.compute.ssh_auth_method == 'keypair' and CONF.compute.keypair_name:
+            kwargs['key_name'] = CONF.compute.keypair_name
 
         for option in ['personality', 'adminPass', 'key_name',
                        'security_groups', 'networks', 'user_data',
@@ -145,8 +156,14 @@ class ServersClientJSON(service_client.ServiceClient):
 
     def delete_server(self, server_id):
         """Deletes the given server."""
+        server = self.get_server(server_id)
         resp, body = self.delete("servers/%s" % str(server_id))
         self.validate_response(schema.delete_server, resp, body)
+        if CONF.compute_feature_enabled.boot_from_volume_only:
+            self.wait_for_server_termination(server_id, True)
+            if server['os-extended-volumes:volumes_attached']:
+                self.bfv_cleanup.clean_bfv_resource([server[
+                  'os-extended-volumes:volumes_attached'][0]['id']])
         return service_client.ResponseBody(resp, body)
 
     def list_servers(self, params=None):
@@ -274,6 +291,9 @@ class ServersClientJSON(service_client.ServiceClient):
     def rebuild(self, server_id, image_ref, **kwargs):
         """Rebuilds a server with a new image."""
         kwargs['imageRef'] = image_ref
+        if 'key_name' not in kwargs and CONF.validation.run_validation and \
+            CONF.compute.ssh_auth_method == 'keypair' and CONF.compute.keypair_name:
+            kwargs['key_name'] = CONF.compute.keypair_name
         if 'disk_config' in kwargs:
             kwargs['OS-DCF:diskConfig'] = kwargs['disk_config']
             del kwargs['disk_config']

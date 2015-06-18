@@ -101,11 +101,13 @@ class BaseComputeTest(tempest.test.BaseTestCase):
         cls.images = []
         cls.security_groups = []
         cls.server_groups = []
+        cls.floating_ips = []
 
     @classmethod
     def resource_cleanup(cls):
         cls.clear_images()
         cls.clear_servers()
+        cls.clear_floating_ips()
         cls.clear_security_groups()
         cls.clear_server_groups()
         super(BaseComputeTest, cls).resource_cleanup()
@@ -190,6 +192,19 @@ class BaseComputeTest(tempest.test.BaseTestCase):
             except Exception:
                 LOG.exception('Exception raised deleting server-group %s',
                               server_group_id)
+
+    @classmethod
+    def clear_floating_ips(cls):
+        for ips in cls.floating_ips:
+            cls.floating_ips_client.delete_floating_ip(ips)
+
+    @classmethod
+    def create_assign_floating_ip(cls, server_id):
+        floating_ip = cls.floating_ips_client.create_floating_ip()
+        cls.floating_ips.append(floating_ip['id'])
+        cls.floating_ips_client.associate_floating_ip_to_server(
+            floating_ip['ip'], server_id)
+        return floating_ip['ip']
 
     @classmethod
     def create_test_server(cls, **kwargs):
