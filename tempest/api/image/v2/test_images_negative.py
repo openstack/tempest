@@ -17,7 +17,10 @@
 import uuid
 
 from tempest_lib import exceptions as lib_exc
+import cStringIO as StringIO
+import random
 
+from tempest_lib.common.utils import data_utils
 from tempest.api.image import base
 from tempest import test
 
@@ -98,3 +101,18 @@ class ImagesNegativeTest(base.BaseV2ImageTest):
     def test_register_with_invalid_disk_format(self):
         self.assertRaises(lib_exc.BadRequest, self.client.create_image,
                           'test', 'bare', 'wrong')
+
+    @test.attr(type=['negative', 'gate'])
+    def test_upload_image_negative(self):
+        # Updates an image by image_id
+        # Create image
+        image_name = data_utils.rand_name('image')
+        body = self.client.create_image(name=image_name,
+                                        container_format='bare',
+                                        disk_format='iso',
+                                        visibility='private')
+        image_id = body['id']
+        # Now try uploading an image file
+        image_file = StringIO.StringIO(data_utils.random_bytes())
+        self.assertRaises(lib_exc.Forbidden, self.client.store_image,image_id, image_file)
+
