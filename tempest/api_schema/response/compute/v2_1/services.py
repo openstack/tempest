@@ -32,11 +32,13 @@ list_services = {
                         'updated_at': {'type': ['string', 'null']},
                         'disabled_reason': {'type': ['string', 'null']}
                     },
+                    'additionalProperties': False,
                     'required': ['id', 'zone', 'host', 'state', 'binary',
                                  'status', 'updated_at', 'disabled_reason']
                 }
             }
         },
+        'additionalProperties': False,
         'required': ['services']
     }
 }
@@ -53,9 +55,11 @@ enable_service = {
                     'binary': {'type': 'string'},
                     'host': {'type': 'string'}
                 },
+                'additionalProperties': False,
                 'required': ['status', 'binary', 'host']
             }
         },
+        'additionalProperties': False,
         'required': ['service']
     }
 }

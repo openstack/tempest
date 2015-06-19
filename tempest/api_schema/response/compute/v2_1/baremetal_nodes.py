@@ -25,6 +25,7 @@ node = {
         'memory_mb': {'type': ['integer', 'string']},
         'disk_gb': {'type': ['integer', 'string']},
     },
+    'additionalProperties': False,
     'required': ['id', 'interfaces', 'host', 'task_state', 'cpus', 'memory_mb',
                  'disk_gb']
 }
@@ -39,6 +40,7 @@ list_baremetal_nodes = {
                 'items': node
             }
         },
+        'additionalProperties': False,
         'required': ['nodes']
     }
 }
@@ -50,6 +52,7 @@ baremetal_node = {
         'properties': {
             'node': node
         },
+        'additionalProperties': False,
         'required': ['node']
     }
 }

@@ -24,6 +24,7 @@ set_get_flavor_extra_specs = {
                 }
             }
         },
+        'additionalProperties': False,
         'required': ['extra_specs']
     }
 }

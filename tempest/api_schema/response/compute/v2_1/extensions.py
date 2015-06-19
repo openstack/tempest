@@ -35,11 +35,13 @@ list_extensions = {
                         'alias': {'type': 'string'},
                         'description': {'type': 'string'}
                     },
+                    'additionalProperties': False,
                     'required': ['updated', 'name', 'links', 'namespace',
                                  'alias', 'description']
                 }
             }
         },
+        'additionalProperties': False,
         'required': ['extensions']
     }
 }

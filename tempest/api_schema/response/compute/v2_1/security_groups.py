@@ -20,7 +20,8 @@ common_security_group_rule = {
         'properties': {
             'tenant_id': {'type': 'string'},
             'name': {'type': 'string'}
-        }
+        },
+        'additionalProperties': False,
     },
     'ip_protocol': {'type': ['string', 'null']},
     # 'parent_group_id' can be UUID so defining it as 'string' also.
@@ -29,7 +30,8 @@ common_security_group_rule = {
         'type': 'object',
         'properties': {
             'cidr': {'type': 'string'}
-        }
+        },
+        'additionalProperties': False,
         # When optional argument is provided in request body
         # like 'group_id' then, attribute 'cidr' does not
         # comes in response body. So it is not 'required'.
@@ -47,11 +49,13 @@ common_security_group = {
             'type': 'array',
             'items': {
                 'type': ['object', 'null'],
-                'properties': common_security_group_rule
+                'properties': common_security_group_rule,
+                'additionalProperties': False,
             }
         },
         'description': {'type': 'string'},
     },
+    'additionalProperties': False,
     'required': ['id', 'name', 'tenant_id', 'rules', 'description'],
 }
 
@@ -65,6 +69,7 @@ list_security_groups = {
                 'items': common_security_group
             }
         },
+        'additionalProperties': False,
         'required': ['security_groups']
     }
 }
@@ -76,6 +81,7 @@ get_security_group = create_security_group = update_security_group = {
         'properties': {
             'security_group': common_security_group
         },
+        'additionalProperties': False,
         'required': ['security_group']
     }
 }
@@ -92,10 +98,12 @@ create_security_group_rule = {
             'security_group_rule': {
                 'type': 'object',
                 'properties': common_security_group_rule,
+                'additionalProperties': False,
                 'required': ['from_port', 'to_port', 'group', 'ip_protocol',
                              'parent_group_id', 'id', 'ip_range']
             }
         },
+        'additionalProperties': False,
         'required': ['security_group_rule']
     }
 }

@@ -31,6 +31,7 @@ get_keypair = {
                     'id': {'type': 'integer'}
 
                 },
+                'additionalProperties': False,
                 # When we run the get keypair API, response body includes
                 # all the above mentioned attributes.
                 # But in Nova API sample file, response body includes only
@@ -39,6 +40,7 @@ get_keypair = {
                 'required': ['public_key', 'name', 'fingerprint']
             }
         },
+        'additionalProperties': False,
         'required': ['keypair']
     }
 }
@@ -57,12 +59,14 @@ create_keypair = {
                     'user_id': {'type': 'string'},
                     'private_key': {'type': 'string'}
                 },
+                'additionalProperties': False,
                 # When create keypair API is being called with 'Public key'
                 # (Importing keypair) then, response body does not contain
                 # 'private_key' So it is not defined as 'required'
                 'required': ['fingerprint', 'name', 'public_key', 'user_id']
             }
         },
+        'additionalProperties': False,
         'required': ['keypair']
     }
 }
@@ -88,13 +92,16 @@ list_keypairs = {
                                 'name': {'type': 'string'},
                                 'fingerprint': {'type': 'string'}
                             },
+                            'additionalProperties': False,
                             'required': ['public_key', 'name', 'fingerprint']
                         }
                     },
+                    'additionalProperties': False,
                     'required': ['keypair']
                 }
             }
         },
+        'additionalProperties': False,
         'required': ['keypairs']
     }
 }

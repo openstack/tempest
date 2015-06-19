@@ -26,6 +26,7 @@ aggregate_for_create = {
         'name': {'type': 'string'},
         'updated_at': {'type': ['string', 'null']}
     },
+    'additionalProperties': False,
     'required': ['availability_zone', 'created_at', 'deleted',
                  'deleted_at', 'id', 'name', 'updated_at'],
 }
@@ -47,6 +48,7 @@ list_aggregates = {
                 'items': common_aggregate_info
             }
         },
+        'additionalProperties': False,
         'required': ['aggregates'],
     }
 }
@@ -58,6 +60,7 @@ get_aggregate = {
         'properties': {
             'aggregate': common_aggregate_info
         },
+        'additionalProperties': False,
         'required': ['aggregate'],
     }
 }
@@ -81,6 +84,7 @@ create_aggregate = {
         'properties': {
             'aggregate': aggregate_for_create
         },
+        'additionalProperties': False,
         'required': ['aggregate'],
     }
 }

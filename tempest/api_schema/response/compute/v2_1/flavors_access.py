@@ -25,10 +25,12 @@ add_remove_list_flavor_access = {
                         'flavor_id': {'type': 'string'},
                         'tenant_id': {'type': 'string'},
                     },
+                    'additionalProperties': False,
                     'required': ['flavor_id', 'tenant_id'],
                 }
             }
         },
+        'additionalProperties': False,
         'required': ['flavor_access']
     }
 }
