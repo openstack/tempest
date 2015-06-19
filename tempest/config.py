@@ -528,7 +528,15 @@ NetworkFeaturesGroup = [
     cfg.BoolOpt('port_admin_state_change',
                 default=True,
                 help="Does the test environment support changing"
-                     " port admin state")
+                     " port admin state"),
+    cfg.BoolOpt('advertise_mtu',
+                default=False,
+                help="Allow the execution of MTU tests that use the extended "
+                     "Advertise MTU feature API."),
+    cfg.BoolOpt('vlan_transparent',
+                default=False,
+                help="Allow the execution of VLAN Transparency tests that use "
+                     "the extended VLAN Transparent API."),
 ]
 
 messaging_group = cfg.OptGroup(name='messaging',

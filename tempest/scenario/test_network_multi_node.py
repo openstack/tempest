@@ -160,6 +160,7 @@ class TestNetworkMultiNode(manager.NetworkScenarioTest):
         self.segmentation_ids = []
         self.number_instances_per_compute = 1
         self.number_routers_per_tenant = 1
+        self.network_vms = {}
 
         # Classes that inherit this class can redefine packet size/count
         # based on their own needs or accept the default in the CONF
@@ -196,14 +197,21 @@ class TestNetworkMultiNode(manager.NetworkScenarioTest):
         self.setup_networks()
         self.setup_vms()
 
-    def add_network(self, client=None, tenant_id=None, router=None):
+    def add_network(self, client=None, tenant_id=None, router=None,
+                    vlan_transparent=False):
         if CONF.baremetal.driver_enabled:
             network = self._get_network_by_name(
                 CONF.compute.fixed_network_name)
             router = None
             subnet = None
         else:
-            network = self._create_network(client=client, tenant_id=tenant_id)
+            if CONF.network_feature_enabled.vlan_transparent:
+                network = self._create_network(client=client,
+                                               tenant_id=tenant_id,
+                                               vlan_transparent=True)
+            else:
+                network = self._create_network(client=client,
+                                               tenant_id=tenant_id)
             if router is None:
                 router = self._get_router(client=client, tenant_id=tenant_id)
             subnet = self._create_subnet(network=network, client=client)
@@ -235,6 +243,10 @@ class TestNetworkMultiNode(manager.NetworkScenarioTest):
                 self.servers_client.wait_for_server_status(id, 'ACTIVE')
                 self.assertIsNotNone(server_dict)
                 self.servers[id] = server_dict['keypair']
+                if network.id in self.network_vms:
+                    self.network_vms[network.id].append(id)
+                else:
+                    self.network_vms[network.id] = [id]
 
     def delete_vms(self):
         """
