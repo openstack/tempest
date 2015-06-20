@@ -98,7 +98,7 @@ class BaseVolumeQuotasAdminV2TestJSON(base.BaseVolumeAdminTest):
     @test.idempotent_id('874b35a9-51f1-4258-bec5-cd561b6690d3')
     def test_delete_quota(self):
         # Admin can delete the resource quota set for a tenant
-        tenant_name = data_utils.rand_name('quota_tenant_')
+        tenant_name = data_utils.rand_name('quota_tenant')
         identity_client = self.os_adm.identity_client
         tenant = identity_client.create_tenant(tenant_name)
         tenant_id = tenant['id']
