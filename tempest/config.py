@@ -387,7 +387,13 @@ ComputeFeaturesGroup = [
                 default=False,
                 help='Does Nova preserve preexisting ports from Neutron '
                      'when deleting an instance? This should be set to True '
-                     'if testing Kilo+ Nova.')
+                     'if testing Kilo+ Nova.'),
+    cfg.BoolOpt('attach_encrypted_volume',
+                default=True,
+                help='Does the test environment support attaching an '
+                     'encrypted volume to a running server instance? This may '
+                     'depend on the combination of compute_driver in nova and '
+                     'the volume_driver(s) in cinder.'),
 ]
 
 

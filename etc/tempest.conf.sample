@@ -427,6 +427,12 @@
 # value)
 #preserve_ports = false
 
+# Does the test environment support attaching an encrypted volume to a
+# running server instance? This may depend on the combination of
+# compute_driver in nova and the volume_driver(s) in cinder. (boolean
+# value)
+#attach_encrypted_volume = true
+
 
 [dashboard]
 
