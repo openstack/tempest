@@ -55,8 +55,7 @@ class BaseTelemetryTest(tempest.test.BaseTestCase):
         cls.nova_notifications = ['memory', 'vcpus', 'disk.root.size',
                                   'disk.ephemeral.size']
 
-        cls.glance_notifications = ['image.update', 'image.upload',
-                                    'image.delete']
+        cls.glance_notifications = ['image.size']
 
         cls.glance_v2_notifications = ['image.download', 'image.serve']
 
