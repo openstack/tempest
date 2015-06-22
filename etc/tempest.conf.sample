@@ -254,6 +254,10 @@
 # value)
 #build_timeout = 300
 
+# Shell fragments to use before executing a command when sshing to a
+# guest. (string value)
+#ssh_shell_prologue = set -eu -o pipefail; PATH=$$PATH:/sbin;
+
 # Auth method used for authenticate to the instance. Valid choices
 # are: keypair, configured, adminpass and disabled. Keypair: start the
 # servers with a ssh keypair. Configured: use the configured user and
