@@ -109,7 +109,7 @@ class TestCreateResources(JavelinUnitTest):
         self.fake_client.identity.get_tenant_by_name.return_value = \
             self.fake_object['tenant']
         self.fake_client.identity.get_user_by_username.side_effect = \
-            lib_exc.NotFound()
+            lib_exc.NotFound("user is not found")
         self.useFixture(mockpatch.PatchObject(javelin, "keystone_admin",
                                               return_value=self.fake_client))
 
@@ -126,7 +126,7 @@ class TestCreateResources(JavelinUnitTest):
 
     def test_create_user_missing_tenant(self):
         self.fake_client.identity.get_tenant_by_name.side_effect = \
-            lib_exc.NotFound()
+            lib_exc.NotFound("tenant is not found")
         self.useFixture(mockpatch.PatchObject(javelin, "keystone_admin",
                                               return_value=self.fake_client))
 
