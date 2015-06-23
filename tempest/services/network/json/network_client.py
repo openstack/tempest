@@ -79,9 +79,9 @@ class NetworkClientJSON(service_client.ServiceClient):
             if filters:
                 uri += '?' + urllib.urlencode(filters, doseq=1)
             resp, body = self.get(uri)
-            result = {plural_name: self.deserialize_list(body)}
+            body = self.deserialize_list(body)
             self.expected_success(200, resp.status)
-            return service_client.ResponseBody(resp, result)
+            return service_client.ResponseBody(resp, body)
 
         return _list
 
@@ -268,7 +268,7 @@ class NetworkClientJSON(service_client.ServiceClient):
         body = self.serialize_list(post_data, "networks", "network")
         uri = self.get_uri("networks")
         resp, body = self.post(uri, body)
-        body = {'networks': self.deserialize_list(body)}
+        body = self.deserialize_list(body)
         self.expected_success(201, resp.status)
         return service_client.ResponseBody(resp, body)
 
@@ -277,7 +277,7 @@ class NetworkClientJSON(service_client.ServiceClient):
         body = self.serialize_list(post_data, 'subnets', 'subnet')
         uri = self.get_uri('subnets')
         resp, body = self.post(uri, body)
-        body = {'subnets': self.deserialize_list(body)}
+        body = self.deserialize_list(body)
         self.expected_success(201, resp.status)
         return service_client.ResponseBody(resp, body)
 
@@ -286,7 +286,7 @@ class NetworkClientJSON(service_client.ServiceClient):
         body = self.serialize_list(post_data, 'ports', 'port')
         uri = self.get_uri('ports')
         resp, body = self.post(uri, body)
-        body = {'ports': self.deserialize_list(body)}
+        body = self.deserialize_list(body)
         self.expected_success(201, resp.status)
         return service_client.ResponseBody(resp, body)
 
@@ -351,14 +351,7 @@ class NetworkClientJSON(service_client.ServiceClient):
         return json.loads(body)
 
     def deserialize_list(self, body):
-        res = json.loads(body)
-        # expecting response in form
-        # {'resources': [ res1, res2] } => when pagination disabled
-        # {'resources': [..], 'resources_links': {}} => if pagination enabled
-        for k in res.keys():
-            if k.endswith("_links"):
-                continue
-            return res[k]
+        return json.loads(body)
 
     def serialize(self, data):
         return json.dumps(data)
