@@ -74,7 +74,7 @@ class TestSwiftTelemetry(manager.SwiftScenarioTest):
             called again.
             """
             results = self.telemetry_client.list_samples(
-                'storage.api.request')
+                'storage.objects.incoming.bytes')
             LOG.debug('got samples %s', results)
 
             # Extract container info from samples.
