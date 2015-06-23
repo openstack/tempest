@@ -58,8 +58,8 @@ def sniff(what, interface='any', count=1, timeout=60, is_save=False,
        the commmand to be run by external ssh client.
        In this case, one needs to call sniff_analyzer by hands
     """
-    import tempfile
     from tempest.common import commands
+    import tempfile
 
     cmd = 'tcpdump -vv -n -t -i {i} -c {c} {what}'.format(i=interface,
                                                           what=what,

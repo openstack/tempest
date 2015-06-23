@@ -14,9 +14,6 @@
 #    under the License.
 from tempest.scenario import manager
 from tempest import test
-from tempest.common import sniffer
-from tempest.common import radvd
-from tempest.config import CONF
 
 
 class TestNetworkIPv6(manager.NetworkScenarioTest):
@@ -43,12 +40,14 @@ class TestNetworkIPv6(manager.NetworkScenarioTest):
         end = netaddr.IPAddress(sub.allocation_pools[0]['end'])
         return end.value - start.value + 1
 
+    @test.idempotent_id('2bddab74-257a-4341-8c7b-889198c6542a')
     @test.services('network')
     def test_large_prefix_125(self):
         self.assertEqual(expected=8,
                          observed=self._number_of_addresses_for_net_bits(125),
                          message='::/125 should have 8 addresses')
 
+    @test.idempotent_id('13b9cb6b-c41b-4583-805d-df6a812ff6ed')
     @test.services('network')
     def test_large_prefix_126(self):
         self.assertEqual(expected=4,

@@ -238,6 +238,7 @@ class SecGroupIPv6Test(SecGroupTest):
     _tenant_network_cidr = CONF.network.tenant_network_v6_cidr
 
     @test.attr(type='smoke')
+    @test.idempotent_id('8b751060-3e1a-4c12-bf37-42608237920e')
     def test_create_security_group_rule_with_dufferent_ip_versions(self):
         # Verify creating security group rule with
         # different IP versions in the same group

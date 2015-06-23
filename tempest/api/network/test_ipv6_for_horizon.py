@@ -13,8 +13,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import httplib
 from tempest.api.network import base
+from tempest import test
 
 
 class HorizonIpv6Specifics(base.BaseNetworkTest):
@@ -25,6 +25,7 @@ class HorizonIpv6Specifics(base.BaseNetworkTest):
             self.client.delete_port(self.port_id)
         super(HorizonIpv6Specifics, self).tearDown()
 
+    @test.idempotent_id('7751edbf-b3d3-459b-b602-d5f689945722')
     def test_all(self):
         """Tests number of API calls related ip IPv6 and used by Horizon
         """
@@ -35,10 +36,10 @@ class HorizonIpv6Specifics(base.BaseNetworkTest):
         gateway_ip = cidr.replace('/64', '1')
         port1 = cidr.replace('/64', '2')
 
-        body = self.client.create_subnet(network_id=network['id'],
-                                               cidr='2014:abcd:ef00::/64',
-                                               ip_version=self._ip_version,
-                                               enable_dhcp=False)
+        self.client.create_subnet(network_id=network['id'],
+                                  cidr='2014:abcd:ef00::/64',
+                                  ip_version=self._ip_version,
+                                  enable_dhcp=False)
 
         body = self.client.list_networks()
         network_names = [net['name'] for net in body['networks']]

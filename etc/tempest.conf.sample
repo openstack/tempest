@@ -781,6 +781,12 @@
 # Allowed values: <None>, normal, direct, macvtap
 #port_vnic_type = <None>
 
+# The name of leaf switch 1 (string value)
+#leaf1 = <None>
+
+# The name of leaf switch 2 (string value)
+#leaf2 = <None>
+
 
 [network-feature-enabled]
 
@@ -986,6 +992,20 @@
 
 # The maximum number of instances for one tenant (integer value)
 #max_instances_per_tenant = 9
+
+# The number of times VMs are deleted/added during test (integer
+# value)
+#number_vm_flap_interations = 2
+
+# Indicates if VLAN/VxLANs associated with the network node are
+# deleted when VMs are deleted (boolean value)
+#network_node_segments_deleted = true
+
+# Indicates if the VM has advanced testing features. (boolean value)
+#advanced_vm_capabilities = false
+
+# A file containing details for a test bed (string value)
+#test_bed_id = <None>
 
 
 [service_available]

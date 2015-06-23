@@ -14,14 +14,14 @@
 
 import collections
 import netaddr
-import random
-from tempest_lib.common.utils import data_utils
-from tempest import config
-from tempest_lib import exceptions as lib_exc
 from oslo_log import log as logging
+import random
+from tempest import config
 from tempest.scenario import manager
 from tempest.services.network import resources as net_resources
 from tempest import test
+from tempest_lib.common.utils import data_utils
+from tempest_lib import exceptions as lib_exc
 
 CONF = config.CONF
 LOG = logging.getLogger(__name__)
@@ -169,6 +169,7 @@ class TestNetworkVpnaas(manager.NetworkScenarioTest):
             "'Failed to ping IP: %s via a ssh connection from subnet: %s.'" %
             (dest_ip, source_site.subnet['cidr']))
 
+    @test.idempotent_id('78e8f959-33dc-4383-9128-496b73b7b72e')
     @test.services('compute', 'network')
     def test_ipsec_site_connections(self):
         """The test verifies that it is possible to establish a vpn
