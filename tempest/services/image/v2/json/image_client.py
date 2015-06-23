@@ -138,6 +138,7 @@ class ImageClientV2JSON(service_client.ServiceClient):
         headers = {'Content-Type': 'application/octet-stream'}
         resp, body = self.http.raw_request('PUT', url, headers=headers,
                                            body=data)
+        self._error_checker('PUT', url, headers, data, resp, {'body': body.read()})
         self.expected_success(204, resp.status)
         return service_client.ResponseBody(resp, body)
 
