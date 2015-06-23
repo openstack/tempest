@@ -182,6 +182,7 @@ def is_extension_enabled(extension_name, service):
         'volume': CONF.volume_feature_enabled.api_extensions,
         'network': CONF.network_feature_enabled.api_extensions,
         'object': CONF.object_storage_feature_enabled.discoverable_apis,
+        'identity': CONF.identity_feature_enabled.api_extensions
     }
     if len(config_dict[service]) == 0:
         return False

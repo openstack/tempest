@@ -323,7 +323,19 @@ class IdentityClient(service_client.ServiceClient):
         self.expected_success(200, resp.status)
         return service_client.ResponseBody(resp, self._parse_resp(body))
 
+    def delete_user_ec2_credentials(self, user_id, access):
+        resp, body = self.delete('/users/%s/credentials/OS-EC2/%s' %
+                                 (user_id, access))
+        self.expected_success(204, resp.status)
+        return service_client.ResponseBody(resp, body)
+
     def list_user_ec2_credentials(self, user_id):
         resp, body = self.get('/users/%s/credentials/OS-EC2' % user_id)
         self.expected_success(200, resp.status)
         return service_client.ResponseBodyList(resp, self._parse_resp(body))
+
+    def show_user_ec2_credentials(self, user_id, access):
+        resp, body = self.get('/users/%s/credentials/OS-EC2/%s' %
+                              (user_id, access))
+        self.expected_success(200, resp.status)
+        return service_client.ResponseBody(resp, self._parse_resp(body))
