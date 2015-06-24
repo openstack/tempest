@@ -58,7 +58,7 @@ class QuotasAdminTestJSON(base.BaseV2ComputeAdminTest):
     def test_get_default_quotas(self):
         # Admin can get the default resource quota set for a tenant
         expected_quota_set = self.default_quota_set | set(['id'])
-        quota_set = self.adm_client.get_default_quota_set(
+        quota_set = self.adm_client.show_default_quota_set(
             self.demo_tenant_id)
         self.assertEqual(quota_set['id'], self.demo_tenant_id)
         for quota in expected_quota_set:
@@ -67,7 +67,7 @@ class QuotasAdminTestJSON(base.BaseV2ComputeAdminTest):
     @test.idempotent_id('55fbe2bf-21a9-435b-bbd2-4162b0ed799a')
     def test_update_all_quota_resources_for_tenant(self):
         # Admin can update all the resource quota limits for a tenant
-        default_quota_set = self.adm_client.get_default_quota_set(
+        default_quota_set = self.adm_client.show_default_quota_set(
             self.demo_tenant_id)
         new_quota_set = {'injected_file_content_bytes': 20480,
                          'metadata_items': 256, 'injected_files': 10,
@@ -107,7 +107,7 @@ class QuotasAdminTestJSON(base.BaseV2ComputeAdminTest):
         self.addCleanup(identity_client.delete_tenant, tenant_id)
 
         self.adm_client.update_quota_set(tenant_id, ram='5120')
-        quota_set = self.adm_client.get_quota_set(tenant_id)
+        quota_set = self.adm_client.show_quota_set(tenant_id)
         self.assertEqual(5120, quota_set['ram'])
 
         # Verify that GET shows the updated quota set of user
@@ -124,8 +124,8 @@ class QuotasAdminTestJSON(base.BaseV2ComputeAdminTest):
         self.adm_client.update_quota_set(tenant_id,
                                          user_id=user_id,
                                          ram='2048')
-        quota_set = self.adm_client.get_quota_set(tenant_id,
-                                                  user_id=user_id)
+        quota_set = self.adm_client.show_quota_set(tenant_id,
+                                                   user_id=user_id)
         self.assertEqual(2048, quota_set['ram'])
 
     @test.idempotent_id('389d04f0-3a41-405f-9317-e5f86e3c44f0')
@@ -138,14 +138,14 @@ class QuotasAdminTestJSON(base.BaseV2ComputeAdminTest):
                                                description=tenant_desc)
         tenant_id = tenant['id']
         self.addCleanup(identity_client.delete_tenant, tenant_id)
-        quota_set_default = self.adm_client.get_quota_set(tenant_id)
+        quota_set_default = self.adm_client.show_quota_set(tenant_id)
         ram_default = quota_set_default['ram']
 
         self.adm_client.update_quota_set(tenant_id, ram='5120')
 
         self.adm_client.delete_quota_set(tenant_id)
 
-        quota_set_new = self.adm_client.get_quota_set(tenant_id)
+        quota_set_new = self.adm_client.show_quota_set(tenant_id)
         self.assertEqual(ram_default, quota_set_new['ram'])
 
 
@@ -176,7 +176,7 @@ class QuotaClassesAdminTestJSON(base.BaseV2ComputeAdminTest):
     @test.idempotent_id('7932ab0f-5136-4075-b201-c0e2338df51a')
     def test_update_default_quotas(self):
         LOG.debug("get the current 'default' quota class values")
-        body = self.adm_client.get_quota_class_set('default')
+        body = self.adm_client.show_quota_class_set('default')
         self.assertIn('id', body)
         self.assertEqual('default', body.pop('id'))
         # restore the defaults when the test is done

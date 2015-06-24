@@ -47,14 +47,14 @@ class QuotasTestJSON(base.BaseV2ComputeTest):
     def test_get_quotas(self):
         # User can get the quota set for it's tenant
         expected_quota_set = self.default_quota_set | set(['id'])
-        quota_set = self.client.get_quota_set(self.tenant_id)
+        quota_set = self.client.show_quota_set(self.tenant_id)
         self.assertEqual(quota_set['id'], self.tenant_id)
         for quota in expected_quota_set:
             self.assertIn(quota, quota_set.keys())
 
         # get the quota set using user id
-        quota_set = self.client.get_quota_set(self.tenant_id,
-                                              self.user_id)
+        quota_set = self.client.show_quota_set(self.tenant_id,
+                                               self.user_id)
         self.assertEqual(quota_set['id'], self.tenant_id)
         for quota in expected_quota_set:
             self.assertIn(quota, quota_set.keys())
@@ -63,7 +63,7 @@ class QuotasTestJSON(base.BaseV2ComputeTest):
     def test_get_default_quotas(self):
         # User can get the default quota set for it's tenant
         expected_quota_set = self.default_quota_set | set(['id'])
-        quota_set = self.client.get_default_quota_set(self.tenant_id)
+        quota_set = self.client.show_default_quota_set(self.tenant_id)
         self.assertEqual(quota_set['id'], self.tenant_id)
         for quota in expected_quota_set:
             self.assertIn(quota, quota_set.keys())
@@ -72,6 +72,6 @@ class QuotasTestJSON(base.BaseV2ComputeTest):
     def test_compare_tenant_quotas_with_default_quotas(self):
         # Tenants are created with the default quota values
         defualt_quota_set = \
-            self.client.get_default_quota_set(self.tenant_id)
-        tenant_quota_set = self.client.get_quota_set(self.tenant_id)
+            self.client.show_default_quota_set(self.tenant_id)
+        tenant_quota_set = self.client.show_quota_set(self.tenant_id)
         self.assertEqual(defualt_quota_set, tenant_quota_set)

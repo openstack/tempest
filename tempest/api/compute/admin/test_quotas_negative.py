@@ -54,7 +54,7 @@ class QuotasAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
     @test.idempotent_id('91058876-9947-4807-9f22-f6eb17140d9b')
     def test_create_server_when_cpu_quota_is_full(self):
         # Disallow server creation when tenant's vcpu quota is full
-        quota_set = self.adm_client.get_quota_set(self.demo_tenant_id)
+        quota_set = self.adm_client.show_quota_set(self.demo_tenant_id)
         default_vcpu_quota = quota_set['cores']
         vcpu_quota = 0  # Set the quota to zero to conserve resources
 
@@ -71,7 +71,7 @@ class QuotasAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
     @test.idempotent_id('6fdd7012-584d-4327-a61c-49122e0d5864')
     def test_create_server_when_memory_quota_is_full(self):
         # Disallow server creation when tenant's memory quota is full
-        quota_set = self.adm_client.get_quota_set(self.demo_tenant_id)
+        quota_set = self.adm_client.show_quota_set(self.demo_tenant_id)
         default_mem_quota = quota_set['ram']
         mem_quota = 0  # Set the quota to zero to conserve resources
 
@@ -88,7 +88,7 @@ class QuotasAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
     @test.idempotent_id('7c6be468-0274-449a-81c3-ac1c32ee0161')
     def test_create_server_when_instances_quota_is_full(self):
         # Once instances quota limit is reached, disallow server creation
-        quota_set = self.adm_client.get_quota_set(self.demo_tenant_id)
+        quota_set = self.adm_client.show_quota_set(self.demo_tenant_id)
         default_instances_quota = quota_set['instances']
         instances_quota = 0  # Set quota to zero to disallow server creation
 
@@ -107,7 +107,7 @@ class QuotasAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
     def test_security_groups_exceed_limit(self):
         # Negative test: Creation Security Groups over limit should FAIL
 
-        quota_set = self.adm_client.get_quota_set(self.demo_tenant_id)
+        quota_set = self.adm_client.show_quota_set(self.demo_tenant_id)
         default_sg_quota = quota_set['security_groups']
         sg_quota = 0  # Set the quota to zero to conserve resources
 
@@ -136,7 +136,7 @@ class QuotasAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
         # Negative test: Creation of Security Group Rules should FAIL
         # when we reach limit maxSecurityGroupRules
 
-        quota_set = self.adm_client.get_quota_set(self.demo_tenant_id)
+        quota_set = self.adm_client.show_quota_set(self.demo_tenant_id)
         default_sg_rules_quota = quota_set['security_group_rules']
         sg_rules_quota = 0  # Set the quota to zero to conserve resources
 

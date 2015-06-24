@@ -21,21 +21,21 @@ from tempest.common import service_client
 
 class QuotasClientJSON(service_client.ServiceClient):
 
-    def get_quota_set(self, tenant_id, user_id=None):
+    def show_quota_set(self, tenant_id, user_id=None):
         """List the quota set for a tenant."""
 
-        url = 'os-quota-sets/%s' % str(tenant_id)
+        url = 'os-quota-sets/%s' % tenant_id
         if user_id:
-            url += '?user_id=%s' % str(user_id)
+            url += '?user_id=%s' % user_id
         resp, body = self.get(url)
         body = json.loads(body)
         self.validate_response(schema.get_quota_set, resp, body)
         return service_client.ResponseBody(resp, body['quota_set'])
 
-    def get_default_quota_set(self, tenant_id):
+    def show_default_quota_set(self, tenant_id):
         """List the default quota set for a tenant."""
 
-        url = 'os-quota-sets/%s/defaults' % str(tenant_id)
+        url = 'os-quota-sets/%s/defaults' % tenant_id
         resp, body = self.get(url)
         body = json.loads(body)
         self.validate_response(schema.get_quota_set, resp, body)
@@ -97,9 +97,9 @@ class QuotasClientJSON(service_client.ServiceClient):
 
         if user_id:
             resp, body = self.put('os-quota-sets/%s?user_id=%s' %
-                                  (str(tenant_id), str(user_id)), post_body)
+                                  (tenant_id, user_id), post_body)
         else:
-            resp, body = self.put('os-quota-sets/%s' % str(tenant_id),
+            resp, body = self.put('os-quota-sets/%s' % tenant_id,
                                   post_body)
 
         body = json.loads(body)
@@ -108,6 +108,6 @@ class QuotasClientJSON(service_client.ServiceClient):
 
     def delete_quota_set(self, tenant_id):
         """Delete the tenant's quota set."""
-        resp, body = self.delete('os-quota-sets/%s' % str(tenant_id))
+        resp, body = self.delete('os-quota-sets/%s' % tenant_id)
         self.validate_response(schema.delete_quota, resp, body)
         return service_client.ResponseBody(resp, body)
