@@ -544,13 +544,19 @@ class NetworkScenarioTest(ScenarioTest):
         cls.tenant_id = cls.manager.identity_client.tenant_id
 
     def _create_network(self, client=None, tenant_id=None,
-                        namestart='network-smoke-'):
+                        namestart='network-smoke-',
+                        vlan_transparent=None):
         if not client:
             client = self.network_client
         if not tenant_id:
             tenant_id = client.tenant_id
         name = data_utils.rand_name(namestart)
-        result = client.create_network(name=name, tenant_id=tenant_id)
+        if vlan_transparent is not None:
+            result = client.create_network(name=name, tenant_id=tenant_id,
+                                           vlan_transparent=vlan_transparent)
+        else:
+            result = client.create_network(name=name, tenant_id=tenant_id)
+
         network = net_resources.DeletableNetwork(client=client,
                                                  **result['network'])
         self.assertEqual(network.name, name)

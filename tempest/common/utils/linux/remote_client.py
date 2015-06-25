@@ -51,6 +51,138 @@ class RemoteClient(object):
         cmd = "set -eu -o pipefail; PATH=$PATH:/sbin; " + cmd
         return self.ssh_client.exec_command(cmd)
 
+    def get_kernel_modules(self):
+        """
+        :return: A list of kernel modules currently loaded
+        """
+        kernel_modules = []
+        lsmod_output = self.exec_command('/sbin/lsmod')
+        module_signature_re = re.compile(r"""^(\w+)\s+(\d+).*""",
+                                         re.VERBOSE | re.IGNORECASE)
+        for module_data in lsmod_output.splitlines():
+            module = module_signature_re.match(module_data)
+            if module:
+                kernel_modules.append(module.group(1))
+
+        return kernel_modules
+
+    def is_dot1q_enabled(self):
+        """
+        Determines if the VM has support for 802.1q in the kernel.
+        :return: Boolean -  True indicates the VM is capable of 802.1q
+                            False otherwise
+        """
+        return '8021q' in self.get_kernel_modules()
+
+    def load_dot1q(self):
+        """
+        Tries to load kernel module for 802.1q
+        :return: True if 802.1Q is loaded False otherwise
+        """
+        self.exec_command('sudo /sbin/modprobe 8021q')
+        return self.is_dot1q_enabled()
+
+    def config_dot1q(self, vlan_id, ip_address, parent_interface='eth0'):
+        """
+        Configure a VLAN interface on the VM
+        :param vlan_id:  The VLAN number
+        :param ip_address: in the form of 192.168.1.1/24
+        :param parent_interface: The interface to base the VLAN interface on
+        """
+        if not self.is_dot1q_enabled():
+            self.load_dot1q()
+
+        if not self.is_dot1q_enabled():
+            msg = "Virtual machine image needs to support 8021q in the kernel"
+            raise exceptions.InvalidConfiguration(msg)
+
+        # Check address format
+        ip_re = re.compile(r"""
+                            ^(\d{1,3}\.
+                            \d{1,3}\.
+                            \d{1,3}\.
+                            \d{1,3})
+                            /(\d{1,2})$
+                            """, re.VERBOSE | re.IGNORECASE)
+        if not ip_re.match(ip_address):
+            msg = "Invalid IP address given {0}".format(ip_address)
+            raise exceptions.InvalidConfiguration(msg)
+
+        link_cmd = "sudo /bin/ip link "
+        ip_cmd = "sudo /bin/ip "
+        dev = "{0}.{1}".format(parent_interface, vlan_id)
+        self.exec_command("{0} add link {1} name {2} type vlan id {3}".format(
+            link_cmd,
+            parent_interface,
+            dev,
+            vlan_id))
+        self.exec_command("{0} ".format(link_cmd))
+        self.exec_command("{0} addr add {1} dev {2}".format(ip_cmd,
+                                                            ip_address,
+                                                            dev))
+        self.exec_command("{0} set dev {1} up".format(link_cmd, dev))
+        return self.exec_command("sudo /bin/ip -d link show {0}".format(dev))
+
+    def interface_stats(self, interface='eth0'):
+        """
+        :param interface:  The interface to get stats
+        :return: A dictionary containing the interface stats
+        """
+        raw_data = self.exec_command("sudo /bin/ip -s link")
+
+        # The inital data structure
+        istats = {'interface':          interface,
+                  'hwaddr':             None,
+                  'mtu':                None,
+                  'rx':     {'pkts':    None,
+                             'errors':  None,
+                             'dropped': None,
+                             'bytes':   None},
+                  'tx':     {'pkts':    None,
+                             'errors':  None,
+                             'dropped': None,
+                             'bytes':   None}
+                  }
+
+        intf_re = re.compile(r"\s+link/ether\s+([0-9a-f:]+).*")
+
+        mtu_re = re.compile(r"^(\d+)[:]\s+" + interface +
+                            ".*[:].+[>]\s+mtu\s+(\d+).*")
+
+        counters_re = re.compile("^\s+(\d+)"
+                                 "\s+(\d+)"
+                                 "\s+(\d+)"
+                                 "\s+(\d+)"
+                                 "\s+(\d+)"
+                                 "\s+(\d+).*", re.VERBOSE)
+
+        interface_context = False
+        dir = 'rx'
+        for line in raw_data.splitlines():
+
+            mtu_match = mtu_re.match(line)
+            if mtu_match:
+                istats['mtu'] = mtu_match.group(2)
+                interface_context = True
+                continue
+
+            intf_match = intf_re.match(line)
+            if interface_context and intf_match:
+                istats['hwaddr'] = intf_match.group(1)
+                continue
+
+            counters = counters_re.match(line)
+            if interface_context and counters:
+                istats[dir]['bytes'] = int(counters.group(1))
+                istats[dir]['pkts'] = int(counters.group(2))
+                istats[dir]['errors'] = int(counters.group(3))
+                istats[dir]['dropped'] = int(counters.group(4))
+                if dir == 'tx':
+                    break
+                dir = 'tx'
+
+        return istats
+
     def validate_authentication(self):
         """Validate ssh connection and authentication
            This method raises an Exception when the validation fails.
