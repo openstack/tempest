@@ -558,12 +558,11 @@ class NetworkClient(service_client.ServiceClient):
         self.expected_success(204, resp.status)
         return service_client.ResponseBody(resp, body)
 
-    def update_extra_routes(self, router_id, nexthop, destination):
+    def update_extra_routes(self, router_id, routes):
         uri = '%s/routers/%s' % (self.uri_prefix, router_id)
         put_body = {
             'router': {
-                'routes': [{'nexthop': nexthop,
-                            "destination": destination}]
+                'routes': routes
             }
         }
         body = json.dumps(put_body)
