@@ -119,24 +119,19 @@ class NetworkClientJSON(service_client.ServiceClient):
         self.expected_success(201, resp.status)
         return service_client.ResponseBody(resp, body)
 
-    def _updater(self, resource_name):
-        def _update(res_id, **kwargs):
-            plural = self.pluralize(resource_name)
-            uri = '%s/%s' % (self.get_uri(plural), res_id)
-            post_data = self.serialize({resource_name: kwargs})
-            resp, body = self.put(uri, post_data)
-            body = self.deserialize_single(body)
-            self.expected_success(200, resp.status)
-            return service_client.ResponseBody(resp, body)
-
-        return _update
+    def _update_resource(self, uri, post_data):
+        req_uri = self.uri_prefix + uri
+        req_post_data = self.serialize(post_data)
+        resp, body = self.put(req_uri, req_post_data)
+        body = self.deserialize_single(body)
+        self.expected_success(200, resp.status)
+        return service_client.ResponseBody(resp, body)
 
     def __getattr__(self, name):
-        method_prefixes = ["list_", "delete_", "show_", "update_"]
+        method_prefixes = ["list_", "delete_", "show_"]
         method_functors = [self._lister,
                            self._deleter,
-                           self._shower,
-                           self._updater]
+                           self._shower]
         for index, prefix in enumerate(method_prefixes):
             prefix_len = len(prefix)
             if name[:prefix_len] == prefix:
@@ -148,20 +143,40 @@ class NetworkClientJSON(service_client.ServiceClient):
         post_data = {'network': kwargs}
         return self._create_resource(uri, post_data)
 
+    def update_network(self, network_id, **kwargs):
+        uri = '/networks/%s' % network_id
+        post_data = {'network': kwargs}
+        return self._update_resource(uri, post_data)
+
     def create_subnet(self, **kwargs):
         uri = '/subnets'
         post_data = {'subnet': kwargs}
         return self._create_resource(uri, post_data)
+
+    def update_subnet(self, subnet_id, **kwargs):
+        uri = '/subnets/%s' % subnet_id
+        post_data = {'subnet': kwargs}
+        return self._update_resource(uri, post_data)
 
     def create_port(self, **kwargs):
         uri = '/ports'
         post_data = {'port': kwargs}
         return self._create_resource(uri, post_data)
 
+    def update_port(self, port_id, **kwargs):
+        uri = '/ports/%s' % port_id
+        post_data = {'port': kwargs}
+        return self._update_resource(uri, post_data)
+
     def create_floatingip(self, **kwargs):
         uri = '/floatingips'
         post_data = {'floatingip': kwargs}
         return self._create_resource(uri, post_data)
+
+    def update_floatingip(self, floatingip_id, **kwargs):
+        uri = '/floatingips/%s' % floatingip_id
+        post_data = {'floatingip': kwargs}
+        return self._update_resource(uri, post_data)
 
     def create_metering_label(self, **kwargs):
         uri = '/metering/metering-labels'
@@ -177,6 +192,11 @@ class NetworkClientJSON(service_client.ServiceClient):
         uri = '/security-groups'
         post_data = {'security_group': kwargs}
         return self._create_resource(uri, post_data)
+
+    def update_security_group(self, security_group_id, **kwargs):
+        uri = '/security-groups/%s' % security_group_id
+        post_data = {'security_group': kwargs}
+        return self._update_resource(uri, post_data)
 
     def create_security_group_rule(self, **kwargs):
         uri = '/security-group-rules'
