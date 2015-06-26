@@ -85,15 +85,11 @@ class NetworkClientJSON(service_client.ServiceClient):
 
         return _list
 
-    def _deleter(self, resource_name):
-        def _delete(resource_id):
-            plural = self.pluralize(resource_name)
-            uri = '%s/%s' % (self.get_uri(plural), resource_id)
-            resp, body = self.delete(uri)
-            self.expected_success(204, resp.status)
-            return service_client.ResponseBody(resp, body)
-
-        return _delete
+    def _delete_resource(self, uri):
+        req_uri = self.uri_prefix + uri
+        resp, body = self.delete(req_uri)
+        self.expected_success(204, resp.status)
+        return service_client.ResponseBody(resp, body)
 
     def _show_resource(self, uri, **fields):
         # fields is a dict which key is 'fields' and value is a
@@ -124,9 +120,8 @@ class NetworkClientJSON(service_client.ServiceClient):
         return service_client.ResponseBody(resp, body)
 
     def __getattr__(self, name):
-        method_prefixes = ["list_", "delete_"]
-        method_functors = [self._lister,
-                           self._deleter]
+        method_prefixes = ["list_"]
+        method_functors = [self._lister]
         for index, prefix in enumerate(method_prefixes):
             prefix_len = len(prefix)
             if name[:prefix_len] == prefix:
@@ -147,6 +142,10 @@ class NetworkClientJSON(service_client.ServiceClient):
         uri = '/networks/%s' % network_id
         return self._show_resource(uri, **fields)
 
+    def delete_network(self, network_id):
+        uri = '/networks/%s' % network_id
+        return self._delete_resource(uri)
+
     def create_subnet(self, **kwargs):
         uri = '/subnets'
         post_data = {'subnet': kwargs}
@@ -160,6 +159,10 @@ class NetworkClientJSON(service_client.ServiceClient):
     def show_subnet(self, subnet_id, **fields):
         uri = '/subnets/%s' % subnet_id
         return self._show_resource(uri, **fields)
+
+    def delete_subnet(self, subnet_id):
+        uri = '/subnets/%s' % subnet_id
+        return self._delete_resource(uri)
 
     def create_port(self, **kwargs):
         uri = '/ports'
@@ -175,6 +178,10 @@ class NetworkClientJSON(service_client.ServiceClient):
         uri = '/ports/%s' % port_id
         return self._show_resource(uri, **fields)
 
+    def delete_port(self, port_id):
+        uri = '/ports/%s' % port_id
+        return self._delete_resource(uri)
+
     def create_floatingip(self, **kwargs):
         uri = '/floatingips'
         post_data = {'floatingip': kwargs}
@@ -189,6 +196,10 @@ class NetworkClientJSON(service_client.ServiceClient):
         uri = '/floatingips/%s' % floatingip_id
         return self._show_resource(uri, **fields)
 
+    def delete_floatingip(self, floatingip_id):
+        uri = '/floatingips/%s' % floatingip_id
+        return self._delete_resource(uri)
+
     def create_metering_label(self, **kwargs):
         uri = '/metering/metering-labels'
         post_data = {'metering_label': kwargs}
@@ -198,6 +209,10 @@ class NetworkClientJSON(service_client.ServiceClient):
         uri = '/metering/metering-labels/%s' % metering_label_id
         return self._show_resource(uri, **fields)
 
+    def delete_metering_label(self, metering_label_id):
+        uri = '/metering/metering-labels/%s' % metering_label_id
+        return self._delete_resource(uri)
+
     def create_metering_label_rule(self, **kwargs):
         uri = '/metering/metering-label-rules'
         post_data = {'metering_label_rule': kwargs}
@@ -206,6 +221,10 @@ class NetworkClientJSON(service_client.ServiceClient):
     def show_metering_label_rule(self, metering_label_rule_id, **fields):
         uri = '/metering/metering-label-rules/%s' % metering_label_rule_id
         return self._show_resource(uri, **fields)
+
+    def delete_metering_label_rule(self, metering_label_rule_id):
+        uri = '/metering/metering-label-rules/%s' % metering_label_rule_id
+        return self._delete_resource(uri)
 
     def create_security_group(self, **kwargs):
         uri = '/security-groups'
@@ -221,6 +240,10 @@ class NetworkClientJSON(service_client.ServiceClient):
         uri = '/security-groups/%s' % security_group_id
         return self._show_resource(uri, **fields)
 
+    def delete_security_group(self, security_group_id):
+        uri = '/security-groups/%s' % security_group_id
+        return self._delete_resource(uri)
+
     def create_security_group_rule(self, **kwargs):
         uri = '/security-group-rules'
         post_data = {'security_group_rule': kwargs}
@@ -229,6 +252,10 @@ class NetworkClientJSON(service_client.ServiceClient):
     def show_security_group_rule(self, security_group_rule_id, **fields):
         uri = '/security-group-rules/%s' % security_group_rule_id
         return self._show_resource(uri, **fields)
+
+    def delete_security_group_rule(self, security_group_rule_id):
+        uri = '/security-group-rules/%s' % security_group_rule_id
+        return self._delete_resource(uri)
 
     def show_extension(self, ext_alias, **fields):
         uri = '/extensions/%s' % ext_alias
@@ -410,6 +437,10 @@ class NetworkClientJSON(service_client.ServiceClient):
     def show_router(self, router_id, **fields):
         uri = '/routers/%s' % router_id
         return self._show_resource(uri, **fields)
+
+    def delete_router(self, router_id):
+        uri = '/routers/%s' % router_id
+        return self._delete_resource(uri)
 
     def update_router_with_snat_gw_info(self, router_id, **kwargs):
         """Update a router passing also the enable_snat attribute.
