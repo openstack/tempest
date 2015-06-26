@@ -801,7 +801,8 @@
 
 # A list of enabled network extensions with a special entry all which
 # indicates every extension is enabled. Empty list indicates all
-# extensions are disabled (list value)
+# extensions are disabled. To get the list of extensions run: 'neutron
+# ext-list' (list value)
 #api_extensions = all
 
 # Allow the execution of IPv6 subnet tests that use the extended IPv6
