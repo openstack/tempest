@@ -559,27 +559,27 @@ class NetworkScenarioTest(ScenarioTest):
 
     def _list_networks(self, *args, **kwargs):
         """List networks using admin creds """
-        return self._admin_lister('networks')(*args, **kwargs)
+        networks_list = self.admin_manager.network_client.list_networks(
+            *args, **kwargs)
+        return networks_list['networks']
 
     def _list_subnets(self, *args, **kwargs):
         """List subnets using admin creds """
-        return self._admin_lister('subnets')(*args, **kwargs)
+        subnets_list = self.admin_manager.network_client.list_subnets(
+            *args, **kwargs)
+        return subnets_list['subnets']
 
     def _list_routers(self, *args, **kwargs):
         """List routers using admin creds """
-        return self._admin_lister('routers')(*args, **kwargs)
+        routers_list = self.admin_manager.network_client.list_routers(
+            *args, **kwargs)
+        return routers_list['routers']
 
     def _list_ports(self, *args, **kwargs):
         """List ports using admin creds """
-        return self._admin_lister('ports')(*args, **kwargs)
-
-    def _admin_lister(self, resource_type):
-        def temp(*args, **kwargs):
-            temp_method = self.admin_manager.network_client.__getattr__(
-                'list_%s' % resource_type)
-            resource_list = temp_method(*args, **kwargs)
-            return resource_list[resource_type]
-        return temp
+        ports_list = self.admin_manager.network_client.list_ports(
+            *args, **kwargs)
+        return ports_list['ports']
 
     def _create_subnet(self, network, client=None, namestart='subnet-smoke',
                        **kwargs):
