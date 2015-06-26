@@ -42,34 +42,18 @@ class NetworkClientJSON(service_client.ServiceClient):
     def get_uri(self, plural_name):
         # get service prefix from resource name
 
-        # The following list represents resource names that do not require
-        # changing underscore to a hyphen
-        hyphen_exceptions = ["health_monitors", "firewall_rules",
-                             "firewall_policies"]
         # the following map is used to construct proper URI
         # for the given neutron resource
         service_resource_prefix_map = {
             'networks': '',
             'subnets': '',
             'ports': '',
-            'pools': 'lb',
-            'vips': 'lb',
-            'health_monitors': 'lb',
-            'members': 'lb',
-            'ipsecpolicies': 'vpn',
-            'vpnservices': 'vpn',
-            'ikepolicies': 'vpn',
-            'ipsec-site-connections': 'vpn',
             'metering_labels': 'metering',
             'metering_label_rules': 'metering',
-            'firewall_rules': 'fw',
-            'firewall_policies': 'fw',
-            'firewalls': 'fw'
         }
         service_prefix = service_resource_prefix_map.get(
             plural_name)
-        if plural_name not in hyphen_exceptions:
-            plural_name = plural_name.replace("_", "-")
+        plural_name = plural_name.replace("_", "-")
         if service_prefix:
             uri = '%s/%s/%s' % (self.uri_prefix, service_prefix,
                                 plural_name)
@@ -85,11 +69,7 @@ class NetworkClientJSON(service_client.ServiceClient):
         resource_plural_map = {
             'security_groups': 'security_groups',
             'security_group_rules': 'security_group_rules',
-            'ipsecpolicy': 'ipsecpolicies',
-            'ikepolicy': 'ikepolicies',
-            'ipsec_site_connection': 'ipsec-site-connections',
             'quotas': 'quotas',
-            'firewall_policy': 'firewall_policies'
         }
         return resource_plural_map.get(resource_name, resource_name + 's')
 
@@ -385,29 +365,6 @@ class NetworkClientJSON(service_client.ServiceClient):
         body = json.loads(body)
         return service_client.ResponseBody(resp, body)
 
-    def associate_health_monitor_with_pool(self, health_monitor_id,
-                                           pool_id):
-        post_body = {
-            "health_monitor": {
-                "id": health_monitor_id,
-            }
-        }
-        body = json.dumps(post_body)
-        uri = '%s/lb/pools/%s/health_monitors' % (self.uri_prefix,
-                                                  pool_id)
-        resp, body = self.post(uri, body)
-        self.expected_success(201, resp.status)
-        body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
-
-    def disassociate_health_monitor_with_pool(self, health_monitor_id,
-                                              pool_id):
-        uri = '%s/lb/pools/%s/health_monitors/%s' % (self.uri_prefix, pool_id,
-                                                     health_monitor_id)
-        resp, body = self.delete(uri)
-        self.expected_success(204, resp.status)
-        return service_client.ResponseBody(resp, body)
-
     def list_router_interfaces(self, uuid):
         uri = '%s/ports?device_id=%s' % (self.uri_prefix, uuid)
         resp, body = self.get(uri)
@@ -424,21 +381,6 @@ class NetworkClientJSON(service_client.ServiceClient):
         agent = {"agent": agent_info}
         body = json.dumps(agent)
         resp, body = self.put(uri, body)
-        self.expected_success(200, resp.status)
-        body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
-
-    def list_pools_hosted_by_one_lbaas_agent(self, agent_id):
-        uri = '%s/agents/%s/loadbalancer-pools' % (self.uri_prefix, agent_id)
-        resp, body = self.get(uri)
-        self.expected_success(200, resp.status)
-        body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
-
-    def show_lbaas_agent_hosting_pool(self, pool_id):
-        uri = ('%s/lb/pools/%s/loadbalancer-agent' %
-               (self.uri_prefix, pool_id))
-        resp, body = self.get(uri)
         self.expected_success(200, resp.status)
         body = json.loads(body)
         return service_client.ResponseBody(resp, body)
@@ -494,21 +436,6 @@ class NetworkClientJSON(service_client.ServiceClient):
         self.expected_success(204, resp.status)
         return service_client.ResponseBody(resp, body)
 
-    def create_ikepolicy(self, name, **kwargs):
-        post_body = {
-            "ikepolicy": {
-                "name": name,
-            }
-        }
-        for key, val in kwargs.items():
-            post_body['ikepolicy'][key] = val
-        body = json.dumps(post_body)
-        uri = '%s/vpn/ikepolicies' % (self.uri_prefix)
-        resp, body = self.post(uri, body)
-        self.expected_success(201, resp.status)
-        body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
-
     def update_extra_routes(self, router_id, nexthop, destination):
         uri = '%s/routers/%s' % (self.uri_prefix, router_id)
         put_body = {
@@ -537,45 +464,11 @@ class NetworkClientJSON(service_client.ServiceClient):
         body = json.loads(body)
         return service_client.ResponseBody(resp, body)
 
-    def list_lb_pool_stats(self, pool_id):
-        uri = '%s/lb/pools/%s/stats' % (self.uri_prefix, pool_id)
-        resp, body = self.get(uri)
-        self.expected_success(200, resp.status)
-        body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
-
     def add_dhcp_agent_to_network(self, agent_id, network_id):
         post_body = {'network_id': network_id}
         body = json.dumps(post_body)
         uri = '%s/agents/%s/dhcp-networks' % (self.uri_prefix, agent_id)
         resp, body = self.post(uri, body)
         self.expected_success(201, resp.status)
-        body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
-
-    def insert_firewall_rule_in_policy(self, firewall_policy_id,
-                                       firewall_rule_id, insert_after="",
-                                       insert_before=""):
-        uri = '%s/fw/firewall_policies/%s/insert_rule' % (self.uri_prefix,
-                                                          firewall_policy_id)
-        body = {
-            "firewall_rule_id": firewall_rule_id,
-            "insert_after": insert_after,
-            "insert_before": insert_before
-        }
-        body = json.dumps(body)
-        resp, body = self.put(uri, body)
-        self.expected_success(200, resp.status)
-        body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
-
-    def remove_firewall_rule_from_policy(self, firewall_policy_id,
-                                         firewall_rule_id):
-        uri = '%s/fw/firewall_policies/%s/remove_rule' % (self.uri_prefix,
-                                                          firewall_policy_id)
-        update_body = {"firewall_rule_id": firewall_rule_id}
-        update_body = json.dumps(update_body)
-        resp, body = self.put(uri, update_body)
-        self.expected_success(200, resp.status)
         body = json.loads(body)
         return service_client.ResponseBody(resp, body)
