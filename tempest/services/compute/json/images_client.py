@@ -43,26 +43,20 @@ class ImagesClientJSON(service_client.ServiceClient):
         self.validate_response(schema.create_image, resp, body)
         return service_client.ResponseBody(resp, body)
 
-    def list_images(self, params=None):
+    def list_images(self, detail=False, **params):
         """Returns a list of all images filtered by any parameters."""
         url = 'images'
+        _schema = schema.list_images
+        if detail:
+            url += '/detail'
+            _schema = schema.list_images_details
+
         if params:
             url += '?%s' % urllib.urlencode(params)
 
         resp, body = self.get(url)
         body = json.loads(body)
-        self.validate_response(schema.list_images, resp, body)
-        return service_client.ResponseBodyList(resp, body['images'])
-
-    def list_images_with_detail(self, params=None):
-        """Returns a detailed list of images filtered by any parameters."""
-        url = 'images/detail'
-        if params:
-            url += '?%s' % urllib.urlencode(params)
-
-        resp, body = self.get(url)
-        body = json.loads(body)
-        self.validate_response(schema.list_images_details, resp, body)
+        self.validate_response(_schema, resp, body)
         return service_client.ResponseBodyList(resp, body['images'])
 
     def show_image(self, image_id):
@@ -106,7 +100,7 @@ class ImagesClientJSON(service_client.ServiceClient):
         self.validate_response(schema.image_metadata, resp, body)
         return service_client.ResponseBody(resp, body['metadata'])
 
-    def get_image_metadata_item(self, image_id, key):
+    def show_image_metadata_item(self, image_id, key):
         """Returns the value for a specific image metadata key."""
         resp, body = self.get("images/%s/metadata/%s" % (str(image_id), key))
         body = json.loads(body)

@@ -39,12 +39,12 @@ class InstanceUsageAuditLogNegativeTestJSON(base.BaseV2ComputeAdminTest):
         now = datetime.datetime.now()
         self.assertRaises(lib_exc.Forbidden,
                           self.instance_usages_audit_log_client.
-                          get_instance_usage_audit_log,
+                          show_instance_usage_audit_log,
                           urllib.quote(now.strftime("%Y-%m-%d %H:%M:%S")))
 
     @test.attr(type=['negative'])
     @test.idempotent_id('9b952047-3641-41c7-ba91-a809fc5974c8')
     def test_get_instance_usage_audit_logs_with_invalid_time(self):
         self.assertRaises(lib_exc.BadRequest,
-                          self.adm_client.get_instance_usage_audit_log,
+                          self.adm_client.show_instance_usage_audit_log,
                           "invalid_time")

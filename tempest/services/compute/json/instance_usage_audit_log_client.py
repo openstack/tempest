@@ -31,7 +31,7 @@ class InstanceUsagesAuditLogClientJSON(service_client.ServiceClient):
         return service_client.ResponseBody(resp,
                                            body["instance_usage_audit_logs"])
 
-    def get_instance_usage_audit_log(self, time_before):
+    def show_instance_usage_audit_log(self, time_before):
         url = 'os-instance_usage_audit_log/%s' % time_before
         resp, body = self.get(url)
         body = json.loads(body)

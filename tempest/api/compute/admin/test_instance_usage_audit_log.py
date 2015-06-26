@@ -44,7 +44,7 @@ class InstanceUsageAuditLogTestJSON(base.BaseV2ComputeAdminTest):
     def test_get_instance_usage_audit_log(self):
         # Get instance usage audit log before specified time
         now = datetime.datetime.now()
-        body = self.adm_client.get_instance_usage_audit_log(
+        body = self.adm_client.show_instance_usage_audit_log(
             urllib.quote(now.strftime("%Y-%m-%d %H:%M:%S")))
 
         expected_items = ['total_errors', 'total_instances', 'log',

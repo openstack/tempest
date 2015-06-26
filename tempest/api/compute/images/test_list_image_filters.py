@@ -105,7 +105,7 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
         # The list of images should contain only images with the
         # provided status
         params = {'status': 'ACTIVE'}
-        images = self.client.list_images(params)
+        images = self.client.list_images(**params)
 
         self.assertTrue(any([i for i in images if i['id'] == self.image1_id]))
         self.assertTrue(any([i for i in images if i['id'] == self.image2_id]))
@@ -116,7 +116,7 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
         # List of all images should contain the expected images filtered
         # by name
         params = {'name': self.image1['name']}
-        images = self.client.list_images(params)
+        images = self.client.list_images(**params)
 
         self.assertTrue(any([i for i in images if i['id'] == self.image1_id]))
         self.assertFalse(any([i for i in images if i['id'] == self.image2_id]))
@@ -128,7 +128,7 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
     def test_list_images_filter_by_server_id(self):
         # The images should contain images filtered by server id
         params = {'server': self.server1['id']}
-        images = self.client.list_images(params)
+        images = self.client.list_images(**params)
 
         self.assertTrue(any([i for i in images
                              if i['id'] == self.snapshot1_id]),
@@ -149,7 +149,7 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
         # Try all server link types
         for link in server_links:
             params = {'server': link['href']}
-            images = self.client.list_images(params)
+            images = self.client.list_images(**params)
 
             self.assertFalse(any([i for i in images
                                   if i['id'] == self.snapshot1_id]))
@@ -164,7 +164,7 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
     def test_list_images_filter_by_type(self):
         # The list of servers should be filtered by image type
         params = {'type': 'snapshot'}
-        images = self.client.list_images(params)
+        images = self.client.list_images(**params)
 
         self.assertTrue(any([i for i in images
                              if i['id'] == self.snapshot1_id]))
@@ -179,7 +179,7 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
     def test_list_images_limit_results(self):
         # Verify only the expected number of results are returned
         params = {'limit': '1'}
-        images = self.client.list_images(params)
+        images = self.client.list_images(**params)
         self.assertEqual(1, len([x for x in images if 'id' in x]))
 
     @test.idempotent_id('18bac3ae-da27-436c-92a9-b22474d13aab')
@@ -189,7 +189,7 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
         # Becoming ACTIVE will modify the updated time
         # Filter by the image's created time
         params = {'changes-since': self.image3['created']}
-        images = self.client.list_images(params)
+        images = self.client.list_images(**params)
         found = any([i for i in images if i['id'] == self.image3_id])
         self.assertTrue(found)
 
@@ -198,7 +198,7 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
         # Detailed list of all images should only contain images
         # with the provided status
         params = {'status': 'ACTIVE'}
-        images = self.client.list_images_with_detail(params)
+        images = self.client.list_images(detail=True, **params)
 
         self.assertTrue(any([i for i in images if i['id'] == self.image1_id]))
         self.assertTrue(any([i for i in images if i['id'] == self.image2_id]))
@@ -209,7 +209,7 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
         # Detailed list of all images should contain the expected
         # images filtered by name
         params = {'name': self.image1['name']}
-        images = self.client.list_images_with_detail(params)
+        images = self.client.list_images(detail=True, **params)
 
         self.assertTrue(any([i for i in images if i['id'] == self.image1_id]))
         self.assertFalse(any([i for i in images if i['id'] == self.image2_id]))
@@ -220,7 +220,7 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
         # Verify only the expected number of results (with full details)
         # are returned
         params = {'limit': '1'}
-        images = self.client.list_images_with_detail(params)
+        images = self.client.list_images(detail=True, **params)
         self.assertEqual(1, len(images))
 
     @test.idempotent_id('8c78f822-203b-4bf6-8bba-56ebd551cf84')
@@ -233,7 +233,7 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
         # Try all server link types
         for link in server_links:
             params = {'server': link['href']}
-            images = self.client.list_images_with_detail(params)
+            images = self.client.list_images(detail=True, **params)
 
             self.assertFalse(any([i for i in images
                                   if i['id'] == self.snapshot1_id]))
@@ -248,7 +248,7 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
     def test_list_images_with_detail_filter_by_type(self):
         # The detailed list of servers should be filtered by image type
         params = {'type': 'snapshot'}
-        images = self.client.list_images_with_detail(params)
+        images = self.client.list_images(detail=True, **params)
         self.client.show_image(self.image_ref)
 
         self.assertTrue(any([i for i in images
@@ -267,5 +267,5 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
         # Becoming ACTIVE will modify the updated time
         # Filter by the image's created time
         params = {'changes-since': self.image1['created']}
-        images = self.client.list_images_with_detail(params)
+        images = self.client.list_images(detail=True, **params)
         self.assertTrue(any([i for i in images if i['id'] == self.image1_id]))

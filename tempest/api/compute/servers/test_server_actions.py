@@ -430,7 +430,7 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         server = self.client.get_server(self.server_id)
         image_name = server['name'] + '-shelved'
         params = {'name': image_name}
-        images = self.images_client.list_images(params)
+        images = self.images_client.list_images(**params)
         self.assertEqual(1, len(images))
         self.assertEqual(image_name, images[0]['name'])
 
