@@ -18,7 +18,7 @@ import re
 from oslo_log import log as logging
 from tempest import config
 from tempest import exceptions
-from tempest.scenario.test_network_multi_node import TestNetworkMultiNode
+from tempest.scenario import test_network_multi_node
 
 CONF = config.CONF
 LOG = logging.getLogger(__name__)
@@ -42,7 +42,7 @@ class VlanNetwork():
                                      packet_sizes=[56, 572]):
         """
         Cycles through and pings other VMs using the IP/VLAN interface.
-        Verifies Pkt/Bye counts on the VLAN interface
+        Verifies Pkt/Byte counts on the VLAN interface
         """
         if len(self.servers) < 2:
             return False
@@ -89,7 +89,7 @@ class VlanNetwork():
         return True
 
 
-class TestNetworkVLANTransparency(TestNetworkMultiNode):
+class TestNetworkVLANTransparency(test_network_multi_node.TestNetworkMultiNode):
 
     """
     VLAN Trunking or VLAN Transparency is a feature that allows a network
