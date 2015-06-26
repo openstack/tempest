@@ -61,7 +61,7 @@ class QuotasTest(base.BaseAdminNetworkTest):
 
         # Change quotas for tenant
         quota_set = self.admin_client.update_quotas(tenant_id,
-                                                    **new_quotas)
+                                                    **new_quotas)['quota']
         self.addCleanup(self.admin_client.reset_quotas, tenant_id)
         for key, value in six.iteritems(new_quotas):
             self.assertEqual(value, quota_set[key])
