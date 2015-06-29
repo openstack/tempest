@@ -213,8 +213,8 @@ class TestRequiresExtDecorator(BaseDecoratorsTest):
                                        service='compute')
 
     def test_requires_ext_decorator_with_all_ext_enabled(self):
-        # disable fixture so the default (all) is used.
-        self.config_fixture.cleanUp()
+        cfg.CONF.set_default('api_extensions', 'all',
+                             group='compute-feature-enabled')
         self._test_requires_ext_helper(expected_to_skip=False,
                                        extension='random_ext',
                                        service='compute')

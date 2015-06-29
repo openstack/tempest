@@ -292,7 +292,6 @@ class TestAccount(base.TestCase):
              'password': 'p', 'roles': ['role-7', 'role-11'],
              'resources': {'network': 'network-2'}}]
         # Clear previous mock using self.test_accounts
-        self.accounts_mock.cleanUp()
         self.useFixture(mockpatch.Patch(
             'tempest.common.accounts.read_accounts_yaml',
             return_value=test_accounts))
