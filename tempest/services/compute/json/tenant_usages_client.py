@@ -33,7 +33,7 @@ class TenantUsagesClientJSON(service_client.ServiceClient):
         self.validate_response(schema.list_tenant_usage, resp, body)
         return service_client.ResponseBodyList(resp, body['tenant_usages'][0])
 
-    def get_tenant_usage(self, tenant_id, params=None):
+    def show_tenant_usage(self, tenant_id, params=None):
         url = 'os-simple-tenant-usage/%s' % tenant_id
         if params:
             url += '?%s' % urllib.urlencode(params)

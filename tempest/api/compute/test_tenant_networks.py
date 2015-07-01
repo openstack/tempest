@@ -29,5 +29,5 @@ class NetworksTestJSON(base.BaseV2ComputeTest):
         self.assertNotEmpty(tenant_networks, "No tenant networks found.")
 
         for net in tenant_networks:
-            tenant_network = self.client.get_tenant_network(net['id'])
+            tenant_network = self.client.show_tenant_network(net['id'])
             self.assertEqual(net['id'], tenant_network['id'])

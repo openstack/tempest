@@ -47,7 +47,7 @@ class TenantUsagesNegativeTestJSON(base.BaseV2ComputeAdminTest):
         params = {'start': self.start,
                   'end': self.end}
         self.assertRaises(lib_exc.NotFound,
-                          self.adm_client.get_tenant_usage,
+                          self.adm_client.show_tenant_usage,
                           '', params)
 
     @test.attr(type=['negative'])
@@ -57,7 +57,7 @@ class TenantUsagesNegativeTestJSON(base.BaseV2ComputeAdminTest):
         params = {'start': self.end,
                   'end': self.start}
         self.assertRaises(lib_exc.BadRequest,
-                          self.adm_client.get_tenant_usage,
+                          self.adm_client.show_tenant_usage,
                           self.client.tenant_id, params)
 
     @test.attr(type=['negative'])
