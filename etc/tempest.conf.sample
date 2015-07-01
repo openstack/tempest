@@ -88,6 +88,15 @@
 # Enables or disables fatal status of deprecations. (boolean value)
 #fatal_deprecations = false
 
+#
+# From tempest.config
+#
+
+# Prefix to be added when generating the name for test resources. It
+# can be used to discover all resources associated with a specific
+# test run when running tempest on a real-life cloud (string value)
+#resources_prefix = tempest
+
 
 [auth]
 
