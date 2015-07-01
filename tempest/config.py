@@ -22,6 +22,8 @@ from oslo_config import cfg
 
 from oslo_log import log as logging
 
+from tempest.test_discover import plugins
+
 
 # TODO(marun) Replace use of oslo_config's global ConfigOpts
 # (cfg.CONF) instance with a local instance (cfg.ConfigOpts()) once
@@ -1184,8 +1186,12 @@ _opts = [
 
 
 def register_opts():
+    ext_plugins = plugins.TempestTestPluginManager()
+    # Register in-tree tempest config options
     for g, o in _opts:
         register_opt_group(_CONF, g, o)
+    # Call external plugin config option registration
+    ext_plugins.register_plugin_opts(_CONF)
 
 
 def list_opts():
