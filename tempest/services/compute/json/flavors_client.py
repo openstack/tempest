@@ -43,7 +43,7 @@ class FlavorsClientJSON(service_client.ServiceClient):
         return service_client.ResponseBodyList(resp, body['flavors'])
 
     def show_flavor(self, flavor_id):
-        resp, body = self.get("flavors/%s" % str(flavor_id))
+        resp, body = self.get("flavors/%s" % flavor_id)
         body = json.loads(body)
         self.validate_response(schema.create_get_flavor_details, resp, body)
         return service_client.ResponseBody(resp, body['flavor'])
@@ -113,7 +113,7 @@ class FlavorsClientJSON(service_client.ServiceClient):
 
     def show_flavor_extra_spec(self, flavor_id, key):
         """Gets extra Specs key-value of the mentioned flavor and key."""
-        resp, body = self.get('flavors/%s/os-extra_specs/%s' % (str(flavor_id),
+        resp, body = self.get('flavors/%s/os-extra_specs/%s' % (flavor_id,
                               key))
         body = json.loads(body)
         self.validate_response(
@@ -134,7 +134,7 @@ class FlavorsClientJSON(service_client.ServiceClient):
     def unset_flavor_extra_spec(self, flavor_id, key):
         """Unsets extra Specs from the mentioned flavor."""
         resp, body = self.delete('flavors/%s/os-extra_specs/%s' %
-                                 (str(flavor_id), key))
+                                 (flavor_id, key))
         self.validate_response(schema.unset_flavor_extra_specs, resp, body)
         return service_client.ResponseBody(resp, body)
 

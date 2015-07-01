@@ -33,7 +33,7 @@ class KeyPairsClientJSON(service_client.ServiceClient):
         return service_client.ResponseBodyList(resp, body['keypairs'])
 
     def show_keypair(self, key_name):
-        resp, body = self.get("os-keypairs/%s" % str(key_name))
+        resp, body = self.get("os-keypairs/%s" % key_name)
         body = json.loads(body)
         self.validate_response(schema.get_keypair, resp, body)
         return service_client.ResponseBody(resp, body['keypair'])
@@ -49,6 +49,6 @@ class KeyPairsClientJSON(service_client.ServiceClient):
         return service_client.ResponseBody(resp, body['keypair'])
 
     def delete_keypair(self, key_name):
-        resp, body = self.delete("os-keypairs/%s" % str(key_name))
+        resp, body = self.delete("os-keypairs/%s" % key_name)
         self.validate_response(schema.delete_keypair, resp, body)
         return service_client.ResponseBody(resp, body)
