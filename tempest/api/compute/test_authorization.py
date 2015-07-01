@@ -271,7 +271,7 @@ class AuthorizationTestJSON(base.BaseV2ComputeTest):
     def test_get_security_group_of_alt_account_fails(self):
         # A GET request for another user's security group should fail
         self.assertRaises(lib_exc.NotFound,
-                          self.alt_security_client.get_security_group,
+                          self.alt_security_client.show_security_group,
                           self.security_group['id'])
 
     @test.idempotent_id('155387a5-2bbc-4acf-ab06-698dae537ea5')
