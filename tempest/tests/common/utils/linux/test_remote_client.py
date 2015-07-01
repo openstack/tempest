@@ -79,8 +79,7 @@ class TestRemoteClient(base.TestCase):
     def test_get_number_of_vcpus(self):
         self.ssh_mock.mock.exec_command.return_value = '16'
         self.assertEqual(self.conn.get_number_of_vcpus(), 16)
-        self._assert_exec_called_with(
-            'cat /proc/cpuinfo | grep processor | wc -l')
+        self._assert_exec_called_with('grep -c processor /proc/cpuinfo')
 
     def test_get_partitions(self):
         proc_partitions = """major minor  #blocks  name
