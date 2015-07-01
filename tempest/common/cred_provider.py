@@ -101,12 +101,13 @@ class CredentialProvider(object):
     def __init__(self, identity_version=None, name=None,
                  network_resources=None):
         """A CredentialProvider supplies credentials to test classes.
-        :param identity_version If specified it will return credentials of the
-                                corresponding identity version, otherwise it
-                                uses auth_version from configuration
-        :param name Name of the calling test. Included in provisioned
-                    credentials when credentials are provisioned on the fly
-        :param network_resources Network resources required for the credentials
+        :param identity_version: If specified it will return credentials of the
+                                 corresponding identity version, otherwise it
+                                 uses auth_version from configuration
+        :param name: Name of the calling test. Included in provisioned
+                     credentials when credentials are provisioned on the fly
+        :param network_resources: Network resources required for the
+                                  credentials
         """
         self.name = name or "test_creds"
         self.identity_version = identity_version or CONF.identity.auth_version
