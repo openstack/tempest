@@ -24,7 +24,7 @@ from tempest.common import service_client
 
 class SecurityGroupsClient(service_client.ServiceClient):
 
-    def list_security_groups(self, params=None):
+    def list_security_groups(self, **params):
         """List all security groups for a user."""
 
         url = 'os-security-groups'

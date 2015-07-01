@@ -26,7 +26,7 @@ class BaremetalNodesClient(service_client.ServiceClient):
     Tests Baremetal API
     """
 
-    def list_baremetal_nodes(self, params=None):
+    def list_baremetal_nodes(self, **params):
         """List all baremetal nodes."""
         url = 'os-baremetal-nodes'
         if params:

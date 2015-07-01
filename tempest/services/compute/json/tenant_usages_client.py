@@ -23,7 +23,7 @@ from tempest.common import service_client
 
 class TenantUsagesClient(service_client.ServiceClient):
 
-    def list_tenant_usages(self, params=None):
+    def list_tenant_usages(self, **params):
         url = 'os-simple-tenant-usage'
         if params:
             url += '?%s' % urllib.urlencode(params)
@@ -33,7 +33,7 @@ class TenantUsagesClient(service_client.ServiceClient):
         self.validate_response(schema.list_tenant_usage, resp, body)
         return service_client.ResponseBodyList(resp, body['tenant_usages'][0])
 
-    def show_tenant_usage(self, tenant_id, params=None):
+    def show_tenant_usage(self, tenant_id, **params):
         url = 'os-simple-tenant-usage/%s' % tenant_id
         if params:
             url += '?%s' % urllib.urlencode(params)

@@ -49,28 +49,22 @@ class TenantUsagesTestJSON(base.BaseV2ComputeAdminTest):
     @test.idempotent_id('062c8ae9-9912-4249-8b51-e38d664e926e')
     def test_list_usage_all_tenants(self):
         # Get usage for all tenants
-        params = {'start': self.start,
-                  'end': self.end,
-                  'detailed': int(bool(True))}
-        tenant_usage = self.adm_client.list_tenant_usages(params)
+        tenant_usage = self.adm_client.list_tenant_usages(
+            start=self.start, end=self.end, detailed=int(bool(True)))
         self.assertEqual(len(tenant_usage), 8)
 
     @test.idempotent_id('94135049-a4c5-4934-ad39-08fa7da4f22e')
     def test_get_usage_tenant(self):
         # Get usage for a specific tenant
-        params = {'start': self.start,
-                  'end': self.end}
         tenant_usage = self.adm_client.show_tenant_usage(
-            self.tenant_id, params)
+            self.tenant_id, start=self.start, end=self.end)
 
         self.assertEqual(len(tenant_usage), 8)
 
     @test.idempotent_id('9d00a412-b40e-4fd9-8eba-97b496316116')
     def test_get_usage_tenant_with_non_admin_user(self):
         # Get usage for a specific tenant with non admin user
-        params = {'start': self.start,
-                  'end': self.end}
         tenant_usage = self.client.show_tenant_usage(
-            self.tenant_id, params)
+            self.tenant_id, start=self.start, end=self.end)
 
         self.assertEqual(len(tenant_usage), 8)

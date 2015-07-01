@@ -22,7 +22,7 @@ from tempest.common import service_client
 
 class MigrationsClient(service_client.ServiceClient):
 
-    def list_migrations(self, params=None):
+    def list_migrations(self, **params):
         """Lists all migrations."""
 
         url = 'os-migrations'

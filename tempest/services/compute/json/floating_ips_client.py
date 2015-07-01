@@ -24,7 +24,7 @@ from tempest.common import service_client
 
 class FloatingIPsClient(service_client.ServiceClient):
 
-    def list_floating_ips(self, params=None):
+    def list_floating_ips(self, **params):
         """Returns a list of all floating IPs filtered by any parameters."""
         url = 'os-floating-ips'
         if params:

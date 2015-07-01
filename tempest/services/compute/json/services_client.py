@@ -24,7 +24,7 @@ from tempest.common import service_client
 
 class ServicesClient(service_client.ServiceClient):
 
-    def list_services(self, params=None):
+    def list_services(self, **params):
         url = 'os-services'
         if params:
             url += '?%s' % urllib.urlencode(params)
