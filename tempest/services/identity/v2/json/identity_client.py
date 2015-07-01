@@ -297,6 +297,17 @@ class IdentityClient(service_client.ServiceClient):
         self.expected_success(200, resp.status)
         return service_client.ResponseBody(resp, self._parse_resp(body))
 
+    def update_user_own_password(self, user_id, new_pass, old_pass):
+        """User updates own password"""
+        patch_body = {
+            "password": new_pass,
+            "original_password": old_pass
+        }
+        patch_body = json.dumps({'user': patch_body})
+        resp, body = self.patch('OS-KSCRUD/users/%s' % user_id, patch_body)
+        self.expected_success(200, resp.status)
+        return service_client.ResponseBody(resp, self._parse_resp(body))
+
     def list_extensions(self):
         """List all the extensions."""
         resp, body = self.get('/extensions')
