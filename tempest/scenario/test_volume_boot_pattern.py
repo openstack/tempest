@@ -47,7 +47,7 @@ class TestVolumeBootPattern(manager.ScenarioTest):
         vol_name = data_utils.rand_name('volume-origin')
         return self.create_volume(name=vol_name, imageRef=img_uuid)
 
-    def _boot_instance_from_volume(self, vol_id, keypair):
+    def _boot_instance_from_volume(self, vol_id, keypair, security_group):
         # NOTE(gfidente): the syntax for block_device_mapping is
         # dev_name=id:type:size:delete_on_terminate
         # where type needs to be "snap" if the server is booted
@@ -56,12 +56,10 @@ class TestVolumeBootPattern(manager.ScenarioTest):
             'device_name': 'vda',
             'volume_id': vol_id,
             'delete_on_termination': '0'}]
-        self.security_group = self._create_security_group()
-        security_groups = [{'name': self.security_group['name']}]
         create_kwargs = {
             'block_device_mapping': bd_map,
             'key_name': keypair['name'],
-            'security_groups': security_groups
+            'security_groups': [{'name': security_group['name']}]
         }
         return self.create_server(image='', create_kwargs=create_kwargs)
 
@@ -134,12 +132,12 @@ class TestVolumeBootPattern(manager.ScenarioTest):
     @test.services('compute', 'volume', 'image')
     def test_volume_boot_pattern(self):
         keypair = self.create_keypair()
-        self.security_group = self._create_security_group()
+        security_group = self._create_security_group()
 
         # create an instance from volume
         volume_origin = self._create_volume_from_image()
         instance_1st = self._boot_instance_from_volume(volume_origin['id'],
-                                                       keypair)
+                                                       keypair, security_group)
 
         # write content to volume on instance
         ssh_client_for_instance_1st = self._ssh_to_server(instance_1st,
@@ -151,7 +149,7 @@ class TestVolumeBootPattern(manager.ScenarioTest):
 
         # create a 2nd instance from volume
         instance_2nd = self._boot_instance_from_volume(volume_origin['id'],
-                                                       keypair)
+                                                       keypair, security_group)
 
         # check the content of written file
         ssh_client_for_instance_2nd = self._ssh_to_server(instance_2nd,
@@ -163,8 +161,9 @@ class TestVolumeBootPattern(manager.ScenarioTest):
 
         # create a 3rd instance from snapshot
         volume = self._create_volume_from_snapshot(snapshot['id'])
-        instance_from_snapshot = self._boot_instance_from_volume(volume['id'],
-                                                                 keypair)
+        instance_from_snapshot = (
+            self._boot_instance_from_volume(volume['id'],
+                                            keypair, security_group))
 
         # check the content of written file
         ssh_client = self._ssh_to_server(instance_from_snapshot, keypair)
@@ -176,15 +175,16 @@ class TestVolumeBootPattern(manager.ScenarioTest):
 
 
 class TestVolumeBootPatternV2(TestVolumeBootPattern):
-    def _boot_instance_from_volume(self, vol_id, keypair):
-        bdms = [{'uuid': vol_id, 'source_type': 'volume',
-                 'destination_type': 'volume', 'boot_index': 0,
-                 'delete_on_termination': False}]
-        self.security_group = self._create_security_group()
-        security_groups = [{'name': self.security_group['name']}]
+    def _boot_instance_from_volume(self, vol_id, keypair, security_group):
+        bd_map_v2 = [{
+            'uuid': vol_id,
+            'source_type': 'volume',
+            'destination_type': 'volume',
+            'boot_index': 0,
+            'delete_on_termination': False}]
         create_kwargs = {
-            'block_device_mapping_v2': bdms,
+            'block_device_mapping_v2': bd_map_v2,
             'key_name': keypair['name'],
-            'security_groups': security_groups
+            'security_groups': [{'name': security_group['name']}]
         }
         return self.create_server(image='', create_kwargs=create_kwargs)
