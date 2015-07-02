@@ -45,7 +45,7 @@ class VolumesNegativeTest(base.BaseV2ComputeTest):
         # Negative: Should not be able to get details of nonexistent volume
         # Creating a nonexistent volume id
         # Trying to GET a non existent volume
-        self.assertRaises(lib_exc.NotFound, self.client.get_volume,
+        self.assertRaises(lib_exc.NotFound, self.client.show_volume,
                           str(uuid.uuid4()))
 
     @test.attr(type=['negative'])
@@ -91,13 +91,13 @@ class VolumesNegativeTest(base.BaseV2ComputeTest):
     def test_get_invalid_volume_id(self):
         # Negative: Should not be able to get volume with invalid id
         self.assertRaises(lib_exc.NotFound,
-                          self.client.get_volume, '#$%%&^&^')
+                          self.client.show_volume, '#$%%&^&^')
 
     @test.attr(type=['negative'])
     @test.idempotent_id('62bab09a-4c03-4617-8cca-8572bc94af9b')
     def test_get_volume_without_passing_volume_id(self):
         # Negative: Should not be able to get volume when empty ID is passed
-        self.assertRaises(lib_exc.NotFound, self.client.get_volume, '')
+        self.assertRaises(lib_exc.NotFound, self.client.show_volume, '')
 
     @test.attr(type=['negative'])
     @test.idempotent_id('62972737-124b-4513-b6cf-2f019f178494')

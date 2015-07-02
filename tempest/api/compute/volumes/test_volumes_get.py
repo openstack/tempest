@@ -58,7 +58,7 @@ class VolumesGetTestJSON(base.BaseV2ComputeTest):
         # Wait for Volume status to become ACTIVE
         self.client.wait_for_volume_status(volume['id'], 'available')
         # GET Volume
-        fetched_volume = self.client.get_volume(volume['id'])
+        fetched_volume = self.client.show_volume(volume['id'])
         # Verification of details of fetched Volume
         self.assertEqual(v_name,
                          fetched_volume['displayName'],
