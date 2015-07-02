@@ -20,7 +20,7 @@ from six.moves.urllib import parse as urllib
 from tempest.common import service_client
 
 
-class BaseVolumesServicesClientJSON(service_client.ServiceClient):
+class BaseVolumesServicesClient(service_client.ServiceClient):
 
     def list_services(self, params=None):
         url = 'os-services'
@@ -33,5 +33,5 @@ class BaseVolumesServicesClientJSON(service_client.ServiceClient):
         return service_client.ResponseBodyList(resp, body['services'])
 
 
-class VolumesServicesClientJSON(BaseVolumesServicesClientJSON):
+class VolumesServicesClient(BaseVolumesServicesClient):
     """Volume V1 volume services client"""

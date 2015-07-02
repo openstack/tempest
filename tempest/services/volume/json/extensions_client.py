@@ -18,7 +18,7 @@ import json
 from tempest.common import service_client
 
 
-class BaseExtensionsClientJSON(service_client.ServiceClient):
+class BaseExtensionsClient(service_client.ServiceClient):
 
     def list_extensions(self):
         url = 'extensions'
@@ -28,7 +28,7 @@ class BaseExtensionsClientJSON(service_client.ServiceClient):
         return service_client.ResponseBodyList(resp, body['extensions'])
 
 
-class ExtensionsClientJSON(BaseExtensionsClientJSON):
+class ExtensionsClient(BaseExtensionsClient):
     """
     Volume V1 extensions client.
     """

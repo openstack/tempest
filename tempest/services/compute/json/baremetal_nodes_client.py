@@ -21,7 +21,7 @@ from tempest.api_schema.response.compute.v2_1 import baremetal_nodes \
 from tempest.common import service_client
 
 
-class BaremetalNodesClientJSON(service_client.ServiceClient):
+class BaremetalNodesClient(service_client.ServiceClient):
     """
     Tests Baremetal API
     """

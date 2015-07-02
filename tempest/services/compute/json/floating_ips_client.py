@@ -22,7 +22,7 @@ from tempest.api_schema.response.compute.v2_1 import floating_ips as schema
 from tempest.common import service_client
 
 
-class FloatingIPsClientJSON(service_client.ServiceClient):
+class FloatingIPsClient(service_client.ServiceClient):
 
     def list_floating_ips(self, params=None):
         """Returns a list of all floating IPs filtered by any parameters."""

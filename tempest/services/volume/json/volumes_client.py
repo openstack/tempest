@@ -23,7 +23,7 @@ from tempest.common import service_client
 from tempest import exceptions
 
 
-class BaseVolumesClientJSON(service_client.ServiceClient):
+class BaseVolumesClient(service_client.ServiceClient):
     """
     Base client class to send CRUD Volume API requests to a Cinder endpoint
     """
@@ -32,7 +32,7 @@ class BaseVolumesClientJSON(service_client.ServiceClient):
 
     def __init__(self, auth_provider, service, region,
                  default_volume_size=1, **kwargs):
-        super(BaseVolumesClientJSON, self).__init__(
+        super(BaseVolumesClient, self).__init__(
             auth_provider, service, region, **kwargs)
         self.default_volume_size = default_volume_size
 
@@ -345,7 +345,7 @@ class BaseVolumesClientJSON(service_client.ServiceClient):
         self.expected_success(202, resp.status)
 
 
-class VolumesClientJSON(BaseVolumesClientJSON):
+class VolumesClient(BaseVolumesClient):
     """
     Client class to send CRUD Volume V1 API requests to a Cinder endpoint
     """

@@ -22,7 +22,7 @@ from tempest.api_schema.response.compute.v2_1 import services as schema
 from tempest.common import service_client
 
 
-class ServicesClientJSON(service_client.ServiceClient):
+class ServicesClient(service_client.ServiceClient):
 
     def list_services(self, params=None):
         url = 'os-services'

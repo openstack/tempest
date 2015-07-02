@@ -20,7 +20,7 @@ from tempest.api_schema.response.compute.v2_1 import hosts as schema
 from tempest.common import service_client
 
 
-class HostsClientJSON(service_client.ServiceClient):
+class HostsClient(service_client.ServiceClient):
 
     def list_hosts(self, params=None):
         """Lists all hosts."""

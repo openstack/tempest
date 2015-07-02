@@ -128,7 +128,7 @@ class V3CredsClient(CredsClient):
 
 
 def get_creds_client(identity_client, project_domain_name=None):
-    if isinstance(identity_client, v2_identity.IdentityClientJSON):
+    if isinstance(identity_client, v2_identity.IdentityClient):
         return V2CredsClient(identity_client)
     else:
         return V3CredsClient(identity_client, project_domain_name)

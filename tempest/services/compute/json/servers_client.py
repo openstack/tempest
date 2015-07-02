@@ -26,11 +26,11 @@ from tempest.common import waiters
 from tempest import exceptions
 
 
-class ServersClientJSON(service_client.ServiceClient):
+class ServersClient(service_client.ServiceClient):
 
     def __init__(self, auth_provider, service, region,
                  enable_instance_password=True, **kwargs):
-        super(ServersClientJSON, self).__init__(
+        super(ServersClient, self).__init__(
             auth_provider, service, region, **kwargs)
         self.enable_instance_password = enable_instance_password
 

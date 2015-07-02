@@ -18,7 +18,7 @@ import json
 from tempest.common import service_client
 
 
-class BaseVolumeAvailabilityZoneClientJSON(service_client.ServiceClient):
+class BaseVolumeAvailabilityZoneClient(service_client.ServiceClient):
 
     def list_availability_zones(self):
         resp, body = self.get('os-availability-zone')
@@ -27,7 +27,7 @@ class BaseVolumeAvailabilityZoneClientJSON(service_client.ServiceClient):
         return service_client.ResponseBody(resp, body['availabilityZoneInfo'])
 
 
-class VolumeAvailabilityZoneClientJSON(BaseVolumeAvailabilityZoneClientJSON):
+class VolumeAvailabilityZoneClient(BaseVolumeAvailabilityZoneClient):
     """
     Volume V1 availability zone client.
     """

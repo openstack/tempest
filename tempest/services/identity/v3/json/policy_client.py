@@ -18,7 +18,7 @@ import json
 from tempest.common import service_client
 
 
-class PolicyClientJSON(service_client.ServiceClient):
+class PolicyClient(service_client.ServiceClient):
     api_version = "v3"
 
     def create_policy(self, blob, type):

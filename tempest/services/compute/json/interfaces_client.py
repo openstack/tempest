@@ -22,7 +22,7 @@ from tempest.common import service_client
 from tempest import exceptions
 
 
-class InterfacesClientJSON(service_client.ServiceClient):
+class InterfacesClient(service_client.ServiceClient):
 
     def list_interfaces(self, server):
         resp, body = self.get('servers/%s/os-interface' % server)

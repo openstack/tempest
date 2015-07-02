@@ -20,7 +20,7 @@ from six.moves.urllib import parse as urllib
 from tempest.common import service_client
 
 
-class RegionClientJSON(service_client.ServiceClient):
+class RegionClient(service_client.ServiceClient):
     api_version = "v3"
 
     def create_region(self, description, **kwargs):

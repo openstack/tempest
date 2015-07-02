@@ -24,7 +24,7 @@ from tempest import exceptions
 LOG = logging.getLogger(__name__)
 
 
-class BaseSnapshotsClientJSON(service_client.ServiceClient):
+class BaseSnapshotsClient(service_client.ServiceClient):
     """Base Client class to send CRUD Volume API requests."""
 
     create_resp = 200
@@ -198,5 +198,5 @@ class BaseSnapshotsClientJSON(service_client.ServiceClient):
         return service_client.ResponseBody(resp, body)
 
 
-class SnapshotsClientJSON(BaseSnapshotsClientJSON):
+class SnapshotsClient(BaseSnapshotsClient):
     """Client class to send CRUD Volume V1 API requests."""

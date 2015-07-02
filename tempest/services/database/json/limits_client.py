@@ -18,7 +18,7 @@ from six.moves.urllib import parse as urllib
 from tempest.common import service_client
 
 
-class DatabaseLimitsClientJSON(service_client.ServiceClient):
+class DatabaseLimitsClient(service_client.ServiceClient):
 
     def list_db_limits(self, params=None):
         """List all limits."""

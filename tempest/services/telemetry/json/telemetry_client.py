@@ -19,7 +19,7 @@ from six.moves.urllib import parse as urllib
 from tempest.common import service_client
 
 
-class TelemetryClientJSON(service_client.ServiceClient):
+class TelemetryClient(service_client.ServiceClient):
 
     version = '2'
     uri_prefix = "v2"

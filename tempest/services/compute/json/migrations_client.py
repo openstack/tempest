@@ -20,7 +20,7 @@ from tempest.api_schema.response.compute.v2_1 import migrations as schema
 from tempest.common import service_client
 
 
-class MigrationsClientJSON(service_client.ServiceClient):
+class MigrationsClient(service_client.ServiceClient):
 
     def list_migrations(self, params=None):
         """Lists all migrations."""
