@@ -60,7 +60,7 @@ class TenantUsagesTestJSON(base.BaseV2ComputeAdminTest):
         # Get usage for a specific tenant
         params = {'start': self.start,
                   'end': self.end}
-        tenant_usage = self.adm_client.get_tenant_usage(
+        tenant_usage = self.adm_client.show_tenant_usage(
             self.tenant_id, params)
 
         self.assertEqual(len(tenant_usage), 8)
@@ -70,7 +70,7 @@ class TenantUsagesTestJSON(base.BaseV2ComputeAdminTest):
         # Get usage for a specific tenant with non admin user
         params = {'start': self.start,
                   'end': self.end}
-        tenant_usage = self.client.get_tenant_usage(
+        tenant_usage = self.client.show_tenant_usage(
             self.tenant_id, params)
 
         self.assertEqual(len(tenant_usage), 8)
