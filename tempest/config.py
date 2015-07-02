@@ -240,18 +240,10 @@ ComputeGroup = [
                default=1,
                help="The number of ping packets originating from remote "
                     "linux hosts"),
-    cfg.IntOpt('ssh_timeout',
-               default=300,
-               help="Timeout in seconds to wait for authentication to "
-                    "succeed."),
     cfg.IntOpt('ready_wait',
                default=0,
                help="Additional wait time for clean state, when there is "
                     "no OS-EXT-STS extension available"),
-    cfg.IntOpt('ssh_channel_timeout',
-               default=60,
-               help="Timeout in seconds to wait for output from ssh "
-                    "channel."),
     cfg.StrOpt('fixed_network_name',
                help="Name of the fixed network that is visible to all test "
                     "tenants. If multiple networks are available for a tenant"
@@ -263,9 +255,6 @@ ComputeGroup = [
                default='public',
                help="Network used for SSH connections. Ignored if "
                     "use_floatingip_for_ssh=true or run_validation=false."),
-    cfg.IntOpt('ip_version_for_ssh',
-               default=4,
-               help="IP version used for SSH connections."),
     cfg.BoolOpt('use_floatingip_for_ssh',
                 default=True,
                 help="Does SSH use Floating IPs?"),
@@ -602,17 +591,23 @@ ValidationGroup = [
                     'Additional methods will be handled in a separate spec.'),
     cfg.IntOpt('ip_version_for_ssh',
                default=4,
-               help='Default IP version for ssh connections.'),
+               help='Default IP version for ssh connections.',
+               deprecated_opts=[cfg.DeprecatedOpt('ip_version_for_ssh',
+                                                  group='compute')]),
     cfg.IntOpt('ping_timeout',
                default=120,
                help='Timeout in seconds to wait for ping to succeed.'),
     cfg.IntOpt('connect_timeout',
                default=60,
                help='Timeout in seconds to wait for the TCP connection to be '
-                    'successful.'),
+                    'successful.',
+               deprecated_opts=[cfg.DeprecatedOpt('ssh_channel_timeout',
+                                                  group='compute')]),
     cfg.IntOpt('ssh_timeout',
                default=300,
-               help='Timeout in seconds to wait for the ssh banner.'),
+               help='Timeout in seconds to wait for the ssh banner.',
+               deprecated_opts=[cfg.DeprecatedOpt('ssh_timeout',
+                                                  group='compute')]),
 ]
 
 volume_group = cfg.OptGroup(name='volume',
