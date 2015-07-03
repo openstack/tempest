@@ -43,6 +43,7 @@ get_limit = {
                             'maxServerGroups': {'type': 'integer'},
                             'totalServerGroupsUsed': {'type': 'integer'}
                         },
+                        'additionalProperties': False,
                         # NOTE(gmann): maxServerGroupMembers,  maxServerGroups
                         # and totalServerGroupsUsed are API extension,
                         # and some environments return a response without these
@@ -84,18 +85,22 @@ get_limit = {
                                                 {'type': 'integer'},
                                             'verb':
                                                 {'type': 'string'}
-                                        }
+                                        },
+                                        'additionalProperties': False,
                                     }
                                 },
                                 'regex': {'type': 'string'},
                                 'uri': {'type': 'string'}
-                            }
+                            },
+                            'additionalProperties': False,
                         }
                     }
                 },
+                'additionalProperties': False,
                 'required': ['absolute', 'rate']
             }
         },
+        'additionalProperties': False,
         'required': ['limits']
     }
 }

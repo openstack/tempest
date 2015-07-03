@@ -34,6 +34,7 @@ from tempest.services.compute.json import keypairs_client
 from tempest.services.compute.json import limits_client
 from tempest.services.compute.json import migrations_client
 from tempest.services.compute.json import networks_client as nova_net_client
+from tempest.services.compute.json import quota_classes_client
 from tempest.services.compute.json import quotas_client
 from tempest.services.compute.json import security_group_default_rules_client \
     as nova_secgrop_default_client
@@ -122,7 +123,7 @@ class TestServiceClient(base.TestCase):
             migrations_client.MigrationsClientJSON,
             nova_net_client.NetworksClientJSON,
             quotas_client.QuotasClientJSON,
-            quotas_client.QuotaClassesClientJSON,
+            quota_classes_client.QuotaClassesClientJSON,
             nova_secgrop_default_client.SecurityGroupDefaultRulesClientJSON,
             security_groups_client.SecurityGroupsClientJSON,
             servers_client.ServersClientJSON,

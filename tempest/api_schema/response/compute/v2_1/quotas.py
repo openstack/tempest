@@ -37,6 +37,7 @@ update_quota_set = {
                     'injected_file_content_bytes': {'type': 'integer'},
                     'injected_file_path_bytes': {'type': 'integer'}
                 },
+                'additionalProperties': False,
                 # NOTE: server_group_members and server_groups are represented
                 # when enabling quota_server_group extension. So they should
                 # not be required.
@@ -48,6 +49,7 @@ update_quota_set = {
                              'injected_file_path_bytes']
             }
         },
+        'additionalProperties': False,
         'required': ['quota_set']
     }
 }

@@ -45,12 +45,12 @@ class AgentsClientJSON(service_client.ServiceClient):
 
     def delete_agent(self, agent_id):
         """Delete an existing agent build."""
-        resp, body = self.delete("os-agents/%s" % str(agent_id))
+        resp, body = self.delete("os-agents/%s" % agent_id)
         self.validate_response(schema.delete_agent, resp, body)
         return service_client.ResponseBody(resp, body)
 
     def update_agent(self, agent_id, **kwargs):
         """Update an agent build."""
         put_body = json.dumps({'para': kwargs})
-        resp, body = self.put('os-agents/%s' % str(agent_id), put_body)
+        resp, body = self.put('os-agents/%s' % agent_id, put_body)
         return service_client.ResponseBody(resp, self._parse_resp(body))

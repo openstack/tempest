@@ -13,8 +13,11 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest import config
 from tempest.scenario import manager
 from tempest import test
+
+CONF = config.CONF
 
 
 class TestEncryptedCinderVolumes(manager.EncryptionScenarioTest):
@@ -30,6 +33,12 @@ class TestEncryptedCinderVolumes(manager.EncryptionScenarioTest):
         * Creates a volume of that encryption type (as a regular user)
         * Attaches and detaches the encrypted volume to the instance
     """
+
+    @classmethod
+    def skip_checks(cls):
+        super(TestEncryptedCinderVolumes, cls).skip_checks()
+        if not CONF.compute_feature_enabled.attach_encrypted_volume:
+            raise cls.skipException('Encrypted volume attach is not supported')
 
     def launch_instance(self):
         self.glance_image_create()

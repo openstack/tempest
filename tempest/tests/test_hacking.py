@@ -119,6 +119,13 @@ class HackingTestCase(base.TestCase):
         self.assertFalse(checks.service_tags_not_in_module_path(
             "@test.services('compute')", './tempest/api/image/fake_test.py'))
 
+    def test_no_hyphen_at_end_of_rand_name(self):
+        self.assertIsNone(checks.no_hyphen_at_end_of_rand_name(
+            'data_utils.rand_name("fake-resource")', './tempest/test_foo.py'))
+        self.assertEqual(2, len(list(checks.no_hyphen_at_end_of_rand_name(
+            'data_utils.rand_name("fake-resource-")', './tempest/test_foo.py')
+        )))
+
     def test_no_mutable_default_args(self):
         self.assertEqual(1, len(list(checks.no_mutable_default_args(
             " def function1(para={}):"))))

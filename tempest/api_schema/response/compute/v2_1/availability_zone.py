@@ -31,16 +31,19 @@ base = {
                             'properties': {
                                 'available': {'type': 'boolean'}
                             },
+                            'additionalProperties': False,
                             'required': ['available']
                         },
                         # NOTE: Here is the difference between detail and
                         # non-detail.
                         'hosts': {'type': 'null'}
                     },
+                    'additionalProperties': False,
                     'required': ['zoneName', 'zoneState', 'hosts']
                 }
             }
         },
+        'additionalProperties': False,
         'required': ['availabilityZoneInfo']
     }
 }
@@ -60,6 +63,7 @@ detail = {
                         'active': {'type': 'boolean'},
                         'updated_at': {'type': ['string', 'null']}
                     },
+                    'additionalProperties': False,
                     'required': ['available', 'active', 'updated_at']
                 }
             }

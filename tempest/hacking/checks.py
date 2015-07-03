@@ -27,6 +27,7 @@ TEST_DEFINITION = re.compile(r'^\s*def test.*')
 SETUP_TEARDOWN_CLASS_DEFINITION = re.compile(r'^\s+def (setUp|tearDown)Class')
 SCENARIO_DECORATOR = re.compile(r'\s*@.*services\((.*)\)')
 VI_HEADER_RE = re.compile(r"^#\s+vim?:.+")
+RAND_NAME_HYPHEN_RE = re.compile(r".*rand_name\(.+[\-\_][\"\']\)")
 mutable_default_args = re.compile(r"^\s*def .+\((.+=\{\}|.+=\[\])")
 
 
@@ -106,6 +107,21 @@ def service_tags_not_in_module_path(physical_line, filename):
                             "T107: service tag should not be in path")
 
 
+def no_hyphen_at_end_of_rand_name(logical_line, filename):
+    """Check no hyphen at the end of rand_name() argument
+
+    T108
+    """
+    if './tempest/api/network/' in filename:
+        # Network API tests are migrating from Tempest to Neutron repo now.
+        # So here should avoid network API tests checks.
+        return
+
+    msg = "T108: hyphen should not be specified at the end of rand_name()"
+    if RAND_NAME_HYPHEN_RE.match(logical_line):
+        return 0, msg
+
+
 def no_mutable_default_args(logical_line):
     """Check that mutable object isn't used as default argument
 
@@ -122,4 +138,5 @@ def factory(register):
     register(no_setup_teardown_class_for_tests)
     register(no_vi_headers)
     register(service_tags_not_in_module_path)
+    register(no_hyphen_at_end_of_rand_name)
     register(no_mutable_default_args)

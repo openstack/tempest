@@ -211,9 +211,10 @@ class ListImagesTest(base.BaseV1ImageTest):
 
     @test.idempotent_id('e5dc26d9-9aa2-48dd-bda5-748e1445da98')
     def test_index_status_active_detail(self):
-        images_list = self.client.image_list_detail(status='active',
-                                                    sort_key='size',
-                                                    sort_dir='desc')
+        images_list = self.client.list_images(detail=True,
+                                              status='active',
+                                              sort_key='size',
+                                              sort_dir='desc')
         top_size = images_list[0]['size']  # We have non-zero sized images
         for image in images_list:
             size = image['size']
@@ -223,7 +224,8 @@ class ListImagesTest(base.BaseV1ImageTest):
 
     @test.idempotent_id('097af10a-bae8-4342-bff4-edf89969ed2a')
     def test_index_name(self):
-        images_list = self.client.image_list_detail(
+        images_list = self.client.list_images(
+            detail=True,
             name='New Remote Image dup')
         result_set = set(map(lambda x: x['id'], images_list))
         for image in images_list:

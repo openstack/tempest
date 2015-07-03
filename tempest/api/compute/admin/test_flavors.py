@@ -82,7 +82,7 @@ class FlavorsAdminTestJSON(base.BaseV2ComputeAdminTest):
         self.assertEqual(flavor['os-flavor-access:is_public'], True)
 
         # Verify flavor is retrieved
-        flavor = self.client.get_flavor_details(flavor['id'])
+        flavor = self.client.show_flavor(flavor['id'])
         self.assertEqual(flavor['name'], flavor_name)
 
         return flavor['id']
@@ -125,7 +125,7 @@ class FlavorsAdminTestJSON(base.BaseV2ComputeAdminTest):
         self.addCleanup(self.flavor_clean_up, flavor['id'])
         flag = False
         # Verify flavor is retrieved
-        flavors = self.client.list_flavors_with_detail()
+        flavors = self.client.list_flavors(detail=True)
         for flavor in flavors:
             if flavor['name'] == flavor_name:
                 flag = True
@@ -160,12 +160,12 @@ class FlavorsAdminTestJSON(base.BaseV2ComputeAdminTest):
         verify_flavor_response_extension(flavor)
 
         # Verify flavor is retrieved
-        flavor = self.client.get_flavor_details(new_flavor_id)
+        flavor = self.client.show_flavor(new_flavor_id)
         self.assertEqual(flavor['name'], flavor_name)
         verify_flavor_response_extension(flavor)
 
         # Check if flavor is present in list
-        flavors = self.user_client.list_flavors_with_detail()
+        flavors = self.user_client.list_flavors(detail=True)
         for flavor in flavors:
             if flavor['name'] == flavor_name:
                 verify_flavor_response_extension(flavor)
@@ -190,7 +190,7 @@ class FlavorsAdminTestJSON(base.BaseV2ComputeAdminTest):
         self.addCleanup(self.flavor_clean_up, flavor['id'])
         # Verify flavor is retrieved
         flag = False
-        flavors = self.client.list_flavors_with_detail()
+        flavors = self.client.list_flavors(detail=True)
         for flavor in flavors:
             if flavor['name'] == flavor_name:
                 flag = True
@@ -198,7 +198,7 @@ class FlavorsAdminTestJSON(base.BaseV2ComputeAdminTest):
 
         # Verify flavor is not retrieved with other user
         flag = False
-        flavors = self.user_client.list_flavors_with_detail()
+        flavors = self.user_client.list_flavors(detail=True)
         for flavor in flavors:
             if flavor['name'] == flavor_name:
                 flag = True
@@ -240,7 +240,7 @@ class FlavorsAdminTestJSON(base.BaseV2ComputeAdminTest):
         flag = False
         self.new_client = self.flavors_client
         # Verify flavor is retrieved with new user
-        flavors = self.new_client.list_flavors_with_detail()
+        flavors = self.new_client.list_flavors(detail=True)
         for flavor in flavors:
             if flavor['name'] == flavor_name:
                 flag = True
@@ -278,7 +278,7 @@ class FlavorsAdminTestJSON(base.BaseV2ComputeAdminTest):
         def _test_string_variations(variations, flavor_name):
             for string in variations:
                 params = {'is_public': string}
-                flavors = self.client.list_flavors_with_detail(params)
+                flavors = self.client.list_flavors(detail=True, **params)
                 flavor = _flavor_lookup(flavors, flavor_name)
                 self.assertIsNotNone(flavor)
 

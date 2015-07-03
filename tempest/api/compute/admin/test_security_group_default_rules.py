@@ -64,7 +64,7 @@ class SecurityGroupDefaultRulesTest(base.BaseV2ComputeAdminTest):
             # Delete Security Group default rule
             self.adm_client.delete_security_group_default_rule(rule['id'])
             self.assertRaises(lib_exc.NotFound,
-                              self.adm_client.get_security_group_default_rule,
+                              self.adm_client.show_security_group_default_rule,
                               rule['id'])
 
     @test.idempotent_id('4d752e0a-33a1-4c3a-b498-ff8667ca22e5')
@@ -125,6 +125,6 @@ class SecurityGroupDefaultRulesTest(base.BaseV2ComputeAdminTest):
                                                          cidr)
         self.addCleanup(self.adm_client.delete_security_group_default_rule,
                         rule['id'])
-        fetched_rule = self.adm_client.get_security_group_default_rule(
+        fetched_rule = self.adm_client.show_security_group_default_rule(
             rule['id'])
         self.assertEqual(rule, fetched_rule)

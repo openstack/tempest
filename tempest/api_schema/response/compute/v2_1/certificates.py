@@ -25,9 +25,11 @@ _common_schema = {
                     'data': {'type': 'string'},
                     'private_key': {'type': 'string'},
                 },
+                'additionalProperties': False,
                 'required': ['data', 'private_key']
             }
         },
+        'additionalProperties': False,
         'required': ['certificate']
     }
 }

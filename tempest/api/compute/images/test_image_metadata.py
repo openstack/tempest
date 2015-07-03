@@ -93,8 +93,8 @@ class ImagesMetadataTestJSON(base.BaseV2ComputeTest):
     @test.idempotent_id('4f5db52f-6685-4c75-b848-f4bb363f9aa6')
     def test_get_image_metadata_item(self):
         # The value for a specific metadata key should be returned
-        meta = self.client.get_image_metadata_item(self.image_id,
-                                                   'os_distro')
+        meta = self.client.show_image_metadata_item(self.image_id,
+                                                    'os_distro')
         self.assertEqual('value2', meta['os_distro'])
 
     @test.idempotent_id('f2de776a-4778-4d90-a5da-aae63aee64ae')

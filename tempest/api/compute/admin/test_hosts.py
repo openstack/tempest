@@ -69,7 +69,7 @@ class HostsAdminTestJSON(base.BaseV2ComputeAdminTest):
 
         for host in hosts:
             hostname = host['host_name']
-            resources = self.client.show_host_detail(hostname)
+            resources = self.client.show_host(hostname)
             self.assertTrue(len(resources) >= 1)
             host_resource = resources[0]['resource']
             self.assertIsNotNone(host_resource)

@@ -42,6 +42,10 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         # Check if the server is in a clean state after test
         try:
             self.client.wait_for_server_status(self.server_id, 'ACTIVE')
+        except lib_exc.NotFound:
+            # The server was deleted by previous test, create a new one
+            server = self.create_test_server(wait_until='ACTIVE')
+            self.__class__.server_id = server['id']
         except Exception:
             # Rebuild server if something happened to it during a test
             self.__class__.server_id = self.rebuild_server(self.server_id)
@@ -287,8 +291,9 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
             'backup_type': "daily",
             'instance_uuid': self.server_id,
         }
-        image_list = self.os.image_client.image_list_detail(
-            properties,
+        image_list = self.os.image_client.list_images(
+            detail=True,
+            properties=properties,
             status='active',
             sort_key='created_at',
             sort_dir='asc')
@@ -310,8 +315,9 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         self.servers_client.wait_for_server_status(self.server_id, 'ACTIVE')
         self.os.image_client.wait_for_resource_deletion(image1_id)
         oldest_backup_exist = False
-        image_list = self.os.image_client.image_list_detail(
-            properties,
+        image_list = self.os.image_client.list_images(
+            detail=True,
+            properties=properties,
             status='active',
             sort_key='created_at',
             sort_dir='asc')
@@ -424,7 +430,7 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         server = self.client.get_server(self.server_id)
         image_name = server['name'] + '-shelved'
         params = {'name': image_name}
-        images = self.images_client.list_images(params)
+        images = self.images_client.list_images(**params)
         self.assertEqual(1, len(images))
         self.assertEqual(image_name, images[0]['name'])
 

@@ -126,4 +126,4 @@ class EndPointsTestJSON(base.BaseIdentityV3AdminTest):
         self.assertEqual(interface2, endpoint['interface'])
         self.assertEqual(url2, endpoint['url'])
         self.assertEqual(region2, endpoint['region'])
-        self.assertEqual('false', str(endpoint['enabled']).lower())
+        self.assertEqual(False, endpoint['enabled'])

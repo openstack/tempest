@@ -39,8 +39,8 @@
 # Deprecated group/name - [DEFAULT]/logdir
 #log_dir = <None>
 
-# Use syslog for logging. Existing syslog format is DEPRECATED during
-# I, and changed in J to honor RFC5424. (boolean value)
+# Use syslog for logging. Existing syslog format is DEPRECATED and
+# will be changed later to honor RFC5424. (boolean value)
 #use_syslog = false
 
 # (Optional) Enables or disables syslog rfc5424 format for logging. If
@@ -77,9 +77,6 @@
 # Enables or disables publication of error events. (boolean value)
 #publish_errors = false
 
-# Enables or disables fatal status of deprecations. (boolean value)
-#fatal_deprecations = false
-
 # The format for an instance that is passed with the log message.
 # (string value)
 #instance_format = "[instance: %(uuid)s] "
@@ -90,6 +87,15 @@
 
 # Enables or disables fatal status of deprecations. (boolean value)
 #fatal_deprecations = false
+
+#
+# From tempest.config
+#
+
+# Prefix to be added when generating the name for test resources. It
+# can be used to discover all resources associated with a specific
+# test run when running tempest on a real-life cloud (string value)
+#resources_prefix = tempest
 
 
 [auth]
@@ -254,6 +260,10 @@
 # value)
 #build_timeout = 300
 
+# Shell fragments to use before executing a command when sshing to a
+# guest. (string value)
+#ssh_shell_prologue = set -eu -o pipefail; PATH=$$PATH:/sbin;
+
 # Auth method used for authenticate to the instance. Valid choices
 # are: keypair, configured, adminpass and disabled. Keypair: start the
 # servers with a ssh keypair. Configured: use the configured user and
@@ -280,17 +290,9 @@
 # (integer value)
 #ping_count = 1
 
-# Timeout in seconds to wait for authentication to succeed. (integer
-# value)
-#ssh_timeout = 300
-
 # Additional wait time for clean state, when there is no OS-EXT-STS
 # extension available (integer value)
 #ready_wait = 0
-
-# Timeout in seconds to wait for output from ssh channel. (integer
-# value)
-#ssh_channel_timeout = 60
 
 # Name of the fixed network that is visible to all test tenants. If
 # multiple networks are available for a tenant this is the network
@@ -302,9 +304,6 @@
 # Network used for SSH connections. Ignored if
 # use_floatingip_for_ssh=true or run_validation=false. (string value)
 #network_for_ssh = public
-
-# IP version used for SSH connections. (integer value)
-#ip_version_for_ssh = 4
 
 # Does SSH use Floating IPs? (boolean value)
 #use_floatingip_for_ssh = true
@@ -426,6 +425,12 @@
 # instance? This should be set to True if testing Kilo+ Nova. (boolean
 # value)
 #preserve_ports = false
+
+# Does the test environment support attaching an encrypted volume to a
+# running server instance? This may depend on the combination of
+# compute_driver in nova and the volume_driver(s) in cinder. (boolean
+# value)
+#attach_encrypted_volume = true
 
 
 [dashboard]
@@ -648,6 +653,10 @@
 # Is the v1 image API enabled (boolean value)
 #api_v1 = true
 
+# Is the deactivate-image feature enabled. The feature has been
+# integrated since Kilo. (boolean value)
+#deactivate_image = false
+
 
 [input-scenario]
 
@@ -799,7 +808,8 @@
 
 # A list of enabled network extensions with a special entry all which
 # indicates every extension is enabled. Empty list indicates all
-# extensions are disabled (list value)
+# extensions are disabled. To get the list of extensions run: 'neutron
+# ext-list' (list value)
 #api_extensions = all
 
 # Allow the execution of IPv6 subnet tests that use the extended IPv6
@@ -1136,6 +1146,7 @@
 #auth_method = keypair
 
 # Default IP version for ssh connections. (integer value)
+# Deprecated group/name - [compute]/ip_version_for_ssh
 #ip_version_for_ssh = 4
 
 # Timeout in seconds to wait for ping to succeed. (integer value)
@@ -1143,9 +1154,11 @@
 
 # Timeout in seconds to wait for the TCP connection to be successful.
 # (integer value)
+# Deprecated group/name - [compute]/ssh_channel_timeout
 #connect_timeout = 60
 
 # Timeout in seconds to wait for the ssh banner. (integer value)
+# Deprecated group/name - [compute]/ssh_timeout
 #ssh_timeout = 300
 
 

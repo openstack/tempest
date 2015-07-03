@@ -377,8 +377,8 @@ class NovaQuotaService(BaseService):
 
     def dry_run(self):
         client = self.limits_client
-        quotas = client.get_absolute_limits()
-        self.data['compute_quotas'] = quotas
+        quotas = client.show_limits()
+        self.data['compute_quotas'] = quotas['absolute']
 
 
 # Begin network service classes
@@ -418,131 +418,6 @@ class NetworkService(BaseService):
     def dry_run(self):
         networks = self.list()
         self.data['networks'] = networks
-
-
-class NetworkIpSecPolicyService(NetworkService):
-
-    def list(self):
-        client = self.client
-        ipsecpols = client.list_ipsecpolicies()
-        ipsecpols = ipsecpols['ipsecpolicies']
-        ipsecpols = self._filter_by_tenant_id(ipsecpols)
-        LOG.debug("List count, %s IP Security Policies" % len(ipsecpols))
-        return ipsecpols
-
-    def delete(self):
-        client = self.client
-        ipsecpols = self.list()
-        for ipsecpol in ipsecpols:
-            try:
-                client.delete_ipsecpolicy(ipsecpol['id'])
-            except Exception as e:
-                LOG.exception("Delete IP Securty Policy exception: %s" % e)
-                pass
-
-    def dry_run(self):
-        ipsecpols = self.list()
-        self.data['ip_security_policies'] = ipsecpols
-
-
-class NetworkFwPolicyService(NetworkService):
-
-    def list(self):
-        client = self.client
-        fwpols = client.list_firewall_policies()
-        fwpols = fwpols['firewall_policies']
-        fwpols = self._filter_by_tenant_id(fwpols)
-        LOG.debug("List count, %s Firewall Policies" % len(fwpols))
-        return fwpols
-
-    def delete(self):
-        client = self.client
-        fwpols = self.list()
-        for fwpol in fwpols:
-            try:
-                client.delete_firewall_policy(fwpol['id'])
-            except Exception as e:
-                LOG.exception("Delete Firewall Policy exception: %s" % e)
-                pass
-
-    def dry_run(self):
-        fwpols = self.list()
-        self.data['firewall_policies'] = fwpols
-
-
-class NetworkFwRulesService(NetworkService):
-
-    def list(self):
-        client = self.client
-        fwrules = client.list_firewall_rules()
-        fwrules = fwrules['firewall_rules']
-        fwrules = self._filter_by_tenant_id(fwrules)
-        LOG.debug("List count, %s Firewall Rules" % len(fwrules))
-        return fwrules
-
-    def delete(self):
-        client = self.client
-        fwrules = self.list()
-        for fwrule in fwrules:
-            try:
-                client.delete_firewall_rule(fwrule['id'])
-            except Exception as e:
-                LOG.exception("Delete Firewall Rule exception: %s" % e)
-                pass
-
-    def dry_run(self):
-        fwrules = self.list()
-        self.data['firewall_rules'] = fwrules
-
-
-class NetworkIkePolicyService(NetworkService):
-
-    def list(self):
-        client = self.client
-        ikepols = client.list_ikepolicies()
-        ikepols = ikepols['ikepolicies']
-        ikepols = self._filter_by_tenant_id(ikepols)
-        LOG.debug("List count, %s IKE Policies" % len(ikepols))
-        return ikepols
-
-    def delete(self):
-        client = self.client
-        ikepols = self.list()
-        for ikepol in ikepols:
-            try:
-                client.delete_firewall_rule(ikepol['id'])
-            except Exception as e:
-                LOG.exception("Delete IKE Policy exception: %s" % e)
-                pass
-
-    def dry_run(self):
-        ikepols = self.list()
-        self.data['ike_policies'] = ikepols
-
-
-class NetworkVpnServiceService(NetworkService):
-
-    def list(self):
-        client = self.client
-        vpnsrvs = client.list_vpnservices()
-        vpnsrvs = vpnsrvs['vpnservices']
-        vpnsrvs = self._filter_by_tenant_id(vpnsrvs)
-        LOG.debug("List count, %s VPN Services" % len(vpnsrvs))
-        return vpnsrvs
-
-    def delete(self):
-        client = self.client
-        vpnsrvs = self.list()
-        for vpnsrv in vpnsrvs:
-            try:
-                client.delete_vpnservice(vpnsrv['id'])
-            except Exception as e:
-                LOG.exception("Delete VPN Service exception: %s" % e)
-                pass
-
-    def dry_run(self):
-        vpnsrvs = self.list()
-        self.data['vpn_services'] = vpnsrvs
 
 
 class NetworkFloatingIpService(NetworkService):
@@ -1094,18 +969,6 @@ def get_tenant_cleanup_services():
     if IS_HEAT:
         tenant_services.append(StackService)
     if IS_NEUTRON:
-        if test.is_extension_enabled('vpnaas', 'network'):
-            tenant_services.append(NetworkIpSecPolicyService)
-            tenant_services.append(NetworkIkePolicyService)
-            tenant_services.append(NetworkVpnServiceService)
-        if test.is_extension_enabled('fwaas', 'network'):
-            tenant_services.append(NetworkFwPolicyService)
-            tenant_services.append(NetworkFwRulesService)
-        if test.is_extension_enabled('lbaas', 'network'):
-            tenant_services.append(NetworkHealthMonitorService)
-            tenant_services.append(NetworkMemberService)
-            tenant_services.append(NetworkVipService)
-            tenant_services.append(NetworkPoolService)
         if test.is_extension_enabled('metering', 'network'):
             tenant_services.append(NetworkMeteringLabelRuleService)
             tenant_services.append(NetworkMeteringLabelService)

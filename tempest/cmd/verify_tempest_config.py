@@ -57,14 +57,17 @@ def print_and_or_update(option, group, value, update):
         change_option(option, group, value)
 
 
+def contains_version(prefix, versions):
+    return any([x for x in versions if x.startswith(prefix)])
+
+
 def verify_glance_api_versions(os, update):
     # Check glance api versions
-    versions = os.image_client.get_versions()
-    if CONF.image_feature_enabled.api_v1 != ('v1.1' in versions or 'v1.0' in
-                                             versions):
+    _, versions = os.image_client.get_versions()
+    if CONF.image_feature_enabled.api_v1 != contains_version('v1.', versions):
         print_and_or_update('api_v1', 'image_feature_enabled',
                             not CONF.image_feature_enabled.api_v1, update)
-    if CONF.image_feature_enabled.api_v2 != ('v2.0' in versions):
+    if CONF.image_feature_enabled.api_v2 != contains_version('v2.', versions):
         print_and_or_update('api_v2', 'image_feature_enabled',
                             not CONF.image_feature_enabled.api_v2, update)
 
@@ -100,10 +103,12 @@ def _get_api_versions(os, service):
 def verify_keystone_api_versions(os, update):
     # Check keystone api versions
     versions = _get_api_versions(os, 'keystone')
-    if CONF.identity_feature_enabled.api_v2 != ('v2.0' in versions):
+    if (CONF.identity_feature_enabled.api_v2 !=
+            contains_version('v2.', versions)):
         print_and_or_update('api_v2', 'identity_feature_enabled',
                             not CONF.identity_feature_enabled.api_v2, update)
-    if CONF.identity_feature_enabled.api_v3 != ('v3.0' in versions):
+    if (CONF.identity_feature_enabled.api_v3 !=
+            contains_version('v3.', versions)):
         print_and_or_update('api_v3', 'identity_feature_enabled',
                             not CONF.identity_feature_enabled.api_v3, update)
 
@@ -111,10 +116,12 @@ def verify_keystone_api_versions(os, update):
 def verify_cinder_api_versions(os, update):
     # Check cinder api versions
     versions = _get_api_versions(os, 'cinder')
-    if CONF.volume_feature_enabled.api_v1 != ('v1.0' in versions):
+    if (CONF.volume_feature_enabled.api_v1 !=
+            contains_version('v1.', versions)):
         print_and_or_update('api_v1', 'volume_feature_enabled',
                             not CONF.volume_feature_enabled.api_v1, update)
-    if CONF.volume_feature_enabled.api_v2 != ('v2.0' in versions):
+    if (CONF.volume_feature_enabled.api_v2 !=
+            contains_version('v2.', versions)):
         print_and_or_update('api_v2', 'volume_feature_enabled',
                             not CONF.volume_feature_enabled.api_v2, update)
 

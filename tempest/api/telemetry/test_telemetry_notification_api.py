@@ -10,7 +10,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest_lib import decorators
 import testtools
 
 from tempest.api.telemetry import base
@@ -46,7 +45,6 @@ class TelemetryNotificationAPITestJSON(base.BaseTelemetryTest):
     @test.services("image")
     @testtools.skipIf(not CONF.image_feature_enabled.api_v1,
                       "Glance api v1 is disabled")
-    @decorators.skip_because(bug='1351627')
     def test_check_glance_v1_notifications(self):
         body = self.create_image(self.image_client)
         self.image_client.update_image(body['id'], data='data')
@@ -63,12 +61,11 @@ class TelemetryNotificationAPITestJSON(base.BaseTelemetryTest):
     @test.services("image")
     @testtools.skipIf(not CONF.image_feature_enabled.api_v2,
                       "Glance api v2 is disabled")
-    @decorators.skip_because(bug='1351627')
     def test_check_glance_v2_notifications(self):
         body = self.create_image(self.image_client_v2)
 
-        self.image_client_v2.store_image(body['id'], "file")
-        self.image_client_v2.get_image_file(body['id'])
+        self.image_client_v2.store_image_file(body['id'], "file")
+        self.image_client_v2.load_image_file(body['id'])
 
         query = 'resource', 'eq', body['id']
 

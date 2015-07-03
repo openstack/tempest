@@ -940,41 +940,6 @@ class NetworkScenarioTest(ScenarioTest):
 
         return rules
 
-    def _create_pool(self, lb_method, protocol, subnet_id):
-        """Wrapper utility that returns a test pool."""
-        client = self.network_client
-        name = data_utils.rand_name('pool')
-        resp_pool = client.create_pool(protocol=protocol, name=name,
-                                       subnet_id=subnet_id,
-                                       lb_method=lb_method)
-        pool = net_resources.DeletablePool(client=client, **resp_pool['pool'])
-        self.assertEqual(pool['name'], name)
-        self.addCleanup(self.delete_wrapper, pool.delete)
-        return pool
-
-    def _create_member(self, address, protocol_port, pool_id):
-        """Wrapper utility that returns a test member."""
-        client = self.network_client
-        resp_member = client.create_member(protocol_port=protocol_port,
-                                           pool_id=pool_id,
-                                           address=address)
-        member = net_resources.DeletableMember(client=client,
-                                               **resp_member['member'])
-        self.addCleanup(self.delete_wrapper, member.delete)
-        return member
-
-    def _create_vip(self, protocol, protocol_port, subnet_id, pool_id):
-        """Wrapper utility that returns a test vip."""
-        client = self.network_client
-        name = data_utils.rand_name('vip')
-        resp_vip = client.create_vip(protocol=protocol, name=name,
-                                     subnet_id=subnet_id, pool_id=pool_id,
-                                     protocol_port=protocol_port)
-        vip = net_resources.DeletableVip(client=client, **resp_vip['vip'])
-        self.assertEqual(vip['name'], name)
-        self.addCleanup(self.delete_wrapper, vip.delete)
-        return vip
-
     def _ssh_to_server(self, server, private_key):
         ssh_login = CONF.compute.image_ssh_user
         return self.get_remote_client(server,
