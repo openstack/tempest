@@ -91,7 +91,7 @@ class ServersTestJSON(base.BaseV2ComputeTest):
     @test.idempotent_id('585e934c-448e-43c4-acbf-d06a9b899997')
     def test_list_servers_with_detail(self):
         # The created server should be in the detailed list of all servers
-        body = self.client.list_servers_with_detail()
+        body = self.client.list_servers(detail=True)
         servers = body['servers']
         found = any([i for i in servers if i['id'] == self.server['id']])
         self.assertTrue(found)

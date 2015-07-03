@@ -52,7 +52,7 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
     @test.idempotent_id('51717b38-bdc1-458b-b636-1cf82d99f62f')
     def test_list_servers_by_admin(self):
         # Listing servers by admin user returns empty list by default
-        body = self.client.list_servers_with_detail()
+        body = self.client.list_servers(detail=True)
         servers = body['servers']
         self.assertEqual([], servers)
 
@@ -61,7 +61,7 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
         # Filter the list of servers by server error status
         params = {'status': 'error'}
         self.client.reset_state(self.s1_id, state='error')
-        body = self.non_admin_client.list_servers(params)
+        body = self.non_admin_client.list_servers(**params)
         # Reset server's state to 'active'
         self.client.reset_state(self.s1_id, state='active')
         # Verify server's state
@@ -77,7 +77,7 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
         # Listing servers by admin user with all tenants parameter
         # Here should be listed all servers
         params = {'all_tenants': ''}
-        body = self.client.list_servers_with_detail(params)
+        body = self.client.list_servers(detail=True, **params)
         servers = body['servers']
         servers_name = map(lambda x: x['name'], servers)
 
@@ -91,14 +91,14 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
         # List the primary tenant but get nothing due to odd specified behavior
         tenant_id = self.non_admin_client.tenant_id
         params = {'tenant_id': tenant_id}
-        body = self.client.list_servers_with_detail(params)
+        body = self.client.list_servers(detail=True, **params)
         servers = body['servers']
         self.assertEqual([], servers)
 
         # List the admin tenant which has no servers
         admin_tenant_id = self.client.tenant_id
         params = {'all_tenants': '', 'tenant_id': admin_tenant_id}
-        body = self.client.list_servers_with_detail(params)
+        body = self.client.list_servers(detail=True, **params)
         servers = body['servers']
         self.assertEqual([], servers)
 
@@ -118,10 +118,10 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
         self.assertEqual(server['status'], 'ACTIVE')
         hostname = server[self._host_key]
         params = {'host': hostname}
-        body = self.client.list_servers(params)
+        body = self.client.list_servers(**params)
         servers = body['servers']
         nonexistent_params = {'host': 'nonexistent_host'}
-        nonexistent_body = self.client.list_servers(nonexistent_params)
+        nonexistent_body = self.client.list_servers(**nonexistent_params)
         nonexistent_servers = nonexistent_body['servers']
         self.assertIn(test_server['id'], map(lambda x: x['id'], servers))
         self.assertNotIn(test_server['id'],

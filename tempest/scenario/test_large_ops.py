@@ -102,7 +102,7 @@ class TestLargeOpsScenario(manager.ScenarioTest):
             **create_kwargs)
         # needed because of bug 1199788
         params = {'name': name}
-        server_list = self.servers_client.list_servers(params)
+        server_list = self.servers_client.list_servers(**params)
         self.servers = server_list['servers']
         for server in self.servers:
             # after deleting all servers - wait for all servers to clear
