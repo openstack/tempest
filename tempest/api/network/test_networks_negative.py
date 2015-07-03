@@ -57,3 +57,17 @@ class NetworksNegativeTestJSON(base.BaseNetworkTest):
         non_exist_id = data_utils.rand_name('network')
         self.assertRaises(lib_exc.NotFound, self.client.delete_network,
                           non_exist_id)
+
+    @test.attr(type=['negative'])
+    @test.idempotent_id('1cc47884-ac52-4415-a31c-e7ce5474a868')
+    def test_update_non_existent_subnet(self):
+        non_exist_id = data_utils.rand_uuid()
+        self.assertRaises(lib_exc.NotFound, self.client.update_subnet,
+                          non_exist_id, name='new_name')
+
+    @test.attr(type=['negative'])
+    @test.idempotent_id('a176c859-99fb-42ec-a208-8a85b552a239')
+    def test_delete_non_existent_subnet(self):
+        non_exist_id = data_utils.rand_uuid()
+        self.assertRaises(lib_exc.NotFound,
+                          self.client.delete_subnet, non_exist_id)
