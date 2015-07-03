@@ -4,7 +4,8 @@
 pbr<2.0,>=0.11
 anyjson>=0.3.3
 httplib2>=0.7.5
-jsonschema!=2.5.0,<3.0.0,>=2.0.0
+#jsonschema!=2.5.0,<3.0.0,>=2.0.0
+jsonschema<3.0.0,>=2.0.0,!=2.5.0
 testtools>=1.4.0
 boto>=2.32.1
 paramiko>=1.13.0
