@@ -1,0 +1,65 @@
+tenants:
+  - javelin
+  - discuss
+
+users:
+  - name: javelin
+    pass: gungnir
+    tenant: javelin
+  - name: javelin2
+    pass: gungnir2
+    tenant: discuss
+
+secgroups:
+  - name: secgroup1
+    owner: javelin
+    description: SecurityGroup1
+    rules:
+      - 'icmp -1 -1 0.0.0.0/0'
+      - 'tcp 22 22 0.0.0.0/0'
+  - name: secgroup2
+    owner: javelin2
+    description: SecurityGroup2
+    rules:
+      - 'tcp 80 80 0.0.0.0/0'
+
+images:
+  - name: cirros1
+    owner: javelin
+    imgdir: images
+    file: cirros.img
+    container_format: bare
+    disk_format: qcow2
+  - name: cirros2
+    owner: javelin2
+    imgdir: files/images/cirros-0.3.2-x86_64-uec
+    file: cirros-0.3.2-x86_64-blank.img
+    container_format: ami
+    disk_format: ami
+    aki: cirros-0.3.2-x86_64-vmlinuz
+    ari: cirros-0.3.2-x86_64-initrd
+
+networks:
+  - name: network1
+    owner: javelin
+  - name: network2
+    owner: javelin2
+
+subnets:
+  - name: net1-subnet1
+    range: 10.1.0.0/24
+    network: network1
+    owner: javelin
+  - name: net2-subnet2
+    range: 192.168.1.0/24
+    network: network2
+    owner: javelin2
+
+objects:
+  - container: container1
+    name: object1
+    owner: javelin
+    file: /etc/hosts
+    swift_role: Member
+
+telemetry: true

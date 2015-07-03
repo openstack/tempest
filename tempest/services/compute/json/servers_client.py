@@ -20,14 +20,11 @@ import time
 from six.moves.urllib import parse as urllib
 from tempest_lib import exceptions as lib_exc
 
-from tempest.services.volume.json import boot_from_vol_client
 from tempest.api_schema.response.compute.v2_1 import servers as schema
 from tempest.common import service_client
 from tempest.common import waiters
 from tempest import exceptions
-from tempest import config
 
-CONF = config.CONF
 
 class ServersClientJSON(service_client.ServiceClient):
 
@@ -36,7 +33,6 @@ class ServersClientJSON(service_client.ServiceClient):
         super(ServersClientJSON, self).__init__(
             auth_provider, service, region, **kwargs)
         self.enable_instance_password = enable_instance_password
-        self.bfv_cleanup = boot_from_vol_client.get_cleanBFV_obj(auth_provider)
 
     def create_server(self, name, image_ref, flavor_ref, **kwargs):
         """
@@ -68,13 +64,6 @@ class ServersClientJSON(service_client.ServiceClient):
             'imageRef': image_ref,
             'flavorRef': flavor_ref
         }
-
-        if CONF.compute_feature_enabled.boot_from_volume_only:
-            kwargs = boot_from_vol_client.set_block_device_mapping_args(
-                     image_ref, kwargs)
-        if 'key_name' not in kwargs and CONF.validation.run_validation and \
-            CONF.compute.ssh_auth_method == 'keypair' and CONF.compute.keypair_name:
-            kwargs['key_name'] = CONF.compute.keypair_name
 
         for option in ['personality', 'adminPass', 'key_name',
                        'security_groups', 'networks', 'user_data',
@@ -142,28 +131,22 @@ class ServersClientJSON(service_client.ServiceClient):
             post_body['OS-DCF:diskConfig'] = disk_config
 
         post_body = json.dumps({'server': post_body})
-        resp, body = self.put("servers/%s" % str(server_id), post_body)
+        resp, body = self.put("servers/%s" % server_id, post_body)
         body = json.loads(body)
         self.validate_response(schema.update_server, resp, body)
         return service_client.ResponseBody(resp, body['server'])
 
     def get_server(self, server_id):
         """Returns the details of an existing server."""
-        resp, body = self.get("servers/%s" % str(server_id))
+        resp, body = self.get("servers/%s" % server_id)
         body = json.loads(body)
         self.validate_response(schema.get_server, resp, body)
         return service_client.ResponseBody(resp, body['server'])
 
     def delete_server(self, server_id):
         """Deletes the given server."""
-        server = self.get_server(server_id)
-        resp, body = self.delete("servers/%s" % str(server_id))
+        resp, body = self.delete("servers/%s" % server_id)
         self.validate_response(schema.delete_server, resp, body)
-        if CONF.compute_feature_enabled.boot_from_volume_only:
-            self.wait_for_server_termination(server_id, True)
-            if server['os-extended-volumes:volumes_attached']:
-                self.bfv_cleanup.clean_bfv_resource([server[
-                  'os-extended-volumes:volumes_attached'][0]['id']])
         return service_client.ResponseBody(resp, body)
 
     def list_servers(self, params=None):
@@ -218,7 +201,7 @@ class ServersClientJSON(service_client.ServiceClient):
 
     def list_addresses(self, server_id):
         """Lists all addresses for a server."""
-        resp, body = self.get("servers/%s/ips" % str(server_id))
+        resp, body = self.get("servers/%s/ips" % server_id)
         body = json.loads(body)
         self.validate_response(schema.list_addresses, resp, body)
         return service_client.ResponseBody(resp, body['addresses'])
@@ -226,7 +209,7 @@ class ServersClientJSON(service_client.ServiceClient):
     def list_addresses_by_network(self, server_id, network_id):
         """Lists all addresses of a specific network type for a server."""
         resp, body = self.get("servers/%s/ips/%s" %
-                              (str(server_id), network_id))
+                              (server_id, network_id))
         body = json.loads(body)
         self.validate_response(schema.list_addresses_by_network, resp, body)
         return service_client.ResponseBody(resp, body)
@@ -235,7 +218,7 @@ class ServersClientJSON(service_client.ServiceClient):
                schema=schema.server_actions_common_schema,
                response_class=service_client.ResponseBody, **kwargs):
         post_body = json.dumps({action_name: kwargs})
-        resp, body = self.post('servers/%s/action' % str(server_id),
+        resp, body = self.post('servers/%s/action' % server_id,
                                post_body)
         if response_key is not None:
             body = json.loads(body)
@@ -267,7 +250,7 @@ class ServersClientJSON(service_client.ServiceClient):
 
     def get_password(self, server_id):
         resp, body = self.get("servers/%s/os-server-password" %
-                              str(server_id))
+                              server_id)
         body = json.loads(body)
         self.validate_response(schema.get_password, resp, body)
         return service_client.ResponseBody(resp, body)
@@ -279,7 +262,7 @@ class ServersClientJSON(service_client.ServiceClient):
         password.
         """
         resp, body = self.delete("servers/%s/os-server-password" %
-                                 str(server_id))
+                                 server_id)
         self.validate_response(schema.server_actions_delete_password,
                                resp, body)
         return service_client.ResponseBody(resp, body)
@@ -291,9 +274,6 @@ class ServersClientJSON(service_client.ServiceClient):
     def rebuild(self, server_id, image_ref, **kwargs):
         """Rebuilds a server with a new image."""
         kwargs['imageRef'] = image_ref
-        if 'key_name' not in kwargs and CONF.validation.run_validation and \
-            CONF.compute.ssh_auth_method == 'keypair' and CONF.compute.keypair_name:
-            kwargs['key_name'] = CONF.compute.keypair_name
         if 'disk_config' in kwargs:
             kwargs['OS-DCF:diskConfig'] = kwargs['disk_config']
             del kwargs['disk_config']
@@ -323,7 +303,7 @@ class ServersClientJSON(service_client.ServiceClient):
         return self.action(server_id, 'revertResize', None, **kwargs)
 
     def list_server_metadata(self, server_id):
-        resp, body = self.get("servers/%s/metadata" % str(server_id))
+        resp, body = self.get("servers/%s/metadata" % server_id)
         body = json.loads(body)
         self.validate_response(schema.list_server_metadata, resp, body)
         return service_client.ResponseBody(resp, body['metadata'])
@@ -333,7 +313,7 @@ class ServersClientJSON(service_client.ServiceClient):
             post_body = ""
         else:
             post_body = json.dumps({'metadata': meta})
-        resp, body = self.put('servers/%s/metadata' % str(server_id),
+        resp, body = self.put('servers/%s/metadata' % server_id,
                               post_body)
         body = json.loads(body)
         self.validate_response(schema.set_server_metadata, resp, body)
@@ -341,7 +321,7 @@ class ServersClientJSON(service_client.ServiceClient):
 
     def update_server_metadata(self, server_id, meta):
         post_body = json.dumps({'metadata': meta})
-        resp, body = self.post('servers/%s/metadata' % str(server_id),
+        resp, body = self.post('servers/%s/metadata' % server_id,
                                post_body)
         body = json.loads(body)
         self.validate_response(schema.update_server_metadata,
@@ -349,7 +329,7 @@ class ServersClientJSON(service_client.ServiceClient):
         return service_client.ResponseBody(resp, body['metadata'])
 
     def get_server_metadata_item(self, server_id, key):
-        resp, body = self.get("servers/%s/metadata/%s" % (str(server_id), key))
+        resp, body = self.get("servers/%s/metadata/%s" % (server_id, key))
         body = json.loads(body)
         self.validate_response(schema.set_get_server_metadata_item,
                                resp, body)
@@ -357,7 +337,7 @@ class ServersClientJSON(service_client.ServiceClient):
 
     def set_server_metadata_item(self, server_id, key, meta):
         post_body = json.dumps({'meta': meta})
-        resp, body = self.put('servers/%s/metadata/%s' % (str(server_id), key),
+        resp, body = self.put('servers/%s/metadata/%s' % (server_id, key),
                               post_body)
         body = json.loads(body)
         self.validate_response(schema.set_get_server_metadata_item,
@@ -366,7 +346,7 @@ class ServersClientJSON(service_client.ServiceClient):
 
     def delete_server_metadata_item(self, server_id, key):
         resp, body = self.delete("servers/%s/metadata/%s" %
-                                 (str(server_id), key))
+                                 (server_id, key))
         self.validate_response(schema.delete_server_metadata_item,
                                resp, body)
         return service_client.ResponseBody(resp, body)
@@ -401,7 +381,7 @@ class ServersClientJSON(service_client.ServiceClient):
     def get_volume_attachment(self, server_id, attach_id):
         """Return details about the given volume attachment."""
         resp, body = self.get('servers/%s/os-volume_attachments/%s' % (
-            str(server_id), attach_id))
+            server_id, attach_id))
         body = json.loads(body)
         self.validate_response(schema.get_volume_attachment, resp, body)
         return service_client.ResponseBody(resp, body['volumeAttachment'])
@@ -409,7 +389,7 @@ class ServersClientJSON(service_client.ServiceClient):
     def list_volume_attachments(self, server_id):
         """Returns the list of volume attachments for a given instance."""
         resp, body = self.get('servers/%s/os-volume_attachments' % (
-            str(server_id)))
+            server_id))
         body = json.loads(body)
         self.validate_response(schema.list_volume_attachments, resp, body)
         return service_client.ResponseBodyList(resp, body['volumeAttachments'])
@@ -433,7 +413,7 @@ class ServersClientJSON(service_client.ServiceClient):
 
         req_body = json.dumps({'os-migrateLive': migrate_params})
 
-        resp, body = self.post("servers/%s/action" % str(server_id), req_body)
+        resp, body = self.post("servers/%s/action" % server_id, req_body)
         self.validate_response(schema.server_actions_common_schema,
                                resp, body)
         return service_client.ResponseBody(resp, body)
@@ -512,13 +492,13 @@ class ServersClientJSON(service_client.ServiceClient):
 
     def get_server_diagnostics(self, server_id):
         """Get the usage data for a server."""
-        resp, body = self.get("servers/%s/diagnostics" % str(server_id))
+        resp, body = self.get("servers/%s/diagnostics" % server_id)
         return service_client.ResponseBody(resp, json.loads(body))
 
     def list_instance_actions(self, server_id):
         """List the provided server action."""
         resp, body = self.get("servers/%s/os-instance-actions" %
-                              str(server_id))
+                              server_id)
         body = json.loads(body)
         self.validate_response(schema.list_instance_actions, resp, body)
         return service_client.ResponseBodyList(resp, body['instanceActions'])
@@ -526,7 +506,7 @@ class ServersClientJSON(service_client.ServiceClient):
     def get_instance_action(self, server_id, request_id):
         """Returns the action details of the provided server."""
         resp, body = self.get("servers/%s/os-instance-actions/%s" %
-                              (str(server_id), str(request_id)))
+                              (server_id, request_id))
         body = json.loads(body)
         self.validate_response(schema.get_instance_action, resp, body)
         return service_client.ResponseBody(resp, body['instanceAction'])
@@ -573,7 +553,7 @@ class ServersClientJSON(service_client.ServiceClient):
 
     def delete_server_group(self, server_group_id):
         """Delete the given server-group."""
-        resp, body = self.delete("os-server-groups/%s" % str(server_group_id))
+        resp, body = self.delete("os-server-groups/%s" % server_group_id)
         self.validate_response(schema.delete_server_group, resp, body)
         return service_client.ResponseBody(resp, body)
 
@@ -586,7 +566,7 @@ class ServersClientJSON(service_client.ServiceClient):
 
     def get_server_group(self, server_group_id):
         """Get the details of given server_group."""
-        resp, body = self.get("os-server-groups/%s" % str(server_group_id))
+        resp, body = self.get("os-server-groups/%s" % server_group_id)
         body = json.loads(body)
         self.validate_response(schema.create_get_server_group, resp, body)
         return service_client.ResponseBody(resp, body['server_group'])

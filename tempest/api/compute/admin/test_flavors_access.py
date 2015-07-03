@@ -87,7 +87,7 @@ class FlavorsAccessTestJSON(base.BaseV2ComputeAdminTest):
         self.assertIn(resp_body, add_body)
 
         # The flavor is present in list.
-        flavors = self.flavors_client.list_flavors_with_detail()
+        flavors = self.flavors_client.list_flavors(detail=True)
         self.assertIn(new_flavor['id'], map(lambda x: x['id'], flavors))
 
         # Remove flavor access from a tenant.
@@ -96,5 +96,5 @@ class FlavorsAccessTestJSON(base.BaseV2ComputeAdminTest):
         self.assertNotIn(resp_body, remove_body)
 
         # The flavor is not present in list.
-        flavors = self.flavors_client.list_flavors_with_detail()
+        flavors = self.flavors_client.list_flavors(detail=True)
         self.assertNotIn(new_flavor['id'], map(lambda x: x['id'], flavors))

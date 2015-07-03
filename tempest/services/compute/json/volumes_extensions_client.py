@@ -32,9 +32,12 @@ class VolumesExtensionsClientJSON(service_client.ServiceClient):
             auth_provider, service, region, **kwargs)
         self.default_volume_size = default_volume_size
 
-    def list_volumes(self, params=None):
+    def list_volumes(self, detail=False, **params):
         """List all the volumes created."""
         url = 'os-volumes'
+
+        if detail:
+            url += '/detail'
         if params:
             url += '?%s' % urllib.urlencode(params)
 
@@ -43,20 +46,9 @@ class VolumesExtensionsClientJSON(service_client.ServiceClient):
         self.validate_response(schema.list_volumes, resp, body)
         return service_client.ResponseBodyList(resp, body['volumes'])
 
-    def list_volumes_with_detail(self, params=None):
-        """List all the details of volumes."""
-        url = 'os-volumes/detail'
-        if params:
-            url += '?%s' % urllib.urlencode(params)
-
-        resp, body = self.get(url)
-        body = json.loads(body)
-        self.validate_response(schema.list_volumes, resp, body)
-        return service_client.ResponseBodyList(resp, body['volumes'])
-
-    def get_volume(self, volume_id):
+    def show_volume(self, volume_id):
         """Returns the details of a single volume."""
-        url = "os-volumes/%s" % str(volume_id)
+        url = "os-volumes/%s" % volume_id
         resp, body = self.get(url)
         body = json.loads(body)
         self.validate_response(schema.create_get_volume, resp, body)
@@ -85,19 +77,19 @@ class VolumesExtensionsClientJSON(service_client.ServiceClient):
 
     def delete_volume(self, volume_id):
         """Deletes the Specified Volume."""
-        resp, body = self.delete("os-volumes/%s" % str(volume_id))
+        resp, body = self.delete("os-volumes/%s" % volume_id)
         self.validate_response(schema.delete_volume, resp, body)
         return service_client.ResponseBody(resp, body)
 
     def wait_for_volume_status(self, volume_id, status):
         """Waits for a Volume to reach a given status."""
-        body = self.get_volume(volume_id)
+        body = self.show_volume(volume_id)
         volume_status = body['status']
         start = int(time.time())
 
         while volume_status != status:
             time.sleep(self.build_interval)
-            body = self.get_volume(volume_id)
+            body = self.show_volume(volume_id)
             volume_status = body['status']
             if volume_status == 'error':
                 raise exceptions.VolumeBuildErrorException(volume_id=volume_id)
@@ -111,7 +103,7 @@ class VolumesExtensionsClientJSON(service_client.ServiceClient):
 
     def is_resource_deleted(self, id):
         try:
-            self.get_volume(id)
+            self.show_volume(id)
         except lib_exc.NotFound:
             return True
         return False

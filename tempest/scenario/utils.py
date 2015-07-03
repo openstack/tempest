@@ -65,7 +65,7 @@ class ImageUtils(object):
 
     def is_flavor_enough(self, flavor_id, image_id):
         _image = self.images_client.show_image(image_id)
-        _flavor = self.flavors_client.get_flavor_details(flavor_id)
+        _flavor = self.flavors_client.show_flavor(flavor_id)
         return self._is_flavor_enough(_flavor, _image)
 
 

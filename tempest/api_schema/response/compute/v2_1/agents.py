@@ -23,6 +23,7 @@ common_agent_info = {
         'url': {'type': 'string', 'format': 'uri'},
         'md5hash': {'type': 'string'}
     },
+    'additionalProperties': False,
     'required': ['agent_id', 'hypervisor', 'os', 'architecture',
                  'version', 'url', 'md5hash']
 }
@@ -37,6 +38,7 @@ list_agents = {
                 'items': common_agent_info
             }
         },
+        'additionalProperties': False,
         'required': ['agents']
     }
 }
@@ -48,6 +50,7 @@ create_agent = {
         'properties': {
             'agent': common_agent_info
         },
+        'additionalProperties': False,
         'required': ['agent']
     }
 }

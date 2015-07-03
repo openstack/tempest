@@ -53,14 +53,16 @@ class ServersTestJSON(base.BaseV2ComputeTest):
         personality = [{'path': '/test.txt',
                        'contents': base64.b64encode(file_contents)}]
         disk_config = cls.disk_config
-        cls.server_initial = cls.create_test_server(name=cls.name,
-                                                    meta=cls.meta,
-                                                    accessIPv4=cls.accessIPv4,
-                                                    accessIPv6=cls.accessIPv6,
-                                                    personality=personality,
-                                                    disk_config=disk_config)
+        cls.server_initial = cls.create_test_server(
+            validatable=True,
+            wait_until='ACTIVE',
+            name=cls.name,
+            meta=cls.meta,
+            accessIPv4=cls.accessIPv4,
+            accessIPv6=cls.accessIPv6,
+            personality=personality,
+            disk_config=disk_config)
         cls.password = cls.server_initial['adminPass']
-        cls.client.wait_for_server_status(cls.server_initial['id'], 'ACTIVE')
         cls.server = cls.client.get_server(cls.server_initial['id'])
         cls.floating_ip = cls.create_assign_floating_ip(cls.server['id'])
 
@@ -101,7 +103,7 @@ class ServersTestJSON(base.BaseV2ComputeTest):
     def test_verify_created_server_vcpus(self):
         # Verify that the number of vcpus reported by the instance matches
         # the amount stated by the flavor
-        flavor = self.flavors_client.get_flavor_details(self.flavor_ref)
+        flavor = self.flavors_client.show_flavor(self.flavor_ref)
         linux_client = remote_client.RemoteClient(self.floating_ip,
                                            self.ssh_user, self.password)
         self.assertEqual(flavor['vcpus'], linux_client.get_number_of_vcpus())

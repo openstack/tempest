@@ -839,8 +839,8 @@ class ObjectTest(base.BaseObjectTest):
         resp, _ = self.object_client.create_object(src_container_name,
                                                    object_name, data)
         # set object metadata
-        meta_key = data_utils.rand_name(name='test-')
-        meta_value = data_utils.rand_name(name='MetaValue-')
+        meta_key = data_utils.rand_name(name='test')
+        meta_value = data_utils.rand_name(name='MetaValue')
         orig_metadata = {meta_key: meta_value}
         resp, _ = self.object_client.update_object_metadata(src_container_name,
                                                             object_name,

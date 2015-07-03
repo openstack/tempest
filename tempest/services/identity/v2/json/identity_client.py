@@ -17,6 +17,14 @@ from tempest.common import service_client
 
 
 class IdentityClientJSON(service_client.ServiceClient):
+    api_version = "v2.0"
+
+    def get_api_description(self):
+        """Retrieves info about the v2.0 Identity API"""
+        url = ''
+        resp, body = self.get(url)
+        self.expected_success([200, 203], resp.status)
+        return service_client.ResponseBody(resp, self._parse_resp(body))
 
     def has_admin_extensions(self):
         """

@@ -58,7 +58,7 @@ class SecurityGroupsNegativeTestJSON(base.BaseSecurityGroupsTest):
         # Negative test:Should not be able to GET the details
         # of non-existent Security Group
         non_exist_id = self._generate_a_non_existent_security_group_id()
-        self.assertRaises(lib_exc.NotFound, self.client.get_security_group,
+        self.assertRaises(lib_exc.NotFound, self.client.show_security_group,
                           non_exist_id)
 
     @decorators.skip_because(bug="1161411",

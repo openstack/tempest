@@ -61,6 +61,26 @@ class JavelinUnitTest(base.TestCase):
         javelin.client_for_user(fake_non_existing_user['name'])
         self.assertFalse(javelin.OSClient.called)
 
+    def test_attach_volumes(self):
+        self.useFixture(mockpatch.PatchObject(javelin, "client_for_user",
+                                              return_value=self.fake_client))
+
+        self.useFixture(mockpatch.PatchObject(
+            javelin, "_get_volume_by_name",
+            return_value=self.fake_object.volume))
+
+        self.useFixture(mockpatch.PatchObject(
+            javelin, "_get_server_by_name",
+            return_value=self.fake_object.server))
+
+        javelin.attach_volumes([self.fake_object])
+
+        mocked_function = self.fake_client.volumes.attach_volume
+        mocked_function.assert_called_once_with(
+            self.fake_object.volume['id'],
+            self.fake_object.server['id'],
+            self.fake_object['device'])
+
 
 class TestCreateResources(JavelinUnitTest):
     def test_create_tenants(self):
@@ -89,7 +109,7 @@ class TestCreateResources(JavelinUnitTest):
         self.fake_client.identity.get_tenant_by_name.return_value = \
             self.fake_object['tenant']
         self.fake_client.identity.get_user_by_username.side_effect = \
-            lib_exc.NotFound()
+            lib_exc.NotFound("user is not found")
         self.useFixture(mockpatch.PatchObject(javelin, "keystone_admin",
                                               return_value=self.fake_client))
 
@@ -106,7 +126,7 @@ class TestCreateResources(JavelinUnitTest):
 
     def test_create_user_missing_tenant(self):
         self.fake_client.identity.get_tenant_by_name.side_effect = \
-            lib_exc.NotFound()
+            lib_exc.NotFound("tenant is not found")
         self.useFixture(mockpatch.PatchObject(javelin, "keystone_admin",
                                               return_value=self.fake_client))
 
@@ -152,7 +172,7 @@ class TestCreateResources(JavelinUnitTest):
                                                 self.fake_object['format'],
                                                 self.fake_object['format'])
 
-        mocked_function = self.fake_client.images.store_image
+        mocked_function = self.fake_client.images.store_image_file
         fake_image_id = self.fake_object['body'].get('id')
         mocked_function.assert_called_once_with(fake_image_id, open_mock())
 
@@ -190,14 +210,84 @@ class TestCreateResources(JavelinUnitTest):
                                                 name=self.fake_object['name'],
                                                 ip_version=fake_version)
 
+    def test_create_volumes(self):
+
+        self.useFixture(mockpatch.PatchObject(javelin, "client_for_user",
+                                              return_value=self.fake_client))
+        self.useFixture(mockpatch.PatchObject(javelin, "_get_volume_by_name",
+                                              return_value=None))
+        self.fake_client.volumes.create_volume.return_value = \
+            self.fake_object.body
+
+        javelin.create_volumes([self.fake_object])
+
+        mocked_function = self.fake_client.volumes.create_volume
+        mocked_function.assert_called_once_with(
+            size=self.fake_object['gb'],
+            display_name=self.fake_object['name'])
+        mocked_function = self.fake_client.volumes.wait_for_volume_status
+        mocked_function.assert_called_once_with(
+            self.fake_object.body['id'],
+            'available')
+
+    def test_create_volume_existing(self):
+        self.useFixture(mockpatch.PatchObject(javelin, "client_for_user",
+                                              return_value=self.fake_client))
+        self.useFixture(mockpatch.PatchObject(javelin, "_get_volume_by_name",
+                                              return_value=self.fake_object))
+        self.fake_client.volumes.create_volume.return_value = \
+            self.fake_object.body
+
+        javelin.create_volumes([self.fake_object])
+
+        mocked_function = self.fake_client.volumes.create_volume
+        self.assertFalse(mocked_function.called)
+        mocked_function = self.fake_client.volumes.wait_for_volume_status
+        self.assertFalse(mocked_function.called)
+
+    def test_create_router(self):
+
+        self.fake_client.networks.list_routers.return_value = {'routers': []}
+        self.useFixture(mockpatch.PatchObject(javelin, "client_for_user",
+                                              return_value=self.fake_client))
+
+        javelin.create_routers([self.fake_object])
+
+        mocked_function = self.fake_client.networks.create_router
+        mocked_function.assert_called_once_with(self.fake_object['name'])
+
+    def test_create_router_existing(self):
+        self.fake_client.networks.list_routers.return_value = {
+            'routers': [self.fake_object]}
+        self.useFixture(mockpatch.PatchObject(javelin, "client_for_user",
+                                              return_value=self.fake_client))
+
+        javelin.create_routers([self.fake_object])
+
+        mocked_function = self.fake_client.networks.create_router
+        self.assertFalse(mocked_function.called)
+
+    def test_create_secgroup(self):
+        self.useFixture(mockpatch.PatchObject(javelin, "client_for_user",
+                                              return_value=self.fake_client))
+        self.fake_client.secgroups.list_security_groups.return_value = []
+        self.fake_client.secgroups.create_security_group.return_value = \
+            {'id': self.fake_object['secgroup_id']}
+
+        javelin.create_secgroups([self.fake_object])
+
+        mocked_function = self.fake_client.secgroups.create_security_group
+        mocked_function.assert_called_once_with(
+            self.fake_object['name'],
+            self.fake_object['description'])
+
 
 class TestDestroyResources(JavelinUnitTest):
 
     def test_destroy_tenants(self):
 
         fake_tenant = self.fake_object['tenant']
-
-        fake_auth = mock.MagicMock()
+        fake_auth = self.fake_client
         fake_auth.identity.get_tenant_by_name.return_value = fake_tenant
 
         self.useFixture(mockpatch.PatchObject(javelin, "keystone_admin",
@@ -212,7 +302,7 @@ class TestDestroyResources(JavelinUnitTest):
         fake_user = self.fake_object['user']
         fake_tenant = self.fake_object['tenant']
 
-        fake_auth = mock.MagicMock()
+        fake_auth = self.fake_client
         fake_auth.identity.get_tenant_by_name.return_value = fake_tenant
         fake_auth.identity.get_user_by_username.return_value = fake_user
 
@@ -226,41 +316,98 @@ class TestDestroyResources(JavelinUnitTest):
 
     def test_destroy_objects(self):
 
-        fake_client = mock.MagicMock()
-        fake_client.objects.delete_object.return_value = {'status': "200"}, ""
+        self.fake_client.objects.delete_object.return_value = \
+            {'status': "200"}, ""
         self.useFixture(mockpatch.PatchObject(javelin, "client_for_user",
-                                              return_value=fake_client))
+                                              return_value=self.fake_client))
         javelin.destroy_objects([self.fake_object])
 
-        mocked_function = fake_client.objects.delete_object
+        mocked_function = self.fake_client.objects.delete_object
         mocked_function.asswert_called_once(self.fake_object['container'],
                                             self.fake_object['name'])
 
     def test_destroy_images(self):
 
-        fake_client = mock.MagicMock()
         self.useFixture(mockpatch.PatchObject(javelin, "client_for_user",
-                                              return_value=fake_client))
+                                              return_value=self.fake_client))
         self.useFixture(mockpatch.PatchObject(javelin, "_get_image_by_name",
                         return_value=self.fake_object['image']))
 
         javelin.destroy_images([self.fake_object])
 
-        mocked_function = fake_client.images.delete_image
+        mocked_function = self.fake_client.images.delete_image
         mocked_function.assert_called_once_with(
             self.fake_object['image']['id'])
 
     def test_destroy_networks(self):
 
-        fake_client = mock.MagicMock()
         self.useFixture(mockpatch.PatchObject(javelin, "client_for_user",
-                                              return_value=fake_client))
+                                              return_value=self.fake_client))
         self.useFixture(mockpatch.PatchObject(
             javelin, "_get_resource_by_name",
             return_value=self.fake_object['resource']))
 
         javelin.destroy_networks([self.fake_object])
 
-        mocked_function = fake_client.networks.delete_network
+        mocked_function = self.fake_client.networks.delete_network
         mocked_function.assert_called_once_with(
             self.fake_object['resource']['id'])
+
+    def test_destroy_volumes(self):
+        self.useFixture(mockpatch.PatchObject(javelin, "client_for_user",
+                                              return_value=self.fake_client))
+
+        self.useFixture(mockpatch.PatchObject(
+            javelin, "_get_volume_by_name",
+            return_value=self.fake_object.volume))
+
+        javelin.destroy_volumes([self.fake_object])
+
+        mocked_function = self.fake_client.volumes.detach_volume
+        mocked_function.assert_called_once_with(self.fake_object.volume['id'])
+        mocked_function = self.fake_client.volumes.delete_volume
+        mocked_function.assert_called_once_with(self.fake_object.volume['id'])
+
+    def test_destroy_subnets(self):
+
+        self.useFixture(mockpatch.PatchObject(javelin, "client_for_user",
+                                              return_value=self.fake_client))
+        fake_subnet_id = self.fake_object['subnet_id']
+        self.useFixture(mockpatch.PatchObject(javelin, "_get_resource_by_name",
+                                              return_value={
+                                                  'id': fake_subnet_id}))
+
+        javelin.destroy_subnets([self.fake_object])
+
+        mocked_function = self.fake_client.networks.delete_subnet
+        mocked_function.assert_called_once_with(fake_subnet_id)
+
+    def test_destroy_routers(self):
+        self.useFixture(mockpatch.PatchObject(javelin, "client_for_user",
+                                              return_value=self.fake_client))
+
+        # this function is used on 2 different occasions in the code
+        def _fake_get_resource_by_name(*args):
+            if args[1] == "routers":
+                return {"id": self.fake_object['router_id']}
+            elif args[1] == "subnets":
+                return {"id": self.fake_object['subnet_id']}
+        javelin._get_resource_by_name = _fake_get_resource_by_name
+
+        javelin.destroy_routers([self.fake_object])
+
+        mocked_function = self.fake_client.networks.delete_router
+        mocked_function.assert_called_once_with(
+            self.fake_object['router_id'])
+
+    def test_destroy_secgroup(self):
+        self.useFixture(mockpatch.PatchObject(javelin, "client_for_user",
+                                              return_value=self.fake_client))
+        fake_secgroup = {'id': self.fake_object['id']}
+        self.useFixture(mockpatch.PatchObject(javelin, "_get_resource_by_name",
+                                              return_value=fake_secgroup))
+
+        javelin.destroy_secgroups([self.fake_object])
+
+        mocked_function = self.fake_client.secgroups.delete_security_group
+        mocked_function.assert_called_once_with(self.fake_object['id'])

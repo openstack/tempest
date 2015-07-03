@@ -31,9 +31,10 @@ _CONF = cfg.CONF
 
 
 def register_opt_group(conf, opt_group, options):
-    conf.register_group(opt_group)
+    if opt_group:
+        conf.register_group(opt_group)
     for opt in options:
-        conf.register_opt(opt, group=opt_group.name)
+        conf.register_opt(opt, group=getattr(opt_group, 'name', None))
 
 
 auth_group = cfg.OptGroup(name='auth',
@@ -206,6 +207,10 @@ ComputeGroup = [
                help="Timeout in seconds to wait for an instance to build. "
                     "Other services that do not define build_timeout will "
                     "inherit this value."),
+    cfg.StrOpt('ssh_shell_prologue',
+               default="set -eu -o pipefail; PATH=$$PATH:/sbin;",
+               help="Shell fragments to use before executing a command "
+                    "when sshing to a guest."),
     cfg.StrOpt('ssh_auth_method',
                default='keypair',
                help="Auth method used for authenticate to the instance. "
@@ -235,18 +240,10 @@ ComputeGroup = [
                default=1,
                help="The number of ping packets originating from remote "
                     "linux hosts"),
-    cfg.IntOpt('ssh_timeout',
-               default=300,
-               help="Timeout in seconds to wait for authentication to "
-                    "succeed."),
     cfg.IntOpt('ready_wait',
                default=0,
                help="Additional wait time for clean state, when there is "
                     "no OS-EXT-STS extension available"),
-    cfg.IntOpt('ssh_channel_timeout',
-               default=60,
-               help="Timeout in seconds to wait for output from ssh "
-                    "channel."),
     cfg.StrOpt('fixed_network_name',
                help="Name of the fixed network that is visible to all test "
                     "tenants. If multiple networks are available for a tenant"
@@ -258,9 +255,6 @@ ComputeGroup = [
                default='public',
                help="Network used for SSH connections. Ignored if "
                     "use_floatingip_for_ssh=true or run_validation=false."),
-    cfg.IntOpt('ip_version_for_ssh',
-               default=4,
-               help="IP version used for SSH connections."),
     cfg.BoolOpt('use_floatingip_for_ssh',
                 default=True,
                 help="Does SSH use Floating IPs?"),
@@ -397,7 +391,13 @@ ComputeFeaturesGroup = [
                 default=False,
                 help='Does Nova preserve preexisting ports from Neutron '
                      'when deleting an instance? This should be set to True '
-                     'if testing Kilo+ Nova.')
+                     'if testing Kilo+ Nova.'),
+    cfg.BoolOpt('attach_encrypted_volume',
+                default=True,
+                help='Does the test environment support attaching an '
+                     'encrypted volume to a running server instance? This may '
+                     'depend on the combination of compute_driver in nova and '
+                     'the volume_driver(s) in cinder.'),
 ]
 
 
@@ -443,6 +443,10 @@ ImageFeaturesGroup = [
     cfg.BoolOpt('api_v1',
                 default=True,
                 help="Is the v1 image API enabled"),
+    cfg.BoolOpt('deactivate_image',
+                default=False,
+                help="Is the deactivate-image feature enabled."
+                     " The feature has been integrated since Kilo."),
 ]
 
 network_group = cfg.OptGroup(name='network',
@@ -522,9 +526,10 @@ NetworkFeaturesGroup = [
                 help="Allow the execution of IPv6 tests"),
     cfg.ListOpt('api_extensions',
                 default=['all'],
-                help='A list of enabled network extensions with a special '
-                     'entry all which indicates every extension is enabled. '
-                     'Empty list indicates all extensions are disabled'),
+                help="A list of enabled network extensions with a special "
+                     "entry all which indicates every extension is enabled. "
+                     "Empty list indicates all extensions are disabled. "
+                     "To get the list of extensions run: 'neutron ext-list'"),
     cfg.BoolOpt('ipv6_subnet_attributes',
                 default=False,
                 help="Allow the execution of IPv6 subnet tests that use "
@@ -596,17 +601,23 @@ ValidationGroup = [
                     'Additional methods will be handled in a separate spec.'),
     cfg.IntOpt('ip_version_for_ssh',
                default=4,
-               help='Default IP version for ssh connections.'),
+               help='Default IP version for ssh connections.',
+               deprecated_opts=[cfg.DeprecatedOpt('ip_version_for_ssh',
+                                                  group='compute')]),
     cfg.IntOpt('ping_timeout',
                default=120,
                help='Timeout in seconds to wait for ping to succeed.'),
     cfg.IntOpt('connect_timeout',
                default=60,
                help='Timeout in seconds to wait for the TCP connection to be '
-                    'successful.'),
+                    'successful.',
+               deprecated_opts=[cfg.DeprecatedOpt('ssh_channel_timeout',
+                                                  group='compute')]),
     cfg.IntOpt('ssh_timeout',
                default=300,
-               help='Timeout in seconds to wait for the ssh banner.'),
+               help='Timeout in seconds to wait for the ssh banner.',
+               deprecated_opts=[cfg.DeprecatedOpt('ssh_timeout',
+                                                  group='compute')]),
 ]
 
 volume_group = cfg.OptGroup(name='volume',
@@ -1139,6 +1150,15 @@ NegativeGroup = [
                help="Test generator class for all negative tests"),
 ]
 
+DefaultGroup = [
+    cfg.StrOpt('resources_prefix',
+               default='tempest',
+               help="Prefix to be added when generating the name for "
+                    "test resources. It can be used to discover all "
+                    "resources associated with a specific test run when "
+                    "running tempest on a real-life cloud"),
+]
+
 _opts = [
     (auth_group, AuthGroup),
     (compute_group, ComputeGroup),
@@ -1168,7 +1188,8 @@ _opts = [
     (debug_group, DebugGroup),
     (baremetal_group, BaremetalGroup),
     (input_scenario_group, InputScenarioGroup),
-    (negative_group, NegativeGroup)
+    (negative_group, NegativeGroup),
+    (None, DefaultGroup)
 ]
 
 
@@ -1183,7 +1204,7 @@ def list_opts():
     The purpose of this is to allow tools like the Oslo sample config file
     generator to discover the options exposed to users.
     """
-    return [(g.name, o) for g, o in _opts]
+    return [(getattr(g, 'name', None), o) for g, o in _opts]
 
 
 # this should never be called outside of this class

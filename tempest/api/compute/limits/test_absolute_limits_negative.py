@@ -38,7 +38,8 @@ class AbsoluteLimitsNegativeTestJSON(base.BaseV2ComputeTest):
     def test_max_image_meta_exceed_limit(self):
         # We should not create vm with image meta over maxImageMeta limit
         # Get max limit value
-        max_meta = self.client.get_specific_absolute_limit('maxImageMeta')
+        limits = self.client.show_limits()
+        max_meta = limits['absolute']['maxImageMeta']
 
         # No point in running this test if there is no limit.
         if int(max_meta) == -1:

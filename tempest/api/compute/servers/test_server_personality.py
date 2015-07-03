@@ -34,8 +34,8 @@ class ServerPersonalityTestJSON(base.BaseV2ComputeTest):
         # number of files are injected into the server.
         file_contents = 'This is a test file.'
         personality = []
-        max_file_limit = \
-            self.user_client.get_specific_absolute_limit("maxPersonality")
+        limits = self.user_client.show_limits()
+        max_file_limit = limits['absolute']['maxPersonality']
         if max_file_limit == -1:
             raise self.skipException("No limit for personality files")
         for i in range(0, int(max_file_limit) + 1):
@@ -52,8 +52,8 @@ class ServerPersonalityTestJSON(base.BaseV2ComputeTest):
         # Server should be created successfully if maximum allowed number of
         # files is injected into the server during creation.
         file_contents = 'This is a test file.'
-        max_file_limit = \
-            self.user_client.get_specific_absolute_limit("maxPersonality")
+        limits = self.user_client.show_limits()
+        max_file_limit = limits['absolute']['maxPersonality']
         if max_file_limit == -1:
             raise self.skipException("No limit for personality files")
         person = []

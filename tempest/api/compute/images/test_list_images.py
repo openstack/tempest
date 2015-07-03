@@ -50,6 +50,6 @@ class ListImagesTestJSON(base.BaseV2ComputeTest):
     @test.idempotent_id('9f94cb6b-7f10-48c5-b911-a0b84d7d4cd6')
     def test_list_images_with_detail(self):
         # Detailed list of all images should contain the expected images
-        images = self.client.list_images_with_detail()
+        images = self.client.list_images(detail=True)
         found = any([i for i in images if i['id'] == self.image_ref])
         self.assertTrue(found)

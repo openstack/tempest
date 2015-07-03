@@ -30,6 +30,7 @@ common_instance_usage_audit_log = {
         'total_errors': {'type': 'integer'},
         'total_instances': {'type': 'integer'}
     },
+    'additionalProperties': False,
     'required': ['hosts_not_run', 'log', 'num_hosts', 'num_hosts_done',
                  'num_hosts_not_run', 'num_hosts_running', 'overall_status',
                  'period_beginning', 'period_ending', 'total_errors',
@@ -43,6 +44,7 @@ get_instance_usage_audit_log = {
         'properties': {
             'instance_usage_audit_log': common_instance_usage_audit_log
         },
+        'additionalProperties': False,
         'required': ['instance_usage_audit_log']
     }
 }
@@ -54,6 +56,7 @@ list_instance_usage_audit_log = {
         'properties': {
             'instance_usage_audit_logs': common_instance_usage_audit_log
         },
+        'additionalProperties': False,
         'required': ['instance_usage_audit_logs']
     }
 }

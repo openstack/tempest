@@ -291,15 +291,14 @@ class TestAccount(base.TestCase):
             {'username': 'test_user14', 'tenant_name': 'test_tenant14',
              'password': 'p', 'roles': ['role-7', 'role-11'],
              'resources': {'network': 'network-2'}}]
-        # Clear previous mock using self.test_accounts
-        self.accounts_mock.cleanUp()
         self.useFixture(mockpatch.Patch(
             'tempest.common.accounts.read_accounts_yaml',
             return_value=test_accounts))
         test_accounts_class = accounts.Accounts('v2', 'test_name')
         with mock.patch('tempest.services.compute.json.networks_client.'
                         'NetworksClientJSON.list_networks',
-                        return_value=[{'name': 'network-2', 'id': 'fake-id'}]):
+                        return_value=[{'name': 'network-2', 'id': 'fake-id',
+                                       'label': 'network-2'}]):
             creds = test_accounts_class.get_creds_by_roles(['role-7'])
         self.assertTrue(isinstance(creds, cred_provider.TestResources))
         network = creds.network

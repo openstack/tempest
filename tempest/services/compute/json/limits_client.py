@@ -21,17 +21,8 @@ from tempest.common import service_client
 
 class LimitsClientJSON(service_client.ServiceClient):
 
-    def get_absolute_limits(self):
+    def show_limits(self):
         resp, body = self.get("limits")
         body = json.loads(body)
         self.validate_response(schema.get_limit, resp, body)
-        return service_client.ResponseBody(resp, body['limits']['absolute'])
-
-    def get_specific_absolute_limit(self, absolute_limit):
-        resp, body = self.get("limits")
-        body = json.loads(body)
-        self.validate_response(schema.get_limit, resp, body)
-        if absolute_limit not in body['limits']['absolute']:
-            return None
-        else:
-            return body['limits']['absolute'][absolute_limit]
+        return service_client.ResponseBody(resp, body['limits'])

@@ -39,7 +39,8 @@ create_get_volume = {
                                 'device': {'type': 'string'},
                                 'volumeId': {'type': 'string'},
                                 'serverId': {'type': 'string'}
-                            }
+                            },
+                            'additionalProperties': False,
                             # NOTE- If volume is not attached to any server
                             # then, 'attachments' attributes comes as array
                             # with empty objects "[{}]" due to that elements
@@ -49,11 +50,13 @@ create_get_volume = {
                         }
                     }
                 },
+                'additionalProperties': False,
                 'required': ['id', 'status', 'displayName', 'availabilityZone',
                              'createdAt', 'displayDescription', 'volumeType',
                              'snapshotId', 'metadata', 'size', 'attachments']
             }
         },
+        'additionalProperties': False,
         'required': ['volume']
     }
 }
@@ -87,7 +90,8 @@ list_volumes = {
                                     'device': {'type': 'string'},
                                     'volumeId': {'type': 'string'},
                                     'serverId': {'type': 'string'}
-                                }
+                                },
+                                'additionalProperties': False,
                                 # NOTE- If volume is not attached to any server
                                 # then, 'attachments' attributes comes as array
                                 # with empty object "[{}]" due to that elements
@@ -97,6 +101,7 @@ list_volumes = {
                             }
                         }
                     },
+                    'additionalProperties': False,
                     'required': ['id', 'status', 'displayName',
                                  'availabilityZone', 'createdAt',
                                  'displayDescription', 'volumeType',
@@ -105,6 +110,7 @@ list_volumes = {
                 }
             }
         },
+        'additionalProperties': False,
         'required': ['volumes']
     }
 }

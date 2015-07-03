@@ -23,10 +23,12 @@ common_security_group_default_rule_info = {
             'properties': {
                 'cidr': {'type': 'string'}
             },
+            'additionalProperties': False,
             'required': ['cidr'],
         },
         'to_port': {'type': 'integer'},
     },
+    'additionalProperties': False,
     'required': ['from_port', 'id', 'ip_protocol', 'ip_range', 'to_port'],
 }
 
@@ -38,6 +40,7 @@ create_get_security_group_default_rule = {
             'security_group_default_rule':
                 common_security_group_default_rule_info
         },
+        'additionalProperties': False,
         'required': ['security_group_default_rule']
     }
 }
@@ -56,6 +59,7 @@ list_security_group_default_rules = {
                 'items': common_security_group_default_rule_info
             }
         },
+        'additionalProperties': False,
         'required': ['security_group_default_rules']
     }
 }

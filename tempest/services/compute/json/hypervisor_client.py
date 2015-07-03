@@ -21,42 +21,41 @@ from tempest.common import service_client
 
 class HypervisorClientJSON(service_client.ServiceClient):
 
-    def get_hypervisor_list(self):
+    def list_hypervisors(self, detail=False):
         """List hypervisors information."""
-        resp, body = self.get('os-hypervisors')
+        url = 'os-hypervisors'
+        _schema = schema.list_search_hypervisors
+        if detail:
+            url += '/detail'
+            _schema = schema.list_hypervisors_detail
+
+        resp, body = self.get(url)
         body = json.loads(body)
-        self.validate_response(schema.list_search_hypervisors, resp, body)
+        self.validate_response(_schema, resp, body)
         return service_client.ResponseBodyList(resp, body['hypervisors'])
 
-    def get_hypervisor_list_details(self):
-        """Show detailed hypervisors information."""
-        resp, body = self.get('os-hypervisors/detail')
-        body = json.loads(body)
-        self.validate_response(schema.list_hypervisors_detail, resp, body)
-        return service_client.ResponseBodyList(resp, body['hypervisors'])
-
-    def get_hypervisor_show_details(self, hyper_id):
+    def show_hypervisor(self, hyper_id):
         """Display the details of the specified hypervisor."""
         resp, body = self.get('os-hypervisors/%s' % hyper_id)
         body = json.loads(body)
         self.validate_response(schema.get_hypervisor, resp, body)
         return service_client.ResponseBody(resp, body['hypervisor'])
 
-    def get_hypervisor_servers(self, hyper_name):
+    def list_servers_on_hypervisor(self, hyper_name):
         """List instances belonging to the specified hypervisor."""
         resp, body = self.get('os-hypervisors/%s/servers' % hyper_name)
         body = json.loads(body)
         self.validate_response(schema.get_hypervisors_servers, resp, body)
         return service_client.ResponseBodyList(resp, body['hypervisors'])
 
-    def get_hypervisor_stats(self):
+    def show_hypervisor_statistics(self):
         """Get hypervisor statistics over all compute nodes."""
         resp, body = self.get('os-hypervisors/statistics')
         body = json.loads(body)
         self.validate_response(schema.get_hypervisor_statistics, resp, body)
         return service_client.ResponseBody(resp, body['hypervisor_statistics'])
 
-    def get_hypervisor_uptime(self, hyper_id):
+    def show_hypervisor_uptime(self, hyper_id):
         """Display the uptime of the specified hypervisor."""
         resp, body = self.get('os-hypervisors/%s/uptime' % hyper_id)
         body = json.loads(body)

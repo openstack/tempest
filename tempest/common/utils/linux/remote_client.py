@@ -14,6 +14,7 @@ import netaddr
 import re
 import time
 
+from oslo_log import log as logging
 import six
 from tempest_lib.common import ssh
 
@@ -22,16 +23,17 @@ from tempest import exceptions
 
 CONF = config.CONF
 
+LOG = logging.getLogger(__name__)
+
 
 class RemoteClient(object):
 
     # NOTE(afazekas): It should always get an address instead of server
-    def __init__(self, server, username, password=None, pkey=None,
-                                                key_filename=None):
-        ssh_timeout = CONF.compute.ssh_timeout
+    def __init__(self, server, username, password=None, pkey=None):
+        ssh_timeout = CONF.validation.ssh_timeout
         network = CONF.compute.network_for_ssh
-        ip_version = CONF.compute.ip_version_for_ssh
-        ssh_channel_timeout = CONF.compute.ssh_channel_timeout
+        ip_version = CONF.validation.ip_version_for_ssh
+        connect_timeout = CONF.validation.connect_timeout
         if isinstance(server, six.string_types):
             ip_address = server
         else:
@@ -42,18 +44,15 @@ class RemoteClient(object):
                     break
             else:
                 raise exceptions.ServerUnreachable()
-        if CONF.compute.ssh_auth_method == 'keypair' and pkey == None:
-            key_filename = CONF.compute.path_to_private_key if \
-                CONF.compute.path_to_private_key else None
-        self.ssh_client = ssh.Client(ip_address, username, password=None,
-                                     timeout=ssh_timeout, pkey=pkey,
-                                     key_filename=key_filename,
-                                     channel_timeout=ssh_channel_timeout)
+        self.ssh_client = ssh.Client(ip_address, username, password,
+                                     ssh_timeout, pkey=pkey,
+                                     channel_timeout=connect_timeout)
 
     def exec_command(self, cmd):
         # Shell options below add more clearness on failures,
         # path is extended for some non-cirros guest oses (centos7)
-        cmd = "set -eu -o pipefail; PATH=$PATH:/sbin; " + cmd
+        cmd = CONF.compute.ssh_shell_prologue + " " + cmd
+        LOG.debug("Remote command: %s" % cmd)
         return self.ssh_client.exec_command(cmd)
 
     def validate_authentication(self):
@@ -73,8 +72,7 @@ class RemoteClient(object):
             return output.split()[1]
 
     def get_number_of_vcpus(self):
-        command = 'cat /proc/cpuinfo | grep processor | wc -l'
-        output = self.exec_command(command)
+        output = self.exec_command('grep -c processor /proc/cpuinfo')
         return int(output)
 
     def get_partitions(self):

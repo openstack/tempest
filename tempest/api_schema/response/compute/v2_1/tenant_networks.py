@@ -19,6 +19,7 @@ param_network = {
         'cidr': {'type': ['string', 'null']},
         'label': {'type': 'string'}
     },
+    'additionalProperties': False,
     'required': ['id', 'cidr', 'label']
 }
 
@@ -33,6 +34,7 @@ list_tenant_networks = {
                 'items': param_network
             }
         },
+        'additionalProperties': False,
         'required': ['networks']
     }
 }
@@ -45,6 +47,7 @@ get_tenant_network = {
         'properties': {
             'network': param_network
         },
+        'additionalProperties': False,
         'required': ['network']
     }
 }

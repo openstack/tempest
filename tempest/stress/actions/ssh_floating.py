@@ -91,8 +91,8 @@ class FloatingStress(stressaction.StressAction):
 
     def _create_sec_group(self):
         sec_grp_cli = self.manager.security_groups_client
-        s_name = data_utils.rand_name('sec_grp-')
-        s_description = data_utils.rand_name('desc-')
+        s_name = data_utils.rand_name('sec_grp')
+        s_description = data_utils.rand_name('desc')
         self.sec_grp = sec_grp_cli.create_security_group(s_name,
                                                          s_description)
         create_rule = sec_grp_cli.create_security_group_rule
@@ -145,7 +145,7 @@ class FloatingStress(stressaction.StressAction):
         cli = self.manager.floating_ips_client
 
         def func():
-            floating = cli.get_floating_ip_details(self.floating['id'])
+            floating = cli.show_floating_ip(self.floating['id'])
             return floating['instance_id'] is None
 
         if not tempest.test.call_until_true(func, self.check_timeout,

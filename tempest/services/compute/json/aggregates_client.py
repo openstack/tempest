@@ -32,7 +32,7 @@ class AggregatesClientJSON(service_client.ServiceClient):
 
     def show_aggregate(self, aggregate_id):
         """Get details of the given aggregate."""
-        resp, body = self.get("os-aggregates/%s" % str(aggregate_id))
+        resp, body = self.get("os-aggregates/%s" % aggregate_id)
         body = json.loads(body)
         self.validate_response(schema.get_aggregate, resp, body)
         return service_client.ResponseBody(resp, body['aggregate'])
@@ -53,7 +53,7 @@ class AggregatesClientJSON(service_client.ServiceClient):
             'availability_zone': availability_zone
         }
         put_body = json.dumps({'aggregate': put_body})
-        resp, body = self.put('os-aggregates/%s' % str(aggregate_id), put_body)
+        resp, body = self.put('os-aggregates/%s' % aggregate_id, put_body)
 
         body = json.loads(body)
         self.validate_response(schema.update_aggregate, resp, body)
@@ -61,7 +61,7 @@ class AggregatesClientJSON(service_client.ServiceClient):
 
     def delete_aggregate(self, aggregate_id):
         """Deletes the given aggregate."""
-        resp, body = self.delete("os-aggregates/%s" % str(aggregate_id))
+        resp, body = self.delete("os-aggregates/%s" % aggregate_id)
         self.validate_response(schema.delete_aggregate, resp, body)
         return service_client.ResponseBody(resp, body)
 

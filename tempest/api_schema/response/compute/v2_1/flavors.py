@@ -28,11 +28,13 @@ list_flavors = {
                         'links': parameter_types.links,
                         'id': {'type': 'string'}
                     },
+                    'additionalProperties': False,
                     'required': ['name', 'links', 'id']
                 }
             },
             'flavors_links': parameter_types.links
         },
+        'additionalProperties': False,
         # NOTE(gmann): flavors_links attribute is not necessary
         # to be present always So it is not 'required'.
         'required': ['flavors']
@@ -56,6 +58,7 @@ common_flavor_info = {
         'rxtx_factor': {'type': 'number'},
         'OS-FLV-EXT-DATA:ephemeral': {'type': 'integer'}
     },
+    'additionalProperties': False,
     # 'OS-FLV-DISABLED', 'os-flavor-access', 'rxtx_factor' and
     # 'OS-FLV-EXT-DATA' are API extensions. So they are not 'required'.
     'required': ['name', 'links', 'ram', 'vcpus', 'swap', 'disk', 'id']
@@ -74,6 +77,7 @@ list_flavors_details = {
             # to be present always So it is not 'required'.
             'flavors_links': parameter_types.links
         },
+        'additionalProperties': False,
         'required': ['flavors']
     }
 }
@@ -89,6 +93,7 @@ create_get_flavor_details = {
         'properties': {
             'flavor': common_flavor_info
         },
+        'additionalProperties': False,
         'required': ['flavor']
     }
 }

@@ -29,12 +29,14 @@ create_server = {
                     'links': parameter_types.links,
                     'OS-DCF:diskConfig': {'type': 'string'}
                 },
+                'additionalProperties': False,
                 # NOTE: OS-DCF:diskConfig & security_groups are API extension,
                 # and some environments return a response without these
                 # attributes.So they are not 'required'.
                 'required': ['id', 'links']
             }
         },
+        'additionalProperties': False,
         'required': ['server']
     }
 }
@@ -59,11 +61,13 @@ list_servers = {
                         'links': parameter_types.links,
                         'name': {'type': 'string'}
                     },
+                    'additionalProperties': False,
                     'required': ['id', 'links', 'name']
                 }
             },
             'servers_links': parameter_types.links
         },
+        'additionalProperties': False,
         # NOTE(gmann): servers_links attribute is not necessary to be
         # present always So it is not 'required'.
         'required': ['servers']
@@ -86,6 +90,7 @@ common_show_server = {
                     'id': {'type': 'string'},
                     'links': parameter_types.links
                 },
+                'additionalProperties': False,
                 'required': ['id', 'links']},
             {'type': ['string', 'null']}
         ]},
@@ -95,6 +100,7 @@ common_show_server = {
                 'id': {'type': 'string'},
                 'links': parameter_types.links
             },
+            'additionalProperties': False,
             'required': ['id', 'links']
         },
         'fault': {
@@ -105,6 +111,7 @@ common_show_server = {
                 'message': {'type': 'string'},
                 'details': {'type': 'string'},
             },
+            'additionalProperties': False,
             # NOTE(gmann): 'details' is not necessary to be present
             #  in the 'fault'. So it is not defined as 'required'.
             'required': ['code', 'created', 'message']
@@ -122,6 +129,7 @@ common_show_server = {
         'accessIPv4': parameter_types.access_ip_v4,
         'accessIPv6': parameter_types.access_ip_v6
     },
+    'additionalProperties': False,
     # NOTE(GMann): 'progress' attribute is present in the response
     # only when server's status is one of the progress statuses
     # ("ACTIVE","BUILD", "REBUILD", "RESIZE","VERIFY_RESIZE")
@@ -142,6 +150,7 @@ update_server = {
         'properties': {
             'server': common_show_server
         },
+        'additionalProperties': False,
         'required': ['server']
     }
 }
@@ -184,6 +193,7 @@ get_server = {
         'properties': {
             'server': server_detail
         },
+        'additionalProperties': False,
         'required': ['server']
     }
 }
@@ -199,6 +209,7 @@ list_servers_detail = {
             },
             'servers_links': parameter_types.links
         },
+        'additionalProperties': False,
         # NOTE(gmann): servers_links attribute is not necessary to be
         # present always So it is not 'required'.
         'required': ['servers']
@@ -221,6 +232,7 @@ rescue_server = {
         'properties': {
             'adminPass': {'type': 'string'}
         },
+        'additionalProperties': False,
         'required': ['adminPass']
     }
 }
@@ -239,12 +251,14 @@ list_virtual_interfaces = {
                         'mac_address': parameter_types.mac_address,
                         'OS-EXT-VIF-NET:net_id': {'type': 'string'}
                     },
+                    'additionalProperties': False,
                     # 'OS-EXT-VIF-NET:net_id' is API extension So it is
                     # not defined as 'required'
                     'required': ['id', 'mac_address']
                 }
             }
         },
+        'additionalProperties': False,
         'required': ['virtual_interfaces']
     }
 }
@@ -257,6 +271,7 @@ common_attach_volume_info = {
         'volumeId': {'type': 'string'},
         'serverId': {'type': ['integer', 'string']}
     },
+    'additionalProperties': False,
     'required': ['id', 'device', 'volumeId', 'serverId']
 }
 
@@ -267,6 +282,7 @@ attach_volume = {
         'properties': {
             'volumeAttachment': common_attach_volume_info
         },
+        'additionalProperties': False,
         'required': ['volumeAttachment']
     }
 }
@@ -289,6 +305,7 @@ list_volume_attachments = {
                 'items': common_attach_volume_info
             }
         },
+        'additionalProperties': False,
         'required': ['volumeAttachments']
     }
 }
@@ -308,6 +325,7 @@ list_addresses = {
         'properties': {
             'addresses': parameter_types.addresses
         },
+        'additionalProperties': False,
         'required': ['addresses']
     }
 }
@@ -329,6 +347,7 @@ common_server_group = {
         },
         'metadata': {'type': 'object'}
     },
+    'additionalProperties': False,
     'required': ['id', 'name', 'policies', 'members', 'metadata']
 }
 
@@ -339,6 +358,7 @@ create_get_server_group = {
         'properties': {
             'server_group': common_server_group
         },
+        'additionalProperties': False,
         'required': ['server_group']
     }
 }
@@ -357,6 +377,7 @@ list_server_groups = {
                 'items': common_server_group
             }
         },
+        'additionalProperties': False,
         'required': ['server_groups']
     }
 }
@@ -372,6 +393,7 @@ instance_actions = {
         'message': {'type': ['string', 'null']},
         'instance_uuid': {'type': 'string'}
     },
+    'additionalProperties': False,
     'required': ['action', 'request_id', 'user_id', 'project_id',
                  'start_time', 'message', 'instance_uuid']
 }
@@ -387,6 +409,7 @@ instance_action_events = {
             'result': {'type': 'string'},
             'traceback': {'type': ['string', 'null']}
         },
+        'additionalProperties': False,
         'required': ['event', 'start_time', 'finish_time', 'result',
                      'traceback']
     }
@@ -402,6 +425,7 @@ list_instance_actions = {
                 'items': instance_actions
             }
         },
+        'additionalProperties': False,
         'required': ['instanceActions']
     }
 }
@@ -419,6 +443,7 @@ get_instance_action = {
         'properties': {
             'instanceAction': instance_actions_with_events
         },
+        'additionalProperties': False,
         'required': ['instanceAction']
     }
 }
@@ -430,6 +455,7 @@ get_password = {
         'properties': {
             'password': {'type': 'string'}
         },
+        'additionalProperties': False,
         'required': ['password']
     }
 }
@@ -448,9 +474,11 @@ get_vnc_console = {
                         'format': 'uri'
                     }
                 },
+                'additionalProperties': False,
                 'required': ['type', 'url']
             }
         },
+        'additionalProperties': False,
         'required': ['console']
     }
 }
@@ -462,6 +490,7 @@ get_console_output = {
         'properties': {
             'output': {'type': 'string'}
         },
+        'additionalProperties': False,
         'required': ['output']
     }
 }
@@ -478,6 +507,7 @@ set_server_metadata = {
                 }
             }
         },
+        'additionalProperties': False,
         'required': ['metadata']
     }
 }
@@ -502,6 +532,7 @@ set_get_server_metadata_item = {
                 }
             }
         },
+        'additionalProperties': False,
         'required': ['meta']
     }
 }
