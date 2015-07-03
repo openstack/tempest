@@ -71,3 +71,24 @@ class NetworksNegativeTestJSON(base.BaseNetworkTest):
         non_exist_id = data_utils.rand_uuid()
         self.assertRaises(lib_exc.NotFound,
                           self.client.delete_subnet, non_exist_id)
+
+    @test.attr(type=['negative'])
+    @test.idempotent_id('13d3b106-47e6-4b9b-8d53-dae947f092fe')
+    def test_create_port_on_non_existent_network(self):
+        non_exist_net_id = data_utils.rand_uuid()
+        self.assertRaises(lib_exc.NotFound,
+                          self.client.create_port, network_id=non_exist_net_id)
+
+    @test.attr(type=['negative'])
+    @test.idempotent_id('cf8eef21-4351-4f53-adcd-cc5cb1e76b92')
+    def test_update_non_existent_port(self):
+        non_exist_port_id = data_utils.rand_uuid()
+        self.assertRaises(lib_exc.NotFound, self.client.update_port,
+                          non_exist_port_id, name='new_name')
+
+    @test.attr(type=['negative'])
+    @test.idempotent_id('49ec2bbd-ac2e-46fd-8054-798e679ff894')
+    def test_delete_non_existent_port(self):
+        non_exist_port_id = data_utils.rand_uuid()
+        self.assertRaises(lib_exc.NotFound,
+                          self.client.delete_port, non_exist_port_id)
