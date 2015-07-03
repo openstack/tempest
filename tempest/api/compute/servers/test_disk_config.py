@@ -43,12 +43,12 @@ class ServerDiskConfigTestJSON(base.BaseV2ComputeTest):
         cls.server_id = server['id']
 
     def _update_server_with_disk_config(self, disk_config):
-        server = self.client.get_server(self.server_id)
+        server = self.client.show_server(self.server_id)
         if disk_config != server['OS-DCF:diskConfig']:
             server = self.client.update_server(self.server_id,
                                                disk_config=disk_config)
             self.client.wait_for_server_status(server['id'], 'ACTIVE')
-            server = self.client.get_server(server['id'])
+            server = self.client.show_server(server['id'])
             self.assertEqual(disk_config, server['OS-DCF:diskConfig'])
 
     @test.idempotent_id('bef56b09-2e8c-4883-a370-4950812f430e')
@@ -64,7 +64,7 @@ class ServerDiskConfigTestJSON(base.BaseV2ComputeTest):
         self.client.wait_for_server_status(server['id'], 'ACTIVE')
 
         # Verify the specified attributes are set correctly
-        server = self.client.get_server(server['id'])
+        server = self.client.show_server(server['id'])
         self.assertEqual('MANUAL', server['OS-DCF:diskConfig'])
 
     @test.idempotent_id('9c9fae77-4feb-402f-8450-bf1c8b609713')
@@ -80,11 +80,11 @@ class ServerDiskConfigTestJSON(base.BaseV2ComputeTest):
         self.client.wait_for_server_status(server['id'], 'ACTIVE')
 
         # Verify the specified attributes are set correctly
-        server = self.client.get_server(server['id'])
+        server = self.client.show_server(server['id'])
         self.assertEqual('AUTO', server['OS-DCF:diskConfig'])
 
     def _get_alternative_flavor(self):
-        server = self.client.get_server(self.server_id)
+        server = self.client.show_server(self.server_id)
 
         if server['flavor']['id'] == self.flavor_ref:
             return self.flavor_ref_alt
@@ -105,7 +105,7 @@ class ServerDiskConfigTestJSON(base.BaseV2ComputeTest):
         self.client.confirm_resize(self.server_id)
         self.client.wait_for_server_status(self.server_id, 'ACTIVE')
 
-        server = self.client.get_server(self.server_id)
+        server = self.client.show_server(self.server_id)
         self.assertEqual('AUTO', server['OS-DCF:diskConfig'])
 
     @test.idempotent_id('693d16f3-556c-489a-8bac-3d0ca2490bad')
@@ -122,7 +122,7 @@ class ServerDiskConfigTestJSON(base.BaseV2ComputeTest):
         self.client.confirm_resize(self.server_id)
         self.client.wait_for_server_status(self.server_id, 'ACTIVE')
 
-        server = self.client.get_server(self.server_id)
+        server = self.client.show_server(self.server_id)
         self.assertEqual('MANUAL', server['OS-DCF:diskConfig'])
 
     @test.idempotent_id('5ef18867-358d-4de9-b3c9-94d4ba35742f')
@@ -136,5 +136,5 @@ class ServerDiskConfigTestJSON(base.BaseV2ComputeTest):
         self.client.wait_for_server_status(server['id'], 'ACTIVE')
 
         # Verify the disk_config attribute is set correctly
-        server = self.client.get_server(server['id'])
+        server = self.client.show_server(server['id'])
         self.assertEqual('MANUAL', server['OS-DCF:diskConfig'])

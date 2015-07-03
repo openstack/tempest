@@ -326,7 +326,7 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
     def test_get_non_existent_server(self):
         # Get a non existent server details
         nonexistent_server = data_utils.rand_uuid()
-        self.assertRaises(lib_exc.NotFound, self.client.get_server,
+        self.assertRaises(lib_exc.NotFound, self.client.show_server,
                           nonexistent_server)
 
     @test.attr(type=['negative'])
@@ -472,7 +472,7 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
             self.client.wait_for_server_status(self.server_id,
                                                'SHELVED')
 
-        server = self.client.get_server(self.server_id)
+        server = self.client.show_server(self.server_id)
         image_name = server['name'] + '-shelved'
         params = {'name': image_name}
         images = self.images_client.list_images(**params)

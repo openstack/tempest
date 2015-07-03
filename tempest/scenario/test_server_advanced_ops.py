@@ -80,19 +80,19 @@ class TestServerAdvancedOps(manager.ScenarioTest):
         self.servers_client.suspend_server(instance_id)
         self.servers_client.wait_for_server_status(instance_id,
                                                    'SUSPENDED')
-        fetched_instance = self.servers_client.get_server(instance_id)
+        fetched_instance = self.servers_client.show_server(instance_id)
         LOG.debug("Resuming instance %s. Current status: %s",
                   instance_id, fetched_instance['status'])
         self.servers_client.resume_server(instance_id)
         self.servers_client.wait_for_server_status(instance_id,
                                                    'ACTIVE')
-        fetched_instance = self.servers_client.get_server(instance_id)
+        fetched_instance = self.servers_client.show_server(instance_id)
         LOG.debug("Suspending instance %s. Current status: %s",
                   instance_id, fetched_instance['status'])
         self.servers_client.suspend_server(instance_id)
         self.servers_client.wait_for_server_status(instance_id,
                                                    'SUSPENDED')
-        fetched_instance = self.servers_client.get_server(instance_id)
+        fetched_instance = self.servers_client.show_server(instance_id)
         LOG.debug("Resuming instance %s. Current status: %s",
                   instance_id, fetched_instance['status'])
         self.servers_client.resume_server(instance_id)

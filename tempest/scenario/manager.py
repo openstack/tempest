@@ -182,7 +182,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
         # The instance retrieved on creation is missing network
         # details, necessitating retrieval after it becomes active to
         # ensure correct details.
-        server = self.servers_client.get_server(server['id'])
+        server = self.servers_client.show_server(server['id'])
         self.assertEqual(server['name'], name)
         return server
 
@@ -1229,7 +1229,7 @@ class BaremetalScenarioTest(ScenarioTest):
         self.servers_client.wait_for_server_status(self.instance['id'],
                                                    'ACTIVE')
         self.node = self.get_node(instance_id=self.instance['id'])
-        self.instance = self.servers_client.get_server(self.instance['id'])
+        self.instance = self.servers_client.show_server(self.instance['id'])
 
     def terminate_instance(self):
         self.servers_client.delete_server(self.instance['id'])

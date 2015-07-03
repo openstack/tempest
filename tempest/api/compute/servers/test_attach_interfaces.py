@@ -159,7 +159,7 @@ class AttachInterfacesTestJSON(base.BaseV2ComputeTest):
         network_id = ifs[0]['net_id']
         self.client.add_fixed_ip(server['id'], network_id)
         # Remove the fixed IP from server.
-        server_detail = self.os.servers_client.get_server(
+        server_detail = self.os.servers_client.show_server(
             server['id'])
         # Get the Fixed IP from server.
         fixed_ip = None
