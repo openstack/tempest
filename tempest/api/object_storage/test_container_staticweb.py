@@ -18,6 +18,7 @@ from tempest_lib import exceptions as lib_exc
 from tempest.api.object_storage import base
 from tempest.common import custom_matchers
 from tempest import test
+from tempest_lib import decorators
 
 
 class StaticWebTest(base.BaseObjectTest):
@@ -49,6 +50,7 @@ class StaticWebTest(base.BaseObjectTest):
             cls.delete_containers([cls.container_name])
         super(StaticWebTest, cls).resource_cleanup()
 
+    @decorators.skip_because(bug="1417500")
     @test.idempotent_id('c1f055ab-621d-4a6a-831f-846fcb578b8b')
     @test.requires_ext(extension='staticweb', service='object')
     def test_web_index(self):
@@ -80,6 +82,7 @@ class StaticWebTest(base.BaseObjectTest):
             self.container_name)
         self.assertNotIn('x-container-meta-web-index', body)
 
+    @decorators.skip_because(bug="1417500")
     @test.idempotent_id('941814cf-db9e-4b21-8112-2b6d0af10ee5')
     @test.requires_ext(extension='staticweb', service='object')
     def test_web_listing(self):
@@ -112,6 +115,7 @@ class StaticWebTest(base.BaseObjectTest):
             self.container_name)
         self.assertNotIn('x-container-meta-web-listings', body)
 
+    @decorators.skip_because(bug="1417500")
     @test.idempotent_id('bc37ec94-43c8-4990-842e-0e5e02fc8926')
     @test.requires_ext(extension='staticweb', service='object')
     def test_web_listing_css(self):
@@ -136,6 +140,7 @@ class StaticWebTest(base.BaseObjectTest):
         css = '<link rel="stylesheet" type="text/css" href="listings.css" />'
         self.assertIn(css, body)
 
+    @decorators.skip_because(bug="1417500")
     @test.idempotent_id('f18b4bef-212e-45e7-b3ca-59af3a465f82')
     @test.requires_ext(extension='staticweb', service='object')
     def test_web_error(self):

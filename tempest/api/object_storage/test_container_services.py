@@ -17,6 +17,7 @@ from tempest_lib.common.utils import data_utils
 
 from tempest.api.object_storage import base
 from tempest import test
+from tempest_lib import decorators
 
 
 class ContainerTest(base.BaseObjectTest):
@@ -82,6 +83,8 @@ class ContainerTest(base.BaseObjectTest):
         # in the server
         self.assertNotIn('x-container-meta-test-container-meta', resp)
 
+    @decorators.skip_because(bug="1417490")
+    @test.attr(type='smoke')
     @test.idempotent_id('e1e8df32-7b22-44e1-aa08-ccfd8d446b58')
     def test_create_container_with_metadata_value(self):
         # create container with metadata value
@@ -293,6 +296,7 @@ class ContainerTest(base.BaseObjectTest):
         self.assertHeaders(resp, 'Container', 'GET')
         self.assertEqual(object_name, object_list.strip('\n'))
 
+    @decorators.skip_because(bug="1417490")
     @test.attr(type='smoke')
     @test.idempotent_id('96e68f0e-19ec-4aa2-86f3-adc6a45e14dd')
     def test_list_container_metadata(self):
@@ -320,6 +324,8 @@ class ContainerTest(base.BaseObjectTest):
         self.assertHeaders(resp, 'Container', 'HEAD')
         self.assertNotIn('x-container-meta-', str(resp))
 
+    @decorators.skip_because(bug="1417490")
+    @test.attr(type='smoke')
     @test.idempotent_id('cf19bc0b-7e16-4a5a-aaed-cb0c2fe8deef')
     def test_update_container_metadata_with_create_and_delete_matadata(self):
         # Send one request of adding and deleting metadata
@@ -343,6 +349,8 @@ class ContainerTest(base.BaseObjectTest):
         self.assertEqual(resp['x-container-meta-test-container-meta2'],
                          metadata_2['test-container-meta2'])
 
+    @decorators.skip_because(bug="1417490")
+    @test.attr(type='smoke')
     @test.idempotent_id('2ae5f295-4bf1-4e04-bfad-21e54b62cec5')
     def test_update_container_metadata_with_create_metadata(self):
         # update container metadata using add metadata
@@ -360,6 +368,8 @@ class ContainerTest(base.BaseObjectTest):
         self.assertEqual(resp['x-container-meta-test-container-meta1'],
                          metadata['test-container-meta1'])
 
+    @decorators.skip_because(bug="1417490")
+    @test.attr(type='smoke')
     @test.idempotent_id('3a5ce7d4-6e4b-47d0-9d87-7cd42c325094')
     def test_update_container_metadata_with_delete_metadata(self):
         # update container metadata using delete metadata
@@ -378,6 +388,8 @@ class ContainerTest(base.BaseObjectTest):
             container_name)
         self.assertNotIn('x-container-meta-test-container-meta1', resp)
 
+    @decorators.skip_because(bug="1417490")
+    @test.attr(type='smoke')
     @test.idempotent_id('31f40a5f-6a52-4314-8794-cd89baed3040')
     def test_update_container_metadata_with_create_matadata_key(self):
         # update container metadata with a blenk value of metadata
@@ -393,6 +405,8 @@ class ContainerTest(base.BaseObjectTest):
             container_name)
         self.assertNotIn('x-container-meta-test-container-meta1', resp)
 
+    @decorators.skip_because(bug="1417490")
+    @test.attr(type='smoke')
     @test.idempotent_id('a2e36378-6f1f-43f4-840a-ffd9cfd61914')
     def test_update_container_metadata_with_delete_metadata_key(self):
         # update container metadata with a blank value of matadata

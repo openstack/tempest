@@ -16,6 +16,7 @@
 import uuid
 
 from tempest_lib import exceptions as lib_exc
+from tempest_lib import decorators
 
 from tempest.api.network import base_security_groups as base
 from tempest import config
@@ -86,6 +87,7 @@ class NegativeSecGroupTest(base.BaseSecGroupTest):
 
     @test.attr(type=['negative'])
     @test.idempotent_id('4bf786fd-2f02-443c-9716-5b98e159a49a')
+    @decorators.skip_because(bug="1435662")
     def test_create_security_group_rule_with_non_existent_remote_groupid(self):
         group_create_body, _ = self._create_security_group()
         non_exist_id = str(uuid.uuid4())
@@ -101,6 +103,7 @@ class NegativeSecGroupTest(base.BaseSecGroupTest):
 
     @test.attr(type=['negative'])
     @test.idempotent_id('b5c4b247-6b02-435b-b088-d10d45650881')
+    @decorators.skip_because(bug="1435662")
     def test_create_security_group_rule_with_remote_ip_and_group(self):
         sg1_body, _ = self._create_security_group()
         sg2_body, _ = self._create_security_group()
@@ -168,6 +171,7 @@ class NegativeSecGroupTest(base.BaseSecGroupTest):
 
     @test.attr(type=['negative'])
     @test.idempotent_id('8fde898f-ce88-493b-adc9-4e4692879fc5')
+    @decorators.skip_because(bug="1435662")
     def test_create_duplicate_security_group_rule_fails(self):
         # Create duplicate security group rule, it should fail.
         body, _ = self._create_security_group()

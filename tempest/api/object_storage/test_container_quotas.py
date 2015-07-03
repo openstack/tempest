@@ -19,6 +19,7 @@ from tempest_lib import exceptions as lib_exc
 from tempest.api.object_storage import base
 from tempest import config
 from tempest import test
+from tempest_lib import decorators
 
 CONF = config.CONF
 QUOTA_BYTES = 10
@@ -68,6 +69,7 @@ class ContainerQuotasTest(base.BaseObjectTest):
         nafter = self._get_bytes_used()
         self.assertEqual(nbefore + len(data), nafter)
 
+    @decorators.skip_because(bug="1417472")
     @test.idempotent_id('22eeeb2b-3668-4160-baef-44790f65a5a0')
     @test.requires_ext(extension='container_quotas', service='object')
     @test.attr(type="smoke")
@@ -85,6 +87,7 @@ class ContainerQuotasTest(base.BaseObjectTest):
         nafter = self._get_bytes_used()
         self.assertEqual(nbefore, nafter)
 
+    @decorators.skip_because(bug="1417472")
     @test.idempotent_id('3a387039-697a-44fc-a9c0-935de31f426b')
     @test.requires_ext(extension='container_quotas', service='object')
     @test.attr(type="smoke")

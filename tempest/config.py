@@ -272,6 +272,12 @@ ComputeGroup = [
                choices=['public', 'admin', 'internal',
                         'publicURL', 'adminURL', 'internalURL'],
                help="The endpoint type to use for the compute service."),
+    cfg.StrOpt('path_to_private_key',
+               default='',
+               help="Path of private key file."),
+    cfg.StrOpt('keypair_name',
+               default='',
+               help="Name of existing keypair to launch servers with."),
     cfg.StrOpt('volume_device_name',
                default='vdb',
                help="Expected device name when a volume is attached to "
@@ -295,6 +301,10 @@ compute_features_group = cfg.OptGroup(name='compute-feature-enabled',
                                       title="Enabled Compute Service Features")
 
 ComputeFeaturesGroup = [
+    cfg.BoolOpt('boot_from_volume_only',
+                default=True,
+                help="if true, then all the servers will boot from volume "\
+                "only not from image"),
     cfg.BoolOpt('disk_config',
                 default=True,
                 help="If false, skip disk config tests"),

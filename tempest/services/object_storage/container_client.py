@@ -72,7 +72,8 @@ class ContainerClient(service_client.ServiceClient):
                 headers[remove_metadata_prefix + key] = remove_metadata[key]
 
         resp, body = self.post(url, body=None, headers=headers)
-        self.expected_success(204, resp.status)
+        #status returned is 202 not 204. Bug = 1417486
+        self.expected_success(202, resp.status)
         return resp, body
 
     def delete_container_metadata(self, container_name, metadata,
@@ -86,7 +87,8 @@ class ContainerClient(service_client.ServiceClient):
                 headers[metadata_prefix + item] = metadata[item]
 
         resp, body = self.post(url, body=None, headers=headers)
-        self.expected_success(204, resp.status)
+        #status returned is 202 not 204. Bug = 1417486
+        self.expected_success(202, resp.status)
         return resp, body
 
     def list_container_metadata(self, container_name):

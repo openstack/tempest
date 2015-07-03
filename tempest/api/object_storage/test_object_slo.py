@@ -21,6 +21,7 @@ from tempest_lib import exceptions as lib_exc
 from tempest.api.object_storage import base
 from tempest.common import custom_matchers
 from tempest import test
+from tempest_lib import decorators
 
 # Each segment, except for the final one, must be at least 1 megabyte
 MIN_SEGMENT_SIZE = 1024 * 1024
@@ -109,6 +110,8 @@ class ObjectSloTest(base.BaseObjectTest):
         resp['etag'] = resp['etag'].strip('"')
         self.assertHeaders(resp, 'Object', method)
 
+    @decorators.skip_because(bug="1417497")
+    @test.attr(type='gate')
     @test.idempotent_id('2c3f24a6-36e8-4711-9aa2-800ee1fc7b5b')
     @test.requires_ext(extension='slo', service='object')
     def test_upload_manifest(self):
@@ -124,6 +127,8 @@ class ObjectSloTest(base.BaseObjectTest):
 
         self._assertHeadersSLO(resp, 'PUT')
 
+    @decorators.skip_because(bug="1417497")
+    @test.attr(type='gate')
     @test.idempotent_id('e69ad766-e1aa-44a2-bdd2-bf62c09c1456')
     @test.requires_ext(extension='slo', service='object')
     def test_list_large_object_metadata(self):
@@ -136,6 +141,8 @@ class ObjectSloTest(base.BaseObjectTest):
 
         self._assertHeadersSLO(resp, 'HEAD')
 
+    @decorators.skip_because(bug="1417497")
+    @test.attr(type='gate')
     @test.idempotent_id('49bc49bc-dd1b-4c0f-904e-d9f10b830ee8')
     @test.requires_ext(extension='slo', service='object')
     def test_retrieve_large_object(self):
@@ -151,6 +158,8 @@ class ObjectSloTest(base.BaseObjectTest):
         sum_data = self.content + self.content
         self.assertEqual(body, sum_data)
 
+    @decorators.skip_because(bug="1417497")
+    @test.attr(type='gate')
     @test.idempotent_id('87b6dfa1-abe9-404d-8bf0-6c3751e6aa77')
     @test.requires_ext(extension='slo', service='object')
     def test_delete_large_object(self):

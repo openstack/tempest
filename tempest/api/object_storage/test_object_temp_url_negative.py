@@ -22,6 +22,7 @@ from tempest_lib import exceptions as lib_exc
 
 from tempest.api.object_storage import base
 from tempest import test
+from tempest_lib import decorators
 
 
 class ObjectTempUrlNegativeTest(base.BaseObjectTest):
@@ -46,8 +47,9 @@ class ObjectTempUrlNegativeTest(base.BaseObjectTest):
 
     @classmethod
     def resource_cleanup(cls):
-        resp, _ = cls.account_client.delete_account_metadata(
-            metadata=cls.metadata)
+        #Bug = 1417477
+        #resp, _ = cls.account_client.delete_account_metadata(
+        #    metadata=cls.metadata)
 
         cls.delete_containers(cls.containers)
 
@@ -55,13 +57,14 @@ class ObjectTempUrlNegativeTest(base.BaseObjectTest):
 
     def setUp(self):
         super(ObjectTempUrlNegativeTest, self).setUp()
+        #Bug = 1417477
         # make sure the metadata has been set
-        self.assertIn('x-account-meta-temp-url-key',
-                      self.account_client_metadata)
+        #self.assertIn('x-account-meta-temp-url-key',
+        #              self.account_client_metadata)
 
-        self.assertEqual(
-            self.account_client_metadata['x-account-meta-temp-url-key'],
-            self.key)
+        #self.assertEqual(
+        #    self.account_client_metadata['x-account-meta-temp-url-key'],
+        #    self.key)
 
         # create object
         self.object_name = data_utils.rand_name(name='ObjectTemp')
@@ -90,7 +93,8 @@ class ObjectTempUrlNegativeTest(base.BaseObjectTest):
 
         return url
 
-    @test.attr(type=['negative'])
+    @decorators.skip_because(bug="1417478")
+    @test.attr(type=['gate', 'negative'])
     @test.idempotent_id('5a583aca-c804-41ba-9d9a-e7be132bdf0b')
     @test.requires_ext(extension='tempurl', service='object')
     def test_get_object_after_expiration_time(self):

@@ -165,6 +165,57 @@ class IsolatedCreds(cred_provider.CredentialProvider):
             identity
             network
         """
+        os = clients.AdminManager()
+        return os.identity_client, os.network_client
+
+    def _create_tenant(self, name, description):
+        tenant = self.identity_admin_client.create_tenant(
+            name=name, description=description)
+        return tenant
+
+    def _get_tenant_by_name(self, name):
+        tenant = self.identity_admin_client.get_tenant_by_name(name)
+        return tenant
+
+    def _create_user(self, username, password, tenant, email):
+        user = self.identity_admin_client.create_user(
+            username, password, tenant['id'], email)
+        return user
+
+    def _get_user(self, tenant, username):
+        user = self.identity_admin_client.get_user_by_username(
+            tenant['id'], username)
+        return user
+
+    def _list_roles(self):
+        roles = self.identity_admin_client.list_roles()
+        return roles
+
+    def _assign_user_role(self, tenant, user, role_name):
+        role = None
+        try:
+            roles = self._list_roles()
+            role = next(r for r in roles if r['name'] == role_name)
+        except StopIteration:
+            msg = 'No "%s" role found' % role_name
+            raise lib_exc.NotFound(msg)
+        try:
+            self.identity_admin_client.assign_user_role(tenant['id'],
+                                                        user['id'],
+                                                        role['id'])
+        except lib_exc.Conflict:
+            LOG.warning('Trying to add %s for user %s in tenant %s but they '
+                        ' were already granted that role' % (role_name,
+                                                             user['name'],
+                                                             tenant['name']))
+
+    def _delete_user(self, user):
+        self.identity_admin_client.delete_user(user)
+
+    def _delete_tenant(self, tenant):
+        #if CONF.service_available.neutron:
+            #self._cleanup_default_secgroup(tenant)
+        self.identity_admin_client.delete_tenant(tenant)
         os = clients.Manager(self.default_admin_creds)
         if self.identity_version == 'v2':
             return os.identity_client, os.network_client
@@ -287,6 +338,7 @@ class IsolatedCreds(cred_provider.CredentialProvider):
     def _create_router(self, router_name, tenant_id):
         external_net_id = dict(
             network_id=CONF.network.public_network_id)
+        print "***********************************",external_net_id
         resp_body = self.network_admin_client.create_router(
             router_name,
             external_gateway_info=external_net_id,

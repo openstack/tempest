@@ -20,6 +20,7 @@ from tempest_lib.common.utils import data_utils
 from tempest.api.object_storage import base
 from tempest import config
 from tempest import test
+from tempest_lib import decorators
 
 CONF = config.CONF
 
@@ -45,6 +46,7 @@ class ContainerTest(base.BaseObjectTest):
         header_value = resp.get('x-versions-location', 'Missing Header')
         self.assertEqual(header_value, versioned)
 
+    @test.attr(type='smoke')
     @test.idempotent_id('a151e158-dcbf-4a1f-a1e7-46cd65895a6f')
     @testtools.skipIf(
         not CONF.object_storage_feature_enabled.object_versioning,

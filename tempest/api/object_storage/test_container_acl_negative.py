@@ -227,3 +227,25 @@ class ObjectACLsNegativeTest(base.BaseObjectTest):
                           self.object_client.delete_object,
                           self.container_name,
                           object_name)
+    
+    @test.attr(type=['negative', 'smoke'])
+    def test_create_container_with_invalid_container_name_greater_than_255_bytes(self):
+        #Container Name greater than 255 bytes
+        container_name = data_utils.arbitrary_string(256)
+        resp, body = self.container_client.create_container(container_name)
+        self.assertNotEqual(resp, '201', 'Container creation successful with invalid container name greater than 255 bytes')
+
+    @test.attr(type=['negative', 'smoke'])
+    def test_create_container_with_invalid_container_name_less_than_3_bytes(self): 
+        #Container Name less than 3 bytes
+        container_name = data_utils.arbitrary_string(2)
+        resp, body = self.container_client.create_container(container_name)
+        self.assertNotEqual(resp, '201', 'Container creation successful with invalid container name less than 3 bytes')
+        
+    @test.attr(type=['negative', 'smoke'])
+    def test_create_container_with_invalid_container_name_containing_forward_slash(self):    
+        #Container Name contains '/'
+        container_name = data_utils.arbitrary_string(10)+"/"
+        resp, body = self.container_client.create_container(container_name)
+        self.assertNotEqual(resp, '201', 'Container creation successful with invalid container name containing /')
+        
