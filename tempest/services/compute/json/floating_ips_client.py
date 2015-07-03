@@ -37,7 +37,7 @@ class FloatingIPsClientJSON(service_client.ServiceClient):
 
     def show_floating_ip(self, floating_ip_id):
         """Get the details of a floating IP."""
-        url = "os-floating-ips/%s" % str(floating_ip_id)
+        url = "os-floating-ips/%s" % floating_ip_id
         resp, body = self.get(url)
         body = json.loads(body)
         self.validate_response(schema.create_get_floating_ip, resp, body)
@@ -55,14 +55,14 @@ class FloatingIPsClientJSON(service_client.ServiceClient):
 
     def delete_floating_ip(self, floating_ip_id):
         """Deletes the provided floating IP from the project."""
-        url = "os-floating-ips/%s" % str(floating_ip_id)
+        url = "os-floating-ips/%s" % floating_ip_id
         resp, body = self.delete(url)
         self.validate_response(schema.add_remove_floating_ip, resp, body)
         return service_client.ResponseBody(resp, body)
 
     def associate_floating_ip_to_server(self, floating_ip, server_id):
         """Associate the provided floating IP to a specific server."""
-        url = "servers/%s/action" % str(server_id)
+        url = "servers/%s/action" % server_id
         post_body = {
             'addFloatingIp': {
                 'address': floating_ip,
@@ -76,7 +76,7 @@ class FloatingIPsClientJSON(service_client.ServiceClient):
 
     def disassociate_floating_ip_from_server(self, floating_ip, server_id):
         """Disassociate the provided floating IP from a specific server."""
-        url = "servers/%s/action" % str(server_id)
+        url = "servers/%s/action" % server_id
         post_body = {
             'removeFloatingIp': {
                 'address': floating_ip,

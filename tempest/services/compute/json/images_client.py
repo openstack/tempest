@@ -38,7 +38,7 @@ class ImagesClientJSON(service_client.ServiceClient):
             post_body['createImage']['metadata'] = meta
 
         post_body = json.dumps(post_body)
-        resp, body = self.post('servers/%s/action' % str(server_id),
+        resp, body = self.post('servers/%s/action' % server_id,
                                post_body)
         self.validate_response(schema.create_image, resp, body)
         return service_client.ResponseBody(resp, body)
@@ -61,7 +61,7 @@ class ImagesClientJSON(service_client.ServiceClient):
 
     def show_image(self, image_id):
         """Returns the details of a single image."""
-        resp, body = self.get("images/%s" % str(image_id))
+        resp, body = self.get("images/%s" % image_id)
         self.expected_success(200, resp.status)
         body = json.loads(body)
         self.validate_response(schema.get_image, resp, body)
@@ -69,7 +69,7 @@ class ImagesClientJSON(service_client.ServiceClient):
 
     def delete_image(self, image_id):
         """Deletes the provided image."""
-        resp, body = self.delete("images/%s" % str(image_id))
+        resp, body = self.delete("images/%s" % image_id)
         self.validate_response(schema.delete, resp, body)
         return service_client.ResponseBody(resp, body)
 
@@ -79,7 +79,7 @@ class ImagesClientJSON(service_client.ServiceClient):
 
     def list_image_metadata(self, image_id):
         """Lists all metadata items for an image."""
-        resp, body = self.get("images/%s/metadata" % str(image_id))
+        resp, body = self.get("images/%s/metadata" % image_id)
         body = json.loads(body)
         self.validate_response(schema.image_metadata, resp, body)
         return service_client.ResponseBody(resp, body['metadata'])
@@ -87,7 +87,7 @@ class ImagesClientJSON(service_client.ServiceClient):
     def set_image_metadata(self, image_id, meta):
         """Sets the metadata for an image."""
         post_body = json.dumps({'metadata': meta})
-        resp, body = self.put('images/%s/metadata' % str(image_id), post_body)
+        resp, body = self.put('images/%s/metadata' % image_id, post_body)
         body = json.loads(body)
         self.validate_response(schema.image_metadata, resp, body)
         return service_client.ResponseBody(resp, body['metadata'])
@@ -95,14 +95,14 @@ class ImagesClientJSON(service_client.ServiceClient):
     def update_image_metadata(self, image_id, meta):
         """Updates the metadata for an image."""
         post_body = json.dumps({'metadata': meta})
-        resp, body = self.post('images/%s/metadata' % str(image_id), post_body)
+        resp, body = self.post('images/%s/metadata' % image_id, post_body)
         body = json.loads(body)
         self.validate_response(schema.image_metadata, resp, body)
         return service_client.ResponseBody(resp, body['metadata'])
 
     def show_image_metadata_item(self, image_id, key):
         """Returns the value for a specific image metadata key."""
-        resp, body = self.get("images/%s/metadata/%s" % (str(image_id), key))
+        resp, body = self.get("images/%s/metadata/%s" % (image_id, key))
         body = json.loads(body)
         self.validate_response(schema.image_meta_item, resp, body)
         return service_client.ResponseBody(resp, body['meta'])
@@ -110,7 +110,7 @@ class ImagesClientJSON(service_client.ServiceClient):
     def set_image_metadata_item(self, image_id, key, meta):
         """Sets the value for a specific image metadata key."""
         post_body = json.dumps({'meta': meta})
-        resp, body = self.put('images/%s/metadata/%s' % (str(image_id), key),
+        resp, body = self.put('images/%s/metadata/%s' % (image_id, key),
                               post_body)
         body = json.loads(body)
         self.validate_response(schema.image_meta_item, resp, body)
@@ -119,7 +119,7 @@ class ImagesClientJSON(service_client.ServiceClient):
     def delete_image_metadata_item(self, image_id, key):
         """Deletes a single image metadata key/value pair."""
         resp, body = self.delete("images/%s/metadata/%s" %
-                                 (str(image_id), key))
+                                 (image_id, key))
         self.validate_response(schema.delete, resp, body)
         return service_client.ResponseBody(resp, body)
 
