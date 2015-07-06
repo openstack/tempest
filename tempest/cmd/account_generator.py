@@ -128,7 +128,7 @@ def get_admin_clients(opts):
         'build_interval': CONF.compute.build_interval,
         'build_timeout': CONF.compute.build_timeout
     }
-    identity_admin = identity_client.IdentityClientJSON(
+    identity_admin = identity_client.IdentityClient(
         _auth,
         CONF.identity.catalog_type,
         CONF.identity.region,
@@ -138,7 +138,7 @@ def get_admin_clients(opts):
     network_admin = None
     if (CONF.service_available.neutron and
         CONF.auth.create_isolated_networks):
-        network_admin = network_client.NetworkClientJSON(
+        network_admin = network_client.NetworkClient(
             _auth,
             CONF.network.catalog_type,
             CONF.network.region or CONF.identity.region,

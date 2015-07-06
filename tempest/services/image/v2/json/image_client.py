@@ -23,13 +23,13 @@ from tempest.common import glance_http
 from tempest.common import service_client
 
 
-class ImageClientV2JSON(service_client.ServiceClient):
+class ImageClientV2(service_client.ServiceClient):
 
     def __init__(self, auth_provider, catalog_type, region, endpoint_type=None,
                  build_interval=None, build_timeout=None,
                  disable_ssl_certificate_validation=None, ca_certs=None,
                  trace_requests=None):
-        super(ImageClientV2JSON, self).__init__(
+        super(ImageClientV2, self).__init__(
             auth_provider,
             catalog_type,
             region,

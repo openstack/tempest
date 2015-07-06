@@ -21,7 +21,7 @@ from tempest.common import service_client
 from tempest import exceptions
 
 
-class BaseQosSpecsClientJSON(service_client.ServiceClient):
+class BaseQosSpecsClient(service_client.ServiceClient):
     """Client class to send CRUD QoS API requests"""
 
     def is_resource_deleted(self, qos_id):
@@ -157,5 +157,5 @@ class BaseQosSpecsClientJSON(service_client.ServiceClient):
         return service_client.ResponseBody(resp, body)
 
 
-class QosSpecsClientJSON(BaseQosSpecsClientJSON):
+class QosSpecsClient(BaseQosSpecsClient):
     """Volume V1 QoS client."""

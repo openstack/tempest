@@ -17,7 +17,7 @@
 from tempest.services.volume.json.admin import volume_hosts_client
 
 
-class VolumeHostsV2ClientJSON(volume_hosts_client.BaseVolumeHostsClientJSON):
+class VolumeHostsV2Client(volume_hosts_client.BaseVolumeHostsClient):
     """
     Client class to send CRUD Volume V2 API requests to a Cinder endpoint
     """

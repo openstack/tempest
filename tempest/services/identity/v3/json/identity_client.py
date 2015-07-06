@@ -20,7 +20,7 @@ from six.moves.urllib import parse as urllib
 from tempest.common import service_client
 
 
-class IdentityV3ClientJSON(service_client.ServiceClient):
+class IdentityV3Client(service_client.ServiceClient):
     api_version = "v3"
 
     def get_api_description(self):

@@ -19,7 +19,7 @@ from tempest.api_schema.response.compute.v2_1 import extensions as schema
 from tempest.common import service_client
 
 
-class ExtensionsClientJSON(service_client.ServiceClient):
+class ExtensionsClient(service_client.ServiceClient):
 
     def list_extensions(self):
         url = 'extensions'

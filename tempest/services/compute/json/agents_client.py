@@ -20,7 +20,7 @@ from tempest.api_schema.response.compute.v2_1 import agents as schema
 from tempest.common import service_client
 
 
-class AgentsClientJSON(service_client.ServiceClient):
+class AgentsClient(service_client.ServiceClient):
     """
     Tests Agents API
     """

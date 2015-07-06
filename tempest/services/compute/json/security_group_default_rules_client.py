@@ -20,7 +20,7 @@ from tempest.api_schema.response.compute.v2_1 import \
 from tempest.common import service_client
 
 
-class SecurityGroupDefaultRulesClientJSON(service_client.ServiceClient):
+class SecurityGroupDefaultRulesClient(service_client.ServiceClient):
 
     def create_security_default_group_rule(self, ip_protocol, from_port,
                                            to_port, **kwargs):

@@ -16,6 +16,6 @@
 from tempest.services.volume.json import availability_zone_client
 
 
-class VolumeV2AvailabilityZoneClientJSON(
-        availability_zone_client.BaseVolumeAvailabilityZoneClientJSON):
+class VolumeV2AvailabilityZoneClient(
+        availability_zone_client.BaseVolumeAvailabilityZoneClient):
     api_version = "v2"

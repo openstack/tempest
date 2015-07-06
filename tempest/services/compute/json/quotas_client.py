@@ -19,7 +19,7 @@ from tempest.api_schema.response.compute.v2_1 import quotas as schema
 from tempest.common import service_client
 
 
-class QuotasClientJSON(service_client.ServiceClient):
+class QuotasClient(service_client.ServiceClient):
 
     def show_quota_set(self, tenant_id, user_id=None):
         """List the quota set for a tenant."""

@@ -19,7 +19,7 @@ from tempest.api_schema.response.compute.v2_1 import keypairs as schema
 from tempest.common import service_client
 
 
-class KeyPairsClientJSON(service_client.ServiceClient):
+class KeyPairsClient(service_client.ServiceClient):
 
     def list_keypairs(self):
         resp, body = self.get("os-keypairs")

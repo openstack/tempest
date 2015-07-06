@@ -18,7 +18,7 @@ from tempest.api_schema.response.compute.v2_1 import tenant_networks as schema
 from tempest.common import service_client
 
 
-class TenantNetworksClientJSON(service_client.ServiceClient):
+class TenantNetworksClient(service_client.ServiceClient):
 
     def list_tenant_networks(self):
         resp, body = self.get("os-tenant-networks")

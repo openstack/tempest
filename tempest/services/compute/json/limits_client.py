@@ -19,7 +19,7 @@ from tempest.api_schema.response.compute.v2_1 import limits as schema
 from tempest.common import service_client
 
 
-class LimitsClientJSON(service_client.ServiceClient):
+class LimitsClient(service_client.ServiceClient):
 
     def show_limits(self):
         resp, body = self.get("limits")

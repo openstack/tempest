@@ -24,11 +24,11 @@ from tempest.common import service_client
 from tempest import exceptions
 
 
-class VolumesExtensionsClientJSON(service_client.ServiceClient):
+class VolumesExtensionsClient(service_client.ServiceClient):
 
     def __init__(self, auth_provider, service, region,
                  default_volume_size=1, **kwargs):
-        super(VolumesExtensionsClientJSON, self).__init__(
+        super(VolumesExtensionsClient, self).__init__(
             auth_provider, service, region, **kwargs)
         self.default_volume_size = default_volume_size
 

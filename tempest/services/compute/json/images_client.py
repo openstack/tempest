@@ -23,7 +23,7 @@ from tempest.common import service_client
 from tempest.common import waiters
 
 
-class ImagesClientJSON(service_client.ServiceClient):
+class ImagesClient(service_client.ServiceClient):
 
     def create_image(self, server_id, name, meta=None):
         """Creates an image of the original server."""

@@ -18,7 +18,7 @@ import urllib
 from tempest.common import service_client
 
 
-class DatabaseFlavorsClientJSON(service_client.ServiceClient):
+class DatabaseFlavorsClient(service_client.ServiceClient):
 
     def list_db_flavors(self, params=None):
         url = 'flavors'

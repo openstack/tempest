@@ -20,7 +20,7 @@ from tempest.api_schema.response.compute.v2_1\
 from tempest.common import service_client
 
 
-class QuotaClassesClientJSON(service_client.ServiceClient):
+class QuotaClassesClient(service_client.ServiceClient):
 
     def show_quota_class_set(self, quota_class_id):
         """List the quota class set for a quota class."""

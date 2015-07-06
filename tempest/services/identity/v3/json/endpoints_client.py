@@ -18,7 +18,7 @@ import json
 from tempest.common import service_client
 
 
-class EndPointClientJSON(service_client.ServiceClient):
+class EndPointClient(service_client.ServiceClient):
     api_version = "v3"
 
     def list_endpoints(self):

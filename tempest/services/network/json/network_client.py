@@ -21,7 +21,7 @@ from tempest.common import service_client
 from tempest import exceptions
 
 
-class NetworkClientJSON(service_client.ServiceClient):
+class NetworkClient(service_client.ServiceClient):
 
     """
     Tempest REST client for Neutron. Uses v2 of the Neutron API, since the

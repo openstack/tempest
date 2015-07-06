@@ -18,7 +18,7 @@ import json
 from tempest.common import service_client
 
 
-class NetworksClientJSON(service_client.ServiceClient):
+class NetworksClient(service_client.ServiceClient):
 
     def list_networks(self):
         resp, body = self.get("os-networks")

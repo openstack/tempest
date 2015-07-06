@@ -20,7 +20,7 @@ from tempest.api_schema.response.compute.v2_1 import availability_zone \
 from tempest.common import service_client
 
 
-class AvailabilityZoneClientJSON(service_client.ServiceClient):
+class AvailabilityZoneClient(service_client.ServiceClient):
 
     def list_availability_zones(self, detail=False):
         url = 'os-availability-zone'

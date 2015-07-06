@@ -13,7 +13,7 @@
 from tempest.services.baremetal import base
 
 
-class BaremetalClientJSON(base.BaremetalClient):
+class BaremetalClient(base.BaremetalClient):
     """
     Base Tempest REST client for Ironic API v1.
     """

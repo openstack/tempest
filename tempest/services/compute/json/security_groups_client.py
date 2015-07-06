@@ -22,7 +22,7 @@ from tempest.api_schema.response.compute.v2_1 import security_groups as schema
 from tempest.common import service_client
 
 
-class SecurityGroupsClientJSON(service_client.ServiceClient):
+class SecurityGroupsClient(service_client.ServiceClient):
 
     def list_security_groups(self, params=None):
         """List all security groups for a user."""

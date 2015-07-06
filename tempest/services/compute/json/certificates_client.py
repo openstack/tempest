@@ -19,7 +19,7 @@ from tempest.api_schema.response.compute.v2_1 import certificates as schema
 from tempest.common import service_client
 
 
-class CertificatesClientJSON(service_client.ServiceClient):
+class CertificatesClient(service_client.ServiceClient):
 
     def show_certificate(self, id):
         url = "os-certificates/%s" % (id)

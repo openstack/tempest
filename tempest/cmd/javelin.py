@@ -188,25 +188,25 @@ class OSClient(object):
         }
         _auth = auth.KeystoneV2AuthProvider(
             _creds, CONF.identity.uri, **auth_provider_params)
-        self.identity = identity_client.IdentityClientJSON(
+        self.identity = identity_client.IdentityClient(
             _auth,
             CONF.identity.catalog_type,
             CONF.identity.region,
             endpoint_type='adminURL',
             **default_params_with_timeout_values)
-        self.servers = servers_client.ServersClientJSON(_auth,
-                                                        **compute_params)
-        self.flavors = flavors_client.FlavorsClientJSON(_auth,
-                                                        **compute_params)
-        self.floating_ips = floating_ips_client.FloatingIPsClientJSON(
+        self.servers = servers_client.ServersClient(_auth,
+                                                    **compute_params)
+        self.flavors = flavors_client.FlavorsClient(_auth,
+                                                    **compute_params)
+        self.floating_ips = floating_ips_client.FloatingIPsClient(
             _auth, **compute_params)
-        self.secgroups = security_groups_client.SecurityGroupsClientJSON(
+        self.secgroups = security_groups_client.SecurityGroupsClient(
             _auth, **compute_params)
         self.objects = object_client.ObjectClient(_auth,
                                                   **object_storage_params)
         self.containers = container_client.ContainerClient(
             _auth, **object_storage_params)
-        self.images = image_client.ImageClientV2JSON(
+        self.images = image_client.ImageClientV2(
             _auth,
             CONF.image.catalog_type,
             CONF.image.region or CONF.identity.region,
@@ -214,13 +214,13 @@ class OSClient(object):
             build_interval=CONF.image.build_interval,
             build_timeout=CONF.image.build_timeout,
             **default_params)
-        self.telemetry = telemetry_client.TelemetryClientJSON(
+        self.telemetry = telemetry_client.TelemetryClient(
             _auth,
             CONF.telemetry.catalog_type,
             CONF.identity.region,
             endpoint_type=CONF.telemetry.endpoint_type,
             **default_params_with_timeout_values)
-        self.volumes = volumes_client.VolumesClientJSON(
+        self.volumes = volumes_client.VolumesClient(
             _auth,
             CONF.volume.catalog_type,
             CONF.volume.region or CONF.identity.region,
@@ -228,7 +228,7 @@ class OSClient(object):
             build_interval=CONF.volume.build_interval,
             build_timeout=CONF.volume.build_timeout,
             **default_params)
-        self.networks = network_client.NetworkClientJSON(
+        self.networks = network_client.NetworkClient(
             _auth,
             CONF.network.catalog_type,
             CONF.network.region or CONF.identity.region,
