@@ -62,7 +62,7 @@ class AuthorizationTestJSON(base.BaseV2ComputeTest):
     def resource_setup(cls):
         super(AuthorizationTestJSON, cls).resource_setup()
         server = cls.create_test_server(wait_until='ACTIVE')
-        cls.server = cls.client.get_server(server['id'])
+        cls.server = cls.client.show_server(server['id'])
 
         name = data_utils.rand_name('image')
         body = cls.glance_client.create_image(name=name,
@@ -103,7 +103,7 @@ class AuthorizationTestJSON(base.BaseV2ComputeTest):
     @test.idempotent_id('56816e4a-bd34-47b5-aee9-268c3efeb5d4')
     def test_get_server_for_alt_account_fails(self):
         # A GET request for a server on another user's account should fail
-        self.assertRaises(lib_exc.NotFound, self.alt_client.get_server,
+        self.assertRaises(lib_exc.NotFound, self.alt_client.show_server,
                           self.server['id'])
 
     @test.idempotent_id('fb8a4870-6d9d-44ad-8375-95d52e98d9f6')

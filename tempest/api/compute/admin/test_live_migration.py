@@ -47,7 +47,7 @@ class LiveBlockMigrationTestJSON(base.BaseV2ComputeAdminTest):
         ]
 
     def _get_server_details(self, server_id):
-        body = self.admin_servers_client.get_server(server_id)
+        body = self.admin_servers_client.show_server(server_id)
         return body
 
     def _get_host_for_server(self, server_id):

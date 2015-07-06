@@ -273,7 +273,7 @@ class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
         if not self.fixed_network_name:
             msg = 'fixed_network_name needs to be configured to run this test'
             raise self.skipException(msg)
-        self.s1 = self.client.get_server(self.s1['id'])
+        self.s1 = self.client.show_server(self.s1['id'])
         for addr_spec in self.s1['addresses'][self.fixed_network_name]:
             ip = addr_spec['addr']
             if addr_spec['version'] == 4:
@@ -297,7 +297,7 @@ class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
         if not self.fixed_network_name:
             msg = 'fixed_network_name needs to be configured to run this test'
             raise self.skipException(msg)
-        self.s1 = self.client.get_server(self.s1['id'])
+        self.s1 = self.client.show_server(self.s1['id'])
         addr_spec = self.s1['addresses'][self.fixed_network_name][0]
         ip = addr_spec['addr'][0:-3]
         if addr_spec['version'] == 4:

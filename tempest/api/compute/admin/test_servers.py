@@ -65,7 +65,7 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
         # Reset server's state to 'active'
         self.client.reset_state(self.s1_id, state='active')
         # Verify server's state
-        server = self.client.get_server(self.s1_id)
+        server = self.client.show_server(self.s1_id)
         self.assertEqual(server['status'], 'ACTIVE')
         servers = body['servers']
         # Verify error server in list result
@@ -114,7 +114,7 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
                                                 **network_kwargs)
         self.addCleanup(self.client.delete_server, test_server['id'])
         self.client.wait_for_server_status(test_server['id'], 'ACTIVE')
-        server = self.client.get_server(test_server['id'])
+        server = self.client.show_server(test_server['id'])
         self.assertEqual(server['status'], 'ACTIVE')
         hostname = server[self._host_key]
         params = {'host': hostname}
@@ -133,14 +133,14 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
         self.client.reset_state(self.s1_id)
 
         # Verify server's state
-        server = self.client.get_server(self.s1_id)
+        server = self.client.show_server(self.s1_id)
         self.assertEqual(server['status'], 'ERROR')
 
         # Reset server's state to 'active'
         self.client.reset_state(self.s1_id, state='active')
 
         # Verify server's state
-        server = self.client.get_server(self.s1_id)
+        server = self.client.show_server(self.s1_id)
         self.assertEqual(server['status'], 'ACTIVE')
 
     @decorators.skip_because(bug="1240043")
@@ -177,7 +177,7 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
                                                      'ACTIVE',
                                                      raise_on_error=False)
         # Verify the server properties after rebuilding
-        server = self.non_admin_client.get_server(rebuilt_server['id'])
+        server = self.non_admin_client.show_server(rebuilt_server['id'])
         rebuilt_image_id = server['image']['id']
         self.assertEqual(self.image_ref_alt, rebuilt_image_id)
 

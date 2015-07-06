@@ -144,7 +144,7 @@ class DeleteServersAdminTestJSON(base.BaseV2ComputeAdminTest):
         server = self.create_test_server(wait_until='ACTIVE')
         self.admin_client.reset_state(server['id'], state='error')
         # Verify server's state
-        server = self.non_admin_client.get_server(server['id'])
+        server = self.non_admin_client.show_server(server['id'])
         self.assertEqual(server['status'], 'ERROR')
         self.non_admin_client.delete_server(server['id'])
         self.servers_client.wait_for_server_termination(server['id'],

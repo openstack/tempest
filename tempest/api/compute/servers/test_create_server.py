@@ -63,7 +63,7 @@ class ServersTestJSON(base.BaseV2ComputeTest):
             personality=personality,
             disk_config=disk_config)
         cls.password = cls.server_initial['adminPass']
-        cls.server = cls.client.get_server(cls.server_initial['id'])
+        cls.server = cls.client.show_server(cls.server_initial['id'])
 
     @test.attr(type='smoke')
     @test.idempotent_id('5de47127-9977-400a-936f-abcfbec1218f')
@@ -265,13 +265,13 @@ class ServersWithSpecificFlavorTestJSON(base.BaseV2ComputeAdminTest):
                                 adminPass=admin_pass,
                                 flavor=flavor_with_eph_disk_id))
         # Get partition number of server without extra specs.
-        server_no_eph_disk = self.client.get_server(
+        server_no_eph_disk = self.client.show_server(
             server_no_eph_disk['id'])
         linux_client = remote_client.RemoteClient(server_no_eph_disk,
                                                   self.ssh_user, admin_pass)
         partition_num = len(linux_client.get_partitions().split('\n'))
 
-        server_with_eph_disk = self.client.get_server(
+        server_with_eph_disk = self.client.show_server(
             server_with_eph_disk['id'])
         linux_client = remote_client.RemoteClient(server_with_eph_disk,
                                                   self.ssh_user, admin_pass)

@@ -183,7 +183,7 @@ class NeutronResourcesTestJSON(base.BaseOrchestrationTest):
     def test_created_server(self):
         """Verifies created sever."""
         server_id = self.test_resources.get('Server')['physical_resource_id']
-        server = self.servers_client.get_server(server_id)
+        server = self.servers_client.show_server(server_id)
         self.assertEqual(self.keypair_name, server['key_name'])
         self.assertEqual('ACTIVE', server['status'])
         network = server['addresses'][self.neutron_basic_template['resources'][
