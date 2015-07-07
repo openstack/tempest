@@ -43,7 +43,7 @@ LOG = logging.getLogger(__name__)
 CONF = config.CONF
 
 
-def attr(*args, **kwargs):
+def attr(**kwargs):
     """A decorator which applies the  testtools attr decorator
 
     This decorator applies the testtools.testcase.attr if it is in the list of
@@ -98,7 +98,7 @@ def get_service_list():
     return service_list
 
 
-def services(*args, **kwargs):
+def services(*args):
     """A decorator used to set an attr for each service used in a test case
 
     This decorator applies a testtools attr for each service that gets
@@ -128,7 +128,7 @@ def services(*args, **kwargs):
     return decorator
 
 
-def stresstest(*args, **kwargs):
+def stresstest(**kwargs):
     """Add stress test decorator
 
     For all functions with this decorator a attr stress will be
@@ -154,7 +154,7 @@ def stresstest(*args, **kwargs):
     return decorator
 
 
-def requires_ext(*args, **kwargs):
+def requires_ext(**kwargs):
     """A decorator to skip tests if an extension is not enabled
 
     @param extension
