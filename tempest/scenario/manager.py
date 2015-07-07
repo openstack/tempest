@@ -19,11 +19,11 @@ import subprocess
 import netaddr
 from oslo_log import log
 import six
-from tempest_lib.common.utils import data_utils
 from tempest_lib.common.utils import misc as misc_utils
 from tempest_lib import exceptions as lib_exc
 
 from tempest.common import fixed_network
+from tempest.common.utils import data_utils
 from tempest.common.utils.linux import remote_client
 from tempest import config
 from tempest import exceptions

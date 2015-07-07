@@ -14,9 +14,9 @@
 #    under the License.
 
 import six
-from tempest_lib.common.utils import data_utils
 
 from tempest.api.network import base
+from tempest.common.utils import data_utils
 from tempest import test
 
 

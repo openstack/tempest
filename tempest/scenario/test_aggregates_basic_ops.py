@@ -14,9 +14,9 @@
 #    under the License.
 
 from oslo_log import log as logging
-from tempest_lib.common.utils import data_utils
 
 from tempest.common import tempest_fixtures as fixtures
+from tempest.common.utils import data_utils
 from tempest.scenario import manager
 from tempest import test
 

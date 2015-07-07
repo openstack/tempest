@@ -17,10 +17,10 @@ import hmac
 import time
 
 from six.moves.urllib import parse as urlparse
-from tempest_lib.common.utils import data_utils
 from tempest_lib import exceptions as lib_exc
 
 from tempest.api.object_storage import base
+from tempest.common.utils import data_utils
 from tempest import test
 
 

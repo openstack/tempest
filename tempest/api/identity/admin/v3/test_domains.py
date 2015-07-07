@@ -14,10 +14,9 @@
 #    under the License.
 
 from tempest.api.identity import base
+from tempest.common.utils import data_utils
 from tempest import config
 from tempest import test
-
-from tempest_lib.common.utils import data_utils
 
 CONF = config.CONF
 

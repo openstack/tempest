@@ -16,11 +16,11 @@
 import logging
 
 from six import moves
-from tempest_lib.common.utils import data_utils
 from tempest_lib import exceptions as lib_exc
 from testtools import matchers
 
 from tempest.api.messaging import base
+from tempest.common.utils import data_utils
 from tempest import test
 
 

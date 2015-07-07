@@ -11,8 +11,8 @@
 #    under the License.
 
 from oslo_log import log
-from tempest_lib.common.utils import data_utils
 
+from tempest.common.utils import data_utils
 from tempest import config
 from tempest.scenario import manager
 from tempest import test
