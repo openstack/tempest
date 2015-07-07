@@ -22,15 +22,15 @@ from tempest.common import service_client
 class FixedIPsClient(service_client.ServiceClient):
 
     def show_fixed_ip(self, fixed_ip):
-        url = "os-fixed-ips/%s" % (fixed_ip)
+        url = "os-fixed-ips/%s" % fixed_ip
         resp, body = self.get(url)
         body = json.loads(body)
         self.validate_response(schema.get_fixed_ip, resp, body)
         return service_client.ResponseBody(resp, body['fixed_ip'])
 
-    def reserve_fixed_ip(self, ip, body):
+    def reserve_fixed_ip(self, fixed_ip, body):
         """This reserves and unreserves fixed ips."""
-        url = "os-fixed-ips/%s/action" % (ip)
+        url = "os-fixed-ips/%s/action" % fixed_ip
         resp, body = self.post(url, json.dumps(body))
         self.validate_response(schema.reserve_fixed_ip, resp, body)
         return service_client.ResponseBody(resp)

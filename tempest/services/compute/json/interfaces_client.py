@@ -22,14 +22,14 @@ from tempest.common import service_client
 
 class InterfacesClient(service_client.ServiceClient):
 
-    def list_interfaces(self, server):
-        resp, body = self.get('servers/%s/os-interface' % server)
+    def list_interfaces(self, server_id):
+        resp, body = self.get('servers/%s/os-interface' % server_id)
         body = json.loads(body)
         self.validate_response(schema.list_interfaces, resp, body)
         return service_client.ResponseBodyList(resp,
                                                body['interfaceAttachments'])
 
-    def create_interface(self, server, port_id=None, network_id=None,
+    def create_interface(self, server_id, port_id=None, network_id=None,
                          fixed_ip=None):
         post_body = dict(interfaceAttachment=dict())
         if port_id:
@@ -40,20 +40,21 @@ class InterfacesClient(service_client.ServiceClient):
             fip = dict(ip_address=fixed_ip)
             post_body['interfaceAttachment']['fixed_ips'] = [fip]
         post_body = json.dumps(post_body)
-        resp, body = self.post('servers/%s/os-interface' % server,
+        resp, body = self.post('servers/%s/os-interface' % server_id,
                                body=post_body)
         body = json.loads(body)
         self.validate_response(schema.get_create_interfaces, resp, body)
         return service_client.ResponseBody(resp, body['interfaceAttachment'])
 
-    def show_interface(self, server, port_id):
-        resp, body = self.get('servers/%s/os-interface/%s' % (server, port_id))
+    def show_interface(self, server_id, port_id):
+        resp, body = self.get('servers/%s/os-interface/%s' % (server_id,
+                                                              port_id))
         body = json.loads(body)
         self.validate_response(schema.get_create_interfaces, resp, body)
         return service_client.ResponseBody(resp, body['interfaceAttachment'])
 
-    def delete_interface(self, server, port_id):
-        resp, body = self.delete('servers/%s/os-interface/%s' % (server,
+    def delete_interface(self, server_id, port_id):
+        resp, body = self.delete('servers/%s/os-interface/%s' % (server_id,
                                                                  port_id))
         self.validate_response(schema.delete_interface, resp, body)
         return service_client.ResponseBody(resp, body)
