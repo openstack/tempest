@@ -20,6 +20,7 @@ from tempest_lib import exceptions as lib_exc
 
 from tempest.common import compute
 from tempest.common.utils import data_utils
+from tempest.common import waiters
 from tempest import config
 from tempest import exceptions
 import tempest.test
@@ -280,8 +281,8 @@ class BaseComputeTest(tempest.test.BaseTestCase):
         cls.images.append(image_id)
 
         if 'wait_until' in kwargs:
-            cls.images_client.wait_for_image_status(image_id,
-                                                    kwargs['wait_until'])
+            waiters.wait_for_image_status(cls.images_client,
+                                          image_id, kwargs['wait_until'])
             image = cls.images_client.show_image(image_id)
 
             if kwargs['wait_until'] == 'ACTIVE':
