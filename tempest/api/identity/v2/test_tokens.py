@@ -13,6 +13,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from oslo_utils import timeutils
+import six
 from tempest.api.identity import base
 from tempest import test
 
@@ -30,9 +32,19 @@ class TokensTest(base.BaseIdentityV2Test):
         password = creds.password
         tenant_name = creds.tenant_name
 
-        body = token_client.auth(username,
-                                 password,
-                                 tenant_name)
+        body = token_client.auth(username, password, tenant_name)
 
+        self.assertNotEmpty(body['token']['id'])
+        self.assertIsInstance(body['token']['id'], six.string_types)
+
+        now = timeutils.utcnow()
+        expires_at = timeutils.normalize_time(
+            timeutils.parse_isotime(body['token']['expires']))
+        self.assertGreater(expires_at, now)
+
+        self.assertEqual(body['token']['tenant']['id'],
+                         creds.credentials.tenant_id)
         self.assertEqual(body['token']['tenant']['name'],
                          tenant_name)
+
+        self.assertEqual(body['user']['id'], creds.credentials.user_id)
