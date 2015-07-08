@@ -14,12 +14,10 @@
 #    under the License.
 
 import json
-import time
 
 from tempest.api_schema.response.compute.v2_1 import interfaces as schema
 from tempest.api_schema.response.compute.v2_1 import servers as servers_schema
 from tempest.common import service_client
-from tempest import exceptions
 
 
 class InterfacesClient(service_client.ServiceClient):
@@ -59,28 +57,6 @@ class InterfacesClient(service_client.ServiceClient):
                                                                  port_id))
         self.validate_response(schema.delete_interface, resp, body)
         return service_client.ResponseBody(resp, body)
-
-    def wait_for_interface_status(self, server, port_id, status):
-        """Waits for a interface to reach a given status."""
-        body = self.show_interface(server, port_id)
-        interface_status = body['port_state']
-        start = int(time.time())
-
-        while(interface_status != status):
-            time.sleep(self.build_interval)
-            body = self.show_interface(server, port_id)
-            interface_status = body['port_state']
-
-            timed_out = int(time.time()) - start >= self.build_timeout
-
-            if interface_status != status and timed_out:
-                message = ('Interface %s failed to reach %s status '
-                           '(current %s) within the required time (%s s).' %
-                           (port_id, status, interface_status,
-                            self.build_timeout))
-                raise exceptions.TimeoutException(message)
-
-        return body
 
     def add_fixed_ip(self, server_id, network_id):
         """Add a fixed IP to input server instance."""
