@@ -20,7 +20,6 @@ from tempest_lib import exceptions as lib_exc
 
 from tempest.api_schema.response.compute.v2_1 import volumes as schema
 from tempest.common import service_client
-from tempest.common import waiters
 
 
 class VolumesExtensionsClient(service_client.ServiceClient):
@@ -79,10 +78,6 @@ class VolumesExtensionsClient(service_client.ServiceClient):
         resp, body = self.delete("os-volumes/%s" % volume_id)
         self.validate_response(schema.delete_volume, resp, body)
         return service_client.ResponseBody(resp, body)
-
-    def wait_for_volume_status(self, volume_id, status):
-        """Waits for a Volume to reach a given status."""
-        waiters.wait_for_volume_status(self, volume_id, status)
 
     def is_resource_deleted(self, id):
         try:
