@@ -17,6 +17,7 @@ from oslo_log import log as logging
 
 from tempest.api.compute import base
 from tempest.common.utils import data_utils
+from tempest.common import waiters
 from tempest import config
 from tempest import test
 
@@ -81,7 +82,7 @@ class ImagesOneServerTestJSON(base.BaseV2ComputeTest):
         meta = {'image_type': 'test'}
         body = self.client.create_image(self.server_id, name, meta)
         image_id = data_utils.parse_image_id(body.response['location'])
-        self.client.wait_for_image_status(image_id, 'ACTIVE')
+        waiters.wait_for_image_status(self.client, image_id, 'ACTIVE')
 
         # Verify the image was created correctly
         image = self.client.show_image(image_id)

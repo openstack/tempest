@@ -20,7 +20,6 @@ from tempest_lib import exceptions as lib_exc
 
 from tempest.api_schema.response.compute.v2_1 import images as schema
 from tempest.common import service_client
-from tempest.common import waiters
 
 
 class ImagesClient(service_client.ServiceClient):
@@ -72,10 +71,6 @@ class ImagesClient(service_client.ServiceClient):
         resp, body = self.delete("images/%s" % image_id)
         self.validate_response(schema.delete, resp, body)
         return service_client.ResponseBody(resp, body)
-
-    def wait_for_image_status(self, image_id, status):
-        """Waits for an image to reach a given status."""
-        waiters.wait_for_image_status(self, image_id, status)
 
     def list_image_metadata(self, image_id):
         """Lists all metadata items for an image."""
