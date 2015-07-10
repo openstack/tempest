@@ -132,6 +132,27 @@ def wait_for_image_status(client, image_id, status):
             raise exceptions.TimeoutException(message)
 
 
+def wait_for_volume_status(client, volume_id, status):
+    """Waits for a Volume to reach a given status."""
+    body = client.show_volume(volume_id)
+    volume_status = body['status']
+    start = int(time.time())
+
+    while volume_status != status:
+        time.sleep(client.build_interval)
+        body = client.show_volume(volume_id)
+        volume_status = body['status']
+        if volume_status == 'error':
+            raise exceptions.VolumeBuildErrorException(volume_id=volume_id)
+
+        if int(time.time()) - start >= client.build_timeout:
+            message = ('Volume %s failed to reach %s status (current %s) '
+                       'within the required time (%s s).' %
+                       (volume_id, status, volume_status,
+                        client.build_timeout))
+            raise exceptions.TimeoutException(message)
+
+
 def wait_for_bm_node_status(client, node_id, attr, status):
     """Waits for a baremetal node attribute to reach given status.
 

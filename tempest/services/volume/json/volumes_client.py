@@ -14,13 +14,12 @@
 #    under the License.
 
 import json
-import time
 
 from six.moves.urllib import parse as urllib
 from tempest_lib import exceptions as lib_exc
 
 from tempest.common import service_client
-from tempest import exceptions
+from tempest.common import waiters
 
 
 class BaseVolumesClient(service_client.ServiceClient):
@@ -161,25 +160,7 @@ class BaseVolumesClient(service_client.ServiceClient):
 
     def wait_for_volume_status(self, volume_id, status):
         """Waits for a Volume to reach a given status."""
-        body = self.show_volume(volume_id)
-        volume_status = body['status']
-        start = int(time.time())
-
-        while volume_status != status:
-            time.sleep(self.build_interval)
-            body = self.show_volume(volume_id)
-            volume_status = body['status']
-            if volume_status == 'error':
-                raise exceptions.VolumeBuildErrorException(volume_id=volume_id)
-
-            if int(time.time()) - start >= self.build_timeout:
-                message = ('Volume %s failed to reach %s status (current: %s) '
-                           'within the required time '
-                           '(%s s).' % (volume_id,
-                                        status,
-                                        volume_status,
-                                        self.build_timeout))
-                raise exceptions.TimeoutException(message)
+        waiters.wait_for_volume_status(self, volume_id, status)
 
     def is_resource_deleted(self, id):
         try:
