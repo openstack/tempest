@@ -24,7 +24,7 @@ LOG = logging.getLogger(__name__)
 def cleanup():
     admin_manager = clients.AdminManager()
 
-    body = admin_manager.servers_client.list_servers({"all_tenants": True})
+    body = admin_manager.servers_client.list_servers(all_tenants=True)
     LOG.info("Cleanup::remove %s servers" % len(body['servers']))
     for s in body['servers']:
         try:

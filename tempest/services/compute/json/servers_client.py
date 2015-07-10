@@ -149,28 +149,21 @@ class ServersClient(service_client.ServiceClient):
         self.validate_response(schema.delete_server, resp, body)
         return service_client.ResponseBody(resp, body)
 
-    def list_servers(self, params=None):
+    def list_servers(self, detail=False, **params):
         """Lists all servers for a user."""
 
         url = 'servers'
+        _schema = schema.list_servers
+
+        if detail:
+            url += '/detail'
+            _schema = schema.list_servers_detail
         if params:
             url += '?%s' % urllib.urlencode(params)
 
         resp, body = self.get(url)
         body = json.loads(body)
-        self.validate_response(schema.list_servers, resp, body)
-        return service_client.ResponseBody(resp, body)
-
-    def list_servers_with_detail(self, params=None):
-        """Lists all servers in detail for a user."""
-
-        url = 'servers/detail'
-        if params:
-            url += '?%s' % urllib.urlencode(params)
-
-        resp, body = self.get(url)
-        body = json.loads(body)
-        self.validate_response(schema.list_servers_detail, resp, body)
+        self.validate_response(_schema, resp, body)
         return service_client.ResponseBody(resp, body)
 
     def wait_for_server_status(self, server_id, status, extra_timeout=0,
