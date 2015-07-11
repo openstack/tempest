@@ -1077,6 +1077,11 @@ class NetworkScenarioTest(ScenarioTest):
                 port = self._create_port(network_id=net_id,
                                          client=net_client,
                                          **create_port_body)
+                # if port_vnic_type is set, ports in the passing
+                # create_kwargs will be override, which cause the
+                # inconsistence. Set the port_id according to network id
+                if net_id == self.network['id']:
+                    self.port_id = port.id
                 ports.append({'port': port.id})
             if ports:
                 create_kwargs['networks'] = ports
