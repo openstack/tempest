@@ -73,17 +73,14 @@ class NetworkClient(service_client.ServiceClient):
         }
         return resource_plural_map.get(resource_name, resource_name + 's')
 
-    def _lister(self, plural_name):
-        def _list(**filters):
-            uri = self.get_uri(plural_name)
-            if filters:
-                uri += '?' + urllib.urlencode(filters, doseq=1)
-            resp, body = self.get(uri)
-            body = self.deserialize_list(body)
-            self.expected_success(200, resp.status)
-            return service_client.ResponseBody(resp, body)
-
-        return _list
+    def _list_resources(self, uri, **filters):
+        req_uri = self.uri_prefix + uri
+        if filters:
+            req_uri += '?' + urllib.urlencode(filters, doseq=1)
+        resp, body = self.get(req_uri)
+        body = self.deserialize_list(body)
+        self.expected_success(200, resp.status)
+        return service_client.ResponseBody(resp, body)
 
     def _delete_resource(self, uri):
         req_uri = self.uri_prefix + uri
@@ -119,15 +116,6 @@ class NetworkClient(service_client.ServiceClient):
         self.expected_success(200, resp.status)
         return service_client.ResponseBody(resp, body)
 
-    def __getattr__(self, name):
-        method_prefixes = ["list_"]
-        method_functors = [self._lister]
-        for index, prefix in enumerate(method_prefixes):
-            prefix_len = len(prefix)
-            if name[:prefix_len] == prefix:
-                return method_functors[index](name[prefix_len:])
-        raise AttributeError(name)
-
     def create_network(self, **kwargs):
         uri = '/networks'
         post_data = {'network': kwargs}
@@ -145,6 +133,10 @@ class NetworkClient(service_client.ServiceClient):
     def delete_network(self, network_id):
         uri = '/networks/%s' % network_id
         return self._delete_resource(uri)
+
+    def list_networks(self, **filters):
+        uri = '/networks'
+        return self._list_resources(uri, **filters)
 
     def create_subnet(self, **kwargs):
         uri = '/subnets'
@@ -164,6 +156,10 @@ class NetworkClient(service_client.ServiceClient):
         uri = '/subnets/%s' % subnet_id
         return self._delete_resource(uri)
 
+    def list_subnets(self, **filters):
+        uri = '/subnets'
+        return self._list_resources(uri, **filters)
+
     def create_port(self, **kwargs):
         uri = '/ports'
         post_data = {'port': kwargs}
@@ -181,6 +177,10 @@ class NetworkClient(service_client.ServiceClient):
     def delete_port(self, port_id):
         uri = '/ports/%s' % port_id
         return self._delete_resource(uri)
+
+    def list_ports(self, **filters):
+        uri = '/ports'
+        return self._list_resources(uri, **filters)
 
     def create_floatingip(self, **kwargs):
         uri = '/floatingips'
@@ -200,6 +200,10 @@ class NetworkClient(service_client.ServiceClient):
         uri = '/floatingips/%s' % floatingip_id
         return self._delete_resource(uri)
 
+    def list_floatingips(self, **filters):
+        uri = '/floatingips'
+        return self._list_resources(uri, **filters)
+
     def create_metering_label(self, **kwargs):
         uri = '/metering/metering-labels'
         post_data = {'metering_label': kwargs}
@@ -213,6 +217,10 @@ class NetworkClient(service_client.ServiceClient):
         uri = '/metering/metering-labels/%s' % metering_label_id
         return self._delete_resource(uri)
 
+    def list_metering_labels(self, **filters):
+        uri = '/metering/metering-labels'
+        return self._list_resources(uri, **filters)
+
     def create_metering_label_rule(self, **kwargs):
         uri = '/metering/metering-label-rules'
         post_data = {'metering_label_rule': kwargs}
@@ -225,6 +233,10 @@ class NetworkClient(service_client.ServiceClient):
     def delete_metering_label_rule(self, metering_label_rule_id):
         uri = '/metering/metering-label-rules/%s' % metering_label_rule_id
         return self._delete_resource(uri)
+
+    def list_metering_label_rules(self, **filters):
+        uri = '/metering/metering-label-rules'
+        return self._list_resources(uri, **filters)
 
     def create_security_group(self, **kwargs):
         uri = '/security-groups'
@@ -244,6 +256,10 @@ class NetworkClient(service_client.ServiceClient):
         uri = '/security-groups/%s' % security_group_id
         return self._delete_resource(uri)
 
+    def list_security_groups(self, **filters):
+        uri = '/security-groups'
+        return self._list_resources(uri, **filters)
+
     def create_security_group_rule(self, **kwargs):
         uri = '/security-group-rules'
         post_data = {'security_group_rule': kwargs}
@@ -257,9 +273,17 @@ class NetworkClient(service_client.ServiceClient):
         uri = '/security-group-rules/%s' % security_group_rule_id
         return self._delete_resource(uri)
 
+    def list_security_group_rules(self, **filters):
+        uri = '/security-group-rules'
+        return self._list_resources(uri, **filters)
+
     def show_extension(self, ext_alias, **fields):
         uri = '/extensions/%s' % ext_alias
         return self._show_resource(uri, **fields)
+
+    def list_extensions(self, **filters):
+        uri = '/extensions'
+        return self._list_resources(uri, **filters)
 
     # Common methods that are hard to automate
     def create_bulk_network(self, names):
@@ -378,6 +402,10 @@ class NetworkClient(service_client.ServiceClient):
         uri = '/quotas/%s' % tenant_id
         return self._show_resource(uri, **fields)
 
+    def list_quotas(self, **filters):
+        uri = '/quotas'
+        return self._list_resources(uri, **filters)
+
     def create_router(self, name, admin_state_up=True, **kwargs):
         post_body = {'router': kwargs}
         post_body['router']['name'] = name
@@ -434,6 +462,10 @@ class NetworkClient(service_client.ServiceClient):
     def delete_router(self, router_id):
         uri = '/routers/%s' % router_id
         return self._delete_resource(uri)
+
+    def list_routers(self, **filters):
+        uri = '/routers'
+        return self._list_resources(uri, **filters)
 
     def update_router_with_snat_gw_info(self, router_id, **kwargs):
         """Update a router passing also the enable_snat attribute.
@@ -506,6 +538,10 @@ class NetworkClient(service_client.ServiceClient):
     def show_agent(self, agent_id, **fields):
         uri = '/agents/%s' % agent_id
         return self._show_resource(uri, **fields)
+
+    def list_agents(self, **filters):
+        uri = '/agents'
+        return self._list_resources(uri, **filters)
 
     def list_routers_on_l3_agent(self, agent_id):
         uri = '%s/agents/%s/l3-routers' % (self.uri_prefix, agent_id)
