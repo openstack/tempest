@@ -24,6 +24,7 @@ from tempest.services.compute.json import certificates_client
 from tempest.services.compute.json import extensions_client
 from tempest.services.compute.json import fixed_ips_client
 from tempest.services.compute.json import flavors_client
+from tempest.services.compute.json import floating_ip_pools_client
 from tempest.services.compute.json import floating_ips_client
 from tempest.services.compute.json import hosts_client
 from tempest.services.compute.json import hypervisor_client
@@ -112,6 +113,7 @@ class TestServiceClient(base.TestCase):
             extensions_client.ExtensionsClient,
             fixed_ips_client.FixedIPsClient,
             flavors_client.FlavorsClient,
+            floating_ip_pools_client.FloatingIpPoolsClient,
             floating_ips_client.FloatingIPsClient,
             hosts_client.HostsClient,
             hypervisor_client.HypervisorClient,

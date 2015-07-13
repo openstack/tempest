@@ -100,17 +100,6 @@ class FloatingIPsClient(service_client.ServiceClient):
         """Returns the primary type of resource this client works with."""
         return 'floating_ip'
 
-    def list_floating_ip_pools(self, params=None):
-        """Returns a list of all floating IP Pools."""
-        url = 'os-floating-ip-pools'
-        if params:
-            url += '?%s' % urllib.urlencode(params)
-
-        resp, body = self.get(url)
-        body = json.loads(body)
-        self.validate_response(schema.list_floating_ip_pools, resp, body)
-        return service_client.ResponseBodyList(resp, body['floating_ip_pools'])
-
     def create_floating_ips_bulk(self, ip_range, pool, interface):
         """Allocate floating IPs in bulk."""
         post_body = {

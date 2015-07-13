@@ -60,6 +60,7 @@ class BaseComputeTest(tempest.test.BaseTestCase):
         cls.flavors_client = cls.os.flavors_client
         cls.images_client = cls.os.images_client
         cls.extensions_client = cls.os.extensions_client
+        cls.floating_ip_pools_client = cls.os.floating_ip_pools_client
         cls.floating_ips_client = cls.os.floating_ips_client
         cls.keypairs_client = cls.os.keypairs_client
         cls.security_groups_client = cls.os.security_groups_client

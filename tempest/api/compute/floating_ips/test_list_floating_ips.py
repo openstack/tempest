@@ -23,6 +23,7 @@ class FloatingIPDetailsTestJSON(base.BaseV2ComputeTest):
     def setup_clients(cls):
         super(FloatingIPDetailsTestJSON, cls).setup_clients()
         cls.client = cls.floating_ips_client
+        cls.pools_client = cls.floating_ip_pools_client
 
     @classmethod
     def resource_setup(cls):
@@ -76,6 +77,6 @@ class FloatingIPDetailsTestJSON(base.BaseV2ComputeTest):
     @test.services('network')
     def test_list_floating_ip_pools(self):
         # Positive test:Should return the list of floating IP Pools
-        floating_ip_pools = self.client.list_floating_ip_pools()
+        floating_ip_pools = self.pools_client.list_floating_ip_pools()
         self.assertNotEqual(0, len(floating_ip_pools),
                             "Expected floating IP Pools. Got zero.")
