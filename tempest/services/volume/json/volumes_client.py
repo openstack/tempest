@@ -13,8 +13,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import json
-
+from oslo_serialization import jsonutils as json
 import six
 from six.moves.urllib import parse as urllib
 from tempest_lib import exceptions as lib_exc

@@ -13,8 +13,8 @@
 #    under the License.
 
 import hashlib
-import json
 
+from oslo_serialization import jsonutils as json
 from tempest_lib import exceptions as lib_exc
 
 from tempest.api.object_storage import base

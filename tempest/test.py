@@ -15,7 +15,6 @@
 
 import atexit
 import functools
-import json
 import os
 import re
 import sys
@@ -25,6 +24,7 @@ import uuid
 
 import fixtures
 from oslo_log import log as logging
+from oslo_serialization import jsonutils as json
 from oslo_utils import importutils
 import six
 import testscenarios

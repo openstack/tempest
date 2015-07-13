@@ -13,11 +13,11 @@
 #    under the License.
 
 
-import json
 import re
 import string
 import unicodedata
 
+from oslo_serialization import jsonutils as json
 from tempest_lib.common.utils import misc
 import testscenarios
 import testtools

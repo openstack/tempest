@@ -11,8 +11,8 @@
 #    under the License.
 
 import functools
-import json
 
+from oslo_serialization import jsonutils as json
 import six
 from six.moves.urllib import parse as urllib
 

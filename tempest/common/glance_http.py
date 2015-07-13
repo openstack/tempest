@@ -17,7 +17,6 @@
 
 import copy
 import hashlib
-import json
 import posixpath
 import re
 import socket
@@ -25,6 +24,7 @@ import struct
 
 import OpenSSL
 from oslo_log import log as logging
+from oslo_serialization import jsonutils as json
 import six
 from six import moves
 from six.moves import http_client as httplib

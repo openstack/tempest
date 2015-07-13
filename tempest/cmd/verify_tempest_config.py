@@ -15,11 +15,11 @@
 #    under the License.
 
 import argparse
-import json
 import os
 import sys
 
 import httplib2
+from oslo_serialization import jsonutils as json
 from six import moves
 from six.moves.urllib import parse as urlparse
 
