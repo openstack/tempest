@@ -32,6 +32,7 @@ class QuotasAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
         cls.client = cls.os.quotas_client
         cls.adm_client = cls.os_adm.quotas_client
         cls.sg_client = cls.security_groups_client
+        cls.sgr_client = cls.security_group_rules_client
 
     @classmethod
     def resource_setup(cls):
@@ -167,5 +168,5 @@ class QuotasAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
         # A 403 Forbidden or 413 Overlimit (old behaviour) exception
         # will be raised when out of quota
         self.assertRaises((lib_exc.OverLimit, lib_exc.Forbidden),
-                          self.sg_client.create_security_group_rule,
+                          self.sgr_client.create_security_group_rule,
                           secgroup_id, ip_protocol, 1025, 1025)

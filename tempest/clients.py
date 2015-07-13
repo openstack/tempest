@@ -65,6 +65,8 @@ from tempest.services.compute.json.quota_classes_client import \
 from tempest.services.compute.json.quotas_client import QuotasClient
 from tempest.services.compute.json.security_group_default_rules_client import \
     SecurityGroupDefaultRulesClient
+from tempest.services.compute.json.security_group_rules_client import \
+    SecurityGroupRulesClient
 from tempest.services.compute.json.security_groups_client import \
     SecurityGroupsClient
 from tempest.services.compute.json.server_groups_client import \
@@ -286,6 +288,8 @@ class Manager(manager.Manager):
             self.auth_provider, **params)
         self.floating_ips_client = FloatingIPsClient(self.auth_provider,
                                                      **params)
+        self.security_group_rules_client = SecurityGroupRulesClient(
+            self.auth_provider, **params)
         self.security_groups_client = SecurityGroupsClient(
             self.auth_provider, **params)
         self.interfaces_client = InterfacesClient(self.auth_provider,

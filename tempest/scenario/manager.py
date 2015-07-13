@@ -54,6 +54,8 @@ class ScenarioTest(tempest.test.BaseTestCase):
         cls.keypairs_client = cls.manager.keypairs_client
         # Nova security groups client
         cls.security_groups_client = cls.manager.security_groups_client
+        cls.security_group_rules_client = (
+            cls.manager.security_group_rules_client)
         cls.servers_client = cls.manager.servers_client
         cls.volumes_client = cls.manager.volumes_client
         cls.snapshots_client = cls.manager.snapshots_client
@@ -217,6 +219,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
 
     def _create_loginable_secgroup_rule(self, secgroup_id=None):
         _client = self.security_groups_client
+        _client_rules = self.security_group_rules_client
         if secgroup_id is None:
             sgs = _client.list_security_groups()
             for sg in sgs:
@@ -245,10 +248,10 @@ class ScenarioTest(tempest.test.BaseTestCase):
         ]
         rules = list()
         for ruleset in rulesets:
-            sg_rule = _client.create_security_group_rule(secgroup_id,
-                                                         **ruleset)
+            sg_rule = _client_rules.create_security_group_rule(secgroup_id,
+                                                               **ruleset)
             self.addCleanup(self.delete_wrapper,
-                            _client.delete_security_group_rule,
+                            _client_rules.delete_security_group_rule,
                             sg_rule['id'])
             rules.append(sg_rule)
         return rules

@@ -25,7 +25,7 @@ class SecurityGroupRulesTestJSON(base.BaseSecurityGroupsTest):
     @classmethod
     def setup_clients(cls):
         super(SecurityGroupRulesTestJSON, cls).setup_clients()
-        cls.client = cls.security_groups_client
+        cls.client = cls.security_group_rules_client
 
     @classmethod
     def resource_setup(cls):
@@ -183,7 +183,7 @@ class SecurityGroupRulesTestJSON(base.BaseSecurityGroupsTest):
                                                group_id=sg2_id)
 
         # Delete group2
-        self.client.delete_security_group(sg2_id)
+        self.security_groups_client.delete_security_group(sg2_id)
         # Get rules of the Group1
         rules = \
             self.client.list_security_group_rules(sg1_id)
