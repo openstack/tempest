@@ -67,6 +67,8 @@ from tempest.services.compute.json.security_group_default_rules_client import \
     SecurityGroupDefaultRulesClient
 from tempest.services.compute.json.security_groups_client import \
     SecurityGroupsClient
+from tempest.services.compute.json.server_groups_client import \
+    ServerGroupsClient
 from tempest.services.compute.json.servers_client import ServersClient
 from tempest.services.compute.json.services_client import ServicesClient
 from tempest.services.compute.json.tenant_networks_client import \
@@ -267,6 +269,8 @@ class Manager(manager.Manager):
             enable_instance_password=CONF.compute_feature_enabled
                 .enable_instance_password,
             **params)
+        self.server_groups_client = ServerGroupsClient(
+            self.auth_provider, **params)
         self.limits_client = LimitsClient(self.auth_provider, **params)
         self.images_client = ImagesClient(self.auth_provider, **params)
         self.keypairs_client = KeyPairsClient(self.auth_provider, **params)

@@ -57,6 +57,7 @@ class BaseComputeTest(tempest.test.BaseTestCase):
     def setup_clients(cls):
         super(BaseComputeTest, cls).setup_clients()
         cls.servers_client = cls.os.servers_client
+        cls.server_groups_client = cls.os.server_groups_client
         cls.flavors_client = cls.os.flavors_client
         cls.images_client = cls.os.images_client
         cls.extensions_client = cls.os.extensions_client
@@ -184,7 +185,7 @@ class BaseComputeTest(tempest.test.BaseTestCase):
         LOG.debug('Clearing server groups: %s', ','.join(cls.server_groups))
         for server_group_id in cls.server_groups:
             try:
-                cls.servers_client.delete_server_group(server_group_id)
+                cls.server_groups_client.delete_server_group(server_group_id)
             except lib_exc.NotFound:
                 # The server-group may have already been deleted which is OK.
                 pass
@@ -232,7 +233,7 @@ class BaseComputeTest(tempest.test.BaseTestCase):
             name = data_utils.rand_name(cls.__name__ + "-Server-Group")
         if policy is None:
             policy = ['affinity']
-        body = cls.servers_client.create_server_group(name, policy)
+        body = cls.server_groups_client.create_server_group(name, policy)
         cls.server_groups.append(body['id'])
         return body
 

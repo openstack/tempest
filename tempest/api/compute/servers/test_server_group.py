@@ -37,7 +37,7 @@ class ServerGroupTestJSON(base.BaseV2ComputeTest):
     @classmethod
     def setup_clients(cls):
         super(ServerGroupTestJSON, cls).setup_clients()
-        cls.client = cls.servers_client
+        cls.client = cls.server_groups_client
 
     @classmethod
     def resource_setup(cls):
