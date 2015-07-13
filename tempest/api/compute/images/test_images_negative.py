@@ -16,6 +16,7 @@ from tempest_lib import exceptions as lib_exc
 
 from tempest.api.compute import base
 from tempest.common.utils import data_utils
+from tempest.common import waiters
 from tempest import config
 from tempest import test
 
@@ -74,8 +75,8 @@ class ImagesNegativeTestJSON(base.BaseV2ComputeTest):
     def test_create_image_from_stopped_server(self):
         server = self.create_test_server(wait_until='ACTIVE')
         self.servers_client.stop(server['id'])
-        self.servers_client.wait_for_server_status(server['id'],
-                                                   'SHUTOFF')
+        waiters.wait_for_server_status(self.servers_client,
+                                       server['id'], 'SHUTOFF')
         self.addCleanup(self.servers_client.delete_server, server['id'])
         snapshot_name = data_utils.rand_name('test-snap')
         image = self.create_image_from_server(server['id'],

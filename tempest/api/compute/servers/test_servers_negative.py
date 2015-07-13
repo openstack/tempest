@@ -20,6 +20,7 @@ import testtools
 
 from tempest.api.compute import base
 from tempest.common.utils import data_utils
+from tempest.common import waiters
 from tempest import config
 from tempest import test
 
@@ -33,7 +34,8 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
     def setUp(self):
         super(ServersNegativeTestJSON, self).setUp()
         try:
-            self.client.wait_for_server_status(self.server_id, 'ACTIVE')
+            waiters.wait_for_server_status(self.client, self.server_id,
+                                           'ACTIVE')
         except Exception:
             self.__class__.server_id = self.rebuild_server(self.server_id)
 
@@ -157,7 +159,7 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
     def test_pause_paused_server(self):
         # Pause a paused server.
         self.client.pause_server(self.server_id)
-        self.client.wait_for_server_status(self.server_id, 'PAUSED')
+        waiters.wait_for_server_status(self.client, self.server_id, 'PAUSED')
         self.assertRaises(lib_exc.Conflict,
                           self.client.pause_server,
                           self.server_id)
@@ -384,7 +386,8 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
     def test_suspend_server_invalid_state(self):
         # suspend a suspended server.
         self.client.suspend_server(self.server_id)
-        self.client.wait_for_server_status(self.server_id, 'SUSPENDED')
+        waiters.wait_for_server_status(self.client, self.server_id,
+                                       'SUSPENDED')
         self.assertRaises(lib_exc.Conflict,
                           self.client.suspend_server,
                           self.server_id)
@@ -465,12 +468,14 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
 
         offload_time = CONF.compute.shelved_offload_time
         if offload_time >= 0:
-            self.client.wait_for_server_status(self.server_id,
-                                               'SHELVED_OFFLOADED',
-                                               extra_timeout=offload_time)
+            waiters.wait_for_server_status(self.client,
+                                           self.server_id,
+                                           'SHELVED_OFFLOADED',
+                                           extra_timeout=offload_time)
         else:
-            self.client.wait_for_server_status(self.server_id,
-                                               'SHELVED')
+            waiters.wait_for_server_status(self.client,
+                                           self.server_id,
+                                           'SHELVED')
 
         server = self.client.show_server(self.server_id)
         image_name = server['name'] + '-shelved'

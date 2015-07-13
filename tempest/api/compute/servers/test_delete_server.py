@@ -52,7 +52,7 @@ class DeleteServersTestJSON(base.BaseV2ComputeTest):
         # Delete a server while it's VM state is Shutoff
         server = self.create_test_server(wait_until='ACTIVE')
         self.client.stop(server['id'])
-        self.client.wait_for_server_status(server['id'], 'SHUTOFF')
+        waiters.wait_for_server_status(self.client, server['id'], 'SHUTOFF')
         self.client.delete_server(server['id'])
         self.client.wait_for_server_termination(server['id'])
 
@@ -63,7 +63,7 @@ class DeleteServersTestJSON(base.BaseV2ComputeTest):
         # Delete a server while it's VM state is Pause
         server = self.create_test_server(wait_until='ACTIVE')
         self.client.pause_server(server['id'])
-        self.client.wait_for_server_status(server['id'], 'PAUSED')
+        waiters.wait_for_server_status(self.client, server['id'], 'PAUSED')
         self.client.delete_server(server['id'])
         self.client.wait_for_server_termination(server['id'])
 
@@ -74,7 +74,7 @@ class DeleteServersTestJSON(base.BaseV2ComputeTest):
         # Delete a server while it's VM state is Suspended
         server = self.create_test_server(wait_until='ACTIVE')
         self.client.suspend_server(server['id'])
-        self.client.wait_for_server_status(server['id'], 'SUSPENDED')
+        waiters.wait_for_server_status(self.client, server['id'], 'SUSPENDED')
         self.client.delete_server(server['id'])
         self.client.wait_for_server_termination(server['id'])
 
@@ -88,12 +88,12 @@ class DeleteServersTestJSON(base.BaseV2ComputeTest):
 
         offload_time = CONF.compute.shelved_offload_time
         if offload_time >= 0:
-            self.client.wait_for_server_status(server['id'],
-                                               'SHELVED_OFFLOADED',
-                                               extra_timeout=offload_time)
+            waiters.wait_for_server_status(self.client, server['id'],
+                                           'SHELVED_OFFLOADED',
+                                           extra_timeout=offload_time)
         else:
-            self.client.wait_for_server_status(server['id'],
-                                               'SHELVED')
+            waiters.wait_for_server_status(self.client, server['id'],
+                                           'SHELVED')
         self.client.delete_server(server['id'])
         self.client.wait_for_server_termination(server['id'])
 
@@ -104,7 +104,8 @@ class DeleteServersTestJSON(base.BaseV2ComputeTest):
         # Delete a server while it's VM state is VERIFY_RESIZE
         server = self.create_test_server(wait_until='ACTIVE')
         self.client.resize(server['id'], self.flavor_ref_alt)
-        self.client.wait_for_server_status(server['id'], 'VERIFY_RESIZE')
+        waiters.wait_for_server_status(self.client, server['id'],
+                                       'VERIFY_RESIZE')
         self.client.delete_server(server['id'])
         self.client.wait_for_server_termination(server['id'])
 

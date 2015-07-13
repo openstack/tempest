@@ -18,6 +18,7 @@ from oslo_utils import excutils
 from tempest_lib.common.utils import data_utils
 
 from tempest.common import fixed_network
+from tempest.common import waiters
 from tempest import config
 
 CONF = config.CONF
@@ -98,8 +99,8 @@ def create_test_server(clients, validatable, validation_resources=None,
     if 'wait_until' in kwargs:
         for server in servers:
             try:
-                clients.servers_client.wait_for_server_status(
-                    server['id'], kwargs['wait_until'])
+                waiters.wait_for_server_status(
+                    clients.servers_client, server['id'], kwargs['wait_until'])
 
                 # Multiple validatable servers are not supported for now. Their
                 # creation will fail with the condition above (l.58).

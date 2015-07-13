@@ -17,6 +17,7 @@ from tempest_lib import exceptions as lib_exc
 
 from tempest.api.compute.security_groups import base
 from tempest.common.utils import data_utils
+from tempest.common import waiters
 from tempest import test
 
 
@@ -97,7 +98,8 @@ class SecurityGroupsTestJSON(base.BaseSecurityGroupsTest):
         server_name = data_utils.rand_name('server')
         server = self.create_test_server(name=server_name)
         server_id = server['id']
-        self.servers_client.wait_for_server_status(server_id, 'ACTIVE')
+        waiters.wait_for_server_status(self.servers_client, server_id,
+                                       'ACTIVE')
         self.servers_client.add_security_group(server_id, sg['name'])
 
         # Check that we are not able to delete the security
@@ -108,7 +110,8 @@ class SecurityGroupsTestJSON(base.BaseSecurityGroupsTest):
 
         # Reboot and add the other security group
         self.servers_client.reboot(server_id, 'HARD')
-        self.servers_client.wait_for_server_status(server_id, 'ACTIVE')
+        waiters.wait_for_server_status(self.servers_client, server_id,
+                                       'ACTIVE')
         self.servers_client.add_security_group(server_id, sg2['name'])
 
         # Check that we are not able to delete the other security

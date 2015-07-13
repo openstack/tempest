@@ -17,6 +17,7 @@ from tempest_lib import exceptions as lib_exc
 
 from tempest.api.compute import base
 from tempest.common.utils import data_utils
+from tempest.common import waiters
 from tempest import config
 from tempest import test
 
@@ -55,4 +56,5 @@ class LiveBlockMigrationNegativeTestJSON(base.BaseV2ComputeAdminTest):
 
         self.assertRaises(lib_exc.BadRequest, self._migrate_server_to,
                           server_id, target_host)
-        self.servers_client.wait_for_server_status(server_id, 'ACTIVE')
+        waiters.wait_for_server_status(self.servers_client, server_id,
+                                       'ACTIVE')

@@ -20,6 +20,7 @@ import testtools
 from tempest.api.compute import base
 from tempest.common import tempest_fixtures as fixtures
 from tempest.common.utils import data_utils
+from tempest.common import waiters
 from tempest import config
 from tempest import test
 
@@ -151,7 +152,8 @@ class ServersAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
         server_id = server['id']
         # suspend the server.
         self.client.suspend_server(server_id)
-        self.client.wait_for_server_status(server_id, 'SUSPENDED')
+        waiters.wait_for_server_status(self.client,
+                                       server_id, 'SUSPENDED')
         # migrate an suspended server should fail
         self.assertRaises(lib_exc.Conflict,
                           self.client.migrate_server,

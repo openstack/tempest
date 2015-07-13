@@ -14,6 +14,7 @@
 #    under the License.
 
 from tempest.api.compute import base
+from tempest.common import waiters
 from tempest import test
 
 
@@ -35,7 +36,7 @@ class InstanceActionsTestJSON(base.BaseV2ComputeTest):
     def test_list_instance_actions(self):
         # List actions of the provided server
         self.client.reboot(self.server_id, 'HARD')
-        self.client.wait_for_server_status(self.server_id, 'ACTIVE')
+        waiters.wait_for_server_status(self.client, self.server_id, 'ACTIVE')
 
         body = self.client.list_instance_actions(self.server_id)
         self.assertTrue(len(body) == 2, str(body))

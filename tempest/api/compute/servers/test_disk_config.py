@@ -16,6 +16,7 @@
 import testtools
 
 from tempest.api.compute import base
+from tempest.common import waiters
 from tempest import config
 from tempest import test
 
@@ -47,7 +48,7 @@ class ServerDiskConfigTestJSON(base.BaseV2ComputeTest):
         if disk_config != server['OS-DCF:diskConfig']:
             server = self.client.update_server(self.server_id,
                                                disk_config=disk_config)
-            self.client.wait_for_server_status(server['id'], 'ACTIVE')
+            waiters.wait_for_server_status(self.client, server['id'], 'ACTIVE')
             server = self.client.show_server(server['id'])
             self.assertEqual(disk_config, server['OS-DCF:diskConfig'])
 
@@ -61,7 +62,7 @@ class ServerDiskConfigTestJSON(base.BaseV2ComputeTest):
                                      disk_config='MANUAL')
 
         # Wait for the server to become active
-        self.client.wait_for_server_status(server['id'], 'ACTIVE')
+        waiters.wait_for_server_status(self.client, server['id'], 'ACTIVE')
 
         # Verify the specified attributes are set correctly
         server = self.client.show_server(server['id'])
@@ -77,7 +78,7 @@ class ServerDiskConfigTestJSON(base.BaseV2ComputeTest):
                                      disk_config='AUTO')
 
         # Wait for the server to become active
-        self.client.wait_for_server_status(server['id'], 'ACTIVE')
+        waiters.wait_for_server_status(self.client, server['id'], 'ACTIVE')
 
         # Verify the specified attributes are set correctly
         server = self.client.show_server(server['id'])
@@ -101,9 +102,10 @@ class ServerDiskConfigTestJSON(base.BaseV2ComputeTest):
         # Resize with auto option
         flavor_id = self._get_alternative_flavor()
         self.client.resize(self.server_id, flavor_id, disk_config='AUTO')
-        self.client.wait_for_server_status(self.server_id, 'VERIFY_RESIZE')
+        waiters.wait_for_server_status(self.client, self.server_id,
+                                       'VERIFY_RESIZE')
         self.client.confirm_resize(self.server_id)
-        self.client.wait_for_server_status(self.server_id, 'ACTIVE')
+        waiters.wait_for_server_status(self.client, self.server_id, 'ACTIVE')
 
         server = self.client.show_server(self.server_id)
         self.assertEqual('AUTO', server['OS-DCF:diskConfig'])
@@ -118,9 +120,10 @@ class ServerDiskConfigTestJSON(base.BaseV2ComputeTest):
         # Resize with manual option
         flavor_id = self._get_alternative_flavor()
         self.client.resize(self.server_id, flavor_id, disk_config='MANUAL')
-        self.client.wait_for_server_status(self.server_id, 'VERIFY_RESIZE')
+        waiters.wait_for_server_status(self.client, self.server_id,
+                                       'VERIFY_RESIZE')
         self.client.confirm_resize(self.server_id)
-        self.client.wait_for_server_status(self.server_id, 'ACTIVE')
+        waiters.wait_for_server_status(self.client, self.server_id, 'ACTIVE')
 
         server = self.client.show_server(self.server_id)
         self.assertEqual('MANUAL', server['OS-DCF:diskConfig'])
@@ -133,7 +136,7 @@ class ServerDiskConfigTestJSON(base.BaseV2ComputeTest):
         # Update the disk_config attribute to manual
         server = self.client.update_server(self.server_id,
                                            disk_config='MANUAL')
-        self.client.wait_for_server_status(server['id'], 'ACTIVE')
+        waiters.wait_for_server_status(self.client, server['id'], 'ACTIVE')
 
         # Verify the disk_config attribute is set correctly
         server = self.client.show_server(server['id'])

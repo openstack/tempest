@@ -14,6 +14,7 @@ import re
 
 from tempest.common.utils import data_utils
 from tempest.common.utils.linux import remote_client
+from tempest.common import waiters
 from tempest import config
 import tempest.stress.stressaction as stressaction
 import tempest.test
@@ -41,8 +42,8 @@ class VolumeVerifyStress(stressaction.StressAction):
                                               self.flavor,
                                               **vm_args)
         self.server_id = server['id']
-        self.manager.servers_client.wait_for_server_status(self.server_id,
-                                                           'ACTIVE')
+        waiters.wait_for_server_status(self.manager.servers_client,
+                                       self.server_id, 'ACTIVE')
 
     def _destroy_vm(self):
         self.logger.info("deleting server: %s" % self.server_id)

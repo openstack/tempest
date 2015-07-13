@@ -19,6 +19,7 @@ from tempest_lib import exceptions as lib_exc
 
 from tempest.api.compute import base
 from tempest.common.utils import data_utils
+from tempest.common import waiters
 from tempest import config
 from tempest import test
 
@@ -43,8 +44,8 @@ class ImagesOneServerNegativeTestJSON(base.BaseV2ComputeTest):
         super(ImagesOneServerNegativeTestJSON, self).setUp()
         # Check if the server is in a clean state after test
         try:
-            self.servers_client.wait_for_server_status(self.server_id,
-                                                       'ACTIVE')
+            waiters.wait_for_server_status(self.servers_client, self.server_id,
+                                           'ACTIVE')
         except Exception:
             LOG.exception('server %s timed out to become ACTIVE. rebuilding'
                           % self.server_id)

@@ -22,7 +22,6 @@ from tempest_lib import exceptions as lib_exc
 
 from tempest.api_schema.response.compute.v2_1 import servers as schema
 from tempest.common import service_client
-from tempest.common import waiters
 from tempest import exceptions
 
 
@@ -165,14 +164,6 @@ class ServersClient(service_client.ServiceClient):
         body = json.loads(body)
         self.validate_response(_schema, resp, body)
         return service_client.ResponseBody(resp, body)
-
-    def wait_for_server_status(self, server_id, status, extra_timeout=0,
-                               raise_on_error=True, ready_wait=True):
-        """Waits for a server to reach a given status."""
-        return waiters.wait_for_server_status(self, server_id, status,
-                                              extra_timeout=extra_timeout,
-                                              raise_on_error=raise_on_error,
-                                              ready_wait=ready_wait)
 
     def wait_for_server_termination(self, server_id, ignore_error=False):
         """Waits for server to reach termination."""

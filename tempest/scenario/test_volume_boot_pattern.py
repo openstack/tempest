@@ -13,6 +13,7 @@
 from oslo_log import log
 
 from tempest.common.utils import data_utils
+from tempest.common import waiters
 from tempest import config
 from tempest.scenario import manager
 from tempest import test
@@ -85,7 +86,8 @@ class TestVolumeBootPattern(manager.ScenarioTest):
         for i in instances:
             self.servers_client.stop(i['id'])
         for i in instances:
-            self.servers_client.wait_for_server_status(i['id'], 'SHUTOFF')
+            waiters.wait_for_server_status(self.servers_client,
+                                           i['id'], 'SHUTOFF')
 
     def _detach_volumes(self, volumes):
         # NOTE(gfidente): two loops so we do not wait for the status twice
