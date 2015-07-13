@@ -15,6 +15,7 @@
 
 from tempest.api.compute import base
 from tempest.common.utils import data_utils
+from tempest.common import waiters
 from tempest import config
 from tempest import test
 
@@ -55,7 +56,8 @@ class VolumesTestJSON(base.BaseV2ComputeTest):
             try:
                 volume = cls.client.create_volume(display_name=v_name,
                                                   metadata=metadata)
-                cls.client.wait_for_volume_status(volume['id'], 'available')
+                waiters.wait_for_volume_status(cls.client,
+                                               volume['id'], 'available')
                 volume = cls.client.show_volume(volume['id'])
                 cls.volume_list.append(volume)
                 cls.volume_id_list.append(volume['id'])

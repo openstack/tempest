@@ -16,6 +16,7 @@
 import testtools
 
 from tempest.api.compute import base
+from tempest.common import waiters
 from tempest import config
 from tempest import test
 
@@ -117,15 +118,18 @@ class DeleteServersTestJSON(base.BaseV2ComputeTest):
 
         volume = volumes_client.create_volume()
         self.addCleanup(volumes_client.delete_volume, volume['id'])
-        volumes_client.wait_for_volume_status(volume['id'], 'available')
+        waiters.wait_for_volume_status(volumes_client,
+                                       volume['id'], 'available')
         self.client.attach_volume(server['id'],
                                   volume['id'],
                                   device=device)
-        volumes_client.wait_for_volume_status(volume['id'], 'in-use')
+        waiters.wait_for_volume_status(volumes_client,
+                                       volume['id'], 'in-use')
 
         self.client.delete_server(server['id'])
         self.client.wait_for_server_termination(server['id'])
-        volumes_client.wait_for_volume_status(volume['id'], 'available')
+        waiters.wait_for_volume_status(volumes_client,
+                                       volume['id'], 'available')
 
 
 class DeleteServersAdminTestJSON(base.BaseV2ComputeAdminTest):
