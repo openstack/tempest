@@ -46,7 +46,7 @@ class TempestTestPluginManager(object):
     """
     def __init__(self):
         self.ext_plugins = stevedore.ExtensionManager(
-            'tempest.test.plugins', invoke_on_load=True,
+            'tempest.test_plugins', invoke_on_load=True,
             propagate_map_exceptions=True)
 
     def get_plugin_load_tests_tuple(self):
