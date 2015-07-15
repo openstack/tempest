@@ -121,7 +121,7 @@ class TestNetworkMultiNode(manager.NetworkScenarioTest):
         """
         self.aggregates_client = self.manager.aggregates_client
         self.hypervisor_client = self.manager.hypervisor_client
-        self.hypervisors_list = self.hypervisor_client.get_hypervisor_list()
+        self.hypervisors_list = self.hypervisor_client.list_hypervisors()
 
         # Verify the hypervisors are operational and make a list
         # of them for later use
