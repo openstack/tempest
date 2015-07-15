@@ -15,11 +15,11 @@
 
 import copy
 import errno
-import json
 import os
 import time
 
 from oslo_log import log as logging
+from oslo_serialization import jsonutils as json
 import six
 from six.moves.urllib import parse as urllib
 from tempest_lib.common.utils import misc as misc_utils

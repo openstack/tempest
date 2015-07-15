@@ -13,10 +13,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import json
 import socket
 
 import mock
+from oslo_serialization import jsonutils as json
 from oslotest import mockpatch
 import six
 from six.moves import http_client as httplib

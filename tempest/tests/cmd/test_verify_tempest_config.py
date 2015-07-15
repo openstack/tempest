@@ -12,9 +12,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import json
 
 import mock
+from oslo_serialization import jsonutils as json
 from oslotest import mockpatch
 
 from tempest.cmd import verify_tempest_config
