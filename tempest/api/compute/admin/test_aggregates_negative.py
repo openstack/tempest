@@ -143,7 +143,7 @@ class AggregatesAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
         self.addCleanup(self.client.delete_aggregate, aggregate['id'])
 
         self.assertRaises(lib_exc.NotFound, self.client.add_host,
-                          aggregate['id'], non_exist_host)
+                          aggregate['id'], host=non_exist_host)
 
     @test.attr(type=['negative'])
     @test.idempotent_id('7324c334-bd13-4c93-8521-5877322c3d51')
@@ -155,7 +155,7 @@ class AggregatesAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
 
         self.assertRaises(lib_exc.Forbidden,
                           self.user_client.add_host,
-                          aggregate['id'], self.host)
+                          aggregate['id'], host=self.host)
 
     @test.attr(type=['negative'])
     @test.idempotent_id('19dd44e1-c435-4ee1-a402-88c4f90b5950')
@@ -165,11 +165,12 @@ class AggregatesAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
         aggregate = self.client.create_aggregate(name=aggregate_name)
         self.addCleanup(self.client.delete_aggregate, aggregate['id'])
 
-        self.client.add_host(aggregate['id'], self.host)
-        self.addCleanup(self.client.remove_host, aggregate['id'], self.host)
+        self.client.add_host(aggregate['id'], host=self.host)
+        self.addCleanup(self.client.remove_host, aggregate['id'],
+                        host=self.host)
 
         self.assertRaises(lib_exc.Conflict, self.client.add_host,
-                          aggregate['id'], self.host)
+                          aggregate['id'], host=self.host)
 
     @test.attr(type=['negative'])
     @test.idempotent_id('7a53af20-137a-4e44-a4ae-e19260e626d9')
@@ -179,12 +180,13 @@ class AggregatesAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
         aggregate_name = data_utils.rand_name(self.aggregate_name_prefix)
         aggregate = self.client.create_aggregate(name=aggregate_name)
         self.addCleanup(self.client.delete_aggregate, aggregate['id'])
-        self.client.add_host(aggregate['id'], self.host)
-        self.addCleanup(self.client.remove_host, aggregate['id'], self.host)
+        self.client.add_host(aggregate['id'], host=self.host)
+        self.addCleanup(self.client.remove_host, aggregate['id'],
+                        host=self.host)
 
         self.assertRaises(lib_exc.Forbidden,
                           self.user_client.remove_host,
-                          aggregate['id'], self.host)
+                          aggregate['id'], host=self.host)
 
     @test.attr(type=['negative'])
     @test.idempotent_id('95d6a6fa-8da9-4426-84d0-eec0329f2e4d')
@@ -195,4 +197,4 @@ class AggregatesAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
         self.addCleanup(self.client.delete_aggregate, aggregate['id'])
 
         self.assertRaises(lib_exc.NotFound, self.client.remove_host,
-                          aggregate['id'], non_exist_host)
+                          aggregate['id'], host=non_exist_host)

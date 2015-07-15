@@ -64,12 +64,12 @@ class TestAggregatesBasicOps(manager.ScenarioTest):
         return computes[0]['host_name']
 
     def _add_host(self, aggregate_id, host):
-        aggregate = self.aggregates_client.add_host(aggregate_id, host)
+        aggregate = self.aggregates_client.add_host(aggregate_id, host=host)
         self.addCleanup(self._remove_host, aggregate['id'], host)
         self.assertIn(host, aggregate['hosts'])
 
     def _remove_host(self, aggregate_id, host):
-        aggregate = self.aggregates_client.remove_host(aggregate_id, host)
+        aggregate = self.aggregates_client.remove_host(aggregate_id, host=host)
         self.assertNotIn(host, aggregate['hosts'])
 
     def _check_aggregate_details(self, aggregate, aggregate_name, azone,
@@ -85,7 +85,7 @@ class TestAggregatesBasicOps(manager.ScenarioTest):
 
     def _set_aggregate_metadata(self, aggregate, meta):
         aggregate = self.aggregates_client.set_metadata(aggregate['id'],
-                                                        meta)
+                                                        metadata=meta)
 
         for key, value in meta.items():
             self.assertEqual(meta[key], aggregate['metadata'][key])
