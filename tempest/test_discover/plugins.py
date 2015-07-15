@@ -13,10 +13,14 @@
 # under the License.
 
 import abc
+import logging
 
 import six
 import stevedore
 from tempest_lib.common.utils import misc
+
+
+LOG = logging.getLogger(__name__)
 
 
 @six.add_metaclass(abc.ABCMeta)
@@ -47,7 +51,13 @@ class TempestTestPluginManager(object):
     def __init__(self):
         self.ext_plugins = stevedore.ExtensionManager(
             'tempest.test_plugins', invoke_on_load=True,
-            propagate_map_exceptions=True)
+            propagate_map_exceptions=True,
+            on_load_failure_callback=self.failure_hook)
+
+    @staticmethod
+    def failure_hook(_, ep, err):
+        LOG.error('Could not load %r: %s', ep.name, err)
+        raise err
 
     def get_plugin_load_tests_tuple(self):
         load_tests_dict = {}
