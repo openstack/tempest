@@ -51,11 +51,21 @@ class CredsClient(object):
     def create_project(self, name, description):
         pass
 
-    def assign_user_role(self, user, project, role_name):
+    def _check_role_exists(self, role_name):
         try:
             roles = self._list_roles()
             role = next(r for r in roles if r['name'] == role_name)
         except StopIteration:
+            return None
+        return role
+
+    def create_user_role(self, role_name):
+        if not self._check_role_exists(role_name):
+            self.identity_client.create_role(role_name)
+
+    def assign_user_role(self, user, project, role_name):
+        role = self._check_role_exists(role_name)
+        if not role:
             msg = 'No "%s" role found' % role_name
             raise lib_exc.NotFound(msg)
         try:
@@ -196,16 +206,27 @@ class IsolatedCreds(cred_provider.CredentialProvider):
         email = data_utils.rand_name(root) + suffix + "@example.com"
         user = self.creds_client.create_user(
             username, user_password, project, email)
+        role_assigned = False
         if admin:
             self.creds_client.assign_user_role(user, project,
                                                CONF.identity.admin_role)
+            role_assigned = True
         # Add roles specified in config file
         for conf_role in CONF.auth.tempest_roles:
             self.creds_client.assign_user_role(user, project, conf_role)
+            role_assigned = True
         # Add roles requested by caller
         if roles:
             for role in roles:
                 self.creds_client.assign_user_role(user, project, role)
+                role_assigned = True
+        # NOTE(mtreinish) For a user to have access to a project with v3 auth
+        # it must beassigned a role on the project. So we need to ensure that
+        # our newly created user has a role on the newly created project.
+        if self.identity_version == 'v3' and not role_assigned:
+            self.creds_client.create_user_role('Member')
+            self.creds_client.assign_user_role(user, project, 'Member')
+
         creds = self.creds_client.get_credentials(user, project, user_password)
         return cred_provider.TestResources(creds)
 
