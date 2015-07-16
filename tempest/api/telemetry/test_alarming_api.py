@@ -17,7 +17,7 @@ from tempest.common.utils import data_utils
 from tempest import test
 
 
-class TelemetryAlarmingAPITestJSON(base.BaseTelemetryTest):
+class TelemetryAlarmingAPITestJSON(base.BaseAlarmingTest):
 
     @classmethod
     def resource_setup(cls):
@@ -32,7 +32,7 @@ class TelemetryAlarmingAPITestJSON(base.BaseTelemetryTest):
     @test.idempotent_id('1c918e06-210b-41eb-bd45-14676dd77cd6')
     def test_alarm_list(self):
         # List alarms
-        alarm_list = self.telemetry_client.list_alarms()
+        alarm_list = self.alarming_client.list_alarms()
 
         # Verify created alarm in the list
         fetched_ids = [a['alarm_id'] for a in alarm_list]
@@ -46,7 +46,7 @@ class TelemetryAlarmingAPITestJSON(base.BaseTelemetryTest):
     def test_create_update_get_delete_alarm(self):
         # Create an alarm
         alarm_name = data_utils.rand_name('telemetry_alarm')
-        body = self.telemetry_client.create_alarm(
+        body = self.alarming_client.create_alarm(
             name=alarm_name, type='threshold', threshold_rule=self.rule)
         self.assertEqual(alarm_name, body['name'])
         alarm_id = body['alarm_id']
@@ -57,7 +57,7 @@ class TelemetryAlarmingAPITestJSON(base.BaseTelemetryTest):
                     'threshold': 70.0,
                     'period': 60}
         alarm_name_updated = data_utils.rand_name('telemetry-alarm-update')
-        body = self.telemetry_client.update_alarm(
+        body = self.alarming_client.update_alarm(
             alarm_id,
             threshold_rule=new_rule,
             name=alarm_name_updated,
@@ -65,19 +65,19 @@ class TelemetryAlarmingAPITestJSON(base.BaseTelemetryTest):
         self.assertEqual(alarm_name_updated, body['name'])
         self.assertDictContainsSubset(new_rule, body['threshold_rule'])
         # Get and verify details of an alarm after update
-        body = self.telemetry_client.show_alarm(alarm_id)
+        body = self.alarming_client.show_alarm(alarm_id)
         self.assertEqual(alarm_name_updated, body['name'])
         self.assertDictContainsSubset(new_rule, body['threshold_rule'])
         # Get history for the alarm and verify the same
-        body = self.telemetry_client.show_alarm_history(alarm_id)
+        body = self.alarming_client.show_alarm_history(alarm_id)
         self.assertEqual("rule change", body[0]['type'])
         self.assertIn(alarm_name_updated, body[0]['detail'])
         self.assertEqual("creation", body[1]['type'])
         self.assertIn(alarm_name, body[1]['detail'])
         # Delete alarm and verify if deleted
-        self.telemetry_client.delete_alarm(alarm_id)
+        self.alarming_client.delete_alarm(alarm_id)
         self.assertRaises(lib_exc.NotFound,
-                          self.telemetry_client.show_alarm, alarm_id)
+                          self.alarming_client.show_alarm, alarm_id)
 
     @test.idempotent_id('aca49486-70bb-4016-87e0-f6131374f741')
     def test_set_get_alarm_state(self):
@@ -86,11 +86,11 @@ class TelemetryAlarmingAPITestJSON(base.BaseTelemetryTest):
         # Set alarm state and verify
         new_state =\
             [elem for elem in alarm_states if elem != alarm['state']][0]
-        state = self.telemetry_client.alarm_set_state(alarm['alarm_id'],
-                                                      new_state)
+        state = self.alarming_client.alarm_set_state(alarm['alarm_id'],
+                                                     new_state)
         self.assertEqual(new_state, state.data)
         # Get alarm state and verify
-        state = self.telemetry_client.show_alarm_state(alarm['alarm_id'])
+        state = self.alarming_client.show_alarm_state(alarm['alarm_id'])
         self.assertEqual(new_state, state.data)
 
     @test.idempotent_id('08d7e45a-1344-4e5c-ba6f-f6cbb77f55b9')
@@ -99,13 +99,13 @@ class TelemetryAlarmingAPITestJSON(base.BaseTelemetryTest):
                 "operator": "or"}
         # Verifies alarm create
         alarm_name = data_utils.rand_name('combination_alarm')
-        body = self.telemetry_client.create_alarm(name=alarm_name,
-                                                  combination_rule=rule,
-                                                  type='combination')
+        body = self.alarming_client.create_alarm(name=alarm_name,
+                                                 combination_rule=rule,
+                                                 type='combination')
         self.assertEqual(alarm_name, body['name'])
         alarm_id = body['alarm_id']
         self.assertDictContainsSubset(rule, body['combination_rule'])
         # Verify alarm delete
-        self.telemetry_client.delete_alarm(alarm_id)
+        self.alarming_client.delete_alarm(alarm_id)
         self.assertRaises(lib_exc.NotFound,
-                          self.telemetry_client.show_alarm, alarm_id)
+                          self.alarming_client.show_alarm, alarm_id)

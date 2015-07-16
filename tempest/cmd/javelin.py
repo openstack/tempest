@@ -132,6 +132,7 @@ from tempest.services.network.json import network_client
 from tempest.services.network.json import subnets_client
 from tempest.services.object_storage import container_client
 from tempest.services.object_storage import object_client
+from tempest.services.telemetry.json import alarming_client
 from tempest.services.telemetry.json import telemetry_client
 from tempest.services.volume.json import volumes_client
 
@@ -224,6 +225,12 @@ class OSClient(object):
             CONF.telemetry.catalog_type,
             CONF.identity.region,
             endpoint_type=CONF.telemetry.endpoint_type,
+            **default_params_with_timeout_values)
+        self.alarming = alarming_client.AlarmingClient(
+            _auth,
+            CONF.alarm.catalog_type,
+            CONF.identity.region,
+            endpoint_type=CONF.alarm.endpoint_type,
             **default_params_with_timeout_values)
         self.volumes = volumes_client.VolumesClient(
             _auth,
