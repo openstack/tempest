@@ -199,8 +199,8 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         # the provided flavor
 
         if stop:
-            self.servers_client.stop(self.server_id)
-            waiters.wait_for_server_status(self.servers_client, self.server_id,
+            self.client.stop(self.server_id)
+            waiters.wait_for_server_status(self.client, self.server_id,
                                            'SHUTOFF')
 
         self.client.resize(self.server_id, self.flavor_ref_alt)
@@ -260,10 +260,10 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         # Positive test:create backup successfully and rotate backups correctly
         # create the first and the second backup
         backup1 = data_utils.rand_name('backup-1')
-        resp = self.servers_client.create_backup(self.server_id,
-                                                 'daily',
-                                                 2,
-                                                 backup1).response
+        resp = self.client.create_backup(self.server_id,
+                                         'daily',
+                                         2,
+                                         backup1).response
         oldest_backup_exist = True
 
         # the oldest one should be deleted automatically in this test
@@ -283,12 +283,11 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         self.os.image_client.wait_for_image_status(image1_id, 'active')
 
         backup2 = data_utils.rand_name('backup-2')
-        waiters.wait_for_server_status(self.servers_client, self.server_id,
-                                       'ACTIVE')
-        resp = self.servers_client.create_backup(self.server_id,
-                                                 'daily',
-                                                 2,
-                                                 backup2).response
+        waiters.wait_for_server_status(self.client, self.server_id, 'ACTIVE')
+        resp = self.client.create_backup(self.server_id,
+                                         'daily',
+                                         2,
+                                         backup2).response
         image2_id = data_utils.parse_image_id(resp['location'])
         self.addCleanup(self.os.image_client.delete_image, image2_id)
         self.os.image_client.wait_for_image_status(image2_id, 'active')
@@ -312,17 +311,15 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         # create the third one, due to the rotation is 2,
         # the first one will be deleted
         backup3 = data_utils.rand_name('backup-3')
-        waiters.wait_for_server_status(self.servers_client, self.server_id,
-                                       'ACTIVE')
-        resp = self.servers_client.create_backup(self.server_id,
-                                                 'daily',
-                                                 2,
-                                                 backup3).response
+        waiters.wait_for_server_status(self.client, self.server_id, 'ACTIVE')
+        resp = self.client.create_backup(self.server_id,
+                                         'daily',
+                                         2,
+                                         backup3).response
         image3_id = data_utils.parse_image_id(resp['location'])
         self.addCleanup(self.os.image_client.delete_image, image3_id)
         # the first back up should be deleted
-        waiters.wait_for_server_status(self.servers_client, self.server_id,
-                                       'ACTIVE')
+        waiters.wait_for_server_status(self.client, self.server_id, 'ACTIVE')
         self.os.image_client.wait_for_resource_deletion(image1_id)
         oldest_backup_exist = False
         image_list = self.os.image_client.list_images(
@@ -340,7 +337,7 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
                          (image_list[0]['name'], image_list[1]['name']))
 
     def _get_output(self):
-        output = self.servers_client.get_console_output(
+        output = self.client.get_console_output(
             self.server_id, 10).data
         self.assertTrue(output, "Console output was empty.")
         lines = len(output.split('\n'))
@@ -358,9 +355,8 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         # log file is truncated and we cannot get any console log through
         # "console-log" API.
         # The detail is https://bugs.launchpad.net/nova/+bug/1251920
-        self.servers_client.reboot(self.server_id, 'HARD')
-        waiters.wait_for_server_status(self.servers_client, self.server_id,
-                                       'ACTIVE')
+        self.client.reboot(self.server_id, 'HARD')
+        waiters.wait_for_server_status(self.client, self.server_id, 'ACTIVE')
         self.wait_for(self._get_output)
 
     @test.idempotent_id('89104062-69d8-4b19-a71b-f47b7af093d7')
@@ -370,8 +366,8 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         server = self.create_test_server(wait_until='ACTIVE')
 
         def _check_full_length_console_log():
-            output = self.servers_client.get_console_output(server['id'],
-                                                            None).data
+            output = self.client.get_console_output(server['id'],
+                                                    None).data
             self.assertTrue(output, "Console output was empty.")
             lines = len(output.split('\n'))
 
@@ -395,9 +391,8 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         server = self.create_test_server(wait_until='ACTIVE')
         temp_server_id = server['id']
 
-        self.servers_client.stop(temp_server_id)
-        waiters.wait_for_server_status(self.servers_client, temp_server_id,
-                                       'SHUTOFF')
+        self.client.stop(temp_server_id)
+        waiters.wait_for_server_status(self.client, temp_server_id, 'SHUTOFF')
         self.wait_for(self._get_output)
 
     @test.idempotent_id('bd61a9fd-062f-4670-972b-2d6c3e3b9e73')
@@ -450,29 +445,25 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
 
     @test.idempotent_id('af8eafd4-38a7-4a4b-bdbc-75145a580560')
     def test_stop_start_server(self):
-        self.servers_client.stop(self.server_id)
-        waiters.wait_for_server_status(self.servers_client, self.server_id,
-                                       'SHUTOFF')
-        self.servers_client.start(self.server_id)
-        waiters.wait_for_server_status(self.servers_client, self.server_id,
-                                       'ACTIVE')
+        self.client.stop(self.server_id)
+        waiters.wait_for_server_status(self.client, self.server_id, 'SHUTOFF')
+        self.client.start(self.server_id)
+        waiters.wait_for_server_status(self.client, self.server_id, 'ACTIVE')
 
     @test.idempotent_id('80a8094c-211e-440a-ab88-9e59d556c7ee')
     def test_lock_unlock_server(self):
         # Lock the server,try server stop(exceptions throw),unlock it and retry
-        self.servers_client.lock_server(self.server_id)
-        server = self.servers_client.show_server(self.server_id)
+        self.client.lock_server(self.server_id)
+        server = self.client.show_server(self.server_id)
         self.assertEqual(server['status'], 'ACTIVE')
         # Locked server is not allowed to be stopped by non-admin user
         self.assertRaises(lib_exc.Conflict,
-                          self.servers_client.stop, self.server_id)
-        self.servers_client.unlock_server(self.server_id)
-        self.servers_client.stop(self.server_id)
-        waiters.wait_for_server_status(self.servers_client, self.server_id,
-                                       'SHUTOFF')
-        self.servers_client.start(self.server_id)
-        waiters.wait_for_server_status(self.servers_client, self.server_id,
-                                       'ACTIVE')
+                          self.client.stop, self.server_id)
+        self.client.unlock_server(self.server_id)
+        self.client.stop(self.server_id)
+        waiters.wait_for_server_status(self.client, self.server_id, 'SHUTOFF')
+        self.client.start(self.server_id)
+        waiters.wait_for_server_status(self.client, self.server_id, 'ACTIVE')
 
     def _validate_url(self, url):
         valid_scheme = ['http', 'https']
@@ -488,8 +479,8 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         # Get the VNC console of type 'novnc' and 'xvpvnc'
         console_types = ['novnc', 'xvpvnc']
         for console_type in console_types:
-            body = self.servers_client.get_vnc_console(self.server_id,
-                                                       console_type)
+            body = self.client.get_vnc_console(self.server_id,
+                                               console_type)
             self.assertEqual(console_type, body['type'])
             self.assertNotEqual('', body['url'])
             self._validate_url(body['url'])
