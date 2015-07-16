@@ -51,6 +51,7 @@ class PortsTestJSON(base.BaseNetworkTest):
         ports_list = body['ports']
         self.assertFalse(port_id in [n['id'] for n in ports_list])
 
+    @test.skip_because(bug='1474804')
     @test.attr(type='smoke')
     def test_create_update_delete_port(self):
         # Verify port creation
