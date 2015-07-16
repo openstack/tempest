@@ -24,7 +24,7 @@ class AgentsClient(service_client.ServiceClient):
     Tests Agents API
     """
 
-    def list_agents(self, params=None):
+    def list_agents(self, **params):
         """List all agent builds."""
         url = 'os-agents'
         if params:

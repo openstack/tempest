@@ -69,8 +69,7 @@ class SecurityGroupsTestAdminJSON(base.BaseV2ComputeAdminTest):
             security_group_list.append(adm_securitygroup)
 
         # Fetch all security groups based on 'all_tenants' search filter
-        param = {'all_tenants': 'true'}
-        fetched_list = self.adm_client.list_security_groups(params=param)
+        fetched_list = self.adm_client.list_security_groups(all_tenants='true')
         sec_group_id_list = map(lambda sg: sg['id'], fetched_list)
         # Now check if all created Security Groups are present in fetched list
         for sec_group in security_group_list:
@@ -78,7 +77,7 @@ class SecurityGroupsTestAdminJSON(base.BaseV2ComputeAdminTest):
 
         # Fetch all security groups for non-admin user with 'all_tenants'
         # search filter
-        fetched_list = self.client.list_security_groups(params=param)
+        fetched_list = self.client.list_security_groups(all_tenants='true')
         # Now check if all created Security Groups are present in fetched list
         for sec_group in fetched_list:
             self.assertEqual(sec_group['tenant_id'], client_tenant_id,

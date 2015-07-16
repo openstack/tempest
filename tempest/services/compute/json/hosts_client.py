@@ -21,7 +21,7 @@ from tempest.common import service_client
 
 class HostsClient(service_client.ServiceClient):
 
-    def list_hosts(self, params=None):
+    def list_hosts(self, **params):
         """Lists all hosts."""
 
         url = 'os-hosts'

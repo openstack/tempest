@@ -38,9 +38,7 @@ class HostsAdminTestJSON(base.BaseV2ComputeAdminTest):
         self.useFixture(fixtures.LockFixture('availability_zone'))
         hosts = self.client.list_hosts()
         host = hosts[0]
-        zone_name = host['zone']
-        params = {'zone': zone_name}
-        hosts = self.client.list_hosts(params)
+        hosts = self.client.list_hosts(zone=host['zone'])
         self.assertTrue(len(hosts) >= 1)
         self.assertIn(host, hosts)
 
@@ -48,16 +46,14 @@ class HostsAdminTestJSON(base.BaseV2ComputeAdminTest):
     def test_list_hosts_with_a_blank_zone(self):
         # If send the request with a blank zone, the request will be successful
         # and it will return all the hosts list
-        params = {'zone': ''}
-        hosts = self.client.list_hosts(params)
+        hosts = self.client.list_hosts(zone='')
         self.assertNotEqual(0, len(hosts))
 
     @test.idempotent_id('c6ddbadb-c94e-4500-b12f-8ffc43843ff8')
     def test_list_hosts_with_nonexistent_zone(self):
         # If send the request with a nonexistent zone, the request will be
         # successful and no hosts will be retured
-        params = {'zone': 'xxx'}
-        hosts = self.client.list_hosts(params)
+        hosts = self.client.list_hosts(zone='xxx')
         self.assertEqual(0, len(hosts))
 
     @test.idempotent_id('38adbb12-aee2-4498-8aec-329c72423aa4')
