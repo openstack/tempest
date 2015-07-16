@@ -78,15 +78,6 @@ class TestMinimumBasicScenario(manager.ScenarioTest):
         volume = self.volumes_client.show_volume(self.volume['id'])
         self.assertEqual(self.volume, volume)
 
-    def nova_volume_attach(self):
-        volume_device_path = '/dev/' + CONF.compute.volume_device_name
-        volume = self.servers_client.attach_volume(
-            self.server['id'], self.volume['id'], volume_device_path)
-        self.assertEqual(self.volume['id'], volume['id'])
-        self.volumes_client.wait_for_volume_status(volume['id'], 'in-use')
-        # Refresh the volume after the attachment
-        self.volume = self.volumes_client.show_volume(volume['id'])
-
     def nova_reboot(self):
         self.servers_client.reboot(self.server['id'], 'SOFT')
         self._wait_for_server_status('ACTIVE')
@@ -95,14 +86,6 @@ class TestMinimumBasicScenario(manager.ScenarioTest):
         # NOTE(andreaf) The device name may be different on different guest OS
         partitions = self.linux_client.get_partitions()
         self.assertEqual(1, partitions.count(CONF.compute.volume_device_name))
-
-    def nova_volume_detach(self):
-        self.servers_client.detach_volume(self.server['id'], self.volume['id'])
-        self.volumes_client.wait_for_volume_status(self.volume['id'],
-                                                   'available')
-
-        volume = self.volumes_client.show_volume(self.volume['id'])
-        self.assertEqual('available', volume['status'])
 
     def create_and_add_security_group(self):
         secgroup = self._create_security_group()
