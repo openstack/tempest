@@ -48,8 +48,8 @@ def load_tests(loader, tests, pattern):
     for plugin in plugin_load_tests:
         test_dir, top_path = plugin_load_tests[plugin]
         if not pattern:
-            suite.addTests(loader.discover(test_dir, top_level=top_path))
+            suite.addTests(loader.discover(test_dir, top_level_dir=top_path))
         else:
             suite.addTests(loader.discover(test_dir, pattern=pattern,
-                                           top_level=top_path))
+                                           top_level_dir=top_path))
     return suite
