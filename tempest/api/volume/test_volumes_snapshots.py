@@ -14,6 +14,7 @@ from oslo_log import log as logging
 
 from tempest.api.volume import base
 from tempest.common.utils import data_utils
+from tempest.common import waiters
 from tempest import config
 from tempest import test
 
@@ -70,7 +71,8 @@ class VolumesV2SnapshotTestJSON(base.BaseVolumeTest):
         server_name = data_utils.rand_name('instance')
         server = self.create_server(server_name)
         self.addCleanup(self.servers_client.delete_server, server['id'])
-        self.servers_client.wait_for_server_status(server['id'], 'ACTIVE')
+        waiters.wait_for_server_status(self.servers_client, server['id'],
+                                       'ACTIVE')
         mountpoint = '/dev/%s' % CONF.compute.volume_device_name
         self.servers_client.attach_volume(
             server['id'], self.volume_origin['id'], mountpoint)

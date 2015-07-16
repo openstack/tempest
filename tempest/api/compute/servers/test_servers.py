@@ -15,6 +15,7 @@
 
 from tempest.api.compute import base
 from tempest.common.utils import data_utils
+from tempest.common import waiters
 from tempest import test
 
 
@@ -66,7 +67,7 @@ class ServersTestJSON(base.BaseV2ComputeTest):
         self.addCleanup(self.keypairs_client.delete_keypair, key_name)
         self.keypairs_client.list_keypairs()
         server = self.create_test_server(key_name=key_name)
-        self.client.wait_for_server_status(server['id'], 'ACTIVE')
+        waiters.wait_for_server_status(self.client, server['id'], 'ACTIVE')
         server = self.client.show_server(server['id'])
         self.assertEqual(key_name, server['key_name'])
 
@@ -76,7 +77,7 @@ class ServersTestJSON(base.BaseV2ComputeTest):
         # Update the server with a new name
         self.client.update_server(server_id,
                                   name=new_name)
-        self.client.wait_for_server_status(server_id, status)
+        waiters.wait_for_server_status(self.client, server_id, status)
 
         # Verify the name of the server has changed
         server = self.client.show_server(server_id)
@@ -95,7 +96,7 @@ class ServersTestJSON(base.BaseV2ComputeTest):
         # The server name should be changed to the the provided value
         server = self.create_test_server(wait_until='ACTIVE')
         self.client.stop(server['id'])
-        self.client.wait_for_server_status(server['id'], 'SHUTOFF')
+        waiters.wait_for_server_status(self.client, server['id'], 'SHUTOFF')
         updated_server = self._update_server_name(server['id'], 'SHUTOFF')
         self.assertNotIn('progress', updated_server)
 
@@ -108,7 +109,7 @@ class ServersTestJSON(base.BaseV2ComputeTest):
         self.client.update_server(server['id'],
                                   accessIPv4='1.1.1.1',
                                   accessIPv6='::babe:202:202')
-        self.client.wait_for_server_status(server['id'], 'ACTIVE')
+        waiters.wait_for_server_status(self.client, server['id'], 'ACTIVE')
 
         # Verify the access addresses have been updated
         server = self.client.show_server(server['id'])
@@ -119,6 +120,6 @@ class ServersTestJSON(base.BaseV2ComputeTest):
     def test_create_server_with_ipv6_addr_only(self):
         # Create a server without an IPv4 address(only IPv6 address).
         server = self.create_test_server(accessIPv6='2001:2001::3')
-        self.client.wait_for_server_status(server['id'], 'ACTIVE')
+        waiters.wait_for_server_status(self.client, server['id'], 'ACTIVE')
         server = self.client.show_server(server['id'])
         self.assertEqual('2001:2001::3', server['accessIPv6'])

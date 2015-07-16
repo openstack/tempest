@@ -25,6 +25,7 @@ from tempest_lib import exceptions as lib_exc
 from tempest.common import fixed_network
 from tempest.common.utils import data_utils
 from tempest.common.utils.linux import remote_client
+from tempest.common import waiters
 from tempest import config
 from tempest import exceptions
 from tempest.services.network import resources as net_resources
@@ -177,8 +178,9 @@ class ScenarioTest(tempest.test.BaseTestCase):
             cleanup_callable=self.delete_wrapper,
             cleanup_args=[self.servers_client.delete_server, server['id']])
         if wait_on_boot:
-            self.servers_client.wait_for_server_status(server_id=server['id'],
-                                                       status='ACTIVE')
+            waiters.wait_for_server_status(self.servers_client,
+                                           server_id=server['id'],
+                                           status='ACTIVE')
         # The instance retrieved on creation is missing network
         # details, necessitating retrieval after it becomes active to
         # ensure correct details.
@@ -443,7 +445,8 @@ class ScenarioTest(tempest.test.BaseTestCase):
                                     preserve_ephemeral=preserve_ephemeral,
                                     **rebuild_kwargs)
         if wait:
-            self.servers_client.wait_for_server_status(server_id, 'ACTIVE')
+            waiters.wait_for_server_status(self.servers_client,
+                                           server_id, 'ACTIVE')
 
     def ping_ip_address(self, ip_address, should_succeed=True,
                         ping_timeout=None):
@@ -1226,8 +1229,8 @@ class BaremetalScenarioTest(ScenarioTest):
                                      BaremetalProvisionStates.ACTIVE,
                                      timeout=CONF.baremetal.active_timeout)
 
-        self.servers_client.wait_for_server_status(self.instance['id'],
-                                                   'ACTIVE')
+        waiters.wait_for_server_status(self.servers_client,
+                                       self.instance['id'], 'ACTIVE')
         self.node = self.get_node(instance_id=self.instance['id'])
         self.instance = self.servers_client.show_server(self.instance['id'])
 

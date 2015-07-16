@@ -17,6 +17,7 @@ import testtools
 
 from tempest.api.compute import base
 from tempest.common.utils.linux import remote_client
+from tempest.common import waiters
 from tempest import config
 from tempest import test
 
@@ -93,11 +94,12 @@ class AttachVolumeTestJSON(base.BaseV2ComputeTest):
         self._create_and_attach()
 
         self.servers_client.stop(self.server['id'])
-        self.servers_client.wait_for_server_status(self.server['id'],
-                                                   'SHUTOFF')
+        waiters.wait_for_server_status(self.servers_client, self.server['id'],
+                                       'SHUTOFF')
 
         self.servers_client.start(self.server['id'])
-        self.servers_client.wait_for_server_status(self.server['id'], 'ACTIVE')
+        waiters.wait_for_server_status(self.servers_client, self.server['id'],
+                                       'ACTIVE')
 
         linux_client = remote_client.RemoteClient(self.server,
                                                   self.image_ssh_user,
@@ -108,11 +110,12 @@ class AttachVolumeTestJSON(base.BaseV2ComputeTest):
         self._detach(self.server['id'], self.volume['id'])
         self.attachment = None
         self.servers_client.stop(self.server['id'])
-        self.servers_client.wait_for_server_status(self.server['id'],
-                                                   'SHUTOFF')
+        waiters.wait_for_server_status(self.servers_client, self.server['id'],
+                                       'SHUTOFF')
 
         self.servers_client.start(self.server['id'])
-        self.servers_client.wait_for_server_status(self.server['id'], 'ACTIVE')
+        waiters.wait_for_server_status(self.servers_client, self.server['id'],
+                                       'ACTIVE')
 
         linux_client = remote_client.RemoteClient(self.server,
                                                   self.image_ssh_user,

@@ -12,6 +12,7 @@
 #    limitations under the License.
 
 from tempest.common.utils import data_utils
+from tempest.common import waiters
 from tempest import config
 import tempest.stress.stressaction as stressaction
 
@@ -40,7 +41,8 @@ class VolumeAttachDeleteTest(stressaction.StressAction):
         server = self.manager.servers_client.create_server(
             vm_name, self.image, self.flavor)
         server_id = server['id']
-        self.manager.servers_client.wait_for_server_status(server_id, 'ACTIVE')
+        waiters.wait_for_server_status(self.manager.servers_client, server_id,
+                                       'ACTIVE')
         self.logger.info("created vm %s" % server_id)
 
         # Step 3: attach volume to vm

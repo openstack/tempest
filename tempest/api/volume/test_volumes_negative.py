@@ -19,6 +19,7 @@ from tempest_lib import exceptions as lib_exc
 
 from tempest.api.volume import base
 from tempest.common.utils import data_utils
+from tempest.common import waiters
 from tempest import test
 
 
@@ -183,7 +184,8 @@ class VolumesV2NegativeTest(base.BaseVolumeTest):
         self.addCleanup(self.servers_client.wait_for_server_termination,
                         server['id'])
         self.addCleanup(self.servers_client.delete_server, server['id'])
-        self.servers_client.wait_for_server_status(server['id'], 'ACTIVE')
+        waiters.wait_for_server_status(self.servers_client, server['id'],
+                                       'ACTIVE')
         self.assertRaises(lib_exc.NotFound,
                           self.client.attach_volume,
                           str(uuid.uuid4()),

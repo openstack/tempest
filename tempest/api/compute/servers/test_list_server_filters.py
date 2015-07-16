@@ -19,6 +19,7 @@ from tempest.api.compute import base
 from tempest.api import utils
 from tempest.common import fixed_network
 from tempest.common.utils import data_utils
+from tempest.common import waiters
 from tempest import config
 from tempest import test
 
@@ -137,12 +138,12 @@ class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
         # Filter the list of servers by server shutoff status
         params = {'status': 'shutoff'}
         self.client.stop(self.s1['id'])
-        self.client.wait_for_server_status(self.s1['id'],
-                                           'SHUTOFF')
+        waiters.wait_for_server_status(self.client, self.s1['id'],
+                                       'SHUTOFF')
         body = self.client.list_servers(**params)
         self.client.start(self.s1['id'])
-        self.client.wait_for_server_status(self.s1['id'],
-                                           'ACTIVE')
+        waiters.wait_for_server_status(self.client, self.s1['id'],
+                                       'ACTIVE')
         servers = body['servers']
 
         self.assertIn(self.s1['id'], map(lambda x: x['id'], servers))

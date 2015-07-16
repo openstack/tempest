@@ -18,6 +18,7 @@ from tempest_lib import exceptions as lib_exc
 
 from tempest.common import fixed_network
 from tempest.common.utils import data_utils
+from tempest.common import waiters
 from tempest import config
 from tempest.scenario import manager
 from tempest import test
@@ -76,7 +77,8 @@ class TestLargeOpsScenario(manager.ScenarioTest):
         for server in self.servers:
             # Make sure nova list keeps working throughout the build process
             self.servers_client.list_servers()
-            self.servers_client.wait_for_server_status(server['id'], status)
+            waiters.wait_for_server_status(self.servers_client,
+                                           server['id'], status)
 
     def nova_boot(self):
         name = data_utils.rand_name('scenario-server')

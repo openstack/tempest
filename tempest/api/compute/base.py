@@ -144,8 +144,8 @@ class BaseComputeTest(tempest.test.BaseTestCase):
         """
         if getattr(cls, 'server_id', None) is not None:
             try:
-                cls.servers_client.wait_for_server_status(cls.server_id,
-                                                          'ACTIVE')
+                waiters.wait_for_server_status(cls.servers_client,
+                                               cls.server_id, 'ACTIVE')
             except Exception as exc:
                 LOG.exception(exc)
                 cls.servers_client.delete_server(cls.server_id)
@@ -289,8 +289,8 @@ class BaseComputeTest(tempest.test.BaseTestCase):
 
             if kwargs['wait_until'] == 'ACTIVE':
                 if kwargs.get('wait_for_server', True):
-                    cls.servers_client.wait_for_server_status(server_id,
-                                                              'ACTIVE')
+                    waiters.wait_for_server_status(cls.servers_client,
+                                                   server_id, 'ACTIVE')
         return image
 
     @classmethod

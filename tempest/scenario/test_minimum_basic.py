@@ -16,6 +16,7 @@
 from oslo_log import log as logging
 
 from tempest.common import custom_matchers
+from tempest.common import waiters
 from tempest import config
 from tempest import exceptions
 from tempest.scenario import manager
@@ -43,7 +44,8 @@ class TestMinimumBasicScenario(manager.ScenarioTest):
         server_id = self.server['id']
         # Raise on error defaults to True, which is consistent with the
         # original function from scenario tests here
-        self.servers_client.wait_for_server_status(server_id, status)
+        waiters.wait_for_server_status(self.servers_client,
+                                       server_id, status)
 
     def nova_keypair_add(self):
         self.keypair = self.create_keypair()

@@ -14,6 +14,7 @@ import socket
 import subprocess
 
 from tempest.common.utils import data_utils
+from tempest.common import waiters
 from tempest import config
 import tempest.stress.stressaction as stressaction
 import tempest.test
@@ -79,8 +80,8 @@ class FloatingStress(stressaction.StressAction):
                                               **vm_args)
         self.server_id = server['id']
         if self.wait_after_vm_create:
-            self.manager.servers_client.wait_for_server_status(self.server_id,
-                                                               'ACTIVE')
+            waiters.wait_for_server_status(self.manager.servers_client,
+                                           self.server_id, 'ACTIVE')
 
     def _destroy_vm(self):
         self.logger.info("deleting %s" % self.server_id)
@@ -172,8 +173,8 @@ class FloatingStress(stressaction.StressAction):
             self._create_vm()
         if self.reboot:
             self.manager.servers_client.reboot(self.server_id, 'HARD')
-            self.manager.servers_client.wait_for_server_status(self.server_id,
-                                                               'ACTIVE')
+            waiters.wait_for_server_status(self.manager.servers_client,
+                                           self.server_id, 'ACTIVE')
 
         self.run_core()
 

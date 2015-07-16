@@ -17,6 +17,7 @@ from tempest_lib import decorators
 from tempest.api.compute import base
 from tempest.common import fixed_network
 from tempest.common.utils import data_utils
+from tempest.common import waiters
 from tempest import test
 
 
@@ -113,7 +114,8 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
         test_server = self.client.create_server(name, image_id, flavor,
                                                 **network_kwargs)
         self.addCleanup(self.client.delete_server, test_server['id'])
-        self.client.wait_for_server_status(test_server['id'], 'ACTIVE')
+        waiters.wait_for_server_status(self.client,
+                                       test_server['id'], 'ACTIVE')
         server = self.client.show_server(test_server['id'])
         self.assertEqual(server['status'], 'ACTIVE')
         hostname = server[self._host_key]
@@ -163,7 +165,7 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
         self.client.reset_state(self.s1_id, state='error')
         rebuilt_server = self.non_admin_client.rebuild(
             self.s1_id, self.image_ref_alt)
-        self.addCleanup(self.non_admin_client.wait_for_server_status,
+        self.addCleanup(waiters.wait_for_server_status, self.non_admin_client,
                         self.s1_id, 'ACTIVE')
         self.addCleanup(self.non_admin_client.rebuild, self.s1_id,
                         self.image_ref)
@@ -173,9 +175,9 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
         rebuilt_image_id = rebuilt_server['image']['id']
         self.assertEqual(self.image_ref_alt, rebuilt_image_id)
         self.assertEqual(self.flavor_ref, rebuilt_server['flavor']['id'])
-        self.non_admin_client.wait_for_server_status(rebuilt_server['id'],
-                                                     'ACTIVE',
-                                                     raise_on_error=False)
+        waiters.wait_for_server_status(self.non_admin_client,
+                                       rebuilt_server['id'], 'ACTIVE',
+                                       raise_on_error=False)
         # Verify the server properties after rebuilding
         server = self.non_admin_client.show_server(rebuilt_server['id'])
         rebuilt_image_id = server['image']['id']
