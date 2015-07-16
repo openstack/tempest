@@ -270,33 +270,57 @@ class RoutersTest(base.BaseRouterTest):
     @test.idempotent_id('c86ac3a8-50bd-4b00-a6b8-62af84a0765c')
     @test.requires_ext(extension='extraroute', service='network')
     def test_update_extra_route(self):
-        self.network = self.create_network()
-        self.name = self.network['name']
-        self.subnet = self.create_subnet(self.network)
-        # Add router interface with subnet id
+        # Create different cidr for each subnet to avoid cidr duplicate
+        # The cidr starts from tenant_cidr
+        next_cidr = netaddr.IPNetwork(self.tenant_cidr)
+        # Prepare to build several routes
+        test_routes = []
+        routes_num = 5
+        # Create a router
         self.router = self._create_router(
             data_utils.rand_name('router-'), True)
-        self.create_router_interface(self.router['id'], self.subnet['id'])
         self.addCleanup(
             self._delete_extra_routes,
             self.router['id'])
         # Update router extra route, second ip of the range is
         # used as next hop
-        cidr = netaddr.IPNetwork(self.subnet['cidr'])
-        next_hop = str(cidr[2])
-        destination = str(self.subnet['cidr'])
+        for i in range(routes_num):
+            network = self.create_network()
+            subnet = self.create_subnet(network, cidr=next_cidr)
+            next_cidr = next_cidr.next()
+
+            # Add router interface with subnet id
+            self.create_router_interface(self.router['id'], subnet['id'])
+
+            cidr = netaddr.IPNetwork(subnet['cidr'])
+            next_hop = str(cidr[2])
+            destination = str(subnet['cidr'])
+            test_routes.append(
+                {'nexthop': next_hop, 'destination': destination}
+            )
+
+        test_routes.sort(key=lambda x: x['destination'])
         extra_route = self.client.update_extra_routes(self.router['id'],
-                                                      next_hop, destination)
-        self.assertEqual(1, len(extra_route['router']['routes']))
-        self.assertEqual(destination,
-                         extra_route['router']['routes'][0]['destination'])
-        self.assertEqual(next_hop,
-                         extra_route['router']['routes'][0]['nexthop'])
+                                                      test_routes)
         show_body = self.client.show_router(self.router['id'])
-        self.assertEqual(destination,
-                         show_body['router']['routes'][0]['destination'])
-        self.assertEqual(next_hop,
-                         show_body['router']['routes'][0]['nexthop'])
+        # Assert the number of routes
+        self.assertEqual(routes_num, len(extra_route['router']['routes']))
+        self.assertEqual(routes_num, len(show_body['router']['routes']))
+
+        routes = extra_route['router']['routes']
+        routes.sort(key=lambda x: x['destination'])
+        # Assert the nexthops & destination
+        for i in range(routes_num):
+            self.assertEqual(test_routes[i]['destination'],
+                             routes[i]['destination'])
+            self.assertEqual(test_routes[i]['nexthop'], routes[i]['nexthop'])
+
+        routes = show_body['router']['routes']
+        routes.sort(key=lambda x: x['destination'])
+        for i in range(routes_num):
+            self.assertEqual(test_routes[i]['destination'],
+                             routes[i]['destination'])
+            self.assertEqual(test_routes[i]['nexthop'], routes[i]['nexthop'])
 
     def _delete_extra_routes(self, router_id):
         self.client.delete_extra_routes(router_id)
