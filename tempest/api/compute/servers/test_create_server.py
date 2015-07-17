@@ -269,9 +269,9 @@ class ServersWithSpecificFlavorTestJSON(base.BaseV2ComputeAdminTest):
 
             # Create a flavor with extra specs
             flavor = (self.flavor_client.
-                      create_flavor(flavor_with_eph_disk_name,
-                                    ram, vcpus, disk,
-                                    flavor_with_eph_disk_id,
+                      create_flavor(name=flavor_with_eph_disk_name,
+                                    ram=ram, vcpus=vcpus, disk=disk,
+                                    id=flavor_with_eph_disk_id,
                                     ephemeral=1))
             self.addCleanup(flavor_clean_up, flavor['id'])
 
@@ -287,9 +287,9 @@ class ServersWithSpecificFlavorTestJSON(base.BaseV2ComputeAdminTest):
 
             # Create a flavor without extra specs
             flavor = (self.flavor_client.
-                      create_flavor(flavor_no_eph_disk_name,
-                                    ram, vcpus, disk,
-                                    flavor_no_eph_disk_id))
+                      create_flavor(name=flavor_no_eph_disk_name,
+                                    ram=ram, vcpus=vcpus, disk=disk,
+                                    id=flavor_no_eph_disk_id))
             self.addCleanup(flavor_clean_up, flavor['id'])
 
             return flavor['id']

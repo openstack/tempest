@@ -50,12 +50,12 @@ class FlavorsExtraSpecsTestJSON(base.BaseV2ComputeAdminTest):
         swap = 1024
         rxtx = 1
         # Create a flavor so as to set/get/unset extra specs
-        cls.flavor = cls.client.create_flavor(flavor_name,
-                                              ram, vcpus,
-                                              disk,
-                                              cls.new_flavor_id,
+        cls.flavor = cls.client.create_flavor(name=flavor_name,
+                                              ram=ram, vcpus=vcpus,
+                                              disk=disk,
+                                              id=cls.new_flavor_id,
                                               ephemeral=ephemeral,
-                                              swap=swap, rxtx=rxtx)
+                                              swap=swap, rxtx_factor=rxtx)
 
     @classmethod
     def resource_cleanup(cls):
