@@ -28,9 +28,9 @@ class FixedIPsClient(service_client.ServiceClient):
         self.validate_response(schema.get_fixed_ip, resp, body)
         return service_client.ResponseBody(resp, body['fixed_ip'])
 
-    def reserve_fixed_ip(self, fixed_ip, body):
+    def reserve_fixed_ip(self, fixed_ip, **kwargs):
         """This reserves and unreserves fixed ips."""
         url = "os-fixed-ips/%s/action" % fixed_ip
-        resp, body = self.post(url, json.dumps(body))
+        resp, body = self.post(url, json.dumps(kwargs))
         self.validate_response(schema.reserve_fixed_ip, resp, body)
         return service_client.ResponseBody(resp)
