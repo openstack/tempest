@@ -29,16 +29,8 @@ class InterfacesClient(service_client.ServiceClient):
         return service_client.ResponseBodyList(resp,
                                                body['interfaceAttachments'])
 
-    def create_interface(self, server_id, port_id=None, network_id=None,
-                         fixed_ip=None):
-        post_body = dict(interfaceAttachment=dict())
-        if port_id:
-            post_body['interfaceAttachment']['port_id'] = port_id
-        if network_id:
-            post_body['interfaceAttachment']['net_id'] = network_id
-        if fixed_ip:
-            fip = dict(ip_address=fixed_ip)
-            post_body['interfaceAttachment']['fixed_ips'] = [fip]
+    def create_interface(self, server_id, **kwargs):
+        post_body = {'interfaceAttachment': kwargs}
         post_body = json.dumps(post_body)
         resp, body = self.post('servers/%s/os-interface' % server_id,
                                body=post_body)
@@ -59,26 +51,18 @@ class InterfacesClient(service_client.ServiceClient):
         self.validate_response(schema.delete_interface, resp, body)
         return service_client.ResponseBody(resp, body)
 
-    def add_fixed_ip(self, server_id, network_id):
+    def add_fixed_ip(self, server_id, **kwargs):
         """Add a fixed IP to input server instance."""
-        post_body = json.dumps({
-            'addFixedIp': {
-                'networkId': network_id
-            }
-        })
+        post_body = json.dumps({'addFixedIp': kwargs})
         resp, body = self.post('servers/%s/action' % server_id,
                                post_body)
         self.validate_response(servers_schema.server_actions_common_schema,
                                resp, body)
         return service_client.ResponseBody(resp, body)
 
-    def remove_fixed_ip(self, server_id, ip_address):
+    def remove_fixed_ip(self, server_id, **kwargs):
         """Remove input fixed IP from input server instance."""
-        post_body = json.dumps({
-            'removeFixedIp': {
-                'address': ip_address
-            }
-        })
+        post_body = json.dumps({'removeFixedIp': kwargs})
         resp, body = self.post('servers/%s/action' % server_id,
                                post_body)
         self.validate_response(servers_schema.server_actions_common_schema,
