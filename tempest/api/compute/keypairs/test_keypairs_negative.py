@@ -29,7 +29,10 @@ class KeyPairsNegativeTestJSON(base.BaseV2ComputeTest):
         cls.client = cls.keypairs_client
 
     def _create_keypair(self, keypair_name, pub_key=None):
-        self.client.create_keypair(keypair_name, pub_key)
+        kwargs = {'name': keypair_name}
+        if pub_key:
+            kwargs.update({'public_key': pub_key})
+        self.client.create_keypair(**kwargs)
         self.addCleanup(self.client.delete_keypair, keypair_name)
 
     @test.attr(type=['negative'])
@@ -72,7 +75,7 @@ class KeyPairsNegativeTestJSON(base.BaseV2ComputeTest):
     def test_create_keypair_with_duplicate_name(self):
         # Keypairs with duplicate names should not be created
         k_name = data_utils.rand_name('keypair')
-        self.client.create_keypair(k_name)
+        self.client.create_keypair(name=k_name)
         # Now try the same keyname to create another key
         self.assertRaises(lib_exc.Conflict, self._create_keypair,
                           k_name)

@@ -78,7 +78,7 @@ class AuthorizationTestJSON(base.BaseV2ComputeTest):
         cls.image = cls.images_client.show_image(image_id)
 
         cls.keypairname = data_utils.rand_name('keypair')
-        cls.keypairs_client.create_keypair(cls.keypairname)
+        cls.keypairs_client.create_keypair(name=cls.keypairname)
 
         name = data_utils.rand_name('security')
         description = data_utils.rand_name('description')
@@ -209,7 +209,8 @@ class AuthorizationTestJSON(base.BaseV2ComputeTest):
             resp = {}
             resp['status'] = None
             self.assertRaises(lib_exc.BadRequest,
-                              self.alt_keypairs_client.create_keypair, k_name)
+                              self.alt_keypairs_client.create_keypair,
+                              name=k_name)
         finally:
             # Next request the base_url is back to normal
             if (resp['status'] is not None):
