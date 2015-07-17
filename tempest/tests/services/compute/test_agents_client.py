@@ -32,10 +32,9 @@ class TestAgentsClient(base.TestCase):
                                                  'compute', 'regionOne')
 
     def _test_list_agents(self, bytes_body=False):
+        body = '{"agents": []}'
         if bytes_body:
-            body = bytes(b'{"agents": []}')
-        else:
-            body = '{"agents": []}'
+            body = bytes(body.encode('utf-8'))
         expected = []
         response = (httplib2.Response({'status': 200}), body)
         self.useFixture(mockpatch.Patch(
