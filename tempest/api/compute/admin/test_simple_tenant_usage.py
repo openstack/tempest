@@ -50,7 +50,7 @@ class TenantUsagesTestJSON(base.BaseV2ComputeAdminTest):
     def test_list_usage_all_tenants(self):
         # Get usage for all tenants
         tenant_usage = self.adm_client.list_tenant_usages(
-            start=self.start, end=self.end, detailed=int(bool(True)))
+            start=self.start, end=self.end, detailed="1")
         self.assertEqual(len(tenant_usage), 8)
 
     @test.idempotent_id('94135049-a4c5-4934-ad39-08fa7da4f22e')
