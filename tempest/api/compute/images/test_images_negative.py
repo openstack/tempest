@@ -93,7 +93,7 @@ class ImagesNegativeTestJSON(base.BaseV2ComputeTest):
         snapshot_name = data_utils.rand_name('test-snap')
         test_uuid = ('a' * 35)
         self.assertRaises(lib_exc.NotFound, self.client.create_image,
-                          test_uuid, snapshot_name)
+                          test_uuid, name=snapshot_name)
 
     @test.attr(type=['negative'])
     @test.idempotent_id('36741560-510e-4cc2-8641-55fe4dfb2437')
@@ -102,7 +102,7 @@ class ImagesNegativeTestJSON(base.BaseV2ComputeTest):
         snapshot_name = data_utils.rand_name('test-snap')
         test_uuid = ('a' * 37)
         self.assertRaises(lib_exc.NotFound, self.client.create_image,
-                          test_uuid, snapshot_name)
+                          test_uuid, name=snapshot_name)
 
     @test.attr(type=['negative'])
     @test.idempotent_id('381acb65-785a-4942-94ce-d8f8c84f1f0f')

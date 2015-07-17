@@ -279,7 +279,7 @@ class BaseComputeTest(tempest.test.BaseTestCase):
         if 'name' in kwargs:
             name = kwargs.pop('name')
 
-        image = cls.images_client.create_image(server_id, name)
+        image = cls.images_client.create_image(server_id, name=name)
         image_id = data_utils.parse_image_id(image.response['location'])
         cls.images.append(image_id)
 

@@ -173,7 +173,7 @@ class AuthorizationTestJSON(base.BaseV2ComputeTest):
         # A create image request for another user's server should fail
         self.assertRaises(lib_exc.NotFound,
                           self.alt_images_client.create_image,
-                          self.server['id'], 'testImage')
+                          self.server['id'], name='testImage')
 
     @test.idempotent_id('95d445f6-babc-4f2e-aea3-aa24ec5e7f0d')
     def test_create_server_with_unauthorized_image(self):
