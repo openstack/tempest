@@ -44,7 +44,7 @@ CONF = config.CONF
 
 
 def attr(**kwargs):
-    """A decorator which applies the  testtools attr decorator
+    """A decorator which applies the testtools attr decorator
 
     This decorator applies the testtools.testcase.attr if it is in the list of
     attributes to testtools we want to apply.
