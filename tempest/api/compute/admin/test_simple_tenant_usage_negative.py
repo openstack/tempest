@@ -66,6 +66,6 @@ class TenantUsagesNegativeTestJSON(base.BaseV2ComputeAdminTest):
         # Get usage for all tenants with non admin user
         params = {'start': self.start,
                   'end': self.end,
-                  'detailed': int(bool(True))}
+                  'detailed': "1"}
         self.assertRaises(lib_exc.Forbidden,
                           self.client.list_tenant_usages, **params)
