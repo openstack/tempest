@@ -494,9 +494,23 @@ class ScenarioTest(tempest.test.BaseTestCase):
                                     stdout=subprocess.PIPE,
                                     stderr=subprocess.PIPE)
             proc.communicate()
+
             return (proc.returncode == 0) == should_succeed
 
-        return tempest.test.call_until_true(ping, timeout, 1)
+        caller = misc_utils.find_test_caller()
+        LOG.debug('%(caller)s begins to ping %(ip)s in %(timeout)s sec and the'
+                  ' expected result is %(should_succeed)s' % {
+                      'caller': caller, 'ip': ip_address, 'timeout': timeout,
+                      'should_succeed':
+                      'reachable' if should_succeed else 'unreachable'
+                  })
+        result = tempest.test.call_until_true(ping, timeout, 1)
+        LOG.debug('%(caller)s finishes ping %(ip)s in %(timeout)s sec and the '
+                  'ping result is %(result)s' % {
+                      'caller': caller, 'ip': ip_address, 'timeout': timeout,
+                      'result': 'expected' if result else 'unexpected'
+                  })
+        return result
 
     def check_vm_connectivity(self, ip_address,
                               username=None,
