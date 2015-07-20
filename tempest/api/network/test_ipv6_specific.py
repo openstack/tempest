@@ -30,7 +30,7 @@ class NetworksTestPortsIPv6JSON(base.BaseNetworkTest):
     _ip_version = 6
 
     def setUp(self):
-        super(NetworksTestPortsIPv6JSON, self).setUpClass()
+        super(NetworksTestPortsIPv6JSON, self).setUp()
         msg = None
         if not CONF.network_feature_enabled.ipv6:
             msg = "IPv6 is not enabled"
