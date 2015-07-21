@@ -22,8 +22,7 @@ from tempest.common import service_client
 
 class SecurityGroupDefaultRulesClient(service_client.ServiceClient):
 
-    def create_security_default_group_rule(self, ip_protocol, from_port,
-                                           to_port, **kwargs):
+    def create_security_default_group_rule(self, **kwargs):
         """
         Creating security group default rules.
         ip_protocol : ip_protocol (icmp, tcp, udp).
@@ -31,13 +30,7 @@ class SecurityGroupDefaultRulesClient(service_client.ServiceClient):
         to_port  : Port at end of range.
         cidr     : CIDR for address range.
         """
-        post_body = {
-            'ip_protocol': ip_protocol,
-            'from_port': from_port,
-            'to_port': to_port,
-            'cidr': kwargs.get('cidr'),
-        }
-        post_body = json.dumps({'security_group_default_rule': post_body})
+        post_body = json.dumps({'security_group_default_rule': kwargs})
         url = 'os-security-group-default-rules'
         resp, body = self.post(url, post_body)
         body = json.loads(body)
