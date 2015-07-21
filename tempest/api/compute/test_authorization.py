@@ -83,7 +83,7 @@ class AuthorizationTestJSON(base.BaseV2ComputeTest):
         name = data_utils.rand_name('security')
         description = data_utils.rand_name('description')
         cls.security_group = cls.security_client.create_security_group(
-            name, description)
+            name=name, description=description)
 
         parent_group_id = cls.security_group['id']
         ip_protocol = 'tcp'
@@ -261,7 +261,7 @@ class AuthorizationTestJSON(base.BaseV2ComputeTest):
             resp['status'] = None
             self.assertRaises(lib_exc.BadRequest,
                               self.alt_security_client.create_security_group,
-                              s_name, s_description)
+                              name=s_name, description=s_description)
         finally:
             # Next request the base_url is back to normal
             if resp['status'] is not None:

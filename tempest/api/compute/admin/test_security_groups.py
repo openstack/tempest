@@ -51,7 +51,8 @@ class SecurityGroupsTestAdminJSON(base.BaseV2ComputeAdminTest):
             name = data_utils.rand_name('securitygroup')
             description = data_utils.rand_name('description')
             securitygroup = (self.client
-                             .create_security_group(name, description))
+                             .create_security_group(name=name,
+                                                    description=description))
             self.addCleanup(self._delete_security_group,
                             securitygroup['id'], admin=False)
             security_group_list.append(securitygroup)
@@ -61,9 +62,8 @@ class SecurityGroupsTestAdminJSON(base.BaseV2ComputeAdminTest):
         for i in range(2):
             name = data_utils.rand_name('securitygroup')
             description = data_utils.rand_name('description')
-            adm_securitygroup = (self.adm_client
-                                 .create_security_group(name,
-                                                        description))
+            adm_securitygroup = self.adm_client.create_security_group(
+                name=name, description=description)
             self.addCleanup(self._delete_security_group,
                             adm_securitygroup['id'])
             security_group_list.append(adm_securitygroup)

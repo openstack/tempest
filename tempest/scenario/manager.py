@@ -261,7 +261,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
         sg_name = data_utils.rand_name(self.__class__.__name__)
         sg_desc = sg_name + " description"
         secgroup = self.security_groups_client.create_security_group(
-            sg_name, sg_desc)
+            name=sg_name, description=sg_desc)
         self.assertEqual(secgroup['name'], sg_name)
         self.assertEqual(secgroup['description'], sg_desc)
         self.addCleanup(self.delete_wrapper,

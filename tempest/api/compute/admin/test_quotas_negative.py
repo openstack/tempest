@@ -129,7 +129,7 @@ class QuotasAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
         # will be raised when out of quota
         self.assertRaises((lib_exc.Forbidden, lib_exc.OverLimit),
                           self.sg_client.create_security_group,
-                          "sg-overlimit", "sg-desc")
+                          name="sg-overlimit", description="sg-desc")
 
     @decorators.skip_because(bug="1186354",
                              condition=CONF.service_available.neutron)
@@ -157,7 +157,8 @@ class QuotasAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
         s_name = data_utils.rand_name('securitygroup')
         s_description = data_utils.rand_name('description')
         securitygroup =\
-            self.sg_client.create_security_group(s_name, s_description)
+            self.sg_client.create_security_group(name=s_name,
+                                                 description=s_description)
         self.addCleanup(self.sg_client.delete_security_group,
                         securitygroup['id'])
 
