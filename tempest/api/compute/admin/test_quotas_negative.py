@@ -170,4 +170,5 @@ class QuotasAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
         # will be raised when out of quota
         self.assertRaises((lib_exc.OverLimit, lib_exc.Forbidden),
                           self.sgr_client.create_security_group_rule,
-                          secgroup_id, ip_protocol, 1025, 1025)
+                          parent_group_id=secgroup_id, ip_protocol=ip_protocol,
+                          from_port=1025, to_port=1025)

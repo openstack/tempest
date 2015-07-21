@@ -921,7 +921,8 @@ def create_secgroups(secgroups):
         for rule in secgroup['rules']:
             ip_proto, from_port, to_port, cidr = rule.split()
             client.secrules.create_security_group_rule(
-                secgroup_id, ip_proto, from_port, to_port, cidr=cidr)
+                parent_group_id=secgroup_id, ip_protocol=ip_proto,
+                from_port=from_port, to_port=to_port, cidr=cidr)
 
 
 def destroy_secgroups(secgroups):

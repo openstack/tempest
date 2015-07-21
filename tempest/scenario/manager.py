@@ -233,14 +233,14 @@ class ScenarioTest(tempest.test.BaseTestCase):
         rulesets = [
             {
                 # ssh
-                'ip_proto': 'tcp',
+                'ip_protocol': 'tcp',
                 'from_port': 22,
                 'to_port': 22,
                 'cidr': '0.0.0.0/0',
             },
             {
                 # ping
-                'ip_proto': 'icmp',
+                'ip_protocol': 'icmp',
                 'from_port': -1,
                 'to_port': -1,
                 'cidr': '0.0.0.0/0',
@@ -248,8 +248,8 @@ class ScenarioTest(tempest.test.BaseTestCase):
         ]
         rules = list()
         for ruleset in rulesets:
-            sg_rule = _client_rules.create_security_group_rule(secgroup_id,
-                                                               **ruleset)
+            sg_rule = _client_rules.create_security_group_rule(
+                parent_group_id=secgroup_id, **ruleset)
             self.addCleanup(self.delete_wrapper,
                             _client_rules.delete_security_group_rule,
                             sg_rule['id'])
