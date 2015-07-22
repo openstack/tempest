@@ -1260,6 +1260,27 @@ DefaultGroup = [
                     "running tempest on a real-life cloud"),
 ]
 
+ucsm_group = cfg.OptGroup(name='ucsm',
+                          title="Options for UCSM tests")
+
+UcsmGroup = [
+    cfg.StrOpt('ucsm_ip',
+               help="UCSM ip"),
+    cfg.StrOpt('ucsm_username',
+               help="UCSM username"),
+    cfg.StrOpt('ucsm_password',
+               help="UCSM password"),
+    cfg.DictOpt('ucsm_host_dict',
+                help="UCSM host dictionary. Ex.: qa11:os2,qa13:os3,qa14:os1"),
+    cfg.StrOpt('network_node_host',
+               help="hostname of a network node"),
+    cfg.ListOpt('eth_names',
+                default=['eth0', 'eth1'],
+                help="Hosts eth names"),
+    cfg.IntOpt('virtual_functions_amount',
+               help="Amount of virtual functions"),
+]
+
 _opts = [
     (auth_group, AuthGroup),
     (compute_group, ComputeGroup),
@@ -1291,6 +1312,7 @@ _opts = [
     (baremetal_group, BaremetalGroup),
     (input_scenario_group, InputScenarioGroup),
     (negative_group, NegativeGroup),
+    (ucsm_group, UcsmGroup),
     (None, DefaultGroup)
 ]
 
