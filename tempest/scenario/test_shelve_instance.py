@@ -64,22 +64,29 @@ class TestShelveInstance(manager.ScenarioTest):
         waiters.wait_for_server_status(self.servers_client, server['id'],
                                        'ACTIVE')
 
-    @test.idempotent_id('1164e700-0af0-4a4c-8792-35909a88743c')
-    @testtools.skipUnless(CONF.compute_feature_enabled.shelve,
-                          'Shelve is not available.')
-    @test.services('compute', 'network', 'image')
-    def test_shelve_instance(self):
+    def _create_server_then_shelve_and_unshelve(self, boot_from_volume=False):
         self.keypair = self.create_keypair()
 
         self.security_group = self._create_security_group()
         security_groups = [{'name': self.security_group['name']}]
-
         create_kwargs = {
             'key_name': self.keypair['name'],
             'security_groups': security_groups
         }
-        server = self.create_server(image=CONF.compute.image_ref,
-                                    create_kwargs=create_kwargs)
+
+        if boot_from_volume:
+            volume = self.create_volume(size=CONF.volume.volume_size,
+                                        imageRef=CONF.compute.image_ref)
+            bd_map = [{
+                'device_name': 'vda',
+                'volume_id': volume['id'],
+                'delete_on_termination': '0'}]
+
+            create_kwargs['block_device_mapping'] = bd_map
+            server = self.create_server(create_kwargs=create_kwargs)
+        else:
+            server = self.create_server(image=CONF.compute.image_ref,
+                                        create_kwargs=create_kwargs)
 
         if CONF.compute.use_floatingip_for_ssh:
             floating_ip = (self.floating_ips_client.create_floating_ip()
@@ -101,3 +108,17 @@ class TestShelveInstance(manager.ScenarioTest):
             self._check_timestamp(floating_ip['ip'])
         else:
             self._check_timestamp(server)
+
+    @test.idempotent_id('1164e700-0af0-4a4c-8792-35909a88743c')
+    @testtools.skipUnless(CONF.compute_feature_enabled.shelve,
+                          'Shelve is not available.')
+    @test.services('compute', 'network', 'image')
+    def test_shelve_instance(self):
+        self._create_server_then_shelve_and_unshelve()
+
+    @test.idempotent_id('c1b6318c-b9da-490b-9c67-9339b627271f')
+    @testtools.skipUnless(CONF.compute_feature_enabled.shelve,
+                          'Shelve is not available.')
+    @test.services('compute', 'volume', 'network', 'image')
+    def test_shelve_volume_backed_instance(self):
+        self._create_server_then_shelve_and_unshelve(boot_from_volume=True)
