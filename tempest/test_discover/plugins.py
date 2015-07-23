@@ -51,6 +51,16 @@ class TempestPlugin(object):
         """
         return
 
+    @abc.abstractmethod
+    def get_opt_lists(self):
+        """Method to get a list of options for sample config generation
+
+        :return option_list: A list of tuples with the group name and options
+                             in that group.
+        :rtype: list
+        """
+        return []
+
 
 @misc.singleton
 class TempestTestPluginManager(object):
@@ -79,3 +89,11 @@ class TempestTestPluginManager(object):
     def register_plugin_opts(self, conf):
         for plug in self.ext_plugins:
             plug.obj.register_opts(conf)
+
+    def get_plugin_options_list(self):
+        plugin_options = []
+        for plug in self.ext_plugins:
+            opt_list = plug.obj.get_opt_lists()
+            if opt_list:
+                plugin_options.extend(opt_list)
+        return plugin_options

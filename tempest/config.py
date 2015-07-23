@@ -1224,7 +1224,10 @@ def list_opts():
     The purpose of this is to allow tools like the Oslo sample config file
     generator to discover the options exposed to users.
     """
-    return [(getattr(g, 'name', None), o) for g, o in _opts]
+    ext_plugins = plugins.TempestTestPluginManager()
+    opt_list = [(getattr(g, 'name', None), o) for g, o in _opts]
+    opt_list.extend(ext_plugins.get_plugin_options_list())
+    return opt_list
 
 
 # this should never be called outside of this class
