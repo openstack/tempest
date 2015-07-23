@@ -106,7 +106,7 @@ class AggregatesAdminTestJSON(base.BaseV2ComputeAdminTest):
 
         # set the metadata of the aggregate
         meta = {"key": "value"}
-        body = self.client.set_metadata(aggregate['id'], meta)
+        body = self.client.set_metadata(aggregate['id'], metadata=meta)
         self.assertEqual(meta, body["metadata"])
 
         # verify the metadata has been set
@@ -130,9 +130,10 @@ class AggregatesAdminTestJSON(base.BaseV2ComputeAdminTest):
         new_aggregate_name = aggregate_name + '_new'
         new_az_name = az_name + '_new'
 
-        resp_aggregate = self.client.update_aggregate(aggregate_id,
-                                                      new_aggregate_name,
-                                                      new_az_name)
+        resp_aggregate = self.client.update_aggregate(
+            aggregate_id,
+            name=new_aggregate_name,
+            availability_zone=new_az_name)
         self.assertEqual(new_aggregate_name, resp_aggregate['name'])
         self.assertEqual(new_az_name, resp_aggregate['availability_zone'])
 
@@ -150,13 +151,13 @@ class AggregatesAdminTestJSON(base.BaseV2ComputeAdminTest):
         aggregate = self.client.create_aggregate(name=aggregate_name)
         self.addCleanup(self.client.delete_aggregate, aggregate['id'])
 
-        body = self.client.add_host(aggregate['id'], self.host)
+        body = self.client.add_host(aggregate['id'], host=self.host)
         self.assertEqual(aggregate_name, body['name'])
         self.assertEqual(aggregate['availability_zone'],
                          body['availability_zone'])
         self.assertIn(self.host, body['hosts'])
 
-        body = self.client.remove_host(aggregate['id'], self.host)
+        body = self.client.remove_host(aggregate['id'], host=self.host)
         self.assertEqual(aggregate_name, body['name'])
         self.assertEqual(aggregate['availability_zone'],
                          body['availability_zone'])
@@ -169,8 +170,9 @@ class AggregatesAdminTestJSON(base.BaseV2ComputeAdminTest):
         aggregate_name = data_utils.rand_name(self.aggregate_name_prefix)
         aggregate = self.client.create_aggregate(name=aggregate_name)
         self.addCleanup(self.client.delete_aggregate, aggregate['id'])
-        self.client.add_host(aggregate['id'], self.host)
-        self.addCleanup(self.client.remove_host, aggregate['id'], self.host)
+        self.client.add_host(aggregate['id'], host=self.host)
+        self.addCleanup(self.client.remove_host, aggregate['id'],
+                        host=self.host)
 
         aggregates = self.client.list_aggregates()
         aggs = filter(lambda x: x['id'] == aggregate['id'], aggregates)
@@ -187,8 +189,9 @@ class AggregatesAdminTestJSON(base.BaseV2ComputeAdminTest):
         aggregate_name = data_utils.rand_name(self.aggregate_name_prefix)
         aggregate = self.client.create_aggregate(name=aggregate_name)
         self.addCleanup(self.client.delete_aggregate, aggregate['id'])
-        self.client.add_host(aggregate['id'], self.host)
-        self.addCleanup(self.client.remove_host, aggregate['id'], self.host)
+        self.client.add_host(aggregate['id'], host=self.host)
+        self.addCleanup(self.client.remove_host, aggregate['id'],
+                        host=self.host)
 
         body = self.client.show_aggregate(aggregate['id'])
         self.assertEqual(aggregate_name, body['name'])
@@ -204,8 +207,9 @@ class AggregatesAdminTestJSON(base.BaseV2ComputeAdminTest):
         aggregate = self.client.create_aggregate(
             name=aggregate_name, availability_zone=az_name)
         self.addCleanup(self.client.delete_aggregate, aggregate['id'])
-        self.client.add_host(aggregate['id'], self.host)
-        self.addCleanup(self.client.remove_host, aggregate['id'], self.host)
+        self.client.add_host(aggregate['id'], host=self.host)
+        self.addCleanup(self.client.remove_host, aggregate['id'],
+                        host=self.host)
         server_name = data_utils.rand_name('test_server')
         admin_servers_client = self.os_adm.servers_client
         server = self.create_test_server(name=server_name,
