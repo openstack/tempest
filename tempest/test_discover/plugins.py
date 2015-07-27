@@ -40,6 +40,17 @@ class TempestPlugin(object):
         """
         return
 
+    @abc.abstractmethod
+    def register_opts(self, conf):
+        """Method to add additional configuration options to tempest. This
+        method will be run for the plugin during the register_opts() function
+        in tempest.config
+
+        :param ConfigOpts conf: The conf object that can be used to register
+            additional options on.
+        """
+        return
+
 
 @misc.singleton
 class TempestTestPluginManager(object):
@@ -64,3 +75,7 @@ class TempestTestPluginManager(object):
         for plug in self.ext_plugins:
             load_tests_dict[plug.name] = plug.obj.load_tests()
         return load_tests_dict
+
+    def register_plugin_opts(self, conf):
+        for plug in self.ext_plugins:
+            plug.obj.register_opts(conf)
