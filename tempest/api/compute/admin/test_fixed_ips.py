@@ -56,11 +56,9 @@ class FixedIPsTestJson(base.BaseV2ComputeAdminTest):
     @test.idempotent_id('5485077b-7e46-4cec-b402-91dc3173433b')
     @test.services('network')
     def test_set_reserve(self):
-        body = {"reserve": "None"}
-        self.client.reserve_fixed_ip(self.ip, body)
+        self.client.reserve_fixed_ip(self.ip, reserve="None")
 
     @test.idempotent_id('7476e322-b9ff-4710-bf82-49d51bac6e2e')
     @test.services('network')
     def test_set_unreserve(self):
-        body = {"unreserve": "None"}
-        self.client.reserve_fixed_ip(self.ip, body)
+        self.client.reserve_fixed_ip(self.ip, unreserve="None")

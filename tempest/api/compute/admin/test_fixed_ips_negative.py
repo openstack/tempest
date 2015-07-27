@@ -60,19 +60,17 @@ class FixedIPsNegativeTestJson(base.BaseV2ComputeAdminTest):
     @test.idempotent_id('ce60042c-fa60-4836-8d43-1c8e3359dc47')
     @test.services('network')
     def test_set_reserve_with_non_admin_user(self):
-        body = {"reserve": "None"}
         self.assertRaises(lib_exc.Forbidden,
                           self.non_admin_client.reserve_fixed_ip,
-                          self.ip, body)
+                          self.ip, reserve="None")
 
     @test.attr(type=['negative'])
     @test.idempotent_id('f1f7a35b-0390-48c5-9803-5f27461439db')
     @test.services('network')
     def test_set_unreserve_with_non_admin_user(self):
-        body = {"unreserve": "None"}
         self.assertRaises(lib_exc.Forbidden,
                           self.non_admin_client.reserve_fixed_ip,
-                          self.ip, body)
+                          self.ip, unreserve="None")
 
     @test.attr(type=['negative'])
     @test.idempotent_id('f51cf464-7fc5-4352-bc3e-e75cfa2cb717')
@@ -80,19 +78,17 @@ class FixedIPsNegativeTestJson(base.BaseV2ComputeAdminTest):
     def test_set_reserve_with_invalid_ip(self):
         # NOTE(maurosr): since this exercises the same code snippet, we do it
         # only for reserve action
-        body = {"reserve": "None"}
         # NOTE(eliqiao): in Juno, the exception is NotFound, but in master, we
         # change the error code to BadRequest, both exceptions should be
         # accepted by tempest
         self.assertRaises((lib_exc.NotFound, lib_exc.BadRequest),
                           self.client.reserve_fixed_ip,
-                          "my.invalid.ip", body)
+                          "my.invalid.ip", reserve="None")
 
     @test.attr(type=['negative'])
     @test.idempotent_id('fd26ef50-f135-4232-9d32-281aab3f9176')
     @test.services('network')
     def test_fixed_ip_with_invalid_action(self):
-        body = {"invalid_action": "None"}
         self.assertRaises(lib_exc.BadRequest,
                           self.client.reserve_fixed_ip,
-                          self.ip, body)
+                          self.ip, invalid_action="None")
