@@ -106,8 +106,7 @@ class TestVolumeBootPattern(manager.ScenarioTest):
                 floating_ip['ip'], server['id'])
             ip = floating_ip['ip']
         else:
-            network_name_for_ssh = CONF.compute.network_for_ssh
-            ip = server.networks[network_name_for_ssh][0]
+            ip = server
 
         return self.get_remote_client(ip, private_key=keypair['private_key'],
                                       log_console_of_servers=[server])
