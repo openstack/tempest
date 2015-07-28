@@ -27,13 +27,17 @@ LOG = logging.getLogger(__name__)
 
 
 class TestGettingAddress(manager.NetworkScenarioTest):
-    """Create network with subnets: one IPv4 and
-    one or few IPv6 in a given address mode
-    Boot 2 VMs on this network
-    Allocate and assign 2 FIP4
-    Check that vNICs of all VMs gets all addresses actually assigned
-    Ping4 to one VM from another one
-    If ping6 available in VM, do ping6 to all v6 addresses
+    """Test Summary:
+
+    1. Create network with subnets:
+        1.1. one IPv4 and
+        1.2. one or more IPv6 in a given address mode
+    2. Boot 2 VMs on this network
+    3. Allocate and assign 2 FIP4
+    4. Check that vNICs of all VMs gets all addresses actually assigned
+    5. Each VM will ping the other's v4 private address
+    6. If ping6 available in VM, each VM will ping all of the other's  v6
+       addresses as well as the router's
     """
 
     @classmethod
@@ -74,12 +78,13 @@ class TestGettingAddress(manager.NetworkScenarioTest):
         self.network = self._create_network(tenant_id=self.tenant_id)
         sub4 = self._create_subnet(network=self.network,
                                    namestart='sub4',
-                                   ip_version=4,)
+                                   ip_version=4)
 
         router = self._get_router(tenant_id=self.tenant_id)
         sub4.add_to_router(router_id=router['id'])
         self.addCleanup(sub4.delete)
 
+        self.subnets_v6 = []
         for _ in range(n_subnets6):
             sub6 = self._create_subnet(network=self.network,
                                        namestart='sub6',
@@ -89,6 +94,7 @@ class TestGettingAddress(manager.NetworkScenarioTest):
 
             sub6.add_to_router(router_id=router['id'])
             self.addCleanup(sub6.delete)
+            self.subnets_v6.append(sub6)
 
     @staticmethod
     def define_server_ips(srv):
@@ -145,22 +151,31 @@ class TestGettingAddress(manager.NetworkScenarioTest):
             self.assertTrue(test.call_until_true(srv2_v6_addr_assigned,
                                                  CONF.compute.ping_timeout, 1))
 
-        result = sshv4_1.ping_host(ips_from_api_2['4'])
-        self.assertIn('0% packet loss', result)
-        result = sshv4_2.ping_host(ips_from_api_1['4'])
-        self.assertIn('0% packet loss', result)
+        self._check_connectivity(sshv4_1, ips_from_api_2['4'])
+        self._check_connectivity(sshv4_2, ips_from_api_1['4'])
 
         # Some VM (like cirros) may not have ping6 utility
         result = sshv4_1.exec_command('whereis ping6')
         is_ping6 = False if result == 'ping6:\n' else True
         if is_ping6:
             for i in range(n_subnets6):
-                result = sshv4_1.ping_host(ips_from_api_2['6'][i])
-                self.assertIn('0% packet loss', result)
-                result = sshv4_2.ping_host(ips_from_api_1['6'][i])
-                self.assertIn('0% packet loss', result)
+                self._check_connectivity(sshv4_1,
+                                         ips_from_api_2['6'][i])
+                self._check_connectivity(sshv4_1,
+                                         self.subnets_v6[i].gateway_ip)
+                self._check_connectivity(sshv4_2,
+                                         ips_from_api_1['6'][i])
+                self._check_connectivity(sshv4_2,
+                                         self.subnets_v6[i].gateway_ip)
         else:
             LOG.warning('Ping6 is not available, skipping')
+
+    def _check_connectivity(self, source, dest):
+        self.assertTrue(
+            self._check_remote_connectivity(source, dest),
+            "Timed out waiting for %s to become reachable from %s" %
+            (dest, source.ssh_client.host)
+        )
 
     @test.idempotent_id('2c92df61-29f0-4eaa-bee3-7c65bef62a43')
     @test.services('compute', 'network')
