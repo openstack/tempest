@@ -1,4 +1,4 @@
-pbr<2.0,>=0.11
+pbr<2.0,>=1.3
 anyjson>=0.3.3
 httplib2>=0.7.5
 jsonschema>=2.0.0,<3.0.0
