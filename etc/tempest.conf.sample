@@ -123,10 +123,10 @@
 # Roles to assign to all users created by tempest (list value)
 #tempest_roles =
 
-# Only applicable when identity.auth_version is v3.Domain within which
-# isolated credentials are provisioned.The default "None" means that
-# the domain from theadmin user is used instead. (string value)
-#tenant_isolation_domain_name = <None>
+# Default domain used when getting v3 credentials. This is the name
+# keystone uses for v2 compatibility. (string value)
+# Deprecated group/name - [auth]/tenant_isolation_domain_name
+#default_credentials_domain_name = Default
 
 # If allow_tenant_isolation is set to True and Neutron is enabled
 # Tempest will try to create a useable network, subnet, and router

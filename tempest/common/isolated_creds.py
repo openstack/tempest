@@ -163,8 +163,8 @@ class IsolatedCreds(cred_provider.CredentialProvider):
         self.creds_domain_name = None
         if self.identity_version == 'v3':
             self.creds_domain_name = (
-                CONF.auth.tenant_isolation_domain_name or
-                self.default_admin_creds.project_domain_name)
+                self.default_admin_creds.project_domain_name or
+                CONF.auth.default_credentials_domain_name)
         self.creds_client = get_creds_client(
             self.identity_admin_client, self.creds_domain_name)
 
