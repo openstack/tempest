@@ -43,6 +43,7 @@ class SecGroupTest(base.BaseSecGroupTest):
         msg = "Security-group list doesn't contain default security-group"
         self.assertIsNotNone(found, msg)
 
+    @test.skip_because(bug='1474804')
     @test.attr(type='smoke')
     def test_create_list_update_show_delete_security_group(self):
         group_create_body, name = self._create_security_group()
