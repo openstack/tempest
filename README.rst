@@ -107,7 +107,7 @@ Unit Tests
 ----------
 
 Tempest also has a set of unit tests which test the Tempest code itself. These
-tests can be run by specifing the test discovery path::
+tests can be run by specifying the test discovery path::
 
     $> OS_TEST_PATH=./tempest/tests testr run --parallel
 

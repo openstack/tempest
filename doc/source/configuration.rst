@@ -142,7 +142,7 @@ options in the identity section:
  #. alt_password
  #. alt_tenant_name
 
-And in the auth secion:
+And in the auth section:
 
  #. allow_tenant_isolation = False
  #. comment out 'test_accounts_file' or keep it as empty
