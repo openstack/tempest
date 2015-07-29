@@ -314,6 +314,39 @@ example of this would be::
          * Check written content in the instance booted from snapshot
         """
 
+Test Identification with Idempotent ID
+--------------------------------------
+
+Every function that provides a test must have an ``idempotent_id`` decorator
+that is a unique ``uuid-4`` instance. This ID is used to complement the fully
+qualified test name and track test funcionality through refactoring. The
+format of the metadata looks like::
+
+    @test.idempotent_id('585e934c-448e-43c4-acbf-d06a9b899997')
+    def test_list_servers_with_detail(self):
+        # The created server should be in the detailed list of all servers
+        ...
+
+Tempest includes a ``check_uuid.py`` tool that will test for the existence
+and uniqueness of idempotent_id metadata for every test. By default the
+tool runs against the Tempest package by calling::
+
+    python check_uuid.py
+
+It can be invoked against any test suite by passing a package name::
+
+    python check_uuid.py --package <package_name>
+
+Tests without an ``idempotent_id`` can be automatically fixed by running
+the command with the ``--fix`` flag, which will modify the source package
+by inserting randomly generated uuids for every test that does not have
+one::
+
+    python check_uuid.py --fix
+
+The ``check_uuid.py`` tool is used as part of the tempest gate job
+to ensure that all tests have an ``idempotent_id`` decorator.
+
 Branchless Tempest Considerations
 ---------------------------------
 
