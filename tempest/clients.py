@@ -42,9 +42,9 @@ from tempest.services.compute.json.extensions_client import \
 from tempest.services.compute.json.fixed_ips_client import FixedIPsClient
 from tempest.services.compute.json.flavors_client import FlavorsClient
 from tempest.services.compute.json.floating_ip_pools_client import \
-    FloatingIpPoolsClient
+    FloatingIPPoolsClient
 from tempest.services.compute.json.floating_ips_bulk_client import \
-    FloatingIpsBulkClient
+    FloatingIPsBulkClient
 from tempest.services.compute.json.floating_ips_client import \
     FloatingIPsClient
 from tempest.services.compute.json.hosts_client import HostsClient
@@ -280,9 +280,9 @@ class Manager(manager.Manager):
         self.flavors_client = FlavorsClient(self.auth_provider, **params)
         self.extensions_client = ExtensionsClient(self.auth_provider,
                                                   **params)
-        self.floating_ip_pools_client = FloatingIpPoolsClient(
+        self.floating_ip_pools_client = FloatingIPPoolsClient(
             self.auth_provider, **params)
-        self.floating_ips_bulk_client = FloatingIpsBulkClient(
+        self.floating_ips_bulk_client = FloatingIPsBulkClient(
             self.auth_provider, **params)
         self.floating_ips_client = FloatingIPsClient(self.auth_provider,
                                                      **params)
