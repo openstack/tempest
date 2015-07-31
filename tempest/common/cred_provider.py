@@ -84,9 +84,9 @@ def get_credentials(fill_in=True, identity_version=None, **kwargs):
         domain_fields = set(x for x in auth.KeystoneV3Credentials.ATTRIBUTES
                             if 'domain' in x)
         if not domain_fields.intersection(kwargs.keys()):
-            # TODO(andreaf) It might be better here to use a dedicated config
-            # option such as CONF.auth.tenant_isolation_domain_name
-            params['user_domain_name'] = CONF.identity.admin_domain_name
+            domain_name = CONF.auth.default_credentials_domain_name
+            params['user_domain_name'] = domain_name
+
         auth_url = CONF.identity.uri_v3
     else:
         auth_url = CONF.identity.uri

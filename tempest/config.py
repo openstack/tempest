@@ -67,12 +67,13 @@ AuthGroup = [
     cfg.ListOpt('tempest_roles',
                 help="Roles to assign to all users created by tempest",
                 default=[]),
-    cfg.StrOpt('tenant_isolation_domain_name',
-               default=None,
-               help="Only applicable when identity.auth_version is v3."
-                    "Domain within which isolated credentials are provisioned."
-                    "The default \"None\" means that the domain from the"
-                    "admin user is used instead."),
+    cfg.StrOpt('default_credentials_domain_name',
+               default='Default',
+               help="Default domain used when getting v3 credentials. "
+                    "This is the name keystone uses for v2 compatibility.",
+               deprecated_opts=[cfg.DeprecatedOpt(
+                                'tenant_isolation_domain_name',
+                                group='auth')]),
     cfg.BoolOpt('create_isolated_networks',
                 default=True,
                 help="If allow_tenant_isolation is set to True and Neutron is "
@@ -1257,9 +1258,11 @@ class TempestConfigPrivate(object):
         self.baremetal = _CONF.baremetal
         self.input_scenario = _CONF['input-scenario']
         self.negative = _CONF.negative
-        _CONF.set_default('domain_name', self.identity.admin_domain_name,
+        _CONF.set_default('domain_name',
+                          self.auth.default_credentials_domain_name,
                           group='identity')
-        _CONF.set_default('alt_domain_name', self.identity.admin_domain_name,
+        _CONF.set_default('alt_domain_name',
+                          self.auth.default_credentials_domain_name,
                           group='identity')
 
     def __init__(self, parse_conf=True, config_path=None):
