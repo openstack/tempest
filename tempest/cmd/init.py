@@ -15,6 +15,7 @@
 import os
 import shutil
 import subprocess
+import sys
 
 from cliff import command
 from oslo_log import log as logging
@@ -33,13 +34,44 @@ group_regex=([^\.]*\.)*
 """
 
 
+def get_tempest_default_config_dir():
+    """Returns the correct default config dir to support both cases of
+    tempest being or not installed in a virtualenv.
+    Cases considered:
+    - no virtual env, python2: real_prefix and base_prefix not set
+    - no virtual env, python3: real_prefix not set, base_prefix set and
+      identical to prefix
+    - virtualenv, python2: real_prefix and prefix are set and different
+    - virtualenv, python3: real_prefix not set, base_prefix and prefix are
+      set and identical
+    - pyvenv, any python version: real_prefix not set, base_prefix and prefix
+      are set and different
+
+    :return: default config dir
+    """
+    real_prefix = getattr(sys, 'real_prefix', None)
+    base_prefix = getattr(sys, 'base_prefix', None)
+    prefix = sys.prefix
+    if real_prefix is None and base_prefix is None:
+        # Not running in a virtual environnment of any kind
+        return '/etc/tempest'
+    elif (real_prefix is None and base_prefix is not None and
+            base_prefix == prefix):
+        # Probably not running in a virtual environment
+        # NOTE(andreaf) we cannot distinguish this case from the case of
+        # a virtual environment created with virtualenv, and running python3.
+        return '/etc/tempest'
+    else:
+        return os.path.join(sys.prefix, 'etc/tempest')
+
+
 class TempestInit(command.Command):
     """Setup a local working environment for running tempest"""
 
     def get_parser(self, prog_name):
         parser = super(TempestInit, self).get_parser(prog_name)
         parser.add_argument('dir', nargs='?', default=os.getcwd())
-        parser.add_argument('--config-dir', '-c', default='/etc/tempest')
+        parser.add_argument('--config-dir', '-c', default=None)
         return parser
 
     def generate_testr_conf(self, local_path):
@@ -96,4 +128,5 @@ class TempestInit(command.Command):
             subprocess.call(['testr', 'init'], cwd=local_dir)
 
     def take_action(self, parsed_args):
-        self.create_working_dir(parsed_args.dir, parsed_args.config_dir)
+        config_dir = parsed_args.config_dir or get_tempest_default_config_dir()
+        self.create_working_dir(parsed_args.dir, config_dir)
