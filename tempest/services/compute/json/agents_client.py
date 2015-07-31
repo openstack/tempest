@@ -52,4 +52,5 @@ class AgentsClient(service_client.ServiceClient):
         """Update an agent build."""
         put_body = json.dumps({'para': kwargs})
         resp, body = self.put('os-agents/%s' % agent_id, put_body)
-        return service_client.ResponseBody(resp, self._parse_resp(body))
+        body = json.loads(body)
+        return service_client.ResponseBody(resp, body['agent'])
