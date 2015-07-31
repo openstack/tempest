@@ -29,8 +29,7 @@ class TelemetryNotificationAPITestJSON(base.BaseTelemetryTest):
                                     "is disabled")
 
     @test.idempotent_id('d7f8c1c8-d470-4731-8604-315d3956caad')
-    @testtools.skipIf(not CONF.service_available.nova,
-                      "Nova is not available.")
+    @test.services('compute')
     def test_check_nova_notification(self):
 
         body = self.create_server()
