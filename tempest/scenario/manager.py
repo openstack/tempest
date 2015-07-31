@@ -342,7 +342,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
             'is_public': 'False',
         }
         params['properties'] = properties
-        image = self.image_client.create_image(**params)
+        image = self.image_client.create_image(**params)['image']
         self.addCleanup(self.image_client.delete_image, image['id'])
         self.assertEqual("queued", image['status'])
         self.image_client.update_image(image['id'], data=image_file)
