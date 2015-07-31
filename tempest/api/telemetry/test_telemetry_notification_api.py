@@ -10,6 +10,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib import decorators
 import testtools
 
 from tempest.api.telemetry import base
@@ -83,6 +84,7 @@ class TelemetryNotificationAdminAPITestJSON(base.BaseTelemetryAdminTest):
 
     @test.idempotent_id('29604198-8b45-4fc0-8af8-1cae4f94ebe9')
     @test.services('compute')
+    @decorators.skip_because(bug='1480490')
     def test_check_nova_notification_event_and_meter(self):
 
         body = self.create_server()
