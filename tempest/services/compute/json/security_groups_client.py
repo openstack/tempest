@@ -86,50 +86,6 @@ class SecurityGroupsClient(service_client.ServiceClient):
         self.validate_response(schema.delete_security_group, resp, body)
         return service_client.ResponseBody(resp, body)
 
-    def create_security_group_rule(self, parent_group_id, ip_proto, from_port,
-                                   to_port, **kwargs):
-        """
-        Creating a new security group rules.
-        parent_group_id :ID of Security group
-        ip_protocol : ip_proto (icmp, tcp, udp).
-        from_port: Port at start of range.
-        to_port  : Port at end of range.
-        Following optional keyword arguments are accepted:
-        cidr     : CIDR for address range.
-        group_id : ID of the Source group
-        """
-        post_body = {
-            'parent_group_id': parent_group_id,
-            'ip_protocol': ip_proto,
-            'from_port': from_port,
-            'to_port': to_port,
-            'cidr': kwargs.get('cidr'),
-            'group_id': kwargs.get('group_id'),
-        }
-        post_body = json.dumps({'security_group_rule': post_body})
-        url = 'os-security-group-rules'
-        resp, body = self.post(url, post_body)
-        body = json.loads(body)
-        self.validate_response(schema.create_security_group_rule, resp, body)
-        return service_client.ResponseBody(resp, body['security_group_rule'])
-
-    def delete_security_group_rule(self, group_rule_id):
-        """Deletes the provided Security Group rule."""
-        resp, body = self.delete('os-security-group-rules/%s' %
-                                 group_rule_id)
-        self.validate_response(schema.delete_security_group_rule, resp, body)
-        return service_client.ResponseBody(resp, body)
-
-    def list_security_group_rules(self, security_group_id):
-        """List all rules for a security group."""
-        resp, body = self.get('os-security-groups')
-        body = json.loads(body)
-        self.validate_response(schema.list_security_groups, resp, body)
-        for sg in body['security_groups']:
-            if sg['id'] == security_group_id:
-                return service_client.ResponseBodyList(resp, sg['rules'])
-        raise lib_exc.NotFound('No such Security Group')
-
     def is_resource_deleted(self, id):
         try:
             self.show_security_group(id)

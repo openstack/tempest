@@ -40,6 +40,7 @@ from tempest.services.compute.json import quota_classes_client
 from tempest.services.compute.json import quotas_client
 from tempest.services.compute.json import security_group_default_rules_client \
     as nova_secgrop_default_client
+from tempest.services.compute.json import security_group_rules_client
 from tempest.services.compute.json import security_groups_client
 from tempest.services.compute.json import server_groups_client
 from tempest.services.compute.json import servers_client
@@ -130,6 +131,7 @@ class TestServiceClient(base.TestCase):
             quotas_client.QuotasClient,
             quota_classes_client.QuotaClassesClient,
             nova_secgrop_default_client.SecurityGroupDefaultRulesClient,
+            security_group_rules_client.SecurityGroupRulesClient,
             security_groups_client.SecurityGroupsClient,
             server_groups_client.ServerGroupsClient,
             servers_client.ServersClient,
