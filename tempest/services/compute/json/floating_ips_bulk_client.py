@@ -19,7 +19,7 @@ from tempest.api_schema.response.compute.v2_1 import floating_ips as schema
 from tempest.common import service_client
 
 
-class FloatingIpsBulkClient(service_client.ServiceClient):
+class FloatingIPsBulkClient(service_client.ServiceClient):
 
     def create_floating_ips_bulk(self, ip_range, pool, interface):
         """Allocate floating IPs in bulk."""
