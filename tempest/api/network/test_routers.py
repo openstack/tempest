@@ -275,7 +275,7 @@ class RoutersTest(base.BaseRouterTest):
         next_cidr = netaddr.IPNetwork(self.tenant_cidr)
         # Prepare to build several routes
         test_routes = []
-        routes_num = 5
+        routes_num = 4
         # Create a router
         self.router = self._create_router(
             data_utils.rand_name('router-'), True)
