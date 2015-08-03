@@ -331,6 +331,10 @@ ComputeFeaturesGroup = [
                 default=True,
                 help="Does the test environment support live migration "
                      "available?"),
+    cfg.BoolOpt('metadata_service',
+                default=True,
+                help="Does the test environment support metadata service? "
+                     "Ignored unless validation.run_validation=true."),
     cfg.BoolOpt('block_migration_for_live_migration',
                 default=False,
                 help="Does the test environment use block devices for live "

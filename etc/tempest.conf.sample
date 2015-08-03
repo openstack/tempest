@@ -376,6 +376,10 @@
 # value)
 #live_migration = true
 
+# Does the test environment support metadata service? Ignored unless
+# validation.run_validation=true. (boolean value)
+#metadata_service = true
+
 # Does the test environment use block devices for live migration
 # (boolean value)
 #block_migration_for_live_migration = false
