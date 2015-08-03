@@ -68,5 +68,5 @@ class EC2SecurityGroupTest(boto_test.BotoTestCase):
 
         group_get = self.client.get_all_security_groups(
             groupnames=(group_name,))[0]
-        # all rules shuld be removed now
+        # all rules should be removed now
         self.assertEqual(0, len(group_get.rules))
