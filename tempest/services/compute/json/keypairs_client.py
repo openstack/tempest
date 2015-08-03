@@ -38,11 +38,8 @@ class KeyPairsClient(service_client.ServiceClient):
         self.validate_response(schema.get_keypair, resp, body)
         return service_client.ResponseBody(resp, body['keypair'])
 
-    def create_keypair(self, name, pub_key=None):
-        post_body = {'keypair': {'name': name}}
-        if pub_key:
-            post_body['keypair']['public_key'] = pub_key
-        post_body = json.dumps(post_body)
+    def create_keypair(self, **kwargs):
+        post_body = json.dumps({'keypair': kwargs})
         resp, body = self.post("os-keypairs", body=post_body)
         body = json.loads(body)
         self.validate_response(schema.create_keypair, resp, body)

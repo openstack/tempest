@@ -31,7 +31,10 @@ class KeyPairsV2TestJSON(base.BaseComputeTest):
         self.client.delete_keypair(keypair_name)
 
     def _create_keypair(self, keypair_name, pub_key=None):
-        body = self.client.create_keypair(keypair_name, pub_key)
+        kwargs = {'name': keypair_name}
+        if pub_key:
+            kwargs.update({'public_key': pub_key})
+        body = self.client.create_keypair(**kwargs)
         self.addCleanup(self._delete_keypair, keypair_name)
         return body
 

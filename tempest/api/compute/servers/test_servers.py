@@ -63,7 +63,7 @@ class ServersTestJSON(base.BaseV2ComputeTest):
         # Specify a keypair while creating a server
 
         key_name = data_utils.rand_name('key')
-        self.keypairs_client.create_keypair(key_name)
+        self.keypairs_client.create_keypair(name=key_name)
         self.addCleanup(self.keypairs_client.delete_keypair, key_name)
         self.keypairs_client.list_keypairs()
         server = self.create_test_server(key_name=key_name)
