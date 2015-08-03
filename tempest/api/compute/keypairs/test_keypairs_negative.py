@@ -16,25 +16,12 @@
 
 from tempest_lib import exceptions as lib_exc
 
-from tempest.api.compute import base
+from tempest.api.compute.keypairs import base
 from tempest.common.utils import data_utils
 from tempest import test
 
 
-class KeyPairsNegativeTestJSON(base.BaseV2ComputeTest):
-
-    @classmethod
-    def setup_clients(cls):
-        super(KeyPairsNegativeTestJSON, cls).setup_clients()
-        cls.client = cls.keypairs_client
-
-    def _create_keypair(self, keypair_name, pub_key=None):
-        kwargs = {'name': keypair_name}
-        if pub_key:
-            kwargs.update({'public_key': pub_key})
-        self.client.create_keypair(**kwargs)
-        self.addCleanup(self.client.delete_keypair, keypair_name)
-
+class KeyPairsNegativeTestJSON(base.BaseKeypairTest):
     @test.attr(type=['negative'])
     @test.idempotent_id('29cca892-46ae-4d48-bc32-8fe7e731eb81')
     def test_keypair_create_with_invalid_pub_key(self):
