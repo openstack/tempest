@@ -503,7 +503,7 @@ class JavelinCheck(unittest.TestCase):
     def check_telemetry(self):
         """Check that ceilometer provides a sane sample.
 
-        Confirm that there are more than one sample and that they have the
+        Confirm that there is more than one sample and that they have the
         expected metadata.
 
         If in check mode confirm that the oldest sample available is from
@@ -680,7 +680,7 @@ def destroy_images(images):
 
         response = _get_image_by_name(client, image['name'])
         if not response:
-            LOG.info("Image '%s' does not exists" % image['name'])
+            LOG.info("Image '%s' does not exist" % image['name'])
             continue
         client.images.delete_image(response['id'])
 
@@ -729,7 +729,7 @@ def create_networks(networks):
         # only create a network if the name isn't here
         body = client.networks.list_networks()
         if any(item['name'] == network['name'] for item in body['networks']):
-            LOG.warning("Dupplicated network name: %s" % network['name'])
+            LOG.warning("Duplicated network name: %s" % network['name'])
             continue
 
         client.networks.create_network(name=network['name'])
@@ -781,7 +781,7 @@ def create_routers(routers):
         # only create a router if the name isn't here
         body = client.networks.list_routers()
         if any(item['name'] == router['name'] for item in body['routers']):
-            LOG.warning("Dupplicated router name: %s" % router['name'])
+            LOG.warning("Duplicated router name: %s" % router['name'])
             continue
 
         client.networks.create_router(router['name'])
@@ -813,7 +813,7 @@ def add_router_interface(routers):
             # connect routers to their subnets
             client.networks.add_router_interface_with_subnet_id(router_id,
                                                                 subnet_id)
-        # connect routers to exteral network if set to "gateway"
+        # connect routers to external network if set to "gateway"
         if router['gateway']:
             if CONF.network.public_network_id:
                 ext_net = CONF.network.public_network_id
@@ -871,7 +871,7 @@ def create_servers(servers):
             server['name'], image_id, flavor_id, **kwargs)
         server_id = body['id']
         client.servers.wait_for_server_status(server_id, 'ACTIVE')
-        # create to security group(s) after server spawning
+        # create security group(s) after server spawning
         for secgroup in server['secgroups']:
             client.servers.add_security_group(server_id, secgroup)
         if CONF.compute.use_floatingip_for_ssh:
@@ -995,7 +995,7 @@ def attach_volumes(volumes):
 def create_resources():
     LOG.info("Creating Resources")
     # first create keystone level resources, and we need to be admin
-    # for those.
+    # for this.
     create_tenants(RES['tenants'])
     create_users(RES['users'])
     collect_users(RES['users'])
@@ -1015,7 +1015,7 @@ def create_resources():
     create_volumes(RES['volumes'])
 
     # Only attempt attaching the volumes if servers are defined in the
-    # resourcefile
+    # resource file
     if 'servers' in RES:
         create_servers(RES['servers'])
         attach_volumes(RES['volumes'])
