@@ -46,11 +46,11 @@ class BaremetalNodesAdminTestJSON(base.BaseV2ComputeAdminTest):
         # List all baremetal nodes and ensure our created test nodes are
         # listed
         bm_node_ids = set([n['id'] for n in
-                           self.client.list_baremetal_nodes()])
+                           self.client.list_baremetal_nodes()['nodes']])
         test_node_ids = set([n['uuid'] for n in test_nodes])
         self.assertTrue(test_node_ids.issubset(bm_node_ids))
 
         # Test getting each individually
         for node in test_nodes:
             baremetal_node = self.client.show_baremetal_node(node['uuid'])
-            self.assertEqual(node['uuid'], baremetal_node['id'])
+            self.assertEqual(node['uuid'], baremetal_node['node']['id'])
