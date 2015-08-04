@@ -32,5 +32,4 @@ class AvailabilityZoneClient(service_client.ServiceClient):
         resp, body = self.get(url)
         body = json.loads(body)
         self.validate_response(schema_list, resp, body)
-        return service_client.ResponseBodyList(resp,
-                                               body['availabilityZoneInfo'])
+        return service_client.ResponseBody(resp, body)
