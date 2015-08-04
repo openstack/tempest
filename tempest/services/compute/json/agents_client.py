@@ -32,7 +32,7 @@ class AgentsClient(service_client.ServiceClient):
         resp, body = self.get(url)
         body = json.loads(body)
         self.validate_response(schema.list_agents, resp, body)
-        return service_client.ResponseBodyList(resp, body['agents'])
+        return service_client.ResponseBody(resp, body)
 
     def create_agent(self, **kwargs):
         """Create an agent build."""
@@ -40,7 +40,7 @@ class AgentsClient(service_client.ServiceClient):
         resp, body = self.post('os-agents', post_body)
         body = json.loads(body)
         self.validate_response(schema.create_agent, resp, body)
-        return service_client.ResponseBody(resp, body['agent'])
+        return service_client.ResponseBody(resp, body)
 
     def delete_agent(self, agent_id):
         """Delete an existing agent build."""
@@ -53,4 +53,4 @@ class AgentsClient(service_client.ServiceClient):
         put_body = json.dumps({'para': kwargs})
         resp, body = self.put('os-agents/%s' % agent_id, put_body)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body['agent'])
+        return service_client.ResponseBody(resp, body)
