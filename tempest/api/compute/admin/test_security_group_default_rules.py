@@ -45,9 +45,9 @@ class SecurityGroupDefaultRulesTest(base.BaseV2ComputeAdminTest):
                                              cidr='10.10.0.0/24'):
         # Create Security Group default rule
         rule = self.adm_client.create_security_default_group_rule(
-            ip_protocol,
-            from_port,
-            to_port,
+            ip_protocol=ip_protocol,
+            from_port=from_port,
+            to_port=to_port,
             cidr=cidr)
         self.assertEqual(ip_protocol, rule['ip_protocol'])
         self.assertEqual(from_port, rule['from_port'])
@@ -73,9 +73,9 @@ class SecurityGroupDefaultRulesTest(base.BaseV2ComputeAdminTest):
         from_port = 80
         to_port = 80
         rule = self.adm_client.create_security_default_group_rule(
-            ip_protocol,
-            from_port,
-            to_port)
+            ip_protocol=ip_protocol,
+            from_port=from_port,
+            to_port=to_port)
         self.addCleanup(self.adm_client.delete_security_group_default_rule,
                         rule['id'])
         self.assertNotEqual(0, rule['id'])
@@ -88,9 +88,9 @@ class SecurityGroupDefaultRulesTest(base.BaseV2ComputeAdminTest):
         to_port = 10
         cidr = ''
         rule = self.adm_client.create_security_default_group_rule(
-            ip_protocol,
-            from_port,
-            to_port,
+            ip_protocol=ip_protocol,
+            from_port=from_port,
+            to_port=to_port,
             cidr=cidr)
         self.addCleanup(self.adm_client.delete_security_group_default_rule,
                         rule['id'])
