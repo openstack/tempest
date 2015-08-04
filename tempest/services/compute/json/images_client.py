@@ -23,18 +23,10 @@ from tempest.common import service_client
 
 class ImagesClient(service_client.ServiceClient):
 
-    def create_image(self, server_id, name, meta=None):
+    def create_image(self, server_id, **kwargs):
         """Creates an image of the original server."""
 
-        post_body = {
-            'createImage': {
-                'name': name,
-            }
-        }
-
-        if meta is not None:
-            post_body['createImage']['metadata'] = meta
-
+        post_body = {'createImage': kwargs}
         post_body = json.dumps(post_body)
         resp, body = self.post('servers/%s/action' % server_id,
                                post_body)
