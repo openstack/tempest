@@ -92,9 +92,9 @@ class FlavorsClient(service_client.ServiceClient):
         """Returns the primary type of resource this client works with."""
         return 'flavor'
 
-    def set_flavor_extra_spec(self, flavor_id, specs):
+    def set_flavor_extra_spec(self, flavor_id, **kwargs):
         """Sets extra Specs to the mentioned flavor."""
-        post_body = json.dumps({'extra_specs': specs})
+        post_body = json.dumps({'extra_specs': kwargs})
         resp, body = self.post('flavors/%s/os-extra_specs' % flavor_id,
                                post_body)
         body = json.loads(body)

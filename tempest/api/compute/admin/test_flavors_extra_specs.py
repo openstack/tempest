@@ -71,7 +71,7 @@ class FlavorsExtraSpecsTestJSON(base.BaseV2ComputeAdminTest):
         specs = {"key1": "value1", "key2": "value2"}
         # SET extra specs to the flavor created in setUp
         set_body = \
-            self.client.set_flavor_extra_spec(self.flavor['id'], specs)
+            self.client.set_flavor_extra_spec(self.flavor['id'], **specs)
         self.assertEqual(set_body, specs)
         # GET extra specs and verify
         get_body = self.client.list_flavor_extra_specs(self.flavor['id'])
@@ -96,7 +96,7 @@ class FlavorsExtraSpecsTestJSON(base.BaseV2ComputeAdminTest):
     @test.idempotent_id('a99dad88-ae1c-4fba-aeb4-32f898218bd0')
     def test_flavor_non_admin_get_all_keys(self):
         specs = {"key1": "value1", "key2": "value2"}
-        self.client.set_flavor_extra_spec(self.flavor['id'], specs)
+        self.client.set_flavor_extra_spec(self.flavor['id'], **specs)
         body = self.flavors_client.list_flavor_extra_specs(self.flavor['id'])
 
         for key in specs:
@@ -104,8 +104,8 @@ class FlavorsExtraSpecsTestJSON(base.BaseV2ComputeAdminTest):
 
     @test.idempotent_id('12805a7f-39a3-4042-b989-701d5cad9c90')
     def test_flavor_non_admin_get_specific_key(self):
-        specs = {"key1": "value1", "key2": "value2"}
-        body = self.client.set_flavor_extra_spec(self.flavor['id'], specs)
+        body = self.client.set_flavor_extra_spec(self.flavor['id'],
+                                                 key1="value1", key2="value2")
         self.assertEqual(body['key1'], 'value1')
         self.assertIn('key2', body)
         body = self.flavors_client.show_flavor_extra_spec(

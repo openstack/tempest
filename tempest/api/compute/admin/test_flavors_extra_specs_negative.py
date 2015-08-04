@@ -70,19 +70,17 @@ class FlavorsExtraSpecsNegativeTestJSON(base.BaseV2ComputeAdminTest):
     @test.idempotent_id('a00a3b81-5641-45a8-ab2b-4a8ec41e1d7d')
     def test_flavor_non_admin_set_keys(self):
         # Test to SET flavor extra spec as a user without admin privileges.
-        specs = {"key1": "value1", "key2": "value2"}
         self.assertRaises(lib_exc.Forbidden,
                           self.flavors_client.set_flavor_extra_spec,
                           self.flavor['id'],
-                          specs)
+                          key1="value1", key2="value2")
 
     @test.attr(type=['negative'])
     @test.idempotent_id('1ebf4ef8-759e-48fe-a801-d451d80476fb')
     def test_flavor_non_admin_update_specific_key(self):
         # non admin user is not allowed to update flavor extra spec
-        specs = {"key1": "value1", "key2": "value2"}
         body = self.client.set_flavor_extra_spec(
-            self.flavor['id'], specs)
+            self.flavor['id'], key1="value1", key2="value2")
         self.assertEqual(body['key1'], 'value1')
         self.assertRaises(lib_exc.Forbidden,
                           self.flavors_client.
@@ -94,8 +92,8 @@ class FlavorsExtraSpecsNegativeTestJSON(base.BaseV2ComputeAdminTest):
     @test.attr(type=['negative'])
     @test.idempotent_id('28f12249-27c7-44c1-8810-1f382f316b11')
     def test_flavor_non_admin_unset_keys(self):
-        specs = {"key1": "value1", "key2": "value2"}
-        self.client.set_flavor_extra_spec(self.flavor['id'], specs)
+        self.client.set_flavor_extra_spec(self.flavor['id'],
+                                          key1="value1", key2="value2")
 
         self.assertRaises(lib_exc.Forbidden,
                           self.flavors_client.unset_flavor_extra_spec,
