@@ -90,7 +90,8 @@ class AuthorizationTestJSON(base.BaseV2ComputeTest):
         from_port = 22
         to_port = 22
         cls.rule = cls.rule_client.create_security_group_rule(
-            parent_group_id, ip_protocol, from_port, to_port)
+            parent_group_id=parent_group_id, ip_protocol=ip_protocol,
+            from_port=from_port, to_port=to_port)
 
     @classmethod
     def resource_cleanup(cls):
@@ -304,8 +305,9 @@ class AuthorizationTestJSON(base.BaseV2ComputeTest):
             self.assertRaises(lib_exc.BadRequest,
                               self.alt_rule_client.
                               create_security_group_rule,
-                              parent_group_id, ip_protocol, from_port,
-                              to_port)
+                              parent_group_id=parent_group_id,
+                              ip_protocol=ip_protocol,
+                              from_port=from_port, to_port=to_port)
         finally:
             # Next request the base_url is back to normal
             if resp['status'] is not None:

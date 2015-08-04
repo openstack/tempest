@@ -23,8 +23,7 @@ from tempest.common import service_client
 
 class SecurityGroupRulesClient(service_client.ServiceClient):
 
-    def create_security_group_rule(self, parent_group_id, ip_proto, from_port,
-                                   to_port, **kwargs):
+    def create_security_group_rule(self, **kwargs):
         """
         Creating a new security group rules.
         parent_group_id :ID of Security group
@@ -35,15 +34,7 @@ class SecurityGroupRulesClient(service_client.ServiceClient):
         cidr     : CIDR for address range.
         group_id : ID of the Source group
         """
-        post_body = {
-            'parent_group_id': parent_group_id,
-            'ip_protocol': ip_proto,
-            'from_port': from_port,
-            'to_port': to_port,
-            'cidr': kwargs.get('cidr'),
-            'group_id': kwargs.get('group_id'),
-        }
-        post_body = json.dumps({'security_group_rule': post_body})
+        post_body = json.dumps({'security_group_rule': kwargs})
         url = 'os-security-group-rules'
         resp, body = self.post(url, post_body)
         body = json.loads(body)

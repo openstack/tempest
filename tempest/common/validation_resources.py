@@ -30,10 +30,12 @@ def create_ssh_security_group(os, add_rule=False):
         security_group_client.create_security_group(name=sg_name,
                                                     description=sg_description)
     if add_rule:
-        security_group_client.create_security_group_rule(security_group['id'],
-                                                         'tcp', 22, 22)
-        security_group_client.create_security_group_rule(security_group['id'],
-                                                         'icmp', -1, -1)
+        security_group_client.create_security_group_rule(
+            parent_group_id=security_group['id'], ip_protocol='tcp',
+            from_port=22, to_port=22)
+        security_group_client.create_security_group_rule(
+            parent_group_id=security_group['id'], ip_protocol='icmp',
+            from_port=-1, to_port=-1)
     LOG.debug("SSH Validation resource security group with tcp and icmp "
               "rules %s created"
               % sg_name)
