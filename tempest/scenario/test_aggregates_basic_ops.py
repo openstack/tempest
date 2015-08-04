@@ -46,7 +46,8 @@ class TestAggregatesBasicOps(manager.ScenarioTest):
         cls.hosts_client = cls.manager.hosts_client
 
     def _create_aggregate(self, **kwargs):
-        aggregate = self.aggregates_client.create_aggregate(**kwargs)
+        aggregate = (self.aggregates_client.create_aggregate(**kwargs)
+                     ['aggregate'])
         self.addCleanup(self._delete_aggregate, aggregate)
         aggregate_name = kwargs['name']
         availability_zone = kwargs['availability_zone']
@@ -64,17 +65,19 @@ class TestAggregatesBasicOps(manager.ScenarioTest):
         return computes[0]['host_name']
 
     def _add_host(self, aggregate_id, host):
-        aggregate = self.aggregates_client.add_host(aggregate_id, host=host)
+        aggregate = (self.aggregates_client.add_host(aggregate_id, host=host)
+                     ['aggregate'])
         self.addCleanup(self._remove_host, aggregate['id'], host)
         self.assertIn(host, aggregate['hosts'])
 
     def _remove_host(self, aggregate_id, host):
         aggregate = self.aggregates_client.remove_host(aggregate_id, host=host)
-        self.assertNotIn(host, aggregate['hosts'])
+        self.assertNotIn(host, aggregate['aggregate']['hosts'])
 
     def _check_aggregate_details(self, aggregate, aggregate_name, azone,
                                  hosts, metadata):
-        aggregate = self.aggregates_client.show_aggregate(aggregate['id'])
+        aggregate = (self.aggregates_client.show_aggregate(aggregate['id'])
+                     ['aggregate'])
         self.assertEqual(aggregate_name, aggregate['name'])
         self.assertEqual(azone, aggregate['availability_zone'])
         self.assertEqual(hosts, aggregate['hosts'])
@@ -88,13 +91,14 @@ class TestAggregatesBasicOps(manager.ScenarioTest):
                                                         metadata=meta)
 
         for key, value in meta.items():
-            self.assertEqual(meta[key], aggregate['metadata'][key])
+            self.assertEqual(meta[key],
+                             aggregate['aggregate']['metadata'][key])
 
     def _update_aggregate(self, aggregate, aggregate_name,
                           availability_zone):
         aggregate = self.aggregates_client.update_aggregate(
             aggregate['id'], name=aggregate_name,
-            availability_zone=availability_zone)
+            availability_zone=availability_zone)['aggregate']
         self.assertEqual(aggregate['name'], aggregate_name)
         self.assertEqual(aggregate['availability_zone'], availability_zone)
         return aggregate
