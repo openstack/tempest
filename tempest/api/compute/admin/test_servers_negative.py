@@ -73,9 +73,9 @@ class ServersAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
         ram = int(quota_set['ram']) + 1
         vcpus = 8
         disk = 10
-        flavor_ref = self.flavors_client.create_flavor(flavor_name,
-                                                       ram, vcpus, disk,
-                                                       flavor_id)
+        flavor_ref = self.flavors_client.create_flavor(name=flavor_name,
+                                                       ram=ram, vcpus=vcpus,
+                                                       disk=disk, id=flavor_id)
         self.addCleanup(self.flavors_client.delete_flavor, flavor_id)
         self.assertRaises((lib_exc.Forbidden, lib_exc.OverLimit),
                           self.client.resize,
@@ -95,9 +95,9 @@ class ServersAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
         quota_set = self.quotas_client.show_default_quota_set(self.tenant_id)
         vcpus = int(quota_set['cores']) + 1
         disk = 10
-        flavor_ref = self.flavors_client.create_flavor(flavor_name,
-                                                       ram, vcpus, disk,
-                                                       flavor_id)
+        flavor_ref = self.flavors_client.create_flavor(name=flavor_name,
+                                                       ram=ram, vcpus=vcpus,
+                                                       disk=disk, id=flavor_id)
         self.addCleanup(self.flavors_client.delete_flavor, flavor_id)
         self.assertRaises((lib_exc.Forbidden, lib_exc.OverLimit),
                           self.client.resize,

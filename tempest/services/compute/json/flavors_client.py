@@ -47,24 +47,19 @@ class FlavorsClient(service_client.ServiceClient):
         self.validate_response(schema.create_get_flavor_details, resp, body)
         return service_client.ResponseBody(resp, body['flavor'])
 
-    def create_flavor(self, name, ram, vcpus, disk, flavor_id, **kwargs):
-        """Creates a new flavor or instance type."""
-        post_body = {
-            'name': name,
-            'ram': ram,
-            'vcpus': vcpus,
-            'disk': disk,
-            'id': flavor_id,
-        }
+    def create_flavor(self, **kwargs):
+        """Creates a new flavor or instance type.
+        Most parameters except the following are passed to the API without
+        any changes.
+        :param ephemeral: The name is changed to OS-FLV-EXT-DATA:ephemeral
+        :param is_public: The name is changed to os-flavor-access:is_public
+        """
         if kwargs.get('ephemeral'):
-            post_body['OS-FLV-EXT-DATA:ephemeral'] = kwargs.get('ephemeral')
-        if kwargs.get('swap'):
-            post_body['swap'] = kwargs.get('swap')
-        if kwargs.get('rxtx'):
-            post_body['rxtx_factor'] = kwargs.get('rxtx')
+            kwargs['OS-FLV-EXT-DATA:ephemeral'] = kwargs.pop('ephemeral')
         if kwargs.get('is_public'):
-            post_body['os-flavor-access:is_public'] = kwargs.get('is_public')
-        post_body = json.dumps({'flavor': post_body})
+            kwargs['os-flavor-access:is_public'] = kwargs.pop('is_public')
+
+        post_body = json.dumps({'flavor': kwargs})
         resp, body = self.post('flavors', post_body)
 
         body = json.loads(body)
