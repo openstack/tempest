@@ -10,6 +10,7 @@ Contents:
    overview
    HACKING
    REVIEWING
+   plugin
 
 ------------
 Field Guides
