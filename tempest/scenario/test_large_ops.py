@@ -87,7 +87,7 @@ class TestLargeOpsScenario(manager.ScenarioTest):
         # Since no traffic is tested, we don't need to actually add rules to
         # secgroup
         secgroup = self.security_groups_client.create_security_group(
-            'secgroup-%s' % name, 'secgroup-desc-%s' % name)
+            name='secgroup-%s' % name, description='secgroup-desc-%s' % name)
         self.addCleanupClass(self.security_groups_client.delete_security_group,
                              secgroup['id'])
         create_kwargs = {

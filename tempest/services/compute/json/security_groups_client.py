@@ -43,36 +43,26 @@ class SecurityGroupsClient(service_client.ServiceClient):
         self.validate_response(schema.get_security_group, resp, body)
         return service_client.ResponseBody(resp, body['security_group'])
 
-    def create_security_group(self, name, description):
+    def create_security_group(self, **kwargs):
         """
         Creates a new security group.
         name (Required): Name of security group.
         description (Required): Description of security group.
         """
-        post_body = {
-            'name': name,
-            'description': description,
-        }
-        post_body = json.dumps({'security_group': post_body})
+        post_body = json.dumps({'security_group': kwargs})
         resp, body = self.post('os-security-groups', post_body)
         body = json.loads(body)
         self.validate_response(schema.get_security_group, resp, body)
         return service_client.ResponseBody(resp, body['security_group'])
 
-    def update_security_group(self, security_group_id, name=None,
-                              description=None):
+    def update_security_group(self, security_group_id, **kwargs):
         """
         Update a security group.
         security_group_id: a security_group to update
         name: new name of security group
         description: new description of security group
         """
-        post_body = {}
-        if name:
-            post_body['name'] = name
-        if description:
-            post_body['description'] = description
-        post_body = json.dumps({'security_group': post_body})
+        post_body = json.dumps({'security_group': kwargs})
         resp, body = self.put('os-security-groups/%s' % security_group_id,
                               post_body)
         body = json.loads(body)

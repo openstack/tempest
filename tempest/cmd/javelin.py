@@ -915,7 +915,7 @@ def create_secgroups(secgroups):
             continue
 
         body = client.secgroups.create_security_group(
-            secgroup['name'], secgroup['description'])
+            name=secgroup['name'], description=secgroup['description'])
         secgroup_id = body['id']
         # for each security group, create the rules
         for rule in secgroup['rules']:

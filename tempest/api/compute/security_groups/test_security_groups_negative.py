@@ -72,16 +72,17 @@ class SecurityGroupsNegativeTestJSON(base.BaseSecurityGroupsTest):
         s_description = data_utils.rand_name('description')
         # Create Security Group with empty string as group name
         self.assertRaises(lib_exc.BadRequest,
-                          self.client.create_security_group, "", s_description)
+                          self.client.create_security_group,
+                          name="", description=s_description)
         # Create Security Group with white space in group name
         self.assertRaises(lib_exc.BadRequest,
-                          self.client.create_security_group, " ",
-                          s_description)
+                          self.client.create_security_group,
+                          name=" ", description=s_description)
         # Create Security Group with group name longer than 255 chars
         s_name = 'securitygroup-'.ljust(260, '0')
         self.assertRaises(lib_exc.BadRequest,
-                          self.client.create_security_group, s_name,
-                          s_description)
+                          self.client.create_security_group,
+                          name=s_name, description=s_description)
 
     @decorators.skip_because(bug="1161411",
                              condition=CONF.service_available.neutron)
@@ -96,8 +97,8 @@ class SecurityGroupsNegativeTestJSON(base.BaseSecurityGroupsTest):
         # Create Security Group with group description longer than 255 chars
         s_description = 'description-'.ljust(260, '0')
         self.assertRaises(lib_exc.BadRequest,
-                          self.client.create_security_group, s_name,
-                          s_description)
+                          self.client.create_security_group,
+                          name=s_name, description=s_description)
 
     @test.idempotent_id('9fdb4abc-6b66-4b27-b89c-eb215a956168')
     @testtools.skipIf(CONF.service_available.neutron,
@@ -109,11 +110,11 @@ class SecurityGroupsNegativeTestJSON(base.BaseSecurityGroupsTest):
         # be created
         s_name = data_utils.rand_name('securitygroup')
         s_description = data_utils.rand_name('description')
-        self.create_security_group(s_name, s_description)
+        self.create_security_group(name=s_name, description=s_description)
         # Now try the Security Group with the same 'Name'
         self.assertRaises(lib_exc.BadRequest,
-                          self.client.create_security_group, s_name,
-                          s_description)
+                          self.client.create_security_group,
+                          name=s_name, description=s_description)
 
     @test.attr(type=['negative'])
     @test.idempotent_id('36a1629f-c6da-4a26-b8b8-55e7e5d5cd58')
