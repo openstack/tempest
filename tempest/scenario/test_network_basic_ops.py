@@ -108,12 +108,14 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         self.network, self.subnet, self.router = self.create_networks(**kwargs)
         self.check_networks()
 
+        self.ports = []
         self.port_id = None
         # when vnic_type is set, ports will be created in create_server.
         # So no need to create a port here in this case.
         if boot_with_port and not vnic_type:
             # create a port on the network and boot with that
             self.port_id = self._create_port(self.network['id']).id
+            self.ports.append({'port': self.port_id})
 
         name = data_utils.rand_name('server-smoke')
         server = self._create_server(name, self.network, self.port_id)
@@ -634,7 +636,11 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         # Setup the network, create a port and boot the server from that port.
         self._setup_network_and_servers(boot_with_port=True)
         _, server = self.floating_ip_tuple
-        self.assertIsNotNone(self.port_id,
+        self.assertEqual(1, len(self.ports),
+                         'There should only be one port created for '
+                         'server %s.' % server['id'])
+        port_id = self.ports[0]['port']
+        self.assertIsNotNone(port_id,
                              'Server should have been created from a '
                              'pre-existing port.')
         # Assert the port is bound to the server.
@@ -643,13 +649,13 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         self.assertEqual(1, len(port_list),
                          'There should only be one port created for '
                          'server %s.' % server['id'])
-        self.assertEqual(self.port_id, port_list[0]['id'])
+        self.assertEqual(port_id, port_list[0]['id'])
         # Delete the server.
         self.servers_client.delete_server(server['id'])
         self.servers_client.wait_for_server_termination(server['id'])
         # Assert the port still exists on the network but is unbound from
         # the deleted server.
-        port = self.network_client.show_port(self.port_id)['port']
+        port = self.network_client.show_port(port_id)['port']
         self.assertEqual(self.network['id'], port['network_id'])
         self.assertEqual('', port['device_id'])
         self.assertEqual('', port['device_owner'])
