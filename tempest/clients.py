@@ -344,15 +344,25 @@ class Manager(manager.Manager):
     def _set_identity_clients(self):
         params = {
             'service': CONF.identity.catalog_type,
-            'region': CONF.identity.region,
-            'endpoint_type': 'adminURL'
+            'region': CONF.identity.region
         }
         params.update(self.default_params_with_timeout_values)
-
+        params_v2_admin = params.copy()
+        params_v2_admin['endpoint_type'] = CONF.identity.v2_admin_endpoint_type
+        # Client uses admin endpoint type of Keystone API v2
         self.identity_client = IdentityClient(self.auth_provider,
-                                              **params)
+                                              **params_v2_admin)
+        params_v2_public = params.copy()
+        params_v2_public['endpoint_type'] = (
+            CONF.identity.v2_public_endpoint_type)
+        # Client uses public endpoint type of Keystone API v2
+        self.identity_public_client = IdentityClient(self.auth_provider,
+                                                     **params_v2_public)
+        params_v3 = params.copy()
+        params_v3['endpoint_type'] = CONF.identity.v3_endpoint_type
+        # Client uses the endpoint type of Keystone API v3
         self.identity_v3_client = IdentityV3Client(self.auth_provider,
-                                                   **params)
+                                                   **params_v3)
         self.endpoints_client = EndPointClient(self.auth_provider,
                                                **params)
         self.service_client = ServiceClient(self.auth_provider, **params)
