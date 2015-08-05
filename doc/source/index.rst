@@ -38,6 +38,7 @@ Tempest Configuration Guide
    :maxdepth: 2
 
    configuration
+   sampleconf
 
 ---------------------
 Command Documentation
