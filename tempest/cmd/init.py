@@ -99,6 +99,11 @@ class TempestInit(command.Command):
     def copy_config(self, etc_dir, config_dir):
         shutil.copytree(config_dir, etc_dir)
 
+    def generate_sample_config(self, local_dir):
+        subprocess.call(['oslo-config-generator', '--config-file',
+                         'tools/config/config-generator.tempest.conf'],
+                        cwd=local_dir)
+
     def create_working_dir(self, local_dir, config_dir):
         # Create local dir if missing
         if not os.path.isdir(local_dir):
@@ -119,6 +124,8 @@ class TempestInit(command.Command):
             os.mkdir(log_dir)
         # Create and copy local etc dir
         self.copy_config(etc_dir, config_dir)
+        # Generate the sample config file
+        self.generate_sample_config(local_dir)
         # Update local confs to reflect local paths
         self.update_local_conf(config_path, lock_dir, log_dir)
         # Generate a testr conf file
