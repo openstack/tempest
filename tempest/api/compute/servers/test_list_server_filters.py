@@ -305,12 +305,20 @@ class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
             params = {'ip': ip}
         else:
             params = {'ip6': ip}
+        # capture all servers in case something goes wrong
+        all_servers = self.client.list_servers(detail=True)
         body = self.client.list_servers(**params)
         servers = body['servers']
 
-        self.assertIn(self.s1_name, map(lambda x: x['name'], servers))
-        self.assertIn(self.s2_name, map(lambda x: x['name'], servers))
-        self.assertIn(self.s3_name, map(lambda x: x['name'], servers))
+        self.assertIn(self.s1_name, map(lambda x: x['name'], servers),
+                      "%s not found in %s, all servers %s" %
+                      (self.s1_name, servers, all_servers))
+        self.assertIn(self.s2_name, map(lambda x: x['name'], servers),
+                      "%s not found in %s, all servers %s" %
+                      (self.s2_name, servers, all_servers))
+        self.assertIn(self.s3_name, map(lambda x: x['name'], servers),
+                      "%s not found in %s, all servers %s" %
+                      (self.s3_name, servers, all_servers))
 
     @test.idempotent_id('67aec2d0-35fe-4503-9f92-f13272b867ed')
     def test_list_servers_detailed_limit_results(self):
