@@ -54,7 +54,8 @@ class VolumesTestJSON(base.BaseV2ComputeTest):
             v_name = data_utils.rand_name('volume')
             metadata = {'Type': 'work'}
             try:
-                volume = cls.client.create_volume(display_name=v_name,
+                volume = cls.client.create_volume(size=CONF.volume.volume_size,
+                                                  display_name=v_name,
                                                   metadata=metadata)
                 waiters.wait_for_volume_status(cls.client,
                                                volume['id'], 'available')
