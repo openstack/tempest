@@ -587,6 +587,12 @@ class NetworkScenarioTest(ScenarioTest):
             *args, **kwargs)
         return ports_list['ports']
 
+    def _list_agents(self, *args, **kwargs):
+        """List agents using admin creds """
+        agents_list = self.admin_manager.network_client.list_agents(
+            *args, **kwargs)
+        return agents_list['agents']
+
     def _create_subnet(self, network, client=None, namestart='subnet-smoke',
                        **kwargs):
         """

@@ -650,3 +650,70 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         self.assertEqual(self.network['id'], port['network_id'])
         self.assertEqual('', port['device_id'])
         self.assertEqual('', port['device_owner'])
+
+    @test.idempotent_id('2e788c46-fb3f-4ac9-8f82-0561555bea73')
+    @testtools.skipIf("dvr" in CONF.network_feature_enabled.api_extensions,
+                      "Router rescheduling not supported on DVR")
+    @test.services('compute', 'network')
+    def test_router_rescheduling(self):
+        """Tests that router can be removed from agent and add to a new agent.
+
+        1. Verify connectivity
+        2. Remove router from all l3-agents
+        3. Verify connectivity is down
+        4. Assign router to new l3-agent (or old one if no new agent is
+         available)
+        5. Verify connectivity
+        """
+
+        # TODO(yfried): refactor this test to be used for other agents (dhcp)
+        # as well
+
+        list_hosts = (self.admin_manager.network_client.
+                      list_l3_agents_hosting_router)
+        schedule_router = (self.admin_manager.network_client.
+                           add_router_to_l3_agent)
+        unschedule_router = (self.admin_manager.network_client.
+                             remove_router_from_l3_agent)
+
+        agent_list = set(a["id"] for a in
+                         self._list_agents(agent_type="L3 agent"))
+        self._setup_network_and_servers()
+        self.check_public_network_connectivity(should_connect=True)
+
+        # remove resource from agents
+        hosting_agents = set(a["id"] for a in
+                             list_hosts(self.router.id)['agents'])
+        no_migration = agent_list == hosting_agents
+        LOG.info("Router will be assigned to {mig} hosting agent".
+                 format(mig="the same" if no_migration else "a new"))
+
+        for hosting_agent in hosting_agents:
+            unschedule_router(hosting_agent, self.router.id)
+            self.assertNotIn(hosting_agent,
+                             [a["id"] for a in
+                              list_hosts(self.router.id)['agents']],
+                             'unscheduling router failed')
+
+        # verify resource is un-functional
+        self.check_public_network_connectivity(
+            should_connect=False,
+            msg='after router unscheduling',
+            should_check_floating_ip_status=False
+        )
+
+        # schedule resource to new agent
+        target_agent = list(hosting_agents if no_migration else
+                            agent_list - hosting_agents)[0]
+        schedule_router(target_agent,
+                        self.router['id'])
+        self.assertEqual(
+            target_agent,
+            list_hosts(self.router.id)['agents'][0]['id'],
+            "Router failed to reschedule. Hosting agent doesn't match "
+            "target agent")
+
+        # verify resource is functional
+        self.check_public_network_connectivity(
+            should_connect=True,
+            msg='After router rescheduling')
