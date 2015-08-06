@@ -273,7 +273,7 @@ def create_tenants(tenants):
     Don't create the tenants if they already exist.
     """
     admin = keystone_admin()
-    body = admin.identity.list_tenants()
+    body = admin.identity.list_tenants()['tenants']
     existing = [x['name'] for x in body]
     for tenant in tenants:
         if tenant not in existing:
