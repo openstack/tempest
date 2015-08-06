@@ -240,7 +240,10 @@ class TestDiscovery(base.TestCase):
                                    {'alias': 'fake2'},
                                    {'alias': 'not_fake'}]}
         fake_os = mock.MagicMock()
+        # NOTE (e0ne): mock both v1 and v2 APIs
         fake_os.volumes_extension_client.list_extensions = fake_list_extensions
+        fake_os.volumes_v2_extension_client.list_extensions = (
+            fake_list_extensions)
         self.useFixture(mockpatch.PatchObject(
             verify_tempest_config, 'get_enabled_extensions',
             return_value=(['fake1', 'fake2', 'fake3'])))
@@ -262,7 +265,10 @@ class TestDiscovery(base.TestCase):
                                    {'alias': 'fake2'},
                                    {'alias': 'not_fake'}]}
         fake_os = mock.MagicMock()
+        # NOTE (e0ne): mock both v1 and v2 APIs
         fake_os.volumes_extension_client.list_extensions = fake_list_extensions
+        fake_os.volumes_v2_extension_client.list_extensions = (
+            fake_list_extensions)
         self.useFixture(mockpatch.PatchObject(
             verify_tempest_config, 'get_enabled_extensions',
             return_value=(['all'])))

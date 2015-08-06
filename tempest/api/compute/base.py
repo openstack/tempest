@@ -73,7 +73,6 @@ class BaseComputeTest(tempest.test.BaseTestCase):
         cls.networks_client = cls.os.networks_client
         cls.limits_client = cls.os.limits_client
         cls.volumes_extensions_client = cls.os.volumes_extensions_client
-        cls.volumes_client = cls.os.volumes_client
         cls.interfaces_client = cls.os.interfaces_client
         cls.fixed_ips_client = cls.os.fixed_ips_client
         cls.availability_zone_client = cls.os.availability_zone_client
@@ -87,6 +86,11 @@ class BaseComputeTest(tempest.test.BaseTestCase):
         cls.migrations_client = cls.os.migrations_client
         cls.security_group_default_rules_client = (
             cls.os.security_group_default_rules_client)
+
+        if CONF.volume_feature_enabled.api_v1:
+            cls.volumes_client = cls.os.volumes_client
+        else:
+            cls.volumes_client = cls.os.volumes_v2_client
 
     @classmethod
     def resource_setup(cls):

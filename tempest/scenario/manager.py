@@ -57,13 +57,18 @@ class ScenarioTest(tempest.test.BaseTestCase):
         cls.security_group_rules_client = (
             cls.manager.security_group_rules_client)
         cls.servers_client = cls.manager.servers_client
-        cls.volumes_client = cls.manager.volumes_client
-        cls.snapshots_client = cls.manager.snapshots_client
         cls.interface_client = cls.manager.interfaces_client
         # Neutron network client
         cls.network_client = cls.manager.network_client
         # Heat client
         cls.orchestration_client = cls.manager.orchestration_client
+
+        if CONF.volume_feature_enabled.api_v1:
+            cls.volumes_client = cls.manager.volumes_client
+            cls.snapshots_client = cls.manager.snapshots_client
+        else:
+            cls.volumes_client = cls.manager.volumes_v2_client
+            cls.snapshots_client = cls.manager.snapshots_v2_client
 
     # ## Methods to handle sync and async deletes
 
@@ -210,7 +215,11 @@ class ScenarioTest(tempest.test.BaseTestCase):
                 cleanup_callable=self.delete_wrapper,
                 cleanup_args=[self.volumes_client.delete_volume, volume['id']])
 
-        self.assertEqual(name, volume['display_name'])
+        # NOTE(e0ne): Cinder API v2 uses name instead of display_name
+        if 'display_name' in volume:
+            self.assertEqual(name, volume['display_name'])
+        else:
+            self.assertEqual(name, volume['name'])
         self.volumes_client.wait_for_volume_status(volume['id'], 'available')
         # The volume retrieved on creation has a non-up-to-date status.
         # Retrieval after it becomes active ensures correct details.
@@ -1262,7 +1271,10 @@ class EncryptionScenarioTest(ScenarioTest):
     @classmethod
     def setup_clients(cls):
         super(EncryptionScenarioTest, cls).setup_clients()
-        cls.admin_volume_types_client = cls.os_adm.volume_types_client
+        if CONF.volume_feature_enabled.api_v1:
+            cls.admin_volume_types_client = cls.os_adm.volume_types_client
+        else:
+            cls.admin_volume_types_client = cls.os_adm.volume_types_v2_client
 
     def _wait_for_volume_status(self, status):
         self.status_timeout(
