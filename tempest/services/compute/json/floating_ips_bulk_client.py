@@ -32,18 +32,17 @@ class FloatingIPsBulkClient(service_client.ServiceClient):
         resp, body = self.post('os-floating-ips-bulk', post_body)
         body = json.loads(body)
         self.validate_response(schema.create_floating_ips_bulk, resp, body)
-        return service_client.ResponseBody(resp,
-                                           body['floating_ips_bulk_create'])
+        return service_client.ResponseBody(resp, body)
 
     def list_floating_ips_bulk(self):
-        """Returns a list of all floating IPs bulk."""
+        """Gets all floating IPs in bulk."""
         resp, body = self.get('os-floating-ips-bulk')
         body = json.loads(body)
         self.validate_response(schema.list_floating_ips_bulk, resp, body)
-        return service_client.ResponseBodyList(resp, body['floating_ip_info'])
+        return service_client.ResponseBody(resp, body)
 
     def delete_floating_ips_bulk(self, ip_range):
-        """Deletes the provided floating IPs bulk."""
+        """Deletes the provided floating IPs in bulk."""
         post_body = json.dumps({'ip_range': ip_range})
         resp, body = self.put('os-floating-ips-bulk/delete', post_body)
         body = json.loads(body)
