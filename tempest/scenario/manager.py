@@ -663,14 +663,18 @@ class NetworkScenarioTest(ScenarioTest):
     def _get_server_port_id_and_ip4(self, server, ip_addr=None):
         ports = self._list_ports(device_id=server['id'],
                                  fixed_ip=ip_addr)
-        self.assertEqual(len(ports), 1,
-                         "Unable to determine which port to target.")
         # it might happen here that this port has more then one ip address
         # as in case of dual stack- when this port is created on 2 subnets
-        for ip46 in ports[0]['fixed_ips']:
-            ip = ip46['ip_address']
-            if netaddr.valid_ipv4(ip):
-                return ports[0]['id'], ip
+        port_map = [(p["id"], fxip["ip_address"])
+                    for p in ports
+                    for fxip in p["fixed_ips"]
+                    if netaddr.valid_ipv4(fxip["ip_address"])]
+
+        self.assertEqual(len(port_map), 1,
+                         "Found multiple IPv4 addresses: %s. "
+                         "Unable to determine which port to target."
+                         % port_map)
+        return port_map[0]
 
     def _get_network_by_name(self, network_name):
         net = self._list_networks(name=network_name)

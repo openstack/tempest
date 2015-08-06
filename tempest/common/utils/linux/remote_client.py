@@ -106,7 +106,8 @@ class RemoteClient(object):
 
     def get_nic_name(self, address):
         cmd = "ip -o addr | awk '/%s/ {print $2}'" % address
-        return self.exec_command(cmd)
+        nic = self.exec_command(cmd)
+        return nic.strip().strip(":").lower()
 
     def get_ip_list(self):
         cmd = "ip address"
@@ -144,7 +145,6 @@ class RemoteClient(object):
         """Renews DHCP lease via udhcpc client. """
         file_path = '/var/run/udhcpc.'
         nic_name = self.get_nic_name(fixed_ip)
-        nic_name = nic_name.strip().lower()
         pid = self.exec_command('cat {path}{nic}.pid'.
                                 format(path=file_path, nic=nic_name))
         pid = pid.strip()
