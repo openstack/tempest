@@ -505,7 +505,7 @@ class BotoTestCase(tempest.test.BaseTestCase):
             LOG.critical("%s Volume has %s snapshot(s)", volume.id,
                          map(snaps.id, snaps))
 
-        # NOTE(afazekas): detaching/attching not valid EC2 status
+        # NOTE(afazekas): detaching/attaching not valid EC2 status
         def _volume_state():
             volume.update(validate=True)
             try:
