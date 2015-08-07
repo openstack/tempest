@@ -23,17 +23,17 @@ LOG = logging.getLogger(__name__)
 
 
 def create_ssh_security_group(os, add_rule=False):
-    security_group_client = os.security_groups_client
+    security_groups_client = os.security_groups_client
+    security_group_rules_client = os.security_group_rules_client
     sg_name = data_utils.rand_name('securitygroup-')
     sg_description = data_utils.rand_name('description-')
-    security_group = \
-        security_group_client.create_security_group(name=sg_name,
-                                                    description=sg_description)
+    security_group = security_groups_client.create_security_group(
+        name=sg_name, description=sg_description)
     if add_rule:
-        security_group_client.create_security_group_rule(
+        security_group_rules_client.create_security_group_rule(
             parent_group_id=security_group['id'], ip_protocol='tcp',
             from_port=22, to_port=22)
-        security_group_client.create_security_group_rule(
+        security_group_rules_client.create_security_group_rule(
             parent_group_id=security_group['id'], ip_protocol='icmp',
             from_port=-1, to_port=-1)
     LOG.debug("SSH Validation resource security group with tcp and icmp "
