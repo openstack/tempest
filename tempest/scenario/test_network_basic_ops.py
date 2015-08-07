@@ -101,7 +101,6 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         self.servers = []
 
     def _setup_network_and_servers(self, **kwargs):
-        vnic_type = CONF.network.port_vnic_type
         boot_with_port = kwargs.pop('boot_with_port', False)
         self.security_group = \
             self._create_security_group(tenant_id=self.tenant_id)
@@ -109,9 +108,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         self.check_networks()
 
         self.port_id = None
-        # when vnic_type is set, ports will be created in create_server.
-        # So no need to create a port here in this case.
-        if boot_with_port and not vnic_type:
+        if boot_with_port:
             # create a port on the network and boot with that
             self.port_id = self._create_port(self.network['id']).id
 
