@@ -277,11 +277,11 @@ class RoutersTest(base.BaseRouterTest):
         test_routes = []
         routes_num = 5
         # Create a router
-        self.router = self._create_router(
+        router = self._create_router(
             data_utils.rand_name('router-'), True)
         self.addCleanup(
             self._delete_extra_routes,
-            self.router['id'])
+            router['id'])
         # Update router extra route, second ip of the range is
         # used as next hop
         for i in range(routes_num):
@@ -290,7 +290,7 @@ class RoutersTest(base.BaseRouterTest):
             next_cidr = next_cidr.next()
 
             # Add router interface with subnet id
-            self.create_router_interface(self.router['id'], subnet['id'])
+            self.create_router_interface(router['id'], subnet['id'])
 
             cidr = netaddr.IPNetwork(subnet['cidr'])
             next_hop = str(cidr[2])
@@ -300,9 +300,9 @@ class RoutersTest(base.BaseRouterTest):
             )
 
         test_routes.sort(key=lambda x: x['destination'])
-        extra_route = self.client.update_extra_routes(self.router['id'],
+        extra_route = self.client.update_extra_routes(router['id'],
                                                       test_routes)
-        show_body = self.client.show_router(self.router['id'])
+        show_body = self.client.show_router(router['id'])
         # Assert the number of routes
         self.assertEqual(routes_num, len(extra_route['router']['routes']))
         self.assertEqual(routes_num, len(show_body['router']['routes']))
@@ -327,13 +327,13 @@ class RoutersTest(base.BaseRouterTest):
 
     @test.idempotent_id('a8902683-c788-4246-95c7-ad9c6d63a4d9')
     def test_update_router_admin_state(self):
-        self.router = self._create_router(data_utils.rand_name('router-'))
-        self.assertFalse(self.router['admin_state_up'])
+        router = self._create_router(data_utils.rand_name('router-'))
+        self.assertFalse(router['admin_state_up'])
         # Update router admin state
-        update_body = self.client.update_router(self.router['id'],
+        update_body = self.client.update_router(router['id'],
                                                 admin_state_up=True)
         self.assertTrue(update_body['router']['admin_state_up'])
-        show_body = self.client.show_router(self.router['id'])
+        show_body = self.client.show_router(router['id'])
         self.assertTrue(show_body['router']['admin_state_up'])
 
     @test.attr(type='smoke')
