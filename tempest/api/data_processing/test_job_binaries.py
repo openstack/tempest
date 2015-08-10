@@ -80,7 +80,7 @@ class JobBinaryTest(dp_base.BaseDataProcessingTest):
         binary_info = self._create_job_binary(self.swift_job_binary_with_extra)
 
         # check for job binary in list
-        binaries = self.client.list_job_binaries()
+        binaries = self.client.list_job_binaries()['binaries']
         binaries_info = [(binary['id'], binary['name']) for binary in binaries]
         self.assertIn(binary_info, binaries_info)
 
@@ -91,7 +91,7 @@ class JobBinaryTest(dp_base.BaseDataProcessingTest):
             self._create_job_binary(self.swift_job_binary_with_extra))
 
         # check job binary fetch by id
-        binary = self.client.get_job_binary(binary_id)
+        binary = self.client.get_job_binary(binary_id)['job_binary']
         self.assertEqual(binary_name, binary['name'])
         self.assertDictContainsSubset(self.swift_job_binary, binary)
 
@@ -115,7 +115,7 @@ class JobBinaryTest(dp_base.BaseDataProcessingTest):
         binary_info = self._create_job_binary(self.internal_db_job_binary)
 
         # check for job binary in list
-        binaries = self.client.list_job_binaries()
+        binaries = self.client.list_job_binaries()['binaries']
         binaries_info = [(binary['id'], binary['name']) for binary in binaries]
         self.assertIn(binary_info, binaries_info)
 
@@ -126,7 +126,7 @@ class JobBinaryTest(dp_base.BaseDataProcessingTest):
             self._create_job_binary(self.internal_db_job_binary))
 
         # check job binary fetch by id
-        binary = self.client.get_job_binary(binary_id)
+        binary = self.client.get_job_binary(binary_id)['job_binary']
         self.assertEqual(binary_name, binary['name'])
         self.assertDictContainsSubset(self.internal_db_job_binary, binary)
 
