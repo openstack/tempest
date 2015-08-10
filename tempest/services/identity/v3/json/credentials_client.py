@@ -36,11 +36,11 @@ class CredentialsClient(service_client.ServiceClient):
         self.expected_success(201, resp.status)
         body = json.loads(body)
         body['credential']['blob'] = json.loads(body['credential']['blob'])
-        return service_client.ResponseBody(resp, body['credential'])
+        return service_client.ResponseBody(resp, body)
 
     def update_credential(self, credential_id, **kwargs):
         """Updates a credential."""
-        body = self.get_credential(credential_id)
+        body = self.get_credential(credential_id)['credential']
         cred_type = kwargs.get('type', body['type'])
         access_key = kwargs.get('access_key', body['blob']['access'])
         secret_key = kwargs.get('secret_key', body['blob']['secret'])
@@ -59,7 +59,7 @@ class CredentialsClient(service_client.ServiceClient):
         self.expected_success(200, resp.status)
         body = json.loads(body)
         body['credential']['blob'] = json.loads(body['credential']['blob'])
-        return service_client.ResponseBody(resp, body['credential'])
+        return service_client.ResponseBody(resp, body)
 
     def get_credential(self, credential_id):
         """To GET Details of a credential."""
@@ -67,14 +67,14 @@ class CredentialsClient(service_client.ServiceClient):
         self.expected_success(200, resp.status)
         body = json.loads(body)
         body['credential']['blob'] = json.loads(body['credential']['blob'])
-        return service_client.ResponseBody(resp, body['credential'])
+        return service_client.ResponseBody(resp, body)
 
     def list_credentials(self):
         """Lists out all the available credentials."""
         resp, body = self.get('credentials')
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBodyList(resp, body['credentials'])
+        return service_client.ResponseBody(resp, body)
 
     def delete_credential(self, credential_id):
         """Deletes a credential."""
