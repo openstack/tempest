@@ -41,11 +41,13 @@ To run Tempest, you first need to create a configuration file that
 will tell Tempest where to find the various OpenStack services and
 other testing behavior switches.
 
-The easiest way to create a configuration file is to copy the sample
-one in the ``etc/`` directory ::
+The easiest way to create a configuration file is to generate a sample
+in the ``etc/`` directory ::
 
     $> cd $TEMPEST_ROOT_DIR
-    $> cp etc/tempest.conf.sample etc/tempest.conf
+    $> oslo-config-generator --config-file \
+        tools/config/config-generator.tempest.conf \
+        --output-file etc/tempest.conf
 
 After that, open up the ``etc/tempest.conf`` file and edit the
 configuration variables to match valid data in your environment.
