@@ -459,7 +459,16 @@ ImageGroup = [
     cfg.IntOpt('build_interval',
                default=1,
                help="Time in seconds between image operation status "
-                    "checks.")
+                    "checks."),
+    cfg.ListOpt('container_formats',
+                default=['ami', 'ari', 'aki', 'bare', 'ovf', 'ova'],
+                help="A list of image's container formats "
+                     "users can specify."),
+    cfg.ListOpt('disk_formats',
+                default=['ami', 'ari', 'aki', 'vhd', 'vmdk', 'raw', 'qcow2',
+                         'vdi', 'iso'],
+                help="A list of image's disk formats "
+                     "users can specify.")
 ]
 
 image_feature_group = cfg.OptGroup(name='image-feature-enabled',

@@ -18,9 +18,14 @@ import random
 
 from six import moves
 
+from oslo_log import log as logging
 from tempest.api.image import base
 from tempest.common.utils import data_utils
+from tempest import config
 from tempest import test
+
+CONF = config.CONF
+LOG = logging.getLogger(__name__)
 
 
 class BasicOperationsImagesTest(base.BaseV2ImageTest):
@@ -39,9 +44,11 @@ class BasicOperationsImagesTest(base.BaseV2ImageTest):
 
         uuid = '00000000-1111-2222-3333-444455556666'
         image_name = data_utils.rand_name('image')
+        container_format = CONF.image.container_formats[0]
+        disk_format = CONF.image.disk_formats[0]
         body = self.create_image(name=image_name,
-                                 container_format='bare',
-                                 disk_format='raw',
+                                 container_format=container_format,
+                                 disk_format=disk_format,
                                  visibility='private',
                                  ramdisk_id=uuid)
         self.assertIn('id', body)
@@ -77,9 +84,11 @@ class BasicOperationsImagesTest(base.BaseV2ImageTest):
 
         # Create image
         image_name = data_utils.rand_name('image')
+        container_format = CONF.image.container_formats[0]
+        disk_format = CONF.image.disk_formats[0]
         body = self.client.create_image(name=image_name,
-                                        container_format='bare',
-                                        disk_format='raw',
+                                        container_format=container_format,
+                                        disk_format=disk_format,
                                         visibility='private')
         image_id = body['id']
 
@@ -99,9 +108,11 @@ class BasicOperationsImagesTest(base.BaseV2ImageTest):
 
         # Create image
         image_name = data_utils.rand_name('image')
+        container_format = CONF.image.container_formats[0]
+        disk_format = CONF.image.disk_formats[0]
         body = self.client.create_image(name=image_name,
-                                        container_format='bare',
-                                        disk_format='iso',
+                                        container_format=container_format,
+                                        disk_format=disk_format,
                                         visibility='private')
         self.addCleanup(self.client.delete_image, body['id'])
         self.assertEqual('queued', body['status'])
@@ -133,13 +144,17 @@ class ListImagesTest(base.BaseV2ImageTest):
         super(ListImagesTest, cls).resource_setup()
         # We add a few images here to test the listing functionality of
         # the images API
-        cls._create_standard_image('bare', 'raw')
-        cls._create_standard_image('bare', 'raw')
-        cls._create_standard_image('ami', 'raw')
-        # Add some more for listing
-        cls._create_standard_image('ami', 'ami')
-        cls._create_standard_image('ari', 'ari')
-        cls._create_standard_image('aki', 'aki')
+        container_fmts = CONF.image.container_formats
+        disk_fmts = CONF.image.disk_formats
+        all_pairs = [(container_fmt, disk_fmt)
+                     for container_fmt in container_fmts
+                     for disk_fmt in disk_fmts]
+
+        for (container_fmt, disk_fmt) in all_pairs[:6]:
+            LOG.debug("Creating a image"
+                      "(Container format: %s, Disk format: %s).",
+                      container_fmt, disk_fmt)
+            cls._create_standard_image(container_fmt, disk_fmt)
 
     @classmethod
     def _create_standard_image(cls, container_format, disk_format):
@@ -201,7 +216,7 @@ class ListImagesTest(base.BaseV2ImageTest):
     @test.idempotent_id('cf1b9a48-8340-480e-af7b-fe7e17690876')
     def test_list_images_param_size(self):
         # Test to get all images by size
-        image_id = self.created_images[1]
+        image_id = self.created_images[0]
         # Get image metadata
         image = self.client.show_image(image_id)
 
@@ -211,7 +226,7 @@ class ListImagesTest(base.BaseV2ImageTest):
     @test.idempotent_id('4ad8c157-971a-4ba8-aa84-ed61154b1e7f')
     def test_list_images_param_min_max_size(self):
         # Test to get all images with size between 2000 to 3000
-        image_id = self.created_images[1]
+        image_id = self.created_images[0]
         # Get image metadata
         image = self.client.show_image(image_id)
 
@@ -234,7 +249,7 @@ class ListImagesTest(base.BaseV2ImageTest):
     @test.idempotent_id('e914a891-3cc8-4b40-ad32-e0a39ffbddbb')
     def test_list_images_param_limit(self):
         # Test to get images by limit
-        params = {"limit": 2}
+        params = {"limit": 1}
         images_list = self.client.list_images(params=params)['images']
 
         self.assertEqual(len(images_list), params['limit'],
