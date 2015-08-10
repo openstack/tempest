@@ -122,7 +122,7 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
         # Resize a non-existent server
         nonexistent_server = data_utils.rand_uuid()
         self.assertRaises(lib_exc.NotFound,
-                          self.client.resize,
+                          self.client.resize_server,
                           nonexistent_server, self.flavor_ref)
 
     @test.idempotent_id('ced1a1d7-2ab6-45c9-b90f-b27d87b30efd')
@@ -132,7 +132,7 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
     def test_resize_server_with_non_existent_flavor(self):
         # Resize a server with non-existent flavor
         nonexistent_flavor = data_utils.rand_uuid()
-        self.assertRaises(lib_exc.BadRequest, self.client.resize,
+        self.assertRaises(lib_exc.BadRequest, self.client.resize_server,
                           self.server_id, flavor_ref=nonexistent_flavor)
 
     @test.idempotent_id('45436a7d-a388-4a35-a9d8-3adc5d0d940b')
@@ -141,7 +141,7 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
     @test.attr(type=['negative'])
     def test_resize_server_with_null_flavor(self):
         # Resize a server with null flavor
-        self.assertRaises(lib_exc.BadRequest, self.client.resize,
+        self.assertRaises(lib_exc.BadRequest, self.client.resize_server,
                           self.server_id, flavor_ref="")
 
     @test.attr(type=['negative'])
@@ -149,7 +149,7 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
     def test_reboot_non_existent_server(self):
         # Reboot a non existent server
         nonexistent_server = data_utils.rand_uuid()
-        self.assertRaises(lib_exc.NotFound, self.client.reboot,
+        self.assertRaises(lib_exc.NotFound, self.client.reboot_server,
                           nonexistent_server, 'SOFT')
 
     @test.idempotent_id('d1417e7f-a509-41b5-a102-d5eed8613369')
@@ -174,9 +174,9 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
         self.client.wait_for_server_termination(server['id'])
 
         self.assertRaises(lib_exc.NotFound,
-                          self.client.rebuild,
+                          self.client.rebuild_server,
                           server['id'], self.image_ref_alt)
-        self.assertRaises(lib_exc.NotFound, self.client.reboot,
+        self.assertRaises(lib_exc.NotFound, self.client.reboot_server,
                           server['id'], 'SOFT')
 
     @test.attr(type=['negative'])
@@ -185,7 +185,7 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
         # Rebuild a non existent server
         nonexistent_server = data_utils.rand_uuid()
         self.assertRaises(lib_exc.NotFound,
-                          self.client.rebuild,
+                          self.client.rebuild_server,
                           nonexistent_server,
                           self.image_ref_alt)
 

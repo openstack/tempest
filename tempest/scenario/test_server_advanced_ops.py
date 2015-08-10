@@ -58,7 +58,7 @@ class TestServerAdvancedOps(manager.ScenarioTest):
         resize_flavor = CONF.compute.flavor_ref_alt
         LOG.debug("Resizing instance %s from flavor %s to flavor %s",
                   instance['id'], instance['flavor']['id'], resize_flavor)
-        self.servers_client.resize(instance_id, resize_flavor)
+        self.servers_client.resize_server(instance_id, resize_flavor)
         waiters.wait_for_server_status(self.servers_client, instance_id,
                                        'VERIFY_RESIZE')
 

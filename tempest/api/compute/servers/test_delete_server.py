@@ -103,7 +103,7 @@ class DeleteServersTestJSON(base.BaseV2ComputeTest):
     def test_delete_server_while_in_verify_resize_state(self):
         # Delete a server while it's VM state is VERIFY_RESIZE
         server = self.create_test_server(wait_until='ACTIVE')
-        self.client.resize(server['id'], self.flavor_ref_alt)
+        self.client.resize_server(server['id'], self.flavor_ref_alt)
         waiters.wait_for_server_status(self.client, server['id'],
                                        'VERIFY_RESIZE')
         self.client.delete_server(server['id'])

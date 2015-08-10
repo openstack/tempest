@@ -57,9 +57,9 @@ class ServerDiskConfigTestJSON(base.BaseV2ComputeTest):
         # A server should be rebuilt using the manual disk config option
         self._update_server_with_disk_config(disk_config='AUTO')
 
-        server = self.client.rebuild(self.server_id,
-                                     self.image_ref_alt,
-                                     disk_config='MANUAL')
+        server = self.client.rebuild_server(self.server_id,
+                                            self.image_ref_alt,
+                                            disk_config='MANUAL')
 
         # Wait for the server to become active
         waiters.wait_for_server_status(self.client, server['id'], 'ACTIVE')
@@ -73,9 +73,9 @@ class ServerDiskConfigTestJSON(base.BaseV2ComputeTest):
         # A server should be rebuilt using the auto disk config option
         self._update_server_with_disk_config(disk_config='MANUAL')
 
-        server = self.client.rebuild(self.server_id,
-                                     self.image_ref_alt,
-                                     disk_config='AUTO')
+        server = self.client.rebuild_server(self.server_id,
+                                            self.image_ref_alt,
+                                            disk_config='AUTO')
 
         # Wait for the server to become active
         waiters.wait_for_server_status(self.client, server['id'], 'ACTIVE')
@@ -101,7 +101,8 @@ class ServerDiskConfigTestJSON(base.BaseV2ComputeTest):
 
         # Resize with auto option
         flavor_id = self._get_alternative_flavor()
-        self.client.resize(self.server_id, flavor_id, disk_config='AUTO')
+        self.client.resize_server(self.server_id, flavor_id,
+                                  disk_config='AUTO')
         waiters.wait_for_server_status(self.client, self.server_id,
                                        'VERIFY_RESIZE')
         self.client.confirm_resize(self.server_id)
@@ -119,7 +120,8 @@ class ServerDiskConfigTestJSON(base.BaseV2ComputeTest):
 
         # Resize with manual option
         flavor_id = self._get_alternative_flavor()
-        self.client.resize(self.server_id, flavor_id, disk_config='MANUAL')
+        self.client.resize_server(self.server_id, flavor_id,
+                                  disk_config='MANUAL')
         waiters.wait_for_server_status(self.client, self.server_id,
                                        'VERIFY_RESIZE')
         self.client.confirm_resize(self.server_id)
