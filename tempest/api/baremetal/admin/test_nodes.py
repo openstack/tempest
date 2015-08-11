@@ -20,7 +20,7 @@ from tempest import test
 
 
 class TestNodes(base.BaseBaremetalTest):
-    '''Tests for baremetal nodes.'''
+    """Tests for baremetal nodes."""
 
     def setUp(self):
         super(TestNodes, self).setUp()
