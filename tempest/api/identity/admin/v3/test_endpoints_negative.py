@@ -78,7 +78,8 @@ class EndpointsNegativeTestJSON(base.BaseIdentityV3AdminTest):
         interface1 = 'public'
         endpoint_for_update = (
             self.client.create_endpoint(self.service_id, interface1,
-                                        url1, region=region1, enabled=True))
+                                        url1, region=region1,
+                                        enabled=True))['endpoint']
         self.addCleanup(self.client.delete_endpoint, endpoint_for_update['id'])
 
         self.assertRaises(lib_exc.BadRequest, self.client.update_endpoint,
