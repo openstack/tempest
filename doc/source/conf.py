@@ -13,6 +13,19 @@
 
 import sys
 import os
+import subprocess
+
+# Build a tempest sample config file:
+def build_sample_config(app):
+    root_dir = os.path.dirname(
+        os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    subprocess.call(["oslo-config-generator", "--config-file",
+                     "tools/config/config-generator.tempest.conf",
+                     "--output-file", "doc/source/_static/tempest.conf"],
+                    cwd=root_dir)
+
+def setup(app):
+    app.connect('builder-inited', build_sample_config)
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
