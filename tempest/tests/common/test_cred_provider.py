@@ -123,5 +123,9 @@ class ConfiguredV3CredentialsTests(ConfiguredV2CredentialsTests):
         cfg.CONF.set_default('auth_version', 'v3', group='identity')
         # Identity group items
         for prefix in ['', 'alt_', 'admin_']:
+            if prefix == 'admin_':
+                group = 'auth'
+            else:
+                group = 'identity'
             cfg.CONF.set_default(prefix + 'domain_name', 'fake_domain_name',
-                                 group='identity')
+                                 group=group)

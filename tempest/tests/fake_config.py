@@ -48,9 +48,13 @@ class ConfigFixture(conf_fixture.Config):
         for config_option in ['username', 'password', 'tenant_name']:
             # Identity group items
             for prefix in ['', 'alt_', 'admin_']:
+                if prefix == 'admin_':
+                    group = 'auth'
+                else:
+                    group = 'identity'
                 self.conf.set_default(prefix + config_option,
                                       'fake_' + config_option,
-                                      group='identity')
+                                      group=group)
 
 
 class FakePrivate(config.TempestConfigPrivate):
