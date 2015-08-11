@@ -330,7 +330,7 @@ class VerifiedHTTPSConnection(httplib.HTTPSConnection):
             try:
                 self.context.load_verify_locations(self.ca_certs)
             except Exception as e:
-                msg = 'Unable to load CA from "%s"' % (self.ca_certs, e)
+                msg = 'Unable to load CA from "%s" %s' % (self.ca_certs, e)
                 raise exc.SSLConfigurationError(msg)
         else:
             self.context.set_default_verify_paths()
