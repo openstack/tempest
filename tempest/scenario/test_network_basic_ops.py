@@ -338,8 +338,8 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
 
         for remote_ip in address_list:
             if should_connect:
-                msg = "Timed out waiting for "
-                "%s to become reachable" % remote_ip
+                msg = ("Timed out waiting for %s to become "
+                       "reachable") % remote_ip
             else:
                 msg = "ip address %s is reachable" % remote_ip
             try:
