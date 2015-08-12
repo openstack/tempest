@@ -243,8 +243,8 @@ class Manager(manager.Manager):
         # with identity v2
         if CONF.identity_feature_enabled.api_v2 and \
                 CONF.identity.auth_version == 'v2':
-            # EC2 and S3 clients, if used, will check onfigured AWS credentials
-            # and generate new ones if needed
+            # EC2 and S3 clients, if used, will check configured AWS
+            # credentials and generate new ones if needed
             self.ec2api_client = botoclients.APIClientEC2(self.identity_client)
             self.s3_client = botoclients.ObjectClientS3(self.identity_client)
 

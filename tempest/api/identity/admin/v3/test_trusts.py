@@ -245,7 +245,7 @@ class TrustsV3TestJSON(BaseTrustsV3Test):
 
     @test.idempotent_id('3e48f95d-e660-4fa9-85e0-5a3d85594384')
     def test_trust_expire_invalid(self):
-        # Test case to check we can check an invlaid expiry time
+        # Test case to check we can check an invalid expiry time
         # is rejected with the correct error
         # with an expiry specified
         expires_str = 'bad.123Z'
