@@ -45,6 +45,8 @@ class CredsClient(object):
     def create_user(self, username, password, project, email):
         user = self.identity_client.create_user(
             username, password, project['id'], email)
+        if 'user' in user:
+            user = user['user']
         return user
 
     @abc.abstractmethod
@@ -113,7 +115,7 @@ class V3CredsClient(CredsClient):
             # Domain names must be unique, in any case a list is returned,
             # selecting the first (and only) element
             self.creds_domain = self.identity_client.list_domains(
-                params={'name': domain_name})[0]
+                params={'name': domain_name})['domains'][0]
         except lib_exc.NotFound:
             # TODO(andrea) we could probably create the domain on the fly
             msg = "Configured domain %s could not be found" % domain_name
@@ -122,7 +124,7 @@ class V3CredsClient(CredsClient):
     def create_project(self, name, description):
         project = self.identity_client.create_project(
             name=name, description=description,
-            domain_id=self.creds_domain['id'])
+            domain_id=self.creds_domain['id'])['project']
         return project
 
     def get_credentials(self, user, project, password):
@@ -135,6 +137,10 @@ class V3CredsClient(CredsClient):
 
     def delete_project(self, project_id):
         self.identity_client.delete_project(project_id)
+
+    def _list_roles(self):
+        roles = self.identity_client.list_roles()['roles']
+        return roles
 
 
 def get_creds_client(identity_client, project_domain_name=None):
@@ -206,6 +212,8 @@ class IsolatedCreds(cred_provider.CredentialProvider):
         email = data_utils.rand_name(root) + suffix + "@example.com"
         user = self.creds_client.create_user(
             username, user_password, project, email)
+        if 'user' in user:
+            user = user['user']
         role_assigned = False
         if admin:
             self.creds_client.assign_user_role(user, project,
