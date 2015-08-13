@@ -144,6 +144,8 @@ def wait_for_volume_status(client, volume_id, status):
         volume_status = body['status']
         if volume_status == 'error':
             raise exceptions.VolumeBuildErrorException(volume_id=volume_id)
+        if volume_status == 'error_restoring':
+            raise exceptions.VolumeRestoreErrorException(volume_id=volume_id)
 
         if int(time.time()) - start >= client.build_timeout:
             message = ('Volume %s failed to reach %s status (current %s) '
