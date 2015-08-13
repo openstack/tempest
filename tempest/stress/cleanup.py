@@ -17,6 +17,7 @@
 from oslo_log import log as logging
 
 from tempest import clients
+from tempest.common import waiters
 
 LOG = logging.getLogger(__name__)
 
@@ -34,7 +35,8 @@ def cleanup():
 
     for s in body['servers']:
         try:
-            admin_manager.servers_client.wait_for_server_termination(s['id'])
+            waiters.wait_for_server_termination(admin_manager.servers_client,
+                                                s['id'])
         except Exception:
             pass
 

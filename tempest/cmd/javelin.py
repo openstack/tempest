@@ -119,6 +119,7 @@ from tempest_lib import auth
 from tempest_lib import exceptions as lib_exc
 import yaml
 
+from tempest.common import waiters
 from tempest import config
 from tempest.services.compute.json import flavors_client
 from tempest.services.compute.json import floating_ips_client
@@ -896,8 +897,8 @@ def destroy_servers(servers):
 
         # TODO(EmilienM): disassociate floating IP from server and release it.
         client.servers.delete_server(response['id'])
-        client.servers.wait_for_server_termination(response['id'],
-                                                   ignore_error=True)
+        waiters.wait_for_server_termination(client.servers, response['id'],
+                                            ignore_error=True)
 
 
 def create_secgroups(secgroups):

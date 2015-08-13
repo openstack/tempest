@@ -96,10 +96,11 @@ class ScenarioTest(tempest.test.BaseTestCase):
 
     def addCleanup_with_wait(self, waiter_callable, thing_id, thing_id_param,
                              cleanup_callable, cleanup_args=None,
-                             cleanup_kwargs=None):
+                             cleanup_kwargs=None, waiter_client=None):
         """Adds wait for async resource deletion at the end of cleanups
 
         @param waiter_callable: callable to wait for the resource to delete
+            with the following waiter_client if specified.
         @param thing_id: the id of the resource to be cleaned-up
         @param thing_id_param: the name of the id param in the waiter
         @param cleanup_callable: method to load pass to self.addCleanup with
@@ -115,6 +116,8 @@ class ScenarioTest(tempest.test.BaseTestCase):
             'waiter_callable': waiter_callable,
             thing_id_param: thing_id
         }
+        if waiter_client:
+            wait_dict['client'] = waiter_client
         self.cleanup_waits.append(wait_dict)
 
     def _wait_for_cleanups(self):
@@ -172,13 +175,15 @@ class ScenarioTest(tempest.test.BaseTestCase):
         server = self.servers_client.create_server(name, image, flavor,
                                                    **create_kwargs)
         if wait_on_delete:
-            self.addCleanup(self.servers_client.wait_for_server_termination,
+            self.addCleanup(waiters.wait_for_server_termination,
+                            self.servers_client,
                             server['id'])
         self.addCleanup_with_wait(
-            waiter_callable=self.servers_client.wait_for_server_termination,
+            waiter_callable=waiters.wait_for_server_termination,
             thing_id=server['id'], thing_id_param='server_id',
             cleanup_callable=self.delete_wrapper,
-            cleanup_args=[self.servers_client.delete_server, server['id']])
+            cleanup_args=[self.servers_client.delete_server, server['id']],
+            waiter_client=self.servers_client)
         if wait_on_boot:
             waiters.wait_for_server_status(self.servers_client,
                                            server_id=server['id'],

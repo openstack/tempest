@@ -21,6 +21,7 @@ import testtools
 from tempest.api.compute import base
 from tempest.common.utils import data_utils
 from tempest.common.utils.linux import remote_client
+from tempest.common import waiters
 from tempest import config
 from tempest import test
 
@@ -178,7 +179,8 @@ class ServersTestJSON(base.BaseV2ComputeTest):
         # we're OK.
         def cleanup_server():
             self.client.delete_server(server_multi_nics['id'])
-            self.client.wait_for_server_termination(server_multi_nics['id'])
+            waiters.wait_for_server_termination(self.client,
+                                                server_multi_nics['id'])
 
         self.addCleanup(cleanup_server)
 
@@ -218,7 +220,8 @@ class ServersTestJSON(base.BaseV2ComputeTest):
 
         def cleanup_server():
             self.client.delete_server(server_multi_nics['id'])
-            self.client.wait_for_server_termination(server_multi_nics['id'])
+            waiters.wait_for_server_termination(self.client,
+                                                server_multi_nics['id'])
 
         self.addCleanup(cleanup_server)
 

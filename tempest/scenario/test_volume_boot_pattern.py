@@ -122,7 +122,7 @@ class TestVolumeBootPattern(manager.ScenarioTest):
 
     def _delete_server(self, server):
         self.servers_client.delete_server(server['id'])
-        self.servers_client.wait_for_server_termination(server['id'])
+        waiters.wait_for_server_termination(self.servers_client, server['id'])
 
     def _check_content_of_written_file(self, ssh_client, expected):
         actual = self._get_content(ssh_client)

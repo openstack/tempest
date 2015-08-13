@@ -181,8 +181,8 @@ class VolumesV2NegativeTest(base.BaseVolumeTest):
     def test_attach_volumes_with_nonexistent_volume_id(self):
         srv_name = data_utils.rand_name('Instance')
         server = self.create_server(srv_name)
-        self.addCleanup(self.servers_client.wait_for_server_termination,
-                        server['id'])
+        self.addCleanup(waiters.wait_for_server_termination,
+                        self.servers_client, server['id'])
         self.addCleanup(self.servers_client.delete_server, server['id'])
         waiters.wait_for_server_status(self.servers_client, server['id'],
                                        'ACTIVE')

@@ -37,5 +37,6 @@ class ServerCreateDestroyTest(stressaction.StressAction):
         self.logger.info("created %s" % server_id)
         self.logger.info("deleting %s" % name)
         self.manager.servers_client.delete_server(server_id)
-        self.manager.servers_client.wait_for_server_termination(server_id)
+        waiters.wait_for_server_termination(self.manager.servers_client,
+                                            server_id)
         self.logger.info("deleted %s" % server_id)
