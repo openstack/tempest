@@ -42,7 +42,7 @@ class BaseBackupsClient(service_client.ServiceClient):
         resp, body = self.post('backups', post_body)
         body = json.loads(body)
         self.expected_success(202, resp.status)
-        return service_client.ResponseBody(resp, body['backup'])
+        return service_client.ResponseBody(resp, body)
 
     def restore_backup(self, backup_id, volume_id=None):
         """Restore volume from backup."""
@@ -51,7 +51,7 @@ class BaseBackupsClient(service_client.ServiceClient):
         resp, body = self.post('backups/%s/restore' % (backup_id), post_body)
         body = json.loads(body)
         self.expected_success(202, resp.status)
-        return service_client.ResponseBody(resp, body['restore'])
+        return service_client.ResponseBody(resp, body)
 
     def delete_backup(self, backup_id):
         """Delete a backup of volume."""
@@ -65,7 +65,7 @@ class BaseBackupsClient(service_client.ServiceClient):
         resp, body = self.get(url)
         body = json.loads(body)
         self.expected_success(200, resp.status)
-        return service_client.ResponseBody(resp, body['backup'])
+        return service_client.ResponseBody(resp, body)
 
     def list_backups(self, detail=False):
         """Information for all the tenant's backups."""
@@ -75,7 +75,7 @@ class BaseBackupsClient(service_client.ServiceClient):
         resp, body = self.get(url)
         body = json.loads(body)
         self.expected_success(200, resp.status)
-        return service_client.ResponseBodyList(resp, body['backups'])
+        return service_client.ResponseBody(resp, body)
 
     def export_backup(self, backup_id):
         """Export backup metadata record."""
@@ -83,7 +83,7 @@ class BaseBackupsClient(service_client.ServiceClient):
         resp, body = self.get(url)
         body = json.loads(body)
         self.expected_success(200, resp.status)
-        return service_client.ResponseBody(resp, body['backup-record'])
+        return service_client.ResponseBody(resp, body)
 
     def import_backup(self, backup_service, backup_url):
         """Import backup metadata record."""
@@ -93,17 +93,17 @@ class BaseBackupsClient(service_client.ServiceClient):
         resp, body = self.post("backups/import_record", post_body)
         body = json.loads(body)
         self.expected_success(201, resp.status)
-        return service_client.ResponseBody(resp, body['backup'])
+        return service_client.ResponseBody(resp, body)
 
     def wait_for_backup_status(self, backup_id, status):
         """Waits for a Backup to reach a given status."""
-        body = self.show_backup(backup_id)
+        body = self.show_backup(backup_id)['backup']
         backup_status = body['status']
         start = int(time.time())
 
         while backup_status != status:
             time.sleep(self.build_interval)
-            body = self.show_backup(backup_id)
+            body = self.show_backup(backup_id)['backup']
             backup_status = body['status']
             if backup_status == 'error':
                 raise exceptions.VolumeBackupException(backup_id=backup_id)
