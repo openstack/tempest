@@ -153,7 +153,7 @@ class LiveBlockMigrationTestJSON(base.BaseV2ComputeAdminTest):
         self.addCleanup(self._volume_clean_up, server_id, volume['id'])
 
         # Attach the volume to the server
-        self.servers_client.attach_volume(server_id, volume['id'],
+        self.servers_client.attach_volume(server_id, volumeId=volume['id'],
                                           device='/dev/xvdb')
         self.volumes_client.wait_for_volume_status(volume['id'], 'in-use')
 

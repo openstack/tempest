@@ -104,7 +104,7 @@ class TestStampPattern(manager.ScenarioTest):
 
     def _attach_volume(self, server, volume):
         attached_volume = self.servers_client.attach_volume(
-            server['id'], volume['id'], device='/dev/%s'
+            server['id'], volumeId=volume['id'], device='/dev/%s'
             % CONF.compute.volume_device_name)
         self.assertEqual(volume['id'], attached_volume['id'])
         self._wait_for_volume_status(attached_volume, 'in-use')

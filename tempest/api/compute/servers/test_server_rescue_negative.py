@@ -137,7 +137,7 @@ class ServerRescueNegativeTestJSON(base.BaseV2ComputeTest):
         self.assertRaises(lib_exc.Conflict,
                           self.servers_client.attach_volume,
                           self.server_id,
-                          volume['id'],
+                          volumeId=volume['id'],
                           device='/dev/%s' % self.device)
 
     @test.idempotent_id('f56e465b-fe10-48bf-b75d-646cda3a8bc9')
@@ -148,7 +148,7 @@ class ServerRescueNegativeTestJSON(base.BaseV2ComputeTest):
 
         # Attach the volume to the server
         self.servers_client.attach_volume(self.server_id,
-                                          volume['id'],
+                                          volumeId=volume['id'],
                                           device='/dev/%s' % self.device)
         waiters.wait_for_volume_status(self.volumes_extensions_client,
                                        volume['id'], 'in-use')

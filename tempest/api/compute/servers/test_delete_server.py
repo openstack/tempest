@@ -122,7 +122,7 @@ class DeleteServersTestJSON(base.BaseV2ComputeTest):
         waiters.wait_for_volume_status(volumes_client,
                                        volume['id'], 'available')
         self.client.attach_volume(server['id'],
-                                  volume['id'],
+                                  volumeId=volume['id'],
                                   device=device)
         waiters.wait_for_volume_status(volumes_client,
                                        volume['id'], 'in-use')
