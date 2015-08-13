@@ -474,6 +474,7 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
     def test_lock_unlock_server(self):
         # Lock the server,try server stop(exceptions throw),unlock it and retry
         self.client.lock_server(self.server_id)
+        self.addCleanup(self.client.unlock_server, self.server_id)
         server = self.client.show_server(self.server_id)
         self.assertEqual(server['status'], 'ACTIVE')
         # Locked server is not allowed to be stopped by non-admin user
