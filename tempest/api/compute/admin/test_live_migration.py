@@ -32,6 +32,7 @@ class LiveBlockMigrationTestJSON(base.BaseV2ComputeAdminTest):
         super(LiveBlockMigrationTestJSON, cls).setup_clients()
         cls.admin_hosts_client = cls.os_adm.hosts_client
         cls.admin_servers_client = cls.os_adm.servers_client
+        cls.admin_migration_client = cls.os_adm.migrations_client
 
     @classmethod
     def resource_setup(cls):
@@ -109,7 +110,16 @@ class LiveBlockMigrationTestJSON(base.BaseV2ComputeAdminTest):
 
         self._migrate_server_to(server_id, target_host)
         waiters.wait_for_server_status(self.servers_client, server_id, state)
-        self.assertEqual(target_host, self._get_host_for_server(server_id))
+        migration_list = self.admin_migration_client.list_migrations()
+
+        msg = ("Live Migration failed. Migrations list for Instance "
+               "%s: [" % server_id)
+        for live_migration in migration_list:
+            if (live_migration['instance_uuid'] == server_id):
+                msg += "\n%s" % live_migration
+        msg += "]"
+        self.assertEqual(target_host, self._get_host_for_server(server_id),
+                         msg)
 
     @test.idempotent_id('1dce86b8-eb04-4c03-a9d8-9c1dc3ee0c7b')
     @testtools.skipUnless(CONF.compute_feature_enabled.live_migration,
