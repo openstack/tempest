@@ -24,7 +24,7 @@ class BaseVolumeAvailabilityZoneClient(service_client.ServiceClient):
         resp, body = self.get('os-availability-zone')
         body = json.loads(body)
         self.expected_success(200, resp.status)
-        return service_client.ResponseBody(resp, body['availabilityZoneInfo'])
+        return service_client.ResponseBody(resp, body)
 
 
 class VolumeAvailabilityZoneClient(BaseVolumeAvailabilityZoneClient):
