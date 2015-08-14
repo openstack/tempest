@@ -275,7 +275,7 @@ itself, and thus have a different set of guidelines around them:
 Test Documentation
 ------------------
 For tests being added we need to require inline documentation in the form of
-docstings to explain what is being tested. In API tests for a new API a class
+docstrings to explain what is being tested. In API tests for a new API a class
 level docstring should be added to an API reference doc. If one doesn't exist
 a TODO comment should be put indicating that the reference needs to be added.
 For individual API test cases a method level docstring should be used to
