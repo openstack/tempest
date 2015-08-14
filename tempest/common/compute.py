@@ -26,7 +26,7 @@ CONF = config.CONF
 LOG = logging.getLogger(__name__)
 
 
-def create_test_server(clients, validatable, validation_resources=None,
+def create_test_server(clients, validatable=False, validation_resources=None,
                        tenant_network=None, **kwargs):
     """Common wrapper utility returning a test server.
 
