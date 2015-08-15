@@ -118,7 +118,7 @@ class VolumesV2ListTestJSON(base.BaseVolumeTest):
         else:
             remaining = None
 
-        # Mark that we are not comming from a next link
+        # Mark that the current iteration is not from a 'next' link
         next = None
 
         while True:
@@ -149,8 +149,8 @@ class VolumesV2ListTestJSON(base.BaseVolumeTest):
                     # We no longer expect it
                     remaining.remove(element_id)
 
-            # If we come from a next link check that absolute url is the same
-            # as the one used for this request
+            # If the current iteration is from a 'next' link, check that the
+            # absolute url is the same as the one used for this request
             if next:
                 self.assertEqual(next, response.response['content-location'])
 
