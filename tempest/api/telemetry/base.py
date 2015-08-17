@@ -85,6 +85,11 @@ class BaseTelemetryTest(tempest.test.BaseTestCase):
         body = client.create_image(
             data_utils.rand_name('image'), container_format='bare',
             disk_format='raw', visibility='private')
+        # TODO(jswarren) Move ['image'] up to initial body value assignment
+        # once both v1 and v2 glance clients include the full response
+        # object.
+        if 'image' in body:
+            body = body['image']
         cls.image_ids.append(body['id'])
         return body
 

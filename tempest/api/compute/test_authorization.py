@@ -70,10 +70,11 @@ class AuthorizationTestJSON(base.BaseV2ComputeTest):
         body = cls.glance_client.create_image(name=name,
                                               container_format='bare',
                                               disk_format='raw',
-                                              is_public=False)
+                                              is_public=False)['image']
         image_id = body['id']
         image_file = six.StringIO(('*' * 1024))
-        body = cls.glance_client.update_image(image_id, data=image_file)
+        body = cls.glance_client.update_image(image_id,
+                                              data=image_file)['image']
         cls.glance_client.wait_for_image_status(image_id, 'active')
         cls.image = cls.images_client.show_image(image_id)
 

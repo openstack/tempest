@@ -48,7 +48,7 @@ class ImagesMetadataTestJSON(base.BaseV2ComputeTest):
         body = cls.glance_client.create_image(name=name,
                                               container_format='bare',
                                               disk_format='raw',
-                                              is_public=False)
+                                              is_public=False)['image']
         cls.image_id = body['id']
         cls.images.append(cls.image_id)
         image_file = six.StringIO(('*' * 1024))
