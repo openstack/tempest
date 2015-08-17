@@ -48,7 +48,7 @@ class TestVolumeBootPattern(manager.ScenarioTest):
         vol_name = data_utils.rand_name('volume-origin')
         return self.create_volume(name=vol_name, imageRef=img_uuid)
 
-    def _boot_instance_from_volume(self, vol_id, keypair, security_group):
+    def _get_bdm(self, vol_id, delete_on_termination=False):
         # NOTE(gfidente): the syntax for block_device_mapping is
         # dev_name=id:type:size:delete_on_terminate
         # where type needs to be "snap" if the server is booted
@@ -56,12 +56,20 @@ class TestVolumeBootPattern(manager.ScenarioTest):
         bd_map = [{
             'device_name': 'vda',
             'volume_id': vol_id,
-            'delete_on_termination': '0'}]
-        create_kwargs = {
-            'block_device_mapping': bd_map,
-            'key_name': keypair['name'],
-            'security_groups': [{'name': security_group['name']}]
-        }
+            'delete_on_termination': str(int(delete_on_termination))}]
+        return {'block_device_mapping': bd_map}
+
+    def _boot_instance_from_volume(self, vol_id, keypair=None,
+                                   security_group=None,
+                                   delete_on_termination=False):
+        create_kwargs = dict()
+        if keypair:
+            create_kwargs['key_name'] = keypair['name']
+        if security_group:
+            create_kwargs['security_groups'] = [
+                {'name': security_group['name']}]
+        create_kwargs.update(self._get_bdm(
+            vol_id, delete_on_termination=delete_on_termination))
         return self.create_server(image='', create_kwargs=create_kwargs)
 
     def _create_snapshot_from_volume(self, vol_id):
@@ -174,18 +182,34 @@ class TestVolumeBootPattern(manager.ScenarioTest):
         # deletion operations to succeed
         self._stop_instances([instance_2nd, instance_from_snapshot])
 
+    @test.idempotent_id('36c34c67-7b54-4b59-b188-02a2f458a63b')
+    @test.services('compute', 'volume', 'image')
+    def test_create_ebs_image_and_check_boot(self):
+        # create an instance from volume
+        volume_origin = self._create_volume_from_image()
+        instance = self._boot_instance_from_volume(volume_origin['id'],
+                                                   delete_on_termination=True)
+        # create EBS image
+        name = data_utils.rand_name('image')
+        image = self.create_server_snapshot(instance, name=name)
+
+        # delete instance
+        self._delete_server(instance)
+
+        # boot instance from EBS image
+        instance = self.create_server(image=image['id'])
+        # just ensure that instance booted
+
+        # delete instance
+        self._delete_server(instance)
+
 
 class TestVolumeBootPatternV2(TestVolumeBootPattern):
-    def _boot_instance_from_volume(self, vol_id, keypair, security_group):
+    def _get_bdm(self, vol_id, delete_on_termination=False):
         bd_map_v2 = [{
             'uuid': vol_id,
             'source_type': 'volume',
             'destination_type': 'volume',
             'boot_index': 0,
-            'delete_on_termination': False}]
-        create_kwargs = {
-            'block_device_mapping_v2': bd_map_v2,
-            'key_name': keypair['name'],
-            'security_groups': [{'name': security_group['name']}]
-        }
-        return self.create_server(image='', create_kwargs=create_kwargs)
+            'delete_on_termination': delete_on_termination}]
+        return {'block_device_mapping_v2': bd_map_v2}
