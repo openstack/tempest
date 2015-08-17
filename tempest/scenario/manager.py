@@ -142,7 +142,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
         # We don't need to create a keypair by pubkey in scenario
         body = client.create_keypair(name=name)
         self.addCleanup(client.delete_keypair, name)
-        return body
+        return body['keypair']
 
     def create_server(self, name=None, image=None, flavor=None,
                       wait_on_boot=True, wait_on_delete=True,

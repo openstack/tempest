@@ -25,12 +25,12 @@ from tempest.tests import fake_auth_provider
 
 class TestKeyPairsClient(base.TestCase):
 
-    FAKE_KEYPAIR = {
+    FAKE_KEYPAIR = {"keypair": {
         "public_key": "ssh-rsa foo Generated-by-Nova",
         "name": u'\u2740(*\xb4\u25e1`*)\u2740',
         "user_id": "525d55f98980415ba98e634972fa4a10",
         "fingerprint": "76:24:66:49:d7:ca:6e:5c:77:ea:8e:bb:9c:15:5f:98"
-        }
+        }}
 
     def setUp(self):
         super(TestKeyPairsClient, self).setUp()
@@ -42,7 +42,7 @@ class TestKeyPairsClient(base.TestCase):
         body = '{"keypairs": []}'
         if bytes_body:
             body = body.encode('utf-8')
-        expected = []
+        expected = {"keypairs": []}
         response = (httplib2.Response({'status': 200}), body)
         self.useFixture(mockpatch.Patch(
             'tempest.common.service_client.ServiceClient.get',
@@ -57,14 +57,14 @@ class TestKeyPairsClient(base.TestCase):
 
     def _test_show_keypair(self, bytes_body=False):
         fake_keypair = copy.deepcopy(self.FAKE_KEYPAIR)
-        fake_keypair.update({
+        fake_keypair["keypair"].update({
             "deleted": False,
             "created_at": "2015-07-22T04:53:52.000000",
             "updated_at": None,
             "deleted_at": None,
             "id": 1
             })
-        serialized_body = json.dumps({"keypair": fake_keypair})
+        serialized_body = json.dumps(fake_keypair)
         if bytes_body:
             serialized_body = serialized_body.encode('utf-8')
 
@@ -83,8 +83,8 @@ class TestKeyPairsClient(base.TestCase):
 
     def _test_create_keypair(self, bytes_body=False):
         fake_keypair = copy.deepcopy(self.FAKE_KEYPAIR)
-        fake_keypair.update({"private_key": "foo"})
-        serialized_body = json.dumps({"keypair": fake_keypair})
+        fake_keypair["keypair"].update({"private_key": "foo"})
+        serialized_body = json.dumps(fake_keypair)
         if bytes_body:
             serialized_body = serialized_body.encode('utf-8')
 

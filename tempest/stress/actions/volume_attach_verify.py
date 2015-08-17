@@ -26,7 +26,8 @@ class VolumeVerifyStress(stressaction.StressAction):
 
     def _create_keypair(self):
         keyname = data_utils.rand_name("key")
-        self.key = self.manager.keypairs_client.create_keypair(name=keyname)
+        self.key = (self.manager.keypairs_client.create_keypair(name=keyname)
+                    ['keypair'])
 
     def _delete_keypair(self):
         self.manager.keypairs_client.delete_keypair(self.key['name'])

@@ -48,8 +48,8 @@ def create_validation_resources(os, validation_resources=None):
     if validation_resources:
         if validation_resources['keypair']:
             keypair_name = data_utils.rand_name('keypair')
-            validation_data['keypair'] = \
-                os.keypairs_client.create_keypair(name=keypair_name)
+            validation_data.update(os.keypairs_client.create_keypair(
+                name=keypair_name))
             LOG.debug("Validation resource key %s created" % keypair_name)
         add_rule = False
         if validation_resources['security_group']:

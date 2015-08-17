@@ -34,9 +34,7 @@ class KeyPairsV2TestJSON(base.BaseKeypairTest):
             key_list.append(keypair)
         # Fetch all keypairs and verify the list
         # has all created keypairs
-        fetched_list = self.client.list_keypairs()
-        # We need to remove the extra 'keypair' element in the
-        # returned dict. See comment in keypairs_client.list_keypairs()
+        fetched_list = self.client.list_keypairs()['keypairs']
         new_list = list()
         for keypair in fetched_list:
             new_list.append(keypair['keypair'])
@@ -65,7 +63,7 @@ class KeyPairsV2TestJSON(base.BaseKeypairTest):
         # Keypair should be created, Got details by name and deleted
         k_name = data_utils.rand_name('keypair')
         self._create_keypair(k_name)
-        keypair_detail = self.client.show_keypair(k_name)
+        keypair_detail = self.client.show_keypair(k_name)['keypair']
         self.assertIn('name', keypair_detail)
         self.assertIn('public_key', keypair_detail)
         self.assertEqual(keypair_detail['name'], k_name,
