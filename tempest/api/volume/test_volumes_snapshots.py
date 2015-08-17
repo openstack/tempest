@@ -49,12 +49,11 @@ class VolumesV2SnapshotTestJSON(base.BaseVolumeTest):
         and validates result.
         """
         if with_detail:
-            fetched_snap_list = \
-                self.snapshots_client.\
-                list_snapshots(detail=True, params=params)
+            fetched_snap_list = self.snapshots_client.list_snapshots(
+                detail=True, params=params)['snapshots']
         else:
-            fetched_snap_list = \
-                self.snapshots_client.list_snapshots(params=params)
+            fetched_snap_list = self.snapshots_client.list_snapshots(
+                params=params)['snapshots']
 
         # Validating params of fetched snapshots
         for snap in fetched_snap_list:
@@ -98,14 +97,15 @@ class VolumesV2SnapshotTestJSON(base.BaseVolumeTest):
         snapshot = self.create_snapshot(self.volume_origin['id'], **params)
 
         # Get the snap and check for some of its details
-        snap_get = self.snapshots_client.show_snapshot(snapshot['id'])
+        snap_get = self.snapshots_client.show_snapshot(
+            snapshot['id'])['snapshot']
         self.assertEqual(self.volume_origin['id'],
                          snap_get['volume_id'],
                          "Referred volume origin mismatch")
 
         # Compare also with the output from the list action
         tracking_data = (snapshot['id'], snapshot[self.name_field])
-        snaps_list = self.snapshots_client.list_snapshots()
+        snaps_list = self.snapshots_client.list_snapshots()['snapshots']
         snaps_data = [(f['id'], f[self.name_field]) for f in snaps_list]
         self.assertIn(tracking_data, snaps_data)
 
@@ -114,14 +114,14 @@ class VolumesV2SnapshotTestJSON(base.BaseVolumeTest):
         new_desc = 'This is the new description of snapshot.'
         params = {self.name_field: new_s_name,
                   self.descrip_field: new_desc}
-        update_snapshot = \
-            self.snapshots_client.update_snapshot(snapshot['id'], **params)
+        update_snapshot = self.snapshots_client.update_snapshot(
+            snapshot['id'], **params)['snapshot']
         # Assert response body for update_snapshot method
         self.assertEqual(new_s_name, update_snapshot[self.name_field])
         self.assertEqual(new_desc, update_snapshot[self.descrip_field])
         # Assert response body for show_snapshot method
-        updated_snapshot = \
-            self.snapshots_client.show_snapshot(snapshot['id'])
+        updated_snapshot = self.snapshots_client.show_snapshot(
+            snapshot['id'])['snapshot']
         self.assertEqual(new_s_name, updated_snapshot[self.name_field])
         self.assertEqual(new_desc, updated_snapshot[self.descrip_field])
 

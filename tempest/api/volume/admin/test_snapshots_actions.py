@@ -41,8 +41,8 @@ class SnapshotsActionsV2Test(base.BaseVolumeAdminTest):
         # Create a test shared snapshot for tests
         snap_name = data_utils.rand_name(cls.__name__ + '-Snapshot')
         params = {cls.name_field: snap_name}
-        cls.snapshot = \
-            cls.client.create_snapshot(cls.volume['id'], **params)
+        cls.snapshot = cls.client.create_snapshot(
+            cls.volume['id'], **params)['snapshot']
         cls.client.wait_for_snapshot_status(cls.snapshot['id'],
                                             'available')
 
@@ -86,8 +86,8 @@ class SnapshotsActionsV2Test(base.BaseVolumeAdminTest):
         status = 'creating'
         self.admin_snapshots_client.\
             reset_snapshot_status(self.snapshot['id'], status)
-        snapshot_get \
-            = self.admin_snapshots_client.show_snapshot(self.snapshot['id'])
+        snapshot_get = self.admin_snapshots_client.show_snapshot(
+            self.snapshot['id'])['snapshot']
         self.assertEqual(status, snapshot_get['status'])
 
     @test.idempotent_id('41288afd-d463-485e-8f6e-4eea159413eb')
@@ -103,8 +103,8 @@ class SnapshotsActionsV2Test(base.BaseVolumeAdminTest):
         progress_alias = self._get_progress_alias()
         self.client.update_snapshot_status(self.snapshot['id'],
                                            status, progress)
-        snapshot_get \
-            = self.admin_snapshots_client.show_snapshot(self.snapshot['id'])
+        snapshot_get = self.admin_snapshots_client.show_snapshot(
+            self.snapshot['id'])['snapshot']
         self.assertEqual(status, snapshot_get['status'])
         self.assertEqual(progress, snapshot_get[progress_alias])
 
