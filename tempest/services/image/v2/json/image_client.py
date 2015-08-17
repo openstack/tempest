@@ -123,7 +123,7 @@ class ImageClientV2(service_client.ServiceClient):
         self.expected_success(200, resp.status)
         body = json.loads(body)
         self._validate_schema(body, type='images')
-        return service_client.ResponseBodyList(resp, body['images'])
+        return service_client.ResponseBody(resp, body)
 
     def show_image(self, image_id):
         url = 'v2/images/%s' % image_id

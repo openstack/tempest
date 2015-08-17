@@ -72,6 +72,10 @@ class BaseImageTest(tempest.test.BaseTestCase):
 
         image = cls.client.create_image(name, container_format,
                                         disk_format, **kwargs)
+        # Image objects returned by the v1 client have the image
+        # data inside a dict that is keyed against 'image'.
+        if 'image' in image:
+            image = image['image']
         cls.created_images.append(image['id'])
         return image
 
@@ -89,26 +93,6 @@ class BaseV1ImageTest(BaseImageTest):
     def setup_clients(cls):
         super(BaseV1ImageTest, cls).setup_clients()
         cls.client = cls.os.image_client
-
-    # TODO(jswarren) Remove this method once the v2 client also returns the
-    # full response object, not just the ['image'] value. At that
-    # point BaseImageTest.create_image will need to retrieve the
-    # ['image'] value.
-    @classmethod
-    def create_image(cls, **kwargs):
-        """Wrapper that returns a test image."""
-        name = data_utils.rand_name(cls.__name__ + "-instance")
-
-        if 'name' in kwargs:
-            name = kwargs.pop('name')
-
-        container_format = kwargs.pop('container_format')
-        disk_format = kwargs.pop('disk_format')
-
-        image = cls.client.create_image(name, container_format,
-                                        disk_format, **kwargs)['image']
-        cls.created_images.append(image['id'])
-        return image
 
 
 class BaseV1ImageMembersTest(BaseV1ImageTest):
@@ -166,7 +150,7 @@ class BaseV2MemberImageTest(BaseV2ImageTest):
         cls.alt_tenant_id = cls.alt_img_client.tenant_id
 
     def _list_image_ids_as_alt(self):
-        image_list = self.alt_img_client.list_images()
+        image_list = self.alt_img_client.list_images()['images']
         image_ids = map(lambda x: x['id'], image_list)
         return image_ids
 
