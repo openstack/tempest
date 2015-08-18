@@ -341,14 +341,9 @@ class ServersClient(service_client.ServiceClient):
     def start(self, server_id, **kwargs):
         return self.action(server_id, 'os-start', None, **kwargs)
 
-    def attach_volume(self, server_id, volume_id, device='/dev/vdz'):
+    def attach_volume(self, server_id, **kwargs):
         """Attaches a volume to a server instance."""
-        post_body = json.dumps({
-            'volumeAttachment': {
-                'volumeId': volume_id,
-                'device': device,
-            }
-        })
+        post_body = json.dumps({'volumeAttachment': kwargs})
         resp, body = self.post('servers/%s/os-volume_attachments' % server_id,
                                post_body)
         body = json.loads(body)

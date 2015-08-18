@@ -191,8 +191,8 @@ class VolumeVerifyStress(stressaction.StressAction):
         self.logger.info("attach volume (%s) to vm %s" %
                          (self.volume['id'], self.server_id))
         servers_client.attach_volume(self.server_id,
-                                     self.volume['id'],
-                                     self.part_name)
+                                     volumeId=self.volume['id'],
+                                     device=self.part_name)
         self.manager.volumes_client.wait_for_volume_status(self.volume['id'],
                                                            'in-use')
         if self.enable_ssh_verify:

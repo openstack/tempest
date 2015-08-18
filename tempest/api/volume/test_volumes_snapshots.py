@@ -75,7 +75,8 @@ class VolumesV2SnapshotTestJSON(base.BaseVolumeTest):
                                        'ACTIVE')
         mountpoint = '/dev/%s' % CONF.compute.volume_device_name
         self.servers_client.attach_volume(
-            server['id'], self.volume_origin['id'], mountpoint)
+            server['id'], volumeId=self.volume_origin['id'],
+            device=mountpoint)
         self.volumes_client.wait_for_volume_status(self.volume_origin['id'],
                                                    'in-use')
         self.addCleanup(self.volumes_client.wait_for_volume_status,

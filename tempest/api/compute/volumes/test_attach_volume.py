@@ -83,7 +83,7 @@ class AttachVolumeTestJSON(base.BaseV2ComputeTest):
         # Attach the volume to the server
         self.attachment = self.servers_client.attach_volume(
             self.server['id'],
-            self.volume['id'],
+            volumeId=self.volume['id'],
             device='/dev/%s' % self.device)
         self.volumes_client.wait_for_volume_status(self.volume['id'], 'in-use')
 

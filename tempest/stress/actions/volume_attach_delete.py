@@ -49,8 +49,8 @@ class VolumeAttachDeleteTest(stressaction.StressAction):
         self.logger.info("attach volume (%s) to vm %s" %
                          (volume['id'], server_id))
         self.manager.servers_client.attach_volume(server_id,
-                                                  volume['id'],
-                                                  '/dev/vdc')
+                                                  volumeId=volume['id'],
+                                                  device='/dev/vdc')
         self.manager.volumes_client.wait_for_volume_status(volume['id'],
                                                            'in-use')
         self.logger.info("volume (%s) attached to vm %s" %
