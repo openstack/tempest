@@ -187,7 +187,7 @@ servers. There are 2 options in the compute section just like with flavors:
  #. image_ref_alt
 
 Both options are expecting an image id (not name) from nova. The *image_ref*
-option is what what will be used for booting the majority of servers in tempest.
+option is what will be used for booting the majority of servers in tempest.
 *image_ref_alt* is used for tests that require 2 images such as rebuild. If 2
 images are not available you can set both options to the same image_ref and
 those tests will be skipped.
