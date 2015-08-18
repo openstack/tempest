@@ -123,11 +123,19 @@ def wait_for_image_status(client, image_id, status):
     The client should also have build_interval and build_timeout attributes.
     """
     image = client.show_image(image_id)
+    # Compute image client return response wrapped in 'image' element
+    # which is not case with glance image client.
+    if 'image' in image:
+        image = image['image']
     start = int(time.time())
 
     while image['status'] != status:
         time.sleep(client.build_interval)
         image = client.show_image(image_id)
+        # Compute image client return response wrapped in 'image' element
+        # which is not case with glance image client.
+        if 'image' in image:
+            image = image['image']
         status_curr = image['status']
         if status_curr == 'ERROR':
             raise exceptions.AddImageException(image_id=image_id)

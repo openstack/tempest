@@ -44,7 +44,7 @@ class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
 
         # Check to see if the alternate image ref actually exists...
         images_client = cls.images_client
-        images = images_client.list_images()
+        images = images_client.list_images()['images']
 
         if cls.image_ref != cls.image_ref_alt and \
             any([image for image in images
