@@ -40,10 +40,10 @@ class LiveBlockMigrationNegativeTestJSON(base.BaseV2ComputeAdminTest):
         cls.admin_servers_client = cls.os_adm.servers_client
 
     def _migrate_server_to(self, server_id, dest_host):
+        bmflm = CONF.compute_feature_enabled.block_migration_for_live_migration
         body = self.admin_servers_client.live_migrate_server(
-            server_id, dest_host,
-            CONF.compute_feature_enabled.
-            block_migration_for_live_migration)
+            server_id, host=dest_host, block_migration=bmflm,
+            disk_over_commit=False)
         return body
 
     @test.attr(type=['negative'])

@@ -381,16 +381,10 @@ class ServersClient(service_client.ServiceClient):
         """Removes a security group from the server."""
         return self.action(server_id, 'removeSecurityGroup', None, name=name)
 
-    def live_migrate_server(self, server_id, dest_host, use_block_migration):
+    def live_migrate_server(self, server_id, **kwargs):
         """This should be called with administrator privileges ."""
 
-        migrate_params = {
-            "disk_over_commit": False,
-            "block_migration": use_block_migration,
-            "host": dest_host
-        }
-
-        req_body = json.dumps({'os-migrateLive': migrate_params})
+        req_body = json.dumps({'os-migrateLive': kwargs})
 
         resp, body = self.post("servers/%s/action" % server_id, req_body)
         self.validate_response(schema.server_actions_common_schema,
