@@ -30,7 +30,7 @@ class StacksTestJSON(base.BaseOrchestrationTest):
     @test.attr(type='smoke')
     @test.idempotent_id('d35d628c-07f6-4674-85a1-74db9919e986')
     def test_stack_list_responds(self):
-        stacks = self.client.list_stacks()
+        stacks = self.client.list_stacks()['stacks']
         self.assertIsInstance(stacks, list)
 
     @test.attr(type='smoke')
@@ -47,20 +47,20 @@ class StacksTestJSON(base.BaseOrchestrationTest):
         self.client.wait_for_stack_status(stack_identifier, 'CREATE_COMPLETE')
 
         # check for stack in list
-        stacks = self.client.list_stacks()
+        stacks = self.client.list_stacks()['stacks']
         list_ids = list([stack['id'] for stack in stacks])
         self.assertIn(stack_id, list_ids)
 
         # fetch the stack
-        stack = self.client.show_stack(stack_identifier)
+        stack = self.client.show_stack(stack_identifier)['stack']
         self.assertEqual('CREATE_COMPLETE', stack['stack_status'])
 
         # fetch the stack by name
-        stack = self.client.show_stack(stack_name)
+        stack = self.client.show_stack(stack_name)['stack']
         self.assertEqual('CREATE_COMPLETE', stack['stack_status'])
 
         # fetch the stack by id
-        stack = self.client.show_stack(stack_id)
+        stack = self.client.show_stack(stack_id)['stack']
         self.assertEqual('CREATE_COMPLETE', stack['stack_status'])
 
         # delete the stack

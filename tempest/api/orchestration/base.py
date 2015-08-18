@@ -163,7 +163,7 @@ class BaseOrchestrationTest(tempest.test.BaseTestCase):
 
     def list_resources(self, stack_identifier):
         """Get a dict mapping of resource names to types."""
-        resources = self.client.list_resources(stack_identifier)
+        resources = self.client.list_resources(stack_identifier)['resources']
         self.assertIsInstance(resources, list)
         for res in resources:
             self.assert_fields_in_dict(res, 'logical_resource_id',
@@ -174,5 +174,5 @@ class BaseOrchestrationTest(tempest.test.BaseTestCase):
                     for r in resources)
 
     def get_stack_output(self, stack_identifier, output_key):
-        body = self.client.show_stack(stack_identifier)
+        body = self.client.show_stack(stack_identifier)['stack']
         return self.stack_output(body, output_key)

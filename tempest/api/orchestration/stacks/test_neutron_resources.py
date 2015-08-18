@@ -75,7 +75,8 @@ class NeutronResourcesTestJSON(base.BaseOrchestrationTest):
         cls.stack_id = cls.stack_identifier.split('/')[1]
         try:
             cls.client.wait_for_stack_status(cls.stack_id, 'CREATE_COMPLETE')
-            resources = cls.client.list_resources(cls.stack_identifier)
+            resources = (cls.client.list_resources(cls.stack_identifier)
+                         ['resources'])
         except exceptions.TimeoutException as e:
             if CONF.compute_feature_enabled.console_output:
                 # attempt to log the server console to help with debugging

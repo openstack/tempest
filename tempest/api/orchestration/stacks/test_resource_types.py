@@ -20,7 +20,7 @@ class ResourceTypesTest(base.BaseOrchestrationTest):
     @test.idempotent_id('7123d082-3577-4a30-8f00-f805327c4ffd')
     def test_resource_type_list(self):
         """Verify it is possible to list resource types."""
-        resource_types = self.client.list_resource_types()
+        resource_types = self.client.list_resource_types()['resource_types']
         self.assertIsInstance(resource_types, list)
         self.assertIn('OS::Nova::Server', resource_types)
 
@@ -28,7 +28,7 @@ class ResourceTypesTest(base.BaseOrchestrationTest):
     @test.idempotent_id('0e85a483-828b-4a28-a0e3-f0a21809192b')
     def test_resource_type_show(self):
         """Verify it is possible to get schema about resource types."""
-        resource_types = self.client.list_resource_types()
+        resource_types = self.client.list_resource_types()['resource_types']
         self.assertNotEmpty(resource_types)
 
         for resource_type in resource_types:

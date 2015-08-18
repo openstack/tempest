@@ -220,7 +220,7 @@ class StackService(BaseService):
 
     def list(self):
         client = self.client
-        stacks = client.list_stacks()
+        stacks = client.list_stacks()['stacks']
         LOG.debug("List count, %s Stacks" % len(stacks))
         return stacks
 
