@@ -101,7 +101,7 @@ class BaremetalBasicOps(manager.BaremetalScenarioTest):
     def get_flavor_ephemeral_size(self):
         """Returns size of the ephemeral partition in GiB."""
         f_id = self.instance['flavor']['id']
-        flavor = self.flavors_client.show_flavor(f_id)
+        flavor = self.flavors_client.show_flavor(f_id)['flavor']
         ephemeral = flavor.get('OS-FLV-EXT-DATA:ephemeral')
         if not ephemeral or ephemeral == 'N/A':
             return None

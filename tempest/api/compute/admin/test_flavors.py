@@ -69,7 +69,7 @@ class FlavorsAdminTestJSON(base.BaseV2ComputeAdminTest):
                                            id=flavor_id,
                                            ephemeral=self.ephemeral,
                                            swap=self.swap,
-                                           rxtx_factor=self.rxtx)
+                                           rxtx_factor=self.rxtx)['flavor']
         self.addCleanup(self.flavor_clean_up, flavor['id'])
         self.assertEqual(flavor['name'], flavor_name)
         self.assertEqual(flavor['vcpus'], self.vcpus)
@@ -82,7 +82,7 @@ class FlavorsAdminTestJSON(base.BaseV2ComputeAdminTest):
         self.assertEqual(flavor['os-flavor-access:is_public'], True)
 
         # Verify flavor is retrieved
-        flavor = self.client.show_flavor(flavor['id'])
+        flavor = self.client.show_flavor(flavor['id'])['flavor']
         self.assertEqual(flavor['name'], flavor_name)
 
         return flavor['id']
@@ -121,11 +121,11 @@ class FlavorsAdminTestJSON(base.BaseV2ComputeAdminTest):
                                            id=new_flavor_id,
                                            ephemeral=self.ephemeral,
                                            swap=self.swap,
-                                           rxtx_factor=self.rxtx)
+                                           rxtx_factor=self.rxtx)['flavor']
         self.addCleanup(self.flavor_clean_up, flavor['id'])
         flag = False
         # Verify flavor is retrieved
-        flavors = self.client.list_flavors(detail=True)
+        flavors = self.client.list_flavors(detail=True)['flavors']
         for flavor in flavors:
             if flavor['name'] == flavor_name:
                 flag = True
@@ -150,7 +150,7 @@ class FlavorsAdminTestJSON(base.BaseV2ComputeAdminTest):
         flavor = self.client.create_flavor(name=flavor_name,
                                            ram=self.ram, vcpus=self.vcpus,
                                            disk=self.disk,
-                                           id=new_flavor_id)
+                                           id=new_flavor_id)['flavor']
         self.addCleanup(self.flavor_clean_up, flavor['id'])
         self.assertEqual(flavor['name'], flavor_name)
         self.assertEqual(flavor['ram'], self.ram)
@@ -160,12 +160,12 @@ class FlavorsAdminTestJSON(base.BaseV2ComputeAdminTest):
         verify_flavor_response_extension(flavor)
 
         # Verify flavor is retrieved
-        flavor = self.client.show_flavor(new_flavor_id)
+        flavor = self.client.show_flavor(new_flavor_id)['flavor']
         self.assertEqual(flavor['name'], flavor_name)
         verify_flavor_response_extension(flavor)
 
         # Check if flavor is present in list
-        flavors = self.user_client.list_flavors(detail=True)
+        flavors = self.user_client.list_flavors(detail=True)['flavors']
         for flavor in flavors:
             if flavor['name'] == flavor_name:
                 verify_flavor_response_extension(flavor)
@@ -186,11 +186,11 @@ class FlavorsAdminTestJSON(base.BaseV2ComputeAdminTest):
                                            ram=self.ram, vcpus=self.vcpus,
                                            disk=self.disk,
                                            id=new_flavor_id,
-                                           is_public="False")
+                                           is_public="False")['flavor']
         self.addCleanup(self.flavor_clean_up, flavor['id'])
         # Verify flavor is retrieved
         flag = False
-        flavors = self.client.list_flavors(detail=True)
+        flavors = self.client.list_flavors(detail=True)['flavors']
         for flavor in flavors:
             if flavor['name'] == flavor_name:
                 flag = True
@@ -198,7 +198,7 @@ class FlavorsAdminTestJSON(base.BaseV2ComputeAdminTest):
 
         # Verify flavor is not retrieved with other user
         flag = False
-        flavors = self.user_client.list_flavors(detail=True)
+        flavors = self.user_client.list_flavors(detail=True)['flavors']
         for flavor in flavors:
             if flavor['name'] == flavor_name:
                 flag = True
@@ -215,7 +215,7 @@ class FlavorsAdminTestJSON(base.BaseV2ComputeAdminTest):
                                            ram=self.ram, vcpus=self.vcpus,
                                            disk=self.disk,
                                            id=new_flavor_id,
-                                           is_public="False")
+                                           is_public="False")['flavor']
         self.addCleanup(self.flavor_clean_up, flavor['id'])
 
         # Verify flavor is not used by other user
@@ -235,12 +235,12 @@ class FlavorsAdminTestJSON(base.BaseV2ComputeAdminTest):
                                            ram=self.ram, vcpus=self.vcpus,
                                            disk=self.disk,
                                            id=new_flavor_id,
-                                           is_public="True")
+                                           is_public="True")['flavor']
         self.addCleanup(self.flavor_clean_up, flavor['id'])
         flag = False
         self.new_client = self.flavors_client
         # Verify flavor is retrieved with new user
-        flavors = self.new_client.list_flavors(detail=True)
+        flavors = self.new_client.list_flavors(detail=True)['flavors']
         for flavor in flavors:
             if flavor['name'] == flavor_name:
                 flag = True
@@ -258,7 +258,7 @@ class FlavorsAdminTestJSON(base.BaseV2ComputeAdminTest):
                                            ram=self.ram, vcpus=self.vcpus,
                                            disk=self.disk,
                                            id=flavor_id_not_public,
-                                           is_public="False")
+                                           is_public="False")['flavor']
         self.addCleanup(self.flavor_clean_up, flavor['id'])
 
         # Create a public flavor
@@ -266,7 +266,7 @@ class FlavorsAdminTestJSON(base.BaseV2ComputeAdminTest):
                                            ram=self.ram, vcpus=self.vcpus,
                                            disk=self.disk,
                                            id=flavor_id_public,
-                                           is_public="True")
+                                           is_public="True")['flavor']
         self.addCleanup(self.flavor_clean_up, flavor['id'])
 
         def _flavor_lookup(flavors, flavor_name):
@@ -278,7 +278,8 @@ class FlavorsAdminTestJSON(base.BaseV2ComputeAdminTest):
         def _test_string_variations(variations, flavor_name):
             for string in variations:
                 params = {'is_public': string}
-                flavors = self.client.list_flavors(detail=True, **params)
+                flavors = (self.client.list_flavors(detail=True, **params)
+                           ['flavors'])
                 flavor = _flavor_lookup(flavors, flavor_name)
                 self.assertIsNotNone(flavor)
 
@@ -297,7 +298,7 @@ class FlavorsAdminTestJSON(base.BaseV2ComputeAdminTest):
         flavor = self.client.create_flavor(name=flavor_name,
                                            ram=ram, vcpus=self.vcpus,
                                            disk=self.disk,
-                                           id=new_flavor_id)
+                                           id=new_flavor_id)['flavor']
         self.addCleanup(self.flavor_clean_up, flavor['id'])
         self.assertEqual(flavor['name'], flavor_name)
         self.assertEqual(flavor['vcpus'], self.vcpus)

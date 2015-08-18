@@ -55,7 +55,8 @@ class FlavorsExtraSpecsTestJSON(base.BaseV2ComputeAdminTest):
                                               disk=disk,
                                               id=cls.new_flavor_id,
                                               ephemeral=ephemeral,
-                                              swap=swap, rxtx_factor=rxtx)
+                                              swap=swap,
+                                              rxtx_factor=rxtx)['flavor']
 
     @classmethod
     def resource_cleanup(cls):

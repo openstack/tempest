@@ -117,7 +117,7 @@ class ServersTestJSON(base.BaseV2ComputeTest):
     def test_verify_created_server_vcpus(self):
         # Verify that the number of vcpus reported by the instance matches
         # the amount stated by the flavor
-        flavor = self.flavors_client.show_flavor(self.flavor_ref)
+        flavor = self.flavors_client.show_flavor(self.flavor_ref)['flavor']
         linux_client = remote_client.RemoteClient(
             self.get_server_ip(self.server),
             self.ssh_user,
@@ -275,7 +275,7 @@ class ServersWithSpecificFlavorTestJSON(base.BaseV2ComputeAdminTest):
                       create_flavor(name=flavor_with_eph_disk_name,
                                     ram=ram, vcpus=vcpus, disk=disk,
                                     id=flavor_with_eph_disk_id,
-                                    ephemeral=1))
+                                    ephemeral=1))['flavor']
             self.addCleanup(flavor_clean_up, flavor['id'])
 
             return flavor['id']
@@ -292,7 +292,7 @@ class ServersWithSpecificFlavorTestJSON(base.BaseV2ComputeAdminTest):
             flavor = (self.flavor_client.
                       create_flavor(name=flavor_no_eph_disk_name,
                                     ram=ram, vcpus=vcpus, disk=disk,
-                                    id=flavor_no_eph_disk_id))
+                                    id=flavor_no_eph_disk_id))['flavor']
             self.addCleanup(flavor_clean_up, flavor['id'])
 
             return flavor['id']
