@@ -31,7 +31,7 @@ class HostsClient(service_client.ServiceClient):
         resp, body = self.get(url)
         body = json.loads(body)
         self.validate_response(schema.list_hosts, resp, body)
-        return service_client.ResponseBodyList(resp, body['hosts'])
+        return service_client.ResponseBody(resp, body)
 
     def show_host(self, hostname):
         """Show detail information for the host."""
@@ -39,7 +39,7 @@ class HostsClient(service_client.ServiceClient):
         resp, body = self.get("os-hosts/%s" % hostname)
         body = json.loads(body)
         self.validate_response(schema.get_host_detail, resp, body)
-        return service_client.ResponseBodyList(resp, body['host'])
+        return service_client.ResponseBody(resp, body)
 
     def update_host(self, hostname, **kwargs):
         """Update a host."""
@@ -62,7 +62,7 @@ class HostsClient(service_client.ServiceClient):
         resp, body = self.get("os-hosts/%s/startup" % hostname)
         body = json.loads(body)
         self.validate_response(schema.startup_host, resp, body)
-        return service_client.ResponseBody(resp, body['host'])
+        return service_client.ResponseBody(resp, body)
 
     def shutdown_host(self, hostname):
         """Shutdown a host."""
@@ -70,7 +70,7 @@ class HostsClient(service_client.ServiceClient):
         resp, body = self.get("os-hosts/%s/shutdown" % hostname)
         body = json.loads(body)
         self.validate_response(schema.shutdown_host, resp, body)
-        return service_client.ResponseBody(resp, body['host'])
+        return service_client.ResponseBody(resp, body)
 
     def reboot_host(self, hostname):
         """reboot a host."""
@@ -78,4 +78,4 @@ class HostsClient(service_client.ServiceClient):
         resp, body = self.get("os-hosts/%s/reboot" % hostname)
         body = json.loads(body)
         self.validate_response(schema.reboot_host, resp, body)
-        return service_client.ResponseBody(resp, body['host'])
+        return service_client.ResponseBody(resp, body)

@@ -40,7 +40,7 @@ class AggregatesAdminTestJSON(base.BaseV2ComputeAdminTest):
         cls.aggregate_name_prefix = 'test_aggregate'
         cls.az_name_prefix = 'test_az'
 
-        hosts_all = cls.os_adm.hosts_client.list_hosts()
+        hosts_all = cls.os_adm.hosts_client.list_hosts()['hosts']
         hosts = map(lambda x: x['host_name'],
                     filter(lambda y: y['service'] == 'compute', hosts_all))
         cls.host = hosts[0]
