@@ -16,6 +16,7 @@
 from oslo_log import log as logging
 
 from tempest import config
+from tempest import exceptions
 from tempest.scenario import manager
 from tempest.scenario import utils as test_utils
 from tempest import test
@@ -98,9 +99,24 @@ class TestServerBasicOps(manager.ScenarioTest):
     def verify_metadata(self):
         if self.run_ssh and CONF.compute_feature_enabled.metadata_service:
             # Verify metadata service
-            result = self.ssh_client.exec_command(
-                "curl http://169.254.169.254/latest/meta-data/public-ipv4")
-            self.assertEqual(self.floating_ip['ip'], result)
+            md_url = 'http://169.254.169.254/latest/meta-data/public-ipv4'
+
+            def exec_cmd_and_verify_output():
+                cmd = 'curl ' + md_url
+                floating_ip = self.floating_ip['ip']
+                result = self.ssh_client.exec_command(cmd)
+                if result:
+                    msg = ('Failed while verifying metadata on server. Result '
+                           'of command "%s" is NOT "%s".' % (cmd, floating_ip))
+                    self.assertEqual(floating_ip, result, msg)
+                    return 'Verification is successful!'
+
+            if not test.call_until_true(exec_cmd_and_verify_output,
+                                        CONF.compute.build_timeout,
+                                        CONF.compute.build_interval):
+                raise exceptions.TimeoutException('Timed out while waiting to '
+                                                  'verify metadata on server. '
+                                                  '%s is empty.' % md_url)
 
     @test.idempotent_id('7fff3fb3-91d8-4fd0-bd7d-0204f1f180ba')
     @test.attr(type='smoke')
