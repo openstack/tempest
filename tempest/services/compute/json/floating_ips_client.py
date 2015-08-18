@@ -32,7 +32,7 @@ class FloatingIPsClient(service_client.ServiceClient):
         resp, body = self.get(url)
         body = json.loads(body)
         self.validate_response(schema.list_floating_ips, resp, body)
-        return service_client.ResponseBodyList(resp, body['floating_ips'])
+        return service_client.ResponseBody(resp, body)
 
     def show_floating_ip(self, floating_ip_id):
         """Get the details of a floating IP."""
@@ -40,7 +40,7 @@ class FloatingIPsClient(service_client.ServiceClient):
         resp, body = self.get(url)
         body = json.loads(body)
         self.validate_response(schema.create_get_floating_ip, resp, body)
-        return service_client.ResponseBody(resp, body['floating_ip'])
+        return service_client.ResponseBody(resp, body)
 
     def create_floating_ip(self, pool_name=None):
         """Allocate a floating IP to the project."""
@@ -50,7 +50,7 @@ class FloatingIPsClient(service_client.ServiceClient):
         resp, body = self.post(url, post_body)
         body = json.loads(body)
         self.validate_response(schema.create_get_floating_ip, resp, body)
-        return service_client.ResponseBody(resp, body['floating_ip'])
+        return service_client.ResponseBody(resp, body)
 
     def delete_floating_ip(self, floating_ip_id):
         """Deletes the provided floating IP from the project."""
