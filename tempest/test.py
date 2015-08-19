@@ -530,9 +530,10 @@ class BaseTestCase(testtools.testcase.WithAttributes,
             else:
                 floating_ip = False
         if security_group is None:
-            security_group = True
+            security_group = CONF.validation.security_group
         if security_group_rules is None:
-            security_group_rules = True
+            security_group_rules = CONF.validation.security_group_rules
+
         if not cls.validation_resources:
             cls.validation_resources = {
                 'keypair': keypair,
