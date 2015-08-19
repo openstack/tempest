@@ -45,10 +45,6 @@ class VolumesV2ActionsTest(base.BaseVolumeTest):
         cls.volume = cls.create_volume()
         cls.client.wait_for_volume_status(cls.volume['id'], 'available')
 
-    def _delete_image_with_wait(self, image_id):
-        self.image_client.delete_image(image_id)
-        self.image_client.wait_for_resource_deletion(image_id)
-
     @classmethod
     def resource_cleanup(cls):
         # Delete the test instance
