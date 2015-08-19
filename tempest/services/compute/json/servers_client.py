@@ -206,15 +206,7 @@ class ServersClient(service_client.ServiceClient):
                                post_body)
         if response_key is not None:
             body = json.loads(body)
-            # Check for Schema as 'None' because if we do not have any server
-            # action schema implemented yet then they can pass 'None' to skip
-            # the validation.Once all server action has their schema
-            # implemented then, this check can be removed if every actions are
-            # supposed to validate their response.
-            # TODO(GMann): Remove the below 'if' check once all server actions
-            # schema are implemented.
-            if schema is not None:
-                self.validate_response(schema, resp, body)
+            self.validate_response(schema, resp, body)
             body = body[response_key]
         else:
             self.validate_response(schema, resp, body)
