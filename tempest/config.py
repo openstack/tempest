@@ -881,7 +881,8 @@ DashboardGroup = [
                help="Where the dashboard can be found"),
     cfg.StrOpt('login_url',
                default='http://localhost/auth/login/',
-               help="Login page for the dashboard"),
+               help="Login page for the dashboard",
+               deprecated_for_removal=True),
 ]
 
 
