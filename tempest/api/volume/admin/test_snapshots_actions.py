@@ -34,7 +34,7 @@ class SnapshotsActionsV2Test(base.BaseVolumeAdminTest):
         cls.name_field = cls.special_fields['name_field']
         params = {cls.name_field: vol_name}
         cls.volume = \
-            cls.volumes_client.create_volume(**params)
+            cls.volumes_client.create_volume(**params)['volume']
         cls.volumes_client.wait_for_volume_status(cls.volume['id'],
                                                   'available')
 

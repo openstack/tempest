@@ -119,7 +119,7 @@ class VolumesBackupsV2Test(base.BaseVolumeAdminTest):
                                                         'available')
 
         # Verify if restored volume is there in volume list
-        volumes = self.admin_volume_client.list_volumes()
+        volumes = self.admin_volume_client.list_volumes()['volumes']
         self.assertIn(restore['volume_id'], [v['id'] for v in volumes])
         self.backups_adm_client.wait_for_backup_status(import_backup['id'],
                                                        'available')

@@ -30,7 +30,7 @@ class VolumeAttachDeleteTest(stressaction.StressAction):
         name = data_utils.rand_name("volume")
         self.logger.info("creating volume: %s" % name)
         volume = self.manager.volumes_client.create_volume(
-            display_name=name)
+            display_name=name)['volume']
         self.manager.volumes_client.wait_for_volume_status(volume['id'],
                                                            'available')
         self.logger.info("created volume: %s" % volume['id'])

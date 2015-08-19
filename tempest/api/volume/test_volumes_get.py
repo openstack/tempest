@@ -49,7 +49,7 @@ class VolumesV2GetTest(base.BaseVolumeTest):
         # Create a volume
         kwargs[self.name_field] = v_name
         kwargs['metadata'] = metadata
-        volume = self.client.create_volume(**kwargs)
+        volume = self.client.create_volume(**kwargs)['volume']
         self.assertIn('id', volume)
         self.addCleanup(self._delete_volume, volume['id'])
         self.client.wait_for_volume_status(volume['id'], 'available')
@@ -60,7 +60,7 @@ class VolumesV2GetTest(base.BaseVolumeTest):
         self.assertTrue(volume['id'] is not None,
                         "Field volume id is empty or not found.")
         # Get Volume information
-        fetched_volume = self.client.show_volume(volume['id'])
+        fetched_volume = self.client.show_volume(volume['id'])['volume']
         self.assertEqual(v_name,
                          fetched_volume[self.name_field],
                          'The fetched Volume name is different '
@@ -88,12 +88,13 @@ class VolumesV2GetTest(base.BaseVolumeTest):
         new_desc = 'This is the new description of volume'
         params = {self.name_field: new_v_name,
                   self.descrip_field: new_desc}
-        update_volume = self.client.update_volume(volume['id'], **params)
+        update_volume = self.client.update_volume(
+            volume['id'], **params)['volume']
         # Assert response body for update_volume method
         self.assertEqual(new_v_name, update_volume[self.name_field])
         self.assertEqual(new_desc, update_volume[self.descrip_field])
         # Assert response body for show_volume method
-        updated_volume = self.client.show_volume(volume['id'])
+        updated_volume = self.client.show_volume(volume['id'])['volume']
         self.assertEqual(volume['id'], updated_volume['id'])
         self.assertEqual(new_v_name, updated_volume[self.name_field])
         self.assertEqual(new_desc, updated_volume[self.descrip_field])
@@ -108,7 +109,7 @@ class VolumesV2GetTest(base.BaseVolumeTest):
         new_v_desc = data_utils.rand_name('@#$%^* description')
         params = {self.descrip_field: new_v_desc,
                   'availability_zone': volume['availability_zone']}
-        new_volume = self.client.create_volume(**params)
+        new_volume = self.client.create_volume(**params)['volume']
         self.assertIn('id', new_volume)
         self.addCleanup(self._delete_volume, new_volume['id'])
         self.client.wait_for_volume_status(new_volume['id'], 'available')

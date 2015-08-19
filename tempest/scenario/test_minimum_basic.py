@@ -71,11 +71,11 @@ class TestMinimumBasicScenario(manager.ScenarioTest):
         self.volume = self.create_volume()
 
     def cinder_list(self):
-        volumes = self.volumes_client.list_volumes()
+        volumes = self.volumes_client.list_volumes()['volumes']
         self.assertIn(self.volume['id'], [x['id'] for x in volumes])
 
     def cinder_show(self):
-        volume = self.volumes_client.show_volume(self.volume['id'])
+        volume = self.volumes_client.show_volume(self.volume['id'])['volume']
         self.assertEqual(self.volume, volume)
 
     def nova_reboot(self):

@@ -58,7 +58,7 @@ class VolumeTypesV2Test(base.BaseVolumeAdminTest):
                   'volume_type': volume_types[0]['id']}
 
         # Create volume
-        volume = self.volumes_client.create_volume(**params)
+        volume = self.volumes_client.create_volume(**params)['volume']
         self.addCleanup(self._delete_volume, volume['id'])
         self.assertEqual(volume_types[0]['name'], volume["volume_type"])
         self.assertEqual(volume[self.name_field], vol_name,
@@ -74,7 +74,8 @@ class VolumeTypesV2Test(base.BaseVolumeAdminTest):
         self.volumes_client.wait_for_volume_status(volume['id'], 'available')
 
         # Get volume details and Verify
-        fetched_volume = self.volumes_client.show_volume(volume['id'])
+        fetched_volume = self.volumes_client.show_volume(
+            volume['id'])['volume']
         self.assertEqual(volume_types[1]['name'],
                          fetched_volume['volume_type'],
                          'The fetched Volume type is different '
