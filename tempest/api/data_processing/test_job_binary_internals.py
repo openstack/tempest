@@ -57,7 +57,7 @@ class JobBinaryInternalTest(dp_base.BaseDataProcessingTest):
         binary_info = self._create_job_binary_internal()
 
         # check for job binary internal in list
-        binaries = self.client.list_job_binary_internals()
+        binaries = self.client.list_job_binary_internals()['binaries']
         binaries_info = [(binary['id'], binary['name']) for binary in binaries]
         self.assertIn(binary_info, binaries_info)
 
@@ -68,7 +68,7 @@ class JobBinaryInternalTest(dp_base.BaseDataProcessingTest):
 
         # check job binary internal fetch by id
         binary = self.client.get_job_binary_internal(binary_id)
-        self.assertEqual(binary_name, binary['name'])
+        self.assertEqual(binary_name, binary['job_binary_internal']['name'])
 
     @test.attr(type='smoke')
     @test.idempotent_id('b3568c33-4eed-40d5-aae4-6ff3b2ac58f5')

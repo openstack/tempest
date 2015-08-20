@@ -71,7 +71,7 @@ class JobTest(dp_base.BaseDataProcessingTest):
         job_info = self._create_job()
 
         # check for job in list
-        jobs = self.client.list_jobs()
+        jobs = self.client.list_jobs()['jobs']
         jobs_info = [(job['id'], job['name']) for job in jobs]
         self.assertIn(job_info, jobs_info)
 
@@ -81,7 +81,7 @@ class JobTest(dp_base.BaseDataProcessingTest):
         job_id, job_name = self._create_job()
 
         # check job fetch by id
-        job = self.client.get_job(job_id)
+        job = self.client.get_job(job_id)['job']
         self.assertEqual(job_name, job['name'])
 
     @test.attr(type='smoke')
