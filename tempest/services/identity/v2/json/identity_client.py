@@ -56,7 +56,7 @@ class IdentityClient(service_client.ServiceClient):
         resp, body = self.get('OS-KSADM/roles/%s' % role_id)
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body['role'])
+        return service_client.ResponseBody(resp, body)
 
     def create_tenant(self, name, **kwargs):
         """
@@ -125,10 +125,10 @@ class IdentityClient(service_client.ServiceClient):
         resp, body = self.get('tenants')
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBodyList(resp, body['tenants'])
+        return service_client.ResponseBody(resp, body)
 
     def get_tenant_by_name(self, tenant_name):
-        tenants = self.list_tenants()
+        tenants = self.list_tenants()['tenants']
         for tenant in tenants:
             if tenant['name'] == tenant_name:
                 return tenant

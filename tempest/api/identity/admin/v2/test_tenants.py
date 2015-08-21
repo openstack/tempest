@@ -32,7 +32,7 @@ class TenantsTestJSON(base.BaseIdentityV2AdminTest):
             self.data.tenants.append(tenant)
             tenants.append(tenant)
         tenant_ids = map(lambda x: x['id'], tenants)
-        body = self.client.list_tenants()
+        body = self.client.list_tenants()['tenants']
         found = [t for t in body if t['id'] in tenant_ids]
         self.assertEqual(len(found), len(tenants), 'Tenants not created')
 
@@ -40,7 +40,7 @@ class TenantsTestJSON(base.BaseIdentityV2AdminTest):
             self.client.delete_tenant(tenant['id'])
             self.data.tenants.remove(tenant)
 
-        body = self.client.list_tenants()
+        body = self.client.list_tenants()['tenants']
         found = [tenant for tenant in body if tenant['id'] in tenant_ids]
         self.assertFalse(any(found), 'Tenants failed to delete')
 

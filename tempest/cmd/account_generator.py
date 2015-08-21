@@ -160,7 +160,7 @@ def create_resources(opts, resources):
                 raise exceptions.TempestException(
                     "Role: %s - doesn't exist" % r
                 )
-    existing = [x['name'] for x in identity_admin.list_tenants()]
+    existing = [x['name'] for x in identity_admin.list_tenants()['tenants']]
     for tenant in resources['tenants']:
         if tenant not in existing:
             identity_admin.create_tenant(tenant)

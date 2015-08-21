@@ -48,6 +48,10 @@ class BaseIdentityTest(tempest.test.BaseTestCase):
     def get_tenant_by_name(cls, name):
         try:
             tenants = cls.client.list_tenants()
+            # TODO(jswarren): always retrieve 'tenants' value
+            # once both clients return full response objects
+            if 'tenants' in tenants:
+                tenants = tenants['tenants']
         except AttributeError:
             tenants = cls.client.list_projects()['projects']
         tenant = [t for t in tenants if t['name'] == name]

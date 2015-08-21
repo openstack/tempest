@@ -85,7 +85,7 @@ class JavelinUnitTest(base.TestCase):
 class TestCreateResources(JavelinUnitTest):
     def test_create_tenants(self):
 
-        self.fake_client.identity.list_tenants.return_value = []
+        self.fake_client.identity.list_tenants.return_value = {'tenants': []}
         self.useFixture(mockpatch.PatchObject(javelin, "keystone_admin",
                                               return_value=self.fake_client))
 
@@ -95,8 +95,8 @@ class TestCreateResources(JavelinUnitTest):
         mocked_function.assert_called_once_with(self.fake_object['name'])
 
     def test_create_duplicate_tenant(self):
-        self.fake_client.identity.list_tenants.return_value = [
-            {'name': self.fake_object['name']}]
+        self.fake_client.identity.list_tenants.return_value = {'tenants': [
+            {'name': self.fake_object['name']}]}
         self.useFixture(mockpatch.PatchObject(javelin, "keystone_admin",
                                               return_value=self.fake_client))
 

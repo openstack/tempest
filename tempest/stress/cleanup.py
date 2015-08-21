@@ -72,7 +72,7 @@ def cleanup():
         if user['name'].startswith("stress_user"):
             admin_manager.identity_client.delete_user(user['id'])
 
-    tenants = admin_manager.identity_client.list_tenants()
+    tenants = admin_manager.identity_client.list_tenants()['tenants']
     LOG.info("Cleanup::remove %s tenants" % len(tenants))
     for tenant in tenants:
         if tenant['name'].startswith("stress_tenant"):

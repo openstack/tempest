@@ -889,7 +889,7 @@ class TenantService(IdentityService):
 
     def list(self):
         client = self.client
-        tenants = client.list_tenants()
+        tenants = client.list_tenants()['tenants']
         if not self.is_save_state:
             tenants = [tenant for tenant in tenants if (tenant['id']
                        not in self.saved_state_json['tenants'].keys()
