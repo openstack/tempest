@@ -33,12 +33,12 @@ class CredentialsTestJSON(base.BaseIdentityV3AdminTest):
         for i in range(2):
             cls.project = cls.client.create_project(
                 data_utils.rand_name('project'),
-                description=data_utils.rand_name('project-desc'))
+                description=data_utils.rand_name('project-desc'))['project']
             cls.projects.append(cls.project['id'])
 
         cls.user_body = cls.client.create_user(
             u_name, description=u_desc, password=u_password,
-            email=u_email, project_id=cls.projects[0])
+            email=u_email, project_id=cls.projects[0])['user']
 
     @classmethod
     def resource_cleanup(cls):

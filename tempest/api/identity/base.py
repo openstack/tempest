@@ -49,7 +49,7 @@ class BaseIdentityTest(tempest.test.BaseTestCase):
         try:
             tenants = cls.client.list_tenants()
         except AttributeError:
-            tenants = cls.client.list_projects()
+            tenants = cls.client.list_projects()['projects']
         tenant = [t for t in tenants if t['name'] == name]
         if len(tenant) > 0:
             return tenant[0]
@@ -153,21 +153,21 @@ class BaseIdentityV3AdminTest(BaseIdentityV3Test):
 
     @classmethod
     def get_user_by_name(cls, name):
-        users = cls.client.get_users()
+        users = cls.client.get_users()['users']
         user = [u for u in users if u['name'] == name]
         if len(user) > 0:
             return user[0]
 
     @classmethod
     def get_tenant_by_name(cls, name):
-        tenants = cls.client.list_projects()
+        tenants = cls.client.list_projects()['projects']
         tenant = [t for t in tenants if t['name'] == name]
         if len(tenant) > 0:
             return tenant[0]
 
     @classmethod
     def get_role_by_name(cls, name):
-        roles = cls.client.list_roles()
+        roles = cls.client.list_roles()['roles']
         role = [r for r in roles if r['name'] == name]
         if len(role) > 0:
             return role[0]
@@ -237,7 +237,7 @@ class DataGenerator(object):
                 self.test_user,
                 password=self.test_password,
                 project_id=self.project['id'],
-                email=self.test_email)
+                email=self.test_email)['user']
             self.v3_users.append(self.v3_user)
 
         def setup_test_project(self):
@@ -246,13 +246,13 @@ class DataGenerator(object):
             self.test_description = data_utils.rand_name('desc')
             self.project = self.client.create_project(
                 name=self.test_project,
-                description=self.test_description)
+                description=self.test_description)['project']
             self.projects.append(self.project)
 
         def setup_test_v3_role(self):
             """Set up a test v3 role."""
             self.test_role = data_utils.rand_name('role')
-            self.v3_role = self.client.create_role(self.test_role)
+            self.v3_role = self.client.create_role(self.test_role)['role']
             self.v3_roles.append(self.v3_role)
 
         def setup_test_domain(self):
@@ -261,7 +261,7 @@ class DataGenerator(object):
             self.test_description = data_utils.rand_name('desc')
             self.domain = self.client.create_domain(
                 name=self.test_domain,
-                description=self.test_description)
+                description=self.test_description)['domain']
             self.domains.append(self.domain)
 
         @staticmethod

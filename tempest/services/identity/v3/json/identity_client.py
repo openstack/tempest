@@ -49,11 +49,11 @@ class IdentityV3Client(service_client.ServiceClient):
         resp, body = self.post('users', post_body)
         self.expected_success(201, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body['user'])
+        return service_client.ResponseBody(resp, body)
 
     def update_user(self, user_id, name, **kwargs):
         """Updates a user."""
-        body = self.get_user(user_id)
+        body = self.get_user(user_id)['user']
         email = kwargs.get('email', body['email'])
         en = kwargs.get('enabled', body['enabled'])
         project_id = kwargs.get('project_id', body['project_id'])
@@ -78,7 +78,7 @@ class IdentityV3Client(service_client.ServiceClient):
         resp, body = self.patch('users/%s' % user_id, post_body)
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body['user'])
+        return service_client.ResponseBody(resp, body)
 
     def update_user_password(self, user_id, password, original_password):
         """Updates a user password."""
@@ -96,7 +96,7 @@ class IdentityV3Client(service_client.ServiceClient):
         resp, body = self.get('users/%s/projects' % user_id)
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBodyList(resp, body['projects'])
+        return service_client.ResponseBody(resp, body)
 
     def get_users(self, params=None):
         """Get the list of users."""
@@ -106,14 +106,14 @@ class IdentityV3Client(service_client.ServiceClient):
         resp, body = self.get(url)
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBodyList(resp, body['users'])
+        return service_client.ResponseBody(resp, body)
 
     def get_user(self, user_id):
         """GET a user."""
         resp, body = self.get("users/%s" % user_id)
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body['user'])
+        return service_client.ResponseBody(resp, body)
 
     def delete_user(self, user_id):
         """Deletes a User."""
@@ -136,7 +136,7 @@ class IdentityV3Client(service_client.ServiceClient):
         resp, body = self.post('projects', post_body)
         self.expected_success(201, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body['project'])
+        return service_client.ResponseBody(resp, body)
 
     def list_projects(self, params=None):
         url = "projects"
@@ -145,10 +145,10 @@ class IdentityV3Client(service_client.ServiceClient):
         resp, body = self.get(url)
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBodyList(resp, body['projects'])
+        return service_client.ResponseBody(resp, body)
 
     def update_project(self, project_id, **kwargs):
-        body = self.get_project(project_id)
+        body = self.get_project(project_id)['project']
         name = kwargs.get('name', body['name'])
         desc = kwargs.get('description', body['description'])
         en = kwargs.get('enabled', body['enabled'])
@@ -164,14 +164,14 @@ class IdentityV3Client(service_client.ServiceClient):
         resp, body = self.patch('projects/%s' % project_id, post_body)
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body['project'])
+        return service_client.ResponseBody(resp, body)
 
     def get_project(self, project_id):
         """GET a Project."""
         resp, body = self.get("projects/%s" % project_id)
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body['project'])
+        return service_client.ResponseBody(resp, body)
 
     def delete_project(self, project_id):
         """Delete a project."""
@@ -188,21 +188,21 @@ class IdentityV3Client(service_client.ServiceClient):
         resp, body = self.post('roles', post_body)
         self.expected_success(201, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body['role'])
+        return service_client.ResponseBody(resp, body)
 
     def get_role(self, role_id):
         """GET a Role."""
         resp, body = self.get('roles/%s' % str(role_id))
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body['role'])
+        return service_client.ResponseBody(resp, body)
 
     def list_roles(self):
         """Get the list of Roles."""
         resp, body = self.get("roles")
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBodyList(resp, body['roles'])
+        return service_client.ResponseBody(resp, body)
 
     def update_role(self, name, role_id):
         """Create a Role."""
@@ -213,7 +213,7 @@ class IdentityV3Client(service_client.ServiceClient):
         resp, body = self.patch('roles/%s' % str(role_id), post_body)
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body['role'])
+        return service_client.ResponseBody(resp, body)
 
     def delete_role(self, role_id):
         """Delete a role."""
@@ -241,7 +241,7 @@ class IdentityV3Client(service_client.ServiceClient):
         resp, body = self.post('domains', post_body)
         self.expected_success(201, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body['domain'])
+        return service_client.ResponseBody(resp, body)
 
     def delete_domain(self, domain_id):
         """Delete a domain."""
@@ -257,11 +257,11 @@ class IdentityV3Client(service_client.ServiceClient):
         resp, body = self.get(url)
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBodyList(resp, body['domains'])
+        return service_client.ResponseBody(resp, body)
 
     def update_domain(self, domain_id, **kwargs):
         """Updates a domain."""
-        body = self.get_domain(domain_id)
+        body = self.get_domain(domain_id)['domain']
         description = kwargs.get('description', body['description'])
         en = kwargs.get('enabled', body['enabled'])
         name = kwargs.get('name', body['name'])
@@ -274,14 +274,14 @@ class IdentityV3Client(service_client.ServiceClient):
         resp, body = self.patch('domains/%s' % domain_id, post_body)
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body['domain'])
+        return service_client.ResponseBody(resp, body)
 
     def get_domain(self, domain_id):
         """Get Domain details."""
         resp, body = self.get('domains/%s' % domain_id)
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body['domain'])
+        return service_client.ResponseBody(resp, body)
 
     def get_token(self, resp_token):
         """Get token details."""
@@ -289,7 +289,7 @@ class IdentityV3Client(service_client.ServiceClient):
         resp, body = self.get("auth/tokens", headers=headers)
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body['token'])
+        return service_client.ResponseBody(resp, body)
 
     def delete_token(self, resp_token):
         """Deletes token."""
@@ -313,25 +313,25 @@ class IdentityV3Client(service_client.ServiceClient):
         resp, body = self.post('groups', post_body)
         self.expected_success(201, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body['group'])
+        return service_client.ResponseBody(resp, body)
 
     def get_group(self, group_id):
         """Get group details."""
         resp, body = self.get('groups/%s' % group_id)
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body['group'])
+        return service_client.ResponseBody(resp, body)
 
     def list_groups(self):
         """Lists the groups."""
         resp, body = self.get('groups')
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBodyList(resp, body['groups'])
+        return service_client.ResponseBody(resp, body)
 
     def update_group(self, group_id, **kwargs):
         """Updates a group."""
-        body = self.get_group(group_id)
+        body = self.get_group(group_id)['group']
         name = kwargs.get('name', body['name'])
         description = kwargs.get('description', body['description'])
         post_body = {
@@ -342,7 +342,7 @@ class IdentityV3Client(service_client.ServiceClient):
         resp, body = self.patch('groups/%s' % group_id, post_body)
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body['group'])
+        return service_client.ResponseBody(resp, body)
 
     def delete_group(self, group_id):
         """Delete a group."""
@@ -362,14 +362,14 @@ class IdentityV3Client(service_client.ServiceClient):
         resp, body = self.get('groups/%s/users' % group_id)
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBodyList(resp, body['users'])
+        return service_client.ResponseBody(resp, body)
 
     def list_user_groups(self, user_id):
         """Lists groups which a user belongs to."""
         resp, body = self.get('users/%s/groups' % user_id)
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBodyList(resp, body['groups'])
+        return service_client.ResponseBody(resp, body)
 
     def delete_group_user(self, group_id, user_id):
         """Delete user in group."""
@@ -397,7 +397,7 @@ class IdentityV3Client(service_client.ServiceClient):
                               (project_id, user_id))
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBodyList(resp, body['roles'])
+        return service_client.ResponseBody(resp, body)
 
     def list_user_roles_on_domain(self, domain_id, user_id):
         """list roles of a user on a domain."""
@@ -405,7 +405,7 @@ class IdentityV3Client(service_client.ServiceClient):
                               (domain_id, user_id))
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBodyList(resp, body['roles'])
+        return service_client.ResponseBody(resp, body)
 
     def revoke_role_from_user_on_project(self, project_id, user_id, role_id):
         """Delete role of a user on a project."""
@@ -441,7 +441,7 @@ class IdentityV3Client(service_client.ServiceClient):
                               (project_id, group_id))
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBodyList(resp, body['roles'])
+        return service_client.ResponseBody(resp, body)
 
     def list_group_roles_on_domain(self, domain_id, group_id):
         """list roles of a user on a domain."""
@@ -449,7 +449,7 @@ class IdentityV3Client(service_client.ServiceClient):
                               (domain_id, group_id))
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBodyList(resp, body['roles'])
+        return service_client.ResponseBody(resp, body)
 
     def revoke_role_from_group_on_project(self, project_id, group_id, role_id):
         """Delete role of a user on a project."""
@@ -481,7 +481,7 @@ class IdentityV3Client(service_client.ServiceClient):
         resp, body = self.post('OS-TRUST/trusts', post_body)
         self.expected_success(201, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body['trust'])
+        return service_client.ResponseBody(resp, body)
 
     def delete_trust(self, trust_id):
         """Deletes a trust."""
@@ -501,21 +501,21 @@ class IdentityV3Client(service_client.ServiceClient):
             resp, body = self.get("OS-TRUST/trusts")
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBodyList(resp, body['trusts'])
+        return service_client.ResponseBody(resp, body)
 
     def get_trust(self, trust_id):
         """GET trust."""
         resp, body = self.get("OS-TRUST/trusts/%s" % trust_id)
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body['trust'])
+        return service_client.ResponseBody(resp, body)
 
     def get_trust_roles(self, trust_id):
         """GET roles delegated by a trust."""
         resp, body = self.get("OS-TRUST/trusts/%s/roles" % trust_id)
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBodyList(resp, body['roles'])
+        return service_client.ResponseBody(resp, body)
 
     def get_trust_role(self, trust_id, role_id):
         """GET role delegated by a trust."""
@@ -523,7 +523,7 @@ class IdentityV3Client(service_client.ServiceClient):
                               % (trust_id, role_id))
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body['role'])
+        return service_client.ResponseBody(resp, body)
 
     def check_trust_role(self, trust_id, role_id):
         """HEAD Check if role is delegated by a trust."""

@@ -48,7 +48,7 @@ class BaseTrustsV3Test(base.BaseIdentityV3AdminTest):
         # create a project that trusts will be granted on
         self.trustor_project_name = data_utils.rand_name(name='project')
         project = self.client.create_project(self.trustor_project_name,
-                                             domain_id='default')
+                                             domain_id='default')['project']
         self.trustor_project_id = project['id']
         self.assertIsNotNone(self.trustor_project_id)
 
@@ -63,17 +63,17 @@ class BaseTrustsV3Test(base.BaseIdentityV3AdminTest):
             password=self.trustor_password,
             email=u_email,
             project_id=self.trustor_project_id,
-            domain_id='default')
+            domain_id='default')['user']
         self.trustor_user_id = user['id']
 
         # And two roles, one we'll delegate and one we won't
         self.delegated_role = data_utils.rand_name('DelegatedRole')
         self.not_delegated_role = data_utils.rand_name('NotDelegatedRole')
 
-        role = self.client.create_role(self.delegated_role)
+        role = self.client.create_role(self.delegated_role)['role']
         self.delegated_role_id = role['id']
 
-        role = self.client.create_role(self.not_delegated_role)
+        role = self.client.create_role(self.not_delegated_role)['role']
         self.not_delegated_role_id = role['id']
 
         # Assign roles to trustor
@@ -118,7 +118,7 @@ class BaseTrustsV3Test(base.BaseIdentityV3AdminTest):
             project_id=self.trustor_project_id,
             role_names=[self.delegated_role],
             impersonation=impersonate,
-            expires_at=expires)
+            expires_at=expires)['trust']
         self.trust_id = trust_create['id']
         return trust_create
 
@@ -141,7 +141,7 @@ class BaseTrustsV3Test(base.BaseIdentityV3AdminTest):
             self.assertEqual(1, len(trust['roles']))
 
     def get_trust(self):
-        trust_get = self.trustor_client.get_trust(self.trust_id)
+        trust_get = self.trustor_client.get_trust(self.trust_id)['trust']
         return trust_get
 
     def validate_role(self, role):
@@ -157,12 +157,12 @@ class BaseTrustsV3Test(base.BaseIdentityV3AdminTest):
     def check_trust_roles(self):
         # Check we find the delegated role
         roles_get = self.trustor_client.get_trust_roles(
-            self.trust_id)
+            self.trust_id)['roles']
         self.assertEqual(1, len(roles_get))
         self.validate_role(roles_get[0])
 
         role_get = self.trustor_client.get_trust_role(
-            self.trust_id, self.delegated_role_id)
+            self.trust_id, self.delegated_role_id)['role']
         self.validate_role(role_get)
 
         role_get = self.trustor_client.check_trust_role(
@@ -257,7 +257,7 @@ class TrustsV3TestJSON(BaseTrustsV3Test):
     def test_get_trusts_query(self):
         self.create_trust()
         trusts_get = self.trustor_client.get_trusts(
-            trustor_user_id=self.trustor_user_id)
+            trustor_user_id=self.trustor_user_id)['trusts']
         self.assertEqual(1, len(trusts_get))
         self.validate_trust(trusts_get[0], summary=True)
 
@@ -265,7 +265,7 @@ class TrustsV3TestJSON(BaseTrustsV3Test):
     @test.idempotent_id('4773ebd5-ecbf-4255-b8d8-b63e6f72b65d')
     def test_get_trusts_all(self):
         self.create_trust()
-        trusts_get = self.client.get_trusts()
+        trusts_get = self.client.get_trusts()['trusts']
         trusts = [t for t in trusts_get
                   if t['id'] == self.trust_id]
         self.assertEqual(1, len(trusts))
