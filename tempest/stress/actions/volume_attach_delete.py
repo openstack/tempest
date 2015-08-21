@@ -59,7 +59,8 @@ class VolumeAttachDeleteTest(stressaction.StressAction):
         # Step 4: delete vm
         self.logger.info("deleting vm: %s" % vm_name)
         self.manager.servers_client.delete_server(server_id)
-        self.manager.servers_client.wait_for_server_termination(server_id)
+        waiters.wait_for_server_termination(self.manager.servers_client,
+                                            server_id)
         self.logger.info("deleted vm: %s" % server_id)
 
         # Step 5: delete volume

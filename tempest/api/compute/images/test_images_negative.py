@@ -50,7 +50,7 @@ class ImagesNegativeTestJSON(base.BaseV2ComputeTest):
 
         # Delete server before trying to create server
         self.servers_client.delete_server(server['id'])
-        self.servers_client.wait_for_server_termination(server['id'])
+        waiters.wait_for_server_termination(self.servers_client, server['id'])
         # Create a new image after server is deleted
         name = data_utils.rand_name('image')
         meta = {'image_type': 'test'}

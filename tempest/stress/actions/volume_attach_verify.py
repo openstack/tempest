@@ -48,7 +48,8 @@ class VolumeVerifyStress(stressaction.StressAction):
     def _destroy_vm(self):
         self.logger.info("deleting server: %s" % self.server_id)
         self.manager.servers_client.delete_server(self.server_id)
-        self.manager.servers_client.wait_for_server_termination(self.server_id)
+        waiters.wait_for_server_termination(self.manager.servers_client,
+                                            self.server_id)
         self.logger.info("deleted server: %s" % self.server_id)
 
     def _create_sec_group(self):

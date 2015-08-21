@@ -109,8 +109,8 @@ class TestLargeOpsScenario(manager.ScenarioTest):
         for server in self.servers:
             # after deleting all servers - wait for all servers to clear
             # before cleanup continues
-            self.addCleanupClass(self.servers_client.
-                                 wait_for_server_termination,
+            self.addCleanupClass(waiters.wait_for_server_termination,
+                                 self.servers_client,
                                  server['id'])
         for server in self.servers:
             self.addCleanupClass(self.servers_client.delete_server,

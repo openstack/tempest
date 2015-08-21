@@ -20,6 +20,7 @@ from oslo_log import log as logging
 import testtools
 
 from tempest.common.utils import data_utils
+from tempest.common import waiters
 from tempest import config
 from tempest import exceptions
 from tempest.scenario import manager
@@ -643,7 +644,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         self.assertEqual(self.port_id, port_list[0]['id'])
         # Delete the server.
         self.servers_client.delete_server(server['id'])
-        self.servers_client.wait_for_server_termination(server['id'])
+        waiters.wait_for_server_termination(self.servers_client, server['id'])
         # Assert the port still exists on the network but is unbound from
         # the deleted server.
         port = self.network_client.show_port(self.port_id)['port']

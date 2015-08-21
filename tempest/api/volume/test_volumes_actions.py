@@ -53,7 +53,8 @@ class VolumesV2ActionsTest(base.BaseVolumeTest):
     def resource_cleanup(cls):
         # Delete the test instance
         cls.servers_client.delete_server(cls.server['id'])
-        cls.servers_client.wait_for_server_termination(cls.server['id'])
+        waiters.wait_for_server_termination(cls.servers_client,
+                                            cls.server['id'])
 
         super(VolumesV2ActionsTest, cls).resource_cleanup()
 

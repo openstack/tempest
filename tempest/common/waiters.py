@@ -15,6 +15,7 @@ import time
 
 from oslo_log import log as logging
 from tempest_lib.common.utils import misc as misc_utils
+from tempest_lib import exceptions as lib_exc
 
 from tempest import config
 from tempest import exceptions
@@ -94,6 +95,25 @@ def wait_for_server_status(client, server_id, status, ready_wait=True,
             raise exceptions.TimeoutException(message)
         old_status = server_status
         old_task_state = task_state
+
+
+def wait_for_server_termination(client, server_id, ignore_error=False):
+    """Waits for server to reach termination."""
+    start_time = int(time.time())
+    while True:
+        try:
+            body = client.show_server(server_id)
+        except lib_exc.NotFound:
+            return
+
+        server_status = body['status']
+        if server_status == 'ERROR' and not ignore_error:
+            raise exceptions.BuildErrorException(server_id=server_id)
+
+        if int(time.time()) - start_time >= client.build_timeout:
+            raise exceptions.TimeoutException
+
+        time.sleep(client.build_interval)
 
 
 def wait_for_image_status(client, image_id, status):

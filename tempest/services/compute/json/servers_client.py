@@ -14,15 +14,11 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import time
-
 from oslo_serialization import jsonutils as json
 from six.moves.urllib import parse as urllib
-from tempest_lib import exceptions as lib_exc
 
 from tempest.api_schema.response.compute.v2_1 import servers as schema
 from tempest.common import service_client
-from tempest import exceptions
 
 
 class ServersClient(service_client.ServiceClient):
@@ -164,24 +160,6 @@ class ServersClient(service_client.ServiceClient):
         body = json.loads(body)
         self.validate_response(_schema, resp, body)
         return service_client.ResponseBody(resp, body)
-
-    def wait_for_server_termination(self, server_id, ignore_error=False):
-        """Waits for server to reach termination."""
-        start_time = int(time.time())
-        while True:
-            try:
-                body = self.show_server(server_id)
-            except lib_exc.NotFound:
-                return
-
-            server_status = body['status']
-            if server_status == 'ERROR' and not ignore_error:
-                raise exceptions.BuildErrorException(server_id=server_id)
-
-            if int(time.time()) - start_time >= self.build_timeout:
-                raise exceptions.TimeoutException
-
-            time.sleep(self.build_interval)
 
     def list_addresses(self, server_id):
         """Lists all addresses for a server."""

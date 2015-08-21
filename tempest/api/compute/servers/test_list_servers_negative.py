@@ -17,6 +17,7 @@ from six import moves
 from tempest_lib import exceptions as lib_exc
 
 from tempest.api.compute import base
+from tempest.common import waiters
 from tempest import test
 
 
@@ -47,8 +48,8 @@ class ListServersNegativeTestJSON(base.BaseV2ComputeTest):
         # be put into ERROR status on a quick spawn, then delete,
         # as the compute node expects the instance local status
         # to be spawning, not deleted. See LP Bug#1061167
-        cls.client.wait_for_server_termination(srv['id'],
-                                               ignore_error=True)
+        waiters.wait_for_server_termination(cls.client, srv['id'],
+                                            ignore_error=True)
         cls.deleted_fixtures.append(srv)
 
     @test.attr(type=['negative'])
