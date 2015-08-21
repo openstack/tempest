@@ -26,7 +26,7 @@ class EndPointClient(service_client.ServiceClient):
         resp, body = self.get('endpoints')
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBodyList(resp, body['endpoints'])
+        return service_client.ResponseBody(resp, body)
 
     def create_endpoint(self, service_id, interface, url, **kwargs):
         """Create endpoint.
@@ -51,7 +51,7 @@ class EndPointClient(service_client.ServiceClient):
         resp, body = self.post('endpoints', post_body)
         self.expected_success(201, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body['endpoint'])
+        return service_client.ResponseBody(resp, body)
 
     def update_endpoint(self, endpoint_id, service_id=None, interface=None,
                         url=None, region=None, enabled=None, **kwargs):
@@ -78,7 +78,7 @@ class EndPointClient(service_client.ServiceClient):
         resp, body = self.patch('endpoints/%s' % endpoint_id, post_body)
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body['endpoint'])
+        return service_client.ResponseBody(resp, body)
 
     def delete_endpoint(self, endpoint_id):
         """Delete endpoint."""
