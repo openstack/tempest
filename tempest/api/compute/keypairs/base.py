@@ -33,6 +33,6 @@ class BaseKeypairTest(base.BaseComputeTest):
         kwargs = {'name': keypair_name}
         if pub_key:
             kwargs.update({'public_key': pub_key})
-        body = self.client.create_keypair(**kwargs)
+        body = self.client.create_keypair(**kwargs)['keypair']
         self.addCleanup(self._delete_keypair, keypair_name)
         return body
