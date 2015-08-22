@@ -58,7 +58,7 @@ class TestAggregatesBasicOps(manager.ScenarioTest):
         self.aggregates_client.delete_aggregate(aggregate['id'])
 
     def _get_host_name(self):
-        hosts = self.hosts_client.list_hosts()
+        hosts = self.hosts_client.list_hosts()['hosts']
         self.assertTrue(len(hosts) >= 1)
         computes = [x for x in hosts if x['service'] == 'compute']
         return computes[0]['host_name']

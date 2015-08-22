@@ -32,7 +32,7 @@ class HostsAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
         cls.non_admin_client = cls.os.hosts_client
 
     def _get_host_name(self):
-        hosts = self.client.list_hosts()
+        hosts = self.client.list_hosts()['hosts']
         self.assertTrue(len(hosts) >= 1)
         hostname = hosts[0]['host_name']
         return hostname
