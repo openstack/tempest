@@ -19,4 +19,4 @@ build
 .coverage*
 !.coveragerc
 cover/
-doc/source/_static/tempest.conf
+doc/source/_static/tempest.conf.sample
