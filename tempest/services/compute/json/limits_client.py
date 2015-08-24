@@ -25,4 +25,4 @@ class LimitsClient(service_client.ServiceClient):
         resp, body = self.get("limits")
         body = json.loads(body)
         self.validate_response(schema.get_limit, resp, body)
-        return service_client.ResponseBody(resp, body['limits'])
+        return service_client.ResponseBody(resp, body)

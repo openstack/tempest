@@ -49,7 +49,7 @@ class MigrationsAdminTest(base.BaseV2ComputeAdminTest):
         waiters.wait_for_server_status(self.servers_client,
                                        server_id, 'ACTIVE')
 
-        body = self.client.list_migrations()
+        body = self.client.list_migrations()['migrations']
 
         instance_uuids = [x['instance_uuid'] for x in body]
         self.assertIn(server_id, instance_uuids)

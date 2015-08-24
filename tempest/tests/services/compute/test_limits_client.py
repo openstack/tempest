@@ -31,27 +31,33 @@ class TestLimitsClient(base.TestCase):
             fake_auth, 'compute', 'regionOne')
 
     def _test_show_limits(self, bytes_body=False):
-        expected = {"rate": [],
-                    "absolute": {"maxServerMeta": 128,
-                                 "maxPersonality": 5,
-                                 "totalServerGroupsUsed": 0,
-                                 "maxImageMeta": 128,
-                                 "maxPersonalitySize": 10240,
-                                 "maxServerGroups": 10,
-                                 "maxSecurityGroupRules": 20,
-                                 "maxTotalKeypairs": 100,
-                                 "totalCoresUsed": 0,
-                                 "totalRAMUsed": 0,
-                                 "totalInstancesUsed": 0,
-                                 "maxSecurityGroups": 10,
-                                 "totalFloatingIpsUsed": 0,
-                                 "maxTotalCores": 20,
-                                 "totalSecurityGroupsUsed": 0,
-                                 "maxTotalFloatingIps": 10,
-                                 "maxTotalInstances": 10,
-                                 "maxTotalRAMSize": 51200,
-                                 "maxServerGroupMembers": 10}}
-        serialized_body = json.dumps({"limits": expected})
+        expected = {
+            "limits": {
+                "rate": [],
+                "absolute": {
+                    "maxServerMeta": 128,
+                    "maxPersonality": 5,
+                    "totalServerGroupsUsed": 0,
+                    "maxImageMeta": 128,
+                    "maxPersonalitySize": 10240,
+                    "maxServerGroups": 10,
+                    "maxSecurityGroupRules": 20,
+                    "maxTotalKeypairs": 100,
+                    "totalCoresUsed": 0,
+                    "totalRAMUsed": 0,
+                    "totalInstancesUsed": 0,
+                    "maxSecurityGroups": 10,
+                    "totalFloatingIpsUsed": 0,
+                    "maxTotalCores": 20,
+                    "totalSecurityGroupsUsed": 0,
+                    "maxTotalFloatingIps": 10,
+                    "maxTotalInstances": 10,
+                    "maxTotalRAMSize": 51200,
+                    "maxServerGroupMembers": 10
+                }
+            }
+        }
+        serialized_body = json.dumps(expected)
         if bytes_body:
             serialized_body = serialized_body.encode('utf-8')
 

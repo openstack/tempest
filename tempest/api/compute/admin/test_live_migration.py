@@ -111,7 +111,8 @@ class LiveBlockMigrationTestJSON(base.BaseV2ComputeAdminTest):
 
         self._migrate_server_to(server_id, target_host)
         waiters.wait_for_server_status(self.servers_client, server_id, state)
-        migration_list = self.admin_migration_client.list_migrations()
+        migration_list = (self.admin_migration_client.list_migrations()
+                          ['migrations'])
 
         msg = ("Live Migration failed. Migrations list for Instance "
                "%s: [" % server_id)
