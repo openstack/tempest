@@ -34,7 +34,7 @@ class TestExtensionsClient(base.TestCase):
         body = '{"extensions": []}'
         if bytes_body:
             body = body.encode('utf-8')
-        expected = []
+        expected = {"extensions": []}
         response = (httplib2.Response({'status': 200}), body)
         self.useFixture(mockpatch.Patch(
             'tempest.common.service_client.ServiceClient.get',
@@ -48,7 +48,7 @@ class TestExtensionsClient(base.TestCase):
         self._test_list_extensions(bytes_body=True)
 
     def _test_show_extension(self, bytes_body=False):
-        expected = {
+        expected = {"extension": {
             "updated": "2011-06-09T00:00:00Z",
             "name": "Multinic",
             "links": [],
@@ -56,8 +56,8 @@ class TestExtensionsClient(base.TestCase):
             "http://docs.openstack.org/compute/ext/multinic/api/v1.1",
             "alias": "NMN",
             "description": u'\u2740(*\xb4\u25e1`*)\u2740'
-        }
-        serialized_body = json.dumps({"extension": expected})
+        }}
+        serialized_body = json.dumps(expected)
         if bytes_body:
             serialized_body = serialized_body.encode('utf-8')
 

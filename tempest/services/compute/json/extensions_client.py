@@ -26,9 +26,9 @@ class ExtensionsClient(service_client.ServiceClient):
         resp, body = self.get(url)
         body = json.loads(body)
         self.validate_response(schema.list_extensions, resp, body)
-        return service_client.ResponseBodyList(resp, body['extensions'])
+        return service_client.ResponseBody(resp, body)
 
     def show_extension(self, extension_alias):
         resp, body = self.get('extensions/%s' % extension_alias)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body['extension'])
+        return service_client.ResponseBody(resp, body)
