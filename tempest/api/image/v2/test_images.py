@@ -88,7 +88,7 @@ class BasicOperationsImagesTest(base.BaseV2ImageTest):
         self.client.wait_for_resource_deletion(image_id)
 
         # Verifying deletion
-        images = self.client.list_images()
+        images = self.client.list_images()['images']
         images_id = [item['id'] for item in images]
         self.assertNotIn(image_id, images_id)
 
@@ -164,7 +164,7 @@ class ListImagesTest(base.BaseV2ImageTest):
         """
         Perform list action with given params and validates result.
         """
-        images_list = self.client.list_images(params=params)
+        images_list = self.client.list_images(params=params)['images']
         # Validating params of fetched images
         for image in images_list:
             for key in params:
@@ -174,7 +174,7 @@ class ListImagesTest(base.BaseV2ImageTest):
     @test.idempotent_id('1e341d7a-90a9-494c-b143-2cdf2aeb6aee')
     def test_index_no_params(self):
         # Simple test to see all fixture images returned
-        images_list = self.client.list_images()
+        images_list = self.client.list_images()['images']
         image_list = map(lambda x: x['id'], images_list)
 
         for image in self.created_images:
@@ -217,7 +217,7 @@ class ListImagesTest(base.BaseV2ImageTest):
 
         size = image['size']
         params = {"size_min": size - 500, "size_max": size + 500}
-        images_list = self.client.list_images(params=params)
+        images_list = self.client.list_images(params=params)['images']
         image_size_list = map(lambda x: x['size'], images_list)
 
         for image_size in image_size_list:
@@ -235,7 +235,7 @@ class ListImagesTest(base.BaseV2ImageTest):
     def test_list_images_param_limit(self):
         # Test to get images by limit
         params = {"limit": 2}
-        images_list = self.client.list_images(params=params)
+        images_list = self.client.list_images(params=params)['images']
 
         self.assertEqual(len(images_list), params['limit'],
                          "Failed to get images by limit")
