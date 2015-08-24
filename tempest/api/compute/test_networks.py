@@ -33,5 +33,5 @@ class NetworksTestJSON(base.BaseV2ComputeTest):
 
     @test.idempotent_id('3fe07175-312e-49a5-a623-5f52eeada4c2')
     def test_list_networks(self):
-        networks = self.client.list_networks()
+        networks = self.client.list_networks()['networks']
         self.assertNotEmpty(networks, "No networks found.")

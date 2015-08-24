@@ -297,8 +297,9 @@ class TestAccount(base.TestCase):
         test_accounts_class = accounts.Accounts('v2', 'test_name')
         with mock.patch('tempest.services.compute.json.networks_client.'
                         'NetworksClient.list_networks',
-                        return_value=[{'name': 'network-2', 'id': 'fake-id',
-                                       'label': 'network-2'}]):
+                        return_value={'networks': [{'name': 'network-2',
+                                                    'id': 'fake-id',
+                                                    'label': 'network-2'}]}):
             creds = test_accounts_class.get_creds_by_roles(['role-7'])
         self.assertTrue(isinstance(creds, cred_provider.TestResources))
         network = creds.network

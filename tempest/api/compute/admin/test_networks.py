@@ -36,7 +36,7 @@ class NetworksTest(base.BaseComputeAdminTest):
 
     @test.idempotent_id('d206d211-8912-486f-86e2-a9d090d1f416')
     def test_get_network(self):
-        networks = self.client.list_networks()
+        networks = self.client.list_networks()['networks']
         if CONF.compute.fixed_network_name:
             configured_network = [x for x in networks if x['label'] ==
                                   CONF.compute.fixed_network_name]
@@ -47,12 +47,13 @@ class NetworksTest(base.BaseComputeAdminTest):
         else:
             configured_network = networks
         configured_network = configured_network[0]
-        network = self.client.show_network(configured_network['id'])
+        network = (self.client.show_network(configured_network['id'])
+                   ['network'])
         self.assertEqual(configured_network['label'], network['label'])
 
     @test.idempotent_id('df3d1046-6fa5-4b2c-ad0c-cfa46a351cb9')
     def test_list_all_networks(self):
-        networks = self.client.list_networks()
+        networks = self.client.list_networks()['networks']
         # Check the configured network is in the list
         if CONF.compute.fixed_network_name:
             configured_network = CONF.compute.fixed_network_name

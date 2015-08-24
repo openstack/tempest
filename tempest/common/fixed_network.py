@@ -40,7 +40,7 @@ def get_network_from_name(name, compute_networks_client):
     if not name:
         raise exceptions.InvalidConfiguration()
 
-    networks = compute_networks_client.list_networks()
+    networks = compute_networks_client.list_networks()['networks']
     networks = [n for n in networks if n['label'] == name]
 
     # Check that a network exists, else raise an InvalidConfigurationException
