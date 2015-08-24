@@ -53,7 +53,7 @@ class QosSpecsV2TestJSON(base.BaseVolumeAdminTest):
     def _create_test_volume_type(self):
         vol_type_name = utils.rand_name("volume-type")
         vol_type = self.volume_types_client.create_volume_type(
-            vol_type_name)
+            vol_type_name)['volume_type']
         self.addCleanup(self.volume_types_client.delete_volume_type,
                         vol_type['id'])
         return vol_type

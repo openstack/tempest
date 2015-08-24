@@ -58,7 +58,7 @@ class BaseVolumeTypesClient(service_client.ServiceClient):
         resp, body = self.get(url)
         body = json.loads(body)
         self.expected_success(200, resp.status)
-        return service_client.ResponseBodyList(resp, body['volume_types'])
+        return service_client.ResponseBody(resp, body)
 
     def show_volume_type(self, volume_id):
         """Returns the details of a single volume_type."""
@@ -66,7 +66,7 @@ class BaseVolumeTypesClient(service_client.ServiceClient):
         resp, body = self.get(url)
         body = json.loads(body)
         self.expected_success(200, resp.status)
-        return service_client.ResponseBody(resp, body['volume_type'])
+        return service_client.ResponseBody(resp, body)
 
     def create_volume_type(self, name, **kwargs):
         """
@@ -84,7 +84,7 @@ class BaseVolumeTypesClient(service_client.ServiceClient):
         resp, body = self.post('types', post_body)
         body = json.loads(body)
         self.expected_success(200, resp.status)
-        return service_client.ResponseBody(resp, body['volume_type'])
+        return service_client.ResponseBody(resp, body)
 
     def delete_volume_type(self, volume_id):
         """Deletes the Specified Volume_type."""
@@ -101,7 +101,7 @@ class BaseVolumeTypesClient(service_client.ServiceClient):
         resp, body = self.get(url)
         body = json.loads(body)
         self.expected_success(200, resp.status)
-        return service_client.ResponseBody(resp, body['extra_specs'])
+        return service_client.ResponseBody(resp, body)
 
     def show_volume_type_extra_specs(self, vol_type_id, extra_spec_name):
         """Returns the details of a single volume_type extra spec."""
@@ -123,7 +123,7 @@ class BaseVolumeTypesClient(service_client.ServiceClient):
         resp, body = self.post(url, post_body)
         body = json.loads(body)
         self.expected_success(200, resp.status)
-        return service_client.ResponseBody(resp, body['extra_specs'])
+        return service_client.ResponseBody(resp, body)
 
     def delete_volume_type_extra_specs(self, vol_id, extra_spec_name):
         """Deletes the Specified Volume_type extra spec."""
@@ -177,7 +177,7 @@ class BaseVolumeTypesClient(service_client.ServiceClient):
         resp, body = self.post(url, post_body)
         body = json.loads(body)
         self.expected_success(200, resp.status)
-        return service_client.ResponseBody(resp, body['encryption'])
+        return service_client.ResponseBody(resp, body)
 
     def delete_encryption_type(self, vol_type_id):
         """Delete the encryption type for the specified volume-type."""

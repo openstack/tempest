@@ -66,7 +66,7 @@ class VolumeMultiBackendV2Test(base.BaseVolumeAdminTest):
         else:
             extra_specs = {spec_key_without_prefix: backend_name_key}
         self.type = self.volume_types_client.create_volume_type(
-            type_name, extra_specs=extra_specs)
+            type_name, extra_specs=extra_specs)['volume_type']
         self.volume_type_id_list.append(self.type['id'])
 
         params = {self.name_field: vol_name, 'volume_type': type_name}

@@ -31,7 +31,7 @@ class ExtraSpecsNegativeV2Test(base.BaseVolumeAdminTest):
         cls.extra_specs = {"spec1": "val1"}
         cls.volume_type = cls.volume_types_client.create_volume_type(
             vol_type_name,
-            extra_specs=cls.extra_specs)
+            extra_specs=cls.extra_specs)['volume_type']
 
     @classmethod
     def resource_cleanup(cls):
