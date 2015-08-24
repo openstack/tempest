@@ -29,7 +29,7 @@ class BaseVolumesServicesClient(service_client.ServiceClient):
         resp, body = self.get(url)
         body = json.loads(body)
         self.expected_success(200, resp.status)
-        return service_client.ResponseBodyList(resp, body['services'])
+        return service_client.ResponseBody(resp, body)
 
 
 class VolumesServicesClient(BaseVolumesServicesClient):
