@@ -55,7 +55,7 @@ class TestTenantIsolation(base.TestCase):
             json_iden_client.IdentityClient,
             'create_user',
             return_value=(service_client.ResponseBody
-                          (200, {'id': id, 'name': name}))))
+                          (200, {'user': {'id': id, 'name': name}}))))
         return user_fix
 
     def _mock_tenant_create(self, id, name):
@@ -63,28 +63,29 @@ class TestTenantIsolation(base.TestCase):
             json_iden_client.IdentityClient,
             'create_tenant',
             return_value=(service_client.ResponseBody
-                          (200, {'id': id, 'name': name}))))
+                          (200, {'tenant': {'id': id, 'name': name}}))))
         return tenant_fix
 
     def _mock_list_roles(self, id, name):
         roles_fix = self.useFixture(mockpatch.PatchObject(
             json_iden_client.IdentityClient,
             'list_roles',
-            return_value=(service_client.ResponseBodyList
+            return_value=(service_client.ResponseBody
                           (200,
-                           [{'id': id, 'name': name},
-                            {'id': '1', 'name': 'FakeRole'}]))))
+                           {'roles': [{'id': id, 'name': name},
+                            {'id': '1', 'name': 'FakeRole'},
+                            {'id': '2', 'name': 'Member'}]}))))
         return roles_fix
 
     def _mock_list_2_roles(self):
         roles_fix = self.useFixture(mockpatch.PatchObject(
             json_iden_client.IdentityClient,
             'list_roles',
-            return_value=(service_client.ResponseBodyList
+            return_value=(service_client.ResponseBody
                           (200,
-                           [{'id': '1234', 'name': 'role1'},
+                           {'roles': [{'id': '1234', 'name': 'role1'},
                             {'id': '1', 'name': 'FakeRole'},
-                            {'id': '12345', 'name': 'role2'}]))))
+                            {'id': '12345', 'name': 'role2'}]}))))
         return roles_fix
 
     def _mock_assign_user_role(self):
@@ -99,20 +100,22 @@ class TestTenantIsolation(base.TestCase):
         roles_fix = self.useFixture(mockpatch.PatchObject(
             json_iden_client.IdentityClient,
             'list_roles',
-            return_value=(service_client.ResponseBodyList
-                          (200, [{'id': '1', 'name': 'FakeRole'}]))))
+            return_value=(service_client.ResponseBody
+                          (200, {'roles': [{'id': '1',
+                                 'name': 'FakeRole'}]}))))
         return roles_fix
 
     def _mock_list_ec2_credentials(self, user_id, tenant_id):
         ec2_creds_fix = self.useFixture(mockpatch.PatchObject(
             json_iden_client.IdentityClient,
             'list_user_ec2_credentials',
-            return_value=(service_client.ResponseBodyList
-                          (200, [{'access': 'fake_access',
-                                  'secret': 'fake_secret',
-                                  'tenant_id': tenant_id,
-                                  'user_id': user_id,
-                                  'trust_id': None}]))))
+            return_value=(service_client.ResponseBody
+                          (200, {'credentials': [{
+                                 'access': 'fake_access',
+                                 'secret': 'fake_secret',
+                                 'tenant_id': tenant_id,
+                                 'user_id': user_id,
+                                 'trust_id': None}]}))))
         return ec2_creds_fix
 
     def _mock_network_create(self, iso_creds, id, name):

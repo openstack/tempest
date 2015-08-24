@@ -36,7 +36,7 @@ class UsersTestJSON(base.BaseIdentityV2AdminTest):
         self.data.setup_test_tenant()
         user = self.client.create_user(self.alt_user, self.alt_password,
                                        self.data.tenant['id'],
-                                       self.alt_email)
+                                       self.alt_email)['user']
         self.data.users.append(user)
         self.assertEqual(self.alt_user, user['name'])
 
@@ -47,7 +47,7 @@ class UsersTestJSON(base.BaseIdentityV2AdminTest):
         name = data_utils.rand_name('test_user')
         user = self.client.create_user(name, self.alt_password,
                                        self.data.tenant['id'],
-                                       self.alt_email, enabled=False)
+                                       self.alt_email, enabled=False)['user']
         self.data.users.append(user)
         self.assertEqual(name, user['name'])
         self.assertEqual(False, user['enabled'])
@@ -60,7 +60,7 @@ class UsersTestJSON(base.BaseIdentityV2AdminTest):
         self.data.setup_test_tenant()
         user = self.client.create_user(test_user, self.alt_password,
                                        self.data.tenant['id'],
-                                       self.alt_email)
+                                       self.alt_email)['user']
         # Delete the User at the end of this method
         self.addCleanup(self.client.delete_user, user['id'])
         # Updating user details with new values
@@ -68,12 +68,12 @@ class UsersTestJSON(base.BaseIdentityV2AdminTest):
         u_email2 = u_name2 + '@testmail.tm'
         update_user = self.client.update_user(user['id'], name=u_name2,
                                               email=u_email2,
-                                              enabled=False)
+                                              enabled=False)['user']
         self.assertEqual(u_name2, update_user['name'])
         self.assertEqual(u_email2, update_user['email'])
         self.assertEqual(False, update_user['enabled'])
         # GET by id after updating
-        updated_user = self.client.get_user(user['id'])
+        updated_user = self.client.get_user(user['id'])['user']
         # Assert response body of GET after updating
         self.assertEqual(u_name2, updated_user['name'])
         self.assertEqual(u_email2, updated_user['email'])
@@ -86,7 +86,7 @@ class UsersTestJSON(base.BaseIdentityV2AdminTest):
         self.data.setup_test_tenant()
         user = self.client.create_user(test_user, self.alt_password,
                                        self.data.tenant['id'],
-                                       self.alt_email)
+                                       self.alt_email)['user']
         self.client.delete_user(user['id'])
 
     @test.idempotent_id('aca696c3-d645-4f45-b728-63646045beb1')
@@ -121,7 +121,7 @@ class UsersTestJSON(base.BaseIdentityV2AdminTest):
     def test_get_users(self):
         # Get a list of users and find the test user
         self.data.setup_test_user()
-        users = self.client.get_users()
+        users = self.client.get_users()['users']
         self.assertThat([u['name'] for u in users],
                         matchers.Contains(self.data.test_user),
                         "Could not find %s" % self.data.test_user)
@@ -135,18 +135,19 @@ class UsersTestJSON(base.BaseIdentityV2AdminTest):
         alt_tenant_user1 = data_utils.rand_name('tenant_user1')
         user1 = self.client.create_user(alt_tenant_user1, 'password1',
                                         self.data.tenant['id'],
-                                        'user1@123')
+                                        'user1@123')['user']
         user_ids.append(user1['id'])
         self.data.users.append(user1)
 
         alt_tenant_user2 = data_utils.rand_name('tenant_user2')
         user2 = self.client.create_user(alt_tenant_user2, 'password2',
                                         self.data.tenant['id'],
-                                        'user2@123')
+                                        'user2@123')['user']
         user_ids.append(user2['id'])
         self.data.users.append(user2)
         # List of users for the respective tenant ID
-        body = self.client.list_users_for_tenant(self.data.tenant['id'])
+        body = (self.client.list_users_for_tenant(self.data.tenant['id'])
+                ['users'])
         for i in body:
             fetched_user_ids.append(i['id'])
         # verifying the user Id in the list
@@ -169,19 +170,20 @@ class UsersTestJSON(base.BaseIdentityV2AdminTest):
         fetched_user_ids = list()
         user_ids.append(user['id'])
         role = self.client.assign_user_role(tenant['id'], user['id'],
-                                            role['id'])
+                                            role['id'])['role']
 
         alt_user2 = data_utils.rand_name('second_user')
         second_user = self.client.create_user(alt_user2, 'password1',
                                               self.data.tenant['id'],
-                                              'user2@123')
+                                              'user2@123')['user']
         user_ids.append(second_user['id'])
         self.data.users.append(second_user)
         role = self.client.assign_user_role(tenant['id'],
                                             second_user['id'],
-                                            role['id'])
+                                            role['id'])['role']
         # List of users with roles for the respective tenant ID
-        body = self.client.list_users_for_tenant(self.data.tenant['id'])
+        body = (self.client.list_users_for_tenant(self.data.tenant['id'])
+                ['users'])
         for i in body:
             fetched_user_ids.append(i['id'])
         # verifying the user Id in the list
@@ -198,7 +200,7 @@ class UsersTestJSON(base.BaseIdentityV2AdminTest):
         # Updating the user with new password
         new_pass = data_utils.rand_name('pass')
         update_user = self.client.update_user_password(
-            self.data.user['id'], new_pass)
+            self.data.user['id'], new_pass)['user']
         self.assertEqual(update_user['id'], self.data.user['id'])
 
         # Validate the updated password
