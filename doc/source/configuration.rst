@@ -24,7 +24,7 @@ Auth/Credentials
 Tempest currently has 2 different ways in configuration to provide credentials
 to use when running tempest. One is a traditional set of configuration options
 in the tempest.conf file. These options are in the identity section and let you
-specify a regular user, a global admin user, and a alternate user set of
+specify a regular user, a global admin user, and an alternate user set of
 credentials. (which consist of a username, password, and project/tenant name)
 These options should be clearly labelled in the sample config file in the
 identity section.
