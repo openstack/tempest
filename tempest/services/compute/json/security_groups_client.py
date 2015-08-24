@@ -33,7 +33,7 @@ class SecurityGroupsClient(service_client.ServiceClient):
         resp, body = self.get(url)
         body = json.loads(body)
         self.validate_response(schema.list_security_groups, resp, body)
-        return service_client.ResponseBodyList(resp, body['security_groups'])
+        return service_client.ResponseBody(resp, body)
 
     def show_security_group(self, security_group_id):
         """Get the details of a Security Group."""
@@ -41,7 +41,7 @@ class SecurityGroupsClient(service_client.ServiceClient):
         resp, body = self.get(url)
         body = json.loads(body)
         self.validate_response(schema.get_security_group, resp, body)
-        return service_client.ResponseBody(resp, body['security_group'])
+        return service_client.ResponseBody(resp, body)
 
     def create_security_group(self, **kwargs):
         """
@@ -53,7 +53,7 @@ class SecurityGroupsClient(service_client.ServiceClient):
         resp, body = self.post('os-security-groups', post_body)
         body = json.loads(body)
         self.validate_response(schema.get_security_group, resp, body)
-        return service_client.ResponseBody(resp, body['security_group'])
+        return service_client.ResponseBody(resp, body)
 
     def update_security_group(self, security_group_id, **kwargs):
         """
@@ -67,7 +67,7 @@ class SecurityGroupsClient(service_client.ServiceClient):
                               post_body)
         body = json.loads(body)
         self.validate_response(schema.update_security_group, resp, body)
-        return service_client.ResponseBody(resp, body['security_group'])
+        return service_client.ResponseBody(resp, body)
 
     def delete_security_group(self, security_group_id):
         """Deletes the provided Security Group."""

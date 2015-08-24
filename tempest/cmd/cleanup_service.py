@@ -271,7 +271,7 @@ class SecurityGroupService(BaseService):
 
     def list(self):
         client = self.client
-        secgrps = client.list_security_groups()
+        secgrps = client.list_security_groups()['security_groups']
         secgrp_del = [grp for grp in secgrps if grp['name'] != 'default']
         LOG.debug("List count, %s Security Groups" % len(secgrp_del))
         return secgrp_del

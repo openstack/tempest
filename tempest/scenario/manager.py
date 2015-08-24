@@ -226,7 +226,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
         _client = self.security_groups_client
         _client_rules = self.security_group_rules_client
         if secgroup_id is None:
-            sgs = _client.list_security_groups()
+            sgs = _client.list_security_groups()['security_groups']
             for sg in sgs:
                 if sg['name'] == 'default':
                     secgroup_id = sg['id']
@@ -266,7 +266,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
         sg_name = data_utils.rand_name(self.__class__.__name__)
         sg_desc = sg_name + " description"
         secgroup = self.security_groups_client.create_security_group(
-            name=sg_name, description=sg_desc)
+            name=sg_name, description=sg_desc)['security_group']
         self.assertEqual(secgroup['name'], sg_name)
         self.assertEqual(secgroup['description'], sg_desc)
         self.addCleanup(self.delete_wrapper,
