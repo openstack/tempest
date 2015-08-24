@@ -31,7 +31,8 @@ class InstanceUsageAuditLogTestJSON(base.BaseV2ComputeAdminTest):
     @test.idempotent_id('25319919-33d9-424f-9f99-2c203ee48b9d')
     def test_list_instance_usage_audit_logs(self):
         # list instance usage audit logs
-        body = self.adm_client.list_instance_usage_audit_logs()
+        body = (self.adm_client.list_instance_usage_audit_logs()
+                ["instance_usage_audit_logs"])
         expected_items = ['total_errors', 'total_instances', 'log',
                           'num_hosts_running', 'num_hosts_done',
                           'num_hosts', 'hosts_not_run', 'overall_status',
@@ -44,8 +45,9 @@ class InstanceUsageAuditLogTestJSON(base.BaseV2ComputeAdminTest):
     def test_get_instance_usage_audit_log(self):
         # Get instance usage audit log before specified time
         now = datetime.datetime.now()
-        body = self.adm_client.show_instance_usage_audit_log(
+        body = (self.adm_client.show_instance_usage_audit_log(
             urllib.quote(now.strftime("%Y-%m-%d %H:%M:%S")))
+            ["instance_usage_audit_log"])
 
         expected_items = ['total_errors', 'total_instances', 'log',
                           'num_hosts_running', 'num_hosts_done', 'num_hosts',
