@@ -47,7 +47,7 @@ class StacksTestJSON(base.BaseOrchestrationTest):
         cls.client.wait_for_stack_status(cls.stack_id, 'CREATE_COMPLETE')
 
     def _list_stacks(self, expected_num=None, **filter_kwargs):
-        stacks = self.client.list_stacks(params=filter_kwargs)
+        stacks = self.client.list_stacks(params=filter_kwargs)['stacks']
         self.assertIsInstance(stacks, list)
         if expected_num is not None:
             self.assertEqual(expected_num, len(stacks))
@@ -63,7 +63,7 @@ class StacksTestJSON(base.BaseOrchestrationTest):
     @test.idempotent_id('992f96e3-41ee-4ff6-91c7-bcfb670c0919')
     def test_stack_show(self):
         """Getting details about created stack should be possible."""
-        stack = self.client.show_stack(self.stack_name)
+        stack = self.client.show_stack(self.stack_name)['stack']
         self.assertIsInstance(stack, dict)
         self.assert_fields_in_dict(stack, 'stack_name', 'id', 'links',
                                    'parameters', 'outputs', 'disable_rollback',
@@ -100,7 +100,7 @@ class StacksTestJSON(base.BaseOrchestrationTest):
     def test_show_resource(self):
         """Getting details about created resource should be possible."""
         resource = self.client.show_resource(self.stack_identifier,
-                                             self.resource_name)
+                                             self.resource_name)['resource']
         self.assertIsInstance(resource, dict)
         self.assert_fields_in_dict(resource, 'resource_name', 'description',
                                    'links', 'logical_resource_id',
@@ -115,14 +115,14 @@ class StacksTestJSON(base.BaseOrchestrationTest):
         """Getting metadata for created resources should be possible."""
         metadata = self.client.show_resource_metadata(
             self.stack_identifier,
-            self.resource_name)
+            self.resource_name)['metadata']
         self.assertIsInstance(metadata, dict)
         self.assertEqual(['Tom', 'Stinky'], metadata.get('kittens', None))
 
     @test.idempotent_id('46567533-0a7f-483b-8942-fa19e0f17839')
     def test_list_events(self):
         """Getting list of created events for the stack should be possible."""
-        events = self.client.list_events(self.stack_identifier)
+        events = self.client.list_events(self.stack_identifier)['events']
         self.assertIsInstance(events, list)
 
         for event in events:
@@ -138,12 +138,12 @@ class StacksTestJSON(base.BaseOrchestrationTest):
     def test_show_event(self):
         """Getting details about an event should be possible."""
         events = self.client.list_resource_events(self.stack_identifier,
-                                                  self.resource_name)
+                                                  self.resource_name)['events']
         self.assertNotEqual([], events)
         events.sort(key=lambda event: event['event_time'])
         event_id = events[0]['id']
         event = self.client.show_event(self.stack_identifier,
-                                       self.resource_name, event_id)
+                                       self.resource_name, event_id)['event']
         self.assertIsInstance(event, dict)
         self.assert_fields_in_dict(event, 'resource_name', 'event_time',
                                    'links', 'logical_resource_id',
