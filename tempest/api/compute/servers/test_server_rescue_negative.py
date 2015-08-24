@@ -62,7 +62,7 @@ class ServerRescueNegativeTestJSON(base.BaseV2ComputeTest):
     def _create_volume(self):
         volume = self.volumes_extensions_client.create_volume(
             size=CONF.volume.volume_size, display_name=data_utils.rand_name(
-                self.__class__.__name__ + '_volume'))
+                self.__class__.__name__ + '_volume'))['volume']
         self.addCleanup(self.delete_volume, volume['id'])
         waiters.wait_for_volume_status(self.volumes_extensions_client,
                                        volume['id'], 'available')
