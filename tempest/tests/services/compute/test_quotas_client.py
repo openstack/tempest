@@ -25,21 +25,24 @@ from tempest.tests import fake_auth_provider
 
 class TestQuotasClient(base.TestCase):
 
-    FAKE_QUOTA_SET = {"injected_file_content_bytes": 10240,
-                      "metadata_items": 128,
-                      "server_group_members": 10,
-                      "server_groups": 10,
-                      "ram": 51200,
-                      "floating_ips": 10,
-                      "key_pairs": 100,
-                      "id": "8421f7be61064f50b680465c07f334af",
-                      "instances": 10,
-                      "security_group_rules": 20,
-                      "injected_files": 5,
-                      "cores": 20,
-                      "fixed_ips": -1,
-                      "injected_file_path_bytes": 255,
-                      "security_groups": 10}
+    FAKE_QUOTA_SET = {
+        "quota_set": {
+            "injected_file_content_bytes": 10240,
+            "metadata_items": 128,
+            "server_group_members": 10,
+            "server_groups": 10,
+            "ram": 51200,
+            "floating_ips": 10,
+            "key_pairs": 100,
+            "id": "8421f7be61064f50b680465c07f334af",
+            "instances": 10,
+            "security_group_rules": 20,
+            "injected_files": 5,
+            "cores": 20,
+            "fixed_ips": -1,
+            "injected_file_path_bytes": 255,
+            "security_groups": 10}
+        }
 
     project_id = "8421f7be61064f50b680465c07f334af"
 
@@ -50,7 +53,7 @@ class TestQuotasClient(base.TestCase):
             fake_auth, 'compute', 'regionOne')
 
     def _test_show_quota_set(self, bytes_body=False):
-        serialized_body = json.dumps({"quota_set": self.FAKE_QUOTA_SET})
+        serialized_body = json.dumps(self.FAKE_QUOTA_SET)
         if bytes_body:
             serialized_body = serialized_body.encode('utf-8')
 
@@ -68,7 +71,7 @@ class TestQuotasClient(base.TestCase):
         self._test_show_quota_set(bytes_body=True)
 
     def _test_show_default_quota_set(self, bytes_body=False):
-        serialized_body = json.dumps({"quota_set": self.FAKE_QUOTA_SET})
+        serialized_body = json.dumps(self.FAKE_QUOTA_SET)
         if bytes_body:
             serialized_body = serialized_body.encode('utf-8')
 
@@ -87,8 +90,8 @@ class TestQuotasClient(base.TestCase):
 
     def test_update_quota_set(self):
         fake_quota_set = copy.deepcopy(self.FAKE_QUOTA_SET)
-        fake_quota_set.pop("id")
-        serialized_body = json.dumps({"quota_set": fake_quota_set})
+        fake_quota_set['quota_set'].pop("id")
+        serialized_body = json.dumps(fake_quota_set)
         mocked_resp = (httplib2.Response({'status': 200}), serialized_body)
         self.useFixture(mockpatch.Patch(
             'tempest.common.service_client.ServiceClient.put',
