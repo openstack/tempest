@@ -69,7 +69,7 @@ class TestVolumeBootPattern(manager.ScenarioTest):
         snap = self.snapshots_client.create_snapshot(
             volume_id=vol_id,
             force=True,
-            display_name=snap_name)
+            display_name=snap_name)['snapshot']
         self.addCleanup(
             self.snapshots_client.wait_for_resource_deletion, snap['id'])
         self.addCleanup(self.snapshots_client.delete_snapshot, snap['id'])
