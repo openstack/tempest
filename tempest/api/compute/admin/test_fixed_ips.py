@@ -51,7 +51,7 @@ class FixedIPsTestJson(base.BaseV2ComputeAdminTest):
     @test.services('network')
     def test_list_fixed_ip_details(self):
         fixed_ip = self.client.show_fixed_ip(self.ip)
-        self.assertEqual(fixed_ip['address'], self.ip)
+        self.assertEqual(fixed_ip['fixed_ip']['address'], self.ip)
 
     @test.idempotent_id('5485077b-7e46-4cec-b402-91dc3173433b')
     @test.services('network')
