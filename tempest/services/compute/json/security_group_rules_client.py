@@ -39,7 +39,7 @@ class SecurityGroupRulesClient(service_client.ServiceClient):
         resp, body = self.post(url, post_body)
         body = json.loads(body)
         self.validate_response(schema.create_security_group_rule, resp, body)
-        return service_client.ResponseBody(resp, body['security_group_rule'])
+        return service_client.ResponseBody(resp, body)
 
     def delete_security_group_rule(self, group_rule_id):
         """Deletes the provided Security Group rule."""
@@ -55,5 +55,5 @@ class SecurityGroupRulesClient(service_client.ServiceClient):
         self.validate_response(schema.list_security_groups, resp, body)
         for sg in body['security_groups']:
             if sg['id'] == security_group_id:
-                return service_client.ResponseBodyList(resp, sg['rules'])
+                return service_client.ResponseBody(resp, sg)
         raise lib_exc.NotFound('No such Security Group')

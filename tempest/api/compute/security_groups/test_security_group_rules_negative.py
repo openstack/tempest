@@ -87,7 +87,7 @@ class SecurityGroupRulesNegativeTestJSON(base.BaseSecurityGroupsTest):
 
         rule = self.rules_client.create_security_group_rule(
             parent_group_id=parent_group_id, ip_protocol=ip_protocol,
-            from_port=from_port, to_port=to_port)
+            from_port=from_port, to_port=to_port)['security_group_rule']
         self.addCleanup(self.rules_client.delete_security_group_rule,
                         rule['id'])
         # Add the same rule to the group should fail

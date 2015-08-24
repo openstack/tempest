@@ -254,7 +254,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
         rules = list()
         for ruleset in rulesets:
             sg_rule = _client_rules.create_security_group_rule(
-                parent_group_id=secgroup_id, **ruleset)
+                parent_group_id=secgroup_id, **ruleset)['security_group_rule']
             self.addCleanup(self.delete_wrapper,
                             _client_rules.delete_security_group_rule,
                             sg_rule['id'])
