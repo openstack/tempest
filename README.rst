@@ -191,8 +191,6 @@ tests by using ``testr`` ::
 
     $> testr run --parallel
 
-.. _testr: http://testrepository.readthedocs.org/en/latest/MANUAL.html
-
 To run one single test serially ::
 
     $> testr run tempest.api.compute.servers.test_servers_negative.ServersNegativeTestJSON.test_reboot_non_existent_server

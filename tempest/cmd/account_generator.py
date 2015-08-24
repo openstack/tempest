@@ -25,7 +25,7 @@ have the username, tenant_name, password and roles.
 **Usage:** ``tempest-account-generator [-h] [OPTIONS] accounts_file.yaml``.
 
 Positional Arguments
------------------
+--------------------
 **accounts_file.yaml** (Required) Provide an output accounts yaml file. Utility
 creates a .yaml file in the directory where the command is ran. The appropriate
 name for the file is *accounts.yaml* and it should be placed in *tempest/etc*
@@ -49,7 +49,7 @@ You're probably familiar with these, but just to remind::
     +----------+------------------+----------------------+
 
 Optional Arguments
------------------
+------------------
 **-h**, **--help** (Optional) Shows help message with the description of
 utility and its arguments, and exits.
 

@@ -57,7 +57,7 @@ several test jobs in parallel and can run any existing test in Tempest as a
 stress job.
 
 :ref:`third_party_field_guide`
------------------------------
+------------------------------
 
 Many openstack components include 3rdparty API support. It is
 completely legitimate for Tempest to include tests of 3rdparty APIs,
