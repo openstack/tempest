@@ -34,7 +34,7 @@ class TestAgentsClient(base.TestCase):
         body = '{"agents": []}'
         if bytes_body:
             body = body.encode('utf-8')
-        expected = []
+        expected = {"agents": []}
         response = (httplib2.Response({'status': 200}), body)
         self.useFixture(mockpatch.Patch(
             'tempest.common.service_client.ServiceClient.get',
@@ -42,10 +42,11 @@ class TestAgentsClient(base.TestCase):
         self.assertEqual(expected, self.client.list_agents())
 
     def _test_create_agent(self, bytes_body=False):
-        expected = {"url": "http://foo.com", "hypervisor": "kvm",
-                    "md5hash": "md5", "version": "2", "architecture": "x86_64",
-                    "os": "linux", "agent_id": 1}
-        serialized_body = json.dumps({"agent": expected})
+        expected = {"agent": {"url": "http://foo.com", "hypervisor": "kvm",
+                              "md5hash": "md5", "version": "2",
+                              "architecture": "x86_64",
+                              "os": "linux", "agent_id": 1}}
+        serialized_body = json.dumps(expected)
         if bytes_body:
             serialized_body = serialized_body.encode('utf-8')
 
@@ -67,9 +68,9 @@ class TestAgentsClient(base.TestCase):
         self.client.delete_agent("1")
 
     def _test_update_agent(self, bytes_body=False):
-        expected = {"url": "http://foo.com", "md5hash": "md5", "version": "2",
-                    "agent_id": 1}
-        serialized_body = json.dumps({"agent": expected})
+        expected = {"agent": {"url": "http://foo.com", "md5hash": "md5",
+                              "version": "2", "agent_id": 1}}
+        serialized_body = json.dumps(expected)
         if bytes_body:
             serialized_body = serialized_body.encode('utf-8')
 
