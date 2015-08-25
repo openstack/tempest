@@ -105,7 +105,7 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
                 self.validation_resources['keypair']['private_key'])
             boot_time = linux_client.get_boot_time()
 
-        self.client.reboot(self.server_id, reboot_type)
+        self.client.reboot_server(self.server_id, reboot_type)
         waiters.wait_for_server_status(self.client, self.server_id, 'ACTIVE')
 
         if CONF.validation.run_validation:
@@ -132,7 +132,7 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         self._test_reboot_server('SOFT')
 
     def _rebuild_server_and_check(self, image_ref):
-        rebuilt_server = self.client.rebuild(self.server_id, image_ref)
+        rebuilt_server = self.client.rebuild_server(self.server_id, image_ref)
         waiters.wait_for_server_status(self.client, self.server_id, 'ACTIVE')
         msg = ('Server was not rebuilt to the original image. '
                'The original image: {0}. The current image: {1}'
@@ -148,12 +148,12 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         personality = [{'path': 'rebuild.txt',
                        'contents': base64.b64encode(file_contents)}]
         password = 'rebuildPassw0rd'
-        rebuilt_server = self.client.rebuild(self.server_id,
-                                             self.image_ref_alt,
-                                             name=new_name,
-                                             metadata=meta,
-                                             personality=personality,
-                                             adminPass=password)
+        rebuilt_server = self.client.rebuild_server(self.server_id,
+                                                    self.image_ref_alt,
+                                                    name=new_name,
+                                                    metadata=meta,
+                                                    personality=personality,
+                                                    adminPass=password)
 
         # If the server was rebuilt on a different image, restore it to the
         # original image once the test ends
@@ -193,7 +193,7 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
                      if old_image == self.image_ref else self.image_ref)
         self.client.stop(self.server_id)
         waiters.wait_for_server_status(self.client, self.server_id, 'SHUTOFF')
-        rebuilt_server = self.client.rebuild(self.server_id, new_image)
+        rebuilt_server = self.client.rebuild_server(self.server_id, new_image)
         # If the server was rebuilt on a different image, restore it to the
         # original image once the test ends
         if self.image_ref_alt != self.image_ref:
@@ -223,7 +223,7 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
             waiters.wait_for_server_status(self.client, self.server_id,
                                            'SHUTOFF')
 
-        self.client.resize(self.server_id, self.flavor_ref_alt)
+        self.client.resize_server(self.server_id, self.flavor_ref_alt)
         waiters.wait_for_server_status(self.client, self.server_id,
                                        'VERIFY_RESIZE')
 
@@ -262,7 +262,7 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         # The server's RAM and disk space should return to its original
         # values after a resize is reverted
 
-        self.client.resize(self.server_id, self.flavor_ref_alt)
+        self.client.resize_server(self.server_id, self.flavor_ref_alt)
         waiters.wait_for_server_status(self.client, self.server_id,
                                        'VERIFY_RESIZE')
 
@@ -375,7 +375,7 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         # log file is truncated and we cannot get any console log through
         # "console-log" API.
         # The detail is https://bugs.launchpad.net/nova/+bug/1251920
-        self.client.reboot(self.server_id, 'HARD')
+        self.client.reboot_server(self.server_id, 'HARD')
         waiters.wait_for_server_status(self.client, self.server_id, 'ACTIVE')
         self.wait_for(self._get_output)
 

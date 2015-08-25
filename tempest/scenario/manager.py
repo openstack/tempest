@@ -449,9 +449,10 @@ class ScenarioTest(tempest.test.BaseTestCase):
 
         LOG.debug("Rebuilding server (id: %s, image: %s, preserve eph: %s)",
                   server_id, image, preserve_ephemeral)
-        self.servers_client.rebuild(server_id=server_id, image_ref=image,
-                                    preserve_ephemeral=preserve_ephemeral,
-                                    **rebuild_kwargs)
+        self.servers_client.rebuild_server(
+            server_id=server_id, image_ref=image,
+            preserve_ephemeral=preserve_ephemeral,
+            **rebuild_kwargs)
         if wait:
             waiters.wait_for_server_status(self.servers_client,
                                            server_id, 'ACTIVE')

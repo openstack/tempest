@@ -79,7 +79,7 @@ class TestMinimumBasicScenario(manager.ScenarioTest):
         self.assertEqual(self.volume, volume)
 
     def nova_reboot(self):
-        self.servers_client.reboot(self.server['id'], 'SOFT')
+        self.servers_client.reboot_server(self.server['id'], 'SOFT')
         self._wait_for_server_status('ACTIVE')
 
     def check_partitions(self):

@@ -221,11 +221,11 @@ class ServersClient(service_client.ServiceClient):
                                resp, body)
         return service_client.ResponseBody(resp, body)
 
-    def reboot(self, server_id, reboot_type):
+    def reboot_server(self, server_id, reboot_type):
         """Reboots a server."""
         return self.action(server_id, 'reboot', None, type=reboot_type)
 
-    def rebuild(self, server_id, image_ref, **kwargs):
+    def rebuild_server(self, server_id, image_ref, **kwargs):
         """Rebuilds a server with a new image."""
         kwargs['imageRef'] = image_ref
         if 'disk_config' in kwargs:
@@ -238,7 +238,7 @@ class ServersClient(service_client.ServiceClient):
         return self.action(server_id, 'rebuild', 'server',
                            rebuild_schema, **kwargs)
 
-    def resize(self, server_id, flavor_ref, **kwargs):
+    def resize_server(self, server_id, flavor_ref, **kwargs):
         """Changes the flavor of a server."""
         kwargs['flavorRef'] = flavor_ref
         if 'disk_config' in kwargs:

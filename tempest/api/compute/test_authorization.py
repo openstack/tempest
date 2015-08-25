@@ -155,19 +155,19 @@ class AuthorizationTestJSON(base.BaseV2ComputeTest):
     @test.idempotent_id('14cb5ff5-f646-45ca-8f51-09081d6c0c24')
     def test_reboot_server_for_alt_account_fails(self):
         # A reboot request for another user's server should fail
-        self.assertRaises(lib_exc.NotFound, self.alt_client.reboot,
+        self.assertRaises(lib_exc.NotFound, self.alt_client.reboot_server,
                           self.server['id'], 'HARD')
 
     @test.idempotent_id('8a0bce51-cd00-480b-88ba-dbc7d8408a37')
     def test_rebuild_server_for_alt_account_fails(self):
         # A rebuild request for another user's server should fail
-        self.assertRaises(lib_exc.NotFound, self.alt_client.rebuild,
+        self.assertRaises(lib_exc.NotFound, self.alt_client.rebuild_server,
                           self.server['id'], self.image_ref_alt)
 
     @test.idempotent_id('e4da647e-f982-4e61-9dad-1d1abebfb933')
     def test_resize_server_for_alt_account_fails(self):
         # A resize request for another user's server should fail
-        self.assertRaises(lib_exc.NotFound, self.alt_client.resize,
+        self.assertRaises(lib_exc.NotFound, self.alt_client.resize_server,
                           self.server['id'], self.flavor_ref_alt)
 
     @test.idempotent_id('a9fe8112-0ffa-4902-b061-f892bd5fe0d3')

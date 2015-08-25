@@ -163,11 +163,11 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
 
         # resetting vm state require admin privilege
         self.client.reset_state(self.s1_id, state='error')
-        rebuilt_server = self.non_admin_client.rebuild(
+        rebuilt_server = self.non_admin_client.rebuild_server(
             self.s1_id, self.image_ref_alt)
         self.addCleanup(waiters.wait_for_server_status, self.non_admin_client,
                         self.s1_id, 'ACTIVE')
-        self.addCleanup(self.non_admin_client.rebuild, self.s1_id,
+        self.addCleanup(self.non_admin_client.rebuild_server, self.s1_id,
                         self.image_ref)
 
         # Verify the properties in the initial response are correct
