@@ -49,7 +49,8 @@ class TestServicesClient(base.TestCase):
             fake_auth, 'compute', 'regionOne')
 
     def _test_list_services(self, bytes_body=False):
-        serialized_body = json.dumps({"services": self.FAKE_SERVICES})
+        expected = {"services": self.FAKE_SERVICES}
+        serialized_body = json.dumps(expected)
         if bytes_body:
             serialized_body = serialized_body.encode('utf-8')
 
@@ -58,7 +59,7 @@ class TestServicesClient(base.TestCase):
             'tempest.common.service_client.ServiceClient.get',
             return_value=mocked_resp))
         resp = self.client.list_services()
-        self.assertEqual(self.FAKE_SERVICES, resp)
+        self.assertEqual(expected, resp)
 
     def test_list_services_with_str_body(self):
         self._test_list_services()
@@ -67,7 +68,8 @@ class TestServicesClient(base.TestCase):
         self._test_list_services(bytes_body=True)
 
     def _test_enable_service(self, bytes_body=False):
-        serialized_body = json.dumps({"service": self.FAKE_SERVICE})
+        expected = {"service": self.FAKE_SERVICE}
+        serialized_body = json.dumps(expected)
         if bytes_body:
             serialized_body = serialized_body.encode('utf-8')
 
@@ -76,7 +78,7 @@ class TestServicesClient(base.TestCase):
             'tempest.common.service_client.ServiceClient.put',
             return_value=mocked_resp))
         resp = self.client.enable_service("nova-conductor", "controller")
-        self.assertEqual(self.FAKE_SERVICE, resp)
+        self.assertEqual(expected, resp)
 
     def test_enable_service_with_str_body(self):
         self._test_enable_service()
@@ -87,8 +89,8 @@ class TestServicesClient(base.TestCase):
     def _test_disable_service(self, bytes_body=False):
         fake_service = copy.deepcopy(self.FAKE_SERVICE)
         fake_service["status"] = "disable"
-
-        serialized_body = json.dumps({"service": self.FAKE_SERVICE})
+        expected = {"service": self.FAKE_SERVICE}
+        serialized_body = json.dumps(expected)
         if bytes_body:
             serialized_body = serialized_body.encode('utf-8')
 
@@ -97,7 +99,7 @@ class TestServicesClient(base.TestCase):
             'tempest.common.service_client.ServiceClient.put',
             return_value=mocked_resp))
         resp = self.client.disable_service("nova-conductor", "controller")
-        self.assertEqual(self.FAKE_SERVICE, resp)
+        self.assertEqual(expected, resp)
 
     def test_disable_service_with_str_body(self):
         self._test_enable_service()
