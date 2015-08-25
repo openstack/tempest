@@ -92,7 +92,7 @@ class AuthorizationTestJSON(base.BaseV2ComputeTest):
         to_port = 22
         cls.rule = cls.rule_client.create_security_group_rule(
             parent_group_id=parent_group_id, ip_protocol=ip_protocol,
-            from_port=from_port, to_port=to_port)
+            from_port=from_port, to_port=to_port)['security_group_rule']
 
     @classmethod
     def resource_cleanup(cls):
