@@ -81,7 +81,7 @@ class FlavorsExtraSpecsNegativeTestJSON(base.BaseV2ComputeAdminTest):
     def test_flavor_non_admin_update_specific_key(self):
         # non admin user is not allowed to update flavor extra spec
         body = self.client.set_flavor_extra_spec(
-            self.flavor['id'], key1="value1", key2="value2")
+            self.flavor['id'], key1="value1", key2="value2")['extra_specs']
         self.assertEqual(body['key1'], 'value1')
         self.assertRaises(lib_exc.Forbidden,
                           self.flavors_client.
