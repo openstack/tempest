@@ -43,6 +43,8 @@ class BaseComputeTest(tempest.test.BaseTestCase):
     @classmethod
     def skip_checks(cls):
         super(BaseComputeTest, cls).skip_checks()
+        if not CONF.service_available.nova:
+            raise cls.skipException("Nova is not available")
         if cls._api_version != 2:
             msg = ("Unexpected API version is specified (%s)" %
                    cls._api_version)
