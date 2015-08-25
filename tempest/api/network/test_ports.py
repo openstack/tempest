@@ -167,11 +167,19 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
         port_list = self.client.list_ports(fixed_ips=fixed_ips)
         # Check that we got the desired port
         ports = port_list['ports']
-        self.assertEqual(len(ports), 1)
-        self.assertEqual(ports[0]['id'], port_1['port']['id'])
-        self.assertEqual(ports[0]['fixed_ips'][0]['ip_address'],
-                         port_1_fixed_ip)
-        self.assertEqual(ports[0]['network_id'], network['id'])
+        tenant_ids = set([port['tenant_id'] for port in ports])
+        self.assertEqual(len(tenant_ids), 1,
+                         'Ports from multiple tenants are in the list resp')
+        port_ids = [port['id'] for port in ports]
+        fixed_ips = [port['fixed_ips'] for port in ports]
+        port_ips = []
+        for addr in fixed_ips:
+            port_ips.extend([port['ip_address'] for port in addr])
+
+        port_net_ids = [port['network_id'] for port in ports]
+        self.assertIn(port_1['port']['id'], port_ids)
+        self.assertIn(port_1_fixed_ip, port_ips)
+        self.assertIn(network['id'], port_net_ids)
 
     @test.idempotent_id('5ad01ed0-0e6e-4c5d-8194-232801b15c72')
     def test_port_list_filter_by_router_id(self):
