@@ -398,6 +398,9 @@ ComputeFeaturesGroup = [
     cfg.BoolOpt('ec2_api',
                 default=True,
                 help='Does the test environment have the ec2 api running?'),
+    cfg.BoolOpt('nova_cert',
+                default=True,
+                help='Does the test environment have the nova cert running?'),
     # TODO(mriedem): Remove preserve_ports once juno-eol happens.
     cfg.BoolOpt('preserve_ports',
                 default=False,
