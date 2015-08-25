@@ -38,7 +38,8 @@ class InstanceActionsTestJSON(base.BaseV2ComputeTest):
         self.client.reboot_server(self.server_id, 'HARD')
         waiters.wait_for_server_status(self.client, self.server_id, 'ACTIVE')
 
-        body = self.client.list_instance_actions(self.server_id)
+        body = (self.client.list_instance_actions(self.server_id)
+                ['instanceActions'])
         self.assertTrue(len(body) == 2, str(body))
         self.assertTrue(any([i for i in body if i['action'] == 'create']))
         self.assertTrue(any([i for i in body if i['action'] == 'reboot']))
@@ -46,7 +47,7 @@ class InstanceActionsTestJSON(base.BaseV2ComputeTest):
     @test.idempotent_id('aacc71ca-1d70-4aa5-bbf6-0ff71470e43c')
     def test_get_instance_action(self):
         # Get the action details of the provided server
-        body = self.client.get_instance_action(self.server_id,
-                                               self.request_id)
+        body = self.client.get_instance_action(
+            self.server_id, self.request_id)['instanceAction']
         self.assertEqual(self.server_id, body['instance_uuid'])
         self.assertEqual('create', body['action'])

@@ -34,7 +34,7 @@ def wait_for_server_status(client, server_id, status, ready_wait=True,
 
     # NOTE(afazekas): UNKNOWN status possible on ERROR
     # or in a very early stage.
-    body = client.show_server(server_id)
+    body = client.show_server(server_id)['server']
     old_status = server_status = body['status']
     old_task_state = task_state = _get_task_state(body)
     start_time = int(time.time())
@@ -61,7 +61,7 @@ def wait_for_server_status(client, server_id, status, ready_wait=True,
                 return
 
         time.sleep(client.build_interval)
-        body = client.show_server(server_id)
+        body = client.show_server(server_id)['server']
         server_status = body['status']
         task_state = _get_task_state(body)
         if (server_status != old_status) or (task_state != old_task_state):
@@ -102,7 +102,7 @@ def wait_for_server_termination(client, server_id, ignore_error=False):
     start_time = int(time.time())
     while True:
         try:
-            body = client.show_server(server_id)
+            body = client.show_server(server_id)['server']
         except lib_exc.NotFound:
             return
 

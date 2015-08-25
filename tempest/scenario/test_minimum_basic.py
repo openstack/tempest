@@ -62,7 +62,8 @@ class TestMinimumBasicScenario(manager.ScenarioTest):
         self.assertIn(self.server['id'], [x['id'] for x in servers])
 
     def nova_show(self):
-        got_server = self.servers_client.show_server(self.server['id'])
+        got_server = (self.servers_client.show_server(self.server['id'])
+                      ['server'])
         excluded_keys = ['OS-EXT-AZ:availability_zone']
         # Exclude these keys because of LP:#1486475
         excluded_keys.extend(['OS-EXT-STS:power_state', 'updated'])
@@ -98,7 +99,8 @@ class TestMinimumBasicScenario(manager.ScenarioTest):
                         self.server['id'], secgroup['name'])
 
         def wait_for_secgroup_add():
-            body = self.servers_client.show_server(self.server['id'])
+            body = (self.servers_client.show_server(self.server['id'])
+                    ['server'])
             return {'name': secgroup['name']} in body['security_groups']
 
         if not test.call_until_true(wait_for_secgroup_add,

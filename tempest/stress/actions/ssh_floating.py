@@ -77,7 +77,7 @@ class FloatingStress(stressaction.StressAction):
         vm_args['security_groups'] = [self.sec_grp]
         server = servers_client.create_server(name, self.image,
                                               self.flavor,
-                                              **vm_args)
+                                              **vm_args)['server']
         self.server_id = server['id']
         if self.wait_after_vm_create:
             waiters.wait_for_server_status(self.manager.servers_client,
