@@ -26,8 +26,7 @@ class InterfacesClient(service_client.ServiceClient):
         resp, body = self.get('servers/%s/os-interface' % server_id)
         body = json.loads(body)
         self.validate_response(schema.list_interfaces, resp, body)
-        return service_client.ResponseBodyList(resp,
-                                               body['interfaceAttachments'])
+        return service_client.ResponseBody(resp, body)
 
     def create_interface(self, server_id, **kwargs):
         post_body = {'interfaceAttachment': kwargs}
@@ -36,14 +35,14 @@ class InterfacesClient(service_client.ServiceClient):
                                body=post_body)
         body = json.loads(body)
         self.validate_response(schema.get_create_interfaces, resp, body)
-        return service_client.ResponseBody(resp, body['interfaceAttachment'])
+        return service_client.ResponseBody(resp, body)
 
     def show_interface(self, server_id, port_id):
         resp, body = self.get('servers/%s/os-interface/%s' % (server_id,
                                                               port_id))
         body = json.loads(body)
         self.validate_response(schema.get_create_interfaces, resp, body)
-        return service_client.ResponseBody(resp, body['interfaceAttachment'])
+        return service_client.ResponseBody(resp, body)
 
     def delete_interface(self, server_id, port_id):
         resp, body = self.delete('servers/%s/os-interface/%s' % (server_id,

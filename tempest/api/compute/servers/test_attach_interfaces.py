@@ -48,13 +48,15 @@ class AttachInterfacesTestJSON(base.BaseV2ComputeTest):
 
     def wait_for_interface_status(self, server, port_id, status):
         """Waits for a interface to reach a given status."""
-        body = self.client.show_interface(server, port_id)
+        body = (self.client.show_interface(server, port_id)
+                ['interfaceAttachment'])
         interface_status = body['port_state']
         start = int(time.time())
 
         while(interface_status != status):
             time.sleep(self.build_interval)
-            body = self.client.show_interface(server, port_id)
+            body = (self.client.show_interface(server, port_id)
+                    ['interfaceAttachment'])
             interface_status = body['port_state']
 
             timed_out = int(time.time()) - start >= self.build_timeout
@@ -82,14 +84,16 @@ class AttachInterfacesTestJSON(base.BaseV2ComputeTest):
 
     def _create_server_get_interfaces(self):
         server = self.create_test_server(wait_until='ACTIVE')
-        ifs = self.client.list_interfaces(server['id'])
+        ifs = (self.client.list_interfaces(server['id'])
+               ['interfaceAttachments'])
         body = self.wait_for_interface_status(
             server['id'], ifs[0]['port_id'], 'ACTIVE')
         ifs[0]['port_state'] = body['port_state']
         return server, ifs
 
     def _test_create_interface(self, server):
-        iface = self.client.create_interface(server['id'])
+        iface = (self.client.create_interface(server['id'])
+                 ['interfaceAttachment'])
         iface = self.wait_for_interface_status(
             server['id'], iface['port_id'], 'ACTIVE')
         self._check_interface(iface)
@@ -97,8 +101,8 @@ class AttachInterfacesTestJSON(base.BaseV2ComputeTest):
 
     def _test_create_interface_by_network_id(self, server, ifs):
         network_id = ifs[0]['net_id']
-        iface = self.client.create_interface(server['id'],
-                                             net_id=network_id)
+        iface = self.client.create_interface(
+            server['id'], net_id=network_id)['interfaceAttachment']
         iface = self.wait_for_interface_status(
             server['id'], iface['port_id'], 'ACTIVE')
         self._check_interface(iface, network_id=network_id)
@@ -106,8 +110,8 @@ class AttachInterfacesTestJSON(base.BaseV2ComputeTest):
 
     def _test_show_interface(self, server, ifs):
         iface = ifs[0]
-        _iface = self.client.show_interface(server['id'],
-                                            iface['port_id'])
+        _iface = self.client.show_interface(
+            server['id'], iface['port_id'])['interfaceAttachment']
         self._check_interface(iface, port_id=_iface['port_id'],
                               network_id=_iface['net_id'],
                               fixed_ip=_iface['fixed_ips'][0]['ip_address'],
@@ -117,12 +121,14 @@ class AttachInterfacesTestJSON(base.BaseV2ComputeTest):
         # NOTE(danms): delete not the first or last, but one in the middle
         iface = ifs[1]
         self.client.delete_interface(server['id'], iface['port_id'])
-        _ifs = self.client.list_interfaces(server['id'])
+        _ifs = (self.client.list_interfaces(server['id'])
+                ['interfaceAttachments'])
         start = int(time.time())
 
         while len(ifs) == len(_ifs):
             time.sleep(self.build_interval)
-            _ifs = self.client.list_interfaces(server['id'])
+            _ifs = (self.client.list_interfaces(server['id'])
+                    ['interfaceAttachments'])
             timed_out = int(time.time()) - start >= self.build_timeout
             if len(ifs) == len(_ifs) and timed_out:
                 message = ('Failed to delete interface within '
@@ -161,7 +167,8 @@ class AttachInterfacesTestJSON(base.BaseV2ComputeTest):
         iface = self._test_create_interface_by_network_id(server, ifs)
         ifs.append(iface)
 
-        _ifs = self.client.list_interfaces(server['id'])
+        _ifs = (self.client.list_interfaces(server['id'])
+                ['interfaceAttachments'])
         self._compare_iface_list(ifs, _ifs)
 
         self._test_show_interface(server, ifs)
