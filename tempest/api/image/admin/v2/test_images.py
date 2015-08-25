@@ -20,7 +20,7 @@ import testtools
 from tempest.api.image import base
 from tempest import config
 from tempest import test
-
+from tempest_lib import exceptions as lib_exc
 
 CONF = config.CONF
 
@@ -43,13 +43,20 @@ class BasicAdminOperationsImagesTest(base.BaseV2ImageAdminTest):
         image_id = body['id']
         self.addCleanup(self.client.delete_image, image_id)
         # upload an image file
-        image_file = moves.cStringIO(data_utils.random_bytes())
+        content = data_utils.random_bytes()
+        image_file = moves.cStringIO(content)
         self.client.store_image_file(image_id, image_file)
         # deactivate image
         self.admin_client.deactivate_image(image_id)
         body = self.client.show_image(image_id)
         self.assertEqual("deactivated", body['status'])
+        # non-admin user unable to download deactivated image
+        self.assertRaises(lib_exc.Forbidden, self.client.load_image_file,
+                          image_id)
         # reactivate image
         self.admin_client.reactivate_image(image_id)
         body = self.client.show_image(image_id)
         self.assertEqual("active", body['status'])
+        # non-admin user able to download image after reactivation by admin
+        body = self.client.load_image_file(image_id)
+        self.assertEqual(content, body.data)
