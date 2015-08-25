@@ -270,9 +270,10 @@ class TestCreateResources(JavelinUnitTest):
     def test_create_secgroup(self):
         self.useFixture(mockpatch.PatchObject(javelin, "client_for_user",
                                               return_value=self.fake_client))
-        self.fake_client.secgroups.list_security_groups.return_value = []
+        self.fake_client.secgroups.list_security_groups.return_value = (
+            {'security_groups': []})
         self.fake_client.secgroups.create_security_group.return_value = \
-            {'id': self.fake_object['secgroup_id']}
+            {'security_group': {'id': self.fake_object['secgroup_id']}}
 
         javelin.create_secgroups([self.fake_object])
 

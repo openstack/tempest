@@ -39,7 +39,7 @@ class SecurityGroupsNegativeTestJSON(base.BaseSecurityGroupsTest):
 
     def _generate_a_non_existent_security_group_id(self):
         security_group_id = []
-        body = self.client.list_security_groups()
+        body = self.client.list_security_groups()['security_groups']
         for i in range(len(body)):
             security_group_id.append(body[i]['id'])
         # Generate a non-existent security group id
@@ -122,7 +122,7 @@ class SecurityGroupsNegativeTestJSON(base.BaseSecurityGroupsTest):
     def test_delete_the_default_security_group(self):
         # Negative test:Deletion of the "default" Security Group should Fail
         default_security_group_id = None
-        body = self.client.list_security_groups()
+        body = self.client.list_security_groups()['security_groups']
         for i in range(len(body)):
             if body[i]['name'] == 'default':
                 default_security_group_id = body[i]['id']

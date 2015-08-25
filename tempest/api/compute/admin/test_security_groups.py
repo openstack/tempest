@@ -50,9 +50,8 @@ class SecurityGroupsTestAdminJSON(base.BaseV2ComputeAdminTest):
         for i in range(2):
             name = data_utils.rand_name('securitygroup')
             description = data_utils.rand_name('description')
-            securitygroup = (self.client
-                             .create_security_group(name=name,
-                                                    description=description))
+            securitygroup = self.client.create_security_group(
+                name=name, description=description)['security_group']
             self.addCleanup(self._delete_security_group,
                             securitygroup['id'], admin=False)
             security_group_list.append(securitygroup)
@@ -63,13 +62,14 @@ class SecurityGroupsTestAdminJSON(base.BaseV2ComputeAdminTest):
             name = data_utils.rand_name('securitygroup')
             description = data_utils.rand_name('description')
             adm_securitygroup = self.adm_client.create_security_group(
-                name=name, description=description)
+                name=name, description=description)['security_group']
             self.addCleanup(self._delete_security_group,
                             adm_securitygroup['id'])
             security_group_list.append(adm_securitygroup)
 
         # Fetch all security groups based on 'all_tenants' search filter
-        fetched_list = self.adm_client.list_security_groups(all_tenants='true')
+        fetched_list = self.adm_client.list_security_groups(
+            all_tenants='true')['security_groups']
         sec_group_id_list = map(lambda sg: sg['id'], fetched_list)
         # Now check if all created Security Groups are present in fetched list
         for sec_group in security_group_list:
@@ -77,7 +77,8 @@ class SecurityGroupsTestAdminJSON(base.BaseV2ComputeAdminTest):
 
         # Fetch all security groups for non-admin user with 'all_tenants'
         # search filter
-        fetched_list = self.client.list_security_groups(all_tenants='true')
+        fetched_list = (self.client.list_security_groups(all_tenants='true')
+                        ['security_groups'])
         # Now check if all created Security Groups are present in fetched list
         for sec_group in fetched_list:
             self.assertEqual(sec_group['tenant_id'], client_tenant_id,

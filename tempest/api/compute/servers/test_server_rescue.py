@@ -49,7 +49,7 @@ class ServerRescueTestJSON(base.BaseV2ComputeTest):
         cls.sg_name = data_utils.rand_name('sg')
         cls.sg_desc = data_utils.rand_name('sg-desc')
         cls.sg = cls.security_groups_client.create_security_group(
-            name=cls.sg_name, description=cls.sg_desc)
+            name=cls.sg_name, description=cls.sg_desc)['security_group']
         cls.sg_id = cls.sg['id']
 
         # Server for positive tests

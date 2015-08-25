@@ -95,7 +95,7 @@ class FloatingStress(stressaction.StressAction):
         s_name = data_utils.rand_name('sec_grp')
         s_description = data_utils.rand_name('desc')
         self.sec_grp = sec_grp_cli.create_security_group(
-            name=s_name, description=s_description)
+            name=s_name, description=s_description)['security_group']
         create_rule = sec_grp_cli.create_security_group_rule
         create_rule(parent_group_id=self.sec_grp['id'], ip_protocol='tcp',
                     from_port=22, to_port=22)

@@ -84,7 +84,7 @@ class AuthorizationTestJSON(base.BaseV2ComputeTest):
         name = data_utils.rand_name('security')
         description = data_utils.rand_name('description')
         cls.security_group = cls.security_client.create_security_group(
-            name=name, description=description)
+            name=name, description=description)['security_group']
 
         parent_group_id = cls.security_group['id']
         ip_protocol = 'tcp'

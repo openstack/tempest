@@ -28,7 +28,7 @@ def create_ssh_security_group(os, add_rule=False):
     sg_name = data_utils.rand_name('securitygroup-')
     sg_description = data_utils.rand_name('description-')
     security_group = security_groups_client.create_security_group(
-        name=sg_name, description=sg_description)
+        name=sg_name, description=sg_description)['security_group']
     if add_rule:
         security_group_rules_client.create_security_group_rule(
             parent_group_id=security_group['id'], ip_protocol='tcp',
