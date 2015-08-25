@@ -321,7 +321,7 @@ class ContainerTest(base.BaseObjectTest):
         self.assertNotIn('x-container-meta-', str(resp))
 
     @test.idempotent_id('cf19bc0b-7e16-4a5a-aaed-cb0c2fe8deef')
-    def test_update_container_metadata_with_create_and_delete_matadata(self):
+    def test_update_container_metadata_with_create_and_delete_metadata(self):
         # Send one request of adding and deleting metadata
         container_name = data_utils.rand_name(name='TestContainer')
         metadata_1 = {'test-container-meta1': 'Meta1'}
@@ -379,8 +379,8 @@ class ContainerTest(base.BaseObjectTest):
         self.assertNotIn('x-container-meta-test-container-meta1', resp)
 
     @test.idempotent_id('31f40a5f-6a52-4314-8794-cd89baed3040')
-    def test_update_container_metadata_with_create_matadata_key(self):
-        # update container metadata with a blenk value of metadata
+    def test_update_container_metadata_with_create_metadata_key(self):
+        # update container metadata with a blank value of metadata
         container_name = self._create_container()
 
         metadata = {'test-container-meta1': ''}
@@ -395,7 +395,7 @@ class ContainerTest(base.BaseObjectTest):
 
     @test.idempotent_id('a2e36378-6f1f-43f4-840a-ffd9cfd61914')
     def test_update_container_metadata_with_delete_metadata_key(self):
-        # update container metadata with a blank value of matadata
+        # update container metadata with a blank value of metadata
         container_name = data_utils.rand_name(name='TestContainer')
         metadata = {'test-container-meta1': 'Meta1'}
         self.container_client.create_container(container_name,

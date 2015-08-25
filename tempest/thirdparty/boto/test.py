@@ -377,7 +377,7 @@ class BotoTestCase(tempest.test.BaseTestCase):
         state = self.waitSnapshotStatus(lfunction, wait_for)
         self.assertIn(state, wait_for)
 
-    def assertAddressDissasociatedWait(self, address):
+    def assertAddressDisassociatedWait(self, address):
 
         def _disassociate():
             cli = self.ec2_client
@@ -467,7 +467,7 @@ class BotoTestCase(tempest.test.BaseTestCase):
                         client.InvalidInstanceID.NotFound.match(exc) is None:
                     return "_GONE"
                 # NOTE(afazekas): incorrect code,
-                # but the resource must be destoreyd
+                # but the resource must be destroyed
                 if exc.error_code == "InstanceNotFound":
                     return "_GONE"
 
