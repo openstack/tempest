@@ -71,19 +71,6 @@ class HostsAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
                           maintenance_mode='enable')
 
     @test.attr(type=['negative'])
-    @test.idempotent_id('76e396fe-5418-4dd3-a186-5b301edc0721')
-    def test_update_host_with_extra_param(self):
-        # only 'status' and 'maintenance_mode' are the valid params.
-        hostname = self._get_host_name()
-
-        self.assertRaises(lib_exc.BadRequest,
-                          self.client.update_host,
-                          hostname,
-                          status='enable',
-                          maintenance_mode='enable',
-                          param='XXX')
-
-    @test.attr(type=['negative'])
     @test.idempotent_id('fbe2bf3e-3246-4a95-a59f-94e4e298ec77')
     def test_update_host_with_invalid_status(self):
         # 'status' can only be 'enable' or 'disable'
