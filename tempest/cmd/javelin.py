@@ -840,7 +840,7 @@ def _get_server_by_name(client, name):
 
 
 def _get_flavor_by_name(client, name):
-    body = client.flavors.list_flavors()
+    body = client.flavors.list_flavors()['flavors']
     for flavor in body:
         if name == flavor['name']:
             return flavor

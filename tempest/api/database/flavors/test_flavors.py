@@ -58,7 +58,8 @@ class DatabaseFlavorsTest(base.BaseDatabaseTest):
     @test.services('compute')
     def test_compare_db_flavors_with_os(self):
         db_flavors = self.client.list_db_flavors()
-        os_flavors = self.os_flavors_client.list_flavors(detail=True)
+        os_flavors = (self.os_flavors_client.list_flavors(detail=True)
+                      ['flavors'])
         self.assertEqual(len(os_flavors), len(db_flavors),
                          "OS flavors %s do not match DB flavors %s" %
                          (os_flavors, db_flavors))

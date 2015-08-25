@@ -61,7 +61,7 @@ class FlavorsAccessNegativeTestJSON(base.BaseV2ComputeAdminTest):
                                                ram=self.ram, vcpus=self.vcpus,
                                                disk=self.disk,
                                                id=new_flavor_id,
-                                               is_public='True')
+                                               is_public='True')['flavor']
         self.addCleanup(self.client.delete_flavor, new_flavor['id'])
         self.assertRaises(lib_exc.NotFound,
                           self.client.list_flavor_access,
@@ -77,7 +77,7 @@ class FlavorsAccessNegativeTestJSON(base.BaseV2ComputeAdminTest):
                                                ram=self.ram, vcpus=self.vcpus,
                                                disk=self.disk,
                                                id=new_flavor_id,
-                                               is_public='False')
+                                               is_public='False')['flavor']
         self.addCleanup(self.client.delete_flavor, new_flavor['id'])
         self.assertRaises(lib_exc.Forbidden,
                           self.flavors_client.add_flavor_access,
@@ -94,7 +94,7 @@ class FlavorsAccessNegativeTestJSON(base.BaseV2ComputeAdminTest):
                                                ram=self.ram, vcpus=self.vcpus,
                                                disk=self.disk,
                                                id=new_flavor_id,
-                                               is_public='False')
+                                               is_public='False')['flavor']
         self.addCleanup(self.client.delete_flavor, new_flavor['id'])
         # Add flavor access to a tenant.
         self.client.add_flavor_access(new_flavor['id'], self.tenant_id)
@@ -115,7 +115,7 @@ class FlavorsAccessNegativeTestJSON(base.BaseV2ComputeAdminTest):
                                                ram=self.ram, vcpus=self.vcpus,
                                                disk=self.disk,
                                                id=new_flavor_id,
-                                               is_public='False')
+                                               is_public='False')['flavor']
         self.addCleanup(self.client.delete_flavor, new_flavor['id'])
 
         # Add flavor access to a tenant.
@@ -140,7 +140,7 @@ class FlavorsAccessNegativeTestJSON(base.BaseV2ComputeAdminTest):
                                                ram=self.ram, vcpus=self.vcpus,
                                                disk=self.disk,
                                                id=new_flavor_id,
-                                               is_public='False')
+                                               is_public='False')['flavor']
         self.addCleanup(self.client.delete_flavor, new_flavor['id'])
 
         # An exception should be raised when flavor access is not found

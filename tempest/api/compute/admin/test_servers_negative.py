@@ -75,7 +75,8 @@ class ServersAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
         disk = 10
         flavor_ref = self.flavors_client.create_flavor(name=flavor_name,
                                                        ram=ram, vcpus=vcpus,
-                                                       disk=disk, id=flavor_id)
+                                                       disk=disk,
+                                                       id=flavor_id)['flavor']
         self.addCleanup(self.flavors_client.delete_flavor, flavor_id)
         self.assertRaises((lib_exc.Forbidden, lib_exc.OverLimit),
                           self.client.resize_server,
@@ -97,7 +98,8 @@ class ServersAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
         disk = 10
         flavor_ref = self.flavors_client.create_flavor(name=flavor_name,
                                                        ram=ram, vcpus=vcpus,
-                                                       disk=disk, id=flavor_id)
+                                                       disk=disk,
+                                                       id=flavor_id)['flavor']
         self.addCleanup(self.flavors_client.delete_flavor, flavor_id)
         self.assertRaises((lib_exc.Forbidden, lib_exc.OverLimit),
                           self.client.resize_server,

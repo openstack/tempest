@@ -39,13 +39,13 @@ class FlavorsClient(service_client.ServiceClient):
         resp, body = self.get(url)
         body = json.loads(body)
         self.validate_response(_schema, resp, body)
-        return service_client.ResponseBodyList(resp, body['flavors'])
+        return service_client.ResponseBody(resp, body)
 
     def show_flavor(self, flavor_id):
         resp, body = self.get("flavors/%s" % flavor_id)
         body = json.loads(body)
         self.validate_response(schema.create_get_flavor_details, resp, body)
-        return service_client.ResponseBody(resp, body['flavor'])
+        return service_client.ResponseBody(resp, body)
 
     def create_flavor(self, **kwargs):
         """Creates a new flavor or instance type.
@@ -64,7 +64,7 @@ class FlavorsClient(service_client.ServiceClient):
 
         body = json.loads(body)
         self.validate_response(schema.create_get_flavor_details, resp, body)
-        return service_client.ResponseBody(resp, body['flavor'])
+        return service_client.ResponseBody(resp, body)
 
     def delete_flavor(self, flavor_id):
         """Deletes the given flavor."""
@@ -76,7 +76,7 @@ class FlavorsClient(service_client.ServiceClient):
         # Did not use show_flavor(id) for verification as it gives
         # 200 ok even for deleted id. LP #981263
         # we can remove the loop here and use get by ID when bug gets sortedout
-        flavors = self.list_flavors(detail=True)
+        flavors = self.list_flavors(detail=True)['flavors']
         for flavor in flavors:
             if flavor['id'] == id:
                 return False
