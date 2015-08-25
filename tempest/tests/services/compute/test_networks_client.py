@@ -70,7 +70,8 @@ class TestNetworksClient(base.TestCase):
             fake_auth, 'compute', 'regionOne')
 
     def _test_list_networks(self, bytes_body=False):
-        serialized_body = json.dumps({"networks": self.FAKE_NETWORKS})
+        expected = {"networks": self.FAKE_NETWORKS}
+        serialized_body = json.dumps(expected)
         if bytes_body:
             serialized_body = serialized_body.encode('utf-8')
 
@@ -79,7 +80,7 @@ class TestNetworksClient(base.TestCase):
             'tempest.common.service_client.ServiceClient.get',
             return_value=mocked_resp))
         resp = self.client.list_networks()
-        self.assertEqual(self.FAKE_NETWORKS, resp)
+        self.assertEqual(expected, resp)
 
     def test_list_networks_with_str_body(self):
         self._test_list_networks()
@@ -88,7 +89,8 @@ class TestNetworksClient(base.TestCase):
         self._test_list_networks(bytes_body=True)
 
     def _test_show_network(self, bytes_body=False):
-        serialized_body = json.dumps({"network": self.FAKE_NETWORK})
+        expected = {"network": self.FAKE_NETWORKS}
+        serialized_body = json.dumps(expected)
         if bytes_body:
             serialized_body = serialized_body.encode('utf-8')
 
@@ -97,7 +99,7 @@ class TestNetworksClient(base.TestCase):
             'tempest.common.service_client.ServiceClient.get',
             return_value=mocked_resp))
         resp = self.client.show_network(self.network_id)
-        self.assertEqual(self.FAKE_NETWORK, resp)
+        self.assertEqual(expected, resp)
 
     def test_show_network_with_str_body(self):
         self._test_show_network()
