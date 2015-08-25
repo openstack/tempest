@@ -91,6 +91,21 @@ Additionally, when you're creating the plugin you likely want to follow all
 of the tempest developer and reviewer documentation to ensure that the tests
 being added in the plugin act and behave like the rest of tempest.
 
+Dealing with configuration options
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Historically Tempest didn't provide external guarantees on its configuration
+options. However, with the introduction of the plugin interface this is no
+longer the case. An external plugin can rely on using any configuration option
+coming from Tempest, there will be at least a full deprecation cycle for any
+option before it's removed. However, just the options provided by Tempest
+may not be sufficient for the plugin. If you need to add any plugin specific
+configuration options you should use the ``register_opts`` and
+``get_opt_lists`` methods to pass them to Tempest when the plugin is loaded.
+When adding configuration options the ``register_opts`` method gets passed the
+CONF object from tempest. This enables the plugin to add options to both
+existing sections and also create new configuration sections for new options.
+
 Using Plugins
 =============
 
