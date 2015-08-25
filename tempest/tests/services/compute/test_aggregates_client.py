@@ -34,7 +34,7 @@ class TestAggregatesClient(base.TestCase):
         body = '{"aggregates": []}'
         if bytes_body:
             body = body.encode('utf-8')
-        expected = []
+        expected = {"aggregates": []}
         response = (httplib2.Response({'status': 200}), body)
         self.useFixture(mockpatch.Patch(
             'tempest.common.service_client.ServiceClient.get',
@@ -48,17 +48,17 @@ class TestAggregatesClient(base.TestCase):
         self._test_list_aggregates(bytes_body=True)
 
     def _test_show_aggregate(self, bytes_body=False):
-        expected = {"name": "hoge",
-                    "availability_zone": None,
-                    "deleted": False,
-                    "created_at":
-                    "2015-07-16T03:07:32.000000",
-                    "updated_at": None,
-                    "hosts": [],
-                    "deleted_at": None,
-                    "id": 1,
-                    "metadata": {}}
-        serialized_body = json.dumps({"aggregate": expected})
+        expected = {"aggregate": {"name": "hoge",
+                                  "availability_zone": None,
+                                  "deleted": False,
+                                  "created_at":
+                                  "2015-07-16T03:07:32.000000",
+                                  "updated_at": None,
+                                  "hosts": [],
+                                  "deleted_at": None,
+                                  "id": 1,
+                                  "metadata": {}}}
+        serialized_body = json.dumps(expected)
         if bytes_body:
             serialized_body = serialized_body.encode('utf-8')
 
@@ -76,14 +76,14 @@ class TestAggregatesClient(base.TestCase):
         self._test_show_aggregate(bytes_body=True)
 
     def _test_create_aggregate(self, bytes_body=False):
-        expected = {"name": u'\xf4',
-                    "availability_zone": None,
-                    "deleted": False,
-                    "created_at": "2015-07-21T04:11:18.000000",
-                    "updated_at": None,
-                    "deleted_at": None,
-                    "id": 1}
-        serialized_body = json.dumps({"aggregate": expected})
+        expected = {"aggregate": {"name": u'\xf4',
+                                  "availability_zone": None,
+                                  "deleted": False,
+                                  "created_at": "2015-07-21T04:11:18.000000",
+                                  "updated_at": None,
+                                  "deleted_at": None,
+                                  "id": 1}}
+        serialized_body = json.dumps(expected)
         if bytes_body:
             serialized_body = serialized_body.encode('utf-8')
 
@@ -110,16 +110,16 @@ class TestAggregatesClient(base.TestCase):
         self.assertEqual(expected, resp)
 
     def _test_update_aggregate(self, bytes_body=False):
-        expected = {"name": u'\xe9',
-                    "availability_zone": None,
-                    "deleted": False,
-                    "created_at": "2015-07-16T03:07:32.000000",
-                    "updated_at": "2015-07-23T05:16:29.000000",
-                    "hosts": [],
-                    "deleted_at": None,
-                    "id": 1,
-                    "metadata": {}}
-        serialized_body = json.dumps({"aggregate": expected})
+        expected = {"aggregate": {"name": u'\xe9',
+                                  "availability_zone": None,
+                                  "deleted": False,
+                                  "created_at": "2015-07-16T03:07:32.000000",
+                                  "updated_at": "2015-07-23T05:16:29.000000",
+                                  "hosts": [],
+                                  "deleted_at": None,
+                                  "id": 1,
+                                  "metadata": {}}}
+        serialized_body = json.dumps(expected)
         if bytes_body:
             serialized_body = serialized_body.encode('utf-8')
 

@@ -27,14 +27,14 @@ class AggregatesClient(service_client.ServiceClient):
         resp, body = self.get("os-aggregates")
         body = json.loads(body)
         self.validate_response(schema.list_aggregates, resp, body)
-        return service_client.ResponseBodyList(resp, body['aggregates'])
+        return service_client.ResponseBody(resp, body)
 
     def show_aggregate(self, aggregate_id):
         """Get details of the given aggregate."""
         resp, body = self.get("os-aggregates/%s" % aggregate_id)
         body = json.loads(body)
         self.validate_response(schema.get_aggregate, resp, body)
-        return service_client.ResponseBody(resp, body['aggregate'])
+        return service_client.ResponseBody(resp, body)
 
     def create_aggregate(self, **kwargs):
         """Creates a new aggregate."""
@@ -43,7 +43,7 @@ class AggregatesClient(service_client.ServiceClient):
 
         body = json.loads(body)
         self.validate_response(schema.create_aggregate, resp, body)
-        return service_client.ResponseBody(resp, body['aggregate'])
+        return service_client.ResponseBody(resp, body)
 
     def update_aggregate(self, aggregate_id, **kwargs):
         """Update a aggregate."""
@@ -52,7 +52,7 @@ class AggregatesClient(service_client.ServiceClient):
 
         body = json.loads(body)
         self.validate_response(schema.update_aggregate, resp, body)
-        return service_client.ResponseBody(resp, body['aggregate'])
+        return service_client.ResponseBody(resp, body)
 
     def delete_aggregate(self, aggregate_id):
         """Deletes the given aggregate."""
@@ -79,7 +79,7 @@ class AggregatesClient(service_client.ServiceClient):
                                post_body)
         body = json.loads(body)
         self.validate_response(schema.aggregate_add_remove_host, resp, body)
-        return service_client.ResponseBody(resp, body['aggregate'])
+        return service_client.ResponseBody(resp, body)
 
     def remove_host(self, aggregate_id, **kwargs):
         """Removes a host from the given aggregate."""
@@ -88,7 +88,7 @@ class AggregatesClient(service_client.ServiceClient):
                                post_body)
         body = json.loads(body)
         self.validate_response(schema.aggregate_add_remove_host, resp, body)
-        return service_client.ResponseBody(resp, body['aggregate'])
+        return service_client.ResponseBody(resp, body)
 
     def set_metadata(self, aggregate_id, **kwargs):
         """Replaces the aggregate's existing metadata with new metadata."""
@@ -97,4 +97,4 @@ class AggregatesClient(service_client.ServiceClient):
                                post_body)
         body = json.loads(body)
         self.validate_response(schema.aggregate_set_metadata, resp, body)
-        return service_client.ResponseBody(resp, body['aggregate'])
+        return service_client.ResponseBody(resp, body)
