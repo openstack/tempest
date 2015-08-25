@@ -108,7 +108,8 @@ class BaremetalBasicOps(manager.BaremetalScenarioTest):
         return int(ephemeral)
 
     def add_floating_ip(self):
-        floating_ip = self.floating_ips_client.create_floating_ip()
+        floating_ip = (self.floating_ips_client.create_floating_ip()
+                       ['floating_ip'])
         self.floating_ips_client.associate_floating_ip_to_server(
             floating_ip['ip'], self.instance['id'])
         return floating_ip['ip']

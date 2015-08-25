@@ -98,7 +98,8 @@ class TestVolumeBootPattern(manager.ScenarioTest):
 
     def _ssh_to_server(self, server, keypair):
         if CONF.compute.use_floatingip_for_ssh:
-            floating_ip = self.floating_ips_client.create_floating_ip()
+            floating_ip = (self.floating_ips_client.create_floating_ip()
+                           ['floating_ip'])
             self.addCleanup(self.delete_wrapper,
                             self.floating_ips_client.delete_floating_ip,
                             floating_ip['id'])

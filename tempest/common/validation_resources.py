@@ -59,8 +59,7 @@ def create_validation_resources(os, validation_resources=None):
                 create_ssh_security_group(os, add_rule)
         if validation_resources['floating_ip']:
             floating_client = os.floating_ips_client
-            validation_data['floating_ip'] = \
-                floating_client.create_floating_ip()
+            validation_data.update(floating_client.create_floating_ip())
     return validation_data
 
 

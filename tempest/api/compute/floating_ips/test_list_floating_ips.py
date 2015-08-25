@@ -31,7 +31,7 @@ class FloatingIPDetailsTestJSON(base.BaseV2ComputeTest):
         cls.floating_ip = []
         cls.floating_ip_id = []
         for i in range(3):
-            body = cls.client.create_floating_ip()
+            body = cls.client.create_floating_ip()['floating_ip']
             cls.floating_ip.append(body)
             cls.floating_ip_id.append(body['id'])
 
@@ -45,7 +45,7 @@ class FloatingIPDetailsTestJSON(base.BaseV2ComputeTest):
     @test.services('network')
     def test_list_floating_ips(self):
         # Positive test:Should return the list of floating IPs
-        body = self.client.list_floating_ips()
+        body = self.client.list_floating_ips()['floating_ips']
         floating_ips = body
         self.assertNotEqual(0, len(floating_ips),
                             "Expected floating IPs. Got zero.")
@@ -57,14 +57,14 @@ class FloatingIPDetailsTestJSON(base.BaseV2ComputeTest):
     def test_get_floating_ip_details(self):
         # Positive test:Should be able to GET the details of floatingIP
         # Creating a floating IP for which details are to be checked
-        body = self.client.create_floating_ip()
+        body = self.client.create_floating_ip()['floating_ip']
         floating_ip_id = body['id']
         self.addCleanup(self.client.delete_floating_ip,
                         floating_ip_id)
         floating_ip_instance_id = body['instance_id']
         floating_ip_ip = body['ip']
         floating_ip_fixed_ip = body['fixed_ip']
-        body = self.client.show_floating_ip(floating_ip_id)
+        body = self.client.show_floating_ip(floating_ip_id)['floating_ip']
         # Comparing the details of floating IP
         self.assertEqual(floating_ip_instance_id,
                          body['instance_id'])

@@ -878,7 +878,7 @@ def create_servers(servers):
         if CONF.compute.use_floatingip_for_ssh:
             floating_ip_pool = server.get('floating_ip_pool')
             floating_ip = client.floating_ips.create_floating_ip(
-                pool_name=floating_ip_pool)
+                pool_name=floating_ip_pool)['floating_ip']
             client.floating_ips.associate_floating_ip_to_server(
                 floating_ip['ip'], server_id)
 

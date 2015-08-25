@@ -108,7 +108,8 @@ class FloatingStress(stressaction.StressAction):
 
     def _create_floating_ip(self):
         floating_cli = self.manager.floating_ips_client
-        self.floating = floating_cli.create_floating_ip(self.floating_pool)
+        self.floating = (floating_cli.create_floating_ip(self.floating_pool)
+                         ['floating_ip'])
 
     def _destroy_floating_ip(self):
         cli = self.manager.floating_ips_client
@@ -148,7 +149,8 @@ class FloatingStress(stressaction.StressAction):
         cli = self.manager.floating_ips_client
 
         def func():
-            floating = cli.show_floating_ip(self.floating['id'])
+            floating = (cli.show_floating_ip(self.floating['id'])
+                        ['floating_ip'])
             return floating['instance_id'] is None
 
         if not tempest.test.call_until_true(func, self.check_timeout,

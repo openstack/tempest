@@ -39,7 +39,7 @@ class FloatingIPsTestJSON(base.BaseFloatingIPsTest):
         server = cls.create_test_server(wait_until='ACTIVE')
         cls.server_id = server['id']
         # Floating IP creation
-        body = cls.client.create_floating_ip()
+        body = cls.client.create_floating_ip()['floating_ip']
         cls.floating_ip_id = body['id']
         cls.floating_ip = body['ip']
 
@@ -63,14 +63,14 @@ class FloatingIPsTestJSON(base.BaseFloatingIPsTest):
     def test_allocate_floating_ip(self):
         # Positive test:Allocation of a new floating IP to a project
         # should be successful
-        body = self.client.create_floating_ip()
+        body = self.client.create_floating_ip()['floating_ip']
         floating_ip_id_allocated = body['id']
         self.addCleanup(self.client.delete_floating_ip,
                         floating_ip_id_allocated)
-        floating_ip_details = \
-            self.client.show_floating_ip(floating_ip_id_allocated)
+        floating_ip_details = self.client.show_floating_ip(
+            floating_ip_id_allocated)['floating_ip']
         # Checking if the details of allocated IP is in list of floating IP
-        body = self.client.list_floating_ips()
+        body = self.client.list_floating_ips()['floating_ips']
         self.assertIn(floating_ip_details, body)
 
     @test.idempotent_id('de45e989-b5ca-4a9b-916b-04a52e7bbb8b')
@@ -79,7 +79,7 @@ class FloatingIPsTestJSON(base.BaseFloatingIPsTest):
         # Positive test:Deletion of valid floating IP from project
         # should be successful
         # Creating the floating IP that is to be deleted in this method
-        floating_ip_body = self.client.create_floating_ip()
+        floating_ip_body = self.client.create_floating_ip()['floating_ip']
         self.addCleanup(self._try_delete_floating_ip, floating_ip_body['id'])
         # Deleting the floating IP from the project
         self.client.delete_floating_ip(floating_ip_body['id'])
@@ -98,7 +98,8 @@ class FloatingIPsTestJSON(base.BaseFloatingIPsTest):
             self.server_id)
 
         # Check instance_id in the floating_ip body
-        body = self.client.show_floating_ip(self.floating_ip_id)
+        body = (self.client.show_floating_ip(self.floating_ip_id)
+                ['floating_ip'])
         self.assertEqual(self.server_id, body['instance_id'])
 
         # Disassociation of floating IP that was associated in this method
