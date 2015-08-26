@@ -303,7 +303,7 @@ class BotoTestCase(tempest.test.BaseTestCase):
     @classmethod
     def get_lfunction_gone(cls, obj):
         """If the object is instance of a well know type returns back with
-            with the correspoding function otherwise it assumes the obj itself
+            with the corresponding function otherwise it assumes the obj itself
             is the function.
             """
         ec = cls.ec2_error_code
@@ -467,7 +467,7 @@ class BotoTestCase(tempest.test.BaseTestCase):
                         client.InvalidInstanceID.NotFound.match(exc) is None:
                     return "_GONE"
                 # NOTE(afazekas): incorrect code,
-                # but the resource must be destoreyd
+                # but the resource must be destroyed
                 if exc.error_code == "InstanceNotFound":
                     return "_GONE"
 
