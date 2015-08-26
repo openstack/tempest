@@ -77,7 +77,7 @@ AuthGroup = [
     cfg.BoolOpt('create_isolated_networks',
                 default=True,
                 help="If allow_tenant_isolation is set to True and Neutron is "
-                     "enabled Tempest will try to create a useable network, "
+                     "enabled Tempest will try to create a usable network, "
                      "subnet, and router when needed for each tenant it  "
                      "creates. However in some neutron configurations, like "
                      "with VLAN provider networks, this doesn't work. So if "
