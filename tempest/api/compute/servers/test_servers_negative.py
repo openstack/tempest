@@ -258,7 +258,7 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
         new_name = ''
 
         self.assertRaises(lib_exc.BadRequest, self.client.update_server,
-                          server_name, name=new_name)
+                          self.server_id, name=new_name)
 
     @test.attr(type=['negative'])
     @test.idempotent_id('543d84c1-dd2e-4c6d-8cb2-b9da0efaa384')
