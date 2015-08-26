@@ -143,7 +143,7 @@ class ServersTestJSON(base.BaseV2ComputeTest):
         name = data_utils.rand_name('server_group')
         policies = ['affinity']
         body = self.server_groups_client.create_server_group(
-            name=name, policies=policies)
+            name=name, policies=policies)['server_group']
         group_id = body['id']
         self.addCleanup(self.server_groups_client.delete_server_group,
                         group_id)
@@ -153,7 +153,8 @@ class ServersTestJSON(base.BaseV2ComputeTest):
                                          wait_until='ACTIVE')
 
         # Check a server is in the group
-        server_group = self.server_groups_client.get_server_group(group_id)
+        server_group = (self.server_groups_client.get_server_group(group_id)
+                        ['server_group'])
         self.assertIn(server['id'], server_group['members'])
 
     @test.idempotent_id('0578d144-ed74-43f8-8e57-ab10dbf9b3c2')

@@ -195,7 +195,7 @@ class ServerGroupService(ServerService):
 
     def list(self):
         client = self.client
-        sgs = client.list_server_groups()
+        sgs = client.list_server_groups()['server_groups']
         LOG.debug("List count, %s Server Groups" % len(sgs))
         return sgs
 

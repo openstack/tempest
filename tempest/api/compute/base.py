@@ -235,7 +235,8 @@ class BaseComputeTest(tempest.test.BaseTestCase):
             name = data_utils.rand_name(cls.__name__ + "-Server-Group")
         if policy is None:
             policy = ['affinity']
-        body = cls.server_groups_client.create_server_group(name, policy)
+        body = (cls.server_groups_client.create_server_group(name, policy)
+                ['server_group'])
         cls.server_groups.append(body['id'])
         return body
 
