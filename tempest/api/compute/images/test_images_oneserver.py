@@ -86,11 +86,11 @@ class ImagesOneServerTestJSON(base.BaseV2ComputeTest):
         waiters.wait_for_image_status(self.client, image_id, 'ACTIVE')
 
         # Verify the image was created correctly
-        image = self.client.show_image(image_id)
+        image = self.client.show_image(image_id)['image']
         self.assertEqual(name, image['name'])
         self.assertEqual('test', image['metadata']['image_type'])
 
-        original_image = self.client.show_image(self.image_ref)
+        original_image = self.client.show_image(self.image_ref)['image']
 
         # Verify minRAM is the same as the original image
         self.assertEqual(image['minRam'], original_image['minRam'])

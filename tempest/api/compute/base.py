@@ -290,7 +290,7 @@ class BaseComputeTest(tempest.test.BaseTestCase):
         if 'wait_until' in kwargs:
             waiters.wait_for_image_status(cls.images_client,
                                           image_id, kwargs['wait_until'])
-            image = cls.images_client.show_image(image_id)
+            image = cls.images_client.show_image(image_id)['image']
 
             if kwargs['wait_until'] == 'ACTIVE':
                 if kwargs.get('wait_for_server', True):
