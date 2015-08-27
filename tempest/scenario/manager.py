@@ -1094,6 +1094,7 @@ class NetworkScenarioTest(ScenarioTest):
                 ports.append({'port': port.id})
             if ports:
                 create_kwargs['networks'] = ports
+            self.ports = ports
 
         return super(NetworkScenarioTest, self).create_server(
             name=name, image=image, flavor=flavor,
