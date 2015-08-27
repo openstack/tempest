@@ -23,12 +23,6 @@ from tempest.common import service_client
 
 class VolumesExtensionsClient(service_client.ServiceClient):
 
-    def __init__(self, auth_provider, service, region,
-                 default_volume_size=1, **kwargs):
-        super(VolumesExtensionsClient, self).__init__(
-            auth_provider, service, region, **kwargs)
-        self.default_volume_size = default_volume_size
-
     def list_volumes(self, detail=False, **params):
         """List all the volumes created."""
         url = 'os-volumes'
@@ -51,7 +45,7 @@ class VolumesExtensionsClient(service_client.ServiceClient):
         self.validate_response(schema.create_get_volume, resp, body)
         return service_client.ResponseBody(resp, body['volume'])
 
-    def create_volume(self, size=None, **kwargs):
+    def create_volume(self, **kwargs):
         """
         Creates a new Volume.
         size(Required): Size of volume in GB.
@@ -59,14 +53,7 @@ class VolumesExtensionsClient(service_client.ServiceClient):
         display_name: Optional Volume Name.
         metadata: A dictionary of values to be used as metadata.
         """
-        if size is None:
-            size = self.default_volume_size
-        post_body = {
-            'size': size
-        }
-        post_body.update(kwargs)
-
-        post_body = json.dumps({'volume': post_body})
+        post_body = json.dumps({'volume': kwargs})
         resp, body = self.post('os-volumes', post_body)
         body = json.loads(body)
         self.validate_response(schema.create_get_volume, resp, body)

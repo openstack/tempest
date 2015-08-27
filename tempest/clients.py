@@ -321,8 +321,7 @@ class Manager(manager.Manager):
             'build_timeout': CONF.volume.build_timeout
         })
         self.volumes_extensions_client = VolumesExtensionsClient(
-            self.auth_provider, default_volume_size=CONF.volume.volume_size,
-            **params_volume)
+            self.auth_provider, **params_volume)
 
     def _set_database_clients(self):
         self.database_flavors_client = DatabaseFlavorsClient(
