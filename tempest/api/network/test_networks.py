@@ -66,7 +66,6 @@ class NetworksTestJSON(base.BaseNetworkTest):
         cls.name = cls.network['name']
         cls.subnet = cls._create_subnet_with_last_subnet_block(cls.network,
                                                                cls._ip_version)
-        cls.cidr = cls.subnet['cidr']
         cls._subnet_data = {6: {'gateway':
                                 str(cls._get_gateway_from_tempest_conf(6)),
                                 'allocation_pools':

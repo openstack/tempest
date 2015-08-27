@@ -119,9 +119,6 @@ class ListImagesTest(base.BaseV1ImageTest):
         img7 = cls._create_standard_image('33', 'bare', 'raw', 142)
         img8 = cls._create_standard_image('33', 'bare', 'raw', 142)
         cls.created_set = set(cls.created_images)
-        # 4x-4x remote image
-        cls.remote_set = set((img1, img2, img3, img4))
-        cls.standard_set = set((img5, img6, img7, img8))
         # 5x bare, 3x ami
         cls.bare_set = set((img1, img3, img4, img7, img8))
         cls.ami_set = set((img2, img5, img6))

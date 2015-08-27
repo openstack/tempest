@@ -77,7 +77,6 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
     @classmethod
     def resource_setup(cls):
         super(BaseNetworkTest, cls).resource_setup()
-        cls.network_cfg = CONF.network
         cls.networks = []
         cls.subnets = []
         cls.ports = []

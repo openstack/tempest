@@ -97,13 +97,6 @@ class TestVolumeBootPattern(manager.ScenarioTest):
             waiters.wait_for_server_status(self.servers_client,
                                            i['id'], 'SHUTOFF')
 
-    def _detach_volumes(self, volumes):
-        # NOTE(gfidente): two loops so we do not wait for the status twice
-        for v in volumes:
-            self.volumes_client.detach_volume(v['id'])
-        for v in volumes:
-            self.volumes_client.wait_for_volume_status(v['id'], 'available')
-
     def _ssh_to_server(self, server, keypair):
         if CONF.compute.use_floatingip_for_ssh:
             floating_ip = (self.floating_ips_client.create_floating_ip()
