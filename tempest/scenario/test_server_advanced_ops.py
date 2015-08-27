@@ -63,7 +63,7 @@ class TestServerAdvancedOps(manager.ScenarioTest):
                                        'VERIFY_RESIZE')
 
         LOG.debug("Confirming resize of instance %s", instance_id)
-        self.servers_client.confirm_resize(instance_id)
+        self.servers_client.confirm_resize_server(instance_id)
 
         waiters.wait_for_server_status(self.servers_client, instance_id,
                                        'ACTIVE')

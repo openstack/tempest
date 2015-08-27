@@ -252,13 +252,13 @@ class ServersClient(service_client.ServiceClient):
             kwargs['OS-DCF:diskConfig'] = kwargs.pop('disk_config')
         return self.action(server_id, 'resize', None, **kwargs)
 
-    def confirm_resize(self, server_id, **kwargs):
+    def confirm_resize_server(self, server_id, **kwargs):
         """Confirms the flavor change for a server."""
         return self.action(server_id, 'confirmResize',
                            None, schema.server_actions_confirm_resize,
                            **kwargs)
 
-    def revert_resize(self, server_id, **kwargs):
+    def revert_resize_server(self, server_id, **kwargs):
         """Reverts a server back to its original flavor."""
         return self.action(server_id, 'revertResize', None, **kwargs)
 
@@ -311,10 +311,10 @@ class ServersClient(service_client.ServiceClient):
                                resp, body)
         return service_client.ResponseBody(resp, body)
 
-    def stop(self, server_id, **kwargs):
+    def stop_server(self, server_id, **kwargs):
         return self.action(server_id, 'os-stop', None, **kwargs)
 
-    def start(self, server_id, **kwargs):
+    def start_server(self, server_id, **kwargs):
         return self.action(server_id, 'os-start', None, **kwargs)
 
     def attach_volume(self, server_id, **kwargs):

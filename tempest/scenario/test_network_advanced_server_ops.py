@@ -100,11 +100,11 @@ class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
     @test.services('compute', 'network')
     def test_server_connectivity_stop_start(self):
         self._setup_network_and_servers()
-        self.servers_client.stop(self.server['id'])
+        self.servers_client.stop_server(self.server['id'])
         waiters.wait_for_server_status(self.servers_client,
                                        self.server['id'], 'SHUTOFF')
         self._check_network_connectivity(should_connect=False)
-        self.servers_client.start(self.server['id'])
+        self.servers_client.start_server(self.server['id'])
         self._wait_server_status_and_check_network_connectivity()
 
     @test.idempotent_id('7b6860c2-afa3-4846-9522-adeb38dfbe08')
@@ -164,5 +164,5 @@ class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
                                           flavor_ref=resize_flavor)
         waiters.wait_for_server_status(self.servers_client, self.server['id'],
                                        'VERIFY_RESIZE')
-        self.servers_client.confirm_resize(self.server['id'])
+        self.servers_client.confirm_resize_server(self.server['id'])
         self._wait_server_status_and_check_network_connectivity()

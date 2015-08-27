@@ -191,7 +191,7 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         old_image = server['image']['id']
         new_image = (self.image_ref_alt
                      if old_image == self.image_ref else self.image_ref)
-        self.client.stop(self.server_id)
+        self.client.stop_server(self.server_id)
         waiters.wait_for_server_status(self.client, self.server_id, 'SHUTOFF')
         rebuilt_server = self.client.rebuild_server(self.server_id, new_image)
         # If the server was rebuilt on a different image, restore it to the
@@ -212,14 +212,14 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         rebuilt_image_id = server['image']['id']
         self.assertEqual(new_image, rebuilt_image_id)
 
-        self.client.start(self.server_id)
+        self.client.start_server(self.server_id)
 
     def _test_resize_server_confirm(self, stop=False):
         # The server's RAM and disk space should be modified to that of
         # the provided flavor
 
         if stop:
-            self.client.stop(self.server_id)
+            self.client.stop_server(self.server_id)
             waiters.wait_for_server_status(self.client, self.server_id,
                                            'SHUTOFF')
 
@@ -227,7 +227,7 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         waiters.wait_for_server_status(self.client, self.server_id,
                                        'VERIFY_RESIZE')
 
-        self.client.confirm_resize(self.server_id)
+        self.client.confirm_resize_server(self.server_id)
         expected_status = 'SHUTOFF' if stop else 'ACTIVE'
         waiters.wait_for_server_status(self.client, self.server_id,
                                        expected_status)
@@ -237,7 +237,7 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
 
         if stop:
             # NOTE(mriedem): tearDown requires the server to be started.
-            self.client.start(self.server_id)
+            self.client.start_server(self.server_id)
 
         # NOTE(jlk): Explicitly delete the server to get a new one for later
         # tests. Avoids resize down race issues.
@@ -266,7 +266,7 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         waiters.wait_for_server_status(self.client, self.server_id,
                                        'VERIFY_RESIZE')
 
-        self.client.revert_resize(self.server_id)
+        self.client.revert_resize_server(self.server_id)
         waiters.wait_for_server_status(self.client, self.server_id, 'ACTIVE')
 
         server = self.client.show_server(self.server_id)
@@ -411,7 +411,7 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         server = self.create_test_server(wait_until='ACTIVE')
         temp_server_id = server['id']
 
-        self.client.stop(temp_server_id)
+        self.client.stop_server(temp_server_id)
         waiters.wait_for_server_status(self.client, temp_server_id, 'SHUTOFF')
         self.wait_for(self._get_output)
 
@@ -465,9 +465,9 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
 
     @test.idempotent_id('af8eafd4-38a7-4a4b-bdbc-75145a580560')
     def test_stop_start_server(self):
-        self.client.stop(self.server_id)
+        self.client.stop_server(self.server_id)
         waiters.wait_for_server_status(self.client, self.server_id, 'SHUTOFF')
-        self.client.start(self.server_id)
+        self.client.start_server(self.server_id)
         waiters.wait_for_server_status(self.client, self.server_id, 'ACTIVE')
 
     @test.idempotent_id('80a8094c-211e-440a-ab88-9e59d556c7ee')
@@ -479,11 +479,11 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         self.assertEqual(server['status'], 'ACTIVE')
         # Locked server is not allowed to be stopped by non-admin user
         self.assertRaises(lib_exc.Conflict,
-                          self.client.stop, self.server_id)
+                          self.client.stop_server, self.server_id)
         self.client.unlock_server(self.server_id)
-        self.client.stop(self.server_id)
+        self.client.stop_server(self.server_id)
         waiters.wait_for_server_status(self.client, self.server_id, 'SHUTOFF')
-        self.client.start(self.server_id)
+        self.client.start_server(self.server_id)
         waiters.wait_for_server_status(self.client, self.server_id, 'ACTIVE')
 
     def _validate_url(self, url):

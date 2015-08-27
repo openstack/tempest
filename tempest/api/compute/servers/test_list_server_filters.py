@@ -137,11 +137,11 @@ class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
     def test_list_servers_filter_by_shutoff_status(self):
         # Filter the list of servers by server shutoff status
         params = {'status': 'shutoff'}
-        self.client.stop(self.s1['id'])
+        self.client.stop_server(self.s1['id'])
         waiters.wait_for_server_status(self.client, self.s1['id'],
                                        'SHUTOFF')
         body = self.client.list_servers(**params)
-        self.client.start(self.s1['id'])
+        self.client.start_server(self.s1['id'])
         waiters.wait_for_server_status(self.client, self.s1['id'],
                                        'ACTIVE')
         servers = body['servers']

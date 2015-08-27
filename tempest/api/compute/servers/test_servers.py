@@ -95,7 +95,7 @@ class ServersTestJSON(base.BaseV2ComputeTest):
     def test_update_server_name_in_stop_state(self):
         # The server name should be changed to the the provided value
         server = self.create_test_server(wait_until='ACTIVE')
-        self.client.stop(server['id'])
+        self.client.stop_server(server['id'])
         waiters.wait_for_server_status(self.client, server['id'], 'SHUTOFF')
         updated_server = self._update_server_name(server['id'], 'SHUTOFF')
         self.assertNotIn('progress', updated_server)
