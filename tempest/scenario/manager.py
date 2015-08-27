@@ -18,6 +18,7 @@ import subprocess
 
 import netaddr
 from oslo_log import log
+from oslo_serialization import jsonutils as json
 import six
 from tempest_lib.common.utils import misc as misc_utils
 from tempest_lib import exceptions as lib_exc
@@ -416,6 +417,19 @@ class ScenarioTest(tempest.test.BaseTestCase):
             cleanup_callable=self.delete_wrapper,
             cleanup_args=[_image_client.delete_image, image_id])
         snapshot_image = _image_client.get_image_meta(image_id)
+
+        bdm = snapshot_image.get('properties', {}).get('block_device_mapping')
+        if bdm:
+            bdm = json.loads(bdm)
+            if bdm and 'snapshot_id' in bdm[0]:
+                snapshot_id = bdm[0]['snapshot_id']
+                self.addCleanup(
+                    self.snapshots_client.wait_for_resource_deletion,
+                    snapshot_id)
+                self.addCleanup(
+                    self.delete_wrapper, self.snapshots_client.delete_snapshot,
+                    snapshot_id)
+
         image_name = snapshot_image['name']
         self.assertEqual(name, image_name)
         LOG.debug("Created snapshot image %s for server %s",
