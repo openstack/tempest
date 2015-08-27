@@ -77,7 +77,7 @@ AuthGroup = [
     cfg.BoolOpt('create_isolated_networks',
                 default=True,
                 help="If allow_tenant_isolation is set to True and Neutron is "
-                     "enabled Tempest will try to create a useable network, "
+                     "enabled Tempest will try to create a usable network, "
                      "subnet, and router when needed for each tenant it  "
                      "creates. However in some neutron configurations, like "
                      "with VLAN provider networks, this doesn't work. So if "
@@ -1136,7 +1136,7 @@ baremetal_group = cfg.OptGroup(name='baremetal',
                                title='Baremetal provisioning service options',
                                help='When enabling baremetal tests, Nova '
                                     'must be configured to use the Ironic '
-                                    'driver. The following paremeters for the '
+                                    'driver. The following parameters for the '
                                     '[compute] section must be disabled: '
                                     'console_output, interface_attach, '
                                     'live_migration, pause, rescue, resize '
