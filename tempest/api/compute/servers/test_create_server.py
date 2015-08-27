@@ -307,11 +307,11 @@ class ServersWithSpecificFlavorTestJSON(base.BaseV2ComputeAdminTest):
 
         admin_pass = self.image_ssh_password
 
-        server_no_eph_disk = (self.create_test_server(
-                              validatable=True,
-                              wait_until='ACTIVE',
-                              adminPass=admin_pass,
-                              flavor=flavor_no_eph_disk_id))
+        server_no_eph_disk = self.create_test_server(
+            validatable=True,
+            wait_until='ACTIVE',
+            adminPass=admin_pass,
+            flavor=flavor_no_eph_disk_id)
 
         # Get partition number of server without extra specs.
         server_no_eph_disk = self.client.show_server(
@@ -326,11 +326,11 @@ class ServersWithSpecificFlavorTestJSON(base.BaseV2ComputeAdminTest):
         # Explicit server deletion necessary for Juno compatibility
         self.client.delete_server(server_no_eph_disk['id'])
 
-        server_with_eph_disk = (self.create_test_server(
-                                validatable=True,
-                                wait_until='ACTIVE',
-                                adminPass=admin_pass,
-                                flavor=flavor_with_eph_disk_id))
+        server_with_eph_disk = self.create_test_server(
+            validatable=True,
+            wait_until='ACTIVE',
+            adminPass=admin_pass,
+            flavor=flavor_with_eph_disk_id)
 
         server_with_eph_disk = self.client.show_server(
             server_with_eph_disk['id'])
