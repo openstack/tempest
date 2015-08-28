@@ -319,7 +319,7 @@ Test Identification with Idempotent ID
 
 Every function that provides a test must have an ``idempotent_id`` decorator
 that is a unique ``uuid-4`` instance. This ID is used to complement the fully
-qualified test name and track test funcionality through refactoring. The
+qualified test name and track test functionality through refactoring. The
 format of the metadata looks like::
 
     @test.idempotent_id('585e934c-448e-43c4-acbf-d06a9b899997')
