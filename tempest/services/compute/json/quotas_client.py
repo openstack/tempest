@@ -30,7 +30,7 @@ class QuotasClient(service_client.ServiceClient):
         resp, body = self.get(url)
         body = json.loads(body)
         self.validate_response(schema.get_quota_set, resp, body)
-        return service_client.ResponseBody(resp, body['quota_set'])
+        return service_client.ResponseBody(resp, body)
 
     def show_default_quota_set(self, tenant_id):
         """List the default quota set for a tenant."""
@@ -39,7 +39,7 @@ class QuotasClient(service_client.ServiceClient):
         resp, body = self.get(url)
         body = json.loads(body)
         self.validate_response(schema.get_quota_set, resp, body)
-        return service_client.ResponseBody(resp, body['quota_set'])
+        return service_client.ResponseBody(resp, body)
 
     def update_quota_set(self, tenant_id, user_id=None, **kwargs):
         """
@@ -56,7 +56,7 @@ class QuotasClient(service_client.ServiceClient):
 
         body = json.loads(body)
         self.validate_response(schema.update_quota_set, resp, body)
-        return service_client.ResponseBody(resp, body['quota_set'])
+        return service_client.ResponseBody(resp, body)
 
     def delete_quota_set(self, tenant_id):
         """Delete the tenant's quota set."""

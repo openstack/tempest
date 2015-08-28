@@ -29,7 +29,7 @@ class QuotaClassesClient(service_client.ServiceClient):
         resp, body = self.get(url)
         body = json.loads(body)
         self.validate_response(classes_schema.get_quota_class_set, resp, body)
-        return service_client.ResponseBody(resp, body['quota_class_set'])
+        return service_client.ResponseBody(resp, body)
 
     def update_quota_class_set(self, quota_class_id, **kwargs):
         """
@@ -43,4 +43,4 @@ class QuotaClassesClient(service_client.ServiceClient):
         body = json.loads(body)
         self.validate_response(classes_schema.update_quota_class_set,
                                resp, body)
-        return service_client.ResponseBody(resp, body['quota_class_set'])
+        return service_client.ResponseBody(resp, body)

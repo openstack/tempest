@@ -50,8 +50,8 @@ class TestQuotaClassesClient(base.TestCase):
             fake_auth, 'compute', 'regionOne')
 
     def _test_show_quota_class_set(self, bytes_body=False):
-        serialized_body = json.dumps({
-            "quota_class_set": self.FAKE_QUOTA_CLASS_SET})
+        expected = {'quota_class_set': self.FAKE_QUOTA_CLASS_SET}
+        serialized_body = json.dumps(expected)
         if bytes_body:
             serialized_body = serialized_body.encode('utf-8')
 
@@ -60,7 +60,7 @@ class TestQuotaClassesClient(base.TestCase):
             'tempest.common.service_client.ServiceClient.get',
             return_value=mocked_resp))
         resp = self.client.show_quota_class_set("test")
-        self.assertEqual(self.FAKE_QUOTA_CLASS_SET, resp)
+        self.assertEqual(expected, resp)
 
     def test_show_quota_class_set_with_str_body(self):
         self._test_show_quota_class_set()
@@ -71,11 +71,12 @@ class TestQuotaClassesClient(base.TestCase):
     def test_update_quota_class_set(self):
         fake_quota_class_set = copy.deepcopy(self.FAKE_QUOTA_CLASS_SET)
         fake_quota_class_set.pop("id")
-        serialized_body = json.dumps({"quota_class_set": fake_quota_class_set})
+        expected = {'quota_class_set': fake_quota_class_set}
+        serialized_body = json.dumps(expected)
 
         mocked_resp = (httplib2.Response({'status': 200}), serialized_body)
         self.useFixture(mockpatch.Patch(
             'tempest.common.service_client.ServiceClient.put',
             return_value=mocked_resp))
         resp = self.client.update_quota_class_set("test")
-        self.assertEqual(fake_quota_class_set, resp)
+        self.assertEqual(expected, resp)

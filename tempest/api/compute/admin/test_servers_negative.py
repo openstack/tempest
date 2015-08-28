@@ -69,7 +69,8 @@ class ServersAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
         self.useFixture(fixtures.LockFixture('compute_quotas'))
         flavor_name = data_utils.rand_name("flavor")
         flavor_id = self._get_unused_flavor_id()
-        quota_set = self.quotas_client.show_default_quota_set(self.tenant_id)
+        quota_set = (self.quotas_client.show_default_quota_set(self.tenant_id)
+                     ['quota_set'])
         ram = int(quota_set['ram']) + 1
         vcpus = 8
         disk = 10
@@ -93,7 +94,8 @@ class ServersAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
         flavor_name = data_utils.rand_name("flavor")
         flavor_id = self._get_unused_flavor_id()
         ram = 512
-        quota_set = self.quotas_client.show_default_quota_set(self.tenant_id)
+        quota_set = (self.quotas_client.show_default_quota_set(self.tenant_id)
+                     ['quota_set'])
         vcpus = int(quota_set['cores']) + 1
         disk = 10
         flavor_ref = self.flavors_client.create_flavor(name=flavor_name,
