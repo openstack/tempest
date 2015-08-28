@@ -88,7 +88,7 @@ class TestDashboardBasicOps(manager.ScenarioTest):
         parser = HorizonHTMLParser()
         parser.feed(response)
 
-        # construct login url for dashboard, discovery accomodates non-/ web
+        # construct login url for dashboard, discovery accommodates non-/ web
         # root for dashboard
         login_url = CONF.dashboard.dashboard_url + parser.login[1:]
 

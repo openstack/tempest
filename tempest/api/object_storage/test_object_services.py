@@ -811,7 +811,7 @@ class ObjectTest(base.BaseObjectTest):
 
     @test.idempotent_id('aa467252-44f3-472a-b5ae-5b57c3c9c147')
     def test_copy_object_across_containers(self):
-        # create a container to use as  asource container
+        # create a container to use as a source container
         src_container_name = data_utils.rand_name(name='TestSourceContainer')
         self.container_client.create_container(src_container_name)
         self.containers.append(src_container_name)

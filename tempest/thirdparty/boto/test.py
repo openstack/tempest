@@ -377,7 +377,7 @@ class BotoTestCase(tempest.test.BaseTestCase):
         state = self.waitSnapshotStatus(lfunction, wait_for)
         self.assertIn(state, wait_for)
 
-    def assertAddressDissasociatedWait(self, address):
+    def assertAddressDisassociatedWait(self, address):
 
         def _disassociate():
             cli = self.ec2_client
