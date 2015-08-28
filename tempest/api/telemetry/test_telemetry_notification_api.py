@@ -22,13 +22,6 @@ CONF = config.CONF
 
 class TelemetryNotificationAPITestJSON(base.BaseTelemetryTest):
 
-    @classmethod
-    def skip_checks(cls):
-        super(TelemetryNotificationAPITestJSON, cls).skip_checks()
-        if CONF.telemetry.too_slow_to_test:
-            raise cls.skipException("Ceilometer feature for fast work mysql "
-                                    "is disabled")
-
     @test.idempotent_id('d7f8c1c8-d470-4731-8604-315d3956caad')
     @test.services('compute')
     def test_check_nova_notification(self):
@@ -74,13 +67,6 @@ class TelemetryNotificationAPITestJSON(base.BaseTelemetryTest):
 
 
 class TelemetryNotificationAdminAPITestJSON(base.BaseTelemetryAdminTest):
-
-    @classmethod
-    def skip_checks(cls):
-        super(TelemetryNotificationAdminAPITestJSON, cls).skip_checks()
-        if CONF.telemetry.too_slow_to_test:
-            raise cls.skipException("Ceilometer feature for fast work mysql "
-                                    "is disabled")
 
     @test.idempotent_id('29604198-8b45-4fc0-8af8-1cae4f94ebe9')
     @test.services('compute')
