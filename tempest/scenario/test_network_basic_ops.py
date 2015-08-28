@@ -17,6 +17,7 @@ import collections
 import re
 
 from oslo_log import log as logging
+from tempest_lib import decorators
 import testtools
 
 from tempest.common.utils import data_utils
@@ -659,8 +660,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         self.assertEqual('', port['device_owner'])
 
     @test.idempotent_id('2e788c46-fb3f-4ac9-8f82-0561555bea73')
-    @testtools.skipIf("dvr" in CONF.network_feature_enabled.api_extensions,
-                      "Router rescheduling not supported on DVR")
+    @decorators.skip_because(bug="1489929")
     @test.services('compute', 'network')
     def test_router_rescheduling(self):
         """Tests that router can be removed from agent and add to a new agent.
