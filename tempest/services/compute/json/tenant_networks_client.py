@@ -24,10 +24,10 @@ class TenantNetworksClient(service_client.ServiceClient):
         resp, body = self.get("os-tenant-networks")
         body = json.loads(body)
         self.validate_response(schema.list_tenant_networks, resp, body)
-        return service_client.ResponseBodyList(resp, body['networks'])
+        return service_client.ResponseBody(resp, body)
 
     def show_tenant_network(self, network_id):
         resp, body = self.get("os-tenant-networks/%s" % network_id)
         body = json.loads(body)
         self.validate_response(schema.get_tenant_network, resp, body)
-        return service_client.ResponseBody(resp, body['network'])
+        return service_client.ResponseBody(resp, body)

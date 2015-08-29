@@ -25,9 +25,10 @@ class NetworksTestJSON(base.BaseV2ComputeTest):
 
     @test.idempotent_id('edfea98e-bbe3-4c7a-9739-87b986baff26')
     def test_list_show_tenant_networks(self):
-        tenant_networks = self.client.list_tenant_networks()
+        tenant_networks = self.client.list_tenant_networks()['networks']
         self.assertNotEmpty(tenant_networks, "No tenant networks found.")
 
         for net in tenant_networks:
-            tenant_network = self.client.show_tenant_network(net['id'])
+            tenant_network = (self.client.show_tenant_network(net['id'])
+                              ['network'])
             self.assertEqual(net['id'], tenant_network['id'])
