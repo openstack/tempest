@@ -14,6 +14,7 @@
 #    under the License.
 
 from oslo_log import log as logging
+from tempest_lib import decorators
 
 from tempest.api.volume import base
 from tempest.common.utils import data_utils
@@ -79,6 +80,7 @@ class VolumesBackupsV2Test(base.BaseVolumeAdminTest):
         self.admin_volume_client.wait_for_volume_status(
             restore['volume_id'], 'available')
 
+    @decorators.skip_because(bug='1455043')
     @test.idempotent_id('a99c54a1-dd80-4724-8a13-13bf58d4068d')
     def test_volume_backup_export_import(self):
         # Create backup
