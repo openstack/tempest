@@ -29,6 +29,7 @@ SCENARIO_DECORATOR = re.compile(r'\s*@.*services\((.*)\)')
 VI_HEADER_RE = re.compile(r"^#\s+vim?:.+")
 RAND_NAME_HYPHEN_RE = re.compile(r".*rand_name\(.+[\-\_][\"\']\)")
 mutable_default_args = re.compile(r"^\s*def .+\((.+=\{\}|.+=\[\])")
+TESTTOOLS_SKIP_DECORATOR = re.compile(r'\s*@testtools\.skip\((.*)\)')
 
 
 def import_no_clients_in_api_and_scenario_tests(physical_line, filename):
@@ -132,6 +133,16 @@ def no_mutable_default_args(logical_line):
         yield (0, msg)
 
 
+def no_testtools_skip_decorator(logical_line):
+    """Check that methods do not have the testtools.skip decorator
+
+    T109
+    """
+    if TESTTOOLS_SKIP_DECORATOR.match(logical_line):
+        yield (0, "T109: Cannot use testtools.skip decorator; instead use "
+               "decorators.skip_because from tempest-lib")
+
+
 def factory(register):
     register(import_no_clients_in_api_and_scenario_tests)
     register(scenario_tests_need_service_tags)
@@ -140,3 +151,4 @@ def factory(register):
     register(service_tags_not_in_module_path)
     register(no_hyphen_at_end_of_rand_name)
     register(no_mutable_default_args)
+    register(no_testtools_skip_decorator)
