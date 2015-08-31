@@ -11,6 +11,7 @@
 #    under the License.
 
 from oslo_log import log
+from tempest_lib import decorators
 
 from tempest.common.utils import data_utils
 from tempest.common import waiters
@@ -176,6 +177,7 @@ class TestVolumeBootPattern(manager.ScenarioTest):
         # deletion operations to succeed
         self._stop_instances([instance_2nd, instance_from_snapshot])
 
+    @decorators.skip_because(bug='1489581')
     @test.idempotent_id('36c34c67-7b54-4b59-b188-02a2f458a63b')
     @test.services('compute', 'volume', 'image')
     def test_create_ebs_image_and_check_boot(self):
