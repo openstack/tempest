@@ -117,9 +117,7 @@ IdentityGroup = [
                choices=['public', 'admin', 'internal',
                         'publicURL', 'adminURL', 'internalURL'],
                help="The admin endpoint type to use for OpenStack Identity "
-                    "(Keystone) API v2",
-               deprecated_opts=[cfg.DeprecatedOpt('endpoint_type',
-                                                  group='identity')]),
+                    "(Keystone) API v2"),
     cfg.StrOpt('v2_public_endpoint_type',
                default='publicURL',
                choices=['public', 'admin', 'internal',
@@ -133,9 +131,7 @@ IdentityGroup = [
                choices=['public', 'admin', 'internal',
                         'publicURL', 'adminURL', 'internalURL'],
                help="The endpoint type to use for OpenStack Identity "
-                    "(Keystone) API v3",
-               deprecated_opts=[cfg.DeprecatedOpt('endpoint_type',
-                                                  group='identity')]),
+                    "(Keystone) API v3"),
     cfg.StrOpt('username',
                help="Username to use for Nova API requests."),
     cfg.StrOpt('tenant_name',
