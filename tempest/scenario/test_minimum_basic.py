@@ -63,9 +63,12 @@ class TestMinimumBasicScenario(manager.ScenarioTest):
 
     def nova_show(self):
         got_server = self.servers_client.show_server(self.server['id'])
+        excluded_keys = ['OS-EXT-AZ:availability_zone']
+        # Exclude these keys because of LP:#1486475
+        excluded_keys.extend(['OS-EXT-STS:power_state', 'updated'])
         self.assertThat(
             self.server, custom_matchers.MatchesDictExceptForKeys(
-                got_server, excluded_keys=['OS-EXT-AZ:availability_zone']))
+                got_server, excluded_keys=excluded_keys))
 
     def cinder_create(self):
         self.volume = self.create_volume()
