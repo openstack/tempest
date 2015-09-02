@@ -27,7 +27,7 @@ LOG = logging.getLogger(__name__)
 
 
 def create_test_server(clients, validatable=False, validation_resources=None,
-                       tenant_network=None, **kwargs):
+                       tenant_network=None, wait_until=None, **kwargs):
     """Common wrapper utility returning a test server.
 
     This method is a common wrapper returning a test server that can be
@@ -38,6 +38,8 @@ def create_test_server(clients, validatable=False, validation_resources=None,
     :param validation_resources: Resources created for the connection to the
     server. Include a keypair, a security group and an IP.
     :param tenant_network: Tenant network to be used for creating a server.
+    :param wait_until: Server status to wait for the server to reach after
+    its creation.
     :returns a tuple
     """
 
@@ -79,8 +81,8 @@ def create_test_server(clients, validatable=False, validation_resources=None,
                 LOG.debug("No key provided.")
 
         if CONF.validation.connect_method == 'floating':
-            if 'wait_until' not in kwargs:
-                kwargs['wait_until'] = 'ACTIVE'
+            if wait_until is None:
+                wait_until = 'ACTIVE'
 
     body = clients.servers_client.create_server(name, image_id, flavor,
                                                 **kwargs)
@@ -97,11 +99,11 @@ def create_test_server(clients, validatable=False, validation_resources=None,
     # long for PEP8 compliance so:
     assoc = clients.floating_ips_client.associate_floating_ip_to_server
 
-    if 'wait_until' in kwargs:
+    if wait_until:
         for server in servers:
             try:
                 waiters.wait_for_server_status(
-                    clients.servers_client, server['id'], kwargs['wait_until'])
+                    clients.servers_client, server['id'], wait_until)
 
                 # Multiple validatable servers are not supported for now. Their
                 # creation will fail with the condition above (l.58).
