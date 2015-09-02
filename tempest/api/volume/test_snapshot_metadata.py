@@ -16,10 +16,18 @@
 from testtools import matchers
 
 from tempest.api.volume import base
+from tempest import config
 from tempest import test
+
+CONF = config.CONF
 
 
 class SnapshotV2MetadataTestJSON(base.BaseVolumeTest):
+    @classmethod
+    def skip_checks(cls):
+        super(SnapshotV2MetadataTestJSON, cls).skip_checks()
+        if not CONF.volume_feature_enabled.snapshot:
+            raise cls.skipException("Cinder snapshot feature disabled")
 
     @classmethod
     def setup_clients(cls):
