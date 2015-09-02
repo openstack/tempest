@@ -336,7 +336,7 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
     def test_stop_non_existent_server(self):
         # Stop a non existent server
         nonexistent_server = data_utils.rand_uuid()
-        self.assertRaises(lib_exc.NotFound, self.servers_client.stop,
+        self.assertRaises(lib_exc.NotFound, self.servers_client.stop_server,
                           nonexistent_server)
 
     @test.idempotent_id('6a8dc0c6-6cd4-4c0a-9f32-413881828091')

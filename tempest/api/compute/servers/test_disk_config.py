@@ -105,7 +105,7 @@ class ServerDiskConfigTestJSON(base.BaseV2ComputeTest):
                                   disk_config='AUTO')
         waiters.wait_for_server_status(self.client, self.server_id,
                                        'VERIFY_RESIZE')
-        self.client.confirm_resize(self.server_id)
+        self.client.confirm_resize_server(self.server_id)
         waiters.wait_for_server_status(self.client, self.server_id, 'ACTIVE')
 
         server = self.client.show_server(self.server_id)
@@ -124,7 +124,7 @@ class ServerDiskConfigTestJSON(base.BaseV2ComputeTest):
                                   disk_config='MANUAL')
         waiters.wait_for_server_status(self.client, self.server_id,
                                        'VERIFY_RESIZE')
-        self.client.confirm_resize(self.server_id)
+        self.client.confirm_resize_server(self.server_id)
         waiters.wait_for_server_status(self.client, self.server_id, 'ACTIVE')
 
         server = self.client.show_server(self.server_id)

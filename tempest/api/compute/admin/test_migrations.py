@@ -45,7 +45,7 @@ class MigrationsAdminTest(base.BaseV2ComputeAdminTest):
         self.servers_client.resize_server(server_id, self.flavor_ref_alt)
         waiters.wait_for_server_status(self.servers_client,
                                        server_id, 'VERIFY_RESIZE')
-        self.servers_client.confirm_resize(server_id)
+        self.servers_client.confirm_resize_server(server_id)
         waiters.wait_for_server_status(self.servers_client,
                                        server_id, 'ACTIVE')
 

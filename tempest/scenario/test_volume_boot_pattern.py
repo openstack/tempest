@@ -93,7 +93,7 @@ class TestVolumeBootPattern(manager.ScenarioTest):
     def _stop_instances(self, instances):
         # NOTE(gfidente): two loops so we do not wait for the status twice
         for i in instances:
-            self.servers_client.stop(i['id'])
+            self.servers_client.stop_server(i['id'])
         for i in instances:
             waiters.wait_for_server_status(self.servers_client,
                                            i['id'], 'SHUTOFF')

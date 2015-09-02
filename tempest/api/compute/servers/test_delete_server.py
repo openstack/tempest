@@ -51,7 +51,7 @@ class DeleteServersTestJSON(base.BaseV2ComputeTest):
     def test_delete_server_while_in_shutoff_state(self):
         # Delete a server while it's VM state is Shutoff
         server = self.create_test_server(wait_until='ACTIVE')
-        self.client.stop(server['id'])
+        self.client.stop_server(server['id'])
         waiters.wait_for_server_status(self.client, server['id'], 'SHUTOFF')
         self.client.delete_server(server['id'])
         waiters.wait_for_server_termination(self.client, server['id'])
