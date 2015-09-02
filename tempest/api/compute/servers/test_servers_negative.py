@@ -243,22 +243,21 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
     def test_update_name_of_non_existent_server(self):
         # Update name of a non-existent server
 
-        server_name = data_utils.rand_name('server')
+        nonexistent_server = data_utils.rand_uuid()
         new_name = data_utils.rand_name('server') + '_updated'
 
         self.assertRaises(lib_exc.NotFound, self.client.update_server,
-                          server_name, name=new_name)
+                          nonexistent_server, name=new_name)
 
     @test.attr(type=['negative'])
     @test.idempotent_id('38204696-17c6-44da-9590-40f87fb5a899')
     def test_update_server_set_empty_name(self):
         # Update name of the server to an empty string
 
-        server_name = data_utils.rand_name('server')
         new_name = ''
 
         self.assertRaises(lib_exc.BadRequest, self.client.update_server,
-                          server_name, name=new_name)
+                          self.server_id, name=new_name)
 
     @test.attr(type=['negative'])
     @test.idempotent_id('543d84c1-dd2e-4c6d-8cb2-b9da0efaa384')
