@@ -37,6 +37,7 @@ def create_test_server(clients, validatable=False, validation_resources=None,
     :param validatable: Whether the server will be pingable or sshable.
     :param validation_resources: Resources created for the connection to the
     server. Include a keypair, a security group and an IP.
+    :param tenant_network: Tenant network to be used for creating a server.
     :returns a tuple
     """
 
