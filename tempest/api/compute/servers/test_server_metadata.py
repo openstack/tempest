@@ -28,7 +28,7 @@ class ServerMetadataTestJSON(base.BaseV2ComputeTest):
     @classmethod
     def resource_setup(cls):
         super(ServerMetadataTestJSON, cls).resource_setup()
-        server = cls.create_test_server(meta={}, wait_until='ACTIVE')
+        server = cls.create_test_server(metadata={}, wait_until='ACTIVE')
         cls.server_id = server['id']
 
     def setUp(self):

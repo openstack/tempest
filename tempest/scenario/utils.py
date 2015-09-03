@@ -91,8 +91,8 @@ class InputScenarioUtils(object):
         def test_create_server_metadata(self):
             name = rand_name('instance')
             self.servers_client.create_server(name=name,
-                                              flavor_ref=self.flavor_ref,
-                                              image_ref=self.image_ref)
+                                              flavorRef=self.flavor_ref,
+                                              imageRef=self.image_ref)
     """
     validchars = "-_.{ascii}{digit}".format(ascii=string.ascii_letters,
                                             digit=string.digits)

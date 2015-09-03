@@ -221,7 +221,8 @@ class FlavorsAdminTestJSON(base.BaseV2ComputeAdminTest):
         # Verify flavor is not used by other user
         self.assertRaises(lib_exc.BadRequest,
                           self.os.servers_client.create_server,
-                          'test', self.image_ref, flavor['id'])
+                          name='test', imageRef=self.image_ref,
+                          flavorRef=flavor['id'])
 
     @test.idempotent_id('b345b196-bfbd-4231-8ac1-6d7fe15ff3a3')
     def test_list_public_flavor_with_other_user(self):

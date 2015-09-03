@@ -111,7 +111,8 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
         image_id = self.image_ref
         network = self.get_tenant_network()
         network_kwargs = fixed_network.set_networks_kwarg(network)
-        test_server = self.client.create_server(name, image_id, flavor,
+        test_server = self.client.create_server(name=name, imageRef=image_id,
+                                                flavorRef=flavor,
                                                 **network_kwargs)['server']
         self.addCleanup(self.client.delete_server, test_server['id'])
         waiters.wait_for_server_status(self.client,
@@ -198,5 +199,5 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
         hints = {
             'same_host': self.s1_id
         }
-        self.create_test_server(sched_hints=hints,
+        self.create_test_server(scheduler_hints=hints,
                                 wait_until='ACTIVE')

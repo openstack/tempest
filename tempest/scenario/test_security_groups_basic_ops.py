@@ -244,10 +244,12 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
                 {'uuid': tenant.network.id},
             ],
             'key_name': tenant.keypair['name'],
-            'security_groups': security_groups_names,
-            'network_client': tenant.manager.network_client
+            'security_groups': security_groups_names
         }
-        server = self.create_server(name=name, create_kwargs=create_kwargs)
+        server = self.create_server(
+            name=name,
+            network_client=tenant.manager.network_client,
+            create_kwargs=create_kwargs)
         self.assertEqual(
             sorted([s['name'] for s in security_groups]),
             sorted([s['name'] for s in server['security_groups']]))

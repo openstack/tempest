@@ -39,8 +39,8 @@ class VolumeVerifyStress(stressaction.StressAction):
         vm_args = self.vm_extra_args.copy()
         vm_args['security_groups'] = [self.sec_grp]
         vm_args['key_name'] = self.key['name']
-        server = servers_client.create_server(name, self.image,
-                                              self.flavor,
+        server = servers_client.create_server(name=name, imageRef=self.image,
+                                              flavorRef=self.flavor,
                                               **vm_args)['server']
         self.server_id = server['id']
         waiters.wait_for_server_status(self.manager.servers_client,
