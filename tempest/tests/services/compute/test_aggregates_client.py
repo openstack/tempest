@@ -14,15 +14,57 @@
 
 import httplib2
 
-from oslo_serialization import jsonutils as json
 from oslotest import mockpatch
 
 from tempest.services.compute.json import aggregates_client
-from tempest.tests import base
 from tempest.tests import fake_auth_provider
+from tempest.tests.services.compute import base
 
 
-class TestAggregatesClient(base.TestCase):
+class TestAggregatesClient(base.BaseComputeServiceTest):
+    FAKE_SHOW_AGGREGATE = {
+        "aggregate":
+        {
+            "name": "hoge",
+            "availability_zone": None,
+            "deleted": False,
+            "created_at":
+            "2015-07-16T03:07:32.000000",
+            "updated_at": None,
+            "hosts": [],
+            "deleted_at": None,
+            "id": 1,
+            "metadata": {}
+        }
+    }
+
+    FAKE_CREATE_AGGREGATE = {
+        "aggregate":
+        {
+            "name": u'\xf4',
+            "availability_zone": None,
+            "deleted": False,
+            "created_at": "2015-07-21T04:11:18.000000",
+            "updated_at": None,
+            "deleted_at": None,
+            "id": 1
+        }
+    }
+
+    FAKE_UPDATE_AGGREGATE = {
+        "aggregate":
+        {
+            "name": u'\xe9',
+            "availability_zone": None,
+            "deleted": False,
+            "created_at": "2015-07-16T03:07:32.000000",
+            "updated_at": "2015-07-23T05:16:29.000000",
+            "hosts": [],
+            "deleted_at": None,
+            "id": 1,
+            "metadata": {}
+        }
+    }
 
     def setUp(self):
         super(TestAggregatesClient, self).setUp()
@@ -31,15 +73,11 @@ class TestAggregatesClient(base.TestCase):
             fake_auth, 'compute', 'regionOne')
 
     def _test_list_aggregates(self, bytes_body=False):
-        body = '{"aggregates": []}'
-        if bytes_body:
-            body = body.encode('utf-8')
-        expected = {"aggregates": []}
-        response = (httplib2.Response({'status': 200}), body)
-        self.useFixture(mockpatch.Patch(
+        self.check_service_client_function(
+            self.client.list_aggregates,
             'tempest.common.service_client.ServiceClient.get',
-            return_value=response))
-        self.assertEqual(expected, self.client.list_aggregates())
+            {"aggregates": []},
+            bytes_body)
 
     def test_list_aggregates_with_str_body(self):
         self._test_list_aggregates()
@@ -48,26 +86,12 @@ class TestAggregatesClient(base.TestCase):
         self._test_list_aggregates(bytes_body=True)
 
     def _test_show_aggregate(self, bytes_body=False):
-        expected = {"aggregate": {"name": "hoge",
-                                  "availability_zone": None,
-                                  "deleted": False,
-                                  "created_at":
-                                  "2015-07-16T03:07:32.000000",
-                                  "updated_at": None,
-                                  "hosts": [],
-                                  "deleted_at": None,
-                                  "id": 1,
-                                  "metadata": {}}}
-        serialized_body = json.dumps(expected)
-        if bytes_body:
-            serialized_body = serialized_body.encode('utf-8')
-
-        mocked_resp = (httplib2.Response({'status': 200}), serialized_body)
-        self.useFixture(mockpatch.Patch(
+        self.check_service_client_function(
+            self.client.show_aggregate,
             'tempest.common.service_client.ServiceClient.get',
-            return_value=mocked_resp))
-        resp = self.client.show_aggregate(1)
-        self.assertEqual(expected, resp)
+            self.FAKE_SHOW_AGGREGATE,
+            bytes_body,
+            aggregate_id=1)
 
     def test_show_aggregate_with_str_body(self):
         self._test_show_aggregate()
@@ -76,23 +100,12 @@ class TestAggregatesClient(base.TestCase):
         self._test_show_aggregate(bytes_body=True)
 
     def _test_create_aggregate(self, bytes_body=False):
-        expected = {"aggregate": {"name": u'\xf4',
-                                  "availability_zone": None,
-                                  "deleted": False,
-                                  "created_at": "2015-07-21T04:11:18.000000",
-                                  "updated_at": None,
-                                  "deleted_at": None,
-                                  "id": 1}}
-        serialized_body = json.dumps(expected)
-        if bytes_body:
-            serialized_body = serialized_body.encode('utf-8')
-
-        mocked_resp = (httplib2.Response({'status': 200}), serialized_body)
-        self.useFixture(mockpatch.Patch(
+        self.check_service_client_function(
+            self.client.create_aggregate,
             'tempest.common.service_client.ServiceClient.post',
-            return_value=mocked_resp))
-        resp = self.client.create_aggregate(name='hoge')
-        self.assertEqual(expected, resp)
+            self.FAKE_CREATE_AGGREGATE,
+            bytes_body,
+            name='hoge')
 
     def test_create_aggregate_with_str_body(self):
         self._test_create_aggregate()
@@ -101,34 +114,20 @@ class TestAggregatesClient(base.TestCase):
         self._test_create_aggregate(bytes_body=True)
 
     def test_delete_aggregate(self):
-        expected = {}
         mocked_resp = (httplib2.Response({'status': 200}), None)
         self.useFixture(mockpatch.Patch(
             'tempest.common.service_client.ServiceClient.delete',
             return_value=mocked_resp))
         resp = self.client.delete_aggregate("1")
-        self.assertEqual(expected, resp)
+        self.assertEqual({}, resp)
 
     def _test_update_aggregate(self, bytes_body=False):
-        expected = {"aggregate": {"name": u'\xe9',
-                                  "availability_zone": None,
-                                  "deleted": False,
-                                  "created_at": "2015-07-16T03:07:32.000000",
-                                  "updated_at": "2015-07-23T05:16:29.000000",
-                                  "hosts": [],
-                                  "deleted_at": None,
-                                  "id": 1,
-                                  "metadata": {}}}
-        serialized_body = json.dumps(expected)
-        if bytes_body:
-            serialized_body = serialized_body.encode('utf-8')
-
-        mocked_resp = (httplib2.Response({'status': 200}), serialized_body)
-        self.useFixture(mockpatch.Patch(
+        self.check_service_client_function(
+            self.client.update_aggregate,
             'tempest.common.service_client.ServiceClient.put',
-            return_value=mocked_resp))
-        resp = self.client.update_aggregate(1)
-        self.assertEqual(expected, resp)
+            self.FAKE_UPDATE_AGGREGATE,
+            bytes_body,
+            aggregate_id=1)
 
     def test_update_aggregate_with_str_body(self):
         self._test_update_aggregate()

@@ -13,34 +13,36 @@
 #    under the License.
 
 import copy
-import httplib2
-
-from oslo_serialization import jsonutils as json
-from oslotest import mockpatch
 
 from tempest.services.compute.json import services_client
-from tempest.tests import base
 from tempest.tests import fake_auth_provider
+from tempest.tests.services.compute import base
 
 
-class TestServicesClient(base.TestCase):
+class TestServicesClient(base.BaseComputeServiceTest):
 
-    FAKE_SERVICES = [{
-        "status": "enabled",
-        "binary": "nova-conductor",
-        "zone": "internal",
-        "state": "up",
-        "updated_at": "2015-08-19T06:50:55.000000",
-        "host": "controller",
-        "disabled_reason": None,
-        "id": 1
+    FAKE_SERVICES = {
+        "services":
+        [{
+            "status": "enabled",
+            "binary": "nova-conductor",
+            "zone": "internal",
+            "state": "up",
+            "updated_at": "2015-08-19T06:50:55.000000",
+            "host": "controller",
+            "disabled_reason": None,
+            "id": 1
         }]
+    }
 
     FAKE_SERVICE = {
-        "status": "enabled",
-        "binary": "nova-conductor",
-        "host": "controller"
+        "service":
+        {
+            "status": "enabled",
+            "binary": "nova-conductor",
+            "host": "controller"
         }
+    }
 
     def setUp(self):
         super(TestServicesClient, self).setUp()
@@ -48,37 +50,25 @@ class TestServicesClient(base.TestCase):
         self.client = services_client.ServicesClient(
             fake_auth, 'compute', 'regionOne')
 
-    def _test_list_services(self, bytes_body=False):
-        expected = {"services": self.FAKE_SERVICES}
-        serialized_body = json.dumps(expected)
-        if bytes_body:
-            serialized_body = serialized_body.encode('utf-8')
-
-        mocked_resp = (httplib2.Response({'status': 200}), serialized_body)
-        self.useFixture(mockpatch.Patch(
-            'tempest.common.service_client.ServiceClient.get',
-            return_value=mocked_resp))
-        resp = self.client.list_services()
-        self.assertEqual(expected, resp)
-
     def test_list_services_with_str_body(self):
-        self._test_list_services()
+        self.check_service_client_function(
+            self.client.list_services,
+            'tempest.common.service_client.ServiceClient.get',
+            self.FAKE_SERVICES)
 
     def test_list_services_with_bytes_body(self):
-        self._test_list_services(bytes_body=True)
+        self.check_service_client_function(
+            self.client.list_services,
+            'tempest.common.service_client.ServiceClient.get',
+            self.FAKE_SERVICES, to_utf=True)
 
     def _test_enable_service(self, bytes_body=False):
-        expected = {"service": self.FAKE_SERVICE}
-        serialized_body = json.dumps(expected)
-        if bytes_body:
-            serialized_body = serialized_body.encode('utf-8')
-
-        mocked_resp = (httplib2.Response({'status': 200}), serialized_body)
-        self.useFixture(mockpatch.Patch(
+        self.check_service_client_function(
+            self.client.enable_service,
             'tempest.common.service_client.ServiceClient.put',
-            return_value=mocked_resp))
-        resp = self.client.enable_service("nova-conductor", "controller")
-        self.assertEqual(expected, resp)
+            self.FAKE_SERVICE,
+            bytes_body,
+            host_name="nova-conductor", binary="controller")
 
     def test_enable_service_with_str_body(self):
         self._test_enable_service()
@@ -88,18 +78,14 @@ class TestServicesClient(base.TestCase):
 
     def _test_disable_service(self, bytes_body=False):
         fake_service = copy.deepcopy(self.FAKE_SERVICE)
-        fake_service["status"] = "disable"
-        expected = {"service": self.FAKE_SERVICE}
-        serialized_body = json.dumps(expected)
-        if bytes_body:
-            serialized_body = serialized_body.encode('utf-8')
+        fake_service["service"]["status"] = "disable"
 
-        mocked_resp = (httplib2.Response({'status': 200}), serialized_body)
-        self.useFixture(mockpatch.Patch(
+        self.check_service_client_function(
+            self.client.enable_service,
             'tempest.common.service_client.ServiceClient.put',
-            return_value=mocked_resp))
-        resp = self.client.disable_service("nova-conductor", "controller")
-        self.assertEqual(expected, resp)
+            fake_service,
+            bytes_body,
+            host_name="nova-conductor", binary="controller")
 
     def test_disable_service_with_str_body(self):
         self._test_enable_service()
