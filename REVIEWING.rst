@@ -34,7 +34,7 @@ should not be approved.
 
 
 Reject Copy and Paste Test Code
-------------------------
+-------------------------------
 When creating new tests that are similar to existing tests it is tempting to
 simply copy the code and make a few modifications. This increases code size and
 the maintenance burden. Such changes should not be approved if it is easy to

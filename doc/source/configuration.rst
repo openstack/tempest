@@ -6,7 +6,8 @@ Tempest Configuration Guide
 This guide is a starting point for configuring tempest. It aims to elaborate
 on and explain some of the mandatory and common configuration settings and how
 they are used in conjunction. The source of truth on each option is the sample
-config file which explains the purpose of each individual option.
+config file which explains the purpose of each individual option. You can see
+the sample config file here: :ref:`tempest-sampleconf`
 
 Lock Path
 ---------
