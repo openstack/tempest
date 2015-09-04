@@ -930,7 +930,7 @@ class DomainService(BaseService):
 
     def list(self):
         client = self.client
-        domains = client.list_domains()
+        domains = client.list_domains()['domains']
         if not self.is_save_state:
             domains = [domain for domain in domains if domain['id']
                        not in self.saved_state_json['domains'].keys()]
