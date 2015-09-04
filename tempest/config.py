@@ -509,6 +509,18 @@ NetworkGroup = [
                help='The name of leaf switch 1'),
     cfg.StrOpt('leaf2',
                help='The name of leaf switch 2'),
+    cfg.StrOpt('controller',
+               help='Name of the controller'),
+    cfg.StrOpt('compute1',
+               help='Name of compute server 1'),
+    cfg.StrOpt('compute2',
+               help='Name of compute server 2'),
+    cfg.StrOpt('bridge_type',
+               choices=['ovs', 'linux'],
+               help='Identifies the type of bridge used'),
+    cfg.IntOpt('network_interface_mtu',
+               default=1500,
+               help="MTU for network interface.")
 ]
 
 network_feature_group = cfg.OptGroup(name='network-feature-enabled',
