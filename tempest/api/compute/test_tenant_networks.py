@@ -16,11 +16,11 @@ from tempest.api.compute import base
 from tempest import test
 
 
-class NetworksTestJSON(base.BaseV2ComputeTest):
+class ComputeTenantNetworksTest(base.BaseV2ComputeTest):
 
     @classmethod
     def resource_setup(cls):
-        super(NetworksTestJSON, cls).resource_setup()
+        super(ComputeTenantNetworksTest, cls).resource_setup()
         cls.client = cls.os.tenant_networks_client
 
     @test.idempotent_id('edfea98e-bbe3-4c7a-9739-87b986baff26')

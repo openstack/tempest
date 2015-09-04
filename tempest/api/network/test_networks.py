@@ -27,7 +27,7 @@ from tempest import test
 CONF = config.CONF
 
 
-class NetworksTestJSON(base.BaseNetworkTest):
+class NetworksTest(base.BaseNetworkTest):
     """
     Tests the following operations in the Neutron API using the REST client for
     Neutron:
@@ -61,7 +61,7 @@ class NetworksTestJSON(base.BaseNetworkTest):
 
     @classmethod
     def resource_setup(cls):
-        super(NetworksTestJSON, cls).resource_setup()
+        super(NetworksTest, cls).resource_setup()
         cls.network = cls.create_network()
         cls.name = cls.network['name']
         cls.subnet = cls._create_subnet_with_last_subnet_block(cls.network,
@@ -533,7 +533,7 @@ class BulkNetworkOpsIpV6TestJSON(BulkNetworkOpsTestJSON):
     _ip_version = 6
 
 
-class NetworksIpV6TestJSON(NetworksTestJSON):
+class NetworksIpV6TestJSON(NetworksTest):
     _ip_version = 6
 
     @test.idempotent_id('e41a4888-65a6-418c-a095-f7c2ef4ad59a')
