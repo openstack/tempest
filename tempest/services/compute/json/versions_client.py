@@ -21,7 +21,7 @@ from tempest.common import service_client
 
 class VersionsClient(service_client.ServiceClient):
 
-    def list_versions(self):
+    def _get_base_version_url(self):
         # NOTE: The URL which is gotten from keystone's catalog contains
         # API version and project-id like "v2/{project-id}", but we need
         # to access the URL which doesn't contain them for getting API
@@ -29,9 +29,27 @@ class VersionsClient(service_client.ServiceClient):
         # get().
         endpoint = self.base_url
         url = urllib.parse.urlparse(endpoint)
-        version_url = '%s://%s/' % (url.scheme, url.netloc)
+        return '%s://%s/' % (url.scheme, url.netloc)
 
+    def list_versions(self):
+        version_url = self._get_base_version_url()
         resp, body = self.raw_request(version_url, 'GET')
         body = json.loads(body)
         self.validate_response(schema.list_versions, resp, body)
+        return service_client.ResponseBody(resp, body)
+
+    def get_version_by_url(self, version_url):
+        """Get the version document by url.
+
+        This gets the version document for a url, useful in testing
+        the contents of things like /v2/ or /v2.1/ in Nova. That
+        controller needs authenticated access, so we have to get
+        ourselves a token before making the request.
+
+        """
+        # we need a token for this request
+        resp, body = self.raw_request(version_url, 'GET',
+                                      {'X-Auth-Token': self.token})
+        body = json.loads(body)
+        self.validate_response(schema.get_one_version, resp, body)
         return service_client.ResponseBody(resp, body)

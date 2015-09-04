@@ -12,6 +12,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import copy
+
+
 _version = {
     'type': 'object',
     'properties': {
@@ -23,6 +26,7 @@ _version = {
                 'properties': {
                     'href': {'type': 'string', 'format': 'uri'},
                     'rel': {'type': 'string'},
+                    'type': {'type': 'string'},
                 },
                 'required': ['href', 'rel'],
                 'additionalProperties': False
@@ -31,10 +35,18 @@ _version = {
         'status': {'type': 'string'},
         'updated': {'type': 'string', 'format': 'date-time'},
         'version': {'type': 'string'},
-        'min_version': {'type': 'string'}
+        'min_version': {'type': 'string'},
+        'media-types': {
+            'type': 'array',
+            'properties': {
+                'base': {'type': 'string'},
+                'type': {'type': 'string'},
+            }
+        },
     },
     # NOTE: version and min_version have been added since Kilo,
     # so they should not be required.
+    # NOTE(sdague): media-types only shows up in single version requests.
     'required': ['id', 'links', 'status', 'updated'],
     'additionalProperties': False
 }
@@ -50,6 +62,49 @@ list_versions = {
             }
         },
         'required': ['versions'],
+        'additionalProperties': False
+    }
+}
+
+
+_detail_get_version = copy.deepcopy(_version)
+_detail_get_version['properties'].pop('min_version')
+_detail_get_version['properties'].pop('version')
+_detail_get_version['properties'].pop('updated')
+_detail_get_version['properties']['media-types'] = {
+    'type': 'array',
+    'items': {
+        'type': 'object',
+        'properties': {
+            'base': {'type': 'string'},
+            'type': {'type': 'string'}
+        }
+    }
+}
+_detail_get_version['required'] = ['id', 'links', 'status', 'media-types']
+
+get_version = {
+    'status_code': [300],
+    'response_body': {
+        'type': 'object',
+        'properties': {
+            'choices': {
+                'type': 'array',
+                'items': _detail_get_version
+            }
+        },
+        'required': ['choices'],
+        'additionalProperties': False
+    }
+}
+
+get_one_version = {
+    'status_code': [200],
+    'response_body': {
+        'type': 'object',
+        'properties': {
+            'version': _version
+        },
         'additionalProperties': False
     }
 }
