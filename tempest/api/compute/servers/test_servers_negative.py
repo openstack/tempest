@@ -66,6 +66,8 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
 
     @test.attr(type=['negative'])
     @test.idempotent_id('b8a7235e-5246-4a8f-a08e-b34877c6586f')
+    @testtools.skipUnless(CONF.compute_feature_enabled.personality,
+                          'Nova personality feature disabled')
     def test_personality_file_contents_not_encoded(self):
         # Use an unencoded file when creating a server with personality
 

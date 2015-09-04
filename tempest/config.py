@@ -425,6 +425,9 @@ ComputeFeaturesGroup = [
     cfg.BoolOpt('nova_cert',
                 default=True,
                 help='Does the test environment have the nova cert running?'),
+    cfg.BoolOpt('personality',
+                default=True,
+                help='Does the test environment support server personality'),
     # TODO(mriedem): Remove preserve_ports once juno-eol happens.
     cfg.BoolOpt('preserve_ports',
                 default=False,

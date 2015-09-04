@@ -17,16 +17,41 @@ import base64
 from tempest_lib import exceptions as lib_exc
 
 from tempest.api.compute import base
+from tempest import config
 from tempest import test
+
+CONF = config.CONF
 
 
 class ServerPersonalityTestJSON(base.BaseV2ComputeTest):
+
+    @classmethod
+    def skip_checks(cls):
+        super(ServerPersonalityTestJSON, cls).skip_checks()
+        if not CONF.compute_feature_enabled.personality:
+            raise cls.skipException("Nova personality feature disabled")
 
     @classmethod
     def setup_clients(cls):
         super(ServerPersonalityTestJSON, cls).setup_clients()
         cls.client = cls.servers_client
         cls.user_client = cls.limits_client
+
+    @test.idempotent_id('3cfe87fd-115b-4a02-b942-7dc36a337fdf')
+    def test_create_server_with_personality(self):
+        file_contents = 'This is a test file.'
+        personality = [{'path': '/test.txt',
+                        'contents': base64.b64encode(file_contents)}]
+        self.create_test_server(personality=personality)
+
+    @test.idempotent_id('128966d8-71fc-443c-8cab-08e24114ecc9')
+    def test_rebuild_server_with_personality(self):
+        server_id = self.rebuild_server(None)
+        file_contents = 'Test server rebuild.'
+        personality = [{'path': 'rebuild.txt',
+                        'contents': base64.b64encode(file_contents)}]
+        self.client.rebuild_server(server_id, self.image_ref_alt,
+                                   personality=personality)
 
     @test.idempotent_id('176cd8c9-b9e8-48ee-a480-180beab292bf')
     def test_personality_files_exceed_limit(self):
