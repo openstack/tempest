@@ -77,6 +77,7 @@ from tempest.services.compute.json.tenant_networks_client import \
     TenantNetworksClient
 from tempest.services.compute.json.tenant_usages_client import \
     TenantUsagesClient
+from tempest.services.compute.json.versions_client import VersionsClient
 from tempest.services.compute.json.volumes_extensions_client import \
     VolumesExtensionsClient
 from tempest.services.data_processing.v1_1.data_processing_client import \
@@ -322,6 +323,8 @@ class Manager(manager.Manager):
         })
         self.volumes_extensions_client = VolumesExtensionsClient(
             self.auth_provider, **params_volume)
+        self.compute_versions_client = VersionsClient(self.auth_provider,
+                                                      **params_volume)
 
     def _set_database_clients(self):
         self.database_flavors_client = DatabaseFlavorsClient(

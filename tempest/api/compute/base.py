@@ -89,6 +89,7 @@ class BaseComputeTest(tempest.test.BaseTestCase):
         cls.migrations_client = cls.os.migrations_client
         cls.security_group_default_rules_client = (
             cls.os.security_group_default_rules_client)
+        cls.versions_client = cls.os.compute_versions_client
 
     @classmethod
     def resource_setup(cls):
