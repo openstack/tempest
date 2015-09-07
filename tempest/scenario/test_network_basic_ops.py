@@ -17,7 +17,6 @@ import collections
 import re
 
 from oslo_log import log as logging
-from tempest_lib import decorators
 import testtools
 
 from tempest.common.utils import data_utils
@@ -660,7 +659,6 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         self.assertEqual('', port['device_owner'])
 
     @test.idempotent_id('2e788c46-fb3f-4ac9-8f82-0561555bea73')
-    @decorators.skip_because(bug="1489929")
     @test.services('compute', 'network')
     def test_router_rescheduling(self):
         """Tests that router can be removed from agent and add to a new agent.
@@ -686,6 +684,14 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         agent_list = set(a["id"] for a in
                          self._list_agents(agent_type="L3 agent"))
         self._setup_network_and_servers()
+
+        # NOTE(kevinbenton): we have to use the admin credentials to check
+        # for the distributed flag because self.router only has a tenant view.
+        admin = self.admin_manager.network_client.show_router(self.router.id)
+        if admin['router'].get('distributed', False):
+            msg = "Rescheduling test does not apply to distributed routers."
+            raise self.skipException(msg)
+
         self.check_public_network_connectivity(should_connect=True)
 
         # remove resource from agents
