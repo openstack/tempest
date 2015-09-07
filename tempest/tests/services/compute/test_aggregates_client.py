@@ -12,10 +12,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import httplib2
-
-from oslotest import mockpatch
-
 from tempest.services.compute.json import aggregates_client
 from tempest.tests import fake_auth_provider
 from tempest.tests.services.compute import base
@@ -114,12 +110,10 @@ class TestAggregatesClient(base.BaseComputeServiceTest):
         self._test_create_aggregate(bytes_body=True)
 
     def test_delete_aggregate(self):
-        mocked_resp = (httplib2.Response({'status': 200}), None)
-        self.useFixture(mockpatch.Patch(
+        self.check_service_client_function(
+            self.client.delete_aggregate,
             'tempest.common.service_client.ServiceClient.delete',
-            return_value=mocked_resp))
-        resp = self.client.delete_aggregate("1")
-        self.assertEqual({}, resp)
+            {}, aggregate_id="1")
 
     def _test_update_aggregate(self, bytes_body=False):
         self.check_service_client_function(

@@ -22,9 +22,11 @@ from tempest.tests import base
 
 class BaseComputeServiceTest(base.TestCase):
     def create_response(self, body, to_utf=False, status=200):
-        json_body = json.dumps(body)
-        if to_utf:
-            json_body = json_body.encode('utf-8')
+        json_body = {}
+        if body:
+            json_body = json.dumps(body)
+            if to_utf:
+                json_body = json_body.encode('utf-8')
         response = (httplib2.Response({'status': status}), json_body)
         return response
 

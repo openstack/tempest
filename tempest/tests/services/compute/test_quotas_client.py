@@ -13,9 +13,6 @@
 #    under the License.
 
 import copy
-import httplib2
-
-from oslotest import mockpatch
 
 from tempest.services.compute.json import quotas_client
 from tempest.tests import fake_auth_provider
@@ -89,10 +86,7 @@ class TestQuotasClient(base.BaseComputeServiceTest):
             tenant_id=self.project_id)
 
     def test_delete_quota_set(self):
-        expected = {}
-        mocked_resp = (httplib2.Response({'status': 202}), None)
-        self.useFixture(mockpatch.Patch(
+        self.check_service_client_function(
+            self.client.delete_quota_set,
             'tempest.common.service_client.ServiceClient.delete',
-            return_value=mocked_resp))
-        resp = self.client.delete_quota_set(self.project_id)
-        self.assertEqual(expected, resp)
+            {}, status=202, tenant_id=self.project_id)
