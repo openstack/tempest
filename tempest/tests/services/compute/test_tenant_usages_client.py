@@ -12,17 +12,12 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import httplib2
-
-from oslo_serialization import jsonutils as json
-from oslotest import mockpatch
-
 from tempest.services.compute.json import tenant_usages_client
-from tempest.tests import base
 from tempest.tests import fake_auth_provider
+from tempest.tests.services.compute import base
 
 
-class TestTenantUsagesClient(base.TestCase):
+class TestTenantUsagesClient(base.BaseComputeServiceTest):
 
     FAKE_SERVER_USAGES = [{
         "ended_at": None,
@@ -57,17 +52,11 @@ class TestTenantUsagesClient(base.TestCase):
             fake_auth, 'compute', 'regionOne')
 
     def _test_list_tenant_usages(self, bytes_body=False):
-        serialized_body = json.dumps({"tenant_usages":
-                                      self.FAKE_TENANT_USAGES})
-        if bytes_body:
-            serialized_body = serialized_body.encode('utf-8')
-
-        mocked_resp = (httplib2.Response({'status': 200}), serialized_body)
-        self.useFixture(mockpatch.Patch(
+        self.check_service_client_function(
+            self.client.list_tenant_usages,
             'tempest.common.service_client.ServiceClient.get',
-            return_value=mocked_resp))
-        resp = self.client.list_tenant_usages()
-        self.assertEqual({"tenant_usages": self.FAKE_TENANT_USAGES}, resp)
+            {"tenant_usages": self.FAKE_TENANT_USAGES},
+            to_utf=bytes_body)
 
     def test_list_tenant_usages_with_str_body(self):
         self._test_list_tenant_usages()
@@ -76,17 +65,12 @@ class TestTenantUsagesClient(base.TestCase):
         self._test_list_tenant_usages(bytes_body=True)
 
     def _test_show_tenant_usage(self, bytes_body=False):
-        serialized_body = json.dumps({"tenant_usage":
-                                      self.FAKE_TENANT_USAGES[0]})
-        if bytes_body:
-            serialized_body = serialized_body.encode('utf-8')
-
-        mocked_resp = (httplib2.Response({'status': 200}), serialized_body)
-        self.useFixture(mockpatch.Patch(
+        self.check_service_client_function(
+            self.client.show_tenant_usage,
             'tempest.common.service_client.ServiceClient.get',
-            return_value=mocked_resp))
-        resp = self.client.show_tenant_usage('openstack')
-        self.assertEqual({"tenant_usage": self.FAKE_TENANT_USAGES[0]}, resp)
+            {"tenant_usage": self.FAKE_TENANT_USAGES[0]},
+            to_utf=bytes_body,
+            tenant_id='openstack')
 
     def test_show_tenant_usage_with_str_body(self):
         self._test_show_tenant_usage()

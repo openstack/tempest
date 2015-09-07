@@ -12,17 +12,24 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import httplib2
-
-from oslo_serialization import jsonutils as json
-from oslotest import mockpatch
-
 from tempest.services.compute.json import extensions_client
-from tempest.tests import base
 from tempest.tests import fake_auth_provider
+from tempest.tests.services.compute import base
 
 
-class TestExtensionsClient(base.TestCase):
+class TestExtensionsClient(base.BaseComputeServiceTest):
+
+    FAKE_SHOW_EXTENSION = {
+        "extension": {
+            "updated": "2011-06-09T00:00:00Z",
+            "name": "Multinic",
+            "links": [],
+            "namespace":
+            "http://docs.openstack.org/compute/ext/multinic/api/v1.1",
+            "alias": "NMN",
+            "description": u'\u2740(*\xb4\u25e1`*)\u2740'
+        }
+    }
 
     def setUp(self):
         super(TestExtensionsClient, self).setUp()
@@ -31,15 +38,11 @@ class TestExtensionsClient(base.TestCase):
             fake_auth, 'compute', 'regionOne')
 
     def _test_list_extensions(self, bytes_body=False):
-        body = '{"extensions": []}'
-        if bytes_body:
-            body = body.encode('utf-8')
-        expected = {"extensions": []}
-        response = (httplib2.Response({'status': 200}), body)
-        self.useFixture(mockpatch.Patch(
+        self.check_service_client_function(
+            self.client.list_extensions,
             'tempest.common.service_client.ServiceClient.get',
-            return_value=response))
-        self.assertEqual(expected, self.client.list_extensions())
+            {"extensions": []},
+            bytes_body)
 
     def test_list_extensions_with_str_body(self):
         self._test_list_extensions()
@@ -48,25 +51,12 @@ class TestExtensionsClient(base.TestCase):
         self._test_list_extensions(bytes_body=True)
 
     def _test_show_extension(self, bytes_body=False):
-        expected = {"extension": {
-            "updated": "2011-06-09T00:00:00Z",
-            "name": "Multinic",
-            "links": [],
-            "namespace":
-            "http://docs.openstack.org/compute/ext/multinic/api/v1.1",
-            "alias": "NMN",
-            "description": u'\u2740(*\xb4\u25e1`*)\u2740'
-        }}
-        serialized_body = json.dumps(expected)
-        if bytes_body:
-            serialized_body = serialized_body.encode('utf-8')
-
-        mocked_resp = (httplib2.Response({'status': 200}), serialized_body)
-        self.useFixture(mockpatch.Patch(
+        self.check_service_client_function(
+            self.client.show_extension,
             'tempest.common.service_client.ServiceClient.get',
-            return_value=mocked_resp))
-        resp = self.client.show_extension("NMN")
-        self.assertEqual(expected, resp)
+            self.FAKE_SHOW_EXTENSION,
+            bytes_body,
+            extension_alias="NMN")
 
     def test_show_extension_with_str_body(self):
         self._test_show_extension()

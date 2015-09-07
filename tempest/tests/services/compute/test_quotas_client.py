@@ -15,15 +15,14 @@
 import copy
 import httplib2
 
-from oslo_serialization import jsonutils as json
 from oslotest import mockpatch
 
 from tempest.services.compute.json import quotas_client
-from tempest.tests import base
 from tempest.tests import fake_auth_provider
+from tempest.tests.services.compute import base
 
 
-class TestQuotasClient(base.TestCase):
+class TestQuotasClient(base.BaseComputeServiceTest):
 
     FAKE_QUOTA_SET = {
         "quota_set": {
@@ -53,16 +52,12 @@ class TestQuotasClient(base.TestCase):
             fake_auth, 'compute', 'regionOne')
 
     def _test_show_quota_set(self, bytes_body=False):
-        serialized_body = json.dumps(self.FAKE_QUOTA_SET)
-        if bytes_body:
-            serialized_body = serialized_body.encode('utf-8')
-
-        mocked_resp = (httplib2.Response({'status': 200}), serialized_body)
-        self.useFixture(mockpatch.Patch(
+        self.check_service_client_function(
+            self.client.show_quota_set,
             'tempest.common.service_client.ServiceClient.get',
-            return_value=mocked_resp))
-        resp = self.client.show_quota_set(self.project_id)
-        self.assertEqual(self.FAKE_QUOTA_SET, resp)
+            self.FAKE_QUOTA_SET,
+            to_utf=bytes_body,
+            tenant_id=self.project_id)
 
     def test_show_quota_set_with_str_body(self):
         self._test_show_quota_set()
@@ -71,16 +66,12 @@ class TestQuotasClient(base.TestCase):
         self._test_show_quota_set(bytes_body=True)
 
     def _test_show_default_quota_set(self, bytes_body=False):
-        serialized_body = json.dumps(self.FAKE_QUOTA_SET)
-        if bytes_body:
-            serialized_body = serialized_body.encode('utf-8')
-
-        mocked_resp = (httplib2.Response({'status': 200}), serialized_body)
-        self.useFixture(mockpatch.Patch(
+        self.check_service_client_function(
+            self.client.show_default_quota_set,
             'tempest.common.service_client.ServiceClient.get',
-            return_value=mocked_resp))
-        resp = self.client.show_default_quota_set(self.project_id)
-        self.assertEqual(self.FAKE_QUOTA_SET, resp)
+            self.FAKE_QUOTA_SET,
+            to_utf=bytes_body,
+            tenant_id=self.project_id)
 
     def test_show_default_quota_set_with_str_body(self):
         self._test_show_quota_set()
@@ -91,13 +82,11 @@ class TestQuotasClient(base.TestCase):
     def test_update_quota_set(self):
         fake_quota_set = copy.deepcopy(self.FAKE_QUOTA_SET)
         fake_quota_set['quota_set'].pop("id")
-        serialized_body = json.dumps(fake_quota_set)
-        mocked_resp = (httplib2.Response({'status': 200}), serialized_body)
-        self.useFixture(mockpatch.Patch(
+        self.check_service_client_function(
+            self.client.update_quota_set,
             'tempest.common.service_client.ServiceClient.put',
-            return_value=mocked_resp))
-        resp = self.client.update_quota_set(self.project_id)
-        self.assertEqual(fake_quota_set, resp)
+            fake_quota_set,
+            tenant_id=self.project_id)
 
     def test_delete_quota_set(self):
         expected = {}
