@@ -42,14 +42,16 @@ class VolumesV2MetadataTest(base.BaseVolumeTest):
                     "key4": "<value&special_chars>"}
 
         body = self.volumes_client.create_volume_metadata(self.volume_id,
-                                                          metadata)
+                                                          metadata)['metadata']
         # Get the metadata of the volume
-        body = self.volumes_client.show_volume_metadata(self.volume_id)
+        body = self.volumes_client.show_volume_metadata(
+            self.volume_id)['metadata']
         self.assertThat(body.items(), matchers.ContainsAll(metadata.items()))
         # Delete one item metadata of the volume
         self.volumes_client.delete_volume_metadata_item(
             self.volume_id, "key1")
-        body = self.volumes_client.show_volume_metadata(self.volume_id)
+        body = self.volumes_client.show_volume_metadata(
+            self.volume_id)['metadata']
         self.assertNotIn("key1", body)
         del metadata["key1"]
         self.assertThat(body.items(), matchers.ContainsAll(metadata.items()))
@@ -66,15 +68,17 @@ class VolumesV2MetadataTest(base.BaseVolumeTest):
 
         # Create metadata for the volume
         body = self.volumes_client.create_volume_metadata(
-            self.volume_id, metadata)
+            self.volume_id, metadata)['metadata']
         # Get the metadata of the volume
-        body = self.volumes_client.show_volume_metadata(self.volume_id)
+        body = self.volumes_client.show_volume_metadata(
+            self.volume_id)['metadata']
         self.assertThat(body.items(), matchers.ContainsAll(metadata.items()))
         # Update metadata
         body = self.volumes_client.update_volume_metadata(
-            self.volume_id, update)
+            self.volume_id, update)['metadata']
         # Get the metadata of the volume
-        body = self.volumes_client.show_volume_metadata(self.volume_id)
+        body = self.volumes_client.show_volume_metadata(
+            self.volume_id)['metadata']
         self.assertEqual(update, body)
 
     @test.idempotent_id('862261c5-8df4-475a-8c21-946e50e36a20')
@@ -89,13 +93,14 @@ class VolumesV2MetadataTest(base.BaseVolumeTest):
                   "key3": "value3_update"}
         # Create metadata for the volume
         body = self.volumes_client.create_volume_metadata(
-            self.volume_id, metadata)
+            self.volume_id, metadata)['metadata']
         self.assertThat(body.items(), matchers.ContainsAll(metadata.items()))
         # Update metadata item
         body = self.volumes_client.update_volume_metadata_item(
-            self.volume_id, "key3", update_item)
+            self.volume_id, "key3", update_item)['meta']
         # Get the metadata of the volume
-        body = self.volumes_client.show_volume_metadata(self.volume_id)
+        body = self.volumes_client.show_volume_metadata(
+            self.volume_id)['metadata']
         self.assertThat(body.items(), matchers.ContainsAll(expect.items()))
 
 

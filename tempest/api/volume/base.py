@@ -113,7 +113,7 @@ class BaseVolumeTest(tempest.test.BaseTestCase):
         name_field = cls.special_fields['name_field']
 
         kwargs[name_field] = name
-        volume = cls.volumes_client.create_volume(size, **kwargs)
+        volume = cls.volumes_client.create_volume(size, **kwargs)['volume']
 
         cls.volumes.append(volume)
         cls.volumes_client.wait_for_volume_status(volume['id'], 'available')

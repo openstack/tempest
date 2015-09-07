@@ -227,7 +227,7 @@ class TestCreateResources(JavelinUnitTest):
             display_name=self.fake_object['name'])
         mocked_function = self.fake_client.volumes.wait_for_volume_status
         mocked_function.assert_called_once_with(
-            self.fake_object.body['id'],
+            self.fake_object.body['volume']['id'],
             'available')
 
     def test_create_volume_existing(self):

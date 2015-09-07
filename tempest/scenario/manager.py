@@ -202,7 +202,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
             name = data_utils.rand_name(self.__class__.__name__)
         volume = self.volumes_client.create_volume(
             size=size, display_name=name, snapshot_id=snapshot_id,
-            imageRef=imageRef, volume_type=volume_type)
+            imageRef=imageRef, volume_type=volume_type)['volume']
 
         if wait_on_delete:
             self.addCleanup(self.volumes_client.wait_for_resource_deletion,
@@ -220,7 +220,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
         self.volumes_client.wait_for_volume_status(volume['id'], 'available')
         # The volume retrieved on creation has a non-up-to-date status.
         # Retrieval after it becomes active ensures correct details.
-        volume = self.volumes_client.show_volume(volume['id'])
+        volume = self.volumes_client.show_volume(volume['id'])['volume']
         return volume
 
     def _create_loginable_secgroup_rule(self, secgroup_id=None):
@@ -445,14 +445,14 @@ class ScenarioTest(tempest.test.BaseTestCase):
         self.assertEqual(self.volume['id'], volume['id'])
         self.volumes_client.wait_for_volume_status(volume['id'], 'in-use')
         # Refresh the volume after the attachment
-        self.volume = self.volumes_client.show_volume(volume['id'])
+        self.volume = self.volumes_client.show_volume(volume['id'])['volume']
 
     def nova_volume_detach(self):
         self.servers_client.detach_volume(self.server['id'], self.volume['id'])
         self.volumes_client.wait_for_volume_status(self.volume['id'],
                                                    'available')
 
-        volume = self.volumes_client.show_volume(self.volume['id'])
+        volume = self.volumes_client.show_volume(self.volume['id'])['volume']
         self.assertEqual('available', volume['status'])
 
     def rebuild_server(self, server_id, image=None,

@@ -322,7 +322,7 @@ class VolumeService(BaseService):
 
     def list(self):
         client = self.client
-        vols = client.list_volumes()
+        vols = client.list_volumes()['volumes']
         LOG.debug("List count, %s Volumes" % len(vols))
         return vols
 

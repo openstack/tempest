@@ -39,30 +39,6 @@ class BaseVolumesClient(service_client.ServiceClient):
         """Return the element 'attachment' from input volumes."""
         return volume['attachments'][0]
 
-    def _ext_get(self, url, key=None, status=200):
-        """Extended get method.
-
-        Retrieves requested url, checks that status is expected status and
-        return a ResponseBody, ResponseBodyList or ResponseBodyData depending
-        on received data's key entry.
-
-        If key is not specified or is None we will return the whole body in a
-        ResponseBody class.
-        """
-
-        resp, body = self.get(url)
-        body = json.loads(body)
-        self.expected_success(status, resp.status)
-
-        if not key:
-            return service_client.ResponseBody(resp, body)
-        elif isinstance(body[key], dict):
-            return service_client.ResponseBody(resp, body[key])
-        elif isinstance(body[key], list):
-            return service_client.ResponseBodyList(resp, body[key])
-
-        return service_client.ResponseBodyData(resp, body[key])
-
     def _prepare_params(self, params):
         """Prepares params for use in get or _ext_get methods.
 
@@ -73,14 +49,10 @@ class BaseVolumesClient(service_client.ServiceClient):
             return params
         return urllib.urlencode(params)
 
-    def list_volumes(self, detail=False, params=None, return_body=False):
+    def list_volumes(self, detail=False, params=None):
         """List all the volumes created.
 
         Params can be a string (must be urlencoded) or a dictionary.
-        If return_body is True then we will return the whole response body in
-        a ResponseBody class, it it's False or has not been specified we will
-        return only the list of volumes in a ResponseBodyList (inherits from
-        list).
         """
         url = 'volumes'
         if detail:
@@ -88,8 +60,10 @@ class BaseVolumesClient(service_client.ServiceClient):
         if params:
             url += '?%s' % self._prepare_params(params)
 
-        key = None if return_body else 'volumes'
-        return self._ext_get(url, key)
+        resp, body = self.get(url)
+        body = json.loads(body)
+        self.expected_success(200, resp.status)
+        return service_client.ResponseBody(resp, body)
 
     def show_volume(self, volume_id):
         """Returns the details of a single volume."""
@@ -97,7 +71,7 @@ class BaseVolumesClient(service_client.ServiceClient):
         resp, body = self.get(url)
         body = json.loads(body)
         self.expected_success(200, resp.status)
-        return service_client.ResponseBody(resp, body['volume'])
+        return service_client.ResponseBody(resp, body)
 
     def create_volume(self, size=None, **kwargs):
         """
@@ -119,7 +93,7 @@ class BaseVolumesClient(service_client.ServiceClient):
         resp, body = self.post('volumes', post_body)
         body = json.loads(body)
         self.expected_success(self.create_resp, resp.status)
-        return service_client.ResponseBody(resp, body['volume'])
+        return service_client.ResponseBody(resp, body)
 
     def update_volume(self, volume_id, **kwargs):
         """Updates the Specified Volume."""
@@ -127,7 +101,7 @@ class BaseVolumesClient(service_client.ServiceClient):
         resp, body = self.put('volumes/%s' % volume_id, put_body)
         body = json.loads(body)
         self.expected_success(200, resp.status)
-        return service_client.ResponseBody(resp, body['volume'])
+        return service_client.ResponseBody(resp, body)
 
     def delete_volume(self, volume_id):
         """Deletes the Specified Volume."""
@@ -146,8 +120,7 @@ class BaseVolumesClient(service_client.ServiceClient):
         resp, body = self.post(url, post_body)
         body = json.loads(body)
         self.expected_success(202, resp.status)
-        return service_client.ResponseBody(resp,
-                                           body['os-volume_upload_image'])
+        return service_client.ResponseBody(resp, body)
 
     def attach_volume(self, volume_id, instance_uuid, mountpoint):
         """Attaches a volume to a given instance on a given mountpoint."""
@@ -258,7 +231,7 @@ class BaseVolumesClient(service_client.ServiceClient):
         resp, body = self.post('os-volume-transfer', post_body)
         body = json.loads(body)
         self.expected_success(202, resp.status)
-        return service_client.ResponseBody(resp, body['transfer'])
+        return service_client.ResponseBody(resp, body)
 
     def show_volume_transfer(self, transfer_id):
         """Returns the details of a volume transfer."""
@@ -266,7 +239,7 @@ class BaseVolumesClient(service_client.ServiceClient):
         resp, body = self.get(url)
         body = json.loads(body)
         self.expected_success(200, resp.status)
-        return service_client.ResponseBody(resp, body['transfer'])
+        return service_client.ResponseBody(resp, body)
 
     def list_volume_transfers(self, params=None):
         """List all the volume transfers created."""
@@ -276,7 +249,7 @@ class BaseVolumesClient(service_client.ServiceClient):
         resp, body = self.get(url)
         body = json.loads(body)
         self.expected_success(200, resp.status)
-        return service_client.ResponseBodyList(resp, body['transfers'])
+        return service_client.ResponseBody(resp, body)
 
     def delete_volume_transfer(self, transfer_id):
         """Delete a volume transfer."""
@@ -294,7 +267,7 @@ class BaseVolumesClient(service_client.ServiceClient):
         resp, body = self.post(url, post_body)
         body = json.loads(body)
         self.expected_success(202, resp.status)
-        return service_client.ResponseBody(resp, body['transfer'])
+        return service_client.ResponseBody(resp, body)
 
     def update_volume_readonly(self, volume_id, readonly):
         """Update the Specified Volume readonly."""
@@ -321,7 +294,7 @@ class BaseVolumesClient(service_client.ServiceClient):
         resp, body = self.post(url, put_body)
         body = json.loads(body)
         self.expected_success(200, resp.status)
-        return service_client.ResponseBody(resp, body['metadata'])
+        return service_client.ResponseBody(resp, body)
 
     def show_volume_metadata(self, volume_id):
         """Get metadata of the volume."""
@@ -329,7 +302,7 @@ class BaseVolumesClient(service_client.ServiceClient):
         resp, body = self.get(url)
         body = json.loads(body)
         self.expected_success(200, resp.status)
-        return service_client.ResponseBody(resp, body['metadata'])
+        return service_client.ResponseBody(resp, body)
 
     def update_volume_metadata(self, volume_id, metadata):
         """Update metadata for the volume."""
@@ -338,7 +311,7 @@ class BaseVolumesClient(service_client.ServiceClient):
         resp, body = self.put(url, put_body)
         body = json.loads(body)
         self.expected_success(200, resp.status)
-        return service_client.ResponseBody(resp, body['metadata'])
+        return service_client.ResponseBody(resp, body)
 
     def update_volume_metadata_item(self, volume_id, id, meta_item):
         """Update metadata item for the volume."""
@@ -347,7 +320,7 @@ class BaseVolumesClient(service_client.ServiceClient):
         resp, body = self.put(url, put_body)
         body = json.loads(body)
         self.expected_success(200, resp.status)
-        return service_client.ResponseBody(resp, body['meta'])
+        return service_client.ResponseBody(resp, body)
 
     def delete_volume_metadata_item(self, volume_id, id):
         """Delete metadata item for the volume."""

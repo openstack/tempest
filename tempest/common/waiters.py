@@ -163,12 +163,19 @@ def wait_for_image_status(client, image_id, status):
 def wait_for_volume_status(client, volume_id, status):
     """Waits for a Volume to reach a given status."""
     body = client.show_volume(volume_id)
+    if 'volume' in body:
+        body = body['volume']
     volume_status = body['status']
     start = int(time.time())
 
     while volume_status != status:
         time.sleep(client.build_interval)
         body = client.show_volume(volume_id)
+        # TODO(jswarren) always extract 'volume' value
+        # once the compute clients also return the full
+        # response.
+        if 'volume' in body:
+            body = body['volume']
         volume_status = body['status']
         if volume_status == 'error':
             raise exceptions.VolumeBuildErrorException(volume_id=volume_id)

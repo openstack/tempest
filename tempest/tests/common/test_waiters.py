@@ -55,8 +55,8 @@ class TestImageWaiters(base.TestCase):
         # the volume status is 'error_restoring'.
         client = mock.Mock(spec=volumes_client.BaseVolumesClient,
                            build_interval=1)
-        volume1 = {'status': 'restoring-backup'}
-        volume2 = {'status': 'error_restoring'}
+        volume1 = {'volume': {'status': 'restoring-backup'}}
+        volume2 = {'volume': {'status': 'error_restoring'}}
         mock_show = mock.Mock(side_effect=(volume1, volume2))
         client.show_volume = mock_show
         volume_id = '7532b91e-aa0a-4e06-b3e5-20c0c5ee1caa'
