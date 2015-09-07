@@ -138,3 +138,11 @@ class HackingTestCase(base.TestCase):
 
         self.assertEqual(0, len(list(checks.no_mutable_default_args(
             "defined, undefined = [], {}"))))
+
+    def test_no_testtools_skip_decorator(self):
+        self.assertEqual(1, len(list(checks.no_testtools_skip_decorator(
+            " @testtools.skip('Bug xxx')"))))
+        self.assertEqual(0, len(list(checks.no_testtools_skip_decorator(
+            " @testtools.skipUnless(CONF.something, 'msg')"))))
+        self.assertEqual(0, len(list(checks.no_testtools_skip_decorator(
+            " @testtools.skipIf(CONF.something, 'msg')"))))
