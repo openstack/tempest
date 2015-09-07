@@ -12,10 +12,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import httplib2
-
-from oslotest import mockpatch
-
 from tempest.services.compute.json import agents_client
 from tempest.tests import fake_auth_provider
 from tempest.tests.services.compute import base
@@ -71,11 +67,10 @@ class TestAgentsClient(base.BaseComputeServiceTest):
             version="2", architecture="x86_64", os="linux")
 
     def _test_delete_agent(self):
-        mocked_resp = (httplib2.Response({'status': 200}), None)
-        self.useFixture(mockpatch.Patch(
+        self.check_service_client_function(
+            self.client.delete_agent,
             'tempest.common.service_client.ServiceClient.delete',
-            return_value=mocked_resp))
-        self.client.delete_agent("1")
+            {}, agent_id="1")
 
     def _test_update_agent(self, bytes_body=False):
         self.check_service_client_function(
