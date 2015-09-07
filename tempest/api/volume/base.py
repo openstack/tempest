@@ -16,7 +16,7 @@
 from oslo_log import log as logging
 from tempest_lib import exceptions as lib_exc
 
-from tempest.common import fixed_network
+from tempest.common import compute
 from tempest.common.utils import data_utils
 from tempest import config
 from tempest import exceptions
@@ -162,12 +162,13 @@ class BaseVolumeTest(tempest.test.BaseTestCase):
 
     @classmethod
     def create_server(cls, name, **kwargs):
-        network = cls.get_tenant_network()
-        network_kwargs = fixed_network.set_networks_kwarg(network, kwargs)
-        return cls.servers_client.create_server(name,
-                                                cls.image_ref,
-                                                cls.flavor_ref,
-                                                **network_kwargs)
+        tenant_network = cls.get_tenant_network()
+        body, _ = compute.create_test_server(
+            cls.os,
+            tenant_network=tenant_network,
+            name=name,
+            **kwargs)
+        return body
 
 
 class BaseVolumeAdminTest(BaseVolumeTest):

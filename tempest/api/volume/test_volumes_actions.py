@@ -37,9 +37,9 @@ class VolumesV2ActionsTest(base.BaseVolumeTest):
 
         # Create a test shared instance
         srv_name = data_utils.rand_name(cls.__name__ + '-Instance')
-        cls.server = cls.create_server(srv_name)
-        waiters.wait_for_server_status(cls.servers_client, cls.server['id'],
-                                       'ACTIVE')
+        cls.server = cls.create_server(
+            name=srv_name,
+            wait_until='ACTIVE')
 
         # Create a test shared volume for attach/detach tests
         cls.volume = cls.create_volume()
