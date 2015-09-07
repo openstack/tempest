@@ -12,17 +12,12 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import httplib2
-
-from oslo_serialization import jsonutils as json
-from oslotest import mockpatch
-
 from tempest.services.compute.json import tenant_networks_client
-from tempest.tests import base
 from tempest.tests import fake_auth_provider
+from tempest.tests.services.compute import base
 
 
-class TestTenantNetworksClient(base.TestCase):
+class TestTenantNetworksClient(base.BaseComputeServiceTest):
 
     FAKE_NETWORK = {
         "cidr": "None",
@@ -41,16 +36,11 @@ class TestTenantNetworksClient(base.TestCase):
             fake_auth, 'compute', 'regionOne')
 
     def _test_list_tenant_networks(self, bytes_body=False):
-        serialized_body = json.dumps({"networks": self.FAKE_NETWORKS})
-        if bytes_body:
-            serialized_body = serialized_body.encode('utf-8')
-
-        mocked_resp = (httplib2.Response({'status': 200}), serialized_body)
-        self.useFixture(mockpatch.Patch(
+        self.check_service_client_function(
+            self.client.list_tenant_networks,
             'tempest.common.service_client.ServiceClient.get',
-            return_value=mocked_resp))
-        resp = self.client.list_tenant_networks()
-        self.assertEqual({"networks": self.FAKE_NETWORKS}, resp)
+            {"networks": self.FAKE_NETWORKS},
+            bytes_body)
 
     def test_list_tenant_networks_with_str_body(self):
         self._test_list_tenant_networks()
@@ -59,16 +49,12 @@ class TestTenantNetworksClient(base.TestCase):
         self._test_list_tenant_networks(bytes_body=True)
 
     def _test_show_tenant_network(self, bytes_body=False):
-        serialized_body = json.dumps({"network": self.FAKE_NETWORK})
-        if bytes_body:
-            serialized_body = serialized_body.encode('utf-8')
-
-        mocked_resp = (httplib2.Response({'status': 200}), serialized_body)
-        self.useFixture(mockpatch.Patch(
+        self.check_service_client_function(
+            self.client.show_tenant_network,
             'tempest.common.service_client.ServiceClient.get',
-            return_value=mocked_resp))
-        resp = self.client.show_tenant_network(self.NETWORK_ID)
-        self.assertEqual({"network": self.FAKE_NETWORK}, resp)
+            {"network": self.FAKE_NETWORK},
+            bytes_body,
+            network_id=self.NETWORK_ID)
 
     def test_show_tenant_network_with_str_body(self):
         self._test_show_tenant_network()

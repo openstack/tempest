@@ -13,17 +13,13 @@
 #    under the License.
 
 import datetime
-import httplib2
-
-from oslo_serialization import jsonutils as json
-from oslotest import mockpatch
 
 from tempest.services.compute.json import instance_usage_audit_log_client
-from tempest.tests import base
 from tempest.tests import fake_auth_provider
+from tempest.tests.services.compute import base
 
 
-class TestInstanceUsagesAuditLogClient(base.TestCase):
+class TestInstanceUsagesAuditLogClient(base.BaseComputeServiceTest):
 
     FAKE_AUDIT_LOG = {
         "hosts_not_run": [
@@ -49,18 +45,11 @@ class TestInstanceUsagesAuditLogClient(base.TestCase):
                                                     'regionOne'))
 
     def _test_list_instance_usage_audit_logs(self, bytes_body=False):
-        serialized_body = json.dumps({"instance_usage_audit_logs":
-                                      self.FAKE_AUDIT_LOG})
-        if bytes_body:
-            serialized_body = serialized_body.encode('utf-8')
-
-        mocked_resp = (httplib2.Response({'status': 200}), serialized_body)
-        self.useFixture(mockpatch.Patch(
+        self.check_service_client_function(
+            self.client.list_instance_usage_audit_logs,
             'tempest.common.service_client.ServiceClient.get',
-            return_value=mocked_resp))
-        resp = self.client.list_instance_usage_audit_logs()
-        self.assertEqual({"instance_usage_audit_logs": self.FAKE_AUDIT_LOG},
-                         resp)
+            {"instance_usage_audit_logs": self.FAKE_AUDIT_LOG},
+            bytes_body)
 
     def test_list_instance_usage_audit_logs_with_str_body(self):
         self._test_list_instance_usage_audit_logs()
@@ -70,18 +59,12 @@ class TestInstanceUsagesAuditLogClient(base.TestCase):
 
     def _test_show_instance_usage_audit_log(self, bytes_body=False):
         before_time = datetime.datetime(2012, 12, 1, 0, 0)
-        serialized_body = json.dumps({"instance_usage_audit_log":
-                                      self.FAKE_AUDIT_LOG})
-        if bytes_body:
-            serialized_body = serialized_body.encode('utf-8')
-
-        mocked_resp = (httplib2.Response({'status': 200}), serialized_body)
-        self.useFixture(mockpatch.Patch(
+        self.check_service_client_function(
+            self.client.show_instance_usage_audit_log,
             'tempest.common.service_client.ServiceClient.get',
-            return_value=mocked_resp))
-        resp = self.client.show_instance_usage_audit_log(before_time)
-        self.assertEqual({"instance_usage_audit_log": self.FAKE_AUDIT_LOG},
-                         resp)
+            {"instance_usage_audit_log": self.FAKE_AUDIT_LOG},
+            bytes_body,
+            time_before=before_time)
 
     def test_show_instance_usage_audit_log_with_str_body(self):
         self._test_show_instance_usage_audit_log()
