@@ -13,17 +13,13 @@
 #    under the License.
 
 import copy
-import httplib2
-
-from oslo_serialization import jsonutils as json
-from oslotest import mockpatch
 
 from tempest.services.compute.json import certificates_client
-from tempest.tests import base
 from tempest.tests import fake_auth_provider
+from tempest.tests.services.compute import base
 
 
-class TestCertificatesClient(base.TestCase):
+class TestCertificatesClient(base.BaseComputeServiceTest):
 
     FAKE_CERTIFICATE = {
         "certificate": {
@@ -39,16 +35,12 @@ class TestCertificatesClient(base.TestCase):
             fake_auth, 'compute', 'regionOne')
 
     def _test_show_certificate(self, bytes_body=False):
-        serialized_body = json.dumps(self.FAKE_CERTIFICATE)
-        if bytes_body:
-            serialized_body = serialized_body.encode('utf-8')
-
-        mocked_resp = (httplib2.Response({'status': 200}), serialized_body)
-        self.useFixture(mockpatch.Patch(
+        self.check_service_client_function(
+            self.client.show_certificate,
             'tempest.common.service_client.ServiceClient.get',
-            return_value=mocked_resp))
-        resp = self.client.show_certificate("fake-id")
-        self.assertEqual(self.FAKE_CERTIFICATE, resp)
+            self.FAKE_CERTIFICATE,
+            bytes_body,
+            certificate_id="fake-id")
 
     def test_show_certificate_with_str_body(self):
         self._test_show_certificate()
@@ -59,16 +51,11 @@ class TestCertificatesClient(base.TestCase):
     def _test_create_certificate(self, bytes_body=False):
         cert = copy.deepcopy(self.FAKE_CERTIFICATE)
         cert['certificate']['private_key'] = "my_private_key"
-        serialized_body = json.dumps(cert)
-        if bytes_body:
-            serialized_body = serialized_body.encode('utf-8')
-
-        mocked_resp = (httplib2.Response({'status': 200}), serialized_body)
-        self.useFixture(mockpatch.Patch(
+        self.check_service_client_function(
+            self.client.create_certificate,
             'tempest.common.service_client.ServiceClient.post',
-            return_value=mocked_resp))
-        resp = self.client.create_certificate()
-        self.assertEqual(cert, resp)
+            cert,
+            bytes_body)
 
     def test_create_certificate_with_str_body(self):
         self._test_create_certificate()
