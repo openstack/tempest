@@ -82,7 +82,7 @@ class TestNetworksClient(base.BaseComputeServiceTest):
         self.check_service_client_function(
             self.client.show_network,
             'tempest.common.service_client.ServiceClient.get',
-            {"network": self.FAKE_NETWORKS},
+            {"network": self.FAKE_NETWORK},
             bytes_body,
             network_id=self.network_id
             )
