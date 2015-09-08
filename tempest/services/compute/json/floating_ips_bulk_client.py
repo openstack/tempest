@@ -47,5 +47,4 @@ class FloatingIPsBulkClient(service_client.ServiceClient):
         resp, body = self.put('os-floating-ips-bulk/delete', post_body)
         body = json.loads(body)
         self.validate_response(schema.delete_floating_ips_bulk, resp, body)
-        data = body['floating_ips_bulk_delete']
-        return service_client.ResponseBodyData(resp, data)
+        return service_client.ResponseBody(resp, body)

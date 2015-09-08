@@ -71,7 +71,8 @@ class ImageClientV2(service_client.ServiceClient):
                                    "-json-patch"}
         resp, body = self.patch('v2/images/%s' % image_id, data, headers)
         self.expected_success(200, resp.status)
-        return service_client.ResponseBody(resp, self._parse_resp(body))
+        body = json.loads(body)
+        return service_client.ResponseBody(resp, body)
 
     def create_image(self, name, container_format, disk_format, **kwargs):
         params = {
