@@ -11,7 +11,6 @@
 #    under the License.
 
 import six
-from tempest_lib import decorators
 from tempest_lib import exceptions as lib_exc
 
 from tempest.api.baremetal.admin import base
@@ -60,7 +59,6 @@ class TestPorts(base.BaseBaremetalTest):
         _, body = self.client.show_port(uuid)
         self._assertExpected(port, body)
 
-    @decorators.skip_because(bug='1398350')
     @test.idempotent_id('4a02c4b0-6573-42a4-a513-2e36ad485b62')
     def test_create_port_with_extra(self):
         node_id = self.node['uuid']
@@ -237,7 +235,6 @@ class TestPorts(base.BaseBaremetalTest):
         _, body = self.client.show_port(port['uuid'])
         self.assertEqual(extra, body['extra'])
 
-    @decorators.skip_because(bug='1398350')
     @test.idempotent_id('5309e897-0799-4649-a982-0179b04c3876')
     def test_update_port_mixed_ops(self):
         node_id = self.node['uuid']
