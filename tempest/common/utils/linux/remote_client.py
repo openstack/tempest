@@ -163,9 +163,9 @@ class RemoteClient(object):
         * dhclient
         """
         # TODO(yfried): add support for dhcpcd
-        suported_clients = ['udhcpc', 'dhclient']
+        supported_clients = ['udhcpc', 'dhclient']
         dhcp_client = CONF.scenario.dhcp_client
-        if dhcp_client not in suported_clients:
+        if dhcp_client not in supported_clients:
             raise exceptions.InvalidConfiguration('%s DHCP client unsupported'
                                                   % dhcp_client)
         if dhcp_client == 'udhcpc' and not fixed_ip:

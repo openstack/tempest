@@ -150,7 +150,7 @@ class TestStampPattern(manager.ScenarioTest):
                           'Snapshotting is not available.')
     @tempest.test.services('compute', 'network', 'volume', 'image')
     def test_stamp_pattern(self):
-        # prepare for booting a instance
+        # prepare for booting an instance
         self._add_keypair()
         self.security_group = self._create_security_group()
 

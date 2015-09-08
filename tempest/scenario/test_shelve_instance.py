@@ -30,7 +30,7 @@ class TestShelveInstance(manager.ScenarioTest):
     """
     This test shelves then unshelves a Nova instance
     The following is the scenario outline:
-     * boot a instance and create a timestamp file in it
+     * boot an instance and create a timestamp file in it
      * shelve the instance
      * unshelve the instance
      * check the existence of the timestamp file in the unshelved instance

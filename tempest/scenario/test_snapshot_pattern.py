@@ -29,7 +29,7 @@ class TestSnapshotPattern(manager.ScenarioTest):
     """
     This test is for snapshotting an instance and booting with it.
     The following is the scenario outline:
-     * boot a instance and create a timestamp file in it
+     * boot an instance and create a timestamp file in it
      * snapshot the instance
      * boot a second instance from the snapshot
      * check the existence of the timestamp file in the second instance
@@ -62,11 +62,11 @@ class TestSnapshotPattern(manager.ScenarioTest):
                           'Snapshotting is not available.')
     @test.services('compute', 'network', 'image')
     def test_snapshot_pattern(self):
-        # prepare for booting a instance
+        # prepare for booting an instance
         self._add_keypair()
         self.security_group = self._create_security_group()
 
-        # boot a instance and create a timestamp file in it
+        # boot an instance and create a timestamp file in it
         server = self._boot_image(CONF.compute.image_ref)
         if CONF.compute.use_floatingip_for_ssh:
             fip_for_server = self.create_floating_ip(server)

@@ -27,7 +27,7 @@ class DatabaseLimitsTest(base.BaseDatabaseTest):
     @test.attr(type='smoke')
     @test.idempotent_id('73024538-f316-4829-b3e9-b459290e137a')
     def test_absolute_limits(self):
-        # Test to verify if all absolute limit paramaters are
+        # Test to verify if all absolute limit parameters are
         # present when verb is ABSOLUTE
         limits = self.client.list_db_limits()['limits']
         expected_abs_limits = ['max_backups', 'max_volumes',

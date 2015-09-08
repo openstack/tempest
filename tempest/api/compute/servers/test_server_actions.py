@@ -371,7 +371,7 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         # for a given server_id and number of lines
 
         # This reboot is necessary for outputting some console log after
-        # creating a instance backup. If a instance backup, the console
+        # creating an instance backup. If an instance backup, the console
         # log file is truncated and we cannot get any console log through
         # "console-log" API.
         # The detail is https://bugs.launchpad.net/nova/+bug/1251920
