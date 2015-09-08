@@ -83,7 +83,13 @@ class TestVolumeBootPattern(manager.ScenarioTest):
             self.snapshots_client.wait_for_resource_deletion, snap['id'])
         self.addCleanup(self.snapshots_client.delete_snapshot, snap['id'])
         self.snapshots_client.wait_for_snapshot_status(snap['id'], 'available')
-        self.assertEqual(snap_name, snap['display_name'])
+
+        # NOTE(e0ne): Cinder API v2 uses name instead of display_name
+        if 'display_name' in snap:
+            self.assertEqual(snap_name, snap['display_name'])
+        else:
+            self.assertEqual(snap_name, snap['name'])
+
         return snap
 
     def _create_volume_from_snapshot(self, snap_id):

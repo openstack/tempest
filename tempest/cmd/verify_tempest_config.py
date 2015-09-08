@@ -144,6 +144,12 @@ def get_extension_client(os, service):
         'neutron': os.network_client,
         'swift': os.account_client,
     }
+    # NOTE (e0ne): Use Cinder API v2 by default because v1 is deprecated
+    if CONF.volume_feature_enabled.api_v2:
+        extensions_client['cinder'] = os.volumes_v2_extension_client
+    else:
+        extensions_client['cinder'] = os.volumes_extension_client
+
     if service not in extensions_client:
         print('No tempest extensions client for %s' % service)
         exit(1)
