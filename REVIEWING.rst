@@ -51,6 +51,19 @@ skipped or not. Do not approve changes that depend on an API call to determine
 whether to skip or not.
 
 
+Configuration Options
+---------------------
+With the introduction of the tempest external test plugin interface we needed
+to provide a stable contract for tempest's configuration options. This means
+we can no longer simply remove a configuration option when it's no longer used.
+Patches proposed that remove options without a deprecation cycle should not
+be approved. Similarly when changing default values with configuration we need
+to similarly be careful that we don't break existing functionality. Also, when
+adding options, just as before, we need to weigh the benefit of adding an
+additional option against the complexity and maintenance overhead having it
+costs.
+
+
 Test Documentation
 ------------------
 When a new test is being added refer to the :ref:`TestDocumentation` section in
