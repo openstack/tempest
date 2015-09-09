@@ -287,10 +287,13 @@ def generate_resources(opts):
                        [CONF.object_storage.operator_role])}]
     if CONF.service_available.swift:
         spec.append({'number': 1,
-                     'prefix': 'swift_admin',
+                     'prefix': 'swift_operator',
                      'roles': (CONF.auth.tempest_roles +
-                               [CONF.object_storage.operator_role,
-                                CONF.object_storage.reseller_admin_role])})
+                               [CONF.object_storage.operator_role])})
+        spec.append({'number': 1,
+                     'prefix': 'swift_reseller_admin',
+                     'roles': (CONF.auth.tempest_roles +
+                               [CONF.object_storage.reseller_admin_role])})
     if CONF.service_available.heat:
         spec.append({'number': 1,
                      'prefix': 'stack_owner',
