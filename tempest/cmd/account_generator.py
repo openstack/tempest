@@ -90,7 +90,7 @@ from oslo_log import log as logging
 import yaml
 
 from tempest import config
-from tempest import exceptions
+from tempest import exceptions as exc
 from tempest.services.identity.v2.json import identity_client
 from tempest.services.network.json import network_client
 import tempest_lib.auth
@@ -155,11 +155,10 @@ def create_resources(opts, resources):
         for r in u.get('roles', ()):
             try:
                 role = filter(lambda r_: r_['name'] == r, roles)[0]
-                u['role_ids'] += [role['id']]
             except IndexError:
-                raise exceptions.TempestException(
-                    "Role: %s - doesn't exist" % r
-                )
+                msg = "Role: %s doesn't exist" % r
+                raise exc.InvalidConfiguration(msg)
+            u['role_ids'] += [role['id']]
     existing = [x['name'] for x in identity_admin.list_tenants()['tenants']]
     for tenant in resources['tenants']:
         if tenant not in existing:
@@ -285,17 +284,18 @@ def generate_resources(opts):
             {'number': 1,
              'prefix': 'alt',
              'roles': (CONF.auth.tempest_roles +
-                       [CONF.object_storage.operator_role])},
-            {'number': 1,
-             'prefix': 'swift_admin',
-             'roles': (CONF.auth.tempest_roles +
-                       [CONF.object_storage.operator_role,
-                        CONF.object_storage.reseller_admin_role])},
-            {'number': 1,
-             'prefix': 'stack_owner',
-             'roles': (CONF.auth.tempest_roles +
-                       [CONF.orchestration.stack_owner_role])},
-            ]
+                       [CONF.object_storage.operator_role])}]
+    if CONF.service_available.swift:
+        spec.append({'number': 1,
+                     'prefix': 'swift_admin',
+                     'roles': (CONF.auth.tempest_roles +
+                               [CONF.object_storage.operator_role,
+                                CONF.object_storage.reseller_admin_role])})
+    if CONF.service_available.heat:
+        spec.append({'number': 1,
+                     'prefix': 'stack_owner',
+                     'roles': (CONF.auth.tempest_roles +
+                               [CONF.orchestration.stack_owner_role])})
     if opts.admin:
         spec.append({
             'number': 1,
