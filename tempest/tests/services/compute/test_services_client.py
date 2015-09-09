@@ -81,14 +81,14 @@ class TestServicesClient(base.BaseComputeServiceTest):
         fake_service["service"]["status"] = "disable"
 
         self.check_service_client_function(
-            self.client.enable_service,
+            self.client.disable_service,
             'tempest.common.service_client.ServiceClient.put',
             fake_service,
             bytes_body,
             host_name="nova-conductor", binary="controller")
 
     def test_disable_service_with_str_body(self):
-        self._test_enable_service()
+        self._test_disable_service()
 
     def test_disable_service_with_bytes_body(self):
-        self._test_enable_service(bytes_body=True)
+        self._test_disable_service(bytes_body=True)
