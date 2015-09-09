@@ -37,7 +37,7 @@ class TestTenantIsolation(base.TestCase):
         self.useFixture(fake_config.ConfigFixture())
         self.stubs.Set(config, 'TempestConfigPrivate', fake_config.FakePrivate)
         self.fake_http = fake_http.fake_httplib2(return_type=200)
-        self.stubs.Set(json_token_client.TokenClientJSON, 'raw_request',
+        self.stubs.Set(json_token_client.TokenClient, 'raw_request',
                        fake_identity._fake_v2_response)
         cfg.CONF.set_default('operator_role', 'FakeRole',
                              group='object-storage')
