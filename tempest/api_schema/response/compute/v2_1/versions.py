@@ -12,6 +12,33 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+_version = {
+    'type': 'object',
+    'properties': {
+        'id': {'type': 'string'},
+        'links': {
+            'type': 'array',
+            'items': {
+                'type': 'object',
+                'properties': {
+                    'href': {'type': 'string', 'format': 'uri'},
+                    'rel': {'type': 'string'},
+                },
+                'required': ['href', 'rel'],
+                'additionalProperties': False
+            }
+        },
+        'status': {'type': 'string'},
+        'updated': {'type': 'string', 'format': 'date-time'},
+        'version': {'type': 'string'},
+        'min_version': {'type': 'string'}
+    },
+    # NOTE: version and min_version have been added since Kilo,
+    # so they should not be required.
+    'required': ['id', 'links', 'status', 'updated'],
+    'additionalProperties': False
+}
+
 list_versions = {
     'status_code': [200],
     'response_body': {
@@ -19,33 +46,7 @@ list_versions = {
         'properties': {
             'versions': {
                 'type': 'array',
-                'items': {
-                    'type': 'object',
-                    'properties': {
-                        'id': {'type': 'string'},
-                        'links': {
-                            'type': 'array',
-                            'items': {
-                                'type': 'object',
-                                'properties': {
-                                    'href': {'type': 'string',
-                                             'format': 'uri'},
-                                    'rel': {'type': 'string'},
-                                },
-                                'required': ['href', 'rel'],
-                                'additionalProperties': False
-                            }
-                        },
-                        'status': {'type': 'string'},
-                        'updated': {'type': 'string', 'format': 'date-time'},
-                        'version': {'type': 'string'},
-                        'min_version': {'type': 'string'}
-                    },
-                    # NOTE: version and min_version have been added since Kilo,
-                    # so they should not be required.
-                    'required': ['id', 'links', 'status', 'updated'],
-                    'additionalProperties': False
-                }
+                'items': _version
             }
         },
         'required': ['versions'],
