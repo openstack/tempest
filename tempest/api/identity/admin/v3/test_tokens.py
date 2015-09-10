@@ -92,7 +92,6 @@ class TokensV3TestJSON(base.BaseIdentityV3AdminTest):
 
         token_id = token_auth.response['x-subject-token']
         orig_expires_at = token_auth['token']['expires_at']
-        orig_issued_at = token_auth['token']['issued_at']
         orig_user = token_auth['token']['user']
 
         self.assertIsInstance(token_auth['token']['expires_at'], unicode)
@@ -117,7 +116,6 @@ class TokensV3TestJSON(base.BaseIdentityV3AdminTest):
         self.assertEqual(orig_expires_at, token_auth['token']['expires_at'],
                          'Expiration time should match original token')
         self.assertIsInstance(token_auth['token']['issued_at'], unicode)
-        self.assertNotEqual(orig_issued_at, token_auth['token']['issued_at'])
         self.assertEqual(set(['password', 'token']),
                          set(token_auth['token']['methods']))
         self.assertEqual(orig_user, token_auth['token']['user'],
