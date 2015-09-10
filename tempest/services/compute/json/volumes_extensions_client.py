@@ -35,7 +35,7 @@ class VolumesExtensionsClient(service_client.ServiceClient):
         resp, body = self.get(url)
         body = json.loads(body)
         self.validate_response(schema.list_volumes, resp, body)
-        return service_client.ResponseBodyList(resp, body['volumes'])
+        return service_client.ResponseBody(resp, body)
 
     def show_volume(self, volume_id):
         """Returns the details of a single volume."""
@@ -43,7 +43,7 @@ class VolumesExtensionsClient(service_client.ServiceClient):
         resp, body = self.get(url)
         body = json.loads(body)
         self.validate_response(schema.create_get_volume, resp, body)
-        return service_client.ResponseBody(resp, body['volume'])
+        return service_client.ResponseBody(resp, body)
 
     def create_volume(self, **kwargs):
         """
@@ -57,7 +57,7 @@ class VolumesExtensionsClient(service_client.ServiceClient):
         resp, body = self.post('os-volumes', post_body)
         body = json.loads(body)
         self.validate_response(schema.create_get_volume, resp, body)
-        return service_client.ResponseBody(resp, body['volume'])
+        return service_client.ResponseBody(resp, body)
 
     def delete_volume(self, volume_id):
         """Deletes the Specified Volume."""
