@@ -16,8 +16,8 @@
 import copy
 
 from oslo_log import log as logging
-from tempest_lib.services.identity.v2.token_client import TokenClientJSON
-from tempest_lib.services.identity.v3.token_client import V3TokenClientJSON
+from tempest_lib.services.identity.v2.token_client import TokenClient
+from tempest_lib.services.identity.v3.token_client import V3TokenClient
 
 from tempest.common import cred_provider
 from tempest.common import negative_rest_client
@@ -377,14 +377,14 @@ class Manager(manager.Manager):
         # API version is marked as enabled
         if CONF.identity_feature_enabled.api_v2:
             if CONF.identity.uri:
-                self.token_client = TokenClientJSON(
+                self.token_client = TokenClient(
                     CONF.identity.uri, **self.default_params)
             else:
                 msg = 'Identity v2 API enabled, but no identity.uri set'
                 raise exceptions.InvalidConfiguration(msg)
         if CONF.identity_feature_enabled.api_v3:
             if CONF.identity.uri_v3:
-                self.token_v3_client = V3TokenClientJSON(
+                self.token_v3_client = V3TokenClient(
                     CONF.identity.uri_v3, **self.default_params)
             else:
                 msg = 'Identity v3 API enabled, but no identity.uri_v3 set'
