@@ -658,6 +658,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         self.assertEqual('', port['device_id'])
         self.assertEqual('', port['device_owner'])
 
+    @test.requires_ext(service='network', extension='l3_agent_scheduler')
     @test.idempotent_id('2e788c46-fb3f-4ac9-8f82-0561555bea73')
     @test.services('compute', 'network')
     def test_router_rescheduling(self):
