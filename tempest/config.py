@@ -387,9 +387,6 @@ ComputeFeaturesGroup = [
                 default=True,
                 help='Does the test environment support creating snapshot '
                      'images of running instances?'),
-    cfg.BoolOpt('ec2_api',
-                default=True,
-                help='Does the test environment have the ec2 api running?'),
     cfg.BoolOpt('nova_cert',
                 default=True,
                 help='Does the test environment have the nova cert running?'),
@@ -1003,54 +1000,6 @@ DataProcessingFeaturesGroup = [
                 help="List of enabled data processing plugins")
 ]
 
-
-boto_group = cfg.OptGroup(name='boto',
-                          title='EC2/S3 options')
-BotoGroup = [
-    cfg.StrOpt('ec2_url',
-               default="http://localhost:8773/services/Cloud",
-               help="EC2 URL"),
-    cfg.StrOpt('s3_url',
-               default="http://localhost:8080",
-               help="S3 URL"),
-    cfg.StrOpt('aws_secret',
-               help="AWS Secret Key",
-               secret=True),
-    cfg.StrOpt('aws_access',
-               help="AWS Access Key"),
-    cfg.StrOpt('aws_zone',
-               default="nova",
-               help="AWS Zone for EC2 tests"),
-    cfg.StrOpt('s3_materials_path',
-               default="/opt/stack/devstack/files/images/"
-                       "s3-materials/cirros-0.3.0",
-               help="S3 Materials Path"),
-    cfg.StrOpt('ari_manifest',
-               default="cirros-0.3.0-x86_64-initrd.manifest.xml",
-               help="ARI Ramdisk Image manifest"),
-    cfg.StrOpt('ami_manifest',
-               default="cirros-0.3.0-x86_64-blank.img.manifest.xml",
-               help="AMI Machine Image manifest"),
-    cfg.StrOpt('aki_manifest',
-               default="cirros-0.3.0-x86_64-vmlinuz.manifest.xml",
-               help="AKI Kernel Image manifest"),
-    cfg.StrOpt('instance_type',
-               default="m1.tiny",
-               help="Instance type"),
-    cfg.IntOpt('http_socket_timeout',
-               default=3,
-               help="boto Http socket timeout"),
-    cfg.IntOpt('num_retries',
-               default=1,
-               help="boto num_retries on error"),
-    cfg.IntOpt('build_timeout',
-               default=60,
-               help="Status Change Timeout"),
-    cfg.IntOpt('build_interval',
-               default=1,
-               help="Status Change Test Interval"),
-]
-
 stress_group = cfg.OptGroup(name='stress', title='Stress Test Options')
 
 StressGroup = [
@@ -1309,7 +1258,6 @@ _opts = [
     (dashboard_group, DashboardGroup),
     (data_processing_group, DataProcessingGroup),
     (data_processing_feature_group, DataProcessingFeaturesGroup),
-    (boto_group, BotoGroup),
     (stress_group, StressGroup),
     (scenario_group, ScenarioGroup),
     (service_available_group, ServiceAvailableGroup),
@@ -1379,7 +1327,6 @@ class TempestConfigPrivate(object):
         self.data_processing = _CONF['data-processing']
         self.data_processing_feature_enabled = _CONF[
             'data-processing-feature-enabled']
-        self.boto = _CONF.boto
         self.stress = _CONF.stress
         self.scenario = _CONF.scenario
         self.service_available = _CONF.service_available

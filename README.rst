@@ -87,7 +87,7 @@ as it is simpler, and quicker to work with.
    be done with testr directly or any `testr`_ based test runner, like
    `ostestr`_. For example, from the working dir running::
 
-     $ ostestr --regex '(?!.*\[.*\bslow\b.*\])(^tempest\.(api|scenario|thirdparty))'
+     $ ostestr --regex '(?!.*\[.*\bslow\b.*\])(^tempest\.(api|scenario))'
 
    will run the same set of tests as the default gate jobs.
 
