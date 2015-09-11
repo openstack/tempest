@@ -90,7 +90,7 @@ class TestDashboardBasicOps(manager.ScenarioTest):
 
         # construct login url for dashboard, discovery accommodates non-/ web
         # root for dashboard
-        login_url = CONF.dashboard.dashboard_url + parser.login[1:]
+        login_url = parse.urljoin(CONF.dashboard.dashboard_url, parser.login)
 
         # Prepare login form request
         req = request.Request(login_url)
