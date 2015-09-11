@@ -56,6 +56,12 @@ class TestAgentsClient(base.BaseComputeServiceTest):
             'tempest.common.service_client.ServiceClient.get',
             {"agents": []},
             bytes_body)
+        self.check_service_client_function(
+            self.client.list_agents,
+            'tempest.common.service_client.ServiceClient.get',
+            {"agents": []},
+            bytes_body,
+            hypervisor="kvm")
 
     def _test_create_agent(self, bytes_body=False):
         self.check_service_client_function(
