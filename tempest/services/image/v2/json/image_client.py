@@ -212,3 +212,63 @@ class ImageClientV2(service_client.ServiceClient):
         self.expected_success(200, resp.status)
         body = json.loads(body)
         return service_client.ResponseBody(resp, body)
+
+    def list_resource_types(self):
+        url = '/v2/metadefs/resource_types'
+        resp, body = self.get(url)
+        self.expected_success(200, resp.status)
+        body = json.loads(body)
+        return service_client.ResponseBody(resp, body)
+
+    def create_namespaces(self, namespace, **kwargs):
+        params = {
+            "namespace": namespace,
+        }
+
+        for option in kwargs:
+            value = kwargs.get(option)
+            if isinstance(value, dict) or isinstance(value, tuple):
+                params.update(value)
+            else:
+                params[option] = value
+
+        data = json.dumps(params)
+        self._validate_schema(data)
+
+        resp, body = self.post('/v2/metadefs/namespaces', data)
+        self.expected_success(201, resp.status)
+        body = json.loads(body)
+        return service_client.ResponseBody(resp, body)
+
+    def show_namespaces(self, namespace):
+        url = '/v2/metadefs/namespaces/%s' % namespace
+        resp, body = self.get(url)
+        self.expected_success(200, resp.status)
+        body = json.loads(body)
+        return service_client.ResponseBody(resp, body)
+
+    def update_namespaces(self, namespace, visibility, **kwargs):
+        params = {
+            "namespace": namespace,
+            "visibility": visibility
+        }
+        for option in kwargs:
+            value = kwargs.get(option)
+            if isinstance(value, dict) or isinstance(value, tuple):
+                params.update(value)
+            else:
+                params[option] = value
+
+        data = json.dumps(params)
+        self._validate_schema(data)
+        url = '/v2/metadefs/namespaces/%s' % namespace
+        resp, body = self.put(url, body=data)
+        self.expected_success(200, resp.status)
+        body = json.loads(body)
+        return service_client.ResponseBody(resp, body)
+
+    def delete_namespaces(self, namespace):
+        url = '/v2/metadefs/namespaces/%s' % namespace
+        resp, _ = self.delete(url)
+        self.expected_success(204, resp.status)
+        return service_client.ResponseBody(resp)
