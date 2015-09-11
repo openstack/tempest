@@ -161,8 +161,8 @@ class SecurityGroupRulesTestJSON(base.BaseSecurityGroupsTest):
         self.addCleanup(self.client.delete_security_group_rule, rule2_id)
 
         # Get rules of the created Security Group
-        rules = (self.client.list_security_group_rules(securitygroup_id)
-                 ['rules'])
+        rules = self.security_groups_client.show_security_group(
+            securitygroup_id)['security_group']['rules']
         self.assertTrue(any([i for i in rules if i['id'] == rule1_id]))
         self.assertTrue(any([i for i in rules if i['id'] == rule2_id]))
 
@@ -187,6 +187,7 @@ class SecurityGroupRulesTestJSON(base.BaseSecurityGroupsTest):
         # Delete group2
         self.security_groups_client.delete_security_group(sg2_id)
         # Get rules of the Group1
-        rules = self.client.list_security_group_rules(sg1_id)['rules']
+        rules = (self.security_groups_client.show_security_group(sg1_id)
+                 ['security_group']['rules'])
         # The group1 has no rules because group2 has deleted
         self.assertEqual(0, len(rules))
