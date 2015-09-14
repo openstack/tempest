@@ -476,7 +476,7 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
                                            self.server_id,
                                            'SHELVED')
 
-        server = self.client.show_server(self.server_id)
+        server = self.client.show_server(self.server_id)['server']
         image_name = server['name'] + '-shelved'
         params = {'name': image_name}
         images = self.images_client.list_images(**params)['images']

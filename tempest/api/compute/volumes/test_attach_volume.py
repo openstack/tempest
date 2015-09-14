@@ -70,8 +70,8 @@ class AttachVolumeTestJSON(base.BaseV2ComputeTest):
             adminPass=admin_pass)
 
         # Record addresses so that we can ssh later
-        self.server['addresses'] = (
-            self.servers_client.list_addresses(self.server['id']))
+        self.server['addresses'] = self.servers_client.list_addresses(
+            self.server['id'])['addresses']
 
         # Create a volume and wait for it to become ready
         self.volume = self.volumes_client.create_volume(
@@ -84,7 +84,7 @@ class AttachVolumeTestJSON(base.BaseV2ComputeTest):
         self.attachment = self.servers_client.attach_volume(
             self.server['id'],
             volumeId=self.volume['id'],
-            device='/dev/%s' % self.device)
+            device='/dev/%s' % self.device)['volumeAttachment']
         self.volumes_client.wait_for_volume_status(self.volume['id'], 'in-use')
 
         self.addCleanup(self._detach, self.server['id'], self.volume['id'])
@@ -139,14 +139,14 @@ class AttachVolumeTestJSON(base.BaseV2ComputeTest):
         self._create_and_attach()
         # List Volume attachment of the server
         body = self.servers_client.list_volume_attachments(
-            self.server['id'])
+            self.server['id'])['volumeAttachments']
         self.assertEqual(1, len(body))
         self.assertIn(self.attachment, body)
 
         # Get Volume attachment of the server
         body = self.servers_client.get_volume_attachment(
             self.server['id'],
-            self.attachment['id'])
+            self.attachment['id'])['volumeAttachment']
         self.assertEqual(self.server['id'], body['serverId'])
         self.assertEqual(self.volume['id'], body['volumeId'])
         self.assertEqual(self.attachment['id'], body['id'])

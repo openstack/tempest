@@ -87,7 +87,7 @@ class NeutronResourcesTestJSON(base.BaseOrchestrationTest):
                 server_id = body['physical_resource_id']
                 LOG.debug('Console output for %s', server_id)
                 output = cls.servers_client.get_console_output(
-                    server_id, None).data
+                    server_id, None)['output']
                 LOG.debug(output)
             raise e
 
@@ -184,7 +184,7 @@ class NeutronResourcesTestJSON(base.BaseOrchestrationTest):
     def test_created_server(self):
         """Verifies created sever."""
         server_id = self.test_resources.get('Server')['physical_resource_id']
-        server = self.servers_client.show_server(server_id)
+        server = self.servers_client.show_server(server_id)['server']
         self.assertEqual(self.keypair_name, server['key_name'])
         self.assertEqual('ACTIVE', server['status'])
         network = server['addresses'][self.neutron_basic_template['resources'][

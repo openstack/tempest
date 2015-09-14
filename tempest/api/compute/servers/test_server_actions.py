@@ -52,8 +52,8 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
             self.__class__.server_id = server['id']
         except Exception:
             # Rebuild server if something happened to it during a test
-            self.__class__.server_id = self.rebuild_server(self.server_id,
-                                                           validatable=True)
+            self.__class__.server_id = self.rebuild_server(
+                self.server_id, validatable=True)['server']
 
     def tearDown(self):
         self.server_check_teardown()
@@ -87,7 +87,7 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
 
         if CONF.validation.run_validation:
             # Verify that the user can authenticate with the new password
-            server = self.client.show_server(self.server_id)
+            server = self.client.show_server(self.server_id)['server']
             linux_client = remote_client.RemoteClient(
                 self.get_server_ip(server),
                 self.ssh_user,
@@ -97,7 +97,7 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
     def _test_reboot_server(self, reboot_type):
         if CONF.validation.run_validation:
             # Get the time the server was last rebooted,
-            server = self.client.show_server(self.server_id)
+            server = self.client.show_server(self.server_id)['server']
             linux_client = remote_client.RemoteClient(
                 self.get_server_ip(server),
                 self.ssh_user,
@@ -132,7 +132,8 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         self._test_reboot_server('SOFT')
 
     def _rebuild_server_and_check(self, image_ref):
-        rebuilt_server = self.client.rebuild_server(self.server_id, image_ref)
+        rebuilt_server = (self.client.rebuild_server(self.server_id, image_ref)
+                          ['server'])
         waiters.wait_for_server_status(self.client, self.server_id, 'ACTIVE')
         msg = ('Server was not rebuilt to the original image. '
                'The original image: {0}. The current image: {1}'
@@ -148,12 +149,13 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         personality = [{'path': 'rebuild.txt',
                        'contents': base64.b64encode(file_contents)}]
         password = 'rebuildPassw0rd'
-        rebuilt_server = self.client.rebuild_server(self.server_id,
-                                                    self.image_ref_alt,
-                                                    name=new_name,
-                                                    metadata=meta,
-                                                    personality=personality,
-                                                    adminPass=password)
+        rebuilt_server = self.client.rebuild_server(
+            self.server_id,
+            self.image_ref_alt,
+            name=new_name,
+            metadata=meta,
+            personality=personality,
+            adminPass=password)['server']
 
         # If the server was rebuilt on a different image, restore it to the
         # original image once the test ends
@@ -169,7 +171,7 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         # Verify the server properties after the rebuild completes
         waiters.wait_for_server_status(self.client,
                                        rebuilt_server['id'], 'ACTIVE')
-        server = self.client.show_server(rebuilt_server['id'])
+        server = self.client.show_server(rebuilt_server['id'])['server']
         rebuilt_image_id = server['image']['id']
         self.assertTrue(self.image_ref_alt.endswith(rebuilt_image_id))
         self.assertEqual(new_name, server['name'])
@@ -187,13 +189,14 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
     def test_rebuild_server_in_stop_state(self):
         # The server in stop state  should be rebuilt using the provided
         # image and remain in SHUTOFF state
-        server = self.client.show_server(self.server_id)
+        server = self.client.show_server(self.server_id)['server']
         old_image = server['image']['id']
         new_image = (self.image_ref_alt
                      if old_image == self.image_ref else self.image_ref)
         self.client.stop_server(self.server_id)
         waiters.wait_for_server_status(self.client, self.server_id, 'SHUTOFF')
-        rebuilt_server = self.client.rebuild_server(self.server_id, new_image)
+        rebuilt_server = (self.client.rebuild_server(self.server_id, new_image)
+                          ['server'])
         # If the server was rebuilt on a different image, restore it to the
         # original image once the test ends
         if self.image_ref_alt != self.image_ref:
@@ -208,7 +211,7 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         # Verify the server properties after the rebuild completes
         waiters.wait_for_server_status(self.client,
                                        rebuilt_server['id'], 'SHUTOFF')
-        server = self.client.show_server(rebuilt_server['id'])
+        server = self.client.show_server(rebuilt_server['id'])['server']
         rebuilt_image_id = server['image']['id']
         self.assertEqual(new_image, rebuilt_image_id)
 
@@ -232,7 +235,7 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         waiters.wait_for_server_status(self.client, self.server_id,
                                        expected_status)
 
-        server = self.client.show_server(self.server_id)
+        server = self.client.show_server(self.server_id)['server']
         self.assertEqual(self.flavor_ref_alt, server['flavor']['id'])
 
         if stop:
@@ -269,7 +272,7 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         self.client.revert_resize_server(self.server_id)
         waiters.wait_for_server_status(self.client, self.server_id, 'ACTIVE')
 
-        server = self.client.show_server(self.server_id)
+        server = self.client.show_server(self.server_id)['server']
         self.assertEqual(self.flavor_ref, server['flavor']['id'])
 
     @test.idempotent_id('b963d4f1-94b3-4c40-9e97-7b583f46e470')
@@ -358,7 +361,7 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
 
     def _get_output(self):
         output = self.client.get_console_output(
-            self.server_id, 10).data
+            self.server_id, 10)['output']
         self.assertTrue(output, "Console output was empty.")
         lines = len(output.split('\n'))
         self.assertEqual(lines, 10)
@@ -387,7 +390,7 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
 
         def _check_full_length_console_log():
             output = self.client.get_console_output(server['id'],
-                                                    None).data
+                                                    None)['output']
             self.assertTrue(output, "Console output was empty.")
             lines = len(output.split('\n'))
 
@@ -453,7 +456,7 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
             waiters.wait_for_server_status(self.client, self.server_id,
                                            'SHELVED_OFFLOADED')
 
-        server = self.client.show_server(self.server_id)
+        server = self.client.show_server(self.server_id)['server']
         image_name = server['name'] + '-shelved'
         params = {'name': image_name}
         images = self.images_client.list_images(**params)['images']
@@ -475,7 +478,7 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         # Lock the server,try server stop(exceptions throw),unlock it and retry
         self.client.lock_server(self.server_id)
         self.addCleanup(self.client.unlock_server, self.server_id)
-        server = self.client.show_server(self.server_id)
+        server = self.client.show_server(self.server_id)['server']
         self.assertEqual(server['status'], 'ACTIVE')
         # Locked server is not allowed to be stopped by non-admin user
         self.assertRaises(lib_exc.Conflict,
@@ -501,7 +504,7 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         console_types = ['novnc', 'xvpvnc']
         for console_type in console_types:
             body = self.client.get_vnc_console(self.server_id,
-                                               console_type)
+                                               console_type)['console']
             self.assertEqual(console_type, body['type'])
             self.assertNotEqual('', body['url'])
             self._validate_url(body['url'])

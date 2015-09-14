@@ -40,7 +40,7 @@ class FixedIPsNegativeTestJson(base.BaseV2ComputeAdminTest):
     def resource_setup(cls):
         super(FixedIPsNegativeTestJson, cls).resource_setup()
         server = cls.create_test_server(wait_until='ACTIVE')
-        server = cls.servers_client.show_server(server['id'])
+        server = cls.servers_client.show_server(server['id'])['server']
         for ip_set in server['addresses']:
             for ip in server['addresses'][ip_set]:
                 if ip['OS-EXT-IPS:type'] == 'fixed':

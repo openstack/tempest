@@ -457,7 +457,7 @@ class JavelinCheck(unittest.TestCase):
                 found,
                 "Couldn't find expected server %s" % server['name'])
 
-            found = client.servers.show_server(found['id'])
+            found = client.servers.show_server(found['id'])['server']
             # validate neutron is enabled and ironic disabled:
             if (CONF.service_available.neutron and
                     not CONF.baremetal.driver_enabled):
@@ -869,7 +869,7 @@ def create_servers(servers):
             kwargs['networks'] = [{'uuid': get_net_id(network)}
                                   for network in server['networks']]
         body = client.servers.create_server(
-            server['name'], image_id, flavor_id, **kwargs)
+            server['name'], image_id, flavor_id, **kwargs)['server']
         server_id = body['id']
         client.servers.wait_for_server_status(server_id, 'ACTIVE')
         # create security group(s) after server spawning

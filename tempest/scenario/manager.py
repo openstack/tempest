@@ -179,7 +179,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
         LOG.debug("Creating a server (name: %s, image: %s, flavor: %s)",
                   name, image, flavor)
         server = self.servers_client.create_server(name, image, flavor,
-                                                   **create_kwargs)
+                                                   **create_kwargs)['server']
         if wait_on_delete:
             self.addCleanup(waiters.wait_for_server_termination,
                             self.servers_client,
@@ -197,7 +197,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
         # The instance retrieved on creation is missing network
         # details, necessitating retrieval after it becomes active to
         # ensure correct details.
-        server = self.servers_client.show_server(server['id'])
+        server = self.servers_client.show_server(server['id'])['server']
         self.assertEqual(server['name'], name)
         return server
 
@@ -400,7 +400,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
             servers = servers['servers']
         for server in servers:
             console_output = self.servers_client.get_console_output(
-                server['id'], length=None).data
+                server['id'], length=None)['output']
             LOG.debug('Console output for %s\nbody=\n%s',
                       server['id'], console_output)
 
@@ -450,7 +450,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
     def nova_volume_attach(self):
         volume = self.servers_client.attach_volume(
             self.server['id'], volumeId=self.volume['id'], device='/dev/%s'
-            % CONF.compute.volume_device_name)
+            % CONF.compute.volume_device_name)['volumeAttachment']
         self.assertEqual(self.volume['id'], volume['id'])
         self.volumes_client.wait_for_volume_status(volume['id'], 'in-use')
         # Refresh the volume after the attachment
@@ -1278,7 +1278,8 @@ class BaremetalScenarioTest(ScenarioTest):
         waiters.wait_for_server_status(self.servers_client,
                                        self.instance['id'], 'ACTIVE')
         self.node = self.get_node(instance_id=self.instance['id'])
-        self.instance = self.servers_client.show_server(self.instance['id'])
+        self.instance = (self.servers_client.show_server(self.instance['id'])
+                         ['server'])
 
     def terminate_instance(self):
         self.servers_client.delete_server(self.instance['id'])

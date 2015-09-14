@@ -64,7 +64,8 @@ class ServersTestJSON(base.BaseV2ComputeTest):
             personality=personality,
             disk_config=disk_config)
         cls.password = cls.server_initial['adminPass']
-        cls.server = cls.client.show_server(cls.server_initial['id'])
+        cls.server = (cls.client.show_server(cls.server_initial['id'])
+                      ['server'])
 
     def _create_net_subnet_ret_net_from_cidr(self, cidr):
         name_net = data_utils.rand_name(self.__class__.__name__)
@@ -185,7 +186,8 @@ class ServersTestJSON(base.BaseV2ComputeTest):
 
         self.addCleanup(cleanup_server)
 
-        addresses = self.client.list_addresses(server_multi_nics['id'])
+        addresses = (self.client.list_addresses(server_multi_nics['id'])
+                     ['addresses'])
 
         # We can't predict the ip addresses assigned to the server on networks.
         # Sometimes the assigned addresses are ['19.80.0.2', '19.86.0.2'], at
@@ -226,7 +228,8 @@ class ServersTestJSON(base.BaseV2ComputeTest):
 
         self.addCleanup(cleanup_server)
 
-        addresses = self.client.list_addresses(server_multi_nics['id'])
+        addresses = (self.client.list_addresses(server_multi_nics['id'])
+                     ['addresses'])
 
         addr = [addresses[net1['network']['name']][0]['addr'],
                 addresses[net2['network']['name']][0]['addr'],
@@ -315,7 +318,7 @@ class ServersWithSpecificFlavorTestJSON(base.BaseV2ComputeAdminTest):
 
         # Get partition number of server without extra specs.
         server_no_eph_disk = self.client.show_server(
-            server_no_eph_disk['id'])
+            server_no_eph_disk['id'])['server']
         linux_client = remote_client.RemoteClient(
             self.get_server_ip(server_no_eph_disk),
             self.ssh_user,
@@ -333,7 +336,7 @@ class ServersWithSpecificFlavorTestJSON(base.BaseV2ComputeAdminTest):
             flavor=flavor_with_eph_disk_id)
 
         server_with_eph_disk = self.client.show_server(
-            server_with_eph_disk['id'])
+            server_with_eph_disk['id'])['server']
         linux_client = remote_client.RemoteClient(
             self.get_server_ip(server_with_eph_disk),
             self.ssh_user,

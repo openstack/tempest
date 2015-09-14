@@ -223,5 +223,5 @@ class AggregatesAdminTestJSON(base.BaseV2ComputeAdminTest):
         server = self.create_test_server(name=server_name,
                                          availability_zone=az_name,
                                          wait_until='ACTIVE')
-        body = admin_servers_client.show_server(server['id'])
+        body = admin_servers_client.show_server(server['id'])['server']
         self.assertEqual(self.host, body[self._host_key])

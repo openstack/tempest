@@ -30,7 +30,7 @@ class ServerCreateDestroyTest(stressaction.StressAction):
         name = data_utils.rand_name("instance")
         self.logger.info("creating %s" % name)
         server = self.manager.servers_client.create_server(
-            name, self.image, self.flavor)
+            name, self.image, self.flavor)['server']
         server_id = server['id']
         waiters.wait_for_server_status(self.manager.servers_client, server_id,
                                        'ACTIVE')

@@ -64,7 +64,7 @@ class AuthorizationTestJSON(base.BaseV2ComputeTest):
     def resource_setup(cls):
         super(AuthorizationTestJSON, cls).resource_setup()
         server = cls.create_test_server(wait_until='ACTIVE')
-        cls.server = cls.client.show_server(server['id'])
+        cls.server = cls.client.show_server(server['id'])['server']
 
         name = data_utils.rand_name('image')
         body = cls.glance_client.create_image(name=name,
