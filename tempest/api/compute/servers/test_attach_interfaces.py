@@ -186,7 +186,7 @@ class AttachInterfacesTestJSON(base.BaseV2ComputeTest):
         self.assertTrue(interface_count > 0)
         self._check_interface(ifs[0])
         network_id = ifs[0]['net_id']
-        self.client.add_fixed_ip(server['id'], networkId=network_id)
+        self.servers_client.add_fixed_ip(server['id'], networkId=network_id)
         # Remove the fixed IP from server.
         server_detail = self.os.servers_client.show_server(
             server['id'])['server']
@@ -199,4 +199,4 @@ class AttachInterfacesTestJSON(base.BaseV2ComputeTest):
                     break
             if fixed_ip is not None:
                 break
-        self.client.remove_fixed_ip(server['id'], address=fixed_ip)
+        self.servers_client.remove_fixed_ip(server['id'], address=fixed_ip)
