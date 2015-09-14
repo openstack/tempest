@@ -15,10 +15,18 @@
 
 from tempest.api.volume import base
 from tempest.common.utils import data_utils
+from tempest import config
 from tempest import test
+
+CONF = config.CONF
 
 
 class SnapshotsActionsV2Test(base.BaseVolumeAdminTest):
+    @classmethod
+    def skip_checks(cls):
+        super(SnapshotsActionsV2Test, cls).skip_checks()
+        if not CONF.volume_feature_enabled.snapshot:
+            raise cls.skipException("Cinder snapshot feature disabled")
 
     @classmethod
     def setup_clients(cls):
