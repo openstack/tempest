@@ -61,7 +61,7 @@ class BaseVolumeTest(tempest.test.BaseTestCase):
     def setup_clients(cls):
         super(BaseVolumeTest, cls).setup_clients()
         cls.servers_client = cls.os.servers_client
-        cls.networks_client = cls.os.networks_client
+        cls.compute_networks_client = cls.os.compute_networks_client
         cls.images_client = cls.os.images_client
 
         if cls._api_version == 1:

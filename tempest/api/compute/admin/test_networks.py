@@ -32,7 +32,7 @@ class NetworksTest(base.BaseComputeAdminTest):
     @classmethod
     def setup_clients(cls):
         super(NetworksTest, cls).setup_clients()
-        cls.client = cls.os_adm.networks_client
+        cls.client = cls.os_adm.compute_networks_client
 
     @test.idempotent_id('d206d211-8912-486f-86e2-a9d090d1f416')
     def test_get_network(self):

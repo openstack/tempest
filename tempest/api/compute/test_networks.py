@@ -29,7 +29,7 @@ class ComputeNetworksTest(base.BaseV2ComputeTest):
     @classmethod
     def setup_clients(cls):
         super(ComputeNetworksTest, cls).setup_clients()
-        cls.client = cls.os.networks_client
+        cls.client = cls.os.compute_networks_client
 
     @test.idempotent_id('3fe07175-312e-49a5-a623-5f52eeada4c2')
     def test_list_networks(self):
