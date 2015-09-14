@@ -56,18 +56,24 @@ class TelemetryAlarmingAPITestJSON(base.BaseTelemetryTest):
                     'comparison_operator': 'eq',
                     'threshold': 70.0,
                     'period': 60}
-        alarm_name = data_utils.rand_name('telemetry-alarm-update')
+        alarm_name_updated = data_utils.rand_name('telemetry-alarm-update')
         body = self.telemetry_client.update_alarm(
             alarm_id,
             threshold_rule=new_rule,
-            name=alarm_name,
+            name=alarm_name_updated,
             type='threshold')
-        self.assertEqual(alarm_name, body['name'])
+        self.assertEqual(alarm_name_updated, body['name'])
         self.assertDictContainsSubset(new_rule, body['threshold_rule'])
         # Get and verify details of an alarm after update
         body = self.telemetry_client.show_alarm(alarm_id)
-        self.assertEqual(alarm_name, body['name'])
+        self.assertEqual(alarm_name_updated, body['name'])
         self.assertDictContainsSubset(new_rule, body['threshold_rule'])
+        # Get history for the alarm and verify the same
+        body = self.telemetry_client.show_alarm_history(alarm_id)
+        self.assertEqual("rule change", body[0]['type'])
+        self.assertIn(alarm_name_updated, body[0]['detail'])
+        self.assertEqual("creation", body[1]['type'])
+        self.assertIn(alarm_name, body[1]['detail'])
         # Delete alarm and verify if deleted
         self.telemetry_client.delete_alarm(alarm_id)
         self.assertRaises(lib_exc.NotFound,
