@@ -1143,7 +1143,7 @@ baremetal_group = cfg.OptGroup(name='baremetal',
                                title='Baremetal provisioning service options',
                                help='When enabling baremetal tests, Nova '
                                     'must be configured to use the Ironic '
-                                    'driver. The following paremeters for the '
+                                    'driver. The following parameters for the '
                                     '[compute] section must be disabled: '
                                     'console_output, interface_attach, '
                                     'live_migration, pause, rescue, resize '
