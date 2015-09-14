@@ -12,8 +12,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib.tests import fake_auth_provider
+
 from tempest.services.compute.json import limits_client
-from tempest.tests import fake_auth_provider
 from tempest.tests.services.compute import base
 
 

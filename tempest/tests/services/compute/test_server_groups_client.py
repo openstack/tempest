@@ -15,9 +15,9 @@
 import httplib2
 
 from oslotest import mockpatch
+from tempest_lib.tests import fake_auth_provider
 
 from tempest.services.compute.json import server_groups_client
-from tempest.tests import fake_auth_provider
 from tempest.tests.services.compute import base
 
 

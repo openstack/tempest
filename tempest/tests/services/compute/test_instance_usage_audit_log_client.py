@@ -14,8 +14,9 @@
 
 import datetime
 
+from tempest_lib.tests import fake_auth_provider
+
 from tempest.services.compute.json import instance_usage_audit_log_client
-from tempest.tests import fake_auth_provider
 from tempest.tests.services.compute import base
 
 
