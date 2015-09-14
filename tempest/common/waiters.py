@@ -183,6 +183,27 @@ def wait_for_volume_status(client, volume_id, status):
             raise exceptions.TimeoutException(message)
 
 
+def wait_for_snapshot_status(client, snapshot_id, status):
+    """Waits for a Snapshot to reach a given status."""
+    body = client.show_snapshot(snapshot_id)['snapshot']
+    snapshot_status = body['status']
+    start = int(time.time())
+
+    while snapshot_status != status:
+        time.sleep(client.build_interval)
+        body = client.show_snapshot(snapshot_id)['snapshot']
+        snapshot_status = body['status']
+        if snapshot_status == 'error':
+            raise exceptions.SnapshotBuildErrorException(
+                snapshot_id=snapshot_id)
+        if int(time.time()) - start >= client.build_timeout:
+            message = ('Snapshot %s failed to reach %s status (current %s) '
+                       'within the required time (%s s).' %
+                       (snapshot_id, status, snapshot_status,
+                        client.build_timeout))
+            raise exceptions.TimeoutException(message)
+
+
 def wait_for_bm_node_status(client, node_id, attr, status):
     """Waits for a baremetal node attribute to reach given status.
 

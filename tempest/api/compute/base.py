@@ -75,6 +75,7 @@ class BaseComputeTest(tempest.test.BaseTestCase):
         cls.networks_client = cls.os.networks_client
         cls.limits_client = cls.os.limits_client
         cls.volumes_extensions_client = cls.os.volumes_extensions_client
+        cls.snapshots_extensions_client = cls.os.snapshots_extensions_client
         cls.interfaces_client = cls.os.interfaces_client
         cls.fixed_ips_client = cls.os.fixed_ips_client
         cls.availability_zone_client = cls.os.availability_zone_client
