@@ -48,12 +48,12 @@ class RemoteClient(object):
                                      ssh_timeout, pkey=pkey,
                                      channel_timeout=connect_timeout)
 
-    def exec_command(self, cmd):
+    def exec_command(self, cmd, get_pty=False):
         # Shell options below add more clearness on failures,
         # path is extended for some non-cirros guest oses (centos7)
         cmd = CONF.compute.ssh_shell_prologue + " " + cmd
         LOG.debug("Remote command: %s" % cmd)
-        return self.ssh_client.exec_command(cmd)
+        return self.ssh_client.exec_command(cmd, get_pty=get_pty)
 
     def get_kernel_modules(self):
         """
@@ -244,7 +244,8 @@ class RemoteClient(object):
 
     def get_nic_name(self, address):
         cmd = "ip -o addr | awk '/%s/ {print $2}'" % address
-        return self.exec_command(cmd)
+        nic = self.exec_command(cmd)
+        return nic.strip().strip(":").lower()
 
     def get_ip_list(self):
         cmd = "ip address"
@@ -282,7 +283,6 @@ class RemoteClient(object):
         """Renews DHCP lease via udhcpc client. """
         file_path = '/var/run/udhcpc.'
         nic_name = self.get_nic_name(fixed_ip)
-        nic_name = nic_name.strip().lower()
         pid = self.exec_command('cat {path}{nic}.pid'.
                                 format(path=file_path, nic=nic_name))
         pid = pid.strip()
