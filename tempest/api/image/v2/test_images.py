@@ -172,7 +172,7 @@ class ListImagesTest(base.BaseV2ImageTest):
                 self.assertEqual(params[key], image[key], msg)
 
     @test.idempotent_id('1e341d7a-90a9-494c-b143-2cdf2aeb6aee')
-    def test_index_no_params(self):
+    def test_list_no_params(self):
         # Simple test to see all fixture images returned
         images_list = self.client.list_images()['images']
         image_list = map(lambda x: x['id'], images_list)
