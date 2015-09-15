@@ -245,7 +245,6 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
             ],
             'key_name': tenant.keypair['name'],
             'security_groups': security_groups_names,
-            'tenant_id': tenant.creds.tenant_id,
             'network_client': tenant.manager.network_client
         }
         server = self.create_server(name=name, create_kwargs=create_kwargs)
