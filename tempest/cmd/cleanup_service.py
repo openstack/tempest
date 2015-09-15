@@ -83,7 +83,7 @@ def init_conf():
 
 def _get_network_id(net_name, tenant_name):
     am = clients.AdminManager()
-    net_cl = am.network_client
+    net_cl = am.networks_client
     id_cl = am.identity_client
 
     networks = net_cl.list_networks()
@@ -381,6 +381,7 @@ class NetworkService(BaseService):
     def __init__(self, manager, **kwargs):
         super(NetworkService, self).__init__(kwargs)
         self.client = manager.network_client
+        self.networks_client = manager.networks_client
 
     def _filter_by_conf_networks(self, item_list):
         if not item_list or not all(('network_id' in i for i in item_list)):
@@ -390,7 +391,7 @@ class NetworkService(BaseService):
                 not in CONF_NETWORKS]
 
     def list(self):
-        client = self.client
+        client = self.networks_client
         networks = client.list_networks(**self.tenant_filter)
         networks = networks['networks']
         # filter out networks declared in tempest.conf
@@ -401,7 +402,7 @@ class NetworkService(BaseService):
         return networks
 
     def delete(self):
-        client = self.client
+        client = self.networks_client
         networks = self.list()
         for n in networks:
             try:

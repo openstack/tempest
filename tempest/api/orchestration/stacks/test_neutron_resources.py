@@ -118,7 +118,7 @@ class NeutronResourcesTestJSON(base.BaseOrchestrationTest):
     def test_created_network(self):
         """Verifies created network."""
         network_id = self.test_resources.get('Network')['physical_resource_id']
-        body = self.network_client.show_network(network_id)
+        body = self.networks_client.show_network(network_id)
         network = body['network']
         self.assertIsInstance(network, dict)
         self.assertEqual(network_id, network['id'])

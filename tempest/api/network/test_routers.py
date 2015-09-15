@@ -188,7 +188,7 @@ class RoutersTest(base.BaseRouterTest):
         gw_port = list_body['ports'][0]
         fixed_ips = gw_port['fixed_ips']
         self.assertGreaterEqual(len(fixed_ips), 1)
-        public_net_body = self.admin_client.show_network(
+        public_net_body = self.admin_networks_client.show_network(
             CONF.network.public_network_id)
         public_subnet_id = public_net_body['network']['subnets'][0]
         self.assertIn(public_subnet_id,
