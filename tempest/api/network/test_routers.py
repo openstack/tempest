@@ -85,21 +85,21 @@ class RoutersTest(base.BaseRouterTest):
         self.assertEqual(show_body['router']['name'], updated_name)
 
     @test.idempotent_id('e54dd3a3-4352-4921-b09d-44369ae17397')
-    def test_create_router_setting_tenant_id(self):
-        # Test creating router from admin user setting tenant_id.
-        test_tenant = data_utils.rand_name('test_tenant_')
-        test_description = data_utils.rand_name('desc_')
-        tenant = self.identity_admin_client.create_tenant(
-            name=test_tenant, description=test_description)
-        tenant_id = tenant['id']
-        self.addCleanup(self.identity_admin_client.delete_tenant, tenant_id)
+    def test_create_router_setting_project_id(self):
+        # Test creating router from admin user setting project_id.
+        project = data_utils.rand_name('test_tenant_')
+        description = data_utils.rand_name('desc_')
+        project = self.identity_utils.create_project(name=project,
+                                                     description=description)
+        project_id = project['id']
+        self.addCleanup(self.identity_utils.delete_project, project_id)
 
         name = data_utils.rand_name('router-')
         create_body = self.admin_client.create_router(name,
-                                                      tenant_id=tenant_id)
+                                                      tenant_id=project_id)
         self.addCleanup(self.admin_client.delete_router,
                         create_body['router']['id'])
-        self.assertEqual(tenant_id, create_body['router']['tenant_id'])
+        self.assertEqual(project_id, create_body['router']['tenant_id'])
 
     @test.idempotent_id('847257cc-6afd-4154-b8fb-af49f5670ce8')
     @test.requires_ext(extension='ext-gw-mode', service='network')

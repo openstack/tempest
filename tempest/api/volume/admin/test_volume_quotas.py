@@ -98,21 +98,22 @@ class BaseVolumeQuotasAdminV2TestJSON(base.BaseVolumeAdminTest):
 
     @test.idempotent_id('874b35a9-51f1-4258-bec5-cd561b6690d3')
     def test_delete_quota(self):
-        # Admin can delete the resource quota set for a tenant
-        tenant_name = data_utils.rand_name('quota_tenant')
-        identity_client = self.os_adm.identity_client
-        tenant = identity_client.create_tenant(tenant_name)
-        tenant_id = tenant['id']
-        self.addCleanup(identity_client.delete_tenant, tenant_id)
+        # Admin can delete the resource quota set for a project
+        project_name = data_utils.rand_name('quota_tenant')
+        description = data_utils.rand_name('desc_')
+        project = self.identity_utils.create_project(project_name,
+                                                     description=description)
+        project_id = project['id']
+        self.addCleanup(self.identity_utils.delete_project, project_id)
         quota_set_default = self.quotas_client.show_default_quota_set(
-            tenant_id)['quota_set']
+            project_id)['quota_set']
         volume_default = quota_set_default['volumes']
 
-        self.quotas_client.update_quota_set(tenant_id,
+        self.quotas_client.update_quota_set(project_id,
                                             volumes=(int(volume_default) + 5))
 
-        self.quotas_client.delete_quota_set(tenant_id)
-        quota_set_new = (self.quotas_client.show_quota_set(tenant_id)
+        self.quotas_client.delete_quota_set(project_id)
+        quota_set_new = (self.quotas_client.show_quota_set(project_id)
                          ['quota_set'])
         self.assertEqual(volume_default, quota_set_new['volumes'])
 

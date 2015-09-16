@@ -51,18 +51,17 @@ class QuotasTest(base.BaseAdminNetworkTest):
 
     def _check_quotas(self, new_quotas):
         # Add a tenant to conduct the test
-        test_tenant = data_utils.rand_name('test_tenant_')
-        test_description = data_utils.rand_name('desc_')
-        tenant = self.identity_admin_client.create_tenant(
-            name=test_tenant,
-            description=test_description)
-        tenant_id = tenant['id']
-        self.addCleanup(self.identity_admin_client.delete_tenant, tenant_id)
+        project = data_utils.rand_name('test_project_')
+        description = data_utils.rand_name('desc_')
+        project = self.identity_utils.create_project(name=project,
+                                                     description=description)
+        project_id = project['id']
+        self.addCleanup(self.identity_utils.delete_project, project_id)
 
         # Change quotas for tenant
-        quota_set = self.admin_client.update_quotas(tenant_id,
+        quota_set = self.admin_client.update_quotas(project_id,
                                                     **new_quotas)['quota']
-        self.addCleanup(self.admin_client.reset_quotas, tenant_id)
+        self.addCleanup(self.admin_client.reset_quotas, project_id)
         for key, value in six.iteritems(new_quotas):
             self.assertEqual(value, quota_set[key])
 
@@ -70,21 +69,21 @@ class QuotasTest(base.BaseAdminNetworkTest):
         non_default_quotas = self.admin_client.list_quotas()
         found = False
         for qs in non_default_quotas['quotas']:
-            if qs['tenant_id'] == tenant_id:
+            if qs['tenant_id'] == project_id:
                 found = True
         self.assertTrue(found)
 
         # Confirm from API quotas were changed as requested for tenant
-        quota_set = self.admin_client.show_quotas(tenant_id)
+        quota_set = self.admin_client.show_quotas(project_id)
         quota_set = quota_set['quota']
         for key, value in six.iteritems(new_quotas):
             self.assertEqual(value, quota_set[key])
 
         # Reset quotas to default and confirm
-        self.admin_client.reset_quotas(tenant_id)
+        self.admin_client.reset_quotas(project_id)
         non_default_quotas = self.admin_client.list_quotas()
         for q in non_default_quotas['quotas']:
-            self.assertNotEqual(tenant_id, q['tenant_id'])
+            self.assertNotEqual(project_id, q['tenant_id'])
 
     @test.idempotent_id('2390f766-836d-40ef-9aeb-e810d78207fb')
     def test_quotas(self):
