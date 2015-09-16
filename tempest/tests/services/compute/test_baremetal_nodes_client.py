@@ -14,8 +14,9 @@
 
 import copy
 
+from tempest_lib.tests import fake_auth_provider
+
 from tempest.services.compute.json import baremetal_nodes_client
-from tempest.tests import fake_auth_provider
 from tempest.tests.services.compute import base
 
 
