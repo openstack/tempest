@@ -70,7 +70,7 @@ class BaseComputeTest(tempest.test.BaseTestCase):
         cls.security_groups_client = cls.os.security_groups_client
         cls.quotas_client = cls.os.quotas_client
         cls.quota_classes_client = cls.os.quota_classes_client
-        cls.networks_client = cls.os.networks_client
+        cls.compute_networks_client = cls.os.compute_networks_client
         cls.limits_client = cls.os.limits_client
         cls.volumes_extensions_client = cls.os.volumes_extensions_client
         cls.snapshots_extensions_client = cls.os.snapshots_extensions_client

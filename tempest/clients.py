@@ -59,7 +59,8 @@ from tempest.services.compute.json.keypairs_client import KeyPairsClient
 from tempest.services.compute.json.limits_client import LimitsClient
 from tempest.services.compute.json.migrations_client import \
     MigrationsClient
-from tempest.services.compute.json.networks_client import NetworksClient
+from tempest.services.compute.json.networks_client import NetworksClient \
+    as ComputeNetworksClient
 from tempest.services.compute.json.quota_classes_client import \
     QuotaClassesClient
 from tempest.services.compute.json.quotas_client import QuotasClient
@@ -262,7 +263,8 @@ class Manager(manager.Manager):
         params.update(self.default_params)
 
         self.agents_client = AgentsClient(self.auth_provider, **params)
-        self.networks_client = NetworksClient(self.auth_provider, **params)
+        self.compute_networks_client = ComputeNetworksClient(
+            self.auth_provider, **params)
         self.migrations_client = MigrationsClient(self.auth_provider,
                                                   **params)
         self.security_group_default_rules_client = (

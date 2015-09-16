@@ -569,7 +569,7 @@ class BaseTestCase(testtools.testcase.WithAttributes,
         :return: network dict including 'id' and 'name'
         """
         # Make sure isolated_creds exists and get a network client
-        networks_client = cls.get_client_manager().networks_client
+        networks_client = cls.get_client_manager().compute_networks_client
         cred_provider = cls._get_credentials_provider()
         # In case of nova network, isolated tenants are not able to list the
         # network configured in fixed_network_name, even if the can use it
@@ -578,7 +578,8 @@ class BaseTestCase(testtools.testcase.WithAttributes,
         if (not CONF.service_available.neutron and
                 credentials.is_admin_available()):
             admin_creds = cred_provider.get_admin_creds()
-            networks_client = clients.Manager(admin_creds).networks_client
+            admin_manager = clients.Manager(admin_creds)
+            networks_client = admin_manager.compute_networks_client
         return fixed_network.get_tenant_network(cred_provider,
                                                 networks_client)
 
