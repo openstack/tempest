@@ -49,8 +49,8 @@ class QuotasAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
                           self.demo_tenant_id,
                           ram=0)
 
-    # TODO(afazekas): Add dedicated tenant to the skiped quota tests
-    # it can be moved into the setUpClass as well
+    # TODO(afazekas): Add dedicated tenant to the skipped quota tests.
+    # It can be moved into the setUpClass as well.
     @test.attr(type=['negative'])
     @test.idempotent_id('91058876-9947-4807-9f22-f6eb17140d9b')
     def test_create_server_when_cpu_quota_is_full(self):
