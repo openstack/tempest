@@ -188,6 +188,12 @@ IdentityFeatureGroup = [
     cfg.BoolOpt('api_v3',
                 default=True,
                 help='Is the v3 identity API enabled'),
+    cfg.ListOpt('api_extensions',
+                default=['all'],
+                help="A list of enabled identity extensions with a special "
+                     "entry all which indicates every extension is enabled. "
+                     "Empty list indicates all extensions are disabled. "
+                     "To get the list of extensions run: 'keystone discover'")
 ]
 
 compute_group = cfg.OptGroup(name='compute',
