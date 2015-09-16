@@ -17,7 +17,6 @@ import random
 import six
 
 from tempest.services.baremetal.v1.json import baremetal_client
-from tempest.services.compute.json import agents_client
 from tempest.services.compute.json import aggregates_client
 from tempest.services.compute.json import availability_zone_client
 from tempest.services.compute.json import certificates_client
@@ -109,7 +108,6 @@ class TestServiceClient(base.TestCase):
     def test_service_client_creations_with_specified_args(self, mock_init):
         test_clients = [
             baremetal_client.BaremetalClient,
-            agents_client.AgentsClient,
             aggregates_client.AggregatesClient,
             availability_zone_client.AvailabilityZoneClient,
             certificates_client.CertificatesClient,
