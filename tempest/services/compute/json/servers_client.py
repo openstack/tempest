@@ -457,3 +457,11 @@ class ServersClient(service_client.ServiceClient):
         return self.action(server_id, "os-getVNCConsole",
                            schema.get_vnc_console,
                            type=console_type)
+
+    def add_fixed_ip(self, server_id, **kwargs):
+        """Add a fixed IP to input server instance."""
+        return self.action(server_id, 'addFixedIp', **kwargs)
+
+    def remove_fixed_ip(self, server_id, **kwargs):
+        """Remove input fixed IP from input server instance."""
+        return self.action(server_id, 'removeFixedIp', **kwargs)

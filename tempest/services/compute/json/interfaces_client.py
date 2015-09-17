@@ -16,7 +16,6 @@
 from oslo_serialization import jsonutils as json
 
 from tempest.api_schema.response.compute.v2_1 import interfaces as schema
-from tempest.api_schema.response.compute.v2_1 import servers as servers_schema
 from tempest.common import service_client
 
 
@@ -48,22 +47,4 @@ class InterfacesClient(service_client.ServiceClient):
         resp, body = self.delete('servers/%s/os-interface/%s' % (server_id,
                                                                  port_id))
         self.validate_response(schema.delete_interface, resp, body)
-        return service_client.ResponseBody(resp, body)
-
-    def add_fixed_ip(self, server_id, **kwargs):
-        """Add a fixed IP to input server instance."""
-        post_body = json.dumps({'addFixedIp': kwargs})
-        resp, body = self.post('servers/%s/action' % server_id,
-                               post_body)
-        self.validate_response(servers_schema.server_actions_common_schema,
-                               resp, body)
-        return service_client.ResponseBody(resp, body)
-
-    def remove_fixed_ip(self, server_id, **kwargs):
-        """Remove input fixed IP from input server instance."""
-        post_body = json.dumps({'removeFixedIp': kwargs})
-        resp, body = self.post('servers/%s/action' % server_id,
-                               post_body)
-        self.validate_response(servers_schema.server_actions_common_schema,
-                               resp, body)
         return service_client.ResponseBody(resp, body)
