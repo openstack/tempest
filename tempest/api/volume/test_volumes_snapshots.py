@@ -85,9 +85,7 @@ class VolumesV2SnapshotTestJSON(base.BaseVolumeTest):
         snapshot = self.create_snapshot(self.volume_origin['id'],
                                         force=True)
         # Delete the snapshot
-        self.snapshots_client.delete_snapshot(snapshot['id'])
-        self.snapshots_client.wait_for_resource_deletion(snapshot['id'])
-        self.snapshots.remove(snapshot)
+        self.cleanup_snapshot(snapshot)
 
     @test.idempotent_id('2a8abbe4-d871-46db-b049-c41f5af8216e')
     def test_snapshot_create_get_list_update_delete(self):
@@ -126,9 +124,7 @@ class VolumesV2SnapshotTestJSON(base.BaseVolumeTest):
         self.assertEqual(new_desc, updated_snapshot[self.descrip_field])
 
         # Delete the snapshot
-        self.snapshots_client.delete_snapshot(snapshot['id'])
-        self.snapshots_client.wait_for_resource_deletion(snapshot['id'])
-        self.snapshots.remove(snapshot)
+        self.cleanup_snapshot(snapshot)
 
     @test.idempotent_id('59f41f43-aebf-48a9-ab5d-d76340fab32b')
     def test_snapshots_list_with_params(self):
@@ -137,6 +133,7 @@ class VolumesV2SnapshotTestJSON(base.BaseVolumeTest):
         display_name = data_utils.rand_name('snap')
         params = {self.name_field: display_name}
         snapshot = self.create_snapshot(self.volume_origin['id'], **params)
+        self.addCleanup(self.cleanup_snapshot, snapshot)
 
         # Verify list snapshots by display_name filter
         params = {self.name_field: snapshot[self.name_field]}
@@ -158,6 +155,7 @@ class VolumesV2SnapshotTestJSON(base.BaseVolumeTest):
         display_name = data_utils.rand_name('snap')
         params = {self.name_field: display_name}
         snapshot = self.create_snapshot(self.volume_origin['id'], **params)
+        self.addCleanup(self.cleanup_snapshot, snapshot)
 
         # Verify list snapshot details by display_name filter
         params = {self.name_field: snapshot[self.name_field]}
@@ -181,7 +179,13 @@ class VolumesV2SnapshotTestJSON(base.BaseVolumeTest):
         self.volumes_client.wait_for_volume_status(volume['id'], 'available')
         self.volumes_client.delete_volume(volume['id'])
         self.volumes_client.wait_for_resource_deletion(volume['id'])
-        self.clear_snapshots()
+        self.cleanup_snapshot(snapshot)
+
+    def cleanup_snapshot(self, snapshot):
+        # Delete the snapshot
+        self.snapshots_client.delete_snapshot(snapshot['id'])
+        self.snapshots_client.wait_for_resource_deletion(snapshot['id'])
+        self.snapshots.remove(snapshot)
 
 
 class VolumesV1SnapshotTestJSON(VolumesV2SnapshotTestJSON):
