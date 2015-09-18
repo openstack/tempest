@@ -554,3 +554,44 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
                                    username=ssh_login,
                                    private_key=private_key,
                                    should_connect=True)
+
+    @test.requires_ext(service='network', extension='port-security')
+    @test.idempotent_id('7c811dcc-263b-49a3-92d2-1b4d8405f50c')
+    @test.services('compute', 'network')
+    def test_port_security_disable_security_group(self):
+        """
+        This test verifies port_security_enabled=False disables
+        the default security group rules.
+        """
+        new_tenant = self.primary_tenant
+
+        # Create server
+        name = 'server-{tenant}-gen-1'.format(
+               tenant=new_tenant.creds.tenant_name
+        )
+        name = data_utils.rand_name(name)
+        server = self._create_server(name, new_tenant)
+
+        access_point_ssh = self._connect_to_access_point(new_tenant)
+        server_id = server['id']
+        port_id = self._list_ports(device_id=server_id)[0]['id']
+
+        # Flip the port's port security and check connectivity
+        try:
+            self.network_client.update_port(port_id,
+                                            port_security_enabled=True,
+                                            security_groups=[])
+            self._check_connectivity(access_point=access_point_ssh,
+                                     ip=self._get_server_ip(server),
+                                     should_succeed=False)
+
+            self.network_client.update_port(port_id,
+                                            port_security_enabled=False,
+                                            security_groups=[])
+            self._check_connectivity(
+                access_point=access_point_ssh,
+                ip=self._get_server_ip(server))
+        except Exception:
+            for tenant in self.tenants.values():
+                self._log_console_output(servers=tenant.servers)
+            raise
