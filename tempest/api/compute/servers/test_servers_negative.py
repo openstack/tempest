@@ -236,7 +236,7 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
         metadata = {'a': 'b' * 260}
         self.assertRaises((lib_exc.BadRequest, lib_exc.OverLimit),
                           self.create_test_server,
-                          meta=metadata)
+                          metadata=metadata)
 
     @test.attr(type=['negative'])
     @test.idempotent_id('aa8eed43-e2cb-4ebf-930b-da14f6a21d81')

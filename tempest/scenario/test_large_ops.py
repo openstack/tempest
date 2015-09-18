@@ -99,9 +99,9 @@ class TestLargeOpsScenario(manager.ScenarioTest):
         create_kwargs = fixed_network.set_networks_kwarg(network,
                                                          create_kwargs)
         self.servers_client.create_server(
-            name,
-            self.image,
-            flavor_id,
+            name=name,
+            imageRef=self.image,
+            flavorRef=flavor_id,
             **create_kwargs)
         # needed because of bug 1199788
         params = {'name': name}

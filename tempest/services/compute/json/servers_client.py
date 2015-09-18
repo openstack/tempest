@@ -14,6 +14,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import copy
+
 from oslo_serialization import jsonutils as json
 from six.moves.urllib import parse as urllib
 
@@ -29,59 +31,28 @@ class ServersClient(service_client.ServiceClient):
             auth_provider, service, region, **kwargs)
         self.enable_instance_password = enable_instance_password
 
-    def create_server(self, name, image_ref, flavor_ref, **kwargs):
+    def create_server(self, **kwargs):
         """
         Creates an instance of a server.
-        name (Required): The name of the server.
-        image_ref (Required): Reference to the image used to build the server.
-        flavor_ref (Required): The flavor used to build the server.
-        Following optional keyword arguments are accepted:
-        adminPass: Sets the initial root password.
-        key_name: Key name of keypair that was created earlier.
-        meta: A dictionary of values to be used as metadata.
-        personality: A list of dictionaries for files to be injected into
-        the server.
-        security_groups: A list of security group dicts.
-        networks: A list of network dicts with UUID and fixed_ip.
-        user_data: User data for instance.
-        availability_zone: Availability zone in which to launch instance.
-        accessIPv4: The IPv4 access address for the server.
-        accessIPv6: The IPv6 access address for the server.
-        min_count: Count of minimum number of instances to launch.
-        max_count: Count of maximum number of instances to launch.
-        disk_config: Determines if user or admin controls disk configuration.
-        return_reservation_id: Enable/Disable the return of reservation id
-        block_device_mapping: Block device mapping for the server.
-        block_device_mapping_v2: Block device mapping V2 for the server.
+        Most parameters except the following are passed to the API without
+        any changes.
+        :param disk_config: The name is changed to OS-DCF:diskConfig
+        :param scheduler_hints: The name is changed to os:scheduler_hints and
+        the parameter is set in the same level as the parameter 'server'.
         """
-        post_body = {
-            'name': name,
-            'imageRef': image_ref,
-            'flavorRef': flavor_ref
-        }
+        body = copy.deepcopy(kwargs)
+        if body.get('disk_config'):
+            body['OS-DCF:diskConfig'] = body.pop('disk_config')
 
-        for option in ['personality', 'adminPass', 'key_name',
-                       'security_groups', 'networks', 'user_data',
-                       'availability_zone', 'accessIPv4', 'accessIPv6',
-                       'min_count', 'max_count', ('metadata', 'meta'),
-                       ('OS-DCF:diskConfig', 'disk_config'),
-                       'return_reservation_id', 'block_device_mapping',
-                       'block_device_mapping_v2']:
-            if isinstance(option, tuple):
-                post_param = option[0]
-                key = option[1]
-            else:
-                post_param = option
-                key = option
-            value = kwargs.get(key)
-            if value is not None:
-                post_body[post_param] = value
+        hints = None
+        if body.get('scheduler_hints'):
+            hints = {'os:scheduler_hints': body.pop('scheduler_hints')}
 
-        post_body = {'server': post_body}
+        post_body = {'server': body}
 
-        if 'sched_hints' in kwargs:
-            hints = {'os:scheduler_hints': kwargs.get('sched_hints')}
+        if hints:
             post_body = dict(post_body.items() + hints.items())
+
         post_body = json.dumps(post_body)
         resp, body = self.post('servers', post_body)
 

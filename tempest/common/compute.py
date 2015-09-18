@@ -51,8 +51,8 @@ def create_test_server(clients, validatable=False, validation_resources=None,
     else:
         name = data_utils.rand_name(__name__ + "-instance")
 
-    flavor = kwargs.get('flavor', CONF.compute.flavor_ref)
-    image_id = kwargs.get('image_id', CONF.compute.image_ref)
+    flavor = kwargs.pop('flavor', CONF.compute.flavor_ref)
+    image_id = kwargs.pop('image_id', CONF.compute.image_ref)
 
     kwargs = fixed_network.set_networks_kwarg(
         tenant_network, kwargs) or {}
@@ -85,7 +85,8 @@ def create_test_server(clients, validatable=False, validation_resources=None,
             if wait_until is None:
                 wait_until = 'ACTIVE'
 
-    body = clients.servers_client.create_server(name, image_id, flavor,
+    body = clients.servers_client.create_server(name=name, imageRef=image_id,
+                                                flavorRef=flavor,
                                                 **kwargs)
 
     # handle the case of multiple servers

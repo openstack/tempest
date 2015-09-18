@@ -181,7 +181,8 @@ class AuthorizationTestJSON(base.BaseV2ComputeTest):
     def test_create_server_with_unauthorized_image(self):
         # Server creation with another user's image should fail
         self.assertRaises(lib_exc.BadRequest, self.alt_client.create_server,
-                          'test', self.image['id'], self.flavor_ref)
+                          name='test', imageRef=self.image['id'],
+                          flavorRef=self.flavor_ref)
 
     @test.idempotent_id('acf8724b-142b-4044-82c3-78d31a533f24')
     def test_create_server_fails_when_tenant_incorrect(self):
@@ -193,8 +194,8 @@ class AuthorizationTestJSON(base.BaseV2ComputeTest):
             auth_data=self.client.auth_provider.auth_data
         )
         self.assertRaises(lib_exc.BadRequest,
-                          self.alt_client.create_server, 'test',
-                          self.image['id'], self.flavor_ref)
+                          self.alt_client.create_server, name='test',
+                          imageRef=self.image['id'], flavorRef=self.flavor_ref)
 
     @test.idempotent_id('f03d1ded-7fd4-4d29-bc13-e2391f29c625')
     def test_create_keypair_in_analt_user_tenant(self):

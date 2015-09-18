@@ -58,7 +58,7 @@ class ServersTestJSON(base.BaseV2ComputeTest):
             validatable=True,
             wait_until='ACTIVE',
             name=cls.name,
-            meta=cls.meta,
+            metadata=cls.meta,
             accessIPv4=cls.accessIPv4,
             accessIPv6=cls.accessIPv6,
             personality=personality,
@@ -150,7 +150,7 @@ class ServersTestJSON(base.BaseV2ComputeTest):
                         group_id)
 
         hints = {'group': group_id}
-        server = self.create_test_server(sched_hints=hints,
+        server = self.create_test_server(scheduler_hints=hints,
                                          wait_until='ACTIVE')
 
         # Check a server is in the group

@@ -32,7 +32,7 @@ class ServerMetadataNegativeTestJSON(base.BaseV2ComputeTest):
     def resource_setup(cls):
         super(ServerMetadataNegativeTestJSON, cls).resource_setup()
         cls.tenant_id = cls.client.tenant_id
-        server = cls.create_test_server(meta={}, wait_until='ACTIVE')
+        server = cls.create_test_server(metadata={}, wait_until='ACTIVE')
 
         cls.server_id = server['id']
 
@@ -48,7 +48,7 @@ class ServerMetadataNegativeTestJSON(base.BaseV2ComputeTest):
             meta = {key: 'data1'}
             self.assertRaises((lib_exc.BadRequest, lib_exc.OverLimit),
                               self.create_test_server,
-                              meta=meta)
+                              metadata=meta)
 
         # no teardown - all creates should fail
 
@@ -59,7 +59,7 @@ class ServerMetadataNegativeTestJSON(base.BaseV2ComputeTest):
         meta = {'': 'data1'}
         self.assertRaises(lib_exc.BadRequest,
                           self.create_test_server,
-                          meta=meta)
+                          metadata=meta)
 
     @test.attr(type=['negative'])
     @test.idempotent_id('4d9cd7a3-2010-4b41-b8fe-3bbf0b169466')
