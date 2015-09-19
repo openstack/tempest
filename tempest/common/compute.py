@@ -34,7 +34,7 @@ def create_test_server(clients, validatable=False, validation_resources=None,
     This method is a common wrapper returning a test server that can be
     pingable or sshable.
 
-    :param clients: Client manager which provides Openstack Tempest clients.
+    :param clients: Client manager which provides OpenStack Tempest clients.
     :param validatable: Whether the server will be pingable or sshable.
     :param validation_resources: Resources created for the connection to the
     server. Include a keypair, a security group and an IP.

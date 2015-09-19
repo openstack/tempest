@@ -211,7 +211,7 @@ class BotoTestCase(tempest.test.BaseTestCase):
     def resource_setup(cls):
         super(BotoTestCase, cls).resource_setup()
         cls.conclusion = decision_maker()
-        # The trash contains cleanup functions and paramaters in tuples
+        # The trash contains cleanup functions and parameters in tuples
         # (function, *args, **kwargs)
         cls._resource_trash_bin = {}
         cls._sequence = -1
