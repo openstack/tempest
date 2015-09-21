@@ -60,15 +60,11 @@ class TestServerMultinode(manager.ScenarioTest):
         servers = []
 
         for host in hosts[:CONF.compute.min_compute_nodes]:
-            create_kwargs = {
-                'availability_zone': '%(zone)s:%(host_name)s' % host
-            }
-
             # by getting to active state here, this means this has
             # landed on the host in question.
-            inst = self.create_server(image=CONF.compute.image_ref,
-                                      flavor=CONF.compute.flavor_ref,
-                                      create_kwargs=create_kwargs)
+            inst = self.create_server(
+                availability_zone='%(zone)s:%(host_name)s' % host,
+                wait_until='ACTIVE')
             server = self.servers_client.show_server(inst['id'])['server']
             servers.append(server)
 

@@ -64,14 +64,6 @@ class TestStampPattern(manager.ScenarioTest):
         self.snapshots_client.wait_for_snapshot_status(volume_snapshot['id'],
                                                        status)
 
-    def _boot_image(self, image_id, keypair, security_group):
-        security_groups = [{'name': security_group['name']}]
-        create_kwargs = {
-            'key_name': keypair['name'],
-            'security_groups': security_groups
-        }
-        return self.create_server(image=image_id, create_kwargs=create_kwargs)
-
     def _create_volume_snapshot(self, volume):
         snapshot_name = data_utils.rand_name('scenario-snapshot')
         snapshot = self.snapshots_client.create_snapshot(
@@ -135,8 +127,11 @@ class TestStampPattern(manager.ScenarioTest):
 
         # boot an instance and create a timestamp file in it
         volume = self._create_volume()
-        server = self._boot_image(CONF.compute.image_ref, keypair,
-                                  security_group)
+        server = self.create_server(
+            image_id=CONF.compute.image_ref,
+            key_name=keypair['name'],
+            security_groups=security_group,
+            wait_until='ACTIVE')
 
         # create and add floating IP to server1
         ip_for_server = self.get_server_or_ip(server)
@@ -160,8 +155,10 @@ class TestStampPattern(manager.ScenarioTest):
             snapshot_id=volume_snapshot['id'])
 
         # boot second instance from the snapshot(instance2)
-        server_from_snapshot = self._boot_image(snapshot_image['id'],
-                                                keypair, security_group)
+        server_from_snapshot = self.create_server(
+            image_id=snapshot_image['id'],
+            key_name=keypair['name'],
+            security_groups=security_group)
 
         # create and add floating IP to server_from_snapshot
         ip_for_snapshot = self.get_server_or_ip(server_from_snapshot)

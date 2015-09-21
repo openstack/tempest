@@ -23,7 +23,7 @@ import six
 from tempest_lib.common.utils import misc as misc_utils
 from tempest_lib import exceptions as lib_exc
 
-from tempest.common import fixed_network
+from tempest.common import compute
 from tempest.common.utils import data_utils
 from tempest.common.utils.linux import remote_client
 from tempest.common import waiters
@@ -158,52 +158,100 @@ class ScenarioTest(tempest.test.BaseTestCase):
         return body['keypair']
 
     def create_server(self, name=None, image=None, flavor=None,
-                      wait_on_boot=True, wait_on_delete=True,
-                      create_kwargs=None):
-        """Creates VM instance.
+                      validatable=False, wait_until=None,
+                      wait_on_delete=True, clients=None, **kwargs):
+        """Wrapper utility that returns a test server.
 
-        @param image: image from which to create the instance
-        @param wait_on_boot: wait for status ACTIVE before continue
-        @param wait_on_delete: force synchronous delete on cleanup
-        @param create_kwargs: additional details for instance creation
-        @return: server dict
+        This wrapper utility calls the common create test server and
+        returns a test server. The purpose of this wrapper is to minimize
+        the impact on the code of the tests already using this
+        function.
         """
-        if name is None:
-            name = data_utils.rand_name(self.__class__.__name__)
-        if image is None:
-            image = CONF.compute.image_ref
-        if flavor is None:
-            flavor = CONF.compute.flavor_ref
-        if create_kwargs is None:
-            create_kwargs = {}
-        network = self.get_tenant_network()
-        create_kwargs = fixed_network.set_networks_kwarg(network,
-                                                         create_kwargs)
 
-        LOG.debug("Creating a server (name: %s, image: %s, flavor: %s)",
-                  name, image, flavor)
-        server = self.servers_client.create_server(name=name, imageRef=image,
-                                                   flavorRef=flavor,
-                                                   **create_kwargs)['server']
+        # NOTE(jlanoux): As a first step, ssh checks in the scenario
+        # tests need to be run regardless of the run_validation and
+        # validatable parameters and thus until the ssh validation job
+        # becomes voting in CI. The test resources management and IP
+        # association are taken care of in the scenario tests.
+        # Therefore, the validatable parameter is set to false in all
+        # those tests. In this way create_server just return a standard
+        # server and the scenario tests always perform ssh checks.
+
+        # Needed for the cross_tenant_traffic test:
+        if clients is None:
+            clients = self.manager
+
+        vnic_type = CONF.network.port_vnic_type
+
+        # If vnic_type is configured create port for
+        # every network
+        if vnic_type:
+            ports = []
+            networks = []
+            create_port_body = {'binding:vnic_type': vnic_type,
+                                'namestart': 'port-smoke'}
+            if kwargs:
+                # Convert security group names to security group ids
+                # to pass to create_port
+                if 'security_groups' in kwargs:
+                    security_groups =\
+                        clients.network_client.list_security_groups(
+                        ).get('security_groups')
+                    sec_dict = dict([(s['name'], s['id'])
+                                    for s in security_groups])
+
+                    sec_groups_names = [s['name'] for s in kwargs.pop(
+                        'security_groups')]
+                    security_groups_ids = [sec_dict[s]
+                                           for s in sec_groups_names]
+
+                    if security_groups_ids:
+                        create_port_body[
+                            'security_groups'] = security_groups_ids
+                networks = kwargs.pop('networks')
+
+            # If there are no networks passed to us we look up
+            # for the tenant's private networks and create a port
+            # if there is only one private network. The same behaviour
+            # as we would expect when passing the call to the clients
+            # with no networks
+            if not networks:
+                networks = clients.networks_client.list_networks(
+                    filters={'router:external': False})
+                self.assertEqual(1, len(networks),
+                                 "There is more than one"
+                                 " network for the tenant")
+            for net in networks:
+                net_id = net['uuid']
+                port = self._create_port(network_id=net_id,
+                                         client=clients.ports_client,
+                                         **create_port_body)
+                ports.append({'port': port.id})
+            if ports:
+                kwargs['networks'] = ports
+            self.ports = ports
+
+        tenant_network = self.get_tenant_network()
+
+        body, servers = compute.create_test_server(
+            clients,
+            tenant_network=tenant_network,
+            wait_until=wait_until,
+            **kwargs)
+
+        # TODO(jlanoux) Move wait_on_delete in compute.py
         if wait_on_delete:
             self.addCleanup(waiters.wait_for_server_termination,
-                            self.servers_client,
-                            server['id'])
+                            clients.servers_client,
+                            body['id'])
+
         self.addCleanup_with_wait(
             waiter_callable=waiters.wait_for_server_termination,
-            thing_id=server['id'], thing_id_param='server_id',
+            thing_id=body['id'], thing_id_param='server_id',
             cleanup_callable=self.delete_wrapper,
-            cleanup_args=[self.servers_client.delete_server, server['id']],
-            waiter_client=self.servers_client)
-        if wait_on_boot:
-            waiters.wait_for_server_status(self.servers_client,
-                                           server_id=server['id'],
-                                           status='ACTIVE')
-        # The instance retrieved on creation is missing network
-        # details, necessitating retrieval after it becomes active to
-        # ensure correct details.
-        server = self.servers_client.show_server(server['id'])['server']
-        self.assertEqual(server['name'], name)
+            cleanup_args=[clients.servers_client.delete_server, body['id']],
+            waiter_client=clients.servers_client)
+        server = clients.servers_client.show_server(body['id'])['server']
         return server
 
     def create_volume(self, size=None, name=None, snapshot_id=None,
@@ -321,7 +369,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
             username = CONF.scenario.ssh_user
         # Set this with 'keypair' or others to log in with keypair or
         # username/password.
-        if CONF.compute.ssh_auth_method == 'keypair':
+        if CONF.validation.auth_method == 'keypair':
             password = None
             if private_key is None:
                 private_key = self.keypair['private_key']
@@ -491,7 +539,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
 
     def ping_ip_address(self, ip_address, should_succeed=True,
                         ping_timeout=None):
-        timeout = ping_timeout or CONF.compute.ping_timeout
+        timeout = ping_timeout or CONF.validation.ping_timeout
         cmd = ['ping', '-c1', '-w1', ip_address]
 
         def ping():
@@ -884,7 +932,7 @@ class NetworkScenarioTest(ScenarioTest):
             return should_succeed
 
         return tempest.test.call_until_true(ping_remote,
-                                            CONF.compute.ping_timeout,
+                                            CONF.validation.ping_timeout,
                                             1)
 
     def _create_security_group(self, client=None, tenant_id=None,
@@ -1135,71 +1183,6 @@ class NetworkScenarioTest(ScenarioTest):
             subnet.add_to_router(router.id)
         return network, subnet, router
 
-    def create_server(self, name=None, image=None, flavor=None,
-                      wait_on_boot=True, wait_on_delete=True,
-                      network_client=None, networks_client=None,
-                      ports_client=None, create_kwargs=None):
-        if network_client is None:
-            network_client = self.network_client
-        if networks_client is None:
-            networks_client = self.networks_client
-        if ports_client is None:
-            ports_client = self.ports_client
-
-        vnic_type = CONF.network.port_vnic_type
-
-        # If vnic_type is configured create port for
-        # every network
-        if vnic_type:
-            ports = []
-            networks = []
-            create_port_body = {'binding:vnic_type': vnic_type,
-                                'namestart': 'port-smoke'}
-            if create_kwargs:
-                # Convert security group names to security group ids
-                # to pass to create_port
-                if create_kwargs.get('security_groups'):
-                    security_groups = network_client.list_security_groups(
-                        ).get('security_groups')
-                    sec_dict = dict([(s['name'], s['id'])
-                                    for s in security_groups])
-
-                    sec_groups_names = [s['name'] for s in create_kwargs.get(
-                        'security_groups')]
-                    security_groups_ids = [sec_dict[s]
-                                           for s in sec_groups_names]
-
-                    if security_groups_ids:
-                        create_port_body[
-                            'security_groups'] = security_groups_ids
-                networks = create_kwargs.get('networks')
-
-            # If there are no networks passed to us we look up
-            # for the tenant's private networks and create a port
-            # if there is only one private network. The same behaviour
-            # as we would expect when passing the call to the clients
-            # with no networks
-            if not networks:
-                networks = networks_client.list_networks(filters={
-                    'router:external': False})
-                self.assertEqual(1, len(networks),
-                                 "There is more than one"
-                                 " network for the tenant")
-            for net in networks:
-                net_id = net['uuid']
-                port = self._create_port(network_id=net_id,
-                                         client=ports_client,
-                                         **create_port_body)
-                ports.append({'port': port.id})
-            if ports:
-                create_kwargs['networks'] = ports
-            self.ports = ports
-
-        return super(NetworkScenarioTest, self).create_server(
-            name=name, image=image, flavor=flavor,
-            wait_on_boot=wait_on_boot, wait_on_delete=wait_on_delete,
-            create_kwargs=create_kwargs)
-
 
 # power/provision states as of icehouse
 class BaremetalPowerStates(object):
@@ -1322,11 +1305,8 @@ class BaremetalScenarioTest(ScenarioTest):
         dest.validate_authentication()
 
     def boot_instance(self):
-        create_kwargs = {
-            'key_name': self.keypair['name']
-        }
         self.instance = self.create_server(
-            wait_on_boot=False, create_kwargs=create_kwargs)
+            key_name=self.keypair['name'])
 
         self.wait_node(self.instance['id'])
         self.node = self.get_node(instance_id=self.instance['id'])

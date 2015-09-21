@@ -113,7 +113,7 @@ class BaremetalBasicOps(manager.BaremetalScenarioTest):
         self.boot_instance()
         self.validate_ports()
         self.verify_connectivity()
-        if CONF.compute.ssh_connect_method == 'floating':
+        if CONF.validation.connect_method == 'floating':
             floating_ip = self.create_floating_ip(self.instance)['ip']
             self.verify_connectivity(ip=floating_ip)
 

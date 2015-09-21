@@ -155,16 +155,16 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         keypair = self.create_keypair()
         self.keypairs[keypair['name']] = keypair
         security_groups = [{'name': self.security_group['name']}]
-        create_kwargs = {
-            'networks': [
-                {'uuid': network.id},
-            ],
-            'key_name': keypair['name'],
-            'security_groups': security_groups,
-        }
+        network = {'uuid': network.id}
         if port_id is not None:
-            create_kwargs['networks'][0]['port'] = port_id
-        server = self.create_server(name=name, create_kwargs=create_kwargs)
+            network['port'] = port_id
+
+        server = self.create_server(
+            name=name,
+            networks=[network],
+            key_name=keypair['name'],
+            security_groups=security_groups,
+            wait_until='ACTIVE')
         self.servers.append(server)
         return server
 

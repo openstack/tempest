@@ -234,23 +234,16 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
 
     def _create_server(self, name, tenant, security_groups=None):
         """creates a server and assigns to security group"""
-        self._set_compute_context(tenant)
         if security_groups is None:
             security_groups = [tenant.security_groups['default']]
         security_groups_names = [{'name': s['name']} for s in security_groups]
-        create_kwargs = {
-            'networks': [
-                {'uuid': tenant.network.id},
-            ],
-            'key_name': tenant.keypair['name'],
-            'security_groups': security_groups_names
-        }
         server = self.create_server(
             name=name,
-            network_client=tenant.manager.network_client,
-            networks_client=tenant.manager.networks_client,
-            ports_client=tenant.manager.ports_client,
-            create_kwargs=create_kwargs)
+            networks=[{'uuid': tenant.network.id}],
+            key_name=tenant.keypair['name'],
+            security_groups=security_groups_names,
+            wait_until='ACTIVE',
+            clients=tenant.manager)
         self.assertEqual(
             sorted([s['name'] for s in security_groups]),
             sorted([s['name'] for s in server['security_groups']]))
@@ -293,10 +286,6 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
             subnets_client=tenant.manager.subnets_client)
         tenant.set_network(network, subnet, router)
 
-    def _set_compute_context(self, tenant):
-        self.servers_client = tenant.manager.servers_client
-        return self.servers_client
-
     def _deploy_tenant(self, tenant_or_id):
         """creates:
 
@@ -310,7 +299,6 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
             tenant = self.tenants[tenant_or_id]
         else:
             tenant = tenant_or_id
-        self._set_compute_context(tenant)
         self._create_tenant_keypairs(tenant)
         self._create_tenant_network(tenant)
         self._create_tenant_security_groups(tenant)
