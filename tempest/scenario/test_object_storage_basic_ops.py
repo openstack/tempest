@@ -24,7 +24,7 @@ CONF = config.CONF
 LOG = logging.getLogger(__name__)
 
 
-class TestSwiftBasicOps(manager.SwiftScenarioTest):
+class TestObjectStorageBasicOps(manager.ObjectStorageScenarioTest):
     """
     Test swift basic ops.
      * get swift stat.
