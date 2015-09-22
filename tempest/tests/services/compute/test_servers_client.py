@@ -77,7 +77,7 @@ class TestServersClient(base.BaseComputeServiceTest):
             }
         ],
         "metadata": {
-            u"My Server Nu\1234me": u"Apau\1234che1"
+            u"My Server N\u1234me": u"Apa\u1234che1"
         },
         "name": u"new\u1234-server-test",
         "progress": 0,
@@ -87,7 +87,37 @@ class TestServersClient(base.BaseComputeServiceTest):
         "user_id": "fake"}
     }
 
+    FAKE_SERVER_POST = {"server": {
+        "id": "616fb98f-46ca-475e-917e-2563e5a8cd19",
+        "adminPass": "fake-admin-pass",
+        "security_groups": [
+            'fake-security-group-1',
+            'fake-security-group-2'
+        ],
+        "links": [
+            {
+                "href": "http://os.co/v2/616fb98f-46ca-475e-917e-2563e5a8cd19",
+                "rel": "self"
+            },
+            {
+                "href": "http://os.co/616fb98f-46ca-475e-917e-2563e5a8cd19",
+                "rel": "bookmark"
+            }
+        ],
+        "OS-DCF:diskConfig": "fake-disk-config"}
+    }
+
+    FAKE_ADDRESS = {"addresses": {
+        "private": [
+            {
+                "addr": "192.168.0.3",
+                "version": 4
+            }
+        ]}
+    }
+
     server_id = FAKE_SERVER_GET['server']['id']
+    network_id = 'a6b0875b-6b5d-4a5a-81eb-0c3aa62e5fdb'
 
     def setUp(self):
         super(TestServersClient, self).setUp()
@@ -130,4 +160,53 @@ class TestServersClient(base.BaseComputeServiceTest):
             {},
             status=204,
             server_id=self.server_id
+            )
+
+    def test_create_server_with_str_body(self):
+        self._test_create_server()
+
+    def test_create_server_with_bytes_body(self):
+        self._test_create_server(True)
+
+    def _test_create_server(self, bytes_body=False):
+        self.check_service_client_function(
+            self.client.create_server,
+            'tempest.common.service_client.ServiceClient.post',
+            self.FAKE_SERVER_POST,
+            bytes_body,
+            status=202,
+            name='fake-name',
+            imageRef='fake-image-ref',
+            flavorRef='fake-flavor-ref'
+            )
+
+    def test_list_addresses_with_str_body(self):
+        self._test_list_addresses()
+
+    def test_list_addresses_with_bytes_body(self):
+        self._test_list_addresses(True)
+
+    def _test_list_addresses(self, bytes_body=False):
+        self.check_service_client_function(
+            self.client.list_addresses,
+            'tempest.common.service_client.ServiceClient.get',
+            self.FAKE_ADDRESS,
+            bytes_body,
+            server_id=self.server_id
+            )
+
+    def test_list_addresses_by_network_with_str_body(self):
+        self._test_list_addresses_by_network()
+
+    def test_list_addresses_by_network_with_bytes_body(self):
+        self._test_list_addresses_by_network(True)
+
+    def _test_list_addresses_by_network(self, bytes_body=False):
+        self.check_service_client_function(
+            self.client.list_addresses_by_network,
+            'tempest.common.service_client.ServiceClient.get',
+            self.FAKE_ADDRESS['addresses'],
+            bytes_body,
+            server_id=self.server_id,
+            network_id=self.network_id
             )
