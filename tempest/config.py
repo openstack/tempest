@@ -1173,7 +1173,16 @@ BaremetalGroup = [
                default=300,
                help="Timeout for unprovisioning an Ironic node. "
                     "Takes longer since Kilo as Ironic performs an extra "
-                    "step in Node cleaning.")
+                    "step in Node cleaning."),
+    cfg.StrOpt('node_ssh_user',
+               default="root",
+               help="User name used to authenticate to bare metal node."),
+    cfg.StrOpt('node_ssh_password',
+               default="cisco123",
+               help="Password used to authenticate to bare metal node."),
+    cfg.StrOpt('node_ssh_console_ip',
+               default="10.30.118.6",
+               help="IP of the compute bare metal node .")
 ]
 
 negative_group = cfg.OptGroup(name='negative', title="Negative Test Options")
