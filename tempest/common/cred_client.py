@@ -170,6 +170,29 @@ class V3CredsClient(CredsClient):
                                                       user['id'],
                                                       role['id'])
 
+    def assign_user_role_on_domain(self, user, role_name, domain=None):
+        """Assign the specified role on a domain
+
+        :param user: a user dict
+        :param role_name: name of the role to be assigned
+        :param domain: (optional) The domain to assign the role on. If not
+                                  specified the default domain of cred_client
+        """
+        # NOTE(andreaf) This method is very specific to the v3 case, and
+        # because of that it's not defined in the parent class.
+        if domain is None:
+            domain = self.creds_domain
+        role = self._check_role_exists(role_name)
+        if not role:
+            msg = 'No "%s" role found' % role_name
+            raise lib_exc.NotFound(msg)
+        try:
+            self.roles_client.assign_user_role_on_domain(
+                domain['id'], user['id'], role['id'])
+        except lib_exc.Conflict:
+            LOG.debug("Role %s already assigned on domain %s for user %s",
+                      role['id'], domain['id'], user['id'])
+
 
 def get_creds_client(identity_client,
                      projects_client,
