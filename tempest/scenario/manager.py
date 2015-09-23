@@ -557,6 +557,29 @@ class ScenarioTest(tempest.test.BaseTestCase):
             floating_ip['ip'], thing['id'])
         return floating_ip
 
+    def create_timestamp(self, server_or_ip, dev_name=None, mount_path='/mnt'):
+        ssh_client = self.get_remote_client(server_or_ip)
+        if dev_name is not None:
+            ssh_client.make_fs(dev_name)
+            ssh_client.mount(dev_name)
+        cmd_timestamp = 'sudo sh -c "date > %s/timestamp; sync"' % mount_path
+        ssh_client.exec_command(cmd_timestamp)
+        timestamp = ssh_client.exec_command('sudo cat %s/timestamp'
+                                            % mount_path)
+        if dev_name is not None:
+            ssh_client.umount(mount_path)
+        return timestamp
+
+    def get_timestamp(self, server_or_ip, dev_name=None, mount_path='/mnt'):
+        ssh_client = self.get_remote_client(server_or_ip)
+        if dev_name is not None:
+            ssh_client.mount(dev_name)
+        timestamp = ssh_client.exec_command('sudo cat %s/timestamp'
+                                            % mount_path)
+        if dev_name is not None:
+            ssh_client.umount(mount_path)
+        return timestamp
+
 
 class NetworkScenarioTest(ScenarioTest):
     """Base class for network scenario tests.
