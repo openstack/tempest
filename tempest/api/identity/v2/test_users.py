@@ -56,7 +56,7 @@ class IdentityUsersTest(base.BaseIdentityV2Test):
 
         # user updates own password
         resp = self.non_admin_client.update_user_own_password(
-            user_id=user_id, new_pass=new_pass, old_pass=old_pass)
+            user_id=user_id, new_pass=new_pass, old_pass=old_pass)['access']
 
         # check authorization with new token
         self.non_admin_token_client.auth_token(resp['token']['id'])

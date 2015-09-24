@@ -327,7 +327,8 @@ class IdentityClient(service_client.ServiceClient):
         patch_body = json.dumps({'user': patch_body})
         resp, body = self.patch('OS-KSCRUD/users/%s' % user_id, patch_body)
         self.expected_success(200, resp.status)
-        return service_client.ResponseBody(resp, self._parse_resp(body))
+        body = json.loads(body)
+        return service_client.ResponseBody(resp, body)
 
     def list_extensions(self):
         """List all the extensions."""
@@ -360,4 +361,5 @@ class IdentityClient(service_client.ServiceClient):
         resp, body = self.get('/users/%s/credentials/OS-EC2/%s' %
                               (user_id, access))
         self.expected_success(200, resp.status)
-        return service_client.ResponseBody(resp, self._parse_resp(body))
+        body = json.loads(body)
+        return service_client.ResponseBody(resp, body)
