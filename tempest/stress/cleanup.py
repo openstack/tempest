@@ -68,7 +68,7 @@ def cleanup():
         except Exception:
             pass
 
-    users = admin_manager.identity_client.get_users()
+    users = admin_manager.identity_client.get_users()['users']
     LOG.info("Cleanup::remove %s users" % len(users))
     for user in users:
         if user['name'].startswith("stress_user"):

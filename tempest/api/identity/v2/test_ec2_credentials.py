@@ -38,7 +38,7 @@ class EC2CredentialsTest(base.BaseIdentityV2Test):
         """Create user ec2 credentials."""
         resp = self.non_admin_client.create_user_ec2_credentials(
             self.creds.credentials.user_id,
-            self.creds.credentials.tenant_id)
+            self.creds.credentials.tenant_id)["credential"]
         access = resp['access']
         self.addCleanup(
             self.non_admin_client.delete_user_ec2_credentials,
@@ -55,11 +55,13 @@ class EC2CredentialsTest(base.BaseIdentityV2Test):
         fetched_creds = []
         # create first ec2 credentials
         creds1 = self.non_admin_client.create_user_ec2_credentials(
-            self.creds.credentials.user_id, self.creds.credentials.tenant_id)
+            self.creds.credentials.user_id,
+            self.creds.credentials.tenant_id)["credential"]
         created_creds.append(creds1['access'])
         # create second ec2 credentials
         creds2 = self.non_admin_client.create_user_ec2_credentials(
-            self.creds.credentials.user_id, self.creds.credentials.tenant_id)
+            self.creds.credentials.user_id,
+            self.creds.credentials.tenant_id)["credential"]
         created_creds.append(creds2['access'])
         # add credentials to be cleaned up
         self.addCleanup(
@@ -70,7 +72,7 @@ class EC2CredentialsTest(base.BaseIdentityV2Test):
             self.creds.credentials.user_id, creds2['access'])
         # get the list of user ec2 credentials
         resp = self.non_admin_client.list_user_ec2_credentials(
-            self.creds.credentials.user_id)
+            self.creds.credentials.user_id)["credentials"]
         fetched_creds = [cred['access'] for cred in resp]
         # created credentials should be in a fetched list
         missing = [cred for cred in created_creds
@@ -84,7 +86,7 @@ class EC2CredentialsTest(base.BaseIdentityV2Test):
         """Get the definite user ec2 credentials."""
         resp = self.non_admin_client.create_user_ec2_credentials(
             self.creds.credentials.user_id,
-            self.creds.credentials.tenant_id)
+            self.creds.credentials.tenant_id)["credential"]
         self.addCleanup(
             self.non_admin_client.delete_user_ec2_credentials,
             self.creds.credentials.user_id, resp['access'])
@@ -100,7 +102,7 @@ class EC2CredentialsTest(base.BaseIdentityV2Test):
         """Delete user ec2 credentials."""
         resp = self.non_admin_client.create_user_ec2_credentials(
             self.creds.credentials.user_id,
-            self.creds.credentials.tenant_id)
+            self.creds.credentials.tenant_id)["credential"]
         access = resp['access']
         self.non_admin_client.delete_user_ec2_credentials(
             self.creds.credentials.user_id, access)

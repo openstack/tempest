@@ -81,7 +81,7 @@ class CredsClient(object):
         self.identity_client.delete_user(user_id)
 
     def _list_roles(self):
-        roles = self.identity_client.list_roles()
+        roles = self.identity_client.list_roles()['roles']
         return roles
 
 
@@ -89,7 +89,7 @@ class V2CredsClient(CredsClient):
 
     def create_project(self, name, description):
         tenant = self.identity_client.create_tenant(
-            name=name, description=description)
+            name=name, description=description)['tenant']
         return tenant
 
     def get_credentials(self, user, project, password):

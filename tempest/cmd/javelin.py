@@ -278,7 +278,7 @@ def create_tenants(tenants):
     existing = [x['name'] for x in body]
     for tenant in tenants:
         if tenant not in existing:
-            admin.identity.create_tenant(tenant)
+            admin.identity.create_tenant(tenant)['tenant']
         else:
             LOG.warn("Tenant '%s' already exists in this environment" % tenant)
 
@@ -423,7 +423,7 @@ class JavelinCheck(unittest.TestCase):
         LOG.info("checking users")
         for name, user in six.iteritems(self.users):
             client = keystone_admin()
-            found = client.identity.get_user(user['id'])
+            found = client.identity.get_user(user['id'])['user']
             self.assertEqual(found['name'], user['name'])
             self.assertEqual(found['tenantId'], user['tenant_id'])
 
