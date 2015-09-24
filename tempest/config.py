@@ -541,6 +541,10 @@ NetworkGroup = [
                     " with pre-configured ports."
                     " Supported ports are:"
                     " ['normal','direct','macvtap']"),
+    cfg.ListOpt('default_network',
+                default=["1.0.0.0/16", "2.0.0.0/16"],
+                help="List of ip pools"
+                     " for subnetpools creation"),
 ]
 
 network_feature_group = cfg.OptGroup(name='network-feature-enabled',

@@ -445,3 +445,25 @@ class NetworkClient(base.BaseNetworkClient):
         post_body = {'network_id': network_id}
         uri = '/agents/%s/dhcp-networks' % agent_id
         return self.create_resource(uri, post_body)
+
+    def list_subnetpools(self, **filters):
+        uri = '/subnetpools'
+        return self.list_resources(uri, **filters)
+
+    def create_subnetpools(self, **kwargs):
+        uri = '/subnetpools'
+        post_data = {'subnetpool': kwargs}
+        return self.create_resource(uri, post_data)
+
+    def show_subnetpools(self, subnetpool_id, **fields):
+        uri = '/subnetpools/%s' % subnetpool_id
+        return self.show_resource(uri, **fields)
+
+    def update_subnetpools(self, subnetpool_id, **kwargs):
+        uri = '/subnetpools/%s' % subnetpool_id
+        post_data = {'subnetpool': kwargs}
+        return self.update_resource(uri, post_data)
+
+    def delete_subnetpools(self, subnetpool_id):
+        uri = '/subnetpools/%s' % subnetpool_id
+        return self.delete_resource(uri)
