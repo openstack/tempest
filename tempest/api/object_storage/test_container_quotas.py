@@ -26,7 +26,7 @@ QUOTA_COUNT = 3
 
 
 class ContainerQuotasTest(base.BaseObjectTest):
-    """Attemps to test the perfect behavior of quotas in a container."""
+    """Attempts to test the perfect behavior of quotas in a container."""
 
     def setUp(self):
         """Creates and sets a container with quotas.

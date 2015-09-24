@@ -102,7 +102,7 @@ class Accounts(cred_provider.CredentialProvider):
                 if resource == 'network':
                     hash_dict['networks'][temp_hash_key] = resources[resource]
                 else:
-                    LOG.warning('Unkown resource type %s, ignoring this field'
+                    LOG.warning('Unknown resource type %s, ignoring this field'
                                 % resource)
         return hash_dict
 
