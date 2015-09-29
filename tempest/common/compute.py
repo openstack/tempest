@@ -89,11 +89,14 @@ def create_test_server(clients, validatable=False, validation_resources=None,
 
     if volume_backed:
         volume_name = data_utils.rand_name('volume')
-        volume = clients.volumes_client.create_volume(
+        volumes_client = clients.volumes_v2_client
+        if CONF.volume_feature_enabled.api_v1:
+            volumes_client = clients.volumes_client
+        volume = volumes_client.create_volume(
             display_name=volume_name,
             imageRef=image_id)
-        clients.volumes_client.wait_for_volume_status(volume['volume']['id'],
-                                                      'available')
+        volumes_client.wait_for_volume_status(volume['volume']['id'],
+                                              'available')
 
         bd_map_v2 = [{
             'uuid': volume['volume']['id'],
