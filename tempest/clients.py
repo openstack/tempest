@@ -81,8 +81,8 @@ from tempest.services.compute.json.tenant_networks_client import \
 from tempest.services.compute.json.tenant_usages_client import \
     TenantUsagesClient
 from tempest.services.compute.json.versions_client import VersionsClient
-from tempest.services.compute.json.volumes_extensions_client import \
-    VolumesExtensionsClient
+from tempest.services.compute.json.volumes_client import \
+    VolumesClient as ComputeVolumesClient
 from tempest.services.data_processing.v1_1.data_processing_client import \
     DataProcessingClient
 from tempest.services.database.json.flavors_client import \
@@ -334,7 +334,7 @@ class Manager(manager.Manager):
             'build_interval': CONF.volume.build_interval,
             'build_timeout': CONF.volume.build_timeout
         })
-        self.volumes_extensions_client = VolumesExtensionsClient(
+        self.volumes_extensions_client = ComputeVolumesClient(
             self.auth_provider, **params_volume)
         self.compute_versions_client = VersionsClient(self.auth_provider,
                                                       **params_volume)

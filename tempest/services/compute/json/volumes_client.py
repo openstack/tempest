@@ -21,7 +21,7 @@ from tempest.api_schema.response.compute.v2_1 import volumes as schema
 from tempest.common import service_client
 
 
-class VolumesExtensionsClient(service_client.ServiceClient):
+class VolumesClient(service_client.ServiceClient):
 
     def list_volumes(self, detail=False, **params):
         """List all the volumes created."""
