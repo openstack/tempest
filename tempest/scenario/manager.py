@@ -19,12 +19,13 @@ import subprocess
 import netaddr
 from oslo_log import log
 import six
-from tempest_lib.common.utils import data_utils
 from tempest_lib.common.utils import misc as misc_utils
 from tempest_lib import exceptions as lib_exc
 
 from tempest.common import fixed_network
+from tempest.common.utils import data_utils
 from tempest.common.utils.linux import remote_client
+from tempest.common import waiters
 from tempest import config
 from tempest import exceptions
 from tempest.services.network import resources as net_resources
@@ -53,6 +54,8 @@ class ScenarioTest(tempest.test.BaseTestCase):
         cls.keypairs_client = cls.manager.keypairs_client
         # Nova security groups client
         cls.security_groups_client = cls.manager.security_groups_client
+        cls.security_group_rules_client = (
+            cls.manager.security_group_rules_client)
         cls.servers_client = cls.manager.servers_client
         cls.volumes_client = cls.manager.volumes_client
         cls.snapshots_client = cls.manager.snapshots_client
@@ -93,7 +96,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
 
     def addCleanup_with_wait(self, waiter_callable, thing_id, thing_id_param,
                              cleanup_callable, cleanup_args=None,
-                             cleanup_kwargs=None, ignore_error=True):
+                             cleanup_kwargs=None):
         """Adds wait for async resource deletion at the end of cleanups
 
         @param waiter_callable: callable to wait for the resource to delete
@@ -137,7 +140,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
             client = self.keypairs_client
         name = data_utils.rand_name(self.__class__.__name__)
         # We don't need to create a keypair by pubkey in scenario
-        body = client.create_keypair(name)
+        body = client.create_keypair(name=name)
         self.addCleanup(client.delete_keypair, name)
         return body
 
@@ -177,12 +180,13 @@ class ScenarioTest(tempest.test.BaseTestCase):
             cleanup_callable=self.delete_wrapper,
             cleanup_args=[self.servers_client.delete_server, server['id']])
         if wait_on_boot:
-            self.servers_client.wait_for_server_status(server_id=server['id'],
-                                                       status='ACTIVE')
+            waiters.wait_for_server_status(self.servers_client,
+                                           server_id=server['id'],
+                                           status='ACTIVE')
         # The instance retrieved on creation is missing network
         # details, necessitating retrieval after it becomes active to
         # ensure correct details.
-        server = self.servers_client.get_server(server['id'])
+        server = self.servers_client.show_server(server['id'])
         self.assertEqual(server['name'], name)
         return server
 
@@ -215,6 +219,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
 
     def _create_loginable_secgroup_rule(self, secgroup_id=None):
         _client = self.security_groups_client
+        _client_rules = self.security_group_rules_client
         if secgroup_id is None:
             sgs = _client.list_security_groups()
             for sg in sgs:
@@ -228,14 +233,14 @@ class ScenarioTest(tempest.test.BaseTestCase):
         rulesets = [
             {
                 # ssh
-                'ip_proto': 'tcp',
+                'ip_protocol': 'tcp',
                 'from_port': 22,
                 'to_port': 22,
                 'cidr': '0.0.0.0/0',
             },
             {
                 # ping
-                'ip_proto': 'icmp',
+                'ip_protocol': 'icmp',
                 'from_port': -1,
                 'to_port': -1,
                 'cidr': '0.0.0.0/0',
@@ -243,10 +248,10 @@ class ScenarioTest(tempest.test.BaseTestCase):
         ]
         rules = list()
         for ruleset in rulesets:
-            sg_rule = _client.create_security_group_rule(secgroup_id,
-                                                         **ruleset)
+            sg_rule = _client_rules.create_security_group_rule(
+                parent_group_id=secgroup_id, **ruleset)
             self.addCleanup(self.delete_wrapper,
-                            _client.delete_security_group_rule,
+                            _client_rules.delete_security_group_rule,
                             sg_rule['id'])
             rules.append(sg_rule)
         return rules
@@ -256,7 +261,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
         sg_name = data_utils.rand_name(self.__class__.__name__)
         sg_desc = sg_name + " description"
         secgroup = self.security_groups_client.create_security_group(
-            sg_name, sg_desc)
+            name=sg_name, description=sg_desc)
         self.assertEqual(secgroup['name'], sg_name)
         self.assertEqual(secgroup['description'], sg_desc)
         self.addCleanup(self.delete_wrapper,
@@ -337,7 +342,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
             'is_public': 'False',
         }
         params['properties'] = properties
-        image = self.image_client.create_image(**params)
+        image = self.image_client.create_image(**params)['image']
         self.addCleanup(self.image_client.delete_image, image['id'])
         self.assertEqual("queued", image['status'])
         self.image_client.update_image(image['id'], data=image_file)
@@ -397,7 +402,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
         if name is None:
             name = data_utils.rand_name('scenario-snapshot')
         LOG.debug("Creating a snapshot image for server: %s", server['name'])
-        image = _images_client.create_image(server['id'], name)
+        image = _images_client.create_image(server['id'], name=name)
         image_id = image.response['location'].split('images/')[1]
         _image_client.wait_for_image_status(image_id, 'active')
         self.addCleanup_with_wait(
@@ -414,7 +419,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
 
     def nova_volume_attach(self):
         volume = self.servers_client.attach_volume(
-            self.server['id'], self.volume['id'], '/dev/%s'
+            self.server['id'], volumeId=self.volume['id'], device='/dev/%s'
             % CONF.compute.volume_device_name)
         self.assertEqual(self.volume['id'], volume['id'])
         self.volumes_client.wait_for_volume_status(volume['id'], 'in-use')
@@ -443,7 +448,8 @@ class ScenarioTest(tempest.test.BaseTestCase):
                                     preserve_ephemeral=preserve_ephemeral,
                                     **rebuild_kwargs)
         if wait:
-            self.servers_client.wait_for_server_status(server_id, 'ACTIVE')
+            waiters.wait_for_server_status(self.servers_client,
+                                           server_id, 'ACTIVE')
 
     def ping_ip_address(self, ip_address, should_succeed=True,
                         ping_timeout=None):
@@ -545,7 +551,7 @@ class NetworkScenarioTest(ScenarioTest):
 
     def _create_network(self, client=None, tenant_id=None,
                         namestart='network-smoke-',
-                        vlan_transparent=None):
+                        vlan_transparent=None, shared=False):
         if not client:
             client = self.network_client
         if not tenant_id:
@@ -553,7 +559,8 @@ class NetworkScenarioTest(ScenarioTest):
         name = data_utils.rand_name(namestart)
         if vlan_transparent is not None:
             result = client.create_network(name=name, tenant_id=tenant_id,
-                                           vlan_transparent=vlan_transparent)
+                                           vlan_transparent=vlan_transparent,
+                                           shared=shared)
         else:
             result = client.create_network(name=name, tenant_id=tenant_id)
 
@@ -565,27 +572,27 @@ class NetworkScenarioTest(ScenarioTest):
 
     def _list_networks(self, *args, **kwargs):
         """List networks using admin creds """
-        return self._admin_lister('networks')(*args, **kwargs)
+        networks_list = self.admin_manager.network_client.list_networks(
+            *args, **kwargs)
+        return networks_list['networks']
 
     def _list_subnets(self, *args, **kwargs):
         """List subnets using admin creds """
-        return self._admin_lister('subnets')(*args, **kwargs)
+        subnets_list = self.admin_manager.network_client.list_subnets(
+            *args, **kwargs)
+        return subnets_list['subnets']
 
     def _list_routers(self, *args, **kwargs):
         """List routers using admin creds """
-        return self._admin_lister('routers')(*args, **kwargs)
+        routers_list = self.admin_manager.network_client.list_routers(
+            *args, **kwargs)
+        return routers_list['routers']
 
     def _list_ports(self, *args, **kwargs):
         """List ports using admin creds """
-        return self._admin_lister('ports')(*args, **kwargs)
-
-    def _admin_lister(self, resource_type):
-        def temp(*args, **kwargs):
-            temp_method = self.admin_manager.network_client.__getattr__(
-                'list_%s' % resource_type)
-            resource_list = temp_method(*args, **kwargs)
-            return resource_list[resource_type]
-        return temp
+        ports_list = self.admin_manager.network_client.list_ports(
+            *args, **kwargs)
+        return ports_list['ports']
 
     def _create_subnet(self, network, client=None, namestart='subnet-smoke',
                        **kwargs):
@@ -663,14 +670,18 @@ class NetworkScenarioTest(ScenarioTest):
     def _get_server_port_id_and_ip4(self, server, ip_addr=None):
         ports = self._list_ports(device_id=server['id'],
                                  fixed_ip=ip_addr)
-        self.assertEqual(len(ports), 1,
-                         "Unable to determine which port to target.")
         # it might happen here that this port has more then one ip address
         # as in case of dual stack- when this port is created on 2 subnets
-        for ip46 in ports[0]['fixed_ips']:
-            ip = ip46['ip_address']
-            if netaddr.valid_ipv4(ip):
-                return ports[0]['id'], ip
+        port_map = [(p["id"], fxip["ip_address"])
+                    for p in ports
+                    for fxip in p["fixed_ips"]
+                    if netaddr.valid_ipv4(fxip["ip_address"])]
+
+        self.assertEqual(len(port_map), 1,
+                         "Found multiple IPv4 addresses: %s. "
+                         "Unable to determine which port to target."
+                         % port_map)
+        return port_map[0]
 
     def _get_network_by_name(self, network_name):
         net = self._list_networks(name=network_name)
@@ -1232,10 +1243,10 @@ class BaremetalScenarioTest(ScenarioTest):
                                      BaremetalProvisionStates.ACTIVE,
                                      timeout=CONF.baremetal.active_timeout)
 
-        self.servers_client.wait_for_server_status(self.instance['id'],
-                                                   'ACTIVE')
+        waiters.wait_for_server_status(self.servers_client,
+                                       self.instance['id'], 'ACTIVE')
         self.node = self.get_node(instance_id=self.instance['id'])
-        self.instance = self.servers_client.get_server(self.instance['id'])
+        self.instance = self.servers_client.show_server(self.instance['id'])
 
     def terminate_instance(self):
         self.servers_client.delete_server(self.instance['id'])
