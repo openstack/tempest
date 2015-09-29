@@ -21,7 +21,7 @@ from tempest.api_schema.response.compute.v2_1 import snapshots as schema
 from tempest.common import service_client
 
 
-class SnapshotsExtensionsClient(service_client.ServiceClient):
+class SnapshotsClient(service_client.ServiceClient):
 
     def create_snapshot(self, volume_id, **kwargs):
         post_body = {
