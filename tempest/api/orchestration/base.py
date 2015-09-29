@@ -50,8 +50,12 @@ class BaseOrchestrationTest(tempest.test.BaseTestCase):
         cls.servers_client = cls.os.servers_client
         cls.keypairs_client = cls.os.keypairs_client
         cls.network_client = cls.os.network_client
-        cls.volumes_client = cls.os.volumes_client
         cls.images_v2_client = cls.os.image_client_v2
+
+        if CONF.volume_feature_enabled.api_v2:
+            cls.volumes_client = cls.os.volumes_v2_client
+        else:
+            cls.volumes_client = cls.os.volumes_client
 
     @classmethod
     def resource_setup(cls):
