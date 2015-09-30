@@ -55,12 +55,12 @@ class TestShelveInstance(manager.ScenarioTest):
                                        'ACTIVE')
 
     def _create_server_then_shelve_and_unshelve(self, boot_from_volume=False):
-        self.keypair = self.create_keypair()
+        keypair = self.create_keypair()
 
-        self.security_group = self._create_security_group()
-        security_groups = [{'name': self.security_group['name']}]
+        security_group = self._create_security_group()
+        security_groups = [{'name': security_group['name']}]
         create_kwargs = {
-            'key_name': self.keypair['name'],
+            'key_name': keypair['name'],
             'security_groups': security_groups
         }
 
@@ -86,18 +86,22 @@ class TestShelveInstance(manager.ScenarioTest):
                             floating_ip['id'])
             self.floating_ips_client.associate_floating_ip_to_server(
                 floating_ip['ip'], server['id'])
-            timestamp = self.create_timestamp(floating_ip['ip'])
+            timestamp = self.create_timestamp(
+                floating_ip['ip'], private_key=keypair['private_key'])
         else:
-            timestamp = self.create_timestamp(server)
+            timestamp = self.create_timestamp(
+                server, private_key=keypair['private_key'])
 
         # Prevent bug #1257594 from coming back
         # Unshelve used to boot the instance with the original image, not
         # with the instance snapshot
         self._shelve_then_unshelve_server(server)
         if CONF.compute.use_floatingip_for_ssh:
-            timestamp2 = self.get_timestamp(floating_ip['ip'])
+            timestamp2 = self.get_timestamp(floating_ip['ip'],
+                                            private_key=keypair['private_key'])
         else:
-            timestamp2 = self.get_timestamp(server)
+            timestamp2 = self.get_timestamp(server,
+                                            private_key=keypair['private_key'])
         self.assertEqual(timestamp, timestamp2)
 
     @test.idempotent_id('1164e700-0af0-4a4c-8792-35909a88743c')
