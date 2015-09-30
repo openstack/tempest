@@ -562,7 +562,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
         ssh_client = self.get_remote_client(server_or_ip)
         if dev_name is not None:
             ssh_client.make_fs(dev_name)
-            ssh_client.mount(dev_name)
+            ssh_client.mount(dev_name, mount_path)
         cmd_timestamp = 'sudo sh -c "date > %s/timestamp; sync"' % mount_path
         ssh_client.exec_command(cmd_timestamp)
         timestamp = ssh_client.exec_command('sudo cat %s/timestamp'
@@ -574,7 +574,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
     def get_timestamp(self, server_or_ip, dev_name=None, mount_path='/mnt'):
         ssh_client = self.get_remote_client(server_or_ip)
         if dev_name is not None:
-            ssh_client.mount(dev_name)
+            ssh_client.mount(dev_name, mount_path)
         timestamp = ssh_client.exec_command('sudo cat %s/timestamp'
                                             % mount_path)
         if dev_name is not None:
