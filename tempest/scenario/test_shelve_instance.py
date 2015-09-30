@@ -37,16 +37,6 @@ class TestShelveInstance(manager.ScenarioTest):
 
     """
 
-    def _write_timestamp(self, server_or_ip):
-        ssh_client = self.get_remote_client(server_or_ip)
-        ssh_client.exec_command('date > /tmp/timestamp; sync')
-        self.timestamp = ssh_client.exec_command('cat /tmp/timestamp')
-
-    def _check_timestamp(self, server_or_ip):
-        ssh_client = self.get_remote_client(server_or_ip)
-        got_timestamp = ssh_client.exec_command('cat /tmp/timestamp')
-        self.assertEqual(self.timestamp, got_timestamp)
-
     def _shelve_then_unshelve_server(self, server):
         self.servers_client.shelve_server(server['id'])
         offload_time = CONF.compute.shelved_offload_time
@@ -96,18 +86,19 @@ class TestShelveInstance(manager.ScenarioTest):
                             floating_ip['id'])
             self.floating_ips_client.associate_floating_ip_to_server(
                 floating_ip['ip'], server['id'])
-            self._write_timestamp(floating_ip['ip'])
+            timestamp = self.create_timestamp(floating_ip['ip'])
         else:
-            self._write_timestamp(server)
+            timestamp = self.create_timestamp(server)
 
         # Prevent bug #1257594 from coming back
         # Unshelve used to boot the instance with the original image, not
         # with the instance snapshot
         self._shelve_then_unshelve_server(server)
         if CONF.compute.use_floatingip_for_ssh:
-            self._check_timestamp(floating_ip['ip'])
+            timestamp2 = self.get_timestamp(floating_ip['ip'])
         else:
-            self._check_timestamp(server)
+            timestamp2 = self.get_timestamp(server)
+        self.assertEqual(timestamp, timestamp2)
 
     @test.idempotent_id('1164e700-0af0-4a4c-8792-35909a88743c')
     @testtools.skipUnless(CONF.compute_feature_enabled.shelve,

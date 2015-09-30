@@ -127,23 +127,6 @@ class TestStampPattern(manager.ScenarioTest):
                                             CONF.compute.build_interval):
             raise exceptions.TimeoutException
 
-    def _create_timestamp(self, server_or_ip):
-        ssh_client = self._ssh_to_server(server_or_ip)
-        ssh_client.exec_command('sudo /usr/sbin/mkfs.ext4 /dev/%s'
-                                % CONF.compute.volume_device_name)
-        ssh_client.exec_command('sudo mount /dev/%s /mnt'
-                                % CONF.compute.volume_device_name)
-        ssh_client.exec_command('sudo sh -c "date > /mnt/timestamp;sync"')
-        self.timestamp = ssh_client.exec_command('sudo cat /mnt/timestamp')
-        ssh_client.exec_command('sudo umount /mnt')
-
-    def _check_timestamp(self, server_or_ip):
-        ssh_client = self._ssh_to_server(server_or_ip)
-        ssh_client.exec_command('sudo mount /dev/%s /mnt'
-                                % CONF.compute.volume_device_name)
-        got_timestamp = ssh_client.exec_command('sudo cat /mnt/timestamp')
-        self.assertEqual(self.timestamp, got_timestamp)
-
     @decorators.skip_because(bug="1205344")
     @test.idempotent_id('10fd234a-515c-41e5-b092-8323060598c5')
     @testtools.skipUnless(CONF.compute_feature_enabled.snapshot,
@@ -167,7 +150,8 @@ class TestStampPattern(manager.ScenarioTest):
 
         self._attach_volume(server, volume)
         self._wait_for_volume_available_on_the_system(ip_for_server)
-        self._create_timestamp(ip_for_server)
+        timestamp = self.create_timestamp(ip_for_server,
+                                          CONF.compute.volume_device_name)
         self._detach_volume(server, volume)
 
         # snapshot the volume
@@ -196,4 +180,6 @@ class TestStampPattern(manager.ScenarioTest):
         self._wait_for_volume_available_on_the_system(ip_for_snapshot)
 
         # check the existence of the timestamp file in the volume2
-        self._check_timestamp(ip_for_snapshot)
+        timestamp2 = self.get_timestamp(ip_for_snapshot,
+                                        CONF.compute.volume_device_name)
+        self.assertEqual(timestamp, timestamp2)

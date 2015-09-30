@@ -171,3 +171,14 @@ class RemoteClient(object):
         if dhcp_client == 'udhcpc' and not fixed_ip:
             raise ValueError("need to set 'fixed_ip' for udhcpc client")
         return getattr(self, '_renew_lease_' + dhcp_client)(fixed_ip=fixed_ip)
+
+    def mount(self, dev_name, mount_path='/mnt'):
+        cmd_mount = 'sudo mount /dev/%s %s' % (dev_name, mount_path)
+        self.exec_command(cmd_mount)
+
+    def umount(self, mount_path='/mnt'):
+        self.exec_command('sudo umount %s' % mount_path)
+
+    def make_fs(self, dev_name, fs='ext4'):
+        cmd_mkfs = 'sudo /usr/sbin/mke2fs -t %s /dev/%s' % (fs, dev_name)
+        self.exec_command(cmd_mkfs)
