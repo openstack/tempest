@@ -249,6 +249,7 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
         server = self.create_server(
             name=name,
             network_client=tenant.manager.network_client,
+            networks_client=tenant.manager.networks_client,
             create_kwargs=create_kwargs)
         self.assertEqual(
             sorted([s['name'] for s in security_groups]),
@@ -289,7 +290,8 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
 
     def _create_tenant_network(self, tenant):
         network, subnet, router = self.create_networks(
-            client=tenant.manager.network_client)
+            client=tenant.manager.network_client,
+            networks_client=tenant.manager.networks_client)
         tenant.set_network(network, subnet, router)
 
     def _set_compute_context(self, tenant):

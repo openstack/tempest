@@ -93,6 +93,7 @@ from tempest import config
 from tempest import exceptions as exc
 from tempest.services.identity.v2.json import identity_client
 from tempest.services.network.json import network_client
+from tempest.services.network.json import networks_client
 import tempest_lib.auth
 from tempest_lib.common.utils import data_utils
 import tempest_lib.exceptions
@@ -136,19 +137,29 @@ def get_admin_clients(opts):
         **params
     )
     network_admin = None
+    networks_admin = None
+    neutron_iso_networks = False
     if (CONF.service_available.neutron and
         CONF.auth.create_isolated_networks):
+        neutron_iso_networks = True
         network_admin = network_client.NetworkClient(
             _auth,
             CONF.network.catalog_type,
             CONF.network.region or CONF.identity.region,
             endpoint_type='adminURL',
             **params)
-    return identity_admin, network_admin
+        networks_admin = networks_client.NetworksClient(
+            _auth,
+            CONF.network.catalog_type,
+            CONF.network.region or CONF.identity.region,
+            endpoint_type='adminURL',
+            **params)
+    return identity_admin, neutron_iso_networks, network_admin, networks_admin
 
 
 def create_resources(opts, resources):
-    identity_admin, network_admin = get_admin_clients(opts)
+    (identity_admin, neutron_iso_networks,
+     network_admin, networks_admin) = get_admin_clients(opts)
     roles = identity_admin.list_roles()
     for u in resources['users']:
         u['role_ids'] = []
@@ -187,12 +198,11 @@ def create_resources(opts, resources):
                 u['name'] = random_user_name(opts.tag, u['prefix'])
 
     LOG.info('Users created')
-    if network_admin:
+    if neutron_iso_networks:
         for u in resources['users']:
             tenant = identity_admin.get_tenant_by_name(u['tenant'])
-            network_name, router_name = create_network_resources(network_admin,
-                                                                 tenant['id'],
-                                                                 u['name'])
+            network_name, router_name = create_network_resources(
+                network_admin, networks_admin, tenant['id'], u['name'])
             u['network'] = network_name
             u['router'] = router_name
         LOG.info('Networks created')
@@ -218,10 +228,11 @@ def create_resources(opts, resources):
     LOG.info('Resources deployed successfully!')
 
 
-def create_network_resources(network_admin_client, tenant_id, name):
+def create_network_resources(network_admin_client, networks_admin_client,
+                             tenant_id, name):
 
     def _create_network(name):
-        resp_body = network_admin_client.create_network(
+        resp_body = networks_admin_client.create_network(
             name=name, tenant_id=tenant_id)
         return resp_body['network']
 

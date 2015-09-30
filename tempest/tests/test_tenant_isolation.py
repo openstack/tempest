@@ -120,7 +120,7 @@ class TestTenantIsolation(base.TestCase):
 
     def _mock_network_create(self, iso_creds, id, name):
         net_fix = self.useFixture(mockpatch.PatchObject(
-            iso_creds.network_admin_client,
+            iso_creds.networks_admin_client,
             'create_network',
             return_value={'network': {'id': id, 'name': name}}))
         return net_fix
@@ -268,7 +268,7 @@ class TestTenantIsolation(base.TestCase):
         self._mock_list_role()
         self._mock_user_create('1234', 'fake_prim_user')
         self._mock_tenant_create('1234', 'fake_prim_tenant')
-        net = mock.patch.object(iso_creds.network_admin_client,
+        net = mock.patch.object(iso_creds.networks_admin_client,
                                 'delete_network')
         net_mock = net.start()
         subnet = mock.patch.object(iso_creds.network_admin_client,
@@ -361,7 +361,7 @@ class TestTenantIsolation(base.TestCase):
                    'IdentityClient.delete_user')
         self.patch('tempest.services.identity.v2.json.identity_client.'
                    'IdentityClient.delete_tenant')
-        net = mock.patch.object(iso_creds.network_admin_client,
+        net = mock.patch.object(iso_creds.networks_admin_client,
                                 'delete_network')
         net_mock = net.start()
         subnet = mock.patch.object(iso_creds.network_admin_client,
@@ -494,7 +494,7 @@ class TestTenantIsolation(base.TestCase):
         self._mock_list_role()
         self._mock_user_create('1234', 'fake_prim_user')
         self._mock_tenant_create('1234', 'fake_prim_tenant')
-        net = mock.patch.object(iso_creds.network_admin_client,
+        net = mock.patch.object(iso_creds.networks_admin_client,
                                 'delete_network')
         net_mock = net.start()
         subnet = mock.patch.object(iso_creds.network_admin_client,

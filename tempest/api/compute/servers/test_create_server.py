@@ -41,6 +41,7 @@ class ServersTestJSON(base.BaseV2ComputeTest):
         super(ServersTestJSON, cls).setup_clients()
         cls.client = cls.servers_client
         cls.network_client = cls.os.network_client
+        cls.networks_client = cls.os.networks_client
 
     @classmethod
     def resource_setup(cls):
@@ -69,8 +70,8 @@ class ServersTestJSON(base.BaseV2ComputeTest):
 
     def _create_net_subnet_ret_net_from_cidr(self, cidr):
         name_net = data_utils.rand_name(self.__class__.__name__)
-        net = self.network_client.create_network(name=name_net)
-        self.addCleanup(self.network_client.delete_network,
+        net = self.networks_client.create_network(name=name_net)
+        self.addCleanup(self.networks_client.delete_network,
                         net['network']['id'])
 
         subnet = self.network_client.create_subnet(

@@ -34,28 +34,6 @@ class NetworkClient(base.BaseNetworkClient):
     quotas
     """
 
-    def create_network(self, **kwargs):
-        uri = '/networks'
-        post_data = {'network': kwargs}
-        return self.create_resource(uri, post_data)
-
-    def update_network(self, network_id, **kwargs):
-        uri = '/networks/%s' % network_id
-        post_data = {'network': kwargs}
-        return self.update_resource(uri, post_data)
-
-    def show_network(self, network_id, **fields):
-        uri = '/networks/%s' % network_id
-        return self.show_resource(uri, **fields)
-
-    def delete_network(self, network_id):
-        uri = '/networks/%s' % network_id
-        return self.delete_resource(uri)
-
-    def list_networks(self, **filters):
-        uri = '/networks'
-        return self.list_resources(uri, **filters)
-
     def create_subnet(self, **kwargs):
         uri = '/subnets'
         post_data = {'subnet': kwargs}

@@ -40,8 +40,8 @@ class IsolatedCreds(cred_provider.CredentialProvider):
         self.default_admin_creds = cred_provider.get_configured_credentials(
             'identity_admin', fill_in=True,
             identity_version=self.identity_version)
-        self.identity_admin_client, self.network_admin_client = (
-            self._get_admin_clients())
+        (self.identity_admin_client, self.network_admin_client,
+         self.networks_admin_client) = self._get_admin_clients()
         # Domain where isolated credentials are provisioned (v3 only).
         # Use that of the admin account is None is configured.
         self.creds_domain_name = None
@@ -61,9 +61,9 @@ class IsolatedCreds(cred_provider.CredentialProvider):
         """
         os = clients.Manager(self.default_admin_creds)
         if self.identity_version == 'v2':
-            return os.identity_client, os.network_client
+            return os.identity_client, os.network_client, os.networks_client
         else:
-            return os.identity_v3_client, os.network_client
+            return os.identity_v3_client, os.network_client, os.networks_client
 
     def _create_creds(self, suffix="", admin=False, roles=None):
         """Create random credentials under the following schema.
@@ -158,7 +158,7 @@ class IsolatedCreds(cred_provider.CredentialProvider):
         return network, subnet, router
 
     def _create_network(self, name, tenant_id):
-        resp_body = self.network_admin_client.create_network(
+        resp_body = self.networks_admin_client.create_network(
             name=name, tenant_id=tenant_id)
         return resp_body['network']
 
@@ -268,7 +268,7 @@ class IsolatedCreds(cred_provider.CredentialProvider):
                      subnet_name)
 
     def _clear_isolated_network(self, network_id, network_name):
-        net_client = self.network_admin_client
+        net_client = self.networks_admin_client
         try:
             net_client.delete_network(network_id)
         except lib_exc.NotFound:
