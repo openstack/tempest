@@ -93,7 +93,7 @@ class EC2CredentialsTest(base.BaseIdentityV2Test):
 
         ec2_creds = self.non_admin_client.show_user_ec2_credentials(
             self.creds.credentials.user_id, resp['access']
-        )
+        )["credential"]
         for key in ['access', 'secret', 'user_id', 'tenant_id']:
             self.assertEqual(ec2_creds[key], resp[key])
 
