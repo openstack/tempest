@@ -22,18 +22,13 @@ from tempest.common import service_client
 
 class ServerGroupsClient(service_client.ServiceClient):
 
-    def create_server_group(self, name, policies):
+    def create_server_group(self, **kwargs):
         """
         Create the server group
         name : Name of the server-group
         policies : List of the policies - affinity/anti-affinity)
         """
-        post_body = {
-            'name': name,
-            'policies': policies,
-        }
-
-        post_body = json.dumps({'server_group': post_body})
+        post_body = json.dumps({'server_group': kwargs})
         resp, body = self.post('os-server-groups', post_body)
 
         body = json.loads(body)
