@@ -36,16 +36,13 @@ class TestSnapshotPattern(manager.ScenarioTest):
 
     """
 
-    def _boot_image(self, image_id):
-        security_groups = [{'name': self.security_group['name']}]
+    def _boot_image(self, image_id, keypair, security_group):
+        security_groups = [{'name': security_group['name']}]
         create_kwargs = {
-            'key_name': self.keypair['name'],
+            'key_name': keypair['name'],
             'security_groups': security_groups
         }
         return self.create_server(image=image_id, create_kwargs=create_kwargs)
-
-    def _add_keypair(self):
-        self.keypair = self.create_keypair()
 
     @test.idempotent_id('608e604b-1d63-4a82-8e3e-91bc665c90b4')
     @testtools.skipUnless(CONF.compute_feature_enabled.snapshot,
@@ -53,27 +50,33 @@ class TestSnapshotPattern(manager.ScenarioTest):
     @test.services('compute', 'network', 'image')
     def test_snapshot_pattern(self):
         # prepare for booting an instance
-        self._add_keypair()
-        self.security_group = self._create_security_group()
+        keypair = self.create_keypair()
+        security_group = self._create_security_group()
 
         # boot an instance and create a timestamp file in it
-        server = self._boot_image(CONF.compute.image_ref)
+        server = self._boot_image(CONF.compute.image_ref, keypair,
+                                  security_group)
         if CONF.compute.use_floatingip_for_ssh:
             fip_for_server = self.create_floating_ip(server)
-            timestamp = self.create_timestamp(fip_for_server['ip'])
+            timestamp = self.create_timestamp(
+                fip_for_server['ip'], private_key=keypair['private_key'])
         else:
-            timestamp = self.create_timestamp(server)
+            timestamp = self.create_timestamp(
+                server, private_key=keypair['private_key'])
 
         # snapshot the instance
         snapshot_image = self.create_server_snapshot(server=server)
 
         # boot a second instance from the snapshot
-        server_from_snapshot = self._boot_image(snapshot_image['id'])
+        server_from_snapshot = self._boot_image(snapshot_image['id'],
+                                                keypair, security_group)
 
         # check the existence of the timestamp file in the second instance
         if CONF.compute.use_floatingip_for_ssh:
             fip_for_snapshot = self.create_floating_ip(server_from_snapshot)
-            timestamp2 = self.get_timestamp(fip_for_snapshot['ip'])
+            timestamp2 = self.get_timestamp(fip_for_snapshot['ip'],
+                                            private_key=keypair['private_key'])
         else:
-            timestamp2 = self.get_timestamp(server_from_snapshot)
+            timestamp2 = self.get_timestamp(server_from_snapshot,
+                                            private_key=keypair['private_key'])
         self.assertEqual(timestamp, timestamp2)
