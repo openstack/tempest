@@ -74,8 +74,8 @@ from tempest.services.compute.json.server_groups_client import \
     ServerGroupsClient
 from tempest.services.compute.json.servers_client import ServersClient
 from tempest.services.compute.json.services_client import ServicesClient
-from tempest.services.compute.json.snapshots_extensions_client import \
-    SnapshotsExtensionsClient
+from tempest.services.compute.json.snapshots_client import \
+    SnapshotsClient as ComputeSnapshotsClient
 from tempest.services.compute.json.tenant_networks_client import \
     TenantNetworksClient
 from tempest.services.compute.json.tenant_usages_client import \
@@ -338,7 +338,7 @@ class Manager(manager.Manager):
             self.auth_provider, **params_volume)
         self.compute_versions_client = VersionsClient(self.auth_provider,
                                                       **params_volume)
-        self.snapshots_extensions_client = SnapshotsExtensionsClient(
+        self.snapshots_extensions_client = ComputeSnapshotsClient(
             self.auth_provider, **params_volume)
 
     def _set_database_clients(self):
