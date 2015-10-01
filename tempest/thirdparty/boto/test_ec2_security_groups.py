@@ -13,8 +13,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest_lib.common.utils import data_utils
-
+from tempest.common.utils import data_utils
 from tempest import test
 from tempest.thirdparty.boto import test as boto_test
 
@@ -69,5 +68,5 @@ class EC2SecurityGroupTest(boto_test.BotoTestCase):
 
         group_get = self.client.get_all_security_groups(
             groupnames=(group_name,))[0]
-        # all rules shuld be removed now
+        # all rules should be removed now
         self.assertEqual(0, len(group_get.rules))

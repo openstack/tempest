@@ -13,20 +13,20 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import json
+from oslo_serialization import jsonutils as json
 
 from tempest.api_schema.response.compute.v2_1 import certificates as schema
 from tempest.common import service_client
 
 
-class CertificatesClientJSON(service_client.ServiceClient):
+class CertificatesClient(service_client.ServiceClient):
 
-    def show_certificate(self, id):
-        url = "os-certificates/%s" % (id)
+    def show_certificate(self, certificate_id):
+        url = "os-certificates/%s" % certificate_id
         resp, body = self.get(url)
         body = json.loads(body)
         self.validate_response(schema.get_certificate, resp, body)
-        return service_client.ResponseBody(resp, body['certificate'])
+        return service_client.ResponseBody(resp, body)
 
     def create_certificate(self):
         """create certificates."""
@@ -34,4 +34,4 @@ class CertificatesClientJSON(service_client.ServiceClient):
         resp, body = self.post(url, None)
         body = json.loads(body)
         self.validate_response(schema.create_certificate, resp, body)
-        return service_client.ResponseBody(resp, body['certificate'])
+        return service_client.ResponseBody(resp, body)

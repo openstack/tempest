@@ -12,9 +12,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest_lib.common.utils import data_utils
-
 from tempest.api.data_processing import base as dp_base
+from tempest.common.utils import data_utils
 from tempest import test
 
 
@@ -69,13 +68,13 @@ class DataSourceTest(dp_base.BaseDataProcessingTest):
 
     def _list_data_sources(self, source_info):
         # check for data source in list
-        sources = self.client.list_data_sources()
+        sources = self.client.list_data_sources()['data_sources']
         sources_info = [(source['id'], source['name']) for source in sources]
         self.assertIn(source_info, sources_info)
 
     def _get_data_source(self, source_id, source_name, source_body):
         # check data source fetch by id
-        source = self.client.get_data_source(source_id)
+        source = self.client.get_data_source(source_id)['data_source']
         self.assertEqual(source_name, source['name'])
         self.assertDictContainsSubset(source_body, source)
 

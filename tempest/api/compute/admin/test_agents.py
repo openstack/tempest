@@ -13,10 +13,10 @@
 #    under the License.
 
 from oslo_log import log
-from tempest_lib.common.utils import data_utils
 from tempest_lib import exceptions as lib_exc
 
 from tempest.api.compute import base
+from tempest.common.utils import data_utils
 from tempest import test
 
 LOG = log.getLogger(__name__)
@@ -38,7 +38,7 @@ class AgentsAdminTestJSON(base.BaseV2ComputeAdminTest):
             hypervisor='common', os='linux', architecture='x86_64',
             version='7.0', url='xxx://xxxx/xxx/xxx',
             md5hash='add6bb58e139be103324d04d82d8f545')
-        body = self.client.create_agent(**params)
+        body = self.client.create_agent(**params)['agent']
         self.agent_id = body['agent_id']
 
     def tearDown(self):
@@ -67,7 +67,7 @@ class AgentsAdminTestJSON(base.BaseV2ComputeAdminTest):
             hypervisor='kvm', os='win', architecture='x86',
             version='7.0', url='xxx://xxxx/xxx/xxx',
             md5hash='add6bb58e139be103324d04d82d8f545')
-        body = self.client.create_agent(**params)
+        body = self.client.create_agent(**params)['agent']
         self.addCleanup(self.client.delete_agent, body['agent_id'])
         for expected_item, value in params.items():
             self.assertEqual(value, body[expected_item])
@@ -78,7 +78,7 @@ class AgentsAdminTestJSON(base.BaseV2ComputeAdminTest):
         params = self._param_helper(
             version='8.0', url='xxx://xxxx/xxx/xxx2',
             md5hash='add6bb58e139be103324d04d82d8f547')
-        body = self.client.update_agent(self.agent_id, **params)
+        body = self.client.update_agent(self.agent_id, **params)['agent']
         for expected_item, value in params.items():
             self.assertEqual(value, body[expected_item])
 
@@ -88,13 +88,13 @@ class AgentsAdminTestJSON(base.BaseV2ComputeAdminTest):
         self.client.delete_agent(self.agent_id)
 
         # Verify the list doesn't contain the deleted agent.
-        agents = self.client.list_agents()
+        agents = self.client.list_agents()['agents']
         self.assertNotIn(self.agent_id, map(lambda x: x['agent_id'], agents))
 
     @test.idempotent_id('6a326c69-654b-438a-80a3-34bcc454e138')
     def test_list_agents(self):
         # List all agents.
-        agents = self.client.list_agents()
+        agents = self.client.list_agents()['agents']
         self.assertTrue(len(agents) > 0, 'Cannot get any agents.(%s)' % agents)
         self.assertIn(self.agent_id, map(lambda x: x['agent_id'], agents))
 
@@ -105,12 +105,12 @@ class AgentsAdminTestJSON(base.BaseV2ComputeAdminTest):
             hypervisor='xen', os='linux', architecture='x86',
             version='7.0', url='xxx://xxxx/xxx/xxx1',
             md5hash='add6bb58e139be103324d04d82d8f546')
-        agent_xen = self.client.create_agent(**params)
+        agent_xen = self.client.create_agent(**params)['agent']
         self.addCleanup(self.client.delete_agent, agent_xen['agent_id'])
 
         agent_id_xen = agent_xen['agent_id']
-        params_filter = {'hypervisor': agent_xen['hypervisor']}
-        agents = self.client.list_agents(params_filter)
+        agents = (self.client.list_agents(hypervisor=agent_xen['hypervisor'])
+                  ['agents'])
         self.assertTrue(len(agents) > 0, 'Cannot get any agents.(%s)' % agents)
         self.assertIn(agent_id_xen, map(lambda x: x['agent_id'], agents))
         self.assertNotIn(self.agent_id, map(lambda x: x['agent_id'], agents))

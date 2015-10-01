@@ -53,7 +53,7 @@ class RemoteClient(object):
         # path is extended for some non-cirros guest oses (centos7)
         cmd = CONF.compute.ssh_shell_prologue + " " + cmd
         LOG.debug("Remote command: %s" % cmd)
-        return self.ssh_client.exec_command(cmd, get_pty=get_pty)
+        return self.ssh_client.exec_command(cmd)
 
     def get_kernel_modules(self):
         """
@@ -301,11 +301,22 @@ class RemoteClient(object):
         * dhclient
         """
         # TODO(yfried): add support for dhcpcd
-        suported_clients = ['udhcpc', 'dhclient']
+        supported_clients = ['udhcpc', 'dhclient']
         dhcp_client = CONF.scenario.dhcp_client
-        if dhcp_client not in suported_clients:
+        if dhcp_client not in supported_clients:
             raise exceptions.InvalidConfiguration('%s DHCP client unsupported'
                                                   % dhcp_client)
         if dhcp_client == 'udhcpc' and not fixed_ip:
             raise ValueError("need to set 'fixed_ip' for udhcpc client")
         return getattr(self, '_renew_lease_' + dhcp_client)(fixed_ip=fixed_ip)
+
+    def mount(self, dev_name, mount_path='/mnt'):
+        cmd_mount = 'sudo mount /dev/%s %s' % (dev_name, mount_path)
+        self.exec_command(cmd_mount)
+
+    def umount(self, mount_path='/mnt'):
+        self.exec_command('sudo umount %s' % mount_path)
+
+    def make_fs(self, dev_name, fs='ext4'):
+        cmd_mkfs = 'sudo /usr/sbin/mke2fs -t %s /dev/%s' % (fs, dev_name)
+        self.exec_command(cmd_mkfs)

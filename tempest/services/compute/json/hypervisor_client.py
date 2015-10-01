@@ -13,13 +13,13 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import json
+from oslo_serialization import jsonutils as json
 
 from tempest.api_schema.response.compute.v2_1 import hypervisors as schema
 from tempest.common import service_client
 
 
-class HypervisorClientJSON(service_client.ServiceClient):
+class HypervisorClient(service_client.ServiceClient):
 
     def list_hypervisors(self, detail=False):
         """List hypervisors information."""
@@ -32,39 +32,39 @@ class HypervisorClientJSON(service_client.ServiceClient):
         resp, body = self.get(url)
         body = json.loads(body)
         self.validate_response(_schema, resp, body)
-        return service_client.ResponseBodyList(resp, body['hypervisors'])
+        return service_client.ResponseBody(resp, body)
 
-    def show_hypervisor(self, hyper_id):
+    def show_hypervisor(self, hypervisor_id):
         """Display the details of the specified hypervisor."""
-        resp, body = self.get('os-hypervisors/%s' % hyper_id)
+        resp, body = self.get('os-hypervisors/%s' % hypervisor_id)
         body = json.loads(body)
         self.validate_response(schema.get_hypervisor, resp, body)
-        return service_client.ResponseBody(resp, body['hypervisor'])
+        return service_client.ResponseBody(resp, body)
 
-    def list_servers_on_hypervisor(self, hyper_name):
+    def list_servers_on_hypervisor(self, hypervisor_name):
         """List instances belonging to the specified hypervisor."""
-        resp, body = self.get('os-hypervisors/%s/servers' % hyper_name)
+        resp, body = self.get('os-hypervisors/%s/servers' % hypervisor_name)
         body = json.loads(body)
         self.validate_response(schema.get_hypervisors_servers, resp, body)
-        return service_client.ResponseBodyList(resp, body['hypervisors'])
+        return service_client.ResponseBody(resp, body)
 
     def show_hypervisor_statistics(self):
         """Get hypervisor statistics over all compute nodes."""
         resp, body = self.get('os-hypervisors/statistics')
         body = json.loads(body)
         self.validate_response(schema.get_hypervisor_statistics, resp, body)
-        return service_client.ResponseBody(resp, body['hypervisor_statistics'])
+        return service_client.ResponseBody(resp, body)
 
-    def show_hypervisor_uptime(self, hyper_id):
+    def show_hypervisor_uptime(self, hypervisor_id):
         """Display the uptime of the specified hypervisor."""
-        resp, body = self.get('os-hypervisors/%s/uptime' % hyper_id)
+        resp, body = self.get('os-hypervisors/%s/uptime' % hypervisor_id)
         body = json.loads(body)
         self.validate_response(schema.get_hypervisor_uptime, resp, body)
-        return service_client.ResponseBody(resp, body['hypervisor'])
+        return service_client.ResponseBody(resp, body)
 
-    def search_hypervisor(self, hyper_name):
+    def search_hypervisor(self, hypervisor_name):
         """Search specified hypervisor."""
-        resp, body = self.get('os-hypervisors/%s/search' % hyper_name)
+        resp, body = self.get('os-hypervisors/%s/search' % hypervisor_name)
         body = json.loads(body)
         self.validate_response(schema.list_search_hypervisors, resp, body)
-        return service_client.ResponseBodyList(resp, body['hypervisors'])
+        return service_client.ResponseBody(resp, body)

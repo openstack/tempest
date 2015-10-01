@@ -14,8 +14,8 @@
 #    under the License.
 
 from oslo_log import log as logging
-from tempest_lib.common.utils import data_utils
 
+from tempest.common.utils import data_utils
 from tempest.common.utils.linux import remote_client
 from tempest import config
 from tempest import exceptions
@@ -350,7 +350,7 @@ class InstanceRunTest(boto_test.BotoTestCase):
 
         instance.stop()
         address.disassociate()
-        self.assertAddressDissasociatedWait(address)
+        self.assertAddressDisassociatedWait(address)
         self.cancelResourceCleanUp(rcuk_da)
         address.release()
         self.assertAddressReleasedWait(address)

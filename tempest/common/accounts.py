@@ -31,8 +31,8 @@ LOG = logging.getLogger(__name__)
 
 
 def read_accounts_yaml(path):
-    yaml_file = open(path, 'r')
-    accounts = yaml.load(yaml_file)
+    with open(path, 'r') as yaml_file:
+        accounts = yaml.load(yaml_file)
     return accounts
 
 
@@ -102,7 +102,7 @@ class Accounts(cred_provider.CredentialProvider):
                 if resource == 'network':
                     hash_dict['networks'][temp_hash_key] = resources[resource]
                 else:
-                    LOG.warning('Unkown resource type %s, ignoring this field'
+                    LOG.warning('Unknown resource type %s, ignoring this field'
                                 % resource)
         return hash_dict
 
@@ -216,7 +216,7 @@ class Accounts(cred_provider.CredentialProvider):
             if ('user_domain_name' in init_attributes and 'user_domain_name'
                     not in hash_attributes):
                 # Allow for the case of domain_name populated from config
-                domain_name = CONF.identity.admin_domain_name
+                domain_name = CONF.auth.default_credentials_domain_name
                 hash_attributes['user_domain_name'] = domain_name
             if all([getattr(creds, k) == hash_attributes[k] for
                    k in init_attributes]):
@@ -284,7 +284,7 @@ class Accounts(cred_provider.CredentialProvider):
             identity_version=self.identity_version, **creds_dict)
         net_creds = cred_provider.TestResources(credential)
         net_clients = clients.Manager(credentials=credential)
-        compute_network_client = net_clients.networks_client
+        compute_network_client = net_clients.compute_networks_client
         net_name = self.hash_dict['networks'].get(hash, None)
         try:
             network = fixed_network.get_network_from_name(

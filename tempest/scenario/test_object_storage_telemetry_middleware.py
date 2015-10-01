@@ -34,7 +34,7 @@ NOTIFICATIONS_WAIT = 120
 NOTIFICATIONS_SLEEP = 1
 
 
-class TestSwiftTelemetry(manager.SwiftScenarioTest):
+class TestObjectStorageTelemetry(manager.ObjectStorageScenarioTest):
     """
     Test that swift uses the ceilometer middleware.
      * create container.
@@ -45,18 +45,15 @@ class TestSwiftTelemetry(manager.SwiftScenarioTest):
 
     @classmethod
     def skip_checks(cls):
-        super(TestSwiftTelemetry, cls).skip_checks()
+        super(TestObjectStorageTelemetry, cls).skip_checks()
         if not CONF.service_available.ceilometer:
             skip_msg = ("%s skipped as ceilometer is not available" %
                         cls.__name__)
             raise cls.skipException(skip_msg)
-        elif CONF.telemetry.too_slow_to_test:
-            skip_msg = "Ceilometer feature for fast work mysql is disabled"
-            raise cls.skipException(skip_msg)
 
     @classmethod
     def setup_clients(cls):
-        super(TestSwiftTelemetry, cls).setup_clients()
+        super(TestObjectStorageTelemetry, cls).setup_clients()
         cls.telemetry_client = cls.os_operator.telemetry_client
 
     def _confirm_notifications(self, container_name, obj_name):
@@ -74,7 +71,7 @@ class TestSwiftTelemetry(manager.SwiftScenarioTest):
             called again.
             """
             results = self.telemetry_client.list_samples(
-                'storage.api.request')
+                'storage.objects.incoming.bytes')
             LOG.debug('got samples %s', results)
 
             # Extract container info from samples.

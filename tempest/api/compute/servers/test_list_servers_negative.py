@@ -17,6 +17,7 @@ from six import moves
 from tempest_lib import exceptions as lib_exc
 
 from tempest.api.compute import base
+from tempest.common import waiters
 from tempest import test
 
 
@@ -47,8 +48,8 @@ class ListServersNegativeTestJSON(base.BaseV2ComputeTest):
         # be put into ERROR status on a quick spawn, then delete,
         # as the compute node expects the instance local status
         # to be spawning, not deleted. See LP Bug#1061167
-        cls.client.wait_for_server_termination(srv['id'],
-                                               ignore_error=True)
+        waiters.wait_for_server_termination(cls.client, srv['id'],
+                                            ignore_error=True)
         cls.deleted_fixtures.append(srv)
 
     @test.attr(type=['negative'])
@@ -68,7 +69,7 @@ class ListServersNegativeTestJSON(base.BaseV2ComputeTest):
     def test_list_servers_by_non_existing_image(self):
         # Listing servers for a non existing image returns empty list
         non_existing_image = '1234abcd-zzz0-aaa9-ppp3-0987654abcde'
-        body = self.client.list_servers(dict(image=non_existing_image))
+        body = self.client.list_servers(image=non_existing_image)
         servers = body['servers']
         self.assertEqual([], servers)
 
@@ -77,7 +78,7 @@ class ListServersNegativeTestJSON(base.BaseV2ComputeTest):
     def test_list_servers_by_non_existing_flavor(self):
         # Listing servers by non existing flavor returns empty list
         non_existing_flavor = 1234
-        body = self.client.list_servers(dict(flavor=non_existing_flavor))
+        body = self.client.list_servers(flavor=non_existing_flavor)
         servers = body['servers']
         self.assertEqual([], servers)
 
@@ -86,7 +87,7 @@ class ListServersNegativeTestJSON(base.BaseV2ComputeTest):
     def test_list_servers_by_non_existing_server_name(self):
         # Listing servers for a non existent server name returns empty list
         non_existing_name = 'junk_server_1234'
-        body = self.client.list_servers(dict(name=non_existing_name))
+        body = self.client.list_servers(name=non_existing_name)
         servers = body['servers']
         self.assertEqual([], servers)
 
@@ -95,21 +96,21 @@ class ListServersNegativeTestJSON(base.BaseV2ComputeTest):
     def test_list_servers_status_non_existing(self):
         # Return an empty list when invalid status is specified
         non_existing_status = 'BALONEY'
-        body = self.client.list_servers(dict(status=non_existing_status))
+        body = self.client.list_servers(status=non_existing_status)
         servers = body['servers']
         self.assertEqual([], servers)
 
     @test.idempotent_id('12c80a9f-2dec-480e-882b-98ba15757659')
     def test_list_servers_by_limits(self):
         # List servers by specifying limits
-        body = self.client.list_servers({'limit': 1})
+        body = self.client.list_servers(limit=1)
         self.assertEqual(1, len([x for x in body['servers'] if 'id' in x]))
 
     @test.attr(type=['negative'])
     @test.idempotent_id('d47c17fb-eebd-4287-8e95-f20a7e627b18')
     def test_list_servers_by_limits_greater_than_actual_count(self):
         # List servers by specifying a greater value for limit
-        body = self.client.list_servers({'limit': 100})
+        body = self.client.list_servers(limit=100)
         self.assertEqual(len(self.existing_fixtures), len(body['servers']))
 
     @test.attr(type=['negative'])
@@ -117,28 +118,29 @@ class ListServersNegativeTestJSON(base.BaseV2ComputeTest):
     def test_list_servers_by_limits_pass_string(self):
         # Return an error if a string value is passed for limit
         self.assertRaises(lib_exc.BadRequest, self.client.list_servers,
-                          {'limit': 'testing'})
+                          limit='testing')
 
     @test.attr(type=['negative'])
     @test.idempotent_id('62610dd9-4713-4ee0-8beb-fd2c1aa7f950')
     def test_list_servers_by_limits_pass_negative_value(self):
         # Return an error if a negative value for limit is passed
         self.assertRaises(lib_exc.BadRequest, self.client.list_servers,
-                          {'limit': -1})
+                          limit=-1)
 
     @test.attr(type=['negative'])
     @test.idempotent_id('87d12517-e20a-4c9c-97b6-dd1628d6d6c9')
     def test_list_servers_by_changes_since_invalid_date(self):
         # Return an error when invalid date format is passed
+        params = {'changes-since': '2011/01/01'}
         self.assertRaises(lib_exc.BadRequest, self.client.list_servers,
-                          {'changes-since': '2011/01/01'})
+                          **params)
 
     @test.attr(type=['negative'])
     @test.idempotent_id('74745ad8-b346-45b5-b9b8-509d7447fc1f')
     def test_list_servers_by_changes_since_future_date(self):
         # Return an empty list when a date in the future is passed
         changes_since = {'changes-since': '2051-01-01T12:34:00Z'}
-        body = self.client.list_servers(changes_since)
+        body = self.client.list_servers(**changes_since)
         self.assertEqual(0, len(body['servers']))
 
     @test.attr(type=['negative'])
@@ -146,7 +148,7 @@ class ListServersNegativeTestJSON(base.BaseV2ComputeTest):
     def test_list_servers_detail_server_is_deleted(self):
         # Server details are not listed for a deleted server
         deleted_ids = [s['id'] for s in self.deleted_fixtures]
-        body = self.client.list_servers_with_detail()
+        body = self.client.list_servers(detail=True)
         servers = body['servers']
         actual = [srv for srv in servers
                   if srv['id'] in deleted_ids]

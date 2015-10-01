@@ -14,10 +14,10 @@
 
 import uuid
 
-from tempest_lib.common.utils import data_utils
 from tempest_lib import exceptions as lib_exc
 
 from tempest.api.image import base
+from tempest.common.utils import data_utils
 from tempest import test
 
 

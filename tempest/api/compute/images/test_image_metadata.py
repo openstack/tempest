@@ -15,9 +15,9 @@
 
 import six
 
-from tempest_lib.common.utils import data_utils
-
 from tempest.api.compute import base
+from tempest.common.utils import data_utils
+from tempest.common import waiters
 from tempest import config
 from tempest import test
 
@@ -48,12 +48,12 @@ class ImagesMetadataTestJSON(base.BaseV2ComputeTest):
         body = cls.glance_client.create_image(name=name,
                                               container_format='bare',
                                               disk_format='raw',
-                                              is_public=False)
+                                              is_public=False)['image']
         cls.image_id = body['id']
         cls.images.append(cls.image_id)
         image_file = six.StringIO(('*' * 1024))
         cls.glance_client.update_image(cls.image_id, data=image_file)
-        cls.client.wait_for_image_status(cls.image_id, 'ACTIVE')
+        waiters.wait_for_image_status(cls.client, cls.image_id, 'ACTIVE')
 
     def setUp(self):
         super(ImagesMetadataTestJSON, self).setUp()
@@ -64,7 +64,8 @@ class ImagesMetadataTestJSON(base.BaseV2ComputeTest):
     def test_list_image_metadata(self):
         # All metadata key/value pairs for an image should be returned
         resp_metadata = self.client.list_image_metadata(self.image_id)
-        expected = {'os_version': 'value1', 'os_distro': 'value2'}
+        expected = {'metadata': {
+            'os_version': 'value1', 'os_distro': 'value2'}}
         self.assertEqual(expected, resp_metadata)
 
     @test.idempotent_id('ece7befc-d3ce-42a4-b4be-c3067a418c29')
@@ -74,7 +75,8 @@ class ImagesMetadataTestJSON(base.BaseV2ComputeTest):
         self.client.set_image_metadata(self.image_id,
                                        req_metadata)
 
-        resp_metadata = self.client.list_image_metadata(self.image_id)
+        resp_metadata = (self.client.list_image_metadata(self.image_id)
+                         ['metadata'])
         self.assertEqual(req_metadata, resp_metadata)
 
     @test.idempotent_id('7b491c11-a9d5-40fe-a696-7f7e03d3fea2')
@@ -85,16 +87,17 @@ class ImagesMetadataTestJSON(base.BaseV2ComputeTest):
                                           req_metadata)
 
         resp_metadata = self.client.list_image_metadata(self.image_id)
-        expected = {'os_version': 'alt1',
-                    'os_distro': 'value2',
-                    'architecture': 'value3'}
+        expected = {'metadata': {
+            'os_version': 'alt1',
+            'os_distro': 'value2',
+            'architecture': 'value3'}}
         self.assertEqual(expected, resp_metadata)
 
     @test.idempotent_id('4f5db52f-6685-4c75-b848-f4bb363f9aa6')
     def test_get_image_metadata_item(self):
         # The value for a specific metadata key should be returned
         meta = self.client.show_image_metadata_item(self.image_id,
-                                                    'os_distro')
+                                                    'os_distro')['meta']
         self.assertEqual('value2', meta['os_distro'])
 
     @test.idempotent_id('f2de776a-4778-4d90-a5da-aae63aee64ae')
@@ -105,7 +108,7 @@ class ImagesMetadataTestJSON(base.BaseV2ComputeTest):
         self.client.set_image_metadata_item(self.image_id,
                                             'os_version', meta)
         resp_metadata = self.client.list_image_metadata(self.image_id)
-        expected = {'os_version': 'alt', 'os_distro': 'value2'}
+        expected = {'metadata': {'os_version': 'alt', 'os_distro': 'value2'}}
         self.assertEqual(expected, resp_metadata)
 
     @test.idempotent_id('a013796c-ba37-4bb5-8602-d944511def14')
@@ -114,5 +117,5 @@ class ImagesMetadataTestJSON(base.BaseV2ComputeTest):
         self.client.delete_image_metadata_item(self.image_id,
                                                'os_version')
         resp_metadata = self.client.list_image_metadata(self.image_id)
-        expected = {'os_distro': 'value2'}
+        expected = {'metadata': {'os_distro': 'value2'}}
         self.assertEqual(expected, resp_metadata)

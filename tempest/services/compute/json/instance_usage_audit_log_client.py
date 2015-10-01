@@ -13,14 +13,14 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import json
+from oslo_serialization import jsonutils as json
 
 from tempest.api_schema.response.compute.v2_1 import \
     instance_usage_audit_logs as schema
 from tempest.common import service_client
 
 
-class InstanceUsagesAuditLogClientJSON(service_client.ServiceClient):
+class InstanceUsagesAuditLogClient(service_client.ServiceClient):
 
     def list_instance_usage_audit_logs(self):
         url = 'os-instance_usage_audit_log'
@@ -28,13 +28,11 @@ class InstanceUsagesAuditLogClientJSON(service_client.ServiceClient):
         body = json.loads(body)
         self.validate_response(schema.list_instance_usage_audit_log,
                                resp, body)
-        return service_client.ResponseBody(resp,
-                                           body["instance_usage_audit_logs"])
+        return service_client.ResponseBody(resp, body)
 
     def show_instance_usage_audit_log(self, time_before):
         url = 'os-instance_usage_audit_log/%s' % time_before
         resp, body = self.get(url)
         body = json.loads(body)
         self.validate_response(schema.get_instance_usage_audit_log, resp, body)
-        return service_client.ResponseBody(resp,
-                                           body["instance_usage_audit_log"])
+        return service_client.ResponseBody(resp, body)

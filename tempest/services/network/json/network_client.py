@@ -10,18 +10,16 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import json
 import time
 
-from six.moves.urllib import parse as urllib
 from tempest_lib.common.utils import misc
 from tempest_lib import exceptions as lib_exc
 
-from tempest.common import service_client
 from tempest import exceptions
+from tempest.services.network.json import base
 
 
-class NetworkClientJSON(service_client.ServiceClient):
+class NetworkClient(base.BaseNetworkClient):
 
     """
     Tempest REST client for Neutron. Uses v2 of the Neutron API, since the
@@ -36,181 +34,168 @@ class NetworkClientJSON(service_client.ServiceClient):
     quotas
     """
 
-    version = '2.0'
-    uri_prefix = "v2.0"
-
-    def get_uri(self, plural_name):
-        # get service prefix from resource name
-
-        # the following map is used to construct proper URI
-        # for the given neutron resource
-        service_resource_prefix_map = {
-            'networks': '',
-            'subnets': '',
-            'ports': '',
-            'metering_labels': 'metering',
-            'metering_label_rules': 'metering',
-        }
-        service_prefix = service_resource_prefix_map.get(
-            plural_name)
-        plural_name = plural_name.replace("_", "-")
-        if service_prefix:
-            uri = '%s/%s/%s' % (self.uri_prefix, service_prefix,
-                                plural_name)
-        else:
-            uri = '%s/%s' % (self.uri_prefix, plural_name)
-        return uri
-
-    def pluralize(self, resource_name):
-        # get plural from map or just add 's'
-
-        # map from resource name to a plural name
-        # needed only for those which can't be constructed as name + 's'
-        resource_plural_map = {
-            'security_groups': 'security_groups',
-            'security_group_rules': 'security_group_rules',
-            'quotas': 'quotas',
-        }
-        return resource_plural_map.get(resource_name, resource_name + 's')
-
-    def _lister(self, plural_name):
-        def _list(**filters):
-            uri = self.get_uri(plural_name)
-            if filters:
-                uri += '?' + urllib.urlencode(filters, doseq=1)
-            resp, body = self.get(uri)
-            result = {plural_name: self.deserialize_list(body)}
-            self.expected_success(200, resp.status)
-            return service_client.ResponseBody(resp, result)
-
-        return _list
-
-    def _deleter(self, resource_name):
-        def _delete(resource_id):
-            plural = self.pluralize(resource_name)
-            uri = '%s/%s' % (self.get_uri(plural), resource_id)
-            resp, body = self.delete(uri)
-            self.expected_success(204, resp.status)
-            return service_client.ResponseBody(resp, body)
-
-        return _delete
-
-    def _shower(self, resource_name):
-        def _show(resource_id, **fields):
-            # fields is a dict which key is 'fields' and value is a
-            # list of field's name. An example:
-            # {'fields': ['id', 'name']}
-            plural = self.pluralize(resource_name)
-            uri = '%s/%s' % (self.get_uri(plural), resource_id)
-            if fields:
-                uri += '?' + urllib.urlencode(fields, doseq=1)
-            resp, body = self.get(uri)
-            body = self.deserialize_single(body)
-            self.expected_success(200, resp.status)
-            return service_client.ResponseBody(resp, body)
-
-        return _show
-
-    def _create_resource(self, uri, post_data):
-        req_uri = self.uri_prefix + uri
-        req_post_data = self.serialize(post_data)
-        resp, body = self.post(req_uri, req_post_data)
-        body = self.deserialize_single(body)
-        self.expected_success(201, resp.status)
-        return service_client.ResponseBody(resp, body)
-
-    def _updater(self, resource_name):
-        def _update(res_id, **kwargs):
-            plural = self.pluralize(resource_name)
-            uri = '%s/%s' % (self.get_uri(plural), res_id)
-            post_data = self.serialize({resource_name: kwargs})
-            resp, body = self.put(uri, post_data)
-            body = self.deserialize_single(body)
-            self.expected_success(200, resp.status)
-            return service_client.ResponseBody(resp, body)
-
-        return _update
-
-    def __getattr__(self, name):
-        method_prefixes = ["list_", "delete_", "show_", "update_"]
-        method_functors = [self._lister,
-                           self._deleter,
-                           self._shower,
-                           self._updater]
-        for index, prefix in enumerate(method_prefixes):
-            prefix_len = len(prefix)
-            if name[:prefix_len] == prefix:
-                return method_functors[index](name[prefix_len:])
-        raise AttributeError(name)
-
-    def create_network(self, **kwargs):
-        uri = '/networks'
-        post_data = {'network': kwargs}
-        return self._create_resource(uri, post_data)
-
     def create_subnet(self, **kwargs):
         uri = '/subnets'
         post_data = {'subnet': kwargs}
-        return self._create_resource(uri, post_data)
+        return self.create_resource(uri, post_data)
+
+    def update_subnet(self, subnet_id, **kwargs):
+        uri = '/subnets/%s' % subnet_id
+        post_data = {'subnet': kwargs}
+        return self.update_resource(uri, post_data)
+
+    def show_subnet(self, subnet_id, **fields):
+        uri = '/subnets/%s' % subnet_id
+        return self.show_resource(uri, **fields)
+
+    def delete_subnet(self, subnet_id):
+        uri = '/subnets/%s' % subnet_id
+        return self.delete_resource(uri)
+
+    def list_subnets(self, **filters):
+        uri = '/subnets'
+        return self.list_resources(uri, **filters)
 
     def create_port(self, **kwargs):
         uri = '/ports'
         post_data = {'port': kwargs}
-        return self._create_resource(uri, post_data)
+        return self.create_resource(uri, post_data)
+
+    def update_port(self, port_id, **kwargs):
+        uri = '/ports/%s' % port_id
+        post_data = {'port': kwargs}
+        return self.update_resource(uri, post_data)
+
+    def show_port(self, port_id, **fields):
+        uri = '/ports/%s' % port_id
+        return self.show_resource(uri, **fields)
+
+    def delete_port(self, port_id):
+        uri = '/ports/%s' % port_id
+        return self.delete_resource(uri)
+
+    def list_ports(self, **filters):
+        uri = '/ports'
+        return self.list_resources(uri, **filters)
 
     def create_floatingip(self, **kwargs):
         uri = '/floatingips'
         post_data = {'floatingip': kwargs}
-        return self._create_resource(uri, post_data)
+        return self.create_resource(uri, post_data)
+
+    def update_floatingip(self, floatingip_id, **kwargs):
+        uri = '/floatingips/%s' % floatingip_id
+        post_data = {'floatingip': kwargs}
+        return self.update_resource(uri, post_data)
+
+    def show_floatingip(self, floatingip_id, **fields):
+        uri = '/floatingips/%s' % floatingip_id
+        return self.show_resource(uri, **fields)
+
+    def delete_floatingip(self, floatingip_id):
+        uri = '/floatingips/%s' % floatingip_id
+        return self.delete_resource(uri)
+
+    def list_floatingips(self, **filters):
+        uri = '/floatingips'
+        return self.list_resources(uri, **filters)
 
     def create_metering_label(self, **kwargs):
         uri = '/metering/metering-labels'
         post_data = {'metering_label': kwargs}
-        return self._create_resource(uri, post_data)
+        return self.create_resource(uri, post_data)
+
+    def show_metering_label(self, metering_label_id, **fields):
+        uri = '/metering/metering-labels/%s' % metering_label_id
+        return self.show_resource(uri, **fields)
+
+    def delete_metering_label(self, metering_label_id):
+        uri = '/metering/metering-labels/%s' % metering_label_id
+        return self.delete_resource(uri)
+
+    def list_metering_labels(self, **filters):
+        uri = '/metering/metering-labels'
+        return self.list_resources(uri, **filters)
 
     def create_metering_label_rule(self, **kwargs):
         uri = '/metering/metering-label-rules'
         post_data = {'metering_label_rule': kwargs}
-        return self._create_resource(uri, post_data)
+        return self.create_resource(uri, post_data)
+
+    def show_metering_label_rule(self, metering_label_rule_id, **fields):
+        uri = '/metering/metering-label-rules/%s' % metering_label_rule_id
+        return self.show_resource(uri, **fields)
+
+    def delete_metering_label_rule(self, metering_label_rule_id):
+        uri = '/metering/metering-label-rules/%s' % metering_label_rule_id
+        return self.delete_resource(uri)
+
+    def list_metering_label_rules(self, **filters):
+        uri = '/metering/metering-label-rules'
+        return self.list_resources(uri, **filters)
 
     def create_security_group(self, **kwargs):
         uri = '/security-groups'
         post_data = {'security_group': kwargs}
-        return self._create_resource(uri, post_data)
+        return self.create_resource(uri, post_data)
+
+    def update_security_group(self, security_group_id, **kwargs):
+        uri = '/security-groups/%s' % security_group_id
+        post_data = {'security_group': kwargs}
+        return self.update_resource(uri, post_data)
+
+    def show_security_group(self, security_group_id, **fields):
+        uri = '/security-groups/%s' % security_group_id
+        return self.show_resource(uri, **fields)
+
+    def delete_security_group(self, security_group_id):
+        uri = '/security-groups/%s' % security_group_id
+        return self.delete_resource(uri)
+
+    def list_security_groups(self, **filters):
+        uri = '/security-groups'
+        return self.list_resources(uri, **filters)
 
     def create_security_group_rule(self, **kwargs):
         uri = '/security-group-rules'
         post_data = {'security_group_rule': kwargs}
-        return self._create_resource(uri, post_data)
+        return self.create_resource(uri, post_data)
 
-    # Common methods that are hard to automate
+    def show_security_group_rule(self, security_group_rule_id, **fields):
+        uri = '/security-group-rules/%s' % security_group_rule_id
+        return self.show_resource(uri, **fields)
+
+    def delete_security_group_rule(self, security_group_rule_id):
+        uri = '/security-group-rules/%s' % security_group_rule_id
+        return self.delete_resource(uri)
+
+    def list_security_group_rules(self, **filters):
+        uri = '/security-group-rules'
+        return self.list_resources(uri, **filters)
+
+    def show_extension(self, ext_alias, **fields):
+        uri = '/extensions/%s' % ext_alias
+        return self.show_resource(uri, **fields)
+
+    def list_extensions(self, **filters):
+        uri = '/extensions'
+        return self.list_resources(uri, **filters)
+
     def create_bulk_network(self, names):
         network_list = [{'name': name} for name in names]
         post_data = {'networks': network_list}
-        body = self.serialize_list(post_data, "networks", "network")
-        uri = self.get_uri("networks")
-        resp, body = self.post(uri, body)
-        body = {'networks': self.deserialize_list(body)}
-        self.expected_success(201, resp.status)
-        return service_client.ResponseBody(resp, body)
+        uri = '/networks'
+        return self.create_resource(uri, post_data)
 
     def create_bulk_subnet(self, subnet_list):
         post_data = {'subnets': subnet_list}
-        body = self.serialize_list(post_data, 'subnets', 'subnet')
-        uri = self.get_uri('subnets')
-        resp, body = self.post(uri, body)
-        body = {'subnets': self.deserialize_list(body)}
-        self.expected_success(201, resp.status)
-        return service_client.ResponseBody(resp, body)
+        uri = '/subnets'
+        return self.create_resource(uri, post_data)
 
     def create_bulk_port(self, port_list):
         post_data = {'ports': port_list}
-        body = self.serialize_list(post_data, 'ports', 'port')
-        uri = self.get_uri('ports')
-        resp, body = self.post(uri, body)
-        body = {'ports': self.deserialize_list(body)}
-        self.expected_success(201, resp.status)
-        return service_client.ResponseBody(resp, body)
+        uri = '/ports'
+        return self.create_resource(uri, post_data)
 
     def wait_for_resource_deletion(self, resource_type, id):
         """Waits for a resource to be deleted."""
@@ -269,56 +254,33 @@ class NetworkClientJSON(service_client.ServiceClient):
             message = '(%s) %s' % (caller, message)
         raise exceptions.TimeoutException(message)
 
-    def deserialize_single(self, body):
-        return json.loads(body)
-
-    def deserialize_list(self, body):
-        res = json.loads(body)
-        # expecting response in form
-        # {'resources': [ res1, res2] } => when pagination disabled
-        # {'resources': [..], 'resources_links': {}} => if pagination enabled
-        for k in res.keys():
-            if k.endswith("_links"):
-                continue
-            return res[k]
-
-    def serialize(self, data):
-        return json.dumps(data)
-
-    def serialize_list(self, data, root=None, item=None):
-        return self.serialize(data)
-
     def update_quotas(self, tenant_id, **kwargs):
         put_body = {'quota': kwargs}
-        body = json.dumps(put_body)
-        uri = '%s/quotas/%s' % (self.uri_prefix, tenant_id)
-        resp, body = self.put(uri, body)
-        self.expected_success(200, resp.status)
-        body = json.loads(body)
-        return service_client.ResponseBody(resp, body['quota'])
+        uri = '/quotas/%s' % tenant_id
+        return self.update_resource(uri, put_body)
 
     def reset_quotas(self, tenant_id):
-        uri = '%s/quotas/%s' % (self.uri_prefix, tenant_id)
-        resp, body = self.delete(uri)
-        self.expected_success(204, resp.status)
-        return service_client.ResponseBody(resp, body)
+        uri = '/quotas/%s' % tenant_id
+        return self.delete_resource(uri)
+
+    def show_quotas(self, tenant_id, **fields):
+        uri = '/quotas/%s' % tenant_id
+        return self.show_resource(uri, **fields)
+
+    def list_quotas(self, **filters):
+        uri = '/quotas'
+        return self.list_resources(uri, **filters)
 
     def create_router(self, name, admin_state_up=True, **kwargs):
         post_body = {'router': kwargs}
         post_body['router']['name'] = name
         post_body['router']['admin_state_up'] = admin_state_up
-        body = json.dumps(post_body)
-        uri = '%s/routers' % (self.uri_prefix)
-        resp, body = self.post(uri, body)
-        self.expected_success(201, resp.status)
-        body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
+        uri = '/routers'
+        return self.create_resource(uri, post_body)
 
     def _update_router(self, router_id, set_enable_snat, **kwargs):
-        uri = '%s/routers/%s' % (self.uri_prefix, router_id)
-        resp, body = self.get(uri)
-        self.expected_success(200, resp.status)
-        body = json.loads(body)
+        uri = '/routers/%s' % router_id
+        body = self.show_resource(uri)
         update_body = {}
         update_body['name'] = kwargs.get('name', body['router']['name'])
         update_body['admin_state_up'] = kwargs.get(
@@ -337,11 +299,7 @@ class NetworkClientJSON(service_client.ServiceClient):
         if 'distributed' in kwargs:
             update_body['distributed'] = kwargs['distributed']
         update_body = dict(router=update_body)
-        update_body = json.dumps(update_body)
-        resp, body = self.put(uri, update_body)
-        self.expected_success(200, resp.status)
-        body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
+        return self.update_resource(uri, update_body)
 
     def update_router(self, router_id, **kwargs):
         """Update a router leaving enable_snat to its default value."""
@@ -352,6 +310,18 @@ class NetworkClientJSON(service_client.ServiceClient):
         # policy is to restrict enable_snat usage to admins only.
         return self._update_router(router_id, set_enable_snat=False, **kwargs)
 
+    def show_router(self, router_id, **fields):
+        uri = '/routers/%s' % router_id
+        return self.show_resource(uri, **fields)
+
+    def delete_router(self, router_id):
+        uri = '/routers/%s' % router_id
+        return self.delete_resource(uri)
+
+    def list_routers(self, **filters):
+        uri = '/routers'
+        return self.list_resources(uri, **filters)
+
     def update_router_with_snat_gw_info(self, router_id, **kwargs):
         """Update a router passing also the enable_snat attribute.
 
@@ -361,149 +331,95 @@ class NetworkClientJSON(service_client.ServiceClient):
         return self._update_router(router_id, set_enable_snat=True, **kwargs)
 
     def add_router_interface_with_subnet_id(self, router_id, subnet_id):
-        uri = '%s/routers/%s/add_router_interface' % (self.uri_prefix,
-                                                      router_id)
+        uri = '/routers/%s/add_router_interface' % router_id
         update_body = {"subnet_id": subnet_id}
-        update_body = json.dumps(update_body)
-        resp, body = self.put(uri, update_body)
-        self.expected_success(200, resp.status)
-        body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
+        return self.update_resource(uri, update_body)
 
     def add_router_interface_with_port_id(self, router_id, port_id):
-        uri = '%s/routers/%s/add_router_interface' % (self.uri_prefix,
-                                                      router_id)
+        uri = '/routers/%s/add_router_interface' % router_id
         update_body = {"port_id": port_id}
-        update_body = json.dumps(update_body)
-        resp, body = self.put(uri, update_body)
-        self.expected_success(200, resp.status)
-        body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
+        return self.update_resource(uri, update_body)
 
     def remove_router_interface_with_subnet_id(self, router_id, subnet_id):
-        uri = '%s/routers/%s/remove_router_interface' % (self.uri_prefix,
-                                                         router_id)
+        uri = '/routers/%s/remove_router_interface' % router_id
         update_body = {"subnet_id": subnet_id}
-        update_body = json.dumps(update_body)
-        resp, body = self.put(uri, update_body)
-        self.expected_success(200, resp.status)
-        body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
+        return self.update_resource(uri, update_body)
 
     def remove_router_interface_with_port_id(self, router_id, port_id):
-        uri = '%s/routers/%s/remove_router_interface' % (self.uri_prefix,
-                                                         router_id)
+        uri = '/routers/%s/remove_router_interface' % router_id
         update_body = {"port_id": port_id}
-        update_body = json.dumps(update_body)
-        resp, body = self.put(uri, update_body)
-        self.expected_success(200, resp.status)
-        body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
+        return self.update_resource(uri, update_body)
 
     def list_router_interfaces(self, uuid):
-        uri = '%s/ports?device_id=%s' % (self.uri_prefix, uuid)
-        resp, body = self.get(uri)
-        self.expected_success(200, resp.status)
-        body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
+        uri = '/ports?device_id=%s' % uuid
+        return self.list_resources(uri)
 
     def update_agent(self, agent_id, agent_info):
         """
         :param agent_info: Agent update information.
         E.g {"admin_state_up": True}
         """
-        uri = '%s/agents/%s' % (self.uri_prefix, agent_id)
+        uri = '/agents/%s' % agent_id
         agent = {"agent": agent_info}
-        body = json.dumps(agent)
-        resp, body = self.put(uri, body)
-        self.expected_success(200, resp.status)
-        body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
+        return self.update_resource(uri, agent)
+
+    def show_agent(self, agent_id, **fields):
+        uri = '/agents/%s' % agent_id
+        return self.show_resource(uri, **fields)
+
+    def list_agents(self, **filters):
+        uri = '/agents'
+        return self.list_resources(uri, **filters)
 
     def list_routers_on_l3_agent(self, agent_id):
-        uri = '%s/agents/%s/l3-routers' % (self.uri_prefix, agent_id)
-        resp, body = self.get(uri)
-        self.expected_success(200, resp.status)
-        body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
+        uri = '/agents/%s/l3-routers' % agent_id
+        return self.list_resources(uri)
 
     def list_l3_agents_hosting_router(self, router_id):
-        uri = '%s/routers/%s/l3-agents' % (self.uri_prefix, router_id)
-        resp, body = self.get(uri)
-        self.expected_success(200, resp.status)
-        body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
+        uri = '/routers/%s/l3-agents' % router_id
+        return self.list_resources(uri)
 
     def add_router_to_l3_agent(self, agent_id, router_id):
-        uri = '%s/agents/%s/l3-routers' % (self.uri_prefix, agent_id)
+        uri = '/agents/%s/l3-routers' % agent_id
         post_body = {"router_id": router_id}
-        body = json.dumps(post_body)
-        resp, body = self.post(uri, body)
-        self.expected_success(201, resp.status)
-        body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
+        return self.create_resource(uri, post_body)
 
     def remove_router_from_l3_agent(self, agent_id, router_id):
-        uri = '%s/agents/%s/l3-routers/%s' % (
-            self.uri_prefix, agent_id, router_id)
-        resp, body = self.delete(uri)
-        self.expected_success(204, resp.status)
-        return service_client.ResponseBody(resp, body)
+        uri = '/agents/%s/l3-routers/%s' % (agent_id, router_id)
+        return self.delete_resource(uri)
 
     def list_dhcp_agent_hosting_network(self, network_id):
-        uri = '%s/networks/%s/dhcp-agents' % (self.uri_prefix, network_id)
-        resp, body = self.get(uri)
-        self.expected_success(200, resp.status)
-        body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
+        uri = '/networks/%s/dhcp-agents' % network_id
+        return self.list_resources(uri)
 
     def list_networks_hosted_by_one_dhcp_agent(self, agent_id):
-        uri = '%s/agents/%s/dhcp-networks' % (self.uri_prefix, agent_id)
-        resp, body = self.get(uri)
-        self.expected_success(200, resp.status)
-        body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
+        uri = '/agents/%s/dhcp-networks' % agent_id
+        return self.list_resources(uri)
 
     def remove_network_from_dhcp_agent(self, agent_id, network_id):
-        uri = '%s/agents/%s/dhcp-networks/%s' % (self.uri_prefix, agent_id,
-                                                 network_id)
-        resp, body = self.delete(uri)
-        self.expected_success(204, resp.status)
-        return service_client.ResponseBody(resp, body)
+        uri = '/agents/%s/dhcp-networks/%s' % (agent_id,
+                                               network_id)
+        return self.delete_resource(uri)
 
-    def update_extra_routes(self, router_id, nexthop, destination):
-        uri = '%s/routers/%s' % (self.uri_prefix, router_id)
+    def update_extra_routes(self, router_id, routes):
+        uri = '/routers/%s' % router_id
         put_body = {
             'router': {
-                'routes': [{'nexthop': nexthop,
-                            "destination": destination}]
+                'routes': routes
             }
         }
-        body = json.dumps(put_body)
-        resp, body = self.put(uri, body)
-        self.expected_success(200, resp.status)
-        body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
+        return self.update_resource(uri, put_body)
 
     def delete_extra_routes(self, router_id):
-        uri = '%s/routers/%s' % (self.uri_prefix, router_id)
-        null_routes = None
+        uri = '/routers/%s' % router_id
         put_body = {
             'router': {
-                'routes': null_routes
+                'routes': None
             }
         }
-        body = json.dumps(put_body)
-        resp, body = self.put(uri, body)
-        self.expected_success(200, resp.status)
-        body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
+        return self.update_resource(uri, put_body)
 
     def add_dhcp_agent_to_network(self, agent_id, network_id):
         post_body = {'network_id': network_id}
-        body = json.dumps(post_body)
-        uri = '%s/agents/%s/dhcp-networks' % (self.uri_prefix, agent_id)
-        resp, body = self.post(uri, body)
-        self.expected_success(201, resp.status)
-        body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
+        uri = '/agents/%s/dhcp-networks' % agent_id
+        return self.create_resource(uri, post_body)

@@ -85,7 +85,7 @@ class JavelinUnitTest(base.TestCase):
 class TestCreateResources(JavelinUnitTest):
     def test_create_tenants(self):
 
-        self.fake_client.identity.list_tenants.return_value = []
+        self.fake_client.identity.list_tenants.return_value = {'tenants': []}
         self.useFixture(mockpatch.PatchObject(javelin, "keystone_admin",
                                               return_value=self.fake_client))
 
@@ -95,8 +95,8 @@ class TestCreateResources(JavelinUnitTest):
         mocked_function.assert_called_once_with(self.fake_object['name'])
 
     def test_create_duplicate_tenant(self):
-        self.fake_client.identity.list_tenants.return_value = [
-            {'name': self.fake_object['name']}]
+        self.fake_client.identity.list_tenants.return_value = {'tenants': [
+            {'name': self.fake_object['name']}]}
         self.useFixture(mockpatch.PatchObject(javelin, "keystone_admin",
                                               return_value=self.fake_client))
 
@@ -227,7 +227,7 @@ class TestCreateResources(JavelinUnitTest):
             display_name=self.fake_object['name'])
         mocked_function = self.fake_client.volumes.wait_for_volume_status
         mocked_function.assert_called_once_with(
-            self.fake_object.body['id'],
+            self.fake_object.body['volume']['id'],
             'available')
 
     def test_create_volume_existing(self):
@@ -270,16 +270,17 @@ class TestCreateResources(JavelinUnitTest):
     def test_create_secgroup(self):
         self.useFixture(mockpatch.PatchObject(javelin, "client_for_user",
                                               return_value=self.fake_client))
-        self.fake_client.secgroups.list_security_groups.return_value = []
+        self.fake_client.secgroups.list_security_groups.return_value = (
+            {'security_groups': []})
         self.fake_client.secgroups.create_security_group.return_value = \
-            {'id': self.fake_object['secgroup_id']}
+            {'security_group': {'id': self.fake_object['secgroup_id']}}
 
         javelin.create_secgroups([self.fake_object])
 
         mocked_function = self.fake_client.secgroups.create_security_group
         mocked_function.assert_called_once_with(
-            self.fake_object['name'],
-            self.fake_object['description'])
+            name=self.fake_object['name'],
+            description=self.fake_object['description'])
 
 
 class TestDestroyResources(JavelinUnitTest):

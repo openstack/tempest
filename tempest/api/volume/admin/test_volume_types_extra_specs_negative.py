@@ -15,10 +15,10 @@
 
 import uuid
 
-from tempest_lib.common.utils import data_utils
 from tempest_lib import exceptions as lib_exc
 
 from tempest.api.volume import base
+from tempest.common.utils import data_utils
 from tempest import test
 
 
@@ -31,7 +31,7 @@ class ExtraSpecsNegativeV2Test(base.BaseVolumeAdminTest):
         cls.extra_specs = {"spec1": "val1"}
         cls.volume_type = cls.volume_types_client.create_volume_type(
             vol_type_name,
-            extra_specs=cls.extra_specs)
+            extra_specs=cls.extra_specs)['volume_type']
 
     @classmethod
     def resource_cleanup(cls):

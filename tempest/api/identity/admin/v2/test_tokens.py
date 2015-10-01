@@ -13,9 +13,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest_lib.common.utils import data_utils
-
 from tempest.api.identity import base
+from tempest.common.utils import data_utils
 from tempest import test
 
 
@@ -28,11 +27,11 @@ class TokensTestJSON(base.BaseIdentityV2AdminTest):
         user_password = data_utils.rand_name(name='pass')
         # first:create a tenant
         tenant_name = data_utils.rand_name(name='tenant')
-        tenant = self.client.create_tenant(tenant_name)
+        tenant = self.client.create_tenant(tenant_name)['tenant']
         self.data.tenants.append(tenant)
         # second:create a user
         user = self.client.create_user(user_name, user_password,
-                                       tenant['id'], '')
+                                       tenant['id'], '')['user']
         self.data.users.append(user)
         # then get a token for the user
         body = self.token_client.auth(user_name,
@@ -42,7 +41,7 @@ class TokensTestJSON(base.BaseIdentityV2AdminTest):
                          tenant['name'])
         # Perform GET Token
         token_id = body['token']['id']
-        token_details = self.client.get_token(token_id)
+        token_details = self.client.get_token(token_id)['access']
         self.assertEqual(token_id, token_details['token']['id'])
         self.assertEqual(user['id'], token_details['user']['id'])
         self.assertEqual(user_name, token_details['user']['name'])
@@ -63,21 +62,21 @@ class TokensTestJSON(base.BaseIdentityV2AdminTest):
         tenant_id = None  # No default tenant so will get unscoped token.
         email = ''
         user = self.client.create_user(user_name, user_password,
-                                       tenant_id, email)
+                                       tenant_id, email)['user']
         self.data.users.append(user)
 
         # Create a couple tenants.
         tenant1_name = data_utils.rand_name(name='tenant')
-        tenant1 = self.client.create_tenant(tenant1_name)
+        tenant1 = self.client.create_tenant(tenant1_name)['tenant']
         self.data.tenants.append(tenant1)
 
         tenant2_name = data_utils.rand_name(name='tenant')
-        tenant2 = self.client.create_tenant(tenant2_name)
+        tenant2 = self.client.create_tenant(tenant2_name)['tenant']
         self.data.tenants.append(tenant2)
 
         # Create a role
         role_name = data_utils.rand_name(name='role')
-        role = self.client.create_role(role_name)
+        role = self.client.create_role(role_name)['role']
         self.data.roles.append(role)
 
         # Grant the user the role on the tenants.

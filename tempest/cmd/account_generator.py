@@ -25,7 +25,7 @@ have the username, tenant_name, password and roles.
 **Usage:** ``tempest-account-generator [-h] [OPTIONS] accounts_file.yaml``.
 
 Positional Arguments
------------------
+--------------------
 **accounts_file.yaml** (Required) Provide an output accounts yaml file. Utility
 creates a .yaml file in the directory where the command is ran. The appropriate
 name for the file is *accounts.yaml* and it should be placed in *tempest/etc*
@@ -49,7 +49,7 @@ You're probably familiar with these, but just to remind::
     +----------+------------------+----------------------+
 
 Optional Arguments
------------------
+------------------
 **-h**, **--help** (Optional) Shows help message with the description of
 utility and its arguments, and exits.
 
@@ -90,9 +90,10 @@ from oslo_log import log as logging
 import yaml
 
 from tempest import config
-from tempest import exceptions
+from tempest import exceptions as exc
 from tempest.services.identity.v2.json import identity_client
 from tempest.services.network.json import network_client
+from tempest.services.network.json import networks_client
 import tempest_lib.auth
 from tempest_lib.common.utils import data_utils
 import tempest_lib.exceptions
@@ -128,7 +129,7 @@ def get_admin_clients(opts):
         'build_interval': CONF.compute.build_interval,
         'build_timeout': CONF.compute.build_timeout
     }
-    identity_admin = identity_client.IdentityClientJSON(
+    identity_admin = identity_client.IdentityClient(
         _auth,
         CONF.identity.catalog_type,
         CONF.identity.region,
@@ -136,31 +137,40 @@ def get_admin_clients(opts):
         **params
     )
     network_admin = None
+    networks_admin = None
+    neutron_iso_networks = False
     if (CONF.service_available.neutron and
         CONF.auth.create_isolated_networks):
-        network_admin = network_client.NetworkClientJSON(
+        neutron_iso_networks = True
+        network_admin = network_client.NetworkClient(
             _auth,
             CONF.network.catalog_type,
             CONF.network.region or CONF.identity.region,
             endpoint_type='adminURL',
             **params)
-    return identity_admin, network_admin
+        networks_admin = networks_client.NetworksClient(
+            _auth,
+            CONF.network.catalog_type,
+            CONF.network.region or CONF.identity.region,
+            endpoint_type='adminURL',
+            **params)
+    return identity_admin, neutron_iso_networks, network_admin, networks_admin
 
 
 def create_resources(opts, resources):
-    identity_admin, network_admin = get_admin_clients(opts)
+    (identity_admin, neutron_iso_networks,
+     network_admin, networks_admin) = get_admin_clients(opts)
     roles = identity_admin.list_roles()
     for u in resources['users']:
         u['role_ids'] = []
         for r in u.get('roles', ()):
             try:
                 role = filter(lambda r_: r_['name'] == r, roles)[0]
-                u['role_ids'] += [role['id']]
             except IndexError:
-                raise exceptions.TempestException(
-                    "Role: %s - doesn't exist" % r
-                )
-    existing = [x['name'] for x in identity_admin.list_tenants()]
+                msg = "Role: %s doesn't exist" % r
+                raise exc.InvalidConfiguration(msg)
+            u['role_ids'] += [role['id']]
+    existing = [x['name'] for x in identity_admin.list_tenants()['tenants']]
     for tenant in resources['tenants']:
         if tenant not in existing:
             identity_admin.create_tenant(tenant)
@@ -188,12 +198,11 @@ def create_resources(opts, resources):
                 u['name'] = random_user_name(opts.tag, u['prefix'])
 
     LOG.info('Users created')
-    if network_admin:
+    if neutron_iso_networks:
         for u in resources['users']:
             tenant = identity_admin.get_tenant_by_name(u['tenant'])
-            network_name, router_name = create_network_resources(network_admin,
-                                                                 tenant['id'],
-                                                                 u['name'])
+            network_name, router_name = create_network_resources(
+                network_admin, networks_admin, tenant['id'], u['name'])
             u['network'] = network_name
             u['router'] = router_name
         LOG.info('Networks created')
@@ -219,10 +228,11 @@ def create_resources(opts, resources):
     LOG.info('Resources deployed successfully!')
 
 
-def create_network_resources(network_admin_client, tenant_id, name):
+def create_network_resources(network_admin_client, networks_admin_client,
+                             tenant_id, name):
 
     def _create_network(name):
-        resp_body = network_admin_client.create_network(
+        resp_body = networks_admin_client.create_network(
             name=name, tenant_id=tenant_id)
         return resp_body['network']
 
@@ -285,17 +295,21 @@ def generate_resources(opts):
             {'number': 1,
              'prefix': 'alt',
              'roles': (CONF.auth.tempest_roles +
-                       [CONF.object_storage.operator_role])},
-            {'number': 1,
-             'prefix': 'swift_admin',
-             'roles': (CONF.auth.tempest_roles +
-                       [CONF.object_storage.operator_role,
-                        CONF.object_storage.reseller_admin_role])},
-            {'number': 1,
-             'prefix': 'stack_owner',
-             'roles': (CONF.auth.tempest_roles +
-                       [CONF.orchestration.stack_owner_role])},
-            ]
+                       [CONF.object_storage.operator_role])}]
+    if CONF.service_available.swift:
+        spec.append({'number': 1,
+                     'prefix': 'swift_operator',
+                     'roles': (CONF.auth.tempest_roles +
+                               [CONF.object_storage.operator_role])})
+        spec.append({'number': 1,
+                     'prefix': 'swift_reseller_admin',
+                     'roles': (CONF.auth.tempest_roles +
+                               [CONF.object_storage.reseller_admin_role])})
+    if CONF.service_available.heat:
+        spec.append({'number': 1,
+                     'prefix': 'stack_owner',
+                     'roles': (CONF.auth.tempest_roles +
+                               [CONF.orchestration.stack_owner_role])})
     if opts.admin:
         spec.append({
             'number': 1,

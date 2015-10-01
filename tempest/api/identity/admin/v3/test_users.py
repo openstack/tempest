@@ -13,9 +13,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest_lib.common.utils import data_utils
-
 from tempest.api.identity import base
+from tempest.common.utils import data_utils
 from tempest import test
 
 
@@ -31,13 +30,13 @@ class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
         u_password = data_utils.rand_name('pass')
         user = self.client.create_user(
             u_name, description=u_desc, password=u_password,
-            email=u_email, enabled=False)
+            email=u_email, enabled=False)['user']
         # Delete the User at the end of this method
         self.addCleanup(self.client.delete_user, user['id'])
         # Creating second project for updation
         project = self.client.create_project(
             data_utils.rand_name('project'),
-            description=data_utils.rand_name('project-desc'))
+            description=data_utils.rand_name('project-desc'))['project']
         # Delete the Project at the end of this method
         self.addCleanup(self.client.delete_project, project['id'])
         # Updating user details with new values
@@ -47,7 +46,7 @@ class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
         update_user = self.client.update_user(
             user['id'], name=u_name2, description=u_description2,
             project_id=project['id'],
-            email=u_email2, enabled=False)
+            email=u_email2, enabled=False)['user']
         self.assertEqual(u_name2, update_user['name'])
         self.assertEqual(u_description2, update_user['description'])
         self.assertEqual(project['id'],
@@ -55,7 +54,7 @@ class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
         self.assertEqual(u_email2, update_user['email'])
         self.assertEqual(False, update_user['enabled'])
         # GET by id after updation
-        new_user_get = self.client.get_user(user['id'])
+        new_user_get = self.client.get_user(user['id'])['user']
         # Assert response body of GET after updation
         self.assertEqual(u_name2, new_user_get['name'])
         self.assertEqual(u_description2, new_user_get['description'])
@@ -70,7 +69,7 @@ class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
         u_name = data_utils.rand_name('user')
         original_password = data_utils.rand_name('pass')
         user = self.client.create_user(
-            u_name, password=original_password)
+            u_name, password=original_password)['user']
         # Delete the User at the end all test methods
         self.addCleanup(self.client.delete_user, user['id'])
         # Update user with new password
@@ -81,7 +80,7 @@ class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
                                password=new_password).response
         subject_token = resp['x-subject-token']
         # Perform GET Token to verify and confirm password is updated
-        token_details = self.client.get_token(subject_token)
+        token_details = self.client.get_token(subject_token)['token']
         self.assertEqual(resp['x-subject-token'], subject_token)
         self.assertEqual(token_details['user']['id'], user['id'])
         self.assertEqual(token_details['user']['name'], u_name)
@@ -93,7 +92,7 @@ class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
         fetched_project_ids = list()
         u_project = self.client.create_project(
             data_utils.rand_name('project'),
-            description=data_utils.rand_name('project-desc'))
+            description=data_utils.rand_name('project-desc'))['project']
         # Delete the Project at the end of this method
         self.addCleanup(self.client.delete_project, u_project['id'])
         # Create a user.
@@ -103,23 +102,23 @@ class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
         u_password = data_utils.rand_name('pass')
         user_body = self.client.create_user(
             u_name, description=u_desc, password=u_password,
-            email=u_email, enabled=False, project_id=u_project['id'])
+            email=u_email, enabled=False, project_id=u_project['id'])['user']
         # Delete the User at the end of this method
         self.addCleanup(self.client.delete_user, user_body['id'])
         # Creating Role
         role_body = self.client.create_role(
-            data_utils.rand_name('role'))
+            data_utils.rand_name('role'))['role']
         # Delete the Role at the end of this method
         self.addCleanup(self.client.delete_role, role_body['id'])
 
-        user = self.client.get_user(user_body['id'])
-        role = self.client.get_role(role_body['id'])
+        user = self.client.get_user(user_body['id'])['user']
+        role = self.client.get_role(role_body['id'])['role']
         for i in range(2):
             # Creating project so as to assign role
             project_body = self.client.create_project(
                 data_utils.rand_name('project'),
-                description=data_utils.rand_name('project-desc'))
-            project = self.client.get_project(project_body['id'])
+                description=data_utils.rand_name('project-desc'))['project']
+            project = self.client.get_project(project_body['id'])['project']
             # Delete the Project at the end of this method
             self.addCleanup(self.client.delete_project, project_body['id'])
             # Assigning roles to user on project
@@ -127,7 +126,7 @@ class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
                                          user['id'],
                                          role['id'])
             assigned_project_ids.append(project['id'])
-        body = self.client.list_user_projects(user['id'])
+        body = self.client.list_user_projects(user['id'])['projects']
         for i in body:
             fetched_project_ids.append(i['id'])
         # verifying the project ids in list
@@ -143,5 +142,5 @@ class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
     def test_get_user(self):
         # Get a user detail
         self.data.setup_test_v3_user()
-        user = self.client.get_user(self.data.v3_user['id'])
+        user = self.client.get_user(self.data.v3_user['id'])['user']
         self.assertEqual(self.data.v3_user['id'], user['id'])

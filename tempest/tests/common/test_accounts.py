@@ -41,7 +41,7 @@ class TestAccount(base.TestCase):
         self.useFixture(fake_config.ConfigFixture())
         self.stubs.Set(config, 'TempestConfigPrivate', fake_config.FakePrivate)
         self.fake_http = fake_http.fake_httplib2(return_type=200)
-        self.stubs.Set(token_client.TokenClientJSON, 'raw_request',
+        self.stubs.Set(token_client.TokenClient, 'raw_request',
                        fake_identity._fake_v2_response)
         self.useFixture(lockutils_fixtures.ExternalLockFixture())
         self.test_accounts = [
@@ -86,7 +86,7 @@ class TestAccount(base.TestCase):
         return hash_list
 
     def test_get_hash(self):
-        self.stubs.Set(token_client.TokenClientJSON, 'raw_request',
+        self.stubs.Set(token_client.TokenClient, 'raw_request',
                        fake_identity._fake_v2_response)
         test_account_class = accounts.Accounts('v2', 'test_name')
         hash_list = self._get_hash_list(self.test_accounts)
@@ -296,9 +296,10 @@ class TestAccount(base.TestCase):
             return_value=test_accounts))
         test_accounts_class = accounts.Accounts('v2', 'test_name')
         with mock.patch('tempest.services.compute.json.networks_client.'
-                        'NetworksClientJSON.list_networks',
-                        return_value=[{'name': 'network-2', 'id': 'fake-id',
-                                       'label': 'network-2'}]):
+                        'NetworksClient.list_networks',
+                        return_value={'networks': [{'name': 'network-2',
+                                                    'id': 'fake-id',
+                                                    'label': 'network-2'}]}):
             creds = test_accounts_class.get_creds_by_roles(['role-7'])
         self.assertTrue(isinstance(creds, cred_provider.TestResources))
         network = creds.network

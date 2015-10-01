@@ -38,7 +38,7 @@ class FixedIPsTestJson(base.BaseV2ComputeAdminTest):
     def resource_setup(cls):
         super(FixedIPsTestJson, cls).resource_setup()
         server = cls.create_test_server(wait_until='ACTIVE')
-        server = cls.servers_client.get_server(server['id'])
+        server = cls.servers_client.show_server(server['id'])['server']
         for ip_set in server['addresses']:
             for ip in server['addresses'][ip_set]:
                 if ip['OS-EXT-IPS:type'] == 'fixed':
@@ -51,16 +51,14 @@ class FixedIPsTestJson(base.BaseV2ComputeAdminTest):
     @test.services('network')
     def test_list_fixed_ip_details(self):
         fixed_ip = self.client.show_fixed_ip(self.ip)
-        self.assertEqual(fixed_ip['address'], self.ip)
+        self.assertEqual(fixed_ip['fixed_ip']['address'], self.ip)
 
     @test.idempotent_id('5485077b-7e46-4cec-b402-91dc3173433b')
     @test.services('network')
     def test_set_reserve(self):
-        body = {"reserve": "None"}
-        self.client.reserve_fixed_ip(self.ip, body)
+        self.client.reserve_fixed_ip(self.ip, reserve="None")
 
     @test.idempotent_id('7476e322-b9ff-4710-bf82-49d51bac6e2e')
     @test.services('network')
     def test_set_unreserve(self):
-        body = {"unreserve": "None"}
-        self.client.reserve_fixed_ip(self.ip, body)
+        self.client.reserve_fixed_ip(self.ip, unreserve="None")

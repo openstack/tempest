@@ -12,10 +12,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest_lib.common.utils import data_utils
 from tempest_lib import exceptions as lib_exc
 
 from tempest.api.compute import base
+from tempest.common.utils import data_utils
 from tempest import test
 
 
@@ -32,7 +32,7 @@ class HostsAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
         cls.non_admin_client = cls.os.hosts_client
 
     def _get_host_name(self):
-        hosts = self.client.list_hosts()
+        hosts = self.client.list_hosts()['hosts']
         self.assertTrue(len(hosts) >= 1)
         hostname = hosts[0]['host_name']
         return hostname
@@ -69,19 +69,6 @@ class HostsAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
                           hostname,
                           status='enable',
                           maintenance_mode='enable')
-
-    @test.attr(type=['negative'])
-    @test.idempotent_id('76e396fe-5418-4dd3-a186-5b301edc0721')
-    def test_update_host_with_extra_param(self):
-        # only 'status' and 'maintenance_mode' are the valid params.
-        hostname = self._get_host_name()
-
-        self.assertRaises(lib_exc.BadRequest,
-                          self.client.update_host,
-                          hostname,
-                          status='enable',
-                          maintenance_mode='enable',
-                          param='XXX')
 
     @test.attr(type=['negative'])
     @test.idempotent_id('fbe2bf3e-3246-4a95-a59f-94e4e298ec77')

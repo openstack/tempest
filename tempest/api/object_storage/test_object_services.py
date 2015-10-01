@@ -21,10 +21,10 @@ import zlib
 
 import six
 from six import moves
-from tempest_lib.common.utils import data_utils
 
 from tempest.api.object_storage import base
 from tempest.common import custom_matchers
+from tempest.common.utils import data_utils
 from tempest import config
 from tempest import test
 
@@ -811,7 +811,7 @@ class ObjectTest(base.BaseObjectTest):
 
     @test.idempotent_id('aa467252-44f3-472a-b5ae-5b57c3c9c147')
     def test_copy_object_across_containers(self):
-        # create a container to use as  asource container
+        # create a container to use as a source container
         src_container_name = data_utils.rand_name(name='TestSourceContainer')
         self.container_client.create_container(src_container_name)
         self.containers.append(src_container_name)

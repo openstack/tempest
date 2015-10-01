@@ -11,10 +11,10 @@
 #    under the License.
 
 from tempest_lib import auth
-from tempest_lib.common.utils import data_utils
 
 from tempest.api.identity import base
 from tempest import clients
+from tempest.common.utils import data_utils
 from tempest import config
 from tempest import manager
 from tempest import test
@@ -39,13 +39,14 @@ class TestDefaultProjectId (base.BaseIdentityV3AdminTest):
     def test_default_project_id(self):
         # create a domain
         dom_name = data_utils.rand_name('dom')
-        domain_body = self.client.create_domain(dom_name)
+        domain_body = self.client.create_domain(dom_name)['domain']
         dom_id = domain_body['id']
         self.addCleanup(self._delete_domain, dom_id)
 
         # create a project in the domain
         proj_name = data_utils.rand_name('proj')
-        proj_body = self.client.create_project(proj_name, domain_id=dom_id)
+        proj_body = self.client.create_project(proj_name,
+                                               domain_id=dom_id)['project']
         proj_id = proj_body['id']
         self.addCleanup(self.client.delete_project, proj_id)
         self.assertEqual(proj_body['domain_id'], dom_id,
@@ -57,7 +58,7 @@ class TestDefaultProjectId (base.BaseIdentityV3AdminTest):
         user_name = data_utils.rand_name('user')
         user_body = self.client.create_user(user_name, password=user_name,
                                             domain_id=dom_id,
-                                            default_project_id=proj_id)
+                                            default_project_id=proj_id)['user']
         user_id = user_body['id']
         self.addCleanup(self.client.delete_user, user_id)
         self.assertEqual(user_body['domain_id'], dom_id,
@@ -82,6 +83,6 @@ class TestDefaultProjectId (base.BaseIdentityV3AdminTest):
 
         # verify the user's token and see that it is scoped to the project
         token, auth_data = admin_client.auth_provider.get_auth()
-        result = admin_client.identity_v3_client.get_token(token)
+        result = admin_client.identity_v3_client.get_token(token)['token']
         self.assertEqual(result['project']['domain']['id'], dom_id)
         self.assertEqual(result['project']['id'], proj_id)

@@ -12,11 +12,12 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest_lib.common.utils import data_utils
 from tempest_lib import decorators
 
 from tempest.api.compute import base
 from tempest.common import fixed_network
+from tempest.common.utils import data_utils
+from tempest.common import waiters
 from tempest import test
 
 
@@ -52,7 +53,7 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
     @test.idempotent_id('51717b38-bdc1-458b-b636-1cf82d99f62f')
     def test_list_servers_by_admin(self):
         # Listing servers by admin user returns empty list by default
-        body = self.client.list_servers_with_detail()
+        body = self.client.list_servers(detail=True)
         servers = body['servers']
         self.assertEqual([], servers)
 
@@ -61,11 +62,11 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
         # Filter the list of servers by server error status
         params = {'status': 'error'}
         self.client.reset_state(self.s1_id, state='error')
-        body = self.non_admin_client.list_servers(params)
+        body = self.non_admin_client.list_servers(**params)
         # Reset server's state to 'active'
         self.client.reset_state(self.s1_id, state='active')
         # Verify server's state
-        server = self.client.get_server(self.s1_id)
+        server = self.client.show_server(self.s1_id)['server']
         self.assertEqual(server['status'], 'ACTIVE')
         servers = body['servers']
         # Verify error server in list result
@@ -77,7 +78,7 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
         # Listing servers by admin user with all tenants parameter
         # Here should be listed all servers
         params = {'all_tenants': ''}
-        body = self.client.list_servers_with_detail(params)
+        body = self.client.list_servers(detail=True, **params)
         servers = body['servers']
         servers_name = map(lambda x: x['name'], servers)
 
@@ -91,14 +92,14 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
         # List the primary tenant but get nothing due to odd specified behavior
         tenant_id = self.non_admin_client.tenant_id
         params = {'tenant_id': tenant_id}
-        body = self.client.list_servers_with_detail(params)
+        body = self.client.list_servers(detail=True, **params)
         servers = body['servers']
         self.assertEqual([], servers)
 
         # List the admin tenant which has no servers
         admin_tenant_id = self.client.tenant_id
         params = {'all_tenants': '', 'tenant_id': admin_tenant_id}
-        body = self.client.list_servers_with_detail(params)
+        body = self.client.list_servers(detail=True, **params)
         servers = body['servers']
         self.assertEqual([], servers)
 
@@ -110,18 +111,20 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
         image_id = self.image_ref
         network = self.get_tenant_network()
         network_kwargs = fixed_network.set_networks_kwarg(network)
-        test_server = self.client.create_server(name, image_id, flavor,
-                                                **network_kwargs)
+        test_server = self.client.create_server(name=name, imageRef=image_id,
+                                                flavorRef=flavor,
+                                                **network_kwargs)['server']
         self.addCleanup(self.client.delete_server, test_server['id'])
-        self.client.wait_for_server_status(test_server['id'], 'ACTIVE')
-        server = self.client.get_server(test_server['id'])
+        waiters.wait_for_server_status(self.client,
+                                       test_server['id'], 'ACTIVE')
+        server = self.client.show_server(test_server['id'])['server']
         self.assertEqual(server['status'], 'ACTIVE')
         hostname = server[self._host_key]
         params = {'host': hostname}
-        body = self.client.list_servers(params)
+        body = self.client.list_servers(**params)
         servers = body['servers']
         nonexistent_params = {'host': 'nonexistent_host'}
-        nonexistent_body = self.client.list_servers(nonexistent_params)
+        nonexistent_body = self.client.list_servers(**nonexistent_params)
         nonexistent_servers = nonexistent_body['servers']
         self.assertIn(test_server['id'], map(lambda x: x['id'], servers))
         self.assertNotIn(test_server['id'],
@@ -133,14 +136,14 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
         self.client.reset_state(self.s1_id)
 
         # Verify server's state
-        server = self.client.get_server(self.s1_id)
+        server = self.client.show_server(self.s1_id)['server']
         self.assertEqual(server['status'], 'ERROR')
 
         # Reset server's state to 'active'
         self.client.reset_state(self.s1_id, state='active')
 
         # Verify server's state
-        server = self.client.get_server(self.s1_id)
+        server = self.client.show_server(self.s1_id)['server']
         self.assertEqual(server['status'], 'ACTIVE')
 
     @decorators.skip_because(bug="1240043")
@@ -161,11 +164,11 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
 
         # resetting vm state require admin privilege
         self.client.reset_state(self.s1_id, state='error')
-        rebuilt_server = self.non_admin_client.rebuild(
-            self.s1_id, self.image_ref_alt)
-        self.addCleanup(self.non_admin_client.wait_for_server_status,
+        rebuilt_server = self.non_admin_client.rebuild_server(
+            self.s1_id, self.image_ref_alt)['server']
+        self.addCleanup(waiters.wait_for_server_status, self.non_admin_client,
                         self.s1_id, 'ACTIVE')
-        self.addCleanup(self.non_admin_client.rebuild, self.s1_id,
+        self.addCleanup(self.non_admin_client.rebuild_server, self.s1_id,
                         self.image_ref)
 
         # Verify the properties in the initial response are correct
@@ -173,11 +176,12 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
         rebuilt_image_id = rebuilt_server['image']['id']
         self.assertEqual(self.image_ref_alt, rebuilt_image_id)
         self.assertEqual(self.flavor_ref, rebuilt_server['flavor']['id'])
-        self.non_admin_client.wait_for_server_status(rebuilt_server['id'],
-                                                     'ACTIVE',
-                                                     raise_on_error=False)
+        waiters.wait_for_server_status(self.non_admin_client,
+                                       rebuilt_server['id'], 'ACTIVE',
+                                       raise_on_error=False)
         # Verify the server properties after rebuilding
-        server = self.non_admin_client.get_server(rebuilt_server['id'])
+        server = (self.non_admin_client.show_server(rebuilt_server['id'])
+                  ['server'])
         rebuilt_image_id = server['image']['id']
         self.assertEqual(self.image_ref_alt, rebuilt_image_id)
 
@@ -195,5 +199,5 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
         hints = {
             'same_host': self.s1_id
         }
-        self.create_test_server(sched_hints=hints,
+        self.create_test_server(scheduler_hints=hints,
                                 wait_until='ACTIVE')

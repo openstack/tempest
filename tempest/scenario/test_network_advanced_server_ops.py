@@ -14,9 +14,10 @@
 #    under the License.
 
 from oslo_log import log as logging
-from tempest_lib.common.utils import data_utils
 import testtools
 
+from tempest.common.utils import data_utils
+from tempest.common import waiters
 from tempest import config
 from tempest.scenario import manager
 from tempest import test
@@ -90,7 +91,8 @@ class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
                                                servers=[self.server])
 
     def _wait_server_status_and_check_network_connectivity(self):
-        self.servers_client.wait_for_server_status(self.server['id'], 'ACTIVE')
+        waiters.wait_for_server_status(self.servers_client,
+                                       self.server['id'], 'ACTIVE')
         self._check_network_connectivity()
 
     @test.idempotent_id('61f1aa9a-1573-410e-9054-afa557cab021')
@@ -98,18 +100,19 @@ class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
     @test.services('compute', 'network')
     def test_server_connectivity_stop_start(self):
         self._setup_network_and_servers()
-        self.servers_client.stop(self.server['id'])
-        self.servers_client.wait_for_server_status(self.server['id'],
-                                                   'SHUTOFF')
+        self.servers_client.stop_server(self.server['id'])
+        waiters.wait_for_server_status(self.servers_client,
+                                       self.server['id'], 'SHUTOFF')
         self._check_network_connectivity(should_connect=False)
-        self.servers_client.start(self.server['id'])
+        self.servers_client.start_server(self.server['id'])
         self._wait_server_status_and_check_network_connectivity()
 
     @test.idempotent_id('7b6860c2-afa3-4846-9522-adeb38dfbe08')
     @test.services('compute', 'network')
     def test_server_connectivity_reboot(self):
         self._setup_network_and_servers()
-        self.servers_client.reboot(self.server['id'], reboot_type='SOFT')
+        self.servers_client.reboot_server(self.server['id'],
+                                          reboot_type='SOFT')
         self._wait_server_status_and_check_network_connectivity()
 
     @test.idempotent_id('88a529c2-1daa-4c85-9aec-d541ba3eb699')
@@ -117,8 +120,8 @@ class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
     def test_server_connectivity_rebuild(self):
         self._setup_network_and_servers()
         image_ref_alt = CONF.compute.image_ref_alt
-        self.servers_client.rebuild(self.server['id'],
-                                    image_ref=image_ref_alt)
+        self.servers_client.rebuild_server(self.server['id'],
+                                           image_ref=image_ref_alt)
         self._wait_server_status_and_check_network_connectivity()
 
     @test.idempotent_id('2b2642db-6568-4b35-b812-eceed3fa20ce')
@@ -128,7 +131,8 @@ class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
     def test_server_connectivity_pause_unpause(self):
         self._setup_network_and_servers()
         self.servers_client.pause_server(self.server['id'])
-        self.servers_client.wait_for_server_status(self.server['id'], 'PAUSED')
+        waiters.wait_for_server_status(self.servers_client,
+                                       self.server['id'], 'PAUSED')
         self._check_network_connectivity(should_connect=False)
         self.servers_client.unpause_server(self.server['id'])
         self._wait_server_status_and_check_network_connectivity()
@@ -140,8 +144,8 @@ class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
     def test_server_connectivity_suspend_resume(self):
         self._setup_network_and_servers()
         self.servers_client.suspend_server(self.server['id'])
-        self.servers_client.wait_for_server_status(self.server['id'],
-                                                   'SUSPENDED')
+        waiters.wait_for_server_status(self.servers_client, self.server['id'],
+                                       'SUSPENDED')
         self._check_network_connectivity(should_connect=False)
         self.servers_client.resume_server(self.server['id'])
         self._wait_server_status_and_check_network_connectivity()
@@ -156,8 +160,9 @@ class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
             msg = "Skipping test - flavor_ref and flavor_ref_alt are identical"
             raise self.skipException(msg)
         self._setup_network_and_servers()
-        self.servers_client.resize(self.server['id'], flavor_ref=resize_flavor)
-        self.servers_client.wait_for_server_status(self.server['id'],
-                                                   'VERIFY_RESIZE')
-        self.servers_client.confirm_resize(self.server['id'])
+        self.servers_client.resize_server(self.server['id'],
+                                          flavor_ref=resize_flavor)
+        waiters.wait_for_server_status(self.servers_client, self.server['id'],
+                                       'VERIFY_RESIZE')
+        self.servers_client.confirm_resize_server(self.server['id'])
         self._wait_server_status_and_check_network_connectivity()

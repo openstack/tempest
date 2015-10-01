@@ -13,16 +13,16 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import json
+from oslo_serialization import jsonutils as json
 
 from tempest.api_schema.response.compute.v2_1 import limits as schema
 from tempest.common import service_client
 
 
-class LimitsClientJSON(service_client.ServiceClient):
+class LimitsClient(service_client.ServiceClient):
 
     def show_limits(self):
         resp, body = self.get("limits")
         body = json.loads(body)
         self.validate_response(schema.get_limit, resp, body)
-        return service_client.ResponseBody(resp, body['limits'])
+        return service_client.ResponseBody(resp, body)

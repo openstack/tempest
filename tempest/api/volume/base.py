@@ -14,10 +14,10 @@
 #    under the License.
 
 from oslo_log import log as logging
-from tempest_lib.common.utils import data_utils
 from tempest_lib import exceptions as lib_exc
 
-from tempest.common import fixed_network
+from tempest.common import compute
+from tempest.common.utils import data_utils
 from tempest import config
 from tempest import exceptions
 import tempest.test
@@ -61,7 +61,8 @@ class BaseVolumeTest(tempest.test.BaseTestCase):
     def setup_clients(cls):
         super(BaseVolumeTest, cls).setup_clients()
         cls.servers_client = cls.os.servers_client
-        cls.networks_client = cls.os.networks_client
+        cls.compute_networks_client = cls.os.compute_networks_client
+        cls.images_client = cls.os.images_client
 
         if cls._api_version == 1:
             cls.snapshots_client = cls.os.snapshots_client
@@ -112,7 +113,7 @@ class BaseVolumeTest(tempest.test.BaseTestCase):
         name_field = cls.special_fields['name_field']
 
         kwargs[name_field] = name
-        volume = cls.volumes_client.create_volume(size, **kwargs)
+        volume = cls.volumes_client.create_volume(size, **kwargs)['volume']
 
         cls.volumes.append(volume)
         cls.volumes_client.wait_for_volume_status(volume['id'], 'available')
@@ -121,8 +122,8 @@ class BaseVolumeTest(tempest.test.BaseTestCase):
     @classmethod
     def create_snapshot(cls, volume_id=1, **kwargs):
         """Wrapper utility that returns a test snapshot."""
-        snapshot = cls.snapshots_client.create_snapshot(volume_id,
-                                                        **kwargs)
+        snapshot = cls.snapshots_client.create_snapshot(
+            volume_id, **kwargs)['snapshot']
         cls.snapshots.append(snapshot)
         cls.snapshots_client.wait_for_snapshot_status(snapshot['id'],
                                                       'available')
@@ -161,12 +162,13 @@ class BaseVolumeTest(tempest.test.BaseTestCase):
 
     @classmethod
     def create_server(cls, name, **kwargs):
-        network = cls.get_tenant_network()
-        network_kwargs = fixed_network.set_networks_kwarg(network, kwargs)
-        return cls.servers_client.create_server(name,
-                                                cls.image_ref,
-                                                cls.flavor_ref,
-                                                **network_kwargs)
+        tenant_network = cls.get_tenant_network()
+        body, _ = compute.create_test_server(
+            cls.os,
+            tenant_network=tenant_network,
+            name=name,
+            **kwargs)
+        return body
 
 
 class BaseVolumeAdminTest(BaseVolumeTest):
@@ -216,7 +218,7 @@ class BaseVolumeAdminTest(BaseVolumeTest):
         name = name or data_utils.rand_name(cls.__name__ + '-QoS')
         consumer = consumer or 'front-end'
         qos_specs = cls.volume_qos_client.create_qos(name, consumer,
-                                                     **kwargs)
+                                                     **kwargs)['qos_specs']
         cls.qos_specs.append(qos_specs['id'])
         return qos_specs
 

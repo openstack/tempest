@@ -12,9 +12,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest_lib.common.utils import data_utils
-
 from tempest.api.data_processing import base as dp_base
+from tempest.common.utils import data_utils
 from tempest import exceptions
 from tempest import test
 
@@ -99,7 +98,7 @@ class ClusterTemplateTest(dp_base.BaseDataProcessingTest):
         template_info = self._create_cluster_template()
 
         # check for cluster template in list
-        templates = self.client.list_cluster_templates()
+        templates = self.client.list_cluster_templates()['cluster_templates']
         templates_info = [(template['id'], template['name'])
                           for template in templates]
         self.assertIn(template_info, templates_info)
@@ -111,6 +110,7 @@ class ClusterTemplateTest(dp_base.BaseDataProcessingTest):
 
         # check cluster template fetch by id
         template = self.client.get_cluster_template(template_id)
+        template = template['cluster_template']
         self.assertEqual(template_name, template['name'])
         self.assertDictContainsSubset(self.cluster_template, template)
 

@@ -13,23 +13,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import json
 import uuid
 
+from oslo_serialization import jsonutils as json
 from six.moves.urllib import parse as urllib
 
 from tempest.api_schema.response.messaging.v1 import queues as queues_schema
 from tempest.common import service_client
 
 
-class MessagingClientJSON(service_client.ServiceClient):
+class MessagingClient(service_client.ServiceClient):
 
     def __init__(self, auth_provider, service, region,
                  endpoint_type=None, build_interval=None, build_timeout=None,
                  disable_ssl_certificate_validation=None, ca_certs=None,
                  trace_requests=None):
         dscv = disable_ssl_certificate_validation
-        super(MessagingClientJSON, self).__init__(
+        super(MessagingClient, self).__init__(
             auth_provider, service, region,
             endpoint_type=endpoint_type,
             build_interval=build_interval,

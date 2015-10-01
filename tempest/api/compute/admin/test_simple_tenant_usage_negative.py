@@ -48,7 +48,7 @@ class TenantUsagesNegativeTestJSON(base.BaseV2ComputeAdminTest):
                   'end': self.end}
         self.assertRaises(lib_exc.NotFound,
                           self.adm_client.show_tenant_usage,
-                          '', params)
+                          '', **params)
 
     @test.attr(type=['negative'])
     @test.idempotent_id('4079dd2a-9e8d-479f-869d-6fa985ce45b6')
@@ -58,7 +58,7 @@ class TenantUsagesNegativeTestJSON(base.BaseV2ComputeAdminTest):
                   'end': self.start}
         self.assertRaises(lib_exc.BadRequest,
                           self.adm_client.show_tenant_usage,
-                          self.client.tenant_id, params)
+                          self.client.tenant_id, **params)
 
     @test.attr(type=['negative'])
     @test.idempotent_id('bbe6fe2c-15d8-404c-a0a2-44fad0ad5cc7')
@@ -66,6 +66,6 @@ class TenantUsagesNegativeTestJSON(base.BaseV2ComputeAdminTest):
         # Get usage for all tenants with non admin user
         params = {'start': self.start,
                   'end': self.end,
-                  'detailed': int(bool(True))}
+                  'detailed': "1"}
         self.assertRaises(lib_exc.Forbidden,
-                          self.client.list_tenant_usages, params)
+                          self.client.list_tenant_usages, **params)

@@ -13,11 +13,12 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest_lib.common.utils import data_utils
 from tempest_lib import exceptions as lib_exc
 import testtools
 
 from tempest.api.compute import base
+from tempest.common.utils import data_utils
+from tempest.common import waiters
 from tempest import config
 from tempest import test
 
@@ -53,30 +54,34 @@ class ServerRescueNegativeTestJSON(base.BaseV2ComputeTest):
 
         cls.servers_client.rescue_server(
             cls.rescue_id, adminPass=rescue_password)
-        cls.servers_client.wait_for_server_status(cls.rescue_id, 'RESCUE')
-        cls.servers_client.wait_for_server_status(cls.server_id, 'ACTIVE')
+        waiters.wait_for_server_status(cls.servers_client,
+                                       cls.rescue_id, 'RESCUE')
+        waiters.wait_for_server_status(cls.servers_client,
+                                       cls.server_id, 'ACTIVE')
 
     def _create_volume(self):
         volume = self.volumes_extensions_client.create_volume(
-            CONF.volume.volume_size, display_name=data_utils.rand_name(
-                self.__class__.__name__ + '_volume'))
+            size=CONF.volume.volume_size, display_name=data_utils.rand_name(
+                self.__class__.__name__ + '_volume'))['volume']
         self.addCleanup(self.delete_volume, volume['id'])
-        self.volumes_extensions_client.wait_for_volume_status(
-            volume['id'], 'available')
+        waiters.wait_for_volume_status(self.volumes_extensions_client,
+                                       volume['id'], 'available')
         return volume
 
     def _detach(self, server_id, volume_id):
         self.servers_client.detach_volume(server_id, volume_id)
-        self.volumes_extensions_client.wait_for_volume_status(volume_id,
-                                                              'available')
+        waiters.wait_for_volume_status(self.volumes_extensions_client,
+                                       volume_id, 'available')
 
     def _unrescue(self, server_id):
         self.servers_client.unrescue_server(server_id)
-        self.servers_client.wait_for_server_status(server_id, 'ACTIVE')
+        waiters.wait_for_server_status(self.servers_client,
+                                       server_id, 'ACTIVE')
 
     def _unpause(self, server_id):
         self.servers_client.unpause_server(server_id)
-        self.servers_client.wait_for_server_status(server_id, 'ACTIVE')
+        waiters.wait_for_server_status(self.servers_client,
+                                       server_id, 'ACTIVE')
 
     @test.idempotent_id('cc3a883f-43c0-4fb6-a9bb-5579d64984ed')
     @testtools.skipUnless(CONF.compute_feature_enabled.pause,
@@ -86,7 +91,8 @@ class ServerRescueNegativeTestJSON(base.BaseV2ComputeTest):
         # Rescue a paused server
         self.servers_client.pause_server(self.server_id)
         self.addCleanup(self._unpause, self.server_id)
-        self.servers_client.wait_for_server_status(self.server_id, 'PAUSED')
+        waiters.wait_for_server_status(self.servers_client,
+                                       self.server_id, 'PAUSED')
         self.assertRaises(lib_exc.Conflict,
                           self.servers_client.rescue_server,
                           self.server_id)
@@ -94,7 +100,7 @@ class ServerRescueNegativeTestJSON(base.BaseV2ComputeTest):
     @test.attr(type=['negative'])
     @test.idempotent_id('db22b618-f157-4566-a317-1b6d467a8094')
     def test_rescued_vm_reboot(self):
-        self.assertRaises(lib_exc.Conflict, self.servers_client.reboot,
+        self.assertRaises(lib_exc.Conflict, self.servers_client.reboot_server,
                           self.rescue_id, 'HARD')
 
     @test.attr(type=['negative'])
@@ -110,7 +116,7 @@ class ServerRescueNegativeTestJSON(base.BaseV2ComputeTest):
     @test.idempotent_id('70cdb8a1-89f8-437d-9448-8844fd82bf46')
     def test_rescued_vm_rebuild(self):
         self.assertRaises(lib_exc.Conflict,
-                          self.servers_client.rebuild,
+                          self.servers_client.rebuild_server,
                           self.rescue_id,
                           self.image_ref_alt)
 
@@ -123,14 +129,15 @@ class ServerRescueNegativeTestJSON(base.BaseV2ComputeTest):
         # Rescue the server
         self.servers_client.rescue_server(self.server_id,
                                           adminPass=self.password)
-        self.servers_client.wait_for_server_status(self.server_id, 'RESCUE')
+        waiters.wait_for_server_status(self.servers_client,
+                                       self.server_id, 'RESCUE')
         self.addCleanup(self._unrescue, self.server_id)
 
         # Attach the volume to the server
         self.assertRaises(lib_exc.Conflict,
                           self.servers_client.attach_volume,
                           self.server_id,
-                          volume['id'],
+                          volumeId=volume['id'],
                           device='/dev/%s' % self.device)
 
     @test.idempotent_id('f56e465b-fe10-48bf-b75d-646cda3a8bc9')
@@ -141,15 +148,16 @@ class ServerRescueNegativeTestJSON(base.BaseV2ComputeTest):
 
         # Attach the volume to the server
         self.servers_client.attach_volume(self.server_id,
-                                          volume['id'],
+                                          volumeId=volume['id'],
                                           device='/dev/%s' % self.device)
-        self.volumes_extensions_client.wait_for_volume_status(
-            volume['id'], 'in-use')
+        waiters.wait_for_volume_status(self.volumes_extensions_client,
+                                       volume['id'], 'in-use')
 
         # Rescue the server
         self.servers_client.rescue_server(self.server_id,
                                           adminPass=self.password)
-        self.servers_client.wait_for_server_status(self.server_id, 'RESCUE')
+        waiters.wait_for_server_status(self.servers_client,
+                                       self.server_id, 'RESCUE')
         # addCleanup is a LIFO queue
         self.addCleanup(self._detach, self.server_id, volume['id'])
         self.addCleanup(self._unrescue, self.server_id)

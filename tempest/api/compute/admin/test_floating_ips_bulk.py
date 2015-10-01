@@ -34,7 +34,7 @@ class FloatingIPsBulkAdminTestJSON(base.BaseV2ComputeAdminTest):
     @classmethod
     def setup_clients(cls):
         super(FloatingIPsBulkAdminTestJSON, cls).setup_clients()
-        cls.client = cls.os_adm.floating_ips_client
+        cls.client = cls.os_adm.floating_ips_bulk_client
 
     @classmethod
     def resource_setup(cls):
@@ -45,7 +45,7 @@ class FloatingIPsBulkAdminTestJSON(base.BaseV2ComputeAdminTest):
     @classmethod
     def verify_unallocated_floating_ip_range(cls, ip_range):
         # Verify whether configure floating IP range is not already allocated.
-        body = cls.client.list_floating_ips_bulk()
+        body = cls.client.list_floating_ips_bulk()['floating_ip_info']
         allocated_ips_list = map(lambda x: x['address'], body)
         for ip_addr in netaddr.IPNetwork(ip_range).iter_hosts():
             if str(ip_addr) in allocated_ips_list:
@@ -70,14 +70,16 @@ class FloatingIPsBulkAdminTestJSON(base.BaseV2ComputeAdminTest):
         # anywhere. Using the below mentioned interface which is not ever
         # expected to be used. Clean Up has been done for created IP range
         interface = 'eth0'
-        body = self.client.create_floating_ips_bulk(self.ip_range,
-                                                    pool,
-                                                    interface)
+        body = (self.client.create_floating_ips_bulk(self.ip_range,
+                                                     pool,
+                                                     interface)
+                ['floating_ips_bulk_create'])
         self.addCleanup(self._delete_floating_ips_bulk, self.ip_range)
         self.assertEqual(self.ip_range, body['ip_range'])
-        ips_list = self.client.list_floating_ips_bulk()
+        ips_list = self.client.list_floating_ips_bulk()['floating_ip_info']
         self.assertNotEqual(0, len(ips_list))
         for ip in netaddr.IPNetwork(self.ip_range).iter_hosts():
             self.assertIn(str(ip), map(lambda x: x['address'], ips_list))
-        body = self.client.delete_floating_ips_bulk(self.ip_range)
-        self.assertEqual(self.ip_range, body.data)
+        body = (self.client.delete_floating_ips_bulk(self.ip_range)
+                ['floating_ips_bulk_delete'])
+        self.assertEqual(self.ip_range, body)

@@ -26,19 +26,22 @@ class VolumesServicesV2TestJSON(base.BaseVolumeAdminTest):
     @classmethod
     def resource_setup(cls):
         super(VolumesServicesV2TestJSON, cls).resource_setup()
-        cls.services = cls.admin_volume_services_client.list_services()
+        cls.services = (cls.admin_volume_services_client.list_services()
+                        ['services'])
         cls.host_name = cls.services[0]['host']
         cls.binary_name = cls.services[0]['binary']
 
     @test.idempotent_id('e0218299-0a59-4f43-8b2b-f1c035b3d26d')
     def test_list_services(self):
-        services = self.admin_volume_services_client.list_services()
+        services = (self.admin_volume_services_client.list_services()
+                    ['services'])
         self.assertNotEqual(0, len(services))
 
     @test.idempotent_id('63a3e1ca-37ee-4983-826d-83276a370d25')
     def test_get_service_by_service_binary_name(self):
         params = {'binary': self.binary_name}
-        services = self.admin_volume_services_client.list_services(params)
+        services = (self.admin_volume_services_client.list_services(params)
+                    ['services'])
         self.assertNotEqual(0, len(services))
         for service in services:
             self.assertEqual(self.binary_name, service['binary'])
@@ -49,7 +52,8 @@ class VolumesServicesV2TestJSON(base.BaseVolumeAdminTest):
                             service['host'] == self.host_name]
         params = {'host': self.host_name}
 
-        services = self.admin_volume_services_client.list_services(params)
+        services = (self.admin_volume_services_client.list_services(params)
+                    ['services'])
 
         # we could have a periodic job checkin between the 2 service
         # lookups, so only compare binary lists.
@@ -63,7 +67,8 @@ class VolumesServicesV2TestJSON(base.BaseVolumeAdminTest):
     def test_get_service_by_service_and_host_name(self):
         params = {'host': self.host_name, 'binary': self.binary_name}
 
-        services = self.admin_volume_services_client.list_services(params)
+        services = (self.admin_volume_services_client.list_services(params)
+                    ['services'])
         self.assertEqual(1, len(services))
         self.assertEqual(self.host_name, services[0]['host'])
         self.assertEqual(self.binary_name, services[0]['binary'])

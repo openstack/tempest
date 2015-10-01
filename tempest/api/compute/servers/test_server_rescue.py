@@ -13,9 +13,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest_lib.common.utils import data_utils
-
 from tempest.api.compute import base
+from tempest.common.utils import data_utils
+from tempest.common import waiters
 from tempest import config
 from tempest import test
 
@@ -41,23 +41,23 @@ class ServerRescueTestJSON(base.BaseV2ComputeTest):
         super(ServerRescueTestJSON, cls).resource_setup()
 
         # Floating IP creation
-        body = cls.floating_ips_client.create_floating_ip()
+        body = cls.floating_ips_client.create_floating_ip()['floating_ip']
         cls.floating_ip_id = str(body['id']).strip()
         cls.floating_ip = str(body['ip']).strip()
 
         # Security group creation
         cls.sg_name = data_utils.rand_name('sg')
         cls.sg_desc = data_utils.rand_name('sg-desc')
-        cls.sg = \
-            cls.security_groups_client.create_security_group(cls.sg_name,
-                                                             cls.sg_desc)
+        cls.sg = cls.security_groups_client.create_security_group(
+            name=cls.sg_name, description=cls.sg_desc)['security_group']
         cls.sg_id = cls.sg['id']
 
         # Server for positive tests
         server = cls.create_test_server(wait_until='BUILD')
         cls.server_id = server['id']
         cls.password = server['adminPass']
-        cls.servers_client.wait_for_server_status(cls.server_id, 'ACTIVE')
+        waiters.wait_for_server_status(cls.servers_client, cls.server_id,
+                                       'ACTIVE')
 
     def setUp(self):
         super(ServerRescueTestJSON, self).setUp()
@@ -75,22 +75,26 @@ class ServerRescueTestJSON(base.BaseV2ComputeTest):
 
     def _unrescue(self, server_id):
         self.servers_client.unrescue_server(server_id)
-        self.servers_client.wait_for_server_status(server_id, 'ACTIVE')
+        waiters.wait_for_server_status(self.servers_client, server_id,
+                                       'ACTIVE')
 
     @test.idempotent_id('fd032140-714c-42e4-a8fd-adcd8df06be6')
     def test_rescue_unrescue_instance(self):
         self.servers_client.rescue_server(
             self.server_id, adminPass=self.password)
-        self.servers_client.wait_for_server_status(self.server_id, 'RESCUE')
+        waiters.wait_for_server_status(self.servers_client, self.server_id,
+                                       'RESCUE')
         self.servers_client.unrescue_server(self.server_id)
-        self.servers_client.wait_for_server_status(self.server_id, 'ACTIVE')
+        waiters.wait_for_server_status(self.servers_client, self.server_id,
+                                       'ACTIVE')
 
     @test.idempotent_id('4842e0cf-e87d-4d9d-b61f-f4791da3cacc')
     def test_rescued_vm_associate_dissociate_floating_ip(self):
         # Rescue the server
         self.servers_client.rescue_server(
             self.server_id, adminPass=self.password)
-        self.servers_client.wait_for_server_status(self.server_id, 'RESCUE')
+        waiters.wait_for_server_status(self.servers_client, self.server_id,
+                                       'RESCUE')
         self.addCleanup(self._unrescue, self.server_id)
 
         # Association of floating IP to a rescued vm
@@ -107,7 +111,8 @@ class ServerRescueTestJSON(base.BaseV2ComputeTest):
         # Rescue the server
         self.servers_client.rescue_server(
             self.server_id, adminPass=self.password)
-        self.servers_client.wait_for_server_status(self.server_id, 'RESCUE')
+        waiters.wait_for_server_status(self.servers_client, self.server_id,
+                                       'RESCUE')
         self.addCleanup(self._unrescue, self.server_id)
 
         # Add Security group

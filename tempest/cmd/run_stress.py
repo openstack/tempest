@@ -16,7 +16,6 @@
 
 import argparse
 import inspect
-import json
 import sys
 try:
     from unittest import loader
@@ -25,6 +24,7 @@ except ImportError:
     from unittest2 import loader
 
 from oslo_log import log as logging
+from oslo_serialization import jsonutils as json
 from testtools import testsuite
 
 from tempest.stress import driver

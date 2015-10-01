@@ -18,6 +18,8 @@ from oslo_utils import excutils
 from tempest_lib.common.utils import data_utils
 
 from tempest.common import fixed_network
+from tempest.common import service_client
+from tempest.common import waiters
 from tempest import config
 
 CONF = config.CONF
@@ -25,17 +27,22 @@ CONF = config.CONF
 LOG = logging.getLogger(__name__)
 
 
-def create_test_server(clients, validatable, validation_resources=None,
-                       tenant_network=None, **kwargs):
+def create_test_server(clients, validatable=False, validation_resources=None,
+                       tenant_network=None, wait_until=None,
+                       volume_backed=False, **kwargs):
     """Common wrapper utility returning a test server.
 
     This method is a common wrapper returning a test server that can be
     pingable or sshable.
 
-    :param clients: Client manager which provides Openstack Tempest clients.
+    :param clients: Client manager which provides OpenStack Tempest clients.
     :param validatable: Whether the server will be pingable or sshable.
     :param validation_resources: Resources created for the connection to the
     server. Include a keypair, a security group and an IP.
+    :param tenant_network: Tenant network to be used for creating a server.
+    :param wait_until: Server status to wait for the server to reach after
+    its creation.
+    :param volume_backed: Whether the instance is volume backed or not.
     :returns a tuple
     """
 
@@ -46,8 +53,8 @@ def create_test_server(clients, validatable, validation_resources=None,
     else:
         name = data_utils.rand_name(__name__ + "-instance")
 
-    flavor = kwargs.get('flavor', CONF.compute.flavor_ref)
-    image_id = kwargs.get('image_id', CONF.compute.image_ref)
+    flavor = kwargs.pop('flavor', CONF.compute.flavor_ref)
+    image_id = kwargs.pop('image_id', CONF.compute.image_ref)
 
     kwargs = fixed_network.set_networks_kwarg(
         tenant_network, kwargs) or {}
@@ -77,29 +84,56 @@ def create_test_server(clients, validatable, validation_resources=None,
                 LOG.debug("No key provided.")
 
         if CONF.validation.connect_method == 'floating':
-            if 'wait_until' not in kwargs:
-                kwargs['wait_until'] = 'ACTIVE'
+            if wait_until is None:
+                wait_until = 'ACTIVE'
 
-    body = clients.servers_client.create_server(name, image_id, flavor,
+    if volume_backed:
+        volume_name = data_utils.rand_name('volume')
+        volumes_client = clients.volumes_v2_client
+        if CONF.volume_feature_enabled.api_v1:
+            volumes_client = clients.volumes_client
+        volume = volumes_client.create_volume(
+            display_name=volume_name,
+            imageRef=image_id)
+        volumes_client.wait_for_volume_status(volume['volume']['id'],
+                                              'available')
+
+        bd_map_v2 = [{
+            'uuid': volume['volume']['id'],
+            'source_type': 'volume',
+            'destination_type': 'volume',
+            'boot_index': 0,
+            'delete_on_termination': True}]
+        kwargs['block_device_mapping_v2'] = bd_map_v2
+
+        # Since this is boot from volume an image does not need
+        # to be specified.
+        image_id = ''
+
+    body = clients.servers_client.create_server(name=name, imageRef=image_id,
+                                                flavorRef=flavor,
                                                 **kwargs)
 
     # handle the case of multiple servers
-    servers = [body]
+    servers = []
     if 'min_count' in kwargs or 'max_count' in kwargs:
         # Get servers created which name match with name param.
         body_servers = clients.servers_client.list_servers()
         servers = \
             [s for s in body_servers['servers'] if s['name'].startswith(name)]
+    else:
+        body = service_client.ResponseBody(body.response, body['server'])
+        servers = [body]
 
     # The name of the method to associate a floating IP to as server is too
     # long for PEP8 compliance so:
     assoc = clients.floating_ips_client.associate_floating_ip_to_server
 
-    if 'wait_until' in kwargs:
+    if wait_until:
         for server in servers:
             try:
-                clients.servers_client.wait_for_server_status(
-                    server['id'], kwargs['wait_until'])
+                waiters.wait_for_server_status(
+                    clients.servers_client, server['id'], wait_until)
 
                 # Multiple validatable servers are not supported for now. Their
                 # creation will fail with the condition above (l.58).

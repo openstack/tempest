@@ -13,13 +13,13 @@
 #    under the License.
 
 import hashlib
-import json
 
-from tempest_lib.common.utils import data_utils
+from oslo_serialization import jsonutils as json
 from tempest_lib import exceptions as lib_exc
 
 from tempest.api.object_storage import base
 from tempest.common import custom_matchers
+from tempest.common.utils import data_utils
 from tempest import test
 
 # Each segment, except for the final one, must be at least 1 megabyte

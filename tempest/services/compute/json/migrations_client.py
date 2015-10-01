@@ -12,17 +12,16 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import json
-
+from oslo_serialization import jsonutils as json
 from six.moves.urllib import parse as urllib
 
 from tempest.api_schema.response.compute.v2_1 import migrations as schema
 from tempest.common import service_client
 
 
-class MigrationsClientJSON(service_client.ServiceClient):
+class MigrationsClient(service_client.ServiceClient):
 
-    def list_migrations(self, params=None):
+    def list_migrations(self, **params):
         """Lists all migrations."""
 
         url = 'os-migrations'
@@ -32,4 +31,4 @@ class MigrationsClientJSON(service_client.ServiceClient):
         resp, body = self.get(url)
         body = json.loads(body)
         self.validate_response(schema.list_migrations, resp, body)
-        return service_client.ResponseBodyList(resp, body['migrations'])
+        return service_client.ResponseBody(resp, body)

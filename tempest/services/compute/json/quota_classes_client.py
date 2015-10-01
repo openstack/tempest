@@ -13,14 +13,14 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import json
+from oslo_serialization import jsonutils as json
 
 from tempest.api_schema.response.compute.v2_1\
     import quota_classes as classes_schema
 from tempest.common import service_client
 
 
-class QuotaClassesClientJSON(service_client.ServiceClient):
+class QuotaClassesClient(service_client.ServiceClient):
 
     def show_quota_class_set(self, quota_class_id):
         """List the quota class set for a quota class."""
@@ -29,7 +29,7 @@ class QuotaClassesClientJSON(service_client.ServiceClient):
         resp, body = self.get(url)
         body = json.loads(body)
         self.validate_response(classes_schema.get_quota_class_set, resp, body)
-        return service_client.ResponseBody(resp, body['quota_class_set'])
+        return service_client.ResponseBody(resp, body)
 
     def update_quota_class_set(self, quota_class_id, **kwargs):
         """
@@ -43,4 +43,4 @@ class QuotaClassesClientJSON(service_client.ServiceClient):
         body = json.loads(body)
         self.validate_response(classes_schema.update_quota_class_set,
                                resp, body)
-        return service_client.ResponseBody(resp, body['quota_class_set'])
+        return service_client.ResponseBody(resp, body)

@@ -13,10 +13,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest_lib.common.utils import data_utils
 from tempest_lib import exceptions as lib_exc
 
 from tempest.api.compute.security_groups import base
+from tempest.common.utils import data_utils
 from tempest import config
 from tempest import test
 
@@ -36,6 +36,7 @@ class SecurityGroupRulesNegativeTestJSON(base.BaseSecurityGroupsTest):
     def setup_clients(cls):
         super(SecurityGroupRulesNegativeTestJSON, cls).setup_clients()
         cls.client = cls.security_groups_client
+        cls.rules_client = cls.security_group_rules_client
 
     @test.attr(type=['negative'])
     @test.idempotent_id('1d507e98-7951-469b-82c3-23f1e6b8c254')
@@ -49,8 +50,10 @@ class SecurityGroupRulesNegativeTestJSON(base.BaseSecurityGroupsTest):
         from_port = 22
         to_port = 22
         self.assertRaises(lib_exc.NotFound,
-                          self.client.create_security_group_rule,
-                          parent_group_id, ip_protocol, from_port, to_port)
+                          self.rules_client.create_security_group_rule,
+                          parent_group_id=parent_group_id,
+                          ip_protocol=ip_protocol, from_port=from_port,
+                          to_port=to_port)
 
     @test.attr(type=['negative'])
     @test.idempotent_id('2244d7e4-adb7-4ecb-9930-2d77e123ce4f')
@@ -64,8 +67,10 @@ class SecurityGroupRulesNegativeTestJSON(base.BaseSecurityGroupsTest):
         from_port = 22
         to_port = 22
         self.assertRaises(lib_exc.BadRequest,
-                          self.client.create_security_group_rule,
-                          parent_group_id, ip_protocol, from_port, to_port)
+                          self.rules_client.create_security_group_rule,
+                          parent_group_id=parent_group_id,
+                          ip_protocol=ip_protocol, from_port=from_port,
+                          to_port=to_port)
 
     @test.attr(type=['negative'])
     @test.idempotent_id('8bd56d02-3ffa-4d67-9933-b6b9a01d6089')
@@ -80,16 +85,17 @@ class SecurityGroupRulesNegativeTestJSON(base.BaseSecurityGroupsTest):
         from_port = 22
         to_port = 22
 
-        rule = \
-            self.client.create_security_group_rule(parent_group_id,
-                                                   ip_protocol,
-                                                   from_port,
-                                                   to_port)
-        self.addCleanup(self.client.delete_security_group_rule, rule['id'])
+        rule = self.rules_client.create_security_group_rule(
+            parent_group_id=parent_group_id, ip_protocol=ip_protocol,
+            from_port=from_port, to_port=to_port)['security_group_rule']
+        self.addCleanup(self.rules_client.delete_security_group_rule,
+                        rule['id'])
         # Add the same rule to the group should fail
         self.assertRaises(lib_exc.BadRequest,
-                          self.client.create_security_group_rule,
-                          parent_group_id, ip_protocol, from_port, to_port)
+                          self.rules_client.create_security_group_rule,
+                          parent_group_id=parent_group_id,
+                          ip_protocol=ip_protocol, from_port=from_port,
+                          to_port=to_port)
 
     @test.attr(type=['negative'])
     @test.idempotent_id('84c81249-9f6e-439c-9bbf-cbb0d2cddbdf')
@@ -106,8 +112,10 @@ class SecurityGroupRulesNegativeTestJSON(base.BaseSecurityGroupsTest):
         to_port = 22
 
         self.assertRaises(lib_exc.BadRequest,
-                          self.client.create_security_group_rule,
-                          parent_group_id, ip_protocol, from_port, to_port)
+                          self.rules_client.create_security_group_rule,
+                          parent_group_id=parent_group_id,
+                          ip_protocol=ip_protocol, from_port=from_port,
+                          to_port=to_port)
 
     @test.attr(type=['negative'])
     @test.idempotent_id('12bbc875-1045-4f7a-be46-751277baedb9')
@@ -123,8 +131,10 @@ class SecurityGroupRulesNegativeTestJSON(base.BaseSecurityGroupsTest):
         from_port = data_utils.rand_int_id(start=65536)
         to_port = 22
         self.assertRaises(lib_exc.BadRequest,
-                          self.client.create_security_group_rule,
-                          parent_group_id, ip_protocol, from_port, to_port)
+                          self.rules_client.create_security_group_rule,
+                          parent_group_id=parent_group_id,
+                          ip_protocol=ip_protocol, from_port=from_port,
+                          to_port=to_port)
 
     @test.attr(type=['negative'])
     @test.idempotent_id('ff88804d-144f-45d1-bf59-dd155838a43a')
@@ -140,8 +150,10 @@ class SecurityGroupRulesNegativeTestJSON(base.BaseSecurityGroupsTest):
         from_port = 22
         to_port = data_utils.rand_int_id(start=65536)
         self.assertRaises(lib_exc.BadRequest,
-                          self.client.create_security_group_rule,
-                          parent_group_id, ip_protocol, from_port, to_port)
+                          self.rules_client.create_security_group_rule,
+                          parent_group_id=parent_group_id,
+                          ip_protocol=ip_protocol, from_port=from_port,
+                          to_port=to_port)
 
     @test.attr(type=['negative'])
     @test.idempotent_id('00296fa9-0576-496a-ae15-fbab843189e0')
@@ -157,8 +169,10 @@ class SecurityGroupRulesNegativeTestJSON(base.BaseSecurityGroupsTest):
         from_port = 22
         to_port = 21
         self.assertRaises(lib_exc.BadRequest,
-                          self.client.create_security_group_rule,
-                          secgroup_id, ip_protocol, from_port, to_port)
+                          self.rules_client.create_security_group_rule,
+                          parent_group_id=secgroup_id,
+                          ip_protocol=ip_protocol, from_port=from_port,
+                          to_port=to_port)
 
     @test.attr(type=['negative'])
     @test.idempotent_id('56fddcca-dbb8-4494-a0db-96e9f869527c')
@@ -168,5 +182,5 @@ class SecurityGroupRulesNegativeTestJSON(base.BaseSecurityGroupsTest):
         # with non existent id
         non_existent_rule_id = not_existing_id()
         self.assertRaises(lib_exc.NotFound,
-                          self.client.delete_security_group_rule,
+                          self.rules_client.delete_security_group_rule,
                           non_existent_rule_id)

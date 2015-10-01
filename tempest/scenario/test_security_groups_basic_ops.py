@@ -14,9 +14,9 @@
 #    under the License.
 
 from oslo_log import log as logging
-from tempest_lib.common.utils import data_utils
 
 from tempest import clients
+from tempest.common.utils import data_utils
 from tempest import config
 from tempest.scenario import manager
 from tempest import test
@@ -161,9 +161,6 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
 
         cls.floating_ip_access = not CONF.network.public_router_id
 
-    def cleanup_wrapper(self, resource):
-        self.cleanup_resource(resource, self.__class__.__name__)
-
     def setUp(self):
         super(TestSecurityGroupsBasicOps, self).setUp()
         self._deploy_tenant(self.primary_tenant)
@@ -247,11 +244,13 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
                 {'uuid': tenant.network.id},
             ],
             'key_name': tenant.keypair['name'],
-            'security_groups': security_groups_names,
-            'tenant_id': tenant.creds.tenant_id,
-            'network_client': tenant.manager.network_client
+            'security_groups': security_groups_names
         }
-        server = self.create_server(name=name, create_kwargs=create_kwargs)
+        server = self.create_server(
+            name=name,
+            network_client=tenant.manager.network_client,
+            networks_client=tenant.manager.networks_client,
+            create_kwargs=create_kwargs)
         self.assertEqual(
             sorted([s['name'] for s in security_groups]),
             sorted([s['name'] for s in server['security_groups']]))
@@ -291,7 +290,8 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
 
     def _create_tenant_network(self, tenant):
         network, subnet, router = self.create_networks(
-            client=tenant.manager.network_client)
+            client=tenant.manager.network_client,
+            networks_client=tenant.manager.networks_client)
         tenant.set_network(network, subnet, router)
 
     def _set_compute_context(self, tenant):
@@ -556,3 +556,44 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
                                    username=ssh_login,
                                    private_key=private_key,
                                    should_connect=True)
+
+    @test.requires_ext(service='network', extension='port-security')
+    @test.idempotent_id('7c811dcc-263b-49a3-92d2-1b4d8405f50c')
+    @test.services('compute', 'network')
+    def test_port_security_disable_security_group(self):
+        """
+        This test verifies port_security_enabled=False disables
+        the default security group rules.
+        """
+        new_tenant = self.primary_tenant
+
+        # Create server
+        name = 'server-{tenant}-gen-1'.format(
+               tenant=new_tenant.creds.tenant_name
+        )
+        name = data_utils.rand_name(name)
+        server = self._create_server(name, new_tenant)
+
+        access_point_ssh = self._connect_to_access_point(new_tenant)
+        server_id = server['id']
+        port_id = self._list_ports(device_id=server_id)[0]['id']
+
+        # Flip the port's port security and check connectivity
+        try:
+            self.network_client.update_port(port_id,
+                                            port_security_enabled=True,
+                                            security_groups=[])
+            self._check_connectivity(access_point=access_point_ssh,
+                                     ip=self._get_server_ip(server),
+                                     should_succeed=False)
+
+            self.network_client.update_port(port_id,
+                                            port_security_enabled=False,
+                                            security_groups=[])
+            self._check_connectivity(
+                access_point=access_point_ssh,
+                ip=self._get_server_ip(server))
+        except Exception:
+            for tenant in self.tenants.values():
+                self._log_console_output(servers=tenant.servers)
+            raise

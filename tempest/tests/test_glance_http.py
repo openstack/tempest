@@ -13,10 +13,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import json
 import socket
 
 import mock
+from oslo_serialization import jsonutils as json
 from oslotest import mockpatch
 import six
 from six.moves import http_client as httplib
@@ -137,7 +137,8 @@ class TestGlanceHTTPClient(base.TestCase):
         resp, body = self.client.raw_request('PUT', '/images', body=req_body)
         self.assertEqual(200, resp.status)
         self.assertEqual('fake_response_body', body.read())
-        httplib.HTTPConnection.send.assert_call_count(req_body.tell())
+        call_count = httplib.HTTPConnection.send.call_count
+        self.assertEqual(call_count - 1, req_body.tell())
 
     def test_get_connection_class_for_https(self):
         conn_class = self.client.get_connection_class('https')

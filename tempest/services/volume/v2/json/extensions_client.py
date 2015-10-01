@@ -16,5 +16,5 @@
 from tempest.services.volume.json import extensions_client
 
 
-class ExtensionsV2ClientJSON(extensions_client.BaseExtensionsClientJSON):
+class ExtensionsV2Client(extensions_client.BaseExtensionsClient):
     api_version = "v2"

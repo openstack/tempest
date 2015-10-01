@@ -15,6 +15,7 @@
 import testtools
 
 from tempest.api.compute import base
+from tempest.common import waiters
 from tempest import config
 from tempest import test
 
@@ -41,12 +42,14 @@ class MigrationsAdminTest(base.BaseV2ComputeAdminTest):
         server = self.create_test_server(wait_until="ACTIVE")
         server_id = server['id']
 
-        self.servers_client.resize(server_id, self.flavor_ref_alt)
-        self.servers_client.wait_for_server_status(server_id, 'VERIFY_RESIZE')
-        self.servers_client.confirm_resize(server_id)
-        self.servers_client.wait_for_server_status(server_id, 'ACTIVE')
+        self.servers_client.resize_server(server_id, self.flavor_ref_alt)
+        waiters.wait_for_server_status(self.servers_client,
+                                       server_id, 'VERIFY_RESIZE')
+        self.servers_client.confirm_resize_server(server_id)
+        waiters.wait_for_server_status(self.servers_client,
+                                       server_id, 'ACTIVE')
 
-        body = self.client.list_migrations()
+        body = self.client.list_migrations()['migrations']
 
         instance_uuids = [x['instance_uuid'] for x in body]
         self.assertIn(server_id, instance_uuids)

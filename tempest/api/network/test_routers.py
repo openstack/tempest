@@ -15,9 +15,9 @@
 
 import netaddr
 import six
-from tempest_lib.common.utils import data_utils
 
 from tempest.api.network import base_routers as base
+from tempest.common.utils import data_utils
 from tempest import config
 from tempest import test
 
@@ -85,21 +85,21 @@ class RoutersTest(base.BaseRouterTest):
         self.assertEqual(show_body['router']['name'], updated_name)
 
     @test.idempotent_id('e54dd3a3-4352-4921-b09d-44369ae17397')
-    def test_create_router_setting_tenant_id(self):
-        # Test creating router from admin user setting tenant_id.
-        test_tenant = data_utils.rand_name('test_tenant_')
-        test_description = data_utils.rand_name('desc_')
-        tenant = self.identity_admin_client.create_tenant(
-            name=test_tenant, description=test_description)
-        tenant_id = tenant['id']
-        self.addCleanup(self.identity_admin_client.delete_tenant, tenant_id)
+    def test_create_router_setting_project_id(self):
+        # Test creating router from admin user setting project_id.
+        project = data_utils.rand_name('test_tenant_')
+        description = data_utils.rand_name('desc_')
+        project = self.identity_utils.create_project(name=project,
+                                                     description=description)
+        project_id = project['id']
+        self.addCleanup(self.identity_utils.delete_project, project_id)
 
         name = data_utils.rand_name('router-')
         create_body = self.admin_client.create_router(name,
-                                                      tenant_id=tenant_id)
+                                                      tenant_id=project_id)
         self.addCleanup(self.admin_client.delete_router,
                         create_body['router']['id'])
-        self.assertEqual(tenant_id, create_body['router']['tenant_id'])
+        self.assertEqual(project_id, create_body['router']['tenant_id'])
 
     @test.idempotent_id('847257cc-6afd-4154-b8fb-af49f5670ce8')
     @test.requires_ext(extension='ext-gw-mode', service='network')
@@ -188,7 +188,7 @@ class RoutersTest(base.BaseRouterTest):
         gw_port = list_body['ports'][0]
         fixed_ips = gw_port['fixed_ips']
         self.assertGreaterEqual(len(fixed_ips), 1)
-        public_net_body = self.admin_client.show_network(
+        public_net_body = self.admin_networks_client.show_network(
             CONF.network.public_network_id)
         public_subnet_id = public_net_body['network']['subnets'][0]
         self.assertIn(public_subnet_id,
@@ -270,46 +270,70 @@ class RoutersTest(base.BaseRouterTest):
     @test.idempotent_id('c86ac3a8-50bd-4b00-a6b8-62af84a0765c')
     @test.requires_ext(extension='extraroute', service='network')
     def test_update_extra_route(self):
-        self.network = self.create_network()
-        self.name = self.network['name']
-        self.subnet = self.create_subnet(self.network)
-        # Add router interface with subnet id
-        self.router = self._create_router(
+        # Create different cidr for each subnet to avoid cidr duplicate
+        # The cidr starts from tenant_cidr
+        next_cidr = netaddr.IPNetwork(self.tenant_cidr)
+        # Prepare to build several routes
+        test_routes = []
+        routes_num = 4
+        # Create a router
+        router = self._create_router(
             data_utils.rand_name('router-'), True)
-        self.create_router_interface(self.router['id'], self.subnet['id'])
         self.addCleanup(
             self._delete_extra_routes,
-            self.router['id'])
+            router['id'])
         # Update router extra route, second ip of the range is
         # used as next hop
-        cidr = netaddr.IPNetwork(self.subnet['cidr'])
-        next_hop = str(cidr[2])
-        destination = str(self.subnet['cidr'])
-        extra_route = self.client.update_extra_routes(self.router['id'],
-                                                      next_hop, destination)
-        self.assertEqual(1, len(extra_route['router']['routes']))
-        self.assertEqual(destination,
-                         extra_route['router']['routes'][0]['destination'])
-        self.assertEqual(next_hop,
-                         extra_route['router']['routes'][0]['nexthop'])
-        show_body = self.client.show_router(self.router['id'])
-        self.assertEqual(destination,
-                         show_body['router']['routes'][0]['destination'])
-        self.assertEqual(next_hop,
-                         show_body['router']['routes'][0]['nexthop'])
+        for i in range(routes_num):
+            network = self.create_network()
+            subnet = self.create_subnet(network, cidr=next_cidr)
+            next_cidr = next_cidr.next()
+
+            # Add router interface with subnet id
+            self.create_router_interface(router['id'], subnet['id'])
+
+            cidr = netaddr.IPNetwork(subnet['cidr'])
+            next_hop = str(cidr[2])
+            destination = str(subnet['cidr'])
+            test_routes.append(
+                {'nexthop': next_hop, 'destination': destination}
+            )
+
+        test_routes.sort(key=lambda x: x['destination'])
+        extra_route = self.client.update_extra_routes(router['id'],
+                                                      test_routes)
+        show_body = self.client.show_router(router['id'])
+        # Assert the number of routes
+        self.assertEqual(routes_num, len(extra_route['router']['routes']))
+        self.assertEqual(routes_num, len(show_body['router']['routes']))
+
+        routes = extra_route['router']['routes']
+        routes.sort(key=lambda x: x['destination'])
+        # Assert the nexthops & destination
+        for i in range(routes_num):
+            self.assertEqual(test_routes[i]['destination'],
+                             routes[i]['destination'])
+            self.assertEqual(test_routes[i]['nexthop'], routes[i]['nexthop'])
+
+        routes = show_body['router']['routes']
+        routes.sort(key=lambda x: x['destination'])
+        for i in range(routes_num):
+            self.assertEqual(test_routes[i]['destination'],
+                             routes[i]['destination'])
+            self.assertEqual(test_routes[i]['nexthop'], routes[i]['nexthop'])
 
     def _delete_extra_routes(self, router_id):
         self.client.delete_extra_routes(router_id)
 
     @test.idempotent_id('a8902683-c788-4246-95c7-ad9c6d63a4d9')
     def test_update_router_admin_state(self):
-        self.router = self._create_router(data_utils.rand_name('router-'))
-        self.assertFalse(self.router['admin_state_up'])
+        router = self._create_router(data_utils.rand_name('router-'))
+        self.assertFalse(router['admin_state_up'])
         # Update router admin state
-        update_body = self.client.update_router(self.router['id'],
+        update_body = self.client.update_router(router['id'],
                                                 admin_state_up=True)
         self.assertTrue(update_body['router']['admin_state_up'])
-        show_body = self.client.show_router(self.router['id'])
+        show_body = self.client.show_router(router['id'])
         self.assertTrue(show_body['router']['admin_state_up'])
 
     @test.attr(type='smoke')

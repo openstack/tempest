@@ -14,9 +14,9 @@
 
 from oslo_log import log as logging
 from six import moves
-from tempest_lib.common.utils import data_utils
 from tempest_lib import exceptions as lib_exc
 
+from tempest.common.utils import data_utils
 from tempest import config
 import tempest.test
 
@@ -72,6 +72,10 @@ class BaseImageTest(tempest.test.BaseTestCase):
 
         image = cls.client.create_image(name, container_format,
                                         disk_format, **kwargs)
+        # Image objects returned by the v1 client have the image
+        # data inside a dict that is keyed against 'image'.
+        if 'image' in image:
+            image = image['image']
         cls.created_images.append(image['id'])
         return image
 
@@ -146,7 +150,7 @@ class BaseV2MemberImageTest(BaseV2ImageTest):
         cls.alt_tenant_id = cls.alt_img_client.tenant_id
 
     def _list_image_ids_as_alt(self):
-        image_list = self.alt_img_client.list_images()
+        image_list = self.alt_img_client.list_images()['images']
         image_ids = map(lambda x: x['id'], image_list)
         return image_ids
 

@@ -13,10 +13,11 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest_lib.common.utils import data_utils
 from tempest_lib import exceptions as lib_exc
 
 from tempest.api.compute.security_groups import base
+from tempest.common.utils import data_utils
+from tempest.common import waiters
 from tempest import test
 
 
@@ -39,7 +40,7 @@ class SecurityGroupsTestJSON(base.BaseSecurityGroupsTest):
             security_group_list.append(body)
         # Fetch all Security Groups and verify the list
         # has all created Security Groups
-        fetched_list = self.client.list_security_groups()
+        fetched_list = self.client.list_security_groups()['security_groups']
         # Now check if all the created Security Groups are in fetched list
         missing_sgs = \
             [sg for sg in security_group_list if sg not in fetched_list]
@@ -52,7 +53,7 @@ class SecurityGroupsTestJSON(base.BaseSecurityGroupsTest):
             self.client.delete_security_group(sg['id'])
             self.client.wait_for_resource_deletion(sg['id'])
         # Now check if all the created Security Groups are deleted
-        fetched_list = self.client.list_security_groups()
+        fetched_list = self.client.list_security_groups()['security_groups']
         deleted_sgs = \
             [sg for sg in security_group_list if sg in fetched_list]
         self.assertFalse(deleted_sgs,
@@ -74,8 +75,8 @@ class SecurityGroupsTestJSON(base.BaseSecurityGroupsTest):
                          "The created Security Group name is "
                          "not equal to the requested name")
         # Now fetch the created Security Group by its 'id'
-        fetched_group = \
-            self.client.show_security_group(securitygroup['id'])
+        fetched_group = (self.client.show_security_group(securitygroup['id'])
+                         ['security_group'])
         self.assertEqual(securitygroup, fetched_group,
                          "The fetched Security Group is different "
                          "from the created Group")
@@ -97,7 +98,8 @@ class SecurityGroupsTestJSON(base.BaseSecurityGroupsTest):
         server_name = data_utils.rand_name('server')
         server = self.create_test_server(name=server_name)
         server_id = server['id']
-        self.servers_client.wait_for_server_status(server_id, 'ACTIVE')
+        waiters.wait_for_server_status(self.servers_client, server_id,
+                                       'ACTIVE')
         self.servers_client.add_security_group(server_id, sg['name'])
 
         # Check that we are not able to delete the security
@@ -107,8 +109,9 @@ class SecurityGroupsTestJSON(base.BaseSecurityGroupsTest):
                           sg['id'])
 
         # Reboot and add the other security group
-        self.servers_client.reboot(server_id, 'HARD')
-        self.servers_client.wait_for_server_status(server_id, 'ACTIVE')
+        self.servers_client.reboot_server(server_id, 'HARD')
+        waiters.wait_for_server_status(self.servers_client, server_id,
+                                       'ACTIVE')
         self.servers_client.add_security_group(server_id, sg2['name'])
 
         # Check that we are not able to delete the other security
@@ -120,7 +123,7 @@ class SecurityGroupsTestJSON(base.BaseSecurityGroupsTest):
         # Shutdown the server and then verify we can destroy the
         # security groups, since no active server instance is using them
         self.servers_client.delete_server(server_id)
-        self.servers_client.wait_for_server_termination(server_id)
+        waiters.wait_for_server_termination(self.servers_client, server_id)
 
         self.client.delete_security_group(sg['id'])
         self.client.delete_security_group(sg2['id'])
@@ -140,7 +143,7 @@ class SecurityGroupsTestJSON(base.BaseSecurityGroupsTest):
                                           name=s_new_name,
                                           description=s_new_des)
         # get the security group
-        fetched_group = \
-            self.client.show_security_group(securitygroup_id)
+        fetched_group = (self.client.show_security_group(securitygroup_id)
+                         ['security_group'])
         self.assertEqual(s_new_name, fetched_group['name'])
         self.assertEqual(s_new_des, fetched_group['description'])

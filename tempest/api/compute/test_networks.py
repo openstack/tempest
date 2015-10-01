@@ -19,19 +19,19 @@ from tempest import test
 CONF = config.CONF
 
 
-class NetworksTestJSON(base.BaseV2ComputeTest):
+class ComputeNetworksTest(base.BaseV2ComputeTest):
     @classmethod
     def skip_checks(cls):
-        super(NetworksTestJSON, cls).skip_checks()
+        super(ComputeNetworksTest, cls).skip_checks()
         if CONF.service_available.neutron:
             raise cls.skipException('nova-network is not available.')
 
     @classmethod
     def setup_clients(cls):
-        super(NetworksTestJSON, cls).setup_clients()
-        cls.client = cls.os.networks_client
+        super(ComputeNetworksTest, cls).setup_clients()
+        cls.client = cls.os.compute_networks_client
 
     @test.idempotent_id('3fe07175-312e-49a5-a623-5f52eeada4c2')
     def test_list_networks(self):
-        networks = self.client.list_networks()
+        networks = self.client.list_networks()['networks']
         self.assertNotEmpty(networks, "No networks found.")

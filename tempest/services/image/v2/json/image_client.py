@@ -13,9 +13,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import json
-
 import jsonschema
+from oslo_serialization import jsonutils as json
 from six.moves.urllib import parse as urllib
 from tempest_lib import exceptions as lib_exc
 
@@ -23,13 +22,13 @@ from tempest.common import glance_http
 from tempest.common import service_client
 
 
-class ImageClientV2JSON(service_client.ServiceClient):
+class ImageClientV2(service_client.ServiceClient):
 
     def __init__(self, auth_provider, catalog_type, region, endpoint_type=None,
                  build_interval=None, build_timeout=None,
                  disable_ssl_certificate_validation=None, ca_certs=None,
                  trace_requests=None):
-        super(ImageClientV2JSON, self).__init__(
+        super(ImageClientV2, self).__init__(
             auth_provider,
             catalog_type,
             region,
@@ -72,7 +71,8 @@ class ImageClientV2JSON(service_client.ServiceClient):
                                    "-json-patch"}
         resp, body = self.patch('v2/images/%s' % image_id, data, headers)
         self.expected_success(200, resp.status)
-        return service_client.ResponseBody(resp, self._parse_resp(body))
+        body = json.loads(body)
+        return service_client.ResponseBody(resp, body)
 
     def create_image(self, name, container_format, disk_format, **kwargs):
         params = {
@@ -124,7 +124,7 @@ class ImageClientV2JSON(service_client.ServiceClient):
         self.expected_success(200, resp.status)
         body = json.loads(body)
         self._validate_schema(body, type='images')
-        return service_client.ResponseBodyList(resp, body['images'])
+        return service_client.ResponseBody(resp, body)
 
     def show_image(self, image_id):
         url = 'v2/images/%s' % image_id

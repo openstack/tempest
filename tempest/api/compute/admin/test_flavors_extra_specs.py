@@ -13,9 +13,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest_lib.common.utils import data_utils
-
 from tempest.api.compute import base
+from tempest.common.utils import data_utils
 from tempest import test
 
 
@@ -51,12 +50,13 @@ class FlavorsExtraSpecsTestJSON(base.BaseV2ComputeAdminTest):
         swap = 1024
         rxtx = 1
         # Create a flavor so as to set/get/unset extra specs
-        cls.flavor = cls.client.create_flavor(flavor_name,
-                                              ram, vcpus,
-                                              disk,
-                                              cls.new_flavor_id,
+        cls.flavor = cls.client.create_flavor(name=flavor_name,
+                                              ram=ram, vcpus=vcpus,
+                                              disk=disk,
+                                              id=cls.new_flavor_id,
                                               ephemeral=ephemeral,
-                                              swap=swap, rxtx=rxtx)
+                                              swap=swap,
+                                              rxtx_factor=rxtx)['flavor']
 
     @classmethod
     def resource_cleanup(cls):
@@ -71,11 +71,12 @@ class FlavorsExtraSpecsTestJSON(base.BaseV2ComputeAdminTest):
         # Assigning extra specs values that are to be set
         specs = {"key1": "value1", "key2": "value2"}
         # SET extra specs to the flavor created in setUp
-        set_body = \
-            self.client.set_flavor_extra_spec(self.flavor['id'], specs)
+        set_body = self.client.set_flavor_extra_spec(self.flavor['id'],
+                                                     **specs)['extra_specs']
         self.assertEqual(set_body, specs)
         # GET extra specs and verify
-        get_body = self.client.list_flavor_extra_specs(self.flavor['id'])
+        get_body = (self.client.list_flavor_extra_specs(self.flavor['id'])
+                    ['extra_specs'])
         self.assertEqual(get_body, specs)
 
         # UPDATE the value of the extra specs key1
@@ -87,7 +88,8 @@ class FlavorsExtraSpecsTestJSON(base.BaseV2ComputeAdminTest):
 
         # GET extra specs and verify the value of the key2
         # is the same as before
-        get_body = self.client.list_flavor_extra_specs(self.flavor['id'])
+        get_body = (self.client.list_flavor_extra_specs(self.flavor['id'])
+                    ['extra_specs'])
         self.assertEqual(get_body, {"key1": "value", "key2": "value2"})
 
         # UNSET extra specs that were set in this test
@@ -97,16 +99,18 @@ class FlavorsExtraSpecsTestJSON(base.BaseV2ComputeAdminTest):
     @test.idempotent_id('a99dad88-ae1c-4fba-aeb4-32f898218bd0')
     def test_flavor_non_admin_get_all_keys(self):
         specs = {"key1": "value1", "key2": "value2"}
-        self.client.set_flavor_extra_spec(self.flavor['id'], specs)
-        body = self.flavors_client.list_flavor_extra_specs(self.flavor['id'])
+        self.client.set_flavor_extra_spec(self.flavor['id'], **specs)
+        body = (self.flavors_client.list_flavor_extra_specs(self.flavor['id'])
+                ['extra_specs'])
 
         for key in specs:
             self.assertEqual(body[key], specs[key])
 
     @test.idempotent_id('12805a7f-39a3-4042-b989-701d5cad9c90')
     def test_flavor_non_admin_get_specific_key(self):
-        specs = {"key1": "value1", "key2": "value2"}
-        body = self.client.set_flavor_extra_spec(self.flavor['id'], specs)
+        body = self.client.set_flavor_extra_spec(self.flavor['id'],
+                                                 key1="value1",
+                                                 key2="value2")['extra_specs']
         self.assertEqual(body['key1'], 'value1')
         self.assertIn('key2', body)
         body = self.flavors_client.show_flavor_extra_spec(

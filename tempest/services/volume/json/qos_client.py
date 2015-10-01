@@ -12,16 +12,16 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import json
 import time
 
+from oslo_serialization import jsonutils as json
 from tempest_lib import exceptions as lib_exc
 
 from tempest.common import service_client
 from tempest import exceptions
 
 
-class BaseQosSpecsClientJSON(service_client.ServiceClient):
+class BaseQosSpecsClient(service_client.ServiceClient):
     """Client class to send CRUD QoS API requests"""
 
     def is_resource_deleted(self, qos_id):
@@ -48,15 +48,15 @@ class BaseQosSpecsClientJSON(service_client.ServiceClient):
         start_time = int(time.time())
         while True:
             if operation == 'qos-key-unset':
-                body = self.show_qos(qos_id)
+                body = self.show_qos(qos_id)['qos_specs']
                 if not any(key in body['specs'] for key in args):
                     return
             elif operation == 'disassociate':
-                body = self.show_association_qos(qos_id)
+                body = self.show_association_qos(qos_id)['qos_associations']
                 if not any(args in body[i]['id'] for i in range(0, len(body))):
                     return
             elif operation == 'disassociate-all':
-                body = self.show_association_qos(qos_id)
+                body = self.show_association_qos(qos_id)['qos_associations']
                 if not body:
                     return
             else:
@@ -79,7 +79,7 @@ class BaseQosSpecsClientJSON(service_client.ServiceClient):
         resp, body = self.post('qos-specs', post_body)
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body['qos_specs'])
+        return service_client.ResponseBody(resp, body)
 
     def delete_qos(self, qos_id, force=False):
         """Delete the specified QoS specification."""
@@ -94,7 +94,7 @@ class BaseQosSpecsClientJSON(service_client.ServiceClient):
         resp, body = self.get(url)
         body = json.loads(body)
         self.expected_success(200, resp.status)
-        return service_client.ResponseBodyList(resp, body['qos_specs'])
+        return service_client.ResponseBody(resp, body)
 
     def show_qos(self, qos_id):
         """Get the specified QoS specification."""
@@ -102,7 +102,7 @@ class BaseQosSpecsClientJSON(service_client.ServiceClient):
         resp, body = self.get(url)
         body = json.loads(body)
         self.expected_success(200, resp.status)
-        return service_client.ResponseBody(resp, body['qos_specs'])
+        return service_client.ResponseBody(resp, body)
 
     def set_qos_key(self, qos_id, **kwargs):
         """Set the specified keys/values of QoS specification.
@@ -113,7 +113,7 @@ class BaseQosSpecsClientJSON(service_client.ServiceClient):
         resp, body = self.put('qos-specs/%s' % qos_id, put_body)
         body = json.loads(body)
         self.expected_success(200, resp.status)
-        return service_client.ResponseBody(resp, body['qos_specs'])
+        return service_client.ResponseBody(resp, body)
 
     def unset_qos_key(self, qos_id, keys):
         """Unset the specified keys of QoS specification.
@@ -139,7 +139,7 @@ class BaseQosSpecsClientJSON(service_client.ServiceClient):
         resp, body = self.get(url)
         body = json.loads(body)
         self.expected_success(200, resp.status)
-        return service_client.ResponseBodyList(resp, body['qos_associations'])
+        return service_client.ResponseBody(resp, body)
 
     def disassociate_qos(self, qos_id, vol_type_id):
         """Disassociate the specified QoS with specified volume-type."""
@@ -157,5 +157,5 @@ class BaseQosSpecsClientJSON(service_client.ServiceClient):
         return service_client.ResponseBody(resp, body)
 
 
-class QosSpecsClientJSON(BaseQosSpecsClientJSON):
+class QosSpecsClient(BaseQosSpecsClient):
     """Volume V1 QoS client."""

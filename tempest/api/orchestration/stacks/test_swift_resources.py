@@ -13,9 +13,8 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-from tempest_lib.common.utils import data_utils
-
 from tempest.api.orchestration import base
+from tempest.common.utils import data_utils
 from tempest import config
 from tempest import test
 
@@ -56,7 +55,8 @@ class SwiftResourcesTestJSON(base.BaseOrchestrationTest):
         cls.stack_id = cls.stack_identifier.split('/')[1]
         cls.client.wait_for_stack_status(cls.stack_id, 'CREATE_COMPLETE')
         cls.test_resources = {}
-        resources = cls.client.list_resources(cls.stack_identifier)
+        resources = (cls.client.list_resources(cls.stack_identifier)
+                     ['resources'])
         for resource in resources:
             cls.test_resources[resource['logical_resource_id']] = resource
 

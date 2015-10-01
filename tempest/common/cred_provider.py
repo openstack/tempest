@@ -84,9 +84,9 @@ def get_credentials(fill_in=True, identity_version=None, **kwargs):
         domain_fields = set(x for x in auth.KeystoneV3Credentials.ATTRIBUTES
                             if 'domain' in x)
         if not domain_fields.intersection(kwargs.keys()):
-            # TODO(andreaf) It might be better here to use a dedicated config
-            # option such as CONF.auth.tenant_isolation_domain_name
-            params['user_domain_name'] = CONF.identity.admin_domain_name
+            domain_name = CONF.auth.default_credentials_domain_name
+            params['user_domain_name'] = domain_name
+
         auth_url = CONF.identity.uri_v3
     else:
         auth_url = CONF.identity.uri
@@ -101,12 +101,13 @@ class CredentialProvider(object):
     def __init__(self, identity_version=None, name=None,
                  network_resources=None):
         """A CredentialProvider supplies credentials to test classes.
-        :param identity_version If specified it will return credentials of the
-                                corresponding identity version, otherwise it
-                                uses auth_version from configuration
-        :param name Name of the calling test. Included in provisioned
-                    credentials when credentials are provisioned on the fly
-        :param network_resources Network resources required for the credentials
+        :param identity_version: If specified it will return credentials of the
+                                 corresponding identity version, otherwise it
+                                 uses auth_version from configuration
+        :param name: Name of the calling test. Included in provisioned
+                     credentials when credentials are provisioned on the fly
+        :param network_resources: Network resources required for the
+                                  credentials
         """
         self.name = name or "test_creds"
         self.identity_version = identity_version or CONF.identity.auth_version

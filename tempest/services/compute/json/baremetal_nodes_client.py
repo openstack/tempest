@@ -12,8 +12,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import json
-
+from oslo_serialization import jsonutils as json
 from six.moves.urllib import parse as urllib
 
 from tempest.api_schema.response.compute.v2_1 import baremetal_nodes \
@@ -21,12 +20,12 @@ from tempest.api_schema.response.compute.v2_1 import baremetal_nodes \
 from tempest.common import service_client
 
 
-class BaremetalNodesClientJSON(service_client.ServiceClient):
+class BaremetalNodesClient(service_client.ServiceClient):
     """
     Tests Baremetal API
     """
 
-    def list_baremetal_nodes(self, params=None):
+    def list_baremetal_nodes(self, **params):
         """List all baremetal nodes."""
         url = 'os-baremetal-nodes'
         if params:
@@ -34,7 +33,7 @@ class BaremetalNodesClientJSON(service_client.ServiceClient):
         resp, body = self.get(url)
         body = json.loads(body)
         self.validate_response(schema.list_baremetal_nodes, resp, body)
-        return service_client.ResponseBodyList(resp, body['nodes'])
+        return service_client.ResponseBody(resp, body)
 
     def show_baremetal_node(self, baremetal_node_id):
         """Returns the details of a single baremetal node."""
@@ -42,4 +41,4 @@ class BaremetalNodesClientJSON(service_client.ServiceClient):
         resp, body = self.get(url)
         body = json.loads(body)
         self.validate_response(schema.get_baremetal_node, resp, body)
-        return service_client.ResponseBody(resp, body['node'])
+        return service_client.ResponseBody(resp, body)

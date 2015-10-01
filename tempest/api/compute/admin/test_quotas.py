@@ -15,11 +15,11 @@
 
 from oslo_log import log as logging
 import six
-from tempest_lib.common.utils import data_utils
 from testtools import matchers
 
 from tempest.api.compute import base
 from tempest.common import tempest_fixtures as fixtures
+from tempest.common.utils import data_utils
 from tempest import test
 
 LOG = logging.getLogger(__name__)
@@ -59,7 +59,7 @@ class QuotasAdminTestJSON(base.BaseV2ComputeAdminTest):
         # Admin can get the default resource quota set for a tenant
         expected_quota_set = self.default_quota_set | set(['id'])
         quota_set = self.adm_client.show_default_quota_set(
-            self.demo_tenant_id)
+            self.demo_tenant_id)['quota_set']
         self.assertEqual(quota_set['id'], self.demo_tenant_id)
         for quota in expected_quota_set:
             self.assertIn(quota, quota_set.keys())
@@ -68,7 +68,7 @@ class QuotasAdminTestJSON(base.BaseV2ComputeAdminTest):
     def test_update_all_quota_resources_for_tenant(self):
         # Admin can update all the resource quota limits for a tenant
         default_quota_set = self.adm_client.show_default_quota_set(
-            self.demo_tenant_id)
+            self.demo_tenant_id)['quota_set']
         new_quota_set = {'injected_file_content_bytes': 20480,
                          'metadata_items': 256, 'injected_files': 10,
                          'ram': 10240, 'floating_ips': 20, 'fixed_ips': 10,
@@ -79,7 +79,7 @@ class QuotasAdminTestJSON(base.BaseV2ComputeAdminTest):
         quota_set = self.adm_client.update_quota_set(
             self.demo_tenant_id,
             force=True,
-            **new_quota_set)
+            **new_quota_set)['quota_set']
 
         default_quota_set.pop('id')
         # NOTE(PhilDay) The following is safe as we're not updating these
@@ -97,55 +97,56 @@ class QuotasAdminTestJSON(base.BaseV2ComputeAdminTest):
     # TODO(afazekas): merge these test cases
     @test.idempotent_id('ce9e0815-8091-4abd-8345-7fe5b85faa1d')
     def test_get_updated_quotas(self):
-        # Verify that GET shows the updated quota set of tenant
-        tenant_name = data_utils.rand_name('cpu_quota_tenant')
-        tenant_desc = tenant_name + '-desc'
-        identity_client = self.os_adm.identity_client
-        tenant = identity_client.create_tenant(name=tenant_name,
-                                               description=tenant_desc)
-        tenant_id = tenant['id']
-        self.addCleanup(identity_client.delete_tenant, tenant_id)
+        # Verify that GET shows the updated quota set of project
+        project_name = data_utils.rand_name('cpu_quota_project')
+        project_desc = project_name + '-desc'
+        project = self.identity_utils.create_project(name=project_name,
+                                                     description=project_desc)
+        project_id = project['id']
+        self.addCleanup(self.identity_utils.delete_project, project_id)
 
-        self.adm_client.update_quota_set(tenant_id, ram='5120')
-        quota_set = self.adm_client.show_quota_set(tenant_id)
+        self.adm_client.update_quota_set(project_id, ram='5120')
+        quota_set = self.adm_client.show_quota_set(project_id)['quota_set']
         self.assertEqual(5120, quota_set['ram'])
 
         # Verify that GET shows the updated quota set of user
         user_name = data_utils.rand_name('cpu_quota_user')
         password = data_utils.rand_name('password')
         email = user_name + '@testmail.tm'
-        user = identity_client.create_user(name=user_name,
-                                           password=password,
-                                           tenant_id=tenant_id,
-                                           email=email)
+        user = self.identity_utils.create_user(username=user_name,
+                                               password=password,
+                                               project=project,
+                                               email=email)
+        if 'user' in user:
+            user = user['user']
         user_id = user['id']
-        self.addCleanup(identity_client.delete_user, user_id)
+        self.addCleanup(self.identity_utils.delete_user, user_id)
 
-        self.adm_client.update_quota_set(tenant_id,
+        self.adm_client.update_quota_set(project_id,
                                          user_id=user_id,
                                          ram='2048')
-        quota_set = self.adm_client.show_quota_set(tenant_id,
-                                                   user_id=user_id)
+        quota_set = self.adm_client.show_quota_set(
+            project_id, user_id=user_id)['quota_set']
         self.assertEqual(2048, quota_set['ram'])
 
     @test.idempotent_id('389d04f0-3a41-405f-9317-e5f86e3c44f0')
     def test_delete_quota(self):
-        # Admin can delete the resource quota set for a tenant
-        tenant_name = data_utils.rand_name('ram_quota_tenant')
-        tenant_desc = tenant_name + '-desc'
-        identity_client = self.os_adm.identity_client
-        tenant = identity_client.create_tenant(name=tenant_name,
-                                               description=tenant_desc)
-        tenant_id = tenant['id']
-        self.addCleanup(identity_client.delete_tenant, tenant_id)
-        quota_set_default = self.adm_client.show_quota_set(tenant_id)
+        # Admin can delete the resource quota set for a project
+        project_name = data_utils.rand_name('ram_quota_project')
+        project_desc = project_name + '-desc'
+        project = self.identity_utils.create_project(name=project_name,
+                                                     description=project_desc)
+        project_id = project['id']
+        self.addCleanup(self.identity_utils.delete_project, project_id)
+        quota_set_default = (self.adm_client.show_quota_set(project_id)
+                             ['quota_set'])
         ram_default = quota_set_default['ram']
 
-        self.adm_client.update_quota_set(tenant_id, ram='5120')
+        self.adm_client.update_quota_set(project_id, ram='5120')
 
-        self.adm_client.delete_quota_set(tenant_id)
+        self.adm_client.delete_quota_set(project_id)
 
-        quota_set_new = self.adm_client.show_quota_set(tenant_id)
+        quota_set_new = self.adm_client.show_quota_set(project_id)['quota_set']
         self.assertEqual(ram_default, quota_set_new['ram'])
 
 
@@ -167,7 +168,7 @@ class QuotaClassesAdminTestJSON(base.BaseV2ComputeAdminTest):
     def _restore_default_quotas(self, original_defaults):
         LOG.debug("restoring quota class defaults")
         self.adm_client.update_quota_class_set(
-            'default', **original_defaults)
+            'default', **original_defaults)['quota_class_set']
 
     # NOTE(sdague): this test is problematic as it changes
     # global state, and possibly needs to be part of a set of
@@ -176,7 +177,8 @@ class QuotaClassesAdminTestJSON(base.BaseV2ComputeAdminTest):
     @test.idempotent_id('7932ab0f-5136-4075-b201-c0e2338df51a')
     def test_update_default_quotas(self):
         LOG.debug("get the current 'default' quota class values")
-        body = self.adm_client.show_quota_class_set('default')
+        body = (self.adm_client.show_quota_class_set('default')
+                ['quota_class_set'])
         self.assertIn('id', body)
         self.assertEqual('default', body.pop('id'))
         # restore the defaults when the test is done
@@ -188,8 +190,8 @@ class QuotaClassesAdminTestJSON(base.BaseV2ComputeAdminTest):
             # to a very small number which causes issues.
             body[quota] = default + 100
         LOG.debug("update limits for the default quota class set")
-        update_body = self.adm_client.update_quota_class_set('default',
-                                                             **body)
+        update_body = self.adm_client.update_quota_class_set(
+            'default', **body)['quota_class_set']
         LOG.debug("assert that the response has all of the changed values")
         self.assertThat(update_body.items(),
                         matchers.ContainsAll(body.items()))

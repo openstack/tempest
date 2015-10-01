@@ -16,6 +16,7 @@
 from oslo_log import log as logging
 
 from tempest.common import custom_matchers
+from tempest.common import waiters
 from tempest import config
 from tempest import exceptions
 from tempest.scenario import manager
@@ -43,7 +44,8 @@ class TestMinimumBasicScenario(manager.ScenarioTest):
         server_id = self.server['id']
         # Raise on error defaults to True, which is consistent with the
         # original function from scenario tests here
-        self.servers_client.wait_for_server_status(server_id, status)
+        waiters.wait_for_server_status(self.servers_client,
+                                       server_id, status)
 
     def nova_keypair_add(self):
         self.keypair = self.create_keypair()
@@ -60,47 +62,34 @@ class TestMinimumBasicScenario(manager.ScenarioTest):
         self.assertIn(self.server['id'], [x['id'] for x in servers])
 
     def nova_show(self):
-        got_server = self.servers_client.get_server(self.server['id'])
+        got_server = (self.servers_client.show_server(self.server['id'])
+                      ['server'])
+        excluded_keys = ['OS-EXT-AZ:availability_zone']
+        # Exclude these keys because of LP:#1486475
+        excluded_keys.extend(['OS-EXT-STS:power_state', 'updated'])
         self.assertThat(
             self.server, custom_matchers.MatchesDictExceptForKeys(
-                got_server, excluded_keys=['OS-EXT-AZ:availability_zone']))
+                got_server, excluded_keys=excluded_keys))
 
     def cinder_create(self):
         self.volume = self.create_volume()
 
     def cinder_list(self):
-        volumes = self.volumes_client.list_volumes()
+        volumes = self.volumes_client.list_volumes()['volumes']
         self.assertIn(self.volume['id'], [x['id'] for x in volumes])
 
     def cinder_show(self):
-        volume = self.volumes_client.show_volume(self.volume['id'])
+        volume = self.volumes_client.show_volume(self.volume['id'])['volume']
         self.assertEqual(self.volume, volume)
 
-    def nova_volume_attach(self):
-        volume_device_path = '/dev/' + CONF.compute.volume_device_name
-        volume = self.servers_client.attach_volume(
-            self.server['id'], self.volume['id'], volume_device_path)
-        self.assertEqual(self.volume['id'], volume['id'])
-        self.volumes_client.wait_for_volume_status(volume['id'], 'in-use')
-        # Refresh the volume after the attachment
-        self.volume = self.volumes_client.show_volume(volume['id'])
-
     def nova_reboot(self):
-        self.servers_client.reboot(self.server['id'], 'SOFT')
+        self.servers_client.reboot_server(self.server['id'], 'SOFT')
         self._wait_for_server_status('ACTIVE')
 
     def check_partitions(self):
         # NOTE(andreaf) The device name may be different on different guest OS
         partitions = self.linux_client.get_partitions()
         self.assertEqual(1, partitions.count(CONF.compute.volume_device_name))
-
-    def nova_volume_detach(self):
-        self.servers_client.detach_volume(self.server['id'], self.volume['id'])
-        self.volumes_client.wait_for_volume_status(self.volume['id'],
-                                                   'available')
-
-        volume = self.volumes_client.show_volume(self.volume['id'])
-        self.assertEqual('available', volume['status'])
 
     def create_and_add_security_group(self):
         secgroup = self._create_security_group()
@@ -110,7 +99,8 @@ class TestMinimumBasicScenario(manager.ScenarioTest):
                         self.server['id'], secgroup['name'])
 
         def wait_for_secgroup_add():
-            body = self.servers_client.get_server(self.server['id'])
+            body = (self.servers_client.show_server(self.server['id'])
+                    ['server'])
             return {'name': secgroup['name']} in body['security_groups']
 
         if not test.call_until_true(wait_for_secgroup_add,

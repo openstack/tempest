@@ -15,11 +15,11 @@
 #    under the License.
 
 import argparse
-import json
 import os
 import sys
 
 import httplib2
+from oslo_serialization import jsonutils as json
 from six import moves
 from six.moves.urllib import parse as urlparse
 
@@ -65,10 +65,10 @@ def verify_glance_api_versions(os, update):
     # Check glance api versions
     _, versions = os.image_client.get_versions()
     if CONF.image_feature_enabled.api_v1 != contains_version('v1.', versions):
-        print_and_or_update('api_v1', 'image_feature_enabled',
+        print_and_or_update('api_v1', 'image-feature-enabled',
                             not CONF.image_feature_enabled.api_v1, update)
     if CONF.image_feature_enabled.api_v2 != contains_version('v2.', versions):
-        print_and_or_update('api_v2', 'image_feature_enabled',
+        print_and_or_update('api_v2', 'image-feature-enabled',
                             not CONF.image_feature_enabled.api_v2, update)
 
 
@@ -105,11 +105,11 @@ def verify_keystone_api_versions(os, update):
     versions = _get_api_versions(os, 'keystone')
     if (CONF.identity_feature_enabled.api_v2 !=
             contains_version('v2.', versions)):
-        print_and_or_update('api_v2', 'identity_feature_enabled',
+        print_and_or_update('api_v2', 'identity-feature-enabled',
                             not CONF.identity_feature_enabled.api_v2, update)
     if (CONF.identity_feature_enabled.api_v3 !=
             contains_version('v3.', versions)):
-        print_and_or_update('api_v3', 'identity_feature_enabled',
+        print_and_or_update('api_v3', 'identity-feature-enabled',
                             not CONF.identity_feature_enabled.api_v3, update)
 
 
@@ -118,11 +118,11 @@ def verify_cinder_api_versions(os, update):
     versions = _get_api_versions(os, 'cinder')
     if (CONF.volume_feature_enabled.api_v1 !=
             contains_version('v1.', versions)):
-        print_and_or_update('api_v1', 'volume_feature_enabled',
+        print_and_or_update('api_v1', 'volume-feature-enabled',
                             not CONF.volume_feature_enabled.api_v1, update)
     if (CONF.volume_feature_enabled.api_v2 !=
             contains_version('v2.', versions)):
-        print_and_or_update('api_v2', 'volume_feature_enabled',
+        print_and_or_update('api_v2', 'volume-feature-enabled',
                             not CONF.volume_feature_enabled.api_v2, update)
 
 
@@ -144,6 +144,12 @@ def get_extension_client(os, service):
         'neutron': os.network_client,
         'swift': os.account_client,
     }
+    # NOTE (e0ne): Use Cinder API v2 by default because v1 is deprecated
+    if CONF.volume_feature_enabled.api_v2:
+        extensions_client['cinder'] = os.volumes_v2_extension_client
+    else:
+        extensions_client['cinder'] = os.volumes_extension_client
+
     if service not in extensions_client:
         print('No tempest extensions client for %s' % service)
         exit(1)

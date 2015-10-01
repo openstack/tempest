@@ -37,7 +37,7 @@ class TestTenantIsolation(base.TestCase):
         self.useFixture(fake_config.ConfigFixture())
         self.stubs.Set(config, 'TempestConfigPrivate', fake_config.FakePrivate)
         self.fake_http = fake_http.fake_httplib2(return_type=200)
-        self.stubs.Set(json_token_client.TokenClientJSON, 'raw_request',
+        self.stubs.Set(json_token_client.TokenClient, 'raw_request',
                        fake_identity._fake_v2_response)
         cfg.CONF.set_default('operator_role', 'FakeRole',
                              group='object-storage')
@@ -46,50 +46,51 @@ class TestTenantIsolation(base.TestCase):
     def test_tempest_client(self):
         iso_creds = isolated_creds.IsolatedCreds(name='test class')
         self.assertTrue(isinstance(iso_creds.identity_admin_client,
-                                   json_iden_client.IdentityClientJSON))
+                                   json_iden_client.IdentityClient))
         self.assertTrue(isinstance(iso_creds.network_admin_client,
-                                   json_network_client.NetworkClientJSON))
+                                   json_network_client.NetworkClient))
 
     def _mock_user_create(self, id, name):
         user_fix = self.useFixture(mockpatch.PatchObject(
-            json_iden_client.IdentityClientJSON,
+            json_iden_client.IdentityClient,
             'create_user',
             return_value=(service_client.ResponseBody
-                          (200, {'id': id, 'name': name}))))
+                          (200, {'user': {'id': id, 'name': name}}))))
         return user_fix
 
     def _mock_tenant_create(self, id, name):
         tenant_fix = self.useFixture(mockpatch.PatchObject(
-            json_iden_client.IdentityClientJSON,
+            json_iden_client.IdentityClient,
             'create_tenant',
             return_value=(service_client.ResponseBody
-                          (200, {'id': id, 'name': name}))))
+                          (200, {'tenant': {'id': id, 'name': name}}))))
         return tenant_fix
 
     def _mock_list_roles(self, id, name):
         roles_fix = self.useFixture(mockpatch.PatchObject(
-            json_iden_client.IdentityClientJSON,
+            json_iden_client.IdentityClient,
             'list_roles',
-            return_value=(service_client.ResponseBodyList
+            return_value=(service_client.ResponseBody
                           (200,
-                           [{'id': id, 'name': name},
-                            {'id': '1', 'name': 'FakeRole'}]))))
+                           {'roles': [{'id': id, 'name': name},
+                            {'id': '1', 'name': 'FakeRole'},
+                            {'id': '2', 'name': 'Member'}]}))))
         return roles_fix
 
     def _mock_list_2_roles(self):
         roles_fix = self.useFixture(mockpatch.PatchObject(
-            json_iden_client.IdentityClientJSON,
+            json_iden_client.IdentityClient,
             'list_roles',
-            return_value=(service_client.ResponseBodyList
+            return_value=(service_client.ResponseBody
                           (200,
-                           [{'id': '1234', 'name': 'role1'},
+                           {'roles': [{'id': '1234', 'name': 'role1'},
                             {'id': '1', 'name': 'FakeRole'},
-                            {'id': '12345', 'name': 'role2'}]))))
+                            {'id': '12345', 'name': 'role2'}]}))))
         return roles_fix
 
     def _mock_assign_user_role(self):
         tenant_fix = self.useFixture(mockpatch.PatchObject(
-            json_iden_client.IdentityClientJSON,
+            json_iden_client.IdentityClient,
             'assign_user_role',
             return_value=(service_client.ResponseBody
                           (200, {}))))
@@ -97,27 +98,29 @@ class TestTenantIsolation(base.TestCase):
 
     def _mock_list_role(self):
         roles_fix = self.useFixture(mockpatch.PatchObject(
-            json_iden_client.IdentityClientJSON,
+            json_iden_client.IdentityClient,
             'list_roles',
-            return_value=(service_client.ResponseBodyList
-                          (200, [{'id': '1', 'name': 'FakeRole'}]))))
+            return_value=(service_client.ResponseBody
+                          (200, {'roles': [{'id': '1',
+                                 'name': 'FakeRole'}]}))))
         return roles_fix
 
     def _mock_list_ec2_credentials(self, user_id, tenant_id):
         ec2_creds_fix = self.useFixture(mockpatch.PatchObject(
-            json_iden_client.IdentityClientJSON,
+            json_iden_client.IdentityClient,
             'list_user_ec2_credentials',
-            return_value=(service_client.ResponseBodyList
-                          (200, [{'access': 'fake_access',
-                                  'secret': 'fake_secret',
-                                  'tenant_id': tenant_id,
-                                  'user_id': user_id,
-                                  'trust_id': None}]))))
+            return_value=(service_client.ResponseBody
+                          (200, {'credentials': [{
+                                 'access': 'fake_access',
+                                 'secret': 'fake_secret',
+                                 'tenant_id': tenant_id,
+                                 'user_id': user_id,
+                                 'trust_id': None}]}))))
         return ec2_creds_fix
 
     def _mock_network_create(self, iso_creds, id, name):
         net_fix = self.useFixture(mockpatch.PatchObject(
-            iso_creds.network_admin_client,
+            iso_creds.networks_admin_client,
             'create_network',
             return_value={'network': {'id': id, 'name': name}}))
         return net_fix
@@ -131,7 +134,7 @@ class TestTenantIsolation(base.TestCase):
 
     def _mock_router_create(self, id, name):
         router_fix = self.useFixture(mockpatch.PatchObject(
-            json_network_client.NetworkClientJSON,
+            json_network_client.NetworkClient,
             'create_router',
             return_value={'router': {'id': id, 'name': name}}))
         return router_fix
@@ -159,11 +162,11 @@ class TestTenantIsolation(base.TestCase):
         self._mock_user_create('1234', 'fake_admin_user')
         self._mock_tenant_create('1234', 'fake_admin_tenant')
 
-        user_mock = mock.patch.object(json_iden_client.IdentityClientJSON,
+        user_mock = mock.patch.object(json_iden_client.IdentityClient,
                                       'assign_user_role')
         user_mock.start()
         self.addCleanup(user_mock.stop)
-        with mock.patch.object(json_iden_client.IdentityClientJSON,
+        with mock.patch.object(json_iden_client.IdentityClient,
                                'assign_user_role') as user_mock:
             admin_creds = iso_creds.get_admin_creds()
         user_mock.assert_has_calls([
@@ -182,11 +185,11 @@ class TestTenantIsolation(base.TestCase):
         self._mock_user_create('1234', 'fake_role_user')
         self._mock_tenant_create('1234', 'fake_role_tenant')
 
-        user_mock = mock.patch.object(json_iden_client.IdentityClientJSON,
+        user_mock = mock.patch.object(json_iden_client.IdentityClient,
                                       'assign_user_role')
         user_mock.start()
         self.addCleanup(user_mock.stop)
-        with mock.patch.object(json_iden_client.IdentityClientJSON,
+        with mock.patch.object(json_iden_client.IdentityClient,
                                'assign_user_role') as user_mock:
             role_creds = iso_creds.get_creds_by_roles(roles=['role1', 'role2'])
         calls = user_mock.mock_calls
@@ -220,10 +223,10 @@ class TestTenantIsolation(base.TestCase):
         iso_creds.get_admin_creds()
         user_mock = self.patch(
             'tempest.services.identity.v2.json.identity_client.'
-            'IdentityClientJSON.delete_user')
+            'IdentityClient.delete_user')
         tenant_mock = self.patch(
             'tempest.services.identity.v2.json.identity_client.'
-            'IdentityClientJSON.delete_tenant')
+            'IdentityClient.delete_tenant')
         iso_creds.clear_isolated_creds()
         # Verify user delete calls
         calls = user_mock.mock_calls
@@ -265,7 +268,7 @@ class TestTenantIsolation(base.TestCase):
         self._mock_list_role()
         self._mock_user_create('1234', 'fake_prim_user')
         self._mock_tenant_create('1234', 'fake_prim_tenant')
-        net = mock.patch.object(iso_creds.network_admin_client,
+        net = mock.patch.object(iso_creds.networks_admin_client,
                                 'delete_network')
         net_mock = net.start()
         subnet = mock.patch.object(iso_creds.network_admin_client,
@@ -297,7 +300,7 @@ class TestTenantIsolation(base.TestCase):
         self._mock_subnet_create(iso_creds, '1234', 'fake_subnet')
         self._mock_router_create('1234', 'fake_router')
         router_interface_mock = self.patch(
-            'tempest.services.network.json.network_client.NetworkClientJSON.'
+            'tempest.services.network.json.network_client.NetworkClient.'
             'add_router_interface_with_subnet_id')
         primary_creds = iso_creds.get_primary_creds()
         router_interface_mock.called_once_with('1234', '1234')
@@ -329,7 +332,7 @@ class TestTenantIsolation(base.TestCase):
         self._mock_subnet_create(iso_creds, '1234', 'fake_subnet')
         self._mock_router_create('1234', 'fake_router')
         router_interface_mock = self.patch(
-            'tempest.services.network.json.network_client.NetworkClientJSON.'
+            'tempest.services.network.json.network_client.NetworkClient.'
             'add_router_interface_with_subnet_id')
         iso_creds.get_primary_creds()
         router_interface_mock.called_once_with('1234', '1234')
@@ -355,10 +358,10 @@ class TestTenantIsolation(base.TestCase):
         self._mock_list_roles('123456', 'admin')
         iso_creds.get_admin_creds()
         self.patch('tempest.services.identity.v2.json.identity_client.'
-                   'IdentityClientJSON.delete_user')
+                   'IdentityClient.delete_user')
         self.patch('tempest.services.identity.v2.json.identity_client.'
-                   'IdentityClientJSON.delete_tenant')
-        net = mock.patch.object(iso_creds.network_admin_client,
+                   'IdentityClient.delete_tenant')
+        net = mock.patch.object(iso_creds.networks_admin_client,
                                 'delete_network')
         net_mock = net.start()
         subnet = mock.patch.object(iso_creds.network_admin_client,
@@ -368,7 +371,7 @@ class TestTenantIsolation(base.TestCase):
                                    'delete_router')
         router_mock = router.start()
         remove_router_interface_mock = self.patch(
-            'tempest.services.network.json.network_client.NetworkClientJSON.'
+            'tempest.services.network.json.network_client.NetworkClient.'
             'remove_router_interface_with_subnet_id')
         return_values = ({'status': 200}, {'ports': []})
         port_list_mock = mock.patch.object(iso_creds.network_admin_client,
@@ -384,7 +387,7 @@ class TestTenantIsolation(base.TestCase):
         return_values = (fake_http.fake_httplib({}, status=204), {})
         remove_secgroup_mock = self.patch(
             'tempest.services.network.json.network_client.'
-            'NetworkClientJSON.delete', return_value=return_values)
+            'NetworkClient.delete', return_value=return_values)
         iso_creds.clear_isolated_creds()
         # Verify default security group delete
         calls = remove_secgroup_mock.mock_calls
@@ -438,7 +441,7 @@ class TestTenantIsolation(base.TestCase):
         self._mock_subnet_create(iso_creds, '1234', 'fake_alt_subnet')
         self._mock_router_create('1234', 'fake_alt_router')
         router_interface_mock = self.patch(
-            'tempest.services.network.json.network_client.NetworkClientJSON.'
+            'tempest.services.network.json.network_client.NetworkClient.'
             'add_router_interface_with_subnet_id')
         alt_creds = iso_creds.get_alt_creds()
         router_interface_mock.called_once_with('1234', '1234')
@@ -462,7 +465,7 @@ class TestTenantIsolation(base.TestCase):
         self._mock_subnet_create(iso_creds, '1234', 'fake_admin_subnet')
         self._mock_router_create('1234', 'fake_admin_router')
         router_interface_mock = self.patch(
-            'tempest.services.network.json.network_client.NetworkClientJSON.'
+            'tempest.services.network.json.network_client.NetworkClient.'
             'add_router_interface_with_subnet_id')
         self._mock_list_roles('123456', 'admin')
         admin_creds = iso_creds.get_admin_creds()
@@ -491,7 +494,7 @@ class TestTenantIsolation(base.TestCase):
         self._mock_list_role()
         self._mock_user_create('1234', 'fake_prim_user')
         self._mock_tenant_create('1234', 'fake_prim_tenant')
-        net = mock.patch.object(iso_creds.network_admin_client,
+        net = mock.patch.object(iso_creds.networks_admin_client,
                                 'delete_network')
         net_mock = net.start()
         subnet = mock.patch.object(iso_creds.network_admin_client,

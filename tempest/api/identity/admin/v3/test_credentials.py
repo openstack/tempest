@@ -13,9 +13,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest_lib.common.utils import data_utils
-
 from tempest.api.identity import base
+from tempest.common.utils import data_utils
 from tempest import test
 
 
@@ -34,12 +33,12 @@ class CredentialsTestJSON(base.BaseIdentityV3AdminTest):
         for i in range(2):
             cls.project = cls.client.create_project(
                 data_utils.rand_name('project'),
-                description=data_utils.rand_name('project-desc'))
+                description=data_utils.rand_name('project-desc'))['project']
             cls.projects.append(cls.project['id'])
 
         cls.user_body = cls.client.create_user(
             u_name, description=u_desc, password=u_password,
-            email=u_email, project_id=cls.projects[0])
+            email=u_email, project_id=cls.projects[0])['user']
 
     @classmethod
     def resource_cleanup(cls):
@@ -58,7 +57,7 @@ class CredentialsTestJSON(base.BaseIdentityV3AdminTest):
                 data_utils.rand_name('Secret')]
         cred = self.creds_client.create_credential(
             keys[0], keys[1], self.user_body['id'],
-            self.projects[0])
+            self.projects[0])['credential']
         self.addCleanup(self._delete_credential, cred['id'])
         for value1 in self.creds_list[0]:
             self.assertIn(value1, cred)
@@ -69,14 +68,14 @@ class CredentialsTestJSON(base.BaseIdentityV3AdminTest):
                     data_utils.rand_name('NewSecret')]
         update_body = self.creds_client.update_credential(
             cred['id'], access_key=new_keys[0], secret_key=new_keys[1],
-            project_id=self.projects[1])
+            project_id=self.projects[1])['credential']
         self.assertEqual(cred['id'], update_body['id'])
         self.assertEqual(self.projects[1], update_body['project_id'])
         self.assertEqual(self.user_body['id'], update_body['user_id'])
         self.assertEqual(update_body['blob']['access'], new_keys[0])
         self.assertEqual(update_body['blob']['secret'], new_keys[1])
 
-        get_body = self.creds_client.get_credential(cred['id'])
+        get_body = self.creds_client.get_credential(cred['id'])['credential']
         for value1 in self.creds_list[0]:
             self.assertEqual(update_body[value1],
                              get_body[value1])
@@ -93,11 +92,11 @@ class CredentialsTestJSON(base.BaseIdentityV3AdminTest):
             cred = self.creds_client.create_credential(
                 data_utils.rand_name('Access'),
                 data_utils.rand_name('Secret'),
-                self.user_body['id'], self.projects[0])
+                self.user_body['id'], self.projects[0])['credential']
             created_cred_ids.append(cred['id'])
             self.addCleanup(self._delete_credential, cred['id'])
 
-        creds = self.creds_client.list_credentials()
+        creds = self.creds_client.list_credentials()['credentials']
 
         for i in creds:
             fetched_cred_ids.append(i['id'])

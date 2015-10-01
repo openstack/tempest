@@ -13,10 +13,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest_lib.common.utils import data_utils
 from tempest_lib import exceptions as lib_exc
 
 from tempest.api.identity import base
+from tempest.common.utils import data_utils
 from tempest import test
 
 
@@ -32,14 +32,14 @@ class TokensV3TestJSON(base.BaseIdentityV3AdminTest):
         u_password = data_utils.rand_name('pass')
         user = self.client.create_user(
             u_name, description=u_desc, password=u_password,
-            email=u_email)
+            email=u_email)['user']
         self.addCleanup(self.client.delete_user, user['id'])
         # Perform Authentication
         resp = self.token.auth(user_id=user['id'],
                                password=u_password).response
         subject_token = resp['x-subject-token']
         # Perform GET Token
-        token_details = self.client.get_token(subject_token)
+        token_details = self.client.get_token(subject_token)['token']
         self.assertEqual(resp['x-subject-token'], subject_token)
         self.assertEqual(token_details['user']['id'], user['id'])
         self.assertEqual(token_details['user']['name'], u_name)
@@ -61,21 +61,22 @@ class TokensV3TestJSON(base.BaseIdentityV3AdminTest):
         # Create a user.
         user_name = data_utils.rand_name(name='user')
         user_password = data_utils.rand_name(name='pass')
-        user = self.client.create_user(user_name, password=user_password)
+        user = self.client.create_user(user_name,
+                                       password=user_password)['user']
         self.addCleanup(self.client.delete_user, user['id'])
 
         # Create a couple projects
         project1_name = data_utils.rand_name(name='project')
-        project1 = self.client.create_project(project1_name)
+        project1 = self.client.create_project(project1_name)['project']
         self.addCleanup(self.client.delete_project, project1['id'])
 
         project2_name = data_utils.rand_name(name='project')
-        project2 = self.client.create_project(project2_name)
+        project2 = self.client.create_project(project2_name)['project']
         self.addCleanup(self.client.delete_project, project2['id'])
 
         # Create a role
         role_name = data_utils.rand_name(name='role')
-        role = self.client.create_role(role_name)
+        role = self.client.create_role(role_name)['role']
         self.addCleanup(self.client.delete_role, role['id'])
 
         # Grant the user the role on both projects.
@@ -91,7 +92,6 @@ class TokensV3TestJSON(base.BaseIdentityV3AdminTest):
 
         token_id = token_auth.response['x-subject-token']
         orig_expires_at = token_auth['token']['expires_at']
-        orig_issued_at = token_auth['token']['issued_at']
         orig_user = token_auth['token']['user']
 
         self.assertIsInstance(token_auth['token']['expires_at'], unicode)
@@ -116,7 +116,6 @@ class TokensV3TestJSON(base.BaseIdentityV3AdminTest):
         self.assertEqual(orig_expires_at, token_auth['token']['expires_at'],
                          'Expiration time should match original token')
         self.assertIsInstance(token_auth['token']['issued_at'], unicode)
-        self.assertNotEqual(orig_issued_at, token_auth['token']['issued_at'])
         self.assertEqual(set(['password', 'token']),
                          set(token_auth['token']['methods']))
         self.assertEqual(orig_user, token_auth['token']['user'],

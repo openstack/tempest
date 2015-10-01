@@ -13,9 +13,10 @@
 import time
 
 from oslo_utils import timeutils
-from tempest_lib.common.utils import data_utils
 from tempest_lib import exceptions as lib_exc
 
+from tempest.common import compute
+from tempest.common.utils import data_utils
 from tempest import config
 from tempest import exceptions
 import tempest.test
@@ -73,9 +74,11 @@ class BaseTelemetryTest(tempest.test.BaseTestCase):
 
     @classmethod
     def create_server(cls):
-        body = cls.servers_client.create_server(
-            data_utils.rand_name('ceilometer-instance'),
-            CONF.compute.image_ref, CONF.compute.flavor_ref,
+        tenant_network = cls.get_tenant_network()
+        body, server = compute.create_test_server(
+            cls.os,
+            tenant_network=tenant_network,
+            name=data_utils.rand_name('ceilometer-instance'),
             wait_until='ACTIVE')
         cls.server_ids.append(body['id'])
         return body
@@ -85,6 +88,11 @@ class BaseTelemetryTest(tempest.test.BaseTestCase):
         body = client.create_image(
             data_utils.rand_name('image'), container_format='bare',
             disk_format='raw', visibility='private')
+        # TODO(jswarren) Move ['image'] up to initial body value assignment
+        # once both v1 and v2 glance clients include the full response
+        # object.
+        if 'image' in body:
+            body = body['image']
         cls.image_ids.append(body['id'])
         return body
 
@@ -121,3 +129,27 @@ class BaseTelemetryTest(tempest.test.BaseTestCase):
             'Sample for metric:%s with query:%s has not been added to the '
             'database within %d seconds' % (metric, query,
                                             CONF.compute.build_timeout))
+
+
+class BaseTelemetryAdminTest(BaseTelemetryTest):
+    """Base test case class for admin Telemetry API tests."""
+
+    credentials = ['primary', 'admin']
+
+    @classmethod
+    def setup_clients(cls):
+        super(BaseTelemetryAdminTest, cls).setup_clients()
+        cls.telemetry_admin_client = cls.os_adm.telemetry_client
+
+    def await_events(self, query):
+        timeout = CONF.compute.build_timeout
+        start = timeutils.utcnow()
+        while timeutils.delta_seconds(start, timeutils.utcnow()) < timeout:
+            body = self.telemetry_admin_client.list_events(query)
+            if body:
+                return body
+            time.sleep(CONF.compute.build_interval)
+
+        raise exceptions.TimeoutException(
+            'Event with query:%s has not been added to the '
+            'database within %d seconds' % (query, CONF.compute.build_timeout))

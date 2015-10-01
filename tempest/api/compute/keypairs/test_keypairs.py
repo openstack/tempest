@@ -13,29 +13,12 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest_lib.common.utils import data_utils
-
-from tempest.api.compute import base
+from tempest.api.compute.keypairs import base
+from tempest.common.utils import data_utils
 from tempest import test
 
 
-class KeyPairsV2TestJSON(base.BaseComputeTest):
-
-    _api_version = 2
-
-    @classmethod
-    def setup_clients(cls):
-        super(KeyPairsV2TestJSON, cls).setup_clients()
-        cls.client = cls.keypairs_client
-
-    def _delete_keypair(self, keypair_name):
-        self.client.delete_keypair(keypair_name)
-
-    def _create_keypair(self, keypair_name, pub_key=None):
-        body = self.client.create_keypair(keypair_name, pub_key)
-        self.addCleanup(self._delete_keypair, keypair_name)
-        return body
-
+class KeyPairsV2TestJSON(base.BaseKeypairTest):
     @test.idempotent_id('1d1dbedb-d7a0-432a-9d09-83f543c3c19b')
     def test_keypairs_create_list_delete(self):
         # Keypairs created should be available in the response list
@@ -51,9 +34,7 @@ class KeyPairsV2TestJSON(base.BaseComputeTest):
             key_list.append(keypair)
         # Fetch all keypairs and verify the list
         # has all created keypairs
-        fetched_list = self.client.list_keypairs()
-        # We need to remove the extra 'keypair' element in the
-        # returned dict. See comment in keypairs_client.list_keypairs()
+        fetched_list = self.client.list_keypairs()['keypairs']
         new_list = list()
         for keypair in fetched_list:
             new_list.append(keypair['keypair'])
@@ -82,7 +63,7 @@ class KeyPairsV2TestJSON(base.BaseComputeTest):
         # Keypair should be created, Got details by name and deleted
         k_name = data_utils.rand_name('keypair')
         self._create_keypair(k_name)
-        keypair_detail = self.client.show_keypair(k_name)
+        keypair_detail = self.client.show_keypair(k_name)['keypair']
         self.assertIn('name', keypair_detail)
         self.assertIn('public_key', keypair_detail)
         self.assertEqual(keypair_detail['name'], k_name,

@@ -13,8 +13,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import json
-
+from oslo_serialization import jsonutils as json
 from six.moves.urllib import parse as urllib
 from tempest_lib import exceptions as lib_exc
 
@@ -22,9 +21,9 @@ from tempest.api_schema.response.compute.v2_1 import security_groups as schema
 from tempest.common import service_client
 
 
-class SecurityGroupsClientJSON(service_client.ServiceClient):
+class SecurityGroupsClient(service_client.ServiceClient):
 
-    def list_security_groups(self, params=None):
+    def list_security_groups(self, **params):
         """List all security groups for a user."""
 
         url = 'os-security-groups'
@@ -34,7 +33,7 @@ class SecurityGroupsClientJSON(service_client.ServiceClient):
         resp, body = self.get(url)
         body = json.loads(body)
         self.validate_response(schema.list_security_groups, resp, body)
-        return service_client.ResponseBodyList(resp, body['security_groups'])
+        return service_client.ResponseBody(resp, body)
 
     def show_security_group(self, security_group_id):
         """Get the details of a Security Group."""
@@ -42,43 +41,33 @@ class SecurityGroupsClientJSON(service_client.ServiceClient):
         resp, body = self.get(url)
         body = json.loads(body)
         self.validate_response(schema.get_security_group, resp, body)
-        return service_client.ResponseBody(resp, body['security_group'])
+        return service_client.ResponseBody(resp, body)
 
-    def create_security_group(self, name, description):
+    def create_security_group(self, **kwargs):
         """
         Creates a new security group.
         name (Required): Name of security group.
         description (Required): Description of security group.
         """
-        post_body = {
-            'name': name,
-            'description': description,
-        }
-        post_body = json.dumps({'security_group': post_body})
+        post_body = json.dumps({'security_group': kwargs})
         resp, body = self.post('os-security-groups', post_body)
         body = json.loads(body)
         self.validate_response(schema.get_security_group, resp, body)
-        return service_client.ResponseBody(resp, body['security_group'])
+        return service_client.ResponseBody(resp, body)
 
-    def update_security_group(self, security_group_id, name=None,
-                              description=None):
+    def update_security_group(self, security_group_id, **kwargs):
         """
         Update a security group.
         security_group_id: a security_group to update
         name: new name of security group
         description: new description of security group
         """
-        post_body = {}
-        if name:
-            post_body['name'] = name
-        if description:
-            post_body['description'] = description
-        post_body = json.dumps({'security_group': post_body})
+        post_body = json.dumps({'security_group': kwargs})
         resp, body = self.put('os-security-groups/%s' % security_group_id,
                               post_body)
         body = json.loads(body)
         self.validate_response(schema.update_security_group, resp, body)
-        return service_client.ResponseBody(resp, body['security_group'])
+        return service_client.ResponseBody(resp, body)
 
     def delete_security_group(self, security_group_id):
         """Deletes the provided Security Group."""
@@ -86,50 +75,6 @@ class SecurityGroupsClientJSON(service_client.ServiceClient):
             'os-security-groups/%s' % security_group_id)
         self.validate_response(schema.delete_security_group, resp, body)
         return service_client.ResponseBody(resp, body)
-
-    def create_security_group_rule(self, parent_group_id, ip_proto, from_port,
-                                   to_port, **kwargs):
-        """
-        Creating a new security group rules.
-        parent_group_id :ID of Security group
-        ip_protocol : ip_proto (icmp, tcp, udp).
-        from_port: Port at start of range.
-        to_port  : Port at end of range.
-        Following optional keyword arguments are accepted:
-        cidr     : CIDR for address range.
-        group_id : ID of the Source group
-        """
-        post_body = {
-            'parent_group_id': parent_group_id,
-            'ip_protocol': ip_proto,
-            'from_port': from_port,
-            'to_port': to_port,
-            'cidr': kwargs.get('cidr'),
-            'group_id': kwargs.get('group_id'),
-        }
-        post_body = json.dumps({'security_group_rule': post_body})
-        url = 'os-security-group-rules'
-        resp, body = self.post(url, post_body)
-        body = json.loads(body)
-        self.validate_response(schema.create_security_group_rule, resp, body)
-        return service_client.ResponseBody(resp, body['security_group_rule'])
-
-    def delete_security_group_rule(self, group_rule_id):
-        """Deletes the provided Security Group rule."""
-        resp, body = self.delete('os-security-group-rules/%s' %
-                                 group_rule_id)
-        self.validate_response(schema.delete_security_group_rule, resp, body)
-        return service_client.ResponseBody(resp, body)
-
-    def list_security_group_rules(self, security_group_id):
-        """List all rules for a security group."""
-        resp, body = self.get('os-security-groups')
-        body = json.loads(body)
-        self.validate_response(schema.list_security_groups, resp, body)
-        for sg in body['security_groups']:
-            if sg['id'] == security_group_id:
-                return service_client.ResponseBodyList(resp, sg['rules'])
-        raise lib_exc.NotFound('No such Security Group')
 
     def is_resource_deleted(self, id):
         try:

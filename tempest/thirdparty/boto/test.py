@@ -211,7 +211,7 @@ class BotoTestCase(tempest.test.BaseTestCase):
     def resource_setup(cls):
         super(BotoTestCase, cls).resource_setup()
         cls.conclusion = decision_maker()
-        # The trash contains cleanup functions and paramaters in tuples
+        # The trash contains cleanup functions and parameters in tuples
         # (function, *args, **kwargs)
         cls._resource_trash_bin = {}
         cls._sequence = -1
@@ -303,7 +303,7 @@ class BotoTestCase(tempest.test.BaseTestCase):
     @classmethod
     def get_lfunction_gone(cls, obj):
         """If the object is instance of a well know type returns back with
-            with the correspoding function otherwise it assumes the obj itself
+            with the corresponding function otherwise it assumes the obj itself
             is the function.
             """
         ec = cls.ec2_error_code
@@ -377,7 +377,7 @@ class BotoTestCase(tempest.test.BaseTestCase):
         state = self.waitSnapshotStatus(lfunction, wait_for)
         self.assertIn(state, wait_for)
 
-    def assertAddressDissasociatedWait(self, address):
+    def assertAddressDisassociatedWait(self, address):
 
         def _disassociate():
             cli = self.ec2_client
@@ -467,7 +467,7 @@ class BotoTestCase(tempest.test.BaseTestCase):
                         client.InvalidInstanceID.NotFound.match(exc) is None:
                     return "_GONE"
                 # NOTE(afazekas): incorrect code,
-                # but the resource must be destoreyd
+                # but the resource must be destroyed
                 if exc.error_code == "InstanceNotFound":
                     return "_GONE"
 
@@ -505,7 +505,7 @@ class BotoTestCase(tempest.test.BaseTestCase):
             LOG.critical("%s Volume has %s snapshot(s)", volume.id,
                          map(snaps.id, snaps))
 
-        # NOTE(afazekas): detaching/attching not valid EC2 status
+        # NOTE(afazekas): detaching/attaching not valid EC2 status
         def _volume_state():
             volume.update(validate=True)
             try:

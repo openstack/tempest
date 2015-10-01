@@ -14,9 +14,9 @@
 #    under the License.
 
 import netaddr
-from tempest_lib.common.utils import data_utils
 
 from tempest.api.network import base
+from tempest.common.utils import data_utils
 from tempest import config
 from tempest import test
 
@@ -25,7 +25,7 @@ CONF = config.CONF
 
 class FloatingIPTestJSON(base.BaseNetworkTest):
     """
-    Tests the following operations in the Quantum API using the REST client for
+    Tests the following operations in the Neutron API using the REST client for
     Neutron:
 
         Create a Floating IP

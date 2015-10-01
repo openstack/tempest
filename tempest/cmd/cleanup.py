@@ -51,10 +51,10 @@ deleted and the admin user specified in tempest.conf is never deleted.
 Please run with **--help** to see full list of options.
 """
 import argparse
-import json
 import sys
 
 from oslo_log import log as logging
+from oslo_serialization import jsonutils as json
 
 from tempest import clients
 from tempest.cmd import cleanup_service

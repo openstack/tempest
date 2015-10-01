@@ -16,10 +16,18 @@
 from testtools import matchers
 
 from tempest.api.volume import base
+from tempest import config
 from tempest import test
+
+CONF = config.CONF
 
 
 class SnapshotV2MetadataTestJSON(base.BaseVolumeTest):
+    @classmethod
+    def skip_checks(cls):
+        super(SnapshotV2MetadataTestJSON, cls).skip_checks()
+        if not CONF.volume_feature_enabled.snapshot:
+            raise cls.skipException("Cinder snapshot feature disabled")
 
     @classmethod
     def setup_clients(cls):
@@ -48,16 +56,18 @@ class SnapshotV2MetadataTestJSON(base.BaseVolumeTest):
                     "key3": "value3"}
         expected = {"key2": "value2",
                     "key3": "value3"}
-        body = self.client.create_snapshot_metadata(self.snapshot_id,
-                                                    metadata)
+        body = self.client.create_snapshot_metadata(
+            self.snapshot_id, metadata)['metadata']
         # Get the metadata of the snapshot
-        body = self.client.show_snapshot_metadata(self.snapshot_id)
+        body = self.client.show_snapshot_metadata(
+            self.snapshot_id)['metadata']
         self.assertThat(body.items(), matchers.ContainsAll(metadata.items()))
 
         # Delete one item metadata of the snapshot
         self.client.delete_snapshot_metadata_item(
             self.snapshot_id, "key1")
-        body = self.client.show_snapshot_metadata(self.snapshot_id)
+        body = self.client.show_snapshot_metadata(
+            self.snapshot_id)['metadata']
         self.assertThat(body.items(), matchers.ContainsAll(expected.items()))
         self.assertNotIn("key1", body)
 
@@ -70,17 +80,19 @@ class SnapshotV2MetadataTestJSON(base.BaseVolumeTest):
         update = {"key3": "value3_update",
                   "key4": "value4"}
         # Create metadata for the snapshot
-        body = self.client.create_snapshot_metadata(self.snapshot_id,
-                                                    metadata)
+        body = self.client.create_snapshot_metadata(
+            self.snapshot_id, metadata)['metadata']
         # Get the metadata of the snapshot
-        body = self.client.show_snapshot_metadata(self.snapshot_id)
+        body = self.client.show_snapshot_metadata(
+            self.snapshot_id)['metadata']
         self.assertThat(body.items(), matchers.ContainsAll(metadata.items()))
 
         # Update metadata item
         body = self.client.update_snapshot_metadata(
-            self.snapshot_id, update)
+            self.snapshot_id, update)['metadata']
         # Get the metadata of the snapshot
-        body = self.client.show_snapshot_metadata(self.snapshot_id)
+        body = self.client.show_snapshot_metadata(
+            self.snapshot_id)['metadata']
         self.assertEqual(update, body)
 
     @test.idempotent_id('e8ff85c5-8f97-477f-806a-3ac364a949ed')
@@ -94,16 +106,18 @@ class SnapshotV2MetadataTestJSON(base.BaseVolumeTest):
                   "key2": "value2",
                   "key3": "value3_update"}
         # Create metadata for the snapshot
-        body = self.client.create_snapshot_metadata(self.snapshot_id,
-                                                    metadata)
+        body = self.client.create_snapshot_metadata(
+            self.snapshot_id, metadata)['metadata']
         # Get the metadata of the snapshot
-        body = self.client.show_snapshot_metadata(self.snapshot_id)
+        body = self.client.show_snapshot_metadata(
+            self.snapshot_id)['metadata']
         self.assertThat(body.items(), matchers.ContainsAll(metadata.items()))
         # Update metadata item
         body = self.client.update_snapshot_metadata_item(
-            self.snapshot_id, "key3", update_item)
+            self.snapshot_id, "key3", update_item)['meta']
         # Get the metadata of the snapshot
-        body = self.client.show_snapshot_metadata(self.snapshot_id)
+        body = self.client.show_snapshot_metadata(
+            self.snapshot_id)['metadata']
         self.assertThat(body.items(), matchers.ContainsAll(expect.items()))
 
 

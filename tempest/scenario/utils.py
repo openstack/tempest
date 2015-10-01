@@ -13,11 +13,11 @@
 #    under the License.
 
 
-import json
 import re
 import string
 import unicodedata
 
+from oslo_serialization import jsonutils as json
 from tempest_lib.common.utils import misc
 import testscenarios
 import testtools
@@ -44,7 +44,7 @@ class ImageUtils(object):
         self.flavors_client = os.flavors_client
 
     def ssh_user(self, image_id):
-        _image = self.images_client.show_image(image_id)
+        _image = self.images_client.show_image(image_id)['image']
         for regex, user in self.ssh_users:
             # First match wins
             if re.match(regex, _image['name']) is not None:
@@ -57,15 +57,15 @@ class ImageUtils(object):
                              string=str(image['name']))
 
     def is_sshable_image(self, image_id):
-        _image = self.images_client.show_image(image_id)
+        _image = self.images_client.show_image(image_id)['image']
         return self._is_sshable_image(_image)
 
     def _is_flavor_enough(self, flavor, image):
         return image['minDisk'] <= flavor['disk']
 
     def is_flavor_enough(self, flavor_id, image_id):
-        _image = self.images_client.show_image(image_id)
-        _flavor = self.flavors_client.show_flavor(flavor_id)
+        _image = self.images_client.show_image(image_id)['image']
+        _flavor = self.flavors_client.show_flavor(flavor_id)['flavor']
         return self._is_flavor_enough(_flavor, _image)
 
 
@@ -91,8 +91,8 @@ class InputScenarioUtils(object):
         def test_create_server_metadata(self):
             name = rand_name('instance')
             self.servers_client.create_server(name=name,
-                                              flavor_ref=self.flavor_ref,
-                                              image_ref=self.image_ref)
+                                              flavorRef=self.flavor_ref,
+                                              imageRef=self.image_ref)
     """
     validchars = "-_.{ascii}{digit}".format(ascii=string.ascii_letters,
                                             digit=string.digits)
@@ -131,7 +131,7 @@ class InputScenarioUtils(object):
             return []
         if not hasattr(self, '_scenario_images'):
             try:
-                images = self.images_client.list_images()
+                images = self.images_client.list_images()['images']
                 self._scenario_images = [
                     (self._normalize_name(i['name']), dict(image_ref=i['id']))
                     for i in images if re.search(self.image_pattern,
@@ -148,7 +148,7 @@ class InputScenarioUtils(object):
         """
         if not hasattr(self, '_scenario_flavors'):
             try:
-                flavors = self.flavors_client.list_flavors()
+                flavors = self.flavors_client.list_flavors()['flavors']
                 self._scenario_flavors = [
                     (self._normalize_name(f['name']), dict(flavor_ref=f['id']))
                     for f in flavors if re.search(self.flavor_pattern,

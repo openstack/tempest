@@ -10,6 +10,7 @@ Contents:
    overview
    HACKING
    REVIEWING
+   plugin
 
 ------------
 Field Guides
@@ -23,7 +24,6 @@ where your test contributions should go.
 
    field_guide/index
    field_guide/api
-   field_guide/cli
    field_guide/scenario
    field_guide/stress
    field_guide/thirdparty
@@ -37,6 +37,7 @@ Tempest Configuration Guide
    :maxdepth: 2
 
    configuration
+   sampleconf
 
 ---------------------
 Command Documentation

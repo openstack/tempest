@@ -13,10 +13,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest_lib.common.utils import data_utils
 from tempest_lib import decorators
 
 from tempest.api.compute import base
+from tempest.common.utils import data_utils
 from tempest import test
 
 
@@ -37,7 +37,7 @@ class ServerGroupTestJSON(base.BaseV2ComputeTest):
     @classmethod
     def setup_clients(cls):
         super(ServerGroupTestJSON, cls).setup_clients()
-        cls.client = cls.servers_client
+        cls.client = cls.server_groups_client
 
     @classmethod
     def resource_setup(cls):
@@ -61,7 +61,7 @@ class ServerGroupTestJSON(base.BaseV2ComputeTest):
         # delete the test server-group
         self.client.delete_server_group(server_group['id'])
         # validation of server-group deletion
-        server_group_list = self.client.list_server_groups()
+        server_group_list = self.client.list_server_groups()['server_groups']
         self.assertNotIn(server_group, server_group_list)
 
     def _create_delete_server_group(self, policy):
@@ -107,11 +107,11 @@ class ServerGroupTestJSON(base.BaseV2ComputeTest):
     def test_get_server_group(self):
         # Get the server-group
         body = self.client.get_server_group(
-            self.created_server_group['id'])
+            self.created_server_group['id'])['server_group']
         self.assertEqual(self.created_server_group, body)
 
     @test.idempotent_id('d4874179-27b4-4d7d-80e4-6c560cdfe321')
     def test_list_server_groups(self):
         # List the server-group
-        body = self.client.list_server_groups()
+        body = self.client.list_server_groups()['server_groups']
         self.assertIn(self.created_server_group, body)

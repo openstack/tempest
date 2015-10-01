@@ -38,7 +38,7 @@ class AbsoluteLimitsNegativeTestJSON(base.BaseV2ComputeTest):
     def test_max_image_meta_exceed_limit(self):
         # We should not create vm with image meta over maxImageMeta limit
         # Get max limit value
-        limits = self.client.show_limits()
+        limits = self.client.show_limits()['limits']
         max_meta = limits['absolute']['maxImageMeta']
 
         # No point in running this test if there is no limit.
@@ -55,4 +55,4 @@ class AbsoluteLimitsNegativeTestJSON(base.BaseV2ComputeTest):
         # A 403 Forbidden or 413 Overlimit (old behaviour) exception
         # will be raised when out of quota
         self.assertRaises((lib_exc.Forbidden, lib_exc.OverLimit),
-                          self.create_test_server, meta=meta_data)
+                          self.create_test_server, metadata=meta_data)

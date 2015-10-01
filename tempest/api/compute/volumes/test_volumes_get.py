@@ -13,10 +13,11 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest_lib.common.utils import data_utils
 from testtools import matchers
 
 from tempest.api.compute import base
+from tempest.common.utils import data_utils
+from tempest.common import waiters
 from tempest import config
 from tempest import test
 
@@ -45,8 +46,9 @@ class VolumesGetTestJSON(base.BaseV2ComputeTest):
         v_name = data_utils.rand_name('Volume')
         metadata = {'Type': 'work'}
         # Create volume
-        volume = self.client.create_volume(display_name=v_name,
-                                           metadata=metadata)
+        volume = self.client.create_volume(size=CONF.volume.volume_size,
+                                           display_name=v_name,
+                                           metadata=metadata)['volume']
         self.addCleanup(self.delete_volume, volume['id'])
         self.assertIn('id', volume)
         self.assertIn('displayName', volume)
@@ -56,9 +58,9 @@ class VolumesGetTestJSON(base.BaseV2ComputeTest):
         self.assertTrue(volume['id'] is not None,
                         "Field volume id is empty or not found.")
         # Wait for Volume status to become ACTIVE
-        self.client.wait_for_volume_status(volume['id'], 'available')
+        waiters.wait_for_volume_status(self.client, volume['id'], 'available')
         # GET Volume
-        fetched_volume = self.client.show_volume(volume['id'])
+        fetched_volume = self.client.show_volume(volume['id'])['volume']
         # Verification of details of fetched Volume
         self.assertEqual(v_name,
                          fetched_volume['displayName'],

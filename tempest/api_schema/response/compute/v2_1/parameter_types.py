@@ -33,14 +33,27 @@ mac_address = {
     'pattern': '(?:[a-f0-9]{2}:){5}[a-f0-9]{2}'
 }
 
+ip_address = {
+    'oneOf': [
+        {
+            'type': 'string',
+            'oneOf': [
+                {'format': 'ipv4'},
+                {'format': 'ipv6'}
+            ]
+        },
+        {'type': 'null'}
+    ]
+}
+
 access_ip_v4 = {
     'type': 'string',
-    'anyOf': [{'format': 'ipv4'}, {'enum': ['']}]
+    'oneOf': [{'format': 'ipv4'}, {'enum': ['']}]
 }
 
 access_ip_v6 = {
     'type': 'string',
-    'anyOf': [{'format': 'ipv6'}, {'enum': ['']}]
+    'oneOf': [{'format': 'ipv6'}, {'enum': ['']}]
 }
 
 addresses = {
@@ -55,7 +68,7 @@ addresses = {
                     'version': {'type': 'integer'},
                     'addr': {
                         'type': 'string',
-                        'anyOf': [
+                        'oneOf': [
                             {'format': 'ipv4'},
                             {'format': 'ipv6'}
                         ]

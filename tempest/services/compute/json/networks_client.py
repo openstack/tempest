@@ -13,21 +13,21 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import json
+from oslo_serialization import jsonutils as json
 
 from tempest.common import service_client
 
 
-class NetworksClientJSON(service_client.ServiceClient):
+class NetworksClient(service_client.ServiceClient):
 
     def list_networks(self):
         resp, body = self.get("os-networks")
         body = json.loads(body)
         self.expected_success(200, resp.status)
-        return service_client.ResponseBodyList(resp, body['networks'])
+        return service_client.ResponseBody(resp, body)
 
     def show_network(self, network_id):
         resp, body = self.get("os-networks/%s" % network_id)
         body = json.loads(body)
         self.expected_success(200, resp.status)
-        return service_client.ResponseBody(resp, body['network'])
+        return service_client.ResponseBody(resp, body)

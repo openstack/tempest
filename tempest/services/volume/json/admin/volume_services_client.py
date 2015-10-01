@@ -13,14 +13,13 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import json
-
+from oslo_serialization import jsonutils as json
 from six.moves.urllib import parse as urllib
 
 from tempest.common import service_client
 
 
-class BaseVolumesServicesClientJSON(service_client.ServiceClient):
+class BaseVolumesServicesClient(service_client.ServiceClient):
 
     def list_services(self, params=None):
         url = 'os-services'
@@ -30,8 +29,8 @@ class BaseVolumesServicesClientJSON(service_client.ServiceClient):
         resp, body = self.get(url)
         body = json.loads(body)
         self.expected_success(200, resp.status)
-        return service_client.ResponseBodyList(resp, body['services'])
+        return service_client.ResponseBody(resp, body)
 
 
-class VolumesServicesClientJSON(BaseVolumesServicesClientJSON):
+class VolumesServicesClient(BaseVolumesServicesClient):
     """Volume V1 volume services client"""

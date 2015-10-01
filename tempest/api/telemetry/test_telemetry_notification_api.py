@@ -10,6 +10,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib import decorators
 import testtools
 
 from tempest.api.telemetry import base
@@ -21,16 +22,8 @@ CONF = config.CONF
 
 class TelemetryNotificationAPITestJSON(base.BaseTelemetryTest):
 
-    @classmethod
-    def skip_checks(cls):
-        super(TelemetryNotificationAPITestJSON, cls).skip_checks()
-        if CONF.telemetry.too_slow_to_test:
-            raise cls.skipException("Ceilometer feature for fast work mysql "
-                                    "is disabled")
-
     @test.idempotent_id('d7f8c1c8-d470-4731-8604-315d3956caad')
-    @testtools.skipIf(not CONF.service_available.nova,
-                      "Nova is not available.")
+    @test.services('compute')
     def test_check_nova_notification(self):
 
         body = self.create_server()
@@ -70,4 +63,22 @@ class TelemetryNotificationAPITestJSON(base.BaseTelemetryTest):
         query = 'resource', 'eq', body['id']
 
         for metric in self.glance_v2_notifications:
+            self.await_samples(metric, query)
+
+
+class TelemetryNotificationAdminAPITestJSON(base.BaseTelemetryAdminTest):
+
+    @test.idempotent_id('29604198-8b45-4fc0-8af8-1cae4f94ebe9')
+    @test.services('compute')
+    @decorators.skip_because(bug='1480490')
+    def test_check_nova_notification_event_and_meter(self):
+
+        body = self.create_server()
+
+        if CONF.telemetry_feature_enabled.events:
+            query = ('instance_id', 'eq', body['id'])
+            self.await_events(query)
+
+        query = ('resource', 'eq', body['id'])
+        for metric in self.nova_notifications:
             self.await_samples(metric, query)

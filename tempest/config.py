@@ -22,6 +22,8 @@ from oslo_config import cfg
 
 from oslo_log import log as logging
 
+from tempest.test_discover import plugins
+
 
 # TODO(marun) Replace use of oslo_config's global ConfigOpts
 # (cfg.CONF) instance with a local instance (cfg.ConfigOpts()) once
@@ -65,16 +67,17 @@ AuthGroup = [
     cfg.ListOpt('tempest_roles',
                 help="Roles to assign to all users created by tempest",
                 default=[]),
-    cfg.StrOpt('tenant_isolation_domain_name',
-               default=None,
-               help="Only applicable when identity.auth_version is v3."
-                    "Domain within which isolated credentials are provisioned."
-                    "The default \"None\" means that the domain from the"
-                    "admin user is used instead."),
+    cfg.StrOpt('default_credentials_domain_name',
+               default='Default',
+               help="Default domain used when getting v3 credentials. "
+                    "This is the name keystone uses for v2 compatibility.",
+               deprecated_opts=[cfg.DeprecatedOpt(
+                                'tenant_isolation_domain_name',
+                                group='auth')]),
     cfg.BoolOpt('create_isolated_networks',
                 default=True,
                 help="If allow_tenant_isolation is set to True and Neutron is "
-                     "enabled Tempest will try to create a useable network, "
+                     "enabled Tempest will try to create a usable network, "
                      "subnet, and router when needed for each tenant it  "
                      "creates. However in some neutron configurations, like "
                      "with VLAN provider networks, this doesn't work. So if "
@@ -109,11 +112,26 @@ IdentityGroup = [
                     "services' region name unless they are set explicitly. "
                     "If no such region is found in the service catalog, the "
                     "first found one is used."),
-    cfg.StrOpt('endpoint_type',
+    cfg.StrOpt('v2_admin_endpoint_type',
+               default='adminURL',
+               choices=['public', 'admin', 'internal',
+                        'publicURL', 'adminURL', 'internalURL'],
+               help="The admin endpoint type to use for OpenStack Identity "
+                    "(Keystone) API v2"),
+    cfg.StrOpt('v2_public_endpoint_type',
                default='publicURL',
                choices=['public', 'admin', 'internal',
                         'publicURL', 'adminURL', 'internalURL'],
-               help="The endpoint type to use for the identity service."),
+               help="The public endpoint type to use for OpenStack Identity "
+                    "(Keystone) API v2",
+               deprecated_opts=[cfg.DeprecatedOpt('endpoint_type',
+                                                  group='identity')]),
+    cfg.StrOpt('v3_endpoint_type',
+               default='adminURL',
+               choices=['public', 'admin', 'internal',
+                        'publicURL', 'adminURL', 'internalURL'],
+               help="The endpoint type to use for OpenStack Identity "
+                    "(Keystone) API v3"),
     cfg.StrOpt('username',
                help="Username to use for Nova API requests."),
     cfg.StrOpt('tenant_name',
@@ -170,6 +188,12 @@ IdentityFeatureGroup = [
     cfg.BoolOpt('api_v3',
                 default=True,
                 help='Is the v3 identity API enabled'),
+    cfg.ListOpt('api_extensions',
+                default=['all'],
+                help="A list of enabled identity extensions with a special "
+                     "entry all which indicates every extension is enabled. "
+                     "Empty list indicates all extensions are disabled. "
+                     "To get the list of extensions run: 'keystone discover'")
 ]
 
 compute_group = cfg.OptGroup(name='compute',
@@ -328,6 +352,10 @@ ComputeFeaturesGroup = [
                 default=True,
                 help="Does the test environment support live migration "
                      "available?"),
+    cfg.BoolOpt('metadata_service',
+                default=True,
+                help="Does the test environment support metadata service? "
+                     "Ignored unless validation.run_validation=true."),
     cfg.BoolOpt('block_migration_for_live_migration',
                 default=False,
                 help="Does the test environment use block devices for live "
@@ -388,6 +416,14 @@ ComputeFeaturesGroup = [
                      'encrypted volume to a running server instance? This may '
                      'depend on the combination of compute_driver in nova and '
                      'the volume_driver(s) in cinder.'),
+    # TODO(mriedem): Remove allow_duplicate_networks once kilo-eol happens
+    # since the option was removed from nova in Liberty and is the default
+    # behavior starting in Liberty.
+    cfg.BoolOpt('allow_duplicate_networks',
+                default=False,
+                help='Does the test environment support creating instances '
+                     'with multiple ports on the same network? This is only '
+                     'valid when using Neutron.'),
 ]
 
 
@@ -601,6 +637,12 @@ ValidationGroup = [
                      ' validation resources to enable remote access',
                 deprecated_opts=[cfg.DeprecatedOpt('run_ssh',
                                                    group='compute')]),
+    cfg.BoolOpt('security_group',
+                default=True,
+                help='Enable/disable security groups.'),
+    cfg.BoolOpt('security_group_rules',
+                default=True,
+                help='Enable/disable security group rules.'),
     cfg.StrOpt('connect_method',
                default='floating',
                choices=['fixed', 'floating'],
@@ -692,6 +734,9 @@ VolumeFeaturesGroup = [
     cfg.BoolOpt('snapshot',
                 default=True,
                 help='Runs Cinder volume snapshot test'),
+    cfg.BoolOpt('clone',
+                default=True,
+                help='Runs Cinder volume clone test'),
     cfg.ListOpt('api_extensions',
                 default=['all'],
                 help='A list of enabled volume extensions with a special '
@@ -847,8 +892,19 @@ TelemetryGroup = [
                help="The endpoint type to use for the telemetry service."),
     cfg.BoolOpt('too_slow_to_test',
                 default=True,
+                deprecated_for_removal=True,
                 help="This variable is used as flag to enable "
                      "notification tests")
+]
+
+
+telemetry_feature_group = cfg.OptGroup(name='telemetry-feature-enabled',
+                                       title='Enabled Ceilometer Features')
+
+TelemetryFeaturesGroup = [
+    cfg.BoolOpt('events',
+                default=False,
+                help="Runs Ceilometer event-related tests"),
 ]
 
 
@@ -861,7 +917,8 @@ DashboardGroup = [
                help="Where the dashboard can be found"),
     cfg.StrOpt('login_url',
                default='http://localhost/auth/login/',
-               help="Login page for the dashboard"),
+               help="Login page for the dashboard",
+               deprecated_for_removal=True),
 ]
 
 
@@ -1015,7 +1072,7 @@ ScenarioGroup = [
     # TODO(yfried): add support for dhcpcd
     cfg.StrOpt('dhcp_client',
                default='udhcpc',
-               choices=["udhcpc", "dhclient"],
+               choices=["udhcpc", "dhclient", ""],
                help='DHCP client used by images to renew DCHP lease. '
                     'If left empty, update operation will be skipped. '
                     'Supported clients: "udhcpc", "dhclient"'),
@@ -1137,7 +1194,7 @@ baremetal_group = cfg.OptGroup(name='baremetal',
                                title='Baremetal provisioning service options',
                                help='When enabling baremetal tests, Nova '
                                     'must be configured to use the Ironic '
-                                    'driver. The following paremeters for the '
+                                    'driver. The following parameters for the '
                                     '[compute] section must be disabled: '
                                     'console_output, interface_attach, '
                                     'live_migration, pause, rescue, resize '
@@ -1222,6 +1279,7 @@ _opts = [
     (database_group, DatabaseGroup),
     (orchestration_group, OrchestrationGroup),
     (telemetry_group, TelemetryGroup),
+    (telemetry_feature_group, TelemetryFeaturesGroup),
     (dashboard_group, DashboardGroup),
     (data_processing_group, DataProcessingGroup),
     (data_processing_feature_group, DataProcessingFeaturesGroup),
@@ -1238,8 +1296,12 @@ _opts = [
 
 
 def register_opts():
+    ext_plugins = plugins.TempestTestPluginManager()
+    # Register in-tree tempest config options
     for g, o in _opts:
         register_opt_group(_CONF, g, o)
+    # Call external plugin config option registration
+    ext_plugins.register_plugin_opts(_CONF)
 
 
 def list_opts():
@@ -1248,7 +1310,10 @@ def list_opts():
     The purpose of this is to allow tools like the Oslo sample config file
     generator to discover the options exposed to users.
     """
-    return [(getattr(g, 'name', None), o) for g, o in _opts]
+    ext_plugins = plugins.TempestTestPluginManager()
+    opt_list = [(getattr(g, 'name', None), o) for g, o in _opts]
+    opt_list.extend(ext_plugins.get_plugin_options_list())
+    return opt_list
 
 
 # this should never be called outside of this class
@@ -1285,6 +1350,7 @@ class TempestConfigPrivate(object):
         self.orchestration = _CONF.orchestration
         self.messaging = _CONF.messaging
         self.telemetry = _CONF.telemetry
+        self.telemetry_feature_enabled = _CONF['telemetry-feature-enabled']
         self.dashboard = _CONF.dashboard
         self.data_processing = _CONF.data_processing
         self.data_processing_feature_enabled = _CONF[
@@ -1297,9 +1363,11 @@ class TempestConfigPrivate(object):
         self.baremetal = _CONF.baremetal
         self.input_scenario = _CONF['input-scenario']
         self.negative = _CONF.negative
-        _CONF.set_default('domain_name', self.identity.admin_domain_name,
+        _CONF.set_default('domain_name',
+                          self.auth.default_credentials_domain_name,
                           group='identity')
-        _CONF.set_default('alt_domain_name', self.identity.admin_domain_name,
+        _CONF.set_default('alt_domain_name',
+                          self.auth.default_credentials_domain_name,
                           group='identity')
 
     def __init__(self, parse_conf=True, config_path=None):

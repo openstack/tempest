@@ -13,14 +13,13 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import json
-
+from oslo_serialization import jsonutils as json
 from six.moves.urllib import parse as urllib
 
 from tempest.common import service_client
 
 
-class BaseVolumeHostsClientJSON(service_client.ServiceClient):
+class BaseVolumeHostsClient(service_client.ServiceClient):
     """
     Client class to send CRUD Volume Hosts API requests to a Cinder endpoint
     """
@@ -35,10 +34,10 @@ class BaseVolumeHostsClientJSON(service_client.ServiceClient):
         resp, body = self.get(url)
         body = json.loads(body)
         self.expected_success(200, resp.status)
-        return service_client.ResponseBodyList(resp, body['hosts'])
+        return service_client.ResponseBody(resp, body)
 
 
-class VolumeHostsClientJSON(BaseVolumeHostsClientJSON):
+class VolumeHostsClient(BaseVolumeHostsClient):
     """
     Client class to send CRUD Volume Host API V1 requests to a Cinder endpoint
     """

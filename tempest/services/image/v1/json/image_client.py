@@ -15,11 +15,11 @@
 
 import copy
 import errno
-import json
 import os
 import time
 
 from oslo_log import log as logging
+from oslo_serialization import jsonutils as json
 import six
 from six.moves.urllib import parse as urllib
 from tempest_lib.common.utils import misc as misc_utils
@@ -32,13 +32,13 @@ from tempest import exceptions
 LOG = logging.getLogger(__name__)
 
 
-class ImageClientJSON(service_client.ServiceClient):
+class ImageClient(service_client.ServiceClient):
 
     def __init__(self, auth_provider, catalog_type, region, endpoint_type=None,
                  build_interval=None, build_timeout=None,
                  disable_ssl_certificate_validation=None,
                  ca_certs=None, trace_requests=None):
-        super(ImageClientJSON, self).__init__(
+        super(ImageClient, self).__init__(
             auth_provider,
             catalog_type,
             region,
@@ -130,7 +130,7 @@ class ImageClientJSON(service_client.ServiceClient):
         self._error_checker('POST', '/v1/images', headers, data, resp,
                             body_iter)
         body = json.loads(''.join([c for c in body_iter]))
-        return service_client.ResponseBody(resp, body['image'])
+        return service_client.ResponseBody(resp, body)
 
     def _update_with_data(self, image_id, headers, data):
         url = '/v1/images/%s' % image_id
@@ -139,7 +139,7 @@ class ImageClientJSON(service_client.ServiceClient):
         self._error_checker('PUT', url, headers, data,
                             resp, body_iter)
         body = json.loads(''.join([c for c in body_iter]))
-        return service_client.ResponseBody(resp, body['image'])
+        return service_client.ResponseBody(resp, body)
 
     @property
     def http(self):
@@ -169,7 +169,7 @@ class ImageClientJSON(service_client.ServiceClient):
         resp, body = self.post('v1/images', None, headers)
         self.expected_success(201, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body['image'])
+        return service_client.ResponseBody(resp, body)
 
     def update_image(self, image_id, name=None, container_format=None,
                      data=None, properties=None):
@@ -193,7 +193,7 @@ class ImageClientJSON(service_client.ServiceClient):
         resp, body = self.put(url, data, headers)
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body['image'])
+        return service_client.ResponseBody(resp, body)
 
     def delete_image(self, image_id):
         url = 'v1/images/%s' % image_id
@@ -223,7 +223,7 @@ class ImageClientJSON(service_client.ServiceClient):
         resp, body = self.get(url)
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBodyList(resp, body['images'])
+        return service_client.ResponseBody(resp, body)
 
     def get_image_meta(self, image_id):
         url = 'v1/images/%s' % image_id

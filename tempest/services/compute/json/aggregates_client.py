@@ -13,29 +13,28 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import json
-
+from oslo_serialization import jsonutils as json
 from tempest_lib import exceptions as lib_exc
 
 from tempest.api_schema.response.compute.v2_1 import aggregates as schema
 from tempest.common import service_client
 
 
-class AggregatesClientJSON(service_client.ServiceClient):
+class AggregatesClient(service_client.ServiceClient):
 
     def list_aggregates(self):
         """Get aggregate list."""
         resp, body = self.get("os-aggregates")
         body = json.loads(body)
         self.validate_response(schema.list_aggregates, resp, body)
-        return service_client.ResponseBodyList(resp, body['aggregates'])
+        return service_client.ResponseBody(resp, body)
 
     def show_aggregate(self, aggregate_id):
         """Get details of the given aggregate."""
         resp, body = self.get("os-aggregates/%s" % aggregate_id)
         body = json.loads(body)
         self.validate_response(schema.get_aggregate, resp, body)
-        return service_client.ResponseBody(resp, body['aggregate'])
+        return service_client.ResponseBody(resp, body)
 
     def create_aggregate(self, **kwargs):
         """Creates a new aggregate."""
@@ -44,20 +43,16 @@ class AggregatesClientJSON(service_client.ServiceClient):
 
         body = json.loads(body)
         self.validate_response(schema.create_aggregate, resp, body)
-        return service_client.ResponseBody(resp, body['aggregate'])
+        return service_client.ResponseBody(resp, body)
 
-    def update_aggregate(self, aggregate_id, name, availability_zone=None):
+    def update_aggregate(self, aggregate_id, **kwargs):
         """Update a aggregate."""
-        put_body = {
-            'name': name,
-            'availability_zone': availability_zone
-        }
-        put_body = json.dumps({'aggregate': put_body})
+        put_body = json.dumps({'aggregate': kwargs})
         resp, body = self.put('os-aggregates/%s' % aggregate_id, put_body)
 
         body = json.loads(body)
         self.validate_response(schema.update_aggregate, resp, body)
-        return service_client.ResponseBody(resp, body['aggregate'])
+        return service_client.ResponseBody(resp, body)
 
     def delete_aggregate(self, aggregate_id):
         """Deletes the given aggregate."""
@@ -77,38 +72,29 @@ class AggregatesClientJSON(service_client.ServiceClient):
         """Returns the primary type of resource this client works with."""
         return 'aggregate'
 
-    def add_host(self, aggregate_id, host):
+    def add_host(self, aggregate_id, **kwargs):
         """Adds a host to the given aggregate."""
-        post_body = {
-            'host': host,
-        }
-        post_body = json.dumps({'add_host': post_body})
+        post_body = json.dumps({'add_host': kwargs})
         resp, body = self.post('os-aggregates/%s/action' % aggregate_id,
                                post_body)
         body = json.loads(body)
         self.validate_response(schema.aggregate_add_remove_host, resp, body)
-        return service_client.ResponseBody(resp, body['aggregate'])
+        return service_client.ResponseBody(resp, body)
 
-    def remove_host(self, aggregate_id, host):
+    def remove_host(self, aggregate_id, **kwargs):
         """Removes a host from the given aggregate."""
-        post_body = {
-            'host': host,
-        }
-        post_body = json.dumps({'remove_host': post_body})
+        post_body = json.dumps({'remove_host': kwargs})
         resp, body = self.post('os-aggregates/%s/action' % aggregate_id,
                                post_body)
         body = json.loads(body)
         self.validate_response(schema.aggregate_add_remove_host, resp, body)
-        return service_client.ResponseBody(resp, body['aggregate'])
+        return service_client.ResponseBody(resp, body)
 
-    def set_metadata(self, aggregate_id, meta):
+    def set_metadata(self, aggregate_id, **kwargs):
         """Replaces the aggregate's existing metadata with new metadata."""
-        post_body = {
-            'metadata': meta,
-        }
-        post_body = json.dumps({'set_metadata': post_body})
+        post_body = json.dumps({'set_metadata': kwargs})
         resp, body = self.post('os-aggregates/%s/action' % aggregate_id,
                                post_body)
         body = json.loads(body)
         self.validate_response(schema.aggregate_set_metadata, resp, body)
-        return service_client.ResponseBody(resp, body['aggregate'])
+        return service_client.ResponseBody(resp, body)

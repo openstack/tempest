@@ -12,8 +12,8 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-from tempest_lib.common.utils import data_utils
-
+from tempest.common.utils import data_utils
+from tempest.common import waiters
 from tempest import config
 import tempest.stress.stressaction as stressaction
 
@@ -30,12 +30,13 @@ class ServerCreateDestroyTest(stressaction.StressAction):
         name = data_utils.rand_name("instance")
         self.logger.info("creating %s" % name)
         server = self.manager.servers_client.create_server(
-            name, self.image, self.flavor)
+            name=name, imageRef=self.image, flavorRef=self.flavor)['server']
         server_id = server['id']
-        self.manager.servers_client.wait_for_server_status(server_id,
-                                                           'ACTIVE')
+        waiters.wait_for_server_status(self.manager.servers_client, server_id,
+                                       'ACTIVE')
         self.logger.info("created %s" % server_id)
         self.logger.info("deleting %s" % name)
         self.manager.servers_client.delete_server(server_id)
-        self.manager.servers_client.wait_for_server_termination(server_id)
+        waiters.wait_for_server_termination(self.manager.servers_client,
+                                            server_id)
         self.logger.info("deleted %s" % server_id)

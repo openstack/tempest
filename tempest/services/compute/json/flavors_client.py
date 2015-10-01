@@ -13,8 +13,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import json
-
+from oslo_serialization import jsonutils as json
 from six.moves.urllib import parse as urllib
 
 from tempest.api_schema.response.compute.v2_1 import flavors as schema
@@ -25,7 +24,7 @@ from tempest.api_schema.response.compute.v2_1 import flavors_extra_specs \
 from tempest.common import service_client
 
 
-class FlavorsClientJSON(service_client.ServiceClient):
+class FlavorsClient(service_client.ServiceClient):
 
     def list_flavors(self, detail=False, **params):
         url = 'flavors'
@@ -40,37 +39,32 @@ class FlavorsClientJSON(service_client.ServiceClient):
         resp, body = self.get(url)
         body = json.loads(body)
         self.validate_response(_schema, resp, body)
-        return service_client.ResponseBodyList(resp, body['flavors'])
+        return service_client.ResponseBody(resp, body)
 
     def show_flavor(self, flavor_id):
         resp, body = self.get("flavors/%s" % flavor_id)
         body = json.loads(body)
         self.validate_response(schema.create_get_flavor_details, resp, body)
-        return service_client.ResponseBody(resp, body['flavor'])
+        return service_client.ResponseBody(resp, body)
 
-    def create_flavor(self, name, ram, vcpus, disk, flavor_id, **kwargs):
-        """Creates a new flavor or instance type."""
-        post_body = {
-            'name': name,
-            'ram': ram,
-            'vcpus': vcpus,
-            'disk': disk,
-            'id': flavor_id,
-        }
+    def create_flavor(self, **kwargs):
+        """Creates a new flavor or instance type.
+        Most parameters except the following are passed to the API without
+        any changes.
+        :param ephemeral: The name is changed to OS-FLV-EXT-DATA:ephemeral
+        :param is_public: The name is changed to os-flavor-access:is_public
+        """
         if kwargs.get('ephemeral'):
-            post_body['OS-FLV-EXT-DATA:ephemeral'] = kwargs.get('ephemeral')
-        if kwargs.get('swap'):
-            post_body['swap'] = kwargs.get('swap')
-        if kwargs.get('rxtx'):
-            post_body['rxtx_factor'] = kwargs.get('rxtx')
+            kwargs['OS-FLV-EXT-DATA:ephemeral'] = kwargs.pop('ephemeral')
         if kwargs.get('is_public'):
-            post_body['os-flavor-access:is_public'] = kwargs.get('is_public')
-        post_body = json.dumps({'flavor': post_body})
+            kwargs['os-flavor-access:is_public'] = kwargs.pop('is_public')
+
+        post_body = json.dumps({'flavor': kwargs})
         resp, body = self.post('flavors', post_body)
 
         body = json.loads(body)
         self.validate_response(schema.create_get_flavor_details, resp, body)
-        return service_client.ResponseBody(resp, body['flavor'])
+        return service_client.ResponseBody(resp, body)
 
     def delete_flavor(self, flavor_id):
         """Deletes the given flavor."""
@@ -82,7 +76,7 @@ class FlavorsClientJSON(service_client.ServiceClient):
         # Did not use show_flavor(id) for verification as it gives
         # 200 ok even for deleted id. LP #981263
         # we can remove the loop here and use get by ID when bug gets sortedout
-        flavors = self.list_flavors(detail=True)
+        flavors = self.list_flavors(detail=True)['flavors']
         for flavor in flavors:
             if flavor['id'] == id:
                 return False
@@ -93,15 +87,15 @@ class FlavorsClientJSON(service_client.ServiceClient):
         """Returns the primary type of resource this client works with."""
         return 'flavor'
 
-    def set_flavor_extra_spec(self, flavor_id, specs):
+    def set_flavor_extra_spec(self, flavor_id, **kwargs):
         """Sets extra Specs to the mentioned flavor."""
-        post_body = json.dumps({'extra_specs': specs})
+        post_body = json.dumps({'extra_specs': kwargs})
         resp, body = self.post('flavors/%s/os-extra_specs' % flavor_id,
                                post_body)
         body = json.loads(body)
         self.validate_response(schema_extra_specs.set_get_flavor_extra_specs,
                                resp, body)
-        return service_client.ResponseBody(resp, body['extra_specs'])
+        return service_client.ResponseBody(resp, body)
 
     def list_flavor_extra_specs(self, flavor_id):
         """Gets extra Specs details of the mentioned flavor."""
@@ -109,7 +103,7 @@ class FlavorsClientJSON(service_client.ServiceClient):
         body = json.loads(body)
         self.validate_response(schema_extra_specs.set_get_flavor_extra_specs,
                                resp, body)
-        return service_client.ResponseBody(resp, body['extra_specs'])
+        return service_client.ResponseBody(resp, body)
 
     def show_flavor_extra_spec(self, flavor_id, key):
         """Gets extra Specs key-value of the mentioned flavor and key."""
@@ -144,7 +138,7 @@ class FlavorsClientJSON(service_client.ServiceClient):
         body = json.loads(body)
         self.validate_response(schema_access.add_remove_list_flavor_access,
                                resp, body)
-        return service_client.ResponseBodyList(resp, body['flavor_access'])
+        return service_client.ResponseBody(resp, body)
 
     def add_flavor_access(self, flavor_id, tenant_id):
         """Add flavor access for the specified tenant."""
@@ -158,7 +152,7 @@ class FlavorsClientJSON(service_client.ServiceClient):
         body = json.loads(body)
         self.validate_response(schema_access.add_remove_list_flavor_access,
                                resp, body)
-        return service_client.ResponseBodyList(resp, body['flavor_access'])
+        return service_client.ResponseBody(resp, body)
 
     def remove_flavor_access(self, flavor_id, tenant_id):
         """Remove flavor access from the specified tenant."""
@@ -172,4 +166,4 @@ class FlavorsClientJSON(service_client.ServiceClient):
         body = json.loads(body)
         self.validate_response(schema_access.add_remove_list_flavor_access,
                                resp, body)
-        return service_client.ResponseBody(resp, body['flavor_access'])
+        return service_client.ResponseBody(resp, body)

@@ -13,9 +13,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest_lib.common.utils import data_utils as utils
-
 from tempest.api.volume import base
+from tempest.common.utils import data_utils as utils
 from tempest import test
 
 
@@ -35,7 +34,7 @@ class VolumesActionsV2Test(base.BaseVolumeAdminTest):
         cls.name_field = cls.special_fields['name_field']
         params = {cls.name_field: vol_name}
 
-        cls.volume = cls.client.create_volume(**params)
+        cls.volume = cls.client.create_volume(**params)['volume']
         cls.client.wait_for_volume_status(cls.volume['id'], 'available')
 
     @classmethod
@@ -61,7 +60,7 @@ class VolumesActionsV2Test(base.BaseVolumeAdminTest):
         # Create a temp volume for force delete tests
         vol_name = utils.rand_name('Volume')
         params = {self.name_field: vol_name}
-        temp_volume = self.client.create_volume(**params)
+        temp_volume = self.client.create_volume(**params)['volume']
         self.client.wait_for_volume_status(temp_volume['id'], 'available')
 
         return temp_volume
@@ -79,7 +78,7 @@ class VolumesActionsV2Test(base.BaseVolumeAdminTest):
         # test volume reset status : available->error->available
         self._reset_volume_status(self.volume['id'], 'error')
         volume_get = self.admin_volume_client.show_volume(
-            self.volume['id'])
+            self.volume['id'])['volume']
         self.assertEqual('error', volume_get['status'])
 
     @test.idempotent_id('21737d5a-92f2-46d7-b009-a0cc0ee7a570')

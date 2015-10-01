@@ -16,6 +16,7 @@
 import testtools
 
 from tempest.api.compute import base
+from tempest.common import waiters
 from tempest import config
 from tempest import test
 
@@ -43,12 +44,12 @@ class ServerDiskConfigTestJSON(base.BaseV2ComputeTest):
         cls.server_id = server['id']
 
     def _update_server_with_disk_config(self, disk_config):
-        server = self.client.get_server(self.server_id)
+        server = self.client.show_server(self.server_id)['server']
         if disk_config != server['OS-DCF:diskConfig']:
-            server = self.client.update_server(self.server_id,
-                                               disk_config=disk_config)
-            self.client.wait_for_server_status(server['id'], 'ACTIVE')
-            server = self.client.get_server(server['id'])
+            server = self.client.update_server(
+                self.server_id, disk_config=disk_config)['server']
+            waiters.wait_for_server_status(self.client, server['id'], 'ACTIVE')
+            server = self.client.show_server(server['id'])['server']
             self.assertEqual(disk_config, server['OS-DCF:diskConfig'])
 
     @test.idempotent_id('bef56b09-2e8c-4883-a370-4950812f430e')
@@ -56,15 +57,15 @@ class ServerDiskConfigTestJSON(base.BaseV2ComputeTest):
         # A server should be rebuilt using the manual disk config option
         self._update_server_with_disk_config(disk_config='AUTO')
 
-        server = self.client.rebuild(self.server_id,
-                                     self.image_ref_alt,
-                                     disk_config='MANUAL')
+        server = self.client.rebuild_server(self.server_id,
+                                            self.image_ref_alt,
+                                            disk_config='MANUAL')['server']
 
         # Wait for the server to become active
-        self.client.wait_for_server_status(server['id'], 'ACTIVE')
+        waiters.wait_for_server_status(self.client, server['id'], 'ACTIVE')
 
         # Verify the specified attributes are set correctly
-        server = self.client.get_server(server['id'])
+        server = self.client.show_server(server['id'])['server']
         self.assertEqual('MANUAL', server['OS-DCF:diskConfig'])
 
     @test.idempotent_id('9c9fae77-4feb-402f-8450-bf1c8b609713')
@@ -72,19 +73,19 @@ class ServerDiskConfigTestJSON(base.BaseV2ComputeTest):
         # A server should be rebuilt using the auto disk config option
         self._update_server_with_disk_config(disk_config='MANUAL')
 
-        server = self.client.rebuild(self.server_id,
-                                     self.image_ref_alt,
-                                     disk_config='AUTO')
+        server = self.client.rebuild_server(self.server_id,
+                                            self.image_ref_alt,
+                                            disk_config='AUTO')['server']
 
         # Wait for the server to become active
-        self.client.wait_for_server_status(server['id'], 'ACTIVE')
+        waiters.wait_for_server_status(self.client, server['id'], 'ACTIVE')
 
         # Verify the specified attributes are set correctly
-        server = self.client.get_server(server['id'])
+        server = self.client.show_server(server['id'])['server']
         self.assertEqual('AUTO', server['OS-DCF:diskConfig'])
 
     def _get_alternative_flavor(self):
-        server = self.client.get_server(self.server_id)
+        server = self.client.show_server(self.server_id)['server']
 
         if server['flavor']['id'] == self.flavor_ref:
             return self.flavor_ref_alt
@@ -100,12 +101,14 @@ class ServerDiskConfigTestJSON(base.BaseV2ComputeTest):
 
         # Resize with auto option
         flavor_id = self._get_alternative_flavor()
-        self.client.resize(self.server_id, flavor_id, disk_config='AUTO')
-        self.client.wait_for_server_status(self.server_id, 'VERIFY_RESIZE')
-        self.client.confirm_resize(self.server_id)
-        self.client.wait_for_server_status(self.server_id, 'ACTIVE')
+        self.client.resize_server(self.server_id, flavor_id,
+                                  disk_config='AUTO')
+        waiters.wait_for_server_status(self.client, self.server_id,
+                                       'VERIFY_RESIZE')
+        self.client.confirm_resize_server(self.server_id)
+        waiters.wait_for_server_status(self.client, self.server_id, 'ACTIVE')
 
-        server = self.client.get_server(self.server_id)
+        server = self.client.show_server(self.server_id)['server']
         self.assertEqual('AUTO', server['OS-DCF:diskConfig'])
 
     @test.idempotent_id('693d16f3-556c-489a-8bac-3d0ca2490bad')
@@ -117,12 +120,14 @@ class ServerDiskConfigTestJSON(base.BaseV2ComputeTest):
 
         # Resize with manual option
         flavor_id = self._get_alternative_flavor()
-        self.client.resize(self.server_id, flavor_id, disk_config='MANUAL')
-        self.client.wait_for_server_status(self.server_id, 'VERIFY_RESIZE')
-        self.client.confirm_resize(self.server_id)
-        self.client.wait_for_server_status(self.server_id, 'ACTIVE')
+        self.client.resize_server(self.server_id, flavor_id,
+                                  disk_config='MANUAL')
+        waiters.wait_for_server_status(self.client, self.server_id,
+                                       'VERIFY_RESIZE')
+        self.client.confirm_resize_server(self.server_id)
+        waiters.wait_for_server_status(self.client, self.server_id, 'ACTIVE')
 
-        server = self.client.get_server(self.server_id)
+        server = self.client.show_server(self.server_id)['server']
         self.assertEqual('MANUAL', server['OS-DCF:diskConfig'])
 
     @test.idempotent_id('5ef18867-358d-4de9-b3c9-94d4ba35742f')
@@ -132,9 +137,9 @@ class ServerDiskConfigTestJSON(base.BaseV2ComputeTest):
 
         # Update the disk_config attribute to manual
         server = self.client.update_server(self.server_id,
-                                           disk_config='MANUAL')
-        self.client.wait_for_server_status(server['id'], 'ACTIVE')
+                                           disk_config='MANUAL')['server']
+        waiters.wait_for_server_status(self.client, server['id'], 'ACTIVE')
 
         # Verify the disk_config attribute is set correctly
-        server = self.client.get_server(server['id'])
+        server = self.client.show_server(server['id'])['server']
         self.assertEqual('MANUAL', server['OS-DCF:diskConfig'])

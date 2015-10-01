@@ -13,10 +13,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import json
 import re
 import time
 
+from oslo_serialization import jsonutils as json
 from six.moves.urllib import parse as urllib
 from tempest_lib import exceptions as lib_exc
 
@@ -36,7 +36,7 @@ class OrchestrationClient(service_client.ServiceClient):
         resp, body = self.get(uri)
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBodyList(resp, body['stacks'])
+        return service_client.ResponseBody(resp, body)
 
     def create_stack(self, name, disable_rollback=True, parameters=None,
                      timeout_mins=60, template=None, template_url=None,
@@ -111,7 +111,7 @@ class OrchestrationClient(service_client.ServiceClient):
         resp, body = self.get(url)
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body['stack'])
+        return service_client.ResponseBody(resp, body)
 
     def suspend_stack(self, stack_identifier):
         """Suspend a stack."""
@@ -135,7 +135,7 @@ class OrchestrationClient(service_client.ServiceClient):
         resp, body = self.get(url)
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBodyList(resp, body['resources'])
+        return service_client.ResponseBody(resp, body)
 
     def show_resource(self, stack_identifier, resource_name):
         """Returns the details of a single resource."""
@@ -143,7 +143,7 @@ class OrchestrationClient(service_client.ServiceClient):
         resp, body = self.get(url)
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body['resource'])
+        return service_client.ResponseBody(resp, body)
 
     def delete_stack(self, stack_identifier):
         """Deletes the specified Stack."""
@@ -160,7 +160,7 @@ class OrchestrationClient(service_client.ServiceClient):
         while True:
             try:
                 body = self.show_resource(
-                    stack_identifier, resource_name)
+                    stack_identifier, resource_name)['resource']
             except lib_exc.NotFound:
                 # ignore this, as the resource may not have
                 # been created yet
@@ -195,7 +195,7 @@ class OrchestrationClient(service_client.ServiceClient):
 
         while True:
             try:
-                body = self.show_stack(stack_identifier)
+                body = self.show_stack(stack_identifier)['stack']
             except lib_exc.NotFound:
                 if status == 'DELETE_COMPLETE':
                     return
@@ -224,7 +224,7 @@ class OrchestrationClient(service_client.ServiceClient):
         resp, body = self.get(url)
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body['metadata'])
+        return service_client.ResponseBody(resp, body)
 
     def list_events(self, stack_identifier):
         """Returns list of all events for a stack."""
@@ -232,7 +232,7 @@ class OrchestrationClient(service_client.ServiceClient):
         resp, body = self.get(url)
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBodyList(resp, body['events'])
+        return service_client.ResponseBody(resp, body)
 
     def list_resource_events(self, stack_identifier, resource_name):
         """Returns list of all events for a resource from stack."""
@@ -241,7 +241,7 @@ class OrchestrationClient(service_client.ServiceClient):
         resp, body = self.get(url)
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBodyList(resp, body['events'])
+        return service_client.ResponseBody(resp, body)
 
     def show_event(self, stack_identifier, resource_name, event_id):
         """Returns the details of a single stack's event."""
@@ -250,7 +250,7 @@ class OrchestrationClient(service_client.ServiceClient):
         resp, body = self.get(url)
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body['event'])
+        return service_client.ResponseBody(resp, body)
 
     def show_template(self, stack_identifier):
         """Returns the template for the stack."""
@@ -293,7 +293,7 @@ class OrchestrationClient(service_client.ServiceClient):
         resp, body = self.get('resource_types')
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBodyList(resp, body['resource_types'])
+        return service_client.ResponseBody(resp, body)
 
     def show_resource_type(self, resource_type_name):
         """Return the schema of a resource type."""

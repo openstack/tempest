@@ -13,12 +13,13 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from oslo_serialization import jsonutils as json
 import urllib
 
 from tempest.common import service_client
 
 
-class DatabaseFlavorsClientJSON(service_client.ServiceClient):
+class DatabaseFlavorsClient(service_client.ServiceClient):
 
     def list_db_flavors(self, params=None):
         url = 'flavors'
@@ -27,9 +28,11 @@ class DatabaseFlavorsClientJSON(service_client.ServiceClient):
 
         resp, body = self.get(url)
         self.expected_success(200, resp.status)
-        return service_client.ResponseBodyList(resp, self._parse_resp(body))
+        body = json.loads(body)
+        return service_client.ResponseBody(resp, body)
 
     def get_db_flavor_details(self, db_flavor_id):
         resp, body = self.get("flavors/%s" % str(db_flavor_id))
         self.expected_success(200, resp.status)
-        return service_client.ResponseBody(resp, self._parse_resp(body))
+        body = json.loads(body)
+        return service_client.ResponseBody(resp, body)

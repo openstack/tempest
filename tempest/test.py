@@ -15,7 +15,6 @@
 
 import atexit
 import functools
-import json
 import os
 import re
 import sys
@@ -25,12 +24,14 @@ import uuid
 
 import fixtures
 from oslo_log import log as logging
+from oslo_serialization import jsonutils as json
 from oslo_utils import importutils
 import six
 import testscenarios
 import testtools
 
 from tempest import clients
+from tempest.common import cred_client
 from tempest.common import credentials
 from tempest.common import fixed_network
 import tempest.common.generator.valid_generator as valid
@@ -43,8 +44,8 @@ LOG = logging.getLogger(__name__)
 CONF = config.CONF
 
 
-def attr(*args, **kwargs):
-    """A decorator which applies the  testtools attr decorator
+def attr(**kwargs):
+    """A decorator which applies the testtools attr decorator
 
     This decorator applies the testtools.testcase.attr if it is in the list of
     attributes to testtools we want to apply.
@@ -98,7 +99,7 @@ def get_service_list():
     return service_list
 
 
-def services(*args, **kwargs):
+def services(*args):
     """A decorator used to set an attr for each service used in a test case
 
     This decorator applies a testtools attr for each service that gets
@@ -128,7 +129,7 @@ def services(*args, **kwargs):
     return decorator
 
 
-def stresstest(*args, **kwargs):
+def stresstest(**kwargs):
     """Add stress test decorator
 
     For all functions with this decorator a attr stress will be
@@ -154,7 +155,7 @@ def stresstest(*args, **kwargs):
     return decorator
 
 
-def requires_ext(*args, **kwargs):
+def requires_ext(**kwargs):
     """A decorator to skip tests if an extension is not enabled
 
     @param extension
@@ -182,6 +183,7 @@ def is_extension_enabled(extension_name, service):
         'volume': CONF.volume_feature_enabled.api_extensions,
         'network': CONF.network_feature_enabled.api_extensions,
         'object': CONF.object_storage_feature_enabled.discoverable_apis,
+        'identity': CONF.identity_feature_enabled.api_extensions
     }
     if len(config_dict[service]) == 0:
         return False
@@ -432,6 +434,25 @@ class BaseTestCase(testtools.testcase.WithAttributes,
     def credentials_provider(self):
         return self._get_credentials_provider()
 
+    @property
+    def identity_utils(self):
+        """A client that abstracts v2 and v3 identity operations.
+
+        This can be used for creating and tearing down projects in tests. It
+        should not be used for testing identity features.
+        """
+        if CONF.identity.auth_version == 'v2':
+            client = self.os_admin.identity_client
+        else:
+            client = self.os_admin.identity_v3_client
+
+        try:
+            domain = client.auth_provider.credentials.project_domain_name
+        except AttributeError:
+            domain = 'Default'
+
+        return cred_client.get_creds_client(client, domain)
+
     @classmethod
     def _get_credentials_provider(cls):
         """Returns a credentials provider
@@ -530,9 +551,10 @@ class BaseTestCase(testtools.testcase.WithAttributes,
             else:
                 floating_ip = False
         if security_group is None:
-            security_group = True
+            security_group = CONF.validation.security_group
         if security_group_rules is None:
-            security_group_rules = True
+            security_group_rules = CONF.validation.security_group_rules
+
         if not cls.validation_resources:
             cls.validation_resources = {
                 'keypair': keypair,
@@ -568,7 +590,7 @@ class BaseTestCase(testtools.testcase.WithAttributes,
         :return: network dict including 'id' and 'name'
         """
         # Make sure isolated_creds exists and get a network client
-        networks_client = cls.get_client_manager().networks_client
+        networks_client = cls.get_client_manager().compute_networks_client
         cred_provider = cls._get_credentials_provider()
         # In case of nova network, isolated tenants are not able to list the
         # network configured in fixed_network_name, even if the can use it
@@ -577,7 +599,8 @@ class BaseTestCase(testtools.testcase.WithAttributes,
         if (not CONF.service_available.neutron and
                 credentials.is_admin_available()):
             admin_creds = cred_provider.get_admin_creds()
-            networks_client = clients.Manager(admin_creds).networks_client
+            admin_manager = clients.Manager(admin_creds)
+            networks_client = admin_manager.compute_networks_client
         return fixed_network.get_tenant_network(cred_provider,
                                                 networks_client)
 

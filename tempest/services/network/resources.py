@@ -41,6 +41,7 @@ class DeletableResource(AttributeDict):
 
     def __init__(self, *args, **kwargs):
         self.client = kwargs.pop('client', None)
+        self.networks_client = kwargs.pop('networks_client', None)
         super(DeletableResource, self).__init__(*args, **kwargs)
 
     def __str__(self):
@@ -72,7 +73,7 @@ class DeletableResource(AttributeDict):
 class DeletableNetwork(DeletableResource):
 
     def delete(self):
-        self.client.delete_network(self.id)
+        self.networks_client.delete_network(self.id)
 
 
 class DeletableSubnet(DeletableResource):

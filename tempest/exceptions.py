@@ -64,7 +64,7 @@ class InvalidServiceTag(TempestException):
 
 
 class InvalidIdentityVersion(TempestException):
-    message = "Invalid version %(identity_version) of the identity service"
+    message = "Invalid version %(identity_version)s of the identity service"
 
 
 class TimeoutException(TempestException):
@@ -90,6 +90,10 @@ class EC2RegisterImageException(TempestException):
 
 class VolumeBuildErrorException(TempestException):
     message = "Volume %(volume_id)s failed to build and is in ERROR status"
+
+
+class VolumeRestoreErrorException(TempestException):
+    message = "Volume %(volume_id)s failed to restore and is in ERROR status"
 
 
 class SnapshotBuildErrorException(TempestException):

@@ -18,6 +18,7 @@ import subprocess
 
 import netaddr
 from oslo_log import log
+from oslo_serialization import jsonutils as json
 import six
 from tempest_lib.common.utils import misc as misc_utils
 from tempest_lib import exceptions as lib_exc
@@ -62,8 +63,16 @@ class ScenarioTest(tempest.test.BaseTestCase):
         cls.interface_client = cls.manager.interfaces_client
         # Neutron network client
         cls.network_client = cls.manager.network_client
+        cls.networks_client = cls.manager.networks_client
         # Heat client
         cls.orchestration_client = cls.manager.orchestration_client
+
+        if CONF.volume_feature_enabled.api_v1:
+            cls.volumes_client = cls.manager.volumes_client
+            cls.snapshots_client = cls.manager.snapshots_client
+        else:
+            cls.volumes_client = cls.manager.volumes_v2_client
+            cls.snapshots_client = cls.manager.snapshots_v2_client
 
     # ## Methods to handle sync and async deletes
 
@@ -96,10 +105,11 @@ class ScenarioTest(tempest.test.BaseTestCase):
 
     def addCleanup_with_wait(self, waiter_callable, thing_id, thing_id_param,
                              cleanup_callable, cleanup_args=None,
-                             cleanup_kwargs=None):
+                             cleanup_kwargs=None, waiter_client=None):
         """Adds wait for async resource deletion at the end of cleanups
 
         @param waiter_callable: callable to wait for the resource to delete
+            with the following waiter_client if specified.
         @param thing_id: the id of the resource to be cleaned-up
         @param thing_id_param: the name of the id param in the waiter
         @param cleanup_callable: method to load pass to self.addCleanup with
@@ -115,6 +125,8 @@ class ScenarioTest(tempest.test.BaseTestCase):
             'waiter_callable': waiter_callable,
             thing_id_param: thing_id
         }
+        if waiter_client:
+            wait_dict['client'] = waiter_client
         self.cleanup_waits.append(wait_dict)
 
     def _wait_for_cleanups(self):
@@ -142,7 +154,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
         # We don't need to create a keypair by pubkey in scenario
         body = client.create_keypair(name=name)
         self.addCleanup(client.delete_keypair, name)
-        return body
+        return body['keypair']
 
     def create_server(self, name=None, image=None, flavor=None,
                       wait_on_boot=True, wait_on_delete=True,
@@ -169,16 +181,19 @@ class ScenarioTest(tempest.test.BaseTestCase):
 
         LOG.debug("Creating a server (name: %s, image: %s, flavor: %s)",
                   name, image, flavor)
-        server = self.servers_client.create_server(name, image, flavor,
-                                                   **create_kwargs)
+        server = self.servers_client.create_server(name=name, imageRef=image,
+                                                   flavorRef=flavor,
+                                                   **create_kwargs)['server']
         if wait_on_delete:
-            self.addCleanup(self.servers_client.wait_for_server_termination,
+            self.addCleanup(waiters.wait_for_server_termination,
+                            self.servers_client,
                             server['id'])
         self.addCleanup_with_wait(
-            waiter_callable=self.servers_client.wait_for_server_termination,
+            waiter_callable=waiters.wait_for_server_termination,
             thing_id=server['id'], thing_id_param='server_id',
             cleanup_callable=self.delete_wrapper,
-            cleanup_args=[self.servers_client.delete_server, server['id']])
+            cleanup_args=[self.servers_client.delete_server, server['id']],
+            waiter_client=self.servers_client)
         if wait_on_boot:
             waiters.wait_for_server_status(self.servers_client,
                                            server_id=server['id'],
@@ -186,7 +201,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
         # The instance retrieved on creation is missing network
         # details, necessitating retrieval after it becomes active to
         # ensure correct details.
-        server = self.servers_client.show_server(server['id'])
+        server = self.servers_client.show_server(server['id'])['server']
         self.assertEqual(server['name'], name)
         return server
 
@@ -196,7 +211,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
             name = data_utils.rand_name(self.__class__.__name__)
         volume = self.volumes_client.create_volume(
             size=size, display_name=name, snapshot_id=snapshot_id,
-            imageRef=imageRef, volume_type=volume_type)
+            imageRef=imageRef, volume_type=volume_type)['volume']
 
         if wait_on_delete:
             self.addCleanup(self.volumes_client.wait_for_resource_deletion,
@@ -210,18 +225,22 @@ class ScenarioTest(tempest.test.BaseTestCase):
                 cleanup_callable=self.delete_wrapper,
                 cleanup_args=[self.volumes_client.delete_volume, volume['id']])
 
-        self.assertEqual(name, volume['display_name'])
+        # NOTE(e0ne): Cinder API v2 uses name instead of display_name
+        if 'display_name' in volume:
+            self.assertEqual(name, volume['display_name'])
+        else:
+            self.assertEqual(name, volume['name'])
         self.volumes_client.wait_for_volume_status(volume['id'], 'available')
         # The volume retrieved on creation has a non-up-to-date status.
         # Retrieval after it becomes active ensures correct details.
-        volume = self.volumes_client.show_volume(volume['id'])
+        volume = self.volumes_client.show_volume(volume['id'])['volume']
         return volume
 
     def _create_loginable_secgroup_rule(self, secgroup_id=None):
         _client = self.security_groups_client
         _client_rules = self.security_group_rules_client
         if secgroup_id is None:
-            sgs = _client.list_security_groups()
+            sgs = _client.list_security_groups()['security_groups']
             for sg in sgs:
                 if sg['name'] == 'default':
                     secgroup_id = sg['id']
@@ -249,7 +268,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
         rules = list()
         for ruleset in rulesets:
             sg_rule = _client_rules.create_security_group_rule(
-                parent_group_id=secgroup_id, **ruleset)
+                parent_group_id=secgroup_id, **ruleset)['security_group_rule']
             self.addCleanup(self.delete_wrapper,
                             _client_rules.delete_security_group_rule,
                             sg_rule['id'])
@@ -261,7 +280,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
         sg_name = data_utils.rand_name(self.__class__.__name__)
         sg_desc = sg_name + " description"
         secgroup = self.security_groups_client.create_security_group(
-            name=sg_name, description=sg_desc)
+            name=sg_name, description=sg_desc)['security_group']
         self.assertEqual(secgroup['name'], sg_name)
         self.assertEqual(secgroup['description'], sg_desc)
         self.addCleanup(self.delete_wrapper,
@@ -385,7 +404,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
             servers = servers['servers']
         for server in servers:
             console_output = self.servers_client.get_console_output(
-                server['id'], length=None).data
+                server['id'], length=None)['output']
             LOG.debug('Console output for %s\nbody=\n%s',
                       server['id'], console_output)
 
@@ -411,6 +430,21 @@ class ScenarioTest(tempest.test.BaseTestCase):
             cleanup_callable=self.delete_wrapper,
             cleanup_args=[_image_client.delete_image, image_id])
         snapshot_image = _image_client.get_image_meta(image_id)
+
+        bdm = snapshot_image.get('properties', {}).get('block_device_mapping')
+        if bdm:
+            bdm = json.loads(bdm)
+            if bdm and 'snapshot_id' in bdm[0]:
+                snapshot_id = bdm[0]['snapshot_id']
+                self.addCleanup(
+                    self.snapshots_client.wait_for_resource_deletion,
+                    snapshot_id)
+                self.addCleanup(
+                    self.delete_wrapper, self.snapshots_client.delete_snapshot,
+                    snapshot_id)
+                self.snapshots_client.wait_for_snapshot_status(snapshot_id,
+                                                               'available')
+
         image_name = snapshot_image['name']
         self.assertEqual(name, image_name)
         LOG.debug("Created snapshot image %s for server %s",
@@ -420,18 +454,18 @@ class ScenarioTest(tempest.test.BaseTestCase):
     def nova_volume_attach(self):
         volume = self.servers_client.attach_volume(
             self.server['id'], volumeId=self.volume['id'], device='/dev/%s'
-            % CONF.compute.volume_device_name)
+            % CONF.compute.volume_device_name)['volumeAttachment']
         self.assertEqual(self.volume['id'], volume['id'])
         self.volumes_client.wait_for_volume_status(volume['id'], 'in-use')
         # Refresh the volume after the attachment
-        self.volume = self.volumes_client.show_volume(volume['id'])
+        self.volume = self.volumes_client.show_volume(volume['id'])['volume']
 
     def nova_volume_detach(self):
         self.servers_client.detach_volume(self.server['id'], self.volume['id'])
         self.volumes_client.wait_for_volume_status(self.volume['id'],
                                                    'available')
 
-        volume = self.volumes_client.show_volume(self.volume['id'])
+        volume = self.volumes_client.show_volume(self.volume['id'])['volume']
         self.assertEqual('available', volume['status'])
 
     def rebuild_server(self, server_id, image=None,
@@ -444,9 +478,10 @@ class ScenarioTest(tempest.test.BaseTestCase):
 
         LOG.debug("Rebuilding server (id: %s, image: %s, preserve eph: %s)",
                   server_id, image, preserve_ephemeral)
-        self.servers_client.rebuild(server_id=server_id, image_ref=image,
-                                    preserve_ephemeral=preserve_ephemeral,
-                                    **rebuild_kwargs)
+        self.servers_client.rebuild_server(
+            server_id=server_id, image_ref=image,
+            preserve_ephemeral=preserve_ephemeral,
+            **rebuild_kwargs)
         if wait:
             waiters.wait_for_server_status(self.servers_client,
                                            server_id, 'ACTIVE')
@@ -516,13 +551,37 @@ class ScenarioTest(tempest.test.BaseTestCase):
         Nova clients
         """
 
-        floating_ip = self.floating_ips_client.create_floating_ip(pool_name)
+        floating_ip = (self.floating_ips_client.create_floating_ip(pool_name)
+                       ['floating_ip'])
         self.addCleanup(self.delete_wrapper,
                         self.floating_ips_client.delete_floating_ip,
                         floating_ip['id'])
         self.floating_ips_client.associate_floating_ip_to_server(
             floating_ip['ip'], thing['id'])
         return floating_ip
+
+    def create_timestamp(self, server_or_ip, dev_name=None, mount_path='/mnt'):
+        ssh_client = self.get_remote_client(server_or_ip)
+        if dev_name is not None:
+            ssh_client.make_fs(dev_name)
+            ssh_client.mount(dev_name)
+        cmd_timestamp = 'sudo sh -c "date > %s/timestamp; sync"' % mount_path
+        ssh_client.exec_command(cmd_timestamp)
+        timestamp = ssh_client.exec_command('sudo cat %s/timestamp'
+                                            % mount_path)
+        if dev_name is not None:
+            ssh_client.umount(mount_path)
+        return timestamp
+
+    def get_timestamp(self, server_or_ip, dev_name=None, mount_path='/mnt'):
+        ssh_client = self.get_remote_client(server_or_ip)
+        if dev_name is not None:
+            ssh_client.mount(dev_name)
+        timestamp = ssh_client.exec_command('sudo cat %s/timestamp'
+                                            % mount_path)
+        if dev_name is not None:
+            ssh_client.umount(mount_path)
+        return timestamp
 
 
 class NetworkScenarioTest(ScenarioTest):
@@ -549,30 +608,31 @@ class NetworkScenarioTest(ScenarioTest):
         super(NetworkScenarioTest, cls).resource_setup()
         cls.tenant_id = cls.manager.identity_client.tenant_id
 
-    def _create_network(self, client=None, tenant_id=None,
-                        namestart='network-smoke-',
+    def _create_network(self, client=None, networks_client=None,
+                        tenant_id=None, namestart='network-smoke-',
                         vlan_transparent=None, shared=False):
         if not client:
             client = self.network_client
+        if not networks_client:
+            networks_client = self.networks_client
         if not tenant_id:
             tenant_id = client.tenant_id
         name = data_utils.rand_name(namestart)
         if vlan_transparent is not None:
-            result = client.create_network(name=name, tenant_id=tenant_id,
+            result = networks_client.create_network(name=name, tenant_id=tenant_id,
                                            vlan_transparent=vlan_transparent,
                                            shared=shared)
         else:
-            result = client.create_network(name=name, tenant_id=tenant_id)
-
-        network = net_resources.DeletableNetwork(client=client,
-                                                 **result['network'])
+            result = networks_client.create_network(name=name, tenant_id=tenant_id)
+        network = net_resources.DeletableNetwork(
+            networks_client=networks_client, **result['network'])
         self.assertEqual(network.name, name)
         self.addCleanup(self.delete_wrapper, network.delete)
         return network
 
     def _list_networks(self, *args, **kwargs):
         """List networks using admin creds """
-        networks_list = self.admin_manager.network_client.list_networks(
+        networks_list = self.admin_manager.networks_client.list_networks(
             *args, **kwargs)
         return networks_list['networks']
 
@@ -593,6 +653,12 @@ class NetworkScenarioTest(ScenarioTest):
         ports_list = self.admin_manager.network_client.list_ports(
             *args, **kwargs)
         return ports_list['ports']
+
+    def _list_agents(self, *args, **kwargs):
+        """List agents using admin creds """
+        agents_list = self.admin_manager.network_client.list_agents(
+            *args, **kwargs)
+        return agents_list['agents']
 
     def _create_subnet(self, network, client=None, namestart='subnet-smoke',
                        **kwargs):
@@ -1003,8 +1069,8 @@ class NetworkScenarioTest(ScenarioTest):
         router.update(admin_state_up=admin_state_up)
         self.assertEqual(admin_state_up, router.admin_state_up)
 
-    def create_networks(self, client=None, tenant_id=None,
-                        dns_nameservers=None):
+    def create_networks(self, client=None, networks_client=None,
+                        tenant_id=None, dns_nameservers=None):
         """Create a network with a subnet connected to a router.
 
         The baremetal driver is a special case since all nodes are
@@ -1029,7 +1095,9 @@ class NetworkScenarioTest(ScenarioTest):
             router = None
             subnet = None
         else:
-            network = self._create_network(client=client, tenant_id=tenant_id)
+            network = self._create_network(
+                client=client, networks_client=networks_client,
+                tenant_id=tenant_id)
             router = self._get_router(client=client, tenant_id=tenant_id)
 
             subnet_kwargs = dict(network=network, client=client)
@@ -1042,7 +1110,13 @@ class NetworkScenarioTest(ScenarioTest):
 
     def create_server(self, name=None, image=None, flavor=None,
                       wait_on_boot=True, wait_on_delete=True,
+                      network_client=None, networks_client=None,
                       create_kwargs=None):
+        if network_client is None:
+            network_client = self.network_client
+        if networks_client is None:
+            networks_client = self.networks_client
+
         vnic_type = CONF.network.port_vnic_type
 
         # If vnic_type is configured create port for
@@ -1053,19 +1127,16 @@ class NetworkScenarioTest(ScenarioTest):
             create_port_body = {'binding:vnic_type': vnic_type,
                                 'namestart': 'port-smoke'}
             if create_kwargs:
-                net_client = create_kwargs.get("network_client",
-                                               self.network_client)
-
                 # Convert security group names to security group ids
                 # to pass to create_port
                 if create_kwargs.get('security_groups'):
-                    security_groups = net_client.list_security_groups().get(
-                        'security_groups')
+                    security_groups = network_client.list_security_groups(
+                        ).get('security_groups')
                     sec_dict = dict([(s['name'], s['id'])
                                     for s in security_groups])
 
-                    sec_groups_names = [s['name'] for s in create_kwargs[
-                        'security_groups']]
+                    sec_groups_names = [s['name'] for s in create_kwargs.get(
+                        'security_groups')]
                     security_groups_ids = [sec_dict[s]
                                            for s in sec_groups_names]
 
@@ -1073,15 +1144,14 @@ class NetworkScenarioTest(ScenarioTest):
                         create_port_body[
                             'security_groups'] = security_groups_ids
                 networks = create_kwargs.get('networks')
-            else:
-                net_client = self.network_client
+
             # If there are no networks passed to us we look up
             # for the tenant's private networks and create a port
             # if there is only one private network. The same behaviour
             # as we would expect when passing the call to the clients
             # with no networks
             if not networks:
-                networks = net_client.list_networks(filters={
+                networks = networks_client.list_networks(filters={
                     'router:external': False})
                 self.assertEqual(1, len(networks),
                                  "There is more than one"
@@ -1089,11 +1159,12 @@ class NetworkScenarioTest(ScenarioTest):
             for net in networks:
                 net_id = net['uuid']
                 port = self._create_port(network_id=net_id,
-                                         client=net_client,
+                                         client=network_client,
                                          **create_port_body)
                 ports.append({'port': port.id})
             if ports:
                 create_kwargs['networks'] = ports
+            self.ports = ports
 
         return super(NetworkScenarioTest, self).create_server(
             name=name, image=image, flavor=flavor,
@@ -1246,7 +1317,8 @@ class BaremetalScenarioTest(ScenarioTest):
         waiters.wait_for_server_status(self.servers_client,
                                        self.instance['id'], 'ACTIVE')
         self.node = self.get_node(instance_id=self.instance['id'])
-        self.instance = self.servers_client.show_server(self.instance['id'])
+        self.instance = (self.servers_client.show_server(self.instance['id'])
+                         ['server'])
 
     def terminate_instance(self):
         self.servers_client.delete_server(self.instance['id'])
@@ -1268,7 +1340,10 @@ class EncryptionScenarioTest(ScenarioTest):
     @classmethod
     def setup_clients(cls):
         super(EncryptionScenarioTest, cls).setup_clients()
-        cls.admin_volume_types_client = cls.os_adm.volume_types_client
+        if CONF.volume_feature_enabled.api_v1:
+            cls.admin_volume_types_client = cls.os_adm.volume_types_client
+        else:
+            cls.admin_volume_types_client = cls.os_adm.volume_types_v2_client
 
     def _wait_for_volume_status(self, status):
         self.status_timeout(
@@ -1288,7 +1363,7 @@ class EncryptionScenarioTest(ScenarioTest):
         randomized_name = data_utils.rand_name('scenario-type-' + name)
         LOG.debug("Creating a volume type: %s", randomized_name)
         body = client.create_volume_type(
-            randomized_name)
+            randomized_name)['volume_type']
         self.assertIn('id', body)
         self.addCleanup(client.delete_volume_type, body['id'])
         return body
@@ -1304,12 +1379,12 @@ class EncryptionScenarioTest(ScenarioTest):
         LOG.debug("Creating an encryption type for volume type: %s", type_id)
         client.create_encryption_type(
             type_id, provider=provider, key_size=key_size, cipher=cipher,
-            control_location=control_location)
+            control_location=control_location)['encryption']
 
 
-class SwiftScenarioTest(ScenarioTest):
+class ObjectStorageScenarioTest(ScenarioTest):
     """
-    Provide harness to do Swift scenario tests.
+    Provide harness to do Object Storage scenario tests.
 
     Subclasses implement the tests that use the methods provided by this
     class.
@@ -1317,7 +1392,7 @@ class SwiftScenarioTest(ScenarioTest):
 
     @classmethod
     def skip_checks(cls):
-        super(SwiftScenarioTest, cls).skip_checks()
+        super(ObjectStorageScenarioTest, cls).skip_checks()
         if not CONF.service_available.swift:
             skip_msg = ("%s skipped as swift is not available" %
                         cls.__name__)
@@ -1326,13 +1401,13 @@ class SwiftScenarioTest(ScenarioTest):
     @classmethod
     def setup_credentials(cls):
         cls.set_network_resources()
-        super(SwiftScenarioTest, cls).setup_credentials()
+        super(ObjectStorageScenarioTest, cls).setup_credentials()
         operator_role = CONF.object_storage.operator_role
         cls.os_operator = cls.get_client_manager(roles=[operator_role])
 
     @classmethod
     def setup_clients(cls):
-        super(SwiftScenarioTest, cls).setup_clients()
+        super(ObjectStorageScenarioTest, cls).setup_clients()
         # Clients for Swift
         cls.account_client = cls.os_operator.account_client
         cls.container_client = cls.os_operator.container_client

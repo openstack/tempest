@@ -13,24 +13,24 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import json
+from oslo_serialization import jsonutils as json
 
 from tempest.api_schema.response.compute.v2_1 import fixed_ips as schema
 from tempest.common import service_client
 
 
-class FixedIPsClientJSON(service_client.ServiceClient):
+class FixedIPsClient(service_client.ServiceClient):
 
     def show_fixed_ip(self, fixed_ip):
-        url = "os-fixed-ips/%s" % (fixed_ip)
+        url = "os-fixed-ips/%s" % fixed_ip
         resp, body = self.get(url)
         body = json.loads(body)
         self.validate_response(schema.get_fixed_ip, resp, body)
-        return service_client.ResponseBody(resp, body['fixed_ip'])
+        return service_client.ResponseBody(resp, body)
 
-    def reserve_fixed_ip(self, ip, body):
+    def reserve_fixed_ip(self, fixed_ip, **kwargs):
         """This reserves and unreserves fixed ips."""
-        url = "os-fixed-ips/%s/action" % (ip)
-        resp, body = self.post(url, json.dumps(body))
+        url = "os-fixed-ips/%s/action" % fixed_ip
+        resp, body = self.post(url, json.dumps(kwargs))
         self.validate_response(schema.reserve_fixed_ip, resp, body)
         return service_client.ResponseBody(resp)

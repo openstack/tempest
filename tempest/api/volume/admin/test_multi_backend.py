@@ -11,9 +11,9 @@
 #    under the License.
 
 from oslo_log import log as logging
-from tempest_lib.common.utils import data_utils
 
 from tempest.api.volume import base
+from tempest.common.utils import data_utils
 from tempest import config
 from tempest import test
 
@@ -66,12 +66,13 @@ class VolumeMultiBackendV2Test(base.BaseVolumeAdminTest):
         else:
             extra_specs = {spec_key_without_prefix: backend_name_key}
         self.type = self.volume_types_client.create_volume_type(
-            type_name, extra_specs=extra_specs)
+            type_name, extra_specs=extra_specs)['volume_type']
         self.volume_type_id_list.append(self.type['id'])
 
         params = {self.name_field: vol_name, 'volume_type': type_name}
 
-        self.volume = self.admin_volume_client.create_volume(**params)
+        self.volume = self.admin_volume_client.create_volume(
+            **params)['volume']
         if with_prefix:
             self.volume_id_list_with_prefix.append(self.volume['id'])
         else:
@@ -135,7 +136,7 @@ class VolumeMultiBackendV2Test(base.BaseVolumeAdminTest):
         # the multi backend feature has been enabled
         # if multi-backend is enabled: os-vol-attr:host should be like:
         # host@backend_name
-        volume = self.admin_volume_client.show_volume(volume_id)
+        volume = self.admin_volume_client.show_volume(volume_id)['volume']
 
         volume1_host = volume['os-vol-host-attr:host']
         msg = ("multi-backend reporting incorrect values for volume %s" %
@@ -146,10 +147,10 @@ class VolumeMultiBackendV2Test(base.BaseVolumeAdminTest):
         # this test checks that the two volumes created at setUp don't
         # belong to the same backend (if they are, than the
         # volume backend distinction is not working properly)
-        volume = self.admin_volume_client.show_volume(volume1_id)
+        volume = self.admin_volume_client.show_volume(volume1_id)['volume']
         volume1_host = volume['os-vol-host-attr:host']
 
-        volume = self.admin_volume_client.show_volume(volume2_id)
+        volume = self.admin_volume_client.show_volume(volume2_id)['volume']
         volume2_host = volume['os-vol-host-attr:host']
 
         msg = ("volumes %s and %s were created in the same backend" %

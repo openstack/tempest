@@ -12,22 +12,22 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import json
+from oslo_serialization import jsonutils as json
 
 from tempest.api_schema.response.compute.v2_1 import tenant_networks as schema
 from tempest.common import service_client
 
 
-class TenantNetworksClientJSON(service_client.ServiceClient):
+class TenantNetworksClient(service_client.ServiceClient):
 
     def list_tenant_networks(self):
         resp, body = self.get("os-tenant-networks")
         body = json.loads(body)
         self.validate_response(schema.list_tenant_networks, resp, body)
-        return service_client.ResponseBodyList(resp, body['networks'])
+        return service_client.ResponseBody(resp, body)
 
     def show_tenant_network(self, network_id):
         resp, body = self.get("os-tenant-networks/%s" % network_id)
         body = json.loads(body)
         self.validate_response(schema.get_tenant_network, resp, body)
-        return service_client.ResponseBody(resp, body['network'])
+        return service_client.ResponseBody(resp, body)

@@ -23,7 +23,7 @@ class TestApiDiscovery(base.BaseIdentityV3Test):
     @test.attr(type='smoke')
     @test.idempotent_id('b9232f5e-d9e5-4d97-b96c-28d3db4de1bd')
     def test_api_version_resources(self):
-        descr = self.non_admin_client.get_api_description()
+        descr = self.non_admin_client.get_api_description()['version']
         expected_resources = ('id', 'links', 'media-types', 'status',
                               'updated')
 
@@ -34,7 +34,7 @@ class TestApiDiscovery(base.BaseIdentityV3Test):
     @test.attr(type='smoke')
     @test.idempotent_id('657c1970-4722-4189-8831-7325f3bc4265')
     def test_api_media_types(self):
-        descr = self.non_admin_client.get_api_description()
+        descr = self.non_admin_client.get_api_description()['version']
         # Get MIME type bases and descriptions
         media_types = [(media_type['base'], media_type['type']) for
                        media_type in descr['media-types']]
@@ -49,7 +49,7 @@ class TestApiDiscovery(base.BaseIdentityV3Test):
     @test.attr(type='smoke')
     @test.idempotent_id('8879a470-abfb-47bb-bb8d-5a7fd279ad1e')
     def test_api_version_statuses(self):
-        descr = self.non_admin_client.get_api_description()
+        descr = self.non_admin_client.get_api_description()['version']
         status = descr['status'].lower()
         supported_statuses = ['current', 'stable', 'experimental',
                               'supported', 'deprecated']

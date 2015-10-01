@@ -17,9 +17,10 @@ import collections
 import re
 
 from oslo_log import log as logging
-from tempest_lib.common.utils import data_utils
 import testtools
 
+from tempest.common.utils import data_utils
+from tempest.common import waiters
 from tempest import config
 from tempest import exceptions
 from tempest.scenario import manager
@@ -107,10 +108,12 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         self.network, self.subnet, self.router = self.create_networks(**kwargs)
         self.check_networks()
 
+        self.ports = []
         self.port_id = None
         if boot_with_port:
             # create a port on the network and boot with that
             self.port_id = self._create_port(self.network['id']).id
+            self.ports.append({'port': self.port_id})
 
         name = data_utils.rand_name('server-smoke')
         server = self._create_server(name, self.network, self.port_id)
@@ -243,8 +246,8 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         self.assertEqual(1, len(port_list))
         old_port = port_list[0]
         interface = self.interface_client.create_interface(
-            server=server['id'],
-            network_id=self.new_net.id)
+            server_id=server['id'],
+            net_id=self.new_net.id)['interfaceAttachment']
         self.addCleanup(self.network_client.wait_for_resource_deletion,
                         'port',
                         interface['port_id'])
@@ -338,8 +341,8 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
 
         for remote_ip in address_list:
             if should_connect:
-                msg = "Timed out waiting for "
-                "%s to become reachable" % remote_ip
+                msg = ("Timed out waiting for %s to become "
+                       "reachable") % remote_ip
             else:
                 msg = "ip address %s is reachable" % remote_ip
             try:
@@ -631,7 +634,11 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         # Setup the network, create a port and boot the server from that port.
         self._setup_network_and_servers(boot_with_port=True)
         _, server = self.floating_ip_tuple
-        self.assertIsNotNone(self.port_id,
+        self.assertEqual(1, len(self.ports),
+                         'There should only be one port created for '
+                         'server %s.' % server['id'])
+        port_id = self.ports[0]['port']
+        self.assertIsNotNone(port_id,
                              'Server should have been created from a '
                              'pre-existing port.')
         # Assert the port is bound to the server.
@@ -640,13 +647,86 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         self.assertEqual(1, len(port_list),
                          'There should only be one port created for '
                          'server %s.' % server['id'])
-        self.assertEqual(self.port_id, port_list[0]['id'])
+        self.assertEqual(port_id, port_list[0]['id'])
         # Delete the server.
         self.servers_client.delete_server(server['id'])
-        self.servers_client.wait_for_server_termination(server['id'])
+        waiters.wait_for_server_termination(self.servers_client, server['id'])
         # Assert the port still exists on the network but is unbound from
         # the deleted server.
-        port = self.network_client.show_port(self.port_id)['port']
+        port = self.network_client.show_port(port_id)['port']
         self.assertEqual(self.network['id'], port['network_id'])
         self.assertEqual('', port['device_id'])
         self.assertEqual('', port['device_owner'])
+
+    @test.idempotent_id('2e788c46-fb3f-4ac9-8f82-0561555bea73')
+    @test.services('compute', 'network')
+    def test_router_rescheduling(self):
+        """Tests that router can be removed from agent and add to a new agent.
+
+        1. Verify connectivity
+        2. Remove router from all l3-agents
+        3. Verify connectivity is down
+        4. Assign router to new l3-agent (or old one if no new agent is
+         available)
+        5. Verify connectivity
+        """
+
+        # TODO(yfried): refactor this test to be used for other agents (dhcp)
+        # as well
+
+        list_hosts = (self.admin_manager.network_client.
+                      list_l3_agents_hosting_router)
+        schedule_router = (self.admin_manager.network_client.
+                           add_router_to_l3_agent)
+        unschedule_router = (self.admin_manager.network_client.
+                             remove_router_from_l3_agent)
+
+        agent_list = set(a["id"] for a in
+                         self._list_agents(agent_type="L3 agent"))
+        self._setup_network_and_servers()
+
+        # NOTE(kevinbenton): we have to use the admin credentials to check
+        # for the distributed flag because self.router only has a tenant view.
+        admin = self.admin_manager.network_client.show_router(self.router.id)
+        if admin['router'].get('distributed', False):
+            msg = "Rescheduling test does not apply to distributed routers."
+            raise self.skipException(msg)
+
+        self.check_public_network_connectivity(should_connect=True)
+
+        # remove resource from agents
+        hosting_agents = set(a["id"] for a in
+                             list_hosts(self.router.id)['agents'])
+        no_migration = agent_list == hosting_agents
+        LOG.info("Router will be assigned to {mig} hosting agent".
+                 format(mig="the same" if no_migration else "a new"))
+
+        for hosting_agent in hosting_agents:
+            unschedule_router(hosting_agent, self.router.id)
+            self.assertNotIn(hosting_agent,
+                             [a["id"] for a in
+                              list_hosts(self.router.id)['agents']],
+                             'unscheduling router failed')
+
+        # verify resource is un-functional
+        self.check_public_network_connectivity(
+            should_connect=False,
+            msg='after router unscheduling',
+            should_check_floating_ip_status=False
+        )
+
+        # schedule resource to new agent
+        target_agent = list(hosting_agents if no_migration else
+                            agent_list - hosting_agents)[0]
+        schedule_router(target_agent,
+                        self.router['id'])
+        self.assertEqual(
+            target_agent,
+            list_hosts(self.router.id)['agents'][0]['id'],
+            "Router failed to reschedule. Hosting agent doesn't match "
+            "target agent")
+
+        # verify resource is functional
+        self.check_public_network_connectivity(
+            should_connect=True,
+            msg='After router rescheduling')

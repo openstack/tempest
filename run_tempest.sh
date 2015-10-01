@@ -20,7 +20,7 @@ function usage {
 }
 
 testrargs=""
-venv=.venv
+venv=${VENV:-.venv}
 with_venv=tools/with_venv.sh
 serial=0
 always_venv=0

@@ -10,9 +10,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest_lib.common.utils import data_utils
-
 from tempest.api.network import base
+from tempest.common.utils import data_utils
 from tempest import test
 
 
@@ -27,9 +26,10 @@ class ExternalNetworksTestJSON(base.BaseAdminNetworkTest):
         post_body = {'name': data_utils.rand_name('network-')}
         if external:
             post_body['router:external'] = external
-        body = self.admin_client.create_network(**post_body)
+        body = self.admin_networks_client.create_network(**post_body)
         network = body['network']
-        self.addCleanup(self.admin_client.delete_network, network['id'])
+        self.addCleanup(
+            self.admin_networks_client.delete_network, network['id'])
         return network
 
     @test.idempotent_id('462be770-b310-4df9-9c42-773217e4c8b1')
@@ -48,8 +48,8 @@ class ExternalNetworksTestJSON(base.BaseAdminNetworkTest):
         network = self._create_network(external=False)
         self.assertFalse(network.get('router:external', False))
         update_body = {'router:external': True}
-        body = self.admin_client.update_network(network['id'],
-                                                **update_body)
+        body = self.admin_networks_client.update_network(network['id'],
+                                                         **update_body)
         updated_network = body['network']
         # Verify that router:external parameter was updated
         self.assertTrue(updated_network['router:external'])
@@ -61,7 +61,7 @@ class ExternalNetworksTestJSON(base.BaseAdminNetworkTest):
         # List networks as a normal user and confirm the external
         # network extension attribute is returned for those networks
         # that were created as external
-        body = self.client.list_networks()
+        body = self.networks_client.list_networks()
         networks_list = [net['id'] for net in body['networks']]
         self.assertIn(external_network['id'], networks_list)
         self.assertIn(self.network['id'], networks_list)
@@ -77,12 +77,12 @@ class ExternalNetworksTestJSON(base.BaseAdminNetworkTest):
         external_network = self._create_network()
         # Show an external network as a normal user and confirm the
         # external network extension attribute is returned.
-        body = self.client.show_network(external_network['id'])
+        body = self.networks_client.show_network(external_network['id'])
         show_ext_net = body['network']
         self.assertEqual(external_network['name'], show_ext_net['name'])
         self.assertEqual(external_network['id'], show_ext_net['id'])
         self.assertTrue(show_ext_net['router:external'])
-        body = self.client.show_network(self.network['id'])
+        body = self.networks_client.show_network(self.network['id'])
         show_net = body['network']
         # Verify with show that router:external is False for network
         self.assertEqual(self.network['name'], show_net['name'])
@@ -97,10 +97,11 @@ class ExternalNetworksTestJSON(base.BaseAdminNetworkTest):
         """
         # Set cls.client to admin to use base.create_subnet()
         client = self.admin_client
-        body = client.create_network(**{'router:external': True})
+        body = self.admin_networks_client.create_network(
+            **{'router:external': True})
         external_network = body['network']
         self.addCleanup(self._try_delete_resource,
-                        client.delete_network,
+                        self.admin_networks_client.delete_network,
                         external_network['id'])
         subnet = self.create_subnet(external_network, client=client,
                                     enable_dhcp=False)
@@ -114,7 +115,7 @@ class ExternalNetworksTestJSON(base.BaseAdminNetworkTest):
             network=external_network['id'])
         self.assertIn(created_floating_ip['id'],
                       (f['id'] for f in floatingip_list['floatingips']))
-        client.delete_network(external_network['id'])
+        self.admin_networks_client.delete_network(external_network['id'])
         # Verifies floating ip is deleted
         floatingip_list = client.list_floatingips()
         self.assertNotIn(created_floating_ip['id'],

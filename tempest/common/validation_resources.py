@@ -23,16 +23,19 @@ LOG = logging.getLogger(__name__)
 
 
 def create_ssh_security_group(os, add_rule=False):
-    security_group_client = os.security_groups_client
+    security_groups_client = os.security_groups_client
+    security_group_rules_client = os.security_group_rules_client
     sg_name = data_utils.rand_name('securitygroup-')
     sg_description = data_utils.rand_name('description-')
-    security_group = \
-        security_group_client.create_security_group(sg_name, sg_description)
+    security_group = security_groups_client.create_security_group(
+        name=sg_name, description=sg_description)['security_group']
     if add_rule:
-        security_group_client.create_security_group_rule(security_group['id'],
-                                                         'tcp', 22, 22)
-        security_group_client.create_security_group_rule(security_group['id'],
-                                                         'icmp', -1, -1)
+        security_group_rules_client.create_security_group_rule(
+            parent_group_id=security_group['id'], ip_protocol='tcp',
+            from_port=22, to_port=22)
+        security_group_rules_client.create_security_group_rule(
+            parent_group_id=security_group['id'], ip_protocol='icmp',
+            from_port=-1, to_port=-1)
     LOG.debug("SSH Validation resource security group with tcp and icmp "
               "rules %s created"
               % sg_name)
@@ -45,8 +48,8 @@ def create_validation_resources(os, validation_resources=None):
     if validation_resources:
         if validation_resources['keypair']:
             keypair_name = data_utils.rand_name('keypair')
-            validation_data['keypair'] = \
-                os.keypairs_client.create_keypair(keypair_name)
+            validation_data.update(os.keypairs_client.create_keypair(
+                name=keypair_name))
             LOG.debug("Validation resource key %s created" % keypair_name)
         add_rule = False
         if validation_resources['security_group']:
@@ -56,8 +59,7 @@ def create_validation_resources(os, validation_resources=None):
                 create_ssh_security_group(os, add_rule)
         if validation_resources['floating_ip']:
             floating_client = os.floating_ips_client
-            validation_data['floating_ip'] = \
-                floating_client.create_floating_ip()
+            validation_data.update(floating_client.create_floating_ip())
     return validation_data
 
 

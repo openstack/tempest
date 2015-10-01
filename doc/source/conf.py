@@ -13,6 +13,7 @@
 
 import sys
 import os
+import subprocess
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -29,8 +30,12 @@ import os
 extensions = ['sphinx.ext.autodoc',
               'sphinx.ext.todo',
               'sphinx.ext.viewcode',
-              'oslosphinx'
+              'oslosphinx',
+              'oslo_config.sphinxconfiggen',
              ]
+
+config_generator_config_file = '../../tools/config/config-generator.tempest.conf'
+sample_config_basename = '_static/tempest'
 
 todo_include_todos = True
 

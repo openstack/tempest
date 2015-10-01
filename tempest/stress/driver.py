@@ -22,10 +22,11 @@ from oslo_utils import importutils
 import six
 from six import moves
 from tempest_lib.common import ssh
-from tempest_lib.common.utils import data_utils
+
 
 from tempest import clients
-from tempest.common import isolated_creds
+from tempest.common import cred_client
+from tempest.common.utils import data_utils
 from tempest import config
 from tempest import exceptions
 from tempest.stress import cleanup
@@ -154,7 +155,7 @@ def stress_openstack(tests, duration, max_runs=None, stop_on_error=False):
                     identity_client = admin_manager.identity_client
                 else:
                     identity_client = admin_manager.identity_v3_client
-                credentials_client = isolated_creds.get_creds_client(
+                credentials_client = cred_client.get_creds_client(
                     identity_client)
                 project = credentials_client.create_project(
                     name=tenant_name, description=tenant_name)

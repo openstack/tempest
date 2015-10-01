@@ -12,9 +12,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import json
 
 import mock
+from oslo_serialization import jsonutils as json
 from oslotest import mockpatch
 
 from tempest.cmd import verify_tempest_config
@@ -113,7 +113,7 @@ class TestDiscovery(base.TestCase):
                                'print_and_or_update') as print_mock:
             verify_tempest_config.verify_keystone_api_versions(fake_os, True)
         print_mock.assert_called_once_with('api_v3',
-                                           'identity_feature_enabled',
+                                           'identity-feature-enabled',
                                            False, True)
 
     def test_verify_keystone_api_versions_no_v2(self):
@@ -129,7 +129,7 @@ class TestDiscovery(base.TestCase):
                                'print_and_or_update') as print_mock:
             verify_tempest_config.verify_keystone_api_versions(fake_os, True)
         print_mock.assert_called_once_with('api_v2',
-                                           'identity_feature_enabled',
+                                           'identity-feature-enabled',
                                            False, True)
 
     def test_verify_cinder_api_versions_no_v2(self):
@@ -144,7 +144,7 @@ class TestDiscovery(base.TestCase):
         with mock.patch.object(verify_tempest_config,
                                'print_and_or_update') as print_mock:
             verify_tempest_config.verify_cinder_api_versions(fake_os, True)
-        print_mock.assert_called_once_with('api_v2', 'volume_feature_enabled',
+        print_mock.assert_called_once_with('api_v2', 'volume-feature-enabled',
                                            False, True)
 
     def test_verify_cinder_api_versions_no_v1(self):
@@ -159,7 +159,7 @@ class TestDiscovery(base.TestCase):
         with mock.patch.object(verify_tempest_config,
                                'print_and_or_update') as print_mock:
             verify_tempest_config.verify_cinder_api_versions(fake_os, True)
-        print_mock.assert_called_once_with('api_v1', 'volume_feature_enabled',
+        print_mock.assert_called_once_with('api_v1', 'volume-feature-enabled',
                                            False, True)
 
     def test_verify_glance_version_no_v2_with_v1_1(self):
@@ -170,7 +170,7 @@ class TestDiscovery(base.TestCase):
         with mock.patch.object(verify_tempest_config,
                                'print_and_or_update') as print_mock:
             verify_tempest_config.verify_glance_api_versions(fake_os, True)
-        print_mock.assert_called_once_with('api_v2', 'image_feature_enabled',
+        print_mock.assert_called_once_with('api_v2', 'image-feature-enabled',
                                            False, True)
 
     def test_verify_glance_version_no_v2_with_v1_0(self):
@@ -181,7 +181,7 @@ class TestDiscovery(base.TestCase):
         with mock.patch.object(verify_tempest_config,
                                'print_and_or_update') as print_mock:
             verify_tempest_config.verify_glance_api_versions(fake_os, True)
-        print_mock.assert_called_once_with('api_v2', 'image_feature_enabled',
+        print_mock.assert_called_once_with('api_v2', 'image-feature-enabled',
                                            False, True)
 
     def test_verify_glance_version_no_v1(self):
@@ -192,7 +192,7 @@ class TestDiscovery(base.TestCase):
         with mock.patch.object(verify_tempest_config,
                                'print_and_or_update') as print_mock:
             verify_tempest_config.verify_glance_api_versions(fake_os, True)
-        print_mock.assert_called_once_with('api_v1', 'image_feature_enabled',
+        print_mock.assert_called_once_with('api_v1', 'image-feature-enabled',
                                            False, True)
 
     def test_verify_extensions_neutron(self):
@@ -240,7 +240,10 @@ class TestDiscovery(base.TestCase):
                                    {'alias': 'fake2'},
                                    {'alias': 'not_fake'}]}
         fake_os = mock.MagicMock()
+        # NOTE (e0ne): mock both v1 and v2 APIs
         fake_os.volumes_extension_client.list_extensions = fake_list_extensions
+        fake_os.volumes_v2_extension_client.list_extensions = (
+            fake_list_extensions)
         self.useFixture(mockpatch.PatchObject(
             verify_tempest_config, 'get_enabled_extensions',
             return_value=(['fake1', 'fake2', 'fake3'])))
@@ -262,7 +265,10 @@ class TestDiscovery(base.TestCase):
                                    {'alias': 'fake2'},
                                    {'alias': 'not_fake'}]}
         fake_os = mock.MagicMock()
+        # NOTE (e0ne): mock both v1 and v2 APIs
         fake_os.volumes_extension_client.list_extensions = fake_list_extensions
+        fake_os.volumes_v2_extension_client.list_extensions = (
+            fake_list_extensions)
         self.useFixture(mockpatch.PatchObject(
             verify_tempest_config, 'get_enabled_extensions',
             return_value=(['all'])))

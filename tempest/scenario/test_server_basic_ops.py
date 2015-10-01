@@ -16,6 +16,7 @@
 from oslo_log import log as logging
 
 from tempest import config
+from tempest import exceptions
 from tempest.scenario import manager
 from tempest.scenario import utils as test_utils
 from tempest import test
@@ -37,6 +38,7 @@ class TestServerBasicOps(manager.ScenarioTest):
      * Add simple permissive rules to the security group
      * Launch an instance
      * Perform ssh to instance
+     * Verify metadata service
      * Terminate the instance
     """
 
@@ -81,18 +83,41 @@ class TestServerBasicOps(manager.ScenarioTest):
     def verify_ssh(self):
         if self.run_ssh:
             # Obtain a floating IP
-            floating_ip = self.floating_ips_client.create_floating_ip()
+            self.floating_ip = (self.floating_ips_client.create_floating_ip()
+                                ['floating_ip'])
             self.addCleanup(self.delete_wrapper,
                             self.floating_ips_client.delete_floating_ip,
-                            floating_ip['id'])
+                            self.floating_ip['id'])
             # Attach a floating IP
             self.floating_ips_client.associate_floating_ip_to_server(
-                floating_ip['ip'], self.instance['id'])
+                self.floating_ip['ip'], self.instance['id'])
             # Check ssh
-            self.get_remote_client(
-                server_or_ip=floating_ip['ip'],
+            self.ssh_client = self.get_remote_client(
+                server_or_ip=self.floating_ip['ip'],
                 username=self.image_utils.ssh_user(self.image_ref),
                 private_key=self.keypair['private_key'])
+
+    def verify_metadata(self):
+        if self.run_ssh and CONF.compute_feature_enabled.metadata_service:
+            # Verify metadata service
+            md_url = 'http://169.254.169.254/latest/meta-data/public-ipv4'
+
+            def exec_cmd_and_verify_output():
+                cmd = 'curl ' + md_url
+                floating_ip = self.floating_ip['ip']
+                result = self.ssh_client.exec_command(cmd)
+                if result:
+                    msg = ('Failed while verifying metadata on server. Result '
+                           'of command "%s" is NOT "%s".' % (cmd, floating_ip))
+                    self.assertEqual(floating_ip, result, msg)
+                    return 'Verification is successful!'
+
+            if not test.call_until_true(exec_cmd_and_verify_output,
+                                        CONF.compute.build_timeout,
+                                        CONF.compute.build_interval):
+                raise exceptions.TimeoutException('Timed out while waiting to '
+                                                  'verify metadata on server. '
+                                                  '%s is empty.' % md_url)
 
     @test.idempotent_id('7fff3fb3-91d8-4fd0-bd7d-0204f1f180ba')
     @test.attr(type='smoke')
@@ -102,4 +127,5 @@ class TestServerBasicOps(manager.ScenarioTest):
         self.security_group = self._create_security_group()
         self.boot_instance()
         self.verify_ssh()
+        self.verify_metadata()
         self.servers_client.delete_server(self.instance['id'])

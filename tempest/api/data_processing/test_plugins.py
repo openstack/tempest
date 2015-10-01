@@ -25,7 +25,7 @@ class PluginsTest(dp_base.BaseDataProcessingTest):
 
         It ensures main plugins availability.
         """
-        plugins = self.client.list_plugins()
+        plugins = self.client.list_plugins()['plugins']
         plugins_names = [plugin['name'] for plugin in plugins]
         for enabled_plugin in CONF.data_processing_feature_enabled.plugins:
             self.assertIn(enabled_plugin, plugins_names)
@@ -41,12 +41,13 @@ class PluginsTest(dp_base.BaseDataProcessingTest):
     @test.idempotent_id('53cf6487-2cfb-4a6f-8671-97c542c6e901')
     def test_plugin_get(self):
         for plugin_name in self._list_all_plugin_names():
-            plugin = self.client.get_plugin(plugin_name)
+            plugin = self.client.get_plugin(plugin_name)['plugin']
             self.assertEqual(plugin_name, plugin['name'])
 
             for plugin_version in plugin['versions']:
                 detailed_plugin = self.client.get_plugin(plugin_name,
                                                          plugin_version)
+                detailed_plugin = detailed_plugin['plugin']
                 self.assertEqual(plugin_name, detailed_plugin['name'])
 
                 # check that required image tags contains name and version

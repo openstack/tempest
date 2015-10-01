@@ -15,6 +15,7 @@
 
 from oslo_log import log as logging
 
+from tempest.common import waiters
 from tempest import config
 from tempest.scenario import manager
 from tempest import test
@@ -52,11 +53,13 @@ class BaremetalBasicOps(manager.BaremetalScenarioTest):
         self.assertEqual(self.node['uuid'], node['uuid'])
         self.node = node
 
-        self.servers_client.wait_for_server_status(
+        waiters.wait_for_server_status(
+            self.servers_client,
             server_id=self.instance['id'],
             status='REBUILD',
             ready_wait=False)
-        self.servers_client.wait_for_server_status(
+        waiters.wait_for_server_status(
+            self.servers_client,
             server_id=self.instance['id'],
             status='ACTIVE')
 
@@ -98,14 +101,15 @@ class BaremetalBasicOps(manager.BaremetalScenarioTest):
     def get_flavor_ephemeral_size(self):
         """Returns size of the ephemeral partition in GiB."""
         f_id = self.instance['flavor']['id']
-        flavor = self.flavors_client.show_flavor(f_id)
+        flavor = self.flavors_client.show_flavor(f_id)['flavor']
         ephemeral = flavor.get('OS-FLV-EXT-DATA:ephemeral')
         if not ephemeral or ephemeral == 'N/A':
             return None
         return int(ephemeral)
 
     def add_floating_ip(self):
-        floating_ip = self.floating_ips_client.create_floating_ip()
+        floating_ip = (self.floating_ips_client.create_floating_ip()
+                       ['floating_ip'])
         self.floating_ips_client.associate_floating_ip_to_server(
             floating_ip['ip'], self.instance['id'])
         return floating_ip['ip']

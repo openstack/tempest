@@ -13,12 +13,12 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import json
+from oslo_serialization import jsonutils as json
 
 from tempest.common import service_client
 
 
-class PolicyClientJSON(service_client.ServiceClient):
+class PolicyClient(service_client.ServiceClient):
     api_version = "v3"
 
     def create_policy(self, blob, type):
@@ -31,14 +31,14 @@ class PolicyClientJSON(service_client.ServiceClient):
         resp, body = self.post('policies', post_body)
         self.expected_success(201, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body['policy'])
+        return service_client.ResponseBody(resp, body)
 
     def list_policies(self):
         """Lists the policies."""
         resp, body = self.get('policies')
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBodyList(resp, body['policies'])
+        return service_client.ResponseBody(resp, body)
 
     def get_policy(self, policy_id):
         """Lists out the given policy."""
@@ -46,7 +46,7 @@ class PolicyClientJSON(service_client.ServiceClient):
         resp, body = self.get(url)
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body['policy'])
+        return service_client.ResponseBody(resp, body)
 
     def update_policy(self, policy_id, **kwargs):
         """Updates a policy."""
@@ -59,7 +59,7 @@ class PolicyClientJSON(service_client.ServiceClient):
         resp, body = self.patch(url, post_body)
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body['policy'])
+        return service_client.ResponseBody(resp, body)
 
     def delete_policy(self, policy_id):
         """Deletes the policy."""

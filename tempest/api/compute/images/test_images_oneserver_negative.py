@@ -15,10 +15,11 @@
 #    under the License.
 
 from oslo_log import log as logging
-from tempest_lib.common.utils import data_utils
 from tempest_lib import exceptions as lib_exc
 
 from tempest.api.compute import base
+from tempest.common.utils import data_utils
+from tempest.common import waiters
 from tempest import config
 from tempest import test
 
@@ -43,8 +44,8 @@ class ImagesOneServerNegativeTestJSON(base.BaseV2ComputeTest):
         super(ImagesOneServerNegativeTestJSON, self).setUp()
         # Check if the server is in a clean state after test
         try:
-            self.servers_client.wait_for_server_status(self.server_id,
-                                                       'ACTIVE')
+            waiters.wait_for_server_status(self.servers_client, self.server_id,
+                                           'ACTIVE')
         except Exception:
             LOG.exception('server %s timed out to become ACTIVE. rebuilding'
                           % self.server_id)
@@ -68,6 +69,11 @@ class ImagesOneServerNegativeTestJSON(base.BaseV2ComputeTest):
             raise cls.skipException(skip_msg)
 
     @classmethod
+    def setup_credentials(cls):
+        cls.prepare_instance_network()
+        super(ImagesOneServerNegativeTestJSON, cls).setup_credentials()
+
+    @classmethod
     def setup_clients(cls):
         super(ImagesOneServerNegativeTestJSON, cls).setup_clients()
         cls.client = cls.images_client
@@ -87,7 +93,7 @@ class ImagesOneServerNegativeTestJSON(base.BaseV2ComputeTest):
         snapshot_name = data_utils.rand_name('test-snap')
         meta = {'': ''}
         self.assertRaises(lib_exc.BadRequest, self.client.create_image,
-                          self.server_id, snapshot_name, meta)
+                          self.server_id, name=snapshot_name, metadata=meta)
 
     @test.attr(type=['negative'])
     @test.idempotent_id('3d24d11f-5366-4536-bd28-cff32b748eca')
@@ -96,7 +102,7 @@ class ImagesOneServerNegativeTestJSON(base.BaseV2ComputeTest):
         snapshot_name = data_utils.rand_name('test-snap')
         meta = {'a' * 260: 'b' * 260}
         self.assertRaises(lib_exc.BadRequest, self.client.create_image,
-                          self.server_id, snapshot_name, meta)
+                          self.server_id, name=snapshot_name, metadata=meta)
 
     @test.attr(type=['negative'])
     @test.idempotent_id('0460efcf-ee88-4f94-acef-1bf658695456')
@@ -105,8 +111,7 @@ class ImagesOneServerNegativeTestJSON(base.BaseV2ComputeTest):
 
         # Create first snapshot
         snapshot_name = data_utils.rand_name('test-snap')
-        body = self.client.create_image(self.server_id,
-                                        snapshot_name)
+        body = self.client.create_image(self.server_id, name=snapshot_name)
         image_id = data_utils.parse_image_id(body.response['location'])
         self.image_ids.append(image_id)
         self.addCleanup(self._reset_server)
@@ -114,7 +119,7 @@ class ImagesOneServerNegativeTestJSON(base.BaseV2ComputeTest):
         # Create second snapshot
         alt_snapshot_name = data_utils.rand_name('test-snap')
         self.assertRaises(lib_exc.Conflict, self.client.create_image,
-                          self.server_id, alt_snapshot_name)
+                          self.server_id, name=alt_snapshot_name)
 
     @test.attr(type=['negative'])
     @test.idempotent_id('084f0cbc-500a-4963-8a4e-312905862581')
@@ -123,7 +128,7 @@ class ImagesOneServerNegativeTestJSON(base.BaseV2ComputeTest):
 
         snapshot_name = data_utils.rand_name('a' * 260)
         self.assertRaises(lib_exc.BadRequest, self.client.create_image,
-                          self.server_id, snapshot_name)
+                          self.server_id, name=snapshot_name)
 
     @test.attr(type=['negative'])
     @test.idempotent_id('0894954d-2db2-4195-a45b-ffec0bc0187e')
@@ -131,7 +136,7 @@ class ImagesOneServerNegativeTestJSON(base.BaseV2ComputeTest):
         # Return an error while trying to delete an image what is creating
 
         snapshot_name = data_utils.rand_name('test-snap')
-        body = self.client.create_image(self.server_id, snapshot_name)
+        body = self.client.create_image(self.server_id, name=snapshot_name)
         image_id = data_utils.parse_image_id(body.response['location'])
         self.image_ids.append(image_id)
         self.addCleanup(self._reset_server)

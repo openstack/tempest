@@ -15,9 +15,9 @@
 
 import netaddr
 from oslo_log import log as logging
-from tempest_lib.common.utils import data_utils
 from tempest_lib import exceptions as lib_exc
 
+from tempest.common.utils import data_utils
 from tempest import config
 from tempest import exceptions
 import tempest.test
@@ -73,11 +73,11 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
     def setup_clients(cls):
         super(BaseNetworkTest, cls).setup_clients()
         cls.client = cls.os.network_client
+        cls.networks_client = cls.os.networks_client
 
     @classmethod
     def resource_setup(cls):
         super(BaseNetworkTest, cls).resource_setup()
-        cls.network_cfg = CONF.network
         cls.networks = []
         cls.subnets = []
         cls.ports = []
@@ -119,7 +119,7 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
                                          subnet['id'])
             # Clean up networks
             for network in cls.networks:
-                cls._try_delete_resource(cls.client.delete_network,
+                cls._try_delete_resource(cls.networks_client.delete_network,
                                          network['id'])
         super(BaseNetworkTest, cls).resource_cleanup()
 
@@ -148,7 +148,7 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
         """Wrapper utility that returns a test network."""
         network_name = network_name or data_utils.rand_name('test-network-')
 
-        body = cls.client.create_network(name=network_name)
+        body = cls.networks_client.create_network(name=network_name)
         network = body['network']
         cls.networks.append(network)
         return network
@@ -266,6 +266,7 @@ class BaseAdminNetworkTest(BaseNetworkTest):
     def setup_clients(cls):
         super(BaseAdminNetworkTest, cls).setup_clients()
         cls.admin_client = cls.os_adm.network_client
+        cls.admin_networks_client = cls.os_adm.networks_client
 
     @classmethod
     def create_metering_label(cls, name, description):
