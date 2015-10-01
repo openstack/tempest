@@ -74,9 +74,6 @@ class TestStampPattern(manager.ScenarioTest):
     def _add_keypair(self):
         self.keypair = self.create_keypair()
 
-    def _ssh_to_server(self, server_or_ip):
-        return self.get_remote_client(server_or_ip)
-
     def _create_volume_snapshot(self, volume):
         snapshot_name = data_utils.rand_name('scenario-snapshot')
         _, snapshot = self.snapshots_client.create_snapshot(
