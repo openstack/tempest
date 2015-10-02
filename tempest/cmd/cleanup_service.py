@@ -382,6 +382,7 @@ class NetworkService(BaseService):
         super(NetworkService, self).__init__(kwargs)
         self.client = manager.network_client
         self.networks_client = manager.networks_client
+        self.subnets_client = manager.subnets_client
 
     def _filter_by_conf_networks(self, item_list):
         if not item_list or not all(('network_id' in i for i in item_list)):
@@ -676,7 +677,7 @@ class NetworkSecGroupService(NetworkService):
 class NetworkSubnetService(NetworkService):
 
     def list(self):
-        client = self.client
+        client = self.subnets_client
         subnets = client.list_subnets(**self.tenant_filter)
         subnets = subnets['subnets']
         if self.is_preserve:
@@ -685,7 +686,7 @@ class NetworkSubnetService(NetworkService):
         return subnets
 
     def delete(self):
-        client = self.client
+        client = self.subnets_client
         subnets = self.list()
         for subnet in subnets:
             try:

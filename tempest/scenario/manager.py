@@ -62,6 +62,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
         # Neutron network client
         cls.network_client = cls.manager.network_client
         cls.networks_client = cls.manager.networks_client
+        cls.subnets_client = cls.manager.subnets_client
         # Heat client
         cls.orchestration_client = cls.manager.orchestration_client
 
@@ -630,7 +631,7 @@ class NetworkScenarioTest(ScenarioTest):
 
     def _list_subnets(self, *args, **kwargs):
         """List subnets using admin creds """
-        subnets_list = self.admin_manager.network_client.list_subnets(
+        subnets_list = self.admin_manager.subnets_client.list_subnets(
             *args, **kwargs)
         return subnets_list['subnets']
 
@@ -652,14 +653,16 @@ class NetworkScenarioTest(ScenarioTest):
             *args, **kwargs)
         return agents_list['agents']
 
-    def _create_subnet(self, network, client=None, namestart='subnet-smoke',
-                       **kwargs):
+    def _create_subnet(self, network, client=None, subnets_client=None,
+                       namestart='subnet-smoke', **kwargs):
         """
         Create a subnet for the given network within the cidr block
         configured for tenant networks.
         """
         if not client:
             client = self.network_client
+        if not subnets_client:
+            subnets_client = self.subnets_client
 
         def cidr_in_use(cidr, tenant_id):
             """
@@ -697,15 +700,16 @@ class NetworkScenarioTest(ScenarioTest):
                 **kwargs
             )
             try:
-                result = client.create_subnet(**subnet)
+                result = subnets_client.create_subnet(**subnet)
                 break
             except lib_exc.Conflict as e:
                 is_overlapping_cidr = 'overlaps with another subnet' in str(e)
                 if not is_overlapping_cidr:
                     raise
         self.assertIsNotNone(result, 'Unable to allocate tenant network')
-        subnet = net_resources.DeletableSubnet(client=client,
-                                               **result['subnet'])
+        subnet = net_resources.DeletableSubnet(
+            network_client=client, subnets_client=subnets_client,
+            **result['subnet'])
         self.assertEqual(subnet.cidr, str_cidr)
         self.addCleanup(self.delete_wrapper, subnet.delete)
         return subnet
@@ -1062,7 +1066,8 @@ class NetworkScenarioTest(ScenarioTest):
         self.assertEqual(admin_state_up, router.admin_state_up)
 
     def create_networks(self, client=None, networks_client=None,
-                        tenant_id=None, dns_nameservers=None):
+                        subnets_client=None, tenant_id=None,
+                        dns_nameservers=None):
         """Create a network with a subnet connected to a router.
 
         The baremetal driver is a special case since all nodes are
@@ -1092,7 +1097,8 @@ class NetworkScenarioTest(ScenarioTest):
                 tenant_id=tenant_id)
             router = self._get_router(client=client, tenant_id=tenant_id)
 
-            subnet_kwargs = dict(network=network, client=client)
+            subnet_kwargs = dict(network=network, client=client,
+                                 subnets_client=subnets_client)
             # use explicit check because empty list is a valid option
             if dns_nameservers is not None:
                 subnet_kwargs['dns_nameservers'] = dns_nameservers

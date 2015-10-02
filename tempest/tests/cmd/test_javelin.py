@@ -380,7 +380,7 @@ class TestDestroyResources(JavelinUnitTest):
 
         javelin.destroy_subnets([self.fake_object])
 
-        mocked_function = self.fake_client.networks.delete_subnet
+        mocked_function = self.fake_client.subnets.delete_subnet
         mocked_function.assert_called_once_with(fake_subnet_id)
 
     def test_destroy_routers(self):

@@ -74,6 +74,7 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
         super(BaseNetworkTest, cls).setup_clients()
         cls.client = cls.os.network_client
         cls.networks_client = cls.os.networks_client
+        cls.subnets_client = cls.os.subnets_client
 
     @classmethod
     def resource_setup(cls):
@@ -115,7 +116,7 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
                                          router)
             # Clean up subnets
             for subnet in cls.subnets:
-                cls._try_delete_resource(cls.client.delete_subnet,
+                cls._try_delete_resource(cls.subnets_client.delete_subnet,
                                          subnet['id'])
             # Clean up networks
             for network in cls.networks:
@@ -160,7 +161,7 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
 
         # allow tests to use admin client
         if not client:
-            client = cls.client
+            client = cls.subnets_client
 
         # The cidr and mask_bits depend on the ip version.
         ip_version = ip_version if ip_version is not None else cls._ip_version
@@ -267,6 +268,7 @@ class BaseAdminNetworkTest(BaseNetworkTest):
         super(BaseAdminNetworkTest, cls).setup_clients()
         cls.admin_client = cls.os_adm.network_client
         cls.admin_networks_client = cls.os_adm.networks_client
+        cls.admin_subnets_client = cls.os_adm.subnets_client
 
     @classmethod
     def create_metering_label(cls, name, description):

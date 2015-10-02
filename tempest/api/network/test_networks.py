@@ -194,7 +194,7 @@ class NetworksTest(base.BaseNetworkTest):
         subnet_id = subnet['id']
         # Verify subnet update
         new_name = "New_subnet"
-        body = self.client.update_subnet(subnet_id, name=new_name)
+        body = self.subnets_client.update_subnet(subnet_id, name=new_name)
         updated_subnet = body['subnet']
         self.assertEqual(updated_subnet['name'], new_name)
 
@@ -241,7 +241,7 @@ class NetworksTest(base.BaseNetworkTest):
     @test.idempotent_id('bd635d81-6030-4dd1-b3b9-31ba0cfdf6cc')
     def test_show_subnet(self):
         # Verify the details of a subnet
-        body = self.client.show_subnet(self.subnet['id'])
+        body = self.subnets_client.show_subnet(self.subnet['id'])
         subnet = body['subnet']
         self.assertNotEmpty(subnet, "Subnet returned has no fields")
         for key in ['id', 'cidr']:
@@ -252,8 +252,8 @@ class NetworksTest(base.BaseNetworkTest):
     def test_show_subnet_fields(self):
         # Verify specific fields of a subnet
         fields = ['id', 'network_id']
-        body = self.client.show_subnet(self.subnet['id'],
-                                       fields=fields)
+        body = self.subnets_client.show_subnet(self.subnet['id'],
+                                               fields=fields)
         subnet = body['subnet']
         self.assertEqual(sorted(subnet.keys()), sorted(fields))
         for field_name in fields:
@@ -263,7 +263,7 @@ class NetworksTest(base.BaseNetworkTest):
     @test.idempotent_id('db68ba48-f4ea-49e9-81d1-e367f6d0b20a')
     def test_list_subnets(self):
         # Verify the subnet exists in the list of all subnets
-        body = self.client.list_subnets()
+        body = self.subnets_client.list_subnets()
         subnets = [subnet['id'] for subnet in body['subnets']
                    if subnet['id'] == self.subnet['id']]
         self.assertNotEmpty(subnets, "Created subnet not found in the list")
@@ -272,7 +272,7 @@ class NetworksTest(base.BaseNetworkTest):
     def test_list_subnets_fields(self):
         # Verify specific fields of subnets
         fields = ['id', 'network_id']
-        body = self.client.list_subnets(fields=fields)
+        body = self.subnets_client.list_subnets(fields=fields)
         subnets = body['subnets']
         self.assertNotEmpty(subnets, "Subnet list returned is empty")
         for subnet in subnets:
@@ -303,7 +303,7 @@ class NetworksTest(base.BaseNetworkTest):
         body = self.networks_client.delete_network(net_id)
 
         # Verify that the subnet got automatically deleted.
-        self.assertRaises(lib_exc.NotFound, self.client.show_subnet,
+        self.assertRaises(lib_exc.NotFound, self.subnets_client.show_subnet,
                           subnet_id)
 
         # Since create_subnet adds the subnet to the delete list, and it is
@@ -362,8 +362,8 @@ class NetworksTest(base.BaseNetworkTest):
                   'gateway_ip': new_gateway, 'enable_dhcp': True}
 
         new_name = "New_subnet"
-        body = self.client.update_subnet(subnet_id, name=new_name,
-                                         **kwargs)
+        body = self.subnets_client.update_subnet(subnet_id, name=new_name,
+                                                 **kwargs)
         updated_subnet = body['subnet']
         kwargs['name'] = new_name
         self.assertEqual(sorted(updated_subnet['dns_nameservers']),
@@ -398,7 +398,7 @@ class NetworksTest(base.BaseNetworkTest):
         # subnets_iter is a list (iterator) of lists. This flattens it to a
         # list of UUIDs
         public_subnets_iter = itertools.chain(*subnets_iter)
-        body = self.client.list_subnets()
+        body = self.subnets_client.list_subnets()
         subnets = [sub['id'] for sub in body['subnets']
                    if sub['id'] in public_subnets_iter]
         self.assertEmpty(subnets, "Public subnets visible")
@@ -435,9 +435,9 @@ class BulkNetworkOpsTestJSON(base.BaseNetworkTest):
 
     def _delete_subnets(self, created_subnets):
         for n in created_subnets:
-            self.client.delete_subnet(n['id'])
+            self.subnets_client.delete_subnet(n['id'])
         # Asserting that the subnets are not found in the list after deletion
-        body = self.client.list_subnets()
+        body = self.subnets_client.list_subnets()
         subnets_list = [subnet['id'] for subnet in body['subnets']]
         for n in created_subnets:
             self.assertNotIn(n['id'], subnets_list)
@@ -496,7 +496,7 @@ class BulkNetworkOpsTestJSON(base.BaseNetworkTest):
         created_subnets = body['subnets']
         self.addCleanup(self._delete_subnets, created_subnets)
         # Asserting that the subnets are found in the list after creation
-        body = self.client.list_subnets()
+        body = self.subnets_client.list_subnets()
         subnets_list = [subnet['id'] for subnet in body['subnets']]
         for n in created_subnets:
             self.assertIsNotNone(n['id'])
@@ -576,7 +576,7 @@ class NetworksIpV6TestJSON(NetworksTest):
         # Verifies Subnet GW is None in IPv4
         self.assertEqual(subnet2['gateway_ip'], None)
         # Verifies all 2 subnets in the same network
-        body = self.client.list_subnets()
+        body = self.subnets_client.list_subnets()
         subnets = [sub['id'] for sub in body['subnets']
                    if sub['network_id'] == network['id']]
         test_subnet_ids = [sub['id'] for sub in (subnet1, subnet2)]
@@ -621,9 +621,9 @@ class NetworksIpV6TestAttrs(NetworksIpV6TestJSON):
                                              'ipv6_address_mode': mode})
         port = self.create_port(slaac_network)
         self.assertIsNotNone(port['fixed_ips'][0]['ip_address'])
-        self.client.delete_subnet(subnet_slaac['id'])
+        self.subnets_client.delete_subnet(subnet_slaac['id'])
         self.subnets.pop()
-        subnets = self.client.list_subnets()
+        subnets = self.subnets_client.list_subnets()
         subnet_ids = [subnet['id'] for subnet in subnets['subnets']]
         self.assertNotIn(subnet_slaac['id'], subnet_ids,
                          "Subnet wasn't deleted")

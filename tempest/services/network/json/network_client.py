@@ -34,28 +34,6 @@ class NetworkClient(base.BaseNetworkClient):
     quotas
     """
 
-    def create_subnet(self, **kwargs):
-        uri = '/subnets'
-        post_data = {'subnet': kwargs}
-        return self.create_resource(uri, post_data)
-
-    def update_subnet(self, subnet_id, **kwargs):
-        uri = '/subnets/%s' % subnet_id
-        post_data = {'subnet': kwargs}
-        return self.update_resource(uri, post_data)
-
-    def show_subnet(self, subnet_id, **fields):
-        uri = '/subnets/%s' % subnet_id
-        return self.show_resource(uri, **fields)
-
-    def delete_subnet(self, subnet_id):
-        uri = '/subnets/%s' % subnet_id
-        return self.delete_resource(uri)
-
-    def list_subnets(self, **filters):
-        uri = '/subnets'
-        return self.list_resources(uri, **filters)
-
     def create_port(self, **kwargs):
         uri = '/ports'
         post_data = {'port': kwargs}
