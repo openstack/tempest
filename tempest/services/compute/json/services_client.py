@@ -42,7 +42,7 @@ class ServicesClient(service_client.ServiceClient):
         post_body = json.dumps({'binary': binary, 'host': host_name})
         resp, body = self.put('os-services/enable', post_body)
         body = json.loads(body)
-        self.validate_response(schema.enable_service, resp, body)
+        self.validate_response(schema.enable_disable_service, resp, body)
         return service_client.ResponseBody(resp, body)
 
     def disable_service(self, host_name, binary):
@@ -54,4 +54,5 @@ class ServicesClient(service_client.ServiceClient):
         post_body = json.dumps({'binary': binary, 'host': host_name})
         resp, body = self.put('os-services/disable', post_body)
         body = json.loads(body)
+        self.validate_response(schema.enable_disable_service, resp, body)
         return service_client.ResponseBody(resp, body)
