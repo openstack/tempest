@@ -76,8 +76,9 @@ tenant/project names for a primary user, an admin user, and an alternate user.
 To enable and use tenant isolation you only need to configure 2 things:
 
  #. A set of admin credentials with permissions to create users and
-    tenants/projects. This is specified in the identity section with the
-    admin_username, admin_tenant_name, and admin_password options
+    tenants/projects. This is specified in the auth section with the
+    admin_username, admin_tenant_name, admin_domain_name, and admin_password
+    options
  #. To enable tenant_isolation in the auth section with the
     allow_tenant_isolation option.
 
@@ -126,6 +127,9 @@ unexpected failures in some tests.
 
 Non-locking test accounts (aka credentials config options)
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""
+**Starting in the Liberty release this mechanism was deprecated and will be
+removed in a future release**
+
 When Tempest was refactored to allow for locking test accounts, the original
 non-tenant isolated case was converted to internally work similarly to the
 accounts.yaml file. This mechanism was then called the non-locking test accounts
