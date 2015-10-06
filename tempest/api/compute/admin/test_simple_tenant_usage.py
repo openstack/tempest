@@ -14,10 +14,14 @@
 #    under the License.
 
 import datetime
-import time
 
 from tempest.api.compute import base
 from tempest import test
+from tempest_lib import exceptions as e
+
+# Time that waits for until returning valid response
+# TODO(takmatsu): Ideally this value would come from configuration.
+VALID_WAIT = 30
 
 
 class TenantUsagesTestJSON(base.BaseV2ComputeAdminTest):
@@ -35,7 +39,6 @@ class TenantUsagesTestJSON(base.BaseV2ComputeAdminTest):
 
         # Create a server in the demo tenant
         cls.create_test_server(wait_until='ACTIVE')
-        time.sleep(2)
 
         now = datetime.datetime.now()
         cls.start = cls._parse_strtime(now - datetime.timedelta(days=1))
@@ -46,17 +49,32 @@ class TenantUsagesTestJSON(base.BaseV2ComputeAdminTest):
         # Returns formatted datetime
         return at.strftime('%Y-%m-%dT%H:%M:%S.%f')
 
+    def call_until_valid(self, func, duration, *args, **kwargs):
+        # Call until get valid response for "duration"
+        # because tenant usage doesn't become available immediately
+        # after create VM.
+        def is_valid():
+            try:
+                self.resp = func(*args, **kwargs)
+                return True
+            except e.InvalidHTTPResponseBody:
+                return False
+        test.call_until_true(is_valid, duration, 1)
+        return self.resp
+
     @test.idempotent_id('062c8ae9-9912-4249-8b51-e38d664e926e')
     def test_list_usage_all_tenants(self):
         # Get usage for all tenants
-        tenant_usage = self.adm_client.list_tenant_usages(
+        tenant_usage = self.call_until_valid(
+            self.adm_client.list_tenant_usages, VALID_WAIT,
             start=self.start, end=self.end, detailed="1")['tenant_usages'][0]
         self.assertEqual(len(tenant_usage), 8)
 
     @test.idempotent_id('94135049-a4c5-4934-ad39-08fa7da4f22e')
     def test_get_usage_tenant(self):
         # Get usage for a specific tenant
-        tenant_usage = self.adm_client.show_tenant_usage(
+        tenant_usage = self.call_until_valid(
+            self.adm_client.show_tenant_usage, VALID_WAIT,
             self.tenant_id, start=self.start, end=self.end)['tenant_usage']
 
         self.assertEqual(len(tenant_usage), 8)
@@ -64,7 +82,7 @@ class TenantUsagesTestJSON(base.BaseV2ComputeAdminTest):
     @test.idempotent_id('9d00a412-b40e-4fd9-8eba-97b496316116')
     def test_get_usage_tenant_with_non_admin_user(self):
         # Get usage for a specific tenant with non admin user
-        tenant_usage = self.client.show_tenant_usage(
+        tenant_usage = self.call_until_valid(
+            self.client.show_tenant_usage, VALID_WAIT,
             self.tenant_id, start=self.start, end=self.end)['tenant_usage']
-
         self.assertEqual(len(tenant_usage), 8)
