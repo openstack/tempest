@@ -16,7 +16,6 @@ install:
 
 # command to run tests, e.g. python setup.py test
 # Running tempest unit tests for python
-script: 
-    - cp etc/tempest.conf.sample etc/tempest.conf
+script:
     - testr init
     - OS_TEST_PATH=./tempest/tests testr run --parallel
