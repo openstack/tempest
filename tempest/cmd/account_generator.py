@@ -160,7 +160,7 @@ def get_admin_clients(opts):
 def create_resources(opts, resources):
     (identity_admin, neutron_iso_networks,
      network_admin, networks_admin) = get_admin_clients(opts)
-    roles = identity_admin.list_roles()
+    roles = identity_admin.list_roles()['roles']
     for u in resources['users']:
         u['role_ids'] = []
         for r in u.get('roles', ()):
