@@ -22,20 +22,26 @@ from tempest import test
 CONF = config.CONF
 
 
-class BaseVolumeQuotasNegativeV2TestJSON(base.BaseVolumeAdminTest):
+class VolumeSnapshotQuotasNegativeV2TestJSON(base.BaseVolumeAdminTest):
     force_tenant_isolation = True
 
     @classmethod
+    def skip_checks(cls):
+        super(VolumeSnapshotQuotasNegativeV2TestJSON, cls).skip_checks()
+        if not CONF.volume_feature_enabled.snapshot:
+            raise cls.skipException('Cinder volume snapshots are disabled')
+
+    @classmethod
     def setup_credentials(cls):
-        super(BaseVolumeQuotasNegativeV2TestJSON, cls).setup_credentials()
+        super(VolumeSnapshotQuotasNegativeV2TestJSON, cls).setup_credentials()
         cls.demo_tenant_id = cls.os.credentials.tenant_id
 
     @classmethod
     def resource_setup(cls):
-        super(BaseVolumeQuotasNegativeV2TestJSON, cls).resource_setup()
+        super(VolumeSnapshotQuotasNegativeV2TestJSON, cls).resource_setup()
         cls.default_volume_size = cls.volumes_client.default_volume_size
-        cls.shared_quota_set = {'gigabytes': 2 * cls.default_volume_size,
-                                'volumes': 1}
+        cls.shared_quota_set = {'gigabytes': 3 * cls.default_volume_size,
+                                'volumes': 1, 'snapshots': 1}
 
         # NOTE(gfidente): no need to restore original quota set
         # after the tests as they only work with tenant isolation.
@@ -46,30 +52,30 @@ class BaseVolumeQuotasNegativeV2TestJSON(base.BaseVolumeAdminTest):
         # NOTE(gfidente): no need to delete in tearDown as
         # they are created using utility wrapper methods.
         cls.volume = cls.create_volume()
+        cls.snapshot = cls.create_snapshot(cls.volume['id'])
 
     @test.attr(type='negative')
-    @test.idempotent_id('bf544854-d62a-47f2-a681-90f7a47d86b6')
-    def test_quota_volumes(self):
+    @test.idempotent_id('02bbf63f-6c05-4357-9d98-2926a94064ff')
+    def test_quota_volume_snapshots(self):
         self.assertRaises(lib_exc.OverLimit,
-                          self.volumes_client.create_volume)
+                          self.snapshots_client.create_snapshot,
+                          self.volume['id'])
 
     @test.attr(type='negative')
-    @test.idempotent_id('2dc27eee-8659-4298-b900-169d71a91374')
-    def test_quota_volume_gigabytes(self):
-        # NOTE(gfidente): quota set needs to be changed for this test
-        # or we may be limited by the volumes or snaps quota number, not by
-        # actual gigs usage; next line ensures shared set is restored.
+    @test.idempotent_id('c99a1ca9-6cdf-498d-9fdf-25832babef27')
+    def test_quota_volume_gigabytes_snapshots(self):
         self.addCleanup(self.quotas_client.update_quota_set,
                         self.demo_tenant_id,
                         **self.shared_quota_set)
-        new_quota_set = {'gigabytes': self.default_volume_size,
-                         'volumes': 2, 'snapshots': 1}
+        new_quota_set = {'gigabytes': 2 * self.default_volume_size,
+                         'volumes': 1, 'snapshots': 2}
         self.quotas_client.update_quota_set(
             self.demo_tenant_id,
             **new_quota_set)
         self.assertRaises(lib_exc.OverLimit,
-                          self.volumes_client.create_volume)
+                          self.snapshots_client.create_snapshot,
+                          self.volume['id'])
 
 
-class VolumeQuotasNegativeV1TestJSON(BaseVolumeQuotasNegativeV2TestJSON):
+class VolumeSnapshotNegativeV1TestJSON(VolumeSnapshotQuotasNegativeV2TestJSON):
     _api_version = 1
