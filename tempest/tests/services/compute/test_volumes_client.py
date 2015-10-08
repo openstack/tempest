@@ -17,12 +17,12 @@ import copy
 from oslotest import mockpatch
 from tempest_lib import exceptions as lib_exc
 
-from tempest.services.compute.json import volumes_extensions_client
+from tempest.services.compute.json import volumes_client
 from tempest.tests import fake_auth_provider
 from tempest.tests.services.compute import base
 
 
-class TestVolumesExtensionsClient(base.BaseComputeServiceTest):
+class TestVolumesClient(base.BaseComputeServiceTest):
 
     FAKE_VOLUME = {
         "id": "521752a6-acf6-4b2d-bc7a-119f9148cd8c",
@@ -43,9 +43,9 @@ class TestVolumesExtensionsClient(base.BaseComputeServiceTest):
     FAKE_VOLUMES = {"volumes": [FAKE_VOLUME]}
 
     def setUp(self):
-        super(TestVolumesExtensionsClient, self).setUp()
+        super(TestVolumesClient, self).setUp()
         fake_auth = fake_auth_provider.FakeAuthProvider()
-        self.client = volumes_extensions_client.VolumesExtensionsClient(
+        self.client = volumes_client.VolumesClient(
             fake_auth, 'compute', 'regionOne')
 
     def _test_list_volumes(self, bytes_body=False, **params):
@@ -100,15 +100,15 @@ class TestVolumesExtensionsClient(base.BaseComputeServiceTest):
             {}, status=202, volume_id=self.FAKE_VOLUME['id'])
 
     def test_is_resource_deleted_true(self):
-        module = ('tempest.services.compute.json.volumes_extensions_client.'
-                  'VolumesExtensionsClient.show_volume')
+        module = ('tempest.services.compute.json.volumes_client.'
+                  'VolumesClient.show_volume')
         self.useFixture(mockpatch.Patch(
             module, side_effect=lib_exc.NotFound))
         self.assertTrue(self.client.is_resource_deleted('fake-id'))
 
     def test_is_resource_deleted_false(self):
-        module = ('tempest.services.compute.json.volumes_extensions_client.'
-                  'VolumesExtensionsClient.show_volume')
+        module = ('tempest.services.compute.json.volumes_client.'
+                  'VolumesClient.show_volume')
         self.useFixture(mockpatch.Patch(
             module, return_value={}))
         self.assertFalse(self.client.is_resource_deleted('fake-id'))
