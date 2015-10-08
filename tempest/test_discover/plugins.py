@@ -88,7 +88,11 @@ class TempestTestPluginManager(object):
 
     def register_plugin_opts(self, conf):
         for plug in self.ext_plugins:
-            plug.obj.register_opts(conf)
+            try:
+                plug.obj.register_opts(conf)
+            except Exception:
+                LOG.exception('Plugin %s raised an exception trying to run '
+                              'register_opts' % plug.name)
 
     def get_plugin_options_list(self):
         plugin_options = []
