@@ -14,14 +14,11 @@ import abc
 
 from oslo_log import log as logging
 import six
+from tempest_lib import auth
 from tempest_lib import exceptions as lib_exc
 
-from tempest.common import cred_provider
-from tempest import config
-from tempest import exceptions
 from tempest.services.identity.v2.json import identity_client as v2_identity
 
-CONF = config.CONF
 LOG = logging.getLogger(__name__)
 
 
@@ -36,7 +33,6 @@ class CredsClient(object):
     def __init__(self, identity_client):
         # The client implies version and credentials
         self.identity_client = identity_client
-        self.credentials = self.identity_client.auth_provider.credentials
 
     def create_user(self, username, password, project, email):
         user = self.identity_client.create_user(
@@ -75,6 +71,13 @@ class CredsClient(object):
 
     @abc.abstractmethod
     def get_credentials(self, user, project, password):
+        """Produces a Credentials object from the details provided
+
+        :param user: a user dict
+        :param project: a project dict
+        :param password: the password as a string
+        :return: a Credentials object with all the available credential details
+        """
         pass
 
     def delete_user(self, user_id):
@@ -93,7 +96,11 @@ class V2CredsClient(CredsClient):
         return tenant
 
     def get_credentials(self, user, project, password):
-        return cred_provider.get_credentials(
+        # User and project already include both ID and name here,
+        # so there's no need to use the fill_in mode
+        return auth.get_credentials(
+            auth_url=None,
+            fill_in=False,
             identity_version='v2',
             username=user['name'], user_id=user['id'],
             tenant_name=project['name'], tenant_id=project['id'],
@@ -114,8 +121,8 @@ class V3CredsClient(CredsClient):
                 params={'name': domain_name})['domains'][0]
         except lib_exc.NotFound:
             # TODO(andrea) we could probably create the domain on the fly
-            msg = "Configured domain %s could not be found" % domain_name
-            raise exceptions.InvalidConfiguration(msg)
+            msg = "Requested domain %s could not be found" % domain_name
+            raise lib_exc.InvalidCredentials(msg)
 
     def create_project(self, name, description):
         project = self.identity_client.create_project(
@@ -124,11 +131,16 @@ class V3CredsClient(CredsClient):
         return project
 
     def get_credentials(self, user, project, password):
-        return cred_provider.get_credentials(
+        # User, project and domain already include both ID and name here,
+        # so there's no need to use the fill_in mode.
+        return auth.get_credentials(
+            auth_url=None,
+            fill_in=False,
             identity_version='v3',
             username=user['name'], user_id=user['id'],
             project_name=project['name'], project_id=project['id'],
             password=password,
+            project_domain_id=self.creds_domain['id'],
             project_domain_name=self.creds_domain['name'])
 
     def delete_project(self, project_id):
