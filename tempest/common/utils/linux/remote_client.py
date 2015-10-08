@@ -244,8 +244,7 @@ class RemoteClient(object):
 
     def get_nic_name(self, address):
         cmd = "ip -o addr | awk '/%s/ {print $2}'" % address
-        nic = self.exec_command(cmd)
-        return nic.strip().strip(":").lower()
+        return self._get_nic_name(cmd)
 
     def get_ip_list(self):
         cmd = "ip address"
@@ -320,3 +319,12 @@ class RemoteClient(object):
     def make_fs(self, dev_name, fs='ext4'):
         cmd_mkfs = 'sudo /usr/sbin/mke2fs -t %s /dev/%s' % (fs, dev_name)
         self.exec_command(cmd_mkfs)
+
+    def get_nic_name_by_mac_addr(self, mac_address):
+        cmd = "ip -o link | awk '/%s/ {print $2}'" % mac_address
+        return self._get_nic_name(cmd)
+
+    def _get_nic_name(self, cmd):
+        nic = self.exec_command(cmd)
+        return nic.strip().strip(":").lower()
+

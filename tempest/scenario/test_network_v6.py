@@ -146,7 +146,11 @@ class TestGettingAddress(manager.NetworkScenarioTest):
                          message="Multiple IPv6 ports found on network %s"
                          % self.network_v6)
         mac6 = ports[0]
-        ssh.turn_nic_on(ssh.get_nic_name(mac6))
+        nic_name = ssh.get_nic_name_by_mac_addr(mac6)
+        self.assertIsNot('', nic_name,
+                         message="Failed to find nic with mac %s" % mac6
+                         )
+        ssh.turn_nic_on(nic_name)
 
     def _prepare_and_test(self, address6_mode, n_subnets6=1, dualnet=False):
         net_list = self.prepare_network(address6_mode=address6_mode,
