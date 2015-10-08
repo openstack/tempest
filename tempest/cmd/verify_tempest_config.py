@@ -24,7 +24,7 @@ from six import moves
 from six.moves.urllib import parse as urlparse
 
 from tempest import clients
-from tempest.common import credentials
+from tempest.common import credentials_factory as credentials
 from tempest import config
 
 

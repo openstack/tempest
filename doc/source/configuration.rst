@@ -127,16 +127,16 @@ to the tests using the credentials, and failure to do this will likely cause
 unexpected failures in some tests.
 
 
-Non-locking test accounts (aka credentials config options)
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+Legacy test accounts (aka credentials config options)
+"""""""""""""""""""""""""""""""""""""""""""""""""""""
 **Starting in the Liberty release this mechanism was deprecated and will be
 removed in a future release**
 
 When Tempest was refactored to allow for locking test accounts, the original
 non-tenant isolated case was converted to internally work similarly to the
-accounts.yaml file. This mechanism was then called the non-locking test accounts
-provider. To use the non-locking test accounts provider you can specify the sets
-of credentials in the configuration file like detailed above with following 9
+accounts.yaml file. This mechanism was then called the legacy test accounts
+provider. To use the legacy test accounts provider you can specify the sets of
+credentials in the configuration file like detailed above with following 9
 options in the identity section:
 
  #. username

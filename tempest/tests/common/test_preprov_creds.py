@@ -329,36 +329,3 @@ class TestPreProvisionedCredentials(base.TestCase):
         self.assertIn('id', network)
         self.assertEqual('fake-id', network['id'])
         self.assertEqual('network-2', network['name'])
-
-
-class TestNotLockingAccount(base.TestCase):
-
-    fixed_params = {'name': 'test class',
-                    'identity_version': 'v2',
-                    'admin_role': 'admin'}
-
-    def setUp(self):
-        super(TestNotLockingAccount, self).setUp()
-        self.useFixture(fake_config.ConfigFixture())
-        self.stubs.Set(config, 'TempestConfigPrivate', fake_config.FakePrivate)
-        self.useFixture(lockutils_fixtures.ExternalLockFixture())
-        self.test_accounts = [
-            {'username': 'test_user1', 'tenant_name': 'test_tenant1',
-             'password': 'p'},
-            {'username': 'test_user2', 'tenant_name': 'test_tenant2',
-             'password': 'p'},
-            {'username': 'test_user3', 'tenant_name': 'test_tenant3',
-             'password': 'p'},
-        ]
-        self.useFixture(mockpatch.Patch(
-            'tempest.common.preprov_creds.read_accounts_yaml',
-            return_value=self.test_accounts))
-        cfg.CONF.set_default('test_accounts_file', '', group='auth')
-        self.useFixture(mockpatch.Patch('os.path.isfile', return_value=True))
-
-    def test_get_creds_roles_nonlocking_invalid(self):
-        test_accounts_class = preprov_creds.NonLockingCredentialProvider(
-            **self.fixed_params)
-        self.assertRaises(exceptions.InvalidConfiguration,
-                          test_accounts_class.get_creds_by_roles,
-                          ['fake_role'])

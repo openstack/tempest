@@ -16,7 +16,7 @@ import logging
 import netaddr
 
 from tempest.api.orchestration import base
-from tempest import clients
+from tempest.common import credentials_factory as credentials
 from tempest.common.utils import data_utils
 from tempest import config
 from tempest import exceptions
@@ -38,7 +38,7 @@ class NeutronResourcesTestJSON(base.BaseOrchestrationTest):
     @classmethod
     def setup_credentials(cls):
         super(NeutronResourcesTestJSON, cls).setup_credentials()
-        cls.os = clients.Manager()
+        cls.os = credentials.ConfiguredUserManager()
 
     @classmethod
     def setup_clients(cls):

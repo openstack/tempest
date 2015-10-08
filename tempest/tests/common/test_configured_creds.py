@@ -18,8 +18,7 @@ from tempest_lib import exceptions as lib_exc
 from tempest_lib.services.identity.v2 import token_client as v2_client
 from tempest_lib.services.identity.v3 import token_client as v3_client
 
-
-from tempest.common import cred_provider
+from tempest.common import credentials_factory as common_creds
 from tempest.common import tempest_fixtures as fixtures
 from tempest import config
 from tempest.tests import base
@@ -65,12 +64,12 @@ class ConfiguredV2CredentialsTests(base.TestCase):
 
     def _verify_credentials(self, credentials_class, filled=True,
                             identity_version=None):
-        for ctype in cred_provider.CREDENTIAL_TYPES:
+        for ctype in common_creds.CREDENTIAL_TYPES:
             if identity_version is None:
-                creds = cred_provider.get_configured_credentials(
+                creds = common_creds.get_configured_credentials(
                     credential_type=ctype, fill_in=filled)
             else:
-                creds = cred_provider.get_configured_credentials(
+                creds = common_creds.get_configured_credentials(
                     credential_type=ctype, fill_in=filled,
                     identity_version=identity_version)
             self._check(creds, credentials_class, filled)

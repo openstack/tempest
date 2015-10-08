@@ -58,7 +58,7 @@ from oslo_serialization import jsonutils as json
 
 from tempest import clients
 from tempest.cmd import cleanup_service
-from tempest.common import cred_provider
+from tempest.common import credentials_factory as credentials
 from tempest import config
 
 SAVED_STATE_JSON = "saved_state.json"
@@ -75,7 +75,7 @@ class TempestCleanup(command.Command):
     def take_action(self, parsed_args):
         cleanup_service.init_conf()
         self.options = parsed_args
-        self.admin_mgr = clients.AdminManager()
+        self.admin_mgr = credentials.AdminManager()
         self.dry_run_data = {}
         self.json_data = {}
 
@@ -162,7 +162,7 @@ class TempestCleanup(command.Command):
         kwargs = {"username": CONF.auth.admin_username,
                   "password": CONF.auth.admin_password,
                   "tenant_name": tenant['name']}
-        mgr = clients.Manager(credentials=cred_provider.get_credentials(
+        mgr = clients.Manager(credentials=credentials.get_credentials(
             **kwargs))
         kwargs = {'data': tenant_data,
                   'is_dry_run': is_dry_run,
@@ -235,7 +235,7 @@ class TempestCleanup(command.Command):
         LOG.debug("Remove admin user role for tenant: %s" % tenant_id)
         # Must initialize AdminManager for each user role
         # Otherwise authentication exception is thrown, weird
-        id_cl = clients.AdminManager().identity_client
+        id_cl = credentials.AdminManager().identity_client
         if (self._tenant_exists(tenant_id)):
             try:
                 id_cl.remove_user_role(tenant_id, self.admin_id,

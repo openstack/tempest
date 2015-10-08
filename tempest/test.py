@@ -32,7 +32,7 @@ import testtools
 
 from tempest import clients
 from tempest.common import cred_client
-from tempest.common import credentials
+from tempest.common import credentials_factory as credentials
 from tempest.common import fixed_network
 import tempest.common.generator.valid_generator as valid
 import tempest.common.validation_resources as vresources

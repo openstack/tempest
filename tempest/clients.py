@@ -38,7 +38,6 @@ from tempest_lib.services.compute.hypervisor_client import \
 from tempest_lib.services.identity.v2.token_client import TokenClient
 from tempest_lib.services.identity.v3.token_client import V3TokenClient
 
-from tempest.common import cred_provider
 from tempest.common import negative_rest_client
 from tempest import config
 from tempest import exceptions
@@ -174,7 +173,7 @@ class Manager(manager.Manager):
     }
     default_params_with_timeout_values.update(default_params)
 
-    def __init__(self, credentials=None, service=None):
+    def __init__(self, credentials, service=None):
         super(Manager, self).__init__(credentials=credentials)
 
         self._set_compute_clients()
@@ -475,17 +474,3 @@ class Manager(manager.Manager):
         self.account_client = AccountClient(self.auth_provider, **params)
         self.container_client = ContainerClient(self.auth_provider, **params)
         self.object_client = ObjectClient(self.auth_provider, **params)
-
-
-class AdminManager(Manager):
-
-    """
-    Manager object that uses the admin credentials for its
-    managed client objects
-    """
-
-    def __init__(self, service=None):
-        super(AdminManager, self).__init__(
-            credentials=cred_provider.get_configured_credentials(
-                'identity_admin'),
-            service=service)

@@ -16,7 +16,7 @@
 from oslo_log import log as logging
 from tempest_lib import exceptions as lib_exc
 
-from tempest.common import cred_provider
+from tempest.common import credentials_factory as common_creds
 from tempest.common.utils import data_utils
 from tempest import config
 import tempest.test
@@ -195,11 +195,11 @@ class DataGenerator(object):
 
         @property
         def test_credentials(self):
-            return cred_provider.get_credentials(username=self.test_user,
-                                                 user_id=self.user['id'],
-                                                 password=self.test_password,
-                                                 tenant_name=self.test_tenant,
-                                                 tenant_id=self.tenant['id'])
+            return common_creds.get_credentials(username=self.test_user,
+                                                user_id=self.user['id'],
+                                                password=self.test_password,
+                                                tenant_name=self.test_tenant,
+                                                tenant_id=self.tenant['id'])
 
         def setup_test_user(self):
             """Set up a test user."""
