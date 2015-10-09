@@ -19,13 +19,13 @@ import unicodedata
 
 from oslo_serialization import jsonutils as json
 from tempest_lib.common.utils import misc
+from tempest_lib import exceptions as exc_lib
 import testscenarios
 import testtools
 
 from tempest import clients
 from tempest.common import credentials
 from tempest import config
-from tempest import exceptions
 
 CONF = config.CONF
 
@@ -174,7 +174,7 @@ def load_tests_input_scenario_utils(*args):
         scenario_utils = InputScenarioUtils()
         scenario_flavor = scenario_utils.scenario_flavors
         scenario_image = scenario_utils.scenario_images
-    except (exceptions.InvalidConfiguration, TypeError):
+    except (exc_lib.InvalidCredentials, TypeError):
         output = standard_tests
     finally:
         if scenario_utils:

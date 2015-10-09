@@ -18,6 +18,7 @@ import os
 from oslo_concurrency import lockutils
 from oslo_log import log as logging
 import six
+from tempest_lib import auth
 import yaml
 
 from tempest import clients
@@ -280,7 +281,12 @@ class PreProvisionedCredentialProvider(cred_provider.CredentialProvider):
 
     def _wrap_creds_with_network(self, hash):
         creds_dict = self.hash_dict['creds'][hash]
-        credential = cred_provider.get_credentials(
+        # Make sure a domain scope if defined for users in case of V3
+        creds_dict = self._extend_credentials(creds_dict)
+        # This just builds a Credentials object, it does not validate
+        # nor fill  with missing fields.
+        credential = auth.get_credentials(
+            auth_url=None, fill_in=False,
             identity_version=self.identity_version, **creds_dict)
         net_creds = cred_provider.TestResources(credential)
         net_clients = clients.Manager(credentials=credential)
@@ -293,6 +299,16 @@ class PreProvisionedCredentialProvider(cred_provider.CredentialProvider):
             network = {}
         net_creds.set_resources(network=network)
         return net_creds
+
+    def _extend_credentials(self, creds_dict):
+        # In case of v3, adds a user_domain_name field to the creds
+        # dict if not defined
+        if self.identity_version == 'v3':
+            user_domain_fields = set(['user_domain_name', 'user_domain_id'])
+            if not user_domain_fields.intersection(set(creds_dict.keys())):
+                _domain = CONF.auth.default_credentials_domain_name
+                creds_dict['user_domain_name'] = _domain
+        return creds_dict
 
 
 class NonLockingCredentialProvider(PreProvisionedCredentialProvider):
@@ -323,7 +339,8 @@ class NonLockingCredentialProvider(PreProvisionedCredentialProvider):
         if self._creds.get('primary'):
             return self._creds.get('primary')
         primary_credential = cred_provider.get_configured_credentials(
-            credential_type='user', identity_version=self.identity_version)
+            fill_in=False, credential_type='user',
+            identity_version=self.identity_version)
         self._creds['primary'] = cred_provider.TestResources(
             primary_credential)
         return self._creds['primary']
@@ -332,7 +349,7 @@ class NonLockingCredentialProvider(PreProvisionedCredentialProvider):
         if self._creds.get('alt'):
             return self._creds.get('alt')
         alt_credential = cred_provider.get_configured_credentials(
-            credential_type='alt_user',
+            fill_in=False, credential_type='alt_user',
             identity_version=self.identity_version)
         self._creds['alt'] = cred_provider.TestResources(
             alt_credential)
