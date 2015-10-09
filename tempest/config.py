@@ -53,7 +53,7 @@ AuthGroup = [
                     "at least `2 * CONC` distinct accounts configured in "
                     " the `test_accounts_file`, with CONC == the "
                     "number of concurrent test processes."),
-    cfg.BoolOpt('allow_tenant_isolation',
+    cfg.BoolOpt('use_dynamic_credentials',
                 default=True,
                 help="Allows test cases to create/destroy tenants and "
                      "users. This option requires that OpenStack Identity "
@@ -61,6 +61,8 @@ AuthGroup = [
                      "test cases and parallel execution, can still be "
                      "achieved configuring a list of test accounts",
                 deprecated_opts=[cfg.DeprecatedOpt('allow_tenant_isolation',
+                                                   group='auth'),
+                                 cfg.DeprecatedOpt('allow_tenant_isolation',
                                                    group='compute'),
                                  cfg.DeprecatedOpt('allow_tenant_isolation',
                                                    group='orchestration')]),
@@ -76,9 +78,9 @@ AuthGroup = [
                                 group='auth')]),
     cfg.BoolOpt('create_isolated_networks',
                 default=True,
-                help="If allow_tenant_isolation is set to True and Neutron is "
-                     "enabled Tempest will try to create a usable network, "
-                     "subnet, and router when needed for each tenant it  "
+                help="If use_dynamic_credentials is set to True and Neutron "
+                     "is enabled Tempest will try to create a usable network, "
+                     "subnet, and router when needed for each tenant it "
                      "creates. However in some neutron configurations, like "
                      "with VLAN provider networks, this doesn't work. So if "
                      "set to False the isolated networks will not be created"),

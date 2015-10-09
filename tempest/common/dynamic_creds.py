@@ -28,21 +28,21 @@ CONF = config.CONF
 LOG = logging.getLogger(__name__)
 
 
-class IsolatedCreds(cred_provider.CredentialProvider):
+class DynamicCredentialProvider(cred_provider.CredentialProvider):
 
     def __init__(self, identity_version=None, name=None,
                  network_resources=None):
-        super(IsolatedCreds, self).__init__(identity_version, name,
-                                            network_resources)
+        super(DynamicCredentialProvider, self).__init__(
+            identity_version, name, network_resources)
         self.network_resources = network_resources
-        self.isolated_creds = {}
+        self._creds = {}
         self.ports = []
         self.default_admin_creds = cred_provider.get_configured_credentials(
             'identity_admin', fill_in=True,
             identity_version=self.identity_version)
         (self.identity_admin_client, self.network_admin_client,
          self.networks_admin_client) = self._get_admin_clients()
-        # Domain where isolated credentials are provisioned (v3 only).
+        # Domain where dynamic credentials are provisioned (v3 only).
         # Use that of the admin account is None is configured.
         self.creds_domain_name = None
         if self.identity_version == 'v3':
@@ -205,17 +205,17 @@ class IsolatedCreds(cred_provider.CredentialProvider):
             router_id, subnet_id)
 
     def get_credentials(self, credential_type):
-        if self.isolated_creds.get(str(credential_type)):
-            credentials = self.isolated_creds[str(credential_type)]
+        if self._creds.get(str(credential_type)):
+            credentials = self._creds[str(credential_type)]
         else:
             if credential_type in ['primary', 'alt', 'admin']:
                 is_admin = (credential_type == 'admin')
                 credentials = self._create_creds(admin=is_admin)
             else:
                 credentials = self._create_creds(roles=credential_type)
-            self.isolated_creds[str(credential_type)] = credentials
+            self._creds[str(credential_type)] = credentials
             # Maintained until tests are ported
-            LOG.info("Acquired isolated creds:\n credentials: %s"
+            LOG.info("Acquired dynamic creds:\n credentials: %s"
                      % credentials)
             if (CONF.service_available.neutron and
                 not CONF.baremetal.driver_enabled and
@@ -240,15 +240,15 @@ class IsolatedCreds(cred_provider.CredentialProvider):
     def get_creds_by_roles(self, roles, force_new=False):
         roles = list(set(roles))
         # The roles list as a str will become the index as the dict key for
-        # the created credentials set in the isolated_creds dict.
-        exist_creds = self.isolated_creds.get(str(roles))
+        # the created credentials set in the dynamic_creds dict.
+        exist_creds = self._creds.get(str(roles))
         # If force_new flag is True 2 cred sets with the same roles are needed
         # handle this by creating a separate index for old one to store it
         # separately for cleanup
         if exist_creds and force_new:
-            new_index = str(roles) + '-' + str(len(self.isolated_creds))
-            self.isolated_creds[new_index] = exist_creds
-            del self.isolated_creds[str(roles)]
+            new_index = str(roles) + '-' + str(len(self._creds))
+            self._creds[new_index] = exist_creds
+            del self._creds[str(roles)]
         return self.get_credentials(roles)
 
     def _clear_isolated_router(self, router_id, router_name):
@@ -289,8 +289,8 @@ class IsolatedCreds(cred_provider.CredentialProvider):
 
     def _clear_isolated_net_resources(self):
         net_client = self.network_admin_client
-        for cred in self.isolated_creds:
-            creds = self.isolated_creds.get(cred)
+        for cred in self._creds:
+            creds = self._creds.get(cred)
             if (not creds or not any([creds.router, creds.network,
                                       creds.subnet])):
                 continue
@@ -317,11 +317,11 @@ class IsolatedCreds(cred_provider.CredentialProvider):
                 self._clear_isolated_network(creds.network['id'],
                                              creds.network['name'])
 
-    def clear_isolated_creds(self):
-        if not self.isolated_creds:
+    def clear_creds(self):
+        if not self._creds:
             return
         self._clear_isolated_net_resources()
-        for creds in six.itervalues(self.isolated_creds):
+        for creds in six.itervalues(self._creds):
             try:
                 self.creds_client.delete_user(creds.user_id)
             except lib_exc.NotFound:
@@ -334,7 +334,7 @@ class IsolatedCreds(cred_provider.CredentialProvider):
             except lib_exc.NotFound:
                 LOG.warn("tenant with name: %s not found for delete" %
                          creds.tenant_name)
-        self.isolated_creds = {}
+        self._creds = {}
 
     def is_multi_user(self):
         return True

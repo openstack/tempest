@@ -51,7 +51,7 @@ class Accounts(cred_provider.CredentialProvider):
         self.hash_dict = self.get_hash_dict(accounts)
         self.accounts_dir = os.path.join(lockutils.get_lock_path(CONF),
                                          'test_accounts')
-        self.isolated_creds = {}
+        self._creds = {}
 
     @classmethod
     def _append_role(cls, role, account_hash, hash_dict):
@@ -230,38 +230,38 @@ class Accounts(cred_provider.CredentialProvider):
         LOG.info("%s returned allocated creds:\n%s" % (self.name, clean_creds))
 
     def get_primary_creds(self):
-        if self.isolated_creds.get('primary'):
-            return self.isolated_creds.get('primary')
+        if self._creds.get('primary'):
+            return self._creds.get('primary')
         net_creds = self._get_creds()
-        self.isolated_creds['primary'] = net_creds
+        self._creds['primary'] = net_creds
         return net_creds
 
     def get_alt_creds(self):
-        if self.isolated_creds.get('alt'):
-            return self.isolated_creds.get('alt')
+        if self._creds.get('alt'):
+            return self._creds.get('alt')
         net_creds = self._get_creds()
-        self.isolated_creds['alt'] = net_creds
+        self._creds['alt'] = net_creds
         return net_creds
 
     def get_creds_by_roles(self, roles, force_new=False):
         roles = list(set(roles))
-        exist_creds = self.isolated_creds.get(six.text_type(roles).encode(
+        exist_creds = self._creds.get(six.text_type(roles).encode(
             'utf-8'), None)
         # The force kwarg is used to allocate an additional set of creds with
         # the same role list. The index used for the previously allocation
-        # in the isolated_creds dict will be moved.
+        # in the preprov_creds dict will be moved.
         if exist_creds and not force_new:
             return exist_creds
         elif exist_creds and force_new:
             new_index = six.text_type(roles).encode('utf-8') + '-' + \
-                six.text_type(len(self.isolated_creds)).encode('utf-8')
-            self.isolated_creds[new_index] = exist_creds
+                six.text_type(len(self._creds)).encode('utf-8')
+            self._creds[new_index] = exist_creds
         net_creds = self._get_creds(roles=roles)
-        self.isolated_creds[six.text_type(roles).encode('utf-8')] = net_creds
+        self._creds[six.text_type(roles).encode('utf-8')] = net_creds
         return net_creds
 
-    def clear_isolated_creds(self):
-        for creds in self.isolated_creds.values():
+    def clear_creds(self):
+        for creds in self._creds.values():
             self.remove_credentials(creds)
 
     def get_admin_creds(self):
@@ -320,36 +320,36 @@ class NotLockingAccounts(Accounts):
         return self._unique_creds('tenant_id')
 
     def get_primary_creds(self):
-        if self.isolated_creds.get('primary'):
-            return self.isolated_creds.get('primary')
+        if self._creds.get('primary'):
+            return self._creds.get('primary')
         primary_credential = cred_provider.get_configured_credentials(
             credential_type='user', identity_version=self.identity_version)
-        self.isolated_creds['primary'] = cred_provider.TestResources(
+        self._creds['primary'] = cred_provider.TestResources(
             primary_credential)
-        return self.isolated_creds['primary']
+        return self._creds['primary']
 
     def get_alt_creds(self):
-        if self.isolated_creds.get('alt'):
-            return self.isolated_creds.get('alt')
+        if self._creds.get('alt'):
+            return self._creds.get('alt')
         alt_credential = cred_provider.get_configured_credentials(
             credential_type='alt_user',
             identity_version=self.identity_version)
-        self.isolated_creds['alt'] = cred_provider.TestResources(
+        self._creds['alt'] = cred_provider.TestResources(
             alt_credential)
-        return self.isolated_creds['alt']
+        return self._creds['alt']
 
-    def clear_isolated_creds(self):
-        self.isolated_creds = {}
+    def clear_creds(self):
+        self._creds = {}
 
     def get_admin_creds(self):
         creds = cred_provider.get_configured_credentials(
             "identity_admin", fill_in=False)
-        self.isolated_creds['admin'] = cred_provider.TestResources(creds)
-        return self.isolated_creds['admin']
+        self._creds['admin'] = cred_provider.TestResources(creds)
+        return self._creds['admin']
 
     def get_creds_by_roles(self, roles, force_new=False):
         msg = "Credentials being specified through the config file can not be"\
               " used with tests that specify using credentials by roles. "\
               "Either exclude/skip the tests doing this or use either an "\
-              "test_accounts_file or tenant isolation."
+              "test_accounts_file or dynamic credentials."
         raise exceptions.InvalidConfiguration(msg)

@@ -63,39 +63,41 @@ Credential Provider Mechanisms
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Tempest currently also has 3 different internal methods for providing
-authentication to tests. Tenant isolation, locking test accounts, and
+authentication to tests. Dynamic credentials, locking test accounts, and
 non-locking test accounts. Depending on which one is in use the configuration
 of tempest is slightly different.
 
-Tenant Isolation
-""""""""""""""""
-Tenant isolation was originally create to enable running tempest in parallel.
+Dynamic Credentials
+"""""""""""""""""""
+Dynamic Credentials (formerly known as Tenant isolation) was originally created
+to enable running tempest in parallel.
 For each test class it creates a unique set of user credentials to use for the
 tests in the class. It can create up to 3 sets of username, password, and
 tenant/project names for a primary user, an admin user, and an alternate user.
-To enable and use tenant isolation you only need to configure 2 things:
+To enable and use dynamic credentials you only need to configure 2 things:
 
  #. A set of admin credentials with permissions to create users and
     tenants/projects. This is specified in the auth section with the
-    admin_username, admin_tenant_name, admin_domain_name, and admin_password
+    admin_username, admin_tenant_name, admin_domain_name and admin_password
     options
- #. To enable tenant_isolation in the auth section with the
-    allow_tenant_isolation option.
+ #. To enable dynamic_creds in the auth section with the
+    use_dynamic_credentials option.
 
 This is also the currently the default credential provider enabled by tempest,
 due to it's common use and ease of configuration.
 
 It is worth pointing out that depending on your cloud configuration you might
-need to assign a role to each of the users created Tempest's tenant isolation.
+need to assign a role to each of the users created by Tempest's dynamic
+credentials.
 This can be set using the *tempest_roles* option. It takes in a list of role
-names each of which will be assigned to each of the users created by tenant
-isolation. This option will not have any effect when set and tempest is not
-configured to use tenant isolation.
+names each of which will be assigned to each of the users created by dynamic
+credentials. This option will not have any effect when set and tempest is not
+configured to use dynamic credentials.
 
 
 Locking Test Accounts (aka accounts.yaml or accounts file)
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""
-For a long time using tenant isolation was the only method available if you
+For a long time using dynamic credentials was the only method available if you
 wanted to enable parallel execution of tempest tests. However this was
 insufficient for certain use cases because of the admin credentials requirement
 to create the credential sets on demand. To get around that the accounts.yaml
@@ -103,7 +105,7 @@ file was introduced and with that a new internal credential provider to enable
 using the list of credentials instead of creating them on demand. With locking
 test accounts each test class will reserve a set of credentials from the
 accounts.yaml before executing any of its tests so that each class is isolated
-like in tenant isolation.
+like with dynamic credentials.
 
 To enable and use locking test accounts you need do a few things:
 
@@ -117,7 +119,7 @@ To enable and use locking test accounts you need do a few things:
  #. Provide tempest with the location of your accounts.yaml file with the
     test_accounts_file option in the auth section
 
- #. Set allow_tenant_isolation = False in the auth group
+ #. Set use_dynamic_credentials = False in the auth group
 
 It is worth pointing out that each set of credentials in the accounts.yaml
 should have a unique tenant. This is required to provide proper isolation
@@ -149,7 +151,7 @@ options in the identity section:
 
 And in the auth section:
 
- #. allow_tenant_isolation = False
+ #. use_dynamic_credentials = False
  #. comment out 'test_accounts_file' or keep it as empty
 
 It only makes sense to use it if parallel execution isn't needed, since tempest
@@ -295,28 +297,28 @@ fixed network name is provided it will serve as a fallback in case of a
 misconfiguration or a missing network in the accounts file.
 
 
-With Tenant Isolation
-"""""""""""""""""""""
-With tenant isolation enabled and using nova-network then nothing changes. Your
-only option for configuration is to either set a fixed network name or not.
+With Dynamic Credentials
+""""""""""""""""""""""""
+With dynamic credentials enabled and using nova-network then nothing changes.
+Your only option for configuration is to either set a fixed network name or not.
 However, in most cases it shouldn't matter because nova-network should have no
 problem booting a server with multiple networks. If this is not the case for
 your cloud then using an accounts file is recommended because it provides the
-necessary flexibility to describe your configuration. Tenant isolation is not
+necessary flexibility to describe your configuration. Dynamic credentials is not
 able to dynamically allocate things as necessary if neutron is not enabled.
 
-With neutron and tenant isolation enabled there should not be any additional
+With neutron and dynamic credentials enabled there should not be any additional
 configuration necessary to enable Tempest to create servers with working
 networking, assuming you have properly configured the network section to work
 for your cloud. Tempest will dynamically create the neutron resources necessary
 to enable using servers with that network. Also, just as with the accounts
-file, if you specify a fixed network name while using neutron and tenant
-isolation it will enable running tests which require a static network and it
+file, if you specify a fixed network name while using neutron and dynamic
+credentials it will enable running tests which require a static network and it
 will additionally be used as a fallback for server creation. However, unlike
 accounts.yaml this should never be triggered.
 
-However, there is an option *create_isolated_networks* to disable tenant
-isolation's automatic provisioning of network resources. If this option is
+However, there is an option *create_isolated_networks* to disable dynamic
+credentials's automatic provisioning of network resources. If this option is
 used you will have to either rely on there only being a single/default network
 available for the server creation, or use *fixed_network_name* to inform
 Tempest which network to use.
