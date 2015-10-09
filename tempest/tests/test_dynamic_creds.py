@@ -32,6 +32,9 @@ from tempest.tests import fake_identity
 
 class TestDynamicCredentialProvider(base.TestCase):
 
+    fixed_params = {'name': 'test class',
+                    'identity_version': 'v2'}
+
     def setUp(self):
         super(TestDynamicCredentialProvider, self).setUp()
         self.useFixture(fake_config.ConfigFixture())
@@ -44,7 +47,7 @@ class TestDynamicCredentialProvider(base.TestCase):
         self._mock_list_ec2_credentials('fake_user_id', 'fake_tenant_id')
 
     def test_tempest_client(self):
-        creds = dynamic_creds.DynamicCredentialProvider(name='test class')
+        creds = dynamic_creds.DynamicCredentialProvider(**self.fixed_params)
         self.assertTrue(isinstance(creds.identity_admin_client,
                                    json_iden_client.IdentityClient))
         self.assertTrue(isinstance(creds.network_admin_client,
@@ -142,7 +145,7 @@ class TestDynamicCredentialProvider(base.TestCase):
     @mock.patch('tempest_lib.common.rest_client.RestClient')
     def test_primary_creds(self, MockRestClient):
         cfg.CONF.set_default('neutron', False, 'service_available')
-        creds = dynamic_creds.DynamicCredentialProvider(name='test class')
+        creds = dynamic_creds.DynamicCredentialProvider(**self.fixed_params)
         self._mock_assign_user_role()
         self._mock_list_role()
         self._mock_tenant_create('1234', 'fake_prim_tenant')
@@ -157,7 +160,7 @@ class TestDynamicCredentialProvider(base.TestCase):
     @mock.patch('tempest_lib.common.rest_client.RestClient')
     def test_admin_creds(self, MockRestClient):
         cfg.CONF.set_default('neutron', False, 'service_available')
-        creds = dynamic_creds.DynamicCredentialProvider(name='test class')
+        creds = dynamic_creds.DynamicCredentialProvider(**self.fixed_params)
         self._mock_list_roles('1234', 'admin')
         self._mock_user_create('1234', 'fake_admin_user')
         self._mock_tenant_create('1234', 'fake_admin_tenant')
@@ -180,7 +183,7 @@ class TestDynamicCredentialProvider(base.TestCase):
     @mock.patch('tempest_lib.common.rest_client.RestClient')
     def test_role_creds(self, MockRestClient):
         cfg.CONF.set_default('neutron', False, 'service_available')
-        creds = dynamic_creds.DynamicCredentialProvider('v2', 'test class')
+        creds = dynamic_creds.DynamicCredentialProvider(**self.fixed_params)
         self._mock_list_2_roles()
         self._mock_user_create('1234', 'fake_role_user')
         self._mock_tenant_create('1234', 'fake_role_tenant')
@@ -209,7 +212,7 @@ class TestDynamicCredentialProvider(base.TestCase):
     @mock.patch('tempest_lib.common.rest_client.RestClient')
     def test_all_cred_cleanup(self, MockRestClient):
         cfg.CONF.set_default('neutron', False, 'service_available')
-        creds = dynamic_creds.DynamicCredentialProvider(name='test class')
+        creds = dynamic_creds.DynamicCredentialProvider(**self.fixed_params)
         self._mock_assign_user_role()
         self._mock_list_role()
         self._mock_tenant_create('1234', 'fake_prim_tenant')
@@ -249,7 +252,7 @@ class TestDynamicCredentialProvider(base.TestCase):
     @mock.patch('tempest_lib.common.rest_client.RestClient')
     def test_alt_creds(self, MockRestClient):
         cfg.CONF.set_default('neutron', False, 'service_available')
-        creds = dynamic_creds.DynamicCredentialProvider(name='test class')
+        creds = dynamic_creds.DynamicCredentialProvider(**self.fixed_params)
         self._mock_assign_user_role()
         self._mock_list_role()
         self._mock_user_create('1234', 'fake_alt_user')
@@ -264,7 +267,7 @@ class TestDynamicCredentialProvider(base.TestCase):
     @mock.patch('tempest_lib.common.rest_client.RestClient')
     def test_no_network_creation_with_config_set(self, MockRestClient):
         cfg.CONF.set_default('create_isolated_networks', False, group='auth')
-        creds = dynamic_creds.DynamicCredentialProvider(name='test class')
+        creds = dynamic_creds.DynamicCredentialProvider(**self.fixed_params)
         self._mock_assign_user_role()
         self._mock_list_role()
         self._mock_user_create('1234', 'fake_prim_user')
@@ -292,7 +295,7 @@ class TestDynamicCredentialProvider(base.TestCase):
 
     @mock.patch('tempest_lib.common.rest_client.RestClient')
     def test_network_creation(self, MockRestClient):
-        creds = dynamic_creds.DynamicCredentialProvider(name='test class')
+        creds = dynamic_creds.DynamicCredentialProvider(**self.fixed_params)
         self._mock_assign_user_role()
         self._mock_list_role()
         self._mock_user_create('1234', 'fake_prim_user')
@@ -323,7 +326,7 @@ class TestDynamicCredentialProvider(base.TestCase):
                                          "description": args['name'],
                                          "security_group_rules": [],
                                          "id": "sg-%s" % args['tenant_id']}]}
-        creds = dynamic_creds.DynamicCredentialProvider(name='test class')
+        creds = dynamic_creds.DynamicCredentialProvider(**self.fixed_params)
         # Create primary tenant and network
         self._mock_assign_user_role()
         self._mock_list_role()
@@ -431,7 +434,7 @@ class TestDynamicCredentialProvider(base.TestCase):
 
     @mock.patch('tempest_lib.common.rest_client.RestClient')
     def test_network_alt_creation(self, MockRestClient):
-        creds = dynamic_creds.DynamicCredentialProvider(name='test class')
+        creds = dynamic_creds.DynamicCredentialProvider(**self.fixed_params)
         self._mock_assign_user_role()
         self._mock_list_role()
         self._mock_user_create('1234', 'fake_alt_user')
@@ -456,7 +459,7 @@ class TestDynamicCredentialProvider(base.TestCase):
 
     @mock.patch('tempest_lib.common.rest_client.RestClient')
     def test_network_admin_creation(self, MockRestClient):
-        creds = dynamic_creds.DynamicCredentialProvider(name='test class')
+        creds = dynamic_creds.DynamicCredentialProvider(**self.fixed_params)
         self._mock_assign_user_role()
         self._mock_user_create('1234', 'fake_admin_user')
         self._mock_tenant_create('1234', 'fake_admin_tenant')
@@ -488,7 +491,8 @@ class TestDynamicCredentialProvider(base.TestCase):
             'dhcp': False,
         }
         creds = dynamic_creds.DynamicCredentialProvider(
-            name='test class', network_resources=net_dict)
+            network_resources=net_dict,
+            **self.fixed_params)
         self._mock_assign_user_role()
         self._mock_list_role()
         self._mock_user_create('1234', 'fake_prim_user')
@@ -523,7 +527,8 @@ class TestDynamicCredentialProvider(base.TestCase):
             'dhcp': False,
         }
         creds = dynamic_creds.DynamicCredentialProvider(
-            name='test class', network_resources=net_dict)
+            network_resources=net_dict,
+            **self.fixed_params)
         self._mock_assign_user_role()
         self._mock_list_role()
         self._mock_user_create('1234', 'fake_prim_user')
@@ -540,7 +545,8 @@ class TestDynamicCredentialProvider(base.TestCase):
             'dhcp': False,
         }
         creds = dynamic_creds.DynamicCredentialProvider(
-            name='test class', network_resources=net_dict)
+            network_resources=net_dict,
+            **self.fixed_params)
         self._mock_assign_user_role()
         self._mock_list_role()
         self._mock_user_create('1234', 'fake_prim_user')
@@ -557,7 +563,8 @@ class TestDynamicCredentialProvider(base.TestCase):
             'dhcp': True,
         }
         creds = dynamic_creds.DynamicCredentialProvider(
-            name='test class', network_resources=net_dict)
+            network_resources=net_dict,
+            **self.fixed_params)
         self._mock_assign_user_role()
         self._mock_list_role()
         self._mock_user_create('1234', 'fake_prim_user')

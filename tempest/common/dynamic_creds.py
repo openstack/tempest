@@ -30,7 +30,7 @@ LOG = logging.getLogger(__name__)
 
 class DynamicCredentialProvider(cred_provider.CredentialProvider):
 
-    def __init__(self, identity_version=None, name=None,
+    def __init__(self, identity_version, name=None,
                  network_resources=None):
         super(DynamicCredentialProvider, self).__init__(
             identity_version, name, network_resources)

@@ -323,10 +323,13 @@ class BaseTestCase(testtools.testcase.WithAttributes,
         If one is really needed it may be implemented either in the
         resource_setup or at test level.
         """
-        if 'admin' in cls.credentials and not credentials.is_admin_available():
+        identity_version = cls.get_identity_version()
+        if 'admin' in cls.credentials and not credentials.is_admin_available(
+                identity_version=identity_version):
             msg = "Missing Identity Admin API credentials in configuration."
             raise cls.skipException(msg)
-        if 'alt' in cls.credentials and not credentials.is_alt_available():
+        if 'alt' in cls.credentials and not credentials.is_alt_available(
+                identity_version=identity_version):
             msg = "Missing a 2nd set of API credentials in configuration."
             raise cls.skipException(msg)
         if hasattr(cls, 'identity_version'):
@@ -454,6 +457,12 @@ class BaseTestCase(testtools.testcase.WithAttributes,
         return cred_client.get_creds_client(client, domain)
 
     @classmethod
+    def get_identity_version(cls):
+        """Returns the identity version used by the test class"""
+        identity_version = getattr(cls, 'identity_version', None)
+        return identity_version or CONF.identity.auth_version
+
+    @classmethod
     def _get_credentials_provider(cls):
         """Returns a credentials provider
 
@@ -464,13 +473,11 @@ class BaseTestCase(testtools.testcase.WithAttributes,
                 not cls._creds_provider.name == cls.__name__):
             force_tenant_isolation = getattr(cls, 'force_tenant_isolation',
                                              False)
-            identity_version = getattr(cls, 'identity_version', None)
-            identity_version = identity_version or CONF.identity.auth_version
 
             cls._creds_provider = credentials.get_credentials_provider(
                 name=cls.__name__, network_resources=cls.network_resources,
                 force_tenant_isolation=force_tenant_isolation,
-                identity_version=identity_version)
+                identity_version=cls.get_identity_version())
         return cls._creds_provider
 
     @classmethod
@@ -597,7 +604,8 @@ class BaseTestCase(testtools.testcase.WithAttributes,
         # for their servers, so using an admin network client to validate
         # the network name
         if (not CONF.service_available.neutron and
-                credentials.is_admin_available()):
+                credentials.is_admin_available(
+                    identity_version=cls.get_identity_version())):
             admin_creds = cred_provider.get_admin_creds()
             admin_manager = clients.Manager(admin_creds)
             networks_client = admin_manager.compute_networks_client
@@ -747,7 +755,8 @@ class NegativeAutoTest(BaseTestCase):
                             "mechanism")
 
         if "admin_client" in description and description["admin_client"]:
-            if not credentials.is_admin_available():
+            if not credentials.is_admin_available(
+                    identity_version=self.get_identity_version()):
                 msg = ("Missing Identity Admin API credentials in"
                        "configuration.")
                 raise self.skipException(msg)

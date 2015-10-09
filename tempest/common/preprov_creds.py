@@ -39,7 +39,7 @@ def read_accounts_yaml(path):
 
 class PreProvisionedCredentialProvider(cred_provider.CredentialProvider):
 
-    def __init__(self, identity_version=None, name=None):
+    def __init__(self, identity_version, name=None):
         super(PreProvisionedCredentialProvider, self).__init__(
             identity_version=identity_version, name=name)
         if (CONF.auth.test_accounts_file and
