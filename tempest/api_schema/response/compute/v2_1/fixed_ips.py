@@ -36,7 +36,6 @@ get_fixed_ip = {
     }
 }
 
-reserve_fixed_ip = {
-    'status_code': [202],
-    'response_body': {'type': 'string'}
+reserve_unreserve_fixed_ip = {
+    'status_code': [202]
 }

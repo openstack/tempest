@@ -32,5 +32,5 @@ class FixedIPsClient(service_client.ServiceClient):
         """This reserves and unreserves fixed ips."""
         url = "os-fixed-ips/%s/action" % fixed_ip
         resp, body = self.post(url, json.dumps(kwargs))
-        self.validate_response(schema.reserve_fixed_ip, resp, body)
+        self.validate_response(schema.reserve_unreserve_fixed_ip, resp, body)
         return service_client.ResponseBody(resp)
