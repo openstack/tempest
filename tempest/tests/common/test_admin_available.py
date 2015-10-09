@@ -30,10 +30,10 @@ class TestAdminAvailable(base.TestCase):
         self.useFixture(fake_config.ConfigFixture())
         self.stubs.Set(config, 'TempestConfigPrivate', fake_config.FakePrivate)
 
-    def run_test(self, tenant_isolation, use_accounts_file, admin_creds):
+    def run_test(self, dynamic_creds, use_accounts_file, admin_creds):
 
         cfg.CONF.set_default('use_dynamic_credentials',
-                             tenant_isolation, group='auth')
+                             dynamic_creds, group='auth')
         if use_accounts_file:
             accounts = [{'username': 'u1',
                          'tenant_name': 't1',
@@ -62,48 +62,54 @@ class TestAdminAvailable(base.TestCase):
             self.useFixture(mockpatch.Patch('os.path.isfile',
                                             return_value=False))
             if admin_creds:
-                (u, t, p, d) = ('u', 't', 'p', 'd')
+                username = 'u'
+                tenant = 't'
+                password = 'p'
+                domain = 'd'
             else:
-                (u, t, p, d) = (None, None, None, None)
+                username = None
+                tenant = None
+                password = None
+                domain = None
 
-            cfg.CONF.set_default('admin_username', u, group='auth')
-            cfg.CONF.set_default('admin_tenant_name', t, group='auth')
-            cfg.CONF.set_default('admin_password', p, group='auth')
-            cfg.CONF.set_default('admin_domain_name', d, group='auth')
+            cfg.CONF.set_default('admin_username', username, group='auth')
+            cfg.CONF.set_default('admin_tenant_name', tenant, group='auth')
+            cfg.CONF.set_default('admin_password', password, group='auth')
+            cfg.CONF.set_default('admin_domain_name', domain, group='auth')
 
-        expected = admin_creds is not None or tenant_isolation
+        expected = admin_creds is not None or dynamic_creds
         observed = credentials.is_admin_available(
             identity_version=self.identity_version)
         self.assertEqual(expected, observed)
 
-    # Tenant isolation implies admin so only one test case for True
-    def test__tenant_isolation__accounts_file__no_admin(self):
-        self.run_test(tenant_isolation=True,
+    # Dynamic credentials implies admin so only one test case for True
+    def test__dynamic_creds__accounts_file__no_admin(self):
+        self.run_test(dynamic_creds=True,
                       use_accounts_file=True,
                       admin_creds=None)
 
-    def test__no_tenant_isolation__accounts_file__no_admin(self):
-        self.run_test(tenant_isolation=False,
+    def test__no_dynamic_creds__accounts_file__no_admin(self):
+        self.run_test(dynamic_creds=False,
                       use_accounts_file=True,
                       admin_creds=None)
 
-    def test__no_tenant_isolation__accounts_file__admin_role(self):
-        self.run_test(tenant_isolation=False,
+    def test__no_dynamic_creds__accounts_file__admin_role(self):
+        self.run_test(dynamic_creds=False,
                       use_accounts_file=True,
                       admin_creds='role')
 
-    def test__no_tenant_isolation__accounts_file__admin_type(self):
-        self.run_test(tenant_isolation=False,
+    def test__no_dynamic_creds__accounts_file__admin_type(self):
+        self.run_test(dynamic_creds=False,
                       use_accounts_file=True,
                       admin_creds='type')
 
-    def test__no_tenant_isolation__no_accounts_file__no_admin(self):
-        self.run_test(tenant_isolation=False,
+    def test__no_dynamic_creds__no_accounts_file__no_admin(self):
+        self.run_test(dynamic_creds=False,
                       use_accounts_file=False,
                       admin_creds=None)
 
-    def test__no_tenant_isolation__no_accounts_file__admin(self):
-        self.run_test(tenant_isolation=False,
+    def test__no_dynamic_creds__no_accounts_file__admin(self):
+        self.run_test(dynamic_creds=False,
                       use_accounts_file=False,
                       admin_creds='role')
 
