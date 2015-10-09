@@ -30,11 +30,12 @@ LOG = logging.getLogger(__name__)
 
 class DynamicCredentialProvider(cred_provider.CredentialProvider):
 
-    def __init__(self, identity_version, name=None,
-                 network_resources=None):
+    def __init__(self, identity_version, name=None, network_resources=None,
+                 credentials_domain=None):
         super(DynamicCredentialProvider, self).__init__(
-            identity_version, name, network_resources)
-        self.network_resources = network_resources
+            identity_version=identity_version, name=name,
+            network_resources=network_resources,
+            credentials_domain=credentials_domain)
         self._creds = {}
         self.ports = []
         self.default_admin_creds = cred_provider.get_configured_credentials(
@@ -49,7 +50,7 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
         if self.identity_version == 'v3':
             self.creds_domain_name = (
                 self.default_admin_creds.project_domain_name or
-                CONF.auth.default_credentials_domain_name)
+                self.credentials_domain)
         self.creds_client = cred_client.get_creds_client(
             self.identity_admin_client, self.creds_domain_name)
 

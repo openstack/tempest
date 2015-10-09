@@ -39,9 +39,10 @@ def read_accounts_yaml(path):
 
 class PreProvisionedCredentialProvider(cred_provider.CredentialProvider):
 
-    def __init__(self, identity_version, name=None):
+    def __init__(self, identity_version, name=None, credentials_domain=None):
         super(PreProvisionedCredentialProvider, self).__init__(
-            identity_version=identity_version, name=name)
+            identity_version=identity_version, name=name,
+            credentials_domain=credentials_domain)
         if (CONF.auth.test_accounts_file and
                 os.path.isfile(CONF.auth.test_accounts_file)):
             accounts = read_accounts_yaml(CONF.auth.test_accounts_file)
@@ -217,7 +218,7 @@ class PreProvisionedCredentialProvider(cred_provider.CredentialProvider):
             if ('user_domain_name' in init_attributes and 'user_domain_name'
                     not in hash_attributes):
                 # Allow for the case of domain_name populated from config
-                domain_name = CONF.auth.default_credentials_domain_name
+                domain_name = self.credentials_domain
                 hash_attributes['user_domain_name'] = domain_name
             if all([getattr(creds, k) == hash_attributes[k] for
                    k in init_attributes]):
@@ -306,8 +307,7 @@ class PreProvisionedCredentialProvider(cred_provider.CredentialProvider):
         if self.identity_version == 'v3':
             user_domain_fields = set(['user_domain_name', 'user_domain_id'])
             if not user_domain_fields.intersection(set(creds_dict.keys())):
-                _domain = CONF.auth.default_credentials_domain_name
-                creds_dict['user_domain_name'] = _domain
+                creds_dict['user_domain_name'] = self.credentials_domain
         return creds_dict
 
 
