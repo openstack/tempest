@@ -14,12 +14,21 @@
 #    under the License.
 
 from tempest.api.compute import base
+from tempest import config
 from tempest import test
+
+CONF = config.CONF
 
 
 class CertificatesV2TestJSON(base.BaseComputeTest):
 
     _api_version = 2
+
+    @classmethod
+    def skip_checks(cls):
+        super(CertificatesV2TestJSON, cls).skip_checks()
+        if not CONF.compute_feature_enabled.nova_cert:
+            raise cls.skipException("Nova cert is not available")
 
     @test.idempotent_id('c070a441-b08e-447e-a733-905909535b1b')
     def test_create_root_certificate(self):
