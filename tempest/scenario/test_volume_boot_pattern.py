@@ -96,14 +96,6 @@ class TestVolumeBootPattern(manager.ScenarioTest):
         vol_name = data_utils.rand_name('volume')
         return self.create_volume(name=vol_name, snapshot_id=snap_id)
 
-    def _stop_instances(self, instances):
-        # NOTE(gfidente): two loops so we do not wait for the status twice
-        for i in instances:
-            self.servers_client.stop_server(i['id'])
-        for i in instances:
-            waiters.wait_for_server_status(self.servers_client,
-                                           i['id'], 'SHUTOFF')
-
     def _ssh_to_server(self, server, keypair):
         if CONF.compute.use_floatingip_for_ssh:
             ip = self.create_floating_ip(server)['ip']
@@ -171,10 +163,6 @@ class TestVolumeBootPattern(manager.ScenarioTest):
         # check the content of written file
         ssh_client = self._ssh_to_server(instance_from_snapshot, keypair)
         self._check_content_of_written_file(ssh_client, text)
-
-        # NOTE(gfidente): ensure resources are in clean state for
-        # deletion operations to succeed
-        self._stop_instances([instance_2nd, instance_from_snapshot])
 
     @decorators.skip_because(bug='1489581')
     @test.idempotent_id('36c34c67-7b54-4b59-b188-02a2f458a63b')
