@@ -168,7 +168,7 @@ configuration file is to generate a sample in the ``etc/`` directory ::
 
     $> cd $TEMPEST_ROOT_DIR
     $> oslo-config-generator --config-file \
-        tools/config/config-generator.tempest.conf \
+        etc/config-generator.tempest.conf \
         --output-file etc/tempest.conf
 
 After that, open up the ``etc/tempest.conf`` file and edit the

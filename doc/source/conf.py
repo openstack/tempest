@@ -34,7 +34,7 @@ extensions = ['sphinx.ext.autodoc',
               'oslo_config.sphinxconfiggen',
              ]
 
-config_generator_config_file = '../../tools/config/config-generator.tempest.conf'
+config_generator_config_file = '../../etc/config-generator.tempest.conf'
 sample_config_basename = '_static/tempest'
 
 todo_include_todos = True
