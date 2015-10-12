@@ -13,9 +13,9 @@
 
 import os
 
-from tempest.common import accounts
 from tempest.common import cred_provider
 from tempest.common import dynamic_creds
+from tempest.common import preprov_creds
 from tempest import config
 from tempest import exceptions
 
@@ -41,10 +41,10 @@ def get_credentials_provider(name, network_resources=None,
         if (CONF.auth.test_accounts_file and
                 os.path.isfile(CONF.auth.test_accounts_file)):
             # Most params are not relevant for pre-created accounts
-            return accounts.Accounts(name=name,
-                                     identity_version=identity_version)
+            return preprov_creds.PreProvisionedCredentialProvider(
+                name=name, identity_version=identity_version)
         else:
-            return accounts.NotLockingAccounts(
+            return preprov_creds.NonLockingCredentialProvider(
                 name=name, identity_version=identity_version)
 
 
@@ -59,7 +59,8 @@ def is_admin_available():
     # Check whether test accounts file has the admin specified or not
     elif (CONF.auth.test_accounts_file and
             os.path.isfile(CONF.auth.test_accounts_file)):
-        check_accounts = accounts.Accounts(name='check_admin')
+        check_accounts = preprov_creds.PreProvisionedCredentialProvider(
+            name='check_admin')
         if not check_accounts.admin_available():
             is_admin = False
     else:
@@ -81,9 +82,11 @@ def is_alt_available():
     # Check whether test accounts file has the admin specified or not
     if (CONF.auth.test_accounts_file and
             os.path.isfile(CONF.auth.test_accounts_file)):
-        check_accounts = accounts.Accounts(name='check_alt')
+        check_accounts = preprov_creds.PreProvisionedCredentialProvider(
+            name='check_alt')
     else:
-        check_accounts = accounts.NotLockingAccounts(name='check_alt')
+        check_accounts = preprov_creds.NonLockingCredentialProvider(
+            name='check_alt')
     try:
         if not check_accounts.is_multi_user():
             return False
