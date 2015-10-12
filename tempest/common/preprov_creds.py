@@ -19,15 +19,14 @@ from oslo_concurrency import lockutils
 from oslo_log import log as logging
 import six
 from tempest_lib import auth
+from tempest_lib import exceptions as lib_exc
 import yaml
 
 from tempest import clients
 from tempest.common import cred_provider
 from tempest.common import fixed_network
-from tempest import config
 from tempest import exceptions
 
-CONF = config.CONF
 LOG = logging.getLogger(__name__)
 
 
@@ -39,21 +38,52 @@ def read_accounts_yaml(path):
 
 class PreProvisionedCredentialProvider(cred_provider.CredentialProvider):
 
-    def __init__(self, identity_version, name=None, credentials_domain=None,
-                 admin_role=None):
+    def __init__(self, identity_version, test_accounts_file,
+                 accounts_lock_dir, name=None, credentials_domain=None,
+                 admin_role=None, object_storage_operator_role=None,
+                 object_storage_reseller_admin_role=None):
+        """Credentials provider using pre-provisioned accounts
+
+        This credentials provider loads the details of pre-provisioned
+        accounts from a YAML file, in the format specified by
+        `etc/accounts.yaml.sample`. It locks accounts while in use, using the
+        external locking mechanism, allowing for multiple python processes
+        to share a single account file, and thus running tests in parallel.
+
+        The accounts_lock_dir must be generated using `lockutils.get_lock_path`
+        from the oslo.concurrency library. For instance:
+
+            accounts_lock_dir = os.path.join(lockutils.get_lock_path(CONF),
+                                             'test_accounts')
+
+        Role names for object storage are optional as long as the
+        `operator` and `reseller_admin` credential types are not used in the
+        accounts file.
+
+        :param identity_version: identity version of the credentials
+        :param admin_role: name of the admin role
+        :param test_accounts_file: path to the accounts YAML file
+        :param accounts_lock_dir: the directory for external locking
+        :param name: name of the hash file (optional)
+        :param credentials_domain: name of the domain credentials belong to
+                                   (if no domain is configured)
+        :param object_storage_operator_role: name of the role
+        :param object_storage_reseller_admin_role: name of the role
+        """
         super(PreProvisionedCredentialProvider, self).__init__(
             identity_version=identity_version, name=name,
-            credentials_domain=credentials_domain, admin_role=admin_role)
-        if (CONF.auth.test_accounts_file and
-                os.path.isfile(CONF.auth.test_accounts_file)):
-            accounts = read_accounts_yaml(CONF.auth.test_accounts_file)
+            admin_role=admin_role, credentials_domain=credentials_domain)
+        self.test_accounts_file = test_accounts_file
+        if test_accounts_file and os.path.isfile(test_accounts_file):
+            accounts = read_accounts_yaml(self.test_accounts_file)
             self.use_default_creds = False
         else:
             accounts = {}
             self.use_default_creds = True
-        self.hash_dict = self.get_hash_dict(accounts, admin_role)
-        self.accounts_dir = os.path.join(lockutils.get_lock_path(CONF),
-                                         'test_accounts')
+        self.hash_dict = self.get_hash_dict(
+            accounts, admin_role, object_storage_operator_role,
+            object_storage_reseller_admin_role)
+        self.accounts_dir = accounts_lock_dir
         self._creds = {}
 
     @classmethod
@@ -65,7 +95,9 @@ class PreProvisionedCredentialProvider(cred_provider.CredentialProvider):
         return hash_dict
 
     @classmethod
-    def get_hash_dict(cls, accounts, admin_role):
+    def get_hash_dict(cls, accounts, admin_role,
+                      object_storage_operator_role=None,
+                      object_storage_reseller_admin_role=None):
         hash_dict = {'roles': {}, 'creds': {}, 'networks': {}}
         # Loop over the accounts read from the yaml file
         for account in accounts:
@@ -92,14 +124,24 @@ class PreProvisionedCredentialProvider(cred_provider.CredentialProvider):
                     hash_dict = cls._append_role(admin_role, temp_hash_key,
                                                  hash_dict)
                 elif type == 'operator':
-                    hash_dict = cls._append_role(
-                        CONF.object_storage.operator_role, temp_hash_key,
-                        hash_dict)
+                    if object_storage_operator_role:
+                        hash_dict = cls._append_role(
+                            object_storage_operator_role, temp_hash_key,
+                            hash_dict)
+                    else:
+                        msg = ("Type 'operator' configured, but no "
+                               "object_storage_operator_role specified")
+                        raise lib_exc.InvalidCredentials(msg)
                 elif type == 'reseller_admin':
-                    hash_dict = cls._append_role(
-                        CONF.object_storage.reseller_admin_role,
-                        temp_hash_key,
-                        hash_dict)
+                    if object_storage_reseller_admin_role:
+                        hash_dict = cls._append_role(
+                            object_storage_reseller_admin_role,
+                            temp_hash_key,
+                            hash_dict)
+                    else:
+                        msg = ("Type 'reseller_admin' configured, but no "
+                               "object_storage_reseller_admin_role specified")
+                        raise lib_exc.InvalidCredentials(msg)
             # Populate the network subdict
             for resource in resources:
                 if resource == 'network':
@@ -112,8 +154,8 @@ class PreProvisionedCredentialProvider(cred_provider.CredentialProvider):
     def is_multi_user(self):
         # Default credentials is not a valid option with locking Account
         if self.use_default_creds:
-            raise exceptions.InvalidConfiguration(
-                "Account file %s doesn't exist" % CONF.auth.test_accounts_file)
+            raise lib_exc.InvalidCredentials(
+                "Account file %s doesn't exist" % self.test_accounts_file)
         else:
             return len(self.hash_dict['creds']) > 1
 
@@ -149,7 +191,7 @@ class PreProvisionedCredentialProvider(cred_provider.CredentialProvider):
                     names.append(fd.read())
         msg = ('Insufficient number of users provided. %s have allocated all '
                'the credentials for this allocation request' % ','.join(names))
-        raise exceptions.InvalidConfiguration(msg)
+        raise lib_exc.InvalidCredentials(msg)
 
     def _get_match_hash_list(self, roles=None):
         hashes = []
@@ -159,7 +201,7 @@ class PreProvisionedCredentialProvider(cred_provider.CredentialProvider):
             for role in roles:
                 temp_hashes = self.hash_dict['roles'].get(role, None)
                 if not temp_hashes:
-                    raise exceptions.InvalidConfiguration(
+                    raise lib_exc.InvalidCredentials(
                         "No credentials with role: %s specified in the "
                         "accounts ""file" % role)
                 hashes.append(temp_hashes)
@@ -191,8 +233,8 @@ class PreProvisionedCredentialProvider(cred_provider.CredentialProvider):
 
     def _get_creds(self, roles=None):
         if self.use_default_creds:
-            raise exceptions.InvalidConfiguration(
-                "Account file %s doesn't exist" % CONF.auth.test_accounts_file)
+            raise lib_exc.InvalidCredentials(
+                "Account file %s doesn't exist" % self.test_accounts_file)
         useable_hashes = self._get_match_hash_list(roles)
         free_hash = self._get_free_hash(useable_hashes)
         clean_creds = self._sanitize_creds(

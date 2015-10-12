@@ -17,17 +17,17 @@ import os
 
 import mock
 from oslo_concurrency.fixture import lockutils as lockutils_fixtures
-from oslo_concurrency import lockutils
 from oslo_config import cfg
 from oslotest import mockpatch
+import shutil
 import six
 from tempest_lib import auth
+from tempest_lib import exceptions as lib_exc
 from tempest_lib.services.identity.v2 import token_client
 
 from tempest.common import cred_provider
 from tempest.common import preprov_creds
 from tempest import config
-from tempest import exceptions
 from tempest.tests import base
 from tempest.tests import fake_config
 from tempest.tests import fake_http
@@ -38,7 +38,11 @@ class TestPreProvisionedCredentials(base.TestCase):
 
     fixed_params = {'name': 'test class',
                     'identity_version': 'v2',
-                    'admin_role': 'admin'}
+                    'test_accounts_file': 'fake_accounts_file',
+                    'accounts_lock_dir': 'fake_locks_dir',
+                    'admin_role': 'admin',
+                    'object_storage_operator_role': 'operator',
+                    'object_storage_reseller_admin_role': 'reseller'}
 
     def setUp(self):
         super(TestPreProvisionedCredentials, self).setUp()
@@ -77,8 +81,12 @@ class TestPreProvisionedCredentials(base.TestCase):
         self.accounts_mock = self.useFixture(mockpatch.Patch(
             'tempest.common.preprov_creds.read_accounts_yaml',
             return_value=self.test_accounts))
-        cfg.CONF.set_default('test_accounts_file', 'fake_path', group='auth')
         self.useFixture(mockpatch.Patch('os.path.isfile', return_value=True))
+
+    def tearDown(self):
+        super(TestPreProvisionedCredentials, self).tearDown()
+        shutil.rmtree(self.fixed_params['accounts_lock_dir'],
+                      ignore_errors=True)
 
     def _get_hash_list(self, accounts_list):
         hash_list = []
@@ -147,11 +155,10 @@ class TestPreProvisionedCredentials(base.TestCase):
         with mock.patch('six.moves.builtins.open', mock.mock_open(),
                         create=True) as open_mock:
             test_account_class._get_free_hash(hash_list)
-            lock_path = os.path.join(lockutils.get_lock_path(
-                preprov_creds.CONF), 'test_accounts', hash_list[0])
+            lock_path = os.path.join(self.fixed_params['accounts_lock_dir'],
+                                     hash_list[0])
             open_mock.assert_called_once_with(lock_path, 'w')
-        mkdir_path = os.path.join(
-            preprov_creds.CONF.oslo_concurrency.lock_path, 'test_accounts')
+        mkdir_path = os.path.join(self.fixed_params['accounts_lock_dir'])
         mkdir_mock.mock.assert_called_once_with(mkdir_path)
 
     @mock.patch('oslo_concurrency.lockutils.lock')
@@ -165,7 +172,7 @@ class TestPreProvisionedCredentials(base.TestCase):
             **self.fixed_params)
         with mock.patch('six.moves.builtins.open', mock.mock_open(),
                         create=True):
-            self.assertRaises(exceptions.InvalidConfiguration,
+            self.assertRaises(lib_exc.InvalidCredentials,
                               test_account_class._get_free_hash, hash_list)
 
     @mock.patch('oslo_concurrency.lockutils.lock')
@@ -187,9 +194,8 @@ class TestPreProvisionedCredentials(base.TestCase):
         with mock.patch('six.moves.builtins.open', mock.mock_open(),
                         create=True) as open_mock:
             test_account_class._get_free_hash(hash_list)
-            lock_path = os.path.join(
-                lockutils.get_lock_path(preprov_creds.CONF),
-                'test_accounts', hash_list[3])
+            lock_path = os.path.join(self.fixed_params['accounts_lock_dir'],
+                                     hash_list[3])
             open_mock.assert_has_calls([mock.call(lock_path, 'w')])
 
     @mock.patch('oslo_concurrency.lockutils.lock')
@@ -204,11 +210,9 @@ class TestPreProvisionedCredentials(base.TestCase):
         remove_mock = self.useFixture(mockpatch.Patch('os.remove'))
         rmdir_mock = self.useFixture(mockpatch.Patch('os.rmdir'))
         test_account_class.remove_hash(hash_list[2])
-        hash_path = os.path.join(lockutils.get_lock_path(preprov_creds.CONF),
-                                 'test_accounts',
+        hash_path = os.path.join(self.fixed_params['accounts_lock_dir'],
                                  hash_list[2])
-        lock_path = os.path.join(preprov_creds.CONF.oslo_concurrency.lock_path,
-                                 'test_accounts')
+        lock_path = self.fixed_params['accounts_lock_dir']
         remove_mock.mock.assert_called_once_with(hash_path)
         rmdir_mock.mock.assert_called_once_with(lock_path)
 
@@ -225,8 +229,7 @@ class TestPreProvisionedCredentials(base.TestCase):
         remove_mock = self.useFixture(mockpatch.Patch('os.remove'))
         rmdir_mock = self.useFixture(mockpatch.Patch('os.rmdir'))
         test_account_class.remove_hash(hash_list[2])
-        hash_path = os.path.join(lockutils.get_lock_path(preprov_creds.CONF),
-                                 'test_accounts',
+        hash_path = os.path.join(self.fixed_params['accounts_lock_dir'],
                                  hash_list[2])
         remove_mock.mock.assert_called_once_with(hash_path)
         rmdir_mock.mock.assert_not_called()
