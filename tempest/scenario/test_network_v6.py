@@ -143,8 +143,9 @@ class TestGettingAddress(manager.NetworkScenarioTest):
                  self._list_ports(device_id=sid,
                                   network_id=self.network_v6.id)]
         self.assertEqual(1, len(ports),
-                         message="Multiple IPv6 ports found on network %s"
-                         % self.network_v6)
+                         message=("Multiple IPv6 ports found on network %s. "
+                                  "ports: %s")
+                         % (self.network_v6, ports))
         mac6 = ports[0]
         ssh.turn_nic_on(ssh.get_nic_name(mac6))
 
