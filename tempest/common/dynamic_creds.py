@@ -31,11 +31,11 @@ LOG = logging.getLogger(__name__)
 class DynamicCredentialProvider(cred_provider.CredentialProvider):
 
     def __init__(self, identity_version, name=None, network_resources=None,
-                 credentials_domain=None):
+                 credentials_domain=None, admin_role=None):
         super(DynamicCredentialProvider, self).__init__(
             identity_version=identity_version, name=name,
             network_resources=network_resources,
-            credentials_domain=credentials_domain)
+            credentials_domain=credentials_domain, admin_role=admin_role)
         self._creds = {}
         self.ports = []
         self.default_admin_creds = cred_provider.get_configured_credentials(
@@ -99,7 +99,7 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
         role_assigned = False
         if admin:
             self.creds_client.assign_user_role(user, project,
-                                               CONF.identity.admin_role)
+                                               self.admin_role)
             role_assigned = True
         # Add roles specified in config file
         for conf_role in CONF.auth.tempest_roles:

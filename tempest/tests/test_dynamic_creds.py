@@ -33,7 +33,8 @@ from tempest.tests import fake_identity
 class TestDynamicCredentialProvider(base.TestCase):
 
     fixed_params = {'name': 'test class',
-                    'identity_version': 'v2'}
+                    'identity_version': 'v2',
+                    'admin_role': 'admin'}
 
     def setUp(self):
         super(TestDynamicCredentialProvider, self).setUp()
