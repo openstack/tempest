@@ -44,3 +44,16 @@ class TestFixedIPsClient(base.BaseComputeServiceTest):
 
     def test_show_fixed_ip_with_bytes_body(self):
         self._test_show_fixed_ip(True)
+
+    def _test_reserve_fixed_ip(self, bytes_body=False):
+        self.check_service_client_function(
+            self.fixedIPsClient.reserve_fixed_ip,
+            'tempest.common.service_client.ServiceClient.post',
+            {}, bytes_body,
+            status=202, fixed_ip='Identifier')
+
+    def test_reserve_fixed_ip_with_str_body(self):
+        self._test_reserve_fixed_ip()
+
+    def test_reserve_fixed_ip_with_bytes_body(self):
+        self._test_reserve_fixed_ip(True)
