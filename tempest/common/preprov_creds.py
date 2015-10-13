@@ -249,7 +249,7 @@ class PreProvisionedCredentialProvider(cred_provider.CredentialProvider):
             'utf-8'), None)
         # The force kwarg is used to allocate an additional set of creds with
         # the same role list. The index used for the previously allocation
-        # in the preprov_creds dict will be moved.
+        # in the _creds dict will be moved.
         if exist_creds and not force_new:
             return exist_creds
         elif exist_creds and force_new:
