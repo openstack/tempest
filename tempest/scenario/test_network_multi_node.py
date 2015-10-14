@@ -95,15 +95,25 @@ class TestNetworkMultiNode(manager.NetworkScenarioTest):
         cls.manager = cls.admin_manager
 
     def _delete_aggregate(self, aggregate):
-        self.aggregates_client.delete_aggregate(aggregate['id'])
+        self.aggregates_client.delete_aggregate(aggregate_id=aggregate['id'])
 
     def _add_host(self, aggregate_id, host):
-        aggregate = self.aggregates_client.add_host(aggregate_id, host)
+        host_args = {
+            'host': host
+        }
+        aggregate_resp = self.aggregates_client.add_host(
+            aggregate_id=aggregate_id, **host_args)
+        aggregate = aggregate_resp['aggregate']
         self.addCleanup(self._remove_host, aggregate['id'], host)
         self.assertIn(host, aggregate['hosts'])
 
     def _remove_host(self, aggregate_id, host):
-        aggregate = self.aggregates_client.remove_host(aggregate_id, host)
+        host_args = {
+            'host': host
+        }
+        aggregate_resp = self.aggregates_client.remove_host(
+            aggregate_id=aggregate_id, **host_args)
+        aggregate = aggregate_resp['aggregate']
         self.assertNotIn(host, aggregate['hosts'])
 
     def _create_server(self, name, network, zone=None):
@@ -111,7 +121,8 @@ class TestNetworkMultiNode(manager.NetworkScenarioTest):
         create_kwargs['networks'] = [{'uuid': network.id}]
         if zone is not None:
             create_kwargs['availability_zone'] = zone
-        server = self.create_server(name=name, create_kwargs=create_kwargs)
+        server = self.create_server(name=name, wait_on_boot=True,
+                                    create_kwargs=create_kwargs)
         return dict(server=server, keypair=self.keypair)
 
     def setup_aggregates(self):
@@ -121,7 +132,8 @@ class TestNetworkMultiNode(manager.NetworkScenarioTest):
         """
         self.aggregates_client = self.manager.aggregates_client
         self.hypervisor_client = self.manager.hypervisor_client
-        self.hypervisors_list = self.hypervisor_client.list_hypervisors()
+        hypervisors_resp = self.hypervisor_client.list_hypervisors()
+        self.hypervisors_list = hypervisors_resp['hypervisors']
 
         # Verify the hypervisors are operational and make a list
         # of them for later use
@@ -139,8 +151,9 @@ class TestNetworkMultiNode(manager.NetworkScenarioTest):
                         'availability_zone': '{0}-Zone{1}'.format(name, i)
                     }
                     i += 1
-                    aggregate = self.aggregates_client.create_aggregate(
+                    aggregate_resp = self.aggregates_client.create_aggregate(
                         **aggregate_kwargs)
+                    aggregate = aggregate_resp['aggregate']
                     self.addCleanup(self._delete_aggregate, aggregate)
                     self.aggregates.append(aggregate)
                     self._add_host(aggregate['id'],
@@ -240,7 +253,6 @@ class TestNetworkMultiNode(manager.NetworkScenarioTest):
                                                   zone=aggregate[
                                                       'availability_zone'])
                 id = server_dict['server']['id']
-                self.servers_client.wait_for_server_status(id, 'ACTIVE')
                 self.assertIsNotNone(server_dict)
                 self.servers[id] = server_dict['keypair']
                 if network.id in self.network_vms:
@@ -258,7 +270,6 @@ class TestNetworkMultiNode(manager.NetworkScenarioTest):
         for server in self.servers.keys():
             LOG.debug("Deleting server {0}".format(server))
             self.servers_client.delete_server(server)
-            self.servers_client.wait_for_server_termination(server)
             del self.servers[server]
 
     def verify_network_create_events(self):
