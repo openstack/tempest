@@ -69,13 +69,13 @@ class UCSMTestMixin(object):
              for k, v in CONF.ucsm.ucsm_host_dict.iteritems()}
         cls.network_node_profile = cls.ucsm_host_dict[cls.network_node_host]
 
-        hosts = cls.ucsm_host_dict.keys()
-        if len(hosts) > 1:
-            smpl = random.sample(cls.ucsm_host_dict.keys(), 2)
+        compute_hosts = set(cls.ucsm_host_dict.keys()) - {cls.network_node_host}
+        if len(compute_hosts) > 1:
+            smpl = random.sample(compute_hosts, 2)
             cls.master_host = smpl[0]
             cls.slave_host = smpl[1]
         else:
-            cls.master_host = hosts[0]
+            cls.master_host = compute_hosts[0]
             cls.slave_host = None
 
     def ucsm_setup(self):
