@@ -17,7 +17,6 @@ import random
 import six
 
 from tempest.services.baremetal.v1.json import baremetal_client
-from tempest.services.compute.json import extensions_client
 from tempest.services.compute.json import fixed_ips_client
 from tempest.services.compute.json import flavors_client
 from tempest.services.compute.json import floating_ip_pools_client
@@ -105,7 +104,6 @@ class TestServiceClient(base.TestCase):
     def test_service_client_creations_with_specified_args(self, mock_init):
         test_clients = [
             baremetal_client.BaremetalClient,
-            extensions_client.ExtensionsClient,
             fixed_ips_client.FixedIPsClient,
             flavors_client.FlavorsClient,
             floating_ip_pools_client.FloatingIPPoolsClient,
