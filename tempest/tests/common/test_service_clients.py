@@ -17,30 +17,13 @@ import random
 import six
 
 from tempest.services.baremetal.v1.json import baremetal_client
-from tempest.services.compute.json import fixed_ips_client
-from tempest.services.compute.json import flavors_client
-from tempest.services.compute.json import floating_ip_pools_client
-from tempest.services.compute.json import floating_ips_bulk_client
 from tempest.services.compute.json import floating_ips_client
-from tempest.services.compute.json import hosts_client
-from tempest.services.compute.json import hypervisor_client
-from tempest.services.compute.json import images_client
-from tempest.services.compute.json import instance_usage_audit_log_client
 from tempest.services.compute.json import interfaces_client
-from tempest.services.compute.json import keypairs_client
-from tempest.services.compute.json import limits_client
-from tempest.services.compute.json import migrations_client
-from tempest.services.compute.json import networks_client as nova_net_client
 from tempest.services.compute.json import quota_classes_client
-from tempest.services.compute.json import quotas_client
-from tempest.services.compute.json import security_group_default_rules_client \
-    as nova_secgrop_default_client
 from tempest.services.compute.json import security_group_rules_client
-from tempest.services.compute.json import security_groups_client
 from tempest.services.compute.json import server_groups_client
 from tempest.services.compute.json import servers_client
 from tempest.services.compute.json import services_client
-from tempest.services.compute.json import tenant_usages_client
 from tempest.services.compute.json import volumes_client \
     as compute_volumes_client
 from tempest.services.data_processing.v1_1 import data_processing_client
@@ -104,29 +87,13 @@ class TestServiceClient(base.TestCase):
     def test_service_client_creations_with_specified_args(self, mock_init):
         test_clients = [
             baremetal_client.BaremetalClient,
-            fixed_ips_client.FixedIPsClient,
-            flavors_client.FlavorsClient,
-            floating_ip_pools_client.FloatingIPPoolsClient,
-            floating_ips_bulk_client.FloatingIPsBulkClient,
             floating_ips_client.FloatingIPsClient,
-            hosts_client.HostsClient,
-            hypervisor_client.HypervisorClient,
-            images_client.ImagesClient,
-            instance_usage_audit_log_client.InstanceUsagesAuditLogClient,
             interfaces_client.InterfacesClient,
-            keypairs_client.KeyPairsClient,
-            limits_client.LimitsClient,
-            migrations_client.MigrationsClient,
-            nova_net_client.NetworksClient,
-            quotas_client.QuotasClient,
             quota_classes_client.QuotaClassesClient,
-            nova_secgrop_default_client.SecurityGroupDefaultRulesClient,
             security_group_rules_client.SecurityGroupRulesClient,
-            security_groups_client.SecurityGroupsClient,
             server_groups_client.ServerGroupsClient,
             servers_client.ServersClient,
             services_client.ServicesClient,
-            tenant_usages_client.TenantUsagesClient,
             compute_volumes_client.VolumesClient,
             data_processing_client.DataProcessingClient,
             db_flavor_client.DatabaseFlavorsClient,
