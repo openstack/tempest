@@ -18,6 +18,8 @@ import copy
 from oslo_log import log as logging
 from tempest_lib.services.compute.agents_client import AgentsClient
 from tempest_lib.services.compute.aggregates_client import AggregatesClient
+from tempest_lib.services.compute.availability_zone_client import \
+    AvailabilityZoneClient
 from tempest_lib.services.identity.v2.token_client import TokenClient
 from tempest_lib.services.identity.v3.token_client import V3TokenClient
 
@@ -29,8 +31,6 @@ from tempest import manager
 from tempest.services.baremetal.v1.json.baremetal_client import \
     BaremetalClient
 from tempest.services import botoclients
-from tempest.services.compute.json.availability_zone_client import \
-    AvailabilityZoneClient
 from tempest.services.compute.json.baremetal_nodes_client import \
     BaremetalNodesClient
 from tempest.services.compute.json.certificates_client import \
