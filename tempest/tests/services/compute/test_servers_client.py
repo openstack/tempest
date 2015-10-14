@@ -77,7 +77,7 @@ class TestServersClient(base.BaseComputeServiceTest):
             }
         ],
         "metadata": {
-            u"My Server Nu\1234me": u"Apau\1234che1"
+            u"My Server N\u1234me": u"Apa\u1234che1"
         },
         "name": u"new\u1234-server-test",
         "progress": 0,
