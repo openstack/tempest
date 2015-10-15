@@ -726,7 +726,7 @@ class NetworkScenarioTest(ScenarioTest):
         return port
 
     def _get_server_port_id_and_ip4(self, server, ip_addr=None):
-        ports = self._list_ports(device_id=server['id'],
+        ports = self._list_ports(device_id=server['id'], status='ACTIVE',
                                  fixed_ip=ip_addr)
         # it might happen here that this port has more then one ip address
         # as in case of dual stack- when this port is created on 2 subnets
