@@ -1306,9 +1306,7 @@ def list_opts():
 class TempestConfigPrivate(object):
     """Provides OpenStack configuration information."""
 
-    DEFAULT_CONFIG_DIR = os.path.join(
-        os.path.abspath(os.path.dirname(os.path.dirname(__file__))),
-        "etc")
+    DEFAULT_CONFIG_DIR = os.path.join(os.getcwd(), "etc")
 
     DEFAULT_CONFIG_FILE = "tempest.conf"
 
