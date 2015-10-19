@@ -29,9 +29,9 @@ to get information when it needs. To simplify creating this tempest provides an
 abstract class that should be used as the parent for your plugin. To use this
 you would do something like the following::
 
-  from tempest.test_discover import plugin
+  from tempest.test_discover import plugins
 
-  class MyPlugin(plugin.TempestPlugin):
+  class MyPlugin(plugins.TempestPlugin):
 
 Then you need to ensure you locally define all of the methods in the abstract
 class, you can refer to the api doc below for a reference of what that entails.
