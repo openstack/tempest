@@ -291,7 +291,8 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
     def _create_tenant_network(self, tenant):
         network, subnet, router = self.create_networks(
             client=tenant.manager.network_client,
-            networks_client=tenant.manager.networks_client)
+            networks_client=tenant.manager.networks_client,
+            subnets_client=tenant.manager.subnets_client)
         tenant.set_network(network, subnet, router)
 
     def _set_compute_context(self, tenant):

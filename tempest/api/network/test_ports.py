@@ -106,7 +106,7 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
         allocation_pools = {'allocation_pools': [{'start': str(address + 4),
                                                   'end': str(address + 6)}]}
         subnet = self.create_subnet(network, **allocation_pools)
-        self.addCleanup(self.client.delete_subnet, subnet['id'])
+        self.addCleanup(self.subnets_client.delete_subnet, subnet['id'])
         body = self.client.create_port(network_id=net_id)
         self.addCleanup(self.client.delete_port, body['port']['id'])
         port = body['port']
@@ -155,7 +155,7 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
         # Create network and subnet
         network = self.create_network()
         subnet = self.create_subnet(network)
-        self.addCleanup(self.client.delete_subnet, subnet['id'])
+        self.addCleanup(self.subnets_client.delete_subnet, subnet['id'])
         # Create two ports
         port_1 = self.client.create_port(network_id=network['id'])
         self.addCleanup(self.client.delete_port, port_1['port']['id'])
@@ -187,7 +187,7 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
         network = self.create_network()
         self.addCleanup(self.networks_client.delete_network, network['id'])
         subnet = self.create_subnet(network)
-        self.addCleanup(self.client.delete_subnet, subnet['id'])
+        self.addCleanup(self.subnets_client.delete_subnet, subnet['id'])
         router = self.create_router(data_utils.rand_name('router-'))
         self.addCleanup(self.client.delete_router, router['id'])
         port = self.client.create_port(network_id=network['id'])
@@ -220,9 +220,9 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
         network = self.create_network()
         self.addCleanup(self.networks_client.delete_network, network['id'])
         subnet_1 = self.create_subnet(network)
-        self.addCleanup(self.client.delete_subnet, subnet_1['id'])
+        self.addCleanup(self.subnets_client.delete_subnet, subnet_1['id'])
         subnet_2 = self.create_subnet(network)
-        self.addCleanup(self.client.delete_subnet, subnet_2['id'])
+        self.addCleanup(self.subnets_client.delete_subnet, subnet_2['id'])
         fixed_ip_1 = [{'subnet_id': subnet_1['id']}]
         fixed_ip_2 = [{'subnet_id': subnet_2['id']}]
 
@@ -247,7 +247,7 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
 
     def _update_port_with_security_groups(self, security_groups_names):
         subnet_1 = self.create_subnet(self.network)
-        self.addCleanup(self.client.delete_subnet, subnet_1['id'])
+        self.addCleanup(self.subnets_client.delete_subnet, subnet_1['id'])
         fixed_ip_1 = [{'subnet_id': subnet_1['id']}]
 
         security_groups_list = list()
@@ -328,7 +328,7 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
         network = self.create_network()
         self.addCleanup(self.networks_client.delete_network, network['id'])
         subnet = self.create_subnet(network)
-        self.addCleanup(self.client.delete_subnet, subnet['id'])
+        self.addCleanup(self.subnets_client.delete_subnet, subnet['id'])
         port = self.create_port(network, security_groups=[])
         self.addCleanup(self.client.delete_port, port['id'])
         self.assertIsNotNone(port['security_groups'])

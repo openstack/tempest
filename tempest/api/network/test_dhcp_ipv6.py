@@ -75,11 +75,11 @@ class NetworksTestDHCPv6(base.BaseNetworkTest):
                 if port['id'] in [p['id'] for p in self.ports]:
                     self.client.delete_port(port['id'])
                     self._remove_from_list_by_index(self.ports, port)
-        body = self.client.list_subnets()
+        body = self.subnets_client.list_subnets()
         subnets = body['subnets']
         for subnet in subnets:
             if subnet['id'] in [s['id'] for s in self.subnets]:
-                self.client.delete_subnet(subnet['id'])
+                self.subnets_client.delete_subnet(subnet['id'])
                 self._remove_from_list_by_index(self.subnets, subnet)
         body = self.client.list_routers()
         routers = body['routers']

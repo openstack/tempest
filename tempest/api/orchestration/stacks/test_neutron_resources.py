@@ -44,6 +44,7 @@ class NeutronResourcesTestJSON(base.BaseOrchestrationTest):
     def setup_clients(cls):
         super(NeutronResourcesTestJSON, cls).setup_clients()
         cls.network_client = cls.os.network_client
+        cls.subnets_client = cls.os.subnets_client
 
     @classmethod
     def resource_setup(cls):
@@ -130,7 +131,7 @@ class NeutronResourcesTestJSON(base.BaseOrchestrationTest):
     def test_created_subnet(self):
         """Verifies created subnet."""
         subnet_id = self.test_resources.get('Subnet')['physical_resource_id']
-        body = self.network_client.show_subnet(subnet_id)
+        body = self.subnets_client.show_subnet(subnet_id)
         subnet = body['subnet']
         network_id = self.test_resources.get('Network')['physical_resource_id']
         self.assertEqual(subnet_id, subnet['id'])

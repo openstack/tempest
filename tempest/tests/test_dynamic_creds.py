@@ -127,7 +127,7 @@ class TestDynamicCredentialProvider(base.TestCase):
 
     def _mock_subnet_create(self, iso_creds, id, name):
         subnet_fix = self.useFixture(mockpatch.PatchObject(
-            iso_creds.network_admin_client,
+            iso_creds.subnets_admin_client,
             'create_subnet',
             return_value={'subnet': {'id': id, 'name': name}}))
         return subnet_fix
@@ -272,7 +272,7 @@ class TestDynamicCredentialProvider(base.TestCase):
         net = mock.patch.object(creds.networks_admin_client,
                                 'delete_network')
         net_mock = net.start()
-        subnet = mock.patch.object(creds.network_admin_client,
+        subnet = mock.patch.object(creds.subnets_admin_client,
                                    'delete_subnet')
         subnet_mock = subnet.start()
         router = mock.patch.object(creds.network_admin_client,
@@ -362,7 +362,7 @@ class TestDynamicCredentialProvider(base.TestCase):
         net = mock.patch.object(creds.networks_admin_client,
                                 'delete_network')
         net_mock = net.start()
-        subnet = mock.patch.object(creds.network_admin_client,
+        subnet = mock.patch.object(creds.subnets_admin_client,
                                    'delete_subnet')
         subnet_mock = subnet.start()
         router = mock.patch.object(creds.network_admin_client,
@@ -496,7 +496,7 @@ class TestDynamicCredentialProvider(base.TestCase):
         net = mock.patch.object(creds.networks_admin_client,
                                 'delete_network')
         net_mock = net.start()
-        subnet = mock.patch.object(creds.network_admin_client,
+        subnet = mock.patch.object(creds.subnets_admin_client,
                                    'delete_subnet')
         subnet_mock = subnet.start()
         router = mock.patch.object(creds.network_admin_client,

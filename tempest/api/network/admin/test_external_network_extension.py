@@ -103,8 +103,9 @@ class ExternalNetworksTestJSON(base.BaseAdminNetworkTest):
         self.addCleanup(self._try_delete_resource,
                         self.admin_networks_client.delete_network,
                         external_network['id'])
-        subnet = self.create_subnet(external_network, client=client,
-                                    enable_dhcp=False)
+        subnet = self.create_subnet(
+            external_network, client=self.admin_subnets_client,
+            enable_dhcp=False)
         body = client.create_floatingip(
             floating_network_id=external_network['id'])
         created_floating_ip = body['floatingip']
@@ -121,7 +122,7 @@ class ExternalNetworksTestJSON(base.BaseAdminNetworkTest):
         self.assertNotIn(created_floating_ip['id'],
                          (f['id'] for f in floatingip_list['floatingips']))
         # Verifies subnet is deleted
-        subnet_list = client.list_subnets()
+        subnet_list = self.admin_subnets_client.list_subnets()
         self.assertNotIn(subnet['id'],
                          (s['id'] for s in subnet_list))
         # Removes subnet from the cleanup list
