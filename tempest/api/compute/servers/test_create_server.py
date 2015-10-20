@@ -13,8 +13,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import base64
-
 import netaddr
 import testtools
 
@@ -52,9 +50,6 @@ class ServersTestJSON(base.BaseV2ComputeTest):
         cls.accessIPv4 = '1.1.1.1'
         cls.accessIPv6 = '0000:0000:0000:0000:0000:babe:220.12.22.2'
         cls.name = data_utils.rand_name('server')
-        file_contents = 'This is a test file.'
-        personality = [{'path': '/test.txt',
-                       'contents': base64.b64encode(file_contents)}]
         disk_config = cls.disk_config
         cls.server_initial = cls.create_test_server(
             validatable=True,
@@ -63,7 +58,6 @@ class ServersTestJSON(base.BaseV2ComputeTest):
             metadata=cls.meta,
             accessIPv4=cls.accessIPv4,
             accessIPv6=cls.accessIPv6,
-            personality=personality,
             disk_config=disk_config)
         cls.password = cls.server_initial['adminPass']
         cls.server = (cls.client.show_server(cls.server_initial['id'])
