@@ -13,34 +13,85 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-# The tests need special image uploaded to glance:
-#   * It has "Cisco enic" driver installed
-#   * Configured to log into it with username/password
 
-# Before running the tests add/update following parameters to tempest.conf
-#
-# [compute]
-# ssh_auth_method = 'configured'
-# image_ssh_user = 'root'           # username to log into an instance.
-# image_ssh_password = 'ubuntu'     # password to log into an instance
-# flavor_ref = 3 # medium           # flavor id. The flavor should have >= 4Gb of RAM
-# flavor_ref_alt = 3	# medium    # Same as above
-# image_ref = 60ad4b1e-c5d4-49ad-a9ca-6374c1d8b3f6      # Image id. Used to boot an instance
-# image_ref_alt = 60ad4b1e-c5d4-49ad-a9ca-6374c1d8b3f6  # Same as above
-# [ucsm]
-# ucsm_ip=10.30.119.66
-# ucsm_username=admin
-# ucsm_password=cisco
-# # Dictionary of <hostname> VS <UCSM service profile name>
-# ucsm_host_dict=overcloud-controller-0.localdomain:QA2,overcloud-compute-0.localdomain:QA3,overcloud-compute-1.localdomain:QA4
-# network_node_host=overcloud-controller-0.localdomain  # hostname of a network node
-# eth_names=eth0,eth1
-# virtual_functions_amount=4    # Amount of "SR-IOV ports"/"Dynamic VNICs"/"Virtual functions"
+"""
+The tests need special image uploaded to glance:
+  * It has "Cisco enic" driver installed
+  * Configured to log into it with username/password
 
-# Use environment variables to set location of "tempest.conf"
-# Ex:
-#   export TEMPEST_CONFIG_DIR=/etc/redhat-certification-openstack/
-#   export TEMPEST_CONFIG=tempest.conf
+
+Before running the tests:
+* create 'tempest.conf' file in 'etc' folder (default location)
+* add/update following parameters to tempest.conf
+* replace parameter values with correct ones for your OS installation
+
+[DEFAULT]
+debug = true              # Leave it as is
+use_stderr = false        # Leave it as is
+log_file = tempest.log    # Leave it as is
+
+[auth]
+tempest_roles = _member_          # Leave it as is
+allow_tenant_isolation = True     # Leave it as is
+
+[compute]
+ssh_auth_method = 'configured'
+image_ssh_user = 'root'           # username to log into an instance.
+image_ssh_password = 'ubuntu'     # password to log into an instance
+flavor_ref = 3 # medium           # flavor id. The flavor should have >= 4Gb of RAM
+flavor_ref_alt = 3	# medium    # Same as above
+image_ref = 60ad4b1e-c5d4-49ad-a9ca-6374c1d8b3f6      # Image id. Used to boot an instance
+image_ref_alt = 60ad4b1e-c5d4-49ad-a9ca-6374c1d8b3f6  # Same as above
+
+[identity]
+username = demo               # Leave it as is
+tenant_name = demo            # Leave it as is
+password = demo               # Leave it as is
+alt_username = alt_demo       # Leave it as is
+alt_tenant_name = alt_demo    # Leave it as is
+alt_password = secrete        # Leave it as is
+# There should be OS admin user (with admin role) credentials.
+# It will be used by the tests to create another non-admin users
+admin_username = admin        # Change it if needed
+admin_tenant_name = admin     # Change it if needed
+admin_domain_name = Default   # Change it if needed
+disable_ssl_certificate_validation = false
+uri = http://172.29.173.85:5000/v2.0/                         # Set correct IP address
+auth_version = v2
+admin_password = 1567c9ff7c66376a333d28dfa1a5a3cd717156c7     # Set correct admin password
+uri_v3 = http://172.29.173.85:5000/v3/                        # Set correct IP address
+admin_tenant_id = 725d6fa98000418f88e47d283d8f1efb            # Set correct admin tenant id
+
+[service_available]
+neutron = True
+
+[ucsm]
+ucsm_ip=10.30.119.66              # UCSM VIP
+ucsm_username=admin               # UCSM username
+ucsm_password=cisco               # UCSM ppassword
+# Dictionary of <hostname> VS <UCSM service profile name>
+ucsm_host_dict=overcloud-controller-0.localdomain:QA2,overcloud-compute-0.localdomain:QA3,overcloud-compute-1.localdomain:QA4
+network_node_host=overcloud-controller-0.localdomain  # hostname of a network node
+eth_names=eth0,eth1
+virtual_functions_amount=4    # Amount of "SR-IOV ports"/"Dynamic VNICs"/"Virtual functions"
+
+
+Use environment variables to set location of "tempest.conf"
+Ex:
+  export TEMPEST_CONFIG_DIR=/etc/redhat-certification-openstack/
+  export TEMPEST_CONFIG=tempest.conf
+
+It is better to create dedicated virtualenv for the tempest:
+* Run: 'virtualenv myenv'
+* Activate the environment. Run: 'source myenv/bin/activate'
+* Install python requirements: Run: 'pip install -r requirements.txt'
+
+Running tests:
+* Create testr repository: 'testr init'
+* Look for tests: 'testr list-tests | grep cisco'
+* Run tests:
+    'testr run tempest.thirdparty.cisco.test_ucsm'
+"""
 
 import netaddr
 import random
