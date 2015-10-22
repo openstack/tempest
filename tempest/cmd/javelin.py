@@ -117,11 +117,11 @@ from oslo_utils import timeutils
 import six
 from tempest_lib import auth
 from tempest_lib import exceptions as lib_exc
+from tempest_lib.services.compute import flavors_client
 import yaml
 
 from tempest.common import waiters
 from tempest import config
-from tempest.services.compute.json import flavors_client
 from tempest.services.compute.json import floating_ips_client
 from tempest.services.compute.json import security_group_rules_client
 from tempest.services.compute.json import security_groups_client
