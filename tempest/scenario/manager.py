@@ -62,6 +62,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
         # Neutron network client
         cls.network_client = cls.manager.network_client
         cls.networks_client = cls.manager.networks_client
+        cls.ports_client = cls.manager.ports_client
         cls.subnets_client = cls.manager.subnets_client
         # Heat client
         cls.orchestration_client = cls.manager.orchestration_client
@@ -661,7 +662,7 @@ class NetworkScenarioTest(ScenarioTest):
 
     def _list_ports(self, *args, **kwargs):
         """List ports using admin creds """
-        ports_list = self.admin_manager.network_client.list_ports(
+        ports_list = self.admin_manager.ports_client.list_ports(
             *args, **kwargs)
         return ports_list['ports']
 
@@ -735,14 +736,14 @@ class NetworkScenarioTest(ScenarioTest):
     def _create_port(self, network_id, client=None, namestart='port-quotatest',
                      **kwargs):
         if not client:
-            client = self.network_client
+            client = self.ports_client
         name = data_utils.rand_name(namestart)
         result = client.create_port(
             name=name,
             network_id=network_id,
             **kwargs)
         self.assertIsNotNone(result, 'Unable to allocate port')
-        port = net_resources.DeletablePort(client=client,
+        port = net_resources.DeletablePort(ports_client=client,
                                            **result['port'])
         self.addCleanup(self.delete_wrapper, port.delete)
         return port
@@ -1127,11 +1128,13 @@ class NetworkScenarioTest(ScenarioTest):
     def create_server(self, name=None, image=None, flavor=None,
                       wait_on_boot=True, wait_on_delete=True,
                       network_client=None, networks_client=None,
-                      create_kwargs=None):
+                      ports_client=None, create_kwargs=None):
         if network_client is None:
             network_client = self.network_client
         if networks_client is None:
             networks_client = self.networks_client
+        if ports_client is None:
+            ports_client = self.ports_client
 
         vnic_type = CONF.network.port_vnic_type
 
@@ -1175,7 +1178,7 @@ class NetworkScenarioTest(ScenarioTest):
             for net in networks:
                 net_id = net['uuid']
                 port = self._create_port(network_id=net_id,
-                                         client=network_client,
+                                         client=ports_client,
                                          **create_port_body)
                 ports.append({'port': port.id})
             if ports:

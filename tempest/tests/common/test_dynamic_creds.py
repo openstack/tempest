@@ -376,7 +376,7 @@ class TestDynamicCredentialProvider(base.TestCase):
             'tempest.services.network.json.network_client.NetworkClient.'
             'remove_router_interface_with_subnet_id')
         return_values = ({'status': 200}, {'ports': []})
-        port_list_mock = mock.patch.object(creds.network_admin_client,
+        port_list_mock = mock.patch.object(creds.ports_admin_client,
                                            'list_ports',
                                            return_value=return_values)
 

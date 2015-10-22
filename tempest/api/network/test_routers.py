@@ -144,7 +144,7 @@ class RoutersTest(base.BaseRouterTest):
         self.assertIn('subnet_id', interface.keys())
         self.assertIn('port_id', interface.keys())
         # Verify router id is equal to device id in port details
-        show_port_body = self.client.show_port(
+        show_port_body = self.ports_client.show_port(
             interface['port_id'])
         self.assertEqual(show_port_body['port']['device_id'],
                          router['id'])
@@ -155,7 +155,7 @@ class RoutersTest(base.BaseRouterTest):
         network = self.create_network()
         self.create_subnet(network)
         router = self._create_router(data_utils.rand_name('router-'))
-        port_body = self.client.create_port(
+        port_body = self.ports_client.create_port(
             network_id=network['id'])
         # add router interface to port created above
         interface = self.client.add_router_interface_with_port_id(
@@ -165,7 +165,7 @@ class RoutersTest(base.BaseRouterTest):
         self.assertIn('subnet_id', interface.keys())
         self.assertIn('port_id', interface.keys())
         # Verify router id is equal to device id in port details
-        show_port_body = self.client.show_port(
+        show_port_body = self.ports_client.show_port(
             interface['port_id'])
         self.assertEqual(show_port_body['port']['device_id'],
                          router['id'])
@@ -181,7 +181,7 @@ class RoutersTest(base.BaseRouterTest):
             self.assertEqual(v, actual_ext_gw_info[k])
 
     def _verify_gateway_port(self, router_id):
-        list_body = self.admin_client.list_ports(
+        list_body = self.admin_ports_client.list_ports(
             network_id=CONF.network.public_network_id,
             device_id=router_id)
         self.assertEqual(len(list_body['ports']), 1)
@@ -245,7 +245,7 @@ class RoutersTest(base.BaseRouterTest):
         self.client.update_router(router['id'], external_gateway_info={})
         self._verify_router_gateway(router['id'])
         # No gateway port expected
-        list_body = self.admin_client.list_ports(
+        list_body = self.admin_ports_client.list_ports(
             network_id=CONF.network.public_network_id,
             device_id=router['id'])
         self.assertFalse(list_body['ports'])
@@ -357,7 +357,7 @@ class RoutersTest(base.BaseRouterTest):
                                       interface02['port_id'])
 
     def _verify_router_interface(self, router_id, subnet_id, port_id):
-        show_port_body = self.client.show_port(port_id)
+        show_port_body = self.ports_client.show_port(port_id)
         interface_port = show_port_body['port']
         self.assertEqual(router_id, interface_port['device_id'])
         self.assertEqual(subnet_id,

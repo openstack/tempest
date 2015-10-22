@@ -43,7 +43,8 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
             identity_version=self.identity_version)
         (self.identity_admin_client, self.network_admin_client,
          self.networks_admin_client,
-         self.subnets_admin_client) = self._get_admin_clients()
+         self.subnets_admin_client,
+         self.ports_admin_client) = self._get_admin_clients()
         # Domain where isolated credentials are provisioned (v3 only).
         # Use that of the admin account is None is configured.
         self.creds_domain_name = None
@@ -64,10 +65,10 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
         os = clients.Manager(self.default_admin_creds)
         if self.identity_version == 'v2':
             return (os.identity_client, os.network_client, os.networks_client,
-                    os.subnets_client)
+                    os.subnets_client, os.ports_client)
         else:
             return (os.identity_v3_client, os.network_client,
-                    os.networks_client, os.subnets_client)
+                    os.networks_client, os.subnets_client, os.ports_client)
 
     def _create_creds(self, suffix="", admin=False, roles=None):
         """Create random credentials under the following schema.

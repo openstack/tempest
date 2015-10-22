@@ -63,7 +63,7 @@ class NetworksTestDHCPv6(base.BaseNetworkTest):
         del things_list[index]
 
     def _clean_network(self):
-        body = self.client.list_ports()
+        body = self.ports_client.list_ports()
         ports = body['ports']
         for port in ports:
             if (port['device_owner'].startswith('network:router_interface')
@@ -73,7 +73,7 @@ class NetworksTestDHCPv6(base.BaseNetworkTest):
                 )
             else:
                 if port['id'] in [p['id'] for p in self.ports]:
-                    self.client.delete_port(port['id'])
+                    self.ports_client.delete_port(port['id'])
                     self._remove_from_list_by_index(self.ports, port)
         body = self.subnets_client.list_subnets()
         subnets = body['subnets']
@@ -203,9 +203,9 @@ class NetworksTestDHCPv6(base.BaseNetworkTest):
                 real_dhcp_ip, real_eui_ip = [real_ips[sub['id']]
                                              for sub in [subnet_dhcp,
                                              subnet_slaac]]
-                self.client.delete_port(port['id'])
+                self.ports_client.delete_port(port['id'])
                 self.ports.pop()
-                body = self.client.list_ports()
+                body = self.ports_client.list_ports()
                 ports_id_list = [i['id'] for i in body['ports']]
                 self.assertNotIn(port['id'], ports_id_list)
                 self._clean_network()
@@ -362,7 +362,7 @@ class NetworksTestDHCPv6(base.BaseNetworkTest):
             admin_state_up=True)
         port = self.create_router_interface(router['id'],
                                             subnet['id'])
-        body = self.client.show_port(port['port_id'])
+        body = self.ports_client.show_port(port['port_id'])
         return subnet, body['port']
 
     @test.idempotent_id('e98f65db-68f4-4330-9fea-abd8c5192d4d')
