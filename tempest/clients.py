@@ -26,6 +26,7 @@ from tempest_lib.services.compute.certificates_client import \
     CertificatesClient
 from tempest_lib.services.compute.extensions_client import \
     ExtensionsClient
+from tempest_lib.services.compute.fixed_ips_client import FixedIPsClient
 from tempest_lib.services.identity.v2.token_client import TokenClient
 from tempest_lib.services.identity.v3.token_client import V3TokenClient
 
@@ -37,7 +38,6 @@ from tempest import manager
 from tempest.services.baremetal.v1.json.baremetal_client import \
     BaremetalClient
 from tempest.services import botoclients
-from tempest.services.compute.json.fixed_ips_client import FixedIPsClient
 from tempest.services.compute.json.flavors_client import FlavorsClient
 from tempest.services.compute.json.floating_ip_pools_client import \
     FloatingIPPoolsClient
