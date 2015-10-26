@@ -37,13 +37,15 @@ def get_credentials_provider(name, network_resources=None,
         return dynamic_creds.DynamicCredentialProvider(
             name=name,
             network_resources=network_resources,
-            identity_version=identity_version)
+            identity_version=identity_version,
+            credentials_domain=CONF.auth.default_credentials_domain_name)
     else:
         if (CONF.auth.test_accounts_file and
                 os.path.isfile(CONF.auth.test_accounts_file)):
             # Most params are not relevant for pre-created accounts
             return preprov_creds.PreProvisionedCredentialProvider(
-                name=name, identity_version=identity_version)
+                name=name, identity_version=identity_version,
+                credentials_domain=CONF.auth.default_credentials_domain_name)
         else:
             return preprov_creds.NonLockingCredentialProvider(
                 name=name, identity_version=identity_version)
