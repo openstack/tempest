@@ -20,8 +20,43 @@ tempest that you need to rely on in your plugin it likely needs to be migrated
 to tempest-lib. In that situation, file a bug, push a migration patch, etc. to
 expedite providing the interface in a reliable manner.
 
+Plugin Cookiecutter
+-------------------
+
+In order to create the basic structure with base classes and test directories
+you can use the tempest-plugin-cookiecutter project::
+
+  > cookiecutter https://git.openstack.org/openstack/tempest-plugin-cookiecutter
+
+  Cloning into 'tempest-plugin-cookiecutter'...
+  remote: Counting objects: 17, done.
+  remote: Compressing objects: 100% (13/13), done.
+  remote: Total 17 (delta 1), reused 14 (delta 1)
+  Unpacking objects: 100% (17/17), done.
+  Checking connectivity... done.
+  project (default is "sample")? foo
+  testclass (default is "SampleTempestPlugin")? FooTempestPlugin
+
+This would create a folder called ``foo_tempest_plugin/`` with all necessary
+basic classes. You only need to move/create your test in
+``foo_tempest_plugin/tests``.
+
+Entry Point
+-----------
+
+Once you've created your plugin class you need to add an entry point to your
+project to enable tempest to find the plugin. The entry point must be added
+to the "tempest.test_plugins" namespace.
+
+If you are using pbr this is fairly straightforward, in the setup.cfg just add
+something like the following::
+
+  [entry_points]
+  tempest.test_plugins =
+      plugin_name = module.path:PluginClass
+
 Plugin Class
-------------
+============
 
 To provide tempest with all the required information it needs to be able to run
 your plugin you need to create a plugin class which tempest will load and call
@@ -42,28 +77,13 @@ break any existing plugins. But, when that occurs migrating to using tempest-lib
 as the source for the abstract class will be prudent.
 
 Abstract Plugin Class
-^^^^^^^^^^^^^^^^^^^^^
+---------------------
 
 .. autoclass:: tempest.test_discover.plugins.TempestPlugin
    :members:
 
-Entry Point
------------
-
-Once you've created your plugin class you need to add an entry point to your
-project to enable tempest to find the plugin. The entry point must be added
-to the "tempest.test_plugins" namespace.
-
-If you are using pbr this is fairly straightforward, in the setup.cfg just add
-something like the following::
-
-  [entry_points]
-  tempest.test_plugins =
-      plugin_name = module.path:PluginClass
-
 Plugin Structure
-----------------
-
+================
 While there are no hard and fast rules for the structure a plugin, there are
 basically no constraints on what the plugin looks like as long as the 2 steps
 above are done. However,  there are some recommended patterns to follow to make
@@ -92,7 +112,7 @@ of the tempest developer and reviewer documentation to ensure that the tests
 being added in the plugin act and behave like the rest of tempest.
 
 Dealing with configuration options
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+----------------------------------
 
 Historically Tempest didn't provide external guarantees on its configuration
 options. However, with the introduction of the plugin interface this is no
