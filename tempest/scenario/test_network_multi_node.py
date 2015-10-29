@@ -174,6 +174,7 @@ class TestNetworkMultiNode(manager.NetworkScenarioTest):
         self.number_instances_per_compute = 1
         self.number_routers_per_tenant = 1
         self.network_vms = {}
+        self.routers = []
 
         # Classes that inherit this class can redefine packet size/count
         # based on their own needs or accept the default in the CONF
@@ -236,9 +237,13 @@ class TestNetworkMultiNode(manager.NetworkScenarioTest):
         router = None
         for i in range(0, self.num_networks):
             if i % (self.num_networks / self.number_routers_per_tenant) is 0:
+                if router is not None:
+                    self.routers.append(router)
                 router = None
             self.network, self.subnet, router = self.add_network(
                 tenant_id=self.tenant_id, router=router)
+            if len(self.routers) == 0:
+                self.routers.append(router)
             self.networks.append(self.network)
             segmentation_id = self.network['provider:segmentation_id']
             self.segmentation_ids.append(segmentation_id)
