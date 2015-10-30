@@ -33,17 +33,17 @@ Running default stress test set
 
 The stress test framework can automatically discover test inside the tempest
 test suite. All test flag with the `@stresstest` decorator will be executed.
-In order to use this discovery you have to be in the tempest root directory
-and execute the following:
+In order to use this discovery you have to install tempest CLI, be in the
+tempest root directory and execute the following:
 
-	run-tempest-stress -a -d 30
+	tempest run-stress -a -d 30
 
 Running the sample test
 -----------------------
 
 To test installation, do the following:
 
-	run-tempest-stress -t tempest/stress/etc/server-create-destroy-test.json -d 30
+	tempest run-stress -t tempest/stress/etc/server-create-destroy-test.json -d 30
 
 This sample test tries to create a few VMs and kill a few VMs.
 
