@@ -56,7 +56,7 @@ class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
         super(TestNetworkAdvancedServerOps, cls).setup_credentials()
 
     def _setup_network_and_servers(self):
-        self.keypair = self.create_keypair()
+        keypair = self.create_keypair()
         security_group = self._create_security_group()
         network, subnet, router = self.create_networks()
         public_network_id = CONF.network.public_network_id
@@ -64,91 +64,103 @@ class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
             'networks': [
                 {'uuid': network.id},
             ],
-            'key_name': self.keypair['name'],
+            'key_name': keypair['name'],
             'security_groups': [{'name': security_group['name']}],
         }
         server_name = data_utils.rand_name('server-smoke')
-        self.server = self.create_server(name=server_name,
-                                         create_kwargs=create_kwargs)
-        self.floating_ip = self.create_floating_ip(self.server,
-                                                   public_network_id)
+        server = self.create_server(name=server_name,
+                                    create_kwargs=create_kwargs)
+        floating_ip = self.create_floating_ip(server, public_network_id)
         # Verify that we can indeed connect to the server before we mess with
         # it's state
-        self._wait_server_status_and_check_network_connectivity()
+        self._wait_server_status_and_check_network_connectivity(
+            server, keypair, floating_ip)
 
-    def _check_network_connectivity(self, should_connect=True):
+        return server, keypair, floating_ip
+
+    def _check_network_connectivity(self, server, keypair, floating_ip,
+                                    should_connect=True):
         username = CONF.compute.image_ssh_user
-        private_key = self.keypair['private_key']
+        private_key = keypair['private_key']
         self._check_tenant_network_connectivity(
-            self.server, username, private_key,
+            server, username, private_key,
             should_connect=should_connect,
-            servers_for_debug=[self.server])
-        floating_ip = self.floating_ip.floating_ip_address
+            servers_for_debug=[server])
+        floating_ip_addr = floating_ip.floating_ip_address
         # Check FloatingIP status before checking the connectivity
-        self.check_floating_ip_status(self.floating_ip, 'ACTIVE')
-        self.check_public_network_connectivity(floating_ip, username,
+        self.check_floating_ip_status(floating_ip, 'ACTIVE')
+        self.check_public_network_connectivity(floating_ip_addr, username,
                                                private_key, should_connect,
-                                               servers=[self.server])
+                                               servers=[server])
 
-    def _wait_server_status_and_check_network_connectivity(self):
-        waiters.wait_for_server_status(self.servers_client,
-                                       self.server['id'], 'ACTIVE')
-        self._check_network_connectivity()
+    def _wait_server_status_and_check_network_connectivity(self, server,
+                                                           keypair,
+                                                           floating_ip):
+        waiters.wait_for_server_status(self.servers_client, server['id'],
+                                       'ACTIVE')
+        self._check_network_connectivity(server, keypair, floating_ip)
 
     @test.idempotent_id('61f1aa9a-1573-410e-9054-afa557cab021')
     @test.stresstest(class_setup_per='process')
     @test.services('compute', 'network')
     def test_server_connectivity_stop_start(self):
-        self._setup_network_and_servers()
-        self.servers_client.stop_server(self.server['id'])
-        waiters.wait_for_server_status(self.servers_client,
-                                       self.server['id'], 'SHUTOFF')
-        self._check_network_connectivity(should_connect=False)
-        self.servers_client.start_server(self.server['id'])
-        self._wait_server_status_and_check_network_connectivity()
+        server, keypair, floating_ip = self._setup_network_and_servers()
+        self.servers_client.stop_server(server['id'])
+        waiters.wait_for_server_status(self.servers_client, server['id'],
+                                       'SHUTOFF')
+        self._check_network_connectivity(server, keypair, floating_ip,
+                                         should_connect=False)
+        self.servers_client.start_server(server['id'])
+        self._wait_server_status_and_check_network_connectivity(
+            server, keypair, floating_ip)
 
     @test.idempotent_id('7b6860c2-afa3-4846-9522-adeb38dfbe08')
     @test.services('compute', 'network')
     def test_server_connectivity_reboot(self):
-        self._setup_network_and_servers()
-        self.servers_client.reboot_server(self.server['id'],
-                                          reboot_type='SOFT')
-        self._wait_server_status_and_check_network_connectivity()
+        server, keypair, floating_ip = self._setup_network_and_servers()
+        self.servers_client.reboot_server(server['id'], reboot_type='SOFT')
+        self._wait_server_status_and_check_network_connectivity(
+            server, keypair, floating_ip)
 
     @test.idempotent_id('88a529c2-1daa-4c85-9aec-d541ba3eb699')
     @test.services('compute', 'network')
     def test_server_connectivity_rebuild(self):
-        self._setup_network_and_servers()
+        server, keypair, floating_ip = self._setup_network_and_servers()
         image_ref_alt = CONF.compute.image_ref_alt
-        self.servers_client.rebuild_server(self.server['id'],
+        self.servers_client.rebuild_server(server['id'],
                                            image_ref=image_ref_alt)
-        self._wait_server_status_and_check_network_connectivity()
+        self._wait_server_status_and_check_network_connectivity(
+            server, keypair, floating_ip)
 
     @test.idempotent_id('2b2642db-6568-4b35-b812-eceed3fa20ce')
     @testtools.skipUnless(CONF.compute_feature_enabled.pause,
                           'Pause is not available.')
     @test.services('compute', 'network')
     def test_server_connectivity_pause_unpause(self):
-        self._setup_network_and_servers()
-        self.servers_client.pause_server(self.server['id'])
-        waiters.wait_for_server_status(self.servers_client,
-                                       self.server['id'], 'PAUSED')
-        self._check_network_connectivity(should_connect=False)
-        self.servers_client.unpause_server(self.server['id'])
-        self._wait_server_status_and_check_network_connectivity()
+        server, keypair, floating_ip = self._setup_network_and_servers()
+        self.servers_client.pause_server(server['id'])
+        waiters.wait_for_server_status(self.servers_client, server['id'],
+                                       'PAUSED')
+        self._check_network_connectivity(server, keypair, floating_ip,
+                                         should_connect=False)
+        self.servers_client.unpause_server(server['id'])
+        self._wait_server_status_and_check_network_connectivity(
+            server, keypair, floating_ip)
 
     @test.idempotent_id('5cdf9499-541d-4923-804e-b9a60620a7f0')
     @testtools.skipUnless(CONF.compute_feature_enabled.suspend,
                           'Suspend is not available.')
     @test.services('compute', 'network')
     def test_server_connectivity_suspend_resume(self):
-        self._setup_network_and_servers()
-        self.servers_client.suspend_server(self.server['id'])
-        waiters.wait_for_server_status(self.servers_client, self.server['id'],
+        server, keypair, floating_ip = self._setup_network_and_servers()
+        self.servers_client.suspend_server(server['id'])
+        waiters.wait_for_server_status(self.servers_client, server['id'],
                                        'SUSPENDED')
-        self._check_network_connectivity(should_connect=False)
-        self.servers_client.resume_server(self.server['id'])
-        self._wait_server_status_and_check_network_connectivity()
+        self._check_network_connectivity(server, keypair, floating_ip,
+                                         should_connect=False)
+        self.servers_client.resume_server(server['id'])
+        self._wait_server_status_and_check_network_connectivity(
+            server, keypair, floating_ip)
 
     @test.idempotent_id('719eb59d-2f42-4b66-b8b1-bb1254473967')
     @testtools.skipUnless(CONF.compute_feature_enabled.resize,
@@ -159,10 +171,11 @@ class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
         if resize_flavor == CONF.compute.flavor_ref:
             msg = "Skipping test - flavor_ref and flavor_ref_alt are identical"
             raise self.skipException(msg)
-        self._setup_network_and_servers()
-        self.servers_client.resize_server(self.server['id'],
+        server, keypair, floating_ip = self._setup_network_and_servers()
+        self.servers_client.resize_server(server['id'],
                                           flavor_ref=resize_flavor)
-        waiters.wait_for_server_status(self.servers_client, self.server['id'],
+        waiters.wait_for_server_status(self.servers_client, server['id'],
                                        'VERIFY_RESIZE')
-        self.servers_client.confirm_resize_server(self.server['id'])
-        self._wait_server_status_and_check_network_connectivity()
+        self.servers_client.confirm_resize_server(server['id'])
+        self._wait_server_status_and_check_network_connectivity(
+            server, keypair, floating_ip)
