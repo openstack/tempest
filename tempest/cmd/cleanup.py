@@ -50,9 +50,9 @@ deleted and the admin user specified in tempest.conf is never deleted.
 
 Please run with **--help** to see full list of options.
 """
-import argparse
 import sys
 
+from cliff import command
 from oslo_log import log as logging
 from oslo_serialization import jsonutils as json
 
@@ -67,13 +67,17 @@ LOG = logging.getLogger(__name__)
 CONF = config.CONF
 
 
-class Cleanup(object):
+class TempestCleanup(command.Command):
 
-    def __init__(self):
+    def __init__(self, app, cmd):
+        super(TempestCleanup, self).__init__(app, cmd)
+
+    def take_action(self, parsed_args):
+        cleanup_service.init_conf()
+        self.options = parsed_args
         self.admin_mgr = clients.AdminManager()
         self.dry_run_data = {}
         self.json_data = {}
-        self._init_options()
 
         self.admin_id = ""
         self.admin_role_id = ""
@@ -86,9 +90,7 @@ class Cleanup(object):
         self.tenant_services = cleanup_service.get_tenant_cleanup_services()
         self.global_services = cleanup_service.get_global_cleanup_services()
 
-    def run(self):
-        opts = self.options
-        if opts.init_saved_state:
+        if parsed_args.init_saved_state:
             self._init_state()
             return
 
@@ -157,8 +159,8 @@ class Cleanup(object):
             tenant_data = dry_run_data["_tenants_to_clean"][tenant_id] = {}
             tenant_data['name'] = tenant_name
 
-        kwargs = {"username": CONF.identity.admin_username,
-                  "password": CONF.identity.admin_password,
+        kwargs = {"username": CONF.auth.admin_username,
+                  "password": CONF.auth.admin_password,
                   "tenant_name": tenant['name']}
         mgr = clients.Manager(credentials=cred_provider.get_credentials(
             **kwargs))
@@ -175,22 +177,21 @@ class Cleanup(object):
     def _init_admin_ids(self):
         id_cl = self.admin_mgr.identity_client
 
-        tenant = id_cl.get_tenant_by_name(CONF.identity.admin_tenant_name)
+        tenant = id_cl.get_tenant_by_name(CONF.auth.admin_tenant_name)
         self.admin_tenant_id = tenant['id']
 
         user = id_cl.get_user_by_username(self.admin_tenant_id,
-                                          CONF.identity.admin_username)
+                                          CONF.auth.admin_username)
         self.admin_id = user['id']
 
-        roles = id_cl.list_roles()
+        roles = id_cl.list_roles()['roles']
         for role in roles:
             if role['name'] == CONF.identity.admin_role:
                 self.admin_role_id = role['id']
                 break
 
-    def _init_options(self):
-        parser = argparse.ArgumentParser(
-            description='Cleanup after tempest run')
+    def get_parser(self, prog_name):
+        parser = super(TempestCleanup, self).get_parser(prog_name)
         parser.add_argument('--init-saved-state', action="store_true",
                             dest='init_saved_state', default=False,
                             help="Creates JSON file: " + SAVED_STATE_JSON +
@@ -211,13 +212,15 @@ class Cleanup(object):
                             help="Generate JSON file:" + DRY_RUN_JSON +
                             ", that reports the objects that would have "
                             "been deleted had a full cleanup been run.")
+        return parser
 
-        self.options = parser.parse_args()
+    def get_description(self):
+        return 'Cleanup after tempest run'
 
     def _add_admin(self, tenant_id):
         id_cl = self.admin_mgr.identity_client
         needs_role = True
-        roles = id_cl.list_user_roles(tenant_id, self.admin_id)
+        roles = id_cl.list_user_roles(tenant_id, self.admin_id)['roles']
         for role in roles:
             if role['id'] == self.admin_role_id:
                 needs_role = False
@@ -282,14 +285,3 @@ class Cleanup(object):
         except Exception as ex:
             LOG.exception("Exception parsing saved state json : %s" % ex)
             sys.exit(ex)
-
-
-def main():
-    cleanup_service.init_conf()
-    cleanup = Cleanup()
-    cleanup.run()
-    LOG.info('Cleanup finished!')
-    return 0
-
-if __name__ == "__main__":
-    sys.exit(main())
