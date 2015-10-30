@@ -612,8 +612,8 @@ class BaseTestCase(testtools.testcase.WithAttributes,
             admin_creds = cred_provider.get_admin_creds()
             admin_manager = clients.Manager(admin_creds)
             networks_client = admin_manager.compute_networks_client
-        return fixed_network.get_tenant_network(cred_provider,
-                                                networks_client)
+        return fixed_network.get_tenant_network(
+            cred_provider, networks_client, CONF.compute.fixed_network_name)
 
     def assertEmpty(self, list, msg=None):
         self.assertTrue(len(list) == 0, msg)
