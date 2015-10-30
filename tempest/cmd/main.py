@@ -16,8 +16,7 @@ import sys
 
 from cliff import app
 from cliff import commandmanager
-
-TEMPEST_CLI_VERSION = '0.1'
+from pbr import version
 
 
 class Main(app.App):
@@ -27,7 +26,7 @@ class Main(app.App):
     def __init__(self):
         super(Main, self).__init__(
             description='Tempest cli application',
-            version=TEMPEST_CLI_VERSION,
+            version=version.VersionInfo('tempest').version_string(),
             command_manager=commandmanager.CommandManager('tempest.cm'),
             )
 
