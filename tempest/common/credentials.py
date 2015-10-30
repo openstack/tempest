@@ -38,17 +38,20 @@ def get_credentials_provider(name, network_resources=None,
             name=name,
             network_resources=network_resources,
             identity_version=identity_version,
-            credentials_domain=CONF.auth.default_credentials_domain_name)
+            credentials_domain=CONF.auth.default_credentials_domain_name,
+            admin_role=CONF.identity.admin_role)
     else:
         if (CONF.auth.test_accounts_file and
                 os.path.isfile(CONF.auth.test_accounts_file)):
             # Most params are not relevant for pre-created accounts
             return preprov_creds.PreProvisionedCredentialProvider(
                 name=name, identity_version=identity_version,
-                credentials_domain=CONF.auth.default_credentials_domain_name)
+                credentials_domain=CONF.auth.default_credentials_domain_name,
+                admin_role=CONF.identity.admin_role)
         else:
             return preprov_creds.NonLockingCredentialProvider(
-                name=name, identity_version=identity_version)
+                name=name, identity_version=identity_version,
+                admin_role=CONF.identity.admin_role)
 
 
 # We want a helper function here to check and see if admin credentials
@@ -65,7 +68,8 @@ def is_admin_available(identity_version):
     elif (CONF.auth.test_accounts_file and
             os.path.isfile(CONF.auth.test_accounts_file)):
         check_accounts = preprov_creds.PreProvisionedCredentialProvider(
-            identity_version=identity_version, name='check_admin')
+            identity_version=identity_version, name='check_admin',
+            admin_role=CONF.identity.admin_role)
         if not check_accounts.admin_available():
             is_admin = False
     else:
@@ -91,10 +95,12 @@ def is_alt_available(identity_version):
     if (CONF.auth.test_accounts_file and
             os.path.isfile(CONF.auth.test_accounts_file)):
         check_accounts = preprov_creds.PreProvisionedCredentialProvider(
-            identity_version=identity_version, name='check_alt')
+            identity_version=identity_version, name='check_alt',
+            admin_role=CONF.identity.admin_role)
     else:
         check_accounts = preprov_creds.NonLockingCredentialProvider(
-            identity_version=identity_version, name='check_alt')
+            identity_version=identity_version, name='check_alt',
+            admin_role=CONF.identity.admin_role)
     try:
         if not check_accounts.is_multi_user():
             return False

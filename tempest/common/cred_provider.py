@@ -99,7 +99,7 @@ def get_credentials(fill_in=True, identity_version=None, **kwargs):
 @six.add_metaclass(abc.ABCMeta)
 class CredentialProvider(object):
     def __init__(self, identity_version, name=None, network_resources=None,
-                 credentials_domain=None):
+                 credentials_domain=None, admin_role=None):
         """A CredentialProvider supplies credentials to test classes.
         :param identity_version: Identity version of the credentials provided
         :param name: Name of the calling test. Included in provisioned
@@ -107,11 +107,13 @@ class CredentialProvider(object):
         :param network_resources: Network resources required for the
                                   credentials
         :param credentials_domain: Domain credentials belong to
+        :param admin_role: Name of the role of the admin account
         """
         self.identity_version = identity_version
         self.name = name or "test_creds"
         self.network_resources = network_resources
         self.credentials_domain = credentials_domain or 'Default'
+        self.admin_role = admin_role
         if not auth.is_identity_version_supported(self.identity_version):
             raise exceptions.InvalidIdentityVersion(
                 identity_version=self.identity_version)

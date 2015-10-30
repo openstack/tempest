@@ -37,7 +37,8 @@ from tempest.tests import fake_identity
 class TestPreProvisionedCredentials(base.TestCase):
 
     fixed_params = {'name': 'test class',
-                    'identity_version': 'v2'}
+                    'identity_version': 'v2',
+                    'admin_role': 'admin'}
 
     def setUp(self):
         super(TestPreProvisionedCredentials, self).setUp()
@@ -103,7 +104,8 @@ class TestPreProvisionedCredentials(base.TestCase):
     def test_get_hash_dict(self):
         test_account_class = preprov_creds.PreProvisionedCredentialProvider(
             **self.fixed_params)
-        hash_dict = test_account_class.get_hash_dict(self.test_accounts)
+        hash_dict = test_account_class.get_hash_dict(
+            self.test_accounts, self.fixed_params['admin_role'])
         hash_list = self._get_hash_list(self.test_accounts)
         for hash in hash_list:
             self.assertIn(hash, hash_dict['creds'].keys())
@@ -332,7 +334,8 @@ class TestPreProvisionedCredentials(base.TestCase):
 class TestNotLockingAccount(base.TestCase):
 
     fixed_params = {'name': 'test class',
-                    'identity_version': 'v2'}
+                    'identity_version': 'v2',
+                    'admin_role': 'admin'}
 
     def setUp(self):
         super(TestNotLockingAccount, self).setUp()
