@@ -54,8 +54,8 @@ class TestEncryptedCinderVolumes(manager.EncryptionScenarioTest):
         self.volume = self.create_volume(volume_type=volume_type['name'])
 
     def attach_detach_volume(self):
-        self.nova_volume_attach()
-        self.nova_volume_detach()
+        self.volume = self.nova_volume_attach(self.server, self.volume)
+        self.nova_volume_detach(self.server, self.volume)
 
     @test.idempotent_id('79165fb4-5534-4b9d-8429-97ccffb8f86e')
     @test.services('compute', 'volume', 'image')

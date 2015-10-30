@@ -40,66 +40,61 @@ class TestMinimumBasicScenario(manager.ScenarioTest):
 
     """
 
-    def _wait_for_server_status(self, status):
-        server_id = self.server['id']
+    def _wait_for_server_status(self, server, status):
+        server_id = server['id']
         # Raise on error defaults to True, which is consistent with the
         # original function from scenario tests here
         waiters.wait_for_server_status(self.servers_client,
                                        server_id, status)
 
-    def nova_keypair_add(self):
-        self.keypair = self.create_keypair()
-
-    def nova_boot(self):
-        create_kwargs = {'key_name': self.keypair['name']}
-        self.server = self.create_server(image=self.image,
-                                         create_kwargs=create_kwargs)
+    def nova_boot(self, keypair):
+        create_kwargs = {'key_name': keypair['name']}
+        return self.create_server(image=self.image,
+                                  create_kwargs=create_kwargs)
 
     def nova_list(self):
         servers = self.servers_client.list_servers()
         # The list servers in the compute client is inconsistent...
-        servers = servers['servers']
-        self.assertIn(self.server['id'], [x['id'] for x in servers])
+        return servers['servers']
 
-    def nova_show(self):
-        got_server = (self.servers_client.show_server(self.server['id'])
+    def nova_show(self, server):
+        got_server = (self.servers_client.show_server(server['id'])
                       ['server'])
         excluded_keys = ['OS-EXT-AZ:availability_zone']
         # Exclude these keys because of LP:#1486475
         excluded_keys.extend(['OS-EXT-STS:power_state', 'updated'])
         self.assertThat(
-            self.server, custom_matchers.MatchesDictExceptForKeys(
+            server, custom_matchers.MatchesDictExceptForKeys(
                 got_server, excluded_keys=excluded_keys))
 
     def cinder_create(self):
-        self.volume = self.create_volume()
+        return self.create_volume()
 
     def cinder_list(self):
-        volumes = self.volumes_client.list_volumes()['volumes']
-        self.assertIn(self.volume['id'], [x['id'] for x in volumes])
+        return self.volumes_client.list_volumes()['volumes']
 
-    def cinder_show(self):
-        volume = self.volumes_client.show_volume(self.volume['id'])['volume']
-        self.assertEqual(self.volume, volume)
+    def cinder_show(self, volume):
+        got_volume = self.volumes_client.show_volume(volume['id'])['volume']
+        self.assertEqual(volume, got_volume)
 
-    def nova_reboot(self):
-        self.servers_client.reboot_server(self.server['id'], 'SOFT')
-        self._wait_for_server_status('ACTIVE')
+    def nova_reboot(self, server):
+        self.servers_client.reboot_server(server['id'], 'SOFT')
+        self._wait_for_server_status(server, 'ACTIVE')
 
     def check_partitions(self):
         # NOTE(andreaf) The device name may be different on different guest OS
         partitions = self.linux_client.get_partitions()
         self.assertEqual(1, partitions.count(CONF.compute.volume_device_name))
 
-    def create_and_add_security_group(self):
+    def create_and_add_security_group_to_server(self, server):
         secgroup = self._create_security_group()
-        self.servers_client.add_security_group(self.server['id'],
+        self.servers_client.add_security_group(server['id'],
                                                secgroup['name'])
         self.addCleanup(self.servers_client.remove_security_group,
-                        self.server['id'], secgroup['name'])
+                        server['id'], secgroup['name'])
 
         def wait_for_secgroup_add():
-            body = (self.servers_client.show_server(self.server['id'])
+            body = (self.servers_client.show_server(server['id'])
                     ['server'])
             return {'name': secgroup['name']} in body['security_groups']
 
@@ -107,29 +102,39 @@ class TestMinimumBasicScenario(manager.ScenarioTest):
                                     CONF.compute.build_timeout,
                                     CONF.compute.build_interval):
             msg = ('Timed out waiting for adding security group %s to server '
-                   '%s' % (secgroup['id'], self.server['id']))
+                   '%s' % (secgroup['id'], server['id']))
             raise exceptions.TimeoutException(msg)
 
     @test.idempotent_id('bdbb5441-9204-419d-a225-b4fdbfb1a1a8')
     @test.services('compute', 'volume', 'image', 'network')
     def test_minimum_basic_scenario(self):
         self.glance_image_create()
-        self.nova_keypair_add()
-        self.nova_boot()
-        self.nova_list()
-        self.nova_show()
-        self.cinder_create()
-        self.cinder_list()
-        self.cinder_show()
-        self.nova_volume_attach()
-        self.addCleanup(self.nova_volume_detach)
-        self.cinder_show()
 
-        self.floating_ip = self.create_floating_ip(self.server)
-        self.create_and_add_security_group()
+        keypair = self.create_keypair()
 
-        self.linux_client = self.get_remote_client(self.floating_ip['ip'])
-        self.nova_reboot()
+        server = self.nova_boot(keypair)
+        servers = self.nova_list()
+        self.assertIn(server['id'], [x['id'] for x in servers])
 
-        self.linux_client = self.get_remote_client(self.floating_ip['ip'])
+        self.nova_show(server)
+
+        volume = self.cinder_create()
+        volumes = self.cinder_list()
+        self.assertIn(volume['id'], [x['id'] for x in volumes])
+
+        self.cinder_show(volume)
+
+        volume = self.nova_volume_attach(server, volume)
+        self.addCleanup(self.nova_volume_detach, server, volume)
+        self.cinder_show(volume)
+
+        floating_ip = self.create_floating_ip(server)
+        self.create_and_add_security_group_to_server(server)
+
+        self.linux_client = self.get_remote_client(
+            floating_ip['ip'], private_key=keypair['private_key'])
+        self.nova_reboot(server)
+
+        self.linux_client = self.get_remote_client(
+            floating_ip['ip'], private_key=keypair['private_key'])
         self.check_partitions()
