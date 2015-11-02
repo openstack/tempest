@@ -34,10 +34,6 @@ class LiveBlockMigrationTestJSON(base.BaseV2ComputeAdminTest):
         cls.admin_servers_client = cls.os_adm.servers_client
         cls.admin_migration_client = cls.os_adm.migrations_client
 
-    @classmethod
-    def resource_setup(cls):
-        super(LiveBlockMigrationTestJSON, cls).resource_setup()
-
     def _get_compute_hostnames(self):
         body = self.admin_hosts_client.list_hosts()['hosts']
         return [
