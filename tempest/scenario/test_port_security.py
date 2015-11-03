@@ -29,6 +29,14 @@ LOG = logging.getLogger(__name__)
 
 
 class TestPortSecurityExtension(manager.NetworkScenarioTest):
+
+    @classmethod
+    def skip_checks(cls):
+        super(TestPortSecurityExtension, cls).skip_checks()
+        if not test.is_extension_enabled('port-security', 'network'):
+            msg = "port-security extension not enabled."
+            raise cls.skipException(msg)
+
     @test.idempotent_id('eaed2e09-7228-4e37-9286-7eeb0975ac01')
     @test.services('compute', 'network')
     def test_attach_mix_ports_to_vm(self):
