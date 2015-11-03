@@ -19,6 +19,7 @@ from tempest_lib.common.utils import data_utils
 import time
 
 from tempest import config
+from tempest.common import waiters
 from tempest.scenario import manager
 from tempest import test
 
@@ -48,7 +49,7 @@ class TestPortSecurityExtension(manager.NetworkScenarioTest):
         create_kwargs = {'networks': [{'uuid': network.id}]}
         server = self.create_server(create_kwargs=create_kwargs)
 
-        self.interface_client.create_interface(server=server['id'],
+        self.interface_client.create_interface(server['id'],
                                                port_id=secure_port.id)
         self.addCleanup(self.interface_client.delete_interface, server['id'],
                         secure_port['id'])
@@ -68,7 +69,8 @@ class TestPortSecurityExtension(manager.NetworkScenarioTest):
                          'security_groups': [{'name': security_group_name}], }
         server = self.create_server(name=server_name,
                                     create_kwargs=server_kwargs)
-        self.servers_client.wait_for_server_status(server['id'], 'ACTIVE')
+        waiters.wait_for_server_status(self.servers_client, server['id'],
+                                       'ACTIVE')
         return server
 
     def _set_route(self, route_to, route_via, server_ip, private_key):
