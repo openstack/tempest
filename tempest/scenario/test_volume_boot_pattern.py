@@ -11,7 +11,6 @@
 #    under the License.
 
 from oslo_log import log
-from tempest_lib import decorators
 
 from tempest.common.utils import data_utils
 from tempest.common import waiters
@@ -164,7 +163,6 @@ class TestVolumeBootPattern(manager.ScenarioTest):
         ssh_client = self._ssh_to_server(instance_from_snapshot, keypair)
         self._check_content_of_written_file(ssh_client, text)
 
-    @decorators.skip_because(bug='1489581')
     @test.idempotent_id('36c34c67-7b54-4b59-b188-02a2f458a63b')
     @test.services('compute', 'volume', 'image')
     def test_create_ebs_image_and_check_boot(self):
