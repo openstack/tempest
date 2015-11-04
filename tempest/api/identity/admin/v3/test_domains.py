@@ -28,6 +28,11 @@ class DomainsTestJSON(base.BaseIdentityV3AdminTest):
         # or else it would result in unauthorized error
         self.client.update_domain(domain_id, enabled=False)
         self.client.delete_domain(domain_id)
+        # Asserting that the domain is not found in the list
+        # after deletion
+        body = self.client.list_domains()['domains']
+        domains_list = [d['id'] for d in body]
+        self.assertNotIn(domain_id, domains_list)
 
     @test.idempotent_id('8cf516ef-2114-48f1-907b-d32726c734d4')
     def test_list_domains(self):
