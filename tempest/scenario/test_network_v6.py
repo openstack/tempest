@@ -188,21 +188,15 @@ class TestGettingAddress(manager.NetworkScenarioTest):
         self._check_connectivity(sshv4_1, ips_from_api_2['4'])
         self._check_connectivity(sshv4_2, ips_from_api_1['4'])
 
-        # Some VM (like cirros) may not have ping6 utility
-        result = sshv4_1.exec_command('whereis ping6')
-        is_ping6 = False if result == 'ping6:\n' else True
-        if is_ping6:
-            for i in range(n_subnets6):
-                self._check_connectivity(sshv4_1,
-                                         ips_from_api_2['6'][i])
-                self._check_connectivity(sshv4_1,
-                                         self.subnets_v6[i].gateway_ip)
-                self._check_connectivity(sshv4_2,
-                                         ips_from_api_1['6'][i])
-                self._check_connectivity(sshv4_2,
-                                         self.subnets_v6[i].gateway_ip)
-        else:
-            LOG.warning('Ping6 is not available, skipping')
+        for i in range(n_subnets6):
+            self._check_connectivity(sshv4_1,
+                                     ips_from_api_2['6'][i])
+            self._check_connectivity(sshv4_1,
+                                     self.subnets_v6[i].gateway_ip)
+            self._check_connectivity(sshv4_2,
+                                     ips_from_api_1['6'][i])
+            self._check_connectivity(sshv4_2,
+                                     self.subnets_v6[i].gateway_ip)
 
     def _check_connectivity(self, source, dest):
         self.assertTrue(
