@@ -757,6 +757,8 @@ class NetworkScenarioTest(ScenarioTest):
                     for fxip in p["fixed_ips"]
                     if netaddr.valid_ipv4(fxip["ip_address"])]
 
+        self.assertNotEqual(0, len(port_map),
+                            "No IPv4 addresses found in: %s" % ports)
         self.assertEqual(len(port_map), 1,
                          "Found multiple IPv4 addresses: %s. "
                          "Unable to determine which port to target."
