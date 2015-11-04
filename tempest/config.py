@@ -1251,6 +1251,40 @@ NegativeGroup = [
                help="Test generator class for all negative tests"),
 ]
 
+cisco_group = cfg.OptGroup(name='cisco', title="Cisco specific Options")
+
+CiscoGroup = [
+    cfg.StrOpt('user_name',
+               default="admin",
+               help="User name for Cisco gear"),
+    cfg.StrOpt('user_pw',
+               default="cisco123",
+               help="Password for Cisco gear"),
+    cfg.StrOpt('active_asr',
+               help="The name of the active ASR in the testbed"),
+    cfg.StrOpt('active_asr_ip',
+               help="The IP Address of the active ASR in the testbed"),
+    cfg.StrOpt('standby_asr',
+               help="The name of the standby ASR in the testbed"),
+    cfg.StrOpt('standby_asr_ip',
+               help="The IP Address of the standby ASR in the testbed"),
+    cfg.StrOpt('asr_internal_intf',
+               default='TenGigabitEthernet0/1/0',
+               help="The internal ASR interface"),
+    cfg.StrOpt('asr_external_intf',
+               default='TenGigabitEthernet0/1/0',
+               help="The external ASR interface"),
+    cfg.StrOpt('leaf1',
+               help="The name of the leaf1 switch in the testbed"),
+    cfg.StrOpt('leaf1_ip',
+               help="The IP Address of the leaf1 switch in the testbed"),
+    cfg.StrOpt('leaf2',
+               help="The name of the leaf2 switch in the testbed"),
+    cfg.StrOpt('leaf2_ip',
+               help="The IP Address of the leaf2 switch in the testbed"),
+]
+
+
 DefaultGroup = [
     cfg.StrOpt('resources_prefix',
                default='tempest',
@@ -1312,6 +1346,7 @@ _opts = [
     (baremetal_group, BaremetalGroup),
     (input_scenario_group, InputScenarioGroup),
     (negative_group, NegativeGroup),
+    (cisco_group, CiscoGroup),
     (ucsm_group, UcsmGroup),
     (None, DefaultGroup)
 ]
