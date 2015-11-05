@@ -69,10 +69,10 @@ def init_conf():
     CONF_PRIV_NETWORK_NAME = CONF.compute.fixed_network_name
     CONF_PUB_NETWORK = CONF.network.public_network_id
     CONF_PUB_ROUTER = CONF.network.public_router_id
-    CONF_TENANTS = [CONF.identity.admin_tenant_name,
+    CONF_TENANTS = [CONF.auth.admin_tenant_name,
                     CONF.identity.tenant_name,
                     CONF.identity.alt_tenant_name]
-    CONF_USERS = [CONF.identity.admin_username, CONF.identity.username,
+    CONF_USERS = [CONF.auth.admin_username, CONF.identity.username,
                   CONF.identity.alt_username]
 
     if IS_NEUTRON:
@@ -147,7 +147,7 @@ class SnapshotService(BaseService):
 
     def list(self):
         client = self.client
-        snaps = client.list_snapshots()
+        snaps = client.list_snapshots()['snapshots']
         LOG.debug("List count, %s Snapshots" % len(snaps))
         return snaps
 
@@ -169,6 +169,7 @@ class ServerService(BaseService):
     def __init__(self, manager, **kwargs):
         super(ServerService, self).__init__(kwargs)
         self.client = manager.servers_client
+        self.server_groups_client = manager.server_groups_client
 
     def list(self):
         client = self.client
@@ -194,7 +195,7 @@ class ServerService(BaseService):
 class ServerGroupService(ServerService):
 
     def list(self):
-        client = self.client
+        client = self.server_groups_client
         sgs = client.list_server_groups()['server_groups']
         LOG.debug("List count, %s Server Groups" % len(sgs))
         return sgs
@@ -812,7 +813,7 @@ class UserService(IdentityService):
 
     def list(self):
         client = self.client
-        users = client.get_users()
+        users = client.get_users()['users']
 
         if not self.is_save_state:
             users = [user for user in users if user['id']
@@ -824,7 +825,7 @@ class UserService(IdentityService):
 
         elif not self.is_save_state:  # Never delete admin user
             users = [user for user in users if user['name'] !=
-                     CONF.identity.admin_username]
+                     CONF.auth.admin_username]
 
         LOG.debug("List count, %s Users after reconcile" % len(users))
         return users
@@ -854,7 +855,7 @@ class RoleService(IdentityService):
     def list(self):
         client = self.client
         try:
-            roles = client.list_roles()
+            roles = client.list_roles()['roles']
             # reconcile roles with saved state and never list admin role
             if not self.is_save_state:
                 roles = [role for role in roles if
@@ -895,7 +896,7 @@ class TenantService(IdentityService):
         if not self.is_save_state:
             tenants = [tenant for tenant in tenants if (tenant['id']
                        not in self.saved_state_json['tenants'].keys()
-                       and tenant['name'] != CONF.identity.admin_tenant_name)]
+                       and tenant['name'] != CONF.auth.admin_tenant_name)]
 
         if self.is_preserve:
             tenants = [tenant for tenant in tenants if tenant['name']
