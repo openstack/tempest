@@ -16,10 +16,8 @@
 from tempest.api.compute import base
 
 
-class BaseKeypairTest(base.BaseComputeTest):
+class BaseKeypairTest(base.BaseV2ComputeTest):
     """Base test case class for all keypair API tests."""
-
-    _api_version = 2
 
     @classmethod
     def setup_clients(cls):

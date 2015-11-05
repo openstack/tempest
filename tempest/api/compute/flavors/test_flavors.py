@@ -17,9 +17,7 @@ from tempest.api.compute import base
 from tempest import test
 
 
-class FlavorsV2TestJSON(base.BaseComputeTest):
-
-    _api_version = 2
+class FlavorsV2TestJSON(base.BaseV2ComputeTest):
     _min_disk = 'minDisk'
     _min_ram = 'minRam'
 

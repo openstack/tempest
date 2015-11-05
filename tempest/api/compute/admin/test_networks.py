@@ -20,8 +20,7 @@ from tempest import test
 CONF = config.CONF
 
 
-class NetworksTest(base.BaseComputeAdminTest):
-    _api_version = 2
+class NetworksTest(base.BaseV2ComputeAdminTest):
 
     """
     Tests Nova Networks API that usually requires admin privileges.

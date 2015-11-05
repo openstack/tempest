@@ -16,7 +16,7 @@ from tempest.api.compute import base
 from tempest import test
 
 
-class TestVersions(base.BaseComputeTest):
+class TestVersions(base.BaseV2ComputeTest):
 
     @test.idempotent_id('6c0a0990-43b6-4529-9b61-5fd8daf7c55c')
     def test_list_api_versions(self):
