@@ -37,3 +37,10 @@ class DomainsNegativeTestJSON(base.BaseIdentityV3AdminTest):
         # domain need to be disabled before deleting
         self.assertRaises(lib_exc.Forbidden, self.client.delete_domain,
                           domain_id)
+
+    @test.attr(type=['negative'])
+    @test.idempotent_id('9018461d-7d24-408d-b3fe-ae37e8cd5c9e')
+    def test_create_domain_with_empty_name(self):
+        # Domain name should not be empty
+        self.assertRaises(lib_exc.BadRequest, self.client.create_domain,
+                          name='')
