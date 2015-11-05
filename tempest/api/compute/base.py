@@ -18,6 +18,7 @@ import time
 from oslo_log import log as logging
 from tempest_lib import exceptions as lib_exc
 
+from tempest.common import api_version_utils
 from tempest.common import compute
 from tempest.common.utils import data_utils
 from tempest.common import waiters
@@ -29,7 +30,8 @@ CONF = config.CONF
 LOG = logging.getLogger(__name__)
 
 
-class BaseV2ComputeTest(tempest.test.BaseTestCase):
+class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
+                        tempest.test.BaseTestCase):
     """Base test case class for all Compute API tests."""
 
     force_tenant_isolation = False
@@ -43,6 +45,12 @@ class BaseV2ComputeTest(tempest.test.BaseTestCase):
         super(BaseV2ComputeTest, cls).skip_checks()
         if not CONF.service_available.nova:
             raise cls.skipException("Nova is not available")
+        cfg_min_version = CONF.compute_feature_enabled.min_microversion
+        cfg_max_version = CONF.compute_feature_enabled.max_microversion
+        api_version_utils.check_skip_with_microversion(cls.min_microversion,
+                                                       cls.max_microversion,
+                                                       cfg_min_version,
+                                                       cfg_max_version)
 
     @classmethod
     def setup_credentials(cls):
