@@ -116,9 +116,9 @@ class TempestInit(command.Command):
         if not os.path.isdir(local_dir):
             LOG.debug('Creating local working dir: %s' % local_dir)
             os.mkdir(local_dir)
-        else:
+        elif not os.listdir(local_dir) == []:
             raise OSError("Directory you are trying to initialize already "
-                          "exists: %s" % local_dir)
+                          "exists and is not empty: %s" % local_dir)
 
         lock_dir = os.path.join(local_dir, 'tempest_lock')
         etc_dir = os.path.join(local_dir, 'etc')

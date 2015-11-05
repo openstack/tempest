@@ -58,9 +58,11 @@ class TestTempestInit(base.TestCase):
         self.assertTrue(os.path.isfile(local_sample_conf_file))
         self.assertGreater(os.path.getsize(local_sample_conf_file), 0)
 
-    def test_create_working_dir_with_existing_local_dir(self):
+    def test_create_working_dir_with_existing_local_dir_non_empty(self):
         fake_local_dir = self.useFixture(fixtures.TempDir())
         fake_local_conf_dir = self.useFixture(fixtures.TempDir())
+        open("%s/foo" % fake_local_dir.path, 'w').close()
+
         _init = init.TempestInit(None, None)
         self.assertRaises(OSError,
                           _init.create_working_dir,
