@@ -79,15 +79,9 @@ class TestShelveInstance(manager.ScenarioTest):
                                         create_kwargs=create_kwargs)
 
         if CONF.compute.use_floatingip_for_ssh:
-            floating_ip = (self.floating_ips_client.create_floating_ip()
-                           ['floating_ip'])
-            self.addCleanup(self.delete_wrapper,
-                            self.floating_ips_client.delete_floating_ip,
-                            floating_ip['id'])
-            self.floating_ips_client.associate_floating_ip_to_server(
-                floating_ip['ip'], server['id'])
+            floating_ip = self.create_floating_ip(server)['ip']
             timestamp = self.create_timestamp(
-                floating_ip['ip'], private_key=keypair['private_key'])
+                floating_ip, private_key=keypair['private_key'])
         else:
             timestamp = self.create_timestamp(
                 server, private_key=keypair['private_key'])
@@ -97,7 +91,7 @@ class TestShelveInstance(manager.ScenarioTest):
         # with the instance snapshot
         self._shelve_then_unshelve_server(server)
         if CONF.compute.use_floatingip_for_ssh:
-            timestamp2 = self.get_timestamp(floating_ip['ip'],
+            timestamp2 = self.get_timestamp(floating_ip,
                                             private_key=keypair['private_key'])
         else:
             timestamp2 = self.get_timestamp(server,

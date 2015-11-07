@@ -107,13 +107,6 @@ class BaremetalBasicOps(manager.BaremetalScenarioTest):
             return None
         return int(ephemeral)
 
-    def add_floating_ip(self):
-        floating_ip = (self.floating_ips_client.create_floating_ip()
-                       ['floating_ip'])
-        self.floating_ips_client.associate_floating_ip_to_server(
-            floating_ip['ip'], self.instance['id'])
-        return floating_ip['ip']
-
     def validate_ports(self):
         for port in self.get_ports(self.node['uuid']):
             n_port_id = port['extra']['vif_port_id']
@@ -131,7 +124,7 @@ class BaremetalBasicOps(manager.BaremetalScenarioTest):
         self.validate_ports()
         self.verify_connectivity()
         if CONF.compute.ssh_connect_method == 'floating':
-            floating_ip = self.add_floating_ip()
+            floating_ip = self.create_floating_ip(self.instance)['ip']
             self.verify_connectivity(ip=floating_ip)
 
         vm_client = self.get_remote_client(self.instance)
