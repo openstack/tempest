@@ -13,6 +13,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+"""
+http://developer.openstack.org/api-ref-identity-v3.html#credentials-v3
+"""
+
 from oslo_serialization import jsonutils as json
 
 from tempest.common import service_client
@@ -21,17 +25,13 @@ from tempest.common import service_client
 class CredentialsClient(service_client.ServiceClient):
     api_version = "v3"
 
-    def create_credential(self, access_key, secret_key, user_id, project_id):
-        """Creates a credential."""
-        blob = "{\"access\": \"%s\", \"secret\": \"%s\"}" % (
-            access_key, secret_key)
-        post_body = {
-            "blob": blob,
-            "project_id": project_id,
-            "type": "ec2",
-            "user_id": user_id
-        }
-        post_body = json.dumps({'credential': post_body})
+    def create_credential(self, **kwargs):
+        """Creates a credential.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-identity-v3.html#createCredential
+        """
+        post_body = json.dumps({'credential': kwargs})
         resp, body = self.post('credentials', post_body)
         self.expected_success(201, resp.status)
         body = json.loads(body)
@@ -39,22 +39,12 @@ class CredentialsClient(service_client.ServiceClient):
         return service_client.ResponseBody(resp, body)
 
     def update_credential(self, credential_id, **kwargs):
-        """Updates a credential."""
-        body = self.get_credential(credential_id)['credential']
-        cred_type = kwargs.get('type', body['type'])
-        access_key = kwargs.get('access_key', body['blob']['access'])
-        secret_key = kwargs.get('secret_key', body['blob']['secret'])
-        project_id = kwargs.get('project_id', body['project_id'])
-        user_id = kwargs.get('user_id', body['user_id'])
-        blob = "{\"access\": \"%s\", \"secret\": \"%s\"}" % (
-            access_key, secret_key)
-        post_body = {
-            "blob": blob,
-            "project_id": project_id,
-            "type": cred_type,
-            "user_id": user_id
-        }
-        post_body = json.dumps({'credential': post_body})
+        """Updates a credential.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-identity-v3.html#updateCredential
+        """
+        post_body = json.dumps({'credential': kwargs})
         resp, body = self.patch('credentials/%s' % credential_id, post_body)
         self.expected_success(200, resp.status)
         body = json.loads(body)

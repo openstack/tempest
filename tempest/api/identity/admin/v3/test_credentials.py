@@ -53,11 +53,11 @@ class CredentialsTestJSON(base.BaseIdentityV3AdminTest):
     @test.attr(type='smoke')
     @test.idempotent_id('7cd59bf9-bda4-4c72-9467-d21cab278355')
     def test_credentials_create_get_update_delete(self):
-        keys = [data_utils.rand_name('Access'),
-                data_utils.rand_name('Secret')]
+        blob = '{"access": "%s", "secret": "%s"}' % (
+            data_utils.rand_name('Access'), data_utils.rand_name('Secret'))
         cred = self.creds_client.create_credential(
-            keys[0], keys[1], self.user_body['id'],
-            self.projects[0])['credential']
+            user_id=self.user_body['id'], project_id=self.projects[0],
+            blob=blob, type='ec2')['credential']
         self.addCleanup(self._delete_credential, cred['id'])
         for value1 in self.creds_list[0]:
             self.assertIn(value1, cred)
@@ -66,9 +66,10 @@ class CredentialsTestJSON(base.BaseIdentityV3AdminTest):
 
         new_keys = [data_utils.rand_name('NewAccess'),
                     data_utils.rand_name('NewSecret')]
+        blob = '{"access": "%s", "secret": "%s"}' % (new_keys[0], new_keys[1])
         update_body = self.creds_client.update_credential(
-            cred['id'], access_key=new_keys[0], secret_key=new_keys[1],
-            project_id=self.projects[1])['credential']
+            cred['id'], blob=blob, project_id=self.projects[1],
+            type='ec2')['credential']
         self.assertEqual(cred['id'], update_body['id'])
         self.assertEqual(self.projects[1], update_body['project_id'])
         self.assertEqual(self.user_body['id'], update_body['user_id'])
@@ -89,10 +90,11 @@ class CredentialsTestJSON(base.BaseIdentityV3AdminTest):
         fetched_cred_ids = list()
 
         for i in range(2):
+            blob = '{"access": "%s", "secret": "%s"}' % (
+                data_utils.rand_name('Access'), data_utils.rand_name('Secret'))
             cred = self.creds_client.create_credential(
-                data_utils.rand_name('Access'),
-                data_utils.rand_name('Secret'),
-                self.user_body['id'], self.projects[0])['credential']
+                user_id=self.user_body['id'], project_id=self.projects[0],
+                blob=blob, type='ec2')['credential']
             created_cred_ids.append(cred['id'])
             self.addCleanup(self._delete_credential, cred['id'])
 
