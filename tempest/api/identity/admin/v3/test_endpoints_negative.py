@@ -57,8 +57,8 @@ class EndpointsNegativeTestJSON(base.BaseIdentityV3AdminTest):
         url = data_utils.rand_url()
         region = data_utils.rand_name('region')
         self.assertRaises(lib_exc.BadRequest, self.client.create_endpoint,
-                          self.service_id, interface, url, region=region,
-                          force_enabled='False')
+                          service_id=self.service_id, interface=interface,
+                          url=url, region=region, enabled='False')
 
     @test.attr(type=['negative'])
     @test.idempotent_id('9c43181e-0627-484a-8c79-923e8a59598b')
@@ -68,8 +68,8 @@ class EndpointsNegativeTestJSON(base.BaseIdentityV3AdminTest):
         url = data_utils.rand_url()
         region = data_utils.rand_name('region')
         self.assertRaises(lib_exc.BadRequest, self.client.create_endpoint,
-                          self.service_id, interface, url, region=region,
-                          force_enabled='True')
+                          service_id=self.service_id, interface=interface,
+                          url=url, region=region, enabled='True')
 
     def _assert_update_raises_bad_request(self, enabled):
 
@@ -78,13 +78,14 @@ class EndpointsNegativeTestJSON(base.BaseIdentityV3AdminTest):
         url1 = data_utils.rand_url()
         interface1 = 'public'
         endpoint_for_update = (
-            self.client.create_endpoint(self.service_id, interface1,
-                                        url1, region=region1,
-                                        enabled=True))['endpoint']
+            self.client.create_endpoint(service_id=self.service_id,
+                                        interface=interface1,
+                                        url=url1, region=region1,
+                                        enabled=True)['endpoint'])
         self.addCleanup(self.client.delete_endpoint, endpoint_for_update['id'])
 
         self.assertRaises(lib_exc.BadRequest, self.client.update_endpoint,
-                          endpoint_for_update['id'], force_enabled=enabled)
+                          endpoint_for_update['id'], enabled=enabled)
 
     @test.attr(type=['negative'])
     @test.idempotent_id('65e41f32-5eb7-498f-a92a-a6ccacf7439a')
