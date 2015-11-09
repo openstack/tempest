@@ -27,21 +27,6 @@ class IdentityClient(service_client.ServiceClient):
         body = json.loads(body)
         return service_client.ResponseBody(resp, body)
 
-    def has_admin_extensions(self):
-        """
-        Returns True if the KSADM Admin Extensions are supported
-        False otherwise
-        """
-        if hasattr(self, '_has_admin_extensions'):
-            return self._has_admin_extensions
-        # Try something that requires admin
-        try:
-            self.list_roles()
-            self._has_admin_extensions = True
-        except Exception:
-            self._has_admin_extensions = False
-        return self._has_admin_extensions
-
     def create_role(self, name):
         """Create a role."""
         post_body = {
