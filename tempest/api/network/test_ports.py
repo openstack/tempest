@@ -22,6 +22,7 @@ from tempest.api.network import base_security_groups as sec_base
 from tempest.common import custom_matchers
 from tempest.common.utils import data_utils
 from tempest import config
+from tempest import exceptions
 from tempest import test
 
 CONF = config.CONF
@@ -88,14 +89,16 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
 
     @classmethod
     def _get_ipaddress_from_tempest_conf(cls):
-        """Return first subnet gateway for configured CIDR """
+        """Return subnet with mask bits for configured CIDR """
         if cls._ip_version == 4:
             cidr = netaddr.IPNetwork(CONF.network.tenant_network_cidr)
+            cidr.prefixlen = CONF.network.tenant_network_mask_bits
 
         elif cls._ip_version == 6:
             cidr = netaddr.IPNetwork(CONF.network.tenant_network_v6_cidr)
+            cidr.prefixlen = CONF.network.tenant_network_v6_mask_bits
 
-        return netaddr.IPAddress(cidr)
+        return cidr
 
     @test.attr(type='smoke')
     @test.idempotent_id('0435f278-40ae-48cb-a404-b8a087bc09b1')
@@ -103,9 +106,15 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
         network = self.create_network()
         net_id = network['id']
         address = self._get_ipaddress_from_tempest_conf()
-        allocation_pools = {'allocation_pools': [{'start': str(address + 4),
-                                                  'end': str(address + 6)}]}
-        subnet = self.create_subnet(network, **allocation_pools)
+        if ((address.version == 4 and address.prefixlen >= 30) or
+           (address.version == 6 and address.prefixlen >= 126)):
+            msg = ("Subnet %s isn't large enough for the test" % address.cidr)
+            raise exceptions.InvalidConfiguration(message=msg)
+        allocation_pools = {'allocation_pools': [{'start': str(address[2]),
+                                                  'end': str(address[-2])}]}
+        subnet = self.create_subnet(network, cidr=address,
+                                    mask_bits=address.prefixlen,
+                                    **allocation_pools)
         self.addCleanup(self.subnets_client.delete_subnet, subnet['id'])
         body = self.client.create_port(network_id=net_id)
         self.addCleanup(self.client.delete_port, body['port']['id'])
