@@ -22,3 +22,11 @@ def get_tenant_by_name(client, tenant_name):
         if tenant['name'] == tenant_name:
             return tenant
     raise lib_exc.NotFound('No such tenant(%s) in %s' % (tenant_name, tenants))
+
+
+def get_user_by_username(client, tenant_id, username):
+    users = client.list_tenant_users(tenant_id)['users']
+    for user in users:
+        if user['name'] == username:
+            return user
+    raise lib_exc.NotFound('No such user(%s) in %s' % (username, users))
