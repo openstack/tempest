@@ -146,7 +146,7 @@ class UsersTestJSON(base.BaseIdentityV2AdminTest):
         user_ids.append(user2['id'])
         self.data.users.append(user2)
         # List of users for the respective tenant ID
-        body = (self.client.list_users_for_tenant(self.data.tenant['id'])
+        body = (self.client.list_tenant_users(self.data.tenant['id'])
                 ['users'])
         for i in body:
             fetched_user_ids.append(i['id'])
@@ -182,7 +182,7 @@ class UsersTestJSON(base.BaseIdentityV2AdminTest):
                                             second_user['id'],
                                             role['id'])['role']
         # List of users with roles for the respective tenant ID
-        body = (self.client.list_users_for_tenant(self.data.tenant['id'])
+        body = (self.client.list_tenant_users(self.data.tenant['id'])
                 ['users'])
         for i in body:
             fetched_user_ids.append(i['id'])
