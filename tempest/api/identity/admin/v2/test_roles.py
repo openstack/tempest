@@ -76,7 +76,7 @@ class RolesTestJSON(base.BaseIdentityV2AdminTest):
         self.data.setup_test_role()
         role_id = self.data.role['id']
         role_name = self.data.role['name']
-        body = self.client.get_role(role_id)['role']
+        body = self.client.show_role(role_id)['role']
         self.assertEqual(role_id, body['id'])
         self.assertEqual(role_name, body['name'])
 

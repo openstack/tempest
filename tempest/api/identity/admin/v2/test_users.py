@@ -73,7 +73,7 @@ class UsersTestJSON(base.BaseIdentityV2AdminTest):
         self.assertEqual(u_email2, update_user['email'])
         self.assertEqual(False, update_user['enabled'])
         # GET by id after updating
-        updated_user = self.client.get_user(user['id'])['user']
+        updated_user = self.client.show_user(user['id'])['user']
         # Assert response body of GET after updating
         self.assertEqual(u_name2, updated_user['name'])
         self.assertEqual(u_email2, updated_user['email'])
@@ -121,7 +121,7 @@ class UsersTestJSON(base.BaseIdentityV2AdminTest):
     def test_get_users(self):
         # Get a list of users and find the test user
         self.data.setup_test_user()
-        users = self.client.get_users()['users']
+        users = self.client.list_users()['users']
         self.assertThat([u['name'] for u in users],
                         matchers.Contains(self.data.test_user),
                         "Could not find %s" % self.data.test_user)

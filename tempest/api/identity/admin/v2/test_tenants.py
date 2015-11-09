@@ -57,7 +57,7 @@ class TenantsTestJSON(base.BaseIdentityV2AdminTest):
         desc1 = body['description']
         self.assertEqual(desc1, tenant_desc, 'Description should have '
                          'been sent in response for create')
-        body = self.client.get_tenant(tenant_id)['tenant']
+        body = self.client.show_tenant(tenant_id)['tenant']
         desc2 = body['description']
         self.assertEqual(desc2, tenant_desc, 'Description does not appear'
                          'to be set')
@@ -74,7 +74,7 @@ class TenantsTestJSON(base.BaseIdentityV2AdminTest):
         tenant_id = body['id']
         en1 = body['enabled']
         self.assertTrue(en1, 'Enable should be True in response')
-        body = self.client.get_tenant(tenant_id)['tenant']
+        body = self.client.show_tenant(tenant_id)['tenant']
         en2 = body['enabled']
         self.assertTrue(en2, 'Enable should be True in lookup')
         self.client.delete_tenant(tenant_id)
@@ -91,7 +91,7 @@ class TenantsTestJSON(base.BaseIdentityV2AdminTest):
         en1 = body['enabled']
         self.assertEqual('false', str(en1).lower(),
                          'Enable should be False in response')
-        body = self.client.get_tenant(tenant_id)['tenant']
+        body = self.client.show_tenant(tenant_id)['tenant']
         en2 = body['enabled']
         self.assertEqual('false', str(en2).lower(),
                          'Enable should be False in lookup')
@@ -114,7 +114,7 @@ class TenantsTestJSON(base.BaseIdentityV2AdminTest):
         resp2_name = body['name']
         self.assertNotEqual(resp1_name, resp2_name)
 
-        body = self.client.get_tenant(t_id)['tenant']
+        body = self.client.show_tenant(t_id)['tenant']
         resp3_name = body['name']
 
         self.assertNotEqual(resp1_name, resp3_name)
@@ -141,7 +141,7 @@ class TenantsTestJSON(base.BaseIdentityV2AdminTest):
         resp2_desc = body['description']
         self.assertNotEqual(resp1_desc, resp2_desc)
 
-        body = self.client.get_tenant(t_id)['tenant']
+        body = self.client.show_tenant(t_id)['tenant']
         resp3_desc = body['description']
 
         self.assertNotEqual(resp1_desc, resp3_desc)
@@ -168,7 +168,7 @@ class TenantsTestJSON(base.BaseIdentityV2AdminTest):
         resp2_en = body['enabled']
         self.assertNotEqual(resp1_en, resp2_en)
 
-        body = self.client.get_tenant(t_id)['tenant']
+        body = self.client.show_tenant(t_id)['tenant']
         resp3_en = body['enabled']
 
         self.assertNotEqual(resp1_en, resp3_en)

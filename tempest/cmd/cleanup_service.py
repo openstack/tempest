@@ -813,7 +813,7 @@ class UserService(IdentityService):
 
     def list(self):
         client = self.client
-        users = client.get_users()['users']
+        users = client.list_users()['users']
 
         if not self.is_save_state:
             users = [user for user in users if user['id']

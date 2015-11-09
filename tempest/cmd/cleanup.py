@@ -247,7 +247,7 @@ class TempestCleanup(command.Command):
     def _tenant_exists(self, tenant_id):
         id_cl = self.admin_mgr.identity_client
         try:
-            t = id_cl.get_tenant(tenant_id)
+            t = id_cl.show_tenant(tenant_id)
             LOG.debug("Tenant is: %s" % str(t))
             return True
         except Exception as ex:

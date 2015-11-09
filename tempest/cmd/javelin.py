@@ -432,7 +432,7 @@ class JavelinCheck(unittest.TestCase):
         LOG.info("checking users")
         for name, user in six.iteritems(self.users):
             client = keystone_admin()
-            found = client.identity.get_user(user['id'])['user']
+            found = client.identity.show_user(user['id'])['user']
             self.assertEqual(found['name'], user['name'])
             self.assertEqual(found['tenantId'], user['tenant_id'])
 
