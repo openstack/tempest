@@ -119,13 +119,6 @@ class IdentityClient(service_client.ServiceClient):
         body = json.loads(body)
         return service_client.ResponseBody(resp, body)
 
-    def get_tenant_by_name(self, tenant_name):
-        tenants = self.list_tenants()['tenants']
-        for tenant in tenants:
-            if tenant['name'] == tenant_name:
-                return tenant
-        raise lib_exc.NotFound('No such tenant')
-
     def update_tenant(self, tenant_id, **kwargs):
         """Updates a tenant."""
         body = self.show_tenant(tenant_id)['tenant']

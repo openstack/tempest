@@ -59,6 +59,7 @@ from oslo_serialization import jsonutils as json
 from tempest import clients
 from tempest.cmd import cleanup_service
 from tempest.common import credentials_factory as credentials
+from tempest.common import identity
 from tempest import config
 
 SAVED_STATE_JSON = "saved_state.json"
@@ -177,7 +178,8 @@ class TempestCleanup(command.Command):
     def _init_admin_ids(self):
         id_cl = self.admin_mgr.identity_client
 
-        tenant = id_cl.get_tenant_by_name(CONF.auth.admin_tenant_name)
+        tenant = identity.get_tenant_by_name(id_cl,
+                                             CONF.auth.admin_tenant_name)
         self.admin_tenant_id = tenant['id']
 
         user = id_cl.get_user_by_username(self.admin_tenant_id,
