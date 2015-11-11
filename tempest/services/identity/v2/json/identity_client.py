@@ -213,7 +213,7 @@ class IdentityClient(service_client.ServiceClient):
         self.expected_success(204, resp.status)
         return service_client.ResponseBody(resp, body)
 
-    def list_users_for_tenant(self, tenant_id):
+    def list_tenant_users(self, tenant_id):
         """List users for a Tenant."""
         resp, body = self.get('/tenants/%s/users' % tenant_id)
         self.expected_success(200, resp.status)
@@ -221,7 +221,7 @@ class IdentityClient(service_client.ServiceClient):
         return service_client.ResponseBody(resp, body)
 
     def get_user_by_username(self, tenant_id, username):
-        users = self.list_users_for_tenant(tenant_id)['users']
+        users = self.list_tenant_users(tenant_id)['users']
         for user in users:
             if user['name'] == username:
                 return user
