@@ -33,7 +33,8 @@ class RegionsTestJSON(base.BaseIdentityV3AdminTest):
         cls.setup_regions = list()
         for i in range(2):
             r_description = data_utils.rand_name('description')
-            region = cls.client.create_region(r_description)['region']
+            region = cls.client.create_region(
+                description=r_description)['region']
             cls.setup_regions.append(region)
 
     @classmethod
@@ -51,7 +52,7 @@ class RegionsTestJSON(base.BaseIdentityV3AdminTest):
     def test_create_update_get_delete_region(self):
         r_description = data_utils.rand_name('description')
         region = self.client.create_region(
-            r_description,
+            description=r_description,
             parent_region_id=self.setup_regions[0]['id'])['region']
         self.addCleanup(self._delete_region, region['id'])
         self.assertEqual(r_description, region['description'])
@@ -79,7 +80,7 @@ class RegionsTestJSON(base.BaseIdentityV3AdminTest):
         r_region_id = data_utils.rand_uuid()
         r_description = data_utils.rand_name('description')
         region = self.client.create_region(
-            r_description, unique_region_id=r_region_id)['region']
+            region_id=r_region_id, description=r_description)['region']
         self.addCleanup(self._delete_region, region['id'])
         # Asserting Create Region with specific id response body
         self.assertEqual(r_region_id, region['id'])
