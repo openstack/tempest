@@ -65,6 +65,9 @@ admin_tenant_id = 725d6fa98000418f88e47d283d8f1efb            # Set correct admi
 [service_available]
 neutron = True
 
+[network]
+public_network_id = 1c87c1d3-bd1a-4738-bd55-99a84fa45c87    # id of your public network
+
 [ucsm]
 ucsm_ip=10.30.119.66              # UCSM VIP
 ucsm_username=admin               # UCSM username
@@ -112,168 +115,29 @@ CONF = config.CONF
 LOG = log.getLogger(__name__)
 
 
-class ApiUCSMTest(base.BaseAdminNetworkTest, cisco_base.UCSMTestMixin):
-
-    @classmethod
-    def resource_setup(cls):
-        super(ApiUCSMTest, cls).resource_setup()
-        super(ApiUCSMTest, cls).ucsm_resource_setup()
-
-    def setUp(self):
-        super(ApiUCSMTest, self).setUp()
-
-        # Log into UCS Manager
-        self.ucsm_setup()
-        self.addCleanup(self.ucsm_cleanup)
-
-    def _delete_network(self, network):
-        # Deleting network also deletes its subnets if exists
-        self.networks_client.delete_network(network['id'])
-        if network in self.networks:
-            self.networks.remove(network)
-        for subnet in self.subnets:
-            if subnet['network_id'] == network['id']:
-                self.subnets.remove(subnet)
-
-    def _delete_networks(self, networks):
-        for n in networks:
-            self._delete_network(n)
-        # Asserting that the networks are not found in the list after deletion
-        body = self.networks_client.list_networks()
-        networks_list = [network['id'] for network in body['networks']]
-        for n in networks:
-            self.assertNotIn(n['id'], networks_list)
-
-    @test.attr(type='non-sriov')
-    def test_create_delete_networks(self):
-        """Covered test cases:
-        * Creating vlan profiles
-        * Deleting vlan profiles
-        * Adding vlans to both VNICs of a service profile
-        * Deleting vlans from both VNICs of a service profile
-        """
-        # Create network and subnet (DHCP enabled)
-        name = data_utils.rand_name('network-')
-        network = self.create_network(network_name=name)
-        self.assertEqual('ACTIVE', network['status'])
-        self.create_subnet(network)
-
-        # Get a vlan id and verify a vlan profile has been created
-        network = self.admin_networks_client.show_network(network['id'])['network']
-        vlan_id = network['provider:segmentation_id']
-        self.timed_assert(self.assertNotEmpty,
-                          lambda: self.ucsm.get_vlan_profile(vlan_id))
-
-        # Verify vlan has been added to both vnics
-        for eth_name in self.eth_names:
-            self.timed_assert(
-                self.assertNotEmpty,
-                lambda: self.ucsm.get_ether_vlan(self.network_node_profile,
-                                                 eth_name, vlan_id))
-
-        # Delete network and verify that the vlan profile has been removed
-        self._delete_network(network)
-        self.timed_assert(self.assertEmpty,
-                          lambda: self.ucsm.get_vlan_profile(vlan_id))
-
-        # Verify the vlan has been removed from both vnics
-        for eth_name in self.eth_names:
-            self.timed_assert(
-                self.assertEmpty,
-                lambda: self.ucsm.get_ether_vlan(
-                    self.network_node_profile, eth_name, vlan_id))
-
-    @test.attr(type='non-sriov')
-    def test_create_delete_bulk_networks(self):
-        """Covered test cases:
-        * Create bulk vlan profiles
-        * Add bulk vlans to both vnics
-        * Delete bulk vlans from both vnics
-        """
-        # Create networks
-        names = [data_utils.rand_name('network-') for i in range(5)]
-        networks = self.client.create_bulk_network(names)['networks']
-
-        # Create subnets (DHCP enabled)
-        cidr = netaddr.IPNetwork(CONF.network.tenant_network_cidr)
-        mask_bits = CONF.network.tenant_network_mask_bits
-        cidrs = [subnet_cidr for subnet_cidr in cidr.subnet(mask_bits)]
-        names = [data_utils.rand_name('subnet-')
-                 for i in range(len(networks))]
-        subnets_list = []
-        for i in range(len(names)):
-            p1 = {
-                'network_id': networks[i]['id'],
-                'cidr': str(cidrs[(i)]),
-                'name': names[i],
-                'ip_version': 4
-            }
-            subnets_list.append(p1)
-        self.client.create_bulk_subnet(subnets_list)
-
-        # Get vlan ids and verify vlan profiles have been created
-        vlan_ids = [self.admin_networks_client.show_network(n['id'])
-                    ['network']['provider:segmentation_id'] for n in networks]
-        for vlan_id in vlan_ids:
-            self.timed_assert(self.assertNotEmpty,
-                              lambda: self.ucsm.get_vlan_profile(vlan_id))
-            # Verify all vlans have been added to both vnics
-            for eth_name in self.eth_names:
-                self.timed_assert(
-                    self.assertNotEmpty,
-                    lambda: self.ucsm.get_ether_vlan(
-                        self.network_node_profile, eth_name, vlan_id))
-
-        # Delete networks and verify all vlan profiles have been removed
-        self._delete_networks(networks)
-        for vlan_id in vlan_ids:
-            self.timed_assert(self.assertEmpty,
-                              lambda: self.ucsm.get_vlan_profile(vlan_id))
-            # Verify all vlans have been removed from both vnics
-            for eth_name in self.eth_names:
-                self.timed_assert(
-                    self.assertEmpty,
-                    lambda: self.ucsm.get_ether_vlan(
-                        self.network_node_profile, eth_name, vlan_id))
-
-    @testtools.skip("Feature not implemented")
-    @test.attr(type='non-sriov')
-    def test_create_vlan_profile_invalid_vlan_id(self):
-        """Covered test cases:
-        * Driver does not create VLAN profiles if VLAN ID >= 4000
-        """
-        segmentation_id = random.randint(4000, 4093)
-        kwargs = {'provider:network_type': 'vlan',
-                  'provider:physical_network': 'physnet1',
-                  'provider:segmentation_id': segmentation_id}
-        # TODO(nfedotov): Should raise exception.
-        # UCSM does not allow to create vlans
-        # from 4000 to 4093 (need to figure out correct values)
-        self.admin_networks_client.create_network(
-            name=data_utils.rand_name('network-'), **kwargs)['network']
 
 
-class ScenarioUCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
+class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
 
     @classmethod
     def setup_credentials(cls):
         # Create no network resources for these tests.
         cls.set_network_resources()
-        super(ScenarioUCSMTest, cls).setup_credentials()
+        super(UCSMTest, cls).setup_credentials()
 
     @classmethod
     def setup_clients(cls):
-        super(ScenarioUCSMTest, cls).setup_clients()
+        super(UCSMTest, cls).setup_clients()
         cls.admin_networks_client = cls.os_adm.networks_client
         cls.admin_network_client = cls.os_adm.network_client
 
     @classmethod
     def resource_setup(cls):
-        super(ScenarioUCSMTest, cls).resource_setup()
-        super(ScenarioUCSMTest, cls).ucsm_resource_setup()
+        super(UCSMTest, cls).resource_setup()
+        super(UCSMTest, cls).ucsm_resource_setup()
 
     def setUp(self):
-        super(ScenarioUCSMTest, self).setUp()
+        super(UCSMTest, self).setUp()
 
         self.keypairs = {}
         self.servers = []
@@ -324,7 +188,7 @@ class ScenarioUCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
         if should_check_floating_ip_status:
             self.check_floating_ip_status(floating_ip, floatingip_status)
         # call the common method in the parent class
-        super(ScenarioUCSMTest, self).check_public_network_connectivity(
+        super(UCSMTest, self).check_public_network_connectivity(
             ip_address, ssh_login, private_key, should_connect, msg,
             self.servers)
 
@@ -347,6 +211,135 @@ class ScenarioUCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
             server1_client.ping_host(floating_ip2.floating_ip_address))
         self.assertNotEmpty(
             server2_client.ping_host(floating_ip1.floating_ip_address))
+
+    def _delete_network(self, network):
+        self.networks_client.delete_network(network['id'])
+
+    def _delete_networks(self, networks):
+        for n in networks:
+            self._delete_network(n)
+        # Asserting that the networks are not found in the list after deletion
+        body = self.networks_client.list_networks()
+        networks_list = [network['id'] for network in body['networks']]
+        for n in networks:
+            self.assertNotIn(n['id'], networks_list)
+
+    @test.attr(type='non-sriov')
+    def test_create_delete_networks(self):
+        """Covered test cases:
+        * Creating vlan profiles
+        * Deleting vlan profiles
+        * Adding vlans to both VNICs of a service profile
+        * Deleting vlans from both VNICs of a service profile
+        """
+        # Create network and subnet (DHCP enabled)
+        network = self._create_network()
+        self.assertEqual('ACTIVE', network['status'])
+        self._create_subnet(network)
+        port = self._create_port(
+            network.id, security_groups=[self.security_group['id']])
+
+        # Get a vlan id and verify a vlan profile has been created
+        network = self.admin_networks_client.show_network(network['id'])['network']
+        vlan_id = network['provider:segmentation_id']
+        self.timed_assert(self.assertNotEmpty,
+                          lambda: self.ucsm.get_vlan_profile(vlan_id))
+
+        # Verify vlan has been added to both vnics
+        for eth_name in self.eth_names:
+            self.timed_assert(
+                self.assertNotEmpty,
+                lambda: self.ucsm.get_ether_vlan(self.network_node_profile,
+                                                 eth_name, vlan_id))
+
+        # Delete network and verify that the vlan profile has been removed
+        port.delete()
+        self._delete_network(network)
+        self.timed_assert(self.assertEmpty,
+                          lambda: self.ucsm.get_vlan_profile(vlan_id))
+
+        # Verify the vlan has been removed from both vnics
+        for eth_name in self.eth_names:
+            self.timed_assert(
+                self.assertEmpty,
+                lambda: self.ucsm.get_ether_vlan(
+                    self.network_node_profile, eth_name, vlan_id))
+
+    @test.attr(type='non-sriov')
+    def test_create_delete_bulk_networks(self):
+        """Covered test cases:
+        * Create bulk vlan profiles
+        * Add bulk vlans to both vnics
+        * Delete bulk vlans from both vnics
+        """
+        # Create networks
+        names = [data_utils.rand_name('network-') for i in range(5)]
+        networks = self.network_client.create_bulk_network(names)['networks']
+
+        # Create subnets (DHCP enabled)
+        cidr = netaddr.IPNetwork(CONF.network.tenant_network_cidr)
+        mask_bits = CONF.network.tenant_network_mask_bits
+        cidrs = [subnet_cidr for subnet_cidr in cidr.subnet(mask_bits)]
+        names = [data_utils.rand_name('subnet-')
+                 for i in range(len(networks))]
+        subnets_list = []
+        for i in range(len(names)):
+            p1 = {
+                'network_id': networks[i]['id'],
+                'cidr': str(cidrs[(i)]),
+                'name': names[i],
+                'ip_version': 4
+            }
+            subnets_list.append(p1)
+        self.network_client.create_bulk_subnet(subnets_list)
+
+        ports_list = []
+        for network in networks:
+            ports_list.append(self._create_port(
+                network['id'], security_groups=[self.security_group['id']]))
+
+        # Get vlan ids and verify vlan profiles have been created
+        vlan_ids = [self.admin_networks_client.show_network(n['id'])
+                    ['network']['provider:segmentation_id'] for n in networks]
+        for vlan_id in vlan_ids:
+            self.timed_assert(self.assertNotEmpty,
+                              lambda: self.ucsm.get_vlan_profile(vlan_id))
+            # Verify all vlans have been added to both vnics
+            for eth_name in self.eth_names:
+                self.timed_assert(
+                    self.assertNotEmpty,
+                    lambda: self.ucsm.get_ether_vlan(
+                        self.network_node_profile, eth_name, vlan_id))
+
+        # Delete networks and verify all vlan profiles have been removed
+        for port in ports_list:
+            port.delete()
+        self._delete_networks(networks)
+        for vlan_id in vlan_ids:
+            self.timed_assert(self.assertEmpty,
+                              lambda: self.ucsm.get_vlan_profile(vlan_id))
+            # Verify all vlans have been removed from both vnics
+            for eth_name in self.eth_names:
+                self.timed_assert(
+                    self.assertEmpty,
+                    lambda: self.ucsm.get_ether_vlan(
+                        self.network_node_profile, eth_name, vlan_id))
+
+    @testtools.skip("Feature not implemented")
+    @test.attr(type='non-sriov')
+    def test_create_vlan_profile_invalid_vlan_id(self):
+        """Covered test cases:
+        * Driver does not create VLAN profiles if VLAN ID >= 4000
+        """
+        segmentation_id = random.randint(4000, 4093)
+        kwargs = {'provider:network_type': 'vlan',
+                  'provider:physical_network': 'physnet1',
+                  'provider:segmentation_id': segmentation_id}
+        # TODO(nfedotov): Should raise exception.
+        # UCSM does not allow to create vlans
+        # from 4000 to 4093 (need to figure out correct values)
+        self.admin_networks_client.create_network(
+            name=data_utils.rand_name('network-'), **kwargs)['network']
 
     @test.attr(type='sriov')
     # @testtools.skip("https://bugs.launchpad.net/"
