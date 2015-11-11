@@ -47,7 +47,7 @@ from tempest.services.baremetal.v1.json.baremetal_client import \
     BaremetalClient
 from tempest.services import botoclients
 from tempest.services.compute.json.floating_ips_client import \
-    FloatingIPsClient
+    FloatingIPsClient as ComputeFloatingIPsClient
 from tempest.services.compute.json.images_client import ImagesClient
 from tempest.services.compute.json.instance_usage_audit_log_client import \
     InstanceUsagesAuditLogClient
@@ -316,8 +316,8 @@ class Manager(manager.Manager):
             self.auth_provider, **params)
         self.floating_ips_bulk_client = FloatingIPsBulkClient(
             self.auth_provider, **params)
-        self.floating_ips_client = FloatingIPsClient(self.auth_provider,
-                                                     **params)
+        self.compute_floating_ips_client = ComputeFloatingIPsClient(
+            self.auth_provider, **params)
         self.security_group_rules_client = SecurityGroupRulesClient(
             self.auth_provider, **params)
         self.security_groups_client = SecurityGroupsClient(

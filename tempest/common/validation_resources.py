@@ -58,7 +58,7 @@ def create_validation_resources(os, validation_resources=None):
             validation_data['security_group'] = \
                 create_ssh_security_group(os, add_rule)
         if validation_resources['floating_ip']:
-            floating_client = os.floating_ips_client
+            floating_client = os.compute_floating_ips_client
             validation_data.update(floating_client.create_floating_ip())
     return validation_data
 
@@ -100,7 +100,7 @@ def clear_validation_resources(os, validation_data=None):
                 if not has_exception:
                     has_exception = exc
         if 'floating_ip' in validation_data:
-            floating_client = os.floating_ips_client
+            floating_client = os.compute_floating_ips_client
             fip_id = validation_data['floating_ip']['id']
             try:
                 floating_client.delete_floating_ip(fip_id)

@@ -47,7 +47,8 @@ class ScenarioTest(tempest.test.BaseTestCase):
         super(ScenarioTest, cls).setup_clients()
         # Clients (in alphabetical order)
         cls.flavors_client = cls.manager.flavors_client
-        cls.floating_ips_client = cls.manager.floating_ips_client
+        cls.compute_floating_ips_client = (
+            cls.manager.compute_floating_ips_client)
         # Glance image client v1
         cls.image_client = cls.manager.image_client
         # Compute image client
@@ -565,12 +566,12 @@ class ScenarioTest(tempest.test.BaseTestCase):
         Nova clients
         """
 
-        floating_ip = (self.floating_ips_client.create_floating_ip(pool_name)
-                       ['floating_ip'])
+        floating_ip = (self.compute_floating_ips_client.
+                       create_floating_ip(pool_name)['floating_ip'])
         self.addCleanup(self.delete_wrapper,
-                        self.floating_ips_client.delete_floating_ip,
+                        self.compute_floating_ips_client.delete_floating_ip,
                         floating_ip['id'])
-        self.floating_ips_client.associate_floating_ip_to_server(
+        self.compute_floating_ips_client.associate_floating_ip_to_server(
             floating_ip['ip'], thing['id'])
         return floating_ip
 
