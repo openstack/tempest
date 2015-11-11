@@ -363,6 +363,17 @@ communication to a particular service. It is only if you are either not using
 the same *catalog_type* as devstack or you want Tempest to talk to a different
 endpoint type instead of publicURL for a service that these need to be changed.
 
+.. note::
+
+    Tempest does not serve all kind of fancy URLs in the service catalog.
+    Service catalog should be in a standard format (which is going to be
+    standardized at keystone level).
+    Tempest expects URLs in the Service catalog in below format:
+     * http://example.com:1234/<version-info>
+    Examples:
+     * Good - http://example.com:1234/v2.0
+     * Wouldn’t work -  http://example.com:1234/xyz/v2.0/
+       (adding prefix/suffix around version etc)
 
 Service feature configuration
 -----------------------------
