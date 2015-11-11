@@ -237,10 +237,6 @@ ComputeGroup = [
     cfg.StrOpt('image_ssh_password',
                default="password",
                help="Password used to authenticate to an instance."),
-    cfg.StrOpt('image_alt_ssh_user',
-               default="root",
-               help="User name used to authenticate to an instance using "
-                    "the alternate image."),
     cfg.IntOpt('build_interval',
                default=1,
                help="Time in seconds between build status checks."),
