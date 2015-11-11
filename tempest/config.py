@@ -1244,7 +1244,10 @@ def list_opts():
     generator to discover the options exposed to users.
     """
     ext_plugins = plugins.TempestTestPluginManager()
-    opt_list = [(getattr(g, 'name', None), o) for g, o in _opts]
+    # Make a shallow copy of the options list that can be
+    # extended by plugins. Send back the group object
+    # to allow group help text to be generated.
+    opt_list = [(g, o) for g, o in _opts]
     opt_list.extend(ext_plugins.get_plugin_options_list())
     return opt_list
 
