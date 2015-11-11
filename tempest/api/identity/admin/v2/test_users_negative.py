@@ -222,7 +222,7 @@ class UsersNegativeTestJSON(base.BaseIdentityV2AdminTest):
         # Non-administrator user should not be authorized to get user list
         self.data.setup_test_user()
         self.assertRaises(lib_exc.Forbidden,
-                          self.non_admin_client.get_users)
+                          self.non_admin_client.list_users)
 
     @test.attr(type=['negative'])
     @test.idempotent_id('a73591ec-1903-4ffe-be42-282b39fefc9d')
@@ -230,7 +230,7 @@ class UsersNegativeTestJSON(base.BaseIdentityV2AdminTest):
         # Request to get list of users without a valid token should fail
         token = self.client.auth_provider.get_token()
         self.client.delete_token(token)
-        self.assertRaises(lib_exc.Unauthorized, self.client.get_users)
+        self.assertRaises(lib_exc.Unauthorized, self.client.list_users)
         self.client.auth_provider.clear_auth()
 
     @test.attr(type=['negative'])

@@ -22,7 +22,7 @@ from tempest.common import service_client
 class IdentityV3Client(service_client.ServiceClient):
     api_version = "v3"
 
-    def get_api_description(self):
+    def show_api_description(self):
         """Retrieves info about the v3 Identity API"""
         url = ''
         resp, body = self.get(url)
@@ -54,7 +54,7 @@ class IdentityV3Client(service_client.ServiceClient):
 
     def update_user(self, user_id, name, **kwargs):
         """Updates a user."""
-        body = self.get_user(user_id)['user']
+        body = self.show_user(user_id)['user']
         email = kwargs.get('email', body['email'])
         en = kwargs.get('enabled', body['enabled'])
         project_id = kwargs.get('project_id', body['project_id'])
@@ -99,7 +99,7 @@ class IdentityV3Client(service_client.ServiceClient):
         body = json.loads(body)
         return service_client.ResponseBody(resp, body)
 
-    def get_users(self, params=None):
+    def list_users(self, params=None):
         """Get the list of users."""
         url = 'users'
         if params:
@@ -109,7 +109,7 @@ class IdentityV3Client(service_client.ServiceClient):
         body = json.loads(body)
         return service_client.ResponseBody(resp, body)
 
-    def get_user(self, user_id):
+    def show_user(self, user_id):
         """GET a user."""
         resp, body = self.get("users/%s" % user_id)
         self.expected_success(200, resp.status)
@@ -191,7 +191,7 @@ class IdentityV3Client(service_client.ServiceClient):
         body = json.loads(body)
         return service_client.ResponseBody(resp, body)
 
-    def get_role(self, role_id):
+    def show_role(self, role_id):
         """GET a Role."""
         resp, body = self.get('roles/%s' % str(role_id))
         self.expected_success(200, resp.status)
@@ -284,7 +284,7 @@ class IdentityV3Client(service_client.ServiceClient):
         body = json.loads(body)
         return service_client.ResponseBody(resp, body)
 
-    def get_token(self, resp_token):
+    def show_token(self, resp_token):
         """Get token details."""
         headers = {'X-Subject-Token': resp_token}
         resp, body = self.get("auth/tokens", headers=headers)

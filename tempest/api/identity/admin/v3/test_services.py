@@ -26,7 +26,7 @@ class ServicesTestJSON(base.BaseIdentityV3AdminTest):
         # Used for deleting the services created in this class
         self.service_client.delete_service(service_id)
         # Checking whether service is deleted successfully
-        self.assertRaises(lib_exc.NotFound, self.service_client.get_service,
+        self.assertRaises(lib_exc.NotFound, self.service_client.show_service,
                           service_id)
 
     @test.attr(type='smoke')
@@ -56,7 +56,7 @@ class ServicesTestJSON(base.BaseIdentityV3AdminTest):
         self.assertNotEqual(resp1_desc, resp2_desc)
 
         # Get service
-        fetched_service = self.service_client.get_service(s_id)['service']
+        fetched_service = self.service_client.show_service(s_id)['service']
         resp3_desc = fetched_service['description']
 
         self.assertEqual(resp2_desc, resp3_desc)

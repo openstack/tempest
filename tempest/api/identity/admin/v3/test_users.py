@@ -54,7 +54,7 @@ class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
         self.assertEqual(u_email2, update_user['email'])
         self.assertEqual(False, update_user['enabled'])
         # GET by id after updation
-        new_user_get = self.client.get_user(user['id'])['user']
+        new_user_get = self.client.show_user(user['id'])['user']
         # Assert response body of GET after updation
         self.assertEqual(u_name2, new_user_get['name'])
         self.assertEqual(u_description2, new_user_get['description'])
@@ -80,7 +80,7 @@ class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
                                password=new_password).response
         subject_token = resp['x-subject-token']
         # Perform GET Token to verify and confirm password is updated
-        token_details = self.client.get_token(subject_token)['token']
+        token_details = self.client.show_token(subject_token)['token']
         self.assertEqual(resp['x-subject-token'], subject_token)
         self.assertEqual(token_details['user']['id'], user['id'])
         self.assertEqual(token_details['user']['name'], u_name)
@@ -111,8 +111,8 @@ class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
         # Delete the Role at the end of this method
         self.addCleanup(self.client.delete_role, role_body['id'])
 
-        user = self.client.get_user(user_body['id'])['user']
-        role = self.client.get_role(role_body['id'])['role']
+        user = self.client.show_user(user_body['id'])['user']
+        role = self.client.show_role(role_body['id'])['role']
         for i in range(2):
             # Creating project so as to assign role
             project_body = self.client.create_project(
@@ -142,5 +142,5 @@ class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
     def test_get_user(self):
         # Get a user detail
         self.data.setup_test_v3_user()
-        user = self.client.get_user(self.data.v3_user['id'])['user']
+        user = self.client.show_user(self.data.v3_user['id'])['user']
         self.assertEqual(self.data.v3_user['id'], user['id'])

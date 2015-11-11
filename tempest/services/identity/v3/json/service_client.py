@@ -23,7 +23,7 @@ class ServiceClient(service_client.ServiceClient):
 
     def update_service(self, service_id, **kwargs):
         """Updates a service."""
-        body = self.get_service(service_id)['service']
+        body = self.show_service(service_id)['service']
         name = kwargs.get('name', body['name'])
         type = kwargs.get('type', body['type'])
         desc = kwargs.get('description', body['description'])
@@ -38,7 +38,7 @@ class ServiceClient(service_client.ServiceClient):
         body = json.loads(body)
         return service_client.ResponseBody(resp, body)
 
-    def get_service(self, service_id):
+    def show_service(self, service_id):
         """Get Service."""
         url = 'services/%s' % service_id
         resp, body = self.get(url)

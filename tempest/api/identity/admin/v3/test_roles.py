@@ -81,7 +81,7 @@ class RolesV3TestJSON(base.BaseIdentityV3AdminTest):
         self.assertIn('links', updated_role)
         self.assertNotEqual(r_name, updated_role['name'])
 
-        new_role = self.client.get_role(role['id'])['role']
+        new_role = self.client.show_role(role['id'])['role']
         self.assertEqual(new_name, new_role['name'])
         self.assertEqual(updated_role['id'], new_role['id'])
 

@@ -27,7 +27,7 @@ class ServicesTestJSON(base.BaseIdentityV2AdminTest):
         # Deleting the service created in this method
         self.client.delete_service(service_id)
         # Checking whether service is deleted successfully
-        self.assertRaises(lib_exc.NotFound, self.client.get_service,
+        self.assertRaises(lib_exc.NotFound, self.client.show_service,
                           service_id)
 
     @test.idempotent_id('84521085-c6e6-491c-9a08-ec9f70f90110')
@@ -50,7 +50,7 @@ class ServicesTestJSON(base.BaseIdentityV2AdminTest):
         self.assertIn('description', service_data)
         self.assertEqual(description, service_data['description'])
         # Get service
-        fetched_service = (self.client.get_service(service_data['id'])
+        fetched_service = (self.client.show_service(service_data['id'])
                            ['OS-KSADM:service'])
         # verifying the existence of service created
         self.assertIn('id', fetched_service)

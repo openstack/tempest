@@ -19,7 +19,7 @@ from tempest.common import service_client
 class IdentityClient(service_client.ServiceClient):
     api_version = "v2.0"
 
-    def get_api_description(self):
+    def show_api_description(self):
         """Retrieves info about the v2.0 Identity API"""
         url = ''
         resp, body = self.get(url)
@@ -38,7 +38,7 @@ class IdentityClient(service_client.ServiceClient):
         body = json.loads(body)
         return service_client.ResponseBody(resp, body)
 
-    def get_role(self, role_id):
+    def show_role(self, role_id):
         """Get a role by its id."""
         resp, body = self.get('OS-KSADM/roles/%s' % role_id)
         self.expected_success(200, resp.status)
@@ -98,7 +98,7 @@ class IdentityClient(service_client.ServiceClient):
         self.expected_success(204, resp.status)
         return service_client.ResponseBody(resp, body)
 
-    def get_tenant(self, tenant_id):
+    def show_tenant(self, tenant_id):
         """Get tenant details."""
         resp, body = self.get('tenants/%s' % str(tenant_id))
         self.expected_success(200, resp.status)
@@ -128,7 +128,7 @@ class IdentityClient(service_client.ServiceClient):
 
     def update_tenant(self, tenant_id, **kwargs):
         """Updates a tenant."""
-        body = self.get_tenant(tenant_id)['tenant']
+        body = self.show_tenant(tenant_id)['tenant']
         name = kwargs.get('name', body['name'])
         desc = kwargs.get('description', body['description'])
         en = kwargs.get('enabled', body['enabled'])
@@ -169,7 +169,7 @@ class IdentityClient(service_client.ServiceClient):
         body = json.loads(body)
         return service_client.ResponseBody(resp, body)
 
-    def get_user(self, user_id):
+    def show_user(self, user_id):
         """GET a user."""
         resp, body = self.get("users/%s" % user_id)
         self.expected_success(200, resp.status)
@@ -182,7 +182,7 @@ class IdentityClient(service_client.ServiceClient):
         self.expected_success(204, resp.status)
         return service_client.ResponseBody(resp, body)
 
-    def get_users(self):
+    def list_users(self):
         """Get the list of users."""
         resp, body = self.get("users")
         self.expected_success(200, resp.status)
@@ -200,7 +200,7 @@ class IdentityClient(service_client.ServiceClient):
         body = json.loads(body)
         return service_client.ResponseBody(resp, body)
 
-    def get_token(self, token_id):
+    def show_token(self, token_id):
         """Get token details."""
         resp, body = self.get("tokens/%s" % token_id)
         self.expected_success(200, resp.status)
@@ -240,7 +240,7 @@ class IdentityClient(service_client.ServiceClient):
         body = json.loads(body)
         return service_client.ResponseBody(resp, body)
 
-    def get_service(self, service_id):
+    def show_service(self, service_id):
         """Get Service."""
         url = '/OS-KSADM/services/%s' % service_id
         resp, body = self.get(url)

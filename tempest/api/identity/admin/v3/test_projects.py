@@ -169,7 +169,7 @@ class ProjectsTestJSON(base.BaseIdentityV3AdminTest):
         self.addCleanup(self.client.delete_user, user['id'])
 
         # Get User To validate the user details
-        new_user_get = self.client.get_user(user['id'])['user']
+        new_user_get = self.client.show_user(user['id'])['user']
         # Assert response body of GET
         self.assertEqual(u_name, new_user_get['name'])
         self.assertEqual(u_desc, new_user_get['description'])

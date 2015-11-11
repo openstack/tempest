@@ -39,7 +39,7 @@ class BaseIdentityTest(tempest.test.BaseTestCase):
 
     @classmethod
     def get_user_by_name(cls, name):
-        users = cls.client.get_users()['users']
+        users = cls.client.list_users()['users']
         user = [u for u in users if u['name'] == name]
         if len(user) > 0:
             return user[0]
@@ -154,7 +154,7 @@ class BaseIdentityV3AdminTest(BaseIdentityV3Test):
 
     @classmethod
     def get_user_by_name(cls, name):
-        users = cls.client.get_users()['users']
+        users = cls.client.list_users()['users']
         user = [u for u in users if u['name'] == name]
         if len(user) > 0:
             return user[0]
