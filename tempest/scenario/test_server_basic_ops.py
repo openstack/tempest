@@ -89,17 +89,10 @@ class TestServerBasicOps(manager.ScenarioTest):
     def verify_ssh(self):
         if self.run_ssh:
             # Obtain a floating IP
-            self.floating_ip = (self.floating_ips_client.create_floating_ip()
-                                ['floating_ip'])
-            self.addCleanup(self.delete_wrapper,
-                            self.floating_ips_client.delete_floating_ip,
-                            self.floating_ip['id'])
-            # Attach a floating IP
-            self.floating_ips_client.associate_floating_ip_to_server(
-                self.floating_ip['ip'], self.instance['id'])
+            self.fip = self.create_floating_ip(self.instance)['ip']
             # Check ssh
             self.ssh_client = self.get_remote_client(
-                server_or_ip=self.floating_ip['ip'],
+                server_or_ip=self.fip,
                 username=self.image_utils.ssh_user(self.image_ref),
                 private_key=self.keypair['private_key'])
 
@@ -110,12 +103,11 @@ class TestServerBasicOps(manager.ScenarioTest):
 
             def exec_cmd_and_verify_output():
                 cmd = 'curl ' + md_url
-                floating_ip = self.floating_ip['ip']
                 result = self.ssh_client.exec_command(cmd)
                 if result:
                     msg = ('Failed while verifying metadata on server. Result '
-                           'of command "%s" is NOT "%s".' % (cmd, floating_ip))
-                    self.assertEqual(floating_ip, result, msg)
+                           'of command "%s" is NOT "%s".' % (cmd, self.fip))
+                    self.assertEqual(self.fip, result, msg)
                     return 'Verification is successful!'
 
             if not test.call_until_true(exec_cmd_and_verify_output,
