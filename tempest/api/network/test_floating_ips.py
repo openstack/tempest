@@ -130,13 +130,13 @@ class FloatingIPTestJSON(base.BaseNetworkTest):
         self.addCleanup(self.client.delete_floatingip,
                         created_floating_ip['id'])
         # Create a port
-        port = self.client.create_port(network_id=self.network['id'])
+        port = self.ports_client.create_port(network_id=self.network['id'])
         created_port = port['port']
         floating_ip = self.client.update_floatingip(
             created_floating_ip['id'],
             port_id=created_port['id'])
         # Delete port
-        self.client.delete_port(created_port['id'])
+        self.ports_client.delete_port(created_port['id'])
         # Verifies the details of the floating_ip
         floating_ip = self.client.show_floatingip(created_floating_ip['id'])
         shown_floating_ip = floating_ip['floatingip']
@@ -197,10 +197,10 @@ class FloatingIPTestJSON(base.BaseNetworkTest):
         list_ips = [str(ip) for ip in ips[-3:-1]]
         fixed_ips = [{'ip_address': list_ips[0]}, {'ip_address': list_ips[1]}]
         # Create port
-        body = self.client.create_port(network_id=self.network['id'],
-                                       fixed_ips=fixed_ips)
+        body = self.ports_client.create_port(network_id=self.network['id'],
+                                             fixed_ips=fixed_ips)
         port = body['port']
-        self.addCleanup(self.client.delete_port, port['id'])
+        self.addCleanup(self.ports_client.delete_port, port['id'])
         # Create floating ip
         body = self.client.create_floatingip(
             floating_network_id=self.ext_net_id,

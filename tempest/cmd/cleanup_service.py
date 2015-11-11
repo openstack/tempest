@@ -384,6 +384,7 @@ class NetworkService(BaseService):
         self.client = manager.network_client
         self.networks_client = manager.networks_client
         self.subnets_client = manager.subnets_client
+        self.ports_client = manager.ports_client
 
     def _filter_by_conf_networks(self, item_list):
         if not item_list or not all(('network_id' in i for i in item_list)):
@@ -621,7 +622,7 @@ class NetworkMeteringLabelService(NetworkService):
 class NetworkPortService(NetworkService):
 
     def list(self):
-        client = self.client
+        client = self.ports_client
         ports = [port for port in
                  client.list_ports(**self.tenant_filter)['ports']
                  if port["device_owner"] == "" or
@@ -634,7 +635,7 @@ class NetworkPortService(NetworkService):
         return ports
 
     def delete(self):
-        client = self.client
+        client = self.ports_client
         ports = self.list()
         for port in ports:
             try:

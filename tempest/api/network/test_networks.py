@@ -444,9 +444,9 @@ class BulkNetworkOpsTestJSON(base.BaseNetworkTest):
 
     def _delete_ports(self, created_ports):
         for n in created_ports:
-            self.client.delete_port(n['id'])
+            self.ports_client.delete_port(n['id'])
         # Asserting that the ports are not found in the list after deletion
-        body = self.client.list_ports()
+        body = self.ports_client.list_ports()
         ports_list = [port['id'] for port in body['ports']]
         for n in created_ports:
             self.assertNotIn(n['id'], ports_list)
@@ -522,7 +522,7 @@ class BulkNetworkOpsTestJSON(base.BaseNetworkTest):
         created_ports = body['ports']
         self.addCleanup(self._delete_ports, created_ports)
         # Asserting that the ports are found in the list after creation
-        body = self.client.list_ports()
+        body = self.ports_client.list_ports()
         ports_list = [port['id'] for port in body['ports']]
         for n in created_ports:
             self.assertIsNotNone(n['id'])

@@ -164,7 +164,7 @@ class NeutronResourcesTestJSON(base.BaseOrchestrationTest):
         router_id = self.test_resources.get('Router')['physical_resource_id']
         network_id = self.test_resources.get('Network')['physical_resource_id']
         subnet_id = self.test_resources.get('Subnet')['physical_resource_id']
-        body = self.network_client.list_ports()
+        body = self.ports_client.list_ports()
         ports = body['ports']
         router_ports = filter(lambda port: port['device_id'] ==
                               router_id, ports)

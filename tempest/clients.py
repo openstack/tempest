@@ -107,6 +107,7 @@ from tempest.services.messaging.json.messaging_client import \
     MessagingClient
 from tempest.services.network.json.network_client import NetworkClient
 from tempest.services.network.json.networks_client import NetworksClient
+from tempest.services.network.json.ports_client import PortsClient
 from tempest.services.network.json.subnets_client import SubnetsClient
 from tempest.services.object_storage.account_client import AccountClient
 from tempest.services.object_storage.container_client import ContainerClient
@@ -206,6 +207,14 @@ class Manager(manager.Manager):
             build_timeout=CONF.network.build_timeout,
             **self.default_params)
         self.subnets_client = SubnetsClient(
+            self.auth_provider,
+            CONF.network.catalog_type,
+            CONF.network.region or CONF.identity.region,
+            endpoint_type=CONF.network.endpoint_type,
+            build_interval=CONF.network.build_interval,
+            build_timeout=CONF.network.build_timeout,
+            **self.default_params)
+        self.ports_client = PortsClient(
             self.auth_provider,
             CONF.network.catalog_type,
             CONF.network.region or CONF.identity.region,

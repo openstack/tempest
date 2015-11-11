@@ -44,6 +44,7 @@ class DeletableResource(AttributeDict):
         self.network_client = kwargs.pop('network_client', None)
         self.networks_client = kwargs.pop('networks_client', None)
         self.subnets_client = kwargs.pop('subnets_client', None)
+        self.ports_client = kwargs.pop('ports_client', None)
         super(DeletableResource, self).__init__(*args, **kwargs)
 
     def __str__(self):
@@ -152,7 +153,7 @@ class DeletableFloatingIp(DeletableResource):
 class DeletablePort(DeletableResource):
 
     def delete(self):
-        self.client.delete_port(self.id)
+        self.ports_client.delete_port(self.id)
 
 
 class DeletableSecurityGroup(DeletableResource):

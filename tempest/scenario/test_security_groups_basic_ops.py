@@ -250,6 +250,7 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
             name=name,
             network_client=tenant.manager.network_client,
             networks_client=tenant.manager.networks_client,
+            ports_client=tenant.manager.ports_client,
             create_kwargs=create_kwargs)
         self.assertEqual(
             sorted([s['name'] for s in security_groups]),
@@ -514,7 +515,7 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
             port_id = self._list_ports(device_id=server_id)[0]['id']
 
             # update port with new security group and check connectivity
-            self.network_client.update_port(port_id, security_groups=[
+            self.ports_client.update_port(port_id, security_groups=[
                 new_tenant.security_groups['new_sg'].id])
             self._check_connectivity(
                 access_point=access_point_ssh,
@@ -581,16 +582,16 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
 
         # Flip the port's port security and check connectivity
         try:
-            self.network_client.update_port(port_id,
-                                            port_security_enabled=True,
-                                            security_groups=[])
+            self.ports_client.update_port(port_id,
+                                          port_security_enabled=True,
+                                          security_groups=[])
             self._check_connectivity(access_point=access_point_ssh,
                                      ip=self._get_server_ip(server),
                                      should_succeed=False)
 
-            self.network_client.update_port(port_id,
-                                            port_security_enabled=False,
-                                            security_groups=[])
+            self.ports_client.update_port(port_id,
+                                          port_security_enabled=False,
+                                          security_groups=[])
             self._check_connectivity(
                 access_point=access_point_ssh,
                 ip=self._get_server_ip(server))

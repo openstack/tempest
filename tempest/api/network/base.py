@@ -75,6 +75,7 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
         cls.client = cls.os.network_client
         cls.networks_client = cls.os.networks_client
         cls.subnets_client = cls.os.subnets_client
+        cls.ports_client = cls.os.ports_client
 
     @classmethod
     def resource_setup(cls):
@@ -108,7 +109,7 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
                     metering_label['id'])
             # Clean up ports
             for port in cls.ports:
-                cls._try_delete_resource(cls.client.delete_port,
+                cls._try_delete_resource(cls.ports_client.delete_port,
                                          port['id'])
             # Clean up routers
             for router in cls.routers:
@@ -201,8 +202,8 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
     @classmethod
     def create_port(cls, network, **kwargs):
         """Wrapper utility that returns a test port."""
-        body = cls.client.create_port(network_id=network['id'],
-                                      **kwargs)
+        body = cls.ports_client.create_port(network_id=network['id'],
+                                            **kwargs)
         port = body['port']
         cls.ports.append(port)
         return port
@@ -210,8 +211,8 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
     @classmethod
     def update_port(cls, port, **kwargs):
         """Wrapper utility that updates a test port."""
-        body = cls.client.update_port(port['id'],
-                                      **kwargs)
+        body = cls.ports_client.update_port(port['id'],
+                                            **kwargs)
         return body['port']
 
     @classmethod
@@ -269,6 +270,7 @@ class BaseAdminNetworkTest(BaseNetworkTest):
         cls.admin_client = cls.os_adm.network_client
         cls.admin_networks_client = cls.os_adm.networks_client
         cls.admin_subnets_client = cls.os_adm.subnets_client
+        cls.admin_ports_client = cls.os_adm.ports_client
 
     @classmethod
     def create_metering_label(cls, name, description):

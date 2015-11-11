@@ -250,7 +250,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
             net_id=self.new_net.id)['interfaceAttachment']
         self.addCleanup(self.network_client.wait_for_resource_deletion,
                         'port',
-                        interface['port_id'])
+                        interface['port_id'], client=self.ports_client)
         self.addCleanup(self.delete_wrapper,
                         self.interface_client.delete_interface,
                         server['id'], interface['port_id'])
@@ -268,7 +268,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
                 "Old port: %s. Number of new ports: %d" % (
                     CONF.network.build_timeout, old_port,
                     len(self.new_port_list)))
-        new_port = net_resources.DeletablePort(client=self.network_client,
+        new_port = net_resources.DeletablePort(ports_client=self.ports_client,
                                                **self.new_port_list[0])
 
         def check_new_nic():
@@ -609,12 +609,12 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         self.check_public_network_connectivity(
             should_connect=True, msg="before updating "
             "admin_state_up of instance port to False")
-        self.network_client.update_port(port_id, admin_state_up=False)
+        self.ports_client.update_port(port_id, admin_state_up=False)
         self.check_public_network_connectivity(
             should_connect=False, msg="after updating "
             "admin_state_up of instance port to False",
             should_check_floating_ip_status=False)
-        self.network_client.update_port(port_id, admin_state_up=True)
+        self.ports_client.update_port(port_id, admin_state_up=True)
         self.check_public_network_connectivity(
             should_connect=True, msg="after updating "
             "admin_state_up of instance port to True")
@@ -653,7 +653,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         waiters.wait_for_server_termination(self.servers_client, server['id'])
         # Assert the port still exists on the network but is unbound from
         # the deleted server.
-        port = self.network_client.show_port(port_id)['port']
+        port = self.ports_client.show_port(port_id)['port']
         self.assertEqual(self.network['id'], port['network_id'])
         self.assertEqual('', port['device_id'])
         self.assertEqual('', port['device_owner'])

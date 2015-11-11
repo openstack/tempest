@@ -34,28 +34,6 @@ class NetworkClient(base.BaseNetworkClient):
     quotas
     """
 
-    def create_port(self, **kwargs):
-        uri = '/ports'
-        post_data = {'port': kwargs}
-        return self.create_resource(uri, post_data)
-
-    def update_port(self, port_id, **kwargs):
-        uri = '/ports/%s' % port_id
-        post_data = {'port': kwargs}
-        return self.update_resource(uri, post_data)
-
-    def show_port(self, port_id, **fields):
-        uri = '/ports/%s' % port_id
-        return self.show_resource(uri, **fields)
-
-    def delete_port(self, port_id):
-        uri = '/ports/%s' % port_id
-        return self.delete_resource(uri)
-
-    def list_ports(self, **filters):
-        uri = '/ports'
-        return self.list_resources(uri, **filters)
-
     def create_floatingip(self, **kwargs):
         uri = '/floatingips'
         post_data = {'floatingip': kwargs}
@@ -175,20 +153,22 @@ class NetworkClient(base.BaseNetworkClient):
         uri = '/ports'
         return self.create_resource(uri, post_data)
 
-    def wait_for_resource_deletion(self, resource_type, id):
+    def wait_for_resource_deletion(self, resource_type, id, client=None):
         """Waits for a resource to be deleted."""
         start_time = int(time.time())
         while True:
-            if self.is_resource_deleted(resource_type, id):
+            if self.is_resource_deleted(resource_type, id, client=client):
                 return
             if int(time.time()) - start_time >= self.build_timeout:
                 raise exceptions.TimeoutException
             time.sleep(self.build_interval)
 
-    def is_resource_deleted(self, resource_type, id):
+    def is_resource_deleted(self, resource_type, id, client=None):
+        if client is None:
+            client = self
         method = 'show_' + resource_type
         try:
-            getattr(self, method)(id)
+            getattr(client, method)(id)
         except AttributeError:
             raise Exception("Unknown resource type %s " % resource_type)
         except lib_exc.NotFound:
