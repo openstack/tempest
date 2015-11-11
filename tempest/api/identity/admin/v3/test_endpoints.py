@@ -33,9 +33,9 @@ class EndPointsTestJSON(base.BaseIdentityV3AdminTest):
         s_name = data_utils.rand_name('service')
         s_type = data_utils.rand_name('type')
         s_description = data_utils.rand_name('description')
-        cls.service_data =\
-            cls.service_client.create_service(s_name, s_type,
-                                              description=s_description)
+        cls.service_data = (
+            cls.service_client.create_service(name=s_name, type=s_type,
+                                              description=s_description))
         cls.service_data = cls.service_data['service']
         cls.service_id = cls.service_data['id']
         cls.service_ids.append(cls.service_id)
@@ -112,9 +112,9 @@ class EndPointsTestJSON(base.BaseIdentityV3AdminTest):
         s_name = data_utils.rand_name('service')
         s_type = data_utils.rand_name('type')
         s_description = data_utils.rand_name('description')
-        service2 =\
-            self.service_client.create_service(s_name, s_type,
-                                               description=s_description)
+        service2 = (
+            self.service_client.create_service(name=s_name, type=s_type,
+                                               description=s_description))
         service2 = service2['service']
         self.service_ids.append(service2['id'])
         # Updating endpoint with new values

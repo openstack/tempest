@@ -37,7 +37,7 @@ class ServicesTestJSON(base.BaseIdentityV3AdminTest):
         serv_type = data_utils.rand_name('type')
         desc = data_utils.rand_name('description')
         create_service = self.service_client.create_service(
-            serv_type, name=name, description=desc)['service']
+            type=serv_type, name=name, description=desc)['service']
         self.addCleanup(self._del_service, create_service['id'])
         self.assertIsNotNone(create_service['id'])
 
@@ -68,7 +68,7 @@ class ServicesTestJSON(base.BaseIdentityV3AdminTest):
         name = data_utils.rand_name('service')
         serv_type = data_utils.rand_name('type')
         service = self.service_client.create_service(
-            serv_type, name=name)['service']
+            type=serv_type, name=name)['service']
         self.addCleanup(self.service_client.delete_service, service['id'])
         self.assertIn('id', service)
         expected_data = {'name': name, 'type': serv_type}
@@ -82,7 +82,7 @@ class ServicesTestJSON(base.BaseIdentityV3AdminTest):
             name = data_utils.rand_name('service')
             serv_type = data_utils.rand_name('type')
             create_service = self.service_client.create_service(
-                serv_type, name=name)['service']
+                type=serv_type, name=name)['service']
             self.addCleanup(self.service_client.delete_service,
                             create_service['id'])
             service_ids.append(create_service['id'])

@@ -13,6 +13,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+"""
+http://developer.openstack.org/api-ref-identity-v3.html#service-catalog-v3
+"""
+
 from oslo_serialization import jsonutils as json
 
 from tempest.common import service_client
@@ -22,17 +26,12 @@ class ServiceClient(service_client.ServiceClient):
     api_version = "v3"
 
     def update_service(self, service_id, **kwargs):
-        """Updates a service."""
-        body = self.show_service(service_id)['service']
-        name = kwargs.get('name', body['name'])
-        type = kwargs.get('type', body['type'])
-        desc = kwargs.get('description', body['description'])
-        patch_body = {
-            'description': desc,
-            'type': type,
-            'name': name
-        }
-        patch_body = json.dumps({'service': patch_body})
+        """Updates a service.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-identity-v3.html#updateService
+        """
+        patch_body = json.dumps({'service': kwargs})
         resp, body = self.patch('services/%s' % service_id, patch_body)
         self.expected_success(200, resp.status)
         body = json.loads(body)
@@ -46,15 +45,13 @@ class ServiceClient(service_client.ServiceClient):
         body = json.loads(body)
         return service_client.ResponseBody(resp, body)
 
-    def create_service(self, serv_type, name=None, description=None,
-                       enabled=True):
-        body_dict = {
-            'name': name,
-            'type': serv_type,
-            'enabled': enabled,
-            'description': description,
-        }
-        body = json.dumps({'service': body_dict})
+    def create_service(self, **kwargs):
+        """Creates a service.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-identity-v3.html#createService
+        """
+        body = json.dumps({'service': kwargs})
         resp, body = self.post("services", body)
         self.expected_success(201, resp.status)
         body = json.loads(body)

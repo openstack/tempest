@@ -37,7 +37,7 @@ class EndpointsNegativeTestJSON(base.BaseIdentityV3AdminTest):
         s_type = data_utils.rand_name('type')
         s_description = data_utils.rand_name('description')
         cls.service_data = (
-            cls.service_client.create_service(s_name, s_type,
+            cls.service_client.create_service(name=s_name, type=s_type,
                                               description=s_description)
             ['service'])
         cls.service_id = cls.service_data['id']
