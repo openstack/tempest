@@ -330,7 +330,13 @@ ComputeGroup = [
                help='Unallocated floating IP range, which will be used to '
                     'test the floating IP bulk feature for CRUD operation. '
                     'This block must not overlap an existing floating IP '
-                    'pool.')
+                    'pool.'),
+    cfg.IntOpt('min_compute_nodes',
+               default=1,
+               help=('The minimum number of compute nodes expected. This will '
+                     'be utilized by some multinode specific tests to ensure '
+                     'that requests match the expected size of the cluster '
+                     'you are testing with.'))
 ]
 
 compute_features_group = cfg.OptGroup(name='compute-feature-enabled',
