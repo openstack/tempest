@@ -601,6 +601,13 @@ class ScenarioTest(tempest.test.BaseTestCase):
             ssh_client.umount(mount_path)
         return timestamp
 
+    def get_server_or_ip(self, server):
+        if CONF.validation.connect_method == 'floating':
+            ip = self.create_floating_ip(server)['ip']
+        else:
+            ip = server
+        return ip
+
 
 class NetworkScenarioTest(ScenarioTest):
     """Base class for network scenario tests.
