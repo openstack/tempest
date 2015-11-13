@@ -63,15 +63,6 @@ class BaremetalBasicOps(manager.BaremetalScenarioTest):
             server_id=self.instance['id'],
             status='ACTIVE')
 
-    def create_remote_file(self, client, filename):
-        """Create a file on the remote client connection.
-
-        After creating the file, force a filesystem sync. Otherwise,
-        if we issue a rebuild too quickly, the file may not exist.
-        """
-        client.exec_command('sudo touch ' + filename)
-        client.exec_command('sync')
-
     def verify_partition(self, client, label, mount, gib_size):
         """Verify a labeled partition's mount point and size."""
         LOG.info("Looking for partition %s mounted on %s" % (label, mount))
@@ -118,7 +109,6 @@ class BaremetalBasicOps(manager.BaremetalScenarioTest):
     @test.idempotent_id('549173a5-38ec-42bb-b0e2-c8b9f4a08943')
     @test.services('baremetal', 'compute', 'image', 'network')
     def test_baremetal_server_ops(self):
-        test_filename = '/mnt/rebuild_test.txt'
         self.add_keypair()
         self.boot_instance()
         self.validate_ports()
@@ -132,12 +122,13 @@ class BaremetalBasicOps(manager.BaremetalScenarioTest):
         # We expect the ephemeral partition to be mounted on /mnt and to have
         # the same size as our flavor definition.
         eph_size = self.get_flavor_ephemeral_size()
-        if eph_size > 0:
+        if eph_size:
             preserve_ephemeral = True
 
             self.verify_partition(vm_client, 'ephemeral0', '/mnt', eph_size)
             # Create the test file
-            self.create_remote_file(vm_client, test_filename)
+            timestamp = self.create_timestamp(
+                floating_ip, private_key=self.keypair['private_key'])
         else:
             preserve_ephemeral = False
 
@@ -146,9 +137,9 @@ class BaremetalBasicOps(manager.BaremetalScenarioTest):
         self.verify_connectivity()
 
         # Check that we maintained our data
-        if eph_size > 0:
-            vm_client = self.get_remote_client(self.instance)
+        if eph_size:
             self.verify_partition(vm_client, 'ephemeral0', '/mnt', eph_size)
-            vm_client.exec_command('ls ' + test_filename)
-
+            timestamp2 = self.get_timestamp(
+                floating_ip, private_key=self.keypair['private_key'])
+            self.assertEqual(timestamp, timestamp2)
         self.terminate_instance()
