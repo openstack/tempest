@@ -147,7 +147,7 @@ class BaseComputeTest(tempest.test.BaseTestCase):
            Method will delete the server when it's dirty.
            The setUp method is responsible for creating a new server.
            Exceptions raised in tearDown class are fails the test case,
-           This method supposed to use only by tierDown methods, when
+           This method supposed to use only by tearDown methods, when
            the shared server_id is stored in the server_id of the class.
         """
         if getattr(cls, 'server_id', None) is not None:
