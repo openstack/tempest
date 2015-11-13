@@ -44,3 +44,11 @@ class DomainsNegativeTestJSON(base.BaseIdentityV3AdminTest):
         # Domain name should not be empty
         self.assertRaises(lib_exc.BadRequest, self.client.create_domain,
                           name='')
+
+    @test.attr(type=['negative'])
+    @test.idempotent_id('37b1bbf2-d664-4785-9a11-333438586eae')
+    def test_create_domain_with_name_length_over_64(self):
+        # Domain name length should not ne greater than 64 characters
+        d_name = 'a' * 65
+        self.assertRaises(lib_exc.BadRequest, self.client.create_domain,
+                          d_name)
