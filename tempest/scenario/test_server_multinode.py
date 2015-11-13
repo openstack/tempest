@@ -34,11 +34,21 @@ class TestServerMultinode(manager.ScenarioTest):
     """
     credentials = ['primary', 'admin']
 
+    @classmethod
+    def setup_clients(cls):
+        super(TestServerMultinode, cls).setup_clients()
+        # Use admin client by default
+        cls.manager = cls.admin_manager
+        # this is needed so that we can use the availability_zone:host
+        # scheduler hint, which is admin_only by default
+        cls.servers_client = cls.admin_manager.servers_client
+        super(TestServerMultinode, cls).resource_setup()
+
     @test.idempotent_id('9cecbe35-b9d4-48da-a37e-7ce70aa43d30')
     @test.attr(type='smoke')
     @test.services('compute', 'network')
     def test_schedule_to_all_nodes(self):
-        host_client = self.admin_manager.hosts_client
+        host_client = self.manager.hosts_client
         hosts = host_client.list_hosts()['hosts']
         hosts = [x for x in hosts if x['service'] == 'compute']
 
@@ -55,7 +65,7 @@ class TestServerMultinode(manager.ScenarioTest):
 
         for host in hosts[:CONF.compute.min_compute_nodes]:
             create_kwargs = {
-                'scheduler_hints': {'force_hosts': host['host_name']}
+                'availability_zone': '%(zone)s:%(host_name)s' % host
             }
 
             # by getting to active state here, this means this has
