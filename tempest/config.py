@@ -255,6 +255,7 @@ ComputeGroup = [
                     "when sshing to a guest."),
     cfg.StrOpt('ssh_auth_method',
                default='keypair',
+               choices=('keypair', 'configured', 'adminpass', 'disabled'),
                help="Auth method used for authenticate to the instance. "
                     "Valid choices are: keypair, configured, adminpass "
                     "and disabled. "
@@ -264,6 +265,7 @@ ComputeGroup = [
                     "Disabled: avoid using ssh when it is an option."),
     cfg.StrOpt('ssh_connect_method',
                default='floating',
+               choices=('fixed', 'floating'),
                help="How to connect to the instance? "
                     "fixed: using the first ip belongs the fixed network "
                     "floating: creating and using a floating ip."),
