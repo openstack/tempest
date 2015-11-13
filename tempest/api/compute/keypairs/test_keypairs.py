@@ -19,6 +19,8 @@ from tempest import test
 
 
 class KeyPairsV2TestJSON(base.BaseKeypairTest):
+    max_microversion = '2.1'
+
     @test.idempotent_id('1d1dbedb-d7a0-432a-9d09-83f543c3c19b')
     def test_keypairs_create_list_delete(self):
         # Keypairs created should be available in the response list
