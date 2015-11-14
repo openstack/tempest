@@ -28,14 +28,27 @@ class LiveBlockMigrationTestJSON(base.BaseV2ComputeAdminTest):
     _host_key = 'OS-EXT-SRV-ATTR:host'
 
     @classmethod
+    def skip_checks(cls):
+        super(LiveBlockMigrationTestJSON, cls).skip_checks()
+
+        if not CONF.compute_feature_enabled.live_migration:
+            skip_msg = ("%s skipped as live-migration is "
+                        "not available" % cls.__name__)
+            raise cls.skipException(skip_msg)
+        if len(cls._get_compute_hostnames()) < 2:
+            raise cls.skipTest(
+                "Less than 2 compute nodes, skipping migration test.")
+
+    @classmethod
     def setup_clients(cls):
         super(LiveBlockMigrationTestJSON, cls).setup_clients()
         cls.admin_hosts_client = cls.os_adm.hosts_client
         cls.admin_servers_client = cls.os_adm.servers_client
         cls.admin_migration_client = cls.os_adm.migrations_client
 
-    def _get_compute_hostnames(self):
-        body = self.admin_hosts_client.list_hosts()['hosts']
+    @classmethod
+    def _get_compute_hostnames(cls):
+        body = cls.admin_hosts_client.list_hosts()['hosts']
         return [
             host_record['host_name']
             for host_record in body
@@ -90,9 +103,6 @@ class LiveBlockMigrationTestJSON(base.BaseV2ComputeAdminTest):
                               volume_backed, *block* migration is not used.
         """
         # Live migrate an instance to another host
-        if len(self._get_compute_hostnames()) < 2:
-            raise self.skipTest(
-                "Less than 2 compute nodes, skipping migration test.")
         server_id = self._create_server(volume_backed=volume_backed)
         actual_host = self._get_host_for_server(server_id)
         target_host = self._get_host_other_than(actual_host)
@@ -117,14 +127,10 @@ class LiveBlockMigrationTestJSON(base.BaseV2ComputeAdminTest):
                          msg)
 
     @test.idempotent_id('1dce86b8-eb04-4c03-a9d8-9c1dc3ee0c7b')
-    @testtools.skipUnless(CONF.compute_feature_enabled.live_migration,
-                          'Live migration not available')
     def test_live_block_migration(self):
         self._test_live_migration()
 
     @test.idempotent_id('1e107f21-61b2-4988-8f22-b196e938ab88')
-    @testtools.skipUnless(CONF.compute_feature_enabled.live_migration,
-                          'Live migration not available')
     @testtools.skipUnless(CONF.compute_feature_enabled.pause,
                           'Pause is not available.')
     @testtools.skipUnless(CONF.compute_feature_enabled
@@ -135,24 +141,18 @@ class LiveBlockMigrationTestJSON(base.BaseV2ComputeAdminTest):
         self._test_live_migration(state='PAUSED')
 
     @test.idempotent_id('5071cf17-3004-4257-ae61-73a84e28badd')
-    @testtools.skipUnless(CONF.compute_feature_enabled.live_migration,
-                          'Live migration not available')
     @test.services('volume')
     def test_volume_backed_live_migration(self):
         self._test_live_migration(volume_backed=True)
 
     @test.idempotent_id('e19c0cc6-6720-4ed8-be83-b6603ed5c812')
-    @testtools.skipIf(not CONF.compute_feature_enabled.live_migration or not
-                      CONF.compute_feature_enabled.
+    @testtools.skipIf(not CONF.compute_feature_enabled.
                       block_migration_for_live_migration,
                       'Block Live migration not available')
     @testtools.skipIf(not CONF.compute_feature_enabled.
                       block_migrate_cinder_iscsi,
                       'Block Live migration not configured for iSCSI')
     def test_iscsi_volume(self):
-        if len(self._get_compute_hostnames()) < 2:
-            raise self.skipTest(
-                "Less than 2 compute nodes, skipping migration test.")
         server_id = self._create_server()
         actual_host = self._get_host_for_server(server_id)
         target_host = self._get_host_other_than(actual_host)
