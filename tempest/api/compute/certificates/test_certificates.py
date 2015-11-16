@@ -20,9 +20,7 @@ from tempest import test
 CONF = config.CONF
 
 
-class CertificatesV2TestJSON(base.BaseComputeTest):
-
-    _api_version = 2
+class CertificatesV2TestJSON(base.BaseV2ComputeTest):
 
     @classmethod
     def skip_checks(cls):

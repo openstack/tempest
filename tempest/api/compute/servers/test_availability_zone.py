@@ -17,11 +17,10 @@ from tempest.api.compute import base
 from tempest import test
 
 
-class AZV2TestJSON(base.BaseComputeTest):
+class AZV2TestJSON(base.BaseV2ComputeTest):
     """
     Tests Availability Zone API List
     """
-    _api_version = 2
 
     @classmethod
     def setup_clients(cls):
