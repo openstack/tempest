@@ -69,16 +69,16 @@ class TestServerGroupsClient(base.BaseComputeServiceTest):
     def test_list_server_groups_byte_body(self):
         self._test_list_server_groups(bytes_body=True)
 
-    def _test_get_server_group(self, bytes_body=False):
+    def _test_show_server_group(self, bytes_body=False):
         expected = {"server_group": TestServerGroupsClient.server_group}
         self.check_service_client_function(
-            self.client.get_server_group,
+            self.client.show_server_group,
             'tempest.common.service_client.ServiceClient.get',
             expected, bytes_body,
             server_group_id='5bbcc3c4-1da2-4437-a48a-66f15b1b13f9')
 
-    def test_get_server_group_str_body(self):
-        self._test_get_server_group(bytes_body=False)
+    def test_show_server_group_str_body(self):
+        self._test_show_server_group(bytes_body=False)
 
-    def test_get_server_group_byte_body(self):
-        self._test_get_server_group(bytes_body=True)
+    def test_show_server_group_byte_body(self):
+        self._test_show_server_group(bytes_body=True)

@@ -104,9 +104,9 @@ class ServerGroupTestJSON(base.BaseV2ComputeTest):
             self._delete_server_group(server_groups[i])
 
     @test.idempotent_id('b3545034-dd78-48f0-bdc2-a4adfa6d0ead')
-    def test_get_server_group(self):
+    def test_show_server_group(self):
         # Get the server-group
-        body = self.client.get_server_group(
+        body = self.client.show_server_group(
             self.created_server_group['id'])['server_group']
         self.assertEqual(self.created_server_group, body)
 

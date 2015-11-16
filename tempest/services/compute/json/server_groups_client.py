@@ -32,7 +32,7 @@ class ServerGroupsClient(service_client.ServiceClient):
         resp, body = self.post('os-server-groups', post_body)
 
         body = json.loads(body)
-        self.validate_response(schema.create_get_server_group, resp, body)
+        self.validate_response(schema.create_show_server_group, resp, body)
         return service_client.ResponseBody(resp, body)
 
     def delete_server_group(self, server_group_id):
@@ -48,9 +48,9 @@ class ServerGroupsClient(service_client.ServiceClient):
         self.validate_response(schema.list_server_groups, resp, body)
         return service_client.ResponseBody(resp, body)
 
-    def get_server_group(self, server_group_id):
+    def show_server_group(self, server_group_id):
         """Get the details of given server_group."""
         resp, body = self.get("os-server-groups/%s" % server_group_id)
         body = json.loads(body)
-        self.validate_response(schema.create_get_server_group, resp, body)
+        self.validate_response(schema.create_show_server_group, resp, body)
         return service_client.ResponseBody(resp, body)
