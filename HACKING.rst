@@ -17,6 +17,7 @@ Tempest Specific Commandments
 - [T108] Check no hyphen at the end of rand_name() argument
 - [T109] Cannot use testtools.skip decorator; instead use
          decorators.skip_because from tempest-lib
+- [T110] Check that service client names of GET should be consistent
 - [N322] Method's default argument shouldn't be mutable
 
 Test Data/Configuration
