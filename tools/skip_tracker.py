@@ -40,7 +40,8 @@ def debug(msg, *args, **kwargs):
 
 
 def find_skips(start=TESTDIR):
-    """
+    """Find skipped tests
+
     Returns a list of tuples (method, bug) that represent
     test methods that have been decorated to skip because of
     a particular bug.
@@ -67,9 +68,7 @@ def find_skips(start=TESTDIR):
 
 
 def find_skips_in_file(path):
-    """
-    Return the skip tuples in a test file
-    """
+    """Return the skip tuples in a test file"""
     BUG_RE = re.compile(r'\s*@.*skip_because\(bug=[\'"](\d+)[\'"]')
     DEF_RE = re.compile(r'\s*def (\w+)\(')
     bug_found = False
