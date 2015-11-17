@@ -13,6 +13,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+"""
+http://developer.openstack.org/api-ref-identity-v3.html#endpoints-v3
+"""
+
 from oslo_serialization import jsonutils as json
 
 from tempest.common import service_client
@@ -28,53 +32,25 @@ class EndPointClient(service_client.ServiceClient):
         body = json.loads(body)
         return service_client.ResponseBody(resp, body)
 
-    def create_endpoint(self, service_id, interface, url, **kwargs):
+    def create_endpoint(self, **kwargs):
         """Create endpoint.
 
-        Normally this function wouldn't allow setting values that are not
-        allowed for 'enabled'. Use `force_enabled` to set a non-boolean.
-
+        Available params: see http://developer.openstack.org/
+                              api-ref-identity-v3.html#createEndpoint
         """
-        region = kwargs.get('region', None)
-        if 'force_enabled' in kwargs:
-            enabled = kwargs.get('force_enabled', None)
-        else:
-            enabled = kwargs.get('enabled', None)
-        post_body = {
-            'service_id': service_id,
-            'interface': interface,
-            'url': url,
-            'region': region,
-            'enabled': enabled
-        }
-        post_body = json.dumps({'endpoint': post_body})
+        post_body = json.dumps({'endpoint': kwargs})
         resp, body = self.post('endpoints', post_body)
         self.expected_success(201, resp.status)
         body = json.loads(body)
         return service_client.ResponseBody(resp, body)
 
-    def update_endpoint(self, endpoint_id, service_id=None, interface=None,
-                        url=None, region=None, enabled=None, **kwargs):
+    def update_endpoint(self, endpoint_id, **kwargs):
         """Updates an endpoint with given parameters.
 
-        Normally this function wouldn't allow setting values that are not
-        allowed for 'enabled'. Use `force_enabled` to set a non-boolean.
-
+        Available params: see http://developer.openstack.org/
+                              api-ref-identity-v3.html#updateEndpoint
         """
-        post_body = {}
-        if service_id is not None:
-            post_body['service_id'] = service_id
-        if interface is not None:
-            post_body['interface'] = interface
-        if url is not None:
-            post_body['url'] = url
-        if region is not None:
-            post_body['region'] = region
-        if 'force_enabled' in kwargs:
-            post_body['enabled'] = kwargs['force_enabled']
-        elif enabled is not None:
-            post_body['enabled'] = enabled
-        post_body = json.dumps({'endpoint': post_body})
+        post_body = json.dumps({'endpoint': kwargs})
         resp, body = self.patch('endpoints/%s' % endpoint_id, post_body)
         self.expected_success(200, resp.status)
         body = json.loads(body)
