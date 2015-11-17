@@ -26,7 +26,7 @@ Plugin Cookiecutter
 In order to create the basic structure with base classes and test directories
 you can use the tempest-plugin-cookiecutter project::
 
-  > cookiecutter https://git.openstack.org/openstack/tempest-plugin-cookiecutter
+  > pip install -U cookiecutter && cookiecutter https://git.openstack.org/openstack/tempest-plugin-cookiecutter
 
   Cloning into 'tempest-plugin-cookiecutter'...
   remote: Counting objects: 17, done.
