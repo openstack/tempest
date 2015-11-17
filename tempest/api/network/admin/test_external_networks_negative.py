@@ -32,12 +32,11 @@ class ExternalNetworksAdminNegativeTestJSON(base.BaseAdminNetworkTest):
         # pre-created floating-ip should be denied.
 
         # create a floating ip
-        client = self.admin_client
-        body = client.create_floatingip(
+        body = self.admin_floating_ips_client.create_floatingip(
             floating_network_id=CONF.network.public_network_id)
         created_floating_ip = body['floatingip']
         self.addCleanup(self._try_delete_resource,
-                        client.delete_floatingip,
+                        self.admin_floating_ips_client.delete_floatingip,
                         created_floating_ip['id'])
         floating_ip_address = created_floating_ip['floating_ip_address']
         self.assertIsNotNone(floating_ip_address)

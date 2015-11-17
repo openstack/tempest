@@ -35,28 +35,6 @@ class NetworkClient(base.BaseNetworkClient):
     quotas
     """
 
-    def create_floatingip(self, **kwargs):
-        uri = '/floatingips'
-        post_data = {'floatingip': kwargs}
-        return self.create_resource(uri, post_data)
-
-    def update_floatingip(self, floatingip_id, **kwargs):
-        uri = '/floatingips/%s' % floatingip_id
-        post_data = {'floatingip': kwargs}
-        return self.update_resource(uri, post_data)
-
-    def show_floatingip(self, floatingip_id, **fields):
-        uri = '/floatingips/%s' % floatingip_id
-        return self.show_resource(uri, **fields)
-
-    def delete_floatingip(self, floatingip_id):
-        uri = '/floatingips/%s' % floatingip_id
-        return self.delete_resource(uri)
-
-    def list_floatingips(self, **filters):
-        uri = '/floatingips'
-        return self.list_resources(uri, **filters)
-
     def create_metering_label(self, **kwargs):
         uri = '/metering/metering-labels'
         post_data = {'metering_label': kwargs}

@@ -74,6 +74,7 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
         cls.networks_client = cls.os.networks_client
         cls.subnets_client = cls.os.subnets_client
         cls.ports_client = cls.os.ports_client
+        cls.floating_ips_client = cls.os.floating_ips_client
 
     @classmethod
     def resource_setup(cls):
@@ -92,8 +93,9 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
         if CONF.service_available.neutron:
             # Clean up floating IPs
             for floating_ip in cls.floating_ips:
-                cls._try_delete_resource(cls.client.delete_floatingip,
-                                         floating_ip['id'])
+                cls._try_delete_resource(
+                    cls.floating_ips_client.delete_floatingip,
+                    floating_ip['id'])
 
             # Clean up metering label rules
             for metering_label_rule in cls.metering_label_rules:
@@ -232,7 +234,7 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
     @classmethod
     def create_floatingip(cls, external_network_id):
         """Wrapper utility that returns a test floating IP."""
-        body = cls.client.create_floatingip(
+        body = cls.floating_ips_client.create_floatingip(
             floating_network_id=external_network_id)
         fip = body['floatingip']
         cls.floating_ips.append(fip)
@@ -269,6 +271,7 @@ class BaseAdminNetworkTest(BaseNetworkTest):
         cls.admin_networks_client = cls.os_adm.networks_client
         cls.admin_subnets_client = cls.os_adm.subnets_client
         cls.admin_ports_client = cls.os_adm.ports_client
+        cls.admin_floating_ips_client = cls.os_adm.floating_ips_client
 
     @classmethod
     def create_metering_label(cls, name, description):
