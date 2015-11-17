@@ -13,6 +13,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+"""
+http://developer.openstack.org/api-ref-identity-v3.html#policies-v3
+"""
+
 from oslo_serialization import jsonutils as json
 
 from tempest.common import service_client
@@ -21,13 +25,13 @@ from tempest.common import service_client
 class PolicyClient(service_client.ServiceClient):
     api_version = "v3"
 
-    def create_policy(self, blob, type):
-        """Creates a Policy."""
-        post_body = {
-            "blob": blob,
-            "type": type
-        }
-        post_body = json.dumps({'policy': post_body})
+    def create_policy(self, **kwargs):
+        """Creates a Policy.
+
+        Available params: see http://developer.openstack.org/
+                          api-ref-identity-v3.html#createPolicy
+        """
+        post_body = json.dumps({'policy': kwargs})
         resp, body = self.post('policies', post_body)
         self.expected_success(201, resp.status)
         body = json.loads(body)
@@ -49,12 +53,12 @@ class PolicyClient(service_client.ServiceClient):
         return service_client.ResponseBody(resp, body)
 
     def update_policy(self, policy_id, **kwargs):
-        """Updates a policy."""
-        type = kwargs.get('type')
-        post_body = {
-            'type': type
-        }
-        post_body = json.dumps({'policy': post_body})
+        """Updates a policy.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-identity-v3.html#updatePolicy
+        """
+        post_body = json.dumps({'policy': kwargs})
         url = 'policies/%s' % policy_id
         resp, body = self.patch(url, post_body)
         self.expected_success(200, resp.status)
