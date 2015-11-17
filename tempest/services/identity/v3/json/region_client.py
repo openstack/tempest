@@ -13,6 +13,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+"""
+http://developer.openstack.org/api-ref-identity-v3.html#regions-v3
+"""
+
 from oslo_serialization import jsonutils as json
 from six.moves.urllib import parse as urllib
 
@@ -22,31 +26,34 @@ from tempest.common import service_client
 class RegionClient(service_client.ServiceClient):
     api_version = "v3"
 
-    def create_region(self, description, **kwargs):
-        """Create region."""
-        req_body = {
-            'description': description,
-        }
-        if kwargs.get('parent_region_id'):
-            req_body['parent_region_id'] = kwargs.get('parent_region_id')
-        req_body = json.dumps({'region': req_body})
-        if kwargs.get('unique_region_id'):
-            resp, body = self.put(
-                'regions/%s' % kwargs.get('unique_region_id'), req_body)
+    def create_region(self, region_id=None, **kwargs):
+        """Create region.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-identity-v3.html#createRegion
+
+                          see http://developer.openstack.org/
+                              api-ref-identity-v3.html#createRegionWithID
+        """
+        if region_id is not None:
+            method = self.put
+            url = 'regions/%s' % region_id
         else:
-            resp, body = self.post('regions', req_body)
+            method = self.post
+            url = 'regions'
+        req_body = json.dumps({'region': kwargs})
+        resp, body = method(url, req_body)
         self.expected_success(201, resp.status)
         body = json.loads(body)
         return service_client.ResponseBody(resp, body)
 
     def update_region(self, region_id, **kwargs):
-        """Updates a region."""
-        post_body = {}
-        if 'description' in kwargs:
-            post_body['description'] = kwargs.get('description')
-        if 'parent_region_id' in kwargs:
-            post_body['parent_region_id'] = kwargs.get('parent_region_id')
-        post_body = json.dumps({'region': post_body})
+        """Updates a region.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-identity-v3.html#updateRegion
+        """
+        post_body = json.dumps({'region': kwargs})
         resp, body = self.patch('regions/%s' % region_id, post_body)
         self.expected_success(200, resp.status)
         body = json.loads(body)
