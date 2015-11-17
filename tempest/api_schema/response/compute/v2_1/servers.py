@@ -351,7 +351,7 @@ common_server_group = {
     'required': ['id', 'name', 'policies', 'members', 'metadata']
 }
 
-create_get_server_group = {
+create_show_server_group = {
     'status_code': [200],
     'response_body': {
         'type': 'object',

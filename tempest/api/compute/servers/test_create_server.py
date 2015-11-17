@@ -150,7 +150,7 @@ class ServersTestJSON(base.BaseV2ComputeTest):
                                          wait_until='ACTIVE')
 
         # Check a server is in the group
-        server_group = (self.server_groups_client.get_server_group(group_id)
+        server_group = (self.server_groups_client.show_server_group(group_id)
                         ['server_group'])
         self.assertIn(server['id'], server_group['members'])
 
