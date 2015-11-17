@@ -70,12 +70,13 @@ class TestGettingAddress(manager.NetworkScenarioTest):
             'security_groups': [{'name': self.sec_grp['name']}]}
 
     def prepare_network(self, address6_mode, n_subnets6=1, dualnet=False):
-        """Creates network with
-         given number of IPv6 subnets in the given mode and
-         one IPv4 subnet
-         Creates router with ports on all subnets
-         if dualnet - create IPv6 subnets on a different network
-         :return: list of created networks
+        """Prepare network
+
+        Creates network with given number of IPv6 subnets in the given mode and
+        one IPv4 subnet.
+        Creates router with ports on all subnets.
+        if dualnet - create IPv6 subnets on a different network
+        :return: list of created networks
         """
         self.network = self._create_network(tenant_id=self.tenant_id)
         if dualnet:

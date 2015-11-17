@@ -25,8 +25,7 @@ LOG = log.getLogger(__name__)
 
 class TestVolumeBootPattern(manager.ScenarioTest):
 
-    """
-    This test case attempts to reproduce the following steps:
+    """This test case attempts to reproduce the following steps:
 
      * Create in Cinder some bootable volume importing a Glance image
      * Boot an instance from the bootable volume

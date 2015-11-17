@@ -26,9 +26,9 @@ LOG = logging.getLogger(__name__)
 
 
 class BaremetalBasicOps(manager.BaremetalScenarioTest):
-    """
-    This smoke test tests the pxe_ssh Ironic driver.  It follows this basic
-    set of operations:
+    """This smoke test tests the pxe_ssh Ironic driver.
+
+    It follows this basic set of operations:
         * Creates a keypair
         * Boots an instance using the keypair
         * Monitors the associated Ironic node for power and

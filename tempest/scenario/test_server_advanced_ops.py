@@ -28,9 +28,9 @@ LOG = logging.getLogger(__name__)
 
 class TestServerAdvancedOps(manager.ScenarioTest):
 
-    """
-    This test case stresses some advanced server instance operations:
+    """The test suite for server advanced operations
 
+    This test case stresses some advanced server instance operations:
      * Resizing an instance
      * Sequence suspend resume
     """

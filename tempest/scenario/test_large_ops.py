@@ -31,8 +31,7 @@ LOG = logging.getLogger(__name__)
 
 class TestLargeOpsScenario(manager.ScenarioTest):
 
-    """
-    Test large operations.
+    """Test large operations.
 
     This test below:
     * Spin up multiple instances in one nova call, and repeat three times

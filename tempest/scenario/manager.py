@@ -131,14 +131,13 @@ class ScenarioTest(tempest.test.BaseTestCase):
         self.cleanup_waits.append(wait_dict)
 
     def _wait_for_cleanups(self):
-        """To handle async delete actions, a list of waits is added
-        which will be iterated over as the last step of clearing the
-        cleanup queue. That way all the delete calls are made up front
-        and the tests won't succeed unless the deletes are eventually
-        successful. This is the same basic approach used in the api tests to
-        limit cleanup execution time except here it is multi-resource,
-        because of the nature of the scenario tests.
-        """
+        # To handle async delete actions, a list of waits is added
+        # which will be iterated over as the last step of clearing the
+        # cleanup queue. That way all the delete calls are made up front
+        # and the tests won't succeed unless the deletes are eventually
+        # successful. This is the same basic approach used in the api tests to
+        # limit cleanup execution time except here it is multi-resource,
+        # because of the nature of the scenario tests.
         for wait in self.cleanup_waits:
             waiter_callable = wait.pop('waiter_callable')
             waiter_callable(**wait)
@@ -519,7 +518,8 @@ class ScenarioTest(tempest.test.BaseTestCase):
                               username=None,
                               private_key=None,
                               should_connect=True):
-        """
+        """Check server connectivity
+
         :param ip_address: server to test against
         :param username: server's ssh username
         :param private_key: server's ssh private key to be used
@@ -603,6 +603,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
 
 class NetworkScenarioTest(ScenarioTest):
     """Base class for network scenario tests.
+
     This class provide helpers for network scenario tests, using the neutron
     API. Helpers from ancestor which use the nova network API are overridden
     with the neutron API.
@@ -673,9 +674,9 @@ class NetworkScenarioTest(ScenarioTest):
 
     def _create_subnet(self, network, client=None, subnets_client=None,
                        namestart='subnet-smoke', **kwargs):
-        """
-        Create a subnet for the given network within the cidr block
-        configured for tenant networks.
+        """Create a subnet for the given network
+
+        within the cidr block configured for tenant networks.
         """
         if not client:
             client = self.network_client
@@ -683,7 +684,8 @@ class NetworkScenarioTest(ScenarioTest):
             subnets_client = self.subnets_client
 
         def cidr_in_use(cidr, tenant_id):
-            """
+            """Check cidr existence
+
             :return True if subnet with cidr already exist in tenant
                 False else
             """
@@ -801,9 +803,7 @@ class NetworkScenarioTest(ScenarioTest):
         return floating_ip
 
     def _disassociate_floating_ip(self, floating_ip):
-        """
-        :param floating_ip: type DeletableFloatingIp
-        """
+        """:param floating_ip: type DeletableFloatingIp"""
         floating_ip.update(port_id=None)
         self.assertIsNone(floating_ip.port_id)
         return floating_ip
@@ -856,8 +856,7 @@ class NetworkScenarioTest(ScenarioTest):
             raise
 
     def _check_remote_connectivity(self, source, dest, should_succeed=True):
-        """
-        check ping server via source ssh connection
+        """check ping server via source ssh connection
 
         :param source: RemoteClient: an ssh connection from which to ping
         :param dest: and IP to ping against
@@ -988,7 +987,9 @@ class NetworkScenarioTest(ScenarioTest):
         return sg_rule
 
     def _create_loginable_secgroup_rule(self, client=None, secgroup=None):
-        """These rules are intended to permit inbound ssh and icmp
+        """Create loginable security group rule
+
+        These rules are intended to permit inbound ssh and icmp
         traffic from all sources, so no group_id is provided.
         Setting a group_id would only permit traffic from ports
         belonging to the same security group.
@@ -1349,9 +1350,7 @@ class BaremetalScenarioTest(ScenarioTest):
 
 
 class EncryptionScenarioTest(ScenarioTest):
-    """
-    Base class for encryption scenario tests
-    """
+    """Base class for encryption scenario tests"""
 
     credentials = ['primary', 'admin']
 
@@ -1401,8 +1400,7 @@ class EncryptionScenarioTest(ScenarioTest):
 
 
 class ObjectStorageScenarioTest(ScenarioTest):
-    """
-    Provide harness to do Object Storage scenario tests.
+    """Provide harness to do Object Storage scenario tests.
 
     Subclasses implement the tests that use the methods provided by this
     class.
@@ -1470,10 +1468,8 @@ class ObjectStorageScenarioTest(ScenarioTest):
     def list_and_check_container_objects(self, container_name,
                                          present_obj=None,
                                          not_present_obj=None):
-        """
-        List objects for a given container and assert which are present and
-        which are not.
-        """
+        # List objects for a given container and assert which are present and
+        # which are not.
         if present_obj is None:
             present_obj = []
         if not_present_obj is None:

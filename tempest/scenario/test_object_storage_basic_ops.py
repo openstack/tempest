@@ -25,8 +25,8 @@ LOG = logging.getLogger(__name__)
 
 
 class TestObjectStorageBasicOps(manager.ObjectStorageScenarioTest):
-    """
-    Test swift basic ops.
+    """Test swift basic ops.
+
      * get swift stat.
      * create container.
      * upload a file to the created container.
@@ -57,6 +57,7 @@ class TestObjectStorageBasicOps(manager.ObjectStorageScenarioTest):
     @test.services('object_storage')
     def test_swift_acl_anonymous_download(self):
         """This test will cover below steps:
+
         1. Create container
         2. Upload object to the new container
         3. Change the ACL of the container

@@ -27,11 +27,7 @@ LOG = logging.getLogger(__name__)
 
 
 class TestServerMultinode(manager.ScenarioTest):
-
-    """
-    This is a set of tests specific to multinode testing.
-
-    """
+    """This is a set of tests specific to multinode testing."""
     credentials = ['primary', 'admin']
 
     @classmethod

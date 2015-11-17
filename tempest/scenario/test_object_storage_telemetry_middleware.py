@@ -35,8 +35,8 @@ NOTIFICATIONS_SLEEP = 1
 
 
 class TestObjectStorageTelemetry(manager.ObjectStorageScenarioTest):
-    """
-    Test that swift uses the ceilometer middleware.
+    """Test that swift uses the ceilometer middleware.
+
      * create container.
      * upload a file to the created container.
      * retrieve the file from the created container.
@@ -57,19 +57,15 @@ class TestObjectStorageTelemetry(manager.ObjectStorageScenarioTest):
         cls.telemetry_client = cls.os_operator.telemetry_client
 
     def _confirm_notifications(self, container_name, obj_name):
-        """
-        Loop seeking for appropriate notifications about the containers
-        and objects sent to swift.
-        """
+        # NOTE: Loop seeking for appropriate notifications about the containers
+        # and objects sent to swift.
 
         def _check_samples():
-            """
-            Return True only if we have notifications about some
-            containers and some objects and the notifications are about
-            the expected containers and objects.
-            Otherwise returning False will case _check_samples to be
-            called again.
-            """
+            # NOTE: Return True only if we have notifications about some
+            # containers and some objects and the notifications are about
+            # the expected containers and objects.
+            # Otherwise returning False will case _check_samples to be
+            # called again.
             results = self.telemetry_client.list_samples(
                 'storage.objects.incoming.bytes')
             LOG.debug('got samples %s', results)

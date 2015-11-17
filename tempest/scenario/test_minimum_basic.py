@@ -29,8 +29,7 @@ LOG = logging.getLogger(__name__)
 
 class TestMinimumBasicScenario(manager.ScenarioTest):
 
-    """
-    This is a basic minimum scenario test.
+    """This is a basic minimum scenario test.
 
     This test below:
     * across the multiple components

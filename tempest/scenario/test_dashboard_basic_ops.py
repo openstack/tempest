@@ -58,7 +58,8 @@ class HorizonHTMLParser(HTMLParser.HTMLParser):
 
 class TestDashboardBasicOps(manager.ScenarioTest):
 
-    """
+    """The test suite for dashboard basic operations
+
     This is a basic scenario test:
     * checks that the login page is available
     * logs in as a regular user

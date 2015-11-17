@@ -32,9 +32,9 @@ load_tests = test_utils.load_tests_input_scenario_utils
 
 class TestServerBasicOps(manager.ScenarioTest):
 
-    """
-    This smoke test case follows this basic set of operations:
+    """The test suite for server basic operations
 
+    This smoke test case follows this basic set of operations:
      * Create a keypair for use in launching an instance
      * Create a security group to control network access in instance
      * Add simple permissive rules to the security group
