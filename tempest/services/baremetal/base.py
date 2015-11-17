@@ -40,10 +40,7 @@ def handle_errors(f):
 
 
 class BaremetalClient(service_client.ServiceClient):
-    """
-    Base Tempest REST client for Ironic API.
-
-    """
+    """Base Tempest REST client for Ironic API."""
 
     uri_prefix = ''
 
@@ -58,8 +55,7 @@ class BaremetalClient(service_client.ServiceClient):
         return json.loads(object_str)
 
     def _get_uri(self, resource_name, uuid=None, permanent=False):
-        """
-        Get URI for a specific resource or object.
+        """Get URI for a specific resource or object.
 
         :param resource_name: The name of the REST resource, e.g., 'nodes'.
         :param uuid: The unique identifier of an object in UUID format.
@@ -73,8 +69,7 @@ class BaremetalClient(service_client.ServiceClient):
                                            uuid='/%s' % uuid if uuid else '')
 
     def _make_patch(self, allowed_attributes, **kw):
-        """
-        Create a JSON patch according to RFC 6902.
+        """Create a JSON patch according to RFC 6902.
 
         :param allowed_attributes: An iterable object that contains a set of
             allowed attributes for an object.
@@ -103,8 +98,7 @@ class BaremetalClient(service_client.ServiceClient):
         return patch
 
     def _list_request(self, resource, permanent=False, **kwargs):
-        """
-        Get the list of objects of the specified type.
+        """Get the list of objects of the specified type.
 
         :param resource: The name of the REST resource, e.g., 'nodes'.
         "param **kw: Parameters for the request.
@@ -122,8 +116,7 @@ class BaremetalClient(service_client.ServiceClient):
         return resp, self.deserialize(body)
 
     def _show_request(self, resource, uuid, permanent=False, **kwargs):
-        """
-        Gets a specific object of the specified type.
+        """Gets a specific object of the specified type.
 
         :param uuid: Unique identifier of the object in UUID format.
         :return: Serialized object as a dictionary.
@@ -139,8 +132,7 @@ class BaremetalClient(service_client.ServiceClient):
         return resp, self.deserialize(body)
 
     def _create_request(self, resource, object_dict):
-        """
-        Create an object of the specified type.
+        """Create an object of the specified type.
 
         :param resource: The name of the REST resource, e.g., 'nodes'.
         :param object_dict: A Python dict that represents an object of the
@@ -158,8 +150,7 @@ class BaremetalClient(service_client.ServiceClient):
         return resp, self.deserialize(body)
 
     def _delete_request(self, resource, uuid):
-        """
-        Delete specified object.
+        """Delete specified object.
 
         :param resource: The name of the REST resource, e.g., 'nodes'.
         :param uuid: The unique identifier of an object in UUID format.
@@ -173,8 +164,7 @@ class BaremetalClient(service_client.ServiceClient):
         return resp, body
 
     def _patch_request(self, resource, uuid, patch_object):
-        """
-        Update specified object with JSON-patch.
+        """Update specified object with JSON-patch.
 
         :param resource: The name of the REST resource, e.g., 'nodes'.
         :param uuid: The unique identifier of an object in UUID format.
@@ -197,8 +187,7 @@ class BaremetalClient(service_client.ServiceClient):
 
     @handle_errors
     def get_version_description(self, version='v1'):
-        """
-        Retrieves the desctription of the API.
+        """Retrieves the desctription of the API.
 
         :param version: The version of the API. Default: 'v1'.
         :return: Serialized description of API resources.
@@ -207,10 +196,7 @@ class BaremetalClient(service_client.ServiceClient):
         return self._list_request(version, permanent=True)
 
     def _put_request(self, resource, put_object):
-        """
-        Update specified object with JSON-patch.
-
-        """
+        """Update specified object with JSON-patch."""
         uri = self._get_uri(resource)
         put_body = json.dumps(put_object)
 

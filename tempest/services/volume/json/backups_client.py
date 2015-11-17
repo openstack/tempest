@@ -24,9 +24,7 @@ from tempest import exceptions
 
 
 class BaseBackupsClient(service_client.ServiceClient):
-    """
-    Client class to send CRUD Volume backup API requests to a Cinder endpoint
-    """
+    """Client class to send CRUD Volume backup API requests"""
 
     def create_backup(self, volume_id, container=None, name=None,
                       description=None):

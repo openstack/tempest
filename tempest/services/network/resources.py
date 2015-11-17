@@ -19,10 +19,7 @@ import six
 
 
 class AttributeDict(dict):
-
-    """
-    Provide attribute access (dict.key) to dictionary values.
-    """
+    """Provide attribute access (dict.key) to dictionary values."""
 
     def __getattr__(self, name):
         """Allow attribute access for all keys in the dict."""
@@ -33,10 +30,9 @@ class AttributeDict(dict):
 
 @six.add_metaclass(abc.ABCMeta)
 class DeletableResource(AttributeDict):
+    """Support deletion of neutron resources (networks, subnets)
 
-    """
-    Support deletion of neutron resources (networks, subnets) via a
-    delete() method, as is supported by keystone and nova resources.
+    via a delete() method, as is supported by keystone and nova resources.
     """
 
     def __init__(self, *args, **kwargs):

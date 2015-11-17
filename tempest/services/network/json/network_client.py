@@ -21,9 +21,10 @@ from tempest.services.network.json import base
 
 class NetworkClient(base.BaseNetworkClient):
 
-    """
-    Tempest REST client for Neutron. Uses v2 of the Neutron API, since the
-    V1 API has been removed from the code base.
+    """Tempest REST client for Neutron.
+
+    Uses v2 of the Neutron API, since the V1 API has been removed from the
+    code base.
 
     Implements create, delete, update, list and show for the basic Neutron
     abstractions (networks, sub-networks, routers, ports and floating IP):
@@ -177,8 +178,8 @@ class NetworkClient(base.BaseNetworkClient):
 
     def wait_for_resource_status(self, fetch, status, interval=None,
                                  timeout=None):
-        """
-        @summary: Waits for a network resource to reach a status
+        """Waits for a network resource to reach a status
+
         @param fetch: the callable to be used to query the resource status
         @type fecth: callable that takes no parameters and returns the resource
         @param status: the status that the resource has to reach
@@ -313,7 +314,8 @@ class NetworkClient(base.BaseNetworkClient):
         return self.list_resources(uri)
 
     def update_agent(self, agent_id, agent_info):
-        """
+        """Update agent
+
         :param agent_info: Agent update information.
         E.g {"admin_state_up": True}
         """

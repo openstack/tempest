@@ -20,9 +20,7 @@ from tempest.common import service_client
 
 
 class BaseVolumeHostsClient(service_client.ServiceClient):
-    """
-    Client class to send CRUD Volume Hosts API requests to a Cinder endpoint
-    """
+    """Client class to send CRUD Volume Hosts API requests"""
 
     def list_hosts(self, params=None):
         """Lists all hosts."""
@@ -38,6 +36,4 @@ class BaseVolumeHostsClient(service_client.ServiceClient):
 
 
 class VolumeHostsClient(BaseVolumeHostsClient):
-    """
-    Client class to send CRUD Volume Host API V1 requests to a Cinder endpoint
-    """
+    """Client class to send CRUD Volume Host API V1 requests"""

@@ -51,8 +51,8 @@ class BaseSnapshotsClient(service_client.ServiceClient):
         return service_client.ResponseBody(resp, body)
 
     def create_snapshot(self, volume_id, **kwargs):
-        """
-        Creates a new snapshot.
+        """Creates a new snapshot.
+
         volume_id(Required): id of the volume.
         force: Create a snapshot even if the volume attached (Default=False)
         display_name: Optional snapshot Name.
