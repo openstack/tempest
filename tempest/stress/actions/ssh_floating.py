@@ -107,12 +107,12 @@ class FloatingStress(stressaction.StressAction):
         sec_grp_cli.delete_security_group(self.sec_grp['id'])
 
     def _create_floating_ip(self):
-        floating_cli = self.manager.floating_ips_client
+        floating_cli = self.manager.compute_floating_ips_client
         self.floating = (floating_cli.create_floating_ip(self.floating_pool)
                          ['floating_ip'])
 
     def _destroy_floating_ip(self):
-        cli = self.manager.floating_ips_client
+        cli = self.manager.compute_floating_ips_client
         cli.delete_floating_ip(self.floating['id'])
         cli.wait_for_resource_deletion(self.floating['id'])
         self.logger.info("Deleted Floating IP %s", str(self.floating['ip']))
@@ -146,7 +146,7 @@ class FloatingStress(stressaction.StressAction):
             self._create_vm()
 
     def wait_disassociate(self):
-        cli = self.manager.floating_ips_client
+        cli = self.manager.compute_floating_ips_client
 
         def func():
             floating = (cli.show_floating_ip(self.floating['id'])
@@ -158,7 +158,7 @@ class FloatingStress(stressaction.StressAction):
             raise RuntimeError("IP disassociate timeout!")
 
     def run_core(self):
-        cli = self.manager.floating_ips_client
+        cli = self.manager.compute_floating_ips_client
         cli.associate_floating_ip_to_server(self.floating['ip'],
                                             self.server_id)
         for method in self.verify:

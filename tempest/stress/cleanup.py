@@ -59,12 +59,13 @@ def cleanup():
         except Exception:
             pass
 
-    floating_ips = (admin_manager.floating_ips_client.list_floating_ips()
+    admin_floating_ips_client = admin_manager.compute_floating_ips_client
+    floating_ips = (admin_floating_ips_client.list_floating_ips()
                     ['floating_ips'])
     LOG.info("Cleanup::remove %s floating ips" % len(floating_ips))
     for f in floating_ips:
         try:
-            admin_manager.floating_ips_client.delete_floating_ip(f['id'])
+            admin_floating_ips_client.delete_floating_ip(f['id'])
         except Exception:
             pass
 

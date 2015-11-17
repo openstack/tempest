@@ -294,7 +294,7 @@ class SecurityGroupService(BaseService):
 class FloatingIpService(BaseService):
     def __init__(self, manager, **kwargs):
         super(FloatingIpService, self).__init__(kwargs)
-        self.client = manager.floating_ips_client
+        self.client = manager.compute_floating_ips_client
 
     def list(self):
         client = self.client

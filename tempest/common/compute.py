@@ -127,7 +127,7 @@ def create_test_server(clients, validatable=False, validation_resources=None,
 
     # The name of the method to associate a floating IP to as server is too
     # long for PEP8 compliance so:
-    assoc = clients.floating_ips_client.associate_floating_ip_to_server
+    assoc = clients.compute_floating_ips_client.associate_floating_ip_to_server
 
     if wait_until:
         for server in servers:
