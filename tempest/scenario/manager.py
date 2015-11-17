@@ -562,9 +562,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
             raise
 
     def create_floating_ip(self, thing, pool_name=None):
-        """Creates a floating IP and associates to a server using
-        Nova clients
-        """
+        """Create a floating IP and associates to a server on Nova"""
 
         floating_ip = (self.compute_floating_ips_client.
                        create_floating_ip(pool_name)['floating_ip'])
@@ -775,9 +773,7 @@ class NetworkScenarioTest(ScenarioTest):
 
     def create_floating_ip(self, thing, external_network_id=None,
                            port_id=None, client=None):
-        """Creates a floating IP and associates to a resource/port using
-        Neutron client
-        """
+        """Create a floating IP and associates to a resource/port on Neutron"""
         if not external_network_id:
             external_network_id = CONF.network.public_network_id
         if not client:
