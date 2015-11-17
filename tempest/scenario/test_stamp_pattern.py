@@ -33,7 +33,8 @@ LOG = logging.getLogger(__name__)
 
 
 class TestStampPattern(manager.ScenarioTest):
-    """
+    """The test suite for both snapshoting and attaching of volume
+
     This test is for snapshotting an instance/volume and attaching the volume
     created from snapshot to the instance booted from snapshot.
     The following is the scenario outline:

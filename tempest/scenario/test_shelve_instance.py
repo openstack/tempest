@@ -27,8 +27,8 @@ LOG = log.getLogger(__name__)
 
 
 class TestShelveInstance(manager.ScenarioTest):
-    """
-    This test shelves then unshelves a Nova instance
+    """This test shelves then unshelves a Nova instance
+
     The following is the scenario outline:
      * boot an instance and create a timestamp file in it
      * shelve the instance

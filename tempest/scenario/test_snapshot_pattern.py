@@ -26,8 +26,8 @@ LOG = log.getLogger(__name__)
 
 
 class TestSnapshotPattern(manager.ScenarioTest):
-    """
-    This test is for snapshotting an instance and booting with it.
+    """This test is for snapshotting an instance and booting with it.
+
     The following is the scenario outline:
      * boot an instance and create a timestamp file in it
      * snapshot the instance

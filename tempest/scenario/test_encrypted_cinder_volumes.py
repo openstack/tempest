@@ -22,7 +22,8 @@ CONF = config.CONF
 
 class TestEncryptedCinderVolumes(manager.EncryptionScenarioTest):
 
-    """
+    """The test suite for encrypted cinder volumes
+
     This test is for verifying the functionality of encrypted cinder volumes.
 
     For both LUKS and cryptsetup encryption types, this test performs

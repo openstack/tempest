@@ -72,8 +72,7 @@ class ImageUtils(object):
 @misc.singleton
 class InputScenarioUtils(object):
 
-    """
-    Example usage:
+    """Example usage:
 
     import testscenarios
     (...)
@@ -124,9 +123,7 @@ class InputScenarioUtils(object):
 
     @property
     def scenario_images(self):
-        """
-        :return: a scenario with name and uuid of images
-        """
+        """:return: a scenario with name and uuid of images"""
         if not CONF.service_available.glance:
             return []
         if not hasattr(self, '_scenario_images'):
@@ -143,9 +140,7 @@ class InputScenarioUtils(object):
 
     @property
     def scenario_flavors(self):
-        """
-        :return: a scenario with name and uuid of flavors
-        """
+        """:return: a scenario with name and uuid of flavors"""
         if not hasattr(self, '_scenario_flavors'):
             try:
                 flavors = self.flavors_client.list_flavors()['flavors']
@@ -160,10 +155,11 @@ class InputScenarioUtils(object):
 
 
 def load_tests_input_scenario_utils(*args):
+    """Wrapper for testscenarios to set the scenarios
+
+    The purpose is to avoid running a getattr on the CONF object at import.
     """
-    Wrapper for testscenarios to set the scenarios to avoid running a getattr
-    on the CONF object at import.
-    """
+
     if getattr(args[0], 'suiteClass', None) is not None:
         loader, standard_tests, pattern = args
     else:

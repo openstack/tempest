@@ -28,7 +28,8 @@ LOG = logging.getLogger(__name__)
 
 class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
 
-    """
+    """The test suite for security groups
+
     This test suite assumes that Nova has been configured to
     boot VM's with Neutron-managed networking, and attempts to
     verify cross tenant connectivity as follows
@@ -95,8 +96,7 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
     credentials = ['primary', 'alt', 'admin']
 
     class TenantProperties(object):
-        """
-        helper class to save tenant details
+        """helper class to save tenant details
             id
             credentials
             network
@@ -232,9 +232,7 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
         return port['device_owner'].startswith('network:router_interface')
 
     def _create_server(self, name, tenant, security_groups=None):
-        """
-        creates a server and assigns to security group
-        """
+        """creates a server and assigns to security group"""
         self._set_compute_context(tenant)
         if security_groups is None:
             security_groups = [tenant.security_groups['default']]
@@ -268,11 +266,9 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
             tenant.servers.append(server)
 
     def _set_access_point(self, tenant):
-        """
-        creates a server in a secgroup with rule allowing external ssh
-        in order to access tenant internal network
-        workaround ip namespace
-        """
+        # creates a server in a secgroup with rule allowing external ssh
+        # in order to access tenant internal network
+        # workaround ip namespace
         secgroups = tenant.security_groups.values()
         name = 'server-{tenant}-access_point'.format(
             tenant=tenant.creds.tenant_name)
@@ -301,8 +297,7 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
         return self.servers_client
 
     def _deploy_tenant(self, tenant_or_id):
-        """
-        creates:
+        """creates:
             network
             subnet
             router (if public not defined)
@@ -320,9 +315,7 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
         self._set_access_point(tenant)
 
     def _get_server_ip(self, server, floating=False):
-        """
-        returns the ip (floating/internal) of a server
-        """
+        """returns the ip (floating/internal) of a server"""
         if floating:
             server_ip = self.floating_ips[server['id']].floating_ip_address
         else:
@@ -333,9 +326,7 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
         return server_ip
 
     def _connect_to_access_point(self, tenant):
-        """
-        create ssh connection to tenant access point
-        """
+        """create ssh connection to tenant access point"""
         access_point_ssh = \
             self.floating_ips[tenant.access_point['id']].floating_ip_address
         private_key = tenant.keypair['private_key']
@@ -374,10 +365,8 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
                                      ip=self._get_server_ip(server))
 
     def _test_cross_tenant_block(self, source_tenant, dest_tenant):
-        """
-        if public router isn't defined, then dest_tenant access is via
-        floating-ip
-        """
+        # if public router isn't defined, then dest_tenant access is via
+        # floating-ip
         access_point_ssh = self._connect_to_access_point(source_tenant)
         ip = self._get_server_ip(dest_tenant.access_point,
                                  floating=self.floating_ip_access)

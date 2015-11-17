@@ -25,8 +25,8 @@ LOG = logging.getLogger(__name__)
 
 
 class TestAggregatesBasicOps(manager.ScenarioTest):
-    """
-    Creates an aggregate within an availability zone
+    """Creates an aggregate within an availability zone
+
     Adds a host to the aggregate
     Checks aggregate details
     Updates aggregate's name
