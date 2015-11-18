@@ -56,13 +56,9 @@ class TestSnapshotPattern(manager.ScenarioTest):
         # boot an instance and create a timestamp file in it
         server = self._boot_image(CONF.compute.image_ref, keypair,
                                   security_group)
-        if CONF.compute.use_floatingip_for_ssh:
-            fip_for_server = self.create_floating_ip(server)
-            timestamp = self.create_timestamp(
-                fip_for_server['ip'], private_key=keypair['private_key'])
-        else:
-            timestamp = self.create_timestamp(
-                server, private_key=keypair['private_key'])
+        instance_ip = self.get_server_or_ip(server)
+        timestamp = self.create_timestamp(instance_ip,
+                                          private_key=keypair['private_key'])
 
         # snapshot the instance
         snapshot_image = self.create_server_snapshot(server=server)
@@ -72,11 +68,7 @@ class TestSnapshotPattern(manager.ScenarioTest):
                                                 keypair, security_group)
 
         # check the existence of the timestamp file in the second instance
-        if CONF.compute.use_floatingip_for_ssh:
-            fip_for_snapshot = self.create_floating_ip(server_from_snapshot)
-            timestamp2 = self.get_timestamp(fip_for_snapshot['ip'],
-                                            private_key=keypair['private_key'])
-        else:
-            timestamp2 = self.get_timestamp(server_from_snapshot,
-                                            private_key=keypair['private_key'])
+        server_from_snapshot_ip = self.get_server_or_ip(server_from_snapshot)
+        timestamp2 = self.get_timestamp(server_from_snapshot_ip,
+                                        private_key=keypair['private_key'])
         self.assertEqual(timestamp, timestamp2)

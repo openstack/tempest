@@ -139,11 +139,7 @@ class TestStampPattern(manager.ScenarioTest):
                                   security_group)
 
         # create and add floating IP to server1
-        if CONF.compute.use_floatingip_for_ssh:
-            floating_ip_for_server = self.create_floating_ip(server)
-            ip_for_server = floating_ip_for_server['ip']
-        else:
-            ip_for_server = server
+        ip_for_server = self.get_server_or_ip(server)
 
         self._attach_volume(server, volume)
         self._wait_for_volume_available_on_the_system(ip_for_server,
@@ -168,12 +164,7 @@ class TestStampPattern(manager.ScenarioTest):
                                                 keypair, security_group)
 
         # create and add floating IP to server_from_snapshot
-        if CONF.compute.use_floatingip_for_ssh:
-            floating_ip_for_snapshot = self.create_floating_ip(
-                server_from_snapshot)
-            ip_for_snapshot = floating_ip_for_snapshot['ip']
-        else:
-            ip_for_snapshot = server_from_snapshot
+        ip_for_snapshot = self.get_server_or_ip(server_from_snapshot)
 
         # attach volume2 to instance2
         self._attach_volume(server_from_snapshot, volume_from_snapshot)
