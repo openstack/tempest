@@ -14,6 +14,7 @@
 #    under the License.
 
 import copy
+import time
 
 from tempest_lib.common.utils import data_utils
 from tempest_lib import exceptions
@@ -53,6 +54,15 @@ class IdentityUsersTest(base.BaseIdentityV2Test):
             user_id=user_id,
             new_pass=old_pass,
             old_pass=new_pass)
+
+        # TODO(lbragstad): Sleeping after the response status has been checked
+        # and the body loaded as JSON allows requests to fail-fast. The sleep
+        # is necessary because keystone will err on the side of security and
+        # invalidate tokens within a small margin of error (within the same
+        # wall clock second) after a revocation event is issued (such as a
+        # password change). Remove this once keystone and Fernet support
+        # sub-second precision.
+        time.sleep(1)
 
         # user updates own password
         resp = self.non_admin_client.update_user_own_password(
