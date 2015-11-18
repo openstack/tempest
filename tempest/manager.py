@@ -31,22 +31,18 @@ class Manager(object):
     and a client object for a test case to use in performing actions.
     """
 
-    def __init__(self, credentials=None):
+    def __init__(self, credentials):
         """
-        We allow overriding of the credentials used within the various
-        client classes managed by the Manager object. Left as None, the
-        standard username/password/tenant_name[/domain_name] is used.
+        Credentials to be used within the various client classes managed by the
+        Manager object must be defined.
 
-        :param credentials: Override of the credentials
+        :param credentials: type Credentials or TestResources
         """
-        self.auth_version = CONF.identity.auth_version
-        if credentials is None:
-            self.credentials = cred_provider.get_configured_credentials('user')
-        else:
-            self.credentials = credentials
+        self.credentials = credentials
         # Check if passed or default credentials are valid
         if not self.credentials.is_valid():
             raise exceptions.InvalidCredentials()
+        self.auth_version = CONF.identity.auth_version
         # Tenant isolation creates TestResources, but
         # PreProvisionedCredentialProvider and some tests create Credentials
         if isinstance(credentials, cred_provider.TestResources):

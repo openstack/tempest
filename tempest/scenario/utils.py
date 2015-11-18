@@ -24,7 +24,7 @@ import testscenarios
 import testtools
 
 from tempest import clients
-from tempest.common import credentials
+from tempest.common import credentials_factory as credentials
 from tempest import config
 
 CONF = config.CONF

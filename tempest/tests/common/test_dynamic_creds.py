@@ -17,6 +17,7 @@ from oslo_config import cfg
 from oslotest import mockpatch
 from tempest_lib.services.identity.v2 import token_client as json_token_client
 
+from tempest.common import credentials_factory as credentials
 from tempest.common import dynamic_creds
 from tempest.common import service_client
 from tempest import config
@@ -46,6 +47,8 @@ class TestDynamicCredentialProvider(base.TestCase):
         cfg.CONF.set_default('operator_role', 'FakeRole',
                              group='object-storage')
         self._mock_list_ec2_credentials('fake_user_id', 'fake_tenant_id')
+        self.fixed_params.update(
+            admin_creds=self._get_fake_admin_creds())
 
     def test_tempest_client(self):
         creds = dynamic_creds.DynamicCredentialProvider(**self.fixed_params)
@@ -53,6 +56,13 @@ class TestDynamicCredentialProvider(base.TestCase):
                                    json_iden_client.IdentityClient))
         self.assertTrue(isinstance(creds.network_admin_client,
                                    json_network_client.NetworkClient))
+
+    def _get_fake_admin_creds(self):
+        return credentials.get_credentials(
+            fill_in=False,
+            identity_version=self.fixed_params['identity_version'],
+            username='fake_username', password='fake_password',
+            tenant_name='fake_tenant')
 
     def _mock_user_create(self, id, name):
         user_fix = self.useFixture(mockpatch.PatchObject(

@@ -15,7 +15,7 @@
 from oslo_config import cfg
 from oslotest import mockpatch
 
-from tempest.common import credentials
+from tempest.common import credentials_factory as credentials
 from tempest import config
 from tempest.tests import base
 from tempest.tests import fake_config

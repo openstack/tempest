@@ -16,14 +16,14 @@
 
 from oslo_log import log as logging
 
-from tempest import clients
+from tempest.common import credentials_factory as credentials
 from tempest.common import waiters
 
 LOG = logging.getLogger(__name__)
 
 
 def cleanup():
-    admin_manager = clients.AdminManager()
+    admin_manager = credentials.AdminManager()
 
     body = admin_manager.servers_client.list_servers(all_tenants=True)
     LOG.info("Cleanup::remove %s servers" % len(body['servers']))

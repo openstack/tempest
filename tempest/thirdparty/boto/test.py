@@ -27,7 +27,7 @@ import six
 from six.moves.urllib import parse as urlparse
 from tempest_lib import exceptions as lib_exc
 
-import tempest.clients
+from tempest.common import credentials_factory as credentials
 from tempest.common.utils import file_utils
 from tempest import config
 from tempest import exceptions
@@ -67,7 +67,7 @@ def decision_maker():
         raise Exception("Unknown (Authentication?) Error")
     # NOTE(andreaf) Setting up an extra manager here is redundant,
     # and should be removed.
-    openstack = tempest.clients.Manager()
+    openstack = credentials.ConfiguredUserManager()
     try:
         if urlparse.urlparse(CONF.boto.ec2_url).hostname is None:
             raise Exception("Failed to get hostname from the ec2_url")
