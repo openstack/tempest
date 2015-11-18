@@ -253,10 +253,19 @@ class TestNetworkMultiNode(manager.NetworkScenarioTest):
         for network in self.networks:
             for aggregate in self.aggregates:
                 name = data_utils.rand_name('server')
-                server_dict = self._create_server(name,
-                                                  network,
-                                                  zone=aggregate[
-                                                      'availability_zone'])
+                for i in range(0, 2):
+                    try:
+                        server_dict = \
+                            self._create_server(name,
+                                                network,
+                                                zone=aggregate[
+                                                    'availability_zone'])
+                    except Exception:
+                        LOG.debug("Failed to bring up server")
+                        LOG.debug("Retrying")
+                        continue
+                    break
+
                 id = server_dict['server']['id']
                 self.assertIsNotNone(server_dict)
                 self.servers[id] = server_dict['keypair']
@@ -360,6 +369,8 @@ class TestNetworkMultiNode(manager.NetworkScenarioTest):
                 break
             except exceptions.SSHExecCommandFailed:
                 LOG.debug("SSHExecCommandFailed - retrying")
+            except Exception:
+                LOG.debug("Catch all - retrying")
 
         self.assertIsNotNone(ping_result,
                              "SSHExecCommandFailed - ping failed")
