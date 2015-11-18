@@ -146,8 +146,11 @@ a0:b0:c0:d0:e0:f0"""
         self._assert_exec_called_with(
             "sudo ip addr add %s/%s dev %s" % (ip, '28', nic))
 
-    def test_turn_nic_on(self):
+    def test_set_nic_state(self):
         nic = 'eth0'
-        self.conn.turn_nic_on(nic)
+        self.conn.set_nic_state(nic)
         self._assert_exec_called_with(
             'sudo ip link set %s up' % nic)
+        self.conn.set_nic_state(nic, "down")
+        self._assert_exec_called_with(
+            'sudo ip link set %s down' % nic)

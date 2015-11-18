@@ -287,7 +287,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         num, new_nic = self.diff_list[0]
         ssh_client.assign_static_ip(nic=new_nic,
                                     addr=new_port.fixed_ips[0]['ip_address'])
-        ssh_client.turn_nic_on(nic=new_nic)
+        ssh_client.set_nic_state(nic=new_nic)
 
     def _get_server_nics(self, ssh_client):
         reg = re.compile(r'(?P<num>\d+): (?P<nic_name>\w+):')
@@ -737,3 +737,49 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         self.check_public_network_connectivity(
             should_connect=True,
             msg='After router rescheduling')
+
+    @test.requires_ext(service='network', extension='port-security')
+    @test.idempotent_id('7c0bb1a2-d053-49a4-98f9-ca1a1d849f63')
+    @test.services('compute', 'network')
+    def test_port_security_macspoofing_port(self):
+        """Tests port_security extension enforces mac spoofing
+
+        1. create a new network
+        2. connect VM to new network
+        4. check VM can ping new network DHCP port
+        5. spoof mac on new new network interface
+        6. check Neutron enforces mac spoofing and blocks pings via spoofed
+            interface
+        7. disable port-security on the spoofed port
+        8. check Neutron allows pings via spoofed interface
+        """
+        spoof_mac = "00:00:00:00:00:01"
+
+        # Create server
+        self._setup_network_and_servers()
+        self.check_public_network_connectivity(should_connect=False)
+        self._create_new_network()
+        self._hotplug_server()
+        fip, server = self.floating_ip_tuple
+        new_ports = self._list_ports(device_id=server["id"],
+                                     network_id=self.new_net["id"])
+        spoof_port = new_ports[0]
+        private_key = self._get_server_key(server)
+        ssh_client = self.get_remote_client(fip.floating_ip_address,
+                                            private_key=private_key)
+        spoof_nic = ssh_client.get_nic_name(spoof_port["mac_address"])
+        dhcp_ports = self._list_ports(device_owner="network:dhcp",
+                                      network_id=self.new_net["id"])
+        new_net_dhcp = dhcp_ports[0]["fixed_ips"][0]["ip_address"]
+        self._check_remote_connectivity(ssh_client, dest=new_net_dhcp,
+                                        nic=spoof_nic, should_succeed=True)
+        ssh_client.set_mac_address(spoof_nic, spoof_mac)
+        new_mac = ssh_client.get_mac_address(nic=spoof_nic)
+        self.assertEqual(spoof_mac, new_mac)
+        self._check_remote_connectivity(ssh_client, dest=new_net_dhcp,
+                                        nic=spoof_nic, should_succeed=False)
+        self.ports_client.update_port(spoof_port["id"],
+                                      port_security_enabled=False,
+                                      security_groups=[])
+        self._check_remote_connectivity(ssh_client, dest=new_net_dhcp,
+                                        nic=spoof_nic, should_succeed=True)
