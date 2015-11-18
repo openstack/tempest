@@ -186,8 +186,9 @@ def wait_for_volume_resource_status(client, resource_id, status):
     resources. The function extracts the name of the desired resource from
     the client class name of the resource.
     """
-    resource_name = re.findall(r'(Volume|Snapshot|Backup)',
-                               client.__class__.__name__)[0].lower()
+    resource_name = re.findall(
+        r'(Volume|Snapshot|Backup|Group)',
+        client.__class__.__name__)[0].lower()
     show_resource = getattr(client, 'show_' + resource_name)
     resource_status = show_resource(resource_id)[resource_name]['status']
     start = int(time.time())

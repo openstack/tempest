@@ -13,8 +13,11 @@
 # the License.
 
 from tempest.lib.services.volume.v3.base_client import BaseClient
+from tempest.lib.services.volume.v3.group_types_client import GroupTypesClient
+from tempest.lib.services.volume.v3.groups_client import GroupsClient
 from tempest.lib.services.volume.v3.messages_client import MessagesClient
 from tempest.lib.services.volume.v3.versions_client import VersionsClient
 from tempest.lib.services.volume.v3.volumes_client import VolumesClient
 
-__all__ = ['MessagesClient', 'BaseClient', 'VersionsClient', 'VolumesClient']
+__all__ = ['BaseClient', 'GroupsClient', 'GroupTypesClient',
+           'MessagesClient', 'VersionsClient', 'VolumesClient']
