@@ -94,6 +94,7 @@ from tempest.services.identity.v3.json.credentials_client import \
     CredentialsClient
 from tempest.services.identity.v3.json.endpoints_client import \
     EndPointClient
+from tempest.services.identity.v3.json.groups_client import GroupsClient
 from tempest.services.identity.v3.json.identity_client import \
     IdentityV3Client
 from tempest.services.identity.v3.json.policy_client import PolicyClient
@@ -402,6 +403,7 @@ class Manager(manager.Manager):
         self.region_client = RegionClient(self.auth_provider, **params)
         self.credentials_client = CredentialsClient(self.auth_provider,
                                                     **params)
+        self.groups_client = GroupsClient(self.auth_provider, **params_v3)
         # Token clients do not use the catalog. They only need default_params.
         # They read auth_url, so they should only be set if the corresponding
         # API version is marked as enabled
