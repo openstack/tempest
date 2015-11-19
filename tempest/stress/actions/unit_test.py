@@ -35,6 +35,7 @@ class SetUpClassRunTime(object):
 
 class UnitTest(stressaction.StressAction):
     """This is a special action for running existing unittests as stress test.
+
        You need to pass ``test_method`` and ``class_setup_per``
        using ``kwargs`` in the JSON descriptor;
        ``test_method`` should be the fully qualified name of a unittest,

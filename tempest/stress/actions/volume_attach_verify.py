@@ -121,6 +121,7 @@ class VolumeVerifyStress(stressaction.StressAction):
 
     def setUp(self, **kwargs):
         """Note able configuration combinations:
+
             Closest options to the test_stamp_pattern:
                 new_server = True
                 new_volume = True
