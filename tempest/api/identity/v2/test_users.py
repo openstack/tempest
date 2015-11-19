@@ -55,6 +55,10 @@ class IdentityUsersTest(base.BaseIdentityV2Test):
             new_pass=old_pass,
             old_pass=new_pass)
 
+        # user updates own password
+        resp = self.non_admin_client.update_user_own_password(
+            user_id=user_id, new_pass=new_pass, old_pass=old_pass)['access']
+
         # TODO(lbragstad): Sleeping after the response status has been checked
         # and the body loaded as JSON allows requests to fail-fast. The sleep
         # is necessary because keystone will err on the side of security and
@@ -63,10 +67,6 @@ class IdentityUsersTest(base.BaseIdentityV2Test):
         # password change). Remove this once keystone and Fernet support
         # sub-second precision.
         time.sleep(1)
-
-        # user updates own password
-        resp = self.non_admin_client.update_user_own_password(
-            user_id=user_id, new_pass=new_pass, old_pass=old_pass)['access']
 
         # check authorization with new token
         self.non_admin_token_client.auth_token(resp['token']['id'])
