@@ -50,9 +50,9 @@ import testtools
 
 
 class _AnsiColorizer(object):
-    """
-    A colorizer is an object that loosely wraps around a stream, allowing
-    callers to write text to the stream in a particular color.
+    """A colorizer is an object that loosely wraps around a stream
+
+    allowing callers to write text to the stream in a particular color.
 
     Colorizer classes must implement C{supported()} and C{write(text, color)}.
     """
@@ -63,7 +63,8 @@ class _AnsiColorizer(object):
         self.stream = stream
 
     def supported(cls, stream=sys.stdout):
-        """
+        """Check the current platform supports coloring terminal output
+
         A class method that returns True if the current platform supports
         coloring terminal output using this method. Returns False otherwise.
         """
@@ -86,8 +87,7 @@ class _AnsiColorizer(object):
     supported = classmethod(supported)
 
     def write(self, text, color):
-        """
-        Write the given text to the stream in the given color.
+        """Write the given text to the stream in the given color.
 
         @param text: Text to be written to the stream.
 
@@ -98,9 +98,7 @@ class _AnsiColorizer(object):
 
 
 class _Win32Colorizer(object):
-    """
-    See _AnsiColorizer docstring.
-    """
+    """See _AnsiColorizer docstring."""
     def __init__(self, stream):
         import win32console
         red, green, blue, bold = (win32console.FOREGROUND_RED,
@@ -146,9 +144,7 @@ class _Win32Colorizer(object):
 
 
 class _NullColorizer(object):
-    """
-    See _AnsiColorizer docstring.
-    """
+    """See _AnsiColorizer docstring."""
     def __init__(self, stream):
         self.stream = stream
 

@@ -114,10 +114,8 @@ class TestChecker(object):
 
     @staticmethod
     def _get_idempotent_id(test_node):
-        """
-        Return key-value dict with all metadata from @test.idempotent_id
-        decorators for test method
-        """
+        # Return key-value dict with all metadata from @test.idempotent_id
+        # decorators for test method
         idempotent_id = None
         for decorator in test_node.decorator_list:
             if (hasattr(decorator, 'func') and
@@ -264,8 +262,9 @@ class TestChecker(object):
         return self._filter_tests(check_uuid_in_meta, tests)
 
     def report_collisions(self, tests):
-        """Reports collisions if there are any. Returns true if
-        collisions exist.
+        """Reports collisions if there are any.
+
+        Returns true if collisions exist.
         """
         uuids = {}
 
@@ -298,8 +297,9 @@ class TestChecker(object):
         return bool(self._filter_tests(report, tests))
 
     def report_untagged(self, tests):
-        """Reports untagged tests if there are any. Returns true if
-        untagged tests exist.
+        """Reports untagged tests if there are any.
+
+        Returns true if untagged tests exist.
         """
         def report(module_name, test_name, tests):
             error_str = "%s:%s\nmissing @test.idempotent_id('...')\n%s\n" % (
@@ -312,9 +312,7 @@ class TestChecker(object):
         return bool(self._filter_tests(report, tests))
 
     def fix_tests(self, tests):
-        """Add uuids to all tests specified in tests and
-        fix it in source files
-        """
+        """Add uuids to all tests specified in tests and fix it"""
         patcher = SourcePatcher()
         for module_name in tests:
             add_import_once = True
