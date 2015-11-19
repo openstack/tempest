@@ -13,6 +13,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+"""
+http://developer.openstack.org/api-ref-identity-v3.html#groups-v3
+"""
+
 from oslo_serialization import jsonutils as json
 
 from tempest.common import service_client
@@ -21,18 +25,13 @@ from tempest.common import service_client
 class GroupsClient(service_client.ServiceClient):
     api_version = "v3"
 
-    def create_group(self, name, **kwargs):
-        """Creates a group."""
-        description = kwargs.get('description', None)
-        domain_id = kwargs.get('domain_id', 'default')
-        project_id = kwargs.get('project_id', None)
-        post_body = {
-            'description': description,
-            'domain_id': domain_id,
-            'project_id': project_id,
-            'name': name
-        }
-        post_body = json.dumps({'group': post_body})
+    def create_group(self, **kwargs):
+        """Creates a group.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-identity-v3.html#createGroup
+        """
+        post_body = json.dumps({'group': kwargs})
         resp, body = self.post('groups', post_body)
         self.expected_success(201, resp.status)
         body = json.loads(body)
@@ -53,15 +52,12 @@ class GroupsClient(service_client.ServiceClient):
         return service_client.ResponseBody(resp, body)
 
     def update_group(self, group_id, **kwargs):
-        """Updates a group."""
-        body = self.get_group(group_id)['group']
-        name = kwargs.get('name', body['name'])
-        description = kwargs.get('description', body['description'])
-        post_body = {
-            'name': name,
-            'description': description
-        }
-        post_body = json.dumps({'group': post_body})
+        """Updates a group.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-identity-v3.html#updateGroup
+        """
+        post_body = json.dumps({'group': kwargs})
         resp, body = self.patch('groups/%s' % group_id, post_body)
         self.expected_success(200, resp.status)
         body = json.loads(body)
