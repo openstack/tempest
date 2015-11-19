@@ -44,8 +44,8 @@ class SecurityGroupsClient(service_client.ServiceClient):
         return service_client.ResponseBody(resp, body)
 
     def create_security_group(self, **kwargs):
-        """
-        Creates a new security group.
+        """Creates a new security group.
+
         name (Required): Name of security group.
         description (Required): Description of security group.
         """
@@ -56,8 +56,8 @@ class SecurityGroupsClient(service_client.ServiceClient):
         return service_client.ResponseBody(resp, body)
 
     def update_security_group(self, security_group_id, **kwargs):
-        """
-        Update a security group.
+        """Update a security group.
+
         security_group_id: a security_group to update
         name: new name of security group
         description: new description of security group

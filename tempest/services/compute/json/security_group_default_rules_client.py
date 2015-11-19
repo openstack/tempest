@@ -23,8 +23,8 @@ from tempest.common import service_client
 class SecurityGroupDefaultRulesClient(service_client.ServiceClient):
 
     def create_security_default_group_rule(self, **kwargs):
-        """
-        Creating security group default rules.
+        """Creating security group default rules.
+
         ip_protocol : ip_protocol (icmp, tcp, udp).
         from_port: Port at start of range.
         to_port  : Port at end of range.

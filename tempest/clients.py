@@ -154,10 +154,7 @@ LOG = logging.getLogger(__name__)
 
 
 class Manager(manager.Manager):
-
-    """
-    Top level manager for OpenStack tempest clients
-    """
+    """Top level manager for OpenStack tempest clients"""
 
     default_params = {
         'disable_ssl_certificate_validation':

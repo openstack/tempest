@@ -97,6 +97,7 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
 
     class TenantProperties(object):
         """helper class to save tenant details
+
             id
             credentials
             network
@@ -298,6 +299,7 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
 
     def _deploy_tenant(self, tenant_or_id):
         """creates:
+
             network
             subnet
             router (if public not defined)
@@ -374,8 +376,8 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
                                  should_succeed=False)
 
     def _test_cross_tenant_allow(self, source_tenant, dest_tenant):
-        """
-        check for each direction:
+        """check for each direction:
+
         creating rule for tenant incoming traffic enables only 1way traffic
         """
         ruleset = dict(
@@ -408,10 +410,8 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
         self._check_connectivity(access_point_ssh_2, ip)
 
     def _verify_mac_addr(self, tenant):
-        """
-        verify that VM (tenant's access point) has the same ip,mac as listed in
-        port list
-        """
+        """Verify that VM has the same ip, mac as listed in port"""
+
         access_point_ssh = self._connect_to_access_point(tenant)
         mac_addr = access_point_ssh.get_mac_address()
         mac_addr = mac_addr.strip().lower()
@@ -466,9 +466,9 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
     @test.idempotent_id('f4d556d7-1526-42ad-bafb-6bebf48568f6')
     @test.services('compute', 'network')
     def test_port_update_new_security_group(self):
-        """
-        This test verifies the traffic after updating the vm port with new
-        security group having appropriate rule.
+        """Verifies the traffic after updating the vm port
+
+        With new security group having appropriate rule.
         """
         new_tenant = self.primary_tenant
 
@@ -517,8 +517,8 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
     @test.idempotent_id('d2f77418-fcc4-439d-b935-72eca704e293')
     @test.services('compute', 'network')
     def test_multiple_security_groups(self):
-        """
-        This test verifies multiple security groups and checks that rules
+        """Verify multiple security groups and checks that rules
+
         provided in the both the groups is applied onto VM
         """
         tenant = self.primary_tenant
@@ -536,13 +536,11 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
             secgroup=tenant.security_groups['default'],
             **ruleset
         )
-        """
-        Vm now has 2 security groups one with ssh rule(
-        already added in setUp() method),and other with icmp rule
-        (added in the above step).The check_vm_connectivity tests
-        -that vm ping test is successful
-        -ssh to vm is successful
-        """
+        # NOTE: Vm now has 2 security groups one with ssh rule(
+        # already added in setUp() method),and other with icmp rule
+        # (added in the above step).The check_vm_connectivity tests
+        # -that vm ping test is successful
+        # -ssh to vm is successful
         self.check_vm_connectivity(ip,
                                    username=ssh_login,
                                    private_key=private_key,
@@ -552,10 +550,7 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
     @test.idempotent_id('7c811dcc-263b-49a3-92d2-1b4d8405f50c')
     @test.services('compute', 'network')
     def test_port_security_disable_security_group(self):
-        """
-        This test verifies port_security_enabled=False disables
-        the default security group rules.
-        """
+        """Verify the default security group rules is disabled."""
         new_tenant = self.primary_tenant
 
         # Create server

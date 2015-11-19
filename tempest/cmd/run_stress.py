@@ -33,8 +33,7 @@ LOG = logging.getLogger(__name__)
 
 
 def discover_stress_tests(path="./", filter_attr=None, call_inherited=False):
-    """Discovers all tempest tests and create action out of them
-    """
+    """Discovers all tempest tests and create action out of them"""
     LOG.info("Start test discovery")
     tests = []
     testloader = loader.TestLoader()

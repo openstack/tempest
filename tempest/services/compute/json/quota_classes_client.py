@@ -32,9 +32,7 @@ class QuotaClassesClient(service_client.ServiceClient):
         return service_client.ResponseBody(resp, body)
 
     def update_quota_class_set(self, quota_class_id, **kwargs):
-        """
-        Updates the quota class's limits for one or more resources.
-        """
+        """Updates the quota class's limits for one or more resources."""
         post_body = json.dumps({'quota_class_set': kwargs})
 
         resp, body = self.put('os-quota-class-sets/%s' % quota_class_id,

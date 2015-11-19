@@ -36,7 +36,8 @@ Floating_IP_tuple = collections.namedtuple('Floating_IP_tuple',
 
 class TestNetworkBasicOps(manager.NetworkScenarioTest):
 
-    """
+    """The test suite of network basic operations
+
     This smoke test suite assumes that Nova has been configured to
     boot VM's with Neutron-managed networking, and attempts to
     verify network connectivity as follows:
@@ -123,9 +124,9 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         self.floating_ip_tuple = Floating_IP_tuple(floating_ip, server)
 
     def check_networks(self):
-        """
-        Checks that we see the newly created network/subnet/router via
-        checking the result of list_[networks,routers,subnets]
+        """Checks that we see the newly created network/subnet/router
+
+        via checking the result of list_[networks,routers,subnets]
         """
 
         seen_nets = self._list_networks()
@@ -182,7 +183,8 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
     def check_public_network_connectivity(
             self, should_connect=True, msg=None,
             should_check_floating_ip_status=True):
-        """Verifies connectivty to a VM via public network and floating IP,
+        """Verifies connectivty to a VM via public network and floating IP
+
         and verifies floating IP has resource status is correct.
 
         :param should_connect: bool. determines if connectivity check is
@@ -294,8 +296,8 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
 
     def _check_network_internal_connectivity(self, network,
                                              should_connect=True):
-        """
-        via ssh check VM internal connectivity:
+        """via ssh check VM internal connectivity:
+
         - ping internal gateway and DHCP port, implying in-tenant connectivity
         pinging both, because L3 and DHCP agents might be on different nodes
         """
@@ -312,10 +314,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
                                         should_connect)
 
     def _check_network_external_connectivity(self):
-        """
-        ping public network default gateway to imply external connectivity
-
-        """
+        """ping default gateway to imply external connectivity"""
         if not CONF.network.public_network_id:
             msg = 'public network not defined.'
             LOG.info(msg)
@@ -359,7 +358,8 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
     @test.idempotent_id('f323b3ba-82f8-4db7-8ea6-6a895869ec49')
     @test.services('compute', 'network')
     def test_network_basic_ops(self):
-        """
+        """Basic network operation test
+
         For a freshly-booted VM with an IP address ("port") on a given
             network:
 
@@ -412,7 +412,8 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
                       'Baremetal relies on a shared physical network.')
     @test.services('compute', 'network')
     def test_connectivity_between_vms_on_different_networks(self):
-        """
+        """Test connectivity between VMs on different networks
+
         For a freshly-booted VM with an IP address ("port") on a given
             network:
 
@@ -460,7 +461,8 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
                       'vnic_type direct or macvtap')
     @test.services('compute', 'network')
     def test_hotplug_nic(self):
-        """
+        """Test hotplug network interface
+
         1. create a new network, with no gateway (to prevent overwriting VM's
             gateway)
         2. connect VM to new network
@@ -480,7 +482,8 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
                       'network')
     @test.services('compute', 'network')
     def test_update_router_admin_state(self):
-        """
+        """Test to update admin state up of router
+
         1. Check public connectivity before updating
                 admin_state_up attribute of router to False
         2. Check public connectivity after updating
@@ -512,8 +515,9 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
                           "DHCP client is not available.")
     @test.services('compute', 'network')
     def test_subnet_details(self):
-        """Tests that subnet's extra configuration details are affecting
-        the VMs. This test relies on non-shared, isolated tenant networks.
+        """Tests that subnet's extra configuration details are affecting VMs.
+
+         This test relies on non-shared, isolated tenant networks.
 
          NOTE: Neutron subnets push data to servers via dhcp-agent, so any
          update in subnet requires server to actively renew its DHCP lease.
@@ -567,12 +571,11 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
                          "Failed to update subnet's nameservers")
 
         def check_new_dns_server():
-            """Server needs to renew its dhcp lease in order to get the new dns
-            definitions from subnet
-            NOTE(amuller): we are renewing the lease as part of the retry
-            because Neutron updates dnsmasq asynchronously after the
-            subnet-update API call returns.
-            """
+            # NOTE: Server needs to renew its dhcp lease in order to get new
+            # definitions from subnet
+            # NOTE(amuller): we are renewing the lease as part of the retry
+            # because Neutron updates dnsmasq asynchronously after the
+            # subnet-update API call returns.
             ssh_client.renew_lease(fixed_ip=floating_ip['fixed_ip_address'])
             if ssh_client.get_dns_servers() != [alt_dns_server]:
                 LOG.debug("Failed to update DNS nameservers")
@@ -594,7 +597,8 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
                           "by the test environment")
     @test.services('compute', 'network')
     def test_update_instance_port_admin_state(self):
-        """
+        """Test to update admin_state_up attribute of instance port
+
         1. Check public connectivity before updating
                 admin_state_up attribute of instance port to False
         2. Check public connectivity after updating
@@ -625,8 +629,10 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
                           'supported in the version of Nova being tested.')
     @test.services('compute', 'network')
     def test_preserve_preexisting_port(self):
-        """Tests that a pre-existing port provided on server boot is not
-        deleted if the server is deleted.
+        """Test preserve pre-existing port
+
+        Tests that a pre-existing port provided on server boot is not deleted
+        if the server is deleted.
 
         Nova should unbind the port from the instance on delete if the port was
         not created by Nova as part of the boot request.

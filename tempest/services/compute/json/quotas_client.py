@@ -42,9 +42,7 @@ class QuotasClient(service_client.ServiceClient):
         return service_client.ResponseBody(resp, body)
 
     def update_quota_set(self, tenant_id, user_id=None, **kwargs):
-        """
-        Updates the tenant's quota limits for one or more resources
-        """
+        """Updates the tenant's quota limits for one or more resources"""
         post_body = json.dumps({'quota_set': kwargs})
 
         if user_id:

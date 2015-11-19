@@ -211,6 +211,7 @@ atexit.register(validate_tearDownClass)
 class BaseTestCase(testtools.testcase.WithAttributes,
                    testtools.TestCase):
     """The test base class defines Tempest framework for class level fixtures.
+
     `setUpClass` and `tearDownClass` are defined here and cannot be overwritten
     by subclasses (enforced via hacking rule T105).
 
@@ -315,8 +316,10 @@ class BaseTestCase(testtools.testcase.WithAttributes,
 
     @classmethod
     def skip_checks(cls):
-        """Class level skip checks. Subclasses verify in here all
-        conditions that might prevent the execution of the entire test class.
+        """Class level skip checks.
+
+        Subclasses verify in here all conditions that might prevent the
+        execution of the entire test class.
         Checks implemented here may not make use API calls, and should rely on
         configuration alone.
         In general skip checks that require an API call are discouraged.
@@ -343,6 +346,7 @@ class BaseTestCase(testtools.testcase.WithAttributes,
     @classmethod
     def setup_credentials(cls):
         """Allocate credentials and the client managers from them.
+
         A test class that requires network resources must override
         setup_credentials and defined the required resources before super
         is invoked.
@@ -380,8 +384,7 @@ class BaseTestCase(testtools.testcase.WithAttributes,
 
     @classmethod
     def resource_setup(cls):
-        """Class level resource setup for test cases.
-        """
+        """Class level resource setup for test cases."""
         if hasattr(cls, "os"):
             cls.validation_resources = vresources.create_validation_resources(
                 cls.os, cls.validation_resources)
@@ -392,6 +395,7 @@ class BaseTestCase(testtools.testcase.WithAttributes,
     @classmethod
     def resource_cleanup(cls):
         """Class level resource cleanup for test cases.
+
         Resource cleanup must be able to handle the case of partially setup
         resources, in case a failure during `resource_setup` should happen.
         """
@@ -523,9 +527,7 @@ class BaseTestCase(testtools.testcase.WithAttributes,
 
     @classmethod
     def clear_credentials(cls):
-        """
-        Clears creds if set
-        """
+        """Clears creds if set"""
         if hasattr(cls, '_creds_provider'):
             cls._creds_provider.clear_creds()
 
@@ -534,6 +536,7 @@ class BaseTestCase(testtools.testcase.WithAttributes,
                                  security_group=None,
                                  security_group_rules=None):
         """Specify which ssh server validation resources should be created.
+
         Each of the argument must be set to either None, True or False, with
         None - use default from config (security groups and security group
                rules get created when set to None)
@@ -631,10 +634,11 @@ class NegativeAutoTest(BaseTestCase):
 
     @staticmethod
     def load_tests(*args):
-        """
-        Wrapper for testscenarios to set the mandatory scenarios variable
-        only in case a real test loader is in place. Will be automatically
-        called in case the variable "load_tests" is set.
+        """Wrapper for testscenarios
+
+        To set the mandatory scenarios variable only in case a real test
+        loader is in place. Will be automatically called in case the variable
+        "load_tests" is set.
         """
         if getattr(args[0], 'suiteClass', None) is not None:
             loader, standard_tests, pattern = args
@@ -649,8 +653,7 @@ class NegativeAutoTest(BaseTestCase):
 
     @staticmethod
     def generate_scenario(description):
-        """
-        Generates the test scenario list for a given description.
+        """Generates the test scenario list for a given description.
 
         :param description: A file or dictionary with the following entries:
             name (required) name for the api
@@ -694,7 +697,8 @@ class NegativeAutoTest(BaseTestCase):
         return scenario_list
 
     def execute(self, description):
-        """
+        """Execute a http call
+
         Execute a http call on an api that are expected to
         result in client errors. First it uses invalid resources that are part
         of the url, and then invalid data for queries and http request bodies.
@@ -788,7 +792,8 @@ class NegativeAutoTest(BaseTestCase):
 
     @classmethod
     def set_resource(cls, name, resource):
-        """
+        """Register a resoruce for a test
+
         This function can be used in setUpClass context to register a resoruce
         for a test.
 
@@ -799,10 +804,10 @@ class NegativeAutoTest(BaseTestCase):
         cls._resources[name] = resource
 
     def get_resource(self, name):
-        """
-        Return a valid uuid for a type of resource. If a real resource is
-        needed as part of a url then this method should return one. Otherwise
-        it can return None.
+        """Return a valid uuid for a type of resource.
+
+        If a real resource is needed as part of a url then this method should
+        return one. Otherwise it can return None.
 
         :param name: The name of the kind of resource such as "flavor", "role",
             etc.
@@ -819,9 +824,7 @@ class NegativeAutoTest(BaseTestCase):
 
 
 def SimpleNegativeAutoTest(klass):
-    """
-    This decorator registers a test function on basis of the class name.
-    """
+    """This decorator registers a test function on basis of the class name."""
     @attr(type=['negative'])
     def generic_test(self):
         if hasattr(self, '_schema'):
@@ -838,10 +841,9 @@ def SimpleNegativeAutoTest(klass):
 
 
 def call_until_true(func, duration, sleep_for):
-    """
-    Call the given function until it returns True (and return True) or
-    until the specified duration (in seconds) elapses (and return
-    False).
+    """Call the given function until it returns True (and return True)
+
+    or until the specified duration (in seconds) elapses (and return False).
 
     :param func: A zero argument callable that returns True on success.
     :param duration: The number of seconds for which to attempt a
