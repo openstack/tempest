@@ -21,9 +21,7 @@ from tempest import test
 
 
 class QuotasTest(base.BaseAdminNetworkTest):
-    """
-    Tests the following operations in the Neutron API using the REST client for
-    Neutron:
+    """Tests the following operations in the Neutron API:
 
         list quotas for tenants who have non-default quota values
         show quotas for a specified tenant

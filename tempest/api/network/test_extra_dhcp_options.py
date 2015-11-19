@@ -19,9 +19,7 @@ from tempest import test
 
 
 class ExtraDHCPOptionsTestJSON(base.BaseNetworkTest):
-    """
-    Tests the following operations with the Extra DHCP Options Neutron API
-    extension:
+    """Tests the following operations with the Extra DHCP Options:
 
         port create
         port list

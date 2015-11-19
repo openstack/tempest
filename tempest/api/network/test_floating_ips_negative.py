@@ -25,8 +25,7 @@ CONF = config.CONF
 
 
 class FloatingIPNegativeTestJSON(base.BaseNetworkTest):
-    """
-    Test the following negative  operations for floating ips:
+    """Test the following negative operations for floating ips:
 
         Create floatingip with a port that is unreachable to external network
         Create floatingip in private network

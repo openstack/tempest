@@ -28,9 +28,7 @@ LOG = logging.getLogger(__name__)
 
 
 class BaseNetworkTest(tempest.test.BaseTestCase):
-
-    """
-    Base class for the Neutron tests that use the Tempest Neutron REST client
+    """Base class for the Neutron tests
 
     Per the Neutron API Guide, API v1.x was removed from the source code tree
     (docs.openstack.org/api/openstack-network/2.0/content/Overview-d1e71.html)

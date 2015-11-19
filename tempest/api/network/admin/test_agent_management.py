@@ -79,9 +79,8 @@ class AgentManagementTestJSON(base.BaseAdminNetworkTest):
         self.assertEqual(updated_description, description)
 
     def _restore_agent(self):
-        """
-        Restore the agent description after update test.
-        """
+        """Restore the agent description after update test"""
+
         description = self.agent['description'] or ''
         origin_agent = {'description': description}
         self.admin_client.update_agent(agent_id=self.agent['id'],

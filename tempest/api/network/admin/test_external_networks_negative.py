@@ -27,11 +27,9 @@ class ExternalNetworksAdminNegativeTestJSON(base.BaseAdminNetworkTest):
     @test.attr(type=['negative'])
     @test.idempotent_id('d402ae6c-0be0-4d8e-833b-a738895d98d0')
     def test_create_port_with_precreated_floatingip_as_fixed_ip(self):
-        """
-        External networks can be used to create both floating-ip as well
-        as instance-ip. So, creating an instance-ip with a value of a
-        pre-created floating-ip should be denied.
-        """
+        # NOTE: External networks can be used to create both floating-ip as
+        # well as instance-ip. So, creating an instance-ip with a value of a
+        # pre-created floating-ip should be denied.
 
         # create a floating ip
         client = self.admin_client

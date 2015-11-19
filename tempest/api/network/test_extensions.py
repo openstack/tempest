@@ -19,10 +19,7 @@ from tempest import test
 
 
 class ExtensionsTestJSON(base.BaseNetworkTest):
-
-    """
-    Tests the following operations in the Neutron API using the REST client for
-    Neutron:
+    """Tests the following operations in the Neutron API:
 
         List all available extensions
 

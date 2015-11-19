@@ -28,8 +28,7 @@ CONF = config.CONF
 
 
 class PortsTestJSON(sec_base.BaseSecGroupTest):
-    """
-    Test the following operations for ports:
+    """Test the following operations for ports:
 
         port create
         port delete

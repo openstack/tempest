@@ -22,9 +22,7 @@ CONF = config.CONF
 
 
 class SubnetPoolsTestJSON(base.BaseNetworkTest):
-    """
-    Tests the following operations in the subnetpools API using the REST client
-    for Neutron:
+    """Tests the following operations in the subnetpools API:
 
         Create a subnet pool.
         Update a subnet pool.
