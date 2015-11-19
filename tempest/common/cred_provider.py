@@ -28,6 +28,7 @@ class CredentialProvider(object):
     def __init__(self, identity_version, name=None, network_resources=None,
                  credentials_domain=None, admin_role=None):
         """A CredentialProvider supplies credentials to test classes.
+
         :param identity_version: Identity version of the credentials provided
         :param name: Name of the calling test. Included in provisioned
                      credentials when credentials are provisioned on the fly

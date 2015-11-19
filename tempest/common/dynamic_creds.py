@@ -72,9 +72,9 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
             self.identity_admin_client, self.creds_domain_name)
 
     def _get_admin_clients(self):
-        """
-        Returns a tuple with instances of the following admin clients (in this
-        order):
+        """Returns a tuple with instances of the following admin clients
+
+        (in this order):
             identity
             network
         """

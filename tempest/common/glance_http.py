@@ -203,8 +203,7 @@ class HTTPClient(object):
 
 
 class OpenSSLConnectionDelegator(object):
-    """
-    An OpenSSL.SSL.Connection delegator.
+    """An OpenSSL.SSL.Connection delegator.
 
     Supplies an additional 'makefile' method which httplib requires
     and is not present in OpenSSL.SSL.Connection.
@@ -225,9 +224,8 @@ class OpenSSLConnectionDelegator(object):
 
 
 class VerifiedHTTPSConnection(httplib.HTTPSConnection):
-    """
-    Extended HTTPSConnection which uses the OpenSSL library
-    for enhanced SSL support.
+    """Extended HTTPSConnection which uses OpenSSL library for enhanced SSL
+
     Note: Much of this functionality can eventually be replaced
           with native Python 3.3 code.
     """
@@ -247,11 +245,10 @@ class VerifiedHTTPSConnection(httplib.HTTPSConnection):
 
     @staticmethod
     def host_matches_cert(host, x509):
-        """
-        Verify that the the x509 certificate we have received
-        from 'host' correctly identifies the server we are
-        connecting to, ie that the certificate's Common Name
-        or a Subject Alternative Name matches 'host'.
+        """Verify that the x509 certificate we have received from 'host'
+
+        Identifies the server we are connecting to, ie that the certificate's
+        Common Name or a Subject Alternative Name matches 'host'.
         """
         # First see if we can match the CN
         if x509.get_subject().commonName == host:
@@ -289,9 +286,7 @@ class VerifiedHTTPSConnection(httplib.HTTPSConnection):
             return preverify_ok
 
     def setcontext(self):
-        """
-        Set up the OpenSSL context.
-        """
+        """Set up the OpenSSL context."""
         self.context = OpenSSL.SSL.Context(OpenSSL.SSL.SSLv23_METHOD)
 
         if self.ssl_compression is False:
@@ -336,10 +331,7 @@ class VerifiedHTTPSConnection(httplib.HTTPSConnection):
             self.context.set_default_verify_paths()
 
     def connect(self):
-        """
-        Connect to an SSL port using the OpenSSL library and apply
-        per-connection parameters.
-        """
+        """Connect to SSL port and apply per-connection parameters."""
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         if self.timeout is not None:
             # '0' microseconds

@@ -57,8 +57,7 @@ class ResponseBody(dict):
 
 
 class ResponseBodyData(object):
-    """Class that wraps an http response and string data into a single value.
-    """
+    """Class that wraps an http response and string data into a single value"""
 
     def __init__(self, response, data):
         self.response = response

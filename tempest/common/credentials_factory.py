@@ -292,10 +292,7 @@ def get_credentials(fill_in=True, identity_version=None, **kwargs):
 
 
 class ConfiguredUserManager(clients.Manager):
-    """
-    Manager object that uses the `user` credentials for its
-    managed client objects
-    """
+    """Manager that uses user credentials for its managed client objects"""
 
     def __init__(self, service=None):
         super(ConfiguredUserManager, self).__init__(
@@ -304,11 +301,7 @@ class ConfiguredUserManager(clients.Manager):
 
 
 class AdminManager(clients.Manager):
-
-    """
-    Manager object that uses the admin credentials for its
-    managed client objects
-    """
+    """Manager that uses admin credentials for its managed client objects"""
 
     def __init__(self, service=None):
         super(AdminManager, self).__init__(
