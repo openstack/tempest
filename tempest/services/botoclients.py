@@ -88,8 +88,8 @@ class BotoClientBase(object):
         return self.connect_method(**self.connection_data)
 
     def get_aws_credentials(self, identity_client):
-        """
-        Obtain existing, or create new AWS credentials
+        """Obtain existing, or create new AWS credentials
+
         :param identity_client: identity client with embedded credentials
         :return: EC2 credentials
         """

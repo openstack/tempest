@@ -14,9 +14,7 @@ from tempest.services.baremetal import base
 
 
 class BaremetalClient(base.BaremetalClient):
-    """
-    Base Tempest REST client for Ironic API v1.
-    """
+    """Base Tempest REST client for Ironic API v1."""
     version = '1'
     uri_prefix = 'v1'
 
@@ -62,8 +60,7 @@ class BaremetalClient(base.BaremetalClient):
 
     @base.handle_errors
     def show_node(self, uuid):
-        """
-        Gets a specific node.
+        """Gets a specific node.
 
         :param uuid: Unique identifier of the node in UUID format.
         :return: Serialized node as a dictionary.
@@ -73,8 +70,7 @@ class BaremetalClient(base.BaremetalClient):
 
     @base.handle_errors
     def show_node_by_instance_uuid(self, instance_uuid):
-        """
-        Gets a node associated with given instance uuid.
+        """Gets a node associated with given instance uuid.
 
         :param uuid: Unique identifier of the node in UUID format.
         :return: Serialized node as a dictionary.
@@ -88,8 +84,7 @@ class BaremetalClient(base.BaremetalClient):
 
     @base.handle_errors
     def show_chassis(self, uuid):
-        """
-        Gets a specific chassis.
+        """Gets a specific chassis.
 
         :param uuid: Unique identifier of the chassis in UUID format.
         :return: Serialized chassis as a dictionary.
@@ -99,8 +94,7 @@ class BaremetalClient(base.BaremetalClient):
 
     @base.handle_errors
     def show_port(self, uuid):
-        """
-        Gets a specific port.
+        """Gets a specific port.
 
         :param uuid: Unique identifier of the port in UUID format.
         :return: Serialized port as a dictionary.
@@ -110,8 +104,7 @@ class BaremetalClient(base.BaremetalClient):
 
     @base.handle_errors
     def show_port_by_address(self, address):
-        """
-        Gets a specific port by address.
+        """Gets a specific port by address.
 
         :param address: MAC address of the port.
         :return: Serialized port as a dictionary.
@@ -122,8 +115,7 @@ class BaremetalClient(base.BaremetalClient):
         return self._show_request('ports', uuid=None, uri=uri)
 
     def show_driver(self, driver_name):
-        """
-        Gets a specific driver.
+        """Gets a specific driver.
 
         :param driver_name: Name of driver.
         :return: Serialized driver as a dictionary.
@@ -132,8 +124,7 @@ class BaremetalClient(base.BaremetalClient):
 
     @base.handle_errors
     def create_node(self, chassis_id=None, **kwargs):
-        """
-        Create a baremetal node with the specified parameters.
+        """Create a baremetal node with the specified parameters.
 
         :param cpu_arch: CPU architecture of the node. Default: x86_64.
         :param cpus: Number of CPUs. Default: 8.
@@ -154,8 +145,7 @@ class BaremetalClient(base.BaremetalClient):
 
     @base.handle_errors
     def create_chassis(self, **kwargs):
-        """
-        Create a chassis with the specified parameters.
+        """Create a chassis with the specified parameters.
 
         :param description: The description of the chassis.
             Default: test-chassis
@@ -168,8 +158,7 @@ class BaremetalClient(base.BaremetalClient):
 
     @base.handle_errors
     def create_port(self, node_id, **kwargs):
-        """
-        Create a port with the specified parameters.
+        """Create a port with the specified parameters.
 
         :param node_id: The ID of the node which owns the port.
         :param address: MAC address of the port.
@@ -191,8 +180,7 @@ class BaremetalClient(base.BaremetalClient):
 
     @base.handle_errors
     def delete_node(self, uuid):
-        """
-        Deletes a node having the specified UUID.
+        """Deletes a node having the specified UUID.
 
         :param uuid: The unique identifier of the node.
         :return: A tuple with the server response and the response body.
@@ -202,8 +190,7 @@ class BaremetalClient(base.BaremetalClient):
 
     @base.handle_errors
     def delete_chassis(self, uuid):
-        """
-        Deletes a chassis having the specified UUID.
+        """Deletes a chassis having the specified UUID.
 
         :param uuid: The unique identifier of the chassis.
         :return: A tuple with the server response and the response body.
@@ -213,8 +200,7 @@ class BaremetalClient(base.BaremetalClient):
 
     @base.handle_errors
     def delete_port(self, uuid):
-        """
-        Deletes a port having the specified UUID.
+        """Deletes a port having the specified UUID.
 
         :param uuid: The unique identifier of the port.
         :return: A tuple with the server response and the response body.
@@ -224,8 +210,7 @@ class BaremetalClient(base.BaremetalClient):
 
     @base.handle_errors
     def update_node(self, uuid, **kwargs):
-        """
-        Update the specified node.
+        """Update the specified node.
 
         :param uuid: The unique identifier of the node.
         :return: A tuple with the server response and the updated node.
@@ -244,8 +229,7 @@ class BaremetalClient(base.BaremetalClient):
 
     @base.handle_errors
     def update_chassis(self, uuid, **kwargs):
-        """
-        Update the specified chassis.
+        """Update the specified chassis.
 
         :param uuid: The unique identifier of the chassis.
         :return: A tuple with the server response and the updated chassis.
@@ -258,8 +242,7 @@ class BaremetalClient(base.BaremetalClient):
 
     @base.handle_errors
     def update_port(self, uuid, patch):
-        """
-        Update the specified port.
+        """Update the specified port.
 
         :param uuid: The unique identifier of the port.
         :param patch: List of dicts representing json patches.
@@ -271,8 +254,7 @@ class BaremetalClient(base.BaremetalClient):
 
     @base.handle_errors
     def set_node_power_state(self, node_uuid, state):
-        """
-        Set power state of the specified node.
+        """Set power state of the specified node.
 
         :param node_uuid: The unique identifier of the node.
         :state: desired state to set (on/off/reboot).
@@ -284,8 +266,7 @@ class BaremetalClient(base.BaremetalClient):
 
     @base.handle_errors
     def validate_driver_interface(self, node_uuid):
-        """
-        Get all driver interfaces of a specific node.
+        """Get all driver interfaces of a specific node.
 
         :param uuid: Unique identifier of the node in UUID format.
 
@@ -300,8 +281,7 @@ class BaremetalClient(base.BaremetalClient):
 
     @base.handle_errors
     def set_node_boot_device(self, node_uuid, boot_device, persistent=False):
-        """
-        Set the boot device of the specified node.
+        """Set the boot device of the specified node.
 
         :param node_uuid: The unique identifier of the node.
         :param boot_device: The boot device name.
@@ -318,8 +298,7 @@ class BaremetalClient(base.BaremetalClient):
 
     @base.handle_errors
     def get_node_boot_device(self, node_uuid):
-        """
-        Get the current boot device of the specified node.
+        """Get the current boot device of the specified node.
 
         :param node_uuid: The unique identifier of the node.
 
@@ -331,8 +310,7 @@ class BaremetalClient(base.BaremetalClient):
 
     @base.handle_errors
     def get_node_supported_boot_devices(self, node_uuid):
-        """
-        Get the supported boot devices of the specified node.
+        """Get the supported boot devices of the specified node.
 
         :param node_uuid: The unique identifier of the node.
 
@@ -344,8 +322,7 @@ class BaremetalClient(base.BaremetalClient):
 
     @base.handle_errors
     def get_console(self, node_uuid):
-        """
-        Get connection information about the console.
+        """Get connection information about the console.
 
         :param node_uuid: Unique identifier of the node in UUID format.
 
@@ -357,8 +334,7 @@ class BaremetalClient(base.BaremetalClient):
 
     @base.handle_errors
     def set_console_mode(self, node_uuid, enabled):
-        """
-        Start and stop the node console.
+        """Start and stop the node console.
 
         :param node_uuid: Unique identifier of the node in UUID format.
         :param enabled: Boolean value; whether to enable or disable the

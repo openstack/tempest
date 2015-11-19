@@ -19,9 +19,7 @@ from tempest.common import service_client
 
 
 class BaseVolumeQuotasClient(service_client.ServiceClient):
-    """
-    Client class to send CRUD Volume Quotas API requests to a Cinder endpoint
-    """
+    """Client class to send CRUD Volume Quotas API requests"""
 
     TYPE = "json"
 
@@ -79,6 +77,4 @@ class BaseVolumeQuotasClient(service_client.ServiceClient):
 
 
 class VolumeQuotasClient(BaseVolumeQuotasClient):
-    """
-    Client class to send CRUD Volume Type API V1 requests to a Cinder endpoint
-    """
+    """Client class to send CRUD Volume Type API V1 requests"""

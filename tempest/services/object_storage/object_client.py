@@ -149,9 +149,7 @@ class ObjectClient(service_client.ServiceClient):
         return resp, body
 
     def put_object_with_chunk(self, container, name, contents, chunk_size):
-        """
-        Put an object with Transfer-Encoding header
-        """
+        """Put an object with Transfer-Encoding header"""
         if self.base_url is None:
             self._set_auth()
 
@@ -204,8 +202,8 @@ class ObjectClient(service_client.ServiceClient):
 
 def put_object_connection(base_url, container, name, contents=None,
                           chunk_size=65536, headers=None, query_string=None):
-    """
-    Helper function to make connection to put object with httplib
+    """Helper function to make connection to put object with httplib
+
     :param base_url: base_url of an object client
     :param container: container name that the object is in
     :param name: object name to put

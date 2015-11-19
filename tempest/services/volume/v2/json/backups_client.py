@@ -17,7 +17,5 @@ from tempest.services.volume.json import backups_client
 
 
 class BackupsClientV2(backups_client.BaseBackupsClient):
-    """
-    Client class to send CRUD Volume V2 API requests to a Cinder endpoint
-    """
+    """Client class to send CRUD Volume V2 API requests"""
     api_version = "v2"

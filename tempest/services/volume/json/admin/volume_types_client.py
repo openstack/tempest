@@ -21,9 +21,7 @@ from tempest.common import service_client
 
 
 class BaseVolumeTypesClient(service_client.ServiceClient):
-    """
-    Client class to send CRUD Volume Types API requests to a Cinder endpoint
-    """
+    """Client class to send CRUD Volume Types API requests"""
 
     def is_resource_deleted(self, resource):
         # to use this method self.resource must be defined to respective value
@@ -69,8 +67,8 @@ class BaseVolumeTypesClient(service_client.ServiceClient):
         return service_client.ResponseBody(resp, body)
 
     def create_volume_type(self, name, **kwargs):
-        """
-        Creates a new Volume_type.
+        """Creates a new Volume_type.
+
         name(Required): Name of volume_type.
         Following optional keyword arguments are accepted:
         extra_specs: A dictionary of values to be used as extra_specs.
@@ -113,8 +111,8 @@ class BaseVolumeTypesClient(service_client.ServiceClient):
         return service_client.ResponseBody(resp, body)
 
     def create_volume_type_extra_specs(self, vol_type_id, extra_spec):
-        """
-        Creates a new Volume_type extra spec.
+        """Creates a new Volume_type extra spec.
+
         vol_type_id: Id of volume_type.
         extra_specs: A dictionary of values to be used as extra_specs.
         """
@@ -134,8 +132,8 @@ class BaseVolumeTypesClient(service_client.ServiceClient):
 
     def update_volume_type_extra_specs(self, vol_type_id, extra_spec_name,
                                        extra_spec):
-        """
-        Update a volume_type extra spec.
+        """Update a volume_type extra spec.
+
         vol_type_id: Id of volume_type.
         extra_spec_name: Name of the extra spec to be updated.
         extra_spec: A dictionary of with key as extra_spec_name and the
@@ -150,8 +148,8 @@ class BaseVolumeTypesClient(service_client.ServiceClient):
         return service_client.ResponseBody(resp, body)
 
     def show_encryption_type(self, vol_type_id):
-        """
-        Get the volume encryption type for the specified volume type.
+        """Get the volume encryption type for the specified volume type.
+
         vol_type_id: Id of volume_type.
         """
         url = "/types/%s/encryption" % str(vol_type_id)
@@ -161,8 +159,7 @@ class BaseVolumeTypesClient(service_client.ServiceClient):
         return service_client.ResponseBody(resp, body)
 
     def create_encryption_type(self, vol_type_id, **kwargs):
-        """
-        Create a new encryption type for the specified volume type.
+        """Create a new encryption type for the specified volume type.
 
         vol_type_id: Id of volume_type.
         provider: Class providing encryption support.

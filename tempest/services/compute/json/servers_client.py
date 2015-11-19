@@ -160,8 +160,8 @@ class ServersClient(service_client.ServiceClient):
         return service_client.ResponseBody(resp, body)
 
     def delete_password(self, server_id):
-        """
-        Removes the encrypted server password from the metadata server
+        """Removes the encrypted server password from the metadata server
+
         Note that this does not actually change the instance server
         password.
         """
@@ -177,6 +177,7 @@ class ServersClient(service_client.ServiceClient):
 
     def rebuild_server(self, server_id, image_ref, **kwargs):
         """Rebuilds a server with a new image.
+
         Most parameters except the following are passed to the API without
         any changes.
         :param disk_config: The name is changed to OS-DCF:diskConfig
@@ -193,6 +194,7 @@ class ServersClient(service_client.ServiceClient):
 
     def resize_server(self, server_id, flavor_ref, **kwargs):
         """Changes the flavor of a server.
+
         Most parameters except the following are passed to the API without
         any changes.
         :param disk_config: The name is changed to OS-DCF:diskConfig
@@ -368,9 +370,7 @@ class ServersClient(service_client.ServiceClient):
                            **kwargs)
 
     def list_virtual_interfaces(self, server_id):
-        """
-        List the virtual interfaces used in an instance.
-        """
+        """List the virtual interfaces used in an instance."""
         resp, body = self.get('/'.join(['servers', server_id,
                               'os-virtual-interfaces']))
         body = json.loads(body)

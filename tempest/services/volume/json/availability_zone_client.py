@@ -28,6 +28,4 @@ class BaseVolumeAvailabilityZoneClient(service_client.ServiceClient):
 
 
 class VolumeAvailabilityZoneClient(BaseVolumeAvailabilityZoneClient):
-    """
-    Volume V1 availability zone client.
-    """
+    """Volume V1 availability zone client."""

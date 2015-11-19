@@ -18,9 +18,10 @@ from tempest.common import service_client
 
 class BaseNetworkClient(service_client.ServiceClient):
 
-    """
-    Base class for Tempest REST clients for Neutron.  Child classes use v2 of
-    the Neutron API, since the V1 API has been removed from the code base.
+    """Base class for Tempest REST clients for Neutron.
+
+    Child classes use v2 of the Neutron API, since the V1 API has been
+    removed from the code base.
     """
 
     version = '2.0'

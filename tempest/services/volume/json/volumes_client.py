@@ -23,9 +23,7 @@ from tempest.common import waiters
 
 
 class BaseVolumesClient(service_client.ServiceClient):
-    """
-    Base client class to send CRUD Volume API requests to a Cinder endpoint
-    """
+    """Base client class to send CRUD Volume API requests"""
 
     create_resp = 200
 
@@ -74,8 +72,8 @@ class BaseVolumesClient(service_client.ServiceClient):
         return service_client.ResponseBody(resp, body)
 
     def create_volume(self, size=None, **kwargs):
-        """
-        Creates a new Volume.
+        """Creates a new Volume.
+
         size: Size of volume in GB.
         Following optional keyword arguments are accepted:
         display_name: Optional Volume Name(only for V1).
@@ -339,6 +337,4 @@ class BaseVolumesClient(service_client.ServiceClient):
 
 
 class VolumesClient(BaseVolumesClient):
-    """
-    Client class to send CRUD Volume V1 API requests to a Cinder endpoint
-    """
+    """Client class to send CRUD Volume V1 API requests"""

@@ -46,8 +46,8 @@ class IdentityClient(service_client.ServiceClient):
         return service_client.ResponseBody(resp, body)
 
     def create_tenant(self, name, **kwargs):
-        """
-        Create a tenant
+        """Create a tenant
+
         name (required): New tenant name
         description: Description of new tenant (default is none)
         enabled <true|false>: Initial tenant status (default is true)

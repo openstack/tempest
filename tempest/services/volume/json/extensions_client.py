@@ -29,6 +29,4 @@ class BaseExtensionsClient(service_client.ServiceClient):
 
 
 class ExtensionsClient(BaseExtensionsClient):
-    """
-    Volume V1 extensions client.
-    """
+    """Volume V1 extensions client."""
