@@ -23,10 +23,7 @@ from tempest import test
 
 
 class HypervisorAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
-
-    """
-    Tests Hypervisors API that require admin privileges
-    """
+    """Tests Hypervisors API that require admin privileges"""
 
     @classmethod
     def setup_clients(cls):

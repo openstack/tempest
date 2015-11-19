@@ -151,8 +151,7 @@ class QuotasAdminTestJSON(base.BaseV2ComputeAdminTest):
 
 
 class QuotaClassesAdminTestJSON(base.BaseV2ComputeAdminTest):
-    """Tests the os-quota-class-sets API to update default quotas.
-    """
+    """Tests the os-quota-class-sets API to update default quotas."""
 
     def setUp(self):
         # All test cases in this class need to externally lock on doing

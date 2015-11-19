@@ -21,9 +21,8 @@ CONF = config.CONF
 
 
 class NetworksTest(base.BaseV2ComputeAdminTest):
+    """Tests Nova Networks API that usually requires admin privileges.
 
-    """
-    Tests Nova Networks API that usually requires admin privileges.
     API docs:
     http://developer.openstack.org/api-ref-compute-v2-ext.html#ext-os-networks
     """

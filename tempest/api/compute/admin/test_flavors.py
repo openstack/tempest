@@ -23,10 +23,7 @@ from tempest import test
 
 
 class FlavorsAdminTestJSON(base.BaseV2ComputeAdminTest):
-
-    """
-    Tests Flavors API Create and Delete that require admin privileges
-    """
+    """Tests Flavors API Create and Delete that require admin privileges"""
 
     @classmethod
     def skip_checks(cls):

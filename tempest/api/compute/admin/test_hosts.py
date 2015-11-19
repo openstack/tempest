@@ -18,10 +18,7 @@ from tempest import test
 
 
 class HostsAdminTestJSON(base.BaseV2ComputeAdminTest):
-
-    """
-    Tests hosts API using admin privileges.
-    """
+    """Tests hosts API using admin privileges."""
 
     @classmethod
     def setup_clients(cls):

@@ -19,9 +19,8 @@ from tempest import test
 
 
 class FlavorsExtraSpecsTestJSON(base.BaseV2ComputeAdminTest):
+    """Tests Flavor Extra Spec API extension.
 
-    """
-    Tests Flavor Extra Spec API extension.
     SET, UNSET, UPDATE Flavor Extra specs require admin privileges.
     GET Flavor Extra specs can be performed even by without admin privileges.
     """

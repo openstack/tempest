@@ -23,9 +23,8 @@ from tempest import test
 
 
 class FlavorsAccessNegativeTestJSON(base.BaseV2ComputeAdminTest):
+    """Tests Flavor Access API extension.
 
-    """
-    Tests Flavor Access API extension.
     Add and remove Flavor Access require admin privileges.
     """
 

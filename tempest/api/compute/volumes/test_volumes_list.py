@@ -23,14 +23,11 @@ CONF = config.CONF
 
 
 class VolumesTestJSON(base.BaseV2ComputeTest):
-
-    """
-    This test creates a number of 1G volumes. To run successfully,
-    ensure that the backing file for the volume group that Nova uses
-    has space for at least 3 1G volumes!
-    If you are running a Devstack environment, ensure that the
-    VOLUME_BACKING_FILE_SIZE is atleast 4G in your localrc
-    """
+    # NOTE: This test creates a number of 1G volumes. To run successfully,
+    # ensure that the backing file for the volume group that Nova uses
+    # has space for at least 3 1G volumes!
+    # If you are running a Devstack environment, ensure that the
+    # VOLUME_BACKING_FILE_SIZE is atleast 4G in your localrc
 
     @classmethod
     def skip_checks(cls):

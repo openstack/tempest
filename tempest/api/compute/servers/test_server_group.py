@@ -21,8 +21,8 @@ from tempest import test
 
 
 class ServerGroupTestJSON(base.BaseV2ComputeTest):
-    """
-    These tests check for the server-group APIs
+    """These tests check for the server-group APIs
+
     They create/delete server-groups with different policies.
     policies = affinity/anti-affinity
     It also adds the tests for list and get details of server-groups
