@@ -17,7 +17,8 @@ from tempest.tests import base
 
 
 class HackingTestCase(base.TestCase):
-    """
+    """Test class for hacking rule
+
     This class tests the hacking checks in tempest.hacking.checks by passing
     strings to the check methods like the pep8/flake8 parser would. The parser
     loops over each line in the file and then passes the parameters to the
