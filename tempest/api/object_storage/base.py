@@ -90,10 +90,8 @@ class BaseObjectTest(tempest.test.BaseTestCase):
                 pass
 
     def assertHeaders(self, resp, target, method):
-        """
-        Common method to check the existence and the format of common response
-        headers
-        """
+        """Check the existence and the format of response headers"""
+
         self.assertThat(resp, custom_matchers.ExistsAllResponseHeaders(
                         target, method))
         self.assertThat(resp, custom_matchers.AreAllWellFormatted())

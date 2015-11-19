@@ -112,8 +112,8 @@ class BaseTelemetryTest(tempest.test.BaseTestCase):
         super(BaseTelemetryTest, cls).resource_cleanup()
 
     def await_samples(self, metric, query):
-        """
-        This method is to wait for sample to add it to database.
+        """This method is to wait for sample to add it to database.
+
         There are long time delays when using Postgresql (or Mysql)
         database as ceilometer backend
         """

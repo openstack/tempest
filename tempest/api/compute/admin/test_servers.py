@@ -22,10 +22,7 @@ from tempest import test
 
 
 class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
-
-    """
-    Tests Servers API using admin privileges
-    """
+    """Tests Servers API using admin privileges"""
 
     _host_key = 'OS-EXT-SRV-ATTR:host'
 

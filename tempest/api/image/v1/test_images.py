@@ -100,10 +100,7 @@ class CreateRegisterImagesTest(base.BaseV1ImageTest):
 
 
 class ListImagesTest(base.BaseV1ImageTest):
-
-    """
-    Here we test the listing of image information
-    """
+    """Here we test the listing of image information"""
 
     @classmethod
     def resource_setup(cls):
@@ -131,10 +128,8 @@ class ListImagesTest(base.BaseV1ImageTest):
 
     @classmethod
     def _create_remote_image(cls, name, container_format, disk_format):
-        """
-        Create a new remote image and return the ID of the newly-registered
-        image
-        """
+        """Create a new remote image and return newly-registered image-id"""
+
         name = 'New Remote Image %s' % name
         location = CONF.image.http_image
         image = cls.create_image(name=name,
@@ -148,9 +143,9 @@ class ListImagesTest(base.BaseV1ImageTest):
     @classmethod
     def _create_standard_image(cls, name, container_format,
                                disk_format, size):
-        """
-        Create a new standard image and return the ID of the newly-registered
-        image. Note that the size of the new image is a random number between
+        """Create a new standard image and return newly-registered image-id
+
+        Note that the size of the new image is a random number between
         1024 and 4096
         """
         image_file = moves.cStringIO(data_utils.random_bytes(size))
@@ -241,10 +236,8 @@ class UpdateImageMetaTest(base.BaseV1ImageTest):
     @classmethod
     def _create_standard_image(cls, name, container_format,
                                disk_format, size):
-        """
-        Create a new standard image and return the ID of the newly-registered
-        image.
-        """
+        """Create a new standard image and return newly-registered image-id"""
+
         image_file = moves.cStringIO(data_utils.random_bytes(size))
         name = 'New Standard Image %s' % name
         image = cls.create_image(name=name,

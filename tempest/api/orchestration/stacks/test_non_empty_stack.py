@@ -91,8 +91,7 @@ class StacksTestJSON(base.BaseOrchestrationTest):
 
     @test.idempotent_id('c951d55e-7cce-4c1f-83a0-bad735437fa6')
     def test_list_resources(self):
-        """Getting list of created resources for the stack should be possible.
-        """
+        """Get list of created resources for the stack should be possible."""
         resources = self.list_resources(self.stack_identifier)
         self.assertEqual({self.resource_name: self.resource_type}, resources)
 

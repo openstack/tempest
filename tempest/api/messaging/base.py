@@ -26,8 +26,7 @@ LOG = logging.getLogger(__name__)
 
 class BaseMessagingTest(test.BaseTestCase):
 
-    """
-    Base class for the Messaging tests that use the Tempest Zaqar REST client
+    """Base class for the Messaging (Zaqar) tests
 
     It is assumed that the following option is defined in the
     [service_available] section of etc/tempest.conf

@@ -21,8 +21,8 @@ import uuid
 
 
 class TelemetryAlarmingNegativeTest(base.BaseTelemetryTest):
-    """here we have negative tests for show_alarm, update_alarm, show_alarm_history
-       Tests
+    """Negative tests for show_alarm, update_alarm, show_alarm_history tests
+
         ** show non-existent alarm
         ** show the deleted alarm
         ** delete deleted alarm

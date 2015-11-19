@@ -26,10 +26,8 @@ CONF = config.CONF
 
 
 class BasicAdminOperationsImagesTest(base.BaseV2ImageAdminTest):
+    """Here we test admin operations of images"""
 
-    """
-    Here we test admin operations of images
-    """
     @testtools.skipUnless(CONF.image_feature_enabled.deactivate_image,
                           'deactivate-image is not available.')
     @test.idempotent_id('951ebe01-969f-4ea9-9898-8a3f1f442ab0')

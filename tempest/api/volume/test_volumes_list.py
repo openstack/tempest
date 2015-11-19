@@ -26,14 +26,11 @@ LOG = logging.getLogger(__name__)
 
 
 class VolumesV2ListTestJSON(base.BaseVolumeTest):
-
-    """
-    This test creates a number of 1G volumes. To run successfully,
-    ensure that the backing file for the volume group that Nova uses
-    has space for at least 3 1G volumes!
-    If you are running a Devstack environment, ensure that the
-    VOLUME_BACKING_FILE_SIZE is at least 4G in your localrc
-    """
+    # NOTE: This test creates a number of 1G volumes. To run successfully,
+    # ensure that the backing file for the volume group that Nova uses
+    # has space for at least 3 1G volumes!
+    # If you are running a Devstack environment, ensure that the
+    # VOLUME_BACKING_FILE_SIZE is at least 4G in your localrc
 
     VOLUME_FIELDS = ('id', 'name')
 
@@ -83,10 +80,7 @@ class VolumesV2ListTestJSON(base.BaseVolumeTest):
         super(VolumesV2ListTestJSON, cls).resource_cleanup()
 
     def _list_by_param_value_and_assert(self, params, with_detail=False):
-        """
-        Perform list or list_details action with given params
-        and validates result.
-        """
+        """list or list_details with given params and validates result"""
         if with_detail:
             fetched_vol_list = \
                 self.client.list_volumes(detail=True, params=params)['volumes']

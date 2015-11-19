@@ -18,8 +18,8 @@ from tempest import test
 
 
 class VolumesServicesV2TestJSON(base.BaseVolumeAdminTest):
-    """
-    Tests Volume Services API.
+    """Tests Volume Services API.
+
     volume service list requires admin privileges.
     """
 

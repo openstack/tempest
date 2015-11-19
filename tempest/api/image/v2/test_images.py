@@ -29,17 +29,15 @@ LOG = logging.getLogger(__name__)
 
 
 class BasicOperationsImagesTest(base.BaseV2ImageTest):
-    """
-    Here we test the basic operations of images
-    """
+    """Here we test the basic operations of images"""
 
     @test.attr(type='smoke')
     @test.idempotent_id('139b765e-7f3d-4b3d-8b37-3ca3876ee318')
     def test_register_upload_get_image_file(self):
+        """Here we test these functionalities
 
-        """
-        Here we test these functionalities - Register image,
-        upload the image file, get image and get image file api's
+        Register image, upload the image file, get image and get image
+        file api's
         """
 
         uuid = '00000000-1111-2222-3333-444455556666'
@@ -135,9 +133,7 @@ class BasicOperationsImagesTest(base.BaseV2ImageTest):
 
 
 class ListImagesTest(base.BaseV2ImageTest):
-    """
-    Here we test the listing of image information
-    """
+    """Here we test the listing of image information"""
 
     @classmethod
     def resource_setup(cls):
@@ -158,9 +154,9 @@ class ListImagesTest(base.BaseV2ImageTest):
 
     @classmethod
     def _create_standard_image(cls, container_format, disk_format):
-        """
-        Create a new standard image and return the ID of the newly-registered
-        image. Note that the size of the new image is a random number between
+        """Create a new standard image and return the newly-registered image-id
+
+        Note that the size of the new image is a random number between
         1024 and 4096
         """
         size = random.randint(1024, 4096)
@@ -176,9 +172,8 @@ class ListImagesTest(base.BaseV2ImageTest):
         return image_id
 
     def _list_by_param_value_and_assert(self, params):
-        """
-        Perform list action with given params and validates result.
-        """
+        """Perform list action with given params and validates result."""
+
         images_list = self.client.list_images(params=params)['images']
         # Validating params of fetched images
         for image in images_list:

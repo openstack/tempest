@@ -18,10 +18,7 @@ from tempest import test
 
 
 class AvailabilityZoneV2TestJSON(base.BaseVolumeTest):
-
-    """
-    Tests Availability Zone V2 API List
-    """
+    """Tests Availability Zone V2 API List"""
 
     @classmethod
     def setup_clients(cls):

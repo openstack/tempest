@@ -43,10 +43,8 @@ class VolumesV2SnapshotTestJSON(base.BaseVolumeTest):
         self.volumes_client.wait_for_volume_status(volume_id, 'available')
 
     def _list_by_param_values_and_assert(self, params, with_detail=False):
-        """
-        Perform list or list_details action with given params
-        and validates result.
-        """
+        """list or list_details with given params and validates result."""
+
         if with_detail:
             fetched_snap_list = self.snapshots_client.list_snapshots(
                 detail=True, params=params)['snapshots']

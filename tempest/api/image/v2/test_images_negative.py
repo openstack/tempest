@@ -24,8 +24,7 @@ from tempest import test
 
 class ImagesNegativeTest(base.BaseV2ImageTest):
 
-    """
-    here we have -ve tests for show_image and delete_image api
+    """here we have -ve tests for show_image and delete_image api
 
     Tests
         ** get non-existent image

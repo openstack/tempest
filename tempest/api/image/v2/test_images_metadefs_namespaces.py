@@ -20,9 +20,8 @@ from tempest_lib import exceptions as lib_exc
 
 
 class MetadataNamespacesTest(base.BaseV2ImageTest):
-    """
-    Here we will test the Metadata definition Namespaces basic functionality.
-    """
+    """Test the Metadata definition Namespaces basic functionality"""
+
     @test.idempotent_id('319b765e-7f3d-4b3d-8b37-3ca3876ee768')
     def test_basic_metadata_definition_namespaces(self):
         # get the available resource types and use one resource_type

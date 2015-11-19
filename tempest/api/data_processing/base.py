@@ -399,6 +399,7 @@ class BaseDataProcessingTest(tempest.test.BaseTestCase):
     @classmethod
     def _get_default_version(cls):
         """Returns the default plugin version used for testing.
+
         This is gathered separately from the plugin to allow
         the usage of plugin name in skip_checks. This method is
         rather invoked into resource_setup, which allows API calls
@@ -439,6 +440,7 @@ class BaseDataProcessingTest(tempest.test.BaseTestCase):
     @classmethod
     def get_cluster_template(cls, node_group_template_ids=None):
         """Returns a cluster template for the default plugin.
+
         node_group_template_defined contains the type and ID of pre-defined
         node group templates that have to be used in the cluster template
         (instead of dynamically defining them with 'node_processes').

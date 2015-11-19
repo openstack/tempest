@@ -92,8 +92,7 @@ class AccountQuotasTest(base.BaseObjectTest):
     @test.idempotent_id('63f51f9f-5f1d-4fc6-b5be-d454d70949d6')
     @test.requires_ext(extension='account_quotas', service='object')
     def test_admin_modify_quota(self):
-        """Test that the ResellerAdmin is able to modify and remove the quota
-        on a user's account.
+        """Test ResellerAdmin can modify/remove the quota on a user's account
 
         Using the account client, the test modifies the quota
         successively to:

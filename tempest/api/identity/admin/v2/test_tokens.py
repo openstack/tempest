@@ -52,8 +52,9 @@ class TokensTestJSON(base.BaseIdentityV2AdminTest):
 
     @test.idempotent_id('25ba82ee-8a32-4ceb-8f50-8b8c71e8765e')
     def test_rescope_token(self):
-        """An unscoped token can be requested, that token can be used to
-           request a scoped token.
+        """An unscoped token can be requested
+
+        That token can be used to request a scoped token.
         """
 
         # Create a user.
