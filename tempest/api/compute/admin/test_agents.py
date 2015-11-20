@@ -23,9 +23,7 @@ LOG = log.getLogger(__name__)
 
 
 class AgentsAdminTestJSON(base.BaseV2ComputeAdminTest):
-    """
-    Tests Agents API
-    """
+    """Tests Agents API"""
 
     @classmethod
     def setup_clients(cls):

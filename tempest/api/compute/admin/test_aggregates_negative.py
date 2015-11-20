@@ -22,10 +22,7 @@ from tempest import test
 
 
 class AggregatesAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
-
-    """
-    Tests Aggregates API that require admin privileges
-    """
+    """Tests Aggregates API that require admin privileges"""
 
     @classmethod
     def setup_clients(cls):

@@ -19,10 +19,7 @@ from tempest import test
 
 
 class ServicesAdminTestJSON(base.BaseV2ComputeAdminTest):
-
-    """
-    Tests Services API. List and Enable/Disable require admin privileges.
-    """
+    """Tests Services API. List and Enable/Disable require admin privileges."""
 
     @classmethod
     def setup_clients(cls):

@@ -28,10 +28,7 @@ CONF = config.CONF
 
 
 class ServersAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
-
-    """
-    Tests Servers API using admin privileges
-    """
+    """Tests Servers API using admin privileges"""
 
     @classmethod
     def setup_clients(cls):

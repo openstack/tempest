@@ -22,9 +22,8 @@ from tempest import test
 
 
 class FlavorsExtraSpecsNegativeTestJSON(base.BaseV2ComputeAdminTest):
+    """Negative Tests Flavor Extra Spec API extension.
 
-    """
-    Negative Tests Flavor Extra Spec API extension.
     SET, UNSET, UPDATE Flavor Extra specs require admin privileges.
     """
 

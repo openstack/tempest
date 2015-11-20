@@ -138,6 +138,7 @@ class BaseV2ComputeTest(tempest.test.BaseTestCase):
     @classmethod
     def server_check_teardown(cls):
         """Checks is the shared server clean enough for subsequent test.
+
            Method will delete the server when it's dirty.
            The setUp method is responsible for creating a new server.
            Exceptions raised in tearDown class are fails the test case,
