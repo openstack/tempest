@@ -91,10 +91,9 @@ class ExternalNetworksTestJSON(base.BaseAdminNetworkTest):
 
     @test.idempotent_id('82068503-2cf2-4ed4-b3be-ecb89432e4bb')
     def test_delete_external_networks_with_floating_ip(self):
-        """Verifies external network can be deleted while still holding
-        (unassociated) floating IPs
+        # Verifies external network can be deleted while still holding
+        # (unassociated) floating IPs
 
-        """
         # Set cls.client to admin to use base.create_subnet()
         client = self.admin_client
         body = self.admin_networks_client.create_network(

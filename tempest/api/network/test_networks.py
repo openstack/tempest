@@ -28,9 +28,7 @@ CONF = config.CONF
 
 
 class NetworksTest(base.BaseNetworkTest):
-    """
-    Tests the following operations in the Neutron API using the REST client for
-    Neutron:
+    """Tests the following operations in the Neutron API:
 
         create a network for a tenant
         list tenant's networks
@@ -95,9 +93,8 @@ class NetworksTest(base.BaseNetworkTest):
 
     @classmethod
     def _create_subnet_with_last_subnet_block(cls, network, ip_version):
-        """Derive last subnet CIDR block from tenant CIDR and
-           create the subnet with that derived CIDR
-        """
+        # Derive last subnet CIDR block from tenant CIDR and
+        # create the subnet with that derived CIDR
         if ip_version == 4:
             cidr = netaddr.IPNetwork(CONF.network.tenant_network_cidr)
             mask_bits = CONF.network.tenant_network_mask_bits
@@ -133,9 +130,8 @@ class NetworksTest(base.BaseNetworkTest):
         return [{'start': str(gateway + 2), 'end': str(gateway + 3)}]
 
     def subnet_dict(self, include_keys):
-        """Return a subnet dict which has include_keys and their corresponding
-           value from self._subnet_data
-        """
+        # Return a subnet dict which has include_keys and their corresponding
+        # value from self._subnet_data
         return dict((key, self._subnet_data[self._ip_version][key])
                     for key in include_keys)
 
@@ -405,9 +401,7 @@ class NetworksTest(base.BaseNetworkTest):
 
 
 class BulkNetworkOpsTestJSON(base.BaseNetworkTest):
-    """
-    Tests the following operations in the Neutron API using the REST client for
-    Neutron:
+    """Tests the following operations in the Neutron API:
 
         bulk network creation
         bulk subnet creation

@@ -24,9 +24,7 @@ CONF = config.CONF
 
 
 class FloatingIPTestJSON(base.BaseNetworkTest):
-    """
-    Tests the following operations in the Neutron API using the REST client for
-    Neutron:
+    """Tests the following operations in the Neutron API:
 
         Create a Floating IP
         Update a Floating IP

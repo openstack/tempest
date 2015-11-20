@@ -23,9 +23,7 @@ LOG = logging.getLogger(__name__)
 
 
 class MeteringTestJSON(base.BaseAdminNetworkTest):
-    """
-    Tests the following operations in the Neutron API using the REST client for
-    Neutron:
+    """Tests the following operations in the Neutron API:
 
         List, Show, Create, Delete Metering labels
         List, Show, Create, Delete Metering labels rules

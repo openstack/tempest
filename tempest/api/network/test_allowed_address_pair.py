@@ -23,9 +23,9 @@ CONF = config.CONF
 
 
 class AllowedAddressPairTestJSON(base.BaseNetworkTest):
-    """
-    Tests the Neutron Allowed Address Pair API extension using the Tempest
-    ReST client. The following API operations are tested with this extension:
+    """Tests the Neutron Allowed Address Pair API extension
+
+    The following API operations are tested with this extension:
 
         create port
         list ports
