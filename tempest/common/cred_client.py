@@ -24,10 +24,11 @@ LOG = logging.getLogger(__name__)
 
 @six.add_metaclass(abc.ABCMeta)
 class CredsClient(object):
-    """This class is a wrapper around the identity clients, to provide a
-     single interface for managing credentials in both v2 and v3 cases.
-     It's not bound to created credentials, only to a specific set of admin
-     credentials used for generating credentials.
+    """This class is a wrapper around the identity clients
+
+     to provide a single interface for managing credentials in both v2 and v3
+     cases. It's not bound to created credentials, only to a specific set of
+     admin credentials used for generating credentials.
     """
 
     def __init__(self, identity_client):

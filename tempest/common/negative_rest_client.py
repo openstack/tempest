@@ -22,9 +22,7 @@ CONF = config.CONF
 
 
 class NegativeRestClient(service_client.ServiceClient):
-    """
-    Version of RestClient that does not raise exceptions.
-    """
+    """Version of RestClient that does not raise exceptions."""
     def __init__(self, auth_provider, service,
                  build_interval=None, build_timeout=None,
                  disable_ssl_certificate_validation=None,
@@ -43,9 +41,7 @@ class NegativeRestClient(service_client.ServiceClient):
             trace_requests=trace_requests)
 
     def _get_region_and_endpoint_type(self, service):
-        """
-        Returns the region for a specific service
-        """
+        """Returns the region for a specific service"""
         service_region = None
         service_endpoint_type = None
         for cfgname in dir(CONF._config):

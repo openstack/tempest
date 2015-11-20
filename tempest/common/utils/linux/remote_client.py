@@ -57,6 +57,7 @@ class RemoteClient(object):
 
     def validate_authentication(self):
         """Validate ssh connection and authentication
+
            This method raises an Exception when the validation fails.
         """
         self.ssh_client.test_connection_auth()
