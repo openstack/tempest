@@ -9,5 +9,4 @@
 ./tempest/services/telemetry/json/telemetry_client.py
 ./tempest/services/volume/json/qos_client.py
 ./tempest/services/volume/json/backups_client.py
-./tempest/services/image/v2/json/image_client.py
 ./tempest/services/baremetal/base.py
