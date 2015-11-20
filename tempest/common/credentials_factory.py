@@ -118,11 +118,11 @@ class LegacyCredentialProvider(cred_provider.CredentialProvider):
         raise exceptions.InvalidConfiguration(msg)
 
     def is_role_available(self, role):
-        msg = "Credentials being specified through the config file can not be"\
-              " used with tests that specify using credentials by roles. "\
-              "Either exclude/skip the tests doing this or use either an "\
-              "test_accounts_file or dynamic credentials."
-        raise exceptions.InvalidConfiguration(msg)
+        # NOTE(andreaf) LegacyCredentialProvider does not support credentials
+        # by role, so returning always False.
+        # Test that rely on credentials by role should use this to skip
+        # when this is credential provider is used
+        return False
 
 
 # Return the right implementation of CredentialProvider based on config
