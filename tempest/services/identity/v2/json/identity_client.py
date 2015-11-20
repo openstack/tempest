@@ -85,7 +85,7 @@ class IdentityClient(service_client.ServiceClient):
         body = json.loads(body)
         return service_client.ResponseBody(resp, body)
 
-    def remove_user_role(self, tenant_id, user_id, role_id):
+    def delete_user_role(self, tenant_id, user_id, role_id):
         """Removes a role assignment for a user on a tenant."""
         resp, body = self.delete('/tenants/%s/users/%s/roles/OS-KSADM/%s' %
                                  (tenant_id, user_id, role_id))

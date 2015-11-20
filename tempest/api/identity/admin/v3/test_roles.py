@@ -102,7 +102,7 @@ class RolesV3TestJSON(base.BaseIdentityV3AdminTest):
         self._list_assertions(roles, self.fetched_role_ids,
                               self.role['id'])
 
-        self.client.revoke_role_from_user_on_project(
+        self.client.delete_role_from_user_on_project(
             self.project['id'], self.user_body['id'], self.role['id'])
 
     @test.idempotent_id('6c9a2940-3625-43a3-ac02-5dcec62ef3bd')
@@ -119,7 +119,7 @@ class RolesV3TestJSON(base.BaseIdentityV3AdminTest):
         self._list_assertions(roles, self.fetched_role_ids,
                               self.role['id'])
 
-        self.client.revoke_role_from_user_on_domain(
+        self.client.delete_role_from_user_on_domain(
             self.domain['id'], self.user_body['id'], self.role['id'])
 
     @test.idempotent_id('cbf11737-1904-4690-9613-97bcbb3df1c4')
@@ -149,7 +149,7 @@ class RolesV3TestJSON(base.BaseIdentityV3AdminTest):
         self.assertEqual(len(roles), 1)
         self.assertEqual(roles[0]['id'], self.role['id'])
         # Revoke role to group on project
-        self.client.revoke_role_from_group_on_project(
+        self.client.delete_role_from_group_on_project(
             self.project['id'], self.group_body['id'], self.role['id'])
 
     @test.idempotent_id('4bf8a70b-e785-413a-ad53-9f91ce02faa7')
@@ -166,7 +166,7 @@ class RolesV3TestJSON(base.BaseIdentityV3AdminTest):
         self._list_assertions(roles, self.fetched_role_ids,
                               self.role['id'])
 
-        self.client.revoke_role_from_group_on_domain(
+        self.client.delete_role_from_group_on_domain(
             self.domain['id'], self.group_body['id'], self.role['id'])
 
     @test.idempotent_id('f5654bcc-08c4-4f71-88fe-05d64e06de94')

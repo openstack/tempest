@@ -408,14 +408,14 @@ class IdentityV3Client(service_client.ServiceClient):
         body = json.loads(body)
         return service_client.ResponseBody(resp, body)
 
-    def revoke_role_from_user_on_project(self, project_id, user_id, role_id):
+    def delete_role_from_user_on_project(self, project_id, user_id, role_id):
         """Delete role of a user on a project."""
         resp, body = self.delete('projects/%s/users/%s/roles/%s' %
                                  (project_id, user_id, role_id))
         self.expected_success(204, resp.status)
         return service_client.ResponseBody(resp, body)
 
-    def revoke_role_from_user_on_domain(self, domain_id, user_id, role_id):
+    def delete_role_from_user_on_domain(self, domain_id, user_id, role_id):
         """Delete role of a user on a domain."""
         resp, body = self.delete('domains/%s/users/%s/roles/%s' %
                                  (domain_id, user_id, role_id))
@@ -452,14 +452,14 @@ class IdentityV3Client(service_client.ServiceClient):
         body = json.loads(body)
         return service_client.ResponseBody(resp, body)
 
-    def revoke_role_from_group_on_project(self, project_id, group_id, role_id):
+    def delete_role_from_group_on_project(self, project_id, group_id, role_id):
         """Delete role of a user on a project."""
         resp, body = self.delete('projects/%s/groups/%s/roles/%s' %
                                  (project_id, group_id, role_id))
         self.expected_success(204, resp.status)
         return service_client.ResponseBody(resp, body)
 
-    def revoke_role_from_group_on_domain(self, domain_id, group_id, role_id):
+    def delete_role_from_group_on_domain(self, domain_id, group_id, role_id):
         """Delete role of a user on a domain."""
         resp, body = self.delete('domains/%s/groups/%s/roles/%s' %
                                  (domain_id, group_id, role_id))
