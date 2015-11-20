@@ -152,11 +152,11 @@ class ServersClient(service_client.ServiceClient):
         return self.action(server_id, 'changePassword',
                            adminPass=adminPass)
 
-    def get_password(self, server_id):
+    def show_password(self, server_id):
         resp, body = self.get("servers/%s/os-server-password" %
                               server_id)
         body = json.loads(body)
-        self.validate_response(schema.get_password, resp, body)
+        self.validate_response(schema.show_password, resp, body)
         return service_client.ResponseBody(resp, body)
 
     def delete_password(self, server_id):
@@ -240,10 +240,10 @@ class ServersClient(service_client.ServiceClient):
                                resp, body)
         return service_client.ResponseBody(resp, body)
 
-    def get_server_metadata_item(self, server_id, key):
+    def show_server_metadata_item(self, server_id, key):
         resp, body = self.get("servers/%s/metadata/%s" % (server_id, key))
         body = json.loads(body)
-        self.validate_response(schema.set_get_server_metadata_item,
+        self.validate_response(schema.set_show_server_metadata_item,
                                resp, body)
         return service_client.ResponseBody(resp, body)
 
@@ -252,7 +252,7 @@ class ServersClient(service_client.ServiceClient):
         resp, body = self.put('servers/%s/metadata/%s' % (server_id, key),
                               post_body)
         body = json.loads(body)
-        self.validate_response(schema.set_get_server_metadata_item,
+        self.validate_response(schema.set_show_server_metadata_item,
                                resp, body)
         return service_client.ResponseBody(resp, body)
 
@@ -285,12 +285,12 @@ class ServersClient(service_client.ServiceClient):
         self.validate_response(schema.detach_volume, resp, body)
         return service_client.ResponseBody(resp, body)
 
-    def get_volume_attachment(self, server_id, attach_id):
+    def show_volume_attachment(self, server_id, attach_id):
         """Return details about the given volume attachment."""
         resp, body = self.get('servers/%s/os-volume_attachments/%s' % (
             server_id, attach_id))
         body = json.loads(body)
-        self.validate_response(schema.get_volume_attachment, resp, body)
+        self.validate_response(schema.show_volume_attachment, resp, body)
         return service_client.ResponseBody(resp, body)
 
     def list_volume_attachments(self, server_id):
@@ -387,7 +387,7 @@ class ServersClient(service_client.ServiceClient):
         """Unrescue the provided server."""
         return self.action(server_id, 'unrescue')
 
-    def get_server_diagnostics(self, server_id):
+    def show_server_diagnostics(self, server_id):
         """Get the usage data for a server."""
         resp, body = self.get("servers/%s/diagnostics" % server_id)
         return service_client.ResponseBody(resp, json.loads(body))
@@ -400,12 +400,12 @@ class ServersClient(service_client.ServiceClient):
         self.validate_response(schema.list_instance_actions, resp, body)
         return service_client.ResponseBody(resp, body)
 
-    def get_instance_action(self, server_id, request_id):
+    def show_instance_action(self, server_id, request_id):
         """Returns the action details of the provided server."""
         resp, body = self.get("servers/%s/os-instance-actions/%s" %
                               (server_id, request_id))
         body = json.loads(body)
-        self.validate_response(schema.get_instance_action, resp, body)
+        self.validate_response(schema.show_instance_action, resp, body)
         return service_client.ResponseBody(resp, body)
 
     def force_delete_server(self, server_id, **kwargs):

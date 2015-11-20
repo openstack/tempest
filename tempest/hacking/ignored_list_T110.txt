@@ -1,4 +1,3 @@
-./tempest/services/compute/json/servers_client.py
 ./tempest/services/database/json/flavors_client.py
 ./tempest/services/identity/v3/json/credentials_client.py
 ./tempest/services/identity/v3/json/identity_client.py

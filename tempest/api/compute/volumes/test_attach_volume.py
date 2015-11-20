@@ -144,7 +144,7 @@ class AttachVolumeTestJSON(base.BaseV2ComputeTest):
         self.assertIn(self.attachment, body)
 
         # Get Volume attachment of the server
-        body = self.servers_client.get_volume_attachment(
+        body = self.servers_client.show_volume_attachment(
             self.server['id'],
             self.attachment['id'])['volumeAttachment']
         self.assertEqual(self.server['id'], body['serverId'])
