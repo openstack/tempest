@@ -36,6 +36,8 @@ from tempest_lib.services.compute.hosts_client import HostsClient
 from tempest_lib.services.compute.hypervisor_client import \
     HypervisorClient
 from tempest_lib.services.compute.images_client import ImagesClient
+from tempest_lib.services.compute.instance_usage_audit_log_client import \
+    InstanceUsagesAuditLogClient
 from tempest_lib.services.identity.v2.token_client import TokenClient
 from tempest_lib.services.identity.v3.token_client import V3TokenClient
 
@@ -48,8 +50,6 @@ from tempest.services.baremetal.v1.json.baremetal_client import \
 from tempest.services import botoclients
 from tempest.services.compute.json.floating_ips_client import \
     FloatingIPsClient as ComputeFloatingIPsClient
-from tempest.services.compute.json.instance_usage_audit_log_client import \
-    InstanceUsagesAuditLogClient
 from tempest.services.compute.json.interfaces_client import \
     InterfacesClient
 from tempest.services.compute.json.keypairs_client import KeyPairsClient
