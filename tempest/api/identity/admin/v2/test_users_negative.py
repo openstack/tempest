@@ -247,4 +247,4 @@ class UsersNegativeTestJSON(base.BaseIdentityV2AdminTest):
         # List the users with invalid tenant id
         for invalid in invalid_id:
             self.assertRaises(lib_exc.NotFound,
-                              self.client.list_tenant_users, invalid)
+                              self.tenants_client.list_tenant_users, invalid)

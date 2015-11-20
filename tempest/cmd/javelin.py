@@ -128,6 +128,7 @@ from tempest.services.compute.json import floating_ips_client
 from tempest.services.compute.json import security_group_rules_client
 from tempest.services.compute.json import servers_client
 from tempest.services.identity.v2.json import identity_client
+from tempest.services.identity.v2.json import tenants_client
 from tempest.services.image.v2.json import images_client
 from tempest.services.network.json import network_client
 from tempest.services.network.json import subnets_client
@@ -194,6 +195,12 @@ class OSClient(object):
         _auth = auth.KeystoneV2AuthProvider(
             _creds, CONF.identity.uri, **auth_provider_params)
         self.identity = identity_client.IdentityClient(
+            _auth,
+            CONF.identity.catalog_type,
+            CONF.identity.region,
+            endpoint_type='adminURL',
+            **default_params_with_timeout_values)
+        self.tenants = tenants_client.TenantsClient(
             _auth,
             CONF.identity.catalog_type,
             CONF.identity.region,
@@ -291,11 +298,11 @@ def create_tenants(tenants):
     Don't create the tenants if they already exist.
     """
     admin = keystone_admin()
-    body = admin.identity.list_tenants()['tenants']
+    body = admin.tenants.list_tenants()['tenants']
     existing = [x['name'] for x in body]
     for tenant in tenants:
         if tenant not in existing:
-            admin.identity.create_tenant(tenant)['tenant']
+            admin.tenants.create_tenant(tenant)['tenant']
         else:
             LOG.warn("Tenant '%s' already exists in this environment" % tenant)
 
@@ -303,8 +310,8 @@ def create_tenants(tenants):
 def destroy_tenants(tenants):
     admin = keystone_admin()
     for tenant in tenants:
-        tenant_id = identity.get_tenant_by_name(admin.identity, tenant)['id']
-        admin.identity.delete_tenant(tenant_id)
+        tenant_id = identity.get_tenant_by_name(admin.tenant, tenant)['id']
+        admin.tenants.delete_tenant(tenant_id)
 
 ##############
 #
@@ -355,7 +362,7 @@ def create_users(users):
     admin = keystone_admin()
     for u in users:
         try:
-            tenant = identity.get_tenant_by_name(admin.identity, u['tenant'])
+            tenant = identity.get_tenant_by_name(admin.tenants, u['tenant'])
         except lib_exc.NotFound:
             LOG.error("Tenant: %s - not found" % u['tenant'])
             continue
@@ -374,7 +381,7 @@ def create_users(users):
 def destroy_users(users):
     admin = keystone_admin()
     for user in users:
-        tenant_id = identity.get_tenant_by_name(admin.identity,
+        tenant_id = identity.get_tenant_by_name(admin.tenants,
                                                 user['tenant'])['id']
         user_id = identity.get_user_by_username(admin.identity,
                                                 tenant_id, user['name'])['id']
@@ -386,7 +393,7 @@ def collect_users(users):
     LOG.info("Collecting users")
     admin = keystone_admin()
     for u in users:
-        tenant = identity.get_tenant_by_name(admin.identity, u['tenant'])
+        tenant = identity.get_tenant_by_name(admin.tenants, u['tenant'])
         u['tenant_id'] = tenant['id']
         USERS[u['name']] = u
         body = identity.get_user_by_username(admin.identity,

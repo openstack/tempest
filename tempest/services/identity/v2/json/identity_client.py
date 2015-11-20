@@ -44,24 +44,6 @@ class IdentityClient(service_client.ServiceClient):
         body = json.loads(body)
         return service_client.ResponseBody(resp, body)
 
-    def create_tenant(self, name, **kwargs):
-        """Create a tenant
-
-        name (required): New tenant name
-        description: Description of new tenant (default is none)
-        enabled <true|false>: Initial tenant status (default is true)
-        """
-        post_body = {
-            'name': name,
-            'description': kwargs.get('description', ''),
-            'enabled': kwargs.get('enabled', True),
-        }
-        post_body = json.dumps({'tenant': post_body})
-        resp, body = self.post('tenants', post_body)
-        self.expected_success(200, resp.status)
-        body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
-
     def delete_role(self, role_id):
         """Delete a role."""
         resp, body = self.delete('OS-KSADM/roles/%s' % str(role_id))
@@ -91,47 +73,9 @@ class IdentityClient(service_client.ServiceClient):
         self.expected_success(204, resp.status)
         return service_client.ResponseBody(resp, body)
 
-    def delete_tenant(self, tenant_id):
-        """Delete a tenant."""
-        resp, body = self.delete('tenants/%s' % str(tenant_id))
-        self.expected_success(204, resp.status)
-        return service_client.ResponseBody(resp, body)
-
-    def show_tenant(self, tenant_id):
-        """Get tenant details."""
-        resp, body = self.get('tenants/%s' % str(tenant_id))
-        self.expected_success(200, resp.status)
-        body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
-
     def list_roles(self):
         """Returns roles."""
         resp, body = self.get('OS-KSADM/roles')
-        self.expected_success(200, resp.status)
-        body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
-
-    def list_tenants(self):
-        """Returns tenants."""
-        resp, body = self.get('tenants')
-        self.expected_success(200, resp.status)
-        body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
-
-    def update_tenant(self, tenant_id, **kwargs):
-        """Updates a tenant."""
-        body = self.show_tenant(tenant_id)['tenant']
-        name = kwargs.get('name', body['name'])
-        desc = kwargs.get('description', body['description'])
-        en = kwargs.get('enabled', body['enabled'])
-        post_body = {
-            'id': tenant_id,
-            'name': name,
-            'description': desc,
-            'enabled': en,
-        }
-        post_body = json.dumps({'tenant': post_body})
-        resp, body = self.post('tenants/%s' % tenant_id, post_body)
         self.expected_success(200, resp.status)
         body = json.loads(body)
         return service_client.ResponseBody(resp, body)
@@ -203,13 +147,6 @@ class IdentityClient(service_client.ServiceClient):
         """Delete a token."""
         resp, body = self.delete("tokens/%s" % token_id)
         self.expected_success(204, resp.status)
-        return service_client.ResponseBody(resp, body)
-
-    def list_tenant_users(self, tenant_id):
-        """List users for a Tenant."""
-        resp, body = self.get('/tenants/%s/users' % tenant_id)
-        self.expected_success(200, resp.status)
-        body = json.loads(body)
         return service_client.ResponseBody(resp, body)
 
     def create_service(self, name, type, **kwargs):

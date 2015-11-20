@@ -35,7 +35,7 @@ class BaseIdentityTest(tempest.test.BaseTestCase):
     @classmethod
     def disable_tenant(cls, tenant_name):
         tenant = cls.get_tenant_by_name(tenant_name)
-        cls.client.update_tenant(tenant['id'], enabled=False)
+        cls.tenants_client.update_tenant(tenant['id'], enabled=False)
 
     @classmethod
     def get_user_by_name(cls, name):
@@ -47,7 +47,7 @@ class BaseIdentityTest(tempest.test.BaseTestCase):
     @classmethod
     def get_tenant_by_name(cls, name):
         try:
-            tenants = cls.client.list_tenants()['tenants']
+            tenants = cls.tenants_client.list_tenants()['tenants']
         except AttributeError:
             tenants = cls.client.list_projects()['projects']
         tenant = [t for t in tenants if t['name'] == name]
@@ -75,6 +75,7 @@ class BaseIdentityV2Test(BaseIdentityTest):
         super(BaseIdentityV2Test, cls).setup_clients()
         cls.non_admin_client = cls.os.identity_public_client
         cls.non_admin_token_client = cls.os.token_client
+        cls.non_admin_tenants_client = cls.os.tenants_public_client
 
     @classmethod
     def resource_setup(cls):
@@ -95,11 +96,13 @@ class BaseIdentityV2AdminTest(BaseIdentityV2Test):
         cls.client = cls.os_adm.identity_client
         cls.non_admin_client = cls.os.identity_client
         cls.token_client = cls.os_adm.token_client
+        cls.tenants_client = cls.os_adm.tenants_client
+        cls.non_admin_tenants_client = cls.os.tenants_client
 
     @classmethod
     def resource_setup(cls):
         super(BaseIdentityV2AdminTest, cls).resource_setup()
-        cls.data = DataGenerator(cls.client)
+        cls.data = DataGenerator(cls.client, cls.tenants_client)
 
     @classmethod
     def resource_cleanup(cls):
@@ -184,8 +187,10 @@ class BaseIdentityV3AdminTest(BaseIdentityV3Test):
 
 class DataGenerator(object):
 
-        def __init__(self, client):
+        def __init__(self, client, tenants_client=None):
             self.client = client
+            # TODO(dmellado) split Datagenerator for v2 and v3
+            self.tenants_client = tenants_client
             self.users = []
             self.tenants = []
             self.roles = []
@@ -219,7 +224,7 @@ class DataGenerator(object):
             """Set up a test tenant."""
             self.test_tenant = data_utils.rand_name('test_tenant')
             self.test_description = data_utils.rand_name('desc')
-            self.tenant = self.client.create_tenant(
+            self.tenant = self.tenants_client.create_tenant(
                 name=self.test_tenant,
                 description=self.test_description)['tenant']
             self.tenants.append(self.tenant)
@@ -287,7 +292,7 @@ class DataGenerator(object):
             for user in self.users:
                 self._try_wrapper(self.client.delete_user, user)
             for tenant in self.tenants:
-                self._try_wrapper(self.client.delete_tenant, tenant)
+                self._try_wrapper(self.tenants_client.delete_tenant, tenant)
             for role in self.roles:
                 self._try_wrapper(self.client.delete_role, role)
             for v3_user in self.v3_users:

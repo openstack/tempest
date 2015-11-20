@@ -436,15 +436,18 @@ class BaseTestCase(testtools.testcase.WithAttributes,
         """
         if CONF.identity.auth_version == 'v2':
             client = self.os_admin.identity_client
+            project_client = self.os_admin.tenants_client
         else:
             client = self.os_admin.identity_v3_client
+            project_client = None
 
         try:
             domain = client.auth_provider.credentials.project_domain_name
         except AttributeError:
             domain = 'Default'
 
-        return cred_client.get_creds_client(client, domain)
+        return cred_client.get_creds_client(client, project_client,
+                                            project_domain_name=domain)
 
     @classmethod
     def get_identity_version(cls):
