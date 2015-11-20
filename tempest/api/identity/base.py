@@ -170,6 +170,11 @@ class BaseIdentityV3AdminTest(BaseIdentityV3Test):
         if len(role) > 0:
             return role[0]
 
+    @classmethod
+    def disable_user(cls, user_name):
+        user = cls.get_user_by_name(user_name)
+        cls.client.update_user(user['id'], user_name, enabled=False)
+
     def delete_domain(self, domain_id):
         # NOTE(mpavlase) It is necessary to disable the domain before deleting
         # otherwise it raises Forbidden exception
