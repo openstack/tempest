@@ -37,7 +37,7 @@ class GroupsClient(service_client.ServiceClient):
         body = json.loads(body)
         return service_client.ResponseBody(resp, body)
 
-    def get_group(self, group_id):
+    def show_group(self, group_id):
         """Get group details."""
         resp, body = self.get('groups/%s' % group_id)
         self.expected_success(200, resp.status)
