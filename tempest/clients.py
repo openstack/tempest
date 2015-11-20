@@ -91,16 +91,18 @@ from tempest.services.database.json.versions_client import \
 from tempest.services.identity.v2.json.identity_client import \
     IdentityClient
 from tempest.services.identity.v3.json.credentials_client import \
-    CredentialsClient
+    CredentialsClient as CredentialsV3Client
 from tempest.services.identity.v3.json.endpoints_client import \
-    EndPointClient
-from tempest.services.identity.v3.json.groups_client import GroupsClient
-from tempest.services.identity.v3.json.identity_client import \
-    IdentityV3Client
-from tempest.services.identity.v3.json.policy_client import PolicyClient
-from tempest.services.identity.v3.json.region_client import RegionClient
+    EndPointClient as EndPointV3Client
+from tempest.services.identity.v3.json.groups_client import \
+    GroupsClient as GroupsV3Client
+from tempest.services.identity.v3.json.identity_client import IdentityV3Client
+from tempest.services.identity.v3.json.policy_client import \
+    PolicyClient as PolicyV3Client
+from tempest.services.identity.v3.json.region_client import \
+    RegionClient as RegionV3Client
 from tempest.services.identity.v3.json.service_client import \
-    ServiceClient
+    ServiceClient as ServiceV3Client
 from tempest.services.image.v1.json.image_client import ImageClient
 from tempest.services.image.v2.json.image_client import ImageClientV2
 from tempest.services.messaging.json.messaging_client import \
@@ -399,17 +401,17 @@ class Manager(manager.Manager):
                                                      **params_v2_public)
         params_v3 = params.copy()
         params_v3['endpoint_type'] = CONF.identity.v3_endpoint_type
-        # Client uses the endpoint type of Keystone API v3
+        # Clients below use the endpoint type of Keystone API v3
         self.identity_v3_client = IdentityV3Client(self.auth_provider,
                                                    **params_v3)
-        self.endpoints_client = EndPointClient(self.auth_provider,
-                                               **params)
-        self.service_client = ServiceClient(self.auth_provider, **params)
-        self.policy_client = PolicyClient(self.auth_provider, **params)
-        self.region_client = RegionClient(self.auth_provider, **params)
-        self.credentials_client = CredentialsClient(self.auth_provider,
-                                                    **params)
-        self.groups_client = GroupsClient(self.auth_provider, **params_v3)
+        self.endpoints_client = EndPointV3Client(self.auth_provider,
+                                                 **params_v3)
+        self.service_client = ServiceV3Client(self.auth_provider, **params_v3)
+        self.policy_client = PolicyV3Client(self.auth_provider, **params_v3)
+        self.region_client = RegionV3Client(self.auth_provider, **params_v3)
+        self.credentials_client = CredentialsV3Client(self.auth_provider,
+                                                      **params_v3)
+        self.groups_client = GroupsV3Client(self.auth_provider, **params_v3)
         # Token clients do not use the catalog. They only need default_params.
         # They read auth_url, so they should only be set if the corresponding
         # API version is marked as enabled
