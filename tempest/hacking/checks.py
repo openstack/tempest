@@ -146,27 +146,37 @@ def no_testtools_skip_decorator(logical_line):
                "decorators.skip_because from tempest-lib")
 
 
+def _common_service_clients_check(logical_line, physical_line, filename,
+                                  ignored_list_file=None):
+    if 'tempest/services/' not in filename:
+        return False
+
+    if ignored_list_file is not None:
+        ignored_list = []
+        with open('tempest/hacking/' + ignored_list_file) as f:
+            for line in f:
+                ignored_list.append(line.strip())
+
+        if filename in ignored_list:
+            return False
+
+    if not METHOD.match(physical_line):
+        return False
+
+    if pep8.noqa(physical_line):
+        return False
+
+    return True
+
+
 def get_resources_on_service_clients(logical_line, physical_line, filename,
                                      line_number, lines):
     """Check that service client names of GET should be consistent
 
     T110
     """
-    if 'tempest/services/' not in filename:
-        return
-
-    ignored_list = []
-    with open('tempest/hacking/ignored_list_T110.txt') as f:
-        for line in f:
-            ignored_list.append(line.strip())
-
-    if filename in ignored_list:
-        return
-
-    if not METHOD.match(physical_line):
-        return
-
-    if pep8.noqa(physical_line):
+    if not _common_service_clients_check(logical_line, physical_line,
+                                         filename, 'ignored_list_T110.txt'):
         return
 
     for line in lines[line_number:]:
