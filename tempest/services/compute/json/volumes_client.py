@@ -46,8 +46,8 @@ class VolumesClient(service_client.ServiceClient):
         return service_client.ResponseBody(resp, body)
 
     def create_volume(self, **kwargs):
-        """
-        Creates a new Volume.
+        """Creates a new Volume.
+
         size(Required): Size of volume in GB.
         Following optional keyword arguments are accepted:
         display_name: Optional Volume Name.

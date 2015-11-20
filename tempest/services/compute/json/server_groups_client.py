@@ -23,8 +23,8 @@ from tempest.common import service_client
 class ServerGroupsClient(service_client.ServiceClient):
 
     def create_server_group(self, **kwargs):
-        """
-        Create the server group
+        """Create the server group
+
         name : Name of the server-group
         policies : List of the policies - affinity/anti-affinity)
         """

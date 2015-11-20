@@ -17,8 +17,7 @@ import testtools
 
 
 class TempestException(Exception):
-    """
-    Base Tempest Exception
+    """Base Tempest Exception
 
     To correctly use this class, inherit from it and define
     a 'message' property. That message will get printf'd

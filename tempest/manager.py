@@ -23,16 +23,15 @@ CONF = config.CONF
 
 
 class Manager(object):
-
-    """
-    Base manager class
+    """Base manager class
 
     Manager objects are responsible for providing a configuration object
     and a client object for a test case to use in performing actions.
     """
 
     def __init__(self, credentials):
-        """
+        """Initialization of base manager class
+
         Credentials to be used within the various client classes managed by the
         Manager object must be defined.
 

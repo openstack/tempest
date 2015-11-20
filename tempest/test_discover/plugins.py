@@ -25,14 +25,14 @@ LOG = logging.getLogger(__name__)
 
 @six.add_metaclass(abc.ABCMeta)
 class TempestPlugin(object):
-    """A TempestPlugin class provides the basic hooks for an external
-    plugin to provide tempest the necessary information to run the plugin.
+    """Provide basic hooks for an external plugin
+
+    To provide tempest the necessary information to run the plugin.
     """
 
     @abc.abstractmethod
     def load_tests(self):
-        """Method to return the information necessary to load the tests in the
-        plugin.
+        """Return the information necessary to load the tests in the plugin.
 
         :return: a tuple with the first value being the test_dir and the second
                  being the top_level
@@ -42,9 +42,10 @@ class TempestPlugin(object):
 
     @abc.abstractmethod
     def register_opts(self, conf):
-        """Method to add additional configuration options to tempest. This
-        method will be run for the plugin during the register_opts() function
-        in tempest.config
+        """Add additional configuration options to tempest.
+
+        This method will be run for the plugin during the register_opts()
+        function in tempest.config
 
         :param ConfigOpts conf: The conf object that can be used to register
             additional options on.
@@ -53,7 +54,7 @@ class TempestPlugin(object):
 
     @abc.abstractmethod
     def get_opt_lists(self):
-        """Method to get a list of options for sample config generation
+        """Get a list of options for sample config generation
 
         :return option_list: A list of tuples with the group name and options
                              in that group.

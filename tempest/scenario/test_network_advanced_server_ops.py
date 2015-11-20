@@ -27,10 +27,7 @@ LOG = logging.getLogger(__name__)
 
 
 class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
-
-    """
-    This test case checks VM connectivity after some advanced
-    instance operations executed:
+    """Check VM connectivity after some advanced instance operations executed:
 
      * Stop/Start an instance
      * Reboot an instance

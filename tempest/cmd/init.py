@@ -35,7 +35,9 @@ group_regex=([^\.]*\.)*
 
 
 def get_tempest_default_config_dir():
-    """Returns the correct default config dir to support both cases of
+    """Get default config directory of tempest
+
+    Returns the correct default config dir to support both cases of
     tempest being or not installed in a virtualenv.
     Cases considered:
     - no virtual env, python2: real_prefix and base_prefix not set

@@ -22,8 +22,8 @@ from tempest.common import service_client
 class SecurityGroupRulesClient(service_client.ServiceClient):
 
     def create_security_group_rule(self, **kwargs):
-        """
-        Creating a new security group rules.
+        """Creating a new security group rules.
+
         parent_group_id :ID of Security group
         ip_protocol : ip_proto (icmp, tcp, udp).
         from_port: Port at start of range.
