@@ -26,8 +26,7 @@ class TestCase(base.BaseTestCase):
         self.stubs = mox_fixture.stubs
 
     def patch(self, target, **kwargs):
-        """
-        Returns a started `mock.patch` object for the supplied target.
+        """Returns a started `mock.patch` object for the supplied target.
 
         The caller may then call the returned patcher to create a mock object.
 

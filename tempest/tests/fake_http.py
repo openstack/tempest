@@ -50,7 +50,8 @@ class fake_httplib2(object):
 class fake_httplib(object):
     def __init__(self, headers, body=None,
                  version=1.0, status=200, reason="Ok"):
-        """
+        """Initialization of fake httplib
+
         :param headers: dict representing HTTP response headers
         :param body: file-like object
         :param version: HTTP Version

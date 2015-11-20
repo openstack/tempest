@@ -25,8 +25,7 @@ LOG = logging.getLogger(__name__)
 
 
 class StressFrameworkTest(base.TestCase):
-    """Basic test for the stress test framework.
-    """
+    """Basic test for the stress test framework."""
 
     def _cmd(self, cmd, param):
         """Executes specified command."""
