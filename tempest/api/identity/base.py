@@ -120,11 +120,6 @@ class BaseIdentityV3Test(BaseIdentityTest):
         super(BaseIdentityV3Test, cls).setup_clients()
         cls.non_admin_client = cls.os.identity_v3_client
         cls.non_admin_token = cls.os.token_v3_client
-        cls.non_admin_endpoints_client = cls.os.endpoints_client
-        cls.non_admin_region_client = cls.os.region_client
-        cls.non_admin_service_client = cls.os.service_client
-        cls.non_admin_policy_client = cls.os.policy_client
-        cls.non_admin_creds_client = cls.os.credentials_client
 
     @classmethod
     def resource_cleanup(cls):
