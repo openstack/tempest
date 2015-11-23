@@ -29,6 +29,7 @@ class FloatingIPAdminTestJSON(base.BaseAdminNetworkTest):
     def setup_clients(cls):
         super(FloatingIPAdminTestJSON, cls).setup_clients()
         cls.alt_client = cls.alt_manager.network_client
+        cls.alt_floating_ips_client = cls.alt_manager.floating_ips_client
 
     @classmethod
     def resource_setup(cls):
@@ -45,18 +46,18 @@ class FloatingIPAdminTestJSON(base.BaseAdminNetworkTest):
     @test.idempotent_id('64f2100b-5471-4ded-b46c-ddeeeb4f231b')
     def test_list_floating_ips_from_admin_and_nonadmin(self):
         # Create floating ip from admin user
-        floating_ip_admin = self.admin_client.create_floatingip(
+        floating_ip_admin = self.admin_floating_ips_client.create_floatingip(
             floating_network_id=self.ext_net_id)
-        self.addCleanup(self.admin_client.delete_floatingip,
+        self.addCleanup(self.admin_floating_ips_client.delete_floatingip,
                         floating_ip_admin['floatingip']['id'])
         # Create floating ip from alt user
-        body = self.alt_client.create_floatingip(
+        body = self.alt_floating_ips_client.create_floatingip(
             floating_network_id=self.ext_net_id)
         floating_ip_alt = body['floatingip']
-        self.addCleanup(self.alt_client.delete_floatingip,
+        self.addCleanup(self.alt_floating_ips_client.delete_floatingip,
                         floating_ip_alt['id'])
         # List floating ips from admin
-        body = self.admin_client.list_floatingips()
+        body = self.admin_floating_ips_client.list_floatingips()
         floating_ip_ids_admin = [f['id'] for f in body['floatingips']]
         # Check that admin sees all floating ips
         self.assertIn(self.floating_ip['id'], floating_ip_ids_admin)
@@ -64,7 +65,7 @@ class FloatingIPAdminTestJSON(base.BaseAdminNetworkTest):
                       floating_ip_ids_admin)
         self.assertIn(floating_ip_alt['id'], floating_ip_ids_admin)
         # List floating ips from nonadmin
-        body = self.client.list_floatingips()
+        body = self.floating_ips_client.list_floatingips()
         floating_ip_ids = [f['id'] for f in body['floatingips']]
         # Check that nonadmin user doesn't see floating ip created from admin
         # and floating ip that is created in another tenant (alt user)
@@ -76,12 +77,12 @@ class FloatingIPAdminTestJSON(base.BaseAdminNetworkTest):
     @test.idempotent_id('32727cc3-abe2-4485-a16e-48f2d54c14f2')
     def test_create_list_show_floating_ip_with_tenant_id_by_admin(self):
         # Creates a floating IP
-        body = self.admin_client.create_floatingip(
+        body = self.admin_floating_ips_client.create_floatingip(
             floating_network_id=self.ext_net_id,
             tenant_id=self.network['tenant_id'],
             port_id=self.port['id'])
         created_floating_ip = body['floatingip']
-        self.addCleanup(self.client.delete_floatingip,
+        self.addCleanup(self.floating_ips_client.delete_floatingip,
                         created_floating_ip['id'])
         self.assertIsNotNone(created_floating_ip['id'])
         self.assertIsNotNone(created_floating_ip['tenant_id'])
@@ -93,7 +94,7 @@ class FloatingIPAdminTestJSON(base.BaseAdminNetworkTest):
         self.assertEqual(created_floating_ip['fixed_ip_address'],
                          port[0]['ip_address'])
         # Verifies the details of a floating_ip
-        floating_ip = self.admin_client.show_floatingip(
+        floating_ip = self.admin_floating_ips_client.show_floatingip(
             created_floating_ip['id'])
         shown_floating_ip = floating_ip['floatingip']
         self.assertEqual(shown_floating_ip['id'], created_floating_ip['id'])
@@ -105,6 +106,6 @@ class FloatingIPAdminTestJSON(base.BaseAdminNetworkTest):
                          created_floating_ip['floating_ip_address'])
         self.assertEqual(shown_floating_ip['port_id'], self.port['id'])
         # Verify the floating ip exists in the list of all floating_ips
-        floating_ips = self.admin_client.list_floatingips()
+        floating_ips = self.admin_floating_ips_client.list_floatingips()
         floatingip_id_list = [f['id'] for f in floating_ips['floatingips']]
         self.assertIn(created_floating_ip['id'], floatingip_id_list)

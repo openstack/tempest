@@ -385,6 +385,7 @@ class NetworkService(BaseService):
         self.networks_client = manager.networks_client
         self.subnets_client = manager.subnets_client
         self.ports_client = manager.ports_client
+        self.floating_ips_client = manager.floating_ips_client
 
     def _filter_by_conf_networks(self, item_list):
         if not item_list or not all(('network_id' in i for i in item_list)):
@@ -421,7 +422,7 @@ class NetworkService(BaseService):
 class NetworkFloatingIpService(NetworkService):
 
     def list(self):
-        client = self.client
+        client = self.floating_ips_client
         flips = client.list_floatingips(**self.tenant_filter)
         flips = flips['floatingips']
         LOG.debug("List count, %s Network Floating IPs" % len(flips))

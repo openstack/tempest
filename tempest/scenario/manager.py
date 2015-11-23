@@ -65,6 +65,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
         cls.networks_client = cls.manager.networks_client
         cls.ports_client = cls.manager.ports_client
         cls.subnets_client = cls.manager.subnets_client
+        cls.floating_ips_client = cls.manager.floating_ips_client
         # Heat client
         cls.orchestration_client = cls.manager.orchestration_client
 
@@ -786,7 +787,7 @@ class NetworkScenarioTest(ScenarioTest):
         if not external_network_id:
             external_network_id = CONF.network.public_network_id
         if not client:
-            client = self.network_client
+            client = self.floating_ips_client
         if not port_id:
             port_id, ip4 = self._get_server_port_id_and_ip4(thing)
         else:
