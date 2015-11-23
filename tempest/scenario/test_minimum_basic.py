@@ -37,6 +37,18 @@ class TestMinimumBasicScenario(manager.ScenarioTest):
     * with and without optional parameters
     * check command outputs
 
+    Steps:
+    1. Create image
+    2. Create keypair
+    3. Boot instance with keypair and get list of instances
+    4. Create volume and show list of volumes
+    5. Attach volume to instance and getlist of volumes
+    6. Add IP to instance
+    7. Create and add security group to instance
+    8. Check SSH connection to instance
+    9. Reboot instance
+    10. Check SSH connection to instance after reboot
+
     """
 
     def _wait_for_server_status(self, server, status):
@@ -130,10 +142,15 @@ class TestMinimumBasicScenario(manager.ScenarioTest):
         floating_ip = self.create_floating_ip(server)
         self.create_and_add_security_group_to_server(server)
 
+        # check that we can SSH to the server before reboot
         self.linux_client = self.get_remote_client(
             floating_ip['ip'], private_key=keypair['private_key'])
+
         self.nova_reboot(server)
 
+        # check that we can SSH to the server after reboot
+        # (both connections are part of the scenario)
         self.linux_client = self.get_remote_client(
             floating_ip['ip'], private_key=keypair['private_key'])
+
         self.check_partitions()
