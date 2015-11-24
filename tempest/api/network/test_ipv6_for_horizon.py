@@ -46,9 +46,12 @@ class HorizonIpv6Specifics(base.BaseNetworkTest):
         self.assertIn(network['name'], network_names)
 
         body = self.client.list_subnets()
-        subnet = body['subnets'][0]
-        self.assertEqual(expected=cidr, observed=subnet['cidr'])
-        self.assertEqual(expected=gateway_ip, observed=subnet['gateway_ip'])
+
+        ip_v6_subnet = filter(lambda s: s['ip_version'] == 6,
+                              body['subnets'])[0]
+        self.assertEqual(expected=cidr, observed=ip_v6_subnet['cidr'])
+        self.assertEqual(expected=gateway_ip,
+                         observed=ip_v6_subnet['gateway_ip'])
 
         body = self.client.create_port(network_id=network['id'])
         self.port_id = body['port']['id']

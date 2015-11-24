@@ -19,6 +19,7 @@ from tempest.api.network import base
 from tempest import config
 from tempest import test
 from tempest_lib.common.utils import data_utils
+from tempest_lib import  exceptions
 
 
 CONF = config.CONF
@@ -51,19 +52,31 @@ class NetworksTestPortsIPv6JSON(base.BaseNetworkTest):
                     port['device_id'], port['id']
                 )
             else:
-                self.client.delete_port(port['id'])
+                try:
+                    self.client.delete_port(port['id'])
+                except exceptions.NotFound:
+                    LOG.warning("Port {} to delete not found"
+                            .format(port['id']))
         body = self.client.list_subnets()
         subnets = body['subnets']
         for subnet in subnets:
             if self.subnets:
                 self.subnets.pop()
-            self.client.delete_subnet(subnet['id'])
+            try:
+                self.client.delete_subnet(subnet['id'])
+            except exceptions.NotFound:
+                LOG.warning("Subnet {} to delete not found"
+                            .format(subnet['id']))
         body = self.client.list_routers()
         routers = body['routers']
         for router in routers:
             if self.routers:
                 self.routers.pop()
-            self.client.delete_router(router['id'])
+            try:
+                self.client.delete_router(router['id'])
+            except exceptions.NotFound:
+                    LOG.warning("Router {} to delete not found"
+                                .format(router['id']))
 
     def _create_subnets_and_port(self, kwargs1=None, kwargs2=None):
         kwargs1 = kwargs1 or {}
@@ -102,7 +115,7 @@ class NetworksTestPortsIPv6JSON(base.BaseNetworkTest):
             (None, None)
         ]
         for ra_mode, address_mode in ipv6_valid_modes_combinations:
-            body = self.client.create_network(name=name)
+            body = self.networks_client.create_network(name=name)
             network = body['network']
             net_id = network['id']
             kwargs = {'gateway': 'fe80::1',
@@ -115,7 +128,7 @@ class NetworksTestPortsIPv6JSON(base.BaseNetworkTest):
             self.assertEqual(subnet['ipv6_ra_mode'], ra_mode)
             self.assertEqual(subnet['ipv6_address_mode'], address_mode)
             # Delete network and subnet
-            body = self.client.delete_network(net_id)
+            self.networks_client.delete_network(net_id)
             self.subnets.pop()
 
     @test.attr(type='smoke')
