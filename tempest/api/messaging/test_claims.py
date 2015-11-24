@@ -115,7 +115,7 @@ class TestClaims(base.BaseMessagingTest):
         claim_uri = resp['location']
 
         # Release Claim
-        self.client.release_claim(claim_uri)
+        self.client.delete_claim(claim_uri)
 
         # Delete Claimed message
         # This will implicitly verify that the claim is deleted.

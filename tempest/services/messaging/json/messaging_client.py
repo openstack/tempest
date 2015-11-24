@@ -170,7 +170,7 @@ class MessagingClient(service_client.ServiceClient):
         self.expected_success(204, resp.status)
         return resp, body
 
-    def release_claim(self, claim_uri):
+    def delete_claim(self, claim_uri):
         resp, body = self.delete(claim_uri)
         self.expected_success(204, resp.status)
         return resp, body

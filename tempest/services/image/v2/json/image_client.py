@@ -200,7 +200,7 @@ class ImageClientV2(service_client.ServiceClient):
         self.expected_success(200, resp.status)
         return service_client.ResponseBody(resp, json.loads(body))
 
-    def remove_image_member(self, image_id, member_id):
+    def delete_image_member(self, image_id, member_id):
         url = 'v2/images/%s/members/%s' % (image_id, member_id)
         resp, _ = self.delete(url)
         self.expected_success(204, resp.status)

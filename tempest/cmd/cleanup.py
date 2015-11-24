@@ -240,7 +240,7 @@ class TempestCleanup(command.Command):
         id_cl = credentials.AdminManager().identity_client
         if (self._tenant_exists(tenant_id)):
             try:
-                id_cl.remove_user_role(tenant_id, self.admin_id,
+                id_cl.delete_user_role(tenant_id, self.admin_id,
                                        self.admin_role_id)
             except Exception as ex:
                 LOG.exception("Failed removing role from tenant which still"

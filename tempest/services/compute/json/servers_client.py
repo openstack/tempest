@@ -278,7 +278,7 @@ class ServersClient(service_client.ServiceClient):
         self.validate_response(schema.attach_volume, resp, body)
         return service_client.ResponseBody(resp, body)
 
-    def detach_volume(self, server_id, volume_id):
+    def detach_volume(self, server_id, volume_id):  # noqa
         """Detaches a volume from a server instance."""
         resp, body = self.delete('servers/%s/os-volume_attachments/%s' %
                                  (server_id, volume_id))

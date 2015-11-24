@@ -77,7 +77,7 @@ class ImagesMemberTest(base.BaseV2MemberImageTest):
                                                 {'status': 'accepted'})
 
         self.assertIn(image_id, self._list_image_ids_as_alt())
-        self.os_img_client.remove_image_member(image_id, self.alt_tenant_id)
+        self.os_img_client.delete_image_member(image_id, self.alt_tenant_id)
         self.assertNotIn(image_id, self._list_image_ids_as_alt())
 
     @test.idempotent_id('634dcc3f-f6e2-4409-b8fd-354a0bb25d83')
@@ -103,5 +103,5 @@ class ImagesMemberTest(base.BaseV2MemberImageTest):
                                                 self.alt_tenant_id,
                                                 {'status': 'accepted'})
         self.assertIn(image_id, self._list_image_ids_as_alt())
-        self.os_img_client.remove_image_member(image_id, self.alt_tenant_id)
+        self.os_img_client.delete_image_member(image_id, self.alt_tenant_id)
         self.assertNotIn(image_id, self._list_image_ids_as_alt())

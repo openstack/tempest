@@ -146,7 +146,7 @@ class BaseMessagingTest(test.BaseTestCase):
     @classmethod
     def release_claim(cls, claim_uri):
         """Wrapper utility that deletes a claim."""
-        resp, body = cls.client.release_claim(claim_uri)
+        resp, body = cls.client.delete_claim(claim_uri)
 
         return resp, body
 
