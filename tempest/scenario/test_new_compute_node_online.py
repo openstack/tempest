@@ -14,7 +14,6 @@
 # under the License.
 from oslo_log import log as logging
 from tempest import config
-from tempest import exceptions as tempest_exceptions
 from tempest.scenario import manager
 from tempest import test
 import tempest_lib
@@ -25,6 +24,7 @@ LOG = logging.getLogger(__name__)
 
 
 class TestNewComputeNodeOnline(manager.NetworkScenarioTest):
+
     @classmethod
     def resource_setup(cls):
         super(TestNewComputeNodeOnline, cls).resource_setup()
@@ -33,7 +33,13 @@ class TestNewComputeNodeOnline(manager.NetworkScenarioTest):
         cls.num_networks = 3
         cls.compute_nodes = map(lambda x: x.get('host_name'),
                                 filter(lambda y: y.get('service') == 'compute',
-                                       compute_nodes))
+                                       compute_nodes['hosts']))
+        if len(cls.compute_nodes) < 3:
+            raise cls.skipException(
+                "TestNewComputeNodesOnline."
+                "test_connectivity_between_vms: "
+                "Not enough compute nodes."
+            )
 
     def _boot_server(self, zone_id, network):
 
@@ -118,12 +124,7 @@ class TestNewComputeNodeOnline(manager.NetworkScenarioTest):
             bring disabled compute node online
             boot new vms there and ping old vms
         """
-        if len(self.compute_nodes) < 3:
-            raise tempest_exceptions.InvalidConfiguration(
-                "TestNewComputeNodesOnline."
-                "test_connectivity_between_vms: "
-                "Not enough compute nodes."
-            )
+
         self._prepare_test_environment()
         time.sleep(60)
         for pair in zip(self.old_ips, self.new_ips):

@@ -118,13 +118,13 @@ class TestNetworkVLANTransparency(test_network_multi_node.TestNetworkMultiNode):
     @classmethod
     def skip_checks(cls):
         super(TestNetworkVLANTransparency, cls).skip_checks()
-
-    def setUp(self):
-        super(TestNetworkVLANTransparency, self).setUp()
         if not CONF.network_feature_enabled.vlan_transparent:
             msg = ('The network feature vlan_transparent must be set to true'
                    ' for theses tests to run')
-            raise exceptions.InvalidConfiguration(msg)
+            raise cls.skipException(msg)
+
+    def setUp(self):
+        super(TestNetworkVLANTransparency, self).setUp()
 
         for network in self.networks:
             self.assertTrue(network['vlan_transparent'],
