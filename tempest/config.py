@@ -917,6 +917,20 @@ TelemetryGroup = [
                      "notification tests")
 ]
 
+alarming_group = cfg.OptGroup(name='alarming',
+                              title='Alarming Service Options')
+
+AlarmingGroup = [
+    cfg.StrOpt('catalog_type',
+               default='alarming',
+               help="Catalog type of the Alarming service."),
+    cfg.StrOpt('endpoint_type',
+               default='publicURL',
+               choices=['public', 'admin', 'internal',
+                        'publicURL', 'adminURL', 'internalURL'],
+               help="The endpoint type to use for the alarming service."),
+]
+
 
 telemetry_feature_group = cfg.OptGroup(name='telemetry-feature-enabled',
                                        title='Enabled Ceilometer Features')
@@ -1127,6 +1141,9 @@ ServiceAvailableGroup = [
     cfg.BoolOpt('ceilometer',
                 default=True,
                 help="Whether or not Ceilometer is expected to be available"),
+    cfg.BoolOpt('aodh',
+                default=False,
+                help="Whether or not Aodh is expected to be available"),
     cfg.BoolOpt('horizon',
                 default=True,
                 help="Whether or not Horizon is expected to be available"),
@@ -1273,6 +1290,7 @@ _opts = [
     (orchestration_group, OrchestrationGroup),
     (telemetry_group, TelemetryGroup),
     (telemetry_feature_group, TelemetryFeaturesGroup),
+    (alarming_group, AlarmingGroup),
     (dashboard_group, DashboardGroup),
     (data_processing_group, DataProcessingGroup),
     (data_processing_feature_group, DataProcessingFeaturesGroup),

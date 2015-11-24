@@ -46,6 +46,7 @@ from tempest.services.object_storage import account_client
 from tempest.services.object_storage import container_client
 from tempest.services.object_storage import object_client
 from tempest.services.orchestration.json import orchestration_client
+from tempest.services.telemetry.json import alarming_client
 from tempest.services.telemetry.json import telemetry_client
 from tempest.services.volume.json.admin import volume_hosts_client
 from tempest.services.volume.json.admin import volume_quotas_client
@@ -105,6 +106,7 @@ class TestServiceClient(base.TestCase):
             object_client.ObjectClient,
             orchestration_client.OrchestrationClient,
             telemetry_client.TelemetryClient,
+            alarming_client.AlarmingClient,
             qos_client.QosSpecsClient,
             volume_hosts_client.VolumeHostsClient,
             volume_quotas_client.VolumeQuotasClient,
