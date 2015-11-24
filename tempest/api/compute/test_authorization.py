@@ -400,7 +400,7 @@ class AuthorizationTestJSON(base.BaseV2ComputeTest):
         self.addCleanup(self.client.delete_server_metadata_item,
                         self.server['id'], 'meta1')
         self.assertRaises(lib_exc.NotFound,
-                          self.alt_client.get_server_metadata_item,
+                          self.alt_client.show_server_metadata_item,
                           self.server['id'], 'meta1')
 
     @test.idempotent_id('16b2d724-0d3b-4216-a9fa-97bd4d9cf670')

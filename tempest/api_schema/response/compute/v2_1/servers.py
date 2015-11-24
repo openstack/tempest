@@ -291,8 +291,8 @@ detach_volume = {
     'status_code': [202]
 }
 
-get_volume_attachment = copy.deepcopy(attach_volume)
-get_volume_attachment['response_body']['properties'][
+show_volume_attachment = copy.deepcopy(attach_volume)
+show_volume_attachment['response_body']['properties'][
     'volumeAttachment']['properties'].update({'serverId': {'type': 'string'}})
 
 list_volume_attachments = {
@@ -436,7 +436,7 @@ instance_actions_with_events['properties'].update({
 # 'events' does not come in response body always so it is not
 # defined as 'required'
 
-get_instance_action = {
+show_instance_action = {
     'status_code': [200],
     'response_body': {
         'type': 'object',
@@ -448,7 +448,7 @@ get_instance_action = {
     }
 }
 
-get_password = {
+show_password = {
     'status_code': [200],
     'response_body': {
         'type': 'object',
@@ -520,7 +520,7 @@ delete_server_metadata_item = {
     'status_code': [204]
 }
 
-set_get_server_metadata_item = {
+set_show_server_metadata_item = {
     'status_code': [200],
     'response_body': {
         'type': 'object',

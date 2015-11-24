@@ -67,7 +67,7 @@ class ServerMetadataNegativeTestJSON(base.BaseV2ComputeTest):
         # GET on a non-existent server should not succeed
         non_existent_server_id = data_utils.rand_uuid()
         self.assertRaises(lib_exc.NotFound,
-                          self.client.get_server_metadata_item,
+                          self.client.show_server_metadata_item,
                           non_existent_server_id,
                           'test2')
 

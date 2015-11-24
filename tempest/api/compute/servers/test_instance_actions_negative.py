@@ -46,5 +46,5 @@ class InstanceActionsNegativeTestJSON(base.BaseV2ComputeTest):
     @test.idempotent_id('0269f40a-6f18-456c-b336-c03623c897f1')
     def test_get_instance_action_invalid_request(self):
         # Get the action details of the provided server with invalid request
-        self.assertRaises(lib_exc.NotFound, self.client.get_instance_action,
+        self.assertRaises(lib_exc.NotFound, self.client.show_instance_action,
                           self.server_id, '999')

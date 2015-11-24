@@ -130,7 +130,7 @@ class ServersAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
     def test_get_server_diagnostics_by_non_admin(self):
         # Non-admin user can not view server diagnostics according to policy
         self.assertRaises(lib_exc.Forbidden,
-                          self.non_adm_client.get_server_diagnostics,
+                          self.non_adm_client.show_server_diagnostics,
                           self.s1_id)
 
     @test.attr(type=['negative'])
