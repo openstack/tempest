@@ -11,7 +11,6 @@
 #    under the License.
 
 from oslo_serialization import jsonutils as json
-from tempest_lib import exceptions as lib_exc
 
 from tempest.common import service_client
 
@@ -212,13 +211,6 @@ class IdentityClient(service_client.ServiceClient):
         self.expected_success(200, resp.status)
         body = json.loads(body)
         return service_client.ResponseBody(resp, body)
-
-    def get_user_by_username(self, tenant_id, username):
-        users = self.list_tenant_users(tenant_id)['users']
-        for user in users:
-            if user['name'] == username:
-                return user
-        raise lib_exc.NotFound('No such user')
 
     def create_service(self, name, type, **kwargs):
         """Create a service."""

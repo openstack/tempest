@@ -353,7 +353,8 @@ def create_users(users):
             LOG.error("Tenant: %s - not found" % u['tenant'])
             continue
         try:
-            admin.identity.get_user_by_username(tenant['id'], u['name'])
+            identity.get_user_by_username(admin.identity,
+                                          tenant['id'], u['name'])
             LOG.warn("User '%s' already exists in this environment"
                      % u['name'])
         except lib_exc.NotFound:
@@ -368,8 +369,8 @@ def destroy_users(users):
     for user in users:
         tenant_id = identity.get_tenant_by_name(admin.identity,
                                                 user['tenant'])['id']
-        user_id = admin.identity.get_user_by_username(tenant_id,
-                                                      user['name'])['id']
+        user_id = identity.get_user_by_username(admin.identity,
+                                                tenant_id, user['name'])['id']
         admin.identity.delete_user(user_id)
 
 
@@ -381,7 +382,8 @@ def collect_users(users):
         tenant = identity.get_tenant_by_name(admin.identity, u['tenant'])
         u['tenant_id'] = tenant['id']
         USERS[u['name']] = u
-        body = admin.identity.get_user_by_username(tenant['id'], u['name'])
+        body = identity.get_user_by_username(admin.identity,
+                                             tenant['id'], u['name'])
         USERS[u['name']]['id'] = body['id']
 
 

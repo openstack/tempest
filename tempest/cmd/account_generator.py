@@ -195,7 +195,8 @@ def create_resources(opts, resources):
             continue
         while True:
             try:
-                identity_admin.get_user_by_username(tenant['id'], u['name'])
+                identity.get_user_by_username(identity_admin,
+                                              tenant['id'], u['name'])
             except tempest_lib.exceptions.NotFound:
                 identity_admin.create_user(
                     u['name'], u['pass'], tenant['id'],
@@ -224,8 +225,8 @@ def create_resources(opts, resources):
             LOG.error("Tenant: %s - not found" % u['tenant'])
             continue
         try:
-            user = identity_admin.get_user_by_username(tenant['id'],
-                                                       u['name'])
+            user = identity.get_user_by_username(identity_admin,
+                                                 tenant['id'], u['name'])
         except tempest_lib.exceptions.NotFound:
             LOG.error("User: %s - not found" % u['user'])
             continue

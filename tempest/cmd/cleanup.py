@@ -182,8 +182,8 @@ class TempestCleanup(command.Command):
                                              CONF.auth.admin_tenant_name)
         self.admin_tenant_id = tenant['id']
 
-        user = id_cl.get_user_by_username(self.admin_tenant_id,
-                                          CONF.auth.admin_username)
+        user = identity.get_user_by_username(id_cl, self.admin_tenant_id,
+                                             CONF.auth.admin_username)
         self.admin_id = user['id']
 
         roles = id_cl.list_roles()['roles']
