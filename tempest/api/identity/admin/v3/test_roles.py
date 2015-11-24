@@ -39,7 +39,7 @@ class RolesV3TestJSON(base.BaseIdentityV3AdminTest):
             data_utils.rand_name('project'),
             description=data_utils.rand_name('project-desc'),
             domain_id=cls.domain['id'])['project']
-        cls.group_body = cls.client.create_group(
+        cls.group_body = cls.groups_client.create_group(
             data_utils.rand_name('Group'), project_id=cls.project['id'],
             domain_id=cls.domain['id'])['group']
         cls.user_body = cls.client.create_user(
@@ -52,7 +52,7 @@ class RolesV3TestJSON(base.BaseIdentityV3AdminTest):
     @classmethod
     def resource_cleanup(cls):
         cls.client.delete_role(cls.role['id'])
-        cls.client.delete_group(cls.group_body['id'])
+        cls.groups_client.delete_group(cls.group_body['id'])
         cls.client.delete_user(cls.user_body['id'])
         cls.client.delete_project(cls.project['id'])
         # NOTE(harika-vakadi): It is necessary to disable the domain
@@ -137,8 +137,9 @@ class RolesV3TestJSON(base.BaseIdentityV3AdminTest):
         self._list_assertions(roles, self.fetched_role_ids,
                               self.role['id'])
         # Add user to group, and insure user has role on project
-        self.client.add_group_user(self.group_body['id'], self.user_body['id'])
-        self.addCleanup(self.client.delete_group_user,
+        self.groups_client.add_group_user(self.group_body['id'],
+                                          self.user_body['id'])
+        self.addCleanup(self.groups_client.delete_group_user,
                         self.group_body['id'], self.user_body['id'])
         body = self.token.auth(user_id=self.user_body['id'],
                                password=self.u_password,

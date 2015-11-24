@@ -137,10 +137,12 @@ class BaseIdentityV3AdminTest(BaseIdentityV3Test):
         cls.token = cls.os_adm.token_v3_client
         cls.endpoints_client = cls.os_adm.endpoints_client
         cls.region_client = cls.os_adm.region_client
-        cls.data = DataGenerator(cls.client)
         cls.service_client = cls.os_adm.service_client
         cls.policy_client = cls.os_adm.policy_client
         cls.creds_client = cls.os_adm.credentials_client
+        cls.groups_client = cls.os_adm.groups_client
+
+        cls.data = DataGenerator(cls.client)
 
     @classmethod
     def resource_cleanup(cls):
