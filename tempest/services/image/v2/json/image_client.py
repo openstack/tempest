@@ -220,7 +220,7 @@ class ImageClientV2(service_client.ServiceClient):
         body = json.loads(body)
         return service_client.ResponseBody(resp, body)
 
-    def create_namespaces(self, namespace, **kwargs):
+    def create_namespace(self, namespace, **kwargs):
         params = {
             "namespace": namespace,
         }
@@ -240,14 +240,14 @@ class ImageClientV2(service_client.ServiceClient):
         body = json.loads(body)
         return service_client.ResponseBody(resp, body)
 
-    def show_namespaces(self, namespace):
+    def show_namespace(self, namespace):
         url = '/v2/metadefs/namespaces/%s' % namespace
         resp, body = self.get(url)
         self.expected_success(200, resp.status)
         body = json.loads(body)
         return service_client.ResponseBody(resp, body)
 
-    def update_namespaces(self, namespace, visibility, **kwargs):
+    def update_namespace(self, namespace, visibility, **kwargs):
         params = {
             "namespace": namespace,
             "visibility": visibility
@@ -267,7 +267,7 @@ class ImageClientV2(service_client.ServiceClient):
         body = json.loads(body)
         return service_client.ResponseBody(resp, body)
 
-    def delete_namespaces(self, namespace):
+    def delete_namespace(self, namespace):
         url = '/v2/metadefs/namespaces/%s' % namespace
         resp, _ = self.delete(url)
         self.expected_success(204, resp.status)
