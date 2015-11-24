@@ -38,6 +38,7 @@ from tempest_lib.services.compute.hypervisor_client import \
 from tempest_lib.services.compute.images_client import ImagesClient
 from tempest_lib.services.compute.instance_usage_audit_log_client import \
     InstanceUsagesAuditLogClient
+from tempest_lib.services.compute.limits_client import LimitsClient
 from tempest_lib.services.identity.v2.token_client import TokenClient
 from tempest_lib.services.identity.v3.token_client import V3TokenClient
 
@@ -53,7 +54,6 @@ from tempest.services.compute.json.floating_ips_client import \
 from tempest.services.compute.json.interfaces_client import \
     InterfacesClient
 from tempest.services.compute.json.keypairs_client import KeyPairsClient
-from tempest.services.compute.json.limits_client import LimitsClient
 from tempest.services.compute.json.migrations_client import \
     MigrationsClient
 from tempest.services.compute.json.networks_client import NetworksClient \
