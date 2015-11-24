@@ -20,14 +20,14 @@ class ImagesMemberTest(base.BaseV2MemberImageTest):
     def test_image_share_accept(self):
         image_id = self._create_image()
         member = self.os_img_client.add_image_member(image_id,
-                                                     self.alt_tenant_id)
+                                                     member=self.alt_tenant_id)
         self.assertEqual(member['member_id'], self.alt_tenant_id)
         self.assertEqual(member['image_id'], image_id)
         self.assertEqual(member['status'], 'pending')
         self.assertNotIn(image_id, self._list_image_ids_as_alt())
         self.alt_img_client.update_image_member(image_id,
                                                 self.alt_tenant_id,
-                                                {'status': 'accepted'})
+                                                status='accepted')
         self.assertIn(image_id, self._list_image_ids_as_alt())
         body = self.os_img_client.list_image_members(image_id)
         members = body['members']
@@ -41,24 +41,24 @@ class ImagesMemberTest(base.BaseV2MemberImageTest):
     def test_image_share_reject(self):
         image_id = self._create_image()
         member = self.os_img_client.add_image_member(image_id,
-                                                     self.alt_tenant_id)
+                                                     member=self.alt_tenant_id)
         self.assertEqual(member['member_id'], self.alt_tenant_id)
         self.assertEqual(member['image_id'], image_id)
         self.assertEqual(member['status'], 'pending')
         self.assertNotIn(image_id, self._list_image_ids_as_alt())
         self.alt_img_client.update_image_member(image_id,
                                                 self.alt_tenant_id,
-                                                {'status': 'rejected'})
+                                                status='rejected')
         self.assertNotIn(image_id, self._list_image_ids_as_alt())
 
     @test.idempotent_id('a6ee18b9-4378-465e-9ad9-9a6de58a3287')
     def test_get_image_member(self):
         image_id = self._create_image()
         self.os_img_client.add_image_member(image_id,
-                                            self.alt_tenant_id)
+                                            member=self.alt_tenant_id)
         self.alt_img_client.update_image_member(image_id,
                                                 self.alt_tenant_id,
-                                                {'status': 'accepted'})
+                                                status='accepted')
 
         self.assertIn(image_id, self._list_image_ids_as_alt())
         member = self.os_img_client.show_image_member(image_id,
@@ -71,10 +71,10 @@ class ImagesMemberTest(base.BaseV2MemberImageTest):
     def test_remove_image_member(self):
         image_id = self._create_image()
         self.os_img_client.add_image_member(image_id,
-                                            self.alt_tenant_id)
+                                            member=self.alt_tenant_id)
         self.alt_img_client.update_image_member(image_id,
                                                 self.alt_tenant_id,
-                                                {'status': 'accepted'})
+                                                status='accepted')
 
         self.assertIn(image_id, self._list_image_ids_as_alt())
         self.os_img_client.delete_image_member(image_id, self.alt_tenant_id)
@@ -94,14 +94,14 @@ class ImagesMemberTest(base.BaseV2MemberImageTest):
     def test_get_private_image(self):
         image_id = self._create_image()
         member = self.os_img_client.add_image_member(image_id,
-                                                     self.alt_tenant_id)
+                                                     member=self.alt_tenant_id)
         self.assertEqual(member['member_id'], self.alt_tenant_id)
         self.assertEqual(member['image_id'], image_id)
         self.assertEqual(member['status'], 'pending')
         self.assertNotIn(image_id, self._list_image_ids_as_alt())
         self.alt_img_client.update_image_member(image_id,
                                                 self.alt_tenant_id,
-                                                {'status': 'accepted'})
+                                                status='accepted')
         self.assertIn(image_id, self._list_image_ids_as_alt())
         self.os_img_client.delete_image_member(image_id, self.alt_tenant_id)
         self.assertNotIn(image_id, self._list_image_ids_as_alt())
