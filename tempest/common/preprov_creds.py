@@ -339,7 +339,7 @@ class PreProvisionedCredentialProvider(cred_provider.CredentialProvider):
         try:
             network = fixed_network.get_network_from_name(
                 net_name, compute_network_client)
-        except exceptions.InvalidConfiguration:
+        except exceptions.InvalidTestResource:
             network = {}
         net_creds.set_resources(network=network)
         return net_creds
