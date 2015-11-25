@@ -13,6 +13,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 from oslo_log import log as logging
+from tempest_lib import exceptions
 from tempest.common import waiters
 from tempest import config
 from tempest.scenario import manager
@@ -111,11 +112,14 @@ poison_arp("{victim_ip}", "{router_ip}")
         attacker_vm_connection = self._ssh_to_server(
             attacker_vm_ip.floating_ip_address, self.key_pair['private_key']
         )
-        python_path = attacker_vm_connection.exec_command("which python")
-        if not python_path:
+        try:
+            python_path = attacker_vm_connection.exec_command("which python")
+            if not python_path:
+                LOG.warning("No python is available, skipping test")
+                return
+        except exceptions.SSHExecCommandFailed:
             LOG.warning("No python is available, skipping test")
             return
-
         subnets = self._list_subnets(tenant_id=self.tenant_id,
                                      network=network)
         gateway_ip = subnets[0]['gateway_ip']
@@ -162,15 +166,16 @@ poison_arp("{victim_ip}", "{router_ip}")
 
     @test.idempotent_id('778904f3-9ee6-44c0-a946-bc103519da80')
     @test.services('compute', 'network')
-    def test_arp_spoofing_single_compute_node(self):
+    def test_arp_poisoning_single_compute_node(self):
         attacker_vm_ip, target_vm_ip = self._boot_servers()
         self.run_arp_poisoning_test(attacker_vm_ip, target_vm_ip)
 
     @test.idempotent_id('e0eb97ef-1068-49ee-87b8-f398facddef6')
     @test.services('compute', 'network')
-    def test_arp_spoofing_single_compute_node_shared_network(self):
+    def test_arp_poisoning_single_compute_node_shared_network(self):
         shared_network = self._create_network(
-            client=self.admin_manager.network_client,
+            networks_client=self.admin_manager.networks_client,
+            tenant_id=self.admin_manager.network_client.tenant_id,
             shared=True
         )
         subnet = self._create_subnet(shared_network,
@@ -194,10 +199,10 @@ poison_arp("{victim_ip}", "{router_ip}")
         self.run_arp_poisoning_test(attacker_vm_ip, target_vm_ip)
         compute_to_disable = self.compute_nodes[-1]
         self.admin_manager.services_client.disable_service(
-            compute_to_disable, 'nova-compute')
+            host=compute_to_disable, binary='nova-compute')
         time.sleep(10)
         self.admin_manager.services_client.enable_service(
-            compute_to_disable, 'nova-compute')
+            host=compute_to_disable, binary='nova-compute')
         time.sleep(10)
         self.run_arp_poisoning_test(attacker_vm_ip, target_vm_ip)
 
@@ -267,18 +272,18 @@ poison_arp("{victim_ip}", "{router_ip}")
                 'availability_zone': 'arp-avail-{}'.format(idx)
             }
             aggregate = self.admin_manager.aggregates_client. \
-                create_aggregate(**create_kwargs)
+                create_aggregate(**create_kwargs)['aggregate']
             self.addCleanup(self.admin_manager.aggregates_client.
                             delete_aggregate, aggregate['id'])
             self.admin_manager.aggregates_client.add_host(
-                aggregate['id'], node)
+                aggregate['id'], node=node)
             self.addCleanup(self.admin_manager.aggregates_client.remove_host,
-                            aggregate['id'], node)
+                            aggregate['id'], node=node)
             self.aggregates.append(aggregate['availability_zone'])
 
     @test.idempotent_id('67381e35-9661-497a-ae84-8643e4ebd905')
     @test.services('compute', 'network')
-    def test_arp_spoofing_multiple_nodes(self):
+    def test_arp_poisoning_multiple_nodes(self):
         if self._is_multi_compute_nodes():
             self._prepare_multi_compute_nodes()
             attacker_vm_ip, target_vm_ip = self._boot_servers(
