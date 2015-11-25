@@ -43,7 +43,7 @@ def create_test_server(clients, validatable=False, validation_resources=None,
     :param wait_until: Server status to wait for the server to reach after
     its creation.
     :param volume_backed: Whether the instance is volume backed or not.
-    :returns a tuple
+    :returns: a tuple
     """
 
     # TODO(jlanoux) add support of wait_until PINGABLE/SSHABLE

@@ -495,7 +495,7 @@ class BaseTestCase(testtools.testcase.WithAttributes,
         :param credential_type: string - primary, alt or admin
         :param roles: list of roles
 
-        :returns the created client manager
+        :returns: the created client manager
         :raises skipException: if the requested credentials are not available
         """
         if all([roles, credential_type]):
