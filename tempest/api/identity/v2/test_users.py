@@ -56,8 +56,8 @@ class IdentityUsersTest(base.BaseIdentityV2Test):
             old_pass=new_pass)
 
         # user updates own password
-        resp = self.non_admin_client.update_user_own_password(
-            user_id=user_id, new_pass=new_pass, old_pass=old_pass)['access']
+        self.non_admin_client.update_user_own_password(
+            user_id=user_id, new_pass=new_pass, old_pass=old_pass)
 
         # TODO(lbragstad): Sleeping after the response status has been checked
         # and the body loaded as JSON allows requests to fail-fast. The sleep
@@ -68,8 +68,6 @@ class IdentityUsersTest(base.BaseIdentityV2Test):
         # sub-second precision.
         time.sleep(1)
 
-        # check authorization with new token
-        self.non_admin_token_client.auth_token(resp['token']['id'])
         # check authorization with new password
         self.non_admin_token_client.auth(self.username,
                                          new_pass,

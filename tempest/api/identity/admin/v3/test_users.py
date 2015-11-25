@@ -13,6 +13,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import time
+
 from tempest.api.identity import base
 from tempest.common.utils import data_utils
 from tempest import test
@@ -76,6 +78,14 @@ class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
         new_password = data_utils.rand_name('pass1')
         self.client.update_user_password(user['id'], new_password,
                                          original_password)
+        # TODO(lbragstad): Sleeping after the response status has been checked
+        # and the body loaded as JSON allows requests to fail-fast. The sleep
+        # is necessary because keystone will err on the side of security and
+        # invalidate tokens within a small margin of error (within the same
+        # wall clock second) after a revocation event is issued (such as a
+        # password change). Remove this once keystone and Fernet support
+        # sub-second precision, see bug 1517697 for more details.
+        time.sleep(1)
         resp = self.token.auth(user_id=user['id'],
                                password=new_password).response
         subject_token = resp['x-subject-token']
