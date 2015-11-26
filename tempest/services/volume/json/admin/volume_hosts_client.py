@@ -22,7 +22,7 @@ from tempest.common import service_client
 class BaseVolumeHostsClient(service_client.ServiceClient):
     """Client class to send CRUD Volume Hosts API requests"""
 
-    def list_hosts(self, params=None):
+    def list_hosts(self, **params):
         """Lists all hosts."""
 
         url = 'os-hosts'
