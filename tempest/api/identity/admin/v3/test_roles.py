@@ -40,7 +40,7 @@ class RolesV3TestJSON(base.BaseIdentityV3AdminTest):
             description=data_utils.rand_name('project-desc'),
             domain_id=cls.domain['id'])['project']
         cls.group_body = cls.groups_client.create_group(
-            data_utils.rand_name('Group'), project_id=cls.project['id'],
+            name=data_utils.rand_name('Group'), project_id=cls.project['id'],
             domain_id=cls.domain['id'])['group']
         cls.user_body = cls.client.create_user(
             u_name, description=u_desc, password=cls.u_password,
