@@ -37,7 +37,7 @@ class GroupsV3TestJSON(base.BaseIdentityV3AdminTest):
         self.assertEqual(updated_group['name'], new_name)
         self.assertEqual(updated_group['description'], new_desc)
 
-        new_group = self.groups_client.get_group(group['id'])['group']
+        new_group = self.groups_client.show_group(group['id'])['group']
         self.assertEqual(group['id'], new_group['id'])
         self.assertEqual(new_name, new_group['name'])
         self.assertEqual(new_desc, new_group['description'])
