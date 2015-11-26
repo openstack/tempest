@@ -49,6 +49,7 @@ from tempest_lib.services.compute.security_group_default_rules_client import \
     SecurityGroupDefaultRulesClient
 from tempest_lib.services.compute.security_groups_client import \
     SecurityGroupsClient
+from tempest_lib.services.compute.services_client import ServicesClient
 from tempest_lib.services.identity.v2.token_client import TokenClient
 from tempest_lib.services.identity.v3.token_client import V3TokenClient
 
@@ -69,7 +70,6 @@ from tempest.services.compute.json.security_group_rules_client import \
 from tempest.services.compute.json.server_groups_client import \
     ServerGroupsClient
 from tempest.services.compute.json.servers_client import ServersClient
-from tempest.services.compute.json.services_client import ServicesClient
 from tempest.services.compute.json.snapshots_client import \
     SnapshotsClient as ComputeSnapshotsClient
 from tempest.services.compute.json.tenant_networks_client import \
