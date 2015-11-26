@@ -126,7 +126,7 @@ class NetworksTestDHCPv6(base.BaseNetworkTest):
         ):
             kwargs = {'ipv6_ra_mode': ra_mode,
                       'ipv6_address_mode': add_mode}
-            kwargs = {k: v for k, v in six.iteritems(kwargs) if v}
+            kwargs = dict((k, v) for k, v in six.iteritems(kwargs) if v)
             real_ip, eui_ip = self._get_ips_from_subnet(**kwargs)
             self._clean_network()
             self.assertEqual(eui_ip, real_ip,
@@ -269,7 +269,7 @@ class NetworksTestDHCPv6(base.BaseNetworkTest):
         ):
             kwargs = {'ipv6_ra_mode': ra_mode,
                       'ipv6_address_mode': add_mode}
-            kwargs = {k: v for k, v in six.iteritems(kwargs) if v}
+            kwargs = dict((k, v) for k, v in six.iteritems(kwargs) if v)
             subnet = self.create_subnet(self.network, **kwargs)
             port = self.create_port(self.network)
             port_ip = next(iter(port['fixed_ips']), None)['ip_address']
@@ -291,7 +291,7 @@ class NetworksTestDHCPv6(base.BaseNetworkTest):
         ):
             kwargs = {'ipv6_ra_mode': ra_mode,
                       'ipv6_address_mode': add_mode}
-            kwargs = {k: v for k, v in six.iteritems(kwargs) if v}
+            kwargs = dict((k, v) for k, v in six.iteritems(kwargs) if v)
             subnet = self.create_subnet(self.network, **kwargs)
             ip_range = netaddr.IPRange(subnet["allocation_pools"][0]["start"],
                                        subnet["allocation_pools"][0]["end"])
@@ -366,7 +366,7 @@ class NetworksTestDHCPv6(base.BaseNetworkTest):
         ):
             kwargs = {'ipv6_ra_mode': ra_mode,
                       'ipv6_address_mode': add_mode}
-            kwargs = {k: v for k, v in six.iteritems(kwargs) if v}
+            kwargs = dict((k, v) for k, v in six.iteritems(kwargs) if v)
             subnet, port = self._create_subnet_router(kwargs)
             port_ip = next(iter(port['fixed_ips']), None)['ip_address']
             self._clean_network()
