@@ -30,7 +30,7 @@ class ExtraSpecsNegativeV2Test(base.BaseVolumeAdminTest):
         vol_type_name = data_utils.rand_name('Volume-type')
         cls.extra_specs = {"spec1": "val1"}
         cls.volume_type = cls.volume_types_client.create_volume_type(
-            vol_type_name,
+            name=vol_type_name,
             extra_specs=cls.extra_specs)['volume_type']
 
     @classmethod
@@ -70,7 +70,7 @@ class ExtraSpecsNegativeV2Test(base.BaseVolumeAdminTest):
     def test_update_multiple_extra_spec(self):
         # Should not update volume type extra specs with multiple specs as
             # body.
-        extra_spec = {"spec1": "val2", 'spec2': 'val1'}
+        extra_spec = {"spec1": "val2", "spec2": "val1"}
         self.assertRaises(
             lib_exc.BadRequest,
             self.volume_types_client.update_volume_type_extra_specs,
@@ -101,7 +101,7 @@ class ExtraSpecsNegativeV2Test(base.BaseVolumeAdminTest):
         self.assertRaises(
             lib_exc.BadRequest,
             self.volume_types_client.create_volume_type_extra_specs,
-            self.volume_type['id'], ['invalid'])
+            self.volume_type['id'], extra_specs=['invalid'])
 
     @test.idempotent_id('031cda8b-7d23-4246-8bf6-bbe73fd67074')
     def test_delete_nonexistent_volume_type_id(self):

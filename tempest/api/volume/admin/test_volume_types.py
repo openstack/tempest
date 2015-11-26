@@ -50,7 +50,7 @@ class VolumeTypesV2Test(base.BaseVolumeAdminTest):
         for i in range(2):
             vol_type_name = data_utils.rand_name("volume-type")
             vol_type = self.volume_types_client.create_volume_type(
-                vol_type_name,
+                name=vol_type_name,
                 extra_specs=extra_specs)['volume_type']
             volume_types.append(vol_type)
             self.addCleanup(self._delete_volume_type, vol_type['id'])
@@ -97,7 +97,7 @@ class VolumeTypesV2Test(base.BaseVolumeAdminTest):
         extra_specs = {"storage_protocol": proto,
                        "vendor_name": vendor}
         body = self.volume_types_client.create_volume_type(
-            name,
+            name=name,
             extra_specs=extra_specs)['volume_type']
         self.assertIn('id', body)
         self.addCleanup(self._delete_volume_type, body['id'])
@@ -125,7 +125,8 @@ class VolumeTypesV2Test(base.BaseVolumeAdminTest):
         provider = "LuksEncryptor"
         control_location = "front-end"
         name = data_utils.rand_name("volume-type")
-        body = self.volume_types_client.create_volume_type(name)['volume_type']
+        body = self.volume_types_client.create_volume_type(
+            name=name)['volume_type']
         self.addCleanup(self._delete_volume_type, body['id'])
 
         # Create encryption type
