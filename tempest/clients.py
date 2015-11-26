@@ -45,6 +45,8 @@ from tempest_lib.services.compute.networks_client import NetworksClient \
 from tempest_lib.services.compute.quota_classes_client import \
     QuotaClassesClient
 from tempest_lib.services.compute.quotas_client import QuotasClient
+from tempest_lib.services.compute.security_group_default_rules_client import \
+    SecurityGroupDefaultRulesClient
 from tempest_lib.services.identity.v2.token_client import TokenClient
 from tempest_lib.services.identity.v3.token_client import V3TokenClient
 
@@ -60,8 +62,6 @@ from tempest.services.compute.json.floating_ips_client import \
 from tempest.services.compute.json.interfaces_client import \
     InterfacesClient
 from tempest.services.compute.json.keypairs_client import KeyPairsClient
-from tempest.services.compute.json.security_group_default_rules_client import \
-    SecurityGroupDefaultRulesClient
 from tempest.services.compute.json.security_group_rules_client import \
     SecurityGroupRulesClient
 from tempest.services.compute.json.security_groups_client import \
