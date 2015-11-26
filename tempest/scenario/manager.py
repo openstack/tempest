@@ -381,20 +381,22 @@ class ScenarioTest(tempest.test.BaseTestCase):
                   (img_path, img_container_format, img_disk_format,
                    img_properties, ami_img_path, ari_img_path, aki_img_path))
         try:
-            self.image = self._image_create('scenario-img',
-                                            img_container_format,
-                                            img_path,
-                                            disk_format=img_disk_format,
-                                            properties=img_properties)
+            image = self._image_create('scenario-img',
+                                       img_container_format,
+                                       img_path,
+                                       disk_format=img_disk_format,
+                                       properties=img_properties)
         except IOError:
             LOG.debug("A qcow2 image was not found. Try to get a uec image.")
             kernel = self._image_create('scenario-aki', 'aki', aki_img_path)
             ramdisk = self._image_create('scenario-ari', 'ari', ari_img_path)
             properties = {'kernel_id': kernel, 'ramdisk_id': ramdisk}
-            self.image = self._image_create('scenario-ami', 'ami',
-                                            path=ami_img_path,
-                                            properties=properties)
-        LOG.debug("image:%s" % self.image)
+            image = self._image_create('scenario-ami', 'ami',
+                                       path=ami_img_path,
+                                       properties=properties)
+        LOG.debug("image:%s" % image)
+
+        return image
 
     def _log_console_output(self, servers=None):
         if not CONF.compute_feature_enabled.console_output:
@@ -1369,16 +1371,6 @@ class EncryptionScenarioTest(ScenarioTest):
             cls.admin_volume_types_client = cls.os_adm.volume_types_client
         else:
             cls.admin_volume_types_client = cls.os_adm.volume_types_v2_client
-
-    def _wait_for_volume_status(self, status):
-        self.status_timeout(
-            self.volume_client.volumes, self.volume.id, status)
-
-    def nova_boot(self):
-        self.keypair = self.create_keypair()
-        create_kwargs = {'key_name': self.keypair['name']}
-        self.server = self.create_server(image=self.image,
-                                         create_kwargs=create_kwargs)
 
     def create_volume_type(self, client=None, name=None):
         if not client:

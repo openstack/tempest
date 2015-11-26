@@ -79,7 +79,7 @@ class TestLargeOpsScenario(manager.ScenarioTest):
             waiters.wait_for_server_status(self.servers_client,
                                            server['id'], status)
 
-    def nova_boot(self):
+    def nova_boot(self, image):
         name = data_utils.rand_name('scenario-server')
         flavor_id = CONF.compute.flavor_ref
         # Explicitly create secgroup to avoid cleanup at the end of testcases.
@@ -99,7 +99,7 @@ class TestLargeOpsScenario(manager.ScenarioTest):
                                                          create_kwargs)
         self.servers_client.create_server(
             name=name,
-            imageRef=self.image,
+            imageRef=image,
             flavorRef=flavor_id,
             **create_kwargs)
         # needed because of bug 1199788
@@ -118,8 +118,8 @@ class TestLargeOpsScenario(manager.ScenarioTest):
         self._wait_for_server_status('ACTIVE')
 
     def _large_ops_scenario(self):
-        self.glance_image_create()
-        self.nova_boot()
+        image = self.glance_image_create()
+        self.nova_boot(image)
 
     @test.idempotent_id('14ba0e78-2ed9-4d17-9659-a48f4756ecb3')
     @test.services('compute', 'image')
