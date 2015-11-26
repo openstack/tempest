@@ -72,7 +72,7 @@ class BasicOperationsImagesTest(base.BaseV2ImageTest):
         self.assertEqual(1024, body.get('size'))
 
         # Now try get image file
-        body = self.client.load_image_file(image_id)
+        body = self.client.show_image_file(image_id)
         self.assertEqual(file_content, body.data)
 
     @test.attr(type='smoke')
