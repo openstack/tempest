@@ -865,18 +865,20 @@ class NetworkScenarioTest(ScenarioTest):
             self._log_net_info(e)
             raise
 
-    def _check_remote_connectivity(self, source, dest, should_succeed=True):
+    def _check_remote_connectivity(self, source, dest, should_succeed=True,
+                                   nic=None):
         """check ping server via source ssh connection
 
         :param source: RemoteClient: an ssh connection from which to ping
         :param dest: and IP to ping against
         :param should_succeed: boolean should ping succeed or not
+        :param nic: specific network interface to ping from
         :returns: boolean -- should_succeed == ping
         :returns: ping is false if ping failed
         """
         def ping_remote():
             try:
-                source.ping_host(dest)
+                source.ping_host(dest, nic=nic)
             except lib_exc.SSHExecCommandFailed:
                 LOG.warn('Failed to ping IP: %s via a ssh connection from: %s.'
                          % (dest, source.ssh_client.host))

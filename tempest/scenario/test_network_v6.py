@@ -148,7 +148,7 @@ class TestGettingAddress(manager.NetworkScenarioTest):
                                   "ports: %s")
                          % (self.network_v6, ports))
         mac6 = ports[0]
-        ssh.turn_nic_on(ssh.get_nic_name(mac6))
+        ssh.set_nic_state(ssh.get_nic_name(mac6))
 
     def _prepare_and_test(self, address6_mode, n_subnets6=1, dualnet=False):
         net_list = self.prepare_network(address6_mode=address6_mode,
