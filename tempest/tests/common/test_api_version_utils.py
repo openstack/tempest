@@ -192,3 +192,30 @@ class TestVersionSkipLogic(base.TestCase):
     def test_cfg_version_min_greater_than_max(self):
         self.assertRaises(exceptions.InvalidConfiguration,
                           self._test_version, '2.2', '2.7', '2.9', '2.7')
+
+
+class TestSelectRequestMicroversion(base.TestCase):
+
+    def _test_request_version(self, test_min_version,
+                              cfg_min_version, expected_version):
+        selected_version = api_version_utils.select_request_microversion(
+            test_min_version, cfg_min_version)
+        self.assertEqual(expected_version, selected_version)
+
+    def test_cfg_min_version_greater(self):
+        self._test_request_version('2.1', '2.3', expected_version='2.3')
+
+    def test_class_min_version_greater(self):
+        self._test_request_version('2.5', '2.3', expected_version='2.5')
+
+    def test_cfg_min_version_none(self):
+        self._test_request_version('2.5', None, expected_version='2.5')
+
+    def test_class_min_version_none(self):
+        self._test_request_version(None, '2.3', expected_version='2.3')
+
+    def test_both_min_version_none(self):
+        self._test_request_version(None, None, expected_version=None)
+
+    def test_both_min_version_equal(self):
+        self._test_request_version('2.3', '2.3', expected_version='2.3')

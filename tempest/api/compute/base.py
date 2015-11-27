@@ -55,6 +55,13 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
     @classmethod
     def setup_credentials(cls):
         cls.set_network_resources()
+        cls.request_microversion = (
+            api_version_utils.select_request_microversion(
+                cls.min_microversion,
+                CONF.compute_feature_enabled.min_microversion))
+        if cls.request_microversion:
+            cls.services_microversion = {
+                CONF.compute.catalog_type: cls.request_microversion}
         super(BaseV2ComputeTest, cls).setup_credentials()
 
     @classmethod

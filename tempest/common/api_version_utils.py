@@ -62,3 +62,10 @@ def check_skip_with_microversion(test_min_version, test_max_version,
                   config_min_version.get_string(),
                   config_max_version.get_string()))
         raise testtools.TestCase.skipException(msg)
+
+
+def select_request_microversion(test_min_version, cfg_min_version):
+    test_version = api_version_request.APIVersionRequest(test_min_version)
+    cfg_version = api_version_request.APIVersionRequest(cfg_min_version)
+    max_version = cfg_version if cfg_version >= test_version else test_version
+    return max_version.get_string()
