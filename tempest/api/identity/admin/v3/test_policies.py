@@ -64,7 +64,7 @@ class PoliciesTestJSON(base.BaseIdentityV3AdminTest):
             policy['id'], type=update_type)['policy']
         self.assertIn('type', data)
         # Assertion for updated value with fetched value
-        fetched_policy = self.policy_client.get_policy(policy['id'])['policy']
+        fetched_policy = self.policy_client.show_policy(policy['id'])['policy']
         self.assertIn('id', fetched_policy)
         self.assertIn('blob', fetched_policy)
         self.assertIn('type', fetched_policy)

@@ -44,7 +44,7 @@ class PolicyClient(service_client.ServiceClient):
         body = json.loads(body)
         return service_client.ResponseBody(resp, body)
 
-    def get_policy(self, policy_id):
+    def show_policy(self, policy_id):
         """Lists out the given policy."""
         url = 'policies/%s' % policy_id
         resp, body = self.get(url)
