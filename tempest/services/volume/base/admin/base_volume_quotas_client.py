@@ -74,7 +74,3 @@ class BaseVolumeQuotasClient(service_client.ServiceClient):
         resp, body = self.delete('os-quota-sets/%s' % tenant_id)
         self.expected_success(200, resp.status)
         return service_client.ResponseBody(resp, body)
-
-
-class VolumeQuotasClient(BaseVolumeQuotasClient):
-    """Client class to send CRUD Volume Type API V1 requests"""

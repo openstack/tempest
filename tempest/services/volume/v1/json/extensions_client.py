@@ -1,4 +1,4 @@
-# Copyright 2014 IBM Corp.
+# Copyright 2012 OpenStack Foundation
 # All Rights Reserved.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -16,5 +16,5 @@
 from tempest.services.volume.base import base_extensions_client
 
 
-class ExtensionsV2Client(base_extensions_client.BaseExtensionsClient):
-    api_version = "v2"
+class ExtensionsClient(base_extensions_client.BaseExtensionsClient):
+    """Volume V1 extensions client."""

@@ -13,9 +13,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest.services.volume.json import availability_zone_client
+from tempest.services.volume.base import base_availability_zone_client
 
 
 class VolumeV2AvailabilityZoneClient(
-        availability_zone_client.BaseVolumeAvailabilityZoneClient):
+        base_availability_zone_client.BaseVolumeAvailabilityZoneClient):
     api_version = "v2"

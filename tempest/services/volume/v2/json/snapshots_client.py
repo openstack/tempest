@@ -10,10 +10,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest.services.volume.json import snapshots_client
+from tempest.services.volume.base import base_snapshots_client
 
 
-class SnapshotsV2Client(snapshots_client.BaseSnapshotsClient):
+class SnapshotsV2Client(base_snapshots_client.BaseSnapshotsClient):
     """Client class to send CRUD Volume V2 API requests."""
     api_version = "v2"
     create_resp = 202

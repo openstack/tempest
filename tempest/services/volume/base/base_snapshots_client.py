@@ -196,7 +196,3 @@ class BaseSnapshotsClient(service_client.ServiceClient):
         resp, body = self.post('snapshots/%s/action' % snapshot_id, post_body)
         self.expected_success(202, resp.status)
         return service_client.ResponseBody(resp, body)
-
-
-class SnapshotsClient(BaseSnapshotsClient):
-    """Client class to send CRUD Volume V1 API requests."""

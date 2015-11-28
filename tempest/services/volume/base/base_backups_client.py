@@ -16,7 +16,6 @@
 import time
 
 from oslo_serialization import jsonutils as json
-
 from tempest_lib import exceptions as lib_exc
 
 from tempest.common import service_client
@@ -124,7 +123,3 @@ class BaseBackupsClient(service_client.ServiceClient):
             if int(time.time()) - start_time >= self.build_timeout:
                 raise exceptions.TimeoutException
             time.sleep(self.build_interval)
-
-
-class BackupsClient(BaseBackupsClient):
-    """Volume V1 Backups client"""

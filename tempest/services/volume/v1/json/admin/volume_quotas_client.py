@@ -1,5 +1,4 @@
-# Copyright 2014 IBM Corp.
-# All Rights Reserved.
+# Copyright (C) 2014 eNovance SAS <licensing@enovance.com>
 #
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
 #    not use this file except in compliance with the License. You may obtain
@@ -13,8 +12,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest.services.volume.base import base_extensions_client
+from tempest.services.volume.base.admin import base_volume_quotas_client
 
 
-class ExtensionsV2Client(base_extensions_client.BaseExtensionsClient):
-    api_version = "v2"
+class VolumeQuotasClient(base_volume_quotas_client.BaseVolumeQuotasClient):
+    """Client class to send CRUD Volume Type API V1 requests"""

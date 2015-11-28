@@ -13,20 +13,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from oslo_serialization import jsonutils as json
-
-from tempest.common import service_client
+from tempest.services.volume.base.admin import base_volume_types_client
 
 
-class BaseExtensionsClient(service_client.ServiceClient):
-
-    def list_extensions(self):
-        url = 'extensions'
-        resp, body = self.get(url)
-        body = json.loads(body)
-        self.expected_success(200, resp.status)
-        return service_client.ResponseBody(resp, body)
-
-
-class ExtensionsClient(BaseExtensionsClient):
-    """Volume V1 extensions client."""
+class VolumeTypesClient(base_volume_types_client.BaseVolumeTypesClient):
+    """Volume V1 Volume Types client"""
