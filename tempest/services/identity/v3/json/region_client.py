@@ -59,7 +59,7 @@ class RegionClient(service_client.ServiceClient):
         body = json.loads(body)
         return service_client.ResponseBody(resp, body)
 
-    def get_region(self, region_id):
+    def show_region(self, region_id):
         """Get region."""
         url = 'regions/%s' % region_id
         resp, body = self.get(url)
