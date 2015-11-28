@@ -76,7 +76,7 @@ class CredentialsTestJSON(base.BaseIdentityV3AdminTest):
         self.assertEqual(update_body['blob']['access'], new_keys[0])
         self.assertEqual(update_body['blob']['secret'], new_keys[1])
 
-        get_body = self.creds_client.get_credential(cred['id'])['credential']
+        get_body = self.creds_client.show_credential(cred['id'])['credential']
         for value1 in self.creds_list[0]:
             self.assertEqual(update_body[value1],
                              get_body[value1])
