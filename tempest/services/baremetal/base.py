@@ -59,7 +59,7 @@ class BaremetalClient(service_client.ServiceClient):
 
         :param resource_name: The name of the REST resource, e.g., 'nodes'.
         :param uuid: The unique identifier of an object in UUID format.
-        :return: Relative URI for the resource or object.
+        :returns: Relative URI for the resource or object.
 
         """
         prefix = self.uri_prefix if not permanent else ''
@@ -68,18 +68,18 @@ class BaremetalClient(service_client.ServiceClient):
                                            res=resource_name,
                                            uuid='/%s' % uuid if uuid else '')
 
-    def _make_patch(self, allowed_attributes, **kw):
+    def _make_patch(self, allowed_attributes, **kwargs):
         """Create a JSON patch according to RFC 6902.
 
         :param allowed_attributes: An iterable object that contains a set of
             allowed attributes for an object.
-        :param **kw: Attributes and new values for them.
-        :return: A JSON path that sets values of the specified attributes to
+        :param **kwargs: Attributes and new values for them.
+        :returns: A JSON path that sets values of the specified attributes to
             the new ones.
 
         """
-        def get_change(kw, path='/'):
-            for name, value in six.iteritems(kw):
+        def get_change(kwargs, path='/'):
+            for name, value in six.iteritems(kwargs):
                 if isinstance(value, dict):
                     for ch in get_change(value, path + '%s/' % name):
                         yield ch
@@ -92,7 +92,7 @@ class BaremetalClient(service_client.ServiceClient):
                                'value': value,
                                'op': 'replace'}
 
-        patch = [ch for ch in get_change(kw)
+        patch = [ch for ch in get_change(kwargs)
                  if ch['path'].lstrip('/') in allowed_attributes]
 
         return patch
@@ -101,8 +101,8 @@ class BaremetalClient(service_client.ServiceClient):
         """Get the list of objects of the specified type.
 
         :param resource: The name of the REST resource, e.g., 'nodes'.
-        "param **kw: Parameters for the request.
-        :return: A tuple with the server response and deserialized JSON list
+        :param **kwargs: Parameters for the request.
+        :returns: A tuple with the server response and deserialized JSON list
                  of objects
 
         """
@@ -119,7 +119,7 @@ class BaremetalClient(service_client.ServiceClient):
         """Gets a specific object of the specified type.
 
         :param uuid: Unique identifier of the object in UUID format.
-        :return: Serialized object as a dictionary.
+        :returns: Serialized object as a dictionary.
 
         """
         if 'uri' in kwargs:
@@ -137,7 +137,7 @@ class BaremetalClient(service_client.ServiceClient):
         :param resource: The name of the REST resource, e.g., 'nodes'.
         :param object_dict: A Python dict that represents an object of the
                             specified type.
-        :return: A tuple with the server response and the deserialized created
+        :returns: A tuple with the server response and the deserialized created
                  object.
 
         """
@@ -154,7 +154,7 @@ class BaremetalClient(service_client.ServiceClient):
 
         :param resource: The name of the REST resource, e.g., 'nodes'.
         :param uuid: The unique identifier of an object in UUID format.
-        :return: A tuple with the server response and the response body.
+        :returns: A tuple with the server response and the response body.
 
         """
         uri = self._get_uri(resource, uuid)
@@ -168,7 +168,7 @@ class BaremetalClient(service_client.ServiceClient):
 
         :param resource: The name of the REST resource, e.g., 'nodes'.
         :param uuid: The unique identifier of an object in UUID format.
-        :return: A tuple with the server response and the serialized patched
+        :returns: A tuple with the server response and the serialized patched
                  object.
 
         """
@@ -190,7 +190,7 @@ class BaremetalClient(service_client.ServiceClient):
         """Retrieves the desctription of the API.
 
         :param version: The version of the API. Default: 'v1'.
-        :return: Serialized description of API resources.
+        :returns: Serialized description of API resources.
 
         """
         return self._list_request(version, permanent=True)
