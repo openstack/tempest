@@ -105,7 +105,7 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
             # Clean up metering labels
             for metering_label in cls.metering_labels:
                 cls._try_delete_resource(
-                    cls.admin_client.delete_metering_label,
+                    cls.admin_metering_labels_client.delete_metering_label,
                     metering_label['id'])
             # Clean up ports
             for port in cls.ports:
@@ -272,11 +272,12 @@ class BaseAdminNetworkTest(BaseNetworkTest):
         cls.admin_subnets_client = cls.os_adm.subnets_client
         cls.admin_ports_client = cls.os_adm.ports_client
         cls.admin_floating_ips_client = cls.os_adm.floating_ips_client
+        cls.admin_metering_labels_client = cls.os_adm.metering_labels_client
 
     @classmethod
     def create_metering_label(cls, name, description):
         """Wrapper utility that returns a test metering label."""
-        body = cls.admin_client.create_metering_label(
+        body = cls.admin_metering_labels_client.create_metering_label(
             description=description,
             name=data_utils.rand_name("metering-label"))
         metering_label = body['metering_label']

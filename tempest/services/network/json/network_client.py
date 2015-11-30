@@ -35,23 +35,6 @@ class NetworkClient(base.BaseNetworkClient):
     quotas
     """
 
-    def create_metering_label(self, **kwargs):
-        uri = '/metering/metering-labels'
-        post_data = {'metering_label': kwargs}
-        return self.create_resource(uri, post_data)
-
-    def show_metering_label(self, metering_label_id, **fields):
-        uri = '/metering/metering-labels/%s' % metering_label_id
-        return self.show_resource(uri, **fields)
-
-    def delete_metering_label(self, metering_label_id):
-        uri = '/metering/metering-labels/%s' % metering_label_id
-        return self.delete_resource(uri)
-
-    def list_metering_labels(self, **filters):
-        uri = '/metering/metering-labels'
-        return self.list_resources(uri, **filters)
-
     def create_metering_label_rule(self, **kwargs):
         uri = '/metering/metering-label-rules'
         post_data = {'metering_label_rule': kwargs}
