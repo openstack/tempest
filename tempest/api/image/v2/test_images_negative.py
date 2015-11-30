@@ -90,10 +90,12 @@ class ImagesNegativeTest(base.BaseV2ImageTest):
     def test_register_with_invalid_container_format(self):
         # Negative tests for invalid data supplied to POST /images
         self.assertRaises(lib_exc.BadRequest, self.client.create_image,
-                          'test', 'wrong', 'vhd')
+                          name='test', container_format='wrong',
+                          disk_format='vhd')
 
     @test.attr(type=['negative'])
     @test.idempotent_id('70c6040c-5a97-4111-9e13-e73665264ce1')
     def test_register_with_invalid_disk_format(self):
         self.assertRaises(lib_exc.BadRequest, self.client.create_image,
-                          'test', 'bare', 'wrong')
+                          name='test', container_format='bare',
+                          disk_format='wrong')

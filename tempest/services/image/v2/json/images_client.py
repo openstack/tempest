@@ -55,6 +55,11 @@ class ImagesClientV2(service_client.ServiceClient):
         return self._http
 
     def update_image(self, image_id, patch):
+        """Update an image.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-image-v2.html#updateImage-v2
+        """
         data = json.dumps(patch)
         headers = {"Content-Type": "application/openstack-images-v2.0"
                                    "-json-patch"}
@@ -63,21 +68,13 @@ class ImagesClientV2(service_client.ServiceClient):
         body = json.loads(body)
         return service_client.ResponseBody(resp, body)
 
-    def create_image(self, name, container_format, disk_format, **kwargs):
-        params = {
-            "name": name,
-            "container_format": container_format,
-            "disk_format": disk_format,
-        }
+    def create_image(self, **kwargs):
+        """Create an image.
 
-        for option in kwargs:
-            value = kwargs.get(option)
-            if isinstance(value, dict) or isinstance(value, tuple):
-                params.update(value)
-            else:
-                params[option] = value
-
-        data = json.dumps(params)
+        Available params: see http://developer.openstack.org/
+                              api-ref-image-v2.html#createImage-v2
+        """
+        data = json.dumps(kwargs)
         resp, body = self.post('v2/images', data)
         self.expected_success(201, resp.status)
         body = json.loads(body)
