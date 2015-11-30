@@ -13,7 +13,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import jsonschema
 from oslo_serialization import jsonutils as json
 from six.moves.urllib import parse as urllib
 from tempest_lib import exceptions as lib_exc
@@ -49,14 +48,6 @@ class ImagesClientV2(service_client.ServiceClient):
                                       insecure=self.dscv,
                                       ca_certs=self.ca_certs)
 
-    def _validate_schema(self, body, type='image'):
-        if type in ['image', 'images']:
-            schema = self.show_schema(type)
-        else:
-            raise ValueError("%s is not a valid schema type" % type)
-
-        jsonschema.validate(body, schema)
-
     @property
     def http(self):
         if self._http is None:
@@ -65,8 +56,6 @@ class ImagesClientV2(service_client.ServiceClient):
 
     def update_image(self, image_id, patch):
         data = json.dumps(patch)
-        self._validate_schema(data)
-
         headers = {"Content-Type": "application/openstack-images-v2.0"
                                    "-json-patch"}
         resp, body = self.patch('v2/images/%s' % image_id, data, headers)
@@ -89,8 +78,6 @@ class ImagesClientV2(service_client.ServiceClient):
                 params[option] = value
 
         data = json.dumps(params)
-        self._validate_schema(data)
-
         resp, body = self.post('v2/images', data)
         self.expected_success(201, resp.status)
         body = json.loads(body)
@@ -123,7 +110,6 @@ class ImagesClientV2(service_client.ServiceClient):
         resp, body = self.get(url)
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        self._validate_schema(body, type='images')
         return service_client.ResponseBody(resp, body)
 
     def show_image(self, image_id):
@@ -232,8 +218,6 @@ class ImagesClientV2(service_client.ServiceClient):
                               api-ref-image-v2.html#createNamespace-v2
         """
         data = json.dumps(kwargs)
-        self._validate_schema(data)
-
         resp, body = self.post('/v2/metadefs/namespaces', data)
         self.expected_success(201, resp.status)
         body = json.loads(body)
@@ -257,7 +241,6 @@ class ImagesClientV2(service_client.ServiceClient):
         params = {'namespace': namespace}
         params.update(kwargs)
         data = json.dumps(params)
-        self._validate_schema(data)
         url = '/v2/metadefs/namespaces/%s' % namespace
         resp, body = self.put(url, body=data)
         self.expected_success(200, resp.status)
