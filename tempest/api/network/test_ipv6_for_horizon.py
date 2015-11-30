@@ -41,7 +41,7 @@ class HorizonIpv6Specifics(base.BaseNetworkTest):
                                   ip_version=self._ip_version,
                                   enable_dhcp=False)
 
-        body = self.client.list_networks()
+        body = self.networks_client.list_networks()
         network_names = [net['name'] for net in body['networks']]
         self.assertIn(network['name'], network_names)
 
