@@ -24,12 +24,10 @@ import struct
 
 import OpenSSL
 from oslo_log import log as logging
-from oslo_serialization import jsonutils as json
 import six
 from six import moves
 from six.moves import http_client as httplib
 from six.moves.urllib import parse as urlparse
-from tempest_lib import exceptions as lib_exc
 
 from tempest import exceptions as exc
 
@@ -159,30 +157,6 @@ class HTTPClient(object):
             if length >= 2048:
                 self.LOG.debug("Large body (%d) md5 summary: %s", length,
                                hashlib.md5(str_body).hexdigest())
-
-    def json_request(self, method, url, **kwargs):
-        kwargs.setdefault('headers', {})
-        kwargs['headers'].setdefault('Content-Type', 'application/json')
-        if kwargs['headers']['Content-Type'] != 'application/json':
-            msg = "Only application/json content-type is supported."
-            raise lib_exc.InvalidContentType(msg)
-
-        if 'body' in kwargs:
-            kwargs['body'] = json.dumps(kwargs['body'])
-
-        resp, body_iter = self._http_request(url, method, **kwargs)
-
-        if 'application/json' in resp.getheader('content-type', ''):
-            body = ''.join([chunk for chunk in body_iter])
-            try:
-                body = json.loads(body)
-            except ValueError:
-                LOG.error('Could not decode response body as JSON')
-        else:
-            msg = "Only json/application content-type is supported."
-            raise lib_exc.InvalidContentType(msg)
-
-        return resp, body
 
     def raw_request(self, method, url, **kwargs):
         kwargs.setdefault('headers', {})
