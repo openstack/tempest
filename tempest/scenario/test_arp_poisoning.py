@@ -276,9 +276,9 @@ poison_arp("{victim_ip}", "{router_ip}")
             self.addCleanup(self.admin_manager.aggregates_client.
                             delete_aggregate, aggregate['id'])
             self.admin_manager.aggregates_client.add_host(
-                aggregate['id'], node=node)
+                aggregate['id'], host=node)
             self.addCleanup(self.admin_manager.aggregates_client.remove_host,
-                            aggregate['id'], node=node)
+                            aggregate['id'], host=node)
             self.aggregates.append(aggregate['availability_zone'])
 
     @test.idempotent_id('67381e35-9661-497a-ae84-8643e4ebd905')
