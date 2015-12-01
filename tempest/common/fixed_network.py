@@ -83,7 +83,7 @@ def get_tenant_network(creds_provider, compute_networks_client,
            is the network to be used, and it's not visible to the tenant
     :param shared_network_name: name of the shared network to be used if no
            tenant network is available in the creds provider
-    :return a dict with 'id' and 'name' of the network
+    :returns: a dict with 'id' and 'name' of the network
     """
     caller = misc_utils.find_test_caller()
     net_creds = creds_provider.get_primary_creds()

@@ -696,8 +696,8 @@ class NetworkScenarioTest(ScenarioTest):
         def cidr_in_use(cidr, tenant_id):
             """Check cidr existence
 
-            :return True if subnet with cidr already exist in tenant
-                False else
+            :returns: True if subnet with cidr already exist in tenant
+                  False else
             """
             cidr_in_use = self._list_subnets(tenant_id=tenant_id, cidr=cidr)
             return len(cidr_in_use) != 0
