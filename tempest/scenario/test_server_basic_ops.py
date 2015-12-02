@@ -72,20 +72,6 @@ class TestServerBasicOps(manager.ScenarioTest):
     def add_keypair(self):
         self.keypair = self.create_keypair()
 
-    def boot_instance(self):
-        # Create server with image and flavor from input scenario
-        security_groups = [{'name': self.security_group['name']}]
-        self.md = {'meta1': 'data1', 'meta2': 'data2', 'metaN': 'dataN'}
-        create_kwargs = {
-            'key_name': self.keypair['name'],
-            'security_groups': security_groups,
-            'config_drive': CONF.compute_feature_enabled.config_drive,
-            'metadata': self.md
-        }
-        self.instance = self.create_server(image=self.image_ref,
-                                           flavor=self.flavor_ref,
-                                           create_kwargs=create_kwargs)
-
     def verify_ssh(self):
         if self.run_ssh:
             # Obtain a floating IP
@@ -139,7 +125,16 @@ class TestServerBasicOps(manager.ScenarioTest):
     def test_server_basicops(self):
         self.add_keypair()
         self.security_group = self._create_security_group()
-        self.boot_instance()
+        security_groups = [{'name': self.security_group['name']}]
+        self.md = {'meta1': 'data1', 'meta2': 'data2', 'metaN': 'dataN'}
+        self.instance = self.create_server(
+            image_id=self.image_ref,
+            flavor=self.flavor_ref,
+            key_name=self.keypair['name'],
+            security_groups=security_groups,
+            config_drive=CONF.compute_feature_enabled.config_drive,
+            metadata=self.md,
+            wait_until='ACTIVE')
         self.verify_ssh()
         self.verify_metadata()
         self.verify_metadata_on_config_drive()

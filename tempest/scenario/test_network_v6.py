@@ -65,9 +65,6 @@ class TestGettingAddress(manager.NetworkScenarioTest):
         super(TestGettingAddress, self).setUp()
         self.keypair = self.create_keypair()
         self.sec_grp = self._create_security_group(tenant_id=self.tenant_id)
-        self.srv_kwargs = {
-            'key_name': self.keypair['name'],
-            'security_groups': [{'name': self.sec_grp['name']}]}
 
     def prepare_network(self, address6_mode, n_subnets6=1, dualnet=False):
         """Prepare network
@@ -119,11 +116,13 @@ class TestGettingAddress(manager.NetworkScenarioTest):
     def prepare_server(self, networks=None):
         username = CONF.compute.image_ssh_user
 
-        create_kwargs = self.srv_kwargs
         networks = networks or [self.network]
-        create_kwargs['networks'] = [{'uuid': n.id} for n in networks]
 
-        srv = self.create_server(create_kwargs=create_kwargs)
+        srv = self.create_server(
+            key_name=self.keypair['name'],
+            security_groups=[{'name': self.sec_grp['name']}],
+            networks=[{'uuid': n.id} for n in networks],
+            wait_until='ACTIVE')
         fip = self.create_floating_ip(thing=srv)
         ips = self.define_server_ips(srv=srv)
         ssh = self.get_remote_client(
@@ -181,10 +180,10 @@ class TestGettingAddress(manager.NetworkScenarioTest):
                 guest_has_address, sshv4_2, ips_from_api_2['6'][i])
 
             self.assertTrue(test.call_until_true(srv1_v6_addr_assigned,
-                                                 CONF.compute.ping_timeout, 1))
+                            CONF.validation.ping_timeout, 1))
 
             self.assertTrue(test.call_until_true(srv2_v6_addr_assigned,
-                                                 CONF.compute.ping_timeout, 1))
+                            CONF.validation.ping_timeout, 1))
 
         self._check_connectivity(sshv4_1, ips_from_api_2['4'])
         self._check_connectivity(sshv4_2, ips_from_api_1['4'])

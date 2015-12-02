@@ -117,9 +117,9 @@ class TestMinimumBasicScenario(manager.ScenarioTest):
         image = self.glance_image_create()
         keypair = self.create_keypair()
 
-        create_kwargs = {'key_name': keypair['name']}
-        server = self.create_server(image=image,
-                                    create_kwargs=create_kwargs)
+        server = self.create_server(image_id=image,
+                                    key_name=keypair['name'],
+                                    wait_until='ACTIVE')
         servers = self.nova_list()
         self.assertIn(server['id'], [x['id'] for x in servers])
 

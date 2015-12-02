@@ -57,16 +57,13 @@ class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
         security_group = self._create_security_group()
         network, subnet, router = self.create_networks()
         public_network_id = CONF.network.public_network_id
-        create_kwargs = {
-            'networks': [
-                {'uuid': network.id},
-            ],
-            'key_name': keypair['name'],
-            'security_groups': [{'name': security_group['name']}],
-        }
         server_name = data_utils.rand_name('server-smoke')
-        server = self.create_server(name=server_name,
-                                    create_kwargs=create_kwargs)
+        server = self.create_server(
+            name=server_name,
+            networks=[{'uuid': network.id}],
+            key_name=keypair['name'],
+            security_groups=[{'name': security_group['name']}],
+            wait_until='ACTIVE')
         floating_ip = self.create_floating_ip(server, public_network_id)
         # Verify that we can indeed connect to the server before we mess with
         # it's state

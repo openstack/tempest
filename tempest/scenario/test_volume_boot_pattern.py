@@ -69,7 +69,10 @@ class TestVolumeBootPattern(manager.ScenarioTest):
                 {'name': security_group['name']}]
         create_kwargs.update(self._get_bdm(
             vol_id, delete_on_termination=delete_on_termination))
-        return self.create_server(image='', create_kwargs=create_kwargs)
+        return self.create_server(
+            image='',
+            wait_until='ACTIVE',
+            **create_kwargs)
 
     def _create_snapshot_from_volume(self, vol_id):
         snap_name = data_utils.rand_name('snapshot')
@@ -158,7 +161,8 @@ class TestVolumeBootPattern(manager.ScenarioTest):
         self._delete_server(instance)
 
         # boot instance from EBS image
-        instance = self.create_server(image=image['id'])
+        instance = self.create_server(
+            image_id=image['id'])
         # just ensure that instance booted
 
         # delete instance
