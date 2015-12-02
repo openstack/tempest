@@ -265,11 +265,14 @@ class ImagesClient(service_client.ServiceClient):
         body = json.loads(body)
         return service_client.ResponseBody(resp, body)
 
-    def add_member(self, member_id, image_id, can_share=False):
+    def add_member(self, member_id, image_id, **kwargs):
+        """Add a member to an image.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-image-v1.html#addMember-v1
+        """
         url = 'v1/images/%s/members/%s' % (image_id, member_id)
-        body = None
-        if can_share:
-            body = json.dumps({'member': {'can_share': True}})
+        body = json.dumps({'member': kwargs})
         resp, __ = self.put(url, body)
         self.expected_success(204, resp.status)
         return service_client.ResponseBody(resp)
