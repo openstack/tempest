@@ -16,6 +16,6 @@
 from tempest.services.volume.base import base_availability_zone_client
 
 
-class VolumeAvailabilityZoneClient(
-        base_availability_zone_client.BaseVolumeAvailabilityZoneClient):
+class AvailabilityZoneClient(
+        base_availability_zone_client.BaseAvailabilityZoneClient):
     """Volume V1 availability zone client."""

@@ -18,7 +18,7 @@ from six.moves.urllib import parse as urllib
 from tempest.common import service_client
 
 
-class BaseVolumeQuotasClient(service_client.ServiceClient):
+class BaseQuotasClient(service_client.ServiceClient):
     """Client class to send CRUD Volume Quotas API requests"""
 
     TYPE = "json"

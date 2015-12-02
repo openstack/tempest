@@ -16,6 +16,6 @@
 from tempest.services.volume.base.admin import base_types_client
 
 
-class VolumeTypesV2Client(base_types_client.BaseVolumeTypesClient):
+class TypesClient(base_types_client.BaseTypesClient):
     """Client class to send CRUD Volume V2 API requests"""
     api_version = "v2"

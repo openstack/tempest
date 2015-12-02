@@ -20,7 +20,7 @@ from tempest_lib import exceptions as lib_exc
 from tempest.common import service_client
 
 
-class BaseVolumeTypesClient(service_client.ServiceClient):
+class BaseTypesClient(service_client.ServiceClient):
     """Client class to send CRUD Volume Types API requests"""
 
     def is_resource_deleted(self, resource):

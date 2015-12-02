@@ -16,5 +16,5 @@
 from tempest.services.volume.base.admin import base_services_client
 
 
-class VolumesServicesClient(base_services_client.BaseVolumesServicesClient):
+class ServicesClient(base_services_client.BaseServicesClient):
     """Volume V1 volume services client"""
