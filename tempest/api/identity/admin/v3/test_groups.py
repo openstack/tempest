@@ -42,6 +42,21 @@ class GroupsV3TestJSON(base.BaseIdentityV3AdminTest):
         self.assertEqual(new_name, new_group['name'])
         self.assertEqual(new_desc, new_group['description'])
 
+    @test.idempotent_id('b66eb441-b08a-4a6d-81ab-fef71baeb26c')
+    def test_group_update_with_few_fields(self):
+        name = data_utils.rand_name('Group')
+        old_description = data_utils.rand_name('Description')
+        group = self.groups_client.create_group(
+            name=name, description=old_description)['group']
+        self.addCleanup(self.groups_client.delete_group, group['id'])
+
+        new_name = data_utils.rand_name('UpdateGroup')
+        updated_group = self.groups_client.update_group(
+            group['id'], name=new_name)['group']
+        self.assertEqual(new_name, updated_group['name'])
+        # Verify that 'description' is not being updated or deleted.
+        self.assertEqual(old_description, updated_group['description'])
+
     @test.attr(type='smoke')
     @test.idempotent_id('1598521a-2f36-4606-8df9-30772bd51339')
     def test_group_users_add_list_delete(self):
