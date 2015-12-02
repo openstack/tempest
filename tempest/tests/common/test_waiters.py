@@ -18,7 +18,7 @@ import mock
 
 from tempest.common import waiters
 from tempest import exceptions
-from tempest.services.volume.json import volumes_client
+from tempest.services.volume.base import base_volumes_client
 from tempest.tests import base
 
 
@@ -53,7 +53,7 @@ class TestImageWaiters(base.TestCase):
     def test_wait_for_volume_status_error_restoring(self, mock_sleep):
         # Tests that the wait method raises VolumeRestoreErrorException if
         # the volume status is 'error_restoring'.
-        client = mock.Mock(spec=volumes_client.BaseVolumesClient,
+        client = mock.Mock(spec=base_volumes_client.BaseVolumesClient,
                            build_interval=1)
         volume1 = {'volume': {'status': 'restoring-backup'}}
         volume2 = {'volume': {'status': 'error_restoring'}}

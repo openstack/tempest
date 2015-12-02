@@ -1,4 +1,4 @@
-# Copyright 2014 IBM Corp.
+# Copyright 2012 OpenStack Foundation
 # All Rights Reserved.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -13,8 +13,16 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest.services.volume.base import base_extensions_client
+from oslo_serialization import jsonutils as json
+
+from tempest.common import service_client
 
 
-class ExtensionsV2Client(base_extensions_client.BaseExtensionsClient):
-    api_version = "v2"
+class BaseExtensionsClient(service_client.ServiceClient):
+
+    def list_extensions(self):
+        url = 'extensions'
+        resp, body = self.get(url)
+        body = json.loads(body)
+        self.expected_success(200, resp.status)
+        return service_client.ResponseBody(resp, body)

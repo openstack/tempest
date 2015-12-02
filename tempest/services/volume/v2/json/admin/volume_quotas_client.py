@@ -13,9 +13,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest.services.volume.json.admin import volume_quotas_client
+from tempest.services.volume.base.admin import base_volume_quotas_client
 
 
-class VolumeQuotasV2Client(volume_quotas_client.BaseVolumeQuotasClient):
+class VolumeQuotasV2Client(base_volume_quotas_client.BaseVolumeQuotasClient):
     """Client class to send CRUD Volume V2 API requests"""
     api_version = "v2"

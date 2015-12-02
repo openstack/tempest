@@ -334,7 +334,3 @@ class BaseVolumesClient(service_client.ServiceClient):
         post_body = json.dumps({'os-retype': post_body})
         resp, body = self.post('volumes/%s/action' % volume_id, post_body)
         self.expected_success(202, resp.status)
-
-
-class VolumesClient(BaseVolumesClient):
-    """Client class to send CRUD Volume V1 API requests"""

@@ -13,9 +13,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest.services.volume.json.admin import volume_services_client as vs_cli
+from tempest.services.volume.base.admin import base_volume_services_client
 
 
-class VolumesServicesV2Client(vs_cli.BaseVolumesServicesClient):
+class VolumesServicesV2Client(
+        base_volume_services_client.BaseVolumesServicesClient):
     """Client class to send CRUD Volume V2 API requests"""
     api_version = "v2"

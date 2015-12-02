@@ -155,7 +155,3 @@ class BaseQosSpecsClient(service_client.ServiceClient):
         resp, body = self.get(url)
         self.expected_success(202, resp.status)
         return service_client.ResponseBody(resp, body)
-
-
-class QosSpecsClient(BaseQosSpecsClient):
-    """Volume V1 QoS client."""

@@ -46,18 +46,18 @@ from tempest.services.object_storage import object_client
 from tempest.services.orchestration.json import orchestration_client
 from tempest.services.telemetry.json import alarming_client
 from tempest.services.telemetry.json import telemetry_client
-from tempest.services.volume.json.admin import volume_hosts_client
-from tempest.services.volume.json.admin import volume_quotas_client
-from tempest.services.volume.json.admin import volume_services_client
-from tempest.services.volume.json.admin import volume_types_client
-from tempest.services.volume.json import availability_zone_client \
+from tempest.services.volume.v1.json.admin import volume_hosts_client
+from tempest.services.volume.v1.json.admin import volume_quotas_client
+from tempest.services.volume.v1.json.admin import volume_services_client
+from tempest.services.volume.v1.json.admin import volume_types_client
+from tempest.services.volume.v1.json import availability_zone_client \
     as volume_az_client
-from tempest.services.volume.json import backups_client
-from tempest.services.volume.json import extensions_client \
+from tempest.services.volume.v1.json import backups_client
+from tempest.services.volume.v1.json import extensions_client \
     as volume_extensions_client
-from tempest.services.volume.json import qos_client
-from tempest.services.volume.json import snapshots_client
-from tempest.services.volume.json import volumes_client
+from tempest.services.volume.v1.json import qos_client
+from tempest.services.volume.v1.json import snapshots_client
+from tempest.services.volume.v1.json import volumes_client
 from tempest.services.volume.v2.json.admin import volume_hosts_client \
     as volume_v2_hosts_client
 from tempest.services.volume.v2.json.admin import volume_quotas_client \

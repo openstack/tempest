@@ -182,7 +182,3 @@ class BaseVolumeTypesClient(service_client.ServiceClient):
             "/types/%s/encryption/provider" % str(vol_type_id))
         self.expected_success(202, resp.status)
         return service_client.ResponseBody(resp, body)
-
-
-class VolumeTypesClient(BaseVolumeTypesClient):
-    """Volume V1 Volume Types client"""

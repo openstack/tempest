@@ -135,7 +135,7 @@ from tempest.services.object_storage import container_client
 from tempest.services.object_storage import object_client
 from tempest.services.telemetry.json import alarming_client
 from tempest.services.telemetry.json import telemetry_client
-from tempest.services.volume.json import volumes_client
+from tempest.services.volume.v1.json import volumes_client
 
 CONF = config.CONF
 OPTS = {}
