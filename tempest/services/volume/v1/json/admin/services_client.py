@@ -1,4 +1,4 @@
-# Copyright 2013 OpenStack Foundation
+# Copyright 2014 NEC Corporation
 # All Rights Reserved.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -13,8 +13,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest.services.volume.base.admin import base_volume_hosts_client
+from tempest.services.volume.base.admin import base_services_client
 
 
-class VolumeHostsClient(base_volume_hosts_client.BaseVolumeHostsClient):
-    """Client class to send CRUD Volume Host API V1 requests"""
+class VolumesServicesClient(base_services_client.BaseVolumesServicesClient):
+    """Volume V1 volume services client"""

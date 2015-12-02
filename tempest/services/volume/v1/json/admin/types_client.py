@@ -1,4 +1,4 @@
-# Copyright 2014 OpenStack Foundation
+# Copyright 2012 OpenStack Foundation
 # All Rights Reserved.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -13,9 +13,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest.services.volume.base.admin import base_volume_hosts_client
+from tempest.services.volume.base.admin import base_types_client
 
 
-class VolumeHostsV2Client(base_volume_hosts_client.BaseVolumeHostsClient):
-    """Client class to send CRUD Volume V2 API requests"""
-    api_version = "v2"
+class VolumeTypesClient(base_types_client.BaseVolumeTypesClient):
+    """Volume V1 Volume Types client"""

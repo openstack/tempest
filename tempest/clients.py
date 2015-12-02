@@ -121,13 +121,13 @@ from tempest.services.orchestration.json.orchestration_client import \
 from tempest.services.telemetry.json.alarming_client import AlarmingClient
 from tempest.services.telemetry.json.telemetry_client import \
     TelemetryClient
-from tempest.services.volume.v1.json.admin.volume_hosts_client import \
+from tempest.services.volume.v1.json.admin.hosts_client import \
     VolumeHostsClient
-from tempest.services.volume.v1.json.admin.volume_quotas_client import \
+from tempest.services.volume.v1.json.admin.quotas_client import \
     VolumeQuotasClient
-from tempest.services.volume.v1.json.admin.volume_services_client import \
+from tempest.services.volume.v1.json.admin.services_client import \
     VolumesServicesClient
-from tempest.services.volume.v1.json.admin.volume_types_client import \
+from tempest.services.volume.v1.json.admin.types_client import \
     VolumeTypesClient
 from tempest.services.volume.v1.json.availability_zone_client import \
     VolumeAvailabilityZoneClient
@@ -137,13 +137,13 @@ from tempest.services.volume.v1.json.extensions_client import \
 from tempest.services.volume.v1.json.qos_client import QosSpecsClient
 from tempest.services.volume.v1.json.snapshots_client import SnapshotsClient
 from tempest.services.volume.v1.json.volumes_client import VolumesClient
-from tempest.services.volume.v2.json.admin.volume_hosts_client import \
+from tempest.services.volume.v2.json.admin.hosts_client import \
     VolumeHostsV2Client
-from tempest.services.volume.v2.json.admin.volume_quotas_client import \
+from tempest.services.volume.v2.json.admin.quotas_client import \
     VolumeQuotasV2Client
-from tempest.services.volume.v2.json.admin.volume_services_client import \
+from tempest.services.volume.v2.json.admin.services_client import \
     VolumesServicesV2Client
-from tempest.services.volume.v2.json.admin.volume_types_client import \
+from tempest.services.volume.v2.json.admin.types_client import \
     VolumeTypesV2Client
 from tempest.services.volume.v2.json.availability_zone_client import \
     VolumeV2AvailabilityZoneClient
