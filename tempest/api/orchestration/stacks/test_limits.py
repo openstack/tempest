@@ -37,7 +37,7 @@ Outputs:
   Foo: bar''' % fill
         ex = self.assertRaises(lib_exc.BadRequest, self.create_stack,
                                stack_name, template)
-        self.assertIn('Template exceeds maximum allowed size', str(ex))
+        self.assertIn('exceeds maximum allowed size', str(ex))
 
     @test.idempotent_id('d1b83e73-7cad-4a22-9839-036548c5387c')
     def test_exceed_max_resources_per_stack(self):
