@@ -187,6 +187,11 @@ class ImageClientV2(service_client.ServiceClient):
         return service_client.ResponseBody(resp, body)
 
     def update_image_member(self, image_id, member_id, **kwargs):
+        """Update an image member.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-image-v2.html#updateImageMember-v2
+        """
         url = 'v2/images/%s/members/%s' % (image_id, member_id)
         data = json.dumps(kwargs)
         resp, body = self.put(url, data)
