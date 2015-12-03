@@ -33,3 +33,14 @@ class UsersNegativeTest(base.BaseIdentityV3AdminTest):
                           u_name, u_password,
                           email=u_email,
                           domain_id=data_utils.rand_uuid_hex())
+
+    @test.attr(type=['negative'])
+    @test.idempotent_id('b3c9fccc-4134-46f5-b600-1da6fb0a3b1f')
+    def test_authentication_for_disabled_user(self):
+        # Attempt to authenticate for disabled user should fail
+        self.data.setup_test_v3_user()
+        self.disable_user(self.data.test_user)
+        self.assertRaises(lib_exc.Unauthorized, self.token.auth,
+                          username=self.data.test_user,
+                          password=self.data.test_password,
+                          user_domain_id='default')
