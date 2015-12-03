@@ -388,6 +388,7 @@ class NetworkService(BaseService):
         self.ports_client = manager.ports_client
         self.floating_ips_client = manager.floating_ips_client
         self.metering_labels_client = manager.metering_labels_client
+        self.metering_label_rules_client = manager.metering_label_rules_client
 
     def _filter_by_conf_networks(self, item_list):
         if not item_list or not all(('network_id' in i for i in item_list)):
@@ -577,7 +578,7 @@ class NetworkPoolService(NetworkService):
 class NetworkMeteringLabelRuleService(NetworkService):
 
     def list(self):
-        client = self.client
+        client = self.metering_label_rules_client
         rules = client.list_metering_label_rules()
         rules = rules['metering_label_rules']
         rules = self._filter_by_tenant_id(rules)
@@ -585,7 +586,7 @@ class NetworkMeteringLabelRuleService(NetworkService):
         return rules
 
     def delete(self):
-        client = self.client
+        client = self.metering_label_rules_client
         rules = self.list()
         for rule in rules:
             try:

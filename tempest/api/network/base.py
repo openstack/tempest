@@ -98,9 +98,12 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
                     floating_ip['id'])
 
             # Clean up metering label rules
+            # Not all classes in the hierarchy have the client class variable
+            if len(cls.metering_label_rules) > 0:
+                label_rules_client = cls.admin_metering_label_rules_client
             for metering_label_rule in cls.metering_label_rules:
                 cls._try_delete_resource(
-                    cls.admin_client.delete_metering_label_rule,
+                    label_rules_client.delete_metering_label_rule,
                     metering_label_rule['id'])
             # Clean up metering labels
             for metering_label in cls.metering_labels:
@@ -273,6 +276,8 @@ class BaseAdminNetworkTest(BaseNetworkTest):
         cls.admin_ports_client = cls.os_adm.ports_client
         cls.admin_floating_ips_client = cls.os_adm.floating_ips_client
         cls.admin_metering_labels_client = cls.os_adm.metering_labels_client
+        cls.admin_metering_label_rules_client = (
+            cls.os_adm.metering_label_rules_client)
 
     @classmethod
     def create_metering_label(cls, name, description):
@@ -288,7 +293,8 @@ class BaseAdminNetworkTest(BaseNetworkTest):
     def create_metering_label_rule(cls, remote_ip_prefix, direction,
                                    metering_label_id):
         """Wrapper utility that returns a test metering label rule."""
-        body = cls.admin_client.create_metering_label_rule(
+        client = cls.admin_metering_label_rules_client
+        body = client.create_metering_label_rule(
             remote_ip_prefix=remote_ip_prefix, direction=direction,
             metering_label_id=metering_label_id)
         metering_label_rule = body['metering_label_rule']
