@@ -97,7 +97,7 @@ class L3AgentSchedulerTestJSON(base.BaseAdminNetworkTest):
         l3_agent_ids = list()
         self.admin_client.add_router_to_l3_agent(
             self.agent['id'],
-            self.router['id'])
+            router_id=self.router['id'])
         body = (
             self.admin_client.list_l3_agents_hosting_router(self.router['id']))
         for agent in body['agents']:

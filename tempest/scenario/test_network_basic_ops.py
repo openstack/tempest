@@ -726,7 +726,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         target_agent = list(hosting_agents if no_migration else
                             agent_list - hosting_agents)[0]
         schedule_router(target_agent,
-                        self.router['id'])
+                        router_id=self.router['id'])
         self.assertEqual(
             target_agent,
             list_hosts(self.router.id)['agents'][0]['id'],
