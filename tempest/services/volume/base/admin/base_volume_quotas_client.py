@@ -50,21 +50,14 @@ class BaseVolumeQuotasClient(service_client.ServiceClient):
         body = self.show_quota_set(tenant_id, params={'usage': True})
         return body
 
-    def update_quota_set(self, tenant_id, gigabytes=None, volumes=None,
-                         snapshots=None):
-        post_body = {}
+    def update_quota_set(self, tenant_id, **kwargs):
+        """Updates quota set
 
-        if gigabytes is not None:
-            post_body['gigabytes'] = gigabytes
-
-        if volumes is not None:
-            post_body['volumes'] = volumes
-
-        if snapshots is not None:
-            post_body['snapshots'] = snapshots
-
-        post_body = jsonutils.dumps({'quota_set': post_body})
-        resp, body = self.put('os-quota-sets/%s' % tenant_id, post_body)
+        Available params: see http://developer.openstack.org/
+                              api-ref-blockstorage-v2.html#updateQuotas-v2
+        """
+        put_body = jsonutils.dumps({'quota_set': kwargs})
+        resp, body = self.put('os-quota-sets/%s' % tenant_id, put_body)
         self.expected_success(200, resp.status)
         body = jsonutils.loads(body)
         return service_client.ResponseBody(resp, body)
