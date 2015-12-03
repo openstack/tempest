@@ -51,9 +51,11 @@ class MeteringTestJSON(base.BaseAdminNetworkTest):
 
     def _delete_metering_label(self, metering_label_id):
         # Deletes a label and verifies if it is deleted or not
-        self.admin_client.delete_metering_label(metering_label_id)
+        self.admin_metering_labels_client.delete_metering_label(
+            metering_label_id)
         # Asserting that the label is not found in list after deletion
-        labels = self.admin_client.list_metering_labels(id=metering_label_id)
+        labels = self.admin_metering_labels_client.list_metering_labels(
+            id=metering_label_id)
         self.assertEqual(len(labels['metering_labels']), 0)
 
     def _delete_metering_label_rule(self, metering_label_rule_id):
@@ -68,7 +70,7 @@ class MeteringTestJSON(base.BaseAdminNetworkTest):
     @test.idempotent_id('e2fb2f8c-45bf-429a-9f17-171c70444612')
     def test_list_metering_labels(self):
         # Verify label filtering
-        body = self.admin_client.list_metering_labels(id=33)
+        body = self.admin_metering_labels_client.list_metering_labels(id=33)
         metering_labels = body['metering_labels']
         self.assertEqual(0, len(metering_labels))
 
@@ -77,21 +79,22 @@ class MeteringTestJSON(base.BaseAdminNetworkTest):
         # Creates a label
         name = data_utils.rand_name('metering-label-')
         description = "label created by tempest"
-        body = self.admin_client.create_metering_label(name=name,
-                                                       description=description)
+        body = self.admin_metering_labels_client.create_metering_label(
+            name=name, description=description)
         metering_label = body['metering_label']
         self.addCleanup(self._delete_metering_label,
                         metering_label['id'])
         # Assert whether created labels are found in labels list or fail
         # if created labels are not found in labels list
-        labels = (self.admin_client.list_metering_labels(
+        labels = (self.admin_metering_labels_client.list_metering_labels(
                   id=metering_label['id']))
         self.assertEqual(len(labels['metering_labels']), 1)
 
     @test.idempotent_id('30abb445-0eea-472e-bd02-8649f54a5968')
     def test_show_metering_label(self):
         # Verifies the details of a label
-        body = self.admin_client.show_metering_label(self.metering_label['id'])
+        body = self.admin_metering_labels_client.show_metering_label(
+            self.metering_label['id'])
         metering_label = body['metering_label']
         self.assertEqual(self.metering_label['id'], metering_label['id'])
         self.assertEqual(self.metering_label['tenant_id'],

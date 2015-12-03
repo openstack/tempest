@@ -107,6 +107,8 @@ from tempest.services.image.v2.json.image_client import ImageClientV2
 from tempest.services.messaging.json.messaging_client import \
     MessagingClient
 from tempest.services.network.json.floating_ips_client import FloatingIPsClient
+from tempest.services.network.json.metering_labels_client import \
+    MeteringLabelsClient
 from tempest.services.network.json.network_client import NetworkClient
 from tempest.services.network.json.networks_client import NetworksClient
 from tempest.services.network.json.ports_client import PortsClient
@@ -223,6 +225,14 @@ class Manager(manager.Manager):
             build_timeout=CONF.network.build_timeout,
             **self.default_params)
         self.floating_ips_client = FloatingIPsClient(
+            self.auth_provider,
+            CONF.network.catalog_type,
+            CONF.network.region or CONF.identity.region,
+            endpoint_type=CONF.network.endpoint_type,
+            build_interval=CONF.network.build_interval,
+            build_timeout=CONF.network.build_timeout,
+            **self.default_params)
+        self.metering_labels_client = MeteringLabelsClient(
             self.auth_provider,
             CONF.network.catalog_type,
             CONF.network.region or CONF.identity.region,

@@ -387,6 +387,7 @@ class NetworkService(BaseService):
         self.subnets_client = manager.subnets_client
         self.ports_client = manager.ports_client
         self.floating_ips_client = manager.floating_ips_client
+        self.metering_labels_client = manager.metering_labels_client
 
     def _filter_by_conf_networks(self, item_list):
         if not item_list or not all(('network_id' in i for i in item_list)):
@@ -600,7 +601,7 @@ class NetworkMeteringLabelRuleService(NetworkService):
 class NetworkMeteringLabelService(NetworkService):
 
     def list(self):
-        client = self.client
+        client = self.metering_labels_client
         labels = client.list_metering_labels()
         labels = labels['metering_labels']
         labels = self._filter_by_tenant_id(labels)
@@ -608,7 +609,7 @@ class NetworkMeteringLabelService(NetworkService):
         return labels
 
     def delete(self):
-        client = self.client
+        client = self.metering_labels_client
         labels = self.list()
         for label in labels:
             try:
