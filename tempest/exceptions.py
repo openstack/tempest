@@ -177,8 +177,8 @@ class InvalidStructure(TempestException):
 
 
 class InvalidAPIVersionString(TempestException):
-    msg_fmt = ("API Version String %(version)s is of invalid format. Must "
-               "be of format MajorNum.MinorNum.")
+    message = ("API Version String %(version)s is of invalid format. Must "
+               "be of format MajorNum.MinorNum or string 'latest'.")
 
 
 class CommandFailed(Exception):

@@ -347,16 +347,18 @@ ComputeFeaturesGroup = [
                     "The format is 'X.Y', where 'X' and 'Y' are int values. "
                     "Tempest selects tests based on the range between "
                     "min_microversion and max_microversion. "
-                    "If both values are None, Tempest avoids tests which "
-                    "require a microversion."),
+                    "If both values are not specified, Tempest avoids tests "
+                    "which require a microversion. Valid values are string "
+                    "with format 'X.Y' or string 'latest'"),
     cfg.StrOpt('max_microversion',
                default=None,
                help="Upper version of the test target microversion range. "
                     "The format is 'X.Y', where 'X' and 'Y' are int values. "
                     "Tempest selects tests based on the range between "
                     "min_microversion and max_microversion. "
-                    "If both values are None, Tempest avoids tests which "
-                    "require a microversion."),
+                    "If both values are not specified, Tempest avoids tests "
+                    "which require a microversion. Valid values are string "
+                    "with format 'X.Y' or string 'latest'"),
     cfg.BoolOpt('disk_config',
                 default=True,
                 help="If false, skip disk config tests"),
