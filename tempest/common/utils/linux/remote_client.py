@@ -31,7 +31,7 @@ class RemoteClient(object):
     # NOTE(afazekas): It should always get an address instead of server
     def __init__(self, server, username, password=None, pkey=None):
         ssh_timeout = CONF.validation.ssh_timeout
-        network = CONF.compute.network_for_ssh
+        network = CONF.validation.network_for_ssh
         ip_version = CONF.validation.ip_version_for_ssh
         connect_timeout = CONF.validation.connect_timeout
         if isinstance(server, six.string_types):
@@ -51,7 +51,7 @@ class RemoteClient(object):
     def exec_command(self, cmd):
         # Shell options below add more clearness on failures,
         # path is extended for some non-cirros guest oses (centos7)
-        cmd = CONF.compute.ssh_shell_prologue + " " + cmd
+        cmd = CONF.validation.ssh_shell_prologue + " " + cmd
         LOG.debug("Remote command: %s" % cmd)
         return self.ssh_client.exec_command(cmd)
 
@@ -94,8 +94,8 @@ class RemoteClient(object):
         cmd = 'sudo sh -c "echo \\"%s\\" >/dev/console"' % message
         return self.exec_command(cmd)
 
-    def ping_host(self, host, count=CONF.compute.ping_count,
-                  size=CONF.compute.ping_size, nic=None):
+    def ping_host(self, host, count=CONF.validation.ping_count,
+                  size=CONF.validation.ping_size, nic=None):
         addr = netaddr.IPAddress(host)
         cmd = 'ping6' if addr.version == 6 else 'ping'
         if nic:

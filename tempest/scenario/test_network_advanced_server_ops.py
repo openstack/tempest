@@ -74,7 +74,7 @@ class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
 
     def _check_network_connectivity(self, server, keypair, floating_ip,
                                     should_connect=True):
-        username = CONF.compute.image_ssh_user
+        username = CONF.validation.image_ssh_user
         private_key = keypair['private_key']
         self._check_tenant_network_connectivity(
             server, username, private_key,

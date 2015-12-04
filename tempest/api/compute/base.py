@@ -101,13 +101,13 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
         super(BaseV2ComputeTest, cls).resource_setup()
         cls.build_interval = CONF.compute.build_interval
         cls.build_timeout = CONF.compute.build_timeout
-        cls.ssh_user = CONF.compute.ssh_user
         cls.image_ref = CONF.compute.image_ref
         cls.image_ref_alt = CONF.compute.image_ref_alt
         cls.flavor_ref = CONF.compute.flavor_ref
         cls.flavor_ref_alt = CONF.compute.flavor_ref_alt
-        cls.image_ssh_user = CONF.compute.image_ssh_user
-        cls.image_ssh_password = CONF.compute.image_ssh_password
+        cls.ssh_user = CONF.validation.image_ssh_user
+        cls.image_ssh_user = CONF.validation.image_ssh_user
+        cls.image_ssh_password = CONF.validation.image_ssh_password
         cls.servers = []
         cls.images = []
         cls.security_groups = []

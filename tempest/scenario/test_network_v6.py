@@ -114,7 +114,7 @@ class TestGettingAddress(manager.NetworkScenarioTest):
         return ips
 
     def prepare_server(self, networks=None):
-        username = CONF.compute.image_ssh_user
+        username = CONF.validation.image_ssh_user
 
         networks = networks or [self.network]
 

@@ -512,7 +512,7 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
         tenant = self.primary_tenant
         ip = self._get_server_ip(tenant.access_point,
                                  floating=self.floating_ip_access)
-        ssh_login = CONF.compute.image_ssh_user
+        ssh_login = CONF.validation.image_ssh_user
         private_key = tenant.keypair['private_key']
         self.check_vm_connectivity(ip,
                                    should_connect=False)

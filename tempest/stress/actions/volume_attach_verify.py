@@ -161,7 +161,7 @@ class VolumeVerifyStress(stressaction.StressAction):
         self._create_sec_group()
         self._create_keypair()
         private_key = self.key['private_key']
-        username = CONF.compute.image_ssh_user
+        username = CONF.validation.image_ssh_user
         self.remote_client = remote_client.RemoteClient(self.floating['ip'],
                                                         username,
                                                         pkey=private_key)

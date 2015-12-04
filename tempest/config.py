@@ -231,12 +231,6 @@ ComputeGroup = [
     cfg.StrOpt('flavor_ref_alt',
                default="2",
                help='Valid secondary flavor to be used in tests.'),
-    cfg.StrOpt('image_ssh_user',
-               default="root",
-               help="User name used to authenticate to an instance."),
-    cfg.StrOpt('image_ssh_password',
-               default="password",
-               help="Password used to authenticate to an instance."),
     cfg.IntOpt('build_interval',
                default=1,
                help="Time in seconds between build status checks."),
@@ -245,41 +239,6 @@ ComputeGroup = [
                help="Timeout in seconds to wait for an instance to build. "
                     "Other services that do not define build_timeout will "
                     "inherit this value."),
-    cfg.StrOpt('ssh_shell_prologue',
-               default="set -eu -o pipefail; PATH=$$PATH:/sbin;",
-               help="Shell fragments to use before executing a command "
-                    "when sshing to a guest."),
-    cfg.StrOpt('ssh_auth_method',
-               default='keypair',
-               choices=('keypair', 'configured', 'adminpass', 'disabled'),
-               help="Auth method used for authenticate to the instance. "
-                    "Valid choices are: keypair, configured, adminpass "
-                    "and disabled. "
-                    "Keypair: start the servers with a ssh keypair. "
-                    "Configured: use the configured user and password. "
-                    "Adminpass: use the injected adminPass. "
-                    "Disabled: avoid using ssh when it is an option."),
-    cfg.StrOpt('ssh_connect_method',
-               default='floating',
-               choices=('fixed', 'floating'),
-               help="How to connect to the instance? "
-                    "fixed: using the first ip belongs the fixed network "
-                    "floating: creating and using a floating ip."),
-    cfg.StrOpt('ssh_user',
-               default='root',
-               help="User name used to authenticate to an instance."),
-    cfg.IntOpt('ping_timeout',
-               default=120,
-               help="Timeout in seconds to wait for ping to "
-                    "succeed."),
-    cfg.IntOpt('ping_size',
-               default=56,
-               help="The packet size for ping packets originating "
-                    "from remote linux hosts"),
-    cfg.IntOpt('ping_count',
-               default=1,
-               help="The number of ping packets originating from remote "
-                    "linux hosts"),
     cfg.IntOpt('ready_wait',
                default=0,
                help="Additional wait time for clean state, when there is "
@@ -291,13 +250,6 @@ ComputeGroup = [
                     "servers if tempest does not create a network or a "
                     "network is not specified elsewhere. It may be used for "
                     "ssh validation only if floating IPs are disabled."),
-    cfg.StrOpt('network_for_ssh',
-               default='public',
-               help="Network used for SSH connections. Ignored if "
-                    "use_floatingip_for_ssh=true or run_validation=false."),
-    cfg.BoolOpt('use_floatingip_for_ssh',
-                default=True,
-                help="Does SSH use Floating IPs?"),
     cfg.StrOpt('catalog_type',
                default='compute',
                help="Catalog type of the Compute service."),
@@ -323,12 +275,6 @@ ComputeGroup = [
                     'when shelved. This time should be the same as the time '
                     'of nova.conf, and some tests will run for as long as the '
                     'time.'),
-    cfg.StrOpt('floating_ip_range',
-               default='10.0.0.0/29',
-               help='Unallocated floating IP range, which will be used to '
-                    'test the floating IP bulk feature for CRUD operation. '
-                    'This block must not overlap an existing floating IP '
-                    'pool.'),
     cfg.IntOpt('min_compute_nodes',
                default=1,
                help=('The minimum number of compute nodes expected. This will '
@@ -672,9 +618,7 @@ ValidationGroup = [
     cfg.BoolOpt('run_validation',
                 default=False,
                 help='Enable ssh on created servers and creation of additional'
-                     ' validation resources to enable remote access',
-                deprecated_opts=[cfg.DeprecatedOpt('run_ssh',
-                                                   group='compute')]),
+                     ' validation resources to enable remote access'),
     cfg.BoolOpt('security_group',
                 default=True,
                 help='Enable/disable security groups.'),
@@ -686,31 +630,77 @@ ValidationGroup = [
                choices=['fixed', 'floating'],
                help='Default IP type used for validation: '
                     '-fixed: uses the first IP belonging to the fixed network '
-                    '-floating: creates and uses a floating IP'),
+                    '-floating: creates and uses a floating IP',
+               deprecated_opts=[cfg.DeprecatedOpt('use_floatingip_for_ssh',
+                                                  group='compute')]),
     cfg.StrOpt('auth_method',
                default='keypair',
                choices=['keypair'],
                help='Default authentication method to the instance. '
                     'Only ssh via keypair is supported for now. '
-                    'Additional methods will be handled in a separate spec.'),
+                    'Additional methods will be handled in a separate spec.',
+               deprecated_opts=[cfg.DeprecatedOpt('ssh_auth_method',
+                                                  group='compute')]),
     cfg.IntOpt('ip_version_for_ssh',
                default=4,
-               help='Default IP version for ssh connections.',
-               deprecated_opts=[cfg.DeprecatedOpt('ip_version_for_ssh',
-                                                  group='compute')]),
+               help='Default IP version for ssh connections.'),
     cfg.IntOpt('ping_timeout',
                default=120,
-               help='Timeout in seconds to wait for ping to succeed.'),
+               help='Timeout in seconds to wait for ping to succeed.',
+               deprecated_opts=[cfg.DeprecatedOpt('ping_timeout',
+                                                  group='compute')]),
     cfg.IntOpt('connect_timeout',
                default=60,
                help='Timeout in seconds to wait for the TCP connection to be '
-                    'successful.',
-               deprecated_opts=[cfg.DeprecatedOpt('ssh_channel_timeout',
-                                                  group='compute')]),
+                    'successful.'),
     cfg.IntOpt('ssh_timeout',
                default=300,
-               help='Timeout in seconds to wait for the ssh banner.',
-               deprecated_opts=[cfg.DeprecatedOpt('ssh_timeout',
+               help='Timeout in seconds to wait for the ssh banner.'),
+    cfg.StrOpt('image_ssh_user',
+               default="root",
+               help="User name used to authenticate to an instance.",
+               deprecated_opts=[cfg.DeprecatedOpt('image_ssh_user',
+                                                  group='compute'),
+                                cfg.DeprecatedOpt('ssh_user',
+                                                  group='compute'),
+                                cfg.DeprecatedOpt('ssh_user',
+                                                  group='scenario')]),
+    cfg.StrOpt('image_ssh_password',
+               default="password",
+               help="Password used to authenticate to an instance.",
+               deprecated_opts=[cfg.DeprecatedOpt('image_ssh_password',
+                                                  group='compute')]),
+    cfg.StrOpt('ssh_shell_prologue',
+               default="set -eu -o pipefail; PATH=$$PATH:/sbin;",
+               help="Shell fragments to use before executing a command "
+                    "when sshing to a guest.",
+               deprecated_opts=[cfg.DeprecatedOpt('ssh_shell_prologue',
+                                                  group='compute')]),
+    cfg.IntOpt('ping_size',
+               default=56,
+               help="The packet size for ping packets originating "
+                    "from remote linux hosts",
+               deprecated_opts=[cfg.DeprecatedOpt('ping_size',
+                                                  group='compute')]),
+    cfg.IntOpt('ping_count',
+               default=1,
+               help="The number of ping packets originating from remote "
+                    "linux hosts",
+               deprecated_opts=[cfg.DeprecatedOpt('ping_count',
+                                                  group='compute')]),
+    cfg.StrOpt('floating_ip_range',
+               default='10.0.0.0/29',
+               help='Unallocated floating IP range, which will be used to '
+                    'test the floating IP bulk feature for CRUD operation. '
+                    'This block must not overlap an existing floating IP '
+                    'pool.',
+               deprecated_opts=[cfg.DeprecatedOpt('floating_ip_range',
+                                                  group='compute')]),
+    cfg.StrOpt('network_for_ssh',
+               default='public',
+               help="Network used for SSH connections. Ignored if "
+                    "use_floatingip_for_ssh=true or run_validation=false.",
+               deprecated_opts=[cfg.DeprecatedOpt('network_for_ssh',
                                                   group='compute')]),
 ]
 
@@ -1126,9 +1116,6 @@ ScenarioGroup = [
     cfg.StrOpt('aki_img_file',
                default='cirros-0.3.1-x86_64-vmlinuz',
                help='AKI image file name'),
-    cfg.StrOpt('ssh_user',
-               default='cirros',
-               help='ssh username for the image file'),
     cfg.IntOpt(
         'large_ops_number',
         default=0,
