@@ -13,14 +13,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import socket
-
 import mock
-from oslo_serialization import jsonutils as json
 from oslotest import mockpatch
 import six
 from six.moves import http_client as httplib
-from tempest_lib import exceptions as lib_exc
 
 from tempest.common import glance_http
 from tempest import exceptions
@@ -55,60 +51,6 @@ class TestGlanceHTTPClient(base.TestCase):
         self.useFixture(mockpatch.PatchObject(httplib.HTTPConnection,
                         'getresponse', return_value=resp))
         return resp
-
-    def test_json_request_without_content_type_header_in_response(self):
-        self._set_response_fixture({}, 200, 'fake_response_body')
-        self.assertRaises(lib_exc.InvalidContentType,
-                          self.client.json_request, 'GET', '/images')
-
-    def test_json_request_with_xml_content_type_header_in_request(self):
-        self.assertRaises(lib_exc.InvalidContentType,
-                          self.client.json_request, 'GET', '/images',
-                          headers={'Content-Type': 'application/xml'})
-
-    def test_json_request_with_xml_content_type_header_in_response(self):
-        self._set_response_fixture({'content-type': 'application/xml'},
-                                   200, 'fake_response_body')
-        self.assertRaises(lib_exc.InvalidContentType,
-                          self.client.json_request, 'GET', '/images')
-
-    def test_json_request_with_json_content_type_header_only_in_resp(self):
-        self._set_response_fixture({'content-type': 'application/json'},
-                                   200, 'fake_response_body')
-        resp, body = self.client.json_request('GET', '/images')
-        self.assertEqual(200, resp.status)
-        self.assertEqual('fake_response_body', body)
-
-    def test_json_request_with_json_content_type_header_in_req_and_resp(self):
-        self._set_response_fixture({'content-type': 'application/json'},
-                                   200, 'fake_response_body')
-        resp, body = self.client.json_request('GET', '/images', headers={
-            'Content-Type': 'application/json'})
-        self.assertEqual(200, resp.status)
-        self.assertEqual('fake_response_body', body)
-
-    def test_json_request_fails_to_json_loads(self):
-        self._set_response_fixture({'content-type': 'application/json'},
-                                   200, 'fake_response_body')
-        self.useFixture(mockpatch.PatchObject(json, 'loads',
-                        side_effect=ValueError()))
-        resp, body = self.client.json_request('GET', '/images')
-        self.assertEqual(200, resp.status)
-        self.assertEqual(body, 'fake_response_body')
-
-    def test_json_request_socket_timeout(self):
-        self.useFixture(mockpatch.PatchObject(httplib.HTTPConnection,
-                                              'request',
-                                              side_effect=socket.timeout()))
-        self.assertRaises(exceptions.TimeoutException,
-                          self.client.json_request, 'GET', '/images')
-
-    def test_json_request_endpoint_not_found(self):
-        self.useFixture(mockpatch.PatchObject(httplib.HTTPConnection,
-                                              'request',
-                                              side_effect=socket.gaierror()))
-        self.assertRaises(exceptions.EndpointNotFound,
-                          self.client.json_request, 'GET', '/images')
 
     def test_raw_request(self):
         self._set_response_fixture({}, 200, 'fake_response_body')
