@@ -51,19 +51,20 @@ class HTTPClient(object):
         self.endpoint_port = endpoint_parts.port
         self.endpoint_path = endpoint_parts.path
 
-        self.connection_class = self.get_connection_class(self.endpoint_scheme)
-        self.connection_kwargs = self.get_connection_kwargs(
+        self.connection_class = self._get_connection_class(
+            self.endpoint_scheme)
+        self.connection_kwargs = self._get_connection_kwargs(
             self.endpoint_scheme, **kwargs)
 
     @staticmethod
-    def get_connection_class(scheme):
+    def _get_connection_class(scheme):
         if scheme == 'https':
             return VerifiedHTTPSConnection
         else:
             return httplib.HTTPConnection
 
     @staticmethod
-    def get_connection_kwargs(scheme, **kwargs):
+    def _get_connection_kwargs(scheme, **kwargs):
         _kwargs = {'timeout': float(kwargs.get('timeout', 600))}
 
         if scheme == 'https':
@@ -75,7 +76,7 @@ class HTTPClient(object):
 
         return _kwargs
 
-    def get_connection(self):
+    def _get_connection(self):
         _class = self.connection_class
         try:
             return _class(self.endpoint_hostname, self.endpoint_port,
@@ -95,7 +96,7 @@ class HTTPClient(object):
 
         self._log_request(method, url, kwargs['headers'])
 
-        conn = self.get_connection()
+        conn = self._get_connection()
 
         try:
             url_parts = urlparse.urlparse(url)
