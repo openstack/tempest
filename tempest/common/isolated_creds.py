@@ -135,15 +135,15 @@ class IsolatedCreds(cred_provider.CredentialProvider):
                 raise exceptions.InvalidConfiguration('DHCP requires a subnet')
 
         data_utils.rand_name_root = data_utils.rand_name(self.name)
-        if not self.network_resources or not self.network_resources['network']:
+        if not self.network_resources or self.network_resources['network']:
             network_name = data_utils.rand_name_root + "-network"
             network = self._create_network(network_name, tenant_id)
         try:
-            if not self.network_resources or not self.network_resources['subnet']:
+            if not self.network_resources or self.network_resources['subnet']:
                 subnet_name = data_utils.rand_name_root + "-subnet"
                 subnet = self._create_subnet(subnet_name, tenant_id,
                                              network['id'])
-            if not self.network_resources or not self.network_resources['router']:
+            if not self.network_resources or self.network_resources['router']:
                 router_name = data_utils.rand_name_root + "-router"
                 router = self._create_router(router_name, tenant_id)
                 self._add_router_interface(router['id'], subnet['id'])
