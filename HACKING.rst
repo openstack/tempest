@@ -330,24 +330,25 @@ format of the metadata looks like::
         # The created server should be in the detailed list of all servers
         ...
 
-Tempest includes a ``check_uuid.py`` tool that will test for the existence
-and uniqueness of idempotent_id metadata for every test. By default the
-tool runs against the Tempest package by calling::
+Tempest-lib includes a ``check-uuid`` tool that will test for the existence
+and uniqueness of idempotent_id metadata for every test. If you have
+tempest-lib installed you run the tool against Tempest by calling from the
+tempest repo::
 
-    python check_uuid.py
+    check-uuid
 
 It can be invoked against any test suite by passing a package name::
 
-    python check_uuid.py --package <package_name>
+    check-uuid --package <package_name>
 
 Tests without an ``idempotent_id`` can be automatically fixed by running
 the command with the ``--fix`` flag, which will modify the source package
 by inserting randomly generated uuids for every test that does not have
 one::
 
-    python check_uuid.py --fix
+    check-uuid --fix
 
-The ``check_uuid.py`` tool is used as part of the tempest gate job
+The ``check-uuid`` tool is used as part of the tempest gate job
 to ensure that all tests have an ``idempotent_id`` decorator.
 
 Branchless Tempest Considerations
