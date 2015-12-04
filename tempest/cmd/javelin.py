@@ -128,7 +128,7 @@ from tempest.services.compute.json import floating_ips_client
 from tempest.services.compute.json import security_group_rules_client
 from tempest.services.compute.json import servers_client
 from tempest.services.identity.v2.json import identity_client
-from tempest.services.image.v2.json import image_client
+from tempest.services.image.v2.json import images_client
 from tempest.services.network.json import network_client
 from tempest.services.network.json import subnets_client
 from tempest.services.object_storage import container_client
@@ -213,7 +213,7 @@ class OSClient(object):
                                                   **object_storage_params)
         self.containers = container_client.ContainerClient(
             _auth, **object_storage_params)
-        self.images = image_client.ImageClientV2(
+        self.images = images_client.ImagesClientV2(
             _auth,
             CONF.image.catalog_type,
             CONF.image.region or CONF.identity.region,

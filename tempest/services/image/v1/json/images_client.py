@@ -32,13 +32,13 @@ from tempest import exceptions
 LOG = logging.getLogger(__name__)
 
 
-class ImageClient(service_client.ServiceClient):
+class ImagesClient(service_client.ServiceClient):
 
     def __init__(self, auth_provider, catalog_type, region, endpoint_type=None,
                  build_interval=None, build_timeout=None,
                  disable_ssl_certificate_validation=None,
                  ca_certs=None, trace_requests=None):
-        super(ImageClient, self).__init__(
+        super(ImagesClient, self).__init__(
             auth_provider,
             catalog_type,
             region,
