@@ -169,8 +169,8 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
 
     @test.attr(type=['negative'])
     @test.idempotent_id('98fa0458-1485-440f-873b-fe7f0d714930')
-    def test_rebuild_reboot_deleted_server(self):
-        # Rebuild and Reboot a deleted server
+    def test_rebuild_deleted_server(self):
+        # Rebuild a deleted server
         server = self.create_test_server()
         self.client.delete_server(server['id'])
         waiters.wait_for_server_termination(self.client, server['id'])
@@ -178,6 +178,15 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
         self.assertRaises(lib_exc.NotFound,
                           self.client.rebuild_server,
                           server['id'], self.image_ref_alt)
+
+    @test.attr(type=['negative'])
+    @test.idempotent_id('581a397d-5eab-486f-9cf9-1014bbd4c984')
+    def test_reboot_deleted_server(self):
+        # Reboot a deleted server
+        server = self.create_test_server()
+        self.client.delete_server(server['id'])
+        waiters.wait_for_server_termination(self.client, server['id'])
+
         self.assertRaises(lib_exc.NotFound, self.client.reboot_server,
                           server['id'], 'SOFT')
 
