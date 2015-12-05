@@ -42,11 +42,14 @@ class FloatingIPsClient(service_client.ServiceClient):
         self.validate_response(schema.create_get_floating_ip, resp, body)
         return service_client.ResponseBody(resp, body)
 
-    def create_floating_ip(self, pool_name=None):
-        """Allocate a floating IP to the project."""
+    def create_floating_ip(self, **kwargs):
+        """Allocate a floating IP to the project.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-compute-v2.1.html#createFloatingIP
+        """
         url = 'os-floating-ips'
-        post_body = {'pool': pool_name}
-        post_body = json.dumps(post_body)
+        post_body = json.dumps(kwargs)
         resp, body = self.post(url, post_body)
         body = json.loads(body)
         self.validate_response(schema.create_get_floating_ip, resp, body)

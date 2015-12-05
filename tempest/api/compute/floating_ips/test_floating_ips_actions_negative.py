@@ -60,7 +60,7 @@ class FloatingIPsNegativeTestJSON(base.BaseFloatingIPsTest):
         # to a project should fail
         self.assertRaises(lib_exc.NotFound,
                           self.client.create_floating_ip,
-                          "non_exist_pool")
+                          pool="non_exist_pool")
 
     @test.attr(type=['negative'])
     @test.idempotent_id('ae1c55a8-552b-44d4-bfb6-2a115a15d0ba')
