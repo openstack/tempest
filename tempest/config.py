@@ -341,6 +341,22 @@ compute_features_group = cfg.OptGroup(name='compute-feature-enabled',
                                       title="Enabled Compute Service Features")
 
 ComputeFeaturesGroup = [
+    cfg.StrOpt('min_microversion',
+               default=None,
+               help="Lower version of the test target microversion range. "
+                    "The format is 'X.Y', where 'X' and 'Y' are int values. "
+                    "Tempest selects tests based on the range between "
+                    "min_microversion and max_microversion. "
+                    "If both values are None, Tempest avoids tests which "
+                    "require a microversion."),
+    cfg.StrOpt('max_microversion',
+               default=None,
+               help="Upper version of the test target microversion range. "
+                    "The format is 'X.Y', where 'X' and 'Y' are int values. "
+                    "Tempest selects tests based on the range between "
+                    "min_microversion and max_microversion. "
+                    "If both values are None, Tempest avoids tests which "
+                    "require a microversion."),
     cfg.BoolOpt('disk_config',
                 default=True,
                 help="If false, skip disk config tests"),
