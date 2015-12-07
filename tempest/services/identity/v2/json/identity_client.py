@@ -307,8 +307,11 @@ class IdentityClient(service_client.ServiceClient):
         body = json.loads(body)
         return service_client.ResponseBody(resp, body)
 
-    def create_user_ec2_credentials(self, user_id, tenant_id):
-        post_body = json.dumps({'tenant_id': tenant_id})
+    def create_user_ec2_credentials(self, user_id, **kwargs):
+        # TODO(piyush): Current api-site doesn't contain this API description.
+        # After fixing the api-site, we need to fix here also for putting the
+        # link to api-site.
+        post_body = json.dumps(kwargs)
         resp, body = self.post('/users/%s/credentials/OS-EC2' % user_id,
                                post_body)
         self.expected_success(200, resp.status)
