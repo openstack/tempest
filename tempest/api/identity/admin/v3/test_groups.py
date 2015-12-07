@@ -76,8 +76,10 @@ class GroupsV3TestJSON(base.BaseIdentityV3AdminTest):
         # list users in group
         group_users = self.groups_client.list_group_users(group['id'])['users']
         self.assertEqual(sorted(users), sorted(group_users))
-        # delete user in group
+        # check and delete user in group
         for user in users:
+            self.groups_client.check_group_user_existence(
+                group['id'], user['id'])
             self.groups_client.delete_group_user(group['id'], user['id'])
         group_users = self.groups_client.list_group_users(group['id'])['users']
         self.assertEqual(len(group_users), 0)
