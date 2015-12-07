@@ -128,6 +128,7 @@ from tempest.services.compute.json import floating_ips_client
 from tempest.services.compute.json import security_group_rules_client
 from tempest.services.compute.json import servers_client
 from tempest.services.identity.v2.json import identity_client
+from tempest.services.identity.v2.json import roles_client
 from tempest.services.identity.v2.json import tenants_client
 from tempest.services.image.v2.json import images_client
 from tempest.services.network.json import network_client
@@ -201,6 +202,12 @@ class OSClient(object):
             endpoint_type='adminURL',
             **default_params_with_timeout_values)
         self.tenants = tenants_client.TenantsClient(
+            _auth,
+            CONF.identity.catalog_type,
+            CONF.identity.region,
+            endpoint_type='adminURL',
+            **default_params_with_timeout_values)
+        self.roles = roles_client.RolesClient(
             _auth,
             CONF.identity.catalog_type,
             CONF.identity.region,
@@ -339,11 +346,11 @@ def _tenants_from_users(users):
 
 def _assign_swift_role(user, swift_role):
     admin = keystone_admin()
-    roles = admin.identity.list_roles()
+    roles = admin.roles.list_roles()
     role = next(r for r in roles if r['name'] == swift_role)
     LOG.debug(USERS[user])
     try:
-        admin.identity.assign_user_role(
+        admin.roles.assign_user_role(
             USERS[user]['tenant_id'],
             USERS[user]['id'],
             role['id'])

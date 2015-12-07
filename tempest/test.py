@@ -437,9 +437,11 @@ class BaseTestCase(testtools.testcase.WithAttributes,
         if CONF.identity.auth_version == 'v2':
             client = self.os_admin.identity_client
             project_client = self.os_admin.tenants_client
+            roles_client = self.os_admin.roles_client
         else:
             client = self.os_admin.identity_v3_client
             project_client = None
+            roles_client = None
 
         try:
             domain = client.auth_provider.credentials.project_domain_name
@@ -447,6 +449,7 @@ class BaseTestCase(testtools.testcase.WithAttributes,
             domain = 'Default'
 
         return cred_client.get_creds_client(client, project_client,
+                                            roles_client,
                                             project_domain_name=domain)
 
     @classmethod

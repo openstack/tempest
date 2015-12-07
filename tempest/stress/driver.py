@@ -147,11 +147,13 @@ def stress_openstack(tests, duration, max_runs=None, stop_on_error=False):
                 if CONF.identity.auth_version == 'v2':
                     identity_client = admin_manager.identity_client
                     projects_client = admin_manager.tenants_client
+                    roles_client = admin_manager.roles_client
                 else:
                     identity_client = admin_manager.identity_v3_client
                     projects_client = None
+                    roles_client = None
                 credentials_client = cred_client.get_creds_client(
-                    identity_client, projects_client)
+                    identity_client, projects_client, roles_client)
                 project = credentials_client.create_project(
                     name=tenant_name, description=tenant_name)
                 user = credentials_client.create_user(username, password,

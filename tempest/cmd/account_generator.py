@@ -93,6 +93,7 @@ from tempest.common import identity
 from tempest import config
 from tempest import exceptions as exc
 from tempest.services.identity.v2.json import identity_client
+from tempest.services.identity.v2.json import roles_client
 from tempest.services.identity.v2.json import tenants_client
 from tempest.services.network.json import network_client
 from tempest.services.network.json import networks_client
@@ -146,6 +147,13 @@ def get_admin_clients(opts):
         endpoint_type='adminURL',
         **params
     )
+    roles_admin = roles_client.RolesClient(
+        _auth,
+        CONF.identity.catalog_type,
+        CONF.identity.region,
+        endpoint_type='adminURL',
+        **params
+    )
     network_admin = None
     networks_admin = None
     subnets_admin = None
@@ -171,14 +179,14 @@ def get_admin_clients(opts):
             CONF.network.region or CONF.identity.region,
             endpoint_type='adminURL',
             **params)
-    return (identity_admin, tenants_admin, neutron_iso_networks, network_admin,
-            networks_admin, subnets_admin)
+    return (identity_admin, tenants_admin, roles_admin, neutron_iso_networks,
+            network_admin, networks_admin, subnets_admin)
 
 
 def create_resources(opts, resources):
-    (identity_admin, tenants_admin, neutron_iso_networks,
+    (identity_admin, tenants_admin, roles_admin, neutron_iso_networks,
      network_admin, networks_admin, subnets_admin) = get_admin_clients(opts)
-    roles = identity_admin.list_roles()['roles']
+    roles = roles_admin.list_roles()['roles']
     for u in resources['users']:
         u['role_ids'] = []
         for r in u.get('roles', ()):
@@ -240,7 +248,7 @@ def create_resources(opts, resources):
             continue
         for r in u['role_ids']:
             try:
-                identity_admin.assign_user_role(tenant['id'], user['id'], r)
+                roles_admin.assign_user_role(tenant['id'], user['id'], r)
             except tempest_lib.exceptions.Conflict:
                 # don't care if it's already assigned
                 pass

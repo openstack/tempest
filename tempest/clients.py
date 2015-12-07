@@ -89,6 +89,8 @@ from tempest.services.database.json.versions_client import \
     DatabaseVersionsClient
 from tempest.services.identity.v2.json.identity_client import \
     IdentityClient
+from tempest.services.identity.v2.json.roles_client import \
+    RolesClient
 from tempest.services.identity.v2.json.tenants_client import \
     TenantsClient
 from tempest.services.identity.v3.json.credentials_client import \
@@ -427,6 +429,8 @@ class Manager(manager.Manager):
                                               **params_v2_admin)
         self.tenants_client = TenantsClient(self.auth_provider,
                                             **params_v2_admin)
+        self.roles_client = RolesClient(self.auth_provider,
+                                        **params_v2_admin)
         params_v2_public = params.copy()
         params_v2_public['endpoint_type'] = (
             CONF.identity.v2_public_endpoint_type)
@@ -435,6 +439,8 @@ class Manager(manager.Manager):
                                                      **params_v2_public)
         self.tenants_public_client = TenantsClient(self.auth_provider,
                                                    **params_v2_public)
+        self.roles_public_client = RolesClient(self.auth_provider,
+                                               **params_v2_public)
         params_v3 = params.copy()
         params_v3['endpoint_type'] = CONF.identity.v3_endpoint_type
         # Clients below use the endpoint type of Keystone API v3

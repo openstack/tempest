@@ -31,12 +31,14 @@ class CredsClient(object):
      admin credentials used for generating credentials.
     """
 
-    def __init__(self, identity_client, projects_client=None):
+    def __init__(self, identity_client, projects_client=None,
+                 roles_client=None):
         # The client implies version and credentials
         self.identity_client = identity_client
         # this is temporary until the v3 project client is
         # separated, then projects_client will become mandatory
         self.projects_client = projects_client or identity_client
+        self.roles_client = roles_client or identity_client
 
     def create_user(self, username, password, project, email):
         user = self.identity_client.create_user(
@@ -59,7 +61,7 @@ class CredsClient(object):
 
     def create_user_role(self, role_name):
         if not self._check_role_exists(role_name):
-            self.identity_client.create_role(role_name)
+            self.roles_client.create_role(role_name)
 
     def assign_user_role(self, user, project, role_name):
         role = self._check_role_exists(role_name)
@@ -67,8 +69,8 @@ class CredsClient(object):
             msg = 'No "%s" role found' % role_name
             raise lib_exc.NotFound(msg)
         try:
-            self.identity_client.assign_user_role(project['id'], user['id'],
-                                                  role['id'])
+            self.roles_client.assign_user_role(project['id'], user['id'],
+                                               role['id'])
         except lib_exc.Conflict:
             LOG.debug("Role %s already assigned on project %s for user %s" % (
                 role['id'], project['id'], user['id']))
@@ -88,14 +90,16 @@ class CredsClient(object):
         self.identity_client.delete_user(user_id)
 
     def _list_roles(self):
-        roles = self.identity_client.list_roles()['roles']
+        roles = self.roles_client.list_roles()['roles']
         return roles
 
 
 class V2CredsClient(CredsClient):
 
-    def __init__(self, identity_client, projects_client):
-        super(V2CredsClient, self).__init__(identity_client, projects_client)
+    def __init__(self, identity_client, projects_client, roles_client):
+        super(V2CredsClient, self).__init__(identity_client,
+                                            projects_client,
+                                            roles_client)
 
     def create_project(self, name, description):
         tenant = self.projects_client.create_tenant(
@@ -160,8 +164,9 @@ class V3CredsClient(CredsClient):
 
 def get_creds_client(identity_client,
                      projects_client=None,
+                     roles_client=None,
                      project_domain_name=None):
     if isinstance(identity_client, v2_identity.IdentityClient):
-        return V2CredsClient(identity_client, projects_client)
+        return V2CredsClient(identity_client, projects_client, roles_client)
     else:
         return V3CredsClient(identity_client, project_domain_name)
