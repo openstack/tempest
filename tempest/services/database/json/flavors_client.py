@@ -31,8 +31,8 @@ class DatabaseFlavorsClient(service_client.ServiceClient):
         body = json.loads(body)
         return service_client.ResponseBody(resp, body)
 
-    def get_db_flavor_details(self, db_flavor_id):
-        resp, body = self.get("flavors/%s" % str(db_flavor_id))
+    def show_db_flavor(self, db_flavor_id):
+        resp, body = self.get("flavors/%s" % db_flavor_id)
         self.expected_success(200, resp.status)
         body = json.loads(body)
         return service_client.ResponseBody(resp, body)
