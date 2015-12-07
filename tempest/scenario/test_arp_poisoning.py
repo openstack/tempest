@@ -173,10 +173,11 @@ poison_arp("{victim_ip}", "{router_ip}")
     @test.idempotent_id('e0eb97ef-1068-49ee-87b8-f398facddef6')
     @test.services('compute', 'network')
     def test_arp_poisoning_single_compute_node_shared_network(self):
+        self.admin_manager.network_client.create_network
         shared_network = self._create_network(
             networks_client=self.admin_manager.networks_client,
-            tenant_id=self.admin_manager.network_client.tenant_id,
-            shared=True
+            shared=True,
+            namestart="test_arp_poisoning-shared"
         )
         subnet = self._create_subnet(shared_network,
                                      client=self.admin_manager.network_client)
@@ -199,10 +200,10 @@ poison_arp("{victim_ip}", "{router_ip}")
         self.run_arp_poisoning_test(attacker_vm_ip, target_vm_ip)
         compute_to_disable = self.compute_nodes[-1]
         self.admin_manager.services_client.disable_service(
-            host=compute_to_disable, binary='nova-compute')
+            host_name=compute_to_disable, binary='nova-compute')
         time.sleep(10)
         self.admin_manager.services_client.enable_service(
-            host=compute_to_disable, binary='nova-compute')
+            host_name=compute_to_disable, binary='nova-compute')
         time.sleep(10)
         self.run_arp_poisoning_test(attacker_vm_ip, target_vm_ip)
 
