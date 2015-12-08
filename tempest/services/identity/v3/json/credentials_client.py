@@ -51,7 +51,7 @@ class CredentialsClient(service_client.ServiceClient):
         body['credential']['blob'] = json.loads(body['credential']['blob'])
         return service_client.ResponseBody(resp, body)
 
-    def get_credential(self, credential_id):
+    def show_credential(self, credential_id):
         """To GET Details of a credential."""
         resp, body = self.get('credentials/%s' % credential_id)
         self.expected_success(200, resp.status)
