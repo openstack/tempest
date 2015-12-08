@@ -30,17 +30,6 @@ class TelemetryClient(service_client.ServiceClient):
     def serialize(self, body):
         return json.dumps(body)
 
-    def add_sample(self, sample_list, meter_name, meter_unit, volume,
-                   sample_type, resource_id, **kwargs):
-        sample = {"counter_name": meter_name, "counter_unit": meter_unit,
-                  "counter_volume": volume, "counter_type": sample_type,
-                  "resource_id": resource_id}
-        for key in kwargs:
-            sample[key] = kwargs[key]
-
-        sample_list.append(self.serialize(sample))
-        return sample_list
-
     def create_sample(self, meter_name, sample_list):
         uri = "%s/meters/%s" % (self.uri_prefix, meter_name)
         body = self.serialize(sample_list)
