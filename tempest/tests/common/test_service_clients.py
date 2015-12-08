@@ -46,10 +46,14 @@ from tempest.services.object_storage import object_client
 from tempest.services.orchestration.json import orchestration_client
 from tempest.services.telemetry.json import alarming_client
 from tempest.services.telemetry.json import telemetry_client
-from tempest.services.volume.v1.json.admin import volume_hosts_client
-from tempest.services.volume.v1.json.admin import volume_quotas_client
-from tempest.services.volume.v1.json.admin import volume_services_client
-from tempest.services.volume.v1.json.admin import volume_types_client
+from tempest.services.volume.v1.json.admin import hosts_client \
+    as volume_hosts_client
+from tempest.services.volume.v1.json.admin import quotas_client \
+    as volume_quotas_client
+from tempest.services.volume.v1.json.admin import services_client \
+    as volume_services_client
+from tempest.services.volume.v1.json.admin import types_client \
+    as volume_types_client
 from tempest.services.volume.v1.json import availability_zone_client \
     as volume_az_client
 from tempest.services.volume.v1.json import backups_client
@@ -58,13 +62,13 @@ from tempest.services.volume.v1.json import extensions_client \
 from tempest.services.volume.v1.json import qos_client
 from tempest.services.volume.v1.json import snapshots_client
 from tempest.services.volume.v1.json import volumes_client
-from tempest.services.volume.v2.json.admin import volume_hosts_client \
+from tempest.services.volume.v2.json.admin import hosts_client \
     as volume_v2_hosts_client
-from tempest.services.volume.v2.json.admin import volume_quotas_client \
+from tempest.services.volume.v2.json.admin import quotas_client \
     as volume_v2_quotas_client
-from tempest.services.volume.v2.json.admin import volume_services_client \
+from tempest.services.volume.v2.json.admin import services_client \
     as volume_v2_services_client
-from tempest.services.volume.v2.json.admin import volume_types_client \
+from tempest.services.volume.v2.json.admin import types_client \
     as volume_v2_types_client
 from tempest.services.volume.v2.json import availability_zone_client \
     as volume_v2_az_client
