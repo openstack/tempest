@@ -46,7 +46,7 @@ class RegionsTestJSON(base.BaseIdentityV3AdminTest):
     def _delete_region(self, region_id):
         self.client.delete_region(region_id)
         self.assertRaises(lib_exc.NotFound,
-                          self.client.get_region, region_id)
+                          self.client.show_region, region_id)
 
     @test.idempotent_id('56186092-82e4-43f2-b954-91013218ba42')
     def test_create_update_get_delete_region(self):
@@ -68,7 +68,7 @@ class RegionsTestJSON(base.BaseIdentityV3AdminTest):
         self.assertEqual(self.setup_regions[1]['id'],
                          region['parent_region_id'])
         # Get the details of region
-        region = self.client.get_region(region['id'])['region']
+        region = self.client.show_region(region['id'])['region']
         self.assertEqual(r_alt_description, region['description'])
         self.assertEqual(self.setup_regions[1]['id'],
                          region['parent_region_id'])
