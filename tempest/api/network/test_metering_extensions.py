@@ -59,12 +59,11 @@ class MeteringTestJSON(base.BaseAdminNetworkTest):
         self.assertEqual(len(labels['metering_labels']), 0)
 
     def _delete_metering_label_rule(self, metering_label_rule_id):
+        client = self.admin_metering_label_rules_client
         # Deletes a rule and verifies if it is deleted or not
-        self.admin_client.delete_metering_label_rule(
-            metering_label_rule_id)
+        client.delete_metering_label_rule(metering_label_rule_id)
         # Asserting that the rule is not found in list after deletion
-        rules = (self.admin_client.list_metering_label_rules(
-                 id=metering_label_rule_id))
+        rules = client.list_metering_label_rules(id=metering_label_rule_id)
         self.assertEqual(len(rules['metering_label_rules']), 0)
 
     @test.idempotent_id('e2fb2f8c-45bf-429a-9f17-171c70444612')
@@ -105,8 +104,9 @@ class MeteringTestJSON(base.BaseAdminNetworkTest):
 
     @test.idempotent_id('cc832399-6681-493b-9d79-0202831a1281')
     def test_list_metering_label_rules(self):
+        client = self.admin_metering_label_rules_client
         # Verify rule filtering
-        body = self.admin_client.list_metering_label_rules(id=33)
+        body = client.list_metering_label_rules(id=33)
         metering_label_rules = body['metering_label_rules']
         self.assertEqual(0, len(metering_label_rules))
 
@@ -115,7 +115,8 @@ class MeteringTestJSON(base.BaseAdminNetworkTest):
         # Creates a rule
         remote_ip_prefix = ("10.0.1.0/24" if self._ip_version == 4
                             else "fd03::/64")
-        body = (self.admin_client.create_metering_label_rule(
+        client = self.admin_metering_label_rules_client
+        body = (client.create_metering_label_rule(
                 remote_ip_prefix=remote_ip_prefix,
                 direction="ingress",
                 metering_label_id=self.metering_label['id']))
@@ -124,14 +125,14 @@ class MeteringTestJSON(base.BaseAdminNetworkTest):
                         metering_label_rule['id'])
         # Assert whether created rules are found in rules list or fail
         # if created rules are not found in rules list
-        rules = (self.admin_client.list_metering_label_rules(
-                 id=metering_label_rule['id']))
+        rules = client.list_metering_label_rules(id=metering_label_rule['id'])
         self.assertEqual(len(rules['metering_label_rules']), 1)
 
     @test.idempotent_id('b7354489-96ea-41f3-9452-bace120fb4a7')
     def test_show_metering_label_rule(self):
         # Verifies the details of a rule
-        body = (self.admin_client.show_metering_label_rule(
+        client = self.admin_metering_label_rules_client
+        body = (client.show_metering_label_rule(
                 self.metering_label_rule['id']))
         metering_label_rule = body['metering_label_rule']
         self.assertEqual(self.metering_label_rule['id'],
