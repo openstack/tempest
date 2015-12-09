@@ -81,7 +81,7 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
     def test_change_server_password(self):
         # The server's password should be set to the provided password
         new_password = 'Newpass1234'
-        self.client.change_password(self.server_id, new_password)
+        self.client.change_password(self.server_id, adminPass=new_password)
         waiters.wait_for_server_status(self.client, self.server_id, 'ACTIVE')
 
         if CONF.validation.run_validation:
@@ -279,9 +279,9 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         # create the first and the second backup
         backup1 = data_utils.rand_name('backup-1')
         resp = self.client.create_backup(self.server_id,
-                                         'daily',
-                                         2,
-                                         backup1).response
+                                         backup_type='daily',
+                                         rotation=2,
+                                         name=backup1).response
         oldest_backup_exist = True
 
         # the oldest one should be deleted automatically in this test
@@ -303,9 +303,9 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         backup2 = data_utils.rand_name('backup-2')
         waiters.wait_for_server_status(self.client, self.server_id, 'ACTIVE')
         resp = self.client.create_backup(self.server_id,
-                                         'daily',
-                                         2,
-                                         backup2).response
+                                         backup_type='daily',
+                                         rotation=2,
+                                         name=backup2).response
         image2_id = data_utils.parse_image_id(resp['location'])
         self.addCleanup(self.os.image_client.delete_image, image2_id)
         self.os.image_client.wait_for_image_status(image2_id, 'active')
@@ -331,9 +331,9 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         backup3 = data_utils.rand_name('backup-3')
         waiters.wait_for_server_status(self.client, self.server_id, 'ACTIVE')
         resp = self.client.create_backup(self.server_id,
-                                         'daily',
-                                         2,
-                                         backup3).response
+                                         backup_type='daily',
+                                         rotation=2,
+                                         name=backup3).response
         image3_id = data_utils.parse_image_id(resp['location'])
         self.addCleanup(self.os.image_client.delete_image, image3_id)
         # the first back up should be deleted

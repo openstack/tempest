@@ -895,7 +895,7 @@ def create_servers(servers):
         client.servers.wait_for_server_status(server_id, 'ACTIVE')
         # create security group(s) after server spawning
         for secgroup in server['secgroups']:
-            client.servers.add_security_group(server_id, secgroup)
+            client.servers.add_security_group(server_id, name=secgroup)
         if CONF.compute.use_floatingip_for_ssh:
             floating_ip_pool = server.get('floating_ip_pool')
             floating_ip = client.floating_ips.create_floating_ip(

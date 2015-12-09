@@ -150,7 +150,7 @@ class AuthorizationTestJSON(base.BaseV2ComputeTest):
     def test_change_password_for_alt_account_fails(self):
         # A change password request for another user's server should fail
         self.assertRaises(lib_exc.NotFound, self.alt_client.change_password,
-                          self.server['id'], 'newpass')
+                          self.server['id'], adminPass='newpass')
 
     @test.idempotent_id('14cb5ff5-f646-45ca-8f51-09081d6c0c24')
     def test_reboot_server_for_alt_account_fails(self):

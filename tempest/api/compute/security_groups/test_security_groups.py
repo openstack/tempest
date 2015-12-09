@@ -100,7 +100,7 @@ class SecurityGroupsTestJSON(base.BaseSecurityGroupsTest):
         server_id = server['id']
         waiters.wait_for_server_status(self.servers_client, server_id,
                                        'ACTIVE')
-        self.servers_client.add_security_group(server_id, sg['name'])
+        self.servers_client.add_security_group(server_id, name=sg['name'])
 
         # Check that we are not able to delete the security
         # group since it is in use by an active server
@@ -112,7 +112,7 @@ class SecurityGroupsTestJSON(base.BaseSecurityGroupsTest):
         self.servers_client.reboot_server(server_id, 'HARD')
         waiters.wait_for_server_status(self.servers_client, server_id,
                                        'ACTIVE')
-        self.servers_client.add_security_group(server_id, sg2['name'])
+        self.servers_client.add_security_group(server_id, name=sg2['name'])
 
         # Check that we are not able to delete the other security
         # group since it is in use by an active server
