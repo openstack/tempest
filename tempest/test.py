@@ -439,10 +439,12 @@ class BaseTestCase(testtools.testcase.WithAttributes,
             client = self.os_admin.identity_client
             project_client = self.os_admin.tenants_client
             roles_client = self.os_admin.roles_client
+            users_client = self.os_admin.users_client
         else:
             client = self.os_admin.identity_v3_client
             project_client = None
             roles_client = None
+            users_client = None
 
         try:
             domain = client.auth_provider.credentials.project_domain_name
@@ -451,6 +453,7 @@ class BaseTestCase(testtools.testcase.WithAttributes,
 
         return cred_client.get_creds_client(client, project_client,
                                             roles_client,
+                                            users_client,
                                             project_domain_name=domain)
 
     @classmethod

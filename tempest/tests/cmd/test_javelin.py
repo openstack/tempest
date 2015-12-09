@@ -119,7 +119,7 @@ class TestCreateResources(JavelinUnitTest):
 
         fake_tenant_id = self.fake_object['tenant']['id']
         fake_email = "%s@%s" % (self.fake_object['user'], fake_tenant_id)
-        mocked_function = self.fake_client.identity.create_user
+        mocked_function = self.fake_client.users.create_user
         mocked_function.assert_called_once_with(self.fake_object['name'],
                                                 self.fake_object['password'],
                                                 fake_tenant_id,
@@ -135,7 +135,7 @@ class TestCreateResources(JavelinUnitTest):
 
         javelin.create_users([self.fake_object])
 
-        mocked_function = self.fake_client.identity.create_user
+        mocked_function = self.fake_client.users.create_user
         self.assertFalse(mocked_function.called)
 
     def test_create_objects(self):
@@ -310,7 +310,7 @@ class TestDestroyResources(JavelinUnitTest):
         fake_auth = self.fake_client
         fake_auth.tenants.list_tenants.return_value = \
             {'tenants': [fake_tenant]}
-        fake_auth.identity.list_users.return_value = {'users': [fake_user]}
+        fake_auth.users.list_users.return_value = {'users': [fake_user]}
 
         self.useFixture(mockpatch.Patch(
                         'tempest.common.identity.get_user_by_username',
@@ -320,7 +320,7 @@ class TestDestroyResources(JavelinUnitTest):
 
         javelin.destroy_users([fake_user])
 
-        mocked_function = fake_auth.identity.delete_user
+        mocked_function = fake_auth.users.delete_user
         mocked_function.assert_called_once_with(fake_user['id'])
 
     def test_destroy_objects(self):

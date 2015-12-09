@@ -30,8 +30,8 @@ class TokensTestJSON(base.BaseIdentityV2AdminTest):
         tenant = self.tenants_client.create_tenant(tenant_name)['tenant']
         self.data.tenants.append(tenant)
         # second:create a user
-        user = self.client.create_user(user_name, user_password,
-                                       tenant['id'], '')['user']
+        user = self.users_client.create_user(user_name, user_password,
+                                             tenant['id'], '')['user']
         self.data.users.append(user)
         # then get a token for the user
         body = self.token_client.auth(user_name,
@@ -62,8 +62,8 @@ class TokensTestJSON(base.BaseIdentityV2AdminTest):
         user_password = data_utils.rand_password()
         tenant_id = None  # No default tenant so will get unscoped token.
         email = ''
-        user = self.client.create_user(user_name, user_password,
-                                       tenant_id, email)['user']
+        user = self.users_client.create_user(user_name, user_password,
+                                             tenant_id, email)['user']
         self.data.users.append(user)
 
         # Create a couple tenants.

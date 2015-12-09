@@ -41,8 +41,9 @@ class IdentityUsersTest(base.BaseIdentityV2Test):
         # we need new non-admin Identity Client with new credentials, since
         # current non_admin_client token will be revoked after updating
         # password
-        self.non_admin_client_for_cleanup = copy.copy(self.non_admin_client)
-        self.non_admin_client_for_cleanup.auth_provider = (
+        self.non_admin_users_client_for_cleanup = copy.copy(
+            self.non_admin_users_client)
+        self.non_admin_users_client_for_cleanup.auth_provider = (
             manager.get_auth_provider(self.new_creds))
         user_id = self.creds.credentials.user_id
         old_pass = self.creds.credentials.password
@@ -50,10 +51,10 @@ class IdentityUsersTest(base.BaseIdentityV2Test):
 
         # to change password back. important for allow_tenant_isolation = false
         self.addCleanup(
-            self.non_admin_client_for_cleanup.update_user_own_password,
+            self.non_admin_users_client_for_cleanup.update_user_own_password,
             user_id, original_password=new_pass, password=old_pass)
         # user updates own password
-        self.non_admin_client.update_user_own_password(
+        self.non_admin_users_client.update_user_own_password(
             user_id, password=new_pass, original_password=old_pass)
         # TODO(lbragstad): Sleeping after the response status has been checked
         # and the body loaded as JSON allows requests to fail-fast. The sleep
@@ -72,7 +73,7 @@ class IdentityUsersTest(base.BaseIdentityV2Test):
         # authorize with old token should lead to Unauthorized
         self.assertRaises(exceptions.Unauthorized,
                           self.non_admin_token_client.auth_token,
-                          self.non_admin_client.token)
+                          self.non_admin_users_client.token)
 
         # authorize with old password should lead to Unauthorized
         self.assertRaises(exceptions.Unauthorized,

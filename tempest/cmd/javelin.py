@@ -130,6 +130,7 @@ from tempest import config
 from tempest.services.identity.v2.json import identity_client
 from tempest.services.identity.v2.json import roles_client
 from tempest.services.identity.v2.json import tenants_client
+from tempest.services.identity.v2.json import users_client
 from tempest.services.image.v2.json import images_client
 from tempest.services.network.json import network_client
 from tempest.services.network.json import subnets_client
@@ -208,6 +209,12 @@ class OSClient(object):
             endpoint_type='adminURL',
             **default_params_with_timeout_values)
         self.roles = roles_client.RolesClient(
+            _auth,
+            CONF.identity.catalog_type,
+            CONF.identity.region,
+            endpoint_type='adminURL',
+            **default_params_with_timeout_values)
+        self.users = users_client.UsersClient(
             _auth,
             CONF.identity.catalog_type,
             CONF.identity.region,
@@ -375,12 +382,12 @@ def create_users(users):
             LOG.error("Tenant: %s - not found" % u['tenant'])
             continue
         try:
-            identity.get_user_by_username(admin.identity,
+            identity.get_user_by_username(admin.tenants,
                                           tenant['id'], u['name'])
             LOG.warning("User '%s' already exists in this environment"
                         % u['name'])
         except lib_exc.NotFound:
-            admin.identity.create_user(
+            admin.users.create_user(
                 u['name'], u['pass'], tenant['id'],
                 "%s@%s" % (u['name'], tenant['id']),
                 enabled=True)
@@ -391,9 +398,9 @@ def destroy_users(users):
     for user in users:
         tenant_id = identity.get_tenant_by_name(admin.tenants,
                                                 user['tenant'])['id']
-        user_id = identity.get_user_by_username(admin.identity,
+        user_id = identity.get_user_by_username(admin.tenants,
                                                 tenant_id, user['name'])['id']
-        admin.identity.delete_user(user_id)
+        admin.users.delete_user(user_id)
 
 
 def collect_users(users):
@@ -404,7 +411,7 @@ def collect_users(users):
         tenant = identity.get_tenant_by_name(admin.tenants, u['tenant'])
         u['tenant_id'] = tenant['id']
         USERS[u['name']] = u
-        body = identity.get_user_by_username(admin.identity,
+        body = identity.get_user_by_username(admin.tenants,
                                              tenant['id'], u['name'])
         USERS[u['name']]['id'] = body['id']
 
@@ -458,7 +465,7 @@ class JavelinCheck(unittest.TestCase):
         LOG.info("checking users")
         for name, user in six.iteritems(self.users):
             client = keystone_admin()
-            found = client.identity.show_user(user['id'])['user']
+            found = client.users.show_user(user['id'])['user']
             self.assertEqual(found['name'], user['name'])
             self.assertEqual(found['tenantId'], user['tenant_id'])
 
