@@ -183,12 +183,19 @@ class ServersClient(service_client.ServiceClient):
                                resp, body)
         return service_client.ResponseBody(resp, body)
 
-    def reboot_server(self, server_id, reboot_type):
-        """Reboots a server."""
-        return self.action(server_id, 'reboot', type=reboot_type)
+    def reboot_server(self, server_id, **kwargs):
+        """Reboot a server.
+
+        Available params: http://developer.openstack.org/
+                          api-ref-compute-v2.1.html#reboot
+        """
+        return self.action(server_id, 'reboot', **kwargs)
 
     def rebuild_server(self, server_id, image_ref, **kwargs):
-        """Rebuilds a server with a new image.
+        """Rebuild a server with a new image.
+
+        Available params: http://developer.openstack.org/
+                          api-ref-compute-v2.1.html#rebuild
 
         Most parameters except the following are passed to the API without
         any changes.
@@ -205,7 +212,10 @@ class ServersClient(service_client.ServiceClient):
                            rebuild_schema, **kwargs)
 
     def resize_server(self, server_id, flavor_ref, **kwargs):
-        """Changes the flavor of a server.
+        """Change the flavor of a server.
+
+        Available params: http://developer.openstack.org/
+                          api-ref-compute-v2.1.html#resize
 
         Most parameters except the following are passed to the API without
         any changes.
@@ -223,7 +233,11 @@ class ServersClient(service_client.ServiceClient):
                            **kwargs)
 
     def revert_resize_server(self, server_id, **kwargs):
-        """Reverts a server back to its original flavor."""
+        """Revert a server back to its original flavor.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-compute-v2.1.html#revertResize
+        """
         return self.action(server_id, 'revertResize', **kwargs)
 
     def list_server_metadata(self, server_id):
@@ -317,16 +331,27 @@ class ServersClient(service_client.ServiceClient):
         """Adds a security group to the server."""
         return self.action(server_id, 'addSecurityGroup', name=name)
 
-    def remove_security_group(self, server_id, name):
-        """Removes a security group from the server."""
-        return self.action(server_id, 'removeSecurityGroup', name=name)
+    def remove_security_group(self, server_id, **kwargs):
+        """Remove a security group from the server.
+
+        Available params: TODO
+        """
+        # TODO(oomichi): The api-site doesn't contain this API description.
+        # So the above should be changed to the api-site link after
+        # adding the description on the api-site.
+        # LP: https://bugs.launchpad.net/openstack-api-site/+bug/1524199
+        return self.action(server_id, 'removeSecurityGroup', **kwargs)
 
     def live_migrate_server(self, server_id, **kwargs):
         """This should be called with administrator privileges ."""
         return self.action(server_id, 'os-migrateLive', **kwargs)
 
     def migrate_server(self, server_id, **kwargs):
-        """Migrates a server to a new host."""
+        """Migrate a server to a new host.
+
+        Available params: http://developer.openstack.org/
+                          api-ref-compute-v2.1.html#migrate
+        """
         return self.action(server_id, 'migrate', **kwargs)
 
     def lock_server(self, server_id, **kwargs):
@@ -334,39 +359,75 @@ class ServersClient(service_client.ServiceClient):
         return self.action(server_id, 'lock', **kwargs)
 
     def unlock_server(self, server_id, **kwargs):
-        """UNlocks the given server."""
+        """UNlock the given server.
+
+        Available params: http://developer.openstack.org/
+                          api-ref-compute-v2.1.html#unlock
+        """
         return self.action(server_id, 'unlock', **kwargs)
 
     def suspend_server(self, server_id, **kwargs):
-        """Suspends the provided server."""
+        """Suspend the provided server.
+
+        Available params: http://developer.openstack.org/
+                          api-ref-compute-v2.1.html#suspend
+        """
         return self.action(server_id, 'suspend', **kwargs)
 
     def resume_server(self, server_id, **kwargs):
-        """Un-suspends the provided server."""
+        """Un-suspend the provided server.
+
+        Available params: http://developer.openstack.org/
+                          api-ref-compute-v2.1.html#resume
+        """
         return self.action(server_id, 'resume', **kwargs)
 
     def pause_server(self, server_id, **kwargs):
-        """Pauses the provided server."""
+        """Pause the provided server.
+
+        Available params: http://developer.openstack.org/
+                          api-ref-compute-v2.1.html#pause
+        """
         return self.action(server_id, 'pause', **kwargs)
 
     def unpause_server(self, server_id, **kwargs):
-        """Un-pauses the provided server."""
+        """Un-pause the provided server.
+
+        Available params: http://developer.openstack.org/
+                          api-ref-compute-v2.1.html#unpause
+        """
         return self.action(server_id, 'unpause', **kwargs)
 
-    def reset_state(self, server_id, state='error'):
-        """Resets the state of a server to active/error."""
-        return self.action(server_id, 'os-resetState', state=state)
+    def reset_state(self, server_id, **kwargs):
+        """Reset the state of a server to active/error.
+
+        Available params: http://developer.openstack.org/
+                          api-ref-compute-v2.1.html#resetState
+        """
+        return self.action(server_id, 'os-resetState', **kwargs)
 
     def shelve_server(self, server_id, **kwargs):
-        """Shelves the provided server."""
+        """Shelve the provided server.
+
+        Available params: http://developer.openstack.org/
+                          api-ref-compute-v2.1.html#shelve
+        """
         return self.action(server_id, 'shelve', **kwargs)
 
     def unshelve_server(self, server_id, **kwargs):
-        """Un-shelves the provided server."""
+        """Un-shelve the provided server.
+
+        Available params: http://developer.openstack.org/
+                          api-ref-compute-v2.1.html#unshelve
+        """
         return self.action(server_id, 'unshelve', **kwargs)
 
     def shelve_offload_server(self, server_id, **kwargs):
-        """Shelve-offload the provided server."""
+        """Shelve-offload the provided server.
+
+        Available params: http://developer.openstack.org/
+                          api-ref-compute-v2.1.html#shelveOffload
+        """
         return self.action(server_id, 'shelveOffload', **kwargs)
 
     def get_console_output(self, server_id, length):
@@ -384,10 +445,12 @@ class ServersClient(service_client.ServiceClient):
         return service_client.ResponseBody(resp, body)
 
     def rescue_server(self, server_id, **kwargs):
-        """Rescue the provided server."""
-        return self.action(server_id, 'rescue',
-                           schema.rescue_server,
-                           **kwargs)
+        """Rescue the provided server.
+
+        Available params: http://developer.openstack.org/
+                          api-ref-compute-v2.1.html#rescue
+        """
+        return self.action(server_id, 'rescue', schema.rescue_server, **kwargs)
 
     def unrescue_server(self, server_id):
         """Unrescue the provided server."""
@@ -419,11 +482,19 @@ class ServersClient(service_client.ServiceClient):
         return self.action(server_id, 'forceDelete', **kwargs)
 
     def restore_soft_deleted_server(self, server_id, **kwargs):
-        """Restore a soft-deleted server."""
+        """Restore a soft-deleted server.
+
+        Available params: http://developer.openstack.org/
+                          api-ref-compute-v2.1.html#restore
+        """
         return self.action(server_id, 'restore', **kwargs)
 
     def reset_network(self, server_id, **kwargs):
-        """Resets the Network of a server"""
+        """Reset the Network of a server.
+
+        Available params: http://developer.openstack.org/
+                          api-ref-compute-v2.1.html#resetNetwork
+        """
         return self.action(server_id, 'resetNetwork', **kwargs)
 
     def inject_network_info(self, server_id, **kwargs):
@@ -441,5 +512,9 @@ class ServersClient(service_client.ServiceClient):
         return self.action(server_id, 'addFixedIp', **kwargs)
 
     def remove_fixed_ip(self, server_id, **kwargs):
-        """Remove input fixed IP from input server instance."""
+        """Remove input fixed IP from input server instance.
+
+        Available params: http://developer.openstack.org/
+                          api-ref-compute-v2.1.html#removeFixedIp
+        """
         return self.action(server_id, 'removeFixedIp', **kwargs)

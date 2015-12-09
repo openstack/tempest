@@ -156,7 +156,7 @@ class AuthorizationTestJSON(base.BaseV2ComputeTest):
     def test_reboot_server_for_alt_account_fails(self):
         # A reboot request for another user's server should fail
         self.assertRaises(lib_exc.NotFound, self.alt_client.reboot_server,
-                          self.server['id'], 'HARD')
+                          self.server['id'], type='HARD')
 
     @test.idempotent_id('8a0bce51-cd00-480b-88ba-dbc7d8408a37')
     def test_rebuild_server_for_alt_account_fails(self):

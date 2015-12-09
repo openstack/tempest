@@ -120,4 +120,4 @@ class ServerRescueTestJSON(base.BaseV2ComputeTest):
 
         # Delete Security group
         self.servers_client.remove_security_group(self.server_id,
-                                                  self.sg_name)
+                                                  name=self.sg_name)

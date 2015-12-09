@@ -112,7 +112,7 @@ class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
     @test.services('compute', 'network')
     def test_server_connectivity_reboot(self):
         server, keypair, floating_ip = self._setup_network_and_servers()
-        self.servers_client.reboot_server(server['id'], reboot_type='SOFT')
+        self.servers_client.reboot_server(server['id'], type='SOFT')
         self._wait_server_status_and_check_network_connectivity(
             server, keypair, floating_ip)
 

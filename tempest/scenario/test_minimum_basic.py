@@ -84,7 +84,7 @@ class TestMinimumBasicScenario(manager.ScenarioTest):
         self.assertEqual(volume, got_volume)
 
     def nova_reboot(self, server):
-        self.servers_client.reboot_server(server['id'], 'SOFT')
+        self.servers_client.reboot_server(server['id'], type='SOFT')
         self._wait_for_server_status(server, 'ACTIVE')
 
     def check_partitions(self):
@@ -97,7 +97,7 @@ class TestMinimumBasicScenario(manager.ScenarioTest):
         self.servers_client.add_security_group(server['id'],
                                                secgroup['name'])
         self.addCleanup(self.servers_client.remove_security_group,
-                        server['id'], secgroup['name'])
+                        server['id'], name=secgroup['name'])
 
         def wait_for_secgroup_add():
             body = (self.servers_client.show_server(server['id'])
