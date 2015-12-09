@@ -234,6 +234,9 @@ class BaseTestCase(testtools.testcase.WithAttributes,
     log_format = ('%(asctime)s %(process)d %(levelname)-8s '
                   '[%(name)s] %(message)s')
 
+    # Client manager class to use in this test case.
+    client_manager = clients.Manager
+
     @classmethod
     def setUpClass(cls):
         # It should never be overridden by descendants
@@ -519,8 +522,8 @@ class BaseTestCase(testtools.testcase.WithAttributes,
             else:
                 raise exceptions.InvalidCredentials(
                     "Invalid credentials type %s" % credential_type)
-        return clients.Manager(credentials=creds, service=cls._service,
-                               api_microversions=cls.services_microversion)
+        return cls.client_manager(credentials=creds, service=cls._service,
+                                  api_microversions=cls.services_microversion)
 
     @classmethod
     def clear_credentials(cls):
