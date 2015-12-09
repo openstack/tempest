@@ -217,8 +217,8 @@ class BaseVolumeAdminTest(BaseVolumeTest):
         """create a test Qos-Specs."""
         name = name or data_utils.rand_name(cls.__name__ + '-QoS')
         consumer = consumer or 'front-end'
-        qos_specs = cls.volume_qos_client.create_qos(name, consumer,
-                                                     **kwargs)['qos_specs']
+        qos_specs = cls.volume_qos_client.create_qos(
+            name=name, consumer=consumer, **kwargs)['qos_specs']
         cls.qos_specs.append(qos_specs['id'])
         return qos_specs
 
