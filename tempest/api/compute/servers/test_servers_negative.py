@@ -430,7 +430,7 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
         nonexistent_server = data_utils.rand_uuid()
         self.assertRaises(lib_exc.NotFound,
                           self.client.get_console_output,
-                          nonexistent_server, 10)
+                          nonexistent_server, length=10)
 
     @test.attr(type=['negative'])
     @test.idempotent_id('6f47992b-5144-4250-9f8b-f00aa33950f3')

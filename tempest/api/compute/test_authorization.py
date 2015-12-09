@@ -443,4 +443,4 @@ class AuthorizationTestJSON(base.BaseV2ComputeTest):
         # A Get Console Output for another user's server should fail
         self.assertRaises(lib_exc.NotFound,
                           self.alt_client.get_console_output,
-                          self.server['id'], 10)
+                          self.server['id'], length=10)

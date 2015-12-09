@@ -455,7 +455,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
             servers = servers['servers']
         for server in servers:
             console_output = self.servers_client.get_console_output(
-                server['id'], length=None)['output']
+                server['id'])['output']
             LOG.debug('Console output for %s\nbody=\n%s',
                       server['id'], console_output)
 
