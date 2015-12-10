@@ -39,9 +39,8 @@ class VolumesServicesV2TestJSON(base.BaseVolumeAdminTest):
 
     @test.idempotent_id('63a3e1ca-37ee-4983-826d-83276a370d25')
     def test_get_service_by_service_binary_name(self):
-        params = {'binary': self.binary_name}
-        services = (self.admin_volume_services_client.list_services(params)
-                    ['services'])
+        services = (self.admin_volume_services_client.list_services(
+            binary=self.binary_name)['services'])
         self.assertNotEqual(0, len(services))
         for service in services:
             self.assertEqual(self.binary_name, service['binary'])
@@ -50,10 +49,9 @@ class VolumesServicesV2TestJSON(base.BaseVolumeAdminTest):
     def test_get_service_by_host_name(self):
         services_on_host = [service for service in self.services if
                             service['host'] == self.host_name]
-        params = {'host': self.host_name}
 
-        services = (self.admin_volume_services_client.list_services(params)
-                    ['services'])
+        services = (self.admin_volume_services_client.list_services(
+            host=self.host_name)['services'])
 
         # we could have a periodic job checkin between the 2 service
         # lookups, so only compare binary lists.
@@ -65,10 +63,10 @@ class VolumesServicesV2TestJSON(base.BaseVolumeAdminTest):
 
     @test.idempotent_id('ffa6167c-4497-4944-a464-226bbdb53908')
     def test_get_service_by_service_and_host_name(self):
-        params = {'host': self.host_name, 'binary': self.binary_name}
 
-        services = (self.admin_volume_services_client.list_services(params)
-                    ['services'])
+        services = (self.admin_volume_services_client.list_services(
+            host=self.host_name, binary=self.binary_name))['services']
+
         self.assertEqual(1, len(services))
         self.assertEqual(self.host_name, services[0]['host'])
         self.assertEqual(self.binary_name, services[0]['binary'])
