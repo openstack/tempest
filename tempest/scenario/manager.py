@@ -67,6 +67,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
         cls.ports_client = cls.manager.ports_client
         cls.subnets_client = cls.manager.subnets_client
         cls.floating_ips_client = cls.manager.floating_ips_client
+        cls.security_groups_client = cls.manager.security_groups_client
         # Heat client
         cls.orchestration_client = cls.manager.orchestration_client
 
@@ -196,7 +197,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
                 # to pass to create_port
                 if 'security_groups' in kwargs:
                     security_groups =\
-                        clients.network_client.list_security_groups(
+                        clients.security_groups_client.list_security_groups(
                         ).get('security_groups')
                     sec_dict = dict([(s['name'], s['id'])
                                     for s in security_groups])
@@ -941,18 +942,22 @@ class NetworkScenarioTest(ScenarioTest):
                                             1)
 
     def _create_security_group(self, client=None, tenant_id=None,
-                               namestart='secgroup-smoke'):
+                               namestart='secgroup-smoke',
+                               security_groups_client=None):
         if client is None:
             client = self.network_client
+        if security_groups_client is None:
+            security_groups_client = self.security_groups_client
         if tenant_id is None:
-            tenant_id = client.tenant_id
-        secgroup = self._create_empty_security_group(namestart=namestart,
-                                                     client=client,
-                                                     tenant_id=tenant_id)
+            tenant_id = security_groups_client.tenant_id
+        secgroup = self._create_empty_security_group(
+            namestart=namestart, client=security_groups_client,
+            tenant_id=tenant_id)
 
         # Add rules to the security group
-        rules = self._create_loginable_secgroup_rule(client=client,
-                                                     secgroup=secgroup)
+        rules = self._create_loginable_secgroup_rule(
+            client=client, secgroup=secgroup,
+            security_groups_client=security_groups_client)
         for rule in rules:
             self.assertEqual(tenant_id, rule.tenant_id)
             self.assertEqual(secgroup.id, rule.security_group_id)
@@ -970,7 +975,7 @@ class NetworkScenarioTest(ScenarioTest):
         :returns: DeletableSecurityGroup -- containing the secgroup created
         """
         if client is None:
-            client = self.network_client
+            client = self.security_groups_client
         if not tenant_id:
             tenant_id = client.tenant_id
         sg_name = data_utils.rand_name(namestart)
@@ -995,7 +1000,7 @@ class NetworkScenarioTest(ScenarioTest):
         :returns: DeletableSecurityGroup -- default secgroup for given tenant
         """
         if client is None:
-            client = self.network_client
+            client = self.security_groups_client
         if not tenant_id:
             tenant_id = client.tenant_id
         sgs = [
@@ -1008,7 +1013,8 @@ class NetworkScenarioTest(ScenarioTest):
                                                     **sgs[0])
 
     def _create_security_group_rule(self, secgroup=None, client=None,
-                                    tenant_id=None, **kwargs):
+                                    tenant_id=None,
+                                    security_groups_client=None, **kwargs):
         """Create a rule from a dictionary of rule parameters.
 
         Create a rule in a secgroup. if secgroup not defined will search for
@@ -1028,11 +1034,13 @@ class NetworkScenarioTest(ScenarioTest):
         """
         if client is None:
             client = self.network_client
+        if security_groups_client is None:
+            security_groups_client = self.security_groups_client
         if not tenant_id:
-            tenant_id = client.tenant_id
+            tenant_id = security_groups_client.tenant_id
         if secgroup is None:
-            secgroup = self._default_security_group(client=client,
-                                                    tenant_id=tenant_id)
+            secgroup = self._default_security_group(
+                client=security_groups_client, tenant_id=tenant_id)
 
         ruleset = dict(security_group_id=secgroup.id,
                        tenant_id=secgroup.tenant_id)
@@ -1049,7 +1057,8 @@ class NetworkScenarioTest(ScenarioTest):
 
         return sg_rule
 
-    def _create_loginable_secgroup_rule(self, client=None, secgroup=None):
+    def _create_loginable_secgroup_rule(self, client=None, secgroup=None,
+                                        security_groups_client=None):
         """Create loginable security group rule
 
         These rules are intended to permit inbound ssh and icmp
@@ -1060,6 +1069,8 @@ class NetworkScenarioTest(ScenarioTest):
 
         if client is None:
             client = self.network_client
+        if security_groups_client is None:
+            security_groups_client = self.security_groups_client
         rules = []
         rulesets = [
             dict(
@@ -1083,7 +1094,9 @@ class NetworkScenarioTest(ScenarioTest):
                 ruleset['direction'] = r_direction
                 try:
                     sg_rule = self._create_security_group_rule(
-                        client=client, secgroup=secgroup, **ruleset)
+                        client=client, secgroup=secgroup,
+                        security_groups_client=security_groups_client,
+                        **ruleset)
                 except lib_exc.Conflict as ex:
                     # if rule already exist - skip rule and continue
                     msg = 'Security group rule already exists'

@@ -71,7 +71,7 @@ class SecGroupTest(base.BaseSecGroupTest):
     @test.idempotent_id('e30abd17-fef9-4739-8617-dc26da88e686')
     def test_list_security_groups(self):
         # Verify the that security group belonging to tenant exist in list
-        body = self.client.list_security_groups()
+        body = self.security_groups_client.list_security_groups()
         security_groups = body['security_groups']
         found = None
         for n in security_groups:
@@ -86,7 +86,7 @@ class SecGroupTest(base.BaseSecGroupTest):
         group_create_body, name = self._create_security_group()
 
         # List security groups and verify if created group is there in response
-        list_body = self.client.list_security_groups()
+        list_body = self.security_groups_client.list_security_groups()
         secgroup_list = list()
         for secgroup in list_body['security_groups']:
             secgroup_list.append(secgroup['id'])
@@ -94,7 +94,7 @@ class SecGroupTest(base.BaseSecGroupTest):
         # Update the security group
         new_name = data_utils.rand_name('security-')
         new_description = data_utils.rand_name('security-description')
-        update_body = self.client.update_security_group(
+        update_body = self.security_groups_client.update_security_group(
             group_create_body['security_group']['id'],
             name=new_name,
             description=new_description)
@@ -103,7 +103,7 @@ class SecGroupTest(base.BaseSecGroupTest):
         self.assertEqual(update_body['security_group']['description'],
                          new_description)
         # Show details of the updated security group
-        show_body = self.client.show_security_group(
+        show_body = self.security_groups_client.show_security_group(
             group_create_body['security_group']['id'])
         self.assertEqual(show_body['security_group']['name'], new_name)
         self.assertEqual(show_body['security_group']['description'],

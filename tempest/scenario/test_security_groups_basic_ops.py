@@ -176,14 +176,14 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
         access_sg = self._create_empty_security_group(
             namestart='secgroup_access-',
             tenant_id=tenant.creds.tenant_id,
-            client=tenant.manager.network_client
+            client=tenant.manager.security_groups_client
         )
 
         # don't use default secgroup since it allows in-tenant traffic
         def_sg = self._create_empty_security_group(
             namestart='secgroup_general-',
             tenant_id=tenant.creds.tenant_id,
-            client=tenant.manager.network_client
+            client=tenant.manager.security_groups_client
         )
         tenant.security_groups.update(access=access_sg, default=def_sg)
         ssh_rule = dict(
@@ -464,7 +464,7 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
         new_sg = self._create_empty_security_group(
             namestart='secgroup_new-',
             tenant_id=new_tenant.creds.tenant_id,
-            client=new_tenant.manager.network_client)
+            client=new_tenant.manager.security_groups_client)
         icmp_rule = dict(
             protocol='icmp',
             direction='ingress',
