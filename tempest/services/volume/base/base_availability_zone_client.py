@@ -18,7 +18,7 @@ from oslo_serialization import jsonutils as json
 from tempest.common import service_client
 
 
-class BaseVolumeAvailabilityZoneClient(service_client.ServiceClient):
+class BaseAvailabilityZoneClient(service_client.ServiceClient):
 
     def list_availability_zones(self):
         resp, body = self.get('os-availability-zone')

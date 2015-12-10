@@ -16,6 +16,6 @@
 from tempest.services.volume.base import base_backups_client
 
 
-class BackupsClientV2(base_backups_client.BaseBackupsClient):
+class BackupsClient(base_backups_client.BaseBackupsClient):
     """Client class to send CRUD Volume V2 API requests"""
     api_version = "v2"

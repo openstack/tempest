@@ -15,5 +15,5 @@
 from tempest.services.volume.base import base_qos_client
 
 
-class QosSpecsV2Client(base_qos_client.BaseQosSpecsClient):
+class QosSpecsClient(base_qos_client.BaseQosSpecsClient):
     api_version = "v2"

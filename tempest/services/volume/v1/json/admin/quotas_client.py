@@ -15,5 +15,5 @@
 from tempest.services.volume.base.admin import base_quotas_client
 
 
-class VolumeQuotasClient(base_quotas_client.BaseVolumeQuotasClient):
+class QuotasClient(base_quotas_client.BaseQuotasClient):
     """Client class to send CRUD Volume Type API V1 requests"""

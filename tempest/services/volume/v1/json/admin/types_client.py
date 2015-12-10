@@ -16,5 +16,5 @@
 from tempest.services.volume.base.admin import base_types_client
 
 
-class VolumeTypesClient(base_types_client.BaseVolumeTypesClient):
+class TypesClient(base_types_client.BaseTypesClient):
     """Volume V1 Volume Types client"""

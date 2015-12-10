@@ -16,5 +16,5 @@
 from tempest.services.volume.base.admin import base_hosts_client
 
 
-class VolumeHostsClient(base_hosts_client.BaseVolumeHostsClient):
+class HostsClient(base_hosts_client.BaseHostsClient):
     """Client class to send CRUD Volume Host API V1 requests"""

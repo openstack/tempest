@@ -19,7 +19,7 @@ from six.moves.urllib import parse as urllib
 from tempest.common import service_client
 
 
-class BaseVolumeHostsClient(service_client.ServiceClient):
+class BaseHostsClient(service_client.ServiceClient):
     """Client class to send CRUD Volume Hosts API requests"""
 
     def list_hosts(self, **params):
