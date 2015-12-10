@@ -54,6 +54,8 @@ class APIVersionRequest(object):
             None value should be used to create Null APIVersionRequest,
             which is equal to 0.0
         """
+        # NOTE(gmann): 'version_string' as String "None" will be considered as
+        # invalid version string.
         self.ver_major = 0
         self.ver_minor = 0
 
