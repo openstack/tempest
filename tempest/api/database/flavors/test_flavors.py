@@ -28,7 +28,7 @@ class DatabaseFlavorsTest(base.BaseDatabaseTest):
     @test.idempotent_id('c94b825e-0132-4686-8049-8a4a2bc09525')
     def test_get_db_flavor(self):
         # The expected flavor details should be returned
-        flavor = (self.client.get_db_flavor_details(self.db_flavor_ref)
+        flavor = (self.client.show_db_flavor(self.db_flavor_ref)
                   ['flavor'])
         self.assertEqual(self.db_flavor_ref, str(flavor['id']))
         self.assertIn('ram', flavor)
@@ -38,7 +38,7 @@ class DatabaseFlavorsTest(base.BaseDatabaseTest):
     @test.attr(type='smoke')
     @test.idempotent_id('685025d6-0cec-4673-8a8d-995cb8e0d3bb')
     def test_list_db_flavors(self):
-        flavor = (self.client.get_db_flavor_details(self.db_flavor_ref)
+        flavor = (self.client.show_db_flavor(self.db_flavor_ref)
                   ['flavor'])
         # List of all flavors should contain the expected flavor
         flavors = self.client.list_db_flavors()['flavors']
@@ -67,7 +67,7 @@ class DatabaseFlavorsTest(base.BaseDatabaseTest):
                          (os_flavors, db_flavors))
         for os_flavor in os_flavors:
             db_flavor =\
-                self.client.get_db_flavor_details(os_flavor['id'])['flavor']
+                self.client.show_db_flavor(os_flavor['id'])['flavor']
             self._check_values(['id', 'name', 'ram'], db_flavor, os_flavor)
             self._check_values(['disk', 'vcpus', 'swap'], db_flavor, os_flavor,
                                in_db=False)
