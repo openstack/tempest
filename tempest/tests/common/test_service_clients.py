@@ -21,8 +21,6 @@ from tempest.services.compute.json import floating_ips_client
 from tempest.services.compute.json import security_group_rules_client
 from tempest.services.compute.json import server_groups_client
 from tempest.services.compute.json import servers_client
-from tempest.services.compute.json import volumes_client \
-    as compute_volumes_client
 from tempest.services.data_processing.v1_1 import data_processing_client
 from tempest.services.database.json import flavors_client as db_flavor_client
 from tempest.services.database.json import versions_client as db_version_client
@@ -93,7 +91,6 @@ class TestServiceClient(base.TestCase):
             security_group_rules_client.SecurityGroupRulesClient,
             server_groups_client.ServerGroupsClient,
             servers_client.ServersClient,
-            compute_volumes_client.VolumesClient,
             data_processing_client.DataProcessingClient,
             db_flavor_client.DatabaseFlavorsClient,
             db_version_client.DatabaseVersionsClient,
