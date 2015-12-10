@@ -48,7 +48,7 @@ class VolumesBackupsV2Test(base.BaseVolumeAdminTest):
         # Create backup
         backup_name = data_utils.rand_name('Backup')
         create_backup = self.backups_adm_client.create_backup
-        backup = create_backup(self.volume['id'],
+        backup = create_backup(volume_id=self.volume['id'],
                                name=backup_name)['backup']
         self.addCleanup(self.backups_adm_client.delete_backup,
                         backup['id'])
@@ -85,9 +85,8 @@ class VolumesBackupsV2Test(base.BaseVolumeAdminTest):
     def test_volume_backup_export_import(self):
         # Create backup
         backup_name = data_utils.rand_name('Backup')
-        backup = (self.backups_adm_client.create_backup(self.volume['id'],
-                                                        name=backup_name)
-                  ['backup'])
+        backup = (self.backups_adm_client.create_backup(
+            volume_id=self.volume['id'], name=backup_name)['backup'])
         self.addCleanup(self._delete_backup, backup['id'])
         self.assertEqual(backup_name, backup['name'])
         self.backups_adm_client.wait_for_backup_status(backup['id'],
