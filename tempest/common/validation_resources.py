@@ -23,7 +23,7 @@ LOG = logging.getLogger(__name__)
 
 
 def create_ssh_security_group(os, add_rule=False):
-    security_groups_client = os.security_groups_client
+    security_groups_client = os.compute_security_groups_client
     security_group_rules_client = os.security_group_rules_client
     sg_name = data_utils.rand_name('securitygroup-')
     sg_description = data_utils.rand_name('description-')
@@ -81,7 +81,7 @@ def clear_validation_resources(os, validation_data=None):
                 if not has_exception:
                     has_exception = exc
         if 'security_group' in validation_data:
-            security_group_client = os.security_groups_client
+            security_group_client = os.compute_security_groups_client
             sec_id = validation_data['security_group']['id']
             try:
                 security_group_client.delete_security_group(sec_id)

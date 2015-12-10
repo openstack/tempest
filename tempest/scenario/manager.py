@@ -55,7 +55,8 @@ class ScenarioTest(tempest.test.BaseTestCase):
         cls.images_client = cls.manager.images_client
         cls.keypairs_client = cls.manager.keypairs_client
         # Nova security groups client
-        cls.security_groups_client = cls.manager.security_groups_client
+        cls.compute_security_groups_client = (
+            cls.manager.compute_security_groups_client)
         cls.security_group_rules_client = (
             cls.manager.security_group_rules_client)
         cls.servers_client = cls.manager.servers_client
@@ -286,7 +287,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
         return volume
 
     def _create_loginable_secgroup_rule(self, secgroup_id=None):
-        _client = self.security_groups_client
+        _client = self.compute_security_groups_client
         _client_rules = self.security_group_rules_client
         if secgroup_id is None:
             sgs = _client.list_security_groups()['security_groups']
@@ -328,13 +329,14 @@ class ScenarioTest(tempest.test.BaseTestCase):
         # Create security group
         sg_name = data_utils.rand_name(self.__class__.__name__)
         sg_desc = sg_name + " description"
-        secgroup = self.security_groups_client.create_security_group(
+        secgroup = self.compute_security_groups_client.create_security_group(
             name=sg_name, description=sg_desc)['security_group']
         self.assertEqual(secgroup['name'], sg_name)
         self.assertEqual(secgroup['description'], sg_desc)
-        self.addCleanup(self.delete_wrapper,
-                        self.security_groups_client.delete_security_group,
-                        secgroup['id'])
+        self.addCleanup(
+            self.delete_wrapper,
+            self.compute_security_groups_client.delete_security_group,
+            secgroup['id'])
 
         # Add rules to the security group
         self._create_loginable_secgroup_rule(secgroup['id'])

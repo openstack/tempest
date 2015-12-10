@@ -269,7 +269,7 @@ class KeyPairService(BaseService):
 class SecurityGroupService(BaseService):
     def __init__(self, manager, **kwargs):
         super(SecurityGroupService, self).__init__(kwargs)
-        self.client = manager.security_groups_client
+        self.client = manager.compute_security_groups_client
 
     def list(self):
         client = self.client
