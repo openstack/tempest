@@ -394,19 +394,13 @@ class IdentityV3Client(service_client.ServiceClient):
         self.expected_success(204, resp.status)
         return service_client.ResponseBody(resp, body)
 
-    def create_trust(self, trustor_user_id, trustee_user_id, project_id,
-                     role_names, impersonation, expires_at):
-        """Creates a trust."""
-        roles = [{'name': n} for n in role_names]
-        post_body = {
-            'trustor_user_id': trustor_user_id,
-            'trustee_user_id': trustee_user_id,
-            'project_id': project_id,
-            'impersonation': impersonation,
-            'roles': roles,
-            'expires_at': expires_at
-        }
-        post_body = json.dumps({'trust': post_body})
+    def create_trust(self, **kwargs):
+        """Creates a trust.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-identity-v3-ext.html#createTrust
+        """
+        post_body = json.dumps({'trust': kwargs})
         resp, body = self.post('OS-TRUST/trusts', post_body)
         self.expected_success(201, resp.status)
         body = json.loads(body)
