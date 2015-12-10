@@ -101,8 +101,8 @@ class BotoClientBase(object):
                 break
         else:
             ec2_cred = (identity_client.create_user_ec2_credentials(
-                identity_client.user_id, identity_client.tenant_id)
-                ['credential'])
+                identity_client.user_id,
+                tenant_id=identity_client.tenant_id)['credential'])
         if not all((ec2_cred, ec2_cred['access'], ec2_cred['secret'])):
             raise lib_exc.NotFound("Unable to get access and secret keys")
         else:
