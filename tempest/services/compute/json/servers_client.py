@@ -311,13 +311,7 @@ class ServersClient(service_client.ServiceClient):
 
     def live_migrate_server(self, server_id, **kwargs):
         """This should be called with administrator privileges ."""
-
-        req_body = json.dumps({'os-migrateLive': kwargs})
-
-        resp, body = self.post("servers/%s/action" % server_id, req_body)
-        self.validate_response(schema.server_actions_common_schema,
-                               resp, body)
-        return service_client.ResponseBody(resp, body)
+        return self.action(server_id, 'os-migrateLive', **kwargs)
 
     def migrate_server(self, server_id, **kwargs):
         """Migrates a server to a new host."""
