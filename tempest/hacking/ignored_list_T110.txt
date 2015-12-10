@@ -1,6 +1,5 @@
 ./tempest/services/database/json/flavors_client.py
 ./tempest/services/identity/v3/json/identity_client.py
-./tempest/services/identity/v3/json/policy_client.py
 ./tempest/services/messaging/json/messaging_client.py
 ./tempest/services/object_storage/object_client.py
 ./tempest/services/telemetry/json/alarming_client.py
