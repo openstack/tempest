@@ -117,7 +117,7 @@ class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
         self.addCleanup(self.client.delete_user, user_body['id'])
         # Creating Role
         role_body = self.client.create_role(
-            data_utils.rand_name('role'))['role']
+            name=data_utils.rand_name('role'))['role']
         # Delete the Role at the end of this method
         self.addCleanup(self.client.delete_role, role_body['id'])
 
