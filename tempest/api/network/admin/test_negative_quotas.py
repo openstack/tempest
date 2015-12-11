@@ -29,6 +29,7 @@ class QuotasNegativeTest(base.BaseAdminNetworkTest):
 
         quota_driver = neutron.db.quota_db.DbQuotaDriver
     """
+    force_tenant_isolation = True
 
     @classmethod
     def skip_checks(cls):
