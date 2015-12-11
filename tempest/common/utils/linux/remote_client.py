@@ -73,7 +73,7 @@ class RemoteClient(object):
             return output.split()[1]
 
     def get_number_of_vcpus(self):
-        output = self.exec_command('grep -c processor /proc/cpuinfo')
+        output = self.exec_command('grep -c ^processor /proc/cpuinfo')
         return int(output)
 
     def get_partitions(self):
