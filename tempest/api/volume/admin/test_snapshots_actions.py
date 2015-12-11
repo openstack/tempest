@@ -50,7 +50,7 @@ class SnapshotsActionsV2Test(base.BaseVolumeAdminTest):
         snap_name = data_utils.rand_name(cls.__name__ + '-Snapshot')
         params = {cls.name_field: snap_name}
         cls.snapshot = cls.client.create_snapshot(
-            cls.volume['id'], **params)['snapshot']
+            volume_id=cls.volume['id'], **params)['snapshot']
         cls.client.wait_for_snapshot_status(cls.snapshot['id'],
                                             'available')
 
@@ -77,7 +77,7 @@ class SnapshotsActionsV2Test(base.BaseVolumeAdminTest):
     def _create_reset_and_force_delete_temp_snapshot(self, status=None):
         # Create snapshot, reset snapshot status,
         # and force delete temp snapshot
-        temp_snapshot = self.create_snapshot(self.volume['id'])
+        temp_snapshot = self.create_snapshot(volume_id=self.volume['id'])
         if status:
             self.admin_snapshots_client.\
                 reset_snapshot_status(temp_snapshot['id'], status)
@@ -110,7 +110,7 @@ class SnapshotsActionsV2Test(base.BaseVolumeAdminTest):
         status = 'error'
         progress_alias = self._get_progress_alias()
         self.client.update_snapshot_status(self.snapshot['id'],
-                                           status, progress)
+                                           status=status, progress=progress)
         snapshot_get = self.admin_snapshots_client.show_snapshot(
             self.snapshot['id'])['snapshot']
         self.assertEqual(status, snapshot_get['status'])

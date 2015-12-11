@@ -52,14 +52,14 @@ class VolumeSnapshotQuotasNegativeV2TestJSON(base.BaseVolumeAdminTest):
         # NOTE(gfidente): no need to delete in tearDown as
         # they are created using utility wrapper methods.
         cls.volume = cls.create_volume()
-        cls.snapshot = cls.create_snapshot(cls.volume['id'])
+        cls.snapshot = cls.create_snapshot(volume_id=cls.volume['id'])
 
     @test.attr(type='negative')
     @test.idempotent_id('02bbf63f-6c05-4357-9d98-2926a94064ff')
     def test_quota_volume_snapshots(self):
         self.assertRaises(lib_exc.OverLimit,
                           self.snapshots_client.create_snapshot,
-                          self.volume['id'])
+                          volume_id=self.volume['id'])
 
     @test.attr(type='negative')
     @test.idempotent_id('c99a1ca9-6cdf-498d-9fdf-25832babef27')
@@ -74,7 +74,7 @@ class VolumeSnapshotQuotasNegativeV2TestJSON(base.BaseVolumeAdminTest):
             **new_quota_set)
         self.assertRaises(lib_exc.OverLimit,
                           self.snapshots_client.create_snapshot,
-                          self.volume['id'])
+                          volume_id=self.volume['id'])
 
 
 class VolumeSnapshotNegativeV1TestJSON(VolumeSnapshotQuotasNegativeV2TestJSON):

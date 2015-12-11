@@ -67,7 +67,7 @@ class TestStampPattern(manager.ScenarioTest):
     def _create_volume_snapshot(self, volume):
         snapshot_name = data_utils.rand_name('scenario-snapshot')
         snapshot = self.snapshots_client.create_snapshot(
-            volume['id'], display_name=snapshot_name)['snapshot']
+            volume_id=volume['id'], display_name=snapshot_name)['snapshot']
 
         def cleaner():
             self.snapshots_client.delete_snapshot(snapshot['id'])

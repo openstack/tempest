@@ -42,15 +42,15 @@ class VolumesV2SnapshotTestJSON(base.BaseVolumeTest):
         self.volumes_client.detach_volume(volume_id)
         self.volumes_client.wait_for_volume_status(volume_id, 'available')
 
-    def _list_by_param_values_and_assert(self, params, with_detail=False):
+    def _list_by_param_values_and_assert(self, with_detail=False, **params):
         """list or list_details with given params and validates result."""
 
         if with_detail:
             fetched_snap_list = self.snapshots_client.list_snapshots(
-                detail=True, params=params)['snapshots']
+                detail=True, **params)['snapshots']
         else:
             fetched_snap_list = self.snapshots_client.list_snapshots(
-                params=params)['snapshots']
+                **params)['snapshots']
 
         # Validating params of fetched snapshots
         for snap in fetched_snap_list:
@@ -135,16 +135,16 @@ class VolumesV2SnapshotTestJSON(base.BaseVolumeTest):
 
         # Verify list snapshots by display_name filter
         params = {self.name_field: snapshot[self.name_field]}
-        self._list_by_param_values_and_assert(params)
+        self._list_by_param_values_and_assert(**params)
 
         # Verify list snapshots by status filter
         params = {'status': 'available'}
-        self._list_by_param_values_and_assert(params)
+        self._list_by_param_values_and_assert(**params)
 
         # Verify list snapshots by status and display name filter
         params = {'status': 'available',
                   self.name_field: snapshot[self.name_field]}
-        self._list_by_param_values_and_assert(params)
+        self._list_by_param_values_and_assert(**params)
 
     @test.idempotent_id('220a1022-1fcd-4a74-a7bd-6b859156cda2')
     def test_snapshots_list_details_with_params(self):
@@ -157,14 +157,14 @@ class VolumesV2SnapshotTestJSON(base.BaseVolumeTest):
 
         # Verify list snapshot details by display_name filter
         params = {self.name_field: snapshot[self.name_field]}
-        self._list_by_param_values_and_assert(params, with_detail=True)
+        self._list_by_param_values_and_assert(with_detail=True, **params)
         # Verify list snapshot details by status filter
         params = {'status': 'available'}
-        self._list_by_param_values_and_assert(params, with_detail=True)
+        self._list_by_param_values_and_assert(with_detail=True, **params)
         # Verify list snapshot details by status and display name filter
         params = {'status': 'available',
                   self.name_field: snapshot[self.name_field]}
-        self._list_by_param_values_and_assert(params, with_detail=True)
+        self._list_by_param_values_and_assert(with_detail=True, **params)
 
     @test.idempotent_id('677863d1-3142-456d-b6ac-9924f667a7f4')
     def test_volume_from_snapshot(self):

@@ -29,7 +29,7 @@ class BaseSnapshotsClient(service_client.ServiceClient):
 
     create_resp = 200
 
-    def list_snapshots(self, detail=False, params=None):
+    def list_snapshots(self, detail=False, **params):
         """List all the snapshot."""
         url = 'snapshots'
         if detail:
@@ -50,17 +50,13 @@ class BaseSnapshotsClient(service_client.ServiceClient):
         self.expected_success(200, resp.status)
         return service_client.ResponseBody(resp, body)
 
-    def create_snapshot(self, volume_id, **kwargs):
+    def create_snapshot(self, **kwargs):
         """Creates a new snapshot.
 
-        volume_id(Required): id of the volume.
-        force: Create a snapshot even if the volume attached (Default=False)
-        display_name: Optional snapshot Name.
-        display_description: User friendly snapshot description.
+        Available params: see http://developer.openstack.org/
+                              api-ref-blockstorage-v2.html#createSnapshot
         """
-        post_body = {'volume_id': volume_id}
-        post_body.update(kwargs)
-        post_body = json.dumps({'snapshot': post_body})
+        post_body = json.dumps({'snapshot': kwargs})
         resp, body = self.post('snapshots', post_body)
         body = json.loads(body)
         self.expected_success(self.create_resp, resp.status)
@@ -136,13 +132,14 @@ class BaseSnapshotsClient(service_client.ServiceClient):
         self.expected_success(202, resp.status)
         return service_client.ResponseBody(resp, body)
 
-    def update_snapshot_status(self, snapshot_id, status, progress):
+    def update_snapshot_status(self, snapshot_id, **kwargs):
         """Update the specified snapshot's status."""
-        post_body = {
-            'status': status,
-            'progress': progress
-        }
-        post_body = json.dumps({'os-update_snapshot_status': post_body})
+        # TODO(gmann): api-site doesn't contain doc ref
+        # for this API. After fixing the api-site, we need to
+        # add the link here.
+        # Bug https://bugs.launchpad.net/openstack-api-site/+bug/1532645
+
+        post_body = json.dumps({'os-update_snapshot_status': kwargs})
         url = 'snapshots/%s/action' % str(snapshot_id)
         resp, body = self.post(url, post_body)
         self.expected_success(202, resp.status)

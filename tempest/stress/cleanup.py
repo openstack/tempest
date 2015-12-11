@@ -84,7 +84,7 @@ def cleanup():
     # volume deletion may block
 
     _, snaps = admin_manager.snapshots_client.list_snapshots(
-        params={"all_tenants": True})['snapshots']
+        all_tenants=True)['snapshots']
     LOG.info("Cleanup::remove %s snapshots" % len(snaps))
     for v in snaps:
         try:
