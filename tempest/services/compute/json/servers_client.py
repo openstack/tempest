@@ -32,7 +32,10 @@ class ServersClient(service_client.ServiceClient):
         self.enable_instance_password = enable_instance_password
 
     def create_server(self, **kwargs):
-        """Create server
+        """Create server.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-compute-v2.1.html#createServer
 
         Most parameters except the following are passed to the API without
         any changes.
@@ -69,7 +72,10 @@ class ServersClient(service_client.ServiceClient):
         return service_client.ResponseBody(resp, body)
 
     def update_server(self, server_id, **kwargs):
-        """Update server
+        """Update server.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-compute-v2.1.html#updateServer
 
         Most parameters except the following are passed to the API without
         any changes.
@@ -85,20 +91,26 @@ class ServersClient(service_client.ServiceClient):
         return service_client.ResponseBody(resp, body)
 
     def show_server(self, server_id):
-        """Get server details"""
+        """Get server details."""
         resp, body = self.get("servers/%s" % server_id)
         body = json.loads(body)
         self.validate_response(schema.get_server, resp, body)
         return service_client.ResponseBody(resp, body)
 
     def delete_server(self, server_id):
-        """Delete server"""
+        """Delete server."""
         resp, body = self.delete("servers/%s" % server_id)
         self.validate_response(schema.delete_server, resp, body)
         return service_client.ResponseBody(resp, body)
 
     def list_servers(self, detail=False, **params):
-        """List servers"""
+        """List servers.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-compute-v2.1.html#listServers
+                          and http://developer.openstack.org/
+                              api-ref-compute-v2.1.html#listDetailServers
+        """
 
         url = 'servers'
         _schema = schema.list_servers
