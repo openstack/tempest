@@ -45,9 +45,10 @@ class AttachInterfacesTestJSON(base.BaseV2ComputeTest):
     def setup_clients(cls):
         super(AttachInterfacesTestJSON, cls).setup_clients()
         cls.client = cls.os.interfaces_client
+        cls.ports_client = cls.os.ports_client
 
     def wait_for_interface_status(self, server, port_id, status):
-        """Waits for a interface to reach a given status."""
+        """Waits for an interface to reach a given status."""
         body = (self.client.show_interface(server, port_id)
                 ['interfaceAttachment'])
         interface_status = body['port_state']
@@ -108,6 +109,18 @@ class AttachInterfacesTestJSON(base.BaseV2ComputeTest):
         self._check_interface(iface, network_id=network_id)
         return iface
 
+    def _test_create_interface_by_port_id(self, server, ifs):
+        network_id = ifs[0]['net_id']
+        port = self.ports_client.create_port(network_id=network_id)
+        port_id = port['port']['id']
+        self.addCleanup(self.ports_client.delete_port, port_id)
+        iface = self.client.create_interface(
+            server['id'], port_id=port_id)['interfaceAttachment']
+        iface = self.wait_for_interface_status(
+            server['id'], iface['port_id'], 'ACTIVE')
+        self._check_interface(iface, port_id=port_id)
+        return iface
+
     def _test_show_interface(self, server, ifs):
         iface = ifs[0]
         _iface = self.client.show_interface(
@@ -165,6 +178,9 @@ class AttachInterfacesTestJSON(base.BaseV2ComputeTest):
             ifs.append(iface)
 
         iface = self._test_create_interface_by_network_id(server, ifs)
+        ifs.append(iface)
+
+        iface = self._test_create_interface_by_port_id(server, ifs)
         ifs.append(iface)
 
         _ifs = (self.client.list_interfaces(server['id'])
