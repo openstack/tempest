@@ -25,26 +25,17 @@ from tempest import exceptions
 class BaseBackupsClient(service_client.ServiceClient):
     """Client class to send CRUD Volume backup API requests"""
 
-    def create_backup(self, volume_id, container=None, name=None,
-                      description=None):
+    def create_backup(self, **kwargs):
         """Creates a backup of volume."""
-        post_body = {'volume_id': volume_id}
-        if container:
-            post_body['container'] = container
-        if name:
-            post_body['name'] = name
-        if description:
-            post_body['description'] = description
-        post_body = json.dumps({'backup': post_body})
+        post_body = json.dumps({'backup': kwargs})
         resp, body = self.post('backups', post_body)
         body = json.loads(body)
         self.expected_success(202, resp.status)
         return service_client.ResponseBody(resp, body)
 
-    def restore_backup(self, backup_id, volume_id=None):
+    def restore_backup(self, backup_id, **kwargs):
         """Restore volume from backup."""
-        post_body = {'volume_id': volume_id}
-        post_body = json.dumps({'restore': post_body})
+        post_body = json.dumps({'restore': kwargs})
         resp, body = self.post('backups/%s/restore' % (backup_id), post_body)
         body = json.loads(body)
         self.expected_success(202, resp.status)
@@ -82,11 +73,9 @@ class BaseBackupsClient(service_client.ServiceClient):
         self.expected_success(200, resp.status)
         return service_client.ResponseBody(resp, body)
 
-    def import_backup(self, backup_service, backup_url):
+    def import_backup(self, **kwargs):
         """Import backup metadata record."""
-        post_body = {'backup_service': backup_service,
-                     'backup_url': backup_url}
-        post_body = json.dumps({'backup-record': post_body})
+        post_body = json.dumps({'backup-record': kwargs})
         resp, body = self.post("backups/import_record", post_body)
         body = json.loads(body)
         self.expected_success(201, resp.status)
