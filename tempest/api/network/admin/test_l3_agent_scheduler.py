@@ -14,9 +14,11 @@
 
 from tempest.api.network import base
 from tempest.common.utils import data_utils
+from tempest import config
 from tempest import exceptions
 from tempest import test
 
+CONF = config.CONF
 AGENT_TYPE = 'L3 agent'
 AGENT_MODES = (
     'legacy',
@@ -80,6 +82,19 @@ class L3AgentSchedulerTestJSON(base.BaseAdminNetworkTest):
                 cls.port = cls.create_port(cls.network)
                 cls.client.add_router_interface_with_port_id(
                     cls.router['id'], cls.port['id'])
+                # NOTE: Sometimes we have seen this test fail with dvr in,
+                # multinode tests, since the dhcp port is not created before
+                # the test gets executed and so the router is not scheduled
+                # on the given agent. By adding the external gateway info to
+                # the router, the router should be properly scheduled in the
+                # dvr_snat node.
+                # This is a temporary work around to prevent a race condition.
+                external_gateway_info = {
+                    'network_id': CONF.network.public_network_id,
+                    'enable_snat': True}
+                cls.admin_client.update_router_with_snat_gw_info(
+                    cls.router['id'],
+                    external_gateway_info=external_gateway_info)
 
     @classmethod
     def resource_cleanup(cls):
