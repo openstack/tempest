@@ -19,8 +19,8 @@ class ImagesMemberTest(base.BaseV2MemberImageTest):
     @test.idempotent_id('5934c6ea-27dc-4d6e-9421-eeb5e045494a')
     def test_image_share_accept(self):
         image_id = self._create_image()
-        member = self.os_img_client.add_image_member(image_id,
-                                                     member=self.alt_tenant_id)
+        member = self.os_img_client.create_image_member(
+            image_id, member=self.alt_tenant_id)
         self.assertEqual(member['member_id'], self.alt_tenant_id)
         self.assertEqual(member['image_id'], image_id)
         self.assertEqual(member['status'], 'pending')
@@ -40,8 +40,8 @@ class ImagesMemberTest(base.BaseV2MemberImageTest):
     @test.idempotent_id('d9e83e5f-3524-4b38-a900-22abcb26e90e')
     def test_image_share_reject(self):
         image_id = self._create_image()
-        member = self.os_img_client.add_image_member(image_id,
-                                                     member=self.alt_tenant_id)
+        member = self.os_img_client.create_image_member(
+            image_id, member=self.alt_tenant_id)
         self.assertEqual(member['member_id'], self.alt_tenant_id)
         self.assertEqual(member['image_id'], image_id)
         self.assertEqual(member['status'], 'pending')
@@ -54,8 +54,8 @@ class ImagesMemberTest(base.BaseV2MemberImageTest):
     @test.idempotent_id('a6ee18b9-4378-465e-9ad9-9a6de58a3287')
     def test_get_image_member(self):
         image_id = self._create_image()
-        self.os_img_client.add_image_member(image_id,
-                                            member=self.alt_tenant_id)
+        self.os_img_client.create_image_member(
+            image_id, member=self.alt_tenant_id)
         self.alt_img_client.update_image_member(image_id,
                                                 self.alt_tenant_id,
                                                 status='accepted')
@@ -70,8 +70,8 @@ class ImagesMemberTest(base.BaseV2MemberImageTest):
     @test.idempotent_id('72989bc7-2268-48ed-af22-8821e835c914')
     def test_remove_image_member(self):
         image_id = self._create_image()
-        self.os_img_client.add_image_member(image_id,
-                                            member=self.alt_tenant_id)
+        self.os_img_client.create_image_member(
+            image_id, member=self.alt_tenant_id)
         self.alt_img_client.update_image_member(image_id,
                                                 self.alt_tenant_id,
                                                 status='accepted')
@@ -93,8 +93,8 @@ class ImagesMemberTest(base.BaseV2MemberImageTest):
     @test.idempotent_id('cb961424-3f68-4d21-8e36-30ad66fb6bfb')
     def test_get_private_image(self):
         image_id = self._create_image()
-        member = self.os_img_client.add_image_member(image_id,
-                                                     member=self.alt_tenant_id)
+        member = self.os_img_client.create_image_member(
+            image_id, member=self.alt_tenant_id)
         self.assertEqual(member['member_id'], self.alt_tenant_id)
         self.assertEqual(member['image_id'], image_id)
         self.assertEqual(member['status'], 'pending')

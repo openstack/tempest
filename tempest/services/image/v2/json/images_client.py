@@ -164,7 +164,12 @@ class ImagesClientV2(service_client.ServiceClient):
         body = json.loads(body)
         return service_client.ResponseBody(resp, body)
 
-    def add_image_member(self, image_id, **kwargs):
+    def create_image_member(self, image_id, **kwargs):
+        """Create an image member.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-image-v2.html#createImageMember-v2
+        """
         url = 'v2/images/%s/members' % image_id
         data = json.dumps(kwargs)
         resp, body = self.post(url, data)
