@@ -123,9 +123,9 @@ class TestGlanceHTTPClient(base.TestCase):
     def test_get_connection_kwargs_default_for_https(self):
         kwargs = self.client._get_connection_kwargs('https')
         self.assertEqual(600, kwargs['timeout'])
-        self.assertEqual(None, kwargs['ca_certs'])
-        self.assertEqual(None, kwargs['cert_file'])
-        self.assertEqual(None, kwargs['key_file'])
+        self.assertIsNone(kwargs['ca_certs'])
+        self.assertIsNone(kwargs['cert_file'])
+        self.assertIsNone(kwargs['key_file'])
         self.assertEqual(False, kwargs['insecure'])
         self.assertEqual(True, kwargs['ssl_compression'])
         self.assertEqual(6, len(kwargs.keys()))
