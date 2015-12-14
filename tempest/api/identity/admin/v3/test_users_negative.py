@@ -28,7 +28,7 @@ class UsersNegativeTest(base.BaseIdentityV3AdminTest):
         # Attempt to create a user in a non-existent domain should fail
         u_name = data_utils.rand_name('user')
         u_email = u_name + '@testmail.tm'
-        u_password = data_utils.rand_name('pass')
+        u_password = data_utils.rand_password()
         self.assertRaises(lib_exc.NotFound, self.client.create_user,
                           u_name, u_password,
                           email=u_email,

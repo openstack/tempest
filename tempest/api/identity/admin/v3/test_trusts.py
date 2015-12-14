@@ -55,7 +55,7 @@ class BaseTrustsV3Test(base.BaseIdentityV3AdminTest):
         self.trustor_username = data_utils.rand_name('user')
         u_desc = self.trustor_username + 'description'
         u_email = self.trustor_username + '@testmail.xx'
-        self.trustor_password = data_utils.rand_name('pass')
+        self.trustor_password = data_utils.rand_password()
         user = self.client.create_user(
             self.trustor_username,
             description=u_desc,

@@ -28,7 +28,7 @@ class UsersNegativeTestJSON(base.BaseIdentityV2AdminTest):
     def resource_setup(cls):
         super(UsersNegativeTestJSON, cls).resource_setup()
         cls.alt_user = data_utils.rand_name('test_user')
-        cls.alt_password = data_utils.rand_name('pass')
+        cls.alt_password = data_utils.rand_password()
         cls.alt_email = cls.alt_user + '@testmail.tm'
 
     @test.attr(type=['negative'])

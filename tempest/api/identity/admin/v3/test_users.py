@@ -29,7 +29,7 @@ class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
         u_name = data_utils.rand_name('user')
         u_desc = u_name + 'description'
         u_email = u_name + '@testmail.tm'
-        u_password = data_utils.rand_name('pass')
+        u_password = data_utils.rand_password()
         user = self.client.create_user(
             u_name, description=u_desc, password=u_password,
             email=u_email, enabled=False)['user']
@@ -69,13 +69,13 @@ class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
     def test_update_user_password(self):
         # Creating User to check password updation
         u_name = data_utils.rand_name('user')
-        original_password = data_utils.rand_name('pass')
+        original_password = data_utils.rand_password()
         user = self.client.create_user(
             u_name, password=original_password)['user']
         # Delete the User at the end all test methods
         self.addCleanup(self.client.delete_user, user['id'])
         # Update user with new password
-        new_password = data_utils.rand_name('pass1')
+        new_password = data_utils.rand_password()
         self.client.update_user_password(user['id'], password=new_password,
                                          original_password=original_password)
         # TODO(lbragstad): Sleeping after the response status has been checked
@@ -109,7 +109,7 @@ class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
         u_name = data_utils.rand_name('user')
         u_desc = u_name + 'description'
         u_email = u_name + '@testmail.tm'
-        u_password = data_utils.rand_name('pass')
+        u_password = data_utils.rand_password()
         user_body = self.client.create_user(
             u_name, description=u_desc, password=u_password,
             email=u_email, enabled=False, project_id=u_project['id'])['user']

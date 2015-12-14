@@ -34,7 +34,7 @@ class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
     def resource_setup(cls):
         super(UsersV3TestJSON, cls).resource_setup()
         alt_user = data_utils.rand_name('test_user')
-        alt_password = data_utils.rand_name('pass')
+        alt_password = data_utils.rand_password()
         cls.alt_email = alt_user + '@testmail.tm'
         cls.data.setup_test_domain()
         # Create user with Domain

@@ -161,7 +161,7 @@ class ProjectsTestJSON(base.BaseIdentityV3AdminTest):
         u_name = data_utils.rand_name('user')
         u_desc = u_name + 'description'
         u_email = u_name + '@testmail.tm'
-        u_password = data_utils.rand_name('pass')
+        u_password = data_utils.rand_password()
         user = self.client.create_user(
             u_name, description=u_desc, password=u_password,
             email=u_email, project_id=project['id'])['user']

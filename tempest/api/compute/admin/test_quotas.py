@@ -111,7 +111,7 @@ class QuotasAdminTestJSON(base.BaseV2ComputeAdminTest):
 
         # Verify that GET shows the updated quota set of user
         user_name = data_utils.rand_name('cpu_quota_user')
-        password = data_utils.rand_name('password')
+        password = data_utils.rand_password()
         email = user_name + '@testmail.tm'
         user = self.identity_utils.create_user(username=user_name,
                                                password=password,

@@ -26,7 +26,7 @@ class UsersTestJSON(base.BaseIdentityV2AdminTest):
     def resource_setup(cls):
         super(UsersTestJSON, cls).resource_setup()
         cls.alt_user = data_utils.rand_name('test_user')
-        cls.alt_password = data_utils.rand_name('pass')
+        cls.alt_password = data_utils.rand_password()
         cls.alt_email = cls.alt_user + '@testmail.tm'
 
     @test.attr(type='smoke')
@@ -132,15 +132,16 @@ class UsersTestJSON(base.BaseIdentityV2AdminTest):
         self.data.setup_test_tenant()
         user_ids = list()
         fetched_user_ids = list()
+        password1 = data_utils.rand_password()
         alt_tenant_user1 = data_utils.rand_name('tenant_user1')
-        user1 = self.client.create_user(alt_tenant_user1, 'password1',
+        user1 = self.client.create_user(alt_tenant_user1, password1,
                                         self.data.tenant['id'],
                                         'user1@123')['user']
         user_ids.append(user1['id'])
         self.data.users.append(user1)
-
+        password2 = data_utils.rand_password()
         alt_tenant_user2 = data_utils.rand_name('tenant_user2')
-        user2 = self.client.create_user(alt_tenant_user2, 'password2',
+        user2 = self.client.create_user(alt_tenant_user2, password2,
                                         self.data.tenant['id'],
                                         'user2@123')['user']
         user_ids.append(user2['id'])
@@ -173,7 +174,8 @@ class UsersTestJSON(base.BaseIdentityV2AdminTest):
                                             role['id'])['role']
 
         alt_user2 = data_utils.rand_name('second_user')
-        second_user = self.client.create_user(alt_user2, 'password1',
+        alt_password2 = data_utils.rand_password()
+        second_user = self.client.create_user(alt_user2, alt_password2,
                                               self.data.tenant['id'],
                                               'user2@123')['user']
         user_ids.append(second_user['id'])
@@ -198,7 +200,7 @@ class UsersTestJSON(base.BaseIdentityV2AdminTest):
         # Test case to check if updating of user password is successful.
         self.data.setup_test_user()
         # Updating the user with new password
-        new_pass = data_utils.rand_name('pass')
+        new_pass = data_utils.rand_password()
         update_user = self.client.update_user_password(
             self.data.user['id'], new_pass)['user']
         self.assertEqual(update_user['id'], self.data.user['id'])
