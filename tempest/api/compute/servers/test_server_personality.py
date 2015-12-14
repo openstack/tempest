@@ -17,6 +17,8 @@ import base64
 from tempest_lib import exceptions as lib_exc
 
 from tempest.api.compute import base
+from tempest.common.utils.linux import remote_client
+from tempest.common import waiters
 from tempest import config
 from tempest import test
 
@@ -24,6 +26,16 @@ CONF = config.CONF
 
 
 class ServerPersonalityTestJSON(base.BaseV2ComputeTest):
+
+    @classmethod
+    def setup_credentials(cls):
+        cls.prepare_instance_network()
+        super(ServerPersonalityTestJSON, cls).setup_credentials()
+
+    @classmethod
+    def resource_setup(cls):
+        cls.set_validation_resources()
+        super(ServerPersonalityTestJSON, cls).resource_setup()
 
     @classmethod
     def skip_checks(cls):
@@ -40,18 +52,34 @@ class ServerPersonalityTestJSON(base.BaseV2ComputeTest):
     @test.idempotent_id('3cfe87fd-115b-4a02-b942-7dc36a337fdf')
     def test_create_server_with_personality(self):
         file_contents = 'This is a test file.'
-        personality = [{'path': '/test.txt',
+        file_path = '/test.txt'
+        personality = [{'path': file_path,
                         'contents': base64.b64encode(file_contents)}]
-        self.create_test_server(personality=personality)
+        server = self.create_test_server(personality=personality,
+                                         wait_until='ACTIVE',
+                                         validatable=True)
+        if CONF.validation.run_validation:
+            linux_client = remote_client.RemoteClient(
+                self.get_server_ip(server),
+                self.ssh_user, server['adminPass'],
+                self.validation_resources['keypair']['private_key'])
+            self.assertEqual(file_contents,
+                             linux_client.exec_command(
+                                 'sudo cat %s' % file_path))
 
     @test.idempotent_id('128966d8-71fc-443c-8cab-08e24114ecc9')
     def test_rebuild_server_with_personality(self):
-        server_id = self.rebuild_server(None)
+        server = self.create_test_server(wait_until='ACTIVE', validatable=True)
+        server_id = server['id']
         file_contents = 'Test server rebuild.'
         personality = [{'path': 'rebuild.txt',
                         'contents': base64.b64encode(file_contents)}]
-        self.client.rebuild_server(server_id, self.image_ref_alt,
-                                   personality=personality)
+        rebuilt_server = self.client.rebuild_server(server_id,
+                                                    self.image_ref_alt,
+                                                    personality=personality)
+        waiters.wait_for_server_status(self.client, server_id, 'ACTIVE')
+        self.assertEqual(self.image_ref_alt,
+                         rebuilt_server['server']['image']['id'])
 
     @test.idempotent_id('176cd8c9-b9e8-48ee-a480-180beab292bf')
     def test_personality_files_exceed_limit(self):
@@ -83,9 +111,20 @@ class ServerPersonalityTestJSON(base.BaseV2ComputeTest):
             raise self.skipException("No limit for personality files")
         person = []
         for i in range(0, int(max_file_limit)):
-            path = 'etc/test' + str(i) + '.txt'
+            path = '/etc/test' + str(i) + '.txt'
             person.append({
                 'path': path,
                 'contents': base64.b64encode(file_contents),
             })
-        self.create_test_server(personality=person)
+        server = self.create_test_server(personality=person,
+                                         wait_until='ACTIVE',
+                                         validatable=True)
+        if CONF.validation.run_validation:
+            linux_client = remote_client.RemoteClient(
+                self.get_server_ip(server),
+                self.ssh_user, server['adminPass'],
+                self.validation_resources['keypair']['private_key'])
+            for i in person:
+                self.assertEqual(base64.b64decode(i['contents']),
+                                 linux_client.exec_command(
+                                     'sudo cat %s' % i['path']))
