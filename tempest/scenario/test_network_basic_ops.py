@@ -744,15 +744,23 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
     def test_port_security_macspoofing_port(self):
         """Tests port_security extension enforces mac spoofing
 
-        1. create a new network
-        2. connect VM to new network
-        4. check VM can ping new network DHCP port
-        5. spoof mac on new new network interface
-        6. check Neutron enforces mac spoofing and blocks pings via spoofed
-            interface
-        7. disable port-security on the spoofed port
-        8. check Neutron allows pings via spoofed interface
+        Neutron security groups always apply anti-spoof rules on the VMs. This
+        allows traffic to originate and terminate at the VM as expected, but
+        prevents traffic to pass through the VM. Anti-spoof rules are not
+        required in cases where the VM routes traffic through it.
+
+        The test steps are :
+        1. Create a new network.
+        2. Connect (hotplug) the VM to a new network.
+        3. Check the VM can ping the DHCP interface of this network.
+        4. Spoof the mac address of the new VM interface.
+        5. Check the Security Group enforces mac spoofing and blocks pings via
+           spoofed interface (VM cannot ping the DHCP interface).
+        6. Disable port-security of the spoofed port- set the flag to false.
+        7. Retest 3rd step and check that the Security Group allows pings via
+        the spoofed interface.
         """
+
         spoof_mac = "00:00:00:00:00:01"
 
         # Create server
