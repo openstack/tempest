@@ -23,6 +23,7 @@ except ImportError:
     # unittest in python 2.6 does not contain loader, so uses unittest2
     from unittest2 import loader
 
+from cliff import command
 from oslo_log import log as logging
 from oslo_serialization import jsonutils as json
 from testtools import testsuite
@@ -70,29 +71,42 @@ def discover_stress_tests(path="./", filter_attr=None, call_inherited=False):
     return tests
 
 
-parser = argparse.ArgumentParser(description='Run stress tests')
-parser.add_argument('-d', '--duration', default=300, type=int,
-                    help="Duration of test in secs")
-parser.add_argument('-s', '--serial', action='store_true',
-                    help="Trigger running tests serially")
-parser.add_argument('-S', '--stop', action='store_true',
-                    default=False, help="Stop on first error")
-parser.add_argument('-n', '--number', type=int,
-                    help="How often an action is executed for each process")
-group = parser.add_mutually_exclusive_group(required=True)
-group.add_argument('-a', '--all', action='store_true',
-                   help="Execute all stress tests")
-parser.add_argument('-T', '--type',
-                    help="Filters tests of a certain type (e.g. gate)")
-parser.add_argument('-i', '--call-inherited', action='store_true',
-                    default=False,
-                    help="Call also inherited function with stress attribute")
-group.add_argument('-t', "--tests", nargs='?',
-                   help="Name of the file with test description")
+class TempestRunStress(command.Command):
+
+    def get_parser(self, prog_name):
+        pa = super(TempestRunStress, self).get_parser(prog_name)
+        pa = add_arguments(pa)
+        return pa
+
+    def take_action(self, pa):
+        return action(pa)
 
 
-def main():
-    ns = parser.parse_args()
+def add_arguments(parser):
+    parser.add_argument('-d', '--duration', default=300, type=int,
+                        help="Duration of test in secs")
+    parser.add_argument('-s', '--serial', action='store_true',
+                        help="Trigger running tests serially")
+    parser.add_argument('-S', '--stop', action='store_true',
+                        default=False, help="Stop on first error")
+    parser.add_argument('-n', '--number', type=int,
+                        help="How often an action is executed for each "
+                        "process")
+    group = parser.add_mutually_exclusive_group(required=True)
+    group.add_argument('-a', '--all', action='store_true',
+                       help="Execute all stress tests")
+    parser.add_argument('-T', '--type',
+                        help="Filters tests of a certain type (e.g. gate)")
+    parser.add_argument('-i', '--call-inherited', action='store_true',
+                        default=False,
+                        help="Call also inherited function with stress "
+                        "attribute")
+    group.add_argument('-t', "--tests", nargs='?',
+                       help="Name of the file with test description")
+    return parser
+
+
+def action(ns):
     result = 0
     if not ns.all:
         tests = json.load(open(ns.tests, 'r'))
@@ -119,6 +133,15 @@ def main():
                                          ns.number,
                                          ns.stop)
     return result
+
+
+def main():
+    LOG.warning("Deprecated: Use 'tempest run-stress' instead. "
+                "The old entrypoint will be removed in a future release.")
+    parser = argparse.ArgumentParser(description='Run stress tests')
+    pa = add_arguments(parser)
+    ns = pa.parse_args()
+    return action(ns)
 
 
 if __name__ == "__main__":
