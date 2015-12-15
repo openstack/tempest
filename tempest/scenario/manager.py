@@ -812,8 +812,9 @@ class NetworkScenarioTest(ScenarioTest):
     def _get_server_port_id_and_ip4(self, server, ip_addr=None):
         ports = self._list_ports(device_id=server['id'], status='ACTIVE',
                                  fixed_ip=ip_addr)
-        # it might happen here that this port has more then one ip address
-        # as in case of dual stack- when this port is created on 2 subnets
+        # A port can have more then one IP address in some cases.
+        # If the network is dual-stack (IPv4 + IPv6), this port is associated
+        # with 2 subnets
         port_map = [(p["id"], fxip["ip_address"])
                     for p in ports
                     for fxip in p["fixed_ips"]
