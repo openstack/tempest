@@ -152,17 +152,21 @@ class ServersClient(service_client.ServiceClient):
         self.validate_response(schema, resp, body)
         return service_client.ResponseBody(resp, body)
 
-    def create_backup(self, server_id, backup_type, rotation, name):
-        """Backup a server instance."""
-        return self.action(server_id, "createBackup",
-                           backup_type=backup_type,
-                           rotation=rotation,
-                           name=name)
+    def create_backup(self, server_id, **kwargs):
+        """Backup a server instance.
 
-    def change_password(self, server_id, adminPass):
-        """Changes the root password for the server."""
-        return self.action(server_id, 'changePassword',
-                           adminPass=adminPass)
+        Available params: see http://developer.openstack.org/
+                              api-ref-compute-v2.1.html#createBackup
+        """
+        return self.action(server_id, "createBackup", **kwargs)
+
+    def change_password(self, server_id, **kwargs):
+        """Change the root password for the server.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-compute-v2.1.html#changePassword
+        """
+        return self.action(server_id, 'changePassword', **kwargs)
 
     def show_password(self, server_id):
         resp, body = self.get("servers/%s/os-server-password" %
@@ -217,7 +221,11 @@ class ServersClient(service_client.ServiceClient):
         return self.action(server_id, 'resize', **kwargs)
 
     def confirm_resize_server(self, server_id, **kwargs):
-        """Confirms the flavor change for a server."""
+        """Confirm the flavor change for a server.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-compute-v2.1.html#confirmResize
+        """
         return self.action(server_id, 'confirmResize',
                            schema.server_actions_confirm_resize,
                            **kwargs)
@@ -313,9 +321,16 @@ class ServersClient(service_client.ServiceClient):
         self.validate_response(schema.list_volume_attachments, resp, body)
         return service_client.ResponseBody(resp, body)
 
-    def add_security_group(self, server_id, name):
-        """Adds a security group to the server."""
-        return self.action(server_id, 'addSecurityGroup', name=name)
+    def add_security_group(self, server_id, **kwargs):
+        """Add a security group to the server.
+
+        Available params: TODO
+        """
+        # TODO(oomichi): The api-site doesn't contain this API description.
+        # So the above should be changed to the api-site link after
+        # adding the description on the api-site.
+        # LP: https://bugs.launchpad.net/openstack-api-site/+bug/1524199
+        return self.action(server_id, 'addSecurityGroup', **kwargs)
 
     def remove_security_group(self, server_id, name):
         """Removes a security group from the server."""
@@ -437,7 +452,11 @@ class ServersClient(service_client.ServiceClient):
                            type=console_type)
 
     def add_fixed_ip(self, server_id, **kwargs):
-        """Add a fixed IP to input server instance."""
+        """Add a fixed IP to server instance.
+
+        Available params: http://developer.openstack.org/
+                          api-ref-compute-v2.1.html#addFixedIp
+        """
         return self.action(server_id, 'addFixedIp', **kwargs)
 
     def remove_fixed_ip(self, server_id, **kwargs):

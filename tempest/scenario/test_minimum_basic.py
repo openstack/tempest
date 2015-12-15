@@ -95,7 +95,7 @@ class TestMinimumBasicScenario(manager.ScenarioTest):
     def create_and_add_security_group_to_server(self, server):
         secgroup = self._create_security_group()
         self.servers_client.add_security_group(server['id'],
-                                               secgroup['name'])
+                                               name=secgroup['name'])
         self.addCleanup(self.servers_client.remove_security_group,
                         server['id'], secgroup['name'])
 

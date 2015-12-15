@@ -116,7 +116,8 @@ class ServerRescueTestJSON(base.BaseV2ComputeTest):
         self.addCleanup(self._unrescue, self.server_id)
 
         # Add Security group
-        self.servers_client.add_security_group(self.server_id, self.sg_name)
+        self.servers_client.add_security_group(self.server_id,
+                                               name=self.sg_name)
 
         # Delete Security group
         self.servers_client.remove_security_group(self.server_id,
