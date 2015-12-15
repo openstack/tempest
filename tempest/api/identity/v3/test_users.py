@@ -50,13 +50,13 @@ class IdentityV3UsersTest(base.BaseIdentityV3Test):
         # to change password back. important for allow_tenant_isolation = false
         self.addCleanup(
             self.non_admin_client_for_cleanup.update_user_password,
-            user_id=user_id,
+            user_id,
             password=old_pass,
             original_password=new_pass)
 
         # user updates own password
         self.non_admin_client.update_user_password(
-            user_id=user_id, password=new_pass, original_password=old_pass)
+            user_id, password=new_pass, original_password=old_pass)
 
         # TODO(lbragstad): Sleeping after the response status has been checked
         # and the body loaded as JSON allows requests to fail-fast. The sleep
