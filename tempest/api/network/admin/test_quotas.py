@@ -57,14 +57,14 @@ class QuotasTest(base.BaseAdminNetworkTest):
         self.addCleanup(self.identity_utils.delete_project, project_id)
 
         # Change quotas for tenant
-        quota_set = self.admin_client.update_quotas(project_id,
-                                                    **new_quotas)['quota']
-        self.addCleanup(self.admin_client.reset_quotas, project_id)
+        quota_set = self.admin_quotas_client.update_quotas(
+            project_id, **new_quotas)['quota']
+        self.addCleanup(self.admin_quotas_client.reset_quotas, project_id)
         for key, value in six.iteritems(new_quotas):
             self.assertEqual(value, quota_set[key])
 
         # Confirm our tenant is listed among tenants with non default quotas
-        non_default_quotas = self.admin_client.list_quotas()
+        non_default_quotas = self.admin_quotas_client.list_quotas()
         found = False
         for qs in non_default_quotas['quotas']:
             if qs['tenant_id'] == project_id:
@@ -72,14 +72,14 @@ class QuotasTest(base.BaseAdminNetworkTest):
         self.assertTrue(found)
 
         # Confirm from API quotas were changed as requested for tenant
-        quota_set = self.admin_client.show_quotas(project_id)
+        quota_set = self.admin_quotas_client.show_quotas(project_id)
         quota_set = quota_set['quota']
         for key, value in six.iteritems(new_quotas):
             self.assertEqual(value, quota_set[key])
 
         # Reset quotas to default and confirm
-        self.admin_client.reset_quotas(project_id)
-        non_default_quotas = self.admin_client.list_quotas()
+        self.admin_quotas_client.reset_quotas(project_id)
+        non_default_quotas = self.admin_quotas_client.list_quotas()
         for q in non_default_quotas['quotas']:
             self.assertNotEqual(project_id, q['tenant_id'])
 

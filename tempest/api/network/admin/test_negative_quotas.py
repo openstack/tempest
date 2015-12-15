@@ -45,9 +45,9 @@ class QuotasNegativeTest(base.BaseAdminNetworkTest):
     @test.idempotent_id('644f4e1b-1bf9-4af0-9fd8-eb56ac0f51cf')
     def test_network_quota_exceeding(self):
         # Set the network quota to two
-        self.admin_client.update_quotas(self.networks_client.tenant_id,
-                                        network=2)
-        self.addCleanup(self.admin_client.reset_quotas,
+        self.admin_quotas_client.update_quotas(self.networks_client.tenant_id,
+                                               network=2)
+        self.addCleanup(self.admin_quotas_client.reset_quotas,
                         self.networks_client.tenant_id)
 
         # Create two networks

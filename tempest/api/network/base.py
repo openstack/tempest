@@ -74,6 +74,7 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
         cls.networks_client = cls.os.networks_client
         cls.subnets_client = cls.os.subnets_client
         cls.ports_client = cls.os.ports_client
+        cls.quotas_client = cls.os.network_quotas_client
         cls.floating_ips_client = cls.os.floating_ips_client
 
     @classmethod
@@ -274,6 +275,7 @@ class BaseAdminNetworkTest(BaseNetworkTest):
         cls.admin_networks_client = cls.os_adm.networks_client
         cls.admin_subnets_client = cls.os_adm.subnets_client
         cls.admin_ports_client = cls.os_adm.ports_client
+        cls.admin_quotas_client = cls.os_adm.network_quotas_client
         cls.admin_floating_ips_client = cls.os_adm.floating_ips_client
         cls.admin_metering_labels_client = cls.os_adm.metering_labels_client
         cls.admin_metering_label_rules_client = (
