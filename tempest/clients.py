@@ -123,6 +123,7 @@ from tempest.services.network.json.quotas_client import QuotasClient \
     as NetworkQuotasClient
 from tempest.services.network.json.security_groups_client import \
     SecurityGroupsClient
+from tempest.services.network.json.subnetpools_client import SubnetpoolsClient
 from tempest.services.network.json.subnets_client import SubnetsClient
 from tempest.services.object_storage.account_client import AccountClient
 from tempest.services.object_storage.container_client import ContainerClient
@@ -223,6 +224,14 @@ class Manager(manager.Manager):
             build_timeout=CONF.network.build_timeout,
             **self.default_params)
         self.networks_client = NetworksClient(
+            self.auth_provider,
+            CONF.network.catalog_type,
+            CONF.network.region or CONF.identity.region,
+            endpoint_type=CONF.network.endpoint_type,
+            build_interval=CONF.network.build_interval,
+            build_timeout=CONF.network.build_timeout,
+            **self.default_params)
+        self.subnetpools_client = SubnetpoolsClient(
             self.auth_provider,
             CONF.network.catalog_type,
             CONF.network.region or CONF.identity.region,
