@@ -76,8 +76,8 @@ class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
         self.addCleanup(self.client.delete_user, user['id'])
         # Update user with new password
         new_password = data_utils.rand_name('pass1')
-        self.client.update_user_password(user['id'], new_password,
-                                         original_password)
+        self.client.update_user_password(user['id'], password=new_password,
+                                         original_password=original_password)
         # TODO(lbragstad): Sleeping after the response status has been checked
         # and the body loaded as JSON allows requests to fail-fast. The sleep
         # is necessary because keystone will err on the side of security and

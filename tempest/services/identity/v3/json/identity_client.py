@@ -81,13 +81,13 @@ class IdentityV3Client(service_client.ServiceClient):
         body = json.loads(body)
         return service_client.ResponseBody(resp, body)
 
-    def update_user_password(self, user_id, password, original_password):
-        """Updates a user password."""
-        update_user = {
-            'password': password,
-            'original_password': original_password
-        }
-        update_user = json.dumps({'user': update_user})
+    def update_user_password(self, user_id, **kwargs):
+        """Update a user password
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-identity-v3.html#changeUserPassword
+        """
+        update_user = json.dumps({'user': kwargs})
         resp, _ = self.post('users/%s/password' % user_id, update_user)
         self.expected_success(204, resp.status)
         return service_client.ResponseBody(resp)
