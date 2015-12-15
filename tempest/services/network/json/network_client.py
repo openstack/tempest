@@ -229,59 +229,13 @@ class NetworkClient(base.BaseNetworkClient):
         uri = '/ports?device_id=%s' % uuid
         return self.list_resources(uri)
 
-    def update_agent(self, agent_id, **kwargs):
-        """Update agent
-
-        :param agent_info: Agent update information.
-        E.g {"admin_state_up": True}
-        """
-        # TODO(piyush): Current api-site doesn't contain this API description.
-        # After fixing the api-site, we need to fix here also for putting the
-        # link to api-site.
-        # LP: https://bugs.launchpad.net/openstack-api-site/+bug/1526673
-        uri = '/agents/%s' % agent_id
-        return self.update_resource(uri, kwargs)
-
-    def show_agent(self, agent_id, **fields):
-        uri = '/agents/%s' % agent_id
-        return self.show_resource(uri, **fields)
-
-    def list_agents(self, **filters):
-        uri = '/agents'
-        return self.list_resources(uri, **filters)
-
-    def list_routers_on_l3_agent(self, agent_id):
-        uri = '/agents/%s/l3-routers' % agent_id
-        return self.list_resources(uri)
-
     def list_l3_agents_hosting_router(self, router_id):
         uri = '/routers/%s/l3-agents' % router_id
         return self.list_resources(uri)
 
-    def add_router_to_l3_agent(self, agent_id, **kwargs):
-        # TODO(piyush): Current api-site doesn't contain this API description.
-        # After fixing the api-site, we need to fix here also for putting the
-        # link to api-site.
-        # LP: https://bugs.launchpad.net/openstack-api-site/+bug/1526670
-        uri = '/agents/%s/l3-routers' % agent_id
-        return self.create_resource(uri, kwargs)
-
-    def remove_router_from_l3_agent(self, agent_id, router_id):
-        uri = '/agents/%s/l3-routers/%s' % (agent_id, router_id)
-        return self.delete_resource(uri)
-
     def list_dhcp_agent_hosting_network(self, network_id):
         uri = '/networks/%s/dhcp-agents' % network_id
         return self.list_resources(uri)
-
-    def list_networks_hosted_by_one_dhcp_agent(self, agent_id):
-        uri = '/agents/%s/dhcp-networks' % agent_id
-        return self.list_resources(uri)
-
-    def remove_network_from_dhcp_agent(self, agent_id, network_id):
-        uri = '/agents/%s/dhcp-networks/%s' % (agent_id,
-                                               network_id)
-        return self.delete_resource(uri)
 
     def update_extra_routes(self, router_id, **kwargs):
         """Update Extra routes.
@@ -301,14 +255,6 @@ class NetworkClient(base.BaseNetworkClient):
             }
         }
         return self.update_resource(uri, put_body)
-
-    def add_dhcp_agent_to_network(self, agent_id, **kwargs):
-        # TODO(piyush): Current api-site doesn't contain this API description.
-        # After fixing the api-site, we need to fix here also for putting the
-        # link to api-site.
-        # LP: https://bugs.launchpad.net/openstack-api-site/+bug/1526212
-        uri = '/agents/%s/dhcp-networks' % agent_id
-        return self.create_resource(uri, kwargs)
 
     def list_subnetpools(self, **filters):
         uri = '/subnetpools'

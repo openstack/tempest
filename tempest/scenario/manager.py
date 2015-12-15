@@ -729,7 +729,7 @@ class NetworkScenarioTest(ScenarioTest):
 
     def _list_agents(self, *args, **kwargs):
         """List agents using admin creds """
-        agents_list = self.admin_manager.network_client.list_agents(
+        agents_list = self.admin_manager.network_agents_client.list_agents(
             *args, **kwargs)
         return agents_list['agents']
 
