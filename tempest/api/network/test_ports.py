@@ -74,7 +74,7 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
         network2 = self.create_network(network_name=name)
         network_list = [network1['id'], network2['id']]
         port_list = [{'network_id': net_id} for net_id in network_list]
-        body = self.client.create_bulk_port(port_list)
+        body = self.client.create_bulk_port(ports=port_list)
         created_ports = body['ports']
         port1 = created_ports[0]
         port2 = created_ports[1]

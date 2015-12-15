@@ -82,21 +82,32 @@ class NetworkClient(base.BaseNetworkClient):
         uri = '/extensions'
         return self.list_resources(uri, **filters)
 
-    def create_bulk_network(self, names):
-        network_list = [{'name': name} for name in names]
-        post_data = {'networks': network_list}
+    def create_bulk_network(self, **kwargs):
+        """create bulk network
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-networking-v2.html#bulkCreateNetwork
+        """
         uri = '/networks'
-        return self.create_resource(uri, post_data)
+        return self.create_resource(uri, kwargs)
 
-    def create_bulk_subnet(self, subnet_list):
-        post_data = {'subnets': subnet_list}
+    def create_bulk_subnet(self, **kwargs):
+        """create bulk subnet
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-networking-v2.html#bulkCreateSubnet
+        """
         uri = '/subnets'
-        return self.create_resource(uri, post_data)
+        return self.create_resource(uri, kwargs)
 
-    def create_bulk_port(self, port_list):
-        post_data = {'ports': port_list}
+    def create_bulk_port(self, **kwargs):
+        """create bulk port
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-networking-v2.html#bulkCreatePorts
+        """
         uri = '/ports'
-        return self.create_resource(uri, post_data)
+        return self.create_resource(uri, kwargs)
 
     def wait_for_resource_deletion(self, resource_type, id, client=None):
         """Waits for a resource to be deleted."""
