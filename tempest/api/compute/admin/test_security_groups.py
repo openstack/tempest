@@ -28,7 +28,7 @@ class SecurityGroupsTestAdminJSON(base.BaseV2ComputeAdminTest):
     @classmethod
     def setup_clients(cls):
         super(SecurityGroupsTestAdminJSON, cls).setup_clients()
-        cls.adm_client = cls.os_adm.security_groups_client
+        cls.adm_client = cls.os_adm.compute_security_groups_client
         cls.client = cls.security_groups_client
 
     def _delete_security_group(self, securitygroup_id, admin=True):

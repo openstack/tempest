@@ -48,7 +48,7 @@ def cleanup():
         except Exception:
             pass
 
-    secgrp_client = admin_manager.security_groups_client
+    secgrp_client = admin_manager.compute_security_groups_client
     secgrp = (secgrp_client.list_security_groups(all_tenants=True)
               ['security_groups'])
     secgrp_del = [grp for grp in secgrp if grp['name'] != 'default']

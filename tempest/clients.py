@@ -50,7 +50,7 @@ from tempest_lib.services.compute.quotas_client import QuotasClient
 from tempest_lib.services.compute.security_group_default_rules_client import \
     SecurityGroupDefaultRulesClient
 from tempest_lib.services.compute.security_groups_client import \
-    SecurityGroupsClient
+    SecurityGroupsClient as ComputeSecurityGroupsClient
 from tempest_lib.services.compute.services_client import ServicesClient
 from tempest_lib.services.compute.snapshots_client import \
     SnapshotsClient as ComputeSnapshotsClient
@@ -358,7 +358,7 @@ class Manager(manager.Manager):
             self.auth_provider, **params)
         self.security_group_rules_client = SecurityGroupRulesClient(
             self.auth_provider, **params)
-        self.security_groups_client = SecurityGroupsClient(
+        self.compute_security_groups_client = ComputeSecurityGroupsClient(
             self.auth_provider, **params)
         self.interfaces_client = InterfacesClient(self.auth_provider,
                                                   **params)

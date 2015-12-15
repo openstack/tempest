@@ -54,7 +54,7 @@ class VolumeVerifyStress(stressaction.StressAction):
         self.logger.info("deleted server: %s" % self.server_id)
 
     def _create_sec_group(self):
-        sec_grp_cli = self.manager.security_groups_client
+        sec_grp_cli = self.manager.compute_security_groups_client
         s_name = data_utils.rand_name('sec_grp')
         s_description = data_utils.rand_name('desc')
         self.sec_grp = sec_grp_cli.create_security_group(
@@ -66,7 +66,7 @@ class VolumeVerifyStress(stressaction.StressAction):
                     from_port=-1, to_port=-1)
 
     def _destroy_sec_grp(self):
-        sec_grp_cli = self.manager.security_groups_client
+        sec_grp_cli = self.manager.compute_security_groups_client
         sec_grp_cli.delete_security_group(self.sec_grp['id'])
 
     def _create_floating_ip(self):
