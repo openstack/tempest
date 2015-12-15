@@ -57,7 +57,8 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
         self._creds = {}
         self.ports = []
         self.default_admin_creds = admin_creds
-        (self.identity_admin_client, self.network_admin_client,
+        (self.identity_admin_client, self.tenants_admin_client,
+         self.network_admin_client,
          self.networks_admin_client,
          self.subnets_admin_client,
          self.ports_admin_client) = self._get_admin_clients()
@@ -69,7 +70,9 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
                 self.default_admin_creds.project_domain_name or
                 self.credentials_domain)
         self.creds_client = cred_client.get_creds_client(
-            self.identity_admin_client, self.creds_domain_name)
+            self.identity_admin_client,
+            self.tenants_admin_client,
+            self.creds_domain_name)
 
     def _get_admin_clients(self):
         """Returns a tuple with instances of the following admin clients
@@ -80,10 +83,10 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
         """
         os = clients.Manager(self.default_admin_creds)
         if self.identity_version == 'v2':
-            return (os.identity_client, os.network_client, os.networks_client,
-                    os.subnets_client, os.ports_client)
+            return (os.identity_client, os.tenants_client, os.network_client,
+                    os.networks_client, os.subnets_client, os.ports_client)
         else:
-            return (os.identity_v3_client, os.network_client,
+            return (os.identity_v3_client, None, os.network_client,
                     os.networks_client, os.subnets_client, os.ports_client)
 
     def _create_creds(self, suffix="", admin=False, roles=None):

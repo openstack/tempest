@@ -27,7 +27,7 @@ class TokensTestJSON(base.BaseIdentityV2AdminTest):
         user_password = data_utils.rand_name(name='pass')
         # first:create a tenant
         tenant_name = data_utils.rand_name(name='tenant')
-        tenant = self.client.create_tenant(tenant_name)['tenant']
+        tenant = self.tenants_client.create_tenant(tenant_name)['tenant']
         self.data.tenants.append(tenant)
         # second:create a user
         user = self.client.create_user(user_name, user_password,
@@ -68,11 +68,11 @@ class TokensTestJSON(base.BaseIdentityV2AdminTest):
 
         # Create a couple tenants.
         tenant1_name = data_utils.rand_name(name='tenant')
-        tenant1 = self.client.create_tenant(tenant1_name)['tenant']
+        tenant1 = self.tenants_client.create_tenant(tenant1_name)['tenant']
         self.data.tenants.append(tenant1)
 
         tenant2_name = data_utils.rand_name(name='tenant')
-        tenant2 = self.client.create_tenant(tenant2_name)['tenant']
+        tenant2 = self.tenants_client.create_tenant(tenant2_name)['tenant']
         self.data.tenants.append(tenant2)
 
         # Create a role

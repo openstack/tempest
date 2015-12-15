@@ -24,6 +24,8 @@ from tempest import config
 from tempest import exceptions
 from tempest.services.identity.v2.json import identity_client as \
     json_iden_client
+from tempest.services.identity.v2.json import tenants_client as \
+    json_tenants_client
 from tempest.services.network.json import network_client as json_network_client
 from tempest.tests import base
 from tempest.tests import fake_config
@@ -74,7 +76,7 @@ class TestDynamicCredentialProvider(base.TestCase):
 
     def _mock_tenant_create(self, id, name):
         tenant_fix = self.useFixture(mockpatch.PatchObject(
-            json_iden_client.IdentityClient,
+            json_tenants_client.TenantsClient,
             'create_tenant',
             return_value=(service_client.ResponseBody
                           (200, {'tenant': {'id': id, 'name': name}}))))
@@ -240,8 +242,8 @@ class TestDynamicCredentialProvider(base.TestCase):
             'tempest.services.identity.v2.json.identity_client.'
             'IdentityClient.delete_user')
         tenant_mock = self.patch(
-            'tempest.services.identity.v2.json.identity_client.'
-            'IdentityClient.delete_tenant')
+            'tempest.services.identity.v2.json.tenants_client.'
+            'TenantsClient.delete_tenant')
         creds.clear_creds()
         # Verify user delete calls
         calls = user_mock.mock_calls
@@ -371,8 +373,8 @@ class TestDynamicCredentialProvider(base.TestCase):
         creds.get_admin_creds()
         self.patch('tempest.services.identity.v2.json.identity_client.'
                    'IdentityClient.delete_user')
-        self.patch('tempest.services.identity.v2.json.identity_client.'
-                   'IdentityClient.delete_tenant')
+        self.patch('tempest.services.identity.v2.json.tenants_client.'
+                   'TenantsClient.delete_tenant')
         net = mock.patch.object(creds.networks_admin_client,
                                 'delete_network')
         net_mock = net.start()

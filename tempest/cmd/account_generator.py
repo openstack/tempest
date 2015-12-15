@@ -93,6 +93,7 @@ from tempest.common import identity
 from tempest import config
 from tempest import exceptions as exc
 from tempest.services.identity.v2.json import identity_client
+from tempest.services.identity.v2.json import tenants_client
 from tempest.services.network.json import network_client
 from tempest.services.network.json import networks_client
 from tempest.services.network.json import subnets_client
@@ -138,6 +139,13 @@ def get_admin_clients(opts):
         endpoint_type='adminURL',
         **params
     )
+    tenants_admin = tenants_client.TenantsClient(
+        _auth,
+        CONF.identity.catalog_type,
+        CONF.identity.region,
+        endpoint_type='adminURL',
+        **params
+    )
     network_admin = None
     networks_admin = None
     subnets_admin = None
@@ -163,12 +171,12 @@ def get_admin_clients(opts):
             CONF.network.region or CONF.identity.region,
             endpoint_type='adminURL',
             **params)
-    return (identity_admin, neutron_iso_networks, network_admin,
+    return (identity_admin, tenants_admin, neutron_iso_networks, network_admin,
             networks_admin, subnets_admin)
 
 
 def create_resources(opts, resources):
-    (identity_admin, neutron_iso_networks,
+    (identity_admin, tenants_admin, neutron_iso_networks,
      network_admin, networks_admin, subnets_admin) = get_admin_clients(opts)
     roles = identity_admin.list_roles()['roles']
     for u in resources['users']:
@@ -180,22 +188,22 @@ def create_resources(opts, resources):
                 msg = "Role: %s doesn't exist" % r
                 raise exc.InvalidConfiguration(msg)
             u['role_ids'] += [role['id']]
-    existing = [x['name'] for x in identity_admin.list_tenants()['tenants']]
+    existing = [x['name'] for x in tenants_admin.list_tenants()['tenants']]
     for tenant in resources['tenants']:
         if tenant not in existing:
-            identity_admin.create_tenant(tenant)
+            tenants_admin.create_tenant(tenant)
         else:
             LOG.warn("Tenant '%s' already exists in this environment" % tenant)
     LOG.info('Tenants created')
     for u in resources['users']:
         try:
-            tenant = identity.get_tenant_by_name(identity_admin, u['tenant'])
+            tenant = identity.get_tenant_by_name(tenants_admin, u['tenant'])
         except tempest_lib.exceptions.NotFound:
             LOG.error("Tenant: %s - not found" % u['tenant'])
             continue
         while True:
             try:
-                identity.get_user_by_username(identity_admin,
+                identity.get_user_by_username(tenants_admin,
                                               tenant['id'], u['name'])
             except tempest_lib.exceptions.NotFound:
                 identity_admin.create_user(
@@ -211,7 +219,7 @@ def create_resources(opts, resources):
     LOG.info('Users created')
     if neutron_iso_networks:
         for u in resources['users']:
-            tenant = identity.get_tenant_by_name(identity_admin, u['tenant'])
+            tenant = identity.get_tenant_by_name(tenants_admin, u['tenant'])
             network_name, router_name = create_network_resources(
                 network_admin, networks_admin, subnets_admin, tenant['id'],
                 u['name'])
@@ -220,12 +228,12 @@ def create_resources(opts, resources):
         LOG.info('Networks created')
     for u in resources['users']:
         try:
-            tenant = identity.get_tenant_by_name(identity_admin, u['tenant'])
+            tenant = identity.get_tenant_by_name(tenants_admin, u['tenant'])
         except tempest_lib.exceptions.NotFound:
             LOG.error("Tenant: %s - not found" % u['tenant'])
             continue
         try:
-            user = identity.get_user_by_username(identity_admin,
+            user = identity.get_user_by_username(tenants_admin,
                                                  tenant['id'], u['name'])
         except tempest_lib.exceptions.NotFound:
             LOG.error("User: %s - not found" % u['user'])

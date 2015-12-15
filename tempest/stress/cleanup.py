@@ -74,12 +74,11 @@ def cleanup():
     for user in users:
         if user['name'].startswith("stress_user"):
             admin_manager.identity_client.delete_user(user['id'])
-
-    tenants = admin_manager.identity_client.list_tenants()['tenants']
+    tenants = admin_manager.tenants_client.list_tenants()['tenants']
     LOG.info("Cleanup::remove %s tenants" % len(tenants))
     for tenant in tenants:
         if tenant['name'].startswith("stress_tenant"):
-            admin_manager.identity_client.delete_tenant(tenant['id'])
+            admin_manager.tenants_client.delete_tenant(tenant['id'])
 
     # We have to delete snapshots first or
     # volume deletion may block

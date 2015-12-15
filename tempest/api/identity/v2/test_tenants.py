@@ -26,7 +26,7 @@ class IdentityTenantsTest(base.BaseIdentityV2Test):
     @test.idempotent_id('ecae2459-243d-4ba1-ad02-65f15dc82b78')
     def test_list_tenants_returns_only_authorized_tenants(self):
         alt_tenant_name = self.alt_manager.credentials.credentials.tenant_name
-        resp = self.non_admin_client.list_tenants()
+        resp = self.non_admin_tenants_client.list_tenants()
 
         # check that user can see only that tenants that he presents in so user
         # can successfully authenticate using his credentials and tenant name

@@ -85,10 +85,10 @@ def init_conf():
 def _get_network_id(net_name, tenant_name):
     am = credentials.AdminManager()
     net_cl = am.networks_client
-    id_cl = am.identity_client
+    tn_cl = am.tenants_client
 
     networks = net_cl.list_networks()
-    tenant = identity.get_tenant_by_name(id_cl, tenant_name)
+    tenant = identity.get_tenant_by_name(tn_cl, tenant_name)
     t_id = tenant['id']
     n_id = None
     for net in networks['networks']:
@@ -895,9 +895,12 @@ class RoleService(IdentityService):
 
 class TenantService(IdentityService):
 
+    def __init__(self, manager, **kwargs):
+        super(TenantService, self).__init__(kwargs)
+        self.client = manager.tenants_client
+
     def list(self):
-        client = self.client
-        tenants = client.list_tenants()['tenants']
+        tenants = self.client.list_tenants()['tenants']
         if not self.is_save_state:
             tenants = [tenant for tenant in tenants if (tenant['id']
                        not in self.saved_state_json['tenants'].keys()
@@ -911,11 +914,10 @@ class TenantService(IdentityService):
         return tenants
 
     def delete(self):
-        client = self.client
         tenants = self.list()
         for tenant in tenants:
             try:
-                client.delete_tenant(tenant['id'])
+                self.client.delete_tenant(tenant['id'])
             except Exception:
                 LOG.exception("Delete Tenant exception.")
 

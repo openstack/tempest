@@ -31,9 +31,12 @@ class CredsClient(object):
      admin credentials used for generating credentials.
     """
 
-    def __init__(self, identity_client):
+    def __init__(self, identity_client, projects_client=None):
         # The client implies version and credentials
         self.identity_client = identity_client
+        # this is temporary until the v3 project client is
+        # separated, then projects_client will become mandatory
+        self.projects_client = projects_client or identity_client
 
     def create_user(self, username, password, project, email):
         user = self.identity_client.create_user(
@@ -91,8 +94,11 @@ class CredsClient(object):
 
 class V2CredsClient(CredsClient):
 
+    def __init__(self, identity_client, projects_client):
+        super(V2CredsClient, self).__init__(identity_client, projects_client)
+
     def create_project(self, name, description):
-        tenant = self.identity_client.create_tenant(
+        tenant = self.projects_client.create_tenant(
             name=name, description=description)['tenant']
         return tenant
 
@@ -108,7 +114,7 @@ class V2CredsClient(CredsClient):
             password=password)
 
     def delete_project(self, project_id):
-        self.identity_client.delete_tenant(project_id)
+        self.projects_client.delete_tenant(project_id)
 
 
 class V3CredsClient(CredsClient):
@@ -152,8 +158,10 @@ class V3CredsClient(CredsClient):
         return roles
 
 
-def get_creds_client(identity_client, project_domain_name=None):
+def get_creds_client(identity_client,
+                     projects_client=None,
+                     project_domain_name=None):
     if isinstance(identity_client, v2_identity.IdentityClient):
-        return V2CredsClient(identity_client)
+        return V2CredsClient(identity_client, projects_client)
     else:
         return V3CredsClient(identity_client, project_domain_name)

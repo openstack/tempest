@@ -85,24 +85,24 @@ class JavelinUnitTest(base.TestCase):
 class TestCreateResources(JavelinUnitTest):
     def test_create_tenants(self):
 
-        self.fake_client.identity.list_tenants.return_value = {'tenants': []}
+        self.fake_client.tenants.list_tenants.return_value = {'tenants': []}
         self.useFixture(mockpatch.PatchObject(javelin, "keystone_admin",
                                               return_value=self.fake_client))
 
         javelin.create_tenants([self.fake_object['name']])
 
-        mocked_function = self.fake_client.identity.create_tenant
+        mocked_function = self.fake_client.tenants.create_tenant
         mocked_function.assert_called_once_with(self.fake_object['name'])
 
     def test_create_duplicate_tenant(self):
-        self.fake_client.identity.list_tenants.return_value = {'tenants': [
+        self.fake_client.tenants.list_tenants.return_value = {'tenants': [
             {'name': self.fake_object['name']}]}
         self.useFixture(mockpatch.PatchObject(javelin, "keystone_admin",
                                               return_value=self.fake_client))
 
         javelin.create_tenants([self.fake_object['name']])
 
-        mocked_function = self.fake_client.identity.create_tenant
+        mocked_function = self.fake_client.tenants.create_tenant
         self.assertFalse(mocked_function.called)
 
     def test_create_users(self):
@@ -299,7 +299,7 @@ class TestDestroyResources(JavelinUnitTest):
                                               return_value=fake_auth))
         javelin.destroy_tenants([fake_tenant])
 
-        mocked_function = fake_auth.identity.delete_tenant
+        mocked_function = fake_auth.tenants.delete_tenant
         mocked_function.assert_called_once_with(fake_tenant['id'])
 
     def test_destroy_users(self):
@@ -308,7 +308,7 @@ class TestDestroyResources(JavelinUnitTest):
         fake_tenant = self.fake_object['tenant']
 
         fake_auth = self.fake_client
-        fake_auth.identity.list_tenants.return_value = \
+        fake_auth.tenants.list_tenants.return_value = \
             {'tenants': [fake_tenant]}
         fake_auth.identity.list_users.return_value = {'users': [fake_user]}
 
