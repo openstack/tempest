@@ -115,7 +115,7 @@ class BaseTrustsV3Test(base.BaseIdentityV3AdminTest):
             trustor_user_id=self.trustor_user_id,
             trustee_user_id=self.trustee_user_id,
             project_id=self.trustor_project_id,
-            role_names=[self.delegated_role],
+            roles=[{'name': self.delegated_role}],
             impersonation=impersonate,
             expires_at=expires)['trust']
         self.trust_id = trust_create['id']
