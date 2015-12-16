@@ -212,7 +212,7 @@ class DataGenerator(object):
             """Set up a test user."""
             self.setup_test_tenant()
             self.test_user = data_utils.rand_name('test_user')
-            self.test_password = data_utils.rand_name('pass')
+            self.test_password = data_utils.rand_password()
             self.test_email = self.test_user + '@testmail.tm'
             self.user = self.client.create_user(self.test_user,
                                                 self.test_password,
@@ -239,7 +239,7 @@ class DataGenerator(object):
             """Set up a test v3 user."""
             self.setup_test_project()
             self.test_user = data_utils.rand_name('test_user')
-            self.test_password = data_utils.rand_name('pass')
+            self.test_password = data_utils.rand_password()
             self.test_email = self.test_user + '@testmail.tm'
             self.v3_user = self.client.create_user(
                 self.test_user,

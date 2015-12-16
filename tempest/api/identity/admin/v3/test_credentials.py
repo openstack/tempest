@@ -29,7 +29,7 @@ class CredentialsTestJSON(base.BaseIdentityV3AdminTest):
         u_name = data_utils.rand_name('user')
         u_desc = '%s description' % u_name
         u_email = '%s@testmail.tm' % u_name
-        u_password = data_utils.rand_name('pass')
+        u_password = data_utils.rand_password()
         for i in range(2):
             cls.project = cls.client.create_project(
                 data_utils.rand_name('project'),

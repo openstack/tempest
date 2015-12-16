@@ -31,7 +31,7 @@ class RolesV3TestJSON(base.BaseIdentityV3AdminTest):
         u_name = data_utils.rand_name('user')
         u_desc = '%s description' % u_name
         u_email = '%s@testmail.tm' % u_name
-        cls.u_password = data_utils.rand_name('pass')
+        cls.u_password = data_utils.rand_password()
         cls.domain = cls.client.create_domain(
             data_utils.rand_name('domain'),
             description=data_utils.rand_name('domain-desc'))['domain']

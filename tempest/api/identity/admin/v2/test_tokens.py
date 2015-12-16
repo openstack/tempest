@@ -24,7 +24,7 @@ class TokensTestJSON(base.BaseIdentityV2AdminTest):
     def test_create_get_delete_token(self):
         # get a token by username and password
         user_name = data_utils.rand_name(name='user')
-        user_password = data_utils.rand_name(name='pass')
+        user_password = data_utils.rand_password()
         # first:create a tenant
         tenant_name = data_utils.rand_name(name='tenant')
         tenant = self.tenants_client.create_tenant(tenant_name)['tenant']
@@ -59,7 +59,7 @@ class TokensTestJSON(base.BaseIdentityV2AdminTest):
 
         # Create a user.
         user_name = data_utils.rand_name(name='user')
-        user_password = data_utils.rand_name(name='pass')
+        user_password = data_utils.rand_password()
         tenant_id = None  # No default tenant so will get unscoped token.
         email = ''
         user = self.client.create_user(user_name, user_password,
