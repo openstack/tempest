@@ -119,6 +119,9 @@ To enable and use locking test accounts you need do a few things:
  #. Provide tempest with the location of your accounts.yaml file with the
     test_accounts_file option in the auth section
 
+    *NOTE: Be sure to use a full path for the file otherwise Tempest will
+    likely not find it.*
+
  #. Set use_dynamic_credentials = False in the auth group
 
 It is worth pointing out that each set of credentials in the accounts.yaml
