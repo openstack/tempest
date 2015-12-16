@@ -31,8 +31,13 @@ LOG = logging.getLogger(__name__)
 
 
 def read_accounts_yaml(path):
-    with open(path, 'r') as yaml_file:
-        accounts = yaml.load(yaml_file)
+    try:
+        with open(path, 'r') as yaml_file:
+            accounts = yaml.load(yaml_file)
+    except IOError:
+        raise exceptions.InvalidConfiguration(
+            'The path for the test accounts file: %s '
+            'could not be found' % path)
     return accounts
 
 
@@ -74,7 +79,7 @@ class PreProvisionedCredentialProvider(cred_provider.CredentialProvider):
             identity_version=identity_version, name=name,
             admin_role=admin_role, credentials_domain=credentials_domain)
         self.test_accounts_file = test_accounts_file
-        if test_accounts_file and os.path.isfile(test_accounts_file):
+        if test_accounts_file:
             accounts = read_accounts_yaml(self.test_accounts_file)
             self.use_default_creds = False
         else:
