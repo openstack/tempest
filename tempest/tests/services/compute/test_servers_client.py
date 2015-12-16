@@ -363,7 +363,7 @@ class TestServersClient(base.BaseComputeServiceTest):
             {},
             status=202,
             server_id=self.server_id,
-            reboot_type='fake-reboot-type'
+            type='fake-reboot-type'
             )
 
     def test_rebuild_server_with_str_body(self):

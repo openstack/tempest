@@ -35,7 +35,7 @@ class InstanceActionsTestJSON(base.BaseV2ComputeTest):
     @test.idempotent_id('77ca5cc5-9990-45e0-ab98-1de8fead201a')
     def test_list_instance_actions(self):
         # List actions of the provided server
-        self.client.reboot_server(self.server_id, 'HARD')
+        self.client.reboot_server(self.server_id, type='HARD')
         waiters.wait_for_server_status(self.client, self.server_id, 'ACTIVE')
 
         body = (self.client.list_instance_actions(self.server_id)

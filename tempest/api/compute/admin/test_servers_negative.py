@@ -123,7 +123,7 @@ class ServersAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
     @test.idempotent_id('e741298b-8df2-46f0-81cb-8f814ff2504c')
     def test_reset_state_server_nonexistent_server(self):
         self.assertRaises(lib_exc.NotFound,
-                          self.client.reset_state, '999')
+                          self.client.reset_state, '999', state='error')
 
     @test.attr(type=['negative'])
     @test.idempotent_id('e84e2234-60d2-42fa-8b30-e2d3049724ac')

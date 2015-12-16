@@ -101,7 +101,7 @@ class ServerRescueNegativeTestJSON(base.BaseV2ComputeTest):
     @test.idempotent_id('db22b618-f157-4566-a317-1b6d467a8094')
     def test_rescued_vm_reboot(self):
         self.assertRaises(lib_exc.Conflict, self.servers_client.reboot_server,
-                          self.rescue_id, 'HARD')
+                          self.rescue_id, type='HARD')
 
     @test.attr(type=['negative'])
     @test.idempotent_id('6dfc0a55-3a77-4564-a144-1587b7971dde')

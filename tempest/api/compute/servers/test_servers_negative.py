@@ -152,7 +152,7 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
         # Reboot a non existent server
         nonexistent_server = data_utils.rand_uuid()
         self.assertRaises(lib_exc.NotFound, self.client.reboot_server,
-                          nonexistent_server, 'SOFT')
+                          nonexistent_server, type='SOFT')
 
     @test.idempotent_id('d1417e7f-a509-41b5-a102-d5eed8613369')
     @testtools.skipUnless(CONF.compute_feature_enabled.pause,
@@ -188,7 +188,7 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
         waiters.wait_for_server_termination(self.client, server['id'])
 
         self.assertRaises(lib_exc.NotFound, self.client.reboot_server,
-                          server['id'], 'SOFT')
+                          server['id'], type='SOFT')
 
     @test.attr(type=['negative'])
     @test.idempotent_id('d86141a7-906e-4731-b187-d64a2ea61422')

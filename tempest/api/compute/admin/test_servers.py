@@ -130,7 +130,7 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
     @test.idempotent_id('ee8ae470-db70-474d-b752-690b7892cab1')
     def test_reset_state_server(self):
         # Reset server's state to 'error'
-        self.client.reset_state(self.s1_id)
+        self.client.reset_state(self.s1_id, state='error')
 
         # Verify server's state
         server = self.client.show_server(self.s1_id)['server']
