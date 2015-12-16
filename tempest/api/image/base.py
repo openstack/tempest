@@ -62,18 +62,12 @@ class BaseImageTest(tempest.test.BaseTestCase):
     @classmethod
     def create_image(cls, **kwargs):
         """Wrapper that returns a test image."""
-        name = data_utils.rand_name(cls.__name__ + "-instance")
 
-        if 'name' in kwargs:
-            name = kwargs.pop('name')
+        if 'name' not in kwargs:
+            name = data_utils.rand_name(cls.__name__ + "-instance")
+            kwargs['name'] = name
 
-        container_format = kwargs.pop('container_format')
-        disk_format = kwargs.pop('disk_format')
-
-        image = cls.client.create_image(name=name,
-                                        container_format=container_format,
-                                        disk_format=disk_format,
-                                        **kwargs)
+        image = cls.client.create_image(**kwargs)
         # Image objects returned by the v1 client have the image
         # data inside a dict that is keyed against 'image'.
         if 'image' in image:

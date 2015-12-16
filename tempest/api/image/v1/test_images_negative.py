@@ -27,13 +27,17 @@ class CreateDeleteImagesNegativeTest(base.BaseV1ImageTest):
     def test_register_with_invalid_container_format(self):
         # Negative tests for invalid data supplied to POST /images
         self.assertRaises(lib_exc.BadRequest, self.client.create_image,
-                          'test', 'wrong', 'vhd')
+                          name='test',
+                          container_format='wrong',
+                          disk_format='vhd',)
 
     @test.attr(type=['negative'])
     @test.idempotent_id('993face5-921d-4e84-aabf-c1bba4234a67')
     def test_register_with_invalid_disk_format(self):
         self.assertRaises(lib_exc.BadRequest, self.client.create_image,
-                          'test', 'bare', 'wrong')
+                          name='test',
+                          container_format='bare',
+                          disk_format='wrong',)
 
     @test.attr(type=['negative'])
     @test.idempotent_id('bb016f15-0820-4f27-a92d-09b2f67d2488')
