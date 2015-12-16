@@ -157,23 +157,6 @@ class NetworkClient(base.BaseNetworkClient):
             message = '(%s) %s' % (caller, message)
         raise exceptions.TimeoutException(message)
 
-    def update_quotas(self, tenant_id, **kwargs):
-        put_body = {'quota': kwargs}
-        uri = '/quotas/%s' % tenant_id
-        return self.update_resource(uri, put_body)
-
-    def reset_quotas(self, tenant_id):
-        uri = '/quotas/%s' % tenant_id
-        return self.delete_resource(uri)
-
-    def show_quotas(self, tenant_id, **fields):
-        uri = '/quotas/%s' % tenant_id
-        return self.show_resource(uri, **fields)
-
-    def list_quotas(self, **filters):
-        uri = '/quotas'
-        return self.list_resources(uri, **filters)
-
     def create_router(self, name, admin_state_up=True, **kwargs):
         post_body = {'router': kwargs}
         post_body['router']['name'] = name
