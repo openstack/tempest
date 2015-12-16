@@ -337,7 +337,11 @@ class ServersClient(service_client.ServiceClient):
         return self.action(server_id, 'removeSecurityGroup', name=name)
 
     def live_migrate_server(self, server_id, **kwargs):
-        """This should be called with administrator privileges ."""
+        """This should be called with administrator privileges.
+
+        Available params: http://developer.openstack.org/
+                          api-ref-compute-v2.1.html#migrateLive
+        """
         return self.action(server_id, 'os-migrateLive', **kwargs)
 
     def migrate_server(self, server_id, **kwargs):
@@ -345,7 +349,11 @@ class ServersClient(service_client.ServiceClient):
         return self.action(server_id, 'migrate', **kwargs)
 
     def lock_server(self, server_id, **kwargs):
-        """Locks the given server."""
+        """Lock the given server.
+
+        Available params: http://developer.openstack.org/
+                          api-ref-compute-v2.1.html#lock
+        """
         return self.action(server_id, 'lock', **kwargs)
 
     def unlock_server(self, server_id, **kwargs):
@@ -384,11 +392,14 @@ class ServersClient(service_client.ServiceClient):
         """Shelve-offload the provided server."""
         return self.action(server_id, 'shelveOffload', **kwargs)
 
-    def get_console_output(self, server_id, length):
-        kwargs = {'length': length} if length else {}
+    def get_console_output(self, server_id, **kwargs):
+        """Get console output.
+
+        Available params: http://developer.openstack.org/
+                          api-ref-compute-v2.1.html#getConsoleOutput
+        """
         return self.action(server_id, 'os-getConsoleOutput',
-                           schema.get_console_output,
-                           **kwargs)
+                           schema.get_console_output, **kwargs)
 
     def list_virtual_interfaces(self, server_id):
         """List the virtual interfaces used in an instance."""
@@ -430,7 +441,11 @@ class ServersClient(service_client.ServiceClient):
         return service_client.ResponseBody(resp, body)
 
     def force_delete_server(self, server_id, **kwargs):
-        """Force delete a server."""
+        """Force delete a server.
+
+        Available params: http://developer.openstack.org/
+                          api-ref-compute-v2.1.html#forceDelete
+        """
         return self.action(server_id, 'forceDelete', **kwargs)
 
     def restore_soft_deleted_server(self, server_id, **kwargs):
@@ -442,14 +457,21 @@ class ServersClient(service_client.ServiceClient):
         return self.action(server_id, 'resetNetwork', **kwargs)
 
     def inject_network_info(self, server_id, **kwargs):
-        """Inject the Network Info into server"""
+        """Inject the Network Info into server.
+
+        Available params: http://developer.openstack.org/
+                          api-ref-compute-v2.1.html#injectNetworkInfo
+        """
         return self.action(server_id, 'injectNetworkInfo', **kwargs)
 
-    def get_vnc_console(self, server_id, console_type):
-        """Get URL of VNC console."""
+    def get_vnc_console(self, server_id, **kwargs):
+        """Get URL of VNC console.
+
+        Available params: http://developer.openstack.org/
+                          api-ref-compute-v2.1.html#getVNCConsole
+        """
         return self.action(server_id, "os-getVNCConsole",
-                           schema.get_vnc_console,
-                           type=console_type)
+                           schema.get_vnc_console, **kwargs)
 
     def add_fixed_ip(self, server_id, **kwargs):
         """Add a fixed IP to server instance.

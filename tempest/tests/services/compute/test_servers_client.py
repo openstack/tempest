@@ -995,5 +995,5 @@ class TestServersClient(base.BaseComputeServiceTest):
             'tempest.common.service_client.ServiceClient.post',
             {'console': self.FAKE_VNC_CONSOLE},
             server_id=self.server_id,
-            console_type='fake-console-type'
+            type='fake-console-type'
             )
