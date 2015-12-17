@@ -757,7 +757,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
 
         # Create server
         self._setup_network_and_servers()
-        self.check_public_network_connectivity(should_connect=False)
+        self.check_public_network_connectivity(should_connect=True)
         self._create_new_network()
         self._hotplug_server()
         fip, server = self.floating_ip_tuple
