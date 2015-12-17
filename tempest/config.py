@@ -1436,6 +1436,13 @@ class TempestConfigPrivate(object):
             _CONF([], project='tempest', default_config_files=config_files)
         else:
             _CONF([], project='tempest')
+
+        logging_cfg_path = "%s/logging.conf" % os.path.dirname(path)
+        if (not hasattr(_CONF, 'log_config_append') and
+            os.path.isfile(logging_cfg_path)):
+            # if logging conf is in place we need to set log_config_append
+            _CONF.log_config_append = logging_cfg_path
+
         logging.setup(_CONF, 'tempest')
         LOG = logging.getLogger('tempest')
         LOG.info("Using tempest config file %s" % path)
