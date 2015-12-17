@@ -1406,6 +1406,7 @@ class TempestConfigPrivate(object):
         _CONF.set_default('alt_domain_name',
                           self.auth.default_credentials_domain_name,
                           group='identity')
+        logging.tempest_set_log_file('tempest.log')
 
     def __init__(self, parse_conf=True, config_path=None):
         """Initialize a configuration from a conf directory and conf file."""
