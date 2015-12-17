@@ -12,10 +12,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest.common import service_client
+from tempest_lib.common import rest_client
 
 
-class BaseComputeClient(service_client.ServiceClient):
+class BaseComputeClient(rest_client.RestClient):
     api_microversion = None
 
     def get_headers(self):
@@ -23,3 +23,6 @@ class BaseComputeClient(service_client.ServiceClient):
         if self.api_microversion:
             headers['X-OpenStack-Nova-API-Version'] = self.api_microversion
         return headers
+
+    def set_api_microversion(self, microversion):
+        self.api_microversion = microversion
