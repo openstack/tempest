@@ -26,60 +26,6 @@ class IdentityClient(service_client.ServiceClient):
         body = json.loads(body)
         return service_client.ResponseBody(resp, body)
 
-    def create_role(self, name):
-        """Create a role."""
-        post_body = {
-            'name': name,
-        }
-        post_body = json.dumps({'role': post_body})
-        resp, body = self.post('OS-KSADM/roles', post_body)
-        self.expected_success(200, resp.status)
-        body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
-
-    def show_role(self, role_id):
-        """Get a role by its id."""
-        resp, body = self.get('OS-KSADM/roles/%s' % role_id)
-        self.expected_success(200, resp.status)
-        body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
-
-    def delete_role(self, role_id):
-        """Delete a role."""
-        resp, body = self.delete('OS-KSADM/roles/%s' % str(role_id))
-        self.expected_success(204, resp.status)
-        return resp, body
-
-    def list_user_roles(self, tenant_id, user_id):
-        """Returns a list of roles assigned to a user for a tenant."""
-        url = '/tenants/%s/users/%s/roles' % (tenant_id, user_id)
-        resp, body = self.get(url)
-        self.expected_success(200, resp.status)
-        body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
-
-    def assign_user_role(self, tenant_id, user_id, role_id):
-        """Add roles to a user on a tenant."""
-        resp, body = self.put('/tenants/%s/users/%s/roles/OS-KSADM/%s' %
-                              (tenant_id, user_id, role_id), "")
-        self.expected_success(200, resp.status)
-        body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
-
-    def delete_user_role(self, tenant_id, user_id, role_id):
-        """Removes a role assignment for a user on a tenant."""
-        resp, body = self.delete('/tenants/%s/users/%s/roles/OS-KSADM/%s' %
-                                 (tenant_id, user_id, role_id))
-        self.expected_success(204, resp.status)
-        return service_client.ResponseBody(resp, body)
-
-    def list_roles(self):
-        """Returns roles."""
-        resp, body = self.get('OS-KSADM/roles')
-        self.expected_success(200, resp.status)
-        body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
-
     def create_user(self, name, password, tenant_id, email, **kwargs):
         """Create a user."""
         post_body = {

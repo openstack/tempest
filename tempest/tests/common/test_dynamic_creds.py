@@ -24,6 +24,8 @@ from tempest import config
 from tempest import exceptions
 from tempest.services.identity.v2.json import identity_client as \
     json_iden_client
+from tempest.services.identity.v2.json import roles_client as \
+    json_roles_client
 from tempest.services.identity.v2.json import tenants_client as \
     json_tenants_client
 from tempest.services.network.json import network_client as json_network_client
@@ -84,7 +86,7 @@ class TestDynamicCredentialProvider(base.TestCase):
 
     def _mock_list_roles(self, id, name):
         roles_fix = self.useFixture(mockpatch.PatchObject(
-            json_iden_client.IdentityClient,
+            json_roles_client.RolesClient,
             'list_roles',
             return_value=(service_client.ResponseBody
                           (200,
@@ -95,7 +97,7 @@ class TestDynamicCredentialProvider(base.TestCase):
 
     def _mock_list_2_roles(self):
         roles_fix = self.useFixture(mockpatch.PatchObject(
-            json_iden_client.IdentityClient,
+            json_roles_client.RolesClient,
             'list_roles',
             return_value=(service_client.ResponseBody
                           (200,
@@ -106,7 +108,7 @@ class TestDynamicCredentialProvider(base.TestCase):
 
     def _mock_assign_user_role(self):
         tenant_fix = self.useFixture(mockpatch.PatchObject(
-            json_iden_client.IdentityClient,
+            json_roles_client.RolesClient,
             'assign_user_role',
             return_value=(service_client.ResponseBody
                           (200, {}))))
@@ -114,7 +116,7 @@ class TestDynamicCredentialProvider(base.TestCase):
 
     def _mock_list_role(self):
         roles_fix = self.useFixture(mockpatch.PatchObject(
-            json_iden_client.IdentityClient,
+            json_roles_client.RolesClient,
             'list_roles',
             return_value=(service_client.ResponseBody
                           (200, {'roles': [{'id': '1',
@@ -178,11 +180,11 @@ class TestDynamicCredentialProvider(base.TestCase):
         self._mock_user_create('1234', 'fake_admin_user')
         self._mock_tenant_create('1234', 'fake_admin_tenant')
 
-        user_mock = mock.patch.object(json_iden_client.IdentityClient,
+        user_mock = mock.patch.object(json_roles_client.RolesClient,
                                       'assign_user_role')
         user_mock.start()
         self.addCleanup(user_mock.stop)
-        with mock.patch.object(json_iden_client.IdentityClient,
+        with mock.patch.object(json_roles_client.RolesClient,
                                'assign_user_role') as user_mock:
             admin_creds = creds.get_admin_creds()
         user_mock.assert_has_calls([
@@ -201,11 +203,11 @@ class TestDynamicCredentialProvider(base.TestCase):
         self._mock_user_create('1234', 'fake_role_user')
         self._mock_tenant_create('1234', 'fake_role_tenant')
 
-        user_mock = mock.patch.object(json_iden_client.IdentityClient,
+        user_mock = mock.patch.object(json_roles_client.RolesClient,
                                       'assign_user_role')
         user_mock.start()
         self.addCleanup(user_mock.stop)
-        with mock.patch.object(json_iden_client.IdentityClient,
+        with mock.patch.object(json_roles_client.RolesClient,
                                'assign_user_role') as user_mock:
             role_creds = creds.get_creds_by_roles(
                 roles=['role1', 'role2'])

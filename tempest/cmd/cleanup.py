@@ -177,6 +177,7 @@ class TempestCleanup(command.Command):
 
     def _init_admin_ids(self):
         id_cl = self.admin_mgr.identity_client
+        rl_cl = self.admin_mgr.roles_client
 
         tenant = identity.get_tenant_by_name(id_cl,
                                              CONF.auth.admin_tenant_name)
@@ -186,7 +187,7 @@ class TempestCleanup(command.Command):
                                              CONF.auth.admin_username)
         self.admin_id = user['id']
 
-        roles = id_cl.list_roles()['roles']
+        roles = rl_cl.list_roles()['roles']
         for role in roles:
             if role['name'] == CONF.identity.admin_role:
                 self.admin_role_id = role['id']
@@ -221,8 +222,9 @@ class TempestCleanup(command.Command):
 
     def _add_admin(self, tenant_id):
         id_cl = self.admin_mgr.identity_client
+        rl_cl = self.admin_mgr.roles_client
         needs_role = True
-        roles = id_cl.list_user_roles(tenant_id, self.admin_id)['roles']
+        roles = rl_cl.list_user_roles(tenant_id, self.admin_id)['roles']
         for role in roles:
             if role['id'] == self.admin_role_id:
                 needs_role = False

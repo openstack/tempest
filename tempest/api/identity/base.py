@@ -56,7 +56,7 @@ class BaseIdentityTest(tempest.test.BaseTestCase):
 
     @classmethod
     def get_role_by_name(cls, name):
-        roles = cls.client.list_roles()['roles']
+        roles = cls.roles_client.list_roles()['roles']
         role = [r for r in roles if r['name'] == name]
         if len(role) > 0:
             return role[0]
@@ -76,6 +76,7 @@ class BaseIdentityV2Test(BaseIdentityTest):
         cls.non_admin_client = cls.os.identity_public_client
         cls.non_admin_token_client = cls.os.token_client
         cls.non_admin_tenants_client = cls.os.tenants_public_client
+        cls.non_admin_roles_client = cls.os.roles_public_client
 
     @classmethod
     def resource_setup(cls):
@@ -98,11 +99,14 @@ class BaseIdentityV2AdminTest(BaseIdentityV2Test):
         cls.token_client = cls.os_adm.token_client
         cls.tenants_client = cls.os_adm.tenants_client
         cls.non_admin_tenants_client = cls.os.tenants_client
+        cls.roles_client = cls.os_adm.roles_client
+        cls.non_admin_roles_client = cls.os.roles_client
 
     @classmethod
     def resource_setup(cls):
         super(BaseIdentityV2AdminTest, cls).resource_setup()
-        cls.data = DataGenerator(cls.client, cls.tenants_client)
+        cls.data = DataGenerator(cls.client, cls.tenants_client,
+                                 cls.roles_client)
 
     @classmethod
     def resource_cleanup(cls):
@@ -187,10 +191,11 @@ class BaseIdentityV3AdminTest(BaseIdentityV3Test):
 
 class DataGenerator(object):
 
-        def __init__(self, client, tenants_client=None):
+        def __init__(self, client, tenants_client=None, roles_client=None):
             self.client = client
             # TODO(dmellado) split Datagenerator for v2 and v3
             self.tenants_client = tenants_client
+            self.roles_client = roles_client
             self.users = []
             self.tenants = []
             self.roles = []
@@ -232,7 +237,7 @@ class DataGenerator(object):
         def setup_test_role(self):
             """Set up a test role."""
             self.test_role = data_utils.rand_name('role')
-            self.role = self.client.create_role(self.test_role)['role']
+            self.role = self.roles_client.create_role(self.test_role)['role']
             self.roles.append(self.role)
 
         def setup_test_v3_user(self):
@@ -294,7 +299,7 @@ class DataGenerator(object):
             for tenant in self.tenants:
                 self._try_wrapper(self.tenants_client.delete_tenant, tenant)
             for role in self.roles:
-                self._try_wrapper(self.client.delete_role, role)
+                self._try_wrapper(self.roles_client.delete_role, role)
             for v3_user in self.v3_users:
                 self._try_wrapper(self.client.delete_user, v3_user)
             for v3_project in self.projects:
