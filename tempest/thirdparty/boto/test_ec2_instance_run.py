@@ -280,7 +280,7 @@ class InstanceRunTest(boto_test.BotoTestCase):
         # NOTE(afazekas): it may be reports available before it is available
 
         ssh = remote_client.RemoteClient(address.public_ip,
-                                         CONF.compute.ssh_user,
+                                         CONF.validation.image_ssh_user,
                                          pkey=self.keypair.material)
         text = data_utils.rand_name("Pattern text for console output")
         try:

@@ -499,24 +499,26 @@ class JavelinCheck(unittest.TestCase):
                 for network_name, body in found['addresses'].items():
                     for addr in body:
                         ip = addr['addr']
-                        # If floatingip_for_ssh is at True, it's assumed
-                        # you want to use the floating IP to reach the server,
-                        # fallback to fixed IP, then other type.
+                        # Use floating IP, fixed IP or other type to
+                        # reach the server.
                         # This is useful in multi-node environment.
-                        if CONF.compute.use_floatingip_for_ssh:
+                        if CONF.validation.connect_method == 'floating':
                             if addr.get('OS-EXT-IPS:type',
                                         'floating') == 'floating':
                                 self._ping_ip(ip, 60)
                                 _floating_is_alive = True
-                        elif addr.get('OS-EXT-IPS:type', 'fixed') == 'fixed':
-                            namespace = _get_router_namespace(client,
-                                                              network_name)
-                            self._ping_ip(ip, 60, namespace)
+                        elif CONF.validation.connect_method == 'fixed':
+                            if addr.get('OS-EXT-IPS:type',
+                                        'fixed') == 'fixed':
+                                namespace = _get_router_namespace(client,
+                                                                  network_name)
+                                self._ping_ip(ip, 60, namespace)
                         else:
                             self._ping_ip(ip, 60)
-                # if floatingip_for_ssh is at True, validate found a
-                # floating IP and ping worked.
-                if CONF.compute.use_floatingip_for_ssh:
+                # If CONF.validation.connect_method is floating, validate
+                # that the floating IP is attached to the server and the
+                # the server is pingable.
+                if CONF.validation.connect_method == 'floating':
                     self.assertTrue(_floating_is_alive,
                                     "Server %s has no floating IP." %
                                     server['name'])
@@ -910,7 +912,7 @@ def create_servers(servers):
         # create security group(s) after server spawning
         for secgroup in server['secgroups']:
             client.servers.add_security_group(server_id, name=secgroup)
-        if CONF.compute.use_floatingip_for_ssh:
+        if CONF.validation.connect_method == 'floating':
             floating_ip_pool = server.get('floating_ip_pool')
             floating_ip = client.floating_ips.create_floating_ip(
                 pool_name=floating_ip_pool)['floating_ip']
