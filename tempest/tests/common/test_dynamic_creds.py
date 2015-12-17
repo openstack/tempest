@@ -322,9 +322,9 @@ class TestDynamicCredentialProvider(base.TestCase):
         self._mock_router_create('1234', 'fake_router')
         router_interface_mock = self.patch(
             'tempest.services.network.json.network_client.NetworkClient.'
-            'add_router_interface_with_subnet_id')
+            'add_router_interface')
         primary_creds = creds.get_primary_creds()
-        router_interface_mock.assert_called_once_with('1234', '1234')
+        router_interface_mock.assert_called_once_with('1234', subnet_id='1234')
         network = primary_creds.network
         subnet = primary_creds.subnet
         router = primary_creds.router
@@ -354,9 +354,9 @@ class TestDynamicCredentialProvider(base.TestCase):
         self._mock_router_create('1234', 'fake_router')
         router_interface_mock = self.patch(
             'tempest.services.network.json.network_client.NetworkClient.'
-            'add_router_interface_with_subnet_id')
+            'add_router_interface')
         creds.get_primary_creds()
-        router_interface_mock.assert_called_once_with('1234', '1234')
+        router_interface_mock.assert_called_once_with('1234', subnet_id='1234')
         router_interface_mock.reset_mock()
         # Create alternate tenant and network
         self._mock_user_create('12345', 'fake_alt_user')
@@ -365,7 +365,8 @@ class TestDynamicCredentialProvider(base.TestCase):
         self._mock_subnet_create(creds, '12345', 'fake_alt_subnet')
         self._mock_router_create('12345', 'fake_alt_router')
         creds.get_alt_creds()
-        router_interface_mock.assert_called_once_with('12345', '12345')
+        router_interface_mock.assert_called_once_with('12345',
+                                                      subnet_id='12345')
         router_interface_mock.reset_mock()
         # Create admin tenant and networks
         self._mock_user_create('123456', 'fake_admin_user')
@@ -390,7 +391,7 @@ class TestDynamicCredentialProvider(base.TestCase):
         router_mock = router.start()
         remove_router_interface_mock = self.patch(
             'tempest.services.network.json.network_client.NetworkClient.'
-            'remove_router_interface_with_subnet_id')
+            'remove_router_interface')
         return_values = ({'status': 200}, {'ports': []})
         port_list_mock = mock.patch.object(creds.ports_admin_client,
                                            'list_ports',
@@ -419,11 +420,11 @@ class TestDynamicCredentialProvider(base.TestCase):
         # Verify remove router interface calls
         calls = remove_router_interface_mock.mock_calls
         self.assertEqual(len(calls), 3)
-        args = map(lambda x: x[1], calls)
+        args = map(lambda x: (x[1][0], x[2]), calls)
         args = list(args)
-        self.assertIn(('1234', '1234'), args)
-        self.assertIn(('12345', '12345'), args)
-        self.assertIn(('123456', '123456'), args)
+        self.assertIn(('1234', {'subnet_id': '1234'}), args)
+        self.assertIn(('12345', {'subnet_id': '12345'}), args)
+        self.assertIn(('123456', {'subnet_id': '123456'}), args)
         # Verify network delete calls
         calls = net_mock.mock_calls
         self.assertEqual(len(calls), 3)
@@ -461,9 +462,9 @@ class TestDynamicCredentialProvider(base.TestCase):
         self._mock_router_create('1234', 'fake_alt_router')
         router_interface_mock = self.patch(
             'tempest.services.network.json.network_client.NetworkClient.'
-            'add_router_interface_with_subnet_id')
+            'add_router_interface')
         alt_creds = creds.get_alt_creds()
-        router_interface_mock.assert_called_once_with('1234', '1234')
+        router_interface_mock.assert_called_once_with('1234', subnet_id='1234')
         network = alt_creds.network
         subnet = alt_creds.subnet
         router = alt_creds.router
@@ -485,10 +486,10 @@ class TestDynamicCredentialProvider(base.TestCase):
         self._mock_router_create('1234', 'fake_admin_router')
         router_interface_mock = self.patch(
             'tempest.services.network.json.network_client.NetworkClient.'
-            'add_router_interface_with_subnet_id')
+            'add_router_interface')
         self._mock_list_roles('123456', 'admin')
         admin_creds = creds.get_admin_creds()
-        router_interface_mock.assert_called_once_with('1234', '1234')
+        router_interface_mock.assert_called_once_with('1234', subnet_id='1234')
         network = admin_creds.network
         subnet = admin_creds.subnet
         router = admin_creds.router

@@ -247,8 +247,8 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
     @classmethod
     def create_router_interface(cls, router_id, subnet_id):
         """Wrapper utility that returns a router interface."""
-        interface = cls.client.add_router_interface_with_subnet_id(
-            router_id, subnet_id)
+        interface = cls.client.add_router_interface(router_id,
+                                                    subnet_id=subnet_id)
         return interface
 
     @classmethod
@@ -257,8 +257,9 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
         interfaces = body['ports']
         for i in interfaces:
             try:
-                cls.client.remove_router_interface_with_subnet_id(
-                    router['id'], i['fixed_ips'][0]['subnet_id'])
+                cls.client.remove_router_interface(
+                    router['id'],
+                    subnet_id=i['fixed_ips'][0]['subnet_id'])
             except lib_exc.NotFound:
                 pass
         cls.client.delete_router(router['id'])

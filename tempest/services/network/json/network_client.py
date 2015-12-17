@@ -205,25 +205,23 @@ class NetworkClient(base.BaseNetworkClient):
         """
         return self._update_router(router_id, set_enable_snat=True, **kwargs)
 
-    def add_router_interface_with_subnet_id(self, router_id, subnet_id):
+    def add_router_interface(self, router_id, **kwargs):
+        """Add router interface.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-networking-v2-ext.html#addRouterInterface
+        """
         uri = '/routers/%s/add_router_interface' % router_id
-        update_body = {"subnet_id": subnet_id}
-        return self.update_resource(uri, update_body)
+        return self.update_resource(uri, kwargs)
 
-    def add_router_interface_with_port_id(self, router_id, port_id):
-        uri = '/routers/%s/add_router_interface' % router_id
-        update_body = {"port_id": port_id}
-        return self.update_resource(uri, update_body)
+    def remove_router_interface(self, router_id, **kwargs):
+        """Remove router interface.
 
-    def remove_router_interface_with_subnet_id(self, router_id, subnet_id):
+        Available params: see http://developer.openstack.org/
+                              api-ref-networking-v2-ext.html#removeRouterInterface
+        """
         uri = '/routers/%s/remove_router_interface' % router_id
-        update_body = {"subnet_id": subnet_id}
-        return self.update_resource(uri, update_body)
-
-    def remove_router_interface_with_port_id(self, router_id, port_id):
-        uri = '/routers/%s/remove_router_interface' % router_id
-        update_body = {"port_id": port_id}
-        return self.update_resource(uri, update_body)
+        return self.update_resource(uri, kwargs)
 
     def list_router_interfaces(self, uuid):
         uri = '/ports?device_id=%s' % uuid

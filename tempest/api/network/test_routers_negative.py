@@ -84,8 +84,8 @@ class RoutersNegativeTest(base.BaseRouterTest):
     @test.attr(type=['negative'])
     @test.idempotent_id('04df80f9-224d-47f5-837a-bf23e33d1c20')
     def test_router_remove_interface_in_use_returns_409(self):
-        self.client.add_router_interface_with_subnet_id(
-            self.router['id'], self.subnet['id'])
+        self.client.add_router_interface(self.router['id'],
+                                         subnet_id=self.subnet['id'])
         self.assertRaises(lib_exc.Conflict,
                           self.client.delete_router,
                           self.router['id'])

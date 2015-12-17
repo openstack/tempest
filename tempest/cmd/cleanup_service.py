@@ -469,8 +469,7 @@ class NetworkRouterService(NetworkService):
                          in client.list_router_interfaces(rid)['ports']
                          if port["device_owner"] == "network:router_interface"]
                 for port in ports:
-                    client.remove_router_interface_with_port_id(rid,
-                                                                port['id'])
+                    client.remove_router_interface(rid, port_id=port['id'])
                 client.delete_router(rid)
             except Exception:
                 LOG.exception("Delete Router exception.")

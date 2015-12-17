@@ -137,8 +137,8 @@ class RoutersTest(base.BaseRouterTest):
         subnet = self.create_subnet(network)
         router = self._create_router(data_utils.rand_name('router-'))
         # Add router interface with subnet id
-        interface = self.client.add_router_interface_with_subnet_id(
-            router['id'], subnet['id'])
+        interface = self.client.add_router_interface(router['id'],
+                                                     subnet_id=subnet['id'])
         self.addCleanup(self._remove_router_interface_with_subnet_id,
                         router['id'], subnet['id'])
         self.assertIn('subnet_id', interface.keys())
@@ -158,8 +158,9 @@ class RoutersTest(base.BaseRouterTest):
         port_body = self.ports_client.create_port(
             network_id=network['id'])
         # add router interface to port created above
-        interface = self.client.add_router_interface_with_port_id(
-            router['id'], port_body['port']['id'])
+        interface = self.client.add_router_interface(
+            router['id'],
+            port_id=port_body['port']['id'])
         self.addCleanup(self._remove_router_interface_with_port_id,
                         router['id'], port_body['port']['id'])
         self.assertIn('subnet_id', interface.keys())

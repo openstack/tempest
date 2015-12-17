@@ -312,8 +312,8 @@ def create_network_resources(network_admin_client, networks_admin_client,
         return resp_body['router']
 
     def _add_router_interface(router_id, subnet_id):
-        network_admin_client.add_router_interface_with_subnet_id(
-            router_id, subnet_id)
+        network_admin_client.add_router_interface(router_id,
+                                                  subnet_id=subnet_id)
 
     network_name = name + "-network"
     network = _create_network(network_name)
