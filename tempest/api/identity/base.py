@@ -145,7 +145,7 @@ class BaseIdentityV3AdminTest(BaseIdentityV3Test):
         cls.endpoints_client = cls.os_adm.endpoints_client
         cls.region_client = cls.os_adm.region_client
         cls.services_client = cls.os_adm.identity_services_client
-        cls.policy_client = cls.os_adm.policy_client
+        cls.policies_client = cls.os_adm.policies_client
         cls.creds_client = cls.os_adm.credentials_client
         cls.groups_client = cls.os_adm.groups_client
 
