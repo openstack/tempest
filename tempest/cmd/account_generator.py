@@ -357,7 +357,7 @@ def generate_resources(opts):
                 resources['users'].append({
                     'tenant': tenant,
                     'name': user,
-                    'pass': data_utils.rand_name(),
+                    'pass': data_utils.rand_password(),
                     'prefix': user_group['prefix'],
                     'roles': user_group['roles']
                 })
