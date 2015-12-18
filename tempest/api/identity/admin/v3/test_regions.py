@@ -25,7 +25,7 @@ class RegionsTestJSON(base.BaseIdentityV3AdminTest):
     @classmethod
     def setup_clients(cls):
         super(RegionsTestJSON, cls).setup_clients()
-        cls.client = cls.region_client
+        cls.client = cls.regions_client
 
     @classmethod
     def resource_setup(cls):
