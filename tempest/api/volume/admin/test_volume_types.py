@@ -70,7 +70,7 @@ class VolumeTypesV2Test(base.BaseVolumeAdminTest):
 
         # Update volume with new volume_type
         self.volumes_client.retype_volume(volume['id'],
-                                          volume_type=volume_types[1]['id'])
+                                          new_type=volume_types[1]['id'])
         self.volumes_client.wait_for_volume_status(volume['id'], 'available')
 
         # Get volume details and Verify

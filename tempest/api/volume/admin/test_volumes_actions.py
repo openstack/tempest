@@ -48,12 +48,12 @@ class VolumesActionsV2Test(base.BaseVolumeAdminTest):
     def _reset_volume_status(self, volume_id, status):
         # Reset the volume status
         body = self.admin_volume_client.reset_volume_status(volume_id,
-                                                            status)
+                                                            status=status)
         return body
 
     def tearDown(self):
         # Set volume's status to available after test
-        self._reset_volume_status(self.volume['id'], 'available')
+        self._reset_volume_status(self.volume['id'], status='available')
         super(VolumesActionsV2Test, self).tearDown()
 
     def _create_temp_volume(self):
