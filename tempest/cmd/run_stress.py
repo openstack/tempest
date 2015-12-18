@@ -22,6 +22,7 @@ try:
 except ImportError:
     # unittest in python 2.6 does not contain loader, so uses unittest2
     from unittest2 import loader
+import traceback
 
 from cliff import command
 from oslo_log import log as logging
@@ -79,7 +80,13 @@ class TempestRunStress(command.Command):
         return pa
 
     def take_action(self, pa):
-        return action(pa)
+        try:
+            action(pa)
+        except Exception:
+            LOG.exception("Failure in the stress test framework")
+            traceback.print_exc()
+            raise
+        return 0
 
 
 def add_arguments(parser):
@@ -149,4 +156,5 @@ if __name__ == "__main__":
         sys.exit(main())
     except Exception:
         LOG.exception("Failure in the stress test framework")
+        traceback.print_exc()
         sys.exit(1)
