@@ -855,7 +855,7 @@ class UserService(IdentityService):
             self.data['users'][user['id']] = user['name']
 
 
-class RoleService(IdentityService):
+class RoleService(BaseService):
 
     def __init__(self, manager, **kwargs):
         super(RoleService, self).__init__(kwargs)
@@ -895,7 +895,7 @@ class RoleService(IdentityService):
             self.data['roles'][role['id']] = role['name']
 
 
-class TenantService(IdentityService):
+class TenantService(BaseService):
 
     def __init__(self, manager, **kwargs):
         super(TenantService, self).__init__(kwargs)
