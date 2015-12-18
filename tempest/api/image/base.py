@@ -70,8 +70,10 @@ class BaseImageTest(tempest.test.BaseTestCase):
         container_format = kwargs.pop('container_format')
         disk_format = kwargs.pop('disk_format')
 
-        image = cls.client.create_image(name, container_format,
-                                        disk_format, **kwargs)
+        image = cls.client.create_image(name=name,
+                                        container_format=container_format,
+                                        disk_format=disk_format,
+                                        **kwargs)
         # Image objects returned by the v1 client have the image
         # data inside a dict that is keyed against 'image'.
         if 'image' in image:
@@ -156,7 +158,7 @@ class BaseV2MemberImageTest(BaseV2ImageTest):
 
     def _create_image(self):
         name = data_utils.rand_name('image')
-        image = self.os_img_client.create_image(name,
+        image = self.os_img_client.create_image(name=name,
                                                 container_format='bare',
                                                 disk_format='raw')
         image_id = image['id']
