@@ -22,7 +22,7 @@ from oslo_serialization import jsonutils as json
 from tempest.common import service_client
 
 
-class ServiceClient(service_client.ServiceClient):
+class ServicesClient(service_client.ServiceClient):
     api_version = "v3"
 
     def update_service(self, service_id, **kwargs):
