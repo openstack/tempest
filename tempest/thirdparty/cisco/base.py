@@ -42,7 +42,8 @@ class UCSMTestMixin(object):
     ucsm_username = CONF.ucsm.ucsm_username
     ucsm_password = CONF.ucsm.ucsm_password
     ucsm_host_dict = None
-    network_node_host = CONF.ucsm.network_node_host
+    network_node_list = CONF.ucsm.network_node_list
+    network_node_host = CONF.ucsm.network_node_list[0]
     eth_names = CONF.ucsm.eth_names
     virtual_functions = CONF.ucsm.virtual_functions_amount
 
@@ -69,7 +70,7 @@ class UCSMTestMixin(object):
              for k, v in CONF.ucsm.ucsm_host_dict.iteritems()}
         cls.network_node_profile = cls.ucsm_host_dict[cls.network_node_host]
 
-        compute_hosts = set(cls.ucsm_host_dict.keys()) - {cls.network_node_host}
+        compute_hosts = set(cls.ucsm_host_dict.keys()) - set(cls.network_node_list)
         if len(compute_hosts) > 1:
             smpl = random.sample(compute_hosts, 2)
             cls.master_host = smpl[0]
