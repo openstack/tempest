@@ -1306,7 +1306,7 @@ UcsmGroup = [
                help="UCSM password"),
     cfg.DictOpt('ucsm_host_dict',
                 help="UCSM host dictionary. Ex.: qa11:os2,qa13:os3,qa14:os1"),
-    cfg.StrOpt('network_node_host',
+    cfg.ListOpt('network_node_list',
                help="hostname of a network node"),
     cfg.ListOpt('eth_names',
                 default=['eth0', 'eth1'],

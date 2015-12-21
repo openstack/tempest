@@ -74,7 +74,7 @@ ucsm_username=admin               # UCSM username
 ucsm_password=cisco               # UCSM ppassword
 # Dictionary of <hostname> VS <UCSM service profile name>
 ucsm_host_dict=overcloud-controller-0.localdomain:QA2,overcloud-compute-0.localdomain:QA3,overcloud-compute-1.localdomain:QA4
-network_node_host=overcloud-controller-0.localdomain  # hostname of a network node
+network_node_list=overcloud-controller-0.localdomain, overcloud-controller-1.localdomain  # list of hostnames of a network nodes
 eth_names=eth0,eth1
 virtual_functions_amount=4    # Amount of "SR-IOV ports"/"Dynamic VNICs"/"Virtual functions"
 
