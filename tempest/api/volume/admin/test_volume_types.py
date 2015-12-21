@@ -32,7 +32,7 @@ class VolumeTypesV2Test(base.BaseVolumeAdminTest):
 
     @test.idempotent_id('9d9b28e3-1b2e-4483-a2cc-24aa0ea1de54')
     def test_volume_type_list(self):
-        # List Volume types.
+        # List volume types.
         body = self.volume_types_client.list_volume_types()['volume_types']
         self.assertIsInstance(body, list)
 
