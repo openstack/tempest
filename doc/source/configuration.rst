@@ -9,16 +9,6 @@ they are used in conjunction. The source of truth on each option is the sample
 config file which explains the purpose of each individual option. You can see
 the sample config file here: :ref:`tempest-sampleconf`
 
-Lock Path
----------
-
-There are some tests and operations inside of tempest that need to be
-externally locked when running in parallel to prevent them from running at
-the same time. This is a mandatory step for configuring tempest and is still
-needed even when running serially. All that is needed to do this is:
-
- #. Set the lock_path option in the oslo_concurrency group
-
 Auth/Credentials
 ----------------
 
