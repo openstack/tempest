@@ -90,6 +90,8 @@ from tempest.services.identity.v2.json.identity_client import \
     IdentityClient
 from tempest.services.identity.v2.json.roles_client import \
     RolesClient
+from tempest.services.identity.v2.json.services_client import \
+    ServicesClient as ServicesV2Client
 from tempest.services.identity.v2.json.tenants_client import \
     TenantsClient
 from tempest.services.identity.v2.json.users_client import \
@@ -488,6 +490,8 @@ class Manager(manager.Manager):
                                         **params_v2_admin)
         self.users_client = UsersClient(self.auth_provider,
                                         **params_v2_admin)
+        self.services_v2_client = ServicesV2Client(self.auth_provider,
+                                                   **params_v2_admin)
         params_v2_public = params.copy()
         params_v2_public['endpoint_type'] = (
             CONF.identity.v2_public_endpoint_type)

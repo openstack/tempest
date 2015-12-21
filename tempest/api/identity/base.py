@@ -104,6 +104,7 @@ class BaseIdentityV2AdminTest(BaseIdentityV2Test):
         cls.non_admin_roles_client = cls.os.roles_client
         cls.users_client = cls.os_adm.users_client
         cls.non_admin_users_client = cls.os.users_client
+        cls.services_client = cls.os_adm.services_v2_client
 
     @classmethod
     def resource_setup(cls):
