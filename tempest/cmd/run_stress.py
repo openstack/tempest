@@ -81,6 +81,9 @@ class TempestRunStress(command.Command):
     def take_action(self, pa):
         return action(pa)
 
+    def get_description(self):
+        return 'Run tempest stress tests'
+
 
 def add_arguments(parser):
     parser.add_argument('-d', '--duration', default=300, type=int,
