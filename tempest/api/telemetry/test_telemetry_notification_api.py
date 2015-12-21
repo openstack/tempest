@@ -39,7 +39,7 @@ class TelemetryNotificationAPITestJSON(base.BaseTelemetryTest):
     @testtools.skipIf(not CONF.image_feature_enabled.api_v1,
                       "Glance api v1 is disabled")
     def test_check_glance_v1_notifications(self):
-        body = self.create_image(self.image_client)
+        body = self.create_image(self.image_client, is_public=False)
         self.image_client.update_image(body['id'], data='data')
 
         query = 'resource', 'eq', body['id']
@@ -55,7 +55,7 @@ class TelemetryNotificationAPITestJSON(base.BaseTelemetryTest):
     @testtools.skipIf(not CONF.image_feature_enabled.api_v2,
                       "Glance api v2 is disabled")
     def test_check_glance_v2_notifications(self):
-        body = self.create_image(self.image_client_v2)
+        body = self.create_image(self.image_client_v2, visibility='private')
 
         self.image_client_v2.store_image_file(body['id'], "file")
         self.image_client_v2.show_image_file(body['id'])

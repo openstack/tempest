@@ -75,10 +75,11 @@ class BaseTelemetryTest(tempest.test.BaseTestCase):
         return body
 
     @classmethod
-    def create_image(cls, client):
-        body = client.create_image(
-            name=data_utils.rand_name('image'), container_format='bare',
-            disk_format='raw', visibility='private')
+    def create_image(cls, client, **kwargs):
+        body = client.create_image(name=data_utils.rand_name('image'),
+                                   container_format='bare',
+                                   disk_format='raw',
+                                   **kwargs)
         # TODO(jswarren) Move ['image'] up to initial body value assignment
         # once both v1 and v2 glance clients include the full response
         # object.
