@@ -51,6 +51,7 @@ deleted and the admin user specified in tempest.conf is never deleted.
 Please run with **--help** to see full list of options.
 """
 import sys
+import traceback
 
 from cliff import command
 from oslo_log import log as logging
@@ -74,6 +75,16 @@ class TempestCleanup(command.Command):
         super(TempestCleanup, self).__init__(app, cmd)
 
     def take_action(self, parsed_args):
+        try:
+            self.init(parsed_args)
+            self._cleanup()
+        except Exception:
+            LOG.exception("Failure during cleanup")
+            traceback.print_exc()
+            raise
+        return 0
+
+    def init(self, parsed_args):
         cleanup_service.init_conf()
         self.options = parsed_args
         self.admin_mgr = credentials.AdminManager()
@@ -96,10 +107,9 @@ class TempestCleanup(command.Command):
             return
 
         self._load_json()
-        self._cleanup()
 
     def _cleanup(self):
-        LOG.debug("Begin cleanup")
+        print ("Begin cleanup")
         is_dry_run = self.options.dry_run
         is_preserve = not self.options.delete_tempest_conf_objects
         is_save_state = False
@@ -118,7 +128,7 @@ class TempestCleanup(command.Command):
                   'is_save_state': is_save_state}
         tenant_service = cleanup_service.TenantService(admin_mgr, **kwargs)
         tenants = tenant_service.list()
-        LOG.debug("Process %s tenants" % len(tenants))
+        print ("Process %s tenants" % len(tenants))
 
         # Loop through list of tenants and clean them up.
         for tenant in tenants:
@@ -149,7 +159,7 @@ class TempestCleanup(command.Command):
             self._remove_admin_role(tenant_id)
 
     def _clean_tenant(self, tenant):
-        LOG.debug("Cleaning tenant:  %s " % tenant['name'])
+        print ("Cleaning tenant:  %s " % tenant['name'])
         is_dry_run = self.options.dry_run
         dry_run_data = self.dry_run_data
         is_preserve = not self.options.delete_tempest_conf_objects
@@ -259,7 +269,7 @@ class TempestCleanup(command.Command):
             return False
 
     def _init_state(self):
-        LOG.debug("Initializing saved state.")
+        print ("Initializing saved state.")
         data = {}
         admin_mgr = self.admin_mgr
         kwargs = {'data': data,
