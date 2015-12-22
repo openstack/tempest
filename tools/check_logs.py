@@ -19,7 +19,7 @@ import argparse
 import gzip
 import os
 import re
-import StringIO
+import six
 import sys
 import urllib2
 
@@ -71,7 +71,7 @@ def process_files(file_specs, url_specs, whitelists):
         req = urllib2.Request(url)
         req.add_header('Accept-Encoding', 'gzip')
         page = urllib2.urlopen(req)
-        buf = StringIO.StringIO(page.read())
+        buf = six.StringIO(page.read())
         f = gzip.GzipFile(fileobj=buf)
         if scan_content(name, f.read().splitlines(), regexp, whitelist):
             logs_with_errors.append(name)
