@@ -55,6 +55,8 @@ from tempest_lib.services.compute.security_group_rules_client import \
     SecurityGroupRulesClient
 from tempest_lib.services.compute.security_groups_client import \
     SecurityGroupsClient as ComputeSecurityGroupsClient
+from tempest_lib.services.compute.server_groups_client import \
+    ServerGroupsClient
 from tempest_lib.services.compute.services_client import ServicesClient
 from tempest_lib.services.compute.snapshots_client import \
     SnapshotsClient as ComputeSnapshotsClient
@@ -75,8 +77,6 @@ from tempest import manager
 from tempest.services.baremetal.v1.json.baremetal_client import \
     BaremetalClient
 from tempest.services.compute.json.keypairs_client import KeyPairsClient
-from tempest.services.compute.json.server_groups_client import \
-    ServerGroupsClient
 from tempest.services.compute.json.servers_client import ServersClient
 from tempest.services.data_processing.v1_1.data_processing_client import \
     DataProcessingClient
