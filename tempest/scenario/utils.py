@@ -40,11 +40,11 @@ class ImageUtils(object):
         self.non_ssh_image_pattern = \
             CONF.input_scenario.non_ssh_image_regex
         # Setup clients
-        self.images_client = os.images_client
+        self.compute_images_client = os.compute_images_client
         self.flavors_client = os.flavors_client
 
     def ssh_user(self, image_id):
-        _image = self.images_client.show_image(image_id)['image']
+        _image = self.compute_images_client.show_image(image_id)['image']
         for regex, user in self.ssh_users:
             # First match wins
             if re.match(regex, _image['name']) is not None:
@@ -57,14 +57,14 @@ class ImageUtils(object):
                              string=str(image['name']))
 
     def is_sshable_image(self, image_id):
-        _image = self.images_client.show_image(image_id)['image']
+        _image = self.compute_images_client.show_image(image_id)['image']
         return self._is_sshable_image(_image)
 
     def _is_flavor_enough(self, flavor, image):
         return image['minDisk'] <= flavor['disk']
 
     def is_flavor_enough(self, flavor_id, image_id):
-        _image = self.images_client.show_image(image_id)['image']
+        _image = self.compute_images_client.show_image(image_id)['image']
         _flavor = self.flavors_client.show_flavor(flavor_id)['flavor']
         return self._is_flavor_enough(_flavor, _image)
 
@@ -108,7 +108,7 @@ class InputScenarioUtils(object):
             identity_version=CONF.identity.auth_version,
             network_resources=network_resources)
         os = clients.Manager(self.cred_provider.get_primary_creds())
-        self.images_client = os.images_client
+        self.compute_images_client = os.compute_images_client
         self.flavors_client = os.flavors_client
         self.image_pattern = CONF.input_scenario.image_regex
         self.flavor_pattern = CONF.input_scenario.flavor_regex
@@ -128,7 +128,7 @@ class InputScenarioUtils(object):
             return []
         if not hasattr(self, '_scenario_images'):
             try:
-                images = self.images_client.list_images()['images']
+                images = self.compute_images_client.list_images()['images']
                 self._scenario_images = [
                     (self._normalize_name(i['name']), dict(image_ref=i['id']))
                     for i in images if re.search(self.image_pattern,

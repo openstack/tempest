@@ -63,7 +63,7 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
         cls.servers_client = cls.os.servers_client
         cls.server_groups_client = cls.os.server_groups_client
         cls.flavors_client = cls.os.flavors_client
-        cls.images_client = cls.os.images_client
+        cls.compute_images_client = cls.os.compute_images_client
         cls.extensions_client = cls.os.extensions_client
         cls.floating_ip_pools_client = cls.os.floating_ip_pools_client
         cls.floating_ips_client = cls.os.compute_floating_ips_client
@@ -170,7 +170,7 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
         LOG.debug('Clearing images: %s', ','.join(cls.images))
         for image_id in cls.images:
             try:
-                cls.images_client.delete_image(image_id)
+                cls.compute_images_client.delete_image(image_id)
             except lib_exc.NotFound:
                 # The image may have already been deleted which is OK.
                 pass
@@ -295,14 +295,14 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
         if 'name' in kwargs:
             name = kwargs.pop('name')
 
-        image = cls.images_client.create_image(server_id, name=name)
+        image = cls.compute_images_client.create_image(server_id, name=name)
         image_id = data_utils.parse_image_id(image.response['location'])
         cls.images.append(image_id)
 
         if 'wait_until' in kwargs:
-            waiters.wait_for_image_status(cls.images_client,
+            waiters.wait_for_image_status(cls.compute_images_client,
                                           image_id, kwargs['wait_until'])
-            image = cls.images_client.show_image(image_id)['image']
+            image = cls.compute_images_client.show_image(image_id)['image']
 
             if kwargs['wait_until'] == 'ACTIVE':
                 if kwargs.get('wait_for_server', True):

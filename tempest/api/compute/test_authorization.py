@@ -48,14 +48,14 @@ class AuthorizationTestJSON(base.BaseV2ComputeTest):
     def setup_clients(cls):
         super(AuthorizationTestJSON, cls).setup_clients()
         cls.client = cls.os.servers_client
-        cls.images_client = cls.os.images_client
+        cls.compute_images_client = cls.os.compute_images_client
         cls.glance_client = cls.os.image_client
         cls.keypairs_client = cls.os.keypairs_client
         cls.security_client = cls.os.compute_security_groups_client
         cls.rule_client = cls.os.security_group_rules_client
 
         cls.alt_client = cls.alt_manager.servers_client
-        cls.alt_images_client = cls.alt_manager.images_client
+        cls.alt_compute_images_client = cls.alt_manager.compute_images_client
         cls.alt_keypairs_client = cls.alt_manager.keypairs_client
         cls.alt_security_client = (
             cls.alt_manager.compute_security_groups_client)
@@ -77,7 +77,7 @@ class AuthorizationTestJSON(base.BaseV2ComputeTest):
         body = cls.glance_client.update_image(image_id,
                                               data=image_file)['image']
         cls.glance_client.wait_for_image_status(image_id, 'active')
-        cls.image = cls.images_client.show_image(image_id)['image']
+        cls.image = cls.compute_images_client.show_image(image_id)['image']
 
         cls.keypairname = data_utils.rand_name('keypair')
         cls.keypairs_client.create_keypair(name=cls.keypairname)
@@ -98,7 +98,7 @@ class AuthorizationTestJSON(base.BaseV2ComputeTest):
     @classmethod
     def resource_cleanup(cls):
         if hasattr(cls, 'image'):
-            cls.images_client.delete_image(cls.image['id'])
+            cls.compute_images_client.delete_image(cls.image['id'])
         if hasattr(cls, 'keypairname'):
             cls.keypairs_client.delete_keypair(cls.keypairname)
         if hasattr(cls, 'security_group'):
@@ -175,7 +175,7 @@ class AuthorizationTestJSON(base.BaseV2ComputeTest):
     def test_create_image_for_alt_account_fails(self):
         # A create image request for another user's server should fail
         self.assertRaises(lib_exc.NotFound,
-                          self.alt_images_client.create_image,
+                          self.alt_compute_images_client.create_image,
                           self.server['id'], name='testImage')
 
     @test.idempotent_id('95d445f6-babc-4f2e-aea3-aa24ec5e7f0d')
@@ -261,13 +261,14 @@ class AuthorizationTestJSON(base.BaseV2ComputeTest):
     def test_get_image_for_alt_account_fails(self):
         # A GET request for an image on another user's account should fail
         self.assertRaises(lib_exc.NotFound,
-                          self.alt_images_client.show_image, self.image['id'])
+                          self.alt_compute_images_client.show_image,
+                          self.image['id'])
 
     @test.idempotent_id('9facb962-f043-4a9d-b9ee-166a32dea098')
     def test_delete_image_for_alt_account_fails(self):
         # A DELETE request for another user's image should fail
         self.assertRaises(lib_exc.NotFound,
-                          self.alt_images_client.delete_image,
+                          self.alt_compute_images_client.delete_image,
                           self.image['id'])
 
     @test.idempotent_id('752c917e-83be-499d-a422-3559127f7d3c')
@@ -390,7 +391,7 @@ class AuthorizationTestJSON(base.BaseV2ComputeTest):
         # A set metadata for another user's image should fail
         req_metadata = {'meta1': 'value1', 'meta2': 'value2'}
         self.assertRaises(lib_exc.NotFound,
-                          self.alt_images_client.set_image_metadata,
+                          self.alt_compute_images_client.set_image_metadata,
                           self.image['id'], req_metadata)
 
     @test.idempotent_id('dea1936a-473d-49f2-92ad-97bb7aded22e')
@@ -408,13 +409,14 @@ class AuthorizationTestJSON(base.BaseV2ComputeTest):
     def test_get_metadata_of_alt_account_image_fails(self):
         # A get metadata for another user's image should fail
         req_metadata = {'meta1': 'value1'}
-        self.addCleanup(self.images_client.delete_image_metadata_item,
+        self.addCleanup(self.compute_images_client.delete_image_metadata_item,
                         self.image['id'], 'meta1')
-        self.images_client.set_image_metadata(self.image['id'],
-                                              req_metadata)
-        self.assertRaises(lib_exc.NotFound,
-                          self.alt_images_client.show_image_metadata_item,
-                          self.image['id'], 'meta1')
+        self.compute_images_client.set_image_metadata(self.image['id'],
+                                                      req_metadata)
+        self.assertRaises(
+            lib_exc.NotFound,
+            self.alt_compute_images_client.show_image_metadata_item,
+            self.image['id'], 'meta1')
 
     @test.idempotent_id('79531e2e-e721-493c-8b30-a35db36fdaa6')
     def test_delete_metadata_of_alt_account_server_fails(self):
@@ -431,13 +433,14 @@ class AuthorizationTestJSON(base.BaseV2ComputeTest):
     def test_delete_metadata_of_alt_account_image_fails(self):
         # A delete metadata for another user's image should fail
         req_metadata = {'meta1': 'data1'}
-        self.addCleanup(self.images_client.delete_image_metadata_item,
+        self.addCleanup(self.compute_images_client.delete_image_metadata_item,
                         self.image['id'], 'meta1')
-        self.images_client.set_image_metadata(self.image['id'],
-                                              req_metadata)
-        self.assertRaises(lib_exc.NotFound,
-                          self.alt_images_client.delete_image_metadata_item,
-                          self.image['id'], 'meta1')
+        self.compute_images_client.set_image_metadata(self.image['id'],
+                                                      req_metadata)
+        self.assertRaises(
+            lib_exc.NotFound,
+            self.alt_compute_images_client.delete_image_metadata_item,
+            self.image['id'], 'meta1')
 
     @test.idempotent_id('b0c1e7a0-8853-40fd-8384-01f93d116cae')
     def test_get_console_output_of_alt_account_server_fails(self):

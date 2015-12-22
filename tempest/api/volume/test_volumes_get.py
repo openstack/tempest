@@ -133,7 +133,8 @@ class VolumesV2GetTest(base.BaseVolumeTest):
     @test.idempotent_id('54a01030-c7fc-447c-86ee-c1182beae638')
     @test.services('image')
     def test_volume_create_get_update_delete_from_image(self):
-        image = self.images_client.show_image(CONF.compute.image_ref)['image']
+        image = self.compute_images_client.show_image(
+            CONF.compute.image_ref)['image']
         min_disk = image.get('minDisk')
         disk_size = max(min_disk, CONF.volume.volume_size)
         self._volume_create_get_update_delete(
