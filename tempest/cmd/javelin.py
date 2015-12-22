@@ -121,12 +121,12 @@ from tempest_lib.services.compute import flavors_client
 from tempest_lib.services.compute import floating_ips_client
 from tempest_lib.services.compute import security_group_rules_client
 from tempest_lib.services.compute import security_groups_client
+from tempest_lib.services.compute import servers_client
 import yaml
 
 from tempest.common import identity
 from tempest.common import waiters
 from tempest import config
-from tempest.services.compute.json import servers_client
 from tempest.services.identity.v2.json import identity_client
 from tempest.services.identity.v2.json import roles_client
 from tempest.services.identity.v2.json import tenants_client
