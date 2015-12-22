@@ -47,10 +47,10 @@ class BaseTypesClient(service_client.ServiceClient):
         """Returns the primary type of resource this client works with."""
         return 'volume-type/encryption-type'
 
-    def list_volume_types(self, params=None):
+    def list_volume_types(self, **params):
         """List all the volume_types created."""
         url = 'types'
-        if params is not None:
+        if params:
             url += '?%s' % urllib.urlencode(params)
 
         resp, body = self.get(url)
@@ -66,19 +66,13 @@ class BaseTypesClient(service_client.ServiceClient):
         self.expected_success(200, resp.status)
         return service_client.ResponseBody(resp, body)
 
-    def create_volume_type(self, name, **kwargs):
-        """Creates a new Volume_type.
+    def create_volume_type(self, **kwargs):
+        """Create volume type.
 
-        name(Required): Name of volume_type.
-        Following optional keyword arguments are accepted:
-        extra_specs: A dictionary of values to be used as extra_specs.
+        Available params: see http://developer.openstack.org/
+                              api-ref-blockstorage-v2.html#createVolumeType
         """
-        post_body = {
-            'name': name,
-            'extra_specs': kwargs.get('extra_specs'),
-        }
-
-        post_body = json.dumps({'volume_type': post_body})
+        post_body = json.dumps({'volume_type': kwargs})
         resp, body = self.post('types', post_body)
         body = json.loads(body)
         self.expected_success(200, resp.status)
@@ -90,10 +84,17 @@ class BaseTypesClient(service_client.ServiceClient):
         self.expected_success(202, resp.status)
         return service_client.ResponseBody(resp, body)
 
-    def list_volume_types_extra_specs(self, vol_type_id, params=None):
-        """List all the volume_types extra specs created."""
+    def list_volume_types_extra_specs(self, vol_type_id, **params):
+        """List all the volume_types extra specs created.
+
+        TODO: Current api-site doesn't contain this API description.
+        After fixing the api-site, we need to fix here also for putting
+        the link to api-site.
+
+
+        """
         url = 'types/%s/extra_specs' % str(vol_type_id)
-        if params is not None:
+        if params:
             url += '?%s' % urllib.urlencode(params)
 
         resp, body = self.get(url)
@@ -101,23 +102,23 @@ class BaseTypesClient(service_client.ServiceClient):
         self.expected_success(200, resp.status)
         return service_client.ResponseBody(resp, body)
 
-    def show_volume_type_extra_specs(self, vol_type_id, extra_spec_name):
+    def show_volume_type_extra_specs(self, vol_type_id, extra_specs_name):
         """Returns the details of a single volume_type extra spec."""
         url = "types/%s/extra_specs/%s" % (str(vol_type_id),
-                                           str(extra_spec_name))
+                                           str(extra_specs_name))
         resp, body = self.get(url)
         body = json.loads(body)
         self.expected_success(200, resp.status)
         return service_client.ResponseBody(resp, body)
 
-    def create_volume_type_extra_specs(self, vol_type_id, extra_spec):
+    def create_volume_type_extra_specs(self, vol_type_id, extra_specs):
         """Creates a new Volume_type extra spec.
 
         vol_type_id: Id of volume_type.
         extra_specs: A dictionary of values to be used as extra_specs.
         """
         url = "types/%s/extra_specs" % str(vol_type_id)
-        post_body = json.dumps({'extra_specs': extra_spec})
+        post_body = json.dumps({'extra_specs': extra_specs})
         resp, body = self.post(url, post_body)
         body = json.loads(body)
         self.expected_success(200, resp.status)
@@ -131,7 +132,7 @@ class BaseTypesClient(service_client.ServiceClient):
         return service_client.ResponseBody(resp, body)
 
     def update_volume_type_extra_specs(self, vol_type_id, extra_spec_name,
-                                       extra_spec):
+                                       extra_specs):
         """Update a volume_type extra spec.
 
         vol_type_id: Id of volume_type.
@@ -141,7 +142,7 @@ class BaseTypesClient(service_client.ServiceClient):
         """
         url = "types/%s/extra_specs/%s" % (str(vol_type_id),
                                            str(extra_spec_name))
-        put_body = json.dumps(extra_spec)
+        put_body = json.dumps(extra_specs)
         resp, body = self.put(url, put_body)
         body = json.loads(body)
         self.expected_success(200, resp.status)
@@ -159,18 +160,14 @@ class BaseTypesClient(service_client.ServiceClient):
         return service_client.ResponseBody(resp, body)
 
     def create_encryption_type(self, vol_type_id, **kwargs):
-        """Create a new encryption type for the specified volume type.
+        """Create encryption type.
 
-        vol_type_id: Id of volume_type.
-        provider: Class providing encryption support.
-        cipher: Encryption algorithm/mode to use.
-        key_size: Size of the encryption key, in bits.
-        control_location: Notional service where encryption is performed.
+        TODO: Current api-site doesn't contain this API description.
+        After fixing the api-site, we need to fix here also for putting
+        the link to api-site.
         """
         url = "/types/%s/encryption" % str(vol_type_id)
-        post_body = {}
-        post_body.update(kwargs)
-        post_body = json.dumps({'encryption': post_body})
+        post_body = json.dumps({'encryption': kwargs})
         resp, body = self.post(url, post_body)
         body = json.loads(body)
         self.expected_success(200, resp.status)
