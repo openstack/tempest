@@ -62,7 +62,8 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
          self.network_admin_client,
          self.networks_admin_client,
          self.subnets_admin_client,
-         self.ports_admin_client) = self._get_admin_clients()
+         self.ports_admin_client,
+         self.security_groups_admin_client) = self._get_admin_clients()
         # Domain where isolated credentials are provisioned (v3 only).
         # Use that of the admin account is None is configured.
         self.creds_domain_name = None
@@ -87,10 +88,11 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
         if self.identity_version == 'v2':
             return (os.identity_client, os.tenants_client, os.roles_client,
                     os.network_client, os.networks_client, os.subnets_client,
-                    os.ports_client)
+                    os.ports_client, os.security_groups_client)
         else:
             return (os.identity_v3_client, None, None, os.network_client,
-                    os.networks_client, os.subnets_client, os.ports_client)
+                    os.networks_client, os.subnets_client, os.ports_client,
+                    os.security_groups_client)
 
     def _create_creds(self, suffix="", admin=False, roles=None):
         """Create random credentials under the following schema.
@@ -303,13 +305,13 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
                      network_name)
 
     def _cleanup_default_secgroup(self, tenant):
-        net_client = self.network_admin_client
-        resp_body = net_client.list_security_groups(tenant_id=tenant,
+        nsg_client = self.security_groups_admin_client
+        resp_body = nsg_client.list_security_groups(tenant_id=tenant,
                                                     name="default")
         secgroups_to_delete = resp_body['security_groups']
         for secgroup in secgroups_to_delete:
             try:
-                net_client.delete_security_group(secgroup['id'])
+                nsg_client.delete_security_group(secgroup['id'])
             except lib_exc.NotFound:
                 LOG.warn('Security group %s, id %s not found for clean-up' %
                          (secgroup['name'], secgroup['id']))

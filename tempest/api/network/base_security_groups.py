@@ -22,17 +22,18 @@ class BaseSecGroupTest(base.BaseNetworkTest):
     def _create_security_group(self):
         # Create a security group
         name = data_utils.rand_name('secgroup-')
-        group_create_body = self.client.create_security_group(name=name)
+        group_create_body = (
+            self.security_groups_client.create_security_group(name=name))
         self.addCleanup(self._delete_security_group,
                         group_create_body['security_group']['id'])
         self.assertEqual(group_create_body['security_group']['name'], name)
         return group_create_body, name
 
     def _delete_security_group(self, secgroup_id):
-        self.client.delete_security_group(secgroup_id)
+        self.security_groups_client.delete_security_group(secgroup_id)
         # Asserting that the security group is not found in the list
         # after deletion
-        list_body = self.client.list_security_groups()
+        list_body = self.security_groups_client.list_security_groups()
         secgroup_list = list()
         for secgroup in list_body['security_groups']:
             secgroup_list.append(secgroup['id'])

@@ -250,17 +250,19 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
         fixed_ip_1 = [{'subnet_id': subnet_1['id']}]
 
         security_groups_list = list()
+        sec_grps_client = self.security_groups_client
         for name in security_groups_names:
-            group_create_body = self.client.create_security_group(
+            group_create_body = sec_grps_client.create_security_group(
                 name=name)
-            self.addCleanup(self.client.delete_security_group,
+            self.addCleanup(self.security_groups_client.delete_security_group,
                             group_create_body['security_group']['id'])
             security_groups_list.append(group_create_body['security_group']
                                         ['id'])
         # Create a port
         sec_grp_name = data_utils.rand_name('secgroup')
-        security_group = self.client.create_security_group(name=sec_grp_name)
-        self.addCleanup(self.client.delete_security_group,
+        security_group = sec_grps_client.create_security_group(
+            name=sec_grp_name)
+        self.addCleanup(self.security_groups_client.delete_security_group,
                         security_group['security_group']['id'])
         post_body = {
             "name": data_utils.rand_name('port-'),

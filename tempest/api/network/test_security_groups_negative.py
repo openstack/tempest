@@ -38,8 +38,9 @@ class NegativeSecGroupTest(base.BaseSecGroupTest):
     @test.idempotent_id('424fd5c3-9ddc-486a-b45f-39bf0c820fc6')
     def test_show_non_existent_security_group(self):
         non_exist_id = str(uuid.uuid4())
-        self.assertRaises(lib_exc.NotFound, self.client.show_security_group,
-                          non_exist_id)
+        self.assertRaises(
+            lib_exc.NotFound, self.security_groups_client.show_security_group,
+            non_exist_id)
 
     @test.attr(type=['negative'])
     @test.idempotent_id('4c094c09-000b-4e41-8100-9617600c02a6')
@@ -54,7 +55,7 @@ class NegativeSecGroupTest(base.BaseSecGroupTest):
     def test_delete_non_existent_security_group(self):
         non_exist_id = str(uuid.uuid4())
         self.assertRaises(lib_exc.NotFound,
-                          self.client.delete_security_group,
+                          self.security_groups_client.delete_security_group,
                           non_exist_id
                           )
 
@@ -163,7 +164,7 @@ class NegativeSecGroupTest(base.BaseSecGroupTest):
         # Create security group named 'default', it should be failed.
         name = 'default'
         self.assertRaises(lib_exc.Conflict,
-                          self.client.create_security_group,
+                          self.security_groups_client.create_security_group,
                           name=name)
 
     @test.attr(type=['negative'])

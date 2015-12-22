@@ -396,15 +396,15 @@ class TestDynamicCredentialProvider(base.TestCase):
 
         port_list_mock.start()
         secgroup_list_mock = mock.patch.object(
-            creds.network_admin_client,
+            creds.security_groups_admin_client,
             'list_security_groups',
             side_effect=side_effect)
         secgroup_list_mock.start()
 
         return_values = (fake_http.fake_httplib({}, status=204), {})
         remove_secgroup_mock = self.patch(
-            'tempest.services.network.json.network_client.'
-            'NetworkClient.delete', return_value=return_values)
+            'tempest.services.network.json.security_groups_client.'
+            'SecurityGroupsClient.delete', return_value=return_values)
         creds.clear_creds()
         # Verify default security group delete
         calls = remove_secgroup_mock.mock_calls
