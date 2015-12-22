@@ -51,6 +51,8 @@ from tempest_lib.services.compute.quota_classes_client import \
 from tempest_lib.services.compute.quotas_client import QuotasClient
 from tempest_lib.services.compute.security_group_default_rules_client import \
     SecurityGroupDefaultRulesClient
+from tempest_lib.services.compute.security_group_rules_client import \
+    SecurityGroupRulesClient
 from tempest_lib.services.compute.security_groups_client import \
     SecurityGroupsClient as ComputeSecurityGroupsClient
 from tempest_lib.services.compute.services_client import ServicesClient
@@ -73,8 +75,6 @@ from tempest import manager
 from tempest.services.baremetal.v1.json.baremetal_client import \
     BaremetalClient
 from tempest.services.compute.json.keypairs_client import KeyPairsClient
-from tempest.services.compute.json.security_group_rules_client import \
-    SecurityGroupRulesClient
 from tempest.services.compute.json.server_groups_client import \
     ServerGroupsClient
 from tempest.services.compute.json.servers_client import ServersClient
