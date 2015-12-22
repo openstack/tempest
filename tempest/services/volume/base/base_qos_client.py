@@ -67,15 +67,13 @@ class BaseQosSpecsClient(service_client.ServiceClient):
                 raise exceptions.TimeoutException
             time.sleep(self.build_interval)
 
-    def create_qos(self, name, consumer, **kwargs):
+    def create_qos(self, **kwargs):
         """Create a QoS Specification.
 
-        name : name of the QoS specifications
-        consumer : conumer of Qos ( front-end / back-end / both )
+        Available params: see http://developer.openstack.org/
+                              api-ref-blockstorage-v2.html#createQoSSpec
         """
-        post_body = {'name': name, 'consumer': consumer}
-        post_body.update(kwargs)
-        post_body = json.dumps({'qos_specs': post_body})
+        post_body = json.dumps({'qos_specs': kwargs})
         resp, body = self.post('qos-specs', post_body)
         self.expected_success(200, resp.status)
         body = json.loads(body)
@@ -107,7 +105,8 @@ class BaseQosSpecsClient(service_client.ServiceClient):
     def set_qos_key(self, qos_id, **kwargs):
         """Set the specified keys/values of QoS specification.
 
-        kwargs : it is the dictionary of the key=value pairs to set
+        Available params: see http://developer.openstack.org/
+                              api-ref-blockstorage-v2.html#setQoSKey
         """
         put_body = json.dumps({"qos_specs": kwargs})
         resp, body = self.put('qos-specs/%s' % qos_id, put_body)
@@ -118,7 +117,9 @@ class BaseQosSpecsClient(service_client.ServiceClient):
     def unset_qos_key(self, qos_id, keys):
         """Unset the specified keys of QoS specification.
 
-        keys : it is the array of the keys to unset
+        :param keys: keys to delete from the QoS specification.
+
+        TODO(jordanP): Add a link once LP #1524877 is fixed.
         """
         put_body = json.dumps({'keys': keys})
         resp, body = self.put('qos-specs/%s/delete_keys' % qos_id, put_body)
