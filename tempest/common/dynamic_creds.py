@@ -64,6 +64,7 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
          self.domains_admin_client,
          self.network_admin_client,
          self.networks_admin_client,
+         self.routers_admin_client,
          self.subnets_admin_client,
          self.ports_admin_client,
          self.security_groups_admin_client) = self._get_admin_clients()
@@ -93,13 +94,14 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
         if self.identity_version == 'v2':
             return (os.identity_client, os.tenants_client, os.users_client,
                     os.roles_client, None, os.network_client,
-                    os.networks_client, os.subnets_client, os.ports_client,
-                    os.security_groups_client)
+                    os.networks_client, os.routers_client, os.subnets_client,
+                    os.ports_client, os.security_groups_client)
         else:
             return (os.identity_v3_client, os.projects_client,
                     os.users_v3_client, os.roles_v3_client, os.domains_client,
-                    os.network_client, os.networks_client, os.subnets_client,
-                    os.ports_client, os.security_groups_client)
+                    os.network_client, os.networks_client, os.routers_client,
+                    os.subnets_client, os.ports_client,
+                    os.security_groups_client)
 
     def _create_creds(self, suffix="", admin=False, roles=None):
         """Create random credentials under the following schema.
@@ -237,14 +239,14 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
     def _create_router(self, router_name, tenant_id):
         external_net_id = dict(
             network_id=CONF.network.public_network_id)
-        resp_body = self.network_admin_client.create_router(
+        resp_body = self.routers_admin_client.create_router(
             router_name,
             external_gateway_info=external_net_id,
             tenant_id=tenant_id)
         return resp_body['router']
 
     def _add_router_interface(self, router_id, subnet_id):
-        self.network_admin_client.add_router_interface(router_id,
+        self.routers_admin_client.add_router_interface(router_id,
                                                        subnet_id=subnet_id)
 
     def get_credentials(self, credential_type):
@@ -295,9 +297,9 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
         return self.get_credentials(roles)
 
     def _clear_isolated_router(self, router_id, router_name):
-        net_client = self.network_admin_client
+        client = self.routers_admin_client
         try:
-            net_client.delete_router(router_id)
+            client.delete_router(router_id)
         except lib_exc.NotFound:
             LOG.warning('router with name: %s not found for delete' %
                         router_name)
@@ -331,7 +333,7 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
                             (secgroup['name'], secgroup['id']))
 
     def _clear_isolated_net_resources(self):
-        net_client = self.network_admin_client
+        client = self.routers_admin_client
         for cred in self._creds:
             creds = self._creds.get(cred)
             if (not creds or not any([creds.router, creds.network,
@@ -344,7 +346,7 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
             if (not self.network_resources or
                     (self.network_resources.get('router') and creds.subnet)):
                 try:
-                    net_client.remove_router_interface(
+                    client.remove_router_interface(
                         creds.router['id'],
                         subnet_id=creds.subnet['id'])
                 except lib_exc.NotFound:

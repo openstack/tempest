@@ -680,7 +680,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         # TODO(yfried): refactor this test to be used for other agents (dhcp)
         # as well
 
-        list_hosts = (self.admin_manager.network_client.
+        list_hosts = (self.admin_manager.routers_client.
                       list_l3_agents_hosting_router)
         schedule_router = (self.admin_manager.network_agents_client.
                            create_router_on_l3_agent)
@@ -693,7 +693,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
 
         # NOTE(kevinbenton): we have to use the admin credentials to check
         # for the distributed flag because self.router only has a tenant view.
-        admin = self.admin_manager.network_client.show_router(self.router.id)
+        admin = self.admin_manager.routers_client.show_router(self.router.id)
         if admin['router'].get('distributed', False):
             msg = "Rescheduling test does not apply to distributed routers."
             raise self.skipException(msg)

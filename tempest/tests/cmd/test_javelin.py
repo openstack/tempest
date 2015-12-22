@@ -250,7 +250,7 @@ class TestCreateResources(JavelinUnitTest):
 
     def test_create_router(self):
 
-        self.fake_client.networks.list_routers.return_value = {'routers': []}
+        self.fake_client.routers.list_routers.return_value = {'routers': []}
         self.useFixture(mockpatch.PatchObject(javelin, "client_for_user",
                                               return_value=self.fake_client))
 
@@ -260,7 +260,7 @@ class TestCreateResources(JavelinUnitTest):
         mocked_function.assert_called_once_with(self.fake_object['name'])
 
     def test_create_router_existing(self):
-        self.fake_client.networks.list_routers.return_value = {
+        self.fake_client.routers.list_routers.return_value = {
             'routers': [self.fake_object]}
         self.useFixture(mockpatch.PatchObject(javelin, "client_for_user",
                                               return_value=self.fake_client))
@@ -405,7 +405,7 @@ class TestDestroyResources(JavelinUnitTest):
 
         javelin.destroy_routers([self.fake_object])
 
-        mocked_function = self.fake_client.networks.delete_router
+        mocked_function = self.fake_client.routers.delete_router
         mocked_function.assert_called_once_with(
             self.fake_object['router_id'])
 

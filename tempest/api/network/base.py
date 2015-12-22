@@ -71,6 +71,7 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
         cls.agents_client = cls.os.network_agents_client
         cls.network_extensions_client = cls.os.network_extensions_client
         cls.networks_client = cls.os.networks_client
+        cls.routers_client = cls.os.routers_client
         cls.subnetpools_client = cls.os.subnetpools_client
         cls.subnets_client = cls.os.subnets_client
         cls.ports_client = cls.os.ports_client
@@ -231,7 +232,7 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
             ext_gw_info['network_id'] = external_network_id
         if enable_snat is not None:
             ext_gw_info['enable_snat'] = enable_snat
-        body = cls.client.create_router(
+        body = cls.routers_client.create_router(
             router_name, external_gateway_info=ext_gw_info,
             admin_state_up=admin_state_up, **kwargs)
         router = body['router']
@@ -250,8 +251,8 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
     @classmethod
     def create_router_interface(cls, router_id, subnet_id):
         """Wrapper utility that returns a router interface."""
-        interface = cls.client.add_router_interface(router_id,
-                                                    subnet_id=subnet_id)
+        interface = cls.routers_client.add_router_interface(
+            router_id, subnet_id=subnet_id)
         return interface
 
     @classmethod
@@ -260,12 +261,12 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
         interfaces = body['ports']
         for i in interfaces:
             try:
-                cls.client.remove_router_interface(
+                cls.routers_client.remove_router_interface(
                     router['id'],
                     subnet_id=i['fixed_ips'][0]['subnet_id'])
             except lib_exc.NotFound:
                 pass
-        cls.client.delete_router(router['id'])
+        cls.routers_client.delete_router(router['id'])
 
 
 class BaseAdminNetworkTest(BaseNetworkTest):
@@ -278,6 +279,7 @@ class BaseAdminNetworkTest(BaseNetworkTest):
         cls.admin_client = cls.os_adm.network_client
         cls.admin_agents_client = cls.os_adm.network_agents_client
         cls.admin_networks_client = cls.os_adm.networks_client
+        cls.admin_routers_client = cls.os_adm.routers_client
         cls.admin_subnets_client = cls.os_adm.subnets_client
         cls.admin_ports_client = cls.os_adm.ports_client
         cls.admin_quotas_client = cls.os_adm.network_quotas_client

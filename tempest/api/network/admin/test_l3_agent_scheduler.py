@@ -74,14 +74,14 @@ class L3AgentSchedulerTestJSON(base.BaseAdminNetworkTest):
         # query and setup steps are only required if the extension is available
         # and only if the router's default type is distributed.
         if test.is_extension_enabled('dvr', 'network'):
-            cls.is_dvr_router = cls.admin_client.show_router(
+            cls.is_dvr_router = cls.admin_routers_client.show_router(
                 cls.router['id'])['router'].get('distributed', False)
             if cls.is_dvr_router:
                 cls.network = cls.create_network()
                 cls.subnet = cls.create_subnet(cls.network)
                 cls.port = cls.create_port(cls.network)
-                cls.client.add_router_interface(cls.router['id'],
-                                                port_id=cls.port['id'])
+                cls.routers_client.add_router_interface(
+                    cls.router['id'], port_id=cls.port['id'])
                 # NOTE: Sometimes we have seen this test fail with dvr in,
                 # multinode tests, since the dhcp port is not created before
                 # the test gets executed and so the router is not scheduled
@@ -92,15 +92,15 @@ class L3AgentSchedulerTestJSON(base.BaseAdminNetworkTest):
                 external_gateway_info = {
                     'network_id': CONF.network.public_network_id,
                     'enable_snat': True}
-                cls.admin_client.update_router_with_snat_gw_info(
+                cls.admin_routers_client.update_router_with_snat_gw_info(
                     cls.router['id'],
                     external_gateway_info=external_gateway_info)
 
     @classmethod
     def resource_cleanup(cls):
         if cls.is_dvr_router:
-            cls.client.remove_router_interface(cls.router['id'],
-                                               port_id=cls.port['id'])
+            cls.routers_client.remove_router_interface(cls.router['id'],
+                                                       port_id=cls.port['id'])
         super(L3AgentSchedulerTestJSON, cls).resource_cleanup()
 
     @test.idempotent_id('b7ce6e89-e837-4ded-9b78-9ed3c9c6a45a')
@@ -114,7 +114,8 @@ class L3AgentSchedulerTestJSON(base.BaseAdminNetworkTest):
             self.agent['id'],
             router_id=self.router['id'])
         body = (
-            self.admin_client.list_l3_agents_hosting_router(self.router['id']))
+            self.admin_routers_client.list_l3_agents_hosting_router(
+                self.router['id']))
         for agent in body['agents']:
             l3_agent_ids.append(agent['id'])
             self.assertIn('agent_type', agent)

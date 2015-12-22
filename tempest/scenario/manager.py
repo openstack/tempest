@@ -66,6 +66,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
         cls.network_client = cls.manager.network_client
         cls.networks_client = cls.manager.networks_client
         cls.ports_client = cls.manager.ports_client
+        cls.routers_client = cls.manager.routers_client
         cls.subnets_client = cls.manager.subnets_client
         cls.floating_ips_client = cls.manager.floating_ips_client
         cls.security_groups_client = cls.manager.security_groups_client
@@ -690,17 +691,21 @@ class NetworkScenarioTest(ScenarioTest):
         cls.tenant_id = cls.manager.identity_client.tenant_id
 
     def _create_network(self, client=None, networks_client=None,
-                        tenant_id=None, namestart='network-smoke-'):
+                        routers_client=None, tenant_id=None,
+                        namestart='network-smoke-'):
         if not client:
             client = self.network_client
         if not networks_client:
             networks_client = self.networks_client
+        if not routers_client:
+            routers_client = self.routers_client
         if not tenant_id:
             tenant_id = client.tenant_id
         name = data_utils.rand_name(namestart)
         result = networks_client.create_network(name=name, tenant_id=tenant_id)
         network = net_resources.DeletableNetwork(
-            networks_client=networks_client, **result['network'])
+            networks_client=networks_client, routers_client=routers_client,
+            **result['network'])
         self.assertEqual(network.name, name)
         self.addCleanup(self.delete_wrapper, network.delete)
         return network
@@ -719,7 +724,7 @@ class NetworkScenarioTest(ScenarioTest):
 
     def _list_routers(self, *args, **kwargs):
         """List routers using admin creds """
-        routers_list = self.admin_manager.network_client.list_routers(
+        routers_list = self.admin_manager.routers_client.list_routers(
             *args, **kwargs)
         return routers_list['routers']
 
@@ -736,7 +741,8 @@ class NetworkScenarioTest(ScenarioTest):
         return agents_list['agents']
 
     def _create_subnet(self, network, client=None, subnets_client=None,
-                       namestart='subnet-smoke', **kwargs):
+                       routers_client=None, namestart='subnet-smoke',
+                       **kwargs):
         """Create a subnet for the given network
 
         within the cidr block configured for tenant networks.
@@ -745,6 +751,8 @@ class NetworkScenarioTest(ScenarioTest):
             client = self.network_client
         if not subnets_client:
             subnets_client = self.subnets_client
+        if not routers_client:
+            routers_client = self.routers_client
 
         def cidr_in_use(cidr, tenant_id):
             """Check cidr existence
@@ -792,7 +800,7 @@ class NetworkScenarioTest(ScenarioTest):
         self.assertIsNotNone(result, 'Unable to allocate tenant network')
         subnet = net_resources.DeletableSubnet(
             network_client=client, subnets_client=subnets_client,
-            **result['subnet'])
+            routers_client=routers_client, **result['subnet'])
         self.assertEqual(subnet.cidr, str_cidr)
         self.addCleanup(self.delete_wrapper, subnet.delete)
         return subnet
@@ -992,7 +1000,7 @@ class NetworkScenarioTest(ScenarioTest):
         sg_dict['tenant_id'] = tenant_id
         result = client.create_security_group(**sg_dict)
         secgroup = net_resources.DeletableSecurityGroup(
-            client=client,
+            client=client, routers_client=self.routers_client,
             **result['security_group']
         )
         self.assertEqual(secgroup.name, sg_name)
@@ -1128,7 +1136,7 @@ class NetworkScenarioTest(ScenarioTest):
         routes traffic to the public network.
         """
         if not client:
-            client = self.network_client
+            client = self.routers_client
         if not tenant_id:
             tenant_id = client.tenant_id
         router_id = CONF.network.public_router_id
@@ -1147,14 +1155,14 @@ class NetworkScenarioTest(ScenarioTest):
     def _create_router(self, client=None, tenant_id=None,
                        namestart='router-smoke'):
         if not client:
-            client = self.network_client
+            client = self.routers_client
         if not tenant_id:
             tenant_id = client.tenant_id
         name = data_utils.rand_name(namestart)
         result = client.create_router(name=name,
                                       admin_state_up=True,
                                       tenant_id=tenant_id)
-        router = net_resources.DeletableRouter(client=client,
+        router = net_resources.DeletableRouter(routers_client=client,
                                                **result['router'])
         self.assertEqual(router.name, name)
         self.addCleanup(self.delete_wrapper, router.delete)
@@ -1165,8 +1173,8 @@ class NetworkScenarioTest(ScenarioTest):
         self.assertEqual(admin_state_up, router.admin_state_up)
 
     def create_networks(self, client=None, networks_client=None,
-                        subnets_client=None, tenant_id=None,
-                        dns_nameservers=None):
+                        routers_client=None, subnets_client=None,
+                        tenant_id=None, dns_nameservers=None):
         """Create a network with a subnet connected to a router.
 
         The baremetal driver is a special case since all nodes are
@@ -1194,10 +1202,12 @@ class NetworkScenarioTest(ScenarioTest):
             network = self._create_network(
                 client=client, networks_client=networks_client,
                 tenant_id=tenant_id)
-            router = self._get_router(client=client, tenant_id=tenant_id)
+            router = self._get_router(client=routers_client,
+                                      tenant_id=tenant_id)
 
             subnet_kwargs = dict(network=network, client=client,
-                                 subnets_client=subnets_client)
+                                 subnets_client=subnets_client,
+                                 routers_client=routers_client)
             # use explicit check because empty list is a valid option
             if dns_nameservers is not None:
                 subnet_kwargs['dns_nameservers'] = dns_nameservers

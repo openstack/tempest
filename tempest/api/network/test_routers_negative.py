@@ -47,7 +47,7 @@ class RoutersNegativeTest(base.BaseRouterTest):
     @test.idempotent_id('37a94fc0-a834-45b9-bd23-9a81d2fd1e22')
     def test_router_add_gateway_invalid_network_returns_404(self):
         self.assertRaises(lib_exc.NotFound,
-                          self.client.update_router,
+                          self.routers_client.update_router,
                           self.router['id'],
                           external_gateway_info={
                               'network_id': self.router['id']})
@@ -60,7 +60,7 @@ class RoutersNegativeTest(base.BaseRouterTest):
         sub_cidr = netaddr.IPNetwork(self.tenant_cidr).next()
         self.create_subnet(alt_network, cidr=sub_cidr)
         self.assertRaises(lib_exc.BadRequest,
-                          self.client.update_router,
+                          self.routers_client.update_router,
                           self.router['id'],
                           external_gateway_info={
                               'network_id': alt_network['id']})
@@ -84,31 +84,31 @@ class RoutersNegativeTest(base.BaseRouterTest):
     @test.attr(type=['negative'])
     @test.idempotent_id('04df80f9-224d-47f5-837a-bf23e33d1c20')
     def test_router_remove_interface_in_use_returns_409(self):
-        self.client.add_router_interface(self.router['id'],
-                                         subnet_id=self.subnet['id'])
+        self.routers_client.add_router_interface(self.router['id'],
+                                                 subnet_id=self.subnet['id'])
         self.assertRaises(lib_exc.Conflict,
-                          self.client.delete_router,
+                          self.routers_client.delete_router,
                           self.router['id'])
 
     @test.attr(type=['negative'])
     @test.idempotent_id('c2a70d72-8826-43a7-8208-0209e6360c47')
     def test_show_non_existent_router_returns_404(self):
         router = data_utils.rand_name('non_exist_router')
-        self.assertRaises(lib_exc.NotFound, self.client.show_router,
+        self.assertRaises(lib_exc.NotFound, self.routers_client.show_router,
                           router)
 
     @test.attr(type=['negative'])
     @test.idempotent_id('b23d1569-8b0c-4169-8d4b-6abd34fad5c7')
     def test_update_non_existent_router_returns_404(self):
         router = data_utils.rand_name('non_exist_router')
-        self.assertRaises(lib_exc.NotFound, self.client.update_router,
+        self.assertRaises(lib_exc.NotFound, self.routers_client.update_router,
                           router, name="new_name")
 
     @test.attr(type=['negative'])
     @test.idempotent_id('c7edc5ad-d09d-41e6-a344-5c0c31e2e3e4')
     def test_delete_non_existent_router_returns_404(self):
         router = data_utils.rand_name('non_exist_router')
-        self.assertRaises(lib_exc.NotFound, self.client.delete_router,
+        self.assertRaises(lib_exc.NotFound, self.routers_client.delete_router,
                           router)
 
 
