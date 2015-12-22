@@ -32,6 +32,8 @@ from tempest_lib.services.compute.floating_ip_pools_client import \
     FloatingIPPoolsClient
 from tempest_lib.services.compute.floating_ips_bulk_client import \
     FloatingIPsBulkClient
+from tempest_lib.services.compute.floating_ips_client import \
+    FloatingIPsClient as ComputeFloatingIPsClient
 from tempest_lib.services.compute.hosts_client import HostsClient
 from tempest_lib.services.compute.hypervisor_client import \
     HypervisorClient
@@ -70,8 +72,6 @@ from tempest import exceptions
 from tempest import manager
 from tempest.services.baremetal.v1.json.baremetal_client import \
     BaremetalClient
-from tempest.services.compute.json.floating_ips_client import \
-    FloatingIPsClient as ComputeFloatingIPsClient
 from tempest.services.compute.json.keypairs_client import KeyPairsClient
 from tempest.services.compute.json.security_group_rules_client import \
     SecurityGroupRulesClient
