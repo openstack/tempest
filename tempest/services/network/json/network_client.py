@@ -313,10 +313,13 @@ class NetworkClient(base.BaseNetworkClient):
         }
         return self.update_resource(uri, put_body)
 
-    def add_dhcp_agent_to_network(self, agent_id, network_id):
-        post_body = {'network_id': network_id}
+    def add_dhcp_agent_to_network(self, agent_id, **kwargs):
+        # TODO(piyush): Current api-site doesn't contain this API description.
+        # After fixing the api-site, we need to fix here also for putting the
+        # link to api-site.
+        # LP: https://bugs.launchpad.net/openstack-api-site/+bug/1526212
         uri = '/agents/%s/dhcp-networks' % agent_id
-        return self.create_resource(uri, post_body)
+        return self.create_resource(uri, kwargs)
 
     def list_subnetpools(self, **filters):
         uri = '/subnetpools'

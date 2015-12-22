@@ -92,6 +92,6 @@ class DHCPAgentSchedulersTestJSON(base.BaseAdminNetworkTest):
 
     def _add_dhcp_agent_to_network(self, network_id, agent):
         self.admin_client.add_dhcp_agent_to_network(agent['id'],
-                                                    network_id)
+                                                    network_id=network_id)
         self.assertTrue(self._check_network_in_dhcp_agent(
             network_id, agent))
