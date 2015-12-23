@@ -123,23 +123,9 @@ class BaremetalBasicOps(manager.BaremetalScenarioTest):
         # the same size as our flavor definition.
         eph_size = self.get_flavor_ephemeral_size()
         if eph_size:
-            preserve_ephemeral = True
-
             self.verify_partition(vm_client, 'ephemeral0', '/mnt', eph_size)
             # Create the test file
-            timestamp = self.create_timestamp(
+            self.create_timestamp(
                 floating_ip, private_key=self.keypair['private_key'])
-        else:
-            preserve_ephemeral = False
 
-        # Rebuild and preserve the ephemeral partition if it exists
-        self.rebuild_instance(preserve_ephemeral)
-        self.verify_connectivity()
-
-        # Check that we maintained our data
-        if eph_size:
-            self.verify_partition(vm_client, 'ephemeral0', '/mnt', eph_size)
-            timestamp2 = self.get_timestamp(
-                floating_ip, private_key=self.keypair['private_key'])
-            self.assertEqual(timestamp, timestamp2)
         self.terminate_instance()
