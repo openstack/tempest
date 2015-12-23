@@ -62,7 +62,7 @@ class TestPortSecurityExtension(manager.NetworkScenarioTest):
         self.addCleanup(self.interface_client.delete_interface, server['id'],
                         secure_port['id'])
 
-        self.interface_client.create_interface(server=server['id'],
+        self.interface_client.create_interface(server['id'],
                                                port_id=insecure_port.id)
 
         self.addCleanup(self.interface_client.delete_interface, server['id'],
