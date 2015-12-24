@@ -165,18 +165,26 @@ class BaseSnapshotsClient(service_client.ServiceClient):
         self.expected_success(200, resp.status)
         return service_client.ResponseBody(resp, body)
 
-    def update_snapshot_metadata(self, snapshot_id, metadata):
+    def update_snapshot_metadata(self, snapshot_id, **kwargs):
         """Update metadata for the snapshot."""
-        put_body = json.dumps({'metadata': metadata})
+        # TODO(piyush): Current api-site doesn't contain this API description.
+        # After fixing the api-site, we need to fix here also for putting the
+        # link to api-site.
+        # LP: https://bugs.launchpad.net/openstack-api-site/+bug/1529063
+        put_body = json.dumps(kwargs)
         url = "snapshots/%s/metadata" % str(snapshot_id)
         resp, body = self.put(url, put_body)
         body = json.loads(body)
         self.expected_success(200, resp.status)
         return service_client.ResponseBody(resp, body)
 
-    def update_snapshot_metadata_item(self, snapshot_id, id, meta_item):
+    def update_snapshot_metadata_item(self, snapshot_id, id, **kwargs):
         """Update metadata item for the snapshot."""
-        put_body = json.dumps({'meta': meta_item})
+        # TODO(piyush): Current api-site doesn't contain this API description.
+        # After fixing the api-site, we need to fix here also for putting the
+        # link to api-site.
+        # LP: https://bugs.launchpad.net/openstack-api-site/+bug/1529064
+        put_body = json.dumps(kwargs)
         url = "snapshots/%s/metadata/%s" % (str(snapshot_id), str(id))
         resp, body = self.put(url, put_body)
         body = json.loads(body)

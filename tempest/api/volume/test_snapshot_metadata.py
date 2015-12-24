@@ -45,7 +45,7 @@ class SnapshotV2MetadataTestJSON(base.BaseVolumeTest):
 
     def tearDown(self):
         # Update the metadata to {}
-        self.client.update_snapshot_metadata(self.snapshot_id, {})
+        self.client.update_snapshot_metadata(self.snapshot_id, metadata={})
         super(SnapshotV2MetadataTestJSON, self).tearDown()
 
     @test.idempotent_id('a2f20f99-e363-4584-be97-bc33afb1a56c')
@@ -89,7 +89,7 @@ class SnapshotV2MetadataTestJSON(base.BaseVolumeTest):
 
         # Update metadata item
         body = self.client.update_snapshot_metadata(
-            self.snapshot_id, update)['metadata']
+            self.snapshot_id, metadata=update)['metadata']
         # Get the metadata of the snapshot
         body = self.client.show_snapshot_metadata(
             self.snapshot_id)['metadata']
@@ -114,7 +114,7 @@ class SnapshotV2MetadataTestJSON(base.BaseVolumeTest):
         self.assertThat(body.items(), matchers.ContainsAll(metadata.items()))
         # Update metadata item
         body = self.client.update_snapshot_metadata_item(
-            self.snapshot_id, "key3", update_item)['meta']
+            self.snapshot_id, "key3", meta=update_item)['meta']
         # Get the metadata of the snapshot
         body = self.client.show_snapshot_metadata(
             self.snapshot_id)['metadata']
