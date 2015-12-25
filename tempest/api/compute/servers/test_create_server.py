@@ -50,6 +50,7 @@ class ServersTestJSON(base.BaseV2ComputeTest):
         cls.accessIPv4 = '1.1.1.1'
         cls.accessIPv6 = '0000:0000:0000:0000:0000:babe:220.12.22.2'
         cls.name = data_utils.rand_name('server')
+        cls.password = data_utils.rand_password()
         disk_config = cls.disk_config
         cls.server_initial = cls.create_test_server(
             validatable=True,
@@ -58,8 +59,8 @@ class ServersTestJSON(base.BaseV2ComputeTest):
             metadata=cls.meta,
             accessIPv4=cls.accessIPv4,
             accessIPv6=cls.accessIPv6,
-            disk_config=disk_config)
-        cls.password = cls.server_initial['adminPass']
+            disk_config=disk_config,
+            adminPass=cls.password)
         cls.server = (cls.client.show_server(cls.server_initial['id'])
                       ['server'])
 

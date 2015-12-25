@@ -13,10 +13,15 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import testtools
+
 from tempest.api.compute import base
 from tempest.common.utils import data_utils
 from tempest.common import waiters
+from tempest import config
 from tempest import test
+
+CONF = config.CONF
 
 
 class ServersTestJSON(base.BaseV2ComputeTest):
@@ -31,6 +36,9 @@ class ServersTestJSON(base.BaseV2ComputeTest):
         super(ServersTestJSON, self).tearDown()
 
     @test.idempotent_id('b92d5ec7-b1dd-44a2-87e4-45e888c46ef0')
+    @testtools.skipUnless(CONF.compute_feature_enabled.
+                          enable_instance_password,
+                          'Instance password not available.')
     def test_create_server_with_admin_password(self):
         # If an admin password is provided on server creation, the server's
         # root password should be set to that password.

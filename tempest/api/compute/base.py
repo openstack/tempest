@@ -321,11 +321,12 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
             except Exception:
                 LOG.exception('Failed to delete server %s' % server_id)
 
+        cls.password = data_utils.rand_password()
         server = cls.create_test_server(
             validatable,
             wait_until='ACTIVE',
+            adminPass=cls.password,
             **kwargs)
-        cls.password = server['adminPass']
         return server['id']
 
     @classmethod

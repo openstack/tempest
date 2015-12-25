@@ -63,11 +63,11 @@ class AttachVolumeTestJSON(base.BaseV2ComputeTest):
 
     def _create_and_attach(self):
         # Start a server and wait for it to become ready
-        admin_pass = self.image_ssh_password
+        self.admin_pass = self.image_ssh_password
         self.server = self.create_test_server(
             validatable=True,
             wait_until='ACTIVE',
-            adminPass=admin_pass)
+            adminPass=self.admin_pass)
 
         # Record addresses so that we can ssh later
         self.server['addresses'] = self.servers_client.list_addresses(
@@ -108,7 +108,7 @@ class AttachVolumeTestJSON(base.BaseV2ComputeTest):
         linux_client = remote_client.RemoteClient(
             self.get_server_ip(self.server),
             self.image_ssh_user,
-            self.server['adminPass'],
+            self.admin_pass,
             self.validation_resources['keypair']['private_key'])
 
         partitions = linux_client.get_partitions()
@@ -127,7 +127,7 @@ class AttachVolumeTestJSON(base.BaseV2ComputeTest):
         linux_client = remote_client.RemoteClient(
             self.get_server_ip(self.server),
             self.image_ssh_user,
-            self.server['adminPass'],
+            self.admin_pass,
             self.validation_resources['keypair']['private_key'])
 
         partitions = linux_client.get_partitions()
