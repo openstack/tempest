@@ -22,7 +22,7 @@ from oslo_serialization import jsonutils as json
 from tempest.common import service_client
 
 
-class PolicyClient(service_client.ServiceClient):
+class PoliciesClient(service_client.ServiceClient):
     api_version = "v3"
 
     def create_policy(self, **kwargs):

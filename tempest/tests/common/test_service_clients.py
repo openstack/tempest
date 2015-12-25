@@ -26,7 +26,7 @@ from tempest.services.identity.v3.json import credentials_client
 from tempest.services.identity.v3.json import endpoints_client
 from tempest.services.identity.v3.json import identity_client as \
     identity_v3_identity_client
-from tempest.services.identity.v3.json import policy_client
+from tempest.services.identity.v3.json import policies_client
 from tempest.services.identity.v3.json import region_client
 from tempest.services.identity.v3.json import services_client
 from tempest.services.image.v1.json import images_client
@@ -118,7 +118,7 @@ class TestServiceClient(base.TestCase):
             credentials_client.CredentialsClient,
             endpoints_client.EndPointClient,
             identity_v3_identity_client.IdentityV3Client,
-            policy_client.PolicyClient,
+            policies_client.PoliciesClient,
             region_client.RegionClient,
             services_client.ServicesClient,
             images_client.ImagesClient,

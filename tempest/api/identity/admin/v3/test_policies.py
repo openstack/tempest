@@ -21,7 +21,7 @@ from tempest import test
 class PoliciesTestJSON(base.BaseIdentityV3AdminTest):
 
     def _delete_policy(self, policy_id):
-        self.policy_client.delete_policy(policy_id)
+        self.policies_client.delete_policy(policy_id)
 
     @test.idempotent_id('1a0ad286-2d06-4123-ab0d-728893a76201')
     def test_list_policies(self):
@@ -31,13 +31,13 @@ class PoliciesTestJSON(base.BaseIdentityV3AdminTest):
         for _ in range(3):
             blob = data_utils.rand_name('BlobName')
             policy_type = data_utils.rand_name('PolicyType')
-            policy = self.policy_client.create_policy(
+            policy = self.policies_client.create_policy(
                 blob=blob, type=policy_type)['policy']
             # Delete the Policy at the end of this method
             self.addCleanup(self._delete_policy, policy['id'])
             policy_ids.append(policy['id'])
         # List and Verify Policies
-        body = self.policy_client.list_policies()['policies']
+        body = self.policies_client.list_policies()['policies']
         for p in body:
             fetched_ids.append(p['id'])
         missing_pols = [p for p in policy_ids if p not in fetched_ids]
@@ -49,8 +49,8 @@ class PoliciesTestJSON(base.BaseIdentityV3AdminTest):
         # Test to update policy
         blob = data_utils.rand_name('BlobName')
         policy_type = data_utils.rand_name('PolicyType')
-        policy = self.policy_client.create_policy(blob=blob,
-                                                  type=policy_type)['policy']
+        policy = self.policies_client.create_policy(blob=blob,
+                                                    type=policy_type)['policy']
         self.addCleanup(self._delete_policy, policy['id'])
         self.assertIn('id', policy)
         self.assertIn('type', policy)
@@ -60,11 +60,12 @@ class PoliciesTestJSON(base.BaseIdentityV3AdminTest):
         self.assertEqual(policy_type, policy['type'])
         # Update policy
         update_type = data_utils.rand_name('UpdatedPolicyType')
-        data = self.policy_client.update_policy(
+        data = self.policies_client.update_policy(
             policy['id'], type=update_type)['policy']
         self.assertIn('type', data)
         # Assertion for updated value with fetched value
-        fetched_policy = self.policy_client.show_policy(policy['id'])['policy']
+        fetched_policy = self.policies_client.show_policy(
+            policy['id'])['policy']
         self.assertIn('id', fetched_policy)
         self.assertIn('blob', fetched_policy)
         self.assertIn('type', fetched_policy)
