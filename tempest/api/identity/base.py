@@ -30,7 +30,7 @@ class BaseIdentityTest(tempest.test.BaseTestCase):
     @classmethod
     def disable_user(cls, user_name):
         user = cls.get_user_by_name(user_name)
-        cls.client.enable_disable_user(user['id'], False)
+        cls.client.enable_disable_user(user['id'], enabled=False)
 
     @classmethod
     def disable_tenant(cls, tenant_name):

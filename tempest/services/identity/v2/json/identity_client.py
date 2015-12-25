@@ -71,12 +71,17 @@ class IdentityClient(service_client.ServiceClient):
         body = json.loads(body)
         return service_client.ResponseBody(resp, body)
 
-    def enable_disable_user(self, user_id, enabled):
-        """Enables or disables a user."""
-        put_body = {
-            'enabled': enabled
-        }
-        put_body = json.dumps({'user': put_body})
+    def enable_disable_user(self, user_id, **kwargs):
+        """Enables or disables a user.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-identity-v2-ext.html#enableUser
+        """
+        # NOTE: The URL (users/<id>/enabled) is different from the api-site
+        # one (users/<id>/OS-KSADM/enabled) , but they are the same API
+        # because of the fact that in keystone/contrib/admin_crud/core.py
+        # both api use same action='set_user_enabled'
+        put_body = json.dumps({'user': kwargs})
         resp, body = self.put('users/%s/enabled' % user_id, put_body)
         self.expected_success(200, resp.status)
         body = json.loads(body)
@@ -159,25 +164,28 @@ class IdentityClient(service_client.ServiceClient):
         self.expected_success(204, resp.status)
         return service_client.ResponseBody(resp, body)
 
-    def update_user_password(self, user_id, new_pass):
+    def update_user_password(self, user_id, **kwargs):
         """Update User Password."""
-        put_body = {
-            'password': new_pass,
-            'id': user_id
-        }
-        put_body = json.dumps({'user': put_body})
+        # TODO(piyush): Current api-site doesn't contain this API description.
+        # After fixing the api-site, we need to fix here also for putting the
+        # link to api-site.
+        # LP: https://bugs.launchpad.net/openstack-api-site/+bug/1524147
+        put_body = json.dumps({'user': kwargs})
         resp, body = self.put('users/%s/OS-KSADM/password' % user_id, put_body)
         self.expected_success(200, resp.status)
         body = json.loads(body)
         return service_client.ResponseBody(resp, body)
 
-    def update_user_own_password(self, user_id, new_pass, old_pass):
+    def update_user_own_password(self, user_id, **kwargs):
         """User updates own password"""
-        patch_body = {
-            "password": new_pass,
-            "original_password": old_pass
-        }
-        patch_body = json.dumps({'user': patch_body})
+        # TODO(piyush): Current api-site doesn't contain this API description.
+        # After fixing the api-site, we need to fix here also for putting the
+        # link to api-site.
+        # LP: https://bugs.launchpad.net/openstack-api-site/+bug/1524153
+        # NOTE: This API is used for updating user password by itself.
+        # Ref: http://lists.openstack.org/pipermail/openstack-dev/2015-December
+        #      /081803.html
+        patch_body = json.dumps({'user': kwargs})
         resp, body = self.patch('OS-KSCRUD/users/%s' % user_id, patch_body)
         self.expected_success(200, resp.status)
         body = json.loads(body)

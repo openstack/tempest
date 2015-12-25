@@ -202,7 +202,7 @@ class UsersTestJSON(base.BaseIdentityV2AdminTest):
         # Updating the user with new password
         new_pass = data_utils.rand_password()
         update_user = self.client.update_user_password(
-            self.data.user['id'], new_pass)['user']
+            self.data.user['id'], password=new_pass)['user']
         self.assertEqual(update_user['id'], self.data.user['id'])
 
         # Validate the updated password
