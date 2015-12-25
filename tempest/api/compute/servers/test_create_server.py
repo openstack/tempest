@@ -262,13 +262,16 @@ class ServersWithSpecificFlavorTestJSON(base.BaseV2ComputeAdminTest):
                           'Instance validation tests are disabled.')
     def test_verify_created_server_ephemeral_disk(self):
         # Verify that the ephemeral disk is created when creating server
+        flavor_base = self.flavors_client.show_flavor(
+            self.flavor_ref)['flavor']
 
         def create_flavor_with_extra_specs():
             flavor_with_eph_disk_name = data_utils.rand_name('eph_flavor')
             flavor_with_eph_disk_id = data_utils.rand_int_id(start=1000)
-            ram = 64
-            vcpus = 1
-            disk = 0
+
+            ram = flavor_base['ram']
+            vcpus = flavor_base['vcpus']
+            disk = flavor_base['disk']
 
             # Create a flavor with extra specs
             flavor = (self.flavor_client.
@@ -284,9 +287,9 @@ class ServersWithSpecificFlavorTestJSON(base.BaseV2ComputeAdminTest):
             flavor_no_eph_disk_name = data_utils.rand_name('no_eph_flavor')
             flavor_no_eph_disk_id = data_utils.rand_int_id(start=1000)
 
-            ram = 64
-            vcpus = 1
-            disk = 0
+            ram = flavor_base['ram']
+            vcpus = flavor_base['vcpus']
+            disk = flavor_base['disk']
 
             # Create a flavor without extra specs
             flavor = (self.flavor_client.
