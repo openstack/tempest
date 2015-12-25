@@ -75,7 +75,8 @@ class RolesV3TestJSON(base.BaseIdentityV3AdminTest):
         self.assertEqual(role['name'], r_name)
 
         new_name = data_utils.rand_name('NewRole')
-        updated_role = self.client.update_role(new_name, role['id'])['role']
+        updated_role = self.client.update_role(role['id'],
+                                               name=new_name)['role']
         self.assertIn('name', updated_role)
         self.assertIn('id', updated_role)
         self.assertIn('links', updated_role)
