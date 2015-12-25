@@ -143,7 +143,7 @@ class BaseIdentityV3AdminTest(BaseIdentityV3Test):
         cls.client = cls.os_adm.identity_v3_client
         cls.token = cls.os_adm.token_v3_client
         cls.endpoints_client = cls.os_adm.endpoints_client
-        cls.region_client = cls.os_adm.region_client
+        cls.regions_client = cls.os_adm.regions_client
         cls.services_client = cls.os_adm.identity_services_client
         cls.policies_client = cls.os_adm.policies_client
         cls.creds_client = cls.os_adm.credentials_client
