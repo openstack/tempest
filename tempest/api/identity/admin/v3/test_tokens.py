@@ -76,7 +76,7 @@ class TokensV3TestJSON(base.BaseIdentityV3AdminTest):
 
         # Create a role
         role_name = data_utils.rand_name(name='role')
-        role = self.client.create_role(role_name)['role']
+        role = self.client.create_role(name=role_name)['role']
         self.addCleanup(self.client.delete_role, role['id'])
 
         # Grant the user the role on both projects.

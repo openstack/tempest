@@ -18,12 +18,13 @@ from tempest.common import service_client
 class RolesClient(service_client.ServiceClient):
     api_version = "v2.0"
 
-    def create_role(self, name):
-        """Create a role."""
-        post_body = {
-            'name': name,
-        }
-        post_body = json.dumps({'role': post_body})
+    def create_role(self, **kwargs):
+        """Create a role.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-identity-v2-ext.html#createRole
+        """
+        post_body = json.dumps({'role': kwargs})
         resp, body = self.post('OS-KSADM/roles', post_body)
         self.expected_success(200, resp.status)
         body = json.loads(body)

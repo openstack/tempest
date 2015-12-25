@@ -61,7 +61,7 @@ class CredsClient(object):
 
     def create_user_role(self, role_name):
         if not self._check_role_exists(role_name):
-            self.roles_client.create_role(role_name)
+            self.roles_client.create_role(name=role_name)
 
     def assign_user_role(self, user, project, role_name):
         role = self._check_role_exists(role_name)

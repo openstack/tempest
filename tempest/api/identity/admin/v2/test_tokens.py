@@ -77,7 +77,7 @@ class TokensTestJSON(base.BaseIdentityV2AdminTest):
 
         # Create a role
         role_name = data_utils.rand_name(name='role')
-        role = self.roles_client.create_role(role_name)['role']
+        role = self.roles_client.create_role(name=role_name)['role']
         self.data.roles.append(role)
 
         # Grant the user the role on the tenants.

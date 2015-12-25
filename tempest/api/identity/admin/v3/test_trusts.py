@@ -69,10 +69,10 @@ class BaseTrustsV3Test(base.BaseIdentityV3AdminTest):
         self.delegated_role = data_utils.rand_name('DelegatedRole')
         self.not_delegated_role = data_utils.rand_name('NotDelegatedRole')
 
-        role = self.client.create_role(self.delegated_role)['role']
+        role = self.client.create_role(name=self.delegated_role)['role']
         self.delegated_role_id = role['id']
 
-        role = self.client.create_role(self.not_delegated_role)['role']
+        role = self.client.create_role(name=self.not_delegated_role)['role']
         self.not_delegated_role_id = role['id']
 
         # Assign roles to trustor

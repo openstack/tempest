@@ -180,12 +180,13 @@ class IdentityV3Client(service_client.ServiceClient):
         self.expected_success(204, resp.status)
         return service_client.ResponseBody(resp, body)
 
-    def create_role(self, name):
-        """Create a Role."""
-        post_body = {
-            'name': name
-        }
-        post_body = json.dumps({'role': post_body})
+    def create_role(self, **kwargs):
+        """Create a Role.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-identity-v3.html#createRole
+        """
+        post_body = json.dumps({'role': kwargs})
         resp, body = self.post('roles', post_body)
         self.expected_success(201, resp.status)
         body = json.loads(body)
