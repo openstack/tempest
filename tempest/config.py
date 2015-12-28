@@ -737,7 +737,7 @@ VolumeGroup = [
                deprecated_for_removal=True),
     cfg.ListOpt('backend_names',
                 default=['BACKEND_1', 'BACKEND_2'],
-                help='A list of backend names seperated by comma .'
+                help='A list of backend names separated by comma. '
                      'The backend name must be declared in cinder.conf',
                 deprecated_opts=[cfg.DeprecatedOpt('BACKEND_1',
                                                    group='volume'),
