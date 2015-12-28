@@ -47,7 +47,7 @@ class AttachInterfacesTestJSON(base.BaseV2ComputeTest):
         cls.client = cls.os.interfaces_client
 
     def wait_for_interface_status(self, server, port_id, status):
-        """Waits for a interface to reach a given status."""
+        """Waits for an interface to reach a given status."""
         body = (self.client.show_interface(server, port_id)
                 ['interfaceAttachment'])
         interface_status = body['port_state']

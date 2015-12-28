@@ -147,7 +147,7 @@ class ListImagesTest(base.BaseV2ImageTest):
                      for disk_fmt in disk_fmts]
 
         for (container_fmt, disk_fmt) in all_pairs[:6]:
-            LOG.debug("Creating a image"
+            LOG.debug("Creating an image"
                       "(Container format: %s, Disk format: %s).",
                       container_fmt, disk_fmt)
             cls._create_standard_image(container_fmt, disk_fmt)
