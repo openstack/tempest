@@ -145,7 +145,7 @@ class AggregatesAdminTestJSON(base.BaseV2ComputeAdminTest):
 
     @test.idempotent_id('c8e85064-e79b-4906-9931-c11c24294d02')
     def test_aggregate_add_remove_host(self):
-        # Add an host to the given aggregate and remove.
+        # Add a host to the given aggregate and remove.
         self.useFixture(fixtures.LockFixture('availability_zone'))
         aggregate_name = data_utils.rand_name(self.aggregate_name_prefix)
         aggregate = (self.client.create_aggregate(name=aggregate_name)
@@ -168,7 +168,7 @@ class AggregatesAdminTestJSON(base.BaseV2ComputeAdminTest):
 
     @test.idempotent_id('7f6a1cc5-2446-4cdb-9baa-b6ae0a919b72')
     def test_aggregate_add_host_list(self):
-        # Add an host to the given aggregate and list.
+        # Add a host to the given aggregate and list.
         self.useFixture(fixtures.LockFixture('availability_zone'))
         aggregate_name = data_utils.rand_name(self.aggregate_name_prefix)
         aggregate = (self.client.create_aggregate(name=aggregate_name)
@@ -188,7 +188,7 @@ class AggregatesAdminTestJSON(base.BaseV2ComputeAdminTest):
 
     @test.idempotent_id('eeef473c-7c52-494d-9f09-2ed7fc8fc036')
     def test_aggregate_add_host_get_details(self):
-        # Add an host to the given aggregate and get details.
+        # Add a host to the given aggregate and get details.
         self.useFixture(fixtures.LockFixture('availability_zone'))
         aggregate_name = data_utils.rand_name(self.aggregate_name_prefix)
         aggregate = (self.client.create_aggregate(name=aggregate_name)
@@ -205,7 +205,7 @@ class AggregatesAdminTestJSON(base.BaseV2ComputeAdminTest):
 
     @test.idempotent_id('96be03c7-570d-409c-90f8-e4db3c646996')
     def test_aggregate_add_host_create_server_with_az(self):
-        # Add an host to the given aggregate and create a server.
+        # Add a host to the given aggregate and create a server.
         self.useFixture(fixtures.LockFixture('availability_zone'))
         aggregate_name = data_utils.rand_name(self.aggregate_name_prefix)
         az_name = data_utils.rand_name(self.az_name_prefix)
