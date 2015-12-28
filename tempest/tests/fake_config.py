@@ -24,6 +24,7 @@ from tempest import config
 class ConfigFixture(conf_fixture.Config):
 
     def __init__(self):
+        cfg.CONF([], default_config_files=[])
         config.register_opts()
         super(ConfigFixture, self).__init__()
 
@@ -59,6 +60,5 @@ class ConfigFixture(conf_fixture.Config):
 
 class FakePrivate(config.TempestConfigPrivate):
     def __init__(self, parse_conf=True, config_path=None):
-        cfg.CONF([], default_config_files=[])
         self._set_attrs()
-        self.lock_path = cfg.CONF.lock_path
+        self.lock_path = cfg.CONF.oslo_concurrency.lock_path
