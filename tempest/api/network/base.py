@@ -14,7 +14,6 @@
 #    under the License.
 
 import netaddr
-from oslo_log import log as logging
 from tempest_lib import exceptions as lib_exc
 
 from tempest.common.utils import data_utils
@@ -23,8 +22,6 @@ from tempest import exceptions
 import tempest.test
 
 CONF = config.CONF
-
-LOG = logging.getLogger(__name__)
 
 
 class BaseNetworkTest(tempest.test.BaseTestCase):

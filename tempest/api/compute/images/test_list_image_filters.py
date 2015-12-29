@@ -15,7 +15,6 @@
 
 import time
 
-from oslo_log import log as logging
 import six
 import testtools
 
@@ -26,8 +25,6 @@ from tempest import config
 from tempest import test
 
 CONF = config.CONF
-
-LOG = logging.getLogger(__name__)
 
 
 class ListImageFiltersTestJSON(base.BaseV2ComputeTest):

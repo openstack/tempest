@@ -10,7 +10,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from oslo_log import log as logging
 import six
 from tempest.api.volume import base
 from tempest.common.utils import data_utils
@@ -18,8 +17,6 @@ from tempest import config
 from tempest import test
 
 CONF = config.CONF
-
-LOG = logging.getLogger(__name__)
 
 
 class VolumeMultiBackendV2Test(base.BaseVolumeAdminTest):

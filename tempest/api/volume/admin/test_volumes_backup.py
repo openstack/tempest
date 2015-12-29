@@ -13,7 +13,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from oslo_log import log as logging
 from tempest_lib import decorators
 
 from tempest.api.volume import base
@@ -22,7 +21,6 @@ from tempest import config
 from tempest import test
 
 CONF = config.CONF
-LOG = logging.getLogger(__name__)
 
 
 class VolumesBackupsV2Test(base.BaseVolumeAdminTest):

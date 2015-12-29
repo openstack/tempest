@@ -14,16 +14,12 @@
 #    under the License.
 
 
-from oslo_log import log as logging
-
 from tempest import config
 from tempest import exceptions
 from tempest.scenario import manager
 from tempest import test
 
 CONF = config.CONF
-
-LOG = logging.getLogger(__name__)
 
 
 class TestServerMultinode(manager.ScenarioTest):
