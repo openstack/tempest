@@ -58,8 +58,8 @@ class TestDynamicCredentialProvider(base.TestCase):
 
     def test_tempest_client(self):
         creds = dynamic_creds.DynamicCredentialProvider(**self.fixed_params)
-        self.assertTrue(isinstance(creds.identity_admin_client,
-                                   json_iden_client.IdentityClient))
+        self.assertIsInstance(creds.identity_admin_client,
+                              json_iden_client.IdentityClient)
 
     def _get_fake_admin_creds(self):
         return credentials.get_credentials(

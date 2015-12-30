@@ -93,29 +93,29 @@ class TestGlanceHTTPClient(base.TestCase):
         self.assertEqual(httplib.HTTPConnection, conn_class)
 
     def test_get_connection_http(self):
-        self.assertTrue(isinstance(self.client._get_connection(),
-                                   httplib.HTTPConnection))
+        self.assertIsInstance(self.client._get_connection(),
+                              httplib.HTTPConnection)
 
     def test_get_connection_https(self):
         endpoint = 'https://fake_url.com'
         self.fake_auth.base_url = mock.MagicMock(return_value=endpoint)
         self.client = glance_http.HTTPClient(self.fake_auth, {})
-        self.assertTrue(isinstance(self.client._get_connection(),
-                                   glance_http.VerifiedHTTPSConnection))
+        self.assertIsInstance(self.client._get_connection(),
+                              glance_http.VerifiedHTTPSConnection)
 
     def test_get_connection_ipv4_https(self):
         endpoint = 'https://127.0.0.1'
         self.fake_auth.base_url = mock.MagicMock(return_value=endpoint)
         self.client = glance_http.HTTPClient(self.fake_auth, {})
-        self.assertTrue(isinstance(self.client._get_connection(),
-                                   glance_http.VerifiedHTTPSConnection))
+        self.assertIsInstance(self.client._get_connection(),
+                              glance_http.VerifiedHTTPSConnection)
 
     def test_get_connection_ipv6_https(self):
         endpoint = 'https://[::1]'
         self.fake_auth.base_url = mock.MagicMock(return_value=endpoint)
         self.client = glance_http.HTTPClient(self.fake_auth, {})
-        self.assertTrue(isinstance(self.client._get_connection(),
-                                   glance_http.VerifiedHTTPSConnection))
+        self.assertIsInstance(self.client._get_connection(),
+                              glance_http.VerifiedHTTPSConnection)
 
     def test_get_connection_url_not_fount(self):
         self.useFixture(mockpatch.PatchObject(self.client, 'connection_class',
