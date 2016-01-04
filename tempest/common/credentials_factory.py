@@ -14,7 +14,6 @@
 from oslo_concurrency import lockutils
 
 from tempest import clients
-from tempest.common import cred_provider
 from tempest.common import dynamic_creds
 from tempest.common import preprov_creds
 from tempest import config
@@ -62,89 +61,6 @@ def _get_preprov_provider_params():
     ]))
 
 
-class LegacyCredentialProvider(cred_provider.CredentialProvider):
-
-    def __init__(self, identity_version):
-        """Credentials provider which returns credentials from tempest.conf
-
-        Credentials provider which always returns the first and second
-        configured accounts as primary and alt users.
-        Credentials from tempest.conf are deprecated, and this credential
-        provider is also accordingly.
-
-        This credential provider can be used in case of serial test execution
-        to preserve the current behaviour of the serial tempest run.
-
-        :param identity_version: Version of the identity API
-        :return: CredentialProvider
-        """
-        super(LegacyCredentialProvider, self).__init__(
-            identity_version=identity_version)
-        self._creds = {}
-
-    def _unique_creds(self, cred_arg=None):
-        """Verify that the configured credentials are valid and distinct """
-        try:
-            user = self.get_primary_creds()
-            alt_user = self.get_alt_creds()
-            return getattr(user, cred_arg) != getattr(alt_user, cred_arg)
-        except exceptions.InvalidCredentials as ic:
-            msg = "At least one of the configured credentials is " \
-                  "not valid: %s" % ic.message
-            raise exceptions.InvalidConfiguration(msg)
-
-    def is_multi_user(self):
-        return self._unique_creds('username')
-
-    def is_multi_tenant(self):
-        return self._unique_creds('tenant_id')
-
-    def get_primary_creds(self):
-        if self._creds.get('primary'):
-            return self._creds.get('primary')
-        primary_credential = get_configured_credentials(
-            credential_type='user', fill_in=False,
-            identity_version=self.identity_version)
-        self._creds['primary'] = cred_provider.TestResources(
-            primary_credential)
-        return self._creds['primary']
-
-    def get_alt_creds(self):
-        if self._creds.get('alt'):
-            return self._creds.get('alt')
-        alt_credential = get_configured_credentials(
-            credential_type='alt_user', fill_in=False,
-            identity_version=self.identity_version)
-        self._creds['alt'] = cred_provider.TestResources(
-            alt_credential)
-        return self._creds['alt']
-
-    def clear_creds(self):
-        self._creds = {}
-
-    def get_admin_creds(self):
-        if self._creds.get('admin'):
-            return self._creds.get('admin')
-        creds = get_configured_credentials(
-            "identity_admin", fill_in=False)
-        self._creds['admin'] = cred_provider.TestResources(creds)
-        return self._creds['admin']
-
-    def get_creds_by_roles(self, roles, force_new=False):
-        msg = "Credentials being specified through the config file can not be"\
-              " used with tests that specify using credentials by roles. "\
-              "Either exclude/skip the tests doing this or use either a "\
-              "test_accounts_file or dynamic credentials."
-        raise exceptions.InvalidConfiguration(msg)
-
-    def is_role_available(self, role):
-        # NOTE(andreaf) LegacyCredentialProvider does not support credentials
-        # by role, so returning always False.
-        # Test that rely on credentials by role should use this to skip
-        # when this is credential provider is used
-        return False
-
-
 # Return the right implementation of CredentialProvider based on config
 # Dropping interface and password, as they are never used anyways
 # TODO(andreaf) Drop them from the CredentialsProvider interface completely
@@ -172,9 +88,8 @@ def get_credentials_provider(name, network_resources=None,
                 name=name, identity_version=identity_version,
                 **_get_preprov_provider_params())
         else:
-            # Dynamic credentials are disabled, and the account file is not
-            # defined - we fall back on credentials configured in tempest.conf
-            return LegacyCredentialProvider(identity_version=identity_version)
+            raise exceptions.InvalidConfiguration(
+                'A valid credential provider is needed')
 
 
 # We want a helper function here to check and see if admin credentials
@@ -218,7 +133,9 @@ def is_alt_available(identity_version):
             identity_version=identity_version, name='check_alt',
             **_get_preprov_provider_params())
     else:
-        check_accounts = LegacyCredentialProvider(identity_version)
+        raise exceptions.InvalidConfiguration(
+            'A valid credential provider is needed')
+
     try:
         if not check_accounts.is_multi_user():
             return False

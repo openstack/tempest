@@ -160,41 +160,9 @@ IdentityGroup = [
                         'publicURL', 'adminURL', 'internalURL'],
                help="The endpoint type to use for OpenStack Identity "
                     "(Keystone) API v3"),
-    cfg.StrOpt('username',
-               help="Username to use for Nova API requests.",
-               deprecated_for_removal=True),
-    cfg.StrOpt('project_name',
-               deprecated_name='tenant_name',
-               help="Project name to use for Nova API requests.",
-               deprecated_for_removal=True),
     cfg.StrOpt('admin_role',
                default='admin',
                help="Role required to administrate keystone."),
-    cfg.StrOpt('password',
-               help="API key to use when authenticating.",
-               secret=True,
-               deprecated_for_removal=True),
-    cfg.StrOpt('domain_name',
-               help="Domain name for authentication (Keystone V3)."
-                    "The same domain applies to user and project",
-               deprecated_for_removal=True),
-    cfg.StrOpt('alt_username',
-               help="Username of alternate user to use for Nova API "
-                    "requests.",
-               deprecated_for_removal=True),
-    cfg.StrOpt('alt_project_name',
-               deprecated_name='alt_tenant_name',
-               help="Alternate user's Project name to use for Nova API "
-                    "requests.",
-               deprecated_for_removal=True),
-    cfg.StrOpt('alt_password',
-               help="API key to use when authenticating as alternate user.",
-               secret=True,
-               deprecated_for_removal=True),
-    cfg.StrOpt('alt_domain_name',
-               help="Alternate domain name for authentication (Keystone V3)."
-                    "The same domain applies to user and project",
-               deprecated_for_removal=True),
     cfg.StrOpt('default_domain_id',
                default='default',
                help="ID of the default domain"),
@@ -1250,12 +1218,6 @@ class TempestConfigPrivate(object):
         self.baremetal = _CONF.baremetal
         self.input_scenario = _CONF['input-scenario']
         self.negative = _CONF.negative
-        _CONF.set_default('domain_name',
-                          self.auth.default_credentials_domain_name,
-                          group='identity')
-        _CONF.set_default('alt_domain_name',
-                          self.auth.default_credentials_domain_name,
-                          group='identity')
         logging.tempest_set_log_file('tempest.log')
 
     def __init__(self, parse_conf=True, config_path=None):
