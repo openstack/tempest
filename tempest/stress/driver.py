@@ -106,7 +106,7 @@ def terminate_all_processes(check_interval=20):
         if process['process'].is_alive():
             try:
                 pid = process['process'].pid
-                LOG.warn("Process %d hangs. Send SIGKILL." % pid)
+                LOG.warning("Process %d hangs. Send SIGKILL." % pid)
                 os.kill(pid, signal.SIGKILL)
             except Exception:
                 pass

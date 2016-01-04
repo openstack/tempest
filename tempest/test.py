@@ -375,8 +375,8 @@ class BaseTestCase(testtools.testcase.WithAttributes,
             cls.validation_resources = vresources.create_validation_resources(
                 cls.os, cls.validation_resources)
         else:
-            LOG.warn("Client manager not found, validation resources not"
-                     " created")
+            LOG.warning("Client manager not found, validation resources not"
+                        " created")
 
     @classmethod
     def resource_cleanup(cls):
@@ -391,8 +391,8 @@ class BaseTestCase(testtools.testcase.WithAttributes,
                                                       cls.validation_resources)
                 cls.validation_resources = {}
             else:
-                LOG.warn("Client manager not found, validation resources not"
-                         " deleted")
+                LOG.warning("Client manager not found, validation resources "
+                            "not deleted")
 
     def setUp(self):
         super(BaseTestCase, self).setUp()
