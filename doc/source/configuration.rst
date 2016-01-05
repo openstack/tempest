@@ -14,11 +14,11 @@ Auth/Credentials
 
 Tempest currently has 2 different ways in configuration to provide credentials
 to use when running tempest. One is a traditional set of configuration options
-in the tempest.conf file. These options are in the identity section and let you
-specify a regular user, a global admin user, and an alternate user set of
-credentials. (which consist of a username, password, and project/tenant name)
-These options should be clearly labelled in the sample config file in the
-identity section.
+in the tempest.conf file. These options are in the auth and identity sections
+and let you specify a global admin user, a regular user and an alternate user
+set of credentials. (which consist of a username, password, and project/tenant
+name) These options should be clearly labelled in the sample config file in the
+auth and identity sections.
 
 The other method to provide credentials is using the accounts.yaml file. This
 file is used to specify an arbitrary number of users available to run tests
@@ -129,21 +129,21 @@ When Tempest was refactored to allow for locking test accounts, the original
 non-tenant isolated case was converted to internally work similarly to the
 accounts.yaml file. This mechanism was then called the legacy test accounts
 provider. To use the legacy test accounts provider you can specify the sets of
-credentials in the configuration file like detailed above with following 9
+credentials in the configuration file like detailed above with following 6
 options in the identity section:
 
  #. username
  #. password
  #. tenant_name
- #. admin_username
- #. admin_password
- #. admin_tenant_name
  #. alt_username
  #. alt_password
  #. alt_tenant_name
 
 And in the auth section:
-
+ 
+ #. admin_username
+ #. admin_password
+ #. admin_tenant_name
  #. use_dynamic_credentials = False
  #. comment out 'test_accounts_file' or keep it as empty
 
