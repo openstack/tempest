@@ -52,14 +52,15 @@ class AuthorizationTestJSON(base.BaseV2ComputeTest):
         cls.glance_client = cls.os.image_client
         cls.keypairs_client = cls.os.keypairs_client
         cls.security_client = cls.os.compute_security_groups_client
-        cls.rule_client = cls.os.security_group_rules_client
+        cls.rule_client = cls.os.compute_security_group_rules_client
 
         cls.alt_client = cls.alt_manager.servers_client
         cls.alt_images_client = cls.alt_manager.images_client
         cls.alt_keypairs_client = cls.alt_manager.keypairs_client
         cls.alt_security_client = (
             cls.alt_manager.compute_security_groups_client)
-        cls.alt_rule_client = cls.alt_manager.security_group_rules_client
+        cls.alt_rule_client = (
+            cls.alt_manager.compute_security_group_rules_client)
 
     @classmethod
     def resource_setup(cls):

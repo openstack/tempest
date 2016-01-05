@@ -75,7 +75,8 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
         cls.floating_ip_pools_client = cls.os.floating_ip_pools_client
         cls.floating_ips_client = cls.os.compute_floating_ips_client
         cls.keypairs_client = cls.os.keypairs_client
-        cls.security_group_rules_client = cls.os.security_group_rules_client
+        cls.security_group_rules_client = (
+            cls.os.compute_security_group_rules_client)
         cls.security_groups_client = cls.os.compute_security_groups_client
         cls.quotas_client = cls.os.quotas_client
         cls.quota_classes_client = cls.os.quota_classes_client

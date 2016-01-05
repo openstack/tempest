@@ -24,7 +24,7 @@ LOG = logging.getLogger(__name__)
 
 def create_ssh_security_group(os, add_rule=False):
     security_groups_client = os.compute_security_groups_client
-    security_group_rules_client = os.security_group_rules_client
+    security_group_rules_client = os.compute_security_group_rules_client
     sg_name = data_utils.rand_name('securitygroup-')
     sg_description = data_utils.rand_name('description-')
     security_group = security_groups_client.create_security_group(
