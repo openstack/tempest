@@ -192,9 +192,30 @@ class Manager(manager.Manager):
     }
     default_params_with_timeout_values.update(default_params)
 
-    def __init__(self, credentials, service=None):
-        super(Manager, self).__init__(credentials=credentials)
+    def __init__(self, credentials, service=None, api_microversions=None):
+        """Initialization of Manager class.
 
+        Setup all services clients and make them available for tests cases.
+        :param credentials: type Credentials or TestResources
+        :param service: Service name
+        :param api_microversions: This is dict of services catalog type
+               and their microversion which will be set on respective
+               services clients.
+               {<service catalog type>: request_microversion}
+               Example :
+                {'compute': request_microversion}
+                    - request_microversion will be set on all compute
+                      service clients.
+                OR
+                {'compute': request_microversion,
+                 'volume': request_microversion}
+                    - request_microversion of compute will be set on all
+                      compute service clients.
+                    - request_microversion of volume will be set on all
+                      volume service clients.
+        """
+        super(Manager, self).__init__(credentials=credentials)
+        self.api_microversions = api_microversions or {}
         self._set_compute_clients()
         self._set_database_clients()
         self._set_identity_clients()
@@ -347,6 +368,8 @@ class Manager(manager.Manager):
             **self.default_params_with_timeout_values)
         self.negative_client = negative_rest_client.NegativeRestClient(
             self.auth_provider, service, **self.default_params)
+
+        self._set_api_microversions()
 
     def _set_compute_clients(self):
         params = {
@@ -566,3 +589,15 @@ class Manager(manager.Manager):
         self.account_client = AccountClient(self.auth_provider, **params)
         self.container_client = ContainerClient(self.auth_provider, **params)
         self.object_client = ObjectClient(self.auth_provider, **params)
+
+    def _set_api_microversions(self):
+        service_clients = [x for x in self.__dict__ if x.endswith('_client')]
+        for client in service_clients:
+            client_obj = getattr(self, client)
+            microversion = self.api_microversions.get(client_obj.service)
+            if microversion:
+                if hasattr(client_obj, 'set_api_microversion'):
+                    client_obj.set_api_microversion(microversion)
+                else:
+                    LOG.debug("Need to implement set_api_microversion on %s"
+                              % client)
