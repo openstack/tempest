@@ -53,7 +53,7 @@ class AgentsAdminTestJSON(base.BaseV2ComputeAdminTest):
         if rand_key in kwargs:
             # NOTE: The rand_name is for avoiding agent conflicts.
             # If you try to create an agent with the same hypervisor,
-            # os and architecture as an exising agent, Nova will return
+            # os and architecture as an existing agent, Nova will return
             # an HTTPConflict or HTTPServerError.
             kwargs[rand_key] = data_utils.rand_name(kwargs[rand_key])
         return kwargs
