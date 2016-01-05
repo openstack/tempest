@@ -24,7 +24,7 @@ class JavelinUnitTest(base.TestCase):
 
     def setUp(self):
         super(JavelinUnitTest, self).setUp()
-        javelin.setup_logging()
+        javelin.LOG = mock.MagicMock()
         self.fake_client = mock.MagicMock()
         self.fake_object = mock.MagicMock()
 
