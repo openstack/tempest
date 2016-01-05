@@ -201,7 +201,8 @@ def create_resources(opts, resources):
         if tenant not in existing:
             tenants_admin.create_tenant(tenant)
         else:
-            LOG.warn("Tenant '%s' already exists in this environment" % tenant)
+            LOG.warning("Tenant '%s' already exists in this environment"
+                        % tenant)
     LOG.info('Tenants created')
     for u in resources['users']:
         try:
@@ -220,8 +221,8 @@ def create_resources(opts, resources):
                     enabled=True)
                 break
             else:
-                LOG.warn("User '%s' already exists in this environment. "
-                         "New name generated" % u['name'])
+                LOG.warning("User '%s' already exists in this environment. "
+                            "New name generated" % u['name'])
                 u['name'] = random_user_name(opts.tag, u['prefix'])
 
     LOG.info('Users created')

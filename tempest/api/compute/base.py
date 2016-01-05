@@ -285,8 +285,8 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
             # into the delete_volume method as a convenience to the caller.
             volumes_client.wait_for_resource_deletion(volume_id)
         except lib_exc.NotFound:
-            LOG.warn("Unable to delete volume '%s' since it was not found. "
-                     "Maybe it was already deleted?" % volume_id)
+            LOG.warning("Unable to delete volume '%s' since it was not found. "
+                        "Maybe it was already deleted?" % volume_id)
 
     @classmethod
     def prepare_instance_network(cls):

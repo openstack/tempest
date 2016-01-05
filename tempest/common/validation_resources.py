@@ -73,8 +73,8 @@ def clear_validation_resources(os, validation_data=None):
             try:
                 keypair_client.delete_keypair(keypair_name)
             except lib_exc.NotFound:
-                LOG.warn("Keypair %s is not found when attempting to delete"
-                         % keypair_name)
+                LOG.warning("Keypair %s is not found when attempting to delete"
+                            % keypair_name)
             except Exception as exc:
                 LOG.exception('Exception raised while deleting key %s'
                               % keypair_name)
@@ -87,8 +87,8 @@ def clear_validation_resources(os, validation_data=None):
                 security_group_client.delete_security_group(sec_id)
                 security_group_client.wait_for_resource_deletion(sec_id)
             except lib_exc.NotFound:
-                LOG.warn("Security group %s is not found when attempting to "
-                         " delete" % sec_id)
+                LOG.warning("Security group %s is not found when attempting "
+                            "to delete" % sec_id)
             except lib_exc.Conflict as exc:
                 LOG.exception('Conflict while deleting security '
                               'group %s VM might not be deleted ' % sec_id)
@@ -105,8 +105,8 @@ def clear_validation_resources(os, validation_data=None):
             try:
                 floating_client.delete_floating_ip(fip_id)
             except lib_exc.NotFound:
-                LOG.warn('Floating ip %s not found while attempting to delete'
-                         % fip_id)
+                LOG.warning('Floating ip %s not found while attempting to '
+                            'delete' % fip_id)
             except Exception as exc:
                 LOG.exception('Exception raised while deleting ip %s '
                               % fip_id)

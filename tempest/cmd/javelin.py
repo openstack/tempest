@@ -311,7 +311,8 @@ def create_tenants(tenants):
         if tenant not in existing:
             admin.tenants.create_tenant(tenant)['tenant']
         else:
-            LOG.warn("Tenant '%s' already exists in this environment" % tenant)
+            LOG.warning("Tenant '%s' already exists in this environment"
+                        % tenant)
 
 
 def destroy_tenants(tenants):
@@ -376,8 +377,8 @@ def create_users(users):
         try:
             identity.get_user_by_username(admin.identity,
                                           tenant['id'], u['name'])
-            LOG.warn("User '%s' already exists in this environment"
-                     % u['name'])
+            LOG.warning("User '%s' already exists in this environment"
+                        % u['name'])
         except lib_exc.NotFound:
             admin.identity.create_user(
                 u['name'], u['pass'], tenant['id'],
@@ -1074,7 +1075,7 @@ def destroy_resources():
     destroy_secgroups(RES['secgroups'])
     destroy_users(RES['users'])
     destroy_tenants(RES['tenants'])
-    LOG.warn("Destroy mode incomplete")
+    LOG.warning("Destroy mode incomplete")
 
 
 def get_options():

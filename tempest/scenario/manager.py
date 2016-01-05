@@ -932,8 +932,8 @@ class NetworkScenarioTest(ScenarioTest):
             try:
                 source.ping_host(dest, nic=nic)
             except lib_exc.SSHExecCommandFailed:
-                LOG.warn('Failed to ping IP: %s via a ssh connection from: %s.'
-                         % (dest, source.ssh_client.host))
+                LOG.warning('Failed to ping IP: %s via a ssh connection '
+                            'from: %s.' % (dest, source.ssh_client.host))
                 return not should_succeed
             return should_succeed
 
