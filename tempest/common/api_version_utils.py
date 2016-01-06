@@ -39,7 +39,7 @@ def check_skip_with_microversion(test_min_version, test_max_version,
     if ((min_version > max_version) or
        (config_min_version > config_max_version)):
         msg = ("Min version is greater than Max version. Test Class versions "
-               "[%s - %s]. configration versions [%s - %s]."
+               "[%s - %s]. configuration versions [%s - %s]."
                % (min_version.get_string(),
                   max_version.get_string(),
                   config_min_version.get_string(),
@@ -56,7 +56,7 @@ def check_skip_with_microversion(test_min_version, test_max_version,
     if (max_version < config_min_version or
         config_max_version < min_version):
         msg = ("The microversion range[%s - %s] of this test is out of the "
-               "configration range[%s - %s]."
+               "configuration range[%s - %s]."
                % (min_version.get_string(),
                   max_version.get_string(),
                   config_min_version.get_string(),
