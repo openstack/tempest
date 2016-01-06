@@ -124,7 +124,7 @@ class TestGettingAddress(manager.NetworkScenarioTest):
         fip = self.create_floating_ip(thing=srv)
         ips = self.define_server_ips(srv=srv)
         ssh = self.get_remote_client(
-            server_or_ip=fip.floating_ip_address,
+            ip_address=fip.floating_ip_address,
             username=username)
         return ssh, ips, srv["id"]
 

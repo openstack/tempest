@@ -75,7 +75,7 @@ class TestServerBasicOps(manager.ScenarioTest):
             self.fip = self.create_floating_ip(self.instance)['ip']
             # Check ssh
             self.ssh_client = self.get_remote_client(
-                server_or_ip=self.fip,
+                ip_address=self.fip,
                 username=self.image_utils.ssh_user(self.image_ref),
                 private_key=keypair['private_key'])
 

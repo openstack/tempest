@@ -23,6 +23,7 @@ from tempest.common import compute
 from tempest.common.utils import data_utils
 from tempest.common import waiters
 from tempest import config
+from tempest import exceptions
 import tempest.test
 
 CONF = config.CONF
@@ -356,16 +357,19 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
     def get_server_ip(cls, server):
         """Get the server fixed or floating IP.
 
-        For the floating IP, the address created by the validation resources
-        is returned.
-        For the fixed IP, the server is returned and the current mechanism of
-        address extraction in the remote_client is followed.
+        Based on the configuration we're in, return a correct ip
+        address for validating that a guest is up.
         """
         if CONF.validation.connect_method == 'floating':
-            ip_or_server = cls.validation_resources['floating_ip']['ip']
+            return cls.validation_resources['floating_ip']['ip']
         elif CONF.validation.connect_method == 'fixed':
-            ip_or_server = server
-        return ip_or_server
+            addresses = server['addresses'][CONF.validation.network_for_ssh]
+            for address in addresses:
+                if address['version'] == CONF.validation.ip_version_for_ssh:
+                    return address['addr']
+            raise exceptions.ServerUnreachable()
+        else:
+            raise exceptions.InvalidConfiguration()
 
 
 class BaseV2ComputeAdminTest(BaseV2ComputeTest):
