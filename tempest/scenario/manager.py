@@ -57,8 +57,8 @@ class ScenarioTest(tempest.test.BaseTestCase):
         # Nova security groups client
         cls.compute_security_groups_client = (
             cls.manager.compute_security_groups_client)
-        cls.security_group_rules_client = (
-            cls.manager.security_group_rules_client)
+        cls.compute_security_group_rules_client = (
+            cls.manager.compute_security_group_rules_client)
         cls.servers_client = cls.manager.servers_client
         cls.interface_client = cls.manager.interfaces_client
         # Neutron network client
@@ -289,7 +289,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
 
     def _create_loginable_secgroup_rule(self, secgroup_id=None):
         _client = self.compute_security_groups_client
-        _client_rules = self.security_group_rules_client
+        _client_rules = self.compute_security_group_rules_client
         if secgroup_id is None:
             sgs = _client.list_security_groups()['security_groups']
             for sg in sgs:
