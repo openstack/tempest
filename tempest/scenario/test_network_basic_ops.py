@@ -684,9 +684,9 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         list_hosts = (self.admin_manager.network_client.
                       list_l3_agents_hosting_router)
         schedule_router = (self.admin_manager.network_agents_client.
-                           add_router_to_l3_agent)
+                           create_router_on_l3_agent)
         unschedule_router = (self.admin_manager.network_agents_client.
-                             remove_router_from_l3_agent)
+                             delete_router_from_l3_agent)
 
         agent_list = set(a["id"] for a in
                          self._list_agents(agent_type="L3 agent"))
