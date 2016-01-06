@@ -140,7 +140,7 @@ class TestServicesDecorator(BaseDecoratorsTest):
                 self.fail('%s is not listed in the valid service tag list'
                           % service)
             except KeyError:
-                # NOTE(mtreinish): This condition is to test for a entry in
+                # NOTE(mtreinish): This condition is to test for an entry in
                 # the outer decorator list but not in the service_list dict.
                 # However, because we're looping over the service_list dict
                 # it's unlikely we'll trigger this. So manual review is still
