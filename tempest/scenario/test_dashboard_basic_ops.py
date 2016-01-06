@@ -97,9 +97,13 @@ class TestDashboardBasicOps(manager.ScenarioTest):
         req = request.Request(login_url)
         req.add_header('Content-type', 'application/x-www-form-urlencoded')
         req.add_header('Referer', CONF.dashboard.dashboard_url)
+
+        # Pass the default domain name regardless of the auth version in order
+        # to test the scenario of when horizon is running with keystone v3
         params = {'username': username,
                   'password': password,
                   'region': parser.region,
+                  'domain': CONF.auth.default_credentials_domain_name,
                   'csrfmiddlewaretoken': parser.csrf_token}
         self.opener.open(req, parse.urlencode(params))
 
