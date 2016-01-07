@@ -21,20 +21,20 @@ class SubnetpoolsClient(base.BaseNetworkClient):
         uri = '/subnetpools'
         return self.list_resources(uri, **filters)
 
-    def create_subnetpools(self, **kwargs):
+    def create_subnetpool(self, **kwargs):
         uri = '/subnetpools'
         post_data = {'subnetpool': kwargs}
         return self.create_resource(uri, post_data)
 
-    def show_subnetpools(self, subnetpool_id, **fields):
+    def show_subnetpool(self, subnetpool_id, **fields):
         uri = '/subnetpools/%s' % subnetpool_id
         return self.show_resource(uri, **fields)
 
-    def update_subnetpools(self, subnetpool_id, **kwargs):
+    def update_subnetpool(self, subnetpool_id, **kwargs):
         uri = '/subnetpools/%s' % subnetpool_id
         post_data = {'subnetpool': kwargs}
         return self.update_resource(uri, post_data)
 
-    def delete_subnetpools(self, subnetpool_id):
+    def delete_subnetpool(self, subnetpool_id):
         uri = '/subnetpools/%s' % subnetpool_id
         return self.delete_resource(uri)
