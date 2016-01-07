@@ -16,6 +16,7 @@ import httplib2
 import mock
 from tempest_lib.common import rest_client
 
+from tempest import exceptions
 from tempest.services.compute.json import base as base_compute_client
 from tempest.tests import fake_auth_provider
 from tempest.tests.services.compute import base
@@ -70,3 +71,82 @@ class TestClientWithMicroversionHeader(base.BaseComputeServiceTest):
                                'raw_request') as mock_get:
             mock_get.side_effect = raw_request
             self.client.get('fake_url')
+
+
+class DummyServiceClient1(base_compute_client.BaseComputeClient):
+    schema_versions_info = [
+        {'min': None, 'max': '2.1', 'schema': 'schemav21'},
+        {'min': '2.2', 'max': '2.9', 'schema': 'schemav22'},
+        {'min': '2.10', 'max': None, 'schema': 'schemav210'}]
+
+    def return_selected_schema(self):
+        return self.get_schema(self.schema_versions_info)
+
+
+class TestSchemaVersionsNone(base.BaseComputeServiceTest):
+    api_microversion = None
+    expected_schema = 'schemav21'
+
+    def setUp(self):
+        super(TestSchemaVersionsNone, self).setUp()
+        fake_auth = fake_auth_provider.FakeAuthProvider()
+        self.client = DummyServiceClient1(fake_auth, 'compute', 'regionOne')
+        self.client.api_microversion = self.api_microversion
+
+    def test_schema(self):
+        self.assertEqual(self.expected_schema,
+                         self.client.return_selected_schema())
+
+
+class TestSchemaVersionsV21(TestSchemaVersionsNone):
+    api_microversion = '2.1'
+    expected_schema = 'schemav21'
+
+
+class TestSchemaVersionsV22(TestSchemaVersionsNone):
+    api_microversion = '2.2'
+    expected_schema = 'schemav22'
+
+
+class TestSchemaVersionsV25(TestSchemaVersionsNone):
+    api_microversion = '2.5'
+    expected_schema = 'schemav22'
+
+
+class TestSchemaVersionsV29(TestSchemaVersionsNone):
+    api_microversion = '2.9'
+    expected_schema = 'schemav22'
+
+
+class TestSchemaVersionsV210(TestSchemaVersionsNone):
+    api_microversion = '2.10'
+    expected_schema = 'schemav210'
+
+
+class TestSchemaVersionsLatest(TestSchemaVersionsNone):
+    api_microversion = 'latest'
+    expected_schema = 'schemav210'
+
+
+class DummyServiceClient2(base_compute_client.BaseComputeClient):
+    schema_versions_info = [
+        {'min': None, 'max': '2.1', 'schema': 'schemav21'},
+        {'min': '2.2', 'max': '2.9', 'schema': 'schemav22'}]
+
+    def return_selected_schema(self):
+        return self.get_schema(self.schema_versions_info)
+
+
+class TestSchemaVersionsNotFound(base.BaseComputeServiceTest):
+    api_microversion = '2.10'
+    expected_schema = 'schemav210'
+
+    def setUp(self):
+        super(TestSchemaVersionsNotFound, self).setUp()
+        fake_auth = fake_auth_provider.FakeAuthProvider()
+        self.client = DummyServiceClient2(fake_auth, 'compute', 'regionOne')
+        self.client.api_microversion = self.api_microversion
+
+    def test_schema(self):
+        self.assertRaises(exceptions.JSONSchemaNotFound,
+                          self.client.return_selected_schema)
