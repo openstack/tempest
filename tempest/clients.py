@@ -398,7 +398,8 @@ class Manager(manager.Manager):
         self.server_groups_client = ServerGroupsClient(
             self.auth_provider, **params)
         self.limits_client = LimitsClient(self.auth_provider, **params)
-        self.images_client = ComputeImagesClient(self.auth_provider, **params)
+        self.compute_images_client = ComputeImagesClient(self.auth_provider,
+                                                         **params)
         self.keypairs_client = KeyPairsClient(self.auth_provider, **params)
         self.quotas_client = QuotasClient(self.auth_provider, **params)
         self.quota_classes_client = QuotaClassesClient(self.auth_provider,

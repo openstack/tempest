@@ -25,7 +25,7 @@ class ImagesMetadataTestJSON(base.BaseV2ComputeTest):
     @classmethod
     def setup_clients(cls):
         super(ImagesMetadataTestJSON, cls).setup_clients()
-        cls.client = cls.images_client
+        cls.client = cls.compute_images_client
 
     @test.attr(type=['negative'])
     @test.idempotent_id('94069db2-792f-4fa8-8bd3-2271a6e0c095')

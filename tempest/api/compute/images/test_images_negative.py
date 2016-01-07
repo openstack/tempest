@@ -39,7 +39,7 @@ class ImagesNegativeTestJSON(base.BaseV2ComputeTest):
     @classmethod
     def setup_clients(cls):
         super(ImagesNegativeTestJSON, cls).setup_clients()
-        cls.client = cls.images_client
+        cls.client = cls.compute_images_client
         cls.servers_client = cls.servers_client
 
     @test.attr(type=['negative'])

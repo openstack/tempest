@@ -43,7 +43,7 @@ class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
         super(ListServerFiltersTestJSON, cls).resource_setup()
 
         # Check to see if the alternate image ref actually exists...
-        images_client = cls.images_client
+        images_client = cls.compute_images_client
         images = images_client.list_images()['images']
 
         if cls.image_ref != cls.image_ref_alt and \
@@ -56,13 +56,13 @@ class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
         # Do some sanity checks here. If one of the images does
         # not exist, fail early since the tests won't work...
         try:
-            cls.images_client.show_image(cls.image_ref)
+            cls.compute_images_client.show_image(cls.image_ref)
         except lib_exc.NotFound:
             raise RuntimeError("Image %s (image_ref) was not found!" %
                                cls.image_ref)
 
         try:
-            cls.images_client.show_image(cls.image_ref_alt)
+            cls.compute_images_client.show_image(cls.image_ref_alt)
         except lib_exc.NotFound:
             raise RuntimeError("Image %s (image_ref_alt) was not found!" %
                                cls.image_ref_alt)

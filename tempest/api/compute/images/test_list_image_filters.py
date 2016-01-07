@@ -42,7 +42,7 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
     @classmethod
     def setup_clients(cls):
         super(ListImageFiltersTestJSON, cls).setup_clients()
-        cls.client = cls.images_client
+        cls.client = cls.compute_images_client
         cls.glance_client = cls.os.image_client
 
     @classmethod

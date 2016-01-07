@@ -775,7 +775,7 @@ class FlavorService(BaseService):
 class ImageService(BaseService):
     def __init__(self, manager, **kwargs):
         super(ImageService, self).__init__(kwargs)
-        self.client = manager.images_client
+        self.client = manager.compute_images_client
 
     def list(self):
         client = self.client

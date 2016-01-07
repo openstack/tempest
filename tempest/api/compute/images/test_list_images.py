@@ -32,7 +32,7 @@ class ListImagesTestJSON(base.BaseV2ComputeTest):
     @classmethod
     def setup_clients(cls):
         super(ListImagesTestJSON, cls).setup_clients()
-        cls.client = cls.images_client
+        cls.client = cls.compute_images_client
 
     @test.idempotent_id('490d0898-e12a-463f-aef0-c50156b9f789')
     def test_get_image(self):
