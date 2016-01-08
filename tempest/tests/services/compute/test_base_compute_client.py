@@ -13,64 +13,48 @@
 #    under the License.
 
 import httplib2
-import mock
+from oslotest import mockpatch
 from tempest_lib.common import rest_client
 
 from tempest import exceptions
-from tempest.services.compute.json import base as base_compute_client
+from tempest.services.compute.json import base_compute_client
 from tempest.tests import fake_auth_provider
 from tempest.tests.services.compute import base
 
 
-class TestClientWithoutMicroversionHeader(base.BaseComputeServiceTest):
+class TestMicroversionHeaderCheck(base.BaseComputeServiceTest):
 
     def setUp(self):
-        super(TestClientWithoutMicroversionHeader, self).setUp()
+        super(TestMicroversionHeaderCheck, self).setUp()
         fake_auth = fake_auth_provider.FakeAuthProvider()
         self.client = base_compute_client.BaseComputeClient(
             fake_auth, 'compute', 'regionOne')
+        self.client.set_api_microversion('2.2')
 
-    def test_no_microverion_header(self):
-        header = self.client.get_headers()
-        self.assertNotIn('X-OpenStack-Nova-API-Version', header)
+    def _check_microverion_header_in_response(self, fake_response):
+        def request(*args, **kwargs):
+            return (httplib2.Response(fake_response), {})
 
-    def test_no_microverion_header_in_raw_request(self):
-        def raw_request(*args, **kwargs):
-            self.assertNotIn('X-OpenStack-Nova-API-Version', kwargs['headers'])
-            return (httplib2.Response({'status': 200}), {})
+        self.useFixture(mockpatch.PatchObject(
+            rest_client.RestClient,
+            'request',
+            side_effect=request))
 
-        with mock.patch.object(rest_client.RestClient,
-                               'raw_request') as mock_get:
-            mock_get.side_effect = raw_request
-            self.client.get('fake_url')
+    def test_correct_microverion_in_response(self):
+        fake_response = {self.client.api_microversion_header_name: '2.2'}
+        self._check_microverion_header_in_response(fake_response)
+        self.client.get('fake_url')
 
+    def test_incorrect_microverion_in_response(self):
+        fake_response = {self.client.api_microversion_header_name: '2.3'}
+        self._check_microverion_header_in_response(fake_response)
+        self.assertRaises(exceptions.InvalidHTTPResponseHeader,
+                          self.client.get, 'fake_url')
 
-class TestClientWithMicroversionHeader(base.BaseComputeServiceTest):
-
-    def setUp(self):
-        super(TestClientWithMicroversionHeader, self).setUp()
-        fake_auth = fake_auth_provider.FakeAuthProvider()
-        self.client = base_compute_client.BaseComputeClient(
-            fake_auth, 'compute', 'regionOne')
-        self.client.api_microversion = '2.2'
-
-    def test_microverion_header(self):
-        header = self.client.get_headers()
-        self.assertIn('X-OpenStack-Nova-API-Version', header)
-        self.assertEqual(self.client.api_microversion,
-                         header['X-OpenStack-Nova-API-Version'])
-
-    def test_microverion_header_in_raw_request(self):
-        def raw_request(*args, **kwargs):
-            self.assertIn('X-OpenStack-Nova-API-Version', kwargs['headers'])
-            self.assertEqual(self.client.api_microversion,
-                             kwargs['headers']['X-OpenStack-Nova-API-Version'])
-            return (httplib2.Response({'status': 200}), {})
-
-        with mock.patch.object(rest_client.RestClient,
-                               'raw_request') as mock_get:
-            mock_get.side_effect = raw_request
-            self.client.get('fake_url')
+    def test_no_microverion_header_in_response(self):
+        self._check_microverion_header_in_response({})
+        self.assertRaises(exceptions.InvalidHTTPResponseHeader,
+                          self.client.get, 'fake_url')
 
 
 class DummyServiceClient1(base_compute_client.BaseComputeClient):

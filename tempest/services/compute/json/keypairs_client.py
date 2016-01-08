@@ -18,10 +18,10 @@ from oslo_serialization import jsonutils as json
 from tempest.api_schema.response.compute.v2_1 import keypairs as schemav21
 from tempest.api_schema.response.compute.v2_2 import keypairs as schemav22
 from tempest.common import service_client
-from tempest.services.compute.json import base
+from tempest.services.compute.json import base_compute_client
 
 
-class KeyPairsClient(base.BaseComputeClient):
+class KeyPairsClient(base_compute_client.BaseComputeClient):
 
     schema_versions_info = [{'min': None, 'max': '2.1', 'schema': schemav21},
                             {'min': '2.2', 'max': None, 'schema': schemav22}]
