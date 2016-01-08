@@ -190,8 +190,8 @@ class VolumesV2NegativeTest(base.BaseVolumeTest):
         self.assertRaises(lib_exc.NotFound,
                           self.client.attach_volume,
                           str(uuid.uuid4()),
-                          server['id'],
-                          self.mountpoint)
+                          instance_uuid=server['id'],
+                          mountpoint=self.mountpoint)
 
     @test.attr(type=['negative'])
     @test.idempotent_id('9f9c24e4-011d-46b5-b992-952140ce237a')

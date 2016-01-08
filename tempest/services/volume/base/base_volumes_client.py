@@ -71,23 +71,15 @@ class BaseVolumesClient(service_client.ServiceClient):
         self.expected_success(200, resp.status)
         return service_client.ResponseBody(resp, body)
 
-    def create_volume(self, size=None, **kwargs):
+    def create_volume(self, **kwargs):
         """Creates a new Volume.
 
-        size: Size of volume in GB.
-        Following optional keyword arguments are accepted:
-        display_name: Optional Volume Name(only for V1).
-        name: Optional Volume Name(only for V2).
-        metadata: A dictionary of values to be used as metadata.
-        volume_type: Optional Name of volume_type for the volume
-        snapshot_id: When specified the volume is created from this snapshot
-        imageRef: When specified the volume is created from this image
+        Available params: see http://developer.openstack.org/
+                              api-ref-blockstorage-v2.html#createVolume
         """
-        if size is None:
-            size = self.default_volume_size
-        post_body = {'size': size}
-        post_body.update(kwargs)
-        post_body = json.dumps({'volume': post_body})
+        if 'size' not in kwargs:
+            kwargs['size'] = self.default_volume_size
+        post_body = json.dumps({'volume': kwargs})
         resp, body = self.post('volumes', post_body)
         body = json.loads(body)
         self.expected_success(self.create_resp, resp.status)
@@ -107,26 +99,18 @@ class BaseVolumesClient(service_client.ServiceClient):
         self.expected_success(202, resp.status)
         return service_client.ResponseBody(resp, body)
 
-    def upload_volume(self, volume_id, image_name, disk_format):
+    def upload_volume(self, volume_id, **kwargs):
         """Uploads a volume in Glance."""
-        post_body = {
-            'image_name': image_name,
-            'disk_format': disk_format
-        }
-        post_body = json.dumps({'os-volume_upload_image': post_body})
+        post_body = json.dumps({'os-volume_upload_image': kwargs})
         url = 'volumes/%s/action' % (volume_id)
         resp, body = self.post(url, post_body)
         body = json.loads(body)
         self.expected_success(202, resp.status)
         return service_client.ResponseBody(resp, body)
 
-    def attach_volume(self, volume_id, instance_uuid, mountpoint):
+    def attach_volume(self, volume_id, **kwargs):
         """Attaches a volume to a given instance on a given mountpoint."""
-        post_body = {
-            'instance_uuid': instance_uuid,
-            'mountpoint': mountpoint,
-        }
-        post_body = json.dumps({'os-attach': post_body})
+        post_body = json.dumps({'os-attach': kwargs})
         url = 'volumes/%s/action' % (volume_id)
         resp, body = self.post(url, post_body)
         self.expected_success(202, resp.status)

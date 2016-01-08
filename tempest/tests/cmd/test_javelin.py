@@ -78,8 +78,8 @@ class JavelinUnitTest(base.TestCase):
         mocked_function = self.fake_client.volumes.attach_volume
         mocked_function.assert_called_once_with(
             self.fake_object.volume['id'],
-            self.fake_object.server['id'],
-            self.fake_object['device'])
+            instance_uuid=self.fake_object.server['id'],
+            mountpoint=self.fake_object['device'])
 
 
 class TestCreateResources(JavelinUnitTest):

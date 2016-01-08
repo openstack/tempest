@@ -1023,7 +1023,9 @@ def attach_volumes(volumes):
         server_id = _get_server_by_name(client, volume['server'])['id']
         volume_id = _get_volume_by_name(client, volume['name'])['id']
         device = volume['device']
-        client.volumes.attach_volume(volume_id, server_id, device)
+        client.volumes.attach_volume(volume_id,
+                                     instance_uuid=server_id,
+                                     mountpoint=device)
 
 
 #######################
