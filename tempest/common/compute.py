@@ -48,11 +48,7 @@ def create_test_server(clients, validatable=False, validation_resources=None,
 
     # TODO(jlanoux) add support of wait_until PINGABLE/SSHABLE
 
-    if 'name' in kwargs:
-        name = kwargs.pop('name')
-    else:
-        name = data_utils.rand_name(__name__ + "-instance")
-
+    name = kwargs.pop('name', data_utils.rand_name(__name__ + "-instance"))
     flavor = kwargs.pop('flavor', CONF.compute.flavor_ref)
     image_id = kwargs.pop('image_id', CONF.compute.image_ref)
 
