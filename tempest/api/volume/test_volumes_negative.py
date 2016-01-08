@@ -206,7 +206,7 @@ class VolumesV2NegativeTest(base.BaseVolumeTest):
         # Extend volume with smaller size than original size.
         extend_size = 0
         self.assertRaises(lib_exc.BadRequest, self.client.extend_volume,
-                          self.volume['id'], extend_size)
+                          self.volume['id'], new_size=extend_size)
 
     @test.attr(type=['negative'])
     @test.idempotent_id('5d0b480d-e833-439f-8a5a-96ad2ed6f22f')
@@ -214,7 +214,7 @@ class VolumesV2NegativeTest(base.BaseVolumeTest):
         # Extend volume when size is non number.
         extend_size = 'abc'
         self.assertRaises(lib_exc.BadRequest, self.client.extend_volume,
-                          self.volume['id'], extend_size)
+                          self.volume['id'], new_size=extend_size)
 
     @test.attr(type=['negative'])
     @test.idempotent_id('355218f1-8991-400a-a6bb-971239287d92')
@@ -222,7 +222,7 @@ class VolumesV2NegativeTest(base.BaseVolumeTest):
         # Extend volume with None size.
         extend_size = None
         self.assertRaises(lib_exc.BadRequest, self.client.extend_volume,
-                          self.volume['id'], extend_size)
+                          self.volume['id'], new_size=extend_size)
 
     @test.attr(type=['negative'])
     @test.idempotent_id('8f05a943-013c-4063-ac71-7baf561e82eb')
@@ -230,7 +230,7 @@ class VolumesV2NegativeTest(base.BaseVolumeTest):
         # Extend volume size when volume is nonexistent.
         extend_size = int(self.volume['size']) + 1
         self.assertRaises(lib_exc.NotFound, self.client.extend_volume,
-                          str(uuid.uuid4()), extend_size)
+                          str(uuid.uuid4()), new_size=extend_size)
 
     @test.attr(type=['negative'])
     @test.idempotent_id('aff8ba64-6d6f-4f2e-bc33-41a08ee9f115')
@@ -238,7 +238,7 @@ class VolumesV2NegativeTest(base.BaseVolumeTest):
         # Extend volume size when passing volume id is None.
         extend_size = int(self.volume['size']) + 1
         self.assertRaises(lib_exc.NotFound, self.client.extend_volume,
-                          None, extend_size)
+                          None, new_size=extend_size)
 
     @test.attr(type=['negative'])
     @test.idempotent_id('ac6084c0-0546-45f9-b284-38a367e0e0e2')

@@ -47,7 +47,8 @@ class VolumesV2TransfersTest(base.BaseVolumeTest):
         self.addCleanup(self._delete_volume, volume['id'])
 
         # Create a volume transfer
-        transfer = self.client.create_volume_transfer(volume['id'])['transfer']
+        transfer = self.client.create_volume_transfer(
+            volume_id=volume['id'])['transfer']
         transfer_id = transfer['id']
         auth_key = transfer['auth_key']
         self.client.wait_for_volume_status(volume['id'],
@@ -63,8 +64,8 @@ class VolumesV2TransfersTest(base.BaseVolumeTest):
         self.assertThat(len(body), matchers.GreaterThan(0))
 
         # Accept a volume transfer by alt_tenant
-        body = self.alt_client.accept_volume_transfer(transfer_id,
-                                                      auth_key)['transfer']
+        body = self.alt_client.accept_volume_transfer(
+            transfer_id, auth_key=auth_key)['transfer']
         self.alt_client.wait_for_volume_status(volume['id'], 'available')
 
     @test.idempotent_id('ab526943-b725-4c07-b875-8e8ef87a2c30')
@@ -74,7 +75,8 @@ class VolumesV2TransfersTest(base.BaseVolumeTest):
         self.addCleanup(self._delete_volume, volume['id'])
 
         # Create a volume transfer
-        body = self.client.create_volume_transfer(volume['id'])['transfer']
+        body = self.client.create_volume_transfer(
+            volume_id=volume['id'])['transfer']
         transfer_id = body['id']
         self.client.wait_for_volume_status(volume['id'],
                                            'awaiting-transfer')

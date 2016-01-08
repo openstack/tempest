@@ -74,7 +74,8 @@ class VolumesV2ActionsTest(base.BaseVolumeTest):
     def test_volume_bootable(self):
         # Verify that a volume bootable flag is retrieved
         for bool_bootable in [True, False]:
-            self.client.set_bootable_volume(self.volume['id'], bool_bootable)
+            self.client.set_bootable_volume(self.volume['id'],
+                                            bootable=bool_bootable)
             fetched_volume = self.client.show_volume(
                 self.volume['id'])['volume']
             # Get Volume information
@@ -142,7 +143,7 @@ class VolumesV2ActionsTest(base.BaseVolumeTest):
         # Update volume readonly true
         readonly = True
         self.client.update_volume_readonly(self.volume['id'],
-                                           readonly)
+                                           readonly=readonly)
         # Get Volume information
         fetched_volume = self.client.show_volume(self.volume['id'])['volume']
         bool_flag = self._is_true(fetched_volume['metadata']['readonly'])
@@ -150,7 +151,8 @@ class VolumesV2ActionsTest(base.BaseVolumeTest):
 
         # Update volume readonly false
         readonly = False
-        self.client.update_volume_readonly(self.volume['id'], readonly)
+        self.client.update_volume_readonly(self.volume['id'],
+                                           readonly=readonly)
 
         # Get Volume information
         fetched_volume = self.client.show_volume(self.volume['id'])['volume']
