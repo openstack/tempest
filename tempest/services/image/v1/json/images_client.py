@@ -147,50 +147,29 @@ class ImagesClient(service_client.ServiceClient):
             self._http = self._get_http()
         return self._http
 
-    def create_image(self, name, container_format, disk_format, **kwargs):
-        params = {
-            "name": name,
-            "container_format": container_format,
-            "disk_format": disk_format,
-        }
-
+    def create_image(self, **kwargs):
         headers = {}
+        data = kwargs.pop('data', None)
+        headers.update(self._image_meta_to_headers(kwargs))
 
-        for option in ['is_public', 'location', 'properties',
-                       'copy_from', 'min_ram']:
-            if option in kwargs:
-                params[option] = kwargs.get(option)
-
-        headers.update(self._image_meta_to_headers(params))
-
-        if 'data' in kwargs:
-            return self._create_with_data(headers, kwargs.get('data'))
+        if data is not None:
+            return self._create_with_data(headers, data)
 
         resp, body = self.post('v1/images', None, headers)
         self.expected_success(201, resp.status)
         body = json.loads(body)
         return service_client.ResponseBody(resp, body)
 
-    def update_image(self, image_id, name=None, container_format=None,
-                     data=None, properties=None):
-        params = {}
+    def update_image(self, image_id, **kwargs):
         headers = {}
-        if name is not None:
-            params['name'] = name
-
-        if container_format is not None:
-            params['container_format'] = container_format
-
-        if properties is not None:
-            params['properties'] = properties
-
-        headers.update(self._image_meta_to_headers(params))
+        data = kwargs.pop('data', None)
+        headers.update(self._image_meta_to_headers(kwargs))
 
         if data is not None:
             return self._update_with_data(image_id, headers, data)
 
         url = 'v1/images/%s' % image_id
-        resp, body = self.put(url, data, headers)
+        resp, body = self.put(url, None, headers)
         self.expected_success(200, resp.status)
         body = json.loads(body)
         return service_client.ResponseBody(resp, body)
