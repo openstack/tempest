@@ -43,7 +43,6 @@ class UCSMTestMixin(object):
     ucsm_password = CONF.ucsm.ucsm_password
     ucsm_host_dict = None
     network_node_list = CONF.ucsm.network_node_list
-    network_node_host = CONF.ucsm.network_node_list[0]
     eth_names = CONF.ucsm.eth_names
     virtual_functions = CONF.ucsm.virtual_functions_amount
 
@@ -63,6 +62,7 @@ class UCSMTestMixin(object):
 
     @classmethod
     def ucsm_resource_setup(cls):
+        cls.network_node_host = CONF.ucsm.network_node_list[0]
         cls.ucsm = utils.UCSMClient(cls.ucsm_ip, cls.ucsm_username,
                                     cls.ucsm_password)
         cls.ucsm_host_dict = \
