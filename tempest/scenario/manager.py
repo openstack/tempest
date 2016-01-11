@@ -49,8 +49,9 @@ class ScenarioTest(tempest.test.BaseTestCase):
         cls.flavors_client = cls.manager.flavors_client
         cls.compute_floating_ips_client = (
             cls.manager.compute_floating_ips_client)
-        # Glance image client v1
-        cls.image_client = cls.manager.image_client
+        if CONF.service_available.glance:
+            # Glance image client v1
+            cls.image_client = cls.manager.image_client
         # Compute image client
         cls.compute_images_client = cls.manager.compute_images_client
         cls.keypairs_client = cls.manager.keypairs_client
