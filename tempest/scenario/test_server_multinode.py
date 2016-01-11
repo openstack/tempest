@@ -31,6 +31,14 @@ class TestServerMultinode(manager.ScenarioTest):
     credentials = ['primary', 'admin']
 
     @classmethod
+    def skip_checks(cls):
+        super(TestServerMultinode, cls).skip_checks()
+
+        if CONF.compute.min_compute_nodes < 2:
+            raise cls.skipException(
+                "Less than 2 compute nodes, skipping multinode tests.")
+
+    @classmethod
     def setup_clients(cls):
         super(TestServerMultinode, cls).setup_clients()
         # Use admin client by default
