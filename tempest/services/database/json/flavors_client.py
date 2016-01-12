@@ -14,7 +14,7 @@
 #    under the License.
 
 from oslo_serialization import jsonutils as json
-import urllib
+from six.moves import urllib
 
 from tempest.common import service_client
 
@@ -24,7 +24,7 @@ class DatabaseFlavorsClient(service_client.ServiceClient):
     def list_db_flavors(self, params=None):
         url = 'flavors'
         if params:
-            url += '?%s' % urllib.urlencode(params)
+            url += '?%s' % urllib.parse.urlencode(params)
 
         resp, body = self.get(url)
         self.expected_success(200, resp.status)
