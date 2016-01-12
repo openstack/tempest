@@ -122,6 +122,7 @@ from tempest_lib.services.compute import floating_ips_client
 from tempest_lib.services.compute import security_group_rules_client
 from tempest_lib.services.compute import security_groups_client
 from tempest_lib.services.compute import servers_client
+from tempest_lib.services.network import subnets_client
 import yaml
 
 from tempest.common import identity
@@ -132,7 +133,6 @@ from tempest.services.identity.v2.json import roles_client
 from tempest.services.identity.v2.json import tenants_client
 from tempest.services.image.v2.json import images_client
 from tempest.services.network.json import network_client
-from tempest.services.network.json import subnets_client
 from tempest.services.object_storage import container_client
 from tempest.services.object_storage import object_client
 from tempest.services.telemetry.json import alarming_client

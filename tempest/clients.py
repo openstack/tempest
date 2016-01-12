@@ -71,6 +71,13 @@ from tempest_lib.services.compute.volumes_client import \
 from tempest_lib.services.identity.v2.token_client import TokenClient
 from tempest_lib.services.identity.v3.token_client import V3TokenClient
 from tempest_lib.services.network.floating_ips_client import FloatingIPsClient
+from tempest_lib.services.network.metering_label_rules_client import \
+    MeteringLabelRulesClient
+from tempest_lib.services.network.metering_labels_client import \
+    MeteringLabelsClient
+from tempest_lib.services.network.networks_client import NetworksClient
+from tempest_lib.services.network.ports_client import PortsClient
+from tempest_lib.services.network.subnets_client import SubnetsClient
 
 from tempest.common import negative_rest_client
 from tempest import config
@@ -112,19 +119,12 @@ from tempest.services.messaging.json.messaging_client import \
     MessagingClient
 from tempest.services.network.json.agents_client import AgentsClient \
     as NetworkAgentsClient
-from tempest.services.network.json.metering_label_rules_client import \
-    MeteringLabelRulesClient
-from tempest.services.network.json.metering_labels_client import \
-    MeteringLabelsClient
 from tempest.services.network.json.network_client import NetworkClient
-from tempest.services.network.json.networks_client import NetworksClient
-from tempest.services.network.json.ports_client import PortsClient
 from tempest.services.network.json.quotas_client import QuotasClient \
     as NetworkQuotasClient
 from tempest.services.network.json.security_groups_client import \
     SecurityGroupsClient
 from tempest.services.network.json.subnetpools_client import SubnetpoolsClient
-from tempest.services.network.json.subnets_client import SubnetsClient
 from tempest.services.object_storage.account_client import AccountClient
 from tempest.services.object_storage.container_client import ContainerClient
 from tempest.services.object_storage.object_client import ObjectClient

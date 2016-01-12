@@ -90,6 +90,8 @@ from oslo_log import log as logging
 import tempest_lib.auth
 from tempest_lib.common.utils import data_utils
 import tempest_lib.exceptions
+from tempest_lib.services.network import networks_client
+from tempest_lib.services.network import subnets_client
 import yaml
 
 from tempest.common import identity
@@ -99,8 +101,6 @@ from tempest.services.identity.v2.json import identity_client
 from tempest.services.identity.v2.json import roles_client
 from tempest.services.identity.v2.json import tenants_client
 from tempest.services.network.json import network_client
-from tempest.services.network.json import networks_client
-from tempest.services.network.json import subnets_client
 
 LOG = None
 CONF = config.CONF
