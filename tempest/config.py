@@ -785,9 +785,10 @@ VolumeFeaturesGroup = [
                 default=True,
                 help="Is the v2 volume API enabled"),
     cfg.BoolOpt('bootable',
-                default=False,
+                default=True,
                 help='Update bootable status of a volume '
-                     'Not implemented on icehouse ')
+                     'Not implemented on icehouse ',
+                deprecated_for_removal=True)
 ]
 
 
