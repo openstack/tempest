@@ -1131,6 +1131,8 @@ def setup_logging():
 
 
 def main():
+    print("Javelin is deprecated and will be removed from Tempest in the "
+          "future.")
     global RES
     get_options()
     setup_logging()
