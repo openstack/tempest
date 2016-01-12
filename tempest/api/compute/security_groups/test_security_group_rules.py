@@ -158,7 +158,9 @@ class SecurityGroupRulesTestJSON(base.BaseSecurityGroupsTest):
             to_port=to_port2)['security_group_rule']
         rule2_id = rule['id']
         # Delete the Security Group rule2 at the end of this method
-        self.addCleanup(self.client.delete_security_group_rule, rule2_id)
+        self.addCleanup(
+            self.security_group_rules_client.delete_security_group_rule,
+            rule2_id)
 
         # Get rules of the created Security Group
         rules = self.security_groups_client.show_security_group(

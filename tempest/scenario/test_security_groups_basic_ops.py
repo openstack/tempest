@@ -191,9 +191,11 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
             port_range_max=22,
             direction='ingress',
         )
-        self._create_security_group_rule(secgroup=access_sg,
-                                         client=tenant.manager.network_client,
-                                         **ssh_rule)
+        sec_group_rules_client = tenant.manager.security_group_rules_client
+        self._create_security_group_rule(
+            secgroup=access_sg,
+            sec_group_rules_client=sec_group_rules_client,
+            **ssh_rule)
 
     def _verify_network_details(self, tenant):
         # Checks that we see the newly created network/subnet/router via
@@ -371,9 +373,11 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
             protocol='icmp',
             direction='ingress'
         )
+        sec_group_rules_client = (
+            dest_tenant.manager.security_group_rules_client)
         self._create_security_group_rule(
             secgroup=dest_tenant.security_groups['default'],
-            client=dest_tenant.manager.network_client,
+            sec_group_rules_client=sec_group_rules_client,
             **ruleset
         )
         access_point_ssh = self._connect_to_access_point(source_tenant)
@@ -385,9 +389,11 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
         self._test_cross_tenant_block(dest_tenant, source_tenant)
 
         # allow reverse traffic and check
+        sec_group_rules_client = (
+            source_tenant.manager.security_group_rules_client)
         self._create_security_group_rule(
             secgroup=source_tenant.security_groups['default'],
-            client=source_tenant.manager.network_client,
+            sec_group_rules_client=sec_group_rules_client,
             **ruleset
         )
 
@@ -468,9 +474,10 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
             protocol='icmp',
             direction='ingress',
         )
+        sec_group_rules_client = new_tenant.manager.security_group_rules_client
         self._create_security_group_rule(
             secgroup=new_sg,
-            client=new_tenant.manager.network_client,
+            sec_group_rules_client=sec_group_rules_client,
             **icmp_rule)
         new_tenant.security_groups.update(new_sg=new_sg)
 

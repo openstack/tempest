@@ -35,23 +35,6 @@ class NetworkClient(base.BaseNetworkClient):
     quotas
     """
 
-    def create_security_group_rule(self, **kwargs):
-        uri = '/security-group-rules'
-        post_data = {'security_group_rule': kwargs}
-        return self.create_resource(uri, post_data)
-
-    def show_security_group_rule(self, security_group_rule_id, **fields):
-        uri = '/security-group-rules/%s' % security_group_rule_id
-        return self.show_resource(uri, **fields)
-
-    def delete_security_group_rule(self, security_group_rule_id):
-        uri = '/security-group-rules/%s' % security_group_rule_id
-        return self.delete_resource(uri)
-
-    def list_security_group_rules(self, **filters):
-        uri = '/security-group-rules'
-        return self.list_resources(uri, **filters)
-
     def show_extension(self, ext_alias, **fields):
         uri = '/extensions/%s' % ext_alias
         return self.show_resource(uri, **fields)

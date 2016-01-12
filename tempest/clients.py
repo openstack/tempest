@@ -123,6 +123,8 @@ from tempest.services.network.json.networks_client import NetworksClient
 from tempest.services.network.json.ports_client import PortsClient
 from tempest.services.network.json.quotas_client import QuotasClient \
     as NetworkQuotasClient
+from tempest.services.network.json.security_group_rules_client import \
+    SecurityGroupRulesClient
 from tempest.services.network.json.security_groups_client import \
     SecurityGroupsClient
 from tempest.services.network.json.subnetpools_client import SubnetpoolsClient
@@ -303,6 +305,14 @@ class Manager(manager.Manager):
             build_timeout=CONF.network.build_timeout,
             **self.default_params)
         self.metering_label_rules_client = MeteringLabelRulesClient(
+            self.auth_provider,
+            CONF.network.catalog_type,
+            CONF.network.region or CONF.identity.region,
+            endpoint_type=CONF.network.endpoint_type,
+            build_interval=CONF.network.build_interval,
+            build_timeout=CONF.network.build_timeout,
+            **self.default_params)
+        self.security_group_rules_client = SecurityGroupRulesClient(
             self.auth_provider,
             CONF.network.catalog_type,
             CONF.network.region or CONF.identity.region,
