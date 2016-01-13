@@ -13,7 +13,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from oslo_log import log as logging
 from tempest_lib import exceptions as lib_exc
 
 from tempest.common import fixed_network
@@ -24,9 +23,6 @@ from tempest.scenario import manager
 from tempest import test
 
 CONF = config.CONF
-
-
-LOG = logging.getLogger(__name__)
 
 
 class TestLargeOpsScenario(manager.ScenarioTest):

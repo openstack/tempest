@@ -14,7 +14,6 @@
 #    under the License.
 import functools
 
-from oslo_log import log as logging
 import six
 
 from tempest import config
@@ -23,7 +22,6 @@ from tempest import test
 
 
 CONF = config.CONF
-LOG = logging.getLogger(__name__)
 
 
 class TestGettingAddress(manager.NetworkScenarioTest):

@@ -12,7 +12,6 @@
 #    limitations under the License.
 
 from oslo_concurrency import lockutils
-from oslo_log import log as logging
 from tempest_lib import auth
 
 from tempest import clients
@@ -23,7 +22,6 @@ from tempest import config
 from tempest import exceptions
 
 CONF = config.CONF
-LOG = logging.getLogger(__name__)
 
 
 """This module provides factories of credential and credential providers

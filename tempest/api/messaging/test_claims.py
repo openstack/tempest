@@ -13,8 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import logging
-
 from six.moves.urllib import parse as urlparse
 from tempest_lib import decorators
 
@@ -24,7 +22,6 @@ from tempest import config
 from tempest import test
 
 
-LOG = logging.getLogger(__name__)
 CONF = config.CONF
 
 

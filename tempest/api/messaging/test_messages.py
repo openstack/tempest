@@ -13,7 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import logging
 
 from tempest.api.messaging import base
 from tempest.common.utils import data_utils
@@ -21,7 +20,6 @@ from tempest import config
 from tempest import test
 
 
-LOG = logging.getLogger(__name__)
 CONF = config.CONF
 
 

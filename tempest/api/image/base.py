@@ -12,7 +12,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from oslo_log import log as logging
 from six import moves
 from tempest_lib import exceptions as lib_exc
 
@@ -21,8 +20,6 @@ from tempest import config
 import tempest.test
 
 CONF = config.CONF
-
-LOG = logging.getLogger(__name__)
 
 
 class BaseImageTest(tempest.test.BaseTestCase):

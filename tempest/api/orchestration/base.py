@@ -12,7 +12,6 @@
 
 import os.path
 
-from oslo_log import log as logging
 from tempest_lib import exceptions as lib_exc
 import yaml
 
@@ -21,8 +20,6 @@ from tempest import config
 import tempest.test
 
 CONF = config.CONF
-
-LOG = logging.getLogger(__name__)
 
 
 class BaseOrchestrationTest(tempest.test.BaseTestCase):
