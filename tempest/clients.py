@@ -94,6 +94,8 @@ from tempest.services.database.json.limits_client import \
     DatabaseLimitsClient
 from tempest.services.database.json.versions_client import \
     DatabaseVersionsClient
+from tempest.services.identity.v2.json.endpoints_client import \
+    EndpointsClient as EndpointsV2Client
 from tempest.services.identity.v2.json.identity_client import \
     IdentityClient
 from tempest.services.identity.v2.json.roles_client import \
@@ -492,6 +494,8 @@ class Manager(manager.Manager):
         params_v2_admin = params.copy()
         params_v2_admin['endpoint_type'] = CONF.identity.v2_admin_endpoint_type
         # Client uses admin endpoint type of Keystone API v2
+        self.endpoints_v2_client = EndpointsV2Client(self.auth_provider,
+                                                     **params_v2_admin)
         self.identity_client = IdentityClient(self.auth_provider,
                                               **params_v2_admin)
         self.tenants_client = TenantsClient(self.auth_provider,
