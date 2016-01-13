@@ -18,7 +18,7 @@
 import gzip
 import pprint
 import re
-import StringIO
+import six
 import sys
 import urllib2
 
@@ -68,7 +68,7 @@ def hunt_for_stacktrace(url):
     req = urllib2.Request(url)
     req.add_header('Accept-Encoding', 'gzip')
     page = urllib2.urlopen(req)
-    buf = StringIO.StringIO(page.read())
+    buf = six.StringIO(page.read())
     f = gzip.GzipFile(fileobj=buf)
     content = f.read()
 
