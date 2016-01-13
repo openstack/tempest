@@ -69,11 +69,11 @@ def cleanup():
         except Exception:
             pass
 
-    users = admin_manager.identity_client.list_users()['users']
+    users = admin_manager.users_client.list_users()['users']
     LOG.info("Cleanup::remove %s users" % len(users))
     for user in users:
         if user['name'].startswith("stress_user"):
-            admin_manager.identity_client.delete_user(user['id'])
+            admin_manager.users_client.delete_user(user['id'])
     tenants = admin_manager.tenants_client.list_tenants()['tenants']
     LOG.info("Cleanup::remove %s tenants" % len(tenants))
     for tenant in tenants:

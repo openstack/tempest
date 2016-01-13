@@ -28,6 +28,8 @@ from tempest.services.identity.v2.json import roles_client as \
     json_roles_client
 from tempest.services.identity.v2.json import tenants_client as \
     json_tenants_client
+from tempest.services.identity.v2.json import users_client as \
+    json_users_client
 from tempest.services.network.json import network_client as json_network_client
 from tempest.tests import base
 from tempest.tests import fake_config
@@ -70,7 +72,7 @@ class TestDynamicCredentialProvider(base.TestCase):
 
     def _mock_user_create(self, id, name):
         user_fix = self.useFixture(mockpatch.PatchObject(
-            json_iden_client.IdentityClient,
+            json_users_client.UsersClient,
             'create_user',
             return_value=(service_client.ResponseBody
                           (200, {'user': {'id': id, 'name': name}}))))
@@ -125,7 +127,7 @@ class TestDynamicCredentialProvider(base.TestCase):
 
     def _mock_list_ec2_credentials(self, user_id, tenant_id):
         ec2_creds_fix = self.useFixture(mockpatch.PatchObject(
-            json_iden_client.IdentityClient,
+            json_users_client.UsersClient,
             'list_user_ec2_credentials',
             return_value=(service_client.ResponseBody
                           (200, {'credentials': [{
@@ -241,8 +243,8 @@ class TestDynamicCredentialProvider(base.TestCase):
         self._mock_list_roles('123456', 'admin')
         creds.get_admin_creds()
         user_mock = self.patch(
-            'tempest.services.identity.v2.json.identity_client.'
-            'IdentityClient.delete_user')
+            'tempest.services.identity.v2.json.users_client.'
+            'UsersClient.delete_user')
         tenant_mock = self.patch(
             'tempest.services.identity.v2.json.tenants_client.'
             'TenantsClient.delete_tenant')
@@ -373,8 +375,8 @@ class TestDynamicCredentialProvider(base.TestCase):
         self._mock_router_create('123456', 'fake_admin_router')
         self._mock_list_roles('123456', 'admin')
         creds.get_admin_creds()
-        self.patch('tempest.services.identity.v2.json.identity_client.'
-                   'IdentityClient.delete_user')
+        self.patch('tempest.services.identity.v2.json.users_client.'
+                   'UsersClient.delete_user')
         self.patch('tempest.services.identity.v2.json.tenants_client.'
                    'TenantsClient.delete_tenant')
         net = mock.patch.object(creds.networks_admin_client,

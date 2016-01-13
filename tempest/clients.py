@@ -93,6 +93,8 @@ from tempest.services.identity.v2.json.roles_client import \
     RolesClient
 from tempest.services.identity.v2.json.tenants_client import \
     TenantsClient
+from tempest.services.identity.v2.json.users_client import \
+    UsersClient
 from tempest.services.identity.v3.json.credentials_client import \
     CredentialsClient as CredentialsV3Client
 from tempest.services.identity.v3.json.endpoints_client import \
@@ -484,6 +486,8 @@ class Manager(manager.Manager):
                                             **params_v2_admin)
         self.roles_client = RolesClient(self.auth_provider,
                                         **params_v2_admin)
+        self.users_client = UsersClient(self.auth_provider,
+                                        **params_v2_admin)
         params_v2_public = params.copy()
         params_v2_public['endpoint_type'] = (
             CONF.identity.v2_public_endpoint_type)
@@ -493,6 +497,8 @@ class Manager(manager.Manager):
         self.tenants_public_client = TenantsClient(self.auth_provider,
                                                    **params_v2_public)
         self.roles_public_client = RolesClient(self.auth_provider,
+                                               **params_v2_public)
+        self.users_public_client = UsersClient(self.auth_provider,
                                                **params_v2_public)
         params_v3 = params.copy()
         params_v3['endpoint_type'] = CONF.identity.v3_endpoint_type

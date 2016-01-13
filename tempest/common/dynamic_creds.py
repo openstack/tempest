@@ -59,6 +59,7 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
         self.default_admin_creds = admin_creds
         (self.identity_admin_client, self.tenants_admin_client,
          self.roles_admin_client,
+         self.users_admin_client,
          self.network_admin_client,
          self.networks_admin_client,
          self.subnets_admin_client,
@@ -75,6 +76,7 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
             self.identity_admin_client,
             self.tenants_admin_client,
             self.roles_admin_client,
+            self.users_admin_client,
             self.creds_domain_name)
 
     def _get_admin_clients(self):
@@ -87,10 +89,11 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
         os = clients.Manager(self.default_admin_creds)
         if self.identity_version == 'v2':
             return (os.identity_client, os.tenants_client, os.roles_client,
-                    os.network_client, os.networks_client, os.subnets_client,
-                    os.ports_client, os.security_groups_client)
+                    os.users_client, os.network_client, os.networks_client,
+                    os.subnets_client, os.ports_client,
+                    os.security_groups_client)
         else:
-            return (os.identity_v3_client, None, None, os.network_client,
+            return (os.identity_v3_client, None, None, None, os.network_client,
                     os.networks_client, os.subnets_client, os.ports_client,
                     os.security_groups_client)
 

@@ -815,11 +815,14 @@ class IdentityService(BaseService):
         self.client = manager.identity_client
 
 
-class UserService(IdentityService):
+class UserService(BaseService):
+
+    def __init__(self, manager, **kwargs):
+        super(UserService, self).__init__(kwargs)
+        self.client = manager.users_client
 
     def list(self):
-        client = self.client
-        users = client.list_users()['users']
+        users = self.client.list_users()['users']
 
         if not self.is_save_state:
             users = [user for user in users if user['id']
@@ -837,11 +840,10 @@ class UserService(IdentityService):
         return users
 
     def delete(self):
-        client = self.client
         users = self.list()
         for user in users:
             try:
-                client.delete_user(user['id'])
+                self.client.delete_user(user['id'])
             except Exception:
                 LOG.exception("Delete User exception.")
 

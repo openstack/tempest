@@ -98,6 +98,7 @@ from tempest import exceptions as exc
 from tempest.services.identity.v2.json import identity_client
 from tempest.services.identity.v2.json import roles_client
 from tempest.services.identity.v2.json import tenants_client
+from tempest.services.identity.v2.json import users_client
 from tempest.services.network.json import network_client
 from tempest.services.network.json import networks_client
 from tempest.services.network.json import subnets_client
@@ -154,6 +155,13 @@ def get_admin_clients(opts):
         endpoint_type='adminURL',
         **params
     )
+    users_admin = users_client.UsersClient(
+        _auth,
+        CONF.identity.catalog_type,
+        CONF.identity.region,
+        endpoint_type='adminURL',
+        **params
+    )
     network_admin = None
     networks_admin = None
     subnets_admin = None
@@ -179,13 +187,14 @@ def get_admin_clients(opts):
             CONF.network.region or CONF.identity.region,
             endpoint_type='adminURL',
             **params)
-    return (identity_admin, tenants_admin, roles_admin, neutron_iso_networks,
-            network_admin, networks_admin, subnets_admin)
+    return (identity_admin, tenants_admin, roles_admin, users_admin,
+            neutron_iso_networks, network_admin, networks_admin, subnets_admin)
 
 
 def create_resources(opts, resources):
-    (identity_admin, tenants_admin, roles_admin, neutron_iso_networks,
-     network_admin, networks_admin, subnets_admin) = get_admin_clients(opts)
+    (identity_admin, tenants_admin, roles_admin, users_admin,
+     neutron_iso_networks, network_admin, networks_admin,
+     subnets_admin) = get_admin_clients(opts)
     roles = roles_admin.list_roles()['roles']
     for u in resources['users']:
         u['role_ids'] = []
@@ -215,7 +224,7 @@ def create_resources(opts, resources):
                 identity.get_user_by_username(tenants_admin,
                                               tenant['id'], u['name'])
             except tempest_lib.exceptions.NotFound:
-                identity_admin.create_user(
+                users_admin.create_user(
                     u['name'], u['pass'], tenant['id'],
                     "%s@%s" % (u['name'], tenant['id']),
                     enabled=True)

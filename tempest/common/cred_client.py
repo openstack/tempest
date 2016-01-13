@@ -32,16 +32,17 @@ class CredsClient(object):
     """
 
     def __init__(self, identity_client, projects_client=None,
-                 roles_client=None):
+                 roles_client=None, users_client=None):
         # The client implies version and credentials
         self.identity_client = identity_client
         # this is temporary until the v3 project client is
         # separated, then projects_client will become mandatory
         self.projects_client = projects_client or identity_client
         self.roles_client = roles_client or identity_client
+        self.users_client = users_client or identity_client
 
     def create_user(self, username, password, project, email):
-        user = self.identity_client.create_user(
+        user = self.users_client.create_user(
             username, password, project['id'], email)
         if 'user' in user:
             user = user['user']
@@ -87,7 +88,7 @@ class CredsClient(object):
         pass
 
     def delete_user(self, user_id):
-        self.identity_client.delete_user(user_id)
+        self.users_client.delete_user(user_id)
 
     def _list_roles(self):
         roles = self.roles_client.list_roles()['roles']
@@ -96,10 +97,12 @@ class CredsClient(object):
 
 class V2CredsClient(CredsClient):
 
-    def __init__(self, identity_client, projects_client, roles_client):
+    def __init__(self, identity_client, projects_client, roles_client,
+                 users_client):
         super(V2CredsClient, self).__init__(identity_client,
                                             projects_client,
-                                            roles_client)
+                                            roles_client,
+                                            users_client)
 
     def create_project(self, name, description):
         tenant = self.projects_client.create_tenant(
@@ -165,8 +168,10 @@ class V3CredsClient(CredsClient):
 def get_creds_client(identity_client,
                      projects_client=None,
                      roles_client=None,
+                     users_client=None,
                      project_domain_name=None):
     if isinstance(identity_client, v2_identity.IdentityClient):
-        return V2CredsClient(identity_client, projects_client, roles_client)
+        return V2CredsClient(identity_client, projects_client, roles_client,
+                             users_client)
     else:
         return V3CredsClient(identity_client, project_domain_name)
