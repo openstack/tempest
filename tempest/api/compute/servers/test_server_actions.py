@@ -172,11 +172,16 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         self.assertEqual(new_name, server['name'])
 
         if CONF.validation.run_validation:
-            # TODO(jlanoux) add authentication with the provided password
+            # Authentication is attempted in the following order of priority:
+            # 1.The key passed in, if one was passed in.
+            # 2.Any key we can find through an SSH agent (if allowed).
+            # 3.Any "id_rsa", "id_dsa" or "id_ecdsa" key discoverable in
+            #   ~/.ssh/ (if allowed).
+            # 4.Plain username/password auth, if a password was given.
             linux_client = remote_client.RemoteClient(
                 self.get_server_ip(rebuilt_server),
                 self.ssh_user,
-                self.password,
+                password,
                 self.validation_resources['keypair']['private_key'])
             linux_client.validate_authentication()
 
