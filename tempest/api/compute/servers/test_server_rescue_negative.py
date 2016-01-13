@@ -43,14 +43,15 @@ class ServerRescueNegativeTestJSON(base.BaseV2ComputeTest):
     def resource_setup(cls):
         super(ServerRescueNegativeTestJSON, cls).resource_setup()
         cls.device = CONF.compute.volume_device_name
-
+        cls.password = data_utils.rand_password()
+        rescue_password = data_utils.rand_password()
         # Server for negative tests
-        server = cls.create_test_server(wait_until='BUILD')
-        resc_server = cls.create_test_server(wait_until='ACTIVE')
+        server = cls.create_test_server(adminPass=cls.password,
+                                        wait_until='BUILD')
+        resc_server = cls.create_test_server(adminPass=rescue_password,
+                                             wait_until='ACTIVE')
         cls.server_id = server['id']
-        cls.password = server['adminPass']
         cls.rescue_id = resc_server['id']
-        rescue_password = resc_server['adminPass']
 
         cls.servers_client.rescue_server(
             cls.rescue_id, adminPass=rescue_password)

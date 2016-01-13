@@ -52,10 +52,11 @@ class ServerRescueTestJSON(base.BaseV2ComputeTest):
             name=cls.sg_name, description=cls.sg_desc)['security_group']
         cls.sg_id = cls.sg['id']
 
+        cls.password = data_utils.rand_password()
         # Server for positive tests
-        server = cls.create_test_server(wait_until='BUILD')
+        server = cls.create_test_server(adminPass=cls.password,
+                                        wait_until='BUILD')
         cls.server_id = server['id']
-        cls.password = server['adminPass']
         waiters.wait_for_server_status(cls.servers_client, cls.server_id,
                                        'ACTIVE')
 
