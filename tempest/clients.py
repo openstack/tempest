@@ -501,9 +501,10 @@ class Manager(manager.Manager):
             'region': CONF.identity.region
         }
         params.update(self.default_params_with_timeout_values)
+
+        # Clients below use the admin endpoint type of Keystone API v2
         params_v2_admin = params.copy()
         params_v2_admin['endpoint_type'] = CONF.identity.v2_admin_endpoint_type
-        # Client uses admin endpoint type of Keystone API v2
         self.endpoints_v2_client = EndpointsV2Client(self.auth_provider,
                                                      **params_v2_admin)
         self.identity_client = IdentityClient(self.auth_provider,
@@ -516,21 +517,21 @@ class Manager(manager.Manager):
                                         **params_v2_admin)
         self.services_v2_client = ServicesV2Client(self.auth_provider,
                                                    **params_v2_admin)
+
+        # Clients below use the public endpoint type of Keystone API v2
         params_v2_public = params.copy()
         params_v2_public['endpoint_type'] = (
             CONF.identity.v2_public_endpoint_type)
-        # Client uses public endpoint type of Keystone API v2
         self.identity_public_client = IdentityClient(self.auth_provider,
                                                      **params_v2_public)
         self.tenants_public_client = TenantsClient(self.auth_provider,
                                                    **params_v2_public)
-        self.roles_public_client = RolesClient(self.auth_provider,
-                                               **params_v2_public)
         self.users_public_client = UsersClient(self.auth_provider,
                                                **params_v2_public)
+
+        # Clients below use the endpoint type of Keystone API v3
         params_v3 = params.copy()
         params_v3['endpoint_type'] = CONF.identity.v3_endpoint_type
-        # Clients below use the endpoint type of Keystone API v3
         self.identity_v3_client = IdentityV3Client(self.auth_provider,
                                                    **params_v3)
         self.endpoints_client = EndPointV3Client(self.auth_provider,
@@ -543,6 +544,7 @@ class Manager(manager.Manager):
         self.credentials_client = CredentialsV3Client(self.auth_provider,
                                                       **params_v3)
         self.groups_client = GroupsV3Client(self.auth_provider, **params_v3)
+
         # Token clients do not use the catalog. They only need default_params.
         # They read auth_url, so they should only be set if the corresponding
         # API version is marked as enabled

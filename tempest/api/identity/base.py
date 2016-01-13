@@ -75,7 +75,6 @@ class BaseIdentityV2Test(BaseIdentityTest):
         cls.non_admin_client = cls.os.identity_public_client
         cls.non_admin_token_client = cls.os.token_client
         cls.non_admin_tenants_client = cls.os.tenants_public_client
-        cls.non_admin_roles_client = cls.os.roles_public_client
         cls.non_admin_users_client = cls.os.users_public_client
 
     @classmethod
