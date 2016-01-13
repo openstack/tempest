@@ -133,6 +133,9 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
             msg = ('Either tenant_networks_reachable must be "true", or '
                    'public_network_id must be defined.')
             raise cls.skipException(msg)
+        if not test.is_extension_enabled('security-group', 'network'):
+            msg = "security-group extension not enabled."
+            raise cls.skipException(msg)
 
     @classmethod
     def setup_credentials(cls):
