@@ -28,6 +28,7 @@ class Main(app.App):
             description='Tempest cli application',
             version=version.VersionInfo('tempest').version_string(),
             command_manager=commandmanager.CommandManager('tempest.cm'),
+            deferred_help=True,
             )
 
     def initialize_app(self, argv):
