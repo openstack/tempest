@@ -788,7 +788,11 @@ VolumeFeaturesGroup = [
                 default=True,
                 help='Update bootable status of a volume '
                      'Not implemented on icehouse ',
-                deprecated_for_removal=True)
+                deprecated_for_removal=True),
+    # TODO(ynesenenko): Remove volume_services once liberty-eol happens.
+    cfg.BoolOpt('volume_services',
+                default=False,
+                help='Extract correct host info from host@backend')
 ]
 
 
