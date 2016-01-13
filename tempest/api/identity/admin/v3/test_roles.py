@@ -26,7 +26,7 @@ class RolesV3TestJSON(base.BaseIdentityV3AdminTest):
         for _ in range(3):
             role_name = data_utils.rand_name(name='role')
             role = cls.client.create_role(name=role_name)['role']
-            cls.data.v3_roles.append(role)
+            cls.data.roles.append(role)
         cls.fetched_role_ids = list()
         u_name = data_utils.rand_name('user')
         u_desc = '%s description' % u_name
@@ -175,5 +175,5 @@ class RolesV3TestJSON(base.BaseIdentityV3AdminTest):
     def test_list_roles(self):
         # Return a list of all roles
         body = self.client.list_roles()['roles']
-        found = [role for role in body if role in self.data.v3_roles]
-        self.assertEqual(len(found), len(self.data.v3_roles))
+        found = [role for role in body if role in self.data.roles]
+        self.assertEqual(len(found), len(self.data.roles))
