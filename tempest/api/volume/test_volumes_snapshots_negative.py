@@ -37,7 +37,7 @@ class VolumesV2SnapshotNegativeTestJSON(base.BaseVolumeTest):
         s_name = data_utils.rand_name('snap')
         self.assertRaises(lib_exc.NotFound,
                           self.snapshots_client.create_snapshot,
-                          str(uuid.uuid4()), display_name=s_name)
+                          volume_id=str(uuid.uuid4()), display_name=s_name)
 
     @test.attr(type=['negative'])
     @test.idempotent_id('bb9da53e-d335-4309-9c15-7e76fd5e4d6d')
@@ -46,7 +46,7 @@ class VolumesV2SnapshotNegativeTestJSON(base.BaseVolumeTest):
         s_name = data_utils.rand_name('snap')
         self.assertRaises(lib_exc.NotFound,
                           self.snapshots_client.create_snapshot,
-                          None, display_name=s_name)
+                          volume_id=None, display_name=s_name)
 
 
 class VolumesV1SnapshotNegativeTestJSON(VolumesV2SnapshotNegativeTestJSON):
