@@ -1,0 +1,12 @@
+---
+other:
+  - |
+    A new configuration option ``[compute-feature-enabled]/volume_multiattach``
+    has been added which defaults to False. Set this to True to enable volume
+    multiattach testing. These tests require that compute API version 2.60 is
+    available and block storage API version 3.44 is available.
+
+    .. note:: In the Queens release, the only compute driver that supports
+      volume multiattach is the libvirt driver, and only then when qemu<2.10
+      or libvirt>=3.10. The only volume backend in Queens that supports volume
+      multiattach is lvm.

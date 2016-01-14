@@ -475,6 +475,11 @@ ComputeFeaturesGroup = [
                 default=False,
                 help='Does the test environment support volume-backed live '
                      'migration?'),
+    cfg.BoolOpt('volume_multiattach',
+                default=False,
+                help='Does the test environment support attaching a volume to '
+                     'more than one instance? This depends on hypervisor and '
+                     'volume backend/type and compute API version 2.60.'),
 ]
 
 
