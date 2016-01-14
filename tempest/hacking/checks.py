@@ -185,7 +185,8 @@ def get_resources_on_service_clients(logical_line, physical_line, filename,
             # the end of a method
             return
 
-        if 'self.get(' not in line:
+        if 'self.get(' not in line and ('self.show_resource(' not in line and
+                                        'self.list_resources(' not in line):
             continue
 
         if METHOD_GET_RESOURCE.match(logical_line):
@@ -211,7 +212,7 @@ def delete_resources_on_service_clients(logical_line, physical_line, filename,
             # the end of a method
             return
 
-        if 'self.delete(' not in line:
+        if 'self.delete(' not in line and 'self.delete_resource(' not in line:
             continue
 
         if METHOD_DELETE_RESOURCE.match(logical_line):
