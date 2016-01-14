@@ -269,7 +269,7 @@ class RoutersTest(base.BaseRouterTest):
 
     @test.idempotent_id('c86ac3a8-50bd-4b00-a6b8-62af84a0765c')
     @test.requires_ext(extension='extraroute', service='network')
-    def test_update_extra_route(self):
+    def test_update_delete_extra_route(self):
         # Create different cidr for each subnet to avoid cidr duplicate
         # The cidr starts from tenant_cidr
         next_cidr = netaddr.IPNetwork(self.tenant_cidr)
@@ -321,6 +321,10 @@ class RoutersTest(base.BaseRouterTest):
             self.assertEqual(test_routes[i]['destination'],
                              routes[i]['destination'])
             self.assertEqual(test_routes[i]['nexthop'], routes[i]['nexthop'])
+
+        self.client.delete_extra_routes(router['id'])
+        show_body_after_deletion = self.client.show_router(router['id'])
+        self.assertEmpty(show_body_after_deletion['router']['routes'])
 
     def _delete_extra_routes(self, router_id):
         self.client.delete_extra_routes(router_id)
