@@ -85,7 +85,9 @@ To see help on specific argument, please do: ``tempest-account-generator
 import argparse
 import netaddr
 import os
+import traceback
 
+from cliff import command
 from oslo_log import log as logging
 import tempest_lib.auth
 from tempest_lib.common.utils import data_utils
@@ -105,6 +107,11 @@ from tempest.services.network.json import network_client
 
 LOG = None
 CONF = config.CONF
+DESCRIPTION = ('Create accounts.yaml file for concurrent test runs.%s'
+               'One primary user, one alt user, '
+               'one swift admin, one stack owner '
+               'and one admin (optionally) will be created '
+               'for each concurrent thread.' % os.linesep)
 
 
 def setup_logging():
@@ -397,20 +404,7 @@ def dump_accounts(opts, resources):
     LOG.info('%s generated successfully!' % opts.accounts)
 
 
-def get_options():
-    usage_string = ('tempest-account-generator [-h] <ARG> ...\n\n'
-                    'To see help on specific argument, do:\n'
-                    'tempest-account-generator <ARG> -h')
-    parser = argparse.ArgumentParser(
-        description='Create accounts.yaml file for concurrent test runs. '
-                    'One primary user, one alt user, '
-                    'one swift admin, one stack owner '
-                    'and one admin (optionally) will be created '
-                    'for each concurrent thread.',
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-        usage=usage_string
-    )
-
+def _parser_add_args(parser):
     parser.add_argument('-c', '--config-file',
                         metavar='/etc/tempest.conf',
                         help='path to tempest config file')
@@ -447,16 +441,50 @@ def get_options():
                         metavar='accounts_file.yaml',
                         help='Output accounts yaml file')
 
+
+def get_options():
+    usage_string = ('tempest-account-generator [-h] <ARG> ...\n\n'
+                    'To see help on specific argument, do:\n'
+                    'tempest-account-generator <ARG> -h')
+    parser = argparse.ArgumentParser(
+        description=DESCRIPTION,
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+        usage=usage_string
+    )
+
+    _parser_add_args(parser)
     opts = parser.parse_args()
-    if opts.config_file:
-        config.CONF.set_config_path(opts.config_file)
     return opts
 
 
+class TempestAccountGenerator(command.Command):
+
+    def get_parser(self, prog_name):
+        parser = super(TempestAccountGenerator, self).get_parser(prog_name)
+        _parser_add_args(parser)
+        return parser
+
+    def take_action(self, parsed_args):
+        try:
+            return main(parsed_args)
+        except Exception:
+            LOG.exception("Failure generating test accounts.")
+            traceback.print_exc()
+            raise
+        return 0
+
+    def get_description(self):
+        return DESCRIPTION
+
+
 def main(opts=None):
-    if not opts:
-        opts = get_options()
     setup_logging()
+    if not opts:
+        LOG.warn("Use of: 'tempest-account-generator' is deprecated, "
+                 "please use: 'tempest account-generator'")
+        opts = get_options()
+    if opts.config_file:
+        config.CONF.set_config_path(opts.config_file)
     resources = generate_resources(opts)
     create_resources(opts, resources)
     dump_accounts(opts, resources)
