@@ -17,6 +17,7 @@ from tempest_lib import exceptions as lib_exc
 
 from tempest.common import compute
 from tempest.common.utils import data_utils
+from tempest.common import waiters
 from tempest import config
 from tempest import exceptions
 import tempest.test
@@ -97,8 +98,14 @@ class BaseTelemetryTest(tempest.test.BaseTestCase):
                 pass
 
     @classmethod
+    def wait_for_server_termination(cls, server_id):
+        waiters.wait_for_server_termination(cls.servers_client,
+                                            server_id)
+
+    @classmethod
     def resource_cleanup(cls):
         cls.cleanup_resources(cls.servers_client.delete_server, cls.server_ids)
+        cls.cleanup_resources(cls.wait_for_server_termination, cls.server_ids)
         cls.cleanup_resources(cls.image_client.delete_image, cls.image_ids)
         super(BaseTelemetryTest, cls).resource_cleanup()
 
