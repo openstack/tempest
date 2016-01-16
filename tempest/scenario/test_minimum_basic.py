@@ -47,13 +47,6 @@ class TestMinimumBasicScenario(manager.ScenarioTest):
 
     """
 
-    def _wait_for_server_status(self, server, status):
-        server_id = server['id']
-        # Raise on error defaults to True, which is consistent with the
-        # original function from scenario tests here
-        waiters.wait_for_server_status(self.servers_client,
-                                       server_id, status)
-
     def nova_list(self):
         servers = self.servers_client.list_servers()
         # The list servers in the compute client is inconsistent...
@@ -81,7 +74,8 @@ class TestMinimumBasicScenario(manager.ScenarioTest):
 
     def nova_reboot(self, server):
         self.servers_client.reboot_server(server['id'], type='SOFT')
-        self._wait_for_server_status(server, 'ACTIVE')
+        waiters.wait_for_server_status(self.servers_client,
+                                       server['id'], 'ACTIVE')
 
     def check_partitions(self):
         # NOTE(andreaf) The device name may be different on different guest OS
