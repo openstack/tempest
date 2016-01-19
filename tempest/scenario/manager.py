@@ -160,7 +160,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
         self.addCleanup(client.delete_keypair, name)
         return body['keypair']
 
-    def create_server(self, name=None, image=None, flavor=None,
+    def create_server(self, name=None, image_id=None, flavor=None,
                       validatable=False, wait_until=None,
                       wait_on_delete=True, clients=None, **kwargs):
         """Wrapper utility that returns a test server.
@@ -240,7 +240,8 @@ class ScenarioTest(tempest.test.BaseTestCase):
             clients,
             tenant_network=tenant_network,
             wait_until=wait_until,
-            **kwargs)
+            name=name, flavor=flavor,
+            image_id=image_id, **kwargs)
 
         # TODO(jlanoux) Move wait_on_delete in compute.py
         if wait_on_delete:

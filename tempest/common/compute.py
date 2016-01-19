@@ -29,7 +29,8 @@ LOG = logging.getLogger(__name__)
 
 def create_test_server(clients, validatable=False, validation_resources=None,
                        tenant_network=None, wait_until=None,
-                       volume_backed=False, **kwargs):
+                       volume_backed=False, name=None, flavor=None,
+                       image_id=None, **kwargs):
     """Common wrapper utility returning a test server.
 
     This method is a common wrapper returning a test server that can be
@@ -48,9 +49,16 @@ def create_test_server(clients, validatable=False, validation_resources=None,
 
     # TODO(jlanoux) add support of wait_until PINGABLE/SSHABLE
 
-    name = kwargs.pop('name', data_utils.rand_name(__name__ + "-instance"))
-    flavor = kwargs.pop('flavor', CONF.compute.flavor_ref)
-    image_id = kwargs.pop('image_id', CONF.compute.image_ref)
+    name = name
+    flavor = flavor
+    image_id = image_id
+
+    if name is None:
+        name = data_utils.rand_name(__name__ + "-instance")
+    if flavor is None:
+        flavor = CONF.compute.flavor_ref
+    if image_id is None:
+        image_id = CONF.compute.image_ref
 
     kwargs = fixed_network.set_networks_kwarg(
         tenant_network, kwargs) or {}
