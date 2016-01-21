@@ -13,6 +13,7 @@
 #    under the License.
 
 from collections import OrderedDict
+import copy
 
 import six
 from tempest_lib import exceptions as lib_exc
@@ -27,42 +28,93 @@ CONF = config.CONF
 """Default templates.
 There should always be at least a master1 and a worker1 node
 group template."""
-DEFAULT_TEMPLATES = {
-    'vanilla': OrderedDict([
-        ('2.6.0', {
-            'NODES': {
-                'master1': {
-                    'count': 1,
-                    'node_processes': ['namenode', 'resourcemanager',
-                                       'hiveserver']
+BASE_VANILLA_DESC = {
+    'NODES': {
+        'master1': {
+            'count': 1,
+            'node_processes': ['namenode', 'resourcemanager',
+                               'hiveserver']
+        },
+        'master2': {
+            'count': 1,
+            'node_processes': ['oozie', 'historyserver',
+                               'secondarynamenode']
+        },
+        'worker1': {
+            'count': 1,
+            'node_processes': ['datanode', 'nodemanager'],
+            'node_configs': {
+                'MapReduce': {
+                    'yarn.app.mapreduce.am.resource.mb': 256,
+                    'yarn.app.mapreduce.am.command-opts': '-Xmx256m'
                 },
-                'master2': {
-                    'count': 1,
-                    'node_processes': ['oozie', 'historyserver',
-                                       'secondarynamenode']
-                },
-                'worker1': {
-                    'count': 1,
-                    'node_processes': ['datanode', 'nodemanager'],
-                    'node_configs': {
-                        'MapReduce': {
-                            'yarn.app.mapreduce.am.resource.mb': 256,
-                            'yarn.app.mapreduce.am.command-opts': '-Xmx256m'
-                        },
-                        'YARN': {
-                            'yarn.scheduler.minimum-allocation-mb': 256,
-                            'yarn.scheduler.maximum-allocation-mb': 1024,
-                            'yarn.nodemanager.vmem-check-enabled': False
-                        }
-                    }
-                }
-            },
-            'cluster_configs': {
-                'HDFS': {
-                    'dfs.replication': 1
+                'YARN': {
+                    'yarn.scheduler.minimum-allocation-mb': 256,
+                    'yarn.scheduler.maximum-allocation-mb': 1024,
+                    'yarn.nodemanager.vmem-check-enabled': False
                 }
             }
-        }),
+        }
+    },
+    'cluster_configs': {
+        'HDFS': {
+            'dfs.replication': 1
+        }
+    }
+}
+
+BASE_SPARK_DESC = {
+    'NODES': {
+        'master1': {
+            'count': 1,
+            'node_processes': ['namenode', 'master']
+        },
+        'worker1': {
+            'count': 1,
+            'node_processes': ['datanode', 'slave']
+        }
+    },
+    'cluster_configs': {
+        'HDFS': {
+            'dfs.replication': 1
+        }
+    }
+}
+
+BASE_CDH_DESC = {
+    'NODES': {
+        'master1': {
+            'count': 1,
+            'node_processes': ['CLOUDERA_MANAGER']
+        },
+        'master2': {
+            'count': 1,
+            'node_processes': ['HDFS_NAMENODE',
+                               'YARN_RESOURCEMANAGER']
+        },
+        'master3': {
+            'count': 1,
+            'node_processes': ['OOZIE_SERVER', 'YARN_JOBHISTORY',
+                               'HDFS_SECONDARYNAMENODE',
+                               'HIVE_METASTORE', 'HIVE_SERVER2']
+        },
+        'worker1': {
+            'count': 1,
+            'node_processes': ['YARN_NODEMANAGER', 'HDFS_DATANODE']
+        }
+    },
+    'cluster_configs': {
+        'HDFS': {
+            'dfs_replication': 1
+        }
+    }
+}
+
+
+DEFAULT_TEMPLATES = {
+    'vanilla': OrderedDict([
+        ('2.6.0', copy.deepcopy(BASE_VANILLA_DESC)),
+        ('2.7.1', copy.deepcopy(BASE_VANILLA_DESC)),
         ('1.2.1', {
             'NODES': {
                 'master1': {
@@ -123,81 +175,13 @@ DEFAULT_TEMPLATES = {
         })
     ]),
     'spark': OrderedDict([
-        ('1.0.0', {
-            'NODES': {
-                'master1': {
-                    'count': 1,
-                    'node_processes': ['namenode', 'master']
-                },
-                'worker1': {
-                    'count': 1,
-                    'node_processes': ['datanode', 'slave']
-                }
-            },
-            'cluster_configs': {
-                'HDFS': {
-                    'dfs.replication': 1
-                }
-            }
-        })
+        ('1.0.0', copy.deepcopy(BASE_SPARK_DESC)),
+        ('1.3.1', copy.deepcopy(BASE_SPARK_DESC))
     ]),
     'cdh': OrderedDict([
-        ('5.3.0', {
-            'NODES': {
-                'master1': {
-                    'count': 1,
-                    'node_processes': ['CLOUDERA_MANAGER']
-                },
-                'master2': {
-                    'count': 1,
-                    'node_processes': ['HDFS_NAMENODE',
-                                       'YARN_RESOURCEMANAGER']
-                },
-                'master3': {
-                    'count': 1,
-                    'node_processes': ['OOZIE_SERVER', 'YARN_JOBHISTORY',
-                                       'HDFS_SECONDARYNAMENODE',
-                                       'HIVE_METASTORE', 'HIVE_SERVER2']
-                },
-                'worker1': {
-                    'count': 1,
-                    'node_processes': ['YARN_NODEMANAGER', 'HDFS_DATANODE']
-                }
-            },
-            'cluster_configs': {
-                'HDFS': {
-                    'dfs_replication': 1
-                }
-            }
-        }),
-        ('5', {
-            'NODES': {
-                'master1': {
-                    'count': 1,
-                    'node_processes': ['CLOUDERA_MANAGER']
-                },
-                'master2': {
-                    'count': 1,
-                    'node_processes': ['HDFS_NAMENODE',
-                                       'YARN_RESOURCEMANAGER']
-                },
-                'master3': {
-                    'count': 1,
-                    'node_processes': ['OOZIE_SERVER', 'YARN_JOBHISTORY',
-                                       'HDFS_SECONDARYNAMENODE',
-                                       'HIVE_METASTORE', 'HIVE_SERVER2']
-                },
-                'worker1': {
-                    'count': 1,
-                    'node_processes': ['YARN_NODEMANAGER', 'HDFS_DATANODE']
-                }
-            },
-            'cluster_configs': {
-                'HDFS': {
-                    'dfs_replication': 1
-                }
-            }
-        })
+        ('5.4.0', copy.deepcopy(BASE_CDH_DESC)),
+        ('5.3.0', copy.deepcopy(BASE_CDH_DESC)),
+        ('5', copy.deepcopy(BASE_CDH_DESC))
     ]),
     'mapr': OrderedDict([
         ('4.0.1.mrv2', {
