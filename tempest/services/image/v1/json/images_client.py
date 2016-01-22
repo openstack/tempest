@@ -180,21 +180,27 @@ class ImagesClient(service_client.ServiceClient):
         self.expected_success(200, resp.status)
         return service_client.ResponseBody(resp, body)
 
-    def list_images(self, detail=False, properties=dict(),
-                    changes_since=None, **kwargs):
+    def list_images(self, detail=False, **kwargs):
+        """Return a list of all images filtered by input parameters.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-image-v1.html#listImage-v1
+
+        Most parameters except the following are passed to the API without
+        any changes.
+        :param changes_since: The name is changed to changes-since
+        """
         url = 'v1/images'
 
         if detail:
             url += '/detail'
 
-        params = {}
-        for key, value in properties.items():
-            params['property-%s' % key] = value
+        properties = kwargs.pop('properties', {})
+        for key, value in six.iteritems(properties):
+            kwargs['property-%s' % key] = value
 
-        kwargs.update(params)
-
-        if changes_since is not None:
-            kwargs['changes-since'] = changes_since
+        if kwargs.get('changes_since'):
+            kwargs['changes-since'] = kwargs.pop('changes_since')
 
         if len(kwargs) > 0:
             url += '?%s' % urllib.urlencode(kwargs)
