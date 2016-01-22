@@ -70,7 +70,7 @@ class TestVolumeBootPattern(manager.ScenarioTest):
         create_kwargs.update(self._get_bdm(
             vol_id, delete_on_termination=delete_on_termination))
         return self.create_server(
-            image='',
+            image_id='',
             wait_until='ACTIVE',
             **create_kwargs)
 
