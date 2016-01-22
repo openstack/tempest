@@ -38,7 +38,7 @@ class AgentsClient(base.BaseNetworkClient):
         uri = '/agents/%s/l3-routers' % agent_id
         return self.list_resources(uri)
 
-    def add_router_to_l3_agent(self, agent_id, **kwargs):
+    def create_router_on_l3_agent(self, agent_id, **kwargs):
         # TODO(piyush): Current api-site doesn't contain this API description.
         # After fixing the api-site, we need to fix here also for putting the
         # link to api-site.
@@ -46,7 +46,7 @@ class AgentsClient(base.BaseNetworkClient):
         uri = '/agents/%s/l3-routers' % agent_id
         return self.create_resource(uri, kwargs)
 
-    def remove_router_from_l3_agent(self, agent_id, router_id):
+    def delete_router_from_l3_agent(self, agent_id, router_id):
         uri = '/agents/%s/l3-routers/%s' % (agent_id, router_id)
         return self.delete_resource(uri)
 
@@ -54,7 +54,7 @@ class AgentsClient(base.BaseNetworkClient):
         uri = '/agents/%s/dhcp-networks' % agent_id
         return self.list_resources(uri)
 
-    def remove_network_from_dhcp_agent(self, agent_id, network_id):
+    def delete_network_from_dhcp_agent(self, agent_id, network_id):
         uri = '/agents/%s/dhcp-networks/%s' % (agent_id,
                                                network_id)
         return self.delete_resource(uri)

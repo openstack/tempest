@@ -84,7 +84,7 @@ class DHCPAgentSchedulersTestJSON(base.BaseAdminNetworkTest):
             self._remove_network_from_dhcp_agent(network_id, agent)
 
     def _remove_network_from_dhcp_agent(self, network_id, agent):
-        self.admin_agents_client.remove_network_from_dhcp_agent(
+        self.admin_agents_client.delete_network_from_dhcp_agent(
             agent_id=agent['id'],
             network_id=network_id)
         self.assertFalse(self._check_network_in_dhcp_agent(

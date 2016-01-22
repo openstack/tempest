@@ -110,7 +110,7 @@ class L3AgentSchedulerTestJSON(base.BaseAdminNetworkTest):
     @test.idempotent_id('9464e5e7-8625-49c3-8fd1-89c52be59d66')
     def test_add_list_remove_router_on_l3_agent(self):
         l3_agent_ids = list()
-        self.admin_agents_client.add_router_to_l3_agent(
+        self.admin_agents_client.create_router_on_l3_agent(
             self.agent['id'],
             router_id=self.router['id'])
         body = (
@@ -120,7 +120,7 @@ class L3AgentSchedulerTestJSON(base.BaseAdminNetworkTest):
             self.assertIn('agent_type', agent)
             self.assertEqual('L3 agent', agent['agent_type'])
         self.assertIn(self.agent['id'], l3_agent_ids)
-        body = self.admin_agents_client.remove_router_from_l3_agent(
+        body = self.admin_agents_client.delete_router_from_l3_agent(
             self.agent['id'],
             self.router['id'])
         # NOTE(afazekas): The deletion not asserted, because neutron
