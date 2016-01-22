@@ -15,6 +15,7 @@
 from tempest_lib import decorators
 
 from tempest.api.compute import base
+from tempest.common import compute
 from tempest.common import fixed_network
 from tempest.common.utils import data_utils
 from tempest.common import waiters
@@ -104,16 +105,14 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
     def test_list_servers_filter_by_exist_host(self):
         # Filter the list of servers by existent host
         name = data_utils.rand_name('server')
-        flavor = self.flavor_ref
-        image_id = self.image_ref
         network = self.get_tenant_network()
         network_kwargs = fixed_network.set_networks_kwarg(network)
-        test_server = self.client.create_server(name=name, imageRef=image_id,
-                                                flavorRef=flavor,
-                                                **network_kwargs)['server']
+        # We need to create the server as an admin, so we can't use
+        # self.create_test_server() here as this method creates the server
+        # in the "primary" (i.e non-admin) tenant.
+        test_server, _ = compute.create_test_server(
+            self.os_adm, wait_until="ACTIVE", name=name, **network_kwargs)
         self.addCleanup(self.client.delete_server, test_server['id'])
-        waiters.wait_for_server_status(self.client,
-                                       test_server['id'], 'ACTIVE')
         server = self.client.show_server(test_server['id'])['server']
         self.assertEqual(server['status'], 'ACTIVE')
         hostname = server[self._host_key]

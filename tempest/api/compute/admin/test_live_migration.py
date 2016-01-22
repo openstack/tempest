@@ -79,11 +79,6 @@ class LiveBlockMigrationTestJSON(base.BaseV2ComputeAdminTest):
     def _get_server_status(self, server_id):
         return self._get_server_details(server_id)['status']
 
-    def _create_server(self, volume_backed=False):
-            server = self.create_test_server(wait_until="ACTIVE",
-                                             volume_backed=volume_backed)
-            return server['id']
-
     def _volume_clean_up(self, server_id, volume_id):
         body = self.volumes_client.show_volume(volume_id)['volume']
         if body['status'] == 'in-use':
@@ -103,7 +98,8 @@ class LiveBlockMigrationTestJSON(base.BaseV2ComputeAdminTest):
                               volume_backed, *block* migration is not used.
         """
         # Live migrate an instance to another host
-        server_id = self._create_server(volume_backed=volume_backed)
+        server_id = self.create_test_server(wait_until="ACTIVE",
+                                            volume_backed=volume_backed)['id']
         actual_host = self._get_host_for_server(server_id)
         target_host = self._get_host_other_than(actual_host)
 
@@ -153,7 +149,7 @@ class LiveBlockMigrationTestJSON(base.BaseV2ComputeAdminTest):
                       block_migrate_cinder_iscsi,
                       'Block Live migration not configured for iSCSI')
     def test_iscsi_volume(self):
-        server_id = self._create_server()
+        server_id = self.create_test_server(wait_until="ACTIVE")['id']
         actual_host = self._get_host_for_server(server_id)
         target_host = self._get_host_other_than(actual_host)
 
