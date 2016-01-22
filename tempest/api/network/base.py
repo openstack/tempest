@@ -76,6 +76,8 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
         cls.quotas_client = cls.os.network_quotas_client
         cls.floating_ips_client = cls.os.floating_ips_client
         cls.security_groups_client = cls.os.security_groups_client
+        cls.security_group_rules_client = (
+            cls.os.security_group_rules_client)
 
     @classmethod
     def resource_setup(cls):

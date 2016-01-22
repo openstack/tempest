@@ -69,6 +69,8 @@ class ScenarioTest(tempest.test.BaseTestCase):
         cls.subnets_client = cls.manager.subnets_client
         cls.floating_ips_client = cls.manager.floating_ips_client
         cls.security_groups_client = cls.manager.security_groups_client
+        cls.security_group_rules_client = (
+            cls.manager.security_group_rules_client)
         # Heat client
         cls.orchestration_client = cls.manager.orchestration_client
 
@@ -940,11 +942,12 @@ class NetworkScenarioTest(ScenarioTest):
                                             CONF.validation.ping_timeout,
                                             1)
 
-    def _create_security_group(self, client=None, tenant_id=None,
+    def _create_security_group(self, security_group_rules_client=None,
+                               tenant_id=None,
                                namestart='secgroup-smoke',
                                security_groups_client=None):
-        if client is None:
-            client = self.network_client
+        if security_group_rules_client is None:
+            security_group_rules_client = self.security_group_rules_client
         if security_groups_client is None:
             security_groups_client = self.security_groups_client
         if tenant_id is None:
@@ -955,7 +958,8 @@ class NetworkScenarioTest(ScenarioTest):
 
         # Add rules to the security group
         rules = self._create_loginable_secgroup_rule(
-            client=client, secgroup=secgroup,
+            security_group_rules_client=security_group_rules_client,
+            secgroup=secgroup,
             security_groups_client=security_groups_client)
         for rule in rules:
             self.assertEqual(tenant_id, rule.tenant_id)
@@ -1011,7 +1015,8 @@ class NetworkScenarioTest(ScenarioTest):
         return net_resources.DeletableSecurityGroup(client=client,
                                                     **sgs[0])
 
-    def _create_security_group_rule(self, secgroup=None, client=None,
+    def _create_security_group_rule(self, secgroup=None,
+                                    sec_group_rules_client=None,
                                     tenant_id=None,
                                     security_groups_client=None, **kwargs):
         """Create a rule from a dictionary of rule parameters.
@@ -1031,8 +1036,8 @@ class NetworkScenarioTest(ScenarioTest):
                     port_range_max: 22
                     }
         """
-        if client is None:
-            client = self.network_client
+        if sec_group_rules_client is None:
+            sec_group_rules_client = self.security_group_rules_client
         if security_groups_client is None:
             security_groups_client = self.security_groups_client
         if not tenant_id:
@@ -1045,9 +1050,9 @@ class NetworkScenarioTest(ScenarioTest):
                        tenant_id=secgroup.tenant_id)
         ruleset.update(kwargs)
 
-        sg_rule = client.create_security_group_rule(**ruleset)
+        sg_rule = sec_group_rules_client.create_security_group_rule(**ruleset)
         sg_rule = net_resources.DeletableSecurityGroupRule(
-            client=client,
+            client=sec_group_rules_client,
             **sg_rule['security_group_rule']
         )
         self.addCleanup(self.delete_wrapper, sg_rule.delete)
@@ -1056,7 +1061,8 @@ class NetworkScenarioTest(ScenarioTest):
 
         return sg_rule
 
-    def _create_loginable_secgroup_rule(self, client=None, secgroup=None,
+    def _create_loginable_secgroup_rule(self, security_group_rules_client=None,
+                                        secgroup=None,
                                         security_groups_client=None):
         """Create loginable security group rule
 
@@ -1066,8 +1072,8 @@ class NetworkScenarioTest(ScenarioTest):
         belonging to the same security group.
         """
 
-        if client is None:
-            client = self.network_client
+        if security_group_rules_client is None:
+            security_group_rules_client = self.security_group_rules_client
         if security_groups_client is None:
             security_groups_client = self.security_groups_client
         rules = []
@@ -1088,12 +1094,14 @@ class NetworkScenarioTest(ScenarioTest):
                 ethertype='IPv6',
             )
         ]
+        sec_group_rules_client = security_group_rules_client
         for ruleset in rulesets:
             for r_direction in ['ingress', 'egress']:
                 ruleset['direction'] = r_direction
                 try:
                     sg_rule = self._create_security_group_rule(
-                        client=client, secgroup=secgroup,
+                        sec_group_rules_client=sec_group_rules_client,
+                        secgroup=secgroup,
                         security_groups_client=security_groups_client,
                         **ruleset)
                 except lib_exc.Conflict as ex:
