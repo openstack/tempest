@@ -390,7 +390,7 @@ def dump_accounts(opts, resources):
             'password': user['pass'],
             'roles': user['roles']
         }
-        if 'network' or 'router' in user:
+        if 'network' in user or 'router' in user:
             account['resources'] = {}
         if 'network' in user:
             account['resources']['network'] = user['network']
