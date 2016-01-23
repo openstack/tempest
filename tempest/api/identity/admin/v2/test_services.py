@@ -25,9 +25,9 @@ class ServicesTestJSON(base.BaseIdentityV2AdminTest):
 
     def _del_service(self, service_id):
         # Deleting the service created in this method
-        self.client.delete_service(service_id)
+        self.services_client.delete_service(service_id)
         # Checking whether service is deleted successfully
-        self.assertRaises(lib_exc.NotFound, self.client.show_service,
+        self.assertRaises(lib_exc.NotFound, self.services_client.show_service,
                           service_id)
 
     @test.idempotent_id('84521085-c6e6-491c-9a08-ec9f70f90110')
@@ -37,7 +37,7 @@ class ServicesTestJSON(base.BaseIdentityV2AdminTest):
         name = data_utils.rand_name('service')
         type = data_utils.rand_name('type')
         description = data_utils.rand_name('description')
-        service_data = self.client.create_service(
+        service_data = self.services_client.create_service(
             name, type, description=description)['OS-KSADM:service']
         self.assertFalse(service_data['id'] is None)
         self.addCleanup(self._del_service, service_data['id'])
@@ -50,8 +50,9 @@ class ServicesTestJSON(base.BaseIdentityV2AdminTest):
         self.assertIn('description', service_data)
         self.assertEqual(description, service_data['description'])
         # Get service
-        fetched_service = (self.client.show_service(service_data['id'])
-                           ['OS-KSADM:service'])
+        fetched_service = (
+            self.services_client.show_service(service_data['id'])
+            ['OS-KSADM:service'])
         # verifying the existence of service created
         self.assertIn('id', fetched_service)
         self.assertEqual(fetched_service['id'], service_data['id'])
@@ -68,7 +69,8 @@ class ServicesTestJSON(base.BaseIdentityV2AdminTest):
         # Create a service only with name and type
         name = data_utils.rand_name('service')
         type = data_utils.rand_name('type')
-        service = self.client.create_service(name, type)['OS-KSADM:service']
+        service = self.services_client.create_service(name,
+                                                      type)['OS-KSADM:service']
         self.assertIn('id', service)
         self.addCleanup(self._del_service, service['id'])
         self.assertIn('name', service)
@@ -85,17 +87,17 @@ class ServicesTestJSON(base.BaseIdentityV2AdminTest):
             name = data_utils.rand_name('service')
             type = data_utils.rand_name('type')
             description = data_utils.rand_name('description')
-            service = self.client.create_service(
+            service = self.services_client.create_service(
                 name, type, description=description)['OS-KSADM:service']
             services.append(service)
         service_ids = map(lambda x: x['id'], services)
 
         def delete_services():
             for service_id in service_ids:
-                self.client.delete_service(service_id)
+                self.services_client.delete_service(service_id)
 
         self.addCleanup(delete_services)
         # List and Verify Services
-        body = self.client.list_services()['OS-KSADM:services']
+        body = self.services_client.list_services()['OS-KSADM:services']
         found = [serv for serv in body if serv['id'] in service_ids]
         self.assertEqual(len(found), len(services), 'Services not found')

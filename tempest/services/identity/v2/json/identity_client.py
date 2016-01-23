@@ -39,41 +39,6 @@ class IdentityClient(service_client.ServiceClient):
         self.expected_success(204, resp.status)
         return service_client.ResponseBody(resp, body)
 
-    def create_service(self, name, type, **kwargs):
-        """Create a service."""
-        post_body = {
-            'name': name,
-            'type': type,
-            'description': kwargs.get('description')
-        }
-        post_body = json.dumps({'OS-KSADM:service': post_body})
-        resp, body = self.post('/OS-KSADM/services', post_body)
-        self.expected_success(200, resp.status)
-        body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
-
-    def show_service(self, service_id):
-        """Get Service."""
-        url = '/OS-KSADM/services/%s' % service_id
-        resp, body = self.get(url)
-        self.expected_success(200, resp.status)
-        body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
-
-    def list_services(self):
-        """List Service - Returns Services."""
-        resp, body = self.get('/OS-KSADM/services')
-        self.expected_success(200, resp.status)
-        body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
-
-    def delete_service(self, service_id):
-        """Delete Service."""
-        url = '/OS-KSADM/services/%s' % service_id
-        resp, body = self.delete(url)
-        self.expected_success(204, resp.status)
-        return service_client.ResponseBody(resp, body)
-
     def create_endpoint(self, service_id, region_id, **kwargs):
         """Create an endpoint for service."""
         post_body = {
