@@ -157,7 +157,7 @@ def get_extension_client(os, service):
 
     if service not in extensions_client:
         print('No tempest extensions client for %s' % service)
-        exit(1)
+        sys.exit(1)
     return extensions_client[service]
 
 
@@ -170,7 +170,7 @@ def get_enabled_extensions(service):
     }
     if service not in extensions_options:
         print('No supported extensions list option for %s' % service)
-        exit(1)
+        sys.exit(1)
     return extensions_options[service]
 
 
