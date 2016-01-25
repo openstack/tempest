@@ -78,7 +78,16 @@ class AccountTest(base.BaseObjectTest):
         # container request, the response does not contain 'accept-ranges'
         # header. This is a special case, therefore the existence of response
         # headers is checked without custom matcher.
-        self.assertIn('content-length', resp)
+        #
+        # As the expected response is 204 No Content, Content-Length presence
+        # is not checked here intensionally. According to RFC 7230 a server
+        # MUST NOT send the header in such responses. Thus, clients should not
+        # depend on this header. However, the standard does not require them
+        # to validate the server's behavior. We leverage that to not refuse
+        # any implementation violating it like Swift [1] or some versions of
+        # Ceph RadosGW [2].
+        # [1] https://bugs.launchpad.net/swift/+bug/1537811
+        # [2] http://tracker.ceph.com/issues/13582
         self.assertIn('x-timestamp', resp)
         self.assertIn('x-account-bytes-used', resp)
         self.assertIn('x-account-container-count', resp)
