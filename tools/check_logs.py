@@ -105,7 +105,7 @@ def collect_url_logs(url):
 def main(opts):
     if opts.directory and opts.url or not (opts.directory or opts.url):
         print("Must provide exactly one of -d or -u")
-        exit(1)
+        return 1
     print("Checking logs...")
     WHITELIST_FILE = os.path.join(
         os.path.abspath(os.path.dirname(os.path.dirname(__file__))),
