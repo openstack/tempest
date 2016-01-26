@@ -123,6 +123,8 @@ from tempest.services.messaging.json.messaging_client import \
     MessagingClient
 from tempest.services.network.json.agents_client import AgentsClient \
     as NetworkAgentsClient
+from tempest.services.network.json.extensions_client import \
+    ExtensionsClient as NetworkExtensionsClient
 from tempest.services.network.json.network_client import NetworkClient
 from tempest.services.network.json.quotas_client import QuotasClient \
     as NetworkQuotasClient
@@ -235,6 +237,14 @@ class Manager(manager.Manager):
             endpoint_type=CONF.baremetal.endpoint_type,
             **self.default_params_with_timeout_values)
         self.network_agents_client = NetworkAgentsClient(
+            self.auth_provider,
+            CONF.network.catalog_type,
+            CONF.network.region or CONF.identity.region,
+            endpoint_type=CONF.network.endpoint_type,
+            build_interval=CONF.network.build_interval,
+            build_timeout=CONF.network.build_timeout,
+            **self.default_params)
+        self.network_extensions_client = NetworkExtensionsClient(
             self.auth_provider,
             CONF.network.catalog_type,
             CONF.network.region or CONF.identity.region,
