@@ -43,15 +43,13 @@ class TestAggregatesBasicOps(manager.ScenarioTest):
     def _create_aggregate(self, **kwargs):
         aggregate = (self.aggregates_client.create_aggregate(**kwargs)
                      ['aggregate'])
-        self.addCleanup(self._delete_aggregate, aggregate)
+        self.addCleanup(self.aggregates_client.delete_aggregate,
+                        aggregate['id'])
         aggregate_name = kwargs['name']
         availability_zone = kwargs['availability_zone']
         self.assertEqual(aggregate['name'], aggregate_name)
         self.assertEqual(aggregate['availability_zone'], availability_zone)
         return aggregate
-
-    def _delete_aggregate(self, aggregate):
-        self.aggregates_client.delete_aggregate(aggregate['id'])
 
     def _get_host_name(self):
         hosts = self.hosts_client.list_hosts()['hosts']

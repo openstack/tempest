@@ -1115,12 +1115,6 @@ class NetworkScenarioTest(ScenarioTest):
 
         return rules
 
-    def _ssh_to_server(self, server, private_key):
-        ssh_login = CONF.validation.image_ssh_user
-        return self.get_remote_client(server,
-                                      username=ssh_login,
-                                      private_key=private_key)
-
     def _get_router(self, client=None, tenant_id=None):
         """Retrieve a router for the given tenant id.
 

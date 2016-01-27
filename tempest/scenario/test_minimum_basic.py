@@ -62,12 +62,6 @@ class TestMinimumBasicScenario(manager.ScenarioTest):
             server, custom_matchers.MatchesDictExceptForKeys(
                 got_server, excluded_keys=excluded_keys))
 
-    def cinder_create(self):
-        return self.create_volume()
-
-    def cinder_list(self):
-        return self.volumes_client.list_volumes()['volumes']
-
     def cinder_show(self, volume):
         got_volume = self.volumes_client.show_volume(volume['id'])['volume']
         self.assertEqual(volume, got_volume)
@@ -115,8 +109,8 @@ class TestMinimumBasicScenario(manager.ScenarioTest):
 
         self.nova_show(server)
 
-        volume = self.cinder_create()
-        volumes = self.cinder_list()
+        volume = self.create_volume()
+        volumes = self.volumes_client.list_volumes()['volumes']
         self.assertIn(volume['id'], [x['id'] for x in volumes])
 
         self.cinder_show(volume)

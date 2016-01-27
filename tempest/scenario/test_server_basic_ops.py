@@ -69,10 +69,7 @@ class TestServerBasicOps(manager.ScenarioTest):
                       image=self.image_ref, flavor=self.flavor_ref,
                       ssh=self.run_ssh, ssh_user=self.ssh_user))
 
-    def add_keypair(self):
-        self.keypair = self.create_keypair()
-
-    def verify_ssh(self):
+    def verify_ssh(self, keypair):
         if self.run_ssh:
             # Obtain a floating IP
             self.fip = self.create_floating_ip(self.instance)['ip']
@@ -80,7 +77,7 @@ class TestServerBasicOps(manager.ScenarioTest):
             self.ssh_client = self.get_remote_client(
                 server_or_ip=self.fip,
                 username=self.image_utils.ssh_user(self.image_ref),
-                private_key=self.keypair['private_key'])
+                private_key=keypair['private_key'])
 
     def verify_metadata(self):
         if self.run_ssh and CONF.compute_feature_enabled.metadata_service:
@@ -123,19 +120,19 @@ class TestServerBasicOps(manager.ScenarioTest):
     @test.attr(type='smoke')
     @test.services('compute', 'network')
     def test_server_basicops(self):
-        self.add_keypair()
+        keypair = self.create_keypair()
         self.security_group = self._create_security_group()
         security_groups = [{'name': self.security_group['name']}]
         self.md = {'meta1': 'data1', 'meta2': 'data2', 'metaN': 'dataN'}
         self.instance = self.create_server(
             image_id=self.image_ref,
             flavor=self.flavor_ref,
-            key_name=self.keypair['name'],
+            key_name=keypair['name'],
             security_groups=security_groups,
             config_drive=CONF.compute_feature_enabled.config_drive,
             metadata=self.md,
             wait_until='ACTIVE')
-        self.verify_ssh()
+        self.verify_ssh(keypair)
         self.verify_metadata()
         self.verify_metadata_on_config_drive()
         self.servers_client.delete_server(self.instance['id'])
