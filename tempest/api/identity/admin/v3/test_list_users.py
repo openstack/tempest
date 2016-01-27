@@ -42,13 +42,13 @@ class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
         cls.domain_enabled_user = cls.client.create_user(
             u1_name, password=alt_password,
             email=cls.alt_email, domain_id=cls.data.domain['id'])['user']
-        cls.data.v3_users.append(cls.domain_enabled_user)
+        cls.data.users.append(cls.domain_enabled_user)
         # Create default not enabled user
         u2_name = data_utils.rand_name('test_user')
         cls.non_domain_enabled_user = cls.client.create_user(
             u2_name, password=alt_password,
             email=cls.alt_email, enabled=False)['user']
-        cls.data.v3_users.append(cls.non_domain_enabled_user)
+        cls.data.users.append(cls.non_domain_enabled_user)
 
     @test.idempotent_id('08f9aabb-dcfe-41d0-8172-82b5fa0bd73d')
     def test_list_user_domains(self):
@@ -79,7 +79,7 @@ class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
         # List users
         body = self.client.list_users()['users']
         fetched_ids = [u['id'] for u in body]
-        missing_users = [u['id'] for u in self.data.v3_users
+        missing_users = [u['id'] for u in self.data.users
                          if u['id'] not in fetched_ids]
         self.assertEqual(0, len(missing_users),
                          "Failed to find user %s in fetched list" %
@@ -88,8 +88,8 @@ class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
     @test.idempotent_id('b4baa3ae-ac00-4b4e-9e27-80deaad7771f')
     def test_get_user(self):
         # Get a user detail
-        user = self.client.show_user(self.data.v3_users[0]['id'])['user']
-        self.assertEqual(self.data.v3_users[0]['id'], user['id'])
-        self.assertEqual(self.data.v3_users[0]['name'], user['name'])
+        user = self.client.show_user(self.data.users[0]['id'])['user']
+        self.assertEqual(self.data.users[0]['id'], user['id'])
+        self.assertEqual(self.data.users[0]['name'], user['name'])
         self.assertEqual(self.alt_email, user['email'])
         self.assertEqual(self.data.domain['id'], user['domain_id'])
