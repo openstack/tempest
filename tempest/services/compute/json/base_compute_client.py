@@ -12,23 +12,31 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest_lib.common import rest_client
-
 from tempest.common import api_version_request
+from tempest.common import api_version_utils
 from tempest import exceptions
+from tempest.services import base_microversion_client
 
 
-class BaseComputeClient(rest_client.RestClient):
-    api_microversion = None
+class BaseComputeClient(base_microversion_client.BaseMicroversionClient):
 
-    def get_headers(self):
-        headers = super(BaseComputeClient, self).get_headers()
-        if self.api_microversion:
-            headers['X-OpenStack-Nova-API-Version'] = self.api_microversion
-        return headers
+    def __init__(self, auth_provider, service, region,
+                 api_microversion_header_name='X-OpenStack-Nova-API-Version',
+                 **kwargs):
+        super(BaseComputeClient, self).__init__(
+            auth_provider, service, region,
+            api_microversion_header_name, **kwargs)
 
-    def set_api_microversion(self, microversion):
-        self.api_microversion = microversion
+    def request(self, method, url, extra_headers=False, headers=None,
+                body=None):
+        resp, resp_body = super(BaseComputeClient, self).request(
+            method, url, extra_headers, headers, body)
+        if self.api_microversion and self.api_microversion != 'latest':
+            api_version_utils.assert_version_header_matches_request(
+                self.api_microversion_header_name,
+                self.api_microversion,
+                resp)
+        return resp, resp_body
 
     def get_schema(self, schema_versions_info):
         """Get JSON schema

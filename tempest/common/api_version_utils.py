@@ -69,3 +69,27 @@ def select_request_microversion(test_min_version, cfg_min_version):
     cfg_version = api_version_request.APIVersionRequest(cfg_min_version)
     max_version = cfg_version if cfg_version >= test_version else test_version
     return max_version.get_string()
+
+
+def assert_version_header_matches_request(api_microversion_header_name,
+                                          api_microversion,
+                                          response_header):
+    """Checks API microversion in resposne header
+
+    Verify whether microversion is present in response header
+    and with specified 'api_microversion' value.
+
+    @param: api_microversion_header_name: Microversion header name
+            Example- "X-OpenStack-Nova-API-Version"
+    @param: api_microversion: Microversion number like "2.10"
+    @param: response_header: Response header where microversion is
+            expected to be present.
+    """
+    api_microversion_header_name = api_microversion_header_name.lower()
+    if (api_microversion_header_name not in response_header or
+        api_microversion != response_header[api_microversion_header_name]):
+        msg = ("Microversion header '%s' with value '%s' does not match in "
+               "response - %s. " % (api_microversion_header_name,
+                                    api_microversion,
+                                    response_header))
+        raise exceptions.InvalidHTTPResponseHeader(msg)

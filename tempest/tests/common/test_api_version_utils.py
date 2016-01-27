@@ -219,3 +219,31 @@ class TestSelectRequestMicroversion(base.TestCase):
 
     def test_both_min_version_equal(self):
         self._test_request_version('2.3', '2.3', expected_version='2.3')
+
+
+class TestMicroversionHeaderMatches(base.TestCase):
+
+    def test_header_matches(self):
+        microversion_header_name = 'x-openstack-xyz-api-version'
+        request_microversion = '2.1'
+        test_respose = {microversion_header_name: request_microversion}
+        api_version_utils.assert_version_header_matches_request(
+            microversion_header_name, request_microversion, test_respose)
+
+    def test_header_does_not_match(self):
+        microversion_header_name = 'x-openstack-xyz-api-version'
+        request_microversion = '2.1'
+        test_respose = {microversion_header_name: '2.2'}
+        self.assertRaises(
+            exceptions.InvalidHTTPResponseHeader,
+            api_version_utils.assert_version_header_matches_request,
+            microversion_header_name, request_microversion, test_respose)
+
+    def test_header_not_present(self):
+        microversion_header_name = 'x-openstack-xyz-api-version'
+        request_microversion = '2.1'
+        test_respose = {}
+        self.assertRaises(
+            exceptions.InvalidHTTPResponseHeader,
+            api_version_utils.assert_version_header_matches_request,
+            microversion_header_name, request_microversion, test_respose)
