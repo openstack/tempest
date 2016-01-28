@@ -255,12 +255,17 @@ class TestNetworkMultiNode(manager.NetworkScenarioTest):
                 name = data_utils.rand_name('server')
                 for i in range(0, 2):
                     try:
-                        server_dict = \
-                            self._create_server(name,
-                                                network,
-                                                zone=aggregate[
-                                                    'availability_zone'])
-                    except Exception:
+                        if CONF.scenario.use_host_aggregates and \
+                                        CONF.scenario.use_host_aggregates is True:
+                            server_dict = \
+                                self._create_server(name,
+                                                    network,
+                                                    zone=aggregate['availability_zone'])
+                        else:
+                            server_dict = self._create_server(name, network)
+
+                    except Exception as e:
+                        LOG.debug("Exception {0}".format(e))
                         LOG.debug("Failed to bring up server")
                         LOG.debug("Retrying")
                         continue
