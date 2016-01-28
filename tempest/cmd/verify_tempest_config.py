@@ -146,7 +146,7 @@ def get_extension_client(os, service):
     extensions_client = {
         'nova': os.extensions_client,
         'cinder': os.volumes_extension_client,
-        'neutron': os.network_client,
+        'neutron': os.network_extensions_client,
         'swift': os.account_client,
     }
     # NOTE (e0ne): Use Cinder API v2 by default because v1 is deprecated

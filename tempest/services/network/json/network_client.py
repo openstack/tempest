@@ -35,14 +35,6 @@ class NetworkClient(base.BaseNetworkClient):
     quotas
     """
 
-    def show_extension(self, ext_alias, **fields):
-        uri = '/extensions/%s' % ext_alias
-        return self.show_resource(uri, **fields)
-
-    def list_extensions(self, **filters):
-        uri = '/extensions'
-        return self.list_resources(uri, **filters)
-
     def create_bulk_network(self, **kwargs):
         """create bulk network
 

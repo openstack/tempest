@@ -41,14 +41,15 @@ class ExtensionsTestJSON(base.BaseNetworkTest):
         expected_alias = [ext for ext in expected_alias if
                           test.is_extension_enabled(ext, 'network')]
         actual_alias = list()
-        extensions = self.client.list_extensions()
+        extensions = self.network_extensions_client.list_extensions()
         list_extensions = extensions['extensions']
         # Show and verify the details of the available extensions
         for ext in list_extensions:
             ext_name = ext['name']
             ext_alias = ext['alias']
             actual_alias.append(ext['alias'])
-            ext_details = self.client.show_extension(ext_alias)
+            ext_details = self.network_extensions_client.show_extension(
+                ext_alias)
             ext_details = ext_details['extension']
 
             self.assertIsNotNone(ext_details)

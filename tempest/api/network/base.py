@@ -69,6 +69,7 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
         super(BaseNetworkTest, cls).setup_clients()
         cls.client = cls.os.network_client
         cls.agents_client = cls.os.network_agents_client
+        cls.network_extensions_client = cls.os.network_extensions_client
         cls.networks_client = cls.os.networks_client
         cls.subnetpools_client = cls.os.subnetpools_client
         cls.subnets_client = cls.os.subnets_client

@@ -201,7 +201,8 @@ class TestDiscovery(base.TestCase):
                                    {'alias': 'fake2'},
                                    {'alias': 'not_fake'}]}
         fake_os = mock.MagicMock()
-        fake_os.network_client.list_extensions = fake_list_extensions
+        fake_os.network_extensions_client.list_extensions = (
+            fake_list_extensions)
         self.useFixture(mockpatch.PatchObject(
             verify_tempest_config, 'get_enabled_extensions',
             return_value=(['fake1', 'fake2', 'fake3'])))
@@ -223,7 +224,8 @@ class TestDiscovery(base.TestCase):
                                    {'alias': 'fake2'},
                                    {'alias': 'not_fake'}]}
         fake_os = mock.MagicMock()
-        fake_os.network_client.list_extensions = fake_list_extensions
+        fake_os.network_extensions_client.list_extensions = (
+            fake_list_extensions)
         self.useFixture(mockpatch.PatchObject(
             verify_tempest_config, 'get_enabled_extensions',
             return_value=(['all'])))
