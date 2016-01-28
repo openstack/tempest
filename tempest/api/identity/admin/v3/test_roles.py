@@ -103,6 +103,9 @@ class RolesV3TestJSON(base.BaseIdentityV3AdminTest):
         self._list_assertions(roles, self.fetched_role_ids,
                               self.role['id'])
 
+        self.client.check_user_role_existence_on_project(
+            self.project['id'], self.user_body['id'], self.role['id'])
+
         self.client.delete_role_from_user_on_project(
             self.project['id'], self.user_body['id'], self.role['id'])
 
@@ -119,6 +122,9 @@ class RolesV3TestJSON(base.BaseIdentityV3AdminTest):
 
         self._list_assertions(roles, self.fetched_role_ids,
                               self.role['id'])
+
+        self.client.check_user_role_existence_on_domain(
+            self.domain['id'], self.user_body['id'], self.role['id'])
 
         self.client.delete_role_from_user_on_domain(
             self.domain['id'], self.user_body['id'], self.role['id'])
@@ -150,6 +156,10 @@ class RolesV3TestJSON(base.BaseIdentityV3AdminTest):
         roles = body['token']['roles']
         self.assertEqual(len(roles), 1)
         self.assertEqual(roles[0]['id'], self.role['id'])
+
+        self.client.check_role_from_group_on_project_existence(
+            self.project['id'], self.group_body['id'], self.role['id'])
+
         # Revoke role to group on project
         self.client.delete_role_from_group_on_project(
             self.project['id'], self.group_body['id'], self.role['id'])
@@ -167,6 +177,9 @@ class RolesV3TestJSON(base.BaseIdentityV3AdminTest):
 
         self._list_assertions(roles, self.fetched_role_ids,
                               self.role['id'])
+
+        self.client.check_role_from_group_on_domain_existence(
+            self.domain['id'], self.group_body['id'], self.role['id'])
 
         self.client.delete_role_from_group_on_domain(
             self.domain['id'], self.group_body['id'], self.role['id'])

@@ -88,3 +88,9 @@ class GroupsClient(service_client.ServiceClient):
         resp, body = self.delete('groups/%s/users/%s' % (group_id, user_id))
         self.expected_success(204, resp.status)
         return service_client.ResponseBody(resp, body)
+
+    def check_group_user_existence(self, group_id, user_id):
+        """Check user in group."""
+        resp, body = self.head('groups/%s/users/%s' % (group_id, user_id))
+        self.expected_success(204, resp.status)
+        return service_client.ResponseBody(resp)

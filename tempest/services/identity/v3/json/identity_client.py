@@ -352,6 +352,22 @@ class IdentityV3Client(service_client.ServiceClient):
         self.expected_success(204, resp.status)
         return service_client.ResponseBody(resp, body)
 
+    def check_user_role_existence_on_project(self, project_id,
+                                             user_id, role_id):
+        """Check role of a user on a project."""
+        resp, body = self.head('projects/%s/users/%s/roles/%s' %
+                               (project_id, user_id, role_id))
+        self.expected_success(204, resp.status)
+        return service_client.ResponseBody(resp)
+
+    def check_user_role_existence_on_domain(self, domain_id,
+                                            user_id, role_id):
+        """Check role of a user on a domain."""
+        resp, body = self.head('domains/%s/users/%s/roles/%s' %
+                               (domain_id, user_id, role_id))
+        self.expected_success(204, resp.status)
+        return service_client.ResponseBody(resp)
+
     def assign_group_role_on_project(self, project_id, group_id, role_id):
         """Add roles to a user on a project."""
         resp, body = self.put('projects/%s/groups/%s/roles/%s' %
@@ -395,6 +411,22 @@ class IdentityV3Client(service_client.ServiceClient):
                                  (domain_id, group_id, role_id))
         self.expected_success(204, resp.status)
         return service_client.ResponseBody(resp, body)
+
+    def check_role_from_group_on_project_existence(self, project_id,
+                                                   group_id, role_id):
+        """Check role of a user on a project."""
+        resp, body = self.head('projects/%s/groups/%s/roles/%s' %
+                               (project_id, group_id, role_id))
+        self.expected_success(204, resp.status)
+        return service_client.ResponseBody(resp)
+
+    def check_role_from_group_on_domain_existence(self, domain_id,
+                                                  group_id, role_id):
+        """Check role of a user on a domain."""
+        resp, body = self.head('domains/%s/groups/%s/roles/%s' %
+                               (domain_id, group_id, role_id))
+        self.expected_success(204, resp.status)
+        return service_client.ResponseBody(resp)
 
     def create_trust(self, **kwargs):
         """Creates a trust.
