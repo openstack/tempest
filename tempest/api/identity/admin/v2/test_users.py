@@ -95,27 +95,29 @@ class UsersTestJSON(base.BaseIdentityV2AdminTest):
         # Valid user's token is authenticated
         self.data.setup_test_user()
         # Get a token
-        self.token_client.auth(self.data.test_user, self.data.test_password,
-                               self.data.test_tenant)
+        self.token_client.auth(self.data.user['name'],
+                               self.data.user_password,
+                               self.data.tenant['name'])
         # Re-auth
-        self.token_client.auth(self.data.test_user,
-                               self.data.test_password,
-                               self.data.test_tenant)
+        self.token_client.auth(self.data.user['name'],
+                               self.data.user_password,
+                               self.data.tenant['name'])
 
     @test.idempotent_id('5d1fa498-4c2d-4732-a8fe-2b054598cfdd')
     def test_authentication_request_without_token(self):
         # Request for token authentication with a valid token in header
         self.data.setup_test_user()
-        self.token_client.auth(self.data.test_user, self.data.test_password,
-                               self.data.test_tenant)
+        self.token_client.auth(self.data.user['name'],
+                               self.data.user_password,
+                               self.data.tenant['name'])
         # Get the token of the current client
         token = self.client.auth_provider.get_token()
         # Delete the token from database
         self.client.delete_token(token)
         # Re-auth
-        self.token_client.auth(self.data.test_user,
-                               self.data.test_password,
-                               self.data.test_tenant)
+        self.token_client.auth(self.data.user['name'],
+                               self.data.user_password,
+                               self.data.tenant['name'])
         self.client.auth_provider.clear_auth()
 
     @test.idempotent_id('a149c02e-e5e0-4b89-809e-7e8faf33ccda')
@@ -124,8 +126,8 @@ class UsersTestJSON(base.BaseIdentityV2AdminTest):
         self.data.setup_test_user()
         users = self.users_client.list_users()['users']
         self.assertThat([u['name'] for u in users],
-                        matchers.Contains(self.data.test_user),
-                        "Could not find %s" % self.data.test_user)
+                        matchers.Contains(self.data.user['name']),
+                        "Could not find %s" % self.data.user['name'])
 
     @test.idempotent_id('6e317209-383a-4bed-9f10-075b7c82c79a')
     def test_list_users_for_tenant(self):
@@ -164,9 +166,9 @@ class UsersTestJSON(base.BaseIdentityV2AdminTest):
         # Return list of users on tenant when roles are assigned to users
         self.data.setup_test_user()
         self.data.setup_test_role()
-        user = self.get_user_by_name(self.data.test_user)
-        tenant = self.get_tenant_by_name(self.data.test_tenant)
-        role = self.get_role_by_name(self.data.test_role)
+        user = self.get_user_by_name(self.data.user['name'])
+        tenant = self.get_tenant_by_name(self.data.tenant['name'])
+        role = self.get_role_by_name(self.data.role['name'])
         # Assigning roles to two users
         user_ids = list()
         fetched_user_ids = list()
@@ -208,6 +210,6 @@ class UsersTestJSON(base.BaseIdentityV2AdminTest):
 
         # Validate the updated password
         # Get a token
-        body = self.token_client.auth(self.data.test_user, new_pass,
-                                      self.data.test_tenant)
+        body = self.token_client.auth(self.data.user['name'], new_pass,
+                                      self.data.tenant['name'])
         self.assertTrue('id' in body['token'])

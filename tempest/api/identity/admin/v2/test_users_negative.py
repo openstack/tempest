@@ -66,8 +66,8 @@ class UsersNegativeTestJSON(base.BaseIdentityV2AdminTest):
         # Duplicate user should not be created
         self.data.setup_test_user()
         self.assertRaises(lib_exc.Conflict, self.users_client.create_user,
-                          self.data.test_user, self.data.test_password,
-                          self.data.tenant['id'], self.data.test_email)
+                          self.data.user['name'], self.data.user_password,
+                          self.data.tenant['id'], self.data.user['email'])
 
     @test.attr(type=['negative'])
     @test.idempotent_id('0132cc22-7c4f-42e1-9e50-ac6aad31d59a')
@@ -173,22 +173,22 @@ class UsersNegativeTestJSON(base.BaseIdentityV2AdminTest):
     def test_authentication_for_disabled_user(self):
         # Disabled user's token should not get authenticated
         self.data.setup_test_user()
-        self.disable_user(self.data.test_user)
+        self.disable_user(self.data.user['name'])
         self.assertRaises(lib_exc.Unauthorized, self.token_client.auth,
-                          self.data.test_user,
-                          self.data.test_password,
-                          self.data.test_tenant)
+                          self.data.user['name'],
+                          self.data.user_password,
+                          self.data.tenant['name'])
 
     @test.attr(type=['negative'])
     @test.idempotent_id('440a7a8d-9328-4b7b-83e0-d717010495e4')
     def test_authentication_when_tenant_is_disabled(self):
         # User's token for a disabled tenant should not be authenticated
         self.data.setup_test_user()
-        self.disable_tenant(self.data.test_tenant)
+        self.disable_tenant(self.data.tenant['name'])
         self.assertRaises(lib_exc.Unauthorized, self.token_client.auth,
-                          self.data.test_user,
-                          self.data.test_password,
-                          self.data.test_tenant)
+                          self.data.user['name'],
+                          self.data.user_password,
+                          self.data.tenant['name'])
 
     @test.attr(type=['negative'])
     @test.idempotent_id('921f1ad6-7907-40b8-853f-637e7ee52178')
@@ -196,8 +196,8 @@ class UsersNegativeTestJSON(base.BaseIdentityV2AdminTest):
         # User's token for an invalid tenant should not be authenticated
         self.data.setup_test_user()
         self.assertRaises(lib_exc.Unauthorized, self.token_client.auth,
-                          self.data.test_user,
-                          self.data.test_password,
+                          self.data.user['name'],
+                          self.data.user_password,
                           'junktenant1234')
 
     @test.attr(type=['negative'])
@@ -206,8 +206,8 @@ class UsersNegativeTestJSON(base.BaseIdentityV2AdminTest):
         # Non-existent user's token should not get authenticated
         self.data.setup_test_user()
         self.assertRaises(lib_exc.Unauthorized, self.token_client.auth,
-                          'junkuser123', self.data.test_password,
-                          self.data.test_tenant)
+                          'junkuser123', self.data.user_password,
+                          self.data.tenant['name'])
 
     @test.attr(type=['negative'])
     @test.idempotent_id('d5308b33-3574-43c3-8d87-1c090c5e1eca')
@@ -215,8 +215,8 @@ class UsersNegativeTestJSON(base.BaseIdentityV2AdminTest):
         # User's token with invalid password should not be authenticated
         self.data.setup_test_user()
         self.assertRaises(lib_exc.Unauthorized, self.token_client.auth,
-                          self.data.test_user, 'junkpass1234',
-                          self.data.test_tenant)
+                          self.data.user['name'], 'junkpass1234',
+                          self.data.tenant['name'])
 
     @test.attr(type=['negative'])
     @test.idempotent_id('284192ce-fb7c-4909-a63b-9a502e0ddd11')
