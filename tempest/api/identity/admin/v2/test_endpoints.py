@@ -36,11 +36,12 @@ class EndPointsTestJSON(base.BaseIdentityV2AdminTest):
         for i in range(2):
             region = data_utils.rand_name('region')
             url = data_utils.rand_url()
-            endpoint = cls.client.create_endpoint(cls.service_id,
-                                                  region,
-                                                  publicurl=url,
-                                                  adminurl=url,
-                                                  internalurl=url)['endpoint']
+            endpoint = cls.endpoints_client.create_endpoint(
+                cls.service_id,
+                region,
+                publicurl=url,
+                adminurl=url,
+                internalurl=url)['endpoint']
             # list_endpoints() will return 'enabled' field
             endpoint['enabled'] = True
             cls.setup_endpoints.append(endpoint)
@@ -48,7 +49,7 @@ class EndPointsTestJSON(base.BaseIdentityV2AdminTest):
     @classmethod
     def resource_cleanup(cls):
         for e in cls.setup_endpoints:
-            cls.client.delete_endpoint(e['id'])
+            cls.endpoints_client.delete_endpoint(e['id'])
         for s in cls.service_ids:
             cls.services_client.delete_service(s)
         super(EndPointsTestJSON, cls).resource_cleanup()
@@ -56,7 +57,7 @@ class EndPointsTestJSON(base.BaseIdentityV2AdminTest):
     @test.idempotent_id('11f590eb-59d8-4067-8b2b-980c7f387f51')
     def test_list_endpoints(self):
         # Get a list of endpoints
-        fetched_endpoints = self.client.list_endpoints()['endpoints']
+        fetched_endpoints = self.endpoints_client.list_endpoints()['endpoints']
         # Asserting LIST endpoints
         missing_endpoints =\
             [e for e in self.setup_endpoints if e not in fetched_endpoints]
@@ -68,22 +69,23 @@ class EndPointsTestJSON(base.BaseIdentityV2AdminTest):
     def test_create_list_delete_endpoint(self):
         region = data_utils.rand_name('region')
         url = data_utils.rand_url()
-        endpoint = self.client.create_endpoint(self.service_id,
-                                               region,
-                                               publicurl=url,
-                                               adminurl=url,
-                                               internalurl=url)['endpoint']
+        endpoint = self.endpoints_client.create_endpoint(
+            self.service_id,
+            region,
+            publicurl=url,
+            adminurl=url,
+            internalurl=url)['endpoint']
         # Asserting Create Endpoint response body
         self.assertIn('id', endpoint)
         self.assertEqual(region, endpoint['region'])
         self.assertEqual(url, endpoint['publicurl'])
         # Checking if created endpoint is present in the list of endpoints
-        fetched_endpoints = self.client.list_endpoints()['endpoints']
+        fetched_endpoints = self.endpoints_client.list_endpoints()['endpoints']
         fetched_endpoints_id = [e['id'] for e in fetched_endpoints]
         self.assertIn(endpoint['id'], fetched_endpoints_id)
         # Deleting the endpoint created in this method
-        self.client.delete_endpoint(endpoint['id'])
+        self.endpoints_client.delete_endpoint(endpoint['id'])
         # Checking whether endpoint is deleted successfully
-        fetched_endpoints = self.client.list_endpoints()['endpoints']
+        fetched_endpoints = self.endpoints_client.list_endpoints()['endpoints']
         fetched_endpoints_id = [e['id'] for e in fetched_endpoints]
         self.assertNotIn(endpoint['id'], fetched_endpoints_id)
