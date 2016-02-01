@@ -26,57 +26,71 @@ Before running the tests:
 * replace parameter values with correct ones for your OS installation
 
 [DEFAULT]
-debug = true              # Leave it as is
-use_stderr = false        # Leave it as is
-log_file = tempest.log    # Leave it as is
+debug = true
+use_stderr = false
+log_file = tempest.log
 
 [auth]
-tempest_roles = _member_          # Leave it as is
-allow_tenant_isolation = True     # Leave it as is
+tempest_roles = _member_
+allow_tenant_isolation = True
 
 [compute]
 ssh_auth_method = 'configured'
-image_ssh_user = 'root'           # username to log into an instance.
-image_ssh_password = 'ubuntu'     # password to log into an instance
-flavor_ref = 3 # medium           # flavor id. The flavor should have >= 4Gb of RAM
-flavor_ref_alt = 3	# medium    # Same as above
-image_ref = 60ad4b1e-c5d4-49ad-a9ca-6374c1d8b3f6      # Image id. Used to boot an instance
-image_ref_alt = 60ad4b1e-c5d4-49ad-a9ca-6374c1d8b3f6  # Same as above
+# username to log into an instance.
+image_ssh_user = 'root'
+# password to log into an instance
+image_ssh_password = 'ubuntu'
+# flavor id. The flavor should have >= 4Gb of RAM
+flavor_ref = 3
+flavor_ref_alt = 3
+# Image id. Used to boot an instance
+image_ref = 60ad4b1e-c5d4-49ad-a9ca-6374c1d8b3f6
+# Same as above
+image_ref_alt = 60ad4b1e-c5d4-49ad-a9ca-6374c1d8b3f6
 
 [identity]
-username = demo               # Leave it as is
-tenant_name = demo            # Leave it as is
-password = demo               # Leave it as is
-alt_username = alt_demo       # Leave it as is
-alt_tenant_name = alt_demo    # Leave it as is
-alt_password = secrete        # Leave it as is
+username = demo
+tenant_name = demo
+password = demo
+alt_username = alt_demo
+alt_tenant_name = alt_demo
+alt_password = secrete
 # There should be OS admin user (with admin role) credentials.
 # It will be used by the tests to create another non-admin users
-admin_username = admin        # Change it if needed
-admin_tenant_name = admin     # Change it if needed
-admin_domain_name = Default   # Change it if needed
+admin_username = admin
+admin_tenant_name = admin
+admin_domain_name = Default
 disable_ssl_certificate_validation = false
-uri = http://172.29.173.85:5000/v2.0/                         # Set correct IP address
+# Set correct IP address
+uri = http://172.29.173.85:5000/v2.0/
 auth_version = v2
-admin_password = 1567c9ff7c66376a333d28dfa1a5a3cd717156c7     # Set correct admin password
-uri_v3 = http://172.29.173.85:5000/v3/                        # Set correct IP address
-admin_tenant_id = 725d6fa98000418f88e47d283d8f1efb            # Set correct admin tenant id
+# Set correct admin password
+admin_password = 1567c9ff7c66376a333d28dfa1a5a3cd717156c7
+# Set correct IP address
+uri_v3 = http://172.29.173.85:5000/v3/
+# Set correct admin tenant id
+admin_tenant_id = 725d6fa98000418f88e47d283d8f1efb
 
 [service_available]
 neutron = True
 
 [network]
-public_network_id = 1c87c1d3-bd1a-4738-bd55-99a84fa45c87    # id of your public network
+# id of your public network
+public_network_id = 1c87c1d3-bd1a-4738-bd55-99a84fa45c87
 
 [ucsm]
-ucsm_ip=10.30.119.66              # UCSM VIP
-ucsm_username=admin               # UCSM username
-ucsm_password=cisco               # UCSM ppassword
+# UCSM VIP
+ucsm_ip=10.30.119.66
+# UCSM username
+ucsm_username=admin
+# UCSM ppassword
+ucsm_password=cisco
 # Dictionary of <hostname> VS <UCSM service profile name>
 ucsm_host_dict=overcloud-controller-0.localdomain:QA2,overcloud-compute-0.localdomain:QA3,overcloud-compute-1.localdomain:QA4
 network_node_list=overcloud-controller-0.localdomain, overcloud-controller-1.localdomain  # list of hostnames of a network nodes
 eth_names=eth0,eth1
-virtual_functions_amount=4    # Amount of "SR-IOV ports"/"Dynamic VNICs"/"Virtual functions"
+# Amount of "SR-IOV ports"/"Dynamic VNICs"/"Virtual functions"
+virtual_functions_amount=4
 
 
 Use environment variables to set location of "tempest.conf"
@@ -104,7 +118,6 @@ import time
 from oslo_log import log
 from tempest_lib.common.utils import data_utils
 
-from tempest.api.network import base
 from tempest.common import waiters
 from tempest import config
 from tempest.scenario import manager
