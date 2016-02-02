@@ -51,11 +51,11 @@ class TestVersionSkipLogic(base.TestCase):
         self._test_version('2.8', '2.9', '2.3', '2.7', expected_skip=True)
 
     def test_version_min_greater_than_max(self):
-        self.assertRaises(exceptions.InvalidConfiguration,
+        self.assertRaises(exceptions.InvalidAPIVersionRange,
                           self._test_version, '2.8', '2.7', '2.3', '2.7')
 
     def test_cfg_version_min_greater_than_max(self):
-        self.assertRaises(exceptions.InvalidConfiguration,
+        self.assertRaises(exceptions.InvalidAPIVersionRange,
                           self._test_version, '2.2', '2.7', '2.9', '2.7')
 
 
