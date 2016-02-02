@@ -205,13 +205,7 @@ class BaseDataGenerator(object):
         self.users_client = users_client or client
         self.roles_client = roles_client or client
 
-        self.test_user = ''
-        self.test_password = ''
-        self.test_tenant = ''
-        self.test_project = ''
-        self.test_role = ''
-        self.test_email = ''
-
+        self.user_password = None
         self.user = None
         self.tenant = None
         self.project = None
@@ -225,18 +219,17 @@ class BaseDataGenerator(object):
         self.domains = []
 
     def _create_test_user(self, **kwargs):
-        self.test_user = data_utils.rand_name('test_user')
-        self.test_password = data_utils.rand_password()
-        self.test_email = self.test_user + '@testmail.tm'
+        username = data_utils.rand_name('test_user')
+        self.user_password = data_utils.rand_password()
         self.user = self.users_client.create_user(
-            self.test_user, password=self.test_password,
-            email=self.test_email, **kwargs)['user']
+            username, password=self.user_password,
+            email=username + '@testmail.tm', **kwargs)['user']
         self.users.append(self.user)
 
     def setup_test_role(self):
         """Set up a test role."""
-        self.test_role = data_utils.rand_name('role')
-        self.role = self.roles_client.create_role(name=self.test_role)['role']
+        self.role = self.roles_client.create_role(
+            name=data_utils.rand_name('test_role'))['role']
         self.roles.append(self.role)
 
     @staticmethod
@@ -272,9 +265,8 @@ class DataGeneratorV2(BaseDataGenerator):
 
     def setup_test_tenant(self):
         """Set up a test tenant."""
-        self.test_tenant = data_utils.rand_name('test_tenant')
         self.tenant = self.projects_client.create_tenant(
-            name=self.test_tenant,
+            name=data_utils.rand_name('test_tenant'),
             description=data_utils.rand_name('desc'))['tenant']
         self.tenants.append(self.tenant)
 
@@ -288,9 +280,8 @@ class DataGeneratorV3(BaseDataGenerator):
 
     def setup_test_project(self):
         """Set up a test project."""
-        self.test_project = data_utils.rand_name('test_project')
         self.project = self.projects_client.create_project(
-            name=self.test_project,
+            name=data_utils.rand_name('test_project'),
             description=data_utils.rand_name('desc'))['project']
         self.projects.append(self.project)
 
