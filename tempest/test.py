@@ -293,7 +293,7 @@ class BaseTestCase(testtools.testcase.WithAttributes,
                     LOG.exception("teardown of %s failed: %s" % (name, te))
                 if not etype:
                     etype, value, trace = sys_exec_info
-        # If exceptions were raised during teardown, an not before, re-raise
+        # If exceptions were raised during teardown, and not before, re-raise
         # the first one
         if re_raise and etype is not None:
             try:
@@ -600,7 +600,7 @@ class BaseTestCase(testtools.testcase.WithAttributes,
         networks_client = cls.get_client_manager().compute_networks_client
         cred_provider = cls._get_credentials_provider()
         # In case of nova network, isolated tenants are not able to list the
-        # network configured in fixed_network_name, even if the can use it
+        # network configured in fixed_network_name, even if they can use it
         # for their servers, so using an admin network client to validate
         # the network name
         if (not CONF.service_available.neutron and
@@ -790,9 +790,9 @@ class NegativeAutoTest(BaseTestCase):
 
     @classmethod
     def set_resource(cls, name, resource):
-        """Register a resoruce for a test
+        """Register a resource for a test
 
-        This function can be used in setUpClass context to register a resoruce
+        This function can be used in setUpClass context to register a resource
         for a test.
 
         :param name: The name of the kind of resource such as "flavor", "role",
