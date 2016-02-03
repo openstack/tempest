@@ -80,9 +80,9 @@ class TestStampPattern(manager.ScenarioTest):
         self.assertEqual(snapshot_name, snapshot['display_name'])
         return snapshot
 
-    def _wait_for_volume_available_on_the_system(self, server_or_ip,
+    def _wait_for_volume_available_on_the_system(self, ip_address,
                                                  private_key):
-        ssh = self.get_remote_client(server_or_ip, private_key=private_key)
+        ssh = self.get_remote_client(ip_address, private_key=private_key)
 
         def _func():
             part = ssh.get_partitions()
@@ -113,7 +113,7 @@ class TestStampPattern(manager.ScenarioTest):
             wait_until='ACTIVE')
 
         # create and add floating IP to server1
-        ip_for_server = self.get_server_or_ip(server)
+        ip_for_server = self.get_server_ip(server)
 
         self.nova_volume_attach(server, volume)
         self._wait_for_volume_available_on_the_system(ip_for_server,
@@ -140,7 +140,7 @@ class TestStampPattern(manager.ScenarioTest):
             security_groups=security_group)
 
         # create and add floating IP to server_from_snapshot
-        ip_for_snapshot = self.get_server_or_ip(server_from_snapshot)
+        ip_for_snapshot = self.get_server_ip(server_from_snapshot)
 
         # attach volume2 to instance2
         self.nova_volume_attach(server_from_snapshot, volume_from_snapshot)

@@ -80,7 +80,7 @@ class TestShelveInstance(manager.ScenarioTest):
                 security_groups=security_groups,
                 wait_until='ACTIVE')
 
-        instance_ip = self.get_server_or_ip(server)
+        instance_ip = self.get_server_ip(server)
         timestamp = self.create_timestamp(instance_ip,
                                           private_key=keypair['private_key'])
 

@@ -352,25 +352,15 @@ class ScenarioTest(tempest.test.BaseTestCase):
 
         return secgroup
 
-    def get_remote_client(self, server_or_ip, username=None, private_key=None):
+    def get_remote_client(self, ip_address, username=None, private_key=None):
         """Get a SSH client to a remote server
 
-        @param server_or_ip a server object as returned by Tempest compute
-            client or an IP address to connect to
+        @param ip_address the server floating or fixed IP address to use
+                          for ssh validation
         @param username name of the Linux account on the remote server
         @param private_key the SSH private key to use
         @return a RemoteClient object
         """
-        if isinstance(server_or_ip, six.string_types):
-            ip = server_or_ip
-        else:
-            addrs = server_or_ip['addresses'][CONF.validation.network_for_ssh]
-            try:
-                ip = (addr['addr'] for addr in addrs if
-                      netaddr.valid_ipv4(addr['addr'])).next()
-            except StopIteration:
-                raise lib_exc.NotFound("No IPv4 addresses to use for SSH to "
-                                       "remote server.")
 
         if username is None:
             username = CONF.validation.image_ssh_user
@@ -383,14 +373,15 @@ class ScenarioTest(tempest.test.BaseTestCase):
         else:
             password = CONF.validation.image_ssh_password
             private_key = None
-        linux_client = remote_client.RemoteClient(ip, username,
+        linux_client = remote_client.RemoteClient(ip_address, username,
                                                   pkey=private_key,
                                                   password=password)
         try:
             linux_client.validate_authentication()
         except Exception as e:
             message = ('Initializing SSH connection to %(ip)s failed. '
-                       'Error: %(error)s' % {'ip': ip, 'error': e})
+                       'Error: %(error)s' % {'ip_address': ip_address,
+                                             'error': e})
             caller = misc_utils.find_test_caller()
             if caller:
                 message = '(%s) %s' % (caller, message)
@@ -628,9 +619,9 @@ class ScenarioTest(tempest.test.BaseTestCase):
             floating_ip['ip'], thing['id'])
         return floating_ip
 
-    def create_timestamp(self, server_or_ip, dev_name=None, mount_path='/mnt',
+    def create_timestamp(self, ip_address, dev_name=None, mount_path='/mnt',
                          private_key=None):
-        ssh_client = self.get_remote_client(server_or_ip,
+        ssh_client = self.get_remote_client(ip_address,
                                             private_key=private_key)
         if dev_name is not None:
             ssh_client.make_fs(dev_name)
@@ -643,9 +634,9 @@ class ScenarioTest(tempest.test.BaseTestCase):
             ssh_client.umount(mount_path)
         return timestamp
 
-    def get_timestamp(self, server_or_ip, dev_name=None, mount_path='/mnt',
+    def get_timestamp(self, ip_address, dev_name=None, mount_path='/mnt',
                       private_key=None):
-        ssh_client = self.get_remote_client(server_or_ip,
+        ssh_client = self.get_remote_client(ip_address,
                                             private_key=private_key)
         if dev_name is not None:
             ssh_client.mount(dev_name, mount_path)
@@ -655,12 +646,25 @@ class ScenarioTest(tempest.test.BaseTestCase):
             ssh_client.umount(mount_path)
         return timestamp
 
-    def get_server_or_ip(self, server):
+    def get_server_ip(self, server):
+        """Get the server fixed or floating IP.
+
+        Based on the configuration we're in, return a correct ip
+        address for validating that a guest is up.
+        """
         if CONF.validation.connect_method == 'floating':
-            ip = self.create_floating_ip(server)['ip']
+            # The tests calling this method don't have a floating IP
+            # and can't make use of the validattion resources. So the
+            # method is creating the floating IP there.
+            return self.create_floating_ip(server)['ip']
+        elif CONF.validation.connect_method == 'fixed':
+            addresses = server['addresses'][CONF.validation.network_for_ssh]
+            for address in addresses:
+                if address['version'] == CONF.validation.ip_version_for_ssh:
+                    return address['addr']
+            raise exceptions.ServerUnreachable()
         else:
-            ip = server
-        return ip
+            raise exceptions.InvalidConfiguration()
 
 
 class NetworkScenarioTest(ScenarioTest):
@@ -1315,13 +1319,6 @@ class BaremetalScenarioTest(ScenarioTest):
 
     def add_keypair(self):
         self.keypair = self.create_keypair()
-
-    def verify_connectivity(self, ip=None):
-        if ip:
-            dest = self.get_remote_client(ip)
-        else:
-            dest = self.get_remote_client(self.instance)
-        dest.validate_authentication()
 
     def boot_instance(self):
         self.instance = self.create_server(

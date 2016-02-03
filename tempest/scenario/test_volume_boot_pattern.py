@@ -114,7 +114,7 @@ class TestVolumeBootPattern(manager.ScenarioTest):
                                                        keypair, security_group)
 
         # write content to volume on instance
-        ip_instance_1st = self.get_server_or_ip(instance_1st)
+        ip_instance_1st = self.get_server_ip(instance_1st)
         timestamp = self.create_timestamp(ip_instance_1st,
                                           private_key=keypair['private_key'])
 
@@ -126,7 +126,7 @@ class TestVolumeBootPattern(manager.ScenarioTest):
                                                        keypair, security_group)
 
         # check the content of written file
-        ip_instance_2nd = self.get_server_or_ip(instance_2nd)
+        ip_instance_2nd = self.get_server_ip(instance_2nd)
         timestamp2 = self.get_timestamp(ip_instance_2nd,
                                         private_key=keypair['private_key'])
         self.assertEqual(timestamp, timestamp2)
@@ -141,7 +141,7 @@ class TestVolumeBootPattern(manager.ScenarioTest):
                                             keypair, security_group))
 
         # check the content of written file
-        server_from_snapshot_ip = self.get_server_or_ip(server_from_snapshot)
+        server_from_snapshot_ip = self.get_server_ip(server_from_snapshot)
         timestamp3 = self.get_timestamp(server_from_snapshot_ip,
                                         private_key=keypair['private_key'])
         self.assertEqual(timestamp, timestamp3)
