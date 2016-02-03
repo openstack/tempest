@@ -44,8 +44,8 @@ class ListProjectsTestJSON(base.BaseIdentityV3AdminTest):
         list_projects = self.client.list_projects()['projects']
 
         for p in self.project_ids:
-            get_project = self.client.get_project(p)['project']
-            self.assertIn(get_project, list_projects)
+            show_project = self.client.show_project(p)['project']
+            self.assertIn(show_project, list_projects)
 
     @test.idempotent_id('fab13f3c-f6a6-4b9f-829b-d32fd44fdf10')
     def test_list_projects_with_domains(self):

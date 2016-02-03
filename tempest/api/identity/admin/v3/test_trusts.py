@@ -139,8 +139,8 @@ class BaseTrustsV3Test(base.BaseIdentityV3AdminTest):
             self.assertEqual(self.delegated_role, trust['roles'][0]['name'])
             self.assertEqual(1, len(trust['roles']))
 
-    def get_trust(self):
-        trust_get = self.trustor_client.get_trust(self.trust_id)['trust']
+    def show_trust(self):
+        trust_get = self.trustor_client.show_trust(self.trust_id)['trust']
         return trust_get
 
     def validate_role(self, role):
@@ -155,12 +155,12 @@ class BaseTrustsV3Test(base.BaseIdentityV3AdminTest):
 
     def check_trust_roles(self):
         # Check we find the delegated role
-        roles_get = self.trustor_client.get_trust_roles(
+        roles_get = self.trustor_client.list_trust_roles(
             self.trust_id)['roles']
         self.assertEqual(1, len(roles_get))
         self.validate_role(roles_get[0])
 
-        role_get = self.trustor_client.get_trust_role(
+        role_get = self.trustor_client.show_trust_role(
             self.trust_id, self.delegated_role_id)['role']
         self.validate_role(role_get)
 
@@ -169,7 +169,7 @@ class BaseTrustsV3Test(base.BaseIdentityV3AdminTest):
 
         # And that we don't find not_delegated_role
         self.assertRaises(lib_exc.NotFound,
-                          self.trustor_client.get_trust_role,
+                          self.trustor_client.show_trust_role,
                           self.trust_id,
                           self.not_delegated_role_id)
 
@@ -181,7 +181,7 @@ class BaseTrustsV3Test(base.BaseIdentityV3AdminTest):
     def delete_trust(self):
         self.trustor_client.delete_trust(self.trust_id)
         self.assertRaises(lib_exc.NotFound,
-                          self.trustor_client.get_trust,
+                          self.trustor_client.show_trust,
                           self.trust_id)
         self.trust_id = None
 
@@ -200,7 +200,7 @@ class TrustsV3TestJSON(BaseTrustsV3Test):
         trust = self.create_trust()
         self.validate_trust(trust)
 
-        trust_get = self.get_trust()
+        trust_get = self.show_trust()
         self.validate_trust(trust_get)
 
         self.check_trust_roles()
@@ -212,7 +212,7 @@ class TrustsV3TestJSON(BaseTrustsV3Test):
         trust = self.create_trust(impersonate=False)
         self.validate_trust(trust, impersonate=False)
 
-        trust_get = self.get_trust()
+        trust_get = self.show_trust()
         self.validate_trust(trust_get, impersonate=False)
 
         self.check_trust_roles()
@@ -236,7 +236,7 @@ class TrustsV3TestJSON(BaseTrustsV3Test):
         trust = self.create_trust(expires=expires_str)
         self.validate_trust(trust, expires=expires_str)
 
-        trust_get = self.get_trust()
+        trust_get = self.show_trust()
 
         self.validate_trust(trust_get, expires=expires_str)
 
@@ -255,7 +255,7 @@ class TrustsV3TestJSON(BaseTrustsV3Test):
     @test.idempotent_id('6268b345-87ca-47c0-9ce3-37792b43403a')
     def test_get_trusts_query(self):
         self.create_trust()
-        trusts_get = self.trustor_client.get_trusts(
+        trusts_get = self.trustor_client.list_trusts(
             trustor_user_id=self.trustor_user_id)['trusts']
         self.assertEqual(1, len(trusts_get))
         self.validate_trust(trusts_get[0], summary=True)
@@ -264,7 +264,7 @@ class TrustsV3TestJSON(BaseTrustsV3Test):
     @test.idempotent_id('4773ebd5-ecbf-4255-b8d8-b63e6f72b65d')
     def test_get_trusts_all(self):
         self.create_trust()
-        trusts_get = self.client.get_trusts()['trusts']
+        trusts_get = self.client.list_trusts()['trusts']
         trusts = [t for t in trusts_get
                   if t['id'] == self.trust_id]
         self.assertEqual(1, len(trusts))

@@ -149,7 +149,7 @@ class IdentityV3Client(service_client.ServiceClient):
         return service_client.ResponseBody(resp, body)
 
     def update_project(self, project_id, **kwargs):
-        body = self.get_project(project_id)['project']
+        body = self.show_project(project_id)['project']
         name = kwargs.get('name', body['name'])
         desc = kwargs.get('description', body['description'])
         en = kwargs.get('enabled', body['enabled'])
@@ -167,7 +167,7 @@ class IdentityV3Client(service_client.ServiceClient):
         body = json.loads(body)
         return service_client.ResponseBody(resp, body)
 
-    def get_project(self, project_id):
+    def show_project(self, project_id):
         """GET a Project."""
         resp, body = self.get("projects/%s" % project_id)
         self.expected_success(200, resp.status)
@@ -264,7 +264,7 @@ class IdentityV3Client(service_client.ServiceClient):
 
     def update_domain(self, domain_id, **kwargs):
         """Updates a domain."""
-        body = self.get_domain(domain_id)['domain']
+        body = self.show_domain(domain_id)['domain']
         description = kwargs.get('description', body['description'])
         en = kwargs.get('enabled', body['enabled'])
         name = kwargs.get('name', body['name'])
@@ -279,7 +279,7 @@ class IdentityV3Client(service_client.ServiceClient):
         body = json.loads(body)
         return service_client.ResponseBody(resp, body)
 
-    def get_domain(self, domain_id):
+    def show_domain(self, domain_id):
         """Get Domain details."""
         resp, body = self.get('domains/%s' % domain_id)
         self.expected_success(200, resp.status)
@@ -446,7 +446,7 @@ class IdentityV3Client(service_client.ServiceClient):
         self.expected_success(204, resp.status)
         return service_client.ResponseBody(resp, body)
 
-    def get_trusts(self, trustor_user_id=None, trustee_user_id=None):
+    def list_trusts(self, trustor_user_id=None, trustee_user_id=None):
         """GET trusts."""
         if trustor_user_id:
             resp, body = self.get("OS-TRUST/trusts?trustor_user_id=%s"
@@ -460,21 +460,21 @@ class IdentityV3Client(service_client.ServiceClient):
         body = json.loads(body)
         return service_client.ResponseBody(resp, body)
 
-    def get_trust(self, trust_id):
+    def show_trust(self, trust_id):
         """GET trust."""
         resp, body = self.get("OS-TRUST/trusts/%s" % trust_id)
         self.expected_success(200, resp.status)
         body = json.loads(body)
         return service_client.ResponseBody(resp, body)
 
-    def get_trust_roles(self, trust_id):
+    def list_trust_roles(self, trust_id):
         """GET roles delegated by a trust."""
         resp, body = self.get("OS-TRUST/trusts/%s/roles" % trust_id)
         self.expected_success(200, resp.status)
         body = json.loads(body)
         return service_client.ResponseBody(resp, body)
 
-    def get_trust_role(self, trust_id, role_id):
+    def show_trust_role(self, trust_id, role_id):
         """GET role delegated by a trust."""
         resp, body = self.get("OS-TRUST/trusts/%s/roles/%s"
                               % (trust_id, role_id))
