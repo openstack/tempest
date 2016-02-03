@@ -18,6 +18,7 @@ import six
 
 from tempest import config
 from tempest.lib.common.utils import test_utils
+from tempest.lib import decorators
 from tempest.scenario import manager
 from tempest import test
 
@@ -254,6 +255,7 @@ class TestGettingAddress(manager.NetworkScenarioTest):
         self._prepare_and_test(address6_mode='dhcpv6-stateless', n_subnets6=2,
                                dualnet=True)
 
+    @decorators.skip_because(bug="1540983")
     @test.idempotent_id('9178ad42-10e4-47e9-8987-e02b170cc5cd')
     @test.services('compute', 'network')
     def test_dualnet_multi_prefix_slaac(self):
