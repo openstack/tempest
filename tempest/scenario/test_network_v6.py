@@ -203,31 +203,37 @@ class TestGettingAddress(manager.NetworkScenarioTest):
             (dest, source.ssh_client.host)
         )
 
+    @test.attr(type='slow')
     @test.idempotent_id('2c92df61-29f0-4eaa-bee3-7c65bef62a43')
     @test.services('compute', 'network')
     def test_slaac_from_os(self):
         self._prepare_and_test(address6_mode='slaac')
 
+    @test.attr(type='slow')
     @test.idempotent_id('d7e1f858-187c-45a6-89c9-bdafde619a9f')
     @test.services('compute', 'network')
     def test_dhcp6_stateless_from_os(self):
         self._prepare_and_test(address6_mode='dhcpv6-stateless')
 
+    @test.attr(type='slow')
     @test.idempotent_id('7ab23f41-833b-4a16-a7c9-5b42fe6d4123')
     @test.services('compute', 'network')
     def test_multi_prefix_dhcpv6_stateless(self):
         self._prepare_and_test(address6_mode='dhcpv6-stateless', n_subnets6=2)
 
+    @test.attr(type='slow')
     @test.idempotent_id('dec222b1-180c-4098-b8c5-cc1b8342d611')
     @test.services('compute', 'network')
     def test_multi_prefix_slaac(self):
         self._prepare_and_test(address6_mode='slaac', n_subnets6=2)
 
+    @test.attr(type='slow')
     @test.idempotent_id('b6399d76-4438-4658-bcf5-0d6c8584fde2')
     @test.services('compute', 'network')
     def test_dualnet_slaac_from_os(self):
         self._prepare_and_test(address6_mode='slaac', dualnet=True)
 
+    @test.attr(type='slow')
     @test.idempotent_id('76f26acd-9688-42b4-bc3e-cd134c4cb09e')
     @test.services('compute', 'network')
     def test_dualnet_dhcp6_stateless_from_os(self):
