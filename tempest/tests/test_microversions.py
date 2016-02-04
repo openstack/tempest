@@ -141,7 +141,7 @@ class TestMicroversionsTestsClass(base.TestCase):
                              '2.5', group='compute-feature-enabled')
         cfg.CONF.set_default('max_microversion',
                              '2.1', group='compute-feature-enabled')
-        self.assertRaises(exceptions.InvalidConfiguration,
+        self.assertRaises(exceptions.InvalidAPIVersionRange,
                           VersionTestNoneTolatest.skip_checks)
 
     def test_config_version_invalid_test_version(self):
@@ -149,5 +149,5 @@ class TestMicroversionsTestsClass(base.TestCase):
                              None, group='compute-feature-enabled')
         cfg.CONF.set_default('max_microversion',
                              '2.13', group='compute-feature-enabled')
-        self.assertRaises(exceptions.InvalidConfiguration,
+        self.assertRaises(exceptions.InvalidAPIVersionRange,
                           InvalidVersionTest.skip_checks)
