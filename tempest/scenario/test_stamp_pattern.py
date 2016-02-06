@@ -25,10 +25,8 @@ from tempest import config
 from tempest import exceptions
 from tempest.scenario import manager
 from tempest import test
-import tempest.test
 
 CONF = config.CONF
-
 LOG = logging.getLogger(__name__)
 
 
@@ -89,16 +87,16 @@ class TestStampPattern(manager.ScenarioTest):
             LOG.debug("Partitions:%s" % part)
             return CONF.compute.volume_device_name in part
 
-        if not tempest.test.call_until_true(_func,
-                                            CONF.compute.build_timeout,
-                                            CONF.compute.build_interval):
+        if not test.call_until_true(_func,
+                                    CONF.compute.build_timeout,
+                                    CONF.compute.build_interval):
             raise exceptions.TimeoutException
 
     @decorators.skip_because(bug="1205344")
     @test.idempotent_id('10fd234a-515c-41e5-b092-8323060598c5')
     @testtools.skipUnless(CONF.compute_feature_enabled.snapshot,
                           'Snapshotting is not available.')
-    @tempest.test.services('compute', 'network', 'volume', 'image')
+    @test.services('compute', 'network', 'volume', 'image')
     def test_stamp_pattern(self):
         # prepare for booting an instance
         keypair = self.create_keypair()

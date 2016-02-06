@@ -10,8 +10,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from oslo_log import log
-
 from tempest.common.utils import data_utils
 from tempest.common import waiters
 from tempest import config
@@ -19,8 +17,6 @@ from tempest.scenario import manager
 from tempest import test
 
 CONF = config.CONF
-
-LOG = log.getLogger(__name__)
 
 
 class TestVolumeBootPattern(manager.ScenarioTest):
