@@ -328,9 +328,6 @@ class ScenarioTest(tempest.test.BaseTestCase):
         for ruleset in rulesets:
             sg_rule = _client_rules.create_security_group_rule(
                 parent_group_id=secgroup_id, **ruleset)['security_group_rule']
-            self.addCleanup(self.delete_wrapper,
-                            _client_rules.delete_security_group_rule,
-                            sg_rule['id'])
             rules.append(sg_rule)
         return rules
 
@@ -1059,7 +1056,6 @@ class NetworkScenarioTest(ScenarioTest):
             client=sec_group_rules_client,
             **sg_rule['security_group_rule']
         )
-        self.addCleanup(self.delete_wrapper, sg_rule.delete)
         self.assertEqual(secgroup.tenant_id, sg_rule.tenant_id)
         self.assertEqual(secgroup.id, sg_rule.security_group_id)
 
