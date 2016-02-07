@@ -31,13 +31,13 @@ class CredsClient(object):
      admin credentials used for generating credentials.
     """
 
-    def __init__(self, identity_client, projects_client=None,
+    def __init__(self, identity_client, projects_client,
                  roles_client=None, users_client=None):
         # The client implies version and credentials
         self.identity_client = identity_client
-        # this is temporary until the v3 project client is
-        # separated, then projects_client will become mandatory
-        self.projects_client = projects_client or identity_client
+        self.projects_client = projects_client
+        # this is temporary until v3 roles client and v3 users client are
+        # separated, then these clients will become mandatory
         self.roles_client = roles_client or identity_client
         self.users_client = users_client or identity_client
 
@@ -47,6 +47,9 @@ class CredsClient(object):
         if 'user' in user:
             user = user['user']
         return user
+
+    def delete_user(self, user_id):
+        self.users_client.delete_user(user_id)
 
     @abc.abstractmethod
     def create_project(self, name, description):
@@ -87,9 +90,6 @@ class CredsClient(object):
         """
         pass
 
-    def delete_user(self, user_id):
-        self.users_client.delete_user(user_id)
-
     def _list_roles(self):
         roles = self.roles_client.list_roles()['roles']
         return roles
@@ -109,6 +109,9 @@ class V2CredsClient(CredsClient):
             name=name, description=description)['tenant']
         return tenant
 
+    def delete_project(self, project_id):
+        self.projects_client.delete_tenant(project_id)
+
     def get_credentials(self, user, project, password):
         # User and project already include both ID and name here,
         # so there's no need to use the fill_in mode
@@ -120,14 +123,11 @@ class V2CredsClient(CredsClient):
             tenant_name=project['name'], tenant_id=project['id'],
             password=password)
 
-    def delete_project(self, project_id):
-        self.projects_client.delete_tenant(project_id)
-
 
 class V3CredsClient(CredsClient):
 
-    def __init__(self, identity_client, domain_name):
-        super(V3CredsClient, self).__init__(identity_client)
+    def __init__(self, identity_client, projects_client, domain_name):
+        super(V3CredsClient, self).__init__(identity_client, projects_client)
         try:
             # Domain names must be unique, in any case a list is returned,
             # selecting the first (and only) element
@@ -139,10 +139,13 @@ class V3CredsClient(CredsClient):
             raise lib_exc.InvalidCredentials(msg)
 
     def create_project(self, name, description):
-        project = self.identity_client.create_project(
+        project = self.projects_client.create_project(
             name=name, description=description,
             domain_id=self.creds_domain['id'])['project']
         return project
+
+    def delete_project(self, project_id):
+        self.projects_client.delete_project(project_id)
 
     def get_credentials(self, user, project, password):
         # User, project and domain already include both ID and name here,
@@ -157,16 +160,13 @@ class V3CredsClient(CredsClient):
             project_domain_id=self.creds_domain['id'],
             project_domain_name=self.creds_domain['name'])
 
-    def delete_project(self, project_id):
-        self.identity_client.delete_project(project_id)
-
     def _list_roles(self):
         roles = self.identity_client.list_roles()['roles']
         return roles
 
 
 def get_creds_client(identity_client,
-                     projects_client=None,
+                     projects_client,
                      roles_client=None,
                      users_client=None,
                      project_domain_name=None):
@@ -174,4 +174,5 @@ def get_creds_client(identity_client,
         return V2CredsClient(identity_client, projects_client, roles_client,
                              users_client)
     else:
-        return V3CredsClient(identity_client, project_domain_name)
+        return V3CredsClient(identity_client,
+                             projects_client, project_domain_name)

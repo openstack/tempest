@@ -25,14 +25,14 @@ class ProjectsTestJSON(base.BaseIdentityV3AdminTest):
         # Create project with a description
         project_name = data_utils.rand_name('project')
         project_desc = data_utils.rand_name('desc')
-        project = self.client.create_project(
+        project = self.projects_client.create_project(
             project_name, description=project_desc)['project']
         self.data.projects.append(project)
         project_id = project['id']
         desc1 = project['description']
         self.assertEqual(desc1, project_desc, 'Description should have '
                          'been sent in response for create')
-        body = self.client.show_project(project_id)['project']
+        body = self.projects_client.show_project(project_id)['project']
         desc2 = body['description']
         self.assertEqual(desc2, project_desc, 'Description does not appear'
                          'to be set')
@@ -42,13 +42,13 @@ class ProjectsTestJSON(base.BaseIdentityV3AdminTest):
         # Create project with a domain
         self.data.setup_test_domain()
         project_name = data_utils.rand_name('project')
-        project = self.client.create_project(
+        project = self.projects_client.create_project(
             project_name, domain_id=self.data.domain['id'])['project']
         self.data.projects.append(project)
         project_id = project['id']
         self.assertEqual(project_name, project['name'])
         self.assertEqual(self.data.domain['id'], project['domain_id'])
-        body = self.client.show_project(project_id)['project']
+        body = self.projects_client.show_project(project_id)['project']
         self.assertEqual(project_name, body['name'])
         self.assertEqual(self.data.domain['id'], body['domain_id'])
 
@@ -56,13 +56,13 @@ class ProjectsTestJSON(base.BaseIdentityV3AdminTest):
     def test_project_create_enabled(self):
         # Create a project that is enabled
         project_name = data_utils.rand_name('project')
-        project = self.client.create_project(
+        project = self.projects_client.create_project(
             project_name, enabled=True)['project']
         self.data.projects.append(project)
         project_id = project['id']
         en1 = project['enabled']
         self.assertTrue(en1, 'Enable should be True in response')
-        body = self.client.show_project(project_id)['project']
+        body = self.projects_client.show_project(project_id)['project']
         en2 = body['enabled']
         self.assertTrue(en2, 'Enable should be True in lookup')
 
@@ -70,13 +70,13 @@ class ProjectsTestJSON(base.BaseIdentityV3AdminTest):
     def test_project_create_not_enabled(self):
         # Create a project that is not enabled
         project_name = data_utils.rand_name('project')
-        project = self.client.create_project(
+        project = self.projects_client.create_project(
             project_name, enabled=False)['project']
         self.data.projects.append(project)
         en1 = project['enabled']
         self.assertEqual('false', str(en1).lower(),
                          'Enable should be False in response')
-        body = self.client.show_project(project['id'])['project']
+        body = self.projects_client.show_project(project['id'])['project']
         en2 = body['enabled']
         self.assertEqual('false', str(en2).lower(),
                          'Enable should be False in lookup')
@@ -85,18 +85,18 @@ class ProjectsTestJSON(base.BaseIdentityV3AdminTest):
     def test_project_update_name(self):
         # Update name attribute of a project
         p_name1 = data_utils.rand_name('project')
-        project = self.client.create_project(p_name1)['project']
+        project = self.projects_client.create_project(p_name1)['project']
         self.data.projects.append(project)
 
         resp1_name = project['name']
 
         p_name2 = data_utils.rand_name('project2')
-        body = self.client.update_project(project['id'],
-                                          name=p_name2)['project']
+        body = self.projects_client.update_project(project['id'],
+                                                   name=p_name2)['project']
         resp2_name = body['name']
         self.assertNotEqual(resp1_name, resp2_name)
 
-        body = self.client.show_project(project['id'])['project']
+        body = self.projects_client.show_project(project['id'])['project']
         resp3_name = body['name']
 
         self.assertNotEqual(resp1_name, resp3_name)
@@ -108,18 +108,18 @@ class ProjectsTestJSON(base.BaseIdentityV3AdminTest):
         # Update description attribute of a project
         p_name = data_utils.rand_name('project')
         p_desc = data_utils.rand_name('desc')
-        project = self.client.create_project(
+        project = self.projects_client.create_project(
             p_name, description=p_desc)['project']
         self.data.projects.append(project)
         resp1_desc = project['description']
 
         p_desc2 = data_utils.rand_name('desc2')
-        body = self.client.update_project(
+        body = self.projects_client.update_project(
             project['id'], description=p_desc2)['project']
         resp2_desc = body['description']
         self.assertNotEqual(resp1_desc, resp2_desc)
 
-        body = self.client.show_project(project['id'])['project']
+        body = self.projects_client.show_project(project['id'])['project']
         resp3_desc = body['description']
 
         self.assertNotEqual(resp1_desc, resp3_desc)
@@ -131,18 +131,19 @@ class ProjectsTestJSON(base.BaseIdentityV3AdminTest):
         # Update the enabled attribute of a project
         p_name = data_utils.rand_name('project')
         p_en = False
-        project = self.client.create_project(p_name, enabled=p_en)['project']
+        project = self.projects_client.create_project(p_name,
+                                                      enabled=p_en)['project']
         self.data.projects.append(project)
 
         resp1_en = project['enabled']
 
         p_en2 = True
-        body = self.client.update_project(
-            project['id'], enabled=p_en2)['project']
+        body = self.projects_client.update_project(project['id'],
+                                                   enabled=p_en2)['project']
         resp2_en = body['enabled']
         self.assertNotEqual(resp1_en, resp2_en)
 
-        body = self.client.show_project(project['id'])['project']
+        body = self.projects_client.show_project(project['id'])['project']
         resp3_en = body['enabled']
 
         self.assertNotEqual(resp1_en, resp3_en)
@@ -154,7 +155,7 @@ class ProjectsTestJSON(base.BaseIdentityV3AdminTest):
         # Associate a user to a project
         # Create a Project
         p_name = data_utils.rand_name('project')
-        project = self.client.create_project(p_name)['project']
+        project = self.projects_client.create_project(p_name)['project']
         self.data.projects.append(project)
 
         # Create a User

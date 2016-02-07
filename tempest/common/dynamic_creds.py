@@ -57,7 +57,8 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
         self._creds = {}
         self.ports = []
         self.default_admin_creds = admin_creds
-        (self.identity_admin_client, self.tenants_admin_client,
+        (self.identity_admin_client,
+         self.tenants_admin_client,
          self.roles_admin_client,
          self.users_admin_client,
          self.network_admin_client,
@@ -93,9 +94,9 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
                     os.subnets_client, os.ports_client,
                     os.security_groups_client)
         else:
-            return (os.identity_v3_client, None, None, None, os.network_client,
-                    os.networks_client, os.subnets_client, os.ports_client,
-                    os.security_groups_client)
+            return (os.identity_v3_client, os.projects_client, None, None,
+                    os.network_client, os.networks_client, os.subnets_client,
+                    os.ports_client, os.security_groups_client)
 
     def _create_creds(self, suffix="", admin=False, roles=None):
         """Create random credentials under the following schema.

@@ -36,11 +36,11 @@ class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
         # Delete the User at the end of this method
         self.addCleanup(self.client.delete_user, user['id'])
         # Creating second project for updation
-        project = self.client.create_project(
+        project = self.projects_client.create_project(
             data_utils.rand_name('project'),
             description=data_utils.rand_name('project-desc'))['project']
         # Delete the Project at the end of this method
-        self.addCleanup(self.client.delete_project, project['id'])
+        self.addCleanup(self.projects_client.delete_project, project['id'])
         # Updating user details with new values
         u_name2 = data_utils.rand_name('user2')
         u_email2 = u_name2 + '@testmail.tm'
@@ -100,11 +100,11 @@ class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
         # List the projects that a user has access upon
         assigned_project_ids = list()
         fetched_project_ids = list()
-        u_project = self.client.create_project(
+        u_project = self.projects_client.create_project(
             data_utils.rand_name('project'),
             description=data_utils.rand_name('project-desc'))['project']
         # Delete the Project at the end of this method
-        self.addCleanup(self.client.delete_project, u_project['id'])
+        self.addCleanup(self.projects_client.delete_project, u_project['id'])
         # Create a user.
         u_name = data_utils.rand_name('user')
         u_desc = u_name + 'description'
@@ -125,12 +125,14 @@ class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
         role = self.client.show_role(role_body['id'])['role']
         for i in range(2):
             # Creating project so as to assign role
-            project_body = self.client.create_project(
+            project_body = self.projects_client.create_project(
                 data_utils.rand_name('project'),
                 description=data_utils.rand_name('project-desc'))['project']
-            project = self.client.show_project(project_body['id'])['project']
+            project = self.projects_client.show_project(
+                project_body['id'])['project']
             # Delete the Project at the end of this method
-            self.addCleanup(self.client.delete_project, project_body['id'])
+            self.addCleanup(
+                self.projects_client.delete_project, project_body['id'])
             # Assigning roles to user on project
             self.client.assign_user_role(project['id'],
                                          user['id'],

@@ -46,8 +46,8 @@ class BaseTrustsV3Test(base.BaseIdentityV3AdminTest):
     def create_trustor_and_roles(self):
         # create a project that trusts will be granted on
         self.trustor_project_name = data_utils.rand_name(name='project')
-        project = self.client.create_project(self.trustor_project_name,
-                                             domain_id='default')['project']
+        project = self.projects_client.create_project(
+            self.trustor_project_name, domain_id='default')['project']
         self.trustor_project_id = project['id']
         self.assertIsNotNone(self.trustor_project_id)
 
@@ -103,7 +103,7 @@ class BaseTrustsV3Test(base.BaseIdentityV3AdminTest):
         if self.trustor_user_id:
             self.client.delete_user(self.trustor_user_id)
         if self.trustor_project_id:
-            self.client.delete_project(self.trustor_project_id)
+            self.projects_client.delete_project(self.trustor_project_id)
         if self.delegated_role_id:
             self.client.delete_role(self.delegated_role_id)
         if self.not_delegated_role_id:

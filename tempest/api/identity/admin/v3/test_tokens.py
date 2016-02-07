@@ -67,12 +67,14 @@ class TokensV3TestJSON(base.BaseIdentityV3AdminTest):
 
         # Create a couple projects
         project1_name = data_utils.rand_name(name='project')
-        project1 = self.client.create_project(project1_name)['project']
-        self.addCleanup(self.client.delete_project, project1['id'])
+        project1 = self.projects_client.create_project(
+            project1_name)['project']
+        self.addCleanup(self.projects_client.delete_project, project1['id'])
 
         project2_name = data_utils.rand_name(name='project')
-        project2 = self.client.create_project(project2_name)['project']
-        self.addCleanup(self.client.delete_project, project2['id'])
+        project2 = self.projects_client.create_project(
+            project2_name)['project']
+        self.addCleanup(self.projects_client.delete_project, project2['id'])
 
         # Create a role
         role_name = data_utils.rand_name(name='role')

@@ -151,7 +151,7 @@ def stress_openstack(tests, duration, max_runs=None, stop_on_error=False):
                     users_client = admin_manager.users_client
                 else:
                     identity_client = admin_manager.identity_v3_client
-                    projects_client = None
+                    projects_client = admin_manager.projects_client
                     roles_client = None
                     users_client = None
                 domain = (identity_client.auth_provider.credentials.

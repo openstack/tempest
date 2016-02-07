@@ -442,7 +442,7 @@ class BaseTestCase(testtools.testcase.WithAttributes,
             users_client = self.os_admin.users_client
         else:
             client = self.os_admin.identity_v3_client
-            project_client = None
+            project_client = self.os_adm.projects_client
             roles_client = None
             users_client = None
 

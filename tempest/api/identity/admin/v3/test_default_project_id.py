@@ -45,10 +45,10 @@ class TestDefaultProjectId (base.BaseIdentityV3AdminTest):
 
         # create a project in the domain
         proj_name = data_utils.rand_name('proj')
-        proj_body = self.client.create_project(proj_name,
-                                               domain_id=dom_id)['project']
+        proj_body = self.projects_client.create_project(
+            proj_name, domain_id=dom_id)['project']
         proj_id = proj_body['id']
-        self.addCleanup(self.client.delete_project, proj_id)
+        self.addCleanup(self.projects_client.delete_project, proj_id)
         self.assertEqual(proj_body['domain_id'], dom_id,
                          "project " + proj_name +
                          "doesn't have domain id " + dom_id)

@@ -48,7 +48,7 @@ class BaseIdentityTest(tempest.test.BaseTestCase):
         try:
             tenants = cls.tenants_client.list_tenants()['tenants']
         except AttributeError:
-            tenants = cls.client.list_projects()['projects']
+            tenants = cls.projects_client.list_projects()['projects']
         tenant = [t for t in tenants if t['name'] == name]
         if len(tenant) > 0:
             return tenant[0]
@@ -130,6 +130,7 @@ class BaseIdentityV3Test(BaseIdentityTest):
         super(BaseIdentityV3Test, cls).setup_clients()
         cls.non_admin_client = cls.os.identity_v3_client
         cls.non_admin_token = cls.os.token_v3_client
+        cls.non_admin_projects_client = cls.os.projects_client
 
     @classmethod
     def resource_cleanup(cls):
@@ -151,11 +152,12 @@ class BaseIdentityV3AdminTest(BaseIdentityV3Test):
         cls.policies_client = cls.os_adm.policies_client
         cls.creds_client = cls.os_adm.credentials_client
         cls.groups_client = cls.os_adm.groups_client
+        cls.projects_client = cls.os_adm.projects_client
 
     @classmethod
     def resource_setup(cls):
         super(BaseIdentityV3AdminTest, cls).resource_setup()
-        cls.data = DataGeneratorV3(cls.client)
+        cls.data = DataGeneratorV3(cls.client, cls.projects_client)
 
     @classmethod
     def resource_cleanup(cls):
@@ -168,13 +170,6 @@ class BaseIdentityV3AdminTest(BaseIdentityV3Test):
         user = [u for u in users if u['name'] == name]
         if len(user) > 0:
             return user[0]
-
-    @classmethod
-    def get_tenant_by_name(cls, name):
-        tenants = cls.client.list_projects()['projects']
-        tenant = [t for t in tenants if t['name'] == name]
-        if len(tenant) > 0:
-            return tenant[0]
 
     @classmethod
     def get_role_by_name(cls, name):
@@ -197,10 +192,10 @@ class BaseIdentityV3AdminTest(BaseIdentityV3Test):
 
 class BaseDataGenerator(object):
 
-    def __init__(self, client, projects_client=None,
+    def __init__(self, client, projects_client,
                  users_client=None, roles_client=None):
         self.client = client
-        self.projects_client = projects_client or client
+        self.projects_client = projects_client
         self.users_client = users_client or client
         self.roles_client = roles_client or client
 
