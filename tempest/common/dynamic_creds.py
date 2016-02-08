@@ -233,8 +233,8 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
         return resp_body['router']
 
     def _add_router_interface(self, router_id, subnet_id):
-        self.network_admin_client.add_router_interface_with_subnet_id(
-            router_id, subnet_id)
+        self.network_admin_client.add_router_interface(router_id,
+                                                       subnet_id=subnet_id)
 
     def get_credentials(self, credential_type):
         if self._creds.get(str(credential_type)):
@@ -333,8 +333,9 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
             if (not self.network_resources or
                     (self.network_resources.get('router') and creds.subnet)):
                 try:
-                    net_client.remove_router_interface_with_subnet_id(
-                        creds.router['id'], creds.subnet['id'])
+                    net_client.remove_router_interface(
+                        creds.router['id'],
+                        subnet_id=creds.subnet['id'])
                 except lib_exc.NotFound:
                     LOG.warning('router with name: %s not found for delete' %
                                 creds.router['name'])

@@ -841,8 +841,8 @@ def destroy_routers(routers):
         for subnet in router['subnet']:
             subnet_id = _get_resource_by_name(client.networks,
                                               'subnets', subnet)['id']
-            client.networks.remove_router_interface_with_subnet_id(router_id,
-                                                                   subnet_id)
+            client.networks.remove_router_interface(router_id,
+                                                    subnet_id=subnet_id)
         client.networks.delete_router(router_id)
 
 
@@ -856,8 +856,8 @@ def add_router_interface(routers):
             subnet_id = _get_resource_by_name(client.networks,
                                               'subnets', subnet)['id']
             # connect routers to their subnets
-            client.networks.add_router_interface_with_subnet_id(router_id,
-                                                                subnet_id)
+            client.networks.add_router_interface(router_id,
+                                                 subnet_id=subnet_id)
         # connect routers to external network if set to "gateway"
         if router['gateway']:
             if CONF.network.public_network_id:

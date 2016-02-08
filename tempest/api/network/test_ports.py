@@ -191,10 +191,10 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
         self.addCleanup(self.client.delete_router, router['id'])
         port = self.ports_client.create_port(network_id=network['id'])
         # Add router interface to port created above
-        self.client.add_router_interface_with_port_id(
-            router['id'], port['port']['id'])
-        self.addCleanup(self.client.remove_router_interface_with_port_id,
-                        router['id'], port['port']['id'])
+        self.client.add_router_interface(router['id'],
+                                         port_id=port['port']['id'])
+        self.addCleanup(self.client.remove_router_interface, router['id'],
+                        port_id=port['port']['id'])
         # List ports filtered by router_id
         port_list = self.ports_client.list_ports(device_id=router['id'])
         ports = port_list['ports']

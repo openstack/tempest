@@ -80,8 +80,8 @@ class L3AgentSchedulerTestJSON(base.BaseAdminNetworkTest):
                 cls.network = cls.create_network()
                 cls.subnet = cls.create_subnet(cls.network)
                 cls.port = cls.create_port(cls.network)
-                cls.client.add_router_interface_with_port_id(
-                    cls.router['id'], cls.port['id'])
+                cls.client.add_router_interface(cls.router['id'],
+                                                port_id=cls.port['id'])
                 # NOTE: Sometimes we have seen this test fail with dvr in,
                 # multinode tests, since the dhcp port is not created before
                 # the test gets executed and so the router is not scheduled
@@ -99,8 +99,8 @@ class L3AgentSchedulerTestJSON(base.BaseAdminNetworkTest):
     @classmethod
     def resource_cleanup(cls):
         if cls.is_dvr_router:
-            cls.client.remove_router_interface_with_port_id(
-                cls.router['id'], cls.port['id'])
+            cls.client.remove_router_interface(cls.router['id'],
+                                               port_id=cls.port['id'])
         super(L3AgentSchedulerTestJSON, cls).resource_cleanup()
 
     @test.idempotent_id('b7ce6e89-e837-4ded-9b78-9ed3c9c6a45a')
