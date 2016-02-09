@@ -15,6 +15,7 @@
 from tempest.api.network import base
 from tempest.common.utils import data_utils
 from tempest import config
+from tempest.lib.common.utils import test_utils
 from tempest.lib import exceptions as lib_exc
 from tempest import test
 
@@ -53,7 +54,9 @@ class SubnetPoolsTestJSON(base.BaseNetworkTest):
         body = self.subnetpools_client.create_subnetpool(name=subnetpool_name,
                                                          prefixes=prefix)
         subnetpool_id = body["subnetpool"]["id"]
-        self.addCleanup(self._cleanup_subnetpools, subnetpool_id)
+        self.addCleanup(test_utils.call_and_ignore_notfound_exc,
+                        self.subnetpools_client.delete_subnetpool,
+                        subnetpool_id)
         self.assertEqual(subnetpool_name, body["subnetpool"]["name"])
         # get detail about subnet pool
         body = self.subnetpools_client.show_subnetpool(subnetpool_id)
@@ -68,10 +71,3 @@ class SubnetPoolsTestJSON(base.BaseNetworkTest):
         self.assertRaises(lib_exc.NotFound,
                           self.subnetpools_client.show_subnetpool,
                           subnetpool_id)
-
-    def _cleanup_subnetpools(self, subnetpool_id):
-        # this is used to cleanup the resources
-        try:
-            self.subnetpools_client.delete_subnetpool(subnetpool_id)
-        except lib_exc.NotFound:
-            pass

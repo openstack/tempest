@@ -17,7 +17,7 @@ from oslo_log import log as logging
 
 from tempest.common.utils import data_utils
 from tempest import config
-from tempest.lib import exceptions as lib_exc
+from tempest.lib.common.utils import test_utils
 import tempest.test
 
 CONF = config.CONF
@@ -225,9 +225,7 @@ class BaseDataGenerator(object):
     @staticmethod
     def _try_wrapper(func, item, **kwargs):
         try:
-            func(item['id'], **kwargs)
-        except lib_exc.NotFound:
-            pass
+            test_utils.call_and_ignore_notfound_exc(func, item['id'], **kwargs)
         except Exception:
             LOG.exception("Unexpected exception occurred in %s deletion. "
                           "But ignored here." % item['id'])

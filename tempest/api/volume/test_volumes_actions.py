@@ -12,14 +12,14 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
+import testtools
 
 from tempest.api.volume import base
 from tempest.common.utils import data_utils
 from tempest.common import waiters
 from tempest import config
-from tempest.lib import exceptions
+from tempest.lib.common.utils import test_utils
 from tempest import test
-import testtools
 
 CONF = config.CONF
 
@@ -124,18 +124,12 @@ class VolumesV2ActionsTest(base.BaseVolumeTest):
             self.volume['id'], image_name=image_name,
             disk_format=CONF.volume.disk_format)['os-volume_upload_image']
         image_id = body["image_id"]
-        self.addCleanup(self._cleanup_image, image_id)
+        self.addCleanup(test_utils.call_and_ignore_notfound_exc,
+                        self.image_client.delete_image,
+                        image_id)
         waiters.wait_for_image_status(self.image_client, image_id, 'active')
         waiters.wait_for_volume_status(self.client,
                                        self.volume['id'], 'available')
-
-    def _cleanup_image(self, image_id):
-        # Ignores the image deletion
-        # in the case that image wasn't created in the first place
-        try:
-            self.image_client.delete_image(image_id)
-        except exceptions.NotFound:
-            pass
 
     @test.idempotent_id('92c4ef64-51b2-40c0-9f7e-4749fbaaba33')
     def test_reserve_unreserve_volume(self):

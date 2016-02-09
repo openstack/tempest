@@ -21,7 +21,7 @@ from oslo_log import log as logging
 from tempest import config
 from tempest import exceptions
 from tempest.lib.common import ssh
-from tempest.lib.common.utils import misc as misc_utils
+from tempest.lib.common.utils import test_utils
 import tempest.lib.exceptions
 
 CONF = config.CONF
@@ -37,7 +37,7 @@ def debug_ssh(function):
         except tempest.lib.exceptions.SSHTimeout:
             try:
                 original_exception = sys.exc_info()
-                caller = misc_utils.find_test_caller() or "not found"
+                caller = test_utils.find_test_caller() or "not found"
                 if self.server:
                     msg = 'Caller: %s. Timeout trying to ssh to server %s'
                     LOG.debug(msg, caller, self.server)

@@ -26,7 +26,7 @@ from oslo_serialization import jsonutils as json
 import six
 
 from tempest.lib.common import http
-from tempest.lib.common.utils import misc as misc_utils
+from tempest.lib.common.utils import test_utils
 from tempest.lib import exceptions
 
 # redrive rate limited calls at most twice
@@ -393,7 +393,7 @@ class RestClient(object):
                            req_body=None):
         if req_headers is None:
             req_headers = {}
-        caller_name = misc_utils.find_test_caller()
+        caller_name = test_utils.find_test_caller()
         if self.trace_requests and re.search(self.trace_requests, caller_name):
             self.LOG.debug('Starting Request (%s): %s %s' %
                            (caller_name, method, req_url))
@@ -432,7 +432,7 @@ class RestClient(object):
         # we're going to just provide work around on who is actually
         # providing timings by gracefully adding no content if they don't.
         # Once we're down to 1 caller, clean this up.
-        caller_name = misc_utils.find_test_caller()
+        caller_name = test_utils.find_test_caller()
         if secs:
             secs = " %.3fs" % secs
         self.LOG.info(
@@ -849,7 +849,7 @@ class RestClient(object):
                            'the required time (%(timeout)s s).' %
                            {'resource_type': self.resource_type, 'id': id,
                             'timeout': self.build_timeout})
-                caller = misc_utils.find_test_caller()
+                caller = test_utils.find_test_caller()
                 if caller:
                     message = '(%s) %s' % (caller, message)
                 raise exceptions.TimeoutException(message)

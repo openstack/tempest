@@ -23,6 +23,7 @@ from tempest.common.utils import data_utils
 from tempest.common import waiters
 from tempest import config
 from tempest import exceptions
+from tempest.lib.common.utils import test_utils
 from tempest.scenario import manager
 from tempest.scenario import network_resources
 from tempest import test
@@ -252,7 +253,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
             net_id=self.new_net.id)['interfaceAttachment']
         self.addCleanup(self.ports_client.wait_for_resource_deletion,
                         interface['port_id'])
-        self.addCleanup(self.delete_wrapper,
+        self.addCleanup(test_utils.call_and_ignore_notfound_exc,
                         self.interface_client.delete_interface,
                         server['id'], interface['port_id'])
 

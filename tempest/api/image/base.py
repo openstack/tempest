@@ -16,7 +16,7 @@ from six import moves
 
 from tempest.common.utils import data_utils
 from tempest import config
-from tempest.lib import exceptions as lib_exc
+from tempest.lib.common.utils import test_utils
 import tempest.test
 
 CONF = config.CONF
@@ -47,10 +47,8 @@ class BaseImageTest(tempest.test.BaseTestCase):
     @classmethod
     def resource_cleanup(cls):
         for image_id in cls.created_images:
-            try:
-                cls.client.delete_image(image_id)
-            except lib_exc.NotFound:
-                pass
+            test_utils.call_and_ignore_notfound_exc(
+                cls.client.delete_image, image_id)
 
         for image_id in cls.created_images:
                 cls.client.wait_for_resource_deletion(image_id)

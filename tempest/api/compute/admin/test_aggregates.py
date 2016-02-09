@@ -16,7 +16,7 @@
 from tempest.api.compute import base
 from tempest.common import tempest_fixtures as fixtures
 from tempest.common.utils import data_utils
-from tempest.lib import exceptions as lib_exc
+from tempest.lib.common.utils import test_utils
 from tempest import test
 
 
@@ -41,21 +41,14 @@ class AggregatesAdminTestJSON(base.BaseV2ComputeAdminTest):
                     filter(lambda y: y['service'] == 'compute', hosts_all))
         cls.host = hosts[0]
 
-    def _try_delete_aggregate(self, aggregate_id):
-        # delete aggregate, if it exists
-        try:
-            self.client.delete_aggregate(aggregate_id)
-        # if aggregate not found, it depict it was deleted in the test
-        except lib_exc.NotFound:
-            pass
-
     @test.idempotent_id('0d148aa3-d54c-4317-aa8d-42040a475e20')
     def test_aggregate_create_delete(self):
         # Create and delete an aggregate.
         aggregate_name = data_utils.rand_name(self.aggregate_name_prefix)
         aggregate = (self.client.create_aggregate(name=aggregate_name)
                      ['aggregate'])
-        self.addCleanup(self._try_delete_aggregate, aggregate['id'])
+        self.addCleanup(test_utils.call_and_ignore_notfound_exc,
+                        self.client.delete_aggregate, aggregate['id'])
         self.assertEqual(aggregate_name, aggregate['name'])
         self.assertIsNone(aggregate['availability_zone'])
 
@@ -69,7 +62,8 @@ class AggregatesAdminTestJSON(base.BaseV2ComputeAdminTest):
         az_name = data_utils.rand_name(self.az_name_prefix)
         aggregate = self.client.create_aggregate(
             name=aggregate_name, availability_zone=az_name)['aggregate']
-        self.addCleanup(self._try_delete_aggregate, aggregate['id'])
+        self.addCleanup(test_utils.call_and_ignore_notfound_exc,
+                        self.client.delete_aggregate, aggregate['id'])
         self.assertEqual(aggregate_name, aggregate['name'])
         self.assertEqual(az_name, aggregate['availability_zone'])
 
