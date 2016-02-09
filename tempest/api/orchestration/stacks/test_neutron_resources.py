@@ -35,11 +35,6 @@ class NeutronResourcesTestJSON(base.BaseOrchestrationTest):
             raise cls.skipException("Neutron support is required")
 
     @classmethod
-    def setup_credentials(cls):
-        cls.set_network_resources()
-        super(NeutronResourcesTestJSON, cls).setup_credentials()
-
-    @classmethod
     def setup_clients(cls):
         super(NeutronResourcesTestJSON, cls).setup_clients()
         cls.network_client = cls.os.network_client
