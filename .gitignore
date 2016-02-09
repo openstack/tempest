@@ -16,6 +16,9 @@ include/swift_objects/swift_large
 dist
 build
 .testrepository
+.idea
+.project
+.pydevproject
 .coverage*
 !.coveragerc
 cover/
