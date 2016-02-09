@@ -377,7 +377,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
             linux_client.validate_authentication()
         except Exception as e:
             message = ('Initializing SSH connection to %(ip)s failed. '
-                       'Error: %(error)s' % {'ip_address': ip_address,
+                       'Error: %(error)s' % {'ip': ip_address,
                                              'error': e})
             caller = misc_utils.find_test_caller()
             if caller:
