@@ -32,7 +32,7 @@ class ProjectsTestJSON(base.BaseIdentityV3AdminTest):
         desc1 = project['description']
         self.assertEqual(desc1, project_desc, 'Description should have '
                          'been sent in response for create')
-        body = self.client.get_project(project_id)['project']
+        body = self.client.show_project(project_id)['project']
         desc2 = body['description']
         self.assertEqual(desc2, project_desc, 'Description does not appear'
                          'to be set')
@@ -48,7 +48,7 @@ class ProjectsTestJSON(base.BaseIdentityV3AdminTest):
         project_id = project['id']
         self.assertEqual(project_name, project['name'])
         self.assertEqual(self.data.domain['id'], project['domain_id'])
-        body = self.client.get_project(project_id)['project']
+        body = self.client.show_project(project_id)['project']
         self.assertEqual(project_name, body['name'])
         self.assertEqual(self.data.domain['id'], body['domain_id'])
 
@@ -62,7 +62,7 @@ class ProjectsTestJSON(base.BaseIdentityV3AdminTest):
         project_id = project['id']
         en1 = project['enabled']
         self.assertTrue(en1, 'Enable should be True in response')
-        body = self.client.get_project(project_id)['project']
+        body = self.client.show_project(project_id)['project']
         en2 = body['enabled']
         self.assertTrue(en2, 'Enable should be True in lookup')
 
@@ -76,7 +76,7 @@ class ProjectsTestJSON(base.BaseIdentityV3AdminTest):
         en1 = project['enabled']
         self.assertEqual('false', str(en1).lower(),
                          'Enable should be False in response')
-        body = self.client.get_project(project['id'])['project']
+        body = self.client.show_project(project['id'])['project']
         en2 = body['enabled']
         self.assertEqual('false', str(en2).lower(),
                          'Enable should be False in lookup')
@@ -96,7 +96,7 @@ class ProjectsTestJSON(base.BaseIdentityV3AdminTest):
         resp2_name = body['name']
         self.assertNotEqual(resp1_name, resp2_name)
 
-        body = self.client.get_project(project['id'])['project']
+        body = self.client.show_project(project['id'])['project']
         resp3_name = body['name']
 
         self.assertNotEqual(resp1_name, resp3_name)
@@ -119,7 +119,7 @@ class ProjectsTestJSON(base.BaseIdentityV3AdminTest):
         resp2_desc = body['description']
         self.assertNotEqual(resp1_desc, resp2_desc)
 
-        body = self.client.get_project(project['id'])['project']
+        body = self.client.show_project(project['id'])['project']
         resp3_desc = body['description']
 
         self.assertNotEqual(resp1_desc, resp3_desc)
@@ -142,7 +142,7 @@ class ProjectsTestJSON(base.BaseIdentityV3AdminTest):
         resp2_en = body['enabled']
         self.assertNotEqual(resp1_en, resp2_en)
 
-        body = self.client.get_project(project['id'])['project']
+        body = self.client.show_project(project['id'])['project']
         resp3_en = body['enabled']
 
         self.assertNotEqual(resp1_en, resp3_en)

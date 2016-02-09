@@ -128,7 +128,7 @@ class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
             project_body = self.client.create_project(
                 data_utils.rand_name('project'),
                 description=data_utils.rand_name('project-desc'))['project']
-            project = self.client.get_project(project_body['id'])['project']
+            project = self.client.show_project(project_body['id'])['project']
             # Delete the Project at the end of this method
             self.addCleanup(self.client.delete_project, project_body['id'])
             # Assigning roles to user on project

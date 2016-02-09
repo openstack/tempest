@@ -85,7 +85,7 @@ class DomainsTestJSON(base.BaseIdentityV3AdminTest):
         self.assertEqual(new_desc, updated_domain['description'])
         self.assertEqual(True, updated_domain['enabled'])
 
-        fetched_domain = self.client.get_domain(domain['id'])['domain']
+        fetched_domain = self.client.show_domain(domain['id'])['domain']
         self.assertEqual(new_name, fetched_domain['name'])
         self.assertEqual(new_desc, fetched_domain['description'])
         self.assertEqual(True, fetched_domain['enabled'])
@@ -124,6 +124,6 @@ class DefaultDomainTestJSON(base.BaseIdentityV3AdminTest):
     @test.attr(type='smoke')
     @test.idempotent_id('17a5de24-e6a0-4e4a-a9ee-d85b6e5612b5')
     def test_default_domain_exists(self):
-        domain = self.client.get_domain(self.domain_id)['domain']
+        domain = self.client.show_domain(self.domain_id)['domain']
 
         self.assertTrue(domain['enabled'])
