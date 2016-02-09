@@ -129,6 +129,7 @@ class BaseIdentityV3Test(BaseIdentityTest):
     def setup_clients(cls):
         super(BaseIdentityV3Test, cls).setup_clients()
         cls.non_admin_client = cls.os.identity_v3_client
+        cls.non_admin_users_client = cls.os.users_v3_client
         cls.non_admin_token = cls.os.token_v3_client
         cls.non_admin_projects_client = cls.os.projects_client
 
@@ -145,6 +146,7 @@ class BaseIdentityV3AdminTest(BaseIdentityV3Test):
     def setup_clients(cls):
         super(BaseIdentityV3AdminTest, cls).setup_clients()
         cls.client = cls.os_adm.identity_v3_client
+        cls.users_client = cls.os_adm.users_v3_client
         cls.token = cls.os_adm.token_v3_client
         cls.endpoints_client = cls.os_adm.endpoints_client
         cls.regions_client = cls.os_adm.regions_client
@@ -157,19 +159,13 @@ class BaseIdentityV3AdminTest(BaseIdentityV3Test):
     @classmethod
     def resource_setup(cls):
         super(BaseIdentityV3AdminTest, cls).resource_setup()
-        cls.data = DataGeneratorV3(cls.client, cls.projects_client)
+        cls.data = DataGeneratorV3(cls.client, cls.projects_client,
+                                   cls.users_client)
 
     @classmethod
     def resource_cleanup(cls):
         cls.data.teardown_all()
         super(BaseIdentityV3AdminTest, cls).resource_cleanup()
-
-    @classmethod
-    def get_user_by_name(cls, name):
-        users = cls.client.list_users()['users']
-        user = [u for u in users if u['name'] == name]
-        if len(user) > 0:
-            return user[0]
 
     @classmethod
     def get_role_by_name(cls, name):
@@ -181,7 +177,7 @@ class BaseIdentityV3AdminTest(BaseIdentityV3Test):
     @classmethod
     def disable_user(cls, user_name):
         user = cls.get_user_by_name(user_name)
-        cls.client.update_user(user['id'], user_name, enabled=False)
+        cls.users_client.update_user(user['id'], user_name, enabled=False)
 
     def delete_domain(self, domain_id):
         # NOTE(mpavlase) It is necessary to disable the domain before deleting
@@ -193,10 +189,10 @@ class BaseIdentityV3AdminTest(BaseIdentityV3Test):
 class BaseDataGenerator(object):
 
     def __init__(self, client, projects_client,
-                 users_client=None, roles_client=None):
+                 users_client, roles_client=None):
         self.client = client
         self.projects_client = projects_client
-        self.users_client = users_client or client
+        self.users_client = users_client
         self.roles_client = roles_client or client
 
         self.user_password = None

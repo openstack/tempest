@@ -30,11 +30,11 @@ class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
         u_desc = u_name + 'description'
         u_email = u_name + '@testmail.tm'
         u_password = data_utils.rand_password()
-        user = self.client.create_user(
+        user = self.users_client.create_user(
             u_name, description=u_desc, password=u_password,
             email=u_email, enabled=False)['user']
         # Delete the User at the end of this method
-        self.addCleanup(self.client.delete_user, user['id'])
+        self.addCleanup(self.users_client.delete_user, user['id'])
         # Creating second project for updation
         project = self.projects_client.create_project(
             data_utils.rand_name('project'),
@@ -45,7 +45,7 @@ class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
         u_name2 = data_utils.rand_name('user2')
         u_email2 = u_name2 + '@testmail.tm'
         u_description2 = u_name2 + ' description'
-        update_user = self.client.update_user(
+        update_user = self.users_client.update_user(
             user['id'], name=u_name2, description=u_description2,
             project_id=project['id'],
             email=u_email2, enabled=False)['user']
@@ -56,7 +56,7 @@ class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
         self.assertEqual(u_email2, update_user['email'])
         self.assertEqual(False, update_user['enabled'])
         # GET by id after updation
-        new_user_get = self.client.show_user(user['id'])['user']
+        new_user_get = self.users_client.show_user(user['id'])['user']
         # Assert response body of GET after updation
         self.assertEqual(u_name2, new_user_get['name'])
         self.assertEqual(u_description2, new_user_get['description'])
@@ -70,14 +70,15 @@ class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
         # Creating User to check password updation
         u_name = data_utils.rand_name('user')
         original_password = data_utils.rand_password()
-        user = self.client.create_user(
+        user = self.users_client.create_user(
             u_name, password=original_password)['user']
         # Delete the User at the end all test methods
-        self.addCleanup(self.client.delete_user, user['id'])
+        self.addCleanup(self.users_client.delete_user, user['id'])
         # Update user with new password
         new_password = data_utils.rand_password()
-        self.client.update_user_password(user['id'], password=new_password,
-                                         original_password=original_password)
+        self.users_client.update_user_password(
+            user['id'], password=new_password,
+            original_password=original_password)
         # TODO(lbragstad): Sleeping after the response status has been checked
         # and the body loaded as JSON allows requests to fail-fast. The sleep
         # is necessary because keystone will err on the side of security and
@@ -110,18 +111,18 @@ class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
         u_desc = u_name + 'description'
         u_email = u_name + '@testmail.tm'
         u_password = data_utils.rand_password()
-        user_body = self.client.create_user(
+        user_body = self.users_client.create_user(
             u_name, description=u_desc, password=u_password,
             email=u_email, enabled=False, project_id=u_project['id'])['user']
         # Delete the User at the end of this method
-        self.addCleanup(self.client.delete_user, user_body['id'])
+        self.addCleanup(self.users_client.delete_user, user_body['id'])
         # Creating Role
         role_body = self.client.create_role(
             name=data_utils.rand_name('role'))['role']
         # Delete the Role at the end of this method
         self.addCleanup(self.client.delete_role, role_body['id'])
 
-        user = self.client.show_user(user_body['id'])['user']
+        user = self.users_client.show_user(user_body['id'])['user']
         role = self.client.show_role(role_body['id'])['role']
         for i in range(2):
             # Creating project so as to assign role
@@ -138,7 +139,7 @@ class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
                                          user['id'],
                                          role['id'])
             assigned_project_ids.append(project['id'])
-        body = self.client.list_user_projects(user['id'])['projects']
+        body = self.users_client.list_user_projects(user['id'])['projects']
         for i in body:
             fetched_project_ids.append(i['id'])
         # verifying the project ids in list
@@ -154,5 +155,5 @@ class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
     def test_get_user(self):
         # Get a user detail
         self.data.setup_test_user()
-        user = self.client.show_user(self.data.user['id'])['user']
+        user = self.users_client.show_user(self.data.user['id'])['user']
         self.assertEqual(self.data.user['id'], user['id'])

@@ -163,14 +163,14 @@ class ProjectsTestJSON(base.BaseIdentityV3AdminTest):
         u_desc = u_name + 'description'
         u_email = u_name + '@testmail.tm'
         u_password = data_utils.rand_password()
-        user = self.client.create_user(
+        user = self.users_client.create_user(
             u_name, description=u_desc, password=u_password,
             email=u_email, project_id=project['id'])['user']
         # Delete the User at the end of this method
-        self.addCleanup(self.client.delete_user, user['id'])
+        self.addCleanup(self.users_client.delete_user, user['id'])
 
         # Get User To validate the user details
-        new_user_get = self.client.show_user(user['id'])['user']
+        new_user_get = self.users_client.show_user(user['id'])['user']
         # Assert response body of GET
         self.assertEqual(u_name, new_user_get['name'])
         self.assertEqual(u_desc, new_user_get['description'])
