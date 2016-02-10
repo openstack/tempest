@@ -31,7 +31,6 @@ class AbsoluteLimitsNegativeTestJSON(base.BaseV2ComputeTest):
     def setup_clients(cls):
         super(AbsoluteLimitsNegativeTestJSON, cls).setup_clients()
         cls.client = cls.limits_client
-        cls.server_client = cls.servers_client
 
     @test.attr(type=['negative'])
     @test.idempotent_id('215cd465-d8ae-49c9-bf33-9c911913a5c8')

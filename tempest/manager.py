@@ -50,8 +50,6 @@ class Manager(object):
             creds = self.credentials
         # Creates an auth provider for the credentials
         self.auth_provider = get_auth_provider(creds, pre_auth=True)
-        # FIXME(andreaf) unused
-        self.client_attr_names = []
 
 
 def get_auth_provider_class(credentials):

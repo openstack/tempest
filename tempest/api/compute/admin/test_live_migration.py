@@ -76,9 +76,6 @@ class LiveBlockMigrationTestJSON(base.BaseV2ComputeAdminTest):
             if host != target_host:
                 return target_host
 
-    def _get_server_status(self, server_id):
-        return self._get_server_details(server_id)['status']
-
     def _volume_clean_up(self, server_id, volume_id):
         body = self.volumes_client.show_volume(volume_id)['volume']
         if body['status'] == 'in-use':
