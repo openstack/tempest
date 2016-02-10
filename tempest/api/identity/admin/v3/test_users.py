@@ -117,13 +117,13 @@ class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
         # Delete the User at the end of this method
         self.addCleanup(self.users_client.delete_user, user_body['id'])
         # Creating Role
-        role_body = self.client.create_role(
+        role_body = self.roles_client.create_role(
             name=data_utils.rand_name('role'))['role']
         # Delete the Role at the end of this method
-        self.addCleanup(self.client.delete_role, role_body['id'])
+        self.addCleanup(self.roles_client.delete_role, role_body['id'])
 
         user = self.users_client.show_user(user_body['id'])['user']
-        role = self.client.show_role(role_body['id'])['role']
+        role = self.roles_client.show_role(role_body['id'])['role']
         for i in range(2):
             # Creating project so as to assign role
             project_body = self.projects_client.create_project(
@@ -135,9 +135,9 @@ class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
             self.addCleanup(
                 self.projects_client.delete_project, project_body['id'])
             # Assigning roles to user on project
-            self.client.assign_user_role_on_project(project['id'],
-                                                    user['id'],
-                                                    role['id'])
+            self.roles_client.assign_user_role_on_project(project['id'],
+                                                          user['id'],
+                                                          role['id'])
             assigned_project_ids.append(project['id'])
         body = self.users_client.list_user_projects(user['id'])['projects']
         for i in body:

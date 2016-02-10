@@ -97,7 +97,7 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
                     os.security_groups_client)
         else:
             return (os.identity_v3_client, os.projects_client,
-                    os.users_v3_client, None, os.domains_client,
+                    os.users_v3_client, os.roles_v3_client, os.domains_client,
                     os.network_client, os.networks_client, os.subnets_client,
                     os.ports_client, os.security_groups_client)
 
