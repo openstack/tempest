@@ -61,3 +61,10 @@ class EndPointClient(service_client.ServiceClient):
         resp_header, resp_body = self.delete('endpoints/%s' % endpoint_id)
         self.expected_success(204, resp_header.status)
         return service_client.ResponseBody(resp_header, resp_body)
+
+    def show_endpoint(self, endpoint_id):
+        """Get endpoint."""
+        resp_header, resp_body = self.get('endpoints/%s' % endpoint_id)
+        self.expected_success(200, resp_header.status)
+        resp_body = json.loads(resp_body)
+        return service_client.ResponseBody(resp_header, resp_body)
