@@ -80,6 +80,7 @@ class EndPointsTestJSON(base.BaseIdentityV3AdminTest):
                                                url=url, region=region,
                                                enabled=True)['endpoint']
 
+        self.setup_endpoints.append(endpoint)
         # Asserting Create Endpoint response body
         self.assertIn('id', endpoint)
         self.assertEqual(region, endpoint['region'])
@@ -102,6 +103,7 @@ class EndPointsTestJSON(base.BaseIdentityV3AdminTest):
 
         # Deleting the endpoint created in this method
         self.client.delete_endpoint(endpoint['id'])
+        self.setup_endpoints.remove(endpoint)
 
         # Checking whether endpoint is deleted successfully
         fetched_endpoints = self.client.list_endpoints()['endpoints']
