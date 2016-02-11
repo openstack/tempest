@@ -34,6 +34,12 @@ class BaseOrchestrationTest(tempest.test.BaseTestCase):
             raise cls.skipException("Heat support is required")
 
     @classmethod
+    def setup_credentials(cls):
+        super(BaseOrchestrationTest, cls).setup_credentials()
+        stack_owner_role = CONF.orchestration.stack_owner_role
+        cls.os = cls.get_client_manager(roles=[stack_owner_role])
+
+    @classmethod
     def setup_clients(cls):
         super(BaseOrchestrationTest, cls).setup_clients()
         cls.orchestration_client = cls.os.orchestration_client
