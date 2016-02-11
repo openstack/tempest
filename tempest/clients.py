@@ -70,6 +70,10 @@ from tempest_lib.services.compute.volumes_client import \
     VolumesClient as ComputeVolumesClient
 from tempest_lib.services.identity.v2.token_client import TokenClient
 from tempest_lib.services.identity.v3.token_client import V3TokenClient
+from tempest_lib.services.network.agents_client import AgentsClient \
+    as NetworkAgentsClient
+from tempest_lib.services.network.extensions_client import \
+    ExtensionsClient as NetworkExtensionsClient
 from tempest_lib.services.network.floating_ips_client import FloatingIPsClient
 from tempest_lib.services.network.metering_label_rules_client import \
     MeteringLabelRulesClient
@@ -123,10 +127,6 @@ from tempest.services.image.v1.json.images_client import ImagesClient
 from tempest.services.image.v2.json.images_client import ImagesClientV2
 from tempest.services.messaging.json.messaging_client import \
     MessagingClient
-from tempest.services.network.json.agents_client import AgentsClient \
-    as NetworkAgentsClient
-from tempest.services.network.json.extensions_client import \
-    ExtensionsClient as NetworkExtensionsClient
 from tempest.services.network.json.network_client import NetworkClient
 from tempest.services.network.json.quotas_client import QuotasClient \
     as NetworkQuotasClient
