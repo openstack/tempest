@@ -97,7 +97,7 @@ class BaseTrustsV3Test(base.BaseIdentityV3AdminTest):
             tenant_name=self.trustor_project_name,
             project_domain_id='default')
         os = clients.Manager(credentials=creds)
-        self.trustor_client = os.identity_v3_client
+        self.trustor_client = os.trusts_client
 
     def cleanup_user_and_roles(self):
         if self.trustor_user_id:
@@ -264,7 +264,7 @@ class TrustsV3TestJSON(BaseTrustsV3Test):
     @test.idempotent_id('4773ebd5-ecbf-4255-b8d8-b63e6f72b65d')
     def test_get_trusts_all(self):
         self.create_trust()
-        trusts_get = self.client.list_trusts()['trusts']
+        trusts_get = self.trusts_client.list_trusts()['trusts']
         trusts = [t for t in trusts_get
                   if t['id'] == self.trust_id]
         self.assertEqual(1, len(trusts))
