@@ -32,14 +32,14 @@ class TestDefaultProjectId (base.BaseIdentityV3AdminTest):
     def _delete_domain(self, domain_id):
         # It is necessary to disable the domain before deleting,
         # or else it would result in unauthorized error
-        self.client.update_domain(domain_id, enabled=False)
-        self.client.delete_domain(domain_id)
+        self.domains_client.update_domain(domain_id, enabled=False)
+        self.domains_client.delete_domain(domain_id)
 
     @test.idempotent_id('d6110661-6a71-49a7-a453-b5e26640ff6d')
     def test_default_project_id(self):
         # create a domain
         dom_name = data_utils.rand_name('dom')
-        domain_body = self.client.create_domain(dom_name)['domain']
+        domain_body = self.domains_client.create_domain(dom_name)['domain']
         dom_id = domain_body['id']
         self.addCleanup(self._delete_domain, dom_id)
 

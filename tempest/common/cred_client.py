@@ -130,13 +130,15 @@ class V2CredsClient(CredsClient):
 class V3CredsClient(CredsClient):
 
     def __init__(self, identity_client, projects_client, users_client,
-                 domain_name):
-        super(V3CredsClient, self).__init__(identity_client,
-                                            projects_client, users_client)
+                 domains_client, domain_name):
+        super(V3CredsClient, self).__init__(identity_client, projects_client,
+                                            users_client)
+        self.domains_client = domains_client
+
         try:
             # Domain names must be unique, in any case a list is returned,
             # selecting the first (and only) element
-            self.creds_domain = self.identity_client.list_domains(
+            self.creds_domain = self.domains_client.list_domains(
                 params={'name': domain_name})['domains'][0]
         except lib_exc.NotFound:
             # TODO(andrea) we could probably create the domain on the fly
@@ -179,10 +181,11 @@ def get_creds_client(identity_client,
                      projects_client,
                      users_client,
                      roles_client=None,
+                     domains_client=None,
                      project_domain_name=None):
     if isinstance(identity_client, v2_identity.IdentityClient):
         return V2CredsClient(identity_client, projects_client, users_client,
                              roles_client)
     else:
         return V3CredsClient(identity_client, projects_client, users_client,
-                             project_domain_name)
+                             domains_client, project_domain_name)

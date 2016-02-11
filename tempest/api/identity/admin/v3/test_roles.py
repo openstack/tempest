@@ -32,7 +32,7 @@ class RolesV3TestJSON(base.BaseIdentityV3AdminTest):
         u_desc = '%s description' % u_name
         u_email = '%s@testmail.tm' % u_name
         cls.u_password = data_utils.rand_password()
-        cls.domain = cls.client.create_domain(
+        cls.domain = cls.domains_client.create_domain(
             data_utils.rand_name('domain'),
             description=data_utils.rand_name('domain-desc'))['domain']
         cls.project = cls.projects_client.create_project(
@@ -57,8 +57,8 @@ class RolesV3TestJSON(base.BaseIdentityV3AdminTest):
         cls.projects_client.delete_project(cls.project['id'])
         # NOTE(harika-vakadi): It is necessary to disable the domain
         # before deleting,or else it would result in unauthorized error
-        cls.client.update_domain(cls.domain['id'], enabled=False)
-        cls.client.delete_domain(cls.domain['id'])
+        cls.domains_client.update_domain(cls.domain['id'], enabled=False)
+        cls.domains_client.delete_domain(cls.domain['id'])
         super(RolesV3TestJSON, cls).resource_cleanup()
 
     def _list_assertions(self, body, fetched_role_ids, role_id):

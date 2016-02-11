@@ -146,6 +146,7 @@ class BaseIdentityV3AdminTest(BaseIdentityV3Test):
     def setup_clients(cls):
         super(BaseIdentityV3AdminTest, cls).setup_clients()
         cls.client = cls.os_adm.identity_v3_client
+        cls.domains_client = cls.os_adm.domains_client
         cls.users_client = cls.os_adm.users_v3_client
         cls.token = cls.os_adm.token_v3_client
         cls.endpoints_client = cls.os_adm.endpoints_client
@@ -160,7 +161,7 @@ class BaseIdentityV3AdminTest(BaseIdentityV3Test):
     def resource_setup(cls):
         super(BaseIdentityV3AdminTest, cls).resource_setup()
         cls.data = DataGeneratorV3(cls.client, cls.projects_client,
-                                   cls.users_client)
+                                   cls.users_client, None, cls.domains_client)
 
     @classmethod
     def resource_cleanup(cls):
@@ -182,18 +183,19 @@ class BaseIdentityV3AdminTest(BaseIdentityV3Test):
     def delete_domain(self, domain_id):
         # NOTE(mpavlase) It is necessary to disable the domain before deleting
         # otherwise it raises Forbidden exception
-        self.client.update_domain(domain_id, enabled=False)
-        self.client.delete_domain(domain_id)
+        self.domains_client.update_domain(domain_id, enabled=False)
+        self.domains_client.delete_domain(domain_id)
 
 
 class BaseDataGenerator(object):
 
     def __init__(self, client, projects_client,
-                 users_client, roles_client=None):
+                 users_client, roles_client=None, domains_client=None):
         self.client = client
         self.projects_client = projects_client
         self.users_client = users_client
         self.roles_client = roles_client or client
+        self.domains_client = domains_client
 
         self.user_password = None
         self.user = None
@@ -242,8 +244,9 @@ class BaseDataGenerator(object):
         for role in self.roles:
             self._try_wrapper(self.roles_client.delete_role, role)
         for domain in self.domains:
-            self._try_wrapper(self.client.update_domain, domain, enabled=False)
-            self._try_wrapper(self.client.delete_domain, domain)
+            self._try_wrapper(self.domains_client.update_domain, domain,
+                              enabled=False)
+            self._try_wrapper(self.domains_client.delete_domain, domain)
 
 
 class DataGeneratorV2(BaseDataGenerator):
@@ -277,7 +280,7 @@ class DataGeneratorV3(BaseDataGenerator):
 
     def setup_test_domain(self):
         """Set up a test domain."""
-        self.domain = self.client.create_domain(
+        self.domain = self.domains_client.create_domain(
             name=data_utils.rand_name('test_domain'),
             description=data_utils.rand_name('desc'))['domain']
         self.domains.append(self.domain)

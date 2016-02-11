@@ -940,7 +940,7 @@ class DomainService(BaseService):
 
     def __init__(self, manager, **kwargs):
         super(DomainService, self).__init__(kwargs)
-        self.client = manager.identity_v3_client
+        self.client = manager.domains_client
 
     def list(self):
         client = self.client
