@@ -13,9 +13,11 @@
 #    under the License.
 
 import httplib2
+import mock
 from oslotest import mockpatch
 from tempest_lib.common import rest_client
 
+from tempest.api.compute import api_microversion_fixture
 from tempest import exceptions
 from tempest.services.compute.json import base_compute_client
 from tempest.tests import fake_auth_provider
@@ -29,7 +31,7 @@ class TestMicroversionHeaderCheck(base.BaseComputeServiceTest):
         fake_auth = fake_auth_provider.FakeAuthProvider()
         self.client = base_compute_client.BaseComputeClient(
             fake_auth, 'compute', 'regionOne')
-        self.client.set_api_microversion('2.2')
+        self.useFixture(api_microversion_fixture.APIMicroversionFixture('2.2'))
 
     def _check_microverion_header_in_response(self, fake_response):
         def request(*args, **kwargs):
@@ -75,7 +77,8 @@ class TestSchemaVersionsNone(base.BaseComputeServiceTest):
         super(TestSchemaVersionsNone, self).setUp()
         fake_auth = fake_auth_provider.FakeAuthProvider()
         self.client = DummyServiceClient1(fake_auth, 'compute', 'regionOne')
-        self.client.api_microversion = self.api_microversion
+        self.useFixture(api_microversion_fixture.APIMicroversionFixture(
+            self.api_microversion))
 
     def test_schema(self):
         self.assertEqual(self.expected_schema,
@@ -129,8 +132,62 @@ class TestSchemaVersionsNotFound(base.BaseComputeServiceTest):
         super(TestSchemaVersionsNotFound, self).setUp()
         fake_auth = fake_auth_provider.FakeAuthProvider()
         self.client = DummyServiceClient2(fake_auth, 'compute', 'regionOne')
-        self.client.api_microversion = self.api_microversion
+        self.useFixture(api_microversion_fixture.APIMicroversionFixture(
+            self.api_microversion))
 
     def test_schema(self):
         self.assertRaises(exceptions.JSONSchemaNotFound,
                           self.client.return_selected_schema)
+
+
+class TestClientWithoutMicroversionHeader(base.BaseComputeServiceTest):
+
+    def setUp(self):
+        super(TestClientWithoutMicroversionHeader, self).setUp()
+        fake_auth = fake_auth_provider.FakeAuthProvider()
+        self.client = base_compute_client.BaseComputeClient(
+            fake_auth, 'compute', 'regionOne')
+
+    def test_no_microverion_header(self):
+        header = self.client.get_headers()
+        self.assertNotIn('X-OpenStack-Nova-API-Version', header)
+
+    def test_no_microverion_header_in_raw_request(self):
+        def raw_request(*args, **kwargs):
+            self.assertNotIn('X-OpenStack-Nova-API-Version', kwargs['headers'])
+            return (httplib2.Response({'status': 200}), {})
+
+        with mock.patch.object(rest_client.RestClient,
+                               'raw_request') as mock_get:
+            mock_get.side_effect = raw_request
+            self.client.get('fake_url')
+
+
+class TestClientWithMicroversionHeader(base.BaseComputeServiceTest):
+
+    def setUp(self):
+        super(TestClientWithMicroversionHeader, self).setUp()
+        fake_auth = fake_auth_provider.FakeAuthProvider()
+        self.client = base_compute_client.BaseComputeClient(
+            fake_auth, 'compute', 'regionOne')
+        self.useFixture(api_microversion_fixture.APIMicroversionFixture('2.2'))
+
+    def test_microverion_header(self):
+        header = self.client.get_headers()
+        self.assertIn('X-OpenStack-Nova-API-Version', header)
+        self.assertEqual('2.2',
+                         header['X-OpenStack-Nova-API-Version'])
+
+    def test_microverion_header_in_raw_request(self):
+        def raw_request(*args, **kwargs):
+            self.assertIn('X-OpenStack-Nova-API-Version', kwargs['headers'])
+            self.assertEqual('2.2',
+                             kwargs['headers']['X-OpenStack-Nova-API-Version'])
+            return (httplib2.Response(
+                {'status': 200,
+                 self.client.api_microversion_header_name: '2.2'}), {})
+
+        with mock.patch.object(rest_client.RestClient,
+                               'raw_request') as mock_get:
+            mock_get.side_effect = raw_request
+            self.client.get('fake_url')

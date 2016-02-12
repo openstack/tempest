@@ -11,30 +11,38 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
+from tempest_lib.common import rest_client
 
 from tempest.common import api_version_request
 from tempest.common import api_version_utils
 from tempest import exceptions
-from tempest.services import base_microversion_client
+
+COMPUTE_MICROVERSION = None
 
 
-class BaseComputeClient(base_microversion_client.BaseMicroversionClient):
+class BaseComputeClient(rest_client.RestClient):
+    api_microversion_header_name = 'X-OpenStack-Nova-API-Version'
 
     def __init__(self, auth_provider, service, region,
-                 api_microversion_header_name='X-OpenStack-Nova-API-Version',
                  **kwargs):
         super(BaseComputeClient, self).__init__(
-            auth_provider, service, region,
-            api_microversion_header_name, **kwargs)
+            auth_provider, service, region, **kwargs)
+
+    def get_headers(self):
+        headers = super(BaseComputeClient, self).get_headers()
+        if COMPUTE_MICROVERSION:
+            headers[self.api_microversion_header_name] = COMPUTE_MICROVERSION
+        return headers
 
     def request(self, method, url, extra_headers=False, headers=None,
                 body=None):
         resp, resp_body = super(BaseComputeClient, self).request(
             method, url, extra_headers, headers, body)
-        if self.api_microversion and self.api_microversion != 'latest':
+        if (COMPUTE_MICROVERSION and
+            COMPUTE_MICROVERSION != api_version_utils.LATEST_MICROVERSION):
             api_version_utils.assert_version_header_matches_request(
                 self.api_microversion_header_name,
-                self.api_microversion,
+                COMPUTE_MICROVERSION,
                 resp)
         return resp, resp_body
 
@@ -52,7 +60,7 @@ class BaseComputeClient(base_microversion_client.BaseMicroversionClient):
             {'min': '2.10', 'max': None, 'schema': schemav210}]
         """
         schema = None
-        version = api_version_request.APIVersionRequest(self.api_microversion)
+        version = api_version_request.APIVersionRequest(COMPUTE_MICROVERSION)
         for items in schema_versions_info:
             min_version = api_version_request.APIVersionRequest(items['min'])
             max_version = api_version_request.APIVersionRequest(items['max'])
