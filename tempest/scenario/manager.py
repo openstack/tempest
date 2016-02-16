@@ -813,15 +813,18 @@ class NetworkScenarioTest(ScenarioTest):
         return port
 
     def _get_server_port_id_and_ip4(self, server, ip_addr=None):
-        ports = self._list_ports(device_id=server['id'], status='ACTIVE',
-                                 fixed_ip=ip_addr)
+        ports = self._list_ports(device_id=server['id'], fixed_ip=ip_addr)
         # A port can have more then one IP address in some cases.
         # If the network is dual-stack (IPv4 + IPv6), this port is associated
         # with 2 subnets
         port_map = [(p["id"], fxip["ip_address"])
                     for p in ports
                     for fxip in p["fixed_ips"]
-                    if netaddr.valid_ipv4(fxip["ip_address"])]
+                    if netaddr.valid_ipv4(fxip["ip_address"])
+                    and p['status'] == 'ACTIVE']
+        inactive = [p for p in ports if p['status'] != 'ACTIVE']
+        if inactive:
+            LOG.warning("Instance has ports that are not ACTIVE: %s", inactive)
 
         self.assertNotEqual(0, len(port_map),
                             "No IPv4 addresses found in: %s" % ports)
