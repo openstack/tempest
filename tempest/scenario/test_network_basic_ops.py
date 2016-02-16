@@ -741,6 +741,8 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
             msg='After router rescheduling')
 
     @test.requires_ext(service='network', extension='port-security')
+    @testtools.skipUnless(CONF.compute_feature_enabled.interface_attach,
+                          'NIC hotplug not available')
     @test.idempotent_id('7c0bb1a2-d053-49a4-98f9-ca1a1d849f63')
     @test.services('compute', 'network')
     def test_port_security_macspoofing_port(self):
