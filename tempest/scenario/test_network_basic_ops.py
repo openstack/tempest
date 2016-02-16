@@ -777,7 +777,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         private_key = self._get_server_key(server)
         ssh_client = self.get_remote_client(fip.floating_ip_address,
                                             private_key=private_key)
-        spoof_nic = ssh_client.get_nic_name(spoof_port["mac_address"])
+        spoof_nic = ssh_client.get_nic_name_by_mac(spoof_port["mac_address"])
         dhcp_ports = self._list_ports(device_owner="network:dhcp",
                                       network_id=self.new_net["id"])
         new_net_dhcp = dhcp_ports[0]["fixed_ips"][0]["ip_address"]
