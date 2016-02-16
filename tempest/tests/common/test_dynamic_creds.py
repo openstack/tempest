@@ -406,7 +406,7 @@ class TestDynamicCredentialProvider(base.TestCase):
 
         return_values = (fake_http.fake_httplib({}, status=204), {})
         remove_secgroup_mock = self.patch(
-            'tempest.services.network.json.security_groups_client.'
+            'tempest_lib.services.network.security_groups_client.'
             'SecurityGroupsClient.delete', return_value=return_values)
         creds.clear_creds()
         # Verify default security group delete

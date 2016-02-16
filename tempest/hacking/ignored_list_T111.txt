@@ -1,2 +1,1 @@
 ./tempest/services/baremetal/base.py
-./tempest/services/network/json/quotas_client.py
