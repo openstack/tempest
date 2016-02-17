@@ -31,15 +31,15 @@ class CredsClient(object):
      admin credentials used for generating credentials.
     """
 
-    def __init__(self, identity_client, projects_client,
-                 roles_client=None, users_client=None):
+    def __init__(self, identity_client, projects_client, users_client,
+                 roles_client=None):
         # The client implies version and credentials
         self.identity_client = identity_client
+        self.users_client = users_client
         self.projects_client = projects_client
-        # this is temporary until v3 roles client and v3 users client are
-        # separated, then these clients will become mandatory
+        # this is temporary until the v3 clients are
+        # separated, then using *only* each client will become mandatory
         self.roles_client = roles_client or identity_client
-        self.users_client = users_client or identity_client
 
     def create_user(self, username, password, project, email):
         user = self.users_client.create_user(
@@ -97,12 +97,12 @@ class CredsClient(object):
 
 class V2CredsClient(CredsClient):
 
-    def __init__(self, identity_client, projects_client, roles_client,
-                 users_client):
+    def __init__(self, identity_client, projects_client, users_client,
+                 roles_client):
         super(V2CredsClient, self).__init__(identity_client,
                                             projects_client,
-                                            roles_client,
-                                            users_client)
+                                            users_client,
+                                            roles_client)
 
     def create_project(self, name, description):
         tenant = self.projects_client.create_tenant(
@@ -126,8 +126,10 @@ class V2CredsClient(CredsClient):
 
 class V3CredsClient(CredsClient):
 
-    def __init__(self, identity_client, projects_client, domain_name):
-        super(V3CredsClient, self).__init__(identity_client, projects_client)
+    def __init__(self, identity_client, projects_client, users_client,
+                 domain_name):
+        super(V3CredsClient, self).__init__(identity_client,
+                                            projects_client, users_client)
         try:
             # Domain names must be unique, in any case a list is returned,
             # selecting the first (and only) element
@@ -167,12 +169,12 @@ class V3CredsClient(CredsClient):
 
 def get_creds_client(identity_client,
                      projects_client,
+                     users_client,
                      roles_client=None,
-                     users_client=None,
                      project_domain_name=None):
     if isinstance(identity_client, v2_identity.IdentityClient):
-        return V2CredsClient(identity_client, projects_client, roles_client,
-                             users_client)
+        return V2CredsClient(identity_client, projects_client, users_client,
+                             roles_client)
     else:
-        return V3CredsClient(identity_client,
-                             projects_client, project_domain_name)
+        return V3CredsClient(identity_client, projects_client, users_client,
+                             project_domain_name)

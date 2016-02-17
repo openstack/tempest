@@ -68,9 +68,9 @@ class GroupsV3TestJSON(base.BaseIdentityV3AdminTest):
         for i in range(3):
             name = data_utils.rand_name('User')
             password = data_utils.rand_password()
-            user = self.client.create_user(name, password)['user']
+            user = self.users_client.create_user(name, password)['user']
             users.append(user)
-            self.addCleanup(self.client.delete_user, user['id'])
+            self.addCleanup(self.users_client.delete_user, user['id'])
             self.groups_client.add_group_user(group['id'], user['id'])
 
         # list users in group
@@ -87,9 +87,9 @@ class GroupsV3TestJSON(base.BaseIdentityV3AdminTest):
     @test.idempotent_id('64573281-d26a-4a52-b899-503cb0f4e4ec')
     def test_list_user_groups(self):
         # create a user
-        user = self.client.create_user(
+        user = self.users_client.create_user(
             data_utils.rand_name('User'), data_utils.rand_password())['user']
-        self.addCleanup(self.client.delete_user, user['id'])
+        self.addCleanup(self.users_client.delete_user, user['id'])
         # create two groups, and add user into them
         groups = []
         for i in range(2):
@@ -99,7 +99,7 @@ class GroupsV3TestJSON(base.BaseIdentityV3AdminTest):
             self.addCleanup(self.groups_client.delete_group, group['id'])
             self.groups_client.add_group_user(group['id'], user['id'])
         # list groups which user belongs to
-        user_groups = self.client.list_user_groups(user['id'])['groups']
+        user_groups = self.users_client.list_user_groups(user['id'])['groups']
         self.assertEqual(sorted(groups), sorted(user_groups))
         self.assertEqual(2, len(user_groups))
 

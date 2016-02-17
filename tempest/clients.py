@@ -128,6 +128,7 @@ from tempest.services.identity.v3.json.regions_client import \
     RegionsClient as RegionsV3Client
 from tempest.services.identity.v3.json.services_client import \
     ServicesClient as IdentityServicesV3Client
+from tempest.services.identity.v3.json.users_clients import UsersV3Client
 from tempest.services.image.v1.json.images_client import ImagesClient
 from tempest.services.image.v2.json.images_client import ImagesClientV2
 from tempest.services.messaging.json.messaging_client import \
@@ -535,6 +536,7 @@ class Manager(manager.Manager):
         params_v3['endpoint_type'] = CONF.identity.v3_endpoint_type
         self.identity_v3_client = IdentityV3Client(self.auth_provider,
                                                    **params_v3)
+        self.users_v3_client = UsersV3Client(self.auth_provider, **params_v3)
         self.endpoints_client = EndPointV3Client(self.auth_provider,
                                                  **params_v3)
         self.identity_services_client = IdentityServicesV3Client(

@@ -56,11 +56,13 @@ class TestDefaultProjectId (base.BaseIdentityV3AdminTest):
         # create a user in the domain, with the previous project as his
         # default project
         user_name = data_utils.rand_name('user')
-        user_body = self.client.create_user(user_name, password=user_name,
-                                            domain_id=dom_id,
-                                            default_project_id=proj_id)['user']
+        user_body = self.users_client.create_user(
+            user_name,
+            password=user_name,
+            domain_id=dom_id,
+            default_project_id=proj_id)['user']
         user_id = user_body['id']
-        self.addCleanup(self.client.delete_user, user_id)
+        self.addCleanup(self.users_client.delete_user, user_id)
         self.assertEqual(user_body['domain_id'], dom_id,
                          "user " + user_name +
                          "doesn't have domain id " + dom_id)

@@ -42,7 +42,7 @@ class RolesV3TestJSON(base.BaseIdentityV3AdminTest):
         cls.group_body = cls.groups_client.create_group(
             name=data_utils.rand_name('Group'), project_id=cls.project['id'],
             domain_id=cls.domain['id'])['group']
-        cls.user_body = cls.client.create_user(
+        cls.user_body = cls.users_client.create_user(
             u_name, description=u_desc, password=cls.u_password,
             email=u_email, project_id=cls.project['id'],
             domain_id=cls.domain['id'])['user']
@@ -53,7 +53,7 @@ class RolesV3TestJSON(base.BaseIdentityV3AdminTest):
     def resource_cleanup(cls):
         cls.client.delete_role(cls.role['id'])
         cls.groups_client.delete_group(cls.group_body['id'])
-        cls.client.delete_user(cls.user_body['id'])
+        cls.users_client.delete_user(cls.user_body['id'])
         cls.projects_client.delete_project(cls.project['id'])
         # NOTE(harika-vakadi): It is necessary to disable the domain
         # before deleting,or else it would result in unauthorized error

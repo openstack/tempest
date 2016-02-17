@@ -56,7 +56,7 @@ class BaseTrustsV3Test(base.BaseIdentityV3AdminTest):
         u_desc = self.trustor_username + 'description'
         u_email = self.trustor_username + '@testmail.xx'
         self.trustor_password = data_utils.rand_password()
-        user = self.client.create_user(
+        user = self.users_client.create_user(
             self.trustor_username,
             description=u_desc,
             password=self.trustor_password,
@@ -101,7 +101,7 @@ class BaseTrustsV3Test(base.BaseIdentityV3AdminTest):
 
     def cleanup_user_and_roles(self):
         if self.trustor_user_id:
-            self.client.delete_user(self.trustor_user_id)
+            self.users_client.delete_user(self.trustor_user_id)
         if self.trustor_project_id:
             self.projects_client.delete_project(self.trustor_project_id)
         if self.delegated_role_id:

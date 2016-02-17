@@ -25,7 +25,7 @@ class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
         # assert the response based on expected and not_expected
         # expected: user expected in the list response
         # not_expected: user, which should not be present in list response
-        body = self.client.list_users(params)['users']
+        body = self.users_client.list_users(params)['users']
         self.assertIn(expected[key], map(lambda x: x[key], body))
         self.assertNotIn(not_expected[key],
                          map(lambda x: x[key], body))
@@ -39,13 +39,13 @@ class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
         cls.data.setup_test_domain()
         # Create user with Domain
         u1_name = data_utils.rand_name('test_user')
-        cls.domain_enabled_user = cls.client.create_user(
+        cls.domain_enabled_user = cls.users_client.create_user(
             u1_name, password=alt_password,
             email=cls.alt_email, domain_id=cls.data.domain['id'])['user']
         cls.data.users.append(cls.domain_enabled_user)
         # Create default not enabled user
         u2_name = data_utils.rand_name('test_user')
-        cls.non_domain_enabled_user = cls.client.create_user(
+        cls.non_domain_enabled_user = cls.users_client.create_user(
             u2_name, password=alt_password,
             email=cls.alt_email, enabled=False)['user']
         cls.data.users.append(cls.non_domain_enabled_user)
@@ -77,7 +77,7 @@ class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
     @test.idempotent_id('b30d4651-a2ea-4666-8551-0c0e49692635')
     def test_list_users(self):
         # List users
-        body = self.client.list_users()['users']
+        body = self.users_client.list_users()['users']
         fetched_ids = [u['id'] for u in body]
         missing_users = [u['id'] for u in self.data.users
                          if u['id'] not in fetched_ids]
@@ -88,7 +88,7 @@ class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
     @test.idempotent_id('b4baa3ae-ac00-4b4e-9e27-80deaad7771f')
     def test_get_user(self):
         # Get a user detail
-        user = self.client.show_user(self.data.users[0]['id'])['user']
+        user = self.users_client.show_user(self.data.users[0]['id'])['user']
         self.assertEqual(self.data.users[0]['id'], user['id'])
         self.assertEqual(self.data.users[0]['name'], user['name'])
         self.assertEqual(self.alt_email, user['email'])
