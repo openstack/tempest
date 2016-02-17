@@ -85,6 +85,7 @@ from tempest_lib.services.network.quotas_client import QuotasClient \
     as NetworkQuotasClient
 from tempest_lib.services.network.security_groups_client import \
     SecurityGroupsClient
+from tempest_lib.services.network.subnetpools_client import SubnetpoolsClient
 from tempest_lib.services.network.subnets_client import SubnetsClient
 
 from tempest.common import negative_rest_client
@@ -136,7 +137,6 @@ from tempest.services.messaging.json.messaging_client import \
 from tempest.services.network.json.network_client import NetworkClient
 from tempest.services.network.json.security_group_rules_client import \
     SecurityGroupRulesClient
-from tempest.services.network.json.subnetpools_client import SubnetpoolsClient
 from tempest.services.object_storage.account_client import AccountClient
 from tempest.services.object_storage.container_client import ContainerClient
 from tempest.services.object_storage.object_client import ObjectClient
