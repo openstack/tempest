@@ -76,12 +76,12 @@ class BaseTrustsV3Test(base.BaseIdentityV3AdminTest):
         self.not_delegated_role_id = role['id']
 
         # Assign roles to trustor
-        self.client.assign_user_role(self.trustor_project_id,
-                                     self.trustor_user_id,
-                                     self.delegated_role_id)
-        self.client.assign_user_role(self.trustor_project_id,
-                                     self.trustor_user_id,
-                                     self.not_delegated_role_id)
+        self.client.assign_user_role_on_project(self.trustor_project_id,
+                                                self.trustor_user_id,
+                                                self.delegated_role_id)
+        self.client.assign_user_role_on_project(self.trustor_project_id,
+                                                self.trustor_user_id,
+                                                self.not_delegated_role_id)
 
         # Get trustee user ID, use the demo user
         trustee_username = self.non_admin_client.user
