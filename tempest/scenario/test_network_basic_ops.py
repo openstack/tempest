@@ -626,9 +626,6 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
             "admin_state_up of instance port to True")
 
     @test.idempotent_id('759462e1-8535-46b0-ab3a-33aa45c55aaa')
-    @testtools.skipUnless(CONF.compute_feature_enabled.preserve_ports,
-                          'Preserving ports on instance delete may not be '
-                          'supported in the version of Nova being tested.')
     @test.services('compute', 'network')
     def test_preserve_preexisting_port(self):
         """Test preserve pre-existing port

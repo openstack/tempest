@@ -129,10 +129,6 @@ class LiveBlockMigrationTestJSON(base.BaseV2ComputeAdminTest):
     @test.idempotent_id('1e107f21-61b2-4988-8f22-b196e938ab88')
     @testtools.skipUnless(CONF.compute_feature_enabled.pause,
                           'Pause is not available.')
-    @testtools.skipUnless(CONF.compute_feature_enabled
-                              .live_migrate_paused_instances,
-                          'Live migration of paused instances is not '
-                          'available.')
     def test_live_block_migration_paused(self):
         self._test_live_migration(state='PAUSED')
 
