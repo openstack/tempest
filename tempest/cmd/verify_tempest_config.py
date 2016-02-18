@@ -269,7 +269,6 @@ def check_service_availability(os, update):
         'data_processing': 'sahara',
         'baremetal': 'ironic',
         'identity': 'keystone',
-        'messaging': 'zaqar',
         'database': 'trove'
     }
     # Get catalog list for endpoints to use for validation

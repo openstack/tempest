@@ -1,4 +1,3 @@
-./tempest/services/messaging/json/messaging_client.py
 ./tempest/services/object_storage/object_client.py
 ./tempest/services/telemetry/json/alarming_client.py
 ./tempest/services/telemetry/json/telemetry_client.py
