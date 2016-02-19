@@ -82,11 +82,11 @@ class TokensV3TestJSON(base.BaseIdentityV3AdminTest):
         self.addCleanup(self.client.delete_role, role['id'])
 
         # Grant the user the role on both projects.
-        self.client.assign_user_role(project1['id'], user['id'],
-                                     role['id'])
+        self.client.assign_user_role_on_project(project1['id'], user['id'],
+                                                role['id'])
 
-        self.client.assign_user_role(project2['id'], user['id'],
-                                     role['id'])
+        self.client.assign_user_role_on_project(project2['id'], user['id'],
+                                                role['id'])
 
         # Get an unscoped token.
         token_auth = self.token.auth(user_id=user['id'],

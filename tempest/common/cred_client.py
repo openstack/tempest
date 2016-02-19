@@ -73,8 +73,7 @@ class CredsClient(object):
             msg = 'No "%s" role found' % role_name
             raise lib_exc.NotFound(msg)
         try:
-            self.roles_client.assign_user_role(project['id'], user['id'],
-                                               role['id'])
+            self._assign_user_role(project, user, role)
         except lib_exc.Conflict:
             LOG.debug("Role %s already assigned on project %s for user %s" % (
                 role['id'], project['id'], user['id']))
@@ -123,6 +122,10 @@ class V2CredsClient(CredsClient):
             tenant_name=project['name'], tenant_id=project['id'],
             password=password)
 
+    def _assign_user_role(self, project, user, role):
+        self.roles_client.assign_user_role(project['id'], user['id'],
+                                           role['id'])
+
 
 class V3CredsClient(CredsClient):
 
@@ -165,6 +168,11 @@ class V3CredsClient(CredsClient):
     def _list_roles(self):
         roles = self.identity_client.list_roles()['roles']
         return roles
+
+    def _assign_user_role(self, project, user, role):
+        self.roles_client.assign_user_role_on_project(project['id'],
+                                                      user['id'],
+                                                      role['id'])
 
 
 def get_creds_client(identity_client,

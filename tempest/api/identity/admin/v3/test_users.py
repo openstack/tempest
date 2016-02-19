@@ -135,9 +135,9 @@ class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
             self.addCleanup(
                 self.projects_client.delete_project, project_body['id'])
             # Assigning roles to user on project
-            self.client.assign_user_role(project['id'],
-                                         user['id'],
-                                         role['id'])
+            self.client.assign_user_role_on_project(project['id'],
+                                                    user['id'],
+                                                    role['id'])
             assigned_project_ids.append(project['id'])
         body = self.users_client.list_user_projects(user['id'])['projects']
         for i in body:

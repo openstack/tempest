@@ -74,13 +74,6 @@ class IdentityV3Client(service_client.ServiceClient):
         self.expected_success(204, resp.status)
         return service_client.ResponseBody(resp, body)
 
-    def assign_user_role(self, project_id, user_id, role_id):
-        """Add roles to a user on a project."""
-        resp, body = self.put('projects/%s/users/%s/roles/%s' %
-                              (project_id, user_id, role_id), None)
-        self.expected_success(204, resp.status)
-        return service_client.ResponseBody(resp, body)
-
     def create_domain(self, name, **kwargs):
         """Creates a domain."""
         description = kwargs.get('description', None)
