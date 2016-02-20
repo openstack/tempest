@@ -132,8 +132,6 @@ from tempest.services.identity.v3.json.services_client import \
 from tempest.services.identity.v3.json.users_clients import UsersV3Client
 from tempest.services.image.v1.json.images_client import ImagesClient
 from tempest.services.image.v2.json.images_client import ImagesClientV2
-from tempest.services.messaging.json.messaging_client import \
-    MessagingClient
 from tempest.services.network.json.network_client import NetworkClient
 from tempest.services.network.json.security_group_rules_client import \
     SecurityGroupRulesClient
@@ -344,11 +342,6 @@ class Manager(manager.Manager):
             build_interval=CONF.network.build_interval,
             build_timeout=CONF.network.build_timeout,
             **self.default_params)
-        self.messaging_client = MessagingClient(
-            self.auth_provider,
-            CONF.messaging.catalog_type,
-            CONF.identity.region,
-            **self.default_params_with_timeout_values)
         if CONF.service_available.ceilometer:
             self.telemetry_client = TelemetryClient(
                 self.auth_provider,

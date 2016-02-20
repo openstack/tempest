@@ -561,41 +561,6 @@ NetworkFeaturesGroup = [
                      " port admin state"),
 ]
 
-messaging_group = cfg.OptGroup(name='messaging',
-                               title='Messaging Service')
-
-MessagingGroup = [
-    cfg.StrOpt('catalog_type',
-               default='messaging',
-               help='Catalog type of the Messaging service.'),
-    cfg.IntOpt('max_queues_per_page',
-               default=20,
-               help='The maximum number of queue records per page when '
-                    'listing queues'),
-    cfg.IntOpt('max_queue_metadata',
-               default=65536,
-               help='The maximum metadata size for a queue'),
-    cfg.IntOpt('max_messages_per_page',
-               default=20,
-               help='The maximum number of queue message per page when '
-                    'listing (or) posting messages'),
-    cfg.IntOpt('max_message_size',
-               default=262144,
-               help='The maximum size of a message body'),
-    cfg.IntOpt('max_messages_per_claim',
-               default=20,
-               help='The maximum number of messages per claim'),
-    cfg.IntOpt('max_message_ttl',
-               default=1209600,
-               help='The maximum ttl for a message'),
-    cfg.IntOpt('max_claim_ttl',
-               default=43200,
-               help='The maximum ttl for a claim'),
-    cfg.IntOpt('max_claim_grace',
-               default=43200,
-               help='The maximum grace period for a claim'),
-]
-
 validation_group = cfg.OptGroup(name='validation',
                                 title='SSH Validation options')
 
@@ -1113,9 +1078,6 @@ ServiceAvailableGroup = [
     cfg.BoolOpt('trove',
                 default=False,
                 help="Whether or not Trove is expected to be available"),
-    cfg.BoolOpt('zaqar',
-                default=False,
-                help="Whether or not Zaqar is expected to be available"),
 ]
 
 debug_group = cfg.OptGroup(name="debug",
@@ -1242,7 +1204,6 @@ _opts = [
     (image_feature_group, ImageFeaturesGroup),
     (network_group, NetworkGroup),
     (network_feature_group, NetworkFeaturesGroup),
-    (messaging_group, MessagingGroup),
     (validation_group, ValidationGroup),
     (volume_group, VolumeGroup),
     (volume_feature_group, VolumeFeaturesGroup),
@@ -1318,7 +1279,6 @@ class TempestConfigPrivate(object):
             'object-storage-feature-enabled']
         self.database = _CONF.database
         self.orchestration = _CONF.orchestration
-        self.messaging = _CONF.messaging
         self.telemetry = _CONF.telemetry
         self.telemetry_feature_enabled = _CONF['telemetry-feature-enabled']
         self.dashboard = _CONF.dashboard
