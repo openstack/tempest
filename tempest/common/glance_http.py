@@ -47,7 +47,6 @@ class HTTPClient(object):
         self.endpoint_scheme = endpoint_parts.scheme
         self.endpoint_hostname = endpoint_parts.hostname
         self.endpoint_port = endpoint_parts.port
-        self.endpoint_path = endpoint_parts.path
 
         self.connection_class = self._get_connection_class(
             self.endpoint_scheme)

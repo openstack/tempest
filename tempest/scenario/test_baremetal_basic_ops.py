@@ -15,7 +15,6 @@
 
 from oslo_log import log as logging
 
-from tempest.common import waiters
 from tempest import config
 from tempest.scenario import manager
 from tempest import test
@@ -37,32 +36,10 @@ class BaremetalBasicOps(manager.BaremetalScenarioTest):
         * Verifies SSH connectivity using created keypair via fixed IP
         * Associates a floating ip
         * Verifies SSH connectivity using created keypair via floating IP
-        * Verifies instance rebuild with ephemeral partition preservation
         * Deletes instance
         * Monitors the associated Ironic node for power and
           expected state transitions
     """
-    def rebuild_instance(self, preserve_ephemeral=False):
-        self.rebuild_server(server_id=self.instance['id'],
-                            preserve_ephemeral=preserve_ephemeral,
-                            wait=False)
-
-        node = self.get_node(instance_id=self.instance['id'])
-
-        # We should remain on the same node
-        self.assertEqual(self.node['uuid'], node['uuid'])
-        self.node = node
-
-        waiters.wait_for_server_status(
-            self.servers_client,
-            server_id=self.instance['id'],
-            status='REBUILD',
-            ready_wait=False)
-        waiters.wait_for_server_status(
-            self.servers_client,
-            server_id=self.instance['id'],
-            status='ACTIVE')
-
     def verify_partition(self, client, label, mount, gib_size):
         """Verify a labeled partition's mount point and size."""
         LOG.info("Looking for partition %s mounted on %s" % (label, mount))
