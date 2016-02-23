@@ -11,6 +11,7 @@ Contents:
    HACKING
    REVIEWING
    plugin
+   library
 
 ------------
 Field Guides
