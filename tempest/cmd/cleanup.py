@@ -77,7 +77,8 @@ class TempestCleanup(command.Command):
     def take_action(self, parsed_args):
         try:
             self.init(parsed_args)
-            self._cleanup()
+            if not parsed_args.init_saved_state:
+                self._cleanup()
         except Exception:
             LOG.exception("Failure during cleanup")
             traceback.print_exc()

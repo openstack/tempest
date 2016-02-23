@@ -78,7 +78,7 @@ def init_conf():
 
     if IS_NEUTRON:
         CONF_PRIV_NETWORK = _get_network_id(CONF.compute.fixed_network_name,
-                                            CONF.identity.tenant_name)
+                                            CONF.auth.admin_tenant_name)
         CONF_NETWORKS = [CONF_PUB_NETWORK, CONF_PRIV_NETWORK]
 
 
