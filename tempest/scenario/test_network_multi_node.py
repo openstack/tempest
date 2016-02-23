@@ -194,6 +194,12 @@ class TestNetworkMultiNode(manager.NetworkScenarioTest):
         self.num_networks = int(self.max_instances_per_tenant /
                                 len(self.hypervisors))
 
+        # If user specified max_instances_per_tenant less than
+        # number of hypervisors availabe then result is zero
+        # give at least one.
+        if self.num_networks == 0:
+            self.num_networks = 1
+
         LOG.debug("Max instances per tenant = {0}".
                   format(self.max_instances_per_tenant))
         LOG.debug("Number of instances per Network/compute = {0}".
@@ -202,7 +208,8 @@ class TestNetworkMultiNode(manager.NetworkScenarioTest):
 
         self.security_group = self._create_security_group(
             tenant_id=self.tenant_id)
-        self.srv_kwargs['security_groups'] = [self.security_group]
+        my_security_groups = [{'name': self.security_group['name']}]
+        self.srv_kwargs['security_groups'] = my_security_groups
         try:
             self._create_loginable_secgroup_rule(secgroup=self.security_group)
         except Exception as e:
@@ -278,6 +285,10 @@ class TestNetworkMultiNode(manager.NetworkScenarioTest):
                     self.network_vms[network.id].append(id)
                 else:
                     self.network_vms[network.id] = [id]
+
+                # Safety net for max_instances_per_tenant
+                if len(self.servers) == self.max_instances_per_tenant:
+                    return
 
     def delete_vms(self):
         """
