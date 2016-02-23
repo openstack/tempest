@@ -23,3 +23,6 @@ build
 !.coveragerc
 cover/
 doc/source/_static/tempest.conf.sample
+
+# Files created by releasenotes build
+releasenotes/build
