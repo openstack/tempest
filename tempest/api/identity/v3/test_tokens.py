@@ -28,10 +28,15 @@ class TokensV3Test(base.BaseIdentityV3Test):
         user_id = creds.user_id
         username = creds.username
         password = creds.password
+        user_domain_id = creds.user_domain_id
 
-        token_id, resp = self.non_admin_token.get_token(user_id=user_id,
-                                                        password=password,
-                                                        auth_data=True)
+        # 'user_domain_id' needs to be specified otherwise tempest_lib assumes
+        # it to be 'default'
+        token_id, resp = self.non_admin_token.get_token(
+            user_id=user_id,
+            user_domain_id=user_domain_id,
+            password=password,
+            auth_data=True)
 
         self.assertNotEmpty(token_id)
         self.assertIsInstance(token_id, six.string_types)
