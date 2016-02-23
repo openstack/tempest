@@ -26,17 +26,6 @@ class ObjectTestACLs(base.BaseObjectTest):
     credentials = [['operator', CONF.object_storage.operator_role],
                    ['operator_alt', CONF.object_storage.operator_role]]
 
-    @classmethod
-    def setup_credentials(cls):
-        super(ObjectTestACLs, cls).setup_credentials()
-        cls.os = cls.os_roles_operator
-        cls.os_operator = cls.os_roles_operator_alt
-
-    @classmethod
-    def resource_setup(cls):
-        super(ObjectTestACLs, cls).resource_setup()
-        cls.test_auth_data = cls.os_operator.auth_provider.auth_data
-
     def setUp(self):
         super(ObjectTestACLs, self).setUp()
         self.container_name = data_utils.rand_name(name='TestContainer')
@@ -50,24 +39,26 @@ class ObjectTestACLs(base.BaseObjectTest):
     def test_read_object_with_rights(self):
         # attempt to read object using authorized user
         # update X-Container-Read metadata ACL
-        tenant_name = self.os_operator.credentials.tenant_name
-        username = self.os_operator.credentials.username
+        tenant_name = self.os_roles_operator_alt.credentials.tenant_name
+        username = self.os_roles_operator_alt.credentials.username
         cont_headers = {'X-Container-Read': tenant_name + ':' + username}
-        resp_meta, body = self.container_client.update_container_metadata(
-            self.container_name, metadata=cont_headers,
-            metadata_prefix='')
+        resp_meta, body = self.os_roles_operator.container_client.\
+            update_container_metadata(
+                self.container_name, metadata=cont_headers,
+                metadata_prefix='')
         self.assertHeaders(resp_meta, 'Container', 'POST')
         # create object
         object_name = data_utils.rand_name(name='Object')
-        resp, _ = self.object_client.create_object(self.container_name,
-                                                   object_name, 'data')
+        resp, _ = self.os_roles_operator.object_client.create_object(
+            self.container_name, object_name, 'data')
         self.assertHeaders(resp, 'Object', 'PUT')
-        # Trying to read the object with rights
-        self.object_client.auth_provider.set_alt_auth_data(
+        # set alternative authentication data; cannot simply use the
+        # other object client.
+        self.os_roles_operator.object_client.auth_provider.set_alt_auth_data(
             request_part='headers',
-            auth_data=self.test_auth_data
-        )
-        resp, _ = self.object_client.get_object(
+            auth_data=self.os_roles_operator_alt.object_client.auth_provider.
+            auth_data)
+        resp, _ = self.os_roles_operator.object_client.get_object(
             self.container_name, object_name)
         self.assertHeaders(resp, 'Object', 'GET')
 
@@ -75,20 +66,23 @@ class ObjectTestACLs(base.BaseObjectTest):
     def test_write_object_with_rights(self):
         # attempt to write object using authorized user
         # update X-Container-Write metadata ACL
-        tenant_name = self.os_operator.credentials.tenant_name
-        username = self.os_operator.credentials.username
+        tenant_name = self.os_roles_operator_alt.credentials.tenant_name
+        username = self.os_roles_operator_alt.credentials.username
         cont_headers = {'X-Container-Write': tenant_name + ':' + username}
-        resp_meta, body = self.container_client.update_container_metadata(
-            self.container_name, metadata=cont_headers,
-            metadata_prefix='')
+        resp_meta, body = self.os_roles_operator.container_client.\
+            update_container_metadata(self.container_name,
+                                      metadata=cont_headers,
+                                      metadata_prefix='')
         self.assertHeaders(resp_meta, 'Container', 'POST')
-        # Trying to write the object with rights
-        self.object_client.auth_provider.set_alt_auth_data(
+        # set alternative authentication data; cannot simply use the
+        # other object client.
+        self.os_roles_operator.object_client.auth_provider.set_alt_auth_data(
             request_part='headers',
-            auth_data=self.test_auth_data
-        )
+            auth_data=self.os_roles_operator_alt.object_client.auth_provider.
+            auth_data)
+        # Trying to write the object with rights
         object_name = data_utils.rand_name(name='Object')
-        resp, _ = self.object_client.create_object(
+        resp, _ = self.os_roles_operator.object_client.create_object(
             self.container_name,
             object_name, 'data', headers={})
         self.assertHeaders(resp, 'Object', 'PUT')
