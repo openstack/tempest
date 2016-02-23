@@ -11,7 +11,7 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
-from tempest_lib.common import rest_client
+from tempest.lib.common import rest_client
 
 from tempest.common import api_version_request
 from tempest.common import api_version_utils

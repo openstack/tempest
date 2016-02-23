@@ -15,13 +15,13 @@
 import mock
 from oslo_config import cfg
 from oslotest import mockpatch
-from tempest_lib.services.identity.v2 import token_client as json_token_client
 
 from tempest.common import credentials_factory as credentials
 from tempest.common import dynamic_creds
 from tempest.common import service_client
 from tempest import config
 from tempest import exceptions
+from tempest.lib.services.identity.v2 import token_client as json_token_client
 from tempest.services.identity.v2.json import identity_client as \
     json_iden_client
 from tempest.services.identity.v2.json import roles_client as \
@@ -159,7 +159,7 @@ class TestDynamicCredentialProvider(base.TestCase):
             return_value={'router': {'id': id, 'name': name}}))
         return router_fix
 
-    @mock.patch('tempest_lib.common.rest_client.RestClient')
+    @mock.patch('tempest.lib.common.rest_client.RestClient')
     def test_primary_creds(self, MockRestClient):
         cfg.CONF.set_default('neutron', False, 'service_available')
         creds = dynamic_creds.DynamicCredentialProvider(**self.fixed_params)
@@ -174,7 +174,7 @@ class TestDynamicCredentialProvider(base.TestCase):
         self.assertEqual(primary_creds.tenant_id, '1234')
         self.assertEqual(primary_creds.user_id, '1234')
 
-    @mock.patch('tempest_lib.common.rest_client.RestClient')
+    @mock.patch('tempest.lib.common.rest_client.RestClient')
     def test_admin_creds(self, MockRestClient):
         cfg.CONF.set_default('neutron', False, 'service_available')
         creds = dynamic_creds.DynamicCredentialProvider(**self.fixed_params)
@@ -197,7 +197,7 @@ class TestDynamicCredentialProvider(base.TestCase):
         self.assertEqual(admin_creds.tenant_id, '1234')
         self.assertEqual(admin_creds.user_id, '1234')
 
-    @mock.patch('tempest_lib.common.rest_client.RestClient')
+    @mock.patch('tempest.lib.common.rest_client.RestClient')
     def test_role_creds(self, MockRestClient):
         cfg.CONF.set_default('neutron', False, 'service_available')
         creds = dynamic_creds.DynamicCredentialProvider(**self.fixed_params)
@@ -226,7 +226,7 @@ class TestDynamicCredentialProvider(base.TestCase):
         self.assertEqual(role_creds.tenant_id, '1234')
         self.assertEqual(role_creds.user_id, '1234')
 
-    @mock.patch('tempest_lib.common.rest_client.RestClient')
+    @mock.patch('tempest.lib.common.rest_client.RestClient')
     def test_all_cred_cleanup(self, MockRestClient):
         cfg.CONF.set_default('neutron', False, 'service_available')
         creds = dynamic_creds.DynamicCredentialProvider(**self.fixed_params)
@@ -266,7 +266,7 @@ class TestDynamicCredentialProvider(base.TestCase):
         self.assertIn('12345', args)
         self.assertIn('123456', args)
 
-    @mock.patch('tempest_lib.common.rest_client.RestClient')
+    @mock.patch('tempest.lib.common.rest_client.RestClient')
     def test_alt_creds(self, MockRestClient):
         cfg.CONF.set_default('neutron', False, 'service_available')
         creds = dynamic_creds.DynamicCredentialProvider(**self.fixed_params)
@@ -281,7 +281,7 @@ class TestDynamicCredentialProvider(base.TestCase):
         self.assertEqual(alt_creds.tenant_id, '1234')
         self.assertEqual(alt_creds.user_id, '1234')
 
-    @mock.patch('tempest_lib.common.rest_client.RestClient')
+    @mock.patch('tempest.lib.common.rest_client.RestClient')
     def test_no_network_creation_with_config_set(self, MockRestClient):
         cfg.CONF.set_default('create_isolated_networks', False, group='auth')
         creds = dynamic_creds.DynamicCredentialProvider(**self.fixed_params)
@@ -310,7 +310,7 @@ class TestDynamicCredentialProvider(base.TestCase):
         self.assertIsNone(subnet)
         self.assertIsNone(router)
 
-    @mock.patch('tempest_lib.common.rest_client.RestClient')
+    @mock.patch('tempest.lib.common.rest_client.RestClient')
     def test_network_creation(self, MockRestClient):
         creds = dynamic_creds.DynamicCredentialProvider(**self.fixed_params)
         self._mock_assign_user_role()
@@ -335,7 +335,7 @@ class TestDynamicCredentialProvider(base.TestCase):
         self.assertEqual(router['id'], '1234')
         self.assertEqual(router['name'], 'fake_router')
 
-    @mock.patch('tempest_lib.common.rest_client.RestClient')
+    @mock.patch('tempest.lib.common.rest_client.RestClient')
     def test_network_cleanup(self, MockRestClient):
         def side_effect(**args):
             return {"security_groups": [{"tenant_id": args['tenant_id'],
@@ -406,7 +406,7 @@ class TestDynamicCredentialProvider(base.TestCase):
 
         return_values = (fake_http.fake_httplib({}, status=204), {})
         remove_secgroup_mock = self.patch(
-            'tempest_lib.services.network.security_groups_client.'
+            'tempest.lib.services.network.security_groups_client.'
             'SecurityGroupsClient.delete', return_value=return_values)
         creds.clear_creds()
         # Verify default security group delete
@@ -450,7 +450,7 @@ class TestDynamicCredentialProvider(base.TestCase):
         self.assertIn('12345', args)
         self.assertIn('123456', args)
 
-    @mock.patch('tempest_lib.common.rest_client.RestClient')
+    @mock.patch('tempest.lib.common.rest_client.RestClient')
     def test_network_alt_creation(self, MockRestClient):
         creds = dynamic_creds.DynamicCredentialProvider(**self.fixed_params)
         self._mock_assign_user_role()
@@ -475,7 +475,7 @@ class TestDynamicCredentialProvider(base.TestCase):
         self.assertEqual(router['id'], '1234')
         self.assertEqual(router['name'], 'fake_alt_router')
 
-    @mock.patch('tempest_lib.common.rest_client.RestClient')
+    @mock.patch('tempest.lib.common.rest_client.RestClient')
     def test_network_admin_creation(self, MockRestClient):
         creds = dynamic_creds.DynamicCredentialProvider(**self.fixed_params)
         self._mock_assign_user_role()
@@ -500,7 +500,7 @@ class TestDynamicCredentialProvider(base.TestCase):
         self.assertEqual(router['id'], '1234')
         self.assertEqual(router['name'], 'fake_admin_router')
 
-    @mock.patch('tempest_lib.common.rest_client.RestClient')
+    @mock.patch('tempest.lib.common.rest_client.RestClient')
     def test_no_network_resources(self, MockRestClient):
         net_dict = {
             'network': False,
@@ -536,7 +536,7 @@ class TestDynamicCredentialProvider(base.TestCase):
         self.assertIsNone(subnet)
         self.assertIsNone(router)
 
-    @mock.patch('tempest_lib.common.rest_client.RestClient')
+    @mock.patch('tempest.lib.common.rest_client.RestClient')
     def test_router_without_network(self, MockRestClient):
         net_dict = {
             'network': False,
@@ -554,7 +554,7 @@ class TestDynamicCredentialProvider(base.TestCase):
         self.assertRaises(exceptions.InvalidConfiguration,
                           creds.get_primary_creds)
 
-    @mock.patch('tempest_lib.common.rest_client.RestClient')
+    @mock.patch('tempest.lib.common.rest_client.RestClient')
     def test_subnet_without_network(self, MockRestClient):
         net_dict = {
             'network': False,
@@ -572,7 +572,7 @@ class TestDynamicCredentialProvider(base.TestCase):
         self.assertRaises(exceptions.InvalidConfiguration,
                           creds.get_primary_creds)
 
-    @mock.patch('tempest_lib.common.rest_client.RestClient')
+    @mock.patch('tempest.lib.common.rest_client.RestClient')
     def test_dhcp_without_subnet(self, MockRestClient):
         net_dict = {
             'network': False,

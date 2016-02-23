@@ -13,9 +13,8 @@
 import copy
 from oslo_log import log as logging
 
-from tempest_lib.common.utils import misc as misc_utils
-
 from tempest import exceptions
+from tempest.lib.common.utils import misc as misc_utils
 
 LOG = logging.getLogger(__name__)
 

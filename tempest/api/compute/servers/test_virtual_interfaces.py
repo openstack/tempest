@@ -14,10 +14,10 @@
 #    under the License.
 
 import netaddr
-from tempest_lib import decorators
 
 from tempest.api.compute import base
 from tempest import config
+from tempest.lib import decorators
 from tempest import test
 
 CONF = config.CONF

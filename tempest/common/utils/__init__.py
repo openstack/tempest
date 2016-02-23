@@ -15,8 +15,7 @@
 from functools import partial
 
 from tempest import config
-
-from tempest_lib.common.utils import data_utils as lib_data_utils
+from tempest.lib.common.utils import data_utils as lib_data_utils
 
 CONF = config.CONF
 

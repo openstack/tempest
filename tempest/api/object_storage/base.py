@@ -13,10 +13,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest_lib import exceptions as lib_exc
-
 from tempest.common import custom_matchers
 from tempest import config
+from tempest.lib import exceptions as lib_exc
 import tempest.test
 
 CONF = config.CONF

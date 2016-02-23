@@ -16,9 +16,8 @@
 import shlex
 import subprocess
 
-from tempest_lib import exceptions
-
 from oslo_log import log as logging
+from tempest.lib import exceptions
 from tempest.tests import base
 
 LOG = logging.getLogger(__name__)

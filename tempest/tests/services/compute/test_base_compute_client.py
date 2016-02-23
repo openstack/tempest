@@ -15,10 +15,10 @@
 import httplib2
 import mock
 from oslotest import mockpatch
-from tempest_lib.common import rest_client
 
 from tempest.api.compute import api_microversion_fixture
 from tempest import exceptions
+from tempest.lib.common import rest_client
 from tempest.services.compute.json import base_compute_client
 from tempest.tests import fake_auth_provider
 from tempest.tests.services.compute import base

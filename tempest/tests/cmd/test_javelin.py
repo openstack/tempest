@@ -14,9 +14,9 @@
 
 import mock
 from oslotest import mockpatch
-from tempest_lib import exceptions as lib_exc
 
 from tempest.cmd import javelin
+from tempest.lib import exceptions as lib_exc
 from tempest.tests import base
 
 

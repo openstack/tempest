@@ -18,10 +18,10 @@ import time
 
 from oslo_serialization import jsonutils as json
 from six.moves.urllib import parse as urllib
-from tempest_lib import exceptions as lib_exc
 
 from tempest.common import service_client
 from tempest import exceptions
+from tempest.lib import exceptions as lib_exc
 
 
 class OrchestrationClient(service_client.ServiceClient):

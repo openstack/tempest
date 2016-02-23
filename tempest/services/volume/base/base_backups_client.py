@@ -16,10 +16,10 @@
 import time
 
 from oslo_serialization import jsonutils as json
-from tempest_lib import exceptions as lib_exc
 
 from tempest.common import service_client
 from tempest import exceptions
+from tempest.lib import exceptions as lib_exc
 
 
 class BaseBackupsClient(service_client.ServiceClient):

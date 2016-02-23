@@ -17,8 +17,8 @@ import logging
 
 import six
 import stevedore
-from tempest_lib.common.utils import misc
 
+from tempest.lib.common.utils import misc
 
 LOG = logging.getLogger(__name__)
 

@@ -16,10 +16,9 @@
 import copy
 import time
 
-from tempest_lib.common.utils import data_utils
-from tempest_lib import exceptions
-
 from tempest.api.identity import base
+from tempest.lib.common.utils import data_utils
+from tempest.lib import exceptions
 from tempest import manager
 from tempest import test
 

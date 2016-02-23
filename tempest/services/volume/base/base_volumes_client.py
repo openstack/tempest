@@ -16,10 +16,10 @@
 from oslo_serialization import jsonutils as json
 import six
 from six.moves.urllib import parse as urllib
-from tempest_lib import exceptions as lib_exc
 
 from tempest.common import service_client
 from tempest.common import waiters
+from tempest.lib import exceptions as lib_exc
 
 
 class BaseVolumesClient(service_client.ServiceClient):

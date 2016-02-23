@@ -12,10 +12,9 @@
 
 import time
 
-from tempest_lib.common.utils import misc
-from tempest_lib import exceptions as lib_exc
-
 from tempest import exceptions
+from tempest.lib.common.utils import misc
+from tempest.lib import exceptions as lib_exc
 from tempest.services.network.json import base
 
 

@@ -16,81 +16,81 @@
 import copy
 
 from oslo_log import log as logging
-from tempest_lib.services.compute.agents_client import AgentsClient
-from tempest_lib.services.compute.aggregates_client import AggregatesClient
-from tempest_lib.services.compute.availability_zone_client import \
-    AvailabilityZoneClient
-from tempest_lib.services.compute.baremetal_nodes_client import \
-    BaremetalNodesClient
-from tempest_lib.services.compute.certificates_client import \
-    CertificatesClient
-from tempest_lib.services.compute.extensions_client import \
-    ExtensionsClient
-from tempest_lib.services.compute.fixed_ips_client import FixedIPsClient
-from tempest_lib.services.compute.flavors_client import FlavorsClient
-from tempest_lib.services.compute.floating_ip_pools_client import \
-    FloatingIPPoolsClient
-from tempest_lib.services.compute.floating_ips_bulk_client import \
-    FloatingIPsBulkClient
-from tempest_lib.services.compute.floating_ips_client import \
-    FloatingIPsClient as ComputeFloatingIPsClient
-from tempest_lib.services.compute.hosts_client import HostsClient
-from tempest_lib.services.compute.hypervisor_client import \
-    HypervisorClient
-from tempest_lib.services.compute.images_client import ImagesClient \
-    as ComputeImagesClient
-from tempest_lib.services.compute.instance_usage_audit_log_client import \
-    InstanceUsagesAuditLogClient
-from tempest_lib.services.compute.interfaces_client import InterfacesClient
-from tempest_lib.services.compute.limits_client import LimitsClient
-from tempest_lib.services.compute.migrations_client import MigrationsClient
-from tempest_lib.services.compute.networks_client import NetworksClient \
-    as ComputeNetworksClient
-from tempest_lib.services.compute.quota_classes_client import \
-    QuotaClassesClient
-from tempest_lib.services.compute.quotas_client import QuotasClient
-from tempest_lib.services.compute.security_group_default_rules_client import \
-    SecurityGroupDefaultRulesClient
-from tempest_lib.services.compute.security_group_rules_client import \
-    SecurityGroupRulesClient as ComputeSecurityGroupRulesClient
-from tempest_lib.services.compute.security_groups_client import \
-    SecurityGroupsClient as ComputeSecurityGroupsClient
-from tempest_lib.services.compute.server_groups_client import \
-    ServerGroupsClient
-from tempest_lib.services.compute.servers_client import ServersClient
-from tempest_lib.services.compute.services_client import ServicesClient
-from tempest_lib.services.compute.snapshots_client import \
-    SnapshotsClient as ComputeSnapshotsClient
-from tempest_lib.services.compute.tenant_networks_client import \
-    TenantNetworksClient
-from tempest_lib.services.compute.tenant_usages_client import \
-    TenantUsagesClient
-from tempest_lib.services.compute.versions_client import VersionsClient
-from tempest_lib.services.compute.volumes_client import \
-    VolumesClient as ComputeVolumesClient
-from tempest_lib.services.identity.v2.token_client import TokenClient
-from tempest_lib.services.identity.v3.token_client import V3TokenClient
-from tempest_lib.services.network.agents_client import AgentsClient \
-    as NetworkAgentsClient
-from tempest_lib.services.network.extensions_client import \
-    ExtensionsClient as NetworkExtensionsClient
-from tempest_lib.services.network.floating_ips_client import FloatingIPsClient
-from tempest_lib.services.network.metering_label_rules_client import \
-    MeteringLabelRulesClient
-from tempest_lib.services.network.metering_labels_client import \
-    MeteringLabelsClient
-from tempest_lib.services.network.networks_client import NetworksClient
-from tempest_lib.services.network.ports_client import PortsClient
-from tempest_lib.services.network.quotas_client import QuotasClient \
-    as NetworkQuotasClient
-from tempest_lib.services.network.security_groups_client import \
-    SecurityGroupsClient
-from tempest_lib.services.network.subnetpools_client import SubnetpoolsClient
-from tempest_lib.services.network.subnets_client import SubnetsClient
 
 from tempest.common import negative_rest_client
 from tempest import config
 from tempest import exceptions
+from tempest.lib.services.compute.agents_client import AgentsClient
+from tempest.lib.services.compute.aggregates_client import AggregatesClient
+from tempest.lib.services.compute.availability_zone_client import \
+    AvailabilityZoneClient
+from tempest.lib.services.compute.baremetal_nodes_client import \
+    BaremetalNodesClient
+from tempest.lib.services.compute.certificates_client import \
+    CertificatesClient
+from tempest.lib.services.compute.extensions_client import \
+    ExtensionsClient
+from tempest.lib.services.compute.fixed_ips_client import FixedIPsClient
+from tempest.lib.services.compute.flavors_client import FlavorsClient
+from tempest.lib.services.compute.floating_ip_pools_client import \
+    FloatingIPPoolsClient
+from tempest.lib.services.compute.floating_ips_bulk_client import \
+    FloatingIPsBulkClient
+from tempest.lib.services.compute.floating_ips_client import \
+    FloatingIPsClient as ComputeFloatingIPsClient
+from tempest.lib.services.compute.hosts_client import HostsClient
+from tempest.lib.services.compute.hypervisor_client import \
+    HypervisorClient
+from tempest.lib.services.compute.images_client import ImagesClient \
+    as ComputeImagesClient
+from tempest.lib.services.compute.instance_usage_audit_log_client import \
+    InstanceUsagesAuditLogClient
+from tempest.lib.services.compute.interfaces_client import InterfacesClient
+from tempest.lib.services.compute.limits_client import LimitsClient
+from tempest.lib.services.compute.migrations_client import MigrationsClient
+from tempest.lib.services.compute.networks_client import NetworksClient \
+    as ComputeNetworksClient
+from tempest.lib.services.compute.quota_classes_client import \
+    QuotaClassesClient
+from tempest.lib.services.compute.quotas_client import QuotasClient
+from tempest.lib.services.compute.security_group_default_rules_client import \
+    SecurityGroupDefaultRulesClient
+from tempest.lib.services.compute.security_group_rules_client import \
+    SecurityGroupRulesClient as ComputeSecurityGroupRulesClient
+from tempest.lib.services.compute.security_groups_client import \
+    SecurityGroupsClient as ComputeSecurityGroupsClient
+from tempest.lib.services.compute.server_groups_client import \
+    ServerGroupsClient
+from tempest.lib.services.compute.servers_client import ServersClient
+from tempest.lib.services.compute.services_client import ServicesClient
+from tempest.lib.services.compute.snapshots_client import \
+    SnapshotsClient as ComputeSnapshotsClient
+from tempest.lib.services.compute.tenant_networks_client import \
+    TenantNetworksClient
+from tempest.lib.services.compute.tenant_usages_client import \
+    TenantUsagesClient
+from tempest.lib.services.compute.versions_client import VersionsClient
+from tempest.lib.services.compute.volumes_client import \
+    VolumesClient as ComputeVolumesClient
+from tempest.lib.services.identity.v2.token_client import TokenClient
+from tempest.lib.services.identity.v3.token_client import V3TokenClient
+from tempest.lib.services.network.agents_client import AgentsClient \
+    as NetworkAgentsClient
+from tempest.lib.services.network.extensions_client import \
+    ExtensionsClient as NetworkExtensionsClient
+from tempest.lib.services.network.floating_ips_client import FloatingIPsClient
+from tempest.lib.services.network.metering_label_rules_client import \
+    MeteringLabelRulesClient
+from tempest.lib.services.network.metering_labels_client import \
+    MeteringLabelsClient
+from tempest.lib.services.network.networks_client import NetworksClient
+from tempest.lib.services.network.ports_client import PortsClient
+from tempest.lib.services.network.quotas_client import QuotasClient \
+    as NetworkQuotasClient
+from tempest.lib.services.network.security_groups_client import \
+    SecurityGroupsClient
+from tempest.lib.services.network.subnetpools_client import SubnetpoolsClient
+from tempest.lib.services.network.subnets_client import SubnetsClient
 from tempest import manager
 from tempest.services.baremetal.v1.json.baremetal_client import \
     BaremetalClient

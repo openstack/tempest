@@ -14,9 +14,9 @@ import abc
 
 from oslo_log import log as logging
 import six
-from tempest_lib import auth
-from tempest_lib import exceptions as lib_exc
 
+from tempest.lib import auth
+from tempest.lib import exceptions as lib_exc
 from tempest.services.identity.v2.json import identity_client as v2_identity
 
 LOG = logging.getLogger(__name__)

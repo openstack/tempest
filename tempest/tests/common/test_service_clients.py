@@ -78,7 +78,7 @@ from tempest.tests import base
 
 class TestServiceClient(base.TestCase):
 
-    @mock.patch('tempest_lib.common.rest_client.RestClient.__init__')
+    @mock.patch('tempest.lib.common.rest_client.RestClient.__init__')
     def test_service_client_creations_with_specified_args(self, mock_init):
         test_clients = [
             baremetal_client.BaremetalClient,

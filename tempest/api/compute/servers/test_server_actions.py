@@ -16,8 +16,6 @@
 import logging
 
 from six.moves.urllib import parse as urlparse
-from tempest_lib import decorators
-from tempest_lib import exceptions as lib_exc
 import testtools
 
 from tempest.api.compute import base
@@ -25,6 +23,8 @@ from tempest.common.utils import data_utils
 from tempest.common.utils.linux import remote_client
 from tempest.common import waiters
 from tempest import config
+from tempest.lib import decorators
+from tempest.lib import exceptions as lib_exc
 from tempest import test
 
 CONF = config.CONF

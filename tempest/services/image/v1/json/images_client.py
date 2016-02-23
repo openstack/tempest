@@ -22,12 +22,12 @@ from oslo_log import log as logging
 from oslo_serialization import jsonutils as json
 import six
 from six.moves.urllib import parse as urllib
-from tempest_lib.common.utils import misc as misc_utils
-from tempest_lib import exceptions as lib_exc
 
 from tempest.common import glance_http
 from tempest.common import service_client
 from tempest import exceptions
+from tempest.lib.common.utils import misc as misc_utils
+from tempest.lib import exceptions as lib_exc
 
 LOG = logging.getLogger(__name__)
 

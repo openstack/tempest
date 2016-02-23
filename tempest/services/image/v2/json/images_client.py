@@ -15,10 +15,10 @@
 
 from oslo_serialization import jsonutils as json
 from six.moves.urllib import parse as urllib
-from tempest_lib import exceptions as lib_exc
 
 from tempest.common import glance_http
 from tempest.common import service_client
+from tempest.lib import exceptions as lib_exc
 
 
 class ImagesClientV2(service_client.ServiceClient):

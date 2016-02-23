@@ -14,13 +14,13 @@
 #    under the License.
 
 import base64
-from tempest_lib.common.utils import data_utils
-from tempest_lib import exceptions as lib_exc
 
 from tempest.api.compute import base
 from tempest.common.utils.linux import remote_client
 from tempest.common import waiters
 from tempest import config
+from tempest.lib.common.utils import data_utils
+from tempest.lib import exceptions as lib_exc
 from tempest import test
 
 CONF = config.CONF

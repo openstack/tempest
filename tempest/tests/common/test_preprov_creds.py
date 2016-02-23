@@ -21,13 +21,13 @@ from oslo_config import cfg
 from oslotest import mockpatch
 import shutil
 import six
-from tempest_lib import auth
-from tempest_lib import exceptions as lib_exc
-from tempest_lib.services.identity.v2 import token_client
 
 from tempest.common import cred_provider
 from tempest.common import preprov_creds
 from tempest import config
+from tempest.lib import auth
+from tempest.lib import exceptions as lib_exc
+from tempest.lib.services.identity.v2 import token_client
 from tempest.tests import base
 from tempest.tests import fake_config
 from tempest.tests import fake_http
@@ -319,7 +319,7 @@ class TestPreProvisionedCredentials(base.TestCase):
             return_value=test_accounts))
         test_accounts_class = preprov_creds.PreProvisionedCredentialProvider(
             **self.fixed_params)
-        with mock.patch('tempest_lib.services.compute.networks_client.'
+        with mock.patch('tempest.lib.services.compute.networks_client.'
                         'NetworksClient.list_networks',
                         return_value={'networks': [{'name': 'network-2',
                                                     'id': 'fake-id',

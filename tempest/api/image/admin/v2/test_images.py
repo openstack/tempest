@@ -14,13 +14,13 @@
 #    under the License.
 
 from six import moves
-from tempest_lib.common.utils import data_utils
 import testtools
 
 from tempest.api.image import base
 from tempest import config
+from tempest.lib.common.utils import data_utils
+from tempest.lib import exceptions as lib_exc
 from tempest import test
-from tempest_lib import exceptions as lib_exc
 
 CONF = config.CONF
 

@@ -16,8 +16,8 @@
 import datetime
 
 from tempest.api.compute import base
+from tempest.lib import exceptions as e
 from tempest import test
-from tempest_lib import exceptions as e
 
 # Time that waits for until returning valid response
 # TODO(takmatsu): Ideally this value would come from configuration.

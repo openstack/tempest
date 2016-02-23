@@ -15,11 +15,10 @@
 
 import time
 
-from tempest_lib import exceptions as lib_exc
-
 from tempest.api.compute import base
 from tempest import config
 from tempest import exceptions
+from tempest.lib import exceptions as lib_exc
 from tempest import test
 
 CONF = config.CONF

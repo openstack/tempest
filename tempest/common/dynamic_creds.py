@@ -15,7 +15,6 @@
 import netaddr
 from oslo_log import log as logging
 import six
-from tempest_lib import exceptions as lib_exc
 
 from tempest import clients
 from tempest.common import cred_client
@@ -23,6 +22,7 @@ from tempest.common import cred_provider
 from tempest.common.utils import data_utils
 from tempest import config
 from tempest import exceptions
+from tempest.lib import exceptions as lib_exc
 
 CONF = config.CONF
 LOG = logging.getLogger(__name__)

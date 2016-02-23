@@ -13,15 +13,14 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest_lib import decorators
-from tempest_lib import exceptions as lib_exc
-
 from tempest.api.compute import base
 from tempest.api import utils
 from tempest.common import fixed_network
 from tempest.common.utils import data_utils
 from tempest.common import waiters
 from tempest import config
+from tempest.lib import decorators
+from tempest.lib import exceptions as lib_exc
 from tempest import test
 
 CONF = config.CONF
