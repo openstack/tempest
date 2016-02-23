@@ -13,8 +13,14 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib import decorators
+
 from tempest.api.volume import base
+from tempest import config
 from tempest import test
+
+
+CONF = config.CONF
 
 
 class VolumesServicesV2TestJSON(base.BaseVolumeAdminTest):
@@ -45,10 +51,16 @@ class VolumesServicesV2TestJSON(base.BaseVolumeAdminTest):
         for service in services:
             self.assertEqual(self.binary_name, service['binary'])
 
+    @decorators.skip_because(bug="1530144")
     @test.idempotent_id('178710e4-7596-4e08-9333-745cb8bc4f8d')
     def test_get_service_by_host_name(self):
+        def get_host(host):
+            if CONF.volume_feature_enabled.volume_services:
+                host = host.split('@')[0]
+            return host
+
         services_on_host = [service for service in self.services if
-                            service['host'] == self.host_name]
+                            get_host(service['host']) == self.host_name]
 
         services = (self.admin_volume_services_client.list_services(
             host=self.host_name)['services'])
