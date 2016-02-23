@@ -183,27 +183,6 @@ DEFAULT_TEMPLATES = {
         ('5.3.0', copy.deepcopy(BASE_CDH_DESC)),
         ('5', copy.deepcopy(BASE_CDH_DESC))
     ]),
-    'mapr': OrderedDict([
-        ('4.0.1.mrv2', {
-            'NODES': {
-                'master1': {
-                    'count': 1,
-                    'node_processes': ['CLDB', 'FileServer', 'ZooKeeper',
-                                       'NodeManager', 'ResourceManager',
-                                       'HistoryServer', 'Oozie']
-                },
-                'worker1': {
-                    'count': 1,
-                    'node_processes': ['FileServer', 'NodeManager', 'Pig']
-                }
-            },
-            'cluster_configs': {
-                'Hive': {
-                    'Hive Version': '0.13',
-                }
-            }
-        })
-    ]),
 }
 
 
