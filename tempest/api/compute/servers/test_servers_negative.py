@@ -29,8 +29,6 @@ CONF = config.CONF
 
 class ServersNegativeTestJSON(base.BaseV2ComputeTest):
 
-    credentials = ['primary', 'alt']
-
     def setUp(self):
         super(ServersNegativeTestJSON, self).setUp()
         try:
@@ -47,7 +45,6 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
     def setup_clients(cls):
         super(ServersNegativeTestJSON, cls).setup_clients()
         cls.client = cls.servers_client
-        cls.alt_client = cls.os_alt.servers_client
 
     @classmethod
     def resource_setup(cls):
@@ -271,16 +268,6 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
                           self.server_id, name=new_name)
 
     @test.attr(type=['negative'])
-    @test.idempotent_id('543d84c1-dd2e-4c6d-8cb2-b9da0efaa384')
-    def test_update_server_of_another_tenant(self):
-        # Update name of a server that belongs to another tenant
-
-        new_name = self.server_id + '_new'
-        self.assertRaises(lib_exc.NotFound,
-                          self.alt_client.update_server, self.server_id,
-                          name=new_name)
-
-    @test.attr(type=['negative'])
     @test.idempotent_id('5c8e244c-dada-4590-9944-749c455b431f')
     def test_update_server_name_length_exceeds_256(self):
         # Update name of server exceed the name length limit
@@ -299,14 +286,6 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
         nonexistent_server = data_utils.rand_uuid()
         self.assertRaises(lib_exc.NotFound, self.client.delete_server,
                           nonexistent_server)
-
-    @test.attr(type=['negative'])
-    @test.idempotent_id('5c75009d-3eea-423e-bea3-61b09fd25f9c')
-    def test_delete_a_server_of_another_tenant(self):
-        # Delete a server that belongs to another tenant
-        self.assertRaises(lib_exc.NotFound,
-                          self.alt_client.delete_server,
-                          self.server_id)
 
     @test.attr(type=['negative'])
     @test.idempotent_id('75f79124-277c-45e6-a373-a1d6803f4cc4')
@@ -518,4 +497,46 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
         # unshelve an active server.
         self.assertRaises(lib_exc.Conflict,
                           self.client.unshelve_server,
+                          self.server_id)
+
+
+class ServersNegativeTestMultiTenantJSON(base.BaseV2ComputeTest):
+
+    credentials = ['primary', 'alt']
+
+    def setUp(self):
+        super(ServersNegativeTestMultiTenantJSON, self).setUp()
+        try:
+            waiters.wait_for_server_status(self.client, self.server_id,
+                                           'ACTIVE')
+        except Exception:
+            self.__class__.server_id = self.rebuild_server(self.server_id)
+
+    @classmethod
+    def setup_clients(cls):
+        super(ServersNegativeTestMultiTenantJSON, cls).setup_clients()
+        cls.alt_client = cls.os_alt.servers_client
+
+    @classmethod
+    def resource_setup(cls):
+        super(ServersNegativeTestMultiTenantJSON, cls).resource_setup()
+        server = cls.create_test_server(wait_until='ACTIVE')
+        cls.server_id = server['id']
+
+    @test.attr(type=['negative'])
+    @test.idempotent_id('543d84c1-dd2e-4c6d-8cb2-b9da0efaa384')
+    def test_update_server_of_another_tenant(self):
+        # Update name of a server that belongs to another tenant
+
+        new_name = self.server_id + '_new'
+        self.assertRaises(lib_exc.NotFound,
+                          self.alt_client.update_server, self.server_id,
+                          name=new_name)
+
+    @test.attr(type=['negative'])
+    @test.idempotent_id('5c75009d-3eea-423e-bea3-61b09fd25f9c')
+    def test_delete_a_server_of_another_tenant(self):
+        # Delete a server that belongs to another tenant
+        self.assertRaises(lib_exc.NotFound,
+                          self.alt_client.delete_server,
                           self.server_id)
