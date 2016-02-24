@@ -11,16 +11,30 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
-from tempest.lib.common import rest_client
 
-from tempest.common import api_version_request
-from tempest.common import api_version_utils
-from tempest import exceptions
+from tempest.lib.common import api_version_request
+from tempest.lib.common import api_version_utils
+from tempest.lib.common import rest_client
+from tempest.lib import exceptions
 
 COMPUTE_MICROVERSION = None
 
 
 class BaseComputeClient(rest_client.RestClient):
+    """Base compute service clients class to support microversion.
+
+    This class adds microversion to API request header if same is set
+    and provide interface to select appropriate JSON schema file for
+    response validation.
+
+    :param auth_provider: an auth provider object used to wrap requests in
+                          auth
+    :param str service: The service name to use for the catalog lookup
+    :param str region: The region to use for the catalog lookup
+                                             request with microversion
+    :param kwargs: kwargs required by rest_client.RestClient
+    """
+
     api_microversion_header_name = 'X-OpenStack-Nova-API-Version'
 
     def __init__(self, auth_provider, service, region,
@@ -50,9 +64,10 @@ class BaseComputeClient(rest_client.RestClient):
         """Get JSON schema
 
         This method provides the matching schema for requested
-        microversion (self.api_microversion).
+        microversion.
+
         :param schema_versions_info: List of dict which provides schema
-        information with range of valid versions.
+                                     information with range of valid versions.
         Example -
         schema_versions_info = [
             {'min': None, 'max': '2.1', 'schema': schemav21},

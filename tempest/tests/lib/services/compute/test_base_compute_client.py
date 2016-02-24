@@ -16,12 +16,11 @@ import httplib2
 import mock
 from oslotest import mockpatch
 
-from tempest.api.compute import api_microversion_fixture
-from tempest import exceptions
 from tempest.lib.common import rest_client
-from tempest.services.compute.json import base_compute_client
-from tempest.tests import fake_auth_provider
-from tempest.tests.services.compute import base
+from tempest.lib import exceptions
+from tempest.lib.services.compute import base_compute_client
+from tempest.tests.lib import fake_auth_provider
+from tempest.tests.lib.services.compute import base
 
 
 class TestMicroversionHeaderCheck(base.BaseComputeServiceTest):
@@ -31,7 +30,11 @@ class TestMicroversionHeaderCheck(base.BaseComputeServiceTest):
         fake_auth = fake_auth_provider.FakeAuthProvider()
         self.client = base_compute_client.BaseComputeClient(
             fake_auth, 'compute', 'regionOne')
-        self.useFixture(api_microversion_fixture.APIMicroversionFixture('2.2'))
+        base_compute_client.COMPUTE_MICROVERSION = '2.2'
+
+    def tearDown(self):
+        super(TestMicroversionHeaderCheck, self).tearDown()
+        base_compute_client.COMPUTE_MICROVERSION = None
 
     def _check_microverion_header_in_response(self, fake_response):
         def request(*args, **kwargs):
@@ -77,8 +80,11 @@ class TestSchemaVersionsNone(base.BaseComputeServiceTest):
         super(TestSchemaVersionsNone, self).setUp()
         fake_auth = fake_auth_provider.FakeAuthProvider()
         self.client = DummyServiceClient1(fake_auth, 'compute', 'regionOne')
-        self.useFixture(api_microversion_fixture.APIMicroversionFixture(
-            self.api_microversion))
+        base_compute_client.COMPUTE_MICROVERSION = self.api_microversion
+
+    def tearDown(self):
+        super(TestSchemaVersionsNone, self).tearDown()
+        base_compute_client.COMPUTE_MICROVERSION = None
 
     def test_schema(self):
         self.assertEqual(self.expected_schema,
@@ -132,8 +138,11 @@ class TestSchemaVersionsNotFound(base.BaseComputeServiceTest):
         super(TestSchemaVersionsNotFound, self).setUp()
         fake_auth = fake_auth_provider.FakeAuthProvider()
         self.client = DummyServiceClient2(fake_auth, 'compute', 'regionOne')
-        self.useFixture(api_microversion_fixture.APIMicroversionFixture(
-            self.api_microversion))
+        base_compute_client.COMPUTE_MICROVERSION = self.api_microversion
+
+    def tearDown(self):
+        super(TestSchemaVersionsNotFound, self).tearDown()
+        base_compute_client.COMPUTE_MICROVERSION = None
 
     def test_schema(self):
         self.assertRaises(exceptions.JSONSchemaNotFound,
@@ -170,7 +179,11 @@ class TestClientWithMicroversionHeader(base.BaseComputeServiceTest):
         fake_auth = fake_auth_provider.FakeAuthProvider()
         self.client = base_compute_client.BaseComputeClient(
             fake_auth, 'compute', 'regionOne')
-        self.useFixture(api_microversion_fixture.APIMicroversionFixture('2.2'))
+        base_compute_client.COMPUTE_MICROVERSION = '2.2'
+
+    def tearDown(self):
+        super(TestClientWithMicroversionHeader, self).tearDown()
+        base_compute_client.COMPUTE_MICROVERSION = None
 
     def test_microverion_header(self):
         header = self.client.get_headers()

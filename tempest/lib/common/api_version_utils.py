@@ -14,8 +14,8 @@
 
 import testtools
 
-from tempest.common import api_version_request
-from tempest import exceptions
+from tempest.lib.common import api_version_request
+from tempest.lib import exceptions
 
 
 LATEST_MICROVERSION = 'latest'
@@ -35,6 +35,20 @@ class BaseMicroversionTest(object):
 
 def check_skip_with_microversion(test_min_version, test_max_version,
                                  cfg_min_version, cfg_max_version):
+    """Checks API microversions range and returns whether test needs to be skip
+
+    Compare the test and configured microversion range and returns
+    whether test microversion range is out of configured one.
+    This method can be used to skip the test based on configured and test
+    microversion range.
+
+    :param test_min_version: Test Minimum Microversion
+    :param test_max_version: Test Maximum Microversion
+    :param cfg_min_version: Configured Minimum Microversion
+    :param cfg_max_version: Configured Maximum Microversion
+    :returns: boolean
+    """
+
     min_version = api_version_request.APIVersionRequest(test_min_version)
     max_version = api_version_request.APIVersionRequest(test_max_version)
     config_min_version = api_version_request.APIVersionRequest(cfg_min_version)
@@ -68,6 +82,16 @@ def check_skip_with_microversion(test_min_version, test_max_version,
 
 
 def select_request_microversion(test_min_version, cfg_min_version):
+    """Select microversion from test and configuration.
+
+    Compare requested microversion and return the maximum
+    microversion out of those.
+
+    :param test_min_version: Test Minimum Microversion
+    :param cfg_min_version: Configured Minimum Microversion
+    :returns: Selected microversion string
+    """
+
     test_version = api_version_request.APIVersionRequest(test_min_version)
     cfg_version = api_version_request.APIVersionRequest(cfg_min_version)
     max_version = cfg_version if cfg_version >= test_version else test_version
@@ -82,10 +106,10 @@ def assert_version_header_matches_request(api_microversion_header_name,
     Verify whether microversion is present in response header
     and with specified 'api_microversion' value.
 
-    @param: api_microversion_header_name: Microversion header name
+    :param api_microversion_header_name: Microversion header name
             Example- "X-OpenStack-Nova-API-Version"
-    @param: api_microversion: Microversion number like "2.10"
-    @param: response_header: Response header where microversion is
+    :param api_microversion: Microversion number like "2.10"
+    :param response_header: Response header where microversion is
             expected to be present.
     """
     api_microversion_header_name = api_microversion_header_name.lower()
