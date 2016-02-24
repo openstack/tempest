@@ -18,6 +18,7 @@ import time
 from oslo_log import log as logging
 from tempest_lib import exceptions as lib_exc
 
+from tempest.api.compute import api_microversion_fixture
 from tempest.common import api_version_utils
 from tempest.common import compute
 from tempest.common.utils import data_utils
@@ -56,13 +57,6 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
     @classmethod
     def setup_credentials(cls):
         cls.set_network_resources()
-        cls.request_microversion = (
-            api_version_utils.select_request_microversion(
-                cls.min_microversion,
-                CONF.compute_feature_enabled.min_microversion))
-        if cls.request_microversion:
-            cls.services_microversion = {
-                CONF.compute.catalog_type: cls.request_microversion}
         super(BaseV2ComputeTest, cls).setup_credentials()
 
     @classmethod
@@ -108,6 +102,10 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
     @classmethod
     def resource_setup(cls):
         super(BaseV2ComputeTest, cls).resource_setup()
+        cls.request_microversion = (
+            api_version_utils.select_request_microversion(
+                cls.min_microversion,
+                CONF.compute_feature_enabled.min_microversion))
         cls.build_interval = CONF.compute.build_interval
         cls.build_timeout = CONF.compute.build_timeout
         cls.image_ref = CONF.compute.image_ref
@@ -370,6 +368,11 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
             raise exceptions.ServerUnreachable()
         else:
             raise exceptions.InvalidConfiguration()
+
+    def setUp(self):
+        super(BaseV2ComputeTest, self).setUp()
+        self.useFixture(api_microversion_fixture.APIMicroversionFixture(
+            self.request_microversion))
 
 
 class BaseV2ComputeAdminTest(BaseV2ComputeTest):

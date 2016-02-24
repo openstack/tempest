@@ -18,6 +18,9 @@ from tempest.common import api_version_request
 from tempest import exceptions
 
 
+LATEST_MICROVERSION = 'latest'
+
+
 class BaseMicroversionTest(object):
     """Mixin class for API microversion test class."""
 
@@ -27,7 +30,7 @@ class BaseMicroversionTest(object):
     # for all microversions. We need to define microversion range
     # (min_microversion, max_microversion) on each test class if necessary.
     min_microversion = None
-    max_microversion = 'latest'
+    max_microversion = LATEST_MICROVERSION
 
 
 def check_skip_with_microversion(test_min_version, test_max_version,

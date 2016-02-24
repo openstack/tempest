@@ -226,7 +226,6 @@ class BaseTestCase(testtools.testcase.WithAttributes,
     # Resources required to validate a server using ssh
     validation_resources = {}
     network_resources = {}
-    services_microversion = {}
 
     # NOTE(sdague): log_format is defined inline here instead of using the oslo
     # default because going through the config path recouples config to the
@@ -522,8 +521,7 @@ class BaseTestCase(testtools.testcase.WithAttributes,
             else:
                 raise exceptions.InvalidCredentials(
                     "Invalid credentials type %s" % credential_type)
-        return cls.client_manager(credentials=creds, service=cls._service,
-                                  api_microversions=cls.services_microversion)
+        return cls.client_manager(credentials=creds, service=cls._service)
 
     @classmethod
     def clear_credentials(cls):
@@ -610,8 +608,7 @@ class BaseTestCase(testtools.testcase.WithAttributes,
                 credentials.is_admin_available(
                     identity_version=cls.get_identity_version())):
             admin_creds = cred_provider.get_admin_creds()
-            admin_manager = clients.Manager(
-                admin_creds, api_microversions=cls.services_microversion)
+            admin_manager = clients.Manager(admin_creds)
             networks_client = admin_manager.compute_networks_client
         return fixed_network.get_tenant_network(
             cred_provider, networks_client, CONF.compute.fixed_network_name)
