@@ -54,6 +54,8 @@ class RestClient(object):
     :param auth_provider: an auth provider object used to wrap requests in auth
     :param str service: The service name to use for the catalog lookup
     :param str region: The region to use for the catalog lookup
+    :param str name: The endpoint name to use for the catalog lookup; this
+                     returns only if the service exists
     :param str endpoint_type: The endpoint type to use for the catalog lookup
     :param int build_interval: Time in seconds between to status checks in
                                wait loops
@@ -76,10 +78,11 @@ class RestClient(object):
                  endpoint_type='publicURL',
                  build_interval=1, build_timeout=60,
                  disable_ssl_certificate_validation=False, ca_certs=None,
-                 trace_requests=''):
+                 trace_requests='', name=None):
         self.auth_provider = auth_provider
         self.service = service
         self.region = region
+        self.name = name
         self.endpoint_type = endpoint_type
         self.build_interval = build_interval
         self.build_timeout = build_timeout
@@ -191,7 +194,8 @@ class RestClient(object):
         _filters = dict(
             service=self.service,
             endpoint_type=self.endpoint_type,
-            region=self.region
+            region=self.region,
+            name=self.name
         )
         if self.api_version is not None:
             _filters['api_version'] = self.api_version

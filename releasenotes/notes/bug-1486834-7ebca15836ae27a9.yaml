@@ -1,0 +1,7 @@
+---
+features:
+  - |
+    Tempest library auth interface now supports
+    filtering with catalog name.  Note that filtering by
+    name is only successful if a known service type is
+    provided.
