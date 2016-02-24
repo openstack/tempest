@@ -19,9 +19,10 @@ from six.moves.urllib import parse as urllib
 from tempest.lib.api_schema.response.compute.v2_1 import volumes as schema
 from tempest.lib.common import rest_client
 from tempest.lib import exceptions as lib_exc
+from tempest.lib.services.compute import base_compute_client
 
 
-class VolumesClient(rest_client.RestClient):
+class VolumesClient(base_compute_client.BaseComputeClient):
 
     def list_volumes(self, detail=False, **params):
         """List all the volumes created."""

@@ -17,9 +17,10 @@ from oslo_serialization import jsonutils as json
 
 from tempest.lib.api_schema.response.compute.v2_1 import fixed_ips as schema
 from tempest.lib.common import rest_client
+from tempest.lib.services.compute import base_compute_client
 
 
-class FixedIPsClient(rest_client.RestClient):
+class FixedIPsClient(base_compute_client.BaseComputeClient):
 
     def show_fixed_ip(self, fixed_ip):
         url = "os-fixed-ips/%s" % fixed_ip

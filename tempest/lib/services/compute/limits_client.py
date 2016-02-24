@@ -17,9 +17,10 @@ from oslo_serialization import jsonutils as json
 
 from tempest.lib.api_schema.response.compute.v2_1 import limits as schema
 from tempest.lib.common import rest_client
+from tempest.lib.services.compute import base_compute_client
 
 
-class LimitsClient(rest_client.RestClient):
+class LimitsClient(base_compute_client.BaseComputeClient):
 
     def show_limits(self):
         resp, body = self.get("limits")

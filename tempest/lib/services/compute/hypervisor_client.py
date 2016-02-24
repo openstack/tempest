@@ -17,9 +17,10 @@ from oslo_serialization import jsonutils as json
 
 from tempest.lib.api_schema.response.compute.v2_1 import hypervisors as schema
 from tempest.lib.common import rest_client
+from tempest.lib.services.compute import base_compute_client
 
 
-class HypervisorClient(rest_client.RestClient):
+class HypervisorClient(base_compute_client.BaseComputeClient):
 
     def list_hypervisors(self, detail=False):
         """List hypervisors information."""

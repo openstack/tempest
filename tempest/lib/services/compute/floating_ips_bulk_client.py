@@ -17,9 +17,10 @@ from oslo_serialization import jsonutils as json
 
 from tempest.lib.api_schema.response.compute.v2_1 import floating_ips as schema
 from tempest.lib.common import rest_client
+from tempest.lib.services.compute import base_compute_client
 
 
-class FloatingIPsBulkClient(rest_client.RestClient):
+class FloatingIPsBulkClient(base_compute_client.BaseComputeClient):
 
     def create_floating_ips_bulk(self, ip_range, pool, interface):
         """Allocate floating IPs in bulk."""

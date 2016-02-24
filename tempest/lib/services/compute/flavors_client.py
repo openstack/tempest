@@ -22,9 +22,10 @@ from tempest.lib.api_schema.response.compute.v2_1 import flavors_access \
 from tempest.lib.api_schema.response.compute.v2_1 import flavors_extra_specs \
     as schema_extra_specs
 from tempest.lib.common import rest_client
+from tempest.lib.services.compute import base_compute_client
 
 
-class FlavorsClient(rest_client.RestClient):
+class FlavorsClient(base_compute_client.BaseComputeClient):
 
     def list_flavors(self, detail=False, **params):
         url = 'flavors'

@@ -17,9 +17,10 @@ from oslo_serialization import jsonutils as json
 
 from tempest.lib.api_schema.response.compute.v2_1 import quotas as schema
 from tempest.lib.common import rest_client
+from tempest.lib.services.compute import base_compute_client
 
 
-class QuotasClient(rest_client.RestClient):
+class QuotasClient(base_compute_client.BaseComputeClient):
 
     def show_quota_set(self, tenant_id, user_id=None):
         """List the quota set for a tenant."""

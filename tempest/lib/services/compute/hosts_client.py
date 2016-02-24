@@ -17,9 +17,10 @@ from six.moves.urllib import parse as urllib
 
 from tempest.lib.api_schema.response.compute.v2_1 import hosts as schema
 from tempest.lib.common import rest_client
+from tempest.lib.services.compute import base_compute_client
 
 
-class HostsClient(rest_client.RestClient):
+class HostsClient(base_compute_client.BaseComputeClient):
 
     def list_hosts(self, **params):
         """List all hosts."""

@@ -18,9 +18,10 @@ from six.moves.urllib import parse as urllib
 
 from tempest.lib.api_schema.response.compute.v2_1 import tenant_usages
 from tempest.lib.common import rest_client
+from tempest.lib.services.compute import base_compute_client
 
 
-class TenantUsagesClient(rest_client.RestClient):
+class TenantUsagesClient(base_compute_client.BaseComputeClient):
 
     def list_tenant_usages(self, **params):
         url = 'os-simple-tenant-usage'

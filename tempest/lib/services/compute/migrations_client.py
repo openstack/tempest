@@ -17,9 +17,10 @@ from six.moves.urllib import parse as urllib
 
 from tempest.lib.api_schema.response.compute.v2_1 import migrations as schema
 from tempest.lib.common import rest_client
+from tempest.lib.services.compute import base_compute_client
 
 
-class MigrationsClient(rest_client.RestClient):
+class MigrationsClient(base_compute_client.BaseComputeClient):
 
     def list_migrations(self, **params):
         """List all migrations.

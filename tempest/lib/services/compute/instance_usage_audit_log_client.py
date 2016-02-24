@@ -18,9 +18,10 @@ from oslo_serialization import jsonutils as json
 from tempest.lib.api_schema.response.compute.v2_1 import \
     instance_usage_audit_logs as schema
 from tempest.lib.common import rest_client
+from tempest.lib.services.compute import base_compute_client
 
 
-class InstanceUsagesAuditLogClient(rest_client.RestClient):
+class InstanceUsagesAuditLogClient(base_compute_client.BaseComputeClient):
 
     def list_instance_usage_audit_logs(self):
         url = 'os-instance_usage_audit_log'
