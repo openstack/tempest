@@ -13,7 +13,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest_lib import decorators
+from tempest.lib import decorators
 
 from tempest.api.volume import base
 from tempest import config

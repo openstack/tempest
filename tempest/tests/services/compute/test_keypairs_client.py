@@ -14,9 +14,8 @@
 
 import copy
 
-from tempest_lib.tests import fake_auth_provider
-
 from tempest.services.compute.json import keypairs_client
+from tempest.tests.lib import fake_auth_provider
 from tempest.tests.services.compute import base
 
 
@@ -38,7 +37,7 @@ class TestKeyPairsClient(base.BaseComputeServiceTest):
     def _test_list_keypairs(self, bytes_body=False):
         self.check_service_client_function(
             self.client.list_keypairs,
-            'tempest_lib.common.rest_client.RestClient.get',
+            'tempest.lib.common.rest_client.RestClient.get',
             {"keypairs": []},
             bytes_body)
 
@@ -60,7 +59,7 @@ class TestKeyPairsClient(base.BaseComputeServiceTest):
 
         self.check_service_client_function(
             self.client.show_keypair,
-            'tempest_lib.common.rest_client.RestClient.get',
+            'tempest.lib.common.rest_client.RestClient.get',
             fake_keypair,
             bytes_body,
             keypair_name="test")
@@ -77,7 +76,7 @@ class TestKeyPairsClient(base.BaseComputeServiceTest):
 
         self.check_service_client_function(
             self.client.create_keypair,
-            'tempest_lib.common.rest_client.RestClient.post',
+            'tempest.lib.common.rest_client.RestClient.post',
             fake_keypair,
             bytes_body,
             name="test")
@@ -91,5 +90,5 @@ class TestKeyPairsClient(base.BaseComputeServiceTest):
     def test_delete_keypair(self):
         self.check_service_client_function(
             self.client.delete_keypair,
-            'tempest_lib.common.rest_client.RestClient.delete',
+            'tempest.lib.common.rest_client.RestClient.delete',
             {}, status=202, keypair_name='test')

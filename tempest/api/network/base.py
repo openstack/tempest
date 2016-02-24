@@ -14,11 +14,11 @@
 #    under the License.
 
 import netaddr
-from tempest_lib import exceptions as lib_exc
 
 from tempest.common.utils import data_utils
 from tempest import config
 from tempest import exceptions
+from tempest.lib import exceptions as lib_exc
 import tempest.test
 
 CONF = config.CONF

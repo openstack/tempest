@@ -89,16 +89,16 @@ import traceback
 
 from cliff import command
 from oslo_log import log as logging
-import tempest_lib.auth
-from tempest_lib.common.utils import data_utils
-import tempest_lib.exceptions
-from tempest_lib.services.network import networks_client
-from tempest_lib.services.network import subnets_client
 import yaml
 
 from tempest.common import identity
 from tempest import config
 from tempest import exceptions as exc
+import tempest.lib.auth
+from tempest.lib.common.utils import data_utils
+import tempest.lib.exceptions
+from tempest.lib.services.network import networks_client
+from tempest.lib.services.network import subnets_client
 from tempest.services.identity.v2.json import identity_client
 from tempest.services.identity.v2.json import roles_client
 from tempest.services.identity.v2.json import tenants_client
@@ -121,7 +121,7 @@ def setup_logging():
 
 
 def get_admin_clients(opts):
-    _creds = tempest_lib.auth.KeystoneV2Credentials(
+    _creds = tempest.lib.auth.KeystoneV2Credentials(
         username=opts.os_username,
         password=opts.os_password,
         tenant_name=opts.os_tenant_name)
@@ -131,7 +131,7 @@ def get_admin_clients(opts):
         'ca_certs': CONF.identity.ca_certificates_file,
         'trace_requests': CONF.debug.trace_requests
     }
-    _auth = tempest_lib.auth.KeystoneV2AuthProvider(
+    _auth = tempest.lib.auth.KeystoneV2AuthProvider(
         _creds, CONF.identity.uri, **auth_params)
     params = {
         'disable_ssl_certificate_validation':
@@ -223,14 +223,14 @@ def create_resources(opts, resources):
     for u in resources['users']:
         try:
             tenant = identity.get_tenant_by_name(tenants_admin, u['tenant'])
-        except tempest_lib.exceptions.NotFound:
+        except tempest.lib.exceptions.NotFound:
             LOG.error("Tenant: %s - not found" % u['tenant'])
             continue
         while True:
             try:
                 identity.get_user_by_username(tenants_admin,
                                               tenant['id'], u['name'])
-            except tempest_lib.exceptions.NotFound:
+            except tempest.lib.exceptions.NotFound:
                 users_admin.create_user(
                     u['name'], u['pass'], tenant['id'],
                     "%s@%s" % (u['name'], tenant['id']),
@@ -254,19 +254,19 @@ def create_resources(opts, resources):
     for u in resources['users']:
         try:
             tenant = identity.get_tenant_by_name(tenants_admin, u['tenant'])
-        except tempest_lib.exceptions.NotFound:
+        except tempest.lib.exceptions.NotFound:
             LOG.error("Tenant: %s - not found" % u['tenant'])
             continue
         try:
             user = identity.get_user_by_username(tenants_admin,
                                                  tenant['id'], u['name'])
-        except tempest_lib.exceptions.NotFound:
+        except tempest.lib.exceptions.NotFound:
             LOG.error("User: %s - not found" % u['user'])
             continue
         for r in u['role_ids']:
             try:
                 roles_admin.assign_user_role(tenant['id'], user['id'], r)
-            except tempest_lib.exceptions.Conflict:
+            except tempest.lib.exceptions.Conflict:
                 # don't care if it's already assigned
                 pass
     LOG.info('Roles assigned')
@@ -294,7 +294,7 @@ def create_network_resources(network_admin_client, networks_admin_client,
                         enable_dhcp=True,
                         ip_version=4)
                 break
-            except tempest_lib.exceptions.BadRequest as e:
+            except tempest.lib.exceptions.BadRequest as e:
                 if 'overlaps with another subnet' not in str(e):
                     raise
         else:

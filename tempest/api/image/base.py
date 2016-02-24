@@ -13,10 +13,10 @@
 #    under the License.
 
 from six import moves
-from tempest_lib import exceptions as lib_exc
 
 from tempest.common.utils import data_utils
 from tempest import config
+from tempest.lib import exceptions as lib_exc
 import tempest.test
 
 CONF = config.CONF

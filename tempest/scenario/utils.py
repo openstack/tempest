@@ -18,14 +18,14 @@ import string
 import unicodedata
 
 from oslo_serialization import jsonutils as json
-from tempest_lib.common.utils import misc
-from tempest_lib import exceptions as exc_lib
 import testscenarios
 import testtools
 
 from tempest import clients
 from tempest.common import credentials_factory as credentials
 from tempest import config
+from tempest.lib.common.utils import misc
+from tempest.lib import exceptions as exc_lib
 
 CONF = config.CONF
 

@@ -10,11 +10,11 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest_lib import decorators
 import testtools
 
 from tempest.api.telemetry import base
 from tempest import config
+from tempest.lib import decorators
 from tempest import test
 
 CONF = config.CONF

@@ -15,11 +15,11 @@ import re
 import time
 
 from oslo_log import log as logging
-from tempest_lib.common import ssh
-import tempest_lib.exceptions
 
 from tempest import config
 from tempest import exceptions
+from tempest.lib.common import ssh
+import tempest.lib.exceptions
 
 CONF = config.CONF
 
@@ -181,7 +181,7 @@ class RemoteClient(object):
         cmd_mkfs = 'sudo /usr/sbin/mke2fs -t %s /dev/%s' % (fs, dev_name)
         try:
             self.exec_command(cmd_mkfs)
-        except tempest_lib.exceptions.SSHExecCommandFailed:
+        except tempest.lib.exceptions.SSHExecCommandFailed:
             LOG.error("Couldn't mke2fs")
             cmd_why = 'sudo ls -lR /dev'
             LOG.info("Contents of /dev: %s" % self.exec_command(cmd_why))

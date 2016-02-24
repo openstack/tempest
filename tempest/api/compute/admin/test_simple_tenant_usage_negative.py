@@ -14,9 +14,9 @@
 #    under the License.
 
 import datetime
-from tempest_lib import exceptions as lib_exc
 
 from tempest.api.compute import base
+from tempest.lib import exceptions as lib_exc
 from tempest import test
 
 

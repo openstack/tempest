@@ -12,7 +12,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest_lib.common import rest_client
+from tempest.lib.common import rest_client
 
 
 class ServiceClient(rest_client.RestClient):

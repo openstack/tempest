@@ -20,8 +20,6 @@ import netaddr
 from oslo_log import log
 from oslo_serialization import jsonutils as json
 import six
-from tempest_lib.common.utils import misc as misc_utils
-from tempest_lib import exceptions as lib_exc
 
 from tempest.common import compute
 from tempest.common.utils import data_utils
@@ -29,6 +27,8 @@ from tempest.common.utils.linux import remote_client
 from tempest.common import waiters
 from tempest import config
 from tempest import exceptions
+from tempest.lib.common.utils import misc as misc_utils
+from tempest.lib import exceptions as lib_exc
 from tempest.services.network import resources as net_resources
 import tempest.test
 

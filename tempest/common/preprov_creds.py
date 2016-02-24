@@ -18,14 +18,14 @@ import os
 from oslo_concurrency import lockutils
 from oslo_log import log as logging
 import six
-from tempest_lib import auth
-from tempest_lib import exceptions as lib_exc
 import yaml
 
 from tempest import clients
 from tempest.common import cred_provider
 from tempest.common import fixed_network
 from tempest import exceptions
+from tempest.lib import auth
+from tempest.lib import exceptions as lib_exc
 
 LOG = logging.getLogger(__name__)
 

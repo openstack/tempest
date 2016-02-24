@@ -13,9 +13,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest_lib import exceptions as lib_exc
-
 from tempest.api.compute import base
+from tempest.lib import exceptions as lib_exc
 from tempest import test
 
 

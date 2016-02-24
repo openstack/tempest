@@ -27,7 +27,6 @@ from oslo_serialization import jsonutils as json
 from oslo_utils import importutils
 import six
 from six.moves import urllib
-from tempest_lib import decorators
 import testscenarios
 import testtools
 
@@ -39,6 +38,7 @@ import tempest.common.generator.valid_generator as valid
 import tempest.common.validation_resources as vresources
 from tempest import config
 from tempest import exceptions
+from tempest.lib import decorators
 
 LOG = logging.getLogger(__name__)
 

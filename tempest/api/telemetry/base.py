@@ -13,13 +13,13 @@
 import time
 
 from oslo_utils import timeutils
-from tempest_lib import exceptions as lib_exc
 
 from tempest.common import compute
 from tempest.common.utils import data_utils
 from tempest.common import waiters
 from tempest import config
 from tempest import exceptions
+from tempest.lib import exceptions as lib_exc
 import tempest.test
 
 CONF = config.CONF

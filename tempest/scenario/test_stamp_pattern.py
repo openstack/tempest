@@ -16,13 +16,13 @@
 import time
 
 from oslo_log import log as logging
-from tempest_lib import decorators
-from tempest_lib import exceptions as lib_exc
 import testtools
 
 from tempest.common.utils import data_utils
 from tempest import config
 from tempest import exceptions
+from tempest.lib import decorators
+from tempest.lib import exceptions as lib_exc
 from tempest.scenario import manager
 from tempest import test
 

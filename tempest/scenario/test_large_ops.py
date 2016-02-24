@@ -13,12 +13,11 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest_lib import exceptions as lib_exc
-
 from tempest.common import fixed_network
 from tempest.common.utils import data_utils
 from tempest.common import waiters
 from tempest import config
+from tempest.lib import exceptions as lib_exc
 from tempest.scenario import manager
 from tempest import test
 

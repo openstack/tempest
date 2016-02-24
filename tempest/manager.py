@@ -13,11 +13,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest_lib import auth
-
 from tempest.common import cred_provider
 from tempest import config
 from tempest import exceptions
+from tempest.lib import auth
 
 CONF = config.CONF
 

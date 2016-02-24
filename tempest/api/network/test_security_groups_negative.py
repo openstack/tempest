@@ -15,10 +15,9 @@
 
 import uuid
 
-from tempest_lib import exceptions as lib_exc
-
 from tempest.api.network import base_security_groups as base
 from tempest import config
+from tempest.lib import exceptions as lib_exc
 from tempest import test
 
 CONF = config.CONF
