@@ -257,7 +257,7 @@ class TestCreateResources(JavelinUnitTest):
         javelin.create_routers([self.fake_object])
 
         mocked_function = self.fake_client.networks.create_router
-        mocked_function.assert_called_once_with(self.fake_object['name'])
+        mocked_function.assert_called_once_with(name=self.fake_object['name'])
 
     def test_create_router_existing(self):
         self.fake_client.routers.list_routers.return_value = {
