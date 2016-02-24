@@ -11,7 +11,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-
 import mock
 import subprocess
 
@@ -74,3 +73,20 @@ class TestExecute(base.TestCase):
         self.assertRaises(exceptions.CommandFailed, cli_base.execute,
                           "/bin/ls", action="tempest", flags="--foobar",
                           merge_stderr=True)
+
+    def test_execute_with_prefix(self):
+        result = cli_base.execute("env", action="",
+                                  prefix="env NEW_VAR=1")
+        self.assertIsInstance(result, str)
+        self.assertIn("NEW_VAR=1", result)
+
+
+class TestCLIClient(base.TestCase):
+
+    @mock.patch.object(cli_base, 'execute')
+    def test_execute_with_prefix(self, mock_execute):
+        cli = cli_base.CLIClient(prefix='env LAC_ALL=C')
+        cli.glance('action')
+        self.assertEqual(mock_execute.call_count, 1)
+        self.assertEqual(mock_execute.call_args[1],
+                         {'prefix': 'env LAC_ALL=C'})
