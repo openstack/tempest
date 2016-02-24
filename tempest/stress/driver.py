@@ -149,16 +149,18 @@ def stress_openstack(tests, duration, max_runs=None, stop_on_error=False):
                     projects_client = admin_manager.tenants_client
                     roles_client = admin_manager.roles_client
                     users_client = admin_manager.users_client
+                    domains_client = None
                 else:
                     identity_client = admin_manager.identity_v3_client
                     projects_client = admin_manager.projects_client
                     roles_client = None
                     users_client = admin_manager.users_v3_client
+                    domains_client = admin_manager.domains_client
                 domain = (identity_client.auth_provider.credentials.
                           get('project_domain_name', 'Default'))
                 credentials_client = cred_client.get_creds_client(
                     identity_client, projects_client, users_client,
-                    roles_client, project_domain_name=domain)
+                    roles_client, domains_client, project_domain_name=domain)
                 project = credentials_client.create_project(
                     name=tenant_name, description=tenant_name)
                 user = credentials_client.create_user(username, password,

@@ -14,7 +14,6 @@
 #    under the License.
 
 from oslo_serialization import jsonutils as json
-from six.moves.urllib import parse as urllib
 
 from tempest.common import service_client
 
@@ -72,61 +71,6 @@ class IdentityV3Client(service_client.ServiceClient):
         """Delete a role."""
         resp, body = self.delete('roles/%s' % str(role_id))
         self.expected_success(204, resp.status)
-        return service_client.ResponseBody(resp, body)
-
-    def create_domain(self, name, **kwargs):
-        """Creates a domain."""
-        description = kwargs.get('description', None)
-        en = kwargs.get('enabled', True)
-        post_body = {
-            'description': description,
-            'enabled': en,
-            'name': name
-        }
-        post_body = json.dumps({'domain': post_body})
-        resp, body = self.post('domains', post_body)
-        self.expected_success(201, resp.status)
-        body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
-
-    def delete_domain(self, domain_id):
-        """Delete a domain."""
-        resp, body = self.delete('domains/%s' % str(domain_id))
-        self.expected_success(204, resp.status)
-        return service_client.ResponseBody(resp, body)
-
-    def list_domains(self, params=None):
-        """List Domains."""
-        url = 'domains'
-        if params:
-            url += '?%s' % urllib.urlencode(params)
-        resp, body = self.get(url)
-        self.expected_success(200, resp.status)
-        body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
-
-    def update_domain(self, domain_id, **kwargs):
-        """Updates a domain."""
-        body = self.show_domain(domain_id)['domain']
-        description = kwargs.get('description', body['description'])
-        en = kwargs.get('enabled', body['enabled'])
-        name = kwargs.get('name', body['name'])
-        post_body = {
-            'description': description,
-            'enabled': en,
-            'name': name
-        }
-        post_body = json.dumps({'domain': post_body})
-        resp, body = self.patch('domains/%s' % domain_id, post_body)
-        self.expected_success(200, resp.status)
-        body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
-
-    def show_domain(self, domain_id):
-        """Get Domain details."""
-        resp, body = self.get('domains/%s' % domain_id)
-        self.expected_success(200, resp.status)
-        body = json.loads(body)
         return service_client.ResponseBody(resp, body)
 
     def show_token(self, resp_token):
