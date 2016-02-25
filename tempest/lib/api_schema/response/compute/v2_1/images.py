@@ -77,7 +77,7 @@ list_images = {
                     'properties': {
                         'id': {'type': 'string'},
                         'links': image_links,
-                        'name': {'type': 'string'}
+                        'name': {'type': ['string', 'null']}
                     },
                     'additionalProperties': False,
                     'required': ['id', 'links', 'name']
