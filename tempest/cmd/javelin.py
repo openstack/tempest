@@ -756,7 +756,7 @@ def _get_resource_by_name(client, resource, name):
     # we cannot assume they all have the same signature so we need to discard
     # the unused response first value it two values are being returned.
     body = get_resources()
-    if type(body) == tuple:
+    if isinstance(body, tuple):
         body = body[1]
     if isinstance(body, dict):
         body = body[resource]
