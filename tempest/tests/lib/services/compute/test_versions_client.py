@@ -94,3 +94,42 @@ class TestVersionsClient(base.BaseComputeServiceTest):
 
     def test_get_version_by_url_with_bytes_body(self):
         self._test_get_version_by_url(bytes_body=True)
+
+    def _test_get_base_version_url(self, url, expected_base_url):
+        auth = fake_auth_provider.FakeAuthProvider(fake_base_url=url)
+        client = versions_client.VersionsClient(auth, 'compute', 'regionOne')
+        self.assertEqual(expected_base_url, client._get_base_version_url())
+
+    def test_get_base_version_url(self):
+        self._test_get_base_version_url('https://bar.org/v2/123',
+                                        'https://bar.org/')
+        self._test_get_base_version_url('https://bar.org/v2.1/123',
+                                        'https://bar.org/')
+        self._test_get_base_version_url('https://bar.org/v2.15/123',
+                                        'https://bar.org/')
+        self._test_get_base_version_url('https://bar.org/v22.2/123',
+                                        'https://bar.org/')
+        self._test_get_base_version_url('https://bar.org/v22/123',
+                                        'https://bar.org/')
+
+    def test_get_base_version_url_app_name(self):
+        self._test_get_base_version_url('https://bar.org/compute/v2/123',
+                                        'https://bar.org/compute/')
+        self._test_get_base_version_url('https://bar.org/compute/v2.1/123',
+                                        'https://bar.org/compute/')
+        self._test_get_base_version_url('https://bar.org/compute/v2.15/123',
+                                        'https://bar.org/compute/')
+        self._test_get_base_version_url('https://bar.org/compute/v22.2/123',
+                                        'https://bar.org/compute/')
+        self._test_get_base_version_url('https://bar.org/compute/v22/123',
+                                        'https://bar.org/compute/')
+
+    def test_get_base_version_url_double_slash(self):
+        self._test_get_base_version_url('https://bar.org//v2/123',
+                                        'https://bar.org/')
+        self._test_get_base_version_url('https://bar.org//v2.1/123',
+                                        'https://bar.org/')
+        self._test_get_base_version_url('https://bar.org/compute//v2/123',
+                                        'https://bar.org/compute/')
+        self._test_get_base_version_url('https://bar.org/compute//v2.1/123',
+                                        'https://bar.org/compute/')
