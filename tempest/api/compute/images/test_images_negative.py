@@ -67,7 +67,7 @@ class ImagesNegativeTestJSON(base.BaseV2ComputeTest):
         resp = {}
         resp['status'] = None
         self.assertRaises(lib_exc.NotFound, self.create_image_from_server,
-                          '!@$%^&*()', name=name, meta=meta)
+                          '!@$^&*()', name=name, meta=meta)
 
     @test.attr(type=['negative'])
     @test.idempotent_id('ec176029-73dc-4037-8d72-2e4ff60cf538')
