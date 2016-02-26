@@ -622,6 +622,9 @@ class KeystoneV2Credentials(Credentials):
         return None not in (self.username, self.password)
 
 
+COLLISIONS = [('project_name', 'tenant_name'), ('project_id', 'tenant_id')]
+
+
 class KeystoneV3Credentials(Credentials):
     """Credentials suitable for the Keystone Identity V3 API"""
 
@@ -629,6 +632,16 @@ class KeystoneV3Credentials(Credentials):
                   'project_domain_id', 'project_domain_name', 'project_id',
                   'project_name', 'tenant_id', 'tenant_name', 'user_domain_id',
                   'user_domain_name', 'user_id']
+
+    def _apply_credentials(self, attr):
+        for (key1, key2) in COLLISIONS:
+            val1 = attr.get(key1)
+            val2 = attr.get(key2)
+            if val1 and val2 and val1 != val2:
+                msg = ('Cannot have conflicting values for %s and %s' %
+                       (key1, key2))
+                raise exceptions.InvalidCredentials(msg)
+        super(KeystoneV3Credentials, self)._apply_credentials(attr)
 
     def __setattr__(self, key, value):
         parent = super(KeystoneV3Credentials, self)
@@ -657,8 +670,10 @@ class KeystoneV3Credentials(Credentials):
                 parent.__setattr__('user_domain_name', value)
         # support domain_name coming from config
         if key == 'domain_name':
-            parent.__setattr__('user_domain_name', value)
-            parent.__setattr__('project_domain_name', value)
+            if self.user_domain_name is None:
+                parent.__setattr__('user_domain_name', value)
+            if self.project_domain_name is None:
+                parent.__setattr__('project_domain_name', value)
         # finally trigger default behaviour for all attributes
         parent.__setattr__(key, value)
 
