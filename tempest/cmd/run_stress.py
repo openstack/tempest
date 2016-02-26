@@ -146,8 +146,6 @@ def action(ns):
 
 
 def main():
-    LOG.warning("Deprecated: Use 'tempest run-stress' instead. "
-                "The old entrypoint will be removed in a future release.")
     parser = argparse.ArgumentParser(description='Run stress tests')
     pa = add_arguments(parser)
     ns = pa.parse_args()
