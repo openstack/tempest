@@ -11,12 +11,12 @@ paramiko>=1.16.0 # LGPL
 netaddr!=0.7.16,>=0.7.12 # BSD
 testrepository>=0.0.18 # Apache-2.0/BSD
 pyOpenSSL>=0.14 # Apache-2.0
-oslo.concurrency>=2.3.0 # Apache-2.0
-oslo.config>=3.4.0 # Apache-2.0
+oslo.concurrency>=3.5.0 # Apache-2.0
+oslo.config>=3.7.0 # Apache-2.0
 oslo.i18n>=2.1.0 # Apache-2.0
 oslo.log>=1.14.0 # Apache-2.0
 oslo.serialization>=1.10.0 # Apache-2.0
-oslo.utils>=3.4.0 # Apache-2.0
+oslo.utils>=3.5.0 # Apache-2.0
 six>=1.9.0 # MIT
 iso8601>=0.1.9 # MIT
 fixtures>=1.3.1 # Apache-2.0/BSD
