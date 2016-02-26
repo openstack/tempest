@@ -139,6 +139,11 @@ options in the ``identity`` section:
  #. ``alt_password``
  #. ``alt_tenant_name``
 
+If using Identity API v3, use the ``domain_name`` option to specify a
+domain other than the default domain.  The ``auth_version`` setting is
+used to switch between v2 (``v2``) or v3 (``v3``) versions of the Identity
+API.
+
 And in the ``auth`` section:
 
  #. ``use_dynamic_credentials = False``
