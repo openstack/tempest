@@ -191,7 +191,12 @@ IdentityFeatureGroup = [
                 help="A list of enabled identity extensions with a special "
                      "entry all which indicates every extension is enabled. "
                      "Empty list indicates all extensions are disabled. "
-                     "To get the list of extensions run: 'keystone discover'")
+                     "To get the list of extensions run: 'keystone discover'"),
+    # TODO(rodrigods): Remove the reseller flag when Kilo and Liberty is end
+    # of life.
+    cfg.BoolOpt('reseller',
+                default=False,
+                help='Does the environment support reseller?')
 ]
 
 compute_group = cfg.OptGroup(name='compute',
