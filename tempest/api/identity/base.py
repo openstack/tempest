@@ -37,8 +37,12 @@ class BaseIdentityTest(tempest.test.BaseTestCase):
         cls.tenants_client.update_tenant(tenant['id'], enabled=False)
 
     @classmethod
-    def get_user_by_name(cls, name):
-        users = cls.users_client.list_users()['users']
+    def get_user_by_name(cls, name, domain_id=None):
+        if domain_id:
+            params = {'domain_id': domain_id}
+            users = cls.users_client.list_users(params)['users']
+        else:
+            users = cls.users_client.list_users()['users']
         user = [u for u in users if u['name'] == name]
         if len(user) > 0:
             return user[0]
@@ -177,8 +181,8 @@ class BaseIdentityV3AdminTest(BaseIdentityV3Test):
             return role[0]
 
     @classmethod
-    def disable_user(cls, user_name):
-        user = cls.get_user_by_name(user_name)
+    def disable_user(cls, user_name, domain_id=None):
+        user = cls.get_user_by_name(user_name, domain_id)
         cls.users_client.update_user(user['id'], user_name, enabled=False)
 
     def delete_domain(self, domain_id):
