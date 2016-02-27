@@ -22,7 +22,7 @@ from oslo_serialization import jsonutils as json
 from tempest.lib.common import rest_client
 
 
-class EndPointClient(rest_client.RestClient):
+class EndPointsClient(rest_client.RestClient):
     api_version = "v3"
 
     def list_endpoints(self):
