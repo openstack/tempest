@@ -184,12 +184,19 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
                 router = self._create_router(router_name, tenant_id)
                 self._add_router_interface(router['id'], subnet['id'])
         except Exception:
-            if router:
-                self._clear_isolated_router(router['id'], router['name'])
-            if subnet:
-                self._clear_isolated_subnet(subnet['id'], subnet['name'])
-            if network:
-                self._clear_isolated_network(network['id'], network['name'])
+            try:
+                if router:
+                    self._clear_isolated_router(router['id'], router['name'])
+                if subnet:
+                    self._clear_isolated_subnet(subnet['id'], subnet['name'])
+                if network:
+                    self._clear_isolated_network(network['id'],
+                                                 network['name'])
+            except Exception as cleanup_exception:
+                msg = "There was an exception trying to setup network " \
+                      "resources for tenant %s, and this error happened " \
+                      "trying to clean them up: %s"
+                LOG.warning(msg % (tenant_id, cleanup_exception))
             raise
         return network, subnet, router
 
