@@ -445,9 +445,9 @@ class BaseTestCase(testtools.testcase.WithAttributes,
             domains_client = None
         else:
             client = self.os_admin.identity_v3_client
-            project_client = self.os_adm.projects_client
             users_client = self.os_admin.users_v3_client
-            roles_client = None
+            project_client = self.os_admin.projects_client
+            roles_client = self.os_admin.roles_v3_client
             domains_client = self.os_admin.domains_client
 
         try:

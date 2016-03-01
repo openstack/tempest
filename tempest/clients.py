@@ -128,6 +128,8 @@ from tempest.services.identity.v3.json.policies_client import \
 from tempest.services.identity.v3.json.projects_client import ProjectsClient
 from tempest.services.identity.v3.json.regions_client import \
     RegionsClient as RegionsV3Client
+from tempest.services.identity.v3.json.roles_client import \
+    RolesClient as RolesV3Client
 from tempest.services.identity.v3.json.services_client import \
     ServicesClient as IdentityServicesV3Client
 from tempest.services.identity.v3.json.trusts_client import TrustsClient
@@ -519,6 +521,7 @@ class Manager(manager.Manager):
         self.users_v3_client = UsersV3Client(self.auth_provider, **params_v3)
         self.endpoints_client = EndPointV3Client(self.auth_provider,
                                                  **params_v3)
+        self.roles_v3_client = RolesV3Client(self.auth_provider, **params_v3)
         self.identity_services_client = IdentityServicesV3Client(
             self.auth_provider, **params_v3)
         self.policies_client = PoliciesV3Client(self.auth_provider,

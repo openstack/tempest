@@ -32,14 +32,12 @@ class CredsClient(object):
     """
 
     def __init__(self, identity_client, projects_client, users_client,
-                 roles_client=None):
+                 roles_client):
         # The client implies version and credentials
         self.identity_client = identity_client
         self.users_client = users_client
         self.projects_client = projects_client
-        # this is temporary until the v3 clients are
-        # separated, then using *only* each client will become mandatory
-        self.roles_client = roles_client or identity_client
+        self.roles_client = roles_client
 
     def create_user(self, username, password, project, email):
         user = self.users_client.create_user(
@@ -130,9 +128,9 @@ class V2CredsClient(CredsClient):
 class V3CredsClient(CredsClient):
 
     def __init__(self, identity_client, projects_client, users_client,
-                 domains_client, domain_name):
+                 roles_client, domains_client, domain_name):
         super(V3CredsClient, self).__init__(identity_client, projects_client,
-                                            users_client)
+                                            users_client, roles_client)
         self.domains_client = domains_client
 
         try:
@@ -167,10 +165,6 @@ class V3CredsClient(CredsClient):
             project_domain_id=self.creds_domain['id'],
             project_domain_name=self.creds_domain['name'])
 
-    def _list_roles(self):
-        roles = self.identity_client.list_roles()['roles']
-        return roles
-
     def _assign_user_role(self, project, user, role):
         self.roles_client.assign_user_role_on_project(project['id'],
                                                       user['id'],
@@ -180,7 +174,7 @@ class V3CredsClient(CredsClient):
 def get_creds_client(identity_client,
                      projects_client,
                      users_client,
-                     roles_client=None,
+                     roles_client,
                      domains_client=None,
                      project_domain_name=None):
     if isinstance(identity_client, v2_identity.IdentityClient):
@@ -188,4 +182,4 @@ def get_creds_client(identity_client,
                              roles_client)
     else:
         return V3CredsClient(identity_client, projects_client, users_client,
-                             domains_client, project_domain_name)
+                             roles_client, domains_client, project_domain_name)

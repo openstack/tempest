@@ -25,7 +25,7 @@ class RolesV3TestJSON(base.BaseIdentityV3AdminTest):
         super(RolesV3TestJSON, cls).resource_setup()
         for _ in range(3):
             role_name = data_utils.rand_name(name='role')
-            role = cls.client.create_role(name=role_name)['role']
+            role = cls.roles_client.create_role(name=role_name)['role']
             cls.data.roles.append(role)
         cls.fetched_role_ids = list()
         u_name = data_utils.rand_name('user')
@@ -46,12 +46,12 @@ class RolesV3TestJSON(base.BaseIdentityV3AdminTest):
             u_name, description=u_desc, password=cls.u_password,
             email=u_email, project_id=cls.project['id'],
             domain_id=cls.domain['id'])['user']
-        cls.role = cls.client.create_role(
+        cls.role = cls.roles_client.create_role(
             name=data_utils.rand_name('Role'))['role']
 
     @classmethod
     def resource_cleanup(cls):
-        cls.client.delete_role(cls.role['id'])
+        cls.roles_client.delete_role(cls.role['id'])
         cls.groups_client.delete_group(cls.group_body['id'])
         cls.users_client.delete_user(cls.user_body['id'])
         cls.projects_client.delete_project(cls.project['id'])
@@ -67,34 +67,35 @@ class RolesV3TestJSON(base.BaseIdentityV3AdminTest):
 
     @test.attr(type='smoke')
     @test.idempotent_id('18afc6c0-46cf-4911-824e-9989cc056c3a')
-    def test_role_create_update_get_list(self):
+    def test_role_create_update_show_list(self):
         r_name = data_utils.rand_name('Role')
-        role = self.client.create_role(name=r_name)['role']
-        self.addCleanup(self.client.delete_role, role['id'])
+        role = self.roles_client.create_role(name=r_name)['role']
+        self.addCleanup(self.roles_client.delete_role, role['id'])
         self.assertIn('name', role)
         self.assertEqual(role['name'], r_name)
 
         new_name = data_utils.rand_name('NewRole')
-        updated_role = self.client.update_role(role['id'],
-                                               name=new_name)['role']
+        updated_role = self.roles_client.update_role(role['id'],
+                                                     name=new_name)['role']
         self.assertIn('name', updated_role)
         self.assertIn('id', updated_role)
         self.assertIn('links', updated_role)
         self.assertNotEqual(r_name, updated_role['name'])
 
-        new_role = self.client.show_role(role['id'])['role']
+        new_role = self.roles_client.show_role(role['id'])['role']
         self.assertEqual(new_name, new_role['name'])
         self.assertEqual(updated_role['id'], new_role['id'])
 
-        roles = self.client.list_roles()['roles']
+        roles = self.roles_client.list_roles()['roles']
         self.assertIn(role['id'], [r['id'] for r in roles])
 
     @test.idempotent_id('c6b80012-fe4a-498b-9ce8-eb391c05169f')
     def test_grant_list_revoke_role_to_user_on_project(self):
-        self.client.assign_user_role_on_project(
-            self.project['id'], self.user_body['id'], self.role['id'])
+        self.roles_client.assign_user_role_on_project(self.project['id'],
+                                                      self.user_body['id'],
+                                                      self.role['id'])
 
-        roles = self.client.list_user_roles_on_project(
+        roles = self.roles_client.list_user_roles_on_project(
             self.project['id'], self.user_body['id'])['roles']
 
         for i in roles:
@@ -103,18 +104,18 @@ class RolesV3TestJSON(base.BaseIdentityV3AdminTest):
         self._list_assertions(roles, self.fetched_role_ids,
                               self.role['id'])
 
-        self.client.check_user_role_existence_on_project(
+        self.roles_client.check_user_role_existence_on_project(
             self.project['id'], self.user_body['id'], self.role['id'])
 
-        self.client.delete_role_from_user_on_project(
+        self.roles_client.delete_role_from_user_on_project(
             self.project['id'], self.user_body['id'], self.role['id'])
 
     @test.idempotent_id('6c9a2940-3625-43a3-ac02-5dcec62ef3bd')
     def test_grant_list_revoke_role_to_user_on_domain(self):
-        self.client.assign_user_role_on_domain(
+        self.roles_client.assign_user_role_on_domain(
             self.domain['id'], self.user_body['id'], self.role['id'])
 
-        roles = self.client.list_user_roles_on_domain(
+        roles = self.roles_client.list_user_roles_on_domain(
             self.domain['id'], self.user_body['id'])['roles']
 
         for i in roles:
@@ -123,19 +124,19 @@ class RolesV3TestJSON(base.BaseIdentityV3AdminTest):
         self._list_assertions(roles, self.fetched_role_ids,
                               self.role['id'])
 
-        self.client.check_user_role_existence_on_domain(
+        self.roles_client.check_user_role_existence_on_domain(
             self.domain['id'], self.user_body['id'], self.role['id'])
 
-        self.client.delete_role_from_user_on_domain(
+        self.roles_client.delete_role_from_user_on_domain(
             self.domain['id'], self.user_body['id'], self.role['id'])
 
     @test.idempotent_id('cbf11737-1904-4690-9613-97bcbb3df1c4')
     def test_grant_list_revoke_role_to_group_on_project(self):
         # Grant role to group on project
-        self.client.assign_group_role_on_project(
+        self.roles_client.assign_group_role_on_project(
             self.project['id'], self.group_body['id'], self.role['id'])
         # List group roles on project
-        roles = self.client.list_group_roles_on_project(
+        roles = self.roles_client.list_group_roles_on_project(
             self.project['id'], self.group_body['id'])['roles']
 
         for i in roles:
@@ -157,19 +158,19 @@ class RolesV3TestJSON(base.BaseIdentityV3AdminTest):
         self.assertEqual(len(roles), 1)
         self.assertEqual(roles[0]['id'], self.role['id'])
 
-        self.client.check_role_from_group_on_project_existence(
+        self.roles_client.check_role_from_group_on_project_existence(
             self.project['id'], self.group_body['id'], self.role['id'])
 
         # Revoke role to group on project
-        self.client.delete_role_from_group_on_project(
+        self.roles_client.delete_role_from_group_on_project(
             self.project['id'], self.group_body['id'], self.role['id'])
 
     @test.idempotent_id('4bf8a70b-e785-413a-ad53-9f91ce02faa7')
     def test_grant_list_revoke_role_to_group_on_domain(self):
-        self.client.assign_group_role_on_domain(
+        self.roles_client.assign_group_role_on_domain(
             self.domain['id'], self.group_body['id'], self.role['id'])
 
-        roles = self.client.list_group_roles_on_domain(
+        roles = self.roles_client.list_group_roles_on_domain(
             self.domain['id'], self.group_body['id'])['roles']
 
         for i in roles:
@@ -178,15 +179,15 @@ class RolesV3TestJSON(base.BaseIdentityV3AdminTest):
         self._list_assertions(roles, self.fetched_role_ids,
                               self.role['id'])
 
-        self.client.check_role_from_group_on_domain_existence(
+        self.roles_client.check_role_from_group_on_domain_existence(
             self.domain['id'], self.group_body['id'], self.role['id'])
 
-        self.client.delete_role_from_group_on_domain(
+        self.roles_client.delete_role_from_group_on_domain(
             self.domain['id'], self.group_body['id'], self.role['id'])
 
     @test.idempotent_id('f5654bcc-08c4-4f71-88fe-05d64e06de94')
     def test_list_roles(self):
         # Return a list of all roles
-        body = self.client.list_roles()['roles']
+        body = self.roles_client.list_roles()['roles']
         found = [role for role in body if role in self.data.roles]
         self.assertEqual(len(found), len(self.data.roles))

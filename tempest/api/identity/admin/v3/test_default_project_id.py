@@ -71,8 +71,8 @@ class TestDefaultProjectId (base.BaseIdentityV3AdminTest):
         admin_role_id = admin_role['id']
 
         # grant the admin role to the user on his project
-        self.client.assign_user_role_on_project(proj_id, user_id,
-                                                admin_role_id)
+        self.roles_client.assign_user_role_on_project(proj_id, user_id,
+                                                      admin_role_id)
 
         # create a new client with user's credentials (NOTE: unscoped token!)
         creds = auth.KeystoneV3Credentials(username=user_name,
