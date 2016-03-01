@@ -1027,11 +1027,6 @@ ScenarioGroup = [
                default='cirros-0.3.1-x86_64-vmlinuz',
                help='AKI image file name',
                deprecated_for_removal=True),
-    cfg.IntOpt(
-        'large_ops_number',
-        default=0,
-        help="specifies how many resources to request at once. Used "
-        "for large operations testing."),
     # TODO(yfried): add support for dhcpcd
     cfg.StrOpt('dhcp_client',
                default='udhcpc',
