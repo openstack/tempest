@@ -16,7 +16,7 @@ from oslo_serialization import jsonutils as json
 import six
 from six.moves.urllib import parse as urllib
 
-from tempest.common import service_client
+from tempest.lib.common import rest_client
 
 
 def handle_errors(f):
@@ -39,7 +39,7 @@ def handle_errors(f):
     return wrapper
 
 
-class BaremetalClient(service_client.ServiceClient):
+class BaremetalClient(rest_client.RestClient):
     """Base Tempest REST client for Ironic API."""
 
     uri_prefix = ''
