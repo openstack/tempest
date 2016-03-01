@@ -94,6 +94,45 @@ as it is simpler, and quicker to work with.
 .. _testr: https://testrepository.readthedocs.org/en/latest/MANUAL.html
 .. _ostestr: http://docs.openstack.org/developer/os-testr/
 
+Library
+-------
+Tempest exposes a library interface. This interface is a stable interface and
+should be backwards compatible (including backwards compatibility with the
+old tempest-lib package, with the exception of the import). If you plan to
+directly consume tempest in your project you should only import code from the
+tempest library interface, other pieces of tempest do not have the same
+stable interface and there are no guarantees on the Python API unless otherwise
+stated.
+
+For more details refer to the library documentation here: :ref:`library`
+
+Release Versioning
+------------------
+Tempest's released versions are broken into 2 sets of information. Depending on
+how you intend to consume tempest you might need
+
+The version is a set of 3 numbers:
+
+X.Y.Z
+
+While this is almost `semver`_ like, the way versioning is handled is slightly
+different:
+
+X is used to represent the supported OpenStack releases for tempest tests
+in-tree, and to signify major feature changes to tempest. It's a monotonically
+increasing integer where each version either indicates a new supported OpenStack
+release, the drop of support for an OpenStack release (which will coincide with
+the upstream stable branch going EOL), or a major feature lands (or is removed)
+from tempest.
+
+Y.Z is used to represent library interface changes. This is treated the same
+way as minor and patch versions from `semver`_ but only for the library
+interface. When Y is incremented we've added functionality to the library
+interface and when Z is incremented it's a bug fix release for the library.
+Also note that both Y and Z are reset to 0 at each increment of X.
+
+.. _semver: http://semver.org/
+
 Configuration
 -------------
 
