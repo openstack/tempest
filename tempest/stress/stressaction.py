@@ -85,8 +85,8 @@ class StressAction(object):
             finally:
                 shared_statistic['runs'] += 1
                 if self.stop_on_error and (shared_statistic['fails'] > 1):
-                    self.logger.warn("Stop process due to"
-                                     "\"stop-on-error\" argument")
+                    self.logger.warning("Stop process due to"
+                                        "\"stop-on-error\" argument")
                     self.tearDown()
                     sys.exit(1)
 

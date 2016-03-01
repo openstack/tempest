@@ -480,8 +480,8 @@ class TempestAccountGenerator(command.Command):
 def main(opts=None):
     setup_logging()
     if not opts:
-        LOG.warn("Use of: 'tempest-account-generator' is deprecated, "
-                 "please use: 'tempest account-generator'")
+        LOG.warning("Use of: 'tempest-account-generator' is deprecated, "
+                    "please use: 'tempest account-generator'")
         opts = get_options()
     if opts.config_file:
         config.CONF.set_config_path(opts.config_file)
