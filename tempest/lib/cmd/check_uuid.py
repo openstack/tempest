@@ -173,9 +173,9 @@ class TestChecker(object):
 
     @staticmethod
     def _import_name(node):
-        if type(node) == ast.Import:
+        if isinstance(node, ast.Import):
             return node.names[0].name
-        elif type(node) == ast.ImportFrom:
+        elif isinstance(node, ast.ImportFrom):
             return '%s.%s' % (node.module, node.names[0].name)
 
     def _add_import_for_test_uuid(self, patcher, src_parsed, source_path):
