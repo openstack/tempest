@@ -16,8 +16,6 @@ import mock
 import random
 import six
 
-from tempest.services.database.json import flavors_client as db_flavor_client
-from tempest.services.database.json import versions_client as db_version_client
 from tempest.services.identity.v2.json import identity_client as \
     identity_v2_identity_client
 from tempest.services.identity.v3.json import credentials_client
@@ -30,8 +28,6 @@ from tempest.services.identity.v3.json import services_client
 from tempest.services.image.v1.json import images_client
 from tempest.services.image.v2.json import images_client as images_v2_client
 from tempest.services.network.json import network_client
-from tempest.services.telemetry.json import alarming_client
-from tempest.services.telemetry.json import telemetry_client
 from tempest.services.volume.v1.json.admin import hosts_client \
     as volume_hosts_client
 from tempest.services.volume.v1.json.admin import quotas_client \
@@ -75,11 +71,7 @@ class TestServiceClient(base.TestCase):
     @mock.patch('tempest.lib.common.rest_client.RestClient.__init__')
     def test_service_client_creations_with_specified_args(self, mock_init):
         test_clients = [
-            db_flavor_client.DatabaseFlavorsClient,
-            db_version_client.DatabaseVersionsClient,
             network_client.NetworkClient,
-            telemetry_client.TelemetryClient,
-            alarming_client.AlarmingClient,
             qos_client.QosSpecsClient,
             volume_hosts_client.HostsClient,
             volume_quotas_client.QuotasClient,

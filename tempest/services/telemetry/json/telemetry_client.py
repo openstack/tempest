@@ -16,10 +16,10 @@
 from oslo_serialization import jsonutils as json
 from six.moves.urllib import parse as urllib
 
-from tempest.common import service_client
+from tempest.lib.common import rest_client
 
 
-class TelemetryClient(service_client.ServiceClient):
+class TelemetryClient(rest_client.RestClient):
 
     version = '2'
     uri_prefix = "v2"
@@ -36,7 +36,7 @@ class TelemetryClient(service_client.ServiceClient):
         resp, body = self.post(uri, body)
         self.expected_success(200, resp.status)
         body = self.deserialize(body)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def _helper_list(self, uri, query=None, period=None):
         uri_dict = {}
@@ -51,7 +51,7 @@ class TelemetryClient(service_client.ServiceClient):
         resp, body = self.get(uri)
         self.expected_success(200, resp.status)
         body = self.deserialize(body)
-        return service_client.ResponseBodyList(resp, body)
+        return rest_client.ResponseBodyList(resp, body)
 
     def list_resources(self, query=None):
         uri = '%s/resources' % self.uri_prefix
@@ -78,4 +78,4 @@ class TelemetryClient(service_client.ServiceClient):
         resp, body = self.get(uri)
         self.expected_success(200, resp.status)
         body = self.deserialize(body)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
