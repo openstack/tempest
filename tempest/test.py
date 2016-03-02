@@ -236,6 +236,9 @@ class BaseTestCase(testtools.testcase.WithAttributes,
     # Client manager class to use in this test case.
     client_manager = clients.Manager
 
+    # A way to adjust slow test classes
+    TIMEOUT_SCALING_FACTOR = 1
+
     @classmethod
     def setUpClass(cls):
         # It should never be overridden by descendants
@@ -406,7 +409,7 @@ class BaseTestCase(testtools.testcase.WithAttributes,
         at_exit_set.add(self.__class__)
         test_timeout = os.environ.get('OS_TEST_TIMEOUT', 0)
         try:
-            test_timeout = int(test_timeout)
+            test_timeout = int(test_timeout) * self.TIMEOUT_SCALING_FACTOR
         except ValueError:
             test_timeout = 0
         if test_timeout > 0:
