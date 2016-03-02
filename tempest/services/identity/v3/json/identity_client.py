@@ -15,10 +15,10 @@
 
 from oslo_serialization import jsonutils as json
 
-from tempest.common import service_client
+from tempest.lib.common import rest_client
 
 
-class IdentityClient(service_client.ServiceClient):
+class IdentityClient(rest_client.RestClient):
     api_version = "v3"
 
     def show_api_description(self):
@@ -27,7 +27,7 @@ class IdentityClient(service_client.ServiceClient):
         resp, body = self.get(url)
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def show_token(self, resp_token):
         """Get token details."""
@@ -35,11 +35,11 @@ class IdentityClient(service_client.ServiceClient):
         resp, body = self.get("auth/tokens", headers=headers)
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def delete_token(self, resp_token):
         """Deletes token."""
         headers = {'X-Subject-Token': resp_token}
         resp, body = self.delete("auth/tokens", headers=headers)
         self.expected_success(204, resp.status)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)

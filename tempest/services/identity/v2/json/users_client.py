@@ -12,10 +12,10 @@
 
 from oslo_serialization import jsonutils as json
 
-from tempest.common import service_client
+from tempest.lib.common import rest_client
 
 
-class UsersClient(service_client.ServiceClient):
+class UsersClient(rest_client.RestClient):
     api_version = "v2.0"
 
     def create_user(self, name, password, tenant_id, email, **kwargs):
@@ -33,7 +33,7 @@ class UsersClient(service_client.ServiceClient):
         resp, body = self.post('users', post_body)
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def update_user(self, user_id, **kwargs):
         """Updates a user."""
@@ -41,27 +41,27 @@ class UsersClient(service_client.ServiceClient):
         resp, body = self.put('users/%s' % user_id, put_body)
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def show_user(self, user_id):
         """GET a user."""
         resp, body = self.get("users/%s" % user_id)
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def delete_user(self, user_id):
         """Delete a user."""
         resp, body = self.delete("users/%s" % user_id)
         self.expected_success(204, resp.status)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def list_users(self):
         """Get the list of users."""
         resp, body = self.get("users")
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def enable_disable_user(self, user_id, **kwargs):
         """Enables or disables a user.
@@ -77,7 +77,7 @@ class UsersClient(service_client.ServiceClient):
         resp, body = self.put('users/%s/enabled' % user_id, put_body)
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def update_user_password(self, user_id, **kwargs):
         """Update User Password."""
@@ -89,7 +89,7 @@ class UsersClient(service_client.ServiceClient):
         resp, body = self.put('users/%s/OS-KSADM/password' % user_id, put_body)
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def update_user_own_password(self, user_id, **kwargs):
         """User updates own password"""
@@ -104,7 +104,7 @@ class UsersClient(service_client.ServiceClient):
         resp, body = self.patch('OS-KSCRUD/users/%s' % user_id, patch_body)
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def create_user_ec2_credentials(self, user_id, **kwargs):
         # TODO(piyush): Current api-site doesn't contain this API description.
@@ -115,23 +115,23 @@ class UsersClient(service_client.ServiceClient):
                                post_body)
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def delete_user_ec2_credentials(self, user_id, access):
         resp, body = self.delete('/users/%s/credentials/OS-EC2/%s' %
                                  (user_id, access))
         self.expected_success(204, resp.status)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def list_user_ec2_credentials(self, user_id):
         resp, body = self.get('/users/%s/credentials/OS-EC2' % user_id)
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def show_user_ec2_credentials(self, user_id, access):
         resp, body = self.get('/users/%s/credentials/OS-EC2/%s' %
                               (user_id, access))
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)

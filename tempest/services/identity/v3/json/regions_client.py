@@ -20,10 +20,10 @@ http://developer.openstack.org/api-ref-identity-v3.html#regions-v3
 from oslo_serialization import jsonutils as json
 from six.moves.urllib import parse as urllib
 
-from tempest.common import service_client
+from tempest.lib.common import rest_client
 
 
-class RegionsClient(service_client.ServiceClient):
+class RegionsClient(rest_client.RestClient):
     api_version = "v3"
 
     def create_region(self, region_id=None, **kwargs):
@@ -45,7 +45,7 @@ class RegionsClient(service_client.ServiceClient):
         resp, body = method(url, req_body)
         self.expected_success(201, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def update_region(self, region_id, **kwargs):
         """Updates a region.
@@ -57,7 +57,7 @@ class RegionsClient(service_client.ServiceClient):
         resp, body = self.patch('regions/%s' % region_id, post_body)
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def show_region(self, region_id):
         """Get region."""
@@ -65,7 +65,7 @@ class RegionsClient(service_client.ServiceClient):
         resp, body = self.get(url)
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def list_regions(self, params=None):
         """List regions."""
@@ -75,10 +75,10 @@ class RegionsClient(service_client.ServiceClient):
         resp, body = self.get(url)
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def delete_region(self, region_id):
         """Delete region."""
         resp, body = self.delete('regions/%s' % region_id)
         self.expected_success(204, resp.status)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)

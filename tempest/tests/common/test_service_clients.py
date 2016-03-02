@@ -16,15 +16,6 @@ import mock
 import random
 import six
 
-from tempest.services.identity.v2.json import identity_client as \
-    identity_v2_identity_client
-from tempest.services.identity.v3.json import credentials_client
-from tempest.services.identity.v3.json import endpoints_client
-from tempest.services.identity.v3.json import identity_client as \
-    identity_v3_identity_client
-from tempest.services.identity.v3.json import policies_client
-from tempest.services.identity.v3.json import regions_client
-from tempest.services.identity.v3.json import services_client
 from tempest.services.network.json import network_client
 from tempest.tests import base
 
@@ -35,13 +26,6 @@ class TestServiceClient(base.TestCase):
     def test_service_client_creations_with_specified_args(self, mock_init):
         test_clients = [
             network_client.NetworkClient,
-            identity_v2_identity_client.IdentityClient,
-            credentials_client.CredentialsClient,
-            endpoints_client.EndPointClient,
-            identity_v3_identity_client.IdentityClient,
-            policies_client.PoliciesClient,
-            regions_client.RegionsClient,
-            services_client.ServicesClient,
         ]
 
         for client in test_clients:

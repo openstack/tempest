@@ -14,10 +14,10 @@
 
 from oslo_serialization import jsonutils as json
 
-from tempest.common import service_client
+from tempest.lib.common import rest_client
 
 
-class ServicesClient(service_client.ServiceClient):
+class ServicesClient(rest_client.RestClient):
     api_version = "v2.0"
 
     def create_service(self, name, type, **kwargs):
@@ -31,7 +31,7 @@ class ServicesClient(service_client.ServiceClient):
         resp, body = self.post('/OS-KSADM/services', post_body)
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def show_service(self, service_id):
         """Get Service."""
@@ -39,18 +39,18 @@ class ServicesClient(service_client.ServiceClient):
         resp, body = self.get(url)
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def list_services(self):
         """List Service - Returns Services."""
         resp, body = self.get('/OS-KSADM/services')
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def delete_service(self, service_id):
         """Delete Service."""
         url = '/OS-KSADM/services/%s' % service_id
         resp, body = self.delete(url)
         self.expected_success(204, resp.status)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)

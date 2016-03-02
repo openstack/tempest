@@ -19,10 +19,10 @@ http://developer.openstack.org/api-ref-identity-v3.html#credentials-v3
 
 from oslo_serialization import jsonutils as json
 
-from tempest.common import service_client
+from tempest.lib.common import rest_client
 
 
-class CredentialsClient(service_client.ServiceClient):
+class CredentialsClient(rest_client.RestClient):
     api_version = "v3"
 
     def create_credential(self, **kwargs):
@@ -36,7 +36,7 @@ class CredentialsClient(service_client.ServiceClient):
         self.expected_success(201, resp.status)
         body = json.loads(body)
         body['credential']['blob'] = json.loads(body['credential']['blob'])
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def update_credential(self, credential_id, **kwargs):
         """Updates a credential.
@@ -49,7 +49,7 @@ class CredentialsClient(service_client.ServiceClient):
         self.expected_success(200, resp.status)
         body = json.loads(body)
         body['credential']['blob'] = json.loads(body['credential']['blob'])
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def show_credential(self, credential_id):
         """To GET Details of a credential."""
@@ -57,17 +57,17 @@ class CredentialsClient(service_client.ServiceClient):
         self.expected_success(200, resp.status)
         body = json.loads(body)
         body['credential']['blob'] = json.loads(body['credential']['blob'])
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def list_credentials(self):
         """Lists out all the available credentials."""
         resp, body = self.get('credentials')
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def delete_credential(self, credential_id):
         """Deletes a credential."""
         resp, body = self.delete('credentials/%s' % credential_id)
         self.expected_success(204, resp.status)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)

@@ -19,10 +19,10 @@ http://developer.openstack.org/api-ref-identity-v3.html#service-catalog-v3
 
 from oslo_serialization import jsonutils as json
 
-from tempest.common import service_client
+from tempest.lib.common import rest_client
 
 
-class ServicesClient(service_client.ServiceClient):
+class ServicesClient(rest_client.RestClient):
     api_version = "v3"
 
     def update_service(self, service_id, **kwargs):
@@ -35,7 +35,7 @@ class ServicesClient(service_client.ServiceClient):
         resp, body = self.patch('services/%s' % service_id, patch_body)
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def show_service(self, service_id):
         """Get Service."""
@@ -43,7 +43,7 @@ class ServicesClient(service_client.ServiceClient):
         resp, body = self.get(url)
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def create_service(self, **kwargs):
         """Creates a service.
@@ -55,16 +55,16 @@ class ServicesClient(service_client.ServiceClient):
         resp, body = self.post("services", body)
         self.expected_success(201, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def delete_service(self, serv_id):
         url = "services/" + serv_id
         resp, body = self.delete(url)
         self.expected_success(204, resp.status)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def list_services(self):
         resp, body = self.get('services')
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
