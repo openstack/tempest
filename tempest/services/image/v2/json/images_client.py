@@ -17,30 +17,18 @@ from oslo_serialization import jsonutils as json
 from six.moves.urllib import parse as urllib
 
 from tempest.common import glance_http
-from tempest.common import service_client
+from tempest.lib.common import rest_client
 from tempest.lib import exceptions as lib_exc
 
 
-class ImagesClientV2(service_client.ServiceClient):
+class ImagesClientV2(rest_client.RestClient):
 
-    def __init__(self, auth_provider, catalog_type, region, endpoint_type=None,
-                 build_interval=None, build_timeout=None,
-                 disable_ssl_certificate_validation=None, ca_certs=None,
-                 trace_requests=None):
+    def __init__(self, auth_provider, catalog_type, region, **kwargs):
         super(ImagesClientV2, self).__init__(
-            auth_provider,
-            catalog_type,
-            region,
-            endpoint_type=endpoint_type,
-            build_interval=build_interval,
-            build_timeout=build_timeout,
-            disable_ssl_certificate_validation=(
-                disable_ssl_certificate_validation),
-            ca_certs=ca_certs,
-            trace_requests=trace_requests)
+            auth_provider, catalog_type, region, **kwargs)
         self._http = None
-        self.dscv = disable_ssl_certificate_validation
-        self.ca_certs = ca_certs
+        self.dscv = kwargs.get("disable_ssl_certificate_validation")
+        self.ca_certs = kwargs.get("ca_certs")
 
     def _get_http(self):
         return glance_http.HTTPClient(auth_provider=self.auth_provider,
@@ -66,7 +54,7 @@ class ImagesClientV2(service_client.ServiceClient):
         resp, body = self.patch('v2/images/%s' % image_id, data, headers)
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def create_image(self, **kwargs):
         """Create an image.
@@ -78,25 +66,25 @@ class ImagesClientV2(service_client.ServiceClient):
         resp, body = self.post('v2/images', data)
         self.expected_success(201, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def deactivate_image(self, image_id):
         url = 'v2/images/%s/actions/deactivate' % image_id
         resp, body = self.post(url, None)
         self.expected_success(204, resp.status)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def reactivate_image(self, image_id):
         url = 'v2/images/%s/actions/reactivate' % image_id
         resp, body = self.post(url, None)
         self.expected_success(204, resp.status)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def delete_image(self, image_id):
         url = 'v2/images/%s' % image_id
         resp, _ = self.delete(url)
         self.expected_success(204, resp.status)
-        return service_client.ResponseBody(resp)
+        return rest_client.ResponseBody(resp)
 
     def list_images(self, params=None):
         url = 'v2/images'
@@ -107,14 +95,14 @@ class ImagesClientV2(service_client.ServiceClient):
         resp, body = self.get(url)
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def show_image(self, image_id):
         url = 'v2/images/%s' % image_id
         resp, body = self.get(url)
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def is_resource_deleted(self, id):
         try:
@@ -134,32 +122,32 @@ class ImagesClientV2(service_client.ServiceClient):
         resp, body = self.http.raw_request('PUT', url, headers=headers,
                                            body=data)
         self.expected_success(204, resp.status)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def show_image_file(self, image_id):
         url = 'v2/images/%s/file' % image_id
         resp, body = self.get(url)
         self.expected_success(200, resp.status)
-        return service_client.ResponseBodyData(resp, body)
+        return rest_client.ResponseBodyData(resp, body)
 
     def add_image_tag(self, image_id, tag):
         url = 'v2/images/%s/tags/%s' % (image_id, tag)
         resp, body = self.put(url, body=None)
         self.expected_success(204, resp.status)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def delete_image_tag(self, image_id, tag):
         url = 'v2/images/%s/tags/%s' % (image_id, tag)
         resp, _ = self.delete(url)
         self.expected_success(204, resp.status)
-        return service_client.ResponseBody(resp)
+        return rest_client.ResponseBody(resp)
 
     def list_image_members(self, image_id):
         url = 'v2/images/%s/members' % image_id
         resp, body = self.get(url)
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def create_image_member(self, image_id, **kwargs):
         """Create an image member.
@@ -172,7 +160,7 @@ class ImagesClientV2(service_client.ServiceClient):
         resp, body = self.post(url, data)
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def update_image_member(self, image_id, member_id, **kwargs):
         """Update an image member.
@@ -185,33 +173,33 @@ class ImagesClientV2(service_client.ServiceClient):
         resp, body = self.put(url, data)
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def show_image_member(self, image_id, member_id):
         url = 'v2/images/%s/members/%s' % (image_id, member_id)
         resp, body = self.get(url)
         self.expected_success(200, resp.status)
-        return service_client.ResponseBody(resp, json.loads(body))
+        return rest_client.ResponseBody(resp, json.loads(body))
 
     def delete_image_member(self, image_id, member_id):
         url = 'v2/images/%s/members/%s' % (image_id, member_id)
         resp, _ = self.delete(url)
         self.expected_success(204, resp.status)
-        return service_client.ResponseBody(resp)
+        return rest_client.ResponseBody(resp)
 
     def show_schema(self, schema):
         url = 'v2/schemas/%s' % schema
         resp, body = self.get(url)
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def list_resource_types(self):
         url = '/v2/metadefs/resource_types'
         resp, body = self.get(url)
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def create_namespace(self, **kwargs):
         """Create a namespace.
@@ -223,14 +211,14 @@ class ImagesClientV2(service_client.ServiceClient):
         resp, body = self.post('/v2/metadefs/namespaces', data)
         self.expected_success(201, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def show_namespace(self, namespace):
         url = '/v2/metadefs/namespaces/%s' % namespace
         resp, body = self.get(url)
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def update_namespace(self, namespace, **kwargs):
         """Update a namespace.
@@ -247,10 +235,10 @@ class ImagesClientV2(service_client.ServiceClient):
         resp, body = self.put(url, body=data)
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def delete_namespace(self, namespace):
         url = '/v2/metadefs/namespaces/%s' % namespace
         resp, _ = self.delete(url)
         self.expected_success(204, resp.status)
-        return service_client.ResponseBody(resp)
+        return rest_client.ResponseBody(resp)

@@ -24,34 +24,22 @@ import six
 from six.moves.urllib import parse as urllib
 
 from tempest.common import glance_http
-from tempest.common import service_client
 from tempest import exceptions
+from tempest.lib.common import rest_client
 from tempest.lib.common.utils import misc as misc_utils
 from tempest.lib import exceptions as lib_exc
 
 LOG = logging.getLogger(__name__)
 
 
-class ImagesClient(service_client.ServiceClient):
+class ImagesClient(rest_client.RestClient):
 
-    def __init__(self, auth_provider, catalog_type, region, endpoint_type=None,
-                 build_interval=None, build_timeout=None,
-                 disable_ssl_certificate_validation=None,
-                 ca_certs=None, trace_requests=None):
+    def __init__(self, auth_provider, catalog_type, region, **kwargs):
         super(ImagesClient, self).__init__(
-            auth_provider,
-            catalog_type,
-            region,
-            endpoint_type=endpoint_type,
-            build_interval=build_interval,
-            build_timeout=build_timeout,
-            disable_ssl_certificate_validation=(
-                disable_ssl_certificate_validation),
-            ca_certs=ca_certs,
-            trace_requests=trace_requests)
+            auth_provider, catalog_type, region, **kwargs)
         self._http = None
-        self.dscv = disable_ssl_certificate_validation
-        self.ca_certs = ca_certs
+        self.dscv = kwargs.get("disable_ssl_certificate_validation")
+        self.ca_certs = kwargs.get("ca_certs")
 
     def _image_meta_from_headers(self, headers):
         meta = {'properties': {}}
@@ -130,7 +118,7 @@ class ImagesClient(service_client.ServiceClient):
         self._error_checker('POST', '/v1/images', headers, data, resp,
                             body_iter)
         body = json.loads(''.join([c for c in body_iter]))
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def _update_with_data(self, image_id, headers, data):
         url = '/v1/images/%s' % image_id
@@ -139,7 +127,7 @@ class ImagesClient(service_client.ServiceClient):
         self._error_checker('PUT', url, headers, data,
                             resp, body_iter)
         body = json.loads(''.join([c for c in body_iter]))
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     @property
     def http(self):
@@ -158,7 +146,7 @@ class ImagesClient(service_client.ServiceClient):
         resp, body = self.post('v1/images', None, headers)
         self.expected_success(201, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def update_image(self, image_id, **kwargs):
         headers = {}
@@ -172,13 +160,13 @@ class ImagesClient(service_client.ServiceClient):
         resp, body = self.put(url, None, headers)
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def delete_image(self, image_id):
         url = 'v1/images/%s' % image_id
         resp, body = self.delete(url)
         self.expected_success(200, resp.status)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def list_images(self, detail=False, **kwargs):
         """Return a list of all images filtered by input parameters.
@@ -208,20 +196,20 @@ class ImagesClient(service_client.ServiceClient):
         resp, body = self.get(url)
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def get_image_meta(self, image_id):
         url = 'v1/images/%s' % image_id
         resp, __ = self.head(url)
         self.expected_success(200, resp.status)
         body = self._image_meta_from_headers(resp)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def show_image(self, image_id):
         url = 'v1/images/%s' % image_id
         resp, body = self.get(url)
         self.expected_success(200, resp.status)
-        return service_client.ResponseBodyData(resp, body)
+        return rest_client.ResponseBodyData(resp, body)
 
     def is_resource_deleted(self, id):
         try:
@@ -240,7 +228,7 @@ class ImagesClient(service_client.ServiceClient):
         resp, body = self.get(url)
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def list_shared_images(self, tenant_id):
         """List shared images with the specified tenant"""
@@ -248,7 +236,7 @@ class ImagesClient(service_client.ServiceClient):
         resp, body = self.get(url)
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def add_member(self, member_id, image_id, **kwargs):
         """Add a member to an image.
@@ -260,13 +248,13 @@ class ImagesClient(service_client.ServiceClient):
         body = json.dumps({'member': kwargs})
         resp, __ = self.put(url, body)
         self.expected_success(204, resp.status)
-        return service_client.ResponseBody(resp)
+        return rest_client.ResponseBody(resp)
 
     def delete_member(self, member_id, image_id):
         url = 'v1/images/%s/members/%s' % (image_id, member_id)
         resp, __ = self.delete(url)
         self.expected_success(204, resp.status)
-        return service_client.ResponseBody(resp)
+        return rest_client.ResponseBody(resp)
 
     # NOTE(afazekas): just for the wait function
     def _get_image_status(self, image_id):

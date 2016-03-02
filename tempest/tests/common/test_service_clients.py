@@ -25,8 +25,6 @@ from tempest.services.identity.v3.json import identity_client as \
 from tempest.services.identity.v3.json import policies_client
 from tempest.services.identity.v3.json import regions_client
 from tempest.services.identity.v3.json import services_client
-from tempest.services.image.v1.json import images_client
-from tempest.services.image.v2.json import images_client as images_v2_client
 from tempest.services.network.json import network_client
 from tempest.tests import base
 
@@ -44,8 +42,6 @@ class TestServiceClient(base.TestCase):
             policies_client.PoliciesClient,
             regions_client.RegionsClient,
             services_client.ServicesClient,
-            images_client.ImagesClient,
-            images_v2_client.ImagesClientV2
         ]
 
         for client in test_clients:
