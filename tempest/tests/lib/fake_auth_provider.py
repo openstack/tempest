@@ -16,15 +16,16 @@
 
 class FakeAuthProvider(object):
 
-    def __init__(self, creds_dict=None):
+    def __init__(self, creds_dict=None, fake_base_url=None):
         creds_dict = creds_dict or {}
         self.credentials = FakeCredentials(creds_dict)
+        self.fake_base_url = fake_base_url
 
     def auth_request(self, method, url, headers=None, body=None, filters=None):
         return url, headers, body
 
     def base_url(self, filters, auth_data=None):
-        return "https://example.com"
+        return self.fake_base_url or "https://example.com"
 
 
 class FakeCredentials(object):
