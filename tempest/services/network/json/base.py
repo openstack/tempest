@@ -13,10 +13,10 @@
 from oslo_serialization import jsonutils as json
 from six.moves.urllib import parse as urllib
 
-from tempest.common import service_client
+from tempest.lib.common import rest_client
 
 
-class BaseNetworkClient(service_client.ServiceClient):
+class BaseNetworkClient(rest_client.RestClient):
 
     """Base class for Tempest REST clients for Neutron.
 
@@ -34,13 +34,13 @@ class BaseNetworkClient(service_client.ServiceClient):
         resp, body = self.get(req_uri)
         body = json.loads(body)
         self.expected_success(200, resp.status)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def delete_resource(self, uri):
         req_uri = self.uri_prefix + uri
         resp, body = self.delete(req_uri)
         self.expected_success(204, resp.status)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def show_resource(self, uri, **fields):
         # fields is a dict which key is 'fields' and value is a
@@ -52,7 +52,7 @@ class BaseNetworkClient(service_client.ServiceClient):
         resp, body = self.get(req_uri)
         body = json.loads(body)
         self.expected_success(200, resp.status)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def create_resource(self, uri, post_data):
         req_uri = self.uri_prefix + uri
@@ -60,7 +60,7 @@ class BaseNetworkClient(service_client.ServiceClient):
         resp, body = self.post(req_uri, req_post_data)
         body = json.loads(body)
         self.expected_success(201, resp.status)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def update_resource(self, uri, post_data):
         req_uri = self.uri_prefix + uri
@@ -68,4 +68,4 @@ class BaseNetworkClient(service_client.ServiceClient):
         resp, body = self.put(req_uri, req_post_data)
         body = json.loads(body)
         self.expected_success(200, resp.status)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
