@@ -15,10 +15,10 @@
 from oslo_serialization import jsonutils
 from six.moves.urllib import parse as urllib
 
-from tempest.common import service_client
+from tempest.lib.common import rest_client
 
 
-class BaseQuotasClient(service_client.ServiceClient):
+class BaseQuotasClient(rest_client.RestClient):
     """Client class to send CRUD Volume Quotas API requests"""
 
     TYPE = "json"
@@ -30,7 +30,7 @@ class BaseQuotasClient(service_client.ServiceClient):
         resp, body = self.get(url)
         self.expected_success(200, resp.status)
         body = jsonutils.loads(body)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def show_quota_set(self, tenant_id, params=None):
         """List the quota set for a tenant."""
@@ -42,7 +42,7 @@ class BaseQuotasClient(service_client.ServiceClient):
         resp, body = self.get(url)
         self.expected_success(200, resp.status)
         body = jsonutils.loads(body)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def show_quota_usage(self, tenant_id):
         """List the quota set for a tenant."""
@@ -60,10 +60,10 @@ class BaseQuotasClient(service_client.ServiceClient):
         resp, body = self.put('os-quota-sets/%s' % tenant_id, put_body)
         self.expected_success(200, resp.status)
         body = jsonutils.loads(body)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def delete_quota_set(self, tenant_id):
         """Delete the tenant's quota set."""
         resp, body = self.delete('os-quota-sets/%s' % tenant_id)
         self.expected_success(200, resp.status)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)

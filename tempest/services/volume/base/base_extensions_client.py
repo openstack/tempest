@@ -15,14 +15,14 @@
 
 from oslo_serialization import jsonutils as json
 
-from tempest.common import service_client
+from tempest.lib.common import rest_client
 
 
-class BaseExtensionsClient(service_client.ServiceClient):
+class BaseExtensionsClient(rest_client.RestClient):
 
     def list_extensions(self):
         url = 'extensions'
         resp, body = self.get(url)
         body = json.loads(body)
         self.expected_success(200, resp.status)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)

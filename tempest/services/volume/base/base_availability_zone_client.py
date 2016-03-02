@@ -15,13 +15,13 @@
 
 from oslo_serialization import jsonutils as json
 
-from tempest.common import service_client
+from tempest.lib.common import rest_client
 
 
-class BaseAvailabilityZoneClient(service_client.ServiceClient):
+class BaseAvailabilityZoneClient(rest_client.RestClient):
 
     def list_availability_zones(self):
         resp, body = self.get('os-availability-zone')
         body = json.loads(body)
         self.expected_success(200, resp.status)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)

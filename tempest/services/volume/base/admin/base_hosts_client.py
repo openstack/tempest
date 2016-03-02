@@ -16,10 +16,10 @@
 from oslo_serialization import jsonutils as json
 from six.moves.urllib import parse as urllib
 
-from tempest.common import service_client
+from tempest.lib.common import rest_client
 
 
-class BaseHostsClient(service_client.ServiceClient):
+class BaseHostsClient(rest_client.RestClient):
     """Client class to send CRUD Volume Hosts API requests"""
 
     def list_hosts(self, **params):
@@ -32,4 +32,4 @@ class BaseHostsClient(service_client.ServiceClient):
         resp, body = self.get(url)
         body = json.loads(body)
         self.expected_success(200, resp.status)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)

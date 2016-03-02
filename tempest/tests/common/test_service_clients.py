@@ -28,41 +28,6 @@ from tempest.services.identity.v3.json import services_client
 from tempest.services.image.v1.json import images_client
 from tempest.services.image.v2.json import images_client as images_v2_client
 from tempest.services.network.json import network_client
-from tempest.services.volume.v1.json.admin import hosts_client \
-    as volume_hosts_client
-from tempest.services.volume.v1.json.admin import quotas_client \
-    as volume_quotas_client
-from tempest.services.volume.v1.json.admin import services_client \
-    as volume_services_client
-from tempest.services.volume.v1.json.admin import types_client \
-    as volume_types_client
-from tempest.services.volume.v1.json import availability_zone_client \
-    as volume_az_client
-from tempest.services.volume.v1.json import backups_client
-from tempest.services.volume.v1.json import extensions_client \
-    as volume_extensions_client
-from tempest.services.volume.v1.json import qos_client
-from tempest.services.volume.v1.json import snapshots_client
-from tempest.services.volume.v1.json import volumes_client
-from tempest.services.volume.v2.json.admin import hosts_client \
-    as volume_v2_hosts_client
-from tempest.services.volume.v2.json.admin import quotas_client \
-    as volume_v2_quotas_client
-from tempest.services.volume.v2.json.admin import services_client \
-    as volume_v2_services_client
-from tempest.services.volume.v2.json.admin import types_client \
-    as volume_v2_types_client
-from tempest.services.volume.v2.json import availability_zone_client \
-    as volume_v2_az_client
-from tempest.services.volume.v2.json import backups_client \
-    as volume_v2_backups_client
-from tempest.services.volume.v2.json import extensions_client \
-    as volume_v2_extensions_client
-from tempest.services.volume.v2.json import qos_client as volume_v2_qos_client
-from tempest.services.volume.v2.json import snapshots_client \
-    as volume_v2_snapshots_client
-from tempest.services.volume.v2.json import volumes_client as \
-    volume_v2_volumes_client
 from tempest.tests import base
 
 
@@ -72,26 +37,6 @@ class TestServiceClient(base.TestCase):
     def test_service_client_creations_with_specified_args(self, mock_init):
         test_clients = [
             network_client.NetworkClient,
-            qos_client.QosSpecsClient,
-            volume_hosts_client.HostsClient,
-            volume_quotas_client.QuotasClient,
-            volume_services_client.ServicesClient,
-            volume_types_client.TypesClient,
-            volume_az_client.AvailabilityZoneClient,
-            backups_client.BackupsClient,
-            volume_extensions_client.ExtensionsClient,
-            snapshots_client.SnapshotsClient,
-            volumes_client.VolumesClient,
-            volume_v2_hosts_client.HostsClient,
-            volume_v2_quotas_client.QuotasClient,
-            volume_v2_services_client.ServicesClient,
-            volume_v2_types_client.TypesClient,
-            volume_v2_az_client.AvailabilityZoneClient,
-            volume_v2_backups_client.BackupsClient,
-            volume_v2_extensions_client.ExtensionsClient,
-            volume_v2_qos_client.QosSpecsClient,
-            volume_v2_snapshots_client.SnapshotsClient,
-            volume_v2_volumes_client.VolumesClient,
             identity_v2_identity_client.IdentityClient,
             credentials_client.CredentialsClient,
             endpoints_client.EndPointClient,
