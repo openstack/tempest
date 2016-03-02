@@ -30,10 +30,6 @@ from tempest.services.identity.v3.json import services_client
 from tempest.services.image.v1.json import images_client
 from tempest.services.image.v2.json import images_client as images_v2_client
 from tempest.services.network.json import network_client
-from tempest.services.object_storage import account_client
-from tempest.services.object_storage import container_client
-from tempest.services.object_storage import object_client
-from tempest.services.orchestration.json import orchestration_client
 from tempest.services.telemetry.json import alarming_client
 from tempest.services.telemetry.json import telemetry_client
 from tempest.services.volume.v1.json.admin import hosts_client \
@@ -82,10 +78,6 @@ class TestServiceClient(base.TestCase):
             db_flavor_client.DatabaseFlavorsClient,
             db_version_client.DatabaseVersionsClient,
             network_client.NetworkClient,
-            account_client.AccountClient,
-            container_client.ContainerClient,
-            object_client.ObjectClient,
-            orchestration_client.OrchestrationClient,
             telemetry_client.TelemetryClient,
             alarming_client.AlarmingClient,
             qos_client.QosSpecsClient,

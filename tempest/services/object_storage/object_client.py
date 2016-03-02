@@ -17,10 +17,10 @@ import six
 from six.moves import http_client as httplib
 from six.moves.urllib import parse as urlparse
 
-from tempest.common import service_client
+from tempest.lib.common import rest_client
 
 
-class ObjectClient(service_client.ServiceClient):
+class ObjectClient(rest_client.RestClient):
 
     def create_object(self, container, object_name, data,
                       params=None, metadata=None, headers=None):
