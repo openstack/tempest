@@ -325,13 +325,24 @@ class KeystoneV2AuthProvider(KeystoneAuthProvider):
 
         parts = urlparse.urlparse(_base_url)
         if filters.get('api_version', None) is not None:
+            version_path = '/%s' % filters['api_version']
             path = re.sub(r'(^|/)+v\d+(?:\.\d+)?',
-                          '/' + filters['api_version'],
+                          version_path,
                           parts.path,
                           count=1)
-            _base_url = _base_url.replace(parts.path, path)
+            _base_url = urlparse.urlunparse((parts.scheme,
+                                             parts.netloc,
+                                             path or version_path,
+                                             parts.params,
+                                             parts.query,
+                                             parts.fragment))
         if filters.get('skip_path', None) is not None and parts.path != '':
-            _base_url = _base_url.replace(parts.path, "/")
+            _base_url = urlparse.urlunparse((parts.scheme,
+                                             parts.netloc,
+                                             '/',
+                                             parts.params,
+                                             parts.query,
+                                             parts.fragment))
 
         return _base_url
 
@@ -447,13 +458,24 @@ class KeystoneV3AuthProvider(KeystoneAuthProvider):
 
         parts = urlparse.urlparse(_base_url)
         if filters.get('api_version', None) is not None:
+            version_path = '/%s' % filters['api_version']
             path = re.sub(r'(^|/)+v\d+(?:\.\d+)?',
-                          '/' + filters['api_version'],
+                          version_path,
                           parts.path,
                           count=1)
-            _base_url = _base_url.replace(parts.path, path)
+            _base_url = urlparse.urlunparse((parts.scheme,
+                                             parts.netloc,
+                                             path or version_path,
+                                             parts.params,
+                                             parts.query,
+                                             parts.fragment))
         if filters.get('skip_path', None) is not None:
-            _base_url = _base_url.replace(parts.path, "/")
+            _base_url = urlparse.urlunparse((parts.scheme,
+                                             parts.netloc,
+                                             '/',
+                                             parts.params,
+                                             parts.query,
+                                             parts.fragment))
 
         return _base_url
 
