@@ -14,7 +14,9 @@
 
 import copy
 
-from tempest.lib.api_schema.response.compute.v2_1 import servers
+from tempest.lib.api_schema.response.compute.v2_3 import servers
+
+list_servers = copy.deepcopy(servers.list_servers)
 
 get_server = copy.deepcopy(servers.get_server)
 get_server['response_body']['properties']['server'][

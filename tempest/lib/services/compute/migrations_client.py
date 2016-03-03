@@ -16,11 +16,16 @@ from oslo_serialization import jsonutils as json
 from six.moves.urllib import parse as urllib
 
 from tempest.lib.api_schema.response.compute.v2_1 import migrations as schema
+from tempest.lib.api_schema.response.compute.v2_23 import migrations \
+    as schemav223
 from tempest.lib.common import rest_client
 from tempest.lib.services.compute import base_compute_client
 
 
 class MigrationsClient(base_compute_client.BaseComputeClient):
+    schema_versions_info = [
+        {'min': None, 'max': '2.22', 'schema': schema},
+        {'min': '2.23', 'max': None, 'schema': schemav223}]
 
     def list_migrations(self, **params):
         """List all migrations.
@@ -35,5 +40,6 @@ class MigrationsClient(base_compute_client.BaseComputeClient):
 
         resp, body = self.get(url)
         body = json.loads(body)
+        schema = self.get_schema(self.schema_versions_info)
         self.validate_response(schema.list_migrations, resp, body)
         return rest_client.ResponseBody(resp, body)
