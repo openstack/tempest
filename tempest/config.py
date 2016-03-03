@@ -1340,6 +1340,8 @@ UcsmGroup = [
                 help="Hosts eth names"),
     cfg.IntOpt('virtual_functions_amount',
                help="Amount of virtual functions"),
+    cfg.ListOpt('ucsm_list',
+                help="List of ucsm IPs. Used in testing multi-ucsm installation"),
 ]
 
 _opts = [

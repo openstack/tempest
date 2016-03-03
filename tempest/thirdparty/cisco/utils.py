@@ -28,9 +28,9 @@ class UCSMClient(object):
 
     def __init__(self, ip, username, password):
         self._handle = None
-        self._ip = ip
-        self._username = username
-        self._password = password
+        self.ip = ip
+        self.username = username
+        self.password = password
 
     @property
     def handle(self):
@@ -39,7 +39,7 @@ class UCSMClient(object):
         return self._handle
 
     def login(self):
-        self.handle.Login(self._ip, self._username, self._password)
+        self.handle.Login(self.ip, self.username, self.password)
 
     def logout(self):
         if self._handle:

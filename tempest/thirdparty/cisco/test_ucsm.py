@@ -25,6 +25,10 @@ Before running the tests:
 * add/update following parameters to tempest.conf
 * replace parameter values with correct ones for your OS installation
 
+##############################################################################
+# Example of tempest.conf file
+##############################################################################
+
 [DEFAULT]
 debug = true
 use_stderr = false
@@ -87,10 +91,36 @@ ucsm_username=admin
 ucsm_password=cisco
 # Dictionary of <hostname> VS <UCSM service profile name>
 ucsm_host_dict=overcloud-controller-0.localdomain:QA2,overcloud-compute-0.localdomain:QA3,overcloud-compute-1.localdomain:QA4
-network_node_list=overcloud-controller-0.localdomain, overcloud-controller-1.localdomain  # list of hostnames of a network nodes
+# list of hostnames of a network nodes
+network_node_list=overcloud-controller-0.localdomain, overcloud-controller-1.localdomain
 eth_names=eth0,eth1
 # Amount of "SR-IOV ports"/"Dynamic VNICs"/"Virtual functions"
 virtual_functions_amount=4
+
+# Parameters needed for testing multi-ucsm installation
+# UCSMs list. Each UCSM has it's own section named [ucsm:<ucsm ip>] below
+ucsm_list = 10.10.0.200,10.10.0.156
+
+# Parameters of a particular UCSM
+[ucsm:10.10.0.200]
+eth_names=eth0,eth1
+ucsm_username=ucspe
+ucsm_password=ucspe
+# List of controller nodes and service profiles associated with them
+controller_host_dict=controller:org-root/ls-sp11
+# List of compute nodes and service profiles associated with them
+compute_host_dict=controller:org-root/ls-sp11
+
+[ucsm:10.10.0.156]
+eth_names=eth0,eth1
+ucsm_username=ucspe
+ucsm_password=ucspe
+#controller_host_dict=controller
+compute_host_dict=compute-1:org-root/ls-sp21
+
+##############################################################################
+#
+##############################################################################
 
 
 Use environment variables to set location of "tempest.conf"
@@ -128,8 +158,6 @@ CONF = config.CONF
 LOG = log.getLogger(__name__)
 
 
-
-
 class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
 
     @classmethod
@@ -143,6 +171,7 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
         super(UCSMTest, cls).setup_clients()
         cls.admin_networks_client = cls.os_adm.networks_client
         cls.admin_network_client = cls.os_adm.network_client
+        cls.admin_hosts_client = cls.os_adm.hosts_client
 
     @classmethod
     def resource_setup(cls):
@@ -693,3 +722,137 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
 
         floating_ip1 = self.create_floating_ip(server1)
         self.check_public_network_connectivity(server1, floating_ip1)
+
+    @test.attr(type='multi-ucsm')
+    def test_multi_create_delete_network(self):
+        """Covered test cases:
+        * The driver creates vlan profile in a certain UCSM
+        """
+        self._verify_multi_ucsm_configured()
+
+        # UCSMs to which controllers are connected
+        ucsm_clients = list()
+        for conf in self.multi_ucsm_conf.values():
+            if conf.controller_host_dict:
+                ucsm_clients.append(self.multi_ucsm_clients[conf['ucsm_ip']])
+
+        # Create network and subnet (DHCP enabled)
+        network = self._create_network()
+        self.assertEqual('ACTIVE', network['status'])
+        self._create_subnet(network)
+        port = self._create_port(
+            network.id, security_groups=[self.security_group['id']])
+
+        # Get a vlan id and verify a vlan profile has been created
+        network = self.admin_networks_client.show_network(network['id'])['network']
+        vlan_id = network['provider:segmentation_id']
+
+        for ucsm_client in ucsm_clients:
+            self.timed_assert(self.assertNotEmpty, lambda: ucsm_client.get_vlan_profile(vlan_id))
+
+        # # Verify vlan has been added to both vnics
+        # for ucsm_client in ucsm_clients:
+        #     conf = self.multi_ucsm_conf[ucsm_client.ip]
+        #     for controller_sp in conf['controller_host_dict'].values():
+        #         for eth_name in conf['eth_names']:
+        #             self.timed_assert(
+        #                 self.assertNotEmpty,
+        #                 lambda: self.ucsm.get_ether_vlan(controller_sp, eth_name, vlan_id))
+
+        # Delete network and verify that the vlan profile has been removed
+        port.delete()
+        self._delete_network(network)
+        for ucsm_client in ucsm_clients:
+            self.timed_assert(self.assertEmpty,
+                              lambda: ucsm_client.get_vlan_profile(vlan_id))
+
+        # # Verify the vlan has been removed from both vnics
+        # for ucsm_client in ucsm_clients:
+        #     conf = self.multi_ucsm_conf[ucsm_client.ip]
+        #     for controller_sp in conf['controller_host_dict'].values():
+        #         for eth_name in conf['eth_names']:
+        #             self.timed_assert(
+        #                 self.assertEmpty,
+        #                 lambda: self.ucsm.get_ether_vlan(controller_sp, eth_name, vlan_id))
+
+    @test.attr(type='multi-ucsm')
+    def test_multi_desired_ucsm_vnics_configured(self):
+        """Covered test cases:
+        * The driver creates vlan profile in a certain UCSM
+        * The driver adds vlan profile to vNIC of a service profile located in a certain UCSM
+        * The driver deletes vlan profile to vNIC of a service profile located in a certain UCSM
+        * Right vNICs are configured in a certain UCSM
+        """
+        self._verify_multi_ucsm_configured()
+
+        network_obj, subnet_obj, router_obj = self.create_networks()
+        kwargs = {'security_groups': [self.security_group['id']]}
+        port_obj = self._create_port(network_obj.id, **kwargs)
+
+        random_ucsm = random.choice(self.multi_ucsm_conf.values())
+        random_ucsm_client = self.multi_ucsm_clients[random_ucsm['ucsm_ip']]
+        random_compute = random.choice(random_ucsm['compute_host_dict'].keys())
+        random_compute_sp = random_ucsm['compute_host_dict'][random_compute]
+        server = self._create_server(
+            data_utils.rand_name('server-smoke'),
+            network_obj.id, port_id=port_obj.id,
+            availability_zone='nova:' + random_compute)
+
+        # Verify vlan profile has been created
+        network = self.admin_networks_client.show_network(
+            network_obj.id)['network']
+        vlan_id = network['provider:segmentation_id']
+        self.timed_assert(self.assertNotEmpty,
+                          lambda: random_ucsm_client.get_vlan_profile(vlan_id))
+
+        # Verify vlan has been added to a compute where instance is launched
+        port = self.admin_network_client.show_port(port_obj.id)['port']
+        binding_host_id = port['binding:host_id']
+        self.assertEqual(random_compute, binding_host_id, 'binding:host_id same as we want')
+        for eth_name in random_ucsm['eth_names']:
+            self.timed_assert(
+                self.assertNotEmpty,
+                lambda: random_ucsm_client.get_ether_vlan(random_compute_sp, eth_name, vlan_id))
+
+        self.servers_client.delete_server(server['id'])
+        waiters.wait_for_server_termination(self.servers_client, server['id'])
+        port_obj.delete()
+        subnet_obj.delete()
+        network_obj.delete()
+        self.timed_assert(self.assertEmpty,
+                          lambda: random_ucsm_client.get_vlan_profile(vlan_id))
+
+        for eth_name in random_ucsm['eth_names']:
+            self.timed_assert(
+                self.assertEmpty,
+                lambda: random_ucsm_client.get_ether_vlan(random_compute_sp, eth_name, vlan_id))
+
+    @test.attr(type='multi-ucsm')
+    def test_multi_vm_to_vm(self):
+        """Covered test cases:
+        * Inter VM to VM connectivity
+        """
+        self._verify_multi_ucsm_configured()
+        if len(self.multi_ucsm_clients) < 2:
+            raise self.skipException('Not enough UCSMs. Need at least 2.')
+
+        ucsm_conf1, ucsm_conf2 = self._get_random_ucsm()
+        compute1 = random.choice(ucsm_conf1['compute_host_dict'].keys())
+        compute2 = random.choice(ucsm_conf2['compute_host_dict'].keys())
+
+        network_obj, subnet_obj, router_obj = self.create_networks()
+        kwargs = {'security_groups': [self.security_group['id']]}
+        # Create server #1
+        port_obj1 = self._create_port(network_obj.id, **kwargs)
+        server1 = self._create_server(
+            data_utils.rand_name('server-smoke'),
+            network_obj.id, port_id=port_obj1.id,
+            availability_zone='nova:' + compute1)
+        # Create server #2 on another compute
+        port_obj2 = self._create_port(network_obj.id, **kwargs)
+        server2 = self._create_server(
+            data_utils.rand_name('server-smoke'),
+            network_obj.id, port_id=port_obj2.id,
+            availability_zone='nova:' + compute2)
+
+        self.assert_vm_to_vm_connectivity(server1, server2)
