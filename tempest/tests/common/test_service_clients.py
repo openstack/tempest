@@ -111,7 +111,7 @@ class TestServiceClient(base.TestCase):
             identity_v2_identity_client.IdentityClient,
             credentials_client.CredentialsClient,
             endpoints_client.EndPointClient,
-            identity_v3_identity_client.IdentityV3Client,
+            identity_v3_identity_client.IdentityClient,
             policies_client.PoliciesClient,
             regions_client.RegionsClient,
             services_client.ServicesClient,

@@ -18,7 +18,7 @@ from oslo_serialization import jsonutils as json
 from tempest.common import service_client
 
 
-class IdentityV3Client(service_client.ServiceClient):
+class IdentityClient(service_client.ServiceClient):
     api_version = "v3"
 
     def show_api_description(self):

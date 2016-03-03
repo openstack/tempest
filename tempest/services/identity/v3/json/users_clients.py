@@ -18,7 +18,7 @@ from six.moves.urllib import parse as urllib
 from tempest.common import service_client
 
 
-class UsersV3Client(service_client.ServiceClient):
+class UsersClient(service_client.ServiceClient):
     api_version = "v3"
 
     def create_user(self, user_name, password=None, project_id=None,
