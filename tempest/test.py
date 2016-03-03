@@ -180,7 +180,7 @@ def is_extension_enabled(extension_name, service):
     return False
 
 
-def is_filter_enabled(filter_name):
+def is_scheduler_filter_enabled(filter_name):
     """Check the list of enabled compute scheduler filters from config. """
 
     filters = CONF.compute_feature_enabled.scheduler_available_filters

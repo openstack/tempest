@@ -155,7 +155,7 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
         super(TestSecurityGroupsBasicOps, cls).resource_setup()
 
         cls.multi_node = CONF.compute.min_compute_nodes > 1 and \
-            test.is_filter_enabled("DifferentHostFilter")
+            test.is_scheduler_filter_enabled("DifferentHostFilter")
         if cls.multi_node:
             LOG.info("Working in Multi Node mode")
         else:
