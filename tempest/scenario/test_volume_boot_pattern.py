@@ -32,6 +32,11 @@ class TestVolumeBootPattern(manager.ScenarioTest):
      * Boot an additional instance from the new snapshot based volume
      * Check written content in the instance booted from snapshot
     """
+
+    # Boot from volume scenario is quite slow, and needs extra
+    # breathing room to get through deletes in the time allotted.
+    TIMEOUT_SCALING_FACTOR = 2
+
     @classmethod
     def skip_checks(cls):
         super(TestVolumeBootPattern, cls).skip_checks()
