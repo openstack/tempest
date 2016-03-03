@@ -12,15 +12,18 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
-
-from tempest.lib import decorators
-
 from tempest.api.volume import base
 from tempest import config
 from tempest import test
 
 
 CONF = config.CONF
+
+
+def _get_host(host):
+    if CONF.volume_feature_enabled.volume_services:
+        host = host.split('@')[0]
+    return host
 
 
 class VolumesServicesV2TestJSON(base.BaseVolumeAdminTest):
@@ -34,7 +37,10 @@ class VolumesServicesV2TestJSON(base.BaseVolumeAdminTest):
         super(VolumesServicesV2TestJSON, cls).resource_setup()
         cls.services = (cls.admin_volume_services_client.list_services()
                         ['services'])
-        cls.host_name = cls.services[0]['host']
+        # NOTE: Cinder service-list API returns the list contains
+        # "<host name>@<driver name>" like "nova-compute01@lvmdriver-1".
+        # So here picks <host name> up as a host.
+        cls.host_name = _get_host(cls.services[0]['host'])
         cls.binary_name = cls.services[0]['binary']
 
     @test.idempotent_id('e0218299-0a59-4f43-8b2b-f1c035b3d26d')
@@ -51,16 +57,10 @@ class VolumesServicesV2TestJSON(base.BaseVolumeAdminTest):
         for service in services:
             self.assertEqual(self.binary_name, service['binary'])
 
-    @decorators.skip_because(bug="1530144")
     @test.idempotent_id('178710e4-7596-4e08-9333-745cb8bc4f8d')
     def test_get_service_by_host_name(self):
-        def get_host(host):
-            if CONF.volume_feature_enabled.volume_services:
-                host = host.split('@')[0]
-            return host
-
         services_on_host = [service for service in self.services if
-                            get_host(service['host']) == self.host_name]
+                            _get_host(service['host']) == self.host_name]
 
         services = (self.admin_volume_services_client.list_services(
             host=self.host_name)['services'])
@@ -80,7 +80,7 @@ class VolumesServicesV2TestJSON(base.BaseVolumeAdminTest):
             host=self.host_name, binary=self.binary_name))['services']
 
         self.assertEqual(1, len(services))
-        self.assertEqual(self.host_name, services[0]['host'])
+        self.assertEqual(self.host_name, _get_host(services[0]['host']))
         self.assertEqual(self.binary_name, services[0]['binary'])
 
 
