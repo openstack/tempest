@@ -17,7 +17,7 @@ from oslo_serialization import jsonutils as json
 
 from tempest.api_schema.response.compute.v2_1 import keypairs as schemav21
 from tempest.api_schema.response.compute.v2_2 import keypairs as schemav22
-from tempest.common import service_client
+from tempest.lib.common import rest_client
 from tempest.services.compute.json import base_compute_client
 
 
@@ -31,14 +31,14 @@ class KeyPairsClient(base_compute_client.BaseComputeClient):
         body = json.loads(body)
         schema = self.get_schema(self.schema_versions_info)
         self.validate_response(schema.list_keypairs, resp, body)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def show_keypair(self, keypair_name):
         resp, body = self.get("os-keypairs/%s" % keypair_name)
         body = json.loads(body)
         schema = self.get_schema(self.schema_versions_info)
         self.validate_response(schema.get_keypair, resp, body)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def create_keypair(self, **kwargs):
         post_body = json.dumps({'keypair': kwargs})
@@ -46,10 +46,10 @@ class KeyPairsClient(base_compute_client.BaseComputeClient):
         body = json.loads(body)
         schema = self.get_schema(self.schema_versions_info)
         self.validate_response(schema.create_keypair, resp, body)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def delete_keypair(self, keypair_name):
         resp, body = self.delete("os-keypairs/%s" % keypair_name)
         schema = self.get_schema(self.schema_versions_info)
         self.validate_response(schema.delete_keypair, resp, body)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
