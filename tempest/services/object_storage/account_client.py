@@ -18,10 +18,10 @@ from xml.etree import ElementTree as etree
 from oslo_serialization import jsonutils as json
 from six.moves.urllib import parse as urllib
 
-from tempest.common import service_client
+from tempest.lib.common import rest_client
 
 
-class AccountClient(service_client.ServiceClient):
+class AccountClient(rest_client.RestClient):
 
     def create_account(self, data=None,
                        params=None,
