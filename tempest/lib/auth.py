@@ -319,7 +319,9 @@ class KeystoneV2AuthProvider(KeystoneAuthProvider):
                     _base_url = ep['endpoints'][0].get(endpoint_type)
                 break
         if _base_url is None:
-            raise exceptions.EndpointNotFound(service)
+            raise exceptions.EndpointNotFound(
+                "service: %s, region: %s, endpoint_type: %s" %
+                (service, region, endpoint_type))
 
         parts = urlparse.urlparse(_base_url)
         if filters.get('api_version', None) is not None:
