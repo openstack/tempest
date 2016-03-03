@@ -180,6 +180,19 @@ def is_extension_enabled(extension_name, service):
     return False
 
 
+def is_filter_enabled(filter_name):
+    """Check the list of enabled compute scheduler filters from config. """
+
+    filters = CONF.compute_feature_enabled.scheduler_available_filters
+    if len(filters) == 0:
+        return False
+    if 'all' in filters:
+        return True
+    if filter_name in filters:
+        return True
+    return False
+
+
 at_exit_set = set()
 
 

@@ -404,6 +404,15 @@ ComputeFeaturesGroup = [
     cfg.BoolOpt('config_drive',
                 default=True,
                 help='Enable special configuration drive with metadata.'),
+    cfg.ListOpt('scheduler_available_filters',
+                default=['all'],
+                help="A list of enabled filters that nova will accept as hints"
+                     " to the scheduler when creating a server. A special "
+                     "entry 'all' indicates all filters are enabled. Empty "
+                     "list indicates all filters are disabled. The full "
+                     "available list of filters is in nova.conf: "
+                     "DEFAULT.scheduler_available_filters"),
+
 ]
 
 
