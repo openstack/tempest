@@ -25,6 +25,7 @@ from tempest.lib import exceptions
 from tempest.tests.lib import base
 from tempest.tests.lib import fake_auth_provider
 from tempest.tests.lib import fake_http
+import tempest.tests.utils as utils
 
 
 class BaseRestClientTestClass(base.TestCase):
@@ -511,10 +512,19 @@ class TestRestClientUtils(BaseRestClientTestClass):
     def test_wait_for_resource_deletion_not_deleted(self):
         self.patch('time.sleep')
         # Set timeout to be very quick to force exception faster
-        self.rest_client.build_timeout = 1
+        timeout = 1
+        self.rest_client.build_timeout = timeout
+
+        time_mock = self.patch('time.time')
+        time_mock.side_effect = utils.generate_timeout_series(timeout)
+
         self.assertRaises(exceptions.TimeoutException,
                           self.rest_client.wait_for_resource_deletion,
                           '1234')
+
+        # time.time() should be called twice, first to start the timer
+        # and then to compute the timedelta
+        self.assertEqual(2, time_mock.call_count)
 
     def test_wait_for_deletion_with_unimplemented_deleted_method(self):
         self.rest_client.is_resource_deleted = self.original_deleted_method
