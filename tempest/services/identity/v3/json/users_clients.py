@@ -15,10 +15,10 @@
 from oslo_serialization import jsonutils as json
 from six.moves.urllib import parse as urllib
 
-from tempest.common import service_client
+from tempest.lib.common import rest_client
 
 
-class UsersClient(service_client.ServiceClient):
+class UsersClient(rest_client.RestClient):
     api_version = "v3"
 
     def create_user(self, user_name, password=None, project_id=None,
@@ -41,7 +41,7 @@ class UsersClient(service_client.ServiceClient):
         resp, body = self.post('users', post_body)
         self.expected_success(201, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def update_user(self, user_id, name, **kwargs):
         """Updates a user."""
@@ -70,7 +70,7 @@ class UsersClient(service_client.ServiceClient):
         resp, body = self.patch('users/%s' % user_id, post_body)
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def update_user_password(self, user_id, **kwargs):
         """Update a user password
@@ -81,14 +81,14 @@ class UsersClient(service_client.ServiceClient):
         update_user = json.dumps({'user': kwargs})
         resp, _ = self.post('users/%s/password' % user_id, update_user)
         self.expected_success(204, resp.status)
-        return service_client.ResponseBody(resp)
+        return rest_client.ResponseBody(resp)
 
     def list_user_projects(self, user_id):
         """Lists the projects on which a user has roles assigned."""
         resp, body = self.get('users/%s/projects' % user_id)
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def list_users(self, params=None):
         """Get the list of users."""
@@ -98,24 +98,24 @@ class UsersClient(service_client.ServiceClient):
         resp, body = self.get(url)
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def show_user(self, user_id):
         """GET a user."""
         resp, body = self.get("users/%s" % user_id)
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def delete_user(self, user_id):
         """Deletes a User."""
         resp, body = self.delete("users/%s" % user_id)
         self.expected_success(204, resp.status)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def list_user_groups(self, user_id):
         """Lists groups which a user belongs to."""
         resp, body = self.get('users/%s/groups' % user_id)
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)

@@ -12,10 +12,10 @@
 
 from oslo_serialization import jsonutils as json
 
-from tempest.common import service_client
+from tempest.lib.common import rest_client
 
 
-class RolesClient(service_client.ServiceClient):
+class RolesClient(rest_client.RestClient):
     api_version = "v2.0"
 
     def create_role(self, **kwargs):
@@ -28,14 +28,14 @@ class RolesClient(service_client.ServiceClient):
         resp, body = self.post('OS-KSADM/roles', post_body)
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def show_role(self, role_id):
         """Get a role by its id."""
         resp, body = self.get('OS-KSADM/roles/%s' % role_id)
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def delete_role(self, role_id):
         """Delete a role."""
@@ -49,7 +49,7 @@ class RolesClient(service_client.ServiceClient):
         resp, body = self.get(url)
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def assign_user_role(self, tenant_id, user_id, role_id):
         """Add roles to a user on a tenant."""
@@ -57,18 +57,18 @@ class RolesClient(service_client.ServiceClient):
                               (tenant_id, user_id, role_id), "")
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def delete_user_role(self, tenant_id, user_id, role_id):
         """Removes a role assignment for a user on a tenant."""
         resp, body = self.delete('/tenants/%s/users/%s/roles/OS-KSADM/%s' %
                                  (tenant_id, user_id, role_id))
         self.expected_success(204, resp.status)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def list_roles(self):
         """Returns roles."""
         resp, body = self.get('OS-KSADM/roles')
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)

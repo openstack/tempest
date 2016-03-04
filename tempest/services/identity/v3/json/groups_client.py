@@ -19,10 +19,10 @@ http://developer.openstack.org/api-ref-identity-v3.html#groups-v3
 
 from oslo_serialization import jsonutils as json
 
-from tempest.common import service_client
+from tempest.lib.common import rest_client
 
 
-class GroupsClient(service_client.ServiceClient):
+class GroupsClient(rest_client.RestClient):
     api_version = "v3"
 
     def create_group(self, **kwargs):
@@ -35,21 +35,21 @@ class GroupsClient(service_client.ServiceClient):
         resp, body = self.post('groups', post_body)
         self.expected_success(201, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def show_group(self, group_id):
         """Get group details."""
         resp, body = self.get('groups/%s' % group_id)
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def list_groups(self):
         """Lists the groups."""
         resp, body = self.get('groups')
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def update_group(self, group_id, **kwargs):
         """Updates a group.
@@ -61,36 +61,36 @@ class GroupsClient(service_client.ServiceClient):
         resp, body = self.patch('groups/%s' % group_id, post_body)
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def delete_group(self, group_id):
         """Delete a group."""
         resp, body = self.delete('groups/%s' % str(group_id))
         self.expected_success(204, resp.status)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def add_group_user(self, group_id, user_id):
         """Add user into group."""
         resp, body = self.put('groups/%s/users/%s' % (group_id, user_id),
                               None)
         self.expected_success(204, resp.status)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def list_group_users(self, group_id):
         """List users in group."""
         resp, body = self.get('groups/%s/users' % group_id)
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def delete_group_user(self, group_id, user_id):
         """Delete user in group."""
         resp, body = self.delete('groups/%s/users/%s' % (group_id, user_id))
         self.expected_success(204, resp.status)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def check_group_user_existence(self, group_id, user_id):
         """Check user in group."""
         resp, body = self.head('groups/%s/users/%s' % (group_id, user_id))
         self.expected_success(204, resp.status)
-        return service_client.ResponseBody(resp)
+        return rest_client.ResponseBody(resp)

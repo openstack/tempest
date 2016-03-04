@@ -16,10 +16,10 @@
 from oslo_serialization import jsonutils as json
 from six.moves.urllib import parse as urllib
 
-from tempest.common import service_client
+from tempest.lib.common import rest_client
 
 
-class ProjectsClient(service_client.ServiceClient):
+class ProjectsClient(rest_client.RestClient):
     api_version = "v3"
 
     def create_project(self, name, **kwargs):
@@ -37,7 +37,7 @@ class ProjectsClient(service_client.ServiceClient):
         resp, body = self.post('projects', post_body)
         self.expected_success(201, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def list_projects(self, params=None):
         url = "projects"
@@ -46,7 +46,7 @@ class ProjectsClient(service_client.ServiceClient):
         resp, body = self.get(url)
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def update_project(self, project_id, **kwargs):
         body = self.show_project(project_id)['project']
@@ -65,17 +65,17 @@ class ProjectsClient(service_client.ServiceClient):
         resp, body = self.patch('projects/%s' % project_id, post_body)
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def show_project(self, project_id):
         """GET a Project."""
         resp, body = self.get("projects/%s" % project_id)
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def delete_project(self, project_id):
         """Delete a project."""
         resp, body = self.delete('projects/%s' % str(project_id))
         self.expected_success(204, resp.status)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)

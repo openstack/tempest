@@ -15,10 +15,10 @@
 from oslo_serialization import jsonutils as json
 from six.moves.urllib import parse as urllib
 
-from tempest.common import service_client
+from tempest.lib.common import rest_client
 
 
-class DomainsClient(service_client.ServiceClient):
+class DomainsClient(rest_client.RestClient):
     api_version = "v3"
 
     def create_domain(self, name, **kwargs):
@@ -34,13 +34,13 @@ class DomainsClient(service_client.ServiceClient):
         resp, body = self.post('domains', post_body)
         self.expected_success(201, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def delete_domain(self, domain_id):
         """Deletes a domain."""
         resp, body = self.delete('domains/%s' % str(domain_id))
         self.expected_success(204, resp.status)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def list_domains(self, params=None):
         """List Domains."""
@@ -50,7 +50,7 @@ class DomainsClient(service_client.ServiceClient):
         resp, body = self.get(url)
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def update_domain(self, domain_id, **kwargs):
         """Updates a domain."""
@@ -67,11 +67,11 @@ class DomainsClient(service_client.ServiceClient):
         resp, body = self.patch('domains/%s' % domain_id, post_body)
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def show_domain(self, domain_id):
         """Get Domain details."""
         resp, body = self.get('domains/%s' % domain_id)
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)

@@ -19,10 +19,10 @@ http://developer.openstack.org/api-ref-identity-v3.html#policies-v3
 
 from oslo_serialization import jsonutils as json
 
-from tempest.common import service_client
+from tempest.lib.common import rest_client
 
 
-class PoliciesClient(service_client.ServiceClient):
+class PoliciesClient(rest_client.RestClient):
     api_version = "v3"
 
     def create_policy(self, **kwargs):
@@ -35,14 +35,14 @@ class PoliciesClient(service_client.ServiceClient):
         resp, body = self.post('policies', post_body)
         self.expected_success(201, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def list_policies(self):
         """Lists the policies."""
         resp, body = self.get('policies')
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def show_policy(self, policy_id):
         """Lists out the given policy."""
@@ -50,7 +50,7 @@ class PoliciesClient(service_client.ServiceClient):
         resp, body = self.get(url)
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def update_policy(self, policy_id, **kwargs):
         """Updates a policy.
@@ -63,11 +63,11 @@ class PoliciesClient(service_client.ServiceClient):
         resp, body = self.patch(url, post_body)
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def delete_policy(self, policy_id):
         """Deletes the policy."""
         url = "policies/%s" % policy_id
         resp, body = self.delete(url)
         self.expected_success(204, resp.status)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)

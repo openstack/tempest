@@ -14,10 +14,10 @@
 
 from oslo_serialization import jsonutils as json
 
-from tempest.common import service_client
+from tempest.lib.common import rest_client
 
 
-class EndpointsClient(service_client.ServiceClient):
+class EndpointsClient(rest_client.RestClient):
     api_version = "v2.0"
 
     def create_endpoint(self, service_id, region_id, **kwargs):
@@ -33,18 +33,18 @@ class EndpointsClient(service_client.ServiceClient):
         resp, body = self.post('/endpoints', post_body)
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def list_endpoints(self):
         """List Endpoints - Returns Endpoints."""
         resp, body = self.get('/endpoints')
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def delete_endpoint(self, endpoint_id):
         """Delete an endpoint."""
         url = '/endpoints/%s' % endpoint_id
         resp, body = self.delete(url)
         self.expected_success(204, resp.status)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)

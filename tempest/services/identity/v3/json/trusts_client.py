@@ -14,10 +14,10 @@
 
 from oslo_serialization import jsonutils as json
 
-from tempest.common import service_client
+from tempest.lib.common import rest_client
 
 
-class TrustsClient(service_client.ServiceClient):
+class TrustsClient(rest_client.RestClient):
     api_version = "v3"
 
     def create_trust(self, **kwargs):
@@ -30,13 +30,13 @@ class TrustsClient(service_client.ServiceClient):
         resp, body = self.post('OS-TRUST/trusts', post_body)
         self.expected_success(201, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def delete_trust(self, trust_id):
         """Deletes a trust."""
         resp, body = self.delete("OS-TRUST/trusts/%s" % trust_id)
         self.expected_success(204, resp.status)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def list_trusts(self, trustor_user_id=None, trustee_user_id=None):
         """GET trusts."""
@@ -50,21 +50,21 @@ class TrustsClient(service_client.ServiceClient):
             resp, body = self.get("OS-TRUST/trusts")
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def show_trust(self, trust_id):
         """GET trust."""
         resp, body = self.get("OS-TRUST/trusts/%s" % trust_id)
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def list_trust_roles(self, trust_id):
         """GET roles delegated by a trust."""
         resp, body = self.get("OS-TRUST/trusts/%s/roles" % trust_id)
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def show_trust_role(self, trust_id, role_id):
         """GET role delegated by a trust."""
@@ -72,11 +72,11 @@ class TrustsClient(service_client.ServiceClient):
                               % (trust_id, role_id))
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def check_trust_role(self, trust_id, role_id):
         """HEAD Check if role is delegated by a trust."""
         resp, body = self.head("OS-TRUST/trusts/%s/roles/%s"
                                % (trust_id, role_id))
         self.expected_success(200, resp.status)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
