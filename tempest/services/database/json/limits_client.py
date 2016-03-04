@@ -16,10 +16,10 @@
 from oslo_serialization import jsonutils as json
 from six.moves.urllib import parse as urllib
 
-from tempest.common import service_client
+from tempest.lib.common import rest_client
 
 
-class DatabaseLimitsClient(service_client.ServiceClient):
+class DatabaseLimitsClient(rest_client.RestClient):
 
     def list_db_limits(self, params=None):
         """List all limits."""
@@ -29,4 +29,4 @@ class DatabaseLimitsClient(service_client.ServiceClient):
         resp, body = self.get(url)
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
