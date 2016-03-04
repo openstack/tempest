@@ -16,10 +16,10 @@
 from oslo_serialization import jsonutils as json
 from six.moves.urllib import parse as urllib
 
-from tempest.common import service_client
+from tempest.lib.common import rest_client
 
 
-class BaseServicesClient(service_client.ServiceClient):
+class BaseServicesClient(rest_client.RestClient):
 
     def list_services(self, **params):
         url = 'os-services'
@@ -29,4 +29,4 @@ class BaseServicesClient(service_client.ServiceClient):
         resp, body = self.get(url)
         body = json.loads(body)
         self.expected_success(200, resp.status)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)

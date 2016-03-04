@@ -17,12 +17,12 @@ import time
 
 from oslo_serialization import jsonutils as json
 
-from tempest.common import service_client
 from tempest import exceptions
+from tempest.lib.common import rest_client
 from tempest.lib import exceptions as lib_exc
 
 
-class BaseBackupsClient(service_client.ServiceClient):
+class BaseBackupsClient(rest_client.RestClient):
     """Client class to send CRUD Volume backup API requests"""
 
     def create_backup(self, **kwargs):
@@ -31,7 +31,7 @@ class BaseBackupsClient(service_client.ServiceClient):
         resp, body = self.post('backups', post_body)
         body = json.loads(body)
         self.expected_success(202, resp.status)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def restore_backup(self, backup_id, **kwargs):
         """Restore volume from backup."""
@@ -39,13 +39,13 @@ class BaseBackupsClient(service_client.ServiceClient):
         resp, body = self.post('backups/%s/restore' % (backup_id), post_body)
         body = json.loads(body)
         self.expected_success(202, resp.status)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def delete_backup(self, backup_id):
         """Delete a backup of volume."""
         resp, body = self.delete('backups/%s' % (str(backup_id)))
         self.expected_success(202, resp.status)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def show_backup(self, backup_id):
         """Returns the details of a single backup."""
@@ -53,7 +53,7 @@ class BaseBackupsClient(service_client.ServiceClient):
         resp, body = self.get(url)
         body = json.loads(body)
         self.expected_success(200, resp.status)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def list_backups(self, detail=False):
         """Information for all the tenant's backups."""
@@ -63,7 +63,7 @@ class BaseBackupsClient(service_client.ServiceClient):
         resp, body = self.get(url)
         body = json.loads(body)
         self.expected_success(200, resp.status)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def export_backup(self, backup_id):
         """Export backup metadata record."""
@@ -71,7 +71,7 @@ class BaseBackupsClient(service_client.ServiceClient):
         resp, body = self.get(url)
         body = json.loads(body)
         self.expected_success(200, resp.status)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def import_backup(self, **kwargs):
         """Import backup metadata record."""
@@ -79,7 +79,7 @@ class BaseBackupsClient(service_client.ServiceClient):
         resp, body = self.post("backups/import_record", post_body)
         body = json.loads(body)
         self.expected_success(201, resp.status)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def wait_for_backup_status(self, backup_id, status):
         """Waits for a Backup to reach a given status."""

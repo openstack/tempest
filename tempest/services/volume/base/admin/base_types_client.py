@@ -16,11 +16,11 @@
 from oslo_serialization import jsonutils as json
 from six.moves.urllib import parse as urllib
 
-from tempest.common import service_client
+from tempest.lib.common import rest_client
 from tempest.lib import exceptions as lib_exc
 
 
-class BaseTypesClient(service_client.ServiceClient):
+class BaseTypesClient(rest_client.RestClient):
     """Client class to send CRUD Volume Types API requests"""
 
     def is_resource_deleted(self, resource):
@@ -56,7 +56,7 @@ class BaseTypesClient(service_client.ServiceClient):
         resp, body = self.get(url)
         body = json.loads(body)
         self.expected_success(200, resp.status)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def show_volume_type(self, volume_id):
         """Returns the details of a single volume_type."""
@@ -64,7 +64,7 @@ class BaseTypesClient(service_client.ServiceClient):
         resp, body = self.get(url)
         body = json.loads(body)
         self.expected_success(200, resp.status)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def create_volume_type(self, **kwargs):
         """Create volume type.
@@ -76,13 +76,13 @@ class BaseTypesClient(service_client.ServiceClient):
         resp, body = self.post('types', post_body)
         body = json.loads(body)
         self.expected_success(200, resp.status)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def delete_volume_type(self, volume_id):
         """Deletes the Specified Volume_type."""
         resp, body = self.delete("types/%s" % str(volume_id))
         self.expected_success(202, resp.status)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def list_volume_types_extra_specs(self, vol_type_id, **params):
         """List all the volume_types extra specs created.
@@ -100,7 +100,7 @@ class BaseTypesClient(service_client.ServiceClient):
         resp, body = self.get(url)
         body = json.loads(body)
         self.expected_success(200, resp.status)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def show_volume_type_extra_specs(self, vol_type_id, extra_specs_name):
         """Returns the details of a single volume_type extra spec."""
@@ -109,7 +109,7 @@ class BaseTypesClient(service_client.ServiceClient):
         resp, body = self.get(url)
         body = json.loads(body)
         self.expected_success(200, resp.status)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def create_volume_type_extra_specs(self, vol_type_id, extra_specs):
         """Creates a new Volume_type extra spec.
@@ -122,14 +122,14 @@ class BaseTypesClient(service_client.ServiceClient):
         resp, body = self.post(url, post_body)
         body = json.loads(body)
         self.expected_success(200, resp.status)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def delete_volume_type_extra_specs(self, vol_id, extra_spec_name):
         """Deletes the Specified Volume_type extra spec."""
         resp, body = self.delete("types/%s/extra_specs/%s" % (
             (str(vol_id)), str(extra_spec_name)))
         self.expected_success(202, resp.status)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def update_volume_type_extra_specs(self, vol_type_id, extra_spec_name,
                                        extra_specs):
@@ -146,7 +146,7 @@ class BaseTypesClient(service_client.ServiceClient):
         resp, body = self.put(url, put_body)
         body = json.loads(body)
         self.expected_success(200, resp.status)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def show_encryption_type(self, vol_type_id):
         """Get the volume encryption type for the specified volume type.
@@ -157,7 +157,7 @@ class BaseTypesClient(service_client.ServiceClient):
         resp, body = self.get(url)
         body = json.loads(body)
         self.expected_success(200, resp.status)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def create_encryption_type(self, vol_type_id, **kwargs):
         """Create encryption type.
@@ -171,11 +171,11 @@ class BaseTypesClient(service_client.ServiceClient):
         resp, body = self.post(url, post_body)
         body = json.loads(body)
         self.expected_success(200, resp.status)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def delete_encryption_type(self, vol_type_id):
         """Delete the encryption type for the specified volume-type."""
         resp, body = self.delete(
             "/types/%s/encryption/provider" % str(vol_type_id))
         self.expected_success(202, resp.status)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
