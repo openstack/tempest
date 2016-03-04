@@ -34,33 +34,6 @@ class NetworkClient(base.BaseNetworkClient):
     quotas
     """
 
-    def create_bulk_network(self, **kwargs):
-        """create bulk network
-
-        Available params: see http://developer.openstack.org/
-                              api-ref-networking-v2.html#bulkCreateNetwork
-        """
-        uri = '/networks'
-        return self.create_resource(uri, kwargs)
-
-    def create_bulk_subnet(self, **kwargs):
-        """create bulk subnet
-
-        Available params: see http://developer.openstack.org/
-                              api-ref-networking-v2.html#bulkCreateSubnet
-        """
-        uri = '/subnets'
-        return self.create_resource(uri, kwargs)
-
-    def create_bulk_port(self, **kwargs):
-        """create bulk port
-
-        Available params: see http://developer.openstack.org/
-                              api-ref-networking-v2.html#bulkCreatePorts
-        """
-        uri = '/ports'
-        return self.create_resource(uri, kwargs)
-
     def wait_for_resource_deletion(self, resource_type, id, client=None):
         """Waits for a resource to be deleted."""
         start_time = int(time.time())
