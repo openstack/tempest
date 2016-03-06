@@ -12,10 +12,9 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
-import itertools
-
 import netaddr
 import six
+import testtools
 
 from tempest.api.network import base
 from tempest.common import custom_matchers
@@ -376,6 +375,9 @@ class NetworksTest(base.BaseNetworkTest):
 
     @test.attr(type='smoke')
     @test.idempotent_id('af774677-42a9-4e4b-bb58-16fe6a5bc1ec')
+    @test.requires_ext(extension='external-net', service='network')
+    @testtools.skipUnless(CONF.network.public_network_id,
+                          'The public_network_id option must be specified.')
     def test_external_network_visibility(self):
         """Verifies user can see external networks but not subnets."""
         body = self.networks_client.list_networks(**{'router:external': True})
@@ -387,17 +389,12 @@ class NetworksTest(base.BaseNetworkTest):
         self.assertEmpty(nonexternal, "Found non-external networks"
                                       " in filtered list (%s)." % nonexternal)
         self.assertIn(CONF.network.public_network_id, networks)
-
-        subnets_iter = (network['subnets']
-                        for network in body['networks']
-                        if not network['shared'])
-        # subnets_iter is a list (iterator) of lists. This flattens it to a
-        # list of UUIDs
-        public_subnets_iter = itertools.chain(*subnets_iter)
-        body = self.subnets_client.list_subnets()
-        subnets = [sub['id'] for sub in body['subnets']
-                   if sub['id'] in public_subnets_iter]
-        self.assertEmpty(subnets, "Public subnets visible")
+        # only check the public network ID because the other networks may
+        # belong to other tests and their state may have changed during this
+        # test
+        body = self.subnets_client.list_subnets(
+            network_id=CONF.network.public_network_id)
+        self.assertEmpty(body['subnets'], "Public subnets visible")
 
 
 class BulkNetworkOpsTestJSON(base.BaseNetworkTest):
