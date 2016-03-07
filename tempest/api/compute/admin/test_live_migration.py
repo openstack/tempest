@@ -63,7 +63,7 @@ class LiveBlockMigrationTestJSON(base.BaseV2ComputeAdminTest):
     def _get_host_for_server(self, server_id):
         return self._get_server_details(server_id)[self._host_key]
 
-    def _migrate_server_to(self, server_id, dest_host, volume_backed):
+    def _migrate_server_to(self, server_id, dest_host, volume_backed=False):
         block_migration = (CONF.compute_feature_enabled.
                            block_migration_for_live_migration and
                            not volume_backed)
