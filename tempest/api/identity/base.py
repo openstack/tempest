@@ -106,8 +106,8 @@ class BaseIdentityV2AdminTest(BaseIdentityV2Test):
         cls.non_admin_roles_client = cls.os.roles_client
         cls.users_client = cls.os_adm.users_client
         cls.non_admin_users_client = cls.os.users_client
-        cls.services_client = cls.os_adm.services_v2_client
-        cls.endpoints_client = cls.os_adm.endpoints_v2_client
+        cls.services_client = cls.os_adm.identity_services_client
+        cls.endpoints_client = cls.os_adm.endpoints_client
 
     @classmethod
     def resource_setup(cls):
@@ -155,9 +155,9 @@ class BaseIdentityV3AdminTest(BaseIdentityV3Test):
         cls.trusts_client = cls.os_adm.trusts_client
         cls.roles_client = cls.os_adm.roles_v3_client
         cls.token = cls.os_adm.token_v3_client
-        cls.endpoints_client = cls.os_adm.endpoints_client
+        cls.endpoints_client = cls.os_adm.endpoints_v3_client
         cls.regions_client = cls.os_adm.regions_client
-        cls.services_client = cls.os_adm.identity_services_client
+        cls.services_client = cls.os_adm.identity_services_v3_client
         cls.policies_client = cls.os_adm.policies_client
         cls.creds_client = cls.os_adm.credentials_client
         cls.groups_client = cls.os_adm.groups_client
