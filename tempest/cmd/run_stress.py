@@ -23,6 +23,7 @@ except ImportError:
     # unittest in python 2.6 does not contain loader, so uses unittest2
     from unittest2 import loader
 import traceback
+import warnings
 
 from cliff import command
 from oslo_log import log as logging
@@ -74,7 +75,17 @@ def discover_stress_tests(path="./", filter_attr=None, call_inherited=False):
 
 class TempestRunStress(command.Command):
 
+    @staticmethod
+    def display_deprecation_warning():
+        warnings.simplefilter('once', category=DeprecationWarning)
+        warnings.warn(
+            'Stress tests are deprecated and will be removed from Tempest '
+            'in the Newton release.',
+            DeprecationWarning)
+        warnings.resetwarnings()
+
     def get_parser(self, prog_name):
+        self.display_deprecation_warning()
         pa = super(TempestRunStress, self).get_parser(prog_name)
         pa = add_arguments(pa)
         return pa
@@ -146,6 +157,7 @@ def action(ns):
 
 
 def main():
+    TempestRunStress.display_deprecation_warning()
     parser = argparse.ArgumentParser(description='Run stress tests')
     pa = add_arguments(parser)
     ns = pa.parse_args()
