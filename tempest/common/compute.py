@@ -17,9 +17,9 @@ from oslo_log import log as logging
 from oslo_utils import excutils
 
 from tempest.common import fixed_network
-from tempest.common import service_client
 from tempest.common import waiters
 from tempest import config
+from tempest.lib.common import rest_client
 from tempest.lib.common.utils import data_utils
 
 CONF = config.CONF
@@ -129,7 +129,7 @@ def create_test_server(clients, validatable=False, validation_resources=None,
         servers = \
             [s for s in body_servers['servers'] if s['name'].startswith(name)]
     else:
-        body = service_client.ResponseBody(body.response, body['server'])
+        body = rest_client.ResponseBody(body.response, body['server'])
         servers = [body]
 
     # The name of the method to associate a floating IP to as server is too

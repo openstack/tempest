@@ -18,9 +18,9 @@ from oslotest import mockpatch
 
 from tempest.common import credentials_factory as credentials
 from tempest.common import dynamic_creds
-from tempest.common import service_client
 from tempest import config
 from tempest import exceptions
+from tempest.lib.common import rest_client
 from tempest.lib.services.identity.v2 import token_client as json_token_client
 from tempest.services.identity.v2.json import identity_client as \
     json_iden_client
@@ -74,7 +74,7 @@ class TestDynamicCredentialProvider(base.TestCase):
         user_fix = self.useFixture(mockpatch.PatchObject(
             json_users_client.UsersClient,
             'create_user',
-            return_value=(service_client.ResponseBody
+            return_value=(rest_client.ResponseBody
                           (200, {'user': {'id': id, 'name': name}}))))
         return user_fix
 
@@ -82,7 +82,7 @@ class TestDynamicCredentialProvider(base.TestCase):
         tenant_fix = self.useFixture(mockpatch.PatchObject(
             json_tenants_client.TenantsClient,
             'create_tenant',
-            return_value=(service_client.ResponseBody
+            return_value=(rest_client.ResponseBody
                           (200, {'tenant': {'id': id, 'name': name}}))))
         return tenant_fix
 
@@ -90,7 +90,7 @@ class TestDynamicCredentialProvider(base.TestCase):
         roles_fix = self.useFixture(mockpatch.PatchObject(
             json_roles_client.RolesClient,
             'list_roles',
-            return_value=(service_client.ResponseBody
+            return_value=(rest_client.ResponseBody
                           (200,
                            {'roles': [{'id': id, 'name': name},
                             {'id': '1', 'name': 'FakeRole'},
@@ -101,7 +101,7 @@ class TestDynamicCredentialProvider(base.TestCase):
         roles_fix = self.useFixture(mockpatch.PatchObject(
             json_roles_client.RolesClient,
             'list_roles',
-            return_value=(service_client.ResponseBody
+            return_value=(rest_client.ResponseBody
                           (200,
                            {'roles': [{'id': '1234', 'name': 'role1'},
                             {'id': '1', 'name': 'FakeRole'},
@@ -112,7 +112,7 @@ class TestDynamicCredentialProvider(base.TestCase):
         tenant_fix = self.useFixture(mockpatch.PatchObject(
             json_roles_client.RolesClient,
             'assign_user_role',
-            return_value=(service_client.ResponseBody
+            return_value=(rest_client.ResponseBody
                           (200, {}))))
         return tenant_fix
 
@@ -120,7 +120,7 @@ class TestDynamicCredentialProvider(base.TestCase):
         roles_fix = self.useFixture(mockpatch.PatchObject(
             json_roles_client.RolesClient,
             'list_roles',
-            return_value=(service_client.ResponseBody
+            return_value=(rest_client.ResponseBody
                           (200, {'roles': [{'id': '1',
                                  'name': 'FakeRole'}]}))))
         return roles_fix
@@ -129,7 +129,7 @@ class TestDynamicCredentialProvider(base.TestCase):
         ec2_creds_fix = self.useFixture(mockpatch.PatchObject(
             json_users_client.UsersClient,
             'list_user_ec2_credentials',
-            return_value=(service_client.ResponseBody
+            return_value=(rest_client.ResponseBody
                           (200, {'credentials': [{
                                  'access': 'fake_access',
                                  'secret': 'fake_secret',
