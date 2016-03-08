@@ -14,6 +14,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import random
 from six.moves.urllib import parse
 
 from tempest.api.volume import base
@@ -185,3 +186,28 @@ class VolumesV2ListTestJSON(base.BaseVolumeTest):
     @test.idempotent_id('af55e775-8e4b-4feb-8719-215c43b0238c')
     def test_volume_list_pagination(self):
         self._test_pagination('volumes', ids=self.volume_id_list, detail=False)
+
+    @test.idempotent_id('46eff077-100b-427f-914e-3db2abcdb7e2')
+    def test_volume_list_with_detail_param_marker(self):
+        # Choosing a random volume from a list of volumes for 'marker'
+        # parameter
+        random_volume = random.choice(self.volume_id_list)
+
+        params = {'marker': random_volume}
+
+        # Running volume list using marker parameter
+        vol_with_marker = self.client.list_volumes(detail=True,
+                                                   params=params)['volumes']
+
+        # Fetching the index of the random volume from volume_id_list
+        index_marker = self.volume_id_list.index(random_volume)
+
+        # The expected list with marker parameter
+        verify_volume_list = self.volume_id_list[:index_marker]
+
+        failed_msg = "Failed to list volume details by marker"
+
+        # Validating the expected list is the same like the observed list
+        self.assertEqual(verify_volume_list,
+                         map(lambda x: x['id'],
+                             vol_with_marker[::-1]), failed_msg)
