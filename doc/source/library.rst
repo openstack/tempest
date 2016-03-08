@@ -1,6 +1,6 @@
 .. _library:
 
-Tempest Library Doucmentation
+Tempest Library Documentation
 =============================
 
 Tempest provides a stable library interface that provides external tools or
