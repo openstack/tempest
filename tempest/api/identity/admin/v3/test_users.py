@@ -81,14 +81,13 @@ class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
             original_password=original_password)
         # NOTE(morganfainberg): Fernet tokens are not subsecond aware and
         # Keystone should only be precise to the second. Sleep to ensure
-        # we are passing the second boundry.
+        # we are passing the second boundary.
         time.sleep(1)
         resp = self.token.auth(user_id=user['id'],
                                password=new_password).response
         subject_token = resp['x-subject-token']
         # Perform GET Token to verify and confirm password is updated
         token_details = self.client.show_token(subject_token)['token']
-        self.assertEqual(resp['x-subject-token'], subject_token)
         self.assertEqual(token_details['user']['id'], user['id'])
         self.assertEqual(token_details['user']['name'], u_name)
 

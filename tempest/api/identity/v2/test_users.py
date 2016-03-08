@@ -57,7 +57,7 @@ class IdentityUsersTest(base.BaseIdentityV2Test):
             user_id, password=new_pass, original_password=old_pass)
         # NOTE(morganfainberg): Fernet tokens are not subsecond aware and
         # Keystone should only be precise to the second. Sleep to ensure
-        # we are passing the second boundry.
+        # we are passing the second boundary.
         time.sleep(1)
 
         # check authorization with new password
