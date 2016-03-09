@@ -962,7 +962,7 @@ data_processing_feature_group = cfg.OptGroup(
 
 DataProcessingFeaturesGroup = [
     cfg.ListOpt('plugins',
-                default=["vanilla", "hdp"],
+                default=["vanilla", "cdh"],
                 deprecated_group="data_processing-feature-enabled",
                 help="List of enabled data processing plugins")
 ]
