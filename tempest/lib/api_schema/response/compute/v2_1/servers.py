@@ -267,12 +267,13 @@ common_attach_volume_info = {
     'type': 'object',
     'properties': {
         'id': {'type': 'string'},
-        'device': {'type': 'string'},
+        'device': {'type': ['string', 'null']},
         'volumeId': {'type': 'string'},
         'serverId': {'type': ['integer', 'string']}
     },
     'additionalProperties': False,
-    'required': ['id', 'device', 'volumeId', 'serverId']
+    # 'device' is optional in response.
+    'required': ['id', 'volumeId', 'serverId']
 }
 
 attach_volume = {
