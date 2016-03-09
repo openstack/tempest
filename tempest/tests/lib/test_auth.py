@@ -382,6 +382,31 @@ class TestKeystoneV2AuthProvider(BaseAuthTestsSetUp):
         expected = 'http://fake_url/'
         self._test_base_url_helper(expected, self.filters)
 
+    def test_base_url_with_unversioned_endpoint(self):
+        auth_data = {
+            'serviceCatalog': [
+                {
+                    'type': 'identity',
+                    'endpoints': [
+                        {
+                            'region': 'FakeRegion',
+                            'publicURL': 'http://fake_url'
+                        }
+                    ]
+                }
+            ]
+        }
+
+        filters = {
+            'service': 'identity',
+            'endpoint_type': 'publicURL',
+            'region': 'FakeRegion',
+            'api_version': 'v2.0'
+        }
+
+        expected = 'http://fake_url/v2.0'
+        self._test_base_url_helper(expected, filters, ('token', auth_data))
+
     def test_token_not_expired(self):
         expiry_data = datetime.datetime.utcnow() + datetime.timedelta(days=1)
         self._verify_expiry(expiry_data=expiry_data, should_be_expired=False)
@@ -478,3 +503,30 @@ class TestKeystoneV3AuthProvider(TestKeystoneV2AuthProvider):
         expected = self._get_result_url_from_endpoint(
             self._endpoints[0]['endpoints'][2])
         self._test_base_url_helper(expected, self.filters)
+
+    # Overwrites v2 test
+    def test_base_url_with_unversioned_endpoint(self):
+        auth_data = {
+            'catalog': [
+                {
+                    'type': 'identity',
+                    'endpoints': [
+                        {
+                            'region': 'FakeRegion',
+                            'url': 'http://fake_url',
+                            'interface': 'public'
+                        }
+                    ]
+                }
+            ]
+        }
+
+        filters = {
+            'service': 'identity',
+            'endpoint_type': 'publicURL',
+            'region': 'FakeRegion',
+            'api_version': 'v3'
+        }
+
+        expected = 'http://fake_url/v3'
+        self._test_base_url_helper(expected, filters, ('token', auth_data))
