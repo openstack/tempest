@@ -25,6 +25,7 @@ class UCSMClient(object):
     vlan_path = lan_path + "/net-OS-{id}"
     eth_path = "{service_profile_dn}/ether-{eth_name}"
     eth_vlan_path = eth_path + "/if-OS-{vlan_id}"
+    vnic_tmpl_vlan_path = "{vnic_tmpl_path}/if-OS-{vlan_id}"
 
     def __init__(self, ip, username, password):
         self._handle = None
@@ -70,6 +71,18 @@ class UCSMClient(object):
         return self.handle.GetManagedObject(
             lan_cloud, ucssdk.FabricVlan.ClassId(),
             {ucssdk.FabricVlan.DN: self.vlan_path.format(id=vlan_id)})
+
+    def get_vnic_template(self, vnic_tmpl_dn):
+        return self.handle.GetManagedObject(
+            None, ucssdk.VnicLanConnTempl.ClassId(),
+            {ucssdk.VnicLanConnTempl.DN: vnic_tmpl_dn})
+
+    def get_vnic_template_vlan(self, vnic_tmpl_dn, vlan_id):
+        vnic_tmpl = self.get_vnic_template(vnic_tmpl_dn)
+        return self.handle.GetManagedObject(
+            vnic_tmpl, ucssdk.VnicEtherIf.ClassId(),
+            {ucssdk.VnicEtherIf.DN: self.vnic_tmpl_vlan_path.format(
+                vnic_tmpl_path=vnic_tmpl_dn, vlan_id=vlan_id)})
 
     def get_ether_vlan(self, service_profile_dn, eth_name, vlan_id):
         sp = self._get_service_profile(service_profile_dn)

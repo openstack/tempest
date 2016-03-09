@@ -89,10 +89,11 @@ ucsm_ip=10.30.119.66
 ucsm_username=admin
 # UCSM ppassword
 ucsm_password=cisco
-# Dictionary of <hostname> VS <UCSM service profile name>
-ucsm_host_dict=overcloud-controller-0.localdomain:QA2,overcloud-compute-0.localdomain:QA3,overcloud-compute-1.localdomain:QA4
-# list of hostnames of a network nodes
-network_node_list=overcloud-controller-0.localdomain, overcloud-controller-1.localdomain
+# Dictionary of <hostname> VS <UCSM service profile name>. Compute nodes
+compute_host_dict=controller:org-root/ls-tmpl,compute-1:org-root/ls-tmpl
+# Dictionary of <hostname> VS <UCSM service profile name>. Controller nodes
+controller_host_dict=controller:org-root/ls-tmpl
+# List of vNIC names
 eth_names=eth0,eth1
 # Amount of "SR-IOV ports"/"Dynamic VNICs"/"Virtual functions"
 virtual_functions_amount=4
@@ -101,15 +102,20 @@ virtual_functions_amount=4
 # UCSMs list. Each UCSM has it's own section named [ucsm:<ucsm ip>] below
 ucsm_list = 10.10.0.200,10.10.0.156
 
+# List of physical networks used in Openstack
+physnets = physnet1
+
 # Parameters of a particular UCSM
 [ucsm:10.10.0.200]
 eth_names=eth0,eth1
 ucsm_username=ucspe
 ucsm_password=ucspe
-# List of controller nodes and service profiles associated with them
+# Dictionary of controller nodes and service profiles associated with them
 controller_host_dict=controller:org-root/ls-sp11
-# List of compute nodes and service profiles associated with them
+# Dictionary of compute nodes and service profiles associated with them
 compute_host_dict=controller:org-root/ls-sp11
+# Dictionary of vNIC templates
+vnic_template_dict = physnet1:org-root/lan-conn-templ-vnic_template
 
 [ucsm:10.10.0.156]
 eth_names=eth0,eth1
@@ -117,6 +123,7 @@ ucsm_username=ucspe
 ucsm_password=ucspe
 #controller_host_dict=controller
 compute_host_dict=compute-1:org-root/ls-sp21
+vnic_template_dict = physnet1:org-root/lan-conn-templ-vnic_template
 
 ##############################################################################
 #
@@ -150,7 +157,9 @@ from tempest_lib.common.utils import data_utils
 
 from tempest.common import waiters
 from tempest import config
+from tempest import exceptions
 from tempest.scenario import manager
+from tempest.services.network import resources as net_resources
 from tempest import test
 from tempest.thirdparty.cisco import base as cisco_base
 
@@ -183,15 +192,103 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
 
         self.keypairs = {}
         self.servers = []
-        self.security_group = \
-            self._create_security_group(tenant_id=self.tenant_id)
+        self.security_group = self._create_security_group()
 
         # Log into UCS Manager
         self.ucsm_setup()
         self.addCleanup(self.ucsm_cleanup)
 
+    def _create_security_group(self, client=None, tenant_id=None,
+                               namestart='secgroup-smoke'):
+        secgroup = super(UCSMTest, self)._create_security_group(client=client, tenant_id=self.tenant_id, namestart=namestart)
+        # The group should allow all protocols
+        rulesets = [
+            dict(
+                # all tcp
+                protocol='tcp',
+                port_range_min=1,
+                port_range_max=65535,
+            ),
+            dict(
+                # all udp
+                protocol='udp',
+                port_range_min=1,
+                port_range_max=65535,
+            ),
+        ]
+        for ruleset in rulesets:
+            for r_direction in ['ingress', 'egress']:
+                ruleset['direction'] = r_direction
+                self._create_security_group_rule(
+                    client=self.network_client,
+                    secgroup=secgroup, **ruleset)
+        return secgroup
+
     def _get_server_key(self, server):
         return self.keypairs[server['key_name']]['private_key']
+
+    def create_networks(self, client=None, networks_client=None,
+                        tenant_id=None, dns_nameservers=None,
+                        network_kwargs=None):
+        """Create a network with a subnet connected to a router.
+
+        The baremetal driver is a special case since all nodes are
+        on the same shared network.
+
+        :param client: network client to create resources with.
+        :param tenant_id: id of tenant to create resources in.
+        :param dns_nameservers: list of dns servers to send to subnet.
+        :returns: network, subnet, router
+        """
+        network_kwargs = network_kwargs or {}
+        if CONF.baremetal.driver_enabled:
+            # NOTE(Shrews): This exception is for environments where tenant
+            # credential isolation is available, but network separation is
+            # not (the current baremetal case). Likely can be removed when
+            # test account mgmt is reworked:
+            # https://blueprints.launchpad.net/tempest/+spec/test-accounts
+            if not CONF.compute.fixed_network_name:
+                m = 'fixed_network_name must be specified in config'
+                raise exceptions.InvalidConfiguration(m)
+            network = self._get_network_by_name(
+                CONF.compute.fixed_network_name)
+            router = None
+            subnet = None
+        else:
+            network = self._create_network(
+                client=client, networks_client=networks_client,
+                tenant_id=tenant_id, **network_kwargs)
+            router = self._get_router(client=client, tenant_id=tenant_id)
+
+            subnet_kwargs = dict(network=network, client=client)
+            # use explicit check because empty list is a valid option
+            if dns_nameservers is not None:
+                subnet_kwargs['dns_nameservers'] = dns_nameservers
+            subnet = self._create_subnet(**subnet_kwargs)
+            subnet.add_to_router(router.id)
+        return network, subnet, router
+
+    def _create_network(self, client=None, networks_client=None,
+                        tenant_id=None, namestart='network-smoke-',
+                        vlan_transparent=None, shared=False, **kwargs):
+        if not client:
+            client = self.network_client
+        if not networks_client:
+            networks_client = self.networks_client
+        if not tenant_id:
+            tenant_id = client.tenant_id
+        name = data_utils.rand_name(namestart)
+        if vlan_transparent is not None:
+            result = networks_client.create_network(name=name, tenant_id=tenant_id,
+                                           vlan_transparent=vlan_transparent,
+                                           shared=shared, **kwargs)
+        else:
+            result = networks_client.create_network(name=name, tenant_id=tenant_id, **kwargs)
+        network = net_resources.DeletableNetwork(
+            networks_client=networks_client, **result['network'])
+        self.assertEqual(network.name, name)
+        self.addCleanup(self.delete_wrapper, network.delete)
+        return network
 
     def _create_server(self, name, network_id=None,
                        port_id=None, availability_zone=None):
@@ -254,6 +351,34 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
         self.assertNotEmpty(
             server2_client.ping_host(floating_ip1.floating_ip_address))
 
+    def assert_vm2vm(self, server1, server2):
+        floating_ip1 = self.create_floating_ip(server1)
+        floating_ip2 = self.create_floating_ip(server2)
+
+        # Wait while driver applies settings
+        time.sleep(10)
+        server1_client = self.get_remote_client(
+            floating_ip1.floating_ip_address,
+            CONF.compute.image_ssh_user,
+            self._get_server_key(server1))
+        server2_client = self.get_remote_client(
+            floating_ip2.floating_ip_address,
+            CONF.compute.image_ssh_user,
+            self._get_server_key(server2))
+
+        nc = 'nc'
+        port = 5000
+        message = 'Hi there!'
+        # Run listener
+        server2_client.exec_command('kill -9 `pidof "nc"` || true')
+        server2_client.exec_command('{0} -l -p {1} -s {2} > out.log &'.format(nc, port, floating_ip2.fixed_ip_address))
+        # Send message
+        server1_client.exec_command(
+            'echo -n "{0}" | {1} -w1 -p {2} {3} {4} || true'.format(message, nc, port, floating_ip2.fixed_ip_address, port))
+        # Read received message
+        received = server2_client.exec_command("cat out.log; rm out.log")
+        self.assertEqual(message, received, 'Verify received message')
+
     def _delete_network(self, network):
         self.networks_client.delete_network(network['id'])
 
@@ -274,6 +399,8 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
         * Adding vlans to both VNICs of a service profile
         * Deleting vlans from both VNICs of a service profile
         """
+        self._verify_single_ucsm_configured()
+
         # Create network and subnet (DHCP enabled)
         network = self._create_network()
         self.assertEqual('ACTIVE', network['status'])
@@ -288,11 +415,12 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
                           lambda: self.ucsm.get_vlan_profile(vlan_id))
 
         # Verify vlan has been added to both vnics
-        for eth_name in self.eth_names:
-            self.timed_assert(
-                self.assertNotEmpty,
-                lambda: self.ucsm.get_ether_vlan(self.network_node_profile,
-                                                 eth_name, vlan_id))
+        for service_profile in self.controller_host_dict.values():
+            for eth_name in self.eth_names:
+                self.timed_assert(
+                    self.assertNotEmpty,
+                    lambda: self.ucsm.get_ether_vlan(service_profile,
+                                                     eth_name, vlan_id))
 
         # Delete network and verify that the vlan profile has been removed
         port.delete()
@@ -301,11 +429,12 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
                           lambda: self.ucsm.get_vlan_profile(vlan_id))
 
         # Verify the vlan has been removed from both vnics
-        for eth_name in self.eth_names:
-            self.timed_assert(
-                self.assertEmpty,
-                lambda: self.ucsm.get_ether_vlan(
-                    self.network_node_profile, eth_name, vlan_id))
+        for service_profile in self.controller_host_dict.values():
+            for eth_name in self.eth_names:
+                self.timed_assert(
+                    self.assertEmpty,
+                    lambda: self.ucsm.get_ether_vlan(
+                        service_profile, eth_name, vlan_id))
 
     @test.attr(type='non-sriov')
     def test_create_delete_bulk_networks(self):
@@ -314,6 +443,8 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
         * Add bulk vlans to both vnics
         * Delete bulk vlans from both vnics
         """
+        self._verify_single_ucsm_configured()
+
         # Create networks
         names = [data_utils.rand_name('network-') for i in range(5)]
         networks = self.network_client.create_bulk_network(names)['networks']
@@ -347,11 +478,12 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
             self.timed_assert(self.assertNotEmpty,
                               lambda: self.ucsm.get_vlan_profile(vlan_id))
             # Verify all vlans have been added to both vnics
-            for eth_name in self.eth_names:
-                self.timed_assert(
-                    self.assertNotEmpty,
-                    lambda: self.ucsm.get_ether_vlan(
-                        self.network_node_profile, eth_name, vlan_id))
+            for service_profile in self.controller_host_dict.values():
+                for eth_name in self.eth_names:
+                    self.timed_assert(
+                        self.assertNotEmpty,
+                        lambda: self.ucsm.get_ether_vlan(
+                            service_profile, eth_name, vlan_id))
 
         # Delete networks and verify all vlan profiles have been removed
         for port in ports_list:
@@ -361,11 +493,12 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
             self.timed_assert(self.assertEmpty,
                               lambda: self.ucsm.get_vlan_profile(vlan_id))
             # Verify all vlans have been removed from both vnics
-            for eth_name in self.eth_names:
-                self.timed_assert(
-                    self.assertEmpty,
-                    lambda: self.ucsm.get_ether_vlan(
-                        self.network_node_profile, eth_name, vlan_id))
+            for service_profile in self.controller_host_dict.values():
+                for eth_name in self.eth_names:
+                    self.timed_assert(
+                        self.assertEmpty,
+                        lambda: self.ucsm.get_ether_vlan(
+                            service_profile, eth_name, vlan_id))
 
     @testtools.skip("Feature not implemented")
     @test.attr(type='non-sriov')
@@ -392,6 +525,8 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
         * Deleting SR-IOV port and port profile
         * Attaching instance to SR-IOV port
         """
+        self._verify_single_ucsm_configured()
+
         # Create network, subnet and port (type=direct)
         network_obj = self._create_network()
         self.assertEqual('ACTIVE', network_obj['status'])
@@ -448,6 +583,8 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
         * Create bulk port profiles
         * Delete bulk port profiles
         """
+        self._verify_single_ucsm_configured()
+
         # Create networks
         names = [data_utils.rand_name('network-')
                  for i in range(self.virtual_functions)]
@@ -551,29 +688,39 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
         """Covered test cases:
         * Intra VM to VM connectivity
         """
+        self._verify_single_ucsm_configured()
+
+        master_host = random.choice(self.compute_host_dict.keys())
+
         network_obj, subnet_obj, router_obj = self.create_networks()
         kwargs = {'security_groups': [self.security_group['id']],
                   'binding:vnic_type': 'direct'}
+
         # Create server #1
         port_obj1 = self._create_port(network_obj.id, **kwargs)
         server1 = self._create_server(
             data_utils.rand_name('server-smoke'),
             network_obj.id, port_id=port_obj1.id,
-            availability_zone='nova:' + self.master_host)
+            availability_zone='nova:' + master_host)
+
         # Create server #2 on the same compute
         port_obj2 = self._create_port(network_obj.id, **kwargs)
         server2 = self._create_server(
             data_utils.rand_name('server-smoke'),
             network_obj.id, port_id=port_obj2.id,
-            availability_zone='nova:' + self.master_host)
+            availability_zone='nova:' + master_host)
 
-        self.assert_vm_to_vm_connectivity(server1, server2)
+        self.assert_vm2vm(server1, server2)
 
     @test.attr(type='sriov')
     def test_sriov_inter_vm_to_vm(self):
         """Covered test cases:
         * Inter VM to VM connectivity
         """
+        self._verify_single_ucsm_configured()
+
+        master_host, slave_host = random.sample(self.compute_host_dict.keys(), 2)
+
         network_obj, subnet_obj, router_obj = self.create_networks()
         kwargs = {'security_groups': [self.security_group['id']],
                   'binding:vnic_type': 'direct'}
@@ -582,21 +729,23 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
         server1 = self._create_server(
             data_utils.rand_name('server-smoke'),
             network_obj.id, port_id=port_obj1.id,
-            availability_zone='nova:' + self.master_host)
+            availability_zone='nova:' + master_host)
         # Create server #2 on the same compute
         port_obj2 = self._create_port(network_obj.id, **kwargs)
         server2 = self._create_server(
             data_utils.rand_name('server-smoke'),
             network_obj.id, port_id=port_obj2.id,
-            availability_zone='nova:' + self.slave_host)
+            availability_zone='nova:' + slave_host)
 
-        self.assert_vm_to_vm_connectivity(server1, server2)
+        self.assert_vm2vm(server1, server2)
 
     @test.attr(type='non-sriov')
     def test_non_sriov_port_attach(self):
         """Covered test cases:
         * Attach instance to non-SR-IOV port
         """
+        self._verify_single_ucsm_configured()
+
         network_obj, subnet_obj, router_obj = self.create_networks()
         port_obj = self._create_port(
             network_obj.id, security_groups=[self.security_group['id']])
@@ -616,7 +765,7 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
             self.timed_assert(
                 self.assertNotEmpty,
                 lambda: self.ucsm.get_ether_vlan(
-                    self.ucsm_host_dict[binding_host_id], eth_name, vlan_id))
+                    self.compute_host_dict[binding_host_id], eth_name, vlan_id))
 
         floating_ip = self.create_floating_ip(server)
         self.check_public_network_connectivity(server, floating_ip)
@@ -626,6 +775,10 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
         """Covered test cases:
         * Intra VM to VM connectivity
         """
+        self._verify_single_ucsm_configured()
+
+        master_host = random.choice(self.compute_host_dict.keys())
+
         network_obj, subnet_obj, router_obj = self.create_networks()
         kwargs = {'security_groups': [self.security_group['id']]}
         # Create server #1
@@ -633,21 +786,25 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
         server1 = self._create_server(
             data_utils.rand_name('server-smoke'),
             network_obj.id, port_id=port_obj1.id,
-            availability_zone='nova:' + self.master_host)
+            availability_zone='nova:' + master_host)
         # Create server #2 on the same compute
         port_obj2 = self._create_port(network_obj.id, **kwargs)
         server2 = self._create_server(
             data_utils.rand_name('server-smoke'),
             network_obj.id, port_id=port_obj2.id,
-            availability_zone='nova:' + self.master_host)
+            availability_zone='nova:' + master_host)
 
-        self.assert_vm_to_vm_connectivity(server1, server2)
+        self.assert_vm2vm(server1, server2)
 
     @test.attr(type='non-sriov')
     def test_non_sriov_inter_vm_to_vm(self):
         """Covered test cases:
         * Inter VM to VM connectivity
         """
+        self._verify_single_ucsm_configured()
+
+        master_host, slave_host = random.sample(self.compute_host_dict.keys(), 2)
+
         network_obj, subnet_obj, router_obj = self.create_networks()
         kwargs = {'security_groups': [self.security_group['id']]}
         # Create server #1
@@ -655,15 +812,15 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
         server1 = self._create_server(
             data_utils.rand_name('server-smoke'),
             network_obj.id, port_id=port_obj1.id,
-            availability_zone='nova:' + self.master_host)
+            availability_zone='nova:' + master_host)
         # Create server #2 on another compute
         port_obj2 = self._create_port(network_obj.id, **kwargs)
         server2 = self._create_server(
             data_utils.rand_name('server-smoke'),
             network_obj.id, port_id=port_obj2.id,
-            availability_zone='nova:' + self.slave_host)
+            availability_zone='nova:' + slave_host)
 
-        self.assert_vm_to_vm_connectivity(server1, server2)
+        self.assert_vm2vm(server1, server2)
 
     @test.attr(type='non-sriov')
     def test_non_sriov_delete_second_instance(self):
@@ -671,6 +828,10 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
         * The driver does not delete vlan if there is at
         least one instance on a host
         """
+        self._verify_single_ucsm_configured()
+
+        master_host = random.choice(self.compute_host_dict.keys())
+
         network_obj, subnet_obj, router_obj = self.create_networks()
         kwargs = {'security_groups': [self.security_group['id']]}
         # Create server #1
@@ -678,13 +839,13 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
         server1 = self._create_server(
             data_utils.rand_name('server-smoke'),
             network_obj.id, port_id=port_obj1.id,
-            availability_zone='nova:' + self.master_host)
+            availability_zone='nova:' + master_host)
         # Create server #2 on the same host
         port_obj2 = self._create_port(network_obj.id, **kwargs)
         server2 = self._create_server(
             data_utils.rand_name('server-smoke'),
             network_obj.id, port_id=port_obj2.id,
-            availability_zone='nova:' + self.master_host)
+            availability_zone='nova:' + master_host)
         # Verify vlan profile has been created
         network = self.admin_networks_client.show_network(
             network_obj.id)['network']
@@ -697,7 +858,7 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
             self.timed_assert(
                 self.assertNotEmpty,
                 lambda: self.ucsm.get_ether_vlan(
-                    self.ucsm_host_dict[self.master_host], eth_name, vlan_id))
+                    self.compute_host_dict[master_host], eth_name, vlan_id))
 
         self.servers_client.delete_server(server2['id'])
         waiters.wait_for_server_termination(self.servers_client, server2['id'])
@@ -718,12 +879,12 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
             self.timed_assert(
                 self.assertNotEmpty,
                 lambda: self.ucsm.get_ether_vlan(
-                    self.ucsm_host_dict[self.master_host], eth_name, vlan_id))
+                    self.compute_host_dict[master_host], eth_name, vlan_id))
 
         floating_ip1 = self.create_floating_ip(server1)
         self.check_public_network_connectivity(server1, floating_ip1)
 
-    @test.attr(type='multi-ucsm')
+    @test.attr(type=['non-sriov', 'multi-ucsm'])
     def test_multi_create_delete_network(self):
         """Covered test cases:
         * The driver creates vlan profile in a certain UCSM
@@ -775,7 +936,7 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
         #                 self.assertEmpty,
         #                 lambda: self.ucsm.get_ether_vlan(controller_sp, eth_name, vlan_id))
 
-    @test.attr(type=['multi-ucsm', 'service-profile-templates'])
+    @test.attr(type=['non-sriov', 'multi-ucsm', 'service-profile-templates'])
     def test_multi_desired_ucsm_vnics_configured(self):
         """Covered test cases:
 
@@ -834,24 +995,87 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
                 self.assertEmpty,
                 lambda: random_ucsm_client.get_ether_vlan(random_compute_sp, eth_name, vlan_id))
 
-    @test.attr(type=['multi-ucsm', 'service-profile-templates'])
-    def test_multi_inter_vm_to_vm(self):
+    @test.attr(type=['non-sriov', 'multi-ucsm', 'service-profile-templates'])
+    def test_multi_inter_vm_to_vm_computes_attached_to_same_fi(self):
         """Covered test cases:
 
         Multi-UCSM
         * Inter VM to VM connectivity
 
         Service Profile templates
-        * Inter VM to VM connectivity
+        * Inter VM to VM connectivity. Computes attached to the same UCSM
         * Instance is able to get IP address from DHCP service
         * VLAN profile is not deleted if it used by at least one Service Profile template
+        * Right vNICs are configured in a certain UCSM
         """
-        self._verify_multi_ucsm_configured()
-        if len(self.multi_ucsm_clients) < 2:
-            raise self.skipException('Not enough UCSMs. Need at least 2.')
+        self._verify_multi_ucsm_configured(need_amount=1)
 
-        ucsm_conf1, ucsm_conf2 = self._get_random_ucsm()
+        ucsm_conf1 = random.choice(self.multi_ucsm_conf.values())
         ucsm_client1 = self.multi_ucsm_clients[ucsm_conf1['ucsm_ip']]
+        compute1, compute2 = random.sample(ucsm_conf1['compute_host_dict'].keys(), 2)
+
+        network_obj, subnet_obj, router_obj = self.create_networks()
+        kwargs = {'security_groups': [self.security_group['id']]}
+        # Create server #1
+        port_obj1 = self._create_port(network_obj.id, **kwargs)
+        server1 = self._create_server(
+            data_utils.rand_name('server-smoke'),
+            network_obj.id, port_id=port_obj1.id,
+            availability_zone='nova:' + compute1)
+        # Create server #2 on another compute
+        port_obj2 = self._create_port(network_obj.id, **kwargs)
+        server2 = self._create_server(
+            data_utils.rand_name('server-smoke'),
+            network_obj.id, port_id=port_obj2.id,
+            availability_zone='nova:' + compute2)
+
+        self.assert_vm2vm(server1, server2)
+
+        # Delete one server and verify VLAN profile still exists
+        self.servers_client.delete_server(server1['id'])
+        waiters.wait_for_server_termination(self.servers_client, server1['id'])
+        port_obj1.delete()
+
+        network = self.admin_networks_client.show_network(
+            network_obj.id)['network']
+        vlan_id = network['provider:segmentation_id']
+        self.timed_assert(self.assertNotEmpty,
+                          lambda: ucsm_client1.get_vlan_profile(vlan_id))
+
+        # Delete another server, ports, subnet, network.
+        # Verify VLAN is removed
+        self.servers_client.delete_server(server2['id'])
+        waiters.wait_for_server_termination(self.servers_client, server2['id'])
+        port_obj2.delete()
+        subnet_obj.delete()
+        network_obj.delete()
+        self.timed_assert(self.assertEmpty,
+                          lambda: ucsm_client1.get_vlan_profile(vlan_id))
+        for compute in (compute1, compute2):
+            for eth_name in ucsm_conf1['eth_names']:
+                compute_sp = ucsm_conf1['compute_host_dict'][compute]
+                self.timed_assert(
+                    self.assertEmpty,
+                    lambda: ucsm_client1.get_ether_vlan(compute_sp, eth_name, vlan_id))
+
+    @test.attr(type=['non-sriov', 'multi-ucsm', 'service-profile-templates'])
+    def test_multi_inter_vm_to_vm_computes_attached_to_different_fi(self):
+        """Covered test cases:
+
+        Multi-UCSM
+        * Inter VM to VM connectivity
+
+        Service Profile templates
+        * Inter VM to VM connectivity. Computes attached to different UCSMs
+        * Instance is able to get IP address from DHCP service
+        * VLAN profile is not deleted if it used by at least one Service Profile template
+        * Right vNICs are configured in a certain UCSM
+        """
+        self._verify_multi_ucsm_configured(need_amount=2)
+
+        ucsm_conf1, ucsm_conf2 = random.sample(self.multi_ucsm_conf.values(), 2)
+        ucsm_client1 = self.multi_ucsm_clients[ucsm_conf1['ucsm_ip']]
+        ucsm_client2 = self.multi_ucsm_clients[ucsm_conf2['ucsm_ip']]
         compute1 = random.choice(ucsm_conf1['compute_host_dict'].keys())
         compute2 = random.choice(ucsm_conf2['compute_host_dict'].keys())
 
@@ -870,19 +1094,40 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
             network_obj.id, port_id=port_obj2.id,
             availability_zone='nova:' + compute2)
 
-        self.assert_vm_to_vm_connectivity(server1, server2)
+        self.assert_vm2vm(server1, server2)
 
         # Delete one server and verify VLAN profile still exists
+        self.servers_client.delete_server(server1['id'])
         waiters.wait_for_server_termination(self.servers_client, server1['id'])
         port_obj1.delete()
 
         network = self.admin_networks_client.show_network(
             network_obj.id)['network']
         vlan_id = network['provider:segmentation_id']
+        self.timed_assert(self.assertNotEmpty,
+                          lambda: ucsm_client1.get_vlan_profile(vlan_id))
+        self.timed_assert(self.assertNotEmpty,
+                          lambda: ucsm_client2.get_vlan_profile(vlan_id))
+
+        # Delete another server, ports, subnet, network.
+        # Verify VLAN is removed
+        self.servers_client.delete_server(server2['id'])
+        waiters.wait_for_server_termination(self.servers_client, server2['id'])
+        port_obj2.delete()
+        subnet_obj.delete()
+        network_obj.delete()
         self.timed_assert(self.assertEmpty,
                           lambda: ucsm_client1.get_vlan_profile(vlan_id))
+        self.timed_assert(self.assertEmpty,
+                          lambda: ucsm_client2.get_vlan_profile(vlan_id))
+        for conf, cl, cp in ((ucsm_conf1, ucsm_client1, compute1), (ucsm_conf2, ucsm_client2, compute2)):
+            for eth_name in conf['eth_names']:
+                compute_sp = conf['compute_host_dict'][cp]
+                self.timed_assert(
+                    self.assertEmpty,
+                    lambda: cl.get_ether_vlan(compute_sp, eth_name, vlan_id))
 
-    @test.attr(type=['multi-ucsm', 'service-profile-templates'])
+    @test.attr(type=['non-sriov', 'multi-ucsm', 'service-profile-templates'])
     def test_multi_intra_vm_to_vm(self):
         """Covered test cases:
 
@@ -892,8 +1137,6 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
         * VLAN is not deleted from a service profile template if it used by at least one neutron port on a compute host
         """
         self._verify_multi_ucsm_configured()
-        if len(self.multi_ucsm_clients) < 2:
-            raise self.skipException('Not enough UCSMs. Need at least 2.')
 
         ucsm_conf1 = random.choice(self.multi_ucsm_conf.values())
         ucsm_client1 = self.multi_ucsm_clients[ucsm_conf1['ucsm_ip']]
@@ -914,11 +1157,138 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
             network_obj.id, port_id=port_obj2.id,
             availability_zone='nova:' + compute1)
 
-        self.assert_vm_to_vm_connectivity(server1, server2)
+        self.assert_vm2vm(server1, server2)
 
         # Delete one server and verify VLAN profile still exists
+        self.servers_client.delete_server(server1['id'])
+        waiters.wait_for_server_termination(self.servers_client, server1['id'])
+        port_obj1.delete()
+
+        network = self.admin_networks_client.show_network(
+            network_obj.id)['network']
+        vlan_id = network['provider:segmentation_id']
+        self.timed_assert(self.assertNotEmpty,
+                          lambda: ucsm_client1.get_vlan_profile(vlan_id))
+
+        # Delete another server, ports, subnet, network.
+        # Verify VLAN is removed
+        self.servers_client.delete_server(server2['id'])
         waiters.wait_for_server_termination(self.servers_client, server2['id'])
         port_obj2.delete()
+        subnet_obj.delete()
+        network_obj.delete()
+        self.timed_assert(self.assertEmpty,
+                          lambda: ucsm_client1.get_vlan_profile(vlan_id))
+        for eth_name in ucsm_conf1['eth_names']:
+            compute_sp = ucsm_conf1['compute_host_dict'][compute1]
+            self.timed_assert(
+                self.assertEmpty,
+                lambda: ucsm_client1.get_ether_vlan(compute_sp, eth_name, vlan_id))
+
+    @test.attr(type=['non-sriov', 'multi-ucsm', 'vnic-templates'])
+    def test_multi_vnic_templates_create_delete_network(self):
+        """Covered test cases:
+        * UCSM Diriver adds vlans to a vNIC template
+        * UCSM Driver deletes vlans from a vNIC template
+        """
+        self._verify_vnic_templates_configured()
+
+        random_physnet = random.choice(CONF.ucsm.physnets)
+        # UCSMs to which computes are connected and vNIC template is associated with "random_physnet"
+        ucsm_list = list()
+        for conf in self.ucsm_confs_with_vnic_templates:
+            if conf.compute_host_dict and random_physnet in conf.vnic_template_dict.keys():
+                ucsm_list.append(conf)
+        if len(ucsm_list) == 0:
+            self.skipException('Computes do not use vNIC templates. Check tempest.conf')
+
+        # Create network as an admin user. Only admin user is allowed to set "provider:physical_network"
+        params = {'provider:network_type': 'vlan',
+                  'provider:physical_network': random_physnet}
+        network_obj = self._create_network(networks_client=self.admin_networks_client, **params)
+        self.assertEqual('ACTIVE', network_obj['status'])
+        # Create subnet (DHCP enabled)
+        subnet_obj = self._create_subnet(network_obj)
+        port_obj = self._create_port(
+            network_obj.id, security_groups=[self.security_group['id']])
+
+        # Choose random UCSM.
+        random_ucsm = random.choice(ucsm_list)
+        random_ucsm_client = self.multi_ucsm_clients[random_ucsm['ucsm_ip']]
+        random_compute = random.choice(random_ucsm['compute_host_dict'].keys())
+        vnic_template = random_ucsm['vnic_template_dict'][random_physnet]
+
+        server = self._create_server(
+            data_utils.rand_name('server-smoke'),
+            network_obj.id, port_id=port_obj.id,
+            availability_zone='nova:' + random_compute)
+
+        # Get a vlan id and verify a vlan profile has been created
+        network = self.admin_networks_client.show_network(network_obj['id'])['network']
+        vlan_id = network['provider:segmentation_id']
+
+        self.timed_assert(self.assertNotEmpty,
+                          lambda: random_ucsm_client.get_vlan_profile(vlan_id))
+
+        # Verify VLAN is added to vNIC template
+        self.timed_assert(self.assertNotEmpty, lambda: random_ucsm_client.get_vnic_template_vlan(vnic_template, vlan_id))
+
+        # Delete server, port, subnet, network
+        self.servers_client.delete_server(server['id'])
+        waiters.wait_for_server_termination(self.servers_client, server['id'])
+        port_obj.delete()
+        subnet_obj.delete()
+        network_obj.delete()
+
+        # Verify vlan profile has been removed
+        self.timed_assert(self.assertEmpty,
+                          lambda: random_ucsm_client.get_vlan_profile(vlan_id))
+
+        # Verify VLAN is removed from vNIC template
+        self.timed_assert(self.assertEmpty, lambda: random_ucsm_client.get_vnic_template_vlan(vnic_template, vlan_id))
+
+    @test.attr(type=['non-sriov', 'multi-ucsm', 'vnic-templates'])
+    def test_multi_vnic_templates_inter_vm_to_vm(self):
+        """Covered test cases:
+
+        vNIC templates
+        * Inter VM to VM connectivity
+        * Instance is able to get IP address from DHCP service
+        * VLAN profile is not deleted if it used by at least one vNIC Template
+        """
+        self._verify_vnic_templates_configured(need_amount=2)
+
+        random_physnet = random.choice(CONF.ucsm.physnets)
+        ucsm_conf1, ucsm_conf2 = random.sample(self.ucsm_confs_with_vnic_templates, 2)
+        ucsm_client1 = self.multi_ucsm_clients[ucsm_conf1['ucsm_ip']]
+        ucsm_client2 = self.multi_ucsm_clients[ucsm_conf1['ucsm_ip']]
+        compute1 = random.choice(ucsm_conf1['compute_host_dict'].keys())
+        compute2 = random.choice(ucsm_conf2['compute_host_dict'].keys())
+
+        network_kwargs = {'provider:network_type': 'vlan',
+                          'provider:physical_network': random_physnet}
+        network_obj, subnet_obj, router_obj = self.create_networks(
+            networks_client=self.admin_networks_client, network_kwargs=network_kwargs)
+        kwargs = {'security_groups': [self.security_group['id']]}
+        # Create server #1
+        port_obj1 = self._create_port(network_obj.id, **kwargs)
+        server1 = self._create_server(
+            data_utils.rand_name('server-smoke'),
+            network_obj.id, port_id=port_obj1.id,
+            availability_zone='nova:' + compute1)
+        # Create server #2 on another compute
+        port_obj2 = self._create_port(network_obj.id, **kwargs)
+        server2 = self._create_server(
+            data_utils.rand_name('server-smoke'),
+            network_obj.id, port_id=port_obj2.id,
+            availability_zone='nova:' + compute2)
+
+        self.assert_vm2vm(server1, server2)
+
+        # Delete one server and verify VLAN profile still exists
+        self.servers_client.delete_server(server1['id'])
+        waiters.wait_for_server_termination(self.servers_client, server1['id'])
+        port_obj1.delete()
 
         network = self.admin_networks_client.show_network(
             network_obj.id)['network']
@@ -926,3 +1296,59 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
         self.timed_assert(self.assertEmpty,
                           lambda: ucsm_client1.get_vlan_profile(vlan_id))
 
+        # Verify VLAN is still assigned to vNIC template on another UCSM
+        vnic_template = ucsm_conf1['vnic_template_dict'][random_physnet]
+        self.timed_assert(self.assertNotEmpty, lambda: ucsm_client2.get_vnic_template_vlan(vnic_template, vlan_id))
+        self.timed_assert(self.assertNotEmpty,
+                          lambda: ucsm_client2.get_vlan_profile(vlan_id))
+
+    @test.attr(type=['non-sriov', 'multi-ucsm', 'vnic-templates'])
+    def test_multi_vnic_templates_intra_vm_to_vm(self):
+        """Covered test cases:
+
+        vNIC templates
+        * Intra VM to VM connectivity
+        * Instance is able to get IP address from DHCP service
+        * VLAN is not deleted from vNIC template if it used by at least one neutron port on a compute host
+        """
+        self._verify_vnic_templates_configured()
+
+        random_physnet = random.choice(CONF.ucsm.physnets)
+        ucsm_conf1 = random.choice(self.ucsm_confs_with_vnic_templates)
+        ucsm_client1 = self.multi_ucsm_clients[ucsm_conf1['ucsm_ip']]
+        compute1 = random.choice(ucsm_conf1['compute_host_dict'].keys())
+
+        network_kwargs = {'provider:network_type': 'vlan',
+                          'provider:physical_network': random_physnet}
+        network_obj, subnet_obj, router_obj = self.create_networks(
+            networks_client=self.admin_networks_client, network_kwargs=network_kwargs)
+        kwargs = {'security_groups': [self.security_group['id']]}
+        # Create server #1
+        port_obj1 = self._create_port(network_obj.id, **kwargs)
+        server1 = self._create_server(
+            data_utils.rand_name('server-smoke'),
+            network_obj.id, port_id=port_obj1.id,
+            availability_zone='nova:' + compute1)
+        # Create server #2 on another compute
+        port_obj2 = self._create_port(network_obj.id, **kwargs)
+        server2 = self._create_server(
+            data_utils.rand_name('server-smoke'),
+            network_obj.id, port_id=port_obj2.id,
+            availability_zone='nova:' + compute1)
+
+        self.assert_vm2vm(server1, server2)
+
+        # Delete one server and verify VLAN profile still exists
+        self.servers_client.delete_server(server1['id'])
+        waiters.wait_for_server_termination(self.servers_client, server1['id'])
+        port_obj1.delete()
+
+        network = self.admin_networks_client.show_network(
+            network_obj.id)['network']
+        vlan_id = network['provider:segmentation_id']
+        self.timed_assert(self.assertEmpty,
+                          lambda: ucsm_client1.get_vlan_profile(vlan_id))
+
+        # Verify VLAN is still assigned to vNIC template
+        vnic_template = ucsm_conf1['vnic_template_dict'][random_physnet]
+        self.timed_assert(self.assertNotEmpty, lambda: ucsm_client1.get_vnic_template_vlan(vnic_template, vlan_id))

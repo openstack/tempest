@@ -43,8 +43,8 @@ class UCSMTestMixin(object):
     ucsm_ip = CONF.ucsm.ucsm_ip
     ucsm_username = CONF.ucsm.ucsm_username
     ucsm_password = CONF.ucsm.ucsm_password
-    ucsm_host_dict = None
-    network_node_list = CONF.ucsm.network_node_list
+    compute_host_dict = CONF.ucsm.compute_host_dict
+    controller_host_dict = CONF.ucsm.controller_host_dict
     eth_names = CONF.ucsm.eth_names
     virtual_functions = CONF.ucsm.virtual_functions_amount
 
@@ -65,28 +65,12 @@ class UCSMTestMixin(object):
     @classmethod
     def ucsm_resource_setup(cls):
         cls.multi_ucsm_conf = parse_tempest_multi_ucsm_config(CONF.ucsm.ucsm_list)
+        cls.ucsm_confs_with_vnic_templates = [ucsm for ucsm in cls.multi_ucsm_conf.values() if ucsm['vnic_template_dict']]
         cls.multi_ucsm_clients = {uc['ucsm_ip']: utils.UCSMClient(uc['ucsm_ip'], uc['ucsm_username'], uc['ucsm_password'])
                                   for uc in cls.multi_ucsm_conf.values()}
 
-        cls.network_node_host = CONF.ucsm.network_node_list[0]
         cls.ucsm = utils.UCSMClient(cls.ucsm_ip, cls.ucsm_username,
                                     cls.ucsm_password)
-        cls.ucsm_host_dict = \
-            {k: 'org-root/ls-' + v
-             for k, v in CONF.ucsm.ucsm_host_dict.iteritems()}
-        cls.network_node_profile = cls.ucsm_host_dict[cls.network_node_host]
-
-        compute_hosts = set(cls.ucsm_host_dict.keys()) - set(cls.network_node_list)
-        if len(compute_hosts) > 1:
-            smpl = random.sample(compute_hosts, 2)
-            cls.master_host = smpl[0]
-            cls.slave_host = smpl[1]
-        elif len(compute_hosts) == 1:
-            cls.master_host = compute_hosts[0]
-            cls.slave_host = None
-        else:
-            cls.master_host = None
-            cls.slave_host = None
 
     def ucsm_setup(self):
         self.ucsm.login()
@@ -98,12 +82,28 @@ class UCSMTestMixin(object):
         for c in self.multi_ucsm_clients.values():
             c.logout()
 
-    def _verify_multi_ucsm_configured(self):
+    def _verify_single_ucsm_configured(self):
+        if not CONF.ucsm.compute_host_dict:
+            raise self.skipException('There are no computes. Update tempest.conf')
+        if not CONF.ucsm.controller_host_dict:
+            raise self.skipException('There are no controllers. Update tempest.conf')
+        if not CONF.ucsm.eth_names:
+            raise self.skipException('There are no eth_names. Update tempest.conf')
+
+    def _verify_multi_ucsm_configured(self, need_amount=None):
         if not CONF.ucsm.ucsm_list:
             raise self.skipException('CONF.ucsm.ucsm_list is empty. Please check Multi-UCSM parameters in tempest.conf')
+        if need_amount and len(CONF.ucsm.ucsm_list) < need_amount:
+            raise self.skipException('Not anough amount of UCSMs configured')
 
-    def _get_random_ucsm(self, amount=2):
-        return random.sample(self.multi_ucsm_conf.values(), amount)
+    def _verify_vnic_templates_configured(self, need_amount=None):
+        self._verify_multi_ucsm_configured(need_amount=need_amount)
+        if len(self.ucsm_confs_with_vnic_templates) == 0:
+            raise self.skipException('vNIC templates are not configured. Update tempest.conf')
+        if not CONF.ucsm.physnets:
+            raise self.skipException('CONF.ucsm.physnets is empty. Update tempest.conf')
+        if need_amount and len(self.ucsm_confs_with_vnic_templates) < need_amount:
+            raise self.skipException('Not anough amount of UCSMs are using vNIC templates')
 
 
 def parse_tempest_multi_ucsm_config(ucsm_list):
@@ -121,6 +121,7 @@ def parse_tempest_multi_ucsm_config(ucsm_list):
             cfg.DictOpt('controller_host_dict', help="Dictionary <controller_hostname>:<service_profile>"),
             cfg.DictOpt('compute_host_dict', help="Dictionary <compute_hostname>:<service_profile>"),
             cfg.ListOpt('eth_names', default=['eth0', 'eth1'], help="eth names"),
+            cfg.DictOpt('vnic_template_dict', help="vNIC templates"),
             cfg.IntOpt('virtual_functions_amount', help="Amount of virtual functions"),
         ]
         conf.register_opts(opts, group)

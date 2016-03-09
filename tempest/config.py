@@ -1331,10 +1331,10 @@ UcsmGroup = [
                help="UCSM username"),
     cfg.StrOpt('ucsm_password',
                help="UCSM password"),
-    cfg.DictOpt('ucsm_host_dict',
-                help="UCSM host dictionary. Ex.: qa11:os2,qa13:os3,qa14:os1"),
-    cfg.ListOpt('network_node_list',
-               help="hostname of a network node"),
+    cfg.DictOpt('controller_host_dict',
+                help="Controller host VS Service profile dictionary. Ex.: controller:org-root/ls-tmpl, ..."),
+    cfg.DictOpt('compute_host_dict',
+                help="Compute host VS Service profile "),
     cfg.ListOpt('eth_names',
                 default=['eth0', 'eth1'],
                 help="Hosts eth names"),
@@ -1342,6 +1342,8 @@ UcsmGroup = [
                help="Amount of virtual functions"),
     cfg.ListOpt('ucsm_list',
                 help="List of ucsm IPs. Used in testing multi-ucsm installation"),
+    cfg.ListOpt('physnets',
+                help="List of physnets. Used in testing vNIC templates"),
 ]
 
 _opts = [
