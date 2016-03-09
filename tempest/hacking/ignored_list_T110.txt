@@ -5,3 +5,4 @@
 ./tempest/services/volume/base/base_backups_client.py
 ./tempest/services/baremetal/base.py
 ./tempest/services/network/json/network_client.py
+./tempest/services/network/json/routers_client.py

@@ -39,6 +39,7 @@ class DeletableResource(AttributeDict):
         self.client = kwargs.pop('client', None)
         self.network_client = kwargs.pop('network_client', None)
         self.networks_client = kwargs.pop('networks_client', None)
+        self.routers_client = kwargs.pop('routers_client', None)
         self.subnets_client = kwargs.pop('subnets_client', None)
         self.ports_client = kwargs.pop('ports_client', None)
         super(DeletableResource, self).__init__(*args, **kwargs)
@@ -89,12 +90,12 @@ class DeletableSubnet(DeletableResource):
 
     def add_to_router(self, router_id):
         self._router_ids.add(router_id)
-        self.network_client.add_router_interface(router_id,
+        self.routers_client.add_router_interface(router_id,
                                                  subnet_id=self.id)
 
     def delete(self):
         for router_id in self._router_ids.copy():
-            self.network_client.remove_router_interface(router_id,
+            self.routers_client.remove_router_interface(router_id,
                                                         subnet_id=self.id)
             self._router_ids.remove(router_id)
         self.subnets_client.delete_subnet(self.id)
@@ -109,14 +110,14 @@ class DeletableRouter(DeletableResource):
         return self.update(external_gateway_info=dict())
 
     def update(self, *args, **kwargs):
-        result = self.client.update_router(self.id,
-                                           *args,
-                                           **kwargs)
+        result = self.routers_client.update_router(self.id,
+                                                   *args,
+                                                   **kwargs)
         return super(DeletableRouter, self).update(**result['router'])
 
     def delete(self):
         self.unset_gateway()
-        self.client.delete_router(self.id)
+        self.routers_client.delete_router(self.id)
 
 
 class DeletableFloatingIp(DeletableResource):

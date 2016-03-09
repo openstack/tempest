@@ -449,7 +449,7 @@ class NetworkFloatingIpService(NetworkService):
 class NetworkRouterService(NetworkService):
 
     def list(self):
-        client = self.client
+        client = self.routers_client
         routers = client.list_routers(**self.tenant_filter)
         routers = routers['routers']
         if self.is_preserve:
@@ -460,7 +460,7 @@ class NetworkRouterService(NetworkService):
         return routers
 
     def delete(self):
-        client = self.client
+        client = self.routers_client
         routers = self.list()
         for router in routers:
             try:

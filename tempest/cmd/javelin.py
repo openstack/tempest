@@ -134,6 +134,7 @@ from tempest.services.identity.v2.json import tenants_client
 from tempest.services.identity.v2.json import users_client
 from tempest.services.image.v2.json import images_client
 from tempest.services.network.json import network_client
+from tempest.services.network.json import routers_client
 from tempest.services.object_storage import container_client
 from tempest.services.object_storage import object_client
 from tempest.services.telemetry.json import alarming_client
@@ -263,6 +264,14 @@ class OSClient(object):
             build_timeout=CONF.volume.build_timeout,
             **default_params)
         self.networks = network_client.NetworkClient(
+            _auth,
+            CONF.network.catalog_type,
+            CONF.network.region or CONF.identity.region,
+            endpoint_type=CONF.network.endpoint_type,
+            build_interval=CONF.network.build_interval,
+            build_timeout=CONF.network.build_timeout,
+            **default_params)
+        self.routers = routers_client.RoutersClient(
             _auth,
             CONF.network.catalog_type,
             CONF.network.region or CONF.identity.region,
@@ -739,7 +748,7 @@ def destroy_images(images):
 def _get_router_namespace(client, network):
     network_id = _get_resource_by_name(client.networks,
                                        'networks', network)['id']
-    n_body = client.networks.list_routers()
+    n_body = client.routers.list_routers()
     for router in n_body['routers']:
         router_id = router['id']
         r_body = client.networks.list_router_interfaces(router_id)
@@ -824,7 +833,7 @@ def create_routers(routers):
         client = client_for_user(router['owner'])
 
         # only create a router if the name isn't here
-        body = client.networks.list_routers()
+        body = client.routers.list_routers()
         if any(item['name'] == router['name'] for item in body['routers']):
             LOG.warning("Duplicated router name: %s" % router['name'])
             continue
@@ -841,9 +850,9 @@ def destroy_routers(routers):
         for subnet in router['subnet']:
             subnet_id = _get_resource_by_name(client.networks,
                                               'subnets', subnet)['id']
-            client.networks.remove_router_interface(router_id,
-                                                    subnet_id=subnet_id)
-        client.networks.delete_router(router_id)
+            client.routers.remove_router_interface(router_id,
+                                                   subnet_id=subnet_id)
+        client.routers.delete_router(router_id)
 
 
 def add_router_interface(routers):
@@ -856,13 +865,13 @@ def add_router_interface(routers):
             subnet_id = _get_resource_by_name(client.networks,
                                               'subnets', subnet)['id']
             # connect routers to their subnets
-            client.networks.add_router_interface(router_id,
-                                                 subnet_id=subnet_id)
+            client.routers.add_router_interface(router_id,
+                                                subnet_id=subnet_id)
         # connect routers to external network if set to "gateway"
         if router['gateway']:
             if CONF.network.public_network_id:
                 ext_net = CONF.network.public_network_id
-                client.networks._update_router(
+                client.routers._update_router(
                     router_id, set_enable_snat=True,
                     external_gateway_info={"network_id": ext_net})
             else:

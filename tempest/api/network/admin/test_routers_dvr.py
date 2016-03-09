@@ -34,8 +34,8 @@ class RoutersTestDVR(base.BaseRouterTest):
         # has a distributed attribute.
         super(RoutersTestDVR, cls).resource_setup()
         name = data_utils.rand_name('pretest-check')
-        router = cls.admin_client.create_router(name)
-        cls.admin_client.delete_router(router['router']['id'])
+        router = cls.admin_routers_client.create_router(name)
+        cls.admin_routers_client.delete_router(router['router']['id'])
         if 'distributed' not in router['router']:
             msg = "'distributed' flag not found. DVR Possibly not enabled"
             raise cls.skipException(msg)
@@ -53,8 +53,9 @@ class RoutersTestDVR(base.BaseRouterTest):
         set to True
         """
         name = data_utils.rand_name('router')
-        router = self.admin_client.create_router(name, distributed=True)
-        self.addCleanup(self.admin_client.delete_router,
+        router = self.admin_routers_client.create_router(name,
+                                                         distributed=True)
+        self.addCleanup(self.admin_routers_client.delete_router,
                         router['router']['id'])
         self.assertTrue(router['router']['distributed'])
 
@@ -72,8 +73,9 @@ class RoutersTestDVR(base.BaseRouterTest):
         as opposed to a "Distributed Virtual Router"
         """
         name = data_utils.rand_name('router')
-        router = self.admin_client.create_router(name, distributed=False)
-        self.addCleanup(self.admin_client.delete_router,
+        router = self.admin_routers_client.create_router(name,
+                                                         distributed=False)
+        self.addCleanup(self.admin_routers_client.delete_router,
                         router['router']['id'])
         self.assertFalse(router['router']['distributed'])
 
@@ -93,11 +95,12 @@ class RoutersTestDVR(base.BaseRouterTest):
         """
         name = data_utils.rand_name('router')
         # router needs to be in admin state down in order to be upgraded to DVR
-        router = self.admin_client.create_router(name, distributed=False,
-                                                 admin_state_up=False)
-        self.addCleanup(self.admin_client.delete_router,
+        router = self.admin_routers_client.create_router(name,
+                                                         distributed=False,
+                                                         admin_state_up=False)
+        self.addCleanup(self.admin_routers_client.delete_router,
                         router['router']['id'])
         self.assertFalse(router['router']['distributed'])
-        router = self.admin_client.update_router(router['router']['id'],
-                                                 distributed=True)
+        router = self.admin_routers_client.update_router(
+            router['router']['id'], distributed=True)
         self.assertTrue(router['router']['distributed'])

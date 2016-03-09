@@ -131,6 +131,7 @@ from tempest.services.identity.v3.json.users_clients import \
 from tempest.services.image.v1.json.images_client import ImagesClient
 from tempest.services.image.v2.json.images_client import ImagesClientV2
 from tempest.services.network.json.network_client import NetworkClient
+from tempest.services.network.json.routers_client import RoutersClient
 from tempest.services.network.json.security_group_rules_client import \
     SecurityGroupRulesClient
 from tempest.services.object_storage.account_client import AccountClient
@@ -301,6 +302,14 @@ class Manager(manager.Manager):
             build_timeout=CONF.network.build_timeout,
             **self.default_params)
         self.metering_label_rules_client = MeteringLabelRulesClient(
+            self.auth_provider,
+            CONF.network.catalog_type,
+            CONF.network.region or CONF.identity.region,
+            endpoint_type=CONF.network.endpoint_type,
+            build_interval=CONF.network.build_interval,
+            build_timeout=CONF.network.build_timeout,
+            **self.default_params)
+        self.routers_client = RoutersClient(
             self.auth_provider,
             CONF.network.catalog_type,
             CONF.network.region or CONF.identity.region,
