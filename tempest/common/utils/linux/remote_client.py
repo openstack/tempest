@@ -102,7 +102,12 @@ class RemoteClient(object):
         cmd = "ip addr %s| awk '/ether/ {print $2}'" % show_nic
         return self.exec_command(cmd).strip().lower()
 
-    def get_nic_name(self, address):
+    def get_nic_name_by_mac(self, address):
+        cmd = "ip -o link | awk '/%s/ {print $2}'" % address
+        nic = self.exec_command(cmd)
+        return nic.strip().strip(":").lower()
+
+    def get_nic_name_by_ip(self, address):
         cmd = "ip -o addr | awk '/%s/ {print $2}'" % address
         nic = self.exec_command(cmd)
         return nic.strip().strip(":").lower()
@@ -142,7 +147,7 @@ class RemoteClient(object):
     def _renew_lease_udhcpc(self, fixed_ip=None):
         """Renews DHCP lease via udhcpc client. """
         file_path = '/var/run/udhcpc.'
-        nic_name = self.get_nic_name(fixed_ip)
+        nic_name = self.get_nic_name_by_ip(fixed_ip)
         pid = self.exec_command('cat {path}{nic}.pid'.
                                 format(path=file_path, nic=nic_name))
         pid = pid.strip()
