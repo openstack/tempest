@@ -10,7 +10,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest.services.network.json import base
+from tempest.lib.services.network import base
 
 
 class RoutersClient(base.BaseNetworkClient):
