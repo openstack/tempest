@@ -227,7 +227,7 @@ class NegativeSecGroupIPv6Test(NegativeSecGroupTest):
                  {'ethertype': 'IPv4',
                   'ip_prefix': CONF.network.tenant_network_v6_cidr})
         for pair in pairs:
-            self.assertRaisesRegexp(
+            self.assertRaisesRegex(
                 lib_exc.BadRequest,
                 "Conflicting value ethertype",
                 self.security_group_rules_client.create_security_group_rule,
