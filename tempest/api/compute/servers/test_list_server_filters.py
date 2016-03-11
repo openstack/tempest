@@ -14,7 +14,6 @@
 #    under the License.
 
 from tempest.api.compute import base
-from tempest.api import utils
 from tempest.common import fixed_network
 from tempest.common.utils import data_utils
 from tempest.common import waiters
@@ -89,7 +88,7 @@ class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
                                         wait_until='ACTIVE')
 
     @test.idempotent_id('05e8a8e7-9659-459a-989d-92c2f501f4ba')
-    @utils.skip_unless_attr('multiple_images', 'Only one image found')
+    @decorators.skip_unless_attr('multiple_images', 'Only one image found')
     def test_list_servers_filter_by_image(self):
         # Filter the list of servers by image
         params = {'image': self.image_ref}
@@ -174,7 +173,7 @@ class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
                          len([x for x in servers['servers'] if 'id' in x]))
 
     @test.idempotent_id('b3304c3b-97df-46d2-8cd3-e2b6659724e7')
-    @utils.skip_unless_attr('multiple_images', 'Only one image found')
+    @decorators.skip_unless_attr('multiple_images', 'Only one image found')
     def test_list_servers_detailed_filter_by_image(self):
         # Filter the detailed list of servers by image
         params = {'image': self.image_ref}
