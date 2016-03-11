@@ -621,7 +621,7 @@ class NetworksIpV6TestAttrs(NetworksIpV6TestJSON):
         subnet_ids = [subnet['id'] for subnet in subnets['subnets']]
         self.assertNotIn(subnet_slaac['id'], subnet_ids,
                          "Subnet wasn't deleted")
-        self.assertRaisesRegexp(
+        self.assertRaisesRegex(
             lib_exc.Conflict,
             "There are one or more ports still in use on the network",
             self.networks_client.delete_network,

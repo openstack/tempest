@@ -338,12 +338,12 @@ class NetworksTestDHCPv6(base.BaseNetworkTest):
                          fixed_ips=[
                              {'subnet_id': subnet['id'],
                               'ip_address': ip}])
-        self.assertRaisesRegexp(lib_exc.Conflict,
-                                "object with that identifier already exists",
-                                self.create_port,
-                                self.network,
-                                fixed_ips=[{'subnet_id': subnet['id'],
-                                            'ip_address': ip}])
+        self.assertRaisesRegex(lib_exc.Conflict,
+                               "object with that identifier already exists",
+                               self.create_port,
+                               self.network,
+                               fixed_ips=[{'subnet_id': subnet['id'],
+                                           'ip_address': ip}])
 
     def _create_subnet_router(self, kwargs):
         subnet = self.create_subnet(self.network, **kwargs)
