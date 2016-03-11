@@ -47,8 +47,8 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
         super(BaseV2ComputeTest, cls).skip_checks()
         if not CONF.service_available.nova:
             raise cls.skipException("Nova is not available")
-        cfg_min_version = CONF.compute_feature_enabled.min_microversion
-        cfg_max_version = CONF.compute_feature_enabled.max_microversion
+        cfg_min_version = CONF.compute.min_microversion
+        cfg_max_version = CONF.compute.max_microversion
         api_version_utils.check_skip_with_microversion(cls.min_microversion,
                                                        cls.max_microversion,
                                                        cfg_min_version,
@@ -105,7 +105,7 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
         cls.request_microversion = (
             api_version_utils.select_request_microversion(
                 cls.min_microversion,
-                CONF.compute_feature_enabled.min_microversion))
+                CONF.compute.min_microversion))
         cls.build_interval = CONF.compute.build_interval
         cls.build_timeout = CONF.compute.build_timeout
         cls.image_ref = CONF.compute.image_ref

@@ -281,13 +281,7 @@ ComputeGroup = [
                help=('The minimum number of compute nodes expected. This will '
                      'be utilized by some multinode specific tests to ensure '
                      'that requests match the expected size of the cluster '
-                     'you are testing with.'))
-]
-
-compute_features_group = cfg.OptGroup(name='compute-feature-enabled',
-                                      title="Enabled Compute Service Features")
-
-ComputeFeaturesGroup = [
+                     'you are testing with.')),
     cfg.StrOpt('min_microversion',
                default=None,
                help="Lower version of the test target microversion range. "
@@ -296,7 +290,8 @@ ComputeFeaturesGroup = [
                     "min_microversion and max_microversion. "
                     "If both values are not specified, Tempest avoids tests "
                     "which require a microversion. Valid values are string "
-                    "with format 'X.Y' or string 'latest'"),
+                    "with format 'X.Y' or string 'latest'",
+                    deprecated_group='compute-feature-enabled'),
     cfg.StrOpt('max_microversion',
                default=None,
                help="Upper version of the test target microversion range. "
@@ -305,7 +300,14 @@ ComputeFeaturesGroup = [
                     "min_microversion and max_microversion. "
                     "If both values are not specified, Tempest avoids tests "
                     "which require a microversion. Valid values are string "
-                    "with format 'X.Y' or string 'latest'"),
+                    "with format 'X.Y' or string 'latest'",
+                    deprecated_group='compute-feature-enabled'),
+]
+
+compute_features_group = cfg.OptGroup(name='compute-feature-enabled',
+                                      title="Enabled Compute Service Features")
+
+ComputeFeaturesGroup = [
     cfg.BoolOpt('disk_config',
                 default=True,
                 help="If false, skip disk config tests"),
