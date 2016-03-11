@@ -24,15 +24,15 @@ class TestDataUtils(base.TestCase):
     def test_rand_uuid(self):
         actual = data_utils.rand_uuid()
         self.assertIsInstance(actual, str)
-        self.assertRegexpMatches(actual, "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]"
-                                         "{4}-[0-9a-f]{4}-[0-9a-f]{12}$")
+        self.assertRegex(actual, "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]"
+                         "{4}-[0-9a-f]{4}-[0-9a-f]{12}$")
         actual2 = data_utils.rand_uuid()
         self.assertNotEqual(actual, actual2)
 
     def test_rand_uuid_hex(self):
         actual = data_utils.rand_uuid_hex()
         self.assertIsInstance(actual, str)
-        self.assertRegexpMatches(actual, "^[0-9a-f]{32}$")
+        self.assertRegex(actual, "^[0-9a-f]{32}$")
 
         actual2 = data_utils.rand_uuid_hex()
         self.assertNotEqual(actual, actual2)
@@ -52,14 +52,14 @@ class TestDataUtils(base.TestCase):
     def test_rand_name_with_prefix(self):
         actual = data_utils.rand_name(prefix='prefix-str')
         self.assertIsInstance(actual, str)
-        self.assertRegexpMatches(actual, "^prefix-str-")
+        self.assertRegex(actual, "^prefix-str-")
         actual2 = data_utils.rand_name(prefix='prefix-str')
         self.assertNotEqual(actual, actual2)
 
     def test_rand_password(self):
         actual = data_utils.rand_password()
         self.assertIsInstance(actual, str)
-        self.assertRegexpMatches(actual, "[A-Za-z0-9~!@#$%^&*_=+]{15,}")
+        self.assertRegex(actual, "[A-Za-z0-9~!@#$%^&*_=+]{15,}")
         actual2 = data_utils.rand_password()
         self.assertNotEqual(actual, actual2)
 
@@ -67,7 +67,7 @@ class TestDataUtils(base.TestCase):
         actual = data_utils.rand_password(8)
         self.assertIsInstance(actual, str)
         self.assertEqual(len(actual), 8)
-        self.assertRegexpMatches(actual, "[A-Za-z0-9~!@#$%^&*_=+]{8}")
+        self.assertRegex(actual, "[A-Za-z0-9~!@#$%^&*_=+]{8}")
         actual2 = data_utils.rand_password(8)
         self.assertNotEqual(actual, actual2)
 
@@ -75,14 +75,14 @@ class TestDataUtils(base.TestCase):
         actual = data_utils.rand_password(2)
         self.assertIsInstance(actual, str)
         self.assertEqual(len(actual), 3)
-        self.assertRegexpMatches(actual, "[A-Za-z0-9~!@#$%^&*_=+]{3}")
+        self.assertRegex(actual, "[A-Za-z0-9~!@#$%^&*_=+]{3}")
         actual2 = data_utils.rand_password(2)
         self.assertNotEqual(actual, actual2)
 
     def test_rand_url(self):
         actual = data_utils.rand_url()
         self.assertIsInstance(actual, str)
-        self.assertRegexpMatches(actual, "^https://url-[0-9]*\.com$")
+        self.assertRegex(actual, "^https://url-[0-9]*\.com$")
         actual2 = data_utils.rand_url()
         self.assertNotEqual(actual, actual2)
 
@@ -96,8 +96,8 @@ class TestDataUtils(base.TestCase):
     def test_rand_mac_address(self):
         actual = data_utils.rand_mac_address()
         self.assertIsInstance(actual, str)
-        self.assertRegexpMatches(actual, "^([0-9a-f][0-9a-f]:){5}"
-                                         "[0-9a-f][0-9a-f]$")
+        self.assertRegex(actual, "^([0-9a-f][0-9a-f]:){5}"
+                         "[0-9a-f][0-9a-f]$")
 
         actual2 = data_utils.rand_mac_address()
         self.assertNotEqual(actual, actual2)
@@ -117,12 +117,12 @@ class TestDataUtils(base.TestCase):
     def test_random_bytes(self):
         actual = data_utils.random_bytes()  # default size=1024
         self.assertIsInstance(actual, str)
-        self.assertRegexpMatches(actual, "^[\x00-\xFF]{1024}")
+        self.assertRegex(actual, "^[\x00-\xFF]{1024}")
         actual2 = data_utils.random_bytes()
         self.assertNotEqual(actual, actual2)
 
         actual = data_utils.random_bytes(size=2048)
-        self.assertRegexpMatches(actual, "^[\x00-\xFF]{2048}")
+        self.assertRegex(actual, "^[\x00-\xFF]{2048}")
 
     def test_get_ipv6_addr_by_EUI64(self):
         actual = data_utils.get_ipv6_addr_by_EUI64('2001:db8::',
