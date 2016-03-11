@@ -390,6 +390,7 @@ class NetworkService(BaseService):
         self.metering_labels_client = manager.metering_labels_client
         self.metering_label_rules_client = manager.metering_label_rules_client
         self.security_groups_client = manager.security_groups_client
+        self.routers_client = manager.routers_client
 
     def _filter_by_conf_networks(self, item_list):
         if not item_list or not all(('network_id' in i for i in item_list)):
