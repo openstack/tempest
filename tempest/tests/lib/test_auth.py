@@ -530,3 +530,43 @@ class TestKeystoneV3AuthProvider(TestKeystoneV2AuthProvider):
 
         expected = 'http://fake_url/v3'
         self._test_base_url_helper(expected, filters, ('token', auth_data))
+
+
+class TestKeystoneV3Credentials(base.TestCase):
+    def testSetAttrUserDomain(self):
+        creds = auth.KeystoneV3Credentials()
+        creds.user_domain_name = 'user_domain'
+        creds.domain_name = 'domain'
+        self.assertEqual('user_domain', creds.user_domain_name)
+        creds = auth.KeystoneV3Credentials()
+        creds.domain_name = 'domain'
+        creds.user_domain_name = 'user_domain'
+        self.assertEqual('user_domain', creds.user_domain_name)
+
+    def testSetAttrProjectDomain(self):
+        creds = auth.KeystoneV3Credentials()
+        creds.project_domain_name = 'project_domain'
+        creds.domain_name = 'domain'
+        self.assertEqual('project_domain', creds.user_domain_name)
+        creds = auth.KeystoneV3Credentials()
+        creds.domain_name = 'domain'
+        creds.project_domain_name = 'project_domain'
+        self.assertEqual('project_domain', creds.project_domain_name)
+
+    def testProjectTenantNoCollision(self):
+        creds = auth.KeystoneV3Credentials(tenant_id='tenant')
+        self.assertEqual('tenant', creds.project_id)
+        creds = auth.KeystoneV3Credentials(project_id='project')
+        self.assertEqual('project', creds.tenant_id)
+        creds = auth.KeystoneV3Credentials(tenant_name='tenant')
+        self.assertEqual('tenant', creds.project_name)
+        creds = auth.KeystoneV3Credentials(project_name='project')
+        self.assertEqual('project', creds.tenant_name)
+
+    def testProjectTenantCollision(self):
+        attrs = {'tenant_id': 'tenant', 'project_id': 'project'}
+        self.assertRaises(
+            exceptions.InvalidCredentials, auth.KeystoneV3Credentials, **attrs)
+        attrs = {'tenant_name': 'tenant', 'project_name': 'project'}
+        self.assertRaises(
+            exceptions.InvalidCredentials, auth.KeystoneV3Credentials, **attrs)
