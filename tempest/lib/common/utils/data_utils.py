@@ -121,6 +121,18 @@ def rand_mac_address():
     return ':'.join(["%02x" % x for x in mac])
 
 
+def rand_infiniband_guid_address():
+    """Generate an Infiniband GUID address
+
+    :return: an random Infiniband GUID address
+    :rtype: string
+    """
+    guid = []
+    for i in range(8):
+        guid.append("%02x" % random.randint(0x00, 0xff))
+    return ':'.join(guid)
+
+
 def parse_image_id(image_ref):
     """Return the image id from a given image ref
 
