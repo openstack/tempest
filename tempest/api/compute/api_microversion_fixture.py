@@ -14,7 +14,7 @@
 
 import fixtures
 
-from tempest.services.compute.json import base_compute_client
+from tempest.lib.services.compute import base_compute_client
 
 
 class APIMicroversionFixture(fixtures.Fixture):

@@ -18,7 +18,7 @@ from oslo_serialization import jsonutils as json
 from tempest.api_schema.response.compute.v2_1 import keypairs as schemav21
 from tempest.api_schema.response.compute.v2_2 import keypairs as schemav22
 from tempest.lib.common import rest_client
-from tempest.services.compute.json import base_compute_client
+from tempest.lib.services.compute import base_compute_client
 
 
 class KeyPairsClient(base_compute_client.BaseComputeClient):

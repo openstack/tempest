@@ -18,12 +18,12 @@ import time
 from oslo_log import log as logging
 
 from tempest.api.compute import api_microversion_fixture
-from tempest.common import api_version_utils
 from tempest.common import compute
 from tempest.common.utils import data_utils
 from tempest.common import waiters
 from tempest import config
 from tempest import exceptions
+from tempest.lib.common import api_version_utils
 from tempest.lib import exceptions as lib_exc
 import tempest.test
 

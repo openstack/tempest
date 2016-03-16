@@ -153,6 +153,20 @@ class InvalidStructure(TempestException):
     message = "Invalid structure of table with details"
 
 
+class InvalidAPIVersionString(TempestException):
+    message = ("API Version String %(version)s is of invalid format. Must "
+               "be of format MajorNum.MinorNum or string 'latest'.")
+
+
+class JSONSchemaNotFound(TempestException):
+    message = ("JSON Schema for %(version)s is not found in\n"
+               " %(schema_versions_info)s")
+
+
+class InvalidAPIVersionRange(TempestException):
+    message = ("The API version range is invalid.")
+
+
 class BadAltAuth(TempestException):
     """Used when trying and failing to change to alt creds.
 

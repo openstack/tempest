@@ -14,7 +14,7 @@
 
 import re
 
-from tempest import exceptions
+from tempest.lib import exceptions
 
 
 # Define the minimum and maximum version of the API across all of the
@@ -39,6 +39,11 @@ class APIVersionRequest(object):
     This class provides convenience methods for manipulation
     and comparison of version numbers that we need to do to
     implement microversions.
+
+    :param version_string: String representation of APIVersionRequest.
+            Correct format is 'X.Y', where 'X' and 'Y' are int values.
+            None value should be used to create Null APIVersionRequest,
+            which is equal to 0.0
     """
 
     # NOTE: This 'latest' version is a magic number, we assume any
@@ -47,13 +52,7 @@ class APIVersionRequest(object):
     latest_ver_minor = 99999
 
     def __init__(self, version_string=None):
-        """Create an API version request object.
-
-        :param version_string: String representation of APIVersionRequest.
-            Correct format is 'X.Y', where 'X' and 'Y' are int values.
-            None value should be used to create Null APIVersionRequest,
-            which is equal to 0.0
-        """
+        """Create an API version request object."""
         # NOTE(gmann): 'version_string' as String "None" will be considered as
         # invalid version string.
         self.ver_major = 0
@@ -77,6 +76,12 @@ class APIVersionRequest(object):
         return ("API Version Request: %s" % self.get_string())
 
     def is_null(self):
+        """Checks whether version is null.
+
+        Return True if version object is null otherwise False.
+
+        :returns: boolean
+        """
         return self.ver_major == 0 and self.ver_minor == 0
 
     def _format_type_error(self, other):
@@ -120,9 +125,9 @@ class APIVersionRequest(object):
         greater than or equal to the minimum version and less than
         or equal to the maximum version.
 
-        @param min_version: Minimum acceptable version.
-        @param max_version: Maximum acceptable version.
-        @returns: boolean
+        :param min_version: Minimum acceptable version.
+        :param max_version: Maximum acceptable version.
+        :returns: boolean
 
         If min_version is null then there is no minimum limit.
         If max_version is null then there is no maximum limit.

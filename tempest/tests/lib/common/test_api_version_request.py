@@ -12,9 +12,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest.common import api_version_request
-from tempest import exceptions
-from tempest.tests import base
+from tempest.lib.common import api_version_request
+from tempest.lib import exceptions
+from tempest.tests.lib import base
 
 
 class APIVersionRequestTests(base.TestCase):
