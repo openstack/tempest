@@ -13,6 +13,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import socket
+
 import mock
 from oslotest import mockpatch
 import six
@@ -101,6 +103,20 @@ class TestGlanceHTTPClient(base.TestCase):
         self.assertTrue(isinstance(self.client._get_connection(),
                                    glance_http.VerifiedHTTPSConnection))
 
+    def test_get_connection_ipv4_https(self):
+        endpoint = 'https://127.0.0.1'
+        self.fake_auth.base_url = mock.MagicMock(return_value=endpoint)
+        self.client = glance_http.HTTPClient(self.fake_auth, {})
+        self.assertTrue(isinstance(self.client._get_connection(),
+                                   glance_http.VerifiedHTTPSConnection))
+
+    def test_get_connection_ipv6_https(self):
+        endpoint = 'https://[::1]'
+        self.fake_auth.base_url = mock.MagicMock(return_value=endpoint)
+        self.client = glance_http.HTTPClient(self.fake_auth, {})
+        self.assertTrue(isinstance(self.client._get_connection(),
+                                   glance_http.VerifiedHTTPSConnection))
+
     def test_get_connection_url_not_fount(self):
         self.useFixture(mockpatch.PatchObject(self.client, 'connection_class',
                                               side_effect=httplib.InvalidURL()
@@ -144,6 +160,64 @@ class TestGlanceHTTPClient(base.TestCase):
         self.assertEqual(True, kwargs['insecure'])
         self.assertEqual(False, kwargs['ssl_compression'])
         self.assertEqual(6, len(kwargs.keys()))
+
+
+class TestVerifiedHTTPSConnection(base.TestCase):
+
+    @mock.patch('socket.socket')
+    @mock.patch('tempest.common.glance_http.OpenSSLConnectionDelegator')
+    def test_connect_ipv4(self, mock_delegator, mock_socket):
+        connection = glance_http.VerifiedHTTPSConnection('127.0.0.1')
+        connection.connect()
+
+        mock_socket.assert_called_once_with(socket.AF_INET, socket.SOCK_STREAM)
+        mock_delegator.assert_called_once_with(connection.context,
+                                               mock_socket.return_value)
+        mock_delegator.return_value.connect.assert_called_once_with(
+            (connection.host, 443))
+
+    @mock.patch('socket.socket')
+    @mock.patch('tempest.common.glance_http.OpenSSLConnectionDelegator')
+    def test_connect_ipv6(self, mock_delegator, mock_socket):
+        connection = glance_http.VerifiedHTTPSConnection('[::1]')
+        connection.connect()
+
+        mock_socket.assert_called_once_with(socket.AF_INET6,
+                                            socket.SOCK_STREAM)
+        mock_delegator.assert_called_once_with(connection.context,
+                                               mock_socket.return_value)
+        mock_delegator.return_value.connect.assert_called_once_with(
+            (connection.host, 443, 0, 0))
+
+    @mock.patch('tempest.common.glance_http.OpenSSLConnectionDelegator')
+    @mock.patch('socket.getaddrinfo',
+                side_effect=OSError('Gettaddrinfo failed'))
+    def test_connect_with_address_lookup_failure(self, mock_getaddrinfo,
+                                                 mock_delegator):
+        connection = glance_http.VerifiedHTTPSConnection('127.0.0.1')
+        self.assertRaises(exceptions.RestClientException, connection.connect)
+
+        mock_getaddrinfo.assert_called_once_with(
+            connection.host, connection.port, 0, socket.SOCK_STREAM)
+
+    @mock.patch('socket.socket')
+    @mock.patch('socket.getaddrinfo',
+                return_value=[(2, 1, 6, '', ('127.0.0.1', 443))])
+    @mock.patch('tempest.common.glance_http.OpenSSLConnectionDelegator')
+    def test_connect_with_socket_failure(self, mock_delegator,
+                                         mock_getaddrinfo,
+                                         mock_socket):
+        mock_delegator.return_value.connect.side_effect = \
+            OSError('Connect failed')
+
+        connection = glance_http.VerifiedHTTPSConnection('127.0.0.1')
+        self.assertRaises(exceptions.RestClientException, connection.connect)
+
+        mock_getaddrinfo.assert_called_once_with(
+            connection.host, connection.port, 0, socket.SOCK_STREAM)
+        mock_socket.assert_called_once_with(socket.AF_INET, socket.SOCK_STREAM)
+        mock_delegator.return_value.connect.\
+            assert_called_once_with((connection.host, 443))
 
 
 class TestResponseBodyIterator(base.TestCase):
