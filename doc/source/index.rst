@@ -12,6 +12,7 @@ Contents:
    REVIEWING
    plugin
    library
+   microversion_testing
 
 ------------
 Field Guides
