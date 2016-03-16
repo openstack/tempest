@@ -23,15 +23,14 @@ COMPUTE_MICROVERSION = None
 class BaseComputeClient(rest_client.RestClient):
     """Base compute service clients class to support microversion.
 
-    This class adds microversion to API request header if same is set
-    and provide interface to select appropriate JSON schema file for
+    This class adds microversion to API request header if that is set
+    and provides interface to select appropriate JSON schema file for
     response validation.
 
-    :param auth_provider: an auth provider object used to wrap requests in
+    :param auth_provider: An auth provider object used to wrap requests in
                           auth
     :param str service: The service name to use for the catalog lookup
     :param str region: The region to use for the catalog lookup
-                                             request with microversion
     :param kwargs: kwargs required by rest_client.RestClient
     """
 
@@ -79,12 +78,12 @@ class BaseComputeClient(rest_client.RestClient):
         for items in schema_versions_info:
             min_version = api_version_request.APIVersionRequest(items['min'])
             max_version = api_version_request.APIVersionRequest(items['max'])
-            # This is case where self.api_microversion is None, which means
+            # This is case where COMPUTE_MICROVERSION is None, which means
             # request without microversion So select base v2.1 schema.
             if version.is_null() and items['min'] is None:
                 schema = items['schema']
                 break
-            # else select appropriate schema as per self.api_microversion
+            # else select appropriate schema as per COMPUTE_MICROVERSION
             elif version.matches(min_version, max_version):
                 schema = items['schema']
                 break
