@@ -354,8 +354,6 @@ def main(opts=None):
     outfile = sys.stdout
     if update:
         conf_file = _get_config_file()
-        if opts.output:
-            outfile = open(opts.output, 'w+')
         CONF_PARSER = moves.configparser.SafeConfigParser()
         CONF_PARSER.optionxform = str
         CONF_PARSER.readfp(conf_file)
@@ -378,8 +376,9 @@ def main(opts=None):
         display_results(results, update, replace)
         if update:
             conf_file.close()
-            CONF_PARSER.write(outfile)
-        outfile.close()
+            if opts.output:
+                with open(opts.output, 'w+') as outfile:
+                    CONF_PARSER.write(outfile)
     finally:
         icreds.clear_creds()
 

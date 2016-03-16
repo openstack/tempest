@@ -117,7 +117,6 @@ class TempestCleanup(command.Command):
 
         if is_dry_run:
             self.dry_run_data["_tenants_to_clean"] = {}
-            f = open(DRY_RUN_JSON, 'w+')
 
         admin_mgr = self.admin_mgr
         # Always cleanup tempest and alt tempest tenants unless
@@ -146,9 +145,9 @@ class TempestCleanup(command.Command):
             svc.run()
 
         if is_dry_run:
-            f.write(json.dumps(self.dry_run_data, sort_keys=True,
-                               indent=2, separators=(',', ': ')))
-            f.close()
+            with open(DRY_RUN_JSON, 'w+') as f:
+                f.write(json.dumps(self.dry_run_data, sort_keys=True,
+                                   indent=2, separators=(',', ': ')))
 
         self._remove_admin_user_roles()
 
@@ -281,16 +280,15 @@ class TempestCleanup(command.Command):
             svc = service(admin_mgr, **kwargs)
             svc.run()
 
-        f = open(SAVED_STATE_JSON, 'w+')
-        f.write(json.dumps(data,
-                           sort_keys=True, indent=2, separators=(',', ': ')))
-        f.close()
+        with open(SAVED_STATE_JSON, 'w+') as f:
+            f.write(json.dumps(data,
+                    sort_keys=True, indent=2, separators=(',', ': ')))
 
     def _load_json(self):
         try:
-            json_file = open(SAVED_STATE_JSON)
-            self.json_data = json.load(json_file)
-            json_file.close()
+            with open(SAVED_STATE_JSON) as json_file:
+                self.json_data = json.load(json_file)
+
         except IOError as ex:
             LOG.exception("Failed loading saved state, please be sure you"
                           " have first run cleanup with --init-saved-state "

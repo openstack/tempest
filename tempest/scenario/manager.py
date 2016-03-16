@@ -394,8 +394,6 @@ class ScenarioTest(tempest.test.BaseTestCase):
         if properties is None:
             properties = {}
         name = data_utils.rand_name('%s-' % name)
-        image_file = open(path, 'rb')
-        self.addCleanup(image_file.close)
         params = {
             'name': name,
             'container_format': fmt,
@@ -406,7 +404,8 @@ class ScenarioTest(tempest.test.BaseTestCase):
         image = self.image_client.create_image(**params)['image']
         self.addCleanup(self.image_client.delete_image, image['id'])
         self.assertEqual("queued", image['status'])
-        self.image_client.update_image(image['id'], data=image_file)
+        with open(path, 'rb') as image_file:
+            self.image_client.update_image(image['id'], data=image_file)
         return image['id']
 
     def glance_image_create(self):

@@ -36,9 +36,8 @@ class TestTempestInit(base.TestCase):
         testr_conf_file = init.TESTR_CONF % (top_level_path, discover_path)
 
         conf_path = conf_dir.join('.testr.conf')
-        conf_file = open(conf_path, 'r')
-        self.addCleanup(conf_file.close)
-        self.assertEqual(conf_file.read(), testr_conf_file)
+        with open(conf_path, 'r') as conf_file:
+            self.assertEqual(conf_file.read(), testr_conf_file)
 
     def test_generate_sample_config(self):
         local_dir = self.useFixture(fixtures.TempDir())
