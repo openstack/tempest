@@ -16,6 +16,7 @@
 import testtools
 
 from tempest.api.compute import base
+from tempest.common import compute
 from tempest.common.utils.linux import remote_client
 from tempest.common import waiters
 from tempest import config
@@ -25,6 +26,7 @@ CONF = config.CONF
 
 
 class AttachVolumeTestJSON(base.BaseV2ComputeTest):
+    max_microversion = '2.19'
 
     def __init__(self, *args, **kwargs):
         super(AttachVolumeTestJSON, self).__init__(*args, **kwargs)
@@ -62,7 +64,7 @@ class AttachVolumeTestJSON(base.BaseV2ComputeTest):
             self.volumes_client.wait_for_resource_deletion(self.volume['id'])
             self.volume = None
 
-    def _create_and_attach(self):
+    def _create_and_attach(self, shelve_server=False):
         # Start a server and wait for it to become ready
         self.admin_pass = self.image_ssh_password
         self.server = self.create_test_server(
@@ -80,6 +82,9 @@ class AttachVolumeTestJSON(base.BaseV2ComputeTest):
         self.addCleanup(self._delete_volume)
         waiters.wait_for_volume_status(self.volumes_client,
                                        self.volume['id'], 'available')
+
+        if shelve_server:
+            compute.shelve_server(self.servers_client, self.server['id'])
 
         # Attach the volume to the server
         self.attachment = self.servers_client.attach_volume(
@@ -152,3 +157,66 @@ class AttachVolumeTestJSON(base.BaseV2ComputeTest):
         self.assertEqual(self.server['id'], body['serverId'])
         self.assertEqual(self.volume['id'], body['volumeId'])
         self.assertEqual(self.attachment['id'], body['id'])
+
+
+class AttachVolumeShelveTestJSON(AttachVolumeTestJSON):
+    """Testing volume with shelved instance.
+
+    This test checks the attaching and detaching volumes from
+    a shelved or shelved ofload instance.
+    """
+
+    min_microversion = '2.20'
+    max_microversion = 'latest'
+
+    def _unshelve_server_and_check_volumes(self, number_of_partition):
+        # Unshelve the instance and check that there are expected volumes
+        self.servers_client.unshelve_server(self.server['id'])
+        waiters.wait_for_server_status(self.servers_client,
+                                       self.server['id'],
+                                       'ACTIVE')
+        linux_client = remote_client.RemoteClient(
+            self.get_server_ip(self.server['id']),
+            self.image_ssh_user,
+            self.admin_pass,
+            self.validation_resources['keypair']['private_key'])
+
+        command = 'grep vd /proc/partitions | wc -l'
+        nb_partitions = linux_client.exec_command(command).strip()
+        self.assertEqual(number_of_partition, nb_partitions)
+
+    @test.idempotent_id('13a940b6-3474-4c3c-b03f-29b89112bfee')
+    @testtools.skipUnless(CONF.compute_feature_enabled.shelve,
+                          'Shelve is not available.')
+    @testtools.skipUnless(CONF.validation.run_validation,
+                          'SSH required for this test')
+    def test_attach_volume_shelved_or_offload_server(self):
+        self._create_and_attach(shelve_server=True)
+
+        # Unshelve the instance and check that there are two volumes
+        self._unshelve_server_and_check_volumes('2')
+
+        # Get Volume attachment of the server
+        volume_attachment = self.servers_client.show_volume_attachment(
+            self.server['id'],
+            self.attachment['id'])['volumeAttachment']
+        self.assertEqual(self.server['id'], volume_attachment['serverId'])
+        self.assertEqual(self.attachment['id'], volume_attachment['id'])
+        # Check the mountpoint is not None after unshelve server even in
+        # case of shelved_offloaded.
+        self.assertIsNotNone(volume_attachment['device'])
+
+    @test.idempotent_id('b54e86dd-a070-49c4-9c07-59ae6dae15aa')
+    @testtools.skipUnless(CONF.compute_feature_enabled.shelve,
+                          'Shelve is not available.')
+    @testtools.skipUnless(CONF.validation.run_validation,
+                          'SSH required for this test')
+    def test_detach_volume_shelved_or_offload_server(self):
+        self._create_and_attach(shelve_server=True)
+
+        # Detach the volume
+        self._detach(self.server['id'], self.volume['id'])
+        self.attachment = None
+
+        # Unshelve the instance and check that there is only one volume
+        self._unshelve_server_and_check_volumes('1')
