@@ -109,7 +109,7 @@ class TestSkipUnlessAttrDecorator(base.TestCase):
         t = TestFoo('test_foo')
         if expected_to_skip:
             self.assertRaises(testtools.TestCase.skipException,
-                              t.test_foo())
+                              t.test_foo)
         else:
             try:
                 t.test_foo()
