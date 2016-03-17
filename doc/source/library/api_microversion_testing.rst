@@ -8,7 +8,7 @@ Framework to support API Microversion testing
 ---------------------------------------------
 
 Many of the OpenStack components have implemented API microversions.
-It is important to tests those microversion in Tempest or external plugins.
+It is important to test those microversions in Tempest or external plugins.
 Tempest now provides stable interfaces to support to test the API microversions.
 Based on the microversion range coming from the combination of both configuration
 and each test case, APIs request will be made with selected microversion.

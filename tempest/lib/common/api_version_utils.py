@@ -82,7 +82,7 @@ def check_skip_with_microversion(test_min_version, test_max_version,
 
 
 def select_request_microversion(test_min_version, cfg_min_version):
-    """Select microversion from test and configuration.
+    """Select microversion from test and configuration min version.
 
     Compare requested microversion and return the maximum
     microversion out of those.
@@ -101,7 +101,7 @@ def select_request_microversion(test_min_version, cfg_min_version):
 def assert_version_header_matches_request(api_microversion_header_name,
                                           api_microversion,
                                           response_header):
-    """Checks API microversion in resposne header
+    """Checks API microversion in response header
 
     Verify whether microversion is present in response header
     and with specified 'api_microversion' value.
