@@ -262,7 +262,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
         return server
 
     def create_volume(self, size=None, name=None, snapshot_id=None,
-                      imageRef=None, volume_type=None, wait_on_delete=True):
+                      imageRef=None, volume_type=None):
         if name is None:
             name = data_utils.rand_name(self.__class__.__name__)
         kwargs = {'display_name': name,
@@ -273,17 +273,10 @@ class ScenarioTest(tempest.test.BaseTestCase):
             kwargs.update({'size': size})
         volume = self.volumes_client.create_volume(**kwargs)['volume']
 
-        if wait_on_delete:
-            self.addCleanup(self.volumes_client.wait_for_resource_deletion,
-                            volume['id'])
-            self.addCleanup(self.delete_wrapper,
-                            self.volumes_client.delete_volume, volume['id'])
-        else:
-            self.addCleanup_with_wait(
-                waiter_callable=self.volumes_client.wait_for_resource_deletion,
-                thing_id=volume['id'], thing_id_param='id',
-                cleanup_callable=self.delete_wrapper,
-                cleanup_args=[self.volumes_client.delete_volume, volume['id']])
+        self.addCleanup(self.volumes_client.wait_for_resource_deletion,
+                        volume['id'])
+        self.addCleanup(self.delete_wrapper,
+                        self.volumes_client.delete_volume, volume['id'])
 
         # NOTE(e0ne): Cinder API v2 uses name instead of display_name
         if 'display_name' in volume:
