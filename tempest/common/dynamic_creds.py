@@ -240,7 +240,7 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
         external_net_id = dict(
             network_id=CONF.network.public_network_id)
         resp_body = self.routers_admin_client.create_router(
-            router_name,
+            name=router_name,
             external_gateway_info=external_net_id,
             tenant_id=tenant_id)
         return resp_body['router']

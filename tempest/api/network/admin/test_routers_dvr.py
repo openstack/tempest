@@ -34,7 +34,7 @@ class RoutersTestDVR(base.BaseRouterTest):
         # has a distributed attribute.
         super(RoutersTestDVR, cls).resource_setup()
         name = data_utils.rand_name('pretest-check')
-        router = cls.admin_routers_client.create_router(name)
+        router = cls.admin_routers_client.create_router(name=name)
         cls.admin_routers_client.delete_router(router['router']['id'])
         if 'distributed' not in router['router']:
             msg = "'distributed' flag not found. DVR Possibly not enabled"
@@ -53,7 +53,7 @@ class RoutersTestDVR(base.BaseRouterTest):
         set to True
         """
         name = data_utils.rand_name('router')
-        router = self.admin_routers_client.create_router(name,
+        router = self.admin_routers_client.create_router(name=name,
                                                          distributed=True)
         self.addCleanup(self.admin_routers_client.delete_router,
                         router['router']['id'])
@@ -73,7 +73,7 @@ class RoutersTestDVR(base.BaseRouterTest):
         as opposed to a "Distributed Virtual Router"
         """
         name = data_utils.rand_name('router')
-        router = self.admin_routers_client.create_router(name,
+        router = self.admin_routers_client.create_router(name=name,
                                                          distributed=False)
         self.addCleanup(self.admin_routers_client.delete_router,
                         router['router']['id'])
@@ -95,7 +95,7 @@ class RoutersTestDVR(base.BaseRouterTest):
         """
         name = data_utils.rand_name('router')
         # router needs to be in admin state down in order to be upgraded to DVR
-        router = self.admin_routers_client.create_router(name,
+        router = self.admin_routers_client.create_router(name=name,
                                                          distributed=False,
                                                          admin_state_up=False)
         self.addCleanup(self.admin_routers_client.delete_router,

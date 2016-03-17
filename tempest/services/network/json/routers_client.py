@@ -15,10 +15,13 @@ from tempest.lib.services.network import base
 
 class RoutersClient(base.BaseNetworkClient):
 
-    def create_router(self, name, admin_state_up=True, **kwargs):
+    def create_router(self, **kwargs):
+        """Create a router.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-networking-v2-ext.html#createRouter
+        """
         post_body = {'router': kwargs}
-        post_body['router']['name'] = name
-        post_body['router']['admin_state_up'] = admin_state_up
         uri = '/routers'
         return self.create_resource(uri, post_body)
 

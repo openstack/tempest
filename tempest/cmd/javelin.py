@@ -838,7 +838,7 @@ def create_routers(routers):
             LOG.warning("Duplicated router name: %s" % router['name'])
             continue
 
-        client.networks.create_router(router['name'])
+        client.networks.create_router(name=router['name'])
 
 
 def destroy_routers(routers):
