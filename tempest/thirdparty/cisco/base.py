@@ -82,6 +82,10 @@ class UCSMTestMixin(object):
         for c in self.multi_ucsm_clients.values():
             c.logout()
 
+    def _verify_sriov_configured(self):
+        if not CONF.virtual_functions_amount:
+            raise self.skipException('There are no SR-IOV ports. Update tempest.conf')
+
     def _verify_single_ucsm_configured(self):
         if not CONF.ucsm.compute_host_dict:
             raise self.skipException('There are no computes. Update tempest.conf')

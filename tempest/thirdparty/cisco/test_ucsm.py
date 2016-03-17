@@ -526,6 +526,7 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
         * Attaching instance to SR-IOV port
         """
         self._verify_single_ucsm_configured()
+        self._verify_sriov_configured()
 
         # Create network, subnet and port (type=direct)
         network_obj = self._create_network()
@@ -584,6 +585,7 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
         * Delete bulk port profiles
         """
         self._verify_single_ucsm_configured()
+        self._verify_sriov_configured()
 
         # Create networks
         names = [data_utils.rand_name('network-')
@@ -689,6 +691,7 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
         * Intra VM to VM connectivity
         """
         self._verify_single_ucsm_configured()
+        self._verify_sriov_configured()
 
         master_host = random.choice(self.compute_host_dict.keys())
 
@@ -718,6 +721,7 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
         * Inter VM to VM connectivity
         """
         self._verify_single_ucsm_configured()
+        self._verify_sriov_configured()
 
         master_host, slave_host = random.sample(self.compute_host_dict.keys(), 2)
 
