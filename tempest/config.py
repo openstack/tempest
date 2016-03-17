@@ -1344,6 +1344,7 @@ UcsmGroup = [
                 help="List of ucsm IPs. Used in testing multi-ucsm installation"),
     cfg.ListOpt('physnets',
                 help="List of physnets. Used in testing vNIC templates"),
+    cfg.BoolOpt('test_connectivity', default=True, help='Run connectivity tests')
 ]
 
 _opts = [

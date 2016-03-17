@@ -82,8 +82,12 @@ class UCSMTestMixin(object):
         for c in self.multi_ucsm_clients.values():
             c.logout()
 
+    def _verify_connectivity_tests_enabled(self):
+        if not CONF.ucsm.test_connectivity:
+            raise self.skipException('Connectivity tests are not enabled. Update tempest.conf')
+
     def _verify_sriov_configured(self):
-        if not CONF.virtual_functions_amount:
+        if not CONF.ucsm.virtual_functions_amount:
             raise self.skipException('There are no SR-IOV ports. Update tempest.conf')
 
     def _verify_single_ucsm_configured(self):
@@ -114,21 +118,22 @@ def parse_tempest_multi_ucsm_config(ucsm_list):
     conf = cfg.ConfigOpts()
 
     config_groups = list()
-    for ucsm in ucsm_list:
-        group_name = 'ucsm:{0}'.format(ucsm)
-        group_title = 'Options for UCSM {0}'.format(group_name)
-        group = cfg.OptGroup(name=group_name, title=group_title)
-        opts = [
-            cfg.StrOpt('ucsm_ip', default=ucsm, help="UCSM username"),
-            cfg.StrOpt('ucsm_username', help="UCSM username"),
-            cfg.StrOpt('ucsm_password', help="UCSM password"),
-            cfg.DictOpt('controller_host_dict', help="Dictionary <controller_hostname>:<service_profile>"),
-            cfg.DictOpt('compute_host_dict', help="Dictionary <compute_hostname>:<service_profile>"),
-            cfg.ListOpt('eth_names', default=['eth0', 'eth1'], help="eth names"),
-            cfg.DictOpt('vnic_template_dict', help="vNIC templates"),
-            cfg.IntOpt('virtual_functions_amount', help="Amount of virtual functions"),
-        ]
-        conf.register_opts(opts, group)
-        config_groups.append(group)
+    if ucsm_list:
+        for ucsm in ucsm_list:
+            group_name = 'ucsm:{0}'.format(ucsm)
+            group_title = 'Options for UCSM {0}'.format(group_name)
+            group = cfg.OptGroup(name=group_name, title=group_title)
+            opts = [
+                cfg.StrOpt('ucsm_ip', default=ucsm, help="UCSM username"),
+                cfg.StrOpt('ucsm_username', help="UCSM username"),
+                cfg.StrOpt('ucsm_password', help="UCSM password"),
+                cfg.DictOpt('controller_host_dict', help="Dictionary <controller_hostname>:<service_profile>"),
+                cfg.DictOpt('compute_host_dict', help="Dictionary <compute_hostname>:<service_profile>"),
+                cfg.ListOpt('eth_names', default=['eth0', 'eth1'], help="eth names"),
+                cfg.DictOpt('vnic_template_dict', help="vNIC templates"),
+                cfg.IntOpt('virtual_functions_amount', help="Amount of virtual functions"),
+            ]
+            conf.register_opts(opts, group)
+            config_groups.append(group)
     conf(args=[], project='ucsm_tests', default_config_files=CONF.default_config_files)
     return {conf[g.name]['ucsm_ip']: conf[g.name] for g in config_groups}

@@ -98,6 +98,9 @@ eth_names=eth0,eth1
 # Amount of "SR-IOV ports"/"Dynamic VNICs"/"Virtual functions"
 virtual_functions_amount=4
 
+# Set it to False if you wnat to skip sonnectivity tests
+test_connectivity=True
+
 # Parameters needed for testing multi-ucsm installation
 # UCSMs list. Each UCSM has it's own section named [ucsm:<ucsm ip>] below
 ucsm_list = 10.10.0.200,10.10.0.156
@@ -780,6 +783,7 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
         * Intra VM to VM connectivity
         """
         self._verify_single_ucsm_configured()
+        self._verify_connectivity_tests_enabled()
 
         master_host = random.choice(self.compute_host_dict.keys())
 
@@ -806,6 +810,10 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
         * Inter VM to VM connectivity
         """
         self._verify_single_ucsm_configured()
+        self._verify_connectivity_tests_enabled()
+        if len(self.compute_host_dict.keys()) < 2:
+            raise self.skipException('Not enough amount of compute hosts. Need at least 2. '
+                                     'Update tempest.conf')
 
         master_host, slave_host = random.sample(self.compute_host_dict.keys(), 2)
 
@@ -833,6 +841,7 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
         least one instance on a host
         """
         self._verify_single_ucsm_configured()
+        self._verify_connectivity_tests_enabled()
 
         master_host = random.choice(self.compute_host_dict.keys())
 
@@ -956,6 +965,7 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
         * VLAN profile is deleted once network is removed
         """
         self._verify_multi_ucsm_configured()
+        self._verify_connectivity_tests_enabled()
 
         network_obj, subnet_obj, router_obj = self.create_networks()
         kwargs = {'security_groups': [self.security_group['id']]}
@@ -1013,6 +1023,7 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
         * Right vNICs are configured in a certain UCSM
         """
         self._verify_multi_ucsm_configured(need_amount=1)
+        self._verify_connectivity_tests_enabled()
 
         ucsm_conf1 = random.choice(self.multi_ucsm_conf.values())
         ucsm_client1 = self.multi_ucsm_clients[ucsm_conf1['ucsm_ip']]
@@ -1076,6 +1087,7 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
         * Right vNICs are configured in a certain UCSM
         """
         self._verify_multi_ucsm_configured(need_amount=2)
+        self._verify_connectivity_tests_enabled()
 
         ucsm_conf1, ucsm_conf2 = random.sample(self.multi_ucsm_conf.values(), 2)
         ucsm_client1 = self.multi_ucsm_clients[ucsm_conf1['ucsm_ip']]
@@ -1141,6 +1153,7 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
         * VLAN is not deleted from a service profile template if it used by at least one neutron port on a compute host
         """
         self._verify_multi_ucsm_configured()
+        self._verify_connectivity_tests_enabled()
 
         ucsm_conf1 = random.choice(self.multi_ucsm_conf.values())
         ucsm_client1 = self.multi_ucsm_clients[ucsm_conf1['ucsm_ip']]
@@ -1261,6 +1274,7 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
         * VLAN profile is not deleted if it used by at least one vNIC Template
         """
         self._verify_vnic_templates_configured(need_amount=2)
+        self._verify_connectivity_tests_enabled()
 
         random_physnet = random.choice(CONF.ucsm.physnets)
         ucsm_conf1, ucsm_conf2 = random.sample(self.ucsm_confs_with_vnic_templates, 2)
@@ -1316,6 +1330,7 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
         * VLAN is not deleted from vNIC template if it used by at least one neutron port on a compute host
         """
         self._verify_vnic_templates_configured()
+        self._verify_connectivity_tests_enabled()
 
         random_physnet = random.choice(CONF.ucsm.physnets)
         ucsm_conf1 = random.choice(self.ucsm_confs_with_vnic_templates)
