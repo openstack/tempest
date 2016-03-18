@@ -14,8 +14,7 @@
 
 import json
 
-import httplib2
-from oslotest import mockpatch
+import mock
 
 from tempest.lib.common import rest_client
 from tempest.lib import exceptions
@@ -24,11 +23,10 @@ from tempest.tests.lib import base
 from tempest.tests.lib import fake_http
 
 
-class TestTokenClientV2(base.TestCase):
+class TestTokenClientV3(base.TestCase):
 
     def setUp(self):
-        super(TestTokenClientV2, self).setUp()
-        self.fake_201_http = fake_http.fake_httplib2(return_type=201)
+        super(TestTokenClientV3, self).setUp()
 
     def test_init_without_authurl(self):
         self.assertRaises(exceptions.IdentityError,
@@ -36,10 +34,16 @@ class TestTokenClientV2(base.TestCase):
 
     def test_auth(self):
         token_client_v3 = token_client.V3TokenClient('fake_url')
-        post_mock = self.useFixture(mockpatch.PatchObject(
-            token_client_v3, 'post', return_value=self.fake_201_http.request(
-                'fake_url', body={'access': {'token': 'fake_token'}})))
-        resp = token_client_v3.auth(username='fake_user', password='fake_pass')
+        response = fake_http.fake_http_response(
+            None, status=201,
+        )
+        body = {'access': {'token': 'fake_token'}}
+
+        with mock.patch.object(token_client_v3, 'post') as post_mock:
+            post_mock.return_value = response, body
+            resp = token_client_v3.auth(username='fake_user',
+                                        password='fake_pass')
+
         self.assertIsInstance(resp, rest_client.ResponseBody)
         req_dict = json.dumps({
             'auth': {
@@ -54,19 +58,24 @@ class TestTokenClientV2(base.TestCase):
                 },
             }
         }, sort_keys=True)
-        post_mock.mock.assert_called_once_with('fake_url/auth/tokens',
-                                               body=req_dict)
+        post_mock.assert_called_once_with('fake_url/auth/tokens',
+                                          body=req_dict)
 
     def test_auth_with_project_id_and_domain_id(self):
         token_client_v3 = token_client.V3TokenClient('fake_url')
-        post_mock = self.useFixture(mockpatch.PatchObject(
-            token_client_v3, 'post', return_value=self.fake_201_http.request(
-                'fake_url', body={'access': {'token': 'fake_token'}})))
-        resp = token_client_v3.auth(
-            username='fake_user', password='fake_pass',
-            project_id='fcac2a055a294e4c82d0a9c21c620eb4',
-            user_domain_id='14f4a9a99973404d8c20ba1d2af163ff',
-            project_domain_id='291f63ae9ac54ee292ca09e5f72d9676')
+        response = fake_http.fake_http_response(
+            None, status=201,
+        )
+        body = {'access': {'token': 'fake_token'}}
+
+        with mock.patch.object(token_client_v3, 'post') as post_mock:
+            post_mock.return_value = response, body
+            resp = token_client_v3.auth(
+                username='fake_user', password='fake_pass',
+                project_id='fcac2a055a294e4c82d0a9c21c620eb4',
+                user_domain_id='14f4a9a99973404d8c20ba1d2af163ff',
+                project_domain_id='291f63ae9ac54ee292ca09e5f72d9676')
+
         self.assertIsInstance(resp, rest_client.ResponseBody)
         req_dict = json.dumps({
             'auth': {
@@ -92,16 +101,22 @@ class TestTokenClientV2(base.TestCase):
                 }
             }
         }, sort_keys=True)
-        post_mock.mock.assert_called_once_with('fake_url/auth/tokens',
-                                               body=req_dict)
+        post_mock.assert_called_once_with('fake_url/auth/tokens',
+                                          body=req_dict)
 
     def test_auth_with_tenant(self):
-        token_client_v2 = token_client.V3TokenClient('fake_url')
-        post_mock = self.useFixture(mockpatch.PatchObject(
-            token_client_v2, 'post', return_value=self.fake_201_http.request(
-                'fake_url', body={'access': {'token': 'fake_token'}})))
-        resp = token_client_v2.auth(username='fake_user', password='fake_pass',
-                                    project_name='fake_tenant')
+        token_client_v3 = token_client.V3TokenClient('fake_url')
+        response = fake_http.fake_http_response(
+            None, status=201,
+        )
+        body = {'access': {'token': 'fake_token'}}
+
+        with mock.patch.object(token_client_v3, 'post') as post_mock:
+            post_mock.return_value = response, body
+            resp = token_client_v3.auth(username='fake_user',
+                                        password='fake_pass',
+                                        project_name='fake_tenant')
+
         self.assertIsInstance(resp, rest_client.ResponseBody)
         req_dict = json.dumps({
             'auth': {
@@ -121,25 +136,32 @@ class TestTokenClientV2(base.TestCase):
             }
         }, sort_keys=True)
 
-        post_mock.mock.assert_called_once_with('fake_url/auth/tokens',
-                                               body=req_dict)
+        post_mock.assert_called_once_with('fake_url/auth/tokens',
+                                          body=req_dict)
 
     def test_request_with_str_body(self):
         token_client_v3 = token_client.V3TokenClient('fake_url')
-        self.useFixture(mockpatch.PatchObject(
-            token_client_v3, 'raw_request', return_value=(
-                httplib2.Response({"status": "200"}),
-                str('{"access": {"token": "fake_token"}}'))))
-        resp, body = token_client_v3.request('GET', 'fake_uri')
-        self.assertIsInstance(resp, httplib2.Response)
+        response = fake_http.fake_http_response(
+            None, status=200,
+        )
+        body = str('{"access": {"token": "fake_token"}}')
+
+        with mock.patch.object(token_client_v3, 'raw_request') as mock_raw_r:
+            mock_raw_r.return_value = response, body
+            resp, body = token_client_v3.request('GET', 'fake_uri')
+
         self.assertIsInstance(body, dict)
 
     def test_request_with_bytes_body(self):
         token_client_v3 = token_client.V3TokenClient('fake_url')
-        self.useFixture(mockpatch.PatchObject(
-            token_client_v3, 'raw_request', return_value=(
-                httplib2.Response({"status": "200"}),
-                bytes(b'{"access": {"token": "fake_token"}}'))))
-        resp, body = token_client_v3.request('GET', 'fake_uri')
-        self.assertIsInstance(resp, httplib2.Response)
+
+        response = fake_http.fake_http_response(
+            None, status=200,
+        )
+        body = b'{"access": {"token": "fake_token"}}'
+
+        with mock.patch.object(token_client_v3, 'raw_request') as mock_raw_r:
+            mock_raw_r.return_value = response, body
+            resp, body = token_client_v3.request('GET', 'fake_uri')
+
         self.assertIsInstance(body, dict)

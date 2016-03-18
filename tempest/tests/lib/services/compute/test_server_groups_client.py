@@ -12,12 +12,11 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import httplib2
-
 from oslotest import mockpatch
 from tempest.tests.lib import fake_auth_provider
 
 from tempest.lib.services.compute import server_groups_client
+from tempest.tests.lib import fake_http
 from tempest.tests.lib.services.compute import base
 
 
@@ -50,7 +49,7 @@ class TestServerGroupsClient(base.BaseComputeServiceTest):
         self._test_create_server_group(bytes_body=True)
 
     def test_delete_server_group(self):
-        response = (httplib2.Response({'status': 204}), None)
+        response = fake_http.fake_http_response({}, status=204), ''
         self.useFixture(mockpatch.Patch(
             'tempest.lib.common.rest_client.RestClient.delete',
             return_value=response))

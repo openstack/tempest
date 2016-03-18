@@ -15,7 +15,6 @@
 #    under the License.
 
 import argparse
-import httplib2
 import os
 import sys
 import traceback
@@ -29,6 +28,7 @@ from six.moves.urllib import parse as urlparse
 from tempest import clients
 from tempest.common import credentials_factory as credentials
 from tempest import config
+import tempest.lib.common.http
 
 
 CONF = config.CONF
@@ -91,11 +91,12 @@ def _get_api_versions(os, service):
     }
     client_dict[service].skip_path()
     endpoint = _get_unversioned_endpoint(client_dict[service].base_url)
-    dscv = CONF.identity.disable_ssl_certificate_validation
-    ca_certs = CONF.identity.ca_certificates_file
-    raw_http = httplib2.Http(disable_ssl_certificate_validation=dscv,
-                             ca_certs=ca_certs)
-    __, body = raw_http.request(endpoint, 'GET')
+
+    http = tempest.lib.common.http.ClosingHttp(
+        CONF.identity.disable_ssl_certificate_validation,
+        CONF.identity.ca_certificates_file)
+
+    __, body = http.request(endpoint, 'GET')
     client_dict[service].reset_path()
     try:
         body = json.loads(body)

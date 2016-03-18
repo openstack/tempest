@@ -24,7 +24,6 @@ from tempest.lib.services.identity.v2 import token_client as v2_client
 from tempest.lib.services.identity.v3 import token_client as v3_client
 from tempest.tests.lib import base
 from tempest.tests.lib import fake_credentials
-from tempest.tests.lib import fake_http
 from tempest.tests.lib import fake_identity
 
 
@@ -42,7 +41,6 @@ class BaseAuthTestsSetUp(base.TestCase):
 
     def setUp(self):
         super(BaseAuthTestsSetUp, self).setUp()
-        self.fake_http = fake_http.fake_httplib2(return_type=200)
         self.stubs.Set(auth, 'get_credentials', fake_get_credentials)
         self.auth_provider = self._auth(self.credentials,
                                         fake_identity.FAKE_AUTH_URL)
