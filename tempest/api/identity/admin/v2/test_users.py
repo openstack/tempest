@@ -13,6 +13,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import time
+
 from testtools import matchers
 
 from tempest.api.identity import base
@@ -207,9 +209,11 @@ class UsersTestJSON(base.BaseIdentityV2AdminTest):
         update_user = self.users_client.update_user_password(
             self.data.user['id'], password=new_pass)['user']
         self.assertEqual(update_user['id'], self.data.user['id'])
-
-        # Validate the updated password
-        # Get a token
+        # NOTE(morganfainberg): Fernet tokens are not subsecond aware and
+        # Keystone should only be precise to the second. Sleep to ensure
+        # we are passing the second boundary.
+        time.sleep(1)
+        # Validate the updated password through getting a token.
         body = self.token_client.auth(self.data.user['name'], new_pass,
                                       self.data.tenant['name'])
         self.assertTrue('id' in body['token'])
