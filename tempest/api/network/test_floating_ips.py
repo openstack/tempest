@@ -59,7 +59,6 @@ class FloatingIPTestJSON(base.BaseNetworkTest):
         cls.router = cls.create_router(data_utils.rand_name('router-'),
                                        external_network_id=cls.ext_net_id)
         cls.create_router_interface(cls.router['id'], cls.subnet['id'])
-        cls.port = list()
         # Create two ports one each for Creation and Updating of floatingIP
         for i in range(2):
             cls.create_port(cls.network)
