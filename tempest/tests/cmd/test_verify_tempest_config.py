@@ -12,28 +12,56 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-
 import mock
 from oslo_serialization import jsonutils as json
 from oslotest import mockpatch
 
 from tempest.cmd import verify_tempest_config
 from tempest import config
+from tempest.lib.common.utils import data_utils
 from tempest.tests import base
 from tempest.tests import fake_config
 
 
 class TestGetAPIVersions(base.TestCase):
 
+    def test_remove_version_project(self):
+        f = verify_tempest_config._remove_version_project
+        self.assertEqual('/', f('/v2.1/%s/' % data_utils.rand_uuid_hex()))
+        self.assertEqual('', f('/v2.1/tenant_id'))
+        self.assertEqual('', f('/v3'))
+        self.assertEqual('/', f('/v3/'))
+        self.assertEqual('/something/', f('/something/v2.1/tenant_id/'))
+        self.assertEqual('/something', f('/something/v2.1/tenant_id'))
+        self.assertEqual('/something', f('/something/v3'))
+        self.assertEqual('/something/', f('/something/v3/'))
+        self.assertEqual('/', f('/'))  # http://localhost/
+        self.assertEqual('', f(''))  # http://localhost
+
     def test_url_grab_versioned_nova_nossl(self):
         base_url = 'http://127.0.0.1:8774/v2/'
         endpoint = verify_tempest_config._get_unversioned_endpoint(base_url)
-        self.assertEqual('http://127.0.0.1:8774', endpoint)
+        self.assertEqual('http://127.0.0.1:8774/', endpoint)
 
     def test_url_grab_versioned_nova_ssl(self):
         base_url = 'https://127.0.0.1:8774/v3/'
         endpoint = verify_tempest_config._get_unversioned_endpoint(base_url)
-        self.assertEqual('https://127.0.0.1:8774', endpoint)
+        self.assertEqual('https://127.0.0.1:8774/', endpoint)
+
+    def test_get_unversioned_endpoint_base(self):
+        base_url = 'https://127.0.0.1:5000/'
+        endpoint = verify_tempest_config._get_unversioned_endpoint(base_url)
+        self.assertEqual('https://127.0.0.1:5000/', endpoint)
+
+    def test_get_unversioned_endpoint_subpath(self):
+        base_url = 'https://127.0.0.1/identity/v3'
+        endpoint = verify_tempest_config._get_unversioned_endpoint(base_url)
+        self.assertEqual('https://127.0.0.1/identity', endpoint)
+
+    def test_get_unversioned_endpoint_subpath_trailing_solidus(self):
+        base_url = 'https://127.0.0.1/identity/v3/'
+        endpoint = verify_tempest_config._get_unversioned_endpoint(base_url)
+        self.assertEqual('https://127.0.0.1/identity/', endpoint)
 
 
 class TestDiscovery(base.TestCase):
