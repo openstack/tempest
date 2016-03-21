@@ -20,12 +20,18 @@ from tempest import test
 
 class GroupsV3TestJSON(base.BaseIdentityV3AdminTest):
 
+    @classmethod
+    def resource_setup(cls):
+        super(GroupsV3TestJSON, cls).resource_setup()
+        cls.data.setup_test_domain()
+
     @test.idempotent_id('2e80343b-6c81-4ac3-88c7-452f3e9d5129')
     def test_group_create_update_get(self):
         name = data_utils.rand_name('Group')
         description = data_utils.rand_name('Description')
         group = self.groups_client.create_group(
-            name=name, description=description)['group']
+            name=name, domain_id=self.data.domain['id'],
+            description=description)['group']
         self.addCleanup(self.groups_client.delete_group, group['id'])
         self.assertEqual(group['name'], name)
         self.assertEqual(group['description'], description)
@@ -47,7 +53,8 @@ class GroupsV3TestJSON(base.BaseIdentityV3AdminTest):
         name = data_utils.rand_name('Group')
         old_description = data_utils.rand_name('Description')
         group = self.groups_client.create_group(
-            name=name, description=old_description)['group']
+            name=name, domain_id=self.data.domain['id'],
+            description=old_description)['group']
         self.addCleanup(self.groups_client.delete_group, group['id'])
 
         new_name = data_utils.rand_name('UpdateGroup')
@@ -61,7 +68,8 @@ class GroupsV3TestJSON(base.BaseIdentityV3AdminTest):
     @test.idempotent_id('1598521a-2f36-4606-8df9-30772bd51339')
     def test_group_users_add_list_delete(self):
         name = data_utils.rand_name('Group')
-        group = self.groups_client.create_group(name=name)['group']
+        group = self.groups_client.create_group(
+            name=name, domain_id=self.data.domain['id'])['group']
         self.addCleanup(self.groups_client.delete_group, group['id'])
         # add user into group
         users = []
@@ -94,7 +102,8 @@ class GroupsV3TestJSON(base.BaseIdentityV3AdminTest):
         groups = []
         for i in range(2):
             name = data_utils.rand_name('Group')
-            group = self.groups_client.create_group(name=name)['group']
+            group = self.groups_client.create_group(
+                name=name, domain_id=self.data.domain['id'])['group']
             groups.append(group)
             self.addCleanup(self.groups_client.delete_group, group['id'])
             self.groups_client.add_group_user(group['id'], user['id'])
@@ -112,7 +121,8 @@ class GroupsV3TestJSON(base.BaseIdentityV3AdminTest):
             name = data_utils.rand_name('Group')
             description = data_utils.rand_name('Description')
             group = self.groups_client.create_group(
-                name=name, description=description)['group']
+                name=name, domain_id=self.data.domain['id'],
+                description=description)['group']
             self.addCleanup(self.groups_client.delete_group, group['id'])
             group_ids.append(group['id'])
         # List and Verify Groups
