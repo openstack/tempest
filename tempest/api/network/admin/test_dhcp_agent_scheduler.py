@@ -36,12 +36,12 @@ class DHCPAgentSchedulersTestJSON(base.BaseAdminNetworkTest):
 
     @test.idempotent_id('5032b1fe-eb42-4a64-8f3b-6e189d8b5c7d')
     def test_list_dhcp_agent_hosting_network(self):
-        self.admin_client.list_dhcp_agent_hosting_network(
+        self.admin_networks_client.list_dhcp_agents_on_hosting_network(
             self.network['id'])
 
     @test.idempotent_id('30c48f98-e45d-4ffb-841c-b8aad57c7587')
     def test_list_networks_hosted_by_one_dhcp(self):
-        body = self.admin_client.list_dhcp_agent_hosting_network(
+        body = self.admin_networks_client.list_dhcp_agents_on_hosting_network(
             self.network['id'])
         agents = body['agents']
         self.assertIsNotNone(agents)

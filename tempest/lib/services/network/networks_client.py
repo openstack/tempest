@@ -45,3 +45,7 @@ class NetworksClient(base.BaseNetworkClient):
         """
         uri = '/networks'
         return self.create_resource(uri, kwargs)
+
+    def list_dhcp_agents_on_hosting_network(self, network_id):
+        uri = '/networks/%s/dhcp-agents' % network_id
+        return self.list_resources(uri)
