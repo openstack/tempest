@@ -93,10 +93,6 @@ class NetworkClient(base.BaseNetworkClient):
             message = '(%s) %s' % (caller, message)
         raise exceptions.TimeoutException(message)
 
-    def list_router_interfaces(self, uuid):
-        uri = '/ports?device_id=%s' % uuid
-        return self.list_resources(uri)
-
     def list_dhcp_agent_hosting_network(self, network_id):
         uri = '/networks/%s/dhcp-agents' % network_id
         return self.list_resources(uri)

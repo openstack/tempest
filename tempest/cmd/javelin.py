@@ -127,6 +127,7 @@ from tempest.lib.services.compute import floating_ips_client
 from tempest.lib.services.compute import security_group_rules_client
 from tempest.lib.services.compute import security_groups_client
 from tempest.lib.services.compute import servers_client
+from tempest.lib.services.network import ports_client
 from tempest.lib.services.network import subnets_client
 from tempest.services.identity.v2.json import identity_client
 from tempest.services.identity.v2.json import roles_client
@@ -264,6 +265,14 @@ class OSClient(object):
             build_timeout=CONF.volume.build_timeout,
             **default_params)
         self.networks = network_client.NetworkClient(
+            _auth,
+            CONF.network.catalog_type,
+            CONF.network.region or CONF.identity.region,
+            endpoint_type=CONF.network.endpoint_type,
+            build_interval=CONF.network.build_interval,
+            build_timeout=CONF.network.build_timeout,
+            **default_params)
+        self.ports = ports_client.PortsClient(
             _auth,
             CONF.network.catalog_type,
             CONF.network.region or CONF.identity.region,
@@ -751,7 +760,7 @@ def _get_router_namespace(client, network):
     n_body = client.routers.list_routers()
     for router in n_body['routers']:
         router_id = router['id']
-        r_body = client.networks.list_router_interfaces(router_id)
+        r_body = client.ports.list_ports(device_id=router_id)
         for port in r_body['ports']:
             if port['network_id'] == network_id:
                 return "qrouter-%s" % router_id
