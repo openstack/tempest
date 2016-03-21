@@ -19,9 +19,10 @@ from six.moves.urllib import parse as urllib
 from tempest.lib.api_schema.response.compute.v2_1 import floating_ips as schema
 from tempest.lib.common import rest_client
 from tempest.lib import exceptions as lib_exc
+from tempest.lib.services.compute import base_compute_client
 
 
-class FloatingIPsClient(rest_client.RestClient):
+class FloatingIPsClient(base_compute_client.BaseComputeClient):
 
     def list_floating_ips(self, **params):
         """Returns a list of all floating IPs filtered by any parameters."""

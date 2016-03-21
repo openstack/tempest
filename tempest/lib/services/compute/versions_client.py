@@ -19,9 +19,10 @@ from six.moves import urllib
 
 from tempest.lib.api_schema.response.compute.v2_1 import versions as schema
 from tempest.lib.common import rest_client
+from tempest.lib.services.compute import base_compute_client
 
 
-class VersionsClient(rest_client.RestClient):
+class VersionsClient(base_compute_client.BaseComputeClient):
 
     def _get_base_version_url(self):
         # NOTE: The URL which is got from keystone's catalog contains

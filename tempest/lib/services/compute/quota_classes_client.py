@@ -18,9 +18,10 @@ from oslo_serialization import jsonutils as json
 from tempest.lib.api_schema.response.compute.v2_1\
     import quota_classes as classes_schema
 from tempest.lib.common import rest_client
+from tempest.lib.services.compute import base_compute_client
 
 
-class QuotaClassesClient(rest_client.RestClient):
+class QuotaClassesClient(base_compute_client.BaseComputeClient):
 
     def show_quota_class_set(self, quota_class_id):
         """List the quota class set for a quota class."""

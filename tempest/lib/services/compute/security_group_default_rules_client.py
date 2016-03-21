@@ -18,9 +18,10 @@ from oslo_serialization import jsonutils as json
 from tempest.lib.api_schema.response.compute.v2_1 import \
     security_group_default_rule as schema
 from tempest.lib.common import rest_client
+from tempest.lib.services.compute import base_compute_client
 
 
-class SecurityGroupDefaultRulesClient(rest_client.RestClient):
+class SecurityGroupDefaultRulesClient(base_compute_client.BaseComputeClient):
 
     def create_security_default_group_rule(self, **kwargs):
         """Create security group default rule.

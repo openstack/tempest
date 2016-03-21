@@ -18,9 +18,10 @@ from oslo_serialization import jsonutils as json
 from tempest.lib.api_schema.response.compute.v2_1 import availability_zone \
     as schema
 from tempest.lib.common import rest_client
+from tempest.lib.services.compute import base_compute_client
 
 
-class AvailabilityZoneClient(rest_client.RestClient):
+class AvailabilityZoneClient(base_compute_client.BaseComputeClient):
 
     def list_availability_zones(self, detail=False):
         url = 'os-availability-zone'

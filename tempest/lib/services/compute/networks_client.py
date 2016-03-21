@@ -16,9 +16,10 @@
 from oslo_serialization import jsonutils as json
 
 from tempest.lib.common import rest_client
+from tempest.lib.services.compute import base_compute_client
 
 
-class NetworksClient(rest_client.RestClient):
+class NetworksClient(base_compute_client.BaseComputeClient):
 
     def list_networks(self):
         resp, body = self.get("os-networks")

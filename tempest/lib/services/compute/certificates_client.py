@@ -17,9 +17,10 @@ from oslo_serialization import jsonutils as json
 
 from tempest.lib.api_schema.response.compute.v2_1 import certificates as schema
 from tempest.lib.common import rest_client
+from tempest.lib.services.compute import base_compute_client
 
 
-class CertificatesClient(rest_client.RestClient):
+class CertificatesClient(base_compute_client.BaseComputeClient):
 
     def show_certificate(self, certificate_id):
         url = "os-certificates/%s" % certificate_id

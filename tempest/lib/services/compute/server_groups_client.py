@@ -18,9 +18,10 @@ from oslo_serialization import jsonutils as json
 
 from tempest.lib.api_schema.response.compute.v2_1 import servers as schema
 from tempest.lib.common import rest_client
+from tempest.lib.services.compute import base_compute_client
 
 
-class ServerGroupsClient(rest_client.RestClient):
+class ServerGroupsClient(base_compute_client.BaseComputeClient):
 
     def create_server_group(self, **kwargs):
         """Create the server group.
