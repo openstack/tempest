@@ -14,7 +14,10 @@
 #    under the License.
 
 from tempest.api.compute import base
+from tempest import config
 from tempest import test
+
+CONF = config.CONF
 
 
 class FloatingIPDetailsTestJSON(base.BaseV2ComputeTest):
@@ -31,7 +34,8 @@ class FloatingIPDetailsTestJSON(base.BaseV2ComputeTest):
         cls.floating_ip = []
         cls.floating_ip_id = []
         for i in range(3):
-            body = cls.client.create_floating_ip()['floating_ip']
+            body = cls.client.create_floating_ip(
+                pool=CONF.network.floating_network_name)['floating_ip']
             cls.floating_ip.append(body)
             cls.floating_ip_id.append(body['id'])
 
@@ -57,7 +61,8 @@ class FloatingIPDetailsTestJSON(base.BaseV2ComputeTest):
     def test_get_floating_ip_details(self):
         # Positive test:Should be able to GET the details of floatingIP
         # Creating a floating IP for which details are to be checked
-        body = self.client.create_floating_ip()['floating_ip']
+        body = self.client.create_floating_ip(
+            pool=CONF.network.floating_network_name)['floating_ip']
         floating_ip_id = body['id']
         self.addCleanup(self.client.delete_floating_ip,
                         floating_ip_id)
