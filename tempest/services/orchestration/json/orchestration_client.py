@@ -151,42 +151,6 @@ class OrchestrationClient(rest_client.RestClient):
         self.expected_success(204, resp.status)
         return rest_client.ResponseBody(resp)
 
-    def wait_for_resource_status(self, stack_identifier, resource_name,
-                                 status, failure_pattern='^.*_FAILED$'):
-        """Waits for a Resource to reach a given status."""
-        start = int(time.time())
-        fail_regexp = re.compile(failure_pattern)
-
-        while True:
-            try:
-                body = self.show_resource(
-                    stack_identifier, resource_name)['resource']
-            except lib_exc.NotFound:
-                # ignore this, as the resource may not have
-                # been created yet
-                pass
-            else:
-                resource_name = body['resource_name']
-                resource_status = body['resource_status']
-                if resource_status == status:
-                    return
-                if fail_regexp.search(resource_status):
-                    raise exceptions.StackResourceBuildErrorException(
-                        resource_name=resource_name,
-                        stack_identifier=stack_identifier,
-                        resource_status=resource_status,
-                        resource_status_reason=body['resource_status_reason'])
-
-            if int(time.time()) - start >= self.build_timeout:
-                message = ('Resource %s failed to reach %s status '
-                           '(current %s) within the required time (%s s).' %
-                           (resource_name,
-                            status,
-                            resource_status,
-                            self.build_timeout))
-                raise exceptions.TimeoutException(message)
-            time.sleep(self.build_interval)
-
     def wait_for_stack_status(self, stack_identifier, status,
                               failure_pattern='^.*_FAILED$'):
         """Waits for a Stack to reach a given status."""
