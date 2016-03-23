@@ -64,8 +64,8 @@ LOG_FORMAT = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 TEMPEST_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 
 DEFAULTS_FILE = os.path.join(TEMPEST_DIR, "etc", "default-overrides.conf")
-DEFAULT_IMAGE = "http://download.cirros-cloud.net/0.3.1/" \
-                "cirros-0.3.1-x86_64-disk.img"
+DEFAULT_IMAGE = "http://download.cirros-cloud.net/0.3.4/" \
+                "cirros-0.3.4-x86_64-disk.img"
 DEFAULT_IMAGE_FORMAT = 'qcow2'
 
 VALID_RELEASES = ["rhelosp7", "rhelosp6", "rhelosp5", "icehouse",
