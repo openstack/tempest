@@ -41,7 +41,8 @@ class ServerRescueTestJSON(base.BaseV2ComputeTest):
         super(ServerRescueTestJSON, cls).resource_setup()
 
         # Floating IP creation
-        body = cls.floating_ips_client.create_floating_ip()['floating_ip']
+        body = cls.floating_ips_client.create_floating_ip(
+            pool=CONF.network.floating_network_name)['floating_ip']
         cls.floating_ip_id = str(body['id']).strip()
         cls.floating_ip = str(body['ip']).strip()
 

@@ -600,6 +600,8 @@ class ScenarioTest(tempest.test.BaseTestCase):
     def create_floating_ip(self, thing, pool_name=None):
         """Create a floating IP and associates to a server on Nova"""
 
+        if not pool_name:
+            pool_name = CONF.network.floating_network_name
         floating_ip = (self.compute_floating_ips_client.
                        create_floating_ip(pool=pool_name)['floating_ip'])
         self.addCleanup(self.delete_wrapper,
