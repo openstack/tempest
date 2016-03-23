@@ -352,8 +352,8 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
             self.servers)
 
     def assert_vm_to_vm_connectivity(self, server1, server2):
-        floating_ip1 = self.create_floating_ip(server1)
-        floating_ip2 = self.create_floating_ip(server2)
+        floating_ip1 = self.create_floating_ip(server1, client=self.admin_network_client)
+        floating_ip2 = self.create_floating_ip(server2, client=self.admin_network_client)
 
         # Wait while driver applies settings
         time.sleep(10)
@@ -791,7 +791,7 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
                 lambda: self.ucsm.get_ether_vlan(
                     self.compute_host_dict[binding_host_id], eth_name, vlan_id))
 
-        floating_ip = self.create_floating_ip(server)
+        floating_ip = self.create_floating_ip(server, client=self.admin_network_client)
         self.check_public_network_connectivity(server, floating_ip)
 
     @test.attr(type='non-sriov')
@@ -911,7 +911,7 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
                 lambda: self.ucsm.get_ether_vlan(
                     self.compute_host_dict[master_host], eth_name, vlan_id))
 
-        floating_ip1 = self.create_floating_ip(server1)
+        floating_ip1 = self.create_floating_ip(server1, client=self.admin_network_client)
         self.check_public_network_connectivity(server1, floating_ip1)
 
     @test.attr(type=['non-sriov', 'multi-ucsm'])
