@@ -184,6 +184,7 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
         cls.admin_networks_client = cls.os_adm.networks_client
         cls.admin_network_client = cls.os_adm.network_client
         cls.admin_hosts_client = cls.os_adm.hosts_client
+        cls.servers_client = cls.os_adm.servers_client
 
     @classmethod
     def resource_setup(cls):
@@ -195,7 +196,7 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
 
         self.keypairs = {}
         self.servers = []
-        self.security_group = self._create_security_group()
+        self.security_group = self._create_security_group(client=self.admin_network_client)
 
         # Log into UCS Manager
         self.ucsm_setup()
@@ -203,7 +204,7 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
 
     def _create_security_group(self, client=None, tenant_id=None,
                                namestart='secgroup-smoke'):
-        secgroup = super(UCSMTest, self)._create_security_group(client=client, tenant_id=self.tenant_id, namestart=namestart)
+        secgroup = super(UCSMTest, self)._create_security_group(client=client, tenant_id=client.tenant_id, namestart=namestart)
         # The group should allow all protocols
         rulesets = [
             dict(
@@ -223,7 +224,8 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
             for r_direction in ['ingress', 'egress']:
                 ruleset['direction'] = r_direction
                 self._create_security_group_rule(
-                    client=self.network_client,
+                    client=client,
+                    tenant_id=client.tenant_id,
                     secgroup=secgroup, **ruleset)
         return secgroup
 
@@ -293,9 +295,24 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
         self.addCleanup(self.delete_wrapper, network.delete)
         return network
 
+    def _create_port(self, network_id, client=None, namestart='port-quotatest',
+                     **kwargs):
+        if not client:
+            client = self.admin_network_client
+        name = data_utils.rand_name(namestart)
+        result = client.create_port(
+            name=name,
+            network_id=network_id,
+            **kwargs)
+        self.assertIsNotNone(result, 'Unable to allocate port')
+        port = net_resources.DeletablePort(client=client,
+                                           **result['port'])
+        self.addCleanup(self.delete_wrapper, port.delete)
+        return port
+
     def _create_server(self, name, network_id=None,
                        port_id=None, availability_zone=None):
-        keypair = self.create_keypair()
+        keypair = self.create_keypair(client=self.os_adm.keypairs_client)
         self.keypairs[keypair['name']] = keypair
         security_groups = [{'name': self.security_group['name']}]
         create_kwargs = {
