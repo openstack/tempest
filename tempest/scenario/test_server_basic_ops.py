@@ -119,7 +119,7 @@ class TestServerBasicOps(manager.ScenarioTest):
     @test.idempotent_id('7fff3fb3-91d8-4fd0-bd7d-0204f1f180ba')
     @test.attr(type='smoke')
     @test.services('compute', 'network')
-    def test_server_basicops(self):
+    def test_server_basic_ops(self):
         keypair = self.create_keypair()
         self.security_group = self._create_security_group()
         security_groups = [{'name': self.security_group['name']}]
