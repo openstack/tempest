@@ -246,6 +246,21 @@ and ensure that regardless of the cloud's configuration it'll still be able to
 run. This section covers the different methods of configuring Tempest to provide
 a network when creating servers.
 
+The ``validation`` group gathers all the connection options to remotely access the
+created servers.
+
+To enable remote access to servers, at least the three following options need to be
+set:
+
+* The ``run_validation`` option needs be set to ``true``.
+
+* The ``connect_method`` option. Two connect methods are available: ``fixed`` and
+  ``floating``, the later being set by default.
+
+* The ``auth_method`` option. Currently, only authentication by keypair is
+  available.
+
+
 Fixed Network Name
 """"""""""""""""""
 This is the simplest method of specifying how networks should be used. You can
@@ -296,7 +311,7 @@ misconfiguration or a missing network in the accounts file.
 With Dynamic Credentials
 """"""""""""""""""""""""
 With dynamic credentials enabled and using nova-network, your only option for
-configuration is to either set a fixed network name or not.  However, in most
+configuration is to either set a fixed network name or not. However, in most
 cases it shouldn't matter because nova-network should have no problem booting a
 server with multiple networks. If this is not the case for your cloud then using
 an accounts file is recommended because it provides the necessary flexibility to
