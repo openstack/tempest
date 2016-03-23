@@ -1382,7 +1382,7 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
         network = self.admin_networks_client.show_network(
             network_obj.id)['network']
         vlan_id = network['provider:segmentation_id']
-        self.timed_assert(self.assertEmpty,
+        self.timed_assert(self.assertNotEmpty,
                           lambda: ucsm_client1.get_vlan_profile(vlan_id))
 
         # Verify VLAN is still assigned to vNIC template
