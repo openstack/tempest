@@ -372,8 +372,8 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
             server2_client.ping_host(floating_ip1.floating_ip_address))
 
     def assert_vm2vm(self, server1, server2):
-        floating_ip1 = self.create_floating_ip(server1)
-        floating_ip2 = self.create_floating_ip(server2)
+        floating_ip1 = self.create_floating_ip(server1, client=self.admin_network_client)
+        floating_ip2 = self.create_floating_ip(server2, client=self.admin_network_client)
 
         # Wait while driver applies settings
         time.sleep(10)
