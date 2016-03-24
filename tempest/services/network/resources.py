@@ -14,8 +14,12 @@
 #    under the License.
 
 import abc
+import time
 
 import six
+
+from tempest import exceptions
+from tempest.lib.common.utils import misc
 
 
 class AttributeDict(dict):
@@ -67,7 +71,35 @@ class DeletableResource(AttributeDict):
             self.refresh()
             return self
 
-        return self.client.wait_for_resource_status(helper_get, status)
+        return self.wait_for_resource_status(helper_get, status)
+
+    def wait_for_resource_status(self, fetch, status):
+        """Waits for a network resource to reach a status
+
+        @param fetch: the callable to be used to query the resource status
+        @type fecth: callable that takes no parameters and returns the resource
+        @param status: the status that the resource has to reach
+        @type status: String
+        """
+        interval = self.build_interval
+        timeout = self.build_timeout
+        start_time = time.time()
+
+        while time.time() - start_time <= timeout:
+            resource = fetch()
+            if resource['status'] == status:
+                return
+            time.sleep(interval)
+
+        # At this point, the wait has timed out
+        message = 'Resource %s' % (str(resource))
+        message += ' failed to reach status %s' % status
+        message += ' (current: %s)' % resource['status']
+        message += ' within the required time %s' % timeout
+        caller = misc.find_test_caller()
+        if caller:
+            message = '(%s) %s' % (caller, message)
+        raise exceptions.TimeoutException(message)
 
 
 class DeletableNetwork(DeletableResource):
