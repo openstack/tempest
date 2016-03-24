@@ -462,12 +462,13 @@ class NetworkRouterService(NetworkService):
 
     def delete(self):
         client = self.routers_client
+        ports_client = self.ports_client
         routers = self.list()
         for router in routers:
             try:
                 rid = router['id']
                 ports = [port for port
-                         in client.list_router_interfaces(rid)['ports']
+                         in ports_client.list_ports(device_id=rid)['ports']
                          if port["device_owner"] == "network:router_interface"]
                 for port in ports:
                     client.remove_router_interface(rid, port_id=port['id'])
