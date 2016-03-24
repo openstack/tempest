@@ -263,14 +263,17 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
             network = self._create_network(
                 client=client, networks_client=networks_client,
                 tenant_id=tenant_id, **network_kwargs)
-            router = self._get_router(client=client, tenant_id=tenant_id)
-
-            subnet_kwargs = dict(network=network, client=client)
-            # use explicit check because empty list is a valid option
-            if dns_nameservers is not None:
-                subnet_kwargs['dns_nameservers'] = dns_nameservers
-            subnet = self._create_subnet(**subnet_kwargs)
-            subnet.add_to_router(router.id)
+            if CONF.ucsm.provider_network_id:
+                router = None
+                subnet = None
+            else:
+                router = self._get_router(client=client, tenant_id=tenant_id)
+                subnet_kwargs = dict(network=network, client=client)
+                # use explicit check because empty list is a valid option
+                if dns_nameservers is not None:
+                    subnet_kwargs['dns_nameservers'] = dns_nameservers
+                subnet = self._create_subnet(**subnet_kwargs)
+                subnet.add_to_router(router.id)
         return network, subnet, router
 
     def _create_network(self, client=None, networks_client=None,
@@ -288,9 +291,17 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
                                            vlan_transparent=vlan_transparent,
                                            shared=shared, **kwargs)
         else:
-            result = networks_client.create_network(name=name, tenant_id=tenant_id, **kwargs)
+            if CONF.ucsm.provider_network_id:
+                # Get info because this is provider network
+                result = networks_client.show_network(CONF.ucsm.provider_network_id)
+            else:
+                result = networks_client.create_network(name=name, tenant_id=tenant_id, **kwargs)
         network = net_resources.DeletableNetwork(
             networks_client=networks_client, **result['network'])
+        if CONF.ucsm.provider_network_id:
+            # Mock delete method because this is provider network
+            network.name = name
+            network.delete = lambda: True
         self.assertEqual(network.name, name)
         self.addCleanup(self.delete_wrapper, network.delete)
         return network
@@ -330,6 +341,38 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
         self.servers.append(server)
         return server
 
+    def create_floating_ip(self, thing, external_network_id=None,
+                           port_id=None, client=None):
+        """Creates a floating IP and associates to a resource/port using
+        Neutron client
+        """
+        if not external_network_id:
+            external_network_id = CONF.network.public_network_id
+        if not client:
+            client = self.network_client
+        if not port_id:
+            port_id, ip4 = self._get_server_port_id_and_ip4(thing)
+        else:
+            ip4 = None
+
+        if CONF.ucsm.provider_network_id:
+            return {
+                'floating_ip_address': ip4,
+                'fixed_ip_address': ip4
+            }
+
+        result = client.create_floatingip(
+            floating_network_id=external_network_id,
+            port_id=port_id,
+            tenant_id=thing['tenant_id'],
+            fixed_ip_address=ip4
+        )
+        floating_ip = net_resources.DeletableFloatingIp(
+            client=client,
+            **result['floatingip'])
+        self.addCleanup(self.delete_wrapper, floating_ip.delete)
+        return floating_ip
+
     def check_public_network_connectivity(
             self, server, floating_ip, should_connect=True, msg=None,
             should_check_floating_ip_status=True):
@@ -337,15 +380,17 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
         and verifies floating IP has resource status is correct.
         """
         ssh_login = CONF.compute.image_ssh_user
-        ip_address = floating_ip.floating_ip_address
+        ip_address = floating_ip['floating_ip_address']
         private_key = None
         floatingip_status = 'DOWN'
         if should_connect:
             private_key = self._get_server_key(server)
             floatingip_status = 'ACTIVE'
         # Check FloatingIP Status before initiating a connection
-        if should_check_floating_ip_status:
-            self.check_floating_ip_status(floating_ip, floatingip_status)
+        if not CONF.ucsm.provider_network_id:
+            # If this not a 'provider network' deployment
+            if should_check_floating_ip_status:
+                self.check_floating_ip_status(floating_ip, floatingip_status)
         # call the common method in the parent class
         super(UCSMTest, self).check_public_network_connectivity(
             ip_address, ssh_login, private_key, should_connect, msg,
@@ -358,18 +403,18 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
         # Wait while driver applies settings
         time.sleep(10)
         server1_client = self.get_remote_client(
-            floating_ip1.floating_ip_address,
+            floating_ip1['floating_ip_address'],
             CONF.compute.image_ssh_user,
             self._get_server_key(server1))
         server2_client = self.get_remote_client(
-            floating_ip2.floating_ip_address,
+            floating_ip2['floating_ip_address'],
             CONF.compute.image_ssh_user,
             self._get_server_key(server2))
         # Ping server2 from server1 and vice versa
         self.assertNotEmpty(
-            server1_client.ping_host(floating_ip2.floating_ip_address))
+            server1_client.ping_host(floating_ip2['floating_ip_address']))
         self.assertNotEmpty(
-            server2_client.ping_host(floating_ip1.floating_ip_address))
+            server2_client.ping_host(floating_ip1['floating_ip_address']))
 
     def assert_vm2vm(self, server1, server2):
         floating_ip1 = self.create_floating_ip(server1, client=self.admin_network_client)
@@ -378,11 +423,11 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
         # Wait while driver applies settings
         time.sleep(10)
         server1_client = self.get_remote_client(
-            floating_ip1.floating_ip_address,
+            floating_ip1['floating_ip_address'],
             CONF.compute.image_ssh_user,
             self._get_server_key(server1))
         server2_client = self.get_remote_client(
-            floating_ip2.floating_ip_address,
+            floating_ip2['floating_ip_address'],
             CONF.compute.image_ssh_user,
             self._get_server_key(server2))
 
@@ -391,10 +436,10 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
         message = 'Hi there!'
         # Run listener
         server2_client.exec_command('kill -9 `pidof "nc"` || true')
-        server2_client.exec_command('{0} -l -p {1} -s {2} > out.log &'.format(nc, port, floating_ip2.fixed_ip_address))
+        server2_client.exec_command('{0} -l -p {1} -s {2} > out.log &'.format(nc, port, floating_ip2['fixed_ip_address']))
         # Send message
         server1_client.exec_command(
-            'echo -n "{0}" | {1} -w1 -p {2} {3} {4} || true'.format(message, nc, port, floating_ip2.fixed_ip_address, port))
+            'echo -n "{0}" | {1} -w1 -p {2} {3} {4} || true'.format(message, nc, port, floating_ip2['fixed_ip_address'], port))
         # Read received message
         received = server2_client.exec_command("cat out.log; rm out.log")
         self.assertEqual(message, received, 'Verify received message')
