@@ -19,12 +19,11 @@ Configuration options for Microversion
   multiple Microversion tests in a single Tempest operation, configuration
   options should represent the range of test target Microversions.
   New configuration options are:
- 
   * min_microversion
   * max_microversion
 
   Those should be defined under respective section of each service.
-  For Example::
+  For example::
       [compute]
       min_microversion = None
       max_microversion = latest
@@ -39,7 +38,7 @@ Step1: Add skip logic based on configured Microversion range
 Add logic to skip the tests based on Tests class and configured Microversion
 range.
 api_version_utils.check_skip_with_microversion function can be used
-to automatically skip the tests which does not fall under configured
+to automatically skip the tests which do not fall under configured
 Microversion range.
 For example::
 
@@ -169,13 +168,13 @@ Along with that JSON response schema might need versioning if needed.
 
 Compute service clients strictly validate the response against defined JSON
 schema and does not allow additional elements in response.
-So if that Microversion changed the API response then schema needs to be version.
-New JSON schema file needs be defined with new response attributes and service
+So if that Microversion changed the API response then schema needs to be versioned.
+New JSON schema file needs to be defined with new response attributes and service
 client methods will select the schema based on requested microversion.
 
-If Microversion tests are implemented randomly means not
+If Microversion tests are implemented randomly meaning not
 in sequence order(v2.20 tests added and previous Microversion tests are not yet added)
-then, still schema might needs to be version for older Microversion if they changed
+then, still schema might need to be version for older Microversion if they changed
 the response.
 This is because Nova Microversion includes all the previous Microversions behavior.
 
@@ -183,7 +182,7 @@ For Example:
     Implementing the v2.20 Microversion tests before v2.9 and 2.19-
     v2.20 API request will respond as latest behavior of Nova till v2.20,
     and in v2.9 and 2.19, server response has been changed so response schema needs
-    to be version accordingly.
+    to be versioned accordingly.
 
 That can be done by using the get_schema method in below module:
 
