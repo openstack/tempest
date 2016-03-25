@@ -5,6 +5,7 @@
  .. toctree::
     :maxdepth: 1
 
+    v10.0.0
     unreleased
 
 Indices and tables
