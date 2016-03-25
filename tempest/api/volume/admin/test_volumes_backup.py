@@ -15,6 +15,7 @@
 
 from tempest.api.volume import base
 from tempest.common.utils import data_utils
+from tempest.common import waiters
 from tempest import config
 from tempest.lib import decorators
 from tempest import test
@@ -50,8 +51,8 @@ class VolumesBackupsV2Test(base.BaseVolumeAdminTest):
         self.addCleanup(self.backups_adm_client.delete_backup,
                         backup['id'])
         self.assertEqual(backup_name, backup['name'])
-        self.admin_volume_client.wait_for_volume_status(
-            self.volume['id'], 'available')
+        waiters.wait_for_volume_status(self.admin_volume_client,
+                                       self.volume['id'], 'available')
         self.backups_adm_client.wait_for_backup_status(backup['id'],
                                                        'available')
 
@@ -74,8 +75,8 @@ class VolumesBackupsV2Test(base.BaseVolumeAdminTest):
         self.assertEqual(backup['id'], restore['backup_id'])
         self.backups_adm_client.wait_for_backup_status(backup['id'],
                                                        'available')
-        self.admin_volume_client.wait_for_volume_status(
-            restore['volume_id'], 'available')
+        waiters.wait_for_volume_status(self.admin_volume_client,
+                                       restore['volume_id'], 'available')
 
     @decorators.skip_because(bug='1455043')
     @test.idempotent_id('a99c54a1-dd80-4724-8a13-13bf58d4068d')
@@ -117,8 +118,8 @@ class VolumesBackupsV2Test(base.BaseVolumeAdminTest):
         self.addCleanup(self.admin_volume_client.delete_volume,
                         restore['volume_id'])
         self.assertEqual(import_backup['id'], restore['backup_id'])
-        self.admin_volume_client.wait_for_volume_status(restore['volume_id'],
-                                                        'available')
+        waiters.wait_for_volume_status(self.admin_volume_client,
+                                       restore['volume_id'], 'available')
 
         # Verify if restored volume is there in volume list
         volumes = self.admin_volume_client.list_volumes()['volumes']

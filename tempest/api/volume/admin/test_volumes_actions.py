@@ -15,6 +15,7 @@
 
 from tempest.api.volume import base
 from tempest.common.utils import data_utils as utils
+from tempest.common import waiters
 from tempest import test
 
 
@@ -35,7 +36,8 @@ class VolumesActionsV2Test(base.BaseVolumeAdminTest):
         params = {cls.name_field: vol_name}
 
         cls.volume = cls.client.create_volume(**params)['volume']
-        cls.client.wait_for_volume_status(cls.volume['id'], 'available')
+        waiters.wait_for_volume_status(cls.client,
+                                       cls.volume['id'], 'available')
 
     @classmethod
     def resource_cleanup(cls):
@@ -61,7 +63,8 @@ class VolumesActionsV2Test(base.BaseVolumeAdminTest):
         vol_name = utils.rand_name('Volume')
         params = {self.name_field: vol_name}
         temp_volume = self.client.create_volume(**params)['volume']
-        self.client.wait_for_volume_status(temp_volume['id'], 'available')
+        waiters.wait_for_volume_status(self.client,
+                                       temp_volume['id'], 'available')
 
         return temp_volume
 

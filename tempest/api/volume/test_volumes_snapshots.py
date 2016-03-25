@@ -12,6 +12,7 @@
 
 from tempest.api.volume import base
 from tempest.common.utils import data_utils
+from tempest.common import waiters
 from tempest import config
 from tempest import test
 
@@ -37,7 +38,8 @@ class VolumesV2SnapshotTestJSON(base.BaseVolumeTest):
     def _detach(self, volume_id):
         """Detach volume."""
         self.volumes_client.detach_volume(volume_id)
-        self.volumes_client.wait_for_volume_status(volume_id, 'available')
+        waiters.wait_for_volume_status(self.volumes_client,
+                                       volume_id, 'available')
 
     def _list_by_param_values_and_assert(self, with_detail=False, **params):
         """list or list_details with given params and validates result."""
@@ -70,9 +72,9 @@ class VolumesV2SnapshotTestJSON(base.BaseVolumeTest):
         self.servers_client.attach_volume(
             server['id'], volumeId=self.volume_origin['id'],
             device=mountpoint)
-        self.volumes_client.wait_for_volume_status(self.volume_origin['id'],
-                                                   'in-use')
-        self.addCleanup(self.volumes_client.wait_for_volume_status,
+        waiters.wait_for_volume_status(self.volumes_client,
+                                       self.volume_origin['id'], 'in-use')
+        self.addCleanup(waiters.wait_for_volume_status, self.volumes_client,
                         self.volume_origin['id'], 'available')
         self.addCleanup(self.servers_client.detach_volume, server['id'],
                         self.volume_origin['id'])
@@ -171,7 +173,8 @@ class VolumesV2SnapshotTestJSON(base.BaseVolumeTest):
         # NOTE(gfidente): size is required also when passing snapshot_id
         volume = self.volumes_client.create_volume(
             snapshot_id=snapshot['id'])['volume']
-        self.volumes_client.wait_for_volume_status(volume['id'], 'available')
+        waiters.wait_for_volume_status(self.volumes_client,
+                                       volume['id'], 'available')
         self.volumes_client.delete_volume(volume['id'])
         self.volumes_client.wait_for_resource_deletion(volume['id'])
         self.cleanup_snapshot(snapshot)

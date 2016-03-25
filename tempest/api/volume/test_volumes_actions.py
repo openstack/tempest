@@ -43,7 +43,8 @@ class VolumesV2ActionsTest(base.BaseVolumeTest):
 
         # Create a test shared volume for attach/detach tests
         cls.volume = cls.create_volume()
-        cls.client.wait_for_volume_status(cls.volume['id'], 'available')
+        waiters.wait_for_volume_status(cls.client,
+                                       cls.volume['id'], 'available')
 
     @classmethod
     def resource_cleanup(cls):
@@ -64,9 +65,11 @@ class VolumesV2ActionsTest(base.BaseVolumeTest):
         self.client.attach_volume(self.volume['id'],
                                   instance_uuid=self.server['id'],
                                   mountpoint=mountpoint)
-        self.client.wait_for_volume_status(self.volume['id'], 'in-use')
+        waiters.wait_for_volume_status(self.client,
+                                       self.volume['id'], 'in-use')
         self.client.detach_volume(self.volume['id'])
-        self.client.wait_for_volume_status(self.volume['id'], 'available')
+        waiters.wait_for_volume_status(self.client,
+                                       self.volume['id'], 'available')
 
     @test.idempotent_id('63e21b4c-0a0c-41f6-bfc3-7c2816815599')
     @testtools.skipUnless(CONF.volume_feature_enabled.bootable,
@@ -91,10 +94,11 @@ class VolumesV2ActionsTest(base.BaseVolumeTest):
         self.client.attach_volume(self.volume['id'],
                                   instance_uuid=self.server['id'],
                                   mountpoint=mountpoint)
-        self.client.wait_for_volume_status(self.volume['id'], 'in-use')
+        waiters.wait_for_volume_status(self.client,
+                                       self.volume['id'], 'in-use')
         # NOTE(gfidente): added in reverse order because functions will be
         # called in reverse order to the order they are added (LIFO)
-        self.addCleanup(self.client.wait_for_volume_status,
+        self.addCleanup(waiters.wait_for_volume_status, self.client,
                         self.volume['id'],
                         'available')
         self.addCleanup(self.client.detach_volume, self.volume['id'])
@@ -120,7 +124,8 @@ class VolumesV2ActionsTest(base.BaseVolumeTest):
         image_id = body["image_id"]
         self.addCleanup(self.image_client.delete_image, image_id)
         self.image_client.wait_for_image_status(image_id, 'active')
-        self.client.wait_for_volume_status(self.volume['id'], 'available')
+        waiters.wait_for_volume_status(self.client,
+                                       self.volume['id'], 'available')
 
     @test.idempotent_id('92c4ef64-51b2-40c0-9f7e-4749fbaaba33')
     def test_reserve_unreserve_volume(self):

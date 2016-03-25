@@ -213,8 +213,8 @@ class TestCreateResources(JavelinUnitTest):
                                                 name=self.fake_object['name'],
                                                 ip_version=fake_version)
 
-    def test_create_volumes(self):
-
+    @mock.patch("tempest.common.waiters.wait_for_volume_status")
+    def test_create_volumes(self, mock_wait_for_volume_status):
         self.useFixture(mockpatch.PatchObject(javelin, "client_for_user",
                                               return_value=self.fake_client))
         self.useFixture(mockpatch.PatchObject(javelin, "_get_volume_by_name",
@@ -228,12 +228,12 @@ class TestCreateResources(JavelinUnitTest):
         mocked_function.assert_called_once_with(
             size=self.fake_object['gb'],
             display_name=self.fake_object['name'])
-        mocked_function = self.fake_client.volumes.wait_for_volume_status
-        mocked_function.assert_called_once_with(
-            self.fake_object.body['volume']['id'],
+        mock_wait_for_volume_status.assert_called_once_with(
+            self.fake_client.volumes, self.fake_object.body['volume']['id'],
             'available')
 
-    def test_create_volume_existing(self):
+    @mock.patch("tempest.common.waiters.wait_for_volume_status")
+    def test_create_volume_existing(self, mock_wait_for_volume_status):
         self.useFixture(mockpatch.PatchObject(javelin, "client_for_user",
                                               return_value=self.fake_client))
         self.useFixture(mockpatch.PatchObject(javelin, "_get_volume_by_name",
@@ -245,8 +245,7 @@ class TestCreateResources(JavelinUnitTest):
 
         mocked_function = self.fake_client.volumes.create_volume
         self.assertFalse(mocked_function.called)
-        mocked_function = self.fake_client.volumes.wait_for_volume_status
-        self.assertFalse(mocked_function.called)
+        self.assertFalse(mock_wait_for_volume_status.called)
 
     def test_create_router(self):
 

@@ -19,6 +19,7 @@ from oslo_log import log as logging
 import testtools
 
 from tempest.common.utils import data_utils
+from tempest.common import waiters
 from tempest import config
 from tempest import exceptions
 from tempest.lib import decorators
@@ -72,7 +73,8 @@ class TestStampPattern(manager.ScenarioTest):
             except lib_exc.NotFound:
                 pass
         self.addCleanup(cleaner)
-        self.volumes_client.wait_for_volume_status(volume['id'], 'available')
+        waiters.wait_for_volume_status(self.volumes_client,
+                                       volume['id'], 'available')
         self.snapshots_client.wait_for_snapshot_status(snapshot['id'],
                                                        'available')
         self.assertEqual(snapshot_name, snapshot['display_name'])

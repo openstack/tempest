@@ -1031,7 +1031,7 @@ def create_volumes(volumes):
         v_name = volume['name']
         body = client.volumes.create_volume(size=size,
                                             display_name=v_name)['volume']
-        client.volumes.wait_for_volume_status(body['id'], 'available')
+        waiters.wait_for_volume_status(client.volumes, body['id'], 'available')
 
 
 def destroy_volumes(volumes):
