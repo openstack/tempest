@@ -1,6 +1,14 @@
 Tempest - The OpenStack Integration Test Suite
 ==============================================
 
+.. image:: https://img.shields.io/pypi/v/tempest.svg
+    :target: https://pypi.python.org/pypi/tempest/
+    :alt: Latest Version
+
+.. image:: https://img.shields.io/pypi/dm/tempest.svg
+    :target: https://pypi.python.org/pypi/tempest/
+    :alt: Downloads
+
 This is a set of integration tests to be run against a live OpenStack
 cluster. Tempest has batteries of tests for OpenStack API validation,
 Scenarios, and other specific tests useful in validating an OpenStack
