@@ -87,6 +87,8 @@ from tempest.lib.services.network.networks_client import NetworksClient
 from tempest.lib.services.network.ports_client import PortsClient
 from tempest.lib.services.network.quotas_client import QuotasClient \
     as NetworkQuotasClient
+from tempest.lib.services.network.security_group_rules_client import \
+    SecurityGroupRulesClient
 from tempest.lib.services.network.security_groups_client import \
     SecurityGroupsClient
 from tempest.lib.services.network.subnetpools_client import SubnetpoolsClient
@@ -132,8 +134,6 @@ from tempest.services.image.v1.json.images_client import ImagesClient
 from tempest.services.image.v2.json.images_client import ImagesClientV2
 from tempest.services.network.json.network_client import NetworkClient
 from tempest.services.network.json.routers_client import RoutersClient
-from tempest.services.network.json.security_group_rules_client import \
-    SecurityGroupRulesClient
 from tempest.services.object_storage.account_client import AccountClient
 from tempest.services.object_storage.container_client import ContainerClient
 from tempest.services.object_storage.object_client import ObjectClient
