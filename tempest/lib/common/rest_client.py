@@ -548,7 +548,7 @@ class RestClient(object):
         :param str method: The HTTP verb to use for the request
         :param str headers: Headers to use for the request if none are specifed
                             the headers
-        :param str body: Body to to send with the request
+        :param str body: Body to send with the request
         :rtype: tuple
         :return: a tuple with the first entry containing the response headers
                  and the second the response body
@@ -584,7 +584,7 @@ class RestClient(object):
                              specifed the headers returned from the
                              get_headers() method are used. If the request
                              explicitly requires no headers use an empty dict.
-        :param str body: Body to to send with the request
+        :param str body: Body to send with the request
         :rtype: tuple
         :return: a tuple with the first entry containing the response headers
                  and the second the response body

@@ -251,7 +251,7 @@ class TestKeystoneV2AuthProvider(BaseAuthTestsSetUp):
         """Test empty alternate auth data with no effect
 
         Assert that when alt_part is defined, no auth_data is provided,
-        and the the corresponding original request element was not going to
+        and the corresponding original request element was not going to
         be changed anyways, and exception is raised
         """
         filters = {

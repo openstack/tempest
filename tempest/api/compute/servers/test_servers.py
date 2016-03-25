@@ -80,7 +80,7 @@ class ServersTestJSON(base.BaseV2ComputeTest):
         self.assertEqual(key_name, server['key_name'])
 
     def _update_server_name(self, server_id, status, prefix_name='server'):
-        # The server name should be changed to the the provided value
+        # The server name should be changed to the provided value
         new_name = data_utils.rand_name(prefix_name)
 
         # Update the server with a new name
@@ -95,7 +95,7 @@ class ServersTestJSON(base.BaseV2ComputeTest):
 
     @test.idempotent_id('5e6ccff8-349d-4852-a8b3-055df7988dd2')
     def test_update_server_name(self):
-        # The server name should be changed to the the provided value
+        # The server name should be changed to the provided value
         server = self.create_test_server(wait_until='ACTIVE')
         # Update instance name with non-ASCII characters
         prefix_name = u'\u00CD\u00F1st\u00E1\u00F1c\u00E9'
@@ -103,7 +103,7 @@ class ServersTestJSON(base.BaseV2ComputeTest):
 
     @test.idempotent_id('6ac19cb1-27a3-40ec-b350-810bdc04c08e')
     def test_update_server_name_in_stop_state(self):
-        # The server name should be changed to the the provided value
+        # The server name should be changed to the provided value
         server = self.create_test_server(wait_until='ACTIVE')
         self.client.stop_server(server['id'])
         waiters.wait_for_server_status(self.client, server['id'], 'SHUTOFF')
