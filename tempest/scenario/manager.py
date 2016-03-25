@@ -479,8 +479,8 @@ class ScenarioTest(tempest.test.BaseTestCase):
                 self.addCleanup(
                     self.delete_wrapper, self.snapshots_client.delete_snapshot,
                     snapshot_id)
-                self.snapshots_client.wait_for_snapshot_status(snapshot_id,
-                                                               'available')
+                waiters.wait_for_snapshot_status(self.snapshots_client,
+                                                 snapshot_id, 'available')
 
         image_name = snapshot_image['name']
         self.assertEqual(name, image_name)

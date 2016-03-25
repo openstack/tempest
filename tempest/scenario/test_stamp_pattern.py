@@ -68,15 +68,15 @@ class TestStampPattern(manager.ScenarioTest):
             self.snapshots_client.delete_snapshot(snapshot['id'])
             try:
                 while self.snapshots_client.show_snapshot(
-                    snapshot['id'])['snapshot']:
+                        snapshot['id'])['snapshot']:
                     time.sleep(1)
             except lib_exc.NotFound:
                 pass
         self.addCleanup(cleaner)
         waiters.wait_for_volume_status(self.volumes_client,
                                        volume['id'], 'available')
-        self.snapshots_client.wait_for_snapshot_status(snapshot['id'],
-                                                       'available')
+        waiters.wait_for_snapshot_status(self.snapshots_client,
+                                         snapshot['id'], 'available')
         self.assertEqual(snapshot_name, snapshot['display_name'])
         return snapshot
 
