@@ -81,7 +81,8 @@ class LiveBlockMigrationTestJSON(base.BaseV2ComputeAdminTest):
         body = self.volumes_client.show_volume(volume_id)['volume']
         if body['status'] == 'in-use':
             self.servers_client.detach_volume(server_id, volume_id)
-            self.volumes_client.wait_for_volume_status(volume_id, 'available')
+            waiters.wait_for_volume_status(self.volumes_client,
+                                           volume_id, 'available')
         self.volumes_client.delete_volume(volume_id)
 
     def _test_live_migration(self, state='ACTIVE', volume_backed=False):
@@ -152,14 +153,15 @@ class LiveBlockMigrationTestJSON(base.BaseV2ComputeAdminTest):
         volume = self.volumes_client.create_volume(
             display_name='test')['volume']
 
-        self.volumes_client.wait_for_volume_status(volume['id'],
-                                                   'available')
+        waiters.wait_for_volume_status(self.volumes_client,
+                                       volume['id'], 'available')
         self.addCleanup(self._volume_clean_up, server_id, volume['id'])
 
         # Attach the volume to the server
         self.servers_client.attach_volume(server_id, volumeId=volume['id'],
                                           device='/dev/xvdb')
-        self.volumes_client.wait_for_volume_status(volume['id'], 'in-use')
+        waiters.wait_for_volume_status(self.volumes_client,
+                                       volume['id'], 'in-use')
 
         self._migrate_server_to(server_id, target_host)
         waiters.wait_for_server_status(self.servers_client,

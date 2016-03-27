@@ -17,7 +17,6 @@ from oslo_serialization import jsonutils as json
 import six
 from six.moves.urllib import parse as urllib
 
-from tempest.common import waiters
 from tempest.lib.common import rest_client
 from tempest.lib import exceptions as lib_exc
 
@@ -147,10 +146,6 @@ class BaseVolumesClient(rest_client.RestClient):
         resp, body = self.post(url, post_body)
         self.expected_success(202, resp.status)
         return rest_client.ResponseBody(resp, body)
-
-    def wait_for_volume_status(self, volume_id, status):
-        """Waits for a Volume to reach a given status."""
-        waiters.wait_for_volume_status(self, volume_id, status)
 
     def is_resource_deleted(self, id):
         try:

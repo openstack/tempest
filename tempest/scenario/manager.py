@@ -283,7 +283,8 @@ class ScenarioTest(tempest.test.BaseTestCase):
             self.assertEqual(name, volume['display_name'])
         else:
             self.assertEqual(name, volume['name'])
-        self.volumes_client.wait_for_volume_status(volume['id'], 'available')
+        waiters.wait_for_volume_status(self.volumes_client,
+                                       volume['id'], 'available')
         # The volume retrieved on creation has a non-up-to-date status.
         # Retrieval after it becomes active ensures correct details.
         volume = self.volumes_client.show_volume(volume['id'])['volume']
@@ -492,14 +493,16 @@ class ScenarioTest(tempest.test.BaseTestCase):
             server['id'], volumeId=volume_to_attach['id'], device='/dev/%s'
             % CONF.compute.volume_device_name)['volumeAttachment']
         self.assertEqual(volume_to_attach['id'], volume['id'])
-        self.volumes_client.wait_for_volume_status(volume['id'], 'in-use')
+        waiters.wait_for_volume_status(self.volumes_client,
+                                       volume['id'], 'in-use')
 
         # Return the updated volume after the attachment
         return self.volumes_client.show_volume(volume['id'])['volume']
 
     def nova_volume_detach(self, server, volume):
         self.servers_client.detach_volume(server['id'], volume['id'])
-        self.volumes_client.wait_for_volume_status(volume['id'], 'available')
+        waiters.wait_for_volume_status(self.volumes_client,
+                                       volume['id'], 'available')
 
         volume = self.volumes_client.show_volume(volume['id'])['volume']
         self.assertEqual('available', volume['status'])
