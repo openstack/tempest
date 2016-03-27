@@ -34,7 +34,6 @@ class VolumesV2ActionsTest(base.BaseVolumeTest):
     @classmethod
     def resource_setup(cls):
         super(VolumesV2ActionsTest, cls).resource_setup()
-
         # Create a test shared instance
         srv_name = data_utils.rand_name(cls.__name__ + '-Instance')
         cls.server = cls.create_server(
@@ -61,10 +60,10 @@ class VolumesV2ActionsTest(base.BaseVolumeTest):
     @test.services('compute')
     def test_attach_detach_volume_to_instance(self):
         # Volume is attached and detached successfully from an instance
-        mountpoint = '/dev/vdc'
         self.client.attach_volume(self.volume['id'],
                                   instance_uuid=self.server['id'],
-                                  mountpoint=mountpoint)
+                                  mountpoint='/dev/%s' %
+                                             CONF.compute.volume_device_name)
         waiters.wait_for_volume_status(self.client,
                                        self.volume['id'], 'in-use')
         self.client.detach_volume(self.volume['id'])
@@ -90,10 +89,10 @@ class VolumesV2ActionsTest(base.BaseVolumeTest):
     @test.services('compute')
     def test_get_volume_attachment(self):
         # Verify that a volume's attachment information is retrieved
-        mountpoint = '/dev/vdc'
         self.client.attach_volume(self.volume['id'],
                                   instance_uuid=self.server['id'],
-                                  mountpoint=mountpoint)
+                                  mountpoint='/dev/%s' %
+                                             CONF.compute.volume_device_name)
         waiters.wait_for_volume_status(self.client,
                                        self.volume['id'], 'in-use')
         # NOTE(gfidente): added in reverse order because functions will be
@@ -105,7 +104,9 @@ class VolumesV2ActionsTest(base.BaseVolumeTest):
         volume = self.client.show_volume(self.volume['id'])['volume']
         self.assertIn('attachments', volume)
         attachment = self.client.get_attachment_from_volume(volume)
-        self.assertEqual(mountpoint, attachment['device'])
+        self.assertEqual('/dev/%s' %
+                         CONF.compute.volume_device_name,
+                         attachment['device'])
         self.assertEqual(self.server['id'], attachment['server_id'])
         self.assertEqual(self.volume['id'], attachment['id'])
         self.assertEqual(self.volume['id'], attachment['volume_id'])
