@@ -82,6 +82,28 @@ class TestDiscovery(base.TestCase):
         self.assertIn('v2.0', versions)
         self.assertIn('v3.0', versions)
 
+    def test_get_versions_invalid_response(self):
+        # When the response doesn't contain a JSON response, an error is
+        # logged.
+        mock_log_error = self.useFixture(mockpatch.PatchObject(
+            verify_tempest_config.LOG, 'error')).mock
+
+        self.useFixture(mockpatch.PatchObject(
+            verify_tempest_config, '_get_unversioned_endpoint'))
+
+        # Simulated response is not JSON.
+        sample_body = (
+            '<html><head>Sample Response</head><body>This is the sample page '
+            'for the web server. Why are you requesting it?</body></html>')
+        self.useFixture(mockpatch.Patch('httplib2.Http.request',
+                                        return_value=(None, sample_body)))
+
+        # service value doesn't matter, just needs to match what
+        # _get_api_versions puts in its client_dict.
+        self.assertRaises(ValueError, verify_tempest_config._get_api_versions,
+                          os=mock.MagicMock(), service='keystone')
+        self.assertTrue(mock_log_error.called)
+
     def test_verify_api_versions(self):
         api_services = ['cinder', 'glance', 'keystone']
         fake_os = mock.MagicMock()

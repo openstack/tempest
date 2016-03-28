@@ -97,7 +97,14 @@ def _get_api_versions(os, service):
                              ca_certs=ca_certs)
     __, body = raw_http.request(endpoint, 'GET')
     client_dict[service].reset_path()
-    body = json.loads(body)
+    try:
+        body = json.loads(body)
+    except ValueError:
+        LOG.error(
+            'Failed to get a JSON response from unversioned endpoint %s '
+            '(versioned endpoint was %s). Response is:\n%s',
+            endpoint, client_dict[service].base_url, body[:100])
+        raise
     if service == 'keystone':
         versions = map(lambda x: x['id'], body['versions']['values'])
     else:
