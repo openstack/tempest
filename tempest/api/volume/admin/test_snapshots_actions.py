@@ -51,8 +51,8 @@ class SnapshotsActionsV2Test(base.BaseVolumeAdminTest):
         params = {cls.name_field: snap_name}
         cls.snapshot = cls.client.create_snapshot(
             volume_id=cls.volume['id'], **params)['snapshot']
-        cls.client.wait_for_snapshot_status(cls.snapshot['id'],
-                                            'available')
+        waiters.wait_for_snapshot_status(cls.client,
+                                         cls.snapshot['id'], 'available')
 
     @classmethod
     def resource_cleanup(cls):

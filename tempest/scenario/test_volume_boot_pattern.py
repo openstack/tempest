@@ -87,7 +87,8 @@ class TestVolumeBootPattern(manager.ScenarioTest):
         self.addCleanup(
             self.snapshots_client.wait_for_resource_deletion, snap['id'])
         self.addCleanup(self.snapshots_client.delete_snapshot, snap['id'])
-        self.snapshots_client.wait_for_snapshot_status(snap['id'], 'available')
+        waiters.wait_for_snapshot_status(self.snapshots_client,
+                                         snap['id'], 'available')
 
         # NOTE(e0ne): Cinder API v2 uses name instead of display_name
         if 'display_name' in snap:

@@ -123,8 +123,8 @@ class BaseVolumeTest(tempest.test.BaseTestCase):
         snapshot = cls.snapshots_client.create_snapshot(
             volume_id=volume_id, **kwargs)['snapshot']
         cls.snapshots.append(snapshot)
-        cls.snapshots_client.wait_for_snapshot_status(snapshot['id'],
-                                                      'available')
+        waiters.wait_for_snapshot_status(cls.snapshots_client,
+                                         snapshot['id'], 'available')
         return snapshot
 
     # NOTE(afazekas): these create_* and clean_* could be defined
