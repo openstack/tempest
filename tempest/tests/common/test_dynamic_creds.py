@@ -46,9 +46,10 @@ class TestDynamicCredentialProvider(base.TestCase):
     def setUp(self):
         super(TestDynamicCredentialProvider, self).setUp()
         self.useFixture(fake_config.ConfigFixture())
-        self.stubs.Set(config, 'TempestConfigPrivate', fake_config.FakePrivate)
-        self.stubs.Set(json_token_client.TokenClient, 'raw_request',
-                       fake_identity._fake_v2_response)
+        self.patchobject(config, 'TempestConfigPrivate',
+                         fake_config.FakePrivate)
+        self.patchobject(json_token_client.TokenClient, 'raw_request',
+                         fake_identity._fake_v2_response)
         cfg.CONF.set_default('operator_role', 'FakeRole',
                              group='object-storage')
         self._mock_list_ec2_credentials('fake_user_id', 'fake_tenant_id')

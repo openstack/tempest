@@ -37,9 +37,7 @@ class BaseRestClientTestClass(base.TestCase):
         self.fake_auth_provider = fake_auth_provider.FakeAuthProvider()
         self.rest_client = rest_client.RestClient(
             self.fake_auth_provider, None, None)
-        self.stubs.Set(http.ClosingHttp, 'request',
-                       self.fake_http.request)
-
+        self.patchobject(http.ClosingHttp, 'request', self.fake_http.request)
         self.useFixture(mockpatch.PatchObject(self.rest_client,
                                               '_log_request'))
 

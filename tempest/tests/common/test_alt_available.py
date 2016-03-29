@@ -28,7 +28,8 @@ class TestAltAvailable(base.TestCase):
     def setUp(self):
         super(TestAltAvailable, self).setUp()
         self.useFixture(fake_config.ConfigFixture())
-        self.stubs.Set(config, 'TempestConfigPrivate', fake_config.FakePrivate)
+        self.patchobject(config, 'TempestConfigPrivate',
+                         fake_config.FakePrivate)
 
     def run_test(self, dynamic_creds, use_accounts_file, creds):
 

@@ -32,7 +32,8 @@ class TestNegativeRestClient(base.TestCase):
     def setUp(self):
         super(TestNegativeRestClient, self).setUp()
         self.useFixture(fake_config.ConfigFixture())
-        self.stubs.Set(config, 'TempestConfigPrivate', fake_config.FakePrivate)
+        self.patchobject(config, 'TempestConfigPrivate',
+                         fake_config.FakePrivate)
         self.negative_rest_client = negative_rest_client.NegativeRestClient(
             fake_auth_provider.FakeAuthProvider(), None)
         self.useFixture(mockpatch.PatchObject(self.negative_rest_client,

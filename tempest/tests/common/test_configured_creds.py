@@ -41,9 +41,10 @@ class ConfiguredV2CredentialsTests(base.TestCase):
     def setUp(self):
         super(ConfiguredV2CredentialsTests, self).setUp()
         self.useFixture(fake_config.ConfigFixture())
-        self.stubs.Set(config, 'TempestConfigPrivate', fake_config.FakePrivate)
-        self.stubs.Set(self.tokenclient_class, 'raw_request',
-                       self.identity_response)
+        self.patchobject(config, 'TempestConfigPrivate',
+                         fake_config.FakePrivate)
+        self.patchobject(self.tokenclient_class, 'raw_request',
+                         self.identity_response)
 
     def _get_credentials(self, attributes=None):
         if attributes is None:
