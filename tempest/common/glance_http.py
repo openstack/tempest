@@ -306,13 +306,32 @@ class VerifiedHTTPSConnection(httplib.HTTPSConnection):
 
     def connect(self):
         """Connect to SSL port and apply per-connection parameters."""
-        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        if self.timeout is not None:
-            # '0' microseconds
-            sock.setsockopt(socket.SOL_SOCKET, socket.SO_RCVTIMEO,
-                            struct.pack('LL', self.timeout, 0))
-        self.sock = OpenSSLConnectionDelegator(self.context, sock)
-        self.sock.connect((self.host, self.port))
+        try:
+            addresses = socket.getaddrinfo(self.host,
+                                           self.port,
+                                           socket.AF_UNSPEC,
+                                           socket.SOCK_STREAM)
+        except OSError as msg:
+            raise exc.RestClientException(msg)
+        for res in addresses:
+            af, socktype, proto, canonname, sa = res
+            sock = socket.socket(af, socket.SOCK_STREAM)
+
+            if self.timeout is not None:
+                # '0' microseconds
+                sock.setsockopt(socket.SOL_SOCKET, socket.SO_RCVTIMEO,
+                                struct.pack('LL', self.timeout, 0))
+            self.sock = OpenSSLConnectionDelegator(self.context, sock)
+            try:
+                self.sock.connect(sa)
+            except OSError as msg:
+                if self.sock:
+                    self.sock = None
+                    continue
+            break
+        if self.sock is None:
+            # Happen only when all results have failed.
+            raise exc.RestClientException('Cannot connect to %s' % self.host)
 
     def close(self):
         if self.sock:
