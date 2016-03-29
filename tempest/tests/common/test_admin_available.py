@@ -17,8 +17,8 @@ from oslotest import mockpatch
 
 from tempest.common import credentials_factory as credentials
 from tempest import config
-from tempest.tests import base
 from tempest.tests import fake_config
+from tempest.tests.lib import base
 
 
 class TestAdminAvailable(base.TestCase):

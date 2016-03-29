@@ -20,10 +20,10 @@ from oslotest import mockpatch
 
 from tempest.common import negative_rest_client
 from tempest import config
-from tempest.tests import base
 from tempest.tests import fake_auth_provider
 from tempest.tests import fake_config
 from tempest.tests import fake_http
+from tempest.tests.lib import base
 
 
 class TestNegativeRestClient(base.TestCase):

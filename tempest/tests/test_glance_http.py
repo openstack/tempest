@@ -22,9 +22,9 @@ from six.moves import http_client as httplib
 
 from tempest.common import glance_http
 from tempest import exceptions
-from tempest.tests import base
 from tempest.tests import fake_auth_provider
 from tempest.tests import fake_http
+from tempest.tests.lib import base
 
 
 class TestGlanceHTTPClient(base.TestCase):

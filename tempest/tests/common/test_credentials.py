@@ -15,8 +15,8 @@
 from tempest.common import credentials_factory as credentials
 from tempest import config
 from tempest import exceptions
-from tempest.tests import base
 from tempest.tests import fake_config
+from tempest.tests.lib import base
 
 
 class TestLegacyCredentialsProvider(base.TestCase):

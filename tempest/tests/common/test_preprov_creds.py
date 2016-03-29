@@ -28,10 +28,10 @@ from tempest import config
 from tempest.lib import auth
 from tempest.lib import exceptions as lib_exc
 from tempest.lib.services.identity.v2 import token_client
-from tempest.tests import base
 from tempest.tests import fake_config
 from tempest.tests import fake_http
 from tempest.tests import fake_identity
+from tempest.tests.lib import base
 
 
 class TestPreProvisionedCredentials(base.TestCase):

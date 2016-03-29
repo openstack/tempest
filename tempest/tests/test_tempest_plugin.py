@@ -14,8 +14,8 @@
 #    under the License.
 
 from tempest.test_discover import plugins
-from tempest.tests import base
 from tempest.tests import fake_tempest_plugin as fake_plugin
+from tempest.tests.lib import base
 
 
 class TestPluginDiscovery(base.TestCase):
