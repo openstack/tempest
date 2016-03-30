@@ -785,6 +785,7 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
         """Covered test cases:
         * Inter VM to VM connectivity
         """
+        self._verify_connectivity_tests_enabled()
         self._verify_single_ucsm_configured()
         self._verify_sriov_configured()
 
@@ -844,6 +845,7 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
         """Covered test cases:
         * Intra VM to VM connectivity
         """
+        self._verify_connectivity_tests_enabled()
         self._verify_single_ucsm_configured()
         self._verify_connectivity_tests_enabled()
 
