@@ -14,6 +14,7 @@ from tempest.api.volume import base
 from tempest.common.utils import data_utils
 from tempest.common import waiters
 from tempest import config
+from tempest.lib import decorators
 from tempest import test
 
 CONF = config.CONF
@@ -34,6 +35,9 @@ class VolumesV2SnapshotTestJSON(base.BaseVolumeTest):
 
         cls.name_field = cls.special_fields['name_field']
         cls.descrip_field = cls.special_fields['descrip_field']
+        # Create 2 snapshots
+        for _ in xrange(2):
+            cls.create_snapshot(cls.volume_origin['id'])
 
     def _detach(self, volume_id):
         """Detach volume."""
@@ -57,6 +61,14 @@ class VolumesV2SnapshotTestJSON(base.BaseVolumeTest):
                 msg = "Failed to list snapshots %s by %s" % \
                       ('details' if with_detail else '', key)
                 self.assertEqual(params[key], snap[key], msg)
+
+    def _list_snapshots_by_param_limit(self, limit, expected_elements):
+        """list snapshots by limit param"""
+        # Get snapshots list using limit parameter
+        fetched_snap_list = self.snapshots_client.list_snapshots(
+            limit=limit)['snapshots']
+        # Validating filtered snapshots length equals to expected_elements
+        self.assertEqual(expected_elements, len(fetched_snap_list))
 
     @test.idempotent_id('b467b54c-07a4-446d-a1cf-651dedcc3ff1')
     @test.services('compute')
@@ -178,6 +190,25 @@ class VolumesV2SnapshotTestJSON(base.BaseVolumeTest):
         self.volumes_client.delete_volume(volume['id'])
         self.volumes_client.wait_for_resource_deletion(volume['id'])
         self.cleanup_snapshot(snapshot)
+
+    @test.idempotent_id('db4d8e0a-7a2e-41cc-a712-961f6844e896')
+    def test_snapshot_list_param_limit(self):
+        # List returns limited elements
+        self._list_snapshots_by_param_limit(limit=1, expected_elements=1)
+
+    @test.idempotent_id('a1427f61-420e-48a5-b6e3-0b394fa95400')
+    def test_snapshot_list_param_limit_equals_infinite(self):
+        # List returns all elements when request limit exceeded
+        # snapshots number
+        snap_list = self.snapshots_client.list_snapshots()['snapshots']
+        self._list_snapshots_by_param_limit(limit=100000,
+                                            expected_elements=len(snap_list))
+
+    @decorators.skip_because(bug='1540893')
+    @test.idempotent_id('e3b44b7f-ae87-45b5-8a8c-66110eb24d0a')
+    def test_snapshot_list_param_limit_equals_zero(self):
+        # List returns zero elements
+        self._list_snapshots_by_param_limit(limit=0, expected_elements=0)
 
     def cleanup_snapshot(self, snapshot):
         # Delete the snapshot
