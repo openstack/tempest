@@ -183,6 +183,7 @@ from tempest.services.volume.v2.json.snapshots_client import \
     SnapshotsClient as SnapshotsV2Client
 from tempest.services.volume.v2.json.volumes_client import \
     VolumesClient as VolumesV2Client
+from tempest.services.volume.v3.json.messages_client import MessagesClient
 
 CONF = config.CONF
 LOG = logging.getLogger(__name__)
@@ -508,6 +509,8 @@ class Manager(manager.Manager):
         self.volumes_v2_client = VolumesV2Client(
             self.auth_provider, default_volume_size=CONF.volume.volume_size,
             **params)
+        self.volume_messages_client = MessagesClient(self.auth_provider,
+                                                     **params)
         self.volume_types_client = VolumeTypesClient(self.auth_provider,
                                                      **params)
         self.volume_types_v2_client = VolumeTypesV2Client(
