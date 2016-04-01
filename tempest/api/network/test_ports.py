@@ -131,12 +131,15 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
         body = self.ports_client.show_port(self.port['id'])
         port = body['port']
         self.assertIn('id', port)
-        # TODO(Santosh)- This is a temporary workaround to compare create_port
-        # and show_port dict elements.Remove this once extra_dhcp_opts issue
-        # gets fixed in neutron.( bug - 1365341.)
+        # NOTE(rfolco): created_at and updated_at may get inconsistent values
+        # due to possible delay between POST request and resource creation.
+        # TODO(rfolco): Neutron Bug #1365341 is fixed, can remove the key
+        # extra_dhcp_opts in the O release (K/L gate jobs still need it).
         self.assertThat(self.port,
                         custom_matchers.MatchesDictExceptForKeys
-                        (port, excluded_keys=['extra_dhcp_opts']))
+                        (port, excluded_keys=['extra_dhcp_opts',
+                                              'created_at',
+                                              'updated_at']))
 
     @test.idempotent_id('45fcdaf2-dab0-4c13-ac6c-fcddfb579dbd')
     def test_show_port_fields(self):
