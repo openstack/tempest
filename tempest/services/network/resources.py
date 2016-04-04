@@ -41,7 +41,6 @@ class DeletableResource(AttributeDict):
 
     def __init__(self, *args, **kwargs):
         self.client = kwargs.pop('client', None)
-        self.network_client = kwargs.pop('network_client', None)
         self.networks_client = kwargs.pop('networks_client', None)
         self.routers_client = kwargs.pop('routers_client', None)
         self.subnets_client = kwargs.pop('subnets_client', None)

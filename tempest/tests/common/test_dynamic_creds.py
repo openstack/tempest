@@ -30,7 +30,6 @@ from tempest.services.identity.v2.json import tenants_client as \
     json_tenants_client
 from tempest.services.identity.v2.json import users_client as \
     json_users_client
-from tempest.services.network.json import network_client as json_network_client
 from tempest.services.network.json import routers_client
 from tempest.tests import base
 from tempest.tests import fake_config
@@ -61,8 +60,6 @@ class TestDynamicCredentialProvider(base.TestCase):
         creds = dynamic_creds.DynamicCredentialProvider(**self.fixed_params)
         self.assertTrue(isinstance(creds.identity_admin_client,
                                    json_iden_client.IdentityClient))
-        self.assertTrue(isinstance(creds.network_admin_client,
-                                   json_network_client.NetworkClient))
 
     def _get_fake_admin_creds(self):
         return credentials.get_credentials(

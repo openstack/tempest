@@ -127,6 +127,7 @@ from tempest.lib.services.compute import floating_ips_client
 from tempest.lib.services.compute import security_group_rules_client
 from tempest.lib.services.compute import security_groups_client
 from tempest.lib.services.compute import servers_client
+from tempest.lib.services.network import networks_client
 from tempest.lib.services.network import ports_client
 from tempest.lib.services.network import subnets_client
 from tempest.services.identity.v2.json import identity_client
@@ -134,7 +135,6 @@ from tempest.services.identity.v2.json import roles_client
 from tempest.services.identity.v2.json import tenants_client
 from tempest.services.identity.v2.json import users_client
 from tempest.services.image.v2.json import images_client
-from tempest.services.network.json import network_client
 from tempest.services.network.json import routers_client
 from tempest.services.object_storage import container_client
 from tempest.services.object_storage import object_client
@@ -264,7 +264,7 @@ class OSClient(object):
             build_interval=CONF.volume.build_interval,
             build_timeout=CONF.volume.build_timeout,
             **default_params)
-        self.networks = network_client.NetworkClient(
+        self.networks = networks_client.NetworksClient(
             _auth,
             CONF.network.catalog_type,
             CONF.network.region or CONF.identity.region,
