@@ -14,6 +14,7 @@
 #    under the License.
 
 from oslo_serialization import jsonutils as json
+from six.moves.urllib import parse as urllib
 
 from tempest.api_schema.response.compute.v2_1 import keypairs as schemav21
 from tempest.api_schema.response.compute.v2_2 import keypairs as schemav22
@@ -26,15 +27,21 @@ class KeyPairsClient(base_compute_client.BaseComputeClient):
     schema_versions_info = [{'min': None, 'max': '2.1', 'schema': schemav21},
                             {'min': '2.2', 'max': None, 'schema': schemav22}]
 
-    def list_keypairs(self):
-        resp, body = self.get("os-keypairs")
+    def list_keypairs(self, **params):
+        url = 'os-keypairs'
+        if params:
+            url += '?%s' % urllib.urlencode(params)
+        resp, body = self.get(url)
         body = json.loads(body)
         schema = self.get_schema(self.schema_versions_info)
         self.validate_response(schema.list_keypairs, resp, body)
         return rest_client.ResponseBody(resp, body)
 
-    def show_keypair(self, keypair_name):
-        resp, body = self.get("os-keypairs/%s" % keypair_name)
+    def show_keypair(self, keypair_name, **params):
+        url = "os-keypairs/%s" % keypair_name
+        if params:
+            url += '?%s' % urllib.urlencode(params)
+        resp, body = self.get(url)
         body = json.loads(body)
         schema = self.get_schema(self.schema_versions_info)
         self.validate_response(schema.get_keypair, resp, body)
@@ -48,8 +55,11 @@ class KeyPairsClient(base_compute_client.BaseComputeClient):
         self.validate_response(schema.create_keypair, resp, body)
         return rest_client.ResponseBody(resp, body)
 
-    def delete_keypair(self, keypair_name):
-        resp, body = self.delete("os-keypairs/%s" % keypair_name)
+    def delete_keypair(self, keypair_name, **params):
+        url = "os-keypairs/%s" % keypair_name
+        if params:
+            url += '?%s' % urllib.urlencode(params)
+        resp, body = self.delete(url)
         schema = self.get_schema(self.schema_versions_info)
         self.validate_response(schema.delete_keypair, resp, body)
         return rest_client.ResponseBody(resp, body)
