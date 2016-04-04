@@ -292,8 +292,8 @@ def create_network_resources(network_admin_client, networks_admin_client,
         return resp_body['network']
 
     def _create_subnet(subnet_name, network_id):
-        base_cidr = netaddr.IPNetwork(CONF.network.tenant_network_cidr)
-        mask_bits = CONF.network.tenant_network_mask_bits
+        base_cidr = netaddr.IPNetwork(CONF.network.project_network_cidr)
+        mask_bits = CONF.network.project_network_mask_bits
         for subnet_cidr in base_cidr.subnet(mask_bits):
             try:
                 resp_body = subnets_admin_client.\

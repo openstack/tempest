@@ -44,9 +44,9 @@ class TestGettingAddress(manager.NetworkScenarioTest):
         if not (CONF.network_feature_enabled.ipv6
                 and CONF.network_feature_enabled.ipv6_subnet_attributes):
             raise cls.skipException('IPv6 or its attributes not supported')
-        if not (CONF.network.tenant_networks_reachable
+        if not (CONF.network.project_networks_reachable
                 or CONF.network.public_network_id):
-            msg = ('Either tenant_networks_reachable must be "true", or '
+            msg = ('Either project_networks_reachable must be "true", or '
                    'public_network_id must be defined.')
             raise cls.skipException(msg)
         if CONF.baremetal.driver_enabled:

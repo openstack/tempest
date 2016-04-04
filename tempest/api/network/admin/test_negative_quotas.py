@@ -24,7 +24,7 @@ class QuotasNegativeTest(base.BaseAdminNetworkTest):
         set network quota and exceed this quota
 
     v2.0 of the API is assumed.
-    It is also assumed that the per-tenant quota extension API is configured
+    It is also assumed that the per-project quota extension API is configured
     in /etc/neutron/neutron.conf as follows:
 
         quota_driver = neutron.db.quota_db.DbQuotaDriver

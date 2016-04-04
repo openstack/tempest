@@ -31,7 +31,7 @@ class ExtensionsTestJSON(base.BaseNetworkTest):
     @test.attr(type='smoke')
     @test.idempotent_id('ef28c7e6-e646-4979-9d67-deb207bc5564')
     def test_list_show_extensions(self):
-        # List available extensions for the tenant
+        # List available extensions for the project
         expected_alias = ['security-group', 'l3_agent_scheduler',
                           'ext-gw-mode', 'binding', 'quotas',
                           'agent', 'dhcp_agent_scheduler', 'provider',

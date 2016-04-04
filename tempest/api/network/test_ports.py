@@ -90,12 +90,12 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
     def _get_ipaddress_from_tempest_conf(cls):
         """Return subnet with mask bits for configured CIDR """
         if cls._ip_version == 4:
-            cidr = netaddr.IPNetwork(CONF.network.tenant_network_cidr)
-            cidr.prefixlen = CONF.network.tenant_network_mask_bits
+            cidr = netaddr.IPNetwork(CONF.network.project_network_cidr)
+            cidr.prefixlen = CONF.network.project_network_mask_bits
 
         elif cls._ip_version == 6:
-            cidr = netaddr.IPNetwork(CONF.network.tenant_network_v6_cidr)
-            cidr.prefixlen = CONF.network.tenant_network_v6_mask_bits
+            cidr = netaddr.IPNetwork(CONF.network.project_network_v6_cidr)
+            cidr.prefixlen = CONF.network.project_network_v6_mask_bits
 
         return cidr
 
@@ -428,11 +428,7 @@ class PortsAdminExtendedAttrsTestJSON(base.BaseAdminNetworkTest):
 
 class PortsIpV6TestJSON(PortsTestJSON):
     _ip_version = 6
-    _tenant_network_cidr = CONF.network.tenant_network_v6_cidr
-    _tenant_network_mask_bits = CONF.network.tenant_network_v6_mask_bits
 
 
 class PortsAdminExtendedAttrsIpV6TestJSON(PortsAdminExtendedAttrsTestJSON):
     _ip_version = 6
-    _tenant_network_cidr = CONF.network.tenant_network_v6_cidr
-    _tenant_network_mask_bits = CONF.network.tenant_network_v6_mask_bits

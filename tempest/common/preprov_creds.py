@@ -331,6 +331,7 @@ class PreProvisionedCredentialProvider(cred_provider.CredentialProvider):
     def _wrap_creds_with_network(self, hash):
         creds_dict = self.hash_dict['creds'][hash]
         # Make sure a domain scope if defined for users in case of V3
+        # Make sure a tenant is available in case of V2
         creds_dict = self._extend_credentials(creds_dict)
         # This just builds a Credentials object, it does not validate
         # nor fill  with missing fields.
@@ -356,4 +357,17 @@ class PreProvisionedCredentialProvider(cred_provider.CredentialProvider):
             user_domain_fields = set(['user_domain_name', 'user_domain_id'])
             if not user_domain_fields.intersection(set(creds_dict.keys())):
                 creds_dict['user_domain_name'] = self.credentials_domain
+        # NOTE(andreaf) In case of v2, replace project with tenant if project
+        # is provided and tenant is not
+        if self.identity_version == 'v2':
+            if ('project_name' in creds_dict and
+                    'tenant_name' in creds_dict and
+                    creds_dict['project_name'] != creds_dict['tenant_name']):
+                clean_creds = self._sanitize_creds(creds_dict)
+                msg = 'Cannot specify project and tenant at the same time %s'
+                raise exceptions.InvalidCredentials(msg % clean_creds)
+            if ('project_name' in creds_dict and
+                    'tenant_name' not in creds_dict):
+                creds_dict['tenant_name'] = creds_dict['project_name']
+                creds_dict.pop('project_name')
         return creds_dict

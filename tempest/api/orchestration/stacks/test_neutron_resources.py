@@ -58,8 +58,8 @@ class NeutronResourcesTestJSON(base.BaseOrchestrationTest):
                             cls._create_keypair()['name'])
         cls.external_network_id = CONF.network.public_network_id
 
-        tenant_cidr = netaddr.IPNetwork(CONF.network.tenant_network_cidr)
-        mask_bits = CONF.network.tenant_network_mask_bits
+        tenant_cidr = netaddr.IPNetwork(CONF.network.project_network_cidr)
+        mask_bits = CONF.network.project_network_mask_bits
         cls.subnet_cidr = tenant_cidr.subnet(mask_bits).next()
 
         # create the stack

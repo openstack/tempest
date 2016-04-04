@@ -256,7 +256,7 @@ def get_configured_credentials(credential_type, fill_in=True,
 
     if credential_type not in CREDENTIAL_TYPES:
         raise exceptions.InvalidCredentials()
-    conf_attributes = ['username', 'password', 'tenant_name']
+    conf_attributes = ['username', 'password', 'project_name']
 
     if identity_version == 'v3':
         conf_attributes.append('domain_name')
@@ -269,6 +269,11 @@ def get_configured_credentials(credential_type, fill_in=True,
             params[attr] = getattr(_section, attr)
         else:
             params[attr] = getattr(_section, prefix + "_" + attr)
+    # NOTE(andreaf) v2 API still uses tenants, so we must translate project
+    # to tenant before building the Credentials object
+    if identity_version == 'v2':
+        params['tenant_name'] = params.get('project_name')
+        params.pop('project_name', None)
     # Build and validate credentials. We are reading configured credentials,
     # so validate them even if fill_in is False
     credentials = get_credentials(fill_in=fill_in,

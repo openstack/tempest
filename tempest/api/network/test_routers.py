@@ -41,9 +41,9 @@ class RoutersTest(base.BaseRouterTest):
     @classmethod
     def resource_setup(cls):
         super(RoutersTest, cls).resource_setup()
-        cls.tenant_cidr = (CONF.network.tenant_network_cidr
+        cls.tenant_cidr = (CONF.network.project_network_cidr
                            if cls._ip_version == 4 else
-                           CONF.network.tenant_network_v6_cidr)
+                           CONF.network.project_network_v6_cidr)
 
     @test.attr(type='smoke')
     @test.idempotent_id('f64403e2-8483-4b34-8ccd-b09a87bcc68c')
@@ -274,7 +274,7 @@ class RoutersTest(base.BaseRouterTest):
     @test.requires_ext(extension='extraroute', service='network')
     def test_update_delete_extra_route(self):
         # Create different cidr for each subnet to avoid cidr duplicate
-        # The cidr starts from tenant_cidr
+        # The cidr starts from project_cidr
         next_cidr = netaddr.IPNetwork(self.tenant_cidr)
         # Prepare to build several routes
         test_routes = []

@@ -56,7 +56,7 @@ AuthGroup = [
                     "number of concurrent test processes."),
     cfg.BoolOpt('use_dynamic_credentials',
                 default=True,
-                help="Allows test cases to create/destroy tenants and "
+                help="Allows test cases to create/destroy projects and "
                      "users. This option requires that OpenStack Identity "
                      "API admin credentials are known. If false, isolated "
                      "test cases and parallel execution, can still be "
@@ -81,23 +81,26 @@ AuthGroup = [
                 default=True,
                 help="If use_dynamic_credentials is set to True and Neutron "
                      "is enabled Tempest will try to create a usable network, "
-                     "subnet, and router when needed for each tenant it "
+                     "subnet, and router when needed for each project it "
                      "creates. However in some neutron configurations, like "
                      "with VLAN provider networks, this doesn't work. So if "
                      "set to False the isolated networks will not be created"),
     cfg.StrOpt('admin_username',
                help="Username for an administrative user. This is needed for "
-                    "authenticating requests made by tenant isolation to "
+                    "authenticating requests made by project isolation to "
                     "create users and projects",
                deprecated_group='identity'),
-    cfg.StrOpt('admin_tenant_name',
-               help="Tenant name to use for an  administrative user. This is "
-                    "needed for authenticating requests made by tenant "
+    cfg.StrOpt('admin_project_name',
+               help="Project name to use for an  administrative user. This is "
+                    "needed for authenticating requests made by project "
                     "isolation to create users and projects",
-               deprecated_group='identity'),
+               deprecated_opts=[cfg.DeprecatedOpt('admin_tenant_name',
+                                                  group='auth'),
+                                cfg.DeprecatedOpt('admin_tenant_name',
+                                                  group='identity')]),
     cfg.StrOpt('admin_password',
                help="Password to use for an  administrative user. This is "
-                    "needed for authenticating requests made by tenant "
+                    "needed for authenticating requests made by project "
                     "isolation to create users and projects",
                secret=True,
                deprecated_group='identity'),
@@ -158,8 +161,9 @@ IdentityGroup = [
     cfg.StrOpt('username',
                help="Username to use for Nova API requests.",
                deprecated_for_removal=True),
-    cfg.StrOpt('tenant_name',
-               help="Tenant name to use for Nova API requests.",
+    cfg.StrOpt('project_name',
+               deprecated_name='tenant_name',
+               help="Project name to use for Nova API requests.",
                deprecated_for_removal=True),
     cfg.StrOpt('admin_role',
                default='admin',
@@ -176,8 +180,9 @@ IdentityGroup = [
                help="Username of alternate user to use for Nova API "
                     "requests.",
                deprecated_for_removal=True),
-    cfg.StrOpt('alt_tenant_name',
-               help="Alternate user's Tenant name to use for Nova API "
+    cfg.StrOpt('alt_project_name',
+               deprecated_name='alt_tenant_name',
+               help="Alternate user's Project name to use for Nova API "
                     "requests.",
                deprecated_for_removal=True),
     cfg.StrOpt('alt_password',
@@ -246,10 +251,10 @@ ComputeGroup = [
                     "no OS-EXT-STS extension available"),
     cfg.StrOpt('fixed_network_name',
                help="Name of the fixed network that is visible to all test "
-                    "tenants. If multiple networks are available for a tenant"
-                    " this is the network which will be used for creating "
-                    "servers if tempest does not create a network or a "
-                    "network is not specified elsewhere. It may be used for "
+                    "projects. If multiple networks are available for a "
+                    "project, this is the network which will be used for "
+                    "creating servers if tempest does not create a network or "
+                    "s network is not specified elsewhere. It may be used for "
                     "ssh validation only if floating IPs are disabled."),
     cfg.StrOpt('catalog_type',
                default='compute',
@@ -493,21 +498,26 @@ NetworkGroup = [
                choices=['public', 'admin', 'internal',
                         'publicURL', 'adminURL', 'internalURL'],
                help="The endpoint type to use for the network service."),
-    cfg.StrOpt('tenant_network_cidr',
+    cfg.StrOpt('project_network_cidr',
+               deprecated_name='tenant_network_cidr',
                default="10.100.0.0/16",
-               help="The cidr block to allocate tenant ipv4 subnets from"),
-    cfg.IntOpt('tenant_network_mask_bits',
+               help="The cidr block to allocate project ipv4 subnets from"),
+    cfg.IntOpt('project_network_mask_bits',
+               deprecated_name='tenant_network_mask_bits',
                default=28,
-               help="The mask bits for tenant ipv4 subnets"),
-    cfg.StrOpt('tenant_network_v6_cidr',
+               help="The mask bits for project ipv4 subnets"),
+    cfg.StrOpt('project_network_v6_cidr',
+               deprecated_name='tenant_network_v6_cidr',
                default="2003::/48",
-               help="The cidr block to allocate tenant ipv6 subnets from"),
-    cfg.IntOpt('tenant_network_v6_mask_bits',
+               help="The cidr block to allocate project ipv6 subnets from"),
+    cfg.IntOpt('project_network_v6_mask_bits',
+               deprecated_name='tenant_network_v6_mask_bits',
                default=64,
-               help="The mask bits for tenant ipv6 subnets"),
-    cfg.BoolOpt('tenant_networks_reachable',
+               help="The mask bits for project ipv6 subnets"),
+    cfg.BoolOpt('project_networks_reachable',
+                deprecated_name='tenant_networks_reachable',
                 default=False,
-                help="Whether tenant networks can be reached directly from "
+                help="Whether project networks can be reached directly from "
                      "the test client. This must be set to True when the "
                      "'fixed' ssh_connect_method is selected."),
     cfg.StrOpt('public_network_id',
@@ -1003,7 +1013,7 @@ StressGroup = [
                 default=False,
                 help='Allows a full cleaning process after a stress test.'
                      ' Caution : this cleanup will remove every objects of'
-                     ' every tenant.')
+                     ' every project.')
 ]
 
 

@@ -17,7 +17,7 @@ to use when running Tempest. One is a traditional set of configuration options
 in the tempest.conf file. These options are clearly labelled in the ``identity``
 section and let you specify a set of credentials for a regular user, a global
 admin user, and an alternate user, consisting of a username, password, and
-project/tenant name.
+project name.
 
 The other method to provide credentials is using the accounts.yaml file. This
 file is used to specify an arbitrary number of users available to run tests
@@ -59,13 +59,13 @@ Dynamic Credentials
 Dynamic Credentials (formerly known as Tenant isolation) was originally created
 to enable running Tempest in parallel.  For each test class it creates a unique
 set of user credentials to use for the tests in the class. It can create up to
-three sets of username, password, and tenant/project names for a primary user,
-an admin user, and an alternate user.  To enable and use dynamic credentials you
+three sets of username, password, and project names for a primary user,
+an admin user, and an alternate user. To enable and use dynamic credentials you
 only need to configure two things:
 
  #. A set of admin credentials with permissions to create users and
-    tenants/projects. This is specified in the ``auth`` section with the
-    ``admin_username``, ``admin_tenant_name``, ``admin_domain_name`` and
+    projects. This is specified in the ``auth`` section with the
+    ``admin_username``, ``admin_project_name``, ``admin_domain_name`` and
     ``admin_password`` options
  #. To enable dynamic credentials in the ``auth`` section with the
     ``use_dynamic_credentials`` option.
@@ -112,7 +112,7 @@ To enable and use locking test accounts you need do a few things:
  #. Set ``use_dynamic_credentials = False`` in the ``auth`` group
 
 It is worth pointing out that each set of credentials in the accounts.yaml
-should have a unique tenant. This is required to provide proper isolation
+should have a unique project. This is required to provide proper isolation
 to the tests using the credentials, and failure to do this will likely cause
 unexpected failures in some tests.
 
@@ -123,7 +123,7 @@ Legacy Credentials (aka credentials config options)
 removed in a future release.**
 
 When Tempest was refactored to allow for locking test accounts, the original
-non-tenant isolated case was converted to internally work similarly to the
+non-project isolated case was converted to internally work similarly to the
 accounts.yaml file. This mechanism was then called the legacy test accounts
 provider. To use the legacy test accounts provider you can specify the sets of
 credentials in the configuration file as detailed above with following nine
@@ -131,13 +131,13 @@ options in the ``identity`` section:
 
  #. ``username``
  #. ``password``
- #. ``tenant_name``
+ #. ``project_name``
  #. ``admin_username``
  #. ``admin_password``
- #. ``admin_tenant_name``
+ #. ``admin_project_name``
  #. ``alt_username``
  #. ``alt_password``
- #. ``alt_tenant_name``
+ #. ``alt_project_name``
 
 If using Identity API v3, use the ``domain_name`` option to specify a
 domain other than the default domain.  The ``auth_version`` setting is
@@ -265,7 +265,7 @@ Fixed Network Name
 """"""""""""""""""
 This is the simplest method of specifying how networks should be used. You can
 just specify a single network name/label to use for all server creations. The
-limitation with this is that all tenants/projects and users must be able to see
+limitation with this is that all projects and users must be able to see
 that network name/label if they are to perform a network list and be able to use
 it.
 
@@ -287,10 +287,10 @@ Accounts File
 """""""""""""
 If you are using an accounts file to provide credentials for running Tempest
 then you can leverage it to also specify which network should be used with
-server creations on a per tenant/project and user pair basis. This provides
+server creations on a per project and user pair basis. This provides
 the necessary flexibility to work with more intricate networking configurations
 by enabling the user to specify exactly which network to use for which
-tenants/projects. You can refer to the accounts.yaml.sample file included in
+projects. You can refer to the accounts.yaml.sample file included in
 the Tempest repo for the syntax around specifying networks in the file.
 
 However, specifying a network is not required when using an accounts file. If

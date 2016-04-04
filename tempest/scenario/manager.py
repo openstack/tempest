@@ -217,7 +217,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
                 networks = kwargs.pop('networks')
 
             # If there are no networks passed to us we look up
-            # for the tenant's private networks and create a port
+            # for the project's private networks and create a port
             # if there is only one private network. The same behaviour
             # as we would expect when passing the call to the clients
             # with no networks
@@ -764,11 +764,11 @@ class NetworkScenarioTest(ScenarioTest):
 
         if ip_version == 6:
             tenant_cidr = netaddr.IPNetwork(
-                CONF.network.tenant_network_v6_cidr)
-            num_bits = CONF.network.tenant_network_v6_mask_bits
+                CONF.network.project_network_v6_cidr)
+            num_bits = CONF.network.project_network_v6_mask_bits
         else:
-            tenant_cidr = netaddr.IPNetwork(CONF.network.tenant_network_cidr)
-            num_bits = CONF.network.tenant_network_mask_bits
+            tenant_cidr = netaddr.IPNetwork(CONF.network.project_network_cidr)
+            num_bits = CONF.network.project_network_mask_bits
 
         result = None
         str_cidr = None
@@ -908,7 +908,7 @@ class NetworkScenarioTest(ScenarioTest):
                                            private_key,
                                            should_connect=True,
                                            servers_for_debug=None):
-        if not CONF.network.tenant_networks_reachable:
+        if not CONF.network.project_networks_reachable:
             msg = 'Tenant networks not configured to be reachable.'
             LOG.info(msg)
             return

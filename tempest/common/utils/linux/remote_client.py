@@ -118,7 +118,7 @@ class RemoteClient(object):
 
     def assign_static_ip(self, nic, addr):
         cmd = "sudo ip addr add {ip}/{mask} dev {nic}".format(
-            ip=addr, mask=CONF.network.tenant_network_mask_bits,
+            ip=addr, mask=CONF.network.project_network_mask_bits,
             nic=nic
         )
         return self.exec_command(cmd)
