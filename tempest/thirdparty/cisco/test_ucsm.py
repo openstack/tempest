@@ -687,18 +687,14 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
                 'binding:vnic_type': 'direct'
             }
             ports_data[vlan_id] = port
-        ports_list = self.network_client.create_bulk_port(
+
+        ports_list = self.admin_networks_client.create_bulk_port(
             ports_data.values())['ports']
 
         # Boot servers
         ports = {}
         servers = {}
         for port in ports_list:
-            create_kwargs = {
-                'networks': [
-                    {'port': port['id']},
-                ]
-            }
             server_name = data_utils.rand_name('server-smoke')
             server = self._create_server(
                 server_name, port_id=port['id'],
