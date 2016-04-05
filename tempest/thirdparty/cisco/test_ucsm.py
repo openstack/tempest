@@ -652,6 +652,8 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
         self._verify_single_ucsm_configured()
         self._verify_sriov_configured()
 
+        master_host = random.choice(self.compute_host_dict.keys())
+
         # Create networks
         names = [data_utils.rand_name('network-')
                  for i in range(self.virtual_functions)]
@@ -700,7 +702,7 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
             server_name = data_utils.rand_name('server-smoke')
             server = self._create_server(
                 server_name, port_id=port['id'],
-                availability_zone='nova:' + self.master_host)
+                availability_zone='nova:' + master_host)
 
             # Create ports dictionary
             # Assume we create one port per network.
