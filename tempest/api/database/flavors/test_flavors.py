@@ -14,6 +14,7 @@
 #    under the License.
 
 from tempest.api.database import base
+from tempest.lib import decorators
 from tempest import test
 
 
@@ -58,6 +59,7 @@ class DatabaseFlavorsTest(base.BaseDatabaseTest):
     @test.attr(type='smoke')
     @test.idempotent_id('afb2667f-4ec2-4925-bcb7-313fdcffb80d')
     @test.services('compute')
+    @decorators.skip_because(bug='1567134')
     def test_compare_db_flavors_with_os(self):
         db_flavors = self.client.list_db_flavors()['flavors']
         os_flavors = (self.os_flavors_client.list_flavors(detail=True)
