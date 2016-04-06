@@ -61,7 +61,11 @@ class HostsClient(base_compute_client.BaseComputeClient):
         self.validate_response(schema.update_host, resp, body)
         return rest_client.ResponseBody(resp, body)
 
-    def startup_host(self, hostname):
+    def startup_host(self, hostname):  # noqa
+        # NOTE: This noqa is for passing T110 check and we cannot rename
+        #       to keep backwards compatibility. Actually, the root problem
+        #       of this is a wrong API design. GET operation should not change
+        #       resource status, but current API does that.
         """Startup a host."""
 
         resp, body = self.get("os-hosts/%s/startup" % hostname)
@@ -69,7 +73,11 @@ class HostsClient(base_compute_client.BaseComputeClient):
         self.validate_response(schema.startup_host, resp, body)
         return rest_client.ResponseBody(resp, body)
 
-    def shutdown_host(self, hostname):
+    def shutdown_host(self, hostname):  # noqa
+        # NOTE: This noqa is for passing T110 check and we cannot rename
+        #       to keep backwards compatibility. Actually, the root problem
+        #       of this is a wrong API design. GET operation should not change
+        #       resource status, but current API does that.
         """Shutdown a host."""
 
         resp, body = self.get("os-hosts/%s/shutdown" % hostname)
@@ -77,7 +85,11 @@ class HostsClient(base_compute_client.BaseComputeClient):
         self.validate_response(schema.shutdown_host, resp, body)
         return rest_client.ResponseBody(resp, body)
 
-    def reboot_host(self, hostname):
+    def reboot_host(self, hostname):  # noqa
+        # NOTE: This noqa is for passing T110 check and we cannot rename
+        #       to keep backwards compatibility. Actually, the root problem
+        #       of this is a wrong API design. GET operation should not change
+        #       resource status, but current API does that.
         """Reboot a host."""
 
         resp, body = self.get("os-hosts/%s/reboot" % hostname)

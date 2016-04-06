@@ -133,7 +133,9 @@ class FlavorsClient(base_compute_client.BaseComputeClient):
             resp, body)
         return rest_client.ResponseBody(resp, body)
 
-    def unset_flavor_extra_spec(self, flavor_id, key):
+    def unset_flavor_extra_spec(self, flavor_id, key):  # noqa
+        # NOTE: This noqa is for passing T111 check and we cannot rename
+        #       to keep backwards compatibility.
         """Unset extra Specs from the mentioned flavor."""
         resp, body = self.delete('flavors/%s/os-extra_specs/%s' %
                                  (flavor_id, key))

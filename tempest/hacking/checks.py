@@ -151,7 +151,7 @@ def no_testtools_skip_decorator(logical_line):
 
 def _common_service_clients_check(logical_line, physical_line, filename,
                                   ignored_list_file=None):
-    if 'tempest/services/' not in filename:
+    if not re.match('tempest/(lib/)?services/.*', filename):
         return False
 
     if ignored_list_file is not None:

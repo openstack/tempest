@@ -22,7 +22,9 @@ class QuotasClient(base.BaseNetworkClient):
         uri = '/quotas/%s' % tenant_id
         return self.update_resource(uri, put_body)
 
-    def reset_quotas(self, tenant_id):
+    def reset_quotas(self, tenant_id):  # noqa
+        # NOTE: This noqa is for passing T111 check and we cannot rename
+        #       to keep backwards compatibility.
         uri = '/quotas/%s' % tenant_id
         return self.delete_resource(uri)
 
