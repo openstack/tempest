@@ -688,7 +688,7 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
             }
             ports_data[vlan_id] = port
 
-        ports_list = self.admin_networks_client.create_bulk_port(
+        ports_list = self.admin_network_client.create_bulk_port(
             ports_data.values())['ports']
 
         # Boot servers
