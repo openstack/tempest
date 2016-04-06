@@ -811,21 +811,6 @@ ObjectStoreFeaturesGroup = [
                 help="Execute discoverability tests"),
 ]
 
-database_group = cfg.OptGroup(name='database',
-                              title='Database Service Options')
-
-DatabaseGroup = [
-    cfg.StrOpt('catalog_type',
-               default='database',
-               help="Catalog type of the Database service."),
-    cfg.StrOpt('db_flavor_ref',
-               default="1",
-               help="Valid primary flavor to use in database tests."),
-    cfg.StrOpt('db_current_version',
-               default="v1.0",
-               help="Current database version to use in database tests."),
-]
-
 orchestration_group = cfg.OptGroup(name='orchestration',
                                    title='Orchestration Service Options')
 
@@ -1002,9 +987,6 @@ ServiceAvailableGroup = [
     cfg.BoolOpt('ironic',
                 default=False,
                 help="Whether or not Ironic is expected to be available"),
-    cfg.BoolOpt('trove',
-                default=False,
-                help="Whether or not Trove is expected to be available"),
 ]
 
 debug_group = cfg.OptGroup(name="debug",
@@ -1141,7 +1123,6 @@ _opts = [
     (volume_feature_group, VolumeFeaturesGroup),
     (object_storage_group, ObjectStoreGroup),
     (object_storage_feature_group, ObjectStoreFeaturesGroup),
-    (database_group, DatabaseGroup),
     (orchestration_group, OrchestrationGroup),
     (data_processing_group, DataProcessingGroup),
     (data_processing_feature_group, DataProcessingFeaturesGroup),
@@ -1208,7 +1189,6 @@ class TempestConfigPrivate(object):
         self.object_storage = _CONF['object-storage']
         self.object_storage_feature_enabled = _CONF[
             'object-storage-feature-enabled']
-        self.database = _CONF.database
         self.orchestration = _CONF.orchestration
         self.data_processing = _CONF['data-processing']
         self.data_processing_feature_enabled = _CONF[
