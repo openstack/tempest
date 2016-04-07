@@ -382,7 +382,6 @@ class NovaQuotaService(BaseService):
 class NetworkService(BaseService):
     def __init__(self, manager, **kwargs):
         super(NetworkService, self).__init__(kwargs)
-        self.client = manager.network_client
         self.networks_client = manager.networks_client
         self.subnets_client = manager.subnets_client
         self.ports_client = manager.ports_client

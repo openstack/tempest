@@ -38,7 +38,6 @@ class ServersTestJSON(base.BaseV2ComputeTest):
     def setup_clients(cls):
         super(ServersTestJSON, cls).setup_clients()
         cls.client = cls.servers_client
-        cls.network_client = cls.os.network_client
         cls.networks_client = cls.os.networks_client
         cls.subnets_client = cls.os.subnets_client
 

@@ -67,7 +67,6 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
     @classmethod
     def setup_clients(cls):
         super(BaseNetworkTest, cls).setup_clients()
-        cls.client = cls.os.network_client
         cls.agents_client = cls.os.network_agents_client
         cls.network_extensions_client = cls.os.network_extensions_client
         cls.networks_client = cls.os.networks_client
@@ -276,7 +275,6 @@ class BaseAdminNetworkTest(BaseNetworkTest):
     @classmethod
     def setup_clients(cls):
         super(BaseAdminNetworkTest, cls).setup_clients()
-        cls.admin_client = cls.os_adm.network_client
         cls.admin_agents_client = cls.os_adm.network_agents_client
         cls.admin_networks_client = cls.os_adm.networks_client
         cls.admin_routers_client = cls.os_adm.routers_client

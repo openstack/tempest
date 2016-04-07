@@ -250,9 +250,8 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         interface = self.interface_client.create_interface(
             server_id=server['id'],
             net_id=self.new_net.id)['interfaceAttachment']
-        self.addCleanup(self.network_client.wait_for_resource_deletion,
-                        'port',
-                        interface['port_id'], client=self.ports_client)
+        self.addCleanup(self.ports_client.wait_for_resource_deletion,
+                        interface['port_id'])
         self.addCleanup(self.delete_wrapper,
                         self.interface_client.delete_interface,
                         server['id'], interface['port_id'])
