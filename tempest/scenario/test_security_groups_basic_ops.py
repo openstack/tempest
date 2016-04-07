@@ -130,9 +130,9 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
             msg = ('Not currently supported when using vnic_type'
                    ' direct or macvtap')
             raise cls.skipException(msg)
-        if not (CONF.network.tenant_networks_reachable or
+        if not (CONF.network.project_networks_reachable or
                 CONF.network.public_network_id):
-            msg = ('Either tenant_networks_reachable must be "true", or '
+            msg = ('Either project_networks_reachable must be "true", or '
                    'public_network_id must be defined.')
             raise cls.skipException(msg)
         if not test.is_extension_enabled('security-group', 'network'):
@@ -194,7 +194,7 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
             client=tenant.manager.security_groups_client
         )
 
-        # don't use default secgroup since it allows in-tenant traffic
+        # don't use default secgroup since it allows in-project traffic
         def_sg = self._create_empty_security_group(
             namestart='secgroup_general-',
             tenant_id=tenant.creds.tenant_id,
@@ -301,7 +301,7 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
 
     def _set_access_point(self, tenant):
         # creates a server in a secgroup with rule allowing external ssh
-        # in order to access tenant internal network
+        # in order to access project internal network
         # workaround ip namespace
         secgroups = tenant.security_groups.values()
         name = 'server-{tenant}-access_point'.format(
@@ -468,7 +468,7 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
         if not self.credentials_provider.is_multi_tenant():
             raise self.skipException("No secondary tenant defined")
         try:
-            # deploy new tenant
+            # deploy new project
             self._deploy_tenant(self.alt_tenant)
             self._verify_network_details(self.alt_tenant)
             self._verify_mac_addr(self.alt_tenant)

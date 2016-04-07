@@ -36,19 +36,19 @@ class TestAdminAvailable(base.TestCase):
                              dynamic_creds, group='auth')
         if use_accounts_file:
             accounts = [{'username': 'u1',
-                         'tenant_name': 't1',
+                         'project_name': 't1',
                          'password': 'p'},
                         {'username': 'u2',
-                         'tenant_name': 't2',
+                         'project_name': 't2',
                          'password': 'p'}]
             if admin_creds == 'role':
                 accounts.append({'username': 'admin',
-                                 'tenant_name': 'admin',
+                                 'project_name': 'admin',
                                  'password': 'p',
                                  'roles': ['admin']})
             elif admin_creds == 'type':
                 accounts.append({'username': 'admin',
-                                 'tenant_name': 'admin',
+                                 'project_name': 'admin',
                                  'password': 'p',
                                  'types': ['admin']})
             self.useFixture(mockpatch.Patch(
@@ -63,17 +63,17 @@ class TestAdminAvailable(base.TestCase):
                                             return_value=False))
             if admin_creds:
                 username = 'u'
-                tenant = 't'
+                project = 't'
                 password = 'p'
                 domain = 'd'
             else:
                 username = None
-                tenant = None
+                project = None
                 password = None
                 domain = None
 
             cfg.CONF.set_default('admin_username', username, group='auth')
-            cfg.CONF.set_default('admin_tenant_name', tenant, group='auth')
+            cfg.CONF.set_default('admin_project_name', project, group='auth')
             cfg.CONF.set_default('admin_password', password, group='auth')
             cfg.CONF.set_default('admin_domain_name', domain, group='auth')
 

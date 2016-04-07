@@ -24,7 +24,7 @@ CONF = config.CONF
 
 
 class NegativeSecGroupTest(base.BaseSecGroupTest):
-    _tenant_network_cidr = CONF.network.tenant_network_cidr
+    _project_network_cidr = CONF.network.project_network_cidr
 
     @classmethod
     def skip_checks(cls):
@@ -110,7 +110,7 @@ class NegativeSecGroupTest(base.BaseSecGroupTest):
         sg2_body, _ = self._create_security_group()
 
         # Create rule specifying both remote_ip_prefix and remote_group_id
-        prefix = self._tenant_network_cidr
+        prefix = self._project_network_cidr
         self.assertRaises(
             lib_exc.BadRequest,
             self.security_group_rules_client.create_security_group_rule,
@@ -214,7 +214,7 @@ class NegativeSecGroupTest(base.BaseSecGroupTest):
 
 class NegativeSecGroupIPv6Test(NegativeSecGroupTest):
     _ip_version = 6
-    _tenant_network_cidr = CONF.network.tenant_network_v6_cidr
+    _project_network_cidr = CONF.network.project_network_v6_cidr
 
     @test.attr(type=['negative'])
     @test.idempotent_id('7607439c-af73-499e-bf64-f687fd12a842')
@@ -223,9 +223,9 @@ class NegativeSecGroupIPv6Test(NegativeSecGroupTest):
 
         # Create rule with bad remote_ip_prefix
         pairs = ({'ethertype': 'IPv6',
-                  'ip_prefix': CONF.network.tenant_network_cidr},
+                  'ip_prefix': CONF.network.project_network_cidr},
                  {'ethertype': 'IPv4',
-                  'ip_prefix': CONF.network.tenant_network_v6_cidr})
+                  'ip_prefix': CONF.network.project_network_v6_cidr})
         for pair in pairs:
             self.assertRaisesRegex(
                 lib_exc.BadRequest,

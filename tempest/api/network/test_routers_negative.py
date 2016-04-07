@@ -39,9 +39,9 @@ class RoutersNegativeTest(base.BaseRouterTest):
         cls.router = cls.create_router(data_utils.rand_name('router-'))
         cls.network = cls.create_network()
         cls.subnet = cls.create_subnet(cls.network)
-        cls.tenant_cidr = (CONF.network.tenant_network_cidr
+        cls.tenant_cidr = (CONF.network.project_network_cidr
                            if cls._ip_version == 4 else
-                           CONF.network.tenant_network_v6_cidr)
+                           CONF.network.project_network_v6_cidr)
 
     @test.attr(type=['negative'])
     @test.idempotent_id('37a94fc0-a834-45b9-bd23-9a81d2fd1e22')

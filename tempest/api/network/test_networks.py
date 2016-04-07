@@ -29,12 +29,12 @@ CONF = config.CONF
 class NetworksTest(base.BaseNetworkTest):
     """Tests the following operations in the Neutron API:
 
-        create a network for a tenant
-        list tenant's networks
-        show a tenant network details
-        create a subnet for a tenant
-        list tenant's subnets
-        show a tenant subnet details
+        create a network for a project
+        list project's networks
+        show a project network details
+        create a subnet for a project
+        list project's subnets
+        show a project subnet details
         network update
         subnet update
         delete a network also deletes its subnets
@@ -45,15 +45,15 @@ class NetworksTest(base.BaseNetworkTest):
     v2.0 of the Neutron API is assumed. It is also assumed that the following
     options are defined in the [network] section of etc/tempest.conf:
 
-        tenant_network_cidr with a block of cidr's from which smaller blocks
-        can be allocated for tenant ipv4 subnets
+        project_network_cidr with a block of cidr's from which smaller blocks
+        can be allocated for project ipv4 subnets
 
-        tenant_network_v6_cidr is the equivalent for ipv6 subnets
+        project_network_v6_cidr is the equivalent for ipv6 subnets
 
-        tenant_network_mask_bits with the mask bits to be used to partition the
-        block defined by tenant_network_cidr
+        project_network_mask_bits with the mask bits to be used to partition
+        the block defined by project_network_cidr
 
-        tenant_network_v6_mask_bits is the equivalent for ipv6 subnets
+        project_network_v6_mask_bits is the equivalent for ipv6 subnets
     """
 
     @classmethod
@@ -92,14 +92,14 @@ class NetworksTest(base.BaseNetworkTest):
 
     @classmethod
     def _create_subnet_with_last_subnet_block(cls, network, ip_version):
-        # Derive last subnet CIDR block from tenant CIDR and
+        # Derive last subnet CIDR block from project CIDR and
         # create the subnet with that derived CIDR
         if ip_version == 4:
-            cidr = netaddr.IPNetwork(CONF.network.tenant_network_cidr)
-            mask_bits = CONF.network.tenant_network_mask_bits
+            cidr = netaddr.IPNetwork(CONF.network.project_network_cidr)
+            mask_bits = CONF.network.project_network_mask_bits
         elif ip_version == 6:
-            cidr = netaddr.IPNetwork(CONF.network.tenant_network_v6_cidr)
-            mask_bits = CONF.network.tenant_network_v6_mask_bits
+            cidr = netaddr.IPNetwork(CONF.network.project_network_v6_cidr)
+            mask_bits = CONF.network.project_network_v6_mask_bits
 
         subnet_cidr = list(cidr.subnet(mask_bits))[-1]
         gateway_ip = str(netaddr.IPAddress(subnet_cidr) + 1)
@@ -110,11 +110,11 @@ class NetworksTest(base.BaseNetworkTest):
     def _get_gateway_from_tempest_conf(cls, ip_version):
         """Return first subnet gateway for configured CIDR """
         if ip_version == 4:
-            cidr = netaddr.IPNetwork(CONF.network.tenant_network_cidr)
-            mask_bits = CONF.network.tenant_network_mask_bits
+            cidr = netaddr.IPNetwork(CONF.network.project_network_cidr)
+            mask_bits = CONF.network.project_network_mask_bits
         elif ip_version == 6:
-            cidr = netaddr.IPNetwork(CONF.network.tenant_network_v6_cidr)
-            mask_bits = CONF.network.tenant_network_v6_mask_bits
+            cidr = netaddr.IPNetwork(CONF.network.project_network_v6_cidr)
+            mask_bits = CONF.network.project_network_v6_mask_bits
 
         if mask_bits >= cidr.prefixlen:
             return netaddr.IPAddress(cidr) + 1
@@ -403,16 +403,16 @@ class BulkNetworkOpsTestJSON(base.BaseNetworkTest):
         bulk network creation
         bulk subnet creation
         bulk port creation
-        list tenant's networks
+        list project's networks
 
     v2.0 of the Neutron API is assumed. It is also assumed that the following
     options are defined in the [network] section of etc/tempest.conf:
 
-        tenant_network_cidr with a block of cidr's from which smaller blocks
-        can be allocated for tenant networks
+        project_network_cidr with a block of cidr's from which smaller blocks
+        can be allocated for project networks
 
-        tenant_network_mask_bits with the mask bits to be used to partition the
-        block defined by tenant-network_cidr
+        project_network_mask_bits with the mask bits to be used to partition
+        the block defined by project-network_cidr
     """
 
     def _delete_networks(self, created_networks):
@@ -464,11 +464,11 @@ class BulkNetworkOpsTestJSON(base.BaseNetworkTest):
         networks = [self.create_network(), self.create_network()]
         # Creates 2 subnets in one request
         if self._ip_version == 4:
-            cidr = netaddr.IPNetwork(CONF.network.tenant_network_cidr)
-            mask_bits = CONF.network.tenant_network_mask_bits
+            cidr = netaddr.IPNetwork(CONF.network.project_network_cidr)
+            mask_bits = CONF.network.project_network_mask_bits
         else:
-            cidr = netaddr.IPNetwork(CONF.network.tenant_network_v6_cidr)
-            mask_bits = CONF.network.tenant_network_v6_mask_bits
+            cidr = netaddr.IPNetwork(CONF.network.project_network_v6_cidr)
+            mask_bits = CONF.network.project_network_v6_mask_bits
 
         cidrs = [subnet_cidr for subnet_cidr in cidr.subnet(mask_bits)]
 
@@ -529,7 +529,7 @@ class NetworksIpV6TestJSON(NetworksTest):
 
     @test.idempotent_id('e41a4888-65a6-418c-a095-f7c2ef4ad59a')
     def test_create_delete_subnet_with_gw(self):
-        net = netaddr.IPNetwork(CONF.network.tenant_network_v6_cidr)
+        net = netaddr.IPNetwork(CONF.network.project_network_v6_cidr)
         gateway = str(netaddr.IPAddress(net.first + 2))
         name = data_utils.rand_name('network-')
         network = self.create_network(network_name=name)
@@ -539,7 +539,7 @@ class NetworksIpV6TestJSON(NetworksTest):
 
     @test.idempotent_id('ebb4fd95-524f-46af-83c1-0305b239338f')
     def test_create_delete_subnet_with_default_gw(self):
-        net = netaddr.IPNetwork(CONF.network.tenant_network_v6_cidr)
+        net = netaddr.IPNetwork(CONF.network.project_network_v6_cidr)
         gateway_ip = str(netaddr.IPAddress(net.first + 1))
         name = data_utils.rand_name('network-')
         network = self.create_network(network_name=name)

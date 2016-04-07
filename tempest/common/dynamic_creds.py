@@ -208,8 +208,8 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
         return resp_body['network']
 
     def _create_subnet(self, subnet_name, tenant_id, network_id):
-        base_cidr = netaddr.IPNetwork(CONF.network.tenant_network_cidr)
-        mask_bits = CONF.network.tenant_network_mask_bits
+        base_cidr = netaddr.IPNetwork(CONF.network.project_network_cidr)
+        mask_bits = CONF.network.project_network_mask_bits
         for subnet_cidr in base_cidr.subnet(mask_bits):
             try:
                 if self.network_resources:

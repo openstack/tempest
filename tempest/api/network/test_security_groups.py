@@ -24,7 +24,7 @@ CONF = config.CONF
 
 
 class SecGroupTest(base.BaseSecGroupTest):
-    _tenant_network_cidr = CONF.network.tenant_network_cidr
+    _project_network_cidr = CONF.network.project_network_cidr
 
     @classmethod
     def skip_checks(cls):
@@ -71,7 +71,7 @@ class SecGroupTest(base.BaseSecGroupTest):
     @test.attr(type='smoke')
     @test.idempotent_id('e30abd17-fef9-4739-8617-dc26da88e686')
     def test_list_security_groups(self):
-        # Verify the that security group belonging to tenant exist in list
+        # Verify the that security group belonging to project exist in list
         body = self.security_groups_client.list_security_groups()
         security_groups = body['security_groups']
         found = None
@@ -210,7 +210,7 @@ class SecGroupTest(base.BaseSecGroupTest):
         protocol = 'tcp'
         port_range_min = 76
         port_range_max = 77
-        ip_prefix = self._tenant_network_cidr
+        ip_prefix = self._project_network_cidr
         self._create_verify_security_group_rule(sg_id, direction,
                                                 self.ethertype, protocol,
                                                 port_range_min,
@@ -239,4 +239,4 @@ class SecGroupTest(base.BaseSecGroupTest):
 
 class SecGroupIPv6Test(SecGroupTest):
     _ip_version = 6
-    _tenant_network_cidr = CONF.network.tenant_network_v6_cidr
+    _project_network_cidr = CONF.network.project_network_v6_cidr
