@@ -248,10 +248,10 @@ class RestClient(object):
         :param str url: the relative url to send the post request to
         :param dict body: the request body
         :param dict headers: The headers to use for the request
-        :param dict extra_headers: If the headers returned by the get_headers()
-                                   method are to be used but additional headers
-                                   are needed in the request pass them in as a
-                                   dict
+        :param bool extra_headers: Boolean value than indicates if the headers
+                                   returned by the get_headers() method are to
+                                   be used but additional headers are needed in
+                                   the request pass them in as a dict.
         :return: a tuple with the first entry containing the response headers
                  and the second the response body
         :rtype: tuple
@@ -263,10 +263,10 @@ class RestClient(object):
 
         :param str url: the relative url to send the post request to
         :param dict headers: The headers to use for the request
-        :param dict extra_headers: If the headers returned by the get_headers()
-                                   method are to be used but additional headers
-                                   are needed in the request pass them in as a
-                                   dict
+        :param bool extra_headers: Boolean value than indicates if the headers
+                                   returned by the get_headers() method are to
+                                   be used but additional headers are needed in
+                                   the request pass them in as a dict.
         :return: a tuple with the first entry containing the response headers
                  and the second the response body
         :rtype: tuple
@@ -279,10 +279,10 @@ class RestClient(object):
         :param str url: the relative url to send the post request to
         :param dict headers: The headers to use for the request
         :param dict body: the request body
-        :param dict extra_headers: If the headers returned by the get_headers()
-                                   method are to be used but additional headers
-                                   are needed in the request pass them in as a
-                                   dict
+        :param bool extra_headers: Boolean value than indicates if the headers
+                                   returned by the get_headers() method are to
+                                   be used but additional headers are needed in
+                                   the request pass them in as a dict.
         :return: a tuple with the first entry containing the response headers
                  and the second the response body
         :rtype: tuple
@@ -295,10 +295,10 @@ class RestClient(object):
         :param str url: the relative url to send the post request to
         :param dict body: the request body
         :param dict headers: The headers to use for the request
-        :param dict extra_headers: If the headers returned by the get_headers()
-                                   method are to be used but additional headers
-                                   are needed in the request pass them in as a
-                                   dict
+        :param bool extra_headers: Boolean value than indicates if the headers
+                                   returned by the get_headers() method are to
+                                   be used but additional headers are needed in
+                                   the request pass them in as a dict.
         :return: a tuple with the first entry containing the response headers
                  and the second the response body
         :rtype: tuple
@@ -311,10 +311,10 @@ class RestClient(object):
         :param str url: the relative url to send the post request to
         :param dict body: the request body
         :param dict headers: The headers to use for the request
-        :param dict extra_headers: If the headers returned by the get_headers()
-                                   method are to be used but additional headers
-                                   are needed in the request pass them in as a
-                                   dict
+        :param bool extra_headers: Boolean value than indicates if the headers
+                                   returned by the get_headers() method are to
+                                   be used but additional headers are needed in
+                                   the request pass them in as a dict.
         :return: a tuple with the first entry containing the response headers
                  and the second the response body
         :rtype: tuple
@@ -326,10 +326,10 @@ class RestClient(object):
 
         :param str url: the relative url to send the post request to
         :param dict headers: The headers to use for the request
-        :param dict extra_headers: If the headers returned by the get_headers()
-                                   method are to be used but additional headers
-                                   are needed in the request pass them in as a
-                                   dict
+        :param bool extra_headers: Boolean value than indicates if the headers
+                                   returned by the get_headers() method are to
+                                   be used but additional headers are needed in
+                                   the request pass them in as a dict.
         :return: a tuple with the first entry containing the response headers
                  and the second the response body
         :rtype: tuple
@@ -341,10 +341,10 @@ class RestClient(object):
 
         :param str url: the relative url to send the post request to
         :param dict headers: The headers to use for the request
-        :param dict extra_headers: If the headers returned by the get_headers()
-                                   method are to be used but additional headers
-                                   are needed in the request pass them in as a
-                                   dict
+        :param bool extra_headers: Boolean value than indicates if the headers
+                                   returned by the get_headers() method are to
+                                   be used but additional headers are needed in
+                                   the request pass them in as a dict.
         :return: a tuple with the first entry containing the response headers
                  and the second the response body
         :rtype: tuple
@@ -576,10 +576,10 @@ class RestClient(object):
 
         :param str method: The HTTP verb to use for the request
         :param str url: Relative url to send the request to
-        :param dict extra_headers: If specified without the headers kwarg the
-                                   headers sent with the request will be the
-                                   combination from the get_headers() method
-                                   and this kwarg
+        :param bool extra_headers: Boolean value than indicates if the headers
+                                   returned by the get_headers() method are to
+                                   be used but additional headers are needed in
+                                   the request pass them in as a dict.
         :param dict headers: Headers to use for the request if none are
                              specifed the headers returned from the
                              get_headers() method are used. If the request
@@ -620,7 +620,6 @@ class RestClient(object):
             headers = self.get_headers()
         elif extra_headers:
             try:
-                headers = headers.copy()
                 headers.update(self.get_headers())
             except (ValueError, TypeError):
                 headers = self.get_headers()
