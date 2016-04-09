@@ -325,7 +325,7 @@ class TestPreProvisionedCredentials(base.TestCase):
                                                     'id': 'fake-id',
                                                     'label': 'network-2'}]}):
             creds = test_accounts_class.get_creds_by_roles(['role-7'])
-        self.assertTrue(isinstance(creds, cred_provider.TestResources))
+        self.assertIsInstance(creds, cred_provider.TestResources)
         network = creds.network
         self.assertIsNotNone(network)
         self.assertIn('name', network)
