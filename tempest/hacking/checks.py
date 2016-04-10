@@ -119,11 +119,6 @@ def no_hyphen_at_end_of_rand_name(logical_line, filename):
 
     T108
     """
-    if './tempest/api/network/' in filename:
-        # Network API tests are migrating from Tempest to Neutron repo now.
-        # So here should avoid network API tests checks.
-        return
-
     msg = "T108: hyphen should not be specified at the end of rand_name()"
     if RAND_NAME_HYPHEN_RE.match(logical_line):
         return 0, msg
