@@ -327,8 +327,8 @@ class TestNetworkMultiNode(manager.NetworkScenarioTest):
         pass
 
     def _ping_east_west(self, linux_client, target_ip,
-                        count=CONF.compute.ping_count,
-                        size=CONF.compute.ping_size):
+                        count=CONF.validation_group.ping_count,
+                        size=CONF.validation_group.ping_size):
         """
         From a remote linux host ping an IP address and return a
         data structure containing the results.
