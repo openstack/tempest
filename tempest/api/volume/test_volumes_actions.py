@@ -17,6 +17,7 @@ from tempest.api.volume import base
 from tempest.common.utils import data_utils
 from tempest.common import waiters
 from tempest import config
+from tempest.lib import exceptions
 from tempest import test
 import testtools
 
@@ -122,10 +123,18 @@ class VolumesV2ActionsTest(base.BaseVolumeTest):
             self.volume['id'], image_name=image_name,
             disk_format=CONF.volume.disk_format)['os-volume_upload_image']
         image_id = body["image_id"]
-        self.addCleanup(self.image_client.delete_image, image_id)
+        self.addCleanup(self._cleanup_image, image_id)
         self.image_client.wait_for_image_status(image_id, 'active')
         waiters.wait_for_volume_status(self.client,
                                        self.volume['id'], 'available')
+
+    def _cleanup_image(self, image_id):
+        # Ignores the image deletion
+        # in the case that image wasn't created in the first place
+        try:
+            self.image_client.delete_image(image_id)
+        except exceptions.NotFound:
+            pass
 
     @test.idempotent_id('92c4ef64-51b2-40c0-9f7e-4749fbaaba33')
     def test_reserve_unreserve_volume(self):
