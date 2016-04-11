@@ -12,12 +12,11 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-from tempest_lib import decorators
-from tempest_lib import exceptions as lib_exc
-
 from tempest.api.object_storage import base
 from tempest.common.utils import data_utils
 from tempest import config
+from tempest.lib import decorators
+from tempest.lib import exceptions as lib_exc
 from tempest import test
 
 CONF = config.CONF
@@ -83,9 +82,7 @@ class AccountQuotasNegativeTest(base.BaseObjectTest):
     @test.idempotent_id('d1dc5076-555e-4e6d-9697-28f1fe976324')
     @test.requires_ext(extension='account_quotas', service='object')
     def test_user_modify_quota(self):
-        """Test that a user is not able to modify or remove a quota on
-        its account.
-        """
+        """Test that a user cannot modify or remove a quota on its account."""
 
         # Not able to remove quota
         self.assertRaises(lib_exc.Forbidden,

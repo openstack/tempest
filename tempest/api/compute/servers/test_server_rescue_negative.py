@@ -13,13 +13,13 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest_lib import exceptions as lib_exc
 import testtools
 
 from tempest.api.compute import base
 from tempest.common.utils import data_utils
 from tempest.common import waiters
 from tempest import config
+from tempest.lib import exceptions as lib_exc
 from tempest import test
 
 CONF = config.CONF
@@ -43,14 +43,15 @@ class ServerRescueNegativeTestJSON(base.BaseV2ComputeTest):
     def resource_setup(cls):
         super(ServerRescueNegativeTestJSON, cls).resource_setup()
         cls.device = CONF.compute.volume_device_name
-
+        cls.password = data_utils.rand_password()
+        rescue_password = data_utils.rand_password()
         # Server for negative tests
-        server = cls.create_test_server(wait_until='BUILD')
-        resc_server = cls.create_test_server(wait_until='ACTIVE')
+        server = cls.create_test_server(adminPass=cls.password,
+                                        wait_until='BUILD')
+        resc_server = cls.create_test_server(adminPass=rescue_password,
+                                             wait_until='ACTIVE')
         cls.server_id = server['id']
-        cls.password = server['adminPass']
         cls.rescue_id = resc_server['id']
-        rescue_password = resc_server['adminPass']
 
         cls.servers_client.rescue_server(
             cls.rescue_id, adminPass=rescue_password)
@@ -101,7 +102,7 @@ class ServerRescueNegativeTestJSON(base.BaseV2ComputeTest):
     @test.idempotent_id('db22b618-f157-4566-a317-1b6d467a8094')
     def test_rescued_vm_reboot(self):
         self.assertRaises(lib_exc.Conflict, self.servers_client.reboot_server,
-                          self.rescue_id, 'HARD')
+                          self.rescue_id, type='HARD')
 
     @test.attr(type=['negative'])
     @test.idempotent_id('6dfc0a55-3a77-4564-a144-1587b7971dde')

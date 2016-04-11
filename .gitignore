@@ -16,7 +16,13 @@ include/swift_objects/swift_large
 dist
 build
 .testrepository
+.idea
+.project
+.pydevproject
 .coverage*
 !.coveragerc
 cover/
 doc/source/_static/tempest.conf.sample
+
+# Files created by releasenotes build
+releasenotes/build

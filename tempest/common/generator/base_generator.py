@@ -17,10 +17,7 @@ import copy
 import functools
 
 import jsonschema
-from oslo_log import log as logging
 import six
-
-LOG = logging.getLogger(__name__)
 
 
 def _check_for_expected_result(name, schema):
@@ -41,9 +38,7 @@ def generator_type(*args, **kwargs):
 
 
 def simple_generator(fn):
-    """
-    Decorator for simple generators that return one value
-    """
+    """Decorator for simple generators that return one value"""
     @functools.wraps(fn)
     def wrapped(self, schema):
         result = fn(self, schema)
@@ -110,9 +105,7 @@ class BasicGeneratorSet(object):
         jsonschema.validate(schema, self.schema)
 
     def generate_scenarios(self, schema, path=None):
-        """
-        Generates the scenario (all possible test cases) out of the given
-        schema.
+        """Generate scenario (all possible test cases) out of the given schema
 
         :param schema: a dict style schema (see ``BasicGeneratorSet.schema``)
         :param path: the schema path if the given schema is a subschema
@@ -157,9 +150,10 @@ class BasicGeneratorSet(object):
         return scenarios
 
     def generate_payload(self, test, schema):
-        """
-        Generates one jsonschema out of the given test. It's mandatory to use
-        generate_scenarios before to register all needed variables to the test.
+        """Generates one jsonschema out of the given test.
+
+        It's mandatory to use generate_scenarios before to register all needed
+        variables to the test.
 
         :param test: A test object (scenario) with all _negtest variables on it
         :param schema: schema for the test

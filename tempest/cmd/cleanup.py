@@ -50,15 +50,17 @@ deleted and the admin user specified in tempest.conf is never deleted.
 
 Please run with **--help** to see full list of options.
 """
-import argparse
 import sys
+import traceback
 
+from cliff import command
 from oslo_log import log as logging
 from oslo_serialization import jsonutils as json
 
 from tempest import clients
 from tempest.cmd import cleanup_service
-from tempest.common import cred_provider
+from tempest.common import credentials_factory as credentials
+from tempest.common import identity
 from tempest import config
 
 SAVED_STATE_JSON = "saved_state.json"
@@ -67,13 +69,28 @@ LOG = logging.getLogger(__name__)
 CONF = config.CONF
 
 
-class Cleanup(object):
+class TempestCleanup(command.Command):
 
-    def __init__(self):
-        self.admin_mgr = clients.AdminManager()
+    def __init__(self, app, cmd):
+        super(TempestCleanup, self).__init__(app, cmd)
+
+    def take_action(self, parsed_args):
+        try:
+            self.init(parsed_args)
+            if not parsed_args.init_saved_state:
+                self._cleanup()
+        except Exception:
+            LOG.exception("Failure during cleanup")
+            traceback.print_exc()
+            raise
+        return 0
+
+    def init(self, parsed_args):
+        cleanup_service.init_conf()
+        self.options = parsed_args
+        self.admin_mgr = credentials.AdminManager()
         self.dry_run_data = {}
         self.json_data = {}
-        self._init_options()
 
         self.admin_id = ""
         self.admin_role_id = ""
@@ -86,24 +103,20 @@ class Cleanup(object):
         self.tenant_services = cleanup_service.get_tenant_cleanup_services()
         self.global_services = cleanup_service.get_global_cleanup_services()
 
-    def run(self):
-        opts = self.options
-        if opts.init_saved_state:
+        if parsed_args.init_saved_state:
             self._init_state()
             return
 
         self._load_json()
-        self._cleanup()
 
     def _cleanup(self):
-        LOG.debug("Begin cleanup")
+        print ("Begin cleanup")
         is_dry_run = self.options.dry_run
         is_preserve = not self.options.delete_tempest_conf_objects
         is_save_state = False
 
         if is_dry_run:
             self.dry_run_data["_tenants_to_clean"] = {}
-            f = open(DRY_RUN_JSON, 'w+')
 
         admin_mgr = self.admin_mgr
         # Always cleanup tempest and alt tempest tenants unless
@@ -115,7 +128,7 @@ class Cleanup(object):
                   'is_save_state': is_save_state}
         tenant_service = cleanup_service.TenantService(admin_mgr, **kwargs)
         tenants = tenant_service.list()
-        LOG.debug("Process %s tenants" % len(tenants))
+        print ("Process %s tenants" % len(tenants))
 
         # Loop through list of tenants and clean them up.
         for tenant in tenants:
@@ -132,9 +145,9 @@ class Cleanup(object):
             svc.run()
 
         if is_dry_run:
-            f.write(json.dumps(self.dry_run_data, sort_keys=True,
-                               indent=2, separators=(',', ': ')))
-            f.close()
+            with open(DRY_RUN_JSON, 'w+') as f:
+                f.write(json.dumps(self.dry_run_data, sort_keys=True,
+                                   indent=2, separators=(',', ': ')))
 
         self._remove_admin_user_roles()
 
@@ -146,7 +159,7 @@ class Cleanup(object):
             self._remove_admin_role(tenant_id)
 
     def _clean_tenant(self, tenant):
-        LOG.debug("Cleaning tenant:  %s " % tenant['name'])
+        print ("Cleaning tenant:  %s " % tenant['name'])
         is_dry_run = self.options.dry_run
         dry_run_data = self.dry_run_data
         is_preserve = not self.options.delete_tempest_conf_objects
@@ -157,10 +170,10 @@ class Cleanup(object):
             tenant_data = dry_run_data["_tenants_to_clean"][tenant_id] = {}
             tenant_data['name'] = tenant_name
 
-        kwargs = {"username": CONF.identity.admin_username,
-                  "password": CONF.identity.admin_password,
+        kwargs = {"username": CONF.auth.admin_username,
+                  "password": CONF.auth.admin_password,
                   "tenant_name": tenant['name']}
-        mgr = clients.Manager(credentials=cred_provider.get_credentials(
+        mgr = clients.Manager(credentials=credentials.get_credentials(
             **kwargs))
         kwargs = {'data': tenant_data,
                   'is_dry_run': is_dry_run,
@@ -173,24 +186,25 @@ class Cleanup(object):
             svc.run()
 
     def _init_admin_ids(self):
-        id_cl = self.admin_mgr.identity_client
+        tn_cl = self.admin_mgr.tenants_client
+        rl_cl = self.admin_mgr.roles_client
 
-        tenant = id_cl.get_tenant_by_name(CONF.identity.admin_tenant_name)
+        tenant = identity.get_tenant_by_name(tn_cl,
+                                             CONF.auth.admin_project_name)
         self.admin_tenant_id = tenant['id']
 
-        user = id_cl.get_user_by_username(self.admin_tenant_id,
-                                          CONF.identity.admin_username)
+        user = identity.get_user_by_username(tn_cl, self.admin_tenant_id,
+                                             CONF.auth.admin_username)
         self.admin_id = user['id']
 
-        roles = id_cl.list_roles()
+        roles = rl_cl.list_roles()['roles']
         for role in roles:
             if role['name'] == CONF.identity.admin_role:
                 self.admin_role_id = role['id']
                 break
 
-    def _init_options(self):
-        parser = argparse.ArgumentParser(
-            description='Cleanup after tempest run')
+    def get_parser(self, prog_name):
+        parser = super(TempestCleanup, self).get_parser(prog_name)
         parser.add_argument('--init-saved-state', action="store_true",
                             dest='init_saved_state', default=False,
                             help="Creates JSON file: " + SAVED_STATE_JSON +
@@ -211,20 +225,22 @@ class Cleanup(object):
                             help="Generate JSON file:" + DRY_RUN_JSON +
                             ", that reports the objects that would have "
                             "been deleted had a full cleanup been run.")
+        return parser
 
-        self.options = parser.parse_args()
+    def get_description(self):
+        return 'Cleanup after tempest run'
 
     def _add_admin(self, tenant_id):
-        id_cl = self.admin_mgr.identity_client
+        rl_cl = self.admin_mgr.roles_client
         needs_role = True
-        roles = id_cl.list_user_roles(tenant_id, self.admin_id)
+        roles = rl_cl.list_user_roles(tenant_id, self.admin_id)['roles']
         for role in roles:
             if role['id'] == self.admin_role_id:
                 needs_role = False
                 LOG.debug("User already had admin privilege for this tenant")
         if needs_role:
             LOG.debug("Adding admin privilege for : %s" % tenant_id)
-            id_cl.assign_user_role(tenant_id, self.admin_id,
+            rl_cl.assign_user_role(tenant_id, self.admin_id,
                                    self.admin_role_id)
             self.admin_role_added.append(tenant_id)
 
@@ -232,19 +248,19 @@ class Cleanup(object):
         LOG.debug("Remove admin user role for tenant: %s" % tenant_id)
         # Must initialize AdminManager for each user role
         # Otherwise authentication exception is thrown, weird
-        id_cl = clients.AdminManager().identity_client
+        id_cl = credentials.AdminManager().identity_client
         if (self._tenant_exists(tenant_id)):
             try:
-                id_cl.remove_user_role(tenant_id, self.admin_id,
+                id_cl.delete_user_role(tenant_id, self.admin_id,
                                        self.admin_role_id)
             except Exception as ex:
                 LOG.exception("Failed removing role from tenant which still"
                               "exists, exception: %s" % ex)
 
     def _tenant_exists(self, tenant_id):
-        id_cl = self.admin_mgr.identity_client
+        tn_cl = self.admin_mgr.tenants_client
         try:
-            t = id_cl.get_tenant(tenant_id)
+            t = tn_cl.show_tenant(tenant_id)
             LOG.debug("Tenant is: %s" % str(t))
             return True
         except Exception as ex:
@@ -252,7 +268,7 @@ class Cleanup(object):
             return False
 
     def _init_state(self):
-        LOG.debug("Initializing saved state.")
+        print ("Initializing saved state.")
         data = {}
         admin_mgr = self.admin_mgr
         kwargs = {'data': data,
@@ -264,16 +280,15 @@ class Cleanup(object):
             svc = service(admin_mgr, **kwargs)
             svc.run()
 
-        f = open(SAVED_STATE_JSON, 'w+')
-        f.write(json.dumps(data,
-                           sort_keys=True, indent=2, separators=(',', ': ')))
-        f.close()
+        with open(SAVED_STATE_JSON, 'w+') as f:
+            f.write(json.dumps(data,
+                    sort_keys=True, indent=2, separators=(',', ': ')))
 
     def _load_json(self):
         try:
-            json_file = open(SAVED_STATE_JSON)
-            self.json_data = json.load(json_file)
-            json_file.close()
+            with open(SAVED_STATE_JSON) as json_file:
+                self.json_data = json.load(json_file)
+
         except IOError as ex:
             LOG.exception("Failed loading saved state, please be sure you"
                           " have first run cleanup with --init-saved-state "
@@ -282,14 +297,3 @@ class Cleanup(object):
         except Exception as ex:
             LOG.exception("Exception parsing saved state json : %s" % ex)
             sys.exit(ex)
-
-
-def main():
-    cleanup_service.init_conf()
-    cleanup = Cleanup()
-    cleanup.run()
-    LOG.info('Cleanup finished!')
-    return 0
-
-if __name__ == "__main__":
-    sys.exit(main())

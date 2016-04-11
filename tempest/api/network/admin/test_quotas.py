@@ -17,21 +17,20 @@ import six
 
 from tempest.api.network import base
 from tempest.common.utils import data_utils
+from tempest.lib import exceptions as lib_exc
 from tempest import test
 
 
 class QuotasTest(base.BaseAdminNetworkTest):
-    """
-    Tests the following operations in the Neutron API using the REST client for
-    Neutron:
+    """Tests the following operations in the Neutron API:
 
-        list quotas for tenants who have non-default quota values
-        show quotas for a specified tenant
-        update quotas for a specified tenant
-        reset quotas to default values for a specified tenant
+        list quotas for projects who have non-default quota values
+        show quotas for a specified project
+        update quotas for a specified project
+        reset quotas to default values for a specified project
 
     v2.0 of the API is assumed.
-    It is also assumed that the per-tenant quota extension API is configured
+    It is also assumed that the per-project quota extension API is configured
     in /etc/neutron/neutron.conf as follows:
 
         quota_driver = neutron.db.quota_db.DbQuotaDriver
@@ -50,7 +49,7 @@ class QuotasTest(base.BaseAdminNetworkTest):
         cls.identity_admin_client = cls.os_adm.identity_client
 
     def _check_quotas(self, new_quotas):
-        # Add a tenant to conduct the test
+        # Add a project to conduct the test
         project = data_utils.rand_name('test_project_')
         description = data_utils.rand_name('desc_')
         project = self.identity_utils.create_project(name=project,
@@ -58,30 +57,30 @@ class QuotasTest(base.BaseAdminNetworkTest):
         project_id = project['id']
         self.addCleanup(self.identity_utils.delete_project, project_id)
 
-        # Change quotas for tenant
-        quota_set = self.admin_client.update_quotas(project_id,
-                                                    **new_quotas)['quota']
-        self.addCleanup(self.admin_client.reset_quotas, project_id)
+        # Change quotas for project
+        quota_set = self.admin_quotas_client.update_quotas(
+            project_id, **new_quotas)['quota']
+        self.addCleanup(self._cleanup_quotas, project_id)
         for key, value in six.iteritems(new_quotas):
             self.assertEqual(value, quota_set[key])
 
-        # Confirm our tenant is listed among tenants with non default quotas
-        non_default_quotas = self.admin_client.list_quotas()
+        # Confirm our project is listed among projects with non default quotas
+        non_default_quotas = self.admin_quotas_client.list_quotas()
         found = False
         for qs in non_default_quotas['quotas']:
             if qs['tenant_id'] == project_id:
                 found = True
         self.assertTrue(found)
 
-        # Confirm from API quotas were changed as requested for tenant
-        quota_set = self.admin_client.show_quotas(project_id)
+        # Confirm from API quotas were changed as requested for project
+        quota_set = self.admin_quotas_client.show_quotas(project_id)
         quota_set = quota_set['quota']
         for key, value in six.iteritems(new_quotas):
             self.assertEqual(value, quota_set[key])
 
         # Reset quotas to default and confirm
-        self.admin_client.reset_quotas(project_id)
-        non_default_quotas = self.admin_client.list_quotas()
+        self.admin_quotas_client.reset_quotas(project_id)
+        non_default_quotas = self.admin_quotas_client.list_quotas()
         for q in non_default_quotas['quotas']:
             self.assertNotEqual(project_id, q['tenant_id'])
 
@@ -89,3 +88,12 @@ class QuotasTest(base.BaseAdminNetworkTest):
     def test_quotas(self):
         new_quotas = {'network': 0, 'security_group': 0}
         self._check_quotas(new_quotas)
+
+    def _cleanup_quotas(self, project_id):
+        # try to clean up the resources.If it fails, then
+        # assume that everything was already deleted, so
+        # it is OK to continue.
+        try:
+            self.admin_quotas_client.reset_quotas(project_id)
+        except lib_exc.NotFound:
+            pass

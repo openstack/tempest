@@ -14,36 +14,40 @@ import abc
 
 from oslo_log import log as logging
 import six
-from tempest_lib import exceptions as lib_exc
 
-from tempest.common import cred_provider
-from tempest import config
-from tempest import exceptions
+from tempest.lib import auth
+from tempest.lib import exceptions as lib_exc
 from tempest.services.identity.v2.json import identity_client as v2_identity
 
-CONF = config.CONF
 LOG = logging.getLogger(__name__)
 
 
 @six.add_metaclass(abc.ABCMeta)
 class CredsClient(object):
-    """This class is a wrapper around the identity clients, to provide a
-     single interface for managing credentials in both v2 and v3 cases.
-     It's not bound to created credentials, only to a specific set of admin
-     credentials used for generating credentials.
+    """This class is a wrapper around the identity clients
+
+     to provide a single interface for managing credentials in both v2 and v3
+     cases. It's not bound to created credentials, only to a specific set of
+     admin credentials used for generating credentials.
     """
 
-    def __init__(self, identity_client):
+    def __init__(self, identity_client, projects_client, users_client,
+                 roles_client):
         # The client implies version and credentials
         self.identity_client = identity_client
-        self.credentials = self.identity_client.auth_provider.credentials
+        self.users_client = users_client
+        self.projects_client = projects_client
+        self.roles_client = roles_client
 
     def create_user(self, username, password, project, email):
-        user = self.identity_client.create_user(
+        user = self.users_client.create_user(
             username, password, project['id'], email)
         if 'user' in user:
             user = user['user']
         return user
+
+    def delete_user(self, user_id):
+        self.users_client.delete_user(user_id)
 
     @abc.abstractmethod
     def create_project(self, name, description):
@@ -59,7 +63,7 @@ class CredsClient(object):
 
     def create_user_role(self, role_name):
         if not self._check_role_exists(role_name):
-            self.identity_client.create_role(role_name)
+            self.roles_client.create_role(name=role_name)
 
     def assign_user_role(self, user, project, role_name):
         role = self._check_role_exists(role_name)
@@ -67,80 +71,115 @@ class CredsClient(object):
             msg = 'No "%s" role found' % role_name
             raise lib_exc.NotFound(msg)
         try:
-            self.identity_client.assign_user_role(project['id'], user['id'],
-                                                  role['id'])
+            self._assign_user_role(project, user, role)
         except lib_exc.Conflict:
             LOG.debug("Role %s already assigned on project %s for user %s" % (
                 role['id'], project['id'], user['id']))
 
     @abc.abstractmethod
     def get_credentials(self, user, project, password):
+        """Produces a Credentials object from the details provided
+
+        :param user: a user dict
+        :param project: a project dict
+        :param password: the password as a string
+        :return: a Credentials object with all the available credential details
+        """
         pass
 
-    def delete_user(self, user_id):
-        self.identity_client.delete_user(user_id)
-
     def _list_roles(self):
-        roles = self.identity_client.list_roles()['roles']
+        roles = self.roles_client.list_roles()['roles']
         return roles
 
 
 class V2CredsClient(CredsClient):
 
+    def __init__(self, identity_client, projects_client, users_client,
+                 roles_client):
+        super(V2CredsClient, self).__init__(identity_client,
+                                            projects_client,
+                                            users_client,
+                                            roles_client)
+
     def create_project(self, name, description):
-        tenant = self.identity_client.create_tenant(
+        tenant = self.projects_client.create_tenant(
             name=name, description=description)['tenant']
         return tenant
 
+    def delete_project(self, project_id):
+        self.projects_client.delete_tenant(project_id)
+
     def get_credentials(self, user, project, password):
-        return cred_provider.get_credentials(
+        # User and project already include both ID and name here,
+        # so there's no need to use the fill_in mode
+        return auth.get_credentials(
+            auth_url=None,
+            fill_in=False,
             identity_version='v2',
             username=user['name'], user_id=user['id'],
             tenant_name=project['name'], tenant_id=project['id'],
             password=password)
 
-    def delete_project(self, project_id):
-        self.identity_client.delete_tenant(project_id)
+    def _assign_user_role(self, project, user, role):
+        self.roles_client.assign_user_role(project['id'], user['id'],
+                                           role['id'])
 
 
 class V3CredsClient(CredsClient):
 
-    def __init__(self, identity_client, domain_name):
-        super(V3CredsClient, self).__init__(identity_client)
+    def __init__(self, identity_client, projects_client, users_client,
+                 roles_client, domains_client, domain_name):
+        super(V3CredsClient, self).__init__(identity_client, projects_client,
+                                            users_client, roles_client)
+        self.domains_client = domains_client
+
         try:
             # Domain names must be unique, in any case a list is returned,
             # selecting the first (and only) element
-            self.creds_domain = self.identity_client.list_domains(
+            self.creds_domain = self.domains_client.list_domains(
                 params={'name': domain_name})['domains'][0]
         except lib_exc.NotFound:
             # TODO(andrea) we could probably create the domain on the fly
-            msg = "Configured domain %s could not be found" % domain_name
-            raise exceptions.InvalidConfiguration(msg)
+            msg = "Requested domain %s could not be found" % domain_name
+            raise lib_exc.InvalidCredentials(msg)
 
     def create_project(self, name, description):
-        project = self.identity_client.create_project(
+        project = self.projects_client.create_project(
             name=name, description=description,
             domain_id=self.creds_domain['id'])['project']
         return project
 
+    def delete_project(self, project_id):
+        self.projects_client.delete_project(project_id)
+
     def get_credentials(self, user, project, password):
-        return cred_provider.get_credentials(
+        # User, project and domain already include both ID and name here,
+        # so there's no need to use the fill_in mode.
+        return auth.get_credentials(
+            auth_url=None,
+            fill_in=False,
             identity_version='v3',
             username=user['name'], user_id=user['id'],
             project_name=project['name'], project_id=project['id'],
             password=password,
+            project_domain_id=self.creds_domain['id'],
             project_domain_name=self.creds_domain['name'])
 
-    def delete_project(self, project_id):
-        self.identity_client.delete_project(project_id)
-
-    def _list_roles(self):
-        roles = self.identity_client.list_roles()['roles']
-        return roles
+    def _assign_user_role(self, project, user, role):
+        self.roles_client.assign_user_role_on_project(project['id'],
+                                                      user['id'],
+                                                      role['id'])
 
 
-def get_creds_client(identity_client, project_domain_name=None):
+def get_creds_client(identity_client,
+                     projects_client,
+                     users_client,
+                     roles_client,
+                     domains_client=None,
+                     project_domain_name=None):
     if isinstance(identity_client, v2_identity.IdentityClient):
-        return V2CredsClient(identity_client)
+        return V2CredsClient(identity_client, projects_client, users_client,
+                             roles_client)
     else:
-        return V3CredsClient(identity_client, project_domain_name)
+        return V3CredsClient(identity_client, projects_client, users_client,
+                             roles_client, domains_client, project_domain_name)

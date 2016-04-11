@@ -14,11 +14,11 @@
 #    under the License.
 
 import copy
-
-from tempest_lib.common.utils import data_utils
-from tempest_lib import exceptions
+import time
 
 from tempest.api.identity import base
+from tempest.lib.common.utils import data_utils
+from tempest.lib import exceptions
 from tempest import manager
 from tempest import test
 
@@ -38,24 +38,30 @@ class IdentityV3UsersTest(base.BaseIdentityV3Test):
         self.new_creds = copy.copy(self.creds.credentials)
         self.new_creds.password = data_utils.rand_password()
         # we need new non-admin Identity V3 Client with new credentials, since
-        # current non_admin_client token will be revoked after updating
+        # current non_admin_users_client token will be revoked after updating
         # password
-        self.non_admin_client_for_cleanup = copy.copy(self.non_admin_client)
-        self.non_admin_client_for_cleanup.auth_provider = (
+        self.non_admin_users_client_for_cleanup = (
+            copy.copy(self.non_admin_users_client))
+        self.non_admin_users_client_for_cleanup.auth_provider = (
             manager.get_auth_provider(self.new_creds))
         user_id = self.creds.credentials.user_id
         old_pass = self.creds.credentials.password
         new_pass = self.new_creds.password
         # to change password back. important for allow_tenant_isolation = false
         self.addCleanup(
-            self.non_admin_client_for_cleanup.update_user_password,
-            user_id=user_id,
+            self.non_admin_users_client_for_cleanup.update_user_password,
+            user_id,
             password=old_pass,
             original_password=new_pass)
 
         # user updates own password
-        self.non_admin_client.update_user_password(
-            user_id=user_id, password=new_pass, original_password=old_pass)
+        self.non_admin_users_client.update_user_password(
+            user_id, password=new_pass, original_password=old_pass)
+
+        # NOTE(morganfainberg): Fernet tokens are not subsecond aware and
+        # Keystone should only be precise to the second. Sleep to ensure
+        # we are passing the second boundary.
+        time.sleep(1)
 
         # check authorization with new password
         self.non_admin_token.auth(user_id=self.user_id, password=new_pass)

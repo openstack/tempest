@@ -12,17 +12,13 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest_lib import exceptions as lib_exc
-
 from tempest.api.compute import base
+from tempest.lib import exceptions as lib_exc
 from tempest import test
 
 
 class ServicesAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
-
-    """
-    Tests Services API. List and Enable/Disable require admin privileges.
-    """
+    """Tests Services API. List and Enable/Disable require admin privileges."""
 
     @classmethod
     def setup_clients(cls):

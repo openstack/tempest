@@ -11,11 +11,11 @@
 #    under the License.
 
 import six
-from tempest_lib import exceptions as lib_exc
 
 from tempest.api.baremetal.admin import base
 from tempest.common.utils import data_utils
 from tempest.common import waiters
+from tempest.lib import exceptions as lib_exc
 from tempest import test
 
 
@@ -138,14 +138,14 @@ class TestNodes(base.BaseBaremetalTest):
         body = self.client.get_node_boot_device(self.node['uuid'])
         self.assertIn('boot_device', body)
         self.assertIn('persistent', body)
-        self.assertTrue(isinstance(body['boot_device'], six.string_types))
-        self.assertTrue(isinstance(body['persistent'], bool))
+        self.assertIsInstance(body['boot_device'], six.string_types)
+        self.assertIsInstance(body['persistent'], bool)
 
     @test.idempotent_id('3622bc6f-3589-4bc2-89f3-50419c66b133')
     def test_get_node_supported_boot_devices(self):
         body = self.client.get_node_supported_boot_devices(self.node['uuid'])
         self.assertIn('supported_boot_devices', body)
-        self.assertTrue(isinstance(body['supported_boot_devices'], list))
+        self.assertIsInstance(body['supported_boot_devices'], list)
 
     @test.idempotent_id('f63b6288-1137-4426-8cfe-0d5b7eb87c06')
     def test_get_console(self):

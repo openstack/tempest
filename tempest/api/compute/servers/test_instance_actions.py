@@ -35,7 +35,7 @@ class InstanceActionsTestJSON(base.BaseV2ComputeTest):
     @test.idempotent_id('77ca5cc5-9990-45e0-ab98-1de8fead201a')
     def test_list_instance_actions(self):
         # List actions of the provided server
-        self.client.reboot_server(self.server_id, 'HARD')
+        self.client.reboot_server(self.server_id, type='HARD')
         waiters.wait_for_server_status(self.client, self.server_id, 'ACTIVE')
 
         body = (self.client.list_instance_actions(self.server_id)
@@ -47,7 +47,7 @@ class InstanceActionsTestJSON(base.BaseV2ComputeTest):
     @test.idempotent_id('aacc71ca-1d70-4aa5-bbf6-0ff71470e43c')
     def test_get_instance_action(self):
         # Get the action details of the provided server
-        body = self.client.get_instance_action(
+        body = self.client.show_instance_action(
             self.server_id, self.request_id)['instanceAction']
         self.assertEqual(self.server_id, body['instance_uuid'])
         self.assertEqual('create', body['action'])

@@ -12,17 +12,14 @@
 
 import os.path
 
-from oslo_log import log as logging
-from tempest_lib import exceptions as lib_exc
 import yaml
 
 from tempest.common.utils import data_utils
 from tempest import config
+from tempest.lib import exceptions as lib_exc
 import tempest.test
 
 CONF = config.CONF
-
-LOG = logging.getLogger(__name__)
 
 
 class BaseOrchestrationTest(tempest.test.BaseTestCase):
@@ -49,7 +46,6 @@ class BaseOrchestrationTest(tempest.test.BaseTestCase):
         cls.client = cls.orchestration_client
         cls.servers_client = cls.os.servers_client
         cls.keypairs_client = cls.os.keypairs_client
-        cls.network_client = cls.os.network_client
         cls.networks_client = cls.os.networks_client
         cls.volumes_client = cls.os.volumes_client
         cls.images_v2_client = cls.os.image_client_v2

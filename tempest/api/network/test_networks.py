@@ -12,32 +12,29 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
-import itertools
-
 import netaddr
 import six
-from tempest_lib import exceptions as lib_exc
+import testtools
 
 from tempest.api.network import base
 from tempest.common import custom_matchers
 from tempest.common.utils import data_utils
 from tempest import config
+from tempest.lib import exceptions as lib_exc
 from tempest import test
 
 CONF = config.CONF
 
 
 class NetworksTest(base.BaseNetworkTest):
-    """
-    Tests the following operations in the Neutron API using the REST client for
-    Neutron:
+    """Tests the following operations in the Neutron API:
 
-        create a network for a tenant
-        list tenant's networks
-        show a tenant network details
-        create a subnet for a tenant
-        list tenant's subnets
-        show a tenant subnet details
+        create a network for a project
+        list project's networks
+        show a project network details
+        create a subnet for a project
+        list project's subnets
+        show a project subnet details
         network update
         subnet update
         delete a network also deletes its subnets
@@ -48,15 +45,15 @@ class NetworksTest(base.BaseNetworkTest):
     v2.0 of the Neutron API is assumed. It is also assumed that the following
     options are defined in the [network] section of etc/tempest.conf:
 
-        tenant_network_cidr with a block of cidr's from which smaller blocks
-        can be allocated for tenant ipv4 subnets
+        project_network_cidr with a block of cidr's from which smaller blocks
+        can be allocated for project ipv4 subnets
 
-        tenant_network_v6_cidr is the equivalent for ipv6 subnets
+        project_network_v6_cidr is the equivalent for ipv6 subnets
 
-        tenant_network_mask_bits with the mask bits to be used to partition the
-        block defined by tenant_network_cidr
+        project_network_mask_bits with the mask bits to be used to partition
+        the block defined by project_network_cidr
 
-        tenant_network_v6_mask_bits is the equivalent for ipv6 subnets
+        project_network_v6_mask_bits is the equivalent for ipv6 subnets
     """
 
     @classmethod
@@ -95,15 +92,14 @@ class NetworksTest(base.BaseNetworkTest):
 
     @classmethod
     def _create_subnet_with_last_subnet_block(cls, network, ip_version):
-        """Derive last subnet CIDR block from tenant CIDR and
-           create the subnet with that derived CIDR
-        """
+        # Derive last subnet CIDR block from project CIDR and
+        # create the subnet with that derived CIDR
         if ip_version == 4:
-            cidr = netaddr.IPNetwork(CONF.network.tenant_network_cidr)
-            mask_bits = CONF.network.tenant_network_mask_bits
+            cidr = netaddr.IPNetwork(CONF.network.project_network_cidr)
+            mask_bits = CONF.network.project_network_mask_bits
         elif ip_version == 6:
-            cidr = netaddr.IPNetwork(CONF.network.tenant_network_v6_cidr)
-            mask_bits = CONF.network.tenant_network_v6_mask_bits
+            cidr = netaddr.IPNetwork(CONF.network.project_network_v6_cidr)
+            mask_bits = CONF.network.project_network_v6_mask_bits
 
         subnet_cidr = list(cidr.subnet(mask_bits))[-1]
         gateway_ip = str(netaddr.IPAddress(subnet_cidr) + 1)
@@ -114,11 +110,11 @@ class NetworksTest(base.BaseNetworkTest):
     def _get_gateway_from_tempest_conf(cls, ip_version):
         """Return first subnet gateway for configured CIDR """
         if ip_version == 4:
-            cidr = netaddr.IPNetwork(CONF.network.tenant_network_cidr)
-            mask_bits = CONF.network.tenant_network_mask_bits
+            cidr = netaddr.IPNetwork(CONF.network.project_network_cidr)
+            mask_bits = CONF.network.project_network_mask_bits
         elif ip_version == 6:
-            cidr = netaddr.IPNetwork(CONF.network.tenant_network_v6_cidr)
-            mask_bits = CONF.network.tenant_network_v6_mask_bits
+            cidr = netaddr.IPNetwork(CONF.network.project_network_v6_cidr)
+            mask_bits = CONF.network.project_network_v6_mask_bits
 
         if mask_bits >= cidr.prefixlen:
             return netaddr.IPAddress(cidr) + 1
@@ -133,9 +129,8 @@ class NetworksTest(base.BaseNetworkTest):
         return [{'start': str(gateway + 2), 'end': str(gateway + 3)}]
 
     def subnet_dict(self, include_keys):
-        """Return a subnet dict which has include_keys and their corresponding
-           value from self._subnet_data
-        """
+        # Return a subnet dict which has include_keys and their corresponding
+        # value from self._subnet_data
         return dict((key, self._subnet_data[self._ip_version][key])
                     for key in include_keys)
 
@@ -194,7 +189,7 @@ class NetworksTest(base.BaseNetworkTest):
         subnet_id = subnet['id']
         # Verify subnet update
         new_name = "New_subnet"
-        body = self.client.update_subnet(subnet_id, name=new_name)
+        body = self.subnets_client.update_subnet(subnet_id, name=new_name)
         updated_subnet = body['subnet']
         self.assertEqual(updated_subnet['name'], new_name)
 
@@ -241,7 +236,7 @@ class NetworksTest(base.BaseNetworkTest):
     @test.idempotent_id('bd635d81-6030-4dd1-b3b9-31ba0cfdf6cc')
     def test_show_subnet(self):
         # Verify the details of a subnet
-        body = self.client.show_subnet(self.subnet['id'])
+        body = self.subnets_client.show_subnet(self.subnet['id'])
         subnet = body['subnet']
         self.assertNotEmpty(subnet, "Subnet returned has no fields")
         for key in ['id', 'cidr']:
@@ -252,8 +247,8 @@ class NetworksTest(base.BaseNetworkTest):
     def test_show_subnet_fields(self):
         # Verify specific fields of a subnet
         fields = ['id', 'network_id']
-        body = self.client.show_subnet(self.subnet['id'],
-                                       fields=fields)
+        body = self.subnets_client.show_subnet(self.subnet['id'],
+                                               fields=fields)
         subnet = body['subnet']
         self.assertEqual(sorted(subnet.keys()), sorted(fields))
         for field_name in fields:
@@ -263,7 +258,7 @@ class NetworksTest(base.BaseNetworkTest):
     @test.idempotent_id('db68ba48-f4ea-49e9-81d1-e367f6d0b20a')
     def test_list_subnets(self):
         # Verify the subnet exists in the list of all subnets
-        body = self.client.list_subnets()
+        body = self.subnets_client.list_subnets()
         subnets = [subnet['id'] for subnet in body['subnets']
                    if subnet['id'] == self.subnet['id']]
         self.assertNotEmpty(subnets, "Created subnet not found in the list")
@@ -272,7 +267,7 @@ class NetworksTest(base.BaseNetworkTest):
     def test_list_subnets_fields(self):
         # Verify specific fields of subnets
         fields = ['id', 'network_id']
-        body = self.client.list_subnets(fields=fields)
+        body = self.subnets_client.list_subnets(fields=fields)
         subnets = body['subnets']
         self.assertNotEmpty(subnets, "Subnet list returned is empty")
         for subnet in subnets:
@@ -303,7 +298,7 @@ class NetworksTest(base.BaseNetworkTest):
         body = self.networks_client.delete_network(net_id)
 
         # Verify that the subnet got automatically deleted.
-        self.assertRaises(lib_exc.NotFound, self.client.show_subnet,
+        self.assertRaises(lib_exc.NotFound, self.subnets_client.show_subnet,
                           subnet_id)
 
         # Since create_subnet adds the subnet to the delete list, and it is
@@ -362,8 +357,8 @@ class NetworksTest(base.BaseNetworkTest):
                   'gateway_ip': new_gateway, 'enable_dhcp': True}
 
         new_name = "New_subnet"
-        body = self.client.update_subnet(subnet_id, name=new_name,
-                                         **kwargs)
+        body = self.subnets_client.update_subnet(subnet_id, name=new_name,
+                                                 **kwargs)
         updated_subnet = body['subnet']
         kwargs['name'] = new_name
         self.assertEqual(sorted(updated_subnet['dns_nameservers']),
@@ -380,6 +375,9 @@ class NetworksTest(base.BaseNetworkTest):
 
     @test.attr(type='smoke')
     @test.idempotent_id('af774677-42a9-4e4b-bb58-16fe6a5bc1ec')
+    @test.requires_ext(extension='external-net', service='network')
+    @testtools.skipUnless(CONF.network.public_network_id,
+                          'The public_network_id option must be specified.')
     def test_external_network_visibility(self):
         """Verifies user can see external networks but not subnets."""
         body = self.networks_client.list_networks(**{'router:external': True})
@@ -391,37 +389,30 @@ class NetworksTest(base.BaseNetworkTest):
         self.assertEmpty(nonexternal, "Found non-external networks"
                                       " in filtered list (%s)." % nonexternal)
         self.assertIn(CONF.network.public_network_id, networks)
-
-        subnets_iter = (network['subnets']
-                        for network in body['networks']
-                        if not network['shared'])
-        # subnets_iter is a list (iterator) of lists. This flattens it to a
-        # list of UUIDs
-        public_subnets_iter = itertools.chain(*subnets_iter)
-        body = self.client.list_subnets()
-        subnets = [sub['id'] for sub in body['subnets']
-                   if sub['id'] in public_subnets_iter]
-        self.assertEmpty(subnets, "Public subnets visible")
+        # only check the public network ID because the other networks may
+        # belong to other tests and their state may have changed during this
+        # test
+        body = self.subnets_client.list_subnets(
+            network_id=CONF.network.public_network_id)
+        self.assertEmpty(body['subnets'], "Public subnets visible")
 
 
 class BulkNetworkOpsTestJSON(base.BaseNetworkTest):
-    """
-    Tests the following operations in the Neutron API using the REST client for
-    Neutron:
+    """Tests the following operations in the Neutron API:
 
         bulk network creation
         bulk subnet creation
         bulk port creation
-        list tenant's networks
+        list project's networks
 
     v2.0 of the Neutron API is assumed. It is also assumed that the following
     options are defined in the [network] section of etc/tempest.conf:
 
-        tenant_network_cidr with a block of cidr's from which smaller blocks
-        can be allocated for tenant networks
+        project_network_cidr with a block of cidr's from which smaller blocks
+        can be allocated for project networks
 
-        tenant_network_mask_bits with the mask bits to be used to partition the
-        block defined by tenant-network_cidr
+        project_network_mask_bits with the mask bits to be used to partition
+        the block defined by project-network_cidr
     """
 
     def _delete_networks(self, created_networks):
@@ -435,18 +426,18 @@ class BulkNetworkOpsTestJSON(base.BaseNetworkTest):
 
     def _delete_subnets(self, created_subnets):
         for n in created_subnets:
-            self.client.delete_subnet(n['id'])
+            self.subnets_client.delete_subnet(n['id'])
         # Asserting that the subnets are not found in the list after deletion
-        body = self.client.list_subnets()
+        body = self.subnets_client.list_subnets()
         subnets_list = [subnet['id'] for subnet in body['subnets']]
         for n in created_subnets:
             self.assertNotIn(n['id'], subnets_list)
 
     def _delete_ports(self, created_ports):
         for n in created_ports:
-            self.client.delete_port(n['id'])
+            self.ports_client.delete_port(n['id'])
         # Asserting that the ports are not found in the list after deletion
-        body = self.client.list_ports()
+        body = self.ports_client.list_ports()
         ports_list = [port['id'] for port in body['ports']]
         for n in created_ports:
             self.assertNotIn(n['id'], ports_list)
@@ -455,9 +446,9 @@ class BulkNetworkOpsTestJSON(base.BaseNetworkTest):
     @test.idempotent_id('d4f9024d-1e28-4fc1-a6b1-25dbc6fa11e2')
     def test_bulk_create_delete_network(self):
         # Creates 2 networks in one request
-        network_names = [data_utils.rand_name('network-'),
-                         data_utils.rand_name('network-')]
-        body = self.client.create_bulk_network(network_names)
+        network_list = [{'name': data_utils.rand_name('network-')},
+                        {'name': data_utils.rand_name('network-')}]
+        body = self.networks_client.create_bulk_networks(networks=network_list)
         created_networks = body['networks']
         self.addCleanup(self._delete_networks, created_networks)
         # Asserting that the networks are found in the list after creation
@@ -473,11 +464,11 @@ class BulkNetworkOpsTestJSON(base.BaseNetworkTest):
         networks = [self.create_network(), self.create_network()]
         # Creates 2 subnets in one request
         if self._ip_version == 4:
-            cidr = netaddr.IPNetwork(CONF.network.tenant_network_cidr)
-            mask_bits = CONF.network.tenant_network_mask_bits
+            cidr = netaddr.IPNetwork(CONF.network.project_network_cidr)
+            mask_bits = CONF.network.project_network_mask_bits
         else:
-            cidr = netaddr.IPNetwork(CONF.network.tenant_network_v6_cidr)
-            mask_bits = CONF.network.tenant_network_v6_mask_bits
+            cidr = netaddr.IPNetwork(CONF.network.project_network_v6_cidr)
+            mask_bits = CONF.network.project_network_v6_mask_bits
 
         cidrs = [subnet_cidr for subnet_cidr in cidr.subnet(mask_bits)]
 
@@ -492,11 +483,11 @@ class BulkNetworkOpsTestJSON(base.BaseNetworkTest):
             }
             subnets_list.append(p1)
         del subnets_list[1]['name']
-        body = self.client.create_bulk_subnet(subnets_list)
+        body = self.subnets_client.create_bulk_subnets(subnets=subnets_list)
         created_subnets = body['subnets']
         self.addCleanup(self._delete_subnets, created_subnets)
         # Asserting that the subnets are found in the list after creation
-        body = self.client.list_subnets()
+        body = self.subnets_client.list_subnets()
         subnets_list = [subnet['id'] for subnet in body['subnets']]
         for n in created_subnets:
             self.assertIsNotNone(n['id'])
@@ -518,11 +509,11 @@ class BulkNetworkOpsTestJSON(base.BaseNetworkTest):
             }
             port_list.append(p1)
         del port_list[1]['name']
-        body = self.client.create_bulk_port(port_list)
+        body = self.ports_client.create_bulk_ports(ports=port_list)
         created_ports = body['ports']
         self.addCleanup(self._delete_ports, created_ports)
         # Asserting that the ports are found in the list after creation
-        body = self.client.list_ports()
+        body = self.ports_client.list_ports()
         ports_list = [port['id'] for port in body['ports']]
         for n in created_ports:
             self.assertIsNotNone(n['id'])
@@ -538,7 +529,7 @@ class NetworksIpV6TestJSON(NetworksTest):
 
     @test.idempotent_id('e41a4888-65a6-418c-a095-f7c2ef4ad59a')
     def test_create_delete_subnet_with_gw(self):
-        net = netaddr.IPNetwork(CONF.network.tenant_network_v6_cidr)
+        net = netaddr.IPNetwork(CONF.network.project_network_v6_cidr)
         gateway = str(netaddr.IPAddress(net.first + 2))
         name = data_utils.rand_name('network-')
         network = self.create_network(network_name=name)
@@ -548,7 +539,7 @@ class NetworksIpV6TestJSON(NetworksTest):
 
     @test.idempotent_id('ebb4fd95-524f-46af-83c1-0305b239338f')
     def test_create_delete_subnet_with_default_gw(self):
-        net = netaddr.IPNetwork(CONF.network.tenant_network_v6_cidr)
+        net = netaddr.IPNetwork(CONF.network.project_network_v6_cidr)
         gateway_ip = str(netaddr.IPAddress(net.first + 1))
         name = data_utils.rand_name('network-')
         network = self.create_network(network_name=name)
@@ -576,7 +567,7 @@ class NetworksIpV6TestJSON(NetworksTest):
         # Verifies Subnet GW is None in IPv4
         self.assertEqual(subnet2['gateway_ip'], None)
         # Verifies all 2 subnets in the same network
-        body = self.client.list_subnets()
+        body = self.subnets_client.list_subnets()
         subnets = [sub['id'] for sub in body['subnets']
                    if sub['network_id'] == network['id']]
         test_subnet_ids = [sub['id'] for sub in (subnet1, subnet2)]
@@ -621,13 +612,13 @@ class NetworksIpV6TestAttrs(NetworksIpV6TestJSON):
                                              'ipv6_address_mode': mode})
         port = self.create_port(slaac_network)
         self.assertIsNotNone(port['fixed_ips'][0]['ip_address'])
-        self.client.delete_subnet(subnet_slaac['id'])
+        self.subnets_client.delete_subnet(subnet_slaac['id'])
         self.subnets.pop()
-        subnets = self.client.list_subnets()
+        subnets = self.subnets_client.list_subnets()
         subnet_ids = [subnet['id'] for subnet in subnets['subnets']]
         self.assertNotIn(subnet_slaac['id'], subnet_ids,
                          "Subnet wasn't deleted")
-        self.assertRaisesRegexp(
+        self.assertRaisesRegex(
             lib_exc.Conflict,
             "There are one or more ports still in use on the network",
             self.networks_client.delete_network,

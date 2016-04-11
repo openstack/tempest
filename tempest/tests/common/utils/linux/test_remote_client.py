@@ -29,7 +29,7 @@ class TestRemoteClient(base.TestCase):
         self.useFixture(fake_config.ConfigFixture())
         self.stubs.Set(config, 'TempestConfigPrivate', fake_config.FakePrivate)
         cfg.CONF.set_default('ip_version_for_ssh', 4, group='validation')
-        cfg.CONF.set_default('network_for_ssh', 'public', group='compute')
+        cfg.CONF.set_default('network_for_ssh', 'public', group='validation')
         cfg.CONF.set_default('connect_timeout', 1, group='validation')
 
         self.conn = remote_client.RemoteClient('127.0.0.1', 'user', 'pass')
@@ -79,7 +79,7 @@ class TestRemoteClient(base.TestCase):
     def test_get_number_of_vcpus(self):
         self.ssh_mock.mock.exec_command.return_value = '16'
         self.assertEqual(self.conn.get_number_of_vcpus(), 16)
-        self._assert_exec_called_with('grep -c processor /proc/cpuinfo')
+        self._assert_exec_called_with('grep -c ^processor /proc/cpuinfo')
 
     def test_get_partitions(self):
         proc_partitions = """major minor  #blocks  name
@@ -146,8 +146,11 @@ a0:b0:c0:d0:e0:f0"""
         self._assert_exec_called_with(
             "sudo ip addr add %s/%s dev %s" % (ip, '28', nic))
 
-    def test_turn_nic_on(self):
+    def test_set_nic_state(self):
         nic = 'eth0'
-        self.conn.turn_nic_on(nic)
+        self.conn.set_nic_state(nic)
         self._assert_exec_called_with(
             'sudo ip link set %s up' % nic)
+        self.conn.set_nic_state(nic, "down")
+        self._assert_exec_called_with(
+            'sudo ip link set %s down' % nic)

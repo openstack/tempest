@@ -545,7 +545,7 @@ class ObjectTest(base.BaseObjectTest):
         self.assertTrue(resp['etag'].strip('\"').isalnum())
         self.assertTrue(re.match("^\d+\.?\d*\Z", resp['x-timestamp']))
         self.assertNotEqual(len(resp['content-type']), 0)
-        self.assertTrue(re.match("^tx[0-9a-f]*-[0-9a-f]*$",
+        self.assertTrue(re.match("^tx[0-9a-f]{21}-[0-9a-f]{10}.*",
                                  resp['x-trans-id']))
         self.assertNotEqual(len(resp['date']), 0)
         self.assertEqual(resp['accept-ranges'], 'bytes')
@@ -637,7 +637,7 @@ class ObjectTest(base.BaseObjectTest):
         self.assertTrue(resp['etag'].strip('\"').isalnum())
         self.assertTrue(re.match("^\d+\.?\d*\Z", resp['x-timestamp']))
         self.assertNotEqual(len(resp['content-type']), 0)
-        self.assertTrue(re.match("^tx[0-9a-f]*-[0-9a-f]*$",
+        self.assertTrue(re.match("^tx[0-9a-f]{21}-[0-9a-f]{10}.*",
                                  resp['x-trans-id']))
         self.assertNotEqual(len(resp['date']), 0)
         self.assertEqual(resp['accept-ranges'], 'bytes')

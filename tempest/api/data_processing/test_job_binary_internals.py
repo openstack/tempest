@@ -18,9 +18,9 @@ from tempest import test
 
 
 class JobBinaryInternalTest(dp_base.BaseDataProcessingTest):
-    """Link to the API documentation is http://docs.openstack.org/developer/
-    sahara/restapi/rest_api_v1.1_EDP.html#job-binary-internals
-    """
+    # Link to the API documentation is http://docs.openstack.org/developer/
+    # sahara/restapi/rest_api_v1.1_EDP.html#job-binary-internals
+
     @classmethod
     def resource_setup(cls):
         super(JobBinaryInternalTest, cls).resource_setup()

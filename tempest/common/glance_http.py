@@ -24,12 +24,10 @@ import struct
 
 import OpenSSL
 from oslo_log import log as logging
-from oslo_serialization import jsonutils as json
 import six
 from six import moves
 from six.moves import http_client as httplib
 from six.moves.urllib import parse as urlparse
-from tempest_lib import exceptions as lib_exc
 
 from tempest import exceptions as exc
 
@@ -49,21 +47,21 @@ class HTTPClient(object):
         self.endpoint_scheme = endpoint_parts.scheme
         self.endpoint_hostname = endpoint_parts.hostname
         self.endpoint_port = endpoint_parts.port
-        self.endpoint_path = endpoint_parts.path
 
-        self.connection_class = self.get_connection_class(self.endpoint_scheme)
-        self.connection_kwargs = self.get_connection_kwargs(
+        self.connection_class = self._get_connection_class(
+            self.endpoint_scheme)
+        self.connection_kwargs = self._get_connection_kwargs(
             self.endpoint_scheme, **kwargs)
 
     @staticmethod
-    def get_connection_class(scheme):
+    def _get_connection_class(scheme):
         if scheme == 'https':
             return VerifiedHTTPSConnection
         else:
             return httplib.HTTPConnection
 
     @staticmethod
-    def get_connection_kwargs(scheme, **kwargs):
+    def _get_connection_kwargs(scheme, **kwargs):
         _kwargs = {'timeout': float(kwargs.get('timeout', 600))}
 
         if scheme == 'https':
@@ -75,7 +73,7 @@ class HTTPClient(object):
 
         return _kwargs
 
-    def get_connection(self):
+    def _get_connection(self):
         _class = self.connection_class
         try:
             return _class(self.endpoint_hostname, self.endpoint_port,
@@ -95,7 +93,7 @@ class HTTPClient(object):
 
         self._log_request(method, url, kwargs['headers'])
 
-        conn = self.get_connection()
+        conn = self._get_connection()
 
         try:
             url_parts = urlparse.urlparse(url)
@@ -159,30 +157,6 @@ class HTTPClient(object):
                 self.LOG.debug("Large body (%d) md5 summary: %s", length,
                                hashlib.md5(str_body).hexdigest())
 
-    def json_request(self, method, url, **kwargs):
-        kwargs.setdefault('headers', {})
-        kwargs['headers'].setdefault('Content-Type', 'application/json')
-        if kwargs['headers']['Content-Type'] != 'application/json':
-            msg = "Only application/json content-type is supported."
-            raise lib_exc.InvalidContentType(msg)
-
-        if 'body' in kwargs:
-            kwargs['body'] = json.dumps(kwargs['body'])
-
-        resp, body_iter = self._http_request(url, method, **kwargs)
-
-        if 'application/json' in resp.getheader('content-type', ''):
-            body = ''.join([chunk for chunk in body_iter])
-            try:
-                body = json.loads(body)
-            except ValueError:
-                LOG.error('Could not decode response body as JSON')
-        else:
-            msg = "Only json/application content-type is supported."
-            raise lib_exc.InvalidContentType(msg)
-
-        return resp, body
-
     def raw_request(self, method, url, **kwargs):
         kwargs.setdefault('headers', {})
         kwargs['headers'].setdefault('Content-Type',
@@ -203,8 +177,7 @@ class HTTPClient(object):
 
 
 class OpenSSLConnectionDelegator(object):
-    """
-    An OpenSSL.SSL.Connection delegator.
+    """An OpenSSL.SSL.Connection delegator.
 
     Supplies an additional 'makefile' method which httplib requires
     and is not present in OpenSSL.SSL.Connection.
@@ -225,9 +198,8 @@ class OpenSSLConnectionDelegator(object):
 
 
 class VerifiedHTTPSConnection(httplib.HTTPSConnection):
-    """
-    Extended HTTPSConnection which uses the OpenSSL library
-    for enhanced SSL support.
+    """Extended HTTPSConnection which uses OpenSSL library for enhanced SSL
+
     Note: Much of this functionality can eventually be replaced
           with native Python 3.3 code.
     """
@@ -247,11 +219,10 @@ class VerifiedHTTPSConnection(httplib.HTTPSConnection):
 
     @staticmethod
     def host_matches_cert(host, x509):
-        """
-        Verify that the the x509 certificate we have received
-        from 'host' correctly identifies the server we are
-        connecting to, ie that the certificate's Common Name
-        or a Subject Alternative Name matches 'host'.
+        """Verify that the x509 certificate we have received from 'host'
+
+        Identifies the server we are connecting to, ie that the certificate's
+        Common Name or a Subject Alternative Name matches 'host'.
         """
         # First see if we can match the CN
         if x509.get_subject().commonName == host:
@@ -289,9 +260,7 @@ class VerifiedHTTPSConnection(httplib.HTTPSConnection):
             return preverify_ok
 
     def setcontext(self):
-        """
-        Set up the OpenSSL context.
-        """
+        """Set up the OpenSSL context."""
         self.context = OpenSSL.SSL.Context(OpenSSL.SSL.SSLv23_METHOD)
 
         if self.ssl_compression is False:
@@ -336,17 +305,33 @@ class VerifiedHTTPSConnection(httplib.HTTPSConnection):
             self.context.set_default_verify_paths()
 
     def connect(self):
-        """
-        Connect to an SSL port using the OpenSSL library and apply
-        per-connection parameters.
-        """
-        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        if self.timeout is not None:
-            # '0' microseconds
-            sock.setsockopt(socket.SOL_SOCKET, socket.SO_RCVTIMEO,
-                            struct.pack('LL', self.timeout, 0))
-        self.sock = OpenSSLConnectionDelegator(self.context, sock)
-        self.sock.connect((self.host, self.port))
+        """Connect to SSL port and apply per-connection parameters."""
+        try:
+            addresses = socket.getaddrinfo(self.host,
+                                           self.port,
+                                           socket.AF_UNSPEC,
+                                           socket.SOCK_STREAM)
+        except OSError as msg:
+            raise exc.RestClientException(msg)
+        for res in addresses:
+            af, socktype, proto, canonname, sa = res
+            sock = socket.socket(af, socket.SOCK_STREAM)
+
+            if self.timeout is not None:
+                # '0' microseconds
+                sock.setsockopt(socket.SOL_SOCKET, socket.SO_RCVTIMEO,
+                                struct.pack('LL', self.timeout, 0))
+            self.sock = OpenSSLConnectionDelegator(self.context, sock)
+            try:
+                self.sock.connect(sa)
+            except OSError as msg:
+                if self.sock:
+                    self.sock = None
+                    continue
+            break
+        if self.sock is None:
+            # Happen only when all results have failed.
+            raise exc.RestClientException('Cannot connect to %s' % self.host)
 
     def close(self):
         if self.sock:

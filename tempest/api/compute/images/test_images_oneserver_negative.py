@@ -15,12 +15,12 @@
 #    under the License.
 
 from oslo_log import log as logging
-from tempest_lib import exceptions as lib_exc
 
 from tempest.api.compute import base
 from tempest.common.utils import data_utils
 from tempest.common import waiters
 from tempest import config
+from tempest.lib import exceptions as lib_exc
 from tempest import test
 
 CONF = config.CONF
@@ -76,7 +76,7 @@ class ImagesOneServerNegativeTestJSON(base.BaseV2ComputeTest):
     @classmethod
     def setup_clients(cls):
         super(ImagesOneServerNegativeTestJSON, cls).setup_clients()
-        cls.client = cls.images_client
+        cls.client = cls.compute_images_client
 
     @classmethod
     def resource_setup(cls):

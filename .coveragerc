@@ -1,4 +1,4 @@
 [run]
 branch = True
 source = tempest
-omit = tempest/tests/*,tempest/openstack/*
+omit = tempest/tests/*,tempest/scenario/test_*.py,tempest/api_schema/*,tempest/api/*

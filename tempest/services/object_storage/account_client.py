@@ -18,10 +18,10 @@ from xml.etree import ElementTree as etree
 from oslo_serialization import jsonutils as json
 from six.moves.urllib import parse as urllib
 
-from tempest.common import service_client
+from tempest.lib.common import rest_client
 
 
-class AccountClient(service_client.ServiceClient):
+class AccountClient(rest_client.RestClient):
 
     def create_account(self, data=None,
                        params=None,
@@ -59,8 +59,8 @@ class AccountClient(service_client.ServiceClient):
         return resp, body
 
     def list_account_metadata(self):
-        """
-        HEAD on the storage URL
+        """HEAD on the storage URL
+
         Returns all account metadata headers
         """
         resp, body = self.head('')
@@ -86,9 +86,7 @@ class AccountClient(service_client.ServiceClient):
 
     def delete_account_metadata(self, metadata,
                                 metadata_prefix='X-Remove-Account-Meta-'):
-        """
-        Deletes an account metadata entry.
-        """
+        """Deletes an account metadata entry."""
 
         headers = {}
         for item in metadata:
@@ -103,9 +101,7 @@ class AccountClient(service_client.ServiceClient):
             delete_metadata=None,
             create_metadata_prefix='X-Account-Meta-',
             delete_metadata_prefix='X-Remove-Account-Meta-'):
-        """
-        Creates and deletes an account metadata entry.
-        """
+        """Creates and deletes an account metadata entry."""
         headers = {}
         for key in create_metadata:
             headers[create_metadata_prefix + key] = create_metadata[key]
@@ -117,8 +113,8 @@ class AccountClient(service_client.ServiceClient):
         return resp, body
 
     def list_account_containers(self, params=None):
-        """
-        GET on the (base) storage URL
+        """GET on the (base) storage URL
+
         Given valid X-Auth-Token, returns a list of all containers for the
         account.
 

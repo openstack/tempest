@@ -14,6 +14,7 @@
 
 from tempest.api.compute import base
 from tempest.common.utils import data_utils
+from tempest.common import waiters
 from tempest import config
 from tempest import test
 
@@ -36,7 +37,7 @@ class ImagesTestJSON(base.BaseV2ComputeTest):
     @classmethod
     def setup_clients(cls):
         super(ImagesTestJSON, cls).setup_clients()
-        cls.client = cls.images_client
+        cls.client = cls.compute_images_client
         cls.servers_client = cls.servers_client
 
     @test.idempotent_id('aa06b52b-2db5-4807-b218-9441f75d74e3')
@@ -48,3 +49,18 @@ class ImagesTestJSON(base.BaseV2ComputeTest):
                                               name=snapshot_name,
                                               wait_until='SAVING')
         self.client.delete_image(image['id'])
+
+    @test.idempotent_id('aaacd1d0-55a2-4ce8-818a-b5439df8adc9')
+    def test_create_image_from_stopped_server(self):
+        server = self.create_test_server(wait_until='ACTIVE')
+        self.servers_client.stop_server(server['id'])
+        waiters.wait_for_server_status(self.servers_client,
+                                       server['id'], 'SHUTOFF')
+        self.addCleanup(self.servers_client.delete_server, server['id'])
+        snapshot_name = data_utils.rand_name('test-snap')
+        image = self.create_image_from_server(server['id'],
+                                              name=snapshot_name,
+                                              wait_until='ACTIVE',
+                                              wait_for_server=False)
+        self.addCleanup(self.client.delete_image, image['id'])
+        self.assertEqual(snapshot_name, image['name'])

@@ -19,9 +19,7 @@ from tempest import test
 
 
 class ExtraDHCPOptionsTestJSON(base.BaseNetworkTest):
-    """
-    Tests the following operations with the Extra DHCP Options Neutron API
-    extension:
+    """Tests the following operations with the Extra DHCP Options:
 
         port create
         port list
@@ -59,14 +57,14 @@ class ExtraDHCPOptionsTestJSON(base.BaseNetworkTest):
     @test.idempotent_id('d2c17063-3767-4a24-be4f-a23dbfa133c9')
     def test_create_list_port_with_extra_dhcp_options(self):
         # Create a port with Extra DHCP Options
-        body = self.client.create_port(
+        body = self.ports_client.create_port(
             network_id=self.network['id'],
             extra_dhcp_opts=self.extra_dhcp_opts)
         port_id = body['port']['id']
-        self.addCleanup(self.client.delete_port, port_id)
+        self.addCleanup(self.ports_client.delete_port, port_id)
 
         # Confirm port created has Extra DHCP Options
-        body = self.client.list_ports()
+        body = self.ports_client.list_ports()
         ports = body['ports']
         port = [p for p in ports if p['id'] == port_id]
         self.assertTrue(port)
@@ -76,12 +74,12 @@ class ExtraDHCPOptionsTestJSON(base.BaseNetworkTest):
     def test_update_show_port_with_extra_dhcp_options(self):
         # Update port with extra dhcp options
         name = data_utils.rand_name('new-port-name')
-        body = self.client.update_port(
+        body = self.ports_client.update_port(
             self.port['id'],
             name=name,
             extra_dhcp_opts=self.extra_dhcp_opts)
         # Confirm extra dhcp options were added to the port
-        body = self.client.show_port(self.port['id'])
+        body = self.ports_client.show_port(self.port['id'])
         self._confirm_extra_dhcp_options(body['port'], self.extra_dhcp_opts)
 
     def _confirm_extra_dhcp_options(self, port, extra_dhcp_opts):

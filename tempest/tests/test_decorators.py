@@ -140,7 +140,7 @@ class TestServicesDecorator(BaseDecoratorsTest):
                 self.fail('%s is not listed in the valid service tag list'
                           % service)
             except KeyError:
-                # NOTE(mtreinish): This condition is to test for a entry in
+                # NOTE(mtreinish): This condition is to test for an entry in
                 # the outer decorator list but not in the service_list dict.
                 # However, because we're looping over the service_list dict
                 # it's unlikely we'll trigger this. So manual review is still
@@ -201,7 +201,13 @@ class TestRequiresExtDecorator(BaseDecoratorsTest):
         if expected_to_skip:
             self.assertRaises(testtools.TestCase.skipException, t.test_bar)
         else:
-            self.assertEqual(t.test_bar(), 0)
+            try:
+                self.assertEqual(t.test_bar(), 0)
+            except testtools.TestCase.skipException:
+                # We caught a skipException but we didn't expect to skip
+                # this test so raise a hard test failure instead.
+                raise testtools.TestCase.failureException(
+                    "Not supposed to skip")
 
     def test_requires_ext_decorator(self):
         self._test_requires_ext_helper(expected_to_skip=False,
@@ -213,7 +219,7 @@ class TestRequiresExtDecorator(BaseDecoratorsTest):
                                        service='compute')
 
     def test_requires_ext_decorator_with_all_ext_enabled(self):
-        cfg.CONF.set_default('api_extensions', 'all',
+        cfg.CONF.set_default('api_extensions', ['all'],
                              group='compute-feature-enabled')
         self._test_requires_ext_helper(expected_to_skip=False,
                                        extension='random_ext',

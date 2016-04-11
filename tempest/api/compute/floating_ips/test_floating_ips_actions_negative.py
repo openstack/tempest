@@ -15,11 +15,10 @@
 
 import uuid
 
-from tempest_lib import exceptions as lib_exc
-
 from tempest.api.compute.floating_ips import base
 from tempest.common.utils import data_utils
 from tempest import config
+from tempest.lib import exceptions as lib_exc
 from tempest import test
 
 CONF = config.CONF
@@ -60,7 +59,7 @@ class FloatingIPsNegativeTestJSON(base.BaseFloatingIPsTest):
         # to a project should fail
         self.assertRaises(lib_exc.NotFound,
                           self.client.create_floating_ip,
-                          "non_exist_pool")
+                          pool="non_exist_pool")
 
     @test.attr(type=['negative'])
     @test.idempotent_id('ae1c55a8-552b-44d4-bfb6-2a115a15d0ba')

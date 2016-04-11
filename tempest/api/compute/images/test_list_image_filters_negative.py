@@ -12,11 +12,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest_lib import exceptions as lib_exc
-
 from tempest.api.compute import base
 from tempest.common.utils import data_utils
 from tempest import config
+from tempest.lib import exceptions as lib_exc
 from tempest import test
 
 CONF = config.CONF
@@ -34,7 +33,7 @@ class ListImageFiltersNegativeTestJSON(base.BaseV2ComputeTest):
     @classmethod
     def setup_clients(cls):
         super(ListImageFiltersNegativeTestJSON, cls).setup_clients()
-        cls.client = cls.images_client
+        cls.client = cls.compute_images_client
 
     @test.attr(type=['negative'])
     @test.idempotent_id('391b0440-432c-4d4b-b5da-c5096aa247eb')

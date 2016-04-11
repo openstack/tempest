@@ -15,12 +15,12 @@
 
 from oslo_log import log as logging
 from oslo_utils import excutils
-from tempest_lib.common.utils import data_utils
 
 from tempest.common import fixed_network
-from tempest.common import service_client
 from tempest.common import waiters
 from tempest import config
+from tempest.lib.common import rest_client
+from tempest.lib.common.utils import data_utils
 
 CONF = config.CONF
 
@@ -29,7 +29,8 @@ LOG = logging.getLogger(__name__)
 
 def create_test_server(clients, validatable=False, validation_resources=None,
                        tenant_network=None, wait_until=None,
-                       volume_backed=False, **kwargs):
+                       volume_backed=False, name=None, flavor=None,
+                       image_id=None, **kwargs):
     """Common wrapper utility returning a test server.
 
     This method is a common wrapper returning a test server that can be
@@ -43,26 +44,28 @@ def create_test_server(clients, validatable=False, validation_resources=None,
     :param wait_until: Server status to wait for the server to reach after
     its creation.
     :param volume_backed: Whether the instance is volume backed or not.
-    :returns a tuple
+    :returns: a tuple
     """
 
     # TODO(jlanoux) add support of wait_until PINGABLE/SSHABLE
 
-    if 'name' in kwargs:
-        name = kwargs.pop('name')
-    else:
+    if name is None:
         name = data_utils.rand_name(__name__ + "-instance")
-
-    flavor = kwargs.pop('flavor', CONF.compute.flavor_ref)
-    image_id = kwargs.pop('image_id', CONF.compute.image_ref)
+    if flavor is None:
+        flavor = CONF.compute.flavor_ref
+    if image_id is None:
+        image_id = CONF.compute.image_ref
 
     kwargs = fixed_network.set_networks_kwarg(
         tenant_network, kwargs) or {}
 
+    multiple_create_request = (max(kwargs.get('min_count', 0),
+                                   kwargs.get('max_count', 0)) > 1)
+
     if CONF.validation.run_validation and validatable:
         # As a first implementation, multiple pingable or sshable servers will
         # not be supported
-        if 'min_count' in kwargs or 'max_count' in kwargs:
+        if multiple_create_request:
             msg = ("Multiple pingable or sshable servers not supported at "
                    "this stage.")
             raise ValueError(msg)
@@ -95,8 +98,8 @@ def create_test_server(clients, validatable=False, validation_resources=None,
         volume = volumes_client.create_volume(
             display_name=volume_name,
             imageRef=image_id)
-        volumes_client.wait_for_volume_status(volume['volume']['id'],
-                                              'available')
+        waiters.wait_for_volume_status(volumes_client,
+                                       volume['volume']['id'], 'available')
 
         bd_map_v2 = [{
             'uuid': volume['volume']['id'],
@@ -116,18 +119,18 @@ def create_test_server(clients, validatable=False, validation_resources=None,
 
     # handle the case of multiple servers
     servers = []
-    if 'min_count' in kwargs or 'max_count' in kwargs:
+    if multiple_create_request:
         # Get servers created which name match with name param.
         body_servers = clients.servers_client.list_servers()
         servers = \
             [s for s in body_servers['servers'] if s['name'].startswith(name)]
     else:
-        body = service_client.ResponseBody(body.response, body['server'])
+        body = rest_client.ResponseBody(body.response, body['server'])
         servers = [body]
 
     # The name of the method to associate a floating IP to as server is too
     # long for PEP8 compliance so:
-    assoc = clients.floating_ips_client.associate_floating_ip_to_server
+    assoc = clients.compute_floating_ips_client.associate_floating_ip_to_server
 
     if wait_until:
         for server in servers:
@@ -145,14 +148,12 @@ def create_test_server(clients, validatable=False, validation_resources=None,
 
             except Exception:
                 with excutils.save_and_reraise_exception():
-                    if ('preserve_server_on_error' not in kwargs
-                        or kwargs['preserve_server_on_error'] is False):
-                        for server in servers:
-                            try:
-                                clients.servers_client.delete_server(
-                                    server['id'])
-                            except Exception:
-                                LOG.exception('Deleting server %s failed'
-                                              % server['id'])
+                    for server in servers:
+                        try:
+                            clients.servers_client.delete_server(
+                                server['id'])
+                        except Exception:
+                            LOG.exception('Deleting server %s failed'
+                                          % server['id'])
 
     return body, servers

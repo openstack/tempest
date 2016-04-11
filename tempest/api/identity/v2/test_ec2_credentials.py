@@ -13,9 +13,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest_lib import exceptions as lib_exc
-
 from tempest.api.identity import base
+from tempest.lib import exceptions as lib_exc
 from tempest import test
 
 
@@ -36,12 +35,12 @@ class EC2CredentialsTest(base.BaseIdentityV2Test):
     @test.idempotent_id('b580fab9-7ae9-46e8-8138-417260cb6f9f')
     def test_create_ec2_credentials(self):
         """Create user ec2 credentials."""
-        resp = self.non_admin_client.create_user_ec2_credentials(
+        resp = self.non_admin_users_client.create_user_ec2_credentials(
             self.creds.credentials.user_id,
-            self.creds.credentials.tenant_id)["credential"]
+            tenant_id=self.creds.credentials.tenant_id)["credential"]
         access = resp['access']
         self.addCleanup(
-            self.non_admin_client.delete_user_ec2_credentials,
+            self.non_admin_users_client.delete_user_ec2_credentials,
             self.creds.credentials.user_id, access)
         self.assertNotEmpty(resp['access'])
         self.assertNotEmpty(resp['secret'])
@@ -54,24 +53,24 @@ class EC2CredentialsTest(base.BaseIdentityV2Test):
         created_creds = []
         fetched_creds = []
         # create first ec2 credentials
-        creds1 = self.non_admin_client.create_user_ec2_credentials(
+        creds1 = self.non_admin_users_client.create_user_ec2_credentials(
             self.creds.credentials.user_id,
-            self.creds.credentials.tenant_id)["credential"]
+            tenant_id=self.creds.credentials.tenant_id)["credential"]
         created_creds.append(creds1['access'])
         # create second ec2 credentials
-        creds2 = self.non_admin_client.create_user_ec2_credentials(
+        creds2 = self.non_admin_users_client.create_user_ec2_credentials(
             self.creds.credentials.user_id,
-            self.creds.credentials.tenant_id)["credential"]
+            tenant_id=self.creds.credentials.tenant_id)["credential"]
         created_creds.append(creds2['access'])
         # add credentials to be cleaned up
         self.addCleanup(
-            self.non_admin_client.delete_user_ec2_credentials,
+            self.non_admin_users_client.delete_user_ec2_credentials,
             self.creds.credentials.user_id, creds1['access'])
         self.addCleanup(
-            self.non_admin_client.delete_user_ec2_credentials,
+            self.non_admin_users_client.delete_user_ec2_credentials,
             self.creds.credentials.user_id, creds2['access'])
         # get the list of user ec2 credentials
-        resp = self.non_admin_client.list_user_ec2_credentials(
+        resp = self.non_admin_users_client.list_user_ec2_credentials(
             self.creds.credentials.user_id)["credentials"]
         fetched_creds = [cred['access'] for cred in resp]
         # created credentials should be in a fetched list
@@ -84,14 +83,14 @@ class EC2CredentialsTest(base.BaseIdentityV2Test):
     @test.idempotent_id('cb284075-b613-440d-83ca-fe0b33b3c2b8')
     def test_show_ec2_credentials(self):
         """Get the definite user ec2 credentials."""
-        resp = self.non_admin_client.create_user_ec2_credentials(
+        resp = self.non_admin_users_client.create_user_ec2_credentials(
             self.creds.credentials.user_id,
-            self.creds.credentials.tenant_id)["credential"]
+            tenant_id=self.creds.credentials.tenant_id)["credential"]
         self.addCleanup(
-            self.non_admin_client.delete_user_ec2_credentials,
+            self.non_admin_users_client.delete_user_ec2_credentials,
             self.creds.credentials.user_id, resp['access'])
 
-        ec2_creds = self.non_admin_client.show_user_ec2_credentials(
+        ec2_creds = self.non_admin_users_client.show_user_ec2_credentials(
             self.creds.credentials.user_id, resp['access']
         )["credential"]
         for key in ['access', 'secret', 'user_id', 'tenant_id']:
@@ -100,14 +99,14 @@ class EC2CredentialsTest(base.BaseIdentityV2Test):
     @test.idempotent_id('6aba0d4c-b76b-4e46-aa42-add79bc1551d')
     def test_delete_ec2_credentials(self):
         """Delete user ec2 credentials."""
-        resp = self.non_admin_client.create_user_ec2_credentials(
+        resp = self.non_admin_users_client.create_user_ec2_credentials(
             self.creds.credentials.user_id,
-            self.creds.credentials.tenant_id)["credential"]
+            tenant_id=self.creds.credentials.tenant_id)["credential"]
         access = resp['access']
-        self.non_admin_client.delete_user_ec2_credentials(
+        self.non_admin_users_client.delete_user_ec2_credentials(
             self.creds.credentials.user_id, access)
         self.assertRaises(
             lib_exc.NotFound,
-            self.non_admin_client.show_user_ec2_credentials,
+            self.non_admin_users_client.show_user_ec2_credentials,
             self.creds.credentials.user_id,
             access)

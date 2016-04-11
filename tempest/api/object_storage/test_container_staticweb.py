@@ -12,11 +12,10 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-from tempest_lib import exceptions as lib_exc
-
 from tempest.api.object_storage import base
 from tempest.common import custom_matchers
 from tempest.common.utils import data_utils
+from tempest.lib import exceptions as lib_exc
 from tempest import test
 
 
@@ -28,7 +27,7 @@ class StaticWebTest(base.BaseObjectTest):
         cls.container_name = data_utils.rand_name(name="TestContainer")
 
         # This header should be posted on the container before every test
-        cls.headers_public_read_acl = {'Read': '.r:*'}
+        cls.headers_public_read_acl = {'Read': '.r:*,.rlistings'}
 
         # Create test container and create one object in it
         cls.container_client.create_container(cls.container_name)

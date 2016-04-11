@@ -24,9 +24,8 @@ CONF = config.CONF
 
 
 class FloatingIPsBulkAdminTestJSON(base.BaseV2ComputeAdminTest):
-    """
-    Tests Floating IPs Bulk APIs Create, List and  Delete that
-    require admin privileges.
+    """Tests Floating IPs Bulk APIs that require admin privileges.
+
     API documentation - http://docs.openstack.org/api/openstack-compute/2/
     content/ext-os-floating-ips-bulk.html
     """
@@ -39,7 +38,7 @@ class FloatingIPsBulkAdminTestJSON(base.BaseV2ComputeAdminTest):
     @classmethod
     def resource_setup(cls):
         super(FloatingIPsBulkAdminTestJSON, cls).resource_setup()
-        cls.ip_range = CONF.compute.floating_ip_range
+        cls.ip_range = CONF.validation.floating_ip_range
         cls.verify_unallocated_floating_ip_range(cls.ip_range)
 
     @classmethod

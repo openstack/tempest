@@ -13,12 +13,14 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest_lib import exceptions as lib_exc
-
 from tempest.api.compute.floating_ips import base
 from tempest.common.utils import data_utils
 from tempest.common import waiters
+from tempest import config
+from tempest.lib import exceptions as lib_exc
 from tempest import test
+
+CONF = config.CONF
 
 
 class FloatingIPsTestJSON(base.BaseFloatingIPsTest):
@@ -39,7 +41,8 @@ class FloatingIPsTestJSON(base.BaseFloatingIPsTest):
         server = cls.create_test_server(wait_until='ACTIVE')
         cls.server_id = server['id']
         # Floating IP creation
-        body = cls.client.create_floating_ip()['floating_ip']
+        body = cls.client.create_floating_ip(
+            pool=CONF.network.floating_network_name)['floating_ip']
         cls.floating_ip_id = body['id']
         cls.floating_ip = body['ip']
 
@@ -63,7 +66,8 @@ class FloatingIPsTestJSON(base.BaseFloatingIPsTest):
     def test_allocate_floating_ip(self):
         # Positive test:Allocation of a new floating IP to a project
         # should be successful
-        body = self.client.create_floating_ip()['floating_ip']
+        body = self.client.create_floating_ip(
+            pool=CONF.network.floating_network_name)['floating_ip']
         floating_ip_id_allocated = body['id']
         self.addCleanup(self.client.delete_floating_ip,
                         floating_ip_id_allocated)
@@ -79,7 +83,8 @@ class FloatingIPsTestJSON(base.BaseFloatingIPsTest):
         # Positive test:Deletion of valid floating IP from project
         # should be successful
         # Creating the floating IP that is to be deleted in this method
-        floating_ip_body = self.client.create_floating_ip()['floating_ip']
+        floating_ip_body = self.client.create_floating_ip(
+            pool=CONF.network.floating_network_name)['floating_ip']
         self.addCleanup(self._try_delete_floating_ip, floating_ip_body['id'])
         # Deleting the floating IP from the project
         self.client.delete_floating_ip(floating_ip_body['id'])

@@ -11,6 +11,9 @@ Contents:
    HACKING
    REVIEWING
    plugin
+   plugin-registry
+   library
+   microversion_testing
 
 ------------
 Field Guides
@@ -26,7 +29,6 @@ where your test contributions should go.
    field_guide/api
    field_guide/scenario
    field_guide/stress
-   field_guide/thirdparty
    field_guide/unit_tests
 
 ---------------------------

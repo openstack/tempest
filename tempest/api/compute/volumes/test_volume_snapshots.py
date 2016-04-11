@@ -50,7 +50,7 @@ class VolumesSnapshotsTestJSON(base.BaseV2ComputeTest):
         s_name = data_utils.rand_name('Snapshot')
         # Create snapshot
         snapshot = self.snapshots_client.create_snapshot(
-            volume['id'],
+            volume_id=volume['id'],
             display_name=s_name)['snapshot']
 
         def delete_snapshot(snapshot_id):

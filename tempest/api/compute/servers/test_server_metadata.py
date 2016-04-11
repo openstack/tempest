@@ -87,8 +87,8 @@ class ServerMetadataTestJSON(base.BaseV2ComputeTest):
     @test.idempotent_id('3043c57d-7e0e-49a6-9a96-ad569c265e6a')
     def test_get_server_metadata_item(self):
         # The value for a specific metadata key should be returned
-        meta = self.client.get_server_metadata_item(self.server_id,
-                                                    'key2')['meta']
+        meta = self.client.show_server_metadata_item(self.server_id,
+                                                     'key2')['meta']
         self.assertEqual('value2', meta['key2'])
 
     @test.idempotent_id('58c02d4f-5c67-40be-8744-d3fa5982eb1c')

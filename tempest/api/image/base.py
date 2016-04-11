@@ -12,17 +12,14 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from oslo_log import log as logging
 from six import moves
-from tempest_lib import exceptions as lib_exc
 
 from tempest.common.utils import data_utils
 from tempest import config
+from tempest.lib import exceptions as lib_exc
 import tempest.test
 
 CONF = config.CONF
-
-LOG = logging.getLogger(__name__)
 
 
 class BaseImageTest(tempest.test.BaseTestCase):
@@ -62,16 +59,12 @@ class BaseImageTest(tempest.test.BaseTestCase):
     @classmethod
     def create_image(cls, **kwargs):
         """Wrapper that returns a test image."""
-        name = data_utils.rand_name(cls.__name__ + "-instance")
 
-        if 'name' in kwargs:
-            name = kwargs.pop('name')
+        if 'name' not in kwargs:
+            name = data_utils.rand_name(cls.__name__ + "-instance")
+            kwargs['name'] = name
 
-        container_format = kwargs.pop('container_format')
-        disk_format = kwargs.pop('disk_format')
-
-        image = cls.client.create_image(name, container_format,
-                                        disk_format, **kwargs)
+        image = cls.client.create_image(**kwargs)
         # Image objects returned by the v1 client have the image
         # data inside a dict that is keyed against 'image'.
         if 'image' in image:
@@ -156,7 +149,7 @@ class BaseV2MemberImageTest(BaseV2ImageTest):
 
     def _create_image(self):
         name = data_utils.rand_name('image')
-        image = self.os_img_client.create_image(name,
+        image = self.os_img_client.create_image(name=name,
                                                 container_format='bare',
                                                 disk_format='raw')
         image_id = image['id']

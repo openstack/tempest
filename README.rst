@@ -1,6 +1,14 @@
 Tempest - The OpenStack Integration Test Suite
 ==============================================
 
+.. image:: https://img.shields.io/pypi/v/tempest.svg
+    :target: https://pypi.python.org/pypi/tempest/
+    :alt: Latest Version
+
+.. image:: https://img.shields.io/pypi/dm/tempest.svg
+    :target: https://pypi.python.org/pypi/tempest/
+    :alt: Downloads
+
 This is a set of integration tests to be run against a live OpenStack
 cluster. Tempest has batteries of tests for OpenStack API validation,
 Scenarios, and other specific tests useful in validating an OpenStack
@@ -22,8 +30,8 @@ Tempest Design Principles that we strive to live by.
 - Tempest should not touch private or implementation specific
   interfaces. This means not directly going to the database, not
   directly hitting the hypervisors, not testing extensions not
-  included in the OpenStack base. If there is some feature of
-  OpenStack that is not verifiable through standard interfaces, this
+  included in the OpenStack base. If there are some features of
+  OpenStack that are not verifiable through standard interfaces, this
   should be considered a possible enhancement.
 - Tempest strives for complete coverage of the OpenStack API and
   common scenarios that demonstrate a working cloud.
@@ -47,10 +55,11 @@ working dir is the actually Tempest source repo, and there are a number of
 assumptions related to that. For this section we'll only cover the newer method
 as it is simpler, and quicker to work with.
 
-#. You first need to install Tempest this is done with pip, after you check out
-   the Tempest repo you simply run something like::
+#. You first need to install Tempest. This is done with pip after you check out
+   the Tempest repo::
 
-    $ pip install tempest
+    $ git clone https://github.com/openstack/tempest/
+    $ pip install tempest/
 
    This can be done within a venv, but the assumption for this guide is that
    the Tempest cli entry point will be in your shell's PATH.
@@ -86,12 +95,51 @@ as it is simpler, and quicker to work with.
    be done with testr directly or any `testr`_ based test runner, like
    `ostestr`_. For example, from the working dir running::
 
-     $ ostestr --regex '(?!.*\[.*\bslow\b.*\])(^tempest\.(api|scenario|thirdparty))'
+     $ ostestr --regex '(?!.*\[.*\bslow\b.*\])(^tempest\.(api|scenario))'
 
    will run the same set of tests as the default gate jobs.
 
 .. _testr: https://testrepository.readthedocs.org/en/latest/MANUAL.html
 .. _ostestr: http://docs.openstack.org/developer/os-testr/
+
+Library
+-------
+Tempest exposes a library interface. This interface is a stable interface and
+should be backwards compatible (including backwards compatibility with the
+old tempest-lib package, with the exception of the import). If you plan to
+directly consume tempest in your project you should only import code from the
+tempest library interface, other pieces of tempest do not have the same
+stable interface and there are no guarantees on the Python API unless otherwise
+stated.
+
+For more details refer to the library documentation here: :ref:`library`
+
+Release Versioning
+------------------
+Tempest's released versions are broken into 2 sets of information. Depending on
+how you intend to consume tempest you might need
+
+The version is a set of 3 numbers:
+
+X.Y.Z
+
+While this is almost `semver`_ like, the way versioning is handled is slightly
+different:
+
+X is used to represent the supported OpenStack releases for tempest tests
+in-tree, and to signify major feature changes to tempest. It's a monotonically
+increasing integer where each version either indicates a new supported OpenStack
+release, the drop of support for an OpenStack release (which will coincide with
+the upstream stable branch going EOL), or a major feature lands (or is removed)
+from tempest.
+
+Y.Z is used to represent library interface changes. This is treated the same
+way as minor and patch versions from `semver`_ but only for the library
+interface. When Y is incremented we've added functionality to the library
+interface and when Z is incremented it's a bug fix release for the library.
+Also note that both Y and Z are reset to 0 at each increment of X.
+
+.. _semver: http://semver.org/
 
 Configuration
 -------------
@@ -168,7 +216,7 @@ configuration file is to generate a sample in the ``etc/`` directory ::
 
     $> cd $TEMPEST_ROOT_DIR
     $> oslo-config-generator --config-file \
-        tools/config/config-generator.tempest.conf \
+        etc/config-generator.tempest.conf \
         --output-file etc/tempest.conf
 
 After that, open up the ``etc/tempest.conf`` file and edit the

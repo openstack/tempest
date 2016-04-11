@@ -24,6 +24,7 @@ from tempest import config
 class ConfigFixture(conf_fixture.Config):
 
     def __init__(self):
+        cfg.CONF([], default_config_files=[])
         config.register_opts()
         super(ConfigFixture, self).__init__()
 
@@ -45,16 +46,19 @@ class ConfigFixture(conf_fixture.Config):
             lock_path=str(os.environ.get('OS_TEST_LOCK_PATH')),
         )
         self.conf.set_default('auth_version', 'v2', group='identity')
-        for config_option in ['username', 'password', 'tenant_name']:
+        for config_option in ['username', 'password', 'project_name']:
             # Identity group items
             for prefix in ['', 'alt_', 'admin_']:
+                if prefix == 'admin_':
+                    group = 'auth'
+                else:
+                    group = 'identity'
                 self.conf.set_default(prefix + config_option,
                                       'fake_' + config_option,
-                                      group='identity')
+                                      group=group)
 
 
 class FakePrivate(config.TempestConfigPrivate):
     def __init__(self, parse_conf=True, config_path=None):
-        cfg.CONF([], default_config_files=[])
         self._set_attrs()
-        self.lock_path = cfg.CONF.lock_path
+        self.lock_path = cfg.CONF.oslo_concurrency.lock_path

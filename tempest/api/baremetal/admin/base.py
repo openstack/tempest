@@ -12,10 +12,9 @@
 
 import functools
 
-from tempest_lib import exceptions as lib_exc
-
 from tempest.common.utils import data_utils
 from tempest import config
+from tempest.lib import exceptions as lib_exc
 from tempest import test
 
 CONF = config.CONF
@@ -98,8 +97,7 @@ class BaseBaremetalTest(test.BaseTestCase):
     @classmethod
     @creates('chassis')
     def create_chassis(cls, description=None, expect_errors=False):
-        """
-        Wrapper utility for creating test chassis.
+        """Wrapper utility for creating test chassis.
 
         :param description: A description of the chassis. if not supplied,
             a random value will be generated.
@@ -114,8 +112,7 @@ class BaseBaremetalTest(test.BaseTestCase):
     @creates('node')
     def create_node(cls, chassis_id, cpu_arch='x86', cpus=8, local_gb=10,
                     memory_mb=4096):
-        """
-        Wrapper utility for creating test baremetal nodes.
+        """Wrapper utility for creating test baremetal nodes.
 
         :param cpu_arch: CPU architecture of the node. Default: x86.
         :param cpus: Number of CPUs. Default: 8.
@@ -134,8 +131,7 @@ class BaseBaremetalTest(test.BaseTestCase):
     @classmethod
     @creates('port')
     def create_port(cls, node_id, address, extra=None, uuid=None):
-        """
-        Wrapper utility for creating test ports.
+        """Wrapper utility for creating test ports.
 
         :param address: MAC address of the port.
         :param extra: Meta data of the port. If not supplied, an empty
@@ -152,8 +148,7 @@ class BaseBaremetalTest(test.BaseTestCase):
 
     @classmethod
     def delete_chassis(cls, chassis_id):
-        """
-        Deletes a chassis having the specified UUID.
+        """Deletes a chassis having the specified UUID.
 
         :param uuid: The unique identifier of the chassis.
         :return: Server response.
@@ -169,8 +164,7 @@ class BaseBaremetalTest(test.BaseTestCase):
 
     @classmethod
     def delete_node(cls, node_id):
-        """
-        Deletes a node having the specified UUID.
+        """Deletes a node having the specified UUID.
 
         :param uuid: The unique identifier of the node.
         :return: Server response.
@@ -186,8 +180,7 @@ class BaseBaremetalTest(test.BaseTestCase):
 
     @classmethod
     def delete_port(cls, port_id):
-        """
-        Deletes a port having the specified UUID.
+        """Deletes a port having the specified UUID.
 
         :param uuid: The unique identifier of the port.
         :return: Server response.

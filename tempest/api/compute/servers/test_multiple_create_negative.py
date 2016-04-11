@@ -13,10 +13,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest_lib import exceptions as lib_exc
-
 from tempest.api.compute import base
 from tempest.common.utils import data_utils
+from tempest.lib import exceptions as lib_exc
 from tempest import test
 
 
@@ -27,10 +26,8 @@ class MultipleCreateNegativeTestJSON(base.BaseV2ComputeTest):
         return data_utils.rand_name(self._name)
 
     def _create_multiple_servers(self, name=None, wait_until=None, **kwargs):
-        """
-        This is the right way to create_multiple servers and manage to get the
-        created servers into the servers list to be cleaned up after all.
-        """
+        # This is the right way to create_multiple servers and manage to get
+        # the created servers into the servers list to be cleaned up after all.
         kwargs['name'] = kwargs.get('name', self._generate_name())
         body = self.create_test_server(**kwargs)
 

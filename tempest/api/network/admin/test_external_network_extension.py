@@ -91,37 +91,35 @@ class ExternalNetworksTestJSON(base.BaseAdminNetworkTest):
 
     @test.idempotent_id('82068503-2cf2-4ed4-b3be-ecb89432e4bb')
     def test_delete_external_networks_with_floating_ip(self):
-        """Verifies external network can be deleted while still holding
-        (unassociated) floating IPs
+        # Verifies external network can be deleted while still holding
+        # (unassociated) floating IPs
 
-        """
-        # Set cls.client to admin to use base.create_subnet()
-        client = self.admin_client
         body = self.admin_networks_client.create_network(
             **{'router:external': True})
         external_network = body['network']
         self.addCleanup(self._try_delete_resource,
                         self.admin_networks_client.delete_network,
                         external_network['id'])
-        subnet = self.create_subnet(external_network, client=client,
-                                    enable_dhcp=False)
-        body = client.create_floatingip(
+        subnet = self.create_subnet(
+            external_network, client=self.admin_subnets_client,
+            enable_dhcp=False)
+        body = self.admin_floating_ips_client.create_floatingip(
             floating_network_id=external_network['id'])
         created_floating_ip = body['floatingip']
         self.addCleanup(self._try_delete_resource,
-                        client.delete_floatingip,
+                        self.admin_floating_ips_client.delete_floatingip,
                         created_floating_ip['id'])
-        floatingip_list = client.list_floatingips(
+        floatingip_list = self.admin_floating_ips_client.list_floatingips(
             network=external_network['id'])
         self.assertIn(created_floating_ip['id'],
                       (f['id'] for f in floatingip_list['floatingips']))
         self.admin_networks_client.delete_network(external_network['id'])
         # Verifies floating ip is deleted
-        floatingip_list = client.list_floatingips()
+        floatingip_list = self.admin_floating_ips_client.list_floatingips()
         self.assertNotIn(created_floating_ip['id'],
                          (f['id'] for f in floatingip_list['floatingips']))
         # Verifies subnet is deleted
-        subnet_list = client.list_subnets()
+        subnet_list = self.admin_subnets_client.list_subnets()
         self.assertNotIn(subnet['id'],
                          (s['id'] for s in subnet_list))
         # Removes subnet from the cleanup list

@@ -13,11 +13,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest.services.volume.json import backups_client
+from tempest.services.volume.base import base_backups_client
 
 
-class BackupsClientV2(backups_client.BaseBackupsClient):
-    """
-    Client class to send CRUD Volume V2 API requests to a Cinder endpoint
-    """
+class BackupsClient(base_backups_client.BaseBackupsClient):
+    """Client class to send CRUD Volume V2 API requests"""
     api_version = "v2"

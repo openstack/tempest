@@ -12,12 +12,11 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest_lib import exceptions as lib_exc
-
 from tempest.api.compute import base
 from tempest.common.utils import data_utils
 from tempest.common import waiters
 from tempest import config
+from tempest.lib import exceptions as lib_exc
 from tempest import test
 
 CONF = config.CONF
@@ -39,7 +38,7 @@ class ImagesNegativeTestJSON(base.BaseV2ComputeTest):
     @classmethod
     def setup_clients(cls):
         super(ImagesNegativeTestJSON, cls).setup_clients()
-        cls.client = cls.images_client
+        cls.client = cls.compute_images_client
         cls.servers_client = cls.servers_client
 
     @test.attr(type=['negative'])
@@ -68,23 +67,7 @@ class ImagesNegativeTestJSON(base.BaseV2ComputeTest):
         resp = {}
         resp['status'] = None
         self.assertRaises(lib_exc.NotFound, self.create_image_from_server,
-                          '!@#$%^&*()', name=name, meta=meta)
-
-    @test.attr(type=['negative'])
-    @test.idempotent_id('aaacd1d0-55a2-4ce8-818a-b5439df8adc9')
-    def test_create_image_from_stopped_server(self):
-        server = self.create_test_server(wait_until='ACTIVE')
-        self.servers_client.stop_server(server['id'])
-        waiters.wait_for_server_status(self.servers_client,
-                                       server['id'], 'SHUTOFF')
-        self.addCleanup(self.servers_client.delete_server, server['id'])
-        snapshot_name = data_utils.rand_name('test-snap')
-        image = self.create_image_from_server(server['id'],
-                                              name=snapshot_name,
-                                              wait_until='ACTIVE',
-                                              wait_for_server=False)
-        self.addCleanup(self.client.delete_image, image['id'])
-        self.assertEqual(snapshot_name, image['name'])
+                          '!@$^&*()', name=name, meta=meta)
 
     @test.attr(type=['negative'])
     @test.idempotent_id('ec176029-73dc-4037-8d72-2e4ff60cf538')

@@ -14,17 +14,15 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest_lib import exceptions as lib_exc
-
 from tempest.api.compute import base
 from tempest.common.utils import data_utils
+from tempest.lib import exceptions as lib_exc
 from tempest import test
 
 
 class FlavorsExtraSpecsNegativeTestJSON(base.BaseV2ComputeAdminTest):
+    """Negative Tests Flavor Extra Spec API extension.
 
-    """
-    Negative Tests Flavor Extra Spec API extension.
     SET, UNSET, UPDATE Flavor Extra specs require admin privileges.
     """
 

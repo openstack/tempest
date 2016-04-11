@@ -13,6 +13,7 @@
 # under the License.
 
 import os
+import shutil
 
 import fixtures
 
@@ -35,13 +36,42 @@ class TestTempestInit(base.TestCase):
         testr_conf_file = init.TESTR_CONF % (top_level_path, discover_path)
 
         conf_path = conf_dir.join('.testr.conf')
-        conf_file = open(conf_path, 'r')
-        self.addCleanup(conf_file.close)
-        self.assertEqual(conf_file.read(), testr_conf_file)
+        with open(conf_path, 'r') as conf_file:
+            self.assertEqual(conf_file.read(), testr_conf_file)
+
+    def test_generate_sample_config(self):
+        local_dir = self.useFixture(fixtures.TempDir())
+        etc_dir_path = os.path.join(local_dir.path, 'etc/')
+        os.mkdir(etc_dir_path)
+        tmp_dir = self.useFixture(fixtures.TempDir())
+        config_dir = os.path.join(tmp_dir.path, 'config/')
+        shutil.copytree('etc/', config_dir)
+        init_cmd = init.TempestInit(None, None)
+        local_sample_conf_file = os.path.join(etc_dir_path,
+                                              'tempest.conf.sample')
+        # Verify no sample config file exist
+        self.assertFalse(os.path.isfile(local_sample_conf_file))
+        init_cmd.generate_sample_config(local_dir.path, config_dir)
+
+        # Verify sample config file exist with some content
+        self.assertTrue(os.path.isfile(local_sample_conf_file))
+        self.assertGreater(os.path.getsize(local_sample_conf_file), 0)
+
+    def test_create_working_dir_with_existing_local_dir_non_empty(self):
+        fake_local_dir = self.useFixture(fixtures.TempDir())
+        fake_local_conf_dir = self.useFixture(fixtures.TempDir())
+        open("%s/foo" % fake_local_dir.path, 'w').close()
+
+        _init = init.TempestInit(None, None)
+        self.assertRaises(OSError,
+                          _init.create_working_dir,
+                          fake_local_dir.path,
+                          fake_local_conf_dir.path)
 
     def test_create_working_dir(self):
         fake_local_dir = self.useFixture(fixtures.TempDir())
         fake_local_conf_dir = self.useFixture(fixtures.TempDir())
+        os.rmdir(fake_local_dir.path)
         # Create a fake conf file
         fake_file = fake_local_conf_dir.join('conf_file.conf')
         open(fake_file, 'w').close()

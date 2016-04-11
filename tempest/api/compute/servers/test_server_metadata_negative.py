@@ -13,10 +13,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest_lib import exceptions as lib_exc
-
 from tempest.api.compute import base
 from tempest.common.utils import data_utils
+from tempest.lib import exceptions as lib_exc
 from tempest import test
 
 
@@ -67,7 +66,7 @@ class ServerMetadataNegativeTestJSON(base.BaseV2ComputeTest):
         # GET on a non-existent server should not succeed
         non_existent_server_id = data_utils.rand_uuid()
         self.assertRaises(lib_exc.NotFound,
-                          self.client.get_server_metadata_item,
+                          self.client.show_server_metadata_item,
                           non_existent_server_id,
                           'test2')
 

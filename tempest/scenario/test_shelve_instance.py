@@ -13,7 +13,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from oslo_log import log
 import testtools
 
 from tempest.common import waiters
@@ -23,12 +22,10 @@ from tempest import test
 
 CONF = config.CONF
 
-LOG = log.getLogger(__name__)
-
 
 class TestShelveInstance(manager.ScenarioTest):
-    """
-    This test shelves then unshelves a Nova instance
+    """This test shelves then unshelves a Nova instance
+
     The following is the scenario outline:
      * boot an instance and create a timestamp file in it
      * shelve the instance
@@ -55,14 +52,10 @@ class TestShelveInstance(manager.ScenarioTest):
                                        'ACTIVE')
 
     def _create_server_then_shelve_and_unshelve(self, boot_from_volume=False):
-        self.keypair = self.create_keypair()
+        keypair = self.create_keypair()
 
-        self.security_group = self._create_security_group()
-        security_groups = [{'name': self.security_group['name']}]
-        create_kwargs = {
-            'key_name': self.keypair['name'],
-            'security_groups': security_groups
-        }
+        security_group = self._create_security_group()
+        security_groups = [{'name': security_group['name']}]
 
         if boot_from_volume:
             volume = self.create_volume(size=CONF.volume.volume_size,
@@ -72,32 +65,29 @@ class TestShelveInstance(manager.ScenarioTest):
                 'volume_id': volume['id'],
                 'delete_on_termination': '0'}]
 
-            create_kwargs['block_device_mapping'] = bd_map
-            server = self.create_server(create_kwargs=create_kwargs)
+            server = self.create_server(
+                key_name=keypair['name'],
+                security_groups=security_groups,
+                block_device_mapping=bd_map,
+                wait_until='ACTIVE')
         else:
-            server = self.create_server(image=CONF.compute.image_ref,
-                                        create_kwargs=create_kwargs)
+            server = self.create_server(
+                image_id=CONF.compute.image_ref,
+                key_name=keypair['name'],
+                security_groups=security_groups,
+                wait_until='ACTIVE')
 
-        if CONF.compute.use_floatingip_for_ssh:
-            floating_ip = (self.floating_ips_client.create_floating_ip()
-                           ['floating_ip'])
-            self.addCleanup(self.delete_wrapper,
-                            self.floating_ips_client.delete_floating_ip,
-                            floating_ip['id'])
-            self.floating_ips_client.associate_floating_ip_to_server(
-                floating_ip['ip'], server['id'])
-            timestamp = self.create_timestamp(floating_ip['ip'])
-        else:
-            timestamp = self.create_timestamp(server)
+        instance_ip = self.get_server_ip(server)
+        timestamp = self.create_timestamp(instance_ip,
+                                          private_key=keypair['private_key'])
 
         # Prevent bug #1257594 from coming back
         # Unshelve used to boot the instance with the original image, not
         # with the instance snapshot
         self._shelve_then_unshelve_server(server)
-        if CONF.compute.use_floatingip_for_ssh:
-            timestamp2 = self.get_timestamp(floating_ip['ip'])
-        else:
-            timestamp2 = self.get_timestamp(server)
+
+        timestamp2 = self.get_timestamp(instance_ip,
+                                        private_key=keypair['private_key'])
         self.assertEqual(timestamp, timestamp2)
 
     @test.idempotent_id('1164e700-0af0-4a4c-8792-35909a88743c')

@@ -15,18 +15,14 @@
 
 import uuid
 
-from tempest_lib import exceptions as lib_exc
-
 from tempest.api.compute import base
 from tempest.common.utils import data_utils
+from tempest.lib import exceptions as lib_exc
 from tempest import test
 
 
 class FlavorsAdminTestJSON(base.BaseV2ComputeAdminTest):
-
-    """
-    Tests Flavors API Create and Delete that require admin privileges
-    """
+    """Tests Flavors API Create and Delete that require admin privileges"""
 
     @classmethod
     def skip_checks(cls):

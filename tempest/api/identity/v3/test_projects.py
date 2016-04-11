@@ -13,9 +13,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest_lib import exceptions as lib_exc
-
 from tempest.api.identity import base
+from tempest.lib import exceptions as lib_exc
 from tempest import test
 
 
@@ -27,17 +26,21 @@ class IdentityV3ProjectsTest(base.BaseIdentityV3Test):
     def test_list_projects_returns_only_authorized_projects(self):
         alt_project_name =\
             self.alt_manager.credentials.credentials.project_name
-        resp = self.non_admin_client.list_user_projects(
+        resp = self.non_admin_users_client.list_user_projects(
             self.os.credentials.user_id)
 
         # check that user can see only that projects that he presents in so
         # user can successfully authenticate using his credentials and
         # project name from received projects list
         for project in resp['projects']:
+            # 'user_domain_id' needs to be specified otherwise tempest_lib
+            # assumes it to be 'default'
             token_id, body = self.non_admin_token.get_token(
                 username=self.os.credentials.username,
+                user_domain_id=self.os.credentials.user_domain_id,
                 password=self.os.credentials.password,
                 project_name=project['name'],
+                project_domain_id=project['domain_id'],
                 auth_data=True)
             self.assertNotEmpty(token_id)
             self.assertEqual(body['project']['id'], project['id'])
@@ -49,5 +52,7 @@ class IdentityV3ProjectsTest(base.BaseIdentityV3Test):
             lib_exc.Unauthorized,
             self.non_admin_token.get_token,
             username=self.os.credentials.username,
+            user_domain_id=self.os.credentials.user_domain_id,
             password=self.os.credentials.password,
-            project_name=alt_project_name)
+            project_name=alt_project_name,
+            project_domain_id=project['domain_id'])

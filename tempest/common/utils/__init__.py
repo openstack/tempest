@@ -15,8 +15,7 @@
 from functools import partial
 
 from tempest import config
-
-from tempest_lib.common.utils import data_utils as lib_data_utils
+from tempest.lib.common.utils import data_utils as lib_data_utils
 
 CONF = config.CONF
 
@@ -27,8 +26,6 @@ PING_PACKET_LOSS_REGEX = '(\d{1,3})\.?\d*\% packet loss'
 
 class DataUtils(object):
     def __getattr__(self, attr):
-        if attr in self.__dict__:
-            return self.__dict__[attr]
 
         if attr == 'rand_name':
             # NOTE(flwang): This is a proxy to generate a random name that

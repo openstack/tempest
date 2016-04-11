@@ -10,12 +10,11 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest_lib import auth
-
 from tempest.api.identity import base
 from tempest import clients
 from tempest.common.utils import data_utils
 from tempest import config
+from tempest.lib import auth
 from tempest import manager
 from tempest import test
 
@@ -32,23 +31,23 @@ class TestDefaultProjectId (base.BaseIdentityV3AdminTest):
     def _delete_domain(self, domain_id):
         # It is necessary to disable the domain before deleting,
         # or else it would result in unauthorized error
-        self.client.update_domain(domain_id, enabled=False)
-        self.client.delete_domain(domain_id)
+        self.domains_client.update_domain(domain_id, enabled=False)
+        self.domains_client.delete_domain(domain_id)
 
     @test.idempotent_id('d6110661-6a71-49a7-a453-b5e26640ff6d')
     def test_default_project_id(self):
         # create a domain
         dom_name = data_utils.rand_name('dom')
-        domain_body = self.client.create_domain(dom_name)['domain']
+        domain_body = self.domains_client.create_domain(dom_name)['domain']
         dom_id = domain_body['id']
         self.addCleanup(self._delete_domain, dom_id)
 
         # create a project in the domain
         proj_name = data_utils.rand_name('proj')
-        proj_body = self.client.create_project(proj_name,
-                                               domain_id=dom_id)['project']
+        proj_body = self.projects_client.create_project(
+            proj_name, domain_id=dom_id)['project']
         proj_id = proj_body['id']
-        self.addCleanup(self.client.delete_project, proj_id)
+        self.addCleanup(self.projects_client.delete_project, proj_id)
         self.assertEqual(proj_body['domain_id'], dom_id,
                          "project " + proj_name +
                          "doesn't have domain id " + dom_id)
@@ -56,11 +55,13 @@ class TestDefaultProjectId (base.BaseIdentityV3AdminTest):
         # create a user in the domain, with the previous project as his
         # default project
         user_name = data_utils.rand_name('user')
-        user_body = self.client.create_user(user_name, password=user_name,
-                                            domain_id=dom_id,
-                                            default_project_id=proj_id)['user']
+        user_body = self.users_client.create_user(
+            user_name,
+            password=user_name,
+            domain_id=dom_id,
+            default_project_id=proj_id)['user']
         user_id = user_body['id']
-        self.addCleanup(self.client.delete_user, user_id)
+        self.addCleanup(self.users_client.delete_user, user_id)
         self.assertEqual(user_body['domain_id'], dom_id,
                          "user " + user_name +
                          "doesn't have domain id " + dom_id)
@@ -70,8 +71,8 @@ class TestDefaultProjectId (base.BaseIdentityV3AdminTest):
         admin_role_id = admin_role['id']
 
         # grant the admin role to the user on his project
-        self.client.assign_user_role_on_project(proj_id, user_id,
-                                                admin_role_id)
+        self.roles_client.assign_user_role_on_project(proj_id, user_id,
+                                                      admin_role_id)
 
         # create a new client with user's credentials (NOTE: unscoped token!)
         creds = auth.KeystoneV3Credentials(username=user_name,
@@ -83,6 +84,6 @@ class TestDefaultProjectId (base.BaseIdentityV3AdminTest):
 
         # verify the user's token and see that it is scoped to the project
         token, auth_data = admin_client.auth_provider.get_auth()
-        result = admin_client.identity_v3_client.get_token(token)['token']
+        result = admin_client.identity_v3_client.show_token(token)['token']
         self.assertEqual(result['project']['domain']['id'], dom_id)
         self.assertEqual(result['project']['id'], proj_id)

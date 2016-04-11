@@ -37,7 +37,7 @@ class ImagesMetadataTestJSON(base.BaseV2ComputeTest):
     def setup_clients(cls):
         super(ImagesMetadataTestJSON, cls).setup_clients()
         cls.glance_client = cls.os.image_client
-        cls.client = cls.images_client
+        cls.client = cls.compute_images_client
 
     @classmethod
     def resource_setup(cls):

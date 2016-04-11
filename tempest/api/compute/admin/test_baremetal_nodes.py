@@ -20,9 +20,7 @@ CONF = config.CONF
 
 
 class BaremetalNodesAdminTestJSON(base.BaseV2ComputeAdminTest):
-    """
-    Tests Baremetal API
-    """
+    """Tests Baremetal API"""
 
     @classmethod
     def resource_setup(cls):

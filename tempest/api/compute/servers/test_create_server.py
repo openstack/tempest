@@ -13,8 +13,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import base64
-
 import netaddr
 import testtools
 
@@ -40,8 +38,8 @@ class ServersTestJSON(base.BaseV2ComputeTest):
     def setup_clients(cls):
         super(ServersTestJSON, cls).setup_clients()
         cls.client = cls.servers_client
-        cls.network_client = cls.os.network_client
         cls.networks_client = cls.os.networks_client
+        cls.subnets_client = cls.os.subnets_client
 
     @classmethod
     def resource_setup(cls):
@@ -51,9 +49,7 @@ class ServersTestJSON(base.BaseV2ComputeTest):
         cls.accessIPv4 = '1.1.1.1'
         cls.accessIPv6 = '0000:0000:0000:0000:0000:babe:220.12.22.2'
         cls.name = data_utils.rand_name('server')
-        file_contents = 'This is a test file.'
-        personality = [{'path': '/test.txt',
-                       'contents': base64.b64encode(file_contents)}]
+        cls.password = data_utils.rand_password()
         disk_config = cls.disk_config
         cls.server_initial = cls.create_test_server(
             validatable=True,
@@ -62,9 +58,8 @@ class ServersTestJSON(base.BaseV2ComputeTest):
             metadata=cls.meta,
             accessIPv4=cls.accessIPv4,
             accessIPv6=cls.accessIPv6,
-            personality=personality,
-            disk_config=disk_config)
-        cls.password = cls.server_initial['adminPass']
+            disk_config=disk_config,
+            adminPass=cls.password)
         cls.server = (cls.client.show_server(cls.server_initial['id'])
                       ['server'])
 
@@ -74,11 +69,11 @@ class ServersTestJSON(base.BaseV2ComputeTest):
         self.addCleanup(self.networks_client.delete_network,
                         net['network']['id'])
 
-        subnet = self.network_client.create_subnet(
+        subnet = self.subnets_client.create_subnet(
             network_id=net['network']['id'],
             cidr=cidr,
             ip_version=4)
-        self.addCleanup(self.network_client.delete_subnet,
+        self.addCleanup(self.subnets_client.delete_subnet,
                         subnet['subnet']['id'])
         return net
 
@@ -155,7 +150,7 @@ class ServersTestJSON(base.BaseV2ComputeTest):
                                          wait_until='ACTIVE')
 
         # Check a server is in the group
-        server_group = (self.server_groups_client.get_server_group(group_id)
+        server_group = (self.server_groups_client.show_server_group(group_id)
                         ['server_group'])
         self.assertIn(server['id'], server_group['members'])
 
@@ -267,13 +262,16 @@ class ServersWithSpecificFlavorTestJSON(base.BaseV2ComputeAdminTest):
                           'Instance validation tests are disabled.')
     def test_verify_created_server_ephemeral_disk(self):
         # Verify that the ephemeral disk is created when creating server
+        flavor_base = self.flavors_client.show_flavor(
+            self.flavor_ref)['flavor']
 
         def create_flavor_with_extra_specs():
             flavor_with_eph_disk_name = data_utils.rand_name('eph_flavor')
             flavor_with_eph_disk_id = data_utils.rand_int_id(start=1000)
-            ram = 64
-            vcpus = 1
-            disk = 0
+
+            ram = flavor_base['ram']
+            vcpus = flavor_base['vcpus']
+            disk = flavor_base['disk']
 
             # Create a flavor with extra specs
             flavor = (self.flavor_client.
@@ -289,9 +287,9 @@ class ServersWithSpecificFlavorTestJSON(base.BaseV2ComputeAdminTest):
             flavor_no_eph_disk_name = data_utils.rand_name('no_eph_flavor')
             flavor_no_eph_disk_id = data_utils.rand_int_id(start=1000)
 
-            ram = 64
-            vcpus = 1
-            disk = 0
+            ram = flavor_base['ram']
+            vcpus = flavor_base['vcpus']
+            disk = flavor_base['disk']
 
             # Create a flavor without extra specs
             flavor = (self.flavor_client.

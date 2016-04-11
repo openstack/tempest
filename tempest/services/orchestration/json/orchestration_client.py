@@ -18,13 +18,13 @@ import time
 
 from oslo_serialization import jsonutils as json
 from six.moves.urllib import parse as urllib
-from tempest_lib import exceptions as lib_exc
 
-from tempest.common import service_client
 from tempest import exceptions
+from tempest.lib.common import rest_client
+from tempest.lib import exceptions as lib_exc
 
 
-class OrchestrationClient(service_client.ServiceClient):
+class OrchestrationClient(rest_client.RestClient):
 
     def list_stacks(self, params=None):
         """Lists all stacks for a user."""
@@ -36,7 +36,7 @@ class OrchestrationClient(service_client.ServiceClient):
         resp, body = self.get(uri)
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def create_stack(self, name, disable_rollback=True, parameters=None,
                      timeout_mins=60, template=None, template_url=None,
@@ -56,7 +56,7 @@ class OrchestrationClient(service_client.ServiceClient):
         resp, body = self.post(uri, headers=headers, body=body)
         self.expected_success(201, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def update_stack(self, stack_identifier, name, disable_rollback=True,
                      parameters=None, timeout_mins=60, template=None,
@@ -75,7 +75,7 @@ class OrchestrationClient(service_client.ServiceClient):
         uri = "stacks/%s" % stack_identifier
         resp, body = self.put(uri, headers=headers, body=body)
         self.expected_success(202, resp.status)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def _prepare_update_create(self, name, disable_rollback=True,
                                parameters=None, timeout_mins=60,
@@ -111,7 +111,7 @@ class OrchestrationClient(service_client.ServiceClient):
         resp, body = self.get(url)
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def suspend_stack(self, stack_identifier):
         """Suspend a stack."""
@@ -119,7 +119,7 @@ class OrchestrationClient(service_client.ServiceClient):
         body = {'suspend': None}
         resp, body = self.post(url, json.dumps(body))
         self.expected_success(200, resp.status)
-        return service_client.ResponseBody(resp)
+        return rest_client.ResponseBody(resp)
 
     def resume_stack(self, stack_identifier):
         """Resume a stack."""
@@ -127,7 +127,7 @@ class OrchestrationClient(service_client.ServiceClient):
         body = {'resume': None}
         resp, body = self.post(url, json.dumps(body))
         self.expected_success(200, resp.status)
-        return service_client.ResponseBody(resp)
+        return rest_client.ResponseBody(resp)
 
     def list_resources(self, stack_identifier):
         """Returns the details of a single resource."""
@@ -135,7 +135,7 @@ class OrchestrationClient(service_client.ServiceClient):
         resp, body = self.get(url)
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def show_resource(self, stack_identifier, resource_name):
         """Returns the details of a single resource."""
@@ -143,49 +143,13 @@ class OrchestrationClient(service_client.ServiceClient):
         resp, body = self.get(url)
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def delete_stack(self, stack_identifier):
         """Deletes the specified Stack."""
         resp, _ = self.delete("stacks/%s" % str(stack_identifier))
         self.expected_success(204, resp.status)
-        return service_client.ResponseBody(resp)
-
-    def wait_for_resource_status(self, stack_identifier, resource_name,
-                                 status, failure_pattern='^.*_FAILED$'):
-        """Waits for a Resource to reach a given status."""
-        start = int(time.time())
-        fail_regexp = re.compile(failure_pattern)
-
-        while True:
-            try:
-                body = self.show_resource(
-                    stack_identifier, resource_name)['resource']
-            except lib_exc.NotFound:
-                # ignore this, as the resource may not have
-                # been created yet
-                pass
-            else:
-                resource_name = body['resource_name']
-                resource_status = body['resource_status']
-                if resource_status == status:
-                    return
-                if fail_regexp.search(resource_status):
-                    raise exceptions.StackResourceBuildErrorException(
-                        resource_name=resource_name,
-                        stack_identifier=stack_identifier,
-                        resource_status=resource_status,
-                        resource_status_reason=body['resource_status_reason'])
-
-            if int(time.time()) - start >= self.build_timeout:
-                message = ('Resource %s failed to reach %s status '
-                           '(current %s) within the required time (%s s).' %
-                           (resource_name,
-                            status,
-                            resource_status,
-                            self.build_timeout))
-                raise exceptions.TimeoutException(message)
-            time.sleep(self.build_interval)
+        return rest_client.ResponseBody(resp)
 
     def wait_for_stack_status(self, stack_identifier, status,
                               failure_pattern='^.*_FAILED$'):
@@ -224,7 +188,7 @@ class OrchestrationClient(service_client.ServiceClient):
         resp, body = self.get(url)
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def list_events(self, stack_identifier):
         """Returns list of all events for a stack."""
@@ -232,7 +196,7 @@ class OrchestrationClient(service_client.ServiceClient):
         resp, body = self.get(url)
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def list_resource_events(self, stack_identifier, resource_name):
         """Returns list of all events for a resource from stack."""
@@ -241,7 +205,7 @@ class OrchestrationClient(service_client.ServiceClient):
         resp, body = self.get(url)
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def show_event(self, stack_identifier, resource_name, event_id):
         """Returns the details of a single stack's event."""
@@ -250,7 +214,7 @@ class OrchestrationClient(service_client.ServiceClient):
         resp, body = self.get(url)
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def show_template(self, stack_identifier):
         """Returns the template for the stack."""
@@ -258,7 +222,7 @@ class OrchestrationClient(service_client.ServiceClient):
         resp, body = self.get(url)
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def _validate_template(self, post_body):
         """Returns the validation request result."""
@@ -266,7 +230,7 @@ class OrchestrationClient(service_client.ServiceClient):
         resp, body = self.post('validate', post_body)
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def validate_template(self, template, parameters=None):
         """Returns the validation result for a template with parameters."""
@@ -293,21 +257,21 @@ class OrchestrationClient(service_client.ServiceClient):
         resp, body = self.get('resource_types')
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def show_resource_type(self, resource_type_name):
         """Return the schema of a resource type."""
         url = 'resource_types/%s' % resource_type_name
         resp, body = self.get(url)
         self.expected_success(200, resp.status)
-        return service_client.ResponseBody(resp, json.loads(body))
+        return rest_client.ResponseBody(resp, json.loads(body))
 
     def show_resource_type_template(self, resource_type_name):
         """Return the template of a resource type."""
         url = 'resource_types/%s/template' % resource_type_name
         resp, body = self.get(url)
         self.expected_success(200, resp.status)
-        return service_client.ResponseBody(resp, json.loads(body))
+        return rest_client.ResponseBody(resp, json.loads(body))
 
     def create_software_config(self, name=None, config=None, group=None,
                                inputs=None, outputs=None, options=None):
@@ -318,7 +282,7 @@ class OrchestrationClient(service_client.ServiceClient):
         resp, body = self.post(url, headers=headers, body=body)
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def show_software_config(self, conf_id):
         """Returns a software configuration resource."""
@@ -326,14 +290,14 @@ class OrchestrationClient(service_client.ServiceClient):
         resp, body = self.get(url)
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def delete_software_config(self, conf_id):
         """Deletes a specific software configuration."""
         url = 'software_configs/%s' % str(conf_id)
         resp, _ = self.delete(url)
         self.expected_success(204, resp.status)
-        return service_client.ResponseBody(resp)
+        return rest_client.ResponseBody(resp)
 
     def create_software_deploy(self, server_id=None, config_id=None,
                                action=None, status=None,
@@ -348,7 +312,7 @@ class OrchestrationClient(service_client.ServiceClient):
         resp, body = self.post(url, headers=headers, body=body)
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def update_software_deploy(self, deploy_id=None, server_id=None,
                                config_id=None, action=None, status=None,
@@ -363,7 +327,7 @@ class OrchestrationClient(service_client.ServiceClient):
         resp, body = self.put(url, headers=headers, body=body)
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def list_software_deployments(self):
         """Returns a list of all deployments."""
@@ -371,7 +335,7 @@ class OrchestrationClient(service_client.ServiceClient):
         resp, body = self.get(url)
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def show_software_deployment(self, deploy_id):
         """Returns a specific software deployment."""
@@ -379,7 +343,7 @@ class OrchestrationClient(service_client.ServiceClient):
         resp, body = self.get(url)
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def show_software_deployment_metadata(self, server_id):
         """Return a config metadata for a specific server."""
@@ -387,14 +351,14 @@ class OrchestrationClient(service_client.ServiceClient):
         resp, body = self.get(url)
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def delete_software_deploy(self, deploy_id):
         """Deletes a specific software deployment."""
         url = 'software_deployments/%s' % str(deploy_id)
         resp, _ = self.delete(url)
         self.expected_success(204, resp.status)
-        return service_client.ResponseBody(resp)
+        return rest_client.ResponseBody(resp)
 
     def _prep_software_config_create(self, name=None, conf=None, group=None,
                                      inputs=None, outputs=None, options=None):

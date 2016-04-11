@@ -16,10 +16,10 @@
 from oslo_serialization import jsonutils as json
 from six.moves.urllib import parse as urllib
 
-from tempest.common import service_client
+from tempest.lib.common import rest_client
 
 
-class TelemetryClient(service_client.ServiceClient):
+class TelemetryClient(rest_client.RestClient):
 
     version = '2'
     uri_prefix = "v2"
@@ -30,24 +30,13 @@ class TelemetryClient(service_client.ServiceClient):
     def serialize(self, body):
         return json.dumps(body)
 
-    def add_sample(self, sample_list, meter_name, meter_unit, volume,
-                   sample_type, resource_id, **kwargs):
-        sample = {"counter_name": meter_name, "counter_unit": meter_unit,
-                  "counter_volume": volume, "counter_type": sample_type,
-                  "resource_id": resource_id}
-        for key in kwargs:
-            sample[key] = kwargs[key]
-
-        sample_list.append(self.serialize(sample))
-        return sample_list
-
     def create_sample(self, meter_name, sample_list):
         uri = "%s/meters/%s" % (self.uri_prefix, meter_name)
         body = self.serialize(sample_list)
         resp, body = self.post(uri, body)
         self.expected_success(200, resp.status)
         body = self.deserialize(body)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def _helper_list(self, uri, query=None, period=None):
         uri_dict = {}
@@ -62,7 +51,7 @@ class TelemetryClient(service_client.ServiceClient):
         resp, body = self.get(uri)
         self.expected_success(200, resp.status)
         body = self.deserialize(body)
-        return service_client.ResponseBodyList(resp, body)
+        return rest_client.ResponseBodyList(resp, body)
 
     def list_resources(self, query=None):
         uri = '%s/resources' % self.uri_prefix
@@ -70,10 +59,6 @@ class TelemetryClient(service_client.ServiceClient):
 
     def list_meters(self, query=None):
         uri = '%s/meters' % self.uri_prefix
-        return self._helper_list(uri, query)
-
-    def list_alarms(self, query=None):
-        uri = '%s/alarms' % self.uri_prefix
         return self._helper_list(uri, query)
 
     def list_statistics(self, meter, period=None, query=None):
@@ -93,57 +78,4 @@ class TelemetryClient(service_client.ServiceClient):
         resp, body = self.get(uri)
         self.expected_success(200, resp.status)
         body = self.deserialize(body)
-        return service_client.ResponseBody(resp, body)
-
-    def show_alarm(self, alarm_id):
-        uri = '%s/alarms/%s' % (self.uri_prefix, alarm_id)
-        resp, body = self.get(uri)
-        self.expected_success(200, resp.status)
-        body = self.deserialize(body)
-        return service_client.ResponseBody(resp, body)
-
-    def delete_alarm(self, alarm_id):
-        uri = "%s/alarms/%s" % (self.uri_prefix, alarm_id)
-        resp, body = self.delete(uri)
-        self.expected_success(204, resp.status)
-        if body:
-            body = self.deserialize(body)
-        return service_client.ResponseBody(resp, body)
-
-    def create_alarm(self, **kwargs):
-        uri = "%s/alarms" % self.uri_prefix
-        body = self.serialize(kwargs)
-        resp, body = self.post(uri, body)
-        self.expected_success(201, resp.status)
-        body = self.deserialize(body)
-        return service_client.ResponseBody(resp, body)
-
-    def update_alarm(self, alarm_id, **kwargs):
-        uri = "%s/alarms/%s" % (self.uri_prefix, alarm_id)
-        body = self.serialize(kwargs)
-        resp, body = self.put(uri, body)
-        self.expected_success(200, resp.status)
-        body = self.deserialize(body)
-        return service_client.ResponseBody(resp, body)
-
-    def show_alarm_state(self, alarm_id):
-        uri = "%s/alarms/%s/state" % (self.uri_prefix, alarm_id)
-        resp, body = self.get(uri)
-        self.expected_success(200, resp.status)
-        body = self.deserialize(body)
-        return service_client.ResponseBodyData(resp, body)
-
-    def alarm_set_state(self, alarm_id, state):
-        uri = "%s/alarms/%s/state" % (self.uri_prefix, alarm_id)
-        body = self.serialize(state)
-        resp, body = self.put(uri, body)
-        self.expected_success(200, resp.status)
-        body = self.deserialize(body)
-        return service_client.ResponseBodyData(resp, body)
-
-    def show_alarm_history(self, alarm_id):
-        uri = "%s/alarms/%s/history" % (self.uri_prefix, alarm_id)
-        resp, body = self.get(uri)
-        self.expected_success(200, resp.status)
-        body = self.deserialize(body)
-        return service_client.ResponseBodyList(resp, body)
+        return rest_client.ResponseBody(resp, body)

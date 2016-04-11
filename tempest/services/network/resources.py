@@ -14,15 +14,16 @@
 #    under the License.
 
 import abc
+import time
 
 import six
 
+from tempest import exceptions
+from tempest.lib.common.utils import misc
+
 
 class AttributeDict(dict):
-
-    """
-    Provide attribute access (dict.key) to dictionary values.
-    """
+    """Provide attribute access (dict.key) to dictionary values."""
 
     def __getattr__(self, name):
         """Allow attribute access for all keys in the dict."""
@@ -33,15 +34,17 @@ class AttributeDict(dict):
 
 @six.add_metaclass(abc.ABCMeta)
 class DeletableResource(AttributeDict):
+    """Support deletion of neutron resources (networks, subnets)
 
-    """
-    Support deletion of neutron resources (networks, subnets) via a
-    delete() method, as is supported by keystone and nova resources.
+    via a delete() method, as is supported by keystone and nova resources.
     """
 
     def __init__(self, *args, **kwargs):
         self.client = kwargs.pop('client', None)
         self.networks_client = kwargs.pop('networks_client', None)
+        self.routers_client = kwargs.pop('routers_client', None)
+        self.subnets_client = kwargs.pop('subnets_client', None)
+        self.ports_client = kwargs.pop('ports_client', None)
         super(DeletableResource, self).__init__(*args, **kwargs)
 
     def __str__(self):
@@ -67,7 +70,35 @@ class DeletableResource(AttributeDict):
             self.refresh()
             return self
 
-        return self.client.wait_for_resource_status(helper_get, status)
+        return self.wait_for_resource_status(helper_get, status)
+
+    def wait_for_resource_status(self, fetch, status):
+        """Waits for a network resource to reach a status
+
+        @param fetch: the callable to be used to query the resource status
+        @type fecth: callable that takes no parameters and returns the resource
+        @param status: the status that the resource has to reach
+        @type status: String
+        """
+        interval = self.build_interval
+        timeout = self.build_timeout
+        start_time = time.time()
+
+        while time.time() - start_time <= timeout:
+            resource = fetch()
+            if resource['status'] == status:
+                return
+            time.sleep(interval)
+
+        # At this point, the wait has timed out
+        message = 'Resource %s' % (str(resource))
+        message += ' failed to reach status %s' % status
+        message += ' (current: %s)' % resource['status']
+        message += ' within the required time %s' % timeout
+        caller = misc.find_test_caller()
+        if caller:
+            message = '(%s) %s' % (caller, message)
+        raise exceptions.TimeoutException(message)
 
 
 class DeletableNetwork(DeletableResource):
@@ -83,23 +114,22 @@ class DeletableSubnet(DeletableResource):
         self._router_ids = set()
 
     def update(self, *args, **kwargs):
-        result = self.client.update_subnet(self.id,
-                                           *args,
-                                           **kwargs)
+        result = self.subnets_client.update_subnet(self.id,
+                                                   *args,
+                                                   **kwargs)
         return super(DeletableSubnet, self).update(**result['subnet'])
 
     def add_to_router(self, router_id):
         self._router_ids.add(router_id)
-        self.client.add_router_interface_with_subnet_id(router_id,
-                                                        subnet_id=self.id)
+        self.routers_client.add_router_interface(router_id,
+                                                 subnet_id=self.id)
 
     def delete(self):
         for router_id in self._router_ids.copy():
-            self.client.remove_router_interface_with_subnet_id(
-                router_id,
-                subnet_id=self.id)
+            self.routers_client.remove_router_interface(router_id,
+                                                        subnet_id=self.id)
             self._router_ids.remove(router_id)
-        self.client.delete_subnet(self.id)
+        self.subnets_client.delete_subnet(self.id)
 
 
 class DeletableRouter(DeletableResource):
@@ -111,14 +141,14 @@ class DeletableRouter(DeletableResource):
         return self.update(external_gateway_info=dict())
 
     def update(self, *args, **kwargs):
-        result = self.client.update_router(self.id,
-                                           *args,
-                                           **kwargs)
+        result = self.routers_client.update_router(self.id,
+                                                   *args,
+                                                   **kwargs)
         return super(DeletableRouter, self).update(**result['router'])
 
     def delete(self):
         self.unset_gateway()
-        self.client.delete_router(self.id)
+        self.routers_client.delete_router(self.id)
 
 
 class DeletableFloatingIp(DeletableResource):
@@ -150,7 +180,7 @@ class DeletableFloatingIp(DeletableResource):
 class DeletablePort(DeletableResource):
 
     def delete(self):
-        self.client.delete_port(self.id)
+        self.ports_client.delete_port(self.id)
 
 
 class DeletableSecurityGroup(DeletableResource):

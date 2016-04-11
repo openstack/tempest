@@ -14,103 +14,31 @@
 
 import abc
 
-from oslo_log import log as logging
 import six
-from tempest_lib import auth
 
-from tempest import config
 from tempest import exceptions
-
-CONF = config.CONF
-LOG = logging.getLogger(__name__)
-
-# Type of credentials available from configuration
-CREDENTIAL_TYPES = {
-    'identity_admin': ('identity', 'admin'),
-    'user': ('identity', None),
-    'alt_user': ('identity', 'alt')
-}
-
-DEFAULT_PARAMS = {
-    'disable_ssl_certificate_validation':
-        CONF.identity.disable_ssl_certificate_validation,
-    'ca_certs': CONF.identity.ca_certificates_file,
-    'trace_requests': CONF.debug.trace_requests
-}
-
-
-# Read credentials from configuration, builds a Credentials object
-# based on the specified or configured version
-def get_configured_credentials(credential_type, fill_in=True,
-                               identity_version=None):
-    identity_version = identity_version or CONF.identity.auth_version
-    if identity_version not in ('v2', 'v3'):
-        raise exceptions.InvalidConfiguration(
-            'Unsupported auth version: %s' % identity_version)
-    if credential_type not in CREDENTIAL_TYPES:
-        raise exceptions.InvalidCredentials()
-    conf_attributes = ['username', 'password', 'tenant_name']
-    if identity_version == 'v3':
-        conf_attributes.append('domain_name')
-    # Read the parts of credentials from config
-    params = DEFAULT_PARAMS.copy()
-    section, prefix = CREDENTIAL_TYPES[credential_type]
-    for attr in conf_attributes:
-        _section = getattr(CONF, section)
-        if prefix is None:
-            params[attr] = getattr(_section, attr)
-        else:
-            params[attr] = getattr(_section, prefix + "_" + attr)
-    # Build and validate credentials. We are reading configured credentials,
-    # so validate them even if fill_in is False
-    credentials = get_credentials(fill_in=fill_in,
-                                  identity_version=identity_version, **params)
-    if not fill_in:
-        if not credentials.is_valid():
-            msg = ("The %s credentials are incorrectly set in the config file."
-                   " Double check that all required values are assigned" %
-                   credential_type)
-            raise exceptions.InvalidConfiguration(msg)
-    return credentials
-
-
-# Wrapper around auth.get_credentials to use the configured identity version
-# is none is specified
-def get_credentials(fill_in=True, identity_version=None, **kwargs):
-    params = dict(DEFAULT_PARAMS, **kwargs)
-    identity_version = identity_version or CONF.identity.auth_version
-    # In case of "v3" add the domain from config if not specified
-    if identity_version == 'v3':
-        domain_fields = set(x for x in auth.KeystoneV3Credentials.ATTRIBUTES
-                            if 'domain' in x)
-        if not domain_fields.intersection(kwargs.keys()):
-            domain_name = CONF.auth.default_credentials_domain_name
-            params['user_domain_name'] = domain_name
-
-        auth_url = CONF.identity.uri_v3
-    else:
-        auth_url = CONF.identity.uri
-    return auth.get_credentials(auth_url,
-                                fill_in=fill_in,
-                                identity_version=identity_version,
-                                **params)
+from tempest.lib import auth
 
 
 @six.add_metaclass(abc.ABCMeta)
 class CredentialProvider(object):
-    def __init__(self, identity_version=None, name=None,
-                 network_resources=None):
+    def __init__(self, identity_version, name=None, network_resources=None,
+                 credentials_domain=None, admin_role=None):
         """A CredentialProvider supplies credentials to test classes.
-        :param identity_version: If specified it will return credentials of the
-                                 corresponding identity version, otherwise it
-                                 uses auth_version from configuration
+
+        :param identity_version: Identity version of the credentials provided
         :param name: Name of the calling test. Included in provisioned
                      credentials when credentials are provisioned on the fly
         :param network_resources: Network resources required for the
                                   credentials
+        :param credentials_domain: Domain credentials belong to
+        :param admin_role: Name of the role of the admin account
         """
+        self.identity_version = identity_version
         self.name = name or "test_creds"
-        self.identity_version = identity_version or CONF.identity.auth_version
+        self.network_resources = network_resources
+        self.credentials_domain = credentials_domain or 'Default'
+        self.admin_role = admin_role
         if not auth.is_identity_version_supported(self.identity_version):
             raise exceptions.InvalidIdentityVersion(
                 identity_version=self.identity_version)
@@ -128,7 +56,7 @@ class CredentialProvider(object):
         return
 
     @abc.abstractmethod
-    def clear_isolated_creds(self):
+    def clear_creds(self):
         return
 
     @abc.abstractmethod

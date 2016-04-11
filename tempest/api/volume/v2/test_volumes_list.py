@@ -21,9 +21,7 @@ from tempest import test
 
 
 class VolumesV2ListTestJSON(base.BaseVolumeTest):
-
-    """
-    volumes v2 specific tests.
+    """volumes v2 specific tests.
 
     This test creates a number of 1G volumes. To run successfully,
     ensure that the backing file for the volume group that Nova uses

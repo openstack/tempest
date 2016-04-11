@@ -20,32 +20,26 @@ tempest that you need to rely on in your plugin it likely needs to be migrated
 to tempest-lib. In that situation, file a bug, push a migration patch, etc. to
 expedite providing the interface in a reliable manner.
 
-Plugin Class
-------------
+Plugin Cookiecutter
+-------------------
 
-To provide tempest with all the required information it needs to be able to run
-your plugin you need to create a plugin class which tempest will load and call
-to get information when it needs. To simplify creating this tempest provides an
-abstract class that should be used as the parent for your plugin. To use this
-you would do something like the following::
+In order to create the basic structure with base classes and test directories
+you can use the tempest-plugin-cookiecutter project::
 
-  from tempest.test_discover import plugin
+  > pip install -U cookiecutter && cookiecutter https://git.openstack.org/openstack/tempest-plugin-cookiecutter
 
-  class MyPlugin(plugin.TempestPlugin):
+  Cloning into 'tempest-plugin-cookiecutter'...
+  remote: Counting objects: 17, done.
+  remote: Compressing objects: 100% (13/13), done.
+  remote: Total 17 (delta 1), reused 14 (delta 1)
+  Unpacking objects: 100% (17/17), done.
+  Checking connectivity... done.
+  project (default is "sample")? foo
+  testclass (default is "SampleTempestPlugin")? FooTempestPlugin
 
-Then you need to ensure you locally define all of the methods in the abstract
-class, you can refer to the api doc below for a reference of what that entails.
-
-Also, note eventually this abstract class will likely live in tempest-lib, when
-that migration occurs a deprecation shim will be added to tempest so as to not
-break any existing plugins. But, when that occurs migrating to using tempest-lib
-as the source for the abstract class will be prudent.
-
-Abstract Plugin Class
-^^^^^^^^^^^^^^^^^^^^^
-
-.. autoclass:: tempest.test_discover.plugins.TempestPlugin
-   :members:
+This would create a folder called ``foo_tempest_plugin/`` with all necessary
+basic classes. You only need to move/create your test in
+``foo_tempest_plugin/tests``.
 
 Entry Point
 -----------
@@ -61,9 +55,66 @@ something like the following::
   tempest.test_plugins =
       plugin_name = module.path:PluginClass
 
-Plugin Structure
-----------------
+Standalone Plugin vs In-repo Plugin
+-----------------------------------
 
+Since all that's required for a plugin to be detected by tempest is a valid
+setuptools entry point in the proper namespace there is no difference from the
+tempest perspective on either creating a separate python package to
+house the plugin or adding the code to an existing python project. However,
+there are tradeoffs to consider when deciding which approach to take when
+creating a new plugin.
+
+If you create a separate python project for your plugin this makes a lot of
+things much easier. Firstly it makes packaging and versioning much simpler, you
+can easily decouple the requirements for the plugin from the requirements for
+the other project. It lets you version the plugin independently and maintain a
+single version of the test code across project release boundaries (see the
+`Branchless Tempest Spec`_ for more details on this). It also greatly
+simplifies the install time story for external users. Instead of having to
+install the right version of a project in the same python namespace as tempest
+they simply need to pip install the plugin in that namespace. It also means
+that users don't have to worry about inadvertently installing a tempest plugin
+when they install another package.
+
+.. _Branchless Tempest Spec: http://specs.openstack.org/openstack/qa-specs/specs/tempest/implemented/branchless-tempest.html
+
+The sole advantage to integrating a plugin into an existing python project is
+that it enables you to land code changes at the same time you land test changes
+in the plugin. This reduces some of the burden on contributors by not having
+to land 2 changes to add a new API feature and then test it and doing it as a
+single combined commit.
+
+
+Plugin Class
+============
+
+To provide tempest with all the required information it needs to be able to run
+your plugin you need to create a plugin class which tempest will load and call
+to get information when it needs. To simplify creating this tempest provides an
+abstract class that should be used as the parent for your plugin. To use this
+you would do something like the following::
+
+  from tempest.test_discover import plugins
+
+  class MyPlugin(plugins.TempestPlugin):
+
+Then you need to ensure you locally define all of the methods in the abstract
+class, you can refer to the api doc below for a reference of what that entails.
+
+Also, note eventually this abstract class will likely live in tempest-lib, when
+that migration occurs a deprecation shim will be added to tempest so as to not
+break any existing plugins. But, when that occurs migrating to using tempest-lib
+as the source for the abstract class will be prudent.
+
+Abstract Plugin Class
+---------------------
+
+.. autoclass:: tempest.test_discover.plugins.TempestPlugin
+   :members:
+
+Plugin Structure
+================
 While there are no hard and fast rules for the structure a plugin, there are
 basically no constraints on what the plugin looks like as long as the 2 steps
 above are done. However,  there are some recommended patterns to follow to make
@@ -92,7 +143,7 @@ of the tempest developer and reviewer documentation to ensure that the tests
 being added in the plugin act and behave like the rest of tempest.
 
 Dealing with configuration options
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+----------------------------------
 
 Historically Tempest didn't provide external guarantees on its configuration
 options. However, with the introduction of the plugin interface this is no

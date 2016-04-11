@@ -16,11 +16,9 @@
 import socket
 
 import mock
-from oslo_serialization import jsonutils as json
 from oslotest import mockpatch
 import six
 from six.moves import http_client as httplib
-from tempest_lib import exceptions as lib_exc
 
 from tempest.common import glance_http
 from tempest import exceptions
@@ -56,60 +54,6 @@ class TestGlanceHTTPClient(base.TestCase):
                         'getresponse', return_value=resp))
         return resp
 
-    def test_json_request_without_content_type_header_in_response(self):
-        self._set_response_fixture({}, 200, 'fake_response_body')
-        self.assertRaises(lib_exc.InvalidContentType,
-                          self.client.json_request, 'GET', '/images')
-
-    def test_json_request_with_xml_content_type_header_in_request(self):
-        self.assertRaises(lib_exc.InvalidContentType,
-                          self.client.json_request, 'GET', '/images',
-                          headers={'Content-Type': 'application/xml'})
-
-    def test_json_request_with_xml_content_type_header_in_response(self):
-        self._set_response_fixture({'content-type': 'application/xml'},
-                                   200, 'fake_response_body')
-        self.assertRaises(lib_exc.InvalidContentType,
-                          self.client.json_request, 'GET', '/images')
-
-    def test_json_request_with_json_content_type_header_only_in_resp(self):
-        self._set_response_fixture({'content-type': 'application/json'},
-                                   200, 'fake_response_body')
-        resp, body = self.client.json_request('GET', '/images')
-        self.assertEqual(200, resp.status)
-        self.assertEqual('fake_response_body', body)
-
-    def test_json_request_with_json_content_type_header_in_req_and_resp(self):
-        self._set_response_fixture({'content-type': 'application/json'},
-                                   200, 'fake_response_body')
-        resp, body = self.client.json_request('GET', '/images', headers={
-            'Content-Type': 'application/json'})
-        self.assertEqual(200, resp.status)
-        self.assertEqual('fake_response_body', body)
-
-    def test_json_request_fails_to_json_loads(self):
-        self._set_response_fixture({'content-type': 'application/json'},
-                                   200, 'fake_response_body')
-        self.useFixture(mockpatch.PatchObject(json, 'loads',
-                        side_effect=ValueError()))
-        resp, body = self.client.json_request('GET', '/images')
-        self.assertEqual(200, resp.status)
-        self.assertEqual(body, 'fake_response_body')
-
-    def test_json_request_socket_timeout(self):
-        self.useFixture(mockpatch.PatchObject(httplib.HTTPConnection,
-                                              'request',
-                                              side_effect=socket.timeout()))
-        self.assertRaises(exceptions.TimeoutException,
-                          self.client.json_request, 'GET', '/images')
-
-    def test_json_request_endpoint_not_found(self):
-        self.useFixture(mockpatch.PatchObject(httplib.HTTPConnection,
-                                              'request',
-                                              side_effect=socket.gaierror()))
-        self.assertRaises(exceptions.EndpointNotFound,
-                          self.client.json_request, 'GET', '/images')
-
     def test_raw_request(self):
         self._set_response_fixture({}, 200, 'fake_response_body')
         resp, body = self.client.raw_request('GET', '/images')
@@ -141,60 +85,74 @@ class TestGlanceHTTPClient(base.TestCase):
         self.assertEqual(call_count - 1, req_body.tell())
 
     def test_get_connection_class_for_https(self):
-        conn_class = self.client.get_connection_class('https')
+        conn_class = self.client._get_connection_class('https')
         self.assertEqual(glance_http.VerifiedHTTPSConnection, conn_class)
 
     def test_get_connection_class_for_http(self):
-        conn_class = (self.client.get_connection_class('http'))
+        conn_class = (self.client._get_connection_class('http'))
         self.assertEqual(httplib.HTTPConnection, conn_class)
 
     def test_get_connection_http(self):
-        self.assertTrue(isinstance(self.client.get_connection(),
-                                   httplib.HTTPConnection))
+        self.assertIsInstance(self.client._get_connection(),
+                              httplib.HTTPConnection)
 
     def test_get_connection_https(self):
         endpoint = 'https://fake_url.com'
         self.fake_auth.base_url = mock.MagicMock(return_value=endpoint)
         self.client = glance_http.HTTPClient(self.fake_auth, {})
-        self.assertTrue(isinstance(self.client.get_connection(),
-                                   glance_http.VerifiedHTTPSConnection))
+        self.assertIsInstance(self.client._get_connection(),
+                              glance_http.VerifiedHTTPSConnection)
+
+    def test_get_connection_ipv4_https(self):
+        endpoint = 'https://127.0.0.1'
+        self.fake_auth.base_url = mock.MagicMock(return_value=endpoint)
+        self.client = glance_http.HTTPClient(self.fake_auth, {})
+        self.assertIsInstance(self.client._get_connection(),
+                              glance_http.VerifiedHTTPSConnection)
+
+    def test_get_connection_ipv6_https(self):
+        endpoint = 'https://[::1]'
+        self.fake_auth.base_url = mock.MagicMock(return_value=endpoint)
+        self.client = glance_http.HTTPClient(self.fake_auth, {})
+        self.assertIsInstance(self.client._get_connection(),
+                              glance_http.VerifiedHTTPSConnection)
 
     def test_get_connection_url_not_fount(self):
         self.useFixture(mockpatch.PatchObject(self.client, 'connection_class',
                                               side_effect=httplib.InvalidURL()
                                               ))
         self.assertRaises(exceptions.EndpointNotFound,
-                          self.client.get_connection)
+                          self.client._get_connection)
 
     def test_get_connection_kwargs_default_for_http(self):
-        kwargs = self.client.get_connection_kwargs('http')
+        kwargs = self.client._get_connection_kwargs('http')
         self.assertEqual(600, kwargs['timeout'])
         self.assertEqual(1, len(kwargs.keys()))
 
     def test_get_connection_kwargs_set_timeout_for_http(self):
-        kwargs = self.client.get_connection_kwargs('http', timeout=10,
-                                                   ca_certs='foo')
+        kwargs = self.client._get_connection_kwargs('http', timeout=10,
+                                                    ca_certs='foo')
         self.assertEqual(10, kwargs['timeout'])
         # nothing more than timeout is evaluated for http connections
         self.assertEqual(1, len(kwargs.keys()))
 
     def test_get_connection_kwargs_default_for_https(self):
-        kwargs = self.client.get_connection_kwargs('https')
+        kwargs = self.client._get_connection_kwargs('https')
         self.assertEqual(600, kwargs['timeout'])
-        self.assertEqual(None, kwargs['ca_certs'])
-        self.assertEqual(None, kwargs['cert_file'])
-        self.assertEqual(None, kwargs['key_file'])
+        self.assertIsNone(kwargs['ca_certs'])
+        self.assertIsNone(kwargs['cert_file'])
+        self.assertIsNone(kwargs['key_file'])
         self.assertEqual(False, kwargs['insecure'])
         self.assertEqual(True, kwargs['ssl_compression'])
         self.assertEqual(6, len(kwargs.keys()))
 
     def test_get_connection_kwargs_set_params_for_https(self):
-        kwargs = self.client.get_connection_kwargs('https', timeout=10,
-                                                   ca_certs='foo',
-                                                   cert_file='/foo/bar.cert',
-                                                   key_file='/foo/key.pem',
-                                                   insecure=True,
-                                                   ssl_compression=False)
+        kwargs = self.client._get_connection_kwargs('https', timeout=10,
+                                                    ca_certs='foo',
+                                                    cert_file='/foo/bar.cert',
+                                                    key_file='/foo/key.pem',
+                                                    insecure=True,
+                                                    ssl_compression=False)
         self.assertEqual(10, kwargs['timeout'])
         self.assertEqual('foo', kwargs['ca_certs'])
         self.assertEqual('/foo/bar.cert', kwargs['cert_file'])
@@ -202,6 +160,64 @@ class TestGlanceHTTPClient(base.TestCase):
         self.assertEqual(True, kwargs['insecure'])
         self.assertEqual(False, kwargs['ssl_compression'])
         self.assertEqual(6, len(kwargs.keys()))
+
+
+class TestVerifiedHTTPSConnection(base.TestCase):
+
+    @mock.patch('socket.socket')
+    @mock.patch('tempest.common.glance_http.OpenSSLConnectionDelegator')
+    def test_connect_ipv4(self, mock_delegator, mock_socket):
+        connection = glance_http.VerifiedHTTPSConnection('127.0.0.1')
+        connection.connect()
+
+        mock_socket.assert_called_once_with(socket.AF_INET, socket.SOCK_STREAM)
+        mock_delegator.assert_called_once_with(connection.context,
+                                               mock_socket.return_value)
+        mock_delegator.return_value.connect.assert_called_once_with(
+            (connection.host, 443))
+
+    @mock.patch('socket.socket')
+    @mock.patch('tempest.common.glance_http.OpenSSLConnectionDelegator')
+    def test_connect_ipv6(self, mock_delegator, mock_socket):
+        connection = glance_http.VerifiedHTTPSConnection('[::1]')
+        connection.connect()
+
+        mock_socket.assert_called_once_with(socket.AF_INET6,
+                                            socket.SOCK_STREAM)
+        mock_delegator.assert_called_once_with(connection.context,
+                                               mock_socket.return_value)
+        mock_delegator.return_value.connect.assert_called_once_with(
+            (connection.host, 443, 0, 0))
+
+    @mock.patch('tempest.common.glance_http.OpenSSLConnectionDelegator')
+    @mock.patch('socket.getaddrinfo',
+                side_effect=OSError('Gettaddrinfo failed'))
+    def test_connect_with_address_lookup_failure(self, mock_getaddrinfo,
+                                                 mock_delegator):
+        connection = glance_http.VerifiedHTTPSConnection('127.0.0.1')
+        self.assertRaises(exceptions.RestClientException, connection.connect)
+
+        mock_getaddrinfo.assert_called_once_with(
+            connection.host, connection.port, 0, socket.SOCK_STREAM)
+
+    @mock.patch('socket.socket')
+    @mock.patch('socket.getaddrinfo',
+                return_value=[(2, 1, 6, '', ('127.0.0.1', 443))])
+    @mock.patch('tempest.common.glance_http.OpenSSLConnectionDelegator')
+    def test_connect_with_socket_failure(self, mock_delegator,
+                                         mock_getaddrinfo,
+                                         mock_socket):
+        mock_delegator.return_value.connect.side_effect = \
+            OSError('Connect failed')
+
+        connection = glance_http.VerifiedHTTPSConnection('127.0.0.1')
+        self.assertRaises(exceptions.RestClientException, connection.connect)
+
+        mock_getaddrinfo.assert_called_once_with(
+            connection.host, connection.port, 0, socket.SOCK_STREAM)
+        mock_socket.assert_called_once_with(socket.AF_INET, socket.SOCK_STREAM)
+        mock_delegator.return_value.connect.\
+            assert_called_once_with((connection.host, 443))
 
 
 class TestResponseBodyIterator(base.TestCase):

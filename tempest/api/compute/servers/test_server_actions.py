@@ -13,12 +13,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import base64
 import logging
 
 from six.moves.urllib import parse as urlparse
-from tempest_lib import decorators
-from tempest_lib import exceptions as lib_exc
 import testtools
 
 from tempest.api.compute import base
@@ -26,6 +23,8 @@ from tempest.common.utils import data_utils
 from tempest.common.utils.linux import remote_client
 from tempest.common import waiters
 from tempest import config
+from tempest.lib import decorators
+from tempest.lib import exceptions as lib_exc
 from tempest import test
 
 CONF = config.CONF
@@ -82,7 +81,7 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
     def test_change_server_password(self):
         # The server's password should be set to the provided password
         new_password = 'Newpass1234'
-        self.client.change_password(self.server_id, new_password)
+        self.client.change_password(self.server_id, adminPass=new_password)
         waiters.wait_for_server_status(self.client, self.server_id, 'ACTIVE')
 
         if CONF.validation.run_validation:
@@ -105,7 +104,7 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
                 self.validation_resources['keypair']['private_key'])
             boot_time = linux_client.get_boot_time()
 
-        self.client.reboot_server(self.server_id, reboot_type)
+        self.client.reboot_server(self.server_id, type=reboot_type)
         waiters.wait_for_server_status(self.client, self.server_id, 'ACTIVE')
 
         if CONF.validation.run_validation:
@@ -145,16 +144,12 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         # The server should be rebuilt using the provided image and data
         meta = {'rebuild': 'server'}
         new_name = data_utils.rand_name('server')
-        file_contents = 'Test server rebuild.'
-        personality = [{'path': 'rebuild.txt',
-                       'contents': base64.b64encode(file_contents)}]
         password = 'rebuildPassw0rd'
         rebuilt_server = self.client.rebuild_server(
             self.server_id,
             self.image_ref_alt,
             name=new_name,
             metadata=meta,
-            personality=personality,
             adminPass=password)['server']
 
         # If the server was rebuilt on a different image, restore it to the
@@ -177,11 +172,16 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         self.assertEqual(new_name, server['name'])
 
         if CONF.validation.run_validation:
-            # TODO(jlanoux) add authentication with the provided password
+            # Authentication is attempted in the following order of priority:
+            # 1.The key passed in, if one was passed in.
+            # 2.Any key we can find through an SSH agent (if allowed).
+            # 3.Any "id_rsa", "id_dsa" or "id_ecdsa" key discoverable in
+            #   ~/.ssh/ (if allowed).
+            # 4.Plain username/password auth, if a password was given.
             linux_client = remote_client.RemoteClient(
                 self.get_server_ip(rebuilt_server),
                 self.ssh_user,
-                self.password,
+                password,
                 self.validation_resources['keypair']['private_key'])
             linux_client.validate_authentication()
 
@@ -284,9 +284,9 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         # create the first and the second backup
         backup1 = data_utils.rand_name('backup-1')
         resp = self.client.create_backup(self.server_id,
-                                         'daily',
-                                         2,
-                                         backup1).response
+                                         backup_type='daily',
+                                         rotation=2,
+                                         name=backup1).response
         oldest_backup_exist = True
 
         # the oldest one should be deleted automatically in this test
@@ -308,9 +308,9 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         backup2 = data_utils.rand_name('backup-2')
         waiters.wait_for_server_status(self.client, self.server_id, 'ACTIVE')
         resp = self.client.create_backup(self.server_id,
-                                         'daily',
-                                         2,
-                                         backup2).response
+                                         backup_type='daily',
+                                         rotation=2,
+                                         name=backup2).response
         image2_id = data_utils.parse_image_id(resp['location'])
         self.addCleanup(self.os.image_client.delete_image, image2_id)
         self.os.image_client.wait_for_image_status(image2_id, 'active')
@@ -336,9 +336,9 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         backup3 = data_utils.rand_name('backup-3')
         waiters.wait_for_server_status(self.client, self.server_id, 'ACTIVE')
         resp = self.client.create_backup(self.server_id,
-                                         'daily',
-                                         2,
-                                         backup3).response
+                                         backup_type='daily',
+                                         rotation=2,
+                                         name=backup3).response
         image3_id = data_utils.parse_image_id(resp['location'])
         self.addCleanup(self.os.image_client.delete_image, image3_id)
         # the first back up should be deleted
@@ -361,7 +361,7 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
 
     def _get_output(self):
         output = self.client.get_console_output(
-            self.server_id, 10)['output']
+            self.server_id, length=10)['output']
         self.assertTrue(output, "Console output was empty.")
         lines = len(output.split('\n'))
         self.assertEqual(lines, 10)
@@ -378,7 +378,7 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         # log file is truncated and we cannot get any console log through
         # "console-log" API.
         # The detail is https://bugs.launchpad.net/nova/+bug/1251920
-        self.client.reboot_server(self.server_id, 'HARD')
+        self.client.reboot_server(self.server_id, type='HARD')
         waiters.wait_for_server_status(self.client, self.server_id, 'ACTIVE')
         self.wait_for(self._get_output)
 
@@ -389,8 +389,7 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         server = self.create_test_server(wait_until='ACTIVE')
 
         def _check_full_length_console_log():
-            output = self.client.get_console_output(server['id'],
-                                                    None)['output']
+            output = self.client.get_console_output(server['id'])['output']
             self.assertTrue(output, "Console output was empty.")
             lines = len(output.split('\n'))
 
@@ -459,7 +458,7 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         server = self.client.show_server(self.server_id)['server']
         image_name = server['name'] + '-shelved'
         params = {'name': image_name}
-        images = self.images_client.list_images(**params)['images']
+        images = self.compute_images_client.list_images(**params)['images']
         self.assertEqual(1, len(images))
         self.assertEqual(image_name, images[0]['name'])
 
@@ -504,7 +503,7 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         console_types = ['novnc', 'xvpvnc']
         for console_type in console_types:
             body = self.client.get_vnc_console(self.server_id,
-                                               console_type)['console']
+                                               type=console_type)['console']
             self.assertEqual(console_type, body['type'])
             self.assertNotEqual('', body['url'])
             self._validate_url(body['url'])

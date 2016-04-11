@@ -12,17 +12,13 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest_lib import exceptions as lib_exc
-
 from tempest.api.compute import base
+from tempest.lib import exceptions as lib_exc
 from tempest import test
 
 
 class AZAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
-
-    """
-    Tests Availability Zone API List
-    """
+    """Tests Availability Zone API List"""
 
     @classmethod
     def setup_clients(cls):

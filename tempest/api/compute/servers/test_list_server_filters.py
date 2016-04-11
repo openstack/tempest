@@ -13,14 +13,13 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest_lib import exceptions as lib_exc
-
 from tempest.api.compute import base
-from tempest.api import utils
 from tempest.common import fixed_network
 from tempest.common.utils import data_utils
 from tempest.common import waiters
 from tempest import config
+from tempest.lib import decorators
+from tempest.lib import exceptions as lib_exc
 from tempest import test
 
 CONF = config.CONF
@@ -43,7 +42,7 @@ class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
         super(ListServerFiltersTestJSON, cls).resource_setup()
 
         # Check to see if the alternate image ref actually exists...
-        images_client = cls.images_client
+        images_client = cls.compute_images_client
         images = images_client.list_images()['images']
 
         if cls.image_ref != cls.image_ref_alt and \
@@ -56,13 +55,13 @@ class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
         # Do some sanity checks here. If one of the images does
         # not exist, fail early since the tests won't work...
         try:
-            cls.images_client.show_image(cls.image_ref)
+            cls.compute_images_client.show_image(cls.image_ref)
         except lib_exc.NotFound:
             raise RuntimeError("Image %s (image_ref) was not found!" %
                                cls.image_ref)
 
         try:
-            cls.images_client.show_image(cls.image_ref_alt)
+            cls.compute_images_client.show_image(cls.image_ref_alt)
         except lib_exc.NotFound:
             raise RuntimeError("Image %s (image_ref_alt) was not found!" %
                                cls.image_ref_alt)
@@ -89,7 +88,7 @@ class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
                                         wait_until='ACTIVE')
 
     @test.idempotent_id('05e8a8e7-9659-459a-989d-92c2f501f4ba')
-    @utils.skip_unless_attr('multiple_images', 'Only one image found')
+    @decorators.skip_unless_attr('multiple_images', 'Only one image found')
     def test_list_servers_filter_by_image(self):
         # Filter the list of servers by image
         params = {'image': self.image_ref}
@@ -174,7 +173,7 @@ class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
                          len([x for x in servers['servers'] if 'id' in x]))
 
     @test.idempotent_id('b3304c3b-97df-46d2-8cd3-e2b6659724e7')
-    @utils.skip_unless_attr('multiple_images', 'Only one image found')
+    @decorators.skip_unless_attr('multiple_images', 'Only one image found')
     def test_list_servers_detailed_filter_by_image(self):
         # Filter the detailed list of servers by image
         params = {'image': self.image_ref}
@@ -290,6 +289,7 @@ class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
         self.assertNotIn(self.s2_name, map(lambda x: x['name'], servers))
         self.assertNotIn(self.s3_name, map(lambda x: x['name'], servers))
 
+    @decorators.skip_because(bug="1540645")
     @test.idempotent_id('a905e287-c35e-42f2-b132-d02b09f3654a')
     def test_list_servers_filtered_by_ip_regex(self):
         # Filter servers by regex ip

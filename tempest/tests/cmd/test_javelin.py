@@ -14,9 +14,9 @@
 
 import mock
 from oslotest import mockpatch
-from tempest_lib import exceptions as lib_exc
 
 from tempest.cmd import javelin
+from tempest.lib import exceptions as lib_exc
 from tempest.tests import base
 
 
@@ -24,7 +24,7 @@ class JavelinUnitTest(base.TestCase):
 
     def setUp(self):
         super(JavelinUnitTest, self).setUp()
-        javelin.setup_logging()
+        javelin.LOG = mock.MagicMock()
         self.fake_client = mock.MagicMock()
         self.fake_object = mock.MagicMock()
 
@@ -78,38 +78,40 @@ class JavelinUnitTest(base.TestCase):
         mocked_function = self.fake_client.volumes.attach_volume
         mocked_function.assert_called_once_with(
             self.fake_object.volume['id'],
-            self.fake_object.server['id'],
-            self.fake_object['device'])
+            instance_uuid=self.fake_object.server['id'],
+            mountpoint=self.fake_object['device'])
 
 
 class TestCreateResources(JavelinUnitTest):
     def test_create_tenants(self):
 
-        self.fake_client.identity.list_tenants.return_value = {'tenants': []}
+        self.fake_client.tenants.list_tenants.return_value = {'tenants': []}
         self.useFixture(mockpatch.PatchObject(javelin, "keystone_admin",
                                               return_value=self.fake_client))
 
         javelin.create_tenants([self.fake_object['name']])
 
-        mocked_function = self.fake_client.identity.create_tenant
+        mocked_function = self.fake_client.tenants.create_tenant
         mocked_function.assert_called_once_with(self.fake_object['name'])
 
     def test_create_duplicate_tenant(self):
-        self.fake_client.identity.list_tenants.return_value = {'tenants': [
+        self.fake_client.tenants.list_tenants.return_value = {'tenants': [
             {'name': self.fake_object['name']}]}
         self.useFixture(mockpatch.PatchObject(javelin, "keystone_admin",
                                               return_value=self.fake_client))
 
         javelin.create_tenants([self.fake_object['name']])
 
-        mocked_function = self.fake_client.identity.create_tenant
+        mocked_function = self.fake_client.tenants.create_tenant
         self.assertFalse(mocked_function.called)
 
     def test_create_users(self):
-        self.fake_client.identity.get_tenant_by_name.return_value = \
-            self.fake_object['tenant']
-        self.fake_client.identity.get_user_by_username.side_effect = \
-            lib_exc.NotFound("user is not found")
+        self.useFixture(mockpatch.Patch(
+                        'tempest.common.identity.get_tenant_by_name',
+                        return_value=self.fake_object['tenant']))
+        self.useFixture(mockpatch.Patch(
+                        'tempest.common.identity.get_user_by_username',
+                        side_effect=lib_exc.NotFound("user is not found")))
         self.useFixture(mockpatch.PatchObject(javelin, "keystone_admin",
                                               return_value=self.fake_client))
 
@@ -117,7 +119,7 @@ class TestCreateResources(JavelinUnitTest):
 
         fake_tenant_id = self.fake_object['tenant']['id']
         fake_email = "%s@%s" % (self.fake_object['user'], fake_tenant_id)
-        mocked_function = self.fake_client.identity.create_user
+        mocked_function = self.fake_client.users.create_user
         mocked_function.assert_called_once_with(self.fake_object['name'],
                                                 self.fake_object['password'],
                                                 fake_tenant_id,
@@ -125,14 +127,15 @@ class TestCreateResources(JavelinUnitTest):
                                                 enabled=True)
 
     def test_create_user_missing_tenant(self):
-        self.fake_client.identity.get_tenant_by_name.side_effect = \
-            lib_exc.NotFound("tenant is not found")
+        self.useFixture(mockpatch.Patch(
+                        'tempest.common.identity.get_tenant_by_name',
+                        side_effect=lib_exc.NotFound("tenant is not found")))
         self.useFixture(mockpatch.PatchObject(javelin, "keystone_admin",
                                               return_value=self.fake_client))
 
         javelin.create_users([self.fake_object])
 
-        mocked_function = self.fake_client.identity.create_user
+        mocked_function = self.fake_client.users.create_user
         self.assertFalse(mocked_function.called)
 
     def test_create_objects(self):
@@ -210,8 +213,8 @@ class TestCreateResources(JavelinUnitTest):
                                                 name=self.fake_object['name'],
                                                 ip_version=fake_version)
 
-    def test_create_volumes(self):
-
+    @mock.patch("tempest.common.waiters.wait_for_volume_status")
+    def test_create_volumes(self, mock_wait_for_volume_status):
         self.useFixture(mockpatch.PatchObject(javelin, "client_for_user",
                                               return_value=self.fake_client))
         self.useFixture(mockpatch.PatchObject(javelin, "_get_volume_by_name",
@@ -225,12 +228,12 @@ class TestCreateResources(JavelinUnitTest):
         mocked_function.assert_called_once_with(
             size=self.fake_object['gb'],
             display_name=self.fake_object['name'])
-        mocked_function = self.fake_client.volumes.wait_for_volume_status
-        mocked_function.assert_called_once_with(
-            self.fake_object.body['volume']['id'],
+        mock_wait_for_volume_status.assert_called_once_with(
+            self.fake_client.volumes, self.fake_object.body['volume']['id'],
             'available')
 
-    def test_create_volume_existing(self):
+    @mock.patch("tempest.common.waiters.wait_for_volume_status")
+    def test_create_volume_existing(self, mock_wait_for_volume_status):
         self.useFixture(mockpatch.PatchObject(javelin, "client_for_user",
                                               return_value=self.fake_client))
         self.useFixture(mockpatch.PatchObject(javelin, "_get_volume_by_name",
@@ -242,22 +245,21 @@ class TestCreateResources(JavelinUnitTest):
 
         mocked_function = self.fake_client.volumes.create_volume
         self.assertFalse(mocked_function.called)
-        mocked_function = self.fake_client.volumes.wait_for_volume_status
-        self.assertFalse(mocked_function.called)
+        self.assertFalse(mock_wait_for_volume_status.called)
 
     def test_create_router(self):
 
-        self.fake_client.networks.list_routers.return_value = {'routers': []}
+        self.fake_client.routers.list_routers.return_value = {'routers': []}
         self.useFixture(mockpatch.PatchObject(javelin, "client_for_user",
                                               return_value=self.fake_client))
 
         javelin.create_routers([self.fake_object])
 
         mocked_function = self.fake_client.networks.create_router
-        mocked_function.assert_called_once_with(self.fake_object['name'])
+        mocked_function.assert_called_once_with(name=self.fake_object['name'])
 
     def test_create_router_existing(self):
-        self.fake_client.networks.list_routers.return_value = {
+        self.fake_client.routers.list_routers.return_value = {
             'routers': [self.fake_object]}
         self.useFixture(mockpatch.PatchObject(javelin, "client_for_user",
                                               return_value=self.fake_client))
@@ -289,13 +291,14 @@ class TestDestroyResources(JavelinUnitTest):
 
         fake_tenant = self.fake_object['tenant']
         fake_auth = self.fake_client
-        fake_auth.identity.get_tenant_by_name.return_value = fake_tenant
-
+        self.useFixture(mockpatch.Patch(
+                        'tempest.common.identity.get_tenant_by_name',
+                        return_value=fake_tenant))
         self.useFixture(mockpatch.PatchObject(javelin, "keystone_admin",
                                               return_value=fake_auth))
         javelin.destroy_tenants([fake_tenant])
 
-        mocked_function = fake_auth.identity.delete_tenant
+        mocked_function = fake_auth.tenants.delete_tenant
         mocked_function.assert_called_once_with(fake_tenant['id'])
 
     def test_destroy_users(self):
@@ -304,15 +307,19 @@ class TestDestroyResources(JavelinUnitTest):
         fake_tenant = self.fake_object['tenant']
 
         fake_auth = self.fake_client
-        fake_auth.identity.get_tenant_by_name.return_value = fake_tenant
-        fake_auth.identity.get_user_by_username.return_value = fake_user
+        fake_auth.tenants.list_tenants.return_value = \
+            {'tenants': [fake_tenant]}
+        fake_auth.users.list_users.return_value = {'users': [fake_user]}
 
+        self.useFixture(mockpatch.Patch(
+                        'tempest.common.identity.get_user_by_username',
+                        return_value=fake_user))
         self.useFixture(mockpatch.PatchObject(javelin, "keystone_admin",
                                               return_value=fake_auth))
 
         javelin.destroy_users([fake_user])
 
-        mocked_function = fake_auth.identity.delete_user
+        mocked_function = fake_auth.users.delete_user
         mocked_function.assert_called_once_with(fake_user['id'])
 
     def test_destroy_objects(self):
@@ -380,7 +387,7 @@ class TestDestroyResources(JavelinUnitTest):
 
         javelin.destroy_subnets([self.fake_object])
 
-        mocked_function = self.fake_client.networks.delete_subnet
+        mocked_function = self.fake_client.subnets.delete_subnet
         mocked_function.assert_called_once_with(fake_subnet_id)
 
     def test_destroy_routers(self):
@@ -397,7 +404,7 @@ class TestDestroyResources(JavelinUnitTest):
 
         javelin.destroy_routers([self.fake_object])
 
-        mocked_function = self.fake_client.networks.delete_router
+        mocked_function = self.fake_client.routers.delete_router
         mocked_function.assert_called_once_with(
             self.fake_object['router_id'])
 

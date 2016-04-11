@@ -14,24 +14,22 @@
 
 from oslo_serialization import jsonutils as json
 
-from tempest.common import service_client
+from tempest.lib.common import rest_client
 
 
-class DataProcessingClient(service_client.ServiceClient):
+class DataProcessingClient(rest_client.RestClient):
 
     def _request_and_check_resp(self, request_func, uri, resp_status):
-        """Make a request using specified request_func and check response
-        status code.
+        """Make a request and check response status code.
 
         It returns a ResponseBody.
         """
         resp, body = request_func(uri)
         self.expected_success(resp_status, resp.status)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def _request_and_check_resp_data(self, request_func, uri, resp_status):
-        """Make a request using specified request_func and check response
-        status code.
+        """Make a request and check response status code.
 
         It returns pair: resp and response data.
         """
@@ -41,8 +39,7 @@ class DataProcessingClient(service_client.ServiceClient):
 
     def _request_check_and_parse_resp(self, request_func, uri,
                                       resp_status, *args, **kwargs):
-        """Make a request using specified request_func, check response status
-        code and parse response body.
+        """Make a request, check response status code and parse response body.
 
         It returns a ResponseBody.
         """
@@ -50,7 +47,7 @@ class DataProcessingClient(service_client.ServiceClient):
         resp, body = request_func(uri, headers=headers, *args, **kwargs)
         self.expected_success(resp_status, resp.status)
         body = json.loads(body)
-        return service_client.ResponseBody(resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def list_node_group_templates(self):
         """List all node group templates for a user."""

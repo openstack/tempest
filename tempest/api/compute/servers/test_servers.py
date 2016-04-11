@@ -13,10 +13,15 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import testtools
+
 from tempest.api.compute import base
 from tempest.common.utils import data_utils
 from tempest.common import waiters
+from tempest import config
 from tempest import test
+
+CONF = config.CONF
 
 
 class ServersTestJSON(base.BaseV2ComputeTest):
@@ -31,6 +36,9 @@ class ServersTestJSON(base.BaseV2ComputeTest):
         super(ServersTestJSON, self).tearDown()
 
     @test.idempotent_id('b92d5ec7-b1dd-44a2-87e4-45e888c46ef0')
+    @testtools.skipUnless(CONF.compute_feature_enabled.
+                          enable_instance_password,
+                          'Instance password not available.')
     def test_create_server_with_admin_password(self):
         # If an admin password is provided on server creation, the server's
         # root password should be set to that password.
@@ -71,9 +79,10 @@ class ServersTestJSON(base.BaseV2ComputeTest):
         server = self.client.show_server(server['id'])['server']
         self.assertEqual(key_name, server['key_name'])
 
-    def _update_server_name(self, server_id, status):
-        # The server name should be changed to the the provided value
-        new_name = data_utils.rand_name('server')
+    def _update_server_name(self, server_id, status, prefix_name='server'):
+        # The server name should be changed to the provided value
+        new_name = data_utils.rand_name(prefix_name)
+
         # Update the server with a new name
         self.client.update_server(server_id,
                                   name=new_name)
@@ -86,18 +95,23 @@ class ServersTestJSON(base.BaseV2ComputeTest):
 
     @test.idempotent_id('5e6ccff8-349d-4852-a8b3-055df7988dd2')
     def test_update_server_name(self):
-        # The server name should be changed to the the provided value
+        # The server name should be changed to the provided value
         server = self.create_test_server(wait_until='ACTIVE')
-
-        self._update_server_name(server['id'], 'ACTIVE')
+        # Update instance name with non-ASCII characters
+        prefix_name = u'\u00CD\u00F1st\u00E1\u00F1c\u00E9'
+        self._update_server_name(server['id'], 'ACTIVE', prefix_name)
 
     @test.idempotent_id('6ac19cb1-27a3-40ec-b350-810bdc04c08e')
     def test_update_server_name_in_stop_state(self):
-        # The server name should be changed to the the provided value
+        # The server name should be changed to the provided value
         server = self.create_test_server(wait_until='ACTIVE')
         self.client.stop_server(server['id'])
         waiters.wait_for_server_status(self.client, server['id'], 'SHUTOFF')
-        updated_server = self._update_server_name(server['id'], 'SHUTOFF')
+        # Update instance name with non-ASCII characters
+        prefix_name = u'\u00CD\u00F1st\u00E1\u00F1c\u00E9'
+        updated_server = self._update_server_name(server['id'],
+                                                  'SHUTOFF',
+                                                  prefix_name)
         self.assertNotIn('progress', updated_server)
 
     @test.idempotent_id('89b90870-bc13-4b73-96af-f9d4f2b70077')

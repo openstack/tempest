@@ -22,7 +22,8 @@ CONF = config.CONF
 
 class TestEncryptedCinderVolumes(manager.EncryptionScenarioTest):
 
-    """
+    """The test suite for encrypted cinder volumes
+
     This test is for verifying the functionality of encrypted cinder volumes.
 
     For both LUKS and cryptsetup encryption types, this test performs
@@ -41,8 +42,12 @@ class TestEncryptedCinderVolumes(manager.EncryptionScenarioTest):
             raise cls.skipException('Encrypted volume attach is not supported')
 
     def launch_instance(self):
-        self.glance_image_create()
-        self.nova_boot()
+        image = self.glance_image_create()
+        keypair = self.create_keypair()
+
+        return self.create_server(image_id=image,
+                                  key_name=keypair['name'],
+                                  wait_until='ACTIVE')
 
     def create_encrypted_volume(self, encryption_provider, volume_type):
         volume_type = self.create_volume_type(name=volume_type)
@@ -51,26 +56,26 @@ class TestEncryptedCinderVolumes(manager.EncryptionScenarioTest):
                                     key_size=512,
                                     cipher='aes-xts-plain64',
                                     control_location='front-end')
-        self.volume = self.create_volume(volume_type=volume_type['name'])
+        return self.create_volume(volume_type=volume_type['name'])
 
-    def attach_detach_volume(self):
-        self.nova_volume_attach()
-        self.nova_volume_detach()
+    def attach_detach_volume(self, server, volume):
+        attached_volume = self.nova_volume_attach(server, volume)
+        self.nova_volume_detach(server, attached_volume)
 
     @test.idempotent_id('79165fb4-5534-4b9d-8429-97ccffb8f86e')
     @test.services('compute', 'volume', 'image')
     def test_encrypted_cinder_volumes_luks(self):
-        self.launch_instance()
-        self.create_encrypted_volume('nova.volume.encryptors.'
-                                     'luks.LuksEncryptor',
-                                     volume_type='luks')
-        self.attach_detach_volume()
+        server = self.launch_instance()
+        volume = self.create_encrypted_volume('nova.volume.encryptors.'
+                                              'luks.LuksEncryptor',
+                                              volume_type='luks')
+        self.attach_detach_volume(server, volume)
 
     @test.idempotent_id('cbc752ed-b716-4717-910f-956cce965722')
     @test.services('compute', 'volume', 'image')
     def test_encrypted_cinder_volumes_cryptsetup(self):
-        self.launch_instance()
-        self.create_encrypted_volume('nova.volume.encryptors.'
-                                     'cryptsetup.CryptsetupEncryptor',
-                                     volume_type='cryptsetup')
-        self.attach_detach_volume()
+        server = self.launch_instance()
+        volume = self.create_encrypted_volume('nova.volume.encryptors.'
+                                              'cryptsetup.CryptsetupEncryptor',
+                                              volume_type='cryptsetup')
+        self.attach_detach_volume(server, volume)

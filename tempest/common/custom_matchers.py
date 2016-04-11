@@ -19,8 +19,7 @@ from testtools import helpers
 
 
 class ExistsAllResponseHeaders(object):
-    """
-    Specific matcher to check the existence of Swift's response headers
+    """Specific matcher to check the existence of Swift's response headers
 
     This matcher checks the existence of common headers for each HTTP method
     or the target, which means account, container or object.
@@ -30,7 +29,8 @@ class ExistsAllResponseHeaders(object):
     """
 
     def __init__(self, target, method):
-        """
+        """Initialization of ExistsAllResponseHeaders
+
         param: target Account/Container/Object
         param: method PUT/GET/HEAD/DELETE/COPY/POST
         """
@@ -38,7 +38,8 @@ class ExistsAllResponseHeaders(object):
         self.method = method
 
     def match(self, actual):
-        """
+        """Check headers
+
         param: actual HTTP response headers
         """
         # Check common headers for all HTTP methods
@@ -95,10 +96,7 @@ class ExistsAllResponseHeaders(object):
 
 
 class NonExistentHeader(object):
-    """
-    Informs an error message for end users in the case of missing a
-    certain header in Swift's responses
-    """
+    """Informs an error message in the case of missing a certain header"""
 
     def __init__(self, header):
         self.header = header
@@ -111,9 +109,7 @@ class NonExistentHeader(object):
 
 
 class AreAllWellFormatted(object):
-    """
-    Specific matcher to check the correctness of formats of values of Swift's
-    response headers
+    """Specific matcher to check the correctness of formats of values
 
     This matcher checks the format of values of response headers.
     When checking the format of values of 'specific' headers such as
@@ -149,10 +145,7 @@ class AreAllWellFormatted(object):
 
 
 class InvalidFormat(object):
-    """
-    Informs an error message for end users if a format of a certain header
-    is invalid
-    """
+    """Informs an error message if a format of a certain header is invalid"""
 
     def __init__(self, key, value):
         self.key = key
@@ -166,8 +159,9 @@ class InvalidFormat(object):
 
 
 class MatchesDictExceptForKeys(object):
-    """Matches two dictionaries. Verifies all items are equals except for those
-    identified by a list of keys.
+    """Matches two dictionaries.
+
+    Verifies all items are equals except for those identified by a list of keys
     """
 
     def __init__(self, expected, excluded_keys=None):

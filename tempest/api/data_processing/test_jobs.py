@@ -18,9 +18,9 @@ from tempest import test
 
 
 class JobTest(dp_base.BaseDataProcessingTest):
-    """Link to the API documentation is http://docs.openstack.org/developer/
-    sahara/restapi/rest_api_v1.1_EDP.html#jobs
-    """
+    # NOTE: Link to the API documentation: http://docs.openstack.org/developer/
+    # sahara/restapi/rest_api_v1.1_EDP.html#jobs
+
     @classmethod
     def resource_setup(cls):
         super(JobTest, cls).resource_setup()

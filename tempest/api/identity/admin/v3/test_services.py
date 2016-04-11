@@ -13,10 +13,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest_lib import exceptions as lib_exc
-
 from tempest.api.identity import base
 from tempest.common.utils import data_utils
+from tempest.lib import exceptions as lib_exc
 from tempest import test
 
 
@@ -24,9 +23,9 @@ class ServicesTestJSON(base.BaseIdentityV3AdminTest):
 
     def _del_service(self, service_id):
         # Used for deleting the services created in this class
-        self.service_client.delete_service(service_id)
+        self.services_client.delete_service(service_id)
         # Checking whether service is deleted successfully
-        self.assertRaises(lib_exc.NotFound, self.service_client.get_service,
+        self.assertRaises(lib_exc.NotFound, self.services_client.show_service,
                           service_id)
 
     @test.attr(type='smoke')
@@ -36,8 +35,8 @@ class ServicesTestJSON(base.BaseIdentityV3AdminTest):
         name = data_utils.rand_name('service')
         serv_type = data_utils.rand_name('type')
         desc = data_utils.rand_name('description')
-        create_service = self.service_client.create_service(
-            serv_type, name=name, description=desc)['service']
+        create_service = self.services_client.create_service(
+            type=serv_type, name=name, description=desc)['service']
         self.addCleanup(self._del_service, create_service['id'])
         self.assertIsNotNone(create_service['id'])
 
@@ -49,14 +48,14 @@ class ServicesTestJSON(base.BaseIdentityV3AdminTest):
         s_id = create_service['id']
         resp1_desc = create_service['description']
         s_desc2 = data_utils.rand_name('desc2')
-        update_service = self.service_client.update_service(
+        update_service = self.services_client.update_service(
             s_id, description=s_desc2)['service']
         resp2_desc = update_service['description']
 
         self.assertNotEqual(resp1_desc, resp2_desc)
 
         # Get service
-        fetched_service = self.service_client.get_service(s_id)['service']
+        fetched_service = self.services_client.show_service(s_id)['service']
         resp3_desc = fetched_service['description']
 
         self.assertEqual(resp2_desc, resp3_desc)
@@ -67,9 +66,9 @@ class ServicesTestJSON(base.BaseIdentityV3AdminTest):
         # Create a service only with name and type
         name = data_utils.rand_name('service')
         serv_type = data_utils.rand_name('type')
-        service = self.service_client.create_service(
-            serv_type, name=name)['service']
-        self.addCleanup(self.service_client.delete_service, service['id'])
+        service = self.services_client.create_service(
+            type=serv_type, name=name)['service']
+        self.addCleanup(self.services_client.delete_service, service['id'])
         self.assertIn('id', service)
         expected_data = {'name': name, 'type': serv_type}
         self.assertDictContainsSubset(expected_data, service)
@@ -81,14 +80,14 @@ class ServicesTestJSON(base.BaseIdentityV3AdminTest):
         for _ in range(3):
             name = data_utils.rand_name('service')
             serv_type = data_utils.rand_name('type')
-            create_service = self.service_client.create_service(
-                serv_type, name=name)['service']
-            self.addCleanup(self.service_client.delete_service,
+            create_service = self.services_client.create_service(
+                type=serv_type, name=name)['service']
+            self.addCleanup(self.services_client.delete_service,
                             create_service['id'])
             service_ids.append(create_service['id'])
 
         # List and Verify Services
-        services = self.service_client.list_services()['services']
+        services = self.services_client.list_services()['services']
         fetched_ids = [service['id'] for service in services]
         found = [s for s in fetched_ids if s in service_ids]
         self.assertEqual(len(found), len(service_ids))

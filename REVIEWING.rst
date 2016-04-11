@@ -2,7 +2,7 @@ Reviewing Tempest Code
 ======================
 
 To start read the `OpenStack Common Review Checklist
-<https://wiki.openstack.org/wiki/ReviewChecklist#Common_Review_Checklist>`_
+<http://docs.openstack.org/infra/manual/developers.html#peer-review>`_
 
 
 Ensuring code is executed

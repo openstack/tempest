@@ -13,7 +13,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from oslo_log import log
 import testtools
 
 from tempest import config
@@ -22,12 +21,10 @@ from tempest import test
 
 CONF = config.CONF
 
-LOG = log.getLogger(__name__)
-
 
 class TestSnapshotPattern(manager.ScenarioTest):
-    """
-    This test is for snapshotting an instance and booting with it.
+    """This test is for snapshotting an instance and booting with it.
+
     The following is the scenario outline:
      * boot an instance and create a timestamp file in it
      * snapshot the instance
@@ -36,44 +33,38 @@ class TestSnapshotPattern(manager.ScenarioTest):
 
     """
 
-    def _boot_image(self, image_id):
-        security_groups = [{'name': self.security_group['name']}]
-        create_kwargs = {
-            'key_name': self.keypair['name'],
-            'security_groups': security_groups
-        }
-        return self.create_server(image=image_id, create_kwargs=create_kwargs)
-
-    def _add_keypair(self):
-        self.keypair = self.create_keypair()
-
     @test.idempotent_id('608e604b-1d63-4a82-8e3e-91bc665c90b4')
     @testtools.skipUnless(CONF.compute_feature_enabled.snapshot,
                           'Snapshotting is not available.')
     @test.services('compute', 'network', 'image')
     def test_snapshot_pattern(self):
         # prepare for booting an instance
-        self._add_keypair()
-        self.security_group = self._create_security_group()
+        keypair = self.create_keypair()
+        security_group = self._create_security_group()
 
         # boot an instance and create a timestamp file in it
-        server = self._boot_image(CONF.compute.image_ref)
-        if CONF.compute.use_floatingip_for_ssh:
-            fip_for_server = self.create_floating_ip(server)
-            timestamp = self.create_timestamp(fip_for_server['ip'])
-        else:
-            timestamp = self.create_timestamp(server)
+        server = self.create_server(
+            image_id=CONF.compute.image_ref,
+            key_name=keypair['name'],
+            security_groups=[{'name': security_group['name']}],
+            wait_until='ACTIVE')
+
+        instance_ip = self.get_server_ip(server)
+        timestamp = self.create_timestamp(instance_ip,
+                                          private_key=keypair['private_key'])
 
         # snapshot the instance
         snapshot_image = self.create_server_snapshot(server=server)
 
         # boot a second instance from the snapshot
-        server_from_snapshot = self._boot_image(snapshot_image['id'])
+        server_from_snapshot = self.create_server(
+            image_id=snapshot_image['id'],
+            key_name=keypair['name'],
+            security_groups=[{'name': security_group['name']}],
+            wait_until='ACTIVE')
 
         # check the existence of the timestamp file in the second instance
-        if CONF.compute.use_floatingip_for_ssh:
-            fip_for_snapshot = self.create_floating_ip(server_from_snapshot)
-            timestamp2 = self.get_timestamp(fip_for_snapshot['ip'])
-        else:
-            timestamp2 = self.get_timestamp(server_from_snapshot)
+        server_from_snapshot_ip = self.get_server_ip(server_from_snapshot)
+        timestamp2 = self.get_timestamp(server_from_snapshot_ip,
+                                        private_key=keypair['private_key'])
         self.assertEqual(timestamp, timestamp2)

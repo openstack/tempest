@@ -54,7 +54,7 @@ class VolumeVerifyStress(stressaction.StressAction):
         self.logger.info("deleted server: %s" % self.server_id)
 
     def _create_sec_group(self):
-        sec_grp_cli = self.manager.security_groups_client
+        sec_grp_cli = self.manager.compute_security_groups_client
         s_name = data_utils.rand_name('sec_grp')
         s_description = data_utils.rand_name('desc')
         self.sec_grp = sec_grp_cli.create_security_group(
@@ -66,16 +66,16 @@ class VolumeVerifyStress(stressaction.StressAction):
                     from_port=-1, to_port=-1)
 
     def _destroy_sec_grp(self):
-        sec_grp_cli = self.manager.security_groups_client
+        sec_grp_cli = self.manager.compute_security_groups_client
         sec_grp_cli.delete_security_group(self.sec_grp['id'])
 
     def _create_floating_ip(self):
-        floating_cli = self.manager.floating_ips_client
+        floating_cli = self.manager.compute_floating_ips_client
         self.floating = (floating_cli.create_floating_ip(self.floating_pool)
                          ['floating_ip'])
 
     def _destroy_floating_ip(self):
-        cli = self.manager.floating_ips_client
+        cli = self.manager.compute_floating_ips_client
         cli.delete_floating_ip(self.floating['id'])
         cli.wait_for_resource_deletion(self.floating['id'])
         self.logger.info("Deleted Floating IP %s", str(self.floating['ip']))
@@ -98,7 +98,7 @@ class VolumeVerifyStress(stressaction.StressAction):
         self.logger.info("deleted volume: %s" % self.volume['id'])
 
     def _wait_disassociate(self):
-        cli = self.manager.floating_ips_client
+        cli = self.manager.compute_floating_ips_client
 
         def func():
             floating = (cli.show_floating_ip(self.floating['id'])
@@ -111,7 +111,7 @@ class VolumeVerifyStress(stressaction.StressAction):
 
     def new_server_ops(self):
         self._create_vm()
-        cli = self.manager.floating_ips_client
+        cli = self.manager.compute_floating_ips_client
         cli.associate_floating_ip_to_server(self.floating['ip'],
                                             self.server_id)
         if self.ssh_test_before_attach and self.enable_ssh_verify:
@@ -121,6 +121,7 @@ class VolumeVerifyStress(stressaction.StressAction):
 
     def setUp(self, **kwargs):
         """Note able configuration combinations:
+
             Closest options to the test_stamp_pattern:
                 new_server = True
                 new_volume = True
@@ -160,7 +161,7 @@ class VolumeVerifyStress(stressaction.StressAction):
         self._create_sec_group()
         self._create_keypair()
         private_key = self.key['private_key']
-        username = CONF.compute.image_ssh_user
+        username = CONF.validation.image_ssh_user
         self.remote_client = remote_client.RemoteClient(self.floating['ip'],
                                                         username,
                                                         pkey=private_key)
@@ -218,7 +219,7 @@ class VolumeVerifyStress(stressaction.StressAction):
             self._destroy_vm()
 
     def tearDown(self):
-        cli = self.manager.floating_ips_client
+        cli = self.manager.compute_floating_ips_client
         cli.disassociate_floating_ip_from_server(self.floating['ip'],
                                                  self.server_id)
         self._wait_disassociate()

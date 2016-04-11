@@ -27,25 +27,25 @@ class ListProjectsTestJSON(base.BaseIdentityV3AdminTest):
         cls.data.setup_test_domain()
         # Create project with domain
         cls.p1_name = data_utils.rand_name('project')
-        cls.p1 = cls.client.create_project(
+        cls.p1 = cls.projects_client.create_project(
             cls.p1_name, enabled=False,
             domain_id=cls.data.domain['id'])['project']
         cls.data.projects.append(cls.p1)
         cls.project_ids.append(cls.p1['id'])
         # Create default project
         p2_name = data_utils.rand_name('project')
-        cls.p2 = cls.client.create_project(p2_name)['project']
+        cls.p2 = cls.projects_client.create_project(p2_name)['project']
         cls.data.projects.append(cls.p2)
         cls.project_ids.append(cls.p2['id'])
 
     @test.idempotent_id('1d830662-22ad-427c-8c3e-4ec854b0af44')
     def test_projects_list(self):
         # List projects
-        list_projects = self.client.list_projects()['projects']
+        list_projects = self.projects_client.list_projects()['projects']
 
         for p in self.project_ids:
-            get_project = self.client.get_project(p)['project']
-            self.assertIn(get_project, list_projects)
+            show_project = self.projects_client.show_project(p)['project']
+            self.assertIn(show_project, list_projects)
 
     @test.idempotent_id('fab13f3c-f6a6-4b9f-829b-d32fd44fdf10')
     def test_list_projects_with_domains(self):
@@ -64,6 +64,6 @@ class ListProjectsTestJSON(base.BaseIdentityV3AdminTest):
         self._list_projects_with_params({'name': self.p1_name}, 'name')
 
     def _list_projects_with_params(self, params, key):
-        body = self.client.list_projects(params)['projects']
+        body = self.projects_client.list_projects(params)['projects']
         self.assertIn(self.p1[key], map(lambda x: x[key], body))
         self.assertNotIn(self.p2[key], map(lambda x: x[key], body))

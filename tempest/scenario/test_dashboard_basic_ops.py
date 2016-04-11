@@ -58,7 +58,8 @@ class HorizonHTMLParser(HTMLParser.HTMLParser):
 
 class TestDashboardBasicOps(manager.ScenarioTest):
 
-    """
+    """The test suite for dashboard basic operations
+
     This is a basic scenario test:
     * checks that the login page is available
     * logs in as a regular user
@@ -90,15 +91,19 @@ class TestDashboardBasicOps(manager.ScenarioTest):
 
         # construct login url for dashboard, discovery accommodates non-/ web
         # root for dashboard
-        login_url = CONF.dashboard.dashboard_url + parser.login[1:]
+        login_url = parse.urljoin(CONF.dashboard.dashboard_url, parser.login)
 
         # Prepare login form request
         req = request.Request(login_url)
         req.add_header('Content-type', 'application/x-www-form-urlencoded')
         req.add_header('Referer', CONF.dashboard.dashboard_url)
+
+        # Pass the default domain name regardless of the auth version in order
+        # to test the scenario of when horizon is running with keystone v3
         params = {'username': username,
                   'password': password,
                   'region': parser.region,
+                  'domain': CONF.auth.default_credentials_domain_name,
                   'csrfmiddlewaretoken': parser.csrf_token}
         self.opener.open(req, parse.urlencode(params))
 

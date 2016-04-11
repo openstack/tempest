@@ -22,14 +22,14 @@ from tempest.api.network import base_security_groups as sec_base
 from tempest.common import custom_matchers
 from tempest.common.utils import data_utils
 from tempest import config
+from tempest import exceptions
 from tempest import test
 
 CONF = config.CONF
 
 
 class PortsTestJSON(sec_base.BaseSecGroupTest):
-    """
-    Test the following operations for ports:
+    """Test the following operations for ports:
 
         port create
         port delete
@@ -45,8 +45,8 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
         cls.port = cls.create_port(cls.network)
 
     def _delete_port(self, port_id):
-        self.client.delete_port(port_id)
-        body = self.client.list_ports()
+        self.ports_client.delete_port(port_id)
+        body = self.ports_client.list_ports()
         ports_list = body['ports']
         self.assertFalse(port_id in [n['id'] for n in ports_list])
 
@@ -54,16 +54,16 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
     @test.idempotent_id('c72c1c0c-2193-4aca-aaa4-b1442640f51c')
     def test_create_update_delete_port(self):
         # Verify port creation
-        body = self.client.create_port(network_id=self.network['id'])
+        body = self.ports_client.create_port(network_id=self.network['id'])
         port = body['port']
         # Schedule port deletion with verification upon test completion
         self.addCleanup(self._delete_port, port['id'])
         self.assertTrue(port['admin_state_up'])
         # Verify port update
         new_name = "New_Port"
-        body = self.client.update_port(port['id'],
-                                       name=new_name,
-                                       admin_state_up=False)
+        body = self.ports_client.update_port(port['id'],
+                                             name=new_name,
+                                             admin_state_up=False)
         updated_port = body['port']
         self.assertEqual(updated_port['name'], new_name)
         self.assertFalse(updated_port['admin_state_up'])
@@ -75,7 +75,7 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
         network2 = self.create_network(network_name=name)
         network_list = [network1['id'], network2['id']]
         port_list = [{'network_id': net_id} for net_id in network_list]
-        body = self.client.create_bulk_port(port_list)
+        body = self.ports_client.create_bulk_ports(ports=port_list)
         created_ports = body['ports']
         port1 = created_ports[0]
         port2 = created_ports[1]
@@ -88,14 +88,16 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
 
     @classmethod
     def _get_ipaddress_from_tempest_conf(cls):
-        """Return first subnet gateway for configured CIDR """
+        """Return subnet with mask bits for configured CIDR """
         if cls._ip_version == 4:
-            cidr = netaddr.IPNetwork(CONF.network.tenant_network_cidr)
+            cidr = netaddr.IPNetwork(CONF.network.project_network_cidr)
+            cidr.prefixlen = CONF.network.project_network_mask_bits
 
         elif cls._ip_version == 6:
-            cidr = netaddr.IPNetwork(CONF.network.tenant_network_v6_cidr)
+            cidr = netaddr.IPNetwork(CONF.network.project_network_v6_cidr)
+            cidr.prefixlen = CONF.network.project_network_v6_mask_bits
 
-        return netaddr.IPAddress(cidr)
+        return cidr
 
     @test.attr(type='smoke')
     @test.idempotent_id('0435f278-40ae-48cb-a404-b8a087bc09b1')
@@ -103,12 +105,18 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
         network = self.create_network()
         net_id = network['id']
         address = self._get_ipaddress_from_tempest_conf()
-        allocation_pools = {'allocation_pools': [{'start': str(address + 4),
-                                                  'end': str(address + 6)}]}
-        subnet = self.create_subnet(network, **allocation_pools)
-        self.addCleanup(self.client.delete_subnet, subnet['id'])
-        body = self.client.create_port(network_id=net_id)
-        self.addCleanup(self.client.delete_port, body['port']['id'])
+        if ((address.version == 4 and address.prefixlen >= 30) or
+           (address.version == 6 and address.prefixlen >= 126)):
+            msg = ("Subnet %s isn't large enough for the test" % address.cidr)
+            raise exceptions.InvalidConfiguration(message=msg)
+        allocation_pools = {'allocation_pools': [{'start': str(address[2]),
+                                                  'end': str(address[-2])}]}
+        subnet = self.create_subnet(network, cidr=address,
+                                    mask_bits=address.prefixlen,
+                                    **allocation_pools)
+        self.addCleanup(self.subnets_client.delete_subnet, subnet['id'])
+        body = self.ports_client.create_port(network_id=net_id)
+        self.addCleanup(self.ports_client.delete_port, body['port']['id'])
         port = body['port']
         ip_address = port['fixed_ips'][0]['ip_address']
         start_ip_address = allocation_pools['allocation_pools'][0]['start']
@@ -120,22 +128,25 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
     @test.idempotent_id('c9a685bd-e83f-499c-939f-9f7863ca259f')
     def test_show_port(self):
         # Verify the details of port
-        body = self.client.show_port(self.port['id'])
+        body = self.ports_client.show_port(self.port['id'])
         port = body['port']
         self.assertIn('id', port)
-        # TODO(Santosh)- This is a temporary workaround to compare create_port
-        # and show_port dict elements.Remove this once extra_dhcp_opts issue
-        # gets fixed in neutron.( bug - 1365341.)
+        # NOTE(rfolco): created_at and updated_at may get inconsistent values
+        # due to possible delay between POST request and resource creation.
+        # TODO(rfolco): Neutron Bug #1365341 is fixed, can remove the key
+        # extra_dhcp_opts in the O release (K/L gate jobs still need it).
         self.assertThat(self.port,
                         custom_matchers.MatchesDictExceptForKeys
-                        (port, excluded_keys=['extra_dhcp_opts']))
+                        (port, excluded_keys=['extra_dhcp_opts',
+                                              'created_at',
+                                              'updated_at']))
 
     @test.idempotent_id('45fcdaf2-dab0-4c13-ac6c-fcddfb579dbd')
     def test_show_port_fields(self):
         # Verify specific fields of a port
         fields = ['id', 'mac_address']
-        body = self.client.show_port(self.port['id'],
-                                     fields=fields)
+        body = self.ports_client.show_port(self.port['id'],
+                                           fields=fields)
         port = body['port']
         self.assertEqual(sorted(port.keys()), sorted(fields))
         for field_name in fields:
@@ -145,7 +156,7 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
     @test.idempotent_id('cf95b358-3e92-4a29-a148-52445e1ac50e')
     def test_list_ports(self):
         # Verify the port exists in the list of all ports
-        body = self.client.list_ports()
+        body = self.ports_client.list_ports()
         ports = [port['id'] for port in body['ports']
                  if port['id'] == self.port['id']]
         self.assertNotEmpty(ports, "Created port not found in the list")
@@ -155,16 +166,16 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
         # Create network and subnet
         network = self.create_network()
         subnet = self.create_subnet(network)
-        self.addCleanup(self.client.delete_subnet, subnet['id'])
+        self.addCleanup(self.subnets_client.delete_subnet, subnet['id'])
         # Create two ports
-        port_1 = self.client.create_port(network_id=network['id'])
-        self.addCleanup(self.client.delete_port, port_1['port']['id'])
-        port_2 = self.client.create_port(network_id=network['id'])
-        self.addCleanup(self.client.delete_port, port_2['port']['id'])
+        port_1 = self.ports_client.create_port(network_id=network['id'])
+        self.addCleanup(self.ports_client.delete_port, port_1['port']['id'])
+        port_2 = self.ports_client.create_port(network_id=network['id'])
+        self.addCleanup(self.ports_client.delete_port, port_2['port']['id'])
         # List ports filtered by fixed_ips
         port_1_fixed_ip = port_1['port']['fixed_ips'][0]['ip_address']
         fixed_ips = 'ip_address=' + port_1_fixed_ip
-        port_list = self.client.list_ports(fixed_ips=fixed_ips)
+        port_list = self.ports_client.list_ports(fixed_ips=fixed_ips)
         # Check that we got the desired port
         ports = port_list['ports']
         tenant_ids = set([port['tenant_id'] for port in ports])
@@ -187,17 +198,17 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
         network = self.create_network()
         self.addCleanup(self.networks_client.delete_network, network['id'])
         subnet = self.create_subnet(network)
-        self.addCleanup(self.client.delete_subnet, subnet['id'])
+        self.addCleanup(self.subnets_client.delete_subnet, subnet['id'])
         router = self.create_router(data_utils.rand_name('router-'))
-        self.addCleanup(self.client.delete_router, router['id'])
-        port = self.client.create_port(network_id=network['id'])
+        self.addCleanup(self.routers_client.delete_router, router['id'])
+        port = self.ports_client.create_port(network_id=network['id'])
         # Add router interface to port created above
-        self.client.add_router_interface_with_port_id(
-            router['id'], port['port']['id'])
-        self.addCleanup(self.client.remove_router_interface_with_port_id,
-                        router['id'], port['port']['id'])
+        self.routers_client.add_router_interface(router['id'],
+                                                 port_id=port['port']['id'])
+        self.addCleanup(self.routers_client.remove_router_interface,
+                        router['id'], port_id=port['port']['id'])
         # List ports filtered by router_id
-        port_list = self.client.list_ports(device_id=router['id'])
+        port_list = self.ports_client.list_ports(device_id=router['id'])
         ports = port_list['ports']
         self.assertEqual(len(ports), 1)
         self.assertEqual(ports[0]['id'], port['port']['id'])
@@ -207,7 +218,7 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
     def test_list_ports_fields(self):
         # Verify specific fields of ports
         fields = ['id', 'mac_address']
-        body = self.client.list_ports(fields=fields)
+        body = self.ports_client.list_ports(fields=fields)
         ports = body['ports']
         self.assertNotEmpty(ports, "Port list returned is empty")
         # Asserting the fields returned are correct
@@ -220,9 +231,9 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
         network = self.create_network()
         self.addCleanup(self.networks_client.delete_network, network['id'])
         subnet_1 = self.create_subnet(network)
-        self.addCleanup(self.client.delete_subnet, subnet_1['id'])
+        self.addCleanup(self.subnets_client.delete_subnet, subnet_1['id'])
         subnet_2 = self.create_subnet(network)
-        self.addCleanup(self.client.delete_subnet, subnet_2['id'])
+        self.addCleanup(self.subnets_client.delete_subnet, subnet_2['id'])
         fixed_ip_1 = [{'subnet_id': subnet_1['id']}]
         fixed_ip_2 = [{'subnet_id': subnet_2['id']}]
 
@@ -231,7 +242,7 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
         # Create a port with multiple IP addresses
         port = self.create_port(network,
                                 fixed_ips=fixed_ips)
-        self.addCleanup(self.client.delete_port, port['id'])
+        self.addCleanup(self.ports_client.delete_port, port['id'])
         self.assertEqual(2, len(port['fixed_ips']))
         check_fixed_ips = [subnet_1['id'], subnet_2['id']]
         for item in port['fixed_ips']:
@@ -247,21 +258,23 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
 
     def _update_port_with_security_groups(self, security_groups_names):
         subnet_1 = self.create_subnet(self.network)
-        self.addCleanup(self.client.delete_subnet, subnet_1['id'])
+        self.addCleanup(self.subnets_client.delete_subnet, subnet_1['id'])
         fixed_ip_1 = [{'subnet_id': subnet_1['id']}]
 
         security_groups_list = list()
+        sec_grps_client = self.security_groups_client
         for name in security_groups_names:
-            group_create_body = self.client.create_security_group(
+            group_create_body = sec_grps_client.create_security_group(
                 name=name)
-            self.addCleanup(self.client.delete_security_group,
+            self.addCleanup(self.security_groups_client.delete_security_group,
                             group_create_body['security_group']['id'])
             security_groups_list.append(group_create_body['security_group']
                                         ['id'])
         # Create a port
         sec_grp_name = data_utils.rand_name('secgroup')
-        security_group = self.client.create_security_group(name=sec_grp_name)
-        self.addCleanup(self.client.delete_security_group,
+        security_group = sec_grps_client.create_security_group(
+            name=sec_grp_name)
+        self.addCleanup(self.security_groups_client.delete_security_group,
                         security_group['security_group']['id'])
         post_body = {
             "name": data_utils.rand_name('port-'),
@@ -269,8 +282,8 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
             "network_id": self.network['id'],
             "admin_state_up": True,
             "fixed_ips": fixed_ip_1}
-        body = self.client.create_port(**post_body)
-        self.addCleanup(self.client.delete_port, body['port']['id'])
+        body = self.ports_client.create_port(**post_body)
+        self.addCleanup(self.ports_client.delete_port, body['port']['id'])
         port = body['port']
 
         # Update the port with security groups
@@ -280,7 +293,7 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
                        "admin_state_up": False,
                        "fixed_ips": fixed_ip_2,
                        "security_groups": security_groups_list}
-        body = self.client.update_port(port['id'], **update_body)
+        body = self.ports_client.update_port(port['id'], **update_body)
         port_show = body['port']
         # Verify the security groups and other attributes updated to port
         exclude_keys = set(port_show).symmetric_difference(update_body)
@@ -308,16 +321,16 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
     @test.idempotent_id('13e95171-6cbd-489c-9d7c-3f9c58215c18')
     def test_create_show_delete_port_user_defined_mac(self):
         # Create a port for a legal mac
-        body = self.client.create_port(network_id=self.network['id'])
+        body = self.ports_client.create_port(network_id=self.network['id'])
         old_port = body['port']
         free_mac_address = old_port['mac_address']
-        self.client.delete_port(old_port['id'])
+        self.ports_client.delete_port(old_port['id'])
         # Create a new port with user defined mac
-        body = self.client.create_port(network_id=self.network['id'],
-                                       mac_address=free_mac_address)
-        self.addCleanup(self.client.delete_port, body['port']['id'])
+        body = self.ports_client.create_port(network_id=self.network['id'],
+                                             mac_address=free_mac_address)
+        self.addCleanup(self.ports_client.delete_port, body['port']['id'])
         port = body['port']
-        body = self.client.show_port(port['id'])
+        body = self.ports_client.show_port(port['id'])
         show_port = body['port']
         self.assertEqual(free_mac_address,
                          show_port['mac_address'])
@@ -328,9 +341,9 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
         network = self.create_network()
         self.addCleanup(self.networks_client.delete_network, network['id'])
         subnet = self.create_subnet(network)
-        self.addCleanup(self.client.delete_subnet, subnet['id'])
+        self.addCleanup(self.subnets_client.delete_subnet, subnet['id'])
         port = self.create_port(network, security_groups=[])
-        self.addCleanup(self.client.delete_port, port['id'])
+        self.addCleanup(self.ports_client.delete_port, port['id'])
         self.assertIsNotNone(port['security_groups'])
         self.assertEmpty(port['security_groups'])
 
@@ -352,9 +365,9 @@ class PortsAdminExtendedAttrsTestJSON(base.BaseAdminNetworkTest):
     def test_create_port_binding_ext_attr(self):
         post_body = {"network_id": self.network['id'],
                      "binding:host_id": self.host_id}
-        body = self.admin_client.create_port(**post_body)
+        body = self.admin_ports_client.create_port(**post_body)
         port = body['port']
-        self.addCleanup(self.admin_client.delete_port, port['id'])
+        self.addCleanup(self.admin_ports_client.delete_port, port['id'])
         host_id = port['binding:host_id']
         self.assertIsNotNone(host_id)
         self.assertEqual(self.host_id, host_id)
@@ -362,11 +375,11 @@ class PortsAdminExtendedAttrsTestJSON(base.BaseAdminNetworkTest):
     @test.idempotent_id('6f6c412c-711f-444d-8502-0ac30fbf5dd5')
     def test_update_port_binding_ext_attr(self):
         post_body = {"network_id": self.network['id']}
-        body = self.admin_client.create_port(**post_body)
+        body = self.admin_ports_client.create_port(**post_body)
         port = body['port']
-        self.addCleanup(self.admin_client.delete_port, port['id'])
+        self.addCleanup(self.admin_ports_client.delete_port, port['id'])
         update_body = {"binding:host_id": self.host_id}
-        body = self.admin_client.update_port(port['id'], **update_body)
+        body = self.admin_ports_client.update_port(port['id'], **update_body)
         updated_port = body['port']
         host_id = updated_port['binding:host_id']
         self.assertIsNotNone(host_id)
@@ -376,18 +389,18 @@ class PortsAdminExtendedAttrsTestJSON(base.BaseAdminNetworkTest):
     def test_list_ports_binding_ext_attr(self):
         # Create a new port
         post_body = {"network_id": self.network['id']}
-        body = self.admin_client.create_port(**post_body)
+        body = self.admin_ports_client.create_port(**post_body)
         port = body['port']
-        self.addCleanup(self.admin_client.delete_port, port['id'])
+        self.addCleanup(self.admin_ports_client.delete_port, port['id'])
 
         # Update the port's binding attributes so that is now 'bound'
         # to a host
         update_body = {"binding:host_id": self.host_id}
-        self.admin_client.update_port(port['id'], **update_body)
+        self.admin_ports_client.update_port(port['id'], **update_body)
 
         # List all ports, ensure new port is part of list and its binding
         # attributes are set and accurate
-        body = self.admin_client.list_ports()
+        body = self.admin_ports_client.list_ports()
         ports_list = body['ports']
         pids_list = [p['id'] for p in ports_list]
         self.assertIn(port['id'], pids_list)
@@ -399,10 +412,11 @@ class PortsAdminExtendedAttrsTestJSON(base.BaseAdminNetworkTest):
 
     @test.idempotent_id('b54ac0ff-35fc-4c79-9ca3-c7dbd4ea4f13')
     def test_show_port_binding_ext_attr(self):
-        body = self.admin_client.create_port(network_id=self.network['id'])
+        body = self.admin_ports_client.create_port(
+            network_id=self.network['id'])
         port = body['port']
-        self.addCleanup(self.admin_client.delete_port, port['id'])
-        body = self.admin_client.show_port(port['id'])
+        self.addCleanup(self.admin_ports_client.delete_port, port['id'])
+        body = self.admin_ports_client.show_port(port['id'])
         show_port = body['port']
         self.assertEqual(port['binding:host_id'],
                          show_port['binding:host_id'])
@@ -414,11 +428,7 @@ class PortsAdminExtendedAttrsTestJSON(base.BaseAdminNetworkTest):
 
 class PortsIpV6TestJSON(PortsTestJSON):
     _ip_version = 6
-    _tenant_network_cidr = CONF.network.tenant_network_v6_cidr
-    _tenant_network_mask_bits = CONF.network.tenant_network_v6_mask_bits
 
 
 class PortsAdminExtendedAttrsIpV6TestJSON(PortsAdminExtendedAttrsTestJSON):
     _ip_version = 6
-    _tenant_network_cidr = CONF.network.tenant_network_v6_cidr
-    _tenant_network_mask_bits = CONF.network.tenant_network_v6_mask_bits

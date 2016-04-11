@@ -15,37 +15,22 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest.common import service_client
 from tempest import config
+from tempest.lib.common import rest_client
 
 CONF = config.CONF
 
 
-class NegativeRestClient(service_client.ServiceClient):
-    """
-    Version of RestClient that does not raise exceptions.
-    """
-    def __init__(self, auth_provider, service,
-                 build_interval=None, build_timeout=None,
-                 disable_ssl_certificate_validation=None,
-                 ca_certs=None, trace_requests=None):
+class NegativeRestClient(rest_client.RestClient):
+    """Version of RestClient that does not raise exceptions."""
+    def __init__(self, auth_provider, service, **kwargs):
         region, endpoint_type = self._get_region_and_endpoint_type(service)
         super(NegativeRestClient, self).__init__(
-            auth_provider,
-            service,
-            region,
-            endpoint_type=endpoint_type,
-            build_interval=build_interval,
-            build_timeout=build_timeout,
-            disable_ssl_certificate_validation=(
-                disable_ssl_certificate_validation),
-            ca_certs=ca_certs,
-            trace_requests=trace_requests)
+            auth_provider, service, region, endpoint_type=endpoint_type,
+            **kwargs)
 
     def _get_region_and_endpoint_type(self, service):
-        """
-        Returns the region for a specific service
-        """
+        """Returns the region for a specific service"""
         service_region = None
         service_endpoint_type = None
         for cfgname in dir(CONF._config):

@@ -13,10 +13,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest_lib import exceptions as lib_exc
-
 from tempest.common import custom_matchers
 from tempest import config
+from tempest.lib import exceptions as lib_exc
 import tempest.test
 
 CONF = config.CONF
@@ -90,10 +89,8 @@ class BaseObjectTest(tempest.test.BaseTestCase):
                 pass
 
     def assertHeaders(self, resp, target, method):
-        """
-        Common method to check the existence and the format of common response
-        headers
-        """
+        """Check the existence and the format of response headers"""
+
         self.assertThat(resp, custom_matchers.ExistsAllResponseHeaders(
                         target, method))
         self.assertThat(resp, custom_matchers.AreAllWellFormatted())

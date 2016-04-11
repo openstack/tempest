@@ -79,8 +79,8 @@ class QuotasTestJSON(base.BaseV2ComputeTest):
     @test.idempotent_id('cd65d997-f7e4-4966-a7e9-d5001b674fdc')
     def test_compare_tenant_quotas_with_default_quotas(self):
         # Tenants are created with the default quota values
-        defualt_quota_set = \
+        default_quota_set = \
             self.client.show_default_quota_set(self.tenant_id)['quota_set']
         tenant_quota_set = (self.client.show_quota_set(self.tenant_id)
                             ['quota_set'])
-        self.assertEqual(defualt_quota_set, tenant_quota_set)
+        self.assertEqual(default_quota_set, tenant_quota_set)

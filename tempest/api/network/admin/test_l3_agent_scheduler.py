@@ -14,9 +14,11 @@
 
 from tempest.api.network import base
 from tempest.common.utils import data_utils
+from tempest import config
 from tempest import exceptions
 from tempest import test
 
+CONF = config.CONF
 AGENT_TYPE = 'L3 agent'
 AGENT_MODES = (
     'legacy',
@@ -51,7 +53,7 @@ class L3AgentSchedulerTestJSON(base.BaseAdminNetworkTest):
     @classmethod
     def resource_setup(cls):
         super(L3AgentSchedulerTestJSON, cls).resource_setup()
-        body = cls.admin_client.list_agents()
+        body = cls.admin_agents_client.list_agents()
         agents = body['agents']
         for agent in agents:
             # TODO(armax): falling back on default _agent_mode can be
@@ -72,40 +74,54 @@ class L3AgentSchedulerTestJSON(base.BaseAdminNetworkTest):
         # query and setup steps are only required if the extension is available
         # and only if the router's default type is distributed.
         if test.is_extension_enabled('dvr', 'network'):
-            cls.is_dvr_router = cls.admin_client.show_router(
+            cls.is_dvr_router = cls.admin_routers_client.show_router(
                 cls.router['id'])['router'].get('distributed', False)
             if cls.is_dvr_router:
                 cls.network = cls.create_network()
                 cls.subnet = cls.create_subnet(cls.network)
                 cls.port = cls.create_port(cls.network)
-                cls.client.add_router_interface_with_port_id(
-                    cls.router['id'], cls.port['id'])
+                cls.routers_client.add_router_interface(
+                    cls.router['id'], port_id=cls.port['id'])
+                # NOTE: Sometimes we have seen this test fail with dvr in,
+                # multinode tests, since the dhcp port is not created before
+                # the test gets executed and so the router is not scheduled
+                # on the given agent. By adding the external gateway info to
+                # the router, the router should be properly scheduled in the
+                # dvr_snat node.
+                # This is a temporary work around to prevent a race condition.
+                external_gateway_info = {
+                    'network_id': CONF.network.public_network_id,
+                    'enable_snat': True}
+                cls.admin_routers_client.update_router_with_snat_gw_info(
+                    cls.router['id'],
+                    external_gateway_info=external_gateway_info)
 
     @classmethod
     def resource_cleanup(cls):
         if cls.is_dvr_router:
-            cls.client.remove_router_interface_with_port_id(
-                cls.router['id'], cls.port['id'])
+            cls.routers_client.remove_router_interface(cls.router['id'],
+                                                       port_id=cls.port['id'])
         super(L3AgentSchedulerTestJSON, cls).resource_cleanup()
 
     @test.idempotent_id('b7ce6e89-e837-4ded-9b78-9ed3c9c6a45a')
     def test_list_routers_on_l3_agent(self):
-        self.admin_client.list_routers_on_l3_agent(self.agent['id'])
+        self.admin_agents_client.list_routers_on_l3_agent(self.agent['id'])
 
     @test.idempotent_id('9464e5e7-8625-49c3-8fd1-89c52be59d66')
     def test_add_list_remove_router_on_l3_agent(self):
         l3_agent_ids = list()
-        self.admin_client.add_router_to_l3_agent(
+        self.admin_agents_client.create_router_on_l3_agent(
             self.agent['id'],
-            self.router['id'])
+            router_id=self.router['id'])
         body = (
-            self.admin_client.list_l3_agents_hosting_router(self.router['id']))
+            self.admin_routers_client.list_l3_agents_hosting_router(
+                self.router['id']))
         for agent in body['agents']:
             l3_agent_ids.append(agent['id'])
             self.assertIn('agent_type', agent)
             self.assertEqual('L3 agent', agent['agent_type'])
         self.assertIn(self.agent['id'], l3_agent_ids)
-        body = self.admin_client.remove_router_from_l3_agent(
+        body = self.admin_agents_client.delete_router_from_l3_agent(
             self.agent['id'],
             self.router['id'])
         # NOTE(afazekas): The deletion not asserted, because neutron

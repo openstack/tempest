@@ -16,7 +16,6 @@ to make this clear.
 |    api/ - API tests
 |    scenario/ - complex scenario tests
 |    stress/ - stress tests
-|    thirdparty/ - 3rd party api tests
 
 Each of these directories contains different types of tests. What
 belongs in each directory, the rules and examples for good tests, are
@@ -55,14 +54,6 @@ Stress tests are designed to stress an OpenStack environment by running a high
 workload against it and seeing what breaks. The stress test framework runs
 several test jobs in parallel and can run any existing test in Tempest as a
 stress job.
-
-:ref:`third_party_field_guide`
-------------------------------
-
-Many openstack components include 3rdparty API support. It is
-completely legitimate for Tempest to include tests of 3rdparty APIs,
-but those should be kept separate from the normal OpenStack
-validation.
 
 :ref:`unit_tests_field_guide`
 -----------------------------

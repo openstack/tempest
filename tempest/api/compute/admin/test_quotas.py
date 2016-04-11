@@ -111,7 +111,7 @@ class QuotasAdminTestJSON(base.BaseV2ComputeAdminTest):
 
         # Verify that GET shows the updated quota set of user
         user_name = data_utils.rand_name('cpu_quota_user')
-        password = data_utils.rand_name('password')
+        password = data_utils.rand_password()
         email = user_name + '@testmail.tm'
         user = self.identity_utils.create_user(username=user_name,
                                                password=password,
@@ -151,8 +151,7 @@ class QuotasAdminTestJSON(base.BaseV2ComputeAdminTest):
 
 
 class QuotaClassesAdminTestJSON(base.BaseV2ComputeAdminTest):
-    """Tests the os-quota-class-sets API to update default quotas.
-    """
+    """Tests the os-quota-class-sets API to update default quotas."""
 
     def setUp(self):
         # All test cases in this class need to externally lock on doing

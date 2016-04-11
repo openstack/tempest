@@ -19,7 +19,6 @@ import os
 import re
 import sys
 import time
-import urllib
 import uuid
 
 import fixtures
@@ -27,21 +26,25 @@ from oslo_log import log as logging
 from oslo_serialization import jsonutils as json
 from oslo_utils import importutils
 import six
+from six.moves import urllib
 import testscenarios
 import testtools
 
 from tempest import clients
 from tempest.common import cred_client
-from tempest.common import credentials
+from tempest.common import credentials_factory as credentials
 from tempest.common import fixed_network
 import tempest.common.generator.valid_generator as valid
 import tempest.common.validation_resources as vresources
 from tempest import config
 from tempest import exceptions
+from tempest.lib import decorators
 
 LOG = logging.getLogger(__name__)
 
 CONF = config.CONF
+
+idempotent_id = decorators.idempotent_id
 
 
 def attr(**kwargs):
@@ -59,23 +62,6 @@ def attr(**kwargs):
                 f = testtools.testcase.attr(attr)(f)
         return f
 
-    return decorator
-
-
-def idempotent_id(id):
-    """Stub for metadata decorator"""
-    if not isinstance(id, six.string_types):
-        raise TypeError('Test idempotent_id must be string not %s'
-                        '' % type(id).__name__)
-    uuid.UUID(id)
-
-    def decorator(f):
-        f = testtools.testcase.attr('id-%s' % id)(f)
-        if f.__doc__:
-            f.__doc__ = 'Test idempotent id: %s\n%s' % (id, f.__doc__)
-        else:
-            f.__doc__ = 'Test idempotent id: %s' % id
-        return f
     return decorator
 
 
@@ -194,6 +180,19 @@ def is_extension_enabled(extension_name, service):
     return False
 
 
+def is_scheduler_filter_enabled(filter_name):
+    """Check the list of enabled compute scheduler filters from config. """
+
+    filters = CONF.compute_feature_enabled.scheduler_available_filters
+    if len(filters) == 0:
+        return False
+    if 'all' in filters:
+        return True
+    if filter_name in filters:
+        return True
+    return False
+
+
 at_exit_set = set()
 
 
@@ -211,6 +210,7 @@ atexit.register(validate_tearDownClass)
 class BaseTestCase(testtools.testcase.WithAttributes,
                    testtools.TestCase):
     """The test base class defines Tempest framework for class level fixtures.
+
     `setUpClass` and `tearDownClass` are defined here and cannot be overwritten
     by subclasses (enforced via hacking rule T105).
 
@@ -224,7 +224,7 @@ class BaseTestCase(testtools.testcase.WithAttributes,
     Tear-down is also split in a series of steps (teardown stages), which are
     stacked for execution only if the corresponding setup stage had been
     reached during the setup phase. Tear-down stages are:
-    - clear_isolated_creds (defined in the base test class)
+    - clear_credentials (defined in the base test class)
     - resource_cleanup
     """
 
@@ -246,6 +246,12 @@ class BaseTestCase(testtools.testcase.WithAttributes,
     log_format = ('%(asctime)s %(process)d %(levelname)-8s '
                   '[%(name)s] %(message)s')
 
+    # Client manager class to use in this test case.
+    client_manager = clients.Manager
+
+    # A way to adjust slow test classes
+    TIMEOUT_SCALING_FACTOR = 1
+
     @classmethod
     def setUpClass(cls):
         # It should never be overridden by descendants
@@ -258,7 +264,7 @@ class BaseTestCase(testtools.testcase.WithAttributes,
         cls.skip_checks()
         try:
             # Allocation of all required credentials and client managers
-            cls.teardowns.append(('credentials', cls.clear_isolated_creds))
+            cls.teardowns.append(('credentials', cls.clear_credentials))
             cls.setup_credentials()
             # Shortcuts to clients
             cls.setup_clients()
@@ -305,7 +311,7 @@ class BaseTestCase(testtools.testcase.WithAttributes,
                     LOG.exception("teardown of %s failed: %s" % (name, te))
                 if not etype:
                     etype, value, trace = sys_exec_info
-        # If exceptions were raised during teardown, an not before, re-raise
+        # If exceptions were raised during teardown, and not before, re-raise
         # the first one
         if re_raise and etype is not None:
             try:
@@ -315,18 +321,23 @@ class BaseTestCase(testtools.testcase.WithAttributes,
 
     @classmethod
     def skip_checks(cls):
-        """Class level skip checks. Subclasses verify in here all
-        conditions that might prevent the execution of the entire test class.
+        """Class level skip checks.
+
+        Subclasses verify in here all conditions that might prevent the
+        execution of the entire test class.
         Checks implemented here may not make use API calls, and should rely on
         configuration alone.
         In general skip checks that require an API call are discouraged.
         If one is really needed it may be implemented either in the
         resource_setup or at test level.
         """
-        if 'admin' in cls.credentials and not credentials.is_admin_available():
+        identity_version = cls.get_identity_version()
+        if 'admin' in cls.credentials and not credentials.is_admin_available(
+                identity_version=identity_version):
             msg = "Missing Identity Admin API credentials in configuration."
             raise cls.skipException(msg)
-        if 'alt' in cls.credentials and not credentials.is_alt_available():
+        if 'alt' in cls.credentials and not credentials.is_alt_available(
+                identity_version=identity_version):
             msg = "Missing a 2nd set of API credentials in configuration."
             raise cls.skipException(msg)
         if hasattr(cls, 'identity_version'):
@@ -340,6 +351,7 @@ class BaseTestCase(testtools.testcase.WithAttributes,
     @classmethod
     def setup_credentials(cls):
         """Allocate credentials and the client managers from them.
+
         A test class that requires network resources must override
         setup_credentials and defined the required resources before super
         is invoked.
@@ -377,18 +389,18 @@ class BaseTestCase(testtools.testcase.WithAttributes,
 
     @classmethod
     def resource_setup(cls):
-        """Class level resource setup for test cases.
-        """
+        """Class level resource setup for test cases."""
         if hasattr(cls, "os"):
             cls.validation_resources = vresources.create_validation_resources(
                 cls.os, cls.validation_resources)
         else:
-            LOG.warn("Client manager not found, validation resources not"
-                     " created")
+            LOG.warning("Client manager not found, validation resources not"
+                        " created")
 
     @classmethod
     def resource_cleanup(cls):
         """Class level resource cleanup for test cases.
+
         Resource cleanup must be able to handle the case of partially setup
         resources, in case a failure during `resource_setup` should happen.
         """
@@ -398,8 +410,8 @@ class BaseTestCase(testtools.testcase.WithAttributes,
                                                       cls.validation_resources)
                 cls.validation_resources = {}
             else:
-                LOG.warn("Client manager not found, validation resources not"
-                         " deleted")
+                LOG.warning("Client manager not found, validation resources "
+                            "not deleted")
 
     def setUp(self):
         super(BaseTestCase, self).setUp()
@@ -410,7 +422,7 @@ class BaseTestCase(testtools.testcase.WithAttributes,
         at_exit_set.add(self.__class__)
         test_timeout = os.environ.get('OS_TEST_TIMEOUT', 0)
         try:
-            test_timeout = int(test_timeout)
+            test_timeout = int(test_timeout) * self.TIMEOUT_SCALING_FACTOR
         except ValueError:
             test_timeout = 0
         if test_timeout > 0:
@@ -443,15 +455,33 @@ class BaseTestCase(testtools.testcase.WithAttributes,
         """
         if CONF.identity.auth_version == 'v2':
             client = self.os_admin.identity_client
+            users_client = self.os_admin.users_client
+            project_client = self.os_admin.tenants_client
+            roles_client = self.os_admin.roles_client
+            domains_client = None
         else:
             client = self.os_admin.identity_v3_client
+            users_client = self.os_admin.users_v3_client
+            project_client = self.os_admin.projects_client
+            roles_client = self.os_admin.roles_v3_client
+            domains_client = self.os_admin.domains_client
 
         try:
             domain = client.auth_provider.credentials.project_domain_name
         except AttributeError:
             domain = 'Default'
 
-        return cred_client.get_creds_client(client, domain)
+        return cred_client.get_creds_client(client, project_client,
+                                            users_client,
+                                            roles_client,
+                                            domains_client,
+                                            project_domain_name=domain)
+
+    @classmethod
+    def get_identity_version(cls):
+        """Returns the identity version used by the test class"""
+        identity_version = getattr(cls, 'identity_version', None)
+        return identity_version or CONF.identity.auth_version
 
     @classmethod
     def _get_credentials_provider(cls):
@@ -464,13 +494,11 @@ class BaseTestCase(testtools.testcase.WithAttributes,
                 not cls._creds_provider.name == cls.__name__):
             force_tenant_isolation = getattr(cls, 'force_tenant_isolation',
                                              False)
-            identity_version = getattr(cls, 'identity_version', None)
-            identity_version = identity_version or CONF.identity.auth_version
 
-            cls._creds_provider = credentials.get_isolated_credentials(
+            cls._creds_provider = credentials.get_credentials_provider(
                 name=cls.__name__, network_resources=cls.network_resources,
                 force_tenant_isolation=force_tenant_isolation,
-                identity_version=identity_version)
+                identity_version=cls.get_identity_version())
         return cls._creds_provider
 
     @classmethod
@@ -484,7 +512,7 @@ class BaseTestCase(testtools.testcase.WithAttributes,
         :param credential_type: string - primary, alt or admin
         :param roles: list of roles
 
-        :returns the created client manager
+        :returns: the created client manager
         :raises skipException: if the requested credentials are not available
         """
         if all([roles, credential_type]):
@@ -512,21 +540,20 @@ class BaseTestCase(testtools.testcase.WithAttributes,
             else:
                 raise exceptions.InvalidCredentials(
                     "Invalid credentials type %s" % credential_type)
-        return clients.Manager(credentials=creds, service=cls._service)
+        return cls.client_manager(credentials=creds, service=cls._service)
 
     @classmethod
-    def clear_isolated_creds(cls):
-        """
-        Clears isolated creds if set
-        """
+    def clear_credentials(cls):
+        """Clears creds if set"""
         if hasattr(cls, '_creds_provider'):
-            cls._creds_provider.clear_isolated_creds()
+            cls._creds_provider.clear_creds()
 
     @classmethod
     def set_validation_resources(cls, keypair=None, floating_ip=None,
                                  security_group=None,
                                  security_group_rules=None):
         """Specify which ssh server validation resources should be created.
+
         Each of the argument must be set to either None, True or False, with
         None - use default from config (security groups and security group
                rules get created when set to None)
@@ -584,25 +611,38 @@ class BaseTestCase(testtools.testcase.WithAttributes,
                 'dhcp': dhcp}
 
     @classmethod
-    def get_tenant_network(cls):
+    def get_tenant_network(cls, credentials_type='primary'):
         """Get the network to be used in testing
+
+        :param credentials_type: The type of credentials for which to get the
+                                 tenant network
 
         :return: network dict including 'id' and 'name'
         """
-        # Make sure isolated_creds exists and get a network client
-        networks_client = cls.get_client_manager().compute_networks_client
+        # Get a manager for the given credentials_type, but at least
+        # always fall back on getting the manager for primary credentials
+        if isinstance(credentials_type, six.string_types):
+            manager = cls.get_client_manager(credential_type=credentials_type)
+        elif isinstance(credentials_type, list):
+            manager = cls.get_client_manager(roles=credentials_type[1:])
+        else:
+            manager = cls.get_client_manager()
+
+        # Make sure cred_provider exists and get a network client
+        networks_client = manager.compute_networks_client
         cred_provider = cls._get_credentials_provider()
         # In case of nova network, isolated tenants are not able to list the
-        # network configured in fixed_network_name, even if the can use it
+        # network configured in fixed_network_name, even if they can use it
         # for their servers, so using an admin network client to validate
         # the network name
         if (not CONF.service_available.neutron and
-                credentials.is_admin_available()):
+                credentials.is_admin_available(
+                    identity_version=cls.get_identity_version())):
             admin_creds = cred_provider.get_admin_creds()
             admin_manager = clients.Manager(admin_creds)
             networks_client = admin_manager.compute_networks_client
-        return fixed_network.get_tenant_network(cred_provider,
-                                                networks_client)
+        return fixed_network.get_tenant_network(
+            cred_provider, networks_client, CONF.compute.fixed_network_name)
 
     def assertEmpty(self, list, msg=None):
         self.assertTrue(len(list) == 0, msg)
@@ -623,10 +663,11 @@ class NegativeAutoTest(BaseTestCase):
 
     @staticmethod
     def load_tests(*args):
-        """
-        Wrapper for testscenarios to set the mandatory scenarios variable
-        only in case a real test loader is in place. Will be automatically
-        called in case the variable "load_tests" is set.
+        """Wrapper for testscenarios
+
+        To set the mandatory scenarios variable only in case a real test
+        loader is in place. Will be automatically called in case the variable
+        "load_tests" is set.
         """
         if getattr(args[0], 'suiteClass', None) is not None:
             loader, standard_tests, pattern = args
@@ -641,8 +682,7 @@ class NegativeAutoTest(BaseTestCase):
 
     @staticmethod
     def generate_scenario(description):
-        """
-        Generates the test scenario list for a given description.
+        """Generates the test scenario list for a given description.
 
         :param description: A file or dictionary with the following entries:
             name (required) name for the api
@@ -686,7 +726,8 @@ class NegativeAutoTest(BaseTestCase):
         return scenario_list
 
     def execute(self, description):
-        """
+        """Execute a http call
+
         Execute a http call on an api that are expected to
         result in client errors. First it uses invalid resources that are part
         of the url, and then invalid data for queries and http request bodies.
@@ -747,7 +788,8 @@ class NegativeAutoTest(BaseTestCase):
                             "mechanism")
 
         if "admin_client" in description and description["admin_client"]:
-            if not credentials.is_admin_available():
+            if not credentials.is_admin_available(
+                    identity_version=self.get_identity_version()):
                 msg = ("Missing Identity Admin API credentials in"
                        "configuration.")
                 raise self.skipException(msg)
@@ -765,7 +807,7 @@ class NegativeAutoTest(BaseTestCase):
         if not json_dict:
             return url, None
         elif method in ["GET", "HEAD", "PUT", "DELETE"]:
-            return "%s?%s" % (url, urllib.urlencode(json_dict)), None
+            return "%s?%s" % (url, urllib.parse.urlencode(json_dict)), None
         else:
             return url, json.dumps(json_dict)
 
@@ -779,8 +821,9 @@ class NegativeAutoTest(BaseTestCase):
 
     @classmethod
     def set_resource(cls, name, resource):
-        """
-        This function can be used in setUpClass context to register a resoruce
+        """Register a resource for a test
+
+        This function can be used in setUpClass context to register a resource
         for a test.
 
         :param name: The name of the kind of resource such as "flavor", "role",
@@ -790,10 +833,10 @@ class NegativeAutoTest(BaseTestCase):
         cls._resources[name] = resource
 
     def get_resource(self, name):
-        """
-        Return a valid uuid for a type of resource. If a real resource is
-        needed as part of a url then this method should return one. Otherwise
-        it can return None.
+        """Return a valid uuid for a type of resource.
+
+        If a real resource is needed as part of a url then this method should
+        return one. Otherwise it can return None.
 
         :param name: The name of the kind of resource such as "flavor", "role",
             etc.
@@ -810,9 +853,7 @@ class NegativeAutoTest(BaseTestCase):
 
 
 def SimpleNegativeAutoTest(klass):
-    """
-    This decorator registers a test function on basis of the class name.
-    """
+    """This decorator registers a test function on basis of the class name."""
     @attr(type=['negative'])
     def generic_test(self):
         if hasattr(self, '_schema'):
@@ -829,10 +870,9 @@ def SimpleNegativeAutoTest(klass):
 
 
 def call_until_true(func, duration, sleep_for):
-    """
-    Call the given function until it returns True (and return True) or
-    until the specified duration (in seconds) elapses (and return
-    False).
+    """Call the given function until it returns True (and return True)
+
+    or until the specified duration (in seconds) elapses (and return False).
 
     :param func: A zero argument callable that returns True on success.
     :param duration: The number of seconds for which to attempt a

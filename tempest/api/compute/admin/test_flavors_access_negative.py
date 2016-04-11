@@ -15,17 +15,15 @@
 
 import uuid
 
-from tempest_lib import exceptions as lib_exc
-
 from tempest.api.compute import base
 from tempest.common.utils import data_utils
+from tempest.lib import exceptions as lib_exc
 from tempest import test
 
 
 class FlavorsAccessNegativeTestJSON(base.BaseV2ComputeAdminTest):
+    """Tests Flavor Access API extension.
 
-    """
-    Tests Flavor Access API extension.
     Add and remove Flavor Access require admin privileges.
     """
 

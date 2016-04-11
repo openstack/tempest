@@ -34,15 +34,16 @@ class RoutersTestDVR(base.BaseRouterTest):
         # has a distributed attribute.
         super(RoutersTestDVR, cls).resource_setup()
         name = data_utils.rand_name('pretest-check')
-        router = cls.admin_client.create_router(name)
-        cls.admin_client.delete_router(router['router']['id'])
+        router = cls.admin_routers_client.create_router(name=name)
+        cls.admin_routers_client.delete_router(router['router']['id'])
         if 'distributed' not in router['router']:
             msg = "'distributed' flag not found. DVR Possibly not enabled"
             raise cls.skipException(msg)
 
     @test.idempotent_id('08a2a0a8-f1e4-4b34-8e30-e522e836c44e')
     def test_distributed_router_creation(self):
-        """
+        """Test distributed router creation
+
         Test uses administrative credentials to creates a
         DVR (Distributed Virtual Routing) router using the
         distributed=True.
@@ -52,14 +53,16 @@ class RoutersTestDVR(base.BaseRouterTest):
         set to True
         """
         name = data_utils.rand_name('router')
-        router = self.admin_client.create_router(name, distributed=True)
-        self.addCleanup(self.admin_client.delete_router,
+        router = self.admin_routers_client.create_router(name=name,
+                                                         distributed=True)
+        self.addCleanup(self.admin_routers_client.delete_router,
                         router['router']['id'])
         self.assertTrue(router['router']['distributed'])
 
     @test.idempotent_id('8a0a72b4-7290-4677-afeb-b4ffe37bc352')
     def test_centralized_router_creation(self):
-        """
+        """Test centralized router creation
+
         Test uses administrative credentials to creates a
         CVR (Centralized Virtual Routing) router using the
         distributed=False.
@@ -70,17 +73,19 @@ class RoutersTestDVR(base.BaseRouterTest):
         as opposed to a "Distributed Virtual Router"
         """
         name = data_utils.rand_name('router')
-        router = self.admin_client.create_router(name, distributed=False)
-        self.addCleanup(self.admin_client.delete_router,
+        router = self.admin_routers_client.create_router(name=name,
+                                                         distributed=False)
+        self.addCleanup(self.admin_routers_client.delete_router,
                         router['router']['id'])
         self.assertFalse(router['router']['distributed'])
 
     @test.idempotent_id('acd43596-c1fb-439d-ada8-31ad48ae3c2e')
     def test_centralized_router_update_to_dvr(self):
-        """
+        """Test centralized router update
+
         Test uses administrative credentials to creates a
         CVR (Centralized Virtual Routing) router using the
-        distributed=False.Then it will "update" the router
+        distributed=False. Then it will "update" the router
         distributed attribute to True
 
         Acceptance
@@ -90,11 +95,12 @@ class RoutersTestDVR(base.BaseRouterTest):
         """
         name = data_utils.rand_name('router')
         # router needs to be in admin state down in order to be upgraded to DVR
-        router = self.admin_client.create_router(name, distributed=False,
-                                                 admin_state_up=False)
-        self.addCleanup(self.admin_client.delete_router,
+        router = self.admin_routers_client.create_router(name=name,
+                                                         distributed=False,
+                                                         admin_state_up=False)
+        self.addCleanup(self.admin_routers_client.delete_router,
                         router['router']['id'])
         self.assertFalse(router['router']['distributed'])
-        router = self.admin_client.update_router(router['router']['id'],
-                                                 distributed=True)
+        router = self.admin_routers_client.update_router(
+            router['router']['id'], distributed=True)
         self.assertTrue(router['router']['distributed'])

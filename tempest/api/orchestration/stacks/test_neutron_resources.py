@@ -16,7 +16,6 @@ import logging
 import netaddr
 
 from tempest.api.orchestration import base
-from tempest import clients
 from tempest.common.utils import data_utils
 from tempest import config
 from tempest import exceptions
@@ -31,19 +30,22 @@ class NeutronResourcesTestJSON(base.BaseOrchestrationTest):
 
     @classmethod
     def skip_checks(cls):
+        msg = "Skipped until Bug: 1547261 is resolved."
+        raise cls.skipException(msg)
         super(NeutronResourcesTestJSON, cls).skip_checks()
         if not CONF.service_available.neutron:
             raise cls.skipException("Neutron support is required")
 
     @classmethod
     def setup_credentials(cls):
+        cls.set_network_resources()
         super(NeutronResourcesTestJSON, cls).setup_credentials()
-        cls.os = clients.Manager()
 
     @classmethod
     def setup_clients(cls):
         super(NeutronResourcesTestJSON, cls).setup_clients()
-        cls.network_client = cls.os.network_client
+        cls.subnets_client = cls.os.subnets_client
+        cls.ports_client = cls.os.ports_client
 
     @classmethod
     def resource_setup(cls):
@@ -55,8 +57,8 @@ class NeutronResourcesTestJSON(base.BaseOrchestrationTest):
                             cls._create_keypair()['name'])
         cls.external_network_id = CONF.network.public_network_id
 
-        tenant_cidr = netaddr.IPNetwork(CONF.network.tenant_network_cidr)
-        mask_bits = CONF.network.tenant_network_mask_bits
+        tenant_cidr = netaddr.IPNetwork(CONF.network.project_network_cidr)
+        mask_bits = CONF.network.project_network_mask_bits
         cls.subnet_cidr = tenant_cidr.subnet(mask_bits).next()
 
         # create the stack
@@ -87,7 +89,7 @@ class NeutronResourcesTestJSON(base.BaseOrchestrationTest):
                 server_id = body['physical_resource_id']
                 LOG.debug('Console output for %s', server_id)
                 output = cls.servers_client.get_console_output(
-                    server_id, None)['output']
+                    server_id)['output']
                 LOG.debug(output)
             raise e
 
@@ -130,7 +132,7 @@ class NeutronResourcesTestJSON(base.BaseOrchestrationTest):
     def test_created_subnet(self):
         """Verifies created subnet."""
         subnet_id = self.test_resources.get('Subnet')['physical_resource_id']
-        body = self.network_client.show_subnet(subnet_id)
+        body = self.subnets_client.show_subnet(subnet_id)
         subnet = body['subnet']
         network_id = self.test_resources.get('Network')['physical_resource_id']
         self.assertEqual(subnet_id, subnet['id'])
@@ -148,7 +150,7 @@ class NeutronResourcesTestJSON(base.BaseOrchestrationTest):
     def test_created_router(self):
         """Verifies created router."""
         router_id = self.test_resources.get('Router')['physical_resource_id']
-        body = self.network_client.show_router(router_id)
+        body = self.routers_client.show_router(router_id)
         router = body['router']
         self.assertEqual(self.neutron_basic_template['resources'][
             'Router']['properties']['name'], router['name'])
@@ -163,7 +165,7 @@ class NeutronResourcesTestJSON(base.BaseOrchestrationTest):
         router_id = self.test_resources.get('Router')['physical_resource_id']
         network_id = self.test_resources.get('Network')['physical_resource_id']
         subnet_id = self.test_resources.get('Subnet')['physical_resource_id']
-        body = self.network_client.list_ports()
+        body = self.ports_client.list_ports()
         ports = body['ports']
         router_ports = filter(lambda port: port['device_id'] ==
                               router_id, ports)
