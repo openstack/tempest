@@ -34,13 +34,15 @@ LOG = logging.getLogger(__name__)
 def replace_version(url, new_version):
     parts = urlparse.urlparse(url)
     version_path = '/%s' % new_version
-    path = re.sub(r'(^|/)+v\d+(?:\.\d+)?',
-                  version_path,
-                  parts.path,
-                  count=1)
+    path, subs = re.subn(r'(^|/)+v\d+(?:\.\d+)?',
+                         version_path,
+                         parts.path,
+                         count=1)
+    if not subs:
+        path = '%s%s' % (parts.path.rstrip('/'), version_path)
     url = urlparse.urlunparse((parts.scheme,
                                parts.netloc,
-                               path or version_path,
+                               path,
                                parts.params,
                                parts.query,
                                parts.fragment))

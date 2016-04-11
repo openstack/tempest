@@ -599,21 +599,18 @@ class TestReplaceVersion(base.TestCase):
             auth.replace_version('http://localhost:35357', 'v2.0'))
 
     def test_no_version_base_solidus(self):
-        # TODO(blk-u): This doesn't look like it works as expected.
         self.assertEqual(
-            'http://localhost:35357/',
+            'http://localhost:35357/v2.0',
             auth.replace_version('http://localhost:35357/', 'v2.0'))
 
     def test_no_version_path(self):
-        # TODO(blk-u): This doesn't look like it works as expected.
         self.assertEqual(
-            'http://localhost/identity',
+            'http://localhost/identity/v2.0',
             auth.replace_version('http://localhost/identity', 'v2.0'))
 
     def test_no_version_path_solidus(self):
-        # TODO(blk-u): This doesn't look like it works as expected.
         self.assertEqual(
-            'http://localhost/identity/',
+            'http://localhost/identity/v2.0',
             auth.replace_version('http://localhost/identity/', 'v2.0'))
 
     def test_path_version(self):
