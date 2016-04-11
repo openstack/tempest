@@ -33,7 +33,7 @@ CONF_PUB_ROUTER = None
 CONF_TENANTS = None
 CONF_USERS = None
 
-IS_CEILOMETER = None
+IS_AODH = None
 IS_CINDER = None
 IS_GLANCE = None
 IS_HEAT = None
@@ -51,14 +51,14 @@ def init_conf():
     global CONF_PUB_ROUTER
     global CONF_TENANTS
     global CONF_USERS
-    global IS_CEILOMETER
+    global IS_AODH
     global IS_CINDER
     global IS_GLANCE
     global IS_HEAT
     global IS_NEUTRON
     global IS_NOVA
 
-    IS_CEILOMETER = CONF.service_available.ceilometer
+    IS_AODH = CONF.service_available.aodh
     IS_CINDER = CONF.service_available.cinder
     IS_GLANCE = CONF.service_available.glance
     IS_HEAT = CONF.service_available.heat
@@ -70,25 +70,25 @@ def init_conf():
     CONF_PRIV_NETWORK_NAME = CONF.compute.fixed_network_name
     CONF_PUB_NETWORK = CONF.network.public_network_id
     CONF_PUB_ROUTER = CONF.network.public_router_id
-    CONF_TENANTS = [CONF.auth.admin_tenant_name,
-                    CONF.identity.tenant_name,
-                    CONF.identity.alt_tenant_name]
+    CONF_TENANTS = [CONF.auth.admin_project_name,
+                    CONF.identity.project_name,
+                    CONF.identity.alt_project_name]
     CONF_USERS = [CONF.auth.admin_username, CONF.identity.username,
                   CONF.identity.alt_username]
 
     if IS_NEUTRON:
         CONF_PRIV_NETWORK = _get_network_id(CONF.compute.fixed_network_name,
-                                            CONF.auth.admin_tenant_name)
+                                            CONF.auth.admin_project_name)
         CONF_NETWORKS = [CONF_PUB_NETWORK, CONF_PRIV_NETWORK]
 
 
-def _get_network_id(net_name, tenant_name):
+def _get_network_id(net_name, project_name):
     am = credentials.AdminManager()
     net_cl = am.networks_client
     tn_cl = am.tenants_client
 
     networks = net_cl.list_networks()
-    tenant = identity.get_tenant_by_name(tn_cl, tenant_name)
+    tenant = identity.get_tenant_by_name(tn_cl, project_name)
     t_id = tenant['id']
     n_id = None
     for net in networks['networks']:
@@ -710,7 +710,7 @@ class NetworkSubnetService(NetworkService):
 class TelemetryAlarmService(BaseService):
     def __init__(self, manager, **kwargs):
         super(TelemetryAlarmService, self).__init__(kwargs)
-        self.client = manager.telemetry_client
+        self.client = manager.alarming_client
 
     def list(self):
         client = self.client
@@ -909,7 +909,7 @@ class TenantService(BaseService):
         if not self.is_save_state:
             tenants = [tenant for tenant in tenants if (tenant['id']
                        not in self.saved_state_json['tenants'].keys()
-                       and tenant['name'] != CONF.auth.admin_tenant_name)]
+                       and tenant['name'] != CONF.auth.admin_project_name)]
 
         if self.is_preserve:
             tenants = [tenant for tenant in tenants if tenant['name']
@@ -976,7 +976,7 @@ class DomainService(BaseService):
 
 def get_tenant_cleanup_services():
     tenant_services = []
-    if IS_CEILOMETER:
+    if IS_AODH:
         tenant_services.append(TelemetryAlarmService)
     if IS_NOVA:
         tenant_services.append(ServerService)

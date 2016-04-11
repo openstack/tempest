@@ -190,7 +190,7 @@ class TempestCleanup(command.Command):
         rl_cl = self.admin_mgr.roles_client
 
         tenant = identity.get_tenant_by_name(tn_cl,
-                                             CONF.auth.admin_tenant_name)
+                                             CONF.auth.admin_project_name)
         self.admin_tenant_id = tenant['id']
 
         user = identity.get_user_by_username(tn_cl, self.admin_tenant_id,
