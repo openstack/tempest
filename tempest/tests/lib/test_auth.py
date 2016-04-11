@@ -570,3 +570,68 @@ class TestKeystoneV3Credentials(base.TestCase):
         attrs = {'tenant_name': 'tenant', 'project_name': 'project'}
         self.assertRaises(
             exceptions.InvalidCredentials, auth.KeystoneV3Credentials, **attrs)
+
+
+class TestReplaceVersion(base.TestCase):
+    def test_version_no_trailing_path(self):
+        self.assertEqual(
+            'http://localhost:35357/v2.0',
+            auth.replace_version('http://localhost:35357/v3', 'v2.0'))
+
+    def test_version_no_trailing_path_solidus(self):
+        self.assertEqual(
+            'http://localhost:35357/v2.0/',
+            auth.replace_version('http://localhost:35357/v3/', 'v2.0'))
+
+    def test_version_trailing_path(self):
+        self.assertEqual(
+            'http://localhost:35357/v2.0/uuid',
+            auth.replace_version('http://localhost:35357/v3/uuid', 'v2.0'))
+
+    def test_version_trailing_path_solidus(self):
+        self.assertEqual(
+            'http://localhost:35357/v2.0/uuid/',
+            auth.replace_version('http://localhost:35357/v3/uuid/', 'v2.0'))
+
+    def test_no_version_base(self):
+        self.assertEqual(
+            'http://localhost:35357/v2.0',
+            auth.replace_version('http://localhost:35357', 'v2.0'))
+
+    def test_no_version_base_solidus(self):
+        # TODO(blk-u): This doesn't look like it works as expected.
+        self.assertEqual(
+            'http://localhost:35357/',
+            auth.replace_version('http://localhost:35357/', 'v2.0'))
+
+    def test_no_version_path(self):
+        # TODO(blk-u): This doesn't look like it works as expected.
+        self.assertEqual(
+            'http://localhost/identity',
+            auth.replace_version('http://localhost/identity', 'v2.0'))
+
+    def test_no_version_path_solidus(self):
+        # TODO(blk-u): This doesn't look like it works as expected.
+        self.assertEqual(
+            'http://localhost/identity/',
+            auth.replace_version('http://localhost/identity/', 'v2.0'))
+
+    def test_path_version(self):
+        self.assertEqual(
+            'http://localhost/identity/v2.0',
+            auth.replace_version('http://localhost/identity/v3', 'v2.0'))
+
+    def test_path_version_solidus(self):
+        self.assertEqual(
+            'http://localhost/identity/v2.0/',
+            auth.replace_version('http://localhost/identity/v3/', 'v2.0'))
+
+    def test_path_version_trailing_path(self):
+        self.assertEqual(
+            'http://localhost/identity/v2.0/uuid',
+            auth.replace_version('http://localhost/identity/v3/uuid', 'v2.0'))
+
+    def test_path_version_trailing_path_solidus(self):
+        self.assertEqual(
+            'http://localhost/identity/v2.0/uuid/',
+            auth.replace_version('http://localhost/identity/v3/uuid/', 'v2.0'))
