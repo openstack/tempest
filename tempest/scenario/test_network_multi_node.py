@@ -16,12 +16,12 @@ import collections
 import re
 
 from oslo_log import log as logging
-from tempest_lib.common.utils import data_utils
+from tempest.lib.common.utils import data_utils
 
 from tempest import config
 from tempest.scenario import manager
 from tempest import test
-from tempest_lib import exceptions
+from tempest.lib import exceptions
 
 CONF = config.CONF
 LOG = logging.getLogger(__name__)

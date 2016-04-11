@@ -14,8 +14,8 @@
 # under the License.
 
 from oslo_log import log as logging
-import tempest_lib
-from tempest_lib.common.utils import data_utils
+import tempest.lib
+from tempest.lib.common.utils import data_utils
 import time
 
 from tempest import config
@@ -193,7 +193,7 @@ class TestPortSecurityExtension(manager.NetworkScenarioTest):
         source_connection = self._ssh_to_server(source_ip.floating_ip_address,
                                                 private_key,
                                                 )
-        self.assertRaises(tempest_lib.exceptions.SSHExecCommandFailed,
+        self.assertRaises(tempest.lib.exceptions.SSHExecCommandFailed,
                           source_connection.ping_host, destination_ip)
 
         router_ports = self._list_ports(device_id=router_server['id'])

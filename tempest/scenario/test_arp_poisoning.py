@@ -13,7 +13,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 from oslo_log import log as logging
-from tempest_lib import exceptions
+from tempest.lib import exceptions
 from tempest.common import waiters
 from tempest import config
 from tempest.scenario import manager

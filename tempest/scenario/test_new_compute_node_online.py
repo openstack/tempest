@@ -16,7 +16,7 @@ from oslo_log import log as logging
 from tempest import config
 from tempest.scenario import manager
 from tempest import test
-import tempest_lib
+import tempest.lib
 import time
 
 CONF = config.CONF
@@ -74,7 +74,7 @@ class TestNewComputeNodeOnline(manager.NetworkScenarioTest):
             host_to_shutdown, 'nova-compute')
         try:
             self.admin_manager.hosts_client.shutdown_host(host_to_shutdown)
-        except tempest_lib.exceptions.NotImplemented as ex:
+        except tempest.lib.exceptions.NotImplemented as ex:
             LOG.warning("Can't shutdown compute node: {}".format(ex))
         self.key_pair = self.create_keypair()
         self.sec_group = self._create_security_group()
@@ -102,7 +102,7 @@ class TestNewComputeNodeOnline(manager.NetworkScenarioTest):
 
         try:
             self.admin_manager.hosts_client.startup_host(host_to_shutdown)
-        except tempest_lib.exceptions.NotImplemented as ex:
+        except tempest.lib.exceptions.NotImplemented as ex:
             LOG.warning("Can't startup compute host: {}".format(ex))
 
         self.admin_manager.services_client.enable_service(

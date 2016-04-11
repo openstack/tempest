@@ -42,8 +42,8 @@ import shutil
 import sys
 import urllib2
 
-import tempest_lib.auth
-from tempest_lib import exceptions
+import tempest.lib.auth
+from tempest.lib import exceptions
 # Since tempest can be configured in different directories, we need to use
 # the path starting at cwd.
 sys.path.insert(0, os.getcwd())
@@ -270,7 +270,7 @@ class ClientManager(object):
         }
         compute_params.update(default_params)
 
-        _creds = tempest_lib.auth.KeystoneV2Credentials(
+        _creds = tempest.lib.auth.KeystoneV2Credentials(
             username=username,
             password=password,
             tenant_name=tenant_name)
@@ -280,7 +280,7 @@ class ClientManager(object):
                                    'disable_ssl_certificate_validation'),
             'ca_certs': conf.get_defaulted('identity', 'ca_certificates_file')
         }
-        _auth = tempest_lib.auth.KeystoneV2AuthProvider(
+        _auth = tempest.lib.auth.KeystoneV2AuthProvider(
             _creds, conf.get_defaulted('identity', 'uri'),
             **auth_provider_params)
         self.auth_provider = _auth

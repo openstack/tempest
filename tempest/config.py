@@ -583,11 +583,11 @@ NetworkGroup = [
                help='Region 2 ID used in building ASR config elements'),
     cfg.IntOpt('network_interface_mtu',
                default=1500,
-               help="MTU for network interface.")
+               help="MTU for network interface."),
     cfg.ListOpt('default_network',
                 default=["1.0.0.0/16", "2.0.0.0/16"],
                 help="List of ip pools"
-                     " for subnetpools creation"),
+                     " for subnetpools creation")
 ]
 
 network_feature_group = cfg.OptGroup(name='network-feature-enabled',
