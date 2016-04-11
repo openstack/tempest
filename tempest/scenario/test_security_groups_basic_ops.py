@@ -45,6 +45,12 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
     success - ping returns
     failure - ping_timeout reached
 
+    multi-node:
+        Multi-Node mode is enabled when CONF.compute.min_compute_nodes > 1.
+        Tests connectivity between servers on different compute nodes.
+        When enabled, test will boot each new server to different
+        compute nodes.
+
     setup:
         for primary tenant:
             1. create a network&subnet
