@@ -131,8 +131,10 @@ class ImagesClient(base_compute_client.BaseComputeClient):
         return rest_client.ResponseBody(resp, body)
 
     def is_resource_deleted(self, id):
+        # Added status check for user with admin role
         try:
-            self.show_image(id)
+            if self.show_image(id)['image']['status'] == 'DELETED':
+                return True
         except lib_exc.NotFound:
             return True
         return False

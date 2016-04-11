@@ -213,7 +213,8 @@ class ImagesClient(rest_client.RestClient):
 
     def is_resource_deleted(self, id):
         try:
-            self.get_image_meta(id)
+            if self.get_image_meta(id)['status'] == 'deleted':
+                return True
         except lib_exc.NotFound:
             return True
         return False
