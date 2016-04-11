@@ -46,6 +46,7 @@ from tempest.lib.services.compute.images_client import ImagesClient \
 from tempest.lib.services.compute.instance_usage_audit_log_client import \
     InstanceUsagesAuditLogClient
 from tempest.lib.services.compute.interfaces_client import InterfacesClient
+from tempest.lib.services.compute.keypairs_client import KeyPairsClient
 from tempest.lib.services.compute.limits_client import LimitsClient
 from tempest.lib.services.compute.migrations_client import MigrationsClient
 from tempest.lib.services.compute.networks_client import NetworksClient \
@@ -96,7 +97,6 @@ from tempest.lib.services.network.subnets_client import SubnetsClient
 from tempest import manager
 from tempest.services.baremetal.v1.json.baremetal_client import \
     BaremetalClient
-from tempest.services.compute.json.keypairs_client import KeyPairsClient
 from tempest.services.data_processing.v1_1.data_processing_client import \
     DataProcessingClient
 from tempest.services.database.json.flavors_client import \

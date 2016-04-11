@@ -14,7 +14,7 @@
 
 import copy
 
-from tempest.api_schema.response.compute.v2_1 import keypairs
+from tempest.lib.api_schema.response.compute.v2_1 import keypairs
 
 get_keypair = copy.deepcopy(keypairs.get_keypair)
 get_keypair['response_body']['properties']['keypair'][
