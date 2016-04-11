@@ -397,7 +397,7 @@ class NetworksTest(base.BaseNetworkTest):
         self.assertEmpty(body['subnets'], "Public subnets visible")
 
 
-class BulkNetworkOpsTestJSON(base.BaseNetworkTest):
+class BulkNetworkOpsTest(base.BaseNetworkTest):
     """Tests the following operations in the Neutron API:
 
         bulk network creation
@@ -520,11 +520,11 @@ class BulkNetworkOpsTestJSON(base.BaseNetworkTest):
             self.assertIn(n['id'], ports_list)
 
 
-class BulkNetworkOpsIpV6TestJSON(BulkNetworkOpsTestJSON):
+class BulkNetworkOpsIpV6Test(BulkNetworkOpsTest):
     _ip_version = 6
 
 
-class NetworksIpV6TestJSON(NetworksTest):
+class NetworksIpV6Test(NetworksTest):
     _ip_version = 6
 
     @test.idempotent_id('e41a4888-65a6-418c-a095-f7c2ef4ad59a')
@@ -576,7 +576,7 @@ class NetworksIpV6TestJSON(NetworksTest):
                               'Subnet are not in the same network')
 
 
-class NetworksIpV6TestAttrs(NetworksIpV6TestJSON):
+class NetworksIpV6TestAttrs(NetworksIpV6Test):
 
     @classmethod
     def skip_checks(cls):
