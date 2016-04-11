@@ -63,7 +63,9 @@ class HypervisorClient(base_compute_client.BaseComputeClient):
         self.validate_response(schema.get_hypervisor_uptime, resp, body)
         return rest_client.ResponseBody(resp, body)
 
-    def search_hypervisor(self, hypervisor_name):
+    def search_hypervisor(self, hypervisor_name):  # noqa
+        # NOTE: This noqa is for passing T110 check and we cannot rename
+        #       to keep backwards compatibility.
         """Search specified hypervisor."""
         resp, body = self.get('os-hypervisors/%s/search' % hypervisor_name)
         body = json.loads(body)
