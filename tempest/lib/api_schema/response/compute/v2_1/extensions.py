@@ -12,6 +12,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest.lib.api_schema.response.compute.v2_1 import parameter_types
+
 list_extensions = {
     'status_code': [200],
     'response_body': {
@@ -22,10 +24,7 @@ list_extensions = {
                 'items': {
                     'type': 'object',
                     'properties': {
-                        'updated': {
-                            'type': 'string',
-                            'format': 'data-time'
-                        },
+                        'updated': parameter_types.date_time,
                         'name': {'type': 'string'},
                         'links': {'type': 'array'},
                         'namespace': {

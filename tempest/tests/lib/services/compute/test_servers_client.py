@@ -154,7 +154,7 @@ class TestServersClient(base.BaseServiceTest):
         "request_id": "16fb98f-46ca-475e-917e-2563e5a8cd19",
         "user_id": "16fb98f-46ca-475e-917e-2563e5a8cd12",
         "project_id": "16fb98f-46ca-475e-917e-2563e5a8cd34",
-        "start_time": "09MAR2015 11:15",
+        "start_time": "2016-10-02T10:00:00-05:00",
         "message": "fake-msg",
         "instance_uuid": "16fb98f-46ca-475e-917e-2563e5a8cd12"
     }
@@ -166,8 +166,8 @@ class TestServersClient(base.BaseServiceTest):
 
     FAKE_INSTANCE_ACTION_EVENTS = {
         "event": "fake-event",
-        "start_time": "09MAR2015 11:15",
-        "finish_time": "09MAR2015 11:15",
+        "start_time": "2016-10-02T10:00:00-05:00",
+        "finish_time": "2016-10-02T10:00:00-05:00",
         "result": "fake-result",
         "traceback": "fake-trace-back"
     }

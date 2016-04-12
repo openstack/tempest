@@ -1,0 +1,5 @@
+---
+features:
+  - Added customized JSON schema format checker for 'date-time' format.
+    Compute response schema will be validated against customized format
+    checker.

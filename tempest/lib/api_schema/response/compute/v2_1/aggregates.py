@@ -14,17 +14,19 @@
 
 import copy
 
+from tempest.lib.api_schema.response.compute.v2_1 import parameter_types
+
 # create-aggregate api doesn't have 'hosts' and 'metadata' attributes.
 aggregate_for_create = {
     'type': 'object',
     'properties': {
         'availability_zone': {'type': ['string', 'null']},
-        'created_at': {'type': 'string'},
+        'created_at': parameter_types.date_time,
         'deleted': {'type': 'boolean'},
-        'deleted_at': {'type': ['string', 'null']},
+        'deleted_at': parameter_types.date_time_or_null,
         'id': {'type': 'integer'},
         'name': {'type': 'string'},
-        'updated_at': {'type': ['string', 'null']}
+        'updated_at': parameter_types.date_time_or_null
     },
     'additionalProperties': False,
     'required': ['availability_zone', 'created_at', 'deleted',
@@ -69,9 +71,7 @@ aggregate_set_metadata = get_aggregate
 # The 'updated_at' attribute of 'update_aggregate' can't be null.
 update_aggregate = copy.deepcopy(get_aggregate)
 update_aggregate['response_body']['properties']['aggregate']['properties'][
-    'updated_at'] = {
-        'type': 'string'
-    }
+    'updated_at'] = parameter_types.date_time
 
 delete_aggregate = {
     'status_code': [200]

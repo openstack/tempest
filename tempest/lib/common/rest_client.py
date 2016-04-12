@@ -25,6 +25,7 @@ from oslo_serialization import jsonutils as json
 import six
 
 from tempest.lib.common import http
+from tempest.lib.common import jsonschema_validator
 from tempest.lib.common.utils import test_utils
 from tempest.lib import exceptions
 
@@ -38,8 +39,8 @@ HTTP_SUCCESS = (200, 201, 202, 203, 204, 205, 206, 207)
 HTTP_REDIRECTION = (300, 301, 302, 303, 304, 305, 306, 307)
 
 # JSON Schema validator and format checker used for JSON Schema validation
-JSONSCHEMA_VALIDATOR = jsonschema.Draft4Validator
-FORMAT_CHECKER = jsonschema.draft4_format_checker
+JSONSCHEMA_VALIDATOR = jsonschema_validator.JSONSCHEMA_VALIDATOR
+FORMAT_CHECKER = jsonschema_validator.FORMAT_CHECKER
 
 
 class RestClient(object):

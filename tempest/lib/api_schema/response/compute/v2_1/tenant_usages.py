@@ -14,24 +14,21 @@
 
 import copy
 
+from tempest.lib.api_schema.response.compute.v2_1 import parameter_types
+
 _server_usages = {
     'type': 'array',
     'items': {
         'type': 'object',
         'properties': {
-            'ended_at': {
-                'oneOf': [
-                    {'type': 'string'},
-                    {'type': 'null'}
-                ]
-            },
+            'ended_at': parameter_types.date_time_or_null,
             'flavor': {'type': 'string'},
             'hours': {'type': 'number'},
             'instance_id': {'type': 'string'},
             'local_gb': {'type': 'integer'},
             'memory_mb': {'type': 'integer'},
             'name': {'type': 'string'},
-            'started_at': {'type': 'string'},
+            'started_at': parameter_types.date_time,
             'state': {'type': 'string'},
             'tenant_id': {'type': 'string'},
             'uptime': {'type': 'integer'},
@@ -47,8 +44,8 @@ _tenant_usage_list = {
     'type': 'object',
     'properties': {
         'server_usages': _server_usages,
-        'start': {'type': 'string'},
-        'stop': {'type': 'string'},
+        'start': parameter_types.date_time,
+        'stop': parameter_types.date_time,
         'tenant_id': {'type': 'string'},
         'total_hours': {'type': 'number'},
         'total_local_gb_usage': {'type': 'number'},

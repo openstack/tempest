@@ -118,8 +118,8 @@ common_show_server = {
         },
         'user_id': {'type': 'string'},
         'tenant_id': {'type': 'string'},
-        'created': {'type': 'string'},
-        'updated': {'type': 'string'},
+        'created': parameter_types.date_time,
+        'updated': parameter_types.date_time,
         'progress': {'type': 'integer'},
         'metadata': {'type': 'object'},
         'links': parameter_types.links,
@@ -402,7 +402,7 @@ instance_actions = {
         'request_id': {'type': 'string'},
         'user_id': {'type': 'string'},
         'project_id': {'type': 'string'},
-        'start_time': {'type': 'string'},
+        'start_time': parameter_types.date_time,
         'message': {'type': ['string', 'null']},
         'instance_uuid': {'type': 'string'}
     },
@@ -417,8 +417,8 @@ instance_action_events = {
         'type': 'object',
         'properties': {
             'event': {'type': 'string'},
-            'start_time': {'type': 'string'},
-            'finish_time': {'type': 'string'},
+            'start_time': parameter_types.date_time,
+            'finish_time': parameter_types.date_time,
             'result': {'type': 'string'},
             'traceback': {'type': ['string', 'null']}
         },
