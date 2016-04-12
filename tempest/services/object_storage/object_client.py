@@ -18,6 +18,7 @@ from six.moves import http_client as httplib
 from six.moves.urllib import parse as urlparse
 
 from tempest.lib.common import rest_client
+from tempest.lib import exceptions
 
 
 class ObjectClient(rest_client.RestClient):
@@ -170,29 +171,67 @@ class ObjectClient(rest_client.RestClient):
 
     def create_object_continue(self, container, object_name,
                                data, metadata=None):
-        """Create storage object."""
+        """Put an object using Expect:100-continue"""
         headers = {}
         if metadata:
             for key in metadata:
                 headers[str(key)] = metadata[key]
 
-        if not data:
-            headers['content-length'] = '0'
-
         headers['X-Auth-Token'] = self.token
+        headers['content-length'] = 0 if data is None else len(data)
+        headers['Expect'] = '100-continue'
 
-        conn = put_object_connection(self.base_url, str(container),
-                                     str(object_name), data, None, headers)
+        parsed = urlparse.urlparse(self.base_url)
+        path = str(parsed.path) + "/"
+        path += "%s/%s" % (str(container), str(object_name))
 
+        conn = create_connection(parsed)
+
+        # Send the PUT request and the headers including the "Expect" header
+        conn.putrequest('PUT', path)
+
+        for header, value in six.iteritems(headers):
+            conn.putheader(header, value)
+        conn.endheaders()
+
+        # Read the 100 status prior to sending the data
         response = conn.response_class(conn.sock,
                                        strict=conn.strict,
                                        method=conn._method)
-        version, status, reason = response._read_status()
-        resp = {'version': version,
-                'status': str(status),
-                'reason': reason}
+        _, status, _ = response._read_status()
 
-        return resp
+        # toss the CRLF at the end of the response
+        response._safe_read(2)
+
+        # Expecting a 100 here, if not close and throw an exception
+        if status != 100:
+            conn.close()
+            pattern = "%s %s" % (
+                """Unexpected http success status code {0}.""",
+                """The expected status code is {1}""")
+            details = pattern.format(status, 100)
+            raise exceptions.UnexpectedResponseCode(details)
+
+        # If a continue was received go ahead and send the data
+        # and get the final response
+        conn.send(data)
+
+        resp = conn.getresponse()
+
+        return resp.status, resp.reason
+
+
+def create_connection(parsed_url):
+    """Helper function to create connection with httplib
+
+    :param parsed_url: parsed url of the remote location
+    """
+    if parsed_url.scheme == 'https':
+        conn = httplib.HTTPSConnection(parsed_url.netloc)
+    else:
+        conn = httplib.HTTPConnection(parsed_url.netloc)
+
+    return conn
 
 
 def put_object_connection(base_url, container, name, contents=None,
@@ -211,12 +250,11 @@ def put_object_connection(base_url, container, name, contents=None,
     :param query_string: if set will be appended with '?' to generated path
     """
     parsed = urlparse.urlparse(base_url)
-    if parsed.scheme == 'https':
-        conn = httplib.HTTPSConnection(parsed.netloc)
-    else:
-        conn = httplib.HTTPConnection(parsed.netloc)
+
     path = str(parsed.path) + "/"
     path += "%s/%s" % (str(container), str(name))
+
+    conn = create_connection(parsed)
 
     if query_string:
         path += '?' + query_string
