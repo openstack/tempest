@@ -12,11 +12,11 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import httplib2
 from oslo_serialization import jsonutils as json
 from oslotest import mockpatch
 
 from tempest.tests.lib import base
+from tempest.tests.lib import fake_http
 
 
 class BaseComputeServiceTest(base.TestCase):
@@ -26,11 +26,8 @@ class BaseComputeServiceTest(base.TestCase):
             json_body = json.dumps(body)
             if to_utf:
                 json_body = json_body.encode('utf-8')
-        resp_dict = {'status': status}
-        if headers:
-            resp_dict.update(headers)
-        response = (httplib2.Response(resp_dict), json_body)
-        return response
+        resp = fake_http.fake_http_response(headers, status=status), json_body
+        return resp
 
     def check_service_client_function(self, function, function2mock,
                                       body, to_utf=False, status=200,

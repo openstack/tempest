@@ -15,14 +15,13 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import httplib2
+import mock
 from oslotest import mockpatch
 
 from tempest.common import negative_rest_client
 from tempest import config
 from tempest.tests import fake_auth_provider
 from tempest.tests import fake_config
-from tempest.tests import fake_http
 from tempest.tests.lib import base
 
 
@@ -31,59 +30,69 @@ class TestNegativeRestClient(base.TestCase):
     url = 'fake_endpoint'
 
     def setUp(self):
-        self.fake_http = fake_http.fake_httplib2()
         super(TestNegativeRestClient, self).setUp()
         self.useFixture(fake_config.ConfigFixture())
         self.stubs.Set(config, 'TempestConfigPrivate', fake_config.FakePrivate)
-        self.stubs.Set(httplib2.Http, 'request', self.fake_http.request)
         self.negative_rest_client = negative_rest_client.NegativeRestClient(
             fake_auth_provider.FakeAuthProvider(), None)
         self.useFixture(mockpatch.PatchObject(self.negative_rest_client,
                                               '_log_request'))
 
-    def test_post(self):
+    @mock.patch('tempest.lib.common.rest_client.RestClient.post',
+                return_value=(mock.Mock(), mock.Mock()))
+    def test_post(self, mock_post):
         __, return_dict = self.negative_rest_client.send_request('POST',
                                                                  self.url,
                                                                  [], {})
-        self.assertEqual('POST', return_dict['method'])
+        mock_post.assert_called_once_with(self.url, {})
 
-    def test_get(self):
+    @mock.patch('tempest.lib.common.rest_client.RestClient.get',
+                return_value=(mock.Mock(), mock.Mock()))
+    def test_get(self, mock_get):
         __, return_dict = self.negative_rest_client.send_request('GET',
                                                                  self.url,
                                                                  [])
-        self.assertEqual('GET', return_dict['method'])
+        mock_get.assert_called_once_with(self.url)
 
-    def test_delete(self):
+    @mock.patch('tempest.lib.common.rest_client.RestClient.delete',
+                return_value=(mock.Mock(), mock.Mock()))
+    def test_delete(self, mock_delete):
         __, return_dict = self.negative_rest_client.send_request('DELETE',
                                                                  self.url,
                                                                  [])
-        self.assertEqual('DELETE', return_dict['method'])
+        mock_delete.assert_called_once_with(self.url)
 
-    def test_patch(self):
+    @mock.patch('tempest.lib.common.rest_client.RestClient.patch',
+                return_value=(mock.Mock(), mock.Mock()))
+    def test_patch(self, mock_patch):
         __, return_dict = self.negative_rest_client.send_request('PATCH',
                                                                  self.url,
                                                                  [], {})
-        self.assertEqual('PATCH', return_dict['method'])
+        mock_patch.assert_called_once_with(self.url, {})
 
-    def test_put(self):
+    @mock.patch('tempest.lib.common.rest_client.RestClient.put',
+                return_value=(mock.Mock(), mock.Mock()))
+    def test_put(self, mock_put):
         __, return_dict = self.negative_rest_client.send_request('PUT',
                                                                  self.url,
                                                                  [], {})
-        self.assertEqual('PUT', return_dict['method'])
+        mock_put.assert_called_once_with(self.url, {})
 
-    def test_head(self):
-        self.useFixture(mockpatch.PatchObject(self.negative_rest_client,
-                                              'response_checker'))
+    @mock.patch('tempest.lib.common.rest_client.RestClient.head',
+                return_value=(mock.Mock(), mock.Mock()))
+    def test_head(self, mock_head):
         __, return_dict = self.negative_rest_client.send_request('HEAD',
                                                                  self.url,
                                                                  [])
-        self.assertEqual('HEAD', return_dict['method'])
+        mock_head.assert_called_once_with(self.url)
 
-    def test_copy(self):
+    @mock.patch('tempest.lib.common.rest_client.RestClient.copy',
+                return_value=(mock.Mock(), mock.Mock()))
+    def test_copy(self, mock_copy):
         __, return_dict = self.negative_rest_client.send_request('COPY',
                                                                  self.url,
                                                                  [])
-        self.assertEqual('COPY', return_dict['method'])
+        mock_copy.assert_called_once_with(self.url)
 
     def test_other(self):
         self.assertRaises(AssertionError,

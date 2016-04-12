@@ -22,8 +22,8 @@ from tempest.lib import exceptions as lib_exc
 from tempest.lib.services.identity.v2 import token_client as v2_client
 from tempest.lib.services.identity.v3 import token_client as v3_client
 from tempest.tests import fake_config
-from tempest.tests import fake_identity
 from tempest.tests.lib import base
+from tempest.tests.lib import fake_identity
 
 
 class ConfiguredV2CredentialsTests(base.TestCase):

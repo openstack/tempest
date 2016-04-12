@@ -23,19 +23,14 @@ from six.moves import http_client as httplib
 from tempest.common import glance_http
 from tempest import exceptions
 from tempest.tests import fake_auth_provider
-from tempest.tests import fake_http
 from tempest.tests.lib import base
+from tempest.tests.lib import fake_http
 
 
 class TestGlanceHTTPClient(base.TestCase):
 
     def setUp(self):
         super(TestGlanceHTTPClient, self).setUp()
-        self.fake_http = fake_http.fake_httplib2(return_type=200)
-        # NOTE(maurosr): using http here implies that we will be using httplib
-        # directly. With https glance_client would use an httpS version, but
-        # the real backend would still be httplib anyway and since we mock it
-        # that there is no reason to care.
         self.endpoint = 'http://fake_url.com'
         self.fake_auth = fake_auth_provider.FakeAuthProvider()
 
@@ -44,12 +39,12 @@ class TestGlanceHTTPClient(base.TestCase):
         self.useFixture(mockpatch.PatchObject(
             httplib.HTTPConnection,
             'request',
-            side_effect=self.fake_http.request(self.endpoint)[1]))
+            side_effect=b'fake_body'))
         self.client = glance_http.HTTPClient(self.fake_auth, {})
 
     def _set_response_fixture(self, header, status, resp_body):
-        resp = fake_http.fake_httplib(header, status=status,
-                                      body=six.StringIO(resp_body))
+        resp = fake_http.fake_http_response(header, status=status,
+                                            body=six.StringIO(resp_body))
         self.useFixture(mockpatch.PatchObject(httplib.HTTPConnection,
                         'getresponse', return_value=resp))
         return resp
@@ -223,7 +218,7 @@ class TestVerifiedHTTPSConnection(base.TestCase):
 class TestResponseBodyIterator(base.TestCase):
 
     def test_iter_default_chunk_size_64k(self):
-        resp = fake_http.fake_httplib({}, six.StringIO(
+        resp = fake_http.fake_http_response({}, six.StringIO(
             'X' * (glance_http.CHUNKSIZE + 1)))
         iterator = glance_http.ResponseBodyIterator(resp)
         chunks = list(iterator)
