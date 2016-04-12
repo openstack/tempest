@@ -17,7 +17,7 @@ import re
 import six
 import subprocess
 
-from tempest.tests import base
+from tempest.tests.lib import base
 
 
 class TestTestList(base.TestCase):
