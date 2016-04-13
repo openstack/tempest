@@ -365,7 +365,16 @@ def main(opts=None):
         CONF_PARSER = moves.configparser.SafeConfigParser()
         CONF_PARSER.optionxform = str
         CONF_PARSER.readfp(conf_file)
-    icreds = credentials.get_credentials_provider('verify_tempest_config')
+
+    # Indicate not to create network resources as part of getting credentials
+    net_resources = {
+        'network': False,
+        'router': False,
+        'subnet': False,
+        'dhcp': False
+    }
+    icreds = credentials.get_credentials_provider(
+        'verify_tempest_config', network_resources=net_resources)
     try:
         os = clients.Manager(icreds.get_primary_creds())
         services = check_service_availability(os, update)
