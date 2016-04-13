@@ -272,8 +272,6 @@ def check_service_availability(os, update):
         'object_storage': 'swift',
         'compute': 'nova',
         'orchestration': 'heat',
-        'metering': 'ceilometer',
-        'telemetry': 'ceilometer',
         'data_processing': 'sahara',
         'baremetal': 'ironic',
         'identity': 'keystone',

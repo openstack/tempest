@@ -892,50 +892,6 @@ OrchestrationGroup = [
 ]
 
 
-telemetry_group = cfg.OptGroup(name='telemetry',
-                               title='Telemetry Service Options')
-
-TelemetryGroup = [
-    cfg.StrOpt('catalog_type',
-               default='metering',
-               help="Catalog type of the Telemetry service."),
-    cfg.StrOpt('endpoint_type',
-               default='publicURL',
-               choices=['public', 'admin', 'internal',
-                        'publicURL', 'adminURL', 'internalURL'],
-               help="The endpoint type to use for the telemetry service."),
-    cfg.BoolOpt('too_slow_to_test',
-                default=True,
-                deprecated_for_removal=True,
-                help="This variable is used as flag to enable "
-                     "notification tests")
-]
-
-alarming_group = cfg.OptGroup(name='alarming',
-                              title='Alarming Service Options')
-
-AlarmingGroup = [
-    cfg.StrOpt('catalog_type',
-               default='alarming',
-               help="Catalog type of the Alarming service."),
-    cfg.StrOpt('endpoint_type',
-               default='publicURL',
-               choices=['public', 'admin', 'internal',
-                        'publicURL', 'adminURL', 'internalURL'],
-               help="The endpoint type to use for the alarming service."),
-]
-
-
-telemetry_feature_group = cfg.OptGroup(name='telemetry-feature-enabled',
-                                       title='Enabled Ceilometer Features')
-
-TelemetryFeaturesGroup = [
-    cfg.BoolOpt('events',
-                default=False,
-                help="Runs Ceilometer event-related tests"),
-]
-
-
 dashboard_group = cfg.OptGroup(name="dashboard",
                                title="Dashboard options")
 
@@ -1080,12 +1036,6 @@ ServiceAvailableGroup = [
     cfg.BoolOpt('heat',
                 default=False,
                 help="Whether or not Heat is expected to be available"),
-    cfg.BoolOpt('ceilometer',
-                default=True,
-                help="Whether or not Ceilometer is expected to be available"),
-    cfg.BoolOpt('aodh',
-                default=False,
-                help="Whether or not Aodh is expected to be available"),
     cfg.BoolOpt('horizon',
                 default=True,
                 help="Whether or not Horizon is expected to be available"),
@@ -1231,9 +1181,6 @@ _opts = [
     (object_storage_feature_group, ObjectStoreFeaturesGroup),
     (database_group, DatabaseGroup),
     (orchestration_group, OrchestrationGroup),
-    (telemetry_group, TelemetryGroup),
-    (telemetry_feature_group, TelemetryFeaturesGroup),
-    (alarming_group, AlarmingGroup),
     (dashboard_group, DashboardGroup),
     (data_processing_group, DataProcessingGroup),
     (data_processing_feature_group, DataProcessingFeaturesGroup),
@@ -1302,8 +1249,6 @@ class TempestConfigPrivate(object):
             'object-storage-feature-enabled']
         self.database = _CONF.database
         self.orchestration = _CONF.orchestration
-        self.telemetry = _CONF.telemetry
-        self.telemetry_feature_enabled = _CONF['telemetry-feature-enabled']
         self.dashboard = _CONF.dashboard
         self.data_processing = _CONF['data-processing']
         self.data_processing_feature_enabled = _CONF[
