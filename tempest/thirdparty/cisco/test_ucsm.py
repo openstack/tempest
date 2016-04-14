@@ -182,9 +182,7 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
     def setup_clients(cls):
         super(UCSMTest, cls).setup_clients()
         cls.admin_networks_client = cls.os_adm.networks_client
-        cls.admin_network_client = cls.os_adm.networks_client
-        cls.routers_client = cls.os_adm.routers_client
-        cls.ports_client = cls.os_adm.ports_client
+        cls.admin_ports_client = cls.os_adm.ports_client
         cls.admin_hosts_client = cls.os_adm.hosts_client
         cls.servers_client = cls.os_adm.servers_client
 
@@ -199,8 +197,8 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
         self.keypairs = {}
         self.servers = []
         self.security_group = self._create_security_group(
-            security_group_rules_client=self.os_adm.security_group_rules_client,
-            security_groups_client=self.os_adm.security_groups_client)
+            security_group_rules_client=self.security_group_rules_client,
+            security_groups_client=self.security_groups_client)
 
         # Log into UCS Manager
         self.ucsm_setup()
@@ -326,7 +324,7 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
 
     def _create_server(self, name, network_id=None,
                        port_id=None, availability_zone=None):
-        keypair = self.create_keypair(client=self.os_adm.keypairs_client)
+        keypair = self.create_keypair(client=self.keypairs_client)
         self.keypairs[keypair['name']] = keypair
         security_groups = [{'name': self.security_group['name']}]
         create_kwargs = {
@@ -340,7 +338,7 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
             create_kwargs['networks'][0]['port'] = port_id
         if availability_zone is not None:
             create_kwargs['availability_zone'] = availability_zone
-        server = self.create_server(name=name, **create_kwargs)
+        server = self.create_server(name=name, wait_until='ACTIVE', **create_kwargs)
         self.servers.append(server)
         return server
 
@@ -382,7 +380,7 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
         """Verifies connectivty to a VM via public network and floating IP,
         and verifies floating IP has resource status is correct.
         """
-        ssh_login = CONF.compute.image_ssh_user
+        ssh_login = CONF.validation.image_ssh_user
         ip_address = floating_ip['floating_ip_address']
         private_key = None
         floatingip_status = 'DOWN'
@@ -400,8 +398,8 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
             self.servers)
 
     def assert_vm_to_vm_connectivity(self, server1, server2):
-        floating_ip1 = self.create_floating_ip(server1, client=self.admin_network_client)
-        floating_ip2 = self.create_floating_ip(server2, client=self.admin_network_client)
+        floating_ip1 = self.create_floating_ip(server1)
+        floating_ip2 = self.create_floating_ip(server2)
 
         # Wait while driver applies settings
         time.sleep(10)
@@ -420,8 +418,8 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
             server2_client.ping_host(floating_ip1['floating_ip_address']))
 
     def assert_vm2vm(self, server1, server2):
-        floating_ip1 = self.create_floating_ip(server1, client=self.admin_network_client)
-        floating_ip2 = self.create_floating_ip(server2, client=self.admin_network_client)
+        floating_ip1 = self.create_floating_ip(server1)
+        floating_ip2 = self.create_floating_ip(server2)
 
         # Wait while driver applies settings
         time.sleep(10)
@@ -515,11 +513,12 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
 
         # Create networks
         names = [data_utils.rand_name('network-') for i in range(5)]
-        networks = self.network_client.create_bulk_network(names)['networks']
+        data = {'networks': [{'name': name} for name in names]}
+        networks = self.networks_client.create_bulk_networks(**data)['networks']
 
         # Create subnets (DHCP enabled)
-        cidr = netaddr.IPNetwork(CONF.network.tenant_network_cidr)
-        mask_bits = CONF.network.tenant_network_mask_bits
+        cidr = netaddr.IPNetwork(CONF.network.project_network_cidr)
+        mask_bits = CONF.network.project_network_mask_bits
         cidrs = [subnet_cidr for subnet_cidr in cidr.subnet(mask_bits)]
         names = [data_utils.rand_name('subnet-')
                  for i in range(len(networks))]
@@ -532,7 +531,7 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
                 'ip_version': 4
             }
             subnets_list.append(p1)
-        self.network_client.create_bulk_subnet(subnets_list)
+        self.subnets_client.create_bulk_subnets(**{'subnets': subnets_list})
 
         ports_list = []
         for network in networks:
@@ -620,7 +619,7 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
                           lambda: self.ucsm.get_vlan_profile(vlan_id))
 
         # Verify port profile has been created
-        port = self.admin_network_client.show_port(port_obj.id)['port']
+        port = self.admin_ports_client.show_port(port_obj.id)['port']
         port_profile_id = port['binding:vif_details'].get('profileid', None)
         port_profile_dn = 'fabric/lan/profiles/vnic-' + port_profile_id
         self.assertIsNotNone(port_profile_id,
@@ -691,8 +690,8 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
             }
             ports_data[vlan_id] = port
 
-        ports_list = self.admin_network_client.create_bulk_port(
-            ports_data.values())['ports']
+        ports_list = self.networks_client.create_bulk_port(
+            **{'ports': ports_data.values()})['ports']
 
         # Boot servers
         ports = {}
@@ -708,7 +707,7 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
             # Will identify port by network_id
             for vlan_id, pd in ports_data.iteritems():
                 if port['network_id'] == pd['network_id']:
-                    ports[vlan_id] = self.admin_network_client.show_port(
+                    ports[vlan_id] = self.admin_ports_client.show_port(
                         port['id'])['port']
                     servers[vlan_id] = server
                     break
@@ -831,7 +830,7 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
                           lambda: self.ucsm.get_vlan_profile(vlan_id))
 
         # Verify vlan has been added to a compute where instance is launched
-        port = self.admin_network_client.show_port(port_obj.id)['port']
+        port = self.admin_ports_client.show_port(port_obj.id)['port']
         binding_host_id = port['binding:host_id']
         for eth_name in self.eth_names:
             self.timed_assert(
@@ -839,7 +838,7 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
                 lambda: self.ucsm.get_ether_vlan(
                     self.compute_host_dict[binding_host_id], eth_name, vlan_id))
 
-        floating_ip = self.create_floating_ip(server, client=self.admin_network_client)
+        floating_ip = self.create_floating_ip(server)
         self.check_public_network_connectivity(server, floating_ip)
 
     @test.attr(type='non-sriov')
@@ -959,7 +958,7 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
                 lambda: self.ucsm.get_ether_vlan(
                     self.compute_host_dict[master_host], eth_name, vlan_id))
 
-        floating_ip1 = self.create_floating_ip(server1, client=self.admin_network_client)
+        floating_ip1 = self.create_floating_ip(server1)
         self.check_public_network_connectivity(server1, floating_ip1)
 
     @test.attr(type=['non-sriov', 'multi-ucsm'])
@@ -1053,7 +1052,7 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
                           lambda: random_ucsm_client.get_vlan_profile(vlan_id))
 
         # Verify vlan has been added to a compute where instance is launched
-        port = self.admin_network_client.show_port(port_obj.id)['port']
+        port = self.admin_ports_client.show_port(port_obj.id)['port']
         binding_host_id = port['binding:host_id']
         self.assertEqual(random_compute, binding_host_id, 'binding:host_id same as we want')
         for eth_name in random_ucsm['eth_names']:
