@@ -18,8 +18,8 @@ import testtools
 from tempest.api.compute import base as compute_base
 from tempest import config
 from tempest.lib import exceptions
-from tempest.tests import base
 from tempest.tests import fake_config
+from tempest.tests.lib import base
 
 
 class VersionTestNoneTolatest(compute_base.BaseV2ComputeTest):

@@ -12,14 +12,13 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import httplib2
 import mock
-from oslotest import mockpatch
 
 from tempest.lib.common import rest_client
 from tempest.lib import exceptions
 from tempest.lib.services.compute import base_compute_client
 from tempest.tests.lib import fake_auth_provider
+from tempest.tests.lib import fake_http
 from tempest.tests.lib.services.compute import base
 
 
@@ -36,28 +35,29 @@ class TestMicroversionHeaderCheck(base.BaseComputeServiceTest):
         super(TestMicroversionHeaderCheck, self).tearDown()
         base_compute_client.COMPUTE_MICROVERSION = None
 
-    def _check_microverion_header_in_response(self, fake_response):
-        def request(*args, **kwargs):
-            return (httplib2.Response(fake_response), {})
-
-        self.useFixture(mockpatch.PatchObject(
-            rest_client.RestClient,
-            'request',
-            side_effect=request))
-
-    def test_correct_microverion_in_response(self):
-        fake_response = {self.client.api_microversion_header_name: '2.2'}
-        self._check_microverion_header_in_response(fake_response)
+    @mock.patch('tempest.lib.common.http.ClosingHttp.request')
+    def test_correct_microverion_in_response(self, mock_request):
+        response = fake_http.fake_http_response(
+            headers={self.client.api_microversion_header_name: '2.2'},
+        )
+        mock_request.return_value = response, ''
         self.client.get('fake_url')
 
-    def test_incorrect_microverion_in_response(self):
-        fake_response = {self.client.api_microversion_header_name: '2.3'}
-        self._check_microverion_header_in_response(fake_response)
+    @mock.patch('tempest.lib.common.http.ClosingHttp.request')
+    def test_incorrect_microverion_in_response(self, mock_request):
+        response = fake_http.fake_http_response(
+            headers={self.client.api_microversion_header_name: '2.3'},
+        )
+        mock_request.return_value = response, ''
         self.assertRaises(exceptions.InvalidHTTPResponseHeader,
                           self.client.get, 'fake_url')
 
-    def test_no_microverion_header_in_response(self):
-        self._check_microverion_header_in_response({})
+    @mock.patch('tempest.lib.common.http.ClosingHttp.request')
+    def test_no_microverion_header_in_response(self, mock_request):
+        response = fake_http.fake_http_response(
+            headers={},
+        )
+        mock_request.return_value = response, ''
         self.assertRaises(exceptions.InvalidHTTPResponseHeader,
                           self.client.get, 'fake_url')
 
@@ -164,7 +164,7 @@ class TestClientWithoutMicroversionHeader(base.BaseComputeServiceTest):
     def test_no_microverion_header_in_raw_request(self):
         def raw_request(*args, **kwargs):
             self.assertNotIn('X-OpenStack-Nova-API-Version', kwargs['headers'])
-            return (httplib2.Response({'status': 200}), {})
+            return (fake_http.fake_http_response({}, status=200), '')
 
         with mock.patch.object(rest_client.RestClient,
                                'raw_request') as mock_get:
@@ -196,9 +196,9 @@ class TestClientWithMicroversionHeader(base.BaseComputeServiceTest):
             self.assertIn('X-OpenStack-Nova-API-Version', kwargs['headers'])
             self.assertEqual('2.2',
                              kwargs['headers']['X-OpenStack-Nova-API-Version'])
-            return (httplib2.Response(
-                {'status': 200,
-                 self.client.api_microversion_header_name: '2.2'}), {})
+            return (fake_http.fake_http_response(
+                headers={self.client.api_microversion_header_name: '2.2'},
+                status=200), '')
 
         with mock.patch.object(rest_client.RestClient,
                                'raw_request') as mock_get:

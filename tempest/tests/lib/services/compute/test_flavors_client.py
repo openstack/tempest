@@ -13,13 +13,13 @@
 #    under the License.
 
 import copy
-import httplib2
 
 from oslo_serialization import jsonutils as json
 from oslotest import mockpatch
 
 from tempest.lib.services.compute import flavors_client
 from tempest.tests.lib import fake_auth_provider
+from tempest.tests.lib import fake_http
 from tempest.tests.lib.services.compute import base
 
 
@@ -117,7 +117,7 @@ class TestFlavorsClient(base.BaseComputeServiceTest):
         body = json.dumps({'flavors': [TestFlavorsClient.FAKE_FLAVOR]})
         if bytes_body:
             body = body.encode('utf-8')
-        response = (httplib2.Response({'status': 200}), body)
+        response = fake_http.fake_http_response({}, status=200), body
         self.useFixture(mockpatch.Patch(
             'tempest.lib.common.rest_client.RestClient.get',
             return_value=response))

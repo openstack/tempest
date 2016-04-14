@@ -19,8 +19,8 @@ from oslotest import mockpatch
 
 from tempest.cmd import verify_tempest_config
 from tempest import config
-from tempest.tests import base
 from tempest.tests import fake_config
+from tempest.tests.lib import base
 
 
 class TestGetAPIVersions(base.TestCase):
@@ -49,8 +49,9 @@ class TestDiscovery(base.TestCase):
             return_value='http://fake_endpoint:5000'))
         fake_resp = {'versions': {'values': [{'id': 'v2.0'}, {'id': 'v3.0'}]}}
         fake_resp = json.dumps(fake_resp)
-        self.useFixture(mockpatch.Patch('httplib2.Http.request',
-                                        return_value=(None, fake_resp)))
+        self.useFixture(mockpatch.Patch(
+            'tempest.lib.common.http.ClosingHttp.request',
+            return_value=(None, fake_resp)))
         fake_os = mock.MagicMock()
         versions = verify_tempest_config._get_api_versions(fake_os, 'keystone')
         self.assertIn('v2.0', versions)
@@ -62,8 +63,9 @@ class TestDiscovery(base.TestCase):
             return_value='http://fake_endpoint:5000'))
         fake_resp = {'versions': [{'id': 'v1.0'}, {'id': 'v2.0'}]}
         fake_resp = json.dumps(fake_resp)
-        self.useFixture(mockpatch.Patch('httplib2.Http.request',
-                                        return_value=(None, fake_resp)))
+        self.useFixture(mockpatch.Patch(
+            'tempest.lib.common.http.ClosingHttp.request',
+            return_value=(None, fake_resp)))
         fake_os = mock.MagicMock()
         versions = verify_tempest_config._get_api_versions(fake_os, 'cinder')
         self.assertIn('v1.0', versions)
@@ -75,8 +77,9 @@ class TestDiscovery(base.TestCase):
             return_value='http://fake_endpoint:5000'))
         fake_resp = {'versions': [{'id': 'v2.0'}, {'id': 'v3.0'}]}
         fake_resp = json.dumps(fake_resp)
-        self.useFixture(mockpatch.Patch('httplib2.Http.request',
-                                        return_value=(None, fake_resp)))
+        self.useFixture(mockpatch.Patch(
+            'tempest.lib.common.http.ClosingHttp.request',
+            return_value=(None, fake_resp)))
         fake_os = mock.MagicMock()
         versions = verify_tempest_config._get_api_versions(fake_os, 'nova')
         self.assertIn('v2.0', versions)
@@ -95,8 +98,9 @@ class TestDiscovery(base.TestCase):
         sample_body = (
             '<html><head>Sample Response</head><body>This is the sample page '
             'for the web server. Why are you requesting it?</body></html>')
-        self.useFixture(mockpatch.Patch('httplib2.Http.request',
-                                        return_value=(None, sample_body)))
+        self.useFixture(mockpatch.Patch(
+            'tempest.lib.common.http.ClosingHttp.request',
+            return_value=(None, sample_body)))
 
         # service value doesn't matter, just needs to match what
         # _get_api_versions puts in its client_dict.
@@ -122,14 +126,14 @@ class TestDiscovery(base.TestCase):
                 verify_tempest_config.verify_api_versions(fake_os, 'foo', True)
                 self.assertFalse(verify_mock.called)
 
-    def test_verify_keystone_api_versions_no_v3(self):
+    @mock.patch('tempest.lib.common.http.ClosingHttp.request')
+    def test_verify_keystone_api_versions_no_v3(self, mock_request):
         self.useFixture(mockpatch.PatchObject(
             verify_tempest_config, '_get_unversioned_endpoint',
             return_value='http://fake_endpoint:5000'))
         fake_resp = {'versions': {'values': [{'id': 'v2.0'}]}}
         fake_resp = json.dumps(fake_resp)
-        self.useFixture(mockpatch.Patch('httplib2.Http.request',
-                                        return_value=(None, fake_resp)))
+        mock_request.return_value = (None, fake_resp)
         fake_os = mock.MagicMock()
         with mock.patch.object(verify_tempest_config,
                                'print_and_or_update') as print_mock:
@@ -138,14 +142,14 @@ class TestDiscovery(base.TestCase):
                                            'identity-feature-enabled',
                                            False, True)
 
-    def test_verify_keystone_api_versions_no_v2(self):
+    @mock.patch('tempest.lib.common.http.ClosingHttp.request')
+    def test_verify_keystone_api_versions_no_v2(self, mock_request):
         self.useFixture(mockpatch.PatchObject(
             verify_tempest_config, '_get_unversioned_endpoint',
             return_value='http://fake_endpoint:5000'))
         fake_resp = {'versions': {'values': [{'id': 'v3.0'}]}}
         fake_resp = json.dumps(fake_resp)
-        self.useFixture(mockpatch.Patch('httplib2.Http.request',
-                                        return_value=(None, fake_resp)))
+        mock_request.return_value = (None, fake_resp)
         fake_os = mock.MagicMock()
         with mock.patch.object(verify_tempest_config,
                                'print_and_or_update') as print_mock:
@@ -154,14 +158,14 @@ class TestDiscovery(base.TestCase):
                                            'identity-feature-enabled',
                                            False, True)
 
-    def test_verify_cinder_api_versions_no_v2(self):
+    @mock.patch('tempest.lib.common.http.ClosingHttp.request')
+    def test_verify_cinder_api_versions_no_v2(self, mock_request):
         self.useFixture(mockpatch.PatchObject(
             verify_tempest_config, '_get_unversioned_endpoint',
             return_value='http://fake_endpoint:5000'))
         fake_resp = {'versions': [{'id': 'v1.0'}]}
         fake_resp = json.dumps(fake_resp)
-        self.useFixture(mockpatch.Patch('httplib2.Http.request',
-                                        return_value=(None, fake_resp)))
+        mock_request.return_value = (None, fake_resp)
         fake_os = mock.MagicMock()
         with mock.patch.object(verify_tempest_config,
                                'print_and_or_update') as print_mock:
@@ -169,14 +173,14 @@ class TestDiscovery(base.TestCase):
         print_mock.assert_called_once_with('api_v2', 'volume-feature-enabled',
                                            False, True)
 
-    def test_verify_cinder_api_versions_no_v1(self):
+    @mock.patch('tempest.lib.common.http.ClosingHttp.request')
+    def test_verify_cinder_api_versions_no_v1(self, mock_request):
         self.useFixture(mockpatch.PatchObject(
             verify_tempest_config, '_get_unversioned_endpoint',
             return_value='http://fake_endpoint:5000'))
         fake_resp = {'versions': [{'id': 'v2.0'}]}
         fake_resp = json.dumps(fake_resp)
-        self.useFixture(mockpatch.Patch('httplib2.Http.request',
-                                        return_value=(None, fake_resp)))
+        mock_request.return_value = (None, fake_resp)
         fake_os = mock.MagicMock()
         with mock.patch.object(verify_tempest_config,
                                'print_and_or_update') as print_mock:
