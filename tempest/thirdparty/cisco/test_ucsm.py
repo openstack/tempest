@@ -340,7 +340,7 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
             create_kwargs['networks'][0]['port'] = port_id
         if availability_zone is not None:
             create_kwargs['availability_zone'] = availability_zone
-        server = self.create_server(name=name, create_kwargs=create_kwargs)
+        server = self.create_server(name=name, **create_kwargs)
         self.servers.append(server)
         return server
 
