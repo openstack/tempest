@@ -14,8 +14,6 @@
 
 import copy
 
-import httplib2
-
 
 class fake_httplib2(object):
 
@@ -25,7 +23,7 @@ class fake_httplib2(object):
     def request(self, uri, method="GET", body=None, headers=None,
                 redirections=5, connection_type=None):
         if not self.return_type:
-            fake_headers = httplib2.Response(headers)
+            fake_headers = fake_http_response(headers)
             return_obj = {
                 'uri': uri,
                 'method': method,
@@ -37,20 +35,20 @@ class fake_httplib2(object):
             body = body or "fake_body"
             header_info = {
                 'content-type': 'text/plain',
-                'status': str(self.return_type),
                 'content-length': len(body)
             }
-            resp_header = httplib2.Response(header_info)
+            resp_header = fake_http_response(header_info,
+                                             status=self.return_type)
             return (resp_header, body)
         else:
             msg = "unsupported return type %s" % self.return_type
             raise TypeError(msg)
 
 
-class fake_httplib(object):
+class fake_http_response(dict):
     def __init__(self, headers, body=None,
                  version=1.0, status=200, reason="Ok"):
-        """Fake httplib implementation
+        """Initialization of fake HTTP Response
 
         :param headers: dict representing HTTP response headers
         :param body: file-like object
@@ -60,9 +58,14 @@ class fake_httplib(object):
         """
         self.body = body
         self.status = status
+        self['status'] = str(self.status)
         self.reason = reason
         self.version = version
         self.headers = headers
+
+        if headers:
+            for key, value in headers.items():
+                self[key.lower()] = value
 
     def getheaders(self):
         return copy.deepcopy(self.headers).items()

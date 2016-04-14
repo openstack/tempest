@@ -31,6 +31,39 @@ ISO8601_INT_SECONDS = '%Y-%m-%dT%H:%M:%SZ'
 LOG = logging.getLogger(__name__)
 
 
+def replace_version(url, new_version):
+    parts = urlparse.urlparse(url)
+    version_path = '/%s' % new_version
+    path, subs = re.subn(r'(^|/)+v\d+(?:\.\d+)?',
+                         version_path,
+                         parts.path,
+                         count=1)
+    if not subs:
+        path = '%s%s' % (parts.path.rstrip('/'), version_path)
+    url = urlparse.urlunparse((parts.scheme,
+                               parts.netloc,
+                               path,
+                               parts.params,
+                               parts.query,
+                               parts.fragment))
+    return url
+
+
+def apply_url_filters(url, filters):
+    if filters.get('api_version', None) is not None:
+        url = replace_version(url, filters['api_version'])
+    parts = urlparse.urlparse(url)
+    if filters.get('skip_path', None) is not None and parts.path != '':
+        url = urlparse.urlunparse((parts.scheme,
+                                   parts.netloc,
+                                   '/',
+                                   parts.params,
+                                   parts.query,
+                                   parts.fragment))
+
+    return url
+
+
 @six.add_metaclass(abc.ABCMeta)
 class AuthProvider(object):
     """Provide authentication"""
@@ -322,29 +355,7 @@ class KeystoneV2AuthProvider(KeystoneAuthProvider):
             raise exceptions.EndpointNotFound(
                 "service: %s, region: %s, endpoint_type: %s" %
                 (service, region, endpoint_type))
-
-        parts = urlparse.urlparse(_base_url)
-        if filters.get('api_version', None) is not None:
-            version_path = '/%s' % filters['api_version']
-            path = re.sub(r'(^|/)+v\d+(?:\.\d+)?',
-                          version_path,
-                          parts.path,
-                          count=1)
-            _base_url = urlparse.urlunparse((parts.scheme,
-                                             parts.netloc,
-                                             path or version_path,
-                                             parts.params,
-                                             parts.query,
-                                             parts.fragment))
-        if filters.get('skip_path', None) is not None and parts.path != '':
-            _base_url = urlparse.urlunparse((parts.scheme,
-                                             parts.netloc,
-                                             '/',
-                                             parts.params,
-                                             parts.query,
-                                             parts.fragment))
-
-        return _base_url
+        return apply_url_filters(_base_url, filters)
 
     def is_expired(self, auth_data):
         _, access = auth_data
@@ -455,29 +466,7 @@ class KeystoneV3AuthProvider(KeystoneAuthProvider):
         _base_url = filtered_catalog[0].get('url', None)
         if _base_url is None:
                 raise exceptions.EndpointNotFound(service)
-
-        parts = urlparse.urlparse(_base_url)
-        if filters.get('api_version', None) is not None:
-            version_path = '/%s' % filters['api_version']
-            path = re.sub(r'(^|/)+v\d+(?:\.\d+)?',
-                          version_path,
-                          parts.path,
-                          count=1)
-            _base_url = urlparse.urlunparse((parts.scheme,
-                                             parts.netloc,
-                                             path or version_path,
-                                             parts.params,
-                                             parts.query,
-                                             parts.fragment))
-        if filters.get('skip_path', None) is not None:
-            _base_url = urlparse.urlunparse((parts.scheme,
-                                             parts.netloc,
-                                             '/',
-                                             parts.params,
-                                             parts.query,
-                                             parts.fragment))
-
-        return _base_url
+        return apply_url_filters(_base_url, filters)
 
     def is_expired(self, auth_data):
         _, access = auth_data

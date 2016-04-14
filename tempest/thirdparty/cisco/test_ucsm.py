@@ -182,7 +182,9 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
     def setup_clients(cls):
         super(UCSMTest, cls).setup_clients()
         cls.admin_networks_client = cls.os_adm.networks_client
-        cls.admin_network_client = cls.os_adm.network_client
+        cls.admin_network_client = cls.os_adm.networks_client
+        cls.routers_client = cls.os_adm.routers_client
+        cls.ports_client = cls.os_adm.ports_client
         cls.admin_hosts_client = cls.os_adm.hosts_client
         cls.servers_client = cls.os_adm.servers_client
 
@@ -196,15 +198,21 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
 
         self.keypairs = {}
         self.servers = []
-        self.security_group = self._create_security_group(client=self.admin_network_client)
+        self.security_group = self._create_security_group(
+            security_group_rules_client=self.os_adm.security_group_rules_client,
+            security_groups_client=self.os_adm.security_groups_client)
 
         # Log into UCS Manager
         self.ucsm_setup()
         self.addCleanup(self.ucsm_cleanup)
 
-    def _create_security_group(self, client=None, tenant_id=None,
-                               namestart='secgroup-smoke'):
-        secgroup = super(UCSMTest, self)._create_security_group(client=client, tenant_id=client.tenant_id, namestart=namestart)
+    def _create_security_group(self, security_group_rules_client=None,
+                               tenant_id=None,
+                               namestart='secgroup-smoke',
+                               security_groups_client=None):
+        secgroup = super(UCSMTest, self)._create_security_group(
+            security_group_rules_client=security_group_rules_client,
+            security_groups_client=security_groups_client)
         # The group should allow all protocols
         rulesets = [
             dict(
@@ -224,15 +232,15 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
             for r_direction in ['ingress', 'egress']:
                 ruleset['direction'] = r_direction
                 self._create_security_group_rule(
-                    client=client,
-                    tenant_id=client.tenant_id,
+                    sec_group_rules_client=security_group_rules_client,
+                    security_groups_client=security_groups_client,
                     secgroup=secgroup, **ruleset)
         return secgroup
 
     def _get_server_key(self, server):
         return self.keypairs[server['key_name']]['private_key']
 
-    def create_networks(self, client=None, networks_client=None,
+    def create_networks(self, networks_client=None,
                         tenant_id=None, dns_nameservers=None,
                         network_kwargs=None):
         """Create a network with a subnet connected to a router.
@@ -260,15 +268,13 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
             router = None
             subnet = None
         else:
-            network = self._create_network(
-                client=client, networks_client=networks_client,
-                tenant_id=tenant_id, **network_kwargs)
+            network = self._create_network(**network_kwargs)
             if CONF.ucsm.provider_network_id:
                 router = None
                 subnet = None
             else:
-                router = self._get_router(client=client, tenant_id=tenant_id)
-                subnet_kwargs = dict(network=network, client=client)
+                router = self._get_router(tenant_id=tenant_id)
+                subnet_kwargs = dict(network=network)
                 # use explicit check because empty list is a valid option
                 if dns_nameservers is not None:
                     subnet_kwargs['dns_nameservers'] = dns_nameservers
@@ -276,28 +282,25 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
                 subnet.add_to_router(router.id)
         return network, subnet, router
 
-    def _create_network(self, client=None, networks_client=None,
-                        tenant_id=None, namestart='network-smoke-',
-                        vlan_transparent=None, shared=False, **kwargs):
-        if not client:
-            client = self.network_client
+    def _create_network(self, networks_client=None, routers_client=None,
+                        tenant_id=None, namestart='network-smoke-', **kwargs):
         if not networks_client:
             networks_client = self.networks_client
         if not tenant_id:
-            tenant_id = client.tenant_id
+            tenant_id = networks_client.tenant_id
+        if not routers_client:
+            routers_client = self.routers_client
         name = data_utils.rand_name(namestart)
-        if vlan_transparent is not None:
-            result = networks_client.create_network(name=name, tenant_id=tenant_id,
-                                           vlan_transparent=vlan_transparent,
-                                           shared=shared, **kwargs)
+
+        if CONF.ucsm.provider_network_id:
+            # Get info because this is provider network
+            result = networks_client.show_network(CONF.ucsm.provider_network_id)
         else:
-            if CONF.ucsm.provider_network_id:
-                # Get info because this is provider network
-                result = networks_client.show_network(CONF.ucsm.provider_network_id)
-            else:
-                result = networks_client.create_network(name=name, tenant_id=tenant_id, **kwargs)
+            result = networks_client.create_network(name=name, tenant_id=tenant_id, **kwargs)
         network = net_resources.DeletableNetwork(
-            networks_client=networks_client, **result['network'])
+            networks_client=networks_client,
+            routers_client=routers_client,
+            **result['network'])
         if CONF.ucsm.provider_network_id:
             # Mock delete method because this is provider network
             network.name = name
@@ -309,14 +312,14 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
     def _create_port(self, network_id, client=None, namestart='port-quotatest',
                      **kwargs):
         if not client:
-            client = self.admin_network_client
+            client = self.ports_client
         name = data_utils.rand_name(namestart)
         result = client.create_port(
             name=name,
             network_id=network_id,
             **kwargs)
         self.assertIsNotNone(result, 'Unable to allocate port')
-        port = net_resources.DeletablePort(client=client,
+        port = net_resources.DeletablePort(ports_client=client,
                                            **result['port'])
         self.addCleanup(self.delete_wrapper, port.delete)
         return port
@@ -349,7 +352,7 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
         if not external_network_id:
             external_network_id = CONF.network.public_network_id
         if not client:
-            client = self.network_client
+            client = self.floating_ips_client
         if not port_id:
             port_id, ip4 = self._get_server_port_id_and_ip4(thing)
         else:

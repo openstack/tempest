@@ -103,22 +103,25 @@ then
   fi
   if [ $update -eq 1 ]; then
       echo "Updating virtualenv..."
-      python tools/install_venv.py $installvenvopts
+      virtualenv $installvenvopts $venv
+      $venv/bin/pip install -U -r requirements.txt
   fi
   if [ -e ${venv} ]; then
     wrapper="${with_venv}"
   else
     if [ $always_venv -eq 1 ]; then
       # Automatically install the virtualenv
-      python tools/install_venv.py $installvenvopts
+      virtualenv $installvenvopts $venv
       wrapper="${with_venv}"
+      ${wrapper} pip install -U -r requirements.txt
     else
       echo -e "No virtual environment found...create one? (Y/n) \c"
       read use_ve
       if [ "x$use_ve" = "xY" -o "x$use_ve" = "x" -o "x$use_ve" = "xy" ]; then
         # Install the virtualenv and run the test suite in it
-        python tools/install_venv.py $installvenvopts
+        virtualenv $installvenvopts $venv
         wrapper=${with_venv}
+        ${wrapper} pip install -U -r requirements.txt
       fi
     fi
   fi
