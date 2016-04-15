@@ -15,6 +15,7 @@
 
 import testtools
 
+from tempest.common import compute
 from tempest.common import waiters
 from tempest import config
 from tempest.scenario import manager
@@ -35,18 +36,9 @@ class TestShelveInstance(manager.ScenarioTest):
     """
 
     def _shelve_then_unshelve_server(self, server):
-        self.servers_client.shelve_server(server['id'])
-        offload_time = CONF.compute.shelved_offload_time
-        if offload_time >= 0:
-            waiters.wait_for_server_status(self.servers_client, server['id'],
-                                           'SHELVED_OFFLOADED',
-                                           extra_timeout=offload_time)
-        else:
-            waiters.wait_for_server_status(self.servers_client,
-                                           server['id'], 'SHELVED')
-            self.servers_client.shelve_offload_server(server['id'])
-            waiters.wait_for_server_status(self.servers_client, server['id'],
-                                           'SHELVED_OFFLOADED')
+        compute.shelve_server(self.servers_client, server['id'],
+                              force_shelve_offload=True)
+
         self.servers_client.unshelve_server(server['id'])
         waiters.wait_for_server_status(self.servers_client, server['id'],
                                        'ACTIVE')

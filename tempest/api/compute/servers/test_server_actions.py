@@ -19,6 +19,7 @@ from six.moves.urllib import parse as urlparse
 import testtools
 
 from tempest.api.compute import base
+from tempest.common import compute
 from tempest.common.utils import data_utils
 from tempest.common.utils.linux import remote_client
 from tempest.common import waiters
@@ -440,20 +441,8 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
     @testtools.skipUnless(CONF.compute_feature_enabled.shelve,
                           'Shelve is not available.')
     def test_shelve_unshelve_server(self):
-        self.client.shelve_server(self.server_id)
-
-        offload_time = CONF.compute.shelved_offload_time
-        if offload_time >= 0:
-            waiters.wait_for_server_status(self.client, self.server_id,
-                                           'SHELVED_OFFLOADED',
-                                           extra_timeout=offload_time)
-        else:
-            waiters.wait_for_server_status(self.client, self.server_id,
-                                           'SHELVED')
-
-            self.client.shelve_offload_server(self.server_id)
-            waiters.wait_for_server_status(self.client, self.server_id,
-                                           'SHELVED_OFFLOADED')
+        compute.shelve_server(self.client, self.server_id,
+                              force_shelve_offload=True)
 
         server = self.client.show_server(self.server_id)['server']
         image_name = server['name'] + '-shelved'
