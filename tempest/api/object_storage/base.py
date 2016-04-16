@@ -58,6 +58,16 @@ class BaseObjectTest(tempest.test.BaseTestCase):
         cls.container_client.auth_provider.clear_auth()
         cls.account_client.auth_provider.clear_auth()
 
+        # make sure that discoverability is enabled and that the sections
+        # have not been disallowed by Swift
+        cls.policies = None
+
+        if CONF.object_storage_feature_enabled.discoverability:
+            _, body = cls.account_client.list_extensions()
+
+            if 'swift' in body and 'policies' in body['swift']:
+                cls.policies = body['swift']['policies']
+
         cls.containers = []
 
     @classmethod
@@ -117,5 +127,5 @@ class BaseObjectTest(tempest.test.BaseTestCase):
         """Check the existence and the format of response headers"""
 
         self.assertThat(resp, custom_matchers.ExistsAllResponseHeaders(
-                        target, method))
+                        target, method, self.policies))
         self.assertThat(resp, custom_matchers.AreAllWellFormatted())
