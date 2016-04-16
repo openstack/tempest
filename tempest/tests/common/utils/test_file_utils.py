@@ -16,7 +16,7 @@
 import mock
 
 from tempest.common.utils import file_utils
-from tempest.tests.lib import base
+from tempest.tests import base
 
 
 class TestFileUtils(base.TestCase):

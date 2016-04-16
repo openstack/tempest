@@ -14,7 +14,7 @@
 #    under the License.
 
 from tempest.common import custom_matchers
-from tempest.tests.lib import base
+from tempest.tests import base
 
 from testtools.tests.matchers import helpers
 

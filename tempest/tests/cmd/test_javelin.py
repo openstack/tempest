@@ -17,7 +17,7 @@ from oslotest import mockpatch
 
 from tempest.cmd import javelin
 from tempest.lib import exceptions as lib_exc
-from tempest.tests.lib import base
+from tempest.tests import base
 
 
 class JavelinUnitTest(base.TestCase):

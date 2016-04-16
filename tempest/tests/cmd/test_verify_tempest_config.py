@@ -19,8 +19,8 @@ from oslotest import mockpatch
 
 from tempest.cmd import verify_tempest_config
 from tempest import config
+from tempest.tests import base
 from tempest.tests import fake_config
-from tempest.tests.lib import base
 
 
 class TestGetAPIVersions(base.TestCase):

@@ -22,7 +22,7 @@ import six
 from tempest.common.generator import base_generator
 from tempest.common.generator import negative_generator
 from tempest.common.generator import valid_generator
-from tempest.tests.lib import base
+from tempest.tests import base
 
 
 class TestNegativeBasicGenerator(base.TestCase):

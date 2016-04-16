@@ -14,7 +14,7 @@
 
 from tempest.lib.common import api_version_request
 from tempest.lib import exceptions
-from tempest.tests.lib import base
+from tempest.tests import base
 
 
 class APIVersionRequestTests(base.TestCase):

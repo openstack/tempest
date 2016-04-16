@@ -15,7 +15,7 @@
 
 
 from tempest.lib.common.utils import misc
-from tempest.tests.lib import base
+from tempest.tests import base
 
 
 @misc.singleton

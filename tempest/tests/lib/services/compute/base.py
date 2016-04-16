@@ -15,7 +15,7 @@
 from oslo_serialization import jsonutils as json
 from oslotest import mockpatch
 
-from tempest.tests.lib import base
+from tempest.tests import base
 from tempest.tests.lib import fake_http
 
 

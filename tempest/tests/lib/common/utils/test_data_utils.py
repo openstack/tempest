@@ -16,7 +16,7 @@
 import netaddr
 
 from tempest.lib.common.utils import data_utils
-from tempest.tests.lib import base
+from tempest.tests import base
 
 
 class TestDataUtils(base.TestCase):

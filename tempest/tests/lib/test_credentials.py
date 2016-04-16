@@ -19,7 +19,7 @@ from tempest.lib import auth
 from tempest.lib import exceptions
 from tempest.lib.services.identity.v2 import token_client as v2_client
 from tempest.lib.services.identity.v3 import token_client as v3_client
-from tempest.tests.lib import base
+from tempest.tests import base
 from tempest.tests.lib import fake_identity
 
 

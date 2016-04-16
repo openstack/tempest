@@ -18,7 +18,7 @@ import testtools
 from tempest.lib import base as test
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
-from tempest.tests.lib import base
+from tempest.tests import base
 
 
 class TestSkipBecauseDecorator(base.TestCase):
