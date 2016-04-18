@@ -82,11 +82,6 @@ class AddImageException(TempestException):
     message = "Image %(image_id)s failed to become ACTIVE in the allotted time"
 
 
-class EC2RegisterImageException(TempestException):
-    message = ("Image %(image_id)s failed to become 'available' "
-               "in the allotted time")
-
-
 class VolumeBuildErrorException(TempestException):
     message = "Volume %(volume_id)s failed to build and is in ERROR status"
 
@@ -108,23 +103,8 @@ class StackBuildErrorException(TempestException):
                "due to '%(stack_status_reason)s'")
 
 
-class StackResourceBuildErrorException(TempestException):
-    message = ("Resource %(resource_name)s in stack %(stack_identifier)s is "
-               "in %(resource_status)s status due to "
-               "'%(resource_status_reason)s'")
-
-
-class AuthenticationFailure(TempestException):
-    message = ("Authentication with user %(user)s and password "
-               "%(password)s failed auth using tenant %(tenant)s.")
-
-
 class EndpointNotFound(TempestException):
     message = "Endpoint not found"
-
-
-class ImageFault(TempestException):
-    message = "Got image fault"
 
 
 class IdentityError(TempestException):
@@ -133,10 +113,6 @@ class IdentityError(TempestException):
 
 class ServerUnreachable(TempestException):
     message = "The server is not reachable via the configured network"
-
-
-class TearDownException(TempestException):
-    message = "%(num)d cleanUp operation failed"
 
 
 # NOTE(andreaf) This exception is added here to facilitate the migration
