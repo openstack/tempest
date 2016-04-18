@@ -186,7 +186,7 @@ class TestImagesClient(base.BaseComputeServiceTest):
 
     def _test_resource_deleted(self, bytes_body=False):
         params = {"id": self.FAKE_IMAGE_ID}
-        expected_op = self.FAKE_IMAGE_DATA['show']['image']
+        expected_op = self.FAKE_IMAGE_DATA['show']
         self.useFixture(mockpatch.Patch('tempest.lib.services.compute'
                         '.images_client.ImagesClient.show_image',
                                         side_effect=lib_exc.NotFound))
