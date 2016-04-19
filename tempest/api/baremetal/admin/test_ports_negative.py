@@ -37,7 +37,7 @@ class TestPortsNegative(base.BaseBaremetalTest):
     @test.attr(type=['negative'])
     @test.idempotent_id('30277ee8-0c60-4f1d-b125-0e51c2f43369')
     def test_create_port_nonexsistent_node_id(self):
-        node_id = str(data_utils.rand_uuid())
+        node_id = data_utils.rand_uuid()
         address = data_utils.rand_mac_address()
         self.assertRaises(lib_exc.BadRequest, self.create_port,
                           node_id=node_id, address=address)

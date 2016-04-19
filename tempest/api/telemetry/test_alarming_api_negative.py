@@ -17,8 +17,6 @@ from tempest.common.utils import data_utils
 from tempest.lib import exceptions as lib_exc
 from tempest import test
 
-import uuid
-
 
 class TelemetryAlarmingNegativeTest(base.BaseAlarmingTest):
     """Negative tests for show_alarm, update_alarm, show_alarm_history tests
@@ -33,7 +31,7 @@ class TelemetryAlarmingNegativeTest(base.BaseAlarmingTest):
     @test.idempotent_id('668743d5-08ad-4480-b2b8-15da34f81e7d')
     def test_get_non_existent_alarm(self):
         # get the non-existent alarm
-        non_existent_id = str(uuid.uuid4())
+        non_existent_id = data_utils.rand_uuid()
         self.assertRaises(lib_exc.NotFound, self.alarming_client.show_alarm,
                           non_existent_id)
 

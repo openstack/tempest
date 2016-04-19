@@ -20,6 +20,7 @@ Tempest Specific Commandments
 - [T110] Check that service client names of GET should be consistent
 - [T111] Check that service client names of DELETE should be consistent
 - [T112] Check that tempest.lib should not import local tempest code
+- [T113] Check that tests use data_utils.rand_uuid() instead of uuid.uuid4()
 - [N322] Method's default argument shouldn't be mutable
 
 Test Data/Configuration

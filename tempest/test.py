@@ -19,7 +19,6 @@ import os
 import re
 import sys
 import time
-import uuid
 
 import fixtures
 from oslo_log import log as logging
@@ -38,6 +37,7 @@ import tempest.common.generator.valid_generator as valid
 import tempest.common.validation_resources as vresources
 from tempest import config
 from tempest import exceptions
+from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
 
 LOG = logging.getLogger(__name__)
@@ -714,10 +714,10 @@ class NegativeAutoTest(BaseTestCase):
                 resource = resource['name']
             LOG.debug("Add resource to test %s" % resource)
             scn_name = "inv_res_%s" % (resource)
-            scenario_list.append((scn_name, {"resource": (resource,
-                                                          str(uuid.uuid4())),
-                                             "expected_result": expected_result
-                                             }))
+            scenario_list.append((scn_name, {
+                "resource": (resource, data_utils.rand_uuid()),
+                "expected_result": expected_result
+            }))
         if schema is not None:
             for scenario in generator.generate_scenarios(schema):
                 scenario_list.append((scenario['_negtest_name'],

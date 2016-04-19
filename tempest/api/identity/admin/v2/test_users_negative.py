@@ -13,8 +13,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import uuid
-
 from tempest.api.identity import base
 from tempest.common.utils import data_utils
 from tempest.lib import exceptions as lib_exc
@@ -108,7 +106,7 @@ class UsersNegativeTestJSON(base.BaseIdentityV2AdminTest):
     def test_update_user_for_non_existent_user(self):
         # Attempt to update a user non-existent user should fail
         user_name = data_utils.rand_name('user')
-        non_existent_id = str(uuid.uuid4())
+        non_existent_id = data_utils.rand_uuid()
         self.assertRaises(lib_exc.NotFound, self.users_client.update_user,
                           non_existent_id, name=user_name)
 
