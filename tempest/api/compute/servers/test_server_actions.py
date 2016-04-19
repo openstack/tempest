@@ -312,7 +312,8 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
 
         image1_id = data_utils.parse_image_id(resp['location'])
         self.addCleanup(_clean_oldest_backup, image1_id)
-        self.os.image_client.wait_for_image_status(image1_id, 'active')
+        waiters.wait_for_image_status(self.os.image_client,
+                                      image1_id, 'active')
 
         backup2 = data_utils.rand_name('backup-2')
         waiters.wait_for_server_status(self.client, self.server_id, 'ACTIVE')
@@ -322,7 +323,8 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
                                          name=backup2).response
         image2_id = data_utils.parse_image_id(resp['location'])
         self.addCleanup(self.os.image_client.delete_image, image2_id)
-        self.os.image_client.wait_for_image_status(image2_id, 'active')
+        waiters.wait_for_image_status(self.os.image_client,
+                                      image2_id, 'active')
 
         # verify they have been created
         properties = {

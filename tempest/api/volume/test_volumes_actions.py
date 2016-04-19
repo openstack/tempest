@@ -125,7 +125,7 @@ class VolumesV2ActionsTest(base.BaseVolumeTest):
             disk_format=CONF.volume.disk_format)['os-volume_upload_image']
         image_id = body["image_id"]
         self.addCleanup(self._cleanup_image, image_id)
-        self.image_client.wait_for_image_status(image_id, 'active')
+        waiters.wait_for_image_status(self.image_client, image_id, 'active')
         waiters.wait_for_volume_status(self.client,
                                        self.volume['id'], 'available')
 

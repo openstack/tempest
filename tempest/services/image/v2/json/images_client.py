@@ -21,10 +21,10 @@ from tempest.lib.common import rest_client
 from tempest.lib import exceptions as lib_exc
 
 
-class ImagesClientV2(rest_client.RestClient):
+class ImagesClient(rest_client.RestClient):
 
     def __init__(self, auth_provider, catalog_type, region, **kwargs):
-        super(ImagesClientV2, self).__init__(
+        super(ImagesClient, self).__init__(
             auth_provider, catalog_type, region, **kwargs)
         self._http = None
         self.dscv = kwargs.get("disable_ssl_certificate_validation")

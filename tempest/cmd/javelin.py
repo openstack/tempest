@@ -233,7 +233,7 @@ class OSClient(object):
                                                   **object_storage_params)
         self.containers = container_client.ContainerClient(
             _auth, **object_storage_params)
-        self.images = images_client.ImagesClientV2(
+        self.images = images_client.ImagesClient(
             _auth,
             CONF.image.catalog_type,
             CONF.image.region or CONF.identity.region,
