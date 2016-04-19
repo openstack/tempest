@@ -141,8 +141,6 @@ class TestSshClient(base.TestCase):
     def test_exec_command(self):
         chan_mock, poll_mock, select_mock = (
             self._set_mocks_for_select([[1, 0, 0]], True))
-        closed_prop = mock.PropertyMock(return_value=True)
-        type(chan_mock).closed = closed_prop
 
         chan_mock.recv_exit_status.return_value = 0
         chan_mock.recv.return_value = b''
@@ -164,7 +162,6 @@ class TestSshClient(base.TestCase):
         chan_mock.recv_stderr_ready.assert_called_once_with()
         chan_mock.recv_stderr.assert_called_once_with(1024)
         chan_mock.recv_exit_status.assert_called_once_with()
-        closed_prop.assert_called_once_with()
 
     def _set_mocks_for_select(self, poll_data, ito_value=False):
         gsc_mock = self.patch('tempest.lib.common.ssh.Client.'
@@ -184,7 +181,7 @@ class TestSshClient(base.TestCase):
         gsc_mock.return_value = client_mock
         ito_mock.return_value = ito_value
         client_mock.get_transport.return_value = tran_mock
-        tran_mock.open_session.return_value = chan_mock
+        tran_mock.open_session().__enter__.return_value = chan_mock
         if isinstance(poll_data[0], list):
             poll_mock.poll.side_effect = poll_data
         else:
@@ -242,7 +239,7 @@ class TestSshClient(base.TestCase):
 
         gsc_mock.return_value = client_mock
         client_mock.get_transport.return_value = tran_mock
-        tran_mock.open_session.return_value = chan_mock
+        tran_mock.open_session().__enter__.return_value = chan_mock
         chan_mock.recv_exit_status.return_value = 0
 
         std_out_mock = mock.MagicMock(StringIO)
