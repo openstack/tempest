@@ -465,7 +465,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
             thing_id=image_id, thing_id_param='id',
             cleanup_callable=self.delete_wrapper,
             cleanup_args=[_image_client.delete_image, image_id])
-        snapshot_image = _image_client.get_image_meta(image_id)
+        snapshot_image = _image_client.check_image(image_id)
 
         bdm = snapshot_image.get('properties', {}).get('block_device_mapping')
         if bdm:

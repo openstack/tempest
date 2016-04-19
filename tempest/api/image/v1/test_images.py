@@ -305,7 +305,7 @@ class UpdateImageMetaTest(base.BaseV1ImageTest):
     @test.idempotent_id('01752c1c-0275-4de3-9e5b-876e44541928')
     def test_list_image_metadata(self):
         # All metadata key/value pairs for an image should be returned
-        resp_metadata = self.client.get_image_meta(self.image_id)
+        resp_metadata = self.client.check_image(self.image_id)
         expected = {'key1': 'value1'}
         self.assertEqual(expected, resp_metadata['properties'])
 
@@ -313,12 +313,12 @@ class UpdateImageMetaTest(base.BaseV1ImageTest):
     def test_update_image_metadata(self):
         # The metadata for the image should match the updated values
         req_metadata = {'key1': 'alt1', 'key2': 'value2'}
-        metadata = self.client.get_image_meta(self.image_id)
+        metadata = self.client.check_image(self.image_id)
         self.assertEqual(metadata['properties'], {'key1': 'value1'})
         metadata['properties'].update(req_metadata)
         metadata = self.client.update_image(
             self.image_id, properties=metadata['properties'])['image']
 
-        resp_metadata = self.client.get_image_meta(self.image_id)
+        resp_metadata = self.client.check_image(self.image_id)
         expected = {'key1': 'alt1', 'key2': 'value2'}
         self.assertEqual(expected, resp_metadata['properties'])
