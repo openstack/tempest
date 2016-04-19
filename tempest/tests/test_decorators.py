@@ -254,6 +254,13 @@ class TestConfigDecorators(BaseDecoratorsTest):
         cfg.CONF.set_default('nova', True, 'service_available')
         cfg.CONF.set_default('glance', False, 'service_available')
 
+    def _assert_skip_message(self, func, skip_msg):
+        try:
+            func()
+            self.fail()
+        except testtools.TestCase.skipException as skip_exc:
+            self.assertEqual(skip_exc.args[0], skip_msg)
+
     def _test_skip_unless_config(self, expected_to_skip=True, *decorator_args):
 
         class TestFoo(test.BaseTestCase):
@@ -264,6 +271,9 @@ class TestConfigDecorators(BaseDecoratorsTest):
         t = TestFoo('test_bar')
         if expected_to_skip:
             self.assertRaises(testtools.TestCase.skipException, t.test_bar)
+            if (len(decorator_args) >= 3):
+                # decorator_args[2]: skip message specified
+                self._assert_skip_message(t.test_bar, decorator_args[2])
         else:
             try:
                 self.assertEqual(t.test_bar(), 0)
@@ -284,6 +294,9 @@ class TestConfigDecorators(BaseDecoratorsTest):
         t = TestFoo('test_bar')
         if expected_to_skip:
             self.assertRaises(testtools.TestCase.skipException, t.test_bar)
+            if (len(decorator_args) >= 3):
+                # decorator_args[2]: skip message specified
+                self._assert_skip_message(t.test_bar, decorator_args[2])
         else:
             try:
                 self.assertEqual(t.test_bar(), 0)
@@ -303,6 +316,10 @@ class TestConfigDecorators(BaseDecoratorsTest):
     def test_skip_unless_false_option(self):
         self._test_skip_unless_config(True, 'service_available', 'glance')
 
+    def test_skip_unless_false_option_msg(self):
+        self._test_skip_unless_config(True, 'service_available', 'glance',
+                                      'skip message')
+
     def test_skip_unless_true_option(self):
         self._test_skip_unless_config(False,
                                       'service_available', 'nova')
@@ -318,3 +335,7 @@ class TestConfigDecorators(BaseDecoratorsTest):
 
     def test_skip_if_true_option(self):
         self._test_skip_if_config(True, 'service_available', 'nova')
+
+    def test_skip_if_true_option_msg(self):
+        self._test_skip_if_config(True, 'service_available', 'nova',
+                                  'skip message')
