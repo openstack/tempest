@@ -13,9 +13,9 @@
 #    under the License.
 
 import six
-
 from tempest.api.volume import base
 from tempest.common.utils import data_utils
+from tempest.common import waiters
 from tempest import test
 
 QUOTA_KEYS = ['gigabytes', 'snapshots', 'volumes']
@@ -25,10 +25,13 @@ QUOTA_USAGE_KEYS = ['reserved', 'limit', 'in_use']
 class BaseVolumeQuotasAdminV2TestJSON(base.BaseVolumeAdminTest):
     force_tenant_isolation = True
 
+    credentials = ['primary', 'alt', 'admin']
+
     @classmethod
     def setup_credentials(cls):
         super(BaseVolumeQuotasAdminV2TestJSON, cls).setup_credentials()
         cls.demo_tenant_id = cls.os.credentials.tenant_id
+        cls.alt_client = cls.os_alt.volumes_client
 
     def _delete_volume(self, volume_id):
         # Delete the specified volume using admin credentials
@@ -120,6 +123,54 @@ class BaseVolumeQuotasAdminV2TestJSON(base.BaseVolumeAdminTest):
         quota_set_new = (self.admin_quotas_client.show_quota_set(project_id)
                          ['quota_set'])
         self.assertEqual(volume_default, quota_set_new['volumes'])
+
+    @test.idempotent_id('8911036f-9d54-4720-80cc-a1c9796a8805')
+    def test_quota_usage_after_volume_transfer(self):
+        # Create a volume for transfer
+        volume = self.create_volume()
+        self.addCleanup(self._delete_volume, volume['id'])
+
+        # List of tenants quota usage pre-transfer
+        primary_quota = self.admin_quotas_client.show_quota_usage(
+            self.demo_tenant_id)['quota_set']
+
+        alt_quota = self.admin_quotas_client.show_quota_usage(
+            self.alt_client.tenant_id)['quota_set']
+
+        # Creates a volume transfer
+        transfer = self.volumes_client.create_volume_transfer(
+            volume_id=volume['id'])['transfer']
+        transfer_id = transfer['id']
+        auth_key = transfer['auth_key']
+
+        # Accepts a volume transfer
+        self.alt_client.accept_volume_transfer(
+            transfer_id, auth_key=auth_key)['transfer']
+
+        # Verify volume transferred is available
+        waiters.wait_for_volume_status(
+            self.alt_client, volume['id'], 'available')
+
+        # List of tenants quota usage post transfer
+        new_primary_quota = self.admin_quotas_client.show_quota_usage(
+            self.demo_tenant_id)['quota_set']
+
+        new_alt_quota = self.admin_quotas_client.show_quota_usage(
+            self.alt_client.tenant_id)['quota_set']
+
+        # Verify tenants quota usage was updated
+        self.assertEqual(primary_quota['volumes']['in_use'] -
+                         new_primary_quota['volumes']['in_use'],
+                         new_alt_quota['volumes']['in_use'] -
+                         alt_quota['volumes']['in_use'])
+
+        self.assertEqual(alt_quota['gigabytes']['in_use'] +
+                         volume['size'],
+                         new_alt_quota['gigabytes']['in_use'])
+
+        self.assertEqual(primary_quota['gigabytes']['in_use'] -
+                         volume['size'],
+                         new_primary_quota['gigabytes']['in_use'])
 
 
 class VolumeQuotasAdminV1TestJSON(BaseVolumeQuotasAdminV2TestJSON):
