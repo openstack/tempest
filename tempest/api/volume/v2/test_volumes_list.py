@@ -18,6 +18,7 @@ import random
 from six.moves.urllib import parse
 
 from tempest.api.volume import base
+from tempest.lib import decorators
 from tempest import test
 
 
@@ -188,6 +189,7 @@ class VolumesV2ListTestJSON(base.BaseVolumeTest):
         self._test_pagination('volumes', ids=self.volume_id_list, detail=False)
 
     @test.idempotent_id('46eff077-100b-427f-914e-3db2abcdb7e2')
+    @decorators.skip_because(bug='1572765')
     def test_volume_list_with_detail_param_marker(self):
         # Choosing a random volume from a list of volumes for 'marker'
         # parameter
