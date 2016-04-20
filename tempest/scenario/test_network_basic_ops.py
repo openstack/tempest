@@ -686,8 +686,9 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         unschedule_router = (self.admin_manager.network_agents_client.
                              delete_router_from_l3_agent)
 
-        agent_list = set(a["id"] for a in
-                         self._list_agents(agent_type="L3 agent"))
+        agent_list_alive = set(a["id"] for a in
+                               self._list_agents(agent_type="L3 agent") if
+                               a["alive"] is True)
         self._setup_network_and_servers()
 
         # NOTE(kevinbenton): we have to use the admin credentials to check
@@ -702,7 +703,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         # remove resource from agents
         hosting_agents = set(a["id"] for a in
                              list_hosts(self.router.id)['agents'])
-        no_migration = agent_list == hosting_agents
+        no_migration = agent_list_alive == hosting_agents
         LOG.info("Router will be assigned to {mig} hosting agent".
                  format(mig="the same" if no_migration else "a new"))
 
@@ -722,7 +723,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
 
         # schedule resource to new agent
         target_agent = list(hosting_agents if no_migration else
-                            agent_list - hosting_agents)[0]
+                            agent_list_alive - hosting_agents)[0]
         schedule_router(target_agent,
                         router_id=self.router['id'])
         self.assertEqual(
