@@ -28,7 +28,8 @@ class TestAdminAvailable(base.TestCase):
     def setUp(self):
         super(TestAdminAvailable, self).setUp()
         self.useFixture(fake_config.ConfigFixture())
-        self.stubs.Set(config, 'TempestConfigPrivate', fake_config.FakePrivate)
+        self.patchobject(config, 'TempestConfigPrivate',
+                         fake_config.FakePrivate)
 
     def run_test(self, dynamic_creds, use_accounts_file, admin_creds):
 

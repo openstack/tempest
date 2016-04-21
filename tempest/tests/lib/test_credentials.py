@@ -72,8 +72,8 @@ class KeystoneV2CredentialsTests(CredentialsTests):
 
     def setUp(self):
         super(KeystoneV2CredentialsTests, self).setUp()
-        self.stubs.Set(self.tokenclient_class, 'raw_request',
-                       self.identity_response)
+        self.patchobject(self.tokenclient_class, 'raw_request',
+                         self.identity_response)
 
     def _verify_credentials(self, credentials_class, creds_dict, filled=True):
         creds = auth.get_credentials(fake_identity.FAKE_AUTH_URL,

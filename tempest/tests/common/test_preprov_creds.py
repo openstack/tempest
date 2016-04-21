@@ -46,9 +46,10 @@ class TestPreProvisionedCredentials(base.TestCase):
     def setUp(self):
         super(TestPreProvisionedCredentials, self).setUp()
         self.useFixture(fake_config.ConfigFixture())
-        self.stubs.Set(config, 'TempestConfigPrivate', fake_config.FakePrivate)
-        self.stubs.Set(token_client.TokenClient, 'raw_request',
-                       fake_identity._fake_v2_response)
+        self.patchobject(config, 'TempestConfigPrivate',
+                         fake_config.FakePrivate)
+        self.patchobject(token_client.TokenClient, 'raw_request',
+                         fake_identity._fake_v2_response)
         self.useFixture(lockutils_fixtures.ExternalLockFixture())
         self.test_accounts = [
             {'username': 'test_user1', 'tenant_name': 'test_tenant1',
@@ -96,8 +97,8 @@ class TestPreProvisionedCredentials(base.TestCase):
         return hash_list
 
     def test_get_hash(self):
-        self.stubs.Set(token_client.TokenClient, 'raw_request',
-                       fake_identity._fake_v2_response)
+        self.patchobject(token_client.TokenClient, 'raw_request',
+                         fake_identity._fake_v2_response)
         test_account_class = preprov_creds.PreProvisionedCredentialProvider(
             **self.fixed_params)
         hash_list = self._get_hash_list(self.test_accounts)
@@ -188,7 +189,7 @@ class TestPreProvisionedCredentials(base.TestCase):
                 return False
             return True
 
-        self.stubs.Set(os.path, 'isfile', _fake_is_file)
+        self.patchobject(os.path, 'isfile', _fake_is_file)
         with mock.patch('six.moves.builtins.open', mock.mock_open(),
                         create=True) as open_mock:
             test_account_class._get_free_hash(hash_list)

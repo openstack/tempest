@@ -41,7 +41,7 @@ class BaseAuthTestsSetUp(base.TestCase):
 
     def setUp(self):
         super(BaseAuthTestsSetUp, self).setUp()
-        self.stubs.Set(auth, 'get_credentials', fake_get_credentials)
+        self.patchobject(auth, 'get_credentials', fake_get_credentials)
         self.auth_provider = self._auth(self.credentials,
                                         fake_identity.FAKE_AUTH_URL)
 
@@ -118,8 +118,8 @@ class TestKeystoneV2AuthProvider(BaseAuthTestsSetUp):
 
     def setUp(self):
         super(TestKeystoneV2AuthProvider, self).setUp()
-        self.stubs.Set(v2_client.TokenClient, 'raw_request',
-                       fake_identity._fake_v2_response)
+        self.patchobject(v2_client.TokenClient, 'raw_request',
+                         fake_identity._fake_v2_response)
         self.target_url = 'test_api'
 
     def _get_fake_identity(self):
@@ -433,8 +433,8 @@ class TestKeystoneV3AuthProvider(TestKeystoneV2AuthProvider):
 
     def setUp(self):
         super(TestKeystoneV3AuthProvider, self).setUp()
-        self.stubs.Set(v3_client.V3TokenClient, 'raw_request',
-                       fake_identity._fake_v3_response)
+        self.patchobject(v3_client.V3TokenClient, 'raw_request',
+                         fake_identity._fake_v3_response)
 
     def _get_fake_identity(self):
         return fake_identity.IDENTITY_V3_RESPONSE['token']
