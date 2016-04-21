@@ -91,7 +91,7 @@ class FlavorsAdminTestJSON(base.BaseV2ComputeAdminTest):
 
     @test.idempotent_id('94c9bb4e-2c2a-4f3c-bb1f-5f0daf918e6d')
     def test_create_flavor_with_uuid_id(self):
-        flavor_id = str(uuid.uuid4())
+        flavor_id = data_utils.rand_uuid()
         new_flavor_id = self._create_flavor(flavor_id)
         self.assertEqual(new_flavor_id, flavor_id)
 

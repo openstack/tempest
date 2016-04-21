@@ -10,8 +10,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import uuid
-
 from tempest.api.volume import base
 from tempest.common.utils import data_utils
 from tempest import config
@@ -36,7 +34,8 @@ class VolumesV2SnapshotNegativeTestJSON(base.BaseVolumeTest):
         s_name = data_utils.rand_name('snap')
         self.assertRaises(lib_exc.NotFound,
                           self.snapshots_client.create_snapshot,
-                          volume_id=str(uuid.uuid4()), display_name=s_name)
+                          volume_id=data_utils.rand_uuid(),
+                          display_name=s_name)
 
     @test.attr(type=['negative'])
     @test.idempotent_id('bb9da53e-d335-4309-9c15-7e76fd5e4d6d')

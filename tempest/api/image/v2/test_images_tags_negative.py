@@ -12,8 +12,6 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-import uuid
-
 from tempest.api.image import base
 from tempest.common.utils import data_utils
 from tempest.lib import exceptions as lib_exc
@@ -27,7 +25,7 @@ class ImagesTagsNegativeTest(base.BaseV2ImageTest):
     def test_update_tags_for_non_existing_image(self):
         # Update tag with non existing image.
         tag = data_utils.rand_name('tag')
-        non_exist_image = str(uuid.uuid4())
+        non_exist_image = data_utils.rand_uuid()
         self.assertRaises(lib_exc.NotFound, self.client.add_image_tag,
                           non_exist_image, tag)
 

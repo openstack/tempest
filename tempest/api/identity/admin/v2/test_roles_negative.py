@@ -13,8 +13,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import uuid
-
 from tempest.api.identity import base
 from tempest.common.utils import data_utils
 from tempest.lib import exceptions as lib_exc
@@ -115,7 +113,7 @@ class RolesNegativeTestJSON(base.BaseIdentityV2AdminTest):
     @test.idempotent_id('38373691-8551-453a-b074-4260ad8298ef')
     def test_delete_role_non_existent(self):
         # Attempt to delete a non existent role should fail
-        non_existent_role = str(uuid.uuid4().hex)
+        non_existent_role = data_utils.rand_uuid_hex()
         self.assertRaises(lib_exc.NotFound, self.roles_client.delete_role,
                           non_existent_role)
 
@@ -146,7 +144,7 @@ class RolesNegativeTestJSON(base.BaseIdentityV2AdminTest):
     def test_assign_user_role_for_non_existent_role(self):
         # Attempt to assign a non existent role to user should fail
         (user, tenant, role) = self._get_role_params()
-        non_existent_role = str(uuid.uuid4().hex)
+        non_existent_role = data_utils.rand_uuid_hex()
         self.assertRaises(lib_exc.NotFound, self.roles_client.assign_user_role,
                           tenant['id'], user['id'], non_existent_role)
 
@@ -155,7 +153,7 @@ class RolesNegativeTestJSON(base.BaseIdentityV2AdminTest):
     def test_assign_user_role_for_non_existent_tenant(self):
         # Attempt to assign a role on a non existent tenant should fail
         (user, tenant, role) = self._get_role_params()
-        non_existent_tenant = str(uuid.uuid4().hex)
+        non_existent_tenant = data_utils.rand_uuid_hex()
         self.assertRaises(lib_exc.NotFound, self.roles_client.assign_user_role,
                           non_existent_tenant, user['id'], role['id'])
 
@@ -205,7 +203,7 @@ class RolesNegativeTestJSON(base.BaseIdentityV2AdminTest):
         self.roles_client.assign_user_role(tenant['id'],
                                            user['id'],
                                            role['id'])
-        non_existent_role = str(uuid.uuid4().hex)
+        non_existent_role = data_utils.rand_uuid_hex()
         self.assertRaises(lib_exc.NotFound, self.roles_client.delete_user_role,
                           tenant['id'], user['id'], non_existent_role)
 
@@ -217,7 +215,7 @@ class RolesNegativeTestJSON(base.BaseIdentityV2AdminTest):
         self.roles_client.assign_user_role(tenant['id'],
                                            user['id'],
                                            role['id'])
-        non_existent_tenant = str(uuid.uuid4().hex)
+        non_existent_tenant = data_utils.rand_uuid_hex()
         self.assertRaises(lib_exc.NotFound, self.roles_client.delete_user_role,
                           non_existent_tenant, user['id'], role['id'])
 

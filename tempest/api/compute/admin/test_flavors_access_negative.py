@@ -13,8 +13,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import uuid
-
 from tempest.api.compute import base
 from tempest.common.utils import data_utils
 from tempest.lib import exceptions as lib_exc
@@ -145,4 +143,4 @@ class FlavorsAccessNegativeTestJSON(base.BaseV2ComputeAdminTest):
         self.assertRaises(lib_exc.NotFound,
                           self.client.remove_flavor_access,
                           new_flavor['id'],
-                          str(uuid.uuid4()))
+                          data_utils.rand_uuid())

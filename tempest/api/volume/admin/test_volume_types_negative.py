@@ -13,9 +13,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import uuid
-
 from tempest.api.volume import base
+from tempest.lib.common.utils import data_utils
 from tempest.lib import exceptions as lib_exc
 from tempest import test
 
@@ -26,8 +25,8 @@ class VolumeTypesNegativeV2Test(base.BaseVolumeAdminTest):
     def test_create_with_nonexistent_volume_type(self):
         # Should not be able to create volume with nonexistent volume_type.
         self.name_field = self.special_fields['name_field']
-        params = {self.name_field: str(uuid.uuid4()),
-                  'volume_type': str(uuid.uuid4())}
+        params = {self.name_field: data_utils.rand_uuid(),
+                  'volume_type': data_utils.rand_uuid()}
         self.assertRaises(lib_exc.NotFound,
                           self.volumes_client.create_volume, **params)
 
@@ -42,14 +41,14 @@ class VolumeTypesNegativeV2Test(base.BaseVolumeAdminTest):
         # Should not be able to get volume type with nonexistent type id.
         self.assertRaises(lib_exc.NotFound,
                           self.volume_types_client.show_volume_type,
-                          str(uuid.uuid4()))
+                          data_utils.rand_uuid())
 
     @test.idempotent_id('6b3926d2-7d73-4896-bc3d-e42dfd11a9f6')
     def test_delete_nonexistent_type_id(self):
         # Should not be able to delete volume type with nonexistent type id.
         self.assertRaises(lib_exc.NotFound,
                           self.volume_types_client.delete_volume_type,
-                          str(uuid.uuid4()))
+                          data_utils.rand_uuid())
 
 
 class VolumeTypesNegativeV1Test(VolumeTypesNegativeV2Test):

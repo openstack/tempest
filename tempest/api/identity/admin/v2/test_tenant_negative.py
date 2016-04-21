@@ -13,8 +13,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import uuid
-
 from tempest.api.identity import base
 from tempest.common.utils import data_utils
 from tempest.lib import exceptions as lib_exc
@@ -70,7 +68,7 @@ class TenantsNegativeTestJSON(base.BaseIdentityV2AdminTest):
     def test_delete_non_existent_tenant(self):
         # Attempt to delete a non existent tenant should fail
         self.assertRaises(lib_exc.NotFound, self.tenants_client.delete_tenant,
-                          str(uuid.uuid4().hex))
+                          data_utils.rand_uuid_hex())
 
     @test.attr(type=['negative'])
     @test.idempotent_id('af16f44b-a849-46cb-9f13-a751c388f739')
@@ -130,7 +128,7 @@ class TenantsNegativeTestJSON(base.BaseIdentityV2AdminTest):
     def test_update_non_existent_tenant(self):
         # Attempt to update a non existent tenant should fail
         self.assertRaises(lib_exc.NotFound, self.tenants_client.update_tenant,
-                          str(uuid.uuid4().hex))
+                          data_utils.rand_uuid_hex())
 
     @test.attr(type=['negative'])
     @test.idempotent_id('41704dc5-c5f7-4f79-abfa-76e6fedc570b')

@@ -241,6 +241,22 @@ def dont_import_local_tempest_into_lib(logical_line, filename):
     yield (0, msg)
 
 
+def use_rand_uuid_instead_of_uuid4(logical_line, filename):
+    """Check that tests use data_utils.rand_uuid() instead of uuid.uuid4()
+
+    T113
+    """
+    if 'tempest/lib/' in filename:
+        return
+
+    if 'uuid.uuid4()' not in logical_line:
+        return
+
+    msg = ("T113: Tests should use data_utils.rand_uuid()/rand_uuid_hex() "
+           "instead of uuid.uuid4()/uuid.uuid4().hex")
+    yield (0, msg)
+
+
 def factory(register):
     register(import_no_clients_in_api_and_scenario_tests)
     register(scenario_tests_need_service_tags)
@@ -253,3 +269,4 @@ def factory(register):
     register(get_resources_on_service_clients)
     register(delete_resources_on_service_clients)
     register(dont_import_local_tempest_into_lib)
+    register(use_rand_uuid_instead_of_uuid4)

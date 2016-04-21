@@ -13,10 +13,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import uuid
-
 from tempest.api.network import base_security_groups as base
 from tempest import config
+from tempest.lib.common.utils import data_utils
 from tempest.lib import exceptions as lib_exc
 from tempest import test
 
@@ -36,7 +35,7 @@ class NegativeSecGroupTest(base.BaseSecGroupTest):
     @test.attr(type=['negative'])
     @test.idempotent_id('424fd5c3-9ddc-486a-b45f-39bf0c820fc6')
     def test_show_non_existent_security_group(self):
-        non_exist_id = str(uuid.uuid4())
+        non_exist_id = data_utils.rand_uuid()
         self.assertRaises(
             lib_exc.NotFound, self.security_groups_client.show_security_group,
             non_exist_id)
@@ -44,7 +43,7 @@ class NegativeSecGroupTest(base.BaseSecGroupTest):
     @test.attr(type=['negative'])
     @test.idempotent_id('4c094c09-000b-4e41-8100-9617600c02a6')
     def test_show_non_existent_security_group_rule(self):
-        non_exist_id = str(uuid.uuid4())
+        non_exist_id = data_utils.rand_uuid()
         self.assertRaises(
             lib_exc.NotFound,
             self.security_group_rules_client.show_security_group_rule,
@@ -53,7 +52,7 @@ class NegativeSecGroupTest(base.BaseSecGroupTest):
     @test.attr(type=['negative'])
     @test.idempotent_id('1f1bb89d-5664-4956-9fcd-83ee0fa603df')
     def test_delete_non_existent_security_group(self):
-        non_exist_id = str(uuid.uuid4())
+        non_exist_id = data_utils.rand_uuid()
         self.assertRaises(lib_exc.NotFound,
                           self.security_groups_client.delete_security_group,
                           non_exist_id
@@ -91,7 +90,7 @@ class NegativeSecGroupTest(base.BaseSecGroupTest):
     @test.idempotent_id('4bf786fd-2f02-443c-9716-5b98e159a49a')
     def test_create_security_group_rule_with_non_existent_remote_groupid(self):
         group_create_body, _ = self._create_security_group()
-        non_exist_id = str(uuid.uuid4())
+        non_exist_id = data_utils.rand_uuid()
 
         # Create rule with non existent remote_group_id
         group_ids = ['bad_group_id', non_exist_id]
@@ -204,7 +203,7 @@ class NegativeSecGroupTest(base.BaseSecGroupTest):
     @test.idempotent_id('be308db6-a7cf-4d5c-9baf-71bafd73f35e')
     def test_create_security_group_rule_with_non_existent_security_group(self):
         # Create security group rules with not existing security group.
-        non_existent_sg = str(uuid.uuid4())
+        non_existent_sg = data_utils.rand_uuid()
         self.assertRaises(
             lib_exc.NotFound,
             self.security_group_rules_client.create_security_group_rule,

@@ -13,8 +13,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import uuid
-
 from tempest.api.volume import base
 from tempest.common.utils import data_utils
 from tempest.lib import exceptions as lib_exc
@@ -53,7 +51,7 @@ class ExtraSpecsNegativeV2Test(base.BaseVolumeAdminTest):
         self.assertRaises(
             lib_exc.BadRequest,
             self.volume_types_client.update_volume_type_extra_specs,
-            self.volume_type['id'], str(uuid.uuid4()),
+            self.volume_type['id'], data_utils.rand_uuid(),
             extra_spec)
 
     @test.idempotent_id('9bf7a657-b011-4aec-866d-81c496fbe5c8')
@@ -84,7 +82,7 @@ class ExtraSpecsNegativeV2Test(base.BaseVolumeAdminTest):
         self.assertRaises(
             lib_exc.NotFound,
             self.volume_types_client.create_volume_type_extra_specs,
-            str(uuid.uuid4()), extra_specs)
+            data_utils.rand_uuid(), extra_specs)
 
     @test.idempotent_id('c821bdc8-43a4-4bf4-86c8-82f3858d5f7d')
     def test_create_none_body(self):
@@ -110,7 +108,7 @@ class ExtraSpecsNegativeV2Test(base.BaseVolumeAdminTest):
         self.assertRaises(
             lib_exc.NotFound,
             self.volume_types_client.delete_volume_type_extra_specs,
-            str(uuid.uuid4()), extra_specs.keys()[0])
+            data_utils.rand_uuid(), extra_specs.keys()[0])
 
     @test.idempotent_id('dee5cf0c-cdd6-4353-b70c-e847050d71fb')
     def test_list_nonexistent_volume_type_id(self):
@@ -118,7 +116,7 @@ class ExtraSpecsNegativeV2Test(base.BaseVolumeAdminTest):
         self.assertRaises(
             lib_exc.NotFound,
             self.volume_types_client.list_volume_types_extra_specs,
-            str(uuid.uuid4()))
+            data_utils.rand_uuid())
 
     @test.idempotent_id('9f402cbd-1838-4eb4-9554-126a6b1908c9')
     def test_get_nonexistent_volume_type_id(self):
@@ -127,7 +125,7 @@ class ExtraSpecsNegativeV2Test(base.BaseVolumeAdminTest):
         self.assertRaises(
             lib_exc.NotFound,
             self.volume_types_client.show_volume_type_extra_specs,
-            str(uuid.uuid4()), extra_specs.keys()[0])
+            data_utils.rand_uuid(), extra_specs.keys()[0])
 
     @test.idempotent_id('c881797d-12ff-4f1a-b09d-9f6212159753')
     def test_get_nonexistent_extra_spec_id(self):
@@ -136,7 +134,7 @@ class ExtraSpecsNegativeV2Test(base.BaseVolumeAdminTest):
         self.assertRaises(
             lib_exc.NotFound,
             self.volume_types_client.show_volume_type_extra_specs,
-            self.volume_type['id'], str(uuid.uuid4()))
+            self.volume_type['id'], data_utils.rand_uuid())
 
 
 class ExtraSpecsNegativeV1Test(ExtraSpecsNegativeV2Test):
