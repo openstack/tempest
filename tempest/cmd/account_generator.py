@@ -262,7 +262,7 @@ def create_resources(opts, resources):
             user = identity.get_user_by_username(tenants_admin,
                                                  tenant['id'], u['name'])
         except tempest.lib.exceptions.NotFound:
-            LOG.error("User: %s - not found" % u['user'])
+            LOG.error("User: %s - not found" % u['name'])
             continue
         for r in u['role_ids']:
             try:
