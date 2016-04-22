@@ -157,3 +157,29 @@ def create_test_server(clients, validatable=False, validation_resources=None,
                                           % server['id'])
 
     return body, servers
+
+
+def shelve_server(client, server_id, force_shelve_offload=False):
+    """Common wrapper utility to shelve server.
+
+    This method is a common wrapper to make server in 'SHELVED'
+    or 'SHELVED_OFFLOADED' state.
+
+    :param server_id: Server to make in shelve state
+    :param force_shelve_offload: Forcefully offload shelve server if it
+                                 is configured not to offload server
+                                 automatically after offload time.
+    """
+    client.shelve_server(server_id)
+
+    offload_time = CONF.compute.shelved_offload_time
+    if offload_time >= 0:
+        waiters.wait_for_server_status(client, server_id,
+                                       'SHELVED_OFFLOADED',
+                                       extra_timeout=offload_time)
+    else:
+        waiters.wait_for_server_status(client, server_id, 'SHELVED')
+        if force_shelve_offload:
+            client.shelve_offload_server(server_id)
+            waiters.wait_for_server_status(client, server_id,
+                                           'SHELVED_OFFLOADED')
