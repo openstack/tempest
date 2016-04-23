@@ -54,19 +54,17 @@ def get_tempest_default_config_dir():
     real_prefix = getattr(sys, 'real_prefix', None)
     base_prefix = getattr(sys, 'base_prefix', None)
     prefix = sys.prefix
+    global_conf_dir = '/etc/tempest'
     if (real_prefix is None and
-            (base_prefix is None or base_prefix == prefix)):
+            (base_prefix is None or base_prefix == prefix) and
+            os.path.isdir(global_conf_dir)):
         # Probably not running in a virtual environment.
         # NOTE(andreaf) we cannot distinguish this case from the case of
         # a virtual environment created with virtualenv, and running python3.
         # Also if it appears we are not in virtual env and fail to find
         # global config: '/etc/tempest', fall back to
         # '[sys.prefix]/etc/tempest'
-        global_conf_dir = '/etc/tempest'
-        if os.path.isdir(global_conf_dir):
-            return global_conf_dir
-        else:
-            return os.path.join(prefix, 'etc/tempest')
+        return global_conf_dir
     else:
         return os.path.join(prefix, 'etc/tempest')
 
