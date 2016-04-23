@@ -91,7 +91,7 @@ AuthGroup = [
                     "create users and projects",
                deprecated_group='identity'),
     cfg.StrOpt('admin_project_name',
-               help="Project name to use for an  administrative user. This is "
+               help="Project name to use for an administrative user. This is "
                     "needed for authenticating requests made by project "
                     "isolation to create users and projects",
                deprecated_opts=[cfg.DeprecatedOpt('admin_tenant_name',
@@ -99,7 +99,7 @@ AuthGroup = [
                                 cfg.DeprecatedOpt('admin_tenant_name',
                                                   group='identity')]),
     cfg.StrOpt('admin_password',
-               help="Password to use for an  administrative user. This is "
+               help="Password to use for an administrative user. This is "
                     "needed for authenticating requests made by project "
                     "isolation to create users and projects",
                secret=True,
