@@ -58,7 +58,7 @@ as it is simpler, and quicker to work with.
 #. You first need to install Tempest. This is done with pip after you check out
    the Tempest repo::
 
-    $ git clone https://github.com/openstack/tempest/
+    $ git clone http://git.openstack.org/openstack/tempest
     $ pip install tempest/
 
    This can be done within a venv, but the assumption for this guide is that
@@ -71,14 +71,14 @@ as it is simpler, and quicker to work with.
    it's recommended that you copy or rename tempest.conf.sample to tempest.conf
    and make those changes to that file in /etc/tempest
 
-#. Setup a local working Tempest dir. This is done using the tempest init
+#. Setup a local working Tempest dir. This is done by using the tempest init
    command::
 
-    tempest init cloud-01
+    $ tempest init cloud-01
 
    works the same as::
 
-    mkdir cloud-01 && cd cloud-01 && tempest init
+    $ mkdir cloud-01 && cd cloud-01 && tempest init
 
    This will create a new directory for running a single Tempest configuration.
    If you'd like to run Tempest against multiple OpenStack deployments the idea
