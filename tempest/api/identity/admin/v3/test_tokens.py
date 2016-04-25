@@ -13,6 +13,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import six
+
 from tempest.api.identity import base
 from tempest.common.utils import data_utils
 from tempest.lib import exceptions as lib_exc
@@ -97,8 +99,8 @@ class TokensV3TestJSON(base.BaseIdentityV3AdminTest):
         orig_expires_at = token_auth['token']['expires_at']
         orig_user = token_auth['token']['user']
 
-        self.assertIsInstance(token_auth['token']['expires_at'], unicode)
-        self.assertIsInstance(token_auth['token']['issued_at'], unicode)
+        self.assertIsInstance(token_auth['token']['expires_at'], six.text_type)
+        self.assertIsInstance(token_auth['token']['issued_at'], six.text_type)
         self.assertEqual(['password'], token_auth['token']['methods'])
         self.assertEqual(user['id'], token_auth['token']['user']['id'])
         self.assertEqual(user['name'], token_auth['token']['user']['name'])
@@ -118,7 +120,7 @@ class TokensV3TestJSON(base.BaseIdentityV3AdminTest):
 
         self.assertEqual(orig_expires_at, token_auth['token']['expires_at'],
                          'Expiration time should match original token')
-        self.assertIsInstance(token_auth['token']['issued_at'], unicode)
+        self.assertIsInstance(token_auth['token']['issued_at'], six.text_type)
         self.assertEqual(set(['password', 'token']),
                          set(token_auth['token']['methods']))
         self.assertEqual(orig_user, token_auth['token']['user'],
