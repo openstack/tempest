@@ -1037,7 +1037,7 @@ class NetworkScenarioTest(ScenarioTest):
         if not tenant_id:
             tenant_id = client.tenant_id
         sgs = [
-            sg for sg in client.list_security_groups().values()[0]
+            sg for sg in list(client.list_security_groups().values())[0]
             if sg['tenant_id'] == tenant_id and sg['name'] == 'default'
         ]
         msg = "No default security group for tenant %s." % (tenant_id)

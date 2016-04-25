@@ -38,11 +38,10 @@ class ExtraSpecsNegativeV2Test(base.BaseVolumeAdminTest):
     @test.idempotent_id('08961d20-5cbb-4910-ac0f-89ad6dbb2da1')
     def test_update_no_body(self):
         # Should not update volume type extra specs with no body
-        extra_spec = {"spec1": "val2"}
         self.assertRaises(
             lib_exc.BadRequest,
             self.admin_volume_types_client.update_volume_type_extra_specs,
-            self.volume_type['id'], extra_spec.keys()[0], None)
+            self.volume_type['id'], "spec1", None)
 
     @test.idempotent_id('25e5a0ee-89b3-4c53-8310-236f76c75365')
     def test_update_nonexistent_extra_spec_id(self):
@@ -71,7 +70,7 @@ class ExtraSpecsNegativeV2Test(base.BaseVolumeAdminTest):
         self.assertRaises(
             lib_exc.BadRequest,
             self.admin_volume_types_client.update_volume_type_extra_specs,
-            self.volume_type['id'], extra_spec.keys()[0],
+            self.volume_type['id'], list(extra_spec)[0],
             extra_spec)
 
     @test.idempotent_id('49d5472c-a53d-4eab-a4d3-450c4db1c545')
@@ -103,12 +102,11 @@ class ExtraSpecsNegativeV2Test(base.BaseVolumeAdminTest):
     @test.idempotent_id('031cda8b-7d23-4246-8bf6-bbe73fd67074')
     def test_delete_nonexistent_volume_type_id(self):
         # Should not delete volume type extra spec for nonexistent
-            # type id.
-        extra_specs = {"spec1": "val1"}
+        # type id.
         self.assertRaises(
             lib_exc.NotFound,
             self.admin_volume_types_client.delete_volume_type_extra_specs,
-            data_utils.rand_uuid(), extra_specs.keys()[0])
+            data_utils.rand_uuid(), "spec1")
 
     @test.idempotent_id('dee5cf0c-cdd6-4353-b70c-e847050d71fb')
     def test_list_nonexistent_volume_type_id(self):
@@ -121,11 +119,10 @@ class ExtraSpecsNegativeV2Test(base.BaseVolumeAdminTest):
     @test.idempotent_id('9f402cbd-1838-4eb4-9554-126a6b1908c9')
     def test_get_nonexistent_volume_type_id(self):
         # Should not get volume type extra spec for nonexistent type id.
-        extra_specs = {"spec1": "val1"}
         self.assertRaises(
             lib_exc.NotFound,
             self.admin_volume_types_client.show_volume_type_extra_specs,
-            data_utils.rand_uuid(), extra_specs.keys()[0])
+            data_utils.rand_uuid(), "spec1")
 
     @test.idempotent_id('c881797d-12ff-4f1a-b09d-9f6212159753')
     def test_get_nonexistent_extra_spec_id(self):
