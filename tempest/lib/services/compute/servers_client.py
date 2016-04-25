@@ -61,7 +61,7 @@ class ServersClient(base_compute_client.BaseComputeClient):
         post_body = {'server': body}
 
         if hints:
-            post_body = dict(post_body.items() + hints.items())
+            post_body.update(hints)
 
         post_body = json.dumps(post_body)
         resp, body = self.post('servers', post_body)
