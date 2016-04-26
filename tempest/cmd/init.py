@@ -99,7 +99,6 @@ class TempestInit(command.Command):
         config_parse = moves.configparser.SafeConfigParser()
         config_parse.optionxform = str
         with open(conf_path, 'a+') as conf_file:
-            config_parse.readfp(conf_file)
             # Set local lock_dir in tempest conf
             if not config_parse.has_section('oslo_concurrency'):
                 config_parse.add_section('oslo_concurrency')
@@ -108,6 +107,7 @@ class TempestInit(command.Command):
             config_parse.set('DEFAULT', 'log_dir', log_dir)
             # Set default log filename to tempest.log
             config_parse.set('DEFAULT', 'log_file', 'tempest.log')
+            config_parse.write(conf_file)
 
     def copy_config(self, etc_dir, config_dir):
         shutil.copytree(config_dir, etc_dir)
