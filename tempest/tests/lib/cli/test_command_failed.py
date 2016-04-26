@@ -11,7 +11,7 @@
 #    under the License.
 
 from tempest.lib import exceptions
-from tempest.tests.lib import base
+from tempest.tests import base
 
 
 class TestOutputParser(base.TestCase):

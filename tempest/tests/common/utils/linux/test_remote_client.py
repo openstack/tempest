@@ -19,8 +19,8 @@ from oslotest import mockpatch
 
 from tempest.common.utils.linux import remote_client
 from tempest import config
+from tempest.tests import base
 from tempest.tests import fake_config
-from tempest.tests.lib import base
 
 
 class TestRemoteClient(base.TestCase):

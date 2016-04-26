@@ -22,7 +22,7 @@ import six
 from tempest.lib.common import http
 from tempest.lib.common import rest_client
 from tempest.lib import exceptions
-from tempest.tests.lib import base
+from tempest.tests import base
 from tempest.tests.lib import fake_auth_provider
 from tempest.tests.lib import fake_http
 import tempest.tests.utils as utils

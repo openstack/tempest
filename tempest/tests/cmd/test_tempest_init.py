@@ -18,7 +18,7 @@ import shutil
 import fixtures
 
 from tempest.cmd import init
-from tempest.tests.lib import base
+from tempest.tests import base
 
 
 class TestTempestInit(base.TestCase):

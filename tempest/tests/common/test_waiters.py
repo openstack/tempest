@@ -19,7 +19,7 @@ import mock
 from tempest.common import waiters
 from tempest import exceptions
 from tempest.services.volume.base import base_volumes_client
-from tempest.tests.lib import base
+from tempest.tests import base
 import tempest.tests.utils as utils
 
 

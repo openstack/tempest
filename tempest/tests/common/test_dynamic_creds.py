@@ -31,8 +31,8 @@ from tempest.services.identity.v2.json import tenants_client as \
 from tempest.services.identity.v2.json import users_client as \
     json_users_client
 from tempest.services.network.json import routers_client
+from tempest.tests import base
 from tempest.tests import fake_config
-from tempest.tests.lib import base
 from tempest.tests.lib import fake_http
 from tempest.tests.lib import fake_identity
 

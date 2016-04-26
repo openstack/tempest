@@ -13,7 +13,7 @@
 #    under the License.
 
 from tempest.hacking import checks
-from tempest.tests.lib import base
+from tempest.tests import base
 
 
 class HackingTestCase(base.TestCase):

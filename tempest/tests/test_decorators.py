@@ -21,8 +21,8 @@ from tempest import config
 from tempest import exceptions
 from tempest.lib.common.utils import data_utils
 from tempest import test
+from tempest.tests import base
 from tempest.tests import fake_config
-from tempest.tests.lib import base
 
 
 class BaseDecoratorsTest(base.TestCase):

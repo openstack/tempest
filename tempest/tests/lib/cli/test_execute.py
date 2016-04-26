@@ -14,7 +14,7 @@
 
 from tempest.lib.cli import base as cli_base
 from tempest.lib import exceptions
-from tempest.tests.lib import base
+from tempest.tests import base
 
 
 class TestExecute(base.TestCase):
