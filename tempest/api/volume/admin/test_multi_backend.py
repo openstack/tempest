@@ -32,14 +32,9 @@ class VolumeMultiBackendV2Test(base.BaseVolumeAdminTest):
     @classmethod
     def resource_setup(cls):
         super(VolumeMultiBackendV2Test, cls).resource_setup()
-        # support 2 backends names, deprecated_for_removal.
-        # keep support 2 backend names, in case they are not empty
-        if CONF.volume.backend1_name and CONF.volume.backend2_name:
-            cls.backend_names = {CONF.volume.backend1_name,
-                                 CONF.volume.backend2_name}
-        else:
-            # read backend name from a list .
-            cls.backend_names = set(CONF.volume.backend_names)
+
+        # read backend name from a list .
+        cls.backend_names = set(CONF.volume.backend_names)
 
         cls.name_field = cls.special_fields['name_field']
         cls.volume_type_id_list = []
