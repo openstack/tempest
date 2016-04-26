@@ -66,7 +66,16 @@ def get_tempest_default_config_dir():
         # '[sys.prefix]/etc/tempest'
         return global_conf_dir
     else:
-        return os.path.join(prefix, 'etc/tempest')
+        conf_dir = os.path.join(prefix, 'etc/tempest')
+        if os.path.isdir(conf_dir):
+            return conf_dir
+        else:
+            # NOTE: The prefix is gotten from the path which pyconfig.h is
+            # installed under. Some envs contain it under /usr/include, not
+            # /user/local/include. Then prefix becomes /usr on such envs.
+            # However, etc/tempest is installed under /usr/local and the bove
+            # path logic mismatches. This is a workaround for such envs.
+            return os.path.join(prefix, 'local/etc/tempest')
 
 
 class TempestInit(command.Command):
