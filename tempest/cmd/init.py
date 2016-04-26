@@ -98,7 +98,7 @@ class TempestInit(command.Command):
     def update_local_conf(self, conf_path, lock_dir, log_dir):
         config_parse = moves.configparser.SafeConfigParser()
         config_parse.optionxform = str
-        with open(conf_path, 'w+') as conf_file:
+        with open(conf_path, 'a+') as conf_file:
             config_parse.readfp(conf_file)
             # Set local lock_dir in tempest conf
             if not config_parse.has_section('oslo_concurrency'):
