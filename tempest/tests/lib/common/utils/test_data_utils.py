@@ -169,3 +169,10 @@ class TestDataUtils(base.TestCase):
         bad_mac = 99999999999999999999
         self.assertRaises(TypeError, data_utils.get_ipv6_addr_by_EUI64,
                           cidr, bad_mac)
+
+    def test_chunkify(self):
+        data = "aaa"
+        chunks = data_utils.chunkify(data, 2)
+        self.assertEqual("aa", next(chunks))
+        self.assertEqual("a", next(chunks))
+        self.assertRaises(StopIteration, next, chunks)

@@ -48,9 +48,9 @@ class BaseComputeClient(rest_client.RestClient):
         return headers
 
     def request(self, method, url, extra_headers=False, headers=None,
-                body=None):
+                body=None, chunked=False):
         resp, resp_body = super(BaseComputeClient, self).request(
-            method, url, extra_headers, headers, body)
+            method, url, extra_headers, headers, body, chunked)
         if (COMPUTE_MICROVERSION and
             COMPUTE_MICROVERSION != api_version_utils.LATEST_MICROVERSION):
             api_version_utils.assert_version_header_matches_request(

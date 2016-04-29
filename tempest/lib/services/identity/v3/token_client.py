@@ -122,8 +122,12 @@ class V3TokenClient(rest_client.RestClient):
         return rest_client.ResponseBody(resp, body)
 
     def request(self, method, url, extra_headers=False, headers=None,
-                body=None):
-        """A simple HTTP request interface."""
+                body=None, chunked=False):
+        """A simple HTTP request interface.
+
+        Note: this overloads the `request` method from the parent class and
+        thus must implement the same method signature.
+        """
         if headers is None:
             # Always accept 'json', for xml token client too.
             # Because XML response is not easily
