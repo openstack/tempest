@@ -157,33 +157,7 @@ not there even if the cloud was configured with it.
 
 Negative Tests
 --------------
-Newly added negative tests should use the negative test framework. First step
-is to create an interface description in a python file under
-`tempest/api_schema/request/`. These descriptions consists of two important
-sections for the test (one of those is mandatory):
-
- - A resource (part of the URL of the request): Resources needed for a test
-   must be created in `setUpClass` and registered with `set_resource` e.g.:
-   `cls.set_resource("server", server['id'])`
-
- - A json schema: defines properties for a request.
-
-After that a test class must be added to automatically generate test scenarios
-out of the given interface description::
-
-    load_tests = test.NegativeAutoTest.load_tests
-
-    @test.SimpleNegativeAutoTest
-    class SampleTestNegativeTestJSON(<your base class>, test.NegativeAutoTest):
-        _service = 'compute'
-        _schema = <your schema file>
-
-The class decorator `SimpleNegativeAutoTest` will automatically generate test
-cases out of the given schema in the attribute `_schema`.
-
-All negative tests should be added into a separate negative test file.
-If such a file doesn't exist for the particular resource being tested a new
-test file should be added.
+TODO: Write the guideline related to negative tests.
 
 Test skips because of Known Bugs
 --------------------------------
