@@ -30,7 +30,7 @@ class TokensV3Test(base.BaseIdentityV3Test):
         password = creds.password
         user_domain_id = creds.user_domain_id
 
-        # 'user_domain_id' needs to be specified otherwise tempest_lib assumes
+        # 'user_domain_id' needs to be specified otherwise tempest.lib assumes
         # it to be 'default'
         token_id, resp = self.non_admin_token.get_token(
             user_id=user_id,

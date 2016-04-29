@@ -33,7 +33,7 @@ class IdentityV3ProjectsTest(base.BaseIdentityV3Test):
         # user can successfully authenticate using his credentials and
         # project name from received projects list
         for project in resp['projects']:
-            # 'user_domain_id' needs to be specified otherwise tempest_lib
+            # 'user_domain_id' needs to be specified otherwise tempest.lib
             # assumes it to be 'default'
             token_id, body = self.non_admin_token.get_token(
                 username=self.os.credentials.username,
