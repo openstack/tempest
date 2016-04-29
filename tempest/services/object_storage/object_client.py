@@ -150,9 +150,6 @@ class ObjectClient(rest_client.RestClient):
 
     def put_object_with_chunk(self, container, name, contents, chunk_size):
         """Put an object with Transfer-Encoding header"""
-        if self.base_url is None:
-            self._set_auth()
-
         headers = {'Transfer-Encoding': 'chunked'}
         if self.token:
             headers['X-Auth-Token'] = self.token
@@ -182,8 +179,6 @@ class ObjectClient(rest_client.RestClient):
         if not data:
             headers['content-length'] = '0'
 
-        if self.base_url is None:
-            self._set_auth()
         headers['X-Auth-Token'] = self.token
 
         conn = put_object_connection(self.base_url, str(container),
