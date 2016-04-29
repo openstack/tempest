@@ -54,7 +54,6 @@ allowed_dirty = set([
     'q-meta',
     'q-metering',
     'q-svc',
-    'q-vpn',
     's-proxy'])
 
 
