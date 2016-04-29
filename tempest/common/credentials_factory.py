@@ -26,7 +26,7 @@ CONF = config.CONF
 
 """This module provides factories of credential and credential providers
 
-Credentials providers and clients are (going to be) part of tempest-lib,
+Credentials providers and clients are (going to be) part of tempest.lib,
 and so they may not hold any dependency to tempest configuration.
 
 Methods in this module collect the relevant configuration details and pass

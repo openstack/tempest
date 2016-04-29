@@ -116,7 +116,7 @@ class ServerUnreachable(TempestException):
 
 
 # NOTE(andreaf) This exception is added here to facilitate the migration
-# of get_network_from_name and preprov_creds to tempest-lib, and it should
+# of get_network_from_name and preprov_creds to tempest.lib, and it should
 # be migrated along with them
 class InvalidTestResource(TempestException):
     message = "%(name) is not a valid %(type), or the name is ambiguous"

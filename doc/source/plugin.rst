@@ -11,13 +11,13 @@ Creating a plugin
 =================
 
 Creating a plugin is fairly straightforward and doesn't require much additional
-effort on top of creating a test suite using tempest-lib. One thing to note with
+effort on top of creating a test suite using tempest.lib. One thing to note with
 doing this is that the interfaces exposed by tempest are not considered stable
 (with the exception of configuration variables which ever effort goes into
 ensuring backwards compatibility). You should not need to import anything from
 tempest itself except where explicitly noted. If there is an interface from
 tempest that you need to rely on in your plugin it likely needs to be migrated
-to tempest-lib. In that situation, file a bug, push a migration patch, etc. to
+to tempest.lib. In that situation, file a bug, push a migration patch, etc. to
 expedite providing the interface in a reliable manner.
 
 Plugin Cookiecutter
@@ -101,11 +101,6 @@ you would do something like the following::
 
 Then you need to ensure you locally define all of the methods in the abstract
 class, you can refer to the api doc below for a reference of what that entails.
-
-Also, note eventually this abstract class will likely live in tempest-lib, when
-that migration occurs a deprecation shim will be added to tempest so as to not
-break any existing plugins. But, when that occurs migrating to using tempest-lib
-as the source for the abstract class will be prudent.
 
 Abstract Plugin Class
 ---------------------
