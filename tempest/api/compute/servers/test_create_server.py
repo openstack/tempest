@@ -119,7 +119,9 @@ class ServersTestJSON(base.BaseV2ComputeTest):
             self.get_server_ip(self.server),
             self.ssh_user,
             self.password,
-            self.validation_resources['keypair']['private_key'])
+            self.validation_resources['keypair']['private_key'],
+            server=self.server,
+            servers_client=self.client)
         self.assertEqual(flavor['vcpus'], linux_client.get_number_of_vcpus())
 
     @test.idempotent_id('ac1ad47f-984b-4441-9274-c9079b7a0666')
@@ -131,7 +133,9 @@ class ServersTestJSON(base.BaseV2ComputeTest):
             self.get_server_ip(self.server),
             self.ssh_user,
             self.password,
-            self.validation_resources['keypair']['private_key'])
+            self.validation_resources['keypair']['private_key'],
+            server=self.server,
+            servers_client=self.client)
         self.assertTrue(linux_client.hostname_equals_servername(self.name))
 
     @test.idempotent_id('ed20d3fb-9d1f-4329-b160-543fbd5d9811')
@@ -322,7 +326,9 @@ class ServersWithSpecificFlavorTestJSON(base.BaseV2ComputeAdminTest):
             self.get_server_ip(server_no_eph_disk),
             self.ssh_user,
             admin_pass,
-            self.validation_resources['keypair']['private_key'])
+            self.validation_resources['keypair']['private_key'],
+            server=server_no_eph_disk,
+            servers_client=self.client)
         partition_num = len(linux_client.get_partitions().split('\n'))
 
         # Explicit server deletion necessary for Juno compatibility
@@ -340,7 +346,9 @@ class ServersWithSpecificFlavorTestJSON(base.BaseV2ComputeAdminTest):
             self.get_server_ip(server_with_eph_disk),
             self.ssh_user,
             admin_pass,
-            self.validation_resources['keypair']['private_key'])
+            self.validation_resources['keypair']['private_key'],
+            server=server_with_eph_disk,
+            servers_client=self.client)
         partition_num_emph = len(linux_client.get_partitions().split('\n'))
         self.assertEqual(partition_num + 1, partition_num_emph)
 
