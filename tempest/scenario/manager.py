@@ -29,7 +29,7 @@ from tempest import config
 from tempest import exceptions
 from tempest.lib.common.utils import misc as misc_utils
 from tempest.lib import exceptions as lib_exc
-from tempest.services.network import resources as net_resources
+from tempest.scenario import network_resources
 import tempest.test
 
 CONF = config.CONF
@@ -697,7 +697,7 @@ class NetworkScenarioTest(ScenarioTest):
             tenant_id = networks_client.tenant_id
         name = data_utils.rand_name(namestart)
         result = networks_client.create_network(name=name, tenant_id=tenant_id)
-        network = net_resources.DeletableNetwork(
+        network = network_resources.DeletableNetwork(
             networks_client=networks_client, routers_client=routers_client,
             **result['network'])
         self.assertEqual(network.name, name)
@@ -790,7 +790,7 @@ class NetworkScenarioTest(ScenarioTest):
                 if not is_overlapping_cidr:
                     raise
         self.assertIsNotNone(result, 'Unable to allocate tenant network')
-        subnet = net_resources.DeletableSubnet(
+        subnet = network_resources.DeletableSubnet(
             subnets_client=subnets_client,
             routers_client=routers_client, **result['subnet'])
         self.assertEqual(subnet.cidr, str_cidr)
@@ -807,8 +807,8 @@ class NetworkScenarioTest(ScenarioTest):
             network_id=network_id,
             **kwargs)
         self.assertIsNotNone(result, 'Unable to allocate port')
-        port = net_resources.DeletablePort(ports_client=client,
-                                           **result['port'])
+        port = network_resources.DeletablePort(ports_client=client,
+                                               **result['port'])
         self.addCleanup(self.delete_wrapper, port.delete)
         return port
 
@@ -838,7 +838,7 @@ class NetworkScenarioTest(ScenarioTest):
         net = self._list_networks(name=network_name)
         self.assertNotEqual(len(net), 0,
                             "Unable to get network by name: %s" % network_name)
-        return net_resources.AttributeDict(net[0])
+        return network_resources.AttributeDict(net[0])
 
     def create_floating_ip(self, thing, external_network_id=None,
                            port_id=None, client=None):
@@ -857,7 +857,7 @@ class NetworkScenarioTest(ScenarioTest):
             tenant_id=thing['tenant_id'],
             fixed_ip_address=ip4
         )
-        floating_ip = net_resources.DeletableFloatingIp(
+        floating_ip = network_resources.DeletableFloatingIp(
             client=client,
             **result['floatingip'])
         self.addCleanup(self.delete_wrapper, floating_ip.delete)
@@ -878,8 +878,8 @@ class NetworkScenarioTest(ScenarioTest):
     def check_floating_ip_status(self, floating_ip, status):
         """Verifies floatingip reaches the given status
 
-        :param floating_ip: net_resources.DeletableFloatingIp floating IP to
-        to check status
+        :param floating_ip: network_resources.DeletableFloatingIp floating
+        IP to check status
         :param status: target status
         :raises: AssertionError if status doesn't match
         """
@@ -991,7 +991,7 @@ class NetworkScenarioTest(ScenarioTest):
                        description=sg_desc)
         sg_dict['tenant_id'] = tenant_id
         result = client.create_security_group(**sg_dict)
-        secgroup = net_resources.DeletableSecurityGroup(
+        secgroup = network_resources.DeletableSecurityGroup(
             client=client, routers_client=self.routers_client,
             **result['security_group']
         )
@@ -1016,8 +1016,8 @@ class NetworkScenarioTest(ScenarioTest):
         ]
         msg = "No default security group for tenant %s." % (tenant_id)
         self.assertTrue(len(sgs) > 0, msg)
-        return net_resources.DeletableSecurityGroup(client=client,
-                                                    **sgs[0])
+        return network_resources.DeletableSecurityGroup(client=client,
+                                                        **sgs[0])
 
     def _create_security_group_rule(self, secgroup=None,
                                     sec_group_rules_client=None,
@@ -1055,7 +1055,7 @@ class NetworkScenarioTest(ScenarioTest):
         ruleset.update(kwargs)
 
         sg_rule = sec_group_rules_client.create_security_group_rule(**ruleset)
-        sg_rule = net_resources.DeletableSecurityGroupRule(
+        sg_rule = network_resources.DeletableSecurityGroupRule(
             client=sec_group_rules_client,
             **sg_rule['security_group_rule']
         )
@@ -1135,7 +1135,7 @@ class NetworkScenarioTest(ScenarioTest):
         network_id = CONF.network.public_network_id
         if router_id:
             body = client.show_router(router_id)
-            return net_resources.AttributeDict(**body['router'])
+            return network_resources.AttributeDict(**body['router'])
         elif network_id:
             router = self._create_router(client, tenant_id)
             router.set_gateway(network_id)
@@ -1154,8 +1154,8 @@ class NetworkScenarioTest(ScenarioTest):
         result = client.create_router(name=name,
                                       admin_state_up=True,
                                       tenant_id=tenant_id)
-        router = net_resources.DeletableRouter(routers_client=client,
-                                               **result['router'])
+        router = network_resources.DeletableRouter(routers_client=client,
+                                                   **result['router'])
         self.assertEqual(router.name, name)
         self.addCleanup(self.delete_wrapper, router.delete)
         return router
