@@ -16,7 +16,7 @@ Tempest Specific Commandments
 - [T107] Check that a service tag isn't in the module path
 - [T108] Check no hyphen at the end of rand_name() argument
 - [T109] Cannot use testtools.skip decorator; instead use
-         decorators.skip_because from tempest-lib
+         decorators.skip_because from tempest.lib
 - [T110] Check that service client names of GET should be consistent
 - [T111] Check that service client names of DELETE should be consistent
 - [T112] Check that tempest.lib should not import local tempest code
@@ -333,9 +333,9 @@ format of the metadata looks like::
         # The created server should be in the detailed list of all servers
         ...
 
-Tempest-lib includes a ``check-uuid`` tool that will test for the existence
+Tempest.lib includes a ``check-uuid`` tool that will test for the existence
 and uniqueness of idempotent_id metadata for every test. If you have
-tempest-lib installed you run the tool against Tempest by calling from the
+tempest installed you run the tool against Tempest by calling from the
 tempest repo::
 
     check-uuid

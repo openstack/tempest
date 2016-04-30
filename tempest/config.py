@@ -1147,7 +1147,7 @@ baremetal_group = cfg.OptGroup(name='baremetal',
                                     'shelve, snapshot, and suspend')
 
 
-# NOTE(deva): Ironic tests have been ported to tempest-lib. New config options
+# NOTE(deva): Ironic tests have been ported to tempest.lib. New config options
 #             should be added to ironic/ironic_tempest_plugin/config.py.
 #             However, these options need to remain here for testing stable
 #             branches until Liberty release reaches EOL.

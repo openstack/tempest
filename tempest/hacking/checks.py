@@ -141,7 +141,7 @@ def no_testtools_skip_decorator(logical_line):
     """
     if TESTTOOLS_SKIP_DECORATOR.match(logical_line):
         yield (0, "T109: Cannot use testtools.skip decorator; instead use "
-               "decorators.skip_because from tempest-lib")
+               "decorators.skip_because from tempest.lib")
 
 
 def _common_service_clients_check(logical_line, physical_line, filename,
