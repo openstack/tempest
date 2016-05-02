@@ -16,6 +16,7 @@
 
 import argparse
 import os
+import re
 import sys
 import traceback
 
@@ -77,9 +78,16 @@ def verify_glance_api_versions(os, update):
                             not CONF.image_feature_enabled.api_v2, update)
 
 
+def _remove_version_project(url_path):
+    # The regex matches strings like /v2.0, /v3/, /v2.1/project-id/
+    return re.sub(r'/v\d+(\.\d+)?(/[^/]+)?', '', url_path)
+
+
 def _get_unversioned_endpoint(base_url):
     endpoint_parts = urlparse.urlparse(base_url)
-    endpoint = endpoint_parts.scheme + '://' + endpoint_parts.netloc
+    new_path = _remove_version_project(endpoint_parts.path)
+    endpoint_parts = endpoint_parts._replace(path=new_path)
+    endpoint = urlparse.urlunparse(endpoint_parts)
     return endpoint
 
 
@@ -89,7 +97,9 @@ def _get_api_versions(os, service):
         'keystone': os.identity_client,
         'cinder': os.volumes_client,
     }
-    client_dict[service].skip_path()
+    if service != 'keystone':
+        # Since keystone may be listening on a path, do not remove the path.
+        client_dict[service].skip_path()
     endpoint = _get_unversioned_endpoint(client_dict[service].base_url)
 
     http = tempest.lib.common.http.ClosingHttp(
