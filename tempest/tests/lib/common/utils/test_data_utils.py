@@ -93,6 +93,15 @@ class TestDataUtils(base.TestCase):
         actual2 = data_utils.rand_int_id()
         self.assertNotEqual(actual, actual2)
 
+    def test_rand_infiniband_guid_address(self):
+        actual = data_utils.rand_infiniband_guid_address()
+        self.assertIsInstance(actual, str)
+        self.assertRegex(actual, "^([0-9a-f][0-9a-f]:){7}"
+                         "[0-9a-f][0-9a-f]$")
+
+        actual2 = data_utils.rand_infiniband_guid_address()
+        self.assertNotEqual(actual, actual2)
+
     def test_rand_mac_address(self):
         actual = data_utils.rand_mac_address()
         self.assertIsInstance(actual, str)
