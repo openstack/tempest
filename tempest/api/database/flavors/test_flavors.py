@@ -27,6 +27,7 @@ class DatabaseFlavorsTest(base.BaseDatabaseTest):
 
     @test.attr(type='smoke')
     @test.idempotent_id('c94b825e-0132-4686-8049-8a4a2bc09525')
+    @decorators.skip_because(bug='1567134')
     def test_get_db_flavor(self):
         # The expected flavor details should be returned
         flavor = (self.client.show_db_flavor(self.db_flavor_ref)
@@ -38,6 +39,7 @@ class DatabaseFlavorsTest(base.BaseDatabaseTest):
 
     @test.attr(type='smoke')
     @test.idempotent_id('685025d6-0cec-4673-8a8d-995cb8e0d3bb')
+    @decorators.skip_because(bug='1567134')
     def test_list_db_flavors(self):
         flavor = (self.client.show_db_flavor(self.db_flavor_ref)
                   ['flavor'])
