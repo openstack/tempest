@@ -13,10 +13,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import netaddr
-
 from tempest.api.network import base
 from tempest.common.utils import data_utils
+from tempest.common.utils import net_utils
 from tempest import config
 from tempest import test
 
@@ -192,8 +191,12 @@ class FloatingIPTestJSON(base.BaseNetworkTest):
     @test.idempotent_id('45c4c683-ea97-41ef-9c51-5e9802f2f3d7')
     def test_create_update_floatingip_with_port_multiple_ip_address(self):
         # Find out ips that can be used for tests
-        ips = list(netaddr.IPNetwork(self.subnet['cidr']))
-        list_ips = [str(ip) for ip in ips[-3:-1]]
+        list_ips = net_utils.get_unused_ip_addresses(
+            self.ports_client,
+            self.subnets_client,
+            self.subnet['network_id'],
+            self.subnet['id'],
+            2)
         fixed_ips = [{'ip_address': list_ips[0]}, {'ip_address': list_ips[1]}]
         # Create port
         body = self.ports_client.create_port(network_id=self.network['id'],
