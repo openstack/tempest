@@ -213,7 +213,7 @@ class RoutersTest(base.BaseRouterTest):
     @test.requires_ext(extension='ext-gw-mode', service='network')
     def test_update_router_set_gateway_with_snat_explicit(self):
         router = self._create_router(data_utils.rand_name('router-'))
-        self.admin_routers_client.update_router_with_snat_gw_info(
+        self.admin_routers_client.update_router(
             router['id'],
             external_gateway_info={
                 'network_id': CONF.network.public_network_id,
@@ -228,7 +228,7 @@ class RoutersTest(base.BaseRouterTest):
     @test.requires_ext(extension='ext-gw-mode', service='network')
     def test_update_router_set_gateway_without_snat(self):
         router = self._create_router(data_utils.rand_name('router-'))
-        self.admin_routers_client.update_router_with_snat_gw_info(
+        self.admin_routers_client.update_router(
             router['id'],
             external_gateway_info={
                 'network_id': CONF.network.public_network_id,
@@ -259,7 +259,7 @@ class RoutersTest(base.BaseRouterTest):
         router = self._create_router(
             data_utils.rand_name('router-'),
             external_network_id=CONF.network.public_network_id)
-        self.admin_routers_client.update_router_with_snat_gw_info(
+        self.admin_routers_client.update_router(
             router['id'],
             external_gateway_info={
                 'network_id': CONF.network.public_network_id,
