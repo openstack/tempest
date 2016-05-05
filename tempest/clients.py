@@ -197,14 +197,15 @@ class Manager(manager.Manager):
     }
     default_params_with_timeout_values.update(default_params)
 
-    def __init__(self, credentials, service=None):
+    def __init__(self, credentials, service=None, scope='project'):
         """Initialization of Manager class.
 
         Setup all services clients and make them available for tests cases.
         :param credentials: type Credentials or TestResources
         :param service: Service name
+        :param scope: default scope for tokens produced by the auth provider
         """
-        super(Manager, self).__init__(credentials=credentials)
+        super(Manager, self).__init__(credentials=credentials, scope=scope)
         self._set_compute_clients()
         self._set_database_clients()
         self._set_identity_clients()

@@ -207,6 +207,10 @@ class InvalidCredentials(TempestException):
     message = "Invalid Credentials"
 
 
+class InvalidScope(TempestException):
+    message = "Invalid Scope %(scope)s for %(auth_provider)s"
+
+
 class SSHTimeout(TempestException):
     message = ("Connection to the %(host)s via SSH timed out.\n"
                "User: %(user)s, Password: %(password)s")

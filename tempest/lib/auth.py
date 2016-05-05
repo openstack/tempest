@@ -68,10 +68,16 @@ def apply_url_filters(url, filters):
 class AuthProvider(object):
     """Provide authentication"""
 
-    def __init__(self, credentials):
+    SCOPES = set(['project'])
+
+    def __init__(self, credentials, scope='project'):
         """Auth provider __init__
 
         :param credentials: credentials for authentication
+        :param scope: the default scope to be used by the credential providers
+                      when requesting a token. Valid values depend on the
+                      AuthProvider class implementation, and are defined in
+                      the set SCOPES. Default value is 'project'.
         """
         if self.check_credentials(credentials):
             self.credentials = credentials
@@ -88,6 +94,8 @@ class AuthProvider(object):
                 raise TypeError("credentials object is of type %s, which is"
                                 " not a valid Credentials object type." %
                                 credentials.__class__.__name__)
+        self._scope = None
+        self.scope = scope
         self.cache = None
         self.alt_auth_data = None
         self.alt_part = None
@@ -123,7 +131,13 @@ class AuthProvider(object):
 
     @property
     def auth_data(self):
+        """Auth data for set scope"""
         return self.get_auth()
+
+    @property
+    def scope(self):
+        """Scope used in auth requests"""
+        return self._scope
 
     @auth_data.deleter
     def auth_data(self):
@@ -139,7 +153,7 @@ class AuthProvider(object):
         """Forces setting auth.
 
         Forces setting auth, ignores cache if it exists.
-        Refills credentials
+        Refills credentials.
         """
         self.cache = self._get_auth()
         self._fill_credentials(self.cache[1])
@@ -222,6 +236,19 @@ class AuthProvider(object):
         """Extracts the base_url based on provided filters"""
         return
 
+    @scope.setter
+    def scope(self, value):
+        """Set the scope to be used in token requests
+
+        :param scope: scope to be used. If the scope is different, clear caches
+        """
+        if value not in self.SCOPES:
+            raise exceptions.InvalidScope(
+                scope=value, auth_provider=self.__class__.__name__)
+        if value != self.scope:
+            self.clear_auth()
+            self._scope = value
+
 
 class KeystoneAuthProvider(AuthProvider):
 
@@ -231,17 +258,18 @@ class KeystoneAuthProvider(AuthProvider):
 
     def __init__(self, credentials, auth_url,
                  disable_ssl_certificate_validation=None,
-                 ca_certs=None, trace_requests=None):
-        super(KeystoneAuthProvider, self).__init__(credentials)
+                 ca_certs=None, trace_requests=None, scope='project'):
+        super(KeystoneAuthProvider, self).__init__(credentials, scope)
         self.dsvm = disable_ssl_certificate_validation
         self.ca_certs = ca_certs
         self.trace_requests = trace_requests
+        self.auth_url = auth_url
         self.auth_client = self._auth_client(auth_url)
 
     def _decorate_request(self, filters, method, url, headers=None, body=None,
                           auth_data=None):
         if auth_data is None:
-            auth_data = self.auth_data
+            auth_data = self.get_auth()
         token, _ = auth_data
         base_url = self.base_url(filters=filters, auth_data=auth_data)
         # build authenticated request
@@ -265,6 +293,11 @@ class KeystoneAuthProvider(AuthProvider):
 
     @abc.abstractmethod
     def _auth_params(self):
+        """Auth parameters to be passed to the token request
+
+        By default all fields available in Credentials are passed to the
+        token request. Scope may affect this.
+        """
         return
 
     def _get_auth(self):
@@ -292,10 +325,17 @@ class KeystoneAuthProvider(AuthProvider):
         return expiry
 
     def get_token(self):
-        return self.auth_data[0]
+        return self.get_auth()[0]
 
 
 class KeystoneV2AuthProvider(KeystoneAuthProvider):
+    """Provides authentication based on the Identity V2 API
+
+    The Keystone Identity V2 API defines both unscoped and project scoped
+    tokens. This auth provider only implements 'project'.
+    """
+
+    SCOPES = set(['project'])
 
     def _auth_client(self, auth_url):
         return json_v2id.TokenClient(
@@ -303,6 +343,10 @@ class KeystoneV2AuthProvider(KeystoneAuthProvider):
             ca_certs=self.ca_certs, trace_requests=self.trace_requests)
 
     def _auth_params(self):
+        """Auth parameters to be passed to the token request
+
+        All fields available in Credentials are passed to the token request.
+        """
         return dict(
             user=self.credentials.username,
             password=self.credentials.password,
@@ -332,7 +376,7 @@ class KeystoneV2AuthProvider(KeystoneAuthProvider):
         - skip_path: take just the base URL
         """
         if auth_data is None:
-            auth_data = self.auth_data
+            auth_data = self.get_auth()
         token, _auth_data = auth_data
         service = filters.get('service')
         region = filters.get('region')
@@ -365,6 +409,9 @@ class KeystoneV2AuthProvider(KeystoneAuthProvider):
 
 
 class KeystoneV3AuthProvider(KeystoneAuthProvider):
+    """Provides authentication based on the Identity V3 API"""
+
+    SCOPES = set(['project', 'domain', 'unscoped', None])
 
     def _auth_client(self, auth_url):
         return json_v3id.V3TokenClient(
@@ -372,19 +419,35 @@ class KeystoneV3AuthProvider(KeystoneAuthProvider):
             ca_certs=self.ca_certs, trace_requests=self.trace_requests)
 
     def _auth_params(self):
-        return dict(
+        """Auth parameters to be passed to the token request
+
+        Fields available in Credentials are passed to the token request,
+        depending on the value of scope. Valid values for scope are: "project",
+        "domain". Any other string (e.g. "unscoped") or None will lead to an
+        unscoped token request.
+        """
+
+        auth_params = dict(
             user_id=self.credentials.user_id,
             username=self.credentials.username,
-            password=self.credentials.password,
-            project_id=self.credentials.project_id,
-            project_name=self.credentials.project_name,
             user_domain_id=self.credentials.user_domain_id,
             user_domain_name=self.credentials.user_domain_name,
-            project_domain_id=self.credentials.project_domain_id,
-            project_domain_name=self.credentials.project_domain_name,
-            domain_id=self.credentials.domain_id,
-            domain_name=self.credentials.domain_name,
+            password=self.credentials.password,
             auth_data=True)
+
+        if self.scope == 'project':
+            auth_params.update(
+                project_domain_id=self.credentials.project_domain_id,
+                project_domain_name=self.credentials.project_domain_name,
+                project_id=self.credentials.project_id,
+                project_name=self.credentials.project_name)
+
+        if self.scope == 'domain':
+            auth_params.update(
+                domain_id=self.credentials.domain_id,
+                domain_name=self.credentials.domain_name)
+
+        return auth_params
 
     def _fill_credentials(self, auth_data_body):
         # project or domain, depending on the scope
@@ -422,6 +485,10 @@ class KeystoneV3AuthProvider(KeystoneAuthProvider):
     def base_url(self, filters, auth_data=None):
         """Base URL from catalog
 
+        If scope is not 'project', it may be that there is not catalog in
+        the auth_data. In such case, as long as the requested service is
+        'identity', we can use the original auth URL to build the base_url.
+
         Filters can be:
         - service: compute, image, etc
         - region: the service region
@@ -430,7 +497,7 @@ class KeystoneV3AuthProvider(KeystoneAuthProvider):
         - skip_path: take just the base URL
         """
         if auth_data is None:
-            auth_data = self.auth_data
+            auth_data = self.get_auth()
         token, _auth_data = auth_data
         service = filters.get('service')
         region = filters.get('region')
@@ -442,14 +509,20 @@ class KeystoneV3AuthProvider(KeystoneAuthProvider):
         if 'URL' in endpoint_type:
             endpoint_type = endpoint_type.replace('URL', '')
         _base_url = None
-        catalog = _auth_data['catalog']
+        catalog = _auth_data.get('catalog', [])
         # Select entries with matching service type
         service_catalog = [ep for ep in catalog if ep['type'] == service]
         if len(service_catalog) > 0:
             service_catalog = service_catalog[0]['endpoints']
         else:
-            # No matching service
-            raise exceptions.EndpointNotFound(service)
+            if len(catalog) == 0 and service == 'identity':
+                # NOTE(andreaf) If there's no catalog at all and the service
+                # is identity, it's a valid use case. Having a non-empty
+                # catalog with no identity in it is not valid instead.
+                return apply_url_filters(self.auth_url, filters)
+            else:
+                # No matching service
+                raise exceptions.EndpointNotFound(service)
         # Filter by endpoint type (interface)
         filtered_catalog = [ep for ep in service_catalog if
                             ep['interface'] == endpoint_type]
@@ -465,7 +538,7 @@ class KeystoneV3AuthProvider(KeystoneAuthProvider):
         # There should be only one match. If not take the first.
         _base_url = filtered_catalog[0].get('url', None)
         if _base_url is None:
-                raise exceptions.EndpointNotFound(service)
+            raise exceptions.EndpointNotFound(service)
         return apply_url_filters(_base_url, filters)
 
     def is_expired(self, auth_data):
@@ -669,7 +742,7 @@ class KeystoneV3Credentials(Credentials):
     def is_valid(self):
         """Check of credentials (no API call)
 
-        Valid combinations of v3 credentials (excluding token, scope)
+        Valid combinations of v3 credentials (excluding token)
         - User id, password (optional domain)
         - User name, password and its domain id/name
         For the scope, valid combinations are:

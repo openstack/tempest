@@ -15,6 +15,7 @@
 
 import copy
 import datetime
+import testtools
 
 from oslotest import mockpatch
 
@@ -425,6 +426,16 @@ class TestKeystoneV2AuthProvider(BaseAuthTestsSetUp):
             self.assertEqual(self.auth_provider.is_expired(auth_data),
                              should_be_expired)
 
+    def test_set_scope_all_valid(self):
+        for scope in self.auth_provider.SCOPES:
+            self.auth_provider.scope = scope
+            self.assertEqual(scope, self.auth_provider.scope)
+
+    def test_set_scope_invalid(self):
+        with testtools.ExpectedException(exceptions.InvalidScope,
+                                         '.* invalid_scope .*'):
+            self.auth_provider.scope = 'invalid_scope'
+
 
 class TestKeystoneV3AuthProvider(TestKeystoneV2AuthProvider):
     _endpoints = fake_identity.IDENTITY_V3_RESPONSE['token']['catalog']
@@ -529,6 +540,98 @@ class TestKeystoneV3AuthProvider(TestKeystoneV2AuthProvider):
         expected = 'http://fake_url/v3'
         self._test_base_url_helper(expected, filters, ('token', auth_data))
 
+    # Base URL test with scope only for V3
+    def test_base_url_scope_project(self):
+        self.auth_provider.scope = 'project'
+        self.filters = {
+            'service': 'compute',
+            'endpoint_type': 'publicURL',
+            'region': 'FakeRegion'
+        }
+        expected = self._get_result_url_from_endpoint(
+            self._endpoints[0]['endpoints'][1])
+        self._test_base_url_helper(expected, self.filters)
+
+    # Base URL test with scope only for V3
+    def test_base_url_unscoped_identity(self):
+        self.auth_provider.scope = 'unscoped'
+        self.patchobject(v3_client.V3TokenClient, 'raw_request',
+                         fake_identity._fake_v3_response_no_scope)
+        self.filters = {
+            'service': 'identity',
+            'endpoint_type': 'publicURL',
+            'region': 'FakeRegion'
+        }
+        expected = fake_identity.FAKE_AUTH_URL
+        self._test_base_url_helper(expected, self.filters)
+
+    # Base URL test with scope only for V3
+    def test_base_url_unscoped_other(self):
+        self.auth_provider.scope = 'unscoped'
+        self.patchobject(v3_client.V3TokenClient, 'raw_request',
+                         fake_identity._fake_v3_response_no_scope)
+        self.filters = {
+            'service': 'compute',
+            'endpoint_type': 'publicURL',
+            'region': 'FakeRegion'
+        }
+        self.assertRaises(exceptions.EndpointNotFound,
+                          self.auth_provider.base_url,
+                          auth_data=self.auth_provider.auth_data,
+                          filters=self.filters)
+
+    def test_auth_parameters_with_scope_unset(self):
+        # No scope defaults to 'project'
+        all_creds = fake_credentials.FakeKeystoneV3AllCredentials()
+        self.auth_provider.credentials = all_creds
+        auth_params = self.auth_provider._auth_params()
+        self.assertNotIn('scope', auth_params.keys())
+        for attr in all_creds.get_init_attributes():
+            if attr.startswith('domain_'):
+                self.assertNotIn(attr, auth_params.keys())
+            else:
+                self.assertIn(attr, auth_params.keys())
+                self.assertEqual(getattr(all_creds, attr), auth_params[attr])
+
+    def test_auth_parameters_with_project_scope(self):
+        all_creds = fake_credentials.FakeKeystoneV3AllCredentials()
+        self.auth_provider.credentials = all_creds
+        self.auth_provider.scope = 'project'
+        auth_params = self.auth_provider._auth_params()
+        self.assertNotIn('scope', auth_params.keys())
+        for attr in all_creds.get_init_attributes():
+            if attr.startswith('domain_'):
+                self.assertNotIn(attr, auth_params.keys())
+            else:
+                self.assertIn(attr, auth_params.keys())
+                self.assertEqual(getattr(all_creds, attr), auth_params[attr])
+
+    def test_auth_parameters_with_domain_scope(self):
+        all_creds = fake_credentials.FakeKeystoneV3AllCredentials()
+        self.auth_provider.credentials = all_creds
+        self.auth_provider.scope = 'domain'
+        auth_params = self.auth_provider._auth_params()
+        self.assertNotIn('scope', auth_params.keys())
+        for attr in all_creds.get_init_attributes():
+            if attr.startswith('project_'):
+                self.assertNotIn(attr, auth_params.keys())
+            else:
+                self.assertIn(attr, auth_params.keys())
+                self.assertEqual(getattr(all_creds, attr), auth_params[attr])
+
+    def test_auth_parameters_unscoped(self):
+        all_creds = fake_credentials.FakeKeystoneV3AllCredentials()
+        self.auth_provider.credentials = all_creds
+        self.auth_provider.scope = 'unscoped'
+        auth_params = self.auth_provider._auth_params()
+        self.assertNotIn('scope', auth_params.keys())
+        for attr in all_creds.get_init_attributes():
+            if attr.startswith('project_') or attr.startswith('domain_'):
+                self.assertNotIn(attr, auth_params.keys())
+            else:
+                self.assertIn(attr, auth_params.keys())
+                self.assertEqual(getattr(all_creds, attr), auth_params[attr])
+
 
 class TestKeystoneV3Credentials(base.TestCase):
     def testSetAttrUserDomain(self):
@@ -630,3 +733,20 @@ class TestReplaceVersion(base.TestCase):
         self.assertEqual(
             'http://localhost/identity/v2.0/uuid/',
             auth.replace_version('http://localhost/identity/v3/uuid/', 'v2.0'))
+
+
+class TestKeystoneV3AuthProvider_DomainScope(BaseAuthTestsSetUp):
+    _endpoints = fake_identity.IDENTITY_V3_RESPONSE['token']['catalog']
+    _auth_provider_class = auth.KeystoneV3AuthProvider
+    credentials = fake_credentials.FakeKeystoneV3Credentials()
+
+    def setUp(self):
+        super(TestKeystoneV3AuthProvider_DomainScope, self).setUp()
+        self.patchobject(v3_client.V3TokenClient, 'raw_request',
+                         fake_identity._fake_v3_response_domain_scope)
+
+    def test_get_auth_with_domain_scope(self):
+        self.auth_provider.scope = 'domain'
+        _, auth_data = self.auth_provider.get_auth()
+        self.assertIn('domain', auth_data)
+        self.assertNotIn('project', auth_data)

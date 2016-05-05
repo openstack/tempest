@@ -1,0 +1,7 @@
+---
+features:
+  - Tempest library auth interface now supports scope. Scope allows to control
+    the scope of tokens requested via the identity API. Identity V2 supports
+    unscoped and project scoped tokens, but only the latter are implemented.
+    Identity V3 supports unscoped, project and domain scoped token, all three
+    are available.

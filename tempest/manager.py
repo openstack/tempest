@@ -28,13 +28,14 @@ class Manager(object):
     and a client object for a test case to use in performing actions.
     """
 
-    def __init__(self, credentials):
+    def __init__(self, credentials, scope='project'):
         """Initialization of base manager class
 
         Credentials to be used within the various client classes managed by the
         Manager object must be defined.
 
         :param credentials: type Credentials or TestResources
+        :param scope: default scope for tokens produced by the auth provider
         """
         self.credentials = credentials
         # Check if passed or default credentials are valid
@@ -48,7 +49,8 @@ class Manager(object):
         else:
             creds = self.credentials
         # Creates an auth provider for the credentials
-        self.auth_provider = get_auth_provider(creds, pre_auth=True)
+        self.auth_provider = get_auth_provider(creds, pre_auth=True,
+                                               scope=scope)
 
 
 def get_auth_provider_class(credentials):
@@ -58,7 +60,7 @@ def get_auth_provider_class(credentials):
         return auth.KeystoneV2AuthProvider, CONF.identity.uri
 
 
-def get_auth_provider(credentials, pre_auth=False):
+def get_auth_provider(credentials, pre_auth=False, scope='project'):
     default_params = {
         'disable_ssl_certificate_validation':
             CONF.identity.disable_ssl_certificate_validation,
@@ -71,6 +73,7 @@ def get_auth_provider(credentials, pre_auth=False):
     auth_provider_class, auth_url = get_auth_provider_class(
         credentials)
     _auth_provider = auth_provider_class(credentials, auth_url,
+                                         scope=scope,
                                          **default_params)
     if pre_auth:
         _auth_provider.set_auth()
