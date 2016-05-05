@@ -96,8 +96,15 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
                     os.networks_client, os.routers_client, os.subnets_client,
                     os.ports_client, os.security_groups_client)
         else:
-            return (os.identity_v3_client, os.projects_client,
-                    os.users_v3_client, os.roles_v3_client, os.domains_client,
+            # We use a dedicated client manager for identity client in case we
+            # need a different token scope for them.
+            scope = 'domain' if CONF.identity.admin_domain_scope else 'project'
+            identity_os = clients.Manager(self.default_admin_creds,
+                                          scope=scope)
+            return (identity_os.identity_v3_client,
+                    identity_os.projects_client,
+                    identity_os.users_v3_client, identity_os.roles_v3_client,
+                    identity_os.domains_client,
                     os.networks_client, os.routers_client,
                     os.subnets_client, os.ports_client,
                     os.security_groups_client)
@@ -136,7 +143,8 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
             self.creds_client.assign_user_role(user, project,
                                                self.admin_role)
             role_assigned = True
-            if self.identity_version == 'v3':
+            if (self.identity_version == 'v3' and
+                    CONF.identity.admin_domain_scope):
                 self.creds_client.assign_user_role_on_domain(
                     user, CONF.identity.admin_role)
         # Add roles specified in config file
