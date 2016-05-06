@@ -91,7 +91,9 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
             linux_client = remote_client.RemoteClient(
                 self.get_server_ip(server),
                 self.ssh_user,
-                new_password)
+                new_password,
+                server=server,
+                servers_client=self.client)
             linux_client.validate_authentication()
 
     def _test_reboot_server(self, reboot_type):
@@ -102,7 +104,9 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
                 self.get_server_ip(server),
                 self.ssh_user,
                 self.password,
-                self.validation_resources['keypair']['private_key'])
+                self.validation_resources['keypair']['private_key'],
+                server=server,
+                servers_client=self.client)
             boot_time = linux_client.get_boot_time()
 
         self.client.reboot_server(self.server_id, type=reboot_type)
@@ -114,7 +118,9 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
                 self.get_server_ip(server),
                 self.ssh_user,
                 self.password,
-                self.validation_resources['keypair']['private_key'])
+                self.validation_resources['keypair']['private_key'],
+                server=server,
+                servers_client=self.client)
             new_boot_time = linux_client.get_boot_time()
             self.assertTrue(new_boot_time > boot_time,
                             '%s > %s' % (new_boot_time, boot_time))
@@ -183,7 +189,9 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
                 self.get_server_ip(rebuilt_server),
                 self.ssh_user,
                 password,
-                self.validation_resources['keypair']['private_key'])
+                self.validation_resources['keypair']['private_key'],
+                server=rebuilt_server,
+                servers_client=self.client)
             linux_client.validate_authentication()
 
     @test.idempotent_id('30449a88-5aff-4f9b-9866-6ee9b17f906d')

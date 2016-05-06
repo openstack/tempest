@@ -116,7 +116,9 @@ class AttachVolumeTestJSON(base.BaseV2ComputeTest):
             self.get_server_ip(self.server),
             self.image_ssh_user,
             self.admin_pass,
-            self.validation_resources['keypair']['private_key'])
+            self.validation_resources['keypair']['private_key'],
+            server=self.server,
+            servers_client=self.servers_client)
 
         partitions = linux_client.get_partitions()
         self.assertIn(self.device, partitions)
@@ -135,7 +137,9 @@ class AttachVolumeTestJSON(base.BaseV2ComputeTest):
             self.get_server_ip(self.server),
             self.image_ssh_user,
             self.admin_pass,
-            self.validation_resources['keypair']['private_key'])
+            self.validation_resources['keypair']['private_key'],
+            server=self.server,
+            servers_client=self.servers_client)
 
         partitions = linux_client.get_partitions()
         self.assertNotIn(self.device, partitions)
@@ -179,7 +183,9 @@ class AttachVolumeShelveTestJSON(AttachVolumeTestJSON):
             self.get_server_ip(self.server['id']),
             self.image_ssh_user,
             self.admin_pass,
-            self.validation_resources['keypair']['private_key'])
+            self.validation_resources['keypair']['private_key'],
+            server=self.server,
+            servers_client=self.servers_client)
 
         command = 'grep vd /proc/partitions | wc -l'
         nb_partitions = linux_client.exec_command(command).strip()
