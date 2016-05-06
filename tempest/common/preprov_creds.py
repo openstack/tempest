@@ -219,9 +219,9 @@ class PreProvisionedCredentialProvider(cred_provider.CredentialProvider):
         else:
             hashes = self.hash_dict['creds'].keys()
         # NOTE(mtreinish): admin is a special case because of the increased
-        # privlege set which could potentially cause issues on tests where that
-        # is not expected. So unless the admin role isn't specified do not
-        # allocate admin.
+        # privilege set which could potentially cause issues on tests where
+        # that is not expected. So unless the admin role isn't specified do
+        # not allocate admin.
         admin_hashes = self.hash_dict['roles'].get(self.admin_role,
                                                    None)
         if ((not roles or self.admin_role not in roles) and
