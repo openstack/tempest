@@ -364,6 +364,23 @@ class RoutersTest(base.BaseRouterTest):
         self._verify_router_interface(router['id'], subnet02['id'],
                                       interface02['port_id'])
 
+    @test.idempotent_id('96522edf-b4b5-45d9-8443-fa11c26e6eff')
+    def test_router_interface_port_update_with_fixed_ip(self):
+        network = self.create_network()
+        subnet = self.create_subnet(network)
+        router = self._create_router(data_utils.rand_name('router-'))
+        fixed_ip = [{'subnet_id': subnet['id']}]
+        interface = self._add_router_interface_with_subnet_id(router['id'],
+                                                              subnet['id'])
+        self.assertIn('port_id', interface)
+        self.assertIn('subnet_id', interface)
+        port = self.ports_client.show_port(interface['port_id'])
+        self.assertEqual(port['port']['id'], interface['port_id'])
+        router_port = self.ports_client.update_port(port['port']['id'],
+                                                    fixed_ips=fixed_ip)
+        self.assertEqual(subnet['id'],
+                         router_port['port']['fixed_ips'][0]['subnet_id'])
+
     def _verify_router_interface(self, router_id, subnet_id, port_id):
         show_port_body = self.ports_client.show_port(port_id)
         interface_port = show_port_body['port']
