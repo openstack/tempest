@@ -1,0 +1,7 @@
+---
+upgrade:
+  - The integrated dashboard scenario test has been
+    removed and is now in a separate tempest plugin
+    tempest-horizon. The removed test coverage can be
+    used by installing tempest-horizon on the server
+    where you run tempest.
