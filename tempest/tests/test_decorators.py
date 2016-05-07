@@ -246,3 +246,75 @@ class TestSimpleNegativeDecorator(BaseDecoratorsTest):
         self.assertIn("test_fake_negative", dir(obj))
         obj.test_fake_negative()
         mock.assert_called_once_with(self.FakeNegativeJSONTest._schema)
+
+
+class TestConfigDecorators(BaseDecoratorsTest):
+    def setUp(self):
+        super(TestConfigDecorators, self).setUp()
+        cfg.CONF.set_default('nova', True, 'service_available')
+        cfg.CONF.set_default('glance', False, 'service_available')
+
+    def _test_skip_unless_config(self, expected_to_skip=True, *decorator_args):
+
+        class TestFoo(test.BaseTestCase):
+            @config.skip_unless_config(*decorator_args)
+            def test_bar(self):
+                return 0
+
+        t = TestFoo('test_bar')
+        if expected_to_skip:
+            self.assertRaises(testtools.TestCase.skipException, t.test_bar)
+        else:
+            try:
+                self.assertEqual(t.test_bar(), 0)
+            except testtools.TestCase.skipException:
+                # We caught a skipException but we didn't expect to skip
+                # this test so raise a hard test failure instead.
+                raise testtools.TestCase.failureException(
+                    "Not supposed to skip")
+
+    def _test_skip_if_config(self, expected_to_skip=True,
+                             *decorator_args):
+
+        class TestFoo(test.BaseTestCase):
+            @config.skip_if_config(*decorator_args)
+            def test_bar(self):
+                return 0
+
+        t = TestFoo('test_bar')
+        if expected_to_skip:
+            self.assertRaises(testtools.TestCase.skipException, t.test_bar)
+        else:
+            try:
+                self.assertEqual(t.test_bar(), 0)
+            except testtools.TestCase.skipException:
+                # We caught a skipException but we didn't expect to skip
+                # this test so raise a hard test failure instead.
+                raise testtools.TestCase.failureException(
+                    "Not supposed to skip")
+
+    def test_skip_unless_no_group(self):
+        self._test_skip_unless_config(True, 'fake_group', 'an_option')
+
+    def test_skip_unless_no_option(self):
+        self._test_skip_unless_config(True, 'service_available',
+                                      'not_an_option')
+
+    def test_skip_unless_false_option(self):
+        self._test_skip_unless_config(True, 'service_available', 'glance')
+
+    def test_skip_unless_true_option(self):
+        self._test_skip_unless_config(False,
+                                      'service_available', 'nova')
+
+    def test_skip_if_no_group(self):
+        self._test_skip_if_config(False, 'fake_group', 'an_option')
+
+    def test_skip_if_no_option(self):
+        self._test_skip_if_config(False, 'service_available', 'not_an_option')
+
+    def test_skip_if_false_option(self):
+        self._test_skip_if_config(False, 'service_available', 'glance')
+
+    def test_skip_if_true_option(self):
+        self._test_skip_if_config(True, 'service_available', 'nova')

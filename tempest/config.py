@@ -15,6 +15,7 @@
 
 from __future__ import print_function
 
+import functools
 import logging as std_logging
 import os
 import tempfile
@@ -22,6 +23,7 @@ import tempfile
 from oslo_concurrency import lockutils
 from oslo_config import cfg
 from oslo_log import log as logging
+import testtools
 
 from tempest.test_discover import plugins
 
@@ -1385,3 +1387,72 @@ class TempestConfigProxy(object):
 
 
 CONF = TempestConfigProxy()
+
+
+def skip_unless_config(*args):
+    """Decorator to raise a skip if a config opt doesn't exist and is False
+
+    :param str group: The first arg, the option group to check
+    :param str name: The second arg, the option name to check
+    :param str msg: Optional third arg, the skip msg to use if a skip is raised
+    :raises testtools.TestCaseskipException: If the specified config option
+        doesn't exist or it exists and evaluates to False
+    """
+    def decorator(f):
+        group = args[0]
+        name = args[1]
+
+        @functools.wraps(f)
+        def wrapper(self, *func_args, **func_kwargs):
+            if not hasattr(CONF, group):
+                msg = "Config group %s doesn't exist" % group
+                raise testtools.TestCase.skipException(msg)
+            else:
+                conf_group = getattr(CONF, group)
+                if not hasattr(conf_group, name):
+                    msg = "Config option %s.%s doesn't exist" % (group,
+                                                                 name)
+                    raise testtools.TestCase.skipException(msg)
+                else:
+                    value = getattr(conf_group, name)
+                    if not value:
+                        if len(args) == 3:
+                            msg = args[2]
+                        else:
+                            msg = "Config option %s.%s is false" % (group,
+                                                                    name)
+                        raise testtools.TestCase.skipException(msg)
+            return f(self, *func_args, **func_kwargs)
+        return wrapper
+    return decorator
+
+
+def skip_if_config(*args):
+    """Raise a skipException if a config exists and is True
+
+    :param str group: The first arg, the option group to check
+    :param str name: The second arg, the option name to check
+    :param str msg: Optional third arg, the skip msg to use if a skip is raised
+    :raises testtools.TestCase.skipException: If the specified config option
+        exists and evaluates to True
+    """
+    def decorator(f):
+        group = args[0]
+        name = args[1]
+
+        @functools.wraps(f)
+        def wrapper(self, *func_args, **func_kwargs):
+            if hasattr(CONF, group):
+                conf_group = getattr(CONF, group)
+                if hasattr(conf_group, name):
+                    value = getattr(conf_group, name)
+                    if value:
+                        if len(args) == 3:
+                            msg = args[2]
+                        else:
+                            msg = "Config option %s.%s is false" % (group,
+                                                                    name)
+                        raise testtools.TestCase.skipException(msg)
+            return f(self, *func_args, **func_kwargs)
+        return wrapper
+    return decorator
