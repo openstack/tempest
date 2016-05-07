@@ -1402,7 +1402,7 @@ CONF = TempestConfigProxy()
 
 
 def skip_unless_config(*args):
-    """Decorator to raise a skip if a config opt doesn't exist and is False
+    """Decorator to raise a skip if a config opt doesn't exist or is False
 
     :param str group: The first arg, the option group to check
     :param str name: The second arg, the option name to check
@@ -1419,21 +1419,21 @@ def skip_unless_config(*args):
             if not hasattr(CONF, group):
                 msg = "Config group %s doesn't exist" % group
                 raise testtools.TestCase.skipException(msg)
-            else:
-                conf_group = getattr(CONF, group)
-                if not hasattr(conf_group, name):
-                    msg = "Config option %s.%s doesn't exist" % (group,
-                                                                 name)
-                    raise testtools.TestCase.skipException(msg)
+
+            conf_group = getattr(CONF, group)
+            if not hasattr(conf_group, name):
+                msg = "Config option %s.%s doesn't exist" % (group,
+                                                             name)
+                raise testtools.TestCase.skipException(msg)
+
+            value = getattr(conf_group, name)
+            if not value:
+                if len(args) == 3:
+                    msg = args[2]
                 else:
-                    value = getattr(conf_group, name)
-                    if not value:
-                        if len(args) == 3:
-                            msg = args[2]
-                        else:
-                            msg = "Config option %s.%s is false" % (group,
-                                                                    name)
-                        raise testtools.TestCase.skipException(msg)
+                    msg = "Config option %s.%s is false" % (group,
+                                                            name)
+                raise testtools.TestCase.skipException(msg)
             return f(self, *func_args, **func_kwargs)
         return wrapper
     return decorator
