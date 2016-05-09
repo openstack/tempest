@@ -48,7 +48,7 @@ def debug(msg, *args, **kwargs):
 
 
 def find_skips(start):
-    """Find the entire list of skiped tests.
+    """Find the entire list of skipped tests.
 
     Returns a list of tuples (method, bug) that represent
     test methods that have been decorated to skip because of

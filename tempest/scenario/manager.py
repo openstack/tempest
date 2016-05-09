@@ -648,7 +648,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
         """
         if CONF.validation.connect_method == 'floating':
             # The tests calling this method don't have a floating IP
-            # and can't make use of the validattion resources. So the
+            # and can't make use of the validation resources. So the
             # method is creating the floating IP there.
             return self.create_floating_ip(server)['ip']
         elif CONF.validation.connect_method == 'fixed':

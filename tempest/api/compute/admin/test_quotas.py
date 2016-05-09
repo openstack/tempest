@@ -185,7 +185,7 @@ class QuotaClassesAdminTestJSON(base.BaseV2ComputeAdminTest):
         # increment all of the values for updating the default quota class
         for quota, default in six.iteritems(body):
             # NOTE(sdague): we need to increment a lot, otherwise
-            # there is a real chance that we go from -1 (unlimitted)
+            # there is a real chance that we go from -1 (unlimited)
             # to a very small number which causes issues.
             body[quota] = default + 100
         LOG.debug("update limits for the default quota class set")

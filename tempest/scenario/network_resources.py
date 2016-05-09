@@ -76,7 +76,7 @@ class DeletableResource(AttributeDict):
         """Waits for a network resource to reach a status
 
         @param fetch: the callable to be used to query the resource status
-        @type fecth: callable that takes no parameters and returns the resource
+        @type fetch: callable that takes no parameters and returns the resource
         @param status: the status that the resource has to reach
         @type status: String
         """

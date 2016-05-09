@@ -49,7 +49,7 @@ class HostsAdminTestJSON(base.BaseV2ComputeAdminTest):
     @test.idempotent_id('c6ddbadb-c94e-4500-b12f-8ffc43843ff8')
     def test_list_hosts_with_nonexistent_zone(self):
         # If send the request with a nonexistent zone, the request will be
-        # successful and no hosts will be retured
+        # successful and no hosts will be returned
         hosts = self.client.list_hosts(zone='xxx')['hosts']
         self.assertEqual(0, len(hosts))
 
