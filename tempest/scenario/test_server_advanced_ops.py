@@ -31,7 +31,7 @@ class TestServerAdvancedOps(manager.ScenarioTest):
     """The test suite for server advanced operations
 
     This test case stresses some advanced server instance operations:
-     * Resizing an instance
+     * Resizing a volume-backed instance
      * Sequence suspend resume
     """
 
@@ -50,10 +50,10 @@ class TestServerAdvancedOps(manager.ScenarioTest):
     @test.idempotent_id('e6c28180-7454-4b59-b188-0257af08a63b')
     @testtools.skipUnless(CONF.compute_feature_enabled.resize,
                           'Resize is not available.')
-    @test.services('compute')
-    def test_resize_server_confirm(self):
+    @test.services('compute', 'volume')
+    def test_resize_volume_backed_server_confirm(self):
         # We create an instance for use in this test
-        instance = self.create_server(wait_until='ACTIVE')
+        instance = self.create_server(wait_until='ACTIVE', volume_backed=True)
         instance_id = instance['id']
         resize_flavor = CONF.compute.flavor_ref_alt
         LOG.debug("Resizing instance %s from flavor %s to flavor %s",
