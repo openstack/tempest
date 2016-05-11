@@ -18,6 +18,7 @@ import testtools
 
 from tempest.common import waiters
 from tempest import config
+from tempest.lib import decorators
 from tempest.scenario import manager
 from tempest import test
 
@@ -50,6 +51,7 @@ class TestServerAdvancedOps(manager.ScenarioTest):
     @test.idempotent_id('e6c28180-7454-4b59-b188-0257af08a63b')
     @testtools.skipUnless(CONF.compute_feature_enabled.resize,
                           'Resize is not available.')
+    @decorators.skip_because(bug='1580625')
     @test.services('compute', 'volume')
     def test_resize_volume_backed_server_confirm(self):
         # We create an instance for use in this test
