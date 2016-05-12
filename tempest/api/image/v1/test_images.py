@@ -32,7 +32,7 @@ def get_container_and_disk_format():
 
     if container_format in a_formats and container_format != disk_format:
         msg = ("The container format and the disk format don't match. "
-               "Contaiter format: %(container)s, Disk format: %(disk)s." %
+               "Container format: %(container)s, Disk format: %(disk)s." %
                {'container': container_format, 'disk': disk_format})
         raise exceptions.InvalidConfiguration(message=msg)
 
