@@ -338,7 +338,7 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
             create_kwargs['networks'][0]['port'] = port_id
         if availability_zone is not None:
             create_kwargs['availability_zone'] = availability_zone
-        server = self.create_server(name=name, wait_until='ACTIVE', **create_kwargs)
+        server = self.create_server(name=name, wait_until='ACTIVE', clients=self.os_adm, **create_kwargs)
         self.servers.append(server)
         return server
 
@@ -609,7 +609,7 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
         # Create server
         server_name = data_utils.rand_name('server-smoke')
         server = self.create_server(name=server_name,
-                                    **create_kwargs)
+                                    create_kwargs=create_kwargs)
 
         # Verify vlan profile has been created
         network = self.admin_networks_client.show_network(
@@ -624,9 +624,9 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
         port_profile_dn = 'fabric/lan/profiles/vnic-' + port_profile_id
         self.assertIsNotNone(port_profile_id,
                              'vif_details have a profileid attribute')
-        self.timed_assert(self.assertNotEmpty,
-                          lambda: self.ucsm.get_port_profile(port_profile_dn))
         port_profile = self.ucsm.get_port_profile(port_profile_dn)
+        self.assertNotEmpty(port_profile,
+                            'Port profile has been created in UCSM')
         # Verify the port profile has a correct VLAN
         port_profile_vlans = self.ucsm.get_vnic_ether_if(port_profile)
         self.assertEqual(str(vlan_id), port_profile_vlans[0].Vnet,
@@ -659,11 +659,12 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
         # Create networks
         names = [data_utils.rand_name('network-')
                  for i in range(self.virtual_functions)]
-        networks = self.network_client.create_bulk_network(names)['networks']
+        data = {'networks': [{'name': name} for name in names]}
+        networks = self.networks_client.create_bulk_networks(**data)['networks']
 
         # Create subnets
-        cidr = netaddr.IPNetwork(CONF.network.tenant_network_cidr)
-        mask_bits = CONF.network.tenant_network_mask_bits
+        cidr = netaddr.IPNetwork(CONF.network.project_network_cidr)
+        mask_bits = CONF.network.project_network_mask_bits
         cidrs = [subnet_cidr for subnet_cidr in cidr.subnet(mask_bits)]
         names = [data_utils.rand_name('subnet-') for i in range(len(networks))]
         subnets_list = []
@@ -676,7 +677,7 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
                 'enable_dhcp': False
             }
             subnets_list.append(net)
-        self.network_client.create_bulk_subnet(subnets_list)
+        self.subnets_client.create_bulk_subnets(**{'subnets': subnets_list})
 
         # Create ports
         ports_data = {}
@@ -690,7 +691,7 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
             }
             ports_data[vlan_id] = port
 
-        ports_list = self.networks_client.create_bulk_port(
+        ports_list = self.ports_client.create_bulk_ports(
             **{'ports': ports_data.values()})['ports']
 
         # Boot servers
@@ -723,9 +724,6 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
             port_profile_dn = 'fabric/lan/profiles/vnic-' + port_profile_id
             self.assertIsNotNone(port_profile_id,
                                  'vif_details have a profileid attribute')
-            self.timed_assert(self.assertNotEmpty,
-                              lambda: self.ucsm.get_port_profile(
-                                  port_profile_dn))
             port_profile = self.ucsm.get_port_profile(port_profile_dn)
             self.assertNotEmpty(port_profile,
                                 'Port profile has been created in UCSM')
@@ -737,7 +735,7 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
         for vlan_id, server in servers.iteritems():
             self.servers_client.delete_server(server['id'])
             waiters.wait_for_server_termination(self.servers_client, server['id'])
-            self.network_client.delete_port(ports[vlan_id]['id'])
+            self.networks_client.delete_port(ports[vlan_id]['id'])
 
         # Delete networks
         for network in networks:
