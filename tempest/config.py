@@ -672,7 +672,7 @@ ValidationGroup = [
     cfg.StrOpt('network_for_ssh',
                default='public',
                help="Network used for SSH connections. Ignored if "
-                    "use_floatingip_for_ssh=true or run_validation=false.",
+                    "connect_method=floating or run_validation=false.",
                deprecated_opts=[cfg.DeprecatedOpt('network_for_ssh',
                                                   group='compute')]),
 ]
