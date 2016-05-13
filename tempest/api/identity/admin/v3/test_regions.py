@@ -15,7 +15,7 @@
 
 from tempest.api.identity import base
 from tempest.common.utils import data_utils
-from tempest.lib import exceptions as lib_exc
+from tempest.lib.common.utils import test_utils
 from tempest import test
 
 
@@ -42,18 +42,19 @@ class RegionsTestJSON(base.BaseIdentityV3AdminTest):
             cls.client.delete_region(r['id'])
         super(RegionsTestJSON, cls).resource_cleanup()
 
-    def _delete_region(self, region_id):
-        self.client.delete_region(region_id)
-        self.assertRaises(lib_exc.NotFound,
-                          self.client.show_region, region_id)
-
     @test.idempotent_id('56186092-82e4-43f2-b954-91013218ba42')
     def test_create_update_get_delete_region(self):
+        # Create region
         r_description = data_utils.rand_name('description')
         region = self.client.create_region(
             description=r_description,
             parent_region_id=self.setup_regions[0]['id'])['region']
-        self.addCleanup(self._delete_region, region['id'])
+        # This test will delete the region as part of the validation
+        # procedure, so it needs a different cleanup method that
+        # would be useful in case the tests fails at any point before
+        # reaching the deletion part.
+        self.addCleanup(test_utils.call_and_ignore_notfound_exc,
+                        self.client.delete_region, region['id'])
         self.assertEqual(r_description, region['description'])
         self.assertEqual(self.setup_regions[0]['id'],
                          region['parent_region_id'])
@@ -71,6 +72,11 @@ class RegionsTestJSON(base.BaseIdentityV3AdminTest):
         self.assertEqual(r_alt_description, region['description'])
         self.assertEqual(self.setup_regions[1]['id'],
                          region['parent_region_id'])
+        # Delete the region
+        self.client.delete_region(region['id'])
+        body = self.client.list_regions()['regions']
+        regions_list = [r['id'] for r in body]
+        self.assertNotIn(region['id'], regions_list)
 
     @test.attr(type='smoke')
     @test.idempotent_id('2c12c5b5-efcf-4aa5-90c5-bff1ab0cdbe2')
@@ -80,7 +86,7 @@ class RegionsTestJSON(base.BaseIdentityV3AdminTest):
         r_description = data_utils.rand_name('description')
         region = self.client.create_region(
             region_id=r_region_id, description=r_description)['region']
-        self.addCleanup(self._delete_region, region['id'])
+        self.addCleanup(self.client.delete_region, region['id'])
         # Asserting Create Region with specific id response body
         self.assertEqual(r_region_id, region['id'])
         self.assertEqual(r_description, region['description'])
@@ -95,3 +101,20 @@ class RegionsTestJSON(base.BaseIdentityV3AdminTest):
         self.assertEqual(0, len(missing_regions),
                          "Failed to find region %s in fetched list" %
                          ', '.join(str(e) for e in missing_regions))
+
+    @test.idempotent_id('2d1057cb-bbde-413a-acdf-e2d265284542')
+    def test_list_regions_filter_by_parent_region_id(self):
+        # Add a sub-region to one of the existing test regions
+        r_description = data_utils.rand_name('description')
+        region = self.client.create_region(
+            description=r_description,
+            parent_region_id=self.setup_regions[0]['id'])['region']
+        self.addCleanup(self.client.delete_region, region['id'])
+        # Get the list of regions filtering with the parent_region_id
+        params = {'parent_region_id': self.setup_regions[0]['id']}
+        fetched_regions = self.client.list_regions(params=params)['regions']
+        # Asserting list regions response
+        self.assertIn(region, fetched_regions)
+        for r in fetched_regions:
+            self.assertEqual(self.setup_regions[0]['id'],
+                             r['parent_region_id'])
