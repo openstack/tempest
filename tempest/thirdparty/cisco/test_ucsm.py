@@ -180,7 +180,9 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
 
     @classmethod
     def setup_clients(cls):
+        cls.manager = cls.os_adm
         super(UCSMTest, cls).setup_clients()
+        # TODO: remove lines below
         cls.admin_networks_client = cls.os_adm.networks_client
         cls.admin_ports_client = cls.os_adm.ports_client
         cls.admin_hosts_client = cls.os_adm.hosts_client
