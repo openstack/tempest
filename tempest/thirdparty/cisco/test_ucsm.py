@@ -624,10 +624,14 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
         port_profile_dn = 'fabric/lan/profiles/vnic-' + port_profile_id
         self.assertIsNotNone(port_profile_id,
                              'vif_details have a profileid attribute')
+        self.timed_assert(self.assertNotEmpty,
+                          lambda: self.ucsm.get_port_profile(port_profile_dn))
         port_profile = self.ucsm.get_port_profile(port_profile_dn)
         self.assertNotEmpty(port_profile,
                             'Port profile has been created in UCSM')
         # Verify the port profile has a correct VLAN
+        self.timed_assert(self.assertNotEmpty,
+                          lambda:  self.ucsm.get_vnic_ether_if(port_profile))
         port_profile_vlans = self.ucsm.get_vnic_ether_if(port_profile)
         self.assertEqual(str(vlan_id), port_profile_vlans[0].Vnet,
                          'Vlan has been added to port profile')
@@ -724,9 +728,13 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
             port_profile_dn = 'fabric/lan/profiles/vnic-' + port_profile_id
             self.assertIsNotNone(port_profile_id,
                                  'vif_details have a profileid attribute')
+            self.timed_assert(self.assertNotEmpty,
+                              lambda: self.ucsm.get_port_profile(port_profile_dn))
             port_profile = self.ucsm.get_port_profile(port_profile_dn)
             self.assertNotEmpty(port_profile,
                                 'Port profile has been created in UCSM')
+            self.timed_assert(self.assertNotEmpty,
+                              lambda:self.ucsm.get_vnic_ether_if(port_profile))
             port_profile_vlans = self.ucsm.get_vnic_ether_if(port_profile)
             self.assertEqual(str(vlan_id), port_profile_vlans[0].Vnet,
                              'Vlan has been added to port profile')
