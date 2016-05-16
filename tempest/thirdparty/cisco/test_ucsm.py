@@ -611,7 +611,7 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
         # Create server
         server_name = data_utils.rand_name('server-smoke')
         server = self.create_server(name=server_name,
-                                    create_kwargs=create_kwargs)
+                                    **create_kwargs)
 
         # Verify vlan profile has been created
         network = self.admin_networks_client.show_network(
