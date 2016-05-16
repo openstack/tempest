@@ -407,11 +407,11 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
         time.sleep(10)
         server1_client = self.get_remote_client(
             floating_ip1['floating_ip_address'],
-            CONF.compute.image_ssh_user,
+            CONF.validation.image_ssh_user,
             self._get_server_key(server1))
         server2_client = self.get_remote_client(
             floating_ip2['floating_ip_address'],
-            CONF.compute.image_ssh_user,
+            CONF.validation.image_ssh_user,
             self._get_server_key(server2))
         # Ping server2 from server1 and vice versa
         self.assertNotEmpty(
@@ -427,11 +427,11 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
         time.sleep(10)
         server1_client = self.get_remote_client(
             floating_ip1['floating_ip_address'],
-            CONF.compute.image_ssh_user,
+            CONF.validation.image_ssh_user,
             self._get_server_key(server1))
         server2_client = self.get_remote_client(
             floating_ip2['floating_ip_address'],
-            CONF.compute.image_ssh_user,
+            CONF.validation.image_ssh_user,
             self._get_server_key(server2))
 
         nc = 'nc'
