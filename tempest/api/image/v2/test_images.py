@@ -129,7 +129,6 @@ class BasicOperationsImagesTest(base.BaseV2ImageTest):
 
 
 class ListImagesTest(base.BaseV2ImageTest):
-    """Here we test the listing of image information"""
 
     @classmethod
     def resource_setup(cls):
@@ -157,22 +156,48 @@ class ListImagesTest(base.BaseV2ImageTest):
         """
         size = random.randint(1024, 4096)
         image_file = six.BytesIO(data_utils.random_bytes(size))
+        tags = [data_utils.rand_name('tag'), data_utils.rand_name('tag')]
         image = cls.create_image(container_format=container_format,
                                  disk_format=disk_format,
-                                 visibility='private')
+                                 visibility='private',
+                                 tags=tags)
         cls.client.store_image_file(image['id'], data=image_file)
+        # Keep the data of one test image so it can be used to filter lists
+        cls.test_data = image
+        cls.test_data['size'] = size
 
         return image['id']
 
+
+class ListUserImagesTest(ListImagesTest):
+    """Here we test the listing of image information"""
+
     def _list_by_param_value_and_assert(self, params):
         """Perform list action with given params and validates result."""
-
+        # Retrieve the list of images that meet the filter
         images_list = self.client.list_images(params=params)['images']
         # Validating params of fetched images
+        msg = 'No images were found that met the filter criteria.'
+        self.assertNotEmpty(images_list, msg)
         for image in images_list:
             for key in params:
                 msg = "Failed to list images by %s" % key
                 self.assertEqual(params[key], image[key], msg)
+
+    def _list_sorted_by_image_size_and_assert(self, params, desc=False):
+        """Validate an image list that has been sorted by size
+
+        Perform list action with given params and validates the results are
+        sorted by image size in either ascending or descending order.
+        """
+        # Retrieve the list of images that meet the filter
+        images_list = self.client.list_images(params=params)['images']
+        # Validate that the list was fetched sorted accordingly
+        msg = 'No images were found that met the filter criteria.'
+        self.assertNotEmpty(images_list, msg)
+        sorted_list = [image['size'] for image in images_list]
+        msg = 'The list of images was not sorted correctly.'
+        self.assertEqual(sorted(sorted_list, reverse=desc), sorted_list, msg)
 
     @test.idempotent_id('1e341d7a-90a9-494c-b143-2cdf2aeb6aee')
     def test_list_no_params(self):
@@ -185,8 +210,8 @@ class ListImagesTest(base.BaseV2ImageTest):
 
     @test.idempotent_id('9959ca1d-1aa7-4b7a-a1ea-0fff0499b37e')
     def test_list_images_param_container_format(self):
-        # Test to get all images with container_format='bare'
-        params = {"container_format": "bare"}
+        # Test to get all images with a specific container_format
+        params = {"container_format": self.test_data['container_format']}
         self._list_by_param_value_and_assert(params)
 
     @test.idempotent_id('4a4735a7-f22f-49b6-b0d9-66e1ef7453eb')
@@ -253,6 +278,37 @@ class ListImagesTest(base.BaseV2ImageTest):
         params = {"owner": image['owner']}
         self._list_by_param_value_and_assert(params)
 
+    @test.idempotent_id('55c8f5f5-bfed-409d-a6d5-4caeda985d7b')
+    def test_list_images_param_name(self):
+        # Test to get images by name
+        params = {'name': self.test_data['name']}
+        self._list_by_param_value_and_assert(params)
+
+    @test.idempotent_id('aa8ac4df-cff9-418b-8d0f-dd9c67b072c9')
+    def test_list_images_param_tag(self):
+        # Test to get images matching a tag
+        params = {'tag': self.test_data['tags'][0]}
+        images_list = self.client.list_images(params=params)['images']
+        # Validating properties of fetched images
+        self.assertNotEmpty(images_list)
+        for image in images_list:
+            msg = ("The image {image_name} does not have the expected tag "
+                   "{expected_tag} among its tags: {observerd_tags}."
+                   .format(image_name=image['name'],
+                           expected_tag=self.test_data['tags'][0],
+                           observerd_tags=image['tags']))
+            self.assertIn(self.test_data['tags'][0], image['tags'], msg)
+
+    @test.idempotent_id('eeadce49-04e0-43b7-aec7-52535d903e7a')
+    def test_list_images_param_sort(self):
+        params = {'sort': 'size:desc'}
+        self._list_sorted_by_image_size_and_assert(params, desc=True)
+
+    @test.idempotent_id('9faaa0c2-c3a5-43e1-8f61-61c54b409a49')
+    def test_list_images_param_sort_key_dir(self):
+        params = {'sort_key': 'size', 'sort_dir': 'desc'}
+        self._list_sorted_by_image_size_and_assert(params, desc=True)
+
     @test.idempotent_id('622b925c-479f-4736-860d-adeaf13bc371')
     def test_get_image_schema(self):
         # Test to get image schema
@@ -266,3 +322,32 @@ class ListImagesTest(base.BaseV2ImageTest):
         schema = "images"
         body = self.schemas_client.show_schema(schema)
         self.assertEqual("images", body['name'])
+
+
+class ListSharedImagesTest(ListImagesTest):
+    """Here we test the listing of a shared image information"""
+
+    credentials = ['primary', 'alt']
+
+    @classmethod
+    def setup_clients(cls):
+        super(ListSharedImagesTest, cls).setup_clients()
+        cls.image_member_client = cls.os.image_member_client_v2
+        cls.alt_img_client = cls.os_alt.image_client_v2
+
+    @test.idempotent_id('3fa50be4-8e38-4c02-a8db-7811bb780122')
+    def test_list_images_param_member_status(self):
+        # Share one of the images created with the alt user
+        self.image_member_client.create_image_member(
+            image_id=self.test_data['id'],
+            member=self.alt_img_client.tenant_id)
+        # Update the info on the test data so it remains accurate
+        self.test_data['updated_at'] = self.client.show_image(
+            self.test_data['id'])['updated_at']
+        # As an image consumer you need to provide the member_status parameter
+        # along with the visibility=shared parameter in order for it to show
+        # results
+        params = {'member_status': 'pending', 'visibility': 'shared'}
+        fetched_images = self.alt_img_client.list_images(params)['images']
+        self.assertEqual(1, len(fetched_images))
+        self.assertEqual(self.test_data['id'], fetched_images[0]['id'])
