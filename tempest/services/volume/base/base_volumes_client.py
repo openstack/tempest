@@ -62,6 +62,17 @@ class BaseVolumesClient(rest_client.RestClient):
         self.expected_success(200, resp.status)
         return rest_client.ResponseBody(resp, body)
 
+    def show_pools(self, detail=False):
+        # List all the volumes pools (hosts)
+        url = 'scheduler-stats/get_pools'
+        if detail:
+            url += '?detail=True'
+
+        resp, body = self.get(url)
+        body = json.loads(body)
+        self.expected_success(200, resp.status)
+        return rest_client.ResponseBody(resp, body)
+
     def show_volume(self, volume_id):
         """Returns the details of a single volume."""
         url = "volumes/%s" % str(volume_id)
