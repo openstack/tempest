@@ -179,23 +179,14 @@ class ObjectTest(base.BaseObjectTest):
     @test.idempotent_id('84dafe57-9666-4f6d-84c8-0814d37923b8')
     def test_create_object_with_expect_continue(self):
         # create object with expect_continue
+
         object_name = data_utils.rand_name(name='TestObject')
         data = data_utils.arbitrary_string()
-        metadata = {'Expect': '100-continue'}
-        resp = self.object_client.create_object_continue(
-            self.container_name,
-            object_name,
-            data,
-            metadata=metadata)
 
-        self.assertIn('status', resp)
-        self.assertEqual(resp['status'], '100')
+        status, _ = self.object_client.create_object_continue(
+            self.container_name, object_name, data)
 
-        self.object_client.create_object_continue(
-            self.container_name,
-            object_name,
-            data,
-            metadata=None)
+        self.assertEqual(status, 201)
 
         # check uploaded content
         _, body = self.object_client.get_object(self.container_name,
