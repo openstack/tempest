@@ -132,16 +132,16 @@ overwritten by subclasses (enforced via hacking rule T105).
 
 Set-up is split in a series of steps (setup stages), which can be overwritten
 by test classes. Set-up stages are:
-- `skip_checks`
-- `setup_credentials`
-- `setup_clients`
-- `resource_setup`
+ - `skip_checks`
+ - `setup_credentials`
+ - `setup_clients`
+ - `resource_setup`
 
 Tear-down is also split in a series of steps (teardown stages), which are
 stacked for execution only if the corresponding setup stage had been
 reached during the setup phase. Tear-down stages are:
-- `clear_credentials` (defined in the base test class)
-- `resource_cleanup`
+ - `clear_credentials` (defined in the base test class)
+ - `resource_cleanup`
 
 Skipping Tests
 --------------
