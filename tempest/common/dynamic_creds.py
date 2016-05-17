@@ -154,6 +154,20 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
         return cred_provider.TestResources(creds)
 
     def _create_network_resources(self, tenant_id):
+        """The function creates network resources in the given tenant.
+
+        The function checks if network_resources class member is empty,
+        In case it is, it will create a network, a subnet and a router for
+        the tenant according to the given tenant id parameter.
+        Otherwise it will create a network resource according
+        to the values from network_resources dict.
+
+        :param tenant_id: The tenant id to create resources for.
+        :type tenant_id: str
+        :raises: InvalidConfiguration, Exception
+        :returns: network resources(network,subnet,router)
+        :rtype: tuple
+        """
         network = None
         subnet = None
         router = None
