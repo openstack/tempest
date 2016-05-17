@@ -400,6 +400,10 @@ class RestClient(object):
                           caller_name=None, extra=None):
         if 'X-Auth-Token' in req_headers:
             req_headers['X-Auth-Token'] = '<omitted>'
+        # A shallow copy is sufficient
+        resp_log = resp.copy()
+        if 'x-subject-token' in resp_log:
+            resp_log['x-subject-token'] = '<omitted>'
         log_fmt = """Request - Headers: %s
         Body: %s
     Response - Headers: %s
@@ -409,7 +413,7 @@ class RestClient(object):
             log_fmt % (
                 str(req_headers),
                 self._safe_body(req_body),
-                str(resp),
+                str(resp_log),
                 self._safe_body(resp_body)),
             extra=extra)
 
