@@ -138,9 +138,6 @@ from tempest.services.object_storage.container_client import ContainerClient
 from tempest.services.object_storage.object_client import ObjectClient
 from tempest.services.orchestration.json.orchestration_client import \
     OrchestrationClient
-from tempest.services.telemetry.json.alarming_client import AlarmingClient
-from tempest.services.telemetry.json.telemetry_client import \
-    TelemetryClient
 from tempest.services.volume.v1.json.admin.hosts_client import \
     HostsClient as VolumeHostsClient
 from tempest.services.volume.v1.json.admin.quotas_client import \
@@ -324,20 +321,6 @@ class Manager(manager.Manager):
             build_interval=CONF.network.build_interval,
             build_timeout=CONF.network.build_timeout,
             **self.default_params)
-        if CONF.service_available.ceilometer:
-            self.telemetry_client = TelemetryClient(
-                self.auth_provider,
-                CONF.telemetry.catalog_type,
-                CONF.identity.region,
-                endpoint_type=CONF.telemetry.endpoint_type,
-                **self.default_params_with_timeout_values)
-        if CONF.service_available.aodh:
-            self.alarming_client = AlarmingClient(
-                self.auth_provider,
-                CONF.alarming.catalog_type,
-                CONF.identity.region,
-                endpoint_type=CONF.alarming.endpoint_type,
-                **self.default_params_with_timeout_values)
         if CONF.service_available.glance:
             self.image_client = ImagesClient(
                 self.auth_provider,

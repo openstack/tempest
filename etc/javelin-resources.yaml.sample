@@ -61,5 +61,3 @@ objects:
     owner: javelin
     file: /etc/hosts
     swift_role: Member
-
-telemetry: true

@@ -113,7 +113,6 @@ import unittest
 
 import netaddr
 from oslo_log import log as logging
-from oslo_utils import timeutils
 import six
 import yaml
 
@@ -138,8 +137,6 @@ from tempest.services.image.v2.json import images_client
 from tempest.services.network.json import routers_client
 from tempest.services.object_storage import container_client
 from tempest.services.object_storage import object_client
-from tempest.services.telemetry.json import alarming_client
-from tempest.services.telemetry.json import telemetry_client
 from tempest.services.volume.v1.json import volumes_client
 
 CONF = config.CONF
@@ -244,18 +241,6 @@ class OSClient(object):
             build_interval=CONF.image.build_interval,
             build_timeout=CONF.image.build_timeout,
             **default_params)
-        self.telemetry = telemetry_client.TelemetryClient(
-            _auth,
-            CONF.telemetry.catalog_type,
-            CONF.identity.region,
-            endpoint_type=CONF.telemetry.endpoint_type,
-            **default_params_with_timeout_values)
-        self.alarming = alarming_client.AlarmingClient(
-            _auth,
-            CONF.alarm.catalog_type,
-            CONF.identity.region,
-            endpoint_type=CONF.alarm.endpoint_type,
-            **default_params_with_timeout_values)
         self.volumes = volumes_client.VolumesClient(
             _auth,
             CONF.volume.catalog_type,
@@ -461,7 +446,6 @@ class JavelinCheck(unittest.TestCase):
         self.check_objects()
         self.check_servers()
         self.check_volumes()
-        self.check_telemetry()
         self.check_secgroups()
 
         # validate neutron is enabled and ironic disabled:
@@ -563,27 +547,6 @@ class JavelinCheck(unittest.TestCase):
                 found,
                 "Couldn't find expected secgroup %s" % secgroup['name'])
 
-    def check_telemetry(self):
-        """Check that ceilometer provides a sane sample.
-
-        Confirm that there is more than one sample and that they have the
-        expected metadata.
-
-        If in check mode confirm that the oldest sample available is from
-        before the upgrade.
-        """
-        if not self.res.get('telemetry'):
-            return
-        LOG.info("checking telemetry")
-        for server in self.res['servers']:
-            client = client_for_user(server['owner'])
-            body = client.telemetry.list_samples(
-                'instance',
-                query=('metadata.display_name', 'eq', server['name'])
-            )
-            self.assertTrue(len(body) >= 1, 'expecting at least one sample')
-            self._confirm_telemetry_sample(server, body[-1])
-
     def check_volumes(self):
         """Check that the volumes are still there and attached."""
         if not self.res.get('volumes'):
@@ -601,26 +564,6 @@ class JavelinCheck(unittest.TestCase):
             attachment = client.volumes.get_attachment_from_volume(vol_body)
             self.assertEqual(vol_body['id'], attachment['volume_id'])
             self.assertEqual(server_id, attachment['server_id'])
-
-    def _confirm_telemetry_sample(self, server, sample):
-        """Check this sample matches the expected resource metadata."""
-        # Confirm display_name
-        self.assertEqual(server['name'],
-                         sample['resource_metadata']['display_name'])
-        # Confirm instance_type of flavor
-        flavor = sample['resource_metadata'].get(
-            'flavor.name',
-            sample['resource_metadata'].get('instance_type')
-        )
-        self.assertEqual(server['flavor'], flavor)
-        # Confirm the oldest sample was created before upgrade.
-        if OPTS.mode == 'check':
-            oldest_timestamp = timeutils.normalize_time(
-                timeutils.parse_isotime(sample['timestamp']))
-            self.assertTrue(
-                oldest_timestamp < JAVELIN_START,
-                'timestamp should come before start of second javelin run'
-            )
 
     def check_networking(self):
         """Check that the networks are still there."""

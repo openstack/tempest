@@ -33,7 +33,6 @@ CONF_PUB_ROUTER = None
 CONF_TENANTS = None
 CONF_USERS = None
 
-IS_AODH = None
 IS_CINDER = None
 IS_GLANCE = None
 IS_HEAT = None
@@ -51,14 +50,12 @@ def init_conf():
     global CONF_PUB_ROUTER
     global CONF_TENANTS
     global CONF_USERS
-    global IS_AODH
     global IS_CINDER
     global IS_GLANCE
     global IS_HEAT
     global IS_NEUTRON
     global IS_NOVA
 
-    IS_AODH = CONF.service_available.aodh
     IS_CINDER = CONF.service_available.cinder
     IS_GLANCE = CONF.service_available.glance
     IS_HEAT = CONF.service_available.heat
@@ -706,32 +703,6 @@ class NetworkSubnetService(NetworkService):
         self.data['subnets'] = subnets
 
 
-# Telemetry services
-class TelemetryAlarmService(BaseService):
-    def __init__(self, manager, **kwargs):
-        super(TelemetryAlarmService, self).__init__(kwargs)
-        self.client = manager.alarming_client
-
-    def list(self):
-        client = self.client
-        alarms = client.list_alarms()
-        LOG.debug("List count, %s Alarms" % len(alarms))
-        return alarms
-
-    def delete(self):
-        client = self.client
-        alarms = self.list()
-        for alarm in alarms:
-            try:
-                client.delete_alarm(alarm['id'])
-            except Exception:
-                LOG.exception("Delete Alarms exception.")
-
-    def dry_run(self):
-        alarms = self.list()
-        self.data['alarms'] = alarms
-
-
 # begin global services
 class FlavorService(BaseService):
     def __init__(self, manager, **kwargs):
@@ -976,8 +947,8 @@ class DomainService(BaseService):
 
 def get_tenant_cleanup_services():
     tenant_services = []
-    if IS_AODH:
-        tenant_services.append(TelemetryAlarmService)
+    # TODO(gmann): Tempest should provide some plugin hook for cleanup
+    # script extension to plugin tests also.
     if IS_NOVA:
         tenant_services.append(ServerService)
         tenant_services.append(KeyPairService)
