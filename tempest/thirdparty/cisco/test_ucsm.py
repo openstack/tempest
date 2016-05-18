@@ -745,7 +745,7 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
         for vlan_id, server in servers.iteritems():
             self.servers_client.delete_server(server['id'])
             waiters.wait_for_server_termination(self.servers_client, server['id'])
-            self.networks_client.delete_port(ports[vlan_id]['id'])
+            self.ports_client.delete_port(ports[vlan_id]['id'])
 
         # Delete networks
         for network in networks:
@@ -790,7 +790,7 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
             network_obj.id, port_id=port_obj2.id,
             availability_zone='nova:' + master_host)
 
-        self.assert_vm2vm(server1, server2)
+        self.assert_vm_to_vm_connectivity(server1, server2)
 
     @test.attr(type='sriov')
     def test_sriov_inter_vm_to_vm(self):
@@ -800,6 +800,7 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
         self._verify_connectivity_tests_enabled()
         self._verify_single_ucsm_configured()
         self._verify_sriov_configured()
+        self._verify_more_than_one_compute_host_exist()
 
         master_host, slave_host = random.sample(self.compute_host_dict.keys(), 2)
 
@@ -819,7 +820,7 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
             network_obj.id, port_id=port_obj2.id,
             availability_zone='nova:' + slave_host)
 
-        self.assert_vm2vm(server1, server2)
+        self.assert_vm_to_vm_connectivity(server1, server2)
 
     @test.attr(type='non-sriov')
     def test_non_sriov_port_attach(self):
@@ -877,7 +878,7 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
             network_obj.id, port_id=port_obj2.id,
             availability_zone='nova:' + master_host)
 
-        self.assert_vm2vm(server1, server2)
+        self.assert_vm_to_vm_connectivity(server1, server2)
 
     @test.attr(type='non-sriov')
     def test_non_sriov_inter_vm_to_vm(self):
@@ -886,6 +887,8 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
         """
         self._verify_single_ucsm_configured()
         self._verify_connectivity_tests_enabled()
+        self._verify_more_than_one_compute_host_exist()
+
         if len(self.compute_host_dict.keys()) < 2:
             raise self.skipException('Not enough amount of compute hosts. Need at least 2. '
                                      'Update tempest.conf')
@@ -907,7 +910,7 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
             network_obj.id, port_id=port_obj2.id,
             availability_zone='nova:' + slave_host)
 
-        self.assert_vm2vm(server1, server2)
+        self.assert_vm_to_vm_connectivity(server1, server2)
 
     @test.attr(type='non-sriov')
     def test_non_sriov_delete_second_instance(self):
@@ -1099,6 +1102,7 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
         """
         self._verify_multi_ucsm_configured(need_amount=1)
         self._verify_connectivity_tests_enabled()
+        self._verify_more_than_one_compute_host_exist()
 
         ucsm_conf1 = random.choice(self.multi_ucsm_conf.values())
         ucsm_client1 = self.multi_ucsm_clients[ucsm_conf1['ucsm_ip']]
@@ -1119,7 +1123,7 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
             network_obj.id, port_id=port_obj2.id,
             availability_zone='nova:' + compute2)
 
-        self.assert_vm2vm(server1, server2)
+        self.assert_vm_to_vm_connectivity(server1, server2)
 
         # Delete one server and verify VLAN profile still exists
         self.servers_client.delete_server(server1['id'])
@@ -1163,6 +1167,7 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
         """
         self._verify_multi_ucsm_configured(need_amount=2)
         self._verify_connectivity_tests_enabled()
+        self._verify_more_than_one_compute_host_exist()
 
         ucsm_conf1, ucsm_conf2 = random.sample(self.multi_ucsm_conf.values(), 2)
         ucsm_client1 = self.multi_ucsm_clients[ucsm_conf1['ucsm_ip']]
@@ -1185,7 +1190,7 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
             network_obj.id, port_id=port_obj2.id,
             availability_zone='nova:' + compute2)
 
-        self.assert_vm2vm(server1, server2)
+        self.assert_vm_to_vm_connectivity(server1, server2)
 
         # Delete one server and verify VLAN profile still exists
         self.servers_client.delete_server(server1['id'])
@@ -1249,7 +1254,7 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
             network_obj.id, port_id=port_obj2.id,
             availability_zone='nova:' + compute1)
 
-        self.assert_vm2vm(server1, server2)
+        self.assert_vm_to_vm_connectivity(server1, server2)
 
         # Delete one server and verify VLAN profile still exists
         self.servers_client.delete_server(server1['id'])
@@ -1350,6 +1355,7 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
         """
         self._verify_vnic_templates_configured(need_amount=2)
         self._verify_connectivity_tests_enabled()
+        self._verify_more_than_one_compute_host_exist()
 
         random_physnet = random.choice(CONF.ucsm.physnets)
         ucsm_conf1, ucsm_conf2 = random.sample(self.ucsm_confs_with_vnic_templates, 2)
@@ -1376,7 +1382,7 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
             network_obj.id, port_id=port_obj2.id,
             availability_zone='nova:' + compute2)
 
-        self.assert_vm2vm(server1, server2)
+        self.assert_vm_to_vm_connectivity(server1, server2)
 
         # Delete one server and verify VLAN profile still exists
         self.servers_client.delete_server(server1['id'])
@@ -1430,7 +1436,7 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
             network_obj.id, port_id=port_obj2.id,
             availability_zone='nova:' + compute1)
 
-        self.assert_vm2vm(server1, server2)
+        self.assert_vm_to_vm_connectivity(server1, server2)
 
         # Delete one server and verify VLAN profile still exists
         self.servers_client.delete_server(server1['id'])

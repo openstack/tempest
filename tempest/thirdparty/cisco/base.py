@@ -113,6 +113,10 @@ class UCSMTestMixin(object):
         if need_amount and len(self.ucsm_confs_with_vnic_templates) < need_amount:
             raise self.skipException('Not anough amount of UCSMs are using vNIC templates')
 
+    def _verify_more_than_one_compute_host_exist(self):
+        if not len(CONF.ucsm.compute_host_dict)>1:
+            raise self.skipException('Only one compute host available. At least two required.')
+
 
 def parse_tempest_multi_ucsm_config(ucsm_list):
     conf = cfg.ConfigOpts()
