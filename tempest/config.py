@@ -647,7 +647,7 @@ ValidationGroup = [
                                                   group='compute')]),
     cfg.StrOpt('auth_method',
                default='keypair',
-               choices=['keypair'],
+               choices=['keypair', 'password'],
                help='Default authentication method to the instance. '
                     'Only ssh via keypair is supported for now. '
                     'Additional methods will be handled in a separate spec.',
