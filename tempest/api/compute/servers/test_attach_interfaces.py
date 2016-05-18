@@ -13,10 +13,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import netaddr
 import time
 
 from tempest.api.compute import base
+from tempest.common.utils import net_utils
 from tempest import config
 from tempest import exceptions
 from tempest.lib import exceptions as lib_exc
@@ -125,18 +125,21 @@ class AttachInterfacesTestJSON(base.BaseV2ComputeTest):
 
     def _test_create_interface_by_fixed_ips(self, server, ifs):
         network_id = ifs[0]['net_id']
-        ip_list = [
-            ifs[n]['fixed_ips'][0]['ip_address'] for n in range(0, len(ifs))]
-        ip = str(netaddr.IPAddress(sorted(ip_list)[-1]) + 1)
+        subnet_id = ifs[0]['fixed_ips'][0]['subnet_id']
+        ip_list = net_utils.get_unused_ip_addresses(self.ports_client,
+                                                    self.subnets_client,
+                                                    network_id,
+                                                    subnet_id,
+                                                    1)
 
-        fixed_ips = [{'ip_address': ip}]
+        fixed_ips = [{'ip_address': ip_list[0]}]
         iface = self.client.create_interface(
             server['id'], net_id=network_id,
             fixed_ips=fixed_ips)['interfaceAttachment']
         self.addCleanup(self.ports_client.delete_port, iface['port_id'])
         iface = self.wait_for_interface_status(
             server['id'], iface['port_id'], 'ACTIVE')
-        self._check_interface(iface, fixed_ip=ip)
+        self._check_interface(iface, fixed_ip=ip_list[0])
         return iface
 
     def _test_show_interface(self, server, ifs):
