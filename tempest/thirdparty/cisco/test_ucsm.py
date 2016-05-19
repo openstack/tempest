@@ -479,6 +479,15 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
         # Get a vlan id and verify a vlan profile has been created
         network = self.admin_networks_client.show_network(network['id'])['network']
         vlan_id = network['provider:segmentation_id']
+
+        # Verify VLAN Profiles have not been created yet because there are no
+        # active ports
+        self.timed_assert(self.assertEmpty,
+                          lambda: self.ucsm.get_vlan_profile(vlan_id))
+
+        server = self._create_server(data_utils.rand_name('server-smoke'),
+                                     port_id=port['id'])
+
         self.timed_assert(self.assertNotEmpty,
                           lambda: self.ucsm.get_vlan_profile(vlan_id))
 
@@ -491,6 +500,8 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
                                                      eth_name, vlan_id))
 
         # Delete network and verify that the vlan profile has been removed
+        self.servers_client.delete_server(server['id'])
+        waiters.wait_for_server_termination(self.servers_client, ['id'])
         port.delete()
         self._delete_network(network)
         self.timed_assert(self.assertEmpty,
@@ -517,6 +528,8 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
         names = [data_utils.rand_name('network-') for i in range(5)]
         data = {'networks': [{'name': name} for name in names]}
         networks = self.networks_client.create_bulk_networks(**data)['networks']
+        vlan_ids = [self.admin_networks_client.show_network(n['id'])
+                    ['network']['provider:segmentation_id'] for n in networks]
 
         # Create subnets (DHCP enabled)
         cidr = netaddr.IPNetwork(CONF.network.project_network_cidr)
@@ -535,14 +548,23 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
             subnets_list.append(p1)
         self.subnets_client.create_bulk_subnets(**{'subnets': subnets_list})
 
+        # Verify VLAN Profiles have not been created yet because there are no
+        # active ports
+        for vlan_id in vlan_ids:
+            self.timed_assert(self.assertEmpty,
+                              lambda: self.ucsm.get_vlan_profile(vlan_id))
+
         ports_list = []
+        servers_list = []
         for network in networks:
-            ports_list.append(self._create_port(
-                network['id'], security_groups=[self.security_group['id']]))
+            port = self._create_port(
+                network['id'], security_groups=[self.security_group['id']])
+            server = self._create_server(data_utils.rand_name('server-smoke'),
+                                         port_id=port['id'])
+            ports_list.append(port)
+            servers_list.append(server)
 
         # Get vlan ids and verify vlan profiles have been created
-        vlan_ids = [self.admin_networks_client.show_network(n['id'])
-                    ['network']['provider:segmentation_id'] for n in networks]
         for vlan_id in vlan_ids:
             self.timed_assert(self.assertNotEmpty,
                               lambda: self.ucsm.get_vlan_profile(vlan_id))
@@ -555,6 +577,9 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
                             service_profile, eth_name, vlan_id))
 
         # Delete networks and verify all vlan profiles have been removed
+        for server in servers_list:
+            self.servers_client.delete_server(server['id'])
+            waiters.wait_for_server_termination(self.servers_client, ['id'])
         for port in ports_list:
             port.delete()
         self._delete_networks(networks)
