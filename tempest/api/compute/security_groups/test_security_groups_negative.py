@@ -44,9 +44,11 @@ class SecurityGroupsNegativeTestJSON(base.BaseSecurityGroupsTest):
             security_group_id.append(body[i]['id'])
         # Generate a non-existent security group id
         while True:
-            non_exist_id = data_utils.rand_int_id(start=999)
-            if self.neutron_available:
+            if (self.neutron_available and
+                test.is_extension_enabled('security-group', 'network')):
                 non_exist_id = data_utils.rand_uuid()
+            else:
+                non_exist_id = data_utils.rand_int_id(start=999)
             if non_exist_id not in security_group_id:
                 break
         return non_exist_id
