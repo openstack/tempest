@@ -15,6 +15,7 @@
 #    under the License.
 
 import collections
+import email.utils
 import logging as real_logging
 import re
 import time
@@ -637,13 +638,61 @@ class RestClient(object):
                     resp, self._parse_resp(resp_body)) and
                 retry < MAX_RECURSION_DEPTH):
             retry += 1
-            delay = int(resp['retry-after'])
+            delay = self._get_retry_after_delay(resp)
+            self.LOG.debug(
+                "Sleeping %s seconds based on retry-after header", delay
+            )
             time.sleep(delay)
             resp, resp_body = self._request(method, url,
                                             headers=headers, body=body)
         self._error_checker(method, url, headers, body,
                             resp, resp_body)
         return resp, resp_body
+
+    def _get_retry_after_delay(self, resp):
+        """Extract the delay from the retry-after header.
+
+        This supports both integer and HTTP date formatted retry-after headers
+        per RFC 2616.
+
+        :param resp: The response containing the retry-after headers
+        :rtype: int
+        :return: The delay in seconds, clamped to be at least 1 second
+        :raises ValueError: On failing to parse the delay
+        """
+        delay = None
+        try:
+            delay = int(resp['retry-after'])
+        except (ValueError, KeyError):
+            pass
+
+        try:
+            retry_timestamp = self._parse_http_date(resp['retry-after'])
+            date_timestamp = self._parse_http_date(resp['date'])
+            delay = int(retry_timestamp - date_timestamp)
+        except (ValueError, OverflowError, KeyError):
+            pass
+
+        if delay is None:
+            raise ValueError(
+                "Failed to parse retry-after header %r as either int or "
+                "HTTP-date." % resp.get('retry-after')
+            )
+
+        # Retry-after headers do not have sub-second precision. Clients may
+        # receive a delay of 0. After sleeping 0 seconds, we would (likely) hit
+        # another 413. To avoid this, always sleep at least 1 second.
+        return max(1, delay)
+
+    def _parse_http_date(self, val):
+        """Parse an HTTP date, like 'Fri, 31 Dec 1999 23:59:59 GMT'.
+
+        Return an epoch timestamp (float), as returned by time.mktime().
+        """
+        parts = email.utils.parsedate(val)
+        if not parts:
+            raise ValueError("Failed to parse date %s" % val)
+        return time.mktime(parts)
 
     def _error_checker(self, method, url,
                        headers, body, resp, resp_body):
@@ -771,10 +820,7 @@ class RestClient(object):
         if (not isinstance(resp_body, collections.Mapping) or
                 'retry-after' not in resp):
             return True
-        over_limit = resp_body.get('overLimit', None)
-        if not over_limit:
-            return True
-        return 'exceed' in over_limit.get('message', 'blabla')
+        return 'exceed' in resp_body.get('message', 'blabla')
 
     def wait_for_resource_deletion(self, id):
         """Waits for a resource to be deleted
