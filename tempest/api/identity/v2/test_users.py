@@ -13,13 +13,11 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import copy
 import time
 
 from tempest.api.identity import base
 from tempest.lib.common.utils import data_utils
 from tempest.lib import exceptions
-from tempest import manager
 from tempest import test
 
 
@@ -35,23 +33,26 @@ class IdentityUsersTest(base.BaseIdentityV2Test):
 
     @test.idempotent_id('165859c9-277f-4124-9479-a7d1627b0ca7')
     def test_user_update_own_password(self):
-        self.new_creds = copy.copy(self.creds.credentials)
-        self.new_creds.password = data_utils.rand_password()
-        # we need new non-admin Identity Client with new credentials, since
-        # current non_admin_client token will be revoked after updating
-        # password
-        self.non_admin_users_client_for_cleanup = copy.copy(
-            self.non_admin_users_client)
-        self.non_admin_users_client_for_cleanup.auth_provider = (
-            manager.get_auth_provider(self.new_creds))
-        user_id = self.creds.credentials.user_id
-        old_pass = self.creds.credentials.password
-        new_pass = self.new_creds.password
 
+        def _restore_password(client, user_id, old_pass, new_pass):
+            # Reset auth to get a new token with the new password
+            client.auth_provider.clear_auth()
+            client.auth_provider.credentials.password = new_pass
+            client.update_user_own_password(user_id, password=old_pass,
+                                            original_password=new_pass)
+            # Reset auth again to verify the password restore does work.
+            # Clear auth restores the original credentials and deletes
+            # cached auth data
+            client.auth_provider.clear_auth()
+            client.auth_provider.set_auth()
+
+        old_pass = self.creds.credentials.password
+        new_pass = data_utils.rand_password()
+        user_id = self.creds.credentials.user_id
         # to change password back. important for allow_tenant_isolation = false
-        self.addCleanup(
-            self.non_admin_users_client_for_cleanup.update_user_own_password,
-            user_id, original_password=new_pass, password=old_pass)
+        self.addCleanup(_restore_password, self.non_admin_users_client,
+                        user_id, old_pass=old_pass, new_pass=new_pass)
+
         # user updates own password
         self.non_admin_users_client.update_user_own_password(
             user_id, password=new_pass, original_password=old_pass)
