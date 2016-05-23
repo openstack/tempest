@@ -204,10 +204,6 @@ class ServersTestJSON(base.BaseV2ComputeTest):
     @test.idempotent_id('1678d144-ed74-43f8-8e57-ab10dbf9b3c2')
     @testtools.skipUnless(CONF.service_available.neutron,
                           'Neutron service must be available.')
-    # The below skipUnless should be removed once Kilo-eol happens.
-    @testtools.skipUnless(CONF.compute_feature_enabled.
-                          allow_duplicate_networks,
-                          'Duplicate networks must be allowed')
     def test_verify_duplicate_network_nics(self):
         # Verify that server creation does not fail when more than one nic
         # is created on the same network.

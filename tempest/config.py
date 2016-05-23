@@ -402,14 +402,6 @@ ComputeFeaturesGroup = [
                      'encrypted volume to a running server instance? This may '
                      'depend on the combination of compute_driver in nova and '
                      'the volume_driver(s) in cinder.'),
-    # TODO(mriedem): Remove allow_duplicate_networks once kilo-eol happens
-    # since the option was removed from nova in Liberty and is the default
-    # behavior starting in Liberty.
-    cfg.BoolOpt('allow_duplicate_networks',
-                default=False,
-                help='Does the test environment support creating instances '
-                     'with multiple ports on the same network? This is only '
-                     'valid when using Neutron.'),
     cfg.BoolOpt('config_drive',
                 default=True,
                 help='Enable special configuration drive with metadata.'),
