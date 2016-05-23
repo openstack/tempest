@@ -214,11 +214,13 @@ class BaseVolumeAdminTest(BaseVolumeTest):
         super(BaseVolumeAdminTest, cls).resource_setup()
 
         cls.qos_specs = []
+        cls.volume_types = []
 
     @classmethod
     def resource_cleanup(cls):
         cls.clear_qos_specs()
         super(BaseVolumeAdminTest, cls).resource_cleanup()
+        cls.clear_volume_types()
 
     @classmethod
     def create_test_qos_specs(cls, name=None, consumer=None, **kwargs):
@@ -231,6 +233,15 @@ class BaseVolumeAdminTest(BaseVolumeTest):
         return qos_specs
 
     @classmethod
+    def create_volume_type(cls, name=None, **kwargs):
+        """Create a test volume-type"""
+        name = name or data_utils.rand_name('volume-type')
+        volume_type = cls.admin_volume_types_client.create_volume_type(
+            name=name, **kwargs)['volume_type']
+        cls.volume_types.append(volume_type['id'])
+        return volume_type
+
+    @classmethod
     def clear_qos_specs(cls):
         for qos_id in cls.qos_specs:
             test_utils.call_and_ignore_notfound_exc(
@@ -239,3 +250,17 @@ class BaseVolumeAdminTest(BaseVolumeTest):
         for qos_id in cls.qos_specs:
             test_utils.call_and_ignore_notfound_exc(
                 cls.admin_volume_qos_client.wait_for_resource_deletion, qos_id)
+
+    @classmethod
+    def clear_volume_types(cls):
+        for vol_type in cls.volume_types:
+            test_utils.call_and_ignore_notfound_exc(
+                cls.admin_volume_types_client.delete_volume_type, vol_type)
+
+        for vol_type in cls.volume_types:
+            # Resource dictionary uses for is_resource_deleted method,
+            # to distinguish between volume-type to encryption-type.
+            resource = {'id': vol_type, 'type': 'volume-type'}
+            test_utils.call_and_ignore_notfound_exc(
+                cls.admin_volume_types_client.wait_for_resource_deletion,
+                resource)

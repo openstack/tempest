@@ -44,12 +44,10 @@ class VolumeTypesV2Test(base.BaseVolumeAdminTest):
         # Create two volume_types
         for i in range(2):
             vol_type_name = data_utils.rand_name("volume-type")
-            vol_type = self.admin_volume_types_client.create_volume_type(
+            vol_type = self.create_volume_type(
                 name=vol_type_name,
-                extra_specs=extra_specs)['volume_type']
+                extra_specs=extra_specs)
             volume_types.append(vol_type)
-            self.addCleanup(self.admin_volume_types_client.delete_volume_type,
-                            vol_type['id'])
         params = {self.name_field: vol_name,
                   'volume_type': volume_types[0]['id']}
 
@@ -94,12 +92,10 @@ class VolumeTypesV2Test(base.BaseVolumeAdminTest):
         vendor = CONF.volume.vendor_name
         extra_specs = {"storage_protocol": proto,
                        "vendor_name": vendor}
-        body = self.admin_volume_types_client.create_volume_type(
+        body = self.create_volume_type(
             name=name,
-            extra_specs=extra_specs)['volume_type']
+            extra_specs=extra_specs)
         self.assertIn('id', body)
-        self.addCleanup(self.admin_volume_types_client.delete_volume_type,
-                        body['id'])
         self.assertIn('name', body)
         self.assertEqual(body['name'], name,
                          "The created volume_type name is not equal "
@@ -124,11 +120,7 @@ class VolumeTypesV2Test(base.BaseVolumeAdminTest):
         provider = "LuksEncryptor"
         control_location = "front-end"
         name = data_utils.rand_name("volume-type")
-        body = self.admin_volume_types_client.create_volume_type(
-            name=name)['volume_type']
-        self.addCleanup(self.admin_volume_types_client.delete_volume_type,
-                        body['id'])
-
+        body = self.create_volume_type(name=name)
         # Create encryption type
         encryption_type = \
             self.admin_volume_types_client.create_encryption_type(

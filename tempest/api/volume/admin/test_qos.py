@@ -50,14 +50,6 @@ class QosSpecsV2TestJSON(base.BaseVolumeAdminTest):
         list_qos = self.admin_volume_qos_client.list_qos()['qos_specs']
         self.assertNotIn(body, list_qos)
 
-    def _create_test_volume_type(self):
-        vol_type_name = utils.rand_name("volume-type")
-        vol_type = self.admin_volume_types_client.create_volume_type(
-            name=vol_type_name)['volume_type']
-        self.addCleanup(self.admin_volume_types_client.delete_volume_type,
-                        vol_type['id'])
-        return vol_type
-
     def _test_associate_qos(self, vol_type_id):
         self.admin_volume_qos_client.associate_qos(
             self.created_qos['id'], vol_type_id)
@@ -146,7 +138,7 @@ class QosSpecsV2TestJSON(base.BaseVolumeAdminTest):
         # create a test volume-type
         vol_type = []
         for _ in range(0, 3):
-            vol_type.append(self._create_test_volume_type())
+            vol_type.append(self.create_volume_type())
 
         # associate the qos-specs with volume-types
         for i in range(0, 3):

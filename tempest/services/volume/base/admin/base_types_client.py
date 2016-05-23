@@ -179,3 +179,37 @@ class BaseTypesClient(rest_client.RestClient):
             "/types/%s/encryption/provider" % str(vol_type_id))
         self.expected_success(202, resp.status)
         return rest_client.ResponseBody(resp, body)
+
+    def add_type_access(self, volume_type_id, **kwargs):
+        """Adds volume type access for the given project.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-blockstorage-v2.html
+                              #createVolumeTypeAccessExt
+        """
+        post_body = json.dumps({'addProjectAccess': kwargs})
+        url = 'types/%s/action' % (volume_type_id)
+        resp, body = self.post(url, post_body)
+        self.expected_success(202, resp.status)
+        return rest_client.ResponseBody(resp, body)
+
+    def remove_type_access(self, volume_type_id, **kwargs):
+        """Removes volume type access for the given project.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-blockstorage-v2.html
+                              #removeVolumeTypeAccessExt
+        """
+        post_body = json.dumps({'removeProjectAccess': kwargs})
+        url = 'types/%s/action' % (volume_type_id)
+        resp, body = self.post(url, post_body)
+        self.expected_success(202, resp.status)
+        return rest_client.ResponseBody(resp, body)
+
+    def list_type_access(self, volume_type_id):
+        """Print access information about the given volume type."""
+        url = 'types/%s/os-volume-type-access' % (volume_type_id)
+        resp, body = self.get(url)
+        body = json.loads(body)
+        self.expected_success(200, resp.status)
+        return rest_client.ResponseBody(resp, body)

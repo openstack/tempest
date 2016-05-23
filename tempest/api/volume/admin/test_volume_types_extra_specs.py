@@ -24,14 +24,7 @@ class VolumeTypesExtraSpecsV2Test(base.BaseVolumeAdminTest):
     def resource_setup(cls):
         super(VolumeTypesExtraSpecsV2Test, cls).resource_setup()
         vol_type_name = data_utils.rand_name('Volume-type')
-        cls.volume_type = \
-            cls.admin_volume_types_client.create_volume_type(
-                name=vol_type_name)['volume_type']
-
-    @classmethod
-    def resource_cleanup(cls):
-        cls.admin_volume_types_client.delete_volume_type(cls.volume_type['id'])
-        super(VolumeTypesExtraSpecsV2Test, cls).resource_cleanup()
+        cls.volume_type = cls.create_volume_type(name=vol_type_name)
 
     @test.idempotent_id('b42923e9-0452-4945-be5b-d362ae533e60')
     def test_volume_type_extra_specs_list(self):
