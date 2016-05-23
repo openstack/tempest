@@ -15,10 +15,22 @@ effort on top of creating a test suite using tempest.lib. One thing to note with
 doing this is that the interfaces exposed by tempest are not considered stable
 (with the exception of configuration variables which ever effort goes into
 ensuring backwards compatibility). You should not need to import anything from
-tempest itself except where explicitly noted. If there is an interface from
-tempest that you need to rely on in your plugin it likely needs to be migrated
-to tempest.lib. In that situation, file a bug, push a migration patch, etc. to
-expedite providing the interface in a reliable manner.
+tempest itself except where explicitly noted.
+
+Stable Tempest APIs plugins may use
+-----------------------------------
+
+As noted above, several tempest APIs are acceptable to use from plugins, while
+others are not. A list of stable APIs available to plugins is provided below:
+
+* tempest.lib.*
+* tempest.config
+* tempest.test_discover.plugins
+
+If there is an interface from tempest that you need to rely on in your plugin
+which is not listed above, it likely needs to be migrated to tempest.lib. In
+that situation, file a bug, push a migration patch, etc. to expedite providing
+the interface in a reliable manner.
 
 Plugin Cookiecutter
 -------------------
