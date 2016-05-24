@@ -754,10 +754,10 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         The test steps are :
         1. Create a new network.
         2. Connect (hotplug) the VM to a new network.
-        3. Check the VM can ping the DHCP interface of this network.
+        3. Check the VM can ping a server on the new network ("peer")
         4. Spoof the mac address of the new VM interface.
         5. Check the Security Group enforces mac spoofing and blocks pings via
-           spoofed interface (VM cannot ping the DHCP interface).
+           spoofed interface (VM cannot ping the peer).
         6. Disable port-security of the spoofed port- set the flag to false.
         7. Retest 3rd step and check that the Security Group allows pings via
         the spoofed interface.
@@ -778,18 +778,18 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         ssh_client = self.get_remote_client(fip.floating_ip_address,
                                             private_key=private_key)
         spoof_nic = ssh_client.get_nic_name_by_mac(spoof_port["mac_address"])
-        dhcp_ports = self._list_ports(device_owner="network:dhcp",
-                                      network_id=self.new_net["id"])
-        new_net_dhcp = dhcp_ports[0]["fixed_ips"][0]["ip_address"]
-        self._check_remote_connectivity(ssh_client, dest=new_net_dhcp,
+        name = data_utils.rand_name('peer')
+        peer = self._create_server(name, self.new_net)
+        peer_address = peer['addresses'][self.new_net.name][0]['addr']
+        self._check_remote_connectivity(ssh_client, dest=peer_address,
                                         nic=spoof_nic, should_succeed=True)
         ssh_client.set_mac_address(spoof_nic, spoof_mac)
         new_mac = ssh_client.get_mac_address(nic=spoof_nic)
         self.assertEqual(spoof_mac, new_mac)
-        self._check_remote_connectivity(ssh_client, dest=new_net_dhcp,
+        self._check_remote_connectivity(ssh_client, dest=peer_address,
                                         nic=spoof_nic, should_succeed=False)
         self.ports_client.update_port(spoof_port["id"],
                                       port_security_enabled=False,
                                       security_groups=[])
-        self._check_remote_connectivity(ssh_client, dest=new_net_dhcp,
+        self._check_remote_connectivity(ssh_client, dest=peer_address,
                                         nic=spoof_nic, should_succeed=True)
