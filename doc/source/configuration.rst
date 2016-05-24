@@ -27,20 +27,12 @@ can be used to:
 - Generate test credentials on the fly (see `Dynamic Credentials`_)
 
 Tempest allows for configuring pre-provisioned test credentials as well.
-This can be done in two different ways.
-
-One is to provide credentials is using the accounts.yaml file (see
+This can be done using the accounts.yaml file (see
 `Pre-Provisioned Credentials`_). This file is used to specify an arbitrary
 number of users available to run tests with.
 You can specify the location of the file in the ``auth`` section in the
 tempest.conf file. To see the specific format used in the file please refer to
 the accounts.yaml.sample file included in Tempest.
-
-A second way - now deprecated - is a set of configuration options in the
-tempest.conf file (see `Legacy Credentials`_). These options are clearly
-labelled in the ``identity`` section and let you specify a set of credentials
-for a regular user and an alternate user, consisting of a username, password,
-project and domain name.
 
 Keystone Connection Info
 ^^^^^^^^^^^^^^^^^^^^^^^^
@@ -133,44 +125,6 @@ to the tests using the credentials, and failure to do this will likely cause
 unexpected failures in some tests.
 
 Pre-Provisioned Credentials are also know as accounts.yaml or accounts file.
-
-Legacy Credentials
-""""""""""""""""""
-**Starting in the Liberty release this mechanism was deprecated; it will be
-removed in a future release.**
-
-When Tempest was refactored to allow for locking test accounts, the original
-non-project isolated case was converted to internally work similarly to the
-accounts.yaml file. This mechanism was then called the legacy test accounts
-provider. To use the legacy test accounts provider you can specify the sets of
-credentials in the configuration file as detailed above with following nine
-options in the ``identity`` section:
-
- #. ``username``
- #. ``password``
- #. ``project_name``
- #. ``alt_username``
- #. ``alt_password``
- #. ``alt_project_name``
-
-If using Identity API v3, use the ``domain_name`` option to specify a
-domain other than the default domain.  The ``auth_version`` setting is
-used to switch between v2 (``v2``) or v3 (``v3``) versions of the Identity
-API.
-
-And in the ``auth`` section:
-
- #. ``use_dynamic_credentials = False``
- #. Comment out ``test_accounts_file`` or keep it empty.
-
-It only makes sense to use this if parallel execution isn't needed, since
-Tempest won't be able to properly isolate tests using this. Additionally, using
-the traditional config options for credentials is not able to provide
-credentials to tests requiring specific roles on accounts. This is because the
-config options do not give sufficient flexibility to describe the roles assigned
-to a user for running the tests. There are additional limitations with regard to
-network configuration when using this credential provider mechanism - see the
-`Networking`_ section below.
 
 Compute
 -------
