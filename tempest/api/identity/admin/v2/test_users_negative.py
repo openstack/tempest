@@ -83,12 +83,13 @@ class UsersNegativeTestJSON(base.BaseIdentityV2AdminTest):
         token = self.client.auth_provider.get_token()
         # Delete the token from database
         self.client.delete_token(token)
+
+        # Unset the token to allow further tests to generate a new token
+        self.addCleanup(self.client.auth_provider.clear_auth)
+
         self.assertRaises(lib_exc.Unauthorized, self.users_client.create_user,
                           self.alt_user, self.alt_password,
                           self.data.tenant['id'], self.alt_email)
-
-        # Unset the token to allow further tests to generate a new token
-        self.client.auth_provider.clear_auth()
 
     @test.attr(type=['negative'])
     @test.idempotent_id('23a2f3da-4a1a-41da-abdd-632328a861ad')
@@ -119,11 +120,12 @@ class UsersNegativeTestJSON(base.BaseIdentityV2AdminTest):
         token = self.client.auth_provider.get_token()
         # Delete the token from database
         self.client.delete_token(token)
-        self.assertRaises(lib_exc.Unauthorized, self.users_client.update_user,
-                          self.alt_user)
 
         # Unset the token to allow further tests to generate a new token
-        self.client.auth_provider.clear_auth()
+        self.addCleanup(self.client.auth_provider.clear_auth)
+
+        self.assertRaises(lib_exc.Unauthorized, self.users_client.update_user,
+                          self.alt_user)
 
     @test.attr(type=['negative'])
     @test.idempotent_id('424868d5-18a7-43e1-8903-a64f95ee3aac')
@@ -159,11 +161,12 @@ class UsersNegativeTestJSON(base.BaseIdentityV2AdminTest):
         token = self.client.auth_provider.get_token()
         # Delete the token from database
         self.client.delete_token(token)
-        self.assertRaises(lib_exc.Unauthorized, self.users_client.delete_user,
-                          self.alt_user)
 
         # Unset the token to allow further tests to generate a new token
-        self.client.auth_provider.clear_auth()
+        self.addCleanup(self.client.auth_provider.clear_auth)
+
+        self.assertRaises(lib_exc.Unauthorized, self.users_client.delete_user,
+                          self.alt_user)
 
     @test.attr(type=['negative'])
     @test.idempotent_id('593a4981-f6d4-460a-99a1-57a78bf20829')
@@ -229,8 +232,11 @@ class UsersNegativeTestJSON(base.BaseIdentityV2AdminTest):
         # Request to get list of users without a valid token should fail
         token = self.client.auth_provider.get_token()
         self.client.delete_token(token)
+
+        # Unset the token to allow further tests to generate a new token
+        self.addCleanup(self.client.auth_provider.clear_auth)
+
         self.assertRaises(lib_exc.Unauthorized, self.users_client.list_users)
-        self.client.auth_provider.clear_auth()
 
     @test.attr(type=['negative'])
     @test.idempotent_id('f5d39046-fc5f-425c-b29e-bac2632da28e')
