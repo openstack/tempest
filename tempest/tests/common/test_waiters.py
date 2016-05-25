@@ -38,8 +38,7 @@ class TestImageWaiters(base.TestCase):
         # Ensure waiter returns before build_timeout
         self.assertTrue((end_time - start_time) < 10)
 
-    @mock.patch('time.sleep')
-    def test_wait_for_image_status_timeout(self, mock_sleep):
+    def test_wait_for_image_status_timeout(self):
         time_mock = self.patch('time.time')
         time_mock.side_effect = utils.generate_timeout_series(1)
 
@@ -47,15 +46,12 @@ class TestImageWaiters(base.TestCase):
         self.assertRaises(exceptions.TimeoutException,
                           waiters.wait_for_image_status,
                           self.client, 'fake_image_id', 'active')
-        mock_sleep.assert_called_once_with(1)
 
-    @mock.patch('time.sleep')
-    def test_wait_for_image_status_error_on_image_create(self, mock_sleep):
+    def test_wait_for_image_status_error_on_image_create(self):
         self.client.show_image.return_value = ({'status': 'ERROR'})
         self.assertRaises(exceptions.AddImageException,
                           waiters.wait_for_image_status,
                           self.client, 'fake_image_id', 'active')
-        mock_sleep.assert_called_once_with(1)
 
     @mock.patch.object(time, 'sleep')
     def test_wait_for_volume_status_error_restoring(self, mock_sleep):

@@ -459,7 +459,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
         LOG.debug("Creating a snapshot image for server: %s", server['name'])
         image = _images_client.create_image(server['id'], name=name)
         image_id = image.response['location'].split('images/')[1]
-        _image_client.wait_for_image_status(image_id, 'active')
+        waiters.wait_for_image_status(_image_client, image_id, 'active')
         self.addCleanup_with_wait(
             waiter_callable=_image_client.wait_for_resource_deletion,
             thing_id=image_id, thing_id_param='id',
