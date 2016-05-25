@@ -57,3 +57,18 @@ class FakeKeystoneV3DomainCredentials(auth.KeystoneV3Credentials):
             user_domain_name='fake_domain_name'
         )
         super(FakeKeystoneV3DomainCredentials, self).__init__(**creds)
+
+
+class FakeKeystoneV3AllCredentials(auth.KeystoneV3Credentials):
+    """Fake credentials for the Keystone Identity V3 API, with no scope"""
+
+    def __init__(self):
+        creds = dict(
+            username='fake_username',
+            password='fake_password',
+            user_domain_name='fake_domain_name',
+            project_name='fake_tenant_name',
+            project_domain_name='fake_domain_name',
+            domain_name='fake_domain_name'
+        )
+        super(FakeKeystoneV3AllCredentials, self).__init__(**creds)
