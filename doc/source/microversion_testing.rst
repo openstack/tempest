@@ -24,6 +24,7 @@ Configuration options for Microversion
 
   Those should be defined under respective section of each service.
   For example::
+
       [compute]
       min_microversion = None
       max_microversion = latest
@@ -159,7 +160,8 @@ Below test is applicable for Microversion from 2.10 till latest::
 
 
 Notes about Compute Microversion Tests
-"""""""""""""""""""""""""""""""""""
+""""""""""""""""""""""""""""""""""""""
+
 Some of the compute Microversion tests have been already implemented
 with the Microversion testing framework. So for further tests only
 step 4 is needed.
