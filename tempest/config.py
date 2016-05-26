@@ -54,6 +54,17 @@ AuthGroup = [
                     "at least `2 * CONC` distinct accounts configured in "
                     " the `test_accounts_file`, with CONC == the "
                     "number of concurrent test processes."),
+    cfg.BoolOpt('allow_tenant_isolation',
+                default=True,
+                help="Allows test cases to create/destroy tenants and "
+                     "users. This option requires that OpenStack Identity "
+                     "API admin credentials are known. If false, isolated "
+                     "test cases and parallel execution, can still be "
+                     "achieved configuring a list of test accounts",
+                deprecated_opts=[cfg.DeprecatedOpt('allow_tenant_isolation',
+                                                   group='compute'),
+                                 cfg.DeprecatedOpt('allow_tenant_isolation',
+                                                   group='orchestration')]),
     cfg.BoolOpt('use_dynamic_credentials',
                 default=True,
                 help="Allows test cases to create/destroy projects and "
@@ -196,6 +207,15 @@ IdentityGroup = [
     cfg.StrOpt('default_domain_id',
                default='default',
                help="ID of the default domain"),
+    cfg.StrOpt('admin_username',
+               help="Administrative Username to use for "
+                    "Keystone API requests."),
+    cfg.StrOpt('admin_password',
+               help="API key to use when authenticating as admin.",
+               secret=True),
+    cfg.StrOpt('admin_tenant_name',
+               help="Administrative Tenant name to use for Keystone API "
+                    "requests."),
 ]
 
 identity_feature_group = cfg.OptGroup(name='identity-feature-enabled',
@@ -245,6 +265,53 @@ ComputeGroup = [
                help="Timeout in seconds to wait for an instance to build. "
                     "Other services that do not define build_timeout will "
                     "inherit this value."),
+    cfg.StrOpt('ssh_shell_prologue',
+               default="set -eu -o pipefail; PATH=$$PATH:/sbin;",
+               help="Shell fragments to use before executing a command "
+                    "when sshing to a guest."),
+    cfg.StrOpt('ssh_auth_method',
+               default='keypair',
+               help="Auth method used for authenticate to the instance. "
+                    "Valid choices are: keypair, configured, adminpass "
+                    "and disabled. "
+                    "Keypair: start the servers with a ssh keypair. "
+                    "Configured: use the configured user and password. "
+                    "Adminpass: use the injected adminPass. "
+                    "Disabled: avoid using ssh when it is an option."),
+    cfg.StrOpt('ssh_connect_method',
+               default='floating',
+               help="How to connect to the instance? "
+                    "fixed: using the first ip belongs the fixed network "
+                    "floating: creating and using a floating ip."),
+    cfg.StrOpt('ssh_user',
+               default='root',
+               help="User name used to authenticate to an instance."),
+    cfg.StrOpt('image_ssh_user',
+               default="root",
+               help="User name used to authenticate to an instance."),
+    cfg.StrOpt('image_ssh_password',
+               default="password",
+               help="Password used to authenticate to an instance."),
+    cfg.StrOpt('image_alt_ssh_user',
+               default="root",
+               help="User name used to authenticate to an instance using "
+                    "the alternate image."),
+    cfg.IntOpt('ping_timeout',
+               default=120,
+               help="Timeout in seconds to wait for ping to "
+                    "succeed."),
+    cfg.IntOpt('ping_size',
+               default=56,
+               help="The packet size for ping packets originating "
+                    "from remote linux hosts"),
+    cfg.IntOpt('ping_count',
+               default=1,
+               help="The number of ping packets originating from remote "
+                    "linux hosts"),
+    cfg.StrOpt('network_for_ssh',
+               default='public',
+               help="Network used for SSH connections. Ignored if "
+                    "use_floatingip_for_ssh=true or run_validation=false."),
     cfg.IntOpt('ready_wait',
                default=0,
                help="Additional wait time for clean state, when there is "
@@ -307,6 +374,16 @@ ComputeGroup = [
                     "which require a microversion. Valid values are string "
                     "with format 'X.Y' or string 'latest'",
                     deprecated_group='compute-feature-enabled'),
+    cfg.StrOpt('region2_image_ref',
+               help="Valid primary image reference to be used in tests "
+                    "in Region 2 for multi regions."
+                    "This is a required option for multi regions."),
+    cfg.StrOpt('region2_image_ref_alt',
+               help="Valid secondary image reference to be used in tests "
+                    "in Region 2 for multi regions."
+                    "This is a required option for mutli regions.  But if "
+                    "only one image is available duplicate the value of "
+                    "region2_image_ref above")
 ]
 
 compute_features_group = cfg.OptGroup(name='compute-feature-enabled',
@@ -359,6 +436,12 @@ ComputeFeaturesGroup = [
                 help="Does the test environment block migration support "
                 "cinder iSCSI volumes. Note, libvirt doesn't support this, "
                 "see https://bugs.launchpad.net/nova/+bug/1398999"),
+    cfg.BoolOpt('live_migrate_paused_instances',
+                default=False,
+                help="Does the test system allow live-migration of paused "
+                "instances? Note, this is more than just the ANDing of "
+                "paused and live_migrate, but all 3 should be set to True "
+                "to run those tests"),
     cfg.BoolOpt('vnc_console',
                 default=False,
                 help='Enable VNC console. This configuration value should '
@@ -419,6 +502,11 @@ ComputeFeaturesGroup = [
                      "list indicates all filters are disabled. The full "
                      "available list of filters is in nova.conf: "
                      "DEFAULT.scheduler_available_filters"),
+    cfg.BoolOpt('preserve_ports',
+                default=False,
+                help='Does Nova preserve preexisting ports from Neutron '
+                     'when deleting an instance? This should be set to True '
+                     'if testing Kilo+ Nova.'),
 
 ]
 
@@ -498,6 +586,23 @@ NetworkGroup = [
                choices=['public', 'admin', 'internal',
                         'publicURL', 'adminURL', 'internalURL'],
                help="The endpoint type to use for the network service."),
+    cfg.StrOpt('tenant_network_cidr',
+               default="10.100.0.0/16",
+               help="The cidr block to allocate tenant ipv4 subnets from"),
+    cfg.IntOpt('tenant_network_mask_bits',
+               default=28,
+               help="The mask bits for tenant ipv4 subnets"),
+    cfg.StrOpt('tenant_network_v6_cidr',
+               default="2003::/48",
+               help="The cidr block to allocate tenant ipv6 subnets from"),
+    cfg.IntOpt('tenant_network_v6_mask_bits',
+               default=64,
+               help="The mask bits for tenant ipv6 subnets"),
+    cfg.BoolOpt('tenant_networks_reachable',
+                default=False,
+                help="Whether tenant networks can be reached directly from "
+                     "the test client. This must be set to True when the "
+                     "'fixed' ssh_connect_method is selected."),
     cfg.StrOpt('project_network_cidr',
                deprecated_name='tenant_network_cidr',
                default="10.100.0.0/16",
@@ -587,7 +692,32 @@ NetworkGroup = [
     cfg.ListOpt('default_network',
                 default=["1.0.0.0/16", "2.0.0.0/16"],
                 help="List of ip pools"
-                     " for subnetpools creation")
+                     " for subnetpools creation"),
+    cfg.StrOpt('region2_public_network_id',
+               default="",
+               help="Id of the public network that provides external "
+                    "connectivity in Region 2 in multi regions."),
+    cfg.StrOpt('region2_controller',
+               help='Name of the controller in Region 2'),
+    cfg.StrOpt('region2_controller_ip',
+               help='IP of the controller in Region 2'),
+    cfg.StrOpt('region2_controller_user',
+               default='localadmin',
+               help='User login name for the controller in Region 2'),
+    cfg.StrOpt('region2_controller_pw',
+               default='ubuntu',
+               help='User login password for the controller in Region 2'),
+    cfg.StrOpt('region2_controller_rc_file',
+               default='~/devstack/openrc',
+               help='File to source for Openstack env variables in Region 2'),
+    cfg.StrOpt('reboot_controller_ip',
+               help='IP of the controller to be rebooted'),
+    cfg.StrOpt('reboot_controller_user',
+               default='localadmin',
+               help='User login name for the controller to be rebooted'),
+    cfg.StrOpt('reboot_controller_pw',
+               default='ubuntu',
+               help='User login password for the controller to be rebooted')
 ]
 
 network_feature_group = cfg.OptGroup(name='network-feature-enabled',
@@ -621,6 +751,41 @@ NetworkFeaturesGroup = [
                 default=False,
                 help="Allow the execution of VLAN Transparency tests that use "
                      "the extended VLAN Transparent API."),
+]
+
+messaging_group = cfg.OptGroup(name='messaging',
+                               title='Messaging Service')
+
+MessagingGroup = [
+    cfg.StrOpt('catalog_type',
+               default='messaging',
+               help='Catalog type of the Messaging service.'),
+    cfg.IntOpt('max_queues_per_page',
+               default=20,
+               help='The maximum number of queue records per page when '
+                    'listing queues'),
+    cfg.IntOpt('max_queue_metadata',
+               default=65536,
+               help='The maximum metadata size for a queue'),
+    cfg.IntOpt('max_messages_per_page',
+               default=20,
+               help='The maximum number of queue message per page when '
+                    'listing (or) posting messages'),
+    cfg.IntOpt('max_message_size',
+               default=262144,
+               help='The maximum size of a message body'),
+    cfg.IntOpt('max_messages_per_claim',
+               default=20,
+               help='The maximum number of messages per claim'),
+    cfg.IntOpt('max_message_ttl',
+               default=1209600,
+               help='The maximum ttl for a message'),
+    cfg.IntOpt('max_claim_ttl',
+               default=43200,
+               help='The maximum ttl for a claim'),
+    cfg.IntOpt('max_claim_grace',
+               default=43200,
+               help='The maximum grace period for a claim'),
 ]
 
 validation_group = cfg.OptGroup(name='validation',
@@ -1020,6 +1185,53 @@ DataProcessingFeaturesGroup = [
                 help="List of enabled data processing plugins")
 ]
 
+boto_group = cfg.OptGroup(name='boto',
+                          title='EC2/S3 options')
+BotoGroup = [
+    cfg.StrOpt('ec2_url',
+               default="http://localhost:8773/services/Cloud",
+               help="EC2 URL"),
+    cfg.StrOpt('s3_url',
+               default="http://localhost:8080",
+               help="S3 URL"),
+    cfg.StrOpt('aws_secret',
+               help="AWS Secret Key",
+               secret=True),
+    cfg.StrOpt('aws_access',
+               help="AWS Access Key"),
+    cfg.StrOpt('aws_zone',
+               default="nova",
+               help="AWS Zone for EC2 tests"),
+    cfg.StrOpt('s3_materials_path',
+               default="/opt/stack/devstack/files/images/"
+                       "s3-materials/cirros-0.3.0",
+               help="S3 Materials Path"),
+    cfg.StrOpt('ari_manifest',
+               default="cirros-0.3.0-x86_64-initrd.manifest.xml",
+               help="ARI Ramdisk Image manifest"),
+    cfg.StrOpt('ami_manifest',
+               default="cirros-0.3.0-x86_64-blank.img.manifest.xml",
+               help="AMI Machine Image manifest"),
+    cfg.StrOpt('aki_manifest',
+               default="cirros-0.3.0-x86_64-vmlinuz.manifest.xml",
+               help="AKI Kernel Image manifest"),
+    cfg.StrOpt('instance_type',
+               default="m1.tiny",
+               help="Instance type"),
+    cfg.IntOpt('http_socket_timeout',
+               default=3,
+               help="boto Http socket timeout"),
+    cfg.IntOpt('num_retries',
+               default=1,
+               help="boto num_retries on error"),
+    cfg.IntOpt('build_timeout',
+               default=60,
+               help="Status Change Timeout"),
+    cfg.IntOpt('build_interval',
+               default=1,
+               help="Status Change Test Interval"),
+]
+
 stress_group = cfg.OptGroup(name='stress', title='Stress Test Options')
 
 StressGroup = [
@@ -1089,6 +1301,9 @@ ScenarioGroup = [
                default='cirros-0.3.1-x86_64-vmlinuz',
                help='AKI image file name',
                deprecated_for_removal=True),
+    cfg.StrOpt('ssh_user',
+               default='cirros',
+               help='ssh username for the image file'),
     # TODO(yfried): add support for dhcpcd
     cfg.StrOpt('dhcp_client',
                default='udhcpc',
@@ -1365,7 +1580,9 @@ UcsmGroup = [
     cfg.ListOpt('physnets',
                 help="List of physnets. Used in testing vNIC templates"),
     cfg.BoolOpt('test_connectivity', default=True, help='Run connectivity tests'),
-    cfg.StrOpt('provider_network_id', help="Provider network")
+    cfg.StrOpt('provider_network_id', help="Provider network"),
+    cfg.ListOpt('network_node_list',
+                help="hostname of a network node"),
 ]
 
 _opts = [
@@ -1378,6 +1595,7 @@ _opts = [
     (image_feature_group, ImageFeaturesGroup),
     (network_group, NetworkGroup),
     (network_feature_group, NetworkFeaturesGroup),
+    (messaging_group, MessagingGroup),
     (validation_group, ValidationGroup),
     (volume_group, VolumeGroup),
     (volume_feature_group, VolumeFeaturesGroup),
@@ -1391,6 +1609,7 @@ _opts = [
     (dashboard_group, DashboardGroup),
     (data_processing_group, DataProcessingGroup),
     (data_processing_feature_group, DataProcessingFeaturesGroup),
+    (boto_group, BotoGroup),
     (stress_group, StressGroup),
     (scenario_group, ScenarioGroup),
     (service_available_group, ServiceAvailableGroup),

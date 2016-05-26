@@ -16,12 +16,12 @@ import collections
 import re
 
 from oslo_log import log as logging
-from tempest.lib.common.utils import data_utils
+from tempest_lib.common.utils import data_utils
 
 from tempest import config
 from tempest.scenario import manager
 from tempest import test
-from tempest.lib import exceptions
+from tempest_lib import exceptions
 
 CONF = config.CONF
 LOG = logging.getLogger(__name__)
@@ -116,12 +116,13 @@ class TestNetworkMultiNode(manager.NetworkScenarioTest):
         aggregate = aggregate_resp['aggregate']
         self.assertNotIn(host, aggregate['hosts'])
 
-    def _create_server(self, name, network, zone=None):
+    def _create_server(self, name, network, zone=None, image=None):
         create_kwargs = self.srv_kwargs
         create_kwargs['networks'] = [{'uuid': network.id}]
         if zone is not None:
             create_kwargs['availability_zone'] = zone
         server = self.create_server(name=name, wait_on_boot=True,
+                                    image=image,
                                     create_kwargs=create_kwargs)
         return dict(server=server, keypair=self.keypair)
 
@@ -255,7 +256,7 @@ class TestNetworkMultiNode(manager.NetworkScenarioTest):
             segmentation_id = self.network['provider:segmentation_id']
             self.segmentation_ids.append(segmentation_id)
 
-    def setup_vms(self):
+    def setup_vms(self, image=None):
         # Create a VM on a each hypervisor per network
         for network in self.networks:
             for aggregate in self.aggregates:
@@ -267,9 +268,10 @@ class TestNetworkMultiNode(manager.NetworkScenarioTest):
                             server_dict = \
                                 self._create_server(name,
                                                     network,
-                                                    zone=aggregate['availability_zone'])
+                                                    zone=aggregate['availability_zone'],
+                                                    image=image)
                         else:
-                            server_dict = self._create_server(name, network)
+                            server_dict = self._create_server(name, network, image=image)
 
                     except Exception as e:
                         LOG.debug("Exception {0}".format(e))
@@ -327,8 +329,8 @@ class TestNetworkMultiNode(manager.NetworkScenarioTest):
         pass
 
     def _ping_east_west(self, linux_client, target_ip,
-                        count=CONF.validation.ping_count,
-                        size=CONF.validation.ping_size):
+                        count=CONF.compute.ping_count,
+                        size=CONF.compute.ping_size):
         """
         From a remote linux host ping an IP address and return a
         data structure containing the results.
@@ -436,7 +438,7 @@ class TestNetworkMultiNode(manager.NetworkScenarioTest):
                        linux_client,
                        source_ip,
                        target_ip,
-                       pkt_size=CONF.validation.ping_size):
+                       pkt_size=CONF.compute.ping_size):
         LOG.debug("Ping from {0} to {1}".format(source_ip, target_ip))
         LOG.debug("Testing with packet size {0}".format(pkt_size))
         ping_result = self._ping_east_west(linux_client,
