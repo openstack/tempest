@@ -36,8 +36,10 @@ class CredentialsTests(base.TestCase):
         # Check the right version of credentials has been returned
         self.assertIsInstance(credentials, credentials_class)
         # Check the id attributes are filled in
+        # NOTE(andreaf) project_* attributes are accepted as input but
+        # never set on the credentials object
         attributes = [x for x in credentials.ATTRIBUTES if (
-            '_id' in x and x != 'domain_id')]
+            '_id' in x and x != 'domain_id' and x != 'project_id')]
         for attr in attributes:
             if filled:
                 self.assertIsNotNone(getattr(credentials, attr))

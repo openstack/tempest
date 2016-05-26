@@ -605,6 +605,7 @@ class Credentials(object):
     """
 
     ATTRIBUTES = []
+    COLLISIONS = []
 
     def __init__(self, **kwargs):
         """Enforce the available attributes at init time (only).
@@ -616,6 +617,13 @@ class Credentials(object):
         self._apply_credentials(kwargs)
 
     def _apply_credentials(self, attr):
+        for (key1, key2) in self.COLLISIONS:
+            val1 = attr.get(key1)
+            val2 = attr.get(key2)
+            if val1 and val2 and val1 != val2:
+                msg = ('Cannot have conflicting values for %s and %s' %
+                       (key1, key2))
+                raise exceptions.InvalidCredentials(msg)
         for key in attr.keys():
             if key in self.ATTRIBUTES:
                 setattr(self, key, attr[key])
@@ -673,7 +681,33 @@ class Credentials(object):
 class KeystoneV2Credentials(Credentials):
 
     ATTRIBUTES = ['username', 'password', 'tenant_name', 'user_id',
-                  'tenant_id']
+                  'tenant_id', 'project_id', 'project_name']
+    COLLISIONS = [('project_name', 'tenant_name'), ('project_id', 'tenant_id')]
+
+    def __str__(self):
+        """Represent only attributes included in self.ATTRIBUTES"""
+        attrs = [attr for attr in self.ATTRIBUTES if attr is not 'password']
+        _repr = dict((k, getattr(self, k)) for k in attrs)
+        return str(_repr)
+
+    def __setattr__(self, key, value):
+        # NOTE(andreaf) In order to ease the migration towards 'project' we
+        # support v2 credentials configured with 'project' and translate it
+        # to tenant on the fly. The original kwargs are stored for clients
+        # that may rely on them. We also set project when tenant is defined
+        # so clients can rely on project being part of credentials.
+        parent = super(KeystoneV2Credentials, self)
+        # for project_* set tenant only
+        if key == 'project_id':
+            parent.__setattr__('tenant_id', value)
+        elif key == 'project_name':
+            parent.__setattr__('tenant_name', value)
+        if key == 'tenant_id':
+            parent.__setattr__('project_id', value)
+        elif key == 'tenant_name':
+            parent.__setattr__('project_name', value)
+        # trigger default behaviour for all attributes
+        parent.__setattr__(key, value)
 
     def is_valid(self):
         """Check of credentials (no API call)
@@ -684,9 +718,6 @@ class KeystoneV2Credentials(Credentials):
         return None not in (self.username, self.password)
 
 
-COLLISIONS = [('project_name', 'tenant_name'), ('project_id', 'tenant_id')]
-
-
 class KeystoneV3Credentials(Credentials):
     """Credentials suitable for the Keystone Identity V3 API"""
 
@@ -694,16 +725,7 @@ class KeystoneV3Credentials(Credentials):
                   'project_domain_id', 'project_domain_name', 'project_id',
                   'project_name', 'tenant_id', 'tenant_name', 'user_domain_id',
                   'user_domain_name', 'user_id']
-
-    def _apply_credentials(self, attr):
-        for (key1, key2) in COLLISIONS:
-            val1 = attr.get(key1)
-            val2 = attr.get(key2)
-            if val1 and val2 and val1 != val2:
-                msg = ('Cannot have conflicting values for %s and %s' %
-                       (key1, key2))
-                raise exceptions.InvalidCredentials(msg)
-        super(KeystoneV3Credentials, self)._apply_credentials(attr)
+    COLLISIONS = [('project_name', 'tenant_name'), ('project_id', 'tenant_id')]
 
     def __setattr__(self, key, value):
         parent = super(KeystoneV3Credentials, self)
