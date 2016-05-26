@@ -149,25 +149,30 @@ class ObjectClient(rest_client.RestClient):
         self.expected_success(201, resp.status)
         return resp, body
 
-    def put_object_with_chunk(self, container, name, contents, chunk_size):
-        """Put an object with Transfer-Encoding header"""
+    def put_object_with_chunk(self, container, name, contents):
+        """Put an object with Transfer-Encoding header
+
+        :param container: name of the container
+        :type container: string
+        :param name: name of the object
+        :type name: string
+        :param contents: object data
+        :type contents: iterable
+        """
         headers = {'Transfer-Encoding': 'chunked'}
         if self.token:
             headers['X-Auth-Token'] = self.token
 
-        conn = put_object_connection(self.base_url, container, name, contents,
-                                     chunk_size, headers)
-
-        resp = conn.getresponse()
-        body = resp.read()
-
-        resp_headers = {}
-        for header, value in resp.getheaders():
-            resp_headers[header.lower()] = value
+        url = "%s/%s" % (container, name)
+        resp, body = self.put(
+            url, headers=headers,
+            body=contents,
+            chunked=True
+        )
 
         self._error_checker('PUT', None, headers, contents, resp, body)
         self.expected_success(201, resp.status)
-        return resp.status, resp.reason, resp_headers
+        return resp.status, resp.reason, resp
 
     def create_object_continue(self, container, object_name,
                                data, metadata=None):
@@ -262,30 +267,7 @@ def put_object_connection(base_url, container, name, contents=None,
         headers = dict(headers)
     else:
         headers = {}
-    if hasattr(contents, 'read'):
-        conn.putrequest('PUT', path)
-        for header, value in six.iteritems(headers):
-            conn.putheader(header, value)
-        if 'Content-Length' not in headers:
-            if 'Transfer-Encoding' not in headers:
-                conn.putheader('Transfer-Encoding', 'chunked')
-            conn.endheaders()
-            chunk = contents.read(chunk_size)
-            while chunk:
-                conn.send('%x\r\n%s\r\n' % (len(chunk), chunk))
-                chunk = contents.read(chunk_size)
-            conn.send('0\r\n\r\n')
-        else:
-            conn.endheaders()
-            left = headers['Content-Length']
-            while left > 0:
-                size = chunk_size
-                if size > left:
-                    size = left
-                chunk = contents.read(size)
-                conn.send(chunk)
-                left -= len(chunk)
-    else:
-        conn.request('PUT', path, contents, headers)
+
+    conn.request('PUT', path, contents, headers)
 
     return conn

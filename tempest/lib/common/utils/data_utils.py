@@ -19,6 +19,8 @@ import random
 import string
 import uuid
 
+import six.moves
+
 
 def rand_uuid():
     """Generate a random UUID string
@@ -196,3 +198,10 @@ def get_ipv6_addr_by_EUI64(cidr, mac):
     except TypeError:
         raise TypeError('Bad prefix type for generate IPv6 address by '
                         'EUI-64: %s' % cidr)
+
+
+# Courtesy of http://stackoverflow.com/a/312464
+def chunkify(sequence, chunksize):
+    """Yield successive chunks from `sequence`."""
+    for i in six.moves.xrange(0, len(sequence), chunksize):
+        yield sequence[i:i + chunksize]

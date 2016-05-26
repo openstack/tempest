@@ -1,0 +1,9 @@
+---
+features:
+  - The RestClient (in tempest.lib.common.rest_client) now supports POSTing
+    and PUTing data with chunked transfer encoding. Just pass an `iterable`
+    object as the `body` argument and set the `chunked` argument to `True`.
+  - A new generator called `chunkify` is added in
+    tempest.lib.common.utils.data_utils that yields fixed-size chunks (slices)
+    from a Python sequence.
+

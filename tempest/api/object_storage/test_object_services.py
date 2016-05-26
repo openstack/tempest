@@ -20,7 +20,6 @@ import time
 import zlib
 
 import six
-from six import moves
 
 from tempest.api.object_storage import base
 from tempest.common import custom_matchers
@@ -201,8 +200,8 @@ class ObjectTest(base.BaseObjectTest):
         status, _, resp_headers = self.object_client.put_object_with_chunk(
             container=self.container_name,
             name=object_name,
-            contents=moves.cStringIO(data),
-            chunk_size=512)
+            contents=data_utils.chunkify(data, 512)
+        )
         self.assertHeaders(resp_headers, 'Object', 'PUT')
 
         # check uploaded content
