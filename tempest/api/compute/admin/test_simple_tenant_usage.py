@@ -59,7 +59,9 @@ class TenantUsagesTestJSON(base.BaseV2ComputeAdminTest):
                 return True
             except e.InvalidHTTPResponseBody:
                 return False
-        test.call_until_true(is_valid, duration, 1)
+        self.assertEqual(test.call_until_true(is_valid, duration, 1), True,
+                         "%s not return valid response in %s secs" % (
+                             func.__name__, duration))
         return self.resp
 
     @test.idempotent_id('062c8ae9-9912-4249-8b51-e38d664e926e')
