@@ -352,7 +352,7 @@ class TestPreProvisionedCredentialsV3(TestPreProvisionedCredentials):
     fixed_params = {'name': 'test class',
                     'identity_version': 'v3',
                     'test_accounts_file': 'fake_accounts_file',
-                    'accounts_lock_dir': 'fake_locks_dir',
+                    'accounts_lock_dir': 'fake_locks_dir_v3',
                     'admin_role': 'admin',
                     'object_storage_operator_role': 'operator',
                     'object_storage_reseller_admin_role': 'reseller'}
