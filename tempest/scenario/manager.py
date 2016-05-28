@@ -1069,10 +1069,11 @@ class NetworkScenarioTest(ScenarioTest):
                                         security_groups_client=None):
         """Create loginable security group rule
 
-        These rules are intended to permit inbound ssh and icmp
-        traffic from all sources, so no group_id is provided.
-        Setting a group_id would only permit traffic from ports
-        belonging to the same security group.
+        This function will create:
+        1. egress and ingress tcp port 22 allow rule in order to allow ssh
+        access for ipv4.
+        2. egress and ingress ipv6 icmp allow rule, in order to allow icmpv6.
+        3. egress and ingress ipv4 icmp allow rule, in order to allow icmpv4.
         """
 
         if security_group_rules_client is None:
