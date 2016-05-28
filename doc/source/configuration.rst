@@ -348,11 +348,14 @@ endpoint type instead of publicURL for a service that these need to be changed.
     service catalog should be in a standard format (which is going to be
     standardized at the keystone level).
     Tempest expects URLs in the Service catalog in the following format:
-     * ``http://example.com:1234/<version-info>``
+
+    * ``http://example.com:1234/<version-info>``
+
     Examples:
-     * Good - ``http://example.com:1234/v2.0``
-     * Wouldn’t work -  ``http://example.com:1234/xyz/v2.0/``
-       (adding prefix/suffix around version etc)
+
+    * Good - ``http://example.com:1234/v2.0``
+    * Wouldn’t work -  ``http://example.com:1234/xyz/v2.0/``
+      (adding prefix/suffix around version etc)
 
 Service Feature Configuration
 -----------------------------

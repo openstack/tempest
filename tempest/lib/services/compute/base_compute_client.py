@@ -67,11 +67,13 @@ class BaseComputeClient(rest_client.RestClient):
 
         :param schema_versions_info: List of dict which provides schema
                                      information with range of valid versions.
-        Example -
-        schema_versions_info = [
-            {'min': None, 'max': '2.1', 'schema': schemav21},
-            {'min': '2.2', 'max': '2.9', 'schema': schemav22},
-            {'min': '2.10', 'max': None, 'schema': schemav210}]
+
+        Example::
+
+         schema_versions_info = [
+             {'min': None, 'max': '2.1', 'schema': schemav21},
+             {'min': '2.2', 'max': '2.9', 'schema': schemav22},
+             {'min': '2.10', 'max': None, 'schema': schemav210}]
         """
         schema = None
         version = api_version_request.APIVersionRequest(COMPUTE_MICROVERSION)
