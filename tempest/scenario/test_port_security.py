@@ -55,7 +55,7 @@ class TestPortSecurityExtension(manager.NetworkScenarioTest):
                                           port_security_enabled=False)
         self.assertEqual(False, insecure_port['port_security_enabled'])
         create_kwargs = {'networks': [{'uuid': network.id}]}
-        server = self.create_server(create_kwargs=create_kwargs)
+        server = self.create_server(wait_until='ACTIVE', **create_kwargs)
 
         self.interface_client.create_interface(server['id'],
                                                port_id=secure_port.id)
@@ -75,14 +75,14 @@ class TestPortSecurityExtension(manager.NetworkScenarioTest):
         server_kwargs = {'networks': [{'uuid': network_id}, ],
                          'key_name': ssh_key_name,
                          'security_groups': [{'name': security_group_name}], }
-        server = self.create_server(name=server_name,
-                                    create_kwargs=server_kwargs)
+        server = self.create_server(name=server_name, wait_until='ACTIVE',
+                                    **server_kwargs)
         waiters.wait_for_server_status(self.servers_client, server['id'],
                                        'ACTIVE')
         return server
 
     def _set_route(self, route_to, route_via, server_ip, private_key):
-        ssh_client = self._ssh_to_server(server_ip, private_key)
+        ssh_client = self.get_remote_client(server_ip, private_key=private_key)
         add_route_cmd = "sudo ip route add {destination} via {router}".format(
             destination=route_to,
             router=route_via
@@ -102,7 +102,7 @@ class TestPortSecurityExtension(manager.NetworkScenarioTest):
         )
 
         self._check_tenant_network_connectivity(
-            server_data, CONF.compute.image_ssh_user,
+            server_data, CONF.validation.image_ssh_user,
             private_key, should_connect=True,
             servers_for_debug=[server_data])
         return server_data, floating_ip
@@ -130,9 +130,8 @@ class TestPortSecurityExtension(manager.NetworkScenarioTest):
                                                         private_key,
                                                         sec_group_name
                                                         )
-        router_connection = self._ssh_to_server(router_ip.floating_ip_address,
-                                                private_key,
-                                                )
+        router_connection = self.get_remote_client(router_ip.floating_ip_address,
+                                                   private_key=private_key)
         result = router_connection.exec_command('whereis iptables')
         if result == 'iptables:\n':
             LOG.warning('Iptables  is not available on router, skipping')
@@ -190,9 +189,8 @@ class TestPortSecurityExtension(manager.NetworkScenarioTest):
         router_connection.exec_command("sudo iptables -A FORWARD "
                                        "--in-interface eth0 -j ACCEPT")
 
-        source_connection = self._ssh_to_server(source_ip.floating_ip_address,
-                                                private_key,
-                                                )
+        source_connection = self.get_remote_client(source_ip.floating_ip_address,
+                                                   private_key=private_key)
         self.assertRaises(tempest.lib.exceptions.SSHExecCommandFailed,
                           source_connection.ping_host, destination_ip)
 

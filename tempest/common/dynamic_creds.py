@@ -212,11 +212,11 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
         else:
             ip_version = 4
         if ip_version == 6:
-            base_cidr = netaddr.IPNetwork(CONF.network.tenant_network_v6_cidr)
-            mask_bits = CONF.network.tenant_network_v6_mask_bits
+            base_cidr = netaddr.IPNetwork(CONF.network.project_network_v6_cidr)
+            mask_bits = CONF.network.project_network_v6_mask_bits
         else:
-            base_cidr = netaddr.IPNetwork(CONF.network.tenant_network_cidr)
-            mask_bits = CONF.network.tenant_network_mask_bits
+            base_cidr = netaddr.IPNetwork(CONF.network.project_network_cidr)
+            mask_bits = CONF.network.project_network_mask_bits
         for subnet_cidr in base_cidr.subnet(mask_bits):
             try:
                 if self.network_resources:

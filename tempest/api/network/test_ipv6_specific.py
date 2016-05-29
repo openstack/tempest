@@ -42,38 +42,38 @@ class NetworksTestPortsIPv6JSON(base.BaseNetworkTest):
         self.network = self.create_network()
 
     def _clean_network(self):
-        body = self.client.list_ports()
+        body = self.ports_client.list_ports()
         ports = body['ports']
         for port in ports:
             if self.ports:
                 self.ports.pop()
             if port['device_owner'] == 'network:router_interface':
-                self.client.remove_router_interface_with_port_id(
-                    port['device_id'], port['id']
+                self.routers_client.remove_router_interface(
+                    port['device_id'], **{'port_id': port['id']}
                 )
             else:
                 try:
-                    self.client.delete_port(port['id'])
+                    self.ports_client.delete_port(port['id'])
                 except exceptions.NotFound:
                     LOG.warning("Port {} to delete not found"
                             .format(port['id']))
-        body = self.client.list_subnets()
+        body = self.subnets_client.list_subnets()
         subnets = body['subnets']
         for subnet in subnets:
             if self.subnets:
                 self.subnets.pop()
             try:
-                self.client.delete_subnet(subnet['id'])
+                self.subnets_client.delete_subnet(subnet['id'])
             except exceptions.NotFound:
                 LOG.warning("Subnet {} to delete not found"
                             .format(subnet['id']))
-        body = self.client.list_routers()
+        body = self.routers_client.list_routers()
         routers = body['routers']
         for router in routers:
             if self.routers:
                 self.routers.pop()
             try:
-                self.client.delete_router(router['id'])
+                self.routers_client.delete_router(router['id'])
             except exceptions.NotFound:
                     LOG.warning("Router {} to delete not found"
                                 .format(router['id']))
@@ -161,9 +161,9 @@ class NetworksTestPortsIPv6JSON(base.BaseNetworkTest):
             self.assertEqual(1, len(self._port_ips(port)))
             port = self.update_port(port, fixed_ips=fixed_ips1 + fixed_ips2)
             self.assertEqual(2, len(self._port_ips(port)))
-            self.client.delete_port(port['id'])
+            self.ports_client.delete_port(port['id'])
             self.ports.pop()
-            body = self.client.list_ports()
+            body = self.ports_client.list_ports()
             ports_id_list = [i['id'] for i in body['ports']]
             self.assertNotIn(port['id'], ports_id_list)
             self._clean_network()

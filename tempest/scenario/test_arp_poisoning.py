@@ -68,10 +68,9 @@ poison_arp("{victim_ip}", "{router_ip}")
             'availability_zone': avail_zone or 'nova'
 
         }
-        server = self.create_server(name=name, create_kwargs=server_kwargs)
+        server = self.create_server(name=name, wait_until='ACTIVE', **server_kwargs)
         self.servers[name] = server
-        floating_ip = self.create_floating_ip(server,
-                                              CONF.network.public_network_id)
+        floating_ip = self.create_floating_ip(server)
         return floating_ip
 
     @staticmethod
@@ -106,11 +105,11 @@ poison_arp("{victim_ip}", "{router_ip}")
     def run_arp_poisoning_test(self, attacker_vm_ip, target_vm_ip,
                                network=None):
         network = network or self._get_tenant_network()
-        target_vm_connection = self._ssh_to_server(
-            target_vm_ip.floating_ip_address, self.key_pair['private_key']
+        target_vm_connection = self.get_remote_client(
+            target_vm_ip.floating_ip_address, private_key=self.key_pair['private_key']
         )
-        attacker_vm_connection = self._ssh_to_server(
-            attacker_vm_ip.floating_ip_address, self.key_pair['private_key']
+        attacker_vm_connection = self.get_remote_client(
+            attacker_vm_ip.floating_ip_address, private_key=self.key_pair['private_key']
         )
         try:
             python_path = attacker_vm_connection.exec_command("which python")
@@ -179,15 +178,15 @@ poison_arp("{victim_ip}", "{router_ip}")
             namestart="test_arp_poisoning-shared"
         )
         subnet = self._create_subnet(shared_network,
-                                     client=self.admin_manager.network_client)
+                                     subnets_client=self.admin_manager.subnets_client)
         router = self._list_routers(tenant_id=self.tenant_id)[0]
-        self.admin_manager.network_client.add_router_interface_with_subnet_id(
-            router['id'], subnet['id']
+        self.admin_manager.routers_client.add_router_interface(
+            router_id=router['id'], subnet_id=subnet['id']
         )
         self.addCleanup(
-            self.admin_manager.network_client
-                .remove_router_interface_with_subnet_id, router['id'],
-            subnet['id'])
+            self.admin_manager.routers_client
+                .remove_router_interface, router_id=router['id'],
+            subnet_id=subnet['id'])
         attacker_vm, target_vm = \
             self._boot_servers(network=shared_network)
         self.run_arp_poisoning_test(attacker_vm, target_vm, shared_network)
@@ -198,11 +197,12 @@ poison_arp("{victim_ip}", "{router_ip}")
         attacker_vm_ip, target_vm_ip = self._boot_servers()
         self.run_arp_poisoning_test(attacker_vm_ip, target_vm_ip)
         compute_to_disable = self.compute_nodes[-1]
+
         self.admin_manager.services_client.disable_service(
-            host_name=compute_to_disable, binary='nova-compute')
+            host=compute_to_disable, binary='nova-compute')
         time.sleep(10)
         self.admin_manager.services_client.enable_service(
-            host_name=compute_to_disable, binary='nova-compute')
+            host=compute_to_disable, binary='nova-compute')
         time.sleep(10)
         self.run_arp_poisoning_test(attacker_vm_ip, target_vm_ip)
 
@@ -231,7 +231,7 @@ poison_arp("{victim_ip}", "{router_ip}")
         self.run_arp_poisoning_test(attacker_vm_ip, target_vm_ip)
 
     def _get_neutron_agents(self):
-        agents = self.admin_manager.network_client.list_agents()['agents']
+        agents = self.admin_manager.network_agents_client.list_agents()['agents']
         filtered_agents = filter(
             lambda agent: 'vSwitch' or 'Linux Bridge' in agent['agent_type'],
             agents
@@ -241,13 +241,13 @@ poison_arp("{victim_ip}", "{router_ip}")
     def _restart_neutron_agents(self):
         agents_to_restart = self._get_neutron_agents()
         for agent in agents_to_restart:
-            self.admin_manager.network_client.update_agent(
-                agent['id'], {"admin_state_up": False}
+            self.admin_manager.network_agents_client.update_agent(
+                agent['id'], agent={"admin_state_up": False}
             )
         time.sleep(10)
         for agent in agents_to_restart:
-            self.admin_manager.network_client.update_agent(
-                agent['id'], {"admin_state_up": True}
+            self.admin_manager.network_agents_client.update_agent(
+                agent['id'], agent={"admin_state_up": True}
             )
 
     @test.idempotent_id('f51200bd-d909-4ca6-8a1f-3ef92cf0cb78')

@@ -50,7 +50,7 @@ class TestNewComputeNodeOnline(manager.NetworkScenarioTest):
             'availability_zone': self.avail_zone_name.format(zone_id)
         }
         server = self.create_server(name='srv-avail-zone-{}'.format(zone_id),
-                                    create_kwargs=server_kwargs)
+                                    **server_kwargs)
         floating_ip = self.create_floating_ip(server,
                                               CONF.network.public_network_id)
         return floating_ip
@@ -128,11 +128,11 @@ class TestNewComputeNodeOnline(manager.NetworkScenarioTest):
         self._prepare_test_environment()
         time.sleep(60)
         for pair in zip(self.old_ips, self.new_ips):
-            connect_old = self._ssh_to_server(pair[0].floating_ip_address,
-                                              self.key_pair['private_key']
+            connect_old = self.get_remote_client(pair[0].floating_ip_address,
+                                                 private_key=self.key_pair['private_key']
                                               )
             connect_old.ping_host(pair[1].fixed_ip_address)
-            connect_new = self._ssh_to_server(pair[1].floating_ip_address,
-                                              self.key_pair['private_key']
+            connect_new = self.get_remote_client(pair[1].floating_ip_address,
+                                                 private_key=self.key_pair['private_key']
                                               )
             connect_new.ping_host(pair[0].fixed_ip_address)

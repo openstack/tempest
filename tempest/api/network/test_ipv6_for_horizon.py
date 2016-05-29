@@ -22,11 +22,12 @@ class HorizonIpv6Specifics(base.BaseNetworkTest):
 
     def tearDown(self):
         if self.port_id:
-            self.client.delete_port(self.port_id)
+            self.ports_client.delete_port(self.port_id)
         super(HorizonIpv6Specifics, self).tearDown()
 
     @test.idempotent_id('7751edbf-b3d3-459b-b602-d5f689945722')
     def test_all(self):
+        import netaddr
         """Tests number of API calls related ip IPv6 and used by Horizon
         """
         network = self.create_network()
@@ -36,8 +37,8 @@ class HorizonIpv6Specifics(base.BaseNetworkTest):
         gateway_ip = cidr.replace('/64', '1')
         port1 = cidr.replace('/64', '2')
 
-        self.client.create_subnet(network_id=network['id'],
-                                  cidr='2014:abcd:ef00::/64',
+        self.create_subnet(network=network,
+                                  cidr=netaddr.IPNetwork('2014:abcd:ef00::/64'),
                                   ip_version=self._ip_version,
                                   enable_dhcp=False)
 
@@ -45,7 +46,7 @@ class HorizonIpv6Specifics(base.BaseNetworkTest):
         network_names = [net['name'] for net in body['networks']]
         self.assertIn(network['name'], network_names)
 
-        body = self.client.list_subnets()
+        body = self.subnets_client.list_subnets()
 
         ip_v6_subnet = filter(lambda s: s['ip_version'] == 6,
                               body['subnets'])[0]
@@ -53,9 +54,9 @@ class HorizonIpv6Specifics(base.BaseNetworkTest):
         self.assertEqual(expected=gateway_ip,
                          observed=ip_v6_subnet['gateway_ip'])
 
-        body = self.client.create_port(network_id=network['id'])
+        body = self.ports_client.create_port(network_id=network['id'])
         self.port_id = body['port']['id']
 
-        body = self.client.list_ports()
+        body = self.ports_client.list_ports()
         ips = [port['fixed_ips'][0]['ip_address'] for port in body['ports']]
         self.assertIn(port1, ips)

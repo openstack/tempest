@@ -74,9 +74,9 @@ class TestNetworkMultiNode(manager.NetworkScenarioTest):
     @classmethod
     def skip_checks(cls):
         super(TestNetworkMultiNode, cls).skip_checks()
-        if not (CONF.network.tenant_networks_reachable
+        if not (CONF.network.project_networks_reachable
                 or CONF.network.public_network_id):
-            msg = ('Either tenant_networks_reachable must be "true", or '
+            msg = ('Either project_networks_reachable must be "true", or '
                    'public_network_id must be defined.')
             cls.enabled = False
             raise exceptions.InvalidConfiguration(msg)
@@ -121,9 +121,7 @@ class TestNetworkMultiNode(manager.NetworkScenarioTest):
         create_kwargs['networks'] = [{'uuid': network.id}]
         if zone is not None:
             create_kwargs['availability_zone'] = zone
-        server = self.create_server(name=name, wait_on_boot=True,
-                                    image=image,
-                                    create_kwargs=create_kwargs)
+        server = self.create_server(name=name, wait_until='ACTIVE', image=image, **create_kwargs)
         return dict(server=server, keypair=self.keypair)
 
     def setup_aggregates(self):
@@ -329,8 +327,8 @@ class TestNetworkMultiNode(manager.NetworkScenarioTest):
         pass
 
     def _ping_east_west(self, linux_client, target_ip,
-                        count=CONF.compute.ping_count,
-                        size=CONF.compute.ping_size):
+                        count=CONF.validation.ping_count,
+                        size=CONF.validation.ping_size):
         """
         From a remote linux host ping an IP address and return a
         data structure containing the results.
@@ -424,13 +422,13 @@ class TestNetworkMultiNode(manager.NetworkScenarioTest):
         self.private_key = self.servers[server['id']]['private_key']
 
         self.linux_client = self.get_remote_client(
-            server_or_ip=self.linux_client_ip.
+            ip_address=self.linux_client_ip.
             floating_ip_address,
             private_key=self.private_key)
 
         super(TestNetworkMultiNode, self).check_vm_connectivity(
             self.linux_client_ip.floating_ip_address,
-            username=CONF.compute.image_ssh_user,
+            username=CONF.validation.image_ssh_user,
             private_key=self.private_key,
             should_connect=True)
 
@@ -438,7 +436,7 @@ class TestNetworkMultiNode(manager.NetworkScenarioTest):
                        linux_client,
                        source_ip,
                        target_ip,
-                       pkt_size=CONF.compute.ping_size):
+                       pkt_size=CONF.validation.ping_size):
         LOG.debug("Ping from {0} to {1}".format(source_ip, target_ip))
         LOG.debug("Testing with packet size {0}".format(pkt_size))
         ping_result = self._ping_east_west(linux_client,
