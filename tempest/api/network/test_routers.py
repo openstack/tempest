@@ -303,7 +303,7 @@ class RoutersTest(base.BaseRouterTest):
             )
 
         test_routes.sort(key=lambda x: x['destination'])
-        extra_route = self.routers_client.update_extra_routes(
+        extra_route = self.routers_client.update_router(
             router['id'], routes=test_routes)
         show_body = self.routers_client.show_router(router['id'])
         # Assert the number of routes
