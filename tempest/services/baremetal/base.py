@@ -111,7 +111,7 @@ class BaremetalClient(rest_client.RestClient):
             uri += "?%s" % urllib.urlencode(kwargs)
 
         resp, body = self.get(uri)
-        self.expected_success(200, resp['status'])
+        self.expected_success(200, resp.status)
 
         return resp, self.deserialize(body)
 
@@ -127,7 +127,7 @@ class BaremetalClient(rest_client.RestClient):
         else:
             uri = self._get_uri(resource, uuid=uuid, permanent=permanent)
         resp, body = self.get(uri)
-        self.expected_success(200, resp['status'])
+        self.expected_success(200, resp.status)
 
         return resp, self.deserialize(body)
 
@@ -145,7 +145,7 @@ class BaremetalClient(rest_client.RestClient):
         uri = self._get_uri(resource)
 
         resp, body = self.post(uri, body=body)
-        self.expected_success(201, resp['status'])
+        self.expected_success(201, resp.status)
 
         return resp, self.deserialize(body)
 
@@ -160,7 +160,7 @@ class BaremetalClient(rest_client.RestClient):
         uri = self._get_uri(resource, uuid)
 
         resp, body = self.delete(uri)
-        self.expected_success(204, resp['status'])
+        self.expected_success(204, resp.status)
         return resp, body
 
     def _patch_request(self, resource, uuid, patch_object):
@@ -176,7 +176,7 @@ class BaremetalClient(rest_client.RestClient):
         patch_body = json.dumps(patch_object)
 
         resp, body = self.patch(uri, body=patch_body)
-        self.expected_success(200, resp['status'])
+        self.expected_success(200, resp.status)
         return resp, self.deserialize(body)
 
     @handle_errors
@@ -201,5 +201,5 @@ class BaremetalClient(rest_client.RestClient):
         put_body = json.dumps(put_object)
 
         resp, body = self.put(uri, body=put_body)
-        self.expected_success(202, resp['status'])
+        self.expected_success([202, 204], resp.status)
         return resp, body
