@@ -817,11 +817,17 @@ class NetworkScenarioTest(ScenarioTest):
         # A port can have more then one IP address in some cases.
         # If the network is dual-stack (IPv4 + IPv6), this port is associated
         # with 2 subnets
+        p_status = ['ACTIVE']
+        # NOTE(vsaienko) With Ironic, instances live on separate hardware
+        # servers. Neutron does not bind ports for Ironic instances, as a
+        # result the port remains in the DOWN state.
+        if CONF.service_available.ironic:
+            p_status.append('DOWN')
         port_map = [(p["id"], fxip["ip_address"])
                     for p in ports
                     for fxip in p["fixed_ips"]
                     if netaddr.valid_ipv4(fxip["ip_address"])
-                    and p['status'] == 'ACTIVE']
+                    and p['status'] in p_status]
         inactive = [p for p in ports if p['status'] != 'ACTIVE']
         if inactive:
             LOG.warning("Instance has ports that are not ACTIVE: %s", inactive)
