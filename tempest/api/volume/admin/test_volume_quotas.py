@@ -30,6 +30,11 @@ class BaseVolumeQuotasAdminV2TestJSON(base.BaseVolumeAdminTest):
         super(BaseVolumeQuotasAdminV2TestJSON, cls).setup_credentials()
         cls.demo_tenant_id = cls.os.credentials.tenant_id
 
+    def _delete_volume(self, volume_id):
+        # Delete the specified volume using admin credentials
+        self.admin_volume_client.delete_volume(volume_id)
+        self.admin_volume_client.wait_for_resource_deletion(volume_id)
+
     @test.idempotent_id('59eada70-403c-4cef-a2a3-a8ce2f1b07a0')
     def test_list_quotas(self):
         quotas = (self.quotas_client.show_quota_set(self.demo_tenant_id)
@@ -83,8 +88,7 @@ class BaseVolumeQuotasAdminV2TestJSON(base.BaseVolumeAdminTest):
             self.demo_tenant_id)['quota_set']
 
         volume = self.create_volume()
-        self.addCleanup(self.admin_volume_client.delete_volume,
-                        volume['id'])
+        self.addCleanup(self._delete_volume, volume['id'])
 
         new_quota_usage = self.quotas_client.show_quota_usage(
             self.demo_tenant_id)['quota_set']
