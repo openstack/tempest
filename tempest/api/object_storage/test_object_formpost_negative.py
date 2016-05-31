@@ -32,11 +32,8 @@ class ObjectFormPostNegativeTest(base.BaseObjectTest):
     @classmethod
     def resource_setup(cls):
         super(ObjectFormPostNegativeTest, cls).resource_setup()
-        cls.container_name = data_utils.rand_name(name='TestContainer')
+        cls.container_name = cls.create_container()
         cls.object_name = data_utils.rand_name(name='ObjectTemp')
-
-        cls.container_client.create_container(cls.container_name)
-        cls.containers = [cls.container_name]
 
         cls.key = 'Meta'
         cls.metadata = {'Temp-URL-Key': cls.key}
@@ -57,7 +54,7 @@ class ObjectFormPostNegativeTest(base.BaseObjectTest):
     @classmethod
     def resource_cleanup(cls):
         cls.account_client.delete_account_metadata(metadata=cls.metadata)
-        cls.delete_containers(cls.containers)
+        cls.delete_containers()
         super(ObjectFormPostNegativeTest, cls).resource_cleanup()
 
     def get_multipart_form(self, expires=600):

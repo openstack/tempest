@@ -50,7 +50,7 @@ class AccountTest(base.BaseObjectTest):
 
     @classmethod
     def resource_cleanup(cls):
-        cls.delete_containers(cls.containers)
+        cls.delete_containers()
         super(AccountTest, cls).resource_cleanup()
 
     @test.attr(type='smoke')

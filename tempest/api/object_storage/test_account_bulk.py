@@ -27,7 +27,7 @@ class BulkTest(base.BaseObjectTest):
         self.containers = []
 
     def tearDown(self):
-        self.delete_containers(self.containers)
+        self.delete_containers()
         super(BulkTest, self).tearDown()
 
     def _create_archive(self):

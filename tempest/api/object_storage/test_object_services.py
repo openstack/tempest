@@ -35,23 +35,12 @@ class ObjectTest(base.BaseObjectTest):
     @classmethod
     def resource_setup(cls):
         super(ObjectTest, cls).resource_setup()
-        cls.container_name = data_utils.rand_name(name='TestContainer')
-        cls.container_client.create_container(cls.container_name)
-        cls.containers = [cls.container_name]
+        cls.container_name = cls.create_container()
 
     @classmethod
     def resource_cleanup(cls):
-        cls.delete_containers(cls.containers)
+        cls.delete_containers()
         super(ObjectTest, cls).resource_cleanup()
-
-    def _create_object(self, metadata=None):
-        # setup object
-        object_name = data_utils.rand_name(name='TestObject')
-        data = data_utils.arbitrary_string()
-        self.object_client.create_object(self.container_name,
-                                         object_name, data, metadata=metadata)
-
-        return object_name, data
 
     def _upload_segments(self):
         # create object
@@ -335,7 +324,7 @@ class ObjectTest(base.BaseObjectTest):
     @test.idempotent_id('7a94c25d-66e6-434c-9c38-97d4e2c29945')
     def test_update_object_metadata(self):
         # update object metadata
-        object_name, data = self._create_object()
+        object_name, _ = self.create_object(self.container_name)
 
         metadata = {'X-Object-Meta-test-meta': 'Meta'}
         resp, _ = self.object_client.update_object_metadata(
@@ -431,8 +420,8 @@ class ObjectTest(base.BaseObjectTest):
 
     @test.idempotent_id('0dbbe89c-6811-4d84-a2df-eca2bdd40c0e')
     def test_update_object_metadata_with_x_object_metakey(self):
-        # update object metadata with a blenk value of metadata
-        object_name, data = self._create_object()
+        # update object metadata with a blank value of metadata
+        object_name, _ = self.create_object(self.container_name)
 
         update_metadata = {'X-Object-Meta-test-meta': ''}
         resp, _ = self.object_client.update_object_metadata(
@@ -494,7 +483,7 @@ class ObjectTest(base.BaseObjectTest):
     @test.idempotent_id('170fb90e-f5c3-4b1f-ae1b-a18810821172')
     def test_list_no_object_metadata(self):
         # get empty list of object metadata
-        object_name, data = self._create_object()
+        object_name, _ = self.create_object(self.container_name)
 
         resp, _ = self.object_client.list_object_metadata(
             self.container_name,
@@ -548,7 +537,7 @@ class ObjectTest(base.BaseObjectTest):
         # retrieve object's data (in response body)
 
         # create object
-        object_name, data = self._create_object()
+        object_name, data = self.create_object(self.container_name)
         # get object
         resp, body = self.object_client.get_object(self.container_name,
                                                    object_name)
@@ -701,7 +690,7 @@ class ObjectTest(base.BaseObjectTest):
     @test.idempotent_id('0aa1201c-10aa-467a-bee7-63cbdd463152')
     def test_get_object_with_if_unmodified_since(self):
         # get object with if_unmodified_since
-        object_name, data = self._create_object()
+        object_name, data = self.create_object(self.container_name)
 
         time_now = time.time()
         http_date = time.ctime(time_now + 86400)
@@ -716,7 +705,7 @@ class ObjectTest(base.BaseObjectTest):
     @test.idempotent_id('94587078-475f-48f9-a40f-389c246e31cd')
     def test_get_object_with_x_newest(self):
         # get object with x_newest
-        object_name, data = self._create_object()
+        object_name, data = self.create_object(self.container_name)
 
         list_metadata = {'X-Newest': 'true'}
         resp, body = self.object_client.get_object(
@@ -757,7 +746,7 @@ class ObjectTest(base.BaseObjectTest):
         # change the content type of an existing object
 
         # create object
-        object_name, data = self._create_object()
+        object_name, _ = self.create_object(self.container_name)
         # get the old content type
         resp_tmp, _ = self.object_client.list_object_metadata(
             self.container_name, object_name)
@@ -843,7 +832,8 @@ class ObjectTest(base.BaseObjectTest):
     def test_copy_object_with_x_fresh_metadata(self):
         # create source object
         metadata = {'x-object-meta-src': 'src_value'}
-        src_object_name, data = self._create_object(metadata)
+        src_object_name, data = self.create_object(self.container_name,
+                                                   metadata=metadata)
 
         # copy source object with x_fresh_metadata header
         metadata = {'X-Fresh-Metadata': 'true'}
@@ -863,7 +853,8 @@ class ObjectTest(base.BaseObjectTest):
     def test_copy_object_with_x_object_metakey(self):
         # create source object
         metadata = {'x-object-meta-src': 'src_value'}
-        src_obj_name, data = self._create_object(metadata)
+        src_obj_name, data = self.create_object(self.container_name,
+                                                metadata=metadata)
 
         # copy source object to destination with x-object-meta-key
         metadata = {'x-object-meta-test': ''}
@@ -885,7 +876,8 @@ class ObjectTest(base.BaseObjectTest):
     def test_copy_object_with_x_object_meta(self):
         # create source object
         metadata = {'x-object-meta-src': 'src_value'}
-        src_obj_name, data = self._create_object(metadata)
+        src_obj_name, data = self.create_object(self.container_name,
+                                                metadata=metadata)
 
         # copy source object to destination with object metadata
         metadata = {'x-object-meta-test': 'value'}
@@ -951,7 +943,7 @@ class ObjectTest(base.BaseObjectTest):
         # Make a conditional request for an object using the If-None-Match
         # header, it should get downloaded only if the local file is different,
         # otherwise the response code should be 304 Not Modified
-        object_name, data = self._create_object()
+        object_name, data = self.create_object(self.container_name)
         # local copy is identical, no download
         md5 = hashlib.md5(data).hexdigest()
         headers = {'If-None-Match': md5}
