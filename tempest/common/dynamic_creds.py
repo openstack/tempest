@@ -401,9 +401,18 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
             except lib_exc.NotFound:
                 LOG.warning("user with name: %s not found for delete" %
                             creds.username)
+            # NOTE(zhufl): Only when neutron's security_group ext is
+            # enabled, _cleanup_default_secgroup will not raise error. But
+            # here cannot use test.is_extension_enabled for it will cause
+            # "circular dependency". So here just use try...except to
+            # ensure tenant deletion without big changes.
             try:
                 if CONF.service_available.neutron:
                     self._cleanup_default_secgroup(creds.tenant_id)
+            except lib_exc.NotFound:
+                LOG.warning("failed to cleanup tenant %s's secgroup" %
+                            creds.tenant_name)
+            try:
                 self.creds_client.delete_project(creds.tenant_id)
             except lib_exc.NotFound:
                 LOG.warning("tenant with name: %s not found for delete" %
