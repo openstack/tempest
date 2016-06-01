@@ -693,6 +693,24 @@ class TestExpectedSuccess(BaseRestClientTestClass):
         self.assertRaises(AssertionError, self.rest_client.expected_success,
                           expected_code, read_code)
 
+    def test_non_success_read_code_as_string(self):
+        expected_code = 202
+        read_code = '202'
+        self.assertRaises(TypeError, self.rest_client.expected_success,
+                          expected_code, read_code)
+
+    def test_non_success_read_code_as_list(self):
+        expected_code = 202
+        read_code = [202]
+        self.assertRaises(TypeError, self.rest_client.expected_success,
+                          expected_code, read_code)
+
+    def test_non_success_expected_code_as_non_int(self):
+        expected_code = ['201', 202]
+        read_code = 202
+        self.assertRaises(AssertionError, self.rest_client.expected_success,
+                          expected_code, read_code)
+
 
 class TestResponseBody(base.TestCase):
 

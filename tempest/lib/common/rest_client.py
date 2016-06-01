@@ -221,6 +221,10 @@ class RestClient(object):
         :raises exceptions.InvalidHttpSuccessCode: if the read code isn't an
                                                    expected http success code
         """
+        if not isinstance(read_code, int):
+            raise TypeError("'read_code' must be an int instead of (%s)"
+                            % type(read_code))
+
         assert_msg = ("This function only allowed to use for HTTP status"
                       "codes which explicitly defined in the RFC 7231 & 4918."
                       "{0} is not a defined Success Code!"
