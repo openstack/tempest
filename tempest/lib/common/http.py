@@ -49,7 +49,8 @@ class ClosingHttp(urllib3.poolmanager.PoolManager):
 
         # Follow up to 5 redirections. Don't raise an exception if
         # it's exceeded but return the HTTP 3XX response instead.
-        retry = urllib3.util.Retry(raise_on_redirect=False, redirect=5)
+	# set redirect=0 to prevent auto redirects
+        retry = urllib3.util.Retry(raise_on_redirect=False, redirect=0)
         r = super(ClosingHttp, self).request(method, url, retries=retry,
                                              *args, **new_kwargs)
         return Response(r), r.data

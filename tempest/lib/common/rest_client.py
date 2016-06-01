@@ -248,7 +248,7 @@ class RestClient(object):
                 raise exceptions.InvalidHttpSuccessCode(details)
 
     def post(self, url, body, headers=None, extra_headers=False,
-             chunked=False):
+             chunked=False, saml=False):
         """Send a HTTP POST request using keystone auth
 
         :param str url: the relative url to send the post request to
@@ -263,9 +263,9 @@ class RestClient(object):
                  and the second the response body
         :rtype: tuple
         """
-        return self.request('POST', url, extra_headers, headers, body, chunked)
+        return self.request('POST', url, extra_headers, headers, body, chunked, saml)
 
-    def get(self, url, headers=None, extra_headers=False):
+    def get(self, url, headers=None, extra_headers=False, saml=None):
         """Send a HTTP GET request using keystone service catalog and auth
 
         :param str url: the relative url to send the post request to
@@ -278,7 +278,7 @@ class RestClient(object):
                  and the second the response body
         :rtype: tuple
         """
-        return self.request('GET', url, extra_headers, headers)
+        return self.request('GET', url, extra_headers, headers, saml)
 
     def delete(self, url, headers=None, body=None, extra_headers=False):
         """Send a HTTP DELETE request using keystone service catalog and auth
@@ -574,7 +574,7 @@ class RestClient(object):
                                      body=body, chunked=chunked)
 
     def request(self, method, url, extra_headers=False, headers=None,
-                body=None, chunked=False):
+                body=None, chunked=False, saml=None):
         """Send a HTTP request with keystone auth and using the catalog
 
         This method will send an HTTP request using keystone auth in the
