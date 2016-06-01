@@ -257,6 +257,23 @@ def use_rand_uuid_instead_of_uuid4(logical_line, filename):
     yield (0, msg)
 
 
+def dont_use_config_in_tempest_lib(logical_line, filename):
+    """Check that tempest.lib doesn't use tempest config
+
+    T114
+    """
+
+    if 'tempest/lib/' not in filename:
+        return
+
+    if ('tempest.config' in logical_line
+        or 'from tempest import config' in logical_line
+        or 'oslo_config' in logical_line):
+        msg = ('T114: tempest.lib can not have any dependency on tempest '
+               'config.')
+        yield(0, msg)
+
+
 def factory(register):
     register(import_no_clients_in_api_and_scenario_tests)
     register(scenario_tests_need_service_tags)
@@ -269,4 +286,5 @@ def factory(register):
     register(get_resources_on_service_clients)
     register(delete_resources_on_service_clients)
     register(dont_import_local_tempest_into_lib)
+    register(dont_use_config_in_tempest_lib)
     register(use_rand_uuid_instead_of_uuid4)
