@@ -249,6 +249,9 @@ class PreProvisionedCredentialProvider(cred_provider.CredentialProvider):
             raise lib_exc.InvalidCredentials(
                 "Account file %s doesn't exist" % self.test_accounts_file)
         useable_hashes = self._get_match_hash_list(roles)
+        if len(useable_hashes) == 0:
+            msg = 'No users configured for type/roles %s' % roles
+            raise lib_exc.InvalidCredentials(msg)
         free_hash = self._get_free_hash(useable_hashes)
         clean_creds = self._sanitize_creds(
             self.hash_dict['creds'][free_hash])
