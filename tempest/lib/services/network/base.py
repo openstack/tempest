@@ -54,18 +54,26 @@ class BaseNetworkClient(rest_client.RestClient):
         self.expected_success(200, resp.status)
         return rest_client.ResponseBody(resp, body)
 
-    def create_resource(self, uri, post_data):
+    def create_resource(self, uri, post_data, expect_empty_body=False):
         req_uri = self.uri_prefix + uri
         req_post_data = json.dumps(post_data)
         resp, body = self.post(req_uri, req_post_data)
-        body = json.loads(body)
+        # NOTE: RFC allows both a valid non-empty body and an empty body for
+        # response of POST API. If a body is expected not empty, we decode the
+        # body. Otherwise we returns the body as it is.
+        if not expect_empty_body:
+            body = json.loads(body)
         self.expected_success(201, resp.status)
         return rest_client.ResponseBody(resp, body)
 
-    def update_resource(self, uri, post_data):
+    def update_resource(self, uri, post_data, expect_empty_body=False):
         req_uri = self.uri_prefix + uri
         req_post_data = json.dumps(post_data)
         resp, body = self.put(req_uri, req_post_data)
-        body = json.loads(body)
+        # NOTE: RFC allows both a valid non-empty body and an empty body for
+        # response of PUT API. If a body is expected not empty, we decode the
+        # body. Otherwise we returns the body as it is.
+        if not expect_empty_body:
+            body = json.loads(body)
         self.expected_success(200, resp.status)
         return rest_client.ResponseBody(resp, body)
