@@ -162,7 +162,7 @@ Unit Tests
 Tempest also has a set of unit tests which test the Tempest code itself. These
 tests can be run by specifying the test discovery path::
 
-    $> OS_TEST_PATH=./tempest/tests testr run --parallel
+    $ OS_TEST_PATH=./tempest/tests testr run --parallel
 
 By setting OS_TEST_PATH to ./tempest/tests it specifies that test discover
 should only be run on the unit test directory. The default value of OS_TEST_PATH
@@ -213,8 +213,8 @@ create and configure that.
 To start you need to create a configuration file. The easiest way to create a
 configuration file is to generate a sample in the ``etc/`` directory ::
 
-    $> cd $TEMPEST_ROOT_DIR
-    $> oslo-config-generator --config-file \
+    $ cd $TEMPEST_ROOT_DIR
+    $ oslo-config-generator --config-file \
         etc/config-generator.tempest.conf \
         --output-file etc/tempest.conf
 
@@ -236,21 +236,21 @@ used tool. Also, the nosetests test runner is **not** recommended to run Tempest
 After setting up your configuration file, you can execute the set of Tempest
 tests by using ``testr`` ::
 
-    $> testr run --parallel
+    $ testr run --parallel
 
 To run one single test serially ::
 
-    $> testr run tempest.api.compute.servers.test_servers_negative.ServersNegativeTestJSON.test_reboot_non_existent_server
+    $ testr run tempest.api.compute.servers.test_servers_negative.ServersNegativeTestJSON.test_reboot_non_existent_server
 
 Alternatively, you can use the run_tempest.sh script which will create a venv
 and run the tests or use tox to do the same. Tox also contains several existing
 job configurations. For example::
 
-   $> tox -efull
+   $ tox -efull
 
 which will run the same set of tests as the OpenStack gate. (it's exactly how
 the gate invokes Tempest) Or::
 
-  $> tox -esmoke
+  $ tox -esmoke
 
 to run the tests tagged as smoke.
