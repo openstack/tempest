@@ -25,8 +25,7 @@ Tempest Design Principles that we strive to live by.
   discover features of a cloud incorrectly, and give people an
   incorrect assessment of their cloud. Explicit is always better.
 - Tempest uses OpenStack public interfaces. Tests in Tempest should
-  only touch public interfaces, API calls (native or 3rd party),
-  or libraries.
+  only touch public OpenStack APIs.
 - Tempest should not touch private or implementation specific
   interfaces. This means not directly going to the database, not
   directly hitting the hypervisors, not testing extensions not
