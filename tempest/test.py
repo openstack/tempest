@@ -77,7 +77,6 @@ def get_service_list():
         'network': True,
         'identity': True,
         'object_storage': CONF.service_available.swift,
-        'dashboard': CONF.service_available.horizon,
         'data_processing': CONF.service_available.sahara,
         'database': CONF.service_available.trove
     }
@@ -92,8 +91,8 @@ def services(*args):
     """
     def decorator(f):
         services = ['compute', 'image', 'baremetal', 'volume', 'orchestration',
-                    'network', 'identity', 'object_storage', 'dashboard',
-                    'data_processing', 'database']
+                    'network', 'identity', 'object_storage', 'data_processing',
+                    'database']
         for service in args:
             if service not in services:
                 raise exceptions.InvalidServiceTag('%s is not a valid '

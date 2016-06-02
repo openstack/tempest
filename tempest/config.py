@@ -841,21 +841,6 @@ OrchestrationGroup = [
                help="Value must match heat configuration of the same name."),
 ]
 
-
-dashboard_group = cfg.OptGroup(name="dashboard",
-                               title="Dashboard options")
-
-DashboardGroup = [
-    cfg.StrOpt('dashboard_url',
-               default='http://localhost/',
-               help="Where the dashboard can be found"),
-    cfg.StrOpt('login_url',
-               default='http://localhost/auth/login/',
-               help="Login page for the dashboard",
-               deprecated_for_removal=True),
-]
-
-
 data_processing_group = cfg.OptGroup(name="data-processing",
                                      title="Data Processing options")
 
@@ -986,9 +971,6 @@ ServiceAvailableGroup = [
     cfg.BoolOpt('heat',
                 default=False,
                 help="Whether or not Heat is expected to be available"),
-    cfg.BoolOpt('horizon',
-                default=True,
-                help="Whether or not Horizon is expected to be available"),
     cfg.BoolOpt('sahara',
                 default=False,
                 help="Whether or not Sahara is expected to be available"),
@@ -1131,7 +1113,6 @@ _opts = [
     (object_storage_feature_group, ObjectStoreFeaturesGroup),
     (database_group, DatabaseGroup),
     (orchestration_group, OrchestrationGroup),
-    (dashboard_group, DashboardGroup),
     (data_processing_group, DataProcessingGroup),
     (data_processing_feature_group, DataProcessingFeaturesGroup),
     (stress_group, StressGroup),
@@ -1199,7 +1180,6 @@ class TempestConfigPrivate(object):
             'object-storage-feature-enabled']
         self.database = _CONF.database
         self.orchestration = _CONF.orchestration
-        self.dashboard = _CONF.dashboard
         self.data_processing = _CONF['data-processing']
         self.data_processing_feature_enabled = _CONF[
             'data-processing-feature-enabled']
