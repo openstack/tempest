@@ -15,6 +15,7 @@
 
 import copy
 import errno
+import functools
 import os
 
 from oslo_log import log as logging
@@ -22,11 +23,11 @@ from oslo_serialization import jsonutils as json
 import six
 from six.moves.urllib import parse as urllib
 
-from tempest.common import glance_http
 from tempest.lib.common import rest_client
 from tempest.lib import exceptions as lib_exc
 
 LOG = logging.getLogger(__name__)
+CHUNKSIZE = 1024 * 64  # 64kB
 
 
 class ImagesClient(rest_client.RestClient):
@@ -34,9 +35,6 @@ class ImagesClient(rest_client.RestClient):
     def __init__(self, auth_provider, catalog_type, region, **kwargs):
         super(ImagesClient, self).__init__(
             auth_provider, catalog_type, region, **kwargs)
-        self._http = None
-        self.dscv = kwargs.get("disable_ssl_certificate_validation")
-        self.ca_certs = kwargs.get("ca_certs")
 
     def _image_meta_from_headers(self, headers):
         meta = {'properties': {}}
@@ -103,27 +101,29 @@ class ImagesClient(rest_client.RestClient):
             # Cannot determine size of input image
             return None
 
-    def _get_http(self):
-        return glance_http.HTTPClient(auth_provider=self.auth_provider,
-                                      filters=self.filters,
-                                      insecure=self.dscv,
-                                      ca_certs=self.ca_certs)
-
     def _create_with_data(self, headers, data):
-        resp, body_iter = self.http.raw_request('POST', '/v1/images',
-                                                headers=headers, body=data)
+        # We are going to do chunked transfert, so split the input data
+        # info fixed-sized chunks.
+        headers['Content-Type'] = 'application/octet-stream'
+        data = iter(functools.partial(data.read, CHUNKSIZE), b'')
+        resp, body = self.request('POST', '/v1/images',
+                                  headers=headers, body=data, chunked=True)
         self._error_checker('POST', '/v1/images', headers, data, resp,
-                            body_iter)
-        body = json.loads(''.join([c for c in body_iter]))
+                            body)
+        body = json.loads(body)
         return rest_client.ResponseBody(resp, body)
 
     def _update_with_data(self, image_id, headers, data):
+        # We are going to do chunked transfert, so split the input data
+        # info fixed-sized chunks.
+        headers['Content-Type'] = 'application/octet-stream'
+        data = iter(functools.partial(data.read, CHUNKSIZE), b'')
         url = '/v1/images/%s' % image_id
-        resp, body_iter = self.http.raw_request('PUT', url, headers=headers,
-                                                body=data)
+        resp, body = self.request('PUT', url, headers=headers,
+                                  body=data, chunked=True)
         self._error_checker('PUT', url, headers, data,
-                            resp, body_iter)
-        body = json.loads(''.join([c for c in body_iter]))
+                            resp, body)
+        body = json.loads(body)
         return rest_client.ResponseBody(resp, body)
 
     @property

@@ -13,12 +13,15 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import functools
+
 from oslo_serialization import jsonutils as json
 from six.moves.urllib import parse as urllib
 
-from tempest.common import glance_http
 from tempest.lib.common import rest_client
 from tempest.lib import exceptions as lib_exc
+
+CHUNKSIZE = 1024 * 64  # 64kB
 
 
 class ImagesClient(rest_client.RestClient):
@@ -26,21 +29,6 @@ class ImagesClient(rest_client.RestClient):
     def __init__(self, auth_provider, catalog_type, region, **kwargs):
         super(ImagesClient, self).__init__(
             auth_provider, catalog_type, region, **kwargs)
-        self._http = None
-        self.dscv = kwargs.get("disable_ssl_certificate_validation")
-        self.ca_certs = kwargs.get("ca_certs")
-
-    def _get_http(self):
-        return glance_http.HTTPClient(auth_provider=self.auth_provider,
-                                      filters=self.filters,
-                                      insecure=self.dscv,
-                                      ca_certs=self.ca_certs)
-
-    @property
-    def http(self):
-        if self._http is None:
-            self._http = self._get_http()
-        return self._http
 
     def update_image(self, image_id, patch):
         """Update an image.
@@ -118,9 +106,14 @@ class ImagesClient(rest_client.RestClient):
 
     def store_image_file(self, image_id, data):
         url = 'v2/images/%s/file' % image_id
+
+        # We are going to do chunked transfert, so split the input data
+        # info fixed-sized chunks.
         headers = {'Content-Type': 'application/octet-stream'}
-        resp, body = self.http.raw_request('PUT', url, headers=headers,
-                                           body=data)
+        data = iter(functools.partial(data.read, CHUNKSIZE), b'')
+
+        resp, body = self.request('PUT', url, headers=headers,
+                                  body=data, chunked=True)
         self.expected_success(204, resp.status)
         return rest_client.ResponseBody(resp, body)
 
