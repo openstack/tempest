@@ -77,7 +77,7 @@ class Client(object):
                          self.username, self.host)
                 return ssh
             except (EOFError,
-                    socket.error,
+                    socket.error, socket.timeout,
                     paramiko.SSHException) as e:
                 if self._is_timed_out(_start_time):
                     LOG.exception("Failed to establish authenticated ssh"
