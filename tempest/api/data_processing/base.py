@@ -19,7 +19,7 @@ import six
 
 from tempest import config
 from tempest import exceptions
-from tempest.lib import exceptions as lib_exc
+from tempest.lib.common.utils import test_utils
 import tempest.test
 
 
@@ -238,11 +238,7 @@ class BaseDataProcessingTest(tempest.test.BaseTestCase):
     @staticmethod
     def cleanup_resources(resource_id_list, method):
         for resource_id in resource_id_list:
-            try:
-                method(resource_id)
-            except lib_exc.NotFound:
-                # ignore errors while auto removing created resource
-                pass
+            test_utils.call_and_ignore_notfound_exc(method, resource_id)
 
     @classmethod
     def create_node_group_template(cls, name, plugin_name, hadoop_version,

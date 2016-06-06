@@ -16,7 +16,7 @@ import yaml
 
 from tempest.common.utils import data_utils
 from tempest import config
-from tempest.lib import exceptions as lib_exc
+from tempest.lib.common.utils import test_utils
 import tempest.test
 
 CONF = config.CONF
@@ -83,17 +83,13 @@ class BaseOrchestrationTest(tempest.test.BaseTestCase):
     @classmethod
     def _clear_stacks(cls):
         for stack_identifier in cls.stacks:
-            try:
-                cls.client.delete_stack(stack_identifier)
-            except lib_exc.NotFound:
-                pass
+            test_utils.call_and_ignore_notfound_exc(
+                cls.client.delete_stack, stack_identifier)
 
         for stack_identifier in cls.stacks:
-            try:
-                cls.client.wait_for_stack_status(
-                    stack_identifier, 'DELETE_COMPLETE')
-            except lib_exc.NotFound:
-                pass
+            test_utils.call_and_ignore_notfound_exc(
+                cls.client.wait_for_stack_status, stack_identifier,
+                'DELETE_COMPLETE')
 
     @classmethod
     def _create_keypair(cls, name_start='keypair-heat-'):
@@ -124,10 +120,8 @@ class BaseOrchestrationTest(tempest.test.BaseTestCase):
     @classmethod
     def _clear_images(cls):
         for image_id in cls.images:
-            try:
-                cls.images_v2_client.delete_image(image_id)
-            except lib_exc.NotFound:
-                pass
+            test_utils.call_and_ignore_notfound_exc(
+                cls.images_v2_client.delete_image, image_id)
 
     @classmethod
     def read_template(cls, name, ext='yaml'):

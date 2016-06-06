@@ -12,6 +12,7 @@
 
 from tempest.api.network import base
 from tempest.common.utils import data_utils
+from tempest.lib.common.utils import test_utils
 from tempest import test
 
 
@@ -97,7 +98,7 @@ class ExternalNetworksTestJSON(base.BaseAdminNetworkTest):
         body = self.admin_networks_client.create_network(
             **{'router:external': True})
         external_network = body['network']
-        self.addCleanup(self._try_delete_resource,
+        self.addCleanup(test_utils.call_and_ignore_notfound_exc,
                         self.admin_networks_client.delete_network,
                         external_network['id'])
         subnet = self.create_subnet(
@@ -106,7 +107,7 @@ class ExternalNetworksTestJSON(base.BaseAdminNetworkTest):
         body = self.admin_floating_ips_client.create_floatingip(
             floating_network_id=external_network['id'])
         created_floating_ip = body['floatingip']
-        self.addCleanup(self._try_delete_resource,
+        self.addCleanup(test_utils.call_and_ignore_notfound_exc,
                         self.admin_floating_ips_client.delete_floatingip,
                         created_floating_ip['id'])
         floatingip_list = self.admin_floating_ips_client.list_floatingips(

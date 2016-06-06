@@ -20,6 +20,7 @@ from tempest.api.network import base
 from tempest.common import custom_matchers
 from tempest.common.utils import data_utils
 from tempest import config
+from tempest.lib.common.utils import test_utils
 from tempest.lib import exceptions as lib_exc
 from tempest import test
 
@@ -273,14 +274,6 @@ class NetworksTest(base.BaseNetworkTest):
         for subnet in subnets:
             self.assertEqual(sorted(subnet.keys()), sorted(fields))
 
-    def _try_delete_network(self, net_id):
-        # delete network, if it exists
-        try:
-            self.networks_client.delete_network(net_id)
-        # if network is not found, this means it was deleted in the test
-        except lib_exc.NotFound:
-            pass
-
     @test.idempotent_id('f04f61a9-b7f3-4194-90b2-9bcf660d1bfe')
     def test_delete_network_with_subnet(self):
         # Creates a network
@@ -288,7 +281,8 @@ class NetworksTest(base.BaseNetworkTest):
         body = self.networks_client.create_network(name=name)
         network = body['network']
         net_id = network['id']
-        self.addCleanup(self._try_delete_network, net_id)
+        self.addCleanup(test_utils.call_and_ignore_notfound_exc,
+                        self.networks_client.delete_network, net_id)
 
         # Find a cidr that is not in use yet and create a subnet with it
         subnet = self.create_subnet(network)

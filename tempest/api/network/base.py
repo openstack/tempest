@@ -18,6 +18,7 @@ import netaddr
 from tempest.common.utils import data_utils
 from tempest import config
 from tempest import exceptions
+from tempest.lib.common.utils import test_utils
 from tempest.lib import exceptions as lib_exc
 import tempest.test
 
@@ -97,7 +98,7 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
         if CONF.service_available.neutron:
             # Clean up floating IPs
             for floating_ip in cls.floating_ips:
-                cls._try_delete_resource(
+                test_utils.call_and_ignore_notfound_exc(
                     cls.floating_ips_client.delete_floatingip,
                     floating_ip['id'])
 
@@ -106,51 +107,31 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
             if len(cls.metering_label_rules) > 0:
                 label_rules_client = cls.admin_metering_label_rules_client
             for metering_label_rule in cls.metering_label_rules:
-                cls._try_delete_resource(
+                test_utils.call_and_ignore_notfound_exc(
                     label_rules_client.delete_metering_label_rule,
                     metering_label_rule['id'])
             # Clean up metering labels
             for metering_label in cls.metering_labels:
-                cls._try_delete_resource(
+                test_utils.call_and_ignore_notfound_exc(
                     cls.admin_metering_labels_client.delete_metering_label,
                     metering_label['id'])
             # Clean up ports
             for port in cls.ports:
-                cls._try_delete_resource(cls.ports_client.delete_port,
-                                         port['id'])
+                test_utils.call_and_ignore_notfound_exc(
+                    cls.ports_client.delete_port, port['id'])
             # Clean up routers
             for router in cls.routers:
-                cls._try_delete_resource(cls.delete_router,
-                                         router)
+                test_utils.call_and_ignore_notfound_exc(
+                    cls.delete_router, router)
             # Clean up subnets
             for subnet in cls.subnets:
-                cls._try_delete_resource(cls.subnets_client.delete_subnet,
-                                         subnet['id'])
+                test_utils.call_and_ignore_notfound_exc(
+                    cls.subnets_client.delete_subnet, subnet['id'])
             # Clean up networks
             for network in cls.networks:
-                cls._try_delete_resource(cls.networks_client.delete_network,
-                                         network['id'])
+                test_utils.call_and_ignore_notfound_exc(
+                    cls.networks_client.delete_network, network['id'])
         super(BaseNetworkTest, cls).resource_cleanup()
-
-    @classmethod
-    def _try_delete_resource(self, delete_callable, *args, **kwargs):
-        """Cleanup resources in case of test-failure
-
-        Some resources are explicitly deleted by the test.
-        If the test failed to delete a resource, this method will execute
-        the appropriate delete methods. Otherwise, the method ignores NotFound
-        exceptions thrown for resources that were correctly deleted by the
-        test.
-
-        :param delete_callable: delete method
-        :param args: arguments for delete method
-        :param kwargs: keyword arguments for delete method
-        """
-        try:
-            delete_callable(*args, **kwargs)
-        # if resource is not found, this means it was deleted in the test
-        except lib_exc.NotFound:
-            pass
 
     @classmethod
     def create_network(cls, network_name=None):
@@ -259,12 +240,9 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
         body = cls.ports_client.list_ports(device_id=router['id'])
         interfaces = body['ports']
         for i in interfaces:
-            try:
-                cls.routers_client.remove_router_interface(
-                    router['id'],
-                    subnet_id=i['fixed_ips'][0]['subnet_id'])
-            except lib_exc.NotFound:
-                pass
+            test_utils.call_and_ignore_notfound_exc(
+                cls.routers_client.remove_router_interface, router['id'],
+                subnet_id=i['fixed_ips'][0]['subnet_id'])
         cls.routers_client.delete_router(router['id'])
 
 

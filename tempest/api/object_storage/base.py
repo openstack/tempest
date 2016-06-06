@@ -15,6 +15,7 @@
 
 from tempest.common import custom_matchers
 from tempest import config
+from tempest.lib.common.utils import test_utils
 from tempest.lib import exceptions as lib_exc
 import tempest.test
 
@@ -80,10 +81,8 @@ class BaseObjectTest(tempest.test.BaseTestCase):
                 objlist = container_client.list_all_container_objects(cont)
                 # delete every object in the container
                 for obj in objlist:
-                    try:
-                        object_client.delete_object(cont, obj['name'])
-                    except lib_exc.NotFound:
-                        pass
+                    test_utils.call_and_ignore_notfound_exc(
+                        object_client.delete_object, cont, obj['name'])
                 container_client.delete_container(cont)
             except lib_exc.NotFound:
                 pass

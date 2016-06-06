@@ -15,6 +15,7 @@
 
 from tempest.api.image import base
 from tempest.common.utils import data_utils
+from tempest.lib.common.utils import test_utils
 from tempest.lib import exceptions as lib_exc
 from tempest import test
 
@@ -36,7 +37,8 @@ class MetadataNamespacesTest(base.BaseV2ImageTest):
                                             display_name=namespace_name,
                                             resource_type_associations=name,
                                             protected=True)
-        self.addCleanup(self._cleanup_namespace, namespace_name)
+        self.addCleanup(test_utils.call_and_ignore_notfound_exc,
+                        self._cleanup_namespace, namespace_name)
         # get namespace details
         body = self.client.show_namespace(namespace_name)
         self.assertEqual(namespace_name, body['namespace'])
@@ -56,15 +58,11 @@ class MetadataNamespacesTest(base.BaseV2ImageTest):
         self.client.delete_namespace(namespace_name)
 
     def _cleanup_namespace(self, namespace_name):
-        # this is used to cleanup the resources
-        try:
-            body = self.client.show_namespace(namespace_name)
-            self.assertEqual(namespace_name, body['namespace'])
-            body = self.client.update_namespace(namespace=namespace_name,
-                                                description='Tempest',
-                                                visibility='private',
-                                                display_name=namespace_name,
-                                                protected=False)
-            self.client.delete_namespace(namespace_name)
-        except lib_exc.NotFound:
-            pass
+        body = self.client.show_namespace(namespace_name)
+        self.assertEqual(namespace_name, body['namespace'])
+        body = self.client.update_namespace(namespace=namespace_name,
+                                            description='Tempest',
+                                            visibility='private',
+                                            display_name=namespace_name,
+                                            protected=False)
+        self.client.delete_namespace(namespace_name)

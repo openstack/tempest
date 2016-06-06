@@ -17,6 +17,7 @@ from tempest.api.compute.floating_ips import base
 from tempest.common.utils import data_utils
 from tempest.common import waiters
 from tempest import config
+from tempest.lib.common.utils import test_utils
 from tempest.lib import exceptions as lib_exc
 from tempest import test
 
@@ -53,14 +54,6 @@ class FloatingIPsTestJSON(base.BaseFloatingIPsTest):
             cls.client.delete_floating_ip(cls.floating_ip_id)
         super(FloatingIPsTestJSON, cls).resource_cleanup()
 
-    def _try_delete_floating_ip(self, floating_ip_id):
-        # delete floating ip, if it exists
-        try:
-            self.client.delete_floating_ip(floating_ip_id)
-        # if not found, it depicts it was deleted in the test
-        except lib_exc.NotFound:
-            pass
-
     @test.idempotent_id('f7bfb946-297e-41b8-9e8c-aba8e9bb5194')
     @test.services('network')
     def test_allocate_floating_ip(self):
@@ -85,7 +78,8 @@ class FloatingIPsTestJSON(base.BaseFloatingIPsTest):
         # Creating the floating IP that is to be deleted in this method
         floating_ip_body = self.client.create_floating_ip(
             pool=CONF.network.floating_network_name)['floating_ip']
-        self.addCleanup(self._try_delete_floating_ip, floating_ip_body['id'])
+        self.addCleanup(test_utils.call_and_ignore_notfound_exc,
+                        self.client.delete_floating_ip, floating_ip_body['id'])
         # Deleting the floating IP from the project
         self.client.delete_floating_ip(floating_ip_body['id'])
         # Check it was really deleted.

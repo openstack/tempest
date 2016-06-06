@@ -27,7 +27,7 @@ from tempest.common.utils.linux import remote_client
 from tempest.common import waiters
 from tempest import config
 from tempest import exceptions
-from tempest.lib.common.utils import misc as misc_utils
+from tempest.lib.common.utils import test_utils
 from tempest.lib import exceptions as lib_exc
 from tempest.scenario import network_resources
 import tempest.test
@@ -94,21 +94,6 @@ class ScenarioTest(tempest.test.BaseTestCase):
         # NOTE(yfried): this list is cleaned at the end of test_methods and
         # not at the end of the class
         self.addCleanup(self._wait_for_cleanups)
-
-    def delete_wrapper(self, delete_thing, *args, **kwargs):
-        """Ignores NotFound exceptions for delete operations.
-
-        @param delete_thing: delete method of a resource. method will be
-            executed as delete_thing(*args, **kwargs)
-
-        """
-        try:
-            # Tempest clients return dicts, so there is no common delete
-            # method available. Using a callable instead
-            delete_thing(*args, **kwargs)
-        except lib_exc.NotFound:
-            # If the resource is already missing, mission accomplished.
-            pass
 
     def addCleanup_with_wait(self, waiter_callable, thing_id, thing_id_param,
                              cleanup_callable, cleanup_args=None,
@@ -254,7 +239,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
         self.addCleanup_with_wait(
             waiter_callable=waiters.wait_for_server_termination,
             thing_id=body['id'], thing_id_param='server_id',
-            cleanup_callable=self.delete_wrapper,
+            cleanup_callable=test_utils.call_and_ignore_notfound_exc,
             cleanup_args=[clients.servers_client.delete_server, body['id']],
             waiter_client=clients.servers_client)
         server = clients.servers_client.show_server(body['id'])['server']
@@ -274,7 +259,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
 
         self.addCleanup(self.volumes_client.wait_for_resource_deletion,
                         volume['id'])
-        self.addCleanup(self.delete_wrapper,
+        self.addCleanup(test_utils.call_and_ignore_notfound_exc,
                         self.volumes_client.delete_volume, volume['id'])
 
         # NOTE(e0ne): Cinder API v2 uses name instead of display_name
@@ -334,7 +319,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
         self.assertEqual(secgroup['name'], sg_name)
         self.assertEqual(secgroup['description'], sg_desc)
         self.addCleanup(
-            self.delete_wrapper,
+            test_utils.call_and_ignore_notfound_exc,
             self.compute_security_groups_client.delete_security_group,
             secgroup['id'])
 
@@ -373,7 +358,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
             message = ('Initializing SSH connection to %(ip)s failed. '
                        'Error: %(error)s' % {'ip': ip_address,
                                              'error': e})
-            caller = misc_utils.find_test_caller()
+            caller = test_utils.find_test_caller()
             if caller:
                 message = '(%s) %s' % (caller, message)
             LOG.exception(message)
@@ -463,7 +448,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
         self.addCleanup_with_wait(
             waiter_callable=_image_client.wait_for_resource_deletion,
             thing_id=image_id, thing_id_param='id',
-            cleanup_callable=self.delete_wrapper,
+            cleanup_callable=test_utils.call_and_ignore_notfound_exc,
             cleanup_args=[_image_client.delete_image, image_id])
         snapshot_image = _image_client.check_image(image_id)
 
@@ -475,12 +460,11 @@ class ScenarioTest(tempest.test.BaseTestCase):
                 self.addCleanup(
                     self.snapshots_client.wait_for_resource_deletion,
                     snapshot_id)
-                self.addCleanup(
-                    self.delete_wrapper, self.snapshots_client.delete_snapshot,
-                    snapshot_id)
+                self.addCleanup(test_utils.call_and_ignore_notfound_exc,
+                                self.snapshots_client.delete_snapshot,
+                                snapshot_id)
                 waiters.wait_for_snapshot_status(self.snapshots_client,
                                                  snapshot_id, 'available')
-
         image_name = snapshot_image['name']
         self.assertEqual(name, image_name)
         LOG.debug("Created snapshot image %s for server %s",
@@ -537,7 +521,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
 
             return (proc.returncode == 0) == should_succeed
 
-        caller = misc_utils.find_test_caller()
+        caller = test_utils.find_test_caller()
         LOG.debug('%(caller)s begins to ping %(ip)s in %(timeout)s sec and the'
                   ' expected result is %(should_succeed)s' % {
                       'caller': caller, 'ip': ip_address, 'timeout': timeout,
@@ -606,7 +590,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
             pool_name = CONF.network.floating_network_name
         floating_ip = (self.compute_floating_ips_client.
                        create_floating_ip(pool=pool_name)['floating_ip'])
-        self.addCleanup(self.delete_wrapper,
+        self.addCleanup(test_utils.call_and_ignore_notfound_exc,
                         self.compute_floating_ips_client.delete_floating_ip,
                         floating_ip['id'])
         self.compute_floating_ips_client.associate_floating_ip_to_server(
@@ -701,7 +685,8 @@ class NetworkScenarioTest(ScenarioTest):
             networks_client=networks_client, routers_client=routers_client,
             **result['network'])
         self.assertEqual(network.name, name)
-        self.addCleanup(self.delete_wrapper, network.delete)
+        self.addCleanup(test_utils.call_and_ignore_notfound_exc,
+                        network.delete)
         return network
 
     def _list_networks(self, *args, **kwargs):
@@ -794,7 +779,7 @@ class NetworkScenarioTest(ScenarioTest):
             subnets_client=subnets_client,
             routers_client=routers_client, **result['subnet'])
         self.assertEqual(subnet.cidr, str_cidr)
-        self.addCleanup(self.delete_wrapper, subnet.delete)
+        self.addCleanup(test_utils.call_and_ignore_notfound_exc, subnet.delete)
         return subnet
 
     def _create_port(self, network_id, client=None, namestart='port-quotatest',
@@ -809,7 +794,7 @@ class NetworkScenarioTest(ScenarioTest):
         self.assertIsNotNone(result, 'Unable to allocate port')
         port = network_resources.DeletablePort(ports_client=client,
                                                **result['port'])
-        self.addCleanup(self.delete_wrapper, port.delete)
+        self.addCleanup(test_utils.call_and_ignore_notfound_exc, port.delete)
         return port
 
     def _get_server_port_id_and_ip4(self, server, ip_addr=None):
@@ -860,7 +845,8 @@ class NetworkScenarioTest(ScenarioTest):
         floating_ip = network_resources.DeletableFloatingIp(
             client=client,
             **result['floatingip'])
-        self.addCleanup(self.delete_wrapper, floating_ip.delete)
+        self.addCleanup(test_utils.call_and_ignore_notfound_exc,
+                        floating_ip.delete)
         return floating_ip
 
     def _associate_floating_ip(self, floating_ip, server):
@@ -998,7 +984,8 @@ class NetworkScenarioTest(ScenarioTest):
         self.assertEqual(secgroup.name, sg_name)
         self.assertEqual(tenant_id, secgroup.tenant_id)
         self.assertEqual(secgroup.description, sg_desc)
-        self.addCleanup(self.delete_wrapper, secgroup.delete)
+        self.addCleanup(test_utils.call_and_ignore_notfound_exc,
+                        secgroup.delete)
         return secgroup
 
     def _default_security_group(self, client=None, tenant_id=None):
@@ -1158,7 +1145,7 @@ class NetworkScenarioTest(ScenarioTest):
         router = network_resources.DeletableRouter(routers_client=client,
                                                    **result['router'])
         self.assertEqual(router.name, name)
-        self.addCleanup(self.delete_wrapper, router.delete)
+        self.addCleanup(test_utils.call_and_ignore_notfound_exc, router.delete)
         return router
 
     def _update_router_admin_state(self, router, admin_state_up):
@@ -1287,11 +1274,8 @@ class BaremetalScenarioTest(ScenarioTest):
         """Waits for a node to be associated with instance_id."""
 
         def _get_node():
-            node = None
-            try:
-                node = self.get_node(instance_id=instance_id)
-            except lib_exc.NotFound:
-                pass
+            node = test_utils.call_and_ignore_notfound_exc(
+                self.get_node, instance_id=instance_id)
             return node is not None
 
         if not tempest.test.call_until_true(
@@ -1438,7 +1422,7 @@ class ObjectStorageScenarioTest(ScenarioTest):
         # look for the container to assure it is created
         self.list_and_check_container_objects(name)
         LOG.debug('Container %s created' % (name))
-        self.addCleanup(self.delete_wrapper,
+        self.addCleanup(test_utils.call_and_ignore_notfound_exc,
                         self.container_client.delete_container,
                         name)
         return name
@@ -1451,7 +1435,7 @@ class ObjectStorageScenarioTest(ScenarioTest):
         obj_name = obj_name or data_utils.rand_name('swift-scenario-object')
         obj_data = data_utils.arbitrary_string()
         self.object_client.create_object(container_name, obj_name, obj_data)
-        self.addCleanup(self.delete_wrapper,
+        self.addCleanup(test_utils.call_and_ignore_notfound_exc,
                         self.object_client.delete_object,
                         container_name,
                         obj_name)

@@ -16,7 +16,7 @@ from oslo_log import log
 
 from tempest.api.compute import base
 from tempest.common.utils import data_utils
-from tempest.lib import exceptions as lib_exc
+from tempest.lib.common.utils import test_utils
 from tempest import test
 
 LOG = log.getLogger(__name__)
@@ -41,9 +41,8 @@ class AgentsAdminTestJSON(base.BaseV2ComputeAdminTest):
 
     def tearDown(self):
         try:
-            self.client.delete_agent(self.agent_id)
-        except lib_exc.NotFound:
-            pass
+            test_utils.call_and_ignore_notfound_exc(
+                self.client.delete_agent, self.agent_id)
         except Exception:
             LOG.exception('Exception raised deleting agent %s', self.agent_id)
         super(AgentsAdminTestJSON, self).tearDown()

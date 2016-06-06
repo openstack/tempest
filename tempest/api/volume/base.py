@@ -18,7 +18,7 @@ from tempest.common.utils import data_utils
 from tempest.common import waiters
 from tempest import config
 from tempest import exceptions
-from tempest.lib import exceptions as lib_exc
+from tempest.lib.common.utils import test_utils
 import tempest.test
 
 CONF = config.CONF
@@ -223,15 +223,9 @@ class BaseVolumeAdminTest(BaseVolumeTest):
     @classmethod
     def clear_qos_specs(cls):
         for qos_id in cls.qos_specs:
-            try:
-                cls.volume_qos_client.delete_qos(qos_id)
-            except lib_exc.NotFound:
-                # The qos_specs may have already been deleted which is OK.
-                pass
+            test_utils.call_and_ignore_notfound_exc(
+                cls.volume_qos_client.delete_qos, qos_id)
 
         for qos_id in cls.qos_specs:
-            try:
-                cls.volume_qos_client.wait_for_resource_deletion(qos_id)
-            except lib_exc.NotFound:
-                # The qos_specs may have already been deleted which is OK.
-                pass
+            test_utils.call_and_ignore_notfound_exc(
+                cls.volume_qos_client.wait_for_resource_deletion, qos_id)
