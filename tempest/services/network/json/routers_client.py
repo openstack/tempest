@@ -42,15 +42,6 @@ class RoutersClient(base.BaseNetworkClient):
         uri = '/routers'
         return self.list_resources(uri, **filters)
 
-    def delete_extra_routes(self, router_id):
-        uri = '/routers/%s' % router_id
-        put_body = {
-            'router': {
-                'routes': None
-            }
-        }
-        return self.update_resource(uri, put_body)
-
     def add_router_interface(self, router_id, **kwargs):
         """Add router interface.
 

@@ -325,13 +325,13 @@ class RoutersTest(base.BaseRouterTest):
                              routes[i]['destination'])
             self.assertEqual(test_routes[i]['nexthop'], routes[i]['nexthop'])
 
-        self.routers_client.delete_extra_routes(router['id'])
+        self._delete_extra_routes(router['id'])
         show_body_after_deletion = self.routers_client.show_router(
             router['id'])
         self.assertEmpty(show_body_after_deletion['router']['routes'])
 
     def _delete_extra_routes(self, router_id):
-        self.routers_client.delete_extra_routes(router_id)
+        self.routers_client.update_router(router_id, routes=None)
 
     @test.idempotent_id('a8902683-c788-4246-95c7-ad9c6d63a4d9')
     def test_update_router_admin_state(self):
