@@ -823,7 +823,7 @@ def add_router_interface(routers):
         if router['gateway']:
             if CONF.network.public_network_id:
                 ext_net = CONF.network.public_network_id
-                client.routers._update_router(
+                client.routers.update_router(
                     router_id, set_enable_snat=True,
                     external_gateway_info={"network_id": ext_net})
             else:
