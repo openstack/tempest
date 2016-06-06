@@ -42,16 +42,6 @@ class RoutersClient(base.BaseNetworkClient):
         uri = '/routers'
         return self.list_resources(uri, **filters)
 
-    def update_extra_routes(self, router_id, **kwargs):
-        """Update Extra routes.
-
-        Available params: see http://developer.openstack.org/
-                              api-ref-networking-v2-ext.html#updateExtraRoutes
-        """
-        uri = '/routers/%s' % router_id
-        put_body = {'router': kwargs}
-        return self.update_resource(uri, put_body)
-
     def delete_extra_routes(self, router_id):
         uri = '/routers/%s' % router_id
         put_body = {
