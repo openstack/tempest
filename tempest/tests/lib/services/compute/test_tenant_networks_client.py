@@ -14,10 +14,10 @@
 
 from tempest.lib.services.compute import tenant_networks_client
 from tempest.tests.lib import fake_auth_provider
-from tempest.tests.lib.services.compute import base
+from tempest.tests.lib.services import base
 
 
-class TestTenantNetworksClient(base.BaseComputeServiceTest):
+class TestTenantNetworksClient(base.BaseServiceTest):
 
     FAKE_NETWORK = {
         "cidr": "None",

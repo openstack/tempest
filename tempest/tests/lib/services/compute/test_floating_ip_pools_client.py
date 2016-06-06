@@ -14,10 +14,10 @@
 
 from tempest.lib.services.compute import floating_ip_pools_client
 from tempest.tests.lib import fake_auth_provider
-from tempest.tests.lib.services.compute import base
+from tempest.tests.lib.services import base
 
 
-class TestFloatingIPPoolsClient(base.BaseComputeServiceTest):
+class TestFloatingIPPoolsClient(base.BaseServiceTest):
 
     FAKE_FLOATING_IP_POOLS = {
         "floating_ip_pools":

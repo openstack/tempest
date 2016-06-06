@@ -17,10 +17,10 @@ from tempest.tests.lib import fake_auth_provider
 
 from tempest.lib.services.compute import server_groups_client
 from tempest.tests.lib import fake_http
-from tempest.tests.lib.services.compute import base
+from tempest.tests.lib.services import base
 
 
-class TestServerGroupsClient(base.BaseComputeServiceTest):
+class TestServerGroupsClient(base.BaseServiceTest):
 
     server_group = {
         "id": "5bbcc3c4-1da2-4437-a48a-66f15b1b13f9",

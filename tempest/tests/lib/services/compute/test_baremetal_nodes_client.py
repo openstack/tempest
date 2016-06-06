@@ -16,10 +16,10 @@ import copy
 
 from tempest.lib.services.compute import baremetal_nodes_client
 from tempest.tests.lib import fake_auth_provider
-from tempest.tests.lib.services.compute import base
+from tempest.tests.lib.services import base
 
 
-class TestBareMetalNodesClient(base.BaseComputeServiceTest):
+class TestBareMetalNodesClient(base.BaseServiceTest):
 
     FAKE_NODE_INFO = {'cpus': '8',
                       'disk_gb': '64',

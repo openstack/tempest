@@ -14,10 +14,10 @@
 
 from tempest.lib.services.compute import agents_client
 from tempest.tests.lib import fake_auth_provider
-from tempest.tests.lib.services.compute import base
+from tempest.tests.lib.services import base
 
 
-class TestAgentsClient(base.BaseComputeServiceTest):
+class TestAgentsClient(base.BaseServiceTest):
     FAKE_CREATE_AGENT = {
         "agent": {
             "url": "http://foo.com",

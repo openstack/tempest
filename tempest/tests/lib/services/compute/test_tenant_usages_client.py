@@ -14,10 +14,10 @@
 
 from tempest.lib.services.compute import tenant_usages_client
 from tempest.tests.lib import fake_auth_provider
-from tempest.tests.lib.services.compute import base
+from tempest.tests.lib.services import base
 
 
-class TestTenantUsagesClient(base.BaseComputeServiceTest):
+class TestTenantUsagesClient(base.BaseServiceTest):
 
     FAKE_SERVER_USAGES = [{
         "ended_at": None,

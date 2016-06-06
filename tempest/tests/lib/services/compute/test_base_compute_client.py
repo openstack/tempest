@@ -19,10 +19,10 @@ from tempest.lib import exceptions
 from tempest.lib.services.compute import base_compute_client
 from tempest.tests.lib import fake_auth_provider
 from tempest.tests.lib import fake_http
-from tempest.tests.lib.services.compute import base
+from tempest.tests.lib.services import base
 
 
-class TestMicroversionHeaderCheck(base.BaseComputeServiceTest):
+class TestMicroversionHeaderCheck(base.BaseServiceTest):
 
     def setUp(self):
         super(TestMicroversionHeaderCheck, self).setUp()
@@ -72,7 +72,7 @@ class DummyServiceClient1(base_compute_client.BaseComputeClient):
         return self.get_schema(self.schema_versions_info)
 
 
-class TestSchemaVersionsNone(base.BaseComputeServiceTest):
+class TestSchemaVersionsNone(base.BaseServiceTest):
     api_microversion = None
     expected_schema = 'schemav21'
 
@@ -130,7 +130,7 @@ class DummyServiceClient2(base_compute_client.BaseComputeClient):
         return self.get_schema(self.schema_versions_info)
 
 
-class TestSchemaVersionsNotFound(base.BaseComputeServiceTest):
+class TestSchemaVersionsNotFound(base.BaseServiceTest):
     api_microversion = '2.10'
     expected_schema = 'schemav210'
 
@@ -149,7 +149,7 @@ class TestSchemaVersionsNotFound(base.BaseComputeServiceTest):
                           self.client.return_selected_schema)
 
 
-class TestClientWithoutMicroversionHeader(base.BaseComputeServiceTest):
+class TestClientWithoutMicroversionHeader(base.BaseServiceTest):
 
     def setUp(self):
         super(TestClientWithoutMicroversionHeader, self).setUp()
@@ -172,7 +172,7 @@ class TestClientWithoutMicroversionHeader(base.BaseComputeServiceTest):
             self.client.get('fake_url')
 
 
-class TestClientWithMicroversionHeader(base.BaseComputeServiceTest):
+class TestClientWithMicroversionHeader(base.BaseServiceTest):
 
     def setUp(self):
         super(TestClientWithMicroversionHeader, self).setUp()

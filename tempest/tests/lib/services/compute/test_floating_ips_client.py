@@ -17,10 +17,10 @@ from oslotest import mockpatch
 from tempest.lib import exceptions as lib_exc
 from tempest.lib.services.compute import floating_ips_client
 from tempest.tests.lib import fake_auth_provider
-from tempest.tests.lib.services.compute import base
+from tempest.tests.lib.services import base
 
 
-class TestFloatingIpsClient(base.BaseComputeServiceTest):
+class TestFloatingIpsClient(base.BaseServiceTest):
 
     floating_ip = {"fixed_ip": None,
                    "id": "46d61064-13ba-4bf0-9557-69de824c3d6f",

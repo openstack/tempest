@@ -20,10 +20,10 @@ from oslotest import mockpatch
 from tempest.lib.services.compute import flavors_client
 from tempest.tests.lib import fake_auth_provider
 from tempest.tests.lib import fake_http
-from tempest.tests.lib.services.compute import base
+from tempest.tests.lib.services import base
 
 
-class TestFlavorsClient(base.BaseComputeServiceTest):
+class TestFlavorsClient(base.BaseServiceTest):
 
     FAKE_FLAVOR = {
         "disk": 1,

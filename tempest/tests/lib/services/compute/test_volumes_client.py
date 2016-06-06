@@ -19,10 +19,10 @@ from oslotest import mockpatch
 from tempest.lib import exceptions as lib_exc
 from tempest.lib.services.compute import volumes_client
 from tempest.tests.lib import fake_auth_provider
-from tempest.tests.lib.services.compute import base
+from tempest.tests.lib.services import base
 
 
-class TestVolumesClient(base.BaseComputeServiceTest):
+class TestVolumesClient(base.BaseServiceTest):
 
     FAKE_VOLUME = {
         "id": "521752a6-acf6-4b2d-bc7a-119f9148cd8c",

@@ -16,10 +16,10 @@ import datetime
 
 from tempest.lib.services.compute import instance_usage_audit_log_client
 from tempest.tests.lib import fake_auth_provider
-from tempest.tests.lib.services.compute import base
+from tempest.tests.lib.services import base
 
 
-class TestInstanceUsagesAuditLogClient(base.BaseComputeServiceTest):
+class TestInstanceUsagesAuditLogClient(base.BaseServiceTest):
 
     FAKE_AUDIT_LOG = {
         "hosts_not_run": [

@@ -14,10 +14,10 @@
 
 from tempest.lib.services.compute import security_group_default_rules_client
 from tempest.tests.lib import fake_auth_provider
-from tempest.tests.lib.services.compute import base
+from tempest.tests.lib.services import base
 
 
-class TestSecurityGroupDefaultRulesClient(base.BaseComputeServiceTest):
+class TestSecurityGroupDefaultRulesClient(base.BaseServiceTest):
     FAKE_RULE = {
         "from_port": 80,
         "id": 1,
