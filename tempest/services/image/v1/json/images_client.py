@@ -32,10 +32,6 @@ CHUNKSIZE = 1024 * 64  # 64kB
 
 class ImagesClient(rest_client.RestClient):
 
-    def __init__(self, auth_provider, catalog_type, region, **kwargs):
-        super(ImagesClient, self).__init__(
-            auth_provider, catalog_type, region, **kwargs)
-
     def _image_meta_from_headers(self, headers):
         meta = {'properties': {}}
         for key, value in six.iteritems(headers):
