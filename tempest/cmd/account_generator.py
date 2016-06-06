@@ -98,12 +98,12 @@ import tempest.lib.auth
 from tempest.lib.common.utils import data_utils
 import tempest.lib.exceptions
 from tempest.lib.services.network import networks_client
+from tempest.lib.services.network import routers_client
 from tempest.lib.services.network import subnets_client
 from tempest.services.identity.v2.json import identity_client
 from tempest.services.identity.v2.json import roles_client
 from tempest.services.identity.v2.json import tenants_client
 from tempest.services.identity.v2.json import users_client
-from tempest.services.network.json import routers_client
 
 LOG = None
 CONF = config.CONF

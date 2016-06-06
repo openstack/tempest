@@ -1,0 +1,6 @@
+---
+features:
+  - Define routers_client as stable library interface.
+    The routers_client module is defined as library interface,
+    so the other projects can use the module as stable library
+    without any maintenance changes.
