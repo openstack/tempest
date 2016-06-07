@@ -155,6 +155,9 @@ class V3CredsClient(CredsClient):
     def get_credentials(self, user, project, password):
         # User, project and domain already include both ID and name here,
         # so there's no need to use the fill_in mode.
+        # NOTE(andreaf) We need to set all fields in the returned credentials.
+        # Scope is then used to pick only those relevant for the type of
+        # token needed by each service client.
         return auth.get_credentials(
             auth_url=None,
             fill_in=False,
@@ -163,7 +166,9 @@ class V3CredsClient(CredsClient):
             project_name=project['name'], project_id=project['id'],
             password=password,
             project_domain_id=self.creds_domain['id'],
-            project_domain_name=self.creds_domain['name'])
+            project_domain_name=self.creds_domain['name'],
+            domain_id=self.creds_domain['id'],
+            domain_name=self.creds_domain['name'])
 
     def _assign_user_role(self, project, user, role):
         self.roles_client.assign_user_role_on_project(project['id'],

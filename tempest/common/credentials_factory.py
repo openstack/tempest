@@ -39,19 +39,19 @@ to avoid circular dependencies."""
 
 
 # Subset of the parameters of credential providers that depend on configuration
-def _get_common_provider_params():
+def get_common_provider_params():
     return {
         'credentials_domain': CONF.auth.default_credentials_domain_name,
         'admin_role': CONF.identity.admin_role
     }
 
 
-def _get_dynamic_provider_params():
-    return _get_common_provider_params()
+def get_dynamic_provider_params():
+    return get_common_provider_params()
 
 
-def _get_preprov_provider_params():
-    _common_params = _get_common_provider_params()
+def get_preprov_provider_params():
+    _common_params = get_common_provider_params()
     reseller_admin_role = CONF.object_storage.reseller_admin_role
     return dict(_common_params, **dict([
         ('accounts_lock_dir', lockutils.get_lock_path(CONF)),
@@ -80,13 +80,13 @@ def get_credentials_provider(name, network_resources=None,
             network_resources=network_resources,
             identity_version=identity_version,
             admin_creds=admin_creds,
-            **_get_dynamic_provider_params())
+            **get_dynamic_provider_params())
     else:
         if CONF.auth.test_accounts_file:
             # Most params are not relevant for pre-created accounts
             return preprov_creds.PreProvisionedCredentialProvider(
                 name=name, identity_version=identity_version,
-                **_get_preprov_provider_params())
+                **get_preprov_provider_params())
         else:
             raise exceptions.InvalidConfiguration(
                 'A valid credential provider is needed')
@@ -106,7 +106,7 @@ def is_admin_available(identity_version):
     elif CONF.auth.test_accounts_file:
         check_accounts = preprov_creds.PreProvisionedCredentialProvider(
             identity_version=identity_version, name='check_admin',
-            **_get_preprov_provider_params())
+            **get_preprov_provider_params())
         if not check_accounts.admin_available():
             is_admin = False
     else:
@@ -131,7 +131,7 @@ def is_alt_available(identity_version):
     if CONF.auth.test_accounts_file:
         check_accounts = preprov_creds.PreProvisionedCredentialProvider(
             identity_version=identity_version, name='check_alt',
-            **_get_preprov_provider_params())
+            **get_preprov_provider_params())
     else:
         raise exceptions.InvalidConfiguration(
             'A valid credential provider is needed')
