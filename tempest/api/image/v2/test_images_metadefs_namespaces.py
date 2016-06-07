@@ -26,7 +26,7 @@ class MetadataNamespacesTest(base.BaseV2ImageTest):
     @test.idempotent_id('319b765e-7f3d-4b3d-8b37-3ca3876ee768')
     def test_basic_metadata_definition_namespaces(self):
         # get the available resource types and use one resource_type
-        body = self.client.list_resource_types()
+        body = self.resource_types_client.list_resource_types()
         resource_name = body['resource_types'][0]['name']
         name = [{'name': resource_name}]
         namespace_name = data_utils.rand_name('namespace')

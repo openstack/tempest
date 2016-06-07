@@ -138,6 +138,8 @@ from tempest.services.image.v2.json.images_client import \
 from tempest.services.image.v2.json.members_client import MembersClient \
     as MembersClientV2
 from tempest.services.image.v2.json.namespaces_client import NamespacesClient
+from tempest.services.image.v2.json.resource_types_client import \
+    ResourceTypesClient
 from tempest.services.image.v2.json.schemas_client import SchemasClient
 from tempest.services.object_storage.account_client import AccountClient
 from tempest.services.object_storage.container_client import ContainerClient
@@ -362,6 +364,14 @@ class Manager(manager.Manager):
                 build_timeout=CONF.image.build_timeout,
                 **self.default_params)
             self.namespaces_client = NamespacesClient(
+                self.auth_provider,
+                CONF.image.catalog_type,
+                CONF.image.region or CONF.identity.region,
+                endpoint_type=CONF.image.endpoint_type,
+                build_interval=CONF.image.build_interval,
+                build_timeout=CONF.image.build_timeout,
+                **self.default_params)
+            self.resource_types_client = ResourceTypesClient(
                 self.auth_provider,
                 CONF.image.catalog_type,
                 CONF.image.region or CONF.identity.region,
