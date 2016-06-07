@@ -205,6 +205,8 @@ Tempest's config around network configuration.
 
 Enabling Remote Access to Created Servers
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Network Creation/Usage for Servers
+""""""""""""""""""""""""""""""""""
 When Tempest creates servers for testing, some tests require being able to
 connect those servers. Depending on the configuration of the cloud, the methods
 for doing this can be different. In certain configurations it is required to
@@ -214,23 +216,8 @@ and ensure that regardless of the cloud's configuration it'll still be able to
 run. This section covers the different methods of configuring Tempest to provide
 a network when creating servers.
 
-The ``validation`` group gathers all the connection options to remotely access the
-created servers.
-
-To enable remote access to servers, at least the three following options need to be
-set:
-
-* The ``run_validation`` option needs be set to ``true``.
-
-* The ``connect_method`` option. Two connect methods are available: ``fixed`` and
-  ``floating``, the later being set by default.
-
-* The ``auth_method`` option. Currently, only authentication by keypair is
-  available.
-
-
 Fixed Network Name
-""""""""""""""""""
+''''''''''''''''''
 This is the simplest method of specifying how networks should be used. You can
 just specify a single network name/label to use for all server creations. The
 limitation with this is that all projects and users must be able to see
@@ -252,7 +239,7 @@ warning will be logged stating that it couldn't be found.
 
 
 Accounts File
-"""""""""""""
+'''''''''''''
 If you are using an accounts file to provide credentials for running Tempest
 then you can leverage it to also specify which network should be used with
 server creations on a per project and user pair basis. This provides
@@ -277,7 +264,7 @@ misconfiguration or a missing network in the accounts file.
 
 
 With Dynamic Credentials
-""""""""""""""""""""""""
+''''''''''''''''''''''''
 With dynamic credentials enabled and using nova-network, your only option for
 configuration is to either set a fixed network name or not. However, in most
 cases it shouldn't matter because nova-network should have no problem booting a
@@ -301,6 +288,34 @@ credentials's automatic provisioning of network resources. If this option is set
 to False you will have to either rely on there only being a single/default
 network available for the server creation, or use ``fixed_network_name`` to
 inform Tempest which network to use.
+
+SSH Connection Configuration
+""""""""""""""""""""""""""""
+There are also several different ways to actually establish a connection and
+authenticate/login on the server. After a server is booted with a provided
+network there are still details needed to know how to actually connect to
+the server. The ``validation`` group gathers all the options regarding
+connecting to and remotely accessing the created servers.
+
+To enable remote access to servers, there are 3 options at a minimum that are used:
+
+ #. ``run_validation``
+ #. ``connect_method``
+ #. ``auth_method``
+
+The ``run_validation`` is used to enable or disable ssh connectivity for
+all tests (with the exception of scenario tests which do not have a flag for
+enabling or disabling ssh) To enable ssh connectivity this needs be set to ``true``.
+
+The ``connect_method`` option is used to tell tempest what kind of IP to use for
+establishing a connection to the server. Two methods are available: ``fixed``
+and ``floating``, the later being set by default. If this is set to floating
+tempest will create a floating ip for the server before attempted to connect
+to it. The IP for the floating ip is what is used for the connection.
+
+For the ``auth_method`` option there is currently, only one valid option,
+``keypair``. With this set to ``keypair`` tempest will create an ssh keypair
+and use that for authenticating against the created server.
 
 Configuring Available Services
 ------------------------------
