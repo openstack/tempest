@@ -14,10 +14,10 @@
 
 from tempest.lib.services.compute import hosts_client
 from tempest.tests.lib import fake_auth_provider
-from tempest.tests.lib.services.compute import base
+from tempest.tests.lib.services import base
 
 
-class TestHostsClient(base.BaseComputeServiceTest):
+class TestHostsClient(base.BaseServiceTest):
     FAKE_HOST_DATA = {
         "host": {
             "resource": {

@@ -14,10 +14,10 @@
 
 from tempest.lib.services.compute import interfaces_client
 from tempest.tests.lib import fake_auth_provider
-from tempest.tests.lib.services.compute import base
+from tempest.tests.lib.services import base
 
 
-class TestInterfacesClient(base.BaseComputeServiceTest):
+class TestInterfacesClient(base.BaseServiceTest):
     # Data Values to be used for testing #
     FAKE_INTERFACE_DATA = {
         "fixed_ips": [{

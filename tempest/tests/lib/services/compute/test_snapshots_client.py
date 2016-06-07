@@ -17,10 +17,10 @@ from oslotest import mockpatch
 from tempest.lib import exceptions as lib_exc
 from tempest.lib.services.compute import snapshots_client
 from tempest.tests.lib import fake_auth_provider
-from tempest.tests.lib.services.compute import base
+from tempest.tests.lib.services import base
 
 
-class TestSnapshotsClient(base.BaseComputeServiceTest):
+class TestSnapshotsClient(base.BaseServiceTest):
 
     FAKE_SNAPSHOT = {
         "createdAt": "2015-10-02T16:27:54.724209",

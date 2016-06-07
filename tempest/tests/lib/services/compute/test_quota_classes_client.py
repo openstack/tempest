@@ -16,10 +16,10 @@ import copy
 
 from tempest.lib.services.compute import quota_classes_client
 from tempest.tests.lib import fake_auth_provider
-from tempest.tests.lib.services.compute import base
+from tempest.tests.lib.services import base
 
 
-class TestQuotaClassesClient(base.BaseComputeServiceTest):
+class TestQuotaClassesClient(base.BaseServiceTest):
 
     FAKE_QUOTA_CLASS_SET = {
         "injected_file_content_bytes": 10240,

@@ -19,7 +19,7 @@ from tempest.tests import base
 from tempest.tests.lib import fake_http
 
 
-class BaseComputeServiceTest(base.TestCase):
+class BaseServiceTest(base.TestCase):
     def create_response(self, body, to_utf=False, status=200, headers=None):
         json_body = {}
         if body:

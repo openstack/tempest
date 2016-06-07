@@ -19,10 +19,10 @@ from oslotest import mockpatch
 from tempest.lib import exceptions as lib_exc
 from tempest.lib.services.compute import images_client
 from tempest.tests.lib import fake_auth_provider
-from tempest.tests.lib.services.compute import base
+from tempest.tests.lib.services import base
 
 
-class TestImagesClient(base.BaseComputeServiceTest):
+class TestImagesClient(base.BaseServiceTest):
     # Data Dictionaries used for testing #
     FAKE_IMAGE_METADATA = {
         "list":

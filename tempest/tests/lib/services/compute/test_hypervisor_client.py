@@ -14,10 +14,10 @@
 
 from tempest.lib.services.compute import hypervisor_client
 from tempest.tests.lib import fake_auth_provider
-from tempest.tests.lib.services.compute import base
+from tempest.tests.lib.services import base
 
 
-class TestHypervisorClient(base.BaseComputeServiceTest):
+class TestHypervisorClient(base.BaseServiceTest):
 
     hypervisor_id = "1"
     hypervisor_name = "hyper.hostname.com"

@@ -14,10 +14,10 @@
 
 from tempest.lib.services.compute import limits_client
 from tempest.tests.lib import fake_auth_provider
-from tempest.tests.lib.services.compute import base
+from tempest.tests.lib.services import base
 
 
-class TestLimitsClient(base.BaseComputeServiceTest):
+class TestLimitsClient(base.BaseServiceTest):
 
     def setUp(self):
         super(TestLimitsClient, self).setUp()

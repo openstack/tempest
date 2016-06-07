@@ -14,10 +14,10 @@
 
 from tempest.lib.services.compute import aggregates_client
 from tempest.tests.lib import fake_auth_provider
-from tempest.tests.lib.services.compute import base
+from tempest.tests.lib.services import base
 
 
-class TestAggregatesClient(base.BaseComputeServiceTest):
+class TestAggregatesClient(base.BaseServiceTest):
     FAKE_SHOW_AGGREGATE = {
         "aggregate":
         {

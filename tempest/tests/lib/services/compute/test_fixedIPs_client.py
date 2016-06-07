@@ -14,10 +14,10 @@
 
 from tempest.lib.services.compute import fixed_ips_client
 from tempest.tests.lib import fake_auth_provider
-from tempest.tests.lib.services.compute import base
+from tempest.tests.lib.services import base
 
 
-class TestFixedIPsClient(base.BaseComputeServiceTest):
+class TestFixedIPsClient(base.BaseServiceTest):
     FIXED_IP_INFO = {"fixed_ip": {"address": "10.0.0.1",
                                   "cidr": "10.11.12.0/24",
                                   "host": "localhost",
