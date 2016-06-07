@@ -410,7 +410,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
         img_container_format = CONF.scenario.img_container_format
         img_disk_format = CONF.scenario.img_disk_format
         img_properties = CONF.scenario.img_properties
-        LOG.debug("paths: img: %s, container_fomat: %s, disk_format: %s, "
+        LOG.debug("paths: img: %s, container_format: %s, disk_format: %s, "
                   "properties: %s, ami: %s, ari: %s, aki: %s" %
                   (img_path, img_container_format, img_disk_format,
                    img_properties, ami_img_path, ari_img_path, aki_img_path))
