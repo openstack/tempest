@@ -132,51 +132,6 @@ class ImagesClient(rest_client.RestClient):
         self.expected_success(204, resp.status)
         return rest_client.ResponseBody(resp)
 
-    def list_image_members(self, image_id):
-        url = 'images/%s/members' % image_id
-        resp, body = self.get(url)
-        self.expected_success(200, resp.status)
-        body = json.loads(body)
-        return rest_client.ResponseBody(resp, body)
-
-    def create_image_member(self, image_id, **kwargs):
-        """Create an image member.
-
-        Available params: see http://developer.openstack.org/
-                              api-ref-image-v2.html#createImageMember-v2
-        """
-        url = 'images/%s/members' % image_id
-        data = json.dumps(kwargs)
-        resp, body = self.post(url, data)
-        self.expected_success(200, resp.status)
-        body = json.loads(body)
-        return rest_client.ResponseBody(resp, body)
-
-    def update_image_member(self, image_id, member_id, **kwargs):
-        """Update an image member.
-
-        Available params: see http://developer.openstack.org/
-                              api-ref-image-v2.html#updateImageMember-v2
-        """
-        url = 'images/%s/members/%s' % (image_id, member_id)
-        data = json.dumps(kwargs)
-        resp, body = self.put(url, data)
-        self.expected_success(200, resp.status)
-        body = json.loads(body)
-        return rest_client.ResponseBody(resp, body)
-
-    def show_image_member(self, image_id, member_id):
-        url = 'images/%s/members/%s' % (image_id, member_id)
-        resp, body = self.get(url)
-        self.expected_success(200, resp.status)
-        return rest_client.ResponseBody(resp, json.loads(body))
-
-    def delete_image_member(self, image_id, member_id):
-        url = 'images/%s/members/%s' % (image_id, member_id)
-        resp, _ = self.delete(url)
-        self.expected_success(204, resp.status)
-        return rest_client.ResponseBody(resp)
-
     def show_schema(self, schema):
         url = 'schemas/%s' % schema
         resp, body = self.get(url)
