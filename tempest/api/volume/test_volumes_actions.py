@@ -18,6 +18,7 @@ from tempest.api.volume import base
 from tempest.common.utils import data_utils
 from tempest.common import waiters
 from tempest import config
+from tempest import exceptions
 from tempest.lib.common.utils import test_utils
 from tempest import test
 
@@ -30,7 +31,16 @@ class VolumesV2ActionsTest(base.BaseVolumeTest):
     def setup_clients(cls):
         super(VolumesV2ActionsTest, cls).setup_clients()
         cls.client = cls.volumes_client
-        cls.image_client = cls.os.image_client
+        if CONF.service_available.glance:
+            # Check if glance v1 is available to determine which client to use.
+            if CONF.image_feature_enabled.api_v1:
+                cls.image_client = cls.os.image_client
+            elif CONF.image_feature_enabled.api_v2:
+                cls.image_client = cls.os.image_client_v2
+            else:
+                raise exceptions.InvalidConfiguration(
+                    'Either api_v1 or api_v2 must be True in '
+                    '[image-feature-enabled].')
 
     @classmethod
     def resource_setup(cls):

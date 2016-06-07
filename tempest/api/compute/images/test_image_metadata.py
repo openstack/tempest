@@ -19,6 +19,7 @@ from tempest.api.compute import base
 from tempest.common.utils import data_utils
 from tempest.common import waiters
 from tempest import config
+from tempest import exceptions
 from tempest import test
 
 CONF = config.CONF
@@ -36,7 +37,17 @@ class ImagesMetadataTestJSON(base.BaseV2ComputeTest):
     @classmethod
     def setup_clients(cls):
         super(ImagesMetadataTestJSON, cls).setup_clients()
-        cls.glance_client = cls.os.image_client
+        # Check if glance v1 is available to determine which client to use. We
+        # prefer glance v1 for the compute API tests since the compute image
+        # API proxy was written for glance v1.
+        if CONF.image_feature_enabled.api_v1:
+            cls.glance_client = cls.os.image_client
+        elif CONF.image_feature_enabled.api_v2:
+            cls.glance_client = cls.os.image_client_v2
+        else:
+            raise exceptions.InvalidConfiguration(
+                'Either api_v1 or api_v2 must be True in '
+                '[image-feature-enabled].')
         cls.client = cls.compute_images_client
 
     @classmethod
@@ -45,14 +56,22 @@ class ImagesMetadataTestJSON(base.BaseV2ComputeTest):
         cls.image_id = None
 
         name = data_utils.rand_name('image')
+        if CONF.image_feature_enabled.api_v1:
+            kwargs = dict(is_public=False)
+        else:
+            kwargs = dict(visibility='private')
         body = cls.glance_client.create_image(name=name,
                                               container_format='bare',
                                               disk_format='raw',
-                                              is_public=False)['image']
+                                              **kwargs)
+        body = body['image'] if 'image' in body else body
         cls.image_id = body['id']
         cls.images.append(cls.image_id)
         image_file = six.StringIO(('*' * 1024))
-        cls.glance_client.update_image(cls.image_id, data=image_file)
+        if CONF.image_feature_enabled.api_v1:
+            cls.glance_client.update_image(cls.image_id, data=image_file)
+        else:
+            cls.glance_client.store_image_file(cls.image_id, data=image_file)
         waiters.wait_for_image_status(cls.client, cls.image_id, 'ACTIVE')
 
     def setUp(self):

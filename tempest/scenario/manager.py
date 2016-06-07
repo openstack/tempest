@@ -50,8 +50,15 @@ class ScenarioTest(tempest.test.BaseTestCase):
         cls.compute_floating_ips_client = (
             cls.manager.compute_floating_ips_client)
         if CONF.service_available.glance:
-            # Glance image client v1
-            cls.image_client = cls.manager.image_client
+            # Check if glance v1 is available to determine which client to use.
+            if CONF.image_feature_enabled.api_v1:
+                cls.image_client = cls.manager.image_client
+            elif CONF.image_feature_enabled.api_v2:
+                cls.image_client = cls.manager.image_client_v2
+            else:
+                raise exceptions.InvalidConfiguration(
+                    'Either api_v1 or api_v2 must be True in '
+                    '[image-feature-enabled].')
         # Compute image client
         cls.compute_images_client = cls.manager.compute_images_client
         cls.keypairs_client = cls.manager.keypairs_client
@@ -376,14 +383,23 @@ class ScenarioTest(tempest.test.BaseTestCase):
             'name': name,
             'container_format': fmt,
             'disk_format': disk_format or fmt,
-            'is_public': 'False',
         }
-        params['properties'] = properties
-        image = self.image_client.create_image(**params)['image']
+        if CONF.image_feature_enabled.api_v1:
+            params['is_public'] = 'False'
+            params['properties'] = properties
+        else:
+            params['visibility'] = 'private'
+            # Additional properties are flattened out in the v2 API.
+            params.update(properties)
+        body = self.image_client.create_image(**params)
+        image = body['image'] if 'image' in body else body
         self.addCleanup(self.image_client.delete_image, image['id'])
         self.assertEqual("queued", image['status'])
         with open(path, 'rb') as image_file:
-            self.image_client.update_image(image['id'], data=image_file)
+            if CONF.image_feature_enabled.api_v1:
+                self.image_client.update_image(image['id'], data=image_file)
+            else:
+                self.image_client.store_image_file(image['id'], image_file)
         return image['id']
 
     def glance_image_create(self):
@@ -450,9 +466,16 @@ class ScenarioTest(tempest.test.BaseTestCase):
             thing_id=image_id, thing_id_param='id',
             cleanup_callable=test_utils.call_and_ignore_notfound_exc,
             cleanup_args=[_image_client.delete_image, image_id])
-        snapshot_image = _image_client.check_image(image_id)
+        if CONF.image_feature_enabled.api_v1:
+            # In glance v1 the additional properties are stored in the headers.
+            snapshot_image = _image_client.check_image(image_id)
+            image_props = snapshot_image.get('properties', {})
+        else:
+            # In glance v2 the additional properties are flattened.
+            snapshot_image = _image_client.show_image(image_id)
+            image_props = snapshot_image
 
-        bdm = snapshot_image.get('properties', {}).get('block_device_mapping')
+        bdm = image_props.get('block_device_mapping')
         if bdm:
             bdm = json.loads(bdm)
             if bdm and 'snapshot_id' in bdm[0]:
