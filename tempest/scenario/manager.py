@@ -248,6 +248,27 @@ class ScenarioTest(tempest.test.BaseTestCase):
         volume = self.volumes_client.show_volume(volume['id'])['volume']
         return volume
 
+    def create_volume_type(self, client=None, name=None, backend_name=None):
+        if not client:
+            client = self.admin_volume_types_client
+        if not name:
+            class_name = self.__class__.__name__
+            name = data_utils.rand_name(class_name + '-volume-type')
+        randomized_name = data_utils.rand_name('scenario-type-' + name)
+
+        LOG.debug("Creating a volume type: %s on backend %s",
+                  randomized_name, backend_name)
+        extra_specs = {}
+        if backend_name:
+            extra_specs = {"volume_backend_name": backend_name}
+
+        body = client.create_volume_type(name=randomized_name,
+                                         extra_specs=extra_specs)
+        volume_type = body['volume_type']
+        self.assertIn('id', volume_type)
+        self.addCleanup(client.delete_volume_type, volume_type['id'])
+        return volume_type
+
     def _create_loginable_secgroup_rule(self, secgroup_id=None):
         _client = self.compute_security_groups_client
         _client_rules = self.compute_security_group_rules_client
@@ -1245,19 +1266,6 @@ class EncryptionScenarioTest(ScenarioTest):
             cls.admin_volume_types_client = cls.os_adm.volume_types_client
             cls.admin_encryption_types_client =\
                 cls.os_adm.encryption_types_client
-
-    def create_volume_type(self, client=None, name=None):
-        if not client:
-            client = self.admin_volume_types_client
-        if not name:
-            name = 'generic'
-        randomized_name = data_utils.rand_name('scenario-type-' + name)
-        LOG.debug("Creating a volume type: %s", randomized_name)
-        body = client.create_volume_type(
-            name=randomized_name)['volume_type']
-        self.assertIn('id', body)
-        self.addCleanup(client.delete_volume_type, body['id'])
-        return body
 
     def create_encryption_type(self, client=None, type_id=None, provider=None,
                                key_size=None, cipher=None,
