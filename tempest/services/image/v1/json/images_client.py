@@ -188,36 +188,3 @@ class ImagesClient(rest_client.RestClient):
     def resource_type(self):
         """Returns the primary type of resource this client works with."""
         return 'image_meta'
-
-    def list_image_members(self, image_id):
-        url = 'images/%s/members' % image_id
-        resp, body = self.get(url)
-        self.expected_success(200, resp.status)
-        body = json.loads(body)
-        return rest_client.ResponseBody(resp, body)
-
-    def list_shared_images(self, tenant_id):
-        """List shared images with the specified tenant"""
-        url = 'shared-images/%s' % tenant_id
-        resp, body = self.get(url)
-        self.expected_success(200, resp.status)
-        body = json.loads(body)
-        return rest_client.ResponseBody(resp, body)
-
-    def add_member(self, member_id, image_id, **kwargs):
-        """Add a member to an image.
-
-        Available params: see http://developer.openstack.org/
-                              api-ref-image-v1.html#addMember-v1
-        """
-        url = 'images/%s/members/%s' % (image_id, member_id)
-        body = json.dumps({'member': kwargs})
-        resp, __ = self.put(url, body)
-        self.expected_success(204, resp.status)
-        return rest_client.ResponseBody(resp)
-
-    def delete_member(self, member_id, image_id):
-        url = 'images/%s/members/%s' % (image_id, member_id)
-        resp, __ = self.delete(url)
-        self.expected_success(204, resp.status)
-        return rest_client.ResponseBody(resp)

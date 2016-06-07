@@ -93,12 +93,14 @@ class BaseV1ImageMembersTest(BaseV1ImageTest):
     @classmethod
     def setup_clients(cls):
         super(BaseV1ImageMembersTest, cls).setup_clients()
+        cls.image_member_client = cls.os.image_member_client
+        cls.alt_image_member_client = cls.os_alt.image_member_client
         cls.alt_img_cli = cls.os_alt.image_client
 
     @classmethod
     def resource_setup(cls):
         super(BaseV1ImageMembersTest, cls).resource_setup()
-        cls.alt_tenant_id = cls.alt_img_cli.tenant_id
+        cls.alt_tenant_id = cls.alt_image_member_client.tenant_id
 
     def _create_image(self):
         image_file = moves.cStringIO(data_utils.random_bytes())
