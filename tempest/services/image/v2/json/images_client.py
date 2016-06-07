@@ -132,13 +132,6 @@ class ImagesClient(rest_client.RestClient):
         self.expected_success(204, resp.status)
         return rest_client.ResponseBody(resp)
 
-    def show_schema(self, schema):
-        url = 'schemas/%s' % schema
-        resp, body = self.get(url)
-        self.expected_success(200, resp.status)
-        body = json.loads(body)
-        return rest_client.ResponseBody(resp, body)
-
     def list_resource_types(self):
         url = 'metadefs/resource_types'
         resp, body = self.get(url)

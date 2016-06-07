@@ -83,12 +83,12 @@ class ImagesMemberTest(base.BaseV2MemberImageTest):
 
     @test.idempotent_id('634dcc3f-f6e2-4409-b8fd-354a0bb25d83')
     def test_get_image_member_schema(self):
-        body = self.client.show_schema("member")
+        body = self.schemas_client.show_schema("member")
         self.assertEqual("member", body['name'])
 
     @test.idempotent_id('6ae916ef-1052-4e11-8d36-b3ae14853cbb')
     def test_get_image_members_schema(self):
-        body = self.client.show_schema("members")
+        body = self.schemas_client.show_schema("members")
         self.assertEqual("members", body['name'])
 
     @test.idempotent_id('cb961424-3f68-4d21-8e36-30ad66fb6bfb')

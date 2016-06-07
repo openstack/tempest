@@ -254,12 +254,12 @@ class ListImagesTest(base.BaseV2ImageTest):
     def test_get_image_schema(self):
         # Test to get image schema
         schema = "image"
-        body = self.client.show_schema(schema)
+        body = self.schemas_client.show_schema(schema)
         self.assertEqual("image", body['name'])
 
     @test.idempotent_id('25c8d7b2-df21-460f-87ac-93130bcdc684')
     def test_get_images_schema(self):
         # Test to get images schema
         schema = "images"
-        body = self.client.show_schema(schema)
+        body = self.schemas_client.show_schema(schema)
         self.assertEqual("images", body['name'])
