@@ -114,15 +114,22 @@ class TempestInit(command.Command):
             config_parse.write(conf_file)
 
     def copy_config(self, etc_dir, config_dir):
-        shutil.copytree(config_dir, etc_dir)
+        if os.path.isdir(config_dir):
+            shutil.copytree(config_dir, etc_dir)
+        else:
+            LOG.warning("Global config dir %s can't be found" % config_dir)
 
     def generate_sample_config(self, local_dir, config_dir):
-        conf_generator = os.path.join(config_dir,
-                                      'config-generator.tempest.conf')
+        if os.path.isdir(config_dir):
+            conf_generator = os.path.join(config_dir,
+                                          'config-generator.tempest.conf')
 
-        subprocess.call(['oslo-config-generator', '--config-file',
-                         conf_generator],
-                        cwd=local_dir)
+            subprocess.call(['oslo-config-generator', '--config-file',
+                             conf_generator],
+                            cwd=local_dir)
+        else:
+            LOG.warning("Skipping sample config generation because global "
+                        "config dir %s can't be found" % config_dir)
 
     def create_working_dir(self, local_dir, config_dir):
         # Create local dir if missing
