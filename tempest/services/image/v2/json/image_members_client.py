@@ -15,7 +15,7 @@ from oslo_serialization import jsonutils as json
 from tempest.lib.common import rest_client
 
 
-class MembersClient(rest_client.RestClient):
+class ImageMembersClient(rest_client.RestClient):
     api_version = "v2"
 
     def list_image_members(self, image_id):
