@@ -86,10 +86,8 @@ class PreProvisionedCredentialProvider(cred_provider.CredentialProvider):
         self.test_accounts_file = test_accounts_file
         if test_accounts_file:
             accounts = read_accounts_yaml(self.test_accounts_file)
-            self.use_default_creds = False
         else:
-            accounts = {}
-            self.use_default_creds = True
+            raise lib_exc.InvalidCredentials("No accounts file specified")
         self.hash_dict = self.get_hash_dict(
             accounts, admin_role, object_storage_operator_role,
             object_storage_reseller_admin_role)
@@ -165,12 +163,7 @@ class PreProvisionedCredentialProvider(cred_provider.CredentialProvider):
         return hash_dict
 
     def is_multi_user(self):
-        # Default credentials is not a valid option with locking Account
-        if self.use_default_creds:
-            raise lib_exc.InvalidCredentials(
-                "Account file %s doesn't exist" % self.test_accounts_file)
-        else:
-            return len(self.hash_dict['creds']) > 1
+        return len(self.hash_dict['creds']) > 1
 
     def is_multi_tenant(self):
         return self.is_multi_user()
@@ -245,9 +238,6 @@ class PreProvisionedCredentialProvider(cred_provider.CredentialProvider):
         return temp_creds
 
     def _get_creds(self, roles=None):
-        if self.use_default_creds:
-            raise lib_exc.InvalidCredentials(
-                "Account file %s doesn't exist" % self.test_accounts_file)
         useable_hashes = self._get_match_hash_list(roles)
         if len(useable_hashes) == 0:
             msg = 'No users configured for type/roles %s' % roles
@@ -329,12 +319,9 @@ class PreProvisionedCredentialProvider(cred_provider.CredentialProvider):
         return self.get_creds_by_roles([self.admin_role])
 
     def is_role_available(self, role):
-        if self.use_default_creds:
-            return False
-        else:
-            if self.hash_dict['roles'].get(role):
-                return True
-            return False
+        if self.hash_dict['roles'].get(role):
+            return True
+        return False
 
     def admin_available(self):
         return self.is_role_available(self.admin_role)
