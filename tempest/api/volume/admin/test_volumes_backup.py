@@ -42,8 +42,8 @@ class VolumesBackupsV2Test(base.BaseVolumeAdminTest):
         cls.volume = cls.create_volume()
 
     def _delete_backup(self, backup_id):
-        self.backups_adm_client.delete_backup(backup_id)
-        self.backups_adm_client.wait_for_backup_deletion(backup_id)
+        self.admin_backups_client.delete_backup(backup_id)
+        self.admin_backups_client.wait_for_backup_deletion(backup_id)
 
     def _decode_url(self, backup_url):
         return json.loads(base64.decodestring(backup_url))
@@ -63,36 +63,37 @@ class VolumesBackupsV2Test(base.BaseVolumeAdminTest):
     def test_volume_backup_create_get_detailed_list_restore_delete(self):
         # Create backup
         backup_name = data_utils.rand_name('Backup')
-        create_backup = self.backups_adm_client.create_backup
+        create_backup = self.admin_backups_client.create_backup
         backup = create_backup(volume_id=self.volume['id'],
                                name=backup_name)['backup']
-        self.addCleanup(self.backups_adm_client.delete_backup,
+        self.addCleanup(self.admin_backups_client.delete_backup,
                         backup['id'])
         self.assertEqual(backup_name, backup['name'])
         waiters.wait_for_volume_status(self.admin_volume_client,
                                        self.volume['id'], 'available')
-        self.backups_adm_client.wait_for_backup_status(backup['id'],
-                                                       'available')
+        self.admin_backups_client.wait_for_backup_status(backup['id'],
+                                                         'available')
 
         # Get a given backup
-        backup = self.backups_adm_client.show_backup(backup['id'])['backup']
+        backup = self.admin_backups_client.show_backup(backup['id'])['backup']
         self.assertEqual(backup_name, backup['name'])
 
         # Get all backups with detail
-        backups = self.backups_adm_client.list_backups(detail=True)['backups']
+        backups = self.admin_backups_client.list_backups(
+            detail=True)['backups']
         self.assertIn((backup['name'], backup['id']),
                       [(m['name'], m['id']) for m in backups])
 
         # Restore backup
-        restore = self.backups_adm_client.restore_backup(
+        restore = self.admin_backups_client.restore_backup(
             backup['id'])['restore']
 
         # Delete backup
         self.addCleanup(self.admin_volume_client.delete_volume,
                         restore['volume_id'])
         self.assertEqual(backup['id'], restore['backup_id'])
-        self.backups_adm_client.wait_for_backup_status(backup['id'],
-                                                       'available')
+        self.admin_backups_client.wait_for_backup_status(backup['id'],
+                                                         'available')
         waiters.wait_for_volume_status(self.admin_volume_client,
                                        restore['volume_id'], 'available')
 
@@ -105,15 +106,15 @@ class VolumesBackupsV2Test(base.BaseVolumeAdminTest):
         """
         # Create backup
         backup_name = data_utils.rand_name('Backup')
-        backup = (self.backups_adm_client.create_backup(
+        backup = (self.admin_backups_client.create_backup(
             volume_id=self.volume['id'], name=backup_name)['backup'])
         self.addCleanup(self._delete_backup, backup['id'])
         self.assertEqual(backup_name, backup['name'])
-        self.backups_adm_client.wait_for_backup_status(backup['id'],
-                                                       'available')
+        self.admin_backups_client.wait_for_backup_status(backup['id'],
+                                                         'available')
 
         # Export Backup
-        export_backup = (self.backups_adm_client.export_backup(backup['id'])
+        export_backup = (self.admin_backups_client.export_backup(backup['id'])
                          ['backup-record'])
         self.assertIn('backup_service', export_backup)
         self.assertIn('backup_url', export_backup)
@@ -132,7 +133,7 @@ class VolumesBackupsV2Test(base.BaseVolumeAdminTest):
             export_backup['backup_url'], {'id': new_id})
 
         # Import Backup
-        import_backup = self.backups_adm_client.import_backup(
+        import_backup = self.admin_backups_client.import_backup(
             backup_service=export_backup['backup_service'],
             backup_url=new_url)['backup']
 
@@ -142,15 +143,16 @@ class VolumesBackupsV2Test(base.BaseVolumeAdminTest):
         self.addCleanup(self._delete_backup, new_id)
         self.assertIn("id", import_backup)
         self.assertEqual(new_id, import_backup['id'])
-        self.backups_adm_client.wait_for_backup_status(import_backup['id'],
-                                                       'available')
+        self.admin_backups_client.wait_for_backup_status(import_backup['id'],
+                                                         'available')
 
         # Verify Import Backup
-        backups = self.backups_adm_client.list_backups(detail=True)['backups']
+        backups = self.admin_backups_client.list_backups(
+            detail=True)['backups']
         self.assertIn(new_id, [b['id'] for b in backups])
 
         # Restore backup
-        restore = self.backups_adm_client.restore_backup(
+        restore = self.admin_backups_client.restore_backup(
             backup['id'])['restore']
         self.addCleanup(self.admin_volume_client.delete_volume,
                         restore['volume_id'])
@@ -161,8 +163,8 @@ class VolumesBackupsV2Test(base.BaseVolumeAdminTest):
         # Verify if restored volume is there in volume list
         volumes = self.admin_volume_client.list_volumes()['volumes']
         self.assertIn(restore['volume_id'], [v['id'] for v in volumes])
-        self.backups_adm_client.wait_for_backup_status(import_backup['id'],
-                                                       'available')
+        self.admin_backups_client.wait_for_backup_status(import_backup['id'],
+                                                         'available')
 
 
 class VolumesBackupsV1Test(VolumesBackupsV2Test):

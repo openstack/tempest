@@ -44,7 +44,7 @@ class VolumeSnapshotQuotasNegativeV2TestJSON(base.BaseVolumeAdminTest):
 
         # NOTE(gfidente): no need to restore original quota set
         # after the tests as they only work with tenant isolation.
-        cls.quotas_client.update_quota_set(
+        cls.admin_quotas_client.update_quota_set(
             cls.demo_tenant_id,
             **cls.shared_quota_set)
 
@@ -63,12 +63,12 @@ class VolumeSnapshotQuotasNegativeV2TestJSON(base.BaseVolumeAdminTest):
     @test.attr(type='negative')
     @test.idempotent_id('c99a1ca9-6cdf-498d-9fdf-25832babef27')
     def test_quota_volume_gigabytes_snapshots(self):
-        self.addCleanup(self.quotas_client.update_quota_set,
+        self.addCleanup(self.admin_quotas_client.update_quota_set,
                         self.demo_tenant_id,
                         **self.shared_quota_set)
         new_quota_set = {'gigabytes': 2 * self.default_volume_size,
                          'volumes': 1, 'snapshots': 2}
-        self.quotas_client.update_quota_set(
+        self.admin_quotas_client.update_quota_set(
             self.demo_tenant_id,
             **new_quota_set)
         self.assertRaises(lib_exc.OverLimit,

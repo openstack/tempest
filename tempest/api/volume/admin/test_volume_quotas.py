@@ -37,14 +37,14 @@ class BaseVolumeQuotasAdminV2TestJSON(base.BaseVolumeAdminTest):
 
     @test.idempotent_id('59eada70-403c-4cef-a2a3-a8ce2f1b07a0')
     def test_list_quotas(self):
-        quotas = (self.quotas_client.show_quota_set(self.demo_tenant_id)
+        quotas = (self.admin_quotas_client.show_quota_set(self.demo_tenant_id)
                   ['quota_set'])
         for key in QUOTA_KEYS:
             self.assertIn(key, quotas)
 
     @test.idempotent_id('2be020a2-5fdd-423d-8d35-a7ffbc36e9f7')
     def test_list_default_quotas(self):
-        quotas = self.quotas_client.show_default_quota_set(
+        quotas = self.admin_quotas_client.show_default_quota_set(
             self.demo_tenant_id)['quota_set']
         for key in QUOTA_KEYS:
             self.assertIn(key, quotas)
@@ -52,21 +52,21 @@ class BaseVolumeQuotasAdminV2TestJSON(base.BaseVolumeAdminTest):
     @test.idempotent_id('3d45c99e-cc42-4424-a56e-5cbd212b63a6')
     def test_update_all_quota_resources_for_tenant(self):
         # Admin can update all the resource quota limits for a tenant
-        default_quota_set = self.quotas_client.show_default_quota_set(
+        default_quota_set = self.admin_quotas_client.show_default_quota_set(
             self.demo_tenant_id)['quota_set']
         new_quota_set = {'gigabytes': 1009,
                          'volumes': 11,
                          'snapshots': 11}
 
         # Update limits for all quota resources
-        quota_set = self.quotas_client.update_quota_set(
+        quota_set = self.admin_quotas_client.update_quota_set(
             self.demo_tenant_id,
             **new_quota_set)['quota_set']
 
         cleanup_quota_set = dict(
             (k, v) for k, v in six.iteritems(default_quota_set)
             if k in QUOTA_KEYS)
-        self.addCleanup(self.quotas_client.update_quota_set,
+        self.addCleanup(self.admin_quotas_client.update_quota_set,
                         self.demo_tenant_id, **cleanup_quota_set)
         # test that the specific values we set are actually in
         # the final result. There is nothing here that ensures there
@@ -75,7 +75,7 @@ class BaseVolumeQuotasAdminV2TestJSON(base.BaseVolumeAdminTest):
 
     @test.idempotent_id('18c51ae9-cb03-48fc-b234-14a19374dbed')
     def test_show_quota_usage(self):
-        quota_usage = self.quotas_client.show_quota_usage(
+        quota_usage = self.admin_quotas_client.show_quota_usage(
             self.os_adm.credentials.tenant_id)['quota_set']
         for key in QUOTA_KEYS:
             self.assertIn(key, quota_usage)
@@ -84,13 +84,13 @@ class BaseVolumeQuotasAdminV2TestJSON(base.BaseVolumeAdminTest):
 
     @test.idempotent_id('ae8b6091-48ad-4bfa-a188-bbf5cc02115f')
     def test_quota_usage(self):
-        quota_usage = self.quotas_client.show_quota_usage(
+        quota_usage = self.admin_quotas_client.show_quota_usage(
             self.demo_tenant_id)['quota_set']
 
         volume = self.create_volume()
         self.addCleanup(self._delete_volume, volume['id'])
 
-        new_quota_usage = self.quotas_client.show_quota_usage(
+        new_quota_usage = self.admin_quotas_client.show_quota_usage(
             self.demo_tenant_id)['quota_set']
 
         self.assertEqual(quota_usage['volumes']['in_use'] + 1,
@@ -109,15 +109,15 @@ class BaseVolumeQuotasAdminV2TestJSON(base.BaseVolumeAdminTest):
                                                      description=description)
         project_id = project['id']
         self.addCleanup(self.identity_utils.delete_project, project_id)
-        quota_set_default = self.quotas_client.show_default_quota_set(
+        quota_set_default = self.admin_quotas_client.show_default_quota_set(
             project_id)['quota_set']
         volume_default = quota_set_default['volumes']
 
-        self.quotas_client.update_quota_set(project_id,
-                                            volumes=(int(volume_default) + 5))
+        self.admin_quotas_client.update_quota_set(
+            project_id, volumes=(int(volume_default) + 5))
 
-        self.quotas_client.delete_quota_set(project_id)
-        quota_set_new = (self.quotas_client.show_quota_set(project_id)
+        self.admin_quotas_client.delete_quota_set(project_id)
+        quota_set_new = (self.admin_quotas_client.show_quota_set(project_id)
                          ['quota_set'])
         self.assertEqual(volume_default, quota_set_new['volumes'])
 

@@ -33,21 +33,22 @@ class VolumeTypesNegativeV2Test(base.BaseVolumeAdminTest):
     @test.idempotent_id('878b4e57-faa2-4659-b0d1-ce740a06ae81')
     def test_create_with_empty_name(self):
         # Should not be able to create volume type with an empty name.
-        self.assertRaises(lib_exc.BadRequest,
-                          self.volume_types_client.create_volume_type, name='')
+        self.assertRaises(
+            lib_exc.BadRequest,
+            self.admin_volume_types_client.create_volume_type, name='')
 
     @test.idempotent_id('994610d6-0476-4018-a644-a2602ef5d4aa')
     def test_get_nonexistent_type_id(self):
         # Should not be able to get volume type with nonexistent type id.
         self.assertRaises(lib_exc.NotFound,
-                          self.volume_types_client.show_volume_type,
+                          self.admin_volume_types_client.show_volume_type,
                           data_utils.rand_uuid())
 
     @test.idempotent_id('6b3926d2-7d73-4896-bc3d-e42dfd11a9f6')
     def test_delete_nonexistent_type_id(self):
         # Should not be able to delete volume type with nonexistent type id.
         self.assertRaises(lib_exc.NotFound,
-                          self.volume_types_client.delete_volume_type,
+                          self.admin_volume_types_client.delete_volume_type,
                           data_utils.rand_uuid())
 
 

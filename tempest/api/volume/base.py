@@ -179,25 +179,25 @@ class BaseVolumeAdminTest(BaseVolumeTest):
         super(BaseVolumeAdminTest, cls).setup_clients()
 
         if cls._api_version == 1:
-            cls.volume_qos_client = cls.os_adm.volume_qos_client
+            cls.admin_volume_qos_client = cls.os_adm.volume_qos_client
             cls.admin_volume_services_client = \
                 cls.os_adm.volume_services_client
-            cls.volume_types_client = cls.os_adm.volume_types_client
+            cls.admin_volume_types_client = cls.os_adm.volume_types_client
             cls.admin_volume_client = cls.os_adm.volumes_client
-            cls.hosts_client = cls.os_adm.volume_hosts_client
+            cls.admin_hosts_client = cls.os_adm.volume_hosts_client
             cls.admin_snapshots_client = cls.os_adm.snapshots_client
-            cls.backups_adm_client = cls.os_adm.backups_client
-            cls.quotas_client = cls.os_adm.volume_quotas_client
+            cls.admin_backups_client = cls.os_adm.backups_client
+            cls.admin_quotas_client = cls.os_adm.volume_quotas_client
         elif cls._api_version == 2:
-            cls.volume_qos_client = cls.os_adm.volume_qos_v2_client
+            cls.admin_volume_qos_client = cls.os_adm.volume_qos_v2_client
             cls.admin_volume_services_client = \
                 cls.os_adm.volume_services_v2_client
-            cls.volume_types_client = cls.os_adm.volume_types_v2_client
+            cls.admin_volume_types_client = cls.os_adm.volume_types_v2_client
             cls.admin_volume_client = cls.os_adm.volumes_v2_client
-            cls.hosts_client = cls.os_adm.volume_hosts_v2_client
+            cls.admin_hosts_client = cls.os_adm.volume_hosts_v2_client
             cls.admin_snapshots_client = cls.os_adm.snapshots_v2_client
-            cls.backups_adm_client = cls.os_adm.backups_v2_client
-            cls.quotas_client = cls.os_adm.volume_quotas_v2_client
+            cls.admin_backups_client = cls.os_adm.backups_v2_client
+            cls.admin_quotas_client = cls.os_adm.volume_quotas_v2_client
 
     @classmethod
     def resource_setup(cls):
@@ -215,7 +215,7 @@ class BaseVolumeAdminTest(BaseVolumeTest):
         """create a test Qos-Specs."""
         name = name or data_utils.rand_name(cls.__name__ + '-QoS')
         consumer = consumer or 'front-end'
-        qos_specs = cls.volume_qos_client.create_qos(
+        qos_specs = cls.admin_volume_qos_client.create_qos(
             name=name, consumer=consumer, **kwargs)['qos_specs']
         cls.qos_specs.append(qos_specs['id'])
         return qos_specs
@@ -224,8 +224,8 @@ class BaseVolumeAdminTest(BaseVolumeTest):
     def clear_qos_specs(cls):
         for qos_id in cls.qos_specs:
             test_utils.call_and_ignore_notfound_exc(
-                cls.volume_qos_client.delete_qos, qos_id)
+                cls.admin_volume_qos_client.delete_qos, qos_id)
 
         for qos_id in cls.qos_specs:
             test_utils.call_and_ignore_notfound_exc(
-                cls.volume_qos_client.wait_for_resource_deletion, qos_id)
+                cls.admin_volume_qos_client.wait_for_resource_deletion, qos_id)

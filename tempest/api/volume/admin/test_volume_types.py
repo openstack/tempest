@@ -31,7 +31,8 @@ class VolumeTypesV2Test(base.BaseVolumeAdminTest):
     @test.idempotent_id('9d9b28e3-1b2e-4483-a2cc-24aa0ea1de54')
     def test_volume_type_list(self):
         # List volume types.
-        body = self.volume_types_client.list_volume_types()['volume_types']
+        body = \
+            self.admin_volume_types_client.list_volume_types()['volume_types']
         self.assertIsInstance(body, list)
 
     @test.idempotent_id('c03cc62c-f4e9-4623-91ec-64ce2f9c1260')
@@ -47,11 +48,11 @@ class VolumeTypesV2Test(base.BaseVolumeAdminTest):
         # Create two volume_types
         for i in range(2):
             vol_type_name = data_utils.rand_name("volume-type")
-            vol_type = self.volume_types_client.create_volume_type(
+            vol_type = self.admin_volume_types_client.create_volume_type(
                 name=vol_type_name,
                 extra_specs=extra_specs)['volume_type']
             volume_types.append(vol_type)
-            self.addCleanup(self.volume_types_client.delete_volume_type,
+            self.addCleanup(self.admin_volume_types_client.delete_volume_type,
                             vol_type['id'])
         params = {self.name_field: vol_name,
                   'volume_type': volume_types[0]['id']}
@@ -97,11 +98,11 @@ class VolumeTypesV2Test(base.BaseVolumeAdminTest):
         vendor = CONF.volume.vendor_name
         extra_specs = {"storage_protocol": proto,
                        "vendor_name": vendor}
-        body = self.volume_types_client.create_volume_type(
+        body = self.admin_volume_types_client.create_volume_type(
             name=name,
             extra_specs=extra_specs)['volume_type']
         self.assertIn('id', body)
-        self.addCleanup(self.volume_types_client.delete_volume_type,
+        self.addCleanup(self.admin_volume_types_client.delete_volume_type,
                         body['id'])
         self.assertIn('name', body)
         self.assertEqual(body['name'], name,
@@ -109,7 +110,7 @@ class VolumeTypesV2Test(base.BaseVolumeAdminTest):
                          "to the requested name")
         self.assertTrue(body['id'] is not None,
                         "Field volume_type id is empty or not found.")
-        fetched_volume_type = self.volume_types_client.show_volume_type(
+        fetched_volume_type = self.admin_volume_types_client.show_volume_type(
             body['id'])['volume_type']
         self.assertEqual(name, fetched_volume_type['name'],
                          'The fetched Volume_type is different '
@@ -127,15 +128,16 @@ class VolumeTypesV2Test(base.BaseVolumeAdminTest):
         provider = "LuksEncryptor"
         control_location = "front-end"
         name = data_utils.rand_name("volume-type")
-        body = self.volume_types_client.create_volume_type(
+        body = self.admin_volume_types_client.create_volume_type(
             name=name)['volume_type']
-        self.addCleanup(self.volume_types_client.delete_volume_type,
+        self.addCleanup(self.admin_volume_types_client.delete_volume_type,
                         body['id'])
 
         # Create encryption type
-        encryption_type = self.volume_types_client.create_encryption_type(
-            body['id'], provider=provider,
-            control_location=control_location)['encryption']
+        encryption_type = \
+            self.admin_volume_types_client.create_encryption_type(
+                body['id'], provider=provider,
+                control_location=control_location)['encryption']
         self.assertIn('volume_type_id', encryption_type)
         self.assertEqual(provider, encryption_type['provider'],
                          "The created encryption_type provider is not equal "
@@ -146,7 +148,7 @@ class VolumeTypesV2Test(base.BaseVolumeAdminTest):
 
         # Get encryption type
         fetched_encryption_type = (
-            self.volume_types_client.show_encryption_type(
+            self.admin_volume_types_client.show_encryption_type(
                 encryption_type['volume_type_id']))
         self.assertEqual(provider,
                          fetched_encryption_type['provider'],
@@ -158,13 +160,13 @@ class VolumeTypesV2Test(base.BaseVolumeAdminTest):
                          'different from the created encryption_type')
 
         # Delete encryption type
-        self.volume_types_client.delete_encryption_type(
+        self.admin_volume_types_client.delete_encryption_type(
             encryption_type['volume_type_id'])
         resource = {"id": encryption_type['volume_type_id'],
                     "type": "encryption-type"}
-        self.volume_types_client.wait_for_resource_deletion(resource)
+        self.admin_volume_types_client.wait_for_resource_deletion(resource)
         deleted_encryption_type = (
-            self.volume_types_client.show_encryption_type(
+            self.admin_volume_types_client.show_encryption_type(
                 encryption_type['volume_type_id']))
         self.assertEmpty(deleted_encryption_type)
 
