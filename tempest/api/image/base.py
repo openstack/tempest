@@ -125,6 +125,7 @@ class BaseV2ImageTest(BaseImageTest):
     def setup_clients(cls):
         super(BaseV2ImageTest, cls).setup_clients()
         cls.client = cls.os.image_client_v2
+        cls.namespaces_client = cls.os.namespaces_client
 
 
 class BaseV2MemberImageTest(BaseV2ImageTest):

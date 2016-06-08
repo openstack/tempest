@@ -31,38 +31,42 @@ class MetadataNamespacesTest(base.BaseV2ImageTest):
         name = [{'name': resource_name}]
         namespace_name = data_utils.rand_name('namespace')
         # create the metadef namespace
-        body = self.client.create_namespace(namespace=namespace_name,
-                                            visibility='public',
-                                            description='Tempest',
-                                            display_name=namespace_name,
-                                            resource_type_associations=name,
-                                            protected=True)
+        body = self.namespaces_client.create_namespace(
+            namespace=namespace_name,
+            visibility='public',
+            description='Tempest',
+            display_name=namespace_name,
+            resource_type_associations=name,
+            protected=True)
         self.addCleanup(test_utils.call_and_ignore_notfound_exc,
                         self._cleanup_namespace, namespace_name)
         # get namespace details
-        body = self.client.show_namespace(namespace_name)
+        body = self.namespaces_client.show_namespace(namespace_name)
         self.assertEqual(namespace_name, body['namespace'])
         self.assertEqual('public', body['visibility'])
         # unable to delete protected namespace
-        self.assertRaises(lib_exc.Forbidden, self.client.delete_namespace,
+        self.assertRaises(lib_exc.Forbidden,
+                          self.namespaces_client.delete_namespace,
                           namespace_name)
         # update the visibility to private and protected to False
-        body = self.client.update_namespace(namespace=namespace_name,
-                                            description='Tempest',
-                                            visibility='private',
-                                            display_name=namespace_name,
-                                            protected=False)
+        body = self.namespaces_client.update_namespace(
+            namespace=namespace_name,
+            description='Tempest',
+            visibility='private',
+            display_name=namespace_name,
+            protected=False)
         self.assertEqual('private', body['visibility'])
         self.assertEqual(False, body['protected'])
         # now able to delete the non-protected namespace
-        self.client.delete_namespace(namespace_name)
+        self.namespaces_client.delete_namespace(namespace_name)
 
     def _cleanup_namespace(self, namespace_name):
-        body = self.client.show_namespace(namespace_name)
+        body = self.namespaces_client.show_namespace(namespace_name)
         self.assertEqual(namespace_name, body['namespace'])
-        body = self.client.update_namespace(namespace=namespace_name,
-                                            description='Tempest',
-                                            visibility='private',
-                                            display_name=namespace_name,
-                                            protected=False)
-        self.client.delete_namespace(namespace_name)
+        body = self.namespaces_client.update_namespace(
+            namespace=namespace_name,
+            description='Tempest',
+            visibility='private',
+            display_name=namespace_name,
+            protected=False)
+        self.namespaces_client.delete_namespace(namespace_name)
