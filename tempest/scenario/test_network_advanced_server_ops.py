@@ -52,7 +52,10 @@ class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
 
     def _setup_network_and_servers(self):
         keypair = self.create_keypair()
-        security_group = self._create_security_group()
+        security_groups = []
+        if test.is_extension_enabled('security-group', 'network'):
+            security_group = self._create_security_group()
+            security_groups = [{'name': security_group['name']}]
         network, subnet, router = self.create_networks()
         public_network_id = CONF.network.public_network_id
         server_name = data_utils.rand_name('server-smoke')
@@ -60,7 +63,7 @@ class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
             name=server_name,
             networks=[{'uuid': network.id}],
             key_name=keypair['name'],
-            security_groups=[{'name': security_group['name']}],
+            security_groups=security_groups,
             wait_until='ACTIVE')
         floating_ip = self.create_floating_ip(server, public_network_id)
         # Verify that we can indeed connect to the server before we mess with
