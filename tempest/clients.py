@@ -221,6 +221,7 @@ class Manager(manager.Manager):
         self._set_volume_clients()
         self._set_object_storage_clients()
         self._set_image_clients()
+        self._set_network_clients()
 
         self.baremetal_client = BaremetalClient(
             self.auth_provider,
@@ -228,110 +229,6 @@ class Manager(manager.Manager):
             CONF.identity.region,
             endpoint_type=CONF.baremetal.endpoint_type,
             **self.default_params_with_timeout_values)
-        self.network_agents_client = NetworkAgentsClient(
-            self.auth_provider,
-            CONF.network.catalog_type,
-            CONF.network.region or CONF.identity.region,
-            endpoint_type=CONF.network.endpoint_type,
-            build_interval=CONF.network.build_interval,
-            build_timeout=CONF.network.build_timeout,
-            **self.default_params)
-        self.network_extensions_client = NetworkExtensionsClient(
-            self.auth_provider,
-            CONF.network.catalog_type,
-            CONF.network.region or CONF.identity.region,
-            endpoint_type=CONF.network.endpoint_type,
-            build_interval=CONF.network.build_interval,
-            build_timeout=CONF.network.build_timeout,
-            **self.default_params)
-        self.networks_client = NetworksClient(
-            self.auth_provider,
-            CONF.network.catalog_type,
-            CONF.network.region or CONF.identity.region,
-            endpoint_type=CONF.network.endpoint_type,
-            build_interval=CONF.network.build_interval,
-            build_timeout=CONF.network.build_timeout,
-            **self.default_params)
-        self.subnetpools_client = SubnetpoolsClient(
-            self.auth_provider,
-            CONF.network.catalog_type,
-            CONF.network.region or CONF.identity.region,
-            endpoint_type=CONF.network.endpoint_type,
-            build_interval=CONF.network.build_interval,
-            build_timeout=CONF.network.build_timeout,
-            **self.default_params)
-        self.subnets_client = SubnetsClient(
-            self.auth_provider,
-            CONF.network.catalog_type,
-            CONF.network.region or CONF.identity.region,
-            endpoint_type=CONF.network.endpoint_type,
-            build_interval=CONF.network.build_interval,
-            build_timeout=CONF.network.build_timeout,
-            **self.default_params)
-        self.ports_client = PortsClient(
-            self.auth_provider,
-            CONF.network.catalog_type,
-            CONF.network.region or CONF.identity.region,
-            endpoint_type=CONF.network.endpoint_type,
-            build_interval=CONF.network.build_interval,
-            build_timeout=CONF.network.build_timeout,
-            **self.default_params)
-        self.network_quotas_client = NetworkQuotasClient(
-            self.auth_provider,
-            CONF.network.catalog_type,
-            CONF.network.region or CONF.identity.region,
-            endpoint_type=CONF.network.endpoint_type,
-            build_interval=CONF.network.build_interval,
-            build_timeout=CONF.network.build_timeout,
-            **self.default_params)
-        self.floating_ips_client = FloatingIPsClient(
-            self.auth_provider,
-            CONF.network.catalog_type,
-            CONF.network.region or CONF.identity.region,
-            endpoint_type=CONF.network.endpoint_type,
-            build_interval=CONF.network.build_interval,
-            build_timeout=CONF.network.build_timeout,
-            **self.default_params)
-        self.metering_labels_client = MeteringLabelsClient(
-            self.auth_provider,
-            CONF.network.catalog_type,
-            CONF.network.region or CONF.identity.region,
-            endpoint_type=CONF.network.endpoint_type,
-            build_interval=CONF.network.build_interval,
-            build_timeout=CONF.network.build_timeout,
-            **self.default_params)
-        self.metering_label_rules_client = MeteringLabelRulesClient(
-            self.auth_provider,
-            CONF.network.catalog_type,
-            CONF.network.region or CONF.identity.region,
-            endpoint_type=CONF.network.endpoint_type,
-            build_interval=CONF.network.build_interval,
-            build_timeout=CONF.network.build_timeout,
-            **self.default_params)
-        self.routers_client = RoutersClient(
-            self.auth_provider,
-            CONF.network.catalog_type,
-            CONF.network.region or CONF.identity.region,
-            endpoint_type=CONF.network.endpoint_type,
-            build_interval=CONF.network.build_interval,
-            build_timeout=CONF.network.build_timeout,
-            **self.default_params)
-        self.security_group_rules_client = SecurityGroupRulesClient(
-            self.auth_provider,
-            CONF.network.catalog_type,
-            CONF.network.region or CONF.identity.region,
-            endpoint_type=CONF.network.endpoint_type,
-            build_interval=CONF.network.build_interval,
-            build_timeout=CONF.network.build_timeout,
-            **self.default_params)
-        self.security_groups_client = SecurityGroupsClient(
-            self.auth_provider,
-            CONF.network.catalog_type,
-            CONF.network.region or CONF.identity.region,
-            endpoint_type=CONF.network.endpoint_type,
-            build_interval=CONF.network.build_interval,
-            build_timeout=CONF.network.build_timeout,
-            **self.default_params)
         self.orchestration_client = OrchestrationClient(
             self.auth_provider,
             CONF.orchestration.catalog_type,
@@ -348,6 +245,42 @@ class Manager(manager.Manager):
             **self.default_params_with_timeout_values)
         self.negative_client = negative_rest_client.NegativeRestClient(
             self.auth_provider, service, **self.default_params)
+
+    def _set_network_clients(self):
+        params = {
+            'service': CONF.network.catalog_type,
+            'region': CONF.network.region or CONF.identity.region,
+            'endpoint_type': CONF.network.endpoint_type,
+            'build_interval': CONF.network.build_interval,
+            'build_timeout': CONF.network.build_timeout
+        }
+        params.update(self.default_params)
+        self.network_agents_client = NetworkAgentsClient(
+            self.auth_provider, **params)
+        self.network_extensions_client = NetworkExtensionsClient(
+            self.auth_provider, **params)
+        self.networks_client = NetworksClient(
+            self.auth_provider, **params)
+        self.subnetpools_client = SubnetpoolsClient(
+            self.auth_provider, **params)
+        self.subnets_client = SubnetsClient(
+            self.auth_provider, **params)
+        self.ports_client = PortsClient(
+            self.auth_provider, **params)
+        self.network_quotas_client = NetworkQuotasClient(
+            self.auth_provider, **params)
+        self.floating_ips_client = FloatingIPsClient(
+            self.auth_provider, **params)
+        self.metering_labels_client = MeteringLabelsClient(
+            self.auth_provider, **params)
+        self.metering_label_rules_client = MeteringLabelRulesClient(
+            self.auth_provider, **params)
+        self.routers_client = RoutersClient(
+            self.auth_provider, **params)
+        self.security_group_rules_client = SecurityGroupRulesClient(
+            self.auth_provider, **params)
+        self.security_groups_client = SecurityGroupsClient(
+            self.auth_provider, **params)
 
     def _set_image_clients(self):
         params = {
