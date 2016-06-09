@@ -19,6 +19,7 @@ Configuration options for Microversion
   multiple Microversion tests in a single Tempest operation, configuration
   options should represent the range of test target Microversions.
   New configuration options are:
+
   * min_microversion
   * max_microversion
 
@@ -130,8 +131,9 @@ and max_microversion. Tests will be valid for that defined range.
 If that range is out of configured Microversion range then, test
 will be skipped.
 
-*NOTE: Microversion testing is supported at test class level not at individual
-test case level.*
+.. note:: Microversion testing is supported at test class level not at
+      individual test case level.
+
 For example:
 
 Below test is applicable for Microversion from 2.2 till 2.9::
@@ -211,3 +213,7 @@ Microversion tests implemented in Tempest
  * `2.10`_
 
  .. _2.10: http://docs.openstack.org/developer/nova/api_microversion_history.html#id9
+
+ * `2.20`_
+
+ .. _2.20: http://docs.openstack.org/developer/nova/api_microversion_history.html#id18
