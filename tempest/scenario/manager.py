@@ -19,6 +19,7 @@ import subprocess
 import netaddr
 from oslo_log import log
 from oslo_serialization import jsonutils as json
+from oslo_utils import netutils
 import six
 
 from tempest.common import compute
@@ -834,7 +835,7 @@ class NetworkScenarioTest(ScenarioTest):
         port_map = [(p["id"], fxip["ip_address"])
                     for p in ports
                     for fxip in p["fixed_ips"]
-                    if netaddr.valid_ipv4(fxip["ip_address"])
+                    if netutils.is_valid_ipv4(fxip["ip_address"])
                     and p['status'] in p_status]
         inactive = [p for p in ports if p['status'] != 'ACTIVE']
         if inactive:
