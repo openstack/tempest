@@ -277,12 +277,11 @@ class TempestAccountGenerator(command.Command):
 
     def take_action(self, parsed_args):
         try:
-            return main(parsed_args)
+            main(parsed_args)
         except Exception:
             LOG.exception("Failure generating test accounts.")
             traceback.print_exc()
             raise
-        return 0
 
     def get_description(self):
         return DESCRIPTION

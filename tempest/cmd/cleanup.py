@@ -83,7 +83,6 @@ class TempestCleanup(command.Command):
             LOG.exception("Failure during cleanup")
             traceback.print_exc()
             raise
-        return 0
 
     def init(self, parsed_args):
         cleanup_service.init_conf()
