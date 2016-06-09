@@ -4,6 +4,7 @@ features:
     The following image service clients are defined as library interface,
     so the other projects can use these modules as stable libraries
     without any maintenance changes.
+      **image_members_client**
       **namespaces_client**
       **resource_types_client**
       **schemas_client**
