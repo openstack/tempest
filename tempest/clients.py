@@ -220,6 +220,7 @@ class Manager(manager.Manager):
         self._set_identity_clients()
         self._set_volume_clients()
         self._set_object_storage_clients()
+        self._set_image_clients()
 
         self.baremetal_client = BaremetalClient(
             self.auth_provider,
@@ -331,63 +332,6 @@ class Manager(manager.Manager):
             build_interval=CONF.network.build_interval,
             build_timeout=CONF.network.build_timeout,
             **self.default_params)
-        if CONF.service_available.glance:
-            self.image_client = ImagesClient(
-                self.auth_provider,
-                CONF.image.catalog_type,
-                CONF.image.region or CONF.identity.region,
-                endpoint_type=CONF.image.endpoint_type,
-                build_interval=CONF.image.build_interval,
-                build_timeout=CONF.image.build_timeout,
-                **self.default_params)
-            self.image_member_client = ImageMembersClient(
-                self.auth_provider,
-                CONF.image.catalog_type,
-                CONF.image.region or CONF.identity.region,
-                endpoint_type=CONF.image.endpoint_type,
-                build_interval=CONF.image.build_interval,
-                build_timeout=CONF.image.build_timeout,
-                **self.default_params)
-            self.image_client_v2 = ImagesV2Client(
-                self.auth_provider,
-                CONF.image.catalog_type,
-                CONF.image.region or CONF.identity.region,
-                endpoint_type=CONF.image.endpoint_type,
-                build_interval=CONF.image.build_interval,
-                build_timeout=CONF.image.build_timeout,
-                **self.default_params)
-            self.image_member_client_v2 = ImageMembersClientV2(
-                self.auth_provider,
-                CONF.image.catalog_type,
-                CONF.image.region or CONF.identity.region,
-                endpoint_type=CONF.image.endpoint_type,
-                build_interval=CONF.image.build_interval,
-                build_timeout=CONF.image.build_timeout,
-                **self.default_params)
-            self.namespaces_client = NamespacesClient(
-                self.auth_provider,
-                CONF.image.catalog_type,
-                CONF.image.region or CONF.identity.region,
-                endpoint_type=CONF.image.endpoint_type,
-                build_interval=CONF.image.build_interval,
-                build_timeout=CONF.image.build_timeout,
-                **self.default_params)
-            self.resource_types_client = ResourceTypesClient(
-                self.auth_provider,
-                CONF.image.catalog_type,
-                CONF.image.region or CONF.identity.region,
-                endpoint_type=CONF.image.endpoint_type,
-                build_interval=CONF.image.build_interval,
-                build_timeout=CONF.image.build_timeout,
-                **self.default_params)
-            self.schemas_client = SchemasClient(
-                self.auth_provider,
-                CONF.image.catalog_type,
-                CONF.image.region or CONF.identity.region,
-                endpoint_type=CONF.image.endpoint_type,
-                build_interval=CONF.image.build_interval,
-                build_timeout=CONF.image.build_timeout,
-                **self.default_params)
         self.orchestration_client = OrchestrationClient(
             self.auth_provider,
             CONF.orchestration.catalog_type,
@@ -404,6 +348,32 @@ class Manager(manager.Manager):
             **self.default_params_with_timeout_values)
         self.negative_client = negative_rest_client.NegativeRestClient(
             self.auth_provider, service, **self.default_params)
+
+    def _set_image_clients(self):
+        params = {
+            'service': CONF.image.catalog_type,
+            'region': CONF.image.region or CONF.identity.region,
+            'endpoint_type': CONF.image.endpoint_type,
+            'build_interval': CONF.image.build_interval,
+            'build_timeout': CONF.image.build_timeout
+        }
+        params.update(self.default_params)
+
+        if CONF.service_available.glance:
+            self.image_client = ImagesClient(
+                self.auth_provider, **params)
+            self.image_member_client = ImageMembersClient(
+                self.auth_provider, **params)
+            self.image_client_v2 = ImagesV2Client(
+                self.auth_provider, **params)
+            self.image_member_client_v2 = ImageMembersClientV2(
+                self.auth_provider, **params)
+            self.namespaces_client = NamespacesClient(
+                self.auth_provider, **params)
+            self.resource_types_client = ResourceTypesClient(
+                self.auth_provider, **params)
+            self.schemas_client = SchemasClient(
+                self.auth_provider, **params)
 
     def _set_compute_clients(self):
         params = {
