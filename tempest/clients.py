@@ -75,6 +75,10 @@ from tempest.lib.services.compute.volumes_client import \
     VolumesClient as ComputeVolumesClient
 from tempest.lib.services.identity.v2.token_client import TokenClient
 from tempest.lib.services.identity.v3.token_client import V3TokenClient
+from tempest.lib.services.image.v2.namespaces_client import NamespacesClient
+from tempest.lib.services.image.v2.resource_types_client import \
+    ResourceTypesClient
+from tempest.lib.services.image.v2.schemas_client import SchemasClient
 from tempest.lib.services.network.agents_client import AgentsClient \
     as NetworkAgentsClient
 from tempest.lib.services.network.extensions_client import \
@@ -137,10 +141,6 @@ from tempest.services.image.v2.json.images_client import \
     ImagesClient as ImagesV2Client
 from tempest.services.image.v2.json.members_client import MembersClient \
     as MembersClientV2
-from tempest.services.image.v2.json.namespaces_client import NamespacesClient
-from tempest.services.image.v2.json.resource_types_client import \
-    ResourceTypesClient
-from tempest.services.image.v2.json.schemas_client import SchemasClient
 from tempest.services.object_storage.account_client import AccountClient
 from tempest.services.object_storage.container_client import ContainerClient
 from tempest.services.object_storage.object_client import ObjectClient
