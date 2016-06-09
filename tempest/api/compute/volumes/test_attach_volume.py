@@ -200,7 +200,7 @@ class AttachVolumeShelveTestJSON(AttachVolumeTestJSON):
             server=self.server,
             servers_client=self.servers_client)
 
-        command = 'grep vd /proc/partitions | wc -l'
+        command = 'grep [vs]d /proc/partitions | wc -l'
         nb_partitions = linux_client.exec_command(command).strip()
         self.assertEqual(number_of_partition, nb_partitions)
 
