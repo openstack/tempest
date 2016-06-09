@@ -64,6 +64,14 @@ want to run tempest from. Using this option you don't have to run Tempest
 directly with you current working directory being the workspace, Tempest will
 take care of managing everything to be executed from there.
 
+Running from Anywhere
+---------------------
+Tempest run provides you with an option to execute tempest from anywhere on
+your system. You are required to provide a config file in this case with the
+``--config-file`` option. When run tempest will create a .testrepository
+directory and a .testr.conf file in your current working directory. This way
+you can use testr commands directly to inspect the state of the previous run.
+
 Test Output
 ===========
 By default tempest run's output to STDOUT will be generated using the
@@ -83,6 +91,7 @@ from os_testr import subunit_trace
 from oslo_log import log as logging
 from testrepository.commands import run_argv
 
+from tempest.cmd import init
 from tempest.cmd import workspace
 from tempest import config
 
@@ -93,7 +102,9 @@ CONF = config.CONF
 
 class TempestRun(command.Command):
 
-    def _set_env(self):
+    def _set_env(self, config_file=None):
+        if config_file:
+            CONF.set_config_path(os.path.abspath(config_file))
         # NOTE(mtreinish): This is needed so that testr doesn't gobble up any
         # stacktraces on failure.
         if 'TESTR_PDB' in os.environ:
@@ -108,9 +119,19 @@ class TempestRun(command.Command):
             if returncode:
                 sys.exit(returncode)
 
+    def _create_testr_conf(self):
+        top_level_path = os.path.dirname(os.path.dirname(__file__))
+        discover_path = os.path.join(top_level_path, 'test_discover')
+        file_contents = init.TESTR_CONF % (top_level_path, discover_path)
+        with open('.testr.conf', 'w+') as testr_conf_file:
+                testr_conf_file.write(file_contents)
+
     def take_action(self, parsed_args):
-        self._set_env()
         returncode = 0
+        if parsed_args.config_file:
+            self._set_env(parsed_args.config_file)
+        else:
+            self._set_env()
         # Workspace execution mode
         if parsed_args.workspace:
             workspace_mgr = workspace.WorkspaceManager(
@@ -125,6 +146,10 @@ class TempestRun(command.Command):
         elif os.path.isfile('.testr.conf'):
             # If you're running in local execution mode and there is not a
             # testrepository dir create one
+            self._create_testrepository()
+        # local execution with config file mode
+        elif parsed_args.config_file:
+            self._create_testr_conf()
             self._create_testrepository()
         else:
             print("No .testr.conf file was found for local execution")
@@ -157,6 +182,9 @@ class TempestRun(command.Command):
                             dest='workspace_path',
                             help="The path to the workspace file, the default "
                                  "is ~/.tempest/workspace.yaml")
+        # Configuration flags
+        parser.add_argument('--config-file', default=None, dest='config_file',
+                            help='Configuration file to run tempest with')
         # test selection args
         regex = parser.add_mutually_exclusive_group()
         regex.add_argument('--smoke', action='store_true',
