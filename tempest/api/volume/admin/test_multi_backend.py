@@ -63,7 +63,7 @@ class VolumeMultiBackendV2Test(base.BaseVolumeAdminTest):
             extra_specs = {spec_key_with_prefix: backend_name_key}
         else:
             extra_specs = {spec_key_without_prefix: backend_name_key}
-        self.type = self.volume_types_client.create_volume_type(
+        self.type = self.admin_volume_types_client.create_volume_type(
             name=type_name, extra_specs=extra_specs)['volume_type']
         self.volume_type_id_list.append(self.type['id'])
 
@@ -95,7 +95,7 @@ class VolumeMultiBackendV2Test(base.BaseVolumeAdminTest):
         # volume types deletion
         volume_type_id_list = getattr(cls, 'volume_type_id_list', [])
         for volume_type_id in volume_type_id_list:
-            cls.volume_types_client.delete_volume_type(volume_type_id)
+            cls.admin_volume_types_client.delete_volume_type(volume_type_id)
 
         super(VolumeMultiBackendV2Test, cls).resource_cleanup()
 

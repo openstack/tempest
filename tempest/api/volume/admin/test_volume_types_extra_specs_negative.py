@@ -26,13 +26,13 @@ class ExtraSpecsNegativeV2Test(base.BaseVolumeAdminTest):
         super(ExtraSpecsNegativeV2Test, cls).resource_setup()
         vol_type_name = data_utils.rand_name('Volume-type')
         cls.extra_specs = {"spec1": "val1"}
-        cls.volume_type = cls.volume_types_client.create_volume_type(
+        cls.volume_type = cls.admin_volume_types_client.create_volume_type(
             name=vol_type_name,
             extra_specs=cls.extra_specs)['volume_type']
 
     @classmethod
     def resource_cleanup(cls):
-        cls.volume_types_client.delete_volume_type(cls.volume_type['id'])
+        cls.admin_volume_types_client.delete_volume_type(cls.volume_type['id'])
         super(ExtraSpecsNegativeV2Test, cls).resource_cleanup()
 
     @test.idempotent_id('08961d20-5cbb-4910-ac0f-89ad6dbb2da1')
@@ -41,7 +41,7 @@ class ExtraSpecsNegativeV2Test(base.BaseVolumeAdminTest):
         extra_spec = {"spec1": "val2"}
         self.assertRaises(
             lib_exc.BadRequest,
-            self.volume_types_client.update_volume_type_extra_specs,
+            self.admin_volume_types_client.update_volume_type_extra_specs,
             self.volume_type['id'], extra_spec.keys()[0], None)
 
     @test.idempotent_id('25e5a0ee-89b3-4c53-8310-236f76c75365')
@@ -50,7 +50,7 @@ class ExtraSpecsNegativeV2Test(base.BaseVolumeAdminTest):
         extra_spec = {"spec1": "val2"}
         self.assertRaises(
             lib_exc.BadRequest,
-            self.volume_types_client.update_volume_type_extra_specs,
+            self.admin_volume_types_client.update_volume_type_extra_specs,
             self.volume_type['id'], data_utils.rand_uuid(),
             extra_spec)
 
@@ -60,7 +60,7 @@ class ExtraSpecsNegativeV2Test(base.BaseVolumeAdminTest):
         extra_spec = {"spec1": "val2"}
         self.assertRaises(
             lib_exc.BadRequest,
-            self.volume_types_client.update_volume_type_extra_specs,
+            self.admin_volume_types_client.update_volume_type_extra_specs,
             self.volume_type['id'], None, extra_spec)
 
     @test.idempotent_id('a77dfda2-9100-448e-9076-ed1711f4bdfc')
@@ -70,7 +70,7 @@ class ExtraSpecsNegativeV2Test(base.BaseVolumeAdminTest):
         extra_spec = {"spec1": "val2", "spec2": "val1"}
         self.assertRaises(
             lib_exc.BadRequest,
-            self.volume_types_client.update_volume_type_extra_specs,
+            self.admin_volume_types_client.update_volume_type_extra_specs,
             self.volume_type['id'], extra_spec.keys()[0],
             extra_spec)
 
@@ -81,7 +81,7 @@ class ExtraSpecsNegativeV2Test(base.BaseVolumeAdminTest):
         extra_specs = {"spec2": "val1"}
         self.assertRaises(
             lib_exc.NotFound,
-            self.volume_types_client.create_volume_type_extra_specs,
+            self.admin_volume_types_client.create_volume_type_extra_specs,
             data_utils.rand_uuid(), extra_specs)
 
     @test.idempotent_id('c821bdc8-43a4-4bf4-86c8-82f3858d5f7d')
@@ -89,7 +89,7 @@ class ExtraSpecsNegativeV2Test(base.BaseVolumeAdminTest):
         # Should not create volume type extra spec for none POST body.
         self.assertRaises(
             lib_exc.BadRequest,
-            self.volume_types_client.create_volume_type_extra_specs,
+            self.admin_volume_types_client.create_volume_type_extra_specs,
             self.volume_type['id'], None)
 
     @test.idempotent_id('bc772c71-1ed4-4716-b945-8b5ed0f15e87')
@@ -97,7 +97,7 @@ class ExtraSpecsNegativeV2Test(base.BaseVolumeAdminTest):
         # Should not create volume type extra spec for invalid POST body.
         self.assertRaises(
             lib_exc.BadRequest,
-            self.volume_types_client.create_volume_type_extra_specs,
+            self.admin_volume_types_client.create_volume_type_extra_specs,
             self.volume_type['id'], extra_specs=['invalid'])
 
     @test.idempotent_id('031cda8b-7d23-4246-8bf6-bbe73fd67074')
@@ -107,7 +107,7 @@ class ExtraSpecsNegativeV2Test(base.BaseVolumeAdminTest):
         extra_specs = {"spec1": "val1"}
         self.assertRaises(
             lib_exc.NotFound,
-            self.volume_types_client.delete_volume_type_extra_specs,
+            self.admin_volume_types_client.delete_volume_type_extra_specs,
             data_utils.rand_uuid(), extra_specs.keys()[0])
 
     @test.idempotent_id('dee5cf0c-cdd6-4353-b70c-e847050d71fb')
@@ -115,7 +115,7 @@ class ExtraSpecsNegativeV2Test(base.BaseVolumeAdminTest):
         # Should not list volume type extra spec for nonexistent type id.
         self.assertRaises(
             lib_exc.NotFound,
-            self.volume_types_client.list_volume_types_extra_specs,
+            self.admin_volume_types_client.list_volume_types_extra_specs,
             data_utils.rand_uuid())
 
     @test.idempotent_id('9f402cbd-1838-4eb4-9554-126a6b1908c9')
@@ -124,7 +124,7 @@ class ExtraSpecsNegativeV2Test(base.BaseVolumeAdminTest):
         extra_specs = {"spec1": "val1"}
         self.assertRaises(
             lib_exc.NotFound,
-            self.volume_types_client.show_volume_type_extra_specs,
+            self.admin_volume_types_client.show_volume_type_extra_specs,
             data_utils.rand_uuid(), extra_specs.keys()[0])
 
     @test.idempotent_id('c881797d-12ff-4f1a-b09d-9f6212159753')
@@ -133,7 +133,7 @@ class ExtraSpecsNegativeV2Test(base.BaseVolumeAdminTest):
             # id.
         self.assertRaises(
             lib_exc.NotFound,
-            self.volume_types_client.show_volume_type_extra_specs,
+            self.admin_volume_types_client.show_volume_type_extra_specs,
             self.volume_type['id'], data_utils.rand_uuid())
 
 
