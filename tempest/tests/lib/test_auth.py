@@ -360,6 +360,58 @@ class TestKeystoneV2AuthProvider(BaseAuthTestsSetUp):
         self.assertRaises(exceptions.EndpointNotFound,
                           self._test_base_url_helper, None, self.filters)
 
+    def test_base_url_with_known_name(self):
+        """If name and service is known, return the endpoint."""
+        self.filters = {
+            'service': 'compute',
+            'endpoint_type': 'publicURL',
+            'region': 'FakeRegion',
+            'name': 'nova'
+        }
+        expected = self._get_result_url_from_endpoint(
+            self._endpoints[0]['endpoints'][1])
+        self._test_base_url_helper(expected, self.filters)
+
+    def test_base_url_with_known_name_and_unknown_servce(self):
+        """Test with Known Name and Unknown service
+
+        If the name is known but the service is unknown, raise an exception.
+        """
+        self.filters = {
+            'service': 'AintNoBodyKnowThatService',
+            'endpoint_type': 'publicURL',
+            'region': 'FakeRegion',
+            'name': 'AintNoBodyKnowThatName'
+        }
+        self.assertRaises(exceptions.EndpointNotFound,
+                          self._test_base_url_helper, None, self.filters)
+
+    def test_base_url_with_unknown_name_and_known_service(self):
+        """Test with Unknown Name and Known Service
+
+        If the name is unknown, raise an exception.  Note that filtering by
+        name is only successful service exists.
+        """
+
+        self.filters = {
+            'service': 'compute',
+            'endpoint_type': 'publicURL',
+            'region': 'FakeRegion',
+            'name': 'AintNoBodyKnowThatName'
+        }
+        self.assertRaises(exceptions.EndpointNotFound,
+                          self._test_base_url_helper, None, self.filters)
+
+    def test_base_url_without_name(self):
+        self.filters = {
+            'service': 'compute',
+            'endpoint_type': 'publicURL',
+            'region': 'FakeRegion',
+        }
+        expected = self._get_result_url_from_endpoint(
+            self._endpoints[0]['endpoints'][1])
+        self._test_base_url_helper(expected, self.filters)
+
     def test_base_url_with_api_version_filter(self):
         self.filters = {
             'service': 'compute',

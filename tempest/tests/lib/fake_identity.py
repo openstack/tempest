@@ -100,7 +100,8 @@ COMPUTE_ENDPOINTS_V3 = {
 
     ],
     "type": "compute",
-    "id": "fake_compute_endpoint"
+    "id": "fake_compute_endpoint",
+    "name": "nova"
 }
 
 CATALOG_V3 = [COMPUTE_ENDPOINTS_V3, ]

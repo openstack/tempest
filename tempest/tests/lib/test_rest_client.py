@@ -633,6 +633,7 @@ class TestProperties(BaseRestClientTestClass):
         expected = {'api_version': 'v1',
                     'endpoint_type': 'publicURL',
                     'region': None,
+                    'name': None,
                     'service': None,
                     'skip_path': True}
         self.rest_client.skip_path()
@@ -643,6 +644,7 @@ class TestProperties(BaseRestClientTestClass):
         expected = {'api_version': 'v1',
                     'endpoint_type': 'publicURL',
                     'region': None,
+                    'name': None,
                     'service': None}
         self.assertEqual(expected, self.rest_client.filters)
 

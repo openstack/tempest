@@ -1,4 +1,5 @@
 # Copyright 2014 Hewlett-Packard Development Company, L.P.
+# Copyright 2016 Rackspace Inc.
 # All Rights Reserved.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -368,18 +369,24 @@ class KeystoneV2AuthProvider(KeystoneAuthProvider):
     def base_url(self, filters, auth_data=None):
         """Base URL from catalog
 
-        Filters can be:
-        - service: compute, image, etc
-        - region: the service region
-        - endpoint_type: adminURL, publicURL, internalURL
-        - api_version: replace catalog version with this
-        - skip_path: take just the base URL
+        :param filters: Used to filter results
+            Filters can be:
+            - service: service type name such as compute, image, etc.
+            - region: service region name
+            - name: service name, only if service exists
+            - endpoint_type: type of endpoint such as
+                adminURL, publicURL, internalURL
+            - api_version: the version of api used to replace catalog version
+            - skip_path: skips the suffix path of the url and uses base URL
+        :rtype string
+        :return url with filters applied
         """
         if auth_data is None:
             auth_data = self.get_auth()
         token, _auth_data = auth_data
         service = filters.get('service')
         region = filters.get('region')
+        name = filters.get('name')
         endpoint_type = filters.get('endpoint_type', 'publicURL')
 
         if service is None:
@@ -388,17 +395,19 @@ class KeystoneV2AuthProvider(KeystoneAuthProvider):
         _base_url = None
         for ep in _auth_data['serviceCatalog']:
             if ep["type"] == service:
+                if name is not None and ep["name"] != name:
+                    continue
                 for _ep in ep['endpoints']:
                     if region is not None and _ep['region'] == region:
                         _base_url = _ep.get(endpoint_type)
                 if not _base_url:
-                    # No region matching, use the first
+                    # No region or name matching, use the first
                     _base_url = ep['endpoints'][0].get(endpoint_type)
                 break
         if _base_url is None:
             raise exceptions.EndpointNotFound(
-                "service: %s, region: %s, endpoint_type: %s" %
-                (service, region, endpoint_type))
+                "service: %s, region: %s, endpoint_type: %s, name: %s" %
+                (service, region, endpoint_type, name))
         return apply_url_filters(_base_url, filters)
 
     def is_expired(self, auth_data):
@@ -489,18 +498,24 @@ class KeystoneV3AuthProvider(KeystoneAuthProvider):
         the auth_data. In such case, as long as the requested service is
         'identity', we can use the original auth URL to build the base_url.
 
-        Filters can be:
-        - service: compute, image, etc
-        - region: the service region
-        - endpoint_type: adminURL, publicURL, internalURL
-        - api_version: replace catalog version with this
-        - skip_path: take just the base URL
+        :param filters: Used to filter results
+            Filters can be:
+            - service: service type name such as compute, image, etc.
+            - region: service region name
+            - name: service name, only if service exists
+            - endpoint_type: type of endpoint such as
+                adminURL, publicURL, internalURL
+            - api_version: the version of api used to replace catalog version
+            - skip_path: skips the suffix path of the url and uses base URL
+        :rtype string
+        :return url with filters applied
         """
         if auth_data is None:
             auth_data = self.get_auth()
         token, _auth_data = auth_data
         service = filters.get('service')
         region = filters.get('region')
+        name = filters.get('name')
         endpoint_type = filters.get('endpoint_type', 'public')
 
         if service is None:
@@ -513,7 +528,15 @@ class KeystoneV3AuthProvider(KeystoneAuthProvider):
         # Select entries with matching service type
         service_catalog = [ep for ep in catalog if ep['type'] == service]
         if len(service_catalog) > 0:
-            service_catalog = service_catalog[0]['endpoints']
+            if name is not None:
+                service_catalog = (
+                    [ep for ep in service_catalog if ep['name'] == name])
+                if len(service_catalog) > 0:
+                    service_catalog = service_catalog[0]['endpoints']
+                else:
+                    raise exceptions.EndpointNotFound(name)
+            else:
+                service_catalog = service_catalog[0]['endpoints']
         else:
             if len(catalog) == 0 and service == 'identity':
                 # NOTE(andreaf) If there's no catalog at all and the service
@@ -533,7 +556,7 @@ class KeystoneV3AuthProvider(KeystoneAuthProvider):
         filtered_catalog = [ep for ep in filtered_catalog if
                             ep['region'] == region]
         if len(filtered_catalog) == 0:
-            # No matching region, take the first endpoint
+            # No matching region (or name), take the first endpoint
             filtered_catalog = [service_catalog[0]]
         # There should be only one match. If not take the first.
         _base_url = filtered_catalog[0].get('url', None)
