@@ -54,6 +54,16 @@ tempest will run in parallel with a worker for each CPU present on the machine.
 If you want to adjust the number of workers use the **--concurrency** option
 and if you want to run tests serially use **--serial**
 
+Running with Workspaces
+-----------------------
+Tempest run enables you to run your tempest tests from any setup tempest
+workspace it relies on you having setup a tempest workspace with either the
+``tempest init`` or ``tempest workspace`` commands. Then using the
+``--workspace`` CLI option you can specify which one of your workspaces you
+want to run tempest from. Using this option you don't have to run Tempest
+directly with you current working directory being the workspace, Tempest will
+take care of managing everything to be executed from there.
+
 Test Output
 ===========
 By default tempest run's output to STDOUT will be generated using the
@@ -73,6 +83,7 @@ from os_testr import subunit_trace
 from oslo_log import log as logging
 from testrepository.commands import run_argv
 
+from tempest.cmd import workspace
 from tempest import config
 
 
@@ -90,18 +101,31 @@ class TempestRun(command.Command):
         else:
             os.environ["TESTR_PDB"] = ""
 
+    def _create_testrepository(self):
+        if not os.path.isdir('.testrepository'):
+            returncode = run_argv(['testr', 'init'], sys.stdin, sys.stdout,
+                                  sys.stderr)
+            if returncode:
+                sys.exit(returncode)
+
     def take_action(self, parsed_args):
         self._set_env()
         returncode = 0
+        # Workspace execution mode
+        if parsed_args.workspace:
+            workspace_mgr = workspace.WorkspaceManager(
+                parsed_args.workspace_path)
+            path = workspace_mgr.get_workspace(parsed_args.workspace)
+            os.chdir(path)
+            # NOTE(mtreinish): tempest init should create a .testrepository dir
+            # but since workspaces can be imported let's sanity check and
+            # ensure that one is created
+            self._create_testrepository()
         # Local execution mode
-        if os.path.isfile('.testr.conf'):
+        elif os.path.isfile('.testr.conf'):
             # If you're running in local execution mode and there is not a
             # testrepository dir create one
-            if not os.path.isdir('.testrepository'):
-                returncode = run_argv(['testr', 'init'], sys.stdin, sys.stdout,
-                                      sys.stderr)
-                if returncode:
-                    sys.exit(returncode)
+            self._create_testrepository()
         else:
             print("No .testr.conf file was found for local execution")
             sys.exit(2)
@@ -124,6 +148,15 @@ class TempestRun(command.Command):
         return parser
 
     def _add_args(self, parser):
+        # workspace args
+        parser.add_argument('--workspace', default=None,
+                            help='Name of tempest workspace to use for running'
+                                 ' tests. You can see a list of workspaces '
+                                 'with tempest workspace list')
+        parser.add_argument('--workspace-path', default=None,
+                            dest='workspace_path',
+                            help="The path to the workspace file, the default "
+                                 "is ~/.tempest/workspace.yaml")
         # test selection args
         regex = parser.add_mutually_exclusive_group()
         regex.add_argument('--smoke', action='store_true',
