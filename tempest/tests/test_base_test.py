@@ -66,7 +66,7 @@ class TestBaseTestCase(base.TestCase):
         test.BaseTestCase.get_tenant_network()
 
         mock_man.assert_called_once_with(
-            mock_prov.get_admin_creds.return_value)
+            mock_prov.get_admin_creds.return_value.credentials)
         mock_iaa.assert_called_once_with(
             identity_version=mock_giv.return_value)
         mock_gcp.assert_called_once_with()

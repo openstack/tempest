@@ -541,7 +541,8 @@ class BaseTestCase(testtools.testcase.WithAttributes,
             else:
                 raise exceptions.InvalidCredentials(
                     "Invalid credentials type %s" % credential_type)
-        return cls.client_manager(credentials=creds, service=cls._service)
+        return cls.client_manager(credentials=creds.credentials,
+                                  service=cls._service)
 
     @classmethod
     def clear_credentials(cls):
@@ -640,7 +641,7 @@ class BaseTestCase(testtools.testcase.WithAttributes,
                 credentials.is_admin_available(
                     identity_version=cls.get_identity_version())):
             admin_creds = cred_provider.get_admin_creds()
-            admin_manager = clients.Manager(admin_creds)
+            admin_manager = clients.Manager(admin_creds.credentials)
             networks_client = admin_manager.compute_networks_client
         return fixed_network.get_tenant_network(
             cred_provider, networks_client, CONF.compute.fixed_network_name)

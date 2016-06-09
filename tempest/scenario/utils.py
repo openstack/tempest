@@ -107,7 +107,8 @@ class InputScenarioUtils(object):
             name='InputScenarioUtils',
             identity_version=CONF.identity.auth_version,
             network_resources=network_resources)
-        os = clients.Manager(self.cred_provider.get_primary_creds())
+        os = clients.Manager(
+            self.cred_provider.get_primary_creds().credentials)
         self.compute_images_client = os.compute_images_client
         self.flavors_client = os.flavors_client
         self.image_pattern = CONF.input_scenario.image_regex

@@ -46,9 +46,9 @@ class IdentityUsersTest(base.BaseIdentityV2Test):
             client.auth_provider.clear_auth()
             client.auth_provider.set_auth()
 
-        old_pass = self.creds.credentials.password
+        old_pass = self.creds.password
         new_pass = data_utils.rand_password()
-        user_id = self.creds.credentials.user_id
+        user_id = self.creds.user_id
         # to change password back. important for allow_tenant_isolation = false
         self.addCleanup(_restore_password, self.non_admin_users_client,
                         user_id, old_pass=old_pass, new_pass=new_pass)
