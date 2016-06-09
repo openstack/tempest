@@ -418,12 +418,11 @@ class TempestVerifyConfig(command.Command):
 
     def take_action(self, parsed_args):
         try:
-            return main(parsed_args)
+            main(parsed_args)
         except Exception:
             LOG.exception("Failure verifying configuration.")
             traceback.print_exc()
             raise
-        return 0
 
 if __name__ == "__main__":
     main()

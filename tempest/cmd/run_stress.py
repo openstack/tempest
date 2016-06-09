@@ -97,7 +97,6 @@ class TempestRunStress(command.Command):
             LOG.exception("Failure in the stress test framework")
             traceback.print_exc()
             raise
-        return 0
 
     def get_description(self):
         return 'Run tempest stress tests'

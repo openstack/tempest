@@ -30,7 +30,6 @@ LOG = logging.getLogger(__name__)
 class TempestListPlugins(command.Command):
     def take_action(self, parsed_args):
         self._list_plugins()
-        return 0
 
     def get_description(self):
         return 'List all tempest plugins'
