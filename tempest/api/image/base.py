@@ -137,7 +137,7 @@ class BaseV2MemberImageTest(BaseV2ImageTest):
     @classmethod
     def setup_clients(cls):
         super(BaseV2MemberImageTest, cls).setup_clients()
-        cls.os_image_member_client = cls.os.image_member_client_v2
+        cls.image_member_client = cls.os.image_member_client_v2
         cls.alt_image_member_client = cls.os_alt.image_member_client_v2
         cls.alt_img_client = cls.os_alt.image_client_v2
 
