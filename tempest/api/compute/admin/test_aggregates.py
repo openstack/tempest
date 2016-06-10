@@ -13,6 +13,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import testtools
+
 from tempest.api.compute import base
 from tempest.common import tempest_fixtures as fixtures
 from tempest.common.utils import data_utils
@@ -36,10 +38,16 @@ class AggregatesAdminTestJSON(base.BaseV2ComputeAdminTest):
         cls.aggregate_name_prefix = 'test_aggregate'
         cls.az_name_prefix = 'test_az'
 
-        hosts_all = cls.os_adm.hosts_client.list_hosts()['hosts']
-        hosts = map(lambda x: x['host_name'],
-                    filter(lambda y: y['service'] == 'compute', hosts_all))
-        cls.host = hosts[0]
+        cls.host = None
+        hypers = cls.os_adm.hypervisor_client.list_hypervisors()['hypervisors']
+        hypers_available = [hyper['hypervisor_hostname'] for hyper in hypers
+                            if (hyper['state'] == 'up' and
+                                hyper['status'] == 'enabled')]
+        if hypers_available:
+            cls.host = hypers_available[0]
+        else:
+            raise testtools.TestCase.failureException(
+                "no available compute node found")
 
     @test.idempotent_id('0d148aa3-d54c-4317-aa8d-42040a475e20')
     def test_aggregate_create_delete(self):
