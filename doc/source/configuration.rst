@@ -26,6 +26,11 @@ can be used to:
 - Run tests for admin APIs
 - Generate test credentials on the fly (see `Dynamic Credentials`_)
 
+When keystone uses a policy that requires domain scoped tokens for admin
+actions, the flag ``admin_domain_scope`` must be set to ``True``.
+The admin user configured, if any, must have a role assigned to the domain to
+be usable.
+
 Tempest allows for configuring pre-provisioned test credentials as well.
 This can be done using the accounts.yaml file (see
 `Pre-Provisioned Credentials`_). This file is used to specify an arbitrary
@@ -87,6 +92,14 @@ list of role names each of which will be assigned to each of the users created
 by dynamic credentials. This option will not have any effect when Tempest is not
 configured to use dynamic credentials.
 
+When the ``admin_domain_scope`` option is set to ``True``, provisioned admin
+accounts will be assigned a role on domain configured in
+``default_credentials_domain_name``. This will make the accounts provisioned
+usable in a cloud where domain scoped tokens are required by keystone for
+admin operations. Note that the the initial pre-provision admin accounts,
+configured in tempest.conf, must have a role on the same domain as well, for
+Dynamic Credentials to work.
+
 
 Pre-Provisioned Credentials
 """""""""""""""""""""""""""
@@ -123,6 +136,18 @@ It is worth pointing out that each set of credentials in the accounts.yaml
 should have a unique project. This is required to provide proper isolation
 to the tests using the credentials, and failure to do this will likely cause
 unexpected failures in some tests.
+
+When the keystone in the target cloud requires domain scoped tokens to
+perform admin actions, all pre-provisioned admin users must have a role
+assigned on the domain where test accounts a provisioned.
+The option ``admin_domain_scope`` is used to tell tempest that domain scoped
+tokens shall be used. ``default_credentials_domain_name`` is the domain where
+test accounts are expected to be provisioned if no domain is specified.
+
+Note that if credentials are pre-provisioned via ``tempest account-generator``
+the role on the domain will be assigned automatically for you, as long as
+``admin_domain_scope`` as ``default_credentials_domain_name`` are configured
+properly in tempest.conf.
 
 Pre-Provisioned Credentials are also know as accounts.yaml or accounts file.
 

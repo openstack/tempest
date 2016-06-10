@@ -193,17 +193,21 @@ def get_configured_admin_credentials(fill_in=True, identity_version=None):
 
 
 # Wrapper around auth.get_credentials to use the configured identity version
-# is none is specified
+# if none is specified
 def get_credentials(fill_in=True, identity_version=None, **kwargs):
     params = dict(DEFAULT_PARAMS, **kwargs)
     identity_version = identity_version or CONF.identity.auth_version
     # In case of "v3" add the domain from config if not specified
+    # To honour the "default_credentials_domain_name", if not domain
+    # field is specified at all, add it the credential dict.
     if identity_version == 'v3':
         domain_fields = set(x for x in auth.KeystoneV3Credentials.ATTRIBUTES
                             if 'domain' in x)
         if not domain_fields.intersection(kwargs.keys()):
             domain_name = CONF.auth.default_credentials_domain_name
-            params['user_domain_name'] = domain_name
+            # NOTE(andreaf) Setting domain_name implicitly sets user and
+            # project domain names, if they are None
+            params['domain_name'] = domain_name
 
         auth_url = CONF.identity.uri_v3
     else:

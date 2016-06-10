@@ -166,6 +166,10 @@ IdentityGroup = [
     cfg.StrOpt('default_domain_id',
                default='default',
                help="ID of the default domain"),
+    cfg.BoolOpt('admin_domain_scope',
+                default=False,
+                help="Whether keystone identity v3 policy required "
+                     "a domain scoped token to use admin APIs")
 ]
 
 identity_feature_group = cfg.OptGroup(name='identity-feature-enabled',

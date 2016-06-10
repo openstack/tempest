@@ -532,6 +532,7 @@ class KeystoneV3AuthProvider(KeystoneAuthProvider):
             endpoint_type = endpoint_type.replace('URL', '')
         _base_url = None
         catalog = _auth_data.get('catalog', [])
+
         # Select entries with matching service type
         service_catalog = [ep for ep in catalog if ep['type'] == service]
         if len(service_catalog) > 0:
@@ -549,10 +550,20 @@ class KeystoneV3AuthProvider(KeystoneAuthProvider):
                 # NOTE(andreaf) If there's no catalog at all and the service
                 # is identity, it's a valid use case. Having a non-empty
                 # catalog with no identity in it is not valid instead.
+                msg = ('Got an empty catalog. Scope: %s. '
+                       'Falling back to configured URL for %s: %s')
+                LOG.debug(msg, self.scope, service, self.auth_url)
                 return apply_url_filters(self.auth_url, filters)
             else:
                 # No matching service
-                raise exceptions.EndpointNotFound(service)
+                msg = ('No matching service found in the catalog.\n'
+                       'Scope: %s, Credentials: %s\n'
+                       'Auth data: %s\n'
+                       'Service: %s, Region: %s, endpoint_type: %s\n'
+                       'Catalog: %s')
+                raise exceptions.EndpointNotFound(msg % (
+                    self.scope, self.credentials, _auth_data, service, region,
+                    endpoint_type, catalog))
         # Filter by endpoint type (interface)
         filtered_catalog = [ep for ep in service_catalog if
                             ep['interface'] == endpoint_type]
