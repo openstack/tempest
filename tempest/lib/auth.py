@@ -180,7 +180,7 @@ class AuthProvider(object):
         :param headers: HTTP headers of the request
         :param body: HTTP body in case of POST / PUT
         :param filters: select a base URL out of the catalog
-        :returns a Tuple (url, headers, body)
+        :return: a Tuple (url, headers, body)
         """
         orig_req = dict(url=url, headers=headers, body=body)
 
@@ -224,6 +224,7 @@ class AuthProvider(object):
         Configure auth provider to provide alt authentication data
         on a part of the *next* auth_request. If credentials are None,
         set invalid data.
+
         :param request_part: request part to contain invalid auth: url,
                              headers, body
         :param auth_data: alternative auth_data from which to get the
@@ -370,16 +371,19 @@ class KeystoneV2AuthProvider(KeystoneAuthProvider):
         """Base URL from catalog
 
         :param filters: Used to filter results
-            Filters can be:
-            - service: service type name such as compute, image, etc.
-            - region: service region name
-            - name: service name, only if service exists
-            - endpoint_type: type of endpoint such as
-                adminURL, publicURL, internalURL
-            - api_version: the version of api used to replace catalog version
-            - skip_path: skips the suffix path of the url and uses base URL
-        :rtype string
-        :return url with filters applied
+
+        Filters can be:
+
+        - service: service type name such as compute, image, etc.
+        - region: service region name
+        - name: service name, only if service exists
+        - endpoint_type: type of endpoint such as
+            adminURL, publicURL, internalURL
+        - api_version: the version of api used to replace catalog version
+        - skip_path: skips the suffix path of the url and uses base URL
+
+        :rtype: string
+        :return: url with filters applied
         """
         if auth_data is None:
             auth_data = self.get_auth()
@@ -499,16 +503,19 @@ class KeystoneV3AuthProvider(KeystoneAuthProvider):
         'identity', we can use the original auth URL to build the base_url.
 
         :param filters: Used to filter results
-            Filters can be:
-            - service: service type name such as compute, image, etc.
-            - region: service region name
-            - name: service name, only if service exists
-            - endpoint_type: type of endpoint such as
-                adminURL, publicURL, internalURL
-            - api_version: the version of api used to replace catalog version
-            - skip_path: skips the suffix path of the url and uses base URL
-        :rtype string
-        :return url with filters applied
+
+        Filters can be:
+
+        - service: service type name such as compute, image, etc.
+        - region: service region name
+        - name: service name, only if service exists
+        - endpoint_type: type of endpoint such as
+            adminURL, publicURL, internalURL
+        - api_version: the version of api used to replace catalog version
+        - skip_path: skips the suffix path of the url and uses base URL
+
+        :rtype: string
+        :return: url with filters applied
         """
         if auth_data is None:
             auth_data = self.get_auth()

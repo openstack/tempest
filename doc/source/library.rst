@@ -66,3 +66,4 @@ Current Library APIs
    library/rest_client
    library/utils
    library/api_microversion_testing
+   library/auth
