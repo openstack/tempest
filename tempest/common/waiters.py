@@ -15,6 +15,7 @@ import time
 
 from oslo_log import log as logging
 
+from tempest.common import image as common_image
 from tempest import config
 from tempest import exceptions
 from tempest.lib.common.utils import misc as misc_utils
@@ -127,7 +128,11 @@ def wait_for_image_status(client, image_id, status):
         # The 'check_image' method is used here because the show_image method
         # returns image details plus the image itself which is very expensive.
         # The 'check_image' method returns just image details.
-        show_image = client.check_image
+        def _show_image_v1(image_id):
+            resp = client.check_image(image_id)
+            return common_image.get_image_meta_from_headers(resp)
+
+        show_image = _show_image_v1
     else:
         show_image = client.show_image
 

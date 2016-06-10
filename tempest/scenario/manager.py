@@ -23,6 +23,7 @@ from oslo_utils import netutils
 import six
 
 from tempest.common import compute
+from tempest.common import image as common_image
 from tempest.common.utils import data_utils
 from tempest.common.utils.linux import remote_client
 from tempest.common import waiters
@@ -469,7 +470,8 @@ class ScenarioTest(tempest.test.BaseTestCase):
             cleanup_args=[_image_client.delete_image, image_id])
         if CONF.image_feature_enabled.api_v1:
             # In glance v1 the additional properties are stored in the headers.
-            snapshot_image = _image_client.check_image(image_id)
+            resp = _image_client.check_image(image_id)
+            snapshot_image = common_image.get_image_meta_from_headers(resp)
             image_props = snapshot_image.get('properties', {})
         else:
             # In glance v2 the additional properties are flattened.
