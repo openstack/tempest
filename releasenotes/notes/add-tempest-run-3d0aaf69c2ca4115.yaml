@@ -1,0 +1,4 @@
+---
+features:
+  - Adds the tempest run command to the unified tempest CLI. This new command
+    is used for running tempest tests.

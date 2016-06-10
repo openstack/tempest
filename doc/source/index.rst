@@ -52,6 +52,7 @@ Command Documentation
    cleanup
    javelin
    workspace
+   run
 
 ==================
 Indices and tables
