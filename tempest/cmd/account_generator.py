@@ -38,17 +38,17 @@ Account generator creates users and tenants so it needs the admin credentials
 of your cloud to operate properly. The corresponding info can be given either
 through CLI options or environment variables.
 
-You're probably familiar with these, but just to remind::
+You're probably familiar with these, but just to remind:
 
-    +----------+---------------------------+----------------------+
-    | Param    | CLI                       | Environment Variable |
-    +----------+---------------------------+----------------------+
-    | Username | --os-username             | OS_USERNAME          |
-    | Password | --os-password             | OS_PASSWORD          |
-    | Project  | --os-project-name         | OS_PROJECT_NAME      |
-    | Tenant   | --os-tenant-name (depr.)  | OS_TENANT_NAME       |
-    | Domain   | --os-domain-name          | OS_DOMAIN_NAME       |
-    +----------+---------------------------+----------------------+
+======== ======================== ====================
+Param    CLI                      Environment Variable
+======== ======================== ====================
+Username --os-username            OS_USERNAME
+Password --os-password            OS_PASSWORD
+Project  --os-project-name        OS_PROJECT_NAME
+Tenant   --os-tenant-name (depr.) OS_TENANT_NAME
+Domain   --os-domain-name         OS_DOMAIN_NAME
+======== ======================== ====================
 
 Optional Arguments
 ------------------
