@@ -261,7 +261,7 @@ class KeystoneAuthProvider(AuthProvider):
                  disable_ssl_certificate_validation=None,
                  ca_certs=None, trace_requests=None, scope='project'):
         super(KeystoneAuthProvider, self).__init__(credentials, scope)
-        self.dsvm = disable_ssl_certificate_validation
+        self.dscv = disable_ssl_certificate_validation
         self.ca_certs = ca_certs
         self.trace_requests = trace_requests
         self.auth_url = auth_url
@@ -340,7 +340,7 @@ class KeystoneV2AuthProvider(KeystoneAuthProvider):
 
     def _auth_client(self, auth_url):
         return json_v2id.TokenClient(
-            auth_url, disable_ssl_certificate_validation=self.dsvm,
+            auth_url, disable_ssl_certificate_validation=self.dscv,
             ca_certs=self.ca_certs, trace_requests=self.trace_requests)
 
     def _auth_params(self):
@@ -424,7 +424,7 @@ class KeystoneV3AuthProvider(KeystoneAuthProvider):
 
     def _auth_client(self, auth_url):
         return json_v3id.V3TokenClient(
-            auth_url, disable_ssl_certificate_validation=self.dsvm,
+            auth_url, disable_ssl_certificate_validation=self.dscv,
             ca_certs=self.ca_certs, trace_requests=self.trace_requests)
 
     def _auth_params(self):
@@ -613,9 +613,9 @@ def get_credentials(auth_url, fill_in=True, identity_version='v2',
     creds = credential_class(**kwargs)
     # Fill in the credentials fields that were not specified
     if fill_in:
-        dsvm = disable_ssl_certificate_validation
+        dscv = disable_ssl_certificate_validation
         auth_provider = auth_provider_class(
-            creds, auth_url, disable_ssl_certificate_validation=dsvm,
+            creds, auth_url, disable_ssl_certificate_validation=dscv,
             ca_certs=ca_certs, trace_requests=trace_requests)
         creds = auth_provider.fill_credentials()
     return creds
