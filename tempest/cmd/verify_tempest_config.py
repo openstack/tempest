@@ -384,7 +384,7 @@ def main(opts=None):
     icreds = credentials.get_credentials_provider(
         'verify_tempest_config', network_resources=net_resources)
     try:
-        os = clients.Manager(icreds.get_primary_creds())
+        os = clients.Manager(icreds.get_primary_creds().credentials)
         services = check_service_availability(os, update)
         results = {}
         for service in ['nova', 'cinder', 'neutron', 'swift']:

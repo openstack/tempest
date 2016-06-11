@@ -13,7 +13,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest.common import cred_provider
 from tempest import config
 from tempest import exceptions
 from tempest.lib import auth
@@ -34,7 +33,7 @@ class Manager(object):
         Credentials to be used within the various client classes managed by the
         Manager object must be defined.
 
-        :param credentials: type Credentials or TestResources
+        :param credentials: An instance of `auth.Credentials`
         :param scope: default scope for tokens produced by the auth provider
         """
         self.credentials = credentials
@@ -42,15 +41,9 @@ class Manager(object):
         if not self.credentials.is_valid():
             raise exceptions.InvalidCredentials()
         self.auth_version = CONF.identity.auth_version
-        # Tenant isolation creates TestResources, but
-        # PreProvisionedCredentialProvider and some tests create Credentials
-        if isinstance(credentials, cred_provider.TestResources):
-            creds = self.credentials.credentials
-        else:
-            creds = self.credentials
         # Creates an auth provider for the credentials
-        self.auth_provider = get_auth_provider(creds, pre_auth=True,
-                                               scope=scope)
+        self.auth_provider = get_auth_provider(
+            self.credentials, pre_auth=True, scope=scope)
 
 
 def get_auth_provider_class(credentials):
