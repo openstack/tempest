@@ -315,7 +315,11 @@ class ServersClient(base_compute_client.BaseComputeClient):
         return self.action(server_id, 'os-start', **kwargs)
 
     def attach_volume(self, server_id, **kwargs):
-        """Attaches a volume to a server instance."""
+        """Attaches a volume to a server instance.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-compute-v2.1.html#attachVolume
+        """
         post_body = json.dumps({'volumeAttachment': kwargs})
         resp, body = self.post('servers/%s/os-volume_attachments' % server_id,
                                post_body)
