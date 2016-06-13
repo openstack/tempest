@@ -13,61 +13,50 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from oslo_log import log as logging
+
+from tempest import clients
 from tempest import config
-from tempest.lib import auth
-from tempest.lib import exceptions
+from tempest import service_clients
 
 CONF = config.CONF
+LOG = logging.getLogger(__name__)
 
 
-class Manager(object):
-    """Base manager class
+class Manager(service_clients.ServiceClients):
+    """Service client manager class for backward compatibility
 
-    Manager objects are responsible for providing a configuration object
-    and a client object for a test case to use in performing actions.
+    The former manager.Manager is not a stable interface in Tempest,
+    nonetheless it is consumed by a number of plugins already. This class
+    exists to provide some grace time for the move to tempest.lib.
     """
 
     def __init__(self, credentials, scope='project'):
-        """Initialization of base manager class
-
-        Credentials to be used within the various client classes managed by the
-        Manager object must be defined.
-
-        :param credentials: An instance of `auth.Credentials`
-        :param scope: default scope for tokens produced by the auth provider
-        """
-        self.credentials = credentials
-        # Check if passed or default credentials are valid
-        if not self.credentials.is_valid():
-            raise exceptions.InvalidCredentials()
-        self.auth_version = CONF.identity.auth_version
-        # Creates an auth provider for the credentials
-        self.auth_provider = get_auth_provider(
-            self.credentials, pre_auth=True, scope=scope)
-
-
-def get_auth_provider_class(credentials):
-    if isinstance(credentials, auth.KeystoneV3Credentials):
-        return auth.KeystoneV3AuthProvider, CONF.identity.uri_v3
-    else:
-        return auth.KeystoneV2AuthProvider, CONF.identity.uri
+        msg = ("tempest.manager.Manager is not a stable interface and as such "
+               "it should not imported directly. It will be removed as "
+               "soon as the client manager becomes available in tempest.lib.")
+        LOG.warning(msg)
+        dscv = CONF.identity.disable_ssl_certificate_validation
+        _, uri = clients.get_auth_provider_class(credentials)
+        super(Manager, self).__init__(
+            credentials=credentials, scope=scope,
+            identity_uri=uri,
+            disable_ssl_certificate_validation=dscv,
+            ca_certs=CONF.identity.ca_certificates_file,
+            trace_requests=CONF.debug.trace_requests)
 
 
 def get_auth_provider(credentials, pre_auth=False, scope='project'):
-    default_params = {
-        'disable_ssl_certificate_validation':
-            CONF.identity.disable_ssl_certificate_validation,
-        'ca_certs': CONF.identity.ca_certificates_file,
-        'trace_requests': CONF.debug.trace_requests
-    }
-    if credentials is None:
-        raise exceptions.InvalidCredentials(
-            'Credentials must be specified')
-    auth_provider_class, auth_url = get_auth_provider_class(
-        credentials)
-    _auth_provider = auth_provider_class(credentials, auth_url,
-                                         scope=scope,
-                                         **default_params)
-    if pre_auth:
-        _auth_provider.set_auth()
-    return _auth_provider
+    """Shim to get_auth_provider in clients.py
+
+    get_auth_provider used to be hosted in this module, but it has been
+    moved to clients.py now as a more permanent location.
+    This module will be removed eventually, and this shim is only
+    maintained for the benefit of plugins already consuming this interface.
+    """
+    msg = ("tempest.manager.get_auth_provider is not a stable interface and "
+           "as such it should not imported directly. It will be removed as "
+           "the client manager becomes available in tempest.lib.")
+    LOG.warning(msg)
+    return clients.get_auth_provider(credentials=credentials,
+                                     pre_auth=pre_auth, scope=scope)
