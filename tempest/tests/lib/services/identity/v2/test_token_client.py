@@ -25,9 +25,6 @@ from tempest.tests.lib import fake_http
 
 class TestTokenClientV2(base.TestCase):
 
-    def setUp(self):
-        super(TestTokenClientV2, self).setUp()
-
     def test_init_without_authurl(self):
         self.assertRaises(exceptions.IdentityError,
                           token_client.TokenClient, None)
