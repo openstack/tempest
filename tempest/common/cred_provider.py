@@ -16,8 +16,8 @@ import abc
 
 import six
 
-from tempest import exceptions
 from tempest.lib import auth
+from tempest.lib import exceptions
 
 
 @six.add_metaclass(abc.ABCMeta)

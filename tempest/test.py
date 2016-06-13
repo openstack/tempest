@@ -39,6 +39,7 @@ from tempest import config
 from tempest import exceptions
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
+from tempest.lib import exceptions as lib_exc
 
 LOG = logging.getLogger(__name__)
 
@@ -539,7 +540,7 @@ class BaseTestCase(testtools.testcase.WithAttributes,
             if hasattr(cred_provider, credentials_method):
                 creds = getattr(cred_provider, credentials_method)()
             else:
-                raise exceptions.InvalidCredentials(
+                raise lib_exc.InvalidCredentials(
                     "Invalid credentials type %s" % credential_type)
         return cls.client_manager(credentials=creds.credentials,
                                   service=cls._service)
