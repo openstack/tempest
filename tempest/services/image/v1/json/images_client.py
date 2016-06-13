@@ -76,9 +76,13 @@ class ImagesClient(rest_client.RestClient):
             self._http = self._get_http()
         return self._http
 
-    def create_image(self, **kwargs):
+    def create_image(self, data=None, **kwargs):
+        """Create an image.
+
+        Available params: http://developer.openstack.org/
+                          api-ref-image-v1.html#createImage-v1
+        """
         headers = {}
-        data = kwargs.pop('data', None)
         headers.update(self._image_meta_to_headers(kwargs))
 
         if data is not None:
@@ -89,9 +93,13 @@ class ImagesClient(rest_client.RestClient):
         body = json.loads(body)
         return rest_client.ResponseBody(resp, body)
 
-    def update_image(self, image_id, **kwargs):
+    def update_image(self, image_id, data=None, **kwargs):
+        """Update an image.
+
+        Available params: http://developer.openstack.org/
+                          api-ref-image-v1.html#updateImage-v1
+        """
         headers = {}
-        data = kwargs.pop('data', None)
         headers.update(self._image_meta_to_headers(kwargs))
 
         if data is not None:
