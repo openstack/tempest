@@ -19,6 +19,7 @@ import random
 import string
 import uuid
 
+from oslo_utils import netutils
 import six.moves
 
 
@@ -183,7 +184,7 @@ def get_ipv6_addr_by_EUI64(cidr, mac):
     :rtype: netaddr.IPAddress
     """
     # Check if the prefix is IPv4 address
-    is_ipv4 = netaddr.valid_ipv4(cidr)
+    is_ipv4 = netutils.is_valid_ipv4(cidr)
     if is_ipv4:
         msg = "Unable to generate IP address by EUI64 for IPv4 prefix"
         raise TypeError(msg)
