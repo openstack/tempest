@@ -234,7 +234,7 @@ def _parser_add_args(parser):
     parser.add_argument('-r', '--concurrency',
                         default=1,
                         type=int,
-                        required=True,
+                        required=False,
                         dest='concurrency',
                         help='Concurrency count')
     parser.add_argument('--with-admin',
