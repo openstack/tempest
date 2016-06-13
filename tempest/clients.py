@@ -73,6 +73,7 @@ from tempest.lib.services.compute.tenant_usages_client import \
 from tempest.lib.services.compute.versions_client import VersionsClient
 from tempest.lib.services.compute.volumes_client import \
     VolumesClient as ComputeVolumesClient
+from tempest.lib.services.identity.v2.endpoints_client import EndpointsClient
 from tempest.lib.services.identity.v2.token_client import TokenClient
 from tempest.lib.services.identity.v3.token_client import V3TokenClient
 from tempest.lib.services.image.v2.image_members_client import \
@@ -112,7 +113,6 @@ from tempest.services.database.json.limits_client import \
     DatabaseLimitsClient
 from tempest.services.database.json.versions_client import \
     DatabaseVersionsClient
-from tempest.services.identity.v2.json.endpoints_client import EndpointsClient
 from tempest.services.identity.v2.json.identity_client import IdentityClient
 from tempest.services.identity.v2.json.roles_client import RolesClient
 from tempest.services.identity.v2.json.services_client import \
