@@ -20,59 +20,7 @@ from oslo_log import log as logging
 from tempest.common import negative_rest_client
 from tempest import config
 from tempest import exceptions
-from tempest.lib.services.compute.agents_client import AgentsClient
-from tempest.lib.services.compute.aggregates_client import AggregatesClient
-from tempest.lib.services.compute.availability_zone_client import \
-    AvailabilityZoneClient
-from tempest.lib.services.compute.baremetal_nodes_client import \
-    BaremetalNodesClient
-from tempest.lib.services.compute.certificates_client import \
-    CertificatesClient
-from tempest.lib.services.compute.extensions_client import \
-    ExtensionsClient
-from tempest.lib.services.compute.fixed_ips_client import FixedIPsClient
-from tempest.lib.services.compute.flavors_client import FlavorsClient
-from tempest.lib.services.compute.floating_ip_pools_client import \
-    FloatingIPPoolsClient
-from tempest.lib.services.compute.floating_ips_bulk_client import \
-    FloatingIPsBulkClient
-from tempest.lib.services.compute.floating_ips_client import \
-    FloatingIPsClient as ComputeFloatingIPsClient
-from tempest.lib.services.compute.hosts_client import HostsClient
-from tempest.lib.services.compute.hypervisor_client import \
-    HypervisorClient
-from tempest.lib.services.compute.images_client import ImagesClient \
-    as ComputeImagesClient
-from tempest.lib.services.compute.instance_usage_audit_log_client import \
-    InstanceUsagesAuditLogClient
-from tempest.lib.services.compute.interfaces_client import InterfacesClient
-from tempest.lib.services.compute.keypairs_client import KeyPairsClient
-from tempest.lib.services.compute.limits_client import LimitsClient
-from tempest.lib.services.compute.migrations_client import MigrationsClient
-from tempest.lib.services.compute.networks_client import NetworksClient \
-    as ComputeNetworksClient
-from tempest.lib.services.compute.quota_classes_client import \
-    QuotaClassesClient
-from tempest.lib.services.compute.quotas_client import QuotasClient
-from tempest.lib.services.compute.security_group_default_rules_client import \
-    SecurityGroupDefaultRulesClient
-from tempest.lib.services.compute.security_group_rules_client import \
-    SecurityGroupRulesClient as ComputeSecurityGroupRulesClient
-from tempest.lib.services.compute.security_groups_client import \
-    SecurityGroupsClient as ComputeSecurityGroupsClient
-from tempest.lib.services.compute.server_groups_client import \
-    ServerGroupsClient
-from tempest.lib.services.compute.servers_client import ServersClient
-from tempest.lib.services.compute.services_client import ServicesClient
-from tempest.lib.services.compute.snapshots_client import \
-    SnapshotsClient as ComputeSnapshotsClient
-from tempest.lib.services.compute.tenant_networks_client import \
-    TenantNetworksClient
-from tempest.lib.services.compute.tenant_usages_client import \
-    TenantUsagesClient
-from tempest.lib.services.compute.versions_client import VersionsClient
-from tempest.lib.services.compute.volumes_client import \
-    VolumesClient as ComputeVolumesClient
+from tempest.lib.services import compute
 from tempest.lib.services.identity.v2.endpoints_client import EndpointsClient
 from tempest.lib.services.identity.v2.token_client import TokenClient
 from tempest.lib.services.identity.v3.token_client import V3TokenClient
@@ -323,61 +271,65 @@ class Manager(manager.Manager):
         }
         params.update(self.default_params)
 
-        self.agents_client = AgentsClient(self.auth_provider, **params)
-        self.compute_networks_client = ComputeNetworksClient(
+        self.agents_client = compute.AgentsClient(self.auth_provider, **params)
+        self.compute_networks_client = compute.NetworksClient(
             self.auth_provider, **params)
-        self.migrations_client = MigrationsClient(self.auth_provider,
-                                                  **params)
+        self.migrations_client = compute.MigrationsClient(self.auth_provider,
+                                                          **params)
         self.security_group_default_rules_client = (
-            SecurityGroupDefaultRulesClient(self.auth_provider, **params))
-        self.certificates_client = CertificatesClient(self.auth_provider,
-                                                      **params)
-        self.servers_client = ServersClient(
+            compute.SecurityGroupDefaultRulesClient(self.auth_provider,
+                                                    **params))
+        self.certificates_client = compute.CertificatesClient(
+            self.auth_provider, **params)
+        self.servers_client = compute.ServersClient(
             self.auth_provider,
             enable_instance_password=CONF.compute_feature_enabled
                 .enable_instance_password,
             **params)
-        self.server_groups_client = ServerGroupsClient(
+        self.server_groups_client = compute.ServerGroupsClient(
             self.auth_provider, **params)
-        self.limits_client = LimitsClient(self.auth_provider, **params)
-        self.compute_images_client = ComputeImagesClient(self.auth_provider,
-                                                         **params)
-        self.keypairs_client = KeyPairsClient(self.auth_provider, **params)
-        self.quotas_client = QuotasClient(self.auth_provider, **params)
-        self.quota_classes_client = QuotaClassesClient(self.auth_provider,
+        self.limits_client = compute.LimitsClient(self.auth_provider, **params)
+        self.compute_images_client = compute.ImagesClient(self.auth_provider,
+                                                          **params)
+        self.keypairs_client = compute.KeyPairsClient(self.auth_provider,
+                                                      **params)
+        self.quotas_client = compute.QuotasClient(self.auth_provider, **params)
+        self.quota_classes_client = compute.QuotaClassesClient(
+            self.auth_provider, **params)
+        self.flavors_client = compute.FlavorsClient(self.auth_provider,
+                                                    **params)
+        self.extensions_client = compute.ExtensionsClient(self.auth_provider,
+                                                          **params)
+        self.floating_ip_pools_client = compute.FloatingIPPoolsClient(
+            self.auth_provider, **params)
+        self.floating_ips_bulk_client = compute.FloatingIPsBulkClient(
+            self.auth_provider, **params)
+        self.compute_floating_ips_client = compute.FloatingIPsClient(
+            self.auth_provider, **params)
+        self.compute_security_group_rules_client = (
+            compute.SecurityGroupRulesClient(self.auth_provider, **params))
+        self.compute_security_groups_client = compute.SecurityGroupsClient(
+            self.auth_provider, **params)
+        self.interfaces_client = compute.InterfacesClient(self.auth_provider,
+                                                          **params)
+        self.fixed_ips_client = compute.FixedIPsClient(self.auth_provider,
                                                        **params)
-        self.flavors_client = FlavorsClient(self.auth_provider, **params)
-        self.extensions_client = ExtensionsClient(self.auth_provider,
-                                                  **params)
-        self.floating_ip_pools_client = FloatingIPPoolsClient(
+        self.availability_zone_client = compute.AvailabilityZoneClient(
             self.auth_provider, **params)
-        self.floating_ips_bulk_client = FloatingIPsBulkClient(
+        self.aggregates_client = compute.AggregatesClient(self.auth_provider,
+                                                          **params)
+        self.services_client = compute.ServicesClient(self.auth_provider,
+                                                      **params)
+        self.tenant_usages_client = compute.TenantUsagesClient(
             self.auth_provider, **params)
-        self.compute_floating_ips_client = ComputeFloatingIPsClient(
+        self.hosts_client = compute.HostsClient(self.auth_provider, **params)
+        self.hypervisor_client = compute.HypervisorClient(self.auth_provider,
+                                                          **params)
+        self.instance_usages_audit_log_client = (
+            compute.InstanceUsagesAuditLogClient(self.auth_provider, **params))
+        self.tenant_networks_client = compute.TenantNetworksClient(
             self.auth_provider, **params)
-        self.compute_security_group_rules_client = \
-            ComputeSecurityGroupRulesClient(self.auth_provider, **params)
-        self.compute_security_groups_client = ComputeSecurityGroupsClient(
-            self.auth_provider, **params)
-        self.interfaces_client = InterfacesClient(self.auth_provider,
-                                                  **params)
-        self.fixed_ips_client = FixedIPsClient(self.auth_provider,
-                                               **params)
-        self.availability_zone_client = AvailabilityZoneClient(
-            self.auth_provider, **params)
-        self.aggregates_client = AggregatesClient(self.auth_provider,
-                                                  **params)
-        self.services_client = ServicesClient(self.auth_provider, **params)
-        self.tenant_usages_client = TenantUsagesClient(self.auth_provider,
-                                                       **params)
-        self.hosts_client = HostsClient(self.auth_provider, **params)
-        self.hypervisor_client = HypervisorClient(self.auth_provider,
-                                                  **params)
-        self.instance_usages_audit_log_client = \
-            InstanceUsagesAuditLogClient(self.auth_provider, **params)
-        self.tenant_networks_client = \
-            TenantNetworksClient(self.auth_provider, **params)
-        self.baremetal_nodes_client = BaremetalNodesClient(
+        self.baremetal_nodes_client = compute.BaremetalNodesClient(
             self.auth_provider, **params)
 
         # NOTE: The following client needs special timeout values because
@@ -387,11 +339,11 @@ class Manager(manager.Manager):
             'build_interval': CONF.volume.build_interval,
             'build_timeout': CONF.volume.build_timeout
         })
-        self.volumes_extensions_client = ComputeVolumesClient(
+        self.volumes_extensions_client = compute.VolumesClient(
             self.auth_provider, **params_volume)
-        self.compute_versions_client = VersionsClient(self.auth_provider,
-                                                      **params_volume)
-        self.snapshots_extensions_client = ComputeSnapshotsClient(
+        self.compute_versions_client = compute.VersionsClient(
+            self.auth_provider, **params_volume)
+        self.snapshots_extensions_client = compute.SnapshotsClient(
             self.auth_provider, **params_volume)
 
     def _set_database_clients(self):
