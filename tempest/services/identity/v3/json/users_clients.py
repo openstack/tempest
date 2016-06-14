@@ -44,7 +44,11 @@ class UsersClient(rest_client.RestClient):
         return rest_client.ResponseBody(resp, body)
 
     def update_user(self, user_id, name, **kwargs):
-        """Updates a user."""
+        """Updates a user.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-identity-v3.html#updateUser
+        """
         body = self.show_user(user_id)['user']
         email = kwargs.get('email', body['email'])
         en = kwargs.get('enabled', body['enabled'])

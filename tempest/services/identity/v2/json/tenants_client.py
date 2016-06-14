@@ -59,7 +59,11 @@ class TenantsClient(rest_client.RestClient):
         return rest_client.ResponseBody(resp, body)
 
     def update_tenant(self, tenant_id, **kwargs):
-        """Updates a tenant."""
+        """Updates a tenant.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-identity-v2-ext.html#updateTenant
+        """
         body = self.show_tenant(tenant_id)['tenant']
         name = kwargs.get('name', body['name'])
         desc = kwargs.get('description', body['description'])
