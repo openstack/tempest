@@ -6,8 +6,8 @@ features:
     so the other projects can use these modules as stable libraries
     without any maintenance changes.
 
-      * image_members_client
-      * images_client
-      * namespaces_client
-      * resource_types_client
-      * schemas_client
+      * image_members_client(v2)
+      * images_client(v2)
+      * namespaces_client(v2)
+      * resource_types_client(v2)
+      * schemas_client(v2)
