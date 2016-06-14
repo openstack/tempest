@@ -39,12 +39,13 @@ class AggregatesAdminTestJSON(base.BaseV2ComputeAdminTest):
         cls.az_name_prefix = 'test_az'
 
         cls.host = None
-        hypers = cls.os_adm.hypervisor_client.list_hypervisors()['hypervisors']
-        hypers_available = [hyper['hypervisor_hostname'] for hyper in hypers
-                            if (hyper['state'] == 'up' and
-                                hyper['status'] == 'enabled')]
-        if hypers_available:
-            cls.host = hypers_available[0]
+        hypers = cls.os_adm.hypervisor_client.list_hypervisors(
+            detail=True)['hypervisors']
+        hosts_available = [hyper['service']['host'] for hyper in hypers
+                           if (hyper['state'] == 'up' and
+                               hyper['status'] == 'enabled')]
+        if hosts_available:
+            cls.host = hosts_available[0]
         else:
             raise testtools.TestCase.failureException(
                 "no available compute node found")
