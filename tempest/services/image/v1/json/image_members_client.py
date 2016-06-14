@@ -39,7 +39,7 @@ class ImageMembersClient(rest_client.RestClient):
         body = json.loads(body)
         return rest_client.ResponseBody(resp, body)
 
-    def add_member(self, member_id, image_id, **kwargs):
+    def create_image_member(self, image_id, member_id, **kwargs):
         """Add a member to an image.
 
         Available params: see http://developer.openstack.org/
@@ -51,7 +51,7 @@ class ImageMembersClient(rest_client.RestClient):
         self.expected_success(204, resp.status)
         return rest_client.ResponseBody(resp)
 
-    def delete_member(self, member_id, image_id):
+    def delete_image_member(self, image_id, member_id):
         """Removes a membership from the image.
 
         Available params: see http://developer.openstack.org/
