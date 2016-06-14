@@ -37,9 +37,15 @@ class ListProjectsTestJSON(base.BaseIdentityV3AdminTest):
         cls.p2 = cls.projects_client.create_project(p2_name)['project']
         cls.data.projects.append(cls.p2)
         cls.project_ids.append(cls.p2['id'])
+        # Create a new project (p3) using p2 as parent project
+        p3_name = data_utils.rand_name('project')
+        cls.p3 = cls.projects_client.create_project(
+            p3_name, parent_id=cls.p2['id'])['project']
+        cls.data.projects.append(cls.p3)
+        cls.project_ids.append(cls.p3['id'])
 
     @test.idempotent_id('1d830662-22ad-427c-8c3e-4ec854b0af44')
-    def test_projects_list(self):
+    def test_list_projects(self):
         # List projects
         list_projects = self.projects_client.list_projects()['projects']
 
@@ -62,6 +68,16 @@ class ListProjectsTestJSON(base.BaseIdentityV3AdminTest):
     def test_list_projects_with_name(self):
         # List projects with name
         self._list_projects_with_params({'name': self.p1_name}, 'name')
+
+    @test.idempotent_id('6edc66f5-2941-4a17-9526-4073311c1fac')
+    def test_list_projects_with_parent(self):
+        # List projects with parent
+        params = {'parent_id': self.p3['parent_id']}
+        fetched_projects = self.projects_client.list_projects(
+            params)['projects']
+        self.assertNotEmpty(fetched_projects)
+        for project in fetched_projects:
+            self.assertEqual(self.p3['parent_id'], project['parent_id'])
 
     def _list_projects_with_params(self, params, key):
         body = self.projects_client.list_projects(params)['projects']
