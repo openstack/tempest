@@ -20,16 +20,14 @@ from tempest.lib.common import rest_client
 class EndpointsClient(rest_client.RestClient):
     api_version = "v2.0"
 
-    def create_endpoint(self, service_id, region_id, **kwargs):
-        """Create an endpoint for service."""
-        post_body = {
-            'service_id': service_id,
-            'region': region_id,
-            'publicurl': kwargs.get('publicurl'),
-            'adminurl': kwargs.get('adminurl'),
-            'internalurl': kwargs.get('internalurl')
-        }
-        post_body = json.dumps({'endpoint': post_body})
+    def create_endpoint(self, **kwargs):
+        """Create an endpoint for service.
+
+        Available params: http://developer.openstack.org/
+                          api-ref-identity-v2-ext.html#createEndpoint
+        """
+
+        post_body = json.dumps({'endpoint': kwargs})
         resp, body = self.post('/endpoints', post_body)
         self.expected_success(200, resp.status)
         body = json.loads(body)
