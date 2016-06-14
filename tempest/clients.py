@@ -77,6 +77,8 @@ from tempest.lib.services.identity.v2.token_client import TokenClient
 from tempest.lib.services.identity.v3.token_client import V3TokenClient
 from tempest.lib.services.image.v2.image_members_client import \
     ImageMembersClient as ImageMembersClientV2
+from tempest.lib.services.image.v2.images_client import \
+    ImagesClient as ImagesV2Client
 from tempest.lib.services.image.v2.namespaces_client import NamespacesClient
 from tempest.lib.services.image.v2.resource_types_client import \
     ResourceTypesClient
@@ -140,8 +142,6 @@ from tempest.services.identity.v3.json.users_clients import \
 from tempest.services.image.v1.json.image_members_client import \
     ImageMembersClient
 from tempest.services.image.v1.json.images_client import ImagesClient
-from tempest.services.image.v2.json.images_client import \
-    ImagesClient as ImagesV2Client
 from tempest.services.object_storage.account_client import AccountClient
 from tempest.services.object_storage.container_client import ContainerClient
 from tempest.services.object_storage.object_client import ObjectClient
