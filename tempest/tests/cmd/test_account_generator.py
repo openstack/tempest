@@ -234,7 +234,7 @@ class TestGenerateResourcesV2(base.TestCase, MockHelpersMixin):
         self.assertIn('admin', resource_types)
         self.assertIn(['fake_operator'], resource_types)
         self.assertIn(['fake_reseller'], resource_types)
-        self.assertIn(['fake_owner'], resource_types)
+        self.assertIn(['fake_owner', 'fake_operator'], resource_types)
         for resource in resources:
             self.assertIsNotNone(resource[1].network)
             self.assertIsNotNone(resource[1].router)
