@@ -11,6 +11,7 @@
 #    under the License.
 
 from oslo_serialization import jsonutils as json
+from six.moves.urllib import parse as urllib
 
 from tempest.lib.common import rest_client
 
@@ -18,18 +19,13 @@ from tempest.lib.common import rest_client
 class UsersClient(rest_client.RestClient):
     api_version = "v2.0"
 
-    def create_user(self, name, password, tenant_id, email, **kwargs):
-        """Create a user."""
-        post_body = {
-            'name': name,
-            'password': password,
-            'email': email
-        }
-        if tenant_id is not None:
-            post_body['tenantId'] = tenant_id
-        if kwargs.get('enabled') is not None:
-            post_body['enabled'] = kwargs.get('enabled')
-        post_body = json.dumps({'user': post_body})
+    def create_user(self, **kwargs):
+        """Create a user.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-identity-admin-v2.html#admin-createUser
+        """
+        post_body = json.dumps({'user': kwargs})
         resp, body = self.post('users', post_body)
         self.expected_success(200, resp.status)
         body = json.loads(body)
@@ -48,21 +44,36 @@ class UsersClient(rest_client.RestClient):
         return rest_client.ResponseBody(resp, body)
 
     def show_user(self, user_id):
-        """GET a user."""
+        """GET a user.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-identity-admin-v2.html#admin-showUser
+        """
         resp, body = self.get("users/%s" % user_id)
         self.expected_success(200, resp.status)
         body = json.loads(body)
         return rest_client.ResponseBody(resp, body)
 
     def delete_user(self, user_id):
-        """Delete a user."""
+        """Delete a user.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-identity-admin-v2.html#admin-deleteUser
+        """
         resp, body = self.delete("users/%s" % user_id)
         self.expected_success(204, resp.status)
         return rest_client.ResponseBody(resp, body)
 
-    def list_users(self):
-        """Get the list of users."""
-        resp, body = self.get("users")
+    def list_users(self, **params):
+        """Get the list of users.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-identity-admin-v2.html#admin-listUsers
+        """
+        url = "users"
+        if params:
+            url += '?%s' % urllib.urlencode(params)
+        resp, body = self.get(url)
         self.expected_success(200, resp.status)
         body = json.loads(body)
         return rest_client.ResponseBody(resp, body)

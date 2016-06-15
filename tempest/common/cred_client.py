@@ -40,8 +40,9 @@ class CredsClient(object):
         self.roles_client = roles_client
 
     def create_user(self, username, password, project, email):
-        user = self.users_client.create_user(
-            username, password, project['id'], email)
+        params = self._create_user_params(username, password,
+                                          project['id'], email)
+        user = self.users_client.create_user(**params)
         if 'user' in user:
             user = user['user']
         return user
@@ -101,6 +102,13 @@ class V2CredsClient(CredsClient):
                                             users_client,
                                             roles_client)
 
+    def _create_user_params(self, username, password, project_id, email):
+        params = {'name': username,
+                  'password': password,
+                  'tenantId': project_id,
+                  'email': email}
+        return params
+
     def create_project(self, name, description):
         tenant = self.projects_client.create_tenant(
             name=name, description=description)['tenant']
@@ -142,6 +150,13 @@ class V3CredsClient(CredsClient):
             # TODO(andrea) we could probably create the domain on the fly
             msg = "Requested domain %s could not be found" % domain_name
             raise lib_exc.InvalidCredentials(msg)
+
+    def _create_user_params(self, username, password, project_id, email):
+        params = {'user_name': username,
+                  'password': password,
+                  'project_id': project_id,
+                  'email': email}
+        return params
 
     def create_project(self, name, description):
         project = self.projects_client.create_project(

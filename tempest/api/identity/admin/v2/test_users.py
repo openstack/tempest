@@ -36,9 +36,10 @@ class UsersTestJSON(base.BaseIdentityV2AdminTest):
     def test_create_user(self):
         # Create a user
         self.data.setup_test_tenant()
-        user = self.users_client.create_user(self.alt_user, self.alt_password,
-                                             self.data.tenant['id'],
-                                             self.alt_email)['user']
+        user = self.users_client.create_user(name=self.alt_user,
+                                             password=self.alt_password,
+                                             tenantId=self.data.tenant['id'],
+                                             email=self.alt_email)['user']
         self.data.users.append(user)
         self.assertEqual(self.alt_user, user['name'])
 
@@ -47,9 +48,10 @@ class UsersTestJSON(base.BaseIdentityV2AdminTest):
         # Create a user with enabled : False
         self.data.setup_test_tenant()
         name = data_utils.rand_name('test_user')
-        user = self.users_client.create_user(name, self.alt_password,
-                                             self.data.tenant['id'],
-                                             self.alt_email,
+        user = self.users_client.create_user(name=name,
+                                             password=self.alt_password,
+                                             tenantId=self.data.tenant['id'],
+                                             email=self.alt_email,
                                              enabled=False)['user']
         self.data.users.append(user)
         self.assertEqual(name, user['name'])
@@ -61,9 +63,10 @@ class UsersTestJSON(base.BaseIdentityV2AdminTest):
         # Test case to check if updating of user attributes is successful.
         test_user = data_utils.rand_name('test_user')
         self.data.setup_test_tenant()
-        user = self.users_client.create_user(test_user, self.alt_password,
-                                             self.data.tenant['id'],
-                                             self.alt_email)['user']
+        user = self.users_client.create_user(name=test_user,
+                                             password=self.alt_password,
+                                             tenantId=self.data.tenant['id'],
+                                             email=self.alt_email)['user']
         # Delete the User at the end of this method
         self.addCleanup(self.users_client.delete_user, user['id'])
         # Updating user details with new values
@@ -87,9 +90,10 @@ class UsersTestJSON(base.BaseIdentityV2AdminTest):
         # Delete a user
         test_user = data_utils.rand_name('test_user')
         self.data.setup_test_tenant()
-        user = self.users_client.create_user(test_user, self.alt_password,
-                                             self.data.tenant['id'],
-                                             self.alt_email)['user']
+        user = self.users_client.create_user(name=test_user,
+                                             password=self.alt_password,
+                                             tenantId=self.data.tenant['id'],
+                                             email=self.alt_email)['user']
         self.users_client.delete_user(user['id'])
 
     @test.idempotent_id('aca696c3-d645-4f45-b728-63646045beb1')
@@ -139,16 +143,18 @@ class UsersTestJSON(base.BaseIdentityV2AdminTest):
         fetched_user_ids = list()
         password1 = data_utils.rand_password()
         alt_tenant_user1 = data_utils.rand_name('tenant_user1')
-        user1 = self.users_client.create_user(alt_tenant_user1, password1,
-                                              self.data.tenant['id'],
-                                              'user1@123')['user']
+        user1 = self.users_client.create_user(name=alt_tenant_user1,
+                                              password=password1,
+                                              tenantId=self.data.tenant['id'],
+                                              email='user1@123')['user']
         user_ids.append(user1['id'])
         self.data.users.append(user1)
         password2 = data_utils.rand_password()
         alt_tenant_user2 = data_utils.rand_name('tenant_user2')
-        user2 = self.users_client.create_user(alt_tenant_user2, password2,
-                                              self.data.tenant['id'],
-                                              'user2@123')['user']
+        user2 = self.users_client.create_user(name=alt_tenant_user2,
+                                              password=password2,
+                                              tenantId=self.data.tenant['id'],
+                                              email='user2@123')['user']
         user_ids.append(user2['id'])
         self.data.users.append(user2)
         # List of users for the respective tenant ID
@@ -180,9 +186,11 @@ class UsersTestJSON(base.BaseIdentityV2AdminTest):
 
         alt_user2 = data_utils.rand_name('second_user')
         alt_password2 = data_utils.rand_password()
-        second_user = self.users_client.create_user(alt_user2, alt_password2,
-                                                    self.data.tenant['id'],
-                                                    'user2@123')['user']
+        second_user = self.users_client.create_user(
+            name=alt_user2,
+            password=alt_password2,
+            tenantId=self.data.tenant['id'],
+            email='user2@123')['user']
         user_ids.append(second_user['id'])
         self.data.users.append(second_user)
         role = self.roles_client.assign_user_role(tenant['id'],
