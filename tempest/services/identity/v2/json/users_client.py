@@ -36,7 +36,11 @@ class UsersClient(rest_client.RestClient):
         return rest_client.ResponseBody(resp, body)
 
     def update_user(self, user_id, **kwargs):
-        """Updates a user."""
+        """Updates a user.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-identity-admin-v2.html#admin-updateUser
+        """
         put_body = json.dumps({'user': kwargs})
         resp, body = self.put('users/%s' % user_id, put_body)
         self.expected_success(200, resp.status)
