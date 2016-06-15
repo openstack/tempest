@@ -319,7 +319,7 @@ def create_tenants(tenants):
     existing = [x['name'] for x in body]
     for tenant in tenants:
         if tenant not in existing:
-            admin.tenants.create_tenant(tenant)['tenant']
+            admin.tenants.create_tenant(name=tenant)['tenant']
         else:
             LOG.warning("Tenant '%s' already exists in this environment"
                         % tenant)
