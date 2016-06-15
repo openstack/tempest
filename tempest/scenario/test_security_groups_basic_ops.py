@@ -227,22 +227,23 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
         seen_names = [n['name'] for n in seen_nets]
         seen_ids = [n['id'] for n in seen_nets]
 
-        self.assertIn(tenant.network.name, seen_names)
-        self.assertIn(tenant.network.id, seen_ids)
+        self.assertIn(tenant.network['name'], seen_names)
+        self.assertIn(tenant.network['id'], seen_ids)
 
         seen_subnets = [(n['id'], n['cidr'], n['network_id'])
                         for n in self._list_subnets()]
-        mysubnet = (tenant.subnet.id, tenant.subnet.cidr, tenant.network.id)
+        mysubnet = (tenant.subnet['id'], tenant.subnet['cidr'],
+                    tenant.network['id'])
         self.assertIn(mysubnet, seen_subnets)
 
         seen_routers = self._list_routers()
         seen_router_ids = [n['id'] for n in seen_routers]
         seen_router_names = [n['name'] for n in seen_routers]
 
-        self.assertIn(tenant.router.name, seen_router_names)
-        self.assertIn(tenant.router.id, seen_router_ids)
+        self.assertIn(tenant.router['name'], seen_router_names)
+        self.assertIn(tenant.router['id'], seen_router_ids)
 
-        myport = (tenant.router.id, tenant.subnet.id)
+        myport = (tenant.router['id'], tenant.subnet['id'])
         router_ports = [(i['device_id'], i['fixed_ips'][0]['subnet_id']) for i
                         in self._list_ports()
                         if self._is_router_port(i)]
@@ -270,7 +271,7 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
             kwargs["scheduler_hints"] = {'different_host': self.servers}
         server = self.create_server(
             name=name,
-            networks=[{'uuid': tenant.network.id}],
+            networks=[{'uuid': tenant.network["id"]}],
             key_name=tenant.keypair['name'],
             security_groups=security_groups_names,
             wait_until='ACTIVE',
@@ -353,10 +354,10 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
     def _get_server_ip(self, server, floating=False):
         """returns the ip (floating/internal) of a server"""
         if floating:
-            server_ip = self.floating_ips[server['id']].floating_ip_address
+            server_ip = self.floating_ips[server['id']]['floating_ip_address']
         else:
             server_ip = None
-            network_name = self.tenants[server['tenant_id']].network.name
+            network_name = self.tenants[server['tenant_id']].network['name']
             if network_name in server['addresses']:
                 server_ip = server['addresses'][network_name][0]['addr']
         return server_ip
@@ -364,7 +365,7 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
     def _connect_to_access_point(self, tenant):
         """create ssh connection to tenant access point"""
         access_point_ssh = \
-            self.floating_ips[tenant.access_point['id']].floating_ip_address
+            self.floating_ips[tenant.access_point['id']]['floating_ip_address']
         private_key = tenant.keypair['private_key']
         access_point_ssh = self.get_remote_client(
             access_point_ssh, private_key=private_key)
@@ -388,7 +389,7 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
     def _test_in_tenant_allow(self, tenant):
         ruleset = dict(
             protocol='icmp',
-            remote_group_id=tenant.security_groups['default'].id,
+            remote_group_id=tenant.security_groups['default']['id'],
             direction='ingress'
         )
         self._create_security_group_rule(
@@ -464,7 +465,7 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
             for port in port_list if port['fixed_ips']
         ]
         server_ip = self._get_server_ip(tenant.access_point)
-        subnet_id = tenant.subnet.id
+        subnet_id = tenant.subnet['id']
         self.assertIn((subnet_id, server_ip, mac_addr), port_detail_list)
 
     @test.idempotent_id('e79f879e-debb-440c-a7e4-efeda05b6848')
@@ -545,7 +546,7 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
 
             # update port with new security group and check connectivity
             self.ports_client.update_port(port_id, security_groups=[
-                new_tenant.security_groups['new_sg'].id])
+                new_tenant.security_groups['new_sg']['id']])
             self._check_connectivity(
                 access_point=access_point_ssh,
                 ip=self._get_server_ip(server))

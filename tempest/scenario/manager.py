@@ -30,7 +30,6 @@ from tempest import config
 from tempest import exceptions
 from tempest.lib.common.utils import test_utils
 from tempest.lib import exceptions as lib_exc
-from tempest.scenario import network_resources
 import tempest.test
 
 CONF = config.CONF
@@ -705,12 +704,12 @@ class NetworkScenarioTest(ScenarioTest):
             tenant_id = networks_client.tenant_id
         name = data_utils.rand_name(namestart)
         result = networks_client.create_network(name=name, tenant_id=tenant_id)
-        network = network_resources.DeletableNetwork(
-            networks_client=networks_client, routers_client=routers_client,
-            **result['network'])
-        self.assertEqual(network.name, name)
+        network = result['network']
+
+        self.assertEqual(network['name'], name)
         self.addCleanup(test_utils.call_and_ignore_notfound_exc,
-                        network.delete)
+                        self.networks_client.delete_network,
+                        network['id'])
         return network
 
     def _list_networks(self, *args, **kwargs):
@@ -780,13 +779,13 @@ class NetworkScenarioTest(ScenarioTest):
         # blocks until an unallocated block is found.
         for subnet_cidr in tenant_cidr.subnet(num_bits):
             str_cidr = str(subnet_cidr)
-            if cidr_in_use(str_cidr, tenant_id=network.tenant_id):
+            if cidr_in_use(str_cidr, tenant_id=network['tenant_id']):
                 continue
 
             subnet = dict(
                 name=data_utils.rand_name(namestart),
-                network_id=network.id,
-                tenant_id=network.tenant_id,
+                network_id=network['id'],
+                tenant_id=network['tenant_id'],
                 cidr=str_cidr,
                 ip_version=ip_version,
                 **kwargs
@@ -799,11 +798,13 @@ class NetworkScenarioTest(ScenarioTest):
                 if not is_overlapping_cidr:
                     raise
         self.assertIsNotNone(result, 'Unable to allocate tenant network')
-        subnet = network_resources.DeletableSubnet(
-            subnets_client=subnets_client,
-            routers_client=routers_client, **result['subnet'])
-        self.assertEqual(subnet.cidr, str_cidr)
-        self.addCleanup(test_utils.call_and_ignore_notfound_exc, subnet.delete)
+
+        subnet = result['subnet']
+        self.assertEqual(subnet['cidr'], str_cidr)
+
+        self.addCleanup(test_utils.call_and_ignore_notfound_exc,
+                        subnets_client.delete_subnet, subnet['id'])
+
         return subnet
 
     def _create_port(self, network_id, client=None, namestart='port-quotatest',
@@ -816,9 +817,9 @@ class NetworkScenarioTest(ScenarioTest):
             network_id=network_id,
             **kwargs)
         self.assertIsNotNone(result, 'Unable to allocate port')
-        port = network_resources.DeletablePort(ports_client=client,
-                                               **result['port'])
-        self.addCleanup(test_utils.call_and_ignore_notfound_exc, port.delete)
+        port = result['port']
+        self.addCleanup(test_utils.call_and_ignore_notfound_exc,
+                        client.delete_port, port['id'])
         return port
 
     def _get_server_port_id_and_ip4(self, server, ip_addr=None):
@@ -853,7 +854,7 @@ class NetworkScenarioTest(ScenarioTest):
         net = self._list_networks(name=network_name)
         self.assertNotEqual(len(net), 0,
                             "Unable to get network by name: %s" % network_name)
-        return network_resources.AttributeDict(net[0])
+        return net[0]
 
     def create_floating_ip(self, thing, external_network_id=None,
                            port_id=None, client=None):
@@ -872,44 +873,51 @@ class NetworkScenarioTest(ScenarioTest):
             tenant_id=thing['tenant_id'],
             fixed_ip_address=ip4
         )
-        floating_ip = network_resources.DeletableFloatingIp(
-            client=client,
-            **result['floatingip'])
+        floating_ip = result['floatingip']
         self.addCleanup(test_utils.call_and_ignore_notfound_exc,
-                        floating_ip.delete)
+                        self.floating_ips_client.delete_floatingip,
+                        floating_ip['id'])
         return floating_ip
 
     def _associate_floating_ip(self, floating_ip, server):
         port_id, _ = self._get_server_port_id_and_ip4(server)
-        floating_ip.update(port_id=port_id)
-        self.assertEqual(port_id, floating_ip.port_id)
+        kwargs = dict(port_id=port_id)
+        floating_ip = self.floating_ips_client.update_floatingip(
+            floating_ip['id'], **kwargs)['floatingip']
+        self.assertEqual(port_id, floating_ip['port_id'])
         return floating_ip
 
     def _disassociate_floating_ip(self, floating_ip):
-        """:param floating_ip: type DeletableFloatingIp"""
-        floating_ip.update(port_id=None)
-        self.assertIsNone(floating_ip.port_id)
+        """:param floating_ip: floating_ips_client.create_floatingip"""
+        kwargs = dict(port_id=None)
+        floating_ip = self.floating_ips_client.update_floatingip(
+            floating_ip['id'], **kwargs)['floatingip']
+        self.assertIsNone(floating_ip['port_id'])
         return floating_ip
 
     def check_floating_ip_status(self, floating_ip, status):
         """Verifies floatingip reaches the given status
 
-        :param floating_ip: network_resources.DeletableFloatingIp floating
-        IP to check status
+        :param dict floating_ip: floating IP dict to check status
         :param status: target status
         :raises: AssertionError if status doesn't match
         """
+        floatingip_id = floating_ip['id']
+
         def refresh():
-            floating_ip.refresh()
-            return status == floating_ip.status
+            result = (self.floating_ips_client.
+                      show_floatingip(floatingip_id)['floatingip'])
+            return status == result['status']
 
         tempest.test.call_until_true(refresh,
                                      CONF.network.build_timeout,
                                      CONF.network.build_interval)
-        self.assertEqual(status, floating_ip.status,
+        floating_ip = self.floating_ips_client.show_floatingip(
+            floatingip_id)['floatingip']
+        self.assertEqual(status, floating_ip['status'],
                          message="FloatingIP: {fp} is at status: {cst}. "
                                  "failed  to reach status: {st}"
-                         .format(fp=floating_ip, cst=floating_ip.status,
+                         .format(fp=floating_ip, cst=floating_ip['status'],
                                  st=status))
         LOG.info("FloatingIP: {fp} is at status: {st}"
                  .format(fp=floating_ip, st=status))
@@ -982,8 +990,8 @@ class NetworkScenarioTest(ScenarioTest):
             secgroup=secgroup,
             security_groups_client=security_groups_client)
         for rule in rules:
-            self.assertEqual(tenant_id, rule.tenant_id)
-            self.assertEqual(secgroup.id, rule.security_group_id)
+            self.assertEqual(tenant_id, rule['tenant_id'])
+            self.assertEqual(secgroup['id'], rule['security_group_id'])
         return secgroup
 
     def _create_empty_security_group(self, client=None, tenant_id=None,
@@ -995,7 +1003,7 @@ class NetworkScenarioTest(ScenarioTest):
          - IPv6 egress to any
 
         :param tenant_id: secgroup will be created in this tenant
-        :returns: DeletableSecurityGroup -- containing the secgroup created
+        :returns: the created security group
         """
         if client is None:
             client = self.security_groups_client
@@ -1007,15 +1015,14 @@ class NetworkScenarioTest(ScenarioTest):
                        description=sg_desc)
         sg_dict['tenant_id'] = tenant_id
         result = client.create_security_group(**sg_dict)
-        secgroup = network_resources.DeletableSecurityGroup(
-            client=client, routers_client=self.routers_client,
-            **result['security_group']
-        )
-        self.assertEqual(secgroup.name, sg_name)
-        self.assertEqual(tenant_id, secgroup.tenant_id)
-        self.assertEqual(secgroup.description, sg_desc)
+
+        secgroup = result['security_group']
+        self.assertEqual(secgroup['name'], sg_name)
+        self.assertEqual(tenant_id, secgroup['tenant_id'])
+        self.assertEqual(secgroup['description'], sg_desc)
+
         self.addCleanup(test_utils.call_and_ignore_notfound_exc,
-                        secgroup.delete)
+                        client.delete_security_group, secgroup['id'])
         return secgroup
 
     def _default_security_group(self, client=None, tenant_id=None):
@@ -1033,8 +1040,7 @@ class NetworkScenarioTest(ScenarioTest):
         ]
         msg = "No default security group for tenant %s." % (tenant_id)
         self.assertTrue(len(sgs) > 0, msg)
-        return network_resources.DeletableSecurityGroup(client=client,
-                                                        **sgs[0])
+        return sgs[0]
 
     def _create_security_group_rule(self, secgroup=None,
                                     sec_group_rules_client=None,
@@ -1045,7 +1051,7 @@ class NetworkScenarioTest(ScenarioTest):
         Create a rule in a secgroup. if secgroup not defined will search for
         default secgroup in tenant_id.
 
-        :param secgroup: type DeletableSecurityGroup.
+        :param secgroup: the security group.
         :param tenant_id: if secgroup not passed -- the tenant in which to
             search for default secgroup
         :param kwargs: a dictionary containing rule parameters:
@@ -1067,17 +1073,15 @@ class NetworkScenarioTest(ScenarioTest):
             secgroup = self._default_security_group(
                 client=security_groups_client, tenant_id=tenant_id)
 
-        ruleset = dict(security_group_id=secgroup.id,
-                       tenant_id=secgroup.tenant_id)
+        ruleset = dict(security_group_id=secgroup['id'],
+                       tenant_id=secgroup['tenant_id'])
         ruleset.update(kwargs)
 
         sg_rule = sec_group_rules_client.create_security_group_rule(**ruleset)
-        sg_rule = network_resources.DeletableSecurityGroupRule(
-            client=sec_group_rules_client,
-            **sg_rule['security_group_rule']
-        )
-        self.assertEqual(secgroup.tenant_id, sg_rule.tenant_id)
-        self.assertEqual(secgroup.id, sg_rule.security_group_id)
+        sg_rule = sg_rule['security_group_rule']
+
+        self.assertEqual(secgroup['tenant_id'], sg_rule['tenant_id'])
+        self.assertEqual(secgroup['id'], sg_rule['security_group_id'])
 
         return sg_rule
 
@@ -1131,7 +1135,7 @@ class NetworkScenarioTest(ScenarioTest):
                     if msg not in ex._error_string:
                         raise ex
                 else:
-                    self.assertEqual(r_direction, sg_rule.direction)
+                    self.assertEqual(r_direction, sg_rule['direction'])
                     rules.append(sg_rule)
 
         return rules
@@ -1153,10 +1157,11 @@ class NetworkScenarioTest(ScenarioTest):
         network_id = CONF.network.public_network_id
         if router_id:
             body = client.show_router(router_id)
-            return network_resources.AttributeDict(**body['router'])
+            return body['router']
         elif network_id:
             router = self._create_router(client, tenant_id)
-            router.set_gateway(network_id)
+            kwargs = {'external_gateway_info': dict(network_id=network_id)}
+            router = client.update_router(router['id'], **kwargs)['router']
             return router
         else:
             raise Exception("Neither of 'public_router_id' or "
@@ -1172,15 +1177,18 @@ class NetworkScenarioTest(ScenarioTest):
         result = client.create_router(name=name,
                                       admin_state_up=True,
                                       tenant_id=tenant_id)
-        router = network_resources.DeletableRouter(routers_client=client,
-                                                   **result['router'])
-        self.assertEqual(router.name, name)
-        self.addCleanup(test_utils.call_and_ignore_notfound_exc, router.delete)
+        router = result['router']
+        self.assertEqual(router['name'], name)
+        self.addCleanup(test_utils.call_and_ignore_notfound_exc,
+                        client.delete_router,
+                        router['id'])
         return router
 
     def _update_router_admin_state(self, router, admin_state_up):
-        router.update(admin_state_up=admin_state_up)
-        self.assertEqual(admin_state_up, router.admin_state_up)
+        kwargs = dict(admin_state_up=admin_state_up)
+        router = self.routers_client.update_router(
+            router['id'], **kwargs)['router']
+        self.assertEqual(admin_state_up, router['admin_state_up'])
 
     def create_networks(self, networks_client=None,
                         routers_client=None, subnets_client=None,
@@ -1213,7 +1221,6 @@ class NetworkScenarioTest(ScenarioTest):
                 tenant_id=tenant_id)
             router = self._get_router(client=routers_client,
                                       tenant_id=tenant_id)
-
             subnet_kwargs = dict(network=network,
                                  subnets_client=subnets_client,
                                  routers_client=routers_client)
@@ -1221,7 +1228,17 @@ class NetworkScenarioTest(ScenarioTest):
             if dns_nameservers is not None:
                 subnet_kwargs['dns_nameservers'] = dns_nameservers
             subnet = self._create_subnet(**subnet_kwargs)
-            subnet.add_to_router(router.id)
+            if not routers_client:
+                routers_client = self.routers_client
+            router_id = router['id']
+            routers_client.add_router_interface(router_id,
+                                                subnet_id=subnet['id'])
+
+            # save a cleanup job to remove this association between
+            # router and subnet
+            self.addCleanup(test_utils.call_and_ignore_notfound_exc,
+                            routers_client.remove_router_interface, router_id,
+                            subnet_id=subnet['id'])
         return network, subnet, router
 
 
