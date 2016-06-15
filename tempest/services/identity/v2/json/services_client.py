@@ -13,6 +13,7 @@
 # limitations under the License.
 
 from oslo_serialization import jsonutils as json
+from six.moves.urllib import parse as urllib
 
 from tempest.lib.common import rest_client
 
@@ -20,14 +21,9 @@ from tempest.lib.common import rest_client
 class ServicesClient(rest_client.RestClient):
     api_version = "v2.0"
 
-    def create_service(self, name, type, **kwargs):
+    def create_service(self, **kwargs):
         """Create a service."""
-        post_body = {
-            'name': name,
-            'type': type,
-            'description': kwargs.get('description')
-        }
-        post_body = json.dumps({'OS-KSADM:service': post_body})
+        post_body = json.dumps({'OS-KSADM:service': kwargs})
         resp, body = self.post('/OS-KSADM/services', post_body)
         self.expected_success(200, resp.status)
         body = json.loads(body)
@@ -41,9 +37,12 @@ class ServicesClient(rest_client.RestClient):
         body = json.loads(body)
         return rest_client.ResponseBody(resp, body)
 
-    def list_services(self):
+    def list_services(self, **params):
         """List Service - Returns Services."""
-        resp, body = self.get('/OS-KSADM/services')
+        url = '/OS-KSADM/services'
+        if params:
+            url += '?%s' % urllib.urlencode(params)
+        resp, body = self.get(url)
         self.expected_success(200, resp.status)
         body = json.loads(body)
         return rest_client.ResponseBody(resp, body)
