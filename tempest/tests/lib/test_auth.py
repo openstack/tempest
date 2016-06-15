@@ -802,3 +802,12 @@ class TestKeystoneV3AuthProvider_DomainScope(BaseAuthTestsSetUp):
         _, auth_data = self.auth_provider.get_auth()
         self.assertIn('domain', auth_data)
         self.assertNotIn('project', auth_data)
+
+
+class TestGetCredentials(base.TestCase):
+
+    def test_invalid_identity_version(self):
+        with testtools.ExpectedException(exceptions.InvalidIdentityVersion,
+                                         '.* v1 .*'):
+            auth.get_credentials('http://localhost/identity/v3',
+                                 identity_version='v1')

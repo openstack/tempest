@@ -149,6 +149,10 @@ class UnexpectedResponseCode(OtherRestClientException):
     message = "Unexpected response code received"
 
 
+class InvalidIdentityVersion(TempestException):
+    message = "Invalid version %(identity_version)s of the identity service"
+
+
 class InvalidStructure(TempestException):
     message = "Invalid structure of table with details"
 
