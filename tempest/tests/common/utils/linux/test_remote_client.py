@@ -67,14 +67,9 @@ class TestRemoteClient(base.TestCase):
         self.ssh_mock = self.useFixture(mockpatch.PatchObject(self.conn,
                                                               'ssh_client'))
 
-    def test_hostname_equals_servername_for_expected_names(self):
+    def test_get_hostname(self):
         self.ssh_mock.mock.exec_command.return_value = 'fake_hostname'
-        self.assertTrue(self.conn.hostname_equals_servername('fake_hostname'))
-
-    def test_hostname_equals_servername_for_unexpected_names(self):
-        self.ssh_mock.mock.exec_command.return_value = 'fake_hostname'
-        self.assertFalse(
-            self.conn.hostname_equals_servername('unexpected_hostname'))
+        self.assertEqual(self.conn.get_hostname(), 'fake_hostname')
 
     def test_get_ram_size(self):
         free_output = "Mem:         48294      45738       2555          0" \

@@ -99,10 +99,10 @@ class RemoteClient(object):
         """
         self.ssh_client.test_connection_auth()
 
-    def hostname_equals_servername(self, expected_hostname):
+    def get_hostname(self):
         # Get host name using command "hostname"
         actual_hostname = self.exec_command("hostname").rstrip()
-        return expected_hostname == actual_hostname
+        return actual_hostname
 
     def get_ram_size_in_mb(self):
         output = self.exec_command('free -m | grep Mem')
