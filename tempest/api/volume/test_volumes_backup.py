@@ -36,6 +36,44 @@ class VolumesBackupsV2Test(base.BaseVolumeTest):
 
         cls.volume = cls.create_volume()
 
+    @test.idempotent_id('a66eb488-8ee1-47d4-8e9f-575a095728c6')
+    def test_volume_backup_create_get_detailed_list_restore_delete(self):
+        # Create backup
+        backup_name = data_utils.rand_name('Backup')
+        create_backup = self.backups_client.create_backup
+        backup = create_backup(volume_id=self.volume['id'],
+                               name=backup_name)['backup']
+        self.addCleanup(self.backups_client.delete_backup,
+                        backup['id'])
+        self.assertEqual(backup_name, backup['name'])
+        waiters.wait_for_volume_status(self.volumes_client,
+                                       self.volume['id'], 'available')
+        self.backups_client.wait_for_backup_status(backup['id'],
+                                                   'available')
+
+        # Get a given backup
+        backup = self.backups_client.show_backup(backup['id'])['backup']
+        self.assertEqual(backup_name, backup['name'])
+
+        # Get all backups with detail
+        backups = self.backups_client.list_backups(
+            detail=True)['backups']
+        self.assertIn((backup['name'], backup['id']),
+                      [(m['name'], m['id']) for m in backups])
+
+        # Restore backup
+        restore = self.backups_client.restore_backup(
+            backup['id'])['restore']
+
+        # Delete backup
+        self.addCleanup(self.volumes_client.delete_volume,
+                        restore['volume_id'])
+        self.assertEqual(backup['id'], restore['backup_id'])
+        self.backups_client.wait_for_backup_status(backup['id'],
+                                                   'available')
+        waiters.wait_for_volume_status(self.volumes_client,
+                                       restore['volume_id'], 'available')
+
     @test.idempotent_id('07af8f6d-80af-44c9-a5dc-c8427b1b62e6')
     @test.services('compute')
     def test_backup_create_attached_volume(self):
