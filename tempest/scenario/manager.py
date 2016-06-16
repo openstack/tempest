@@ -223,7 +223,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
                 port = self._create_port(network_id=net_id,
                                          client=clients.ports_client,
                                          **create_port_body)
-                ports.append({'port': port.id})
+                ports.append({'port': port['id']})
             if ports:
                 kwargs['networks'] = ports
             self.ports = ports
