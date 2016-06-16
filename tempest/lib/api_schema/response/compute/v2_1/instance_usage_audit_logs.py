@@ -19,7 +19,23 @@ common_instance_usage_audit_log = {
             'type': 'array',
             'items': {'type': 'string'}
         },
-        'log': {'type': 'object'},
+        'log': {
+            'type': 'object',
+            'patternProperties': {
+                # NOTE: Here is a host name.
+                '^.+$': {
+                    'type': 'object',
+                    'properties': {
+                        'state': {'type': 'string'},
+                        'instances': {'type': 'integer'},
+                        'errors': {'type': 'integer'},
+                        'message': {'type': 'string'}
+                    },
+                    'additionalProperties': False,
+                    'required': ['state', 'instances', 'errors', 'message']
+                }
+            }
+        },
         'num_hosts': {'type': 'integer'},
         'num_hosts_done': {'type': 'integer'},
         'num_hosts_not_run': {'type': 'integer'},
