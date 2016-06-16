@@ -22,6 +22,26 @@ CONF = config.CONF
 LOG = logging.getLogger(__name__)
 
 
+def _create_neutron_sec_group_rules(os, sec_group):
+    sec_group_rules_client = os.security_group_rules_client
+    ethertype = 'IPv4'
+    if CONF.validation.ip_version_for_ssh == 6:
+        ethertype = 'IPv6'
+
+    sec_group_rules_client.create_security_group_rule(
+        security_group_id=sec_group['id'],
+        protocol='tcp',
+        ethertype=ethertype,
+        port_range_min=22,
+        port_range_max=22,
+        direction='ingress')
+    sec_group_rules_client.create_security_group_rule(
+        security_group_id=sec_group['id'],
+        protocol='icmp',
+        ethertype=ethertype,
+        direction='ingress')
+
+
 def create_ssh_security_group(os, add_rule=False):
     security_groups_client = os.compute_security_groups_client
     security_group_rules_client = os.compute_security_group_rules_client
@@ -30,12 +50,15 @@ def create_ssh_security_group(os, add_rule=False):
     security_group = security_groups_client.create_security_group(
         name=sg_name, description=sg_description)['security_group']
     if add_rule:
-        security_group_rules_client.create_security_group_rule(
-            parent_group_id=security_group['id'], ip_protocol='tcp',
-            from_port=22, to_port=22)
-        security_group_rules_client.create_security_group_rule(
-            parent_group_id=security_group['id'], ip_protocol='icmp',
-            from_port=-1, to_port=-1)
+        if CONF.service_available.neutron:
+            _create_neutron_sec_group_rules(os, security_group)
+        else:
+            security_group_rules_client.create_security_group_rule(
+                parent_group_id=security_group['id'], ip_protocol='tcp',
+                from_port=22, to_port=22)
+            security_group_rules_client.create_security_group_rule(
+                parent_group_id=security_group['id'], ip_protocol='icmp',
+                from_port=-1, to_port=-1)
     LOG.debug("SSH Validation resource security group with tcp and icmp "
               "rules %s created"
               % sg_name)
