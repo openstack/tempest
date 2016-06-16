@@ -14,8 +14,8 @@
 #    under the License.
 
 from tempest import config
-from tempest import exceptions
 from tempest.lib import auth
+from tempest.lib import exceptions
 
 CONF = config.CONF
 
