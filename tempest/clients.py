@@ -34,28 +34,7 @@ from tempest.lib.services.image.v2.namespaces_client import NamespacesClient
 from tempest.lib.services.image.v2.resource_types_client import \
     ResourceTypesClient
 from tempest.lib.services.image.v2.schemas_client import SchemasClient
-from tempest.lib.services.network.agents_client import AgentsClient \
-    as NetworkAgentsClient
-from tempest.lib.services.network.extensions_client import \
-    ExtensionsClient as NetworkExtensionsClient
-from tempest.lib.services.network.floating_ips_client import FloatingIPsClient
-from tempest.lib.services.network.metering_label_rules_client import \
-    MeteringLabelRulesClient
-from tempest.lib.services.network.metering_labels_client import \
-    MeteringLabelsClient
-from tempest.lib.services.network.networks_client import NetworksClient
-from tempest.lib.services.network.ports_client import PortsClient
-from tempest.lib.services.network.quotas_client import QuotasClient \
-    as NetworkQuotasClient
-from tempest.lib.services.network.routers_client import RoutersClient
-from tempest.lib.services.network.security_group_rules_client import \
-    SecurityGroupRulesClient
-from tempest.lib.services.network.security_groups_client import \
-    SecurityGroupsClient
-from tempest.lib.services.network.subnetpools_client import SubnetpoolsClient
-from tempest.lib.services.network.subnets_client import SubnetsClient
-from tempest.lib.services.network.versions_client import \
-    NetworkVersionsClient
+from tempest.lib.services import network
 from tempest import manager
 from tempest.services.baremetal.v1.json.baremetal_client import \
     BaremetalClient
@@ -206,33 +185,33 @@ class Manager(manager.Manager):
             'build_timeout': CONF.network.build_timeout
         }
         params.update(self.default_params)
-        self.network_agents_client = NetworkAgentsClient(
+        self.network_agents_client = network.AgentsClient(
             self.auth_provider, **params)
-        self.network_extensions_client = NetworkExtensionsClient(
+        self.network_extensions_client = network.ExtensionsClient(
             self.auth_provider, **params)
-        self.networks_client = NetworksClient(
+        self.networks_client = network.NetworksClient(
             self.auth_provider, **params)
-        self.subnetpools_client = SubnetpoolsClient(
+        self.subnetpools_client = network.SubnetpoolsClient(
             self.auth_provider, **params)
-        self.subnets_client = SubnetsClient(
+        self.subnets_client = network.SubnetsClient(
             self.auth_provider, **params)
-        self.ports_client = PortsClient(
+        self.ports_client = network.PortsClient(
             self.auth_provider, **params)
-        self.network_quotas_client = NetworkQuotasClient(
+        self.network_quotas_client = network.QuotasClient(
             self.auth_provider, **params)
-        self.floating_ips_client = FloatingIPsClient(
+        self.floating_ips_client = network.FloatingIPsClient(
             self.auth_provider, **params)
-        self.metering_labels_client = MeteringLabelsClient(
+        self.metering_labels_client = network.MeteringLabelsClient(
             self.auth_provider, **params)
-        self.metering_label_rules_client = MeteringLabelRulesClient(
+        self.metering_label_rules_client = network.MeteringLabelRulesClient(
             self.auth_provider, **params)
-        self.routers_client = RoutersClient(
+        self.routers_client = network.RoutersClient(
             self.auth_provider, **params)
-        self.security_group_rules_client = SecurityGroupRulesClient(
+        self.security_group_rules_client = network.SecurityGroupRulesClient(
             self.auth_provider, **params)
-        self.security_groups_client = SecurityGroupsClient(
+        self.security_groups_client = network.SecurityGroupsClient(
             self.auth_provider, **params)
-        self.network_versions_client = NetworkVersionsClient(
+        self.network_versions_client = network.NetworkVersionsClient(
             self.auth_provider, **params)
 
     def _set_image_clients(self):
