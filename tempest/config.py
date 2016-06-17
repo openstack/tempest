@@ -247,6 +247,9 @@ ComputeGroup = [
                choices=['public', 'admin', 'internal',
                         'publicURL', 'adminURL', 'internalURL'],
                help="The endpoint type to use for the compute service."),
+    cfg.StrOpt('base_url',
+               default=None,
+               help='Explicitly set base url to use for the Compute service.'),
     cfg.StrOpt('volume_device_name',
                default='vdb',
                help="Expected device name when a volume is attached to "

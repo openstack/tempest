@@ -250,8 +250,8 @@ class Manager(manager.Manager):
         params = {
             'service': CONF.network.catalog_type,
             'region': CONF.network.region or CONF.identity.region,
-            'base_url': CONF.network.base_url,
             'endpoint_type': CONF.network.endpoint_type,
+            'base_url': CONF.network.base_url,
             'build_interval': CONF.network.build_interval,
             'build_timeout': CONF.network.build_timeout
         }
@@ -315,6 +315,7 @@ class Manager(manager.Manager):
             'name': CONF.compute.catalog_name,
             'region': CONF.compute.region or CONF.identity.region,
             'endpoint_type': CONF.compute.endpoint_type,
+            'base_url': CONF.compute.base_url,
             'build_interval': CONF.compute.build_interval,
             'build_timeout': CONF.compute.build_timeout
         }
