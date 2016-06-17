@@ -35,9 +35,7 @@ from tempest.services.database.json.versions_client import \
     DatabaseVersionsClient
 from tempest.services import identity
 from tempest.services import image
-from tempest.services.object_storage.account_client import AccountClient
-from tempest.services.object_storage.container_client import ContainerClient
-from tempest.services.object_storage.object_client import ObjectClient
+from tempest.services import object_storage
 from tempest.services.orchestration.json.orchestration_client import \
     OrchestrationClient
 from tempest.services import volume
@@ -413,6 +411,9 @@ class Manager(manager.Manager):
         }
         params.update(self.default_params_with_timeout_values)
 
-        self.account_client = AccountClient(self.auth_provider, **params)
-        self.container_client = ContainerClient(self.auth_provider, **params)
-        self.object_client = ObjectClient(self.auth_provider, **params)
+        self.account_client = object_storage.AccountClient(self.auth_provider,
+                                                           **params)
+        self.container_client = object_storage.ContainerClient(
+            self.auth_provider, **params)
+        self.object_client = object_storage.ObjectClient(self.auth_provider,
+                                                         **params)
