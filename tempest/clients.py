@@ -311,6 +311,7 @@ class Manager(manager.Manager):
     def _set_compute_clients(self):
         params = {
             'service': CONF.compute.catalog_type,
+            'name': CONF.compute.catalog_name,
             'region': CONF.compute.region or CONF.identity.region,
             'endpoint_type': CONF.compute.endpoint_type,
             'build_interval': CONF.compute.build_interval,

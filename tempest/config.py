@@ -233,6 +233,9 @@ ComputeGroup = [
     cfg.StrOpt('catalog_type',
                default='compute',
                help="Catalog type of the Compute service."),
+    cfg.StrOpt('catalog_name',
+               default='',
+               help="Catalog name of the Compute service."),
     cfg.StrOpt('region',
                default='',
                help="The compute region name to use. If empty, the value "
