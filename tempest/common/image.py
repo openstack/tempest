@@ -13,6 +13,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import copy
+
+import six
+
 
 def get_image_meta_from_headers(resp):
     meta = {'properties': {}}
@@ -36,3 +40,23 @@ def get_image_meta_from_headers(resp):
             except ValueError:
                 pass
     return meta
+
+
+def image_meta_to_headers(**metadata):
+    headers = {}
+    fields_copy = copy.deepcopy(metadata)
+
+    copy_from = fields_copy.pop('copy_from', None)
+    if copy_from is not None:
+        headers['x-glance-api-copy-from'] = copy_from
+
+    for key, value in six.iteritems(fields_copy.pop('properties', {})):
+        headers['x-image-meta-property-%s' % key] = str(value)
+
+    for key, value in six.iteritems(fields_copy.pop('api', {})):
+        headers['x-glance-api-property-%s' % key] = str(value)
+
+    for key, value in six.iteritems(fields_copy):
+        headers['x-image-meta-%s' % key] = str(value)
+
+    return headers

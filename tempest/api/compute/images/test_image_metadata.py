@@ -16,6 +16,7 @@
 import six
 
 from tempest.api.compute import base
+from tempest.common import image as common_image
 from tempest.common.utils import data_utils
 from tempest.common import waiters
 from tempest import config
@@ -55,15 +56,18 @@ class ImagesMetadataTestJSON(base.BaseV2ComputeTest):
         super(ImagesMetadataTestJSON, cls).resource_setup()
         cls.image_id = None
 
-        name = data_utils.rand_name('image')
+        params = {
+            'name': data_utils.rand_name('image'),
+            'container_format': 'bare',
+            'disk_format': 'raw'
+        }
         if CONF.image_feature_enabled.api_v1:
-            kwargs = dict(is_public=False)
+            params.update({'is_public': False})
+            params = {'headers': common_image.image_meta_to_headers(**params)}
         else:
-            kwargs = dict(visibility='private')
-        body = cls.glance_client.create_image(name=name,
-                                              container_format='bare',
-                                              disk_format='raw',
-                                              **kwargs)
+            params.update({'visibility': 'private'})
+
+        body = cls.glance_client.create_image(**params)
         body = body['image'] if 'image' in body else body
         cls.image_id = body['id']
         cls.images.append(cls.image_id)

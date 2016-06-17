@@ -13,11 +13,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import copy
 import functools
 
 from oslo_serialization import jsonutils as json
-import six
 from six.moves.urllib import parse as urllib
 
 from tempest.lib.common import rest_client
@@ -28,20 +26,6 @@ CHUNKSIZE = 1024 * 64  # 64kB
 
 class ImagesClient(rest_client.RestClient):
     api_version = "v1"
-
-    def _image_meta_to_headers(self, fields):
-        headers = {}
-        fields_copy = copy.deepcopy(fields)
-        copy_from = fields_copy.pop('copy_from', None)
-        if copy_from is not None:
-            headers['x-glance-api-copy-from'] = copy_from
-        for key, value in six.iteritems(fields_copy.pop('properties', {})):
-            headers['x-image-meta-property-%s' % key] = str(value)
-        for key, value in six.iteritems(fields_copy.pop('api', {})):
-            headers['x-glance-api-property-%s' % key] = str(value)
-        for key, value in six.iteritems(fields_copy):
-            headers['x-image-meta-%s' % key] = str(value)
-        return headers
 
     def _create_with_data(self, headers, data):
         # We are going to do chunked transfert, so split the input data
@@ -74,14 +58,14 @@ class ImagesClient(rest_client.RestClient):
             self._http = self._get_http()
         return self._http
 
-    def create_image(self, data=None, **kwargs):
+    def create_image(self, data=None, headers=None):
         """Create an image.
 
         Available params: http://developer.openstack.org/
                           api-ref-image-v1.html#createImage-v1
         """
-        headers = {}
-        headers.update(self._image_meta_to_headers(kwargs))
+        if headers is None:
+            headers = {}
 
         if data is not None:
             return self._create_with_data(headers, data)
@@ -91,14 +75,14 @@ class ImagesClient(rest_client.RestClient):
         body = json.loads(body)
         return rest_client.ResponseBody(resp, body)
 
-    def update_image(self, image_id, data=None, **kwargs):
+    def update_image(self, image_id, data=None, headers=None):
         """Update an image.
 
         Available params: http://developer.openstack.org/
                           api-ref-image-v1.html#updateImage-v1
         """
-        headers = {}
-        headers.update(self._image_meta_to_headers(kwargs))
+        if headers is None:
+            headers = {}
 
         if data is not None:
             return self._update_with_data(image_id, headers, data)
