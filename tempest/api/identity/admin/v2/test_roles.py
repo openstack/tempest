@@ -84,28 +84,30 @@ class RolesTestJSON(base.BaseIdentityV2AdminTest):
     def test_assign_user_role(self):
         """Assign a role to a user on a tenant."""
         (user, tenant, role) = self._get_role_params()
-        self.roles_client.assign_user_role(tenant['id'], user['id'],
-                                           role['id'])
-        roles = self.roles_client.list_user_roles(tenant['id'],
-                                                  user['id'])['roles']
+        self.roles_client.create_user_role_on_project(tenant['id'],
+                                                      user['id'],
+                                                      role['id'])
+        roles = self.roles_client.list_user_roles_on_project(
+            tenant['id'], user['id'])['roles']
         self.assert_role_in_role_list(role, roles)
 
     @test.idempotent_id('f0b9292c-d3ba-4082-aa6c-440489beef69')
     def test_remove_user_role(self):
         """Remove a role assigned to a user on a tenant."""
         (user, tenant, role) = self._get_role_params()
-        user_role = self.roles_client.assign_user_role(tenant['id'],
-                                                       user['id'],
-                                                       role['id'])['role']
-        self.roles_client.delete_user_role(tenant['id'], user['id'],
-                                           user_role['id'])
+        user_role = self.roles_client.create_user_role_on_project(
+            tenant['id'], user['id'], role['id'])['role']
+        self.roles_client.delete_role_from_user_on_project(tenant['id'],
+                                                           user['id'],
+                                                           user_role['id'])
 
     @test.idempotent_id('262e1e3e-ed71-4edd-a0e5-d64e83d66d05')
     def test_list_user_roles(self):
         """List roles assigned to a user on tenant."""
         (user, tenant, role) = self._get_role_params()
-        self.roles_client.assign_user_role(tenant['id'], user['id'],
-                                           role['id'])
-        roles = self.roles_client.list_user_roles(tenant['id'],
-                                                  user['id'])['roles']
+        self.roles_client.create_user_role_on_project(tenant['id'],
+                                                      user['id'],
+                                                      role['id'])
+        roles = self.roles_client.list_user_roles_on_project(
+            tenant['id'], user['id'])['roles']
         self.assert_role_in_role_list(role, roles)

@@ -129,8 +129,9 @@ class V2CredsClient(CredsClient):
             password=password)
 
     def _assign_user_role(self, project, user, role):
-        self.roles_client.assign_user_role(project['id'], user['id'],
-                                           role['id'])
+        self.roles_client.create_user_role_on_project(project['id'],
+                                                      user['id'],
+                                                      role['id'])
 
 
 class V3CredsClient(CredsClient):

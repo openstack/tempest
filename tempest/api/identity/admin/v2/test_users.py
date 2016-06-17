@@ -181,8 +181,8 @@ class UsersTestJSON(base.BaseIdentityV2AdminTest):
         user_ids = list()
         fetched_user_ids = list()
         user_ids.append(user['id'])
-        role = self.roles_client.assign_user_role(tenant['id'], user['id'],
-                                                  role['id'])['role']
+        role = self.roles_client.create_user_role_on_project(
+            tenant['id'], user['id'], role['id'])['role']
 
         alt_user2 = data_utils.rand_name('second_user')
         alt_password2 = data_utils.rand_password()
@@ -193,9 +193,8 @@ class UsersTestJSON(base.BaseIdentityV2AdminTest):
             email='user2@123')['user']
         user_ids.append(second_user['id'])
         self.data.users.append(second_user)
-        role = self.roles_client.assign_user_role(tenant['id'],
-                                                  second_user['id'],
-                                                  role['id'])['role']
+        role = self.roles_client.create_user_role_on_project(
+            tenant['id'], second_user['id'], role['id'])['role']
         # List of users with roles for the respective tenant ID
         body = (self.tenants_client.list_tenant_users(self.data.tenant['id'])
                 ['users'])

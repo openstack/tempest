@@ -54,7 +54,7 @@ class TestDynamicCredentialProvider(base.TestCase):
     users_client = v2_users_client
     token_client_class = token_client.TokenClient
     fake_response = fake_identity._fake_v2_response
-    assign_role_on_project = 'assign_user_role'
+    assign_role_on_project = 'create_user_role_on_project'
     tenants_client_class = tenants_client.TenantsClient
     delete_tenant = 'delete_tenant'
 

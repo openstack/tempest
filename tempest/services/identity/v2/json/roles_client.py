@@ -11,6 +11,7 @@
 #    under the License.
 
 from oslo_serialization import jsonutils as json
+from six.moves.urllib import parse as urllib
 
 from tempest.lib.common import rest_client
 
@@ -30,45 +31,77 @@ class RolesClient(rest_client.RestClient):
         body = json.loads(body)
         return rest_client.ResponseBody(resp, body)
 
-    def show_role(self, role_id):
-        """Get a role by its id."""
-        resp, body = self.get('OS-KSADM/roles/%s' % role_id)
+    def show_role(self, role_id_or_name):
+        """Get a role by its id or name.
+
+        Available params: see
+            http://developer.openstack.org/
+            api-ref-identity-v2-ext.html#showRoleByID
+            OR
+            http://developer.openstack.org/
+            api-ref-identity-v2-ext.html#showRoleByName
+        """
+        resp, body = self.get('OS-KSADM/roles/%s' % role_id_or_name)
         self.expected_success(200, resp.status)
         body = json.loads(body)
         return rest_client.ResponseBody(resp, body)
 
-    def delete_role(self, role_id):
-        """Delete a role."""
-        resp, body = self.delete('OS-KSADM/roles/%s' % str(role_id))
-        self.expected_success(204, resp.status)
-        return resp, body
+    def list_roles(self, **params):
+        """Returns roles.
 
-    def list_user_roles(self, tenant_id, user_id):
-        """Returns a list of roles assigned to a user for a tenant."""
-        url = '/tenants/%s/users/%s/roles' % (tenant_id, user_id)
+        Available params: see http://developer.openstack.org/
+                              api-ref-identity-v2-ext.html#listRoles
+        """
+        url = 'OS-KSADM/roles'
+        if params:
+            url += '?%s' % urllib.urlencode(params)
         resp, body = self.get(url)
         self.expected_success(200, resp.status)
         body = json.loads(body)
         return rest_client.ResponseBody(resp, body)
 
-    def assign_user_role(self, tenant_id, user_id, role_id):
-        """Add roles to a user on a tenant."""
+    def delete_role(self, role_id):
+        """Delete a role.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-identity-v2-ext.html#deleteRole
+        """
+        resp, body = self.delete('OS-KSADM/roles/%s' % str(role_id))
+        self.expected_success(204, resp.status)
+        return resp, body
+
+    def create_user_role_on_project(self, tenant_id, user_id, role_id):
+        """Add roles to a user on a tenant.
+
+        Available params: see
+            http://developer.openstack.org/
+            api-ref-identity-v2-ext.html#grantRoleToUserOnTenant
+        """
         resp, body = self.put('/tenants/%s/users/%s/roles/OS-KSADM/%s' %
                               (tenant_id, user_id, role_id), "")
         self.expected_success(200, resp.status)
         body = json.loads(body)
         return rest_client.ResponseBody(resp, body)
 
-    def delete_user_role(self, tenant_id, user_id, role_id):
-        """Removes a role assignment for a user on a tenant."""
+    def list_user_roles_on_project(self, tenant_id, user_id, **params):
+        """Returns a list of roles assigned to a user for a tenant."""
+        # TODO(gmann): Need to write API-ref link, Bug# 1592711
+        url = '/tenants/%s/users/%s/roles' % (tenant_id, user_id)
+        if params:
+            url += '?%s' % urllib.urlencode(params)
+        resp, body = self.get(url)
+        self.expected_success(200, resp.status)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
+
+    def delete_role_from_user_on_project(self, tenant_id, user_id, role_id):
+        """Removes a role assignment for a user on a tenant.
+
+        Available params: see
+            http://developer.openstack.org/
+            api-ref-identity-v2-ext.html#revokeRoleFromUserOnTenant
+        """
         resp, body = self.delete('/tenants/%s/users/%s/roles/OS-KSADM/%s' %
                                  (tenant_id, user_id, role_id))
         self.expected_success(204, resp.status)
-        return rest_client.ResponseBody(resp, body)
-
-    def list_roles(self):
-        """Returns roles."""
-        resp, body = self.get('OS-KSADM/roles')
-        self.expected_success(200, resp.status)
-        body = json.loads(body)
         return rest_client.ResponseBody(resp, body)
