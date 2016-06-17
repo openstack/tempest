@@ -21,16 +21,6 @@ from tempest.common import negative_rest_client
 from tempest import config
 from tempest import exceptions
 from tempest.lib.services import compute
-from tempest.lib.services.image.v1.image_members_client import \
-    ImageMembersClient
-from tempest.lib.services.image.v2.image_members_client import \
-    ImageMembersClient as ImageMembersClientV2
-from tempest.lib.services.image.v2.images_client import \
-    ImagesClient as ImagesV2Client
-from tempest.lib.services.image.v2.namespaces_client import NamespacesClient
-from tempest.lib.services.image.v2.resource_types_client import \
-    ResourceTypesClient
-from tempest.lib.services.image.v2.schemas_client import SchemasClient
 from tempest.lib.services import network
 from tempest import manager
 from tempest.services.baremetal.v1.json.baremetal_client import \
@@ -44,7 +34,7 @@ from tempest.services.database.json.limits_client import \
 from tempest.services.database.json.versions_client import \
     DatabaseVersionsClient
 from tempest.services import identity
-from tempest.services.image.v1.json.images_client import ImagesClient
+from tempest.services import image
 from tempest.services.object_storage.account_client import AccountClient
 from tempest.services.object_storage.container_client import ContainerClient
 from tempest.services.object_storage.object_client import ObjectClient
@@ -163,19 +153,19 @@ class Manager(manager.Manager):
         params.update(self.default_params)
 
         if CONF.service_available.glance:
-            self.image_client = ImagesClient(
+            self.image_client = image.v1.ImagesClient(
                 self.auth_provider, **params)
-            self.image_member_client = ImageMembersClient(
+            self.image_member_client = image.v1.ImageMembersClient(
                 self.auth_provider, **params)
-            self.image_client_v2 = ImagesV2Client(
+            self.image_client_v2 = image.v2.ImagesClient(
                 self.auth_provider, **params)
-            self.image_member_client_v2 = ImageMembersClientV2(
+            self.image_member_client_v2 = image.v2.ImageMembersClient(
                 self.auth_provider, **params)
-            self.namespaces_client = NamespacesClient(
+            self.namespaces_client = image.v2.NamespacesClient(
                 self.auth_provider, **params)
-            self.resource_types_client = ResourceTypesClient(
+            self.resource_types_client = image.v2.ResourceTypesClient(
                 self.auth_provider, **params)
-            self.schemas_client = SchemasClient(
+            self.schemas_client = image.v2.SchemasClient(
                 self.auth_provider, **params)
 
     def _set_compute_clients(self):
