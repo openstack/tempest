@@ -50,43 +50,7 @@ from tempest.services.object_storage.container_client import ContainerClient
 from tempest.services.object_storage.object_client import ObjectClient
 from tempest.services.orchestration.json.orchestration_client import \
     OrchestrationClient
-from tempest.services.volume.v1.json.admin.hosts_client import \
-    HostsClient as VolumeHostsClient
-from tempest.services.volume.v1.json.admin.quotas_client import \
-    QuotasClient as VolumeQuotasClient
-from tempest.services.volume.v1.json.admin.services_client import \
-    ServicesClient as VolumeServicesClient
-from tempest.services.volume.v1.json.admin.types_client import \
-    TypesClient as VolumeTypesClient
-from tempest.services.volume.v1.json.availability_zone_client import \
-    AvailabilityZoneClient as VolumeAvailabilityZoneClient
-from tempest.services.volume.v1.json.backups_client import BackupsClient
-from tempest.services.volume.v1.json.extensions_client import \
-    ExtensionsClient as VolumeExtensionsClient
-from tempest.services.volume.v1.json.qos_client import QosSpecsClient
-from tempest.services.volume.v1.json.snapshots_client import SnapshotsClient
-from tempest.services.volume.v1.json.volumes_client import VolumesClient
-from tempest.services.volume.v2.json.admin.hosts_client import \
-    HostsClient as VolumeHostsV2Client
-from tempest.services.volume.v2.json.admin.quotas_client import \
-    QuotasClient as VolumeQuotasV2Client
-from tempest.services.volume.v2.json.admin.services_client import \
-    ServicesClient as VolumeServicesV2Client
-from tempest.services.volume.v2.json.admin.types_client import \
-    TypesClient as VolumeTypesV2Client
-from tempest.services.volume.v2.json.availability_zone_client import \
-    AvailabilityZoneClient as VolumeAvailabilityZoneV2Client
-from tempest.services.volume.v2.json.backups_client import \
-    BackupsClient as BackupsV2Client
-from tempest.services.volume.v2.json.extensions_client import \
-    ExtensionsClient as VolumeExtensionsV2Client
-from tempest.services.volume.v2.json.qos_client import \
-    QosSpecsClient as QosSpecsV2Client
-from tempest.services.volume.v2.json.snapshots_client import \
-    SnapshotsClient as SnapshotsV2Client
-from tempest.services.volume.v2.json.volumes_client import \
-    VolumesClient as VolumesV2Client
-from tempest.services.volume.v3.json.messages_client import MessagesClient
+from tempest.services import volume
 
 CONF = config.CONF
 LOG = logging.getLogger(__name__)
@@ -406,49 +370,50 @@ class Manager(manager.Manager):
         }
         params.update(self.default_params)
 
-        self.volume_qos_client = QosSpecsClient(self.auth_provider,
-                                                **params)
-        self.volume_qos_v2_client = QosSpecsV2Client(
+        self.volume_qos_client = volume.v1.QosSpecsClient(self.auth_provider,
+                                                          **params)
+        self.volume_qos_v2_client = volume.v2.QosSpecsClient(
             self.auth_provider, **params)
-        self.volume_services_client = VolumeServicesClient(
+        self.volume_services_client = volume.v1.ServicesClient(
             self.auth_provider, **params)
-        self.volume_services_v2_client = VolumeServicesV2Client(
+        self.volume_services_v2_client = volume.v2.ServicesClient(
             self.auth_provider, **params)
-        self.backups_client = BackupsClient(self.auth_provider, **params)
-        self.backups_v2_client = BackupsV2Client(self.auth_provider,
-                                                 **params)
-        self.snapshots_client = SnapshotsClient(self.auth_provider,
-                                                **params)
-        self.snapshots_v2_client = SnapshotsV2Client(self.auth_provider,
-                                                     **params)
-        self.volumes_client = VolumesClient(
+        self.backups_client = volume.v1.BackupsClient(self.auth_provider,
+                                                      **params)
+        self.backups_v2_client = volume.v2.BackupsClient(self.auth_provider,
+                                                         **params)
+        self.snapshots_client = volume.v1.SnapshotsClient(self.auth_provider,
+                                                          **params)
+        self.snapshots_v2_client = volume.v2.SnapshotsClient(
+            self.auth_provider, **params)
+        self.volumes_client = volume.v1.VolumesClient(
             self.auth_provider, default_volume_size=CONF.volume.volume_size,
             **params)
-        self.volumes_v2_client = VolumesV2Client(
+        self.volumes_v2_client = volume.v2.VolumesClient(
             self.auth_provider, default_volume_size=CONF.volume.volume_size,
             **params)
-        self.volume_messages_client = MessagesClient(self.auth_provider,
-                                                     **params)
-        self.volume_types_client = VolumeTypesClient(self.auth_provider,
-                                                     **params)
-        self.volume_types_v2_client = VolumeTypesV2Client(
+        self.volume_messages_client = volume.v3.MessagesClient(
             self.auth_provider, **params)
-        self.volume_hosts_client = VolumeHostsClient(self.auth_provider,
-                                                     **params)
-        self.volume_hosts_v2_client = VolumeHostsV2Client(
-            self.auth_provider, **params)
-        self.volume_quotas_client = VolumeQuotasClient(self.auth_provider,
-                                                       **params)
-        self.volume_quotas_v2_client = VolumeQuotasV2Client(self.auth_provider,
+        self.volume_types_client = volume.v1.TypesClient(self.auth_provider,
+                                                         **params)
+        self.volume_types_v2_client = volume.v2.TypesClient(self.auth_provider,
                                                             **params)
-        self.volumes_extension_client = VolumeExtensionsClient(
+        self.volume_hosts_client = volume.v1.HostsClient(self.auth_provider,
+                                                         **params)
+        self.volume_hosts_v2_client = volume.v2.HostsClient(self.auth_provider,
+                                                            **params)
+        self.volume_quotas_client = volume.v1.QuotasClient(self.auth_provider,
+                                                           **params)
+        self.volume_quotas_v2_client = volume.v2.QuotasClient(
             self.auth_provider, **params)
-        self.volumes_v2_extension_client = VolumeExtensionsV2Client(
+        self.volumes_extension_client = volume.v1.ExtensionsClient(
+            self.auth_provider, **params)
+        self.volumes_v2_extension_client = volume.v2.ExtensionsClient(
             self.auth_provider, **params)
         self.volume_availability_zone_client = \
-            VolumeAvailabilityZoneClient(self.auth_provider, **params)
+            volume.v1.AvailabilityZoneClient(self.auth_provider, **params)
         self.volume_v2_availability_zone_client = \
-            VolumeAvailabilityZoneV2Client(self.auth_provider, **params)
+            volume.v2.AvailabilityZoneClient(self.auth_provider, **params)
 
     def _set_object_storage_clients(self):
         params = {
