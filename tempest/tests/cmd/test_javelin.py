@@ -120,11 +120,12 @@ class TestCreateResources(JavelinUnitTest):
         fake_tenant_id = self.fake_object['tenant']['id']
         fake_email = "%s@%s" % (self.fake_object['user'], fake_tenant_id)
         mocked_function = self.fake_client.users.create_user
-        mocked_function.assert_called_once_with(self.fake_object['name'],
-                                                self.fake_object['password'],
-                                                fake_tenant_id,
-                                                fake_email,
-                                                enabled=True)
+        mocked_function.assert_called_once_with(
+            name=self.fake_object['name'],
+            password=self.fake_object['password'],
+            tenantId=fake_tenant_id,
+            email=fake_email,
+            enabled=True)
 
     def test_create_user_missing_tenant(self):
         self.useFixture(mockpatch.Patch(

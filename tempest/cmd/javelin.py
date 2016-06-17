@@ -391,8 +391,9 @@ def create_users(users):
                         % u['name'])
         except lib_exc.NotFound:
             admin.users.create_user(
-                u['name'], u['pass'], tenant['id'],
-                "%s@%s" % (u['name'], tenant['id']),
+                name=u['name'], password=u['pass'],
+                tenantId=tenant['id'],
+                email="%s@%s" % (u['name'], tenant['id']),
                 enabled=True)
 
 

@@ -215,11 +215,10 @@ class BaseDataGenerator(object):
         self.domains = []
 
     def _create_test_user(self, **kwargs):
-        username = data_utils.rand_name('test_user')
         self.user_password = data_utils.rand_password()
         self.user = self.users_client.create_user(
-            username, password=self.user_password,
-            email=username + '@testmail.tm', **kwargs)['user']
+            password=self.user_password,
+            **kwargs)['user']
         self.users.append(self.user)
 
     def setup_test_role(self):
@@ -256,7 +255,10 @@ class DataGeneratorV2(BaseDataGenerator):
     def setup_test_user(self):
         """Set up a test user."""
         self.setup_test_tenant()
-        self._create_test_user(tenant_id=self.tenant['id'])
+        username = data_utils.rand_name('test_user')
+        email = username + '@testmail.tm'
+        self._create_test_user(name=username, email=email,
+                               tenantId=self.tenant['id'])
 
     def setup_test_tenant(self):
         """Set up a test tenant."""
@@ -271,7 +273,10 @@ class DataGeneratorV3(BaseDataGenerator):
     def setup_test_user(self):
         """Set up a test user."""
         self.setup_test_project()
-        self._create_test_user(project_id=self.project['id'])
+        username = data_utils.rand_name('test_user')
+        email = username + '@testmail.tm'
+        self._create_test_user(user_name=username, email=email,
+                               project_id=self.project['id'])
 
     def setup_test_project(self):
         """Set up a test project."""
