@@ -138,6 +138,8 @@ class TempestInit(command.Command):
                         "config dir %s can't be found" % config_dir)
 
     def create_working_dir(self, local_dir, config_dir):
+        # make sure we are working with abspath however tempest init is called
+        local_dir = os.path.abspath(local_dir)
         # Create local dir if missing
         if not os.path.isdir(local_dir):
             LOG.debug('Creating local working dir: %s' % local_dir)
