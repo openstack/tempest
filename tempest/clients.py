@@ -23,21 +23,13 @@ from tempest import exceptions
 from tempest.lib.services import compute
 from tempest.lib.services import network
 from tempest import manager
-from tempest.services.baremetal.v1.json.baremetal_client import \
-    BaremetalClient
-from tempest.services.data_processing.v1_1.data_processing_client import \
-    DataProcessingClient
-from tempest.services.database.json.flavors_client import \
-    DatabaseFlavorsClient
-from tempest.services.database.json.limits_client import \
-    DatabaseLimitsClient
-from tempest.services.database.json.versions_client import \
-    DatabaseVersionsClient
+from tempest.services import baremetal
+from tempest.services import data_processing
+from tempest.services import database
 from tempest.services import identity
 from tempest.services import image
 from tempest.services import object_storage
-from tempest.services.orchestration.json.orchestration_client import \
-    OrchestrationClient
+from tempest.services import orchestration
 from tempest.services import volume
 
 CONF = config.CONF
@@ -79,13 +71,13 @@ class Manager(manager.Manager):
         self._set_image_clients()
         self._set_network_clients()
 
-        self.baremetal_client = BaremetalClient(
+        self.baremetal_client = baremetal.BaremetalClient(
             self.auth_provider,
             CONF.baremetal.catalog_type,
             CONF.identity.region,
             endpoint_type=CONF.baremetal.endpoint_type,
             **self.default_params_with_timeout_values)
-        self.orchestration_client = OrchestrationClient(
+        self.orchestration_client = orchestration.OrchestrationClient(
             self.auth_provider,
             CONF.orchestration.catalog_type,
             CONF.orchestration.region or CONF.identity.region,
@@ -93,7 +85,7 @@ class Manager(manager.Manager):
             build_interval=CONF.orchestration.build_interval,
             build_timeout=CONF.orchestration.build_timeout,
             **self.default_params)
-        self.data_processing_client = DataProcessingClient(
+        self.data_processing_client = data_processing.DataProcessingClient(
             self.auth_provider,
             CONF.data_processing.catalog_type,
             CONF.identity.region,
@@ -252,17 +244,17 @@ class Manager(manager.Manager):
             self.auth_provider, **params_volume)
 
     def _set_database_clients(self):
-        self.database_flavors_client = DatabaseFlavorsClient(
+        self.database_flavors_client = database.DatabaseFlavorsClient(
             self.auth_provider,
             CONF.database.catalog_type,
             CONF.identity.region,
             **self.default_params_with_timeout_values)
-        self.database_limits_client = DatabaseLimitsClient(
+        self.database_limits_client = database.DatabaseLimitsClient(
             self.auth_provider,
             CONF.database.catalog_type,
             CONF.identity.region,
             **self.default_params_with_timeout_values)
-        self.database_versions_client = DatabaseVersionsClient(
+        self.database_versions_client = database.DatabaseVersionsClient(
             self.auth_provider,
             CONF.database.catalog_type,
             CONF.identity.region,
