@@ -682,6 +682,24 @@ VolumeGroup = [
     cfg.IntOpt('volume_size',
                default=1,
                help='Default size in GB for volumes created by volumes tests'),
+    cfg.StrOpt('min_microversion',
+               default=None,
+               help="Lower version of the test target microversion range. "
+                    "The format is 'X.Y', where 'X' and 'Y' are int values. "
+                    "Tempest selects tests based on the range between "
+                    "min_microversion and max_microversion. "
+                    "If both values are not specified, Tempest avoids tests "
+                    "which require a microversion. Valid values are string "
+                    "with format 'X.Y' or string 'latest'",),
+    cfg.StrOpt('max_microversion',
+               default=None,
+               help="Upper version of the test target microversion range. "
+                    "The format is 'X.Y', where 'X' and 'Y' are int values. "
+                    "Tempest selects tests based on the range between "
+                    "min_microversion and max_microversion. "
+                    "If both values are not specified, Tempest avoids tests "
+                    "which require a microversion. Valid values are string "
+                    "with format 'X.Y' or string 'latest'",),
 ]
 
 volume_feature_group = cfg.OptGroup(name='volume-feature-enabled',
@@ -711,6 +729,9 @@ VolumeFeaturesGroup = [
     cfg.BoolOpt('api_v2',
                 default=True,
                 help="Is the v2 volume API enabled"),
+    cfg.BoolOpt('api_v3',
+                default=False,
+                help="Is the v3 volume API enabled"),
     cfg.BoolOpt('bootable',
                 default=True,
                 help='Update bootable status of a volume '

@@ -45,6 +45,10 @@ class BaseVolumeTest(tempest.test.BaseTestCase):
             if not CONF.volume_feature_enabled.api_v2:
                 msg = "Volume API v2 is disabled"
                 raise cls.skipException(msg)
+        elif cls._api_version == 3:
+            if not CONF.volume_feature_enabled.api_v3:
+                msg = "Volume API v3 is disabled"
+                raise cls.skipException(msg)
         else:
             msg = ("Invalid Cinder API version (%s)" % cls._api_version)
             raise exceptions.InvalidConfiguration(message=msg)
