@@ -35,10 +35,11 @@ class ServicesTestJSON(base.BaseIdentityV2AdminTest):
         # GET Service
         # Creating a Service
         name = data_utils.rand_name('service')
-        type = data_utils.rand_name('type')
+        s_type = data_utils.rand_name('type')
         description = data_utils.rand_name('description')
         service_data = self.services_client.create_service(
-            name, type, description=description)['OS-KSADM:service']
+            name=name, type=s_type,
+            description=description)['OS-KSADM:service']
         self.assertFalse(service_data['id'] is None)
         self.addCleanup(self._del_service, service_data['id'])
         # Verifying response body of create service
@@ -46,7 +47,7 @@ class ServicesTestJSON(base.BaseIdentityV2AdminTest):
         self.assertIn('name', service_data)
         self.assertEqual(name, service_data['name'])
         self.assertIn('type', service_data)
-        self.assertEqual(type, service_data['type'])
+        self.assertEqual(s_type, service_data['type'])
         self.assertIn('description', service_data)
         self.assertEqual(description, service_data['description'])
         # Get service
@@ -68,15 +69,15 @@ class ServicesTestJSON(base.BaseIdentityV2AdminTest):
     def test_create_service_without_description(self):
         # Create a service only with name and type
         name = data_utils.rand_name('service')
-        type = data_utils.rand_name('type')
-        service = self.services_client.create_service(name,
-                                                      type)['OS-KSADM:service']
+        s_type = data_utils.rand_name('type')
+        service = self.services_client.create_service(
+            name=name, type=s_type)['OS-KSADM:service']
         self.assertIn('id', service)
         self.addCleanup(self._del_service, service['id'])
         self.assertIn('name', service)
         self.assertEqual(name, service['name'])
         self.assertIn('type', service)
-        self.assertEqual(type, service['type'])
+        self.assertEqual(s_type, service['type'])
 
     @test.attr(type='smoke')
     @test.idempotent_id('34ea6489-012d-4a86-9038-1287cadd5eca')
@@ -85,10 +86,12 @@ class ServicesTestJSON(base.BaseIdentityV2AdminTest):
         services = []
         for _ in moves.xrange(3):
             name = data_utils.rand_name('service')
-            type = data_utils.rand_name('type')
+            s_type = data_utils.rand_name('type')
             description = data_utils.rand_name('description')
+
             service = self.services_client.create_service(
-                name, type, description=description)['OS-KSADM:service']
+                name=name, type=s_type,
+                description=description)['OS-KSADM:service']
             services.append(service)
         service_ids = map(lambda x: x['id'], services)
 
