@@ -83,7 +83,7 @@ class RestClient(object):
         self.service = service
         self.region = region
         self.name = name
-        self.base_url = base_url
+        self.url = base_url
         self.endpoint_type = endpoint_type
         self.build_interval = build_interval
         self.build_timeout = build_timeout
@@ -184,9 +184,9 @@ class RestClient(object):
 
     @property
     def base_url(self):
-        if self.base_url is None:
+        if self.url is None:
             return self.auth_provider.base_url(filters=self.filters)
-        return self.base_url
+        return self.url
 
     @property
     def token(self):
