@@ -109,22 +109,22 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
                     os.subnets_client, os.ports_client,
                     os.security_groups_client)
 
-    def _create_creds(self, suffix="", admin=False, roles=None):
-        """Create random credentials under the following schema.
+    def _create_creds(self, admin=False, roles=None):
+        """Create credentials with random name.
 
-        If the name contains a '.' is the full class path of something, and
-        we don't really care. If it isn't, it's probably a meaningful name,
-        so use it.
+        Creates project and user. When admin flag is True create user
+        with admin role. Assign user with additional roles (for example
+        _member_) and roles requested by caller.
 
-        For logging purposes, -user and -tenant are long and redundant,
-        don't use them. The user# will be sufficient to figure it out.
+        :param admin: Flag if to assign to the user admin role
+        :type admin: bool
+        :param roles: Roles to assign for the user
+        :type roles: list
+        :return: Readonly Credentials with network resources
         """
-        if '.' in self.name:
-            root = ""
-        else:
-            root = self.name
+        root = self.name
 
-        project_name = data_utils.rand_name(root) + suffix
+        project_name = data_utils.rand_name(root)
         project_desc = project_name + "-desc"
         project = self.creds_client.create_project(
             name=project_name, description=project_desc)
@@ -133,15 +133,14 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
         # having the same ID in both makes it easier to match them and debug.
         username = project_name
         user_password = data_utils.rand_password()
-        email = data_utils.rand_name(root) + suffix + "@example.com"
+        email = data_utils.rand_name(root) + "@example.com"
         user = self.creds_client.create_user(
             username, user_password, project, email)
         if 'user' in user:
             user = user['user']
         role_assigned = False
         if admin:
-            self.creds_client.assign_user_role(user, project,
-                                               self.admin_role)
+            self.creds_client.assign_user_role(user, project, self.admin_role)
             role_assigned = True
             if (self.identity_version == 'v3' and
                     CONF.identity.admin_domain_scope):
