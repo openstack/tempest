@@ -80,6 +80,7 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
         cls.security_groups_client = cls.os.security_groups_client
         cls.security_group_rules_client = (
             cls.os.security_group_rules_client)
+        cls.network_versions_client = cls.os.network_versions_client
 
     @classmethod
     def resource_setup(cls):

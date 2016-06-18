@@ -104,6 +104,8 @@ from tempest.lib.services.network.security_groups_client import \
     SecurityGroupsClient
 from tempest.lib.services.network.subnetpools_client import SubnetpoolsClient
 from tempest.lib.services.network.subnets_client import SubnetsClient
+from tempest.lib.services.network.versions_client import \
+    NetworkVersionsClient
 from tempest import manager
 from tempest.services.baremetal.v1.json.baremetal_client import \
     BaremetalClient
@@ -281,6 +283,8 @@ class Manager(manager.Manager):
         self.security_group_rules_client = SecurityGroupRulesClient(
             self.auth_provider, **params)
         self.security_groups_client = SecurityGroupsClient(
+            self.auth_provider, **params)
+        self.network_versions_client = NetworkVersionsClient(
             self.auth_provider, **params)
 
     def _set_image_clients(self):
