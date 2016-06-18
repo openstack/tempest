@@ -16,7 +16,6 @@
 import copy
 import functools
 
-from oslo_log import log as logging
 from oslo_serialization import jsonutils as json
 import six
 from six.moves.urllib import parse as urllib
@@ -24,7 +23,6 @@ from six.moves.urllib import parse as urllib
 from tempest.lib.common import rest_client
 from tempest.lib import exceptions as lib_exc
 
-LOG = logging.getLogger(__name__)
 CHUNKSIZE = 1024 * 64  # 64kB
 
 
