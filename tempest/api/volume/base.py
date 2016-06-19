@@ -135,6 +135,12 @@ class BaseVolumeTest(tempest.test.BaseTestCase):
     # only in a single location in the source, and could be more general.
 
     @classmethod
+    def delete_volume(cls, client, volume_id):
+        """Delete volume by the given client"""
+        client.delete_volume(volume_id)
+        client.wait_for_resource_deletion(volume_id)
+
+    @classmethod
     def clear_volumes(cls):
         for volume in cls.volumes:
             try:

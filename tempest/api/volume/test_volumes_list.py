@@ -72,8 +72,7 @@ class VolumesV2ListTestJSON(base.BaseVolumeTest):
     def resource_cleanup(cls):
         # Delete the created volumes
         for volid in cls.volume_id_list:
-            cls.client.delete_volume(volid)
-            cls.client.wait_for_resource_deletion(volid)
+            cls.delete_volume(cls.client, volid)
         super(VolumesV2ListTestJSON, cls).resource_cleanup()
 
     def _list_by_param_value_and_assert(self, params, with_detail=False):

@@ -24,10 +24,6 @@ CONF = config.CONF
 
 class VolumeTypesV2Test(base.BaseVolumeAdminTest):
 
-    def _delete_volume(self, volume_id):
-        self.volumes_client.delete_volume(volume_id)
-        self.volumes_client.wait_for_resource_deletion(volume_id)
-
     @test.idempotent_id('9d9b28e3-1b2e-4483-a2cc-24aa0ea1de54')
     def test_volume_type_list(self):
         # List volume types.
@@ -59,7 +55,7 @@ class VolumeTypesV2Test(base.BaseVolumeAdminTest):
 
         # Create volume
         volume = self.volumes_client.create_volume(**params)['volume']
-        self.addCleanup(self._delete_volume, volume['id'])
+        self.addCleanup(self.delete_volume, self.volumes_client, volume['id'])
         self.assertEqual(volume_types[0]['name'], volume["volume_type"])
         self.assertEqual(volume[self.name_field], vol_name,
                          "The created volume name is not equal "

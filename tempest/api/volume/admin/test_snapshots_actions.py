@@ -61,8 +61,7 @@ class SnapshotsActionsV2Test(base.BaseVolumeAdminTest):
         cls.client.wait_for_resource_deletion(cls.snapshot['id'])
 
         # Delete the test volume
-        cls.volumes_client.delete_volume(cls.volume['id'])
-        cls.volumes_client.wait_for_resource_deletion(cls.volume['id'])
+        cls.delete_volume(cls.volumes_client, cls.volume['id'])
 
         super(SnapshotsActionsV2Test, cls).resource_cleanup()
 
