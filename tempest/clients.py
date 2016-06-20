@@ -76,6 +76,8 @@ from tempest.lib.services.compute.volumes_client import \
 from tempest.lib.services.identity.v2.endpoints_client import EndpointsClient
 from tempest.lib.services.identity.v2.token_client import TokenClient
 from tempest.lib.services.identity.v3.token_client import V3TokenClient
+from tempest.lib.services.image.v1.image_members_client import \
+    ImageMembersClient
 from tempest.lib.services.image.v2.image_members_client import \
     ImageMembersClient as ImageMembersClientV2
 from tempest.lib.services.image.v2.images_client import \
@@ -141,8 +143,6 @@ from tempest.services.identity.v3.json.services_client import \
 from tempest.services.identity.v3.json.trusts_client import TrustsClient
 from tempest.services.identity.v3.json.users_clients import \
     UsersClient as UsersV3Client
-from tempest.services.image.v1.json.image_members_client import \
-    ImageMembersClient
 from tempest.services.image.v1.json.images_client import ImagesClient
 from tempest.services.object_storage.account_client import AccountClient
 from tempest.services.object_storage.container_client import ContainerClient
