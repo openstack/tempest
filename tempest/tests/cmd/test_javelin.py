@@ -92,7 +92,7 @@ class TestCreateResources(JavelinUnitTest):
         javelin.create_tenants([self.fake_object['name']])
 
         mocked_function = self.fake_client.tenants.create_tenant
-        mocked_function.assert_called_once_with(self.fake_object['name'])
+        mocked_function.assert_called_once_with(name=self.fake_object['name'])
 
     def test_create_duplicate_tenant(self):
         self.fake_client.tenants.list_tenants.return_value = {'tenants': [

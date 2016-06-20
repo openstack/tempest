@@ -28,7 +28,8 @@ class TenantsTestJSON(base.BaseIdentityV2AdminTest):
         tenants = []
         for _ in moves.xrange(3):
             tenant_name = data_utils.rand_name(name='tenant-new')
-            tenant = self.tenants_client.create_tenant(tenant_name)['tenant']
+            tenant = self.tenants_client.create_tenant(
+                name=tenant_name)['tenant']
             self.data.tenants.append(tenant)
             tenants.append(tenant)
         tenant_ids = map(lambda x: x['id'], tenants)
@@ -49,7 +50,7 @@ class TenantsTestJSON(base.BaseIdentityV2AdminTest):
         # Create tenant with a description
         tenant_name = data_utils.rand_name(name='tenant')
         tenant_desc = data_utils.rand_name(name='desc')
-        body = self.tenants_client.create_tenant(tenant_name,
+        body = self.tenants_client.create_tenant(name=tenant_name,
                                                  description=tenant_desc)
         tenant = body['tenant']
         self.data.tenants.append(tenant)
@@ -68,7 +69,8 @@ class TenantsTestJSON(base.BaseIdentityV2AdminTest):
     def test_tenant_create_enabled(self):
         # Create a tenant that is enabled
         tenant_name = data_utils.rand_name(name='tenant')
-        body = self.tenants_client.create_tenant(tenant_name, enabled=True)
+        body = self.tenants_client.create_tenant(name=tenant_name,
+                                                 enabled=True)
         tenant = body['tenant']
         self.data.tenants.append(tenant)
         tenant_id = tenant['id']
@@ -84,7 +86,8 @@ class TenantsTestJSON(base.BaseIdentityV2AdminTest):
     def test_tenant_create_not_enabled(self):
         # Create a tenant that is not enabled
         tenant_name = data_utils.rand_name(name='tenant')
-        body = self.tenants_client.create_tenant(tenant_name, enabled=False)
+        body = self.tenants_client.create_tenant(name=tenant_name,
+                                                 enabled=False)
         tenant = body['tenant']
         self.data.tenants.append(tenant)
         tenant_id = tenant['id']
@@ -102,7 +105,7 @@ class TenantsTestJSON(base.BaseIdentityV2AdminTest):
     def test_tenant_update_name(self):
         # Update name attribute of a tenant
         t_name1 = data_utils.rand_name(name='tenant')
-        body = self.tenants_client.create_tenant(t_name1)['tenant']
+        body = self.tenants_client.create_tenant(name=t_name1)['tenant']
         tenant = body
         self.data.tenants.append(tenant)
 
@@ -129,7 +132,8 @@ class TenantsTestJSON(base.BaseIdentityV2AdminTest):
         # Update description attribute of a tenant
         t_name = data_utils.rand_name(name='tenant')
         t_desc = data_utils.rand_name(name='desc')
-        body = self.tenants_client.create_tenant(t_name, description=t_desc)
+        body = self.tenants_client.create_tenant(name=t_name,
+                                                 description=t_desc)
         tenant = body['tenant']
         self.data.tenants.append(tenant)
 
@@ -157,7 +161,7 @@ class TenantsTestJSON(base.BaseIdentityV2AdminTest):
         # Update the enabled attribute of a tenant
         t_name = data_utils.rand_name(name='tenant')
         t_en = False
-        body = self.tenants_client.create_tenant(t_name, enabled=t_en)
+        body = self.tenants_client.create_tenant(name=t_name, enabled=t_en)
         tenant = body['tenant']
         self.data.tenants.append(tenant)
 

@@ -13,6 +13,7 @@
 # limitations under the License.
 
 from oslo_serialization import jsonutils as json
+from six.moves.urllib import parse as urllib
 
 from tempest.lib.common import rest_client
 
@@ -20,40 +21,50 @@ from tempest.lib.common import rest_client
 class TenantsClient(rest_client.RestClient):
     api_version = "v2.0"
 
-    def create_tenant(self, name, **kwargs):
+    def create_tenant(self, **kwargs):
         """Create a tenant
 
-        name (required): New tenant name
-        description: Description of new tenant (default is none)
-        enabled <true|false>: Initial tenant status (default is true)
+        Available params: see http://developer.openstack.org/
+                              api-ref-identity-v2-ext.html#createTenant
         """
-        post_body = {
-            'name': name,
-            'description': kwargs.get('description', ''),
-            'enabled': kwargs.get('enabled', True),
-        }
-        post_body = json.dumps({'tenant': post_body})
+        post_body = json.dumps({'tenant': kwargs})
         resp, body = self.post('tenants', post_body)
         self.expected_success(200, resp.status)
         body = json.loads(body)
         return rest_client.ResponseBody(resp, body)
 
     def delete_tenant(self, tenant_id):
-        """Delete a tenant."""
+        """Delete a tenant.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-identity-v2-ext.html#deleteTenant
+        """
         resp, body = self.delete('tenants/%s' % str(tenant_id))
         self.expected_success(204, resp.status)
         return rest_client.ResponseBody(resp, body)
 
     def show_tenant(self, tenant_id):
-        """Get tenant details."""
+        """Get tenant details.
+
+        Available params: see
+            http://developer.openstack.org/
+            api-ref-identity-v2-ext.html#admin-showTenantById
+        """
         resp, body = self.get('tenants/%s' % str(tenant_id))
         self.expected_success(200, resp.status)
         body = json.loads(body)
         return rest_client.ResponseBody(resp, body)
 
-    def list_tenants(self):
-        """Returns tenants."""
-        resp, body = self.get('tenants')
+    def list_tenants(self, **params):
+        """Returns tenants.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-identity-v2-ext.html#admin-listTenants
+        """
+        url = 'tenants'
+        if params:
+            url += '?%s' % urllib.urlencode(params)
+        resp, body = self.get(url)
         self.expected_success(200, resp.status)
         body = json.loads(body)
         return rest_client.ResponseBody(resp, body)
@@ -64,25 +75,24 @@ class TenantsClient(rest_client.RestClient):
         Available params: see http://developer.openstack.org/
                               api-ref-identity-v2-ext.html#updateTenant
         """
-        body = self.show_tenant(tenant_id)['tenant']
-        name = kwargs.get('name', body['name'])
-        desc = kwargs.get('description', body['description'])
-        en = kwargs.get('enabled', body['enabled'])
-        post_body = {
-            'id': tenant_id,
-            'name': name,
-            'description': desc,
-            'enabled': en,
-        }
-        post_body = json.dumps({'tenant': post_body})
+        if 'id' not in kwargs:
+            kwargs['id'] = tenant_id
+        post_body = json.dumps({'tenant': kwargs})
         resp, body = self.post('tenants/%s' % tenant_id, post_body)
         self.expected_success(200, resp.status)
         body = json.loads(body)
         return rest_client.ResponseBody(resp, body)
 
-    def list_tenant_users(self, tenant_id):
-        """List users for a Tenant."""
-        resp, body = self.get('/tenants/%s/users' % tenant_id)
+    def list_tenant_users(self, tenant_id, **params):
+        """List users for a Tenant.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-identity-v2-ext.html#listUsersForTenant
+        """
+        url = '/tenants/%s/users' % tenant_id
+        if params:
+            url += '?%s' % urllib.urlencode(params)
+        resp, body = self.get(url)
         self.expected_success(200, resp.status)
         body = json.loads(body)
         return rest_client.ResponseBody(resp, body)
