@@ -299,6 +299,23 @@ class BaseVolumesClient(rest_client.RestClient):
         self.expected_success(200, resp.status)
         return rest_client.ResponseBody(resp, body)
 
+    def update_volume_image_metadata(self, volume_id, **kwargs):
+        """Update image metadata for the volume."""
+        post_body = json.dumps({'os-set_image_metadata': {'metadata': kwargs}})
+        url = "volumes/%s/action" % (volume_id)
+        resp, body = self.post(url, post_body)
+        body = json.loads(body)
+        self.expected_success(200, resp.status)
+        return rest_client.ResponseBody(resp, body)
+
+    def delete_volume_image_metadata(self, volume_id, key_name):
+        """Delete image metadata item for the volume."""
+        post_body = json.dumps({'os-unset_image_metadata': {'key': key_name}})
+        url = "volumes/%s/action" % (volume_id)
+        resp, body = self.post(url, post_body)
+        self.expected_success(200, resp.status)
+        return rest_client.ResponseBody(resp, body)
+
     def retype_volume(self, volume_id, **kwargs):
         """Updates volume with new volume type."""
         post_body = json.dumps({'os-retype': kwargs})
