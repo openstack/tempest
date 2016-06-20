@@ -42,8 +42,7 @@ class VolumesActionsV2Test(base.BaseVolumeAdminTest):
     @classmethod
     def resource_cleanup(cls):
         # Delete the test volume
-        cls.client.delete_volume(cls.volume['id'])
-        cls.client.wait_for_resource_deletion(cls.volume['id'])
+        cls.delete_volume(cls.client, cls.volume['id'])
 
         super(VolumesActionsV2Test, cls).resource_cleanup()
 

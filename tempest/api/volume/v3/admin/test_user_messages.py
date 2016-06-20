@@ -36,10 +36,6 @@ class UserMessagesTest(base.VolumesV3AdminTest):
     min_microversion = '3.3'
     max_microversion = 'latest'
 
-    def _delete_volume(self, volume_id):
-        self.volumes_client.delete_volume(volume_id)
-        self.volumes_client.wait_for_resource_deletion(volume_id)
-
     def _create_user_message(self):
         """Trigger a 'no valid host' situation to generate a message."""
         bad_protocol = data_utils.rand_name('storage_protocol')
@@ -54,7 +50,7 @@ class UserMessagesTest(base.VolumesV3AdminTest):
                         bogus_type['id'])
         params = {'volume_type': bogus_type['id']}
         volume = self.volumes_client.create_volume(**params)['volume']
-        self.addCleanup(self._delete_volume, volume['id'])
+        self.addCleanup(self.delete_volume, self.volumes_client, volume['id'])
         try:
             waiters.wait_for_volume_status(self.volumes_client, volume['id'],
                                            'error')

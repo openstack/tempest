@@ -39,10 +39,6 @@ class VolumesV2GetTest(base.BaseVolumeTest):
         cls.name_field = cls.special_fields['name_field']
         cls.descrip_field = cls.special_fields['descrip_field']
 
-    def _delete_volume(self, volume_id):
-        self.client.delete_volume(volume_id)
-        self.client.wait_for_resource_deletion(volume_id)
-
     def _volume_create_get_update_delete(self, **kwargs):
         # Create a volume, Get it's details and Delete the volume
         volume = {}
@@ -53,7 +49,7 @@ class VolumesV2GetTest(base.BaseVolumeTest):
         kwargs['metadata'] = metadata
         volume = self.client.create_volume(**kwargs)['volume']
         self.assertIn('id', volume)
-        self.addCleanup(self._delete_volume, volume['id'])
+        self.addCleanup(self.delete_volume, self.client, volume['id'])
         waiters.wait_for_volume_status(self.client, volume['id'], 'available')
         self.assertIn(self.name_field, volume)
         self.assertEqual(volume[self.name_field], v_name,
@@ -113,7 +109,7 @@ class VolumesV2GetTest(base.BaseVolumeTest):
                   'availability_zone': volume['availability_zone']}
         new_volume = self.client.create_volume(**params)['volume']
         self.assertIn('id', new_volume)
-        self.addCleanup(self._delete_volume, new_volume['id'])
+        self.addCleanup(self.delete_volume, self.client, new_volume['id'])
         waiters.wait_for_volume_status(self.client,
                                        new_volume['id'], 'available')
 

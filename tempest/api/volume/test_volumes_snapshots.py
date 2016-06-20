@@ -186,8 +186,7 @@ class VolumesV2SnapshotTestJSON(base.BaseVolumeTest):
             snapshot_id=snapshot['id'])['volume']
         waiters.wait_for_volume_status(self.volumes_client,
                                        volume['id'], 'available')
-        self.volumes_client.delete_volume(volume['id'])
-        self.volumes_client.wait_for_resource_deletion(volume['id'])
+        self.delete_volume(self.volumes_client, volume['id'])
         self.cleanup_snapshot(snapshot)
 
     @test.idempotent_id('db4d8e0a-7a2e-41cc-a712-961f6844e896')

@@ -33,11 +33,6 @@ class BaseVolumeQuotasAdminV2TestJSON(base.BaseVolumeAdminTest):
         cls.demo_tenant_id = cls.os.credentials.tenant_id
         cls.alt_client = cls.os_alt.volumes_client
 
-    def _delete_volume(self, volume_id):
-        # Delete the specified volume using admin credentials
-        self.admin_volume_client.delete_volume(volume_id)
-        self.admin_volume_client.wait_for_resource_deletion(volume_id)
-
     @test.idempotent_id('59eada70-403c-4cef-a2a3-a8ce2f1b07a0')
     def test_list_quotas(self):
         quotas = (self.admin_quotas_client.show_quota_set(self.demo_tenant_id)
@@ -91,7 +86,8 @@ class BaseVolumeQuotasAdminV2TestJSON(base.BaseVolumeAdminTest):
             self.demo_tenant_id)['quota_set']
 
         volume = self.create_volume()
-        self.addCleanup(self._delete_volume, volume['id'])
+        self.addCleanup(self.delete_volume,
+                        self.admin_volume_client, volume['id'])
 
         new_quota_usage = self.admin_quotas_client.show_quota_usage(
             self.demo_tenant_id)['quota_set']
@@ -128,7 +124,8 @@ class BaseVolumeQuotasAdminV2TestJSON(base.BaseVolumeAdminTest):
     def test_quota_usage_after_volume_transfer(self):
         # Create a volume for transfer
         volume = self.create_volume()
-        self.addCleanup(self._delete_volume, volume['id'])
+        self.addCleanup(self.delete_volume,
+                        self.admin_volume_client, volume['id'])
 
         # List of tenants quota usage pre-transfer
         primary_quota = self.admin_quotas_client.show_quota_usage(
