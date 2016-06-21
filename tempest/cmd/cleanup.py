@@ -232,15 +232,16 @@ class TempestCleanup(command.Command):
     def _add_admin(self, tenant_id):
         rl_cl = self.admin_mgr.roles_client
         needs_role = True
-        roles = rl_cl.list_user_roles(tenant_id, self.admin_id)['roles']
+        roles = rl_cl.list_user_roles_on_project(tenant_id,
+                                                 self.admin_id)['roles']
         for role in roles:
             if role['id'] == self.admin_role_id:
                 needs_role = False
                 LOG.debug("User already had admin privilege for this tenant")
         if needs_role:
             LOG.debug("Adding admin privilege for : %s" % tenant_id)
-            rl_cl.assign_user_role(tenant_id, self.admin_id,
-                                   self.admin_role_id)
+            rl_cl.create_user_role_on_project(tenant_id, self.admin_id,
+                                              self.admin_role_id)
             self.admin_role_added.append(tenant_id)
 
     def _remove_admin_role(self, tenant_id):
@@ -250,8 +251,9 @@ class TempestCleanup(command.Command):
         id_cl = credentials.AdminManager().identity_client
         if (self._tenant_exists(tenant_id)):
             try:
-                id_cl.delete_user_role(tenant_id, self.admin_id,
-                                       self.admin_role_id)
+                id_cl.delete_role_from_user_on_project(tenant_id,
+                                                       self.admin_id,
+                                                       self.admin_role_id)
             except Exception as ex:
                 LOG.exception("Failed removing role from tenant which still"
                               "exists, exception: %s" % ex)

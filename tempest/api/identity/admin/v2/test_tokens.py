@@ -87,11 +87,13 @@ class TokensTestJSON(base.BaseIdentityV2AdminTest):
         self.data.roles.append(role)
 
         # Grant the user the role on the tenants.
-        self.roles_client.assign_user_role(tenant1['id'], user['id'],
-                                           role['id'])
+        self.roles_client.create_user_role_on_project(tenant1['id'],
+                                                      user['id'],
+                                                      role['id'])
 
-        self.roles_client.assign_user_role(tenant2['id'], user['id'],
-                                           role['id'])
+        self.roles_client.create_user_role_on_project(tenant2['id'],
+                                                      user['id'],
+                                                      role['id'])
 
         # Get an unscoped token.
         body = self.token_client.auth(user_name, user_password)
