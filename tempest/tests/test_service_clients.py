@@ -13,13 +13,152 @@
 # the License.
 
 import fixtures
+import mock
 import testtools
+import types
 
 from tempest.lib import auth
 from tempest.lib import exceptions
 from tempest import service_clients
 from tempest.tests import base
+from tempest.tests.lib import fake_auth_provider
 from tempest.tests.lib import fake_credentials
+
+
+has_attribute = testtools.matchers.MatchesPredicateWithParams(
+    lambda x, y: hasattr(x, y), '{0} does not have an attribute {1}')
+
+
+class TestClientsFactory(base.TestCase):
+
+    def setUp(self):
+        super(TestClientsFactory, self).setUp()
+        self.classes = []
+
+    def _setup_fake_module(self, class_names=None, extra_dict=None):
+        class_names = class_names or []
+        fake_module = types.ModuleType('fake_service_client')
+        _dict = {}
+        # Add fake classes to the fake module
+        for name in class_names:
+            _dict[name] = type(name, (object,), {})
+            # Store it for assertions
+            self.classes.append(_dict[name])
+        if extra_dict:
+            _dict[extra_dict] = extra_dict
+        fake_module.__dict__.update(_dict)
+        fixture_importlib = self.useFixture(fixtures.MockPatch(
+            'importlib.import_module', return_value=fake_module))
+        return fixture_importlib.mock
+
+    def test___init___one_class(self):
+        fake_partial = 'fake_partial'
+        partial_mock = self.useFixture(fixtures.MockPatch(
+            'tempest.service_clients.ClientsFactory._get_partial_class',
+            return_value=fake_partial)).mock
+        class_names = ['FakeServiceClient1']
+        mock_importlib = self._setup_fake_module(class_names=class_names)
+        auth_provider = fake_auth_provider.FakeAuthProvider()
+        params = {'k1': 'v1', 'k2': 'v2'}
+        factory = service_clients.ClientsFactory('fake_path', class_names,
+                                                 auth_provider, **params)
+        # Assert module has been imported
+        mock_importlib.assert_called_once_with('fake_path')
+        # All attributes have been created
+        for client in class_names:
+            self.assertThat(factory, has_attribute(client))
+        # Partial have been invoked correctly
+        partial_mock.assert_called_once_with(
+            self.classes[0], auth_provider, params)
+        # Get the clients
+        for name in class_names:
+            self.assertEqual(fake_partial, getattr(factory, name))
+
+    def test___init___two_classes(self):
+        fake_partial = 'fake_partial'
+        partial_mock = self.useFixture(fixtures.MockPatch(
+            'tempest.service_clients.ClientsFactory._get_partial_class',
+            return_value=fake_partial)).mock
+        class_names = ['FakeServiceClient1', 'FakeServiceClient2']
+        mock_importlib = self._setup_fake_module(class_names=class_names)
+        auth_provider = fake_auth_provider.FakeAuthProvider()
+        params = {'k1': 'v1', 'k2': 'v2'}
+        factory = service_clients.ClientsFactory('fake_path', class_names,
+                                                 auth_provider, **params)
+        # Assert module has been imported
+        mock_importlib.assert_called_once_with('fake_path')
+        # All attributes have been created
+        for client in class_names:
+            self.assertThat(factory, has_attribute(client))
+        # Partial have been invoked the right number of times
+        partial_mock.call_count = len(class_names)
+        # Get the clients
+        for name in class_names:
+            self.assertEqual(fake_partial, getattr(factory, name))
+
+    def test___init___no_module(self):
+        auth_provider = fake_auth_provider.FakeAuthProvider()
+        class_names = ['FakeServiceClient1', 'FakeServiceClient2']
+        with testtools.ExpectedException(ImportError, '.*fake_module.*'):
+            service_clients.ClientsFactory('fake_module', class_names,
+                                           auth_provider)
+
+    def test___init___not_a_class(self):
+        class_names = ['FakeServiceClient1', 'FakeServiceClient2']
+        extended_class_names = class_names + ['not_really_a_class']
+        self._setup_fake_module(
+            class_names=class_names, extra_dict='not_really_a_class')
+        auth_provider = fake_auth_provider.FakeAuthProvider()
+        expected_msg = '.*not_really_a_class.*str.*'
+        with testtools.ExpectedException(TypeError, expected_msg):
+            service_clients.ClientsFactory('fake_module', extended_class_names,
+                                           auth_provider)
+
+    def test___init___class_not_found(self):
+        class_names = ['FakeServiceClient1', 'FakeServiceClient2']
+        extended_class_names = class_names + ['not_really_a_class']
+        self._setup_fake_module(class_names=class_names)
+        auth_provider = fake_auth_provider.FakeAuthProvider()
+        expected_msg = '.*not_really_a_class.*fake_service_client.*'
+        with testtools.ExpectedException(AttributeError, expected_msg):
+            service_clients.ClientsFactory('fake_module', extended_class_names,
+                                           auth_provider)
+
+    def test__get_partial_class_no_later_kwargs(self):
+        expected_fake_client = 'not_really_a_client'
+        self._setup_fake_module(class_names=[])
+        auth_provider = fake_auth_provider.FakeAuthProvider()
+        params = {'k1': 'v1', 'k2': 'v2'}
+        factory = service_clients.ClientsFactory(
+            'fake_path', [], auth_provider, **params)
+        klass_mock = mock.Mock(return_value=expected_fake_client)
+        partial = factory._get_partial_class(klass_mock, auth_provider, params)
+        # Class has not be initialised yet
+        klass_mock.assert_not_called()
+        # Use partial and assert on parameters
+        client = partial()
+        self.assertEqual(expected_fake_client, client)
+        klass_mock.assert_called_once_with(auth_provider=auth_provider,
+                                           **params)
+
+    def test__get_partial_class_later_kwargs(self):
+        expected_fake_client = 'not_really_a_client'
+        self._setup_fake_module(class_names=[])
+        auth_provider = fake_auth_provider.FakeAuthProvider()
+        params = {'k1': 'v1', 'k2': 'v2'}
+        later_params = {'k2': 'v4', 'k3': 'v3'}
+        factory = service_clients.ClientsFactory(
+            'fake_path', [], auth_provider, **params)
+        klass_mock = mock.Mock(return_value=expected_fake_client)
+        partial = factory._get_partial_class(klass_mock, auth_provider, params)
+        # Class has not be initialised yet
+        klass_mock.assert_not_called()
+        # Use partial and assert on parameters
+        client = partial(**later_params)
+        params.update(later_params)
+        self.assertEqual(expected_fake_client, client)
+        klass_mock.assert_called_once_with(auth_provider=auth_provider,
+                                           **params)
 
 
 class TestServiceClients(base.TestCase):
