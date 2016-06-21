@@ -68,7 +68,7 @@ class RolesClient(rest_client.RestClient):
         """
         resp, body = self.delete('OS-KSADM/roles/%s' % str(role_id))
         self.expected_success(204, resp.status)
-        return resp, body
+        return rest_client.ResponseBody(resp, body)
 
     def create_user_role_on_project(self, tenant_id, user_id, role_id):
         """Add roles to a user on a tenant.
