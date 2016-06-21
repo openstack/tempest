@@ -263,3 +263,82 @@ class TestServiceClients(base.TestCase):
         for _key in _params.keys():
             self.assertEqual(expected_params[_key],
                              _params[_key])
+
+    def test_register_service_client_module(self):
+        factory_mock = self.useFixture(fixtures.MockPatch(
+            'tempest.service_clients.ClientsFactory')).mock
+        expected_params = {'fake_param1': 'fake_value1',
+                           'fake_param2': 'fake_value2'}
+        _manager = self._get_manager(init_region='fake_region_default')
+        _manager.register_service_client_module(
+            name='fake_module',
+            service_version='fake_service',
+            module_path='fake.path.to.module',
+            client_names=[],
+            **expected_params)
+        self.assertThat(_manager, has_attribute('fake_module'))
+        # Assert called once, without check for exact parameters
+        self.assertTrue(factory_mock.called)
+        self.assertEqual(1, factory_mock.call_count)
+        # Assert expected params are in with their values
+        actual_kwargs = factory_mock.call_args[1]
+        self.assertIn('region', actual_kwargs)
+        self.assertEqual('fake_region_default', actual_kwargs['region'])
+        for param in expected_params:
+            self.assertIn(param, actual_kwargs)
+            self.assertEqual(expected_params[param], actual_kwargs[param])
+        # Assert the new service is registered
+        self.assertIn('fake_service', _manager._registered_services)
+
+    def test_register_service_client_module_override_default(self):
+        factory_mock = self.useFixture(fixtures.MockPatch(
+            'tempest.service_clients.ClientsFactory')).mock
+        new_region = 'new_region'
+        expected_params = {'fake_param1': 'fake_value1',
+                           'fake_param2': 'fake_value2',
+                           'region': new_region}
+        _manager = self._get_manager(init_region='fake_region_default')
+        _manager.register_service_client_module(
+            name='fake_module',
+            service_version='fake_service',
+            module_path='fake.path.to.module',
+            client_names=[],
+            **expected_params)
+        self.assertThat(_manager, has_attribute('fake_module'))
+        # Assert called once, without check for exact parameters
+        self.assertTrue(factory_mock.called)
+        self.assertEqual(1, factory_mock.call_count)
+        # Assert expected params are in with their values
+        actual_kwargs = factory_mock.call_args[1]
+        self.assertIn('region', actual_kwargs)
+        self.assertEqual(new_region, actual_kwargs['region'])
+        for param in expected_params:
+            self.assertIn(param, actual_kwargs)
+            self.assertEqual(expected_params[param], actual_kwargs[param])
+        # Assert the new service is registered
+        self.assertIn('fake_service', _manager._registered_services)
+
+    def test_register_service_client_module_duplicate_name(self):
+        self.useFixture(fixtures.MockPatch(
+            'tempest.service_clients.ClientsFactory'))
+        _manager = self._get_manager()
+        name_owner = 'this_is_a_string'
+        setattr(_manager, 'fake_module', name_owner)
+        expected_error = '.*' + name_owner
+        with testtools.ExpectedException(
+                exceptions.ServiceClientRegistrationException, expected_error):
+            _manager.register_service_client_module(
+                name='fake_module', module_path='fake.path.to.module',
+                service_version='fake_service', client_names=[])
+
+    def test_register_service_client_module_duplicate_service(self):
+        self.useFixture(fixtures.MockPatch(
+            'tempest.service_clients.ClientsFactory'))
+        _manager = self._get_manager()
+        duplicate_service = 'fake_service1'
+        expected_error = '.*' + duplicate_service
+        with testtools.ExpectedException(
+                exceptions.ServiceClientRegistrationException, expected_error):
+            _manager.register_service_client_module(
+                name='fake_module', module_path='fake.path.to.module',
+                service_version=duplicate_service, client_names=[])

@@ -17,9 +17,13 @@
 import copy
 import importlib
 import inspect
+import logging
 
 from tempest.lib import auth
 from tempest.lib import exceptions
+from tempest.lib.services import clients
+
+LOG = logging.getLogger(__name__)
 
 
 def tempest_modules():
@@ -33,9 +37,48 @@ def tempest_modules():
 
 
 def available_modules():
-    """List of service client modules available in Tempest and plugins"""
-    # TODO(andreaf) For now this returns only tempest_modules
-    return tempest_modules()
+    """List of service client modules available in Tempest and plugins
+
+    The list of available modules can be used for automatic configuration.
+
+    :raise PluginRegistrationException: if a plugin exposes a service_version
+        already defined by Tempest or another plugin.
+
+    Examples:
+
+        >>> from tempest import config
+        >>> params = {}
+        >>> for service_version in available_modules():
+        >>>     service = service_version.split('.')[0]
+        >>>     params[service] = config.service_client_config(service)
+        >>> service_clients = ServiceClients(creds, identity_uri,
+        >>>                                  client_parameters=params)
+    """
+    extra_service_versions = set([])
+    plugin_services = clients.ClientsRegistry().get_service_clients()
+    for plugin_name in plugin_services:
+        plug_service_versions = set([x['service_version'] for x in
+                                     plugin_services[plugin_name]])
+        # If a plugin exposes a duplicate service_version raise an exception
+        if plug_service_versions:
+            if not plug_service_versions.isdisjoint(extra_service_versions):
+                detailed_error = (
+                    'Plugin %s is trying to register a service %s already '
+                    'claimed by another one' % (plugin_name,
+                                                extra_service_versions &
+                                                plug_service_versions))
+                raise exceptions.PluginRegistrationException(
+                    name=plugin_name, detailed_error=detailed_error)
+            if not plug_service_versions.isdisjoint(tempest_modules()):
+                detailed_error = (
+                    'Plugin %s is trying to register a service %s already '
+                    'claimed by a Tempest one' % (plugin_name,
+                                                  tempest_modules() &
+                                                  plug_service_versions))
+                raise exceptions.PluginRegistrationException(
+                    name=plugin_name, detailed_error=detailed_error)
+        extra_service_versions |= plug_service_versions
+    return tempest_modules() | extra_service_versions
 
 
 class ClientsFactory(object):
@@ -49,8 +92,6 @@ class ClientsFactory(object):
     ClientsFactory can be used directly, or consumed via the `ServiceClients`
     class, which manages the authorization part.
     """
-    # TODO(andreaf) This version includes ClientsFactory but it does not
-    # use it yet in ServiceClients
 
     def __init__(self, module_path, client_names, auth_provider, **kwargs):
         """Initialises the client factory
@@ -206,6 +247,7 @@ class ServiceClients(object):
             >>> client_parameters['service_y'] = params_service_y
 
         """
+        self._registered_services = set([])
         self.credentials = credentials
         self.identity_uri = identity_uri
         if not identity_uri:
@@ -246,6 +288,84 @@ class ServiceClients(object):
         if client_parameters:
             raise exceptions.UnknownServiceClient(
                 services=list(client_parameters.keys()))
+
+        # Register service clients from plugins
+        clients_registry = clients.ClientsRegistry()
+        plugin_service_clients = clients_registry.get_service_clients()
+        for plugin in plugin_service_clients:
+            service_clients = plugin_service_clients[plugin]
+            # Each plugin returns a list of service client parameters
+            for service_client in service_clients:
+                # NOTE(andreaf) If a plugin cannot register, stop the
+                # registration process, log some details to help
+                # troubleshooting, and re-raise
+                try:
+                    self.register_service_client_module(**service_client)
+                except Exception:
+                    LOG.exception(
+                        'Failed to register service client from plugin %s '
+                        'with parameters %s' % (plugin, service_client))
+                    raise
+
+    def register_service_client_module(self, name, service_version,
+                                       module_path, client_names, **kwargs):
+        """Register a service client module
+
+        Initiates a client factory for the specified module, using this
+        class auth_provider, and accessible via a `name` attribute in the
+        service client.
+
+        :param name: Name used to access the client
+        :param service_version: Name of the service complete with version.
+            Used to track registered services. When a plugin implements it,
+            it can be used by other plugins to obtain their configuration.
+        :param module_path: Path to module that includes all service clients.
+            All service client classes must be exposed by a single module.
+            If they are separated in different modules, defining __all__
+            in the root module can help, similar to what is done by service
+            clients in tempest.
+        :param client_names: List or set of names of service client classes.
+        :param kwargs: Extra optional parameters to be passed to all clients.
+            ServiceClient provides defaults for region, dscv, ca_certs and
+            trace_requests.
+        :raise ServiceClientRegistrationException: if the provided name is
+            already in use or if service_version is already registered.
+        :raise ImportError: if module_path cannot be imported.
+        """
+        if hasattr(self, name):
+            using_name = getattr(self, name)
+            detailed_error = 'Module name already in use: %s' % using_name
+            raise exceptions.ServiceClientRegistrationException(
+                name=name, service_version=service_version,
+                module_path=module_path, client_names=client_names,
+                detailed_error=detailed_error)
+        if service_version in self.registered_services:
+            detailed_error = 'Service %s already registered.' % service_version
+            raise exceptions.ServiceClientRegistrationException(
+                name=name, service_version=service_version,
+                module_path=module_path, client_names=client_names,
+                detailed_error=detailed_error)
+        params = dict(region=self.region,
+                      disable_ssl_certificate_validation=self.dscv,
+                      ca_certs=self.ca_certs,
+                      trace_requests=self.trace_requests)
+        params.update(kwargs)
+        # Instantiate the client factory
+        _factory = ClientsFactory(module_path=module_path,
+                                  client_names=client_names,
+                                  auth_provider=self.auth_provider,
+                                  **params)
+        # Adds the client factory to the service_client
+        setattr(self, name, _factory)
+        # Add the name of the new service in self.SERVICES for discovery
+        self._registered_services.add(service_version)
+
+    @property
+    def registered_services(self):
+        # TODO(andreaf) For now add all Tempest services. to the list of
+        # registered service
+        _default_services = tempest_modules()
+        return self._registered_services | _default_services
 
     def _setup_parameters(self, parameters):
         """Setup default values for client parameters
