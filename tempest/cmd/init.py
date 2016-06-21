@@ -40,45 +40,28 @@ group_regex=([^\.]*\.)*
 def get_tempest_default_config_dir():
     """Get default config directory of tempest
 
-    Returns the correct default config dir to support both cases of
-    tempest being or not installed in a virtualenv.
-    Cases considered:
-    - no virtual env, python2: real_prefix and base_prefix not set
-    - no virtual env, python3: real_prefix not set, base_prefix set and
-      identical to prefix
-    - virtualenv, python2: real_prefix and prefix are set and different
-    - virtualenv, python3: real_prefix not set, base_prefix and prefix are
-      set and identical
-    - pyvenv, any python version: real_prefix not set, base_prefix and prefix
-      are set and different
+    There are 3 dirs that get tried in priority order. First is /etc/tempest,
+    if that doesn't exist it looks for a tempest dir in the XDG_CONFIG_HOME
+    dir (defaulting to ~/.config/tempest) and last it tries for a
+    ~/.tempest/etc directory. If none of these exist a ~/.tempest/etc
+    directory will be created.
 
     :return: default config dir
     """
-    real_prefix = getattr(sys, 'real_prefix', None)
-    base_prefix = getattr(sys, 'base_prefix', None)
-    prefix = sys.prefix
     global_conf_dir = '/etc/tempest'
-    if (real_prefix is None and
-            (base_prefix is None or base_prefix == prefix) and
-            os.path.isdir(global_conf_dir)):
-        # Probably not running in a virtual environment.
-        # NOTE(andreaf) we cannot distinguish this case from the case of
-        # a virtual environment created with virtualenv, and running python3.
-        # Also if it appears we are not in virtual env and fail to find
-        # global config: '/etc/tempest', fall back to
-        # '[sys.prefix]/etc/tempest'
+    xdg_config = os.environ.get('XDG_CONFIG_HOME',
+                                os.path.expanduser('~/.config'))
+    user_xdg_global_path = os.path.join(xdg_config, 'tempest')
+    user_global_path = os.path.join(os.path.expanduser('~'), '.tempest/etc')
+    if os.path.isdir(global_conf_dir):
         return global_conf_dir
+    elif os.path.isdir(user_xdg_global_path):
+        return user_xdg_global_path
+    elif os.path.isdir(user_global_path):
+        return user_global_path
     else:
-        conf_dir = os.path.join(prefix, 'etc/tempest')
-        if os.path.isdir(conf_dir):
-            return conf_dir
-        else:
-            # NOTE: The prefix is gotten from the path which pyconfig.h is
-            # installed under. Some envs contain it under /usr/include, not
-            # /user/local/include. Then prefix becomes /usr on such envs.
-            # However, etc/tempest is installed under /usr/local and the bove
-            # path logic mismatches. This is a workaround for such envs.
-            return os.path.join(prefix, 'local/etc/tempest')
+        os.makedirs(user_global_path)
+        return user_global_path
 
 
 class TempestInit(command.Command):
