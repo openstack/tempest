@@ -661,7 +661,7 @@ class NetworkSecGroupService(NetworkService):
 
         if self.is_preserve:
             secgroups = self._filter_by_conf_networks(secgroups)
-        LOG.debug("List count, %s securtiy_groups" % len(secgroups))
+        LOG.debug("List count, %s security_groups" % len(secgroups))
         return secgroups
 
     def delete(self):
