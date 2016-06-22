@@ -108,7 +108,11 @@ class AggregatesClient(base_compute_client.BaseComputeClient):
         return rest_client.ResponseBody(resp, body)
 
     def set_metadata(self, aggregate_id, **kwargs):
-        """Replace the aggregate's existing metadata with new metadata."""
+        """Replace the aggregate's existing metadata with new metadata.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-compute-v2.1.html#addAggregateMetadata
+        """
         post_body = json.dumps({'set_metadata': kwargs})
         resp, body = self.post('os-aggregates/%s/action' % aggregate_id,
                                post_body)
