@@ -14,6 +14,7 @@ Contents:
    plugin-registry
    library
    microversion_testing
+   test-removal
 
 ------------
 Field Guides
