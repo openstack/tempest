@@ -78,7 +78,7 @@ class UsersClient(rest_client.RestClient):
         body = json.loads(body)
         return rest_client.ResponseBody(resp, body)
 
-    def enable_disable_user(self, user_id, **kwargs):
+    def update_user_enabled(self, user_id, **kwargs):
         """Enables or disables a user.
 
         Available params: see http://developer.openstack.org/
@@ -121,7 +121,7 @@ class UsersClient(rest_client.RestClient):
         body = json.loads(body)
         return rest_client.ResponseBody(resp, body)
 
-    def create_user_ec2_credentials(self, user_id, **kwargs):
+    def create_user_ec2_credential(self, user_id, **kwargs):
         # TODO(piyush): Current api-site doesn't contain this API description.
         # After fixing the api-site, we need to fix here also for putting the
         # link to api-site.
@@ -132,7 +132,7 @@ class UsersClient(rest_client.RestClient):
         body = json.loads(body)
         return rest_client.ResponseBody(resp, body)
 
-    def delete_user_ec2_credentials(self, user_id, access):
+    def delete_user_ec2_credential(self, user_id, access):
         resp, body = self.delete('/users/%s/credentials/OS-EC2/%s' %
                                  (user_id, access))
         self.expected_success(204, resp.status)
@@ -144,7 +144,7 @@ class UsersClient(rest_client.RestClient):
         body = json.loads(body)
         return rest_client.ResponseBody(resp, body)
 
-    def show_user_ec2_credentials(self, user_id, access):
+    def show_user_ec2_credential(self, user_id, access):
         resp, body = self.get('/users/%s/credentials/OS-EC2/%s' %
                               (user_id, access))
         self.expected_success(200, resp.status)
