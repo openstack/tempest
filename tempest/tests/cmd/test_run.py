@@ -102,6 +102,14 @@ class TestRunReturnCode(base.TestCase):
         subprocess.call(['git', 'init'], stderr=DEVNULL)
         self.assertRunExit(['tempest', 'run', '--regex', 'passing'], 0)
 
+    def test_tempest_run_passes_with_testrepository(self):
+        # Git init is required for the pbr testr command. pbr requires a git
+        # version or an sdist to work. so make the test directory a git repo
+        # too.
+        subprocess.call(['git', 'init'], stderr=DEVNULL)
+        subprocess.call(['testr', 'init'])
+        self.assertRunExit(['tempest', 'run', '--regex', 'passing'], 0)
+
     def test_tempest_run_fails(self):
         # Git init is required for the pbr testr command. pbr requires a git
         # version or an sdist to work. so make the test directory a git repo
