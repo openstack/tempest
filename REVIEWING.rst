@@ -72,6 +72,19 @@ level docstring linking to the API ref doc in the API tests and a docstring for
 scenario tests this is up to the reviewers discretion whether a docstring is
 required or not.
 
+Release Notes
+-------------
+Release notes are how we indicate to users and other consumers of Tempest what
+has changed in a given release. Since Tempest 10.0.0 we've been using `reno`_
+to manage and build the release notes. There are certain types of changes that
+require release notes and we should not approve them without including a release
+note. These include but aren't limited to, any addition, deprecation or removal
+from the lib interface, any change to configuration options (including
+deprecation), CLI additions or deprecations, major feature additions, and
+anything backwards incompatible or would require a user to take note or do
+something extra.
+
+.. _reno: http://docs.openstack.org/developer/reno/
 
 When to approve
 ---------------
