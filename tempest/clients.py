@@ -21,9 +21,6 @@ from tempest.common import negative_rest_client
 from tempest import config
 from tempest import exceptions
 from tempest.lib.services import compute
-from tempest.lib.services.identity.v2.endpoints_client import EndpointsClient
-from tempest.lib.services.identity.v2.token_client import TokenClient
-from tempest.lib.services.identity.v3.token_client import V3TokenClient
 from tempest.lib.services.image.v1.image_members_client import \
     ImageMembersClient
 from tempest.lib.services.image.v2.image_members_client import \
@@ -46,30 +43,7 @@ from tempest.services.database.json.limits_client import \
     DatabaseLimitsClient
 from tempest.services.database.json.versions_client import \
     DatabaseVersionsClient
-from tempest.services.identity.v2.json.identity_client import IdentityClient
-from tempest.services.identity.v2.json.roles_client import RolesClient
-from tempest.services.identity.v2.json.services_client import \
-    ServicesClient as IdentityServicesClient
-from tempest.services.identity.v2.json.tenants_client import TenantsClient
-from tempest.services.identity.v2.json.users_client import UsersClient
-from tempest.services.identity.v3.json.credentials_client import \
-    CredentialsClient
-from tempest.services.identity.v3.json.domains_client import DomainsClient
-from tempest.services.identity.v3.json.endpoints_client import \
-    EndPointsClient as EndPointsV3Client
-from tempest.services.identity.v3.json.groups_client import GroupsClient
-from tempest.services.identity.v3.json.identity_client import \
-    IdentityClient as IdentityV3Client
-from tempest.services.identity.v3.json.policies_client import PoliciesClient
-from tempest.services.identity.v3.json.projects_client import ProjectsClient
-from tempest.services.identity.v3.json.regions_client import RegionsClient
-from tempest.services.identity.v3.json.roles_client import \
-    RolesClient as RolesV3Client
-from tempest.services.identity.v3.json.services_client import \
-    ServicesClient as IdentityServicesV3Client
-from tempest.services.identity.v3.json.trusts_client import TrustsClient
-from tempest.services.identity.v3.json.users_clients import \
-    UsersClient as UsersV3Client
+from tempest.services import identity
 from tempest.services.image.v1.json.images_client import ImagesClient
 from tempest.services.object_storage.account_client import AccountClient
 from tempest.services.object_storage.container_client import ContainerClient
@@ -352,62 +326,71 @@ class Manager(manager.Manager):
         # Clients below use the admin endpoint type of Keystone API v2
         params_v2_admin = params.copy()
         params_v2_admin['endpoint_type'] = CONF.identity.v2_admin_endpoint_type
-        self.endpoints_client = EndpointsClient(self.auth_provider,
-                                                **params_v2_admin)
-        self.identity_client = IdentityClient(self.auth_provider,
-                                              **params_v2_admin)
-        self.tenants_client = TenantsClient(self.auth_provider,
-                                            **params_v2_admin)
-        self.roles_client = RolesClient(self.auth_provider, **params_v2_admin)
-        self.users_client = UsersClient(self.auth_provider, **params_v2_admin)
-        self.identity_services_client = IdentityServicesClient(
+        self.endpoints_client = identity.v2.EndpointsClient(self.auth_provider,
+                                                            **params_v2_admin)
+        self.identity_client = identity.v2.IdentityClient(self.auth_provider,
+                                                          **params_v2_admin)
+        self.tenants_client = identity.v2.TenantsClient(self.auth_provider,
+                                                        **params_v2_admin)
+        self.roles_client = identity.v2.RolesClient(self.auth_provider,
+                                                    **params_v2_admin)
+        self.users_client = identity.v2.UsersClient(self.auth_provider,
+                                                    **params_v2_admin)
+        self.identity_services_client = identity.v2.ServicesClient(
             self.auth_provider, **params_v2_admin)
 
         # Clients below use the public endpoint type of Keystone API v2
         params_v2_public = params.copy()
         params_v2_public['endpoint_type'] = (
             CONF.identity.v2_public_endpoint_type)
-        self.identity_public_client = IdentityClient(self.auth_provider,
-                                                     **params_v2_public)
-        self.tenants_public_client = TenantsClient(self.auth_provider,
-                                                   **params_v2_public)
-        self.users_public_client = UsersClient(self.auth_provider,
-                                               **params_v2_public)
+        self.identity_public_client = identity.v2.IdentityClient(
+            self.auth_provider, **params_v2_public)
+        self.tenants_public_client = identity.v2.TenantsClient(
+            self.auth_provider, **params_v2_public)
+        self.users_public_client = identity.v2.UsersClient(
+            self.auth_provider, **params_v2_public)
 
         # Clients below use the endpoint type of Keystone API v3
         params_v3 = params.copy()
         params_v3['endpoint_type'] = CONF.identity.v3_endpoint_type
-        self.domains_client = DomainsClient(self.auth_provider,
-                                            **params_v3)
-        self.identity_v3_client = IdentityV3Client(self.auth_provider,
-                                                   **params_v3)
-        self.trusts_client = TrustsClient(self.auth_provider, **params_v3)
-        self.users_v3_client = UsersV3Client(self.auth_provider, **params_v3)
-        self.endpoints_v3_client = EndPointsV3Client(self.auth_provider,
-                                                     **params_v3)
-        self.roles_v3_client = RolesV3Client(self.auth_provider, **params_v3)
-        self.identity_services_v3_client = IdentityServicesV3Client(
+        self.domains_client = identity.v3.DomainsClient(self.auth_provider,
+                                                        **params_v3)
+        self.identity_v3_client = identity.v3.IdentityClient(
             self.auth_provider, **params_v3)
-        self.policies_client = PoliciesClient(self.auth_provider, **params_v3)
-        self.projects_client = ProjectsClient(self.auth_provider, **params_v3)
-        self.regions_client = RegionsClient(self.auth_provider, **params_v3)
-        self.credentials_client = CredentialsClient(self.auth_provider,
-                                                    **params_v3)
-        self.groups_client = GroupsClient(self.auth_provider, **params_v3)
+        self.trusts_client = identity.v3.TrustsClient(self.auth_provider,
+                                                      **params_v3)
+        self.users_v3_client = identity.v3.UsersClient(self.auth_provider,
+                                                       **params_v3)
+        self.endpoints_v3_client = identity.v3.EndPointsClient(
+            self.auth_provider, **params_v3)
+        self.roles_v3_client = identity.v3.RolesClient(self.auth_provider,
+                                                       **params_v3)
+        self.identity_services_v3_client = identity.v3.ServicesClient(
+            self.auth_provider, **params_v3)
+        self.policies_client = identity.v3.PoliciesClient(self.auth_provider,
+                                                          **params_v3)
+        self.projects_client = identity.v3.ProjectsClient(self.auth_provider,
+                                                          **params_v3)
+        self.regions_client = identity.v3.RegionsClient(self.auth_provider,
+                                                        **params_v3)
+        self.credentials_client = identity.v3.CredentialsClient(
+            self.auth_provider, **params_v3)
+        self.groups_client = identity.v3.GroupsClient(self.auth_provider,
+                                                      **params_v3)
 
         # Token clients do not use the catalog. They only need default_params.
         # They read auth_url, so they should only be set if the corresponding
         # API version is marked as enabled
         if CONF.identity_feature_enabled.api_v2:
             if CONF.identity.uri:
-                self.token_client = TokenClient(
+                self.token_client = identity.v2.TokenClient(
                     CONF.identity.uri, **self.default_params)
             else:
                 msg = 'Identity v2 API enabled, but no identity.uri set'
                 raise exceptions.InvalidConfiguration(msg)
         if CONF.identity_feature_enabled.api_v3:
             if CONF.identity.uri_v3:
-                self.token_v3_client = V3TokenClient(
+                self.token_v3_client = identity.v3.V3TokenClient(
                     CONF.identity.uri_v3, **self.default_params)
             else:
                 msg = 'Identity v3 API enabled, but no identity.uri_v3 set'

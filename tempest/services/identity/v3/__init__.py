@@ -1,0 +1,33 @@
+# Copyright (c) 2016 Hewlett-Packard Enterprise Development Company, L.P.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may not
+# use this file except in compliance with the License. You may obtain a copy of
+# the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations under
+# the License.
+
+from tempest.lib.services.identity.v3.token_client import V3TokenClient
+from tempest.services.identity.v3.json.credentials_client import \
+    CredentialsClient
+from tempest.services.identity.v3.json.domains_client import DomainsClient
+from tempest.services.identity.v3.json.endpoints_client import EndPointsClient
+from tempest.services.identity.v3.json.groups_client import GroupsClient
+from tempest.services.identity.v3.json.identity_client import IdentityClient
+from tempest.services.identity.v3.json.policies_client import PoliciesClient
+from tempest.services.identity.v3.json.projects_client import ProjectsClient
+from tempest.services.identity.v3.json.regions_client import RegionsClient
+from tempest.services.identity.v3.json.roles_client import RolesClient
+from tempest.services.identity.v3.json.services_client import ServicesClient
+from tempest.services.identity.v3.json.trusts_client import TrustsClient
+from tempest.services.identity.v3.json.users_clients import UsersClient
+
+__all__ = ['V3TokenClient', 'CredentialsClient', 'DomainsClient',
+           'EndPointsClient', 'GroupsClient', 'IdentityClient',
+           'PoliciesClient', 'ProjectsClient', 'RegionsClient', 'RolesClient',
+           'ServicesClient', 'TrustsClient', 'UsersClient', ]
