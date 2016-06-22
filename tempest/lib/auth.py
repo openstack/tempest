@@ -393,6 +393,9 @@ class KeystoneV2AuthProvider(KeystoneAuthProvider):
         name = filters.get('name')
         endpoint_type = filters.get('endpoint_type', 'publicURL')
 
+        if filters.get('base_url') is not None:
+            return filters.get('base_url')
+
         if service is None:
             raise exceptions.EndpointNotFound("No service provided")
 
@@ -524,6 +527,9 @@ class KeystoneV3AuthProvider(KeystoneAuthProvider):
         region = filters.get('region')
         name = filters.get('name')
         endpoint_type = filters.get('endpoint_type', 'public')
+
+        if filters.get('base_url') is not None:
+            return filters.get('base_url')
 
         if service is None:
             raise exceptions.EndpointNotFound("No service provided")

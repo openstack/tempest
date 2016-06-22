@@ -184,9 +184,10 @@ class RestClient(object):
 
     @property
     def base_url(self):
-        if self.url is None:
-            return self.auth_provider.base_url(filters=self.filters)
-        return self.url
+        # if self.url is None:
+        #     return self.auth_provider.base_url(filters=self.filters)
+        # return self.url
+        return self.auth_provider.base_url(filters=self.filters)
 
     @property
     def token(self):
@@ -195,6 +196,7 @@ class RestClient(object):
     @property
     def filters(self):
         _filters = dict(
+            base_url=self.url,
             service=self.service,
             endpoint_type=self.endpoint_type,
             region=self.region,
