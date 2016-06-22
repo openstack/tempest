@@ -48,13 +48,11 @@ import threading
 
 from cliff import command
 from os_testr import subunit_trace
-from oslo_log import log as logging
 from testrepository.commands import run_argv
 
 from tempest import config
 
 
-LOG = logging.getLogger(__name__)
 CONF = config.CONF
 
 
