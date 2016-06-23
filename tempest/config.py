@@ -1035,23 +1035,28 @@ specify .* as the regex.
 
 input_scenario_group = cfg.OptGroup(name="input-scenario",
                                     title="Filters and values for"
-                                          " input scenarios")
+                                          " input scenarios[DEPRECATED]")
+
 
 InputScenarioGroup = [
     cfg.StrOpt('image_regex',
                default='^cirros-0.3.1-x86_64-uec$',
-               help="Matching images become parameters for scenario tests"),
+               help="Matching images become parameters for scenario tests",
+               deprecated_for_removal=True),
     cfg.StrOpt('flavor_regex',
                default='^m1.nano$',
-               help="Matching flavors become parameters for scenario tests"),
+               help="Matching flavors become parameters for scenario tests",
+               deprecated_for_removal=True),
     cfg.StrOpt('non_ssh_image_regex',
                default='^.*[Ww]in.*$',
                help="SSH verification in tests is skipped"
-                    "for matching images"),
+                    "for matching images",
+               deprecated_for_removal=True),
     cfg.StrOpt('ssh_user_regex',
                default="[[\"^.*[Cc]irros.*$\", \"cirros\"]]",
                help="List of user mapped to regex "
-                    "to matching image names."),
+                    "to matching image names.",
+               deprecated_for_removal=True),
 ]
 
 
