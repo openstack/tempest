@@ -13,7 +13,6 @@
 # under the License.
 
 import os
-import shutil
 
 import fixtures
 
@@ -43,15 +42,12 @@ class TestTempestInit(base.TestCase):
         local_dir = self.useFixture(fixtures.TempDir())
         etc_dir_path = os.path.join(local_dir.path, 'etc/')
         os.mkdir(etc_dir_path)
-        tmp_dir = self.useFixture(fixtures.TempDir())
-        config_dir = os.path.join(tmp_dir.path, 'config/')
-        shutil.copytree('etc/', config_dir)
         init_cmd = init.TempestInit(None, None)
         local_sample_conf_file = os.path.join(etc_dir_path,
                                               'tempest.conf.sample')
         # Verify no sample config file exist
         self.assertFalse(os.path.isfile(local_sample_conf_file))
-        init_cmd.generate_sample_config(local_dir.path, config_dir)
+        init_cmd.generate_sample_config(local_dir.path)
 
         # Verify sample config file exist with some content
         self.assertTrue(os.path.isfile(local_sample_conf_file))

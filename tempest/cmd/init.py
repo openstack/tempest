@@ -18,6 +18,7 @@ import subprocess
 import sys
 
 from cliff import command
+from oslo_config import generator
 from oslo_log import log as logging
 from six import moves
 
@@ -125,17 +126,16 @@ class TempestInit(command.Command):
         else:
             LOG.warning("Global config dir %s can't be found" % config_dir)
 
-    def generate_sample_config(self, local_dir, config_dir):
-        if os.path.isdir(config_dir):
-            conf_generator = os.path.join(config_dir,
-                                          'config-generator.tempest.conf')
-
-            subprocess.call(['oslo-config-generator', '--config-file',
-                             conf_generator],
-                            cwd=local_dir)
+    def generate_sample_config(self, local_dir):
+        conf_generator = os.path.join(os.path.dirname(__file__),
+                                      'config-generator.tempest.conf')
+        output_file = os.path.join(local_dir, 'etc/tempest.conf.sample')
+        if os.path.isfile(conf_generator):
+            generator.main(['--config-file', conf_generator, '--output-file',
+                            output_file])
         else:
             LOG.warning("Skipping sample config generation because global "
-                        "config dir %s can't be found" % config_dir)
+                        "config file %s can't be found" % conf_generator)
 
     def create_working_dir(self, local_dir, config_dir):
         # make sure we are working with abspath however tempest init is called
@@ -164,7 +164,7 @@ class TempestInit(command.Command):
         # Create and copy local etc dir
         self.copy_config(etc_dir, config_dir)
         # Generate the sample config file
-        self.generate_sample_config(local_dir, config_dir)
+        self.generate_sample_config(local_dir)
         # Update local confs to reflect local paths
         self.update_local_conf(config_path, lock_dir, log_dir)
         # Generate a testr conf file
