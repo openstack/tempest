@@ -227,27 +227,24 @@ class BaseDataGenerator(object):
             name=data_utils.rand_name('test_role'))['role']
         self.roles.append(self.role)
 
-    @staticmethod
-    def _try_wrapper(func, item, **kwargs):
-        try:
-            test_utils.call_and_ignore_notfound_exc(func, item['id'], **kwargs)
-        except Exception:
-            LOG.exception("Unexpected exception occurred in %s deletion. "
-                          "But ignored here." % item['id'])
-
     def teardown_all(self):
         for user in self.users:
-            self._try_wrapper(self.users_client.delete_user, user)
+            test_utils.call_and_ignore_notfound_exc(
+                self.users_client.delete_user, user)
         for tenant in self.tenants:
-            self._try_wrapper(self.projects_client.delete_tenant, tenant)
+            test_utils.call_and_ignore_notfound_exc(
+                self.projects_client.delete_tenant, tenant)
         for project in reversed(self.projects):
-            self._try_wrapper(self.projects_client.delete_project, project)
+            test_utils.call_and_ignore_notfound_exc(
+                self.projects_client.delete_project, project)
         for role in self.roles:
-            self._try_wrapper(self.roles_client.delete_role, role)
+            test_utils.call_and_ignore_notfound_exc(
+                self.roles_client.delete_role, role)
         for domain in self.domains:
-            self._try_wrapper(self.domains_client.update_domain, domain,
-                              enabled=False)
-            self._try_wrapper(self.domains_client.delete_domain, domain)
+            test_utils.call_and_ignore_notfound_exc(
+                self.domains_client.update_domain, domain, enabled=False)
+            test_utils.call_and_ignore_notfound_exc(
+                self.domains_client.delete_domain, domain)
 
 
 class DataGeneratorV2(BaseDataGenerator):
