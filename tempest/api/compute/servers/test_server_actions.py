@@ -375,17 +375,18 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
             'backup_type': "daily",
             'instance_uuid': self.server_id,
         }
+        params = {
+            'status': 'active',
+            'sort_key': 'created_at',
+            'sort_dir': 'asc'
+        }
         if CONF.image_feature_enabled.api_v1:
-            params = dict(
-                properties=properties, status='active',
-                sort_key='created_at', sort_dir='asc',)
+            params.update({'properties': properties})
             image_list = glance_client.list_images(
                 detail=True,
                 **params)['images']
         else:
             # Additional properties are flattened in glance v2.
-            params = dict(
-                status='active', sort_key='created_at', sort_dir='asc')
             params.update(properties)
             image_list = glance_client.list_images(params)['images']
 
