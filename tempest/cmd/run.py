@@ -70,6 +70,7 @@ class TempestRun(command.Command):
 
     def take_action(self, parsed_args):
         self._set_env()
+        returncode = 0
         # Local execution mode
         if os.path.isfile('.testr.conf'):
             # If you're running in local execution mode and there is not a
@@ -77,8 +78,8 @@ class TempestRun(command.Command):
             if not os.path.isdir('.testrepository'):
                 returncode = run_argv(['testr', 'init'], sys.stdin, sys.stdout,
                                       sys.stderr)
-            if returncode:
-                sys.exit(returncode)
+                if returncode:
+                    sys.exit(returncode)
         else:
             print("No .testr.conf file was found for local execution")
             sys.exit(2)
