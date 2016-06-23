@@ -52,7 +52,7 @@ class FlavorsClient(base_compute_client.BaseComputeClient):
         """Create a new flavor or instance type.
 
         Available params: see http://developer.openstack.org/
-                              api-ref-compute-v2.1.html#create-flavors
+                              api-ref-compute-v2.1.html#createFlavor
         """
         if kwargs.get('ephemeral'):
             kwargs['OS-FLV-EXT-DATA:ephemeral'] = kwargs.pop('ephemeral')
