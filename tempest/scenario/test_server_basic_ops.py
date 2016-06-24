@@ -56,7 +56,7 @@ class TestServerBasicOps(manager.ScenarioTest):
             # Check ssh
             self.ssh_client = self.get_remote_client(
                 ip_address=self.fip,
-                username=self.image_utils.ssh_user(self.image_ref),
+                username=self.ssh_user,
                 private_key=keypair['private_key'])
 
     def verify_metadata(self):
