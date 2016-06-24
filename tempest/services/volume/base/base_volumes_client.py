@@ -96,7 +96,11 @@ class BaseVolumesClient(rest_client.RestClient):
         return rest_client.ResponseBody(resp, body)
 
     def update_volume(self, volume_id, **kwargs):
-        """Updates the Specified Volume."""
+        """Updates the Specified Volume.
+
+        Available params: see http://developer.openstack.org/
+                                api-ref-blockstorage-v2.html#updateVolume
+        """
         put_body = json.dumps({'volume': kwargs})
         resp, body = self.put('volumes/%s' % volume_id, put_body)
         body = json.loads(body)
@@ -119,7 +123,11 @@ class BaseVolumesClient(rest_client.RestClient):
         return rest_client.ResponseBody(resp, body)
 
     def attach_volume(self, volume_id, **kwargs):
-        """Attaches a volume to a given instance on a given mountpoint."""
+        """Attaches a volume to a given instance on a given mountpoint.
+
+        Available params: see http://developer.openstack.org/
+                                api-ref-blockstorage-v2.html#attachVolume
+        """
         post_body = json.dumps({'os-attach': kwargs})
         url = 'volumes/%s/action' % (volume_id)
         resp, body = self.post(url, post_body)
@@ -171,7 +179,11 @@ class BaseVolumesClient(rest_client.RestClient):
         return 'volume'
 
     def extend_volume(self, volume_id, **kwargs):
-        """Extend a volume."""
+        """Extend a volume.
+
+        Available params: see http://developer.openstack.org/
+                                api-ref-blockstorage-v2.html#extendVolume
+        """
         post_body = json.dumps({'os-extend': kwargs})
         url = 'volumes/%s/action' % (volume_id)
         resp, body = self.post(url, post_body)
@@ -179,7 +191,11 @@ class BaseVolumesClient(rest_client.RestClient):
         return rest_client.ResponseBody(resp, body)
 
     def reset_volume_status(self, volume_id, **kwargs):
-        """Reset the Specified Volume's Status."""
+        """Reset the Specified Volume's Status.
+
+        Available params: see http://developer.openstack.org/
+                                api-ref-blockstorage-v2.html#resetVolume
+        """
         post_body = json.dumps({'os-reset_status': kwargs})
         resp, body = self.post('volumes/%s/action' % volume_id, post_body)
         self.expected_success(202, resp.status)
@@ -202,7 +218,11 @@ class BaseVolumesClient(rest_client.RestClient):
         return rest_client.ResponseBody(resp, body)
 
     def create_volume_transfer(self, **kwargs):
-        """Create a volume transfer."""
+        """Create a volume transfer.
+
+        Available params: see http://developer.openstack.org/
+                                api-ref-blockstorage-v2.html#createVolumeTransfer
+        """
         post_body = json.dumps({'transfer': kwargs})
         resp, body = self.post('os-volume-transfer', post_body)
         body = json.loads(body)
@@ -218,7 +238,11 @@ class BaseVolumesClient(rest_client.RestClient):
         return rest_client.ResponseBody(resp, body)
 
     def list_volume_transfers(self, **params):
-        """List all the volume transfers created."""
+        """List all the volume transfers created.
+
+        Available params: see http://developer.openstack.org/
+                                api-ref-blockstorage-v2.html#listVolumeTransfer
+        """
         url = 'os-volume-transfer'
         if params:
             url += '?%s' % urllib.urlencode(params)
@@ -234,7 +258,11 @@ class BaseVolumesClient(rest_client.RestClient):
         return rest_client.ResponseBody(resp, body)
 
     def accept_volume_transfer(self, transfer_id, **kwargs):
-        """Accept a volume transfer."""
+        """Accept a volume transfer.
+
+        Available params: see http://developer.openstack.org/
+                                api-ref-blockstorage-v2.html#acceptVolumeTransfer
+        """
         url = 'os-volume-transfer/%s/accept' % transfer_id
         post_body = json.dumps({'accept': kwargs})
         resp, body = self.post(url, post_body)
