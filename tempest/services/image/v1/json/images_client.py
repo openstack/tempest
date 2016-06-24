@@ -130,10 +130,6 @@ class ImagesClient(rest_client.RestClient):
         if detail:
             url += '/detail'
 
-        properties = kwargs.pop('properties', {})
-        for key, value in six.iteritems(properties):
-            kwargs['property-%s' % key] = value
-
         if kwargs.get('changes_since'):
             kwargs['changes-since'] = kwargs.pop('changes_since')
 

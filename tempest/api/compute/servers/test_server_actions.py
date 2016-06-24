@@ -381,7 +381,8 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
             'sort_dir': 'asc'
         }
         if CONF.image_feature_enabled.api_v1:
-            params.update({'properties': properties})
+            for key, value in properties.items():
+                params['property-%s' % key] = value
             image_list = glance_client.list_images(
                 detail=True,
                 **params)['images']
