@@ -240,7 +240,7 @@ class BaseDataGenerator(object):
             self._try_wrapper(self.users_client.delete_user, user)
         for tenant in self.tenants:
             self._try_wrapper(self.projects_client.delete_tenant, tenant)
-        for project in self.projects:
+        for project in reversed(self.projects):
             self._try_wrapper(self.projects_client.delete_project, project)
         for role in self.roles:
             self._try_wrapper(self.roles_client.delete_role, role)
