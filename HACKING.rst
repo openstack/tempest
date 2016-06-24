@@ -160,11 +160,17 @@ not there even if the cloud was configured with it.
 
 Negative Tests
 --------------
-TODO: Write the guideline related to negative tests.
+Error handling is an important aspect of API design and usage. Negative
+tests are a way to ensure that an application can gracefully handle
+invalid or unexpected input. However, as a black box integration test
+suite, Tempest is not suitable for handling all negative test cases, as
+the wide variety and complexity of negative tests can lead to long test
+runs and knowledge of internal implementation details. The bulk of
+negative testing should be handled with project function tests. The
+exception to this rule is API tests used for interoperability testing.
 
 Test skips because of Known Bugs
 --------------------------------
-
 If a test is broken because of a bug it is appropriate to skip the test until
 bug has been fixed. You should use the skip_because decorator so that
 Tempest's skip tracking tool can watch the bug status.
