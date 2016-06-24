@@ -300,7 +300,12 @@ class BaseVolumesClient(rest_client.RestClient):
         return rest_client.ResponseBody(resp, body)
 
     def update_volume_image_metadata(self, volume_id, **kwargs):
-        """Update image metadata for the volume."""
+        """Update image metadata for the volume.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-blockstorage-v2.html
+                              #setVolumeimagemetadata
+        """
         post_body = json.dumps({'os-set_image_metadata': {'metadata': kwargs}})
         url = "volumes/%s/action" % (volume_id)
         resp, body = self.post(url, post_body)
