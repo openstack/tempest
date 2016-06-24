@@ -60,7 +60,11 @@ class BaseSnapshotsClient(rest_client.RestClient):
         return rest_client.ResponseBody(resp, body)
 
     def update_snapshot(self, snapshot_id, **kwargs):
-        """Updates a snapshot."""
+        """Updates a snapshot.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-blockstorage-v2.html#updateSnapshot
+        """
         put_body = json.dumps({'snapshot': kwargs})
         resp, body = self.put('snapshots/%s' % snapshot_id, put_body)
         body = json.loads(body)
@@ -123,11 +127,11 @@ class BaseSnapshotsClient(rest_client.RestClient):
         return rest_client.ResponseBody(resp, body)
 
     def update_snapshot_metadata(self, snapshot_id, **kwargs):
-        """Update metadata for the snapshot."""
-        # TODO(piyush): Current api-site doesn't contain this API description.
-        # After fixing the api-site, we need to fix here also for putting the
-        # link to api-site.
-        # LP: https://bugs.launchpad.net/openstack-api-site/+bug/1529063
+        """Update metadata for the snapshot.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-blockstorage-v2.html#updateSnapshotMetadata
+        """
         put_body = json.dumps(kwargs)
         url = "snapshots/%s/metadata" % str(snapshot_id)
         resp, body = self.put(url, put_body)

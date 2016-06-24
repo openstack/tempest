@@ -26,7 +26,11 @@ class BaseBackupsClient(rest_client.RestClient):
     """Client class to send CRUD Volume backup API requests"""
 
     def create_backup(self, **kwargs):
-        """Creates a backup of volume."""
+        """Creates a backup of volume.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-blockstorage-v2.html#createBackup
+        """
         post_body = json.dumps({'backup': kwargs})
         resp, body = self.post('backups', post_body)
         body = json.loads(body)
@@ -34,7 +38,11 @@ class BaseBackupsClient(rest_client.RestClient):
         return rest_client.ResponseBody(resp, body)
 
     def restore_backup(self, backup_id, **kwargs):
-        """Restore volume from backup."""
+        """Restore volume from backup.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-blockstorage-v2.html#restoreBackup
+        """
         post_body = json.dumps({'restore': kwargs})
         resp, body = self.post('backups/%s/restore' % (backup_id), post_body)
         body = json.loads(body)
