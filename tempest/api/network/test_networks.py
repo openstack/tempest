@@ -565,9 +565,9 @@ class NetworksIpV6Test(NetworksTest):
         subnets = [sub['id'] for sub in body['subnets']
                    if sub['network_id'] == network['id']]
         test_subnet_ids = [sub['id'] for sub in (subnet1, subnet2)]
-        self.assertItemsEqual(subnets,
-                              test_subnet_ids,
-                              'Subnet are not in the same network')
+        six.assertCountEqual(self, subnets,
+                             test_subnet_ids,
+                             'Subnet are not in the same network')
 
 
 class NetworksIpV6TestAttrs(NetworksIpV6Test):
