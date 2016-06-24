@@ -14,6 +14,7 @@
 #    under the License.
 
 import json
+import re
 
 from oslo_log import log as logging
 
@@ -83,9 +84,9 @@ class TestServerBasicOps(manager.ScenarioTest):
     def verify_metadata_on_config_drive(self):
         if self.run_ssh and CONF.compute_feature_enabled.config_drive:
             # Verify metadata on config_drive
-            cmd_blkid = 'blkid -t LABEL=config-2 -o device'
-            dev_name = self.ssh_client.exec_command(cmd_blkid)
-            dev_name = dev_name.rstrip()
+            cmd_blkid = 'blkid | grep -i config-2'
+            result = self.ssh_client.exec_command(cmd_blkid)
+            dev_name = re.match('([^:]+)', result).group()
             self.ssh_client.exec_command('sudo mount %s /mnt' % dev_name)
             cmd_md = 'sudo cat /mnt/openstack/latest/meta_data.json'
             result = self.ssh_client.exec_command(cmd_md)
