@@ -18,10 +18,6 @@ from tempest import test
 class StacksTestJSON(base.BaseOrchestrationTest):
     empty_template = "HeatTemplateFormatVersion: '2012-12-12'\n"
 
-    @classmethod
-    def resource_setup(cls):
-        super(StacksTestJSON, cls).resource_setup()
-
     @test.attr(type='smoke')
     @test.idempotent_id('d35d628c-07f6-4674-85a1-74db9919e986')
     def test_stack_list_responds(self):
