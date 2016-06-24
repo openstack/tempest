@@ -36,11 +36,6 @@ class BaseComputeClient(rest_client.RestClient):
 
     api_microversion_header_name = 'X-OpenStack-Nova-API-Version'
 
-    def __init__(self, auth_provider, service, region,
-                 **kwargs):
-        super(BaseComputeClient, self).__init__(
-            auth_provider, service, region, **kwargs)
-
     def get_headers(self):
         headers = super(BaseComputeClient, self).get_headers()
         if COMPUTE_MICROVERSION:

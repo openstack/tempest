@@ -25,10 +25,6 @@ class NodeGroupTemplateTest(dp_base.BaseDataProcessingTest):
         if cls.default_plugin is None:
             raise cls.skipException("No Sahara plugins configured")
 
-    @classmethod
-    def resource_setup(cls):
-        super(NodeGroupTemplateTest, cls).resource_setup()
-
     def _create_node_group_template(self, template_name=None):
         """Creates Node Group Template with optional name specified.
 

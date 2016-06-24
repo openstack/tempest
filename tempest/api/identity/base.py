@@ -81,14 +81,6 @@ class BaseIdentityV2Test(BaseIdentityTest):
         cls.non_admin_tenants_client = cls.os.tenants_public_client
         cls.non_admin_users_client = cls.os.users_public_client
 
-    @classmethod
-    def resource_setup(cls):
-        super(BaseIdentityV2Test, cls).resource_setup()
-
-    @classmethod
-    def resource_cleanup(cls):
-        super(BaseIdentityV2Test, cls).resource_cleanup()
-
 
 class BaseIdentityV2AdminTest(BaseIdentityV2Test):
 
@@ -136,10 +128,6 @@ class BaseIdentityV3Test(BaseIdentityTest):
         cls.non_admin_users_client = cls.os.users_v3_client
         cls.non_admin_token = cls.os.token_v3_client
         cls.non_admin_projects_client = cls.os.projects_client
-
-    @classmethod
-    def resource_cleanup(cls):
-        super(BaseIdentityV3Test, cls).resource_cleanup()
 
 
 class BaseIdentityV3AdminTest(BaseIdentityV3Test):

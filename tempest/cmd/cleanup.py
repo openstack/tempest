@@ -71,9 +71,6 @@ CONF = config.CONF
 
 class TempestCleanup(command.Command):
 
-    def __init__(self, app, cmd):
-        super(TempestCleanup, self).__init__(app, cmd)
-
     def take_action(self, parsed_args):
         try:
             self.init(parsed_args)
