@@ -159,7 +159,10 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
         # it must beassigned a role on the project. So we need to ensure that
         # our newly created user has a role on the newly created project.
         if self.identity_version == 'v3' and not role_assigned:
-            self.creds_client.create_user_role('Member')
+            try:
+                self.creds_client.create_user_role('Member')
+            except lib_exc.Conflict:
+                LOG.warning('Member role already exists, ignoring conflict.')
             self.creds_client.assign_user_role(user, project, 'Member')
 
         creds = self.creds_client.get_credentials(user, project, user_password)

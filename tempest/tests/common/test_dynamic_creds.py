@@ -21,6 +21,7 @@ from tempest.common import dynamic_creds
 from tempest import config
 from tempest import exceptions
 from tempest.lib.common import rest_client
+from tempest.lib import exceptions as lib_exc
 from tempest.lib.services.identity.v2 import token_client as v2_token_client
 from tempest.lib.services.identity.v3 import token_client as v3_token_client
 from tempest.lib.services.network import routers_client
@@ -635,3 +636,15 @@ class TestDynamicCredentialProviderV3(TestDynamicCredentialProvider):
             return_value=(rest_client.ResponseBody
                           (200, {'project': {'id': id, 'name': name}}))))
         return project_fix
+
+    @mock.patch('tempest.lib.common.rest_client.RestClient')
+    def test_member_role_creation_with_duplicate(self, rest_client_mock):
+        creds = dynamic_creds.DynamicCredentialProvider(**self.fixed_params)
+        creds.creds_client = mock.MagicMock()
+        creds.creds_client.create_user_role.side_effect = lib_exc.Conflict
+        with mock.patch('tempest.common.dynamic_creds.LOG') as log_mock:
+            creds._create_creds()
+            log_mock.warning.assert_called_once_with(
+                "Member role already exists, ignoring conflict.")
+        creds.creds_client.assign_user_role.assert_called_once_with(
+            mock.ANY, mock.ANY, 'Member')
