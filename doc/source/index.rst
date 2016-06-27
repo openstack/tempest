@@ -52,6 +52,7 @@ Command Documentation
    account_generator
    cleanup
    javelin
+   subunit_describe_calls
    workspace
    run
 
