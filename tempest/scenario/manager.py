@@ -388,6 +388,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
         if CONF.image_feature_enabled.api_v1:
             params['is_public'] = 'False'
             params['properties'] = properties
+            params = {'headers': common_image.image_meta_to_headers(**params)}
         else:
             params['visibility'] = 'private'
             # Additional properties are flattened out in the v2 API.
