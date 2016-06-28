@@ -22,8 +22,18 @@ import logging
 from tempest.lib import auth
 from tempest.lib import exceptions
 from tempest.lib.services import clients
+from tempest.lib.services import compute
+from tempest.lib.services import image
+from tempest.lib.services import network
 
 LOG = logging.getLogger(__name__)
+
+client_modules_by_service_name = {
+    'compute': compute,
+    'image.v1': image.v1,
+    'image.v2': image.v2,
+    'network': network
+}
 
 
 def tempest_modules():
@@ -289,6 +299,16 @@ class ServiceClients(object):
             raise exceptions.UnknownServiceClient(
                 services=list(client_parameters.keys()))
 
+        # Register service clients owned by tempest
+        for service in tempest_modules():
+            if service in list(client_modules_by_service_name):
+                attribute = service.replace('.', '_')
+                configs = service.split('.')[0]
+                module = client_modules_by_service_name[service]
+                self.register_service_client_module(
+                    attribute, service, module.__name__,
+                    module.__all__, **self.parameters[configs])
+
         # Register service clients from plugins
         clients_registry = clients.ClientsRegistry()
         plugin_service_clients = clients_registry.get_service_clients()
@@ -362,10 +382,10 @@ class ServiceClients(object):
 
     @property
     def registered_services(self):
-        # TODO(andreaf) For now add all Tempest services. to the list of
-        # registered service
-        _default_services = tempest_modules()
-        return self._registered_services | _default_services
+        # TODO(andreaf) Temporary set needed until all services are migrated
+        _non_migrated_services = tempest_modules() - set(
+            client_modules_by_service_name)
+        return self._registered_services | _non_migrated_services
 
     def _setup_parameters(self, parameters):
         """Setup default values for client parameters
