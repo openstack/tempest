@@ -79,8 +79,6 @@ class ScenarioTest(tempest.test.BaseTestCase):
         cls.security_groups_client = cls.manager.security_groups_client
         cls.security_group_rules_client = (
             cls.manager.security_group_rules_client)
-        # Heat client
-        cls.orchestration_client = cls.manager.orchestration_client
 
         if CONF.volume_feature_enabled.api_v1:
             cls.volumes_client = cls.manager.volumes_client

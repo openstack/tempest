@@ -72,13 +72,9 @@ def get_service_list():
         'image': CONF.service_available.glance,
         'baremetal': CONF.service_available.ironic,
         'volume': CONF.service_available.cinder,
-        'orchestration': CONF.service_available.heat,
-        # NOTE(mtreinish) nova-network will provide networking functionality
-        # if neutron isn't available, so always set to True.
         'network': True,
         'identity': True,
         'object_storage': CONF.service_available.swift,
-        'data_processing': CONF.service_available.sahara,
     }
     return service_list
 
@@ -90,8 +86,8 @@ def services(*args):
     exercised by a test case.
     """
     def decorator(f):
-        services = ['compute', 'image', 'baremetal', 'volume', 'orchestration',
-                    'network', 'identity', 'object_storage', 'data_processing']
+        services = ['compute', 'image', 'baremetal', 'volume',
+                    'network', 'identity', 'object_storage']
         for service in args:
             if service not in services:
                 raise exceptions.InvalidServiceTag('%s is not a valid '
