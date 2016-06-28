@@ -26,7 +26,6 @@ from tempest.lib.services import network
 from tempest import manager
 from tempest.services import baremetal
 from tempest.services import data_processing
-from tempest.services import database
 from tempest.services import identity
 from tempest.services import object_storage
 from tempest.services import orchestration
@@ -64,7 +63,6 @@ class Manager(manager.Manager):
         """
         super(Manager, self).__init__(credentials=credentials, scope=scope)
         self._set_compute_clients()
-        self._set_database_clients()
         self._set_identity_clients()
         self._set_volume_clients()
         self._set_object_storage_clients()
@@ -242,23 +240,6 @@ class Manager(manager.Manager):
             self.auth_provider, **params_volume)
         self.snapshots_extensions_client = compute.SnapshotsClient(
             self.auth_provider, **params_volume)
-
-    def _set_database_clients(self):
-        self.database_flavors_client = database.DatabaseFlavorsClient(
-            self.auth_provider,
-            CONF.database.catalog_type,
-            CONF.identity.region,
-            **self.default_params_with_timeout_values)
-        self.database_limits_client = database.DatabaseLimitsClient(
-            self.auth_provider,
-            CONF.database.catalog_type,
-            CONF.identity.region,
-            **self.default_params_with_timeout_values)
-        self.database_versions_client = database.DatabaseVersionsClient(
-            self.auth_provider,
-            CONF.database.catalog_type,
-            CONF.identity.region,
-            **self.default_params_with_timeout_values)
 
     def _set_identity_clients(self):
         params = {
