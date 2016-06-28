@@ -26,14 +26,8 @@ class ExtraSpecsNegativeV2Test(base.BaseVolumeAdminTest):
         super(ExtraSpecsNegativeV2Test, cls).resource_setup()
         vol_type_name = data_utils.rand_name('Volume-type')
         cls.extra_specs = {"spec1": "val1"}
-        cls.volume_type = cls.admin_volume_types_client.create_volume_type(
-            name=vol_type_name,
-            extra_specs=cls.extra_specs)['volume_type']
-
-    @classmethod
-    def resource_cleanup(cls):
-        cls.admin_volume_types_client.delete_volume_type(cls.volume_type['id'])
-        super(ExtraSpecsNegativeV2Test, cls).resource_cleanup()
+        cls.volume_type = cls.create_volume_type(name=vol_type_name,
+                                                 extra_specs=cls.extra_specs)
 
     @test.idempotent_id('08961d20-5cbb-4910-ac0f-89ad6dbb2da1')
     def test_update_no_body(self):
