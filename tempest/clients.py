@@ -21,13 +21,13 @@ from tempest.common import negative_rest_client
 from tempest import config
 from tempest import exceptions
 from tempest.lib.services import compute
+from tempest.lib.services import image
 from tempest.lib.services import network
 from tempest import manager
 from tempest.services import baremetal
 from tempest.services import data_processing
 from tempest.services import database
 from tempest.services import identity
-from tempest.services import image
 from tempest.services import object_storage
 from tempest.services import orchestration
 from tempest.services import volume

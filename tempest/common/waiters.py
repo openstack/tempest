@@ -20,7 +20,7 @@ from tempest import config
 from tempest import exceptions
 from tempest.lib.common.utils import misc as misc_utils
 from tempest.lib import exceptions as lib_exc
-from tempest.services.image.v1.json import images_client as images_v1_client
+from tempest.lib.services.image.v1 import images_client as images_v1_client
 
 CONF = config.CONF
 LOG = logging.getLogger(__name__)
