@@ -20,10 +20,11 @@ from oslo_log import log as logging
 from tempest.common import negative_rest_client
 from tempest import config
 from tempest import exceptions
+from tempest.lib import auth
 from tempest.lib.services import compute
 from tempest.lib.services import image
 from tempest.lib.services import network
-from tempest import manager
+from tempest import service_clients
 from tempest.services import baremetal
 from tempest.services import data_processing
 from tempest.services import identity
@@ -35,7 +36,7 @@ CONF = config.CONF
 LOG = logging.getLogger(__name__)
 
 
-class Manager(manager.Manager):
+class Manager(service_clients.ServiceClients):
     """Top level manager for OpenStack tempest clients"""
 
     default_params = {
@@ -61,7 +62,10 @@ class Manager(manager.Manager):
         :param service: Service name
         :param scope: default scope for tokens produced by the auth provider
         """
-        super(Manager, self).__init__(credentials=credentials, scope=scope)
+        _, identity_uri = get_auth_provider_class(credentials)
+        super(Manager, self).__init__(
+            credentials=credentials, identity_uri=identity_uri, scope=scope,
+            region=CONF.identity.region, **self.default_params)
         self._set_compute_clients()
         self._set_identity_clients()
         self._set_volume_clients()
@@ -390,3 +394,30 @@ class Manager(manager.Manager):
             self.auth_provider, **params)
         self.object_client = object_storage.ObjectClient(self.auth_provider,
                                                          **params)
+
+
+def get_auth_provider_class(credentials):
+    if isinstance(credentials, auth.KeystoneV3Credentials):
+        return auth.KeystoneV3AuthProvider, CONF.identity.uri_v3
+    else:
+        return auth.KeystoneV2AuthProvider, CONF.identity.uri
+
+
+def get_auth_provider(credentials, pre_auth=False, scope='project'):
+    default_params = {
+        'disable_ssl_certificate_validation':
+            CONF.identity.disable_ssl_certificate_validation,
+        'ca_certs': CONF.identity.ca_certificates_file,
+        'trace_requests': CONF.debug.trace_requests
+    }
+    if credentials is None:
+        raise exceptions.InvalidCredentials(
+            'Credentials must be specified')
+    auth_provider_class, auth_url = get_auth_provider_class(
+        credentials)
+    _auth_provider = auth_provider_class(credentials, auth_url,
+                                         scope=scope,
+                                         **default_params)
+    if pre_auth:
+        _auth_provider.set_auth()
+    return _auth_provider
