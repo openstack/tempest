@@ -45,6 +45,7 @@ is dumped in JSON output to the path provided in the --output-file option.
 
 Ports file JSON structure
 ^^^^^^^^^^^^^^^^^^^^^^^^^
+::
 
   {
       "<port number>": "<name of service>",
@@ -54,6 +55,8 @@ Ports file JSON structure
 
 Output file JSON structure
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
+::
+
   {
       "full_test_name[with_id_and_tags]": [
           {
