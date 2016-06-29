@@ -7,3 +7,7 @@ features:
     any maintenance changes.
 
       * endpoints_client(v2)
+      * roles_client(v2)
+      * services_client(v2)
+      * tenants_client(v2)
+      * users_client(v2)

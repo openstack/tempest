@@ -12,7 +12,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-from tempest.services.identity.v2.json import roles_client
+from tempest.lib.services.identity.v2 import roles_client
 from tempest.tests.lib import fake_auth_provider
 from tempest.tests.lib.services import base
 
