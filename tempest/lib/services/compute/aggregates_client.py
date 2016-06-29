@@ -41,7 +41,7 @@ class AggregatesClient(base_compute_client.BaseComputeClient):
         """Create a new aggregate.
 
         Available params: see http://developer.openstack.org/
-                              api-ref-compute-v2.1.html#createaggregate
+                              api-ref-compute-v2.1.html#createAggregate
         """
         post_body = json.dumps({'aggregate': kwargs})
         resp, body = self.post('os-aggregates', post_body)
@@ -54,7 +54,7 @@ class AggregatesClient(base_compute_client.BaseComputeClient):
         """Update an aggregate.
 
         Available params: see http://developer.openstack.org/
-                              api-ref-compute-v2.1.html#updateaggregate
+                              api-ref-compute-v2.1.html#updateAggregate
         """
         put_body = json.dumps({'aggregate': kwargs})
         resp, body = self.put('os-aggregates/%s' % aggregate_id, put_body)
@@ -85,7 +85,7 @@ class AggregatesClient(base_compute_client.BaseComputeClient):
         """Add a host to the given aggregate.
 
         Available params: see http://developer.openstack.org/
-                              api-ref-compute-v2.1.html#addhost
+                              api-ref-compute-v2.1.html#addHost
         """
         post_body = json.dumps({'add_host': kwargs})
         resp, body = self.post('os-aggregates/%s/action' % aggregate_id,
@@ -98,7 +98,7 @@ class AggregatesClient(base_compute_client.BaseComputeClient):
         """Remove a host from the given aggregate.
 
         Available params: see http://developer.openstack.org/
-                              api-ref-compute-v2.1.html#removehost
+                              api-ref-compute-v2.1.html#removeAggregateHost
         """
         post_body = json.dumps({'remove_host': kwargs})
         resp, body = self.post('os-aggregates/%s/action' % aggregate_id,

@@ -26,7 +26,7 @@ class MigrationsClient(base_compute_client.BaseComputeClient):
         """List all migrations.
 
         Available params: see http://developer.openstack.org/
-                              api-ref-compute-v2.1.html#returnmigrations
+                              api-ref-compute-v2.1.html#listMigrations
         """
 
         url = 'os-migrations'

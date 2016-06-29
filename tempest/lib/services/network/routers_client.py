@@ -55,7 +55,7 @@ class RoutersClient(base.BaseNetworkClient):
         """Remove router interface.
 
         Available params: see http://developer.openstack.org/
-                              api-ref-networking-v2-ext.html#removeRouterInterface
+                              api-ref-networking-v2-ext.html#deleteRouterInterface
         """
         uri = '/routers/%s/remove_router_interface' % router_id
         return self.update_resource(uri, kwargs)

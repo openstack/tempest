@@ -91,7 +91,7 @@ class FlavorsClient(base_compute_client.BaseComputeClient):
         """Set extra Specs to the mentioned flavor.
 
         Available params: see http://developer.openstack.org/
-                              api-ref-compute-v2.1.html#updateFlavorExtraSpec
+                              api-ref-compute-v2.1.html#createFlavorExtraSpec
         """
         post_body = json.dumps({'extra_specs': kwargs})
         resp, body = self.post('flavors/%s/os-extra_specs' % flavor_id,
@@ -123,7 +123,7 @@ class FlavorsClient(base_compute_client.BaseComputeClient):
         """Update specified extra Specs of the mentioned flavor and key.
 
         Available params: see http://developer.openstack.org/
-                              api-ref-compute-v2.1.html#updateflavorspec
+                              api-ref-compute-v2.1.html#updateFlavorExtraSpec
         """
         resp, body = self.put('flavors/%s/os-extra_specs/%s' %
                               (flavor_id, key), json.dumps(kwargs))
