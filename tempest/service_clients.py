@@ -149,14 +149,34 @@ class ClientsFactory(object):
             setattr(self, class_name, self._get_partial_class(
                 klass, auth_provider, final_kwargs))
 
-    @classmethod
-    def _get_partial_class(cls, klass, auth_provider, kwargs):
+    def _get_partial_class(self, klass, auth_provider, kwargs):
 
         # Define a function that returns a new class instance by
         # combining default kwargs with extra ones
-        def partial_class(**later_kwargs):
+        def partial_class(alias=None, **later_kwargs):
+            """Returns a callable the initialises a service client
+
+            Builds a callable that accepts kwargs, which are passed through
+            to the __init__ of the service client, along with a set of defaults
+            set in factory at factory __init__ time.
+            Original args in the service client can only be passed as kwargs.
+
+            It accepts one extra parameter 'alias' compared to the original
+            service client. When alias is provided, the returned callable will
+            also set an attribute called with a name defined in 'alias', which
+            contains the instance of the service client.
+
+            :param alias: str Name of the attribute set on the factory once
+                the callable is invoked which contains the initialised
+                service client. If None, no attribute is set.
+            :param later_kwargs: kwargs passed through to the service client
+                __init__ on top of defaults set at factory level.
+            """
             kwargs.update(later_kwargs)
-            return klass(auth_provider=auth_provider, **kwargs)
+            _client = klass(auth_provider=auth_provider, **kwargs)
+            if alias:
+                setattr(self, alias, _client)
+            return _client
 
         return partial_class
 
