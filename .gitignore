@@ -23,6 +23,7 @@ build
 !.coveragerc
 cover/
 doc/source/_static/tempest.conf.sample
+doc/source/plugin-registry.rst
 
 # Files created by releasenotes build
 releasenotes/build

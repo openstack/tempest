@@ -15,6 +15,17 @@ import sys
 import os
 import subprocess
 
+# Build the plugin registry
+def build_plugin_registry(app):
+    root_dir = os.path.dirname(
+        os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    subprocess.call(['tools/generate-tempest-plugins-list.sh'], cwd=root_dir)
+
+def setup(app):
+    app.connect('builder-inited', build_plugin_registry)
+
+
+
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
