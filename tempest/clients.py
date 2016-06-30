@@ -22,7 +22,6 @@ from tempest import config
 from tempest import exceptions
 from tempest.lib import auth
 from tempest.lib import exceptions as lib_exc
-from tempest.lib.services import image
 from tempest import service_clients
 from tempest.services import baremetal
 from tempest.services import data_processing
@@ -144,22 +143,13 @@ class Manager(service_clients.ServiceClients):
 
     def _set_image_clients(self):
         if CONF.service_available.glance:
-            params = self.parameters['image']
-            self.image_client = image.v1.ImagesClient(
-                self.auth_provider, **params)
-            self.image_member_client = image.v1.ImageMembersClient(
-                self.auth_provider, **params)
-
-            self.image_client_v2 = image.v2.ImagesClient(
-                self.auth_provider, **params)
-            self.image_member_client_v2 = image.v2.ImageMembersClient(
-                self.auth_provider, **params)
-            self.namespaces_client = image.v2.NamespacesClient(
-                self.auth_provider, **params)
-            self.resource_types_client = image.v2.ResourceTypesClient(
-                self.auth_provider, **params)
-            self.schemas_client = image.v2.SchemasClient(
-                self.auth_provider, **params)
+            self.image_client = self.image_v1.ImagesClient()
+            self.image_member_client = self.image_v1.ImageMembersClient()
+            self.image_client_v2 = self.image_v2.ImagesClient()
+            self.image_member_client_v2 = self.image_v2.ImageMembersClient()
+            self.namespaces_client = self.image_v2.NamespacesClient()
+            self.resource_types_client = self.image_v2.ResourceTypesClient()
+            self.schemas_client = self.image_v2.SchemasClient()
 
     def _set_compute_clients(self):
         self.agents_client = self.compute.AgentsClient()
