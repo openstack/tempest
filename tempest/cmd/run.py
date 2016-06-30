@@ -23,6 +23,27 @@ Tempest run has several options:
                    any tests that match on re.match() with the regex
  * **--smoke**: Run all the tests tagged as smoke
 
+There are also the **--blacklist_file** and **--whitelist_file** options that
+let you pass a filepath to tempest run with the file format being a line
+seperated regex, with '#' used to signify the start of a comment on a line.
+For example::
+
+    # Regex file
+    ^regex1 # Match these tests
+    .*regex2 # Match those tests
+
+The blacklist file will be used to construct a negative lookahead regex and
+the whitelist file will simply OR all the regexes in the file. The whitelist
+and blacklist file options are mutually exclusive so you can't use them
+together. However, you can combine either with a normal regex or the *--smoke*
+flag. When used with a blacklist file the generated regex will be combined to
+something like::
+
+    ^((?!black_regex1|black_regex2).)*$cli_regex1
+
+When combined with a whitelist file all the regexes from the file and the CLI
+regexes will be ORed.
+
 You can also use the **--list-tests** option in conjunction with selection
 arguments to list which tests will be run.
 
@@ -47,6 +68,7 @@ import sys
 import threading
 
 from cliff import command
+from os_testr import regex_builder
 from os_testr import subunit_trace
 from oslo_log import log as logging
 from testrepository.commands import run_argv
@@ -109,6 +131,15 @@ class TempestRun(command.Command):
         regex.add_argument('--regex', '-r', default='',
                            help='A normal testr selection regex used to '
                                 'specify a subset of tests to run')
+        list_selector = parser.add_mutually_exclusive_group()
+        list_selector.add_argument('--whitelist_file',
+                                   help="Path to a whitelist file, this file "
+                                        "contains a seperate regex on each "
+                                        "newline.")
+        list_selector.add_argument('--blacklist_file',
+                                   help='Path to a blacklist file, this file '
+                                        'contains a separate regex exclude on '
+                                        'each newline')
         # list only args
         parser.add_argument('--list-tests', '-l', action='store_true',
                             help='List tests',
@@ -138,6 +169,10 @@ class TempestRun(command.Command):
             regex = 'smoke'
         elif parsed_args.regex:
             regex = parsed_args.regex
+        if parsed_args.whitelist_file or parsed_args.blacklist_file:
+            regex = regex_builder.construct_regex(parsed_args.blacklist_file,
+                                                  parsed_args.whitelist_file,
+                                                  regex, False)
         return regex
 
     def _build_options(self, parsed_args):
