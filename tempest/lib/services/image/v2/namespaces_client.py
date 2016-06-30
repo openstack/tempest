@@ -58,6 +58,11 @@ class NamespacesClient(rest_client.RestClient):
         return rest_client.ResponseBody(resp, body)
 
     def delete_namespace(self, namespace):
+        """Delete a namespace.
+
+        Available params: http://developer.openstack.org/
+                          api-ref-image-v2.html#deleteNamespace-v2
+        """
         url = 'metadefs/namespaces/%s' % namespace
         resp, _ = self.delete(url)
         self.expected_success(204, resp.status)

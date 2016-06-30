@@ -115,18 +115,33 @@ class ImagesClient(rest_client.RestClient):
         return rest_client.ResponseBody(resp, body)
 
     def show_image_file(self, image_id):
+        """Show an image file.
+
+        Available params: http://developer.openstack.org/
+                          api-ref-image-v2.html#showImageFile-v2
+        """
         url = 'images/%s/file' % image_id
         resp, body = self.get(url)
         self.expected_success(200, resp.status)
         return rest_client.ResponseBodyData(resp, body)
 
     def add_image_tag(self, image_id, tag):
+        """Add an image tag.
+
+        Available params: http://developer.openstack.org/
+                          api-ref-image-v2.html#addImageTag-v2
+        """
         url = 'images/%s/tags/%s' % (image_id, tag)
         resp, body = self.put(url, body=None)
         self.expected_success(204, resp.status)
         return rest_client.ResponseBody(resp, body)
 
     def delete_image_tag(self, image_id, tag):
+        """Delete an image tag.
+
+        Available params: http://developer.openstack.org/
+                          api-ref-image-v2.html#deleteImageTag-v2
+        """
         url = 'images/%s/tags/%s' % (image_id, tag)
         resp, _ = self.delete(url)
         self.expected_success(204, resp.status)
