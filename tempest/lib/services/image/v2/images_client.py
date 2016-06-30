@@ -54,24 +54,44 @@ class ImagesClient(rest_client.RestClient):
         return rest_client.ResponseBody(resp, body)
 
     def deactivate_image(self, image_id):
+        """Deactivate image.
+
+         Available params: see http://developer.openstack.org/
+                               api-ref-image-v2.html#deactivateImage-v2
+         """
         url = 'images/%s/actions/deactivate' % image_id
         resp, body = self.post(url, None)
         self.expected_success(204, resp.status)
         return rest_client.ResponseBody(resp, body)
 
     def reactivate_image(self, image_id):
+        """Reactivate image.
+
+         Available params: see http://developer.openstack.org/
+                               api-ref-image-v2.html#reactivateImage-v2
+         """
         url = 'images/%s/actions/reactivate' % image_id
         resp, body = self.post(url, None)
         self.expected_success(204, resp.status)
         return rest_client.ResponseBody(resp, body)
 
     def delete_image(self, image_id):
+        """Delete image.
+
+         Available params: see http://developer.openstack.org/
+                               api-ref-image-v2.html#deleteImage-v2
+         """
         url = 'images/%s' % image_id
         resp, _ = self.delete(url)
         self.expected_success(204, resp.status)
         return rest_client.ResponseBody(resp)
 
     def list_images(self, params=None):
+        """List images.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-image-v2.html#listImages-v2
+        """
         url = 'images'
 
         if params:
@@ -83,6 +103,11 @@ class ImagesClient(rest_client.RestClient):
         return rest_client.ResponseBody(resp, body)
 
     def show_image(self, image_id):
+        """Show image details.
+
+        Available params: http://developer.openstack.org/
+                          api-ref-image-v2.html#showImage-v2
+        """
         url = 'images/%s' % image_id
         resp, body = self.get(url)
         self.expected_success(200, resp.status)
@@ -102,6 +127,11 @@ class ImagesClient(rest_client.RestClient):
         return 'image'
 
     def store_image_file(self, image_id, data):
+        """Upload binary image data.
+
+        Available params: http://developer.openstack.org/
+                          api-ref-image-v2.html#storeImageFile-v2
+        """
         url = 'images/%s/file' % image_id
 
         # We are going to do chunked transfert, so split the input data
@@ -115,7 +145,7 @@ class ImagesClient(rest_client.RestClient):
         return rest_client.ResponseBody(resp, body)
 
     def show_image_file(self, image_id):
-        """Show an image file.
+        """Download binary image data.
 
         Available params: http://developer.openstack.org/
                           api-ref-image-v2.html#showImageFile-v2
