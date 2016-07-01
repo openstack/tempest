@@ -18,7 +18,7 @@ from oslo_log import log as logging
 from tempest.common import image as common_image
 from tempest import config
 from tempest import exceptions
-from tempest.lib.common.utils import misc as misc_utils
+from tempest.lib.common.utils import test_utils
 from tempest.lib import exceptions as lib_exc
 from tempest.lib.services.image.v1 import images_client as images_v1_client
 
@@ -91,7 +91,7 @@ def wait_for_server_status(client, server_id, status, ready_wait=True,
                         'timeout': timeout})
             message += ' Current status: %s.' % server_status
             message += ' Current task state: %s.' % task_state
-            caller = misc_utils.find_test_caller()
+            caller = test_utils.find_test_caller()
             if caller:
                 message = '(%s) %s' % (caller, message)
             raise exceptions.TimeoutException(message)
@@ -162,7 +162,7 @@ def wait_for_image_status(client, image_id, status):
                                           'status': status,
                                           'current_status': current_status,
                                           'timeout': client.build_timeout})
-    caller = misc_utils.find_test_caller()
+    caller = test_utils.find_test_caller()
     if caller:
         message = '(%s) %s' % (caller, message)
     raise exceptions.TimeoutException(message)
@@ -235,7 +235,7 @@ def wait_for_bm_node_status(client, node_id, attr, status):
                         'status': status,
                         'timeout': client.build_timeout})
             message += ' Current state of %s: %s.' % (attr, status_curr)
-            caller = misc_utils.find_test_caller()
+            caller = test_utils.find_test_caller()
             if caller:
                 message = '(%s) %s' % (caller, message)
             raise exceptions.TimeoutException(message)

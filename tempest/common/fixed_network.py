@@ -14,7 +14,7 @@ import copy
 from oslo_log import log as logging
 
 from tempest import exceptions
-from tempest.lib.common.utils import misc as misc_utils
+from tempest.lib.common.utils import test_utils
 
 LOG = logging.getLogger(__name__)
 
@@ -31,7 +31,7 @@ def get_network_from_name(name, compute_networks_client):
         list returns a 404, there are no found networks, or the found network
         is invalid
     """
-    caller = misc_utils.find_test_caller()
+    caller = test_utils.find_test_caller()
 
     if not name:
         raise exceptions.InvalidTestResource(type='network', name=name)
@@ -84,7 +84,7 @@ def get_tenant_network(creds_provider, compute_networks_client,
            tenant network is available in the creds provider
     :returns: a dict with 'id' and 'name' of the network
     """
-    caller = misc_utils.find_test_caller()
+    caller = test_utils.find_test_caller()
     net_creds = creds_provider.get_primary_creds()
     network = getattr(net_creds, 'network', None)
     if not network or not network.get('name'):
