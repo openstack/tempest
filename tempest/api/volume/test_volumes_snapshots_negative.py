@@ -46,6 +46,20 @@ class VolumesV2SnapshotNegativeTestJSON(base.BaseVolumeTest):
                           self.snapshots_client.create_snapshot,
                           volume_id=None, display_name=s_name)
 
+    @test.idempotent_id('677863d1-34f9-456d-b6ac-9924f667a7f4')
+    def test_volume_from_snapshot_decreasing_size(self):
+        # Creates a volume a snapshot passing a size different from the source
+        src_size = CONF.volume.volume_size + 1
+
+        src_vol = self.create_volume(size=src_size)
+        src_snap = self.create_snapshot(src_vol['id'])
+
+        # Destination volume smaller than source
+        self.assertRaises(lib_exc.BadRequest,
+                          self.volumes_client.create_volume,
+                          size=src_size - 1,
+                          snapshot_id=src_snap['id'])
+
 
 class VolumesV1SnapshotNegativeTestJSON(VolumesV2SnapshotNegativeTestJSON):
     _api_version = 1
