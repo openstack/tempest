@@ -91,8 +91,18 @@ as it is simpler, and quicker to work with.
    any changes to it otherwise Tempest will not know how to load it.
 
 #. Once the configuration is done you're now ready to run Tempest. This can
-   be done with testr directly or any `testr`_ based test runner, like
-   `ostestr`_. For example, from the working dir running::
+   be done using the :ref:`tempest_run` command. This can be done by either
+   cd'ing into the tempest workspace directory and running::
+
+     $ tempest run
+
+   Or use the ``--workspace`` argument to run in the workspace you created
+   regarless of your current working directory. For example::
+
+     $ tempest run --workspace cloud-01
+
+   There is also the option to use testr directly, or any `testr`_ based test
+   runner, like `ostestr`_. For example, from the working dir running::
 
      $ ostestr --regex '(?!.*\[.*\bslow\b.*\])(^tempest\.(api|scenario))'
 

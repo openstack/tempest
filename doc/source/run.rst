@@ -1,3 +1,5 @@
+.. _tempest_run:
+
 -----------
 Tempest Run
 -----------
