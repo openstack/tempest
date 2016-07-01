@@ -2,19 +2,14 @@
 Tempest Testing Project
 =======================
 
-Contents:
+--------
+Overview
+--------
 
 .. toctree::
    :maxdepth: 2
 
    overview
-   HACKING
-   REVIEWING
-   plugin
-   plugin-registry
-   library
-   microversion_testing
-   test-removal
 
 ------------
 Field Guides
@@ -31,6 +26,10 @@ where your test contributions should go.
    field_guide/scenario
    field_guide/stress
    field_guide/unit_tests
+
+=========
+For users
+=========
 
 ---------------------------
 Tempest Configuration Guide
@@ -55,6 +54,41 @@ Command Documentation
    subunit_describe_calls
    workspace
    run
+
+==============
+For developers
+==============
+
+-----------
+Development
+-----------
+
+.. toctree::
+   :maxdepth: 2
+
+   HACKING
+   REVIEWING
+   microversion_testing
+   test-removal
+
+-------
+Plugins
+-------
+
+.. toctree::
+   :maxdepth: 2
+
+   plugin
+   plugin-registry
+
+-------
+Library
+-------
+
+.. toctree::
+   :maxdepth: 2
+
+   library
 
 ==================
 Indices and tables
