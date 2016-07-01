@@ -70,12 +70,12 @@ as it is simpler, and quicker to work with.
    it's recommended that you copy or rename tempest.conf.sample to tempest.conf
    and make those changes to that file in /etc/tempest
 
-#. Setup a local working Tempest dir. This is done by using the tempest init
+#. Setup a local Tempest workspace. This is done by using the tempest init
    command::
 
     $ tempest init cloud-01
 
-   works the same as::
+   which also works the same as::
 
     $ mkdir cloud-01 && cd cloud-01 && tempest init
 
@@ -92,17 +92,18 @@ as it is simpler, and quicker to work with.
 
 #. Once the configuration is done you're now ready to run Tempest. This can
    be done using the :ref:`tempest_run` command. This can be done by either
-   cd'ing into the tempest workspace directory and running::
+   running::
 
      $ tempest run
 
-   Or use the ``--workspace`` argument to run in the workspace you created
-   regarless of your current working directory. For example::
+   from the Tempest workspace directory. Or you can use the ``--workspace``
+   argument to run in the workspace you created regarless of your current
+   working directory. For example::
 
      $ tempest run --workspace cloud-01
 
    There is also the option to use testr directly, or any `testr`_ based test
-   runner, like `ostestr`_. For example, from the working dir running::
+   runner, like `ostestr`_. For example, from the workspace dir run::
 
      $ ostestr --regex '(?!.*\[.*\bslow\b.*\])(^tempest\.(api|scenario))'
 
