@@ -366,7 +366,7 @@ ComputeFeaturesGroup = [
                 default=True,
                 help='Does the test environment have the nova cert running?'),
     cfg.BoolOpt('personality',
-                default=True,
+                default=False,
                 help='Does the test environment support server personality'),
     cfg.BoolOpt('attach_encrypted_volume',
                 default=True,
