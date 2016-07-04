@@ -218,21 +218,21 @@ class BaseDataGenerator(object):
     def teardown_all(self):
         for user in self.users:
             test_utils.call_and_ignore_notfound_exc(
-                self.users_client.delete_user, user)
+                self.users_client.delete_user, user['id'])
         for tenant in self.tenants:
             test_utils.call_and_ignore_notfound_exc(
-                self.projects_client.delete_tenant, tenant)
+                self.projects_client.delete_tenant, tenant['id'])
         for project in reversed(self.projects):
             test_utils.call_and_ignore_notfound_exc(
-                self.projects_client.delete_project, project)
+                self.projects_client.delete_project, project['id'])
         for role in self.roles:
             test_utils.call_and_ignore_notfound_exc(
-                self.roles_client.delete_role, role)
+                self.roles_client.delete_role, role['id'])
         for domain in self.domains:
             test_utils.call_and_ignore_notfound_exc(
-                self.domains_client.update_domain, domain, enabled=False)
+                self.domains_client.update_domain, domain['id'], enabled=False)
             test_utils.call_and_ignore_notfound_exc(
-                self.domains_client.delete_domain, domain)
+                self.domains_client.delete_domain, domain['id'])
 
 
 class DataGeneratorV2(BaseDataGenerator):
