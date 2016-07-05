@@ -1,13 +1,8 @@
 Tempest - The OpenStack Integration Test Suite
 ==============================================
 
-.. image:: https://img.shields.io/pypi/v/tempest.svg
-    :target: https://pypi.python.org/pypi/tempest/
-    :alt: Latest Version
-
-.. image:: https://img.shields.io/pypi/dm/tempest.svg
-    :target: https://pypi.python.org/pypi/tempest/
-    :alt: Downloads
+The documentation for Tempest is officially hosted at:
+http://docs.openstack.org/developer/tempest/
 
 This is a set of integration tests to be run against a live OpenStack
 cluster. Tempest has batteries of tests for OpenStack API validation,
@@ -90,7 +85,8 @@ as it is simpler, and quicker to work with.
    config files located in the etc/ subdir created by the ``tempest init``
    command. Tempest is expecting a tempest.conf file in etc/ so if only a
    sample exists you must rename or copy it to tempest.conf before making
-   any changes to it otherwise Tempest will not know how to load it.
+   any changes to it otherwise Tempest will not know how to load it. For
+   details on configuring tempest refer to the :ref:`tempest-configuration`.
 
 #. Once the configuration is done you're now ready to run Tempest. This can
    be done using the :ref:`tempest_run` command. This can be done by either
