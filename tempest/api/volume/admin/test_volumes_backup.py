@@ -27,17 +27,17 @@ from tempest import test
 CONF = config.CONF
 
 
-class VolumesBackupsV2Test(base.BaseVolumeAdminTest):
+class VolumesBackupsAdminV2Test(base.BaseVolumeAdminTest):
 
     @classmethod
     def skip_checks(cls):
-        super(VolumesBackupsV2Test, cls).skip_checks()
+        super(VolumesBackupsAdminV2Test, cls).skip_checks()
         if not CONF.volume_feature_enabled.backup:
             raise cls.skipException("Cinder backup feature disabled")
 
     @classmethod
     def resource_setup(cls):
-        super(VolumesBackupsV2Test, cls).resource_setup()
+        super(VolumesBackupsAdminV2Test, cls).resource_setup()
 
         cls.volume = cls.create_volume()
 
@@ -167,5 +167,5 @@ class VolumesBackupsV2Test(base.BaseVolumeAdminTest):
                                                          'available')
 
 
-class VolumesBackupsV1Test(VolumesBackupsV2Test):
+class VolumesBackupsAdminV1Test(VolumesBackupsAdminV2Test):
     _api_version = 1
