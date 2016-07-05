@@ -174,7 +174,16 @@ server_detail['properties'].update({
     'OS-EXT-SRV-ATTR:host': {'type': ['string', 'null']},
     'OS-EXT-SRV-ATTR:instance_name': {'type': 'string'},
     'OS-EXT-SRV-ATTR:hypervisor_hostname': {'type': ['string', 'null']},
-    'os-extended-volumes:volumes_attached': {'type': 'array'},
+    'os-extended-volumes:volumes_attached': {
+        'type': 'array',
+        'items': {
+            'type': 'object',
+            'properties': {
+                'id': {'type': 'string'}
+            },
+            'additionalProperties': False,
+        },
+    },
     'config_drive': {'type': 'string'}
 })
 server_detail['properties']['addresses']['patternProperties'][
