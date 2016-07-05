@@ -47,6 +47,11 @@ def image_meta_to_headers(**metadata):
     fields_copy = copy.deepcopy(metadata)
 
     copy_from = fields_copy.pop('copy_from', None)
+    purge = fields_copy.pop('purge_props', None)
+
+    if purge is not None:
+        headers['x-glance-registry-purge-props'] = purge
+
     if copy_from is not None:
         headers['x-glance-api-copy-from'] = copy_from
 

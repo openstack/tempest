@@ -46,7 +46,8 @@ class TestImage(base.TestCase):
             disk_format='vhd',
             copy_from='http://localhost/images/10',
             properties={'foo': 'bar'},
-            api={'abc': 'def'})
+            api={'abc': 'def'},
+            purge_props=True)
 
         expected = {
             'x-image-meta-name': 'test',
@@ -54,6 +55,7 @@ class TestImage(base.TestCase):
             'x-image-meta-disk_format': 'vhd',
             'x-glance-api-copy-from': 'http://localhost/images/10',
             'x-image-meta-property-foo': 'bar',
-            'x-glance-api-property-abc': 'def'
+            'x-glance-api-property-abc': 'def',
+            'x-glance-registry-purge-props': True
         }
         self.assertEqual(expected, observed)
