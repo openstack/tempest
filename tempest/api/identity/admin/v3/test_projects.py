@@ -83,7 +83,7 @@ class ProjectsTestJSON(base.BaseIdentityV3AdminTest):
         project = self.projects_client.create_project(
             project_name, domain_id=domain_id,
             parent_id=root_project_id)['project']
-        self.data.projects.append(project)
+        self.addCleanup(self.projects_client.delete_project, project['id'])
         parent_id = project['parent_id']
         self.assertEqual(project_name, project['name'])
         self.assertEqual(root_project_id, parent_id)
