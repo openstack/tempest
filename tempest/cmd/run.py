@@ -205,7 +205,7 @@ class TempestRun(command.Command):
         parser.add_argument('--list-tests', '-l', action='store_true',
                             help='List tests',
                             default=False)
-        # exectution args
+        # execution args
         parser.add_argument('--concurrency', '-w',
                             help="The number of workers to use, defaults to "
                                  "the number of cpus")
