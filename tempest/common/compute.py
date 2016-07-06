@@ -40,11 +40,20 @@ def create_test_server(clients, validatable=False, validation_resources=None,
     :param clients: Client manager which provides OpenStack Tempest clients.
     :param validatable: Whether the server will be pingable or sshable.
     :param validation_resources: Resources created for the connection to the
-    server. Include a keypair, a security group and an IP.
+        server. Include a keypair, a security group and an IP.
     :param tenant_network: Tenant network to be used for creating a server.
     :param wait_until: Server status to wait for the server to reach after
-    its creation.
+        its creation.
     :param volume_backed: Whether the instance is volume backed or not.
+    :param name: Name of the server to be provisioned. If not defined a random
+        string ending with '-instance' will be generated.
+    :param flavor: Flavor of the server to be provisioned. If not defined,
+        CONF.compute.flavor_ref will be used instead.
+    :param image_id: ID of the image to be used to provision the server. If not
+        defined, CONF.compute.image_ref will be used instead.
+    :param delete_vol_on_termination: Controls whether the backing volume
+        should be deleted when the server is deleted. Only applies to volume
+        backed servers.
     :returns: a tuple
     """
 
