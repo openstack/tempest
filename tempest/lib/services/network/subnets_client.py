@@ -16,11 +16,21 @@ from tempest.lib.services.network import base
 class SubnetsClient(base.BaseNetworkClient):
 
     def create_subnet(self, **kwargs):
+        """Creates a subnet on a network.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-networking-v2.html#createSubnet
+        """
         uri = '/subnets'
         post_data = {'subnet': kwargs}
         return self.create_resource(uri, post_data)
 
     def update_subnet(self, subnet_id, **kwargs):
+        """Updates a subnet.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-networking-v2.html#updateSubnet
+        """
         uri = '/subnets/%s' % subnet_id
         post_data = {'subnet': kwargs}
         return self.update_resource(uri, post_data)
