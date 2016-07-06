@@ -19,6 +19,11 @@ class ImageMembersClient(rest_client.RestClient):
     api_version = "v2"
 
     def list_image_members(self, image_id):
+        """List image members.
+
+        Available params: http://developer.openstack.org/
+                          api-ref-image-v2.html#listImageMembers-v2
+        """
         url = 'images/%s/members' % image_id
         resp, body = self.get(url)
         self.expected_success(200, resp.status)
@@ -52,12 +57,22 @@ class ImageMembersClient(rest_client.RestClient):
         return rest_client.ResponseBody(resp, body)
 
     def show_image_member(self, image_id, member_id):
+        """Show an image member.
+
+        Available params: http://developer.openstack.org/
+                          api-ref-image-v2.html#showImageMember-v2
+        """
         url = 'images/%s/members/%s' % (image_id, member_id)
         resp, body = self.get(url)
         self.expected_success(200, resp.status)
         return rest_client.ResponseBody(resp, json.loads(body))
 
     def delete_image_member(self, image_id, member_id):
+        """Delete an image member.
+
+        Available params: http://developer.openstack.org/
+                          api-ref-image-v2.html#deleteImageMember-v2
+        """
         url = 'images/%s/members/%s' % (image_id, member_id)
         resp, _ = self.delete(url)
         self.expected_success(204, resp.status)
