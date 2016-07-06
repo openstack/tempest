@@ -16,11 +16,21 @@ from tempest.lib.services.network import base
 class NetworksClient(base.BaseNetworkClient):
 
     def create_network(self, **kwargs):
+        """Creates a network.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-networking-v2.html#createNetwork
+        """
         uri = '/networks'
         post_data = {'network': kwargs}
         return self.create_resource(uri, post_data)
 
     def update_network(self, network_id, **kwargs):
+        """Updates a network.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-networking-v2.html#updateNetwork
+        """
         uri = '/networks/%s' % network_id
         post_data = {'network': kwargs}
         return self.update_resource(uri, post_data)
