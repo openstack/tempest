@@ -63,12 +63,14 @@ as it is simpler, and quicker to work with.
    This can be done within a venv, but the assumption for this guide is that
    the Tempest cli entry point will be in your shell's PATH.
 
-#. Installing Tempest will create a /etc/tempest dir which will contain the
-   sample config file packaged with Tempest. The contents of /etc/tempest will
-   be copied to all local working dirs, so if there is any common configuration
-   you'd like to be shared between anyone setting up local Tempest working dirs
-   it's recommended that you copy or rename tempest.conf.sample to tempest.conf
-   and make those changes to that file in /etc/tempest
+#. Installing Tempest may create a /etc/tempest dir, however if one isn't
+   created you can create one or use ~/.tempest/etc or ~/.config/tempest in
+   place of /etc/tempest. If none of these dirs are created tempest will create
+   ~/.tempest/etc when it's needed. The contents of this dir will always
+   automatically be copied to all etc/ dirs in local workspaces as an initial
+   setup step. So if there is any common configuration you'd like to be shared
+   between local Tempest workspaces it's recommended that you pre-populate it
+   before running ``tempest init``.
 
 #. Setup a local Tempest workspace. This is done by using the tempest init
    command::
