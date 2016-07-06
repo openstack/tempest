@@ -249,13 +249,13 @@ def stress_openstack(tests, duration, max_runs=None, stop_on_error=False):
             had_errors = True
         sum_runs += process['statistic']['runs']
         sum_fails += process['statistic']['fails']
-        print ("Process %d (%s): Run %d actions (%d failed)" % (
-               process['p_number'],
-               process['action'],
-               process['statistic']['runs'],
-               process['statistic']['fails']))
-    print ("Summary:")
-    print ("Run %d actions (%d failed)" % (sum_runs, sum_fails))
+        print("Process %d (%s): Run %d actions (%d failed)" % (
+            process['p_number'],
+            process['action'],
+            process['statistic']['runs'],
+            process['statistic']['fails']))
+    print("Summary:")
+    print("Run %d actions (%d failed)" % (sum_runs, sum_fails))
 
     if not had_errors and CONF.stress.full_clean_stack:
         LOG.info("cleaning up")
