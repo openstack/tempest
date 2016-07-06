@@ -166,6 +166,23 @@ class VolumesBackupsAdminV2Test(base.BaseVolumeAdminTest):
         self.admin_backups_client.wait_for_backup_status(import_backup['id'],
                                                          'available')
 
+    @test.idempotent_id('47a35425-a891-4e13-961c-c45deea21e94')
+    def test_volume_backup_reset_status(self):
+        # Create a backup
+        backup_name = data_utils.rand_name('Backup')
+        backup = self.admin_backups_client.create_backup(
+            volume_id=self.volume['id'], name=backup_name)['backup']
+        self.addCleanup(self.admin_backups_client.delete_backup,
+                        backup['id'])
+        self.assertEqual(backup_name, backup['name'])
+        self.admin_backups_client.wait_for_backup_status(backup['id'],
+                                                         'available')
+        # Reset backup status to error
+        self.admin_backups_client.reset_backup_status(backup_id=backup['id'],
+                                                      status="error")
+        self.admin_backups_client.wait_for_backup_status(backup['id'],
+                                                         'error')
+
 
 class VolumesBackupsAdminV1Test(VolumesBackupsAdminV2Test):
     _api_version = 1
