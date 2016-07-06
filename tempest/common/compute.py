@@ -30,7 +30,8 @@ LOG = logging.getLogger(__name__)
 def create_test_server(clients, validatable=False, validation_resources=None,
                        tenant_network=None, wait_until=None,
                        volume_backed=False, name=None, flavor=None,
-                       image_id=None, **kwargs):
+                       image_id=None, delete_vol_on_termination=True,
+                       **kwargs):
     """Common wrapper utility returning a test server.
 
     This method is a common wrapper returning a test server that can be
@@ -106,7 +107,7 @@ def create_test_server(clients, validatable=False, validation_resources=None,
             'source_type': 'volume',
             'destination_type': 'volume',
             'boot_index': 0,
-            'delete_on_termination': True}]
+            'delete_on_termination': delete_vol_on_termination}]
         kwargs['block_device_mapping_v2'] = bd_map_v2
 
         # Since this is boot from volume an image does not need
