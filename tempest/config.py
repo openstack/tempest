@@ -25,6 +25,7 @@ from oslo_config import cfg
 from oslo_log import log as logging
 import testtools
 
+from tempest.lib import exceptions
 from tempest.test_discover import plugins
 
 
@@ -1350,3 +1351,84 @@ def skip_if_config(*args):
             return f(self, *func_args, **func_kwargs)
         return wrapper
     return decorator
+
+
+def service_client_config(service_client_name=None):
+    """Return a dict with the parameters to init service clients
+
+    Extracts from CONF the settings specific to the service_client_name and
+    api_version, and formats them as dict ready to be passed to the service
+    clients __init__:
+
+        * `region` (default to identity)
+        * `catalog_type`
+        * `endpoint_type`
+        * `build_timeout` (object-storage and identity default to compute)
+        * `build_interval` (object-storage and identity default to compute)
+
+    The following common settings are always returned, even if
+    `service_client_name` is None:
+
+        * `disable_ssl_certificate_validation`
+        * `ca_certs`
+        * `trace_requests`
+
+    The dict returned by this does not fit a few service clients:
+
+        * The endpoint type is not returned for identity client, since it takes
+          three different values for v2 admin, v2 public and v3
+        * The `ServersClient` from compute accepts an optional
+          `enable_instance_password` parameter, which is not returned.
+        * The `VolumesClient` for both v1 and v2 volume accept an optional
+          `default_volume_size` parameter, which is not returned.
+        * The `TokenClient` and `V3TokenClient` have a very different
+          interface, only auth_url is needed for them.
+
+    :param service_client_name: str Name of the service. Supported values are
+        'compute', 'identity', 'image', 'network', 'object-storage', 'volume'
+    :return: dictionary of __init__ parameters for the service clients
+    :rtype: dict
+    """
+    _parameters = {
+        'disable_ssl_certificate_validation':
+            CONF.identity.disable_ssl_certificate_validation,
+        'ca_certs': CONF.identity.ca_certificates_file,
+        'trace_requests': CONF.debug.trace_requests
+    }
+
+    if service_client_name is None:
+        return _parameters
+
+    # Get the group of options first, by normalising the service_group_name
+    # Services with a '-' in the name have an '_' in the option group name
+    config_group = service_client_name.replace('-', '_')
+    # NOTE(andreaf) Check if the config group exists. This allows for this
+    # helper to be used for settings from registered plugins as well
+    try:
+        options = getattr(CONF, config_group)
+    except cfg.NoSuchOptError:
+        # Option group not defined
+        raise exceptions.UnknownServiceClient(services=service_client_name)
+    # Set endpoint_type
+    # Identity uses different settings depending on API version, so do not
+    # return the endpoint at all.
+    if service_client_name != 'identity':
+        _parameters['endpoint_type'] = getattr(options, 'endpoint_type')
+    # Set build_*
+    # Object storage and identity groups do not have conf settings for
+    # build_* parameters, and we default to compute in any case
+    for setting in ['build_timeout', 'build_interval']:
+        if not hasattr(options, setting) or not getattr(options, setting):
+            _parameters[setting] = getattr(CONF.compute, setting)
+        else:
+            _parameters[setting] = getattr(options, setting)
+    # Set region
+    # If a service client does not define region or region is not set
+    # default to the identity region
+    if not hasattr(options, 'region') or not getattr(options, 'region'):
+        _parameters['region'] = CONF.identity.region
+    else:
+        _parameters['region'] = getattr(options, 'region')
+    # Set service
+    _parameters['service'] = getattr(options, 'catalog_type')
+    return _parameters

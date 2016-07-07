@@ -21,6 +21,7 @@ from tempest.common import negative_rest_client
 from tempest import config
 from tempest import exceptions
 from tempest.lib import auth
+from tempest.lib import exceptions as lib_exc
 from tempest.lib.services import compute
 from tempest.lib.services import image
 from tempest.lib.services import network
@@ -39,15 +40,10 @@ LOG = logging.getLogger(__name__)
 class Manager(service_clients.ServiceClients):
     """Top level manager for OpenStack tempest clients"""
 
-    default_params = {
-        'disable_ssl_certificate_validation':
-            CONF.identity.disable_ssl_certificate_validation,
-        'ca_certs': CONF.identity.ca_certificates_file,
-        'trace_requests': CONF.debug.trace_requests
-    }
+    default_params = config.service_client_config()
 
-    # NOTE: Tempest uses timeout values of compute API if project specific
-    # timeout values don't exist.
+    # TODO(andreaf) This is only used by data_processing and baremetal clients,
+    # and should be removed once they are out of Tempest
     default_params_with_timeout_values = {
         'build_interval': CONF.compute.build_interval,
         'build_timeout': CONF.compute.build_timeout
@@ -65,7 +61,11 @@ class Manager(service_clients.ServiceClients):
         _, identity_uri = get_auth_provider_class(credentials)
         super(Manager, self).__init__(
             credentials=credentials, identity_uri=identity_uri, scope=scope,
-            region=CONF.identity.region, **self.default_params)
+            region=CONF.identity.region,
+            client_parameters=self._prepare_configuration())
+        # TODO(andreaf) When clients are initialised without the right
+        # parameters available, the calls below will trigger a KeyError.
+        # We should catch that and raise a better error.
         self._set_compute_clients()
         self._set_identity_clients()
         self._set_volume_clients()
@@ -96,15 +96,38 @@ class Manager(service_clients.ServiceClients):
         self.negative_client = negative_rest_client.NegativeRestClient(
             self.auth_provider, service, **self.default_params)
 
+    def _prepare_configuration(self):
+        """Map values from CONF into Manager parameters
+
+        This uses `config.service_client_config` for all services to collect
+        most configuration items needed to init the clients.
+        """
+        # NOTE(andreaf) Configuration items will be passed in future patches
+        # into ClientFactory objects, but for now we update all the
+        # _set_*_client methods to consume them so we can verify that the
+        # configuration collected is correct
+
+        configuration = {}
+
+        # Setup the parameters for all Tempest services.
+        # NOTE(andreaf) Since client.py is an internal module of Tempest,
+        # it doesn't have to consider plugin configuration.
+        for service in service_clients.tempest_modules():
+            try:
+                # NOTE(andreaf) Use the unversioned service name to fetch
+                # the configuration since configuration is not versioned.
+                service_for_config = service.split('.')[0]
+                if service_for_config not in configuration:
+                    configuration[service_for_config] = (
+                        config.service_client_config(service_for_config))
+            except lib_exc.UnknownServiceClient:
+                LOG.warn(
+                    'Could not load configuration for service %s' % service)
+
+        return configuration
+
     def _set_network_clients(self):
-        params = {
-            'service': CONF.network.catalog_type,
-            'region': CONF.network.region or CONF.identity.region,
-            'endpoint_type': CONF.network.endpoint_type,
-            'build_interval': CONF.network.build_interval,
-            'build_timeout': CONF.network.build_timeout
-        }
-        params.update(self.default_params)
+        params = self.parameters['network']
         self.network_agents_client = network.AgentsClient(
             self.auth_provider, **params)
         self.network_extensions_client = network.ExtensionsClient(
@@ -135,20 +158,13 @@ class Manager(service_clients.ServiceClients):
             self.auth_provider, **params)
 
     def _set_image_clients(self):
-        params = {
-            'service': CONF.image.catalog_type,
-            'region': CONF.image.region or CONF.identity.region,
-            'endpoint_type': CONF.image.endpoint_type,
-            'build_interval': CONF.image.build_interval,
-            'build_timeout': CONF.image.build_timeout
-        }
-        params.update(self.default_params)
-
         if CONF.service_available.glance:
+            params = self.parameters['image']
             self.image_client = image.v1.ImagesClient(
                 self.auth_provider, **params)
             self.image_member_client = image.v1.ImageMembersClient(
                 self.auth_provider, **params)
+
             self.image_client_v2 = image.v2.ImagesClient(
                 self.auth_provider, **params)
             self.image_member_client_v2 = image.v2.ImageMembersClient(
@@ -161,14 +177,7 @@ class Manager(service_clients.ServiceClients):
                 self.auth_provider, **params)
 
     def _set_compute_clients(self):
-        params = {
-            'service': CONF.compute.catalog_type,
-            'region': CONF.compute.region or CONF.identity.region,
-            'endpoint_type': CONF.compute.endpoint_type,
-            'build_interval': CONF.compute.build_interval,
-            'build_timeout': CONF.compute.build_timeout
-        }
-        params.update(self.default_params)
+        params = self.parameters['compute']
 
         self.agents_client = compute.AgentsClient(self.auth_provider, **params)
         self.compute_networks_client = compute.NetworksClient(
@@ -234,10 +243,11 @@ class Manager(service_clients.ServiceClients):
         # NOTE: The following client needs special timeout values because
         # the API is a proxy for the other component.
         params_volume = copy.deepcopy(params)
-        params_volume.update({
-            'build_interval': CONF.volume.build_interval,
-            'build_timeout': CONF.volume.build_timeout
-        })
+        # Optional parameters
+        for _key in ('build_interval', 'build_timeout'):
+            _value = self.parameters['volume'].get(_key)
+            if _value:
+                params_volume[_key] = _value
         self.volumes_extensions_client = compute.VolumesClient(
             self.auth_provider, **params_volume)
         self.compute_versions_client = compute.VersionsClient(
@@ -246,14 +256,10 @@ class Manager(service_clients.ServiceClients):
             self.auth_provider, **params_volume)
 
     def _set_identity_clients(self):
-        params = {
-            'service': CONF.identity.catalog_type,
-            'region': CONF.identity.region
-        }
-        params.update(self.default_params_with_timeout_values)
+        params = self.parameters['identity']
 
         # Clients below use the admin endpoint type of Keystone API v2
-        params_v2_admin = params.copy()
+        params_v2_admin = copy.copy(params)
         params_v2_admin['endpoint_type'] = CONF.identity.v2_admin_endpoint_type
         self.endpoints_client = identity.v2.EndpointsClient(self.auth_provider,
                                                             **params_v2_admin)
@@ -269,7 +275,7 @@ class Manager(service_clients.ServiceClients):
             self.auth_provider, **params_v2_admin)
 
         # Clients below use the public endpoint type of Keystone API v2
-        params_v2_public = params.copy()
+        params_v2_public = copy.copy(params)
         params_v2_public['endpoint_type'] = (
             CONF.identity.v2_public_endpoint_type)
         self.identity_public_client = identity.v2.IdentityClient(
@@ -279,8 +285,9 @@ class Manager(service_clients.ServiceClients):
         self.users_public_client = identity.v2.UsersClient(
             self.auth_provider, **params_v2_public)
 
-        # Clients below use the endpoint type of Keystone API v3
-        params_v3 = params.copy()
+        # Clients below use the endpoint type of Keystone API v3, which is set
+        # in endpoint_type
+        params_v3 = copy.copy(params)
         params_v3['endpoint_type'] = CONF.identity.v3_endpoint_type
         self.domains_client = identity.v3.DomainsClient(self.auth_provider,
                                                         **params_v3)
@@ -326,14 +333,8 @@ class Manager(service_clients.ServiceClients):
                 raise exceptions.InvalidConfiguration(msg)
 
     def _set_volume_clients(self):
-        params = {
-            'service': CONF.volume.catalog_type,
-            'region': CONF.volume.region or CONF.identity.region,
-            'endpoint_type': CONF.volume.endpoint_type,
-            'build_interval': CONF.volume.build_interval,
-            'build_timeout': CONF.volume.build_timeout
-        }
-        params.update(self.default_params)
+        # Mandatory parameters (always defined)
+        params = self.parameters['volume']
 
         self.volume_qos_client = volume.v1.QosSpecsClient(self.auth_provider,
                                                           **params)
@@ -381,12 +382,8 @@ class Manager(service_clients.ServiceClients):
             volume.v2.AvailabilityZoneClient(self.auth_provider, **params)
 
     def _set_object_storage_clients(self):
-        params = {
-            'service': CONF.object_storage.catalog_type,
-            'region': CONF.object_storage.region or CONF.identity.region,
-            'endpoint_type': CONF.object_storage.endpoint_type
-        }
-        params.update(self.default_params_with_timeout_values)
+        # Mandatory parameters (always defined)
+        params = self.parameters['object-storage']
 
         self.account_client = object_storage.AccountClient(self.auth_provider,
                                                            **params)
@@ -404,12 +401,8 @@ def get_auth_provider_class(credentials):
 
 
 def get_auth_provider(credentials, pre_auth=False, scope='project'):
-    default_params = {
-        'disable_ssl_certificate_validation':
-            CONF.identity.disable_ssl_certificate_validation,
-        'ca_certs': CONF.identity.ca_certificates_file,
-        'trace_requests': CONF.debug.trace_requests
-    }
+    # kwargs for auth provider match the common ones used by service clients
+    default_params = config.service_client_config()
     if credentials is None:
         raise exceptions.InvalidCredentials(
             'Credentials must be specified')

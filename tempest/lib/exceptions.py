@@ -225,3 +225,7 @@ class SSHExecCommandFailed(TempestException):
     message = ("Command '%(command)s', exit status: %(exit_status)d, "
                "stderr:\n%(stderr)s\n"
                "stdout:\n%(stdout)s")
+
+
+class UnknownServiceClient(TempestException):
+    message = "Service clients named %(services)s are not known"
