@@ -22,7 +22,11 @@ class ServicesClient(rest_client.RestClient):
     api_version = "v2.0"
 
     def create_service(self, **kwargs):
-        """Create a service."""
+        """Create a service.
+
+        Available params: see http://developer.openstack.org/api-ref/identity/
+                              v2-ext/?expanded=#create-service-admin-extension
+        """
         post_body = json.dumps({'OS-KSADM:service': kwargs})
         resp, body = self.post('/OS-KSADM/services', post_body)
         self.expected_success(200, resp.status)
@@ -38,7 +42,11 @@ class ServicesClient(rest_client.RestClient):
         return rest_client.ResponseBody(resp, body)
 
     def list_services(self, **params):
-        """List Service - Returns Services."""
+        """List Service - Returns Services.
+
+        Available params: see http://developer.openstack.org/api-ref/identity/
+                              v2-ext/?expanded=#list-services-admin-extension
+        """
         url = '/OS-KSADM/services'
         if params:
             url += '?%s' % urllib.urlencode(params)
