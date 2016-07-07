@@ -80,8 +80,6 @@ class UnitTest(stressaction.StressAction):
 
             try:
                 self.run_core()
-            except Exception as e:
-                raise e
             finally:
                 if (CONF.stress.leave_dirty_stack is False
                     and self.class_setup_per == SetUpClassRunTime.action):
