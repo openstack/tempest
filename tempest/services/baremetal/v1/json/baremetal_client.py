@@ -20,7 +20,11 @@ class BaremetalClient(base.BaremetalClient):
 
     @base.handle_errors
     def list_nodes(self, **kwargs):
-        """List all existing nodes."""
+        """List all existing nodes.
+
+        Available params: see http://developer.openstack.org/api-ref/
+                              baremetal/index.html#list-nodes
+        """
         return self._list_request('nodes', **kwargs)
 
     @base.handle_errors
@@ -35,7 +39,11 @@ class BaremetalClient(base.BaremetalClient):
 
     @base.handle_errors
     def list_ports(self, **kwargs):
-        """List all existing ports."""
+        """List all existing ports.
+
+        Available params: see http://developer.openstack.org/api-ref/
+                              baremetal/index.html?expanded=#list-ports
+        """
         return self._list_request('ports', **kwargs)
 
     @base.handle_errors
@@ -50,7 +58,11 @@ class BaremetalClient(base.BaremetalClient):
 
     @base.handle_errors
     def list_ports_detail(self, **kwargs):
-        """Details list all existing ports."""
+        """Details list all existing ports.
+
+        Available params: see http://developer.openstack.org/api-ref/baremetal/
+                              index.html?expanded=#list-detailed-ports
+        """
         return self._list_request('/ports/detail', **kwargs)
 
     @base.handle_errors
