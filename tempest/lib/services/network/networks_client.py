@@ -36,6 +36,11 @@ class NetworksClient(base.BaseNetworkClient):
         return self.update_resource(uri, post_data)
 
     def show_network(self, network_id, **fields):
+        """Shows details for a network.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-networking-v2.html#showNetwork
+        """
         uri = '/networks/%s' % network_id
         return self.show_resource(uri, **fields)
 
@@ -44,6 +49,11 @@ class NetworksClient(base.BaseNetworkClient):
         return self.delete_resource(uri)
 
     def list_networks(self, **filters):
+        """Lists networks to which the tenant has access.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-networking-v2.html#listNetworks
+        """
         uri = '/networks'
         return self.list_resources(uri, **filters)
 

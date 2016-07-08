@@ -26,11 +26,21 @@ class RoutersClient(base.BaseNetworkClient):
         return self.create_resource(uri, post_body)
 
     def update_router(self, router_id, **kwargs):
+        """Updates a logical router.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-networking-v2-ext.html#updateRouter
+        """
         uri = '/routers/%s' % router_id
         update_body = {'router': kwargs}
         return self.update_resource(uri, update_body)
 
     def show_router(self, router_id, **fields):
+        """Shows details for a router.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-networking-v2-ext.html#showRouter
+        """
         uri = '/routers/%s' % router_id
         return self.show_resource(uri, **fields)
 
@@ -39,6 +49,11 @@ class RoutersClient(base.BaseNetworkClient):
         return self.delete_resource(uri)
 
     def list_routers(self, **filters):
+        """Lists logical routers.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-networking-v2-ext.html#listRouters
+        """
         uri = '/routers'
         return self.list_resources(uri, **filters)
 
@@ -46,7 +61,8 @@ class RoutersClient(base.BaseNetworkClient):
         """Add router interface.
 
         Available params: see http://developer.openstack.org/
-                              api-ref-networking-v2-ext.html#addRouterInterface
+                              api-ref-networking-v2-ext.html#
+                              addRouterInterface
         """
         uri = '/routers/%s/add_router_interface' % router_id
         return self.update_resource(uri, kwargs)
@@ -55,7 +71,8 @@ class RoutersClient(base.BaseNetworkClient):
         """Remove router interface.
 
         Available params: see http://developer.openstack.org/
-                              api-ref-networking-v2-ext.html#deleteRouterInterface
+                              api-ref-networking-v2-ext.html#
+                              deleteRouterInterface
         """
         uri = '/routers/%s/remove_router_interface' % router_id
         return self.update_resource(uri, kwargs)
