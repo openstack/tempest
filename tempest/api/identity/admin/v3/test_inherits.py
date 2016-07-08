@@ -147,3 +147,88 @@ class InheritsV3TestJSON(BaseInheritsV3Test):
         (self.inherited_roles_client.
          delete_inherited_role_from_group_on_project(
              self.project['id'], self.group['id'], src_role['id']))
+
+    @test.idempotent_id('3acf666e-5354-42ac-8e17-8b68893bcd36')
+    def test_inherit_assign_list_revoke_user_roles_on_domain(self):
+        # Create role
+        src_role = self.roles_client.create_role(
+            name=data_utils.rand_name('Role'))['role']
+        self.addCleanup(self.roles_client.delete_role, src_role['id'])
+
+        # Create a project hierarchy
+        leaf_project_name = data_utils.rand_name('project')
+        leaf_project = self.projects_client.create_project(
+            leaf_project_name, domain_id=self.domain['id'],
+            parent_id=self.project['id'])['project']
+        self.addCleanup(
+            self.projects_client.delete_project, leaf_project['id'])
+
+        # Assign role on domain
+        self.inherited_roles_client.create_inherited_role_on_domains_user(
+            self.domain['id'], self.user['id'], src_role['id'])
+
+        # List "effective" role assignments from user on the parent project
+        assignments = (
+            self.role_assignments.list_user_project_effective_assignments(
+                self.project['id'], self.user['id']))['role_assignments']
+        self.assertNotEmpty(assignments)
+
+        # List "effective" role assignments from user on the leaf project
+        assignments = (
+            self.role_assignments.list_user_project_effective_assignments(
+                leaf_project['id'], self.user['id']))['role_assignments']
+        self.assertNotEmpty(assignments)
+
+        # Revoke role from domain
+        self.inherited_roles_client.delete_inherited_role_from_user_on_domain(
+            self.domain['id'], self.user['id'], src_role['id'])
+
+        # List "effective" role assignments from user on the parent project
+        # should return an empty list
+        assignments = (
+            self.role_assignments.list_user_project_effective_assignments(
+                self.project['id'], self.user['id']))['role_assignments']
+        self.assertEmpty(assignments)
+
+        # List "effective" role assignments from user on the leaf project
+        # should return an empty list
+        assignments = (
+            self.role_assignments.list_user_project_effective_assignments(
+                leaf_project['id'], self.user['id']))['role_assignments']
+        self.assertEmpty(assignments)
+
+    @test.idempotent_id('9f02ccd9-9b57-46b4-8f77-dd5a736f3a06')
+    def test_inherit_assign_list_revoke_user_roles_on_project_tree(self):
+        # Create role
+        src_role = self.roles_client.create_role(
+            name=data_utils.rand_name('Role'))['role']
+        self.addCleanup(self.roles_client.delete_role, src_role['id'])
+
+        # Create a project hierarchy
+        leaf_project_name = data_utils.rand_name('project')
+        leaf_project = self.projects_client.create_project(
+            leaf_project_name, domain_id=self.domain['id'],
+            parent_id=self.project['id'])['project']
+        self.addCleanup(
+            self.projects_client.delete_project, leaf_project['id'])
+
+        # Assign role on parent project
+        self.inherited_roles_client.create_inherited_role_on_projects_user(
+            self.project['id'], self.user['id'], src_role['id'])
+
+        # List "effective" role assignments from user on the leaf project
+        assignments = (
+            self.role_assignments.list_user_project_effective_assignments(
+                leaf_project['id'], self.user['id']))['role_assignments']
+        self.assertNotEmpty(assignments)
+
+        # Revoke role from parent project
+        self.inherited_roles_client.delete_inherited_role_from_user_on_project(
+            self.project['id'], self.user['id'], src_role['id'])
+
+        # List "effective" role assignments from user on the leaf project
+        # should return an empty list
+        assignments = (
+            self.role_assignments.list_user_project_effective_assignments(
+                leaf_project['id'], self.user['id']))['role_assignments']
+        self.assertEmpty(assignments)

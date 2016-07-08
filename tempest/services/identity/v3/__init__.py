@@ -28,8 +28,11 @@ from tempest.lib.services.identity.v3.token_client import V3TokenClient
 from tempest.lib.services.identity.v3.trusts_client import TrustsClient
 from tempest.lib.services.identity.v3.users_client import UsersClient
 from tempest.services.identity.v3.json.domains_client import DomainsClient
+from tempest.services.identity.v3.json.role_assignments_client import \
+    RoleAssignmentsClient
 
 __all__ = ['CredentialsClient', 'EndPointsClient', 'GroupsClient',
            'IdentityClient', 'InheritedRolesClient', 'PoliciesClient',
-           'ProjectsClient', 'RegionsClient', 'RolesClient', 'ServicesClient',
-           'V3TokenClient', 'TrustsClient', 'UsersClient', 'DomainsClient', ]
+           'ProjectsClient', 'RegionsClient', 'RoleAssignmentsClient',
+           'RolesClient', 'ServicesClient', 'V3TokenClient', 'TrustsClient',
+           'UsersClient', 'DomainsClient', ]
