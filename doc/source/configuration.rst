@@ -61,10 +61,9 @@ defined.
 Credential Provider Mechanisms
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Tempest currently also has three different internal methods for providing
-authentication to tests: dynamic credentials, locking test accounts, and
-non-locking test accounts. Depending on which one is in use the configuration
-of Tempest is slightly different.
+Tempest currently has two different internal methods for providing authentication
+to tests: dynamic credentials and pre-provisioned credentials.
+Depending on which one is in use the configuration of Tempest is slightly different.
 
 Dynamic Credentials
 """""""""""""""""""
