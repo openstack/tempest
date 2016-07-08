@@ -23,7 +23,11 @@ class BaseSnapshotsClient(rest_client.RestClient):
     create_resp = 200
 
     def list_snapshots(self, detail=False, **params):
-        """List all the snapshot."""
+        """List all the snapshot.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-blockstorage-v2.html#listSnapshots
+        """
         url = 'snapshots'
         if detail:
             url += '/detail'
@@ -36,7 +40,11 @@ class BaseSnapshotsClient(rest_client.RestClient):
         return rest_client.ResponseBody(resp, body)
 
     def show_snapshot(self, snapshot_id):
-        """Returns the details of a single snapshot."""
+        """Returns the details of a single snapshot.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-blockstorage-v2.html#showSnapshot
+        """
         url = "snapshots/%s" % str(snapshot_id)
         resp, body = self.get(url)
         body = json.loads(body)
@@ -68,7 +76,11 @@ class BaseSnapshotsClient(rest_client.RestClient):
         return rest_client.ResponseBody(resp, body)
 
     def delete_snapshot(self, snapshot_id):
-        """Delete Snapshot."""
+        """Delete Snapshot.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-blockstorage-v2.html#deleteSnapshot
+        """
         resp, body = self.delete("snapshots/%s" % str(snapshot_id))
         self.expected_success(202, resp.status)
         return rest_client.ResponseBody(resp, body)
@@ -115,7 +127,12 @@ class BaseSnapshotsClient(rest_client.RestClient):
         return rest_client.ResponseBody(resp, body)
 
     def show_snapshot_metadata(self, snapshot_id):
-        """Get metadata of the snapshot."""
+        """Get metadata of the snapshot.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-blockstorage-v2.html#
+                              showSnapshotMetadata
+        """
         url = "snapshots/%s/metadata" % str(snapshot_id)
         resp, body = self.get(url)
         body = json.loads(body)
@@ -126,7 +143,8 @@ class BaseSnapshotsClient(rest_client.RestClient):
         """Update metadata for the snapshot.
 
         Available params: see http://developer.openstack.org/
-                              api-ref-blockstorage-v2.html#updateSnapshotMetadata
+                              api-ref-blockstorage-v2.html#
+                              updateSnapshotMetadata
         """
         put_body = json.dumps(kwargs)
         url = "snapshots/%s/metadata" % str(snapshot_id)
