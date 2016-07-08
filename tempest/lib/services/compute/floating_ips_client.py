@@ -25,7 +25,11 @@ from tempest.lib.services.compute import base_compute_client
 class FloatingIPsClient(base_compute_client.BaseComputeClient):
 
     def list_floating_ips(self, **params):
-        """Returns a list of all floating IPs filtered by any parameters."""
+        """Returns a list of all floating IPs filtered by any parameters.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-compute-v2.1.html#listfloatingipsObject
+        """
         url = 'os-floating-ips'
         if params:
             url += '?%s' % urllib.urlencode(params)
@@ -36,7 +40,11 @@ class FloatingIPsClient(base_compute_client.BaseComputeClient):
         return rest_client.ResponseBody(resp, body)
 
     def show_floating_ip(self, floating_ip_id):
-        """Get the details of a floating IP."""
+        """Get the details of a floating IP.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-compute-v2.1.html#showFloatingIP
+        """
         url = "os-floating-ips/%s" % floating_ip_id
         resp, body = self.get(url)
         body = json.loads(body)
@@ -57,7 +65,11 @@ class FloatingIPsClient(base_compute_client.BaseComputeClient):
         return rest_client.ResponseBody(resp, body)
 
     def delete_floating_ip(self, floating_ip_id):
-        """Deletes the provided floating IP from the project."""
+        """Deletes the provided floating IP from the project.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-compute-v2.1.html#deleteFloatingIP
+        """
         url = "os-floating-ips/%s" % floating_ip_id
         resp, body = self.delete(url)
         self.validate_response(schema.add_remove_floating_ip, resp, body)

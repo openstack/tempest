@@ -28,6 +28,11 @@ class KeyPairsClient(base_compute_client.BaseComputeClient):
                             {'min': '2.2', 'max': None, 'schema': schemav22}]
 
     def list_keypairs(self, **params):
+        """Lists keypairs that are associated with the account.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-compute-v2.1.html#listKeypairs
+        """
         url = 'os-keypairs'
         if params:
             url += '?%s' % urllib.urlencode(params)
@@ -38,6 +43,11 @@ class KeyPairsClient(base_compute_client.BaseComputeClient):
         return rest_client.ResponseBody(resp, body)
 
     def show_keypair(self, keypair_name, **params):
+        """Shows details for a keypair that is associated with the account.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-compute-v2.1.html#showKeypair
+        """
         url = "os-keypairs/%s" % keypair_name
         if params:
             url += '?%s' % urllib.urlencode(params)
@@ -61,6 +71,11 @@ class KeyPairsClient(base_compute_client.BaseComputeClient):
         return rest_client.ResponseBody(resp, body)
 
     def delete_keypair(self, keypair_name, **params):
+        """Deletes a keypair.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-compute-v2.1.html#deleteKeypair
+        """
         url = "os-keypairs/%s" % keypair_name
         if params:
             url += '?%s' % urllib.urlencode(params)

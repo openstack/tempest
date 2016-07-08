@@ -103,7 +103,11 @@ class ServersClient(base_compute_client.BaseComputeClient):
         return rest_client.ResponseBody(resp, body)
 
     def show_server(self, server_id):
-        """Get server details."""
+        """Get server details.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-compute-v2.1.html#showServer
+        """
         resp, body = self.get("servers/%s" % server_id)
         body = json.loads(body)
         schema = self.get_schema(self.schema_versions_info)
@@ -111,7 +115,11 @@ class ServersClient(base_compute_client.BaseComputeClient):
         return rest_client.ResponseBody(resp, body)
 
     def delete_server(self, server_id):
-        """Delete server."""
+        """Delete server.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-compute-v2.1.html#deleteServer
+        """
         resp, body = self.delete("servers/%s" % server_id)
         self.validate_response(schema.delete_server, resp, body)
         return rest_client.ResponseBody(resp, body)
@@ -141,7 +149,11 @@ class ServersClient(base_compute_client.BaseComputeClient):
         return rest_client.ResponseBody(resp, body)
 
     def list_addresses(self, server_id):
-        """Lists all addresses for a server."""
+        """Lists all addresses for a server.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-compute-v2.1.html#list-ips
+        """
         resp, body = self.get("servers/%s/ips" % server_id)
         body = json.loads(body)
         self.validate_response(schema.list_addresses, resp, body)
@@ -264,12 +276,22 @@ class ServersClient(base_compute_client.BaseComputeClient):
         return self.action(server_id, 'revertResize', **kwargs)
 
     def list_server_metadata(self, server_id):
+        """Lists all metadata for a server.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-compute-v2.1.html#listServerMetadata
+        """
         resp, body = self.get("servers/%s/metadata" % server_id)
         body = json.loads(body)
         self.validate_response(schema.list_server_metadata, resp, body)
         return rest_client.ResponseBody(resp, body)
 
     def set_server_metadata(self, server_id, meta, no_metadata_field=False):
+        """Sets one or more metadata items for a server.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-compute-v2.1.html#createServerMetadata
+        """
         if no_metadata_field:
             post_body = ""
         else:
@@ -281,6 +303,11 @@ class ServersClient(base_compute_client.BaseComputeClient):
         return rest_client.ResponseBody(resp, body)
 
     def update_server_metadata(self, server_id, meta):
+        """Updates one or more metadata items for a server.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-compute-v2.1.html#updateServerMetadata
+        """
         post_body = json.dumps({'metadata': meta})
         resp, body = self.post('servers/%s/metadata' % server_id,
                                post_body)
@@ -290,6 +317,11 @@ class ServersClient(base_compute_client.BaseComputeClient):
         return rest_client.ResponseBody(resp, body)
 
     def show_server_metadata_item(self, server_id, key):
+        """Shows details for a metadata item, by key, for a server.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-compute-v2.1.html#showServerMetadataItem
+        """
         resp, body = self.get("servers/%s/metadata/%s" % (server_id, key))
         body = json.loads(body)
         self.validate_response(schema.set_show_server_metadata_item,
@@ -297,6 +329,11 @@ class ServersClient(base_compute_client.BaseComputeClient):
         return rest_client.ResponseBody(resp, body)
 
     def set_server_metadata_item(self, server_id, key, meta):
+        """Sets a metadata item, by key, for a server.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-compute-v2.1.html#setServerMetadataItem
+        """
         post_body = json.dumps({'meta': meta})
         resp, body = self.put('servers/%s/metadata/%s' % (server_id, key),
                               post_body)
@@ -306,6 +343,11 @@ class ServersClient(base_compute_client.BaseComputeClient):
         return rest_client.ResponseBody(resp, body)
 
     def delete_server_metadata_item(self, server_id, key):
+        """Deletes a metadata item, by key, from a server.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-compute-v2.1.html#deleteServerMetadataItem
+        """
         resp, body = self.delete("servers/%s/metadata/%s" %
                                  (server_id, key))
         self.validate_response(schema.delete_server_metadata_item,
@@ -313,9 +355,19 @@ class ServersClient(base_compute_client.BaseComputeClient):
         return rest_client.ResponseBody(resp, body)
 
     def stop_server(self, server_id, **kwargs):
+        """Stops a running server and changes its status to SHUTOFF.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-compute-v2.1.html#stop
+        """
         return self.action(server_id, 'os-stop', **kwargs)
 
     def start_server(self, server_id, **kwargs):
+        """Starts a stopped server and changes its status to ACTIVE.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-compute-v2.1.html#start
+        """
         return self.action(server_id, 'os-start', **kwargs)
 
     def attach_volume(self, server_id, **kwargs):
@@ -341,14 +393,23 @@ class ServersClient(base_compute_client.BaseComputeClient):
         return rest_client.ResponseBody(resp, body)
 
     def detach_volume(self, server_id, volume_id):  # noqa
-        """Detaches a volume from a server instance."""
+        """Detaches a volume from a server instance.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-compute-v2.1.html#deleteVolumeAttachment
+        """
         resp, body = self.delete('servers/%s/os-volume_attachments/%s' %
                                  (server_id, volume_id))
         self.validate_response(schema.detach_volume, resp, body)
         return rest_client.ResponseBody(resp, body)
 
     def show_volume_attachment(self, server_id, volume_id):
-        """Return details about the given volume attachment."""
+        """Return details about the given volume attachment.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-compute-v2.1.html#
+                              getVolumeAttachmentDetails
+        """
         resp, body = self.get('servers/%s/os-volume_attachments/%s' % (
             server_id, volume_id))
         body = json.loads(body)
@@ -356,7 +417,11 @@ class ServersClient(base_compute_client.BaseComputeClient):
         return rest_client.ResponseBody(resp, body)
 
     def list_volume_attachments(self, server_id):
-        """Returns the list of volume attachments for a given instance."""
+        """Returns the list of volume attachments for a given instance.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-compute-v2.1.html#listVolumeAttachments
+        """
         resp, body = self.get('servers/%s/os-volume_attachments' % (
             server_id))
         body = json.loads(body)
@@ -366,7 +431,8 @@ class ServersClient(base_compute_client.BaseComputeClient):
     def add_security_group(self, server_id, **kwargs):
         """Add a security group to the server.
 
-        Available params: TODO
+        Available params: http://developer.openstack.org/
+                          api-ref-compute-v2.1.html#addSecurityGroup
         """
         # TODO(oomichi): The api-site doesn't contain this API description.
         # So the above should be changed to the api-site link after
@@ -377,7 +443,8 @@ class ServersClient(base_compute_client.BaseComputeClient):
     def remove_security_group(self, server_id, **kwargs):
         """Remove a security group from the server.
 
-        Available params: TODO
+        Available params: http://developer.openstack.org/
+                          api-ref-compute-v2.1.html#removeSecurityGroup
         """
         # TODO(oomichi): The api-site doesn't contain this API description.
         # So the above should be changed to the api-site link after
@@ -507,7 +574,11 @@ class ServersClient(base_compute_client.BaseComputeClient):
         return self.action(server_id, 'rescue', schema.rescue_server, **kwargs)
 
     def unrescue_server(self, server_id):
-        """Unrescue the provided server."""
+        """Unrescue the provided server.
+
+        Available params: http://developer.openstack.org/
+                          api-ref-compute-v2.1.html#unrescue
+        """
         return self.action(server_id, 'unrescue')
 
     def show_server_diagnostics(self, server_id):

@@ -25,7 +25,11 @@ from tempest.lib.services.compute import base_compute_client
 class VolumesClient(base_compute_client.BaseComputeClient):
 
     def list_volumes(self, detail=False, **params):
-        """List all the volumes created."""
+        """List all the volumes created.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-compute-v2.1.html#listVolumes
+        """
         url = 'os-volumes'
 
         if detail:
@@ -39,7 +43,11 @@ class VolumesClient(base_compute_client.BaseComputeClient):
         return rest_client.ResponseBody(resp, body)
 
     def show_volume(self, volume_id):
-        """Return the details of a single volume."""
+        """Return the details of a single volume.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-compute-v2.1.html#showVolume
+        """
         url = "os-volumes/%s" % volume_id
         resp, body = self.get(url)
         body = json.loads(body)
@@ -59,7 +67,11 @@ class VolumesClient(base_compute_client.BaseComputeClient):
         return rest_client.ResponseBody(resp, body)
 
     def delete_volume(self, volume_id):
-        """Delete the Specified Volume."""
+        """Delete the Specified Volume.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-compute-v2.1.html#deleteVolume
+        """
         resp, body = self.delete("os-volumes/%s" % volume_id)
         self.validate_response(schema.delete_volume, resp, body)
         return rest_client.ResponseBody(resp, body)

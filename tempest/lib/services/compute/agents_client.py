@@ -24,7 +24,11 @@ class AgentsClient(base_compute_client.BaseComputeClient):
     """Tests Agents API"""
 
     def list_agents(self, **params):
-        """List all agent builds."""
+        """List all agent builds.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-compute-v2.1.html#listbuilds
+        """
         url = 'os-agents'
         if params:
             url += '?%s' % urllib.urlencode(params)
@@ -46,7 +50,11 @@ class AgentsClient(base_compute_client.BaseComputeClient):
         return rest_client.ResponseBody(resp, body)
 
     def delete_agent(self, agent_id):
-        """Delete an existing agent build."""
+        """Delete an existing agent build.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-compute-v2.1.html#deleteBuild
+        """
         resp, body = self.delete("os-agents/%s" % agent_id)
         self.validate_response(schema.delete_agent, resp, body)
         return rest_client.ResponseBody(resp, body)
