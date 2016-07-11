@@ -77,8 +77,8 @@ class TestServiceClients(base.TestCase):
         uri = 'fake_uri'
         _manager = service_clients.ServiceClients(creds, identity_uri=uri,
                                                   client_parameters=params)
-        self.assertIn('fake_service1', _manager.parameters.keys())
-        for _key in expeted_params.keys():
+        self.assertIn('fake_service1', _manager.parameters)
+        for _key in expeted_params:
             self.assertIn(_key, _manager.parameters['fake_service1'].keys())
             self.assertEqual(expeted_params[_key],
                              _manager.parameters['fake_service1'].get(_key))

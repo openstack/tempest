@@ -45,7 +45,7 @@ class TestSoftwareConfig(base.BaseOrchestrationTest):
 
     def _validate_config(self, configuration, api_config):
         # Assert all expected keys are present with matching data
-        for k in configuration.keys():
+        for k in configuration:
             self.assertEqual(configuration[k],
                              api_config['software_config'][k])
 

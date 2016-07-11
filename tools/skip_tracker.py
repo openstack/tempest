@@ -95,7 +95,7 @@ def find_skips_in_file(path):
 
 def get_results(result_dict):
     results = []
-    for bug_no in result_dict.keys():
+    for bug_no in result_dict:
         for method in result_dict[bug_no]:
             results.append((method, bug_no))
     return results

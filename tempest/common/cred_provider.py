@@ -94,7 +94,7 @@ class TestResources(object):
                           self.router)
 
     def set_resources(self, **kwargs):
-        for key in kwargs.keys():
+        for key in kwargs:
             if hasattr(self, key):
                 setattr(self, key, kwargs[key])
 

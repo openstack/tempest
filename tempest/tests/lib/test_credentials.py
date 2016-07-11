@@ -99,7 +99,7 @@ class KeystoneV2CredentialsTests(CredentialsTests):
 
     def _test_is_not_valid(self, ignore_key):
         creds = self._get_credentials()
-        for attr in self.attributes.keys():
+        for attr in self.attributes:
             if attr == ignore_key:
                 continue
             temp_attr = getattr(creds, attr)

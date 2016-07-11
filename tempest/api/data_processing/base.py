@@ -349,7 +349,7 @@ class BaseDataProcessingTest(tempest.test.BaseTestCase):
             return None
 
         for plugin in CONF.data_processing_feature_enabled.plugins:
-            if plugin in DEFAULT_TEMPLATES.keys():
+            if plugin in DEFAULT_TEMPLATES:
                 break
         else:
             plugin = ''

@@ -665,7 +665,7 @@ class Credentials(object):
                 msg = ('Cannot have conflicting values for %s and %s' %
                        (key1, key2))
                 raise exceptions.InvalidCredentials(msg)
-        for key in attr.keys():
+        for key in attr:
             if key in self.ATTRIBUTES:
                 setattr(self, key, attr[key])
             else:
