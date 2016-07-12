@@ -185,25 +185,35 @@ class TempestWorkspace(command.Command):
 
         subparsers = parser.add_subparsers()
 
-        list_parser = subparsers.add_parser('list')
+        list_parser = subparsers.add_parser(
+            'list', help='Outputs the name and path of all known tempest '
+            'workspaces')
         list_parser.set_defaults(list=True)
 
-        register_parser = subparsers.add_parser('register')
+        register_parser = subparsers.add_parser(
+            'register', help='Registers a new tempest workspace via a given '
+            '--name and --path')
         register_parser.add_argument('--name', required=True)
         register_parser.add_argument('--path', required=True)
         register_parser.set_defaults(register=True)
 
-        update_parser = subparsers.add_parser('rename')
+        update_parser = subparsers.add_parser(
+            'rename', help='Renames a tempest workspace from --old-name to '
+            '--new-name')
         update_parser.add_argument('--old-name', required=True)
         update_parser.add_argument('--new-name', required=True)
         update_parser.set_defaults(rename=True)
 
-        move_parser = subparsers.add_parser('move')
+        move_parser = subparsers.add_parser(
+            'move', help='Changes the path of a given tempest workspace '
+            '--name to --path')
         move_parser.add_argument('--name', required=True)
         move_parser.add_argument('--path', required=True)
         move_parser.set_defaults(move=True)
 
-        remove_parser = subparsers.add_parser('remove')
+        remove_parser = subparsers.add_parser(
+            'remove', help='Deletes the entry for a given tempest workspace '
+            '--name')
         remove_parser.add_argument('--name', required=True)
         remove_parser.set_defaults(remove=True)
 
