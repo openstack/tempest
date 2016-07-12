@@ -35,7 +35,7 @@ class TenantsTestJSON(base.BaseIdentityV2AdminTest):
             self.addCleanup(test_utils.call_and_ignore_notfound_exc,
                             self.tenants_client.delete_tenant, tenant['id'])
             tenants.append(tenant)
-        tenant_ids = map(lambda x: x['id'], tenants)
+        tenant_ids = [tn['id'] for tn in tenants]
         body = self.tenants_client.list_tenants()['tenants']
         found = [t for t in body if t['id'] in tenant_ids]
         self.assertEqual(len(found), len(tenants), 'Tenants not created')

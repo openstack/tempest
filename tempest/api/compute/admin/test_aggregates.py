@@ -181,7 +181,7 @@ class AggregatesAdminTestJSON(base.BaseV2ComputeAdminTest):
                         host=self.host)
 
         aggregates = self.client.list_aggregates()['aggregates']
-        aggs = filter(lambda x: x['id'] == aggregate['id'], aggregates)
+        aggs = [agg for agg in aggregates if agg['id'] == aggregate['id']]
         self.assertEqual(1, len(aggs))
         agg = aggs[0]
         self.assertEqual(aggregate_name, agg['name'])

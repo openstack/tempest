@@ -93,7 +93,7 @@ class ServicesTestJSON(base.BaseIdentityV2AdminTest):
                 name=name, type=s_type,
                 description=description)['OS-KSADM:service']
             services.append(service)
-        service_ids = map(lambda x: x['id'], services)
+        service_ids = [svc['id'] for svc in services]
 
         def delete_services():
             for service_id in service_ids:

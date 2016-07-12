@@ -77,7 +77,7 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
         params = {'all_tenants': ''}
         body = self.client.list_servers(detail=True, **params)
         servers = body['servers']
-        servers_name = map(lambda x: x['name'], servers)
+        servers_name = [server['name'] for server in servers]
 
         self.assertIn(self.s1_name, servers_name)
         self.assertIn(self.s2_name, servers_name)
