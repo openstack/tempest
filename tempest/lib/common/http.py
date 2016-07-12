@@ -18,7 +18,7 @@ import urllib3
 
 class ClosingHttp(urllib3.poolmanager.PoolManager):
     def __init__(self, disable_ssl_certificate_validation=False,
-                 ca_certs=None):
+                 ca_certs=None, timeout=None):
         kwargs = {}
 
         if disable_ssl_certificate_validation:
@@ -28,6 +28,9 @@ class ClosingHttp(urllib3.poolmanager.PoolManager):
         if ca_certs:
             kwargs['cert_reqs'] = 'CERT_REQUIRED'
             kwargs['ca_certs'] = ca_certs
+
+        if timeout:
+            kwargs['timeout'] = timeout
 
         super(ClosingHttp, self).__init__(**kwargs)
 

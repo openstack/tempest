@@ -22,11 +22,11 @@ from tempest.lib import exceptions
 class V3TokenClient(rest_client.RestClient):
 
     def __init__(self, auth_url, disable_ssl_certificate_validation=None,
-                 ca_certs=None, trace_requests=None):
+                 ca_certs=None, trace_requests=None, **kwargs):
         dscv = disable_ssl_certificate_validation
         super(V3TokenClient, self).__init__(
             None, None, None, disable_ssl_certificate_validation=dscv,
-            ca_certs=ca_certs, trace_requests=trace_requests)
+            ca_certs=ca_certs, trace_requests=trace_requests, **kwargs)
 
         if auth_url is None:
             raise exceptions.IdentityError("Couldn't determine auth_url")
