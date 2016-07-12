@@ -106,7 +106,7 @@ class TempestCleanup(command.Command):
         self._load_json()
 
     def _cleanup(self):
-        print ("Begin cleanup")
+        print("Begin cleanup")
         is_dry_run = self.options.dry_run
         is_preserve = not self.options.delete_tempest_conf_objects
         is_save_state = False
@@ -124,7 +124,7 @@ class TempestCleanup(command.Command):
                   'is_save_state': is_save_state}
         tenant_service = cleanup_service.TenantService(admin_mgr, **kwargs)
         tenants = tenant_service.list()
-        print ("Process %s tenants" % len(tenants))
+        print("Process %s tenants" % len(tenants))
 
         # Loop through list of tenants and clean them up.
         for tenant in tenants:
@@ -155,7 +155,7 @@ class TempestCleanup(command.Command):
             self._remove_admin_role(tenant_id)
 
     def _clean_tenant(self, tenant):
-        print ("Cleaning tenant:  %s " % tenant['name'])
+        print("Cleaning tenant:  %s " % tenant['name'])
         is_dry_run = self.options.dry_run
         dry_run_data = self.dry_run_data
         is_preserve = not self.options.delete_tempest_conf_objects
@@ -266,7 +266,7 @@ class TempestCleanup(command.Command):
             return False
 
     def _init_state(self):
-        print ("Initializing saved state.")
+        print("Initializing saved state.")
         data = {}
         admin_mgr = self.admin_mgr
         kwargs = {'data': data,
