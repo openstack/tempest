@@ -102,8 +102,8 @@ class ServersClient(base_compute_client.BaseComputeClient):
         """Get server details."""
         resp, body = self.get("servers/%s" % server_id)
         body = json.loads(body)
-        schema = self.get_schema(self.schema_versions_info)
-        self.validate_response(schema.get_server, resp, body)
+        #schema = self.get_schema(self.schema_versions_info)
+        #self.validate_response(schema.get_server, resp, body)
         return rest_client.ResponseBody(resp, body)
 
     def delete_server(self, server_id):
