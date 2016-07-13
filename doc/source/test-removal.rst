@@ -31,7 +31,7 @@ In the proposal etherpad we'll be looking for answers to 3 questions
 
  #. The tests proposed for removal must have equiv. coverage in a different
     project's test suite (whether this is another gating test project, or an in
-    tree funcitonal test suite) For API tests preferably the other project will
+    tree functional test suite). For API tests preferably the other project will
     have a similar source of friction in place to prevent breaking api changes
     so that we don't regress and let breaking api changes slip through the
     gate.
@@ -62,7 +62,7 @@ The Old Way using subunit2sql directly
 
 SELECT * from tests where test_id like "%test_id%";
 (where $test_id is the full test_id, but truncated to the class because of
-setupclass or teardownclass failures)
+setupClass or tearDownClass failures)
 
 You can access the infra mysql subunit2sql db w/ read-only permissions with:
 
@@ -113,7 +113,7 @@ during a qa meeting during the tempest discussion. Please put it on the agenda
 well ahead of the scheduled meeting. Since the meeting time will be well known
 ahead of time anyone who depends on the tests will have ample time beforehand
 to outline any concerns on the before the meeting. To give ample time for
-people to respond to removal proposals please add things to the agend by the
+people to respond to removal proposals please add things to the agenda by the
 Monday before the meeting.
 
 The other option is to raise the removal on the openstack-dev mailing list.
@@ -163,6 +163,6 @@ is:
 anything that lives in tempest which doesn't test one of these projects can be
 removed assuming there is equivalent testing elsewhere. Preferably using the
 `tempest plugin mechanism`_
-to mantain continuity after migrating the tests out of tempest
+to maintain continuity after migrating the tests out of tempest.
 
 .. _tempest plugin mechanism: http://docs.openstack.org/developer/tempest/plugin.html
