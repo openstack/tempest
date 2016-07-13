@@ -13,8 +13,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import testtools
-
 from tempest.common import compute
 from tempest.common import waiters
 from tempest import config
@@ -34,6 +32,12 @@ class TestShelveInstance(manager.ScenarioTest):
      * check the existence of the timestamp file in the unshelved instance
 
     """
+
+    @classmethod
+    def skip_checks(cls):
+        super(TestShelveInstance, cls).skip_checks()
+        if not CONF.compute_feature_enabled.shelve:
+            raise cls.skipException("Shelve is not available.")
 
     def _shelve_then_unshelve_server(self, server):
         compute.shelve_server(self.servers_client, server['id'],
@@ -83,15 +87,11 @@ class TestShelveInstance(manager.ScenarioTest):
         self.assertEqual(timestamp, timestamp2)
 
     @test.idempotent_id('1164e700-0af0-4a4c-8792-35909a88743c')
-    @testtools.skipUnless(CONF.compute_feature_enabled.shelve,
-                          'Shelve is not available.')
     @test.services('compute', 'network', 'image')
     def test_shelve_instance(self):
         self._create_server_then_shelve_and_unshelve()
 
     @test.idempotent_id('c1b6318c-b9da-490b-9c67-9339b627271f')
-    @testtools.skipUnless(CONF.compute_feature_enabled.shelve,
-                          'Shelve is not available.')
     @test.services('compute', 'volume', 'network', 'image')
     def test_shelve_volume_backed_instance(self):
         self._create_server_then_shelve_and_unshelve(boot_from_volume=True)
