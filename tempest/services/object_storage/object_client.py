@@ -195,7 +195,6 @@ class ObjectClient(rest_client.RestClient):
 
         # Read the 100 status prior to sending the data
         response = conn.response_class(conn.sock,
-                                       strict=conn.strict,
                                        method=conn._method)
         _, status, _ = response._read_status()
 

@@ -47,9 +47,9 @@ class ObjectTest(base.BaseObjectTest):
         object_name = data_utils.rand_name(name='LObject')
         data = data_utils.arbitrary_string()
         segments = 10
-        data_segments = [data + str(i) for i in six.moves.xrange(segments)]
+        data_segments = [data + str(i) for i in range(segments)]
         # uploading segments
-        for i in six.moves.xrange(segments):
+        for i in range(segments):
             resp, _ = self.object_client.create_object_segments(
                 self.container_name, object_name, i, data_segments[i])
 
@@ -901,9 +901,9 @@ class ObjectTest(base.BaseObjectTest):
         object_name = data_utils.rand_name(name='LObject')
         data = data_utils.arbitrary_string()
         segments = 10
-        data_segments = [data + str(i) for i in six.moves.xrange(segments)]
+        data_segments = [data + str(i) for i in range(segments)]
         # uploading segments
-        for i in six.moves.xrange(segments):
+        for i in range(segments):
             resp, _ = self.object_client.create_object_segments(
                 self.container_name, object_name, i, data_segments[i])
         # creating a manifest file

@@ -13,8 +13,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from six import moves
-
 from tempest.api.identity import base
 from tempest.common.utils import data_utils
 from tempest.lib.common.utils import test_utils
@@ -27,7 +25,7 @@ class TenantsTestJSON(base.BaseIdentityV2AdminTest):
     def test_tenant_list_delete(self):
         # Create several tenants and delete them
         tenants = []
-        for _ in moves.xrange(3):
+        for _ in range(3):
             tenant_name = data_utils.rand_name(name='tenant-new')
             tenant = self.tenants_client.create_tenant(
                 name=tenant_name)['tenant']

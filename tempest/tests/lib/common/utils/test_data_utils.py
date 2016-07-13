@@ -125,13 +125,13 @@ class TestDataUtils(base.TestCase):
 
     def test_random_bytes(self):
         actual = data_utils.random_bytes()  # default size=1024
-        self.assertIsInstance(actual, str)
-        self.assertRegex(actual, "^[\x00-\xFF]{1024}")
+        self.assertIsInstance(actual, bytes)
+        self.assertEqual(1024, len(actual))
         actual2 = data_utils.random_bytes()
         self.assertNotEqual(actual, actual2)
 
         actual = data_utils.random_bytes(size=2048)
-        self.assertRegex(actual, "^[\x00-\xFF]{2048}")
+        self.assertEqual(2048, len(actual))
 
     def test_get_ipv6_addr_by_EUI64(self):
         actual = data_utils.get_ipv6_addr_by_EUI64('2001:db8::',

@@ -302,7 +302,7 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
         # Pass a server ID that exceeds length limit to delete server
 
         self.assertRaises(lib_exc.NotFound, self.client.delete_server,
-                          sys.maxint + 1)
+                          sys.maxsize + 1)
 
     @test.attr(type=['negative'])
     @test.idempotent_id('c5fa6041-80cd-483b-aa6d-4e45f19d093c')

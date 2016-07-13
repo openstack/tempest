@@ -171,7 +171,7 @@ def random_bytes(size=1024):
     :return: size randomly bytes
     :rtype: string
     """
-    return ''.join([chr(random.randint(0, 255))
+    return b''.join([six.int2byte(random.randint(0, 255))
                     for i in range(size)])
 
 
@@ -204,5 +204,5 @@ def get_ipv6_addr_by_EUI64(cidr, mac):
 # Courtesy of http://stackoverflow.com/a/312464
 def chunkify(sequence, chunksize):
     """Yield successive chunks from `sequence`."""
-    for i in six.moves.xrange(0, len(sequence), chunksize):
+    for i in range(0, len(sequence), chunksize):
         yield sequence[i:i + chunksize]
