@@ -12,7 +12,6 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-import itertools
 import netaddr
 
 from tempest.lib import exceptions as lib_exc
@@ -39,10 +38,11 @@ def get_unused_ip_addresses(ports_client, subnets_client,
             alloc_set.add(fixed_ip['ip_address'])
 
     av_set = subnet_set - alloc_set
-    ip_list = [str(ip) for ip in itertools.islice(av_set, count)]
-
-    if len(ip_list) != count:
-        msg = "Insufficient IP addresses available"
-        raise lib_exc.BadRequest(message=msg)
-
-    return ip_list
+    addrs = []
+    for cidr in reversed(av_set.iter_cidrs()):
+        for ip in reversed(cidr):
+            addrs.append(str(ip))
+            if len(addrs) == count:
+                return addrs
+    msg = "Insufficient IP addresses available"
+    raise lib_exc.BadRequest(message=msg)
