@@ -53,13 +53,11 @@ import sys
 
 from cliff import command
 from oslo_concurrency import lockutils
-from oslo_log import log as logging
 import prettytable
 import yaml
 
 from tempest import config
 
-LOG = logging.getLogger(__name__)
 CONF = config.CONF
 
 

@@ -19,12 +19,9 @@ Utility for listing all currently installed Tempest plugins.
 """
 
 from cliff import command
-from oslo_log import log as logging
 import prettytable
 
 from tempest.test_discover.plugins import TempestTestPluginManager
-
-LOG = logging.getLogger(__name__)
 
 
 class TempestListPlugins(command.Command):
