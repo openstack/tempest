@@ -25,7 +25,7 @@ Tempest run has several options:
 
 There are also the **--blacklist_file** and **--whitelist_file** options that
 let you pass a filepath to tempest run with the file format being a line
-seperated regex, with '#' used to signify the start of a comment on a line.
+separated regex, with '#' used to signify the start of a comment on a line.
 For example::
 
     # Regex file
@@ -195,7 +195,7 @@ class TempestRun(command.Command):
         list_selector = parser.add_mutually_exclusive_group()
         list_selector.add_argument('--whitelist_file',
                                    help="Path to a whitelist file, this file "
-                                        "contains a seperate regex on each "
+                                        "contains a separate regex on each "
                                         "newline.")
         list_selector.add_argument('--blacklist_file',
                                    help='Path to a blacklist file, this file '
