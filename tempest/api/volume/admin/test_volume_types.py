@@ -91,8 +91,11 @@ class VolumeTypesV2Test(base.BaseVolumeAdminTest):
         vendor = CONF.volume.vendor_name
         extra_specs = {"storage_protocol": proto,
                        "vendor_name": vendor}
-        body = self.create_volume_type(description=description, name=name,
-                                       extra_specs=extra_specs)
+        params = {'name': name,
+                  'description': description,
+                  'extra_specs': extra_specs,
+                  'os-volume-type-access:is_public': True}
+        body = self.create_volume_type(**params)
         self.assertIn('name', body)
         self.assertEqual(name, body['name'],
                          "The created volume_type name is not equal "
@@ -113,6 +116,12 @@ class VolumeTypesV2Test(base.BaseVolumeAdminTest):
         self.assertEqual(extra_specs, fetched_volume_type['extra_specs'],
                          'The fetched Volume_type is different '
                          'from the created Volume_type')
+        self.assertEqual(description, fetched_volume_type['description'])
+        self.assertEqual(body['is_public'],
+                         fetched_volume_type['is_public'])
+        self.assertEqual(
+            body['os-volume-type-access:is_public'],
+            fetched_volume_type['os-volume-type-access:is_public'])
 
     @test.idempotent_id('7830abd0-ff99-4793-a265-405684a54d46')
     def test_volume_type_encryption_create_get_delete(self):
