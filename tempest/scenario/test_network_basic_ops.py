@@ -642,6 +642,8 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
 
         Nova should unbind the port from the instance on delete if the port was
         not created by Nova as part of the boot request.
+
+        We should also be able to boot another server with the same port.
         """
         # Setup the network, create a port and boot the server from that port.
         self._setup_network_and_servers(boot_with_port=True)
@@ -669,6 +671,17 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         self.assertEqual(self.network['id'], port['network_id'])
         self.assertEqual('', port['device_id'])
         self.assertEqual('', port['device_owner'])
+
+        # Boot another server with the same port to make sure nothing was
+        # left around that could cause issues.
+        name = data_utils.rand_name('reuse-port')
+        server = self._create_server(name, self.network, port['id'])
+        port_list = self._list_ports(device_id=server['id'],
+                                     network_id=self.network['id'])
+        self.assertEqual(1, len(port_list),
+                         'There should only be one port created for '
+                         'server %s.' % server['id'])
+        self.assertEqual(port['id'], port_list[0]['id'])
 
     @test.requires_ext(service='network', extension='l3_agent_scheduler')
     @test.idempotent_id('2e788c46-fb3f-4ac9-8f82-0561555bea73')

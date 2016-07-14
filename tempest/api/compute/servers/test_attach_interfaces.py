@@ -16,7 +16,9 @@
 import time
 
 from tempest.api.compute import base
+from tempest.common import compute
 from tempest.common.utils import net_utils
+from tempest.common import waiters
 from tempest import config
 from tempest import exceptions
 from tempest.lib import exceptions as lib_exc
@@ -48,6 +50,7 @@ class AttachInterfacesTestJSON(base.BaseV2ComputeTest):
         cls.networks_client = cls.os.networks_client
         cls.subnets_client = cls.os.subnets_client
         cls.ports_client = cls.os.ports_client
+        cls.servers_client = cls.servers_client
 
     def wait_for_interface_status(self, server, port_id, status):
         """Waits for an interface to reach a given status."""
@@ -72,6 +75,34 @@ class AttachInterfacesTestJSON(base.BaseV2ComputeTest):
                 raise exceptions.TimeoutException(message)
 
         return body
+
+    # TODO(mriedem): move this into a common waiters utility module
+    def wait_for_port_detach(self, port_id):
+        """Waits for the port's device_id to be unset.
+
+        :param port_id: The id of the port being detached.
+        :returns: The final port dict from the show_port response.
+        """
+        port = self.ports_client.show_port(port_id)['port']
+        device_id = port['device_id']
+        start = int(time.time())
+
+        # NOTE(mriedem): Nova updates the port's device_id to '' rather than
+        # None, but it's not contractual so handle Falsey either way.
+        while device_id:
+            time.sleep(self.build_interval)
+            port = self.ports_client.show_port(port_id)['port']
+            device_id = port['device_id']
+
+            timed_out = int(time.time()) - start >= self.build_timeout
+
+            if device_id and timed_out:
+                message = ('Port %s failed to detach (device_id %s) within '
+                           'the required time (%s s).' %
+                           (port_id, device_id, self.build_timeout))
+                raise exceptions.TimeoutException(message)
+
+        return port
 
     def _check_interface(self, iface, port_id=None, network_id=None,
                          fixed_ip=None, mac_addr=None):
@@ -240,3 +271,40 @@ class AttachInterfacesTestJSON(base.BaseV2ComputeTest):
             if fixed_ip is not None:
                 break
         self.servers_client.remove_fixed_ip(server['id'], address=fixed_ip)
+
+    @test.idempotent_id('2f3a0127-95c7-4977-92d2-bc5aec602fb4')
+    def test_reassign_port_between_servers(self):
+        """Tests the following:
+
+        1. Create a port in Neutron.
+        2. Create two servers in Nova.
+        3. Attach the port to the first server.
+        4. Detach the port from the first server.
+        5. Attach the port to the second server.
+        6. Detach the port from the second server.
+        """
+        network = self.get_tenant_network()
+        network_id = network['id']
+        port = self.ports_client.create_port(network_id=network_id)
+        port_id = port['port']['id']
+        self.addCleanup(self.ports_client.delete_port, port_id)
+
+        # create two servers
+        _, servers = compute.create_test_server(
+            self.os, tenant_network=network, wait_until='ACTIVE', min_count=2)
+        # add our cleanups for the servers since we bypassed the base class
+        for server in servers:
+            self.addCleanup(waiters.wait_for_server_termination,
+                            self.servers_client, server['id'])
+            self.addCleanup(self.servers_client.delete_server, server['id'])
+
+        for server in servers:
+            # attach the port to the server
+            iface = self.client.create_interface(
+                server['id'], port_id=port_id)['interfaceAttachment']
+            self._check_interface(iface, port_id=port_id)
+
+            # detach the port from the server; this is a cast in the compute
+            # API so we have to poll the port until the device_id is unset.
+            self.client.delete_interface(server['id'], port_id)
+            self.wait_for_port_detach(port_id)
