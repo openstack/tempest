@@ -110,6 +110,10 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
                 servers_client=self.client)
             boot_time = linux_client.get_boot_time()
 
+            # NOTE: This sync is for avoiding the loss of pub key data
+            # in a server
+            linux_client.exec_command("sync")
+
         self.client.reboot_server(self.server_id, type=reboot_type)
         waiters.wait_for_server_status(self.client, self.server_id, 'ACTIVE')
 
