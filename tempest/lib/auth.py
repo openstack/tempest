@@ -689,6 +689,10 @@ class Credentials(object):
         """Credentials are equal if attributes in self.ATTRIBUTES are equal"""
         return str(self) == str(other)
 
+    def __ne__(self, other):
+        """Contrary to the __eq__"""
+        return not self.__eq__(other)
+
     def __getattr__(self, key):
         # If an attribute is set, __getattr__ is not invoked
         # If an attribute is not set, and it is a known one, return None
