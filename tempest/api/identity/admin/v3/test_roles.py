@@ -23,10 +23,11 @@ class RolesV3TestJSON(base.BaseIdentityV3AdminTest):
     @classmethod
     def resource_setup(cls):
         super(RolesV3TestJSON, cls).resource_setup()
+        cls.roles = list()
         for _ in range(3):
             role_name = data_utils.rand_name(name='role')
             role = cls.roles_client.create_role(name=role_name)['role']
-            cls.data.roles.append(role)
+            cls.roles.append(role)
         cls.fetched_role_ids = list()
         u_name = data_utils.rand_name('user')
         u_desc = '%s description' % u_name
@@ -59,6 +60,8 @@ class RolesV3TestJSON(base.BaseIdentityV3AdminTest):
         # before deleting,or else it would result in unauthorized error
         cls.domains_client.update_domain(cls.domain['id'], enabled=False)
         cls.domains_client.delete_domain(cls.domain['id'])
+        for role in cls.roles:
+            cls.roles_client.delete_role(role['id'])
         super(RolesV3TestJSON, cls).resource_cleanup()
 
     def _list_assertions(self, body, fetched_role_ids, role_id):
@@ -189,5 +192,5 @@ class RolesV3TestJSON(base.BaseIdentityV3AdminTest):
     def test_list_roles(self):
         # Return a list of all roles
         body = self.roles_client.list_roles()['roles']
-        found = [role for role in body if role in self.data.roles]
-        self.assertEqual(len(found), len(self.data.roles))
+        found = [role for role in body if role in self.roles]
+        self.assertEqual(len(found), len(self.roles))

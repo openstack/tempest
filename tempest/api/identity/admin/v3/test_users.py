@@ -149,6 +149,6 @@ class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
     @test.idempotent_id('c10dcd90-461d-4b16-8e23-4eb836c00644')
     def test_get_user(self):
         # Get a user detail
-        self.data.setup_test_user()
-        user = self.users_client.show_user(self.data.user['id'])['user']
-        self.assertEqual(self.data.user['id'], user['id'])
+        user = self.setup_test_user()
+        fetched_user = self.users_client.show_user(user['id'])['user']
+        self.assertEqual(user['id'], fetched_user['id'])
