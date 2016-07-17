@@ -171,6 +171,11 @@ class BaseVolumeTest(tempest.test.BaseTestCase):
         client.delete_volume(volume_id)
         client.wait_for_resource_deletion(volume_id)
 
+    def delete_snapshot(self, client, snapshot_id):
+        """Delete snapshot by the given client"""
+        client.delete_snapshot(snapshot_id)
+        client.wait_for_resource_deletion(snapshot_id)
+
     def attach_volume(self, server_id, volume_id):
         """Attachs a volume to a server"""
         self.servers_client.attach_volume(
@@ -257,6 +262,8 @@ class BaseVolumeAdminTest(BaseVolumeTest):
             cls.admin_volume_types_client = cls.os_adm.volume_types_v2_client
             cls.admin_volume_client = cls.os_adm.volumes_v2_client
             cls.admin_hosts_client = cls.os_adm.volume_hosts_v2_client
+            cls.admin_snapshot_manage_client = \
+                cls.os_adm.snapshot_manage_v2_client
             cls.admin_snapshots_client = cls.os_adm.snapshots_v2_client
             cls.admin_backups_client = cls.os_adm.backups_v2_client
             cls.admin_encryption_types_client = \

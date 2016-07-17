@@ -184,3 +184,11 @@ class SnapshotsClient(rest_client.RestClient):
         resp, body = self.post('snapshots/%s/action' % snapshot_id, post_body)
         self.expected_success(202, resp.status)
         return rest_client.ResponseBody(resp, body)
+
+    def unmanage_snapshot(self, snapshot_id):
+        """Unmanage a snapshot."""
+        post_body = json.dumps({'os-unmanage': {}})
+        url = 'snapshots/%s/action' % (snapshot_id)
+        resp, body = self.post(url, post_body)
+        self.expected_success(202, resp.status)
+        return rest_client.ResponseBody(resp, body)
