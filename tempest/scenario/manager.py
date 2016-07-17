@@ -183,7 +183,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
         # every network
         if vnic_type:
             ports = []
-            networks = []
+
             create_port_body = {'binding:vnic_type': vnic_type,
                                 'namestart': 'port-smoke'}
             if kwargs:
@@ -204,7 +204,9 @@ class ScenarioTest(tempest.test.BaseTestCase):
                     if security_groups_ids:
                         create_port_body[
                             'security_groups'] = security_groups_ids
-                networks = kwargs.pop('networks')
+                networks = kwargs.pop('networks', [])
+            else:
+                networks = []
 
             # If there are no networks passed to us we look up
             # for the project's private networks and create a port
@@ -219,10 +221,13 @@ class ScenarioTest(tempest.test.BaseTestCase):
                                  " network for the tenant")
             for net in networks:
                 net_id = net['uuid']
-                port = self._create_port(network_id=net_id,
-                                         client=clients.ports_client,
-                                         **create_port_body)
-                ports.append({'port': port['id']})
+                if 'port' not in net:
+                    port = self._create_port(network_id=net_id,
+                                             client=clients.ports_client,
+                                             **create_port_body)
+                    ports.append({'port': port['id']})
+                else:
+                    ports.append({'port': net['port']})
             if ports:
                 kwargs['networks'] = ports
             self.ports = ports
