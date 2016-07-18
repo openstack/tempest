@@ -64,6 +64,23 @@ class BaseIdentityTest(tempest.test.BaseTestCase):
         if len(role) > 0:
             return role[0]
 
+    def _create_test_user(self, **kwargs):
+        if kwargs['password'] is None:
+            user_password = data_utils.rand_password()
+            kwargs['password'] = user_password
+        user = self.users_client.create_user(**kwargs)['user']
+        # Delete the user at the end of the test
+        self.addCleanup(self.users_client.delete_user, user['id'])
+        return user
+
+    def setup_test_role(self):
+        """Set up a test role."""
+        role = self.roles_client.create_role(
+            name=data_utils.rand_name('test_role'))['role']
+        # Delete the role at the end of the test
+        self.addCleanup(self.roles_client.delete_role, role['id'])
+        return role
+
 
 class BaseIdentityV2Test(BaseIdentityTest):
 
@@ -104,13 +121,29 @@ class BaseIdentityV2AdminTest(BaseIdentityV2Test):
     @classmethod
     def resource_setup(cls):
         super(BaseIdentityV2AdminTest, cls).resource_setup()
-        cls.data = DataGeneratorV2(cls.tenants_client, cls.users_client,
-                                   cls.roles_client)
+        cls.projects_client = cls.tenants_client
 
     @classmethod
     def resource_cleanup(cls):
-        cls.data.teardown_all()
         super(BaseIdentityV2AdminTest, cls).resource_cleanup()
+
+    def setup_test_user(self, password=None):
+        """Set up a test user."""
+        tenant = self.setup_test_tenant()
+        username = data_utils.rand_name('test_user')
+        email = username + '@testmail.tm'
+        user = self._create_test_user(name=username, email=email,
+                                      tenantId=tenant['id'], password=password)
+        return user
+
+    def setup_test_tenant(self):
+        """Set up a test tenant."""
+        tenant = self.projects_client.create_tenant(
+            name=data_utils.rand_name('test_tenant'),
+            description=data_utils.rand_name('desc'))['tenant']
+        # Delete the tenant at the end of the test
+        self.addCleanup(self.tenants_client.delete_tenant, tenant['id'])
+        return tenant
 
 
 class BaseIdentityV3Test(BaseIdentityTest):

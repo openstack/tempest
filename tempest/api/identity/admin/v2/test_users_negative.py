@@ -32,43 +32,45 @@ class UsersNegativeTestJSON(base.BaseIdentityV2AdminTest):
     @test.idempotent_id('60a1f5fa-5744-4cdf-82bf-60b7de2d29a4')
     def test_create_user_by_unauthorized_user(self):
         # Non-administrator should not be authorized to create a user
-        self.data.setup_test_tenant()
+        tenant = self.setup_test_tenant()
         self.assertRaises(lib_exc.Forbidden,
                           self.non_admin_users_client.create_user,
                           name=self.alt_user, password=self.alt_password,
-                          tenantId=self.data.tenant['id'],
+                          tenantId=tenant['id'],
                           email=self.alt_email)
 
     @test.attr(type=['negative'])
     @test.idempotent_id('d80d0c2f-4514-4d1e-806d-0930dfc5a187')
     def test_create_user_with_empty_name(self):
         # User with an empty name should not be created
-        self.data.setup_test_tenant()
+        tenant = self.setup_test_tenant()
         self.assertRaises(lib_exc.BadRequest, self.users_client.create_user,
                           name='', password=self.alt_password,
-                          tenantId=self.data.tenant['id'],
+                          tenantId=tenant['id'],
                           email=self.alt_email)
 
     @test.attr(type=['negative'])
     @test.idempotent_id('7704b4f3-3b75-4b82-87cc-931d41c8f780')
     def test_create_user_with_name_length_over_255(self):
         # Length of user name filed should be restricted to 255 characters
-        self.data.setup_test_tenant()
+        tenant = self.setup_test_tenant()
         self.assertRaises(lib_exc.BadRequest, self.users_client.create_user,
                           name='a' * 256, password=self.alt_password,
-                          tenantId=self.data.tenant['id'],
+                          tenantId=tenant['id'],
                           email=self.alt_email)
 
     @test.attr(type=['negative'])
     @test.idempotent_id('57ae8558-120c-4723-9308-3751474e7ecf')
     def test_create_user_with_duplicate_name(self):
         # Duplicate user should not be created
-        self.data.setup_test_user()
+        password = data_utils.rand_password()
+        user = self.setup_test_user(password)
+        tenant = self.tenants_client.show_tenant(user['tenantId'])['tenant']
         self.assertRaises(lib_exc.Conflict, self.users_client.create_user,
-                          name=self.data.user['name'],
-                          password=self.data.user_password,
-                          tenantId=self.data.tenant['id'],
-                          email=self.data.user['email'])
+                          name=user['name'],
+                          password=password,
+                          tenantId=tenant['id'],
+                          email=user['email'])
 
     @test.attr(type=['negative'])
     @test.idempotent_id('0132cc22-7c4f-42e1-9e50-ac6aad31d59a')
@@ -84,7 +86,7 @@ class UsersNegativeTestJSON(base.BaseIdentityV2AdminTest):
     @test.idempotent_id('55bbb103-d1ae-437b-989b-bcdf8175c1f4')
     def test_create_user_request_without_a_token(self):
         # Request to create a user without a valid token should fail
-        self.data.setup_test_tenant()
+        tenant = self.setup_test_tenant()
         # Get the token of the current client
         token = self.client.auth_provider.get_token()
         # Delete the token from database
@@ -95,18 +97,18 @@ class UsersNegativeTestJSON(base.BaseIdentityV2AdminTest):
 
         self.assertRaises(lib_exc.Unauthorized, self.users_client.create_user,
                           name=self.alt_user, password=self.alt_password,
-                          tenantId=self.data.tenant['id'],
+                          tenantId=tenant['id'],
                           email=self.alt_email)
 
     @test.attr(type=['negative'])
     @test.idempotent_id('23a2f3da-4a1a-41da-abdd-632328a861ad')
     def test_create_user_with_enabled_non_bool(self):
         # Attempt to create a user with valid enabled para should fail
-        self.data.setup_test_tenant()
+        tenant = self.setup_test_tenant()
         name = data_utils.rand_name('test_user')
         self.assertRaises(lib_exc.BadRequest, self.users_client.create_user,
                           name=name, password=self.alt_password,
-                          tenantId=self.data.tenant['id'],
+                          tenantId=tenant['id'],
                           email=self.alt_email, enabled=3)
 
     @test.attr(type=['negative'])
@@ -138,7 +140,6 @@ class UsersNegativeTestJSON(base.BaseIdentityV2AdminTest):
     @test.idempotent_id('424868d5-18a7-43e1-8903-a64f95ee3aac')
     def test_update_user_by_unauthorized_user(self):
         # Non-administrator should not be authorized to update user
-        self.data.setup_test_tenant()
         self.assertRaises(lib_exc.Forbidden,
                           self.non_admin_users_client.update_user,
                           self.alt_user)
@@ -147,10 +148,10 @@ class UsersNegativeTestJSON(base.BaseIdentityV2AdminTest):
     @test.idempotent_id('d45195d5-33ed-41b9-a452-7d0d6a00f6e9')
     def test_delete_users_by_unauthorized_user(self):
         # Non-administrator user should not be authorized to delete a user
-        self.data.setup_test_user()
+        user = self.setup_test_user()
         self.assertRaises(lib_exc.Forbidden,
                           self.non_admin_users_client.delete_user,
-                          self.data.user['id'])
+                          user['id'])
 
     @test.attr(type=['negative'])
     @test.idempotent_id('7cc82f7e-9998-4f89-abae-23df36495867')
@@ -179,57 +180,62 @@ class UsersNegativeTestJSON(base.BaseIdentityV2AdminTest):
     @test.idempotent_id('593a4981-f6d4-460a-99a1-57a78bf20829')
     def test_authentication_for_disabled_user(self):
         # Disabled user's token should not get authenticated
-        self.data.setup_test_user()
-        self.disable_user(self.data.user['name'])
+        password = data_utils.rand_password()
+        user = self.setup_test_user(password)
+        tenant = self.tenants_client.show_tenant(user['tenantId'])['tenant']
+        self.disable_user(user['name'])
         self.assertRaises(lib_exc.Unauthorized, self.token_client.auth,
-                          self.data.user['name'],
-                          self.data.user_password,
-                          self.data.tenant['name'])
+                          user['name'],
+                          password,
+                          tenant['name'])
 
     @test.attr(type=['negative'])
     @test.idempotent_id('440a7a8d-9328-4b7b-83e0-d717010495e4')
     def test_authentication_when_tenant_is_disabled(self):
         # User's token for a disabled tenant should not be authenticated
-        self.data.setup_test_user()
-        self.disable_tenant(self.data.tenant['name'])
+        password = data_utils.rand_password()
+        user = self.setup_test_user(password)
+        tenant = self.tenants_client.show_tenant(user['tenantId'])['tenant']
+        self.disable_tenant(tenant['name'])
         self.assertRaises(lib_exc.Unauthorized, self.token_client.auth,
-                          self.data.user['name'],
-                          self.data.user_password,
-                          self.data.tenant['name'])
+                          user['name'],
+                          password,
+                          tenant['name'])
 
     @test.attr(type=['negative'])
     @test.idempotent_id('921f1ad6-7907-40b8-853f-637e7ee52178')
     def test_authentication_with_invalid_tenant(self):
         # User's token for an invalid tenant should not be authenticated
-        self.data.setup_test_user()
+        password = data_utils.rand_password()
+        user = self.setup_test_user(password)
         self.assertRaises(lib_exc.Unauthorized, self.token_client.auth,
-                          self.data.user['name'],
-                          self.data.user_password,
+                          user['name'],
+                          password,
                           'junktenant1234')
 
     @test.attr(type=['negative'])
     @test.idempotent_id('bde9aecd-3b1c-4079-858f-beb5deaa5b5e')
     def test_authentication_with_invalid_username(self):
         # Non-existent user's token should not get authenticated
-        self.data.setup_test_user()
+        password = data_utils.rand_password()
+        user = self.setup_test_user(password)
+        tenant = self.tenants_client.show_tenant(user['tenantId'])['tenant']
         self.assertRaises(lib_exc.Unauthorized, self.token_client.auth,
-                          'junkuser123', self.data.user_password,
-                          self.data.tenant['name'])
+                          'junkuser123', password, tenant['name'])
 
     @test.attr(type=['negative'])
     @test.idempotent_id('d5308b33-3574-43c3-8d87-1c090c5e1eca')
     def test_authentication_with_invalid_password(self):
         # User's token with invalid password should not be authenticated
-        self.data.setup_test_user()
+        user = self.setup_test_user()
+        tenant = self.tenants_client.show_tenant(user['tenantId'])['tenant']
         self.assertRaises(lib_exc.Unauthorized, self.token_client.auth,
-                          self.data.user['name'], 'junkpass1234',
-                          self.data.tenant['name'])
+                          user['name'], 'junkpass1234', tenant['name'])
 
     @test.attr(type=['negative'])
     @test.idempotent_id('284192ce-fb7c-4909-a63b-9a502e0ddd11')
     def test_get_users_by_unauthorized_user(self):
         # Non-administrator user should not be authorized to get user list
-        self.data.setup_test_user()
         self.assertRaises(lib_exc.Forbidden,
                           self.non_admin_users_client.list_users)
 

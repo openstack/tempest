@@ -17,6 +17,7 @@ from six import moves
 
 from tempest.api.identity import base
 from tempest.common.utils import data_utils
+from tempest.lib.common.utils import test_utils
 from tempest import test
 
 
@@ -25,17 +26,22 @@ class RolesTestJSON(base.BaseIdentityV2AdminTest):
     @classmethod
     def resource_setup(cls):
         super(RolesTestJSON, cls).resource_setup()
+        cls.roles = list()
         for _ in moves.xrange(5):
             role_name = data_utils.rand_name(name='role')
             role = cls.roles_client.create_role(name=role_name)['role']
-            cls.data.roles.append(role)
+            cls.roles.append(role)
+
+    @classmethod
+    def resource_cleanup(cls):
+        super(RolesTestJSON, cls).resource_cleanup()
+        for role in cls.roles:
+            cls.roles_client.delete_role(role['id'])
 
     def _get_role_params(self):
-        self.data.setup_test_user()
-        self.data.setup_test_role()
-        user = self.get_user_by_name(self.data.user['name'])
-        tenant = self.get_tenant_by_name(self.data.tenant['name'])
-        role = self.get_role_by_name(self.data.role['name'])
+        user = self.setup_test_user()
+        tenant = self.tenants_client.show_tenant(user['tenantId'])['tenant']
+        role = self.setup_test_role()
         return (user, tenant, role)
 
     def assert_role_in_role_list(self, role, roles):
@@ -49,15 +55,17 @@ class RolesTestJSON(base.BaseIdentityV2AdminTest):
     def test_list_roles(self):
         """Return a list of all roles."""
         body = self.roles_client.list_roles()['roles']
-        found = [role for role in body if role in self.data.roles]
+        found = [role for role in body if role in self.roles]
         self.assertTrue(any(found))
-        self.assertEqual(len(found), len(self.data.roles))
+        self.assertEqual(len(found), len(self.roles))
 
     @test.idempotent_id('c62d909d-6c21-48c0-ae40-0a0760e6db5e')
     def test_role_create_delete(self):
         """Role should be created, verified, and deleted."""
         role_name = data_utils.rand_name(name='role-test')
         body = self.roles_client.create_role(name=role_name)['role']
+        self.addCleanup(test_utils.call_and_ignore_notfound_exc,
+                        self.roles_client.delete_role, body['id'])
         self.assertEqual(role_name, body['name'])
 
         body = self.roles_client.list_roles()['roles']
@@ -73,9 +81,9 @@ class RolesTestJSON(base.BaseIdentityV2AdminTest):
     @test.idempotent_id('db6870bd-a6ed-43be-a9b1-2f10a5c9994f')
     def test_get_role_by_id(self):
         """Get a role by its id."""
-        self.data.setup_test_role()
-        role_id = self.data.role['id']
-        role_name = self.data.role['name']
+        role = self.setup_test_role()
+        role_id = role['id']
+        role_name = role['name']
         body = self.roles_client.show_role(role_id)['role']
         self.assertEqual(role_id, body['id'])
         self.assertEqual(role_name, body['name'])
