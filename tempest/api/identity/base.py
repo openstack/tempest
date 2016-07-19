@@ -17,7 +17,6 @@ from oslo_log import log as logging
 
 from tempest.common.utils import data_utils
 from tempest import config
-from tempest.lib.common.utils import test_utils
 import tempest.test
 
 CONF = config.CONF
@@ -242,101 +241,3 @@ class BaseIdentityV3AdminTest(BaseIdentityV3Test):
         # Delete the domain at the end of the test
         self.addCleanup(self.delete_domain, domain['id'])
         return domain
-
-
-class BaseDataGenerator(object):
-
-    def __init__(self, projects_client, users_client, roles_client,
-                 domains_client=None):
-        self.projects_client = projects_client
-        self.users_client = users_client
-        self.roles_client = roles_client
-        self.domains_client = domains_client
-
-        self.user_password = None
-        self.user = None
-        self.tenant = None
-        self.project = None
-        self.role = None
-        self.domain = None
-
-        self.users = []
-        self.tenants = []
-        self.projects = []
-        self.roles = []
-        self.domains = []
-
-    def _create_test_user(self, **kwargs):
-        self.user_password = data_utils.rand_password()
-        self.user = self.users_client.create_user(
-            password=self.user_password,
-            **kwargs)['user']
-        self.users.append(self.user)
-
-    def setup_test_role(self):
-        """Set up a test role."""
-        self.role = self.roles_client.create_role(
-            name=data_utils.rand_name('test_role'))['role']
-        self.roles.append(self.role)
-
-    def teardown_all(self):
-        for user in self.users:
-            test_utils.call_and_ignore_notfound_exc(
-                self.users_client.delete_user, user['id'])
-        for tenant in self.tenants:
-            test_utils.call_and_ignore_notfound_exc(
-                self.projects_client.delete_tenant, tenant['id'])
-        for project in reversed(self.projects):
-            test_utils.call_and_ignore_notfound_exc(
-                self.projects_client.delete_project, project['id'])
-        for role in self.roles:
-            test_utils.call_and_ignore_notfound_exc(
-                self.roles_client.delete_role, role['id'])
-        for domain in self.domains:
-            test_utils.call_and_ignore_notfound_exc(
-                self.domains_client.update_domain, domain['id'], enabled=False)
-            test_utils.call_and_ignore_notfound_exc(
-                self.domains_client.delete_domain, domain['id'])
-
-
-class DataGeneratorV2(BaseDataGenerator):
-
-    def setup_test_user(self):
-        """Set up a test user."""
-        self.setup_test_tenant()
-        username = data_utils.rand_name('test_user')
-        email = username + '@testmail.tm'
-        self._create_test_user(name=username, email=email,
-                               tenantId=self.tenant['id'])
-
-    def setup_test_tenant(self):
-        """Set up a test tenant."""
-        self.tenant = self.projects_client.create_tenant(
-            name=data_utils.rand_name('test_tenant'),
-            description=data_utils.rand_name('desc'))['tenant']
-        self.tenants.append(self.tenant)
-
-
-class DataGeneratorV3(BaseDataGenerator):
-
-    def setup_test_user(self):
-        """Set up a test user."""
-        self.setup_test_project()
-        username = data_utils.rand_name('test_user')
-        email = username + '@testmail.tm'
-        self._create_test_user(user_name=username, email=email,
-                               project_id=self.project['id'])
-
-    def setup_test_project(self):
-        """Set up a test project."""
-        self.project = self.projects_client.create_project(
-            name=data_utils.rand_name('test_project'),
-            description=data_utils.rand_name('desc'))['project']
-        self.projects.append(self.project)
-
-    def setup_test_domain(self):
-        """Set up a test domain."""
-        self.domain = self.domains_client.create_domain(
-            name=data_utils.rand_name('test_domain'),
-            description=data_utils.rand_name('desc'))['domain']
-        self.domains.append(self.domain)
