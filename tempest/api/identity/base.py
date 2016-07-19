@@ -193,12 +193,9 @@ class BaseIdentityV3AdminTest(BaseIdentityV3Test):
     @classmethod
     def resource_setup(cls):
         super(BaseIdentityV3AdminTest, cls).resource_setup()
-        cls.data = DataGeneratorV3(cls.projects_client, cls.users_client,
-                                   cls.roles_client, cls.domains_client)
 
     @classmethod
     def resource_cleanup(cls):
-        cls.data.teardown_all()
         super(BaseIdentityV3AdminTest, cls).resource_cleanup()
 
     @classmethod
@@ -206,11 +203,45 @@ class BaseIdentityV3AdminTest(BaseIdentityV3Test):
         user = cls.get_user_by_name(user_name, domain_id)
         cls.users_client.update_user(user['id'], user_name, enabled=False)
 
+    @classmethod
+    def create_domain(cls):
+        """Create a domain."""
+        domain = cls.domains_client.create_domain(
+            name=data_utils.rand_name('test_domain'),
+            description=data_utils.rand_name('desc'))['domain']
+        return domain
+
     def delete_domain(self, domain_id):
         # NOTE(mpavlase) It is necessary to disable the domain before deleting
         # otherwise it raises Forbidden exception
         self.domains_client.update_domain(domain_id, enabled=False)
         self.domains_client.delete_domain(domain_id)
+
+    def setup_test_user(self, password=None):
+        """Set up a test user."""
+        project = self.setup_test_project()
+        username = data_utils.rand_name('test_user')
+        email = username + '@testmail.tm'
+        user = self._create_test_user(user_name=username, email=email,
+                                      project_id=project['id'],
+                                      password=password)
+        return user
+
+    def setup_test_project(self):
+        """Set up a test project."""
+        project = self.projects_client.create_project(
+            name=data_utils.rand_name('test_project'),
+            description=data_utils.rand_name('desc'))['project']
+        # Delete the project at the end of the test
+        self.addCleanup(self.projects_client.delete_project, project['id'])
+        return project
+
+    def setup_test_domain(self):
+        """Set up a test domain."""
+        domain = self.create_domain()
+        # Delete the domain at the end of the test
+        self.addCleanup(self.delete_domain, domain['id'])
+        return domain
 
 
 class BaseDataGenerator(object):

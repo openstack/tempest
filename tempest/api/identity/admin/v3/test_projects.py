@@ -32,7 +32,7 @@ class ProjectsTestJSON(base.BaseIdentityV3AdminTest):
         project_desc = data_utils.rand_name('desc')
         project = self.projects_client.create_project(
             project_name, description=project_desc)['project']
-        self.data.projects.append(project)
+        self.addCleanup(self.projects_client.delete_project, project['id'])
         project_id = project['id']
         desc1 = project['description']
         self.assertEqual(desc1, project_desc, 'Description should have '
@@ -45,25 +45,25 @@ class ProjectsTestJSON(base.BaseIdentityV3AdminTest):
     @test.idempotent_id('5f50fe07-8166-430b-a882-3b2ee0abe26f')
     def test_project_create_with_domain(self):
         # Create project with a domain
-        self.data.setup_test_domain()
+        domain = self.setup_test_domain()
         project_name = data_utils.rand_name('project')
         project = self.projects_client.create_project(
-            project_name, domain_id=self.data.domain['id'])['project']
-        self.data.projects.append(project)
+            project_name, domain_id=domain['id'])['project']
+        self.addCleanup(self.projects_client.delete_project, project['id'])
         project_id = project['id']
         self.assertEqual(project_name, project['name'])
-        self.assertEqual(self.data.domain['id'], project['domain_id'])
+        self.assertEqual(domain['id'], project['domain_id'])
         body = self.projects_client.show_project(project_id)['project']
         self.assertEqual(project_name, body['name'])
-        self.assertEqual(self.data.domain['id'], body['domain_id'])
+        self.assertEqual(domain['id'], body['domain_id'])
 
     @testtools.skipUnless(CONF.identity_feature_enabled.reseller,
                           'Reseller not available.')
     @test.idempotent_id('1854f9c0-70bc-4d11-a08a-1c789d339e3d')
     def test_project_create_with_parent(self):
         # Create root project without providing a parent_id
-        self.data.setup_test_domain()
-        domain_id = self.data.domain['id']
+        domain = self.setup_test_domain()
+        domain_id = domain['id']
 
         root_project_name = data_utils.rand_name('root_project')
         root_project = self.projects_client.create_project(
@@ -94,7 +94,7 @@ class ProjectsTestJSON(base.BaseIdentityV3AdminTest):
         project_name = data_utils.rand_name('project')
         project = self.projects_client.create_project(
             project_name, enabled=True)['project']
-        self.data.projects.append(project)
+        self.addCleanup(self.projects_client.delete_project, project['id'])
         project_id = project['id']
         en1 = project['enabled']
         self.assertTrue(en1, 'Enable should be True in response')
@@ -108,7 +108,7 @@ class ProjectsTestJSON(base.BaseIdentityV3AdminTest):
         project_name = data_utils.rand_name('project')
         project = self.projects_client.create_project(
             project_name, enabled=False)['project']
-        self.data.projects.append(project)
+        self.addCleanup(self.projects_client.delete_project, project['id'])
         en1 = project['enabled']
         self.assertEqual('false', str(en1).lower(),
                          'Enable should be False in response')
@@ -122,7 +122,7 @@ class ProjectsTestJSON(base.BaseIdentityV3AdminTest):
         # Update name attribute of a project
         p_name1 = data_utils.rand_name('project')
         project = self.projects_client.create_project(p_name1)['project']
-        self.data.projects.append(project)
+        self.addCleanup(self.projects_client.delete_project, project['id'])
 
         resp1_name = project['name']
 
@@ -146,7 +146,7 @@ class ProjectsTestJSON(base.BaseIdentityV3AdminTest):
         p_desc = data_utils.rand_name('desc')
         project = self.projects_client.create_project(
             p_name, description=p_desc)['project']
-        self.data.projects.append(project)
+        self.addCleanup(self.projects_client.delete_project, project['id'])
         resp1_desc = project['description']
 
         p_desc2 = data_utils.rand_name('desc2')
@@ -169,7 +169,7 @@ class ProjectsTestJSON(base.BaseIdentityV3AdminTest):
         p_en = False
         project = self.projects_client.create_project(p_name,
                                                       enabled=p_en)['project']
-        self.data.projects.append(project)
+        self.addCleanup(self.projects_client.delete_project, project['id'])
 
         resp1_en = project['enabled']
 
@@ -192,7 +192,7 @@ class ProjectsTestJSON(base.BaseIdentityV3AdminTest):
         # Create a Project
         p_name = data_utils.rand_name('project')
         project = self.projects_client.create_project(p_name)['project']
-        self.data.projects.append(project)
+        self.addCleanup(self.projects_client.delete_project, project['id'])
 
         # Create a User
         u_name = data_utils.rand_name('user')

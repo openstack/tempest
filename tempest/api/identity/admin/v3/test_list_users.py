@@ -36,24 +36,36 @@ class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
         alt_user = data_utils.rand_name('test_user')
         alt_password = data_utils.rand_password()
         cls.alt_email = alt_user + '@testmail.tm'
-        cls.data.setup_test_domain()
+        # Create a domain
+        cls.domain = cls.create_domain()
         # Create user with Domain
+        cls.users = list()
         u1_name = data_utils.rand_name('test_user')
         cls.domain_enabled_user = cls.users_client.create_user(
             u1_name, password=alt_password,
-            email=cls.alt_email, domain_id=cls.data.domain['id'])['user']
-        cls.data.users.append(cls.domain_enabled_user)
+            email=cls.alt_email, domain_id=cls.domain['id'])['user']
+        cls.users.append(cls.domain_enabled_user)
         # Create default not enabled user
         u2_name = data_utils.rand_name('test_user')
         cls.non_domain_enabled_user = cls.users_client.create_user(
             u2_name, password=alt_password,
             email=cls.alt_email, enabled=False)['user']
-        cls.data.users.append(cls.non_domain_enabled_user)
+        cls.users.append(cls.non_domain_enabled_user)
+
+    @classmethod
+    def resource_cleanup(cls):
+        # Cleanup the users created during setup
+        for user in cls.users:
+            cls.users_client.delete_user(user['id'])
+        # Cleanup the domain created during setup
+        cls.domains_client.update_domain(cls.domain['id'], enabled=False)
+        cls.domains_client.delete_domain(cls.domain['id'])
+        super(UsersV3TestJSON, cls).resource_cleanup()
 
     @test.idempotent_id('08f9aabb-dcfe-41d0-8172-82b5fa0bd73d')
     def test_list_user_domains(self):
         # List users with domain
-        params = {'domain_id': self.data.domain['id']}
+        params = {'domain_id': self.domain['id']}
         self._list_users_with_params(params, 'domain_id',
                                      self.domain_enabled_user,
                                      self.non_domain_enabled_user)
@@ -79,7 +91,7 @@ class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
         # List users
         body = self.users_client.list_users()['users']
         fetched_ids = [u['id'] for u in body]
-        missing_users = [u['id'] for u in self.data.users
+        missing_users = [u['id'] for u in self.users
                          if u['id'] not in fetched_ids]
         self.assertEqual(0, len(missing_users),
                          "Failed to find user %s in fetched list" %
@@ -88,8 +100,8 @@ class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
     @test.idempotent_id('b4baa3ae-ac00-4b4e-9e27-80deaad7771f')
     def test_get_user(self):
         # Get a user detail
-        user = self.users_client.show_user(self.data.users[0]['id'])['user']
-        self.assertEqual(self.data.users[0]['id'], user['id'])
-        self.assertEqual(self.data.users[0]['name'], user['name'])
+        user = self.users_client.show_user(self.users[0]['id'])['user']
+        self.assertEqual(self.users[0]['id'], user['id'])
+        self.assertEqual(self.users[0]['name'], user['name'])
         self.assertEqual(self.alt_email, user['email'])
-        self.assertEqual(self.data.domain['id'], user['domain_id'])
+        self.assertEqual(self.domain['id'], user['domain_id'])
