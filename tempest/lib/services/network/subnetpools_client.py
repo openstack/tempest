@@ -18,19 +18,39 @@ from tempest.lib.services.network import base
 class SubnetpoolsClient(base.BaseNetworkClient):
 
     def list_subnetpools(self, **filters):
+        """Lists subnet pools to which the tenant has access.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-networking-v2-ext.html#listSubnetPools
+        """
         uri = '/subnetpools'
         return self.list_resources(uri, **filters)
 
     def create_subnetpool(self, **kwargs):
+        """Creates a subnet pool.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-networking-v2-ext.html#createSubnetPool
+        """
         uri = '/subnetpools'
         post_data = {'subnetpool': kwargs}
         return self.create_resource(uri, post_data)
 
     def show_subnetpool(self, subnetpool_id, **fields):
+        """Shows information for a subnet pool.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-networking-v2-ext.html#showSubnetPool
+        """
         uri = '/subnetpools/%s' % subnetpool_id
         return self.show_resource(uri, **fields)
 
     def update_subnetpool(self, subnetpool_id, **kwargs):
+        """Updates a subnet pool.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-networking-v2-ext.html#updateSubnetPool
+        """
         uri = '/subnetpools/%s' % subnetpool_id
         post_data = {'subnetpool': kwargs}
         return self.update_resource(uri, post_data)
