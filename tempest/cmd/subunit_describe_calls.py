@@ -203,7 +203,7 @@ class ArgumentParser(argparse.ArgumentParser):
         desc = "Outputs all HTTP calls a given test made that were logged."
         super(ArgumentParser, self).__init__(description=desc)
 
-        self.prog = "Argument Parser"
+        self.prog = "subunit-describe-calls"
 
         self.add_argument(
             "-s", "--subunit", metavar="<subunit file>", required=True,
