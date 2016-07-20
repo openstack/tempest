@@ -36,6 +36,11 @@ class SubnetsClient(base.BaseNetworkClient):
         return self.update_resource(uri, post_data)
 
     def show_subnet(self, subnet_id, **fields):
+        """Shows details for a subnet.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-networking-v2.html#showSubnet
+        """
         uri = '/subnets/%s' % subnet_id
         return self.show_resource(uri, **fields)
 
@@ -44,6 +49,11 @@ class SubnetsClient(base.BaseNetworkClient):
         return self.delete_resource(uri)
 
     def list_subnets(self, **filters):
+        """Lists subnets to which the tenant has access.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-networking-v2.html#listSubnets
+        """
         uri = '/subnets'
         return self.list_resources(uri, **filters)
 
