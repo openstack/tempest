@@ -185,7 +185,7 @@ class ListImagesTest(base.BaseV2ImageTest):
     def test_list_no_params(self):
         # Simple test to see all fixture images returned
         images_list = self.client.list_images()['images']
-        image_list = map(lambda x: x['id'], images_list)
+        image_list = [image['id'] for image in images_list]
 
         for image in self.created_images:
             self.assertIn(image, image_list)

@@ -33,8 +33,9 @@ class VolumesV2ListTestJSON(base.BaseVolumeTest):
 
     def assertVolumesIn(self, fetched_list, expected_list, fields=None):
         if fields:
-            expected_list = map(operator.itemgetter(*fields), expected_list)
-            fetched_list = map(operator.itemgetter(*fields), fetched_list)
+            fieldsgetter = operator.itemgetter(*fields)
+            expected_list = map(fieldsgetter, expected_list)
+            fetched_list = [fieldsgetter(item) for item in fetched_list]
 
         missing_vols = [v for v in expected_list if v not in fetched_list]
         if len(missing_vols) == 0:

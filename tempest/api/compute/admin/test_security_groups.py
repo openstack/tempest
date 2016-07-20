@@ -65,7 +65,7 @@ class SecurityGroupsTestAdminJSON(base.BaseV2ComputeAdminTest):
         # Fetch all security groups based on 'all_tenants' search filter
         fetched_list = self.adm_client.list_security_groups(
             all_tenants='true')['security_groups']
-        sec_group_id_list = map(lambda sg: sg['id'], fetched_list)
+        sec_group_id_list = [sg['id'] for sg in fetched_list]
         # Now check if all created Security Groups are present in fetched list
         for sec_group in security_group_list:
             self.assertIn(sec_group['id'], sec_group_id_list)

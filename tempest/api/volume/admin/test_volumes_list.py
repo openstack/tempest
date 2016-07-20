@@ -53,7 +53,7 @@ class VolumesListAdminV2TestJSON(base.BaseVolumeAdminTest):
         self.assertEqual(sorted(expected_list_ids), sorted(fetched_list_ids))
         # Verifying tenant id of volumes fetched list is related to
         # primary tenant
-        fetched_tenant_id = map(operator.itemgetter(
-            'os-vol-tenant-attr:tenant_id'), fetched_list)
+        fetched_tenant_id = [operator.itemgetter(
+            'os-vol-tenant-attr:tenant_id')(item) for item in fetched_list]
         expected_tenant_id = [self.volumes_client.tenant_id] * 3
         self.assertEqual(expected_tenant_id, fetched_tenant_id)

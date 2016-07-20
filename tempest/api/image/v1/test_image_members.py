@@ -25,7 +25,7 @@ class ImageMembersTest(base.BaseV1ImageMembersTest):
         self.image_member_client.create_image_member(image, self.alt_tenant_id)
         body = self.image_member_client.list_image_members(image)
         members = body['members']
-        members = map(lambda x: x['member_id'], members)
+        members = [member['member_id'] for member in members]
         self.assertIn(self.alt_tenant_id, members)
         # get image as alt user
         self.alt_img_cli.show_image(image)
@@ -40,7 +40,7 @@ class ImageMembersTest(base.BaseV1ImageMembersTest):
         body = self.image_member_client.list_shared_images(
             self.alt_tenant_id)
         images = body['shared_images']
-        images = map(lambda x: x['image_id'], images)
+        images = [img['image_id'] for img in images]
         self.assertIn(share_image, images)
         self.assertIn(image, images)
 
