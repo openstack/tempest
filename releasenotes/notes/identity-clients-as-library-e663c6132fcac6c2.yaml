@@ -8,6 +8,7 @@ features:
 
       * endpoints_client(v2)
       * endpoints_client(v3)
+      * policies_client (v3)
       * roles_client(v2)
       * services_client(v2)
       * tenants_client(v2)
