@@ -127,6 +127,7 @@ class Manager(clients.ServiceClients):
             self.network.SecurityGroupRulesClient())
         self.security_groups_client = self.network.SecurityGroupsClient()
         self.network_versions_client = self.network.NetworkVersionsClient()
+        self.service_providers_client = self.network.ServiceProvidersClient()
 
     def _set_image_clients(self):
         if CONF.service_available.glance:
