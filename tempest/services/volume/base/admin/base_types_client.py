@@ -48,7 +48,11 @@ class BaseTypesClient(rest_client.RestClient):
         return 'volume-type/encryption-type'
 
     def list_volume_types(self, **params):
-        """List all the volume_types created."""
+        """List all the volume_types created.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-blockstorage-v2.html#showVolumeTypes
+        """
         url = 'types'
         if params:
             url += '?%s' % urllib.urlencode(params)
@@ -59,7 +63,11 @@ class BaseTypesClient(rest_client.RestClient):
         return rest_client.ResponseBody(resp, body)
 
     def show_volume_type(self, volume_id):
-        """Returns the details of a single volume_type."""
+        """Returns the details of a single volume_type.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-blockstorage-v2.html#showVolumeType
+        """
         url = "types/%s" % str(volume_id)
         resp, body = self.get(url)
         body = json.loads(body)
@@ -79,7 +87,11 @@ class BaseTypesClient(rest_client.RestClient):
         return rest_client.ResponseBody(resp, body)
 
     def delete_volume_type(self, volume_id):
-        """Deletes the Specified Volume_type."""
+        """Deletes the Specified Volume_type.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-blockstorage-v2.html#deleteVolumeType
+        """
         resp, body = self.delete("types/%s" % str(volume_id))
         self.expected_success(202, resp.status)
         return rest_client.ResponseBody(resp, body)
@@ -90,8 +102,6 @@ class BaseTypesClient(rest_client.RestClient):
         TODO: Current api-site doesn't contain this API description.
         After fixing the api-site, we need to fix here also for putting
         the link to api-site.
-
-
         """
         url = 'types/%s/extra_specs' % str(vol_type_id)
         if params:
@@ -139,6 +149,9 @@ class BaseTypesClient(rest_client.RestClient):
         extra_spec_name: Name of the extra spec to be updated.
         extra_spec: A dictionary of with key as extra_spec_name and the
                      updated value.
+        Available params: see http://developer.openstack.org/
+                              api-ref-blockstorage-v2.html#
+                              updateVolumeTypeExtraSpecs
         """
         url = "types/%s/extra_specs/%s" % (str(vol_type_id),
                                            str(extra_spec_name))
@@ -207,7 +220,12 @@ class BaseTypesClient(rest_client.RestClient):
         return rest_client.ResponseBody(resp, body)
 
     def list_type_access(self, volume_type_id):
-        """Print access information about the given volume type."""
+        """Print access information about the given volume type.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-blockstorage-v2.html#
+                              listVolumeTypeAccessExt
+        """
         url = 'types/%s/os-volume-type-access' % (volume_type_id)
         resp, body = self.get(url)
         body = json.loads(body)
