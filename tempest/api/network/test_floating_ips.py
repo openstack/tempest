@@ -54,7 +54,7 @@ class FloatingIPTestJSON(base.BaseNetworkTest):
 
         # Create network, subnet, router and add interface
         cls.network = cls.create_network()
-        cls.subnet = cls.create_subnet(cls.network)
+        cls.subnet = cls.create_subnet(cls.network, enable_dhcp=False)
         cls.router = cls.create_router(data_utils.rand_name('router-'),
                                        external_network_id=cls.ext_net_id)
         cls.create_router_interface(cls.router['id'], cls.subnet['id'])
