@@ -15,15 +15,18 @@
 import copy
 
 from tempest.lib.api_schema.response.compute.v2_1 import servers as serversv21
-from tempest.lib.api_schema.response.compute.v2_9 import servers as serversv29
+from tempest.lib.api_schema.response.compute.v2_16 import servers \
+    as serversv216
 
-get_server = copy.deepcopy(serversv29.get_server)
+list_servers = copy.deepcopy(serversv216.list_servers)
+
+get_server = copy.deepcopy(serversv216.get_server)
 get_server['response_body']['properties']['server'][
     'properties'].update({'description': {'type': ['string', 'null']}})
 get_server['response_body']['properties']['server'][
     'required'].append('description')
 
-list_servers_detail = copy.deepcopy(serversv29.list_servers_detail)
+list_servers_detail = copy.deepcopy(serversv216.list_servers_detail)
 list_servers_detail['response_body']['properties']['servers']['items'][
     'properties'].update({'description': {'type': ['string', 'null']}})
 list_servers_detail['response_body']['properties']['servers']['items'][
