@@ -13,8 +13,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import testtools
-
 from tempest import config
 from tempest.scenario import manager
 from tempest import test
@@ -33,9 +31,13 @@ class TestSnapshotPattern(manager.ScenarioTest):
 
     """
 
+    @classmethod
+    def skip_checks(cls):
+        super(TestSnapshotPattern, cls).skip_checks()
+        if not CONF.compute_feature_enabled.snapshot:
+            raise cls.skipException("Snapshotting is not available.")
+
     @test.idempotent_id('608e604b-1d63-4a82-8e3e-91bc665c90b4')
-    @testtools.skipUnless(CONF.compute_feature_enabled.snapshot,
-                          'Snapshotting is not available.')
     @test.services('compute', 'network', 'image')
     def test_snapshot_pattern(self):
         # prepare for booting an instance
