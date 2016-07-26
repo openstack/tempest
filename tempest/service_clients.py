@@ -14,6 +14,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import copy
+import importlib
+import inspect
+
 from tempest.lib import auth
 from tempest.lib import exceptions
 
@@ -32,6 +36,88 @@ def available_modules():
     """List of service client modules available in Tempest and plugins"""
     # TODO(andreaf) For now this returns only tempest_modules
     return tempest_modules()
+
+
+class ClientsFactory(object):
+    """Builds service clients for a service client module
+
+    This class implements the logic of feeding service client parameters
+    to service clients from a specific module. It allows setting the
+    parameters once and obtaining new instances of the clients without the
+    need of passing any parameter.
+
+    ClientsFactory can be used directly, or consumed via the `ServiceClients`
+    class, which manages the authorization part.
+    """
+    # TODO(andreaf) This version includes ClientsFactory but it does not
+    # use it yet in ServiceClients
+
+    def __init__(self, module_path, client_names, auth_provider, **kwargs):
+        """Initialises the client factory
+
+        :param module_path Path to module that includes all service clients.
+            All service client classes must be exposed by a single module.
+            If they are separated in different modules, defining __all__
+            in the root module can help, similar to what is done by service
+            clients in tempest.
+        :param client_names List or set of names of the service client classes.
+        :param auth_provider The auth provider used to initialise client.
+        :param kwargs Parameters to be passed to all clients. Parameters values
+            can be overwritten when clients are initialised, but parameters
+            cannot be deleted.
+        :raise ImportError if the specified module_path cannot be imported
+
+        Example:
+
+            >>> # Get credentials and an auth_provider
+            >>> clients = ClientsFactory(
+            >>>     module_path='my_service.my_service_clients',
+            >>>     client_names=['ServiceClient1', 'ServiceClient2'],
+            >>>     auth_provider=auth_provider,
+            >>>     service='my_service',
+            >>>     region='region1')
+            >>> my_api_client = clients.MyApiClient()
+            >>> my_api_client_region2 = clients.MyApiClient(region='region2')
+
+        """
+        # Import the module. If it's not importable, the raised exception
+        # provides good enough information about what happened
+        _module = importlib.import_module(module_path)
+        # If any of the classes is not in the module we fail
+        for class_name in client_names:
+            # TODO(andreaf) This always passes all parameters to all clients.
+            # In future to allow clients to specify the list of parameters
+            # that they accept based out of a list of standard ones.
+
+            # Obtain the class
+            klass = self._get_class(_module, class_name)
+            final_kwargs = copy.copy(kwargs)
+
+            # Set the function as an attribute of the factory
+            setattr(self, class_name, self._get_partial_class(
+                klass, auth_provider, final_kwargs))
+
+    @classmethod
+    def _get_partial_class(cls, klass, auth_provider, kwargs):
+
+        # Define a function that returns a new class instance by
+        # combining default kwargs with extra ones
+        def partial_class(**later_kwargs):
+            kwargs.update(later_kwargs)
+            return klass(auth_provider=auth_provider, **kwargs)
+
+        return partial_class
+
+    @classmethod
+    def _get_class(cls, module, class_name):
+        klass = getattr(module, class_name, None)
+        if not klass:
+            msg = 'Invalid class name, %s is not found in %s'
+            raise AttributeError(msg % (class_name, module))
+        if not inspect.isclass(klass):
+            msg = 'Expected a class, got %s of type %s instead'
+            raise TypeError(msg % (klass, type(klass)))
+        return klass
 
 
 class ServiceClients(object):
