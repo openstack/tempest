@@ -178,9 +178,8 @@ should only be run on the unit test directory. The default value of OS_TEST_PATH
 is OS_TEST_PATH=./tempest/test_discover which will only run test discover on the
 Tempest suite.
 
-Alternatively, you can use the run_tests.sh script which will create a venv and
-run the unit tests. There are also the py27 and py34 tox jobs which will run
-the unit tests with the corresponding version of python.
+Alternatively, there are the py27 and py34 tox jobs which will run the unit
+tests with the corresponding version of python.
 
 Python 2.6
 ----------
