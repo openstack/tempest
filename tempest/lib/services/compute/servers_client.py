@@ -22,6 +22,7 @@ from six.moves.urllib import parse as urllib
 from tempest.lib.api_schema.response.compute.v2_1 import servers as schema
 from tempest.lib.api_schema.response.compute.v2_16 import servers as schemav216
 from tempest.lib.api_schema.response.compute.v2_19 import servers as schemav219
+from tempest.lib.api_schema.response.compute.v2_26 import servers as schemav226
 from tempest.lib.api_schema.response.compute.v2_3 import servers as schemav23
 from tempest.lib.api_schema.response.compute.v2_9 import servers as schemav29
 from tempest.lib.common import rest_client
@@ -34,7 +35,8 @@ class ServersClient(base_compute_client.BaseComputeClient):
         {'min': '2.3', 'max': '2.8', 'schema': schemav23},
         {'min': '2.9', 'max': '2.15', 'schema': schemav29},
         {'min': '2.16', 'max': '2.18', 'schema': schemav216},
-        {'min': '2.19', 'max': None, 'schema': schemav219}]
+        {'min': '2.19', 'max': '2.25', 'schema': schemav219},
+        {'min': '2.26', 'max': None, 'schema': schemav226}]
 
     def __init__(self, auth_provider, service, region,
                  enable_instance_password=True, **kwargs):
