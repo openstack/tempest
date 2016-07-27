@@ -141,7 +141,7 @@ def wait_for_image_status(client, image_id, status):
     while int(time.time()) - start < client.build_timeout:
         image = show_image(image_id)
         # Compute image client returns response wrapped in 'image' element
-        # which is not case with Glance image client.
+        # which is not the case with Glance image client.
         if 'image' in image:
             image = image['image']
 
