@@ -21,13 +21,14 @@ API calls are made inside of a test and in what order they are called.
 Runtime Arguments
 -----------------
 
-**--subunit, -s**: (Required) The path to the subunit file being parsed
+**--subunit, -s**: (Optional) The path to the subunit file being parsed,
+defaults to stdin
 
 **--non-subunit-name, -n**: (Optional) The file_name that the logs are being
 stored in
 
-**--output-file, -o**: (Required) The path where the JSON output will be
-written to
+**--output-file, -o**: (Optional) The path where the JSON output will be
+written to. This contains more information than is present in stdout.
 
 **--ports, -p**: (Optional) The path to a JSON file describing the ports being
 used by different services
@@ -35,13 +36,14 @@ used by different services
 Usage
 -----
 
-subunit-describe-calls will take in a file path via the --subunit parameter
-which contains either a subunit v1 or v2 stream. This is then parsed checking
-for details contained in the file_bytes of the --non-subunit-name parameter
-(the default is pythonlogging which is what Tempest uses to store logs). By
-default the OpenStack Kilo release port defaults (http://bit.ly/22jpF5P)
-are used unless a file is provided via the --ports option. The resulting output
-is dumped in JSON output to the path provided in the --output-file option.
+subunit-describe-calls will take in either stdin subunit v1 or v2 stream or a
+file path which contains either a subunit v1 or v2 stream passed via the
+--subunit parameter. This is then parsed checking for details contained in the
+file_bytes of the --non-subunit-name parameter (the default is pythonlogging
+which is what Tempest uses to store logs). By default the OpenStack Kilo
+release port defaults (http://bit.ly/22jpF5P) are used unless a file is
+provided via the --ports option. The resulting output is dumped in JSON output
+to the path provided in the --output-file option.
 
 Ports file JSON structure
 ^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -64,7 +66,11 @@ Output file JSON structure
               "verb": "HTTP Verb",
               "service": "Name of the service",
               "url": "A shortened version of the URL called",
-              "status_code": "The status code of the response"
+              "status_code": "The status code of the response",
+              "request_headers": "The headers of the request",
+              "request_body": "The body of the request",
+              "response_headers": "The headers of the response",
+              "response_body": "The body of the response"
           }
       ]
   }
@@ -75,6 +81,7 @@ import io
 import json
 import os
 import re
+import sys
 
 import subunit
 import testtools
@@ -91,6 +98,9 @@ class UrlParser(testtools.TestResult):
                         '(?P<verb>\w*) (?P<url>.*) .*')
     port_re = re.compile(r'.*:(?P<port>\d+).*')
     path_re = re.compile(r'http[s]?://[^/]*/(?P<path>.*)')
+    request_re = re.compile(r'.* Request - Headers: (?P<headers>.*)')
+    response_re = re.compile(r'.* Response - Headers: (?P<headers>.*)')
+    body_re = re.compile(r'.*Body: (?P<body>.*)')
 
     # Based on mitaka defaults:
     # http://docs.openstack.org/mitaka/config-reference/
@@ -151,15 +161,46 @@ class UrlParser(testtools.TestResult):
 
         calls = []
         for _, detail in details.items():
+            in_request = False
+            in_response = False
+            current_call = {}
             for line in detail.as_text().split("\n"):
-                match = self.url_re.match(line)
-                if match is not None:
-                    calls.append({
-                        "name": match.group("name"),
-                        "verb": match.group("verb"),
-                        "status_code": match.group("code"),
-                        "service": self.get_service(match.group("url")),
-                        "url": self.url_path(match.group("url"))})
+                url_match = self.url_re.match(line)
+                request_match = self.request_re.match(line)
+                response_match = self.response_re.match(line)
+                body_match = self.body_re.match(line)
+
+                if url_match is not None:
+                    if current_call != {}:
+                        calls.append(current_call.copy())
+                        current_call = {}
+                        in_request, in_response = False, False
+                    current_call.update({
+                        "name": url_match.group("name"),
+                        "verb": url_match.group("verb"),
+                        "status_code": url_match.group("code"),
+                        "service": self.get_service(url_match.group("url")),
+                        "url": self.url_path(url_match.group("url"))})
+                elif request_match is not None:
+                    in_request, in_response = True, False
+                    current_call.update(
+                        {"request_headers": request_match.group("headers")})
+                elif in_request and body_match is not None:
+                    in_request = False
+                    current_call.update(
+                        {"request_body": body_match.group(
+                            "body")})
+                elif response_match is not None:
+                    in_request, in_response = False, True
+                    current_call.update(
+                        {"response_headers": response_match.group(
+                            "headers")})
+                elif in_response and body_match is not None:
+                    in_response = False
+                    current_call.update(
+                        {"response_body": body_match.group("body")})
+            if current_call != {}:
+                calls.append(current_call.copy())
 
         return calls
 
@@ -206,8 +247,9 @@ class ArgumentParser(argparse.ArgumentParser):
         self.prog = "subunit-describe-calls"
 
         self.add_argument(
-            "-s", "--subunit", metavar="<subunit file>", required=True,
-            default=None, help="The path to the subunit output file.")
+            "-s", "--subunit", metavar="<subunit file>",
+            nargs="?", type=argparse.FileType('rb'), default=sys.stdin,
+            help="The path to the subunit output file.")
 
         self.add_argument(
             "-n", "--non-subunit-name", metavar="<non subunit name>",
@@ -216,19 +258,18 @@ class ArgumentParser(argparse.ArgumentParser):
 
         self.add_argument(
             "-o", "--output-file", metavar="<output file>", default=None,
-            help="The output file name for the json.", required=True)
+            help="The output file name for the json.")
 
         self.add_argument(
             "-p", "--ports", metavar="<ports file>", default=None,
             help="A JSON file describing the ports for each service.")
 
 
-def parse(subunit_file, non_subunit_name, ports):
+def parse(stream, non_subunit_name, ports):
     if ports is not None and os.path.exists(ports):
         ports = json.loads(open(ports).read())
 
     url_parser = UrlParser(ports)
-    stream = open(subunit_file, 'rb')
     suite = subunit.ByteStreamToStreamResult(
         stream, non_subunit_name=non_subunit_name)
     result = testtools.StreamToExtendedDecorator(url_parser)
@@ -248,8 +289,21 @@ def parse(subunit_file, non_subunit_name, ports):
 
 
 def output(url_parser, output_file):
-    with open(output_file, "w") as outfile:
-        outfile.write(json.dumps(url_parser.test_logs))
+    if output_file is not None:
+        with open(output_file, "w") as outfile:
+            outfile.write(json.dumps(url_parser.test_logs))
+        return
+
+    for test_name, items in url_parser.test_logs.iteritems():
+        sys.stdout.write('{0}\n'.format(test_name))
+        if not items:
+            sys.stdout.write('\n')
+            continue
+        for item in items:
+            sys.stdout.write('\t- {0} {1} request for {2} to {3}\n'.format(
+                item.get('status_code'), item.get('verb'),
+                item.get('service'), item.get('url')))
+        sys.stdout.write('\n')
 
 
 def entry_point():
