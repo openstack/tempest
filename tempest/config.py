@@ -26,6 +26,7 @@ from oslo_log import log as logging
 import testtools
 
 from tempest.lib import exceptions
+from tempest.lib.services import clients
 from tempest.test_discover import plugins
 
 
@@ -1287,6 +1288,15 @@ class TempestConfigProxy(object):
             lockutils.set_defaults(lock_dir)
             self._config = TempestConfigPrivate(config_path=self._path)
 
+            # Pushing tempest internal service client configuration to the
+            # service clients register. Doing this in the config module ensures
+            # that the configuration is available by the time we register the
+            # service clients.
+            # NOTE(andreaf) This has to be done at the time the first
+            # attribute is accessed, to ensure all plugins have been already
+            # loaded, options registered, and _config is set.
+            _register_tempest_service_clients()
+
         return getattr(self._config, attr)
 
     def set_config_path(self, path):
@@ -1446,3 +1456,29 @@ def service_client_config(service_client_name=None):
     # Set service
     _parameters['service'] = getattr(options, 'catalog_type')
     return _parameters
+
+
+def _register_tempest_service_clients():
+    # Register tempest own service clients using the same mechanism used
+    # for external plugins.
+    # The configuration data is pushed to the registry so that automatic
+    # configuration of tempest own service clients is possible both for
+    # tempest as well as for the plugins.
+    service_clients = clients.tempest_modules()
+    registry = clients.ClientsRegistry()
+    all_clients = []
+    for service_client in service_clients:
+        module = service_clients[service_client]
+        configs = service_client.split('.')[0]
+        service_client_data = dict(
+            name=service_client.replace('.', '_'),
+            service_version=service_client,
+            module_path=module.__name__,
+            client_names=module.__all__,
+            **service_client_config(configs)
+        )
+        all_clients.append(service_client_data)
+    # NOTE(andreaf) Internal service clients do not actually belong
+    # to a plugin, so using '__tempest__' to indicate a virtual plugin
+    # which holds internal service clients.
+    registry.register_service_client('__tempest__', all_clients)

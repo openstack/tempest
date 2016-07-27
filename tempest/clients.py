@@ -97,19 +97,16 @@ class Manager(clients.ServiceClients):
         This uses `config.service_client_config` for all services to collect
         most configuration items needed to init the clients.
         """
-        # NOTE(andreaf) Configuration items will be passed in future patches
-        # into ClientFactory objects, but for now we update all the
-        # _set_*_client methods to consume them so we can verify that the
-        # configuration collected is correct
+        # NOTE(andreaf) Once all service clients in Tempest are migrated
+        # to tempest.lib, their configuration will be picked up from the
+        # registry, and this method will become redundant.
 
         configuration = {}
 
-        # Setup the parameters for all Tempest services.
+        # Setup the parameters for all Tempest services which are not in lib.
         # NOTE(andreaf) Since client.py is an internal module of Tempest,
         # it doesn't have to consider plugin configuration.
-        all_tempest_modules = (set(clients.tempest_modules()) |
-                               clients._tempest_internal_modules())
-        for service in all_tempest_modules:
+        for service in clients._tempest_internal_modules():
             try:
                 # NOTE(andreaf) Use the unversioned service name to fetch
                 # the configuration since configuration is not versioned.
