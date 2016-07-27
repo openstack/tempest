@@ -89,6 +89,13 @@ class BaseBackupsClient(rest_client.RestClient):
         self.expected_success(201, resp.status)
         return rest_client.ResponseBody(resp, body)
 
+    def reset_backup_status(self, backup_id, status):
+        """Reset the specified backup's status."""
+        post_body = json.dumps({'os-reset_status': {"status": status}})
+        resp, body = self.post('backups/%s/action' % backup_id, post_body)
+        self.expected_success(202, resp.status)
+        return rest_client.ResponseBody(resp, body)
+
     def wait_for_backup_status(self, backup_id, status):
         """Waits for a Backup to reach a given status."""
         body = self.show_backup(backup_id)['backup']
@@ -99,7 +106,7 @@ class BaseBackupsClient(rest_client.RestClient):
             time.sleep(self.build_interval)
             body = self.show_backup(backup_id)['backup']
             backup_status = body['status']
-            if backup_status == 'error':
+            if backup_status == 'error' and backup_status != status:
                 raise exceptions.VolumeBackupException(backup_id=backup_id)
 
             if int(time.time()) - start >= self.build_timeout:
