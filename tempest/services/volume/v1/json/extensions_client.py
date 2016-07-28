@@ -13,8 +13,17 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest.services.volume.base import base_extensions_client
+from oslo_serialization import jsonutils as json
+
+from tempest.lib.common import rest_client
 
 
-class ExtensionsClient(base_extensions_client.BaseExtensionsClient):
+class ExtensionsClient(rest_client.RestClient):
     """Volume V1 extensions client."""
+
+    def list_extensions(self):
+        url = 'extensions'
+        resp, body = self.get(url)
+        body = json.loads(body)
+        self.expected_success(200, resp.status)
+        return rest_client.ResponseBody(resp, body)
