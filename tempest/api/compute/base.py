@@ -359,7 +359,7 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
             for address in addresses:
                 if address['version'] == CONF.validation.ip_version_for_ssh:
                     return address['addr']
-            raise exceptions.ServerUnreachable()
+            raise exceptions.ServerUnreachable(server_id=server['id'])
         else:
             raise exceptions.InvalidConfiguration()
 

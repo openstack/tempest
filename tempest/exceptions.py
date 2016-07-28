@@ -63,7 +63,8 @@ class StackBuildErrorException(exceptions.TempestException):
 
 
 class ServerUnreachable(exceptions.TempestException):
-    message = "The server is not reachable via the configured network"
+    message = ("Server %(server_id)s is not reachable via "
+               "the configured network")
 
 
 # NOTE(andreaf) This exception is added here to facilitate the migration
