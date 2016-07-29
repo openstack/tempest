@@ -174,9 +174,9 @@ class VolumesV2ListTestJSON(base.BaseVolumeTest):
 
             # If cannot follow make sure it's because we have finished
             else:
-                self.assertListEqual([], remaining or [],
-                                     'No more pages reported, but still '
-                                     'missing ids %s' % remaining)
+                self.assertEqual([], remaining or [],
+                                 'No more pages reported, but still '
+                                 'missing ids %s' % remaining)
                 break
 
     @test.idempotent_id('e9138a2c-f67b-4796-8efa-635c196d01de')
