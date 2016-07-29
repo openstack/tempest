@@ -13,8 +13,23 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest.services.volume.base.admin import base_hosts_client
+from oslo_serialization import jsonutils as json
+from six.moves.urllib import parse as urllib
+
+from tempest.lib.common import rest_client
 
 
-class HostsClient(base_hosts_client.BaseHostsClient):
+class HostsClient(rest_client.RestClient):
     """Client class to send CRUD Volume Host API V1 requests"""
+
+    def list_hosts(self, **params):
+        """Lists all hosts."""
+
+        url = 'os-hosts'
+        if params:
+            url += '?%s' % urllib.urlencode(params)
+
+        resp, body = self.get(url)
+        body = json.loads(body)
+        self.expected_success(200, resp.status)
+        return rest_client.ResponseBody(resp, body)
