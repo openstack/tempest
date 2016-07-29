@@ -75,7 +75,7 @@ def rand_password(length=15):
     ascii_char = string.ascii_letters
     digits = string.digits
     digit = random.choice(string.digits)
-    puncs = '~!@#$%^&*_=+'
+    puncs = '~!@#%^&*_=+'
     punc = random.choice(puncs)
     seed = ascii_char + digits + puncs
     pre = upper + digit + punc
