@@ -51,7 +51,6 @@ class EC2CredentialsTest(base.BaseIdentityV2Test):
     def test_list_ec2_credentials(self):
         """Get the list of user ec2 credentials."""
         created_creds = []
-        fetched_creds = []
         # create first ec2 credentials
         creds1 = self.non_admin_users_client.create_user_ec2_credential(
             self.creds.user_id,
