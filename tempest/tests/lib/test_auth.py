@@ -244,7 +244,7 @@ class TestKeystoneV2AuthProvider(BaseAuthTestsSetUp):
         # The original headers where empty
         self.assertNotEqual(url, self.target_url)
         self.assertIsNone(headers)
-        self.assertEqual(body, None)
+        self.assertIsNone(body)
 
     def _test_request_with_alt_part_without_alt_data_no_change(self, body):
         """Test empty alternate auth data with no effect

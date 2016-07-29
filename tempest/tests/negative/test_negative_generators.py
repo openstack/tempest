@@ -146,5 +146,5 @@ class TestNegativeNegativeGenerator(base.TestCase, BaseNegativeGenerator):
             schema_under_test = copy.copy(valid_schema)
             expected_result = \
                 self.generator.generate_payload(test, schema_under_test)
-            self.assertEqual(expected_result, None)
+            self.assertIsNone(expected_result)
             self._validate_result(valid_schema, schema_under_test)
