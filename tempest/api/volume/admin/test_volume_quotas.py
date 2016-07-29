@@ -73,8 +73,9 @@ class BaseVolumeQuotasAdminV2TestJSON(base.BaseVolumeAdminTest):
 
     @test.idempotent_id('18c51ae9-cb03-48fc-b234-14a19374dbed')
     def test_show_quota_usage(self):
-        quota_usage = self.admin_quotas_client.show_quota_usage(
-            self.os_adm.credentials.tenant_id)['quota_set']
+        quota_usage = self.admin_quotas_client.show_quota_set(
+            self.os_adm.credentials.tenant_id,
+            params={'usage': True})['quota_set']
         for key in QUOTA_KEYS:
             self.assertIn(key, quota_usage)
             for usage_key in QUOTA_USAGE_KEYS:
@@ -82,15 +83,15 @@ class BaseVolumeQuotasAdminV2TestJSON(base.BaseVolumeAdminTest):
 
     @test.idempotent_id('ae8b6091-48ad-4bfa-a188-bbf5cc02115f')
     def test_quota_usage(self):
-        quota_usage = self.admin_quotas_client.show_quota_usage(
-            self.demo_tenant_id)['quota_set']
+        quota_usage = self.admin_quotas_client.show_quota_set(
+            self.demo_tenant_id, params={'usage': True})['quota_set']
 
         volume = self.create_volume()
         self.addCleanup(self.delete_volume,
                         self.admin_volume_client, volume['id'])
 
-        new_quota_usage = self.admin_quotas_client.show_quota_usage(
-            self.demo_tenant_id)['quota_set']
+        new_quota_usage = self.admin_quotas_client.show_quota_set(
+            self.demo_tenant_id, params={'usage': True})['quota_set']
 
         self.assertEqual(quota_usage['volumes']['in_use'] + 1,
                          new_quota_usage['volumes']['in_use'])
@@ -128,11 +129,11 @@ class BaseVolumeQuotasAdminV2TestJSON(base.BaseVolumeAdminTest):
                         self.admin_volume_client, volume['id'])
 
         # List of tenants quota usage pre-transfer
-        primary_quota = self.admin_quotas_client.show_quota_usage(
-            self.demo_tenant_id)['quota_set']
+        primary_quota = self.admin_quotas_client.show_quota_set(
+            self.demo_tenant_id, params={'usage': True})['quota_set']
 
-        alt_quota = self.admin_quotas_client.show_quota_usage(
-            self.alt_client.tenant_id)['quota_set']
+        alt_quota = self.admin_quotas_client.show_quota_set(
+            self.alt_client.tenant_id, params={'usage': True})['quota_set']
 
         # Creates a volume transfer
         transfer = self.volumes_client.create_volume_transfer(
@@ -149,11 +150,11 @@ class BaseVolumeQuotasAdminV2TestJSON(base.BaseVolumeAdminTest):
             self.alt_client, volume['id'], 'available')
 
         # List of tenants quota usage post transfer
-        new_primary_quota = self.admin_quotas_client.show_quota_usage(
-            self.demo_tenant_id)['quota_set']
+        new_primary_quota = self.admin_quotas_client.show_quota_set(
+            self.demo_tenant_id, params={'usage': True})['quota_set']
 
-        new_alt_quota = self.admin_quotas_client.show_quota_usage(
-            self.alt_client.tenant_id)['quota_set']
+        new_alt_quota = self.admin_quotas_client.show_quota_set(
+            self.alt_client.tenant_id, params={'usage': True})['quota_set']
 
         # Verify tenants quota usage was updated
         self.assertEqual(primary_quota['volumes']['in_use'] -

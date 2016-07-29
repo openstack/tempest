@@ -42,12 +42,6 @@ class BaseQuotasClient(rest_client.RestClient):
         body = jsonutils.loads(body)
         return rest_client.ResponseBody(resp, body)
 
-    def show_quota_usage(self, tenant_id):
-        """List the quota set for a tenant."""
-
-        body = self.show_quota_set(tenant_id, params={'usage': True})
-        return body
-
     def update_quota_set(self, tenant_id, **kwargs):
         """Updates quota set
 

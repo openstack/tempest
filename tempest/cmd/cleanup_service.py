@@ -349,7 +349,8 @@ class VolumeQuotaService(BaseService):
             LOG.exception("Delete Volume Quotas exception.")
 
     def dry_run(self):
-        quotas = self.client.show_quota_usage(self.tenant_id)['quota_set']
+        quotas = self.client.show_quota_set(
+            self.tenant_id, params={'usage': True})['quota_set']
         self.data['volume_quotas'] = quotas
 
 
