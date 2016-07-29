@@ -23,7 +23,6 @@ from tempest import exceptions
 from tempest.lib import auth
 from tempest.lib import exceptions as lib_exc
 from tempest.lib.services import image
-from tempest.lib.services import network
 from tempest import service_clients
 from tempest.services import baremetal
 from tempest.services import data_processing
@@ -126,35 +125,22 @@ class Manager(service_clients.ServiceClients):
         return configuration
 
     def _set_network_clients(self):
-        params = self.parameters['network']
-        self.network_agents_client = network.AgentsClient(
-            self.auth_provider, **params)
-        self.network_extensions_client = network.ExtensionsClient(
-            self.auth_provider, **params)
-        self.networks_client = network.NetworksClient(
-            self.auth_provider, **params)
-        self.subnetpools_client = network.SubnetpoolsClient(
-            self.auth_provider, **params)
-        self.subnets_client = network.SubnetsClient(
-            self.auth_provider, **params)
-        self.ports_client = network.PortsClient(
-            self.auth_provider, **params)
-        self.network_quotas_client = network.QuotasClient(
-            self.auth_provider, **params)
-        self.floating_ips_client = network.FloatingIPsClient(
-            self.auth_provider, **params)
-        self.metering_labels_client = network.MeteringLabelsClient(
-            self.auth_provider, **params)
-        self.metering_label_rules_client = network.MeteringLabelRulesClient(
-            self.auth_provider, **params)
-        self.routers_client = network.RoutersClient(
-            self.auth_provider, **params)
-        self.security_group_rules_client = network.SecurityGroupRulesClient(
-            self.auth_provider, **params)
-        self.security_groups_client = network.SecurityGroupsClient(
-            self.auth_provider, **params)
-        self.network_versions_client = network.NetworkVersionsClient(
-            self.auth_provider, **params)
+        self.network_agents_client = self.network.AgentsClient()
+        self.network_extensions_client = self.network.ExtensionsClient()
+        self.networks_client = self.network.NetworksClient()
+        self.subnetpools_client = self.network.SubnetpoolsClient()
+        self.subnets_client = self.network.SubnetsClient()
+        self.ports_client = self.network.PortsClient()
+        self.network_quotas_client = self.network.QuotasClient()
+        self.floating_ips_client = self.network.FloatingIPsClient()
+        self.metering_labels_client = self.network.MeteringLabelsClient()
+        self.metering_label_rules_client = (
+            self.network.MeteringLabelRulesClient())
+        self.routers_client = self.network.RoutersClient()
+        self.security_group_rules_client = (
+            self.network.SecurityGroupRulesClient())
+        self.security_groups_client = self.network.SecurityGroupsClient()
+        self.network_versions_client = self.network.NetworkVersionsClient()
 
     def _set_image_clients(self):
         if CONF.service_available.glance:
