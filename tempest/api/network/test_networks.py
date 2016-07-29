@@ -127,7 +127,7 @@ class NetworksTest(base.BaseNetworkTest):
     def _get_allocation_pools_from_gateway(cls, ip_version):
         """Return allocation range for subnet of given gateway"""
         gateway = cls._get_gateway_from_tempest_conf(ip_version)
-        return [{'start': str(gateway + 2), 'end': str(gateway + 3)}]
+        return [{'start': str(gateway + 2), 'end': str(gateway + 6)}]
 
     def subnet_dict(self, include_keys):
         # Return a subnet dict which has include_keys and their corresponding
