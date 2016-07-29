@@ -106,16 +106,17 @@ class ClientsFactory(object):
     def __init__(self, module_path, client_names, auth_provider, **kwargs):
         """Initialises the client factory
 
-        :param module_path Path to module that includes all service clients.
+        :param module_path: Path to module that includes all service clients.
             All service client classes must be exposed by a single module.
             If they are separated in different modules, defining __all__
             in the root module can help, similar to what is done by service
             clients in tempest.
-        :param client_names List or set of names of the service client classes.
-        :param auth_provider The auth provider used to initialise client.
-        :param kwargs Parameters to be passed to all clients. Parameters values
-            can be overwritten when clients are initialised, but parameters
-            cannot be deleted.
+        :param client_names: List or set of names of the service client
+            classes.
+        :param auth_provider: The auth provider used to initialise client.
+        :param kwargs: Parameters to be passed to all clients. Parameters
+            values can be overwritten when clients are initialised, but
+            parameters cannot be deleted.
         :raise ImportError if the specified module_path cannot be imported
 
         Example:
@@ -238,11 +239,11 @@ class ServiceClients(object):
                              mandatory parameter, and it will so soon.
         :param region: Default value of region for service clients.
         :param scope: default scope for tokens produced by the auth provider
-        :param disable_ssl_certificate_validation Applies to auth and to all
+        :param disable_ssl_certificate_validation: Applies to auth and to all
                                                   service clients.
-        :param ca_certs Applies to auth and to all service clients.
-        :param trace_requests Applies to auth and to all service clients.
-        :param client_parameters Dictionary with parameters for service
+        :param ca_certs: Applies to auth and to all service clients.
+        :param trace_requests: Applies to auth and to all service clients.
+        :param client_parameters: Dictionary with parameters for service
             clients. Keys of the dictionary are the service client service
             name, as declared in `service_clients.available_modules()` except
             for the version. Values are dictionaries of parameters that are
