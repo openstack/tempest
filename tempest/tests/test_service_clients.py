@@ -265,11 +265,12 @@ class TestServiceClients(base.TestCase):
                              _params[_key])
 
     def test_register_service_client_module(self):
-        factory_mock = self.useFixture(fixtures.MockPatch(
-            'tempest.service_clients.ClientsFactory')).mock
         expected_params = {'fake_param1': 'fake_value1',
                            'fake_param2': 'fake_value2'}
         _manager = self._get_manager(init_region='fake_region_default')
+        # Mock after the _manager is setup to preserve the call count
+        factory_mock = self.useFixture(fixtures.MockPatch(
+            'tempest.service_clients.ClientsFactory')).mock
         _manager.register_service_client_module(
             name='fake_module',
             service_version='fake_service',
@@ -291,13 +292,14 @@ class TestServiceClients(base.TestCase):
         self.assertIn('fake_service', _manager._registered_services)
 
     def test_register_service_client_module_override_default(self):
-        factory_mock = self.useFixture(fixtures.MockPatch(
-            'tempest.service_clients.ClientsFactory')).mock
         new_region = 'new_region'
         expected_params = {'fake_param1': 'fake_value1',
                            'fake_param2': 'fake_value2',
                            'region': new_region}
         _manager = self._get_manager(init_region='fake_region_default')
+        # Mock after the _manager is setup to preserve the call count
+        factory_mock = self.useFixture(fixtures.MockPatch(
+            'tempest.service_clients.ClientsFactory')).mock
         _manager.register_service_client_module(
             name='fake_module',
             service_version='fake_service',
