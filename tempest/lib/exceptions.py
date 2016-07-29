@@ -229,3 +229,13 @@ class SSHExecCommandFailed(TempestException):
 
 class UnknownServiceClient(TempestException):
     message = "Service clients named %(services)s are not known"
+
+
+class ServiceClientRegistrationException(TempestException):
+    message = ("Error registering module %(name)s in path %(module_path)s, "
+               "with service %(service_version)s and clients "
+               "%(client_names)s: %(detailed_error)s")
+
+
+class PluginRegistrationException(TempestException):
+    message = "Error registering plugin %(name)s: %(detailed_error)s"

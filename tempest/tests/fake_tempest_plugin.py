@@ -18,6 +18,7 @@ from tempest.test_discover import plugins
 
 class FakePlugin(plugins.TempestPlugin):
     expected_load_test = ["my/test/path", "/home/dir"]
+    expected_service_clients = [{'foo': 'bar'}]
 
     def load_tests(self):
         return self.expected_load_test
@@ -28,6 +29,9 @@ class FakePlugin(plugins.TempestPlugin):
     def get_opt_lists(self):
         return []
 
+    def get_service_clients(self):
+        return self.expected_service_clients
+
 
 class FakeStevedoreObj(object):
     obj = FakePlugin()
@@ -37,4 +41,27 @@ class FakeStevedoreObj(object):
         return self._name
 
     def __init__(self, name='Test1'):
+        self._name = name
+
+
+class FakePluginNoServiceClients(plugins.TempestPlugin):
+
+    def load_tests(self):
+        return []
+
+    def register_opts(self, conf):
+        return
+
+    def get_opt_lists(self):
+        return []
+
+
+class FakeStevedoreObjNoServiceClients(object):
+    obj = FakePluginNoServiceClients()
+
+    @property
+    def name(self):
+        return self._name
+
+    def __init__(self, name='Test2'):
         self._name = name
