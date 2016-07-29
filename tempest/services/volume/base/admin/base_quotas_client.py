@@ -21,8 +21,6 @@ from tempest.lib.common import rest_client
 class BaseQuotasClient(rest_client.RestClient):
     """Client class to send CRUD Volume Quotas API requests"""
 
-    TYPE = "json"
-
     def show_default_quota_set(self, tenant_id):
         """List the default volume quota set for a tenant."""
 
