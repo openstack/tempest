@@ -29,7 +29,7 @@ class ImagesNegativeTest(base.BaseV2ImageTest):
         ** get image with image_id=NULL
         ** get the deleted image
         ** delete non-existent image
-        ** delete rimage with  image_id=NULL
+        ** delete image with image_id=NULL
         ** delete the deleted image
      """
 
