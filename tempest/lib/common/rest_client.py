@@ -64,7 +64,7 @@ class RestClient(object):
                                                     certificate validation
     :param str ca_certs: File containing the CA Bundle to use in verifying a
                          TLS server cert
-    :param str trace_request: Regex to use for specifying logging the entirety
+    :param str trace_requests: Regex to use for specifying logging the entirety
                               of the request and response payload
     """
     TYPE = "json"
