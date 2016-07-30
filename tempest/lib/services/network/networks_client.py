@@ -19,7 +19,7 @@ class NetworksClient(base.BaseNetworkClient):
         """Creates a network.
 
         Available params: see http://developer.openstack.org/
-                              api-ref-networking-v2.html#createNetwork
+                              api-ref/networking/v2/index.html#create-network
         """
         uri = '/networks'
         post_data = {'network': kwargs}
@@ -29,7 +29,7 @@ class NetworksClient(base.BaseNetworkClient):
         """Updates a network.
 
         Available params: see http://developer.openstack.org/
-                              api-ref-networking-v2.html#updateNetwork
+                              api-ref/networking/v2/index.html#update-network
         """
         uri = '/networks/%s' % network_id
         post_data = {'network': kwargs}
@@ -39,7 +39,7 @@ class NetworksClient(base.BaseNetworkClient):
         """Shows details for a network.
 
         Available params: see http://developer.openstack.org/
-                              api-ref-networking-v2.html#showNetwork
+                              api-ref/networking/v2/index.html#show-network-details
         """
         uri = '/networks/%s' % network_id
         return self.show_resource(uri, **fields)
@@ -52,7 +52,7 @@ class NetworksClient(base.BaseNetworkClient):
         """Lists networks to which the tenant has access.
 
         Available params: see http://developer.openstack.org/
-                              api-ref-networking-v2.html#listNetworks
+                              api-ref/networking/v2/index.html#list-networks
         """
         uri = '/networks'
         return self.list_resources(uri, **filters)
@@ -61,7 +61,7 @@ class NetworksClient(base.BaseNetworkClient):
         """Create multiple networks in a single request.
 
         Available params: see http://developer.openstack.org/
-                              api-ref-networking-v2.html#bulkCreateNetwork
+                              api-ref/networking/v2/index.html#bulk-create-networks
         """
         uri = '/networks'
         return self.create_resource(uri, kwargs)
