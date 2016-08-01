@@ -18,6 +18,7 @@ http://developer.openstack.org/api-ref-identity-v3.html#service-catalog-v3
 """
 
 from oslo_serialization import jsonutils as json
+from six.moves.urllib import parse as urllib
 
 from tempest.lib.common import rest_client
 
@@ -57,13 +58,21 @@ class ServicesClient(rest_client.RestClient):
         body = json.loads(body)
         return rest_client.ResponseBody(resp, body)
 
-    def delete_service(self, serv_id):
-        url = "services/" + serv_id
+    def delete_service(self, service_id):
+        url = "services/" + service_id
         resp, body = self.delete(url)
         self.expected_success(204, resp.status)
         return rest_client.ResponseBody(resp, body)
 
-    def list_services(self):
+    def list_services(self, **params):
+        """List services.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref/identity/v3/#list-services
+        """
+        url = 'services'
+        if params:
+            url += '?%s' % urllib.urlencode(params)
         resp, body = self.get('services')
         self.expected_success(200, resp.status)
         body = json.loads(body)
