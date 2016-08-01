@@ -36,7 +36,8 @@ class TestDefaultProjectId (base.BaseIdentityV3AdminTest):
     def test_default_project_id(self):
         # create a domain
         dom_name = data_utils.rand_name('dom')
-        domain_body = self.domains_client.create_domain(dom_name)['domain']
+        domain_body = self.domains_client.create_domain(
+            name=dom_name)['domain']
         dom_id = domain_body['id']
         self.addCleanup(self._delete_domain, dom_id)
 
