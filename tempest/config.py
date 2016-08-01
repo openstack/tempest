@@ -173,6 +173,16 @@ IdentityGroup = [
                      "a domain scoped token to use admin APIs")
 ]
 
+service_clients_group = cfg.OptGroup(name='service-clients',
+                                     title="Service Clients Options")
+
+ServiceClientsGroup = [
+    cfg.IntOpt('http_timeout',
+               default=60,
+               help='Timeout in seconds to wait for the http request to '
+                    'return'),
+]
+
 identity_feature_group = cfg.OptGroup(name='identity-feature-enabled',
                                       title='Enabled Identity Features')
 
@@ -1119,6 +1129,7 @@ _opts = [
     (compute_group, ComputeGroup),
     (compute_features_group, ComputeFeaturesGroup),
     (identity_group, IdentityGroup),
+    (service_clients_group, ServiceClientsGroup),
     (identity_feature_group, IdentityFeatureGroup),
     (image_group, ImageGroup),
     (image_feature_group, ImageFeaturesGroup),
@@ -1184,6 +1195,7 @@ class TempestConfigPrivate(object):
         self.compute = _CONF.compute
         self.compute_feature_enabled = _CONF['compute-feature-enabled']
         self.identity = _CONF.identity
+        self.service_clients = _CONF['service-clients']
         self.identity_feature_enabled = _CONF['identity-feature-enabled']
         self.image = _CONF.image
         self.image_feature_enabled = _CONF['image-feature-enabled']
@@ -1372,6 +1384,7 @@ def service_client_config(service_client_name=None):
         * `disable_ssl_certificate_validation`
         * `ca_certs`
         * `trace_requests`
+        * `http_timeout`
 
     The dict returned by this does not fit a few service clients:
 
@@ -1393,7 +1406,8 @@ def service_client_config(service_client_name=None):
         'disable_ssl_certificate_validation':
             CONF.identity.disable_ssl_certificate_validation,
         'ca_certs': CONF.identity.ca_certificates_file,
-        'trace_requests': CONF.debug.trace_requests
+        'trace_requests': CONF.debug.trace_requests,
+        'http_timeout': CONF.service_clients.http_timeout
     }
 
     if service_client_name is None:

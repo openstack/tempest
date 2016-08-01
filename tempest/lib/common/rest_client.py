@@ -66,6 +66,8 @@ class RestClient(object):
                          TLS server cert
     :param str trace_request: Regex to use for specifying logging the entirety
                               of the request and response payload
+    :param str http_timeout: Timeout in seconds to wait for the http request to
+                             return
     """
     TYPE = "json"
 
@@ -78,7 +80,7 @@ class RestClient(object):
                  endpoint_type='publicURL',
                  build_interval=1, build_timeout=60,
                  disable_ssl_certificate_validation=False, ca_certs=None,
-                 trace_requests='', name=None):
+                 trace_requests='', name=None, http_timeout=None):
         self.auth_provider = auth_provider
         self.service = service
         self.region = region
@@ -99,7 +101,8 @@ class RestClient(object):
                                        'vary', 'www-authenticate'))
         dscv = disable_ssl_certificate_validation
         self.http_obj = http.ClosingHttp(
-            disable_ssl_certificate_validation=dscv, ca_certs=ca_certs)
+            disable_ssl_certificate_validation=dscv, ca_certs=ca_certs,
+            timeout=http_timeout)
 
     def _get_type(self):
         return self.TYPE
