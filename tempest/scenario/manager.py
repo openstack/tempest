@@ -832,6 +832,7 @@ class NetworkScenarioTest(ScenarioTest):
         # NOTE(vsaienko) With Ironic, instances live on separate hardware
         # servers. Neutron does not bind ports for Ironic instances, as a
         # result the port remains in the DOWN state.
+        # TODO(vsaienko) remove once bug: #1599836 is resolved.
         if CONF.service_available.ironic:
             p_status.append('DOWN')
         port_map = [(p["id"], fxip["ip_address"])
