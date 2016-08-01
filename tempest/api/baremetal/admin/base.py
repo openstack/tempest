@@ -96,7 +96,7 @@ class BaseBaremetalTest(test.BaseTestCase):
 
     @classmethod
     @creates('chassis')
-    def create_chassis(cls, description=None, expect_errors=False):
+    def create_chassis(cls, description=None):
         """Wrapper utility for creating test chassis.
 
         :param description: A description of the chassis. if not supplied,
