@@ -105,6 +105,9 @@ class RestClient(object):
             timeout=http_timeout)
 
     def _get_type(self):
+        if self.TYPE != "json":
+            self.LOG.warning("Tempest has dropped XML support and the TYPE "
+                             "became meaningless")
         return self.TYPE
 
     def get_headers(self, accept_type=None, send_type=None):
