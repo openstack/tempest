@@ -39,7 +39,7 @@ class BaseIdentityTest(tempest.test.BaseTestCase):
     def get_user_by_name(cls, name, domain_id=None):
         if domain_id:
             params = {'domain_id': domain_id}
-            users = cls.users_client.list_users(params)['users']
+            users = cls.users_client.list_users(**params)['users']
         else:
             users = cls.users_client.list_users()['users']
         user = [u for u in users if u['name'] == name]
@@ -200,7 +200,7 @@ class BaseIdentityV3AdminTest(BaseIdentityV3Test):
     @classmethod
     def disable_user(cls, user_name, domain_id=None):
         user = cls.get_user_by_name(user_name, domain_id)
-        cls.users_client.update_user(user['id'], user_name, enabled=False)
+        cls.users_client.update_user(user['id'], name=user_name, enabled=False)
 
     @classmethod
     def create_domain(cls):
@@ -221,7 +221,7 @@ class BaseIdentityV3AdminTest(BaseIdentityV3Test):
         project = self.setup_test_project()
         username = data_utils.rand_name('test_user')
         email = username + '@testmail.tm'
-        user = self._create_test_user(user_name=username, email=email,
+        user = self._create_test_user(name=username, email=email,
                                       project_id=project['id'],
                                       password=password)
         return user

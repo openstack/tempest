@@ -37,7 +37,7 @@ class CredentialsTestJSON(base.BaseIdentityV3AdminTest):
             cls.projects.append(cls.project['id'])
 
         cls.user_body = cls.users_client.create_user(
-            u_name, description=u_desc, password=u_password,
+            name=u_name, description=u_desc, password=u_password,
             email=u_email, project_id=cls.projects[0])['user']
 
     @classmethod

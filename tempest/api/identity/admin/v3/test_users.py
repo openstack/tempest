@@ -31,7 +31,7 @@ class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
         u_email = u_name + '@testmail.tm'
         u_password = data_utils.rand_password()
         user = self.users_client.create_user(
-            u_name, description=u_desc, password=u_password,
+            name=u_name, description=u_desc, password=u_password,
             email=u_email, enabled=False)['user']
         # Delete the User at the end of this method
         self.addCleanup(self.users_client.delete_user, user['id'])
@@ -71,7 +71,7 @@ class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
         u_name = data_utils.rand_name('user')
         original_password = data_utils.rand_password()
         user = self.users_client.create_user(
-            u_name, password=original_password)['user']
+            name=u_name, password=original_password)['user']
         # Delete the User at the end all test methods
         self.addCleanup(self.users_client.delete_user, user['id'])
         # Update user with new password
@@ -107,7 +107,7 @@ class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
         u_email = u_name + '@testmail.tm'
         u_password = data_utils.rand_password()
         user_body = self.users_client.create_user(
-            u_name, description=u_desc, password=u_password,
+            name=u_name, description=u_desc, password=u_password,
             email=u_email, enabled=False, project_id=u_project['id'])['user']
         # Delete the User at the end of this method
         self.addCleanup(self.users_client.delete_user, user_body['id'])

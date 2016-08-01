@@ -54,7 +54,7 @@ class TestDefaultProjectId (base.BaseIdentityV3AdminTest):
         # default project
         user_name = data_utils.rand_name('user')
         user_body = self.users_client.create_user(
-            user_name,
+            name=user_name,
             password=user_name,
             domain_id=dom_id,
             default_project_id=proj_id)['user']

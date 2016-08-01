@@ -83,7 +83,8 @@ class GroupsV3TestJSON(base.BaseIdentityV3AdminTest):
         for i in range(3):
             name = data_utils.rand_name('User')
             password = data_utils.rand_password()
-            user = self.users_client.create_user(name, password)['user']
+            user = self.users_client.create_user(name=name,
+                                                 password=password)['user']
             users.append(user)
             self.addCleanup(self.users_client.delete_user, user['id'])
             self.groups_client.add_group_user(group['id'], user['id'])
@@ -103,7 +104,8 @@ class GroupsV3TestJSON(base.BaseIdentityV3AdminTest):
     def test_list_user_groups(self):
         # create a user
         user = self.users_client.create_user(
-            data_utils.rand_name('User'), data_utils.rand_password())['user']
+            name=data_utils.rand_name('User'),
+            password=data_utils.rand_password())['user']
         self.addCleanup(self.users_client.delete_user, user['id'])
         # create two groups, and add user into them
         groups = []
