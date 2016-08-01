@@ -14,10 +14,11 @@
 #    under the License.
 
 """
-http://developer.openstack.org/api-ref-identity-v3.html#credentials-v3
+http://developer.openstack.org/api-ref-identity-v3.html#credentials
 """
 
 from oslo_serialization import jsonutils as json
+from six.moves.urllib import parse as urllib
 
 from tempest.lib.common import rest_client
 
@@ -29,7 +30,7 @@ class CredentialsClient(rest_client.RestClient):
         """Creates a credential.
 
         Available params: see http://developer.openstack.org/
-                              api-ref-identity-v3.html#createCredential
+                              api-ref-identity-v3.html#create-credential
         """
         post_body = json.dumps({'credential': kwargs})
         resp, body = self.post('credentials', post_body)
@@ -42,7 +43,7 @@ class CredentialsClient(rest_client.RestClient):
         """Updates a credential.
 
         Available params: see http://developer.openstack.org/
-                              api-ref-identity-v3.html#updateCredential
+                              api-ref-identity-v3.html#update-credential
         """
         post_body = json.dumps({'credential': kwargs})
         resp, body = self.patch('credentials/%s' % credential_id, post_body)
@@ -52,22 +53,37 @@ class CredentialsClient(rest_client.RestClient):
         return rest_client.ResponseBody(resp, body)
 
     def show_credential(self, credential_id):
-        """To GET Details of a credential."""
+        """To GET Details of a credential.
+
+        For API details, see http://developer.openstack.org/
+                             api-ref-identity-v3.html#show-credential-details
+        """
         resp, body = self.get('credentials/%s' % credential_id)
         self.expected_success(200, resp.status)
         body = json.loads(body)
         body['credential']['blob'] = json.loads(body['credential']['blob'])
         return rest_client.ResponseBody(resp, body)
 
-    def list_credentials(self):
-        """Lists out all the available credentials."""
-        resp, body = self.get('credentials')
+    def list_credentials(self, **params):
+        """Lists out all the available credentials.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref/identity/v3/#list-credentials
+        """
+        url = 'credentials'
+        if params:
+            url += '?%s' % urllib.urlencode(params)
+        resp, body = self.get(url)
         self.expected_success(200, resp.status)
         body = json.loads(body)
         return rest_client.ResponseBody(resp, body)
 
     def delete_credential(self, credential_id):
-        """Deletes a credential."""
+        """Deletes a credential.
+
+        For API details, see http://developer.openstack.org/
+                             api-ref/identity/v3/#delete-credential
+        """
         resp, body = self.delete('credentials/%s' % credential_id)
         self.expected_success(204, resp.status)
         return rest_client.ResponseBody(resp, body)
