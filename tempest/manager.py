@@ -36,13 +36,13 @@ class Manager(clients.ServiceClients):
                "it should not imported directly. It will be removed as "
                "soon as the client manager becomes available in tempest.lib.")
         LOG.warning(msg)
-        dscv = CONF.identity.disable_ssl_certificate_validation
+        dscv = CONF.service_clients.disable_ssl_certificate_validation
         _, uri = tempest_clients.get_auth_provider_class(credentials)
         super(Manager, self).__init__(
             credentials=credentials, scope=scope,
             identity_uri=uri,
             disable_ssl_certificate_validation=dscv,
-            ca_certs=CONF.identity.ca_certificates_file,
+            ca_certs=CONF.service_clients.ca_certificates_file,
             trace_requests=CONF.debug.trace_requests)
 
 

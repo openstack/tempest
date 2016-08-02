@@ -120,13 +120,6 @@ IdentityGroup = [
     cfg.StrOpt('catalog_type',
                default='identity',
                help="Catalog type of the Identity service."),
-    cfg.BoolOpt('disable_ssl_certificate_validation',
-                default=False,
-                help="Set to True if using self-signed SSL certificates."),
-    cfg.StrOpt('ca_certificates_file',
-               default=None,
-               help='Specify a CA bundle file to use in verifying a '
-                    'TLS (https) server certificate.'),
     cfg.StrOpt('uri',
                help="Full URI of the OpenStack Identity API (Keystone), v2"),
     cfg.StrOpt('uri_v3',
@@ -181,6 +174,16 @@ ServiceClientsGroup = [
                default=60,
                help='Timeout in seconds to wait for the http request to '
                     'return'),
+    cfg.BoolOpt('disable_ssl_certificate_validation',
+                default=False,
+                help="Set to True if using self-signed SSL certificates.",
+                deprecated_group='identity'),
+    cfg.StrOpt('ca_certificates_file',
+               default=None,
+               help='Specify a CA bundle file to use in verifying a '
+                    'TLS (https) server certificate.',
+               deprecated_group='identity'),
+
 ]
 
 identity_feature_group = cfg.OptGroup(name='identity-feature-enabled',
@@ -1404,8 +1407,8 @@ def service_client_config(service_client_name=None):
     """
     _parameters = {
         'disable_ssl_certificate_validation':
-            CONF.identity.disable_ssl_certificate_validation,
-        'ca_certs': CONF.identity.ca_certificates_file,
+            CONF.service_clients.disable_ssl_certificate_validation,
+        'ca_certs': CONF.service_clients.ca_certificates_file,
         'trace_requests': CONF.debug.trace_requests,
         'http_timeout': CONF.service_clients.http_timeout
     }

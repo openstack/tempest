@@ -41,9 +41,9 @@ class TestServiceClientConfig(base.TestCase):
         for param_name in self.expected_extra_params:
             self.assertNotIn(param_name, params)
         self.assertEqual(
-            self.CONF.identity.disable_ssl_certificate_validation,
+            self.CONF.service_clients.disable_ssl_certificate_validation,
             params['disable_ssl_certificate_validation'])
-        self.assertEqual(self.CONF.identity.ca_certificates_file,
+        self.assertEqual(self.CONF.service_clients.ca_certificates_file,
                          params['ca_certs'])
         self.assertEqual(self.CONF.debug.trace_requests,
                          params['trace_requests'])
