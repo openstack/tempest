@@ -31,7 +31,7 @@ class ContainerTest(base.BaseObjectTest):
 
     @classmethod
     def resource_cleanup(cls):
-        cls.delete_containers(cls.containers)
+        cls.delete_containers()
         super(ContainerTest, cls).resource_cleanup()
 
     def assertContainer(self, container, count, byte, versioned):

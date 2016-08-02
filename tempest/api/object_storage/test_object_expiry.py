@@ -16,7 +16,6 @@
 import time
 
 from tempest.api.object_storage import base
-from tempest.common.utils import data_utils
 from tempest.lib import exceptions as lib_exc
 from tempest import test
 
@@ -25,19 +24,17 @@ class ObjectExpiryTest(base.BaseObjectTest):
     @classmethod
     def resource_setup(cls):
         super(ObjectExpiryTest, cls).resource_setup()
-        cls.container_name = data_utils.rand_name(name='TestContainer')
-        cls.container_client.create_container(cls.container_name)
+        cls.container_name = cls.create_container()
 
     def setUp(self):
         super(ObjectExpiryTest, self).setUp()
         # create object
-        self.object_name = data_utils.rand_name(name='TestObject')
-        resp, _ = self.object_client.create_object(self.container_name,
-                                                   self.object_name, '')
+        self.object_name, _ = self.create_object(
+            self.container_name)
 
     @classmethod
     def resource_cleanup(cls):
-        cls.delete_containers([cls.container_name])
+        cls.delete_containers()
         super(ObjectExpiryTest, cls).resource_cleanup()
 
     def _test_object_expiry(self, metadata):

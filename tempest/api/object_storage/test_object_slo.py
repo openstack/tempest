@@ -30,8 +30,7 @@ class ObjectSloTest(base.BaseObjectTest):
 
     def setUp(self):
         super(ObjectSloTest, self).setUp()
-        self.container_name = data_utils.rand_name(name='TestContainer')
-        self.container_client.create_container(self.container_name)
+        self.container_name = self.create_container()
         self.objects = []
 
     def tearDown(self):

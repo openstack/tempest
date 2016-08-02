@@ -15,6 +15,7 @@
 
 from tempest.common import custom_matchers
 from tempest import config
+from tempest.lib.common.utils import data_utils
 from tempest.lib.common.utils import test_utils
 from tempest.lib import exceptions as lib_exc
 import tempest.test
@@ -57,16 +58,41 @@ class BaseObjectTest(tempest.test.BaseTestCase):
         cls.container_client.auth_provider.clear_auth()
         cls.account_client.auth_provider.clear_auth()
 
+        cls.containers = []
+
     @classmethod
-    def delete_containers(cls, containers, container_client=None,
+    def create_container(cls):
+        # wrapper that returns a test container
+        container_name = data_utils.rand_name(name='TestContainer')
+        cls.container_client.create_container(container_name)
+        cls.containers.append(container_name)
+
+        return container_name
+
+    @classmethod
+    def create_object(cls, container_name, object_name=None,
+                      data=None, metadata=None):
+        # wrapper that returns a test object
+        if object_name is None:
+            object_name = data_utils.rand_name(name='TestObject')
+        if data is None:
+            data = data_utils.arbitrary_string()
+        cls.object_client.create_object(container_name,
+                                        object_name,
+                                        data,
+                                        metadata=metadata)
+
+        return object_name, data
+
+    @classmethod
+    def delete_containers(cls, container_client=None,
                           object_client=None):
-        """Remove given containers and all objects in them.
+        """Remove containers and all objects in them.
 
         The containers should be visible from the container_client given.
         Will not throw any error if the containers don't exist.
         Will not check that object and container deletions succeed.
 
-        :param containers: list of container names to remove
         :param container_client: if None, use cls.container_client, this means
             that the default testing user will be used (see 'username' in
             'etc/tempest.conf')
@@ -76,7 +102,7 @@ class BaseObjectTest(tempest.test.BaseTestCase):
             container_client = cls.container_client
         if object_client is None:
             object_client = cls.object_client
-        for cont in containers:
+        for cont in cls.containers:
             try:
                 objlist = container_client.list_all_container_objects(cont)
                 # delete every object in the container

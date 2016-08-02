@@ -36,8 +36,7 @@ class AccountQuotasNegativeTest(base.BaseObjectTest):
     @classmethod
     def resource_setup(cls):
         super(AccountQuotasNegativeTest, cls).resource_setup()
-        cls.container_name = data_utils.rand_name(name="TestContainer")
-        cls.container_client.create_container(cls.container_name)
+        cls.container_name = cls.create_container()
 
         # Retrieve a ResellerAdmin auth data and use it to set a quota
         # on the client's account
@@ -74,8 +73,7 @@ class AccountQuotasNegativeTest(base.BaseObjectTest):
 
     @classmethod
     def resource_cleanup(cls):
-        if hasattr(cls, "container_name"):
-            cls.delete_containers([cls.container_name])
+        cls.delete_containers()
         super(AccountQuotasNegativeTest, cls).resource_cleanup()
 
     @test.attr(type=["negative"])

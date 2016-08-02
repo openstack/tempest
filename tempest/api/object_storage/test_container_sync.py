@@ -80,7 +80,7 @@ class ContainerSyncTest(base.BaseObjectTest):
     @classmethod
     def resource_cleanup(cls):
         for client in cls.clients.values():
-            cls.delete_containers(cls.containers, client[0], client[1])
+            cls.delete_containers(client[0], client[1])
         super(ContainerSyncTest, cls).resource_cleanup()
 
     def _test_container_synchronization(self, make_headers):
