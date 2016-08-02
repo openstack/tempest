@@ -10,3 +10,5 @@ features:
       * availability_zone_client(v2)
       * extensions_client(v1)
       * extensions_client(v2)
+      * hosts_client(v1)
+      * hosts_client(v2)
