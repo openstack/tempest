@@ -53,9 +53,7 @@ def wait_for_server_status(client, server_id, status, ready_wait=True,
                     return
                 # NOTE(afazekas): The instance is in "ready for action state"
                 # when no task in progress
-                # NOTE(afazekas): Converted to string because of the XML
-                # responses
-                if str(task_state) == "None":
+                if task_state is None:
                     # without state api extension 3 sec usually enough
                     time.sleep(CONF.compute.ready_wait)
                     return
