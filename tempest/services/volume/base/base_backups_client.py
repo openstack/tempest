@@ -116,14 +116,9 @@ class BaseBackupsClient(rest_client.RestClient):
                             self.build_timeout))
                 raise exceptions.TimeoutException(message)
 
-    def wait_for_backup_deletion(self, backup_id):
-        """Waits for backup deletion"""
-        start_time = int(time.time())
-        while True:
-            try:
-                self.show_backup(backup_id)
-            except lib_exc.NotFound:
-                return
-            if int(time.time()) - start_time >= self.build_timeout:
-                raise exceptions.TimeoutException
-            time.sleep(self.build_interval)
+    def is_resource_deleted(self, id):
+        try:
+            self.show_backup(id)
+        except lib_exc.NotFound:
+            return True
+        return False
