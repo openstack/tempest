@@ -43,7 +43,7 @@ class VolumesBackupsAdminV2Test(base.BaseVolumeAdminTest):
 
     def _delete_backup(self, backup_id):
         self.admin_backups_client.delete_backup(backup_id)
-        self.admin_backups_client.wait_for_backup_deletion(backup_id)
+        self.admin_backups_client.wait_for_resource_deletion(backup_id)
 
     def _decode_url(self, backup_url):
         return json.loads(base64.decodestring(backup_url))
