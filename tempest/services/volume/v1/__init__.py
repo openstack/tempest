@@ -12,6 +12,7 @@
 # License for the specific language governing permissions and limitations under
 # the License.
 
+from tempest.lib.services.volume.v1.extensions_client import ExtensionsClient
 from tempest.services.volume.v1.json.admin.hosts_client import HostsClient
 from tempest.services.volume.v1.json.admin.quotas_client import QuotasClient
 from tempest.services.volume.v1.json.admin.services_client import \
@@ -20,7 +21,6 @@ from tempest.services.volume.v1.json.admin.types_client import TypesClient
 from tempest.services.volume.v1.json.availability_zone_client import \
     AvailabilityZoneClient
 from tempest.services.volume.v1.json.backups_client import BackupsClient
-from tempest.services.volume.v1.json.extensions_client import ExtensionsClient
 from tempest.services.volume.v1.json.qos_client import QosSpecsClient
 from tempest.services.volume.v1.json.snapshots_client import SnapshotsClient
 from tempest.services.volume.v1.json.volumes_client import VolumesClient
