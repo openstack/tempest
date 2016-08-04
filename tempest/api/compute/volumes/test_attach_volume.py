@@ -84,19 +84,21 @@ class AttachVolumeTestJSON(base.BaseV2ComputeTest):
                                        self.volume['id'], 'available')
 
         if shelve_server:
-            # NOTE(andreaf) If we are going to shelve a server, we should
-            # check first whether the server is ssh-able. Otherwise we won't
-            # be able to distinguish failures introduced by shelve from
-            # pre-existing ones. Also it's good to wait for cloud-init to be
-            # done and sshd server to be running before shelving to avoid
-            # breaking the VM
-            linux_client = remote_client.RemoteClient(
-                self.get_server_ip(self.server),
-                self.image_ssh_user,
-                self.admin_pass,
-                self.validation_resources['keypair']['private_key'])
-            linux_client.validate_authentication()
-            # If validation went ok, shelve the server
+            if CONF.validation.run_validation:
+                # NOTE(andreaf) If we are going to shelve a server, we should
+                # check first whether the server is ssh-able. Otherwise we
+                # won't be able to distinguish failures introduced by shelve
+                # from pre-existing ones. Also it's good to wait for cloud-init
+                # to be done and sshd server to be running before shelving to
+                # avoid breaking the VM
+                linux_client = remote_client.RemoteClient(
+                    self.get_server_ip(self.server),
+                    self.image_ssh_user,
+                    self.admin_pass,
+                    self.validation_resources['keypair']['private_key'])
+                linux_client.validate_authentication()
+
+            # If validation went ok, or it was skipped, shelve the server
             compute.shelve_server(self.servers_client, self.server['id'])
 
         # Attach the volume to the server
@@ -110,8 +112,6 @@ class AttachVolumeTestJSON(base.BaseV2ComputeTest):
         self.addCleanup(self._detach, self.server['id'], self.volume['id'])
 
     @test.idempotent_id('52e9045a-e90d-4c0d-9087-79d657faffff')
-    @testtools.skipUnless(CONF.validation.run_validation,
-                          'SSH required for this test')
     def test_attach_detach_volume(self):
         # Stop and Start a server with an attached volume, ensuring that
         # the volume remains attached.
@@ -125,16 +125,17 @@ class AttachVolumeTestJSON(base.BaseV2ComputeTest):
         waiters.wait_for_server_status(self.servers_client, self.server['id'],
                                        'ACTIVE')
 
-        linux_client = remote_client.RemoteClient(
-            self.get_server_ip(self.server),
-            self.image_ssh_user,
-            self.admin_pass,
-            self.validation_resources['keypair']['private_key'],
-            server=self.server,
-            servers_client=self.servers_client)
+        if CONF.validation.run_validation:
+            linux_client = remote_client.RemoteClient(
+                self.get_server_ip(self.server),
+                self.image_ssh_user,
+                self.admin_pass,
+                self.validation_resources['keypair']['private_key'],
+                server=self.server,
+                servers_client=self.servers_client)
 
-        partitions = linux_client.get_partitions()
-        self.assertIn(self.device, partitions)
+            partitions = linux_client.get_partitions()
+            self.assertIn(self.device, partitions)
 
         self._detach(self.server['id'], self.volume['id'])
         self.attachment = None
@@ -146,16 +147,17 @@ class AttachVolumeTestJSON(base.BaseV2ComputeTest):
         waiters.wait_for_server_status(self.servers_client, self.server['id'],
                                        'ACTIVE')
 
-        linux_client = remote_client.RemoteClient(
-            self.get_server_ip(self.server),
-            self.image_ssh_user,
-            self.admin_pass,
-            self.validation_resources['keypair']['private_key'],
-            server=self.server,
-            servers_client=self.servers_client)
+        if CONF.validation.run_validation:
+            linux_client = remote_client.RemoteClient(
+                self.get_server_ip(self.server),
+                self.image_ssh_user,
+                self.admin_pass,
+                self.validation_resources['keypair']['private_key'],
+                server=self.server,
+                servers_client=self.servers_client)
 
-        partitions = linux_client.get_partitions()
-        self.assertNotIn(self.device, partitions)
+            partitions = linux_client.get_partitions()
+            self.assertNotIn(self.device, partitions)
 
     @test.idempotent_id('7fa563fe-f0f7-43eb-9e22-a1ece036b513')
     def test_list_get_volume_attachments(self):
@@ -192,23 +194,22 @@ class AttachVolumeShelveTestJSON(AttachVolumeTestJSON):
         waiters.wait_for_server_status(self.servers_client,
                                        self.server['id'],
                                        'ACTIVE')
-        linux_client = remote_client.RemoteClient(
-            self.get_server_ip(self.server['id']),
-            self.image_ssh_user,
-            self.admin_pass,
-            self.validation_resources['keypair']['private_key'],
-            server=self.server,
-            servers_client=self.servers_client)
+        if CONF.validation.run_validation:
+            linux_client = remote_client.RemoteClient(
+                self.get_server_ip(self.server['id']),
+                self.image_ssh_user,
+                self.admin_pass,
+                self.validation_resources['keypair']['private_key'],
+                server=self.server,
+                servers_client=self.servers_client)
 
-        command = 'grep [vs]d /proc/partitions | wc -l'
-        nb_partitions = linux_client.exec_command(command).strip()
-        self.assertEqual(number_of_partition, nb_partitions)
+            command = 'grep [vs]d /proc/partitions | wc -l'
+            nb_partitions = linux_client.exec_command(command).strip()
+            self.assertEqual(number_of_partition, nb_partitions)
 
     @test.idempotent_id('13a940b6-3474-4c3c-b03f-29b89112bfee')
     @testtools.skipUnless(CONF.compute_feature_enabled.shelve,
                           'Shelve is not available.')
-    @testtools.skipUnless(CONF.validation.run_validation,
-                          'SSH required for this test')
     def test_attach_volume_shelved_or_offload_server(self):
         self._create_and_attach(shelve_server=True)
 
@@ -228,8 +229,6 @@ class AttachVolumeShelveTestJSON(AttachVolumeTestJSON):
     @test.idempotent_id('b54e86dd-a070-49c4-9c07-59ae6dae15aa')
     @testtools.skipUnless(CONF.compute_feature_enabled.shelve,
                           'Shelve is not available.')
-    @testtools.skipUnless(CONF.validation.run_validation,
-                          'SSH required for this test')
     def test_detach_volume_shelved_or_offload_server(self):
         self._create_and_attach(shelve_server=True)
 
