@@ -26,7 +26,11 @@ from tempest.lib.services.compute import base_compute_client
 class SecurityGroupsClient(base_compute_client.BaseComputeClient):
 
     def list_security_groups(self, **params):
-        """List all security groups for a user."""
+        """List all security groups for a user.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-compute-v2.1.html#listSecGroups
+        """
 
         url = 'os-security-groups'
         if params:
@@ -38,7 +42,11 @@ class SecurityGroupsClient(base_compute_client.BaseComputeClient):
         return rest_client.ResponseBody(resp, body)
 
     def show_security_group(self, security_group_id):
-        """Get the details of a Security Group."""
+        """Get the details of a Security Group.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-compute-v2.1.html#showSecGroup
+        """
         url = "os-security-groups/%s" % security_group_id
         resp, body = self.get(url)
         body = json.loads(body)
@@ -71,7 +79,11 @@ class SecurityGroupsClient(base_compute_client.BaseComputeClient):
         return rest_client.ResponseBody(resp, body)
 
     def delete_security_group(self, security_group_id):
-        """Delete the provided Security Group."""
+        """Delete the provided Security Group.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-compute-v2.1.html#deleteSecGroup
+        """
         resp, body = self.delete(
             'os-security-groups/%s' % security_group_id)
         self.validate_response(schema.delete_security_group, resp, body)

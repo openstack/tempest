@@ -25,6 +25,11 @@ from tempest.lib.services.compute import base_compute_client
 class ServicesClient(base_compute_client.BaseComputeClient):
 
     def list_services(self, **params):
+        """Lists all running Compute services for a tenant.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-compute-v2.1.html#listServices
+        """
         url = 'os-services'
         if params:
             url += '?%s' % urllib.urlencode(params)
