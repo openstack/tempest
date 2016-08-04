@@ -160,6 +160,28 @@ class TestClientsFactory(base.TestCase):
         klass_mock.assert_called_once_with(auth_provider=auth_provider,
                                            **params)
 
+    def test__get_partial_class_with_alias(self):
+        expected_fake_client = 'not_really_a_client'
+        client_alias = 'fake_client'
+        self._setup_fake_module(class_names=[])
+        auth_provider = fake_auth_provider.FakeAuthProvider()
+        params = {'k1': 'v1', 'k2': 'v2'}
+        later_params = {'k2': 'v4', 'k3': 'v3'}
+        factory = service_clients.ClientsFactory(
+            'fake_path', [], auth_provider, **params)
+        klass_mock = mock.Mock(return_value=expected_fake_client)
+        partial = factory._get_partial_class(klass_mock, auth_provider, params)
+        # Class has not be initialised yet
+        klass_mock.assert_not_called()
+        # Use partial and assert on parameters
+        client = partial(alias=client_alias, **later_params)
+        params.update(later_params)
+        self.assertEqual(expected_fake_client, client)
+        klass_mock.assert_called_once_with(auth_provider=auth_provider,
+                                           **params)
+        self.assertThat(factory, has_attribute(client_alias))
+        self.assertEqual(expected_fake_client, getattr(factory, client_alias))
+
 
 class TestServiceClients(base.TestCase):
 
