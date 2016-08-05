@@ -12,5 +12,7 @@ features:
       * extensions_client(v2)
       * hosts_client(v1)
       * hosts_client(v2)
+      * quotas_client(v1)
+      * quotas_client(v2)
       * services_client(v1)
       * services_client(v2)
