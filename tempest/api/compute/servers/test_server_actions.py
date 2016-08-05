@@ -270,6 +270,9 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
                                            'SHUTOFF')
 
         self.client.resize_server(self.server_id, self.flavor_ref_alt)
+        # NOTE(jlk): Explicitly delete the server to get a new one for later
+        # tests. Avoids resize down race issues.
+        self.addCleanup(self.delete_server, self.server_id)
         waiters.wait_for_server_status(self.client, self.server_id,
                                        'VERIFY_RESIZE')
 
@@ -284,10 +287,6 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         if stop:
             # NOTE(mriedem): tearDown requires the server to be started.
             self.client.start_server(self.server_id)
-
-        # NOTE(jlk): Explicitly delete the server to get a new one for later
-        # tests. Avoids resize down race issues.
-        self.addCleanup(self.delete_server, self.server_id)
 
     @test.idempotent_id('1499262a-9328-4eda-9068-db1ac57498d2')
     @testtools.skipUnless(CONF.compute_feature_enabled.resize,
@@ -309,6 +308,9 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         # values after a resize is reverted
 
         self.client.resize_server(self.server_id, self.flavor_ref_alt)
+        # NOTE(zhufl): Explicitly delete the server to get a new one for later
+        # tests. Avoids resize down race issues.
+        self.addCleanup(self.delete_server, self.server_id)
         waiters.wait_for_server_status(self.client, self.server_id,
                                        'VERIFY_RESIZE')
 
