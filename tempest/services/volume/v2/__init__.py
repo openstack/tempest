@@ -12,14 +12,14 @@
 # License for the specific language governing permissions and limitations under
 # the License.
 
+from tempest.lib.services.volume.v2.availability_zone_client import \
+    AvailabilityZoneClient
 from tempest.lib.services.volume.v2.extensions_client import ExtensionsClient
 from tempest.services.volume.v2.json.admin.hosts_client import HostsClient
 from tempest.services.volume.v2.json.admin.quotas_client import QuotasClient
 from tempest.services.volume.v2.json.admin.services_client import \
     ServicesClient
 from tempest.services.volume.v2.json.admin.types_client import TypesClient
-from tempest.services.volume.v2.json.availability_zone_client import \
-    AvailabilityZoneClient
 from tempest.services.volume.v2.json.backups_client import BackupsClient
 from tempest.services.volume.v2.json.qos_client import QosSpecsClient
 from tempest.services.volume.v2.json.snapshots_client import SnapshotsClient
