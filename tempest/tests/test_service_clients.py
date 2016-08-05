@@ -188,8 +188,10 @@ class TestServiceClients(base.TestCase):
     def setUp(self):
         super(TestServiceClients, self).setUp()
         self.useFixture(fixtures.MockPatch(
-            'tempest.service_clients.tempest_modules',
-            return_value=set(['fake_service1', 'fake_service2'])))
+            'tempest.service_clients.tempest_modules', return_value={}))
+        self.useFixture(fixtures.MockPatch(
+            'tempest.service_clients._tempest_internal_modules',
+            return_value=set(['fake_service1'])))
 
     def test___init___creds_v2_uri(self):
         # Verify that no API request is made, since no mock

@@ -109,7 +109,9 @@ class Manager(service_clients.ServiceClients):
         # Setup the parameters for all Tempest services.
         # NOTE(andreaf) Since client.py is an internal module of Tempest,
         # it doesn't have to consider plugin configuration.
-        for service in service_clients.tempest_modules():
+        all_tempest_modules = (set(service_clients.tempest_modules()) |
+                               service_clients._tempest_internal_modules())
+        for service in all_tempest_modules:
             try:
                 # NOTE(andreaf) Use the unversioned service name to fetch
                 # the configuration since configuration is not versioned.

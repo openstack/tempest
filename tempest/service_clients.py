@@ -18,6 +18,7 @@ import copy
 import importlib
 import inspect
 import logging
+import six
 
 from tempest.lib import auth
 from tempest.lib import exceptions
@@ -28,28 +29,36 @@ from tempest.lib.services import network
 
 LOG = logging.getLogger(__name__)
 
-client_modules_by_service_name = {
-    'compute': compute,
-    'image.v1': image.v1,
-    'image.v2': image.v2,
-    'network': network
-}
-
 
 def tempest_modules():
-    """List of service client modules available in Tempest.
+    """Dict of service client modules available in Tempest.
 
-    Provides a list of service modules available Tempest.
+    Provides a dict of stable service modules available in Tempest, with
+    ``service_version`` as key, and the module object as value.
     """
-    return set(['compute', 'identity.v2', 'identity.v3', 'image.v1',
-                'image.v2', 'network', 'object-storage', 'volume.v1',
+    return {
+        'compute': compute,
+        'image.v1': image.v1,
+        'image.v2': image.v2,
+        'network': network
+    }
+
+
+def _tempest_internal_modules():
+    # Set of unstable service clients available in Tempest
+    # NOTE(andreaf) This list will exists only as long the remain clients
+    # are migrated to tempest.lib, and it will then be deleted without
+    # deprecation or advance notice
+    return set(['identity.v2', 'identity.v3', 'object-storage', 'volume.v1',
                 'volume.v2', 'volume.v3'])
 
 
 def available_modules():
-    """List of service client modules available in Tempest and plugins
+    """Set of service client modules available in Tempest and plugins
 
-    The list of available modules can be used for automatic configuration.
+    Set of stable service clients from Tempest and service clients exposed
+    by plugins. This set of available modules can be used for automatic
+    configuration.
 
     :raise PluginRegistrationException: if a plugin exposes a service_version
         already defined by Tempest or another plugin.
@@ -65,6 +74,7 @@ def available_modules():
         >>>                                  client_parameters=params)
     """
     extra_service_versions = set([])
+    _tempest_modules = set(tempest_modules())
     plugin_services = clients.ClientsRegistry().get_service_clients()
     for plugin_name in plugin_services:
         plug_service_versions = set([x['service_version'] for x in
@@ -79,16 +89,16 @@ def available_modules():
                                                 plug_service_versions))
                 raise exceptions.PluginRegistrationException(
                     name=plugin_name, detailed_error=detailed_error)
-            if not plug_service_versions.isdisjoint(tempest_modules()):
+            if not plug_service_versions.isdisjoint(_tempest_modules):
                 detailed_error = (
                     'Plugin %s is trying to register a service %s already '
                     'claimed by a Tempest one' % (plugin_name,
-                                                  tempest_modules() &
+                                                  _tempest_modules &
                                                   plug_service_versions))
                 raise exceptions.PluginRegistrationException(
                     name=plugin_name, detailed_error=detailed_error)
         extra_service_versions |= plug_service_versions
-    return tempest_modules() | extra_service_versions
+    return _tempest_modules | extra_service_versions
 
 
 class ClientsFactory(object):
@@ -310,8 +320,9 @@ class ServiceClients(object):
         client_parameters = client_parameters or {}
         self.parameters = {}
         # Parameters are provided for unversioned services
+        all_modules = available_modules() | _tempest_internal_modules()
         unversioned_services = set(
-            [x.split('.')[0] for x in available_modules()])
+            [x.split('.')[0] for x in all_modules])
         for service in unversioned_services:
             self.parameters[service] = self._setup_parameters(
                 client_parameters.pop(service, {}))
@@ -321,14 +332,12 @@ class ServiceClients(object):
                 services=list(client_parameters.keys()))
 
         # Register service clients owned by tempest
-        for service in tempest_modules():
-            if service in list(client_modules_by_service_name):
-                attribute = service.replace('.', '_')
-                configs = service.split('.')[0]
-                module = client_modules_by_service_name[service]
-                self.register_service_client_module(
-                    attribute, service, module.__name__,
-                    module.__all__, **self.parameters[configs])
+        for service, module in six.iteritems(tempest_modules()):
+            attribute = service.replace('.', '_')
+            configs = service.split('.')[0]
+            self.register_service_client_module(
+                attribute, service, module.__name__,
+                module.__all__, **self.parameters[configs])
 
         # Register service clients from plugins
         clients_registry = clients.ClientsRegistry()
@@ -403,10 +412,7 @@ class ServiceClients(object):
 
     @property
     def registered_services(self):
-        # TODO(andreaf) Temporary set needed until all services are migrated
-        _non_migrated_services = tempest_modules() - set(
-            client_modules_by_service_name)
-        return self._registered_services | _non_migrated_services
+        return self._registered_services | _tempest_internal_modules()
 
     def _setup_parameters(self, parameters):
         """Setup default values for client parameters
