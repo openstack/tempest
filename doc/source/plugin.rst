@@ -111,8 +111,9 @@ you would do something like the following::
 
   class MyPlugin(plugins.TempestPlugin):
 
-Then you need to ensure you locally define all of the methods in the abstract
-class, you can refer to the api doc below for a reference of what that entails.
+Then you need to ensure you locally define all of the mandatory methods in the
+abstract class, you can refer to the api doc below for a reference of what that
+entails.
 
 Abstract Plugin Class
 ---------------------
@@ -163,6 +164,142 @@ configuration options you should use the ``register_opts`` and
 When adding configuration options the ``register_opts`` method gets passed the
 CONF object from tempest. This enables the plugin to add options to both
 existing sections and also create new configuration sections for new options.
+
+Service Clients
+---------------
+
+If a plugin defines a service client, it is beneficial for it to implement the
+``get_service_clients`` method in the plugin class. All service clients which
+are exposed via this interface will be automatically configured and be
+available in any instance of the service clients class, defined in
+``tempest.lib.services.clients.ServiceClients``. In case multiple plugins are
+installed, all service clients from all plugins will be registered, making it
+easy to write tests which rely on multiple APIs whose service clients are in
+different plugins.
+
+Example implementation of ``get_service_clients``::
+
+    def get_service_clients(self):
+        # Example implementation with two service clients
+        my_service1_config = config.service_client_config('my_service')
+        params_my_service1 = {
+            'name': 'my_service_v1',
+            'service_version': 'my_service.v1',
+            'module_path': 'plugin_tempest_tests.services.my_service.v1',
+            'client_names': ['API1Client', 'API2Client'],
+        }
+        params_my_service1.update(my_service_config)
+        my_service2_config = config.service_client_config('my_service')
+        params_my_service2 = {
+            'name': 'my_service_v2',
+            'service_version': 'my_service.v2',
+            'module_path': 'plugin_tempest_tests.services.my_service.v2',
+            'client_names': ['API1Client', 'API2Client'],
+        }
+        params_my_service2.update(my_service2_config)
+        return [params_my_service1, params_my_service2]
+
+Parameters:
+
+* **name**: Name of the attribute used to access the ``ClientsFactory`` from
+  the ``ServiceClients`` instance. See example below.
+* **service_version**: Tempest enforces a single implementation for each
+  service client. Available service clients are held in a ``ClientsRegistry``
+  singleton, and registered with ``service_version``, which means that
+  ``service_version`` must be unique and it should represent the service API
+  and version implemented by the service client.
+* **module_path**: Relative to the service client module, from the root of the
+  plugin.
+* **client_names**: Name of the classes that implement service clients in the
+  service clients module.
+
+Example usage of the the service clients in tests::
+
+   # my_creds is instance of tempest.lib.auth.Credentials
+   # identity_uri is v2 or v3 depending on the configuration
+   from tempest.lib.services import clients
+
+   my_clients = clients.ServiceClients(my_creds, identity_uri)
+   my_service1_api1_client = my_clients.my_service_v1.API1Client()
+   my_service2_api1_client = my_clients.my_service_v2.API1Client(my_args='any')
+
+Automatic configuration and registration of service clients imposes some extra
+constraints on the structure of the configuration options exposed by the
+plugin.
+
+First ``service_version`` should be in the format `service_config[.version]`.
+The `.version` part is optional, and should only be used if there are multiple
+versions of the same API available. The `service_config` must match the name of
+a configuration options group defined by the plugin. Different versions of one
+API must share the same configuration group.
+
+Second the configuration options group `service_config` must contain the
+following options:
+
+* `catalog_type`: corresponds to `service` in the catalog
+* `endpoint_type`
+
+The following options will be honoured if defined, but they are not mandatory,
+as they do not necessarily apply to all service clients.
+
+* `region`: default to identity.region
+* `build_timeout` : default to compute.build_timeout
+* `build_interval`: default to compute.build_interval
+
+Third the service client classes should inherit from ``RestClient``, should
+accept generic keyword arguments, and should pass those arguments to the
+``__init__`` method of ``RestClient``. Extra arguments can be added. For
+instance::
+
+   class MyAPIClient(rest_client.RestClient):
+
+    def __init__(self, auth_provider, service, region,
+                 my_arg, my_arg2=True, **kwargs):
+        super(MyAPIClient, self).__init__(
+            auth_provider, service, region, **kwargs)
+        self.my_arg = my_arg
+        self.my_args2 = my_arg
+
+Finally the service client should be structured in a python module, so that all
+service client classes are importable from it. Each major API version should
+have its own module.
+
+The following folder and module structure is recommended for a single major
+API version::
+
+    plugin_dir/
+      services/
+        __init__.py
+        client_api_1.py
+        client_api_2.py
+
+The content of __init__.py module should be::
+
+   from client_api_1.py import API1Client
+   from client_api_2.py import API2Client
+
+   __all__ = ['API1Client', 'API2Client']
+
+The following folder and module structure is recommended for multiple major
+API version::
+
+    plugin_dir/
+      services/
+        v1/
+           __init__.py
+           client_api_1.py
+           client_api_2.py
+        v2/
+           __init__.py
+           client_api_1.py
+           client_api_2.py
+
+The content each of __init__.py module under vN should be::
+
+   from client_api_1.py import API1Client
+   from client_api_2.py import API2Client
+
+   __all__ = ['API1Client', 'API2Client']
 
 Using Plugins
 =============

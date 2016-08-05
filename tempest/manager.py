@@ -15,15 +15,15 @@
 
 from oslo_log import log as logging
 
-from tempest import clients
+from tempest import clients as tempest_clients
 from tempest import config
-from tempest import service_clients
+from tempest.lib.services import clients
 
 CONF = config.CONF
 LOG = logging.getLogger(__name__)
 
 
-class Manager(service_clients.ServiceClients):
+class Manager(clients.ServiceClients):
     """Service client manager class for backward compatibility
 
     The former manager.Manager is not a stable interface in Tempest,
@@ -37,7 +37,7 @@ class Manager(service_clients.ServiceClients):
                "soon as the client manager becomes available in tempest.lib.")
         LOG.warning(msg)
         dscv = CONF.identity.disable_ssl_certificate_validation
-        _, uri = clients.get_auth_provider_class(credentials)
+        _, uri = tempest_clients.get_auth_provider_class(credentials)
         super(Manager, self).__init__(
             credentials=credentials, scope=scope,
             identity_uri=uri,

@@ -67,3 +67,4 @@ Current Library APIs
    library/utils
    library/api_microversion_testing
    library/auth
+   library/clients

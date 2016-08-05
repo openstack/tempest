@@ -19,7 +19,7 @@ import types
 
 from tempest.lib import auth
 from tempest.lib import exceptions
-from tempest import service_clients
+from tempest.lib.services import clients
 from tempest.tests import base
 from tempest.tests.lib import fake_auth_provider
 from tempest.tests.lib import fake_credentials
@@ -54,14 +54,14 @@ class TestClientsFactory(base.TestCase):
     def test___init___one_class(self):
         fake_partial = 'fake_partial'
         partial_mock = self.useFixture(fixtures.MockPatch(
-            'tempest.service_clients.ClientsFactory._get_partial_class',
+            'tempest.lib.services.clients.ClientsFactory._get_partial_class',
             return_value=fake_partial)).mock
         class_names = ['FakeServiceClient1']
         mock_importlib = self._setup_fake_module(class_names=class_names)
         auth_provider = fake_auth_provider.FakeAuthProvider()
         params = {'k1': 'v1', 'k2': 'v2'}
-        factory = service_clients.ClientsFactory('fake_path', class_names,
-                                                 auth_provider, **params)
+        factory = clients.ClientsFactory('fake_path', class_names,
+                                         auth_provider, **params)
         # Assert module has been imported
         mock_importlib.assert_called_once_with('fake_path')
         # All attributes have been created
@@ -77,14 +77,14 @@ class TestClientsFactory(base.TestCase):
     def test___init___two_classes(self):
         fake_partial = 'fake_partial'
         partial_mock = self.useFixture(fixtures.MockPatch(
-            'tempest.service_clients.ClientsFactory._get_partial_class',
+            'tempest.lib.services.clients.ClientsFactory._get_partial_class',
             return_value=fake_partial)).mock
         class_names = ['FakeServiceClient1', 'FakeServiceClient2']
         mock_importlib = self._setup_fake_module(class_names=class_names)
         auth_provider = fake_auth_provider.FakeAuthProvider()
         params = {'k1': 'v1', 'k2': 'v2'}
-        factory = service_clients.ClientsFactory('fake_path', class_names,
-                                                 auth_provider, **params)
+        factory = clients.ClientsFactory('fake_path', class_names,
+                                         auth_provider, **params)
         # Assert module has been imported
         mock_importlib.assert_called_once_with('fake_path')
         # All attributes have been created
@@ -100,8 +100,8 @@ class TestClientsFactory(base.TestCase):
         auth_provider = fake_auth_provider.FakeAuthProvider()
         class_names = ['FakeServiceClient1', 'FakeServiceClient2']
         with testtools.ExpectedException(ImportError, '.*fake_module.*'):
-            service_clients.ClientsFactory('fake_module', class_names,
-                                           auth_provider)
+            clients.ClientsFactory('fake_module', class_names,
+                                   auth_provider)
 
     def test___init___not_a_class(self):
         class_names = ['FakeServiceClient1', 'FakeServiceClient2']
@@ -111,8 +111,8 @@ class TestClientsFactory(base.TestCase):
         auth_provider = fake_auth_provider.FakeAuthProvider()
         expected_msg = '.*not_really_a_class.*str.*'
         with testtools.ExpectedException(TypeError, expected_msg):
-            service_clients.ClientsFactory('fake_module', extended_class_names,
-                                           auth_provider)
+            clients.ClientsFactory('fake_module', extended_class_names,
+                                   auth_provider)
 
     def test___init___class_not_found(self):
         class_names = ['FakeServiceClient1', 'FakeServiceClient2']
@@ -121,15 +121,15 @@ class TestClientsFactory(base.TestCase):
         auth_provider = fake_auth_provider.FakeAuthProvider()
         expected_msg = '.*not_really_a_class.*fake_service_client.*'
         with testtools.ExpectedException(AttributeError, expected_msg):
-            service_clients.ClientsFactory('fake_module', extended_class_names,
-                                           auth_provider)
+            clients.ClientsFactory('fake_module', extended_class_names,
+                                   auth_provider)
 
     def test__get_partial_class_no_later_kwargs(self):
         expected_fake_client = 'not_really_a_client'
         self._setup_fake_module(class_names=[])
         auth_provider = fake_auth_provider.FakeAuthProvider()
         params = {'k1': 'v1', 'k2': 'v2'}
-        factory = service_clients.ClientsFactory(
+        factory = clients.ClientsFactory(
             'fake_path', [], auth_provider, **params)
         klass_mock = mock.Mock(return_value=expected_fake_client)
         partial = factory._get_partial_class(klass_mock, auth_provider, params)
@@ -147,7 +147,7 @@ class TestClientsFactory(base.TestCase):
         auth_provider = fake_auth_provider.FakeAuthProvider()
         params = {'k1': 'v1', 'k2': 'v2'}
         later_params = {'k2': 'v4', 'k3': 'v3'}
-        factory = service_clients.ClientsFactory(
+        factory = clients.ClientsFactory(
             'fake_path', [], auth_provider, **params)
         klass_mock = mock.Mock(return_value=expected_fake_client)
         partial = factory._get_partial_class(klass_mock, auth_provider, params)
@@ -167,7 +167,7 @@ class TestClientsFactory(base.TestCase):
         auth_provider = fake_auth_provider.FakeAuthProvider()
         params = {'k1': 'v1', 'k2': 'v2'}
         later_params = {'k2': 'v4', 'k3': 'v3'}
-        factory = service_clients.ClientsFactory(
+        factory = clients.ClientsFactory(
             'fake_path', [], auth_provider, **params)
         klass_mock = mock.Mock(return_value=expected_fake_client)
         partial = factory._get_partial_class(klass_mock, auth_provider, params)
@@ -188,9 +188,9 @@ class TestServiceClients(base.TestCase):
     def setUp(self):
         super(TestServiceClients, self).setUp()
         self.useFixture(fixtures.MockPatch(
-            'tempest.service_clients.tempest_modules', return_value={}))
+            'tempest.lib.services.clients.tempest_modules', return_value={}))
         self.useFixture(fixtures.MockPatch(
-            'tempest.service_clients._tempest_internal_modules',
+            'tempest.lib.services.clients._tempest_internal_modules',
             return_value=set(['fake_service1'])))
 
     def test___init___creds_v2_uri(self):
@@ -198,7 +198,7 @@ class TestServiceClients(base.TestCase):
         # is required to run the test successfully
         creds = fake_credentials.FakeKeystoneV2Credentials()
         uri = 'fake_uri'
-        _manager = service_clients.ServiceClients(creds, identity_uri=uri)
+        _manager = clients.ServiceClients(creds, identity_uri=uri)
         self.assertIsInstance(_manager.auth_provider,
                               auth.KeystoneV2AuthProvider)
 
@@ -207,7 +207,7 @@ class TestServiceClients(base.TestCase):
         # is required to run the test successfully
         creds = fake_credentials.FakeKeystoneV3Credentials()
         uri = 'fake_uri'
-        _manager = service_clients.ServiceClients(creds, identity_uri=uri)
+        _manager = clients.ServiceClients(creds, identity_uri=uri)
         self.assertIsInstance(_manager.auth_provider,
                               auth.KeystoneV3AuthProvider)
 
@@ -215,14 +215,14 @@ class TestServiceClients(base.TestCase):
         creds = fake_credentials.FakeCredentials()
         uri = 'fake_uri'
         with testtools.ExpectedException(exceptions.InvalidCredentials):
-            service_clients.ServiceClients(creds, identity_uri=uri)
+            clients.ServiceClients(creds, identity_uri=uri)
 
     def test___init___invalid_creds_uri(self):
         creds = fake_credentials.FakeKeystoneV2Credentials()
         delattr(creds, 'username')
         uri = 'fake_uri'
         with testtools.ExpectedException(exceptions.InvalidCredentials):
-            service_clients.ServiceClients(creds, identity_uri=uri)
+            clients.ServiceClients(creds, identity_uri=uri)
 
     def test___init___creds_uri_none(self):
         creds = fake_credentials.FakeKeystoneV2Credentials()
@@ -230,7 +230,7 @@ class TestServiceClients(base.TestCase):
                "non-empty")
         with testtools.ExpectedException(exceptions.InvalidCredentials,
                                          value_re=msg):
-            service_clients.ServiceClients(creds, None)
+            clients.ServiceClients(creds, None)
 
     def test___init___creds_uri_params(self):
         creds = fake_credentials.FakeKeystoneV2Credentials()
@@ -238,8 +238,8 @@ class TestServiceClients(base.TestCase):
                           'fake_param2': 'fake_value2'}
         params = {'fake_service1': expeted_params}
         uri = 'fake_uri'
-        _manager = service_clients.ServiceClients(creds, identity_uri=uri,
-                                                  client_parameters=params)
+        _manager = clients.ServiceClients(creds, identity_uri=uri,
+                                          client_parameters=params)
         self.assertIn('fake_service1', _manager.parameters)
         for _key in expeted_params:
             self.assertIn(_key, _manager.parameters['fake_service1'].keys())
@@ -255,14 +255,14 @@ class TestServiceClients(base.TestCase):
         msg = "(?=.*{0})(?=.*{1})".format(*list(params.keys()))
         with testtools.ExpectedException(
                 exceptions.UnknownServiceClient, value_re=msg):
-            service_clients.ServiceClients(creds, identity_uri=uri,
-                                           client_parameters=params)
+            clients.ServiceClients(creds, identity_uri=uri,
+                                   client_parameters=params)
 
     def _get_manager(self, init_region='fake_region'):
         # Get a manager to invoke _setup_parameters on
         creds = fake_credentials.FakeKeystoneV2Credentials()
-        return service_clients.ServiceClients(creds, identity_uri='fake_uri',
-                                              region=init_region)
+        return clients.ServiceClients(creds, identity_uri='fake_uri',
+                                      region=init_region)
 
     def test__setup_parameters_none_no_region(self):
         kwargs = {}
@@ -294,7 +294,7 @@ class TestServiceClients(base.TestCase):
         _manager = self._get_manager(init_region='fake_region_default')
         # Mock after the _manager is setup to preserve the call count
         factory_mock = self.useFixture(fixtures.MockPatch(
-            'tempest.service_clients.ClientsFactory')).mock
+            'tempest.lib.services.clients.ClientsFactory')).mock
         _manager.register_service_client_module(
             name='fake_module',
             service_version='fake_service',
@@ -323,7 +323,7 @@ class TestServiceClients(base.TestCase):
         _manager = self._get_manager(init_region='fake_region_default')
         # Mock after the _manager is setup to preserve the call count
         factory_mock = self.useFixture(fixtures.MockPatch(
-            'tempest.service_clients.ClientsFactory')).mock
+            'tempest.lib.services.clients.ClientsFactory')).mock
         _manager.register_service_client_module(
             name='fake_module',
             service_version='fake_service',
@@ -346,7 +346,7 @@ class TestServiceClients(base.TestCase):
 
     def test_register_service_client_module_duplicate_name(self):
         self.useFixture(fixtures.MockPatch(
-            'tempest.service_clients.ClientsFactory'))
+            'tempest.lib.services.clients.ClientsFactory')).mock
         _manager = self._get_manager()
         name_owner = 'this_is_a_string'
         setattr(_manager, 'fake_module', name_owner)
@@ -359,7 +359,7 @@ class TestServiceClients(base.TestCase):
 
     def test_register_service_client_module_duplicate_service(self):
         self.useFixture(fixtures.MockPatch(
-            'tempest.service_clients.ClientsFactory'))
+            'tempest.lib.services.clients.ClientsFactory')).mock
         _manager = self._get_manager()
         duplicate_service = 'fake_service1'
         expected_error = '.*' + duplicate_service

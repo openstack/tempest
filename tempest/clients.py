@@ -14,15 +14,13 @@
 #    under the License.
 
 import copy
-
 from oslo_log import log as logging
-
 from tempest.common import negative_rest_client
 from tempest import config
 from tempest import exceptions
 from tempest.lib import auth
 from tempest.lib import exceptions as lib_exc
-from tempest import service_clients
+from tempest.lib.services import clients
 from tempest.services import baremetal
 from tempest.services import data_processing
 from tempest.services import identity
@@ -34,7 +32,7 @@ CONF = config.CONF
 LOG = logging.getLogger(__name__)
 
 
-class Manager(service_clients.ServiceClients):
+class Manager(clients.ServiceClients):
     """Top level manager for OpenStack tempest clients"""
 
     default_params = config.service_client_config()
@@ -109,8 +107,8 @@ class Manager(service_clients.ServiceClients):
         # Setup the parameters for all Tempest services.
         # NOTE(andreaf) Since client.py is an internal module of Tempest,
         # it doesn't have to consider plugin configuration.
-        all_tempest_modules = (set(service_clients.tempest_modules()) |
-                               service_clients._tempest_internal_modules())
+        all_tempest_modules = (set(clients.tempest_modules()) |
+                               clients._tempest_internal_modules())
         for service in all_tempest_modules:
             try:
                 # NOTE(andreaf) Use the unversioned service name to fetch

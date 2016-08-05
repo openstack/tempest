@@ -88,7 +88,7 @@ class TempestPlugin(object):
             >>>     'client_names': ['API1Client', 'API2Client'],
             >>>  }
             >>>  params.update(myservice_config)
-            >>> return [params]
+            >>>  return [params]
 
             >>>  # Example implementation with two service clients
             >>>  foo1_config = config.service_client_config('foo')
@@ -107,7 +107,7 @@ class TempestPlugin(object):
             >>>     'client_names': ['API1Client', 'API2Client'],
             >>>  }
             >>>  params_foo2.update(foo2_config)
-            >>> return [params_foo1, params_foo2]
+            >>>  return [params_foo1, params_foo2]
         """
         return []
 
