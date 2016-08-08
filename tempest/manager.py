@@ -58,5 +58,5 @@ def get_auth_provider(credentials, pre_auth=False, scope='project'):
            "as such it should not imported directly. It will be removed as "
            "the client manager becomes available in tempest.lib.")
     LOG.warning(msg)
-    return clients.get_auth_provider(credentials=credentials,
-                                     pre_auth=pre_auth, scope=scope)
+    return tempest_clients.get_auth_provider(credentials=credentials,
+                                             pre_auth=pre_auth, scope=scope)
