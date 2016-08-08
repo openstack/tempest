@@ -379,8 +379,9 @@ ComputeFeaturesGroup = [
                 help='Does the test environment support creating snapshot '
                      'images of running instances?'),
     cfg.BoolOpt('nova_cert',
-                default=True,
-                help='Does the test environment have the nova cert running?'),
+                default=False,
+                help='Does the test environment have the nova cert running?',
+                deprecated_for_removal=True),
     cfg.BoolOpt('personality',
                 default=False,
                 help='Does the test environment support server personality'),

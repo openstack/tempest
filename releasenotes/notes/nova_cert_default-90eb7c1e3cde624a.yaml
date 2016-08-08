@@ -1,0 +1,8 @@
+---
+upgrade:
+
+  - The ``nova_cert`` option default is changed to ``False``. The nova
+    certification management APIs were a hold over from ec2, and are
+    not used by any other parts of nova. They are deprecated for
+    removal in nova after the newton release. This makes false a more
+    sensible default going forward.
