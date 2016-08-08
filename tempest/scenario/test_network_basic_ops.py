@@ -24,6 +24,7 @@ from tempest.common import waiters
 from tempest import config
 from tempest import exceptions
 from tempest.lib.common.utils import test_utils
+from tempest.lib import decorators
 from tempest.scenario import manager
 from tempest import test
 
@@ -410,6 +411,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
     @test.idempotent_id('1546850e-fbaa-42f5-8b5f-03d8a6a95f15')
     @testtools.skipIf(CONF.baremetal.driver_enabled,
                       'Baremetal relies on a shared physical network.')
+    @decorators.skip_because(bug="1610994")
     @test.services('compute', 'network')
     def test_connectivity_between_vms_on_different_networks(self):
         """Test connectivity between VMs on different networks
