@@ -16,6 +16,7 @@ import types
 
 import fixtures
 import mock
+import six
 import testtools
 
 from tempest.lib import auth
@@ -257,6 +258,58 @@ class TestServiceClients(base.TestCase):
                 exceptions.UnknownServiceClient, value_re=msg):
             clients.ServiceClients(creds, identity_uri=uri,
                                    client_parameters=params)
+
+    def test___init___plugin_service_clients_cannot_load(self):
+        creds = fake_credentials.FakeKeystoneV3Credentials()
+        uri = 'fake_uri'
+        fake_service_clients = {
+            'service1': [{'name': 'client1',
+                          'service_version': 'client1.v1',
+                          'module_path': 'I cannot load this',
+                          'client_names': ['SomeClient1']}],
+            'service2': [{'name': 'client2',
+                          'service_version': 'client2.v1',
+                          'module_path': 'This neither',
+                          'client_names': ['SomeClient1']}]}
+        msg = "(?=.*{0})(?=.*{1})".format(
+            *[x[1][0]['module_path'] for x in six.iteritems(
+                fake_service_clients)])
+        self.useFixture(fixtures.MockPatchObject(
+            clients.ClientsRegistry(), 'get_service_clients',
+            return_value=fake_service_clients))
+        with testtools.ExpectedException(
+                testtools.MultipleExceptions, value_re=msg):
+            clients.ServiceClients(creds, identity_uri=uri)
+
+    def test___init___plugin_service_clients_name_conflict(self):
+        creds = fake_credentials.FakeKeystoneV3Credentials()
+        uri = 'fake_uri'
+        fake_service_clients = {
+            'serviceA': [{'name': 'client1',
+                          'service_version': 'client1.v1',
+                          'module_path': 'fake_path_1',
+                          'client_names': ['SomeClient1']}],
+            'serviceB': [{'name': 'client1',
+                          'service_version': 'client1.v2',
+                          'module_path': 'fake_path_2',
+                          'client_names': ['SomeClient2']}],
+            'serviceC': [{'name': 'client1',
+                          'service_version': 'client1.v1',
+                          'module_path': 'fake_path_2',
+                          'client_names': ['SomeClient1']}],
+            'serviceD': [{'name': 'client1',
+                          'service_version': 'client1.v2',
+                          'module_path': 'fake_path_2',
+                          'client_names': ['SomeClient2']}]}
+        msg = "(?=.*{0})(?=.*{1})".format(
+            *[x[1][0]['service_version'] for x in six.iteritems(
+                fake_service_clients)])
+        self.useFixture(fixtures.MockPatchObject(
+            clients.ClientsRegistry(), 'get_service_clients',
+            return_value=fake_service_clients))
+        with testtools.ExpectedException(
+                testtools.MultipleExceptions, value_re=msg):
+            clients.ServiceClients(creds, identity_uri=uri)
 
     def _get_manager(self, init_region='fake_region'):
         # Get a manager to invoke _setup_parameters on
