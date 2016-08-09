@@ -502,7 +502,7 @@ NetworkGroup = [
                 default=False,
                 help="Whether project networks can be reached directly from "
                      "the test client. This must be set to True when the "
-                     "'fixed' ssh_connect_method is selected."),
+                     "'fixed' connect_method is selected."),
     cfg.StrOpt('public_network_id',
                default="",
                help="Id of the public network that provides external "
