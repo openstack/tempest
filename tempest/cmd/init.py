@@ -89,18 +89,28 @@ class TempestInit(command.Command):
         with open(testr_conf_path, 'w+') as testr_conf_file:
             testr_conf_file.write(testr_conf)
 
-    def update_local_conf(self, conf_path, lock_dir, log_dir):
+    def get_configparser(self, conf_path):
         config_parse = moves.configparser.SafeConfigParser()
         config_parse.optionxform = str
-        with open(conf_path, 'a+') as conf_file:
-            # Set local lock_dir in tempest conf
-            if not config_parse.has_section('oslo_concurrency'):
-                config_parse.add_section('oslo_concurrency')
-            config_parse.set('oslo_concurrency', 'lock_path', lock_dir)
-            # Set local log_dir in tempest conf
-            config_parse.set('DEFAULT', 'log_dir', log_dir)
-            # Set default log filename to tempest.log
-            config_parse.set('DEFAULT', 'log_file', 'tempest.log')
+        # get any existing values if a config file already exists
+        if os.path.isfile(conf_path):
+            # use read() for Python 2 and 3 compatibility
+            config_parse.read(conf_path)
+        return config_parse
+
+    def update_local_conf(self, conf_path, lock_dir, log_dir):
+        config_parse = self.get_configparser(conf_path)
+        # Set local lock_dir in tempest conf
+        if not config_parse.has_section('oslo_concurrency'):
+            config_parse.add_section('oslo_concurrency')
+        config_parse.set('oslo_concurrency', 'lock_path', lock_dir)
+        # Set local log_dir in tempest conf
+        config_parse.set('DEFAULT', 'log_dir', log_dir)
+        # Set default log filename to tempest.log
+        config_parse.set('DEFAULT', 'log_file', 'tempest.log')
+
+        # write out a new file with the updated configurations
+        with open(conf_path, 'w+') as conf_file:
             config_parse.write(conf_file)
 
     def copy_config(self, etc_dir, config_dir):
