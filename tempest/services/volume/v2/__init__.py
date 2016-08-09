@@ -15,7 +15,7 @@
 from tempest.lib.services.volume.v2.availability_zone_client import \
     AvailabilityZoneClient
 from tempest.lib.services.volume.v2.extensions_client import ExtensionsClient
-from tempest.services.volume.v2.json.admin.hosts_client import HostsClient
+from tempest.lib.services.volume.v2.hosts_client import HostsClient
 from tempest.services.volume.v2.json.admin.quotas_client import QuotasClient
 from tempest.services.volume.v2.json.admin.services_client import \
     ServicesClient
