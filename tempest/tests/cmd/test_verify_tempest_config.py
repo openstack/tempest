@@ -217,33 +217,45 @@ class TestDiscovery(base.TestCase):
         print_mock.assert_called_once_with('api_v1', 'volume-feature-enabled',
                                            False, True)
 
-    def test_verify_glance_version_no_v2_with_v1_1(self):
-        def fake_get_versions():
-            return (None, ['v1.1'])
+    @mock.patch('tempest.lib.common.http.ClosingHttp.request')
+    def test_verify_glance_version_no_v2_with_v1_1(self, mock_request):
+        self.useFixture(mockpatch.PatchObject(
+            verify_tempest_config, '_get_unversioned_endpoint',
+            return_value='http://fake_endpoint:5000'))
+        fake_resp = {'versions': [{'id': 'v1.1'}]}
+        fake_resp = json.dumps(fake_resp)
+        mock_request.return_value = (None, fake_resp)
         fake_os = mock.MagicMock()
-        fake_os.image_client.get_versions = fake_get_versions
         with mock.patch.object(verify_tempest_config,
                                'print_and_or_update') as print_mock:
             verify_tempest_config.verify_glance_api_versions(fake_os, True)
         print_mock.assert_called_once_with('api_v2', 'image-feature-enabled',
                                            False, True)
 
-    def test_verify_glance_version_no_v2_with_v1_0(self):
-        def fake_get_versions():
-            return (None, ['v1.0'])
+    @mock.patch('tempest.lib.common.http.ClosingHttp.request')
+    def test_verify_glance_version_no_v2_with_v1_0(self, mock_request):
+        self.useFixture(mockpatch.PatchObject(
+            verify_tempest_config, '_get_unversioned_endpoint',
+            return_value='http://fake_endpoint:5000'))
+        fake_resp = {'versions': [{'id': 'v1.0'}]}
+        fake_resp = json.dumps(fake_resp)
+        mock_request.return_value = (None, fake_resp)
         fake_os = mock.MagicMock()
-        fake_os.image_client.get_versions = fake_get_versions
         with mock.patch.object(verify_tempest_config,
                                'print_and_or_update') as print_mock:
             verify_tempest_config.verify_glance_api_versions(fake_os, True)
         print_mock.assert_called_once_with('api_v2', 'image-feature-enabled',
                                            False, True)
 
-    def test_verify_glance_version_no_v1(self):
-        def fake_get_versions():
-            return (None, ['v2.0'])
+    @mock.patch('tempest.lib.common.http.ClosingHttp.request')
+    def test_verify_glance_version_no_v1(self, mock_request):
+        self.useFixture(mockpatch.PatchObject(
+            verify_tempest_config, '_get_unversioned_endpoint',
+            return_value='http://fake_endpoint:5000'))
+        fake_resp = {'versions': [{'id': 'v2.0'}]}
+        fake_resp = json.dumps(fake_resp)
+        mock_request.return_value = (None, fake_resp)
         fake_os = mock.MagicMock()
-        fake_os.image_client.get_versions = fake_get_versions
         with mock.patch.object(verify_tempest_config,
                                'print_and_or_update') as print_mock:
             verify_tempest_config.verify_glance_api_versions(fake_os, True)
