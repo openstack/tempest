@@ -42,15 +42,14 @@ class VolumesGetTestJSON(base.BaseV2ComputeTest):
     @test.idempotent_id('f10f25eb-9775-4d9d-9cbe-1cf54dae9d5f')
     def test_volume_create_get_delete(self):
         # CREATE, GET, DELETE Volume
-        volume = None
         v_name = data_utils.rand_name('Volume')
         metadata = {'Type': 'work'}
         # Create volume
         volume = self.client.create_volume(size=CONF.volume.volume_size,
                                            display_name=v_name,
                                            metadata=metadata)['volume']
-        self.addCleanup(self.delete_volume, volume['id'])
         self.assertIn('id', volume)
+        self.addCleanup(self.delete_volume, volume['id'])
         self.assertIn('displayName', volume)
         self.assertEqual(volume['displayName'], v_name,
                          "The created volume name is not equal "
@@ -65,6 +64,10 @@ class VolumesGetTestJSON(base.BaseV2ComputeTest):
         self.assertEqual(v_name,
                          fetched_volume['displayName'],
                          'The fetched Volume is different '
+                         'from the created Volume')
+        self.assertEqual(CONF.volume.volume_size,
+                         fetched_volume['size'],
+                         'The fetched volume size is different '
                          'from the created Volume')
         self.assertEqual(volume['id'],
                          fetched_volume['id'],
