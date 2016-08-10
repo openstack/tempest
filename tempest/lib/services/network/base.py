@@ -63,6 +63,8 @@ class BaseNetworkClient(rest_client.RestClient):
         # body. Otherwise we returns the body as it is.
         if not expect_empty_body:
             body = json.loads(body)
+        else:
+            body = None
         self.expected_success(201, resp.status)
         return rest_client.ResponseBody(resp, body)
 
@@ -75,5 +77,7 @@ class BaseNetworkClient(rest_client.RestClient):
         # body. Otherwise we returns the body as it is.
         if not expect_empty_body:
             body = json.loads(body)
+        else:
+            body = None
         self.expected_success(200, resp.status)
         return rest_client.ResponseBody(resp, body)
