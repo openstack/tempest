@@ -62,13 +62,13 @@ class BaseTypesClient(rest_client.RestClient):
         self.expected_success(200, resp.status)
         return rest_client.ResponseBody(resp, body)
 
-    def show_volume_type(self, volume_id):
+    def show_volume_type(self, volume_type_id):
         """Returns the details of a single volume_type.
 
         Available params: see http://developer.openstack.org/
                               api-ref-blockstorage-v2.html#showVolumeType
         """
-        url = "types/%s" % volume_id
+        url = "types/%s" % volume_type_id
         resp, body = self.get(url)
         body = json.loads(body)
         self.expected_success(200, resp.status)
@@ -86,24 +86,24 @@ class BaseTypesClient(rest_client.RestClient):
         self.expected_success(200, resp.status)
         return rest_client.ResponseBody(resp, body)
 
-    def delete_volume_type(self, volume_id):
+    def delete_volume_type(self, volume_type_id):
         """Deletes the Specified Volume_type.
 
         Available params: see http://developer.openstack.org/
                               api-ref-blockstorage-v2.html#deleteVolumeType
         """
-        resp, body = self.delete("types/%s" % volume_id)
+        resp, body = self.delete("types/%s" % volume_type_id)
         self.expected_success(202, resp.status)
         return rest_client.ResponseBody(resp, body)
 
-    def list_volume_types_extra_specs(self, vol_type_id, **params):
+    def list_volume_types_extra_specs(self, volume_type_id, **params):
         """List all the volume_types extra specs created.
 
         TODO: Current api-site doesn't contain this API description.
         After fixing the api-site, we need to fix here also for putting
         the link to api-site.
         """
-        url = 'types/%s/extra_specs' % vol_type_id
+        url = 'types/%s/extra_specs' % volume_type_id
         if params:
             url += '?%s' % urllib.urlencode(params)
 
@@ -112,39 +112,39 @@ class BaseTypesClient(rest_client.RestClient):
         self.expected_success(200, resp.status)
         return rest_client.ResponseBody(resp, body)
 
-    def show_volume_type_extra_specs(self, vol_type_id, extra_specs_name):
+    def show_volume_type_extra_specs(self, volume_type_id, extra_specs_name):
         """Returns the details of a single volume_type extra spec."""
-        url = "types/%s/extra_specs/%s" % (vol_type_id, extra_specs_name)
+        url = "types/%s/extra_specs/%s" % (volume_type_id, extra_specs_name)
         resp, body = self.get(url)
         body = json.loads(body)
         self.expected_success(200, resp.status)
         return rest_client.ResponseBody(resp, body)
 
-    def create_volume_type_extra_specs(self, vol_type_id, extra_specs):
+    def create_volume_type_extra_specs(self, volume_type_id, extra_specs):
         """Creates a new Volume_type extra spec.
 
-        vol_type_id: Id of volume_type.
+        volume_type_id: Id of volume_type.
         extra_specs: A dictionary of values to be used as extra_specs.
         """
-        url = "types/%s/extra_specs" % vol_type_id
+        url = "types/%s/extra_specs" % volume_type_id
         post_body = json.dumps({'extra_specs': extra_specs})
         resp, body = self.post(url, post_body)
         body = json.loads(body)
         self.expected_success(200, resp.status)
         return rest_client.ResponseBody(resp, body)
 
-    def delete_volume_type_extra_specs(self, vol_id, extra_spec_name):
+    def delete_volume_type_extra_specs(self, volume_type_id, extra_spec_name):
         """Deletes the Specified Volume_type extra spec."""
         resp, body = self.delete("types/%s/extra_specs/%s" % (
-            vol_id, extra_spec_name))
+            volume_type_id, extra_spec_name))
         self.expected_success(202, resp.status)
         return rest_client.ResponseBody(resp, body)
 
-    def update_volume_type_extra_specs(self, vol_type_id, extra_spec_name,
+    def update_volume_type_extra_specs(self, volume_type_id, extra_spec_name,
                                        extra_specs):
         """Update a volume_type extra spec.
 
-        vol_type_id: Id of volume_type.
+        volume_type_id: Id of volume_type.
         extra_spec_name: Name of the extra spec to be updated.
         extra_spec: A dictionary of with key as extra_spec_name and the
                      updated value.
@@ -152,42 +152,42 @@ class BaseTypesClient(rest_client.RestClient):
                               api-ref-blockstorage-v2.html#
                               updateVolumeTypeExtraSpecs
         """
-        url = "types/%s/extra_specs/%s" % (vol_type_id, extra_spec_name)
+        url = "types/%s/extra_specs/%s" % (volume_type_id, extra_spec_name)
         put_body = json.dumps(extra_specs)
         resp, body = self.put(url, put_body)
         body = json.loads(body)
         self.expected_success(200, resp.status)
         return rest_client.ResponseBody(resp, body)
 
-    def show_encryption_type(self, vol_type_id):
+    def show_encryption_type(self, volume_type_id):
         """Get the volume encryption type for the specified volume type.
 
-        vol_type_id: Id of volume_type.
+        volume_type_id: Id of volume_type.
         """
-        url = "/types/%s/encryption" % vol_type_id
+        url = "/types/%s/encryption" % volume_type_id
         resp, body = self.get(url)
         body = json.loads(body)
         self.expected_success(200, resp.status)
         return rest_client.ResponseBody(resp, body)
 
-    def create_encryption_type(self, vol_type_id, **kwargs):
+    def create_encryption_type(self, volume_type_id, **kwargs):
         """Create encryption type.
 
         TODO: Current api-site doesn't contain this API description.
         After fixing the api-site, we need to fix here also for putting
         the link to api-site.
         """
-        url = "/types/%s/encryption" % vol_type_id
+        url = "/types/%s/encryption" % volume_type_id
         post_body = json.dumps({'encryption': kwargs})
         resp, body = self.post(url, post_body)
         body = json.loads(body)
         self.expected_success(200, resp.status)
         return rest_client.ResponseBody(resp, body)
 
-    def delete_encryption_type(self, vol_type_id):
+    def delete_encryption_type(self, volume_type_id):
         """Delete the encryption type for the specified volume-type."""
         resp, body = self.delete(
-            "/types/%s/encryption/provider" % vol_type_id)
+            "/types/%s/encryption/provider" % volume_type_id)
         self.expected_success(202, resp.status)
         return rest_client.ResponseBody(resp, body)
 
@@ -199,7 +199,7 @@ class BaseTypesClient(rest_client.RestClient):
                               #createVolumeTypeAccessExt
         """
         post_body = json.dumps({'addProjectAccess': kwargs})
-        url = 'types/%s/action' % (volume_type_id)
+        url = 'types/%s/action' % volume_type_id
         resp, body = self.post(url, post_body)
         self.expected_success(202, resp.status)
         return rest_client.ResponseBody(resp, body)
@@ -212,7 +212,7 @@ class BaseTypesClient(rest_client.RestClient):
                               #removeVolumeTypeAccessExt
         """
         post_body = json.dumps({'removeProjectAccess': kwargs})
-        url = 'types/%s/action' % (volume_type_id)
+        url = 'types/%s/action' % volume_type_id
         resp, body = self.post(url, post_body)
         self.expected_success(202, resp.status)
         return rest_client.ResponseBody(resp, body)
@@ -224,7 +224,7 @@ class BaseTypesClient(rest_client.RestClient):
                               api-ref-blockstorage-v2.html#
                               listVolumeTypeAccessExt
         """
-        url = 'types/%s/os-volume-type-access' % (volume_type_id)
+        url = 'types/%s/os-volume-type-access' % volume_type_id
         resp, body = self.get(url)
         body = json.loads(body)
         self.expected_success(200, resp.status)
