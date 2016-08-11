@@ -533,6 +533,10 @@ NetworkGroup = [
                 default=["1.0.0.0/16", "2.0.0.0/16"],
                 help="List of ip pools"
                      " for subnetpools creation"),
+    cfg.StrOpt('member_network_type',
+               default="service",
+               help="Type of network to be used for backend members; used"
+                    " for neutron-lbaas; can either be service or isolated"),
 ]
 
 network_feature_group = cfg.OptGroup(name='network-feature-enabled',
