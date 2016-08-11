@@ -18,7 +18,6 @@ import copy
 import importlib
 import inspect
 import logging
-import six
 
 from tempest.lib import auth
 from tempest.lib.common.utils import misc
@@ -90,11 +89,14 @@ def available_modules():
                                                 plug_service_versions))
                 raise exceptions.PluginRegistrationException(
                     name=plugin_name, detailed_error=detailed_error)
-            if not plug_service_versions.isdisjoint(_tempest_modules):
+            # NOTE(andreaf) Once all tempest clients are stable, the following
+            # if will have to be removed.
+            if not plug_service_versions.isdisjoint(
+                    _tempest_internal_modules()):
                 detailed_error = (
                     'Plugin %s is trying to register a service %s already '
                     'claimed by a Tempest one' % (plugin_name,
-                                                  _tempest_modules &
+                                                  _tempest_internal_modules() &
                                                   plug_service_versions))
                 raise exceptions.PluginRegistrationException(
                     name=plugin_name, detailed_error=detailed_error)
@@ -351,15 +353,7 @@ class ServiceClients(object):
             raise exceptions.UnknownServiceClient(
                 services=list(client_parameters.keys()))
 
-        # Register service clients owned by tempest
-        for service, module in six.iteritems(tempest_modules()):
-            attribute = service.replace('.', '_')
-            configs = service.split('.')[0]
-            self.register_service_client_module(
-                attribute, service, module.__name__,
-                module.__all__, **self.parameters[configs])
-
-        # Register service clients from plugins
+        # Register service clients from the registry (__tempest__ and plugins)
         clients_registry = ClientsRegistry()
         plugin_service_clients = clients_registry.get_service_clients()
         for plugin in plugin_service_clients:
@@ -432,6 +426,8 @@ class ServiceClients(object):
 
     @property
     def registered_services(self):
+        # NOTE(andreaf) Once all tempest modules are stable this needs to
+        # be updated to remove _tempest_internal_modules
         return self._registered_services | _tempest_internal_modules()
 
     def _setup_parameters(self, parameters):
