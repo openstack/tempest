@@ -42,21 +42,12 @@ class VolumesV2ListTestJSON(base.BaseVolumeTest):
         super(VolumesV2ListTestJSON, cls).resource_setup()
 
         # Create 3 test volumes
-        cls.volume_list = []
         cls.volume_id_list = []
         cls.metadata = {'Type': 'work'}
         for i in range(3):
             volume = cls.create_volume(metadata=cls.metadata)
             volume = cls.client.show_volume(volume['id'])['volume']
-            cls.volume_list.append(volume)
             cls.volume_id_list.append(volume['id'])
-
-    @classmethod
-    def resource_cleanup(cls):
-        # Delete the created volumes
-        for volid in cls.volume_id_list:
-            cls.delete_volume(cls.client, volid)
-        super(VolumesV2ListTestJSON, cls).resource_cleanup()
 
     @test.idempotent_id('2a7064eb-b9c3-429b-b888-33928fc5edd3')
     def test_volume_list_details_with_multiple_params(self):
