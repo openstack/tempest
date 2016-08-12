@@ -24,8 +24,6 @@ CONF = config.CONF
 
 
 class LiveBlockMigrationNegativeTestJSON(base.BaseV2ComputeAdminTest):
-    _host_key = 'OS-EXT-SRV-ATTR:host'
-
     @classmethod
     def skip_checks(cls):
         super(LiveBlockMigrationNegativeTestJSON, cls).skip_checks()

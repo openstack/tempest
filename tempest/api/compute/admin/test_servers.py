@@ -24,8 +24,6 @@ from tempest import test
 class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
     """Tests Servers API using admin privileges"""
 
-    _host_key = 'OS-EXT-SRV-ATTR:host'
-
     @classmethod
     def setup_clients(cls):
         super(ServersAdminTestJSON, cls).setup_clients()
@@ -114,7 +112,7 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
         self.addCleanup(self.client.delete_server, test_server['id'])
         server = self.client.show_server(test_server['id'])['server']
         self.assertEqual(server['status'], 'ACTIVE')
-        hostname = server[self._host_key]
+        hostname = server['OS-EXT-SRV-ATTR:host']
         params = {'host': hostname}
         body = self.client.list_servers(**params)
         servers = body['servers']

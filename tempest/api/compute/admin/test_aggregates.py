@@ -25,8 +25,6 @@ from tempest import test
 class AggregatesAdminTestJSON(base.BaseV2ComputeAdminTest):
     """Tests Aggregates API that require admin privileges"""
 
-    _host_key = 'OS-EXT-SRV-ATTR:host'
-
     @classmethod
     def setup_clients(cls):
         super(AggregatesAdminTestJSON, cls).setup_clients()
@@ -223,4 +221,4 @@ class AggregatesAdminTestJSON(base.BaseV2ComputeAdminTest):
                                          availability_zone=az_name,
                                          wait_until='ACTIVE')
         body = admin_servers_client.show_server(server['id'])['server']
-        self.assertEqual(self.host, body[self._host_key])
+        self.assertEqual(self.host, body['OS-EXT-SRV-ATTR:host'])

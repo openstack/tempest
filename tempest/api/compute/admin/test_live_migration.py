@@ -26,7 +26,6 @@ CONF = config.CONF
 
 
 class LiveBlockMigrationTestJSON(base.BaseV2ComputeAdminTest):
-    _host_key = 'OS-EXT-SRV-ATTR:host'
     max_microversion = '2.24'
     block_migration = None
 
@@ -63,7 +62,7 @@ class LiveBlockMigrationTestJSON(base.BaseV2ComputeAdminTest):
         return body
 
     def _get_host_for_server(self, server_id):
-        return self._get_server_details(server_id)[self._host_key]
+        return self._get_server_details(server_id)['OS-EXT-SRV-ATTR:host']
 
     def _migrate_server_to(self, server_id, dest_host, volume_backed=False):
         kwargs = dict()
