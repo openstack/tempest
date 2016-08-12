@@ -278,6 +278,11 @@ ComputeGroup = [
                      'be utilized by some multinode specific tests to ensure '
                      'that requests match the expected size of the cluster '
                      'you are testing with.')),
+    cfg.StrOpt('hypervisor_type',
+               default=None,
+               help="Hypervisor type of the test target on heterogeneous "
+                    "compute environment. The value can be 'QEMU', 'xen' or "
+                    "something."),
     cfg.StrOpt('min_microversion',
                default=None,
                help="Lower version of the test target microversion range. "
