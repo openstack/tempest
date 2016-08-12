@@ -13,9 +13,7 @@
 # under the License.
 
 from tempest.api.object_storage import base
-from tempest.common.utils import data_utils
 from tempest import config
-from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
 from tempest import test
 
@@ -91,14 +89,3 @@ class AccountQuotasNegativeTest(base.BaseObjectTest):
         self.assertRaises(lib_exc.Forbidden,
                           self.account_client.create_account_metadata,
                           {"Quota-Bytes": "100"})
-
-    @test.attr(type=["negative"])
-    @decorators.skip_because(bug="1310597")
-    @test.idempotent_id('cf9e21f5-3aa4-41b1-9462-28ac550d8d3f')
-    @test.requires_ext(extension='account_quotas', service='object')
-    def test_upload_large_object(self):
-        object_name = data_utils.rand_name(name="TestObject")
-        data = data_utils.arbitrary_string(30)
-        self.assertRaises(lib_exc.OverLimit,
-                          self.object_client.create_object,
-                          self.container_name, object_name, data)
