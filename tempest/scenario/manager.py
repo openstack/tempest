@@ -235,7 +235,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
             # and net['id'] if they come from
             # clients.networks_client.list_networks
             for net in networks:
-                net_id = net.get('uuid', net['id'])
+                net_id = net.get('uuid', net.get('id'))
                 if 'port' not in net:
                     port = self._create_port(network_id=net_id,
                                              client=clients.ports_client,
