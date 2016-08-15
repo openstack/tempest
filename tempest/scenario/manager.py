@@ -127,6 +127,21 @@ class ScenarioTest(tempest.test.BaseTestCase):
             wait_dict['client'] = waiter_client
         self.cleanup_waits.append(wait_dict)
 
+    def _create_port(self, network_id, client=None, namestart='port-quotatest',
+                     **kwargs):
+        if not client:
+            client = self.ports_client
+        name = data_utils.rand_name(namestart)
+        result = client.create_port(
+            name=name,
+            network_id=network_id,
+            **kwargs)
+        self.assertIsNotNone(result, 'Unable to allocate port')
+        port = result['port']
+        self.addCleanup(test_utils.call_and_ignore_notfound_exc,
+                        client.delete_port, port['id'])
+        return port
+
     def _wait_for_cleanups(self):
         # To handle async delete actions, a list of waits is added
         # which will be iterated over as the last step of clearing the
@@ -209,18 +224,18 @@ class ScenarioTest(tempest.test.BaseTestCase):
                 networks = []
 
             # If there are no networks passed to us we look up
-            # for the project's private networks and create a port
-            # if there is only one private network. The same behaviour
-            # as we would expect when passing the call to the clients
-            # with no networks
+            # for the project's private networks and create a port.
+            # The same behaviour as we would expect when passing
+            # the call to the clients with no networks
             if not networks:
                 networks = clients.networks_client.list_networks(
-                    filters={'router:external': False})
-                self.assertEqual(1, len(networks),
-                                 "There is more than one"
-                                 " network for the tenant")
+                    **{'router:external': False, 'fields': 'id'})['networks']
+
+            # It's net['uuid'] if networks come from kwargs
+            # and net['id'] if they come from
+            # clients.networks_client.list_networks
             for net in networks:
-                net_id = net['uuid']
+                net_id = net.get('uuid', net['id'])
                 if 'port' not in net:
                     port = self._create_port(network_id=net_id,
                                              client=clients.ports_client,
@@ -812,21 +827,6 @@ class NetworkScenarioTest(ScenarioTest):
                         subnets_client.delete_subnet, subnet['id'])
 
         return subnet
-
-    def _create_port(self, network_id, client=None, namestart='port-quotatest',
-                     **kwargs):
-        if not client:
-            client = self.ports_client
-        name = data_utils.rand_name(namestart)
-        result = client.create_port(
-            name=name,
-            network_id=network_id,
-            **kwargs)
-        self.assertIsNotNone(result, 'Unable to allocate port')
-        port = result['port']
-        self.addCleanup(test_utils.call_and_ignore_notfound_exc,
-                        client.delete_port, port['id'])
-        return port
 
     def _get_server_port_id_and_ip4(self, server, ip_addr=None):
         ports = self._list_ports(device_id=server['id'], fixed_ip=ip_addr)
