@@ -24,18 +24,6 @@ LOG = logging.getLogger(__name__)
 
 class TestVolumeBootPattern(manager.ScenarioTest):
 
-    """This test case attempts to reproduce the following steps:
-
-     * Create in Cinder some bootable volume importing a Glance image
-     * Boot an instance from the bootable volume
-     * Write content to the volume
-     * Delete an instance and Boot a new instance from the volume
-     * Check written content in the instance
-     * Create a volume snapshot while the instance is running
-     * Boot an additional instance from the new snapshot based volume
-     * Check written content in the instance booted from snapshot
-    """
-
     # Boot from volume scenario is quite slow, and needs extra
     # breathing room to get through deletes in the time allotted.
     TIMEOUT_SCALING_FACTOR = 2
@@ -113,6 +101,19 @@ class TestVolumeBootPattern(manager.ScenarioTest):
     @test.attr(type='smoke')
     @test.services('compute', 'volume', 'image')
     def test_volume_boot_pattern(self):
+
+        """This test case attempts to reproduce the following steps:
+
+        * Create in Cinder some bootable volume importing a Glance image
+        * Boot an instance from the bootable volume
+        * Write content to the volume
+        * Delete an instance and Boot a new instance from the volume
+        * Check written content in the instance
+        * Create a volume snapshot while the instance is running
+        * Boot an additional instance from the new snapshot based volume
+        * Check written content in the instance booted from snapshot
+        """
+
         LOG.info("Creating keypair and security group")
         keypair = self.create_keypair()
         security_group = self._create_security_group()
