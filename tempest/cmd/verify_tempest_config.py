@@ -147,6 +147,10 @@ def verify_cinder_api_versions(os, update):
             contains_version('v2.', versions)):
         print_and_or_update('api_v2', 'volume-feature-enabled',
                             not CONF.volume_feature_enabled.api_v2, update)
+    if (CONF.volume_feature_enabled.api_v3 !=
+            contains_version('v3.', versions)):
+        print_and_or_update('api_v3', 'volume-feature-enabled',
+                            not CONF.volume_feature_enabled.api_v3, update)
 
 
 def verify_api_versions(os, service, update):
