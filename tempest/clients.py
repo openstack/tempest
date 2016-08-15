@@ -21,7 +21,6 @@ from tempest import config
 from tempest.lib import auth
 from tempest.lib import exceptions as lib_exc
 from tempest.lib.services import clients
-from tempest.services import baremetal
 from tempest.services import identity
 from tempest.services import object_storage
 from tempest.services import orchestration
@@ -34,14 +33,6 @@ class Manager(clients.ServiceClients):
     """Top level manager for OpenStack tempest clients"""
 
     default_params = config.service_client_config()
-
-    # TODO(andreaf) This is only used by baremetal clients,
-    # and should be removed once they are out of Tempest
-    default_params_with_timeout_values = {
-        'build_interval': CONF.compute.build_interval,
-        'build_timeout': CONF.compute.build_timeout
-    }
-    default_params_with_timeout_values.update(default_params)
 
     def __init__(self, credentials, service=None, scope='project'):
         """Initialization of Manager class.
@@ -66,12 +57,6 @@ class Manager(clients.ServiceClients):
         self._set_image_clients()
         self._set_network_clients()
 
-        self.baremetal_client = baremetal.BaremetalClient(
-            self.auth_provider,
-            CONF.baremetal.catalog_type,
-            CONF.identity.region,
-            endpoint_type=CONF.baremetal.endpoint_type,
-            **self.default_params_with_timeout_values)
         self.orchestration_client = orchestration.OrchestrationClient(
             self.auth_provider,
             CONF.orchestration.catalog_type,
@@ -177,7 +162,6 @@ class Manager(clients.ServiceClients):
         self.instance_usages_audit_log_client = (
             self.compute.InstanceUsagesAuditLogClient())
         self.tenant_networks_client = self.compute.TenantNetworksClient()
-        self.baremetal_nodes_client = self.compute.BaremetalNodesClient()
 
         # NOTE: The following client needs special timeout values because
         # the API is a proxy for the other component.

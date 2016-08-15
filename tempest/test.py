@@ -64,7 +64,6 @@ def get_service_list():
     service_list = {
         'compute': CONF.service_available.nova,
         'image': CONF.service_available.glance,
-        'baremetal': CONF.service_available.ironic,
         'volume': CONF.service_available.cinder,
         'network': True,
         'identity': True,

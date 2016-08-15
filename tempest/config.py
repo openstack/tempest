@@ -565,6 +565,10 @@ NetworkGroup = [
                 default=["1.0.0.0/16", "2.0.0.0/16"],
                 help="List of ip pools"
                      " for subnetpools creation"),
+    cfg.BoolOpt('shared_physical_network',
+                default=False,
+                help="The environment does not support network separation "
+                     "between tenants."),
     # TODO(ylobankov): Delete this option once the Liberty release is EOL.
     cfg.BoolOpt('dvr_extra_resources',
                 default=True,
@@ -969,9 +973,6 @@ ServiceAvailableGroup = [
     cfg.BoolOpt('sahara',
                 default=False,
                 help="Whether or not Sahara is expected to be available"),
-    cfg.BoolOpt('ironic',
-                default=False,
-                help="Whether or not Ironic is expected to be available"),
 ]
 
 debug_group = cfg.OptGroup(name="debug",
@@ -1026,56 +1027,6 @@ InputScenarioGroup = [
                deprecated_for_removal=True),
 ]
 
-
-baremetal_group = cfg.OptGroup(name='baremetal',
-                               title='Baremetal provisioning service options',
-                               help='When enabling baremetal tests, Nova '
-                                    'must be configured to use the Ironic '
-                                    'driver. The following parameters for the '
-                                    '[compute] section must be disabled: '
-                                    'console_output, interface_attach, '
-                                    'live_migration, pause, rescue, resize '
-                                    'shelve, snapshot, and suspend')
-
-
-# NOTE(deva): Ironic tests have been ported to tempest.lib. New config options
-#             should be added to ironic/ironic_tempest_plugin/config.py.
-#             However, these options need to remain here for testing stable
-#             branches until Liberty release reaches EOL.
-BaremetalGroup = [
-    cfg.StrOpt('catalog_type',
-               default='baremetal',
-               help="Catalog type of the baremetal provisioning service"),
-    cfg.BoolOpt('driver_enabled',
-                default=False,
-                help="Whether the Ironic nova-compute driver is enabled"),
-    cfg.StrOpt('driver',
-               default='fake',
-               help="Driver name which Ironic uses"),
-    cfg.StrOpt('endpoint_type',
-               default='publicURL',
-               choices=['public', 'admin', 'internal',
-                        'publicURL', 'adminURL', 'internalURL'],
-               help="The endpoint type to use for the baremetal provisioning "
-                    "service"),
-    cfg.IntOpt('active_timeout',
-               default=300,
-               help="Timeout for Ironic node to completely provision"),
-    cfg.IntOpt('association_timeout',
-               default=30,
-               help="Timeout for association of Nova instance and Ironic "
-                    "node"),
-    cfg.IntOpt('power_timeout',
-               default=60,
-               help="Timeout for Ironic power transitions."),
-    cfg.IntOpt('unprovision_timeout',
-               default=300,
-               help="Timeout for unprovisioning an Ironic node. "
-                    "Takes longer since Kilo as Ironic performs an extra "
-                    "step in Node cleaning.")
-]
-
-
 DefaultGroup = [
     cfg.StrOpt('resources_prefix',
                default='tempest',
@@ -1105,7 +1056,6 @@ _opts = [
     (scenario_group, ScenarioGroup),
     (service_available_group, ServiceAvailableGroup),
     (debug_group, DebugGroup),
-    (baremetal_group, BaremetalGroup),
     (input_scenario_group, InputScenarioGroup),
     (None, DefaultGroup)
 ]
@@ -1168,7 +1118,6 @@ class TempestConfigPrivate(object):
         self.scenario = _CONF.scenario
         self.service_available = _CONF.service_available
         self.debug = _CONF.debug
-        self.baremetal = _CONF.baremetal
         self.input_scenario = _CONF['input-scenario']
         logging.tempest_set_log_file('tempest.log')
 
