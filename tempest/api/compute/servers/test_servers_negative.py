@@ -490,6 +490,36 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
                           self.client.unshelve_server,
                           self.server_id)
 
+    @test.attr(type=['negative'])
+    @test.idempotent_id('74085be3-a370-4ca2-bc51-2d0e10e0f573')
+    @test.services('volume', 'image')
+    def test_create_server_from_non_bootable_volume(self):
+        # Create a volume
+        volume = self.create_volume()
+
+        # Update volume bootable status to false
+        self.volumes_client.set_bootable_volume(volume['id'],
+                                                bootable=False)
+
+        # Verify bootable flag was updated
+        nonbootable_vol = self.volumes_client.show_volume(
+            volume['id'])['volume']
+        self.assertEqual('false', nonbootable_vol['bootable'])
+
+        # Block device mapping
+        bd_map = [{'boot_index': '0',
+                   'uuid': volume['id'],
+                   'source_type': 'volume',
+                   'destination_type': 'volume',
+                   'delete_on_termination': False}]
+
+        # Try creating a server from non-bootable volume
+        self.assertRaises(lib_exc.BadRequest,
+                          self.create_test_server,
+                          image_id='',
+                          wait_until='ACTIVE',
+                          block_device_mapping_v2=bd_map)
+
 
 class ServersNegativeTestMultiTenantJSON(base.BaseV2ComputeTest):
 
