@@ -96,6 +96,13 @@ class TestMinimumBasicScenario(manager.ScenarioTest):
                    '%s' % (secgroup['id'], server['id']))
             raise exceptions.TimeoutException(msg)
 
+    def _get_floating_ip_in_server_addresses(self, floating_ip, server):
+        for network_name, addresses in server['addresses'].items():
+            for address in addresses:
+                if (address['OS-EXT-IPS:type'] == 'floating' and
+                        address['addr'] == floating_ip['ip']):
+                    return address
+
     @test.idempotent_id('bdbb5441-9204-419d-a225-b4fdbfb1a1a8')
     @test.services('compute', 'volume', 'image', 'network')
     def test_minimum_basic_scenario(self):
@@ -121,6 +128,16 @@ class TestMinimumBasicScenario(manager.ScenarioTest):
         self.cinder_show(volume)
 
         floating_ip = self.create_floating_ip(server)
+        # fetch the server again to make sure the addresses were refreshed
+        # after associating the floating IP
+        server = self.servers_client.show_server(server['id'])['server']
+        address = self._get_floating_ip_in_server_addresses(
+            floating_ip, server)
+        self.assertIsNotNone(
+            address,
+            "Failed to find floating IP '%s' in server addresses: %s" %
+            (floating_ip['ip'], server['addresses']))
+
         self.create_and_add_security_group_to_server(server)
 
         # check that we can SSH to the server before reboot
@@ -135,3 +152,13 @@ class TestMinimumBasicScenario(manager.ScenarioTest):
             floating_ip['ip'], private_key=keypair['private_key'])
 
         self.check_partitions()
+
+        # delete the floating IP, this should refresh the server addresses
+        self.compute_floating_ips_client.delete_floating_ip(floating_ip['id'])
+        server = self.servers_client.show_server(server['id'])['server']
+        address = self._get_floating_ip_in_server_addresses(
+            floating_ip, server)
+        self.assertIsNone(
+            address,
+            "Floating IP '%s' should not be in server addresses: %s" %
+            (floating_ip['ip'], server['addresses']))
