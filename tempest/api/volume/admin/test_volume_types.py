@@ -162,6 +162,28 @@ class VolumeTypesV2Test(base.BaseVolumeAdminTest):
                 encryption_type['volume_type_id']))
         self.assertEmpty(deleted_encryption_type)
 
+    @test.idempotent_id('cf9f07c6-db9e-4462-a243-5933ad65e9c8')
+    def test_volume_type_update(self):
+        # Create volume type
+        volume_type = self.create_volume_type()
+
+        # New volume type details
+        name = data_utils.rand_name("volume-type")
+        description = data_utils.rand_name("volume-type-description")
+        is_public = not volume_type['is_public']
+
+        # Update volume type details
+        kwargs = {'name': name,
+                  'description': description,
+                  'is_public': is_public}
+        updated_vol_type = self.admin_volume_types_client.update_volume_type(
+            volume_type['id'], **kwargs)['volume_type']
+
+        # Verify volume type details were updated
+        self.assertEqual(name, updated_vol_type['name'])
+        self.assertEqual(description, updated_vol_type['description'])
+        self.assertEqual(is_public, updated_vol_type['is_public'])
+
 
 class VolumeTypesV1Test(VolumeTypesV2Test):
     _api_version = 1
