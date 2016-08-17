@@ -53,25 +53,12 @@ class TestShelveInstance(manager.ScenarioTest):
         security_group = self._create_security_group()
         security_groups = [{'name': security_group['name']}]
 
-        if boot_from_volume:
-            volume = self.create_volume(size=CONF.volume.volume_size,
-                                        imageRef=CONF.compute.image_ref)
-            bd_map = [{
-                'device_name': 'vda',
-                'volume_id': volume['id'],
-                'delete_on_termination': '0'}]
-
-            server = self.create_server(
-                key_name=keypair['name'],
-                security_groups=security_groups,
-                block_device_mapping=bd_map,
-                wait_until='ACTIVE')
-        else:
-            server = self.create_server(
-                image_id=CONF.compute.image_ref,
-                key_name=keypair['name'],
-                security_groups=security_groups,
-                wait_until='ACTIVE')
+        server = self.create_server(
+            image_id=CONF.compute.image_ref,
+            key_name=keypair['name'],
+            security_groups=security_groups,
+            wait_until='ACTIVE',
+            volume_backed=boot_from_volume)
 
         instance_ip = self.get_server_ip(server)
         timestamp = self.create_timestamp(instance_ip,
