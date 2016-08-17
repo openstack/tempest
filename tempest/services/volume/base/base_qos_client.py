@@ -82,7 +82,7 @@ class BaseQosSpecsClient(rest_client.RestClient):
     def delete_qos(self, qos_id, force=False):
         """Delete the specified QoS specification."""
         resp, body = self.delete(
-            "qos-specs/%s?force=%s" % (str(qos_id), force))
+            "qos-specs/%s?force=%s" % (qos_id, force))
         self.expected_success(202, resp.status)
         return rest_client.ResponseBody(resp, body)
 
@@ -96,7 +96,7 @@ class BaseQosSpecsClient(rest_client.RestClient):
 
     def show_qos(self, qos_id):
         """Get the specified QoS specification."""
-        url = "qos-specs/%s" % str(qos_id)
+        url = "qos-specs/%s" % qos_id
         resp, body = self.get(url)
         body = json.loads(body)
         self.expected_success(200, resp.status)
@@ -128,7 +128,7 @@ class BaseQosSpecsClient(rest_client.RestClient):
 
     def associate_qos(self, qos_id, vol_type_id):
         """Associate the specified QoS with specified volume-type."""
-        url = "qos-specs/%s/associate" % str(qos_id)
+        url = "qos-specs/%s/associate" % qos_id
         url += "?vol_type_id=%s" % vol_type_id
         resp, body = self.get(url)
         self.expected_success(202, resp.status)
@@ -136,7 +136,7 @@ class BaseQosSpecsClient(rest_client.RestClient):
 
     def show_association_qos(self, qos_id):
         """Get the association of the specified QoS specification."""
-        url = "qos-specs/%s/associations" % str(qos_id)
+        url = "qos-specs/%s/associations" % qos_id
         resp, body = self.get(url)
         body = json.loads(body)
         self.expected_success(200, resp.status)
@@ -144,7 +144,7 @@ class BaseQosSpecsClient(rest_client.RestClient):
 
     def disassociate_qos(self, qos_id, vol_type_id):
         """Disassociate the specified QoS with specified volume-type."""
-        url = "qos-specs/%s/disassociate" % str(qos_id)
+        url = "qos-specs/%s/disassociate" % qos_id
         url += "?vol_type_id=%s" % vol_type_id
         resp, body = self.get(url)
         self.expected_success(202, resp.status)
@@ -152,7 +152,7 @@ class BaseQosSpecsClient(rest_client.RestClient):
 
     def disassociate_all_qos(self, qos_id):
         """Disassociate the specified QoS with all associations."""
-        url = "qos-specs/%s/disassociate_all" % str(qos_id)
+        url = "qos-specs/%s/disassociate_all" % qos_id
         resp, body = self.get(url)
         self.expected_success(202, resp.status)
         return rest_client.ResponseBody(resp, body)

@@ -66,7 +66,7 @@ class RolesClient(rest_client.RestClient):
         Available params: see http://developer.openstack.org/
                               api-ref-identity-v2-ext.html#deleteRole
         """
-        resp, body = self.delete('OS-KSADM/roles/%s' % str(role_id))
+        resp, body = self.delete('OS-KSADM/roles/%s' % role_id)
         self.expected_success(204, resp.status)
         return rest_client.ResponseBody(resp, body)
 
