@@ -61,20 +61,11 @@ class VolumesV2ListTestJSON(base.BaseVolumeTest):
 
         # Create 3 test volumes
         cls.volume_list = []
-        cls.volume_id_list = []
         cls.metadata = {'Type': 'work'}
         for i in range(3):
             volume = cls.create_volume(metadata=cls.metadata)
             volume = cls.client.show_volume(volume['id'])['volume']
             cls.volume_list.append(volume)
-            cls.volume_id_list.append(volume['id'])
-
-    @classmethod
-    def resource_cleanup(cls):
-        # Delete the created volumes
-        for volid in cls.volume_id_list:
-            cls.delete_volume(cls.client, volid)
-        super(VolumesV2ListTestJSON, cls).resource_cleanup()
 
     def _list_by_param_value_and_assert(self, params, with_detail=False):
         """list or list_details with given params and validates result"""
