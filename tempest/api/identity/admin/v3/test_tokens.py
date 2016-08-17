@@ -32,7 +32,7 @@ class TokensV3TestJSON(base.BaseIdentityV3AdminTest):
         u_email = '%s@testmail.tm' % u_name
         u_password = data_utils.rand_password()
         user = self.users_client.create_user(
-            u_name, description=u_desc, password=u_password,
+            name=u_name, description=u_desc, password=u_password,
             email=u_email)['user']
         self.addCleanup(self.users_client.delete_user, user['id'])
         # Perform Authentication
@@ -62,7 +62,7 @@ class TokensV3TestJSON(base.BaseIdentityV3AdminTest):
         # Create a user.
         user_name = data_utils.rand_name(name='user')
         user_password = data_utils.rand_password()
-        user = self.users_client.create_user(user_name,
+        user = self.users_client.create_user(name=user_name,
                                              password=user_password)['user']
         self.addCleanup(self.users_client.delete_user, user['id'])
 

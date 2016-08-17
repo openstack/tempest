@@ -200,7 +200,7 @@ class ProjectsTestJSON(base.BaseIdentityV3AdminTest):
         u_email = u_name + '@testmail.tm'
         u_password = data_utils.rand_password()
         user = self.users_client.create_user(
-            u_name, description=u_desc, password=u_password,
+            name=u_name, description=u_desc, password=u_password,
             email=u_email, project_id=project['id'])['user']
         # Delete the User at the end of this method
         self.addCleanup(self.users_client.delete_user, user['id'])

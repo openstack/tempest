@@ -40,8 +40,10 @@ class CredsClient(object):
         self.roles_client = roles_client
 
     def create_user(self, username, password, project, email):
-        params = self._create_user_params(username, password,
-                                          project['id'], email)
+        params = {'name': username,
+                  'password': password,
+                  self.project_id_param: project['id'],
+                  'email': email}
         user = self.users_client.create_user(**params)
         if 'user' in user:
             user = user['user']
@@ -94,6 +96,7 @@ class CredsClient(object):
 
 
 class V2CredsClient(CredsClient):
+    project_id_param = 'tenantId'
 
     def __init__(self, identity_client, projects_client, users_client,
                  roles_client):
@@ -101,13 +104,6 @@ class V2CredsClient(CredsClient):
                                             projects_client,
                                             users_client,
                                             roles_client)
-
-    def _create_user_params(self, username, password, project_id, email):
-        params = {'name': username,
-                  'password': password,
-                  'tenantId': project_id,
-                  'email': email}
-        return params
 
     def create_project(self, name, description):
         tenant = self.projects_client.create_tenant(
@@ -135,6 +131,7 @@ class V2CredsClient(CredsClient):
 
 
 class V3CredsClient(CredsClient):
+    project_id_param = 'project_id'
 
     def __init__(self, identity_client, projects_client, users_client,
                  roles_client, domains_client, domain_name):
@@ -151,13 +148,6 @@ class V3CredsClient(CredsClient):
             # TODO(andrea) we could probably create the domain on the fly
             msg = "Requested domain %s could not be found" % domain_name
             raise lib_exc.InvalidCredentials(msg)
-
-    def _create_user_params(self, username, password, project_id, email):
-        params = {'user_name': username,
-                  'password': password,
-                  'project_id': project_id,
-                  'email': email}
-        return params
 
     def create_project(self, name, description):
         project = self.projects_client.create_project(
