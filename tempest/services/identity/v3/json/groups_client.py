@@ -18,6 +18,7 @@ http://developer.openstack.org/api-ref-identity-v3.html#groups-v3
 """
 
 from oslo_serialization import jsonutils as json
+from six.moves.urllib import parse as urllib
 
 from tempest.lib.common import rest_client
 
@@ -44,9 +45,16 @@ class GroupsClient(rest_client.RestClient):
         body = json.loads(body)
         return rest_client.ResponseBody(resp, body)
 
-    def list_groups(self):
-        """Lists the groups."""
-        resp, body = self.get('groups')
+    def list_groups(self, **params):
+        """Lists the groups.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref/identity/v3/#list-groups
+        """
+        url = 'groups'
+        if params:
+            url += '?%s' % urllib.urlencode(params)
+        resp, body = self.get(url)
         self.expected_success(200, resp.status)
         body = json.loads(body)
         return rest_client.ResponseBody(resp, body)
@@ -76,9 +84,16 @@ class GroupsClient(rest_client.RestClient):
         self.expected_success(204, resp.status)
         return rest_client.ResponseBody(resp, body)
 
-    def list_group_users(self, group_id):
-        """List users in group."""
-        resp, body = self.get('groups/%s/users' % group_id)
+    def list_group_users(self, group_id, **params):
+        """List users in group.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref/identity/v3/#list-users-in-group
+        """
+        url = 'groups/%s/users' % group_id
+        if params:
+            url += '?%s' % urllib.urlencode(params)
+        resp, body = self.get(url)
         self.expected_success(200, resp.status)
         body = json.loads(body)
         return rest_client.ResponseBody(resp, body)
