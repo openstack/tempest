@@ -38,16 +38,11 @@ class VolumesBackupsV2Test(base.BaseVolumeTest):
                         volume['id'])
         backup_name = data_utils.rand_name(
             self.__class__.__name__ + '-Backup')
-        create_backup = self.backups_client.create_backup
-        backup = create_backup(volume_id=volume['id'],
-                               name=backup_name)['backup']
-        self.addCleanup(self.backups_client.delete_backup,
-                        backup['id'])
+        backup = self.create_backup(volume_id=volume['id'],
+                                    name=backup_name)
         self.assertEqual(backup_name, backup['name'])
         waiters.wait_for_volume_status(self.volumes_client,
                                        volume['id'], 'available')
-        waiters.wait_for_backup_status(self.backups_client,
-                                       backup['id'], 'available')
 
         # Get a given backup
         backup = self.backups_client.show_backup(backup['id'])['backup']
@@ -99,12 +94,8 @@ class VolumesBackupsV2Test(base.BaseVolumeTest):
         # Create backup using force flag
         backup_name = data_utils.rand_name(
             self.__class__.__name__ + '-Backup')
-        backup = self.backups_client.create_backup(
-            volume_id=volume['id'],
-            name=backup_name, force=True)['backup']
-        self.addCleanup(self.backups_client.delete_backup, backup['id'])
-        waiters.wait_for_backup_status(self.backups_client,
-                                       backup['id'], 'available')
+        backup = self.create_backup(volume_id=volume['id'],
+                                    name=backup_name, force=True)
         self.assertEqual(backup_name, backup['name'])
 
 
