@@ -129,7 +129,7 @@ class VolumesV2ActionsTest(base.BaseVolumeTest):
         # it is shared with the other tests. After it is uploaded in Glance,
         # there is no way to delete it from Cinder, so we delete it from Glance
         # using the Glance image_client and from Cinder via tearDownClass.
-        image_name = data_utils.rand_name('Image')
+        image_name = data_utils.rand_name(self.__class__.__name__ + '-Image')
         body = self.client.upload_volume(
             self.volume['id'], image_name=image_name,
             disk_format=CONF.volume.disk_format)['os-volume_upload_image']

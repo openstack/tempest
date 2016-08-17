@@ -42,7 +42,8 @@ class UserMessagesTest(base.VolumesV3AdminTest):
         bad_vendor = data_utils.rand_name('vendor_name')
         extra_specs = {'storage_protocol': bad_protocol,
                        'vendor_name': bad_vendor}
-        vol_type_name = data_utils.rand_name('volume-type')
+        vol_type_name = data_utils.rand_name(
+            self.__class__.__name__ + '-volume-type')
         bogus_type = self.admin_volume_types_client.create_volume_type(
             name=vol_type_name,
             extra_specs=extra_specs)['volume_type']

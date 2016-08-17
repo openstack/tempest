@@ -48,7 +48,7 @@ class VolumesTestJSON(base.BaseV2ComputeTest):
         cls.volume_list = []
         cls.volume_id_list = []
         for i in range(3):
-            v_name = data_utils.rand_name('volume')
+            v_name = data_utils.rand_name(cls.__name__ + '-volume')
             metadata = {'Type': 'work'}
             try:
                 volume = cls.client.create_volume(size=CONF.volume.volume_size,

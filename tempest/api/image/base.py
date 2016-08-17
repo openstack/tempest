@@ -167,7 +167,7 @@ class BaseV2MemberImageTest(BaseV2ImageTest):
         return image_ids
 
     def _create_image(self):
-        name = data_utils.rand_name('image')
+        name = data_utils.rand_name(self.__class__.__name__ + '-image')
         image = self.client.create_image(name=name,
                                          container_format='bare',
                                          disk_format='raw')

@@ -253,7 +253,8 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
         # Update name of a non-existent server
 
         nonexistent_server = data_utils.rand_uuid()
-        new_name = data_utils.rand_name('server') + '_updated'
+        new_name = data_utils.rand_name(
+            self.__class__.__name__ + '-server') + '_updated'
 
         self.assertRaises(lib_exc.NotFound, self.client.update_server,
                           nonexistent_server, name=new_name)

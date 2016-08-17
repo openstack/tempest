@@ -23,7 +23,7 @@ class VolumeTypesExtraSpecsV2Test(base.BaseVolumeAdminTest):
     @classmethod
     def resource_setup(cls):
         super(VolumeTypesExtraSpecsV2Test, cls).resource_setup()
-        vol_type_name = data_utils.rand_name('Volume-type')
+        vol_type_name = data_utils.rand_name(cls.__name__ + '-Volume-type')
         cls.volume_type = cls.create_volume_type(name=vol_type_name)
 
     @test.idempotent_id('b42923e9-0452-4945-be5b-d362ae533e60')

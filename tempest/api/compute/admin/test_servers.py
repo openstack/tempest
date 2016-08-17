@@ -37,12 +37,12 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
     def resource_setup(cls):
         super(ServersAdminTestJSON, cls).resource_setup()
 
-        cls.s1_name = data_utils.rand_name('server')
+        cls.s1_name = data_utils.rand_name(cls.__name__ + '-server')
         server = cls.create_test_server(name=cls.s1_name,
                                         wait_until='ACTIVE')
         cls.s1_id = server['id']
 
-        cls.s2_name = data_utils.rand_name('server')
+        cls.s2_name = data_utils.rand_name(cls.__name__ + '-server')
         server = cls.create_test_server(name=cls.s2_name,
                                         wait_until='ACTIVE')
         cls.s2_id = server['id']
@@ -103,7 +103,7 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
     @test.idempotent_id('86c7a8f7-50cf-43a9-9bac-5b985317134f')
     def test_list_servers_filter_by_exist_host(self):
         # Filter the list of servers by existent host
-        name = data_utils.rand_name('server')
+        name = data_utils.rand_name(self.__class__.__name__ + '-server')
         network = self.get_tenant_network()
         network_kwargs = fixed_network.set_networks_kwarg(network)
         # We need to create the server as an admin, so we can't use

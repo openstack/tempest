@@ -31,7 +31,7 @@ class VolumesV2SnapshotNegativeTestJSON(base.BaseVolumeTest):
     @test.idempotent_id('e3e466af-70ab-4f4b-a967-ab04e3532ea7')
     def test_create_snapshot_with_nonexistent_volume_id(self):
         # Create a snapshot with nonexistent volume id
-        s_name = data_utils.rand_name('snap')
+        s_name = data_utils.rand_name(self.__class__.__name__ + '-snap')
         self.assertRaises(lib_exc.NotFound,
                           self.snapshots_client.create_snapshot,
                           volume_id=data_utils.rand_uuid(),
@@ -41,7 +41,7 @@ class VolumesV2SnapshotNegativeTestJSON(base.BaseVolumeTest):
     @test.idempotent_id('bb9da53e-d335-4309-9c15-7e76fd5e4d6d')
     def test_create_snapshot_without_passing_volume_id(self):
         # Create a snapshot without passing volume id
-        s_name = data_utils.rand_name('snap')
+        s_name = data_utils.rand_name(self.__class__.__name__ + '-snap')
         self.assertRaises(lib_exc.NotFound,
                           self.snapshots_client.create_snapshot,
                           volume_id=None, display_name=s_name)

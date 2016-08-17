@@ -48,7 +48,8 @@ class TestVolumeBootPattern(manager.ScenarioTest):
 
     def _create_volume_from_image(self):
         img_uuid = CONF.compute.image_ref
-        vol_name = data_utils.rand_name('volume-origin')
+        vol_name = data_utils.rand_name(
+            self.__class__.__name__ + '-volume-origin')
         return self.create_volume(name=vol_name, imageRef=img_uuid)
 
     def _get_bdm(self, vol_id, delete_on_termination=False):
@@ -79,7 +80,8 @@ class TestVolumeBootPattern(manager.ScenarioTest):
             **create_kwargs)
 
     def _create_snapshot_from_volume(self, vol_id):
-        snap_name = data_utils.rand_name('snapshot')
+        snap_name = data_utils.rand_name(
+            self.__class__.__name__ + '-snapshot')
         snap = self.snapshots_client.create_snapshot(
             volume_id=vol_id,
             force=True,
@@ -99,7 +101,8 @@ class TestVolumeBootPattern(manager.ScenarioTest):
         return snap
 
     def _create_volume_from_snapshot(self, snap_id):
-        vol_name = data_utils.rand_name('volume')
+        vol_name = data_utils.rand_name(
+            self.__class__.__name__ + '-volume')
         return self.create_volume(name=vol_name, snapshot_id=snap_id)
 
     def _delete_server(self, server):
@@ -170,7 +173,7 @@ class TestVolumeBootPattern(manager.ScenarioTest):
         instance = self._boot_instance_from_volume(volume_origin['id'],
                                                    delete_on_termination=True)
         # create EBS image
-        name = data_utils.rand_name('image')
+        name = data_utils.rand_name(self.__class__.__name__ + '-image')
         image = self.create_server_snapshot(instance, name=name)
 
         # delete instance

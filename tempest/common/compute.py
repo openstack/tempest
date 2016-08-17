@@ -101,7 +101,7 @@ def create_test_server(clients, validatable=False, validation_resources=None,
                 wait_until = 'ACTIVE'
 
     if volume_backed:
-        volume_name = data_utils.rand_name('volume')
+        volume_name = data_utils.rand_name(__name__ + '-volume')
         volumes_client = clients.volumes_v2_client
         if CONF.volume_feature_enabled.api_v1:
             volumes_client = clients.volumes_client
