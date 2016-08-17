@@ -41,7 +41,6 @@ class VolumesV2GetTest(base.BaseVolumeTest):
 
     def _volume_create_get_update_delete(self, **kwargs):
         # Create a volume, Get it's details and Delete the volume
-        volume = {}
         v_name = data_utils.rand_name('Volume')
         metadata = {'Type': 'Test'}
         # Create a volume
@@ -103,7 +102,6 @@ class VolumesV2GetTest(base.BaseVolumeTest):
         # Test volume create when display_name is none and display_description
         # contains specific characters,
         # then test volume update if display_name is duplicated
-        new_volume = {}
         new_v_desc = data_utils.rand_name('@#$%^* description')
         params = {self.descrip_field: new_v_desc,
                   'availability_zone': volume['availability_zone']}
