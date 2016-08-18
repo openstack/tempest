@@ -48,9 +48,17 @@ class TestServerMultinode(manager.ScenarioTest):
     @test.attr(type='smoke')
     @test.services('compute', 'network')
     def test_schedule_to_all_nodes(self):
-        host_client = self.manager.hosts_client
-        hosts = host_client.list_hosts()['hosts']
-        hosts = [x for x in hosts if x['service'] == 'compute']
+        available_zone = \
+            self.os_adm.availability_zone_client.list_availability_zones(
+                detail=True)['availabilityZoneInfo']
+        hosts = []
+        for zone in available_zone:
+            if zone['zoneState']['available']:
+                for host in zone['hosts']:
+                    if 'nova-compute' in zone['hosts'][host] and \
+                        zone['hosts'][host]['nova-compute']['available']:
+                        hosts.append({'zone': zone['zoneName'],
+                                      'host_name': host})
 
         # ensure we have at least as many compute hosts as we expect
         if len(hosts) < CONF.compute.min_compute_nodes:
