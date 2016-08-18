@@ -53,7 +53,7 @@ class VolumeMultiBackendV2Test(base.BaseVolumeAdminTest):
             cls._create_type_and_volume(backend_name, True)
 
     @classmethod
-    def _create_type_and_volume(self, backend_name_key, with_prefix):
+    def _create_type_and_volume(cls, backend_name_key, with_prefix):
         # Volume/Type creation
         type_name = data_utils.rand_name('Type')
         vol_name = data_utils.rand_name('Volume')
@@ -63,20 +63,20 @@ class VolumeMultiBackendV2Test(base.BaseVolumeAdminTest):
             extra_specs = {spec_key_with_prefix: backend_name_key}
         else:
             extra_specs = {spec_key_without_prefix: backend_name_key}
-        self.type = self.create_volume_type(name=type_name,
-                                            extra_specs=extra_specs)
+        cls.type = cls.create_volume_type(name=type_name,
+                                          extra_specs=extra_specs)
 
-        params = {self.name_field: vol_name, 'volume_type': type_name}
+        params = {cls.name_field: vol_name, 'volume_type': type_name}
 
-        self.volume = self.admin_volume_client.create_volume(
+        cls.volume = cls.admin_volume_client.create_volume(
             **params)['volume']
         if with_prefix:
-            self.volume_id_list_with_prefix.append(self.volume['id'])
+            cls.volume_id_list_with_prefix.append(cls.volume['id'])
         else:
-            self.volume_id_list_without_prefix.append(
-                self.volume['id'])
-        waiters.wait_for_volume_status(self.admin_volume_client,
-                                       self.volume['id'], 'available')
+            cls.volume_id_list_without_prefix.append(
+                cls.volume['id'])
+        waiters.wait_for_volume_status(cls.admin_volume_client,
+                                       cls.volume['id'], 'available')
 
     @classmethod
     def resource_cleanup(cls):
