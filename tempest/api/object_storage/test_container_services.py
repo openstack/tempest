@@ -19,9 +19,6 @@ from tempest import test
 
 
 class ContainerTest(base.BaseObjectTest):
-    def setUp(self):
-        super(ContainerTest, self).setUp()
-
     def tearDown(self):
         self.delete_containers()
         super(ContainerTest, self).tearDown()
