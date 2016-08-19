@@ -237,37 +237,3 @@ def create_connection(parsed_url):
         conn = httplib.HTTPConnection(parsed_url.netloc)
 
     return conn
-
-
-def put_object_connection(base_url, container, name, contents=None,
-                          chunk_size=65536, headers=None, query_string=None):
-    """Helper function to make connection to put object with httplib
-
-    :param base_url: base_url of an object client
-    :param container: container name that the object is in
-    :param name: object name to put
-    :param contents: a string or a file like object to read object data
-                     from; if None, a zero-byte put will be done
-    :param chunk_size: chunk size of data to write; it defaults to 65536;
-                       used only if the contents object has a 'read'
-                       method, eg. file-like objects, ignored otherwise
-    :param headers: additional headers to include in the request, if any
-    :param query_string: if set will be appended with '?' to generated path
-    """
-    parsed = urlparse.urlparse(base_url)
-
-    path = str(parsed.path) + "/"
-    path += "%s/%s" % (str(container), str(name))
-
-    conn = create_connection(parsed)
-
-    if query_string:
-        path += '?' + query_string
-    if headers:
-        headers = dict(headers)
-    else:
-        headers = {}
-
-    conn.request('PUT', path, contents, headers)
-
-    return conn
