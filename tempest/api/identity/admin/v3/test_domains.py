@@ -44,11 +44,11 @@ class DomainsTestJSON(base.BaseIdentityV3AdminTest):
         super(DomainsTestJSON, cls).resource_cleanup()
 
     @classmethod
-    def _delete_domain(self, domain_id):
+    def _delete_domain(cls, domain_id):
         # It is necessary to disable the domain before deleting,
         # or else it would result in unauthorized error
-        self.domains_client.update_domain(domain_id, enabled=False)
-        self.domains_client.delete_domain(domain_id)
+        cls.domains_client.update_domain(domain_id, enabled=False)
+        cls.domains_client.delete_domain(domain_id)
 
     @test.idempotent_id('8cf516ef-2114-48f1-907b-d32726c734d4')
     def test_list_domains(self):
