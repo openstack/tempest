@@ -33,7 +33,7 @@ class ConfigFixture(conf_fixture.Config):
         self.conf.set_default('build_interval', 10, group='compute')
         self.conf.set_default('build_timeout', 10, group='compute')
         self.conf.set_default('disable_ssl_certificate_validation', True,
-                              group='service-clients')
+                              group='identity')
         self.conf.set_default('uri', 'http://fake_uri.com/auth',
                               group='identity')
         self.conf.set_default('uri_v3', 'http://fake_uri_v3.com/auth',
@@ -89,9 +89,9 @@ class ServiceClientsConfigFixture(conf_fixture.Config):
         self.conf.set_default('trace_requests', 'fake_module', 'debug')
         # Identity default values
         self.conf.set_default('disable_ssl_certificate_validation', True,
-                              group='service-clients')
+                              group='identity')
         self.conf.set_default('ca_certificates_file', '/fake/certificates',
-                              group='service-clients')
+                              group='identity')
         self.conf.set_default('region', 'fake_region', 'identity')
         # Identity endpoints
         self.conf.set_default('v3_endpoint_type', 'fake_v3_uri', 'identity')

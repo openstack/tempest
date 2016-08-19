@@ -103,8 +103,8 @@ def _get_api_versions(os, service):
     endpoint = _get_unversioned_endpoint(client_dict[service].base_url)
 
     http = tempest.lib.common.http.ClosingHttp(
-        CONF.service_clients.disable_ssl_certificate_validation,
-        CONF.service_clients.ca_certificates_file)
+        CONF.identity.disable_ssl_certificate_validation,
+        CONF.identity.ca_certificates_file)
 
     __, body = http.request(endpoint, 'GET')
     client_dict[service].reset_path()
