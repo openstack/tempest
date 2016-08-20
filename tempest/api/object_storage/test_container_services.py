@@ -124,7 +124,6 @@ class ContainerTest(base.BaseObjectTest):
         # delete container, success asserted within
         resp, _ = self.container_client.delete_container(container_name)
         self.assertHeaders(resp, 'Container', 'DELETE')
-        self.containers.remove(container_name)
 
     @test.attr(type='smoke')
     @test.idempotent_id('312ff6bd-5290-497f-bda1-7c5fec6697ab')

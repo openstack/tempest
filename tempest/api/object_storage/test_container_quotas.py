@@ -70,7 +70,7 @@ class ContainerQuotasTest(base.BaseObjectTest):
     @test.requires_ext(extension='container_quotas', service='object')
     @test.attr(type="smoke")
     def test_upload_large_object(self):
-        """Attempts to upload an object lagger than the bytes quota."""
+        """Attempts to upload an object larger than the bytes quota."""
         object_name = data_utils.rand_name(name="TestObject")
         data = data_utils.arbitrary_string(QUOTA_BYTES + 1)
 
