@@ -13,8 +13,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import six
-
 from tempest.api.network import base
 from tempest.common.utils import data_utils
 from tempest.lib.common.utils import test_utils
@@ -57,7 +55,7 @@ class QuotasTest(base.BaseAdminNetworkTest):
             project_id, **new_quotas)['quota']
         self.addCleanup(test_utils.call_and_ignore_notfound_exc,
                         self.admin_quotas_client.reset_quotas, project_id)
-        for key, value in six.iteritems(new_quotas):
+        for key, value in new_quotas.items():
             self.assertEqual(value, quota_set[key])
 
         # Confirm our project is listed among projects with non default quotas
@@ -71,7 +69,7 @@ class QuotasTest(base.BaseAdminNetworkTest):
         # Confirm from API quotas were changed as requested for project
         quota_set = self.admin_quotas_client.show_quotas(project_id)
         quota_set = quota_set['quota']
-        for key, value in six.iteritems(new_quotas):
+        for key, value in new_quotas.items():
             self.assertEqual(value, quota_set[key])
 
         # Reset quotas to default and confirm

@@ -20,7 +20,6 @@ import netaddr
 from oslo_log import log
 from oslo_serialization import jsonutils as json
 from oslo_utils import netutils
-import six
 
 from tempest.common import compute
 from tempest.common import image as common_image
@@ -920,7 +919,7 @@ class NetworkScenarioTest(ScenarioTest):
         # The target login is assumed to have been configured for
         # key-based authentication by cloud-init.
         try:
-            for net_name, ip_addresses in six.iteritems(server['addresses']):
+            for net_name, ip_addresses in server['addresses'].items():
                 for ip_address in ip_addresses:
                     self.check_vm_connectivity(ip_address['addr'],
                                                username,

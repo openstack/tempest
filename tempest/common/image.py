@@ -15,8 +15,6 @@
 
 import copy
 
-import six
-
 
 def get_image_meta_from_headers(resp):
     meta = {'properties': {}}
@@ -55,13 +53,13 @@ def image_meta_to_headers(**metadata):
     if copy_from is not None:
         headers['x-glance-api-copy-from'] = copy_from
 
-    for key, value in six.iteritems(fields_copy.pop('properties', {})):
+    for key, value in fields_copy.pop('properties', {}).items():
         headers['x-image-meta-property-%s' % key] = str(value)
 
-    for key, value in six.iteritems(fields_copy.pop('api', {})):
+    for key, value in fields_copy.pop('api', {}).items():
         headers['x-glance-api-property-%s' % key] = str(value)
 
-    for key, value in six.iteritems(fields_copy):
+    for key, value in fields_copy.items():
         headers['x-image-meta-%s' % key] = str(value)
 
     return headers

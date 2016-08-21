@@ -12,7 +12,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import six
 from tempest.api.volume import base
 from tempest.common.utils import data_utils
 from tempest.common import waiters
@@ -63,7 +62,7 @@ class BaseVolumeQuotasAdminV2TestJSON(base.BaseVolumeAdminTest):
             **new_quota_set)['quota_set']
 
         cleanup_quota_set = dict(
-            (k, v) for k, v in six.iteritems(default_quota_set)
+            (k, v) for k, v in default_quota_set.items()
             if k in QUOTA_KEYS)
         self.addCleanup(self.admin_quotas_client.update_quota_set,
                         self.demo_tenant_id, **cleanup_quota_set)

@@ -120,7 +120,7 @@ class PreProvisionedCredentialProvider(cred_provider.CredentialProvider):
             if 'resources' in account:
                 resources = account.pop('resources')
             temp_hash = hashlib.md5()
-            account_for_hash = dict((k, v) for (k, v) in six.iteritems(account)
+            account_for_hash = dict((k, v) for (k, v) in account.items()
                                     if k in cls.HASH_CRED_FIELDS)
             temp_hash.update(six.text_type(account_for_hash).encode('utf-8'))
             temp_hash_key = temp_hash.hexdigest()

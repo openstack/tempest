@@ -14,8 +14,6 @@
 #    under the License.
 import functools
 
-import six
-
 from tempest import config
 from tempest.lib.common.utils import test_utils
 from tempest.scenario import manager
@@ -112,7 +110,7 @@ class TestGettingAddress(manager.NetworkScenarioTest):
     @staticmethod
     def define_server_ips(srv):
         ips = {'4': None, '6': []}
-        for net_name, nics in six.iteritems(srv['addresses']):
+        for net_name, nics in srv['addresses'].items():
             for nic in nics:
                 if nic['version'] == 6:
                     ips['6'].append(nic['addr'])
