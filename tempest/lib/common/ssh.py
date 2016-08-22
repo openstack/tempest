@@ -121,7 +121,6 @@ class Client(object):
             channel.fileno()  # Register event pipe
             channel.exec_command(cmd)
             channel.shutdown_write()
-            exit_status = channel.recv_exit_status()
 
             # If the executing host is linux-based, poll the channel
             if self._can_system_poll():
@@ -161,6 +160,8 @@ class Client(object):
             if encoding:
                 out_data = out_data.decode(encoding)
                 err_data = err_data.decode(encoding)
+
+            exit_status = channel.recv_exit_status()
 
             if 0 != exit_status:
                 raise exceptions.SSHExecCommandFailed(
