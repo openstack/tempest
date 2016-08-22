@@ -39,7 +39,8 @@ class VolumesBackupsV2Test(base.BaseVolumeTest):
     @test.idempotent_id('a66eb488-8ee1-47d4-8e9f-575a095728c6')
     def test_volume_backup_create_get_detailed_list_restore_delete(self):
         # Create backup
-        backup_name = data_utils.rand_name('Backup')
+        backup_name = data_utils.rand_name(
+            self.__class__.__name__ + '-Backup')
         create_backup = self.backups_client.create_backup
         backup = create_backup(volume_id=self.volume['id'],
                                name=backup_name)['backup']
@@ -83,7 +84,8 @@ class VolumesBackupsV2Test(base.BaseVolumeTest):
         is "available" or "in-use".
         """
         # Create a server
-        server_name = data_utils.rand_name('instance')
+        server_name = data_utils.rand_name(
+            self.__class__.__name__ + '-instance')
         server = self.create_server(name=server_name, wait_until='ACTIVE')
         self.addCleanup(self.servers_client.delete_server, server['id'])
         # Attach volume to instance
@@ -96,7 +98,8 @@ class VolumesBackupsV2Test(base.BaseVolumeTest):
         self.addCleanup(self.servers_client.detach_volume, server['id'],
                         self.volume['id'])
         # Create backup using force flag
-        backup_name = data_utils.rand_name('Backup')
+        backup_name = data_utils.rand_name(
+            self.__class__.__name__ + '-Backup')
         backup = self.backups_client.create_backup(
             volume_id=self.volume['id'],
             name=backup_name, force=True)['backup']

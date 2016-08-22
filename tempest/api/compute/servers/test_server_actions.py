@@ -155,7 +155,7 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
     def test_rebuild_server(self):
         # The server should be rebuilt using the provided image and data
         meta = {'rebuild': 'server'}
-        new_name = data_utils.rand_name('server')
+        new_name = data_utils.rand_name(self.__class__.__name__ + '-server')
         password = 'rebuildPassw0rd'
         rebuilt_server = self.client.rebuild_server(
             self.server_id,

@@ -42,7 +42,7 @@ class VolumesGetTestJSON(base.BaseV2ComputeTest):
     @test.idempotent_id('f10f25eb-9775-4d9d-9cbe-1cf54dae9d5f')
     def test_volume_create_get_delete(self):
         # CREATE, GET, DELETE Volume
-        v_name = data_utils.rand_name('Volume')
+        v_name = data_utils.rand_name(self.__class__.__name__ + '-Volume')
         metadata = {'Type': 'work'}
         # Create volume
         volume = self.client.create_volume(size=CONF.volume.volume_size,

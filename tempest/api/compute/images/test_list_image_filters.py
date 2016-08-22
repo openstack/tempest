@@ -60,7 +60,7 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
 
         def _create_image():
             params = {
-                'name': data_utils.rand_name('image'),
+                'name': data_utils.rand_name(cls.__name__ + '-image'),
                 'container_format': 'bare',
                 'disk_format': 'raw'
             }

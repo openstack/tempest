@@ -37,7 +37,7 @@ class QosSpecsV2TestJSON(base.BaseVolumeAdminTest):
                                                     read_iops_sec='2000')
 
     def _create_delete_test_qos_with_given_consumer(self, consumer):
-        name = utils.rand_name('qos')
+        name = utils.rand_name(self.__class__.__name__ + '-qos')
         qos = {'name': name, 'consumer': consumer}
         body = self.create_test_qos_specs(name, consumer)
         for key in ['name', 'consumer']:

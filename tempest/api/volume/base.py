@@ -110,7 +110,7 @@ class BaseVolumeTest(tempest.test.BaseTestCase):
     @classmethod
     def create_volume(cls, **kwargs):
         """Wrapper utility that returns a test volume."""
-        name = data_utils.rand_name('Volume')
+        name = data_utils.rand_name(cls.__name__ + '-Volume')
 
         name_field = cls.special_fields['name_field']
 
@@ -236,7 +236,7 @@ class BaseVolumeAdminTest(BaseVolumeTest):
     @classmethod
     def create_volume_type(cls, name=None, **kwargs):
         """Create a test volume-type"""
-        name = name or data_utils.rand_name('volume-type')
+        name = name or data_utils.rand_name(cls.__name__ + '-volume-type')
         volume_type = cls.admin_volume_types_client.create_volume_type(
             name=name, **kwargs)['volume_type']
         cls.volume_types.append(volume_type['id'])

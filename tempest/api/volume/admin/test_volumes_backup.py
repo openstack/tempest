@@ -67,7 +67,7 @@ class VolumesBackupsAdminV2Test(base.BaseVolumeAdminTest):
         be imported back in case of a DB loss.
         """
         # Create backup
-        backup_name = data_utils.rand_name('Backup')
+        backup_name = data_utils.rand_name(self.__class__.__name__ + '-Backup')
         backup = (self.admin_backups_client.create_backup(
             volume_id=self.volume['id'], name=backup_name)['backup'])
         self.addCleanup(self._delete_backup, backup['id'])
@@ -131,7 +131,8 @@ class VolumesBackupsAdminV2Test(base.BaseVolumeAdminTest):
     @test.idempotent_id('47a35425-a891-4e13-961c-c45deea21e94')
     def test_volume_backup_reset_status(self):
         # Create a backup
-        backup_name = data_utils.rand_name('Backup')
+        backup_name = data_utils.rand_name(
+            self.__class__.__name__ + '-Backup')
         backup = self.admin_backups_client.create_backup(
             volume_id=self.volume['id'], name=backup_name)['backup']
         self.addCleanup(self.admin_backups_client.delete_backup,

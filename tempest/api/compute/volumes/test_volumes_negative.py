@@ -59,7 +59,7 @@ class VolumesNegativeTest(base.BaseV2ComputeTest):
     def test_create_volume_with_invalid_size(self):
         # Negative: Should not be able to create volume with invalid size
         # in request
-        v_name = data_utils.rand_name('Volume')
+        v_name = data_utils.rand_name(self.__class__.__name__ + '-Volume')
         metadata = {'Type': 'work'}
         self.assertRaises(lib_exc.BadRequest, self.client.create_volume,
                           size='#$%', display_name=v_name, metadata=metadata)
@@ -69,7 +69,7 @@ class VolumesNegativeTest(base.BaseV2ComputeTest):
     def test_create_volume_with_out_passing_size(self):
         # Negative: Should not be able to create volume without passing size
         # in request
-        v_name = data_utils.rand_name('Volume')
+        v_name = data_utils.rand_name(self.__class__.__name__ + '-Volume')
         metadata = {'Type': 'work'}
         self.assertRaises(lib_exc.BadRequest, self.client.create_volume,
                           size='', display_name=v_name, metadata=metadata)
@@ -78,7 +78,7 @@ class VolumesNegativeTest(base.BaseV2ComputeTest):
     @test.idempotent_id('8cce995e-0a83-479a-b94d-e1e40b8a09d1')
     def test_create_volume_with_size_zero(self):
         # Negative: Should not be able to create volume with size zero
-        v_name = data_utils.rand_name('Volume')
+        v_name = data_utils.rand_name(self.__class__.__name__ + '-Volume')
         metadata = {'Type': 'work'}
         self.assertRaises(lib_exc.BadRequest, self.client.create_volume,
                           size='0', display_name=v_name, metadata=metadata)

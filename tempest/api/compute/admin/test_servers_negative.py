@@ -40,7 +40,7 @@ class ServersAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
         super(ServersAdminNegativeTestJSON, cls).resource_setup()
         cls.tenant_id = cls.client.tenant_id
 
-        cls.s1_name = data_utils.rand_name('server')
+        cls.s1_name = data_utils.rand_name(cls.__name__ + '-server')
         server = cls.create_test_server(name=cls.s1_name,
                                         wait_until='ACTIVE')
         cls.s1_id = server['id']

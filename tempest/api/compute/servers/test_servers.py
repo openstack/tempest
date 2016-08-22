@@ -52,7 +52,8 @@ class ServersTestJSON(base.BaseV2ComputeTest):
         # Creating a server with a name that already exists is allowed
 
         # TODO(sdague): clear out try, we do cleanup one layer up
-        server_name = data_utils.rand_name('server')
+        server_name = data_utils.rand_name(
+            self.__class__.__name__ + '-server')
         server = self.create_test_server(name=server_name,
                                          wait_until='ACTIVE')
         id1 = server['id']
