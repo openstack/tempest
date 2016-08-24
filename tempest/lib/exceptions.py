@@ -100,7 +100,7 @@ class RateLimitExceeded(ClientRestClientException):
 
 
 class OverLimit(ClientRestClientException):
-    message = "Quota exceeded"
+    message = "Request entity is too large"
 
 
 class ServerFault(ServerRestClientException):
