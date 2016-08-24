@@ -34,21 +34,22 @@ class VolumesBackupsV2Test(base.BaseVolumeTest):
     def resource_setup(cls):
         super(VolumesBackupsV2Test, cls).resource_setup()
 
-        cls.volume = cls.create_volume()
-
     @test.idempotent_id('a66eb488-8ee1-47d4-8e9f-575a095728c6')
     def test_volume_backup_create_get_detailed_list_restore_delete(self):
         # Create backup
+        volume = self.create_volume()
+        self.addCleanup(self.volumes_client.delete_volume,
+                        volume['id'])
         backup_name = data_utils.rand_name(
             self.__class__.__name__ + '-Backup')
         create_backup = self.backups_client.create_backup
-        backup = create_backup(volume_id=self.volume['id'],
+        backup = create_backup(volume_id=volume['id'],
                                name=backup_name)['backup']
         self.addCleanup(self.backups_client.delete_backup,
                         backup['id'])
         self.assertEqual(backup_name, backup['name'])
         waiters.wait_for_volume_status(self.volumes_client,
-                                       self.volume['id'], 'available')
+                                       volume['id'], 'available')
         self.backups_client.wait_for_backup_status(backup['id'],
                                                    'available')
 
@@ -84,24 +85,27 @@ class VolumesBackupsV2Test(base.BaseVolumeTest):
         is "available" or "in-use".
         """
         # Create a server
+        volume = self.create_volume()
+        self.addCleanup(self.volumes_client.delete_volume,
+                        volume['id'])
         server_name = data_utils.rand_name(
             self.__class__.__name__ + '-instance')
         server = self.create_server(name=server_name, wait_until='ACTIVE')
         self.addCleanup(self.servers_client.delete_server, server['id'])
         # Attach volume to instance
         self.servers_client.attach_volume(server['id'],
-                                          volumeId=self.volume['id'])
+                                          volumeId=volume['id'])
         waiters.wait_for_volume_status(self.volumes_client,
-                                       self.volume['id'], 'in-use')
+                                       volume['id'], 'in-use')
         self.addCleanup(waiters.wait_for_volume_status, self.volumes_client,
-                        self.volume['id'], 'available')
+                        volume['id'], 'available')
         self.addCleanup(self.servers_client.detach_volume, server['id'],
-                        self.volume['id'])
+                        volume['id'])
         # Create backup using force flag
         backup_name = data_utils.rand_name(
             self.__class__.__name__ + '-Backup')
         backup = self.backups_client.create_backup(
-            volume_id=self.volume['id'],
+            volume_id=volume['id'],
             name=backup_name, force=True)['backup']
         self.addCleanup(self.backups_client.delete_backup, backup['id'])
         self.backups_client.wait_for_backup_status(backup['id'],
