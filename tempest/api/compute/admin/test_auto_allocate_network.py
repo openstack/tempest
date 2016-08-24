@@ -45,6 +45,7 @@ class AutoAllocateNetworkTest(base.BaseV2ComputeTest):
     @classmethod
     def skip_checks(cls):
         super(AutoAllocateNetworkTest, cls).skip_checks()
+        raise cls.skipException("Disabled until bug #1616498 is fixed")
         if not CONF.service_available.neutron:
             raise cls.skipException('Neutron is required')
         if not test.is_extension_enabled('auto-allocated-topology', 'network'):
