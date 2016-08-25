@@ -70,6 +70,13 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
         self.assertIn(self.s1_id, map(lambda x: x['id'], servers))
         self.assertNotIn(self.s2_id, map(lambda x: x['id'], servers))
 
+    @test.idempotent_id('d56e9540-73ed-45e0-9b88-98fc419087eb')
+    def test_list_servers_detailed_filter_by_invalid_status(self):
+        params = {'status': 'invalid_status'}
+        body = self.client.list_servers(detail=True, **params)
+        servers = body['servers']
+        self.assertEqual([], servers)
+
     @test.idempotent_id('9f5579ae-19b4-4985-a091-2a5d56106580')
     def test_list_servers_by_admin_with_all_tenants(self):
         # Listing servers by admin user with all tenants parameter
