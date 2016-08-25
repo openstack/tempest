@@ -12,7 +12,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from collections import OrderedDict
+import collections
 import copy
 
 import six
@@ -112,7 +112,7 @@ BASE_CDH_DESC = {
 
 
 DEFAULT_TEMPLATES = {
-    'vanilla': OrderedDict([
+    'vanilla': collections.OrderedDict([
         ('2.6.0', copy.deepcopy(BASE_VANILLA_DESC)),
         ('2.7.1', copy.deepcopy(BASE_VANILLA_DESC)),
         ('1.2.1', {
@@ -148,7 +148,7 @@ DEFAULT_TEMPLATES = {
             }
         })
     ]),
-    'hdp': OrderedDict([
+    'hdp': collections.OrderedDict([
         ('2.0.6', {
             'NODES': {
                 'master1': {
@@ -174,11 +174,11 @@ DEFAULT_TEMPLATES = {
             }
         })
     ]),
-    'spark': OrderedDict([
+    'spark': collections.OrderedDict([
         ('1.0.0', copy.deepcopy(BASE_SPARK_DESC)),
         ('1.3.1', copy.deepcopy(BASE_SPARK_DESC))
     ]),
-    'cdh': OrderedDict([
+    'cdh': collections.OrderedDict([
         ('5.4.0', copy.deepcopy(BASE_CDH_DESC)),
         ('5.3.0', copy.deepcopy(BASE_CDH_DESC)),
         ('5', copy.deepcopy(BASE_CDH_DESC))

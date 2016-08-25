@@ -14,7 +14,7 @@
 
 import copy
 
-from tempest.lib.services.network.versions_client import NetworkVersionsClient
+from tempest.lib.services.network import versions_client
 from tempest.tests.lib import fake_auth_provider
 from tempest.tests.lib.services import base
 
@@ -59,7 +59,7 @@ class TestNetworkVersionsClient(base.BaseServiceTest):
         super(TestNetworkVersionsClient, self).setUp()
         fake_auth = fake_auth_provider.FakeAuthProvider()
         self.versions_client = (
-            NetworkVersionsClient
+            versions_client.NetworkVersionsClient
             (fake_auth, 'compute', 'regionOne'))
 
     def _test_versions_client(self, bytes_body=False):
