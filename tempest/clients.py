@@ -293,6 +293,10 @@ class Manager(clients.ServiceClients):
                                                       **params)
         self.backups_v2_client = volume.v2.BackupsClient(self.auth_provider,
                                                          **params)
+        self.encryption_types_client = volume.v1.EncryptionTypesClient(
+            self.auth_provider, **params)
+        self.encryption_types_v2_client = volume.v2.EncryptionTypesClient(
+            self.auth_provider, **params)
         self.snapshots_client = volume.v1.SnapshotsClient(self.auth_provider,
                                                           **params)
         self.snapshots_v2_client = volume.v2.SnapshotsClient(

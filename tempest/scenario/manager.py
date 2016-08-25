@@ -1346,8 +1346,12 @@ class EncryptionScenarioTest(ScenarioTest):
         super(EncryptionScenarioTest, cls).setup_clients()
         if CONF.volume_feature_enabled.api_v1:
             cls.admin_volume_types_client = cls.os_adm.volume_types_client
+            cls.admin_encryption_types_client =\
+                cls.os_adm.encryption_types_client
         else:
             cls.admin_volume_types_client = cls.os_adm.volume_types_v2_client
+            cls.admin_encryption_types_client =\
+                cls.os_adm.encryption_types_v2_client
 
     def create_volume_type(self, client=None, name=None):
         if not client:
@@ -1366,7 +1370,7 @@ class EncryptionScenarioTest(ScenarioTest):
                                key_size=None, cipher=None,
                                control_location=None):
         if not client:
-            client = self.admin_volume_types_client
+            client = self.admin_encryption_types_client
         if not type_id:
             volume_type = self.create_volume_type()
             type_id = volume_type['id']
