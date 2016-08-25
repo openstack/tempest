@@ -37,6 +37,11 @@ def get_unused_ip_addresses(ports_client, subnets_client,
         for fixed_ip in port.get('fixed_ips'):
             alloc_set.add(fixed_ip['ip_address'])
 
+    # exclude gateway_ip of subnet
+    gateway_ip = subnet['subnet']['gateway_ip']
+    if gateway_ip:
+        alloc_set.add(gateway_ip)
+
     av_set = subnet_set - alloc_set
     addrs = []
     for cidr in reversed(av_set.iter_cidrs()):
