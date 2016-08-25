@@ -400,19 +400,14 @@ class RestClient(object):
         else:
             return text
 
-    def _log_request_start(self, method, req_url, req_headers=None,
-                           req_body=None):
-        if req_headers is None:
-            req_headers = {}
+    def _log_request_start(self, method, req_url):
         caller_name = test_utils.find_test_caller()
         if self.trace_requests and re.search(self.trace_requests, caller_name):
             self.LOG.debug('Starting Request (%s): %s %s' %
                            (caller_name, method, req_url))
 
-    def _log_request_full(self, method, req_url, resp,
-                          secs="", req_headers=None,
-                          req_body=None, resp_body=None,
-                          caller_name=None, extra=None):
+    def _log_request_full(self, resp, req_headers=None, req_body=None,
+                          resp_body=None, extra=None):
         if 'X-Auth-Token' in req_headers:
             req_headers['X-Auth-Token'] = '<omitted>'
         # A shallow copy is sufficient
@@ -458,8 +453,8 @@ class RestClient(object):
         # Also look everything at DEBUG if you want to filter this
         # out, don't run at debug.
         if self.LOG.isEnabledFor(real_logging.DEBUG):
-            self._log_request_full(method, req_url, resp, secs, req_headers,
-                                   req_body, resp_body, caller_name, extra)
+            self._log_request_full(resp, req_headers, req_body,
+                                   resp_body, extra)
 
     def _parse_resp(self, body):
         try:
