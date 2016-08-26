@@ -16,7 +16,10 @@
 from tempest.api.volume import base
 from tempest.common.utils import data_utils as utils
 from tempest.common import waiters
+from tempest import config
 from tempest import test
+
+CONF = config.CONF
 
 
 class VolumesActionsV2Test(base.BaseVolumeAdminTest):
@@ -33,7 +36,7 @@ class VolumesActionsV2Test(base.BaseVolumeAdminTest):
         # Create a test shared volume for tests
         vol_name = utils.rand_name(cls.__name__ + '-Volume')
         cls.name_field = cls.special_fields['name_field']
-        params = {cls.name_field: vol_name}
+        params = {cls.name_field: vol_name, 'size': CONF.volume.volume_size}
 
         cls.volume = cls.client.create_volume(**params)['volume']
         waiters.wait_for_volume_status(cls.client,
@@ -60,7 +63,7 @@ class VolumesActionsV2Test(base.BaseVolumeAdminTest):
     def _create_temp_volume(self):
         # Create a temp volume for force delete tests
         vol_name = utils.rand_name(self.__class__.__name__ + '-Volume')
-        params = {self.name_field: vol_name}
+        params = {self.name_field: vol_name, 'size': CONF.volume.volume_size}
         temp_volume = self.client.create_volume(**params)['volume']
         waiters.wait_for_volume_status(self.client,
                                        temp_volume['id'], 'available')

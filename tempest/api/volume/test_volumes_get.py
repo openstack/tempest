@@ -105,7 +105,8 @@ class VolumesV2GetTest(base.BaseVolumeTest):
         # then test volume update if display_name is duplicated
         new_v_desc = data_utils.rand_name('@#$%^* description')
         params = {self.descrip_field: new_v_desc,
-                  'availability_zone': volume['availability_zone']}
+                  'availability_zone': volume['availability_zone'],
+                  'size': CONF.volume.volume_size}
         new_volume = self.client.create_volume(**params)['volume']
         self.assertIn('id', new_volume)
         self.addCleanup(self.delete_volume, self.client, new_volume['id'])
@@ -124,7 +125,7 @@ class VolumesV2GetTest(base.BaseVolumeTest):
     @test.attr(type='smoke')
     @test.idempotent_id('27fb0e9f-fb64-41dd-8bdb-1ffa762f0d51')
     def test_volume_create_get_update_delete(self):
-        self._volume_create_get_update_delete()
+        self._volume_create_get_update_delete(size=CONF.volume.volume_size)
 
     @test.attr(type='smoke')
     @test.idempotent_id('54a01030-c7fc-447c-86ee-c1182beae638')
@@ -142,7 +143,8 @@ class VolumesV2GetTest(base.BaseVolumeTest):
                           'Cinder volume clones are disabled')
     def test_volume_create_get_update_delete_as_clone(self):
         origin = self.create_volume()
-        self._volume_create_get_update_delete(source_volid=origin['id'])
+        self._volume_create_get_update_delete(source_volid=origin['id'],
+                                              size=CONF.volume.volume_size)
 
 
 class VolumesV1GetTest(VolumesV2GetTest):

@@ -66,8 +66,8 @@ class VolumeMultiBackendV2Test(base.BaseVolumeAdminTest):
         cls.type = cls.create_volume_type(name=type_name,
                                           extra_specs=extra_specs)
 
-        params = {cls.name_field: vol_name, 'volume_type': type_name}
-
+        params = {cls.name_field: vol_name, 'volume_type': type_name,
+                  'size': CONF.volume.volume_size}
         cls.volume = cls.admin_volume_client.create_volume(
             **params)['volume']
         if with_prefix:

@@ -213,14 +213,15 @@ class ScenarioTest(tempest.test.BaseTestCase):
 
     def create_volume(self, size=None, name=None, snapshot_id=None,
                       imageRef=None, volume_type=None):
+        if size is None:
+            size = CONF.volume.volume_size
         if name is None:
             name = data_utils.rand_name(self.__class__.__name__)
         kwargs = {'display_name': name,
                   'snapshot_id': snapshot_id,
                   'imageRef': imageRef,
-                  'volume_type': volume_type}
-        if size is not None:
-            kwargs.update({'size': size})
+                  'volume_type': volume_type,
+                  'size': size}
         volume = self.volumes_client.create_volume(**kwargs)['volume']
 
         self.addCleanup(self.volumes_client.wait_for_resource_deletion,

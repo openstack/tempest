@@ -297,12 +297,10 @@ class Manager(clients.ServiceClients):
                                                           **params)
         self.snapshots_v2_client = volume.v2.SnapshotsClient(
             self.auth_provider, **params)
-        self.volumes_client = volume.v1.VolumesClient(
-            self.auth_provider, default_volume_size=CONF.volume.volume_size,
-            **params)
-        self.volumes_v2_client = volume.v2.VolumesClient(
-            self.auth_provider, default_volume_size=CONF.volume.volume_size,
-            **params)
+        self.volumes_client = volume.v1.VolumesClient(self.auth_provider,
+                                                      **params)
+        self.volumes_v2_client = volume.v2.VolumesClient(self.auth_provider,
+                                                         **params)
         self.volume_messages_client = volume.v3.MessagesClient(
             self.auth_provider, **params)
         self.volume_types_client = volume.v1.TypesClient(self.auth_provider,

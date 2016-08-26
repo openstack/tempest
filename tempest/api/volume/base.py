@@ -110,6 +110,9 @@ class BaseVolumeTest(tempest.test.BaseTestCase):
     @classmethod
     def create_volume(cls, **kwargs):
         """Wrapper utility that returns a test volume."""
+        if 'size' not in kwargs:
+            kwargs['size'] = CONF.volume.volume_size
+
         name = data_utils.rand_name(cls.__name__ + '-Volume')
 
         name_field = cls.special_fields['name_field']

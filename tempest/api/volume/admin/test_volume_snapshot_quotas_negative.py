@@ -38,7 +38,7 @@ class VolumeSnapshotQuotasNegativeV2TestJSON(base.BaseVolumeAdminTest):
     @classmethod
     def resource_setup(cls):
         super(VolumeSnapshotQuotasNegativeV2TestJSON, cls).resource_setup()
-        cls.default_volume_size = cls.volumes_client.default_volume_size
+        cls.default_volume_size = CONF.volume.volume_size
         cls.shared_quota_set = {'gigabytes': 3 * cls.default_volume_size,
                                 'volumes': 1, 'snapshots': 1}
 

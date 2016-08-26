@@ -26,12 +26,6 @@ class BaseVolumesClient(rest_client.RestClient):
 
     create_resp = 200
 
-    def __init__(self, auth_provider, service, region,
-                 default_volume_size=1, **kwargs):
-        super(BaseVolumesClient, self).__init__(
-            auth_provider, service, region, **kwargs)
-        self.default_volume_size = default_volume_size
-
     def get_attachment_from_volume(self, volume):
         """Return the element 'attachment' from input volumes."""
         return volume['attachments'][0]
@@ -104,8 +98,6 @@ class BaseVolumesClient(rest_client.RestClient):
         Available params: see http://developer.openstack.org/
                               api-ref-blockstorage-v2.html#createVolume
         """
-        if 'size' not in kwargs:
-            kwargs['size'] = self.default_volume_size
         post_body = json.dumps({'volume': kwargs})
         resp, body = self.post('volumes', post_body)
         body = json.loads(body)
