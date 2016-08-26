@@ -26,10 +26,9 @@ documented in a README.rst file in the directory.
 
 API tests are validation tests for the OpenStack API. They should not
 use the existing python clients for OpenStack, but should instead use
-the tempest implementations of clients. This allows us to test both
-XML and JSON. Having raw clients also lets us pass invalid JSON and
-XML to the APIs and see the results, something we could not get with
-the native clients.
+the tempest implementations of clients. Having raw clients let us
+pass invalid JSON to the APIs and see the results, something we could
+not get with the native clients.
 
 When it makes sense, API testing should be moved closer to the
 projects themselves, possibly as functional tests in their unit test
