@@ -218,22 +218,6 @@ class BaseVolumesClient(rest_client.RestClient):
         self.expected_success(202, resp.status)
         return rest_client.ResponseBody(resp, body)
 
-    def volume_begin_detaching(self, volume_id):
-        """Volume Begin Detaching."""
-        # ref cinder/api/contrib/volume_actions.py#L158
-        post_body = json.dumps({'os-begin_detaching': {}})
-        resp, body = self.post('volumes/%s/action' % volume_id, post_body)
-        self.expected_success(202, resp.status)
-        return rest_client.ResponseBody(resp, body)
-
-    def volume_roll_detaching(self, volume_id):
-        """Volume Roll Detaching."""
-        # cinder/api/contrib/volume_actions.py#L170
-        post_body = json.dumps({'os-roll_detaching': {}})
-        resp, body = self.post('volumes/%s/action' % volume_id, post_body)
-        self.expected_success(202, resp.status)
-        return rest_client.ResponseBody(resp, body)
-
     def create_volume_transfer(self, **kwargs):
         """Create a volume transfer.
 
