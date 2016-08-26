@@ -26,10 +26,6 @@ class BaseVolumesClient(rest_client.RestClient):
 
     create_resp = 200
 
-    def get_attachment_from_volume(self, volume):
-        """Return the element 'attachment' from input volumes."""
-        return volume['attachments'][0]
-
     def _prepare_params(self, params):
         """Prepares params for use in get or _ext_get methods.
 

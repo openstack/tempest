@@ -114,7 +114,8 @@ class VolumesV2ActionsTest(base.BaseVolumeTest):
         self.addCleanup(self.client.detach_volume, self.volume['id'])
         volume = self.client.show_volume(self.volume['id'])['volume']
         self.assertIn('attachments', volume)
-        attachment = self.client.get_attachment_from_volume(volume)
+        attachment = volume['attachments'][0]
+
         self.assertEqual('/dev/%s' %
                          CONF.compute.volume_device_name,
                          attachment['device'])
