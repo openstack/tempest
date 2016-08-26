@@ -322,10 +322,7 @@ class UpdateImageMetaTest(base.BaseV1ImageTest):
         metadata['properties'].update(req_metadata)
         headers = common_image.image_meta_to_headers(
             properties=metadata['properties'])
-        metadata = self.client.update_image(self.image_id,
-                                            headers=headers)['image']
-
+        self.client.update_image(self.image_id, headers=headers)
         resp = self.client.check_image(self.image_id)
         resp_metadata = common_image.get_image_meta_from_headers(resp)
-        expected = {'key1': 'alt1', 'key2': 'value2'}
-        self.assertEqual(expected, resp_metadata['properties'])
+        self.assertEqual(req_metadata, resp_metadata['properties'])
