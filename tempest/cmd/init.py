@@ -22,7 +22,7 @@ from oslo_config import generator
 from oslo_log import log as logging
 from six import moves
 
-from tempest.cmd.workspace import WorkspaceManager
+from tempest.cmd import workspace
 
 LOG = logging.getLogger(__name__)
 
@@ -167,7 +167,8 @@ class TempestInit(command.Command):
             subprocess.call(['testr', 'init'], cwd=local_dir)
 
     def take_action(self, parsed_args):
-        workspace_manager = WorkspaceManager(parsed_args.workspace_path)
+        workspace_manager = workspace.WorkspaceManager(
+            parsed_args.workspace_path)
         name = parsed_args.name or parsed_args.dir.split(os.path.sep)[-1]
         workspace_manager.register_new_workspace(
             name, parsed_args.dir, init=True)

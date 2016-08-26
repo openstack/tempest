@@ -17,7 +17,7 @@ import shutil
 import subprocess
 import tempfile
 
-from tempest.cmd.workspace import WorkspaceManager
+from tempest.cmd import workspace
 from tempest.lib.common.utils import data_utils
 from tempest.tests import base
 
@@ -31,7 +31,8 @@ class TestTempestWorkspaceBase(base.TestCase):
         store_dir = tempfile.mkdtemp()
         self.addCleanup(shutil.rmtree, store_dir, ignore_errors=True)
         self.store_file = os.path.join(store_dir, 'workspace.yaml')
-        self.workspace_manager = WorkspaceManager(path=self.store_file)
+        self.workspace_manager = workspace.WorkspaceManager(
+            path=self.store_file)
         self.workspace_manager.register_new_workspace(self.name, self.path)
 
 
@@ -92,7 +93,8 @@ class TestTempestWorkspaceManager(TestTempestWorkspaceBase):
         store_dir = tempfile.mkdtemp()
         self.addCleanup(shutil.rmtree, store_dir, ignore_errors=True)
         self.store_file = os.path.join(store_dir, 'workspace.yaml')
-        self.workspace_manager = WorkspaceManager(path=self.store_file)
+        self.workspace_manager = workspace.WorkspaceManager(
+            path=self.store_file)
         self.workspace_manager.register_new_workspace(self.name, self.path)
 
     def test_workspace_manager_get(self):
