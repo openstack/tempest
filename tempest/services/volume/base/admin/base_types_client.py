@@ -140,6 +140,18 @@ class BaseTypesClient(rest_client.RestClient):
         self.expected_success(202, resp.status)
         return rest_client.ResponseBody(resp, body)
 
+    def update_volume_type(self, volume_type_id, **kwargs):
+        """Updates volume type name, description, and/or is_public.
+
+        Available params: see http://developer.openstack.org/
+        api-ref-blockstorage-v2.html#updateVolumeType
+        """
+        put_body = json.dumps({'volume_type': kwargs})
+        resp, body = self.put('types/%s' % volume_type_id, put_body)
+        body = json.loads(body)
+        self.expected_success(200, resp.status)
+        return rest_client.ResponseBody(resp, body)
+
     def update_volume_type_extra_specs(self, volume_type_id, extra_spec_name,
                                        extra_specs):
         """Update a volume_type extra spec.
