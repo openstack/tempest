@@ -25,7 +25,7 @@ class NamespacesClient(rest_client.RestClient):
         """Create a namespace.
 
         Available params: see http://developer.openstack.org/
-                              api-ref-image-v2.html#createNamespace-v2
+                              api-ref/image/v2/metadefs-index.html#create-namespace
         """
         data = json.dumps(kwargs)
         resp, body = self.post('metadefs/namespaces', data)
@@ -34,6 +34,11 @@ class NamespacesClient(rest_client.RestClient):
         return rest_client.ResponseBody(resp, body)
 
     def show_namespace(self, namespace):
+        """Show namespace details.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref/image/v2/metadefs-index.html#get-namespace-details
+        """
         url = 'metadefs/namespaces/%s' % namespace
         resp, body = self.get(url)
         self.expected_success(200, resp.status)
@@ -44,7 +49,7 @@ class NamespacesClient(rest_client.RestClient):
         """Update a namespace.
 
         Available params: see http://developer.openstack.org/
-                              api-ref-image-v2.html#updateNamespace-v2
+                              api-ref/image/v2/metadefs-index.html#update-namespace
         """
         # NOTE: On Glance API, we need to pass namespace on both URI
         # and a request body.
@@ -61,7 +66,7 @@ class NamespacesClient(rest_client.RestClient):
         """Delete a namespace.
 
         Available params: http://developer.openstack.org/
-                          api-ref-image-v2.html#deleteNamespace-v2
+                          api-ref/image/v2/metadefs-index.html#delete-namespace
         """
         url = 'metadefs/namespaces/%s' % namespace
         resp, _ = self.delete(url)
