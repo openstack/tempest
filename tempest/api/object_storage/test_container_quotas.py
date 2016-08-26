@@ -15,11 +15,9 @@
 
 from tempest.api.object_storage import base
 from tempest.common.utils import data_utils
-from tempest import config
 from tempest.lib import exceptions as lib_exc
 from tempest import test
 
-CONF = config.CONF
 QUOTA_BYTES = 10
 QUOTA_COUNT = 3
 
