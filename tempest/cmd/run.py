@@ -23,7 +23,7 @@ Tempest run has several options:
                    any tests that match on re.match() with the regex
  * **--smoke**: Run all the tests tagged as smoke
 
-There are also the **--blacklist_file** and **--whitelist_file** options that
+There are also the **--blacklist-file** and **--whitelist-file** options that
 let you pass a filepath to tempest run with the file format being a line
 separated regex, with '#' used to signify the start of a comment on a line.
 For example::
@@ -191,11 +191,11 @@ class TempestRun(command.Command):
                            help='A normal testr selection regex used to '
                                 'specify a subset of tests to run')
         list_selector = parser.add_mutually_exclusive_group()
-        list_selector.add_argument('--whitelist_file',
+        list_selector.add_argument('--whitelist-file', '--whitelist_file',
                                    help="Path to a whitelist file, this file "
                                         "contains a separate regex on each "
                                         "newline.")
-        list_selector.add_argument('--blacklist_file',
+        list_selector.add_argument('--blacklist-file', '--blacklist_file',
                                    help='Path to a blacklist file, this file '
                                         'contains a separate regex exclude on '
                                         'each newline')
