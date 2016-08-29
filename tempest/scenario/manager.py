@@ -87,45 +87,10 @@ class ScenarioTest(tempest.test.BaseTestCase):
             cls.volumes_client = cls.manager.volumes_v2_client
             cls.snapshots_client = cls.manager.snapshots_v2_client
 
-    # ## Methods to handle sync and async deletes
-
-    def setUp(self):
-        super(ScenarioTest, self).setUp()
-        self.cleanup_waits = []
-        # NOTE(mtreinish) This is safe to do in setUp instead of setUp class
-        # because scenario tests in the same test class should not share
-        # resources. If resources were shared between test cases then it
-        # should be a single scenario test instead of multiples.
-
-        # NOTE(yfried): this list is cleaned at the end of test_methods and
-        # not at the end of the class
-        self.addCleanup(self._wait_for_cleanups)
-
-    def addCleanup_with_wait(self, waiter_callable, thing_id, thing_id_param,
-                             cleanup_callable, cleanup_args=None,
-                             cleanup_kwargs=None, waiter_client=None):
-        """Adds wait for async resource deletion at the end of cleanups
-
-        @param waiter_callable: callable to wait for the resource to delete
-            with the following waiter_client if specified.
-        @param thing_id: the id of the resource to be cleaned-up
-        @param thing_id_param: the name of the id param in the waiter
-        @param cleanup_callable: method to load pass to self.addCleanup with
-            the following *cleanup_args, **cleanup_kwargs.
-            usually a delete method.
-        """
-        if cleanup_args is None:
-            cleanup_args = []
-        if cleanup_kwargs is None:
-            cleanup_kwargs = {}
-        self.addCleanup(cleanup_callable, *cleanup_args, **cleanup_kwargs)
-        wait_dict = {
-            'waiter_callable': waiter_callable,
-            thing_id_param: thing_id
-        }
-        if waiter_client:
-            wait_dict['client'] = waiter_client
-        self.cleanup_waits.append(wait_dict)
+    # ## Test functions library
+    #
+    # The create_[resource] functions only return body and discard the
+    # resp part which is not used in scenario tests
 
     def _create_port(self, network_id, client=None, namestart='port-quotatest',
                      **kwargs):
@@ -142,23 +107,6 @@ class ScenarioTest(tempest.test.BaseTestCase):
                         client.delete_port, port['id'])
         return port
 
-    def _wait_for_cleanups(self):
-        # To handle async delete actions, a list of waits is added
-        # which will be iterated over as the last step of clearing the
-        # cleanup queue. That way all the delete calls are made up front
-        # and the tests won't succeed unless the deletes are eventually
-        # successful. This is the same basic approach used in the api tests to
-        # limit cleanup execution time except here it is multi-resource,
-        # because of the nature of the scenario tests.
-        for wait in self.cleanup_waits:
-            waiter_callable = wait.pop('waiter_callable')
-            waiter_callable(**wait)
-
-    # ## Test functions library
-    #
-    # The create_[resource] functions only return body and discard the
-    # resp part which is not used in scenario tests
-
     def create_keypair(self, client=None):
         if not client:
             client = self.keypairs_client
@@ -170,7 +118,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
 
     def create_server(self, name=None, image_id=None, flavor=None,
                       validatable=False, wait_until=None,
-                      wait_on_delete=True, clients=None, **kwargs):
+                      clients=None, **kwargs):
         """Wrapper utility that returns a test server.
 
         This wrapper utility calls the common create test server and
@@ -256,18 +204,10 @@ class ScenarioTest(tempest.test.BaseTestCase):
             name=name, flavor=flavor,
             image_id=image_id, **kwargs)
 
-        # TODO(jlanoux) Move wait_on_delete in compute.py
-        if wait_on_delete:
-            self.addCleanup(waiters.wait_for_server_termination,
-                            clients.servers_client,
-                            body['id'])
-
-        self.addCleanup_with_wait(
-            waiter_callable=waiters.wait_for_server_termination,
-            thing_id=body['id'], thing_id_param='server_id',
-            cleanup_callable=test_utils.call_and_ignore_notfound_exc,
-            cleanup_args=[clients.servers_client.delete_server, body['id']],
-            waiter_client=clients.servers_client)
+        self.addCleanup(waiters.wait_for_server_termination,
+                        clients.servers_client, body['id'])
+        self.addCleanup(test_utils.call_and_ignore_notfound_exc,
+                        clients.servers_client.delete_server, body['id'])
         server = clients.servers_client.show_server(body['id'])['server']
         return server
 
@@ -481,11 +421,12 @@ class ScenarioTest(tempest.test.BaseTestCase):
         image = _images_client.create_image(server['id'], name=name)
         image_id = image.response['location'].split('images/')[1]
         waiters.wait_for_image_status(_image_client, image_id, 'active')
-        self.addCleanup_with_wait(
-            waiter_callable=_image_client.wait_for_resource_deletion,
-            thing_id=image_id, thing_id_param='id',
-            cleanup_callable=test_utils.call_and_ignore_notfound_exc,
-            cleanup_args=[_image_client.delete_image, image_id])
+
+        self.addCleanup(_image_client.wait_for_resource_deletion,
+                        image_id)
+        self.addCleanup(test_utils.call_and_ignore_notfound_exc,
+                        _image_client.delete_image, image_id)
+
         if CONF.image_feature_enabled.api_v1:
             # In glance v1 the additional properties are stored in the headers.
             resp = _image_client.check_image(image_id)
