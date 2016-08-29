@@ -18,7 +18,7 @@ from tempest.common.utils import data_utils
 from tempest.common import waiters
 from tempest import test
 
-QUOTA_KEYS = ['gigabytes', 'snapshots', 'volumes']
+QUOTA_KEYS = ['gigabytes', 'snapshots', 'volumes', 'backups']
 QUOTA_USAGE_KEYS = ['reserved', 'limit', 'in_use']
 
 
@@ -54,7 +54,8 @@ class BaseVolumeQuotasAdminV2TestJSON(base.BaseVolumeAdminTest):
             self.demo_tenant_id)['quota_set']
         new_quota_set = {'gigabytes': 1009,
                          'volumes': 11,
-                         'snapshots': 11}
+                         'snapshots': 11,
+                         'backups': 11}
 
         # Update limits for all quota resources
         quota_set = self.admin_quotas_client.update_quota_set(
