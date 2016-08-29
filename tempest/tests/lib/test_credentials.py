@@ -19,7 +19,7 @@ from tempest.lib import auth
 from tempest.lib import exceptions
 from tempest.lib.services.identity.v2 import token_client as v2_client
 from tempest.lib.services.identity.v3 import token_client as v3_client
-from tempest.tests.lib import base
+from tempest.tests import base
 from tempest.tests.lib import fake_identity
 
 
@@ -36,8 +36,10 @@ class CredentialsTests(base.TestCase):
         # Check the right version of credentials has been returned
         self.assertIsInstance(credentials, credentials_class)
         # Check the id attributes are filled in
+        # NOTE(andreaf) project_* attributes are accepted as input but
+        # never set on the credentials object
         attributes = [x for x in credentials.ATTRIBUTES if (
-            '_id' in x and x != 'domain_id')]
+            '_id' in x and x != 'domain_id' and x != 'project_id')]
         for attr in attributes:
             if filled:
                 self.assertIsNotNone(getattr(credentials, attr))
@@ -72,8 +74,8 @@ class KeystoneV2CredentialsTests(CredentialsTests):
 
     def setUp(self):
         super(KeystoneV2CredentialsTests, self).setUp()
-        self.stubs.Set(self.tokenclient_class, 'raw_request',
-                       self.identity_response)
+        self.patchobject(self.tokenclient_class, 'raw_request',
+                         self.identity_response)
 
     def _verify_credentials(self, credentials_class, creds_dict, filled=True):
         creds = auth.get_credentials(fake_identity.FAKE_AUTH_URL,
@@ -97,7 +99,7 @@ class KeystoneV2CredentialsTests(CredentialsTests):
 
     def _test_is_not_valid(self, ignore_key):
         creds = self._get_credentials()
-        for attr in self.attributes.keys():
+        for attr in self.attributes:
             if attr == ignore_key:
                 continue
             temp_attr = getattr(creds, attr)

@@ -48,7 +48,7 @@ class ServersTestJSON(base.BaseV2ComputeTest):
         cls.meta = {'hello': 'world'}
         cls.accessIPv4 = '1.1.1.1'
         cls.accessIPv6 = '0000:0000:0000:0000:0000:babe:220.12.22.2'
-        cls.name = data_utils.rand_name('server')
+        cls.name = data_utils.rand_name(cls.__name__ + '-server')
         cls.password = data_utils.rand_password()
         disk_config = cls.disk_config
         cls.server_initial = cls.create_test_server(
@@ -119,7 +119,9 @@ class ServersTestJSON(base.BaseV2ComputeTest):
             self.get_server_ip(self.server),
             self.ssh_user,
             self.password,
-            self.validation_resources['keypair']['private_key'])
+            self.validation_resources['keypair']['private_key'],
+            server=self.server,
+            servers_client=self.client)
         self.assertEqual(flavor['vcpus'], linux_client.get_number_of_vcpus())
 
     @test.idempotent_id('ac1ad47f-984b-4441-9274-c9079b7a0666')
@@ -131,8 +133,13 @@ class ServersTestJSON(base.BaseV2ComputeTest):
             self.get_server_ip(self.server),
             self.ssh_user,
             self.password,
-            self.validation_resources['keypair']['private_key'])
-        self.assertTrue(linux_client.hostname_equals_servername(self.name))
+            self.validation_resources['keypair']['private_key'],
+            server=self.server,
+            servers_client=self.client)
+        hostname = linux_client.get_hostname()
+        msg = ('Failed while verifying servername equals hostname. Expected '
+               'hostname "%s" but got "%s".' % (self.name, hostname))
+        self.assertEqual(self.name, hostname, msg)
 
     @test.idempotent_id('ed20d3fb-9d1f-4329-b160-543fbd5d9811')
     def test_create_server_with_scheduler_hint_group(self):
@@ -200,10 +207,6 @@ class ServersTestJSON(base.BaseV2ComputeTest):
     @test.idempotent_id('1678d144-ed74-43f8-8e57-ab10dbf9b3c2')
     @testtools.skipUnless(CONF.service_available.neutron,
                           'Neutron service must be available.')
-    # The below skipUnless should be removed once Kilo-eol happens.
-    @testtools.skipUnless(CONF.compute_feature_enabled.
-                          allow_duplicate_networks,
-                          'Duplicate networks must be allowed')
     def test_verify_duplicate_network_nics(self):
         # Verify that server creation does not fail when more than one nic
         # is created on the same network.
@@ -322,7 +325,9 @@ class ServersWithSpecificFlavorTestJSON(base.BaseV2ComputeAdminTest):
             self.get_server_ip(server_no_eph_disk),
             self.ssh_user,
             admin_pass,
-            self.validation_resources['keypair']['private_key'])
+            self.validation_resources['keypair']['private_key'],
+            server=server_no_eph_disk,
+            servers_client=self.client)
         partition_num = len(linux_client.get_partitions().split('\n'))
 
         # Explicit server deletion necessary for Juno compatibility
@@ -340,7 +345,9 @@ class ServersWithSpecificFlavorTestJSON(base.BaseV2ComputeAdminTest):
             self.get_server_ip(server_with_eph_disk),
             self.ssh_user,
             admin_pass,
-            self.validation_resources['keypair']['private_key'])
+            self.validation_resources['keypair']['private_key'],
+            server=server_with_eph_disk,
+            servers_client=self.client)
         partition_num_emph = len(linux_client.get_partitions().split('\n'))
         self.assertEqual(partition_num + 1, partition_num_emph)
 

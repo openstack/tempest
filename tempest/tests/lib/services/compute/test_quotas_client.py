@@ -16,10 +16,10 @@ import copy
 
 from tempest.lib.services.compute import quotas_client
 from tempest.tests.lib import fake_auth_provider
-from tempest.tests.lib.services.compute import base
+from tempest.tests.lib.services import base
 
 
-class TestQuotasClient(base.BaseComputeServiceTest):
+class TestQuotasClient(base.BaseServiceTest):
 
     FAKE_QUOTA_SET = {
         "quota_set": {

@@ -43,8 +43,8 @@ class TokensTest(base.BaseIdentityV2Test):
         self.assertGreater(expires_at, now)
 
         self.assertEqual(body['token']['tenant']['id'],
-                         creds.credentials.tenant_id)
+                         creds.tenant_id)
         self.assertEqual(body['token']['tenant']['name'],
                          tenant_name)
 
-        self.assertEqual(body['user']['id'], creds.credentials.user_id)
+        self.assertEqual(body['user']['id'], creds.user_id)

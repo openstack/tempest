@@ -19,7 +19,7 @@ test_tempest.lib
 Tests for `tempest.lib` module.
 """
 
-from tempest.tests.lib import base
+from tempest.tests import base
 
 
 class TestTempest_lib(base.TestCase):

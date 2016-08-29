@@ -33,7 +33,6 @@ CONF_PUB_ROUTER = None
 CONF_TENANTS = None
 CONF_USERS = None
 
-IS_AODH = None
 IS_CINDER = None
 IS_GLANCE = None
 IS_HEAT = None
@@ -51,14 +50,12 @@ def init_conf():
     global CONF_PUB_ROUTER
     global CONF_TENANTS
     global CONF_USERS
-    global IS_AODH
     global IS_CINDER
     global IS_GLANCE
     global IS_HEAT
     global IS_NEUTRON
     global IS_NOVA
 
-    IS_AODH = CONF.service_available.aodh
     IS_CINDER = CONF.service_available.cinder
     IS_GLANCE = CONF.service_available.glance
     IS_HEAT = CONF.service_available.heat
@@ -70,11 +67,8 @@ def init_conf():
     CONF_PRIV_NETWORK_NAME = CONF.compute.fixed_network_name
     CONF_PUB_NETWORK = CONF.network.public_network_id
     CONF_PUB_ROUTER = CONF.network.public_router_id
-    CONF_TENANTS = [CONF.auth.admin_project_name,
-                    CONF.identity.project_name,
-                    CONF.identity.alt_project_name]
-    CONF_USERS = [CONF.auth.admin_username, CONF.identity.username,
-                  CONF.identity.alt_username]
+    CONF_TENANTS = [CONF.auth.admin_project_name]
+    CONF_USERS = [CONF.auth.admin_username]
 
     if IS_NEUTRON:
         CONF_PRIV_NETWORK = _get_network_id(CONF.compute.fixed_network_name,
@@ -355,7 +349,8 @@ class VolumeQuotaService(BaseService):
             LOG.exception("Delete Volume Quotas exception.")
 
     def dry_run(self):
-        quotas = self.client.show_quota_usage(self.tenant_id)['quota_set']
+        quotas = self.client.show_quota_set(
+            self.tenant_id, params={'usage': True})['quota_set']
         self.data['volume_quotas'] = quotas
 
 
@@ -664,7 +659,7 @@ class NetworkSecGroupService(NetworkService):
 
         if self.is_preserve:
             secgroups = self._filter_by_conf_networks(secgroups)
-        LOG.debug("List count, %s securtiy_groups" % len(secgroups))
+        LOG.debug("List count, %s security_groups" % len(secgroups))
         return secgroups
 
     def delete(self):
@@ -704,32 +699,6 @@ class NetworkSubnetService(NetworkService):
     def dry_run(self):
         subnets = self.list()
         self.data['subnets'] = subnets
-
-
-# Telemetry services
-class TelemetryAlarmService(BaseService):
-    def __init__(self, manager, **kwargs):
-        super(TelemetryAlarmService, self).__init__(kwargs)
-        self.client = manager.alarming_client
-
-    def list(self):
-        client = self.client
-        alarms = client.list_alarms()
-        LOG.debug("List count, %s Alarms" % len(alarms))
-        return alarms
-
-    def delete(self):
-        client = self.client
-        alarms = self.list()
-        for alarm in alarms:
-            try:
-                client.delete_alarm(alarm['id'])
-            except Exception:
-                LOG.exception("Delete Alarms exception.")
-
-    def dry_run(self):
-        alarms = self.list()
-        self.data['alarms'] = alarms
 
 
 # begin global services
@@ -976,8 +945,8 @@ class DomainService(BaseService):
 
 def get_tenant_cleanup_services():
     tenant_services = []
-    if IS_AODH:
-        tenant_services.append(TelemetryAlarmService)
+    # TODO(gmann): Tempest should provide some plugin hook for cleanup
+    # script extension to plugin tests also.
     if IS_NOVA:
         tenant_services.append(ServerService)
         tenant_services.append(KeyPairService)

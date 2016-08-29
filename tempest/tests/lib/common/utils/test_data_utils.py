@@ -16,7 +16,7 @@
 import netaddr
 
 from tempest.lib.common.utils import data_utils
-from tempest.tests.lib import base
+from tempest.tests import base
 
 
 class TestDataUtils(base.TestCase):
@@ -59,7 +59,7 @@ class TestDataUtils(base.TestCase):
     def test_rand_password(self):
         actual = data_utils.rand_password()
         self.assertIsInstance(actual, str)
-        self.assertRegex(actual, "[A-Za-z0-9~!@#$%^&*_=+]{15,}")
+        self.assertRegex(actual, "[A-Za-z0-9~!@#%^&*_=+]{15,}")
         actual2 = data_utils.rand_password()
         self.assertNotEqual(actual, actual2)
 
@@ -67,7 +67,7 @@ class TestDataUtils(base.TestCase):
         actual = data_utils.rand_password(8)
         self.assertIsInstance(actual, str)
         self.assertEqual(len(actual), 8)
-        self.assertRegex(actual, "[A-Za-z0-9~!@#$%^&*_=+]{8}")
+        self.assertRegex(actual, "[A-Za-z0-9~!@#%^&*_=+]{8}")
         actual2 = data_utils.rand_password(8)
         self.assertNotEqual(actual, actual2)
 
@@ -75,7 +75,7 @@ class TestDataUtils(base.TestCase):
         actual = data_utils.rand_password(2)
         self.assertIsInstance(actual, str)
         self.assertEqual(len(actual), 3)
-        self.assertRegex(actual, "[A-Za-z0-9~!@#$%^&*_=+]{3}")
+        self.assertRegex(actual, "[A-Za-z0-9~!@#%^&*_=+]{3}")
         actual2 = data_utils.rand_password(2)
         self.assertNotEqual(actual, actual2)
 
@@ -91,6 +91,15 @@ class TestDataUtils(base.TestCase):
         self.assertIsInstance(actual, int)
 
         actual2 = data_utils.rand_int_id()
+        self.assertNotEqual(actual, actual2)
+
+    def test_rand_infiniband_guid_address(self):
+        actual = data_utils.rand_infiniband_guid_address()
+        self.assertIsInstance(actual, str)
+        self.assertRegex(actual, "^([0-9a-f][0-9a-f]:){7}"
+                         "[0-9a-f][0-9a-f]$")
+
+        actual2 = data_utils.rand_infiniband_guid_address()
         self.assertNotEqual(actual, actual2)
 
     def test_rand_mac_address(self):
@@ -160,3 +169,10 @@ class TestDataUtils(base.TestCase):
         bad_mac = 99999999999999999999
         self.assertRaises(TypeError, data_utils.get_ipv6_addr_by_EUI64,
                           cidr, bad_mac)
+
+    def test_chunkify(self):
+        data = "aaa"
+        chunks = data_utils.chunkify(data, 2)
+        self.assertEqual("aa", next(chunks))
+        self.assertEqual("a", next(chunks))
+        self.assertRaises(StopIteration, next, chunks)

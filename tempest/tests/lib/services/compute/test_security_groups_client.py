@@ -17,10 +17,10 @@ from oslotest import mockpatch
 from tempest.lib import exceptions as lib_exc
 from tempest.lib.services.compute import security_groups_client
 from tempest.tests.lib import fake_auth_provider
-from tempest.tests.lib.services.compute import base
+from tempest.tests.lib.services import base
 
 
-class TestSecurityGroupsClient(base.BaseComputeServiceTest):
+class TestSecurityGroupsClient(base.BaseServiceTest):
 
     FAKE_SECURITY_GROUP_INFO = [{
         "description": "default",

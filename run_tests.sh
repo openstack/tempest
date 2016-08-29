@@ -17,6 +17,44 @@ function usage {
   echo "  -- [TESTROPTIONS]        After the first '--' you can pass arbitrary arguments to testr "
 }
 
+function deprecation_warning {
+  cat <<EOF
+-------------------------------------------------------------------------
+WARNING: run_tests.sh is deprecated and this script will be removed after
+the Newton release. All tests should be run through testr/ostestr or tox.
+
+To run style checks:
+
+ tox -e pep8
+
+To run python 2.7 unit tests
+
+ tox -e py27
+
+To run unit tests and generate coverage report
+
+ tox -e cover
+
+To run a subset of any of these tests:
+
+ tox -e py27 someregex
+
+ i.e.: tox -e py27 test_servers
+
+Additional tox targets are available in tox.ini. For more information
+see:
+http://docs.openstack.org/project-team-guide/project-setup/python.html
+
+NOTE: if you want to use testr to run tests, you can instead use:
+
+ OS_TEST_PATH=./tempest/tests testr run
+
+Documentation on using testr directly can be found at
+http://testrepository.readthedocs.org/en/latest/MANUAL.html
+-------------------------------------------------------------------------
+EOF
+}
+
 testrargs=""
 just_pep8=0
 venv=${VENV:-.venv}
@@ -31,6 +69,8 @@ coverage=0
 wrapper=""
 config_file=""
 update=0
+
+deprecation_warning
 
 if ! options=$(getopt -o VNnfuctphd -l virtual-env,no-virtual-env,no-site-packages,force,update,serial,coverage,pep8,help,debug -- "$@")
 then

@@ -19,7 +19,7 @@ import tempfile
 
 import six
 
-from tempest.tests.lib import base
+from tempest.tests import base
 
 DEVNULL = open(os.devnull, 'wb')
 

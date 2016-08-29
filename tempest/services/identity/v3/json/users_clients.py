@@ -21,52 +21,27 @@ from tempest.lib.common import rest_client
 class UsersClient(rest_client.RestClient):
     api_version = "v3"
 
-    def create_user(self, user_name, password=None, project_id=None,
-                    email=None, domain_id='default', **kwargs):
-        """Creates a user."""
-        en = kwargs.get('enabled', True)
-        description = kwargs.get('description', None)
-        default_project_id = kwargs.get('default_project_id')
-        post_body = {
-            'project_id': project_id,
-            'default_project_id': default_project_id,
-            'description': description,
-            'domain_id': domain_id,
-            'email': email,
-            'enabled': en,
-            'name': user_name,
-            'password': password
-        }
-        post_body = json.dumps({'user': post_body})
+    def create_user(self, **kwargs):
+        """Creates a user.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref/identity/v3/#create-user
+        """
+        post_body = json.dumps({'user': kwargs})
         resp, body = self.post('users', post_body)
         self.expected_success(201, resp.status)
         body = json.loads(body)
         return rest_client.ResponseBody(resp, body)
 
-    def update_user(self, user_id, name, **kwargs):
-        """Updates a user."""
-        body = self.show_user(user_id)['user']
-        email = kwargs.get('email', body['email'])
-        en = kwargs.get('enabled', body['enabled'])
-        project_id = kwargs.get('project_id', body['project_id'])
-        if 'default_project_id' in body.keys():
-            default_project_id = kwargs.get('default_project_id',
-                                            body['default_project_id'])
-        else:
-            default_project_id = kwargs.get('default_project_id')
-        description = kwargs.get('description', body['description'])
-        domain_id = kwargs.get('domain_id', body['domain_id'])
-        post_body = {
-            'name': name,
-            'email': email,
-            'enabled': en,
-            'project_id': project_id,
-            'default_project_id': default_project_id,
-            'id': user_id,
-            'domain_id': domain_id,
-            'description': description
-        }
-        post_body = json.dumps({'user': post_body})
+    def update_user(self, user_id, **kwargs):
+        """Updates a user.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-identity-v3.html#updateUser
+        """
+        if 'id' not in kwargs:
+            kwargs['id'] = user_id
+        post_body = json.dumps({'user': kwargs})
         resp, body = self.patch('users/%s' % user_id, post_body)
         self.expected_success(200, resp.status)
         body = json.loads(body)
@@ -83,15 +58,26 @@ class UsersClient(rest_client.RestClient):
         self.expected_success(204, resp.status)
         return rest_client.ResponseBody(resp)
 
-    def list_user_projects(self, user_id):
-        """Lists the projects on which a user has roles assigned."""
-        resp, body = self.get('users/%s/projects' % user_id)
+    def list_user_projects(self, user_id, **params):
+        """Lists the projects on which a user has roles assigned.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref/identity/v3/#list-projects-for-user
+        """
+        url = 'users/%s/projects' % user_id
+        if params:
+            url += '?%s' % urllib.urlencode(params)
+        resp, body = self.get(url)
         self.expected_success(200, resp.status)
         body = json.loads(body)
         return rest_client.ResponseBody(resp, body)
 
-    def list_users(self, params=None):
-        """Get the list of users."""
+    def list_users(self, **params):
+        """Get the list of users.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref/identity/v3/#list-users
+        """
         url = 'users'
         if params:
             url += '?%s' % urllib.urlencode(params)
@@ -113,9 +99,16 @@ class UsersClient(rest_client.RestClient):
         self.expected_success(204, resp.status)
         return rest_client.ResponseBody(resp, body)
 
-    def list_user_groups(self, user_id):
-        """Lists groups which a user belongs to."""
-        resp, body = self.get('users/%s/groups' % user_id)
+    def list_user_groups(self, user_id, **params):
+        """Lists groups which a user belongs to.
+
+        Available params: see http://developer.openstack.org/
+            api-ref/identity/v3/#list-groups-to-which-a-user-belongs
+        """
+        url = 'users/%s/groups' % user_id
+        if params:
+            url += '?%s' % urllib.urlencode(params)
+        resp, body = self.get(url)
         self.expected_success(200, resp.status)
         body = json.loads(body)
         return rest_client.ResponseBody(resp, body)

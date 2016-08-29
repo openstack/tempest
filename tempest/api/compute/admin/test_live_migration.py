@@ -27,6 +27,8 @@ CONF = config.CONF
 
 class LiveBlockMigrationTestJSON(base.BaseV2ComputeAdminTest):
     _host_key = 'OS-EXT-SRV-ATTR:host'
+    max_microversion = '2.24'
+    block_migration = None
 
     @classmethod
     def skip_checks(cls):
@@ -64,12 +66,16 @@ class LiveBlockMigrationTestJSON(base.BaseV2ComputeAdminTest):
         return self._get_server_details(server_id)[self._host_key]
 
     def _migrate_server_to(self, server_id, dest_host, volume_backed=False):
-        block_migration = (CONF.compute_feature_enabled.
-                           block_migration_for_live_migration and
-                           not volume_backed)
+        kwargs = dict()
+        block_migration = getattr(self, 'block_migration', None)
+        if self.block_migration is None:
+            kwargs['disk_over_commit'] = False
+            block_migration = (CONF.compute_feature_enabled.
+                               block_migration_for_live_migration and
+                               not volume_backed)
         body = self.admin_servers_client.live_migrate_server(
             server_id, host=dest_host, block_migration=block_migration,
-            disk_over_commit=False)
+            **kwargs)
         return body
 
     def _get_host_other_than(self, host):
@@ -167,3 +173,9 @@ class LiveBlockMigrationTestJSON(base.BaseV2ComputeAdminTest):
         waiters.wait_for_server_status(self.servers_client,
                                        server_id, 'ACTIVE')
         self.assertEqual(target_host, self._get_host_for_server(server_id))
+
+
+class LiveAutoBlockMigrationV225TestJSON(LiveBlockMigrationTestJSON):
+    min_microversion = '2.25'
+    max_microversion = 'latest'
+    block_migration = 'auto'

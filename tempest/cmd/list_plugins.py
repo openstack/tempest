@@ -19,24 +19,20 @@ Utility for listing all currently installed Tempest plugins.
 """
 
 from cliff import command
-from oslo_log import log as logging
 import prettytable
 
-from tempest.test_discover.plugins import TempestTestPluginManager
-
-LOG = logging.getLogger(__name__)
+from tempest.test_discover import plugins as plg
 
 
 class TempestListPlugins(command.Command):
     def take_action(self, parsed_args):
         self._list_plugins()
-        return 0
 
     def get_description(self):
         return 'List all tempest plugins'
 
     def _list_plugins(self):
-        plugins = TempestTestPluginManager()
+        plugins = plg.TempestTestPluginManager()
 
         output = prettytable.PrettyTable(["Name", "EntryPoint"])
         for plugin in plugins.ext_plugins.extensions:

@@ -13,10 +13,12 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import testtools
+
 from tempest.api.compute import base
 from tempest.common import tempest_fixtures as fixtures
 from tempest.common.utils import data_utils
-from tempest.lib import exceptions as lib_exc
+from tempest.lib.common.utils import test_utils
 from tempest import test
 
 
@@ -36,18 +38,17 @@ class AggregatesAdminTestJSON(base.BaseV2ComputeAdminTest):
         cls.aggregate_name_prefix = 'test_aggregate'
         cls.az_name_prefix = 'test_az'
 
-        hosts_all = cls.os_adm.hosts_client.list_hosts()['hosts']
-        hosts = map(lambda x: x['host_name'],
-                    filter(lambda y: y['service'] == 'compute', hosts_all))
-        cls.host = hosts[0]
-
-    def _try_delete_aggregate(self, aggregate_id):
-        # delete aggregate, if it exists
-        try:
-            self.client.delete_aggregate(aggregate_id)
-        # if aggregate not found, it depict it was deleted in the test
-        except lib_exc.NotFound:
-            pass
+        cls.host = None
+        hypers = cls.os_adm.hypervisor_client.list_hypervisors(
+            detail=True)['hypervisors']
+        hosts_available = [hyper['service']['host'] for hyper in hypers
+                           if (hyper['state'] == 'up' and
+                               hyper['status'] == 'enabled')]
+        if hosts_available:
+            cls.host = hosts_available[0]
+        else:
+            raise testtools.TestCase.failureException(
+                "no available compute node found")
 
     @test.idempotent_id('0d148aa3-d54c-4317-aa8d-42040a475e20')
     def test_aggregate_create_delete(self):
@@ -55,7 +56,8 @@ class AggregatesAdminTestJSON(base.BaseV2ComputeAdminTest):
         aggregate_name = data_utils.rand_name(self.aggregate_name_prefix)
         aggregate = (self.client.create_aggregate(name=aggregate_name)
                      ['aggregate'])
-        self.addCleanup(self._try_delete_aggregate, aggregate['id'])
+        self.addCleanup(test_utils.call_and_ignore_notfound_exc,
+                        self.client.delete_aggregate, aggregate['id'])
         self.assertEqual(aggregate_name, aggregate['name'])
         self.assertIsNone(aggregate['availability_zone'])
 
@@ -69,7 +71,8 @@ class AggregatesAdminTestJSON(base.BaseV2ComputeAdminTest):
         az_name = data_utils.rand_name(self.az_name_prefix)
         aggregate = self.client.create_aggregate(
             name=aggregate_name, availability_zone=az_name)['aggregate']
-        self.addCleanup(self._try_delete_aggregate, aggregate['id'])
+        self.addCleanup(test_utils.call_and_ignore_notfound_exc,
+                        self.client.delete_aggregate, aggregate['id'])
         self.assertEqual(aggregate_name, aggregate['name'])
         self.assertEqual(az_name, aggregate['availability_zone'])
 
@@ -178,7 +181,7 @@ class AggregatesAdminTestJSON(base.BaseV2ComputeAdminTest):
                         host=self.host)
 
         aggregates = self.client.list_aggregates()['aggregates']
-        aggs = filter(lambda x: x['id'] == aggregate['id'], aggregates)
+        aggs = [agg for agg in aggregates if agg['id'] == aggregate['id']]
         self.assertEqual(1, len(aggs))
         agg = aggs[0]
         self.assertEqual(aggregate_name, agg['name'])

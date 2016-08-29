@@ -17,24 +17,49 @@ from tempest.lib.services.network import base
 class PortsClient(base.BaseNetworkClient):
 
     def create_port(self, **kwargs):
+        """Creates a port on a network.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-networking-v2.html#createPort
+        """
         uri = '/ports'
         post_data = {'port': kwargs}
         return self.create_resource(uri, post_data)
 
     def update_port(self, port_id, **kwargs):
+        """Updates a port.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-networking-v2.html#updatePort
+        """
         uri = '/ports/%s' % port_id
         post_data = {'port': kwargs}
         return self.update_resource(uri, post_data)
 
     def show_port(self, port_id, **fields):
+        """Shows details for a port.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-networking-v2.html#showPort
+        """
         uri = '/ports/%s' % port_id
         return self.show_resource(uri, **fields)
 
     def delete_port(self, port_id):
+        """Deletes a port.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-networking-v2.html#removePort
+        """
         uri = '/ports/%s' % port_id
         return self.delete_resource(uri)
 
     def list_ports(self, **filters):
+        """Lists ports to which the tenant has access.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-networking-v2.html#listPorts
+        """
         uri = '/ports'
         return self.list_resources(uri, **filters)
 

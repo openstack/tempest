@@ -14,6 +14,7 @@ from tempest.api.volume import base
 from tempest.common.utils import data_utils
 from tempest.common import waiters
 from tempest import config
+from tempest.lib import decorators
 from tempest import test
 
 CONF = config.CONF
@@ -34,6 +35,9 @@ class VolumesV2SnapshotTestJSON(base.BaseVolumeTest):
 
         cls.name_field = cls.special_fields['name_field']
         cls.descrip_field = cls.special_fields['descrip_field']
+        # Create 2 snapshots
+        for _ in xrange(2):
+            cls.create_snapshot(cls.volume_origin['id'])
 
     def _detach(self, volume_id):
         """Detach volume."""
@@ -58,12 +62,21 @@ class VolumesV2SnapshotTestJSON(base.BaseVolumeTest):
                       ('details' if with_detail else '', key)
                 self.assertEqual(params[key], snap[key], msg)
 
+    def _list_snapshots_by_param_limit(self, limit, expected_elements):
+        """list snapshots by limit param"""
+        # Get snapshots list using limit parameter
+        fetched_snap_list = self.snapshots_client.list_snapshots(
+            limit=limit)['snapshots']
+        # Validating filtered snapshots length equals to expected_elements
+        self.assertEqual(expected_elements, len(fetched_snap_list))
+
     @test.idempotent_id('b467b54c-07a4-446d-a1cf-651dedcc3ff1')
     @test.services('compute')
     def test_snapshot_create_with_volume_in_use(self):
         # Create a snapshot when volume status is in-use
         # Create a test instance
-        server_name = data_utils.rand_name('instance')
+        server_name = data_utils.rand_name(
+            self.__class__.__name__ + '-instance')
         server = self.create_server(
             name=server_name,
             wait_until='ACTIVE')
@@ -86,7 +99,7 @@ class VolumesV2SnapshotTestJSON(base.BaseVolumeTest):
     @test.idempotent_id('2a8abbe4-d871-46db-b049-c41f5af8216e')
     def test_snapshot_create_get_list_update_delete(self):
         # Create a snapshot
-        s_name = data_utils.rand_name('snap')
+        s_name = data_utils.rand_name(self.__class__.__name__ + '-snap')
         params = {self.name_field: s_name}
         snapshot = self.create_snapshot(self.volume_origin['id'], **params)
 
@@ -104,7 +117,8 @@ class VolumesV2SnapshotTestJSON(base.BaseVolumeTest):
         self.assertIn(tracking_data, snaps_data)
 
         # Updates snapshot with new values
-        new_s_name = data_utils.rand_name('new-snap')
+        new_s_name = data_utils.rand_name(
+            self.__class__.__name__ + '-new-snap')
         new_desc = 'This is the new description of snapshot.'
         params = {self.name_field: new_s_name,
                   self.descrip_field: new_desc}
@@ -126,7 +140,7 @@ class VolumesV2SnapshotTestJSON(base.BaseVolumeTest):
     def test_snapshots_list_with_params(self):
         """list snapshots with params."""
         # Create a snapshot
-        display_name = data_utils.rand_name('snap')
+        display_name = data_utils.rand_name(self.__class__.__name__ + '-snap')
         params = {self.name_field: display_name}
         snapshot = self.create_snapshot(self.volume_origin['id'], **params)
         self.addCleanup(self.cleanup_snapshot, snapshot)
@@ -148,7 +162,7 @@ class VolumesV2SnapshotTestJSON(base.BaseVolumeTest):
     def test_snapshots_list_details_with_params(self):
         """list snapshot details with params."""
         # Create a snapshot
-        display_name = data_utils.rand_name('snap')
+        display_name = data_utils.rand_name(self.__class__.__name__ + '-snap')
         params = {self.name_field: display_name}
         snapshot = self.create_snapshot(self.volume_origin['id'], **params)
         self.addCleanup(self.cleanup_snapshot, snapshot)
@@ -166,17 +180,38 @@ class VolumesV2SnapshotTestJSON(base.BaseVolumeTest):
 
     @test.idempotent_id('677863d1-3142-456d-b6ac-9924f667a7f4')
     def test_volume_from_snapshot(self):
-        # Create a temporary snap using wrapper method from base, then
-        # create a snap based volume and deletes it
-        snapshot = self.create_snapshot(self.volume_origin['id'])
-        # NOTE(gfidente): size is required also when passing snapshot_id
-        volume = self.volumes_client.create_volume(
-            snapshot_id=snapshot['id'])['volume']
-        waiters.wait_for_volume_status(self.volumes_client,
-                                       volume['id'], 'available')
-        self.volumes_client.delete_volume(volume['id'])
-        self.volumes_client.wait_for_resource_deletion(volume['id'])
-        self.cleanup_snapshot(snapshot)
+        # Creates a volume a snapshot passing a size different from the source
+        src_size = CONF.volume.volume_size
+
+        src_vol = self.create_volume(size=src_size)
+        src_snap = self.create_snapshot(src_vol['id'])
+        # Destination volume bigger than source snapshot
+        dst_vol = self.create_volume(snapshot_id=src_snap['id'],
+                                     size=src_size + 1)
+
+        volume = self.volumes_client.show_volume(dst_vol['id'])['volume']
+        # Should allow
+        self.assertEqual(volume['snapshot_id'], src_snap['id'])
+        self.assertEqual(int(volume['size']), src_size + 1)
+
+    @test.idempotent_id('db4d8e0a-7a2e-41cc-a712-961f6844e896')
+    def test_snapshot_list_param_limit(self):
+        # List returns limited elements
+        self._list_snapshots_by_param_limit(limit=1, expected_elements=1)
+
+    @test.idempotent_id('a1427f61-420e-48a5-b6e3-0b394fa95400')
+    def test_snapshot_list_param_limit_equals_infinite(self):
+        # List returns all elements when request limit exceeded
+        # snapshots number
+        snap_list = self.snapshots_client.list_snapshots()['snapshots']
+        self._list_snapshots_by_param_limit(limit=100000,
+                                            expected_elements=len(snap_list))
+
+    @decorators.skip_because(bug='1540893')
+    @test.idempotent_id('e3b44b7f-ae87-45b5-8a8c-66110eb24d0a')
+    def test_snapshot_list_param_limit_equals_zero(self):
+        # List returns zero elements
+        self._list_snapshots_by_param_limit(limit=0, expected_elements=0)
 
     def cleanup_snapshot(self, snapshot):
         # Delete the snapshot

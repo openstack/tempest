@@ -19,10 +19,10 @@ from oslotest import mockpatch
 from tempest.lib import exceptions as lib_exc
 from tempest.lib.services.compute import images_client
 from tempest.tests.lib import fake_auth_provider
-from tempest.tests.lib.services.compute import base
+from tempest.tests.lib.services import base
 
 
-class TestImagesClient(base.BaseComputeServiceTest):
+class TestImagesClient(base.BaseServiceTest):
     # Data Dictionaries used for testing #
     FAKE_IMAGE_METADATA = {
         "list":
@@ -186,7 +186,7 @@ class TestImagesClient(base.BaseComputeServiceTest):
 
     def _test_resource_deleted(self, bytes_body=False):
         params = {"id": self.FAKE_IMAGE_ID}
-        expected_op = self.FAKE_IMAGE_DATA['show']['image']
+        expected_op = self.FAKE_IMAGE_DATA['show']
         self.useFixture(mockpatch.Patch('tempest.lib.services.compute'
                         '.images_client.ImagesClient.show_image',
                                         side_effect=lib_exc.NotFound))

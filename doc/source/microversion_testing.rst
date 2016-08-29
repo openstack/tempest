@@ -19,11 +19,13 @@ Configuration options for Microversion
   multiple Microversion tests in a single Tempest operation, configuration
   options should represent the range of test target Microversions.
   New configuration options are:
+
   * min_microversion
   * max_microversion
 
   Those should be defined under respective section of each service.
   For example::
+
       [compute]
       min_microversion = None
       max_microversion = latest
@@ -129,8 +131,9 @@ and max_microversion. Tests will be valid for that defined range.
 If that range is out of configured Microversion range then, test
 will be skipped.
 
-*NOTE: Microversion testing is supported at test class level not at individual
-test case level.*
+.. note:: Microversion testing is supported at test class level not at
+      individual test case level.
+
 For example:
 
 Below test is applicable for Microversion from 2.2 till 2.9::
@@ -159,7 +162,8 @@ Below test is applicable for Microversion from 2.10 till latest::
 
 
 Notes about Compute Microversion Tests
-"""""""""""""""""""""""""""""""""""
+""""""""""""""""""""""""""""""""""""""
+
 Some of the compute Microversion tests have been already implemented
 with the Microversion testing framework. So for further tests only
 step 4 is needed.
@@ -205,3 +209,19 @@ Microversion tests implemented in Tempest
  * `2.2`_
 
  .. _2.2: http://docs.openstack.org/developer/nova/api_microversion_history.html#id2
+
+ * `2.10`_
+
+ .. _2.10: http://docs.openstack.org/developer/nova/api_microversion_history.html#id9
+
+ * `2.20`_
+
+ .. _2.20: http://docs.openstack.org/developer/nova/api_microversion_history.html#id18
+
+ * `2.25`_
+
+ .. _2.25: http://docs.openstack.org/developer/nova/api_microversion_history.html#maximum-in-mitaka
+
+ * `2.37`_
+
+ .. _2.37: http://docs.openstack.org/developer/nova/api_microversion_history.html#id34

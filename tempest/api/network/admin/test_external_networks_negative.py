@@ -15,6 +15,7 @@
 
 from tempest.api.network import base
 from tempest import config
+from tempest.lib.common.utils import test_utils
 from tempest.lib import exceptions as lib_exc
 from tempest import test
 
@@ -34,7 +35,7 @@ class ExternalNetworksAdminNegativeTestJSON(base.BaseAdminNetworkTest):
         body = self.admin_floating_ips_client.create_floatingip(
             floating_network_id=CONF.network.public_network_id)
         created_floating_ip = body['floatingip']
-        self.addCleanup(self._try_delete_resource,
+        self.addCleanup(test_utils.call_and_ignore_notfound_exc,
                         self.admin_floating_ips_client.delete_floatingip,
                         created_floating_ip['id'])
         floating_ip_address = created_floating_ip['floating_ip_address']

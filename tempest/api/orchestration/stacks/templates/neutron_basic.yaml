@@ -58,7 +58,7 @@ resources:
             #!/bin/sh -v
 
             SIGNAL_DATA='{"Status": "SUCCESS", "Reason": "SmokeServerNeutron created", "Data": "Application has completed configuration.", "UniqueId": "00000"}'
-            while ! curl --fail -X PUT -H 'Content-Type:' --data-binary "$SIGNAL_DATA" \
+            while ! curl --insecure --fail -X PUT -H 'Content-Type:' --data-binary "$SIGNAL_DATA" \
             'wait_handle' ; do sleep 3; done
           params:
             wait_handle: {get_resource: WaitHandleNeutron}

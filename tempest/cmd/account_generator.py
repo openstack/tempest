@@ -38,15 +38,17 @@ Account generator creates users and tenants so it needs the admin credentials
 of your cloud to operate properly. The corresponding info can be given either
 through CLI options or environment variables.
 
-You're probably familiar with these, but just to remind::
+You're probably familiar with these, but just to remind:
 
-    +----------+------------------+----------------------+
-    | Param    | CLI              | Environment Variable |
-    +----------+------------------+----------------------+
-    | Username | --os-username    | OS_USERNAME          |
-    | Password | --os-password    | OS_PASSWORD          |
-    | Tenant   | --os-tenant-name | OS_TENANT_NAME       |
-    +----------+------------------+----------------------+
+======== ======================== ====================
+Param    CLI                      Environment Variable
+======== ======================== ====================
+Username --os-username            OS_USERNAME
+Password --os-password            OS_PASSWORD
+Project  --os-project-name        OS_PROJECT_NAME
+Tenant   --os-tenant-name (depr.) OS_TENANT_NAME
+Domain   --os-domain-name         OS_DOMAIN_NAME
+======== ======================== ====================
 
 Optional Arguments
 ------------------
@@ -63,8 +65,14 @@ have permissions to create new user accounts and tenants.
 **--os-password <auth-password>** (Optional) Password used for authentication
 with the OpenStack Identity service. Defaults to env[OS_PASSWORD].
 
-**--os-tenant-name <auth-tenant-name>** (Optional) Tenant to request
-authorization on. Defaults to env[OS_TENANT_NAME].
+**--os-project-name <auth-project-name>** (Optional) Project to request
+authorization on. Defaults to env[OS_PROJECT_NAME].
+
+**--os-tenant-name <auth-tenant-name>** (Optional, deprecated) Tenant to
+request authorization on. Defaults to env[OS_TENANT_NAME].
+
+**--os-domain-name <auth-domain-name>** (Optional) Domain the user and project
+belong to. Defaults to env[OS_DOMAIN_NAME].
 
 **--tag TAG** (Optional) Resources tag. Each created resource (user, project)
 will have the prefix with the given TAG in its name. Using tag is recommended
@@ -79,11 +87,13 @@ running in parallel.
 **--with-admin** (Optional) Creates admin for each concurrent group
 (default: False).
 
+**-i VERSION**, **--identity-version VERSION** (Optional) Provisions accounts
+using the specified version of the identity API. (default: '3').
+
 To see help on specific argument, please do: ``tempest-account-generator
 [OPTIONS] <accounts_file.yaml> -h``.
 """
 import argparse
-import netaddr
 import os
 import traceback
 
@@ -91,19 +101,10 @@ from cliff import command
 from oslo_log import log as logging
 import yaml
 
-from tempest.common import identity
+from tempest.common import credentials_factory
+from tempest.common import dynamic_creds
 from tempest import config
-from tempest import exceptions as exc
-import tempest.lib.auth
-from tempest.lib.common.utils import data_utils
-import tempest.lib.exceptions
-from tempest.lib.services.network import networks_client
-from tempest.lib.services.network import subnets_client
-from tempest.services.identity.v2.json import identity_client
-from tempest.services.identity.v2.json import roles_client
-from tempest.services.identity.v2.json import tenants_client
-from tempest.services.identity.v2.json import users_client
-from tempest.services.network.json import routers_client
+
 
 LOG = None
 CONF = config.CONF
@@ -120,290 +121,84 @@ def setup_logging():
     LOG = logging.getLogger(__name__)
 
 
-def get_admin_clients(opts):
-    _creds = tempest.lib.auth.KeystoneV2Credentials(
-        username=opts.os_username,
-        password=opts.os_password,
-        tenant_name=opts.os_tenant_name)
-    auth_params = {
-        'disable_ssl_certificate_validation':
-            CONF.identity.disable_ssl_certificate_validation,
-        'ca_certs': CONF.identity.ca_certificates_file,
-        'trace_requests': CONF.debug.trace_requests
-    }
-    _auth = tempest.lib.auth.KeystoneV2AuthProvider(
-        _creds, CONF.identity.uri, **auth_params)
-    params = {
-        'disable_ssl_certificate_validation':
-            CONF.identity.disable_ssl_certificate_validation,
-        'ca_certs': CONF.identity.ca_certificates_file,
-        'trace_requests': CONF.debug.trace_requests,
-        'build_interval': CONF.compute.build_interval,
-        'build_timeout': CONF.compute.build_timeout
-    }
-    identity_admin = identity_client.IdentityClient(
-        _auth,
-        CONF.identity.catalog_type,
-        CONF.identity.region,
-        endpoint_type='adminURL',
-        **params
-    )
-    tenants_admin = tenants_client.TenantsClient(
-        _auth,
-        CONF.identity.catalog_type,
-        CONF.identity.region,
-        endpoint_type='adminURL',
-        **params
-    )
-    roles_admin = roles_client.RolesClient(
-        _auth,
-        CONF.identity.catalog_type,
-        CONF.identity.region,
-        endpoint_type='adminURL',
-        **params
-    )
-    users_admin = users_client.UsersClient(
-        _auth,
-        CONF.identity.catalog_type,
-        CONF.identity.region,
-        endpoint_type='adminURL',
-        **params
-    )
-    networks_admin = None
-    routers_admin = None
-    subnets_admin = None
-    neutron_iso_networks = False
-    if (CONF.service_available.neutron and
-        CONF.auth.create_isolated_networks):
-        neutron_iso_networks = True
-        networks_admin = networks_client.NetworksClient(
-            _auth,
-            CONF.network.catalog_type,
-            CONF.network.region or CONF.identity.region,
-            endpoint_type='adminURL',
-            **params)
-        routers_admin = routers_client.RoutersClient(
-            _auth,
-            CONF.network.catalog_type,
-            CONF.network.region or CONF.identity.region,
-            endpoint_type='adminURL',
-            **params)
-        subnets_admin = subnets_client.SubnetsClient(
-            _auth,
-            CONF.network.catalog_type,
-            CONF.network.region or CONF.identity.region,
-            endpoint_type='adminURL',
-            **params)
-    return (identity_admin, tenants_admin, roles_admin, users_admin,
-            neutron_iso_networks, networks_admin, routers_admin,
-            subnets_admin)
+def get_credential_provider(opts):
+    identity_version = "".join(['v', str(opts.identity_version)])
+    # NOTE(andreaf) For now tempest.conf controls whether resources will
+    # actually be created. Once we remove the dependency from tempest.conf
+    # we will need extra CLI option(s) to control this.
+    network_resources = {'router': True,
+                         'network': True,
+                         'subnet': True,
+                         'dhcp': True}
+    admin_creds_dict = {'username': opts.os_username,
+                        'password': opts.os_password}
+    _project_name = opts.os_project_name or opts.os_tenant_name
+    if opts.identity_version == 3:
+        admin_creds_dict['project_name'] = _project_name
+        admin_creds_dict['domain_name'] = opts.os_domain_name or 'Default'
+    elif opts.identity_version == 2:
+        admin_creds_dict['tenant_name'] = _project_name
+    admin_creds = credentials_factory.get_credentials(
+        fill_in=False, identity_version=identity_version, **admin_creds_dict)
+    return dynamic_creds.DynamicCredentialProvider(
+        identity_version=identity_version,
+        name=opts.tag,
+        network_resources=network_resources,
+        admin_creds=admin_creds,
+        **credentials_factory.get_dynamic_provider_params())
 
 
-def create_resources(opts, resources):
-    (identity_admin, tenants_admin, roles_admin, users_admin,
-     neutron_iso_networks, networks_admin, routers_admin,
-     subnets_admin) = get_admin_clients(opts)
-    roles = roles_admin.list_roles()['roles']
-    for u in resources['users']:
-        u['role_ids'] = []
-        for r in u.get('roles', ()):
-            try:
-                role = filter(lambda r_: r_['name'] == r, roles)[0]
-            except IndexError:
-                msg = "Role: %s doesn't exist" % r
-                raise exc.InvalidConfiguration(msg)
-            u['role_ids'] += [role['id']]
-    existing = [x['name'] for x in tenants_admin.list_tenants()['tenants']]
-    for tenant in resources['tenants']:
-        if tenant not in existing:
-            tenants_admin.create_tenant(tenant)
-        else:
-            LOG.warning("Tenant '%s' already exists in this environment"
-                        % tenant)
-    LOG.info('Tenants created')
-    for u in resources['users']:
-        try:
-            tenant = identity.get_tenant_by_name(tenants_admin, u['tenant'])
-        except tempest.lib.exceptions.NotFound:
-            LOG.error("Tenant: %s - not found" % u['tenant'])
-            continue
-        while True:
-            try:
-                identity.get_user_by_username(tenants_admin,
-                                              tenant['id'], u['name'])
-            except tempest.lib.exceptions.NotFound:
-                users_admin.create_user(
-                    u['name'], u['pass'], tenant['id'],
-                    "%s@%s" % (u['name'], tenant['id']),
-                    enabled=True)
-                break
-            else:
-                LOG.warning("User '%s' already exists in this environment. "
-                            "New name generated" % u['name'])
-                u['name'] = random_user_name(opts.tag, u['prefix'])
-
-    LOG.info('Users created')
-    if neutron_iso_networks:
-        for u in resources['users']:
-            tenant = identity.get_tenant_by_name(tenants_admin, u['tenant'])
-            network_name, router_name = create_network_resources(
-                networks_admin, routers_admin, subnets_admin,
-                tenant['id'], u['name'])
-            u['network'] = network_name
-            u['router'] = router_name
-        LOG.info('Networks created')
-    for u in resources['users']:
-        try:
-            tenant = identity.get_tenant_by_name(tenants_admin, u['tenant'])
-        except tempest.lib.exceptions.NotFound:
-            LOG.error("Tenant: %s - not found" % u['tenant'])
-            continue
-        try:
-            user = identity.get_user_by_username(tenants_admin,
-                                                 tenant['id'], u['name'])
-        except tempest.lib.exceptions.NotFound:
-            LOG.error("User: %s - not found" % u['user'])
-            continue
-        for r in u['role_ids']:
-            try:
-                roles_admin.assign_user_role(tenant['id'], user['id'], r)
-            except tempest.lib.exceptions.Conflict:
-                # don't care if it's already assigned
-                pass
-    LOG.info('Roles assigned')
-    LOG.info('Resources deployed successfully!')
-
-
-def create_network_resources(networks_admin_client,
-                             routers_admin_client, subnets_admin_client,
-                             tenant_id, name):
-
-    def _create_network(name):
-        resp_body = networks_admin_client.create_network(
-            name=name, tenant_id=tenant_id)
-        return resp_body['network']
-
-    def _create_subnet(subnet_name, network_id):
-        base_cidr = netaddr.IPNetwork(CONF.network.project_network_cidr)
-        mask_bits = CONF.network.project_network_mask_bits
-        for subnet_cidr in base_cidr.subnet(mask_bits):
-            try:
-                resp_body = subnets_admin_client.\
-                    create_subnet(
-                        network_id=network_id, cidr=str(subnet_cidr),
-                        name=subnet_name,
-                        tenant_id=tenant_id,
-                        enable_dhcp=True,
-                        ip_version=4)
-                break
-            except tempest.lib.exceptions.BadRequest as e:
-                if 'overlaps with another subnet' not in str(e):
-                    raise
-        else:
-            message = 'Available CIDR for subnet creation could not be found'
-            raise Exception(message)
-        return resp_body['subnet']
-
-    def _create_router(router_name):
-        external_net_id = dict(
-            network_id=CONF.network.public_network_id)
-        resp_body = routers_admin_client.create_router(
-            name=router_name,
-            external_gateway_info=external_net_id,
-            tenant_id=tenant_id)
-        return resp_body['router']
-
-    def _add_router_interface(router_id, subnet_id):
-        routers_admin_client.add_router_interface(router_id,
-                                                  subnet_id=subnet_id)
-
-    network_name = name + "-network"
-    network = _create_network(network_name)
-    subnet_name = name + "-subnet"
-    subnet = _create_subnet(subnet_name, network['id'])
-    router_name = name + "-router"
-    router = _create_router(router_name)
-    _add_router_interface(router['id'], subnet['id'])
-    return network_name, router_name
-
-
-def random_user_name(tag, prefix):
-    if tag:
-        return data_utils.rand_name('-'.join((tag, prefix)))
-    else:
-        return data_utils.rand_name(prefix)
-
-
-def generate_resources(opts):
-    spec = [{'number': 1,
-             'prefix': 'primary',
-             'roles': (CONF.auth.tempest_roles +
-                       [CONF.object_storage.operator_role])},
-            {'number': 1,
-             'prefix': 'alt',
-             'roles': (CONF.auth.tempest_roles +
-                       [CONF.object_storage.operator_role])}]
+def generate_resources(cred_provider, admin):
+    # Create the list of resources to be provisioned for each process
+    # NOTE(andreaf) get_credentials expects a string for types or a list for
+    # roles. Adding all required inputs to the spec list.
+    spec = ['primary', 'alt']
     if CONF.service_available.swift:
-        spec.append({'number': 1,
-                     'prefix': 'swift_operator',
-                     'roles': (CONF.auth.tempest_roles +
-                               [CONF.object_storage.operator_role])})
-        spec.append({'number': 1,
-                     'prefix': 'swift_reseller_admin',
-                     'roles': (CONF.auth.tempest_roles +
-                               [CONF.object_storage.reseller_admin_role])})
+        spec.append([CONF.object_storage.operator_role])
+        spec.append([CONF.object_storage.reseller_admin_role])
     if CONF.service_available.heat:
-        spec.append({'number': 1,
-                     'prefix': 'stack_owner',
-                     'roles': (CONF.auth.tempest_roles +
-                               [CONF.orchestration.stack_owner_role])})
-    if opts.admin:
-        spec.append({
-            'number': 1,
-            'prefix': 'admin',
-            'roles': (CONF.auth.tempest_roles +
-                      [CONF.identity.admin_role])
-        })
-    resources = {'tenants': [],
-                 'users': []}
-    for count in range(opts.concurrency):
-        for user_group in spec:
-            users = [random_user_name(opts.tag, user_group['prefix'])
-                     for _ in range(user_group['number'])]
-            for user in users:
-                tenant = '-'.join((user, 'tenant'))
-                resources['tenants'].append(tenant)
-                resources['users'].append({
-                    'tenant': tenant,
-                    'name': user,
-                    'pass': data_utils.rand_password(),
-                    'prefix': user_group['prefix'],
-                    'roles': user_group['roles']
-                })
+        spec.append([CONF.orchestration.stack_owner_role,
+                     CONF.object_storage.operator_role])
+    if admin:
+        spec.append('admin')
+    resources = []
+    for cred_type in spec:
+        resources.append((cred_type, cred_provider.get_credentials(
+            credential_type=cred_type)))
     return resources
 
 
-def dump_accounts(opts, resources):
+def dump_accounts(resources, identity_version, account_file):
     accounts = []
-    for user in resources['users']:
+    for resource in resources:
+        cred_type, test_resource = resource
         account = {
-            'username': user['name'],
-            'tenant_name': user['tenant'],
-            'password': user['pass'],
-            'roles': user['roles']
+            'username': test_resource.username,
+            'password': test_resource.password
         }
-        if 'network' in user or 'router' in user:
+        if identity_version == 3:
+            account['project_name'] = test_resource.project_name
+            account['domain_name'] = test_resource.domain_name
+        else:
+            account['project_name'] = test_resource.tenant_name
+
+        # If the spec includes 'admin' credentials are defined via type,
+        # else they are defined via list of roles.
+        if cred_type == 'admin':
+            account['types'] = [cred_type]
+        elif cred_type not in ['primary', 'alt']:
+            account['roles'] = cred_type
+
+        if test_resource.network:
             account['resources'] = {}
-        if 'network' in user:
-            account['resources']['network'] = user['network']
-        if 'router' in user:
-            account['resources']['router'] = user['router']
+        if test_resource.network:
+            account['resources']['network'] = test_resource.network['name']
         accounts.append(account)
-    if os.path.exists(opts.accounts):
-        os.rename(opts.accounts, '.'.join((opts.accounts, 'bak')))
-    with open(opts.accounts, 'w') as f:
-        yaml.dump(accounts, f, default_flow_style=False)
-    LOG.info('%s generated successfully!' % opts.accounts)
+    if os.path.exists(account_file):
+        os.rename(account_file, '.'.join((account_file, 'bak')))
+    with open(account_file, 'w') as f:
+        yaml.safe_dump(accounts, f, default_flow_style=False)
+    LOG.info('%s generated successfully!' % account_file)
 
 
 def _parser_add_args(parser):
@@ -420,10 +215,18 @@ def _parser_add_args(parser):
                         metavar='<auth-password>',
                         default=os.environ.get('OS_PASSWORD'),
                         help='Defaults to env[OS_PASSWORD].')
+    parser.add_argument('--os-project-name',
+                        metavar='<auth-project-name>',
+                        default=os.environ.get('OS_PROJECT_NAME'),
+                        help='Defaults to env[OS_PROJECT_NAME].')
     parser.add_argument('--os-tenant-name',
                         metavar='<auth-tenant-name>',
                         default=os.environ.get('OS_TENANT_NAME'),
                         help='Defaults to env[OS_TENANT_NAME].')
+    parser.add_argument('--os-domain-name',
+                        metavar='<auth-domain-name>',
+                        default=os.environ.get('OS_DOMAIN_NAME'),
+                        help='Defaults to env[OS_DOMAIN_NAME].')
     parser.add_argument('--tag',
                         default='',
                         required=False,
@@ -432,13 +235,20 @@ def _parser_add_args(parser):
     parser.add_argument('-r', '--concurrency',
                         default=1,
                         type=int,
-                        required=True,
+                        required=False,
                         dest='concurrency',
                         help='Concurrency count')
     parser.add_argument('--with-admin',
                         action='store_true',
                         dest='admin',
                         help='Creates admin for each concurrent group')
+    parser.add_argument('-i', '--identity-version',
+                        default=3,
+                        choices=[2, 3],
+                        type=int,
+                        required=False,
+                        dest='identity_version',
+                        help='Version of the Identity API to use')
     parser.add_argument('accounts',
                         metavar='accounts_file.yaml',
                         help='Output accounts yaml file')
@@ -468,12 +278,11 @@ class TempestAccountGenerator(command.Command):
 
     def take_action(self, parsed_args):
         try:
-            return main(parsed_args)
+            main(parsed_args)
         except Exception:
             LOG.exception("Failure generating test accounts.")
             traceback.print_exc()
             raise
-        return 0
 
     def get_description(self):
         return DESCRIPTION
@@ -487,9 +296,16 @@ def main(opts=None):
         opts = get_options()
     if opts.config_file:
         config.CONF.set_config_path(opts.config_file)
-    resources = generate_resources(opts)
-    create_resources(opts, resources)
-    dump_accounts(opts, resources)
+    if opts.os_tenant_name:
+        LOG.warning("'os-tenant-name' and 'OS_TENANT_NAME' are both "
+                    "deprecated, please use 'os-project-name' or "
+                    "'OS_PROJECT_NAME' instead")
+    resources = []
+    for count in range(opts.concurrency):
+        # Use N different cred_providers to obtain different sets of creds
+        cred_provider = get_credential_provider(opts)
+        resources.extend(generate_resources(cred_provider, opts.admin))
+    dump_accounts(resources, opts.identity_version, opts.accounts)
 
 if __name__ == "__main__":
     main()

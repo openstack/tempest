@@ -17,6 +17,8 @@ import functools
 import six
 
 from tempest import config
+from tempest.lib.common.utils import test_utils
+from tempest.lib import decorators
 from tempest.scenario import manager
 from tempest import test
 
@@ -82,8 +84,12 @@ class TestGettingAddress(manager.NetworkScenarioTest):
                                    ip_version=4)
 
         router = self._get_router(tenant_id=self.tenant_id)
-        sub4.add_to_router(router_id=router['id'])
-        self.addCleanup(sub4.delete)
+        self.routers_client.add_router_interface(router['id'],
+                                                 subnet_id=sub4['id'])
+
+        self.addCleanup(test_utils.call_and_ignore_notfound_exc,
+                        self.routers_client.remove_router_interface,
+                        router['id'], subnet_id=sub4['id'])
 
         self.subnets_v6 = []
         for _ in range(n_subnets6):
@@ -94,10 +100,14 @@ class TestGettingAddress(manager.NetworkScenarioTest):
                                        ipv6_ra_mode=address6_mode,
                                        ipv6_address_mode=address6_mode)
 
-            sub6.add_to_router(router_id=router['id'])
-            self.addCleanup(sub6.delete)
-            self.subnets_v6.append(sub6)
+            self.routers_client.add_router_interface(router['id'],
+                                                     subnet_id=sub6['id'])
 
+            self.addCleanup(test_utils.call_and_ignore_notfound_exc,
+                            self.routers_client.remove_router_interface,
+                            router['id'], subnet_id=sub6['id'])
+
+            self.subnets_v6.append(sub6)
         return [self.network, self.network_v6] if dualnet else [self.network]
 
     @staticmethod
@@ -119,12 +129,12 @@ class TestGettingAddress(manager.NetworkScenarioTest):
         srv = self.create_server(
             key_name=self.keypair['name'],
             security_groups=[{'name': self.sec_grp['name']}],
-            networks=[{'uuid': n.id} for n in networks],
+            networks=[{'uuid': n['id']} for n in networks],
             wait_until='ACTIVE')
         fip = self.create_floating_ip(thing=srv)
         ips = self.define_server_ips(srv=srv)
         ssh = self.get_remote_client(
-            ip_address=fip.floating_ip_address,
+            ip_address=fip['floating_ip_address'],
             username=username)
         return ssh, ips, srv["id"]
 
@@ -139,7 +149,7 @@ class TestGettingAddress(manager.NetworkScenarioTest):
         """
         ports = [p["mac_address"] for p in
                  self._list_ports(device_id=sid,
-                                  network_id=self.network_v6.id)]
+                                  network_id=self.network_v6['id'])]
         self.assertEqual(1, len(ports),
                          message=("Multiple IPv6 ports found on network %s. "
                                   "ports: %s")
@@ -190,11 +200,11 @@ class TestGettingAddress(manager.NetworkScenarioTest):
             self._check_connectivity(sshv4_1,
                                      ips_from_api_2['6'][i])
             self._check_connectivity(sshv4_1,
-                                     self.subnets_v6[i].gateway_ip)
+                                     self.subnets_v6[i]['gateway_ip'])
             self._check_connectivity(sshv4_2,
                                      ips_from_api_1['6'][i])
             self._check_connectivity(sshv4_2,
-                                     self.subnets_v6[i].gateway_ip)
+                                     self.subnets_v6[i]['gateway_ip'])
 
     def _check_connectivity(self, source, dest):
         self.assertTrue(
@@ -245,6 +255,7 @@ class TestGettingAddress(manager.NetworkScenarioTest):
         self._prepare_and_test(address6_mode='dhcpv6-stateless', n_subnets6=2,
                                dualnet=True)
 
+    @decorators.skip_because(bug="1540983")
     @test.idempotent_id('9178ad42-10e4-47e9-8987-e02b170cc5cd')
     @test.services('compute', 'network')
     def test_dualnet_multi_prefix_slaac(self):

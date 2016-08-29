@@ -12,8 +12,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import uuid
-
 import testtools
 
 from tempest.api.compute import base
@@ -42,7 +40,7 @@ class ServersAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
         super(ServersAdminNegativeTestJSON, cls).resource_setup()
         cls.tenant_id = cls.client.tenant_id
 
-        cls.s1_name = data_utils.rand_name('server')
+        cls.s1_name = data_utils.rand_name(cls.__name__ + '-server')
         server = cls.create_test_server(name=cls.s1_name,
                                         wait_until='ACTIVE')
         cls.s1_id = server['id']
@@ -147,7 +145,7 @@ class ServersAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
         # migrate a non existent server
         self.assertRaises(lib_exc.NotFound,
                           self.client.migrate_server,
-                          str(uuid.uuid4()))
+                          data_utils.rand_uuid())
 
     @test.idempotent_id('b0b17f83-d14e-4fc4-8f31-bcc9f3cfa629')
     @testtools.skipUnless(CONF.compute_feature_enabled.resize,

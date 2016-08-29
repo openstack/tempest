@@ -13,181 +13,66 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import testtools
+
+from tempest.lib import exceptions
 
 
-class TempestException(Exception):
-    """Base Tempest Exception
-
-    To correctly use this class, inherit from it and define
-    a 'message' property. That message will get printf'd
-    with the keyword arguments provided to the constructor.
-    """
-    message = "An unknown exception occurred"
-
-    def __init__(self, *args, **kwargs):
-        super(TempestException, self).__init__()
-        try:
-            self._error_string = self.message % kwargs
-        except Exception:
-            # at least get the core message out if something happened
-            self._error_string = self.message
-        if len(args) > 0:
-            # If there is a non-kwarg parameter, assume it's the error
-            # message or reason description and tack it on to the end
-            # of the exception message
-            # Convert all arguments into their string representations...
-            args = ["%s" % arg for arg in args]
-            self._error_string = (self._error_string +
-                                  "\nDetails: %s" % '\n'.join(args))
-
-    def __str__(self):
-        return self._error_string
-
-
-class RestClientException(TempestException,
-                          testtools.TestCase.failureException):
-    pass
-
-
-class InvalidConfiguration(TempestException):
+class InvalidConfiguration(exceptions.TempestException):
     message = "Invalid Configuration"
 
 
-class InvalidCredentials(TempestException):
-    message = "Invalid Credentials"
-
-
-class InvalidServiceTag(TempestException):
+class InvalidServiceTag(exceptions.TempestException):
     message = "Invalid service tag"
 
 
-class InvalidIdentityVersion(TempestException):
-    message = "Invalid version %(identity_version)s of the identity service"
-
-
-class TimeoutException(TempestException):
+class TimeoutException(exceptions.TempestException):
     message = "Request timed out"
 
 
-class BuildErrorException(TempestException):
+class BuildErrorException(exceptions.TempestException):
     message = "Server %(server_id)s failed to build and is in ERROR status"
 
 
-class ImageKilledException(TempestException):
+class ImageKilledException(exceptions.TempestException):
     message = "Image %(image_id)s 'killed' while waiting for '%(status)s'"
 
 
-class AddImageException(TempestException):
+class AddImageException(exceptions.TempestException):
     message = "Image %(image_id)s failed to become ACTIVE in the allotted time"
 
 
-class EC2RegisterImageException(TempestException):
-    message = ("Image %(image_id)s failed to become 'available' "
-               "in the allotted time")
-
-
-class VolumeBuildErrorException(TempestException):
+class VolumeBuildErrorException(exceptions.TempestException):
     message = "Volume %(volume_id)s failed to build and is in ERROR status"
 
 
-class VolumeRestoreErrorException(TempestException):
+class VolumeRestoreErrorException(exceptions.TempestException):
     message = "Volume %(volume_id)s failed to restore and is in ERROR status"
 
 
-class SnapshotBuildErrorException(TempestException):
+class SnapshotBuildErrorException(exceptions.TempestException):
     message = "Snapshot %(snapshot_id)s failed to build and is in ERROR status"
 
 
-class VolumeBackupException(TempestException):
+class VolumeBackupException(exceptions.TempestException):
     message = "Volume backup %(backup_id)s failed and is in ERROR status"
 
 
-class StackBuildErrorException(TempestException):
+class StackBuildErrorException(exceptions.TempestException):
     message = ("Stack %(stack_identifier)s is in %(stack_status)s status "
                "due to '%(stack_status_reason)s'")
 
 
-class StackResourceBuildErrorException(TempestException):
-    message = ("Resource %(resource_name)s in stack %(stack_identifier)s is "
-               "in %(resource_status)s status due to "
-               "'%(resource_status_reason)s'")
-
-
-class AuthenticationFailure(TempestException):
-    message = ("Authentication with user %(user)s and password "
-               "%(password)s failed auth using tenant %(tenant)s.")
-
-
-class EndpointNotFound(TempestException):
-    message = "Endpoint not found"
-
-
-class ImageFault(TempestException):
-    message = "Got image fault"
-
-
-class IdentityError(TempestException):
-    message = "Got identity error"
-
-
-class ServerUnreachable(TempestException):
-    message = "The server is not reachable via the configured network"
-
-
-class TearDownException(TempestException):
-    message = "%(num)d cleanUp operation failed"
+class ServerUnreachable(exceptions.TempestException):
+    message = ("Server %(server_id)s is not reachable via "
+               "the configured network")
 
 
 # NOTE(andreaf) This exception is added here to facilitate the migration
-# of get_network_from_name and preprov_creds to tempest-lib, and it should
+# of get_network_from_name and preprov_creds to tempest.lib, and it should
 # be migrated along with them
-class InvalidTestResource(TempestException):
-    message = "%(name) is not a valid %(type), or the name is ambiguous"
+class InvalidTestResource(exceptions.TempestException):
+    message = "%(name)s is not a valid %(type)s, or the name is ambiguous"
 
 
-class RFCViolation(RestClientException):
+class RFCViolation(exceptions.RestClientException):
     message = "RFC Violation"
-
-
-class InvalidHttpSuccessCode(RestClientException):
-    message = "The success code is different than the expected one"
-
-
-class BadRequest(RestClientException):
-    message = "Bad request"
-
-
-class ResponseWithNonEmptyBody(RFCViolation):
-    message = ("RFC Violation! Response with %(status)d HTTP Status Code "
-               "MUST NOT have a body")
-
-
-class ResponseWithEntity(RFCViolation):
-    message = ("RFC Violation! Response with 205 HTTP Status Code "
-               "MUST NOT have an entity")
-
-
-class InvalidHTTPResponseHeader(RestClientException):
-    message = "HTTP response header is invalid"
-
-
-class InvalidStructure(TempestException):
-    message = "Invalid structure of table with details"
-
-
-class CommandFailed(Exception):
-    def __init__(self, returncode, cmd, output, stderr):
-        super(CommandFailed, self).__init__()
-        self.returncode = returncode
-        self.cmd = cmd
-        self.stdout = output
-        self.stderr = stderr
-
-    def __str__(self):
-        return ("Command '%s' returned non-zero exit status %d.\n"
-                "stdout:\n%s\n"
-                "stderr:\n%s" % (self.cmd,
-                                 self.returncode,
-                                 self.stdout,
-                                 self.stderr))

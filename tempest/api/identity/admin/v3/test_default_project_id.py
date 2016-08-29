@@ -9,13 +9,11 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
-
 from tempest.api.identity import base
 from tempest import clients
 from tempest.common.utils import data_utils
 from tempest import config
 from tempest.lib import auth
-from tempest import manager
 from tempest import test
 
 CONF = config.CONF
@@ -56,7 +54,7 @@ class TestDefaultProjectId (base.BaseIdentityV3AdminTest):
         # default project
         user_name = data_utils.rand_name('user')
         user_body = self.users_client.create_user(
-            user_name,
+            name=user_name,
             password=user_name,
             domain_id=dom_id,
             default_project_id=proj_id)['user']
@@ -78,7 +76,7 @@ class TestDefaultProjectId (base.BaseIdentityV3AdminTest):
         creds = auth.KeystoneV3Credentials(username=user_name,
                                            password=user_name,
                                            user_domain_name=dom_name)
-        auth_provider = manager.get_auth_provider(creds)
+        auth_provider = clients.get_auth_provider(creds)
         creds = auth_provider.fill_credentials()
         admin_client = clients.Manager(credentials=creds)
 

@@ -36,11 +36,6 @@ class BaseComputeClient(rest_client.RestClient):
 
     api_microversion_header_name = 'X-OpenStack-Nova-API-Version'
 
-    def __init__(self, auth_provider, service, region,
-                 **kwargs):
-        super(BaseComputeClient, self).__init__(
-            auth_provider, service, region, **kwargs)
-
     def get_headers(self):
         headers = super(BaseComputeClient, self).get_headers()
         if COMPUTE_MICROVERSION:
@@ -48,9 +43,9 @@ class BaseComputeClient(rest_client.RestClient):
         return headers
 
     def request(self, method, url, extra_headers=False, headers=None,
-                body=None):
+                body=None, chunked=False):
         resp, resp_body = super(BaseComputeClient, self).request(
-            method, url, extra_headers, headers, body)
+            method, url, extra_headers, headers, body, chunked)
         if (COMPUTE_MICROVERSION and
             COMPUTE_MICROVERSION != api_version_utils.LATEST_MICROVERSION):
             api_version_utils.assert_version_header_matches_request(
@@ -67,11 +62,13 @@ class BaseComputeClient(rest_client.RestClient):
 
         :param schema_versions_info: List of dict which provides schema
                                      information with range of valid versions.
-        Example -
-        schema_versions_info = [
-            {'min': None, 'max': '2.1', 'schema': schemav21},
-            {'min': '2.2', 'max': '2.9', 'schema': schemav22},
-            {'min': '2.10', 'max': None, 'schema': schemav210}]
+
+        Example::
+
+         schema_versions_info = [
+             {'min': None, 'max': '2.1', 'schema': schemav21},
+             {'min': '2.2', 'max': '2.9', 'schema': schemav22},
+             {'min': '2.10', 'max': None, 'schema': schemav210}]
         """
         schema = None
         version = api_version_request.APIVersionRequest(COMPUTE_MICROVERSION)

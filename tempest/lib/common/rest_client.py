@@ -15,6 +15,7 @@
 #    under the License.
 
 import collections
+import email.utils
 import logging as real_logging
 import re
 import time
@@ -25,7 +26,7 @@ from oslo_serialization import jsonutils as json
 import six
 
 from tempest.lib.common import http
-from tempest.lib.common.utils import misc as misc_utils
+from tempest.lib.common.utils import test_utils
 from tempest.lib import exceptions
 
 # redrive rate limited calls at most twice
@@ -53,6 +54,8 @@ class RestClient(object):
     :param auth_provider: an auth provider object used to wrap requests in auth
     :param str service: The service name to use for the catalog lookup
     :param str region: The region to use for the catalog lookup
+    :param str name: The endpoint name to use for the catalog lookup; this
+                     returns only if the service exists
     :param str endpoint_type: The endpoint type to use for the catalog lookup
     :param int build_interval: Time in seconds between to status checks in
                                wait loops
@@ -61,8 +64,10 @@ class RestClient(object):
                                                     certificate validation
     :param str ca_certs: File containing the CA Bundle to use in verifying a
                          TLS server cert
-    :param str trace_request: Regex to use for specifying logging the entirety
+    :param str trace_requests: Regex to use for specifying logging the entirety
                               of the request and response payload
+    :param str http_timeout: Timeout in seconds to wait for the http request to
+                             return
     """
     TYPE = "json"
 
@@ -75,10 +80,11 @@ class RestClient(object):
                  endpoint_type='publicURL',
                  build_interval=1, build_timeout=60,
                  disable_ssl_certificate_validation=False, ca_certs=None,
-                 trace_requests=''):
+                 trace_requests='', name=None, http_timeout=None):
         self.auth_provider = auth_provider
         self.service = service
         self.region = region
+        self.name = name
         self.endpoint_type = endpoint_type
         self.build_interval = build_interval
         self.build_timeout = build_timeout
@@ -95,9 +101,13 @@ class RestClient(object):
                                        'vary', 'www-authenticate'))
         dscv = disable_ssl_certificate_validation
         self.http_obj = http.ClosingHttp(
-            disable_ssl_certificate_validation=dscv, ca_certs=ca_certs)
+            disable_ssl_certificate_validation=dscv, ca_certs=ca_certs,
+            timeout=http_timeout)
 
     def _get_type(self):
+        if self.TYPE != "json":
+            self.LOG.warning("Tempest has dropped XML support and the TYPE "
+                             "became meaningless")
         return self.TYPE
 
     def get_headers(self, accept_type=None, send_type=None):
@@ -190,7 +200,8 @@ class RestClient(object):
         _filters = dict(
             service=self.service,
             endpoint_type=self.endpoint_type,
-            region=self.region
+            region=self.region,
+            name=self.name
         )
         if self.api_version is not None:
             _filters['api_version'] = self.api_version
@@ -220,6 +231,10 @@ class RestClient(object):
         :raises exceptions.InvalidHttpSuccessCode: if the read code isn't an
                                                    expected http success code
         """
+        if not isinstance(read_code, int):
+            raise TypeError("'read_code' must be an int instead of (%s)"
+                            % type(read_code))
+
         assert_msg = ("This function only allowed to use for HTTP status"
                       "codes which explicitly defined in the RFC 7231 & 4918."
                       "{0} is not a defined Success Code!"
@@ -242,7 +257,8 @@ class RestClient(object):
                 details = pattern.format(read_code, expected_code)
                 raise exceptions.InvalidHttpSuccessCode(details)
 
-    def post(self, url, body, headers=None, extra_headers=False):
+    def post(self, url, body, headers=None, extra_headers=False,
+             chunked=False):
         """Send a HTTP POST request using keystone auth
 
         :param str url: the relative url to send the post request to
@@ -252,11 +268,12 @@ class RestClient(object):
                                    returned by the get_headers() method are to
                                    be used but additional headers are needed in
                                    the request pass them in as a dict.
+        :param bool chunked: sends the body with chunked encoding
         :return: a tuple with the first entry containing the response headers
                  and the second the response body
         :rtype: tuple
         """
-        return self.request('POST', url, extra_headers, headers, body)
+        return self.request('POST', url, extra_headers, headers, body, chunked)
 
     def get(self, url, headers=None, extra_headers=False):
         """Send a HTTP GET request using keystone service catalog and auth
@@ -305,7 +322,7 @@ class RestClient(object):
         """
         return self.request('PATCH', url, extra_headers, headers, body)
 
-    def put(self, url, body, headers=None, extra_headers=False):
+    def put(self, url, body, headers=None, extra_headers=False, chunked=False):
         """Send a HTTP PUT request using keystone service catalog and auth
 
         :param str url: the relative url to send the post request to
@@ -315,11 +332,12 @@ class RestClient(object):
                                    returned by the get_headers() method are to
                                    be used but additional headers are needed in
                                    the request pass them in as a dict.
+        :param bool chunked: sends the body with chunked encoding
         :return: a tuple with the first entry containing the response headers
                  and the second the response body
         :rtype: tuple
         """
-        return self.request('PUT', url, extra_headers, headers, body)
+        return self.request('PUT', url, extra_headers, headers, body, chunked)
 
     def head(self, url, headers=None, extra_headers=False):
         """Send a HTTP HEAD request using keystone service catalog and auth
@@ -385,21 +403,20 @@ class RestClient(object):
         else:
             return text
 
-    def _log_request_start(self, method, req_url, req_headers=None,
-                           req_body=None):
-        if req_headers is None:
-            req_headers = {}
-        caller_name = misc_utils.find_test_caller()
+    def _log_request_start(self, method, req_url):
+        caller_name = test_utils.find_test_caller()
         if self.trace_requests and re.search(self.trace_requests, caller_name):
             self.LOG.debug('Starting Request (%s): %s %s' %
                            (caller_name, method, req_url))
 
-    def _log_request_full(self, method, req_url, resp,
-                          secs="", req_headers=None,
-                          req_body=None, resp_body=None,
-                          caller_name=None, extra=None):
+    def _log_request_full(self, resp, req_headers=None, req_body=None,
+                          resp_body=None, extra=None):
         if 'X-Auth-Token' in req_headers:
             req_headers['X-Auth-Token'] = '<omitted>'
+        # A shallow copy is sufficient
+        resp_log = resp.copy()
+        if 'x-subject-token' in resp_log:
+            resp_log['x-subject-token'] = '<omitted>'
         log_fmt = """Request - Headers: %s
         Body: %s
     Response - Headers: %s
@@ -409,7 +426,7 @@ class RestClient(object):
             log_fmt % (
                 str(req_headers),
                 self._safe_body(req_body),
-                str(resp),
+                str(resp_log),
                 self._safe_body(resp_body)),
             extra=extra)
 
@@ -424,7 +441,7 @@ class RestClient(object):
         # we're going to just provide work around on who is actually
         # providing timings by gracefully adding no content if they don't.
         # Once we're down to 1 caller, clean this up.
-        caller_name = misc_utils.find_test_caller()
+        caller_name = test_utils.find_test_caller()
         if secs:
             secs = " %.3fs" % secs
         self.LOG.info(
@@ -439,8 +456,8 @@ class RestClient(object):
         # Also look everything at DEBUG if you want to filter this
         # out, don't run at debug.
         if self.LOG.isEnabledFor(real_logging.DEBUG):
-            self._log_request_full(method, req_url, resp, secs, req_headers,
-                                   req_body, resp_body, caller_name, extra)
+            self._log_request_full(resp, req_headers, req_body,
+                                   resp_body, extra)
 
     def _parse_resp(self, body):
         try:
@@ -515,7 +532,7 @@ class RestClient(object):
         if method != 'HEAD' and not resp_body and resp.status >= 400:
             self.LOG.warning("status >= 400 response with empty body")
 
-    def _request(self, method, url, headers=None, body=None):
+    def _request(self, method, url, headers=None, body=None, chunked=False):
         """A simple HTTP request interface."""
         # Authenticate the request with the auth provider
         req_url, req_headers, req_body = self.auth_provider.auth_request(
@@ -525,7 +542,9 @@ class RestClient(object):
         start = time.time()
         self._log_request_start(method, req_url)
         resp, resp_body = self.raw_request(
-            req_url, method, headers=req_headers, body=req_body)
+            req_url, method, headers=req_headers, body=req_body,
+            chunked=chunked
+        )
         end = time.time()
         self._log_request(method, req_url, resp, secs=(end - start),
                           req_headers=req_headers, req_body=req_body,
@@ -536,7 +555,7 @@ class RestClient(object):
 
         return resp, resp_body
 
-    def raw_request(self, url, method, headers=None, body=None):
+    def raw_request(self, url, method, headers=None, body=None, chunked=False):
         """Send a raw HTTP request without the keystone catalog or auth
 
         This method sends a HTTP request in the same manner as the request()
@@ -549,17 +568,18 @@ class RestClient(object):
         :param str headers: Headers to use for the request if none are specifed
                             the headers
         :param str body: Body to send with the request
+        :param bool chunked: sends the body with chunked encoding
         :rtype: tuple
         :return: a tuple with the first entry containing the response headers
                  and the second the response body
         """
         if headers is None:
             headers = self.get_headers()
-        return self.http_obj.request(url, method,
-                                     headers=headers, body=body)
+        return self.http_obj.request(url, method, headers=headers,
+                                     body=body, chunked=chunked)
 
     def request(self, method, url, extra_headers=False, headers=None,
-                body=None):
+                body=None, chunked=False):
         """Send a HTTP request with keystone auth and using the catalog
 
         This method will send an HTTP request using keystone auth in the
@@ -585,6 +605,7 @@ class RestClient(object):
                              get_headers() method are used. If the request
                              explicitly requires no headers use an empty dict.
         :param str body: Body to send with the request
+        :param bool chunked: sends the body with chunked encoding
         :rtype: tuple
         :return: a tuple with the first entry containing the response headers
                  and the second the response body
@@ -624,8 +645,8 @@ class RestClient(object):
             except (ValueError, TypeError):
                 headers = self.get_headers()
 
-        resp, resp_body = self._request(method, url,
-                                        headers=headers, body=body)
+        resp, resp_body = self._request(method, url, headers=headers,
+                                        body=body, chunked=chunked)
 
         while (resp.status == 413 and
                'retry-after' in resp and
@@ -633,13 +654,61 @@ class RestClient(object):
                     resp, self._parse_resp(resp_body)) and
                 retry < MAX_RECURSION_DEPTH):
             retry += 1
-            delay = int(resp['retry-after'])
+            delay = self._get_retry_after_delay(resp)
+            self.LOG.debug(
+                "Sleeping %s seconds based on retry-after header", delay
+            )
             time.sleep(delay)
             resp, resp_body = self._request(method, url,
                                             headers=headers, body=body)
         self._error_checker(method, url, headers, body,
                             resp, resp_body)
         return resp, resp_body
+
+    def _get_retry_after_delay(self, resp):
+        """Extract the delay from the retry-after header.
+
+        This supports both integer and HTTP date formatted retry-after headers
+        per RFC 2616.
+
+        :param resp: The response containing the retry-after headers
+        :rtype: int
+        :return: The delay in seconds, clamped to be at least 1 second
+        :raises ValueError: On failing to parse the delay
+        """
+        delay = None
+        try:
+            delay = int(resp['retry-after'])
+        except (ValueError, KeyError):
+            pass
+
+        try:
+            retry_timestamp = self._parse_http_date(resp['retry-after'])
+            date_timestamp = self._parse_http_date(resp['date'])
+            delay = int(retry_timestamp - date_timestamp)
+        except (ValueError, OverflowError, KeyError):
+            pass
+
+        if delay is None:
+            raise ValueError(
+                "Failed to parse retry-after header %r as either int or "
+                "HTTP-date." % resp.get('retry-after')
+            )
+
+        # Retry-after headers do not have sub-second precision. Clients may
+        # receive a delay of 0. After sleeping 0 seconds, we would (likely) hit
+        # another 413. To avoid this, always sleep at least 1 second.
+        return max(1, delay)
+
+    def _parse_http_date(self, val):
+        """Parse an HTTP date, like 'Fri, 31 Dec 1999 23:59:59 GMT'.
+
+        Return an epoch timestamp (float), as returned by time.mktime().
+        """
+        parts = email.utils.parsedate(val)
+        if not parts:
+            raise ValueError("Failed to parse date %s" % val)
+        return time.mktime(parts)
 
     def _error_checker(self, method, url,
                        headers, body, resp, resp_body):
@@ -767,10 +836,7 @@ class RestClient(object):
         if (not isinstance(resp_body, collections.Mapping) or
                 'retry-after' not in resp):
             return True
-        over_limit = resp_body.get('overLimit', None)
-        if not over_limit:
-            return True
-        return 'exceed' in over_limit.get('message', 'blabla')
+        return 'exceed' in resp_body.get('message', 'blabla')
 
     def wait_for_resource_deletion(self, id):
         """Waits for a resource to be deleted
@@ -792,7 +858,7 @@ class RestClient(object):
                            'the required time (%(timeout)s s).' %
                            {'resource_type': self.resource_type, 'id': id,
                             'timeout': self.build_timeout})
-                caller = misc_utils.find_test_caller()
+                caller = test_utils.find_test_caller()
                 if caller:
                     message = '(%s) %s' % (caller, message)
                 raise exceptions.TimeoutException(message)

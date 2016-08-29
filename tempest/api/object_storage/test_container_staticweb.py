@@ -24,18 +24,14 @@ class StaticWebTest(base.BaseObjectTest):
     @classmethod
     def resource_setup(cls):
         super(StaticWebTest, cls).resource_setup()
-        cls.container_name = data_utils.rand_name(name="TestContainer")
 
         # This header should be posted on the container before every test
         cls.headers_public_read_acl = {'Read': '.r:*,.rlistings'}
 
         # Create test container and create one object in it
-        cls.container_client.create_container(cls.container_name)
-        cls.object_name = data_utils.rand_name(name="TestObject")
-        cls.object_data = data_utils.arbitrary_string()
-        cls.object_client.create_object(cls.container_name,
-                                        cls.object_name,
-                                        cls.object_data)
+        cls.container_name = cls.create_container()
+        cls.object_name, cls.object_data = cls.create_object(
+            cls.container_name)
 
         cls.container_client.update_container_metadata(
             cls.container_name,
@@ -44,8 +40,7 @@ class StaticWebTest(base.BaseObjectTest):
 
     @classmethod
     def resource_cleanup(cls):
-        if hasattr(cls, "container_name"):
-            cls.delete_containers([cls.container_name])
+        cls.delete_containers()
         super(StaticWebTest, cls).resource_cleanup()
 
     @test.idempotent_id('c1f055ab-621d-4a6a-831f-846fcb578b8b')

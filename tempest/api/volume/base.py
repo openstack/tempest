@@ -18,7 +18,7 @@ from tempest.common.utils import data_utils
 from tempest.common import waiters
 from tempest import config
 from tempest import exceptions
-from tempest.lib import exceptions as lib_exc
+from tempest.lib.common.utils import test_utils
 import tempest.test
 
 CONF = config.CONF
@@ -44,6 +44,10 @@ class BaseVolumeTest(tempest.test.BaseTestCase):
         elif cls._api_version == 2:
             if not CONF.volume_feature_enabled.api_v2:
                 msg = "Volume API v2 is disabled"
+                raise cls.skipException(msg)
+        elif cls._api_version == 3:
+            if not CONF.volume_feature_enabled.api_v3:
+                msg = "Volume API v3 is disabled"
                 raise cls.skipException(msg)
         else:
             msg = ("Invalid Cinder API version (%s)" % cls._api_version)
@@ -72,6 +76,7 @@ class BaseVolumeTest(tempest.test.BaseTestCase):
         else:
             cls.snapshots_client = cls.os.snapshots_v2_client
             cls.volumes_client = cls.os.volumes_v2_client
+            cls.backups_client = cls.os.backups_v2_client
             cls.volumes_extension_client = cls.os.volumes_v2_extension_client
             cls.availability_zone_client = (
                 cls.os.volume_v2_availability_zone_client)
@@ -105,7 +110,7 @@ class BaseVolumeTest(tempest.test.BaseTestCase):
     @classmethod
     def create_volume(cls, **kwargs):
         """Wrapper utility that returns a test volume."""
-        name = data_utils.rand_name('Volume')
+        name = data_utils.rand_name(cls.__name__ + '-Volume')
 
         name_field = cls.special_fields['name_field']
 
@@ -129,6 +134,12 @@ class BaseVolumeTest(tempest.test.BaseTestCase):
 
     # NOTE(afazekas): these create_* and clean_* could be defined
     # only in a single location in the source, and could be more general.
+
+    @classmethod
+    def delete_volume(cls, client, volume_id):
+        """Delete volume by the given client"""
+        client.delete_volume(volume_id)
+        client.wait_for_resource_deletion(volume_id)
 
     @classmethod
     def clear_volumes(cls):
@@ -179,59 +190,78 @@ class BaseVolumeAdminTest(BaseVolumeTest):
         super(BaseVolumeAdminTest, cls).setup_clients()
 
         if cls._api_version == 1:
-            cls.volume_qos_client = cls.os_adm.volume_qos_client
+            cls.admin_volume_qos_client = cls.os_adm.volume_qos_client
             cls.admin_volume_services_client = \
                 cls.os_adm.volume_services_client
-            cls.volume_types_client = cls.os_adm.volume_types_client
+            cls.admin_volume_types_client = cls.os_adm.volume_types_client
             cls.admin_volume_client = cls.os_adm.volumes_client
-            cls.hosts_client = cls.os_adm.volume_hosts_client
+            cls.admin_hosts_client = cls.os_adm.volume_hosts_client
             cls.admin_snapshots_client = cls.os_adm.snapshots_client
-            cls.backups_adm_client = cls.os_adm.backups_client
-            cls.quotas_client = cls.os_adm.volume_quotas_client
+            cls.admin_backups_client = cls.os_adm.backups_client
+            cls.admin_quotas_client = cls.os_adm.volume_quotas_client
         elif cls._api_version == 2:
-            cls.volume_qos_client = cls.os_adm.volume_qos_v2_client
+            cls.admin_volume_qos_client = cls.os_adm.volume_qos_v2_client
             cls.admin_volume_services_client = \
                 cls.os_adm.volume_services_v2_client
-            cls.volume_types_client = cls.os_adm.volume_types_v2_client
+            cls.admin_volume_types_client = cls.os_adm.volume_types_v2_client
             cls.admin_volume_client = cls.os_adm.volumes_v2_client
-            cls.hosts_client = cls.os_adm.volume_hosts_v2_client
+            cls.admin_hosts_client = cls.os_adm.volume_hosts_v2_client
             cls.admin_snapshots_client = cls.os_adm.snapshots_v2_client
-            cls.backups_adm_client = cls.os_adm.backups_v2_client
-            cls.quotas_client = cls.os_adm.volume_quotas_v2_client
+            cls.admin_backups_client = cls.os_adm.backups_v2_client
+            cls.admin_quotas_client = cls.os_adm.volume_quotas_v2_client
 
     @classmethod
     def resource_setup(cls):
         super(BaseVolumeAdminTest, cls).resource_setup()
 
         cls.qos_specs = []
+        cls.volume_types = []
 
     @classmethod
     def resource_cleanup(cls):
         cls.clear_qos_specs()
         super(BaseVolumeAdminTest, cls).resource_cleanup()
+        cls.clear_volume_types()
 
     @classmethod
     def create_test_qos_specs(cls, name=None, consumer=None, **kwargs):
         """create a test Qos-Specs."""
         name = name or data_utils.rand_name(cls.__name__ + '-QoS')
         consumer = consumer or 'front-end'
-        qos_specs = cls.volume_qos_client.create_qos(
+        qos_specs = cls.admin_volume_qos_client.create_qos(
             name=name, consumer=consumer, **kwargs)['qos_specs']
         cls.qos_specs.append(qos_specs['id'])
         return qos_specs
 
     @classmethod
+    def create_volume_type(cls, name=None, **kwargs):
+        """Create a test volume-type"""
+        name = name or data_utils.rand_name(cls.__name__ + '-volume-type')
+        volume_type = cls.admin_volume_types_client.create_volume_type(
+            name=name, **kwargs)['volume_type']
+        cls.volume_types.append(volume_type['id'])
+        return volume_type
+
+    @classmethod
     def clear_qos_specs(cls):
         for qos_id in cls.qos_specs:
-            try:
-                cls.volume_qos_client.delete_qos(qos_id)
-            except lib_exc.NotFound:
-                # The qos_specs may have already been deleted which is OK.
-                pass
+            test_utils.call_and_ignore_notfound_exc(
+                cls.admin_volume_qos_client.delete_qos, qos_id)
 
         for qos_id in cls.qos_specs:
-            try:
-                cls.volume_qos_client.wait_for_resource_deletion(qos_id)
-            except lib_exc.NotFound:
-                # The qos_specs may have already been deleted which is OK.
-                pass
+            test_utils.call_and_ignore_notfound_exc(
+                cls.admin_volume_qos_client.wait_for_resource_deletion, qos_id)
+
+    @classmethod
+    def clear_volume_types(cls):
+        for vol_type in cls.volume_types:
+            test_utils.call_and_ignore_notfound_exc(
+                cls.admin_volume_types_client.delete_volume_type, vol_type)
+
+        for vol_type in cls.volume_types:
+            # Resource dictionary uses for is_resource_deleted method,
+            # to distinguish between volume-type to encryption-type.
+            resource = {'id': vol_type, 'type': 'volume-type'}
+            test_utils.call_and_ignore_notfound_exc(
+                cls.admin_volume_types_client.wait_for_resource_deletion,
+                resource)

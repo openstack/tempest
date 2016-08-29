@@ -24,6 +24,7 @@ from tempest.common import waiters
 from tempest import config
 from tempest import exceptions
 from tempest.lib.common import api_version_utils
+from tempest.lib.common.utils import test_utils
 from tempest.lib import exceptions as lib_exc
 import tempest.test
 
@@ -134,11 +135,8 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
             server['id'] for server in cls.servers))
         for server in cls.servers:
             try:
-                cls.servers_client.delete_server(server['id'])
-            except lib_exc.NotFound:
-                # Something else already cleaned up the server, nothing to be
-                # worried about
-                pass
+                test_utils.call_and_ignore_notfound_exc(
+                    cls.servers_client.delete_server, server['id'])
             except Exception:
                 LOG.exception('Deleting server %s failed' % server['id'])
 
@@ -177,10 +175,8 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
         LOG.debug('Clearing images: %s', ','.join(cls.images))
         for image_id in cls.images:
             try:
-                cls.compute_images_client.delete_image(image_id)
-            except lib_exc.NotFound:
-                # The image may have already been deleted which is OK.
-                pass
+                test_utils.call_and_ignore_notfound_exc(
+                    cls.compute_images_client.delete_image, image_id)
             except Exception:
                 LOG.exception('Exception raised deleting image %s' % image_id)
 
@@ -190,10 +186,8 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
             str(sg['id']) for sg in cls.security_groups))
         for sg in cls.security_groups:
             try:
-                cls.security_groups_client.delete_security_group(sg['id'])
-            except lib_exc.NotFound:
-                # The security group may have already been deleted which is OK.
-                pass
+                test_utils.call_and_ignore_notfound_exc(
+                    cls.security_groups_client.delete_security_group, sg['id'])
             except Exception as exc:
                 LOG.info('Exception raised deleting security group %s',
                          sg['id'])
@@ -204,10 +198,10 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
         LOG.debug('Clearing server groups: %s', ','.join(cls.server_groups))
         for server_group_id in cls.server_groups:
             try:
-                cls.server_groups_client.delete_server_group(server_group_id)
-            except lib_exc.NotFound:
-                # The server-group may have already been deleted which is OK.
-                pass
+                test_utils.call_and_ignore_notfound_exc(
+                    cls.server_groups_client.delete_server_group,
+                    server_group_id
+                )
             except Exception:
                 LOG.exception('Exception raised deleting server-group %s',
                               server_group_id)
@@ -365,7 +359,7 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
             for address in addresses:
                 if address['version'] == CONF.validation.ip_version_for_ssh:
                     return address['addr']
-            raise exceptions.ServerUnreachable()
+            raise exceptions.ServerUnreachable(server_id=server['id'])
         else:
             raise exceptions.InvalidConfiguration()
 

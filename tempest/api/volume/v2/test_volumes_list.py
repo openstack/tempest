@@ -14,9 +14,11 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import random
 from six.moves.urllib import parse
 
 from tempest.api.volume import base
+from tempest.lib import decorators
 from tempest import test
 
 
@@ -40,22 +42,12 @@ class VolumesV2ListTestJSON(base.BaseVolumeTest):
         super(VolumesV2ListTestJSON, cls).resource_setup()
 
         # Create 3 test volumes
-        cls.volume_list = []
         cls.volume_id_list = []
         cls.metadata = {'Type': 'work'}
         for i in range(3):
             volume = cls.create_volume(metadata=cls.metadata)
             volume = cls.client.show_volume(volume['id'])['volume']
-            cls.volume_list.append(volume)
             cls.volume_id_list.append(volume['id'])
-
-    @classmethod
-    def resource_cleanup(cls):
-        # Delete the created volumes
-        for volid in cls.volume_id_list:
-            cls.client.delete_volume(volid)
-            cls.client.wait_for_resource_deletion(volid)
-        super(VolumesV2ListTestJSON, cls).resource_cleanup()
 
     @test.idempotent_id('2a7064eb-b9c3-429b-b888-33928fc5edd3')
     def test_volume_list_details_with_multiple_params(self):
@@ -173,9 +165,9 @@ class VolumesV2ListTestJSON(base.BaseVolumeTest):
 
             # If cannot follow make sure it's because we have finished
             else:
-                self.assertListEqual([], remaining or [],
-                                     'No more pages reported, but still '
-                                     'missing ids %s' % remaining)
+                self.assertEqual([], remaining or [],
+                                 'No more pages reported, but still '
+                                 'missing ids %s' % remaining)
                 break
 
     @test.idempotent_id('e9138a2c-f67b-4796-8efa-635c196d01de')
@@ -185,3 +177,29 @@ class VolumesV2ListTestJSON(base.BaseVolumeTest):
     @test.idempotent_id('af55e775-8e4b-4feb-8719-215c43b0238c')
     def test_volume_list_pagination(self):
         self._test_pagination('volumes', ids=self.volume_id_list, detail=False)
+
+    @test.idempotent_id('46eff077-100b-427f-914e-3db2abcdb7e2')
+    @decorators.skip_because(bug='1572765')
+    def test_volume_list_with_detail_param_marker(self):
+        # Choosing a random volume from a list of volumes for 'marker'
+        # parameter
+        random_volume = random.choice(self.volume_id_list)
+
+        params = {'marker': random_volume}
+
+        # Running volume list using marker parameter
+        vol_with_marker = self.client.list_volumes(detail=True,
+                                                   params=params)['volumes']
+
+        # Fetching the index of the random volume from volume_id_list
+        index_marker = self.volume_id_list.index(random_volume)
+
+        # The expected list with marker parameter
+        verify_volume_list = self.volume_id_list[:index_marker]
+
+        failed_msg = "Failed to list volume details by marker"
+
+        # Validating the expected list is the same like the observed list
+        self.assertEqual(verify_volume_list,
+                         map(lambda x: x['id'],
+                             vol_with_marker[::-1]), failed_msg)

@@ -16,16 +16,31 @@ from tempest.lib.services.network import base
 class NetworksClient(base.BaseNetworkClient):
 
     def create_network(self, **kwargs):
+        """Creates a network.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref/networking/v2/index.html#create-network
+        """
         uri = '/networks'
         post_data = {'network': kwargs}
         return self.create_resource(uri, post_data)
 
     def update_network(self, network_id, **kwargs):
+        """Updates a network.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref/networking/v2/index.html#update-network
+        """
         uri = '/networks/%s' % network_id
         post_data = {'network': kwargs}
         return self.update_resource(uri, post_data)
 
     def show_network(self, network_id, **fields):
+        """Shows details for a network.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref/networking/v2/index.html#show-network-details
+        """
         uri = '/networks/%s' % network_id
         return self.show_resource(uri, **fields)
 
@@ -34,6 +49,11 @@ class NetworksClient(base.BaseNetworkClient):
         return self.delete_resource(uri)
 
     def list_networks(self, **filters):
+        """Lists networks to which the tenant has access.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref/networking/v2/index.html#list-networks
+        """
         uri = '/networks'
         return self.list_resources(uri, **filters)
 
@@ -41,7 +61,7 @@ class NetworksClient(base.BaseNetworkClient):
         """Create multiple networks in a single request.
 
         Available params: see http://developer.openstack.org/
-                              api-ref-networking-v2.html#bulkCreateNetwork
+                              api-ref/networking/v2/index.html#bulk-create-networks
         """
         uri = '/networks'
         return self.create_resource(uri, kwargs)

@@ -12,6 +12,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import fixtures
 import time
 
 from oslo_config import cfg
@@ -19,15 +20,45 @@ from oslotest import mockpatch
 
 from tempest.common.utils.linux import remote_client
 from tempest import config
+from tempest.lib import exceptions as lib_exc
+from tempest.tests import base
 from tempest.tests import fake_config
-from tempest.tests.lib import base
+
+
+SERVER = {
+    'id': 'server_uuid',
+    'name': 'fake_server',
+    'status': 'ACTIVE'
+}
+
+BROKEN_SERVER = {
+    'id': 'broken_server_uuid',
+    'name': 'broken_server',
+    'status': 'ERROR'
+}
+
+
+class FakeServersClient(object):
+
+    CONSOLE_OUTPUT = "Console output for %s"
+
+    def get_console_output(self, server_id):
+        status = 'ERROR'
+        for s in SERVER, BROKEN_SERVER:
+            if s['id'] == server_id:
+                status = s['status']
+        if status == 'ERROR':
+            raise lib_exc.BadRequest('Server in ERROR state')
+        else:
+            return dict(output=self.CONSOLE_OUTPUT % server_id)
 
 
 class TestRemoteClient(base.TestCase):
     def setUp(self):
         super(TestRemoteClient, self).setUp()
         self.useFixture(fake_config.ConfigFixture())
-        self.stubs.Set(config, 'TempestConfigPrivate', fake_config.FakePrivate)
+        self.patchobject(config, 'TempestConfigPrivate',
+                         fake_config.FakePrivate)
         cfg.CONF.set_default('ip_version_for_ssh', 4, group='validation')
         cfg.CONF.set_default('network_for_ssh', 'public', group='validation')
         cfg.CONF.set_default('connect_timeout', 1, group='validation')
@@ -36,14 +67,9 @@ class TestRemoteClient(base.TestCase):
         self.ssh_mock = self.useFixture(mockpatch.PatchObject(self.conn,
                                                               'ssh_client'))
 
-    def test_hostname_equals_servername_for_expected_names(self):
+    def test_get_hostname(self):
         self.ssh_mock.mock.exec_command.return_value = 'fake_hostname'
-        self.assertTrue(self.conn.hostname_equals_servername('fake_hostname'))
-
-    def test_hostname_equals_servername_for_unexpected_names(self):
-        self.ssh_mock.mock.exec_command.return_value = 'fake_hostname'
-        self.assertFalse(
-            self.conn.hostname_equals_servername('unexpected_hostname'))
+        self.assertEqual(self.conn.get_hostname(), 'fake_hostname')
 
     def test_get_ram_size(self):
         free_output = "Mem:         48294      45738       2555          0" \
@@ -154,3 +180,78 @@ a0:b0:c0:d0:e0:f0"""
         self.conn.set_nic_state(nic, "down")
         self._assert_exec_called_with(
             'sudo ip link set %s down' % nic)
+
+
+class TestRemoteClientWithServer(base.TestCase):
+
+    server = SERVER
+
+    def setUp(self):
+        super(TestRemoteClientWithServer, self).setUp()
+        self.useFixture(fake_config.ConfigFixture())
+        self.patchobject(config, 'TempestConfigPrivate',
+                         fake_config.FakePrivate)
+        cfg.CONF.set_default('ip_version_for_ssh', 4, group='validation')
+        cfg.CONF.set_default('network_for_ssh', 'public',
+                             group='validation')
+        cfg.CONF.set_default('connect_timeout', 1, group='validation')
+        cfg.CONF.set_default('console_output', True,
+                             group='compute-feature-enabled')
+
+        self.conn = remote_client.RemoteClient(
+            '127.0.0.1', 'user', 'pass',
+            server=self.server, servers_client=FakeServersClient())
+        self.useFixture(fixtures.MockPatch(
+            'tempest.lib.common.ssh.Client._get_ssh_connection',
+            side_effect=lib_exc.SSHTimeout(host='127.0.0.1',
+                                           user='user',
+                                           password='pass')))
+        self.log = self.useFixture(fixtures.FakeLogger(
+            name='tempest.common.utils.linux.remote_client',
+            level='DEBUG'))
+
+    def test_validate_debug_ssh_console(self):
+        self.assertRaises(lib_exc.SSHTimeout,
+                          self.conn.validate_authentication)
+        msg = 'Caller: %s. Timeout trying to ssh to server %s' % (
+            'TestRemoteClientWithServer:test_validate_debug_ssh_console',
+            self.server)
+        self.assertIn(msg, self.log.output)
+        self.assertIn('Console output for', self.log.output)
+
+    def test_exec_command_debug_ssh_console(self):
+        self.assertRaises(lib_exc.SSHTimeout,
+                          self.conn.exec_command, 'fake command')
+        self.assertIn('fake command', self.log.output)
+        msg = 'Caller: %s. Timeout trying to ssh to server %s' % (
+            'TestRemoteClientWithServer:test_exec_command_debug_ssh_console',
+            self.server)
+        self.assertIn(msg, self.log.output)
+        self.assertIn('Console output for', self.log.output)
+
+
+class TestRemoteClientWithBrokenServer(TestRemoteClientWithServer):
+
+    server = BROKEN_SERVER
+
+    def test_validate_debug_ssh_console(self):
+        self.assertRaises(lib_exc.SSHTimeout,
+                          self.conn.validate_authentication)
+        msg = 'Caller: %s. Timeout trying to ssh to server %s' % (
+            'TestRemoteClientWithBrokenServer:test_validate_debug_ssh_console',
+            self.server)
+        self.assertIn(msg, self.log.output)
+        msg = 'Could not get console_log for server %s' % self.server['id']
+        self.assertIn(msg, self.log.output)
+
+    def test_exec_command_debug_ssh_console(self):
+        self.assertRaises(lib_exc.SSHTimeout,
+                          self.conn.exec_command, 'fake command')
+        self.assertIn('fake command', self.log.output)
+        caller = ":".join(['TestRemoteClientWithBrokenServer',
+                           'test_exec_command_debug_ssh_console'])
+        msg = 'Caller: %s. Timeout trying to ssh to server %s' % (
+            caller, self.server)
+        self.assertIn(msg, self.log.output)
+        msg = 'Could not get console_log for server %s' % self.server['id']
+        self.assertIn(msg, self.log.output)

@@ -7,15 +7,14 @@ Tempest provides a stable library interface that provides external tools or
 test suites an interface for reusing pieces of tempest code. Any public
 interface that lives in tempest/lib in the tempest repo is treated as a stable
 public interface and it should be safe to external consume that. Every effort
-goes into maintaining backwards compatibility with any change. Just as with
-tempest-lib the library is self contained and doesn't have any dependency on
-other tempest internals outside of lib. (including no usage of tempest
-configuration)
+goes into maintaining backwards compatibility with any change.
+The library is self contained and doesn't have any dependency on
+other tempest internals outside of lib (including no usage of tempest
+configuration).
 
 Stability
 ---------
-Just as tempest-lib before it any code that lives in tempest/lib will be treated
-as a stable interface, nothing has changed in regards to interface stability.
+Any code that lives in tempest/lib will be treated as a stable interface.
 This means that any public interface under the tempest/lib directory is
 expected to be a stable interface suitable for public consumption. However, for
 any interfaces outside of tempest/lib in the tempest tree (unless otherwise
@@ -67,3 +66,5 @@ Current Library APIs
    library/rest_client
    library/utils
    library/api_microversion_testing
+   library/auth
+   library/clients

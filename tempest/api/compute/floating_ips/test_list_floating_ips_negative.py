@@ -13,8 +13,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import uuid
-
 from tempest.api.compute import base
 from tempest.common.utils import data_utils
 from tempest import config
@@ -39,7 +37,7 @@ class FloatingIPDetailsNegativeTestJSON(base.BaseV2ComputeTest):
         # of non-existent floating IP
         # Creating a non-existent floatingIP id
         if CONF.service_available.neutron:
-            non_exist_id = str(uuid.uuid4())
+            non_exist_id = data_utils.rand_uuid()
         else:
             non_exist_id = data_utils.rand_int_id(start=999)
         self.assertRaises(lib_exc.NotFound,

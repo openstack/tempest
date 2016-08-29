@@ -19,6 +19,9 @@ import random
 import string
 import uuid
 
+from oslo_utils import netutils
+import six.moves
+
 
 def rand_uuid():
     """Generate a random UUID string
@@ -39,13 +42,13 @@ def rand_uuid_hex():
 
 
 def rand_name(name='', prefix=None):
-    """Generate a random name that inclues a random number
+    """Generate a random name that includes a random number
 
     :param str name: The name that you want to include
     :param str prefix: The prefix that you want to include
     :return: a random name. The format is
-             '<prefix>-<random number>-<name>-<random number>'.
-             (e.g. 'prefixfoo-1308607012-namebar-154876201')
+             '<prefix>-<name>-<random number>'.
+             (e.g. 'prefixfoo-namebar-154876201')
     :rtype: string
     """
     randbits = str(random.randint(1, 0x7fffffff))
@@ -72,7 +75,7 @@ def rand_password(length=15):
     ascii_char = string.ascii_letters
     digits = string.digits
     digit = random.choice(string.digits)
-    puncs = '~!@#$%^&*_=+'
+    puncs = '~!@#%^&*_=+'
     punc = random.choice(puncs)
     seed = ascii_char + digits + puncs
     pre = upper + digit + punc
@@ -81,7 +84,7 @@ def rand_password(length=15):
 
 
 def rand_url():
-    """Generate a random url that inclues a random number
+    """Generate a random url that includes a random number
 
     :return: a random url. The format is 'https://url-<random number>.com'.
              (e.g. 'https://url-154876201.com')
@@ -121,6 +124,18 @@ def rand_mac_address():
     return ':'.join(["%02x" % x for x in mac])
 
 
+def rand_infiniband_guid_address():
+    """Generate an Infiniband GUID address
+
+    :return: an random Infiniband GUID address
+    :rtype: string
+    """
+    guid = []
+    for i in range(8):
+        guid.append("%02x" % random.randint(0x00, 0xff))
+    return ':'.join(guid)
+
+
 def parse_image_id(image_ref):
     """Return the image id from a given image ref
 
@@ -139,7 +154,7 @@ def arbitrary_string(size=4, base_text=None):
     This generates a string with an arbitrary number of characters, generated
     by looping the base_text string. If the size is smaller than the size of
     base_text, returning string is shrinked to the size.
-    :param int size: a returning charactors size
+    :param int size: a returning characters size
     :param str base_text: a string you want to repeat
     :return: size string
     :rtype: string
@@ -169,7 +184,7 @@ def get_ipv6_addr_by_EUI64(cidr, mac):
     :rtype: netaddr.IPAddress
     """
     # Check if the prefix is IPv4 address
-    is_ipv4 = netaddr.valid_ipv4(cidr)
+    is_ipv4 = netutils.is_valid_ipv4(cidr)
     if is_ipv4:
         msg = "Unable to generate IP address by EUI64 for IPv4 prefix"
         raise TypeError(msg)
@@ -184,3 +199,10 @@ def get_ipv6_addr_by_EUI64(cidr, mac):
     except TypeError:
         raise TypeError('Bad prefix type for generate IPv6 address by '
                         'EUI-64: %s' % cidr)
+
+
+# Courtesy of http://stackoverflow.com/a/312464
+def chunkify(sequence, chunksize):
+    """Yield successive chunks from `sequence`."""
+    for i in six.moves.xrange(0, len(sequence), chunksize):
+        yield sequence[i:i + chunksize]

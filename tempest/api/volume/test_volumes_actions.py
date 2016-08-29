@@ -12,14 +12,15 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
+import testtools
 
 from tempest.api.volume import base
 from tempest.common.utils import data_utils
 from tempest.common import waiters
 from tempest import config
-from tempest.lib import exceptions
+from tempest import exceptions
+from tempest.lib.common.utils import test_utils
 from tempest import test
-import testtools
 
 CONF = config.CONF
 
@@ -30,7 +31,16 @@ class VolumesV2ActionsTest(base.BaseVolumeTest):
     def setup_clients(cls):
         super(VolumesV2ActionsTest, cls).setup_clients()
         cls.client = cls.volumes_client
-        cls.image_client = cls.os.image_client
+        if CONF.service_available.glance:
+            # Check if glance v1 is available to determine which client to use.
+            if CONF.image_feature_enabled.api_v1:
+                cls.image_client = cls.os.image_client
+            elif CONF.image_feature_enabled.api_v2:
+                cls.image_client = cls.os.image_client_v2
+            else:
+                raise exceptions.InvalidConfiguration(
+                    'Either api_v1 or api_v2 must be True in '
+                    '[image-feature-enabled].')
 
     @classmethod
     def resource_setup(cls):
@@ -119,23 +129,17 @@ class VolumesV2ActionsTest(base.BaseVolumeTest):
         # it is shared with the other tests. After it is uploaded in Glance,
         # there is no way to delete it from Cinder, so we delete it from Glance
         # using the Glance image_client and from Cinder via tearDownClass.
-        image_name = data_utils.rand_name('Image')
+        image_name = data_utils.rand_name(self.__class__.__name__ + '-Image')
         body = self.client.upload_volume(
             self.volume['id'], image_name=image_name,
             disk_format=CONF.volume.disk_format)['os-volume_upload_image']
         image_id = body["image_id"]
-        self.addCleanup(self._cleanup_image, image_id)
-        self.image_client.wait_for_image_status(image_id, 'active')
+        self.addCleanup(test_utils.call_and_ignore_notfound_exc,
+                        self.image_client.delete_image,
+                        image_id)
+        waiters.wait_for_image_status(self.image_client, image_id, 'active')
         waiters.wait_for_volume_status(self.client,
                                        self.volume['id'], 'available')
-
-    def _cleanup_image(self, image_id):
-        # Ignores the image deletion
-        # in the case that image wasn't created in the first place
-        try:
-            self.image_client.delete_image(image_id)
-        except exceptions.NotFound:
-            pass
 
     @test.idempotent_id('92c4ef64-51b2-40c0-9f7e-4749fbaaba33')
     def test_reserve_unreserve_volume(self):

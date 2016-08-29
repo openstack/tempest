@@ -19,14 +19,11 @@ import mock
 from tempest.lib.common import rest_client
 from tempest.lib import exceptions
 from tempest.lib.services.identity.v2 import token_client
-from tempest.tests.lib import base
+from tempest.tests import base
 from tempest.tests.lib import fake_http
 
 
 class TestTokenClientV2(base.TestCase):
-
-    def setUp(self):
-        super(TestTokenClientV2, self).setUp()
 
     def test_init_without_authurl(self):
         self.assertRaises(exceptions.IdentityError,

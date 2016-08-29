@@ -16,7 +16,9 @@
 from six import moves
 
 from tempest.api.image import base
+from tempest.common import image as common_image
 from tempest.common.utils import data_utils
+from tempest.common import waiters
 from tempest import config
 from tempest import exceptions
 from tempest import test
@@ -32,7 +34,7 @@ def get_container_and_disk_format():
 
     if container_format in a_formats and container_format != disk_format:
         msg = ("The container format and the disk format don't match. "
-               "Contaiter format: %(container)s, Disk format: %(disk)s." %
+               "Container format: %(container)s, Disk format: %(disk)s." %
                {'container': container_format, 'disk': disk_format})
         raise exceptions.InvalidConfiguration(message=msg)
 
@@ -95,7 +97,7 @@ class CreateRegisterImagesTest(base.BaseV1ImageTest):
         image_id = body.get('id')
         self.assertEqual('New Http Image', body.get('name'))
         self.assertFalse(body.get('is_public'))
-        self.client.wait_for_image_status(image_id, 'active')
+        waiters.wait_for_image_status(self.client, image_id, 'active')
         self.client.show_image(image_id)
 
     @test.idempotent_id('05b19d55-140c-40d0-b36b-fafd774d421b')
@@ -210,7 +212,7 @@ class ListImagesTest(base.BaseV1ImageTest):
     def test_index_no_params(self):
         # Simple test to see all fixture images returned
         images_list = self.client.list_images()['images']
-        image_list = map(lambda x: x['id'], images_list)
+        image_list = [image['id'] for image in images_list]
         for image_id in self.created_images:
             self.assertIn(image_id, image_list)
 
@@ -305,7 +307,8 @@ class UpdateImageMetaTest(base.BaseV1ImageTest):
     @test.idempotent_id('01752c1c-0275-4de3-9e5b-876e44541928')
     def test_list_image_metadata(self):
         # All metadata key/value pairs for an image should be returned
-        resp_metadata = self.client.get_image_meta(self.image_id)
+        resp = self.client.check_image(self.image_id)
+        resp_metadata = common_image.get_image_meta_from_headers(resp)
         expected = {'key1': 'value1'}
         self.assertEqual(expected, resp_metadata['properties'])
 
@@ -313,12 +316,13 @@ class UpdateImageMetaTest(base.BaseV1ImageTest):
     def test_update_image_metadata(self):
         # The metadata for the image should match the updated values
         req_metadata = {'key1': 'alt1', 'key2': 'value2'}
-        metadata = self.client.get_image_meta(self.image_id)
+        resp = self.client.check_image(self.image_id)
+        metadata = common_image.get_image_meta_from_headers(resp)
         self.assertEqual(metadata['properties'], {'key1': 'value1'})
         metadata['properties'].update(req_metadata)
-        metadata = self.client.update_image(
-            self.image_id, properties=metadata['properties'])['image']
-
-        resp_metadata = self.client.get_image_meta(self.image_id)
-        expected = {'key1': 'alt1', 'key2': 'value2'}
-        self.assertEqual(expected, resp_metadata['properties'])
+        headers = common_image.image_meta_to_headers(
+            properties=metadata['properties'])
+        self.client.update_image(self.image_id, headers=headers)
+        resp = self.client.check_image(self.image_id)
+        resp_metadata = common_image.get_image_meta_from_headers(resp)
+        self.assertEqual(req_metadata, resp_metadata['properties'])

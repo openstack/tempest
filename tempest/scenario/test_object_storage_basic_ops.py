@@ -13,11 +13,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest import config
 from tempest.scenario import manager
 from tempest import test
-
-CONF = config.CONF
 
 
 class TestObjectStorageBasicOps(manager.ObjectStorageScenarioTest):

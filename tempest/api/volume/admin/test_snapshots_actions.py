@@ -15,7 +15,6 @@
 
 from tempest.api.volume import base
 from tempest.common.utils import data_utils
-from tempest.common import waiters
 from tempest import config
 from tempest import test
 
@@ -42,29 +41,13 @@ class SnapshotsActionsV2Test(base.BaseVolumeAdminTest):
         vol_name = data_utils.rand_name(cls.__name__ + '-Volume')
         cls.name_field = cls.special_fields['name_field']
         params = {cls.name_field: vol_name}
-        cls.volume = cls.volumes_client.create_volume(**params)['volume']
-        waiters.wait_for_volume_status(cls.volumes_client,
-                                       cls.volume['id'], 'available')
+        cls.volume = cls.create_volume(**params)
 
         # Create a test shared snapshot for tests
         snap_name = data_utils.rand_name(cls.__name__ + '-Snapshot')
         params = {cls.name_field: snap_name}
-        cls.snapshot = cls.client.create_snapshot(
-            volume_id=cls.volume['id'], **params)['snapshot']
-        waiters.wait_for_snapshot_status(cls.client,
-                                         cls.snapshot['id'], 'available')
-
-    @classmethod
-    def resource_cleanup(cls):
-        # Delete the test snapshot
-        cls.client.delete_snapshot(cls.snapshot['id'])
-        cls.client.wait_for_resource_deletion(cls.snapshot['id'])
-
-        # Delete the test volume
-        cls.volumes_client.delete_volume(cls.volume['id'])
-        cls.volumes_client.wait_for_resource_deletion(cls.volume['id'])
-
-        super(SnapshotsActionsV2Test, cls).resource_cleanup()
+        cls.snapshot = cls.create_snapshot(
+            volume_id=cls.volume['id'], **params)
 
     def tearDown(self):
         # Set snapshot's status to available after test

@@ -61,9 +61,6 @@ class ServerRescueTestJSON(base.BaseV2ComputeTest):
         waiters.wait_for_server_status(cls.servers_client, cls.server_id,
                                        'ACTIVE')
 
-    def setUp(self):
-        super(ServerRescueTestJSON, self).setUp()
-
     @classmethod
     def resource_cleanup(cls):
         # Deleting the floating IP which is created in this method
@@ -71,9 +68,6 @@ class ServerRescueTestJSON(base.BaseV2ComputeTest):
         cls.sg = cls.security_groups_client.delete_security_group(
             cls.sg_id)
         super(ServerRescueTestJSON, cls).resource_cleanup()
-
-    def tearDown(self):
-        super(ServerRescueTestJSON, self).tearDown()
 
     def _unrescue(self, server_id):
         self.servers_client.unrescue_server(server_id)

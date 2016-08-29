@@ -14,11 +14,8 @@
 #    under the License.
 
 from tempest.api.volume import base
-from tempest import config
 from tempest.lib import exceptions as lib_exc
 from tempest import test
-
-CONF = config.CONF
 
 
 class BaseVolumeQuotasNegativeV2TestJSON(base.BaseVolumeAdminTest):
@@ -38,7 +35,7 @@ class BaseVolumeQuotasNegativeV2TestJSON(base.BaseVolumeAdminTest):
 
         # NOTE(gfidente): no need to restore original quota set
         # after the tests as they only work with dynamic credentials.
-        cls.quotas_client.update_quota_set(
+        cls.admin_quotas_client.update_quota_set(
             cls.demo_tenant_id,
             **cls.shared_quota_set)
 
@@ -58,12 +55,12 @@ class BaseVolumeQuotasNegativeV2TestJSON(base.BaseVolumeAdminTest):
         # NOTE(gfidente): quota set needs to be changed for this test
         # or we may be limited by the volumes or snaps quota number, not by
         # actual gigs usage; next line ensures shared set is restored.
-        self.addCleanup(self.quotas_client.update_quota_set,
+        self.addCleanup(self.admin_quotas_client.update_quota_set,
                         self.demo_tenant_id,
                         **self.shared_quota_set)
         new_quota_set = {'gigabytes': self.default_volume_size,
                          'volumes': 2, 'snapshots': 1}
-        self.quotas_client.update_quota_set(
+        self.admin_quotas_client.update_quota_set(
             self.demo_tenant_id,
             **new_quota_set)
         self.assertRaises(lib_exc.OverLimit,

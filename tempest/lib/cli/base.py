@@ -119,7 +119,7 @@ class CLIClient(object):
         :param merge_stderr: if True the stderr buffer is merged into stdout
         :type merge_stderr: boolean
         """
-        flags += ' --endpoint-type %s' % endpoint_type
+        flags += ' --os-endpoint-type %s' % endpoint_type
         return self.cmd_with_auth(
             'nova', action, flags, params, fail_ok, merge_stderr)
 

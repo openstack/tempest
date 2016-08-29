@@ -14,7 +14,7 @@
 
 import subprocess
 
-from tempest.tests.lib import base
+from tempest.tests import base
 
 
 class TestTempestListPlugins(base.TestCase):

@@ -19,7 +19,7 @@ from oslo_serialization import jsonutils as json
 from tempest.api.object_storage import base
 from tempest.common import custom_matchers
 from tempest.common.utils import data_utils
-from tempest.lib import exceptions as lib_exc
+from tempest.lib.common.utils import test_utils
 from tempest import test
 
 # Each segment, except for the final one, must be at least 1 megabyte
@@ -30,18 +30,14 @@ class ObjectSloTest(base.BaseObjectTest):
 
     def setUp(self):
         super(ObjectSloTest, self).setUp()
-        self.container_name = data_utils.rand_name(name='TestContainer')
-        self.container_client.create_container(self.container_name)
+        self.container_name = self.create_container()
         self.objects = []
 
     def tearDown(self):
         for obj in self.objects:
-            try:
-                self.object_client.delete_object(
-                    self.container_name,
-                    obj)
-            except lib_exc.NotFound:
-                pass
+            test_utils.call_and_ignore_notfound_exc(
+                self.object_client.delete_object,
+                self.container_name, obj)
         self.container_client.delete_container(self.container_name)
         super(ObjectSloTest, self).tearDown()
 

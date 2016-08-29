@@ -43,6 +43,11 @@ def read_accounts_yaml(path):
 
 class PreProvisionedCredentialProvider(cred_provider.CredentialProvider):
 
+    # Exclude from the hash fields specific to v2 or v3 identity API
+    # i.e. only include user*, project*, tenant* and password
+    HASH_CRED_FIELDS = (set(auth.KeystoneV2Credentials.ATTRIBUTES) &
+                        set(auth.KeystoneV3Credentials.ATTRIBUTES))
+
     def __init__(self, identity_version, test_accounts_file,
                  accounts_lock_dir, name=None, credentials_domain=None,
                  admin_role=None, object_storage_operator_role=None,
@@ -81,10 +86,8 @@ class PreProvisionedCredentialProvider(cred_provider.CredentialProvider):
         self.test_accounts_file = test_accounts_file
         if test_accounts_file:
             accounts = read_accounts_yaml(self.test_accounts_file)
-            self.use_default_creds = False
         else:
-            accounts = {}
-            self.use_default_creds = True
+            raise lib_exc.InvalidCredentials("No accounts file specified")
         self.hash_dict = self.get_hash_dict(
             accounts, admin_role, object_storage_operator_role,
             object_storage_reseller_admin_role)
@@ -104,6 +107,7 @@ class PreProvisionedCredentialProvider(cred_provider.CredentialProvider):
                       object_storage_operator_role=None,
                       object_storage_reseller_admin_role=None):
         hash_dict = {'roles': {}, 'creds': {}, 'networks': {}}
+
         # Loop over the accounts read from the yaml file
         for account in accounts:
             roles = []
@@ -116,7 +120,9 @@ class PreProvisionedCredentialProvider(cred_provider.CredentialProvider):
             if 'resources' in account:
                 resources = account.pop('resources')
             temp_hash = hashlib.md5()
-            temp_hash.update(six.text_type(account).encode('utf-8'))
+            account_for_hash = dict((k, v) for (k, v) in six.iteritems(account)
+                                    if k in cls.HASH_CRED_FIELDS)
+            temp_hash.update(six.text_type(account_for_hash).encode('utf-8'))
             temp_hash_key = temp_hash.hexdigest()
             hash_dict['creds'][temp_hash_key] = account
             for role in roles:
@@ -157,12 +163,7 @@ class PreProvisionedCredentialProvider(cred_provider.CredentialProvider):
         return hash_dict
 
     def is_multi_user(self):
-        # Default credentials is not a valid option with locking Account
-        if self.use_default_creds:
-            raise lib_exc.InvalidCredentials(
-                "Account file %s doesn't exist" % self.test_accounts_file)
-        else:
-            return len(self.hash_dict['creds']) > 1
+        return len(self.hash_dict['creds']) > 1
 
     def is_multi_tenant(self):
         return self.is_multi_user()
@@ -219,9 +220,9 @@ class PreProvisionedCredentialProvider(cred_provider.CredentialProvider):
         else:
             hashes = self.hash_dict['creds'].keys()
         # NOTE(mtreinish): admin is a special case because of the increased
-        # privlege set which could potentially cause issues on tests where that
-        # is not expected. So unless the admin role isn't specified do not
-        # allocate admin.
+        # privilege set which could potentially cause issues on tests where
+        # that is not expected. So unless the admin role isn't specified do
+        # not allocate admin.
         admin_hashes = self.hash_dict['roles'].get(self.admin_role,
                                                    None)
         if ((not roles or self.admin_role not in roles) and
@@ -237,10 +238,10 @@ class PreProvisionedCredentialProvider(cred_provider.CredentialProvider):
         return temp_creds
 
     def _get_creds(self, roles=None):
-        if self.use_default_creds:
-            raise lib_exc.InvalidCredentials(
-                "Account file %s doesn't exist" % self.test_accounts_file)
         useable_hashes = self._get_match_hash_list(roles)
+        if len(useable_hashes) == 0:
+            msg = 'No users configured for type/roles %s' % roles
+            raise lib_exc.InvalidCredentials(msg)
         free_hash = self._get_free_hash(useable_hashes)
         clean_creds = self._sanitize_creds(
             self.hash_dict['creds'][free_hash])
@@ -262,13 +263,13 @@ class PreProvisionedCredentialProvider(cred_provider.CredentialProvider):
         for _hash in self.hash_dict['creds']:
             # Comparing on the attributes that are expected in the YAML
             init_attributes = creds.get_init_attributes()
+            # Only use the attributes initially used to calculate the hash
+            init_attributes = [x for x in init_attributes if
+                               x in self.HASH_CRED_FIELDS]
             hash_attributes = self.hash_dict['creds'][_hash].copy()
-            if ('user_domain_name' in init_attributes and 'user_domain_name'
-                    not in hash_attributes):
-                # Allow for the case of domain_name populated from config
-                domain_name = self.credentials_domain
-                hash_attributes['user_domain_name'] = domain_name
-            if all([getattr(creds, k) == hash_attributes[k] for
+            # NOTE(andreaf) Not all fields may be available on all credentials
+            # so defaulting to None for that case.
+            if all([getattr(creds, k, None) == hash_attributes.get(k, None) for
                    k in init_attributes]):
                 return _hash
         raise AttributeError('Invalid credentials %s' % creds)
@@ -318,12 +319,9 @@ class PreProvisionedCredentialProvider(cred_provider.CredentialProvider):
         return self.get_creds_by_roles([self.admin_role])
 
     def is_role_available(self, role):
-        if self.use_default_creds:
-            return False
-        else:
-            if self.hash_dict['roles'].get(role):
-                return True
-            return False
+        if self.hash_dict['roles'].get(role):
+            return True
+        return False
 
     def admin_available(self):
         return self.is_role_available(self.admin_role)
@@ -351,23 +349,20 @@ class PreProvisionedCredentialProvider(cred_provider.CredentialProvider):
         return net_creds
 
     def _extend_credentials(self, creds_dict):
-        # In case of v3, adds a user_domain_name field to the creds
-        # dict if not defined
+        # Add or remove credential domain fields to fit the identity version
+        domain_fields = set(x for x in auth.KeystoneV3Credentials.ATTRIBUTES
+                            if 'domain' in x)
+        msg = 'Assuming they are valid in the default domain.'
         if self.identity_version == 'v3':
-            user_domain_fields = set(['user_domain_name', 'user_domain_id'])
-            if not user_domain_fields.intersection(set(creds_dict.keys())):
-                creds_dict['user_domain_name'] = self.credentials_domain
-        # NOTE(andreaf) In case of v2, replace project with tenant if project
-        # is provided and tenant is not
+            if not domain_fields.intersection(set(creds_dict.keys())):
+                msg = 'Using credentials %s for v3 API calls. ' + msg
+                LOG.warning(msg, self._sanitize_creds(creds_dict))
+                creds_dict['domain_name'] = self.credentials_domain
         if self.identity_version == 'v2':
-            if ('project_name' in creds_dict and
-                    'tenant_name' in creds_dict and
-                    creds_dict['project_name'] != creds_dict['tenant_name']):
-                clean_creds = self._sanitize_creds(creds_dict)
-                msg = 'Cannot specify project and tenant at the same time %s'
-                raise exceptions.InvalidCredentials(msg % clean_creds)
-            if ('project_name' in creds_dict and
-                    'tenant_name' not in creds_dict):
-                creds_dict['tenant_name'] = creds_dict['project_name']
-                creds_dict.pop('project_name')
+            if domain_fields.intersection(set(creds_dict.keys())):
+                msg = 'Using credentials %s for v2 API calls. ' + msg
+                LOG.warning(msg, self._sanitize_creds(creds_dict))
+            # Remove all valid domain attributes
+            for attr in domain_fields.intersection(set(creds_dict.keys())):
+                creds_dict.pop(attr)
         return creds_dict

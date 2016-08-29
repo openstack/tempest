@@ -16,6 +16,7 @@
 
 import argparse
 import os
+import re
 import sys
 import traceback
 
@@ -77,9 +78,16 @@ def verify_glance_api_versions(os, update):
                             not CONF.image_feature_enabled.api_v2, update)
 
 
+def _remove_version_project(url_path):
+    # The regex matches strings like /v2.0, /v3/, /v2.1/project-id/
+    return re.sub(r'/v\d+(\.\d+)?(/[^/]+)?', '', url_path)
+
+
 def _get_unversioned_endpoint(base_url):
     endpoint_parts = urlparse.urlparse(base_url)
-    endpoint = endpoint_parts.scheme + '://' + endpoint_parts.netloc
+    new_path = _remove_version_project(endpoint_parts.path)
+    endpoint_parts = endpoint_parts._replace(path=new_path)
+    endpoint = urlparse.urlunparse(endpoint_parts)
     return endpoint
 
 
@@ -89,7 +97,9 @@ def _get_api_versions(os, service):
         'keystone': os.identity_client,
         'cinder': os.volumes_client,
     }
-    client_dict[service].skip_path()
+    if service != 'keystone':
+        # Since keystone may be listening on a path, do not remove the path.
+        client_dict[service].skip_path()
     endpoint = _get_unversioned_endpoint(client_dict[service].base_url)
 
     http = tempest.lib.common.http.ClosingHttp(
@@ -137,6 +147,10 @@ def verify_cinder_api_versions(os, update):
             contains_version('v2.', versions)):
         print_and_or_update('api_v2', 'volume-feature-enabled',
                             not CONF.volume_feature_enabled.api_v2, update)
+    if (CONF.volume_feature_enabled.api_v3 !=
+            contains_version('v3.', versions)):
+        print_and_or_update('api_v3', 'volume-feature-enabled',
+                            not CONF.volume_feature_enabled.api_v3, update)
 
 
 def verify_api_versions(os, service, update):
@@ -272,12 +286,9 @@ def check_service_availability(os, update):
         'object_storage': 'swift',
         'compute': 'nova',
         'orchestration': 'heat',
-        'metering': 'ceilometer',
-        'telemetry': 'ceilometer',
         'data_processing': 'sahara',
         'baremetal': 'ironic',
         'identity': 'keystone',
-        'database': 'trove'
     }
     # Get catalog list for endpoints to use for validation
     _token, auth_data = os.auth_provider.get_auth()
@@ -365,9 +376,18 @@ def main(opts=None):
         CONF_PARSER = moves.configparser.SafeConfigParser()
         CONF_PARSER.optionxform = str
         CONF_PARSER.readfp(conf_file)
-    icreds = credentials.get_credentials_provider('verify_tempest_config')
+
+    # Indicate not to create network resources as part of getting credentials
+    net_resources = {
+        'network': False,
+        'router': False,
+        'subnet': False,
+        'dhcp': False
+    }
+    icreds = credentials.get_credentials_provider(
+        'verify_tempest_config', network_resources=net_resources)
     try:
-        os = clients.Manager(icreds.get_primary_creds())
+        os = clients.Manager(icreds.get_primary_creds().credentials)
         services = check_service_availability(os, update)
         results = {}
         for service in ['nova', 'cinder', 'neutron', 'swift']:
@@ -401,12 +421,11 @@ class TempestVerifyConfig(command.Command):
 
     def take_action(self, parsed_args):
         try:
-            return main(parsed_args)
+            main(parsed_args)
         except Exception:
             LOG.exception("Failure verifying configuration.")
             traceback.print_exc()
             raise
-        return 0
 
 if __name__ == "__main__":
     main()

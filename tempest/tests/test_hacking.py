@@ -13,7 +13,7 @@
 #    under the License.
 
 from tempest.hacking import checks
-from tempest.tests.lib import base
+from tempest.tests import base
 
 
 class HackingTestCase(base.TestCase):
@@ -167,3 +167,16 @@ class HackingTestCase(base.TestCase):
         self.assertEqual(1, len(list(checks.dont_import_local_tempest_into_lib(
             "import tempest.exception",
             './tempest/lib/common/compute.py'))))
+
+    def test_dont_use_config_in_tempest_lib(self):
+        self.assertFalse(list(checks.dont_use_config_in_tempest_lib(
+            'from tempest import config', './tempest/common/compute.py')))
+        self.assertFalse(list(checks.dont_use_config_in_tempest_lib(
+            'from oslo_concurrency import lockutils',
+            './tempest/lib/auth.py')))
+        self.assertTrue(list(checks.dont_use_config_in_tempest_lib(
+            'from tempest import config', './tempest/lib/auth.py')))
+        self.assertTrue(list(checks.dont_use_config_in_tempest_lib(
+            'from oslo_config import cfg', './tempest/lib/decorators.py')))
+        self.assertTrue(list(checks.dont_use_config_in_tempest_lib(
+            'import tempest.config', './tempest/lib/common/rest_client.py')))

@@ -12,6 +12,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import testtools
+
 from tempest.api.compute import base
 from tempest import config
 from tempest import test
@@ -34,6 +36,9 @@ class ServersOnMultiNodesTest(base.BaseV2ComputeAdminTest):
             server_id)['server']['OS-EXT-SRV-ATTR:host']
 
     @test.idempotent_id('26a9d5df-6890-45f2-abc4-a659290cb130')
+    @testtools.skipUnless(
+        test.is_scheduler_filter_enabled("SameHostFilter"),
+        'SameHostFilter is not available.')
     def test_create_servers_on_same_host(self):
         server01 = self.create_test_server(wait_until='ACTIVE')['id']
 
@@ -45,6 +50,9 @@ class ServersOnMultiNodesTest(base.BaseV2ComputeAdminTest):
         self.assertEqual(host01, host02)
 
     @test.idempotent_id('cc7ca884-6e3e-42a3-a92f-c522fcf25e8e')
+    @testtools.skipUnless(
+        test.is_scheduler_filter_enabled("DifferentHostFilter"),
+        'DifferentHostFilter is not available.')
     def test_create_servers_on_different_hosts(self):
         server01 = self.create_test_server(wait_until='ACTIVE')['id']
 
@@ -56,6 +64,9 @@ class ServersOnMultiNodesTest(base.BaseV2ComputeAdminTest):
         self.assertNotEqual(host01, host02)
 
     @test.idempotent_id('7869cc84-d661-4e14-9f00-c18cdc89cf57')
+    @testtools.skipUnless(
+        test.is_scheduler_filter_enabled("DifferentHostFilter"),
+        'DifferentHostFilter is not available.')
     def test_create_servers_on_different_hosts_with_list_of_servers(self):
         server01 = self.create_test_server(wait_until='ACTIVE')['id']
 

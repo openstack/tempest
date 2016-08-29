@@ -100,7 +100,7 @@ class RateLimitExceeded(ClientRestClientException):
 
 
 class OverLimit(ClientRestClientException):
-    message = "Quota exceeded"
+    message = "Request entity is too large"
 
 
 class ServerFault(ServerRestClientException):
@@ -147,6 +147,10 @@ class UnexpectedContentType(OtherRestClientException):
 
 class UnexpectedResponseCode(OtherRestClientException):
     message = "Unexpected response code received"
+
+
+class InvalidIdentityVersion(TempestException):
+    message = "Invalid version %(identity_version)s of the identity service"
 
 
 class InvalidStructure(TempestException):
@@ -207,6 +211,10 @@ class InvalidCredentials(TempestException):
     message = "Invalid Credentials"
 
 
+class InvalidScope(TempestException):
+    message = "Invalid Scope %(scope)s for %(auth_provider)s"
+
+
 class SSHTimeout(TempestException):
     message = ("Connection to the %(host)s via SSH timed out.\n"
                "User: %(user)s, Password: %(password)s")
@@ -217,3 +225,17 @@ class SSHExecCommandFailed(TempestException):
     message = ("Command '%(command)s', exit status: %(exit_status)d, "
                "stderr:\n%(stderr)s\n"
                "stdout:\n%(stdout)s")
+
+
+class UnknownServiceClient(TempestException):
+    message = "Service clients named %(services)s are not known"
+
+
+class ServiceClientRegistrationException(TempestException):
+    message = ("Error registering module %(name)s in path %(module_path)s, "
+               "with service %(service_version)s and clients "
+               "%(client_names)s: %(detailed_error)s")
+
+
+class PluginRegistrationException(TempestException):
+    message = "Error registering plugin %(name)s: %(detailed_error)s"

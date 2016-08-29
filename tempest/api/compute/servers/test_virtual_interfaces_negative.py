@@ -13,9 +13,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import uuid
-
 from tempest.api.compute import base
+from tempest.lib.common.utils import data_utils
 from tempest.lib import exceptions as lib_exc
 from tempest import test
 
@@ -39,7 +38,7 @@ class VirtualInterfacesNegativeTestJSON(base.BaseV2ComputeTest):
     def test_list_virtual_interfaces_invalid_server_id(self):
         # Negative test: Should not be able to GET virtual interfaces
         # for an invalid server_id
-        invalid_server_id = str(uuid.uuid4())
+        invalid_server_id = data_utils.rand_uuid()
         self.assertRaises(lib_exc.NotFound,
                           self.client.list_virtual_interfaces,
                           invalid_server_id)

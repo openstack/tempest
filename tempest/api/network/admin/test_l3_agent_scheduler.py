@@ -92,7 +92,7 @@ class L3AgentSchedulerTestJSON(base.BaseAdminNetworkTest):
                 external_gateway_info = {
                     'network_id': CONF.network.public_network_id,
                     'enable_snat': True}
-                cls.admin_routers_client.update_router_with_snat_gw_info(
+                cls.admin_routers_client.update_router(
                     cls.router['id'],
                     external_gateway_info=external_gateway_info)
 

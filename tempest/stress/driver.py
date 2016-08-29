@@ -135,10 +135,13 @@ def stress_openstack(tests, duration, max_runs=None, stop_on_error=False):
                 break
         if skip:
             break
+        # TODO(andreaf) This has to be reworked to use the credential
+        # provider interface. For now only tests marked as 'use_admin' will
+        # work.
         if test.get('use_admin', False):
             manager = admin_manager
         else:
-            manager = credentials.ConfiguredUserManager()
+            raise NotImplemented('Non admin tests are not supported')
         for p_number in moves.xrange(test.get('threads', default_thread_num)):
             if test.get('use_isolated_tenants', False):
                 username = data_utils.rand_name("stress_user")
@@ -246,13 +249,13 @@ def stress_openstack(tests, duration, max_runs=None, stop_on_error=False):
             had_errors = True
         sum_runs += process['statistic']['runs']
         sum_fails += process['statistic']['fails']
-        print ("Process %d (%s): Run %d actions (%d failed)" % (
-               process['p_number'],
-               process['action'],
-               process['statistic']['runs'],
-               process['statistic']['fails']))
-    print ("Summary:")
-    print ("Run %d actions (%d failed)" % (sum_runs, sum_fails))
+        print("Process %d (%s): Run %d actions (%d failed)" % (
+            process['p_number'],
+            process['action'],
+            process['statistic']['runs'],
+            process['statistic']['fails']))
+    print("Summary:")
+    print("Run %d actions (%d failed)" % (sum_runs, sum_fails))
 
     if not had_errors and CONF.stress.full_clean_stack:
         LOG.info("cleaning up")

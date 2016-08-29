@@ -12,10 +12,7 @@
 
 from tempest.api.identity import base
 from tempest.common.utils import data_utils
-from tempest import config
 from tempest import test
-
-CONF = config.CONF
 
 
 class BaseInheritsV3Test(base.BaseIdentityV3AdminTest):
@@ -44,7 +41,7 @@ class BaseInheritsV3Test(base.BaseIdentityV3AdminTest):
             name=data_utils.rand_name('group-'), project_id=cls.project['id'],
             domain_id=cls.domain['id'])['group']
         cls.user = cls.users_client.create_user(
-            u_name, description=u_desc, password=u_password,
+            name=u_name, description=u_desc, password=u_password,
             email=u_email, project_id=cls.project['id'],
             domain_id=cls.domain['id'])['user']
 

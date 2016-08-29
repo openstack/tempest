@@ -16,10 +16,10 @@ import copy
 
 from tempest.lib.services.compute import services_client
 from tempest.tests.lib import fake_auth_provider
-from tempest.tests.lib.services.compute import base
+from tempest.tests.lib.services import base
 
 
-class TestServicesClient(base.BaseComputeServiceTest):
+class TestServicesClient(base.BaseServiceTest):
 
     FAKE_SERVICES = {
         "services":

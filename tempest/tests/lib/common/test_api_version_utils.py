@@ -16,7 +16,7 @@ import testtools
 
 from tempest.lib.common import api_version_utils
 from tempest.lib import exceptions
-from tempest.tests.lib import base
+from tempest.tests import base
 
 
 class TestVersionSkipLogic(base.TestCase):

@@ -66,7 +66,9 @@ class ServerPersonalityTestJSON(base.BaseV2ComputeTest):
             linux_client = remote_client.RemoteClient(
                 self.get_server_ip(server),
                 self.ssh_user, password,
-                self.validation_resources['keypair']['private_key'])
+                self.validation_resources['keypair']['private_key'],
+                server=server,
+                servers_client=self.client)
             self.assertEqual(file_contents,
                              linux_client.exec_command(
                                  'sudo cat %s' % file_path))
@@ -130,7 +132,9 @@ class ServerPersonalityTestJSON(base.BaseV2ComputeTest):
             linux_client = remote_client.RemoteClient(
                 self.get_server_ip(server),
                 self.ssh_user, password,
-                self.validation_resources['keypair']['private_key'])
+                self.validation_resources['keypair']['private_key'],
+                server=server,
+                servers_client=self.client)
             for i in person:
                 self.assertEqual(base64.b64decode(i['contents']),
                                  linux_client.exec_command(

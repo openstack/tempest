@@ -74,7 +74,7 @@ class TestAggregatesBasicOps(manager.ScenarioTest):
         self.assertEqual(aggregate_name, aggregate['name'])
         self.assertEqual(azone, aggregate['availability_zone'])
         self.assertEqual(hosts, aggregate['hosts'])
-        for meta_key in metadata.keys():
+        for meta_key in metadata:
             self.assertIn(meta_key, aggregate['metadata'])
             self.assertEqual(metadata[meta_key],
                              aggregate['metadata'][meta_key])

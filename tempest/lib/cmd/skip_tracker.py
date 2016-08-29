@@ -48,7 +48,7 @@ def debug(msg, *args, **kwargs):
 
 
 def find_skips(start):
-    """Find the entire list of skiped tests.
+    """Find the entire list of skipped tests.
 
     Returns a list of tuples (method, bug) that represent
     test methods that have been decorated to skip because of
@@ -103,7 +103,7 @@ def find_skips_in_file(path):
 
 def get_results(result_dict):
     results = []
-    for bug_no in result_dict.keys():
+    for bug_no in result_dict:
         for method in result_dict[bug_no]:
             results.append((method, bug_no))
     return results

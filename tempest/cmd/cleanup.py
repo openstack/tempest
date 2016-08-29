@@ -71,9 +71,6 @@ CONF = config.CONF
 
 class TempestCleanup(command.Command):
 
-    def __init__(self, app, cmd):
-        super(TempestCleanup, self).__init__(app, cmd)
-
     def take_action(self, parsed_args):
         try:
             self.init(parsed_args)
@@ -83,7 +80,6 @@ class TempestCleanup(command.Command):
             LOG.exception("Failure during cleanup")
             traceback.print_exc()
             raise
-        return 0
 
     def init(self, parsed_args):
         cleanup_service.init_conf()
@@ -110,7 +106,7 @@ class TempestCleanup(command.Command):
         self._load_json()
 
     def _cleanup(self):
-        print ("Begin cleanup")
+        print("Begin cleanup")
         is_dry_run = self.options.dry_run
         is_preserve = not self.options.delete_tempest_conf_objects
         is_save_state = False
@@ -128,7 +124,7 @@ class TempestCleanup(command.Command):
                   'is_save_state': is_save_state}
         tenant_service = cleanup_service.TenantService(admin_mgr, **kwargs)
         tenants = tenant_service.list()
-        print ("Process %s tenants" % len(tenants))
+        print("Process %s tenants" % len(tenants))
 
         # Loop through list of tenants and clean them up.
         for tenant in tenants:
@@ -159,7 +155,7 @@ class TempestCleanup(command.Command):
             self._remove_admin_role(tenant_id)
 
     def _clean_tenant(self, tenant):
-        print ("Cleaning tenant:  %s " % tenant['name'])
+        print("Cleaning tenant:  %s " % tenant['name'])
         is_dry_run = self.options.dry_run
         dry_run_data = self.dry_run_data
         is_preserve = not self.options.delete_tempest_conf_objects
@@ -233,15 +229,16 @@ class TempestCleanup(command.Command):
     def _add_admin(self, tenant_id):
         rl_cl = self.admin_mgr.roles_client
         needs_role = True
-        roles = rl_cl.list_user_roles(tenant_id, self.admin_id)['roles']
+        roles = rl_cl.list_user_roles_on_project(tenant_id,
+                                                 self.admin_id)['roles']
         for role in roles:
             if role['id'] == self.admin_role_id:
                 needs_role = False
                 LOG.debug("User already had admin privilege for this tenant")
         if needs_role:
             LOG.debug("Adding admin privilege for : %s" % tenant_id)
-            rl_cl.assign_user_role(tenant_id, self.admin_id,
-                                   self.admin_role_id)
+            rl_cl.create_user_role_on_project(tenant_id, self.admin_id,
+                                              self.admin_role_id)
             self.admin_role_added.append(tenant_id)
 
     def _remove_admin_role(self, tenant_id):
@@ -251,8 +248,9 @@ class TempestCleanup(command.Command):
         id_cl = credentials.AdminManager().identity_client
         if (self._tenant_exists(tenant_id)):
             try:
-                id_cl.delete_user_role(tenant_id, self.admin_id,
-                                       self.admin_role_id)
+                id_cl.delete_role_from_user_on_project(tenant_id,
+                                                       self.admin_id,
+                                                       self.admin_role_id)
             except Exception as ex:
                 LOG.exception("Failed removing role from tenant which still"
                               "exists, exception: %s" % ex)
@@ -268,7 +266,7 @@ class TempestCleanup(command.Command):
             return False
 
     def _init_state(self):
-        print ("Initializing saved state.")
+        print("Initializing saved state.")
         data = {}
         admin_mgr = self.admin_mgr
         kwargs = {'data': data,

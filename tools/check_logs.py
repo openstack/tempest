@@ -20,8 +20,8 @@ import gzip
 import os
 import re
 import six
+import six.moves.urllib.request as urlreq
 import sys
-import urllib2
 
 import yaml
 
@@ -54,7 +54,6 @@ allowed_dirty = set([
     'q-meta',
     'q-metering',
     'q-svc',
-    'q-vpn',
     's-proxy'])
 
 
@@ -68,9 +67,9 @@ def process_files(file_specs, url_specs, whitelists):
                 logs_with_errors.append(name)
     for (name, url) in url_specs:
         whitelist = whitelists.get(name, [])
-        req = urllib2.Request(url)
+        req = urlreq.Request(url)
         req.add_header('Accept-Encoding', 'gzip')
-        page = urllib2.urlopen(req)
+        page = urlreq.urlopen(req)
         buf = six.StringIO(page.read())
         f = gzip.GzipFile(fileobj=buf)
         if scan_content(name, f.read().splitlines(), regexp, whitelist):
@@ -96,7 +95,7 @@ def scan_content(name, content, regexp, whitelist):
 
 
 def collect_url_logs(url):
-    page = urllib2.urlopen(url)
+    page = urlreq.urlopen(url)
     content = page.read()
     logs = re.findall('(screen-[\w-]+\.txt\.gz)</a>', content)
     return logs

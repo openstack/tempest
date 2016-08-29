@@ -30,7 +30,8 @@ LOG = logging.getLogger(__name__)
 def create_test_server(clients, validatable=False, validation_resources=None,
                        tenant_network=None, wait_until=None,
                        volume_backed=False, name=None, flavor=None,
-                       image_id=None, **kwargs):
+                       image_id=None, delete_vol_on_termination=True,
+                       **kwargs):
     """Common wrapper utility returning a test server.
 
     This method is a common wrapper returning a test server that can be
@@ -39,11 +40,20 @@ def create_test_server(clients, validatable=False, validation_resources=None,
     :param clients: Client manager which provides OpenStack Tempest clients.
     :param validatable: Whether the server will be pingable or sshable.
     :param validation_resources: Resources created for the connection to the
-    server. Include a keypair, a security group and an IP.
+        server. Include a keypair, a security group and an IP.
     :param tenant_network: Tenant network to be used for creating a server.
     :param wait_until: Server status to wait for the server to reach after
-    its creation.
+        its creation.
     :param volume_backed: Whether the instance is volume backed or not.
+    :param name: Name of the server to be provisioned. If not defined a random
+        string ending with '-instance' will be generated.
+    :param flavor: Flavor of the server to be provisioned. If not defined,
+        CONF.compute.flavor_ref will be used instead.
+    :param image_id: ID of the image to be used to provision the server. If not
+        defined, CONF.compute.image_ref will be used instead.
+    :param delete_vol_on_termination: Controls whether the backing volume
+        should be deleted when the server is deleted. Only applies to volume
+        backed servers.
     :returns: a tuple
     """
 
@@ -91,7 +101,7 @@ def create_test_server(clients, validatable=False, validation_resources=None,
                 wait_until = 'ACTIVE'
 
     if volume_backed:
-        volume_name = data_utils.rand_name('volume')
+        volume_name = data_utils.rand_name(__name__ + '-volume')
         volumes_client = clients.volumes_v2_client
         if CONF.volume_feature_enabled.api_v1:
             volumes_client = clients.volumes_client
@@ -106,7 +116,7 @@ def create_test_server(clients, validatable=False, validation_resources=None,
             'source_type': 'volume',
             'destination_type': 'volume',
             'boot_index': 0,
-            'delete_on_termination': True}]
+            'delete_on_termination': delete_vol_on_termination}]
         kwargs['block_device_mapping_v2'] = bd_map_v2
 
         # Since this is boot from volume an image does not need
@@ -157,3 +167,29 @@ def create_test_server(clients, validatable=False, validation_resources=None,
                                           % server['id'])
 
     return body, servers
+
+
+def shelve_server(client, server_id, force_shelve_offload=False):
+    """Common wrapper utility to shelve server.
+
+    This method is a common wrapper to make server in 'SHELVED'
+    or 'SHELVED_OFFLOADED' state.
+
+    :param server_id: Server to make in shelve state
+    :param force_shelve_offload: Forcefully offload shelve server if it
+                                 is configured not to offload server
+                                 automatically after offload time.
+    """
+    client.shelve_server(server_id)
+
+    offload_time = CONF.compute.shelved_offload_time
+    if offload_time >= 0:
+        waiters.wait_for_server_status(client, server_id,
+                                       'SHELVED_OFFLOADED',
+                                       extra_timeout=offload_time)
+    else:
+        waiters.wait_for_server_status(client, server_id, 'SHELVED')
+        if force_shelve_offload:
+            client.shelve_offload_server(server_id)
+            waiters.wait_for_server_status(client, server_id,
+                                           'SHELVED_OFFLOADED')

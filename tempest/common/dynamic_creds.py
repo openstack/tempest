@@ -96,44 +96,56 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
                     os.networks_client, os.routers_client, os.subnets_client,
                     os.ports_client, os.security_groups_client)
         else:
-            return (os.identity_v3_client, os.projects_client,
-                    os.users_v3_client, os.roles_v3_client, os.domains_client,
+            # We use a dedicated client manager for identity client in case we
+            # need a different token scope for them.
+            scope = 'domain' if CONF.identity.admin_domain_scope else 'project'
+            identity_os = clients.Manager(self.default_admin_creds,
+                                          scope=scope)
+            return (identity_os.identity_v3_client,
+                    identity_os.projects_client,
+                    identity_os.users_v3_client, identity_os.roles_v3_client,
+                    identity_os.domains_client,
                     os.networks_client, os.routers_client,
                     os.subnets_client, os.ports_client,
                     os.security_groups_client)
 
-    def _create_creds(self, suffix="", admin=False, roles=None):
-        """Create random credentials under the following schema.
+    def _create_creds(self, admin=False, roles=None):
+        """Create credentials with random name.
 
-        If the name contains a '.' is the full class path of something, and
-        we don't really care. If it isn't, it's probably a meaningful name,
-        so use it.
+        Creates project and user. When admin flag is True create user
+        with admin role. Assign user with additional roles (for example
+        _member_) and roles requested by caller.
 
-        For logging purposes, -user and -tenant are long and redundant,
-        don't use them. The user# will be sufficient to figure it out.
+        :param admin: Flag if to assign to the user admin role
+        :type admin: bool
+        :param roles: Roles to assign for the user
+        :type roles: list
+        :return: Readonly Credentials with network resources
         """
-        if '.' in self.name:
-            root = ""
-        else:
-            root = self.name
+        root = self.name
 
-        project_name = data_utils.rand_name(root) + suffix
+        project_name = data_utils.rand_name(root)
         project_desc = project_name + "-desc"
         project = self.creds_client.create_project(
             name=project_name, description=project_desc)
 
-        username = data_utils.rand_name(root) + suffix
+        # NOTE(andreaf) User and project can be distinguished from the context,
+        # having the same ID in both makes it easier to match them and debug.
+        username = project_name
         user_password = data_utils.rand_password()
-        email = data_utils.rand_name(root) + suffix + "@example.com"
+        email = data_utils.rand_name(root) + "@example.com"
         user = self.creds_client.create_user(
             username, user_password, project, email)
         if 'user' in user:
             user = user['user']
         role_assigned = False
         if admin:
-            self.creds_client.assign_user_role(user, project,
-                                               self.admin_role)
+            self.creds_client.assign_user_role(user, project, self.admin_role)
             role_assigned = True
+            if (self.identity_version == 'v3' and
+                    CONF.identity.admin_domain_scope):
+                self.creds_client.assign_user_role_on_domain(
+                    user, CONF.identity.admin_role)
         # Add roles specified in config file
         for conf_role in CONF.auth.tempest_roles:
             self.creds_client.assign_user_role(user, project, conf_role)
@@ -147,13 +159,30 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
         # it must beassigned a role on the project. So we need to ensure that
         # our newly created user has a role on the newly created project.
         if self.identity_version == 'v3' and not role_assigned:
-            self.creds_client.create_user_role('Member')
+            try:
+                self.creds_client.create_user_role('Member')
+            except lib_exc.Conflict:
+                LOG.warning('Member role already exists, ignoring conflict.')
             self.creds_client.assign_user_role(user, project, 'Member')
 
         creds = self.creds_client.get_credentials(user, project, user_password)
         return cred_provider.TestResources(creds)
 
     def _create_network_resources(self, tenant_id):
+        """The function creates network resources in the given tenant.
+
+        The function checks if network_resources class member is empty,
+        In case it is, it will create a network, a subnet and a router for
+        the tenant according to the given tenant id parameter.
+        Otherwise it will create a network resource according
+        to the values from network_resources dict.
+
+        :param tenant_id: The tenant id to create resources for.
+        :type tenant_id: str
+        :raises: InvalidConfiguration, Exception
+        :returns: network resources(network,subnet,router)
+        :rtype: tuple
+        """
         network = None
         subnet = None
         router = None

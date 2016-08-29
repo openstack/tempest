@@ -14,6 +14,7 @@
 
 import hashlib
 import os
+import testtools
 
 import mock
 from oslo_concurrency.fixture import lockutils as lockutils_fixtures
@@ -27,9 +28,8 @@ from tempest.common import preprov_creds
 from tempest import config
 from tempest.lib import auth
 from tempest.lib import exceptions as lib_exc
-from tempest.lib.services.identity.v2 import token_client
+from tempest.tests import base
 from tempest.tests import fake_config
-from tempest.tests.lib import base
 from tempest.tests.lib import fake_identity
 
 
@@ -43,39 +43,48 @@ class TestPreProvisionedCredentials(base.TestCase):
                     'object_storage_operator_role': 'operator',
                     'object_storage_reseller_admin_role': 'reseller'}
 
-    def setUp(self):
-        super(TestPreProvisionedCredentials, self).setUp()
-        self.useFixture(fake_config.ConfigFixture())
-        self.stubs.Set(config, 'TempestConfigPrivate', fake_config.FakePrivate)
-        self.stubs.Set(token_client.TokenClient, 'raw_request',
-                       fake_identity._fake_v2_response)
-        self.useFixture(lockutils_fixtures.ExternalLockFixture())
-        self.test_accounts = [
+    identity_response = fake_identity._fake_v2_response
+    token_client = ('tempest.lib.services.identity.v2.token_client'
+                    '.TokenClient.raw_request')
+
+    @classmethod
+    def _fake_accounts(cls, admin_role):
+        return [
             {'username': 'test_user1', 'tenant_name': 'test_tenant1',
              'password': 'p'},
-            {'username': 'test_user2', 'tenant_name': 'test_tenant2',
+            {'username': 'test_user2', 'project_name': 'test_tenant2',
              'password': 'p'},
             {'username': 'test_user3', 'tenant_name': 'test_tenant3',
              'password': 'p'},
-            {'username': 'test_user4', 'tenant_name': 'test_tenant4',
+            {'username': 'test_user4', 'project_name': 'test_tenant4',
              'password': 'p'},
             {'username': 'test_user5', 'tenant_name': 'test_tenant5',
              'password': 'p'},
-            {'username': 'test_user6', 'tenant_name': 'test_tenant6',
+            {'username': 'test_user6', 'project_name': 'test_tenant6',
              'password': 'p', 'roles': ['role1', 'role2']},
             {'username': 'test_user7', 'tenant_name': 'test_tenant7',
              'password': 'p', 'roles': ['role2', 'role3']},
-            {'username': 'test_user8', 'tenant_name': 'test_tenant8',
+            {'username': 'test_user8', 'project_name': 'test_tenant8',
              'password': 'p', 'roles': ['role4', 'role1']},
             {'username': 'test_user9', 'tenant_name': 'test_tenant9',
              'password': 'p', 'roles': ['role1', 'role2', 'role3', 'role4']},
-            {'username': 'test_user10', 'tenant_name': 'test_tenant10',
+            {'username': 'test_user10', 'project_name': 'test_tenant10',
              'password': 'p', 'roles': ['role1', 'role2', 'role3', 'role4']},
-            {'username': 'test_user11', 'tenant_name': 'test_tenant11',
-             'password': 'p', 'roles': [cfg.CONF.identity.admin_role]},
-            {'username': 'test_user12', 'tenant_name': 'test_tenant12',
-             'password': 'p', 'roles': [cfg.CONF.identity.admin_role]},
-        ]
+            {'username': 'test_admin1', 'tenant_name': 'test_tenant11',
+             'password': 'p', 'roles': [admin_role]},
+            {'username': 'test_admin2', 'project_name': 'test_tenant12',
+             'password': 'p', 'roles': [admin_role]},
+            {'username': 'test_admin3', 'project_name': 'test_tenant13',
+             'password': 'p', 'types': ['admin']}]
+
+    def setUp(self):
+        super(TestPreProvisionedCredentials, self).setUp()
+        self.useFixture(fake_config.ConfigFixture())
+        self.patchobject(config, 'TempestConfigPrivate',
+                         fake_config.FakePrivate)
+        self.patch(self.token_client, side_effect=self.identity_response)
+        self.useFixture(lockutils_fixtures.ExternalLockFixture())
+        self.test_accounts = self._fake_accounts(cfg.CONF.identity.admin_role)
         self.accounts_mock = self.useFixture(mockpatch.Patch(
             'tempest.common.preprov_creds.read_accounts_yaml',
             return_value=self.test_accounts))
@@ -88,24 +97,33 @@ class TestPreProvisionedCredentials(base.TestCase):
 
     def _get_hash_list(self, accounts_list):
         hash_list = []
+        hash_fields = (
+            preprov_creds.PreProvisionedCredentialProvider.HASH_CRED_FIELDS)
         for account in accounts_list:
             hash = hashlib.md5()
-            hash.update(six.text_type(account).encode('utf-8'))
+            account_for_hash = dict((k, v) for (k, v) in six.iteritems(account)
+                                    if k in hash_fields)
+            hash.update(six.text_type(account_for_hash).encode('utf-8'))
             temp_hash = hash.hexdigest()
             hash_list.append(temp_hash)
         return hash_list
 
     def test_get_hash(self):
-        self.stubs.Set(token_client.TokenClient, 'raw_request',
-                       fake_identity._fake_v2_response)
-        test_account_class = preprov_creds.PreProvisionedCredentialProvider(
-            **self.fixed_params)
-        hash_list = self._get_hash_list(self.test_accounts)
-        test_cred_dict = self.test_accounts[3]
-        test_creds = auth.get_credentials(fake_identity.FAKE_AUTH_URL,
-                                          **test_cred_dict)
-        results = test_account_class.get_hash(test_creds)
-        self.assertEqual(hash_list[3], results)
+        # Test with all accounts to make sure we try all combinations
+        # and hide no race conditions
+        hash_index = 0
+        for test_cred_dict in self.test_accounts:
+            test_account_class = (
+                preprov_creds.PreProvisionedCredentialProvider(
+                    **self.fixed_params))
+            hash_list = self._get_hash_list(self.test_accounts)
+            test_creds = auth.get_credentials(
+                fake_identity.FAKE_AUTH_URL,
+                identity_version=self.fixed_params['identity_version'],
+                **test_cred_dict)
+            results = test_account_class.get_hash(test_creds)
+            self.assertEqual(hash_list[hash_index], results)
+            hash_index += 1
 
     def test_get_hash_dict(self):
         test_account_class = preprov_creds.PreProvisionedCredentialProvider(
@@ -188,7 +206,7 @@ class TestPreProvisionedCredentials(base.TestCase):
                 return False
             return True
 
-        self.stubs.Set(os.path, 'isfile', _fake_is_file)
+        self.patchobject(os.path, 'isfile', _fake_is_file)
         with mock.patch('six.moves.builtins.open', mock.mock_open(),
                         create=True) as open_mock:
             test_account_class._get_free_hash(hash_list)
@@ -247,9 +265,6 @@ class TestPreProvisionedCredentials(base.TestCase):
         self.assertFalse(test_accounts_class.is_multi_user())
 
     def test__get_creds_by_roles_one_role(self):
-        self.useFixture(mockpatch.Patch(
-            'tempest.common.preprov_creds.read_accounts_yaml',
-            return_value=self.test_accounts))
         test_accounts_class = preprov_creds.PreProvisionedCredentialProvider(
             **self.fixed_params)
         hashes = test_accounts_class.hash_dict['roles']['role4']
@@ -265,9 +280,6 @@ class TestPreProvisionedCredentials(base.TestCase):
             self.assertIn(i, args)
 
     def test__get_creds_by_roles_list_role(self):
-        self.useFixture(mockpatch.Patch(
-            'tempest.common.preprov_creds.read_accounts_yaml',
-            return_value=self.test_accounts))
         test_accounts_class = preprov_creds.PreProvisionedCredentialProvider(
             **self.fixed_params)
         hashes = test_accounts_class.hash_dict['roles']['role4']
@@ -285,9 +297,6 @@ class TestPreProvisionedCredentials(base.TestCase):
             self.assertIn(i, args)
 
     def test__get_creds_by_roles_no_admin(self):
-        self.useFixture(mockpatch.Patch(
-            'tempest.common.preprov_creds.read_accounts_yaml',
-            return_value=self.test_accounts))
         test_accounts_class = preprov_creds.PreProvisionedCredentialProvider(
             **self.fixed_params)
         hashes = list(test_accounts_class.hash_dict['creds'].keys())
@@ -330,3 +339,135 @@ class TestPreProvisionedCredentials(base.TestCase):
         self.assertIn('id', network)
         self.assertEqual('fake-id', network['id'])
         self.assertEqual('network-2', network['name'])
+
+    def test_get_primary_creds(self):
+        test_accounts_class = preprov_creds.PreProvisionedCredentialProvider(
+            **self.fixed_params)
+        primary_creds = test_accounts_class.get_primary_creds()
+        self.assertNotIn('test_admin', primary_creds.username)
+
+    def test_get_primary_creds_none_available(self):
+        admin_accounts = [x for x in self.test_accounts if 'test_admin'
+                          in x['username']]
+        self.useFixture(mockpatch.Patch(
+            'tempest.common.preprov_creds.read_accounts_yaml',
+            return_value=admin_accounts))
+        test_accounts_class = preprov_creds.PreProvisionedCredentialProvider(
+            **self.fixed_params)
+        with testtools.ExpectedException(lib_exc.InvalidCredentials):
+            # Get one more
+            test_accounts_class.get_primary_creds()
+
+    def test_get_alt_creds(self):
+        test_accounts_class = preprov_creds.PreProvisionedCredentialProvider(
+            **self.fixed_params)
+        alt_creds = test_accounts_class.get_alt_creds()
+        self.assertNotIn('test_admin', alt_creds.username)
+
+    def test_get_alt_creds_none_available(self):
+        admin_accounts = [x for x in self.test_accounts if 'test_admin'
+                          in x['username']]
+        self.useFixture(mockpatch.Patch(
+            'tempest.common.preprov_creds.read_accounts_yaml',
+            return_value=admin_accounts))
+        test_accounts_class = preprov_creds.PreProvisionedCredentialProvider(
+            **self.fixed_params)
+        with testtools.ExpectedException(lib_exc.InvalidCredentials):
+            # Get one more
+            test_accounts_class.get_alt_creds()
+
+    def test_get_admin_creds(self):
+        test_accounts_class = preprov_creds.PreProvisionedCredentialProvider(
+            **self.fixed_params)
+        admin_creds = test_accounts_class.get_admin_creds()
+        self.assertIn('test_admin', admin_creds.username)
+
+    def test_get_admin_creds_by_type(self):
+        test_accounts = [
+            {'username': 'test_user10', 'project_name': 'test_tenant10',
+             'password': 'p', 'roles': ['role1', 'role2', 'role3', 'role4']},
+            {'username': 'test_admin1', 'tenant_name': 'test_tenant11',
+             'password': 'p', 'types': ['admin']}]
+        self.useFixture(mockpatch.Patch(
+            'tempest.common.preprov_creds.read_accounts_yaml',
+            return_value=test_accounts))
+        test_accounts_class = preprov_creds.PreProvisionedCredentialProvider(
+            **self.fixed_params)
+        admin_creds = test_accounts_class.get_admin_creds()
+        self.assertIn('test_admin', admin_creds.username)
+
+    def test_get_admin_creds_by_role(self):
+        test_accounts = [
+            {'username': 'test_user10', 'project_name': 'test_tenant10',
+             'password': 'p', 'roles': ['role1', 'role2', 'role3', 'role4']},
+            {'username': 'test_admin1', 'tenant_name': 'test_tenant11',
+             'password': 'p', 'roles': [cfg.CONF.identity.admin_role]}]
+        self.useFixture(mockpatch.Patch(
+            'tempest.common.preprov_creds.read_accounts_yaml',
+            return_value=test_accounts))
+        test_accounts_class = preprov_creds.PreProvisionedCredentialProvider(
+            **self.fixed_params)
+        admin_creds = test_accounts_class.get_admin_creds()
+        self.assertIn('test_admin', admin_creds.username)
+
+    def test_get_admin_creds_none_available(self):
+        non_admin_accounts = [x for x in self.test_accounts if 'test_admin'
+                              not in x['username']]
+        self.useFixture(mockpatch.Patch(
+            'tempest.common.preprov_creds.read_accounts_yaml',
+            return_value=non_admin_accounts))
+        test_accounts_class = preprov_creds.PreProvisionedCredentialProvider(
+            **self.fixed_params)
+        with testtools.ExpectedException(lib_exc.InvalidCredentials):
+            # Get one more
+            test_accounts_class.get_admin_creds()
+
+
+class TestPreProvisionedCredentialsV3(TestPreProvisionedCredentials):
+
+    fixed_params = {'name': 'test class',
+                    'identity_version': 'v3',
+                    'test_accounts_file': 'fake_accounts_file',
+                    'accounts_lock_dir': 'fake_locks_dir_v3',
+                    'admin_role': 'admin',
+                    'object_storage_operator_role': 'operator',
+                    'object_storage_reseller_admin_role': 'reseller'}
+
+    identity_response = fake_identity._fake_v3_response
+    token_client = ('tempest.lib.services.identity.v3.token_client'
+                    '.V3TokenClient.raw_request')
+
+    @classmethod
+    def _fake_accounts(cls, admin_role):
+        return [
+            {'username': 'test_user1', 'project_name': 'test_project1',
+             'domain_name': 'domain', 'password': 'p'},
+            {'username': 'test_user2', 'project_name': 'test_project2',
+             'domain_name': 'domain', 'password': 'p'},
+            {'username': 'test_user3', 'project_name': 'test_project3',
+             'domain_name': 'domain', 'password': 'p'},
+            {'username': 'test_user4', 'project_name': 'test_project4',
+             'domain_name': 'domain', 'password': 'p'},
+            {'username': 'test_user5', 'project_name': 'test_project5',
+             'domain_name': 'domain', 'password': 'p'},
+            {'username': 'test_user6', 'project_name': 'test_project6',
+             'domain_name': 'domain', 'password': 'p',
+             'roles': ['role1', 'role2']},
+            {'username': 'test_user7', 'project_name': 'test_project7',
+             'domain_name': 'domain', 'password': 'p',
+             'roles': ['role2', 'role3']},
+            {'username': 'test_user8', 'project_name': 'test_project8',
+             'domain_name': 'domain', 'password': 'p',
+             'roles': ['role4', 'role1']},
+            {'username': 'test_user9', 'project_name': 'test_project9',
+             'domain_name': 'domain', 'password': 'p',
+             'roles': ['role1', 'role2', 'role3', 'role4']},
+            {'username': 'test_user10', 'project_name': 'test_project10',
+             'domain_name': 'domain', 'password': 'p',
+             'roles': ['role1', 'role2', 'role3', 'role4']},
+            {'username': 'test_admin1', 'project_name': 'test_project11',
+             'domain_name': 'domain', 'password': 'p', 'roles': [admin_role]},
+            {'username': 'test_admin2', 'project_name': 'test_project12',
+             'domain_name': 'domain', 'password': 'p', 'roles': [admin_role]},
+            {'username': 'test_admin3', 'project_name': 'test_tenant13',
+             'domain_name': 'domain', 'password': 'p', 'types': ['admin']}]

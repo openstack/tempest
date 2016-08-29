@@ -18,6 +18,7 @@ import sys
 import testtools
 
 from tempest.api.compute import base
+from tempest.common import compute
 from tempest.common.utils import data_utils
 from tempest.common import waiters
 from tempest import config
@@ -252,7 +253,8 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
         # Update name of a non-existent server
 
         nonexistent_server = data_utils.rand_uuid()
-        new_name = data_utils.rand_name('server') + '_updated'
+        new_name = data_utils.rand_name(
+            self.__class__.__name__ + '-server') + '_updated'
 
         self.assertRaises(lib_exc.NotFound, self.client.update_server,
                           nonexistent_server, name=new_name)
@@ -453,18 +455,7 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
     @test.attr(type=['negative'])
     def test_shelve_shelved_server(self):
         # shelve a shelved server.
-        self.client.shelve_server(self.server_id)
-
-        offload_time = CONF.compute.shelved_offload_time
-        if offload_time >= 0:
-            waiters.wait_for_server_status(self.client,
-                                           self.server_id,
-                                           'SHELVED_OFFLOADED',
-                                           extra_timeout=offload_time)
-        else:
-            waiters.wait_for_server_status(self.client,
-                                           self.server_id,
-                                           'SHELVED')
+        compute.shelve_server(self.client, self.server_id)
 
         server = self.client.show_server(self.server_id)['server']
         image_name = server['name'] + '-shelved'

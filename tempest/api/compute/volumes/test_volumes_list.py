@@ -27,7 +27,7 @@ class VolumesTestJSON(base.BaseV2ComputeTest):
     # ensure that the backing file for the volume group that Nova uses
     # has space for at least 3 1G volumes!
     # If you are running a Devstack environment, ensure that the
-    # VOLUME_BACKING_FILE_SIZE is atleast 4G in your localrc
+    # VOLUME_BACKING_FILE_SIZE is at least 4G in your localrc
 
     @classmethod
     def skip_checks(cls):
@@ -48,7 +48,7 @@ class VolumesTestJSON(base.BaseV2ComputeTest):
         cls.volume_list = []
         cls.volume_id_list = []
         for i in range(3):
-            v_name = data_utils.rand_name('volume')
+            v_name = data_utils.rand_name(cls.__name__ + '-volume')
             metadata = {'Type': 'work'}
             try:
                 volume = cls.client.create_volume(size=CONF.volume.volume_size,

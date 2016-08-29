@@ -32,14 +32,9 @@ class VolumeMultiBackendV2Test(base.BaseVolumeAdminTest):
     @classmethod
     def resource_setup(cls):
         super(VolumeMultiBackendV2Test, cls).resource_setup()
-        # support 2 backends names, deprecated_for_removal.
-        # keep support 2 backend names, in case they are not empty
-        if CONF.volume.backend1_name and CONF.volume.backend2_name:
-            cls.backend_names = {CONF.volume.backend1_name,
-                                 CONF.volume.backend2_name}
-        else:
-            # read backend name from a list .
-            cls.backend_names = set(CONF.volume.backend_names)
+
+        # read backend name from a list .
+        cls.backend_names = set(CONF.volume.backend_names)
 
         cls.name_field = cls.special_fields['name_field']
         cls.volume_type_id_list = []
@@ -58,31 +53,30 @@ class VolumeMultiBackendV2Test(base.BaseVolumeAdminTest):
             cls._create_type_and_volume(backend_name, True)
 
     @classmethod
-    def _create_type_and_volume(self, backend_name_key, with_prefix):
+    def _create_type_and_volume(cls, backend_name_key, with_prefix):
         # Volume/Type creation
-        type_name = data_utils.rand_name('Type')
-        vol_name = data_utils.rand_name('Volume')
+        type_name = data_utils.rand_name(cls.__name__ + '-Type')
+        vol_name = data_utils.rand_name(cls.__name__ + '-Volume')
         spec_key_with_prefix = "capabilities:volume_backend_name"
         spec_key_without_prefix = "volume_backend_name"
         if with_prefix:
             extra_specs = {spec_key_with_prefix: backend_name_key}
         else:
             extra_specs = {spec_key_without_prefix: backend_name_key}
-        self.type = self.volume_types_client.create_volume_type(
-            name=type_name, extra_specs=extra_specs)['volume_type']
-        self.volume_type_id_list.append(self.type['id'])
+        cls.type = cls.create_volume_type(name=type_name,
+                                          extra_specs=extra_specs)
 
-        params = {self.name_field: vol_name, 'volume_type': type_name}
+        params = {cls.name_field: vol_name, 'volume_type': type_name}
 
-        self.volume = self.admin_volume_client.create_volume(
+        cls.volume = cls.admin_volume_client.create_volume(
             **params)['volume']
         if with_prefix:
-            self.volume_id_list_with_prefix.append(self.volume['id'])
+            cls.volume_id_list_with_prefix.append(cls.volume['id'])
         else:
-            self.volume_id_list_without_prefix.append(
-                self.volume['id'])
-        waiters.wait_for_volume_status(self.admin_volume_client,
-                                       self.volume['id'], 'available')
+            cls.volume_id_list_without_prefix.append(
+                cls.volume['id'])
+        waiters.wait_for_volume_status(cls.admin_volume_client,
+                                       cls.volume['id'], 'available')
 
     @classmethod
     def resource_cleanup(cls):
@@ -96,11 +90,6 @@ class VolumeMultiBackendV2Test(base.BaseVolumeAdminTest):
         for volume_id in vid_no_pre:
             cls.admin_volume_client.delete_volume(volume_id)
             cls.admin_volume_client.wait_for_resource_deletion(volume_id)
-
-        # volume types deletion
-        volume_type_id_list = getattr(cls, 'volume_type_id_list', [])
-        for volume_type_id in volume_type_id_list:
-            cls.volume_types_client.delete_volume_type(volume_type_id)
 
         super(VolumeMultiBackendV2Test, cls).resource_cleanup()
 

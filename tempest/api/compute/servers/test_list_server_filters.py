@@ -17,12 +17,9 @@ from tempest.api.compute import base
 from tempest.common import fixed_network
 from tempest.common.utils import data_utils
 from tempest.common import waiters
-from tempest import config
 from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
 from tempest import test
-
-CONF = config.CONF
 
 
 class ListServerFiltersTestJSON(base.BaseV2ComputeTest):

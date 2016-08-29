@@ -18,8 +18,8 @@ import testtools
 from tempest.api.compute import base as compute_base
 from tempest import config
 from tempest.lib import exceptions
+from tempest.tests import base
 from tempest.tests import fake_config
-from tempest.tests.lib import base
 
 
 class VersionTestNoneTolatest(compute_base.BaseV2ComputeTest):
@@ -57,8 +57,8 @@ class TestMicroversionsTestsClass(base.TestCase):
     def setUp(self):
         super(TestMicroversionsTestsClass, self).setUp()
         self.useFixture(fake_config.ConfigFixture())
-        self.stubs.Set(config, 'TempestConfigPrivate',
-                       fake_config.FakePrivate)
+        self.patchobject(config, 'TempestConfigPrivate',
+                         fake_config.FakePrivate)
 
     def _test_version(self, cfg_min, cfg_max,
                       expected_pass_tests,

@@ -20,6 +20,7 @@ from tempest.api.network import base
 from tempest.common import custom_matchers
 from tempest.common.utils import data_utils
 from tempest import config
+from tempest.lib.common.utils import test_utils
 from tempest.lib import exceptions as lib_exc
 from tempest import test
 
@@ -126,7 +127,7 @@ class NetworksTest(base.BaseNetworkTest):
     def _get_allocation_pools_from_gateway(cls, ip_version):
         """Return allocation range for subnet of given gateway"""
         gateway = cls._get_gateway_from_tempest_conf(ip_version)
-        return [{'start': str(gateway + 2), 'end': str(gateway + 3)}]
+        return [{'start': str(gateway + 2), 'end': str(gateway + 6)}]
 
     def subnet_dict(self, include_keys):
         # Return a subnet dict which has include_keys and their corresponding
@@ -273,14 +274,6 @@ class NetworksTest(base.BaseNetworkTest):
         for subnet in subnets:
             self.assertEqual(sorted(subnet.keys()), sorted(fields))
 
-    def _try_delete_network(self, net_id):
-        # delete network, if it exists
-        try:
-            self.networks_client.delete_network(net_id)
-        # if network is not found, this means it was deleted in the test
-        except lib_exc.NotFound:
-            pass
-
     @test.idempotent_id('f04f61a9-b7f3-4194-90b2-9bcf660d1bfe')
     def test_delete_network_with_subnet(self):
         # Creates a network
@@ -288,7 +281,8 @@ class NetworksTest(base.BaseNetworkTest):
         body = self.networks_client.create_network(name=name)
         network = body['network']
         net_id = network['id']
-        self.addCleanup(self._try_delete_network, net_id)
+        self.addCleanup(test_utils.call_and_ignore_notfound_exc,
+                        self.networks_client.delete_network, net_id)
 
         # Find a cidr that is not in use yet and create a subnet with it
         subnet = self.create_subnet(network)
@@ -565,15 +559,15 @@ class NetworksIpV6Test(NetworksTest):
         # Verifies Subnet GW is set in IPv6
         self.assertEqual(subnet1['gateway_ip'], ipv6_gateway)
         # Verifies Subnet GW is None in IPv4
-        self.assertEqual(subnet2['gateway_ip'], None)
+        self.assertIsNone(subnet2['gateway_ip'])
         # Verifies all 2 subnets in the same network
         body = self.subnets_client.list_subnets()
         subnets = [sub['id'] for sub in body['subnets']
                    if sub['network_id'] == network['id']]
         test_subnet_ids = [sub['id'] for sub in (subnet1, subnet2)]
-        self.assertItemsEqual(subnets,
-                              test_subnet_ids,
-                              'Subnet are not in the same network')
+        six.assertCountEqual(self, subnets,
+                             test_subnet_ids,
+                             'Subnet are not in the same network')
 
 
 class NetworksIpV6TestAttrs(NetworksIpV6Test):

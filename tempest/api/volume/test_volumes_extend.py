@@ -15,10 +15,7 @@
 
 from tempest.api.volume import base
 from tempest.common import waiters
-from tempest import config
 from tempest import test
-
-CONF = config.CONF
 
 
 class VolumesV2ExtendTest(base.BaseVolumeTest):

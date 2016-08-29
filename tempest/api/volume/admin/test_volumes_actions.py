@@ -42,8 +42,7 @@ class VolumesActionsV2Test(base.BaseVolumeAdminTest):
     @classmethod
     def resource_cleanup(cls):
         # Delete the test volume
-        cls.client.delete_volume(cls.volume['id'])
-        cls.client.wait_for_resource_deletion(cls.volume['id'])
+        cls.delete_volume(cls.client, cls.volume['id'])
 
         super(VolumesActionsV2Test, cls).resource_cleanup()
 
@@ -60,7 +59,7 @@ class VolumesActionsV2Test(base.BaseVolumeAdminTest):
 
     def _create_temp_volume(self):
         # Create a temp volume for force delete tests
-        vol_name = utils.rand_name('Volume')
+        vol_name = utils.rand_name(self.__class__.__name__ + '-Volume')
         params = {self.name_field: vol_name}
         temp_volume = self.client.create_volume(**params)['volume']
         waiters.wait_for_volume_status(self.client,

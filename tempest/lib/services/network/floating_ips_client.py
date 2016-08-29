@@ -16,16 +16,34 @@ from tempest.lib.services.network import base
 class FloatingIPsClient(base.BaseNetworkClient):
 
     def create_floatingip(self, **kwargs):
+        """Creates a floating IP.
+
+        If you specify port information, associates the floating IP with an
+        internal port.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-networking-v2-ext.html#createFloatingIp
+        """
         uri = '/floatingips'
         post_data = {'floatingip': kwargs}
         return self.create_resource(uri, post_data)
 
     def update_floatingip(self, floatingip_id, **kwargs):
+        """Updates a floating IP and its association with an internal port.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-networking-v2-ext.html#updateFloatingIp
+        """
         uri = '/floatingips/%s' % floatingip_id
         post_data = {'floatingip': kwargs}
         return self.update_resource(uri, post_data)
 
     def show_floatingip(self, floatingip_id, **fields):
+        """Shows details for a floating IP.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-networking-v2-ext.html#showFloatingIp
+        """
         uri = '/floatingips/%s' % floatingip_id
         return self.show_resource(uri, **fields)
 
@@ -34,5 +52,10 @@ class FloatingIPsClient(base.BaseNetworkClient):
         return self.delete_resource(uri)
 
     def list_floatingips(self, **filters):
+        """Lists floating IPs.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-networking-v2-ext.html#listFloatingIps
+        """
         uri = '/floatingips'
         return self.list_resources(uri, **filters)

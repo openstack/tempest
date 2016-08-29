@@ -16,11 +16,22 @@ from tempest.lib.services.network import base
 class SecurityGroupRulesClient(base.BaseNetworkClient):
 
     def create_security_group_rule(self, **kwargs):
+        """Creates an OpenStack Networking security group rule.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-networking-v2-ext.html#
+                              createSecGroupRule
+        """
         uri = '/security-group-rules'
         post_data = {'security_group_rule': kwargs}
         return self.create_resource(uri, post_data)
 
     def show_security_group_rule(self, security_group_rule_id, **fields):
+        """Shows detailed information for a security group rule.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-networking-v2-ext.html#showSecGroupRule
+        """
         uri = '/security-group-rules/%s' % security_group_rule_id
         return self.show_resource(uri, **fields)
 
@@ -29,5 +40,10 @@ class SecurityGroupRulesClient(base.BaseNetworkClient):
         return self.delete_resource(uri)
 
     def list_security_group_rules(self, **filters):
+        """Lists a summary of all OpenStack Networking security group rules.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-networking-v2-ext.html#listSecGroupRules
+        """
         uri = '/security-group-rules'
         return self.list_resources(uri, **filters)

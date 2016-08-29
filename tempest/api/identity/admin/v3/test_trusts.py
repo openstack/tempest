@@ -57,7 +57,7 @@ class BaseTrustsV3Test(base.BaseIdentityV3AdminTest):
         u_email = self.trustor_username + '@testmail.xx'
         self.trustor_password = data_utils.rand_password()
         user = self.users_client.create_user(
-            self.trustor_username,
+            name=self.trustor_username,
             description=u_desc,
             password=self.trustor_password,
             email=u_email,
@@ -98,7 +98,8 @@ class BaseTrustsV3Test(base.BaseIdentityV3AdminTest):
             password=self.trustor_password,
             user_domain_id='default',
             tenant_name=self.trustor_project_name,
-            project_domain_id='default')
+            project_domain_id='default',
+            domain_id='default')
         os = clients.Manager(credentials=creds)
         self.trustor_client = os.trusts_client
 
@@ -266,7 +267,18 @@ class TrustsV3TestJSON(BaseTrustsV3Test):
     @test.attr(type='smoke')
     @test.idempotent_id('4773ebd5-ecbf-4255-b8d8-b63e6f72b65d')
     def test_get_trusts_all(self):
+
+        # Simple function that can be used for cleanup
+        def set_scope(auth_provider, scope):
+            auth_provider.scope = scope
+
         self.create_trust()
+        # Listing trusts can be done by trustor, by trustee, or without
+        # any filter if scoped to a project, so we must ensure token scope is
+        # project for this test.
+        original_scope = self.os_adm.auth_provider.scope
+        set_scope(self.os_adm.auth_provider, 'project')
+        self.addCleanup(set_scope, self.os_adm.auth_provider, original_scope)
         trusts_get = self.trusts_client.list_trusts()['trusts']
         trusts = [t for t in trusts_get
                   if t['id'] == self.trust_id]

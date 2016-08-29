@@ -13,8 +13,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import uuid
-
 from tempest.api.identity import base
 from tempest.common.utils import data_utils
 from tempest.lib import exceptions as lib_exc
@@ -45,8 +43,8 @@ class TenantsNegativeTestJSON(base.BaseIdentityV2AdminTest):
     def test_tenant_delete_by_unauthorized_user(self):
         # Non-administrator user should not be able to delete a tenant
         tenant_name = data_utils.rand_name(name='tenant')
-        tenant = self.tenants_client.create_tenant(tenant_name)['tenant']
-        self.data.tenants.append(tenant)
+        tenant = self.tenants_client.create_tenant(name=tenant_name)['tenant']
+        self.addCleanup(self.tenants_client.delete_tenant, tenant['id'])
         self.assertRaises(lib_exc.Forbidden,
                           self.non_admin_tenants_client.delete_tenant,
                           tenant['id'])
@@ -56,8 +54,8 @@ class TenantsNegativeTestJSON(base.BaseIdentityV2AdminTest):
     def test_tenant_delete_request_without_token(self):
         # Request to delete a tenant without a valid token should fail
         tenant_name = data_utils.rand_name(name='tenant')
-        tenant = self.tenants_client.create_tenant(tenant_name)['tenant']
-        self.data.tenants.append(tenant)
+        tenant = self.tenants_client.create_tenant(name=tenant_name)['tenant']
+        self.addCleanup(self.tenants_client.delete_tenant, tenant['id'])
         token = self.client.auth_provider.get_token()
         self.client.delete_token(token)
         self.assertRaises(lib_exc.Unauthorized,
@@ -70,22 +68,19 @@ class TenantsNegativeTestJSON(base.BaseIdentityV2AdminTest):
     def test_delete_non_existent_tenant(self):
         # Attempt to delete a non existent tenant should fail
         self.assertRaises(lib_exc.NotFound, self.tenants_client.delete_tenant,
-                          str(uuid.uuid4().hex))
+                          data_utils.rand_uuid_hex())
 
     @test.attr(type=['negative'])
     @test.idempotent_id('af16f44b-a849-46cb-9f13-a751c388f739')
     def test_tenant_create_duplicate(self):
         # Tenant names should be unique
         tenant_name = data_utils.rand_name(name='tenant')
-        body = self.tenants_client.create_tenant(tenant_name)['tenant']
-        tenant = body
-        self.data.tenants.append(tenant)
+        body = self.tenants_client.create_tenant(name=tenant_name)['tenant']
         tenant1_id = body.get('id')
 
         self.addCleanup(self.tenants_client.delete_tenant, tenant1_id)
-        self.addCleanup(self.data.tenants.remove, tenant)
         self.assertRaises(lib_exc.Conflict, self.tenants_client.create_tenant,
-                          tenant_name)
+                          name=tenant_name)
 
     @test.attr(type=['negative'])
     @test.idempotent_id('d26b278a-6389-4702-8d6e-5980d80137e0')
@@ -94,7 +89,7 @@ class TenantsNegativeTestJSON(base.BaseIdentityV2AdminTest):
         tenant_name = data_utils.rand_name(name='tenant')
         self.assertRaises(lib_exc.Forbidden,
                           self.non_admin_tenants_client.create_tenant,
-                          tenant_name)
+                          name=tenant_name)
 
     @test.attr(type=['negative'])
     @test.idempotent_id('a3ee9d7e-6920-4dd5-9321-d4b2b7f0a638')
@@ -105,7 +100,7 @@ class TenantsNegativeTestJSON(base.BaseIdentityV2AdminTest):
         self.client.delete_token(token)
         self.assertRaises(lib_exc.Unauthorized,
                           self.tenants_client.create_tenant,
-                          tenant_name)
+                          name=tenant_name)
         self.client.auth_provider.clear_auth()
 
     @test.attr(type=['negative'])
@@ -123,22 +118,22 @@ class TenantsNegativeTestJSON(base.BaseIdentityV2AdminTest):
         tenant_name = 'a' * 65
         self.assertRaises(lib_exc.BadRequest,
                           self.tenants_client.create_tenant,
-                          tenant_name)
+                          name=tenant_name)
 
     @test.attr(type=['negative'])
     @test.idempotent_id('bd20dc2a-9557-4db7-b755-f48d952ad706')
     def test_update_non_existent_tenant(self):
         # Attempt to update a non existent tenant should fail
         self.assertRaises(lib_exc.NotFound, self.tenants_client.update_tenant,
-                          str(uuid.uuid4().hex))
+                          data_utils.rand_uuid_hex())
 
     @test.attr(type=['negative'])
     @test.idempotent_id('41704dc5-c5f7-4f79-abfa-76e6fedc570b')
     def test_tenant_update_by_unauthorized_user(self):
         # Non-administrator user should not be able to update a tenant
         tenant_name = data_utils.rand_name(name='tenant')
-        tenant = self.tenants_client.create_tenant(tenant_name)['tenant']
-        self.data.tenants.append(tenant)
+        tenant = self.tenants_client.create_tenant(name=tenant_name)['tenant']
+        self.addCleanup(self.tenants_client.delete_tenant, tenant['id'])
         self.assertRaises(lib_exc.Forbidden,
                           self.non_admin_tenants_client.update_tenant,
                           tenant['id'])
@@ -148,8 +143,8 @@ class TenantsNegativeTestJSON(base.BaseIdentityV2AdminTest):
     def test_tenant_update_request_without_token(self):
         # Request to update a tenant without a valid token should fail
         tenant_name = data_utils.rand_name(name='tenant')
-        tenant = self.tenants_client.create_tenant(tenant_name)['tenant']
-        self.data.tenants.append(tenant)
+        tenant = self.tenants_client.create_tenant(name=tenant_name)['tenant']
+        self.addCleanup(self.tenants_client.delete_tenant, tenant['id'])
         token = self.client.auth_provider.get_token()
         self.client.delete_token(token)
         self.assertRaises(lib_exc.Unauthorized,

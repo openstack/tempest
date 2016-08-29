@@ -125,7 +125,7 @@ class StacksTestJSON(base.BaseOrchestrationTest):
                                        'resource_status_reason',
                                        'resource_status', 'event_time')
 
-        resource_statuses = map(lambda event: event['resource_status'], events)
+        resource_statuses = [event['resource_status'] for event in events]
         self.assertIn('CREATE_IN_PROGRESS', resource_statuses)
         self.assertIn('CREATE_COMPLETE', resource_statuses)
 

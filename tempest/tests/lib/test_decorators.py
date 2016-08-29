@@ -13,13 +13,12 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import uuid
-
 import testtools
 
 from tempest.lib import base as test
+from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
-from tempest.tests.lib import base
+from tempest.tests import base
 
 
 class TestSkipBecauseDecorator(base.TestCase):
@@ -78,13 +77,13 @@ class TestIdempotentIdDecorator(base.TestCase):
         return foo
 
     def test_positive(self):
-        _id = str(uuid.uuid4())
+        _id = data_utils.rand_uuid()
         foo = self._test_helper(_id)
         self.assertIn('id-%s' % _id, getattr(foo, '__testtools_attrs'))
         self.assertTrue(foo.__doc__.startswith('Test idempotent id: %s' % _id))
 
     def test_positive_without_doc(self):
-        _id = str(uuid.uuid4())
+        _id = data_utils.rand_uuid()
         foo = self._test_helper_without_doc(_id)
         self.assertTrue(foo.__doc__.startswith('Test idempotent id: %s' % _id))
 

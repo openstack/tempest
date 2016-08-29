@@ -50,7 +50,7 @@ class AccountTest(base.BaseObjectTest):
 
     @classmethod
     def resource_cleanup(cls):
-        cls.delete_containers(cls.containers)
+        cls.delete_containers()
         super(AccountTest, cls).resource_cleanup()
 
     @test.attr(type='smoke')
@@ -225,6 +225,17 @@ class AccountTest(base.BaseObjectTest):
         self.assertHeaders(resp, 'Account', 'GET')
         self.assertEqual(len(container_list),
                          min(limit, self.containers_count - 2))
+
+    @test.idempotent_id('365e6fc7-1cfe-463b-a37c-8bd08d47b6aa')
+    def test_list_containers_with_prefix(self):
+        # list containers that have a name that starts with a prefix
+        prefix = '{0}-a'.format(CONF.resources_prefix)
+        params = {'prefix': prefix}
+        resp, container_list = self.account_client.list_account_containers(
+            params=params)
+        self.assertHeaders(resp, 'Account', 'GET')
+        for container in container_list:
+            self.assertEqual(True, container.startswith(prefix))
 
     @test.attr(type='smoke')
     @test.idempotent_id('4894c312-6056-4587-8d6f-86ffbf861f80')

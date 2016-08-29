@@ -33,8 +33,9 @@ class VolumesV2ListTestJSON(base.BaseVolumeTest):
 
     def assertVolumesIn(self, fetched_list, expected_list, fields=None):
         if fields:
-            expected_list = map(operator.itemgetter(*fields), expected_list)
-            fetched_list = map(operator.itemgetter(*fields), fetched_list)
+            fieldsgetter = operator.itemgetter(*fields)
+            expected_list = map(fieldsgetter, expected_list)
+            fetched_list = [fieldsgetter(item) for item in fetched_list]
 
         missing_vols = [v for v in expected_list if v not in fetched_list]
         if len(missing_vols) == 0:
@@ -60,21 +61,11 @@ class VolumesV2ListTestJSON(base.BaseVolumeTest):
 
         # Create 3 test volumes
         cls.volume_list = []
-        cls.volume_id_list = []
         cls.metadata = {'Type': 'work'}
         for i in range(3):
             volume = cls.create_volume(metadata=cls.metadata)
             volume = cls.client.show_volume(volume['id'])['volume']
             cls.volume_list.append(volume)
-            cls.volume_id_list.append(volume['id'])
-
-    @classmethod
-    def resource_cleanup(cls):
-        # Delete the created volumes
-        for volid in cls.volume_id_list:
-            cls.client.delete_volume(volid)
-            cls.client.wait_for_resource_deletion(volid)
-        super(VolumesV2ListTestJSON, cls).resource_cleanup()
 
     def _list_by_param_value_and_assert(self, params, with_detail=False):
         """list or list_details with given params and validates result"""

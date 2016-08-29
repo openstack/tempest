@@ -21,7 +21,7 @@ class fake_httplib2(object):
         self.return_type = return_type
 
     def request(self, uri, method="GET", body=None, headers=None,
-                redirections=5, connection_type=None):
+                redirections=5, connection_type=None, chunked=False):
         if not self.return_type:
             fake_headers = fake_http_response(headers)
             return_obj = {

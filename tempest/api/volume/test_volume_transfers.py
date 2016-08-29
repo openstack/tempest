@@ -17,10 +17,7 @@ from testtools import matchers
 
 from tempest.api.volume import base
 from tempest.common import waiters
-from tempest import config
 from tempest import test
-
-CONF = config.CONF
 
 
 class VolumesV2TransfersTest(base.BaseVolumeTest):
@@ -36,16 +33,11 @@ class VolumesV2TransfersTest(base.BaseVolumeTest):
         cls.alt_tenant_id = cls.alt_client.tenant_id
         cls.adm_client = cls.os_adm.volumes_client
 
-    def _delete_volume(self, volume_id):
-        # Delete the specified volume using admin creds
-        self.adm_client.delete_volume(volume_id)
-        self.adm_client.wait_for_resource_deletion(volume_id)
-
     @test.idempotent_id('4d75b645-a478-48b1-97c8-503f64242f1a')
     def test_create_get_list_accept_volume_transfer(self):
         # Create a volume first
         volume = self.create_volume()
-        self.addCleanup(self._delete_volume, volume['id'])
+        self.addCleanup(self.delete_volume, self.adm_client, volume['id'])
 
         # Create a volume transfer
         transfer = self.client.create_volume_transfer(
@@ -74,7 +66,7 @@ class VolumesV2TransfersTest(base.BaseVolumeTest):
     def test_create_list_delete_volume_transfer(self):
         # Create a volume first
         volume = self.create_volume()
-        self.addCleanup(self._delete_volume, volume['id'])
+        self.addCleanup(self.delete_volume, self.adm_client, volume['id'])
 
         # Create a volume transfer
         body = self.client.create_volume_transfer(

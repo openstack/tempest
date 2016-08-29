@@ -16,10 +16,12 @@ Tempest Specific Commandments
 - [T107] Check that a service tag isn't in the module path
 - [T108] Check no hyphen at the end of rand_name() argument
 - [T109] Cannot use testtools.skip decorator; instead use
-         decorators.skip_because from tempest-lib
+         decorators.skip_because from tempest.lib
 - [T110] Check that service client names of GET should be consistent
 - [T111] Check that service client names of DELETE should be consistent
 - [T112] Check that tempest.lib should not import local tempest code
+- [T113] Check that tests use data_utils.rand_uuid() instead of uuid.uuid4()
+- [T114] Check that tempest.lib does not use tempest config
 - [N322] Method's default argument shouldn't be mutable
 
 Test Data/Configuration
@@ -131,6 +133,7 @@ overwritten by subclasses (enforced via hacking rule T105).
 
 Set-up is split in a series of steps (setup stages), which can be overwritten
 by test classes. Set-up stages are:
+
 - `skip_checks`
 - `setup_credentials`
 - `setup_clients`
@@ -139,6 +142,7 @@ by test classes. Set-up stages are:
 Tear-down is also split in a series of steps (teardown stages), which are
 stacked for execution only if the corresponding setup stage had been
 reached during the setup phase. Tear-down stages are:
+
 - `clear_credentials` (defined in the base test class)
 - `resource_cleanup`
 
@@ -156,37 +160,17 @@ not there even if the cloud was configured with it.
 
 Negative Tests
 --------------
-Newly added negative tests should use the negative test framework. First step
-is to create an interface description in a python file under
-`tempest/api_schema/request/`. These descriptions consists of two important
-sections for the test (one of those is mandatory):
-
- - A resource (part of the URL of the request): Resources needed for a test
-   must be created in `setUpClass` and registered with `set_resource` e.g.:
-   `cls.set_resource("server", server['id'])`
-
- - A json schema: defines properties for a request.
-
-After that a test class must be added to automatically generate test scenarios
-out of the given interface description::
-
-    load_tests = test.NegativeAutoTest.load_tests
-
-    @test.SimpleNegativeAutoTest
-    class SampleTestNegativeTestJSON(<your base class>, test.NegativeAutoTest):
-        _service = 'compute'
-        _schema = <your schema file>
-
-The class decorator `SimpleNegativeAutoTest` will automatically generate test
-cases out of the given schema in the attribute `_schema`.
-
-All negative tests should be added into a separate negative test file.
-If such a file doesn't exist for the particular resource being tested a new
-test file should be added.
+Error handling is an important aspect of API design and usage. Negative
+tests are a way to ensure that an application can gracefully handle
+invalid or unexpected input. However, as a black box integration test
+suite, Tempest is not suitable for handling all negative test cases, as
+the wide variety and complexity of negative tests can lead to long test
+runs and knowledge of internal implementation details. The bulk of
+negative testing should be handled with project function tests. The
+exception to this rule is API tests used for interoperability testing.
 
 Test skips because of Known Bugs
 --------------------------------
-
 If a test is broken because of a bug it is appropriate to skip the test until
 bug has been fixed. You should use the skip_because decorator so that
 Tempest's skip tracking tool can watch the bug status.
@@ -332,9 +316,9 @@ format of the metadata looks like::
         # The created server should be in the detailed list of all servers
         ...
 
-Tempest-lib includes a ``check-uuid`` tool that will test for the existence
+Tempest.lib includes a ``check-uuid`` tool that will test for the existence
 and uniqueness of idempotent_id metadata for every test. If you have
-tempest-lib installed you run the tool against Tempest by calling from the
+tempest installed you run the tool against Tempest by calling from the
 tempest repo::
 
     check-uuid

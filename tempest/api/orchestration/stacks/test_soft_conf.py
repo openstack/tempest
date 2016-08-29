@@ -12,11 +12,8 @@
 
 from tempest.api.orchestration import base
 from tempest.common.utils import data_utils
-from tempest import config
 from tempest.lib import exceptions as lib_exc
 from tempest import test
-
-CONF = config.CONF
 
 
 class TestSoftwareConfig(base.BaseOrchestrationTest):
@@ -45,7 +42,7 @@ class TestSoftwareConfig(base.BaseOrchestrationTest):
 
     def _validate_config(self, configuration, api_config):
         # Assert all expected keys are present with matching data
-        for k in configuration.keys():
+        for k in configuration:
             self.assertEqual(configuration[k],
                              api_config['software_config'][k])
 

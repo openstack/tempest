@@ -22,7 +22,7 @@ import six
 from tempest.common.generator import base_generator
 from tempest.common.generator import negative_generator
 from tempest.common.generator import valid_generator
-from tempest.tests.lib import base
+from tempest.tests import base
 
 
 class TestNegativeBasicGenerator(base.TestCase):
@@ -146,5 +146,5 @@ class TestNegativeNegativeGenerator(base.TestCase, BaseNegativeGenerator):
             schema_under_test = copy.copy(valid_schema)
             expected_result = \
                 self.generator.generate_payload(test, schema_under_test)
-            self.assertEqual(expected_result, None)
+            self.assertIsNone(expected_result)
             self._validate_result(valid_schema, schema_under_test)

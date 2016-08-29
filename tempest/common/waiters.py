@@ -15,10 +15,12 @@ import time
 
 from oslo_log import log as logging
 
+from tempest.common import image as common_image
 from tempest import config
 from tempest import exceptions
-from tempest.lib.common.utils import misc as misc_utils
+from tempest.lib.common.utils import test_utils
 from tempest.lib import exceptions as lib_exc
+from tempest.lib.services.image.v1 import images_client as images_v1_client
 
 CONF = config.CONF
 LOG = logging.getLogger(__name__)
@@ -51,9 +53,7 @@ def wait_for_server_status(client, server_id, status, ready_wait=True,
                     return
                 # NOTE(afazekas): The instance is in "ready for action state"
                 # when no task in progress
-                # NOTE(afazekas): Converted to string because of the XML
-                # responses
-                if str(task_state) == "None":
+                if task_state is None:
                     # without state api extension 3 sec usually enough
                     time.sleep(CONF.compute.ready_wait)
                     return
@@ -89,7 +89,7 @@ def wait_for_server_status(client, server_id, status, ready_wait=True,
                         'timeout': timeout})
             message += ' Current status: %s.' % server_status
             message += ' Current task state: %s.' % task_state
-            caller = misc_utils.find_test_caller()
+            caller = test_utils.find_test_caller()
             if caller:
                 message = '(%s) %s' % (caller, message)
             raise exceptions.TimeoutException(message)
@@ -122,42 +122,48 @@ def wait_for_image_status(client, image_id, status):
     The client should have a show_image(image_id) method to get the image.
     The client should also have build_interval and build_timeout attributes.
     """
-    image = client.show_image(image_id)
-    # Compute image client return response wrapped in 'image' element
-    # which is not case with glance image client.
-    if 'image' in image:
-        image = image['image']
-    start = int(time.time())
+    if isinstance(client, images_v1_client.ImagesClient):
+        # The 'check_image' method is used here because the show_image method
+        # returns image details plus the image itself which is very expensive.
+        # The 'check_image' method returns just image details.
+        def _show_image_v1(image_id):
+            resp = client.check_image(image_id)
+            return common_image.get_image_meta_from_headers(resp)
 
-    while image['status'] != status:
-        time.sleep(client.build_interval)
-        image = client.show_image(image_id)
-        # Compute image client return response wrapped in 'image' element
-        # which is not case with glance image client.
+        show_image = _show_image_v1
+    else:
+        show_image = client.show_image
+
+    current_status = 'An unknown status'
+    start = int(time.time())
+    while int(time.time()) - start < client.build_timeout:
+        image = show_image(image_id)
+        # Compute image client returns response wrapped in 'image' element
+        # which is not the case with Glance image client.
         if 'image' in image:
             image = image['image']
-        status_curr = image['status']
-        if status_curr == 'ERROR':
+
+        current_status = image['status']
+        if current_status == status:
+            return
+        if current_status.lower() == 'killed':
+            raise exceptions.ImageKilledException(image_id=image_id,
+                                                  status=status)
+        if current_status.lower() == 'error':
             raise exceptions.AddImageException(image_id=image_id)
 
-        # check the status again to avoid a false negative where we hit
-        # the timeout at the same time that the image reached the expected
-        # status
-        if status_curr == status:
-            return
+        time.sleep(client.build_interval)
 
-        if int(time.time()) - start >= client.build_timeout:
-            message = ('Image %(image_id)s failed to reach %(status)s state'
-                       '(current state %(status_curr)s) '
-                       'within the required time (%(timeout)s s).' %
-                       {'image_id': image_id,
-                        'status': status,
-                        'status_curr': status_curr,
-                        'timeout': client.build_timeout})
-            caller = misc_utils.find_test_caller()
-            if caller:
-                message = '(%s) %s' % (caller, message)
-            raise exceptions.TimeoutException(message)
+    message = ('Image %(image_id)s failed to reach %(status)s state '
+               '(current state %(current_status)s) within the required '
+               'time (%(timeout)s s).' % {'image_id': image_id,
+                                          'status': status,
+                                          'current_status': current_status,
+                                          'timeout': client.build_timeout})
+    caller = test_utils.find_test_caller()
+    if caller:
+        message = '(%s) %s' % (caller, message)
+    raise exceptions.TimeoutException(message)
 
 
 def wait_for_volume_status(client, volume_id, status):
@@ -227,7 +233,7 @@ def wait_for_bm_node_status(client, node_id, attr, status):
                         'status': status,
                         'timeout': client.build_timeout})
             message += ' Current state of %s: %s.' % (attr, status_curr)
-            caller = misc_utils.find_test_caller()
+            caller = test_utils.find_test_caller()
             if caller:
                 message = '(%s) %s' % (caller, message)
             raise exceptions.TimeoutException(message)

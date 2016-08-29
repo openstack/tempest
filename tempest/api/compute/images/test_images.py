@@ -49,6 +49,9 @@ class ImagesTestJSON(base.BaseV2ComputeTest):
                                               name=snapshot_name,
                                               wait_until='SAVING')
         self.client.delete_image(image['id'])
+        msg = ('The image with ID {image_id} failed to be deleted'
+               .format(image_id=image['id']))
+        self.assertTrue(self.client.is_resource_deleted(image['id']), msg)
 
     @test.idempotent_id('aaacd1d0-55a2-4ce8-818a-b5439df8adc9')
     def test_create_image_from_stopped_server(self):

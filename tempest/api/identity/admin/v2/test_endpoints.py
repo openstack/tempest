@@ -28,7 +28,8 @@ class EndPointsTestJSON(base.BaseIdentityV2AdminTest):
         s_type = data_utils.rand_name('type')
         s_description = data_utils.rand_name('description')
         cls.service_data = cls.services_client.create_service(
-            s_name, s_type, description=s_description)['OS-KSADM:service']
+            name=s_name, type=s_type,
+            description=s_description)['OS-KSADM:service']
         cls.service_id = cls.service_data['id']
         cls.service_ids.append(cls.service_id)
         # Create endpoints so as to use for LIST and GET test cases
@@ -37,8 +38,8 @@ class EndPointsTestJSON(base.BaseIdentityV2AdminTest):
             region = data_utils.rand_name('region')
             url = data_utils.rand_url()
             endpoint = cls.endpoints_client.create_endpoint(
-                cls.service_id,
-                region,
+                service_id=cls.service_id,
+                region=region,
                 publicurl=url,
                 adminurl=url,
                 internalurl=url)['endpoint']
@@ -70,8 +71,8 @@ class EndPointsTestJSON(base.BaseIdentityV2AdminTest):
         region = data_utils.rand_name('region')
         url = data_utils.rand_url()
         endpoint = self.endpoints_client.create_endpoint(
-            self.service_id,
-            region,
+            service_id=self.service_id,
+            region=region,
             publicurl=url,
             adminurl=url,
             internalurl=url)['endpoint']

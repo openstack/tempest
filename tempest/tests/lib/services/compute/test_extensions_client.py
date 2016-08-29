@@ -14,10 +14,10 @@
 
 from tempest.lib.services.compute import extensions_client
 from tempest.tests.lib import fake_auth_provider
-from tempest.tests.lib.services.compute import base
+from tempest.tests.lib.services import base
 
 
-class TestExtensionsClient(base.BaseComputeServiceTest):
+class TestExtensionsClient(base.BaseServiceTest):
 
     FAKE_SHOW_EXTENSION = {
         "extension": {

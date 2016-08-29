@@ -39,11 +39,10 @@ class ObjectTestACLs(base.BaseObjectTest):
 
     def setUp(self):
         super(ObjectTestACLs, self).setUp()
-        self.container_name = data_utils.rand_name(name='TestContainer')
-        self.container_client.create_container(self.container_name)
+        self.container_name = self.create_container()
 
     def tearDown(self):
-        self.delete_containers([self.container_name])
+        self.delete_containers()
         super(ObjectTestACLs, self).tearDown()
 
     @test.idempotent_id('a3270f3f-7640-4944-8448-c7ea783ea5b6')

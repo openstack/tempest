@@ -13,9 +13,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest.lib.services import clients
 from tempest.test_discover import plugins
+from tempest.tests import base
 from tempest.tests import fake_tempest_plugin as fake_plugin
-from tempest.tests.lib import base
 
 
 class TestPluginDiscovery(base.TestCase):
@@ -42,3 +43,39 @@ class TestPluginDiscovery(base.TestCase):
                          result['fake01'])
         self.assertEqual(fake_plugin.FakePlugin.expected_load_test,
                          result['fake02'])
+
+    def test__register_service_clients_with_one_plugin(self):
+        registry = clients.ClientsRegistry()
+        manager = plugins.TempestTestPluginManager()
+        fake_obj = fake_plugin.FakeStevedoreObj()
+        manager.ext_plugins = [fake_obj]
+        manager._register_service_clients()
+        expected_result = fake_plugin.FakePlugin.expected_service_clients
+        registered_clients = registry.get_service_clients()
+        self.assertIn(fake_obj.name, registered_clients)
+        self.assertEqual(expected_result, registered_clients[fake_obj.name])
+
+    def test__get_service_clients_with_two_plugins(self):
+        registry = clients.ClientsRegistry()
+        manager = plugins.TempestTestPluginManager()
+        obj1 = fake_plugin.FakeStevedoreObj('fake01')
+        obj2 = fake_plugin.FakeStevedoreObj('fake02')
+        manager.ext_plugins = [obj1, obj2]
+        manager._register_service_clients()
+        expected_result = fake_plugin.FakePlugin.expected_service_clients
+        registered_clients = registry.get_service_clients()
+        self.assertIn('fake01', registered_clients)
+        self.assertIn('fake02', registered_clients)
+        self.assertEqual(expected_result, registered_clients['fake01'])
+        self.assertEqual(expected_result, registered_clients['fake02'])
+
+    def test__register_service_clients_one_plugin_no_service_clients(self):
+        registry = clients.ClientsRegistry()
+        manager = plugins.TempestTestPluginManager()
+        fake_obj = fake_plugin.FakeStevedoreObjNoServiceClients()
+        manager.ext_plugins = [fake_obj]
+        manager._register_service_clients()
+        expected_result = []
+        registered_clients = registry.get_service_clients()
+        self.assertIn(fake_obj.name, registered_clients)
+        self.assertEqual(expected_result, registered_clients[fake_obj.name])

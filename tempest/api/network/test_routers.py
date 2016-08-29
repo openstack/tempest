@@ -213,7 +213,7 @@ class RoutersTest(base.BaseRouterTest):
     @test.requires_ext(extension='ext-gw-mode', service='network')
     def test_update_router_set_gateway_with_snat_explicit(self):
         router = self._create_router(data_utils.rand_name('router-'))
-        self.admin_routers_client.update_router_with_snat_gw_info(
+        self.admin_routers_client.update_router(
             router['id'],
             external_gateway_info={
                 'network_id': CONF.network.public_network_id,
@@ -228,7 +228,7 @@ class RoutersTest(base.BaseRouterTest):
     @test.requires_ext(extension='ext-gw-mode', service='network')
     def test_update_router_set_gateway_without_snat(self):
         router = self._create_router(data_utils.rand_name('router-'))
-        self.admin_routers_client.update_router_with_snat_gw_info(
+        self.admin_routers_client.update_router(
             router['id'],
             external_gateway_info={
                 'network_id': CONF.network.public_network_id,
@@ -259,7 +259,7 @@ class RoutersTest(base.BaseRouterTest):
         router = self._create_router(
             data_utils.rand_name('router-'),
             external_network_id=CONF.network.public_network_id)
-        self.admin_routers_client.update_router_with_snat_gw_info(
+        self.admin_routers_client.update_router(
             router['id'],
             external_gateway_info={
                 'network_id': CONF.network.public_network_id,
@@ -303,7 +303,7 @@ class RoutersTest(base.BaseRouterTest):
             )
 
         test_routes.sort(key=lambda x: x['destination'])
-        extra_route = self.routers_client.update_extra_routes(
+        extra_route = self.routers_client.update_router(
             router['id'], routes=test_routes)
         show_body = self.routers_client.show_router(router['id'])
         # Assert the number of routes
@@ -325,13 +325,13 @@ class RoutersTest(base.BaseRouterTest):
                              routes[i]['destination'])
             self.assertEqual(test_routes[i]['nexthop'], routes[i]['nexthop'])
 
-        self.routers_client.delete_extra_routes(router['id'])
+        self._delete_extra_routes(router['id'])
         show_body_after_deletion = self.routers_client.show_router(
             router['id'])
         self.assertEmpty(show_body_after_deletion['router']['routes'])
 
     def _delete_extra_routes(self, router_id):
-        self.routers_client.delete_extra_routes(router_id)
+        self.routers_client.update_router(router_id, routes=None)
 
     @test.idempotent_id('a8902683-c788-4246-95c7-ad9c6d63a4d9')
     def test_update_router_admin_state(self):
@@ -363,6 +363,23 @@ class RoutersTest(base.BaseRouterTest):
                                                                 subnet02['id'])
         self._verify_router_interface(router['id'], subnet02['id'],
                                       interface02['port_id'])
+
+    @test.idempotent_id('96522edf-b4b5-45d9-8443-fa11c26e6eff')
+    def test_router_interface_port_update_with_fixed_ip(self):
+        network = self.create_network()
+        subnet = self.create_subnet(network)
+        router = self._create_router(data_utils.rand_name('router-'))
+        fixed_ip = [{'subnet_id': subnet['id']}]
+        interface = self._add_router_interface_with_subnet_id(router['id'],
+                                                              subnet['id'])
+        self.assertIn('port_id', interface)
+        self.assertIn('subnet_id', interface)
+        port = self.ports_client.show_port(interface['port_id'])
+        self.assertEqual(port['port']['id'], interface['port_id'])
+        router_port = self.ports_client.update_port(port['port']['id'],
+                                                    fixed_ips=fixed_ip)
+        self.assertEqual(subnet['id'],
+                         router_port['port']['fixed_ips'][0]['subnet_id'])
 
     def _verify_router_interface(self, router_id, subnet_id, port_id):
         show_port_body = self.ports_client.show_port(port_id)

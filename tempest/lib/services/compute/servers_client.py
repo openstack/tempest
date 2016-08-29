@@ -20,11 +20,23 @@ from oslo_serialization import jsonutils as json
 from six.moves.urllib import parse as urllib
 
 from tempest.lib.api_schema.response.compute.v2_1 import servers as schema
+from tempest.lib.api_schema.response.compute.v2_16 import servers as schemav216
+from tempest.lib.api_schema.response.compute.v2_19 import servers as schemav219
+from tempest.lib.api_schema.response.compute.v2_26 import servers as schemav226
+from tempest.lib.api_schema.response.compute.v2_3 import servers as schemav23
+from tempest.lib.api_schema.response.compute.v2_9 import servers as schemav29
 from tempest.lib.common import rest_client
 from tempest.lib.services.compute import base_compute_client
 
 
 class ServersClient(base_compute_client.BaseComputeClient):
+    schema_versions_info = [
+        {'min': None, 'max': '2.2', 'schema': schema},
+        {'min': '2.3', 'max': '2.8', 'schema': schemav23},
+        {'min': '2.9', 'max': '2.15', 'schema': schemav29},
+        {'min': '2.16', 'max': '2.18', 'schema': schemav216},
+        {'min': '2.19', 'max': '2.25', 'schema': schemav219},
+        {'min': '2.26', 'max': None, 'schema': schemav226}]
 
     def __init__(self, auth_provider, service, region,
                  enable_instance_password=True, **kwargs):
@@ -55,7 +67,7 @@ class ServersClient(base_compute_client.BaseComputeClient):
         post_body = {'server': body}
 
         if hints:
-            post_body = dict(post_body.items() + hints.items())
+            post_body.update(hints)
 
         post_body = json.dumps(post_body)
         resp, body = self.post('servers', post_body)
@@ -88,18 +100,28 @@ class ServersClient(base_compute_client.BaseComputeClient):
         post_body = json.dumps({'server': kwargs})
         resp, body = self.put("servers/%s" % server_id, post_body)
         body = json.loads(body)
+        schema = self.get_schema(self.schema_versions_info)
         self.validate_response(schema.update_server, resp, body)
         return rest_client.ResponseBody(resp, body)
 
     def show_server(self, server_id):
-        """Get server details."""
+        """Get server details.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-compute-v2.1.html#showServer
+        """
         resp, body = self.get("servers/%s" % server_id)
         body = json.loads(body)
+        schema = self.get_schema(self.schema_versions_info)
         self.validate_response(schema.get_server, resp, body)
         return rest_client.ResponseBody(resp, body)
 
     def delete_server(self, server_id):
-        """Delete server."""
+        """Delete server.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-compute-v2.1.html#deleteServer
+        """
         resp, body = self.delete("servers/%s" % server_id)
         self.validate_response(schema.delete_server, resp, body)
         return rest_client.ResponseBody(resp, body)
@@ -114,6 +136,7 @@ class ServersClient(base_compute_client.BaseComputeClient):
         """
 
         url = 'servers'
+        schema = self.get_schema(self.schema_versions_info)
         _schema = schema.list_servers
 
         if detail:
@@ -128,7 +151,11 @@ class ServersClient(base_compute_client.BaseComputeClient):
         return rest_client.ResponseBody(resp, body)
 
     def list_addresses(self, server_id):
-        """Lists all addresses for a server."""
+        """Lists all addresses for a server.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-compute-v2.1.html#list-ips
+        """
         resp, body = self.get("servers/%s/ips" % server_id)
         body = json.loads(body)
         self.validate_response(schema.list_addresses, resp, body)
@@ -209,6 +236,7 @@ class ServersClient(base_compute_client.BaseComputeClient):
         kwargs['imageRef'] = image_ref
         if 'disk_config' in kwargs:
             kwargs['OS-DCF:diskConfig'] = kwargs.pop('disk_config')
+        schema = self.get_schema(self.schema_versions_info)
         if self.enable_instance_password:
             rebuild_schema = schema.rebuild_server_with_admin_pass
         else:
@@ -267,12 +295,22 @@ class ServersClient(base_compute_client.BaseComputeClient):
         return resp, body
 
     def list_server_metadata(self, server_id):
+        """Lists all metadata for a server.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-compute-v2.1.html#listServerMetadata
+        """
         resp, body = self.get("servers/%s/metadata" % server_id)
         body = json.loads(body)
         self.validate_response(schema.list_server_metadata, resp, body)
         return rest_client.ResponseBody(resp, body)
 
     def set_server_metadata(self, server_id, meta, no_metadata_field=False):
+        """Sets one or more metadata items for a server.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-compute-v2.1.html#createServerMetadata
+        """
         if no_metadata_field:
             post_body = ""
         else:
@@ -284,6 +322,11 @@ class ServersClient(base_compute_client.BaseComputeClient):
         return rest_client.ResponseBody(resp, body)
 
     def update_server_metadata(self, server_id, meta):
+        """Updates one or more metadata items for a server.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-compute-v2.1.html#updateServerMetadata
+        """
         post_body = json.dumps({'metadata': meta})
         resp, body = self.post('servers/%s/metadata' % server_id,
                                post_body)
@@ -293,6 +336,11 @@ class ServersClient(base_compute_client.BaseComputeClient):
         return rest_client.ResponseBody(resp, body)
 
     def show_server_metadata_item(self, server_id, key):
+        """Shows details for a metadata item, by key, for a server.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-compute-v2.1.html#showServerMetadataItem
+        """
         resp, body = self.get("servers/%s/metadata/%s" % (server_id, key))
         body = json.loads(body)
         self.validate_response(schema.set_show_server_metadata_item,
@@ -300,6 +348,11 @@ class ServersClient(base_compute_client.BaseComputeClient):
         return rest_client.ResponseBody(resp, body)
 
     def set_server_metadata_item(self, server_id, key, meta):
+        """Sets a metadata item, by key, for a server.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-compute-v2.1.html#setServerMetadataItem
+        """
         post_body = json.dumps({'meta': meta})
         resp, body = self.put('servers/%s/metadata/%s' % (server_id, key),
                               post_body)
@@ -309,6 +362,11 @@ class ServersClient(base_compute_client.BaseComputeClient):
         return rest_client.ResponseBody(resp, body)
 
     def delete_server_metadata_item(self, server_id, key):
+        """Deletes a metadata item, by key, from a server.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-compute-v2.1.html#deleteServerMetadataItem
+        """
         resp, body = self.delete("servers/%s/metadata/%s" %
                                  (server_id, key))
         self.validate_response(schema.delete_server_metadata_item,
@@ -316,13 +374,27 @@ class ServersClient(base_compute_client.BaseComputeClient):
         return rest_client.ResponseBody(resp, body)
 
     def stop_server(self, server_id, **kwargs):
+        """Stops a running server and changes its status to SHUTOFF.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-compute-v2.1.html#stop
+        """
         return self.action(server_id, 'os-stop', **kwargs)
 
     def start_server(self, server_id, **kwargs):
+        """Starts a stopped server and changes its status to ACTIVE.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-compute-v2.1.html#start
+        """
         return self.action(server_id, 'os-start', **kwargs)
 
     def attach_volume(self, server_id, **kwargs):
-        """Attaches a volume to a server instance."""
+        """Attaches a volume to a server instance.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-compute-v2.1.html#attachVolume
+        """
         post_body = json.dumps({'volumeAttachment': kwargs})
         resp, body = self.post('servers/%s/os-volume_attachments' % server_id,
                                post_body)
@@ -340,14 +412,23 @@ class ServersClient(base_compute_client.BaseComputeClient):
         return rest_client.ResponseBody(resp, body)
 
     def detach_volume(self, server_id, volume_id):  # noqa
-        """Detaches a volume from a server instance."""
+        """Detaches a volume from a server instance.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-compute-v2.1.html#deleteVolumeAttachment
+        """
         resp, body = self.delete('servers/%s/os-volume_attachments/%s' %
                                  (server_id, volume_id))
         self.validate_response(schema.detach_volume, resp, body)
         return rest_client.ResponseBody(resp, body)
 
     def show_volume_attachment(self, server_id, volume_id):
-        """Return details about the given volume attachment."""
+        """Return details about the given volume attachment.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-compute-v2.1.html#
+                              getVolumeAttachmentDetails
+        """
         resp, body = self.get('servers/%s/os-volume_attachments/%s' % (
             server_id, volume_id))
         body = json.loads(body)
@@ -355,7 +436,11 @@ class ServersClient(base_compute_client.BaseComputeClient):
         return rest_client.ResponseBody(resp, body)
 
     def list_volume_attachments(self, server_id):
-        """Returns the list of volume attachments for a given instance."""
+        """Returns the list of volume attachments for a given instance.
+
+        Available params: see http://developer.openstack.org/
+                              api-ref-compute-v2.1.html#listVolumeAttachments
+        """
         resp, body = self.get('servers/%s/os-volume_attachments' % (
             server_id))
         body = json.loads(body)
@@ -365,7 +450,8 @@ class ServersClient(base_compute_client.BaseComputeClient):
     def add_security_group(self, server_id, **kwargs):
         """Add a security group to the server.
 
-        Available params: TODO
+        Available params: http://developer.openstack.org/
+                          api-ref-compute-v2.1.html#addSecurityGroup
         """
         # TODO(oomichi): The api-site doesn't contain this API description.
         # So the above should be changed to the api-site link after
@@ -376,7 +462,8 @@ class ServersClient(base_compute_client.BaseComputeClient):
     def remove_security_group(self, server_id, **kwargs):
         """Remove a security group from the server.
 
-        Available params: TODO
+        Available params: http://developer.openstack.org/
+                          api-ref-compute-v2.1.html#removeSecurityGroup
         """
         # TODO(oomichi): The api-site doesn't contain this API description.
         # So the above should be changed to the api-site link after
@@ -506,7 +593,11 @@ class ServersClient(base_compute_client.BaseComputeClient):
         return self.action(server_id, 'rescue', schema.rescue_server, **kwargs)
 
     def unrescue_server(self, server_id):
-        """Unrescue the provided server."""
+        """Unrescue the provided server.
+
+        Available params: http://developer.openstack.org/
+                          api-ref-compute-v2.1.html#unrescue
+        """
         return self.action(server_id, 'unrescue')
 
     def show_server_diagnostics(self, server_id):

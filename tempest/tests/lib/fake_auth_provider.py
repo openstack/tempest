@@ -31,5 +31,5 @@ class FakeAuthProvider(object):
 class FakeCredentials(object):
 
     def __init__(self, creds_dict):
-        for key in creds_dict.keys():
+        for key in creds_dict:
             setattr(self, key, creds_dict[key])

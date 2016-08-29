@@ -23,17 +23,15 @@ class ProjectsClient(rest_client.RestClient):
     api_version = "v3"
 
     def create_project(self, name, **kwargs):
-        """Creates a project."""
-        description = kwargs.get('description', None)
-        en = kwargs.get('enabled', True)
-        domain_id = kwargs.get('domain_id', 'default')
-        post_body = {
-            'description': description,
-            'domain_id': domain_id,
-            'enabled': en,
-            'name': name
-        }
-        post_body = json.dumps({'project': post_body})
+        """Create a Project.
+
+        Available params: see http://developer.openstack.org/
+                          api-ref-identity-v3.html#createProject
+
+        """
+        # Include the project name to the kwargs parameters
+        kwargs['name'] = name
+        post_body = json.dumps({'project': kwargs})
         resp, body = self.post('projects', post_body)
         self.expected_success(201, resp.status)
         body = json.loads(body)
@@ -49,19 +47,13 @@ class ProjectsClient(rest_client.RestClient):
         return rest_client.ResponseBody(resp, body)
 
     def update_project(self, project_id, **kwargs):
-        body = self.show_project(project_id)['project']
-        name = kwargs.get('name', body['name'])
-        desc = kwargs.get('description', body['description'])
-        en = kwargs.get('enabled', body['enabled'])
-        domain_id = kwargs.get('domain_id', body['domain_id'])
-        post_body = {
-            'id': project_id,
-            'name': name,
-            'description': desc,
-            'enabled': en,
-            'domain_id': domain_id,
-        }
-        post_body = json.dumps({'project': post_body})
+        """Update a Project.
+
+        Available params: see http://developer.openstack.org/
+                          api-ref-identity-v3.html#updateProject
+
+        """
+        post_body = json.dumps({'project': kwargs})
         resp, body = self.patch('projects/%s' % project_id, post_body)
         self.expected_success(200, resp.status)
         body = json.loads(body)

@@ -19,6 +19,7 @@ import six
 import stevedore
 
 from tempest.lib.common.utils import misc
+from tempest.lib.services import clients
 
 LOG = logging.getLogger(__name__)
 
@@ -62,6 +63,54 @@ class TempestPlugin(object):
         """
         return []
 
+    def get_service_clients(self):
+        """Get a list of the service clients for registration
+
+        If the plugin implements service clients for one or more APIs, it
+        may return their details by this method for automatic registration
+        in any ServiceClients object instantiated by tests.
+        The default implementation returns an empty list.
+
+        :return list of dictionaries. Each element of the list represents
+            the service client for an API. Each dict must define all
+            parameters required for the invocation of
+            `service_clients.ServiceClients.register_service_client_module`.
+        :rtype: list
+
+        Example:
+
+            >>>  # Example implementation with one service client
+            >>>  myservice_config = config.service_client_config('myservice')
+            >>>  params = {
+            >>>     'name': 'myservice',
+            >>>     'service_version': 'myservice',
+            >>>     'module_path': 'myservice_tempest_tests.services',
+            >>>     'client_names': ['API1Client', 'API2Client'],
+            >>>  }
+            >>>  params.update(myservice_config)
+            >>>  return [params]
+
+            >>>  # Example implementation with two service clients
+            >>>  foo1_config = config.service_client_config('foo')
+            >>>  params_foo1 = {
+            >>>     'name': 'foo_v1',
+            >>>     'service_version': 'foo.v1',
+            >>>     'module_path': 'bar_tempest_tests.services.foo.v1',
+            >>>     'client_names': ['API1Client', 'API2Client'],
+            >>>  }
+            >>>  params_foo1.update(foo_config)
+            >>>  foo2_config = config.service_client_config('foo')
+            >>>  params_foo2 = {
+            >>>     'name': 'foo_v2',
+            >>>     'service_version': 'foo.v2',
+            >>>     'module_path': 'bar_tempest_tests.services.foo.v2',
+            >>>     'client_names': ['API1Client', 'API2Client'],
+            >>>  }
+            >>>  params_foo2.update(foo2_config)
+            >>>  return [params_foo1, params_foo2]
+        """
+        return []
+
 
 @misc.singleton
 class TempestTestPluginManager(object):
@@ -75,6 +124,7 @@ class TempestTestPluginManager(object):
             'tempest.test_plugins', invoke_on_load=True,
             propagate_map_exceptions=True,
             on_load_failure_callback=self.failure_hook)
+        self._register_service_clients()
 
     @staticmethod
     def failure_hook(_, ep, err):
@@ -102,3 +152,13 @@ class TempestTestPluginManager(object):
             if opt_list:
                 plugin_options.extend(opt_list)
         return plugin_options
+
+    def _register_service_clients(self):
+        registry = clients.ClientsRegistry()
+        for plug in self.ext_plugins:
+            try:
+                registry.register_service_client(
+                    plug.name, plug.obj.get_service_clients())
+            except Exception:
+                LOG.exception('Plugin %s raised an exception trying to run '
+                              'get_service_clients' % plug.name)

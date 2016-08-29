@@ -53,7 +53,7 @@ class TestEncryptedCinderVolumes(manager.EncryptionScenarioTest):
         volume_type = self.create_volume_type(name=volume_type)
         self.create_encryption_type(type_id=volume_type['id'],
                                     provider=encryption_provider,
-                                    key_size=512,
+                                    key_size=256,
                                     cipher='aes-xts-plain64',
                                     control_location='front-end')
         return self.create_volume(volume_type=volume_type['name'])

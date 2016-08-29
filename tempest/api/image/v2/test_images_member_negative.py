@@ -21,11 +21,11 @@ class ImagesMemberNegativeTest(base.BaseV2MemberImageTest):
     @test.idempotent_id('b79efb37-820d-4cf0-b54c-308b00cf842c')
     def test_image_share_invalid_status(self):
         image_id = self._create_image()
-        member = self.os_img_client.create_image_member(
+        member = self.image_member_client.create_image_member(
             image_id, member=self.alt_tenant_id)
         self.assertEqual(member['status'], 'pending')
         self.assertRaises(lib_exc.BadRequest,
-                          self.alt_img_client.update_image_member,
+                          self.alt_image_member_client.update_image_member,
                           image_id, self.alt_tenant_id,
                           status='notavalidstatus')
 
@@ -33,11 +33,11 @@ class ImagesMemberNegativeTest(base.BaseV2MemberImageTest):
     @test.idempotent_id('27002f74-109e-4a37-acd0-f91cd4597967')
     def test_image_share_owner_cannot_accept(self):
         image_id = self._create_image()
-        member = self.os_img_client.create_image_member(
+        member = self.image_member_client.create_image_member(
             image_id, member=self.alt_tenant_id)
         self.assertEqual(member['status'], 'pending')
         self.assertNotIn(image_id, self._list_image_ids_as_alt())
         self.assertRaises(lib_exc.Forbidden,
-                          self.os_img_client.update_image_member,
+                          self.image_member_client.update_image_member,
                           image_id, self.alt_tenant_id, status='accepted')
         self.assertNotIn(image_id, self._list_image_ids_as_alt())

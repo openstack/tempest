@@ -14,10 +14,10 @@
 
 from tempest.lib.services.compute import security_group_rules_client
 from tempest.tests.lib import fake_auth_provider
-from tempest.tests.lib.services.compute import base
+from tempest.tests.lib.services import base
 
 
-class TestSecurityGroupRulesClient(base.BaseComputeServiceTest):
+class TestSecurityGroupRulesClient(base.BaseServiceTest):
 
     FAKE_SECURITY_GROUP_RULE = {
         "security_group_rule": {

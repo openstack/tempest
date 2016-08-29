@@ -20,9 +20,9 @@ from oslotest import mockpatch
 
 from tempest.common import negative_rest_client
 from tempest import config
+from tempest.tests import base
 from tempest.tests import fake_auth_provider
 from tempest.tests import fake_config
-from tempest.tests.lib import base
 
 
 class TestNegativeRestClient(base.TestCase):
@@ -32,7 +32,8 @@ class TestNegativeRestClient(base.TestCase):
     def setUp(self):
         super(TestNegativeRestClient, self).setUp()
         self.useFixture(fake_config.ConfigFixture())
-        self.stubs.Set(config, 'TempestConfigPrivate', fake_config.FakePrivate)
+        self.patchobject(config, 'TempestConfigPrivate',
+                         fake_config.FakePrivate)
         self.negative_rest_client = negative_rest_client.NegativeRestClient(
             fake_auth_provider.FakeAuthProvider(), None)
         self.useFixture(mockpatch.PatchObject(self.negative_rest_client,

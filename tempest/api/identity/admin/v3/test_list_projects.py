@@ -24,22 +24,40 @@ class ListProjectsTestJSON(base.BaseIdentityV3AdminTest):
     def resource_setup(cls):
         super(ListProjectsTestJSON, cls).resource_setup()
         cls.project_ids = list()
-        cls.data.setup_test_domain()
+        # Create a domain
+        cls.domain = cls.create_domain()
         # Create project with domain
+        cls.projects = list()
         cls.p1_name = data_utils.rand_name('project')
         cls.p1 = cls.projects_client.create_project(
             cls.p1_name, enabled=False,
-            domain_id=cls.data.domain['id'])['project']
-        cls.data.projects.append(cls.p1)
+            domain_id=cls.domain['id'])['project']
+        cls.projects.append(cls.p1)
         cls.project_ids.append(cls.p1['id'])
         # Create default project
         p2_name = data_utils.rand_name('project')
         cls.p2 = cls.projects_client.create_project(p2_name)['project']
-        cls.data.projects.append(cls.p2)
+        cls.projects.append(cls.p2)
         cls.project_ids.append(cls.p2['id'])
+        # Create a new project (p3) using p2 as parent project
+        p3_name = data_utils.rand_name('project')
+        cls.p3 = cls.projects_client.create_project(
+            p3_name, parent_id=cls.p2['id'])['project']
+        cls.projects.append(cls.p3)
+        cls.project_ids.append(cls.p3['id'])
+
+    @classmethod
+    def resource_cleanup(cls):
+        # Cleanup the projects created during setup in inverse order
+        for project in reversed(cls.projects):
+            cls.projects_client.delete_project(project['id'])
+        # Cleanup the domain created during setup
+        cls.domains_client.update_domain(cls.domain['id'], enabled=False)
+        cls.domains_client.delete_domain(cls.domain['id'])
+        super(ListProjectsTestJSON, cls).resource_cleanup()
 
     @test.idempotent_id('1d830662-22ad-427c-8c3e-4ec854b0af44')
-    def test_projects_list(self):
+    def test_list_projects(self):
         # List projects
         list_projects = self.projects_client.list_projects()['projects']
 
@@ -51,7 +69,7 @@ class ListProjectsTestJSON(base.BaseIdentityV3AdminTest):
     def test_list_projects_with_domains(self):
         # List projects with domain
         self._list_projects_with_params(
-            {'domain_id': self.data.domain['id']}, 'domain_id')
+            {'domain_id': self.domain['id']}, 'domain_id')
 
     @test.idempotent_id('0fe7a334-675a-4509-b00e-1c4b95d5dae8')
     def test_list_projects_with_enabled(self):
@@ -62,6 +80,16 @@ class ListProjectsTestJSON(base.BaseIdentityV3AdminTest):
     def test_list_projects_with_name(self):
         # List projects with name
         self._list_projects_with_params({'name': self.p1_name}, 'name')
+
+    @test.idempotent_id('6edc66f5-2941-4a17-9526-4073311c1fac')
+    def test_list_projects_with_parent(self):
+        # List projects with parent
+        params = {'parent_id': self.p3['parent_id']}
+        fetched_projects = self.projects_client.list_projects(
+            params)['projects']
+        self.assertNotEmpty(fetched_projects)
+        for project in fetched_projects:
+            self.assertEqual(self.p3['parent_id'], project['parent_id'])
 
     def _list_projects_with_params(self, params, key):
         body = self.projects_client.list_projects(params)['projects']

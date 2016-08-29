@@ -14,10 +14,10 @@
 
 from tempest.lib.services.compute import migrations_client
 from tempest.tests.lib import fake_auth_provider
-from tempest.tests.lib.services.compute import base
+from tempest.tests.lib.services import base
 
 
-class TestMigrationsClient(base.BaseComputeServiceTest):
+class TestMigrationsClient(base.BaseServiceTest):
     FAKE_MIGRATION_INFO = {"migrations": [{
         "created_at": "2012-10-29T13:42:02",
         "dest_compute": "compute2",

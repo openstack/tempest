@@ -13,8 +13,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import uuid
-
 from tempest.api.compute import base
 from tempest.common.utils import data_utils
 from tempest.lib import exceptions as lib_exc
@@ -38,7 +36,7 @@ class HypervisorAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
     @test.attr(type=['negative'])
     @test.idempotent_id('c136086a-0f67-4b2b-bc61-8482bd68989f')
     def test_show_nonexistent_hypervisor(self):
-        nonexistent_hypervisor_id = str(uuid.uuid4())
+        nonexistent_hypervisor_id = data_utils.rand_uuid()
 
         self.assertRaises(
             lib_exc.NotFound,
@@ -70,7 +68,7 @@ class HypervisorAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
     @test.attr(type=['negative'])
     @test.idempotent_id('02463d69-0ace-4d33-a4a8-93d7883a2bba')
     def test_show_servers_with_nonexistent_hypervisor(self):
-        nonexistent_hypervisor_id = str(uuid.uuid4())
+        nonexistent_hypervisor_id = data_utils.rand_uuid()
 
         self.assertRaises(
             lib_exc.NotFound,
@@ -87,7 +85,7 @@ class HypervisorAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
     @test.attr(type=['negative'])
     @test.idempotent_id('f60aa680-9a3a-4c7d-90e1-fae3a4891303')
     def test_get_nonexistent_hypervisor_uptime(self):
-        nonexistent_hypervisor_id = str(uuid.uuid4())
+        nonexistent_hypervisor_id = data_utils.rand_uuid()
 
         self.assertRaises(
             lib_exc.NotFound,

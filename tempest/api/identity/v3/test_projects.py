@@ -25,7 +25,7 @@ class IdentityV3ProjectsTest(base.BaseIdentityV3Test):
     @test.idempotent_id('86128d46-e170-4644-866a-cc487f699e1d')
     def test_list_projects_returns_only_authorized_projects(self):
         alt_project_name =\
-            self.alt_manager.credentials.credentials.project_name
+            self.alt_manager.credentials.project_name
         resp = self.non_admin_users_client.list_user_projects(
             self.os.credentials.user_id)
 
@@ -33,7 +33,7 @@ class IdentityV3ProjectsTest(base.BaseIdentityV3Test):
         # user can successfully authenticate using his credentials and
         # project name from received projects list
         for project in resp['projects']:
-            # 'user_domain_id' needs to be specified otherwise tempest_lib
+            # 'user_domain_id' needs to be specified otherwise tempest.lib
             # assumes it to be 'default'
             token_id, body = self.non_admin_token.get_token(
                 username=self.os.credentials.username,

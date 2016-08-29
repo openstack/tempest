@@ -33,9 +33,7 @@ class ObjectTempUrlNegativeTest(base.BaseObjectTest):
     def resource_setup(cls):
         super(ObjectTempUrlNegativeTest, cls).resource_setup()
 
-        cls.container_name = data_utils.rand_name(name='TestContainer')
-        cls.container_client.create_container(cls.container_name)
-        cls.containers = [cls.container_name]
+        cls.container_name = cls.create_container()
 
         # update account metadata
         cls.key = 'Meta'
@@ -49,7 +47,7 @@ class ObjectTempUrlNegativeTest(base.BaseObjectTest):
         resp, _ = cls.account_client.delete_account_metadata(
             metadata=cls.metadata)
 
-        cls.delete_containers(cls.containers)
+        cls.delete_containers()
 
         super(ObjectTempUrlNegativeTest, cls).resource_cleanup()
 
