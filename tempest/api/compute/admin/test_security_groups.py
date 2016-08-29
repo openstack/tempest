@@ -15,10 +15,7 @@
 
 from tempest.api.compute import base
 from tempest.common.utils import data_utils
-from tempest import config
 from tempest import test
-
-CONF = config.CONF
 
 
 class SecurityGroupsTestAdminJSON(base.BaseV2ComputeAdminTest):

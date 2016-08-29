@@ -12,10 +12,7 @@
 
 from tempest.api.identity import base
 from tempest.common.utils import data_utils
-from tempest import config
 from tempest import test
-
-CONF = config.CONF
 
 
 class BaseInheritsV3Test(base.BaseIdentityV3AdminTest):

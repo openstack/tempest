@@ -14,11 +14,8 @@
 #    under the License.
 
 from tempest.api.volume import base
-from tempest import config
 from tempest.lib import exceptions as lib_exc
 from tempest import test
-
-CONF = config.CONF
 
 
 class BaseVolumeQuotasNegativeV2TestJSON(base.BaseVolumeAdminTest):
