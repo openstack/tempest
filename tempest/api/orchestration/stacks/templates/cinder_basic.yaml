@@ -1,10 +1,15 @@
 heat_template_version: 2013-05-23
 
+parameters:
+  volume_size:
+    type: number
+    default: 1
+
 resources:
     volume:
         type: OS::Cinder::Volume
         properties:
-            size: 1
+            size: { get_param: volume_size }
             description: a descriptive description
             name: volume_name
 

@@ -40,7 +40,8 @@ def debug(msg, *args, **kwargs):
 
 
 def find_skips(start=TESTDIR):
-    """
+    """Find skipped tests
+
     Returns a list of tuples (method, bug) that represent
     test methods that have been decorated to skip because of
     a particular bug.
@@ -67,34 +68,34 @@ def find_skips(start=TESTDIR):
 
 
 def find_skips_in_file(path):
-    """
-    Return the skip tuples in a test file
-    """
+    """Return the skip tuples in a test file"""
     BUG_RE = re.compile(r'\s*@.*skip_because\(bug=[\'"](\d+)[\'"]')
     DEF_RE = re.compile(r'\s*def (\w+)\(')
     bug_found = False
     results = []
-    lines = open(path, 'rb').readlines()
-    for x, line in enumerate(lines):
-        if not bug_found:
-            res = BUG_RE.match(line)
-            if res:
-                bug_no = int(res.group(1))
-                debug("Found bug skip %s on line %d", bug_no, x + 1)
-                bug_found = True
-        else:
-            res = DEF_RE.match(line)
-            if res:
-                method = res.group(1)
-                debug("Found test method %s skips for bug %d", method, bug_no)
-                results.append((method, bug_no))
-                bug_found = False
+    with open(path, 'rb') as content:
+        lines = content.readlines()
+        for x, line in enumerate(lines):
+            if not bug_found:
+                res = BUG_RE.match(line)
+                if res:
+                    bug_no = int(res.group(1))
+                    debug("Found bug skip %s on line %d", bug_no, x + 1)
+                    bug_found = True
+            else:
+                res = DEF_RE.match(line)
+                if res:
+                    method = res.group(1)
+                    debug("Found test method %s skips for bug %d",
+                          method, bug_no)
+                    results.append((method, bug_no))
+                    bug_found = False
     return results
 
 
 def get_results(result_dict):
     results = []
-    for bug_no in result_dict.keys():
+    for bug_no in result_dict:
         for method in result_dict[bug_no]:
             results.append((method, bug_no))
     return results

@@ -13,21 +13,19 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest.common import debug
+from tempest.common import custom_matchers
+from tempest.common import waiters
 from tempest import config
-from tempest.openstack.common import log as logging
+from tempest import exceptions
 from tempest.scenario import manager
 from tempest import test
 
 CONF = config.CONF
 
-LOG = logging.getLogger(__name__)
 
+class TestMinimumBasicScenario(manager.ScenarioTest):
 
-class TestMinimumBasicScenario(manager.OfficialClientTest):
-
-    """
-    This is a basic minimum scenario test.
+    """This is a basic minimum scenario test.
 
     This test below:
     * across the multiple components
@@ -35,101 +33,104 @@ class TestMinimumBasicScenario(manager.OfficialClientTest):
     * with and without optional parameters
     * check command outputs
 
+    Steps:
+    1. Create image
+    2. Create keypair
+    3. Boot instance with keypair and get list of instances
+    4. Create volume and show list of volumes
+    5. Attach volume to instance and getlist of volumes
+    6. Add IP to instance
+    7. Create and add security group to instance
+    8. Check SSH connection to instance
+    9. Reboot instance
+    10. Check SSH connection to instance after reboot
+
     """
 
-    def _wait_for_server_status(self, status):
-        server_id = self.server.id
-        self.status_timeout(
-            self.compute_client.servers, server_id, status)
-
-    def nova_keypair_add(self):
-        self.keypair = self.create_keypair()
-
-    def nova_boot(self):
-        create_kwargs = {'key_name': self.keypair.name}
-        self.server = self.create_server(image=self.image,
-                                         create_kwargs=create_kwargs)
-
     def nova_list(self):
-        servers = self.compute_client.servers.list()
-        LOG.debug("server_list:%s" % servers)
-        self.assertIn(self.server, servers)
+        servers = self.servers_client.list_servers()
+        # The list servers in the compute client is inconsistent...
+        return servers['servers']
 
-    def nova_show(self):
-        got_server = self.compute_client.servers.get(self.server)
-        LOG.debug("got server:%s" % got_server)
-        self.assertEqual(self.server, got_server)
+    def nova_show(self, server):
+        got_server = (self.servers_client.show_server(server['id'])
+                      ['server'])
+        excluded_keys = ['OS-EXT-AZ:availability_zone']
+        # Exclude these keys because of LP:#1486475
+        excluded_keys.extend(['OS-EXT-STS:power_state', 'updated'])
+        self.assertThat(
+            server, custom_matchers.MatchesDictExceptForKeys(
+                got_server, excluded_keys=excluded_keys))
 
-    def cinder_create(self):
-        self.volume = self.create_volume()
+    def cinder_show(self, volume):
+        got_volume = self.volumes_client.show_volume(volume['id'])['volume']
+        self.assertEqual(volume, got_volume)
 
-    def cinder_list(self):
-        volumes = self.volume_client.volumes.list()
-        self.assertIn(self.volume, volumes)
-
-    def cinder_show(self):
-        volume = self.volume_client.volumes.get(self.volume.id)
-        self.assertEqual(self.volume, volume)
-
-    def nova_volume_attach(self):
-        attach_volume_client = self.compute_client.volumes.create_server_volume
-        volume = attach_volume_client(self.server.id,
-                                      self.volume.id,
-                                      '/dev/vdb')
-        self.assertEqual(self.volume.id, volume.id)
-        self.wait_for_volume_status('in-use')
-
-    def nova_reboot(self):
-        self.server.reboot()
-        self._wait_for_server_status('ACTIVE')
-
-    def nova_floating_ip_create(self):
-        self.floating_ip = self.compute_client.floating_ips.create()
-        self.addCleanup(self.floating_ip.delete)
-
-    def nova_floating_ip_add(self):
-        self.server.add_floating_ip(self.floating_ip)
-
-    def ssh_to_server(self):
-        try:
-            self.linux_client = self.get_remote_client(self.floating_ip.ip)
-            self.linux_client.validate_authentication()
-        except Exception:
-            LOG.exception('ssh to server failed')
-            self._log_console_output()
-            debug.log_net_debug()
-            raise
+    def nova_reboot(self, server):
+        self.servers_client.reboot_server(server['id'], type='SOFT')
+        waiters.wait_for_server_status(self.servers_client,
+                                       server['id'], 'ACTIVE')
 
     def check_partitions(self):
+        # NOTE(andreaf) The device name may be different on different guest OS
         partitions = self.linux_client.get_partitions()
-        self.assertEqual(1, partitions.count('vdb'))
+        self.assertEqual(1, partitions.count(CONF.compute.volume_device_name))
 
-    def nova_volume_detach(self):
-        detach_volume_client = self.compute_client.volumes.delete_server_volume
-        detach_volume_client(self.server.id, self.volume.id)
-        self.wait_for_volume_status('available')
+    def create_and_add_security_group_to_server(self, server):
+        secgroup = self._create_security_group()
+        self.servers_client.add_security_group(server['id'],
+                                               name=secgroup['name'])
+        self.addCleanup(self.servers_client.remove_security_group,
+                        server['id'], name=secgroup['name'])
 
-        volume = self.volume_client.volumes.get(self.volume.id)
-        self.assertEqual('available', volume.status)
+        def wait_for_secgroup_add():
+            body = (self.servers_client.show_server(server['id'])
+                    ['server'])
+            return {'name': secgroup['name']} in body['security_groups']
 
+        if not test.call_until_true(wait_for_secgroup_add,
+                                    CONF.compute.build_timeout,
+                                    CONF.compute.build_interval):
+            msg = ('Timed out waiting for adding security group %s to server '
+                   '%s' % (secgroup['id'], server['id']))
+            raise exceptions.TimeoutException(msg)
+
+    @test.idempotent_id('bdbb5441-9204-419d-a225-b4fdbfb1a1a8')
     @test.services('compute', 'volume', 'image', 'network')
     def test_minimum_basic_scenario(self):
-        self.glance_image_create()
-        self.nova_keypair_add()
-        self.nova_boot()
-        self.nova_list()
-        self.nova_show()
-        self.cinder_create()
-        self.cinder_list()
-        self.cinder_show()
-        self.nova_volume_attach()
-        self.addCleanup(self.nova_volume_detach)
-        self.cinder_show()
+        image = self.glance_image_create()
+        keypair = self.create_keypair()
 
-        self.nova_floating_ip_create()
-        self.nova_floating_ip_add()
-        self._create_loginable_secgroup_rule_nova()
-        self.ssh_to_server()
-        self.nova_reboot()
-        self.ssh_to_server()
+        server = self.create_server(image_id=image,
+                                    key_name=keypair['name'],
+                                    wait_until='ACTIVE')
+        servers = self.nova_list()
+        self.assertIn(server['id'], [x['id'] for x in servers])
+
+        self.nova_show(server)
+
+        volume = self.create_volume()
+        volumes = self.volumes_client.list_volumes()['volumes']
+        self.assertIn(volume['id'], [x['id'] for x in volumes])
+
+        self.cinder_show(volume)
+
+        volume = self.nova_volume_attach(server, volume)
+        self.addCleanup(self.nova_volume_detach, server, volume)
+        self.cinder_show(volume)
+
+        floating_ip = self.create_floating_ip(server)
+        self.create_and_add_security_group_to_server(server)
+
+        # check that we can SSH to the server before reboot
+        self.linux_client = self.get_remote_client(
+            floating_ip['ip'], private_key=keypair['private_key'])
+
+        self.nova_reboot(server)
+
+        # check that we can SSH to the server after reboot
+        # (both connections are part of the scenario)
+        self.linux_client = self.get_remote_client(
+            floating_ip['ip'], private_key=keypair['private_key'])
+
         self.check_partitions()

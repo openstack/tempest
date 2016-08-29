@@ -13,10 +13,13 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-
 from tempest.api.compute import base
+from tempest.api_schema.request.compute.v2 import flavors
+from tempest import config
 from tempest import test
 
+
+CONF = config.CONF
 
 load_tests = test.NegativeAutoTest.load_tests
 
@@ -24,17 +27,17 @@ load_tests = test.NegativeAutoTest.load_tests
 @test.SimpleNegativeAutoTest
 class FlavorsListWithDetailsNegativeTestJSON(base.BaseV2ComputeTest,
                                              test.NegativeAutoTest):
-    _service = 'compute'
-    _schema_file = 'compute/flavors/flavors_list.json'
+    _service = CONF.compute.catalog_type
+    _schema = flavors.flavor_list
 
 
 @test.SimpleNegativeAutoTest
 class FlavorDetailsNegativeTestJSON(base.BaseV2ComputeTest,
                                     test.NegativeAutoTest):
-    _service = 'compute'
-    _schema_file = 'compute/flavors/flavor_details.json'
+    _service = CONF.compute.catalog_type
+    _schema = flavors.flavors_details
 
     @classmethod
-    def setUpClass(cls):
-        super(FlavorDetailsNegativeTestJSON, cls).setUpClass()
+    def resource_setup(cls):
+        super(FlavorDetailsNegativeTestJSON, cls).resource_setup()
         cls.set_resource("flavor", cls.flavor_ref)

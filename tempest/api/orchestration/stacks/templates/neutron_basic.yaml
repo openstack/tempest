@@ -51,12 +51,14 @@ resources:
       key_name: {get_param: KeyName}
       networks:
       - network: {get_resource: Network}
+      user_data_format: RAW
       user_data:
         str_replace:
           template: |
-            #!/bin/bash -v
+            #!/bin/sh -v
 
-            while ! /opt/aws/bin/cfn-signal -e 0 -r "SmokeServerNeutron created" \
+            SIGNAL_DATA='{"Status": "SUCCESS", "Reason": "SmokeServerNeutron created", "Data": "Application has completed configuration.", "UniqueId": "00000"}'
+            while ! curl --insecure --fail -X PUT -H 'Content-Type:' --data-binary "$SIGNAL_DATA" \
             'wait_handle' ; do sleep 3; done
           params:
             wait_handle: {get_resource: WaitHandleNeutron}

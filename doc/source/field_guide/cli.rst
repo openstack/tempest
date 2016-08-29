@@ -1,1 +1,0 @@
-../../../tempest/cli/README.rst

@@ -1,5 +1,4 @@
 # Copyright (C) 2013 eNovance SAS <licensing@enovance.com>
-# Author: Joe H. Rahme <joe.hakim.rahme@enovance.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
@@ -16,11 +15,12 @@
 import hashlib
 import hmac
 import time
-import urlparse
+
+from six.moves.urllib import parse as urlparse
 
 from tempest.api.object_storage import base
 from tempest.common.utils import data_utils
-from tempest import exceptions
+from tempest.lib import exceptions as lib_exc
 from tempest import test
 
 
@@ -30,14 +30,10 @@ class ObjectFormPostNegativeTest(base.BaseObjectTest):
     containers = []
 
     @classmethod
-    @test.safe_setup
-    def setUpClass(cls):
-        super(ObjectFormPostNegativeTest, cls).setUpClass()
-        cls.container_name = data_utils.rand_name(name='TestContainer')
+    def resource_setup(cls):
+        super(ObjectFormPostNegativeTest, cls).resource_setup()
+        cls.container_name = cls.create_container()
         cls.object_name = data_utils.rand_name(name='ObjectTemp')
-
-        cls.container_client.create_container(cls.container_name)
-        cls.containers = [cls.container_name]
 
         cls.key = 'Meta'
         cls.metadata = {'Temp-URL-Key': cls.key}
@@ -56,11 +52,10 @@ class ObjectFormPostNegativeTest(base.BaseObjectTest):
             self.key)
 
     @classmethod
-    def tearDownClass(cls):
+    def resource_cleanup(cls):
         cls.account_client.delete_account_metadata(metadata=cls.metadata)
-        cls.delete_containers(cls.containers)
-        cls.data.teardown_all()
-        super(ObjectFormPostNegativeTest, cls).tearDownClass()
+        cls.delete_containers()
+        super(ObjectFormPostNegativeTest, cls).resource_cleanup()
 
     def get_multipart_form(self, expires=600):
         path = "%s/%s/%s" % (
@@ -108,8 +103,9 @@ class ObjectFormPostNegativeTest(base.BaseObjectTest):
         content_type = 'multipart/form-data; boundary=%s' % boundary
         return body, content_type
 
+    @test.idempotent_id('d3fb3c4d-e627-48ce-9379-a1631f21336d')
     @test.requires_ext(extension='formpost', service='object')
-    @test.attr(type=['gate', 'negative'])
+    @test.attr(type=['negative'])
     def test_post_object_using_form_expired(self):
         body, content_type = self.get_multipart_form(expires=1)
         time.sleep(2)
@@ -119,13 +115,13 @@ class ObjectFormPostNegativeTest(base.BaseObjectTest):
 
         url = "%s/%s" % (self.container_name, self.object_name)
         exc = self.assertRaises(
-            exceptions.Unauthorized,
+            lib_exc.Unauthorized,
             self.object_client.post,
             url, body, headers=headers)
         self.assertIn('FormPost: Form Expired', str(exc))
 
+    @test.idempotent_id('b277257f-113c-4499-b8d1-5fead79f7360')
     @test.requires_ext(extension='formpost', service='object')
-    @test.attr(type='gate')
     def test_post_object_using_form_invalid_signature(self):
         self.key = "Wrong"
         body, content_type = self.get_multipart_form()
@@ -135,7 +131,7 @@ class ObjectFormPostNegativeTest(base.BaseObjectTest):
 
         url = "%s/%s" % (self.container_name, self.object_name)
         exc = self.assertRaises(
-            exceptions.Unauthorized,
+            lib_exc.Unauthorized,
             self.object_client.post,
             url, body, headers=headers)
         self.assertIn('FormPost: Invalid Signature', str(exc))

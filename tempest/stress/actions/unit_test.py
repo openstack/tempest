@@ -10,9 +10,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from oslo_log import log as logging
+from oslo_utils import importutils
+
 from tempest import config
-from tempest.openstack.common import importutils
-from tempest.openstack.common import log as logging
 import tempest.stress.stressaction as stressaction
 
 CONF = config.CONF
@@ -34,6 +35,7 @@ class SetUpClassRunTime(object):
 
 class UnitTest(stressaction.StressAction):
     """This is a special action for running existing unittests as stress test.
+
        You need to pass ``test_method`` and ``class_setup_per``
        using ``kwargs`` in the JSON descriptor;
        ``test_method`` should be the fully qualified name of a unittest,
@@ -78,8 +80,6 @@ class UnitTest(stressaction.StressAction):
 
             try:
                 self.run_core()
-            except Exception as e:
-                raise e
             finally:
                 if (CONF.stress.leave_dirty_stack is False
                     and self.class_setup_per == SetUpClassRunTime.action):

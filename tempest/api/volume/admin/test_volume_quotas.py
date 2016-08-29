@@ -1,7 +1,5 @@
 # Copyright (C) 2014 eNovance SAS <licensing@enovance.com>
 #
-# Author: Sylvain Baubeau <sylvain.baubeau@enovance.com>
-#
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
 #    not use this file except in compliance with the License. You may obtain
 #    a copy of the License at
@@ -14,113 +12,164 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import six
 from tempest.api.volume import base
 from tempest.common.utils import data_utils
+from tempest.common import waiters
 from tempest import test
 
 QUOTA_KEYS = ['gigabytes', 'snapshots', 'volumes']
 QUOTA_USAGE_KEYS = ['reserved', 'limit', 'in_use']
 
 
-class VolumeQuotasAdminTestJSON(base.BaseVolumeV1AdminTest):
-    _interface = "json"
+class BaseVolumeQuotasAdminV2TestJSON(base.BaseVolumeAdminTest):
     force_tenant_isolation = True
 
+    credentials = ['primary', 'alt', 'admin']
+
     @classmethod
-    def setUpClass(cls):
-        super(VolumeQuotasAdminTestJSON, cls).setUpClass()
-        cls.admin_volume_client = cls.os_adm.volumes_client
-        cls.demo_tenant_id = cls.isolated_creds.get_primary_creds().tenant_id
+    def setup_credentials(cls):
+        super(BaseVolumeQuotasAdminV2TestJSON, cls).setup_credentials()
+        cls.demo_tenant_id = cls.os.credentials.tenant_id
+        cls.alt_client = cls.os_alt.volumes_client
 
-    @test.attr(type='gate')
+    @test.idempotent_id('59eada70-403c-4cef-a2a3-a8ce2f1b07a0')
     def test_list_quotas(self):
-        resp, quotas = self.quotas_client.get_quota_set(self.demo_tenant_id)
-        self.assertEqual(200, resp.status)
+        quotas = (self.admin_quotas_client.show_quota_set(self.demo_tenant_id)
+                  ['quota_set'])
         for key in QUOTA_KEYS:
             self.assertIn(key, quotas)
 
-    @test.attr(type='gate')
+    @test.idempotent_id('2be020a2-5fdd-423d-8d35-a7ffbc36e9f7')
     def test_list_default_quotas(self):
-        resp, quotas = self.quotas_client.get_default_quota_set(
-            self.demo_tenant_id)
-        self.assertEqual(200, resp.status)
+        quotas = self.admin_quotas_client.show_default_quota_set(
+            self.demo_tenant_id)['quota_set']
         for key in QUOTA_KEYS:
             self.assertIn(key, quotas)
 
-    @test.attr(type='gate')
+    @test.idempotent_id('3d45c99e-cc42-4424-a56e-5cbd212b63a6')
     def test_update_all_quota_resources_for_tenant(self):
         # Admin can update all the resource quota limits for a tenant
-        resp, default_quota_set = self.quotas_client.get_default_quota_set(
-            self.demo_tenant_id)
+        default_quota_set = self.admin_quotas_client.show_default_quota_set(
+            self.demo_tenant_id)['quota_set']
         new_quota_set = {'gigabytes': 1009,
                          'volumes': 11,
                          'snapshots': 11}
 
         # Update limits for all quota resources
-        resp, quota_set = self.quotas_client.update_quota_set(
+        quota_set = self.admin_quotas_client.update_quota_set(
             self.demo_tenant_id,
-            **new_quota_set)
+            **new_quota_set)['quota_set']
 
         cleanup_quota_set = dict(
-            (k, v) for k, v in default_quota_set.iteritems()
+            (k, v) for k, v in six.iteritems(default_quota_set)
             if k in QUOTA_KEYS)
-        self.addCleanup(self.quotas_client.update_quota_set,
+        self.addCleanup(self.admin_quotas_client.update_quota_set,
                         self.demo_tenant_id, **cleanup_quota_set)
-        self.assertEqual(200, resp.status)
         # test that the specific values we set are actually in
         # the final result. There is nothing here that ensures there
         # would be no other values in there.
         self.assertDictContainsSubset(new_quota_set, quota_set)
 
-    @test.attr(type='gate')
+    @test.idempotent_id('18c51ae9-cb03-48fc-b234-14a19374dbed')
     def test_show_quota_usage(self):
-        resp, quota_usage = self.quotas_client.get_quota_usage(self.adm_tenant)
-        self.assertEqual(200, resp.status)
+        quota_usage = self.admin_quotas_client.show_quota_set(
+            self.os_adm.credentials.tenant_id,
+            params={'usage': True})['quota_set']
         for key in QUOTA_KEYS:
             self.assertIn(key, quota_usage)
             for usage_key in QUOTA_USAGE_KEYS:
                 self.assertIn(usage_key, quota_usage[key])
 
-    @test.attr(type='gate')
+    @test.idempotent_id('ae8b6091-48ad-4bfa-a188-bbf5cc02115f')
     def test_quota_usage(self):
-        resp, quota_usage = self.quotas_client.get_quota_usage(
-            self.demo_tenant_id)
+        quota_usage = self.admin_quotas_client.show_quota_set(
+            self.demo_tenant_id, params={'usage': True})['quota_set']
 
-        volume = self.create_volume(size=1)
-        self.addCleanup(self.admin_volume_client.delete_volume,
-                        volume['id'])
+        volume = self.create_volume()
+        self.addCleanup(self.delete_volume,
+                        self.admin_volume_client, volume['id'])
 
-        resp, new_quota_usage = self.quotas_client.get_quota_usage(
-            self.demo_tenant_id)
+        new_quota_usage = self.admin_quotas_client.show_quota_set(
+            self.demo_tenant_id, params={'usage': True})['quota_set']
 
-        self.assertEqual(200, resp.status)
         self.assertEqual(quota_usage['volumes']['in_use'] + 1,
                          new_quota_usage['volumes']['in_use'])
 
-        self.assertEqual(quota_usage['gigabytes']['in_use'] + 1,
+        self.assertEqual(quota_usage['gigabytes']['in_use'] +
+                         volume["size"],
                          new_quota_usage['gigabytes']['in_use'])
 
-    @test.attr(type='gate')
+    @test.idempotent_id('874b35a9-51f1-4258-bec5-cd561b6690d3')
     def test_delete_quota(self):
-        # Admin can delete the resource quota set for a tenant
-        tenant_name = data_utils.rand_name('quota_tenant_')
-        identity_client = self.os_adm.identity_client
-        tenant = identity_client.create_tenant(tenant_name)[1]
-        tenant_id = tenant['id']
-        self.addCleanup(identity_client.delete_tenant, tenant_id)
-        _, quota_set_default = self.quotas_client.get_default_quota_set(
-            tenant_id)
+        # Admin can delete the resource quota set for a project
+        project_name = data_utils.rand_name('quota_tenant')
+        description = data_utils.rand_name('desc_')
+        project = self.identity_utils.create_project(project_name,
+                                                     description=description)
+        project_id = project['id']
+        self.addCleanup(self.identity_utils.delete_project, project_id)
+        quota_set_default = self.admin_quotas_client.show_default_quota_set(
+            project_id)['quota_set']
         volume_default = quota_set_default['volumes']
 
-        self.quotas_client.update_quota_set(tenant_id,
-                                            volumes=(int(volume_default) + 5))
+        self.admin_quotas_client.update_quota_set(
+            project_id, volumes=(int(volume_default) + 5))
 
-        resp, _ = self.quotas_client.delete_quota_set(tenant_id)
-        self.assertEqual(200, resp.status)
-
-        _, quota_set_new = self.quotas_client.get_quota_set(tenant_id)
+        self.admin_quotas_client.delete_quota_set(project_id)
+        quota_set_new = (self.admin_quotas_client.show_quota_set(project_id)
+                         ['quota_set'])
         self.assertEqual(volume_default, quota_set_new['volumes'])
 
+    @test.idempotent_id('8911036f-9d54-4720-80cc-a1c9796a8805')
+    def test_quota_usage_after_volume_transfer(self):
+        # Create a volume for transfer
+        volume = self.create_volume()
+        self.addCleanup(self.delete_volume,
+                        self.admin_volume_client, volume['id'])
 
-class VolumeQuotasAdminTestXML(VolumeQuotasAdminTestJSON):
-    _interface = "xml"
+        # List of tenants quota usage pre-transfer
+        primary_quota = self.admin_quotas_client.show_quota_set(
+            self.demo_tenant_id, params={'usage': True})['quota_set']
+
+        alt_quota = self.admin_quotas_client.show_quota_set(
+            self.alt_client.tenant_id, params={'usage': True})['quota_set']
+
+        # Creates a volume transfer
+        transfer = self.volumes_client.create_volume_transfer(
+            volume_id=volume['id'])['transfer']
+        transfer_id = transfer['id']
+        auth_key = transfer['auth_key']
+
+        # Accepts a volume transfer
+        self.alt_client.accept_volume_transfer(
+            transfer_id, auth_key=auth_key)['transfer']
+
+        # Verify volume transferred is available
+        waiters.wait_for_volume_status(
+            self.alt_client, volume['id'], 'available')
+
+        # List of tenants quota usage post transfer
+        new_primary_quota = self.admin_quotas_client.show_quota_set(
+            self.demo_tenant_id, params={'usage': True})['quota_set']
+
+        new_alt_quota = self.admin_quotas_client.show_quota_set(
+            self.alt_client.tenant_id, params={'usage': True})['quota_set']
+
+        # Verify tenants quota usage was updated
+        self.assertEqual(primary_quota['volumes']['in_use'] -
+                         new_primary_quota['volumes']['in_use'],
+                         new_alt_quota['volumes']['in_use'] -
+                         alt_quota['volumes']['in_use'])
+
+        self.assertEqual(alt_quota['gigabytes']['in_use'] +
+                         volume['size'],
+                         new_alt_quota['gigabytes']['in_use'])
+
+        self.assertEqual(primary_quota['gigabytes']['in_use'] -
+                         volume['size'],
+                         new_primary_quota['gigabytes']['in_use'])
+
+
+class VolumeQuotasAdminV1TestJSON(BaseVolumeQuotasAdminV2TestJSON):
+    _api_version = 1

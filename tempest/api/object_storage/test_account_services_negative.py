@@ -1,7 +1,5 @@
 # Copyright (C) 2013 eNovance SAS <licensing@enovance.com>
 #
-# Author: Joe H. Rahme <joe.hakim.rahme@enovance.com>
-#
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
 #    not use this file except in compliance with the License. You may obtain
 #    a copy of the License at
@@ -15,37 +13,44 @@
 #    under the License.
 
 from tempest.api.object_storage import base
-from tempest import clients
-from tempest import exceptions
+from tempest import config
+from tempest.lib import exceptions as lib_exc
 from tempest import test
+
+CONF = config.CONF
 
 
 class AccountNegativeTest(base.BaseObjectTest):
 
-    @test.attr(type=['negative', 'gate'])
+    credentials = [['operator', CONF.object_storage.operator_role],
+                   ['operator_alt', CONF.object_storage.operator_role]]
+
+    @classmethod
+    def setup_credentials(cls):
+        super(AccountNegativeTest, cls).setup_credentials()
+        cls.os = cls.os_roles_operator
+        cls.os_operator = cls.os_roles_operator_alt
+
+    @test.attr(type=['negative'])
+    @test.idempotent_id('070e6aca-6152-4867-868d-1118d68fb38c')
     def test_list_containers_with_non_authorized_user(self):
         # list containers using non-authorized user
 
-        # create user
-        self.data.setup_test_user()
-        test_os = clients.Manager(self.data.test_credentials)
-        test_auth_provider = test_os.auth_provider
+        test_auth_provider = self.os_operator.auth_provider
         # Get auth for the test user
         test_auth_provider.auth_data
 
         # Get fresh auth for test user and set it to next auth request for
-        # custom_account_client
+        # account_client
         delattr(test_auth_provider, 'auth_data')
         test_auth_new_data = test_auth_provider.auth_data
-        self.custom_account_client.auth_provider.set_alt_auth_data(
+        self.account_client.auth_provider.set_alt_auth_data(
             request_part='headers',
             auth_data=test_auth_new_data
         )
 
         params = {'format': 'json'}
         # list containers with non-authorized user token
-        self.assertRaises(exceptions.Unauthorized,
-                          self.custom_account_client.list_account_containers,
+        self.assertRaises(lib_exc.Forbidden,
+                          self.account_client.list_account_containers,
                           params=params)
-        # delete the user which was created
-        self.data.teardown_all()

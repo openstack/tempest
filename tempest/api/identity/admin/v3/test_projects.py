@@ -1,4 +1,4 @@
-# Copyright 2013 OpenStack, LLC
+# Copyright 2013 OpenStack Foundation
 # All Rights Reserved.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -13,191 +13,203 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from six import moves
+import testtools
 
 from tempest.api.identity import base
 from tempest.common.utils import data_utils
-from tempest import exceptions
+from tempest import config
 from tempest import test
+
+CONF = config.CONF
 
 
 class ProjectsTestJSON(base.BaseIdentityV3AdminTest):
-    _interface = 'json'
 
-    def _delete_project(self, project_id):
-        resp, _ = self.client.delete_project(project_id)
-        self.assertEqual(resp['status'], '204')
-        self.assertRaises(
-            exceptions.NotFound, self.client.get_project, project_id)
-
-    @test.attr(type='gate')
-    def test_project_list_delete(self):
-        # Create several projects and delete them
-        for _ in moves.xrange(3):
-            resp, project = self.client.create_project(
-                data_utils.rand_name('project-new'))
-            self.addCleanup(self._delete_project, project['id'])
-
-        resp, list_projects = self.client.list_projects()
-        self.assertEqual(resp['status'], '200')
-
-        resp, get_project = self.client.get_project(project['id'])
-        self.assertIn(get_project, list_projects)
-
-    @test.attr(type='gate')
+    @test.idempotent_id('0ecf465c-0dc4-4532-ab53-91ffeb74d12d')
     def test_project_create_with_description(self):
         # Create project with a description
-        project_name = data_utils.rand_name('project-')
-        project_desc = data_utils.rand_name('desc-')
-        resp, project = self.client.create_project(
-            project_name, description=project_desc)
-        self.data.projects.append(project)
-        st1 = resp['status']
+        project_name = data_utils.rand_name('project')
+        project_desc = data_utils.rand_name('desc')
+        project = self.projects_client.create_project(
+            project_name, description=project_desc)['project']
+        self.addCleanup(self.projects_client.delete_project, project['id'])
         project_id = project['id']
         desc1 = project['description']
-        self.assertEqual(st1, '201')
         self.assertEqual(desc1, project_desc, 'Description should have '
                          'been sent in response for create')
-        resp, body = self.client.get_project(project_id)
+        body = self.projects_client.show_project(project_id)['project']
         desc2 = body['description']
         self.assertEqual(desc2, project_desc, 'Description does not appear'
                          'to be set')
 
-    @test.attr(type='gate')
+    @test.idempotent_id('5f50fe07-8166-430b-a882-3b2ee0abe26f')
+    def test_project_create_with_domain(self):
+        # Create project with a domain
+        domain = self.setup_test_domain()
+        project_name = data_utils.rand_name('project')
+        project = self.projects_client.create_project(
+            project_name, domain_id=domain['id'])['project']
+        self.addCleanup(self.projects_client.delete_project, project['id'])
+        project_id = project['id']
+        self.assertEqual(project_name, project['name'])
+        self.assertEqual(domain['id'], project['domain_id'])
+        body = self.projects_client.show_project(project_id)['project']
+        self.assertEqual(project_name, body['name'])
+        self.assertEqual(domain['id'], body['domain_id'])
+
+    @testtools.skipUnless(CONF.identity_feature_enabled.reseller,
+                          'Reseller not available.')
+    @test.idempotent_id('1854f9c0-70bc-4d11-a08a-1c789d339e3d')
+    def test_project_create_with_parent(self):
+        # Create root project without providing a parent_id
+        domain = self.setup_test_domain()
+        domain_id = domain['id']
+
+        root_project_name = data_utils.rand_name('root_project')
+        root_project = self.projects_client.create_project(
+            root_project_name, domain_id=domain_id)['project']
+        self.addCleanup(
+            self.projects_client.delete_project, root_project['id'])
+
+        root_project_id = root_project['id']
+        parent_id = root_project['parent_id']
+        self.assertEqual(root_project_name, root_project['name'])
+        # If not provided, the parent_id must point to the top level
+        # project in the hierarchy, i.e. its domain
+        self.assertEqual(domain_id, parent_id)
+
+        # Create a project using root_project_id as parent_id
+        project_name = data_utils.rand_name('project')
+        project = self.projects_client.create_project(
+            project_name, domain_id=domain_id,
+            parent_id=root_project_id)['project']
+        self.addCleanup(self.projects_client.delete_project, project['id'])
+        parent_id = project['parent_id']
+        self.assertEqual(project_name, project['name'])
+        self.assertEqual(root_project_id, parent_id)
+
+    @test.idempotent_id('1f66dc76-50cc-4741-a200-af984509e480')
     def test_project_create_enabled(self):
         # Create a project that is enabled
-        project_name = data_utils.rand_name('project-')
-        resp, project = self.client.create_project(
-            project_name, enabled=True)
-        self.data.projects.append(project)
+        project_name = data_utils.rand_name('project')
+        project = self.projects_client.create_project(
+            project_name, enabled=True)['project']
+        self.addCleanup(self.projects_client.delete_project, project['id'])
         project_id = project['id']
-        st1 = resp['status']
         en1 = project['enabled']
-        self.assertEqual(st1, '201')
         self.assertTrue(en1, 'Enable should be True in response')
-        resp, body = self.client.get_project(project_id)
+        body = self.projects_client.show_project(project_id)['project']
         en2 = body['enabled']
         self.assertTrue(en2, 'Enable should be True in lookup')
 
-    @test.attr(type='gate')
+    @test.idempotent_id('78f96a9c-e0e0-4ee6-a3ba-fbf6dfd03207')
     def test_project_create_not_enabled(self):
         # Create a project that is not enabled
-        project_name = data_utils.rand_name('project-')
-        resp, project = self.client.create_project(
-            project_name, enabled=False)
-        self.data.projects.append(project)
-        st1 = resp['status']
+        project_name = data_utils.rand_name('project')
+        project = self.projects_client.create_project(
+            project_name, enabled=False)['project']
+        self.addCleanup(self.projects_client.delete_project, project['id'])
         en1 = project['enabled']
-        self.assertEqual(st1, '201')
         self.assertEqual('false', str(en1).lower(),
                          'Enable should be False in response')
-        resp, body = self.client.get_project(project['id'])
+        body = self.projects_client.show_project(project['id'])['project']
         en2 = body['enabled']
         self.assertEqual('false', str(en2).lower(),
                          'Enable should be False in lookup')
 
-    @test.attr(type='gate')
+    @test.idempotent_id('f608f368-048c-496b-ad63-d286c26dab6b')
     def test_project_update_name(self):
         # Update name attribute of a project
-        p_name1 = data_utils.rand_name('project-')
-        resp, project = self.client.create_project(p_name1)
-        self.data.projects.append(project)
+        p_name1 = data_utils.rand_name('project')
+        project = self.projects_client.create_project(p_name1)['project']
+        self.addCleanup(self.projects_client.delete_project, project['id'])
 
         resp1_name = project['name']
 
-        p_name2 = data_utils.rand_name('project2-')
-        resp, body = self.client.update_project(project['id'], name=p_name2)
-        st2 = resp['status']
+        p_name2 = data_utils.rand_name('project2')
+        body = self.projects_client.update_project(project['id'],
+                                                   name=p_name2)['project']
         resp2_name = body['name']
-        self.assertEqual(st2, '200')
         self.assertNotEqual(resp1_name, resp2_name)
 
-        resp, body = self.client.get_project(project['id'])
+        body = self.projects_client.show_project(project['id'])['project']
         resp3_name = body['name']
 
         self.assertNotEqual(resp1_name, resp3_name)
         self.assertEqual(p_name1, resp1_name)
         self.assertEqual(resp2_name, resp3_name)
 
-    @test.attr(type='gate')
+    @test.idempotent_id('f138b715-255e-4a7d-871d-351e1ef2e153')
     def test_project_update_desc(self):
         # Update description attribute of a project
-        p_name = data_utils.rand_name('project-')
-        p_desc = data_utils.rand_name('desc-')
-        resp, project = self.client.create_project(
-            p_name, description=p_desc)
-        self.data.projects.append(project)
+        p_name = data_utils.rand_name('project')
+        p_desc = data_utils.rand_name('desc')
+        project = self.projects_client.create_project(
+            p_name, description=p_desc)['project']
+        self.addCleanup(self.projects_client.delete_project, project['id'])
         resp1_desc = project['description']
 
-        p_desc2 = data_utils.rand_name('desc2-')
-        resp, body = self.client.update_project(
-            project['id'], description=p_desc2)
-        st2 = resp['status']
+        p_desc2 = data_utils.rand_name('desc2')
+        body = self.projects_client.update_project(
+            project['id'], description=p_desc2)['project']
         resp2_desc = body['description']
-        self.assertEqual(st2, '200')
         self.assertNotEqual(resp1_desc, resp2_desc)
 
-        resp, body = self.client.get_project(project['id'])
+        body = self.projects_client.show_project(project['id'])['project']
         resp3_desc = body['description']
 
         self.assertNotEqual(resp1_desc, resp3_desc)
         self.assertEqual(p_desc, resp1_desc)
         self.assertEqual(resp2_desc, resp3_desc)
 
-    @test.attr(type='gate')
+    @test.idempotent_id('b6b25683-c97f-474d-a595-55d410b68100')
     def test_project_update_enable(self):
         # Update the enabled attribute of a project
-        p_name = data_utils.rand_name('project-')
+        p_name = data_utils.rand_name('project')
         p_en = False
-        resp, project = self.client.create_project(p_name, enabled=p_en)
-        self.data.projects.append(project)
+        project = self.projects_client.create_project(p_name,
+                                                      enabled=p_en)['project']
+        self.addCleanup(self.projects_client.delete_project, project['id'])
 
         resp1_en = project['enabled']
 
         p_en2 = True
-        resp, body = self.client.update_project(
-            project['id'], enabled=p_en2)
-        st2 = resp['status']
+        body = self.projects_client.update_project(project['id'],
+                                                   enabled=p_en2)['project']
         resp2_en = body['enabled']
-        self.assertEqual(st2, '200')
         self.assertNotEqual(resp1_en, resp2_en)
 
-        resp, body = self.client.get_project(project['id'])
+        body = self.projects_client.show_project(project['id'])['project']
         resp3_en = body['enabled']
 
         self.assertNotEqual(resp1_en, resp3_en)
         self.assertEqual('false', str(resp1_en).lower())
         self.assertEqual(resp2_en, resp3_en)
 
-    @test.attr(type='gate')
+    @test.idempotent_id('59398d4a-5dc5-4f86-9a4c-c26cc804d6c6')
     def test_associate_user_to_project(self):
-        #Associate a user to a project
-        #Create a Project
-        p_name = data_utils.rand_name('project-')
-        resp, project = self.client.create_project(p_name)
-        self.data.projects.append(project)
+        # Associate a user to a project
+        # Create a Project
+        p_name = data_utils.rand_name('project')
+        project = self.projects_client.create_project(p_name)['project']
+        self.addCleanup(self.projects_client.delete_project, project['id'])
 
-        #Create a User
-        u_name = data_utils.rand_name('user-')
+        # Create a User
+        u_name = data_utils.rand_name('user')
         u_desc = u_name + 'description'
         u_email = u_name + '@testmail.tm'
-        u_password = data_utils.rand_name('pass-')
-        resp, user = self.client.create_user(
-            u_name, description=u_desc, password=u_password,
-            email=u_email, project_id=project['id'])
-        self.assertEqual(resp['status'], '201')
+        u_password = data_utils.rand_password()
+        user = self.users_client.create_user(
+            name=u_name, description=u_desc, password=u_password,
+            email=u_email, project_id=project['id'])['user']
         # Delete the User at the end of this method
-        self.addCleanup(self.client.delete_user, user['id'])
+        self.addCleanup(self.users_client.delete_user, user['id'])
 
         # Get User To validate the user details
-        resp, new_user_get = self.client.get_user(user['id'])
-        #Assert response body of GET
+        new_user_get = self.users_client.show_user(user['id'])['user']
+        # Assert response body of GET
         self.assertEqual(u_name, new_user_get['name'])
         self.assertEqual(u_desc, new_user_get['description'])
         self.assertEqual(project['id'],
                          new_user_get['project_id'])
         self.assertEqual(u_email, new_user_get['email'])
-
-
-class ProjectsTestXML(ProjectsTestJSON):
-    _interface = 'xml'

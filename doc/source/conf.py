@@ -13,6 +13,18 @@
 
 import sys
 import os
+import subprocess
+
+# Build the plugin registry
+def build_plugin_registry(app):
+    root_dir = os.path.dirname(
+        os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    subprocess.call(['tools/generate-tempest-plugins-list.sh'], cwd=root_dir)
+
+def setup(app):
+    app.connect('builder-inited', build_plugin_registry)
+
+
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -27,11 +39,14 @@ import os
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
 extensions = ['sphinx.ext.autodoc',
-              'sphinx.ext.intersphinx',
               'sphinx.ext.todo',
               'sphinx.ext.viewcode',
-              'oslosphinx'
+              'oslosphinx',
+              'oslo_config.sphinxconfiggen',
              ]
+
+config_generator_config_file = '../../tempest/cmd/config-generator.tempest.conf'
+sample_config_basename = '_static/tempest'
 
 todo_include_todos = True
 
@@ -123,12 +138,15 @@ html_static_path = ['_static']
 
 # If not '', a 'Last updated on:' timestamp is inserted at every page bottom,
 # using the given strftime format.
-git_cmd = "git log --pretty=format:'%ad, commit %h' --date=local -n1"
-html_last_updated_fmt = os.popen(git_cmd).read()
+git_cmd = ["git", "log", "--pretty=format:'%ad, commit %h'", "--date=local",
+   "-n1"]
+html_last_updated_fmt = subprocess.Popen(git_cmd,
+                                         stdout=subprocess.PIPE).\
+                                         communicate()[0]
 
 # If true, SmartyPants will be used to convert quotes and dashes to
 # typographically correct entities.
-#html_use_smartypants = True
+html_use_smartypants = False
 
 # Custom sidebar templates, maps document names to template names.
 #html_sidebars = {}

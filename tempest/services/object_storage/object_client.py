@@ -13,27 +13,22 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import urllib
+import six
+from six.moves import http_client as httplib
+from six.moves.urllib import parse as urlparse
 
-from tempest.common import http
-from tempest.common import rest_client
-from tempest import config
-from tempest import exceptions
-
-CONF = config.CONF
+from tempest.lib.common import rest_client
+from tempest.lib import exceptions
 
 
 class ObjectClient(rest_client.RestClient):
-    def __init__(self, auth_provider):
-        super(ObjectClient, self).__init__(auth_provider)
-
-        self.service = CONF.object_storage.catalog_type
 
     def create_object(self, container, object_name, data,
-                      params=None, metadata=None):
+                      params=None, metadata=None, headers=None):
         """Create storage object."""
 
-        headers = self.get_headers()
+        if headers is None:
+            headers = self.get_headers()
         if not data:
             headers['content-length'] = '0'
         if metadata:
@@ -41,21 +36,25 @@ class ObjectClient(rest_client.RestClient):
                 headers[str(key)] = metadata[key]
         url = "%s/%s" % (str(container), str(object_name))
         if params:
-            url += '?%s' % urllib.urlencode(params)
+            url += '?%s' % urlparse.urlencode(params)
 
         resp, body = self.put(url, data, headers)
+        self.expected_success(201, resp.status)
         return resp, body
 
     def update_object(self, container, object_name, data):
         """Upload data to replace current storage object."""
-        return self.create_object(container, object_name, data)
+        resp, body = self.create_object(container, object_name, data)
+        self.expected_success(201, resp.status)
+        return resp, body
 
     def delete_object(self, container, object_name, params=None):
         """Delete storage object."""
         url = "%s/%s" % (str(container), str(object_name))
         if params:
-            url += '?%s' % urllib.urlencode(params)
+            url += '?%s' % urlparse.urlencode(params)
         resp, body = self.delete(url, headers={})
+        self.expected_success([200, 204], resp.status)
         return resp, body
 
     def update_object_metadata(self, container, object_name, metadata,
@@ -68,6 +67,7 @@ class ObjectClient(rest_client.RestClient):
 
         url = "%s/%s" % (str(container), str(object_name))
         resp, body = self.post(url, None, headers=headers)
+        self.expected_success(202, resp.status)
         return resp, body
 
     def list_object_metadata(self, container, object_name):
@@ -75,6 +75,7 @@ class ObjectClient(rest_client.RestClient):
 
         url = "%s/%s" % (str(container), str(object_name))
         resp, body = self.head(url)
+        self.expected_success(200, resp.status)
         return resp, body
 
     def get_object(self, container, object_name, metadata=None):
@@ -87,6 +88,7 @@ class ObjectClient(rest_client.RestClient):
 
         url = "{0}/{1}".format(container, object_name)
         resp, body = self.get(url, headers=headers)
+        self.expected_success([200, 206], resp.status)
         return resp, body
 
     def copy_object_in_same_container(self, container, src_object_name,
@@ -103,6 +105,7 @@ class ObjectClient(rest_client.RestClient):
                 headers[str(key)] = metadata[key]
 
         resp, body = self.put(url, None, headers=headers)
+        self.expected_success(201, resp.status)
         return resp, body
 
     def copy_object_across_containers(self, src_container, src_object_name,
@@ -120,6 +123,7 @@ class ObjectClient(rest_client.RestClient):
                 headers[str(key)] = metadata[key]
 
         resp, body = self.put(url, None, headers=headers)
+        self.expected_success(201, resp.status)
         return resp, body
 
     def copy_object_2d_way(self, container, src_object_name, dest_object_name,
@@ -135,88 +139,101 @@ class ObjectClient(rest_client.RestClient):
                 headers[str(key)] = metadata[key]
 
         resp, body = self.copy(url, headers=headers)
+        self.expected_success(201, resp.status)
         return resp, body
 
     def create_object_segments(self, container, object_name, segment, data):
         """Creates object segments."""
         url = "{0}/{1}/{2}".format(container, object_name, segment)
         resp, body = self.put(url, data)
+        self.expected_success(201, resp.status)
         return resp, body
 
+    def put_object_with_chunk(self, container, name, contents):
+        """Put an object with Transfer-Encoding header
 
-class ObjectClientCustomizedHeader(rest_client.RestClient):
+        :param container: name of the container
+        :type container: string
+        :param name: name of the object
+        :type name: string
+        :param contents: object data
+        :type contents: iterable
+        """
+        headers = {'Transfer-Encoding': 'chunked'}
+        if self.token:
+            headers['X-Auth-Token'] = self.token
 
-    # TODO(andreaf) This class is now redundant, to be removed in next patch
-
-    def __init__(self, auth_provider):
-        super(ObjectClientCustomizedHeader, self).__init__(
-            auth_provider)
-        # Overwrites json-specific header encoding in rest_client.RestClient
-        self.service = CONF.object_storage.catalog_type
-        self.format = 'json'
-
-    def request(self, method, url, extra_headers=False, headers=None,
-                body=None):
-        """A simple HTTP request interface."""
-        dscv = CONF.identity.disable_ssl_certificate_validation
-        self.http_obj = http.ClosingHttp(
-            disable_ssl_certificate_validation=dscv)
-        if headers is None:
-            headers = {}
-        elif extra_headers:
-            try:
-                headers.update(self.get_headers())
-            except (ValueError, TypeError):
-                headers = {}
-
-        # Authorize the request
-        req_url, req_headers, req_body = self.auth_provider.auth_request(
-            method=method, url=url, headers=headers, body=body,
-            filters=self.filters
+        url = "%s/%s" % (container, name)
+        resp, body = self.put(
+            url, headers=headers,
+            body=contents,
+            chunked=True
         )
-        # Use original method
-        resp, resp_body = self.http_obj.request(req_url, method,
-                                                headers=req_headers,
-                                                body=req_body)
-        self._log_request(method, req_url, resp)
-        if resp.status == 401 or resp.status == 403:
-            raise exceptions.Unauthorized()
 
-        return resp, resp_body
+        self._error_checker('PUT', None, headers, contents, resp, body)
+        self.expected_success(201, resp.status)
+        return resp.status, resp.reason, resp
 
-    def get_object(self, container, object_name, metadata=None):
-        """Retrieve object's data."""
+    def create_object_continue(self, container, object_name,
+                               data, metadata=None):
+        """Put an object using Expect:100-continue"""
         headers = {}
         if metadata:
             for key in metadata:
                 headers[str(key)] = metadata[key]
 
-        url = "{0}/{1}".format(container, object_name)
-        resp, body = self.get(url, headers=headers)
-        return resp, body
+        headers['X-Auth-Token'] = self.token
+        headers['content-length'] = 0 if data is None else len(data)
+        headers['Expect'] = '100-continue'
 
-    def create_object(self, container, object_name, data, metadata=None):
-        """Create storage object."""
+        parsed = urlparse.urlparse(self.base_url)
+        path = str(parsed.path) + "/"
+        path += "%s/%s" % (str(container), str(object_name))
 
-        headers = {}
-        if metadata:
-            for key in metadata:
-                headers[str(key)] = metadata[key]
+        conn = create_connection(parsed)
 
-        if not data:
-            headers['content-length'] = '0'
-        url = "%s/%s" % (str(container), str(object_name))
-        resp, body = self.put(url, data, headers=headers)
-        return resp, body
+        # Send the PUT request and the headers including the "Expect" header
+        conn.putrequest('PUT', path)
 
-    def delete_object(self, container, object_name, metadata=None):
-        """Delete storage object."""
+        for header, value in six.iteritems(headers):
+            conn.putheader(header, value)
+        conn.endheaders()
 
-        headers = {}
-        if metadata:
-            for key in metadata:
-                headers[str(key)] = metadata[key]
+        # Read the 100 status prior to sending the data
+        response = conn.response_class(conn.sock,
+                                       strict=conn.strict,
+                                       method=conn._method)
+        _, status, _ = response._read_status()
 
-        url = "%s/%s" % (str(container), str(object_name))
-        resp, body = self.delete(url, headers=headers)
-        return resp, body
+        # toss the CRLF at the end of the response
+        response._safe_read(2)
+
+        # Expecting a 100 here, if not close and throw an exception
+        if status != 100:
+            conn.close()
+            pattern = "%s %s" % (
+                """Unexpected http success status code {0}.""",
+                """The expected status code is {1}""")
+            details = pattern.format(status, 100)
+            raise exceptions.UnexpectedResponseCode(details)
+
+        # If a continue was received go ahead and send the data
+        # and get the final response
+        conn.send(data)
+
+        resp = conn.getresponse()
+
+        return resp.status, resp.reason
+
+
+def create_connection(parsed_url):
+    """Helper function to create connection with httplib
+
+    :param parsed_url: parsed url of the remote location
+    """
+    if parsed_url.scheme == 'https':
+        conn = httplib.HTTPSConnection(parsed_url.netloc)
+    else:
+        conn = httplib.HTTPConnection(parsed_url.netloc)
+
+    return conn

@@ -19,39 +19,38 @@ from tempest import test
 
 
 class PoliciesTestJSON(base.BaseIdentityV3AdminTest):
-    _interface = 'json'
 
     def _delete_policy(self, policy_id):
-        resp, _ = self.policy_client.delete_policy(policy_id)
-        self.assertEqual(204, resp.status)
+        self.policies_client.delete_policy(policy_id)
 
-    @test.attr(type='smoke')
+    @test.idempotent_id('1a0ad286-2d06-4123-ab0d-728893a76201')
     def test_list_policies(self):
         # Test to list policies
         policy_ids = list()
         fetched_ids = list()
         for _ in range(3):
-            blob = data_utils.rand_name('BlobName-')
-            policy_type = data_utils.rand_name('PolicyType-')
-            resp, policy = self.policy_client.create_policy(blob,
-                                                            policy_type)
+            blob = data_utils.rand_name('BlobName')
+            policy_type = data_utils.rand_name('PolicyType')
+            policy = self.policies_client.create_policy(
+                blob=blob, type=policy_type)['policy']
             # Delete the Policy at the end of this method
             self.addCleanup(self._delete_policy, policy['id'])
             policy_ids.append(policy['id'])
         # List and Verify Policies
-        resp, body = self.policy_client.list_policies()
-        self.assertEqual(resp['status'], '200')
+        body = self.policies_client.list_policies()['policies']
         for p in body:
             fetched_ids.append(p['id'])
         missing_pols = [p for p in policy_ids if p not in fetched_ids]
         self.assertEqual(0, len(missing_pols))
 
     @test.attr(type='smoke')
+    @test.idempotent_id('e544703a-2f03-4cf2-9b0f-350782fdb0d3')
     def test_create_update_delete_policy(self):
         # Test to update policy
-        blob = data_utils.rand_name('BlobName-')
-        policy_type = data_utils.rand_name('PolicyType-')
-        resp, policy = self.policy_client.create_policy(blob, policy_type)
+        blob = data_utils.rand_name('BlobName')
+        policy_type = data_utils.rand_name('PolicyType')
+        policy = self.policies_client.create_policy(blob=blob,
+                                                    type=policy_type)['policy']
         self.addCleanup(self._delete_policy, policy['id'])
         self.assertIn('id', policy)
         self.assertIn('type', policy)
@@ -59,22 +58,17 @@ class PoliciesTestJSON(base.BaseIdentityV3AdminTest):
         self.assertIsNotNone(policy['id'])
         self.assertEqual(blob, policy['blob'])
         self.assertEqual(policy_type, policy['type'])
-        resp, fetched_policy = self.policy_client.get_policy(policy['id'])
-        self.assertEqual(resp['status'], '200')
         # Update policy
-        update_type = data_utils.rand_name('UpdatedPolicyType-')
-        resp, data = self.policy_client.update_policy(
-            policy['id'], type=update_type)
+        update_type = data_utils.rand_name('UpdatedPolicyType')
+        data = self.policies_client.update_policy(
+            policy['id'], type=update_type)['policy']
         self.assertIn('type', data)
         # Assertion for updated value with fetched value
-        resp, fetched_policy = self.policy_client.get_policy(policy['id'])
+        fetched_policy = self.policies_client.show_policy(
+            policy['id'])['policy']
         self.assertIn('id', fetched_policy)
         self.assertIn('blob', fetched_policy)
         self.assertIn('type', fetched_policy)
         self.assertEqual(fetched_policy['id'], policy['id'])
         self.assertEqual(fetched_policy['blob'], policy['blob'])
         self.assertEqual(update_type, fetched_policy['type'])
-
-
-class PoliciesTestXML(PoliciesTestJSON):
-    _interface = 'xml'

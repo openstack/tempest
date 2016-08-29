@@ -13,31 +13,32 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import uuid
-
 from tempest.api.compute import base
-from tempest import exceptions
+from tempest.lib.common.utils import data_utils
+from tempest.lib import exceptions as lib_exc
 from tempest import test
 
 
 class VirtualInterfacesNegativeTestJSON(base.BaseV2ComputeTest):
 
     @classmethod
-    def setUpClass(cls):
+    def setup_credentials(cls):
         # For this test no network resources are needed
         cls.set_network_resources()
-        super(VirtualInterfacesNegativeTestJSON, cls).setUpClass()
+        super(VirtualInterfacesNegativeTestJSON, cls).setup_credentials()
+
+    @classmethod
+    def setup_clients(cls):
+        super(VirtualInterfacesNegativeTestJSON, cls).setup_clients()
         cls.client = cls.servers_client
 
-    @test.attr(type=['negative', 'gate'])
+    @test.attr(type=['negative'])
+    @test.idempotent_id('64ebd03c-1089-4306-93fa-60f5eb5c803c')
+    @test.services('network')
     def test_list_virtual_interfaces_invalid_server_id(self):
         # Negative test: Should not be able to GET virtual interfaces
         # for an invalid server_id
-        invalid_server_id = str(uuid.uuid4())
-        self.assertRaises(exceptions.NotFound,
+        invalid_server_id = data_utils.rand_uuid()
+        self.assertRaises(lib_exc.NotFound,
                           self.client.list_virtual_interfaces,
                           invalid_server_id)
-
-
-class VirtualInterfacesNegativeTestXML(VirtualInterfacesNegativeTestJSON):
-    _interface = 'xml'

@@ -1,0 +1,13 @@
+---
+other:
+    - OpenStack Releases Supported at this time are the same as in the
+      previous release 9,
+        **Kilo** and
+        **Liberty**.
+
+
+      The release under current development as of this tag is Mitaka,
+      meaning that every Tempest commit is also tested against master during
+      the Mitaka cycle. However, this does not necessarily mean that using
+      Tempest as of this tag will work against a Mitaka (or future releases)
+      cloud.

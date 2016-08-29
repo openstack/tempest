@@ -18,64 +18,51 @@ from tempest import test
 
 
 class HostsAdminTestJSON(base.BaseV2ComputeAdminTest):
-
-    """
-    Tests hosts API using admin privileges.
-    """
+    """Tests hosts API using admin privileges."""
 
     @classmethod
-    def setUpClass(cls):
-        super(HostsAdminTestJSON, cls).setUpClass()
+    def setup_clients(cls):
+        super(HostsAdminTestJSON, cls).setup_clients()
         cls.client = cls.os_adm.hosts_client
 
-    @test.attr(type='gate')
+    @test.idempotent_id('9bfaf98d-e2cb-44b0-a07e-2558b2821e4f')
     def test_list_hosts(self):
-        resp, hosts = self.client.list_hosts()
-        self.assertEqual(200, resp.status)
+        hosts = self.client.list_hosts()['hosts']
         self.assertTrue(len(hosts) >= 2, str(hosts))
 
-    @test.attr(type='gate')
+    @test.idempotent_id('5dc06f5b-d887-47a2-bb2a-67762ef3c6de')
     def test_list_hosts_with_zone(self):
         self.useFixture(fixtures.LockFixture('availability_zone'))
-        resp, hosts = self.client.list_hosts()
+        hosts = self.client.list_hosts()['hosts']
         host = hosts[0]
-        zone_name = host['zone']
-        params = {'zone': zone_name}
-        resp, hosts = self.client.list_hosts(params)
-        self.assertEqual(200, resp.status)
+        hosts = self.client.list_hosts(zone=host['zone'])['hosts']
         self.assertTrue(len(hosts) >= 1)
         self.assertIn(host, hosts)
 
-    @test.attr(type='gate')
+    @test.idempotent_id('9af3c171-fbf4-4150-a624-22109733c2a6')
     def test_list_hosts_with_a_blank_zone(self):
         # If send the request with a blank zone, the request will be successful
         # and it will return all the hosts list
-        params = {'zone': ''}
-        resp, hosts = self.client.list_hosts(params)
+        hosts = self.client.list_hosts(zone='')['hosts']
         self.assertNotEqual(0, len(hosts))
-        self.assertEqual(200, resp.status)
 
-    @test.attr(type='gate')
+    @test.idempotent_id('c6ddbadb-c94e-4500-b12f-8ffc43843ff8')
     def test_list_hosts_with_nonexistent_zone(self):
         # If send the request with a nonexistent zone, the request will be
-        # successful and no hosts will be retured
-        params = {'zone': 'xxx'}
-        resp, hosts = self.client.list_hosts(params)
+        # successful and no hosts will be returned
+        hosts = self.client.list_hosts(zone='xxx')['hosts']
         self.assertEqual(0, len(hosts))
-        self.assertEqual(200, resp.status)
 
-    @test.attr(type='gate')
+    @test.idempotent_id('38adbb12-aee2-4498-8aec-329c72423aa4')
     def test_show_host_detail(self):
-        resp, hosts = self.client.list_hosts()
-        self.assertEqual(200, resp.status)
+        hosts = self.client.list_hosts()['hosts']
 
         hosts = [host for host in hosts if host['service'] == 'compute']
         self.assertTrue(len(hosts) >= 1)
 
         for host in hosts:
             hostname = host['host_name']
-            resp, resources = self.client.show_host_detail(hostname)
-            self.assertEqual(200, resp.status)
+            resources = self.client.show_host(hostname)['host']
             self.assertTrue(len(resources) >= 1)
             host_resource = resources[0]['resource']
             self.assertIsNotNone(host_resource)
@@ -84,7 +71,3 @@ class HostsAdminTestJSON(base.BaseV2ComputeAdminTest):
             self.assertIsNotNone(host_resource['memory_mb'])
             self.assertIsNotNone(host_resource['project'])
             self.assertEqual(hostname, host_resource['host'])
-
-
-class HostsAdminTestXML(HostsAdminTestJSON):
-    _interface = 'xml'

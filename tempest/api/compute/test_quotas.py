@@ -14,15 +14,32 @@
 #    under the License.
 
 from tempest.api.compute import base
+from tempest.common import tempest_fixtures as fixtures
 from tempest import test
 
 
 class QuotasTestJSON(base.BaseV2ComputeTest):
 
     @classmethod
-    def setUpClass(cls):
-        super(QuotasTestJSON, cls).setUpClass()
+    def skip_checks(cls):
+        super(QuotasTestJSON, cls).skip_checks()
+        if not test.is_extension_enabled('os-quota-sets', 'compute'):
+            msg = "quotas extension not enabled."
+            raise cls.skipException(msg)
+
+    def setUp(self):
+        # NOTE(mriedem): Avoid conflicts with os-quota-class-sets tests.
+        self.useFixture(fixtures.LockFixture('compute_quotas'))
+        super(QuotasTestJSON, self).setUp()
+
+    @classmethod
+    def setup_clients(cls):
+        super(QuotasTestJSON, cls).setup_clients()
         cls.client = cls.quotas_client
+
+    @classmethod
+    def resource_setup(cls):
+        super(QuotasTestJSON, cls).resource_setup()
         cls.tenant_id = cls.client.tenant_id
         cls.user_id = cls.client.user_id
         cls.default_quota_set = set(('injected_file_content_bytes',
@@ -33,44 +50,37 @@ class QuotasTestJSON(base.BaseV2ComputeTest):
                                      'instances', 'security_group_rules',
                                      'cores', 'security_groups'))
 
-    @test.attr(type='smoke')
+    @test.idempotent_id('f1ef0a97-dbbb-4cca-adc5-c9fbc4f76107')
     def test_get_quotas(self):
         # User can get the quota set for it's tenant
         expected_quota_set = self.default_quota_set | set(['id'])
-        resp, quota_set = self.client.get_quota_set(self.tenant_id)
-        self.assertEqual(200, resp.status)
-        self.assertEqual(sorted(expected_quota_set),
-                         sorted(quota_set.keys()))
+        quota_set = self.client.show_quota_set(self.tenant_id)['quota_set']
         self.assertEqual(quota_set['id'], self.tenant_id)
+        for quota in expected_quota_set:
+            self.assertIn(quota, quota_set.keys())
 
         # get the quota set using user id
-        resp, quota_set = self.client.get_quota_set(self.tenant_id,
-                                                    self.user_id)
-        self.assertEqual(200, resp.status)
-        self.assertEqual(sorted(expected_quota_set),
-                         sorted(quota_set.keys()))
+        quota_set = self.client.show_quota_set(self.tenant_id,
+                                               self.user_id)['quota_set']
         self.assertEqual(quota_set['id'], self.tenant_id)
+        for quota in expected_quota_set:
+            self.assertIn(quota, quota_set.keys())
 
-    @test.attr(type='smoke')
+    @test.idempotent_id('9bfecac7-b966-4f47-913f-1a9e2c12134a')
     def test_get_default_quotas(self):
         # User can get the default quota set for it's tenant
         expected_quota_set = self.default_quota_set | set(['id'])
-        resp, quota_set = self.client.get_default_quota_set(self.tenant_id)
-        self.assertEqual(200, resp.status)
-        self.assertEqual(sorted(expected_quota_set),
-                         sorted(quota_set.keys()))
+        quota_set = (self.client.show_default_quota_set(self.tenant_id)
+                     ['quota_set'])
         self.assertEqual(quota_set['id'], self.tenant_id)
+        for quota in expected_quota_set:
+            self.assertIn(quota, quota_set.keys())
 
-    @test.attr(type='smoke')
+    @test.idempotent_id('cd65d997-f7e4-4966-a7e9-d5001b674fdc')
     def test_compare_tenant_quotas_with_default_quotas(self):
         # Tenants are created with the default quota values
-        resp, defualt_quota_set = \
-            self.client.get_default_quota_set(self.tenant_id)
-        self.assertEqual(200, resp.status)
-        resp, tenant_quota_set = self.client.get_quota_set(self.tenant_id)
-        self.assertEqual(200, resp.status)
-        self.assertEqual(defualt_quota_set, tenant_quota_set)
-
-
-class QuotasTestXML(QuotasTestJSON):
-    _interface = 'xml'
+        default_quota_set = \
+            self.client.show_default_quota_set(self.tenant_id)['quota_set']
+        tenant_quota_set = (self.client.show_quota_set(self.tenant_id)
+                            ['quota_set'])
+        self.assertEqual(default_quota_set, tenant_quota_set)

@@ -15,11 +15,17 @@
 
 import time
 
-from tempest import clients
+from oslo_log import log as logging
+
+from tempest.api.compute import api_microversion_fixture
+from tempest.common import compute
 from tempest.common.utils import data_utils
+from tempest.common import waiters
 from tempest import config
 from tempest import exceptions
-from tempest.openstack.common import log as logging
+from tempest.lib.common import api_version_utils
+from tempest.lib.common.utils import test_utils
+from tempest.lib import exceptions as lib_exc
 import tempest.test
 
 CONF = config.CONF
@@ -27,165 +33,161 @@ CONF = config.CONF
 LOG = logging.getLogger(__name__)
 
 
-class BaseComputeTest(tempest.test.BaseTestCase):
+class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
+                        tempest.test.BaseTestCase):
     """Base test case class for all Compute API tests."""
 
-    _api_version = 3
     force_tenant_isolation = False
 
+    # TODO(andreaf) We should care also for the alt_manager here
+    # but only once client lazy load in the manager is done
+    credentials = ['primary']
+
     @classmethod
-    def setUpClass(cls):
+    def skip_checks(cls):
+        super(BaseV2ComputeTest, cls).skip_checks()
+        if not CONF.service_available.nova:
+            raise cls.skipException("Nova is not available")
+        cfg_min_version = CONF.compute.min_microversion
+        cfg_max_version = CONF.compute.max_microversion
+        api_version_utils.check_skip_with_microversion(cls.min_microversion,
+                                                       cls.max_microversion,
+                                                       cfg_min_version,
+                                                       cfg_max_version)
+
+    @classmethod
+    def setup_credentials(cls):
         cls.set_network_resources()
-        super(BaseComputeTest, cls).setUpClass()
+        super(BaseV2ComputeTest, cls).setup_credentials()
 
-        # TODO(andreaf) WE should care also for the alt_manager here
-        # but only once client lazy load in the manager is done
-        os = cls.get_client_manager()
+    @classmethod
+    def setup_clients(cls):
+        super(BaseV2ComputeTest, cls).setup_clients()
+        cls.servers_client = cls.os.servers_client
+        cls.server_groups_client = cls.os.server_groups_client
+        cls.flavors_client = cls.os.flavors_client
+        cls.compute_images_client = cls.os.compute_images_client
+        cls.extensions_client = cls.os.extensions_client
+        cls.floating_ip_pools_client = cls.os.floating_ip_pools_client
+        cls.floating_ips_client = cls.os.compute_floating_ips_client
+        cls.keypairs_client = cls.os.keypairs_client
+        cls.security_group_rules_client = (
+            cls.os.compute_security_group_rules_client)
+        cls.security_groups_client = cls.os.compute_security_groups_client
+        cls.quotas_client = cls.os.quotas_client
+        cls.quota_classes_client = cls.os.quota_classes_client
+        cls.compute_networks_client = cls.os.compute_networks_client
+        cls.limits_client = cls.os.limits_client
+        cls.volumes_extensions_client = cls.os.volumes_extensions_client
+        cls.snapshots_extensions_client = cls.os.snapshots_extensions_client
+        cls.interfaces_client = cls.os.interfaces_client
+        cls.fixed_ips_client = cls.os.fixed_ips_client
+        cls.availability_zone_client = cls.os.availability_zone_client
+        cls.agents_client = cls.os.agents_client
+        cls.aggregates_client = cls.os.aggregates_client
+        cls.services_client = cls.os.services_client
+        cls.instance_usages_audit_log_client = (
+            cls.os.instance_usages_audit_log_client)
+        cls.hypervisor_client = cls.os.hypervisor_client
+        cls.certificates_client = cls.os.certificates_client
+        cls.migrations_client = cls.os.migrations_client
+        cls.security_group_default_rules_client = (
+            cls.os.security_group_default_rules_client)
+        cls.versions_client = cls.os.compute_versions_client
 
-        cls.os = os
+        if CONF.volume_feature_enabled.api_v1:
+            cls.volumes_client = cls.os.volumes_client
+        else:
+            cls.volumes_client = cls.os.volumes_v2_client
+
+    @classmethod
+    def resource_setup(cls):
+        super(BaseV2ComputeTest, cls).resource_setup()
+        cls.request_microversion = (
+            api_version_utils.select_request_microversion(
+                cls.min_microversion,
+                CONF.compute.min_microversion))
         cls.build_interval = CONF.compute.build_interval
         cls.build_timeout = CONF.compute.build_timeout
-        cls.ssh_user = CONF.compute.ssh_user
         cls.image_ref = CONF.compute.image_ref
         cls.image_ref_alt = CONF.compute.image_ref_alt
         cls.flavor_ref = CONF.compute.flavor_ref
         cls.flavor_ref_alt = CONF.compute.flavor_ref_alt
-        cls.image_ssh_user = CONF.compute.image_ssh_user
-        cls.image_ssh_password = CONF.compute.image_ssh_password
+        cls.ssh_user = CONF.validation.image_ssh_user
+        cls.image_ssh_user = CONF.validation.image_ssh_user
+        cls.image_ssh_password = CONF.validation.image_ssh_password
         cls.servers = []
         cls.images = []
-        cls.multi_user = cls.get_multi_user()
         cls.security_groups = []
         cls.server_groups = []
 
-        if cls._api_version == 2:
-            cls.servers_client = cls.os.servers_client
-            cls.flavors_client = cls.os.flavors_client
-            cls.images_client = cls.os.images_client
-            cls.extensions_client = cls.os.extensions_client
-            cls.floating_ips_client = cls.os.floating_ips_client
-            cls.keypairs_client = cls.os.keypairs_client
-            cls.security_groups_client = cls.os.security_groups_client
-            cls.quotas_client = cls.os.quotas_client
-            cls.limits_client = cls.os.limits_client
-            cls.volumes_extensions_client = cls.os.volumes_extensions_client
-            cls.volumes_client = cls.os.volumes_client
-            cls.interfaces_client = cls.os.interfaces_client
-            cls.fixed_ips_client = cls.os.fixed_ips_client
-            cls.availability_zone_client = cls.os.availability_zone_client
-            cls.agents_client = cls.os.agents_client
-            cls.aggregates_client = cls.os.aggregates_client
-            cls.services_client = cls.os.services_client
-            cls.instance_usages_audit_log_client = \
-                cls.os.instance_usages_audit_log_client
-            cls.hypervisor_client = cls.os.hypervisor_client
-            cls.certificates_client = cls.os.certificates_client
-            cls.migrations_client = cls.os.migrations_client
-
-        elif cls._api_version == 3:
-            if not CONF.compute_feature_enabled.api_v3:
-                skip_msg = ("%s skipped as nova v3 api is not available" %
-                            cls.__name__)
-                raise cls.skipException(skip_msg)
-            cls.servers_client = cls.os.servers_v3_client
-            cls.images_client = cls.os.image_client
-            cls.flavors_client = cls.os.flavors_v3_client
-            cls.services_client = cls.os.services_v3_client
-            cls.extensions_client = cls.os.extensions_v3_client
-            cls.availability_zone_client = cls.os.availability_zone_v3_client
-            cls.interfaces_client = cls.os.interfaces_v3_client
-            cls.hypervisor_client = cls.os.hypervisor_v3_client
-            cls.keypairs_client = cls.os.keypairs_v3_client
-            cls.volumes_client = cls.os.volumes_client
-            cls.certificates_client = cls.os.certificates_v3_client
-            cls.keypairs_client = cls.os.keypairs_v3_client
-            cls.aggregates_client = cls.os.aggregates_v3_client
-            cls.hosts_client = cls.os.hosts_v3_client
-            cls.quotas_client = cls.os.quotas_v3_client
-            cls.version_client = cls.os.version_v3_client
-            cls.migrations_client = cls.os.migrations_v3_client
-        else:
-            msg = ("Unexpected API version is specified (%s)" %
-                   cls._api_version)
-            raise exceptions.InvalidConfiguration(message=msg)
-
     @classmethod
-    def get_multi_user(cls):
-        multi_user = True
-        # Determine if there are two regular users that can be
-        # used in testing. If the test cases are allowed to create
-        # users (config.compute.allow_tenant_isolation is true,
-        # then we allow multi-user.
-        if not CONF.compute.allow_tenant_isolation:
-            user1 = CONF.identity.username
-            user2 = CONF.identity.alt_username
-            if not user2 or user1 == user2:
-                multi_user = False
-            else:
-                user2_password = CONF.identity.alt_password
-                user2_tenant_name = CONF.identity.alt_tenant_name
-                if not user2_password or not user2_tenant_name:
-                    msg = ("Alternate user specified but not alternate "
-                           "tenant or password: alt_tenant_name=%s "
-                           "alt_password=%s"
-                           % (user2_tenant_name, user2_password))
-                    raise exceptions.InvalidConfiguration(msg)
-        return multi_user
+    def resource_cleanup(cls):
+        cls.clear_images()
+        cls.clear_servers()
+        cls.clear_security_groups()
+        cls.clear_server_groups()
+        super(BaseV2ComputeTest, cls).resource_cleanup()
 
     @classmethod
     def clear_servers(cls):
+        LOG.debug('Clearing servers: %s', ','.join(
+            server['id'] for server in cls.servers))
         for server in cls.servers:
             try:
-                cls.servers_client.delete_server(server['id'])
+                test_utils.call_and_ignore_notfound_exc(
+                    cls.servers_client.delete_server, server['id'])
             except Exception:
-                pass
+                LOG.exception('Deleting server %s failed' % server['id'])
 
         for server in cls.servers:
             try:
-                cls.servers_client.wait_for_server_termination(server['id'])
+                waiters.wait_for_server_termination(cls.servers_client,
+                                                    server['id'])
             except Exception:
-                pass
+                LOG.exception('Waiting for deletion of server %s failed'
+                              % server['id'])
 
     @classmethod
     def server_check_teardown(cls):
         """Checks is the shared server clean enough for subsequent test.
+
            Method will delete the server when it's dirty.
            The setUp method is responsible for creating a new server.
            Exceptions raised in tearDown class are fails the test case,
-           This method supposed to use only by tierDown methods, when
+           This method supposed to use only by tearDown methods, when
            the shared server_id is stored in the server_id of the class.
         """
         if getattr(cls, 'server_id', None) is not None:
             try:
-                cls.servers_client.wait_for_server_status(cls.server_id,
-                                                          'ACTIVE')
+                waiters.wait_for_server_status(cls.servers_client,
+                                               cls.server_id, 'ACTIVE')
             except Exception as exc:
                 LOG.exception(exc)
                 cls.servers_client.delete_server(cls.server_id)
-                cls.servers_client.wait_for_server_termination(cls.server_id)
+                waiters.wait_for_server_termination(cls.servers_client,
+                                                    cls.server_id)
                 cls.server_id = None
                 raise
 
     @classmethod
     def clear_images(cls):
+        LOG.debug('Clearing images: %s', ','.join(cls.images))
         for image_id in cls.images:
             try:
-                cls.images_client.delete_image(image_id)
-            except exceptions.NotFound:
-                # The image may have already been deleted which is OK.
-                pass
+                test_utils.call_and_ignore_notfound_exc(
+                    cls.compute_images_client.delete_image, image_id)
             except Exception:
                 LOG.exception('Exception raised deleting image %s' % image_id)
 
     @classmethod
     def clear_security_groups(cls):
+        LOG.debug('Clearing security groups: %s', ','.join(
+            str(sg['id']) for sg in cls.security_groups))
         for sg in cls.security_groups:
             try:
-                resp, body =\
-                    cls.security_groups_client.delete_security_group(sg['id'])
-            except exceptions.NotFound:
-                # The security group may have already been deleted which is OK.
-                pass
+                test_utils.call_and_ignore_notfound_exc(
+                    cls.security_groups_client.delete_security_group, sg['id'])
             except Exception as exc:
                 LOG.info('Exception raised deleting security group %s',
                          sg['id'])
@@ -193,85 +195,65 @@ class BaseComputeTest(tempest.test.BaseTestCase):
 
     @classmethod
     def clear_server_groups(cls):
+        LOG.debug('Clearing server groups: %s', ','.join(cls.server_groups))
         for server_group_id in cls.server_groups:
             try:
-                cls.client.delete_server_group(server_group_id)
-            except exceptions.NotFound:
-                # The server-group may have already been deleted which is OK.
-                pass
+                test_utils.call_and_ignore_notfound_exc(
+                    cls.server_groups_client.delete_server_group,
+                    server_group_id
+                )
             except Exception:
                 LOG.exception('Exception raised deleting server-group %s',
                               server_group_id)
 
     @classmethod
-    def tearDownClass(cls):
-        cls.clear_images()
-        cls.clear_servers()
-        cls.clear_security_groups()
-        cls.clear_isolated_creds()
-        cls.clear_server_groups()
-        super(BaseComputeTest, cls).tearDownClass()
+    def create_test_server(cls, validatable=False, volume_backed=False,
+                           **kwargs):
+        """Wrapper utility that returns a test server.
 
-    @classmethod
-    def create_test_server(cls, **kwargs):
-        """Wrapper utility that returns a test server."""
-        name = data_utils.rand_name(cls.__name__ + "-instance")
-        if 'name' in kwargs:
-            name = kwargs.pop('name')
-        flavor = kwargs.get('flavor', cls.flavor_ref)
-        image_id = kwargs.get('image_id', cls.image_ref)
+        This wrapper utility calls the common create test server and
+        returns a test server. The purpose of this wrapper is to minimize
+        the impact on the code of the tests already using this
+        function.
 
-        resp, body = cls.servers_client.create_server(
-            name, image_id, flavor, **kwargs)
-
-        # handle the case of multiple servers
-        servers = [body]
-        if 'min_count' in kwargs or 'max_count' in kwargs:
-            # Get servers created which name match with name param.
-            r, b = cls.servers_client.list_servers()
-            servers = [s for s in b['servers'] if s['name'].startswith(name)]
-
-        if 'wait_until' in kwargs:
-            for server in servers:
-                try:
-                    cls.servers_client.wait_for_server_status(
-                        server['id'], kwargs['wait_until'])
-                except Exception as ex:
-                    if ('preserve_server_on_error' not in kwargs
-                        or kwargs['preserve_server_on_error'] is False):
-                        for server in servers:
-                            try:
-                                cls.servers_client.delete_server(server['id'])
-                            except Exception:
-                                pass
-                    raise ex
+        :param validatable: Whether the server will be pingable or sshable.
+        :param volume_backed: Whether the instance is volume backed or not.
+        """
+        tenant_network = cls.get_tenant_network()
+        body, servers = compute.create_test_server(
+            cls.os,
+            validatable,
+            validation_resources=cls.validation_resources,
+            tenant_network=tenant_network,
+            volume_backed=volume_backed,
+            **kwargs)
 
         cls.servers.extend(servers)
 
-        return resp, body
+        return body
 
     @classmethod
     def create_security_group(cls, name=None, description=None):
         if name is None:
             name = data_utils.rand_name(cls.__name__ + "-securitygroup")
         if description is None:
-            description = data_utils.rand_name('description-')
-        resp, body = \
-            cls.security_groups_client.create_security_group(name,
-                                                             description)
+            description = data_utils.rand_name('description')
+        body = cls.security_groups_client.create_security_group(
+            name=name, description=description)['security_group']
         cls.security_groups.append(body)
 
-        return resp, body
+        return body
 
     @classmethod
-    def create_test_server_group(cls, name="", policy=[]):
+    def create_test_server_group(cls, name="", policy=None):
         if not name:
             name = data_utils.rand_name(cls.__name__ + "-Server-Group")
-        if not policy:
+        if policy is None:
             policy = ['affinity']
-        resp, body = cls.servers_client.create_server_group(name, policy)
-        cls.server_groups.append(body)
-        return resp, body
+        body = cls.server_groups_client.create_server_group(
+            name=name, policies=policy)['server_group']
+        cls.server_groups.append(body['id'])
+        return body
 
     def wait_for(self, condition):
         """Repeatedly calls condition() until a timeout."""
@@ -292,18 +274,18 @@ class BaseComputeTest(tempest.test.BaseTestCase):
     def _delete_volume(volumes_client, volume_id):
         """Deletes the given volume and waits for it to be gone."""
         try:
-            resp, _ = volumes_client.delete_volume(volume_id)
+            volumes_client.delete_volume(volume_id)
             # TODO(mriedem): We should move the wait_for_resource_deletion
             # into the delete_volume method as a convenience to the caller.
             volumes_client.wait_for_resource_deletion(volume_id)
-        except exceptions.NotFound:
-            LOG.warn("Unable to delete volume '%s' since it was not found. "
-                     "Maybe it was already deleted?" % volume_id)
+        except lib_exc.NotFound:
+            LOG.warning("Unable to delete volume '%s' since it was not found. "
+                        "Maybe it was already deleted?" % volume_id)
 
     @classmethod
     def prepare_instance_network(cls):
-        if (CONF.compute.ssh_auth_method != 'disabled' and
-                CONF.compute.ssh_connect_method == 'floating'):
+        if (CONF.validation.auth_method != 'disabled' and
+                CONF.validation.connect_method == 'floating'):
             cls.set_network_resources(network=True, subnet=True, router=True,
                                       dhcp=True)
 
@@ -314,102 +296,86 @@ class BaseComputeTest(tempest.test.BaseTestCase):
         if 'name' in kwargs:
             name = kwargs.pop('name')
 
-        if cls._api_version == 2:
-            resp, image = cls.images_client.create_image(server_id, name)
-        elif cls._api_version == 3:
-            resp, image = cls.servers_client.create_image(server_id, name)
-        image_id = data_utils.parse_image_id(resp['location'])
+        image = cls.compute_images_client.create_image(server_id, name=name)
+        image_id = data_utils.parse_image_id(image.response['location'])
         cls.images.append(image_id)
 
         if 'wait_until' in kwargs:
-            cls.images_client.wait_for_image_status(image_id,
-                                                    kwargs['wait_until'])
-            if cls._api_version == 2:
-                resp, image = cls.images_client.get_image(image_id)
-            elif cls._api_version == 3:
-                resp, image = cls.images_client.get_image_meta(image_id)
+            waiters.wait_for_image_status(cls.compute_images_client,
+                                          image_id, kwargs['wait_until'])
+            image = cls.compute_images_client.show_image(image_id)['image']
 
             if kwargs['wait_until'] == 'ACTIVE':
                 if kwargs.get('wait_for_server', True):
-                    cls.servers_client.wait_for_server_status(server_id,
-                                                              'ACTIVE')
-        return resp, image
+                    waiters.wait_for_server_status(cls.servers_client,
+                                                   server_id, 'ACTIVE')
+        return image
 
     @classmethod
-    def rebuild_server(cls, server_id, **kwargs):
+    def rebuild_server(cls, server_id, validatable=False, **kwargs):
         # Destroy an existing server and creates a new one
         if server_id:
             try:
                 cls.servers_client.delete_server(server_id)
-                cls.servers_client.wait_for_server_termination(server_id)
+                waiters.wait_for_server_termination(cls.servers_client,
+                                                    server_id)
             except Exception:
                 LOG.exception('Failed to delete server %s' % server_id)
-        resp, server = cls.create_test_server(wait_until='ACTIVE', **kwargs)
-        if cls._api_version == 2:
-            cls.password = server['adminPass']
-        elif cls._api_version == 3:
-            cls.password = server['admin_password']
+
+        cls.password = data_utils.rand_password()
+        server = cls.create_test_server(
+            validatable,
+            wait_until='ACTIVE',
+            adminPass=cls.password,
+            **kwargs)
         return server['id']
+
+    @classmethod
+    def delete_server(cls, server_id):
+        """Deletes an existing server and waits for it to be gone."""
+        try:
+            cls.servers_client.delete_server(server_id)
+            waiters.wait_for_server_termination(cls.servers_client,
+                                                server_id)
+        except Exception:
+            LOG.exception('Failed to delete server %s' % server_id)
 
     @classmethod
     def delete_volume(cls, volume_id):
         """Deletes the given volume and waits for it to be gone."""
-        if cls._api_version == 2:
-            cls._delete_volume(cls.volumes_extensions_client, volume_id)
-        elif cls._api_version == 3:
-            cls._delete_volume(cls.volumes_client, volume_id)
-
-
-class BaseV2ComputeTest(BaseComputeTest):
-    _api_version = 2
-    _interface = "json"
-
-
-class BaseV3ComputeTest(BaseComputeTest):
-    _api_version = 3
-    _interface = "json"
-
-
-class BaseComputeAdminTest(BaseComputeTest):
-    """Base test case class for Compute Admin API tests."""
-    _interface = "json"
+        cls._delete_volume(cls.volumes_extensions_client, volume_id)
 
     @classmethod
-    def setUpClass(cls):
-        super(BaseComputeAdminTest, cls).setUpClass()
-        if (CONF.compute.allow_tenant_isolation or
-            cls.force_tenant_isolation is True):
-            creds = cls.isolated_creds.get_admin_creds()
-            cls.os_adm = clients.Manager(credentials=creds,
-                                         interface=cls._interface)
+    def get_server_ip(cls, server):
+        """Get the server fixed or floating IP.
+
+        Based on the configuration we're in, return a correct ip
+        address for validating that a guest is up.
+        """
+        if CONF.validation.connect_method == 'floating':
+            return cls.validation_resources['floating_ip']['ip']
+        elif CONF.validation.connect_method == 'fixed':
+            addresses = server['addresses'][CONF.validation.network_for_ssh]
+            for address in addresses:
+                if address['version'] == CONF.validation.ip_version_for_ssh:
+                    return address['addr']
+            raise exceptions.ServerUnreachable(server_id=server['id'])
         else:
-            try:
-                cls.os_adm = clients.ComputeAdminManager(
-                    interface=cls._interface)
-            except exceptions.InvalidCredentials:
-                msg = ("Missing Compute Admin API credentials "
-                       "in configuration.")
-                raise cls.skipException(msg)
+            raise exceptions.InvalidConfiguration()
 
-        if cls._api_version == 3:
-            cls.servers_admin_client = cls.os_adm.servers_v3_client
-            cls.services_admin_client = cls.os_adm.services_v3_client
-            cls.availability_zone_admin_client = \
-                cls.os_adm.availability_zone_v3_client
-            cls.hypervisor_admin_client = cls.os_adm.hypervisor_v3_client
-            cls.flavors_admin_client = cls.os_adm.flavors_v3_client
-            cls.aggregates_admin_client = cls.os_adm.aggregates_v3_client
-            cls.hosts_admin_client = cls.os_adm.hosts_v3_client
-            cls.quotas_admin_client = cls.os_adm.quotas_v3_client
-            cls.agents_admin_client = cls.os_adm.agents_v3_client
-            cls.migrations_admin_client = cls.os_adm.migrations_v3_client
+    def setUp(self):
+        super(BaseV2ComputeTest, self).setUp()
+        self.useFixture(api_microversion_fixture.APIMicroversionFixture(
+            self.request_microversion))
 
 
-class BaseV2ComputeAdminTest(BaseComputeAdminTest):
-    """Base test case class for Compute Admin V2 API tests."""
-    _api_version = 2
+class BaseV2ComputeAdminTest(BaseV2ComputeTest):
+    """Base test case class for Compute Admin API tests."""
 
+    credentials = ['primary', 'admin']
 
-class BaseV3ComputeAdminTest(BaseComputeAdminTest):
-    """Base test case class for Compute Admin V3 API tests."""
-    _api_version = 3
+    @classmethod
+    def setup_clients(cls):
+        super(BaseV2ComputeAdminTest, cls).setup_clients()
+        cls.availability_zone_admin_client = (
+            cls.os_adm.availability_zone_client)

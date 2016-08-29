@@ -7,6 +7,8 @@ Parameters:
     Default: not_yet
   image:
     Type: String
+  flavor:
+    Type: String
 Resources:
   fluffy:
     Type: AWS::AutoScaling::LaunchConfiguration
@@ -16,7 +18,7 @@ Resources:
       - Stinky
     Properties:
       ImageId: {Ref: image}
-      InstanceType: not_used
+      InstanceType: {Ref: flavor}
       UserData:
         Fn::Replace:
         - variable_a: {Ref: trigger}

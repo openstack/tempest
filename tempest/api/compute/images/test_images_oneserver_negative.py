@@ -14,11 +14,13 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from oslo_log import log as logging
+
 from tempest.api.compute import base
 from tempest.common.utils import data_utils
+from tempest.common import waiters
 from tempest import config
-from tempest import exceptions
-from tempest.openstack.common import log as logging
+from tempest.lib import exceptions as lib_exc
 from tempest import test
 
 CONF = config.CONF
@@ -42,8 +44,8 @@ class ImagesOneServerNegativeTestJSON(base.BaseV2ComputeTest):
         super(ImagesOneServerNegativeTestJSON, self).setUp()
         # Check if the server is in a clean state after test
         try:
-            self.servers_client.wait_for_server_status(self.server_id,
-                                                       'ACTIVE')
+            waiters.wait_for_server_status(self.servers_client, self.server_id,
+                                           'ACTIVE')
         except Exception:
             LOG.exception('server %s timed out to become ACTIVE. rebuilding'
                           % self.server_id)
@@ -55,95 +57,92 @@ class ImagesOneServerNegativeTestJSON(base.BaseV2ComputeTest):
         self.__class__.server_id = self.rebuild_server(self.server_id)
 
     @classmethod
-    def setUpClass(cls):
-        super(ImagesOneServerNegativeTestJSON, cls).setUpClass()
-        cls.client = cls.images_client
+    def skip_checks(cls):
+        super(ImagesOneServerNegativeTestJSON, cls).skip_checks()
         if not CONF.service_available.glance:
             skip_msg = ("%s skipped as glance is not available" % cls.__name__)
             raise cls.skipException(skip_msg)
 
-        try:
-            resp, server = cls.create_test_server(wait_until='ACTIVE')
-            cls.server_id = server['id']
-        except Exception:
-            cls.tearDownClass()
-            raise
+        if not CONF.compute_feature_enabled.snapshot:
+            skip_msg = ("%s skipped as instance snapshotting is not supported"
+                        % cls.__name__)
+            raise cls.skipException(skip_msg)
+
+    @classmethod
+    def setup_credentials(cls):
+        cls.prepare_instance_network()
+        super(ImagesOneServerNegativeTestJSON, cls).setup_credentials()
+
+    @classmethod
+    def setup_clients(cls):
+        super(ImagesOneServerNegativeTestJSON, cls).setup_clients()
+        cls.client = cls.compute_images_client
+
+    @classmethod
+    def resource_setup(cls):
+        super(ImagesOneServerNegativeTestJSON, cls).resource_setup()
+        server = cls.create_test_server(wait_until='ACTIVE')
+        cls.server_id = server['id']
 
         cls.image_ids = []
 
-    @test.skip_because(bug="1006725")
-    @test.attr(type=['negative', 'gate'])
-    def test_create_image_specify_multibyte_character_image_name(self):
-        if self.__class__._interface == "xml":
-            raise self.skipException("Not testable in XML")
-        # invalid multibyte sequence from:
-        # http://stackoverflow.com/questions/1301402/
-        #     example-invalid-utf8-string
-        invalid_name = data_utils.rand_name(u'\xc3\x28')
-        self.assertRaises(exceptions.BadRequest,
-                          self.client.create_image, self.server_id,
-                          invalid_name)
-
-    @test.attr(type=['negative', 'gate'])
+    @test.attr(type=['negative'])
+    @test.idempotent_id('55d1d38c-dd66-4933-9c8e-7d92aeb60ddc')
     def test_create_image_specify_invalid_metadata(self):
         # Return an error when creating image with invalid metadata
-        snapshot_name = data_utils.rand_name('test-snap-')
+        snapshot_name = data_utils.rand_name('test-snap')
         meta = {'': ''}
-        self.assertRaises(exceptions.BadRequest, self.client.create_image,
-                          self.server_id, snapshot_name, meta)
+        self.assertRaises(lib_exc.BadRequest, self.client.create_image,
+                          self.server_id, name=snapshot_name, metadata=meta)
 
-    @test.attr(type=['negative', 'gate'])
+    @test.attr(type=['negative'])
+    @test.idempotent_id('3d24d11f-5366-4536-bd28-cff32b748eca')
     def test_create_image_specify_metadata_over_limits(self):
         # Return an error when creating image with meta data over 256 chars
-        snapshot_name = data_utils.rand_name('test-snap-')
+        snapshot_name = data_utils.rand_name('test-snap')
         meta = {'a' * 260: 'b' * 260}
-        self.assertRaises(exceptions.BadRequest, self.client.create_image,
-                          self.server_id, snapshot_name, meta)
+        self.assertRaises(lib_exc.BadRequest, self.client.create_image,
+                          self.server_id, name=snapshot_name, metadata=meta)
 
-    @test.attr(type=['negative', 'gate'])
+    @test.attr(type=['negative'])
+    @test.idempotent_id('0460efcf-ee88-4f94-acef-1bf658695456')
     def test_create_second_image_when_first_image_is_being_saved(self):
         # Disallow creating another image when first image is being saved
 
         # Create first snapshot
-        snapshot_name = data_utils.rand_name('test-snap-')
-        resp, body = self.client.create_image(self.server_id,
-                                              snapshot_name)
-        self.assertEqual(202, resp.status)
-        image_id = data_utils.parse_image_id(resp['location'])
+        snapshot_name = data_utils.rand_name('test-snap')
+        body = self.client.create_image(self.server_id, name=snapshot_name)
+        image_id = data_utils.parse_image_id(body.response['location'])
         self.image_ids.append(image_id)
         self.addCleanup(self._reset_server)
 
         # Create second snapshot
-        alt_snapshot_name = data_utils.rand_name('test-snap-')
-        self.assertRaises(exceptions.Conflict, self.client.create_image,
-                          self.server_id, alt_snapshot_name)
+        alt_snapshot_name = data_utils.rand_name('test-snap')
+        self.assertRaises(lib_exc.Conflict, self.client.create_image,
+                          self.server_id, name=alt_snapshot_name)
 
-    @test.attr(type=['negative', 'gate'])
+    @test.attr(type=['negative'])
+    @test.idempotent_id('084f0cbc-500a-4963-8a4e-312905862581')
     def test_create_image_specify_name_over_256_chars(self):
         # Return an error if snapshot name over 256 characters is passed
 
         snapshot_name = data_utils.rand_name('a' * 260)
-        self.assertRaises(exceptions.BadRequest, self.client.create_image,
-                          self.server_id, snapshot_name)
+        self.assertRaises(lib_exc.BadRequest, self.client.create_image,
+                          self.server_id, name=snapshot_name)
 
-    @test.attr(type=['negative', 'gate'])
+    @test.attr(type=['negative'])
+    @test.idempotent_id('0894954d-2db2-4195-a45b-ffec0bc0187e')
     def test_delete_image_that_is_not_yet_active(self):
         # Return an error while trying to delete an image what is creating
 
-        snapshot_name = data_utils.rand_name('test-snap-')
-        resp, body = self.client.create_image(self.server_id, snapshot_name)
-        self.assertEqual(202, resp.status)
-        image_id = data_utils.parse_image_id(resp['location'])
+        snapshot_name = data_utils.rand_name('test-snap')
+        body = self.client.create_image(self.server_id, name=snapshot_name)
+        image_id = data_utils.parse_image_id(body.response['location'])
         self.image_ids.append(image_id)
         self.addCleanup(self._reset_server)
 
         # Do not wait, attempt to delete the image, ensure it's successful
-        resp, body = self.client.delete_image(image_id)
-        self.assertEqual('204', resp['status'])
+        self.client.delete_image(image_id)
         self.image_ids.remove(image_id)
 
-        self.assertRaises(exceptions.NotFound, self.client.get_image, image_id)
-
-
-class ImagesOneServerNegativeTestXML(ImagesOneServerNegativeTestJSON):
-    _interface = 'xml'
+        self.assertRaises(lib_exc.NotFound, self.client.show_image, image_id)

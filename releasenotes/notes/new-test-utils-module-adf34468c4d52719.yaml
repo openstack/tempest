@@ -1,0 +1,11 @@
+---
+features:
+  - A new `test_utils` module has been added to tempest.lib.common.utils. It
+    should hold any common utility functions that help writing Tempest tests.
+  - A new utility function called `call_and_ignore_notfound_exc` has been
+    added to the `test_utils` module. That function call another function
+    passed as parameter and ignore the NotFound exception if it raised.
+deprecations:
+  - tempest.lib.common.utils.misc.find_test_caller has been moved into the
+    tempest.lib.common.utils.test_utils module. Calling the find_test_caller
+    function with its old location is deprecated.

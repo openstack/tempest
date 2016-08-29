@@ -14,19 +14,18 @@
 
 import os
 
-from oslo.config import cfg
+from oslo_concurrency import lockutils
+from oslo_config import cfg
+from oslo_config import fixture as conf_fixture
 
 from tempest import config
-from tempest.openstack.common.fixture import config as conf_fixture
-from tempest.openstack.common import importutils
 
 
 class ConfigFixture(conf_fixture.Config):
 
     def __init__(self):
+        cfg.CONF([], default_config_files=[])
         config.register_opts()
-        # Register locking options
-        importutils.import_module('tempest.openstack.common.lockutils')
         super(ConfigFixture, self).__init__()
 
     def setUp(self):
@@ -43,21 +42,72 @@ class ConfigFixture(conf_fixture.Config):
         self.conf.set_default('heat', True, group='service_available')
         if not os.path.exists(str(os.environ.get('OS_TEST_LOCK_PATH'))):
             os.mkdir(str(os.environ.get('OS_TEST_LOCK_PATH')))
-        self.conf.set_default('lock_path',
-                              str(os.environ.get('OS_TEST_LOCK_PATH')))
+        lockutils.set_defaults(
+            lock_path=str(os.environ.get('OS_TEST_LOCK_PATH')),
+        )
         self.conf.set_default('auth_version', 'v2', group='identity')
-        for config_option in ['username', 'password', 'tenant_name']:
+        for config_option in ['username', 'password', 'project_name']:
             # Identity group items
-            for prefix in ['', 'alt_', 'admin_']:
-                self.conf.set_default(prefix + config_option,
-                                      'fake_' + config_option,
-                                      group='identity')
-            # Compute Admin group items
-            self.conf.set_default(config_option, 'fake_' + config_option,
-                                  group='compute-admin')
+            self.conf.set_default('admin_' + config_option,
+                                  'fake_' + config_option,
+                                  group='auth')
 
 
 class FakePrivate(config.TempestConfigPrivate):
+    def __init__(self, parse_conf=True, config_path=None):
+        self._set_attrs()
+        self.lock_path = cfg.CONF.oslo_concurrency.lock_path
+
+fake_service1_group = cfg.OptGroup(name='fake-service1', title='Fake service1')
+
+FakeService1Group = [
+    cfg.StrOpt('catalog_type', default='fake-service1'),
+    cfg.StrOpt('endpoint_type', default='faketype'),
+    cfg.StrOpt('region', default='fake_region'),
+    cfg.IntOpt('build_timeout', default=99),
+    cfg.IntOpt('build_interval', default=9)]
+
+fake_service2_group = cfg.OptGroup(name='fake-service2', title='Fake service2')
+
+FakeService2Group = [
+    cfg.StrOpt('catalog_type', default='fake-service2'),
+    cfg.StrOpt('endpoint_type', default='faketype')]
+
+
+class ServiceClientsConfigFixture(conf_fixture.Config):
+
     def __init__(self):
         cfg.CONF([], default_config_files=[])
+        config._opts.append((fake_service1_group, FakeService1Group))
+        config._opts.append((fake_service2_group, FakeService2Group))
+        config.register_opts()
+        super(ServiceClientsConfigFixture, self).__init__()
+
+    def setUp(self):
+        super(ServiceClientsConfigFixture, self).setUp()
+        # Debug default values
+        self.conf.set_default('trace_requests', 'fake_module', 'debug')
+        # Identity default values
+        self.conf.set_default('disable_ssl_certificate_validation', True,
+                              group='identity')
+        self.conf.set_default('ca_certificates_file', '/fake/certificates',
+                              group='identity')
+        self.conf.set_default('region', 'fake_region', 'identity')
+        # Identity endpoints
+        self.conf.set_default('v3_endpoint_type', 'fake_v3_uri', 'identity')
+        self.conf.set_default('v2_public_endpoint_type', 'fake_v2_public_uri',
+                              'identity')
+        self.conf.set_default('v2_admin_endpoint_type', 'fake_v2_admin_uri',
+                              'identity')
+        # Compute default values
+        self.conf.set_default('build_interval', 88, group='compute')
+        self.conf.set_default('build_timeout', 8, group='compute')
+
+
+class ServiceClientsFakePrivate(config.TempestConfigPrivate):
+    def __init__(self, parse_conf=True, config_path=None):
         self._set_attrs()
+        self.fake_service1 = cfg.CONF['fake-service1']
+        self.fake_service2 = cfg.CONF['fake-service2']
+        print('Services registered')
+        self.lock_path = cfg.CONF.oslo_concurrency.lock_path

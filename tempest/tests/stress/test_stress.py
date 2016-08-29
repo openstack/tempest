@@ -16,16 +16,15 @@
 import shlex
 import subprocess
 
-import tempest.cli as cli
-from tempest.openstack.common import log as logging
+from oslo_log import log as logging
+from tempest.lib import exceptions
 from tempest.tests import base
 
 LOG = logging.getLogger(__name__)
 
 
 class StressFrameworkTest(base.TestCase):
-    """Basic test for the stress test framework.
-    """
+    """Basic test for the stress test framework."""
 
     def _cmd(self, cmd, param):
         """Executes specified command."""
@@ -43,9 +42,9 @@ class StressFrameworkTest(base.TestCase):
             result, result_err = proc.communicate()
             if proc.returncode != 0:
                 LOG.debug('error of %s:\n%s' % (cmd_str, result_err))
-                raise cli.CommandFailed(proc.returncode,
-                                        cmd,
-                                        result)
+                raise exceptions.CommandFailed(proc.returncode,
+                                               cmd,
+                                               result)
         finally:
             LOG.debug('output of %s:\n%s' % (cmd_str, result))
         return proc.returncode

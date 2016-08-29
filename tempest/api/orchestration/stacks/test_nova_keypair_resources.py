@@ -10,25 +10,21 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-
-import logging
-
 from tempest.api.orchestration import base
 from tempest.common.utils import data_utils
 from tempest import test
 
 
-LOG = logging.getLogger(__name__)
-
-
 class NovaKeyPairResourcesYAMLTest(base.BaseOrchestrationTest):
     _tpl_type = 'yaml'
+    _resource = 'resources'
+    _type = 'type'
 
     @classmethod
-    def setUpClass(cls):
-        super(NovaKeyPairResourcesYAMLTest, cls).setUpClass()
+    def resource_setup(cls):
+        super(NovaKeyPairResourcesYAMLTest, cls).resource_setup()
         cls.stack_name = data_utils.rand_name('heat')
-        template = cls.load_template('nova_keypair', ext=cls._tpl_type)
+        template = cls.read_template('nova_keypair', ext=cls._tpl_type)
 
         # create the stack, avoid any duplicated key.
         cls.stack_identifier = cls.create_stack(
@@ -41,16 +37,24 @@ class NovaKeyPairResourcesYAMLTest(base.BaseOrchestrationTest):
 
         cls.stack_id = cls.stack_identifier.split('/')[1]
         cls.client.wait_for_stack_status(cls.stack_id, 'CREATE_COMPLETE')
-        _, resources = cls.client.list_resources(cls.stack_identifier)
+        resources = (cls.client.list_resources(cls.stack_identifier)
+                     ['resources'])
         cls.test_resources = {}
         for resource in resources:
             cls.test_resources[resource['logical_resource_id']] = resource
 
-    @test.attr(type='slow')
+    @test.idempotent_id('b476eac2-a302-4815-961f-18c410a2a537')
     def test_created_resources(self):
         """Verifies created keypair resource."""
-        resources = [('KeyPairSavePrivate', 'OS::Nova::KeyPair'),
-                     ('KeyPairDontSavePrivate', 'OS::Nova::KeyPair')]
+
+        nova_keypair_template = self.load_template('nova_keypair',
+                                                   ext=self._tpl_type)
+        resources = [('KeyPairSavePrivate',
+                      nova_keypair_template[self._resource][
+                          'KeyPairSavePrivate'][self._type]),
+                     ('KeyPairDontSavePrivate',
+                      nova_keypair_template[self._resource][
+                          'KeyPairDontSavePrivate'][self._type])]
 
         for resource_name, resource_type in resources:
             resource = self.test_resources.get(resource_name, None)
@@ -59,22 +63,21 @@ class NovaKeyPairResourcesYAMLTest(base.BaseOrchestrationTest):
             self.assertEqual(resource_type, resource['resource_type'])
             self.assertEqual('CREATE_COMPLETE', resource['resource_status'])
 
-    @test.attr(type='slow')
+    @test.idempotent_id('8d77dec7-91fd-45a6-943d-5abd45e338a4')
     def test_stack_keypairs_output(self):
-        resp, stack = self.client.get_stack(self.stack_name)
-        self.assertEqual('200', resp['status'])
+        stack = self.client.show_stack(self.stack_name)['stack']
         self.assertIsInstance(stack, dict)
 
         output_map = {}
         for outputs in stack['outputs']:
             output_map[outputs['output_key']] = outputs['output_value']
-        #Test that first key generated public and private keys
+        # Test that first key generated public and private keys
         self.assertTrue('KeyPair_PublicKey' in output_map)
         self.assertTrue("Generated" in output_map['KeyPair_PublicKey'])
         self.assertTrue('KeyPair_PrivateKey' in output_map)
         self.assertTrue('-----BEGIN' in output_map['KeyPair_PrivateKey'])
-        #Test that second key generated public key, and private key is not
-        #in the output due to save_private_key = false
+        # Test that second key generated public key, and private key is not
+        # in the output due to save_private_key = false
         self.assertTrue('KeyPairDontSavePrivate_PublicKey' in output_map)
         self.assertTrue('Generated' in
                         output_map['KeyPairDontSavePrivate_PublicKey'])
@@ -85,3 +88,5 @@ class NovaKeyPairResourcesYAMLTest(base.BaseOrchestrationTest):
 
 class NovaKeyPairResourcesAWSTest(NovaKeyPairResourcesYAMLTest):
     _tpl_type = 'json'
+    _resource = 'Resources'
+    _type = 'Type'

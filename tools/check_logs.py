@@ -19,17 +19,19 @@ import argparse
 import gzip
 import os
 import re
-import StringIO
+import six
+import six.moves.urllib.request as urlreq
 import sys
-import urllib2
+
 import yaml
 
 
-is_grenade = (os.environ.get('DEVSTACK_GATE_GRENADE', "0") == "1" or
-              os.environ.get('DEVSTACK_GATE_GRENADE_FORWARD', "0") == "1")
+# DEVSTACK_GATE_GRENADE is either unset if grenade is not running
+# or a string describing what type of grenade run to perform.
+is_grenade = os.environ.get('DEVSTACK_GATE_GRENADE') is not None
 dump_all_errors = True
 
-# As logs are made clean, add to this set
+# As logs are made clean, remove from this set
 allowed_dirty = set([
     'c-api',
     'ceilometer-acentral',
@@ -52,7 +54,6 @@ allowed_dirty = set([
     'q-meta',
     'q-metering',
     'q-svc',
-    'q-vpn',
     's-proxy'])
 
 
@@ -66,10 +67,10 @@ def process_files(file_specs, url_specs, whitelists):
                 logs_with_errors.append(name)
     for (name, url) in url_specs:
         whitelist = whitelists.get(name, [])
-        req = urllib2.Request(url)
+        req = urlreq.Request(url)
         req.add_header('Accept-Encoding', 'gzip')
-        page = urllib2.urlopen(req)
-        buf = StringIO.StringIO(page.read())
+        page = urlreq.urlopen(req)
+        buf = six.StringIO(page.read())
         f = gzip.GzipFile(fileobj=buf)
         if scan_content(name, f.read().splitlines(), regexp, whitelist):
             logs_with_errors.append(name)
@@ -78,7 +79,6 @@ def process_files(file_specs, url_specs, whitelists):
 
 def scan_content(name, content, regexp, whitelist):
     had_errors = False
-    print_log_name = True
     for line in content:
         if not line.startswith("Stderr:") and regexp.match(line):
             whitelisted = False
@@ -89,18 +89,13 @@ def scan_content(name, content, regexp, whitelist):
                     whitelisted = True
                     break
             if not whitelisted or dump_all_errors:
-                if print_log_name:
-                    print("\nLog File Has Errors: %s" % name)
-                    print_log_name = False
                 if not whitelisted:
                     had_errors = True
-                    print("*** Not Whitelisted ***"),
-                print(line.rstrip())
     return had_errors
 
 
 def collect_url_logs(url):
-    page = urllib2.urlopen(url)
+    page = urlreq.urlopen(url)
     content = page.read()
     logs = re.findall('(screen-[\w-]+\.txt\.gz)</a>', content)
     return logs
@@ -109,7 +104,7 @@ def collect_url_logs(url):
 def main(opts):
     if opts.directory and opts.url or not (opts.directory or opts.url):
         print("Must provide exactly one of -d or -u")
-        exit(1)
+        return 1
     print("Checking logs...")
     WHITELIST_FILE = os.path.join(
         os.path.abspath(os.path.dirname(os.path.dirname(__file__))),
@@ -149,17 +144,21 @@ def main(opts):
             whitelists = loaded
     logs_with_errors = process_files(files_to_process, urls_to_process,
                                      whitelists)
-    if logs_with_errors:
-        print("Logs have errors")
-    if is_grenade:
-        print("Currently not failing grenade runs with errors")
-        return 0
+
     failed = False
-    for log in logs_with_errors:
-        if log not in allowed_dirty:
-            print("Log: %s not allowed to have ERRORS or TRACES" % log)
-            failed = True
+    if logs_with_errors:
+        log_files = set(logs_with_errors)
+        for log in log_files:
+            msg = '%s log file has errors' % log
+            if log not in allowed_dirty:
+                msg += ' and is not allowed to have them'
+                failed = True
+            print(msg)
+        print("\nPlease check the respective log files to see the errors")
     if failed:
+        if is_grenade:
+            print("Currently not failing grenade runs with errors")
+            return 0
         return 1
     print("ok")
     return 0

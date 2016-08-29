@@ -13,62 +13,65 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest.api.compute import base
-from tempest import config
-from tempest import test
+import six
 
-CONF = config.CONF
+from tempest.api.compute import base
+from tempest import test
 
 
 class ServerAddressesTestJSON(base.BaseV2ComputeTest):
 
     @classmethod
-    def setUpClass(cls):
+    def setup_credentials(cls):
         # This test module might use a network and a subnet
         cls.set_network_resources(network=True, subnet=True)
-        super(ServerAddressesTestJSON, cls).setUpClass()
+        super(ServerAddressesTestJSON, cls).setup_credentials()
+
+    @classmethod
+    def setup_clients(cls):
+        super(ServerAddressesTestJSON, cls).setup_clients()
         cls.client = cls.servers_client
 
-        resp, cls.server = cls.create_test_server(wait_until='ACTIVE')
+    @classmethod
+    def resource_setup(cls):
+        super(ServerAddressesTestJSON, cls).resource_setup()
 
-    @test.skip_because(bug="1210483",
-                       condition=CONF.service_available.neutron)
+        cls.server = cls.create_test_server(wait_until='ACTIVE')
+
     @test.attr(type='smoke')
+    @test.idempotent_id('6eb718c0-02d9-4d5e-acd1-4e0c269cef39')
+    @test.services('network')
     def test_list_server_addresses(self):
         # All public and private addresses for
         # a server should be returned
 
-        resp, addresses = self.client.list_addresses(self.server['id'])
-        self.assertEqual('200', resp['status'])
+        addresses = self.client.list_addresses(self.server['id'])['addresses']
 
         # We do not know the exact network configuration, but an instance
         # should at least have a single public or private address
         self.assertTrue(len(addresses) >= 1)
-        for network_name, network_addresses in addresses.iteritems():
+        for network_name, network_addresses in six.iteritems(addresses):
             self.assertTrue(len(network_addresses) >= 1)
             for address in network_addresses:
                 self.assertTrue(address['addr'])
                 self.assertTrue(address['version'])
 
     @test.attr(type='smoke')
+    @test.idempotent_id('87bbc374-5538-4f64-b673-2b0e4443cc30')
+    @test.services('network')
     def test_list_server_addresses_by_network(self):
         # Providing a network type should filter
         # the addresses return by that type
 
-        resp, addresses = self.client.list_addresses(self.server['id'])
+        addresses = self.client.list_addresses(self.server['id'])['addresses']
 
         # Once again we don't know the environment's exact network config,
         # but the response for each individual network should be the same
         # as the partial result of the full address list
         id = self.server['id']
         for addr_type in addresses:
-            resp, addr = self.client.list_addresses_by_network(id, addr_type)
-            self.assertEqual('200', resp['status'])
+            addr = self.client.list_addresses_by_network(id, addr_type)
 
             addr = addr[addr_type]
             for address in addresses[addr_type]:
                 self.assertTrue(any([a for a in addr if a == address]))
-
-
-class ServerAddressesTestXML(ServerAddressesTestJSON):
-    _interface = 'xml'

@@ -13,7 +13,7 @@
 #    under the License.
 
 from tempest.api.orchestration import base
-from tempest import exceptions
+from tempest.lib import exceptions as lib_exc
 from tempest import test
 
 
@@ -30,14 +30,15 @@ Resources:
     invalid_template_url = 'http://www.example.com/template.yaml'
 
     @classmethod
-    def setUpClass(cls):
-        super(TemplateYAMLNegativeTestJSON, cls).setUpClass()
+    def resource_setup(cls):
+        super(TemplateYAMLNegativeTestJSON, cls).resource_setup()
         cls.parameters = {}
 
-    @test.attr(type=['gate', 'negative'])
+    @test.attr(type=['negative'])
+    @test.idempotent_id('5586cbca-ddc4-4152-9db8-fa1ce5fc1876')
     def test_validate_template_url(self):
         """Validating template passing url to it."""
-        self.assertRaises(exceptions.BadRequest,
+        self.assertRaises(lib_exc.BadRequest,
                           self.client.validate_template_url,
                           template_url=self.invalid_template_url,
                           parameters=self.parameters)

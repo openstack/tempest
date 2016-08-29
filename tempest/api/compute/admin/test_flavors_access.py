@@ -19,84 +19,81 @@ from tempest import test
 
 
 class FlavorsAccessTestJSON(base.BaseV2ComputeAdminTest):
+    """Tests Flavor Access API extension.
 
-    """
-    Tests Flavor Access API extension.
     Add and remove Flavor Access require admin privileges.
     """
 
     @classmethod
-    def setUpClass(cls):
-        super(FlavorsAccessTestJSON, cls).setUpClass()
+    def skip_checks(cls):
+        super(FlavorsAccessTestJSON, cls).skip_checks()
         if not test.is_extension_enabled('OS-FLV-EXT-DATA', 'compute'):
             msg = "OS-FLV-EXT-DATA extension not enabled."
             raise cls.skipException(msg)
 
-        # Compute admin flavor client
+    @classmethod
+    def setup_clients(cls):
+        super(FlavorsAccessTestJSON, cls).setup_clients()
         cls.client = cls.os_adm.flavors_client
+
+    @classmethod
+    def resource_setup(cls):
+        super(FlavorsAccessTestJSON, cls).resource_setup()
+
         # Non admin tenant ID
         cls.tenant_id = cls.flavors_client.tenant_id
-        # Compute admin tenant ID
-        cls.adm_tenant_id = cls.client.tenant_id
         cls.flavor_name_prefix = 'test_flavor_access_'
         cls.ram = 512
         cls.vcpus = 1
         cls.disk = 10
 
-    @test.attr(type='gate')
+    @test.idempotent_id('ea2c2211-29fa-4db9-97c3-906d36fad3e0')
     def test_flavor_access_list_with_private_flavor(self):
         # Test to make sure that list flavor access on a newly created
         # private flavor will return an empty access list
         flavor_name = data_utils.rand_name(self.flavor_name_prefix)
         new_flavor_id = data_utils.rand_int_id(start=1000)
-        resp, new_flavor = self.client.create_flavor(flavor_name,
-                                                     self.ram, self.vcpus,
-                                                     self.disk,
-                                                     new_flavor_id,
-                                                     is_public='False')
+        new_flavor = self.client.create_flavor(name=flavor_name,
+                                               ram=self.ram, vcpus=self.vcpus,
+                                               disk=self.disk,
+                                               id=new_flavor_id,
+                                               is_public='False')['flavor']
         self.addCleanup(self.client.delete_flavor, new_flavor['id'])
-        self.assertEqual(resp.status, 200)
-        resp, flavor_access = self.client.list_flavor_access(new_flavor_id)
-        self.assertEqual(resp.status, 200)
+        flavor_access = (self.client.list_flavor_access(new_flavor_id)
+                         ['flavor_access'])
         self.assertEqual(len(flavor_access), 0, str(flavor_access))
 
-    @test.attr(type='gate')
+    @test.idempotent_id('59e622f6-bdf6-45e3-8ba8-fedad905a6b4')
     def test_flavor_access_add_remove(self):
         # Test to add and remove flavor access to a given tenant.
         flavor_name = data_utils.rand_name(self.flavor_name_prefix)
         new_flavor_id = data_utils.rand_int_id(start=1000)
-        resp, new_flavor = self.client.create_flavor(flavor_name,
-                                                     self.ram, self.vcpus,
-                                                     self.disk,
-                                                     new_flavor_id,
-                                                     is_public='False')
+        new_flavor = self.client.create_flavor(name=flavor_name,
+                                               ram=self.ram, vcpus=self.vcpus,
+                                               disk=self.disk,
+                                               id=new_flavor_id,
+                                               is_public='False')['flavor']
         self.addCleanup(self.client.delete_flavor, new_flavor['id'])
         # Add flavor access to a tenant.
         resp_body = {
             "tenant_id": str(self.tenant_id),
             "flavor_id": str(new_flavor['id']),
         }
-        add_resp, add_body = \
-            self.client.add_flavor_access(new_flavor['id'], self.tenant_id)
-        self.assertEqual(add_resp.status, 200)
+        add_body = (self.client.add_flavor_access(new_flavor['id'],
+                                                  self.tenant_id)
+                    ['flavor_access'])
         self.assertIn(resp_body, add_body)
 
         # The flavor is present in list.
-        resp, flavors = self.flavors_client.list_flavors_with_detail()
-        self.assertEqual(resp.status, 200)
+        flavors = self.flavors_client.list_flavors(detail=True)['flavors']
         self.assertIn(new_flavor['id'], map(lambda x: x['id'], flavors))
 
         # Remove flavor access from a tenant.
-        remove_resp, remove_body = \
-            self.client.remove_flavor_access(new_flavor['id'], self.tenant_id)
-        self.assertEqual(remove_resp.status, 200)
+        remove_body = (self.client.remove_flavor_access(new_flavor['id'],
+                                                        self.tenant_id)
+                       ['flavor_access'])
         self.assertNotIn(resp_body, remove_body)
 
         # The flavor is not present in list.
-        resp, flavors = self.flavors_client.list_flavors_with_detail()
-        self.assertEqual(resp.status, 200)
+        flavors = self.flavors_client.list_flavors(detail=True)['flavors']
         self.assertNotIn(new_flavor['id'], map(lambda x: x['id'], flavors))
-
-
-class FlavorsAdminTestXML(FlavorsAccessTestJSON):
-    _interface = 'xml'

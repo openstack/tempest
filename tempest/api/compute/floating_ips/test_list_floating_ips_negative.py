@@ -13,12 +13,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import uuid
-
 from tempest.api.compute import base
 from tempest.common.utils import data_utils
 from tempest import config
-from tempest import exceptions
+from tempest.lib import exceptions as lib_exc
 from tempest import test
 
 CONF = config.CONF
@@ -27,22 +25,20 @@ CONF = config.CONF
 class FloatingIPDetailsNegativeTestJSON(base.BaseV2ComputeTest):
 
     @classmethod
-    def setUpClass(cls):
-        super(FloatingIPDetailsNegativeTestJSON, cls).setUpClass()
+    def setup_clients(cls):
+        super(FloatingIPDetailsNegativeTestJSON, cls).setup_clients()
         cls.client = cls.floating_ips_client
 
-    @test.attr(type=['negative', 'gate'])
+    @test.attr(type=['negative'])
+    @test.idempotent_id('7ab18834-4a4b-4f28-a2c5-440579866695')
+    @test.services('network')
     def test_get_nonexistent_floating_ip_details(self):
         # Negative test:Should not be able to GET the details
         # of non-existent floating IP
         # Creating a non-existent floatingIP id
         if CONF.service_available.neutron:
-            non_exist_id = str(uuid.uuid4())
+            non_exist_id = data_utils.rand_uuid()
         else:
             non_exist_id = data_utils.rand_int_id(start=999)
-        self.assertRaises(exceptions.NotFound,
-                          self.client.get_floating_ip_details, non_exist_id)
-
-
-class FloatingIPDetailsNegativeTestXML(FloatingIPDetailsNegativeTestJSON):
-    _interface = 'xml'
+        self.assertRaises(lib_exc.NotFound,
+                          self.client.show_floating_ip, non_exist_id)

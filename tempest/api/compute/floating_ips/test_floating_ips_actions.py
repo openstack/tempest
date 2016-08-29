@@ -15,8 +15,13 @@
 
 from tempest.api.compute.floating_ips import base
 from tempest.common.utils import data_utils
-from tempest import exceptions
+from tempest.common import waiters
+from tempest import config
+from tempest.lib.common.utils import test_utils
+from tempest.lib import exceptions as lib_exc
 from tempest import test
+
+CONF = config.CONF
 
 
 class FloatingIPsTestJSON(base.BaseFloatingIPsTest):
@@ -24,113 +29,112 @@ class FloatingIPsTestJSON(base.BaseFloatingIPsTest):
     floating_ip = None
 
     @classmethod
-    @test.safe_setup
-    def setUpClass(cls):
-        super(FloatingIPsTestJSON, cls).setUpClass()
+    def setup_clients(cls):
+        super(FloatingIPsTestJSON, cls).setup_clients()
         cls.client = cls.floating_ips_client
+
+    @classmethod
+    def resource_setup(cls):
+        super(FloatingIPsTestJSON, cls).resource_setup()
         cls.floating_ip_id = None
 
         # Server creation
-        resp, server = cls.create_test_server(wait_until='ACTIVE')
+        server = cls.create_test_server(wait_until='ACTIVE')
         cls.server_id = server['id']
         # Floating IP creation
-        resp, body = cls.client.create_floating_ip()
+        body = cls.client.create_floating_ip(
+            pool=CONF.network.floating_network_name)['floating_ip']
         cls.floating_ip_id = body['id']
         cls.floating_ip = body['ip']
 
     @classmethod
-    def tearDownClass(cls):
+    def resource_cleanup(cls):
         # Deleting the floating IP which is created in this method
         if cls.floating_ip_id:
-            resp, body = cls.client.delete_floating_ip(cls.floating_ip_id)
-        super(FloatingIPsTestJSON, cls).tearDownClass()
+            cls.client.delete_floating_ip(cls.floating_ip_id)
+        super(FloatingIPsTestJSON, cls).resource_cleanup()
 
-    def _try_delete_floating_ip(self, floating_ip_id):
-        # delete floating ip, if it exists
-        try:
-            self.client.delete_floating_ip(floating_ip_id)
-        # if not found, it depicts it was deleted in the test
-        except exceptions.NotFound:
-            pass
-
-    @test.attr(type='gate')
+    @test.idempotent_id('f7bfb946-297e-41b8-9e8c-aba8e9bb5194')
+    @test.services('network')
     def test_allocate_floating_ip(self):
         # Positive test:Allocation of a new floating IP to a project
         # should be successful
-        resp, body = self.client.create_floating_ip()
+        body = self.client.create_floating_ip(
+            pool=CONF.network.floating_network_name)['floating_ip']
         floating_ip_id_allocated = body['id']
         self.addCleanup(self.client.delete_floating_ip,
                         floating_ip_id_allocated)
-        self.assertEqual(200, resp.status)
-        resp, floating_ip_details = \
-            self.client.get_floating_ip_details(floating_ip_id_allocated)
+        floating_ip_details = self.client.show_floating_ip(
+            floating_ip_id_allocated)['floating_ip']
         # Checking if the details of allocated IP is in list of floating IP
-        resp, body = self.client.list_floating_ips()
+        body = self.client.list_floating_ips()['floating_ips']
         self.assertIn(floating_ip_details, body)
 
-    @test.attr(type='gate')
+    @test.idempotent_id('de45e989-b5ca-4a9b-916b-04a52e7bbb8b')
+    @test.services('network')
     def test_delete_floating_ip(self):
         # Positive test:Deletion of valid floating IP from project
         # should be successful
         # Creating the floating IP that is to be deleted in this method
-        resp, floating_ip_body = self.client.create_floating_ip()
-        self.addCleanup(self._try_delete_floating_ip, floating_ip_body['id'])
-        # Storing the details of floating IP before deleting it
-        cli_resp = self.client.get_floating_ip_details(floating_ip_body['id'])
-        resp, floating_ip_details = cli_resp
+        floating_ip_body = self.client.create_floating_ip(
+            pool=CONF.network.floating_network_name)['floating_ip']
+        self.addCleanup(test_utils.call_and_ignore_notfound_exc,
+                        self.client.delete_floating_ip, floating_ip_body['id'])
         # Deleting the floating IP from the project
-        resp, body = self.client.delete_floating_ip(floating_ip_body['id'])
-        self.assertEqual(202, resp.status)
+        self.client.delete_floating_ip(floating_ip_body['id'])
         # Check it was really deleted.
         self.client.wait_for_resource_deletion(floating_ip_body['id'])
 
-    @test.attr(type='gate')
+    @test.idempotent_id('307efa27-dc6f-48a0-8cd2-162ce3ef0b52')
+    @test.services('network')
     def test_associate_disassociate_floating_ip(self):
         # Positive test:Associate and disassociate the provided floating IP
         # to a specific server should be successful
 
         # Association of floating IP to fixed IP address
-        resp, body = self.client.associate_floating_ip_to_server(
+        self.client.associate_floating_ip_to_server(
             self.floating_ip,
             self.server_id)
-        self.assertEqual(202, resp.status)
-        # Disassociation of floating IP that was associated in this method
-        resp, body = self.client.disassociate_floating_ip_from_server(
-            self.floating_ip,
-            self.server_id)
-        self.assertEqual(202, resp.status)
 
-    @test.attr(type='gate')
+        # Check instance_id in the floating_ip body
+        body = (self.client.show_floating_ip(self.floating_ip_id)
+                ['floating_ip'])
+        self.assertEqual(self.server_id, body['instance_id'])
+
+        # Disassociation of floating IP that was associated in this method
+        self.client.disassociate_floating_ip_from_server(
+            self.floating_ip,
+            self.server_id)
+
+    @test.idempotent_id('6edef4b2-aaf1-4abc-bbe3-993e2561e0fe')
+    @test.services('network')
     def test_associate_already_associated_floating_ip(self):
         # positive test:Association of an already associated floating IP
         # to specific server should change the association of the Floating IP
         # Create server so as to use for Multiple association
         new_name = data_utils.rand_name('floating_server')
-        resp, body = self.create_test_server(name=new_name)
-        self.servers_client.wait_for_server_status(body['id'], 'ACTIVE')
+        body = self.create_test_server(name=new_name)
+        waiters.wait_for_server_status(self.servers_client,
+                                       body['id'], 'ACTIVE')
         self.new_server_id = body['id']
+        self.addCleanup(self.servers_client.delete_server, self.new_server_id)
 
         # Associating floating IP for the first time
-        resp, _ = self.client.associate_floating_ip_to_server(
+        self.client.associate_floating_ip_to_server(
             self.floating_ip,
             self.server_id)
         # Associating floating IP for the second time
-        resp, body = self.client.associate_floating_ip_to_server(
+        self.client.associate_floating_ip_to_server(
             self.floating_ip,
             self.new_server_id)
 
-        self.addCleanup(self.servers_client.delete_server, self.new_server_id)
-        if (resp['status'] is not None):
-            self.addCleanup(self.client.disassociate_floating_ip_from_server,
-                            self.floating_ip,
-                            self.new_server_id)
+        self.addCleanup(self.client.disassociate_floating_ip_from_server,
+                        self.floating_ip,
+                        self.new_server_id)
 
         # Make sure no longer associated with old server
-        self.assertRaises((exceptions.NotFound,
-                           exceptions.UnprocessableEntity),
+        self.assertRaises((lib_exc.NotFound,
+                           lib_exc.UnprocessableEntity,
+                           lib_exc.Conflict),
                           self.client.disassociate_floating_ip_from_server,
                           self.floating_ip, self.server_id)
-
-
-class FloatingIPsTestXML(FloatingIPsTestJSON):
-    _interface = 'xml'

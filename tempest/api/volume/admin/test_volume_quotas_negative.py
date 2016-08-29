@@ -14,70 +14,58 @@
 #    under the License.
 
 from tempest.api.volume import base
-from tempest import exceptions
+from tempest.lib import exceptions as lib_exc
 from tempest import test
 
 
-class VolumeQuotasNegativeTestJSON(base.BaseVolumeV1AdminTest):
-    _interface = "json"
+class BaseVolumeQuotasNegativeV2TestJSON(base.BaseVolumeAdminTest):
     force_tenant_isolation = True
 
     @classmethod
-    @test.safe_setup
-    def setUpClass(cls):
-        super(VolumeQuotasNegativeTestJSON, cls).setUpClass()
-        demo_user = cls.isolated_creds.get_primary_creds()
-        cls.demo_tenant_id = demo_user.tenant_id
-        cls.shared_quota_set = {'gigabytes': 3, 'volumes': 1, 'snapshots': 1}
+    def setup_credentials(cls):
+        super(BaseVolumeQuotasNegativeV2TestJSON, cls).setup_credentials()
+        cls.demo_tenant_id = cls.os.credentials.tenant_id
+
+    @classmethod
+    def resource_setup(cls):
+        super(BaseVolumeQuotasNegativeV2TestJSON, cls).resource_setup()
+        cls.default_volume_size = cls.volumes_client.default_volume_size
+        cls.shared_quota_set = {'gigabytes': 2 * cls.default_volume_size,
+                                'volumes': 1}
 
         # NOTE(gfidente): no need to restore original quota set
-        # after the tests as they only work with tenant isolation.
-        resp, quota_set = cls.quotas_client.update_quota_set(
+        # after the tests as they only work with dynamic credentials.
+        cls.admin_quotas_client.update_quota_set(
             cls.demo_tenant_id,
             **cls.shared_quota_set)
 
         # NOTE(gfidente): no need to delete in tearDown as
         # they are created using utility wrapper methods.
         cls.volume = cls.create_volume()
-        cls.snapshot = cls.create_snapshot(cls.volume['id'])
 
     @test.attr(type='negative')
+    @test.idempotent_id('bf544854-d62a-47f2-a681-90f7a47d86b6')
     def test_quota_volumes(self):
-        self.assertRaises(exceptions.OverLimit,
-                          self.volumes_client.create_volume,
-                          size=1)
+        self.assertRaises(lib_exc.OverLimit,
+                          self.volumes_client.create_volume)
 
     @test.attr(type='negative')
-    def test_quota_volume_snapshots(self):
-        self.assertRaises(exceptions.OverLimit,
-                          self.snapshots_client.create_snapshot,
-                          self.volume['id'])
-
-    @test.attr(type='negative')
+    @test.idempotent_id('2dc27eee-8659-4298-b900-169d71a91374')
     def test_quota_volume_gigabytes(self):
         # NOTE(gfidente): quota set needs to be changed for this test
         # or we may be limited by the volumes or snaps quota number, not by
         # actual gigs usage; next line ensures shared set is restored.
-        self.addCleanup(self.quotas_client.update_quota_set,
+        self.addCleanup(self.admin_quotas_client.update_quota_set,
                         self.demo_tenant_id,
                         **self.shared_quota_set)
-
-        new_quota_set = {'gigabytes': 2, 'volumes': 2, 'snapshots': 1}
-        resp, quota_set = self.quotas_client.update_quota_set(
+        new_quota_set = {'gigabytes': self.default_volume_size,
+                         'volumes': 2, 'snapshots': 1}
+        self.admin_quotas_client.update_quota_set(
             self.demo_tenant_id,
             **new_quota_set)
-        self.assertRaises(exceptions.OverLimit,
-                          self.volumes_client.create_volume,
-                          size=1)
-
-        new_quota_set = {'gigabytes': 2, 'volumes': 1, 'snapshots': 2}
-        resp, quota_set = self.quotas_client.update_quota_set(
-            self.demo_tenant_id,
-            **self.shared_quota_set)
-        self.assertRaises(exceptions.OverLimit,
-                          self.snapshots_client.create_snapshot,
-                          self.volume['id'])
+        self.assertRaises(lib_exc.OverLimit,
+                          self.volumes_client.create_volume)
 
 
-class VolumeQuotasNegativeTestXML(VolumeQuotasNegativeTestJSON):
-    _interface = "xml"
+class VolumeQuotasNegativeV1TestJSON(BaseVolumeQuotasNegativeV2TestJSON):
+    _api_version = 1

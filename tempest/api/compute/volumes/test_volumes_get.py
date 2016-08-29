@@ -13,11 +13,14 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from testtools import matchers
+
 from tempest.api.compute import base
 from tempest.common.utils import data_utils
+from tempest.common import waiters
 from tempest import config
 from tempest import test
-from testtools import matchers
+
 
 CONF = config.CONF
 
@@ -25,26 +28,28 @@ CONF = config.CONF
 class VolumesGetTestJSON(base.BaseV2ComputeTest):
 
     @classmethod
-    def setUpClass(cls):
-        super(VolumesGetTestJSON, cls).setUpClass()
-        cls.client = cls.volumes_extensions_client
+    def skip_checks(cls):
+        super(VolumesGetTestJSON, cls).skip_checks()
         if not CONF.service_available.cinder:
             skip_msg = ("%s skipped as Cinder is not available" % cls.__name__)
             raise cls.skipException(skip_msg)
 
-    @test.attr(type='smoke')
+    @classmethod
+    def setup_clients(cls):
+        super(VolumesGetTestJSON, cls).setup_clients()
+        cls.client = cls.volumes_extensions_client
+
+    @test.idempotent_id('f10f25eb-9775-4d9d-9cbe-1cf54dae9d5f')
     def test_volume_create_get_delete(self):
         # CREATE, GET, DELETE Volume
-        volume = None
-        v_name = data_utils.rand_name('Volume-%s-') % self._interface
+        v_name = data_utils.rand_name(self.__class__.__name__ + '-Volume')
         metadata = {'Type': 'work'}
         # Create volume
-        resp, volume = self.client.create_volume(size=1,
-                                                 display_name=v_name,
-                                                 metadata=metadata)
-        self.addCleanup(self.delete_volume, volume['id'])
-        self.assertEqual(200, resp.status)
+        volume = self.client.create_volume(size=CONF.volume.volume_size,
+                                           display_name=v_name,
+                                           metadata=metadata)['volume']
         self.assertIn('id', volume)
+        self.addCleanup(self.delete_volume, volume['id'])
         self.assertIn('displayName', volume)
         self.assertEqual(volume['displayName'], v_name,
                          "The created volume name is not equal "
@@ -52,14 +57,17 @@ class VolumesGetTestJSON(base.BaseV2ComputeTest):
         self.assertTrue(volume['id'] is not None,
                         "Field volume id is empty or not found.")
         # Wait for Volume status to become ACTIVE
-        self.client.wait_for_volume_status(volume['id'], 'available')
+        waiters.wait_for_volume_status(self.client, volume['id'], 'available')
         # GET Volume
-        resp, fetched_volume = self.client.get_volume(volume['id'])
-        self.assertEqual(200, resp.status)
+        fetched_volume = self.client.show_volume(volume['id'])['volume']
         # Verification of details of fetched Volume
         self.assertEqual(v_name,
                          fetched_volume['displayName'],
                          'The fetched Volume is different '
+                         'from the created Volume')
+        self.assertEqual(CONF.volume.volume_size,
+                         fetched_volume['size'],
+                         'The fetched volume size is different '
                          'from the created Volume')
         self.assertEqual(volume['id'],
                          fetched_volume['id'],
@@ -69,7 +77,3 @@ class VolumesGetTestJSON(base.BaseV2ComputeTest):
                         matchers.ContainsAll(metadata.items()),
                         'The fetched Volume metadata misses data '
                         'from the created Volume')
-
-
-class VolumesGetTestXML(VolumesGetTestJSON):
-    _interface = "xml"

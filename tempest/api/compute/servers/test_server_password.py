@@ -21,21 +21,19 @@ from tempest import test
 class ServerPasswordTestJSON(base.BaseV2ComputeTest):
 
     @classmethod
-    def setUpClass(cls):
-        super(ServerPasswordTestJSON, cls).setUpClass()
+    def setup_clients(cls):
+        super(ServerPasswordTestJSON, cls).setup_clients()
         cls.client = cls.servers_client
-        resp, cls.server = cls.create_test_server(wait_until="ACTIVE")
 
-    @test.attr(type='gate')
+    @classmethod
+    def resource_setup(cls):
+        super(ServerPasswordTestJSON, cls).resource_setup()
+        cls.server = cls.create_test_server(wait_until="ACTIVE")
+
+    @test.idempotent_id('f83b582f-62a8-4f22-85b0-0dee50ff783a')
     def test_get_server_password(self):
-        resp, body = self.client.get_password(self.server['id'])
-        self.assertEqual(200, resp.status)
+        self.client.show_password(self.server['id'])
 
-    @test.attr(type='gate')
+    @test.idempotent_id('f8229e8b-b625-4493-800a-bde86ac611ea')
     def test_delete_server_password(self):
-        resp, body = self.client.delete_password(self.server['id'])
-        self.assertEqual(204, resp.status)
-
-
-class ServerPasswordTestXML(ServerPasswordTestJSON):
-    _interface = 'xml'
+        self.client.delete_password(self.server['id'])
