@@ -21,6 +21,7 @@ export API_SERVER_HOST_PASSWORD=${API_SERVER_HOST_PASSWORD:-c0ntrail123}
 export PUBLIC_NETWORK_SUBNET=${PUBLIC_NETWORK_SUBNET:-10.1.1.0/24}
 export HTTP_IMAGE_PATH=${HTTP_IMAGE_PATH:-http://10.204.216.51/images/cirros/cirros-0.3.1-x86_64-disk.img}
 
+FLAVOR_ID=7
 SERVICE_HOST=$KEYSTONE_SERVICE_HOST
 
 TEMPEST_CONFIG_DIR=${TEMPEST_CONFIG_DIR:-$TEMPEST_DIR/etc}
@@ -51,6 +52,7 @@ echo "Image id $image_uuid"
 create_project $ALT_TENANT_NAME
 create_user $ALT_USERNAME $password $ALT_TENANT_NAME "member"
 create_public_network $PUBLIC_NETWORK_NAME $PUBLIC_NETWORK_SUBNET
+create_flavor $FLAVOR_ID
 
 #DASHBOARD
 iniset $TEMPEST_CONFIG dashboard dashboard_url "http://$SERVICE_HOST/"
@@ -69,9 +71,11 @@ iniset $TEMPEST_CONFIG identity alt_username $ALT_USERNAME
 iniset $TEMPEST_CONFIG identity alt_password $password
 iniset $TEMPEST_CONFIG identity alt_tenant_name $ALT_TENANT_NAME
 
-iniset $TEMPEST_CONFIG identity admin_username $ADMIN_USERNAME
-iniset $TEMPEST_CONFIG identity admin_password $ADMIN_PASSWORD
-iniset $TEMPEST_CONFIG identity admin_tenant_name $ADMIN_TENANT_NAME
+#AUTH
+iniset $TEMPEST_CONFIG auth admin_username $ADMIN_USERNAME
+iniset $TEMPEST_CONFIG auth admin_password $ADMIN_PASSWORD
+iniset $TEMPEST_CONFIG auth admin_project_name $ADMIN_TENANT_NAME
+iniset $TEMPEST_CONFIG auth use_dynamic_credentials True
 
 iniset $TEMPEST_CONFIG image http_image $HTTP_IMAGE_PATH
 
@@ -81,8 +85,9 @@ public_network_id=$(${with_venv} neutron net-list | grep $PUBLIC_NETWORK_NAME | 
 
 iniset $TEMPEST_CONFIG compute ssh_user ${DEFAULT_INSTANCE_USER:-cirros}
 iniset $TEMPEST_CONFIG compute image_ref $image_uuid
-iniset $TEMPEST_CONFIG compute image_ssh_user ${DEFAULT_INSTANCE_USER:-cirros}
-iniset $TEMPEST_CONFIG compute image_ssh_password ${DEFAULT_INSTANCE_PASSWORD:-cubswin:)}
+iniset $TEMPEST_CONFIG validation image_ssh_user ${DEFAULT_INSTANCE_USER:-cirros}
+iniset $TEMPEST_CONFIG validation image_ssh_password ${DEFAULT_INSTANCE_PASSWORD:-cubswin:)}
+iniset $TEMPEST_CONFIG compute flavor_ref $FLAVOR_ID
 iniset $TEMPEST_CONFIG compute image_ref_alt $image_uuid_alt
 iniset $TEMPEST_CONFIG compute image_alt_ssh_user ${DEFAULT_INSTANCE_USER:-cirros}
 iniset $TEMPEST_CONFIG compute image_alt_ssh_password ${DEFAULT_INSTANCE_PASSWORD:-cubswin:)}

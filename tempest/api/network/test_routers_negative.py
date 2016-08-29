@@ -20,6 +20,7 @@ from tempest.common.utils import data_utils
 from tempest import config
 from tempest.lib import exceptions as lib_exc
 from tempest import test
+from tempest.lib import decorators
 
 CONF = config.CONF
 
@@ -132,6 +133,7 @@ class DvrRoutersNegativeTest(base.BaseRouterTest):
         cls.network = cls.create_network()
         cls.subnet = cls.create_subnet(cls.network)
 
+    @decorators.skip_because(bug="1617403")
     @test.attr(type=['negative'])
     @test.idempotent_id('4990b055-8fc7-48ab-bba7-aa28beaad0b9')
     def test_router_create_tenant_distributed_returns_forbidden(self):

@@ -19,6 +19,7 @@ from tempest.api.network import base_security_groups as base
 from tempest.common.utils import data_utils
 from tempest import config
 from tempest import test
+from tempest.lib import decorators
 
 CONF = config.CONF
 
@@ -81,7 +82,7 @@ class SecGroupTest(base.BaseSecGroupTest):
         msg = "Security-group list doesn't contain default security-group"
         self.assertIsNotNone(found, msg)
 
-    @test.skip_because(bug='1474804')
+    @decorators.skip_because(bug='1474804')
     @test.attr(type='smoke')
     @test.idempotent_id('bfd128e5-3c92-44b6-9d66-7fe29d22c802')
     def test_create_list_update_show_delete_security_group(self):
