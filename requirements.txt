@@ -21,3 +21,4 @@ PyYAML>=3.1.0 # MIT
 functools32
 nose
 UcsSdk
+os-testr>=0.7.0
