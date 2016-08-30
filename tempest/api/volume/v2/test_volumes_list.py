@@ -42,11 +42,13 @@ class VolumesV2ListTestJSON(base.BaseVolumeTest):
         super(VolumesV2ListTestJSON, cls).resource_setup()
 
         # Create 3 test volumes
-        cls.volume_id_list = []
         cls.metadata = {'Type': 'work'}
+        # NOTE(zhufl): When using pre-provisioned credentials, the project
+        # may have volumes other than those created below.
+        existing_volumes = cls.client.list_volumes()['volumes']
+        cls.volume_id_list = [vol['id'] for vol in existing_volumes]
         for i in range(3):
             volume = cls.create_volume(metadata=cls.metadata)
-            volume = cls.client.show_volume(volume['id'])['volume']
             cls.volume_id_list.append(volume['id'])
 
     @test.idempotent_id('2a7064eb-b9c3-429b-b888-33928fc5edd3')
