@@ -36,9 +36,11 @@ LOG = logging.getLogger(__name__)
 class Client(object):
 
     def __init__(self, host, username, password=None, timeout=300, pkey=None,
-                 channel_timeout=10, look_for_keys=False, key_filename=None):
+                 channel_timeout=10, look_for_keys=False, key_filename=None,
+                 port=22):
         self.host = host
         self.username = username
+        self.port = port
         self.password = password
         if isinstance(pkey, six.string_types):
             pkey = paramiko.RSAKey.from_private_key(
@@ -58,17 +60,17 @@ class Client(object):
             paramiko.AutoAddPolicy())
         _start_time = time.time()
         if self.pkey is not None:
-            LOG.info("Creating ssh connection to '%s' as '%s'"
+            LOG.info("Creating ssh connection to '%s:%d' as '%s'"
                      " with public key authentication",
-                     self.host, self.username)
+                     self.host, self.port, self.username)
         else:
-            LOG.info("Creating ssh connection to '%s' as '%s'"
+            LOG.info("Creating ssh connection to '%s:%d' as '%s'"
                      " with password %s",
-                     self.host, self.username, str(self.password))
+                     self.host, self.port, self.username, str(self.password))
         attempts = 0
         while True:
             try:
-                ssh.connect(self.host, username=self.username,
+                ssh.connect(self.host, port=self.port, username=self.username,
                             password=self.password,
                             look_for_keys=self.look_for_keys,
                             key_filename=self.key_filename,
