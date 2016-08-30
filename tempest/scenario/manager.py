@@ -156,11 +156,6 @@ class ScenarioTest(tempest.test.BaseTestCase):
             waiter_callable = wait.pop('waiter_callable')
             waiter_callable(**wait)
 
-    # ## Test functions library
-    #
-    # The create_[resource] functions only return body and discard the
-    # resp part which is not used in scenario tests
-
     def create_keypair(self, client=None):
         if not client:
             client = self.keypairs_client
@@ -172,7 +167,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
 
     def create_server(self, name=None, image_id=None, flavor=None,
                       validatable=False, wait_until=None,
-                      wait_on_delete=True, clients=None, **kwargs):
+                      clients=None, **kwargs):
         """Wrapper utility that returns a test server.
 
         This wrapper utility calls the common create test server and
@@ -270,6 +265,10 @@ class ScenarioTest(tempest.test.BaseTestCase):
             cleanup_callable=test_utils.call_and_ignore_notfound_exc,
             cleanup_args=[clients.servers_client.delete_server, body['id']],
             waiter_client=clients.servers_client)
+        self.addCleanup(waiters.wait_for_server_termination,
+                        clients.servers_client, body['id'])
+        self.addCleanup(test_utils.call_and_ignore_notfound_exc,
+                        clients.servers_client.delete_server, body['id'])
         server = clients.servers_client.show_server(body['id'])['server']
         return server
 
@@ -488,6 +487,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
             thing_id=image_id, thing_id_param='id',
             cleanup_callable=test_utils.call_and_ignore_notfound_exc,
             cleanup_args=[_image_client.delete_image, image_id])
+
         if CONF.image_feature_enabled.api_v1:
             # In glance v1 the additional properties are stored in the headers.
             resp = _image_client.check_image(image_id)
@@ -720,8 +720,7 @@ class NetworkScenarioTest(ScenarioTest):
                         routers_client=None,
                         tenant_id=None, namestart='network-smoke-',
                         vlan_transparent=None, shared=False):
-        if not client:
-            client = self.networks_client
+
         if not networks_client:
             networks_client = self.networks_client
         if not routers_client:
@@ -730,16 +729,14 @@ class NetworkScenarioTest(ScenarioTest):
             tenant_id = networks_client.tenant_id
         name = data_utils.rand_name(namestart)
         if vlan_transparent is not None:
-            result = networks_client.create_network(name=name, tenant_id=tenant_id,
-                                           vlan_transparent=vlan_transparent,
-                                           shared=shared)
+            network = networks_client.create_network(
+                name=name, tenant_id=tenant_id,
+                vlan_transparent=vlan_transparent,
+                shared=shared)
         else:
-            result = networks_client.create_network(name=name,
+            network = networks_client.create_network(name=name,
                                                     tenant_id=tenant_id,
                                                     shared=shared)
-        network = net_resources.DeletableNetwork(
-            networks_client=networks_client, routers_client=routers_client,
-            **result['network'])
         self.assertEqual(network.name, name)
         self.addCleanup(self.delete_wrapper, network.delete)
         result = networks_client.create_network(name=name, tenant_id=tenant_id)
