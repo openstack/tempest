@@ -162,7 +162,7 @@ from tempest.common import waiters
 from tempest import config
 from tempest import exceptions
 from tempest.scenario import manager
-from tempest.services.network import resources as net_resources
+#from tempest.services.network import resources as net_resources
 from tempest import test
 from tempest.thirdparty.cisco import base as cisco_base
 

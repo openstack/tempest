@@ -729,17 +729,14 @@ class NetworkScenarioTest(ScenarioTest):
             tenant_id = networks_client.tenant_id
         name = data_utils.rand_name(namestart)
         if vlan_transparent is not None:
-            result = networks_client.create_network(
+            network = networks_client.create_network(
                 name=name, tenant_id=tenant_id,
                 vlan_transparent=vlan_transparent,
                 shared=shared)
         else:
-            result = networks_client.create_network(name=name,
+            network = networks_client.create_network(name=name,
                                                     tenant_id=tenant_id,
                                                     shared=shared)
-        network = networks_client.DeletableNetwork(
-            networks_client=networks_client, routers_client=routers_client,
-            **result['network'])
         self.assertEqual(network.name, name)
         self.addCleanup(self.delete_wrapper, network.delete)
         result = networks_client.create_network(name=name, tenant_id=tenant_id)
