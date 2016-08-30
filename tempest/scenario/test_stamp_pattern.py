@@ -22,6 +22,7 @@ from tempest.common.utils import data_utils
 from tempest.common import waiters
 from tempest import config
 from tempest import exceptions
+from tempest.lib.common.utils import test_utils
 from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
 from tempest.scenario import manager
@@ -89,9 +90,9 @@ class TestStampPattern(manager.ScenarioTest):
             LOG.debug("Partitions:%s" % part)
             return CONF.compute.volume_device_name in part
 
-        if not test.call_until_true(_func,
-                                    CONF.compute.build_timeout,
-                                    CONF.compute.build_interval):
+        if not test_utils.call_until_true(_func,
+                                          CONF.compute.build_timeout,
+                                          CONF.compute.build_interval):
             raise exceptions.TimeoutException
 
     @decorators.skip_because(bug="1205344")

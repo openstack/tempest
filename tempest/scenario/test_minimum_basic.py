@@ -17,6 +17,7 @@ from tempest.common import custom_matchers
 from tempest.common import waiters
 from tempest import config
 from tempest import exceptions
+from tempest.lib.common.utils import test_utils
 from tempest.scenario import manager
 from tempest import test
 
@@ -88,9 +89,9 @@ class TestMinimumBasicScenario(manager.ScenarioTest):
                     ['server'])
             return {'name': secgroup['name']} in body['security_groups']
 
-        if not test.call_until_true(wait_for_secgroup_add,
-                                    CONF.compute.build_timeout,
-                                    CONF.compute.build_interval):
+        if not test_utils.call_until_true(wait_for_secgroup_add,
+                                          CONF.compute.build_timeout,
+                                          CONF.compute.build_interval):
             msg = ('Timed out waiting for adding security group %s to server '
                    '%s' % (secgroup['id'], server['id']))
             raise exceptions.TimeoutException(msg)

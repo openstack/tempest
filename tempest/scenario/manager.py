@@ -513,7 +513,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
                       'should_succeed':
                       'reachable' if should_succeed else 'unreachable'
                   })
-        result = tempest.test.call_until_true(ping, timeout, 1)
+        result = test_utils.call_until_true(ping, timeout, 1)
         LOG.debug('%(caller)s finishes ping %(ip)s in %(timeout)s sec and the '
                   'ping result is %(result)s' % {
                       'caller': caller, 'ip': ip_address, 'timeout': timeout,
@@ -857,9 +857,9 @@ class NetworkScenarioTest(ScenarioTest):
                       show_floatingip(floatingip_id)['floatingip'])
             return status == result['status']
 
-        tempest.test.call_until_true(refresh,
-                                     CONF.network.build_timeout,
-                                     CONF.network.build_interval)
+        test_utils.call_until_true(refresh,
+                                   CONF.network.build_timeout,
+                                   CONF.network.build_interval)
         floating_ip = self.floating_ips_client.show_floatingip(
             floatingip_id)['floatingip']
         self.assertEqual(status, floating_ip['status'],
@@ -914,9 +914,9 @@ class NetworkScenarioTest(ScenarioTest):
                 return not should_succeed
             return should_succeed
 
-        return tempest.test.call_until_true(ping_remote,
-                                            CONF.validation.ping_timeout,
-                                            1)
+        return test_utils.call_until_true(ping_remote,
+                                          CONF.validation.ping_timeout,
+                                          1)
 
     def _create_security_group(self, security_group_rules_client=None,
                                tenant_id=None,
@@ -1249,7 +1249,7 @@ class BaremetalScenarioTest(ScenarioTest):
                 return True
             return False
 
-        if not tempest.test.call_until_true(
+        if not test_utils.call_until_true(
             check_state, timeout, interval):
             msg = ("Timed out waiting for node %s to reach %s state(s) %s" %
                    (node_id, state_attr, target_states))
@@ -1273,7 +1273,7 @@ class BaremetalScenarioTest(ScenarioTest):
                 self.get_node, instance_id=instance_id)
             return node is not None
 
-        if not tempest.test.call_until_true(
+        if not test_utils.call_until_true(
             _get_node, CONF.baremetal.association_timeout, 1):
             msg = ('Timed out waiting to get Ironic node by instance id %s'
                    % instance_id)

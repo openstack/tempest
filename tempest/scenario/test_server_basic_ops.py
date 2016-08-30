@@ -18,6 +18,7 @@ import re
 
 from tempest import config
 from tempest import exceptions
+from tempest.lib.common.utils import test_utils
 from tempest.scenario import manager
 from tempest import test
 
@@ -70,9 +71,9 @@ class TestServerBasicOps(manager.ScenarioTest):
                     self.assertEqual(self.fip, result, msg)
                     return 'Verification is successful!'
 
-            if not test.call_until_true(exec_cmd_and_verify_output,
-                                        CONF.compute.build_timeout,
-                                        CONF.compute.build_interval):
+            if not test_utils.call_until_true(exec_cmd_and_verify_output,
+                                              CONF.compute.build_timeout,
+                                              CONF.compute.build_interval):
                 raise exceptions.TimeoutException('Timed out while waiting to '
                                                   'verify metadata on server. '
                                                   '%s is empty.' % md_url)

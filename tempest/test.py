@@ -18,8 +18,8 @@ import functools
 import os
 import re
 import sys
-import time
 
+import debtcollector.moves
 import fixtures
 from oslo_log import log as logging
 from oslo_serialization import jsonutils as json
@@ -38,6 +38,7 @@ import tempest.common.validation_resources as vresources
 from tempest import config
 from tempest import exceptions
 from tempest.lib.common.utils import data_utils
+from tempest.lib.common.utils import test_utils
 from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
 
@@ -866,22 +867,6 @@ def SimpleNegativeAutoTest(klass):
     return klass
 
 
-def call_until_true(func, duration, sleep_for):
-    """Call the given function until it returns True (and return True)
-
-    or until the specified duration (in seconds) elapses (and return False).
-
-    :param func: A zero argument callable that returns True on success.
-    :param duration: The number of seconds for which to attempt a
-        successful call of the function.
-    :param sleep_for: The number of seconds to sleep after an unsuccessful
-                      invocation of the function.
-    """
-    now = time.time()
-    timeout = now + duration
-    while now < timeout:
-        if func():
-            return True
-        time.sleep(sleep_for)
-        now = time.time()
-    return False
+call_until_true = debtcollector.moves.moved_function(
+    test_utils.call_until_true, 'call_until_true', __name__,
+    version='Newton', removal_version='Ocata')
