@@ -1,0 +1,5 @@
+---
+upgrade:
+  - The previously deprecated Javelin utility has been removed from Tempest.
+    As an alternative Ansible can be used to construct similar yaml workflows
+    to what Javelin used to provide.

@@ -1,0 +1,12 @@
+---
+prelude: >
+    This release is marking the end of Kilo release support in Tempest
+other:
+    - OpenStack Releases Supported after this release are **Liberty**
+      and **Mitaka**
+
+      The release under current development as of this tag is Newton,
+      meaning that every Tempest commit is also tested against master during
+      the Newton cycle. However, this does not necessarily mean that using
+      Tempest as of this tag will work against a Newton (or future releases)
+      cloud.

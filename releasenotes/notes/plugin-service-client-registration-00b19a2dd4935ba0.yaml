@@ -1,0 +1,12 @@
+---
+features:
+  - A new optional interface `TempestPlugin.get_service_clients`
+    is available to plugins. It allows them to declare
+    any service client they implement. For now this is used by
+    tempest only, for auto-registration of service clients
+    in the new class `ServiceClients`.
+  - A new singleton class `clients.ClientsRegistry` is
+    available. It holds the service clients registration data
+    from all plugins. It is used by `ServiceClients` for
+    auto-registration of the service clients implemented
+    in plugins.
