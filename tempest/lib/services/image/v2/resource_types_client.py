@@ -22,8 +22,54 @@ class ResourceTypesClient(rest_client.RestClient):
     api_version = "v2"
 
     def list_resource_types(self):
+        """Lists all resource types.
+
+         Available params: see http://developer.openstack.org/
+                               api-ref/image/v2/metadefs-index.html?expanded=#
+                               list-resource-types
+         """
         url = 'metadefs/resource_types'
         resp, body = self.get(url)
         self.expected_success(200, resp.status)
         body = json.loads(body)
         return rest_client.ResponseBody(resp, body)
+
+    def create_resource_type_association(self, namespace_id, **kwargs):
+        """Creates a resource type association in given namespace.
+
+         Available params: see http://developer.openstack.org/
+                               api-ref/image/v2/metadefs-index.html?expanded=#
+                               create-resource-type-association
+         """
+        url = 'metadefs/namespaces/%s/resource_types' % namespace_id
+        data = json.dumps(kwargs)
+        resp, body = self.post(url, data)
+        self.expected_success(201, resp.status)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
+
+    def list_resource_type_association(self, namespace_id):
+        """Lists resource type associations in given namespace.
+
+         Available params: see http://developer.openstack.org/
+                               api-ref/image/v2/metadefs-index.html?expanded=#
+                               list-resource-type-associations
+         """
+        url = 'metadefs/namespaces/%s/resource_types' % namespace_id
+        resp, body = self.get(url)
+        self.expected_success(200, resp.status)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
+
+    def delete_resource_type_association(self, namespace_id, resource_name):
+        """Removes resource type association in given namespace.
+
+         Available params: see http://developer.openstack.org/
+                               api-ref/image/v2/metadefs-index.html?expanded=#
+                               remove-resource-type-association
+         """
+        url = 'metadefs/namespaces/%s/resource_types/%s' % (namespace_id,
+                                                            resource_name)
+        resp, _ = self.delete(url)
+        self.expected_success(204, resp.status)
+        return rest_client.ResponseBody(resp)
