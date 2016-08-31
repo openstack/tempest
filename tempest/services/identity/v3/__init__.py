@@ -13,6 +13,7 @@
 # the License.
 
 from tempest.lib.services.identity.v3.endpoints_client import EndPointsClient
+from tempest.lib.services.identity.v3.groups_client import GroupsClient
 from tempest.lib.services.identity.v3.policies_client import PoliciesClient
 from tempest.lib.services.identity.v3.projects_client import ProjectsClient
 from tempest.lib.services.identity.v3.regions_client import RegionsClient
@@ -21,13 +22,13 @@ from tempest.lib.services.identity.v3.token_client import V3TokenClient
 from tempest.services.identity.v3.json.credentials_client import \
     CredentialsClient
 from tempest.services.identity.v3.json.domains_client import DomainsClient
-from tempest.services.identity.v3.json.groups_client import GroupsClient
 from tempest.services.identity.v3.json.identity_client import IdentityClient
 from tempest.services.identity.v3.json.roles_client import RolesClient
 from tempest.services.identity.v3.json.trusts_client import TrustsClient
 from tempest.services.identity.v3.json.users_clients import UsersClient
 
-__all__ = ['EndPointsClient', 'PoliciesClient', 'ProjectsClient',
-           'RegionsClient', 'ServicesClient', 'V3TokenClient',
-           'CredentialsClient', 'DomainsClient', 'GroupsClient',
+
+__all__ = ['EndPointsClient', 'GroupsClient', 'PoliciesClient',
+           'ProjectsClient', 'RegionsClient', 'ServicesClient',
+           'V3TokenClient', 'CredentialsClient', 'DomainsClient',
            'IdentityClient', 'RolesClient', 'TrustsClient', 'UsersClient', ]
