@@ -6,3 +6,4 @@ features:
     any maintenance changes.
 
       * regions_client(v3)
+      * services_client(v3)
