@@ -135,7 +135,10 @@ To enable and use locking test accounts you need do a few things:
 It is worth pointing out that each set of credentials in the accounts.yaml
 should have a unique project. This is required to provide proper isolation
 to the tests using the credentials, and failure to do this will likely cause
-unexpected failures in some tests.
+unexpected failures in some tests. Also, ensure that these projects and users
+used do not have any pre-existing resources created. Tempest assumes all
+tenants it's using are empty and may sporadically fail if there are unexpected
+resources present.
 
 When the keystone in the target cloud requires domain scoped tokens to
 perform admin actions, all pre-provisioned admin users must have a role
