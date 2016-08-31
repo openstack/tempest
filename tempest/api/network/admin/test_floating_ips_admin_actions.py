@@ -26,6 +26,13 @@ class FloatingIPAdminTestJSON(base.BaseAdminNetworkTest):
     credentials = ['primary', 'alt', 'admin']
 
     @classmethod
+    def skip_checks(cls):
+        super(FloatingIPAdminTestJSON, cls).skip_checks()
+        if not test.is_extension_enabled('router', 'network'):
+            msg = "router extension not enabled."
+            raise cls.skipException(msg)
+
+    @classmethod
     def setup_clients(cls):
         super(FloatingIPAdminTestJSON, cls).setup_clients()
         cls.alt_floating_ips_client = cls.alt_manager.floating_ips_client
