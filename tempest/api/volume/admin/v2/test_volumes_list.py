@@ -29,7 +29,9 @@ class VolumesListAdminV2TestJSON(base.BaseVolumeAdminTest):
     def resource_setup(cls):
         super(VolumesListAdminV2TestJSON, cls).resource_setup()
         # Create 3 test volumes
-        cls.volume_list = []
+        # NOTE(zhufl): When using pre-provisioned credentials, the project
+        # may have volumes other than those created below.
+        cls.volume_list = cls.volumes_client.list_volumes()['volumes']
         for i in range(3):
             volume = cls.create_volume()
             # Fetch volume details
@@ -59,5 +61,6 @@ class VolumesListAdminV2TestJSON(base.BaseVolumeAdminTest):
         # primary tenant
         fetched_tenant_id = [operator.itemgetter(
             'os-vol-tenant-attr:tenant_id')(item) for item in fetched_list]
-        expected_tenant_id = [self.volumes_client.tenant_id] * 3
+        expected_tenant_id = [self.volumes_client.tenant_id] * \
+            len(self.volume_list)
         self.assertEqual(expected_tenant_id, fetched_tenant_id)
