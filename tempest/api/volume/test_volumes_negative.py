@@ -299,4 +299,3 @@ class VolumesV2NegativeTest(base.BaseVolumeTest):
 
 class VolumesV1NegativeTest(VolumesV2NegativeTest):
     _api_version = 1
-    _name = 'display_name'
