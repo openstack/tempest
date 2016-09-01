@@ -68,6 +68,6 @@ class ProjectsClient(rest_client.RestClient):
 
     def delete_project(self, project_id):
         """Delete a project."""
-        resp, body = self.delete('projects/%s' % str(project_id))
+        resp, body = self.delete('projects/%s' % project_id)
         self.expected_success(204, resp.status)
         return rest_client.ResponseBody(resp, body)

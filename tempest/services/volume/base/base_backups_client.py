@@ -51,13 +51,13 @@ class BaseBackupsClient(rest_client.RestClient):
 
     def delete_backup(self, backup_id):
         """Delete a backup of volume."""
-        resp, body = self.delete('backups/%s' % (str(backup_id)))
+        resp, body = self.delete('backups/%s' % backup_id)
         self.expected_success(202, resp.status)
         return rest_client.ResponseBody(resp, body)
 
     def show_backup(self, backup_id):
         """Returns the details of a single backup."""
-        url = "backups/%s" % str(backup_id)
+        url = "backups/%s" % backup_id
         resp, body = self.get(url)
         body = json.loads(body)
         self.expected_success(200, resp.status)

@@ -34,7 +34,7 @@ class RolesClient(rest_client.RestClient):
 
     def show_role(self, role_id):
         """GET a Role."""
-        resp, body = self.get('roles/%s' % str(role_id))
+        resp, body = self.get('roles/%s' % role_id)
         self.expected_success(200, resp.status)
         body = json.loads(body)
         return rest_client.ResponseBody(resp, body)
@@ -53,14 +53,14 @@ class RolesClient(rest_client.RestClient):
                           api-ref-identity-v3.html#updateRole
         """
         post_body = json.dumps({'role': kwargs})
-        resp, body = self.patch('roles/%s' % str(role_id), post_body)
+        resp, body = self.patch('roles/%s' % role_id, post_body)
         self.expected_success(200, resp.status)
         body = json.loads(body)
         return rest_client.ResponseBody(resp, body)
 
     def delete_role(self, role_id):
         """Delete a role."""
-        resp, body = self.delete('roles/%s' % str(role_id))
+        resp, body = self.delete('roles/%s' % role_id)
         self.expected_success(204, resp.status)
         return rest_client.ResponseBody(resp, body)
 

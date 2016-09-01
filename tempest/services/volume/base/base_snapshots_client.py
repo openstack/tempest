@@ -45,7 +45,7 @@ class BaseSnapshotsClient(rest_client.RestClient):
         Available params: see http://developer.openstack.org/
                               api-ref-blockstorage-v2.html#showSnapshot
         """
-        url = "snapshots/%s" % str(snapshot_id)
+        url = "snapshots/%s" % snapshot_id
         resp, body = self.get(url)
         body = json.loads(body)
         self.expected_success(200, resp.status)
@@ -81,7 +81,7 @@ class BaseSnapshotsClient(rest_client.RestClient):
         Available params: see http://developer.openstack.org/
                               api-ref-blockstorage-v2.html#deleteSnapshot
         """
-        resp, body = self.delete("snapshots/%s" % str(snapshot_id))
+        resp, body = self.delete("snapshots/%s" % snapshot_id)
         self.expected_success(202, resp.status)
         return rest_client.ResponseBody(resp, body)
 
@@ -112,7 +112,7 @@ class BaseSnapshotsClient(rest_client.RestClient):
         # Bug https://bugs.launchpad.net/openstack-api-site/+bug/1532645
 
         post_body = json.dumps({'os-update_snapshot_status': kwargs})
-        url = 'snapshots/%s/action' % str(snapshot_id)
+        url = 'snapshots/%s/action' % snapshot_id
         resp, body = self.post(url, post_body)
         self.expected_success(202, resp.status)
         return rest_client.ResponseBody(resp, body)
@@ -120,7 +120,7 @@ class BaseSnapshotsClient(rest_client.RestClient):
     def create_snapshot_metadata(self, snapshot_id, metadata):
         """Create metadata for the snapshot."""
         put_body = json.dumps({'metadata': metadata})
-        url = "snapshots/%s/metadata" % str(snapshot_id)
+        url = "snapshots/%s/metadata" % snapshot_id
         resp, body = self.post(url, put_body)
         body = json.loads(body)
         self.expected_success(200, resp.status)
@@ -133,7 +133,7 @@ class BaseSnapshotsClient(rest_client.RestClient):
                               api-ref-blockstorage-v2.html#
                               showSnapshotMetadata
         """
-        url = "snapshots/%s/metadata" % str(snapshot_id)
+        url = "snapshots/%s/metadata" % snapshot_id
         resp, body = self.get(url)
         body = json.loads(body)
         self.expected_success(200, resp.status)
@@ -147,7 +147,7 @@ class BaseSnapshotsClient(rest_client.RestClient):
                               updateSnapshotMetadata
         """
         put_body = json.dumps(kwargs)
-        url = "snapshots/%s/metadata" % str(snapshot_id)
+        url = "snapshots/%s/metadata" % snapshot_id
         resp, body = self.put(url, put_body)
         body = json.loads(body)
         self.expected_success(200, resp.status)
@@ -160,7 +160,7 @@ class BaseSnapshotsClient(rest_client.RestClient):
         # link to api-site.
         # LP: https://bugs.launchpad.net/openstack-api-site/+bug/1529064
         put_body = json.dumps(kwargs)
-        url = "snapshots/%s/metadata/%s" % (str(snapshot_id), str(id))
+        url = "snapshots/%s/metadata/%s" % (snapshot_id, id)
         resp, body = self.put(url, put_body)
         body = json.loads(body)
         self.expected_success(200, resp.status)
@@ -168,7 +168,7 @@ class BaseSnapshotsClient(rest_client.RestClient):
 
     def delete_snapshot_metadata_item(self, snapshot_id, id):
         """Delete metadata item for the snapshot."""
-        url = "snapshots/%s/metadata/%s" % (str(snapshot_id), str(id))
+        url = "snapshots/%s/metadata/%s" % (snapshot_id, id)
         resp, body = self.delete(url)
         self.expected_success(200, resp.status)
         return rest_client.ResponseBody(resp, body)

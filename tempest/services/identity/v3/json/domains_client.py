@@ -38,7 +38,7 @@ class DomainsClient(rest_client.RestClient):
 
     def delete_domain(self, domain_id):
         """Deletes a domain."""
-        resp, body = self.delete('domains/%s' % str(domain_id))
+        resp, body = self.delete('domains/%s' % domain_id)
         self.expected_success(204, resp.status)
         return rest_client.ResponseBody(resp, body)
 

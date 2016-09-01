@@ -92,7 +92,7 @@ class BaseVolumesClient(rest_client.RestClient):
 
     def show_volume(self, volume_id):
         """Returns the details of a single volume."""
-        url = "volumes/%s" % str(volume_id)
+        url = "volumes/%s" % volume_id
         resp, body = self.get(url)
         body = json.loads(body)
         self.expected_success(200, resp.status)
@@ -126,7 +126,7 @@ class BaseVolumesClient(rest_client.RestClient):
 
     def delete_volume(self, volume_id):
         """Deletes the Specified Volume."""
-        resp, body = self.delete("volumes/%s" % str(volume_id))
+        resp, body = self.delete("volumes/%s" % volume_id)
         self.expected_success(202, resp.status)
         return rest_client.ResponseBody(resp, body)
 
@@ -248,7 +248,7 @@ class BaseVolumesClient(rest_client.RestClient):
 
     def show_volume_transfer(self, transfer_id):
         """Returns the details of a volume transfer."""
-        url = "os-volume-transfer/%s" % str(transfer_id)
+        url = "os-volume-transfer/%s" % transfer_id
         resp, body = self.get(url)
         body = json.loads(body)
         self.expected_success(200, resp.status)
@@ -270,7 +270,7 @@ class BaseVolumesClient(rest_client.RestClient):
 
     def delete_volume_transfer(self, transfer_id):
         """Delete a volume transfer."""
-        resp, body = self.delete("os-volume-transfer/%s" % str(transfer_id))
+        resp, body = self.delete("os-volume-transfer/%s" % transfer_id)
         self.expected_success(202, resp.status)
         return rest_client.ResponseBody(resp, body)
 
@@ -305,7 +305,7 @@ class BaseVolumesClient(rest_client.RestClient):
     def create_volume_metadata(self, volume_id, metadata):
         """Create metadata for the volume."""
         put_body = json.dumps({'metadata': metadata})
-        url = "volumes/%s/metadata" % str(volume_id)
+        url = "volumes/%s/metadata" % volume_id
         resp, body = self.post(url, put_body)
         body = json.loads(body)
         self.expected_success(200, resp.status)
@@ -313,7 +313,7 @@ class BaseVolumesClient(rest_client.RestClient):
 
     def show_volume_metadata(self, volume_id):
         """Get metadata of the volume."""
-        url = "volumes/%s/metadata" % str(volume_id)
+        url = "volumes/%s/metadata" % volume_id
         resp, body = self.get(url)
         body = json.loads(body)
         self.expected_success(200, resp.status)
@@ -322,7 +322,7 @@ class BaseVolumesClient(rest_client.RestClient):
     def update_volume_metadata(self, volume_id, metadata):
         """Update metadata for the volume."""
         put_body = json.dumps({'metadata': metadata})
-        url = "volumes/%s/metadata" % str(volume_id)
+        url = "volumes/%s/metadata" % volume_id
         resp, body = self.put(url, put_body)
         body = json.loads(body)
         self.expected_success(200, resp.status)
@@ -331,7 +331,7 @@ class BaseVolumesClient(rest_client.RestClient):
     def update_volume_metadata_item(self, volume_id, id, meta_item):
         """Update metadata item for the volume."""
         put_body = json.dumps({'meta': meta_item})
-        url = "volumes/%s/metadata/%s" % (str(volume_id), str(id))
+        url = "volumes/%s/metadata/%s" % (volume_id, id)
         resp, body = self.put(url, put_body)
         body = json.loads(body)
         self.expected_success(200, resp.status)
@@ -339,7 +339,7 @@ class BaseVolumesClient(rest_client.RestClient):
 
     def delete_volume_metadata_item(self, volume_id, id):
         """Delete metadata item for the volume."""
-        url = "volumes/%s/metadata/%s" % (str(volume_id), str(id))
+        url = "volumes/%s/metadata/%s" % (volume_id, id)
         resp, body = self.delete(url)
         self.expected_success(200, resp.status)
         return rest_client.ResponseBody(resp, body)

@@ -73,7 +73,7 @@ class GroupsClient(rest_client.RestClient):
 
     def delete_group(self, group_id):
         """Delete a group."""
-        resp, body = self.delete('groups/%s' % str(group_id))
+        resp, body = self.delete('groups/%s' % group_id)
         self.expected_success(204, resp.status)
         return rest_client.ResponseBody(resp, body)
 
