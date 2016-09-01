@@ -79,7 +79,7 @@ class VolumesServicesV2TestJSON(base.BaseVolumeAdminTest):
         services = (self.admin_volume_services_client.list_services(
             host=self.host_name, binary=self.binary_name))['services']
 
-        self.assertEqual(1, len(services))
+        self.assertNotEqual(0, len(services))
         self.assertEqual(self.host_name, _get_host(services[0]['host']))
         self.assertEqual(self.binary_name, services[0]['binary'])
 
