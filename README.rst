@@ -124,6 +124,9 @@ For more details refer to the library documentation here: :ref:`library`
 
 Release Versioning
 ------------------
+`Tempest Release Notes <http://docs.openstack.org/releasenotes/tempest>`_
+shows what changes have been released on each version.
+
 Tempest's released versions are broken into 2 sets of information. Depending on
 how you intend to consume tempest you might need
 
