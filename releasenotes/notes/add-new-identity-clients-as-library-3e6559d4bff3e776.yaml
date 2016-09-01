@@ -7,3 +7,4 @@ features:
 
       * regions_client(v3)
       * services_client(v3)
+      * projects_client(v3)
