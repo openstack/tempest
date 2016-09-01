@@ -893,11 +893,11 @@ class RestClient(object):
                                         cls=JSONSCHEMA_VALIDATOR,
                                         format_checker=FORMAT_CHECKER)
                 except jsonschema.ValidationError as ex:
-                    msg = ("HTTP response body is invalid (%s)") % ex
+                    msg = ("HTTP response body is invalid (%s)" % ex)
                     raise exceptions.InvalidHTTPResponseBody(msg)
             else:
                 if body:
-                    msg = ("HTTP response body should not exist (%s)") % body
+                    msg = ("HTTP response body should not exist (%s)" % body)
                     raise exceptions.InvalidHTTPResponseBody(msg)
 
             # Check the header of a response
@@ -908,7 +908,7 @@ class RestClient(object):
                                         cls=JSONSCHEMA_VALIDATOR,
                                         format_checker=FORMAT_CHECKER)
                 except jsonschema.ValidationError as ex:
-                    msg = ("HTTP response header is invalid (%s)") % ex
+                    msg = ("HTTP response header is invalid (%s)" % ex)
                     raise exceptions.InvalidHTTPResponseHeader(msg)
 
 
