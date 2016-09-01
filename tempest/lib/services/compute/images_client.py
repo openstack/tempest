@@ -61,7 +61,6 @@ class ImagesClient(base_compute_client.BaseComputeClient):
     def show_image(self, image_id):
         """Return the details of a single image."""
         resp, body = self.get("images/%s" % image_id)
-        self.expected_success(200, resp.status)
         body = json.loads(body)
         self.validate_response(schema.get_image, resp, body)
         return rest_client.ResponseBody(resp, body)
