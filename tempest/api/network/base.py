@@ -270,7 +270,7 @@ class BaseAdminNetworkTest(BaseNetworkTest):
         """Wrapper utility that returns a test metering label."""
         body = cls.admin_metering_labels_client.create_metering_label(
             description=description,
-            name=data_utils.rand_name("metering-label"))
+            name=name)
         metering_label = body['metering_label']
         cls.metering_labels.append(metering_label)
         return metering_label
