@@ -7,3 +7,4 @@ features:
 
       * identity_client(v2)
       * groups_client(v3)
+      * users_client(v3)
