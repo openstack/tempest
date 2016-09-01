@@ -276,7 +276,7 @@ class ServiceClients(object):
     @removals.removed_kwarg('client_parameters')
     def __init__(self, credentials, identity_uri, region=None, scope='project',
                  disable_ssl_certificate_validation=True, ca_certs=None,
-                 trace_requests='', client_parameters=None):
+                 trace_requests='', client_parameters=None, proxy_url=None):
         """Service Clients provider
 
         Instantiate a `ServiceClients` object, from a set of credentials and an
@@ -336,6 +336,8 @@ class ServiceClients(object):
             name, as declared in `service_clients.available_modules()` except
             for the version. Values are dictionaries of parameters that are
             going to be passed to all clients in the service client module.
+        :param proxy_url: Applies to auth and to all service clients, set a
+            proxy url for the clients to use.
         """
         self._registered_services = set([])
         self.credentials = credentials
@@ -360,14 +362,18 @@ class ServiceClients(object):
         self.dscv = disable_ssl_certificate_validation
         self.ca_certs = ca_certs
         self.trace_requests = trace_requests
+        self.proxy_url = proxy_url
         # Creates an auth provider for the credentials
         self.auth_provider = auth_provider_class(
             self.credentials, self.identity_uri, scope=scope,
             disable_ssl_certificate_validation=self.dscv,
-            ca_certs=self.ca_certs, trace_requests=self.trace_requests)
+            ca_certs=self.ca_certs, trace_requests=self.trace_requests,
+            proxy_url=proxy_url)
+
         # Setup some defaults for client parameters of registered services
         client_parameters = client_parameters or {}
         self.parameters = {}
+
         # Parameters are provided for unversioned services
         all_modules = available_modules() | _tempest_internal_modules()
         unversioned_services = set(
@@ -420,8 +426,8 @@ class ServiceClients(object):
             clients in tempest.
         :param client_names: List or set of names of service client classes.
         :param kwargs: Extra optional parameters to be passed to all clients.
-            ServiceClient provides defaults for region, dscv, ca_certs and
-            trace_requests.
+            ServiceClient provides defaults for region, dscv, ca_certs, http
+            proxies and trace_requests.
         :raise ServiceClientRegistrationException: if the provided name is
             already in use or if service_version is already registered.
         :raise ImportError: if module_path cannot be imported.
@@ -442,7 +448,8 @@ class ServiceClients(object):
         params = dict(region=self.region,
                       disable_ssl_certificate_validation=self.dscv,
                       ca_certs=self.ca_certs,
-                      trace_requests=self.trace_requests)
+                      trace_requests=self.trace_requests,
+                      proxy_url=self.proxy_url)
         params.update(kwargs)
         # Instantiate the client factory
         _factory = ClientsFactory(module_path=module_path,
