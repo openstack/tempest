@@ -24,6 +24,12 @@ CONF = config.CONF
 
 class VolumesCloneTest(base.BaseVolumeTest):
 
+    @classmethod
+    def skip_checks(cls):
+        super(VolumesCloneTest, cls).skip_checks()
+        if not CONF.volume_feature_enabled.clone:
+            raise cls.skipException("Cinder volume clones are disabled")
+
     @test.idempotent_id('9adae371-a257-43a5-459a-dc7c88e66e0e')
     def test_create_from_volume_decreasing_size(self):
         # Creates a volume from another volume passing a size different from
