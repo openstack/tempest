@@ -17,7 +17,7 @@ import six
 
 from tempest.lib import auth
 from tempest.lib import exceptions as lib_exc
-from tempest.services.identity.v2.json import identity_client as v2_identity
+from tempest.lib.services.identity.v2 import identity_client as v2_identity
 
 LOG = logging.getLogger(__name__)
 

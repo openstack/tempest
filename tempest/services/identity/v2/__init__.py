@@ -13,12 +13,12 @@
 # the License.
 
 from tempest.lib.services.identity.v2.endpoints_client import EndpointsClient
+from tempest.lib.services.identity.v2.identity_client import IdentityClient
 from tempest.lib.services.identity.v2.roles_client import RolesClient
 from tempest.lib.services.identity.v2.services_client import ServicesClient
 from tempest.lib.services.identity.v2.tenants_client import TenantsClient
 from tempest.lib.services.identity.v2.token_client import TokenClient
 from tempest.lib.services.identity.v2.users_client import UsersClient
-from tempest.services.identity.v2.json.identity_client import IdentityClient
 
-__all__ = ['EndpointsClient', 'TokenClient', 'IdentityClient', 'RolesClient',
-           'ServicesClient', 'TenantsClient', 'UsersClient']
+__all__ = ['EndpointsClient', 'IdentityClient', 'RolesClient',
+           'ServicesClient', 'TenantsClient', 'TokenClient', 'UsersClient']
