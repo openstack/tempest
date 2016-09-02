@@ -139,7 +139,7 @@ class ServersTestJSON(base.BaseV2ComputeTest):
         hostname = linux_client.get_hostname()
         msg = ('Failed while verifying servername equals hostname. Expected '
                'hostname "%s" but got "%s".' % (self.name, hostname))
-        self.assertEqual(self.name, hostname, msg)
+        self.assertEqual(self.name.lower(), hostname, msg)
 
     @test.idempotent_id('ed20d3fb-9d1f-4329-b160-543fbd5d9811')
     def test_create_server_with_scheduler_hint_group(self):
