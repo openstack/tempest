@@ -106,7 +106,12 @@ function apply_patches {
   git apply contrail/bug_1604923.patch
 }
 
-sudo apt-get install -y git sshpass libxml2-dev libxslt-dev python-dev libffi-dev gcc || exit 1
+mv /etc/apt/sources.list /etc/apt/sources.list_tempest
+echo "deb http://us.archive.ubuntu.com/ubuntu/ precise-updates main restricted" | sudo tee -a /etc/apt/sources.list
+apt-get update
+sudo apt-get install -y git sshpass gcc libxml2-dev libxslt-dev python-dev libffi-dev libssl-dev || exit 1
+pip install virtualenv
+mv /etc/apt/sources.list_tempest /etc/apt/sources.list
 
 if [ $never_venv -eq 0 ]
 then
