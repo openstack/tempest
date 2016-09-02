@@ -235,8 +235,8 @@ class RestClient(object):
             raise TypeError("'read_code' must be an int instead of (%s)"
                             % type(read_code))
 
-        assert_msg = ("This function only allowed to use for HTTP status"
-                      "codes which explicitly defined in the RFC 7231 & 4918."
+        assert_msg = ("This function only allowed to use for HTTP status "
+                      "codes which explicitly defined in the RFC 7231 & 4918. "
                       "{0} is not a defined Success Code!"
                       ).format(expected_code)
         if isinstance(expected_code, list):
