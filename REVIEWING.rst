@@ -86,6 +86,12 @@ something extra.
 
 .. _reno: http://docs.openstack.org/developer/reno/
 
+Deprecated Code
+---------------
+Sometimes we have some bugs in deprecated code. Basically, we leave it. Because
+we don't need to maintain it. However, if the bug is critical, we might need to
+fix it. When it will happen, we will deal with it on a case-by-case basis.
+
 When to approve
 ---------------
  * Every patch needs two +2s before being approved.
