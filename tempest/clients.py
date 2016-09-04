@@ -307,6 +307,10 @@ class Manager(clients.ServiceClients):
             self.volume_v2.AvailabilityZoneClient()
         self.volume_limits_client = self.volume_v1.LimitsClient()
         self.volume_v2_limits_client = self.volume_v2.LimitsClient()
+        self.volume_capabilities_v2_client = \
+            self.volume_v2.CapabilitiesClient()
+        self.volume_scheduler_stats_v2_client = \
+            self.volume_v2.SchedulerStatsClient()
 
     def _set_object_storage_clients(self):
         # Mandatory parameters (always defined)

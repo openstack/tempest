@@ -38,13 +38,13 @@ class BackendsCapabilitiesAdminV2TestsJSON(base.BaseVolumeAdminTest):
         # Get host list, formation: host@backend-name
         cls.hosts = [
             pool['name'] for pool in
-            cls.admin_volume_client.show_pools()['pools']
+            cls.admin_scheduler_stats_client.list_pools()['pools']
         ]
 
     @test.idempotent_id('3750af44-5ea2-4cd4-bc3e-56e7e6caf854')
     def test_get_capabilities_backend(self):
         # Test backend properties
-        backend = self.admin_volume_client.show_backend_capabilities(
+        backend = self.admin_capabilities_client.show_backend_capabilities(
             self.hosts[0])
 
         # Verify getting capabilities parameters from a backend
@@ -62,12 +62,12 @@ class BackendsCapabilitiesAdminV2TestsJSON(base.BaseVolumeAdminTest):
         # Get list backend capabilities using show_pools
         cinder_pools = [
             pool['capabilities'] for pool in
-            self.admin_volume_client.show_pools(detail=True)['pools']
+            self.admin_scheduler_stats_client.list_pools(detail=True)['pools']
         ]
 
         # Get list backends capabilities using show_backend_capabilities
         capabilities = [
-            self.admin_volume_client.show_backend_capabilities(
+            self.admin_capabilities_client.show_backend_capabilities(
                 host=host) for host in self.hosts
         ]
 

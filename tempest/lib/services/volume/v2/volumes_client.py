@@ -13,6 +13,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from debtcollector import removals
 from oslo_serialization import jsonutils as json
 import six
 from six.moves.urllib import parse as urllib
@@ -323,6 +324,8 @@ class VolumesClient(rest_client.RestClient):
         self.expected_success(200, resp.status)
         return rest_client.ResponseBody(resp, body)
 
+    @removals.remove(message="use show_pools from tempest.lib.services."
+                             "volume.v2.scheduler_stats_client")
     def show_pools(self, detail=False):
         # List all the volumes pools (hosts)
         url = 'scheduler-stats/get_pools'
@@ -334,6 +337,8 @@ class VolumesClient(rest_client.RestClient):
         self.expected_success(200, resp.status)
         return rest_client.ResponseBody(resp, body)
 
+    @removals.remove(message="use show_backend_capabilities from tempest.lib."
+                             "services.volume.v2.capabilities_client")
     def show_backend_capabilities(self, host):
         """Shows capabilities for a storage back end.
 

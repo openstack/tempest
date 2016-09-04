@@ -8,3 +8,5 @@ features:
 
     * volumes_client(v1)
     * volumes_client(v2)
+    * capabilities_client(v2)
+    * scheduler_stats_client(v2)

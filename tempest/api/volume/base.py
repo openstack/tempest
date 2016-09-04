@@ -254,6 +254,10 @@ class BaseVolumeAdminTest(BaseVolumeTest):
                 cls.os_adm.encryption_types_v2_client
             cls.admin_quotas_client = cls.os_adm.volume_quotas_v2_client
             cls.admin_volume_limits_client = cls.os_adm.volume_v2_limits_client
+            cls.admin_capabilities_client = \
+                cls.os_adm.volume_capabilities_v2_client
+            cls.admin_scheduler_stats_client = \
+                cls.os_adm.volume_scheduler_stats_v2_client
 
     @classmethod
     def resource_setup(cls):
