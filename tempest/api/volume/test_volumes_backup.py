@@ -91,7 +91,6 @@ class VolumesBackupsV2Test(base.BaseVolumeTest):
         server_name = data_utils.rand_name(
             self.__class__.__name__ + '-instance')
         server = self.create_server(name=server_name, wait_until='ACTIVE')
-        self.addCleanup(self.servers_client.delete_server, server['id'])
         # Attach volume to instance
         self.servers_client.attach_volume(server['id'],
                                           volumeId=volume['id'])

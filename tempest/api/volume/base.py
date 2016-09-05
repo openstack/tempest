@@ -169,14 +169,21 @@ class BaseVolumeTest(tempest.test.BaseTestCase):
             except Exception:
                 pass
 
-    @classmethod
-    def create_server(cls, name, **kwargs):
-        tenant_network = cls.get_tenant_network()
+    def create_server(self, name, wait_for_deletion=False, **kwargs):
+        tenant_network = self.get_tenant_network()
         body, _ = compute.create_test_server(
-            cls.os,
+            self.os,
             tenant_network=tenant_network,
             name=name,
             **kwargs)
+
+        if wait_for_deletion:
+            self.addCleanup(test_utils.call_and_ignore_notfound_exc,
+                            waiters.wait_for_server_termination,
+                            self.servers_client, body['id'])
+
+        self.addCleanup(test_utils.call_and_ignore_notfound_exc,
+                        self.servers_client.delete_server, body['id'])
         return body
 
 
