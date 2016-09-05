@@ -16,8 +16,11 @@
 from tempest.api.volume.v3 import base
 from tempest.common.utils import data_utils
 from tempest.common import waiters
+from tempest import config
 from tempest import exceptions
 from tempest import test
+
+CONF = config.CONF
 
 MESSAGE_KEYS = [
     'created_at',
@@ -49,7 +52,8 @@ class UserMessagesTest(base.VolumesV3AdminTest):
             extra_specs=extra_specs)['volume_type']
         self.addCleanup(self.admin_volume_types_client.delete_volume_type,
                         bogus_type['id'])
-        params = {'volume_type': bogus_type['id']}
+        params = {'volume_type': bogus_type['id'],
+                  'size': CONF.volume.volume_size}
         volume = self.volumes_client.create_volume(**params)['volume']
         self.addCleanup(self.delete_volume, self.volumes_client, volume['id'])
         try:

@@ -17,8 +17,11 @@ import operator
 
 from tempest.api.volume import base
 from tempest.common import waiters
+from tempest import config
 from tempest.lib import exceptions as lib_exc
 from tempest import test
+
+CONF = config.CONF
 
 
 class VolumeTypesAccessV2Test(base.BaseVolumeAdminTest):
@@ -38,7 +41,8 @@ class VolumeTypesAccessV2Test(base.BaseVolumeAdminTest):
 
         # Try creating a volume from volume type in primary tenant
         self.assertRaises(lib_exc.NotFound, self.volumes_client.create_volume,
-                          volume_type=volume_type['id'])
+                          volume_type=volume_type['id'],
+                          size=CONF.volume.volume_size)
 
         # Adding volume type access for primary tenant
         self.admin_volume_types_client.add_type_access(
@@ -49,7 +53,8 @@ class VolumeTypesAccessV2Test(base.BaseVolumeAdminTest):
 
         # Creating a volume from primary tenant
         volume = self.volumes_client.create_volume(
-            volume_type=volume_type['id'])['volume']
+            volume_type=volume_type['id'],
+            size=CONF.volume.volume_size)['volume']
         self.addCleanup(self.delete_volume, self.volumes_client, volume['id'])
         waiters.wait_for_volume_status(self.volumes_client, volume['id'],
                                        'available')

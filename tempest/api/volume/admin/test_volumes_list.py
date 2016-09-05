@@ -17,7 +17,10 @@ import operator
 
 from tempest.api.volume import base
 from tempest.common import waiters
+from tempest import config
 from tempest import test
+
+CONF = config.CONF
 
 
 class VolumesListAdminV2TestJSON(base.BaseVolumeAdminTest):
@@ -38,7 +41,8 @@ class VolumesListAdminV2TestJSON(base.BaseVolumeAdminTest):
     def test_volume_list_param_tenant(self):
         # Test to list volumes from single tenant
         # Create a volume in admin tenant
-        adm_vol = self.admin_volume_client.create_volume()['volume']
+        adm_vol = self.admin_volume_client.create_volume(
+            size=CONF.volume.volume_size)['volume']
         waiters.wait_for_volume_status(self.admin_volume_client,
                                        adm_vol['id'], 'available')
         self.addCleanup(self.admin_volume_client.delete_volume, adm_vol['id'])

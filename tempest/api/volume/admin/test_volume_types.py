@@ -50,7 +50,8 @@ class VolumeTypesV2Test(base.BaseVolumeAdminTest):
                 extra_specs=extra_specs)
             volume_types.append(vol_type)
         params = {self.name_field: vol_name,
-                  'volume_type': volume_types[0]['id']}
+                  'volume_type': volume_types[0]['id'],
+                  'size': CONF.volume.volume_size}
 
         # Create volume
         volume = self.volumes_client.create_volume(**params)['volume']

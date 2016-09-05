@@ -107,7 +107,8 @@ def create_test_server(clients, validatable=False, validation_resources=None,
             volumes_client = clients.volumes_client
         volume = volumes_client.create_volume(
             display_name=volume_name,
-            imageRef=image_id)
+            imageRef=image_id,
+            size=CONF.volume.volume_size)
         waiters.wait_for_volume_status(volumes_client,
                                        volume['volume']['id'], 'available')
 
