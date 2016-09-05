@@ -12,6 +12,8 @@
 # License for the specific language governing permissions and limitations under
 # the License.
 
+from tempest.lib.services.identity.v3.credentials_client import \
+    CredentialsClient
 from tempest.lib.services.identity.v3.endpoints_client import EndPointsClient
 from tempest.lib.services.identity.v3.groups_client import GroupsClient
 from tempest.lib.services.identity.v3.identity_client import IdentityClient
@@ -25,12 +27,9 @@ from tempest.lib.services.identity.v3.services_client import ServicesClient
 from tempest.lib.services.identity.v3.token_client import V3TokenClient
 from tempest.lib.services.identity.v3.trusts_client import TrustsClient
 from tempest.lib.services.identity.v3.users_client import UsersClient
-from tempest.services.identity.v3.json.credentials_client import \
-    CredentialsClient
 from tempest.services.identity.v3.json.domains_client import DomainsClient
 
-__all__ = ['EndPointsClient', 'GroupsClient', 'IdentityClient',
-           'InheritedRolesClient', 'PoliciesClient', 'ProjectsClient',
-           'RegionsClient', 'RolesClient', 'ServicesClient', 'V3TokenClient',
-           'TrustsClient', 'UsersClient', 'CredentialsClient', 'DomainsClient',
-           ]
+__all__ = ['CredentialsClient', 'EndPointsClient', 'GroupsClient',
+           'IdentityClient', 'InheritedRolesClient', 'PoliciesClient',
+           'ProjectsClient', 'RegionsClient', 'RolesClient', 'ServicesClient',
+           'V3TokenClient', 'TrustsClient', 'UsersClient', 'DomainsClient', ]
