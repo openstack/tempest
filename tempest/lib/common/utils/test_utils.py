@@ -14,6 +14,7 @@
 #    under the License.
 import inspect
 import re
+import time
 
 from oslo_log import log as logging
 
@@ -83,3 +84,24 @@ def call_and_ignore_notfound_exc(func, *args, **kwargs):
         return func(*args, **kwargs)
     except exceptions.NotFound:
         pass
+
+
+def call_until_true(func, duration, sleep_for):
+    """Call the given function until it returns True (and return True)
+
+    or until the specified duration (in seconds) elapses (and return False).
+
+    :param func: A zero argument callable that returns True on success.
+    :param duration: The number of seconds for which to attempt a
+        successful call of the function.
+    :param sleep_for: The number of seconds to sleep after an unsuccessful
+                      invocation of the function.
+    """
+    now = time.time()
+    timeout = now + duration
+    while now < timeout:
+        if func():
+            return True
+        time.sleep(sleep_for)
+        now = time.time()
+    return False

@@ -716,11 +716,10 @@ class NetworkScenarioTest(ScenarioTest):
         super(NetworkScenarioTest, cls).resource_setup()
         cls.tenant_id = cls.manager.identity_client.tenant_id
 
-    def _create_network(self, client=None, networks_client=None,
+    def _create_network(self, networks_client=None,
                         routers_client=None,
                         tenant_id=None, namestart='network-smoke-',
                         vlan_transparent=None, shared=False):
-
         if not networks_client:
             networks_client = self.networks_client
         if not routers_client:
@@ -728,18 +727,7 @@ class NetworkScenarioTest(ScenarioTest):
         if not tenant_id:
             tenant_id = networks_client.tenant_id
         name = data_utils.rand_name(namestart)
-        if vlan_transparent is not None:
-            network = networks_client.create_network(
-                name=name, tenant_id=tenant_id,
-                vlan_transparent=vlan_transparent,
-                shared=shared)
-        else:
-            network = networks_client.create_network(name=name,
-                                                    tenant_id=tenant_id,
-                                                    shared=shared)
-        self.assertEqual(network.name, name)
-        self.addCleanup(self.delete_wrapper, network.delete)
-        result = networks_client.create_network(name=name, tenant_id=tenant_id)
+        result = networks_client.create_network(name=name, tenant_id=tenant_id, shared=shared)
         network = result['network']
 
         self.assertEqual(network['name'], name)
