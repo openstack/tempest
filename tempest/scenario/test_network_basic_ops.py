@@ -263,8 +263,9 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
                                   if port['id'] != old_port['id']]
             return len(self.new_port_list) == 1
 
-        if not test.call_until_true(check_ports, CONF.network.build_timeout,
-                                    CONF.network.build_interval):
+        if not test_utils.call_until_true(
+                check_ports, CONF.network.build_timeout,
+                CONF.network.build_interval):
             raise exceptions.TimeoutException(
                 "No new port attached to the server in time (%s sec)! "
                 "Old port: %s. Number of new ports: %d" % (
@@ -277,8 +278,9 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
             self.diff_list = [n for n in new_nic_list if n not in old_nic_list]
             return len(self.diff_list) == 1
 
-        if not test.call_until_true(check_new_nic, CONF.network.build_timeout,
-                                    CONF.network.build_interval):
+        if not test_utils.call_until_true(
+                check_new_nic, CONF.network.build_timeout,
+                CONF.network.build_interval):
             raise exceptions.TimeoutException("Interface not visible on the "
                                               "guest after %s sec"
                                               % CONF.network.build_timeout)
@@ -593,9 +595,9 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
                 return False
             return True
 
-        self.assertTrue(test.call_until_true(check_new_dns_server,
-                                             renew_timeout,
-                                             renew_delay),
+        self.assertTrue(test_utils.call_until_true(check_new_dns_server,
+                                                   renew_timeout,
+                                                   renew_delay),
                         msg="DHCP renewal failed to fetch "
                             "new DNS nameservers")
 

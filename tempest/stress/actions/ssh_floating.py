@@ -16,8 +16,8 @@ import subprocess
 from tempest.common.utils import data_utils
 from tempest.common import waiters
 from tempest import config
+from tempest.lib.common.utils import test_utils
 import tempest.stress.stressaction as stressaction
-import tempest.test
 
 CONF = config.CONF
 
@@ -52,8 +52,8 @@ class FloatingStress(stressaction.StressAction):
     def check_port_ssh(self):
         def func():
             return self.tcp_connect_scan(self.floating['ip'], 22)
-        if not tempest.test.call_until_true(func, self.check_timeout,
-                                            self.check_interval):
+        if not test_utils.call_until_true(func, self.check_timeout,
+                                          self.check_interval):
             raise RuntimeError("Cannot connect to the ssh port.")
 
     def check_icmp_echo(self):
@@ -62,8 +62,8 @@ class FloatingStress(stressaction.StressAction):
 
         def func():
             return self.ping_ip_address(self.floating['ip'])
-        if not tempest.test.call_until_true(func, self.check_timeout,
-                                            self.check_interval):
+        if not test_utils.call_until_true(func, self.check_timeout,
+                                          self.check_interval):
             raise RuntimeError("%s(%s): Cannot ping the machine.",
                                self.server_id, self.floating['ip'])
         self.logger.info("%s(%s): pong :)",
@@ -153,8 +153,8 @@ class FloatingStress(stressaction.StressAction):
                         ['floating_ip'])
             return floating['instance_id'] is None
 
-        if not tempest.test.call_until_true(func, self.check_timeout,
-                                            self.check_interval):
+        if not test_utils.call_until_true(func, self.check_timeout,
+                                          self.check_interval):
             raise RuntimeError("IP disassociate timeout!")
 
     def run_core(self):

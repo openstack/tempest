@@ -16,8 +16,8 @@ from tempest.common.utils import data_utils
 from tempest.common.utils.linux import remote_client
 from tempest.common import waiters
 from tempest import config
+from tempest.lib.common.utils import test_utils
 import tempest.stress.stressaction as stressaction
-import tempest.test
 
 CONF = config.CONF
 
@@ -105,8 +105,8 @@ class VolumeVerifyStress(stressaction.StressAction):
                         ['floating_ip'])
             return floating['instance_id'] is None
 
-        if not tempest.test.call_until_true(func, CONF.compute.build_timeout,
-                                            CONF.compute.build_interval):
+        if not test_utils.call_until_true(func, CONF.compute.build_timeout,
+                                          CONF.compute.build_interval):
             raise RuntimeError("IP disassociate timeout!")
 
     def new_server_ops(self):
@@ -179,9 +179,9 @@ class VolumeVerifyStress(stressaction.StressAction):
                 if self.part_line_re.match(part_line):
                     matching += 1
             return matching == num_match
-        if tempest.test.call_until_true(_part_state,
-                                        CONF.compute.build_timeout,
-                                        CONF.compute.build_interval):
+        if test_utils.call_until_true(_part_state,
+                                      CONF.compute.build_timeout,
+                                      CONF.compute.build_interval):
             return
         else:
             raise RuntimeError("Unexpected partitions: %s",

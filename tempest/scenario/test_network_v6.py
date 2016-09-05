@@ -187,10 +187,10 @@ class TestGettingAddress(manager.NetworkScenarioTest):
             srv2_v6_addr_assigned = functools.partial(
                 guest_has_address, sshv4_2, ips_from_api_2['6'][i])
 
-            self.assertTrue(test.call_until_true(srv1_v6_addr_assigned,
+            self.assertTrue(test_utils.call_until_true(srv1_v6_addr_assigned,
                             CONF.validation.ping_timeout, 1))
 
-            self.assertTrue(test.call_until_true(srv2_v6_addr_assigned,
+            self.assertTrue(test_utils.call_until_true(srv2_v6_addr_assigned,
                             CONF.validation.ping_timeout, 1))
 
         self._check_connectivity(sshv4_1, ips_from_api_2['4'])

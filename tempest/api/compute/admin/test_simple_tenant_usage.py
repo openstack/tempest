@@ -16,6 +16,7 @@
 import datetime
 
 from tempest.api.compute import base
+from tempest.lib.common.utils import test_utils
 from tempest.lib import exceptions as e
 from tempest import test
 
@@ -59,8 +60,8 @@ class TenantUsagesTestJSON(base.BaseV2ComputeAdminTest):
                 return True
             except e.InvalidHTTPResponseBody:
                 return False
-        self.assertEqual(test.call_until_true(is_valid, duration, 1), True,
-                         "%s not return valid response in %s secs" % (
+        self.assertEqual(test_utils.call_until_true(is_valid, duration, 1),
+                         True, "%s not return valid response in %s secs" % (
                              func.__name__, duration))
         return self.resp
 
