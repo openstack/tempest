@@ -33,7 +33,8 @@ class VolumeVerifyStress(stressaction.StressAction):
         self.manager.keypairs_client.delete_keypair(self.key['name'])
 
     def _create_vm(self):
-        self.name = name = data_utils.rand_name("instance")
+        self.name = name = data_utils.rand_name(
+            self.__class__.__name__ + "-instance")
         servers_client = self.manager.servers_client
         self.logger.info("creating %s" % name)
         vm_args = self.vm_extra_args.copy()
@@ -55,7 +56,7 @@ class VolumeVerifyStress(stressaction.StressAction):
 
     def _create_sec_group(self):
         sec_grp_cli = self.manager.compute_security_groups_client
-        s_name = data_utils.rand_name('sec_grp')
+        s_name = data_utils.rand_name(self.__class__.__name__ + '-sec_grp')
         s_description = data_utils.rand_name('desc')
         self.sec_grp = sec_grp_cli.create_security_group(
             name=s_name, description=s_description)['security_group']
@@ -81,7 +82,7 @@ class VolumeVerifyStress(stressaction.StressAction):
         self.logger.info("Deleted Floating IP %s", str(self.floating['ip']))
 
     def _create_volume(self):
-        name = data_utils.rand_name("volume")
+        name = data_utils.rand_name(self.__class__.__name__ + "-volume")
         self.logger.info("creating volume: %s" % name)
         volumes_client = self.manager.volumes_client
         self.volume = volumes_client.create_volume(
