@@ -16,6 +16,7 @@ from oslo_log import log
 
 from tempest.api.compute import base
 from tempest.common import compute
+from tempest.common import credentials_factory as credentials
 from tempest.common import waiters
 from tempest import config
 from tempest import exceptions
@@ -45,6 +46,11 @@ class AutoAllocateNetworkTest(base.BaseV2ComputeTest):
     @classmethod
     def skip_checks(cls):
         super(AutoAllocateNetworkTest, cls).skip_checks()
+        identity_version = cls.get_identity_version()
+        if not credentials.is_admin_available(
+                identity_version=identity_version):
+            msg = "Missing Identity Admin API credentials in configuration."
+            raise cls.skipException(msg)
         if not CONF.service_available.neutron:
             raise cls.skipException('Neutron is required')
         if not test.is_extension_enabled('auto-allocated-topology', 'network'):
