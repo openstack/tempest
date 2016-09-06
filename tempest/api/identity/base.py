@@ -119,10 +119,6 @@ class BaseIdentityV2AdminTest(BaseIdentityV2Test):
         super(BaseIdentityV2AdminTest, cls).resource_setup()
         cls.projects_client = cls.tenants_client
 
-    @classmethod
-    def resource_cleanup(cls):
-        super(BaseIdentityV2AdminTest, cls).resource_cleanup()
-
     def setup_test_user(self, password=None):
         """Set up a test user."""
         tenant = self.setup_test_tenant()
@@ -185,14 +181,6 @@ class BaseIdentityV3AdminTest(BaseIdentityV3Test):
             # As the client manager is already created by the base class,
             # we set the scope for the inner auth provider.
             cls.os_adm.auth_provider.scope = 'domain'
-
-    @classmethod
-    def resource_setup(cls):
-        super(BaseIdentityV3AdminTest, cls).resource_setup()
-
-    @classmethod
-    def resource_cleanup(cls):
-        super(BaseIdentityV3AdminTest, cls).resource_cleanup()
 
     @classmethod
     def disable_user(cls, user_name, domain_id=None):
