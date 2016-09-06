@@ -13,11 +13,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import time
-
 from oslo_serialization import jsonutils as json
 
-from tempest import exceptions
 from tempest.lib.common import rest_client
 from tempest.lib import exceptions as lib_exc
 
@@ -95,26 +92,6 @@ class BaseBackupsClient(rest_client.RestClient):
         resp, body = self.post('backups/%s/action' % backup_id, post_body)
         self.expected_success(202, resp.status)
         return rest_client.ResponseBody(resp, body)
-
-    def wait_for_backup_status(self, backup_id, status):
-        """Waits for a Backup to reach a given status."""
-        body = self.show_backup(backup_id)['backup']
-        backup_status = body['status']
-        start = int(time.time())
-
-        while backup_status != status:
-            time.sleep(self.build_interval)
-            body = self.show_backup(backup_id)['backup']
-            backup_status = body['status']
-            if backup_status == 'error' and backup_status != status:
-                raise exceptions.VolumeBackupException(backup_id=backup_id)
-
-            if int(time.time()) - start >= self.build_timeout:
-                message = ('Volume backup %s failed to reach %s status '
-                           '(current %s) within the required time (%s s).' %
-                           (backup_id, status, backup_status,
-                            self.build_timeout))
-                raise exceptions.TimeoutException(message)
 
     def is_resource_deleted(self, id):
         try:

@@ -46,8 +46,8 @@ class VolumesBackupsV2Test(base.BaseVolumeTest):
         self.assertEqual(backup_name, backup['name'])
         waiters.wait_for_volume_status(self.volumes_client,
                                        volume['id'], 'available')
-        self.backups_client.wait_for_backup_status(backup['id'],
-                                                   'available')
+        waiters.wait_for_backup_status(self.backups_client,
+                                       backup['id'], 'available')
 
         # Get a given backup
         backup = self.backups_client.show_backup(backup['id'])['backup']
@@ -67,8 +67,8 @@ class VolumesBackupsV2Test(base.BaseVolumeTest):
         self.addCleanup(self.volumes_client.delete_volume,
                         restore['volume_id'])
         self.assertEqual(backup['id'], restore['backup_id'])
-        self.backups_client.wait_for_backup_status(backup['id'],
-                                                   'available')
+        waiters.wait_for_backup_status(self.backups_client,
+                                       backup['id'], 'available')
         waiters.wait_for_volume_status(self.volumes_client,
                                        restore['volume_id'], 'available')
 
@@ -103,8 +103,8 @@ class VolumesBackupsV2Test(base.BaseVolumeTest):
             volume_id=volume['id'],
             name=backup_name, force=True)['backup']
         self.addCleanup(self.backups_client.delete_backup, backup['id'])
-        self.backups_client.wait_for_backup_status(backup['id'],
-                                                   'available')
+        waiters.wait_for_backup_status(self.backups_client,
+                                       backup['id'], 'available')
         self.assertEqual(backup_name, backup['name'])
 
 
