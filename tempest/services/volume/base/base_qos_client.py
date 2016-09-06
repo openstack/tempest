@@ -12,11 +12,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import time
-
 from oslo_serialization import jsonutils as json
 
-from tempest import exceptions
 from tempest.lib.common import rest_client
 from tempest.lib import exceptions as lib_exc
 
@@ -35,37 +32,6 @@ class BaseQosSpecsClient(rest_client.RestClient):
     def resource_type(self):
         """Returns the primary type of resource this client works with."""
         return 'qos'
-
-    def wait_for_qos_operations(self, qos_id, operation, args=None):
-        """Waits for a qos operations to be completed.
-
-        NOTE : operation value is required for  wait_for_qos_operations()
-        operation = 'qos-key' / 'disassociate' / 'disassociate-all'
-        args = keys[] when operation = 'qos-key'
-        args = volume-type-id disassociated when operation = 'disassociate'
-        args = None when operation = 'disassociate-all'
-        """
-        start_time = int(time.time())
-        while True:
-            if operation == 'qos-key-unset':
-                body = self.show_qos(qos_id)['qos_specs']
-                if not any(key in body['specs'] for key in args):
-                    return
-            elif operation == 'disassociate':
-                body = self.show_association_qos(qos_id)['qos_associations']
-                if not any(args in body[i]['id'] for i in range(0, len(body))):
-                    return
-            elif operation == 'disassociate-all':
-                body = self.show_association_qos(qos_id)['qos_associations']
-                if not body:
-                    return
-            else:
-                msg = (" operation value is either not defined or incorrect.")
-                raise lib_exc.UnprocessableEntity(msg)
-
-            if int(time.time()) - start_time >= self.build_timeout:
-                raise exceptions.TimeoutException
-            time.sleep(self.build_interval)
 
     def create_qos(self, **kwargs):
         """Create a QoS Specification.

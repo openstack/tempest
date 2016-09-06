@@ -13,12 +13,15 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import time
+
 from tempest.common import compute
 from tempest.common.utils import data_utils
 from tempest.common import waiters
 from tempest import config
 from tempest import exceptions
 from tempest.lib.common.utils import test_utils
+from tempest.lib import exceptions as lib_exc
 import tempest.test
 
 CONF = config.CONF
@@ -268,3 +271,35 @@ class BaseVolumeAdminTest(BaseVolumeTest):
             test_utils.call_and_ignore_notfound_exc(
                 cls.admin_volume_types_client.wait_for_resource_deletion,
                 resource)
+
+    def wait_for_qos_operations(self, qos_id, operation, args=None):
+        """Waits for a qos operations to be completed.
+
+        NOTE : operation value is required for  wait_for_qos_operations()
+        operation = 'qos-key' / 'disassociate' / 'disassociate-all'
+        args = keys[] when operation = 'qos-key'
+        args = volume-type-id disassociated when operation = 'disassociate'
+        args = None when operation = 'disassociate-all'
+        """
+        start_time = int(time.time())
+        client = self.admin_volume_qos_client
+        while True:
+            if operation == 'qos-key-unset':
+                body = client.show_qos(qos_id)['qos_specs']
+                if not any(key in body['specs'] for key in args):
+                    return
+            elif operation == 'disassociate':
+                body = client.show_association_qos(qos_id)['qos_associations']
+                if not any(args in body[i]['id'] for i in range(0, len(body))):
+                    return
+            elif operation == 'disassociate-all':
+                body = client.show_association_qos(qos_id)['qos_associations']
+                if not body:
+                    return
+            else:
+                msg = (" operation value is either not defined or incorrect.")
+                raise lib_exc.UnprocessableEntity(msg)
+
+            if int(time.time()) - start_time >= self.build_timeout:
+                raise exceptions.TimeoutException
+            time.sleep(self.build_interval)
