@@ -162,7 +162,6 @@ from tempest.common import waiters
 from tempest import config
 from tempest import exceptions
 from tempest.scenario import manager
-#from tempest.services.network import resources as net_resources
 from tempest import test
 from tempest.thirdparty.cisco import base as cisco_base
 
@@ -297,16 +296,20 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
             result = networks_client.show_network(CONF.ucsm.provider_network_id)
         else:
             result = networks_client.create_network(name=name, tenant_id=tenant_id, **kwargs)
-        network = net_resources.DeletableNetwork(
-            networks_client=networks_client,
-            routers_client=routers_client,
-            **result['network'])
+        network = result['network']
+        self.assertEqual(network.name, name)
+
         if CONF.ucsm.provider_network_id:
             # Mock delete method because this is provider network
             network.name = name
             network.delete = lambda: True
-        self.assertEqual(network.name, name)
-        self.addCleanup(self.delete_wrapper, network.delete)
+        else:
+            self.addCleanup(test_utils.call_and_ignore_notfound_exc,
+                            self.networks_client.delete_network,
+                            network['id'])
+            # some tests may still expect delete method
+            network.delete = lambda: self.networks_client.delete_network(network['id'])
+
         return network
 
     def _create_port(self, network_id, client=None, namestart='port-quotatest',
@@ -319,9 +322,9 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
             network_id=network_id,
             **kwargs)
         self.assertIsNotNone(result, 'Unable to allocate port')
-        port = net_resources.DeletablePort(ports_client=client,
-                                           **result['port'])
-        self.addCleanup(self.delete_wrapper, port.delete)
+        port = result['port']
+        self.addCleanup(test_utils.call_and_ignore_notfound_exc,
+                        client.delete_port, port['id'])
         return port
 
     def _create_server(self, name, network_id=None,
@@ -370,10 +373,10 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
             tenant_id=thing['tenant_id'],
             fixed_ip_address=ip4
         )
-        floating_ip = net_resources.DeletableFloatingIp(
-            client=client,
-            **result['floatingip'])
-        self.addCleanup(self.delete_wrapper, floating_ip.delete)
+        floating_ip = result['floating_ip']
+        self.addCleanup(test_utils.call_and_ignore_notfound_exc,
+                        self.compute_floating_ips_client.delete_floating_ip,
+                        floating_ip['id'])
         return floating_ip
 
     def check_public_network_connectivity(
@@ -502,7 +505,7 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
         # Delete network and verify that the vlan profile has been removed
         self.servers_client.delete_server(server['id'])
         waiters.wait_for_server_termination(self.servers_client, ['id'])
-        port.delete()
+        self.ports_client.delete_port(port['id'])
         self._delete_network(network)
         self.timed_assert(self.assertEmpty,
                           lambda: self.ucsm.get_vlan_profile(vlan_id))
@@ -581,7 +584,7 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
             self.servers_client.delete_server(server['id'])
             waiters.wait_for_server_termination(self.servers_client, ['id'])
         for port in ports_list:
-            port.delete()
+            self.ports_client.delete_port(port['id'])
         self._delete_networks(networks)
         for vlan_id in vlan_ids:
             self.timed_assert(self.assertEmpty,
@@ -667,7 +670,7 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
         # been removed
         self.servers_client.delete_server(server['id'])
         waiters.wait_for_server_termination(self.servers_client, server['id'])
-        port_obj.delete()
+        self.ports_client.delete_port(port_obj['id'])
         network_obj.delete()
 #        self.assertEmpty(self.ucsm.get_port_profile(port_profile_dn),
 #                         'Port profile has been removed in UCSM')
@@ -978,7 +981,7 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
 
         self.servers_client.delete_server(server2['id'])
         waiters.wait_for_server_termination(self.servers_client, server2['id'])
-        port_obj2.delete()
+        self.ports_client.delete_port(port_obj2['id'])
 
         # Sleep some time to let neutron process all events.
         time.sleep(20)
@@ -1037,7 +1040,7 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
         #                 lambda: self.ucsm.get_ether_vlan(controller_sp, eth_name, vlan_id))
 
         # Delete network and verify that the vlan profile has been removed
-        port.delete()
+        self.ports_client.delete_port(port['id'])
         self._delete_network(network)
         for ucsm_client in ucsm_clients:
             self.timed_assert(self.assertEmpty,
@@ -1101,8 +1104,8 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
 
         self.servers_client.delete_server(server['id'])
         waiters.wait_for_server_termination(self.servers_client, server['id'])
-        port_obj.delete()
-        subnet_obj.delete()
+        self.ports_client.delete_port(port_obj['id'])
+        self.subnets_client.delete_subnet(subnet_obj['id'])
         network_obj.delete()
         self.timed_assert(self.assertEmpty,
                           lambda: random_ucsm_client.get_vlan_profile(vlan_id))
@@ -1153,7 +1156,7 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
         # Delete one server and verify VLAN profile still exists
         self.servers_client.delete_server(server1['id'])
         waiters.wait_for_server_termination(self.servers_client, server1['id'])
-        port_obj1.delete()
+        self.ports_client.delete_port(port_obj1['id'])
 
         network = self.admin_networks_client.show_network(
             network_obj.id)['network']
@@ -1165,8 +1168,8 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
         # Verify VLAN is removed
         self.servers_client.delete_server(server2['id'])
         waiters.wait_for_server_termination(self.servers_client, server2['id'])
-        port_obj2.delete()
-        subnet_obj.delete()
+        self.ports_client.delete_port(port_obj2['id'])
+        self.subnets_client.delete_subnet(subnet_obj['id'])
         network_obj.delete()
         self.timed_assert(self.assertEmpty,
                           lambda: ucsm_client1.get_vlan_profile(vlan_id))
@@ -1203,16 +1206,16 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
         network_obj, subnet_obj, router_obj = self.create_networks()
         kwargs = {'security_groups': [self.security_group['id']]}
         # Create server #1
-        port_obj1 = self._create_port(network_obj.id, **kwargs)
+        port_obj1 = self._create_port(network_obj['id'], **kwargs)
         server1 = self._create_server(
             data_utils.rand_name('server-smoke'),
-            network_obj.id, port_id=port_obj1.id,
+            network_obj['id'], port_id=port_obj1['id'],
             availability_zone='nova:' + compute1)
         # Create server #2 on another compute
-        port_obj2 = self._create_port(network_obj.id, **kwargs)
+        port_obj2 = self._create_port(network_obj['id'], **kwargs)
         server2 = self._create_server(
             data_utils.rand_name('server-smoke'),
-            network_obj.id, port_id=port_obj2.id,
+            network_obj['id'], port_id=port_obj2['id'],
             availability_zone='nova:' + compute2)
 
         self.assert_vm_to_vm_connectivity(server1, server2)
@@ -1220,10 +1223,10 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
         # Delete one server and verify VLAN profile still exists
         self.servers_client.delete_server(server1['id'])
         waiters.wait_for_server_termination(self.servers_client, server1['id'])
-        port_obj1.delete()
+        self.ports_client.delete_port(port_obj1['id'])
 
         network = self.admin_networks_client.show_network(
-            network_obj.id)['network']
+            network_obj['id'])['network']
         vlan_id = network['provider:segmentation_id']
         self.timed_assert(self.assertNotEmpty,
                           lambda: ucsm_client1.get_vlan_profile(vlan_id))
@@ -1234,8 +1237,8 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
         # Verify VLAN is removed
         self.servers_client.delete_server(server2['id'])
         waiters.wait_for_server_termination(self.servers_client, server2['id'])
-        port_obj2.delete()
-        subnet_obj.delete()
+        self.ports_client.delete_port(port_obj2['id'])
+        self.subnets_client.delete_subnet(subnet_obj['id'])
         network_obj.delete()
         self.timed_assert(self.assertEmpty,
                           lambda: ucsm_client1.get_vlan_profile(vlan_id))
@@ -1267,16 +1270,16 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
         network_obj, subnet_obj, router_obj = self.create_networks()
         kwargs = {'security_groups': [self.security_group['id']]}
         # Create server #1
-        port_obj1 = self._create_port(network_obj.id, **kwargs)
+        port_obj1 = self._create_port(network_obj['id'], **kwargs)
         server1 = self._create_server(
             data_utils.rand_name('server-smoke'),
-            network_obj.id, port_id=port_obj1.id,
+            network_obj['id'], port_id=port_obj1['id'],
             availability_zone='nova:' + compute1)
         # Create server #2 on another compute
-        port_obj2 = self._create_port(network_obj.id, **kwargs)
+        port_obj2 = self._create_port(network_obj['id'], **kwargs)
         server2 = self._create_server(
             data_utils.rand_name('server-smoke'),
-            network_obj.id, port_id=port_obj2.id,
+            network_obj['id'], port_id=port_obj2['id'],
             availability_zone='nova:' + compute1)
 
         self.assert_vm_to_vm_connectivity(server1, server2)
@@ -1284,10 +1287,10 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
         # Delete one server and verify VLAN profile still exists
         self.servers_client.delete_server(server1['id'])
         waiters.wait_for_server_termination(self.servers_client, server1['id'])
-        port_obj1.delete()
+        self.ports_client.delete_port(port_obj1['id'])
 
         network = self.admin_networks_client.show_network(
-            network_obj.id)['network']
+            network_obj['id'])['network']
         vlan_id = network['provider:segmentation_id']
         self.timed_assert(self.assertNotEmpty,
                           lambda: ucsm_client1.get_vlan_profile(vlan_id))
@@ -1296,8 +1299,8 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
         # Verify VLAN is removed
         self.servers_client.delete_server(server2['id'])
         waiters.wait_for_server_termination(self.servers_client, server2['id'])
-        port_obj2.delete()
-        subnet_obj.delete()
+        self.ports_client.delete_port(port_obj2['id'])
+        self.subnets_client.delete_subnet(subnet_obj['id'])
         network_obj.delete()
         self.timed_assert(self.assertEmpty,
                           lambda: ucsm_client1.get_vlan_profile(vlan_id))
@@ -1332,7 +1335,7 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
         # Create subnet (DHCP enabled)
         subnet_obj = self._create_subnet(network_obj)
         port_obj = self._create_port(
-            network_obj.id, security_groups=[self.security_group['id']])
+            network_obj['id'], security_groups=[self.security_group['id']])
 
         # Choose random UCSM.
         random_ucsm = random.choice(ucsm_list)
@@ -1342,7 +1345,7 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
 
         server = self._create_server(
             data_utils.rand_name('server-smoke'),
-            network_obj.id, port_id=port_obj.id,
+            network_obj['id'], port_id=port_obj['id'],
             availability_zone='nova:' + random_compute)
 
         # Get a vlan id and verify a vlan profile has been created
@@ -1358,8 +1361,8 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
         # Delete server, port, subnet, network
         self.servers_client.delete_server(server['id'])
         waiters.wait_for_server_termination(self.servers_client, server['id'])
-        port_obj.delete()
-        subnet_obj.delete()
+        self.ports_client.delete_port(port_obj['id'])
+        self.subnets_client.delete_subnet(subnet_obj['id'])
         network_obj.delete()
 
         # Verify vlan profile has been removed
@@ -1395,16 +1398,16 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
             networks_client=self.admin_networks_client, network_kwargs=network_kwargs)
         kwargs = {'security_groups': [self.security_group['id']]}
         # Create server #1
-        port_obj1 = self._create_port(network_obj.id, **kwargs)
+        port_obj1 = self._create_port(network_obj['id'], **kwargs)
         server1 = self._create_server(
             data_utils.rand_name('server-smoke'),
-            network_obj.id, port_id=port_obj1.id,
+            network_obj['id'], port_id=port_obj1['id'],
             availability_zone='nova:' + compute1)
         # Create server #2 on another compute
-        port_obj2 = self._create_port(network_obj.id, **kwargs)
+        port_obj2 = self._create_port(network_obj['id'], **kwargs)
         server2 = self._create_server(
             data_utils.rand_name('server-smoke'),
-            network_obj.id, port_id=port_obj2.id,
+            network_obj['id'], port_id=port_obj2['id'],
             availability_zone='nova:' + compute2)
 
         self.assert_vm_to_vm_connectivity(server1, server2)
@@ -1412,10 +1415,10 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
         # Delete one server and verify VLAN profile still exists
         self.servers_client.delete_server(server1['id'])
         waiters.wait_for_server_termination(self.servers_client, server1['id'])
-        port_obj1.delete()
+        self.ports_client.delete_port(port_obj1['id'])
 
         network = self.admin_networks_client.show_network(
-            network_obj.id)['network']
+            network_obj['id'])['network']
         vlan_id = network['provider:segmentation_id']
         self.timed_assert(self.assertEmpty,
                           lambda: ucsm_client1.get_vlan_profile(vlan_id))
@@ -1449,16 +1452,16 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
             networks_client=self.admin_networks_client, network_kwargs=network_kwargs)
         kwargs = {'security_groups': [self.security_group['id']]}
         # Create server #1
-        port_obj1 = self._create_port(network_obj.id, **kwargs)
+        port_obj1 = self._create_port(network_obj['id'], **kwargs)
         server1 = self._create_server(
             data_utils.rand_name('server-smoke'),
-            network_obj.id, port_id=port_obj1.id,
+            network_obj['id'], port_id=port_obj1['id'],
             availability_zone='nova:' + compute1)
         # Create server #2 on another compute
-        port_obj2 = self._create_port(network_obj.id, **kwargs)
+        port_obj2 = self._create_port(network_obj['id'], **kwargs)
         server2 = self._create_server(
             data_utils.rand_name('server-smoke'),
-            network_obj.id, port_id=port_obj2.id,
+            network_obj['id'], port_id=port_obj2['id'],
             availability_zone='nova:' + compute1)
 
         self.assert_vm_to_vm_connectivity(server1, server2)
@@ -1466,10 +1469,10 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
         # Delete one server and verify VLAN profile still exists
         self.servers_client.delete_server(server1['id'])
         waiters.wait_for_server_termination(self.servers_client, server1['id'])
-        port_obj1.delete()
+        self.ports_client.delete_port(port_obj1['id'])
 
         network = self.admin_networks_client.show_network(
-            network_obj.id)['network']
+            network_obj['id'])['network']
         vlan_id = network['provider:segmentation_id']
         self.timed_assert(self.assertNotEmpty,
                           lambda: ucsm_client1.get_vlan_profile(vlan_id))
