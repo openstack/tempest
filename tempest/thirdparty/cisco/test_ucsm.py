@@ -157,6 +157,7 @@ import time
 
 from oslo_log import log
 from tempest.lib.common.utils import data_utils
+from tempest.lib.common.utils import test_utils
 
 from tempest.common import waiters
 from tempest import config

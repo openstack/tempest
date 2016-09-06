@@ -166,7 +166,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
         return body['keypair']
 
     def create_server(self, name=None, image_id=None, flavor=None,
-                      validatable=False, wait_until=None,
+                      validatable=False, wait_until=None, wait_on_delete=True,
                       clients=None, **kwargs):
         """Wrapper utility that returns a test server.
 
