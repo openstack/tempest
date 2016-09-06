@@ -23,6 +23,12 @@ CONF = config.CONF
 class BaseIdentityTest(tempest.test.BaseTestCase):
 
     @classmethod
+    def setup_credentials(cls):
+        # Create no network resources for these test.
+        cls.set_network_resources()
+        super(BaseIdentityTest, cls).setup_credentials()
+
+    @classmethod
     def disable_user(cls, user_name):
         user = cls.get_user_by_name(user_name)
         cls.users_client.update_user_enabled(user['id'], enabled=False)
