@@ -23,7 +23,8 @@ class UsersClient(rest_client.RestClient):
         """Create a user.
 
         Available params: see http://developer.openstack.org/
-                              api-ref-identity-admin-v2.html#admin-createUser
+                              api-ref/identity/v2-admin/index.html#
+                              create-user-admin-endpoint
         """
         post_body = json.dumps({'user': kwargs})
         resp, body = self.post('users', post_body)
@@ -35,7 +36,8 @@ class UsersClient(rest_client.RestClient):
         """Updates a user.
 
         Available params: see http://developer.openstack.org/
-                              api-ref-identity-admin-v2.html#admin-updateUser
+                              api-ref/identity/v2-admin/index.html#
+                              update-user-admin-endpoint
         """
         put_body = json.dumps({'user': kwargs})
         resp, body = self.put('users/%s' % user_id, put_body)
@@ -68,7 +70,8 @@ class UsersClient(rest_client.RestClient):
         """Get the list of users.
 
         Available params: see http://developer.openstack.org/
-                              api-ref-identity-admin-v2.html#admin-listUsers
+                              api-ref/identity/v2-admin/index.html#
+                              list-users-admin-endpoint
         """
         url = "users"
         if params:
