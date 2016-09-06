@@ -45,13 +45,6 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
                                         wait_until='ACTIVE')
         cls.s2_id = server['id']
 
-    @test.idempotent_id('51717b38-bdc1-458b-b636-1cf82d99f62f')
-    def test_list_servers_by_admin(self):
-        # Listing servers by admin user returns empty list by default
-        body = self.client.list_servers(detail=True)
-        servers = body['servers']
-        self.assertEqual([], servers)
-
     @test.idempotent_id('06f960bb-15bb-48dc-873d-f96e89be7870')
     def test_list_servers_filter_by_error_status(self):
         # Filter the list of servers by server error status
@@ -74,6 +67,19 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
         body = self.client.list_servers(detail=True, **params)
         servers = body['servers']
         self.assertEqual([], servers)
+
+    @test.idempotent_id('51717b38-bdc1-458b-b636-1cf82d99f62f')
+    def test_list_servers_by_admin(self):
+        # Listing servers by admin user returns a list which doesn't
+        # contain the other tenants' server by default
+        body = self.client.list_servers(detail=True)
+        servers = body['servers']
+
+        # This case is for the test environments which contain
+        # the existing servers before testing
+        servers_name = [server['name'] for server in servers]
+        self.assertNotIn(self.s1_name, servers_name)
+        self.assertNotIn(self.s2_name, servers_name)
 
     @test.idempotent_id('9f5579ae-19b4-4985-a091-2a5d56106580')
     def test_list_servers_by_admin_with_all_tenants(self):
