@@ -246,6 +246,8 @@ class Manager(clients.ServiceClients):
             self.auth_provider, **params_v3)
         self.roles_v3_client = identity.v3.RolesClient(self.auth_provider,
                                                        **params_v3)
+        self.inherited_roles_client = identity.v3.InheritedRolesClient(
+            self.auth_provider, **params_v3)
         self.identity_services_v3_client = identity.v3.ServicesClient(
             self.auth_provider, **params_v3)
         self.policies_client = identity.v3.PoliciesClient(self.auth_provider,

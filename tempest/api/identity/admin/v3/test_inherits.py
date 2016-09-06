@@ -68,10 +68,10 @@ class InheritsV3TestJSON(BaseInheritsV3Test):
             name=data_utils.rand_name('Role'))['role']
         self.addCleanup(self.roles_client.delete_role, src_role['id'])
         # Assign role on domains user
-        self.roles_client.assign_inherited_role_on_domains_user(
+        self.inherited_roles_client.create_inherited_role_on_domains_user(
             self.domain['id'], self.user['id'], src_role['id'])
         # list role on domains user
-        roles = self.roles_client.\
+        roles = self.inherited_roles_client.\
             list_inherited_project_role_for_user_on_domain(
                 self.domain['id'], self.user['id'])['roles']
 
@@ -80,10 +80,11 @@ class InheritsV3TestJSON(BaseInheritsV3Test):
                               src_role['id'])
 
         # Check role on domains user
-        self.roles_client.check_user_inherited_project_role_on_domain(
-            self.domain['id'], self.user['id'], src_role['id'])
+        (self.inherited_roles_client.
+         check_user_inherited_project_role_on_domain(
+             self.domain['id'], self.user['id'], src_role['id']))
         # Revoke role from domains user.
-        self.roles_client.revoke_inherited_role_from_user_on_domain(
+        self.inherited_roles_client.delete_inherited_role_from_user_on_domain(
             self.domain['id'], self.user['id'], src_role['id'])
 
     @test.idempotent_id('c7a8dda2-be50-4fb4-9a9c-e830771078b1')
@@ -93,10 +94,10 @@ class InheritsV3TestJSON(BaseInheritsV3Test):
             name=data_utils.rand_name('Role'))['role']
         self.addCleanup(self.roles_client.delete_role, src_role['id'])
         # Assign role on domains group
-        self.roles_client.assign_inherited_role_on_domains_group(
+        self.inherited_roles_client.create_inherited_role_on_domains_group(
             self.domain['id'], self.group['id'], src_role['id'])
         # List role on domains group
-        roles = self.roles_client.\
+        roles = self.inherited_roles_client.\
             list_inherited_project_role_for_group_on_domain(
                 self.domain['id'], self.group['id'])['roles']
 
@@ -105,10 +106,11 @@ class InheritsV3TestJSON(BaseInheritsV3Test):
                               src_role['id'])
 
         # Check role on domains group
-        self.roles_client.check_group_inherited_project_role_on_domain(
-            self.domain['id'], self.group['id'], src_role['id'])
+        (self.inherited_roles_client.
+         check_group_inherited_project_role_on_domain(
+             self.domain['id'], self.group['id'], src_role['id']))
         # Revoke role from domains group
-        self.roles_client.revoke_inherited_role_from_group_on_domain(
+        self.inherited_roles_client.delete_inherited_role_from_group_on_domain(
             self.domain['id'], self.group['id'], src_role['id'])
 
     @test.idempotent_id('18b70e45-7687-4b72-8277-b8f1a47d7591')
@@ -118,13 +120,14 @@ class InheritsV3TestJSON(BaseInheritsV3Test):
             name=data_utils.rand_name('Role'))['role']
         self.addCleanup(self.roles_client.delete_role, src_role['id'])
         # Assign role on projects user
-        self.roles_client.assign_inherited_role_on_projects_user(
+        self.inherited_roles_client.create_inherited_role_on_projects_user(
             self.project['id'], self.user['id'], src_role['id'])
         # Check role on projects user
-        self.roles_client.check_user_has_flag_on_inherited_to_project(
-            self.project['id'], self.user['id'], src_role['id'])
+        (self.inherited_roles_client.
+         check_user_has_flag_on_inherited_to_project(
+             self.project['id'], self.user['id'], src_role['id']))
         # Revoke role from projects user
-        self.roles_client.revoke_inherited_role_from_user_on_project(
+        self.inherited_roles_client.delete_inherited_role_from_user_on_project(
             self.project['id'], self.user['id'], src_role['id'])
 
     @test.idempotent_id('26021436-d5a4-4256-943c-ded01e0d4b45')
@@ -134,11 +137,13 @@ class InheritsV3TestJSON(BaseInheritsV3Test):
             name=data_utils.rand_name('Role'))['role']
         self.addCleanup(self.roles_client.delete_role, src_role['id'])
         # Assign role on projects group
-        self.roles_client.assign_inherited_role_on_projects_group(
+        self.inherited_roles_client.create_inherited_role_on_projects_group(
             self.project['id'], self.group['id'], src_role['id'])
         # Check role on projects group
-        self.roles_client.check_group_has_flag_on_inherited_to_project(
-            self.project['id'], self.group['id'], src_role['id'])
+        (self.inherited_roles_client.
+         check_group_has_flag_on_inherited_to_project(
+             self.project['id'], self.group['id'], src_role['id']))
         # Revoke role from projects group
-        self.roles_client.revoke_inherited_role_from_group_on_project(
-            self.project['id'], self.group['id'], src_role['id'])
+        (self.inherited_roles_client.
+         delete_inherited_role_from_group_on_project(
+             self.project['id'], self.group['id'], src_role['id']))
