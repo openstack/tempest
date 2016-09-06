@@ -22,6 +22,7 @@ from tempest import config
 from tempest import exceptions
 from tempest.lib.common import rest_client
 from tempest.lib import exceptions as lib_exc
+from tempest.lib.services.identity.v2 import identity_client as v2_iden_client
 from tempest.lib.services.identity.v2 import roles_client as v2_roles_client
 from tempest.lib.services.identity.v2 import tenants_client as \
     v2_tenants_client
@@ -31,7 +32,6 @@ from tempest.lib.services.identity.v3 import projects_client as \
     v3_projects_client
 from tempest.lib.services.identity.v3 import token_client as v3_token_client
 from tempest.lib.services.network import routers_client
-from tempest.services.identity.v2.json import identity_client as v2_iden_client
 from tempest.services.identity.v3.json import domains_client
 from tempest.services.identity.v3.json import identity_client as v3_iden_client
 from tempest.services.identity.v3.json import roles_client as v3_roles_client
