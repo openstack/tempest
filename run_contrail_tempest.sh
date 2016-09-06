@@ -107,8 +107,6 @@ function apply_patches {
 }
 
 mv /etc/apt/sources.list /etc/apt/sources.list_tempest
-##echo "deb http://us.archive.ubuntu.com/ubuntu/ precise-updates main restricted" | sudo tee -a /etc/apt/sources.list
-##echo "deb http://us.archive.ubuntu.com/ubuntu/ precise-updates main restricted" | sudo tee -a /etc/apt/sources.list.d/precise-updates.list
 cp /root/tempest/sources.list /etc/apt/sources.list
 apt-get update
 sudo apt-get install -y git sshpass gcc libxml2-dev libxslt-dev python-dev libffi-dev libssl-dev || exit 1
