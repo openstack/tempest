@@ -55,7 +55,6 @@ class TestDynamicCredentialProvider(base.TestCase):
     users_client = v2_users_client
     token_client_class = token_client.TokenClient
     fake_response = fake_identity._fake_v2_response
-    assign_role_on_project = 'create_user_role_on_project'
     tenants_client_class = tenants_client.TenantsClient
     delete_tenant = 'delete_tenant'
 
@@ -125,7 +124,7 @@ class TestDynamicCredentialProvider(base.TestCase):
     def _mock_assign_user_role(self):
         tenant_fix = self.useFixture(mockpatch.PatchObject(
             self.roles_client.RolesClient,
-            self.assign_role_on_project,
+            'create_user_role_on_project',
             return_value=(rest_client.ResponseBody
                           (200, {}))))
         return tenant_fix
@@ -198,11 +197,11 @@ class TestDynamicCredentialProvider(base.TestCase):
         self._mock_tenant_create('1234', 'fake_admin_tenant')
 
         user_mock = mock.patch.object(self.roles_client.RolesClient,
-                                      self.assign_role_on_project)
+                                      'create_user_role_on_project')
         user_mock.start()
         self.addCleanup(user_mock.stop)
         with mock.patch.object(self.roles_client.RolesClient,
-                               self.assign_role_on_project) as user_mock:
+                               'create_user_role_on_project') as user_mock:
             admin_creds = creds.get_admin_creds()
         user_mock.assert_has_calls([
             mock.call('1234', '1234', '1234')])
@@ -221,11 +220,11 @@ class TestDynamicCredentialProvider(base.TestCase):
         self._mock_tenant_create('1234', 'fake_role_tenant')
 
         user_mock = mock.patch.object(self.roles_client.RolesClient,
-                                      self.assign_role_on_project)
+                                      'create_user_role_on_project')
         user_mock.start()
         self.addCleanup(user_mock.stop)
         with mock.patch.object(self.roles_client.RolesClient,
-                               self.assign_role_on_project) as user_mock:
+                               'create_user_role_on_project') as user_mock:
             role_creds = creds.get_creds_by_roles(
                 roles=['role1', 'role2'])
         calls = user_mock.mock_calls
@@ -612,7 +611,6 @@ class TestDynamicCredentialProviderV3(TestDynamicCredentialProvider):
     users_client = v3_users_client
     token_client_class = token_client.V3TokenClient
     fake_response = fake_identity._fake_v3_response
-    assign_role_on_project = 'assign_user_role_on_project'
     tenants_client_class = tenants_client.ProjectsClient
     delete_tenant = 'delete_project'
 
@@ -624,7 +622,7 @@ class TestDynamicCredentialProviderV3(TestDynamicCredentialProvider):
             return_value=dict(domains=[dict(id='default',
                                             name='Default')])))
         self.patchobject(self.roles_client.RolesClient,
-                         'assign_user_role_on_domain')
+                         'create_user_role_on_domain')
 
     def _mock_list_ec2_credentials(self, user_id, tenant_id):
         pass
