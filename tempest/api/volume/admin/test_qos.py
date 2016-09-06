@@ -14,6 +14,7 @@
 
 from tempest.api.volume import base
 from tempest.common.utils import data_utils as utils
+from tempest.common import waiters
 from tempest import test
 
 
@@ -119,7 +120,9 @@ class QosSpecsV2TestJSON(base.BaseVolumeAdminTest):
         self.admin_volume_qos_client.unset_qos_key(self.created_qos['id'],
                                                    keys)
         operation = 'qos-key-unset'
-        self.wait_for_qos_operations(self.created_qos['id'], operation, keys)
+        waiters.wait_for_qos_operations(self.admin_volume_qos_client,
+                                        self.created_qos['id'],
+                                        operation, keys)
         body = self.admin_volume_qos_client.show_qos(
             self.created_qos['id'])['qos_specs']
         self.assertNotIn(keys[0], body['specs'])
@@ -153,8 +156,9 @@ class QosSpecsV2TestJSON(base.BaseVolumeAdminTest):
         self.admin_volume_qos_client.disassociate_qos(
             self.created_qos['id'], vol_type[0]['id'])
         operation = 'disassociate'
-        self.wait_for_qos_operations(self.created_qos['id'],
-                                     operation, vol_type[0]['id'])
+        waiters.wait_for_qos_operations(self.admin_volume_qos_client,
+                                        self.created_qos['id'], operation,
+                                        vol_type[0]['id'])
         associations = self._test_get_association_qos()
         self.assertNotIn(vol_type[0]['id'], associations)
 
@@ -162,7 +166,8 @@ class QosSpecsV2TestJSON(base.BaseVolumeAdminTest):
         self.admin_volume_qos_client.disassociate_all_qos(
             self.created_qos['id'])
         operation = 'disassociate-all'
-        self.wait_for_qos_operations(self.created_qos['id'], operation)
+        waiters.wait_for_qos_operations(self.admin_volume_qos_client,
+                                        self.created_qos['id'], operation)
         associations = self._test_get_association_qos()
         self.assertEmpty(associations)
 
