@@ -187,7 +187,6 @@ class AttachInterfacesTestJSON(base.BaseV2ComputeTest):
         # NOTE(danms): delete not the first or last, but one in the middle
         iface = ifs[1]
         self.client.delete_interface(server['id'], iface['port_id'])
-        time.sleep(5)
         _ifs = (self.client.list_interfaces(server['id'])
                 ['interfaceAttachments'])
         start = int(time.time())
