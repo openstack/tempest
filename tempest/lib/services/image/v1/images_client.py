@@ -61,8 +61,9 @@ class ImagesClient(rest_client.RestClient):
     def create_image(self, data=None, headers=None):
         """Create an image.
 
-        Available params: http://developer.openstack.org/
-                          api-ref-image-v1.html#createImage-v1
+        For a full list of available parameters, please refer to the official
+        API reference:
+        http://developer.openstack.org/api-ref-image-v1.html#createImage-v1
         """
         if headers is None:
             headers = {}
@@ -78,8 +79,9 @@ class ImagesClient(rest_client.RestClient):
     def update_image(self, image_id, data=None, headers=None):
         """Update an image.
 
-        Available params: http://developer.openstack.org/
-                          api-ref-image-v1.html#updateImage-v1
+        For a full list of available parameters, please refer to the official
+        API reference:
+        http://developer.openstack.org/api-ref-image-v1.html#updateImage-v1
         """
         if headers is None:
             headers = {}
@@ -102,8 +104,9 @@ class ImagesClient(rest_client.RestClient):
     def list_images(self, detail=False, **kwargs):
         """Return a list of all images filtered by input parameters.
 
-        Available params: see http://developer.openstack.org/
-                              api-ref-image-v1.html#listImage-v1
+        For a full list of available parameters, please refer to the official
+        API reference:
+        http://developer.openstack.org/api-ref/image/v1/#list-images
 
         Most parameters except the following are passed to the API without
         any changes.

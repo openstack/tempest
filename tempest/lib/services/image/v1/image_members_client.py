@@ -29,8 +29,9 @@ class ImageMembersClient(rest_client.RestClient):
     def list_shared_images(self, tenant_id):
         """List image memberships for the given tenant.
 
-        Available params: see http://developer.openstack.org/
-                              api-ref-image-v1.html#listSharedImages-v1
+        For a full list of available parameters, please refer to the official
+        API reference:
+        http://developer.openstack.org/api-ref/image/v1/#list-shared-images
         """
 
         url = 'shared-images/%s' % tenant_id
@@ -42,8 +43,9 @@ class ImageMembersClient(rest_client.RestClient):
     def create_image_member(self, image_id, member_id, **kwargs):
         """Add a member to an image.
 
-        Available params: see http://developer.openstack.org/
-                              api-ref-image-v1.html#addMember-v1
+        For a full list of available parameters, please refer to the official
+        API reference:
+        http://developer.openstack.org/api-ref/image/v1/#add-member-to-image
         """
         url = 'images/%s/members/%s' % (image_id, member_id)
         body = json.dumps({'member': kwargs})
@@ -54,8 +56,9 @@ class ImageMembersClient(rest_client.RestClient):
     def delete_image_member(self, image_id, member_id):
         """Removes a membership from the image.
 
-        Available params: see http://developer.openstack.org/
-                              api-ref-image-v1.html#removeMember-v1
+        For a full list of available parameters, please refer to the official
+        API reference:
+        http://developer.openstack.org/api-ref/image/v1/#remove-member
         """
         url = 'images/%s/members/%s' % (image_id, member_id)
         resp, __ = self.delete(url)
