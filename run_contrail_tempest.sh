@@ -106,12 +106,16 @@ function apply_patches {
   git apply contrail/bug_1604923.patch
 }
 
-mv /etc/apt/sources.list /etc/apt/sources.list_tempest
-cp /root/tempest/sources.list /etc/apt/sources.list
+echo "###### Ubuntu Main Repos
+deb http://archive.ubuntu.com/ubuntu/ trusty main restricted universe
+###### Ubuntu Update Repos
+deb http://archive.ubuntu.com/ubuntu/ trusty-updates main restricted universe
+" >& /etc/apt/sources.list.d/contrail-tempest.list
+
 apt-get update
 sudo apt-get install -y git sshpass gcc libxml2-dev libxslt-dev python-dev libffi-dev libssl-dev || exit 1
 pip install virtualenv
-mv /etc/apt/sources.list_tempest /etc/apt/sources.list
+rm /etc/apt/sources.list.d/contrail-tempest.list
 
 if [ $never_venv -eq 0 ]
 then
