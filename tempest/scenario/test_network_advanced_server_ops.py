@@ -58,7 +58,7 @@ class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
             security_groups = [{'name': security_group['name']}]
         network, subnet, router = self.create_networks()
         public_network_id = CONF.network.public_network_id
-        server_name = data_utils.rand_name('server')
+        server_name = data_utils.rand_name(self.__class__.__name__ + '-server')
         server = self.create_server(
             name=server_name,
             networks=[{'uuid': network['id']}],

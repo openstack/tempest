@@ -27,7 +27,7 @@ class ServerCreateDestroyTest(stressaction.StressAction):
         self.flavor = CONF.compute.flavor_ref
 
     def run(self):
-        name = data_utils.rand_name("instance")
+        name = data_utils.rand_name(self.__class__.__name__ + "-instance")
         self.logger.info("creating %s" % name)
         server = self.manager.servers_client.create_server(
             name=name, imageRef=self.image, flavorRef=self.flavor)['server']
