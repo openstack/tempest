@@ -19,8 +19,8 @@ class MeteringLabelsClient(base.BaseNetworkClient):
         """Creates an L3 metering label.
 
         Available params: see http://developer.openstack.org/
-                              api-ref-networking-v2-ext.html#
-                              createMeteringLabel
+                              api-ref/networking/v2/index.html#
+                              create-metering-label
         """
         uri = '/metering/metering-labels'
         post_data = {'metering_label': kwargs}
@@ -30,7 +30,8 @@ class MeteringLabelsClient(base.BaseNetworkClient):
         """Shows details for a metering label.
 
         Available params: see http://developer.openstack.org/
-                              api-ref-networking-v2-ext.html#showMeteringLabel
+                              api-ref/networking/v2/index.html#
+                              show-metering-label-details
         """
         uri = '/metering/metering-labels/%s' % metering_label_id
         return self.show_resource(uri, **fields)
@@ -39,8 +40,8 @@ class MeteringLabelsClient(base.BaseNetworkClient):
         """Deletes an L3 metering label.
 
         Available params: see http://developer.openstack.org/
-                              api-ref-networking-v2-ext.html#
-                              deleteMeteringLabel
+                              api-ref/networking/v2/index.html#
+                              delete-metering-label
         """
         uri = '/metering/metering-labels/%s' % metering_label_id
         return self.delete_resource(uri)
@@ -49,8 +50,8 @@ class MeteringLabelsClient(base.BaseNetworkClient):
         """Lists all L3 metering labels that belong to the tenant.
 
         Available params: see http://developer.openstack.org/
-                              api-ref-networking-v2-ext.html#
-                              listMeteringLabels
+                              api-ref/networking/v2/index.html#
+                              list-metering-labels
         """
         uri = '/metering/metering-labels'
         return self.list_resources(uri, **filters)
