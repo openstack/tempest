@@ -20,7 +20,7 @@ class PortsClient(base.BaseNetworkClient):
         """Creates a port on a network.
 
         Available params: see http://developer.openstack.org/
-                              api-ref-networking-v2.html#createPort
+                              api-ref/networking/v2/index.html#create-port
         """
         uri = '/ports'
         post_data = {'port': kwargs}
@@ -30,7 +30,7 @@ class PortsClient(base.BaseNetworkClient):
         """Updates a port.
 
         Available params: see http://developer.openstack.org/
-                              api-ref-networking-v2.html#updatePort
+                              api-ref/networking/v2/index.html#update-port
         """
         uri = '/ports/%s' % port_id
         post_data = {'port': kwargs}
@@ -40,7 +40,7 @@ class PortsClient(base.BaseNetworkClient):
         """Shows details for a port.
 
         Available params: see http://developer.openstack.org/
-                              api-ref-networking-v2.html#showPort
+                              api-ref/networking/v2/index.html#show-port-details
         """
         uri = '/ports/%s' % port_id
         return self.show_resource(uri, **fields)
@@ -49,7 +49,7 @@ class PortsClient(base.BaseNetworkClient):
         """Deletes a port.
 
         Available params: see http://developer.openstack.org/
-                              api-ref-networking-v2.html#removePort
+                              api-ref/networking/v2/index.html#delete-port
         """
         uri = '/ports/%s' % port_id
         return self.delete_resource(uri)
@@ -58,7 +58,7 @@ class PortsClient(base.BaseNetworkClient):
         """Lists ports to which the tenant has access.
 
         Available params: see http://developer.openstack.org/
-                              api-ref-networking-v2.html#listPorts
+                              api-ref/networking/v2/index.html#list-ports
         """
         uri = '/ports'
         return self.list_resources(uri, **filters)
@@ -67,7 +67,7 @@ class PortsClient(base.BaseNetworkClient):
         """Create multiple ports in a single request.
 
         Available params: see http://developer.openstack.org/
-                              api-ref-networking-v2.html#bulkCreatePorts
+                              api-ref/networking/v2/index.html?expanded=#bulk-create-ports
         """
         uri = '/ports'
         return self.create_resource(uri, kwargs)

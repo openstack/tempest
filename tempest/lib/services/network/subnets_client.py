@@ -19,7 +19,7 @@ class SubnetsClient(base.BaseNetworkClient):
         """Creates a subnet on a network.
 
         Available params: see http://developer.openstack.org/
-                              api-ref-networking-v2.html#createSubnet
+                              api-ref/networking/v2/index.html#create-subnet
         """
         uri = '/subnets'
         post_data = {'subnet': kwargs}
@@ -29,7 +29,7 @@ class SubnetsClient(base.BaseNetworkClient):
         """Updates a subnet.
 
         Available params: see http://developer.openstack.org/
-                              api-ref-networking-v2.html#updateSubnet
+                              api-ref/networking/v2/index.html#update-subnet
         """
         uri = '/subnets/%s' % subnet_id
         post_data = {'subnet': kwargs}
@@ -39,7 +39,7 @@ class SubnetsClient(base.BaseNetworkClient):
         """Shows details for a subnet.
 
         Available params: see http://developer.openstack.org/
-                              api-ref-networking-v2.html#showSubnet
+                              api-ref/networking/v2/index.html#show-subnet-details
         """
         uri = '/subnets/%s' % subnet_id
         return self.show_resource(uri, **fields)
@@ -52,7 +52,7 @@ class SubnetsClient(base.BaseNetworkClient):
         """Lists subnets to which the tenant has access.
 
         Available params: see http://developer.openstack.org/
-                              api-ref-networking-v2.html#listSubnets
+                              api-ref/networking/v2/index.html#list-subnets
         """
         uri = '/subnets'
         return self.list_resources(uri, **filters)
@@ -61,7 +61,7 @@ class SubnetsClient(base.BaseNetworkClient):
         """Create multiple subnets in a single request.
 
         Available params: see http://developer.openstack.org/
-                              api-ref-networking-v2.html#bulkCreateSubnet
+                              api-ref/networking/v2/index.html#bulk-create-subnet
         """
         uri = '/subnets'
         return self.create_resource(uri, kwargs)
