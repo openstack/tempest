@@ -13,11 +13,12 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from oslo_log import log as logging
 
 from tempest.api.compute import base
 from tempest.common.utils import data_utils
+from tempest.common import waiters
 from tempest import config
-from tempest.openstack.common import log as logging
 from tempest import test
 
 CONF = config.CONF
@@ -37,8 +38,8 @@ class ImagesOneServerTestJSON(base.BaseV2ComputeTest):
         super(ImagesOneServerTestJSON, self).setUp()
         # Check if the server is in a clean state after test
         try:
-            self.servers_client.wait_for_server_status(self.server_id,
-                                                       'ACTIVE')
+            waiters.wait_for_server_status(self.servers_client,
+                                           self.server_id, 'ACTIVE')
         except Exception:
             LOG.exception('server %s timed out to become ACTIVE. rebuilding'
                           % self.server_id)
@@ -47,41 +48,49 @@ class ImagesOneServerTestJSON(base.BaseV2ComputeTest):
             self.__class__.server_id = self.rebuild_server(self.server_id)
 
     @classmethod
-    def setUpClass(cls):
-        super(ImagesOneServerTestJSON, cls).setUpClass()
-        cls.client = cls.images_client
+    def skip_checks(cls):
+        super(ImagesOneServerTestJSON, cls).skip_checks()
         if not CONF.service_available.glance:
             skip_msg = ("%s skipped as glance is not available" % cls.__name__)
             raise cls.skipException(skip_msg)
 
-        try:
-            resp, server = cls.create_test_server(wait_until='ACTIVE')
-            cls.server_id = server['id']
-        except Exception:
-            cls.tearDownClass()
-            raise
+        if not CONF.compute_feature_enabled.snapshot:
+            skip_msg = ("%s skipped as instance snapshotting is not supported"
+                        % cls.__name__)
+            raise cls.skipException(skip_msg)
+
+    @classmethod
+    def setup_clients(cls):
+        super(ImagesOneServerTestJSON, cls).setup_clients()
+        cls.client = cls.compute_images_client
+
+    @classmethod
+    def resource_setup(cls):
+        super(ImagesOneServerTestJSON, cls).resource_setup()
+        server = cls.create_test_server(wait_until='ACTIVE')
+        cls.server_id = server['id']
 
     def _get_default_flavor_disk_size(self, flavor_id):
-        resp, flavor = self.flavors_client.get_flavor_details(flavor_id)
+        flavor = self.flavors_client.show_flavor(flavor_id)['flavor']
         return flavor['disk']
 
-    @test.attr(type='smoke')
+    @test.idempotent_id('3731d080-d4c5-4872-b41a-64d0d0021314')
     def test_create_delete_image(self):
 
         # Create a new image
         name = data_utils.rand_name('image')
         meta = {'image_type': 'test'}
-        resp, body = self.client.create_image(self.server_id, name, meta)
-        self.assertEqual(202, resp.status)
-        image_id = data_utils.parse_image_id(resp['location'])
-        self.client.wait_for_image_status(image_id, 'ACTIVE')
+        body = self.client.create_image(self.server_id, name=name,
+                                        metadata=meta)
+        image_id = data_utils.parse_image_id(body.response['location'])
+        waiters.wait_for_image_status(self.client, image_id, 'ACTIVE')
 
         # Verify the image was created correctly
-        resp, image = self.client.get_image(image_id)
+        image = self.client.show_image(image_id)['image']
         self.assertEqual(name, image['name'])
         self.assertEqual('test', image['metadata']['image_type'])
 
-        resp, original_image = self.client.get_image(self.image_ref)
+        original_image = self.client.show_image(self.image_ref)['image']
 
         # Verify minRAM is the same as the original image
         self.assertEqual(image['minRam'], original_image['minRam'])
@@ -92,24 +101,18 @@ class ImagesOneServerTestJSON(base.BaseV2ComputeTest):
                       (str(original_image['minDisk']), str(flavor_disk_size)))
 
         # Verify the image was deleted correctly
-        resp, body = self.client.delete_image(image_id)
-        self.assertEqual('204', resp['status'])
+        self.client.delete_image(image_id)
         self.client.wait_for_resource_deletion(image_id)
 
-    @test.attr(type=['gate'])
+    @test.idempotent_id('3b7c6fe4-dfe7-477c-9243-b06359db51e6')
     def test_create_image_specify_multibyte_character_image_name(self):
-        if self.__class__._interface == "xml":
-            # NOTE(sdague): not entirely accurage, but we'd need a ton of work
-            # in our XML client to make this good
-            raise self.skipException("Not testable in XML")
         # prefix character is:
         # http://www.fileformat.info/info/unicode/char/1F4A9/index.htm
-        utf8_name = data_utils.rand_name(u'\xF0\x9F\x92\xA9')
-        resp, body = self.client.create_image(self.server_id, utf8_name)
-        image_id = data_utils.parse_image_id(resp['location'])
+
+        # We use a string with 3 byte utf-8 character due to bug
+        # #1370954 in glance which will 500 if mysql is used as the
+        # backend and it attempts to store a 4 byte utf-8 character
+        utf8_name = data_utils.rand_name('\xe2\x82\xa1')
+        body = self.client.create_image(self.server_id, name=utf8_name)
+        image_id = data_utils.parse_image_id(body.response['location'])
         self.addCleanup(self.client.delete_image, image_id)
-        self.assertEqual('202', resp['status'])
-
-
-class ImagesOneServerTestXML(ImagesOneServerTestJSON):
-    _interface = 'xml'

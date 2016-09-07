@@ -13,56 +13,50 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest import auth
+from oslo_log import log as logging
+
+from tempest import clients as tempest_clients
 from tempest import config
-from tempest import exceptions
+from tempest.lib.services import clients
 
 CONF = config.CONF
+LOG = logging.getLogger(__name__)
 
 
-class Manager(object):
+class Manager(clients.ServiceClients):
+    """Service client manager class for backward compatibility
 
+    The former manager.Manager is not a stable interface in Tempest,
+    nonetheless it is consumed by a number of plugins already. This class
+    exists to provide some grace time for the move to tempest.lib.
     """
-    Base manager class
 
-    Manager objects are responsible for providing a configuration object
-    and a client object for a test case to use in performing actions.
+    def __init__(self, credentials, scope='project'):
+        msg = ("tempest.manager.Manager is not a stable interface and as such "
+               "it should not imported directly. It will be removed as "
+               "soon as the client manager becomes available in tempest.lib.")
+        LOG.warning(msg)
+        dscv = CONF.identity.disable_ssl_certificate_validation
+        _, uri = tempest_clients.get_auth_provider_class(credentials)
+        super(Manager, self).__init__(
+            credentials=credentials, scope=scope,
+            identity_uri=uri,
+            disable_ssl_certificate_validation=dscv,
+            ca_certs=CONF.identity.ca_certificates_file,
+            trace_requests=CONF.debug.trace_requests)
+
+
+def get_auth_provider(credentials, pre_auth=False, scope='project'):
+    """Shim to get_auth_provider in clients.py
+
+    get_auth_provider used to be hosted in this module, but it has been
+    moved to clients.py now as a more permanent location.
+    This module will be removed eventually, and this shim is only
+    maintained for the benefit of plugins already consuming this interface.
     """
-
-    def __init__(self, credentials=None):
-        """
-        We allow overriding of the credentials used within the various
-        client classes managed by the Manager object. Left as None, the
-        standard username/password/tenant_name[/domain_name] is used.
-
-        :param credentials: Override of the credentials
-        """
-        self.auth_version = CONF.identity.auth_version
-        if credentials is None:
-            self.credentials = auth.get_default_credentials('user')
-        else:
-            self.credentials = credentials
-        # Check if passed or default credentials are valid
-        if not self.credentials.is_valid():
-            raise exceptions.InvalidCredentials()
-        # Creates an auth provider for the credentials
-        self.auth_provider = self.get_auth_provider(self.credentials)
-        # FIXME(andreaf) unused
-        self.client_attr_names = []
-
-    @classmethod
-    def get_auth_provider_class(cls, auth_version):
-        if auth_version == 'v2':
-            return auth.KeystoneV2AuthProvider
-        else:
-            return auth.KeystoneV3AuthProvider
-
-    def get_auth_provider(self, credentials):
-        if credentials is None:
-            raise exceptions.InvalidCredentials(
-                'Credentials must be specified')
-        auth_provider_class = self.get_auth_provider_class(self.auth_version)
-        return auth_provider_class(
-            client_type=getattr(self, 'client_type', None),
-            interface=getattr(self, 'interface', None),
-            credentials=credentials)
+    msg = ("tempest.manager.get_auth_provider is not a stable interface and "
+           "as such it should not imported directly. It will be removed as "
+           "the client manager becomes available in tempest.lib.")
+    LOG.warning(msg)
+    return tempest_clients.get_auth_provider(credentials=credentials,
+                                             pre_auth=pre_auth, scope=scope)

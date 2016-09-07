@@ -1,7 +1,5 @@
 # Copyright (C) 2013 eNovance SAS <licensing@enovance.com>
 #
-# Author: Christian Schwede <christian.schwede@enovance.com>
-#
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
 # a copy of the License at
@@ -17,7 +15,8 @@
 import hashlib
 import hmac
 import time
-import urlparse
+
+from six.moves.urllib import parse as urlparse
 
 from tempest.api.object_storage import base
 from tempest.common.utils import data_utils
@@ -30,14 +29,10 @@ class ObjectFormPostTest(base.BaseObjectTest):
     containers = []
 
     @classmethod
-    @test.safe_setup
-    def setUpClass(cls):
-        super(ObjectFormPostTest, cls).setUpClass()
-        cls.container_name = data_utils.rand_name(name='TestContainer')
+    def resource_setup(cls):
+        super(ObjectFormPostTest, cls).resource_setup()
+        cls.container_name = cls.create_container()
         cls.object_name = data_utils.rand_name(name='ObjectTemp')
-
-        cls.container_client.create_container(cls.container_name)
-        cls.containers = [cls.container_name]
 
         cls.key = 'Meta'
         cls.metadata = {'Temp-URL-Key': cls.key}
@@ -56,11 +51,10 @@ class ObjectFormPostTest(base.BaseObjectTest):
             self.key)
 
     @classmethod
-    def tearDownClass(cls):
+    def resource_cleanup(cls):
         cls.account_client.delete_account_metadata(metadata=cls.metadata)
-        cls.delete_containers(cls.containers)
-        cls.data.teardown_all()
-        super(ObjectFormPostTest, cls).tearDownClass()
+        cls.delete_containers()
+        super(ObjectFormPostTest, cls).resource_cleanup()
 
     def get_multipart_form(self, expires=600):
         path = "%s/%s/%s" % (
@@ -108,8 +102,8 @@ class ObjectFormPostTest(base.BaseObjectTest):
         content_type = 'multipart/form-data; boundary=%s' % boundary
         return body, content_type
 
+    @test.idempotent_id('80fac02b-6e54-4f7b-be0d-a965b5cbef76')
     @test.requires_ext(extension='formpost', service='object')
-    @test.attr(type='gate')
     def test_post_object_using_form(self):
         body, content_type = self.get_multipart_form()
 
@@ -119,12 +113,10 @@ class ObjectFormPostTest(base.BaseObjectTest):
         url = "%s/%s" % (self.container_name, self.object_name)
 
         resp, body = self.object_client.post(url, body, headers=headers)
-        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
         self.assertHeaders(resp, "Object", "POST")
 
         # Ensure object is available
         resp, body = self.object_client.get("%s/%s%s" % (
             self.container_name, self.object_name, "testfile"))
-        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
         self.assertHeaders(resp, "Object", "GET")
         self.assertEqual(body, "hello world")

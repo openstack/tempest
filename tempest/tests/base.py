@@ -13,22 +13,13 @@
 #    under the License.
 
 import mock
-
 from oslotest import base
-from oslotest import moxstubout
 
 
 class TestCase(base.BaseTestCase):
 
-    def setUp(self):
-        super(TestCase, self).setUp()
-        mox_fixture = self.useFixture(moxstubout.MoxStubout())
-        self.mox = mox_fixture.mox
-        self.stubs = mox_fixture.stubs
-
     def patch(self, target, **kwargs):
-        """
-        Returns a started `mock.patch` object for the supplied target.
+        """Returns a started `mock.patch` object for the supplied target.
 
         The caller may then call the returned patcher to create a mock object.
 
@@ -41,6 +32,18 @@ class TestCase(base.BaseTestCase):
                          for details.
         """
         p = mock.patch(target, **kwargs)
+        m = p.start()
+        self.addCleanup(p.stop)
+        return m
+
+    def patchobject(self, target, attribute, new=mock.DEFAULT):
+        """Convenient wrapper around `mock.patch.object`
+
+        Returns a started mock that will be automatically stopped after the
+        test ran.
+        """
+
+        p = mock.patch.object(target, attribute, new)
         m = p.start()
         self.addCleanup(p.stop)
         return m

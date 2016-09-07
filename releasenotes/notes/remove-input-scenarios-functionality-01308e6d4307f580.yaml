@@ -1,0 +1,11 @@
+---
+upgrade:
+  - The input scenarios functionality no longer exists in tempest. This caused
+    a large number of issues for limited benefit and was only used by a single
+    test, test_server_basic_ops. If you were using this functionality you'll
+    now have to do it manually with a script and/or tempest workspaces
+deprecations:
+  - All the options in the input-scenario group are now deprecated. These were
+    only used in tree by the now removed input scenarios functionality in
+    test_server_basic_ops. They were only deprecated because there could be
+    external consumers via plugins. They will be removed during the Ocata cycle.

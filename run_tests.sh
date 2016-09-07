@@ -17,9 +17,47 @@ function usage {
   echo "  -- [TESTROPTIONS]        After the first '--' you can pass arbitrary arguments to testr "
 }
 
+function deprecation_warning {
+  cat <<EOF
+-------------------------------------------------------------------------
+WARNING: run_tests.sh is deprecated and this script will be removed after
+the Newton release. All tests should be run through testr/ostestr or tox.
+
+To run style checks:
+
+ tox -e pep8
+
+To run python 2.7 unit tests
+
+ tox -e py27
+
+To run unit tests and generate coverage report
+
+ tox -e cover
+
+To run a subset of any of these tests:
+
+ tox -e py27 someregex
+
+ i.e.: tox -e py27 test_servers
+
+Additional tox targets are available in tox.ini. For more information
+see:
+http://docs.openstack.org/project-team-guide/project-setup/python.html
+
+NOTE: if you want to use testr to run tests, you can instead use:
+
+ OS_TEST_PATH=./tempest/tests testr run
+
+Documentation on using testr directly can be found at
+http://testrepository.readthedocs.org/en/latest/MANUAL.html
+-------------------------------------------------------------------------
+EOF
+}
+
 testrargs=""
 just_pep8=0
-venv=.venv
+venv=${VENV:-.venv}
 with_venv=tools/with_venv.sh
 serial=0
 always_venv=0
@@ -31,6 +69,8 @@ coverage=0
 wrapper=""
 config_file=""
 update=0
+
+deprecation_warning
 
 if ! options=$(getopt -o VNnfuctphd -l virtual-env,no-virtual-env,no-site-packages,force,update,serial,coverage,pep8,help,debug -- "$@")
 then
@@ -90,9 +130,9 @@ function run_tests {
   fi
 
   if [ $serial -eq 1 ]; then
-      ${wrapper} testr run --subunit $testrargs | ${wrapper} subunit-2to1 | ${wrapper} tools/colorizer.py
+      ${wrapper} testr run --subunit $testrargs | ${wrapper} subunit-trace -n -f
   else
-      ${wrapper} testr run --parallel --subunit $testrargs | ${wrapper} subunit-2to1 | ${wrapper} tools/colorizer.py
+      ${wrapper} testr run --parallel --subunit $testrargs | ${wrapper} subunit-trace -n -f
   fi
 }
 
@@ -103,8 +143,6 @@ function run_pep8 {
       echo "Running flake8 without virtual env may miss OpenStack HACKING detection" >&2
   fi
   ${wrapper} flake8
-  export MODULEPATH=tempest.common.generate_sample_tempest
-  ${wrapper} tools/config/check_uptodate.sh
 }
 
 if [ $never_venv -eq 0 ]
@@ -116,22 +154,25 @@ then
   fi
   if [ $update -eq 1 ]; then
       echo "Updating virtualenv..."
-      python tools/install_venv.py $installvenvopts
+      virtualenv $installvenvopts $venv
+      $venv/bin/pip install -U -r requirements.txt -r test-requirements.txt
   fi
   if [ -e ${venv} ]; then
     wrapper="${with_venv}"
   else
     if [ $always_venv -eq 1 ]; then
       # Automatically install the virtualenv
-      python tools/install_venv.py $installvenvopts
+      virtualenv $installvenvopts $venv
       wrapper="${with_venv}"
+      ${wrapper} pip install -U -r requirements.txt -r test-requirements.txt
     else
       echo -e "No virtual environment found...create one? (Y/n) \c"
       read use_ve
       if [ "x$use_ve" = "xY" -o "x$use_ve" = "x" -o "x$use_ve" = "xy" ]; then
         # Install the virtualenv and run the test suite in it
-        python tools/install_venv.py $installvenvopts
+        virtualenv $installvenvopts $venv
         wrapper=${with_venv}
+        ${wrapper} pip install -U -r requirements.txt -r test-requirements.txt
       fi
     fi
   fi

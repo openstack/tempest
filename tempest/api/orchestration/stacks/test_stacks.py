@@ -12,27 +12,20 @@
 
 from tempest.api.orchestration import base
 from tempest.common.utils import data_utils
-from tempest.openstack.common import log as logging
 from tempest import test
-
-
-LOG = logging.getLogger(__name__)
 
 
 class StacksTestJSON(base.BaseOrchestrationTest):
     empty_template = "HeatTemplateFormatVersion: '2012-12-12'\n"
 
-    @classmethod
-    def setUpClass(cls):
-        super(StacksTestJSON, cls).setUpClass()
-
     @test.attr(type='smoke')
+    @test.idempotent_id('d35d628c-07f6-4674-85a1-74db9919e986')
     def test_stack_list_responds(self):
-        resp, stacks = self.client.list_stacks()
-        self.assertEqual('200', resp['status'])
+        stacks = self.client.list_stacks()['stacks']
         self.assertIsInstance(stacks, list)
 
     @test.attr(type='smoke')
+    @test.idempotent_id('10498bd5-a83e-4b62-a817-ce24afe938fe')
     def test_stack_crud_no_resources(self):
         stack_name = data_utils.rand_name('heat')
 
@@ -45,22 +38,22 @@ class StacksTestJSON(base.BaseOrchestrationTest):
         self.client.wait_for_stack_status(stack_identifier, 'CREATE_COMPLETE')
 
         # check for stack in list
-        resp, stacks = self.client.list_stacks()
+        stacks = self.client.list_stacks()['stacks']
         list_ids = list([stack['id'] for stack in stacks])
         self.assertIn(stack_id, list_ids)
 
         # fetch the stack
-        resp, stack = self.client.get_stack(stack_identifier)
+        stack = self.client.show_stack(stack_identifier)['stack']
         self.assertEqual('CREATE_COMPLETE', stack['stack_status'])
 
         # fetch the stack by name
-        resp, stack = self.client.get_stack(stack_name)
+        stack = self.client.show_stack(stack_name)['stack']
         self.assertEqual('CREATE_COMPLETE', stack['stack_status'])
 
         # fetch the stack by id
-        resp, stack = self.client.get_stack(stack_id)
+        stack = self.client.show_stack(stack_id)['stack']
         self.assertEqual('CREATE_COMPLETE', stack['stack_status'])
 
         # delete the stack
-        resp = self.client.delete_stack(stack_identifier)
-        self.assertEqual('204', resp[0]['status'])
+        self.client.delete_stack(stack_identifier)
+        self.client.wait_for_stack_status(stack_identifier, 'DELETE_COMPLETE')

@@ -1,0 +1,12 @@
+---
+upgrade:
+  - The location on disk that the *tempest init* command looks for has changed.
+    Previously it would attempt to use python packaging's data files to guess
+    where setuptools/distutils were installing data files, which was incredibly
+    unreliable and depended on how you installed tempest and which versions of
+    setuptools, distutils, and python you had installed. Instead, now it will
+    use either /etc/tempest, $XDG_CONFIG_PATH/.config/tempest, or
+    ~/.tempest/etc (attempted in that order). If none of these exist it will
+    create an empty ~/.tempest/etc directory. If you were relying on the
+    previous behavior and none of these directories were being used you will
+    need to move the files to live in one of these directories.

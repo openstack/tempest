@@ -19,76 +19,64 @@ from tempest import test
 
 
 class CredentialsTestJSON(base.BaseIdentityV3AdminTest):
-    _interface = 'json'
 
     @classmethod
-    @test.safe_setup
-    def setUpClass(cls):
-        super(CredentialsTestJSON, cls).setUpClass()
+    def resource_setup(cls):
+        super(CredentialsTestJSON, cls).resource_setup()
         cls.projects = list()
         cls.creds_list = [['project_id', 'user_id', 'id'],
                           ['access', 'secret']]
-        u_name = data_utils.rand_name('user-')
+        u_name = data_utils.rand_name('user')
         u_desc = '%s description' % u_name
         u_email = '%s@testmail.tm' % u_name
-        u_password = data_utils.rand_name('pass-')
+        u_password = data_utils.rand_password()
         for i in range(2):
-            resp, cls.project = cls.client.create_project(
-                data_utils.rand_name('project-'),
-                description=data_utils.rand_name('project-desc-'))
-            assert resp['status'] == '201', (
-                "Expected 201, but got: %s" % resp['status'])
+            cls.project = cls.projects_client.create_project(
+                data_utils.rand_name('project'),
+                description=data_utils.rand_name('project-desc'))['project']
             cls.projects.append(cls.project['id'])
 
-        resp, cls.user_body = cls.client.create_user(
-            u_name, description=u_desc, password=u_password,
-            email=u_email, project_id=cls.projects[0])
-        assert resp['status'] == '201', (
-            "Expected 201, but got: %s" % resp['status'])
+        cls.user_body = cls.users_client.create_user(
+            name=u_name, description=u_desc, password=u_password,
+            email=u_email, project_id=cls.projects[0])['user']
 
     @classmethod
-    def tearDownClass(cls):
-        resp, _ = cls.client.delete_user(cls.user_body['id'])
-        assert resp['status'] == '204', (
-            "Expected 204, but got: %s" % resp['status'])
+    def resource_cleanup(cls):
+        cls.users_client.delete_user(cls.user_body['id'])
         for p in cls.projects:
-            resp, _ = cls.client.delete_project(p)
-            assert resp['status'] == '204', (
-                "Expected 204, but got: %s" % resp['status'])
-        super(CredentialsTestJSON, cls).tearDownClass()
+            cls.projects_client.delete_project(p)
+        super(CredentialsTestJSON, cls).resource_cleanup()
 
     def _delete_credential(self, cred_id):
-        resp, body = self.creds_client.delete_credential(cred_id)
-        self.assertEqual(resp['status'], '204')
+        self.creds_client.delete_credential(cred_id)
 
     @test.attr(type='smoke')
+    @test.idempotent_id('7cd59bf9-bda4-4c72-9467-d21cab278355')
     def test_credentials_create_get_update_delete(self):
-        keys = [data_utils.rand_name('Access-'),
-                data_utils.rand_name('Secret-')]
-        resp, cred = self.creds_client.create_credential(
-            keys[0], keys[1], self.user_body['id'],
-            self.projects[0])
+        blob = '{"access": "%s", "secret": "%s"}' % (
+            data_utils.rand_name('Access'), data_utils.rand_name('Secret'))
+        cred = self.creds_client.create_credential(
+            user_id=self.user_body['id'], project_id=self.projects[0],
+            blob=blob, type='ec2')['credential']
         self.addCleanup(self._delete_credential, cred['id'])
-        self.assertEqual(resp['status'], '201')
         for value1 in self.creds_list[0]:
             self.assertIn(value1, cred)
         for value2 in self.creds_list[1]:
             self.assertIn(value2, cred['blob'])
 
-        new_keys = [data_utils.rand_name('NewAccess-'),
-                    data_utils.rand_name('NewSecret-')]
-        resp, update_body = self.creds_client.update_credential(
-            cred['id'], access_key=new_keys[0], secret_key=new_keys[1],
-            project_id=self.projects[1])
-        self.assertEqual(resp['status'], '200')
+        new_keys = [data_utils.rand_name('NewAccess'),
+                    data_utils.rand_name('NewSecret')]
+        blob = '{"access": "%s", "secret": "%s"}' % (new_keys[0], new_keys[1])
+        update_body = self.creds_client.update_credential(
+            cred['id'], blob=blob, project_id=self.projects[1],
+            type='ec2')['credential']
         self.assertEqual(cred['id'], update_body['id'])
         self.assertEqual(self.projects[1], update_body['project_id'])
         self.assertEqual(self.user_body['id'], update_body['user_id'])
         self.assertEqual(update_body['blob']['access'], new_keys[0])
         self.assertEqual(update_body['blob']['secret'], new_keys[1])
 
-        resp, get_body = self.creds_client.get_credential(cred['id'])
-        self.assertEqual(resp['status'], '200')
+        get_body = self.creds_client.show_credential(cred['id'])['credential']
         for value1 in self.creds_list[0]:
             self.assertEqual(update_body[value1],
                              get_body[value1])
@@ -96,22 +84,21 @@ class CredentialsTestJSON(base.BaseIdentityV3AdminTest):
             self.assertEqual(update_body['blob'][value2],
                              get_body['blob'][value2])
 
-    @test.attr(type='smoke')
+    @test.idempotent_id('13202c00-0021-42a1-88d4-81b44d448aab')
     def test_credentials_list_delete(self):
         created_cred_ids = list()
         fetched_cred_ids = list()
 
         for i in range(2):
-            resp, cred = self.creds_client.create_credential(
-                data_utils.rand_name('Access-'),
-                data_utils.rand_name('Secret-'),
-                self.user_body['id'], self.projects[0])
-            self.assertEqual(resp['status'], '201')
+            blob = '{"access": "%s", "secret": "%s"}' % (
+                data_utils.rand_name('Access'), data_utils.rand_name('Secret'))
+            cred = self.creds_client.create_credential(
+                user_id=self.user_body['id'], project_id=self.projects[0],
+                blob=blob, type='ec2')['credential']
             created_cred_ids.append(cred['id'])
             self.addCleanup(self._delete_credential, cred['id'])
 
-        resp, creds = self.creds_client.list_credentials()
-        self.assertEqual(resp['status'], '200')
+        creds = self.creds_client.list_credentials()['credentials']
 
         for i in creds:
             fetched_cred_ids.append(i['id'])
@@ -120,7 +107,3 @@ class CredentialsTestJSON(base.BaseIdentityV3AdminTest):
         self.assertEqual(0, len(missing_creds),
                          "Failed to find cred %s in fetched list" %
                          ', '.join(m_cred for m_cred in missing_creds))
-
-
-class CredentialsTestXML(CredentialsTestJSON):
-    _interface = 'xml'

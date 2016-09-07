@@ -1,6 +1,0 @@
-{
-    "name": "get-flavor-details",
-    "http-method": "GET",
-    "url": "flavors/%s",
-    "resources": ["flavor"]
-}

@@ -1,1 +1,0 @@
-../../../tempest/thirdparty/README.rst

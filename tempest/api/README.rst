@@ -1,3 +1,5 @@
+.. _api_field_guide:
+
 Tempest Field Guide to API tests
 ================================
 

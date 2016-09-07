@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 # Copyright (C) 2013 eNovance SAS <licensing@enovance.com>
 #
-# Author: Chmouel Boudjnah <chmouel@enovance.com>
-#
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
 # a copy of the License at
@@ -14,8 +12,8 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+
 from tempest.api.orchestration import base
-from tempest import clients
 from tempest.common.utils import data_utils
 from tempest import config
 from tempest import test
@@ -26,16 +24,30 @@ CONF = config.CONF
 
 class SwiftResourcesTestJSON(base.BaseOrchestrationTest):
     @classmethod
-    @test.safe_setup
-    def setUpClass(cls):
-        super(SwiftResourcesTestJSON, cls).setUpClass()
-        cls.stack_name = data_utils.rand_name('heat')
-        template = cls.load_template('swift_basic')
-        os = clients.Manager()
+    def skip_checks(cls):
+        super(SwiftResourcesTestJSON, cls).skip_checks()
         if not CONF.service_available.swift:
             raise cls.skipException("Swift support is required")
-        cls.account_client = os.account_client
-        cls.container_client = os.container_client
+
+    @classmethod
+    def setup_credentials(cls):
+        super(SwiftResourcesTestJSON, cls).setup_credentials()
+        stack_owner_role = CONF.orchestration.stack_owner_role
+        operator_role = CONF.object_storage.operator_role
+        cls.os = cls.get_client_manager(
+            roles=[stack_owner_role, operator_role])
+
+    @classmethod
+    def setup_clients(cls):
+        super(SwiftResourcesTestJSON, cls).setup_clients()
+        cls.account_client = cls.os.account_client
+        cls.container_client = cls.os.container_client
+
+    @classmethod
+    def resource_setup(cls):
+        super(SwiftResourcesTestJSON, cls).resource_setup()
+        cls.stack_name = data_utils.rand_name('heat')
+        template = cls.read_template('swift_basic')
         # create the stack
         cls.stack_identifier = cls.create_stack(
             cls.stack_name,
@@ -43,14 +55,19 @@ class SwiftResourcesTestJSON(base.BaseOrchestrationTest):
         cls.stack_id = cls.stack_identifier.split('/')[1]
         cls.client.wait_for_stack_status(cls.stack_id, 'CREATE_COMPLETE')
         cls.test_resources = {}
-        _, resources = cls.client.list_resources(cls.stack_identifier)
+        resources = (cls.client.list_resources(cls.stack_identifier)
+                     ['resources'])
         for resource in resources:
             cls.test_resources[resource['logical_resource_id']] = resource
 
+    @test.idempotent_id('1a6fe69e-4be4-4990-9a7a-84b6f18019cb')
     def test_created_resources(self):
         """Created stack should be in the list of existing stacks."""
-        resources = [('SwiftContainer', 'OS::Swift::Container'),
-                     ('SwiftContainerWebsite', 'OS::Swift::Container')]
+        swift_basic_template = self.load_template('swift_basic')
+        resources = [('SwiftContainer', swift_basic_template['resources'][
+                      'SwiftContainer']['type']),
+                     ('SwiftContainerWebsite', swift_basic_template[
+                      'resources']['SwiftContainerWebsite']['type'])]
         for resource_name, resource_type in resources:
             resource = self.test_resources.get(resource_name)
             self.assertIsInstance(resource, dict)
@@ -58,15 +75,18 @@ class SwiftResourcesTestJSON(base.BaseOrchestrationTest):
             self.assertEqual(resource_name, resource['logical_resource_id'])
             self.assertEqual('CREATE_COMPLETE', resource['resource_status'])
 
+    @test.idempotent_id('bd438b18-5494-4d5a-9ce6-d2a942ec5060')
+    @test.services('object_storage')
     def test_created_containers(self):
         params = {'format': 'json'}
-        resp, container_list = \
+        _, container_list = \
             self.account_client.list_account_containers(params=params)
-        self.assertEqual('200', resp['status'])
-        self.assertEqual(2, len(container_list))
-        for cont in container_list:
-            self.assertTrue(cont['name'].startswith(self.stack_name))
+        created_containers = [cont for cont in container_list
+                              if cont['name'].startswith(self.stack_name)]
+        self.assertEqual(2, len(created_containers))
 
+    @test.idempotent_id('73d0c093-9922-44a0-8b1d-1fc092dee367')
+    @test.services('object_storage')
     def test_acl(self):
         acl_headers = ('x-container-meta-web-index', 'x-container-read')
 
@@ -83,11 +103,12 @@ class SwiftResourcesTestJSON(base.BaseOrchestrationTest):
         for h in acl_headers:
             self.assertIn(h, headers)
 
+    @test.idempotent_id('fda06135-6777-4594-aefa-0f6107169698')
+    @test.services('object_storage')
     def test_metadata(self):
-        metadatas = {
-            "web-index": "index.html",
-            "web-error": "error.html"
-        }
+        swift_basic_template = self.load_template('swift_basic')
+        metadatas = swift_basic_template['resources']['SwiftContainerWebsite'][
+            'properties']['X-Container-Meta']
         swcont_website = self.test_resources.get(
             'SwiftContainerWebsite')['physical_resource_id']
         headers, _ = self.container_client.list_container_metadata(

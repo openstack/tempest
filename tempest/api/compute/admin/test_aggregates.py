@@ -13,93 +13,94 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import testtools
+
 from tempest.api.compute import base
 from tempest.common import tempest_fixtures as fixtures
 from tempest.common.utils import data_utils
-from tempest import exceptions
+from tempest.lib.common.utils import test_utils
 from tempest import test
 
 
 class AggregatesAdminTestJSON(base.BaseV2ComputeAdminTest):
-
-    """
-    Tests Aggregates API that require admin privileges
-    """
+    """Tests Aggregates API that require admin privileges"""
 
     _host_key = 'OS-EXT-SRV-ATTR:host'
 
     @classmethod
-    def setUpClass(cls):
-        super(AggregatesAdminTestJSON, cls).setUpClass()
+    def setup_clients(cls):
+        super(AggregatesAdminTestJSON, cls).setup_clients()
         cls.client = cls.os_adm.aggregates_client
-        cls.aggregate_name_prefix = 'test_aggregate_'
-        cls.az_name_prefix = 'test_az_'
 
-        resp, hosts_all = cls.os_adm.hosts_client.list_hosts()
-        hosts = map(lambda x: x['host_name'],
-                    filter(lambda y: y['service'] == 'compute', hosts_all))
-        cls.host = hosts[0]
+    @classmethod
+    def resource_setup(cls):
+        super(AggregatesAdminTestJSON, cls).resource_setup()
+        cls.aggregate_name_prefix = 'test_aggregate'
+        cls.az_name_prefix = 'test_az'
 
-    def _try_delete_aggregate(self, aggregate_id):
-        # delete aggregate, if it exists
-        try:
-            self.client.delete_aggregate(aggregate_id)
-        # if aggregate not found, it depict it was deleted in the test
-        except exceptions.NotFound:
-            pass
+        cls.host = None
+        hypers = cls.os_adm.hypervisor_client.list_hypervisors(
+            detail=True)['hypervisors']
+        hosts_available = [hyper['service']['host'] for hyper in hypers
+                           if (hyper['state'] == 'up' and
+                               hyper['status'] == 'enabled')]
+        if hosts_available:
+            cls.host = hosts_available[0]
+        else:
+            raise testtools.TestCase.failureException(
+                "no available compute node found")
 
-    @test.attr(type='gate')
+    @test.idempotent_id('0d148aa3-d54c-4317-aa8d-42040a475e20')
     def test_aggregate_create_delete(self):
         # Create and delete an aggregate.
         aggregate_name = data_utils.rand_name(self.aggregate_name_prefix)
-        resp, aggregate = self.client.create_aggregate(name=aggregate_name)
-        self.addCleanup(self._try_delete_aggregate, aggregate['id'])
-        self.assertEqual(200, resp.status)
+        aggregate = (self.client.create_aggregate(name=aggregate_name)
+                     ['aggregate'])
+        self.addCleanup(test_utils.call_and_ignore_notfound_exc,
+                        self.client.delete_aggregate, aggregate['id'])
         self.assertEqual(aggregate_name, aggregate['name'])
         self.assertIsNone(aggregate['availability_zone'])
 
-        resp, _ = self.client.delete_aggregate(aggregate['id'])
-        self.assertEqual(200, resp.status)
+        self.client.delete_aggregate(aggregate['id'])
         self.client.wait_for_resource_deletion(aggregate['id'])
 
-    @test.attr(type='gate')
+    @test.idempotent_id('5873a6f8-671a-43ff-8838-7ce430bb6d0b')
     def test_aggregate_create_delete_with_az(self):
         # Create and delete an aggregate.
         aggregate_name = data_utils.rand_name(self.aggregate_name_prefix)
         az_name = data_utils.rand_name(self.az_name_prefix)
-        resp, aggregate = self.client.create_aggregate(
-            name=aggregate_name, availability_zone=az_name)
-        self.addCleanup(self._try_delete_aggregate, aggregate['id'])
-        self.assertEqual(200, resp.status)
+        aggregate = self.client.create_aggregate(
+            name=aggregate_name, availability_zone=az_name)['aggregate']
+        self.addCleanup(test_utils.call_and_ignore_notfound_exc,
+                        self.client.delete_aggregate, aggregate['id'])
         self.assertEqual(aggregate_name, aggregate['name'])
         self.assertEqual(az_name, aggregate['availability_zone'])
 
-        resp, _ = self.client.delete_aggregate(aggregate['id'])
-        self.assertEqual(200, resp.status)
+        self.client.delete_aggregate(aggregate['id'])
         self.client.wait_for_resource_deletion(aggregate['id'])
 
-    @test.attr(type='gate')
+    @test.idempotent_id('68089c38-04b1-4758-bdf0-cf0daec4defd')
     def test_aggregate_create_verify_entry_in_list(self):
         # Create an aggregate and ensure it is listed.
         aggregate_name = data_utils.rand_name(self.aggregate_name_prefix)
-        resp, aggregate = self.client.create_aggregate(name=aggregate_name)
+        aggregate = (self.client.create_aggregate(name=aggregate_name)
+                     ['aggregate'])
         self.addCleanup(self.client.delete_aggregate, aggregate['id'])
 
-        resp, aggregates = self.client.list_aggregates()
-        self.assertEqual(200, resp.status)
+        aggregates = self.client.list_aggregates()['aggregates']
         self.assertIn((aggregate['id'], aggregate['availability_zone']),
                       map(lambda x: (x['id'], x['availability_zone']),
                           aggregates))
 
-    @test.attr(type='gate')
+    @test.idempotent_id('36ec92ca-7a73-43bc-b920-7531809e8540')
     def test_aggregate_create_update_metadata_get_details(self):
         # Create an aggregate and ensure its details are returned.
         aggregate_name = data_utils.rand_name(self.aggregate_name_prefix)
-        resp, aggregate = self.client.create_aggregate(name=aggregate_name)
+        aggregate = (self.client.create_aggregate(name=aggregate_name)
+                     ['aggregate'])
         self.addCleanup(self.client.delete_aggregate, aggregate['id'])
 
-        resp, body = self.client.get_aggregate(aggregate['id'])
-        self.assertEqual(200, resp.status)
+        body = self.client.show_aggregate(aggregate['id'])['aggregate']
         self.assertEqual(aggregate['name'], body['name'])
         self.assertEqual(aggregate['availability_zone'],
                          body['availability_zone'])
@@ -107,25 +108,22 @@ class AggregatesAdminTestJSON(base.BaseV2ComputeAdminTest):
 
         # set the metadata of the aggregate
         meta = {"key": "value"}
-        resp, body = self.client.set_metadata(aggregate['id'], meta)
-        self.assertEqual(200, resp.status)
-        self.assertEqual(meta, body["metadata"])
+        body = self.client.set_metadata(aggregate['id'], metadata=meta)
+        self.assertEqual(meta, body['aggregate']["metadata"])
 
         # verify the metadata has been set
-        resp, body = self.client.get_aggregate(aggregate['id'])
-        self.assertEqual(200, resp.status)
+        body = self.client.show_aggregate(aggregate['id'])['aggregate']
         self.assertEqual(meta, body["metadata"])
 
-    @test.attr(type='gate')
+    @test.idempotent_id('4d2b2004-40fa-40a1-aab2-66f4dab81beb')
     def test_aggregate_create_update_with_az(self):
         # Update an aggregate and ensure properties are updated correctly
         aggregate_name = data_utils.rand_name(self.aggregate_name_prefix)
         az_name = data_utils.rand_name(self.az_name_prefix)
-        resp, aggregate = self.client.create_aggregate(
-            name=aggregate_name, availability_zone=az_name)
+        aggregate = self.client.create_aggregate(
+            name=aggregate_name, availability_zone=az_name)['aggregate']
         self.addCleanup(self.client.delete_aggregate, aggregate['id'])
 
-        self.assertEqual(200, resp.status)
         self.assertEqual(aggregate_name, aggregate['name'])
         self.assertEqual(az_name, aggregate['availability_zone'])
         self.assertIsNotNone(aggregate['id'])
@@ -134,96 +132,95 @@ class AggregatesAdminTestJSON(base.BaseV2ComputeAdminTest):
         new_aggregate_name = aggregate_name + '_new'
         new_az_name = az_name + '_new'
 
-        resp, resp_aggregate = self.client.update_aggregate(aggregate_id,
-                                                            new_aggregate_name,
-                                                            new_az_name)
-        self.assertEqual(200, resp.status)
+        resp_aggregate = self.client.update_aggregate(
+            aggregate_id,
+            name=new_aggregate_name,
+            availability_zone=new_az_name)['aggregate']
         self.assertEqual(new_aggregate_name, resp_aggregate['name'])
         self.assertEqual(new_az_name, resp_aggregate['availability_zone'])
 
-        resp, aggregates = self.client.list_aggregates()
-        self.assertEqual(200, resp.status)
+        aggregates = self.client.list_aggregates()['aggregates']
         self.assertIn((aggregate_id, new_aggregate_name, new_az_name),
                       map(lambda x:
-                         (x['id'], x['name'], x['availability_zone']),
+                          (x['id'], x['name'], x['availability_zone']),
                           aggregates))
 
-    @test.attr(type='gate')
+    @test.idempotent_id('c8e85064-e79b-4906-9931-c11c24294d02')
     def test_aggregate_add_remove_host(self):
-        # Add an host to the given aggregate and remove.
+        # Add a host to the given aggregate and remove.
         self.useFixture(fixtures.LockFixture('availability_zone'))
         aggregate_name = data_utils.rand_name(self.aggregate_name_prefix)
-        resp, aggregate = self.client.create_aggregate(name=aggregate_name)
+        aggregate = (self.client.create_aggregate(name=aggregate_name)
+                     ['aggregate'])
         self.addCleanup(self.client.delete_aggregate, aggregate['id'])
 
-        resp, body = self.client.add_host(aggregate['id'], self.host)
-        self.assertEqual(200, resp.status)
+        body = (self.client.add_host(aggregate['id'], host=self.host)
+                ['aggregate'])
         self.assertEqual(aggregate_name, body['name'])
         self.assertEqual(aggregate['availability_zone'],
                          body['availability_zone'])
         self.assertIn(self.host, body['hosts'])
 
-        resp, body = self.client.remove_host(aggregate['id'], self.host)
-        self.assertEqual(200, resp.status)
+        body = (self.client.remove_host(aggregate['id'], host=self.host)
+                ['aggregate'])
         self.assertEqual(aggregate_name, body['name'])
         self.assertEqual(aggregate['availability_zone'],
                          body['availability_zone'])
         self.assertNotIn(self.host, body['hosts'])
 
-    @test.attr(type='gate')
+    @test.idempotent_id('7f6a1cc5-2446-4cdb-9baa-b6ae0a919b72')
     def test_aggregate_add_host_list(self):
-        # Add an host to the given aggregate and list.
+        # Add a host to the given aggregate and list.
         self.useFixture(fixtures.LockFixture('availability_zone'))
         aggregate_name = data_utils.rand_name(self.aggregate_name_prefix)
-        resp, aggregate = self.client.create_aggregate(name=aggregate_name)
+        aggregate = (self.client.create_aggregate(name=aggregate_name)
+                     ['aggregate'])
         self.addCleanup(self.client.delete_aggregate, aggregate['id'])
-        self.client.add_host(aggregate['id'], self.host)
-        self.addCleanup(self.client.remove_host, aggregate['id'], self.host)
+        self.client.add_host(aggregate['id'], host=self.host)
+        self.addCleanup(self.client.remove_host, aggregate['id'],
+                        host=self.host)
 
-        resp, aggregates = self.client.list_aggregates()
-        aggs = filter(lambda x: x['id'] == aggregate['id'], aggregates)
+        aggregates = self.client.list_aggregates()['aggregates']
+        aggs = [agg for agg in aggregates if agg['id'] == aggregate['id']]
         self.assertEqual(1, len(aggs))
         agg = aggs[0]
         self.assertEqual(aggregate_name, agg['name'])
         self.assertIsNone(agg['availability_zone'])
         self.assertIn(self.host, agg['hosts'])
 
-    @test.attr(type='gate')
+    @test.idempotent_id('eeef473c-7c52-494d-9f09-2ed7fc8fc036')
     def test_aggregate_add_host_get_details(self):
-        # Add an host to the given aggregate and get details.
+        # Add a host to the given aggregate and get details.
         self.useFixture(fixtures.LockFixture('availability_zone'))
         aggregate_name = data_utils.rand_name(self.aggregate_name_prefix)
-        resp, aggregate = self.client.create_aggregate(name=aggregate_name)
+        aggregate = (self.client.create_aggregate(name=aggregate_name)
+                     ['aggregate'])
         self.addCleanup(self.client.delete_aggregate, aggregate['id'])
-        self.client.add_host(aggregate['id'], self.host)
-        self.addCleanup(self.client.remove_host, aggregate['id'], self.host)
+        self.client.add_host(aggregate['id'], host=self.host)
+        self.addCleanup(self.client.remove_host, aggregate['id'],
+                        host=self.host)
 
-        resp, body = self.client.get_aggregate(aggregate['id'])
+        body = self.client.show_aggregate(aggregate['id'])['aggregate']
         self.assertEqual(aggregate_name, body['name'])
         self.assertIsNone(body['availability_zone'])
         self.assertIn(self.host, body['hosts'])
 
-    @test.attr(type='gate')
+    @test.idempotent_id('96be03c7-570d-409c-90f8-e4db3c646996')
     def test_aggregate_add_host_create_server_with_az(self):
-        # Add an host to the given aggregate and create a server.
+        # Add a host to the given aggregate and create a server.
         self.useFixture(fixtures.LockFixture('availability_zone'))
         aggregate_name = data_utils.rand_name(self.aggregate_name_prefix)
         az_name = data_utils.rand_name(self.az_name_prefix)
-        resp, aggregate = self.client.create_aggregate(
-            name=aggregate_name, availability_zone=az_name)
+        aggregate = self.client.create_aggregate(
+            name=aggregate_name, availability_zone=az_name)['aggregate']
         self.addCleanup(self.client.delete_aggregate, aggregate['id'])
-        self.client.add_host(aggregate['id'], self.host)
-        self.addCleanup(self.client.remove_host, aggregate['id'], self.host)
-        server_name = data_utils.rand_name('test_server_')
+        self.client.add_host(aggregate['id'], host=self.host)
+        self.addCleanup(self.client.remove_host, aggregate['id'],
+                        host=self.host)
+        server_name = data_utils.rand_name('test_server')
         admin_servers_client = self.os_adm.servers_client
-        resp, server = self.create_test_server(name=server_name,
-                                               availability_zone=az_name,
-                                               wait_until='ACTIVE')
-        resp, body = admin_servers_client.get_server(server['id'])
+        server = self.create_test_server(name=server_name,
+                                         availability_zone=az_name,
+                                         wait_until='ACTIVE')
+        body = admin_servers_client.show_server(server['id'])['server']
         self.assertEqual(self.host, body[self._host_key])
-
-
-class AggregatesAdminTestXML(AggregatesAdminTestJSON):
-    _host_key = (
-        '{http://docs.openstack.org/compute/ext/extended_status/api/v1.1}host')
-    _interface = 'xml'

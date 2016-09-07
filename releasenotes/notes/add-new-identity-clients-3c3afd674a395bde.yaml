@@ -1,0 +1,10 @@
+---
+features:
+  - |
+    Define identity service clients as libraries
+    The following identity service clients are defined as library interface,
+    so the other projects can use these modules as stable libraries without
+    any maintenance changes.
+
+     * endpoints_client(v3)
+     * policies_client (v3)

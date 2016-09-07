@@ -14,9 +14,11 @@
 #    under the License.
 
 import netaddr
+import testtools
 
 from tempest.api.compute import base
 from tempest import config
+from tempest.lib import exceptions
 from tempest import test
 
 CONF = config.CONF
@@ -25,31 +27,42 @@ CONF = config.CONF
 class VirtualInterfacesTestJSON(base.BaseV2ComputeTest):
 
     @classmethod
-    def setUpClass(cls):
+    def setup_credentials(cls):
         # This test needs a network and a subnet
         cls.set_network_resources(network=True, subnet=True)
-        super(VirtualInterfacesTestJSON, cls).setUpClass()
+        super(VirtualInterfacesTestJSON, cls).setup_credentials()
+
+    @classmethod
+    def setup_clients(cls):
+        super(VirtualInterfacesTestJSON, cls).setup_clients()
         cls.client = cls.servers_client
-        resp, server = cls.create_test_server(wait_until='ACTIVE')
+
+    @classmethod
+    def resource_setup(cls):
+        super(VirtualInterfacesTestJSON, cls).resource_setup()
+        server = cls.create_test_server(wait_until='ACTIVE')
         cls.server_id = server['id']
 
-    @test.skip_because(bug="1183436",
-                       condition=CONF.service_available.neutron)
-    @test.attr(type='gate')
+    @test.idempotent_id('96c4e2ef-5e4d-4d7f-87f5-fed6dca18016')
+    @test.services('network')
     def test_list_virtual_interfaces(self):
         # Positive test:Should be able to GET the virtual interfaces list
         # for a given server_id
-        resp, output = self.client.list_virtual_interfaces(self.server_id)
-        self.assertEqual(200, resp.status)
-        self.assertIsNotNone(output)
-        virt_ifaces = output
-        self.assertNotEqual(0, len(virt_ifaces['virtual_interfaces']),
-                            'Expected virtual interfaces, got 0 interfaces.')
-        for virt_iface in virt_ifaces['virtual_interfaces']:
-            mac_address = virt_iface['mac_address']
-            self.assertTrue(netaddr.valid_mac(mac_address),
-                            "Invalid mac address detected.")
 
-
-class VirtualInterfacesTestXML(VirtualInterfacesTestJSON):
-    _interface = 'xml'
+        if CONF.service_available.neutron:
+            # TODO(mriedem): After a microversion implements the API for
+            # neutron, a 400 should be a failure for nova-network and neutron.
+            with testtools.ExpectedException(exceptions.BadRequest):
+                self.client.list_virtual_interfaces(self.server_id)
+        else:
+            output = self.client.list_virtual_interfaces(self.server_id)
+            self.assertIsNotNone(output)
+            virt_ifaces = output
+            self.assertNotEqual(0, len(virt_ifaces['virtual_interfaces']),
+                                'Expected virtual interfaces, got 0 '
+                                'interfaces.')
+            for virt_iface in virt_ifaces['virtual_interfaces']:
+                mac_address = virt_iface['mac_address']
+                self.assertTrue(netaddr.valid_mac(mac_address),
+                                "Invalid mac address detected. mac address: %s"
+                                % mac_address)

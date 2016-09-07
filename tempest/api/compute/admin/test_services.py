@@ -19,41 +19,34 @@ from tempest import test
 
 
 class ServicesAdminTestJSON(base.BaseV2ComputeAdminTest):
-
-    """
-    Tests Services API. List and Enable/Disable require admin privileges.
-    """
+    """Tests Services API. List and Enable/Disable require admin privileges."""
 
     @classmethod
-    def setUpClass(cls):
-        super(ServicesAdminTestJSON, cls).setUpClass()
+    def setup_clients(cls):
+        super(ServicesAdminTestJSON, cls).setup_clients()
         cls.client = cls.os_adm.services_client
 
-    @test.attr(type='gate')
+    @test.idempotent_id('5be41ef4-53d1-41cc-8839-5c2a48a1b283')
     def test_list_services(self):
-        resp, services = self.client.list_services()
-        self.assertEqual(200, resp.status)
+        services = self.client.list_services()['services']
         self.assertNotEqual(0, len(services))
 
-    @test.attr(type='gate')
+    @test.idempotent_id('f345b1ec-bc6e-4c38-a527-3ca2bc00bef5')
     def test_get_service_by_service_binary_name(self):
         binary_name = 'nova-compute'
-        params = {'binary': binary_name}
-        resp, services = self.client.list_services(params)
-        self.assertEqual(200, resp.status)
+        services = self.client.list_services(binary=binary_name)['services']
         self.assertNotEqual(0, len(services))
         for service in services:
             self.assertEqual(binary_name, service['binary'])
 
-    @test.attr(type='gate')
+    @test.idempotent_id('affb42d5-5b4b-43c8-8b0b-6dca054abcca')
     def test_get_service_by_host_name(self):
-        resp, services = self.client.list_services()
+        services = self.client.list_services()['services']
         host_name = services[0]['host']
         services_on_host = [service for service in services if
                             service['host'] == host_name]
-        params = {'host': host_name}
 
-        resp, services = self.client.list_services(params)
+        services = self.client.list_services(host=host_name)['services']
 
         # we could have a periodic job checkin between the 2 service
         # lookups, so only compare binary lists.
@@ -64,19 +57,14 @@ class ServicesAdminTestJSON(base.BaseV2ComputeAdminTest):
         # on order.
         self.assertEqual(sorted(s1), sorted(s2))
 
-    @test.attr(type='gate')
+    @test.idempotent_id('39397f6f-37b8-4234-8671-281e44c74025')
     def test_get_service_by_service_and_host_name(self):
-        resp, services = self.client.list_services()
+        services = self.client.list_services()['services']
         host_name = services[0]['host']
         binary_name = services[0]['binary']
-        params = {'host': host_name, 'binary': binary_name}
 
-        resp, services = self.client.list_services(params)
-        self.assertEqual(200, resp.status)
+        services = self.client.list_services(host=host_name,
+                                             binary=binary_name)['services']
         self.assertEqual(1, len(services))
         self.assertEqual(host_name, services[0]['host'])
         self.assertEqual(binary_name, services[0]['binary'])
-
-
-class ServicesAdminTestXML(ServicesAdminTestJSON):
-    _interface = 'xml'

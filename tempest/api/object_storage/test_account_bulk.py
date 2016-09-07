@@ -27,7 +27,7 @@ class BulkTest(base.BaseObjectTest):
         self.containers = []
 
     def tearDown(self):
-        self.delete_containers(self.containers)
+        self.delete_containers()
         super(BulkTest, self).tearDown()
 
     def _create_archive(self):
@@ -50,20 +50,29 @@ class BulkTest(base.BaseObjectTest):
 
         return tarpath.name, container_name, object_name
 
-    @test.attr(type='gate')
-    def test_extract_archive(self):
-        # Test bulk operation of file upload with an archived file
-        filepath, container_name, object_name = self._create_archive()
-
+    def _upload_archive(self, filepath):
+        # upload an archived file
         params = {'extract-archive': 'tar'}
         with open(filepath) as fh:
             mydata = fh.read()
             resp, body = self.account_client.create_account(data=mydata,
                                                             params=params)
+        return resp, body
+
+    def _check_contents_deleted(self, container_name):
+        param = {'format': 'txt'}
+        resp, body = self.account_client.list_account_containers(param)
+        self.assertHeaders(resp, 'Account', 'GET')
+        self.assertNotIn(container_name, body)
+
+    @test.idempotent_id('a407de51-1983-47cc-9f14-47c2b059413c')
+    @test.requires_ext(extension='bulk', service='object')
+    def test_extract_archive(self):
+        # Test bulk operation of file upload with an archived file
+        filepath, container_name, object_name = self._create_archive()
+        resp, _ = self._upload_archive(filepath)
 
         self.containers.append(container_name)
-
-        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
 
         # When uploading an archived file with the bulk operation, the response
         # does not contain 'content-length' header. This is the special case,
@@ -80,7 +89,6 @@ class BulkTest(base.BaseObjectTest):
         param = {'format': 'json'}
         resp, body = self.account_client.list_account_containers(param)
 
-        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
         self.assertHeaders(resp, 'Account', 'GET')
 
         self.assertIn(container_name, [b['name'] for b in body])
@@ -89,28 +97,21 @@ class BulkTest(base.BaseObjectTest):
         resp, contents_list = self.container_client.list_container_contents(
             container_name, param)
 
-        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
         self.assertHeaders(resp, 'Container', 'GET')
 
         self.assertIn(object_name, [c['name'] for c in contents_list])
 
-    @test.attr(type='gate')
+    @test.idempotent_id('c075e682-0d2a-43b2-808d-4116200d736d')
+    @test.requires_ext(extension='bulk', service='object')
     def test_bulk_delete(self):
         # Test bulk operation of deleting multiple files
         filepath, container_name, object_name = self._create_archive()
-
-        params = {'extract-archive': 'tar'}
-        with open(filepath) as fh:
-            mydata = fh.read()
-            resp, body = self.account_client.create_account(data=mydata,
-                                                            params=params)
+        self._upload_archive(filepath)
 
         data = '%s/%s\n%s' % (container_name, object_name, container_name)
         params = {'bulk-delete': ''}
         resp, body = self.account_client.delete_account(data=data,
                                                         params=params)
-
-        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
 
         # When deleting multiple files using the bulk operation, the response
         # does not contain 'content-length' header. This is the special case,
@@ -124,11 +125,33 @@ class BulkTest(base.BaseObjectTest):
         # Check only the format of common headers with custom matcher
         self.assertThat(resp, custom_matchers.AreAllWellFormatted())
 
-        # Check if a container is deleted
-        param = {'format': 'txt'}
-        resp, body = self.account_client.list_account_containers(param)
+        # Check if uploaded contents are completely deleted
+        self._check_contents_deleted(container_name)
 
-        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
-        self.assertHeaders(resp, 'Account', 'GET')
+    @test.idempotent_id('dbea2bcb-efbb-4674-ac8a-a5a0e33d1d79')
+    @test.requires_ext(extension='bulk', service='object')
+    def test_bulk_delete_by_POST(self):
+        # Test bulk operation of deleting multiple files
+        filepath, container_name, object_name = self._create_archive()
+        self._upload_archive(filepath)
 
-        self.assertNotIn(container_name, body)
+        data = '%s/%s\n%s' % (container_name, object_name, container_name)
+        params = {'bulk-delete': ''}
+
+        resp, body = self.account_client.create_account_metadata(
+            {}, data=data, params=params)
+
+        # When deleting multiple files using the bulk operation, the response
+        # does not contain 'content-length' header. This is the special case,
+        # therefore the existence of response headers is checked without
+        # custom matcher.
+        self.assertIn('transfer-encoding', resp)
+        self.assertIn('content-type', resp)
+        self.assertIn('x-trans-id', resp)
+        self.assertIn('date', resp)
+
+        # Check only the format of common headers with custom matcher
+        self.assertThat(resp, custom_matchers.AreAllWellFormatted())
+
+        # Check if uploaded contents are completely deleted
+        self._check_contents_deleted(container_name)

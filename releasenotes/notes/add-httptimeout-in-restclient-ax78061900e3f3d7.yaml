@@ -1,0 +1,7 @@
+---
+features:
+  - RestClient now supports setting timeout in urllib3.poolmanager.
+    Clients will use CONF.service_clients.http_timeout for timeout
+    value to wait for http request to response.
+  - KeystoneAuthProvider will accept http_timeout and will use it in
+    get_credentials.

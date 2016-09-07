@@ -13,44 +13,43 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import six
+
 from tempest.api.identity import base
 from tempest.common.utils import data_utils
-from tempest import exceptions
+from tempest.lib import exceptions as lib_exc
 from tempest import test
 
 
 class TokensV3TestJSON(base.BaseIdentityV3AdminTest):
-    _interface = 'json'
 
-    @test.attr(type='smoke')
+    @test.idempotent_id('0f9f5a5f-d5cd-4a86-8a5b-c5ded151f212')
     def test_tokens(self):
         # Valid user's token is authenticated
         # Create a User
-        u_name = data_utils.rand_name('user-')
+        u_name = data_utils.rand_name('user')
         u_desc = '%s-description' % u_name
         u_email = '%s@testmail.tm' % u_name
-        u_password = data_utils.rand_name('pass-')
-        resp, user = self.client.create_user(
-            u_name, description=u_desc, password=u_password,
-            email=u_email)
-        self.assertEqual(201, resp.status)
-        self.addCleanup(self.client.delete_user, user['id'])
+        u_password = data_utils.rand_password()
+        user = self.users_client.create_user(
+            name=u_name, description=u_desc, password=u_password,
+            email=u_email)['user']
+        self.addCleanup(self.users_client.delete_user, user['id'])
         # Perform Authentication
-        resp, body = self.token.auth(user['id'], u_password)
-        self.assertEqual(201, resp.status)
+        resp = self.token.auth(user_id=user['id'],
+                               password=u_password).response
         subject_token = resp['x-subject-token']
         # Perform GET Token
-        resp, token_details = self.client.get_token(subject_token)
-        self.assertEqual(200, resp.status)
+        token_details = self.client.show_token(subject_token)['token']
         self.assertEqual(resp['x-subject-token'], subject_token)
         self.assertEqual(token_details['user']['id'], user['id'])
         self.assertEqual(token_details['user']['name'], u_name)
         # Perform Delete Token
-        resp, _ = self.client.delete_token(subject_token)
-        self.assertRaises(exceptions.NotFound, self.client.get_token,
+        self.client.delete_token(subject_token)
+        self.assertRaises(lib_exc.NotFound, self.client.show_token,
                           subject_token)
 
-    @test.attr(type='gate')
+    @test.idempotent_id('565fa210-1da1-4563-999b-f7b5b67cf112')
     def test_rescope_token(self):
         """Rescope a token.
 
@@ -61,50 +60,47 @@ class TokensV3TestJSON(base.BaseIdentityV3AdminTest):
         """
 
         # Create a user.
-        user_name = data_utils.rand_name(name='user-')
-        user_password = data_utils.rand_name(name='pass-')
-        resp, user = self.client.create_user(user_name, password=user_password)
-        self.assertEqual(201, resp.status)
-        self.addCleanup(self.client.delete_user, user['id'])
+        user_name = data_utils.rand_name(name='user')
+        user_password = data_utils.rand_password()
+        user = self.users_client.create_user(name=user_name,
+                                             password=user_password)['user']
+        self.addCleanup(self.users_client.delete_user, user['id'])
 
         # Create a couple projects
-        project1_name = data_utils.rand_name(name='project-')
-        resp, project1 = self.client.create_project(project1_name)
-        self.assertEqual(201, resp.status)
-        self.addCleanup(self.client.delete_project, project1['id'])
+        project1_name = data_utils.rand_name(name='project')
+        project1 = self.projects_client.create_project(
+            project1_name)['project']
+        self.addCleanup(self.projects_client.delete_project, project1['id'])
 
-        project2_name = data_utils.rand_name(name='project-')
-        resp, project2 = self.client.create_project(project2_name)
-        self.assertEqual(201, resp.status)
-        self.addCleanup(self.client.delete_project, project2['id'])
+        project2_name = data_utils.rand_name(name='project')
+        project2 = self.projects_client.create_project(
+            project2_name)['project']
+        self.addCleanup(self.projects_client.delete_project, project2['id'])
 
         # Create a role
-        role_name = data_utils.rand_name(name='role-')
-        resp, role = self.client.create_role(role_name)
-        self.assertEqual(201, resp.status)
-        self.addCleanup(self.client.delete_role, role['id'])
+        role_name = data_utils.rand_name(name='role')
+        role = self.roles_client.create_role(name=role_name)['role']
+        self.addCleanup(self.roles_client.delete_role, role['id'])
 
         # Grant the user the role on both projects.
-        resp, _ = self.client.assign_user_role(project1['id'], user['id'],
-                                               role['id'])
-        self.assertEqual(204, resp.status)
+        self.roles_client.assign_user_role_on_project(project1['id'],
+                                                      user['id'],
+                                                      role['id'])
 
-        resp, _ = self.client.assign_user_role(project2['id'], user['id'],
-                                               role['id'])
-        self.assertEqual(204, resp.status)
+        self.roles_client.assign_user_role_on_project(project2['id'],
+                                                      user['id'],
+                                                      role['id'])
 
         # Get an unscoped token.
-        resp, token_auth = self.token.auth(user=user['id'],
-                                           password=user_password)
-        self.assertEqual(201, resp.status)
+        token_auth = self.token.auth(user_id=user['id'],
+                                     password=user_password)
 
-        token_id = resp['x-subject-token']
+        token_id = token_auth.response['x-subject-token']
         orig_expires_at = token_auth['token']['expires_at']
-        orig_issued_at = token_auth['token']['issued_at']
         orig_user = token_auth['token']['user']
 
-        self.assertIsInstance(token_auth['token']['expires_at'], unicode)
-        self.assertIsInstance(token_auth['token']['issued_at'], unicode)
+        self.assertIsInstance(token_auth['token']['expires_at'], six.text_type)
+        self.assertIsInstance(token_auth['token']['issued_at'], six.text_type)
         self.assertEqual(['password'], token_auth['token']['methods'])
         self.assertEqual(user['id'], token_auth['token']['user']['id'])
         self.assertEqual(user['name'], token_auth['token']['user']['name'])
@@ -117,16 +113,14 @@ class TokensV3TestJSON(base.BaseIdentityV3AdminTest):
         self.assertNotIn('roles', token_auth['token'])
 
         # Use the unscoped token to get a scoped token.
-        resp, token_auth = self.token.auth(token=token_id,
-                                           tenant=project1_name,
-                                           domain='Default')
-        token1_id = resp['x-subject-token']
-        self.assertEqual(201, resp.status)
+        token_auth = self.token.auth(token=token_id,
+                                     project_name=project1_name,
+                                     project_domain_name='Default')
+        token1_id = token_auth.response['x-subject-token']
 
         self.assertEqual(orig_expires_at, token_auth['token']['expires_at'],
                          'Expiration time should match original token')
-        self.assertIsInstance(token_auth['token']['issued_at'], unicode)
-        self.assertNotEqual(orig_issued_at, token_auth['token']['issued_at'])
+        self.assertIsInstance(token_auth['token']['issued_at'], six.text_type)
         self.assertEqual(set(['password', 'token']),
                          set(token_auth['token']['methods']))
         self.assertEqual(orig_user, token_auth['token']['user'],
@@ -145,20 +139,14 @@ class TokensV3TestJSON(base.BaseIdentityV3AdminTest):
         self.assertEqual(role['name'], token_auth['token']['roles'][0]['name'])
 
         # Revoke the unscoped token.
-        resp, _ = self.client.delete_token(token1_id)
-        self.assertEqual(204, resp.status)
+        self.client.delete_token(token1_id)
 
         # Now get another scoped token using the unscoped token.
-        resp, token_auth = self.token.auth(token=token_id,
-                                           tenant=project2_name,
-                                           domain='Default')
-        self.assertEqual(201, resp.status)
+        token_auth = self.token.auth(token=token_id,
+                                     project_name=project2_name,
+                                     project_domain_name='Default')
 
         self.assertEqual(project2['id'],
                          token_auth['token']['project']['id'])
         self.assertEqual(project2['name'],
                          token_auth['token']['project']['name'])
-
-
-class TokensV3TestXML(TokensV3TestJSON):
-    _interface = 'xml'

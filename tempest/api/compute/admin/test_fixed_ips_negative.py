@@ -14,7 +14,7 @@
 
 from tempest.api.compute import base
 from tempest import config
-from tempest import exceptions
+from tempest.lib import exceptions as lib_exc
 from tempest import test
 
 CONF = config.CONF
@@ -23,15 +23,23 @@ CONF = config.CONF
 class FixedIPsNegativeTestJson(base.BaseV2ComputeAdminTest):
 
     @classmethod
-    def setUpClass(cls):
-        super(FixedIPsNegativeTestJson, cls).setUpClass()
+    def skip_checks(cls):
+        super(FixedIPsNegativeTestJson, cls).skip_checks()
         if CONF.service_available.neutron:
             msg = ("%s skipped as neutron is available" % cls.__name__)
             raise cls.skipException(msg)
+
+    @classmethod
+    def setup_clients(cls):
+        super(FixedIPsNegativeTestJson, cls).setup_clients()
         cls.client = cls.os_adm.fixed_ips_client
         cls.non_admin_client = cls.fixed_ips_client
-        resp, server = cls.create_test_server(wait_until='ACTIVE')
-        resp, server = cls.servers_client.get_server(server['id'])
+
+    @classmethod
+    def resource_setup(cls):
+        super(FixedIPsNegativeTestJson, cls).resource_setup()
+        server = cls.create_test_server(wait_until='ACTIVE')
+        server = cls.servers_client.show_server(server['id'])['server']
         for ip_set in server['addresses']:
             for ip in server['addresses'][ip_set]:
                 if ip['OS-EXT-IPS:type'] == 'fixed':
@@ -40,41 +48,46 @@ class FixedIPsNegativeTestJson(base.BaseV2ComputeAdminTest):
             if cls.ip:
                 break
 
-    @test.attr(type=['negative', 'gate'])
+    @test.attr(type=['negative'])
+    @test.idempotent_id('9f17f47d-daad-4adc-986e-12370c93e407')
+    @test.services('network')
     def test_list_fixed_ip_details_with_non_admin_user(self):
-        self.assertRaises(exceptions.Unauthorized,
-                          self.non_admin_client.get_fixed_ip_details, self.ip)
+        self.assertRaises(lib_exc.Forbidden,
+                          self.non_admin_client.show_fixed_ip, self.ip)
 
-    @test.attr(type=['negative', 'gate'])
+    @test.attr(type=['negative'])
+    @test.idempotent_id('ce60042c-fa60-4836-8d43-1c8e3359dc47')
+    @test.services('network')
     def test_set_reserve_with_non_admin_user(self):
-        body = {"reserve": "None"}
-        self.assertRaises(exceptions.Unauthorized,
+        self.assertRaises(lib_exc.Forbidden,
                           self.non_admin_client.reserve_fixed_ip,
-                          self.ip, body)
+                          self.ip, reserve="None")
 
-    @test.attr(type=['negative', 'gate'])
+    @test.attr(type=['negative'])
+    @test.idempotent_id('f1f7a35b-0390-48c5-9803-5f27461439db')
+    @test.services('network')
     def test_set_unreserve_with_non_admin_user(self):
-        body = {"unreserve": "None"}
-        self.assertRaises(exceptions.Unauthorized,
+        self.assertRaises(lib_exc.Forbidden,
                           self.non_admin_client.reserve_fixed_ip,
-                          self.ip, body)
+                          self.ip, unreserve="None")
 
-    @test.attr(type=['negative', 'gate'])
+    @test.attr(type=['negative'])
+    @test.idempotent_id('f51cf464-7fc5-4352-bc3e-e75cfa2cb717')
+    @test.services('network')
     def test_set_reserve_with_invalid_ip(self):
         # NOTE(maurosr): since this exercises the same code snippet, we do it
         # only for reserve action
-        body = {"reserve": "None"}
-        self.assertRaises(exceptions.NotFound,
+        # NOTE(eliqiao): in Juno, the exception is NotFound, but in master, we
+        # change the error code to BadRequest, both exceptions should be
+        # accepted by tempest
+        self.assertRaises((lib_exc.NotFound, lib_exc.BadRequest),
                           self.client.reserve_fixed_ip,
-                          "my.invalid.ip", body)
+                          "my.invalid.ip", reserve="None")
 
-    @test.attr(type=['negative', 'gate'])
+    @test.attr(type=['negative'])
+    @test.idempotent_id('fd26ef50-f135-4232-9d32-281aab3f9176')
+    @test.services('network')
     def test_fixed_ip_with_invalid_action(self):
-        body = {"invalid_action": "None"}
-        self.assertRaises(exceptions.BadRequest,
+        self.assertRaises(lib_exc.BadRequest,
                           self.client.reserve_fixed_ip,
-                          self.ip, body)
-
-
-class FixedIPsNegativeTestXml(FixedIPsNegativeTestJson):
-    _interface = 'xml'
+                          self.ip, invalid_action="None")

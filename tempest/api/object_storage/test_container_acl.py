@@ -14,79 +14,80 @@
 #    under the License.
 
 from tempest.api.object_storage import base
-from tempest import clients
 from tempest.common.utils import data_utils
+from tempest import config
 from tempest import test
+
+CONF = config.CONF
 
 
 class ObjectTestACLs(base.BaseObjectTest):
-    @classmethod
-    def setUpClass(cls):
-        super(ObjectTestACLs, cls).setUpClass()
-        cls.data.setup_test_user()
-        test_os = clients.Manager(cls.data.test_credentials)
-        cls.test_auth_data = test_os.auth_provider.auth_data
+
+    credentials = [['operator', CONF.object_storage.operator_role],
+                   ['operator_alt', CONF.object_storage.operator_role]]
 
     @classmethod
-    def tearDownClass(cls):
-        cls.data.teardown_all()
-        super(ObjectTestACLs, cls).tearDownClass()
+    def setup_credentials(cls):
+        super(ObjectTestACLs, cls).setup_credentials()
+        cls.os = cls.os_roles_operator
+        cls.os_operator = cls.os_roles_operator_alt
+
+    @classmethod
+    def resource_setup(cls):
+        super(ObjectTestACLs, cls).resource_setup()
+        cls.test_auth_data = cls.os_operator.auth_provider.auth_data
 
     def setUp(self):
         super(ObjectTestACLs, self).setUp()
-        self.container_name = data_utils.rand_name(name='TestContainer')
-        self.container_client.create_container(self.container_name)
+        self.container_name = self.create_container()
 
     def tearDown(self):
-        self.delete_containers([self.container_name])
+        self.delete_containers()
         super(ObjectTestACLs, self).tearDown()
 
-    @test.attr(type='smoke')
+    @test.idempotent_id('a3270f3f-7640-4944-8448-c7ea783ea5b6')
     def test_read_object_with_rights(self):
         # attempt to read object using authorized user
         # update X-Container-Read metadata ACL
-        cont_headers = {'X-Container-Read':
-                        self.data.test_tenant + ':' + self.data.test_user}
+        tenant_name = self.os_operator.credentials.tenant_name
+        username = self.os_operator.credentials.username
+        cont_headers = {'X-Container-Read': tenant_name + ':' + username}
         resp_meta, body = self.container_client.update_container_metadata(
             self.container_name, metadata=cont_headers,
             metadata_prefix='')
-        self.assertIn(int(resp_meta['status']), test.HTTP_SUCCESS)
         self.assertHeaders(resp_meta, 'Container', 'POST')
         # create object
         object_name = data_utils.rand_name(name='Object')
         resp, _ = self.object_client.create_object(self.container_name,
                                                    object_name, 'data')
-        self.assertEqual(resp['status'], '201')
         self.assertHeaders(resp, 'Object', 'PUT')
         # Trying to read the object with rights
-        self.custom_object_client.auth_provider.set_alt_auth_data(
+        self.object_client.auth_provider.set_alt_auth_data(
             request_part='headers',
             auth_data=self.test_auth_data
         )
-        resp, _ = self.custom_object_client.get_object(
+        resp, _ = self.object_client.get_object(
             self.container_name, object_name)
-        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
         self.assertHeaders(resp, 'Object', 'GET')
 
-    @test.attr(type='smoke')
+    @test.idempotent_id('aa58bfa5-40d9-4bc3-82b4-d07f4a9e392a')
     def test_write_object_with_rights(self):
         # attempt to write object using authorized user
         # update X-Container-Write metadata ACL
-        cont_headers = {'X-Container-Write':
-                        self.data.test_tenant + ':' + self.data.test_user}
+        tenant_name = self.os_operator.credentials.tenant_name
+        username = self.os_operator.credentials.username
+        cont_headers = {'X-Container-Write': tenant_name + ':' + username}
         resp_meta, body = self.container_client.update_container_metadata(
             self.container_name, metadata=cont_headers,
             metadata_prefix='')
-        self.assertIn(int(resp_meta['status']), test.HTTP_SUCCESS)
         self.assertHeaders(resp_meta, 'Container', 'POST')
         # Trying to write the object with rights
-        self.custom_object_client.auth_provider.set_alt_auth_data(
+        self.object_client.auth_provider.set_alt_auth_data(
             request_part='headers',
             auth_data=self.test_auth_data
         )
         object_name = data_utils.rand_name(name='Object')
-        resp, _ = self.custom_object_client.create_object(
+        resp, _ = self.object_client.create_object(
             self.container_name,
-            object_name, 'data')
-        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
+            object_name, 'data', headers={})
         self.assertHeaders(resp, 'Object', 'PUT')

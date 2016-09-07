@@ -15,64 +15,66 @@
 
 from tempest.api.compute import base
 from tempest.common.utils import data_utils
-from tempest import exceptions
+from tempest.lib import exceptions as lib_exc
 from tempest import test
 
 
 class ImagesMetadataTestJSON(base.BaseV2ComputeTest):
 
     @classmethod
-    def setUpClass(cls):
-        super(ImagesMetadataTestJSON, cls).setUpClass()
-        cls.client = cls.images_client
+    def setup_clients(cls):
+        super(ImagesMetadataTestJSON, cls).setup_clients()
+        cls.client = cls.compute_images_client
 
-    @test.attr(type=['negative', 'gate'])
+    @test.attr(type=['negative'])
+    @test.idempotent_id('94069db2-792f-4fa8-8bd3-2271a6e0c095')
     def test_list_nonexistent_image_metadata(self):
         # Negative test: List on nonexistent image
         # metadata should not happen
-        self.assertRaises(exceptions.NotFound, self.client.list_image_metadata,
+        self.assertRaises(lib_exc.NotFound, self.client.list_image_metadata,
                           data_utils.rand_uuid())
 
-    @test.attr(type=['negative', 'gate'])
+    @test.attr(type=['negative'])
+    @test.idempotent_id('a403ef9e-9f95-427c-b70a-3ce3388796f1')
     def test_update_nonexistent_image_metadata(self):
         # Negative test:An update should not happen for a non-existent image
-        meta = {'key1': 'alt1', 'key2': 'alt2'}
-        self.assertRaises(exceptions.NotFound,
+        meta = {'os_distro': 'alt1', 'os_version': 'alt2'}
+        self.assertRaises(lib_exc.NotFound,
                           self.client.update_image_metadata,
                           data_utils.rand_uuid(), meta)
 
-    @test.attr(type=['negative', 'gate'])
+    @test.attr(type=['negative'])
+    @test.idempotent_id('41ae052c-6ee6-405c-985e-5712393a620d')
     def test_get_nonexistent_image_metadata_item(self):
         # Negative test: Get on non-existent image should not happen
-        self.assertRaises(exceptions.NotFound,
-                          self.client.get_image_metadata_item,
-                          data_utils.rand_uuid(), 'key2')
+        self.assertRaises(lib_exc.NotFound,
+                          self.client.show_image_metadata_item,
+                          data_utils.rand_uuid(), 'os_version')
 
-    @test.attr(type=['negative', 'gate'])
+    @test.attr(type=['negative'])
+    @test.idempotent_id('dc64f2ce-77e8-45b0-88c8-e15041d08eaf')
     def test_set_nonexistent_image_metadata(self):
         # Negative test: Metadata should not be set to a non-existent image
-        meta = {'key1': 'alt1', 'key2': 'alt2'}
-        self.assertRaises(exceptions.NotFound, self.client.set_image_metadata,
+        meta = {'os_distro': 'alt1', 'os_version': 'alt2'}
+        self.assertRaises(lib_exc.NotFound, self.client.set_image_metadata,
                           data_utils.rand_uuid(), meta)
 
-    @test.attr(type=['negative', 'gate'])
+    @test.attr(type=['negative'])
+    @test.idempotent_id('2154fd03-ab54-457c-8874-e6e3eb56e9cf')
     def test_set_nonexistent_image_metadata_item(self):
         # Negative test: Metadata item should not be set to a
         # nonexistent image
-        meta = {'key1': 'alt'}
-        self.assertRaises(exceptions.NotFound,
+        meta = {'os_distro': 'alt'}
+        self.assertRaises(lib_exc.NotFound,
                           self.client.set_image_metadata_item,
-                          data_utils.rand_uuid(), 'key1',
+                          data_utils.rand_uuid(), 'os_distro',
                           meta)
 
-    @test.attr(type=['negative', 'gate'])
+    @test.attr(type=['negative'])
+    @test.idempotent_id('848e157f-6bcf-4b2e-a5dd-5124025a8518')
     def test_delete_nonexistent_image_metadata_item(self):
         # Negative test: Shouldn't be able to delete metadata
         # item from non-existent image
-        self.assertRaises(exceptions.NotFound,
+        self.assertRaises(lib_exc.NotFound,
                           self.client.delete_image_metadata_item,
-                          data_utils.rand_uuid(), 'key1')
-
-
-class ImagesMetadataTestXML(ImagesMetadataTestJSON):
-    _interface = 'xml'
+                          data_utils.rand_uuid(), 'os_distro')

@@ -1,0 +1,11 @@
+---
+prelude: |
+    This release includes the addition of the stable library interface for
+    tempest. This behaves just as tempest-lib did prior to this, but instead
+    it lives directly in the tempest project. For more information refer to
+    the `library docs`_.
+
+    .. _library docs: http://docs.openstack.org/developer/tempest/library.html#library
+
+features:
+  - Tempest library interface

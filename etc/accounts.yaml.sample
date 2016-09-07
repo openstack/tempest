@@ -1,0 +1,62 @@
+# The number of accounts required can be estimated as CONCURRENCY x 2
+# It is expected that each user provided here will be in a different tenant.
+# This is required to provide isolation between test for running in parallel
+#
+# Valid fields for credentials are defined in the descendants of
+# lib.auth.Credentials - see KeystoneV[2|3]Credentials.ATTRIBUTES
+#
+# The fields in KeystoneV3Credentials behave as follows:
+#
+# tenant_[id|name] also sets project_[id|name].
+#
+# project_[id|name] also sets tenant_[id|name].
+#
+# Providing distinct values for both tenant_[id|name] and project_[id|name]
+# will result in an InvalidCredentials exception.
+#
+# The value of project_domain_[id|name] is used for user_domain_[id|name] if
+# the latter is not specified.
+#
+# The value of user_domain_[id|name] is used for project_domain_[id|name] if
+# the latter is not specified.
+#
+# The value of domain_[id|name] is used for project_domain_[id|name] if not
+# specified and user_domain_[id|name] if not specified.
+
+- username: 'user_1'
+  tenant_name: 'test_tenant_1'
+  password: 'test_password'
+
+- username: 'user_2'
+  tenant_name: 'test_tenant_2'
+  password: 'test_password'
+
+# To specify which roles a user has list them under the roles field
+- username: 'multi_role_user'
+  tenant_name: 'test_tenant_42'
+  password: 'test_password'
+  roles:
+    - 'fun_role'
+    - 'not_an_admin'
+    - 'an_admin'
+
+# To specify a user has a role specified in the config file you can use the
+# type field to specify it, valid values are admin, operator, and reseller_admin
+- username: 'swift_pseudo_admin_user_1'
+  tenant_name: 'admin_tenant_1'
+  password: 'test_password'
+  types:
+     - 'reseller_admin'
+     - 'operator'
+
+# Networks can be specified to tell tempest which network it should use when
+# creating servers with an account
+
+- username: 'admin_user_1'
+  tenant_name: 'admin_tenant_1'
+  password: 'test_password'
+  types:
+     - 'admin'
+  resources:
+    network: 'public'
+    router: 'admin_tenant_1-router'

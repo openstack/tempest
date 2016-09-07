@@ -13,18 +13,14 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest.tests import fake_credentials
-
-
-def get_default_credentials(credential_type, fill_in=True):
-    return fake_credentials.FakeCredentials()
-
-
-def get_credentials(credential_type=None, fill_in=True, **kwargs):
-    return fake_credentials.FakeCredentials()
-
 
 class FakeAuthProvider(object):
 
     def auth_request(self, method, url, headers=None, body=None, filters=None):
         return url, headers, body
+
+    def get_token(self):
+        return "faketoken"
+
+    def base_url(self, filters, auth_data=None):
+        return "https://example.com"

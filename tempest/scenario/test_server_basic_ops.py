@@ -13,111 +13,124 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest.common.utils import data_utils
+import json
+import re
+
 from tempest import config
-from tempest.openstack.common import log as logging
+from tempest import exceptions
 from tempest.scenario import manager
-from tempest.scenario import utils as test_utils
 from tempest import test
 
 CONF = config.CONF
 
-LOG = logging.getLogger(__name__)
 
-load_tests = test_utils.load_tests_input_scenario_utils
+class TestServerBasicOps(manager.ScenarioTest):
 
+    """The test suite for server basic operations
 
-class TestServerBasicOps(manager.OfficialClientTest):
-
-    """
     This smoke test case follows this basic set of operations:
-
      * Create a keypair for use in launching an instance
      * Create a security group to control network access in instance
      * Add simple permissive rules to the security group
      * Launch an instance
-     * Pause/unpause the instance
-     * Suspend/resume the instance
+     * Perform ssh to instance
+     * Verify metadata service
+     * Verify metadata on config_drive
      * Terminate the instance
     """
 
     def setUp(self):
         super(TestServerBasicOps, self).setUp()
-        # Setup image and flavor the test instance
-        # Support both configured and injected values
-        if not hasattr(self, 'image_ref'):
-            self.image_ref = CONF.compute.image_ref
-        if not hasattr(self, 'flavor_ref'):
-            self.flavor_ref = CONF.compute.flavor_ref
-        self.image_utils = test_utils.ImageUtils()
-        if not self.image_utils.is_flavor_enough(self.flavor_ref,
-                                                 self.image_ref):
-            raise self.skipException(
-                '{image} does not fit in {flavor}'.format(
-                    image=self.image_ref, flavor=self.flavor_ref
-                )
-            )
-        self.run_ssh = CONF.compute.run_ssh and \
-            self.image_utils.is_sshable_image(self.image_ref)
-        self.ssh_user = self.image_utils.ssh_user(self.image_ref)
-        LOG.debug('Starting test for i:{image}, f:{flavor}. '
-                  'Run ssh: {ssh}, user: {ssh_user}'.format(
-                      image=self.image_ref, flavor=self.flavor_ref,
-                      ssh=self.run_ssh, ssh_user=self.ssh_user))
+        self.image_ref = CONF.compute.image_ref
+        self.flavor_ref = CONF.compute.flavor_ref
+        self.run_ssh = CONF.validation.run_validation
+        self.ssh_user = CONF.validation.image_ssh_user
 
-    def add_keypair(self):
-        self.keypair = self.create_keypair()
-
-    def create_security_group(self):
-        sg_name = data_utils.rand_name('secgroup-smoke')
-        sg_desc = sg_name + " description"
-        self.secgroup = self.compute_client.security_groups.create(sg_name,
-                                                                   sg_desc)
-        self.assertEqual(self.secgroup.name, sg_name)
-        self.assertEqual(self.secgroup.description, sg_desc)
-        self.set_resource('secgroup', self.secgroup)
-
-        # Add rules to the security group
-        self._create_loginable_secgroup_rule_nova(secgroup_id=self.secgroup.id)
-
-    def boot_instance(self):
-        # Create server with image and flavor from input scenario
-        create_kwargs = {
-            'key_name': self.keypair.id
-        }
-        instance = self.create_server(image=self.image_ref,
-                                      flavor=self.flavor_ref,
-                                      create_kwargs=create_kwargs)
-        self.set_resource('instance', instance)
-
-    def terminate_instance(self):
-        instance = self.get_resource('instance')
-        instance.delete()
-        self.remove_resource('instance')
-
-    def verify_ssh(self):
+    def verify_ssh(self, keypair):
         if self.run_ssh:
             # Obtain a floating IP
-            floating_ip = self.compute_client.floating_ips.create()
-            # Attach a floating IP
-            instance = self.get_resource('instance')
-            instance.add_floating_ip(floating_ip)
+            self.fip = self.create_floating_ip(self.instance)['ip']
             # Check ssh
-            try:
-                linux_client = self.get_remote_client(
-                    server_or_ip=floating_ip.ip,
-                    username=self.image_utils.ssh_user(self.image_ref),
-                    private_key=self.keypair.private_key)
-                linux_client.validate_authentication()
-            except Exception:
-                LOG.exception('ssh to server failed')
-                self._log_console_output()
-                raise
+            self.ssh_client = self.get_remote_client(
+                ip_address=self.fip,
+                username=self.ssh_user,
+                private_key=keypair['private_key'])
 
+    def verify_metadata(self):
+        if self.run_ssh and CONF.compute_feature_enabled.metadata_service:
+            # Verify metadata service
+            md_url = 'http://169.254.169.254/latest/meta-data/public-ipv4'
+
+            def exec_cmd_and_verify_output():
+                cmd = 'curl ' + md_url
+                result = self.ssh_client.exec_command(cmd)
+                if result:
+                    msg = ('Failed while verifying metadata on server. Result '
+                           'of command "%s" is NOT "%s".' % (cmd, self.fip))
+                    self.assertEqual(self.fip, result, msg)
+                    return 'Verification is successful!'
+
+            if not test.call_until_true(exec_cmd_and_verify_output,
+                                        CONF.compute.build_timeout,
+                                        CONF.compute.build_interval):
+                raise exceptions.TimeoutException('Timed out while waiting to '
+                                                  'verify metadata on server. '
+                                                  '%s is empty.' % md_url)
+
+    def _mount_config_drive(self):
+        cmd_blkid = 'blkid | grep -i config-2'
+        result = self.ssh_client.exec_command(cmd_blkid)
+        dev_name = re.match('([^:]+)', result).group()
+        self.ssh_client.exec_command('sudo mount %s /mnt' % dev_name)
+
+    def _unmount_config_drive(self):
+        self.ssh_client.exec_command('sudo umount /mnt')
+
+    def verify_metadata_on_config_drive(self):
+        if self.run_ssh and CONF.compute_feature_enabled.config_drive:
+            # Verify metadata on config_drive
+            self._mount_config_drive()
+            cmd_md = 'sudo cat /mnt/openstack/latest/meta_data.json'
+            result = self.ssh_client.exec_command(cmd_md)
+            self._unmount_config_drive()
+            result = json.loads(result)
+            self.assertIn('meta', result)
+            msg = ('Failed while verifying metadata on config_drive on server.'
+                   ' Result of command "%s" is NOT "%s".' % (cmd_md, self.md))
+            self.assertEqual(self.md, result['meta'], msg)
+
+    def verify_networkdata_on_config_drive(self):
+        if self.run_ssh and CONF.compute_feature_enabled.config_drive:
+            # Verify network data on config_drive
+            self._mount_config_drive()
+            cmd_md = 'sudo cat /mnt/openstack/latest/network_data.json'
+            result = self.ssh_client.exec_command(cmd_md)
+            self._unmount_config_drive()
+            result = json.loads(result)
+            self.assertIn('services', result)
+            self.assertIn('links', result)
+            self.assertIn('networks', result)
+            # TODO(clarkb) construct network_data from known network
+            # instance info and do direct comparison.
+
+    @test.idempotent_id('7fff3fb3-91d8-4fd0-bd7d-0204f1f180ba')
+    @test.attr(type='smoke')
     @test.services('compute', 'network')
-    def test_server_basicops(self):
-        self.add_keypair()
-        self.create_security_group()
-        self.boot_instance()
-        self.verify_ssh()
-        self.terminate_instance()
+    def test_server_basic_ops(self):
+        keypair = self.create_keypair()
+        self.security_group = self._create_security_group()
+        security_groups = [{'name': self.security_group['name']}]
+        self.md = {'meta1': 'data1', 'meta2': 'data2', 'metaN': 'dataN'}
+        self.instance = self.create_server(
+            image_id=self.image_ref,
+            flavor=self.flavor_ref,
+            key_name=keypair['name'],
+            security_groups=security_groups,
+            config_drive=CONF.compute_feature_enabled.config_drive,
+            metadata=self.md,
+            wait_until='ACTIVE')
+        self.verify_ssh(keypair)
+        self.verify_metadata()
+        self.verify_metadata_on_config_drive()
+        self.verify_networkdata_on_config_drive()
+        self.servers_client.delete_server(self.instance['id'])

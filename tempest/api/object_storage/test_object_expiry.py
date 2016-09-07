@@ -16,29 +16,26 @@
 import time
 
 from tempest.api.object_storage import base
-from tempest.common.utils import data_utils
-from tempest import exceptions
+from tempest.lib import exceptions as lib_exc
 from tempest import test
 
 
 class ObjectExpiryTest(base.BaseObjectTest):
     @classmethod
-    def setUpClass(cls):
-        super(ObjectExpiryTest, cls).setUpClass()
-        cls.container_name = data_utils.rand_name(name='TestContainer')
-        cls.container_client.create_container(cls.container_name)
+    def resource_setup(cls):
+        super(ObjectExpiryTest, cls).resource_setup()
+        cls.container_name = cls.create_container()
 
     def setUp(self):
         super(ObjectExpiryTest, self).setUp()
         # create object
-        self.object_name = data_utils.rand_name(name='TestObject')
-        resp, _ = self.object_client.create_object(self.container_name,
-                                                   self.object_name, '')
+        self.object_name, _ = self.create_object(
+            self.container_name)
 
     @classmethod
-    def tearDownClass(cls):
-        cls.delete_containers([cls.container_name])
-        super(ObjectExpiryTest, cls).tearDownClass()
+    def resource_cleanup(cls):
+        cls.delete_containers()
+        super(ObjectExpiryTest, cls).resource_cleanup()
 
     def _test_object_expiry(self, metadata):
         # update object metadata
@@ -51,28 +48,47 @@ class ObjectExpiryTest(base.BaseObjectTest):
         resp, _ = \
             self.object_client.list_object_metadata(self.container_name,
                                                     self.object_name)
-        self.assertEqual(resp['status'], '200')
         self.assertHeaders(resp, 'Object', 'HEAD')
         self.assertIn('x-delete-at', resp)
+        # we want to ensure that we will sleep long enough for things to
+        # actually expire, so figure out how many secs in the future that is.
+        sleepy_time = int(resp['x-delete-at']) - int(time.time())
+        sleepy_time = sleepy_time if sleepy_time > 0 else 0
         resp, body = self.object_client.get_object(self.container_name,
                                                    self.object_name)
-        self.assertEqual(resp['status'], '200')
         self.assertHeaders(resp, 'Object', 'GET')
         self.assertIn('x-delete-at', resp)
 
-        # sleep for over 5 seconds, so that object expires
-        time.sleep(5)
+        # add several seconds for safety.
+        time.sleep(sleepy_time)
+
+        # Checking whether object still exists for several seconds:
+        # sometimes object is not deleted immediately, so we are making
+        # get calls for an approximately 1 minute in a total. Get calls
+        # can take 3s each sometimes so we are making the requests in
+        # exponential periodicity
+        for i in range(1, 6):
+            time.sleep(2 ** i)
+            try:
+                self.object_client.get_object(self.container_name,
+                                              self.object_name)
+            except lib_exc.NotFound:
+                break
 
         # object should not be there anymore
-        self.assertRaises(exceptions.NotFound, self.object_client.get_object,
-                          self.container_name, self.object_name)
+        self.assertRaises(lib_exc.NotFound,
+                          self.object_client.get_object,
+                          self.container_name,
+                          self.object_name)
 
-    @test.attr(type='gate')
+    @test.idempotent_id('fb024a42-37f3-4ba5-9684-4f40a7910b41')
     def test_get_object_after_expiry_time(self):
-        metadata = {'X-Delete-After': '3'}
+        # the 10s is important, because the get calls can take 3s each
+        # some times
+        metadata = {'X-Delete-After': '10'}
         self._test_object_expiry(metadata)
 
-    @test.attr(type='gate')
+    @test.idempotent_id('e592f18d-679c-48fe-9e36-4be5f47102c5')
     def test_get_object_at_expiry_time(self):
-        metadata = {'X-Delete-At': str(int(time.time()) + 3)}
+        metadata = {'X-Delete-At': str(int(time.time()) + 10)}
         self._test_object_expiry(metadata)

@@ -23,14 +23,22 @@ CONF = config.CONF
 class FixedIPsTestJson(base.BaseV2ComputeAdminTest):
 
     @classmethod
-    def setUpClass(cls):
-        super(FixedIPsTestJson, cls).setUpClass()
+    def skip_checks(cls):
+        super(FixedIPsTestJson, cls).skip_checks()
         if CONF.service_available.neutron:
             msg = ("%s skipped as neutron is available" % cls.__name__)
             raise cls.skipException(msg)
+
+    @classmethod
+    def setup_clients(cls):
+        super(FixedIPsTestJson, cls).setup_clients()
         cls.client = cls.os_adm.fixed_ips_client
-        resp, server = cls.create_test_server(wait_until='ACTIVE')
-        resp, server = cls.servers_client.get_server(server['id'])
+
+    @classmethod
+    def resource_setup(cls):
+        super(FixedIPsTestJson, cls).resource_setup()
+        server = cls.create_test_server(wait_until='ACTIVE')
+        server = cls.servers_client.show_server(server['id'])['server']
         for ip_set in server['addresses']:
             for ip in server['addresses'][ip_set]:
                 if ip['OS-EXT-IPS:type'] == 'fixed':
@@ -39,23 +47,18 @@ class FixedIPsTestJson(base.BaseV2ComputeAdminTest):
             if cls.ip:
                 break
 
-    @test.attr(type='gate')
+    @test.idempotent_id('16b7d848-2f7c-4709-85a3-2dfb4576cc52')
+    @test.services('network')
     def test_list_fixed_ip_details(self):
-        resp, fixed_ip = self.client.get_fixed_ip_details(self.ip)
-        self.assertEqual(fixed_ip['address'], self.ip)
+        fixed_ip = self.client.show_fixed_ip(self.ip)
+        self.assertEqual(fixed_ip['fixed_ip']['address'], self.ip)
 
-    @test.attr(type='gate')
+    @test.idempotent_id('5485077b-7e46-4cec-b402-91dc3173433b')
+    @test.services('network')
     def test_set_reserve(self):
-        body = {"reserve": "None"}
-        resp, body = self.client.reserve_fixed_ip(self.ip, body)
-        self.assertEqual(resp.status, 202)
+        self.client.reserve_fixed_ip(self.ip, reserve="None")
 
-    @test.attr(type='gate')
+    @test.idempotent_id('7476e322-b9ff-4710-bf82-49d51bac6e2e')
+    @test.services('network')
     def test_set_unreserve(self):
-        body = {"unreserve": "None"}
-        resp, body = self.client.reserve_fixed_ip(self.ip, body)
-        self.assertEqual(resp.status, 202)
-
-
-class FixedIPsTestXml(FixedIPsTestJson):
-    _interface = 'xml'
+        self.client.reserve_fixed_ip(self.ip, unreserve="None")

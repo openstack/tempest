@@ -13,24 +13,15 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import json
-import urllib
-
-from tempest.common import rest_client
-from tempest import config
 from xml.etree import ElementTree as etree
 
-CONF = config.CONF
+from oslo_serialization import jsonutils as json
+from six.moves.urllib import parse as urllib
+
+from tempest.lib.common import rest_client
 
 
 class ContainerClient(rest_client.RestClient):
-    def __init__(self, auth_provider):
-        super(ContainerClient, self).__init__(auth_provider)
-
-        # Overwrites json-specific header encoding in rest_client.RestClient
-        self.headers = {}
-        self.service = CONF.object_storage.catalog_type
-        self.format = 'json'
 
     def create_container(
             self, container_name,
@@ -38,9 +29,9 @@ class ContainerClient(rest_client.RestClient):
             remove_metadata=None,
             metadata_prefix='X-Container-Meta-',
             remove_metadata_prefix='X-Remove-Container-Meta-'):
-        """
-           Creates a container, with optional metadata passed in as a
-           dictionary
+        """Creates a container
+
+        with optional metadata passed in as a dictionary
         """
         url = str(container_name)
         headers = {}
@@ -53,12 +44,14 @@ class ContainerClient(rest_client.RestClient):
                 headers[remove_metadata_prefix + key] = remove_metadata[key]
 
         resp, body = self.put(url, body=None, headers=headers)
+        self.expected_success([201, 202], resp.status)
         return resp, body
 
     def delete_container(self, container_name):
         """Deletes the container (if it's empty)."""
         url = str(container_name)
         resp, body = self.delete(url)
+        self.expected_success(204, resp.status)
         return resp, body
 
     def update_container_metadata(
@@ -79,6 +72,7 @@ class ContainerClient(rest_client.RestClient):
                 headers[remove_metadata_prefix + key] = remove_metadata[key]
 
         resp, body = self.post(url, body=None, headers=headers)
+        self.expected_success(204, resp.status)
         return resp, body
 
     def delete_container_metadata(self, container_name, metadata,
@@ -92,21 +86,21 @@ class ContainerClient(rest_client.RestClient):
                 headers[metadata_prefix + item] = metadata[item]
 
         resp, body = self.post(url, body=None, headers=headers)
+        self.expected_success(204, resp.status)
         return resp, body
 
     def list_container_metadata(self, container_name):
-        """
-        Retrieves container metadata headers
-        """
+        """Retrieves container metadata headers"""
         url = str(container_name)
         resp, body = self.head(url)
+        self.expected_success(204, resp.status)
         return resp, body
 
     def list_all_container_objects(self, container, params=None):
-        """
-            Returns complete list of all objects in the container, even if
-            item count is beyond 10,000 item listing limit.
-            Does not require any parameters aside from container name.
+        """Returns complete list of all objects in the container
+
+        even if item count is beyond 10,000 item listing limit.
+        Does not require any parameters aside from container name.
         """
         # TODO(dwalleck): Rewrite using json format to avoid newlines at end of
         # obj names. Set limit to API limit - 1 (max returned items = 9999)
@@ -121,29 +115,11 @@ class ContainerClient(rest_client.RestClient):
         resp, objlist = self.list_container_contents(
             container,
             params={'limit': limit, 'format': 'json'})
+        self.expected_success(200, resp.status)
         return objlist
-        """tmp = []
-        for obj in objlist:
-            tmp.append(obj['name'])
-        objlist = tmp
-
-        if len(objlist) >= limit:
-
-            # Increment marker
-            marker = objlist[len(objlist) - 1]
-
-            # Get the next chunk of the list
-            objlist.extend(_list_all_container_objects(container,
-                                                      params={'marker': marker,
-                                                              'limit': limit}))
-            return objlist
-        else:
-            # Return final, complete list
-            return objlist"""
 
     def list_container_contents(self, container, params=None):
-        """
-           List the objects in a container, given the container name
+        """List the objects in a container, given the container name
 
            Returns the container object listing as a plain text list, or as
            xml or json if that option is specified via the 'format' argument.
@@ -186,4 +162,5 @@ class ContainerClient(rest_client.RestClient):
             body = json.loads(body)
         elif params and params.get('format') == 'xml':
             body = etree.fromstring(body)
+        self.expected_success([200, 204], resp.status)
         return resp, body

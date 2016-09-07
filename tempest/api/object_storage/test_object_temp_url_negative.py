@@ -1,7 +1,5 @@
 # Copyright (C) 2013 eNovance SAS <licensing@enovance.com>
 #
-# Author: Joe H. Rahme <joe.hakim.rahme@enovance.com>
-#
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
 # a copy of the License at
@@ -17,11 +15,12 @@
 import hashlib
 import hmac
 import time
-import urlparse
+
+from six.moves.urllib import parse as urlparse
 
 from tempest.api.object_storage import base
 from tempest.common.utils import data_utils
-from tempest import exceptions
+from tempest.lib import exceptions as lib_exc
 from tempest import test
 
 
@@ -31,13 +30,10 @@ class ObjectTempUrlNegativeTest(base.BaseObjectTest):
     containers = []
 
     @classmethod
-    @test.safe_setup
-    def setUpClass(cls):
-        super(ObjectTempUrlNegativeTest, cls).setUpClass()
+    def resource_setup(cls):
+        super(ObjectTempUrlNegativeTest, cls).resource_setup()
 
-        cls.container_name = data_utils.rand_name(name='TestContainer')
-        cls.container_client.create_container(cls.container_name)
-        cls.containers = [cls.container_name]
+        cls.container_name = cls.create_container()
 
         # update account metadata
         cls.key = 'Meta'
@@ -47,15 +43,13 @@ class ObjectTempUrlNegativeTest(base.BaseObjectTest):
             cls.account_client.list_account_metadata()
 
     @classmethod
-    def tearDownClass(cls):
+    def resource_cleanup(cls):
         resp, _ = cls.account_client.delete_account_metadata(
             metadata=cls.metadata)
 
-        cls.delete_containers(cls.containers)
+        cls.delete_containers()
 
-        # delete the user setup created
-        cls.data.teardown_all()
-        super(ObjectTempUrlNegativeTest, cls).tearDownClass()
+        super(ObjectTempUrlNegativeTest, cls).resource_cleanup()
 
     def setUp(self):
         super(ObjectTempUrlNegativeTest, self).setUp()
@@ -69,10 +63,10 @@ class ObjectTempUrlNegativeTest(base.BaseObjectTest):
 
         # create object
         self.object_name = data_utils.rand_name(name='ObjectTemp')
-        self.data = data_utils.arbitrary_string(size=len(self.object_name),
-                                                base_text=self.object_name)
+        self.content = data_utils.arbitrary_string(size=len(self.object_name),
+                                                   base_text=self.object_name)
         self.object_client.create_object(self.container_name,
-                                         self.object_name, self.data)
+                                         self.object_name, self.content)
 
     def _get_expiry_date(self, expiration_time=1000):
         return int(time.time() + expiration_time)
@@ -94,7 +88,8 @@ class ObjectTempUrlNegativeTest(base.BaseObjectTest):
 
         return url
 
-    @test.attr(type=['gate', 'negative'])
+    @test.attr(type=['negative'])
+    @test.idempotent_id('5a583aca-c804-41ba-9d9a-e7be132bdf0b')
     @test.requires_ext(extension='tempurl', service='object')
     def test_get_object_after_expiration_time(self):
 
@@ -107,5 +102,5 @@ class ObjectTempUrlNegativeTest(base.BaseObjectTest):
         # temp URL is valid for 1 seconds, let's wait 2
         time.sleep(2)
 
-        self.assertRaises(exceptions.Unauthorized,
+        self.assertRaises(lib_exc.Unauthorized,
                           self.object_client.get, url)

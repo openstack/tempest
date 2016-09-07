@@ -14,33 +14,40 @@
 #    under the License.
 
 from tempest.api.compute import base
-from tempest import exceptions
+from tempest.lib import exceptions as lib_exc
 from tempest import test
 
 
 class ServerAddressesNegativeTestJSON(base.BaseV2ComputeTest):
 
     @classmethod
-    def setUpClass(cls):
+    def setup_credentials(cls):
         cls.set_network_resources(network=True, subnet=True)
-        super(ServerAddressesNegativeTestJSON, cls).setUpClass()
+        super(ServerAddressesNegativeTestJSON, cls).setup_credentials()
+
+    @classmethod
+    def setup_clients(cls):
+        super(ServerAddressesNegativeTestJSON, cls).setup_clients()
         cls.client = cls.servers_client
 
-        resp, cls.server = cls.create_test_server(wait_until='ACTIVE')
+    @classmethod
+    def resource_setup(cls):
+        super(ServerAddressesNegativeTestJSON, cls).resource_setup()
+        cls.server = cls.create_test_server(wait_until='ACTIVE')
 
-    @test.attr(type=['negative', 'gate'])
+    @test.attr(type=['negative'])
+    @test.idempotent_id('02c3f645-2d2e-4417-8525-68c0407d001b')
+    @test.services('network')
     def test_list_server_addresses_invalid_server_id(self):
         # List addresses request should fail if server id not in system
-        self.assertRaises(exceptions.NotFound, self.client.list_addresses,
+        self.assertRaises(lib_exc.NotFound, self.client.list_addresses,
                           '999')
 
-    @test.attr(type=['negative', 'gate'])
+    @test.attr(type=['negative'])
+    @test.idempotent_id('a2ab5144-78c0-4942-a0ed-cc8edccfd9ba')
+    @test.services('network')
     def test_list_server_addresses_by_network_neg(self):
         # List addresses by network should fail if network name not valid
-        self.assertRaises(exceptions.NotFound,
+        self.assertRaises(lib_exc.NotFound,
                           self.client.list_addresses_by_network,
                           self.server['id'], 'invalid')
-
-
-class ServerAddressesNegativeTestXML(ServerAddressesNegativeTestJSON):
-    _interface = 'xml'

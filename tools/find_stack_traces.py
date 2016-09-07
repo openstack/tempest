@@ -16,12 +16,13 @@
 #    under the License.
 
 import gzip
-import re
-import StringIO
-import sys
-import urllib2
-
 import pprint
+import re
+import six
+import six.moves.urllib.request as urlreq
+import sys
+
+
 pp = pprint.PrettyPrinter()
 
 NOVA_TIMESTAMP = r"\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d\.\d\d\d"
@@ -64,10 +65,10 @@ class StackTrace(object):
 
 def hunt_for_stacktrace(url):
     """Return TRACE or ERROR lines out of logs."""
-    req = urllib2.Request(url)
+    req = urlreq.Request(url)
     req.add_header('Accept-Encoding', 'gzip')
-    page = urllib2.urlopen(req)
-    buf = StringIO.StringIO(page.read())
+    page = urlreq.urlopen(req)
+    buf = six.StringIO(page.read())
     f = gzip.GzipFile(fileobj=buf)
     content = f.read()
 
@@ -104,7 +105,7 @@ def log_url(url, log):
 
 
 def collect_logs(url):
-    page = urllib2.urlopen(url)
+    page = urlreq.urlopen(url)
     content = page.read()
     logs = re.findall('(screen-[\w-]+\.txt\.gz)</a>', content)
     return logs
