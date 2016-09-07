@@ -13,6 +13,7 @@
 # limitations under the License.
 
 from oslo_serialization import jsonutils as json
+from six.moves.urllib import parse as urllib
 
 from tempest.lib.common import rest_client
 
@@ -39,9 +40,13 @@ class RolesClient(rest_client.RestClient):
         body = json.loads(body)
         return rest_client.ResponseBody(resp, body)
 
-    def list_roles(self):
+    def list_roles(self, **params):
         """Get the list of Roles."""
-        resp, body = self.get("roles")
+
+        url = 'roles'
+        if params:
+            url += '?%s' % urllib.urlencode(params)
+        resp, body = self.get(url)
         self.expected_success(200, resp.status)
         body = json.loads(body)
         return rest_client.ResponseBody(resp, body)
@@ -64,14 +69,14 @@ class RolesClient(rest_client.RestClient):
         self.expected_success(204, resp.status)
         return rest_client.ResponseBody(resp, body)
 
-    def assign_user_role_on_project(self, project_id, user_id, role_id):
+    def create_user_role_on_project(self, project_id, user_id, role_id):
         """Add roles to a user on a project."""
         resp, body = self.put('projects/%s/users/%s/roles/%s' %
                               (project_id, user_id, role_id), None)
         self.expected_success(204, resp.status)
         return rest_client.ResponseBody(resp, body)
 
-    def assign_user_role_on_domain(self, domain_id, user_id, role_id):
+    def create_user_role_on_domain(self, domain_id, user_id, role_id):
         """Add roles to a user on a domain."""
         resp, body = self.put('domains/%s/users/%s/roles/%s' %
                               (domain_id, user_id, role_id), None)
@@ -124,22 +129,22 @@ class RolesClient(rest_client.RestClient):
         self.expected_success(204, resp.status)
         return rest_client.ResponseBody(resp)
 
-    def assign_group_role_on_project(self, project_id, group_id, role_id):
-        """Add roles to a user on a project."""
+    def create_group_role_on_project(self, project_id, group_id, role_id):
+        """Add roles to a group on a project."""
         resp, body = self.put('projects/%s/groups/%s/roles/%s' %
                               (project_id, group_id, role_id), None)
         self.expected_success(204, resp.status)
         return rest_client.ResponseBody(resp, body)
 
-    def assign_group_role_on_domain(self, domain_id, group_id, role_id):
-        """Add roles to a user on a domain."""
+    def create_group_role_on_domain(self, domain_id, group_id, role_id):
+        """Add roles to a group on a domain."""
         resp, body = self.put('domains/%s/groups/%s/roles/%s' %
                               (domain_id, group_id, role_id), None)
         self.expected_success(204, resp.status)
         return rest_client.ResponseBody(resp, body)
 
     def list_group_roles_on_project(self, project_id, group_id):
-        """list roles of a user on a project."""
+        """list roles of a group on a project."""
         resp, body = self.get('projects/%s/groups/%s/roles' %
                               (project_id, group_id))
         self.expected_success(200, resp.status)
@@ -147,7 +152,7 @@ class RolesClient(rest_client.RestClient):
         return rest_client.ResponseBody(resp, body)
 
     def list_group_roles_on_domain(self, domain_id, group_id):
-        """list roles of a user on a domain."""
+        """list roles of a group on a domain."""
         resp, body = self.get('domains/%s/groups/%s/roles' %
                               (domain_id, group_id))
         self.expected_success(200, resp.status)
@@ -155,14 +160,14 @@ class RolesClient(rest_client.RestClient):
         return rest_client.ResponseBody(resp, body)
 
     def delete_role_from_group_on_project(self, project_id, group_id, role_id):
-        """Delete role of a user on a project."""
+        """Delete role of a group on a project."""
         resp, body = self.delete('projects/%s/groups/%s/roles/%s' %
                                  (project_id, group_id, role_id))
         self.expected_success(204, resp.status)
         return rest_client.ResponseBody(resp, body)
 
     def delete_role_from_group_on_domain(self, domain_id, group_id, role_id):
-        """Delete role of a user on a domain."""
+        """Delete role of a group on a domain."""
         resp, body = self.delete('domains/%s/groups/%s/roles/%s' %
                                  (domain_id, group_id, role_id))
         self.expected_success(204, resp.status)
@@ -170,7 +175,7 @@ class RolesClient(rest_client.RestClient):
 
     def check_role_from_group_on_project_existence(self, project_id,
                                                    group_id, role_id):
-        """Check role of a user on a project."""
+        """Check role of a group on a project."""
         resp, body = self.head('projects/%s/groups/%s/roles/%s' %
                                (project_id, group_id, role_id))
         self.expected_success(204, resp.status)
@@ -178,7 +183,7 @@ class RolesClient(rest_client.RestClient):
 
     def check_role_from_group_on_domain_existence(self, domain_id,
                                                   group_id, role_id):
-        """Check role of a user on a domain."""
+        """Check role of a group on a domain."""
         resp, body = self.head('domains/%s/groups/%s/roles/%s' %
                                (domain_id, group_id, role_id))
         self.expected_success(204, resp.status)

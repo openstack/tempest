@@ -77,11 +77,11 @@ class BaseTrustsV3Test(base.BaseIdentityV3AdminTest):
         self.not_delegated_role_id = role['id']
 
         # Assign roles to trustor
-        self.roles_client.assign_user_role_on_project(
+        self.roles_client.create_user_role_on_project(
             self.trustor_project_id,
             self.trustor_user_id,
             self.delegated_role_id)
-        self.roles_client.assign_user_role_on_project(
+        self.roles_client.create_user_role_on_project(
             self.trustor_project_id,
             self.trustor_user_id,
             self.not_delegated_role_id)

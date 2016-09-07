@@ -74,7 +74,9 @@ class CredsClient(object):
             msg = 'No "%s" role found' % role_name
             raise lib_exc.NotFound(msg)
         try:
-            self._assign_user_role(project, user, role)
+            self.roles_client.create_user_role_on_project(project['id'],
+                                                          user['id'],
+                                                          role['id'])
         except lib_exc.Conflict:
             LOG.debug("Role %s already assigned on project %s for user %s" % (
                 role['id'], project['id'], user['id']))
@@ -124,11 +126,6 @@ class V2CredsClient(CredsClient):
             tenant_name=project['name'], tenant_id=project['id'],
             password=password)
 
-    def _assign_user_role(self, project, user, role):
-        self.roles_client.create_user_role_on_project(project['id'],
-                                                      user['id'],
-                                                      role['id'])
-
 
 class V3CredsClient(CredsClient):
     project_id_param = 'project_id'
@@ -176,11 +173,6 @@ class V3CredsClient(CredsClient):
             domain_id=self.creds_domain['id'],
             domain_name=self.creds_domain['name'])
 
-    def _assign_user_role(self, project, user, role):
-        self.roles_client.assign_user_role_on_project(project['id'],
-                                                      user['id'],
-                                                      role['id'])
-
     def assign_user_role_on_domain(self, user, role_name, domain=None):
         """Assign the specified role on a domain
 
@@ -198,7 +190,7 @@ class V3CredsClient(CredsClient):
             msg = 'No "%s" role found' % role_name
             raise lib_exc.NotFound(msg)
         try:
-            self.roles_client.assign_user_role_on_domain(
+            self.roles_client.create_user_role_on_domain(
                 domain['id'], user['id'], role['id'])
         except lib_exc.Conflict:
             LOG.debug("Role %s already assigned on domain %s for user %s",
