@@ -117,8 +117,6 @@ class QuotasAdminTestJSON(base.BaseV2ComputeAdminTest):
                                                password=password,
                                                project=project,
                                                email=email)
-        if 'user' in user:
-            user = user['user']
         user_id = user['id']
         self.addCleanup(self.identity_utils.delete_user, user_id)
 
