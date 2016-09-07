@@ -128,7 +128,7 @@ class VolumeTypesV2Test(base.BaseVolumeAdminTest):
         body = self.create_volume_type(name=name)
         # Create encryption type
         encryption_type = \
-            self.admin_volume_types_client.create_encryption_type(
+            self.admin_encryption_types_client.create_encryption_type(
                 body['id'], provider=provider,
                 control_location=control_location)['encryption']
         self.assertIn('volume_type_id', encryption_type)
@@ -141,7 +141,7 @@ class VolumeTypesV2Test(base.BaseVolumeAdminTest):
 
         # Get encryption type
         fetched_encryption_type = (
-            self.admin_volume_types_client.show_encryption_type(
+            self.admin_encryption_types_client.show_encryption_type(
                 encryption_type['volume_type_id']))
         self.assertEqual(provider,
                          fetched_encryption_type['provider'],
@@ -153,14 +153,11 @@ class VolumeTypesV2Test(base.BaseVolumeAdminTest):
                          'different from the created encryption_type')
 
         # Delete encryption type
-        self.admin_volume_types_client.delete_encryption_type(
-            encryption_type['volume_type_id'])
-        resource = {"id": encryption_type['volume_type_id'],
-                    "type": "encryption-type"}
-        self.admin_volume_types_client.wait_for_resource_deletion(resource)
+        type_id = encryption_type['volume_type_id']
+        self.admin_encryption_types_client.delete_encryption_type(type_id)
+        self.admin_encryption_types_client.wait_for_resource_deletion(type_id)
         deleted_encryption_type = (
-            self.admin_volume_types_client.show_encryption_type(
-                encryption_type['volume_type_id']))
+            self.admin_encryption_types_client.show_encryption_type(type_id))
         self.assertEmpty(deleted_encryption_type)
 
     @test.idempotent_id('cf9f07c6-db9e-4462-a243-5933ad65e9c8')

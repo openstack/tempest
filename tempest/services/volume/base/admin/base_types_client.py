@@ -23,21 +23,9 @@ from tempest.lib import exceptions as lib_exc
 class BaseTypesClient(rest_client.RestClient):
     """Client class to send CRUD Volume Types API requests"""
 
-    def is_resource_deleted(self, resource):
-        # to use this method self.resource must be defined to respective value
-        # Resource is a dictionary containing resource id and type
-        # Resource : {"id" : resource_id
-        #             "type": resource_type}
+    def is_resource_deleted(self, id):
         try:
-            if resource['type'] == "volume-type":
-                self.show_volume_type(resource['id'])
-            elif resource['type'] == "encryption-type":
-                body = self.show_encryption_type(resource['id'])
-                if not body:
-                    return True
-            else:
-                msg = (" resource value is either not defined or incorrect.")
-                raise lib_exc.UnprocessableEntity(msg)
+            self.show_volume_type(id)
         except lib_exc.NotFound:
             return True
         return False
@@ -45,7 +33,7 @@ class BaseTypesClient(rest_client.RestClient):
     @property
     def resource_type(self):
         """Returns the primary type of resource this client works with."""
-        return 'volume-type/encryption-type'
+        return 'volume-type'
 
     def list_volume_types(self, **params):
         """List all the volume_types created.
@@ -169,36 +157,4 @@ class BaseTypesClient(rest_client.RestClient):
         resp, body = self.put(url, put_body)
         body = json.loads(body)
         self.expected_success(200, resp.status)
-        return rest_client.ResponseBody(resp, body)
-
-    def show_encryption_type(self, volume_type_id):
-        """Get the volume encryption type for the specified volume type.
-
-        volume_type_id: Id of volume_type.
-        """
-        url = "/types/%s/encryption" % volume_type_id
-        resp, body = self.get(url)
-        body = json.loads(body)
-        self.expected_success(200, resp.status)
-        return rest_client.ResponseBody(resp, body)
-
-    def create_encryption_type(self, volume_type_id, **kwargs):
-        """Create encryption type.
-
-        TODO: Current api-site doesn't contain this API description.
-        After fixing the api-site, we need to fix here also for putting
-        the link to api-site.
-        """
-        url = "/types/%s/encryption" % volume_type_id
-        post_body = json.dumps({'encryption': kwargs})
-        resp, body = self.post(url, post_body)
-        body = json.loads(body)
-        self.expected_success(200, resp.status)
-        return rest_client.ResponseBody(resp, body)
-
-    def delete_encryption_type(self, volume_type_id):
-        """Delete the encryption type for the specified volume-type."""
-        resp, body = self.delete(
-            "/types/%s/encryption/provider" % volume_type_id)
-        self.expected_success(202, resp.status)
         return rest_client.ResponseBody(resp, body)
