@@ -37,13 +37,32 @@ class ExistsAllResponseHeaders(object):
         self.target = target
         self.method = method
 
+    def _content_length_required(self, resp):
+        # Verify whether given HTTP response must contain content-length.
+        # Take into account the exceptions defined in RFC 7230.
+        if resp.status in range(100, 200) or resp.status == 204:
+            return False
+
+        return True
+
     def match(self, actual):
         """Check headers
 
-        param: actual HTTP response headers
+        param: actual HTTP response object containing headers and status
         """
-        # Check common headers for all HTTP methods
-        if 'content-length' not in actual:
+        # Check common headers for all HTTP methods.
+        #
+        # Please note that for 1xx and 204 responses Content-Length presence
+        # is not checked intensionally. According to RFC 7230 a server MUST
+        # NOT send the header in such responses. Thus, clients should not
+        # depend on this header. However, the standard does not require them
+        # to validate the server's behavior. We leverage that to not refuse
+        # any implementation violating it like Swift [1] or some versions of
+        # Ceph RadosGW [2].
+        # [1] https://bugs.launchpad.net/swift/+bug/1537811
+        # [2] http://tracker.ceph.com/issues/13582
+        if ('content-length' not in actual and
+                self._content_length_required(actual)):
             return NonExistentHeader('content-length')
         if 'content-type' not in actual:
             return NonExistentHeader('content-type')
