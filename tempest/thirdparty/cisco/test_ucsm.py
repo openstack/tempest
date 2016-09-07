@@ -283,7 +283,7 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
                 if dns_nameservers is not None:
                     subnet_kwargs['dns_nameservers'] = dns_nameservers
                 subnet = self._create_subnet(**subnet_kwargs)
-                subnet.add_to_router(router.id)
+                self.routers_client.add_router_interface(router['id'], subnet_id=subnet['id'])
         return network, subnet, router
 
     def _create_network(self, networks_client=None, routers_client=None,
@@ -635,10 +635,10 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
         self.assertEqual('ACTIVE', network_obj['status'])
         self._create_subnet(network_obj, enable_dhcp=False)
         kwargs = {'binding:vnic_type': 'direct'}
-        port_obj = self._create_port(network_obj.id, **kwargs)
+        port_obj = self._create_port(network_obj['id'], **kwargs)
         create_kwargs = {
             'networks': [
-                {'port': port_obj.id},
+                {'port': port_obj['id']},
             ]
         }
         # Create server
@@ -648,13 +648,13 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
 
         # Verify vlan profile has been created
         network = self.admin_networks_client.show_network(
-            network_obj.id)['network']
+            network_obj['id'])['network']
         vlan_id = network['provider:segmentation_id']
         self.timed_assert(self.assertNotEmpty,
                           lambda: self.ucsm.get_vlan_profile(vlan_id))
 
         # Verify port profile has been created
-        port = self.admin_ports_client.show_port(port_obj.id)['port']
+        port = self.admin_ports_client.show_port(port_obj['id'])['port']
         port_profile_id = port['binding:vif_details'].get('profileid', None)
         port_profile_dn = 'fabric/lan/profiles/vnic-' + port_profile_id
         self.assertIsNotNone(port_profile_id,
@@ -810,17 +810,17 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
                   'binding:vnic_type': 'direct'}
 
         # Create server #1
-        port_obj1 = self._create_port(network_obj.id, **kwargs)
+        port_obj1 = self._create_port(network_obj['id'], **kwargs)
         server1 = self._create_server(
             data_utils.rand_name('server-smoke'),
-            network_obj.id, port_id=port_obj1.id,
+            network_obj['id'], port_id=port_obj1['id'],
             availability_zone='nova:' + master_host)
 
         # Create server #2 on the same compute
-        port_obj2 = self._create_port(network_obj.id, **kwargs)
+        port_obj2 = self._create_port(network_obj['id'], **kwargs)
         server2 = self._create_server(
             data_utils.rand_name('server-smoke'),
-            network_obj.id, port_id=port_obj2.id,
+            network_obj['id'], port_id=port_obj2['id'],
             availability_zone='nova:' + master_host)
 
         self.assert_vm_to_vm_connectivity(server1, server2)
@@ -841,16 +841,16 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
         kwargs = {'security_groups': [self.security_group['id']],
                   'binding:vnic_type': 'direct'}
         # Create server #1
-        port_obj1 = self._create_port(network_obj.id, **kwargs)
+        port_obj1 = self._create_port(network_obj['id'], **kwargs)
         server1 = self._create_server(
             data_utils.rand_name('server-smoke'),
-            network_obj.id, port_id=port_obj1.id,
+            network_obj['id'], port_id=port_obj1['id'],
             availability_zone='nova:' + master_host)
         # Create server #2 on the same compute
-        port_obj2 = self._create_port(network_obj.id, **kwargs)
+        port_obj2 = self._create_port(network_obj['id'], **kwargs)
         server2 = self._create_server(
             data_utils.rand_name('server-smoke'),
-            network_obj.id, port_id=port_obj2.id,
+            network_obj['id'], port_id=port_obj2['id'],
             availability_zone='nova:' + slave_host)
 
         self.assert_vm_to_vm_connectivity(server1, server2)
@@ -864,18 +864,18 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
 
         network_obj, subnet_obj, router_obj = self.create_networks()
         port_obj = self._create_port(
-            network_obj.id, security_groups=[self.security_group['id']])
+            network_obj['id'], security_groups=[self.security_group['id']])
         server = self._create_server(data_utils.rand_name('server-smoke'),
-                                     network_obj.id, port_id=port_obj.id)
+                                     network_obj['id'], port_id=port_obj['id'])
         # Verify vlan profile has been created
         network = self.admin_networks_client.show_network(
-            network_obj.id)['network']
+            network_obj['id'])['network']
         vlan_id = network['provider:segmentation_id']
         self.timed_assert(self.assertNotEmpty,
                           lambda: self.ucsm.get_vlan_profile(vlan_id))
 
         # Verify vlan has been added to a compute where instance is launched
-        port = self.admin_ports_client.show_port(port_obj.id)['port']
+        port = self.admin_ports_client.show_port(port_obj['id'])['port']
         binding_host_id = port['binding:host_id']
         for eth_name in self.eth_names:
             self.timed_assert(
@@ -899,16 +899,16 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
         network_obj, subnet_obj, router_obj = self.create_networks()
         kwargs = {'security_groups': [self.security_group['id']]}
         # Create server #1
-        port_obj1 = self._create_port(network_obj.id, **kwargs)
+        port_obj1 = self._create_port(network_obj['id'], **kwargs)
         server1 = self._create_server(
             data_utils.rand_name('server-smoke'),
-            network_obj.id, port_id=port_obj1.id,
+            network_obj['id'], port_id=port_obj1['id'],
             availability_zone='nova:' + master_host)
         # Create server #2 on the same compute
-        port_obj2 = self._create_port(network_obj.id, **kwargs)
+        port_obj2 = self._create_port(network_obj['id'], **kwargs)
         server2 = self._create_server(
             data_utils.rand_name('server-smoke'),
-            network_obj.id, port_id=port_obj2.id,
+            network_obj['id'], port_id=port_obj2['id'],
             availability_zone='nova:' + master_host)
 
         self.assert_vm_to_vm_connectivity(server1, server2)
@@ -931,16 +931,16 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
         network_obj, subnet_obj, router_obj = self.create_networks()
         kwargs = {'security_groups': [self.security_group['id']]}
         # Create server #1
-        port_obj1 = self._create_port(network_obj.id, **kwargs)
+        port_obj1 = self._create_port(network_obj['id'], **kwargs)
         server1 = self._create_server(
             data_utils.rand_name('server-smoke'),
-            network_obj.id, port_id=port_obj1.id,
+            network_obj['id'], port_id=port_obj1['id'],
             availability_zone='nova:' + master_host)
         # Create server #2 on another compute
-        port_obj2 = self._create_port(network_obj.id, **kwargs)
+        port_obj2 = self._create_port(network_obj['id'], **kwargs)
         server2 = self._create_server(
             data_utils.rand_name('server-smoke'),
-            network_obj.id, port_id=port_obj2.id,
+            network_obj['id'], port_id=port_obj2['id'],
             availability_zone='nova:' + slave_host)
 
         self.assert_vm_to_vm_connectivity(server1, server2)
@@ -959,20 +959,20 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
         network_obj, subnet_obj, router_obj = self.create_networks()
         kwargs = {'security_groups': [self.security_group['id']]}
         # Create server #1
-        port_obj1 = self._create_port(network_obj.id, **kwargs)
+        port_obj1 = self._create_port(network_obj['id'], **kwargs)
         server1 = self._create_server(
             data_utils.rand_name('server-smoke'),
-            network_obj.id, port_id=port_obj1.id,
+            network_obj['id'], port_id=port_obj1['id'],
             availability_zone='nova:' + master_host)
         # Create server #2 on the same host
-        port_obj2 = self._create_port(network_obj.id, **kwargs)
+        port_obj2 = self._create_port(network_obj['id'], **kwargs)
         server2 = self._create_server(
             data_utils.rand_name('server-smoke'),
-            network_obj.id, port_id=port_obj2.id,
+            network_obj['id'], port_id=port_obj2['id'],
             availability_zone='nova:' + master_host)
         # Verify vlan profile has been created
         network = self.admin_networks_client.show_network(
-            network_obj.id)['network']
+            network_obj['id'])['network']
         vlan_id = network['provider:segmentation_id']
         self.timed_assert(self.assertNotEmpty,
                           lambda: self.ucsm.get_vlan_profile(vlan_id))
@@ -993,7 +993,7 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
 
         # Verify vlan profile has been created
         network = self.admin_networks_client.show_network(
-            network_obj.id)['network']
+            network_obj['id'])['network']
         vlan_id = network['provider:segmentation_id']
         self.timed_assert(self.assertNotEmpty,
                           lambda: self.ucsm.get_vlan_profile(vlan_id))
@@ -1080,7 +1080,7 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
 
         network_obj, subnet_obj, router_obj = self.create_networks()
         kwargs = {'security_groups': [self.security_group['id']]}
-        port_obj = self._create_port(network_obj.id, **kwargs)
+        port_obj = self._create_port(network_obj['id'], **kwargs)
 
         random_ucsm = random.choice(self.multi_ucsm_conf.values())
         random_ucsm_client = self.multi_ucsm_clients[random_ucsm['ucsm_ip']]
@@ -1088,18 +1088,18 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
         random_compute_sp = random_ucsm['compute_host_dict'][random_compute]
         server = self._create_server(
             data_utils.rand_name('server-smoke'),
-            network_obj.id, port_id=port_obj.id,
+            network_obj['id'], port_id=port_obj['id'],
             availability_zone='nova:' + random_compute)
 
         # Verify vlan profile has been created
         network = self.admin_networks_client.show_network(
-            network_obj.id)['network']
+            network_obj['id'])['network']
         vlan_id = network['provider:segmentation_id']
         self.timed_assert(self.assertNotEmpty,
                           lambda: random_ucsm_client.get_vlan_profile(vlan_id))
 
         # Verify vlan has been added to a compute where instance is launched
-        port = self.admin_ports_client.show_port(port_obj.id)['port']
+        port = self.admin_ports_client.show_port(port_obj['id'])['port']
         binding_host_id = port['binding:host_id']
         self.assertEqual(random_compute, binding_host_id, 'binding:host_id same as we want')
         for eth_name in random_ucsm['eth_names']:
@@ -1144,16 +1144,16 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
         network_obj, subnet_obj, router_obj = self.create_networks()
         kwargs = {'security_groups': [self.security_group['id']]}
         # Create server #1
-        port_obj1 = self._create_port(network_obj.id, **kwargs)
+        port_obj1 = self._create_port(network_obj['id'], **kwargs)
         server1 = self._create_server(
             data_utils.rand_name('server-smoke'),
-            network_obj.id, port_id=port_obj1.id,
+            network_obj['id'], port_id=port_obj1['id'],
             availability_zone='nova:' + compute1)
         # Create server #2 on another compute
-        port_obj2 = self._create_port(network_obj.id, **kwargs)
+        port_obj2 = self._create_port(network_obj['id'], **kwargs)
         server2 = self._create_server(
             data_utils.rand_name('server-smoke'),
-            network_obj.id, port_id=port_obj2.id,
+            network_obj['id'], port_id=port_obj2['id'],
             availability_zone='nova:' + compute2)
 
         self.assert_vm_to_vm_connectivity(server1, server2)
@@ -1164,7 +1164,7 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
         self.ports_client.delete_port(port_obj1['id'])
 
         network = self.admin_networks_client.show_network(
-            network_obj.id)['network']
+            network_obj['id'])['network']
         vlan_id = network['provider:segmentation_id']
         self.timed_assert(self.assertNotEmpty,
                           lambda: ucsm_client1.get_vlan_profile(vlan_id))
