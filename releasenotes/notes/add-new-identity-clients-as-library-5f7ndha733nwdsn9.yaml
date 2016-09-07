@@ -6,3 +6,4 @@ features:
     any maintenance changes.
 
       * identity_client(v2)
+      * groups_client(v3)
