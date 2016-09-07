@@ -30,7 +30,7 @@ class GroupsClient(rest_client.RestClient):
         """Creates a group.
 
         Available params: see http://developer.openstack.org/
-                              api-ref-identity-v3.html#createGroup
+                              api-ref/identity/v3/index.html#create-group
         """
         post_body = json.dumps({'group': kwargs})
         resp, body = self.post('groups', post_body)
@@ -63,7 +63,7 @@ class GroupsClient(rest_client.RestClient):
         """Updates a group.
 
         Available params: see http://developer.openstack.org/
-                              api-ref-identity-v3.html#updateGroup
+                              api-ref/identity/v3/index.html#update-group
         """
         post_body = json.dumps({'group': kwargs})
         resp, body = self.patch('groups/%s' % group_id, post_body)

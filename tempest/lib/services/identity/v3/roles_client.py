@@ -25,7 +25,7 @@ class RolesClient(rest_client.RestClient):
         """Create a Role.
 
         Available params: see http://developer.openstack.org/
-                              api-ref-identity-v3.html#createRole
+                              api-ref/identity/v3/index.html#create-role
         """
         post_body = json.dumps({'role': kwargs})
         resp, body = self.post('roles', post_body)
@@ -55,7 +55,7 @@ class RolesClient(rest_client.RestClient):
         """Update a Role.
 
         Available params: see http://developer.openstack.org/
-                          api-ref-identity-v3.html#updateRole
+                          api-ref/identity/v3/index.html#update-role
         """
         post_body = json.dumps({'role': kwargs})
         resp, body = self.patch('roles/%s' % role_id, post_body)

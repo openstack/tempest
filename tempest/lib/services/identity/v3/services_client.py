@@ -30,7 +30,7 @@ class ServicesClient(rest_client.RestClient):
         """Updates a service.
 
         Available params: see http://developer.openstack.org/
-                              api-ref-identity-v3.html#updateService
+                              api-ref/identity/v3/index.html#update-service
         """
         patch_body = json.dumps({'service': kwargs})
         resp, body = self.patch('services/%s' % service_id, patch_body)
@@ -50,7 +50,7 @@ class ServicesClient(rest_client.RestClient):
         """Creates a service.
 
         Available params: see http://developer.openstack.org/
-                              api-ref-identity-v3.html#createService
+                              api-ref/identity/v3/index.html#create-service
         """
         body = json.dumps({'service': kwargs})
         resp, body = self.post("services", body)

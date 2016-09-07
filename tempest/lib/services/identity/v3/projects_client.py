@@ -26,7 +26,7 @@ class ProjectsClient(rest_client.RestClient):
         """Create a Project.
 
         Available params: see http://developer.openstack.org/
-                          api-ref-identity-v3.html#createProject
+                          api-ref/identity/v3/index.html#create-project
 
         """
         # Include the project name to the kwargs parameters
@@ -50,7 +50,7 @@ class ProjectsClient(rest_client.RestClient):
         """Update a Project.
 
         Available params: see http://developer.openstack.org/
-                          api-ref-identity-v3.html#updateProject
+                          api-ref/identity/v3/index.html#update-project
 
         """
         post_body = json.dumps({'project': kwargs})

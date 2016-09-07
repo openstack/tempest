@@ -37,7 +37,7 @@ class UsersClient(rest_client.RestClient):
         """Updates a user.
 
         Available params: see http://developer.openstack.org/
-                              api-ref-identity-v3.html#updateUser
+                              api-ref/identity/v3/#update-user
         """
         if 'id' not in kwargs:
             kwargs['id'] = user_id
@@ -51,7 +51,8 @@ class UsersClient(rest_client.RestClient):
         """Update a user password
 
         Available params: see http://developer.openstack.org/
-                              api-ref-identity-v3.html#changeUserPassword
+                              api-ref/identity/v3/index.html#
+                              change-password-for-user
         """
         update_user = json.dumps({'user': kwargs})
         resp, _ = self.post('users/%s/password' % user_id, update_user)

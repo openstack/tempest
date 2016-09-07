@@ -24,7 +24,7 @@ class TrustsClient(rest_client.RestClient):
         """Creates a trust.
 
         Available params: see http://developer.openstack.org/
-                              api-ref-identity-v3-ext.html#createTrust
+                              api-ref/identity/v3-ext/index.html#create-trust
         """
         post_body = json.dumps({'trust': kwargs})
         resp, body = self.post('OS-TRUST/trusts', post_body)
