@@ -298,11 +298,11 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
         else:
             result = networks_client.create_network(name=name, tenant_id=tenant_id, **kwargs)
         network = result['network']
-        self.assertEqual(network.name, name)
+        self.assertEqual(network['name'], name)
 
         if CONF.ucsm.provider_network_id:
             # Mock delete method because this is provider network
-            network.name = name
+            network['name'] = name
             network.delete = lambda: True
         else:
             self.addCleanup(test_utils.call_and_ignore_notfound_exc,
@@ -478,7 +478,7 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
         self.assertEqual('ACTIVE', network['status'])
         self._create_subnet(network)
         port = self._create_port(
-            network.id, security_groups=[self.security_group['id']])
+            network['id'], security_groups=[self.security_group['id']])
 
         # Get a vlan id and verify a vlan profile has been created
         network = self.admin_networks_client.show_network(network['id'])['network']
@@ -1022,7 +1022,7 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
         self.assertEqual('ACTIVE', network['status'])
         self._create_subnet(network)
         port = self._create_port(
-            network.id, security_groups=[self.security_group['id']])
+            network['id'], security_groups=[self.security_group['id']])
 
         # Get a vlan id and verify a vlan profile has been created
         network = self.admin_networks_client.show_network(network['id'])['network']
