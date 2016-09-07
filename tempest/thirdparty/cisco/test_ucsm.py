@@ -170,6 +170,10 @@ CONF = config.CONF
 LOG = log.getLogger(__name__)
 
 
+class FuzzyDict(dict):
+    pass
+
+
 class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
 
     @classmethod
@@ -297,7 +301,7 @@ class UCSMTest(manager.NetworkScenarioTest, cisco_base.UCSMTestMixin):
             result = networks_client.show_network(CONF.ucsm.provider_network_id)
         else:
             result = networks_client.create_network(name=name, tenant_id=tenant_id, **kwargs)
-        network = result['network']
+        network = FuzzyDict(result['network'])
         self.assertEqual(network['name'], name)
 
         if CONF.ucsm.provider_network_id:
