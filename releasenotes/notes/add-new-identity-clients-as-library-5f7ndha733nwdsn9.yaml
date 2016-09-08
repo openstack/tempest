@@ -9,3 +9,4 @@ features:
       * groups_client(v3)
       * users_client(v3)
       * identity_client(v3)
+      * roles_client(v3)
