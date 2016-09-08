@@ -44,6 +44,11 @@ class IdentityUsersTest(base.BaseIdentityV2Test):
             # Clear auth restores the original credentials and deletes
             # cached auth data
             client.auth_provider.clear_auth()
+            # NOTE(lbragstad): Fernet tokens are not subsecond aware and
+            # Keystone should only be precise to the second. Sleep to ensure we
+            # are passing the second boundary before attempting to
+            # authenticate.
+            time.sleep(1)
             client.auth_provider.set_auth()
 
         old_pass = self.creds.password
